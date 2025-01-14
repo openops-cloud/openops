@@ -20,6 +20,7 @@ import {
   FlowOperationRequest,
   FlowOperationType,
   MoveActionRequest,
+  PasteActionsRequest,
   StepLocationRelativeToParent,
   UpdateActionRequest,
   UpdateTriggerRequest,
@@ -27,7 +28,6 @@ import {
 import { FlowVersion, FlowVersionState } from './flow-version';
 import { DEFAULT_SAMPLE_DATA_SETTINGS } from './sample-data';
 import { Trigger, TriggerType } from './triggers/trigger';
-
 type Step = Action | Trigger;
 
 type GetStepFromSubFlow = {
@@ -461,6 +461,20 @@ function moveAction(
     flowVersion = flowHelper.apply(flowVersion, operation);
   });
   return flowVersion;
+}
+
+function bulkAddActions(
+  flowVersion: FlowVersion,
+  request: PasteActionsRequest,
+): FlowVersion {
+  let finalFlow: FlowVersion = flowVersion;
+
+  const operations = getImportOperations(request.action);
+  operations.forEach((operation) => {
+    finalFlow = flowHelper.apply(flowVersion, operation);
+  });
+
+  return finalFlow;
 }
 
 function addAction(
@@ -1073,6 +1087,13 @@ export const flowHelper = {
       case FlowOperationType.ADD_ACTION: {
         clonedVersion = transferFlow(
           addAction(clonedVersion, operation.request),
+          (step) => upgradeBlock(step, operation.request.action.name),
+        );
+        break;
+      }
+      case FlowOperationType.PASTE_ACTIONS: {
+        clonedVersion = transferFlow(
+          bulkAddActions(clonedVersion, operation.request.action),
           (step) => upgradeBlock(step, operation.request.action.name),
         );
         break;

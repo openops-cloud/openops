@@ -2,6 +2,7 @@ import { Static, Type } from '@sinclair/typebox';
 import { AppConnectionWithoutSensitiveData } from '../app-connection/app-connection';
 import { Nullable } from '../common';
 import {
+  Action,
   BlockActionSchema,
   BranchActionSchema,
   CodeActionSchema,
@@ -27,6 +28,7 @@ export enum FlowOperationType {
   USE_AS_DRAFT = 'USE_AS_DRAFT',
   CHANGE_DESCRIPTION = 'CHANGE_DESCRIPTION',
   REMOVE_CONNECTIONS = 'REMOVE_CONNECTIONS',
+  PASTE_ACTIONS = 'PASTE_ACTIONS',
 }
 
 export enum StepLocationRelativeToParent {
@@ -126,6 +128,12 @@ export const ChangeDescriptionRequest = Type.Object({
 });
 
 export type ChangeDescriptionRequest = Static<typeof ChangeDescriptionRequest>;
+
+export const PasteActionsRequest = Type.Object({
+  action: Type.Any(Action),
+});
+
+export type PasteActionsRequest = Static<typeof PasteActionsRequest>;
 
 export const FlowOperationRequest = Type.Union([
   Type.Object(
@@ -261,6 +269,15 @@ export const FlowOperationRequest = Type.Union([
     },
     {
       title: 'Remove Connections',
+    },
+  ),
+  Type.Object(
+    {
+      type: Type.Literal(FlowOperationType.PASTE_ACTIONS),
+      request: PasteActionsRequest,
+    },
+    {
+      title: 'Paste Actions',
     },
   ),
 ]);
