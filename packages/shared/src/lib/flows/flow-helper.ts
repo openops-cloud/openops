@@ -467,14 +467,8 @@ function bulkAddActions(
   flowVersion: FlowVersion,
   request: PasteActionsRequest,
 ): FlowVersion {
-  let finalFlow: FlowVersion = flowVersion;
-
-  const operations = getImportOperations(request.action);
-  operations.forEach((operation) => {
-    finalFlow = flowHelper.apply(flowVersion, operation);
-  });
-
-  return finalFlow;
+  const action = request.action as unknown as Action;
+  return duplicateStepCascading(action, flowVersion, request.parentStep);
 }
 
 function addAction(
@@ -927,16 +921,24 @@ function duplicateStep(
   const clonedStep = JSON.parse(
     JSON.stringify(flowHelper.getStep(flowVersionWithArtifacts, stepName)),
   );
+
   clonedStep.nextAction = undefined;
   if (!clonedStep) {
     throw new Error(`step with name '${stepName}' not found`);
   }
-  const existingNames = getAllSteps(flowVersionWithArtifacts.trigger).map(
+
+  return duplicateStepCascading(clonedStep, flowVersionWithArtifacts, stepName);
+}
+
+function duplicateStepCascading(
+  action: Action | Step,
+  flowVersion: FlowVersion,
+  parentStep: string,
+): FlowVersion {
+  const existingNames = getAllSteps(flowVersion.trigger).map(
     (step) => step.name,
   );
-  const oldStepsNameToReplace = getAllSteps(clonedStep).map(
-    (step) => step.name,
-  );
+  const oldStepsNameToReplace = getAllSteps(action).map((step) => step.name);
   const oldNameToNewName: Record<string, string> = {};
 
   oldStepsNameToReplace.forEach((name) => {
@@ -945,7 +947,7 @@ function duplicateStep(
     existingNames.push(newName);
   });
 
-  const duplicatedStep = transferStep(clonedStep, (step: Step) => {
+  const duplicatedStep = transferStep(action, (step: Step) => {
     step.displayName = `${step.displayName} Copy`;
     step.name = oldNameToNewName[step.name];
     if (step.settings.inputUiInfo) {
@@ -969,9 +971,9 @@ function duplicateStep(
     });
     return step;
   });
-  let finalFlow = addAction(flowVersionWithArtifacts, {
+  let finalFlow = addAction(flowVersion, {
     action: duplicatedStep as Action,
-    parentStep: stepName,
+    parentStep,
     stepLocationRelativeToParent: StepLocationRelativeToParent.AFTER,
   });
   const operations = getImportOperations(duplicatedStep);
@@ -980,7 +982,6 @@ function duplicateStep(
   });
   return finalFlow;
 }
-
 function replaceOldStepNameWithNewOne({
   input,
   oldStepName,
