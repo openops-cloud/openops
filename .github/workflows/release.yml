@@ -58,7 +58,7 @@ jobs:
           docker tag $SOURCE_IMAGE_TAG $PUBLIC_IMAGE:${{ needs.get-version.outputs.version }} && docker push $_
           if ${{ inputs.latest }}; then docker tag $SOURCE_IMAGE_TAG $PUBLIC_IMAGE:latest && docker push $_; fi
   create-github-release:
-    name: Create release ${{ needs.get-version.outputs.version }} in GitHub
+    name: Create GitHub release
     needs:
       - tag-images-for-release
       - get-version
@@ -90,7 +90,8 @@ jobs:
       - name: Write summary
         run: |
           echo "## Release $VERSION" >> $GITHUB_STEP_SUMMARY
-          echo "The [draft release](${{ steps.create-release.outputs.url }}) has been created. Please review and publish it." >> $GITHUB_STEP_SUMMARY
+          RELEASE_URL="${{ steps.create-release.outputs.url }}"
+          echo "The draft release has been created. Please [review and publish it](${RELEASE/\/tags\//\/edit\/})." >> $GITHUB_STEP_SUMMARY
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
