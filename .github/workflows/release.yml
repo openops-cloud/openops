@@ -19,7 +19,7 @@ jobs:
       version: ${{ steps.format-version.outputs.version }}
     steps:
     - name: Get next version
-      if: ! inputs.version
+      if: inputs.version != ''
       id: semver
       uses: flatherskevin/semver-action@v1
       with:
