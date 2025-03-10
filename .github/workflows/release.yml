@@ -13,7 +13,8 @@ on:
         default: true
 
 jobs:
-  format-version:
+  get-version:
+    name: Get release version
     runs-on: ubuntu-latest
     outputs:
       version: ${{ inputs.version || steps.semver.outputs.nextVersion }}
@@ -26,7 +27,7 @@ jobs:
         incrementLevel: patch
         source: tags
   tag-images-for-release:
-    needs: format-version
+    needs: get-version
     strategy:
       matrix:
         target:
@@ -34,7 +35,7 @@ jobs:
             repository: openops-app
           - name: Engine
             repository: openops-engine
-    name: Tag ${{ matrix.target.name }} for release
+    name: Tag ${{ matrix.target.name }} for release ${{ needs.get-version.outputs.version }}
     runs-on: ubuntu-latest
     steps:
       - name: Set up Docker Buildx
@@ -54,16 +55,16 @@ jobs:
           SOURCE_IMAGE_TAG=public.ecr.aws/openops/${{ matrix.target.repository }}:${{ github.sha }}
           PUBLIC_IMAGE=public.ecr.aws/openops/${{ matrix.target.repository }}
           docker pull $SOURCE_IMAGE_TAG
-          docker tag $SOURCE_IMAGE_TAG $PUBLIC_IMAGE:${{ needs.format-version.outputs.version }} && docker push $_
+          docker tag $SOURCE_IMAGE_TAG $PUBLIC_IMAGE:${{ needs.get-version.outputs.version }} && docker push $_
           if ${{ inputs.latest }}; then docker tag $SOURCE_IMAGE_TAG $PUBLIC_IMAGE:latest && docker push $_; fi
   create-github-release:
-    name: Create a release in GitHub
+    name: Create release ${{ needs.get-version.outputs.version }} in GitHub
     needs: tag-images-for-release
     runs-on: ubuntu-latest
     permissions:
       contents: write
     env:
-      VERSION: ${{ needs.format-version.outputs.version }}
+      VERSION: ${{ needs.get-version.outputs.version }}
     steps:
       - uses: actions/checkout@v4
       - name: Update version in docker-compose
