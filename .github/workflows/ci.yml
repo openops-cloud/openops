@@ -166,20 +166,21 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.ECR_AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.ECR_AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.ECR_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.ECR_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.ECR_REGION }}
       - name: Login to Amazon ECR
-        id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registry-type: public
       - name: Format image tag parts
         id: tag-parts
         env:
           BRANCH: ${{ github.ref_name }}
           SHA: ${{ github.sha }}
         run: |
-          echo branch=${BRANCH//[\/]/-} >> "$GITHUB_OUTPUT"
-          echo image=${{ steps.login-ecr.outputs.registry }}/${{ matrix.target.repository }} >> "$GITHUB_OUTPUT"
+          echo branch=${BRANCH//[\/.]/-} >> "$GITHUB_OUTPUT"
+          echo image=public.ecr.aws/openops/${{ matrix.target.repository }} >> "$GITHUB_OUTPUT"
           echo version=${SHA::8} >> "$GITHUB_OUTPUT"
       - name: Build image
         uses: docker/build-push-action@v6
@@ -192,7 +193,7 @@ jobs:
           tags: |
             ${{ steps.tag-parts.outputs.image }}:${{ github.sha }}
             ${{ steps.tag-parts.outputs.image }}:${{ steps.tag-parts.outputs.branch }}-${{ github.sha }}
-            ${{ steps.tag-parts.outputs.image }}:${{ steps.tag-parts.outputs.branch }}-latest
+            ${{ steps.tag-parts.outputs.image }}:${{ steps.tag-parts.outputs.branch }}
           cache-from: |
             type=registry,ref=${{ steps.tag-parts.outputs.image }}:${{ steps.tag-parts.outputs.branch }}-cache
             type=registry,ref=${{ steps.tag-parts.outputs.image }}:main-cache
