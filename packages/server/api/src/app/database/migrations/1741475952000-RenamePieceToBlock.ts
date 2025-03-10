@@ -76,8 +76,8 @@ export class RenamePieceToBlockMigration1741475952000
     }
 
     await queryRunner.query(`
-      ALTER TABLE "flow_template";
-      ALTER COLUMN "blocks" SET NOT NULL;
+      ALTER TABLE "flow_template"
+      ALTER COLUMN "blocks" SET NOT NULL,
       ALTER COLUMN "pieces" DROP NOT NULL;
   `);
 
@@ -103,7 +103,7 @@ export class RenamePieceToBlockMigration1741475952000
 
     await queryRunner.query(`
       ALTER TABLE "app_connection"
-      ALTER COLUMN "blockName" SET NOT NULL
+      ALTER COLUMN "blockName" SET NOT NULL,
       ALTER COLUMN "pieceName" DROP NOT NULL;
 `);
 
