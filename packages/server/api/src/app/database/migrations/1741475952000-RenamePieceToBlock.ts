@@ -70,14 +70,15 @@ export class RenamePieceToBlockMigration1741475952000
       );
 
       await queryRunner.query(
-        'UPDATE "flow_template" SET "blocks" = $1, "template" = $2 WHERE "id" = $3;',
-        [blocks, jsonData, record.id],
+        'UPDATE "flow_template" SET "blocks" = $1::jsonb, "template" = $2 WHERE "id" = $3;',
+        [JSON.stringify(blocks), jsonData, record.id],
       );
     }
 
     await queryRunner.query(`
-      ALTER TABLE "flow_template"
-      ALTER COLUMN "blocks" SET NOT NULL
+      ALTER TABLE "flow_template";
+      ALTER COLUMN "blocks" SET NOT NULL;
+      ALTER COLUMN "pieces" DROP NOT NULL;
   `);
 
     logger.info(
@@ -103,6 +104,7 @@ export class RenamePieceToBlockMigration1741475952000
     await queryRunner.query(`
       ALTER TABLE "app_connection"
       ALTER COLUMN "blockName" SET NOT NULL
+      ALTER COLUMN "pieceName" DROP NOT NULL;
 `);
 
     logger.info(
