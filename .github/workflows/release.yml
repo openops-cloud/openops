@@ -78,6 +78,7 @@ jobs:
           cp ../../NOTICE .
           zip -r docker-compose-release-$VERSION.zip .
       - name: Create a release
+        id: create-release
         uses: softprops/action-gh-release@v2
         with:
           target_commitish: ${{ github.sha }}
@@ -86,6 +87,10 @@ jobs:
           draft: true
           files: |
             deploy/docker-compose/docker-compose-release-${{ env.VERSION }}.zip
+      - name: Write summary
+        run: |
+          echo "## Release $VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "The [draft release](${{ steps.create-release.outputs.url }}) has been created. Please review and publish it." >> $GITHUB_STEP_SUMMARY
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
