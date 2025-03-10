@@ -18,8 +18,8 @@ services:
     environment:
       OPS_COMPONENT: app
       OPS_VERSION: ${OPS_VERSION:-latest}
-      OPS_OPENOPS_TABLES_VERSION: 0.1.2
-      OPS_ANALYTICS_VERSION: 0.1.2
+      OPS_OPENOPS_TABLES_VERSION: 0.1.6
+      OPS_ANALYTICS_VERSION: 0.12.15
     depends_on:
       openops-tables:
         condition: service_healthy

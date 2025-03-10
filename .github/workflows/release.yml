@@ -1,0 +1,100 @@
+name: Create a release
+run-name: Create a release for ${{ inputs.version || 'auto-incremented version' }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        type: string
+        description: Override the version, for example if you want to increment minor or major version
+      latest:
+        type: boolean
+        description: Create latest tag
+        default: true
+
+jobs:
+  format-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.format-version.outputs.version }}
+    steps:
+    - name: Get next version
+      if: ! inputs.version
+      id: semver
+      uses: flatherskevin/semver-action@v1
+      with:
+        incrementLevel: patch
+        source: tags
+    - name: Format versiong
+      id: format-version
+      run: |
+        echo "version=${{ inputs.version || steps.semver.outputs.nextVersion }}" >> $GITHUB_OUTPUT
+  tag-images-for-release:
+    needs: format-version
+    strategy:
+      matrix:
+        target:
+          - name: App
+            repository: openops-app
+          - name: Engine
+            repository: openops-engine
+    name: Tag ${{ matrix.target.name }} for release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.ECR_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.ECR_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.ECR_REGION }}
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registry-type: public
+      - name: Pull image and tag it
+        run: |
+          SOURCE_IMAGE_TAG=public.ecr.aws/openops/${{ matrix.target.public-repository }}:${{ github.sha }}
+          PUBLIC_IMAGE=public.ecr.aws/openops/${{ matrix.target.public-repository }}
+          docker pull $SOURCE_IMAGE_TAG
+          docker tag $SOURCE_IMAGE_TAG $PUBLIC_IMAGE:${{ needs.format-version.outputs.version }} && docker push $_
+          if ${{ inputs.latest }}; then docker tag $SOURCE_IMAGE_TAG $PUBLIC_IMAGE:latest && docker push $_; fi
+  create-github-release:
+    name: Create a release in GitHub
+    needs: tag-images-for-release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      VERSION: ${{ needs.format-version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update version in docker-compose
+        run: |
+          cd deploy/docker-compose
+          sed -i "s/\${OPS_VERSION:-latest}/$VERSION/" docker-compose.yml
+          cp ../../THIRD_PARTY_LICENSES.txt .
+          cp ../../LICENSE .
+          cp ../../NOTICE .
+          zip -r docker-compose-release-$VERSION.zip .
+      - name: Create a release
+        uses: softprops/action-gh-release@v2
+        with:
+          target_commitish: ${{ github.sha }}
+          tag_name: ${{ env.VERSION }}
+          generate_release_notes: true
+          draft: true
+          files: |
+            deploy/docker-compose/docker-compose-release-${{ env.VERSION }}.zip
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.RELEASE_S3_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.RELEASE_S3_SECRET_ACCESS_KEY }}
+          aws-region: us-east-2
+      - name: Upload release to S3
+        run: |
+          LOCAL_PATH=deploy/docker-compose/docker-compose-release-$VERSION.zip
+          S3_PATH=s3://openops/releases/$VERSION/openops-docker-compose-$VERSION.zip
+          aws s3 cp $LOCAL_PATH $S3_PATH
