@@ -59,7 +59,9 @@ jobs:
           if ${{ inputs.latest }}; then docker tag $SOURCE_IMAGE_TAG $PUBLIC_IMAGE:latest && docker push $_; fi
   create-github-release:
     name: Create release ${{ needs.get-version.outputs.version }} in GitHub
-    needs: tag-images-for-release
+    needs:
+      - tag-images-for-release
+      - get-version
     runs-on: ubuntu-latest
     permissions:
       contents: write
