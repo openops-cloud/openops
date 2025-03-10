@@ -3,9 +3,6 @@ name: CI
 on:
   push:
 
-env:
-  AWS_REGION: us-east-2
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
 
@@ -168,7 +165,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.ECR_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.ECR_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.ECR_REGION }}
+          aws-region: ${{ vars.ECR_REGION }}
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
         with:
