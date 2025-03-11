@@ -21,4 +21,4 @@ To use the Azure CLI block, you need to create a connection to Azure. If you use
 However, it is possible to share your local session with the platform for local applications.
 To do this, you need to set two environment variables:
 - `OPS_ENABLE_HOST_SESSION=true`: enables sharing of the host session with the platform container.
-- `HOST_AZURE_CONFIG_DIR="~/.azure"`: defines the path to the host machine's Azure configuration folder that will be shared with the platform container
+- `HOST_AZURE_CONFIG_DIR=/root/.azure`: defines the path to the host machine's Azure configuration folder that will be shared with the platform container
