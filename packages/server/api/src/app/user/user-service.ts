@@ -191,6 +191,8 @@ export const userService = {
         },
       });
     }
+
+    await cacheWrapper.deleteKey(`track-events-${id}`);
   },
 
   async addOwnerToOrganization({
