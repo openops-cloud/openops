@@ -190,12 +190,6 @@ export const flagService = {
         updated,
       },
       {
-        id: FlagId.TELEMETRY_ENABLED,
-        value: false,
-        created,
-        updated,
-      },
-      {
         id: FlagId.WEBHOOK_URL_PREFIX,
         value: await webhookUtils.getWebhookPrefix(),
         created,
@@ -347,7 +341,6 @@ export const flagService = {
 
 export type FlagType =
   | BaseFlagStructure<FlagId.FRONTEND_URL, string>
-  | BaseFlagStructure<FlagId.TELEMETRY_ENABLED, boolean>
   | BaseFlagStructure<FlagId.WEBHOOK_URL_PREFIX, string>;
 
 type BaseFlagStructure<K extends FlagId, V> = {

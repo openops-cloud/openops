@@ -67,9 +67,7 @@ export class AccessTokenAuthnHandler extends BaseSecurityHandler {
   }
 }
 
-async function getTrackEventsConfigForUser(
-  userId: string,
-): Promise<string> {
+async function getTrackEventsConfigForUser(userId: string): Promise<string> {
   const trackEventsKey = `track-events-${userId}`;
 
   let trackEvents = await cacheWrapper.getKey(trackEventsKey);
