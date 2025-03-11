@@ -8,9 +8,6 @@ on:
     types: [completed]
     branches: [main]
 
-env:
-  ENVIRONMENT: ${{ inputs.environment || 'dev' }}
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
