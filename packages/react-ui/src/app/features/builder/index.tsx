@@ -255,7 +255,7 @@ const BuilderPage = () => {
                 <CanvasControls
                   topOffset={FLOW_CANVAS_Y_OFFESET}
                 ></CanvasControls>
-                <AiWidget></AiWidget>
+                <AiWidget />
                 <DataSelector
                   parentHeight={middlePanelSize.height}
                   parentWidth={middlePanelSize.width}

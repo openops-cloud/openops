@@ -9,7 +9,6 @@ const AiWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
-      {/*<PopoverAnchor className="absolute left-6 top-[58px]"></PopoverAnchor>*/}
       <PopoverTrigger asChild>
         <div className="w-[40px] h-[40px] absolute left-[246px] bottom-[10px] flex items-center justify-center z-50 bg-background shadow-editor rounded-xl">
           <Button
