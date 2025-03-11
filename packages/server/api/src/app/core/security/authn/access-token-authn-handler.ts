@@ -80,7 +80,7 @@ async function getTrackEventsConfigForUser(userId: string): Promise<string> {
     return 'false';
   }
 
-  trackEvents = user.trackEvents?.toString() ?? false;
+  trackEvents = user.trackEvents?.toString() ?? 'false';
   await cacheWrapper.setKey(trackEventsKey, trackEvents);
   return trackEvents;
 }
