@@ -17,15 +17,10 @@ const telemetryCollectorUrl = system.get<string>(
 const logzioMetricToken = system.get<string>(
   SharedSystemProp.LOGZIO_METRICS_TOKEN,
 );
-const telemetryEnabled = system.getBoolean(AppSystemProp.TELEMETRY_ENABLED);
 
 let environmentId: UUID | undefined;
 export const telemetry = {
   async start(getEnvironmentId: () => Promise<UUID>): Promise<void> {
-    if (!telemetryEnabled) {
-      return;
-    }
-
     if (!telemetryCollectorUrl && !logzioMetricToken) {
       throw new Error(
         'Telemetry is enabled, but neither TELEMETRY_COLLECTOR_URL nor LOGZIO_METRICS_TOKEN is defined.',
@@ -41,7 +36,8 @@ export const telemetry = {
   },
   trackEvent(event: TelemetryEvent): void {
     try {
-      if (!telemetryEnabled) {
+      const isEnable = isTelemetryEnabledForCurrentUser();
+      if (!isEnable) {
         return;
       }
 
@@ -69,7 +65,7 @@ export const telemetry = {
     }
   },
   async flush(): Promise<void> {
-    if (!telemetryEnabled || telemetryCollectorUrl) {
+    if (telemetryCollectorUrl) {
       return;
     }
 
@@ -99,6 +95,10 @@ function enrichEventLabels(event: TelemetryEvent): Timeseries {
       },
     ],
   };
+}
+
+function isTelemetryEnabledForCurrentUser(): boolean {
+  return requestContext.get('trackEvents' as never) === 'true';
 }
 
 async function sendToCollector(
