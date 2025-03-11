@@ -177,7 +177,7 @@ jobs:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
           echo branch=${BRANCH//[\/.:_]/-} >> "$GITHUB_ENV"
-          echo image=${REGISTRY}/openops/${{ matrix.target.repository }} >> "$GITHUB_ENV"
+          echo repositoryUri=${REGISTRY}/openops/${{ matrix.target.repository }} >> "$GITHUB_ENV"
           echo version=${SHA::8} >> "$GITHUB_ENV"
       - name: Build image
         uses: docker/build-push-action@v6
@@ -188,10 +188,10 @@ jobs:
           provenance: false
           push: true
           tags: |
-            ${{ env.image }}:${{ env.version }}
-            ${{ env.image }}:${{ env.branch }}-${{ env.version }}
-            ${{ env.image }}:${{ env.branch }}
+            ${{ env.repositoryUri }}:${{ env.version }}
+            ${{ env.repositoryUri }}:${{ env.branch }}-${{ env.version }}
+            ${{ env.repositoryUri }}:${{ env.branch }}
           cache-from: |
-            type=registry,ref=${{ env.image }}:${{ env.branch }}-cache
-            type=registry,ref=${{ env.image }}:main-cache
-          cache-to: mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${{ env.image }}:${{ env.branch }}-cache
+            type=registry,ref=${{ env.repositoryUri }}:${{ env.branch }}-cache
+            type=registry,ref=${{ env.repositoryUri }}:main-cache
+          cache-to: mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${{ env.repositoryUri }}:${{ env.branch }}-cache
