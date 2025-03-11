@@ -10,3 +10,9 @@ export const UpdateUserRequestBody = Type.Object({
 });
 
 export type UpdateUserRequestBody = Static<typeof UpdateUserRequestBody>;
+
+export const UpdateTrackingRequestBody = Type.Object({
+  trackEvents: Type.Boolean(),
+});
+
+export type UpdateTrackingRequestBody = Static<typeof UpdateTrackingRequestBody>;

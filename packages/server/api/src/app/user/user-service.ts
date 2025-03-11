@@ -1,4 +1,4 @@
-import { sendUserCreatedEvent } from '@openops/server-shared';
+import { cacheWrapper, sendUserCreatedEvent } from '@openops/server-shared';
 import {
   ApplicationError,
   ErrorCode,
@@ -116,6 +116,7 @@ export const userService = {
       firstName: user.firstName,
       organizationRole: user.organizationRole,
       lastName: user.lastName,
+      trackEvents: user.trackEvents,
     };
   },
 
@@ -170,6 +171,28 @@ export const userService = {
       updated: dayjs().toISOString(),
       password: hashedPassword,
     });
+  },
+
+  async updateTracking({
+    id,
+    trackEvents,
+  }: UpdateTrackingParams): Promise<void> {
+    const updateResult = await userRepo().update(id, {
+      updated: dayjs().toISOString(),
+      trackEvents,
+    });
+
+    if (updateResult.affected !== 1) {
+      throw new ApplicationError({
+        code: ErrorCode.ENTITY_NOT_FOUND,
+        params: {
+          entityType: 'user',
+          entityId: id,
+        },
+      });
+    }
+
+    await cacheWrapper.deleteKey(`track-events-${id}`);
   },
 
   async addOwnerToOrganization({
@@ -237,6 +260,11 @@ type IdParams = {
 type UpdatePasswordParams = {
   id: UserId;
   newPassword: string;
+};
+
+type UpdateTrackingParams = {
+  id: UserId;
+  trackEvents: boolean;
 };
 
 type UpdateOrganizationIdParams = {

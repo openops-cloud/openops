@@ -49,6 +49,7 @@ export const UserMeta = Type.Object({
   organizationId: Type.Union([OpenOpsId, Type.Null()]),
   organizationRole: Type.Enum(OrganizationRole),
   lastName: Type.String(),
+  trackEvents: Type.Boolean(),
 });
 
 export type UserMeta = Static<typeof UserMeta>;
