@@ -49,10 +49,6 @@ jobs:
       - name: Login to private ECR
         id: login-private-ecr
         uses: aws-actions/amazon-ecr-login@v2
-#      - name: Configure AWS credentials
-#        uses: aws-actions/configure-aws-credentials@v4
-#        with:
-#          aws-region: ${{ vars.ECR_PUBLIC_REGION }}
       - name: Login to public ECR
         uses: aws-actions/amazon-ecr-login@v2
         env:
@@ -62,13 +58,14 @@ jobs:
       - name: Pull image and tag it
         run: |
           SOURCE_IMAGE_TAG=${{ steps.login-private-ecr.outputs.registry }}/openops/${{ matrix.target.repository }}:${{ github.sha }}
+          echo "- 🚀 Source image: \`$SOURCE_IMAGE_TAG\`" >> $GITHUB_STEP_SUMMARY
           PUBLIC_IMAGE=public.ecr.aws/openops/${{ matrix.target.repository }}
           docker pull $SOURCE_IMAGE_TAG
           docker tag $SOURCE_IMAGE_TAG $PUBLIC_IMAGE:${{ needs.get-version.outputs.version }} && docker push $_
-          echo "- Tagged image \`$SOURCE_IMAGE_TAG\` as \`$PUBLIC_IMAGE:${{ needs.get-version.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Successfully tagged as \`$PUBLIC_IMAGE:${{ needs.get-version.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
           if ${{ inputs.latest }}; then
             docker tag $SOURCE_IMAGE_TAG $PUBLIC_IMAGE:latest && docker push $_
-            echo "- Tagged image \`$SOURCE_IMAGE_TAG\` as \`$PUBLIC_IMAGE:latest\`" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ Successfully tagged as \`$PUBLIC_IMAGE:latest\`" >> $GITHUB_STEP_SUMMARY
           fi
   create-github-release:
     name: Create GitHub release
@@ -102,9 +99,10 @@ jobs:
             deploy/docker-compose/docker-compose-release-${{ env.VERSION }}.zip
       - name: Write summary
         run: |
-          echo "## Release $VERSION" >> $GITHUB_STEP_SUMMARY
           RELEASE_URL="${{ steps.create-release.outputs.url }}"
-          echo "The draft release has been created. Please [review and publish it](${RELEASE/\/tags\//\/edit\/})." >> $GITHUB_STEP_SUMMARY
+          echo "### Release $VERSION was created! 🎉" >> $GITHUB_STEP_SUMMARY
+          echo "The release was created as a draft.\n" >> $GITHUB_STEP_SUMMARY
+          echo "Please [review and publish it](${RELEASE/\/tags\//\/edit\/})." >> $GITHUB_STEP_SUMMARY
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
