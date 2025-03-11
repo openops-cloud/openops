@@ -30,7 +30,7 @@ const HomeGetStarted = ({
     >
       <div className="p-6 flex flex-col gap-4 bg-secondary font-bold">
         <h2 className="text-[24px]">{t('Get started')}</h2>
-        <div className="flex items-center justify-between gap-2 flex-wrap @[1470px]:flex-nowrap @[1470px]:gap-10">
+        <div className="flex items-center justify-between gap-10 flex-wrap @[1500px]:flex-nowrap">
           <div className="w-full flex flex-col gap-4">
             <h3>{t('Start with our Sample template')}</h3>
             <div className="flex gap-4 font-normal">
