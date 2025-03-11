@@ -1,4 +1,5 @@
 import {
+  HelpUsImprove,
   ScrollArea,
   SideMenu,
   SideMenuNavigation,
@@ -23,6 +24,11 @@ export function DashboardSideMenu() {
         <ScrollArea className="border-t">
           <FolderFilterList />
         </ScrollArea>
+      )}
+      {!isSidebarMinimized && (
+        <div className="p-4 flex flex-col h-full justify-end">
+          <HelpUsImprove onAccept={() => {}} onDismiss={() => {}} />
+        </div>
       )}
     </SideMenu>
   );
