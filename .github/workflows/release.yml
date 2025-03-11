@@ -46,13 +46,22 @@ jobs:
           aws-access-key-id: ${{ secrets.ECR_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.ECR_SECRET_ACCESS_KEY }}
           aws-region: ${{ vars.ECR_REGION }}
-      - name: Login to Amazon ECR
+      - name: Login to private ECR
+        id: login-private-ecr
         uses: aws-actions/amazon-ecr-login@v2
+#      - name: Configure AWS credentials
+#        uses: aws-actions/configure-aws-credentials@v4
+#        with:
+#          aws-region: ${{ vars.ECR_PUBLIC_REGION }}
+      - name: Login to public ECR
+        uses: aws-actions/amazon-ecr-login@v2
+        env:
+          AWS_REGION: ${{ vars.ECR_PUBLIC_REGION }}
         with:
           registry-type: public
       - name: Pull image and tag it
         run: |
-          SOURCE_IMAGE_TAG=public.ecr.aws/openops/${{ matrix.target.repository }}:${{ github.sha }}
+          SOURCE_IMAGE_TAG=${{ steps.login-private-ecr.outputs.registry }}/openops/${{ matrix.target.repository }}:${{ github.sha }}
           PUBLIC_IMAGE=public.ecr.aws/openops/${{ matrix.target.repository }}
           docker pull $SOURCE_IMAGE_TAG
           docker tag $SOURCE_IMAGE_TAG $PUBLIC_IMAGE:${{ needs.get-version.outputs.version }} && docker push $_
