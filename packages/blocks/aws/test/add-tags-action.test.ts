@@ -28,7 +28,25 @@ describe('applyRemediationAction', () => {
         type: 'OBJECT',
         required: true,
       },
+      dryRun: {
+        type: 'CHECKBOX',
+        required: false,
+      },
     });
+  });
+
+  test('should skip the execution when dry run is active', async () => {
+    const context = {
+      ...jest.requireActual('@openops/blocks-framework'),
+      propsValue: {
+        dryRun: true,
+      },
+    };
+
+    const result = await addTagsAction.run(context);
+    expect(result).toEqual('Step execution skipped, dry run flag enabled.');
+
+    expect(common.addTagsToResources).not.toHaveBeenCalled();
   });
 
   test.each([

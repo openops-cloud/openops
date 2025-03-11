@@ -3,6 +3,7 @@ import {
   addTagsToResources,
   amazonAuth,
   convertToARNArrayWithValidation,
+  dryRunCheckBox,
   getARNsProperty,
   getCredentialsForAccount,
   groupARNsByAccount,
@@ -22,9 +23,16 @@ export const addTagsAction = createAction({
       description: 'Name and value of the tag to be added',
       required: true,
     }),
+    dryRun: dryRunCheckBox(),
   },
   async run(context) {
     try {
+      const { dryRun } = context.propsValue;
+
+      if (dryRun) {
+        return `Step execution skipped, dry run flag enabled.`;
+      }
+
       const arns = convertToARNArrayWithValidation(
         context.propsValue.resourceARNs,
       );
