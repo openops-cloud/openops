@@ -12,6 +12,7 @@ import { MENU_LINKS } from '@/app/constants/menu-links';
 import { FolderFilterList } from '@/app/features/folders/component/folder-filter-list';
 import { DashboardSideMenuHeader } from '@/app/features/navigation/side-menu/dashboard/dashboard-side-menu-header';
 import { SideMenuFooter } from '@/app/features/navigation/side-menu/side-menu-footer';
+import { usersApi } from '@/app/lib/users-api';
 import { isValidISODate } from '@/app/lib/utils';
 import { useAppStore } from '@/app/store/app-store';
 
@@ -30,6 +31,7 @@ export function DashboardSideMenu() {
     updateUserSettings({
       telemetryBannerInteractionTimestamp: new Date().toISOString(),
     });
+    usersApi.setTelemetry({ trackEvents: true });
 
     refetchUserSettings();
   };
