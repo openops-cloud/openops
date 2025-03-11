@@ -10,17 +10,16 @@ const AiWidget = () => {
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <div className="w-[40px] h-[40px] absolute left-[246px] bottom-[10px] flex items-center justify-center z-50 bg-background shadow-editor rounded-xl">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => {
-              setIsOpen(true);
-            }}
-          >
-            <Sparkles className="w-6 h-6 dark:text-primary" />
-          </Button>
-        </div>
+        <Button
+          variant="ghost"
+          className="w-[40px] h-[40px] absolute left-[246px] bottom-[10px] flex items-center justify-center z-50 bg-background shadow-editor rounded-xl"
+          size="icon"
+          onClick={() => {
+            setIsOpen(true);
+          }}
+        >
+          <Sparkles className="w-6 h-6 dark:text-primary" />
+        </Button>
       </PopoverTrigger>
       <PopoverContent
         side="top"
