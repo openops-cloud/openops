@@ -20,20 +20,20 @@ const KnowledgeBaseCard = ({
     <a
       href={link}
       className={cn(
-        'w-full h-full min-w-[118px] p-4 pr-2 flex flex-col gap-[18px] border rounded-sm bg-background',
+        'w-full h-[78px] min-w-[170px] py-[23px] pl-4 pr-2 flex items-center gap-3 border rounded-sm bg-background',
         className,
       )}
       aria-label={text}
     >
       <div
         className={cn(
-          'w-8 h-8 flex items-center justify-center rounded-full bg-blue-300 text-background',
+          'min-w-8 w-8 h-8 flex items-center justify-center rounded-full bg-blue-300 text-background',
           iconWrapperClassName,
         )}
       >
         {icon}
       </div>
-      <span className=" text-foreground">{text}</span>
+      <span className="font-normal text-sm text-foreground">{text}</span>
     </a>
   );
 };
