@@ -17,7 +17,7 @@ const usersController: FastifyPluginAsyncTypebox = async (app) => {
   });
 
   app.patch(
-    '/tracking',
+    '/tracking-events',
     UpdateTrackingRequestOptions,
     async (request, reply) => {
       try {
