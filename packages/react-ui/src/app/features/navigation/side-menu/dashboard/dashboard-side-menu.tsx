@@ -1,4 +1,5 @@
 import {
+  cn,
   HelpUsImprove,
   ScrollArea,
   SideMenu,
@@ -14,19 +15,23 @@ import { useAppStore } from '@/app/store/app-store';
 
 export function DashboardSideMenu() {
   const location = useLocation();
-  const showFolderFilterList = location.pathname.includes('flows');
+  const isWorkflowsPage = location.pathname.includes('flows');
   const isSidebarMinimized = useAppStore((state) => state.isSidebarMinimized);
 
   return (
     <SideMenu MenuHeader={DashboardSideMenuHeader} MenuFooter={SideMenuFooter}>
       <SideMenuNavigation links={MENU_LINKS} isMinimized={isSidebarMinimized} />
-      {showFolderFilterList && !isSidebarMinimized && (
+      {isWorkflowsPage && !isSidebarMinimized && (
         <ScrollArea className="border-t">
           <FolderFilterList />
         </ScrollArea>
       )}
       {!isSidebarMinimized && (
-        <div className="p-4 flex flex-col h-full justify-end">
+        <div
+          className={cn('p-4 flex flex-col justify-end', {
+            'h-full': !isWorkflowsPage,
+          })}
+        >
           <HelpUsImprove onAccept={() => {}} onDismiss={() => {}} />
         </div>
       )}

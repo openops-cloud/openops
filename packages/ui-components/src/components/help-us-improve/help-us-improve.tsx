@@ -13,7 +13,7 @@ const HelpUsImprove = ({ className, onDismiss, onAccept }: Props) => (
   <DismissiblePanel
     closeTooltip={t('Dismiss')}
     onClose={onDismiss}
-    className={cn('p-2 bg-blueAccent/10 max-h-[160px]', className)}
+    className={cn('p-2 bg-blueAccent/10 max-h-fit', className)}
   >
     <div className="p-1">
       <p className="font-bold text-sm">
