@@ -1,4 +1,4 @@
-import { cacheWrapper, sendUserCreatedEvent } from '@openops/server-shared';
+import { sendUserCreatedEvent } from '@openops/server-shared';
 import {
   ApplicationError,
   ErrorCode,
@@ -178,7 +178,6 @@ export const userService = {
     trackEvents,
   }: UpdateTrackingParams): Promise<void> {
     const updateResult = await userRepo().update(id, {
-      updated: dayjs().toISOString(),
       trackEvents,
     });
 
