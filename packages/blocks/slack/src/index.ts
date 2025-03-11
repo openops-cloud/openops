@@ -7,8 +7,6 @@ import { slackSendMessageAction } from './lib/actions/send-message-action';
 import { updateMessageAction } from './lib/actions/update-message-action';
 import { waitForAction } from './lib/actions/wait-for-action';
 import { slackAuth } from './lib/common/authentication';
-import { newMessage } from './lib/triggers/new-message';
-import { newReactionAdded } from './lib/triggers/new-reaction-added';
 
 export const slack = createBlock({
   displayName: 'Slack',
@@ -71,7 +69,7 @@ export const slack = createBlock({
     }),
     waitForAction,
   ],
-  triggers: [newMessage, newReactionAdded],
+  triggers: [],
 });
 
 type PayloadBody = {
