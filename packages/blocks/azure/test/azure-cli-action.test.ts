@@ -1,16 +1,5 @@
-const commonMock = {
-  getAzureSubscriptionsStaticDropdown: jest.fn(),
-};
-
-jest.mock('@openops/common', () => commonMock);
-
-const azureCliMock = {
-  runCommand: jest.fn(),
-};
-
-jest.mock('../src/lib/actions/azure-cli', () => azureCliMock);
-
 const systemMock = {
+  getNumber: jest.fn(),
   getBoolean: jest.fn(),
 };
 
@@ -21,6 +10,19 @@ jest.mock('@openops/server-shared', () => ({
   },
   system: systemMock,
 }));
+
+const commonMock = {
+  ...jest.requireActual('@openops/common'),
+  getAzureSubscriptionsStaticDropdown: jest.fn(),
+};
+
+jest.mock('@openops/common', () => commonMock);
+
+const azureCliMock = {
+  runCommand: jest.fn(),
+};
+
+jest.mock('../src/lib/actions/azure-cli', () => azureCliMock);
 
 import { azureCliAction } from '../src/lib/actions/azure-cli-action';
 
@@ -49,7 +51,28 @@ describe('azureCliAction', () => {
         type: 'DYNAMIC',
         required: true,
       },
+      dryRun: {
+        type: 'CHECKBOX',
+        required: false,
+      },
     });
+  });
+
+  test('should skip the execution when dry run is active', async () => {
+    const context = {
+      ...jest.requireActual('@openops/blocks-framework'),
+      propsValue: {
+        dryRun: true,
+        commandToRun: 'az account list-locations --output table',
+      },
+    };
+
+    const result = await azureCliAction.run(context);
+    expect(result).toEqual(
+      "Step execution skipped, dry run flag enabled. Azure CLI command will not be executed. Command: 'az account list-locations --output table'",
+    );
+
+    expect(azureCliMock.runCommand).not.toHaveBeenCalled();
   });
 
   test('useHostSession should have checkbox if OPS_ENABLE_HOST_SESSION=true', async () => {

@@ -77,7 +77,7 @@ export async function getPriceList(
   const pricingProducts = await client.getProducts(params);
 
   if (!pricingProducts.PriceList || pricingProducts.PriceList.length === 0) {
-    throw new Error('No pricing found');
+    return [];
   }
 
   const priceList = pricingProducts.PriceList.map((item) =>
