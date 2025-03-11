@@ -23,5 +23,6 @@ jobs:
       - name: Trigger deployment
         env:
           GITHUB_TOKEN: ${{ steps.app_token.outputs.token }}
+          SHA: ${{ github.sha }}
         run: |
-          gh workflow run deploy -f revision=${{ github.sha }} -f environment=dev -r main -R openops-cloud/devops
+          gh workflow run deploy -f revision=${SHA::8} -f environment=dev -r main -R openops-cloud/devops
