@@ -102,7 +102,7 @@ jobs:
           RELEASE_URL="${{ steps.create-release.outputs.url }}"
           echo "### Release $VERSION was created! 🎉" >> $GITHUB_STEP_SUMMARY
           echo "The release was created as a draft.\n" >> $GITHUB_STEP_SUMMARY
-          echo "Please [review and publish it](${RELEASE/\/tags\//\/edit\/})." >> $GITHUB_STEP_SUMMARY
+          echo "Please [review and publish it](${RELEASE_URL/\/tags\//\/edit\/})." >> $GITHUB_STEP_SUMMARY
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
