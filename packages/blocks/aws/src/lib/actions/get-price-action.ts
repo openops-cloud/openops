@@ -31,25 +31,34 @@ export const getPriceAction = createAction({
         }
 
         const credentials = await getCredentialsFromAuth(auth);
-        const services = await getServices(credentials, PRICING_REGION);
+        try {
+          const services = await getServices(credentials, PRICING_REGION);
 
-        if (!services.length) {
+          if (!services.length) {
+            return {
+              disabled: true,
+              options: [],
+              placeholder: 'No services found',
+            };
+          }
+
+          return {
+            disabled: false,
+            options: services.map((service) => {
+              return {
+                label: service.ServiceCode!,
+                value: service,
+              };
+            }),
+          };
+        } catch (error) {
           return {
             disabled: true,
             options: [],
-            placeholder: 'No services found',
+            placeholder: 'An error occurred while fetching services',
+            error: String(error),
           };
         }
-
-        return {
-          disabled: false,
-          options: services.map((service) => {
-            return {
-              label: service.ServiceCode!,
-              value: service,
-            };
-          }),
-        };
       },
     }),
     queryFilters: Property.DynamicProperties({
@@ -92,20 +101,30 @@ export const getPriceAction = createAction({
                 }
 
                 const credentials = await getCredentialsFromAuth(auth);
-                const attributeValues: AttributeValue[] =
-                  await getAttributeValues(
-                    credentials,
-                    PRICING_REGION,
-                    service['ServiceCode'],
-                    attributeName,
-                  );
+                try {
+                  const attributeValues: AttributeValue[] =
+                    await getAttributeValues(
+                      credentials,
+                      PRICING_REGION,
+                      service['ServiceCode'],
+                      attributeName,
+                    );
 
-                return {
-                  options: attributeValues.map((value) => ({
-                    label: value.Value!,
-                    value: value.Value!,
-                  })),
-                };
+                  return {
+                    options: attributeValues.map((value) => ({
+                      label: value.Value!,
+                      value: value.Value!,
+                    })),
+                  };
+                } catch (error) {
+                  return {
+                    options: [],
+                    disabled: true,
+                    placeholder:
+                      'An error occurred while fetching attribute values',
+                    error: String(error),
+                  };
+                }
               },
             }),
           },
