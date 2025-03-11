@@ -15,6 +15,7 @@ import { SideMenuFooter } from '@/app/features/navigation/side-menu/side-menu-fo
 import { usersApi } from '@/app/lib/users-api';
 import { isValidISODate } from '@/app/lib/utils';
 import { useAppStore } from '@/app/store/app-store';
+import { useCallback } from 'react';
 
 export function DashboardSideMenu() {
   const location = useLocation();
@@ -27,21 +28,21 @@ export function DashboardSideMenu() {
 
   const { updateUserSettings } = userSettingsHooks.useUpdateUserSettings();
 
-  const onAccept = async () => {
+  const onAccept = useCallback(() => {
     updateUserSettings({
       telemetryBannerInteractionTimestamp: new Date().toISOString(),
     });
     usersApi.setTelemetry({ trackEvents: true });
 
     refetchUserSettings();
-  };
+  }, [updateUserSettings, refetchUserSettings]);
 
-  const onDismiss = () => {
+  const onDismiss = useCallback(() => {
     updateUserSettings({
       telemetryBannerInteractionTimestamp: new Date().toISOString(),
     });
     refetchUserSettings();
-  };
+  }, [updateUserSettings, refetchUserSettings]);
 
   const showBanner =
     !isSidebarMinimized &&
@@ -52,20 +53,22 @@ export function DashboardSideMenu() {
   return (
     <SideMenu MenuHeader={DashboardSideMenuHeader} MenuFooter={SideMenuFooter}>
       <SideMenuNavigation links={MENU_LINKS} isMinimized={isSidebarMinimized} />
-      {isWorkflowsPage && !isSidebarMinimized && (
-        <ScrollArea className="border-t">
-          <FolderFilterList />
-        </ScrollArea>
-      )}
-      {showBanner && (
-        <div
-          className={cn('p-4 flex flex-col justify-end', {
-            'h-full': !isWorkflowsPage,
-          })}
-        >
-          <HelpUsImprove onAccept={onAccept} onDismiss={onDismiss} />
-        </div>
-      )}
+      <div className="flex flex-col justify-between h-full">
+        {isWorkflowsPage && !isSidebarMinimized && (
+          <ScrollArea className="border-t">
+            <FolderFilterList />
+          </ScrollArea>
+        )}
+        {showBanner && (
+          <div
+            className={cn('p-4 flex flex-col justify-end', {
+              'h-full': !isWorkflowsPage,
+            })}
+          >
+            <HelpUsImprove onAccept={onAccept} onDismiss={onDismiss} />
+          </div>
+        )}
+      </div>
     </SideMenu>
   );
 }

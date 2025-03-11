@@ -6,7 +6,7 @@ type TrackEventsRequest = {
 
 export const usersApi = {
   setTelemetry: async ({ trackEvents }: TrackEventsRequest) => {
-    return await api.patch<TrackEventsRequest>('/v1/users/tracking', {
+    return await api.patch<TrackEventsRequest>('/v1/users/tracking-events', {
       trackEvents: trackEvents,
     });
   },
