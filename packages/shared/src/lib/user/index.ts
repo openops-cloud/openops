@@ -15,4 +15,6 @@ export const UpdateTrackingRequestBody = Type.Object({
   trackEvents: Type.Boolean(),
 });
 
-export type UpdateTrackingRequestBody = Static<typeof UpdateTrackingRequestBody>;
+export type UpdateTrackingRequestBody = Static<
+  typeof UpdateTrackingRequestBody
+>;
