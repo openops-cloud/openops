@@ -12,8 +12,8 @@ import { MENU_LINKS } from '@/app/constants/menu-links';
 import { FolderFilterList } from '@/app/features/folders/component/folder-filter-list';
 import { DashboardSideMenuHeader } from '@/app/features/navigation/side-menu/dashboard/dashboard-side-menu-header';
 import { SideMenuFooter } from '@/app/features/navigation/side-menu/side-menu-footer';
+import { isValidISODate } from '@/app/lib/utils';
 import { useAppStore } from '@/app/store/app-store';
-import { isValid, parseISO } from 'date-fns';
 
 export function DashboardSideMenu() {
   const location = useLocation();
@@ -67,8 +67,3 @@ export function DashboardSideMenu() {
     </SideMenu>
   );
 }
-
-const isValidISODate = (dateString: string) => {
-  const parsedDate = parseISO(dateString);
-  return isValid(parsedDate);
-};

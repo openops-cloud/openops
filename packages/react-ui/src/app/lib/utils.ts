@@ -1,4 +1,5 @@
 import { AxiosError } from 'axios';
+import { isValid, parseISO } from 'date-fns';
 import dayjs from 'dayjs';
 
 const EMAIL_REGEX =
@@ -104,4 +105,9 @@ export const isStepFileUrl = (json: unknown): json is string => {
     typeof json === 'string' &&
     (json.includes('/api/v1/step-files/') || json.includes('file://'))
   );
+};
+
+export const isValidISODate = (dateString: string) => {
+  const parsedDate = parseISO(dateString);
+  return isValid(parsedDate);
 };

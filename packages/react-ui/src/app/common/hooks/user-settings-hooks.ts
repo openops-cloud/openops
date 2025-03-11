@@ -16,7 +16,7 @@ export const userSettingsHooks = {
   useUserSettings: () => {
     const setUserSettings = useAppStore((state) => state.setUserSettings);
 
-    const { data, isLoading, error } = useQuery({
+    const { data, isLoading, error, refetch } = useQuery({
       queryKey: [
         'user-settings',
         authenticationSession.getProjectId(),
@@ -40,7 +40,7 @@ export const userSettingsHooks = {
       }
     }, [data, setUserSettings]);
 
-    return { data, isLoading, error };
+    return { data, isLoading, error, refetch };
   },
 
   useUpdateUserSettings: () => {
