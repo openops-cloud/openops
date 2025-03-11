@@ -28,17 +28,16 @@ export function DashboardSideMenu() {
 
   const { updateUserSettings } = userSettingsHooks.useUpdateUserSettings();
 
-  const onAccept = useCallback(() => {
-    updateUserSettings({
+  const onAccept = useCallback(async () => {
+    await updateUserSettings({
       telemetryBannerInteractionTimestamp: new Date().toISOString(),
     });
-    usersApi.setTelemetry({ trackEvents: true });
-
+    await usersApi.setTelemetry({ ...userSettings, trackEvents: true });
     refetchUserSettings();
-  }, [updateUserSettings, refetchUserSettings]);
+  }, [updateUserSettings, refetchUserSettings, userSettings]);
 
-  const onDismiss = useCallback(() => {
-    updateUserSettings({
+  const onDismiss = useCallback(async () => {
+    await updateUserSettings({
       telemetryBannerInteractionTimestamp: new Date().toISOString(),
     });
     refetchUserSettings();

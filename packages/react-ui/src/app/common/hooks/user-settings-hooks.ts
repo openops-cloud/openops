@@ -49,7 +49,7 @@ export const userSettingsHooks = {
       setUserSettings: state.setUserSettings,
     }));
 
-    const { mutate } = useMutation({
+    const { mutateAsync } = useMutation({
       onMutate: async (settings: UserSettingsDefinition) => {
         setUserSettings({ ...userSettings, ...settings });
         return settings;
@@ -59,7 +59,7 @@ export const userSettingsHooks = {
       },
     });
 
-    return { updateUserSettings: mutate };
+    return { updateUserSettings: mutateAsync };
   },
 
   useHomePageOperationalView: () => {
