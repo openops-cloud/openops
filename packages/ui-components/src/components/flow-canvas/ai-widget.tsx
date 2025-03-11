@@ -33,7 +33,7 @@ const AiWidget = () => {
           <h2 className="font-bold text-base">{t('AI Copilot')}</h2>
         </div>
         <div className="w-[323px] pl-[26px] py-4 text-sm bg-secondary/10">
-          <span>{t('Our AI copilot is coming soon! ')}</span>
+          <span>{t('Our AI copilot is coming soon!')}</span>
           <p>
             <Link
               to="#"
