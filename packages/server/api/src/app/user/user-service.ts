@@ -178,7 +178,6 @@ export const userService = {
     trackEvents,
   }: UpdateTrackingParams): Promise<void> {
     const updateResult = await userRepo().update(id, {
-      updated: dayjs().toISOString(),
       trackEvents,
     });
 
