@@ -50,35 +50,35 @@ const HomeGetStarted = ({
               )}
             </div>
           </div>
-          {/*<div className="w-full flex flex-col gap-4">*/}
-          {/*  <h3>{t('Quick links')}</h3>*/}
-          {/*  <div className="w-full h-[169px] flex gap-4 font-normal">*/}
-          {/*    <KnowledgeBaseCard*/}
-          {/*      link=""*/}
-          {/*      text={t('What is OpenOps?')}*/}
-          {/*      icon={<BookOpenText size={20} />}*/}
-          {/*      iconWrapperClassName="bg-warning"*/}
-          {/*    />*/}
-          {/*    <KnowledgeBaseCard*/}
-          {/*      link=""*/}
-          {/*      text={t('Quick start guide')}*/}
-          {/*      icon={<BookOpenText size={20} />}*/}
-          {/*      iconWrapperClassName="bg-blue-500"*/}
-          {/*    />*/}
-          {/*    <KnowledgeBaseCard*/}
-          {/*      link=""*/}
-          {/*      text={t('FAQ')}*/}
-          {/*      icon={<CircleHelp size={20} />}*/}
-          {/*      iconWrapperClassName="bg-warning-200"*/}
-          {/*    />*/}
-          {/*    <KnowledgeBaseCard*/}
-          {/*      link=""*/}
-          {/*      text={t('Community')}*/}
-          {/*      icon={<BookOpenText size={20} />}*/}
-          {/*      iconWrapperClassName="bg-teal-400"*/}
-          {/*    />*/}
-          {/*  </div>*/}
-          {/*</div>*/}
+          {/* <div className="w-full flex flex-col gap-4">
+            <h3>{t('Quick links')}</h3>
+            <div className="w-full h-[169px] flex gap-4 font-normal">
+              <KnowledgeBaseCard
+                link=""
+                text={t('What is OpenOps?')}
+                icon={<BookOpenText size={20} />}
+                iconWrapperClassName="bg-warning"
+              />
+              <KnowledgeBaseCard
+                link=""
+                text={t('Features and benefits')}
+                icon={<BookOpenText size={20} />}
+                iconWrapperClassName="bg-blue-500"
+              />
+              <KnowledgeBaseCard
+                link=""
+                text={t('Quick start guide')}
+                icon={<BookOpenText size={20} />}
+                iconWrapperClassName="bg-warning-200"
+              />
+              <KnowledgeBaseCard
+                link=""
+                text={t('Community')}
+                icon={<BookOpenText size={20} />}
+                iconWrapperClassName="bg-teal-400"
+              />
+            </div>
+          </div> */}
         </div>
       </div>
     </DismissiblePanel>
