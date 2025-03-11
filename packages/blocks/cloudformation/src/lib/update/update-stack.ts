@@ -35,7 +35,7 @@ export const updateStack = createAction({
     const { arn, template, dryRun } = context.propsValue;
 
     if (dryRun) {
-      return `Step execution skipped, dry run flag enabled.'`;
+      return `Step execution skipped, dry run flag enabled.`;
     }
 
     const waitForInSeconds =

@@ -19,7 +19,7 @@ describe('Apply CloudFormation template', () => {
   });
 
   test('should create action with correct properties', () => {
-    expect(Object.keys(updateStack.props).length).toBe(4);
+    expect(Object.keys(updateStack.props).length).toBe(5);
     expect(updateStack.props).toMatchObject({
       arn: {
         required: true,
