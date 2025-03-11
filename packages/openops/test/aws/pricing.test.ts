@@ -218,9 +218,14 @@ describe('pricing tests', () => {
           getProducts: getProductsCommandMock,
         });
 
-        await expect(
-          getPriceList('credentials', 'us-east-1', 'some service', []),
-        ).rejects.toThrowError('No pricing found');
+        const result = await getPriceList(
+          'credentials',
+          'us-east-1',
+          'some service',
+          [],
+        );
+
+        expect(result).toStrictEqual([]);
 
         expect(getProductsCommandMock).toHaveBeenCalledTimes(1);
         expect(getProductsCommandMock).toHaveBeenCalledWith({
