@@ -178,7 +178,7 @@ describe('flow execution', () => {
     ).toEqual({
       steps: {
         webhook: {
-          type: 'BLOCK_TRIGGER',
+          type: 'TRIGGER',
           status: 'SUCCEEDED',
           input: {},
           output: {},

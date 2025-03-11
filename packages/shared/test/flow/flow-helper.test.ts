@@ -1005,7 +1005,7 @@ it('Should remove connections', () => {
     displayName: 'Untitled',
     trigger: {
       name: 'trigger',
-      type: 'BLOCK_TRIGGER',
+      type: 'TRIGGER',
       valid: true,
       settings: {
         input: {
@@ -1142,7 +1142,7 @@ it('Should remove connections', () => {
   });
   const steps = flowHelper.getAllSteps(result.trigger);
 
-  for (const step of steps.filter((s) => s.type !== 'BLOCK_TRIGGER')) {
+  for (const step of steps.filter((s) => s.type !== 'TRIGGER')) {
     if (step.settings.input) {
       expect(step.settings.input.auth).toEqual('');
     }

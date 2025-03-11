@@ -8,6 +8,7 @@ export type GetTemplatesParams = {
   domains?: string[];
   blocks?: string[];
   tags?: string[];
+  version?: string;
 };
 
 export const cloudTemplatesApi = {

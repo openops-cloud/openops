@@ -11,6 +11,7 @@ import { InitializePostgresSchema1740463047000 } from './migrations/174046304700
 import { AddUserSettings1740734879653 } from './migrations/1740734879653-AddUserSettings';
 import { AddColumnForStartupTemplates1741016911542 } from './migrations/1741016911542-AddColumnForStartupTemplates';
 import { RenamePieceToBlockMigration1741475952000 } from './migrations/1741475952000-RenamePieceToBlock';
+import { AddVersionToTemplates1741636646000 } from './migrations/1741636646000-AddVersionToTemplates';
 
 const getSslConfig = (): boolean | TlsOptions => {
   const useSsl = system.get(AppSystemProp.POSTGRES_USE_SSL);
@@ -30,6 +31,7 @@ const getMigrations = (): (new () => MigrationInterface)[] => {
     AddUserSettings1740734879653,
     AddColumnForStartupTemplates1741016911542,
     RenamePieceToBlockMigration1741475952000,
+    AddVersionToTemplates1741636646000,
   ];
 };
 

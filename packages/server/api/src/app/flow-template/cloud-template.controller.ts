@@ -63,11 +63,13 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
           services: Type.Optional(Type.Array(Type.String())),
           domains: Type.Optional(Type.Array(Type.String())),
           blocks: Type.Optional(Type.Array(Type.String())),
+          version: Type.Optional(Type.String()),
         }),
       },
     },
     async (request) => {
       const token = getCloudToken(request);
+
       if (!(await getCloudUser(identityClient, token))) {
         return flowTemplateService.getFlowTemplates({
           search: request.query.search,
@@ -79,6 +81,7 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
           organizationId: request.principal.organization.id,
           cloudTemplates: true,
           isSample: true,
+          version: request.query.version,
         });
       }
 
@@ -91,6 +94,7 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
         projectId: request.principal.projectId,
         organizationId: request.principal.organization.id,
         cloudTemplates: true,
+        version: request.query.version,
       });
     },
   );

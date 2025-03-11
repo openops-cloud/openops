@@ -6,7 +6,7 @@ export const AUTHENTICATION_PROPERTY_NAME = 'auth';
 
 export enum TriggerType {
   EMPTY = 'EMPTY',
-  BLOCK = 'BLOCK_TRIGGER',
+  BLOCK = 'TRIGGER',
 }
 
 const commonProps = {

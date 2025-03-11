@@ -4,10 +4,12 @@ import {
   flowHelper,
   openOpsId,
 } from '@openops/shared';
+import { compare } from 'compare-versions';
 import { Brackets } from 'typeorm';
 import { repoFactory } from '../core/db/repo-factory';
 import { flowService } from '../flows/flow/flow.service';
 import { FlowTemplateEntity, FlowTemplateSchema } from './flow-template.entity';
+
 const flowTemplateRepo = repoFactory(FlowTemplateEntity);
 
 export type flowTemplateQueryParams = {
@@ -20,6 +22,7 @@ export type flowTemplateQueryParams = {
   organizationId: string;
   cloudTemplates?: boolean;
   isSample?: boolean;
+  version?: string;
 };
 
 type createFlowTemplateParams = {
@@ -35,7 +38,7 @@ type createFlowTemplateParams = {
 };
 
 export const flowTemplateService = {
-  getFlowTemplates(
+  async getFlowTemplates(
     queryParams: flowTemplateQueryParams,
   ): Promise<FlowTemplateSchema[]> {
     let queryBuilder = flowTemplateRepo()
@@ -125,7 +128,9 @@ export const flowTemplateService = {
       );
     }
 
-    return queryBuilder.getMany();
+    const templates = await queryBuilder.getMany();
+
+    return filterTemplatesByVersion(templates, queryParams.version);
   },
   getFlowTemplate(id: string): Promise<FlowTemplateSchema | null> {
     return flowTemplateRepo().findOneBy({ id });
@@ -158,3 +163,23 @@ export const flowTemplateService = {
     });
   },
 };
+
+export function filterTemplatesByVersion(
+  templates: FlowTemplateSchema[],
+  version: string | undefined,
+) {
+  return templates.filter((template) => {
+    if (!version) {
+      return !template.minSupportedVersion && !template.maxSupportedVersion;
+    }
+
+    const meetsMin = template.minSupportedVersion
+      ? compare(version, template.minSupportedVersion, '>=')
+      : false;
+    const meetsMax = template.maxSupportedVersion
+      ? compare(version, template.maxSupportedVersion, '<=')
+      : true;
+
+    return meetsMin && meetsMax;
+  });
+}
