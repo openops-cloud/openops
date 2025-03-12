@@ -87,6 +87,7 @@ describe('telemetry', () => {
       labels: {
         eventName: event.name,
         flowId: 'value',
+        version: '0.0.1',
         projectId: 'projectId',
         environmentId: 'undefined',
         __name__: `${event.name}_total`,
@@ -128,9 +129,17 @@ describe('telemetry', () => {
       jest.spyOn(global, 'Date').mockImplementation(() => fixedDate);
       requestContextMock.requestContext.get.mockReturnValueOnce('true');
 
-      systemMock.get.mockImplementation((key) =>
-        key === 'LOGZIO_METRICS_TOKEN' ? 'logzio-token' : null,
-      );
+      systemMock.getBoolean.mockReturnValue(true);
+      systemMock.get.mockImplementation((key) => {
+        if (key === 'LOGZIO_METRICS_TOKEN') {
+          return 'logzio-token';
+        }
+
+        if (key === 'VERSION') {
+          return '0.0.1';
+        }
+        return null;
+      });
 
       telemetry = getSUT();
       telemetry.trackEvent(event);
