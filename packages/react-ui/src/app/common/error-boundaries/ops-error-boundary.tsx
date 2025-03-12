@@ -12,7 +12,7 @@ export function ErrorFallback({ error }: FallbackProps) {
         {t('Something went wrong')}
       </h2>
       <p className="text-gray-600 mb-2">{error.message}</p>
-      <p className=" text-gray-600 mb-4">
+      <p className="text-gray-600 mb-4">
         {t(
           "If it's a persistant issue, please contact support with steps to reproduce and include any relevant error messages.",
         )}
