@@ -112,7 +112,11 @@ describe('updateRowAction', () => {
       name: 'primary key field',
     });
     openopsCommonMock.getRowByPrimaryKeyValue.mockResolvedValue({ id: 1 });
-    openopsCommonMock.getFields.mockResolvedValue(['some field']);
+    openopsCommonMock.getFields.mockResolvedValue([
+      { id: 1, primary: true, name: 'id' },
+      { id: 2, primary: false, name: 'field1' },
+    ]);
+
     openopsCommonMock.updateRow.mockResolvedValue('mock result');
     const context = createContext({
       tableName: 'Opportunity',
@@ -139,7 +143,10 @@ describe('updateRowAction', () => {
       openopsCommonMock.getPrimaryKeyFieldFromFields,
     ).toHaveBeenCalledTimes(1);
     expect(openopsCommonMock.getPrimaryKeyFieldFromFields).toHaveBeenCalledWith(
-      ['some field'],
+      [
+        { id: 1, primary: true, name: 'id' },
+        { id: 2, primary: false, name: 'field1' },
+      ],
     );
     expect(openopsCommonMock.updateRow).toHaveBeenCalledTimes(1);
     expect(openopsCommonMock.updateRow).toHaveBeenCalledWith({
@@ -151,7 +158,10 @@ describe('updateRowAction', () => {
   });
 
   test('should create record if doesnt exist', async () => {
-    openopsCommonMock.getFields.mockResolvedValue(['some field']);
+    openopsCommonMock.getFields.mockResolvedValue([
+      { id: 1, primary: true, name: 'id' },
+      { id: 2, primary: false, name: 'field1' },
+    ]);
     openopsCommonMock.getPrimaryKeyFieldFromFields.mockReturnValue({
       name: 'primary key field',
     });
@@ -183,7 +193,10 @@ describe('updateRowAction', () => {
       openopsCommonMock.getPrimaryKeyFieldFromFields,
     ).toHaveBeenCalledTimes(1);
     expect(openopsCommonMock.getPrimaryKeyFieldFromFields).toHaveBeenCalledWith(
-      ['some field'],
+      [
+        { id: 1, primary: true, name: 'id' },
+        { id: 2, primary: false, name: 'field1' },
+      ],
     );
     expect(openopsCommonMock.addRow).toHaveBeenCalledTimes(1);
     expect(openopsCommonMock.addRow).toHaveBeenCalledWith({
@@ -196,10 +209,49 @@ describe('updateRowAction', () => {
     });
   });
 
+  test('should fail to add field if column does not exist', async () => {
+    openopsCommonMock.getPrimaryKeyFieldFromFields.mockReturnValue({
+      name: 'primary key field',
+    });
+    openopsCommonMock.getRowByPrimaryKeyValue.mockResolvedValue({ id: 1 });
+    openopsCommonMock.getFields.mockResolvedValue([
+      { id: 1, primary: true, name: 'id' },
+    ]);
+
+    openopsCommonMock.updateRow.mockResolvedValue('mock result');
+    const context = createContext({
+      tableName: 'Opportunity',
+      rowPrimaryKey: { rowPrimaryKey: 'some primary key value' },
+      fieldsProperties: [
+        {
+          fieldName: 'field1',
+          newFieldValue: { newFieldValue: 'new value' },
+        },
+      ],
+    });
+
+    await expect(updateRecordAction.run(context)).rejects.toThrow(
+      'Column field1 does not exist in table Opportunity.',
+    );
+
+    expect(openopsCommonMock.updateRow).not.toHaveBeenCalled();
+    expect(openopsCommonMock.getRowByPrimaryKeyValue).not.toHaveBeenCalled();
+    expect(openopsCommonMock.getRowByPrimaryKeyValue).not.toHaveBeenCalled();
+    expect(
+      openopsCommonMock.getPrimaryKeyFieldFromFields,
+    ).not.toHaveBeenCalled();
+    expect(
+      openopsCommonMock.getPrimaryKeyFieldFromFields,
+    ).not.toHaveBeenCalled();
+  });
+
   test.each([[[]], [{}]])(
     'should throw if the primary key is not a valid string',
     async (rowPrimaryKey: any) => {
-      openopsCommonMock.getFields.mockResolvedValue(['some field']);
+      openopsCommonMock.getFields.mockResolvedValue([
+        { id: 1, primary: true, name: 'id' },
+        { id: 2, primary: false, name: 'field1' },
+      ]);
       openopsCommonMock.getPrimaryKeyFieldFromFields.mockReturnValue({
         name: 'primary key field',
       });
@@ -226,7 +278,10 @@ describe('updateRowAction', () => {
       ).toHaveBeenCalledTimes(1);
       expect(
         openopsCommonMock.getPrimaryKeyFieldFromFields,
-      ).toHaveBeenCalledWith(['some field']);
+      ).toHaveBeenCalledWith([
+        { id: 1, primary: true, name: 'id' },
+        { id: 2, primary: false, name: 'field1' },
+      ]);
     },
   );
 

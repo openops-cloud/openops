@@ -1,6 +1,6 @@
 services:
   nginx:
-    container_name: nginx
+    restart: unless-stopped
     image: nginx:1.27.4
     ports:
       - 80:80
@@ -12,8 +12,8 @@ services:
       openops-analytics:
         condition: service_healthy
   openops-app:
-    container_name: openops-app
     image: public.ecr.aws/openops/openops-app:${OPS_VERSION:-latest}
+    restart: unless-stopped
     env_file: .env
     environment:
       OPS_COMPONENT: app
@@ -30,8 +30,8 @@ services:
       postgres:
         condition: service_healthy
   openops-engine:
-    container_name: openops-engine
     image: public.ecr.aws/openops/openops-engine:${OPS_VERSION:-latest}
+    restart: unless-stopped
     env_file: .env
     command: ["cp -r /var/tmp-base/. /tmp/ && node main.js"]
     environment:
@@ -43,8 +43,8 @@ services:
     volumes:
       - ${HOST_AZURE_CONFIG_DIR:-openops_azure_cli_data}:/tmp/azure
   openops-tables:
-    container_name: openops-tables
     image: public.ecr.aws/openops/openops-tables:0.1.6
+    restart: unless-stopped
     environment:
       BASEROW_PUBLIC_URL: ${OPS_OPENOPS_TABLES_PUBLIC_URL}
       BASEROW_PRIVATE_URL: http://openops-tables
@@ -79,8 +79,8 @@ services:
       postgres:
         condition: service_healthy
   openops-analytics:
-    container_name: openops-analytics
     image: public.ecr.aws/openops/openops-analytics:0.12.15
+    restart: unless-stopped
     platform: linux/amd64 # Needed for M1 Macs until we have cross-platform CI builds(linux/adm64 and linux/arm64 images)
     environment:
       ADMIN_PASSWORD: ${OPS_ANALYTICS_ADMIN_PASSWORD}
@@ -102,7 +102,6 @@ services:
         condition: service_healthy
   postgres:
     image: 'postgres:14.4'
-    container_name: postgres
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${OPS_POSTGRES_USERNAME}
@@ -119,7 +118,6 @@ services:
       retries: 5
   redis:
     image: 'redis:7.4.0'
-    container_name: redis
     ports: ['6379:6379']
     healthcheck:
       test: ['CMD', 'redis-cli', 'ping']
@@ -133,5 +131,3 @@ volumes:
   openops_tables_data:
   postgres_data:
   redis_data:
-networks:
-  openops:

@@ -52,7 +52,7 @@ export function DashboardSideMenu() {
   return (
     <SideMenu MenuHeader={DashboardSideMenuHeader} MenuFooter={SideMenuFooter}>
       <SideMenuNavigation links={MENU_LINKS} isMinimized={isSidebarMinimized} />
-      <div className="flex flex-col justify-between h-full">
+      <div className="flex flex-col justify-between h-full overflow-hidden">
         {isWorkflowsPage && !isSidebarMinimized && (
           <ScrollArea className="border-t">
             <FolderFilterList />
