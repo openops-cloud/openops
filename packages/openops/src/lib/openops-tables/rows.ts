@@ -41,19 +41,19 @@ export interface DeleteRowParams extends RowParams {
   rowId: number;
 }
 
-class GlobalSemaphore {
+class TablesAccessSemaphore {
   private static instance: Semaphore;
   static getInstance(): Semaphore {
-    if (!GlobalSemaphore.instance) {
-      GlobalSemaphore.instance = new Semaphore(100);
+    if (!TablesAccessSemaphore.instance) {
+      TablesAccessSemaphore.instance = new Semaphore(100);
     }
-    return GlobalSemaphore.instance;
+    return TablesAccessSemaphore.instance;
   }
 }
 
-const semaphore = GlobalSemaphore.getInstance();
+const semaphore = TablesAccessSemaphore.getInstance();
 
-async function withGlobalLock<T>(fn: () => Promise<T>): Promise<T> {
+async function executeWithConcurrencyLimit<T>(fn: () => Promise<T>): Promise<T> {
   const [value, release] = await semaphore.acquire();
   try {
     return await fn();
@@ -66,7 +66,7 @@ async function withGlobalLock<T>(fn: () => Promise<T>): Promise<T> {
 }
 
 export async function getRows(getRowsParams: GetRowsParams) {
-  return withGlobalLock(async () => {
+  return executeWithConcurrencyLimit(async () => {
     if (
       getRowsParams.filters &&
       getRowsParams.filters.length > 1 &&
@@ -103,7 +103,7 @@ export async function getRows(getRowsParams: GetRowsParams) {
 }
 
 export async function updateRow(updateRowParams: UpdateRowParams) {
-  return withGlobalLock(async () => {
+  return executeWithConcurrencyLimit(async () => {
     const authenticationHeader = createAxiosHeaders(updateRowParams.token);
     return await makeOpenOpsTablesPatch(
       `api/database/rows/table/${updateRowParams.tableId}/${updateRowParams.rowId}/?user_field_names=true`,
@@ -114,7 +114,7 @@ export async function updateRow(updateRowParams: UpdateRowParams) {
 }
 
 export async function addRow(addRowParams: AddRowParams) {
-  return withGlobalLock(async () => {
+  return executeWithConcurrencyLimit(async () => {
     const authenticationHeader = createAxiosHeaders(addRowParams.token);
     return await makeOpenOpsTablesPost(
       `api/database/rows/table/${addRowParams.tableId}/?user_field_names=true`,
@@ -125,7 +125,7 @@ export async function addRow(addRowParams: AddRowParams) {
 }
 
 export async function deleteRow(deleteRowParams: DeleteRowParams) {
-  return withGlobalLock(async () => {
+  return executeWithConcurrencyLimit(async () => {
     const authenticationHeader = createAxiosHeaders(deleteRowParams.token);
     return await makeOpenOpsTablesDelete(
       `api/database/rows/table/${deleteRowParams.tableId}/${deleteRowParams.rowId}/`,
@@ -140,23 +140,21 @@ export async function getRowByPrimaryKeyValue(
   primaryKeyFieldValue: string,
   primaryKeyFieldName: any,
 ) {
-  return withGlobalLock(async () => {
-    const rows = await getRows({
-      tableId: tableId,
-      token: token,
-      filters: [
-        {
-          fieldName: primaryKeyFieldName,
-          value: primaryKeyFieldValue,
-          type: ViewFilterTypesEnum.equal,
-        },
-      ],
-    });
-
-    if (rows.length > 1) {
-      throw new Error('More than one row found with given primary key');
-    }
-
-    return rows[0];
+  const rows = await getRows({
+    tableId: tableId,
+    token: token,
+    filters: [
+      {
+        fieldName: primaryKeyFieldName,
+        value: primaryKeyFieldValue,
+        type: ViewFilterTypesEnum.equal,
+      },
+    ],
   });
+
+  if (rows.length > 1) {
+    throw new Error('More than one row found with given primary key');
+  }
+
+  return rows[0];
 }
