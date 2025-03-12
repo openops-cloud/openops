@@ -35,7 +35,7 @@ export async function createOpportunitiesTable(
     name: 'Status',
     type: 'single_select',
     select_options: [
-      { value: 'Created', color: 'light-grey' },
+      { value: 'Created', color: 'grey' },
       { value: 'Dismissed', color: 'darker-red' },
       { value: 'Snoozed', color: 'yellow' },
       { value: 'Approved', color: 'dark-green' },
