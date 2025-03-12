@@ -92,6 +92,7 @@ const DynamicProperties = React.memo((props: DynamicPropertiesProps) => {
     const input: Record<string, unknown> = {};
     newRefreshers.forEach((refresher, index) => {
       input[refresher] = refresherValues[index];
+      input.auth = form.getValues('settings.input.auth');
     });
 
     mutate(
