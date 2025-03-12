@@ -1,3 +1,4 @@
+import { LeftSideBarType } from '@/app/features/builder/builder-hooks';
 import {
   Button,
   cn,
@@ -5,36 +6,13 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  LoadingSpinner,
   RunsIcon,
   TooltipWrapper,
-  VerticalDivider,
-  WarningWithIcon,
 } from '@openops/components/ui';
 import { t } from 'i18next';
-import {
-  BookOpen,
-  Copy,
-  CornerUpLeft,
-  Download,
-  EllipsisVertical,
-  History,
-  Import,
-  Pencil,
-  TextCursorInput,
-  Trash2,
-  Workflow,
-} from 'lucide-react';
+import { EllipsisVertical, Workflow } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-
-import { ConfirmationDeleteDialog } from '@/app/common/components/delete-dialog';
-import { SEARCH_PARAMS } from '@/app/constants/search-params';
-import { LeftSideBarType } from '@/app/features/builder/builder-hooks';
-import { ImportFlowDialog } from '@/app/features/flows/components/import-flow-dialog';
-import { MoveFlowDialog } from '@/app/features/flows/components/move-flow-dialog';
-import { RenameFlowDialog } from '@/app/features/flows/components/rename-flow-dialog';
-import { flowsApi } from '@/app/features/flows/lib/flows-api';
+import { useLocation } from 'react-router-dom';
 
 type BuilderHeaderActionBarProps = {
   handleSidebarButtonClick: (type: LeftSideBarType) => void;

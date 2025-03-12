@@ -1,11 +1,11 @@
 import {
+  cn,
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-  cn,
 } from '@openops/components/ui';
 import { t } from 'i18next';
-import { ChevronDown, Folder as FolderIcon } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { createSearchParams, useNavigate } from 'react-router-dom';
 
 import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
