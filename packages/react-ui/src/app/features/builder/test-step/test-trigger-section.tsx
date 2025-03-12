@@ -232,7 +232,7 @@ const TestTriggerSection = React.memo(
     const testTriggerNote =
       formValues.settings.triggerName === CATCH_WEBHOOK
         ? t('Please click on Test URL to generate sample data')
-        : t('testBlockWebhookTriggerNote', {
+        : t('Please go to {blockName} and trigger {triggerName}.', {
             blockName: blockModel?.displayName,
             triggerName:
               blockModel?.triggers[formValues.settings.triggerName].displayName,
