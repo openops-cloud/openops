@@ -8,6 +8,7 @@ import { SEARCH_PARAMS } from '@/app/constants/search-params';
 import { BuilderPage } from '@/app/features/builder';
 import { BuilderStateProvider } from '@/app/features/builder/builder-state-provider';
 import { flowsApi } from '@/app/features/flows/lib/flows-api';
+import { AxiosError } from 'axios';
 
 const FlowBuilderPage = () => {
   const { flowId } = useParams();
@@ -27,16 +28,25 @@ const FlowBuilderPage = () => {
     data: flow,
     isLoading,
     isError,
+    error,
   } = useQuery<PopulatedFlow, Error>({
     queryKey: ['flow', flowId],
     queryFn: () => flowsApi.get(flowId!),
     gcTime: 0,
-    retry: false,
-    refetchOnWindowFocus: false,
+    retry: (failureCount, error) => {
+      if ((error as AxiosError)?.status === 404) {
+        return false;
+      }
+      return failureCount < 4;
+    },
+    refetchOnWindowFocus: true,
   });
 
-  if (isError) {
+  if (isError && (error as AxiosError).status === 404) {
     return <Navigate to="/404" />;
+  }
+  if (isError && error) {
+    throw error;
   }
 
   if (isLoading) {
