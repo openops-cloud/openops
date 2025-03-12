@@ -8,6 +8,7 @@ import {
   getRowByPrimaryKeyValue,
   getTableFields,
   getTableIdByTableName,
+  OpenOpsField,
   openopsTablesDropdownProperty,
   updateRow,
 } from '@openops/common';
@@ -116,6 +117,12 @@ export const updateRecordAction = createAction({
     const { token } = await authenticateDefaultUserInOpenOpsTables();
 
     const fields = await getFields(tableId, token);
+    const fieldsToUpdate = await mapFieldsToObject(
+      tableName,
+      fields,
+      fieldsProperties,
+    );
+
     const primaryKeyField = getPrimaryKeyFieldFromFields(fields);
     const primaryKeyValue = getPrimaryKey(rowPrimaryKey['rowPrimaryKey']);
 
@@ -127,8 +134,6 @@ export const updateRecordAction = createAction({
           primaryKeyField.name,
         )
       : undefined;
-
-    const fieldsToUpdate = await mapFieldsToObject(fieldsProperties);
 
     if (!rowToUpdate) {
       fieldsToUpdate[primaryKeyField.name] = primaryKeyValue;
@@ -161,13 +166,23 @@ function getPrimaryKey(rowPrimaryKey: any): string | undefined {
   return isEmpty(primaryKeyValue) ? undefined : primaryKeyValue;
 }
 
-async function mapFieldsToObject(fieldsProperties: any) {
+async function mapFieldsToObject(
+  tableName: string,
+  validColumns: OpenOpsField[],
+  fieldsProperties: any,
+) {
+  const validColumnsNames = new Set(validColumns.map((field) => field.name));
   const updateFieldsProperty = fieldsProperties[
     'fieldsProperties'
   ] as unknown as { fieldName: string; newFieldValue: any }[];
 
   const fieldsToUpdate: { [key: string]: any } = {};
   updateFieldsProperty?.map((updateFieldData) => {
+    if (!validColumnsNames.has(updateFieldData.fieldName)) {
+      throw new Error(
+        `Column ${updateFieldData.fieldName} does not exist in table ${tableName}.`,
+      );
+    }
     fieldsToUpdate[updateFieldData.fieldName] =
       updateFieldData.newFieldValue['newFieldValue'];
   });
