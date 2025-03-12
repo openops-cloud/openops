@@ -24,7 +24,6 @@ jest.mock('async-mutex', () => {
   };
 });
 
-
 import {
   FilterType,
   ViewFilterTypesEnum,
@@ -59,7 +58,7 @@ describe('getRows', () => {
     expect(releaseMock).toBeCalledTimes(1);
     expect(makeOpenOpsTablesGetMock).toBeCalledTimes(1);
   });
-  
+
   test('Should get rows', async () => {
     makeOpenOpsTablesGetMock.mockResolvedValue([
       { results: [{ id: 1, order: 1234 }] },
@@ -269,7 +268,7 @@ describe('delete row', () => {
     expect(releaseMock).toBeCalledTimes(1);
     expect(makeOpenOpsTablesDeleteMock).toBeCalledTimes(1);
   });
-  
+
   test('Should delete row', async () => {
     makeOpenOpsTablesDeleteMock.mockResolvedValue('mock result');
     createAxiosHeadersMock.mockReturnValue('some header');

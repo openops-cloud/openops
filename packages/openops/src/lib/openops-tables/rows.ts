@@ -1,3 +1,4 @@
+import { logger } from '@openops/server-shared';
 import { Semaphore } from 'async-mutex';
 import {
   buildSimpleFilterUrlParam,
@@ -11,7 +12,6 @@ import {
   makeOpenOpsTablesPatch,
   makeOpenOpsTablesPost,
 } from '../openops-tables/requests-helpers';
-import { logger } from '@openops/server-shared';
 
 export interface OpenOpsRow {
   id: number;
@@ -48,7 +48,7 @@ async function withGlobalLock<T>(fn: () => Promise<T>): Promise<T> {
   try {
     return await fn();
   } catch (error) {
-    logger.error("Error in locked row operation:", error);
+    logger.error('Error in locked row operation:', error);
     throw error;
   } finally {
     release();
