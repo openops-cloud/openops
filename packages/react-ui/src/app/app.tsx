@@ -24,18 +24,18 @@ if (!typesFormatsAdded) {
 
 export function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <InitialDataGuard>
-        <TooltipProvider>
-          <ThemeProvider storageKey="vite-ui-theme">
-            <OpsErrorBoundary>
+    <OpsErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <InitialDataGuard>
+          <TooltipProvider>
+            <ThemeProvider storageKey="vite-ui-theme">
               <ApplicationRouter />
-            </OpsErrorBoundary>
-            <Toaster />
-          </ThemeProvider>
-        </TooltipProvider>
-      </InitialDataGuard>
-    </QueryClientProvider>
+              <Toaster />
+            </ThemeProvider>
+          </TooltipProvider>
+        </InitialDataGuard>
+      </QueryClientProvider>
+    </OpsErrorBoundary>
   );
 }
 

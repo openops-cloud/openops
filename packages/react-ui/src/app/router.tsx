@@ -22,7 +22,10 @@ import { FlowsPageHeader } from '@/app/features/flows/components/flows-page-head
 import { HomeHelpDropdown } from '@/app/features/home/components/home-help-dropdown';
 import { FlagId } from '@openops/shared';
 import { lazy, Suspense } from 'react';
-import { OpsErrorBoundary } from './common/error-boundaries/ops-error-boundary';
+import {
+  OpsErrorBoundary,
+  RouteErrorBoundary,
+} from './common/error-boundaries/ops-error-boundary';
 import { AllowOnlyLoggedInUserOnlyGuard } from './common/guards/allow-logged-in-user-only-guard';
 import { ConnectionsHeader } from './features/connections/components/connection-table';
 import { ConnectionsProvider } from './features/connections/components/connections-context';
@@ -75,6 +78,7 @@ const createRoutes = () => {
           </OpsErrorBoundary>
         </DashboardContainer>
       ),
+      errorElement: <RouteErrorBoundary />,
     },
     {
       path: '/flows/:flowId',
@@ -87,6 +91,7 @@ const createRoutes = () => {
           </OpsErrorBoundary>
         </AllowOnlyLoggedInUserOnlyGuard>
       ),
+      errorElement: <RouteErrorBoundary />,
     },
     {
       path: '/runs/:runId',
@@ -99,6 +104,7 @@ const createRoutes = () => {
           </OpsErrorBoundary>
         </AllowOnlyLoggedInUserOnlyGuard>
       ),
+      errorElement: <RouteErrorBoundary />,
     },
     {
       path: '/runs',
@@ -113,6 +119,7 @@ const createRoutes = () => {
           </OpsErrorBoundary>
         </DashboardContainer>
       ),
+      errorElement: <RouteErrorBoundary />,
     },
     {
       path: '/connections',
@@ -127,6 +134,7 @@ const createRoutes = () => {
           </DashboardContainer>
         </ConnectionsProvider>
       ),
+      errorElement: <RouteErrorBoundary />,
     },
     {
       path: '/settings',
@@ -137,6 +145,7 @@ const createRoutes = () => {
           </OpsErrorBoundary>
         </DashboardContainer>
       ),
+      errorElement: <RouteErrorBoundary />,
     },
     {
       path: '/forget-password',
@@ -147,6 +156,7 @@ const createRoutes = () => {
           </PageTitle>
         </OpsErrorBoundary>
       ),
+      errorElement: <RouteErrorBoundary />,
     },
     {
       path: '/reset-password',
@@ -157,30 +167,40 @@ const createRoutes = () => {
           </PageTitle>
         </OpsErrorBoundary>
       ),
+      errorElement: <RouteErrorBoundary />,
     },
     {
       path: '/sign-in',
       element: (
-        <PageTitle title="Sign In">
-          <SignInPage />
-        </PageTitle>
+        <OpsErrorBoundary>
+          <PageTitle title="Sign In">
+            <SignInPage />
+          </PageTitle>
+        </OpsErrorBoundary>
       ),
+      errorElement: <RouteErrorBoundary />,
     },
     {
       path: '/verify-email',
       element: (
-        <PageTitle title="Verify Email">
-          <VerifyEmail />
-        </PageTitle>
+        <OpsErrorBoundary>
+          <PageTitle title="Verify Email">
+            <VerifyEmail />
+          </PageTitle>
+        </OpsErrorBoundary>
       ),
+      errorElement: <RouteErrorBoundary />,
     },
     {
       path: '/sign-up',
       element: (
-        <PageTitle title="Sign Up">
-          <SignUpPage />
-        </PageTitle>
+        <OpsErrorBoundary>
+          <PageTitle title="Sign Up">
+            <SignUpPage />
+          </PageTitle>
+        </OpsErrorBoundary>
       ),
+      errorElement: <RouteErrorBoundary />,
     },
     {
       path: '/settings/appearance',
@@ -195,6 +215,7 @@ const createRoutes = () => {
           </ProjectSettingsLayout>
         </DashboardContainer>
       ),
+      errorElement: <RouteErrorBoundary />,
     },
     {
       path: '/settings/general',
@@ -209,6 +230,7 @@ const createRoutes = () => {
           </ProjectSettingsLayout>
         </DashboardContainer>
       ),
+      errorElement: <RouteErrorBoundary />,
     },
     {
       path: '/settings/blocks',
@@ -223,6 +245,7 @@ const createRoutes = () => {
           </ProjectSettingsLayout>
         </DashboardContainer>
       ),
+      errorElement: <RouteErrorBoundary />,
     },
     {
       path: '/tables',
@@ -236,6 +259,7 @@ const createRoutes = () => {
           </PageTitle>
         </DashboardContainer>
       ),
+      errorElement: <RouteErrorBoundary />,
     },
     {
       path: '/analytics',
@@ -248,6 +272,7 @@ const createRoutes = () => {
           </OpsErrorBoundary>
         </DashboardContainer>
       ),
+      errorElement: <RouteErrorBoundary />,
     },
     {
       path: '/404',
@@ -258,10 +283,12 @@ const createRoutes = () => {
           </PageTitle>
         </OpsErrorBoundary>
       ),
+      errorElement: <RouteErrorBoundary />,
     },
     {
       path: '/redirect',
       element: <RedirectPage></RedirectPage>,
+      errorElement: <RouteErrorBoundary />,
     },
     {
       path: '/*',
@@ -272,6 +299,7 @@ const createRoutes = () => {
           </PageTitle>
         </OpsErrorBoundary>
       ),
+      errorElement: <RouteErrorBoundary />,
     },
   ];
 
@@ -287,31 +315,28 @@ const createRoutes = () => {
       path: '/connect',
       element: (
         <Suspense>
-          <OpsErrorBoundary>
-            <CloudConnectionPage />
-          </OpsErrorBoundary>
+          <CloudConnectionPage />
         </Suspense>
       ),
+      errorElement: <RouteErrorBoundary />,
     });
     routes.push({
       path: '/oauth/callback',
       element: (
         <Suspense>
-          <OpsErrorBoundary>
-            <CloudConnectionPage />
-          </OpsErrorBoundary>
+          <CloudConnectionPage />
         </Suspense>
       ),
+      errorElement: <RouteErrorBoundary />,
     });
     routes.push({
       path: '/oauth/logout',
       element: (
         <Suspense>
-          <OpsErrorBoundary>
-            <CloudLogoutPage />
-          </OpsErrorBoundary>
+          <CloudLogoutPage />
         </Suspense>
       ),
+      errorElement: <RouteErrorBoundary />,
     });
   }
 
@@ -333,6 +358,7 @@ const createRoutes = () => {
           </OpsErrorBoundary>
         </DashboardContainer>
       ),
+      errorElement: <RouteErrorBoundary />,
     });
   } else {
     routes.push({
@@ -346,6 +372,7 @@ const createRoutes = () => {
           </OpsErrorBoundary>
         </DashboardContainer>
       ),
+      errorElement: <RouteErrorBoundary />,
     });
   }
 
