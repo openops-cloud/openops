@@ -21,6 +21,7 @@ describe('createOpportunityTable', () => {
   });
 
   it('should successfully add new fields', async () => {
+    createTableMock({ id: 1 });
     openopsCommonMock.createAxiosHeaders.mockReturnValue('some header');
     openopsCommonMock.getFields.mockReturnValue(['a field']);
     openopsCommonMock.getPrimaryKeyFieldFromFields.mockReturnValue({ id: 1 });
