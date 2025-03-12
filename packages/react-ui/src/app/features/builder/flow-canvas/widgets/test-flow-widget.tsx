@@ -84,7 +84,7 @@ const TestFlowWidget = ({ flowVersion, setRun }: TestFlowWidgetProps) => {
 
   return (
     flowVersion.valid && (
-      <div className="bg-background">
+      <>
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -117,7 +117,7 @@ const TestFlowWidget = ({ flowVersion, setRun }: TestFlowWidgetProps) => {
           onConfirm={handleExecutingConfirm}
           onCancel={handleExecutingCancel}
         />
-      </div>
+      </>
     )
   );
 };

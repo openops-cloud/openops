@@ -5,7 +5,6 @@ import {
   getAzureSubscriptionsStaticDropdown,
 } from '@openops/common';
 import { logger, SharedSystemProp, system } from '@openops/server-shared';
-import { RiskLevel } from '@openops/shared';
 import { getAzureErrorMessage } from '../error-helper';
 import { runCommand } from './azure-cli';
 
@@ -14,7 +13,6 @@ export const azureCliAction = createAction({
   name: 'azure_cli',
   description: 'Execute Azure CLI command',
   displayName: 'Azure CLI',
-  riskLevel: RiskLevel.HIGH,
   props: {
     useHostSession: Property.DynamicProperties({
       displayName: '',
