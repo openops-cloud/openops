@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { ThemeProvider } from '@/app/common/providers/theme-provider';
 
+import { OpsErrorBoundary } from './common/error-boundaries/ops-error-boundary';
 import { InitialDataGuard } from './common/guards/intial-data-guard';
 import './interceptors';
 import { ApplicationRouter } from './router';
@@ -23,16 +24,18 @@ if (!typesFormatsAdded) {
 
 export function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <InitialDataGuard>
-        <TooltipProvider>
-          <ThemeProvider storageKey="vite-ui-theme">
-            <ApplicationRouter />
-            <Toaster />
-          </ThemeProvider>
-        </TooltipProvider>
-      </InitialDataGuard>
-    </QueryClientProvider>
+    <OpsErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <InitialDataGuard>
+          <TooltipProvider>
+            <ThemeProvider storageKey="vite-ui-theme">
+              <ApplicationRouter />
+              <Toaster />
+            </ThemeProvider>
+          </TooltipProvider>
+        </InitialDataGuard>
+      </QueryClientProvider>
+    </OpsErrorBoundary>
   );
 }
 
