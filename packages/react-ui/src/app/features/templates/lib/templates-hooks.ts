@@ -1,6 +1,7 @@
-import { BlockCategory, FlowTemplateMetadata } from '@openops/shared';
+import { BlockCategory, FlagId, FlowTemplateMetadata } from '@openops/shared';
 import { useQuery } from '@tanstack/react-query';
 
+import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
 import {
   GetTemplatesParams,
@@ -45,6 +46,7 @@ export const templatesHooks = {
     tags = [],
     gettingStartedTemplateFilter: gettingStarted = 'include',
   }: UseTemplatesParams) => {
+    const version = flagsHooks.useFlag<string>(FlagId.CURRENT_VERSION).data;
     const templatesApiToUse = useCloudTemplates
       ? cloudTemplatesApi
       : templatesApi;
@@ -72,6 +74,7 @@ export const templatesHooks = {
             domains,
             blocks,
             tags,
+            version: version && version !== 'local' ? version : undefined,
           })
         ).filter(
           (template: FlowTemplateMetadata) =>

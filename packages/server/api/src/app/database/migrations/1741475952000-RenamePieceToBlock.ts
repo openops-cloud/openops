@@ -32,7 +32,7 @@ export class RenamePieceToBlockMigration1741475952000
     for (const record of records) {
       let jsonData = record.trigger;
 
-      jsonData = this.addBlockToFlowJson(jsonData);
+      jsonData = this.addBlockToFlowJson(jsonData, true);
 
       await queryRunner.query(
         'UPDATE "flow_version" SET "trigger" = $1 WHERE "id" = $2',
@@ -63,7 +63,7 @@ export class RenamePieceToBlockMigration1741475952000
     for (const record of records) {
       let jsonData = record.template;
 
-      jsonData = this.addBlockToFlowJson(jsonData);
+      jsonData = this.addBlockToFlowJson(jsonData, false);
 
       const blocks = (record.pieces as string[]).map((x) =>
         x.replace('@openops/piece-', '@openops/block-'),
@@ -128,7 +128,7 @@ export class RenamePieceToBlockMigration1741475952000
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private addBlockToFlowJson(obj: any): any {
+  private addBlockToFlowJson(obj: any, replaceType: boolean): any {
     if (typeof obj !== 'object' || obj === null) return obj;
 
     obj.blockVersion = obj.pieceVersion;
@@ -138,11 +138,13 @@ export class RenamePieceToBlockMigration1741475952000
       '@openops/block-',
     );
 
-    if (obj.type == 'PIECE_TRIGGER') {
-      obj.type = 'BLOCK_TRIGGER';
-    }
-    if (obj.type == 'PIECE') {
-      obj.type = 'BLOCK';
+    if (replaceType) {
+      if (obj.type == 'PIECE_TRIGGER' || obj.type == 'BLOCK_TRIGGER') {
+        obj.type = 'TRIGGER';
+      }
+      if (obj.type == 'PIECE') {
+        obj.type = 'BLOCK';
+      }
     }
 
     for (const key in obj) {
@@ -151,10 +153,10 @@ export class RenamePieceToBlockMigration1741475952000
           if (Array.isArray(obj[key])) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             obj[key] = obj[key].map((item: any) =>
-              this.addBlockToFlowJson(item),
+              this.addBlockToFlowJson(item, replaceType),
             );
           } else {
-            obj[key] = this.addBlockToFlowJson(obj[key]);
+            obj[key] = this.addBlockToFlowJson(obj[key], replaceType);
           }
         }
       }

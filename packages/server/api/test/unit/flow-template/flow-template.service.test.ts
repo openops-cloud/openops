@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 export const mockedRepo = {
   findOneBy: jest.fn(),
   createQueryBuilder: jest.fn(),
@@ -27,7 +29,10 @@ jest.mock('../../../src/app/flows/flow/flow.service', () => {
   };
 });
 import { TemplateType } from '@openops/shared';
-import { flowTemplateService } from '../../../src/app/flow-template/flow-template.service';
+import {
+  filterTemplatesByVersion,
+  flowTemplateService,
+} from '../../../src/app/flow-template/flow-template.service';
 
 const someFlowTemplate = { id: 'some-id', name: 'some-name' };
 
@@ -67,6 +72,130 @@ describe('flowTemplateService', () => {
 
       expect(flowTemplates).not.toBeNull();
       expect(flowTemplates!.length).toBe(1);
+    });
+
+    describe('filterTemplatesByVersion', () => {
+      describe('when version is not provided', () => {
+        it('should return only templates that dont have versions', () => {
+          const templates: any[] = [
+            { id: 1 },
+            {
+              id: 2,
+              minSupportedVersion: '0.0.1',
+              maxSupportedVersion: undefined,
+            },
+            { id: 3 },
+            {
+              id: 4,
+              minSupportedVersion: undefined,
+              maxSupportedVersion: '1.0.0',
+            },
+            {
+              id: 5,
+              minSupportedVersion: '1.0.0',
+              maxSupportedVersion: '2.0.0',
+            },
+          ];
+          const result = filterTemplatesByVersion(templates, undefined);
+          expect(result).toEqual([{ id: 1 }, { id: 3 }]);
+        });
+      });
+
+      describe('when version is provided', () => {
+        it('should return latest templates when given version is not semantic', () => {
+          const templates: any[] = [
+            { id: 1 },
+            {
+              id: 2,
+              minSupportedVersion: '0.0.1',
+              maxSupportedVersion: '1.0.0',
+            },
+            { id: 3, minSupportedVersion: '1.0.1' },
+            { id: 4, maxSupportedVersion: '1.0.0' },
+            {
+              id: 5,
+              minSupportedVersion: '1.0.0',
+              maxSupportedVersion: '2.0.0',
+            },
+          ];
+          const result = filterTemplatesByVersion(templates, 'bb0656bd');
+          expect(result).toEqual([{ id: 3, minSupportedVersion: '1.0.1' }]);
+        });
+
+        it('should ignore templates that dont have versions', () => {
+          const templates: any[] = [
+            { id: 1 },
+            { minSupportedVersion: '2.0.0' },
+            { id: 2 },
+            { maxSupportedVersion: '0.0.1' },
+          ];
+          const result = filterTemplatesByVersion(templates, '1.0.0');
+          expect(result).toEqual([]);
+        });
+
+        it('should return templates that are in range of both min and max supported versions', () => {
+          const templates: any[] = [
+            {
+              id: 1,
+              minSupportedVersion: '1.0.0',
+              maxSupportedVersion: '2.0.0',
+            },
+            {
+              id: 2,
+              minSupportedVersion: '1.5.0',
+              maxSupportedVersion: '2.0.0',
+            },
+            {
+              id: 3,
+              minSupportedVersion: '1.0.0',
+              maxSupportedVersion: '1.5.0',
+            },
+            {
+              id: 4,
+              minSupportedVersion: '1.6.0',
+              maxSupportedVersion: '2.0.0',
+            },
+            {
+              id: 5,
+              minSupportedVersion: '1.0.0',
+              maxSupportedVersion: '1.4.9',
+            },
+            {
+              id: 6,
+            },
+            {
+              id: 7,
+              minSupportedVersion: '1.0.0',
+            },
+            {
+              id: 8,
+              maxSupportedVersion: '2.0.0',
+            },
+          ];
+          const result = filterTemplatesByVersion(templates, '1.5.0');
+          expect(result).toEqual([
+            {
+              id: 1,
+              minSupportedVersion: '1.0.0',
+              maxSupportedVersion: '2.0.0',
+            },
+            {
+              id: 2,
+              minSupportedVersion: '1.5.0',
+              maxSupportedVersion: '2.0.0',
+            },
+            {
+              id: 3,
+              minSupportedVersion: '1.0.0',
+              maxSupportedVersion: '1.5.0',
+            },
+            {
+              id: 7,
+              minSupportedVersion: '1.0.0',
+            },
+          ]);
+        });
+      });
     });
   });
 

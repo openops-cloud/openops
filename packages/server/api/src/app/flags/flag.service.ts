@@ -34,7 +34,6 @@ export const flagService = {
     const now = new Date().toISOString();
     const created = now;
     const updated = now;
-    const currentVersion = await this.getCurrentRelease();
     const latestVersion = await this.getLatestRelease();
     flags.push(
       {
@@ -209,7 +208,7 @@ export const flagService = {
       },
       {
         id: FlagId.CURRENT_VERSION,
-        value: currentVersion,
+        value: system.get(SharedSystemProp.VERSION),
         created,
         updated,
       },

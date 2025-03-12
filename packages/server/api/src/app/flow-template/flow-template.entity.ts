@@ -8,6 +8,8 @@ import {
 export type FlowTemplateSchema = FlowTemplateDto & {
   project: Project;
   organization: Organization;
+  minSupportedVersion?: string;
+  maxSupportedVersion?: string;
 };
 
 export const FlowTemplateEntity = new EntitySchema<FlowTemplateSchema>({
@@ -35,6 +37,10 @@ export const FlowTemplateEntity = new EntitySchema<FlowTemplateSchema>({
     blocks: {
       type: JSONB_COLUMN_TYPE,
     },
+    pieces: {
+      type: JSONB_COLUMN_TYPE,
+      nullable: true,
+    },
     template: {
       type: JSONB_COLUMN_TYPE,
     },
@@ -51,6 +57,14 @@ export const FlowTemplateEntity = new EntitySchema<FlowTemplateSchema>({
     isGettingStarted: {
       type: Boolean,
       default: false,
+    },
+    minSupportedVersion: {
+      type: String,
+      nullable: true,
+    },
+    maxSupportedVersion: {
+      type: String,
+      nullable: true,
     },
   },
   indices: [
