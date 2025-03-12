@@ -20,16 +20,6 @@ jest.mock('../../../src/app/openops-tables/create-workspace', () => {
   return { createWorkspace: createWorkspaceMock };
 });
 
-const addFieldsToOpenopsDefaultTableMock = jest.fn();
-jest.mock(
-  '../../../src/app/openops-tables/add-fields-to-openops-default-table',
-  () => {
-    return {
-      addFieldsToOpenopsDefaultTable: addFieldsToOpenopsDefaultTableMock,
-    };
-  },
-);
-
 import { OPENOPS_DEFAULT_DATABASE_NAME } from '@openops/common';
 import { createDefaultWorkspaceAndDatabase } from '../../../src/app/openops-tables/default-workspace-database';
 
@@ -57,18 +47,6 @@ describe('createAdminInOpenOpsTables', () => {
       1,
       OPENOPS_DEFAULT_DATABASE_NAME,
       'some token',
-    );
-    expect(createTableMock).toHaveBeenCalledTimes(1);
-    expect(createTableMock).toHaveBeenCalledWith(
-      2,
-      'Opportunities',
-      [['ID']],
-      'some token',
-    );
-    expect(addFieldsToOpenopsDefaultTableMock).toHaveBeenCalledTimes(1);
-    expect(addFieldsToOpenopsDefaultTableMock).toHaveBeenCalledWith(
-      'some token',
-      3,
     );
   });
 

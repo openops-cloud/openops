@@ -15,15 +15,6 @@ export async function createDefaultWorkspaceAndDatabase(
     token,
   );
 
-  const table = await openopsTables.createTable(
-    database.id,
-    SEED_OPENOPS_TABLE_NAME,
-    [['ID']],
-    token,
-  );
-
-  await openopsTables.addFieldsToOpenopsDefaultTable(token, table.id);
-
   return {
     workspaceId: workspace.id,
     databaseId: database.id,

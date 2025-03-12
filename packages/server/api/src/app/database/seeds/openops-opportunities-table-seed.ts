@@ -3,12 +3,12 @@ import { FlagEntity } from '../../flags/flag.entity';
 import { seedTemplateTablesService } from '../../openops-tables/template-tables/seed-tables-for-templates';
 import { databaseConnection } from '../database-connection';
 
-const TEMPLATE_TABLES_SEED = 'TEMPLATE_TABLES_SEED';
+const OPPORTUNITIES_TABLE_SEED = 'OPPORTUNITIES_SEED';
 
-const tablesAlreadyCreated = async (): Promise<boolean> => {
+const tableAlreadyCreated = async (): Promise<boolean> => {
   const flagRepo = databaseConnection().getRepository(FlagEntity);
   const tablesSeedFlag = await flagRepo.findOneBy({
-    id: TEMPLATE_TABLES_SEED,
+    id: OPPORTUNITIES_TABLE_SEED,
   });
   return tablesSeedFlag?.value === true;
 };
@@ -17,20 +17,20 @@ const setTableSeedFlag = async (): Promise<void> => {
   const flagRepo = databaseConnection().getRepository(FlagEntity);
 
   await flagRepo.save({
-    id: TEMPLATE_TABLES_SEED,
+    id: OPPORTUNITIES_TABLE_SEED,
     value: true,
   });
 };
 
-export const seedTemplateTables = async (): Promise<void> => {
-  if (await tablesAlreadyCreated()) {
-    logger.info('Skip: Template tables already seeded', {
-      name: 'seedTemplateTables',
+export const seedOpportunitiesTemplateTable = async (): Promise<void> => {
+  if (await tableAlreadyCreated()) {
+    logger.info('Skip: Opportunity table already seeded', {
+      name: 'seedOpportunityTable',
     });
     return;
   }
 
-  await seedTemplateTablesService.createBaseTemplateTables();
+  await seedTemplateTablesService.createOpportunitiesTemplateTable();
 
   await setTableSeedFlag();
 };

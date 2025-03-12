@@ -1,4 +1,3 @@
-import { addFieldsToOpenopsDefaultTable } from './add-fields-to-openops-default-table';
 import { addUserToWorkspace } from './add-user-workspace';
 import { createDatabase } from './create-database';
 import { createTable } from './create-table';
@@ -15,7 +14,6 @@ export const openopsTables = {
   createDatabase,
   createTable,
   createWorkspace,
-  addFieldsToOpenopsDefaultTable,
   createDefaultWorkspaceAndDatabase,
   renameDatabase,
 };
