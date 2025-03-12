@@ -3,6 +3,7 @@ import {
   Property,
   TriggerStrategy,
 } from '@openops/blocks-framework';
+import { isValidCron } from 'cron-validator';
 import { timezoneOptions } from '../common';
 
 export const cronExpressionTrigger = createTrigger({
@@ -33,8 +34,14 @@ export const cronExpressionTrigger = createTrigger({
       timezone: ctx.propsValue.timezone,
     });
   },
-  run(context) {
-    return Promise.resolve([{}]);
+  async test(context) {
+    if (!isValidCron(context.propsValue.cronExpression)) {
+      return [`Invalid cron expression: ${context.propsValue.cronExpression}`];
+    }
+    return [{}];
+  },
+  async run(context) {
+    return [{}];
   },
   onDisable: async () => {
     console.log('onDisable');
