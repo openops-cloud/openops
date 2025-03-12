@@ -6,7 +6,7 @@ import { logger } from '@openops/server-shared';
 import { createAutoEc2InstancesShutdownTable } from './create-auto-ec2-instances-shutdown-table';
 import { createBusinessUnitsTable } from './create-business-units-table';
 import { createIdleEbsVolumesToDeleteTable } from './create-idle-ebs-volumes-to-delete-table';
-import { createOpportunitiesTable } from './create-opportunities-table';
+import { createOpportunityTable } from './create-opportunity-table';
 import { createResourceBuTagAssignmentTable } from './create-resource-bu-tag-assignment-table';
 import { createTagOwnerMappingTable } from './create-tag-owner-mapping-table';
 
@@ -28,11 +28,11 @@ export const seedTemplateTablesService = {
     logger.info('[Seeding template tables] Done');
   },
 
-  async createOpportunitiesTemplateTable() {
+  async createOpportunityTemplateTable() {
     const { token } = await authenticateDefaultUserInOpenOpsTables();
     const databaseId = await getDefaultDatabaseId(token);
 
-    await createOpportunitiesTable(token, databaseId);
+    await createOpportunityTable(token, databaseId);
 
     logger.info('[Seeding opportunity template table] Done');
   },

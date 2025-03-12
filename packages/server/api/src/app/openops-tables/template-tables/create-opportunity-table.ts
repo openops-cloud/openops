@@ -8,7 +8,7 @@ import {
 } from '@openops/common';
 import { openopsTables, SEED_OPENOPS_TABLE_NAME } from '../index';
 
-export async function createOpportunitiesTable(
+export async function createOpportunityTable(
   token: string,
   databaseId: number,
 ) {

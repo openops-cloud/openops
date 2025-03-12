@@ -13,7 +13,7 @@ jest.mock('../../../src/app/openops-tables/create-table', () => {
   return { createTable: createTableMock };
 });
 
-import { createOpportunitiesTable } from '../../../src/app/openops-tables/template-tables/create-opportunities-table';
+import { createOpportunityTable } from '../../../src/app/openops-tables/template-tables/create-opportunity-table';
 
 describe('createOpportunitiesTable', () => {
   beforeEach(() => {
@@ -25,7 +25,7 @@ describe('createOpportunitiesTable', () => {
     openopsCommonMock.getFields.mockReturnValue(['a field']);
     openopsCommonMock.getPrimaryKeyFieldFromFields.mockReturnValue({ id: 1 });
 
-    await createOpportunitiesTable('some token', 2);
+    await createOpportunityTable('some token', 2);
 
     expect(createTableMock).toHaveBeenCalledTimes(1);
     expect(createTableMock).toHaveBeenCalledWith(
@@ -132,7 +132,7 @@ describe('createOpportunitiesTable', () => {
   it('should throw if something fails', async () => {
     openopsCommonMock.getFields.mockRejectedValue(new Error('some error'));
 
-    await expect(createOpportunitiesTable('some token', 2)).rejects.toThrow(
+    await expect(createOpportunityTable('some token', 2)).rejects.toThrow(
       'some error',
     );
   });
