@@ -43,7 +43,6 @@ export interface DeleteRowParams extends RowParams {
 
 class GlobalSemaphore {
   private static instance: Semaphore;
-  private constructor() {}
   static getInstance(): Semaphore {
     if (!GlobalSemaphore.instance) {
       GlobalSemaphore.instance = new Semaphore(100);
