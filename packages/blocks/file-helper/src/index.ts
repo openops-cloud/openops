@@ -1,6 +1,5 @@
 import { BlockAuth, createBlock } from '@openops/blocks-framework';
 import { BlockCategory } from '@openops/shared';
-import { createFile } from './lib/actions/create-file';
 import { readFileAction } from './lib/actions/read-file';
 
 export const filesHelper = createBlock({
@@ -11,6 +10,6 @@ export const filesHelper = createBlock({
   logoUrl: 'https://static.openops.com/blocks/file-block.svg',
   categories: [BlockCategory.CORE],
   authors: ['kishanprmr', 'MoShizzle', 'abuaboud'],
-  actions: [readFileAction, createFile],
+  actions: [readFileAction],
   triggers: [],
 });
