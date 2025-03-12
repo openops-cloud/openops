@@ -116,14 +116,14 @@ export const updateRecordAction = createAction({
 
     const { token } = await authenticateDefaultUserInOpenOpsTables();
 
-    const fields = await getFields(tableId, token);
-    const fieldsToUpdate = await mapFieldsToObject(
+    const tableFields = await getFields(tableId, token);
+    const fieldsToUpdate = mapFieldsToObject(
       tableName,
-      fields,
+      tableFields,
       fieldsProperties,
     );
 
-    const primaryKeyField = getPrimaryKeyFieldFromFields(fields);
+    const primaryKeyField = getPrimaryKeyFieldFromFields(tableFields);
     const primaryKeyValue = getPrimaryKey(rowPrimaryKey['rowPrimaryKey']);
 
     const rowToUpdate = primaryKeyValue
@@ -166,26 +166,26 @@ function getPrimaryKey(rowPrimaryKey: any): string | undefined {
   return isEmpty(primaryKeyValue) ? undefined : primaryKeyValue;
 }
 
-async function mapFieldsToObject(
+function mapFieldsToObject(
   tableName: string,
   validColumns: OpenOpsField[],
   fieldsProperties: any,
-) {
+): Record<string, any> {
   const validColumnsNames = new Set(validColumns.map((field) => field.name));
   const updateFieldsProperty = fieldsProperties[
     'fieldsProperties'
   ] as unknown as { fieldName: string; newFieldValue: any }[];
 
-  const fieldsToUpdate: { [key: string]: any } = {};
-  updateFieldsProperty?.map((updateFieldData) => {
-    if (!validColumnsNames.has(updateFieldData.fieldName)) {
+  const fieldsToUpdate: Record<string, any> = {};
+  for (const { fieldName, newFieldValue } of updateFieldsProperty) {
+    if (!validColumnsNames.has(fieldName)) {
       throw new Error(
-        `Column ${updateFieldData.fieldName} does not exist in table ${tableName}.`,
+        `Column ${fieldName} does not exist in table ${tableName}.`,
       );
     }
-    fieldsToUpdate[updateFieldData.fieldName] =
-      updateFieldData.newFieldValue['newFieldValue'];
-  });
+
+    fieldsToUpdate[fieldName] = newFieldValue['newFieldValue'];
+  }
 
   return fieldsToUpdate;
 }
