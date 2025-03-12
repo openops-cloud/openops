@@ -6,13 +6,14 @@ import {
   makeOpenOpsTablesPatch,
   makeOpenOpsTablesPost,
 } from '@openops/common';
-import { openopsTables, SEED_OPENOPS_TABLE_NAME } from '../index';
+import { createTable } from '../create-table';
+import { SEED_OPENOPS_TABLE_NAME } from '../index';
 
 export async function createOpportunityTable(
   token: string,
   databaseId: number,
 ) {
-  const table = await openopsTables.createTable(
+  const table = await createTable(
     databaseId,
     SEED_OPENOPS_TABLE_NAME,
     [['ID']],
@@ -55,12 +56,12 @@ export async function createOpportunityTable(
   });
 
   await AddField(token, table.id, {
-    name: 'Workflow',
+    name: 'Resource ID',
     type: 'text',
   });
 
   await AddField(token, table.id, {
-    name: 'Resource ID',
+    name: 'Workflow',
     type: 'text',
   });
 
@@ -112,7 +113,7 @@ export async function createOpportunityTable(
   });
 
   await AddField(token, table.id, {
-    name: 'Opporunity generator',
+    name: 'Opportunity generator',
     type: 'text',
   });
 

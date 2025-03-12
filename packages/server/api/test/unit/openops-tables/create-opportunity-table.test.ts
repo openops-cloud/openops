@@ -21,7 +21,7 @@ describe('createOpportunityTable', () => {
   });
 
   it('should successfully add new fields', async () => {
-    createTableMock({ id: 1 });
+    createTableMock.mockResolvedValue({ id: 1 });
     openopsCommonMock.createAxiosHeaders.mockReturnValue('some header');
     openopsCommonMock.getFields.mockReturnValue(['a field']);
     openopsCommonMock.getPrimaryKeyFieldFromFields.mockReturnValue({ id: 1 });
@@ -65,8 +65,8 @@ describe('createOpportunityTable', () => {
           { value: 'Rate optimization', color: 'darker-orange' },
         ],
       },
-      { name: 'Resource ID', type: 'long_text' },
-      { name: 'Workflow', type: 'long_text' },
+      { name: 'Resource ID', type: 'text' },
+      { name: 'Workflow', type: 'text' },
       { name: 'Service', type: 'text' },
       { name: 'Region', type: 'text' },
       { name: 'Account', type: 'text' },
@@ -123,7 +123,7 @@ describe('createOpportunityTable', () => {
     expectedCalls.forEach((call, index) => {
       expect(openopsCommonMock.makeOpenOpsTablesPost).toHaveBeenNthCalledWith(
         index + 1,
-        'api/database/fields/table/2/',
+        'api/database/fields/table/1/',
         call,
         'some header',
       );
