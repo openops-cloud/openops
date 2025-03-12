@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 const DiscoverPremiumTile = () => (
   <div className="w-full h-[75px] p-4 flex items-center gap-[18px] bg-blue-100 border rounded-lg">
-    <Crown />
+    <Crown aria-hidden="true" />
     <div className="text-foreground">
       <h2 className="font-bold text-sm">
         {t('Discover our premium features')}
