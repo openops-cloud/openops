@@ -24,6 +24,7 @@ export async function waitForInteraction(
   messageObj: MessageInfo,
   timeoutInDays: number,
   context: ActionContext,
+  currentExecutionPath: string,
 ): Promise<WaitForInteractionResult> {
   const messageExpiryDateInUtc = new Date(
     Date.now() + timeoutInDays * 24 * 60 * 60 * 1000,
@@ -35,7 +36,7 @@ export async function waitForInteraction(
   };
 
   await context.store.put(
-    `pauseMetadata_${context.currentExecutionPath}`,
+    `pauseMetadata_${currentExecutionPath}`,
     pauseMetadata,
     StoreScope.FLOW_RUN,
   );
@@ -53,6 +54,7 @@ export async function onReceivedInteraction(
   messageObj: MessageInfo,
   actions: string[],
   context: ResumeExecutionActionContext,
+  currentExecutionPath: string,
 ): Promise<WaitForInteractionResult> {
   const resumePayload = context.resumePayload
     ?.queryParams as unknown as InteractionPayload;
@@ -71,18 +73,18 @@ export async function onReceivedInteraction(
   }
 
   const isResumeForAButtonOnThisMessage =
-    resumePayload.path === context.currentExecutionPath &&
+    resumePayload.path === currentExecutionPath &&
     actions.includes(resumePayload.actionClicked);
 
   if (!isResumeForAButtonOnThisMessage) {
     const pauseMetadata = await context.store.get(
-      `pauseMetadata_${context.currentExecutionPath}`,
+      `pauseMetadata_${currentExecutionPath}`,
       StoreScope.FLOW_RUN,
     );
 
     if (!pauseMetadata) {
       throw new Error(
-        'Could not fetch pause metadata: ' + context.currentExecutionPath,
+        'Could not fetch pause metadata: ' + currentExecutionPath,
       );
     }
 

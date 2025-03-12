@@ -50,6 +50,7 @@ export const requestActionMessageAction = createAction({
         slackSendMessageResponse,
         context.propsValue.timeoutInDays,
         context,
+        context.currentExecutionPath,
       );
     }
 
@@ -73,7 +74,12 @@ export const requestActionMessageAction = createAction({
       return action.buttonText;
     });
 
-    return await onReceivedInteraction(messageObj, actionLabels, context);
+    return await onReceivedInteraction(
+      messageObj,
+      actionLabels,
+      context,
+      context.currentExecutionPath,
+    );
   },
 });
 
