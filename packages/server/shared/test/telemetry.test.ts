@@ -5,6 +5,12 @@ const axiosMock = {
   post: jest.fn(),
 };
 
+const requestContextMock = {
+  requestContext: {
+    get: jest.fn(),
+  },
+};
+
 const systemMock = {
   get: jest.fn(),
   getBoolean: jest.fn(),
@@ -22,6 +28,7 @@ jest.mock('../src/lib/system', () => ({
   ...jest.requireActual('../src/lib/system'),
   system: systemMock,
 }));
+jest.mock('@fastify/request-context', () => requestContextMock);
 jest.mock('../src/lib/telemetry/logzio-collector', () => logzioCollectorMock);
 
 import { WorkflowEventName } from '../src/lib/telemetry/event-models';
@@ -45,19 +52,8 @@ describe('telemetry', () => {
   });
 
   describe('start', () => {
-    it('should not start if telemetry is disabled', async () => {
-      systemMock.getBoolean.mockReturnValue(false);
-
-      telemetry = getSUT();
-
-      await telemetry.start(getEnvironmentId);
-      expect(getEnvironmentId).not.toHaveBeenCalled();
-      expect(logzioCollectorMock.startMetricsCollector).not.toHaveBeenCalled();
-    });
-
     it('should throw an error if telemetry is enabled but no URLs are provided', async () => {
       systemMock.get.mockReturnValue(null);
-      systemMock.getBoolean.mockReturnValue(true);
 
       telemetry = getSUT();
 
@@ -67,7 +63,6 @@ describe('telemetry', () => {
     });
 
     it('should start metric collector if no telemetry URL is provided', async () => {
-      systemMock.getBoolean.mockReturnValue(true);
       systemMock.get.mockImplementation((key) =>
         key === 'LOGZIO_METRICS_TOKEN' ? 'logzio-token' : null,
       );
@@ -107,8 +102,7 @@ describe('telemetry', () => {
     };
 
     it('should not track event if telemetry is disabled', () => {
-      systemMock.getBoolean.mockReturnValue(false);
-
+      requestContextMock.requestContext.get.mockReturnValueOnce('false');
       telemetry = getSUT();
       telemetry.trackEvent(event);
 
@@ -117,8 +111,8 @@ describe('telemetry', () => {
     });
 
     it('should send event to collector if URL is provided', async () => {
-      systemMock.getBoolean.mockReturnValue(true);
       systemMock.get.mockReturnValue('https://collector.example.com');
+      requestContextMock.requestContext.get.mockReturnValueOnce('true');
 
       telemetry = getSUT();
       telemetry.trackEvent(event);
@@ -133,6 +127,7 @@ describe('telemetry', () => {
     it('should save metric to Logzio if no telemetry URL', async () => {
       const fixedDate = new Date('2023-11-25T12:00:00Z');
       jest.spyOn(global, 'Date').mockImplementation(() => fixedDate);
+      requestContextMock.requestContext.get.mockReturnValueOnce('true');
 
       systemMock.getBoolean.mockReturnValue(true);
       systemMock.get.mockImplementation((key) => {
@@ -158,7 +153,6 @@ describe('telemetry', () => {
 
   describe('flush', () => {
     it('should flush metrics if Logzio is enabled', async () => {
-      systemMock.getBoolean.mockReturnValue(true);
       systemMock.get.mockImplementation((key) =>
         key === 'LOGZIO_METRICS_TOKEN' ? 'logzio-token' : null,
       );
@@ -170,7 +164,6 @@ describe('telemetry', () => {
     });
 
     it('should not flush metrics if telemetry collector URL is defined', async () => {
-      systemMock.getBoolean.mockReturnValue(true);
       systemMock.get.mockReturnValue('https://collector.example.com');
 
       telemetry = getSUT();

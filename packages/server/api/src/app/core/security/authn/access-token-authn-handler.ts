@@ -1,4 +1,4 @@
-import { logger } from '@openops/server-shared';
+import { cacheWrapper, logger } from '@openops/server-shared';
 import {
   ApplicationError,
   ErrorCode,
@@ -7,6 +7,7 @@ import {
 } from '@openops/shared';
 import { FastifyRequest } from 'fastify';
 import { accessTokenManager } from '../../../authentication/lib/access-token-manager';
+import { userService } from '../../../user/user-service';
 import { BaseSecurityHandler } from '../security-handler';
 
 export class AccessTokenAuthnHandler extends BaseSecurityHandler {
@@ -28,9 +29,13 @@ export class AccessTokenAuthnHandler extends BaseSecurityHandler {
       request.principal = principal;
 
       if (request.principal && request.principal.type === PrincipalType.USER) {
+        const userId = request.principal.id;
+        request.requestContext.set('userId' as never, userId as never);
+
+        const trackEvents = await getTrackEventsConfigForUser(userId);
         request.requestContext.set(
-          'userId' as never,
-          request.principal.id as never,
+          'trackEvents' as never,
+          trackEvents as never,
         );
       }
     } catch (error) {
@@ -60,4 +65,22 @@ export class AccessTokenAuthnHandler extends BaseSecurityHandler {
 
     return accessToken;
   }
+}
+
+async function getTrackEventsConfigForUser(userId: string): Promise<string> {
+  const trackEventsKey = `track-events-${userId}`;
+
+  let trackEvents = await cacheWrapper.getKey(trackEventsKey);
+  if (trackEvents) {
+    return trackEvents;
+  }
+
+  const user = await userService.get({ id: userId });
+  if (!user) {
+    return 'false';
+  }
+
+  trackEvents = user.trackEvents?.toString() ?? 'false';
+  await cacheWrapper.setKey(trackEventsKey, trackEvents);
+  return trackEvents;
 }

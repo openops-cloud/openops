@@ -1,4 +1,4 @@
-import { sendUserCreatedEvent } from '@openops/server-shared';
+import { cacheWrapper, sendUserCreatedEvent } from '@openops/server-shared';
 import {
   ApplicationError,
   ErrorCode,
@@ -190,6 +190,8 @@ export const userService = {
         },
       });
     }
+
+    await cacheWrapper.setKey(`track-events-${id}`, trackEvents.toString());
   },
 
   async addOwnerToOrganization({
