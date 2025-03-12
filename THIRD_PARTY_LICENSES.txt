@@ -1525,16 +1525,45 @@ Apache License
 
 The following npm packages may be included in this product:
 
+ - @opentelemetry/api-logs@0.57.2
  - @opentelemetry/api@1.9.0
  - @opentelemetry/context-async-hooks@1.30.1
  - @opentelemetry/core@1.30.1
+ - @opentelemetry/instrumentation-amqplib@0.46.1
+ - @opentelemetry/instrumentation-connect@0.43.1
+ - @opentelemetry/instrumentation-dataloader@0.16.1
+ - @opentelemetry/instrumentation-express@0.47.1
+ - @opentelemetry/instrumentation-fastify@0.44.2
+ - @opentelemetry/instrumentation-fs@0.19.1
+ - @opentelemetry/instrumentation-generic-pool@0.43.1
+ - @opentelemetry/instrumentation-graphql@0.47.1
+ - @opentelemetry/instrumentation-hapi@0.45.2
+ - @opentelemetry/instrumentation-http@0.57.2
+ - @opentelemetry/instrumentation-ioredis@0.47.1
+ - @opentelemetry/instrumentation-kafkajs@0.7.1
+ - @opentelemetry/instrumentation-knex@0.44.1
+ - @opentelemetry/instrumentation-koa@0.47.1
+ - @opentelemetry/instrumentation-lru-memoizer@0.44.1
+ - @opentelemetry/instrumentation-mongodb@0.52.0
+ - @opentelemetry/instrumentation-mongoose@0.46.1
+ - @opentelemetry/instrumentation-mysql@0.45.1
+ - @opentelemetry/instrumentation-mysql2@0.45.2
+ - @opentelemetry/instrumentation-pg@0.51.1
+ - @opentelemetry/instrumentation-redis-4@0.46.1
+ - @opentelemetry/instrumentation-tedious@0.18.1
+ - @opentelemetry/instrumentation-undici@0.10.1
+ - @opentelemetry/instrumentation@0.57.2
  - @opentelemetry/propagator-b3@1.30.1
  - @opentelemetry/propagator-jaeger@1.30.1
+ - @opentelemetry/redis-common@0.36.2
  - @opentelemetry/resources@1.30.1
  - @opentelemetry/sdk-trace-base@1.30.1
  - @opentelemetry/sdk-trace-node@1.30.1
  - @opentelemetry/semantic-conventions@1.28.0
+ - @opentelemetry/semantic-conventions@1.30.0
+ - @opentelemetry/sql-common@0.40.1
  - @pkgjs/parseargs@0.11.0
+ - @prisma/instrumentation@6.4.1
  - logzio-nodejs@2.3.0
 
 These packages each contain the following license:
@@ -4775,6 +4804,7 @@ limitations under the License.
 The following npm packages may be included in this product:
 
  - @types/chai@4.3.20
+ - @types/connect@3.4.38
  - @types/cookie@0.4.1
  - @types/cors@2.8.17
  - @types/d3-array@3.2.1
@@ -4801,14 +4831,20 @@ The following npm packages may be included in this product:
  - @types/mdast@4.0.4
  - @types/mocha@8.2.3
  - @types/ms@0.7.34
+ - @types/mysql@2.15.26
  - @types/node-fetch@2.6.11
  - @types/node@18.19.59
  - @types/node@20.17.1
+ - @types/pg-pool@2.0.6
+ - @types/pg@8.10.2
+ - @types/pg@8.6.1
  - @types/prop-types@15.7.12
  - @types/react-dom@18.3.0
  - @types/react@18.3.1
  - @types/resolve@1.20.2
+ - @types/shimmer@1.2.0
  - @types/showdown@2.0.6
+ - @types/tedious@4.0.14
  - @types/triple-beam@1.3.5
  - @types/unist@2.0.11
  - @types/unist@3.0.3
@@ -5859,6 +5895,7 @@ The following npm packages may be included in this product:
 
  - debug@4.3.4
  - debug@4.3.5
+ - debug@4.4.0
 
 These packages each contain the following license:
 
@@ -9687,6 +9724,40 @@ Apache-2.0 AND MIT
 
 The following npm package may be included in this product:
 
+ - shimmer@1.2.1
+
+This package contains the following license:
+
+BSD 2-Clause License
+
+Copyright (c) 2013-2019, Forrest L Norvell
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+-----------
+
+The following npm package may be included in this product:
+
  - highlight.js@10.7.3
 
 This package contains the following license:
@@ -10148,6 +10219,56 @@ The following npm package may be included in this product:
 This package contains the following license:
 
 CC0-1.0
+
+-----------
+
+The following npm package may be included in this product:
+
+ - import-in-the-middle@1.13.1
+
+This package contains the following license:
+
+Component,Origin,License,Copyright
+require,module-details-from-path,MIT,Copyright 2016 Thomas Watson Steen
+dev,c8,ISC,"Copyright (c) 2017, Contributors"
+dev,imhotap,MIT,Copyright (c) 2019 Bryan English.
+
+With the following notices:
+
+import-in-the-middle is licensed for use as follows:
+
+Copyright 2024 Node.js contributors. All rights reserved.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+This license applies to parts of import-in-the-middle originating from the
+https://github.com/DataDog/import-in-the-middle repository:
+
+    This product includes software developed at Datadog (https://www.datadoghq.com/).
+
+    Copyright 2021 Datadog, Inc.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 
 -----------
 
@@ -11490,6 +11611,34 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 The following npm package may be included in this product:
 
+ - forwarded-parse@2.1.2
+
+This package contains the following license:
+
+Copyright (c) 2015 Luigi Pinca
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+-----------
+
+The following npm package may be included in this product:
+
  - delegates@1.0.0
 
 This package contains the following license:
@@ -12461,32 +12610,6 @@ limitations under the License.
 
 -----------
 
-The following npm packages may be included in this product:
-
- - @sentry/core@7.64.0
- - @sentry/node@7.64.0
- - @sentry/types@7.64.0
- - @sentry/utils@7.64.0
-
-These packages each contain the following license:
-
-Copyright (c) 2019 Sentry (https://sentry.io) and individual contributors. All rights reserved.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
-rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit
-persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
-Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
-WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
------------
-
 The following npm package may be included in this product:
 
  - secure-json-parse@2.7.0
@@ -12538,29 +12661,6 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
-
------------
-
-The following npm package may be included in this product:
-
- - @sentry-internal/tracing@7.64.0
-
-This package contains the following license:
-
-Copyright (c) 2020 Sentry (https://sentry.io) and individual contributors. All rights reserved.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
-rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit
-persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
-Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
-WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 -----------
 
@@ -14218,6 +14318,28 @@ IN THE SOFTWARE.
 
 The following npm package may be included in this product:
 
+ - pg-numeric@1.0.2
+
+This package contains the following license:
+
+Copyright 2019 Charmander <~@charmander.me>
+
+Permission to use, copy, modify, and distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+-----------
+
+The following npm package may be included in this product:
+
  - luxon@3.4.4
 
 This package contains the following license:
@@ -14667,6 +14789,35 @@ INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
 OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
 TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
 THIS SOFTWARE.
+
+-----------
+
+The following npm package may be included in this product:
+
+ - obuf@1.1.2
+
+This package contains the following license:
+
+Copyright Fedor Indutny, 2015.
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to permit
+persons to whom the Software is furnished to do so, subject to the
+following conditions:
+
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 -----------
 
@@ -16751,7 +16902,6 @@ The following npm packages may be included in this product:
  - isarray@0.0.1
  - isarray@1.0.0
  - javascript-natural-sort@0.7.1
- - lru_map@0.3.3
  - micromark-factory-destination@2.0.0
  - micromark-factory-label@2.0.0
  - micromark-factory-space@2.0.0
@@ -16775,6 +16925,7 @@ The following npm packages may be included in this product:
  - obj-case@0.2.1
  - packet-reader@1.0.0
  - pg-types@2.2.0
+ - pg-types@4.0.2
  - pgpass@1.0.5
  - product-fruits@1.0.23
  - react-remove-scroll-bar@2.3.6
@@ -19046,6 +19197,36 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
+ - @sentry/core@9.5.0
+
+This package contains the following license:
+
+MIT License
+
+Copyright (c) 2019 Functional Software, Inc. dba Sentry
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+-----------
+
+The following npm package may be included in this product:
+
  - side-channel@1.0.6
 
 This package contains the following license:
@@ -19989,6 +20170,36 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
+ - postgres-range@1.1.4
+
+This package contains the following license:
+
+MIT License
+
+Copyright (c) 2021 Abbas Mashayekh
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+-----------
+
+The following npm package may be included in this product:
+
  - tailwind-merge@2.4.0
 
 This package contains the following license:
@@ -20840,6 +21051,37 @@ SOFTWARE.
 
 -----------
 
+The following npm packages may be included in this product:
+
+ - @sentry/node@9.5.0
+ - @sentry/opentelemetry@9.5.0
+
+These packages each contain the following license:
+
+MIT License
+
+Copyright (c) 2023 Functional Software, Inc. dba Sentry
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+-----------
+
 The following npm package may be included in this product:
 
  - toad-cache@3.7.0
@@ -20910,6 +21152,36 @@ These packages each contain the following license:
 MIT License
 
 Copyright (c) 2023 Robert Kieffer
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+-----------
+
+The following npm package may be included in this product:
+
+ - acorn-import-attributes@1.9.5
+
+This package contains the following license:
+
+MIT License
+
+Copyright (c) 2023 Sven Sauleau
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -21784,6 +22056,25 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+-----------
+
+The following npm package may be included in this product:
+
+ - cjs-module-lexer@1.2.3
+
+This package contains the following license:
+
+MIT License
+-----------
+
+Copyright (C) 2018-2020 Guy Bedford
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 -----------
 
@@ -25846,11 +26137,12 @@ SOFTWARE.
 
 -----------
 
-The following npm package may be included in this product:
+The following npm packages may be included in this product:
 
  - ci-info@4.0.0
+ - module-details-from-path@1.0.3
 
-This package contains the following license:
+These packages each contain the following license:
 
 The MIT License (MIT)
 
@@ -26035,6 +26327,38 @@ This package contains the following license:
 The MIT License (MIT)
 
 Copyright (c) 2016-2019 David Mark Clements
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+-----------
+
+The following npm package may be included in this product:
+
+ - require-in-the-middle@7.5.2
+
+This package contains the following license:
+
+The MIT License (MIT)
+
+Copyright (c) 2016-2019, Thomas Watson Steen
+Copyright (c) 2019-2025, Elasticsearch B.V.
+Copyright (c) 2025+, require-in-the-middle contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -27396,9 +27720,13 @@ SOFTWARE.
 The following npm packages may be included in this product:
 
  - postgres-array@2.0.0
+ - postgres-array@3.0.2
  - postgres-bytea@1.0.0
+ - postgres-bytea@3.0.0
  - postgres-date@1.0.7
+ - postgres-date@2.1.0
  - postgres-interval@1.2.0
+ - postgres-interval@3.0.0
 
 These packages each contain the following license:
 
