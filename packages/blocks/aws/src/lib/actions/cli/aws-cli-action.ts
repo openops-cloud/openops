@@ -6,7 +6,6 @@ import {
   getCredentialsForAccount,
 } from '@openops/common';
 import { logger } from '@openops/server-shared';
-import { RiskLevel } from '@openops/shared';
 import { runCommand } from './aws-cli';
 
 export const awsCliAction = createAction({
@@ -14,7 +13,6 @@ export const awsCliAction = createAction({
   name: 'aws_cli',
   description: 'Execute AWS CLI command',
   displayName: 'AWS CLI',
-  riskLevel: RiskLevel.HIGH,
   props: {
     account: getAwsAccountsSingleSelectDropdown().accounts,
     commandToRun: Property.LongText({ displayName: 'Command', required: true }),
