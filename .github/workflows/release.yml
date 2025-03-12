@@ -37,6 +37,8 @@ jobs:
             repository: openops-engine
     name: Tag ${{ matrix.target.name }} for release ${{ needs.get-version.outputs.version }}
     runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ needs.get-version.outputs.version }}
     steps:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -56,22 +58,22 @@ jobs:
         with:
           registry-type: public
       - name: Pull image and tag it
+        env:
+          SHA: ${{ github.sha }}
         run: |
-          SOURCE_IMAGE_TAG=${{ steps.login-private-ecr.outputs.registry }}/openops/${{ matrix.target.repository }}:${{ github.sha }}
-          echo "- 🚀 Source image: \`$SOURCE_IMAGE_TAG\`" >> $GITHUB_STEP_SUMMARY
+          SOURCE_IMAGE=${{ steps.login-private-ecr.outputs.registry }}/openops/${{ matrix.target.repository }}:${SHA::8}
+          echo "- 🚀 Source image: \`$SOURCE_IMAGE\`" >> $GITHUB_STEP_SUMMARY
           PUBLIC_IMAGE=public.ecr.aws/openops/${{ matrix.target.repository }}
-          docker pull $SOURCE_IMAGE_TAG
-          docker tag $SOURCE_IMAGE_TAG $PUBLIC_IMAGE:${{ needs.get-version.outputs.version }} && docker push $_
-          echo "- ✅ Successfully tagged as \`$PUBLIC_IMAGE:${{ needs.get-version.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+          docker pull $SOURCE_IMAGE
+          docker tag $SOURCE_IMAGE $PUBLIC_IMAGE:$VERSION && docker push $_
+          echo "- ✅ Successfully tagged as \`$PUBLIC_IMAGE:$VERSION\`" >> $GITHUB_STEP_SUMMARY
           if ${{ inputs.latest }}; then
-            docker tag $SOURCE_IMAGE_TAG $PUBLIC_IMAGE:latest && docker push $_
+            docker tag $SOURCE_IMAGE $PUBLIC_IMAGE:latest && docker push $_
             echo "- ✅ Successfully tagged as \`$PUBLIC_IMAGE:latest\`" >> $GITHUB_STEP_SUMMARY
           fi
   create-github-release:
     name: Create GitHub release
-    needs:
-      - tag-images-for-release
-      - get-version
+    needs: [tag-images-for-release, get-version]
     runs-on: ubuntu-latest
     permissions:
       contents: write

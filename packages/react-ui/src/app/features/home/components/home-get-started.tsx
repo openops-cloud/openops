@@ -1,9 +1,12 @@
+import { DiscoverPremiumTile } from '@/app/features/home/components/discover-premium-tile';
 import {
   DismissiblePanel,
   FlowTemplateMetadataWithIntegrations,
+  KnowledgeBaseCard,
   SampleTemplateCard,
 } from '@openops/components/ui';
 import { t } from 'i18next';
+import { BookOpenText } from 'lucide-react';
 
 type HomeGetStartedProps = {
   sampleTemplates: FlowTemplateMetadataWithIntegrations[];
@@ -27,7 +30,7 @@ const HomeGetStarted = ({
     >
       <div className="p-6 flex flex-col gap-4 bg-secondary font-bold">
         <h2 className="text-[24px]">{t('Get started')}</h2>
-        <div className="flex items-center justify-between gap-2 flex-wrap @[1170px]:flex-nowrap @[1200px]:gap-10">
+        <div className="flex items-center justify-between gap-10 flex-wrap @[1500px]:flex-nowrap">
           <div className="w-full flex flex-col gap-4">
             <h3>{t('Start with our Sample template')}</h3>
             <div className="flex gap-4 font-normal">
@@ -50,14 +53,15 @@ const HomeGetStarted = ({
               )}
             </div>
           </div>
-          {/* <div className="w-full flex flex-col gap-4">
+          <div className="w-full flex flex-col gap-4">
             <h3>{t('Quick links')}</h3>
-            <div className="w-full h-[169px] flex gap-4 font-normal">
+            <div className="w-full grid grid-cols-2 gap-4 @[900px]:grid-cols-4 font-normal">
               <KnowledgeBaseCard
                 link=""
                 text={t('What is OpenOps?')}
                 icon={<BookOpenText size={20} />}
                 iconWrapperClassName="bg-warning"
+                className="max"
               />
               <KnowledgeBaseCard
                 link=""
@@ -78,7 +82,9 @@ const HomeGetStarted = ({
                 iconWrapperClassName="bg-teal-400"
               />
             </div>
-          </div> */}
+
+            <DiscoverPremiumTile />
+          </div>
         </div>
       </div>
     </DismissiblePanel>

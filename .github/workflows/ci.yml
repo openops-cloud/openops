@@ -170,28 +170,27 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
       - name: Format image tag parts
-        id: tag-parts
         env:
           BRANCH: ${{ github.ref_name }}
           SHA: ${{ github.sha }}
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
-          echo branch=${BRANCH//[\/.:_]/-} >> "$GITHUB_OUTPUT"
-          echo image=${REGISTRY}/openops/${{ matrix.target.repository }} >> "$GITHUB_OUTPUT"
-          echo version=${SHA::8} >> "$GITHUB_OUTPUT"
+          echo sanitized_branch=${BRANCH//[\/.:_]/-} >> "$GITHUB_ENV"
+          echo repository_uri=${REGISTRY}/openops/${{ matrix.target.repository }} >> "$GITHUB_ENV"
+          echo short_sha=${SHA::8} >> "$GITHUB_ENV"
       - name: Build image
         uses: docker/build-push-action@v6
         with:
           context: .
           file: ./${{ matrix.target.file }}
-          build-args: VERSION=${{ steps.tag-parts.outputs.version }}
+          build-args: VERSION=${{ env.short_sha }}
           provenance: false
           push: true
           tags: |
-            ${{ steps.tag-parts.outputs.image }}:${{ github.sha }}
-            ${{ steps.tag-parts.outputs.image }}:${{ steps.tag-parts.outputs.branch }}-${{ github.sha }}
-            ${{ steps.tag-parts.outputs.image }}:${{ steps.tag-parts.outputs.branch }}
+            ${{ env.repository_uri }}:${{ env.short_sha }}
+            ${{ env.repository_uri }}:${{ env.sanitized_branch }}-${{ env.short_sha }}
+            ${{ env.repository_uri }}:${{ env.sanitized_branch }}
           cache-from: |
-            type=registry,ref=${{ steps.tag-parts.outputs.image }}:${{ steps.tag-parts.outputs.branch }}-cache
-            type=registry,ref=${{ steps.tag-parts.outputs.image }}:main-cache
-          cache-to: mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${{ steps.tag-parts.outputs.image }}:${{ steps.tag-parts.outputs.branch }}-cache
+            type=registry,ref=${{ env.repository_uri }}:${{ env.sanitized_branch }}-cache
+            type=registry,ref=${{ env.repository_uri }}:main-cache
+          cache-to: mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${{ env.repository_uri }}:${{ env.sanitized_branch }}-cache

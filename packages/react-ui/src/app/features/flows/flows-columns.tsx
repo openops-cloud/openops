@@ -117,9 +117,9 @@ export const createColumns = (
         return null;
       }
       return (
-        <div className="w-fit px-3 py-[5px] flex items-center gap-1 rounded-full border border-warning bg-warning-100">
+        <div className="w-fit px-3 py-1 flex items-center gap-1 rounded-full border border-warning bg-warning-100">
           <CircleAlert size={16} className="text-warning" />
-          <span className="font-medium text-base text-blueAccent-200 dark:text-primary text-nowrap">
+          <span className="font-medium text-sm text-blueAccent-200 dark:text-primary text-nowrap">
             {t('Not finished')}
           </span>
         </div>
