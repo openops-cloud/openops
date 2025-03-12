@@ -1,1 +1,1 @@
-export const CATCH_HOOK_NAME = 'catch_webhook';
+export const CATCH_WEBHOOK = 'catch_webhook';

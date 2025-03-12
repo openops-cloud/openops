@@ -23,7 +23,7 @@ import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
 import { triggerEventsApi } from '@/app/features/flows/lib/trigger-events-api';
 import { formatUtils } from '@/app/lib/utils';
 import {
-  CATCH_HOOK_NAME,
+  CATCH_WEBHOOK,
   SeekPage,
   Trigger,
   TriggerEvent,
@@ -229,8 +229,14 @@ const TestTriggerSection = React.memo(
       return null;
     }
 
-    const isCatchWebhookTrigger =
-      formValues.settings.triggerName === CATCH_HOOK_NAME;
+    const testTriggerNote =
+      formValues.settings.triggerName === CATCH_WEBHOOK
+        ? t('Please click on Test URL to generate sample data')
+        : t('testBlockWebhookTriggerNote', {
+            blockName: blockModel?.displayName,
+            triggerName:
+              blockModel?.triggers[formValues.settings.triggerName].displayName,
+          });
 
     return (
       <div>
@@ -311,18 +317,7 @@ const TestTriggerSection = React.memo(
               <AlertCircle className="h-4 w-4 text-warning" />
               <div className="flex flex-col gap-1">
                 <AlertTitle>{t('Action Required')}:</AlertTitle>
-
-                <AlertDescription>
-                  {isCatchWebhookTrigger &&
-                    t('Please click on Test URL to generate sample data')}
-                  {!isCatchWebhookTrigger &&
-                    t('testBlockWebhookTriggerNote', {
-                      blockName: blockModel.displayName,
-                      triggerName:
-                        blockModel.triggers[formValues.settings.triggerName]
-                          .displayName,
-                    })}
-                </AlertDescription>
+                <AlertDescription>{testTriggerNote}</AlertDescription>
               </div>
             </Alert>
           </div>
