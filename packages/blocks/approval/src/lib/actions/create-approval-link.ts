@@ -1,4 +1,5 @@
 import { createAction } from '@openops/blocks-framework';
+import { networkUtls } from '@openops/server-shared';
 
 export const createApprovalLink = createAction({
   name: 'create_approval_links',
@@ -15,13 +16,21 @@ export const createApprovalLink = createAction({
     },
   },
   async run(ctx) {
+    const baseUrl = await networkUtls.getPublicUrl();
+
     return {
-      approvalLink: ctx.generateResumeUrl({
-        queryParams: { action: 'approve' },
-      }),
-      disapprovalLink: ctx.generateResumeUrl({
-        queryParams: { action: 'disapprove' },
-      }),
+      approvalLink: ctx.generateResumeUrl(
+        {
+          queryParams: { action: 'approve' },
+        },
+        baseUrl,
+      ),
+      disapprovalLink: ctx.generateResumeUrl(
+        {
+          queryParams: { action: 'disapprove' },
+        },
+        baseUrl,
+      ),
     };
   },
 });

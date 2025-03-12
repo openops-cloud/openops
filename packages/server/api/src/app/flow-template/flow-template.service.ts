@@ -36,6 +36,8 @@ type createFlowTemplateParams = {
   type?: string;
   isSample?: boolean;
   isGettingStarted?: boolean;
+  minVersion?: string;
+  maxVersion?: string;
 };
 
 export const flowTemplateService = {
@@ -170,6 +172,8 @@ export const flowTemplateService = {
       organizationId: requestOptions.organizationId,
       isSample: requestOptions.isSample,
       isGettingStarted: requestOptions.isGettingStarted,
+      minSupportedVersion: requestOptions.minVersion,
+      maxSupportedVersion: requestOptions.maxVersion,
     });
   },
 };
