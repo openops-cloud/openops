@@ -41,7 +41,9 @@ export interface DeleteRowParams extends RowParams {
   rowId: number;
 }
 
-const maxConcurrentJobs = system.getNumber(AppSystemProp.MAX_CONCURRENT_TABLES_REQUESTS)
+const maxConcurrentJobs = system.getNumber(
+  AppSystemProp.MAX_CONCURRENT_TABLES_REQUESTS,
+);
 class TablesAccessSemaphore {
   private static instance: Semaphore;
   static getInstance(): Semaphore {
