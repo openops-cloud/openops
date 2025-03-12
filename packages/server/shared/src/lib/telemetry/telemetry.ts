@@ -17,6 +17,7 @@ const telemetryCollectorUrl = system.get<string>(
 const logzioMetricToken = system.get<string>(
   SharedSystemProp.LOGZIO_METRICS_TOKEN,
 );
+const version = system.get<string>(SharedSystemProp.VERSION);
 const telemetryEnabled = system.getBoolean(AppSystemProp.TELEMETRY_ENABLED);
 
 let environmentId: UUID | undefined;
@@ -88,6 +89,7 @@ function enrichEventLabels(event: TelemetryEvent): Timeseries {
     labels: {
       ...event.labels,
       eventName: event.name,
+      version: version ?? 'unknown',
       __name__: `${event.name}_total`,
       environmentId: `${environmentId}`,
       timestamp: timestamp.toISOString(),
