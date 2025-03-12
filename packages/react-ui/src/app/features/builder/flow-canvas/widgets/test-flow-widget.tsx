@@ -84,7 +84,7 @@ const TestFlowWidget = ({ flowVersion, setRun }: TestFlowWidgetProps) => {
 
   return (
     flowVersion.valid && (
-      <div className="bg-background">
+      <div className="bg-background rounded-full">
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
