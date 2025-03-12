@@ -15,7 +15,7 @@ jest.mock('../../../src/app/openops-tables/create-table', () => {
 
 import { createOpportunityTable } from '../../../src/app/openops-tables/template-tables/create-opportunity-table';
 
-describe('createOpportunitiesTable', () => {
+describe('createOpportunityTable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -30,7 +30,7 @@ describe('createOpportunitiesTable', () => {
     expect(createTableMock).toHaveBeenCalledTimes(1);
     expect(createTableMock).toHaveBeenCalledWith(
       2,
-      'Opportunities',
+      'Opportunity',
       [['ID']],
       'some token',
     );
