@@ -102,6 +102,26 @@ describe('flowTemplateService', () => {
       });
 
       describe('when version is provided', () => {
+        it('should return latest templates when given version is not semantic', () => {
+          const templates: any[] = [
+            { id: 1 },
+            {
+              id: 2,
+              minSupportedVersion: '0.0.1',
+              maxSupportedVersion: '1.0.0',
+            },
+            { id: 3, minSupportedVersion: '1.0.1' },
+            { id: 4, maxSupportedVersion: '1.0.0' },
+            {
+              id: 5,
+              minSupportedVersion: '1.0.0',
+              maxSupportedVersion: '2.0.0',
+            },
+          ];
+          const result = filterTemplatesByVersion(templates, 'bb0656bd');
+          expect(result).toEqual([{ id: 3, minSupportedVersion: '1.0.1' }]);
+        });
+
         it('should ignore templates that dont have versions', () => {
           const templates: any[] = [
             { id: 1 },

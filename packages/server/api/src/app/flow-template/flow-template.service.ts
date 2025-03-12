@@ -4,7 +4,7 @@ import {
   flowHelper,
   openOpsId,
 } from '@openops/shared';
-import { compare } from 'compare-versions';
+import { compare, validate } from 'compare-versions';
 import { Brackets } from 'typeorm';
 import { repoFactory } from '../core/db/repo-factory';
 import { flowService } from '../flows/flow/flow.service';
@@ -18,6 +18,7 @@ export type flowTemplateQueryParams = {
   services?: string[];
   domains?: string[];
   blocks?: string[];
+  pieces?: string[];
   projectId: string;
   organizationId: string;
   cloudTemplates?: boolean;
@@ -55,10 +56,13 @@ export const flowTemplateService = {
         'flow_template.services',
         'flow_template.domains',
         'flow_template.blocks',
+        'flow_template.pieces',
         'flow_template.projectId',
         'flow_template.organizationId',
         'flow_template.isSample',
         'flow_template.isGettingStarted',
+        'flow_template.minSupportedVersion',
+        'flow_template.maxSupportedVersion',
       ]);
     if (queryParams.search) {
       queryBuilder = queryBuilder.andWhere(
@@ -93,6 +97,12 @@ export const flowTemplateService = {
     if (queryParams.blocks) {
       queryBuilder = queryBuilder.andWhere('blocks @> :blocks', {
         blocks: JSON.stringify(queryParams.blocks),
+      });
+    }
+
+    if (queryParams.pieces) {
+      queryBuilder = queryBuilder.andWhere('pieces @> :pieces', {
+        pieces: JSON.stringify(queryParams.pieces),
       });
     }
 
@@ -168,6 +178,13 @@ export function filterTemplatesByVersion(
   templates: FlowTemplateSchema[],
   version: string | undefined,
 ) {
+  if (version && !validate(version)) {
+    return templates.filter(
+      (template) =>
+        template.minSupportedVersion && !template.maxSupportedVersion,
+    );
+  }
+
   return templates.filter((template) => {
     if (!version) {
       return !template.minSupportedVersion && !template.maxSupportedVersion;

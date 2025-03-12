@@ -1,4 +1,5 @@
 import { logger } from '@openops/server-shared';
+import { openOpsId } from '@openops/shared';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class AddVersionToTemplates1741636646000 implements MigrationInterface {
@@ -11,38 +12,64 @@ export class AddVersionToTemplates1741636646000 implements MigrationInterface {
       ADD COLUMN "maxSupportedVersion" TEXT NULL;
     `);
 
-    await queryRunner.query(`
-      INSERT INTO flow_template (
-        name,
-        description,
-        type,
-        tags,
-        services,
-        domains,
-        pieces,
-        template,
-        "projectId",
-        "organizationId",
-        "isSample",
-        "minSupportedVersion",
-        "maxSupportedVersion"
-      )
-      SELECT
-        name,
-        description,
-        type,
-        tags,
-        services,
-        domains,
-        pieces,
-        template,
-        "projectId",
-        "organizationId",
-        "isSample",
-        '0.1.8' AS "minSupportedVersion",
-        "maxSupportedVersion"
+    const templates = await queryRunner.query(`
+      SELECT name,
+             description,
+             type,
+             tags,
+             services,
+             domains,
+             pieces,
+             template,
+             "projectId",
+             "organizationId",
+             "isSample",
+             "blocks",
+             "maxSupportedVersion"
       FROM flow_template;
-      `);
+    `);
+
+    for (const template of templates) {
+      const newId = openOpsId();
+
+      await queryRunner.query(
+        `INSERT INTO flow_template (
+           id,
+           name,
+           description,
+           type,
+           tags,
+           services,
+           domains,
+           pieces,
+           template,
+           "projectId",
+           "organizationId",
+           "isSample",
+           "blocks",
+           "minSupportedVersion",
+           "maxSupportedVersion"
+         )
+         VALUES ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7::jsonb, $8::jsonb, $9::jsonb, $10, $11, $12, $13::jsonb, '0.1.8', $14);
+        `,
+        [
+          newId,
+          template.name,
+          template.description,
+          template.type,
+          JSON.stringify(template.tags),
+          JSON.stringify(template.services),
+          JSON.stringify(template.domains),
+          JSON.stringify(template.pieces),
+          JSON.stringify(template.template),
+          template.projectId,
+          template.organizationId,
+          template.isSample,
+          JSON.stringify(template.blocks),
+          template.maxSupportedVersion,
+        ],
+      );
+    }
 
     const records = await queryRunner.query(`
         SELECT "id", "template"
