@@ -79,6 +79,8 @@ export const flowTemplateController: FastifyPluginAsyncTypebox = async (
             domains: { type: 'array' },
             isSample: { type: 'boolean' },
             isGettingStarted: { type: 'boolean' },
+            minVersion: { type: 'string' },
+            maxVersion: { type: 'string' },
           },
         },
       },
@@ -92,6 +94,8 @@ export const flowTemplateController: FastifyPluginAsyncTypebox = async (
           domains: string[];
           isSample: boolean;
           isGettingStarted: boolean;
+          minVersion: string;
+          maxVersion: string;
         };
       }>,
       reply,
@@ -106,6 +110,8 @@ export const flowTemplateController: FastifyPluginAsyncTypebox = async (
           isGettingStarted: request.body.isGettingStarted,
           projectId: request.principal.projectId,
           organizationId: request.principal.organization.id,
+          minVersion: request.body.minVersion,
+          maxVersion: request.body.maxVersion,
         });
 
         await reply.status(200).send({ result });
