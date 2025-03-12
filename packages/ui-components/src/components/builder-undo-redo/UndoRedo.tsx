@@ -33,7 +33,7 @@ const UndoRedoContainer = ({ children, className }: UndoRedoContainerProps) => {
   return (
     <div
       className={cn(
-        'w-[105px] h-12 p-1 bg-background rounded-xl shadow-editor justify-between inline-flex items-center',
+        'w-[78px] h-[42px] p-1 bg-background rounded-xl shadow-editor justify-between inline-flex items-center',
         className,
       )}
     >
@@ -49,7 +49,7 @@ UndoRedoContainer.displayName = 'UndoRedoContainer';
  * <UndoRedoDevider />
  */
 const UndoRedoDevider = () => (
-  <div className="h-[calc(100%-16px)] opacity-50 border-[0.5px] border-border"></div>
+  <div className="h-[26px] opacity-50 border-[0.5px] border-border"></div>
 );
 UndoRedoDevider.displayName = 'UndoRedoDevider';
 
@@ -81,7 +81,7 @@ const UndoRedoButton = ({
           {...props}
         >
           <Icon
-            className={cn({
+            className={cn('size-5', {
               'text-border-300': disabled,
               'opacity-100': disabled,
               'cursor-not-allowed': disabled,

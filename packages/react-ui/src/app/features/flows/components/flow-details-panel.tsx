@@ -58,9 +58,8 @@ const FlowDetailsPanel = ({ wrapNavItems }: Props) => {
             }
             className="flex items-center gap-1 min-w-0"
           >
-            <FolderIcon className="h-4 w-4 flex-shrink-0" />
             <div
-              className={cn('max-w-36 truncate', {
+              className={cn('max-w-36 truncate font-medium text-sm', {
                 'max-w-64': wrapNavItems,
               })}
             >
@@ -75,7 +74,7 @@ const FlowDetailsPanel = ({ wrapNavItems }: Props) => {
         <Tooltip>
           <TooltipTrigger className="min-w-0">
             <div
-              className={cn('font-bold max-w-72 truncate', {
+              className={cn('font-medium text-sm max-w-72 truncate', {
                 'max-w-64': wrapNavItems,
               })}
             >

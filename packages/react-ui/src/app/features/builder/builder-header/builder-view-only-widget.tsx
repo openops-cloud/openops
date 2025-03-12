@@ -8,7 +8,7 @@ const BuilderViewOnlyWidget = () => {
 
   return (
     <div
-      className="h-[46px] px-[22px] py-2 z-50 flex items-center shadow-editor gap-2.5 rounded-lg bg-greyBlue text-white"
+      className="h-[42px] px-5 py-2 z-50 flex items-center shadow-editor gap-2.5 rounded-lg bg-greyBlue text-white"
       key={'view-only-widget'}
     >
       <span

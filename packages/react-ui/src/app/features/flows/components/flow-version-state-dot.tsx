@@ -20,10 +20,7 @@ const FlowVersionStateDot = React.memo(
       <Tooltip>
         <TooltipTrigger asChild>
           <div
-            className={cn(
-              'size-10 flex justify-center items-center',
-              className,
-            )}
+            className={cn('flex justify-center items-center pr-1', className)}
           >
             {state === FlowVersionState.DRAFT && (
               <span className="bg-warning size-1.5 rounded-full"></span>

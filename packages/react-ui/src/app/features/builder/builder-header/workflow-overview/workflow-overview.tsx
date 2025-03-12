@@ -53,18 +53,17 @@ const WorkflowOverview = () => {
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
       <PopoverAnchor className="absolute left-6 top-[58px]"></PopoverAnchor>
       <PopoverTrigger asChild>
-        <div className="bg-background shadow-editor flex items-center justify-center rounded-lg z-50 p-1 h-12">
+        <div className="bg-background shadow-editor flex items-center justify-center rounded-lg z-50 p-1 h-[42px]">
           <TooltipWrapper tooltipText={t('Notes')} tooltipPlacement="bottom">
             <Button
               variant={isPopoverOpen ? 'ghostActive' : 'ghost'}
-              className="p-2 gap-2 text-lg font-normal"
+              className="p-2 gap-[10px]"
               aria-label="Workflow notes"
             >
-              <div className="relative size-6">
-                <BookOpen />
-              </div>
+              <BookOpen size={20} />
+
               <span
-                className={cn('hidden text-base', {
+                className={cn('hidden text-[18px] font-normal leading-none', {
                   '@[580px]:block': isSidebarCollapsed,
                   '@[1000px]:block': !isSidebarCollapsed,
                 })}
