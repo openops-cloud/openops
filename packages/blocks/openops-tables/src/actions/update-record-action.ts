@@ -172,9 +172,11 @@ function mapFieldsToObject(
   fieldsProperties: any,
 ): Record<string, any> {
   const validColumnsNames = new Set(validColumns.map((field) => field.name));
-  const updateFieldsProperty = fieldsProperties[
-    'fieldsProperties'
-  ] as unknown as { fieldName: string; newFieldValue: any }[];
+  const updateFieldsProperty =
+    (fieldsProperties['fieldsProperties'] as unknown as {
+      fieldName: string;
+      newFieldValue: any;
+    }[]) ?? [];
 
   const fieldsToUpdate: Record<string, any> = {};
   for (const { fieldName, newFieldValue } of updateFieldsProperty) {
