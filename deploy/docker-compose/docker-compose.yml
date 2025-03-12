@@ -62,6 +62,7 @@ services:
       DATABASE_USER: ${OPS_POSTGRES_USERNAME}
       DATABASE_PASSWORD: ${OPS_POSTGRES_PASSWORD}
       REDIS_URL: redis://redis:6379/0
+    shm_size: '1024mb'
     volumes:
       - 'openops_tables_data:/baserow/data'
     healthcheck:
