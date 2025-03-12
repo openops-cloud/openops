@@ -1,0 +1,28 @@
+name: CD
+
+run-name: Trigger deployment of main to dev
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
+    steps:
+      - name: Get token from Github App
+        id: app_token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.DEVOPS_GITHUB_APP_ID }}
+          private-key: ${{ secrets.DEVOPS_GITHUB_APP_PEM }}
+          owner: ${{ github.repository_owner }}
+      - name: Trigger deployment
+        env:
+          GITHUB_TOKEN: ${{ steps.app_token.outputs.token }}
+          SHA: ${{ github.sha }}
+        run: |
+          gh workflow run deploy -f revision=${SHA::8} -f environment=dev -r main -R openops-cloud/devops

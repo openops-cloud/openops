@@ -16,7 +16,7 @@ export const userSettingsHooks = {
   useUserSettings: () => {
     const setUserSettings = useAppStore((state) => state.setUserSettings);
 
-    const { data, isLoading, error } = useQuery({
+    const { data, isLoading, error, refetch } = useQuery({
       queryKey: [
         'user-settings',
         authenticationSession.getProjectId(),
@@ -40,7 +40,7 @@ export const userSettingsHooks = {
       }
     }, [data, setUserSettings]);
 
-    return { data, isLoading, error };
+    return { data, isLoading, error, refetch };
   },
 
   useUpdateUserSettings: () => {
@@ -49,7 +49,7 @@ export const userSettingsHooks = {
       setUserSettings: state.setUserSettings,
     }));
 
-    const { mutate } = useMutation({
+    const { mutateAsync } = useMutation({
       onMutate: async (settings: UserSettingsDefinition) => {
         setUserSettings({ ...userSettings, ...settings });
         return settings;
@@ -59,7 +59,7 @@ export const userSettingsHooks = {
       },
     });
 
-    return { updateUserSettings: mutate };
+    return { updateUserSettings: mutateAsync };
   },
 
   useHomePageOperationalView: () => {

@@ -53,7 +53,7 @@ const FolderFilterList = () => {
                 ) : (
                   <ChevronDown className="h-4 w-4" />
                 )}
-                <div className="ml-1 text-sm">{t('My workflows')}</div>
+                <div className="ml-1 text-sm">{t('Workflows')}</div>
               </span>
             </CollapsibleTrigger>
             <div className="grow"></div>
