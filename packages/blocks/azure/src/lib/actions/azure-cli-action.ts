@@ -1,9 +1,11 @@
 import { createAction, Property } from '@openops/blocks-framework';
 import {
   azureAuth,
+  dryRunCheckBox,
   getAzureSubscriptionsStaticDropdown,
 } from '@openops/common';
 import { logger, SharedSystemProp, system } from '@openops/server-shared';
+import { RiskLevel } from '@openops/shared';
 import { getAzureErrorMessage } from '../error-helper';
 import { runCommand } from './azure-cli';
 
@@ -12,6 +14,7 @@ export const azureCliAction = createAction({
   name: 'azure_cli',
   description: 'Execute Azure CLI command',
   displayName: 'Azure CLI',
+  riskLevel: RiskLevel.HIGH,
   props: {
     useHostSession: Property.DynamicProperties({
       displayName: '',
@@ -90,10 +93,15 @@ export const azureCliAction = createAction({
       },
     }),
     commandToRun: Property.LongText({ displayName: 'Command', required: true }),
+    dryRun: dryRunCheckBox(),
   },
   async run(context) {
     try {
-      const { commandToRun } = context.propsValue;
+      const { commandToRun, dryRun } = context.propsValue;
+
+      if (dryRun) {
+        return `Step execution skipped, dry run flag enabled. Azure CLI command will not be executed. Command: '${commandToRun}'`;
+      }
 
       const result = await runCommand(
         commandToRun,

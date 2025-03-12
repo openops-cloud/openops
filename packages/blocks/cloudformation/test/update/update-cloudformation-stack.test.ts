@@ -19,7 +19,7 @@ describe('Apply CloudFormation template', () => {
   });
 
   test('should create action with correct properties', () => {
-    expect(Object.keys(updateStack.props).length).toBe(4);
+    expect(Object.keys(updateStack.props).length).toBe(5);
     expect(updateStack.props).toMatchObject({
       arn: {
         required: true,
@@ -37,7 +37,25 @@ describe('Apply CloudFormation template', () => {
         required: false,
         type: 'DYNAMIC',
       },
+      dryRun: {
+        type: 'CHECKBOX',
+        required: false,
+      },
     });
+  });
+
+  test('should skip the execution when dry run is active', async () => {
+    const context = {
+      ...jest.requireActual('@openops/blocks-framework'),
+      propsValue: {
+        dryRun: true,
+      },
+    };
+
+    const result = await updateStack.run(context);
+    expect(result).toEqual('Step execution skipped, dry run flag enabled.');
+
+    expect(applyTemplateUpdateMock.applyTemplateUpdate).not.toHaveBeenCalled();
   });
 
   test.each([

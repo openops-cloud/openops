@@ -1,11 +1,13 @@
 import { Property, createAction } from '@openops/blocks-framework';
 import {
   amazonAuth,
+  dryRunCheckBox,
   getCredentialsForAccount,
   parseArn,
   waitForProperties,
 } from '@openops/common';
 import { logger } from '@openops/server-shared';
+import { RiskLevel } from '@openops/shared';
 import { applyTemplateUpdate } from '../apply-template-update';
 
 export const updateStack = createAction({
@@ -13,6 +15,7 @@ export const updateStack = createAction({
   name: 'apply_template',
   displayName: 'Apply CloudFormation template',
   description: 'Update the CloudFormation template that matches the given ARN.',
+  riskLevel: RiskLevel.HIGH,
   props: {
     arn: Property.ShortText({
       displayName: 'ARN',
@@ -26,9 +29,14 @@ export const updateStack = createAction({
       required: true,
     }),
     ...waitForProperties(),
+    dryRun: dryRunCheckBox(),
   },
   async run(context) {
-    const { arn, template } = context.propsValue;
+    const { arn, template, dryRun } = context.propsValue;
+
+    if (dryRun) {
+      return `Step execution skipped, dry run flag enabled.`;
+    }
 
     const waitForInSeconds =
       context.propsValue['waitForTimeInSecondsProperty'][
