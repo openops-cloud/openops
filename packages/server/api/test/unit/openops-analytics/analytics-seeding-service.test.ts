@@ -119,7 +119,7 @@ describe('seedAnalyticsDashboards', () => {
     );
     expect(openopsCommonMock.getTableIdByTableName).toHaveBeenCalledTimes(1);
     expect(openopsCommonMock.getTableIdByTableName).toHaveBeenCalledWith(
-      'Opportunities',
+      'Opportunity',
     );
   });
 
