@@ -1,6 +1,7 @@
 import { createAction, Property } from '@openops/blocks-framework';
 import {
   amazonAuth,
+  dryRunCheckBox,
   getCredentialsFromAuth,
   listAthenaDatabases,
   runAndWaitForQueryResult,
@@ -66,17 +67,25 @@ export const runAthenaQueryAction = createAction({
       defaultValue: 10,
       required: true,
     }),
+    dryRun: dryRunCheckBox(),
   },
   async run(context) {
-    const database = context.propsValue.database;
-    if (database === undefined) {
-      throw new Error('Database is undefined.');
-    }
+    const { dryRun } = context.propsValue;
 
-    const regex = /LIMIT\s*\d+\s*$/i;
     let query = context.propsValue.query;
+    const regex = /LIMIT\s*\d+\s*$/i;
     if (!regex.test(query)) {
       query += ` LIMIT ${context.propsValue.limit}`;
+    }
+
+    if (dryRun) {
+      return `Step execution skipped, dry run flag enabled. Athena query will not be executed. Query: '${query}'`;
+    }
+
+    const database = context.propsValue.database;
+
+    if (database === undefined) {
+      throw new Error('Database is undefined.');
     }
 
     try {
@@ -90,7 +99,9 @@ export const runAthenaQueryAction = createAction({
         context.propsValue.outputBucket,
       );
     } catch (error) {
-      throw new Error(`An error occurred while running the query: ${error}`);
+      throw new Error(
+        `An error occurred while running the query '${query}': ${error}`,
+      );
     }
   },
 });

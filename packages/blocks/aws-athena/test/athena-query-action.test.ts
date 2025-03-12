@@ -1,4 +1,5 @@
 const openopsCommonMock = {
+  ...jest.requireActual('@openops/common'),
   getCredentialsFromAuth: jest.fn(),
   runAndWaitForQueryResult: jest.fn(),
 };
@@ -43,6 +44,25 @@ describe('runAthenaQueryAction tests', () => {
     });
   });
 
+  test('should skip the execution when dry run is active', async () => {
+    const context = {
+      ...jest.requireActual('@openops/blocks-framework'),
+      auth: auth,
+      propsValue: {
+        query: 'some query 123 limit 456',
+        database: 'some db',
+        dryRun: true,
+      },
+    };
+
+    const result = await runAthenaQueryAction.run(context);
+    expect(result).toEqual(
+      "Step execution skipped, dry run flag enabled. Athena query will not be executed. Query: 'some query 123 limit 456'",
+    );
+
+    expect(openopsCommonMock.runAndWaitForQueryResult).not.toHaveBeenCalled();
+  });
+
   test('should use the correct credentials', async () => {
     openopsCommonMock.runAndWaitForQueryResult.mockResolvedValue('mockResult');
 
@@ -78,7 +98,7 @@ describe('runAthenaQueryAction tests', () => {
     };
 
     await expect(runAthenaQueryAction.run(context)).rejects.toThrow(
-      'An error occurred while running the query: mockError',
+      `An error occurred while running the query 'some query LIMIT 10': mockError`,
     );
   });
 
