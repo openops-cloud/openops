@@ -45,6 +45,9 @@ const FlowBuilderPage = () => {
   if (isError && (error as AxiosError).status === 404) {
     return <Navigate to="/404" />;
   }
+  if (isError && error) {
+    throw error;
+  }
 
   if (isLoading) {
     return (
