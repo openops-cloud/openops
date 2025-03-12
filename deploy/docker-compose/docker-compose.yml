@@ -104,6 +104,8 @@ services:
     image: 'postgres:14.4'
     container_name: postgres
     restart: unless-stopped
+    command: >
+      postgres -c max_connections=300
     environment:
       POSTGRES_USER: ${OPS_POSTGRES_USERNAME}
       POSTGRES_PASSWORD: ${OPS_POSTGRES_PASSWORD}

@@ -41,10 +41,21 @@ export interface DeleteRowParams extends RowParams {
   rowId: number;
 }
 
-const globalSemaphore = new Semaphore(10);
+class GlobalSemaphore {
+  private static instance: Semaphore;
+  private constructor() {}
+  static getInstance(): Semaphore {
+    if (!GlobalSemaphore.instance) {
+      GlobalSemaphore.instance = new Semaphore(100);
+    }
+    return GlobalSemaphore.instance;
+  }
+}
+
+const semaphore = GlobalSemaphore.getInstance();
 
 async function withGlobalLock<T>(fn: () => Promise<T>): Promise<T> {
-  const [_, release] = await globalSemaphore.acquire();
+  const [value, release] = await semaphore.acquire();
   try {
     return await fn();
   } catch (error) {
