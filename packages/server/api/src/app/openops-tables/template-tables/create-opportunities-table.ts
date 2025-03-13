@@ -27,6 +27,9 @@ export async function createOpportunitiesTable(
   const fields = await getFields(table.id, token);
   const primaryField = getPrimaryKeyFieldFromFields(fields);
 
+  logger.debug(
+    `[Seeding ${SEED_OPENOPS_TABLE_NAME} table] Before adding primary field ID with id: ${primaryField.id}`,
+  );
   await makeOpenOpsTablesPatch<unknown>(
     `api/database/fields/${primaryField.id}/`,
     {
@@ -36,7 +39,7 @@ export async function createOpportunitiesTable(
     createAxiosHeaders(token),
   );
   logger.debug(
-    `[Seeding ${SEED_OPENOPS_TABLE_NAME} table] Added field ID with id: ${primaryField.id}`,
+    `[Seeding ${SEED_OPENOPS_TABLE_NAME} table] After adding primary field ID with id: ${primaryField.id}`,
   );
 
   await addField(token, table.id, {
@@ -143,6 +146,9 @@ export async function createOpportunitiesTable(
 async function addField(token: string, tableId: number, fieldBody: any) {
   const createFieldEndpoint = `api/database/fields/table/${tableId}/`;
 
+  logger.debug(
+    `[Seeding ${SEED_OPENOPS_TABLE_NAME} table] Before adding field ${fieldBody.name}`,
+  );
   const field = await makeOpenOpsTablesPost<{ id: number }>(
     createFieldEndpoint,
     fieldBody,
@@ -150,6 +156,6 @@ async function addField(token: string, tableId: number, fieldBody: any) {
   );
 
   logger.debug(
-    `[Seeding ${SEED_OPENOPS_TABLE_NAME} table] Added field ${fieldBody.name} with id: ${field.id}`,
+    `[Seeding ${SEED_OPENOPS_TABLE_NAME} table] After adding field ${fieldBody.name} with id: ${field.id}`,
   );
 }
