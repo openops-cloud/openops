@@ -39,7 +39,7 @@ const FlowSideMenuHeader = () => {
           onClick={closeSidebar}
           aria-label="Toggle Sidebar"
         >
-          <PanelRight className="size-6" strokeWidth="2.3" />
+          <PanelRight className="size-6" />
         </Button>
       </TooltipWrapper>
     </SideMenuHeader>
