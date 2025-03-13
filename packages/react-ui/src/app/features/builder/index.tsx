@@ -187,13 +187,12 @@ const BuilderPage = () => {
   }, [readonly, run, searchParams, setLeftSidebar, setReadOnly]);
 
   useEffect(() => {
-    if (
-      memorizedSelectedStep &&
-      memorizedSelectedStep.type === TriggerType.EMPTY
-    ) {
+    if (!memorizedSelectedStep) {
+      rightHandleRef.current?.resize(0);
+    } else if (memorizedSelectedStep.type === TriggerType.EMPTY) {
       setRightSidebar(RightSideBarType.NONE);
     }
-  }, [memorizedSelectedStep, setRightSidebar]);
+  }, [memorizedSelectedStep, rightHandleRef, setRightSidebar]);
 
   const { switchToDraft, isSwitchingToDraftPending } = useSwitchToDraft();
 
@@ -204,12 +203,6 @@ const BuilderPage = () => {
     !!memorizedSelectedStep &&
     memorizedSelectedStep.type !== TriggerType.EMPTY &&
     !isBlockLoading;
-
-  useEffect(() => {
-    if (!memorizedSelectedStep) {
-      rightHandleRef.current?.resize(0);
-    }
-  }, [memorizedSelectedStep, rightHandleRef]);
 
   return (
     <div className="flex h-screen w-screen flex-col relative">
