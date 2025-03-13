@@ -21,7 +21,7 @@ const ExpandSideMenu = ({
       <TooltipWrapper tooltipText={t('Menu')} tooltipPlacement="bottom">
         <Button
           variant={'ghost'}
-          className="p-0 min-w-[34px]"
+          className="p-0 h-[34px] min-w-[34px]"
           aria-label="Menu"
           onClick={handleCollasedClick}
         >
