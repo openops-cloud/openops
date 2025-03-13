@@ -57,26 +57,26 @@ const HomeGetStarted = ({
             <h3>{t('Quick links')}</h3>
             <div className="w-full grid grid-cols-2 gap-2 @[900px]:grid-cols-4 font-normal">
               <KnowledgeBaseCard
-                link=""
+                link="https://openops.com/docs/introduction/overview"
                 text={t('What is OpenOps?')}
                 icon={<BookOpenText size={15} />}
                 iconWrapperClassName="bg-warning"
                 className="max"
               />
               <KnowledgeBaseCard
-                link=""
+                link="https://openops.com/docs/introduction/features-and-benefits"
                 text={t('Features and benefits')}
                 icon={<BookOpenText size={15} />}
                 iconWrapperClassName="bg-blue-500"
               />
               <KnowledgeBaseCard
-                link=""
+                link="https://openops.com/docs/getting-started/quick-start-guide"
                 text={t('Quick start guide')}
                 icon={<BookOpenText size={15} />}
                 iconWrapperClassName="bg-warning-200"
               />
               <KnowledgeBaseCard
-                link=""
+                link="https://slack.openops.com/"
                 text={t('Community')}
                 icon={<BookOpenText size={15} />}
                 iconWrapperClassName="bg-teal-400"

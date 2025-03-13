@@ -13,7 +13,10 @@ const DiscoverPremiumTile = () => (
         {t(
           'Explore enterprise features, managed offering, AI Copilot and much more. ',
         )}
-        <Link to="#" className="font-bold text-primary-200">
+        <Link
+          to="https://openops.com/pricing"
+          className="font-bold text-primary-200"
+        >
           {t('Learn how')}
         </Link>
       </p>
