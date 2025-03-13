@@ -16967,7 +16967,7 @@ SOFTWARE.
 The following npm packages may be included in this product:
 
  - prismjs@1.27.0
- - prismjs@1.29.0
+ - prismjs@1.30.0
 
 These packages each contain the following license:
 
