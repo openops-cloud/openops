@@ -12,6 +12,7 @@ import { AddUserSettings1740734879653 } from './migrations/1740734879653-AddUser
 import { AddColumnForStartupTemplates1741016911542 } from './migrations/1741016911542-AddColumnForStartupTemplates';
 import { RenamePieceToBlockMigration1741475952000 } from './migrations/1741475952000-RenamePieceToBlock';
 import { AddVersionToTemplates1741636646000 } from './migrations/1741636646000-AddVersionToTemplates';
+import { testfsdasssssdasd1741636646001 } from './migrations/1741636646001-test';
 
 const getSslConfig = (): boolean | TlsOptions => {
   const useSsl = system.get(AppSystemProp.POSTGRES_USE_SSL);
@@ -32,6 +33,7 @@ const getMigrations = (): (new () => MigrationInterface)[] => {
     AddColumnForStartupTemplates1741016911542,
     RenamePieceToBlockMigration1741475952000,
     AddVersionToTemplates1741636646000,
+    testfsdasssssdasd1741636646001,
   ];
 };
 
