@@ -120,7 +120,7 @@ export const azureCliAction = createAction({
       });
       let message = 'An error occurred while running an Azure CLI command: ';
       if (String(error).includes('login --service-principal')) {
-        message += 'az login <<credentials redacted>>';
+        message += 'login --service-principal ***REDACTED***';
       } else {
         message += error;
       }
