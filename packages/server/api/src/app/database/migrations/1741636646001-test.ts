@@ -1,22 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  getTableByNaming,
-  getTableFields,
-  SelectOpenOpsField,
-} from '@openops/common';
+import { getTableFields, SelectOpenOpsField } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class testfsdasssssdasd1741636646001 implements MigrationInterface {
-  name = 'testfsdasssssdasd1741636646001';
+const mappingOfSelectOptionsIdToValuesInEveryTable = new Map<
+  string,
+  Map<string, Map<number, string>>
+>();
 
+export class testfsdasssssdasd1741636646001 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    logger.info('LEYLAAAAA: Migrating select options from ids to names');
     const workflows = await queryRunner.query(
       'SELECT "id", "trigger" FROM "flow_version"',
     );
     const templates = await queryRunner.query(
-      'SELECT "id", "template" FROM "flow_template"',
+      'SELECT "id", "template" FROM "flow_template" where "minSupportedVersion" = "0.1.8"',
     );
 
     if (!workflows.length && !templates.length) return;
@@ -46,34 +44,34 @@ async function updateRecords(
   }
 }
 
-type TableFieldOptions = Map<string, Map<number, string>>;
+const getFieldsFromCache = async (tableName: string) => {
+  if (mappingOfSelectOptionsIdToValuesInEveryTable.has(tableName)) {
+    return mappingOfSelectOptionsIdToValuesInEveryTable.get(tableName);
+  }
+  const fields = (await getTableFields(tableName)) as SelectOpenOpsField[];
+  const fieldMaps = new Map<string, Map<number, string>>();
+  fields.forEach((field) => {
+    if (field.select_options) {
+      fieldMaps.set(
+        field.name,
+        new Map(
+          field.select_options.map((option) => [option.id, option.value]),
+        ),
+      );
+    }
+  });
+  mappingOfSelectOptionsIdToValuesInEveryTable.set(tableName, fieldMaps);
+  return fieldMaps;
+};
 
 async function updateJsonObject(obj: any): Promise<any> {
   if (!obj || typeof obj !== 'object') return obj;
 
   if (obj.input?.tableName) {
-    let fields: SelectOpenOpsField[] = [];
-    try {
-      fields = (await getTableFields(
-        obj.input?.tableName,
-      )) as SelectOpenOpsField[];
-    } catch (error) {
-      logger.info('a' + error);
-    }
-    const fieldMaps = new Map<string, Map<number, string>>();
-    fields.forEach((field) => {
-      if (field.select_options) {
-        fieldMaps.set(
-          field.name,
-          new Map(
-            field.select_options.map((option) => [option.id, option.value]),
-          ),
-        );
-      }
-    });
+    const fields = await getFieldsFromCache(obj.input.tableName);
 
     obj.input.fieldsProperties?.fieldsProperties?.forEach((field: any) => {
-      updateFieldValue(field, fieldMaps.get(field.name));
+      updateFieldValue(field, fields!.get(field.name));
     });
   }
 
