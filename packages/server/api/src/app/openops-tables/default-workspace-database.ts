@@ -1,5 +1,5 @@
 import { OPENOPS_DEFAULT_DATABASE_NAME } from '@openops/common';
-import { openopsTables, SEED_OPENOPS_TABLE_NAME } from './index';
+import { openopsTables } from './index';
 
 export async function createDefaultWorkspaceAndDatabase(
   token: string,

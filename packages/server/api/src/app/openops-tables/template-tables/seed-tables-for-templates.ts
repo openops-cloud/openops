@@ -6,7 +6,7 @@ import { logger } from '@openops/server-shared';
 import { createAutoEc2InstancesShutdownTable } from './create-auto-ec2-instances-shutdown-table';
 import { createBusinessUnitsTable } from './create-business-units-table';
 import { createIdleEbsVolumesToDeleteTable } from './create-idle-ebs-volumes-to-delete-table';
-import { createOpportunityTable } from './create-opportunity-table';
+import { createOpportunityTable } from './create-opportunities-table';
 import { createResourceBuTagAssignmentTable } from './create-resource-bu-tag-assignment-table';
 import { createTagOwnerMappingTable } from './create-tag-owner-mapping-table';
 

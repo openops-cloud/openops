@@ -6,13 +6,17 @@ import {
   makeOpenOpsTablesPatch,
   makeOpenOpsTablesPost,
 } from '@openops/common';
+import { logger } from '@openops/server-shared';
 import { createTable } from '../create-table';
-import { SEED_OPENOPS_TABLE_NAME } from '../index';
+
+export const SEED_OPENOPS_TABLE_NAME = 'Opportunities';
 
 export async function createOpportunityTable(
   token: string,
   databaseId: number,
 ) {
+  logger.debug(`[Seeding ${SEED_OPENOPS_TABLE_NAME} table] Start`);
+
   const table = await createTable(
     databaseId,
     SEED_OPENOPS_TABLE_NAME,
@@ -31,8 +35,11 @@ export async function createOpportunityTable(
     },
     createAxiosHeaders(token),
   );
+  logger.debug(
+    `[Seeding ${SEED_OPENOPS_TABLE_NAME} table] Added field ID with id: ${primaryField.id}`,
+  );
 
-  await AddField(token, table.id, {
+  await addField(token, table.id, {
     name: 'Status',
     type: 'single_select',
     select_options: [
@@ -45,7 +52,7 @@ export async function createOpportunityTable(
     ],
   });
 
-  await AddField(token, table.id, {
+  await addField(token, table.id, {
     name: 'Opportunity Type',
     type: 'single_select',
     select_options: [
@@ -55,34 +62,27 @@ export async function createOpportunityTable(
     ],
   });
 
-  await AddField(token, table.id, {
-    name: 'Resource ID',
-    type: 'text',
-  });
+  const fieldNames = [
+    'Resource ID',
+    'Workflow',
+    'Service',
+    'Region',
+    'Account',
+    'Owner',
+    'Follow-up task',
+    'Opportunity generator',
+    'External Opportunity Id',
+    'Opportunity details',
+    'Resolution notes',
+  ];
 
-  await AddField(token, table.id, {
-    name: 'Workflow',
-    type: 'text',
-  });
+  for (const fieldName of fieldNames) {
+    await addField(token, table.id, { name: fieldName, type: 'text' });
+  }
 
-  await AddField(token, table.id, {
-    name: 'Service',
-    type: 'text',
-  });
-
-  await AddField(token, table.id, {
-    name: 'Region',
-    type: 'text',
-  });
-
-  await AddField(token, table.id, {
-    name: 'Account',
-    type: 'text',
-  });
-
-  await AddField(token, table.id, {
+  await addField(token, table.id, {
     name: 'Complexity',
-    type: 'text',
+    type: 'single_select',
     select_options: [
       { value: 'XS', color: 'darker-green' },
       { value: 'S', color: 'dark-cyan' },
@@ -92,9 +92,9 @@ export async function createOpportunityTable(
     ],
   });
 
-  await AddField(token, table.id, {
+  await addField(token, table.id, {
     name: 'Risk',
-    type: 'text',
+    type: 'single_select',
     select_options: [
       { value: 'Low', color: 'darker-green' },
       { value: 'Medium', color: 'yellow' },
@@ -102,64 +102,40 @@ export async function createOpportunityTable(
     ],
   });
 
-  await AddField(token, table.id, {
-    name: 'Owner',
-    type: 'text',
-  });
-
-  await AddField(token, table.id, {
-    name: 'Follow-up task',
-    type: 'text',
-  });
-
-  await AddField(token, table.id, {
-    name: 'Opportunity generator',
-    type: 'text',
-  });
-
-  await AddField(token, table.id, {
-    name: 'External Opportunity Id',
-    type: 'text',
-  });
-
-  await AddField(token, table.id, {
-    name: 'Opportunity details',
-    type: 'long_text',
-  });
-
-  await AddField(token, table.id, {
+  await addField(token, table.id, {
     name: 'Snoozed until',
     type: 'date',
     date_format: 'ISO',
     date_include_time: true,
   });
 
-  await AddField(token, table.id, {
-    name: 'Resolution notes',
-    type: 'long_text',
-  });
-
-  await AddField(token, table.id, {
+  await addField(token, table.id, {
     name: 'Creation time',
     type: 'created_on',
     date_format: 'ISO',
     date_include_time: true,
   });
 
-  await AddField(token, table.id, {
+  await addField(token, table.id, {
     name: 'Last modified time',
     type: 'last_modified',
     date_format: 'ISO',
     date_include_time: true,
   });
+
+  logger.debug(`[Seeding ${SEED_OPENOPS_TABLE_NAME} table] Done`);
 }
 
-async function AddField(token: string, tableId: number, fieldBody: any) {
+async function addField(token: string, tableId: number, fieldBody: any) {
   const createFieldEndpoint = `api/database/fields/table/${tableId}/`;
 
-  await makeOpenOpsTablesPost<unknown>(
+  const field = await makeOpenOpsTablesPost<{ id: number }>(
     createFieldEndpoint,
     fieldBody,
     createAxiosHeaders(token),
+  );
+
+  logger.debug(
+    `[Seeding ${SEED_OPENOPS_TABLE_NAME} table] Added field ${fieldBody.name} with id: ${field.id}`,
   );
 }

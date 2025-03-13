@@ -6,8 +6,6 @@ import { createWorkspace } from './create-workspace';
 import { createDefaultWorkspaceAndDatabase } from './default-workspace-database';
 import { renameDatabase } from './rename-database';
 
-export const SEED_OPENOPS_TABLE_NAME = 'Opportunity';
-
 export const openopsTables = {
   createUser,
   addUserToWorkspace,

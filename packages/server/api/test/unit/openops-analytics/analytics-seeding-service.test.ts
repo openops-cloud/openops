@@ -47,7 +47,7 @@ jest.mock('../../../src/app/openops-analytics/populate-homepage', () => {
 });
 
 import { seedAnalyticsDashboards } from '../../../src/app/openops-analytics/analytics-seeding-service';
-import { SEED_OPENOPS_TABLE_NAME } from '../../../src/app/openops-tables';
+import { SEED_OPENOPS_TABLE_NAME } from '../../../src/app/openops-tables/template-tables/create-opportunities-table';
 
 describe('seedAnalyticsDashboards', () => {
   beforeEach(() => {

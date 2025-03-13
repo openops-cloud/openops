@@ -11,7 +11,7 @@ import { appPostBoot } from './app/app';
 import { databaseConnection } from './app/database/database-connection';
 import { seedDevData } from './app/database/seeds/dev-seeds';
 import * as analytics from './app/database/seeds/openops-analytics-seed';
-import { seedOpportunityTemplateTable } from './app/database/seeds/openops-opportunity-table-seed';
+import { updateOpportunitiesTable } from './app/database/seeds/openops-delete-and-recreate-opportunities-table';
 import { updateOpenopsTablesDatabase } from './app/database/seeds/openops-tables-rename-database';
 import { seedAdminData } from './app/database/seeds/seed-admin';
 import { seedEnvironmentId } from './app/database/seeds/seed-env-id';
@@ -57,9 +57,10 @@ const main = async (): Promise<void> => {
     await analytics.seedAnalytics();
 
     await seedDevData();
+    await updateOpportunitiesTable();
 
     await seedTemplateTables();
-    await seedOpportunityTemplateTable();
+
     initializeLock();
   }
 
