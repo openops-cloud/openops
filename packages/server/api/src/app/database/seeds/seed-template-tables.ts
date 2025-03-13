@@ -30,7 +30,7 @@ export const seedTemplateTables = async (): Promise<void> => {
     return;
   }
 
-  await seedTemplateTablesService.createTables();
+  await seedTemplateTablesService.createBaseTemplateTables();
 
   await setTableSeedFlag();
 };

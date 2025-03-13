@@ -30,8 +30,8 @@ const HomeGetStarted = ({
     >
       <div className="p-6 flex flex-col gap-4 bg-secondary font-bold">
         <h2 className="text-[24px]">{t('Get started')}</h2>
-        <div className="flex items-center justify-between gap-10 flex-wrap @[1500px]:flex-nowrap">
-          <div className="w-full flex flex-col gap-4">
+        <div className="flex items-center justify-between gap-4 flex-wrap @[1120px]:flex-nowrap">
+          <div className="w-full flex flex-col gap-[10px]">
             <h3>{t('Start with our Sample template')}</h3>
             <div className="flex gap-4 font-normal">
               {sampleTemplates && (
@@ -53,32 +53,32 @@ const HomeGetStarted = ({
               )}
             </div>
           </div>
-          <div className="w-full flex flex-col gap-4">
+          <div className="w-full flex flex-col gap-[10px]">
             <h3>{t('Quick links')}</h3>
-            <div className="w-full grid grid-cols-2 gap-4 @[900px]:grid-cols-4 font-normal">
+            <div className="w-full grid grid-cols-2 gap-2 @[900px]:grid-cols-4 font-normal">
               <KnowledgeBaseCard
                 link=""
                 text={t('What is OpenOps?')}
-                icon={<BookOpenText size={20} />}
+                icon={<BookOpenText size={15} />}
                 iconWrapperClassName="bg-warning"
                 className="max"
               />
               <KnowledgeBaseCard
                 link=""
                 text={t('Features and benefits')}
-                icon={<BookOpenText size={20} />}
+                icon={<BookOpenText size={15} />}
                 iconWrapperClassName="bg-blue-500"
               />
               <KnowledgeBaseCard
                 link=""
                 text={t('Quick start guide')}
-                icon={<BookOpenText size={20} />}
+                icon={<BookOpenText size={15} />}
                 iconWrapperClassName="bg-warning-200"
               />
               <KnowledgeBaseCard
                 link=""
                 text={t('Community')}
-                icon={<BookOpenText size={20} />}
+                icon={<BookOpenText size={15} />}
                 iconWrapperClassName="bg-teal-400"
               />
             </div>

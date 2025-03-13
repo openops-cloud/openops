@@ -12,6 +12,18 @@ jest.mock('../../src/lib/openops-tables/requests-helpers', () => ({
   createAxiosHeaders: createAxiosHeadersMock,
 }));
 
+const acquireMock = jest.fn(async () => [null, releaseMock]);
+const releaseMock = jest.fn();
+
+jest.mock('async-mutex', () => {
+  return {
+    ...jest.requireActual('async-mutex'),
+    Semaphore: jest.fn().mockImplementation(() => ({
+      acquire: acquireMock,
+    })),
+  };
+});
+
 import {
   FilterType,
   ViewFilterTypesEnum,
@@ -28,6 +40,23 @@ import {
 describe('getRows', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  test('Should get rows with lock', async () => {
+    makeOpenOpsTablesGetMock.mockResolvedValue([
+      { results: [{ id: 1, order: 1234 }] },
+    ]);
+    createAxiosHeadersMock.mockReturnValue('some header');
+
+    const result = await getRows({
+      tableId: 1,
+      token: 'token',
+    });
+
+    expect(result).toStrictEqual([{ id: 1, order: 1234 }]);
+    expect(acquireMock).toBeCalledTimes(1);
+    expect(releaseMock).toBeCalledTimes(1);
+    expect(makeOpenOpsTablesGetMock).toBeCalledTimes(1);
   });
 
   test('Should get rows', async () => {
@@ -122,6 +151,26 @@ describe('update row', () => {
     jest.clearAllMocks();
   });
 
+  test('Should update row with lock', async () => {
+    makeOpenOpsTablesPatchMock.mockResolvedValue('mock result');
+    createAxiosHeadersMock.mockReturnValue('some header');
+
+    const result = await updateRow({
+      tableId: 1,
+      token: 'token',
+      rowId: 2,
+      fields: {
+        'some field name one': 'value field1',
+        'some field name two': 2,
+      },
+    });
+
+    expect(result).toBe('mock result');
+    expect(acquireMock).toBeCalledTimes(1);
+    expect(releaseMock).toBeCalledTimes(1);
+    expect(makeOpenOpsTablesPatchMock).toBeCalledTimes(1);
+  });
+
   test('Should update row with usernames', async () => {
     makeOpenOpsTablesPatchMock.mockResolvedValue('mock result');
     createAxiosHeadersMock.mockReturnValue('some header');
@@ -154,6 +203,25 @@ describe('add row', () => {
     jest.clearAllMocks();
   });
 
+  test('Should add row with lock', async () => {
+    makeOpenOpsTablesPostMock.mockResolvedValue('mock result');
+    createAxiosHeadersMock.mockReturnValue('some header');
+
+    const result = await addRow({
+      tableId: 1,
+      token: 'token',
+      fields: {
+        'some field name one': 'value field1',
+        'some field name two': 2,
+      },
+    });
+
+    expect(result).toBe('mock result');
+    expect(acquireMock).toBeCalledTimes(1);
+    expect(releaseMock).toBeCalledTimes(1);
+    expect(makeOpenOpsTablesPostMock).toBeCalledTimes(1);
+  });
+
   test('Should add row with usernames', async () => {
     makeOpenOpsTablesPostMock.mockResolvedValue('mock result');
     createAxiosHeadersMock.mockReturnValue('some header');
@@ -183,6 +251,22 @@ describe('add row', () => {
 describe('delete row', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  test('Should delete row with lock', async () => {
+    makeOpenOpsTablesDeleteMock.mockResolvedValue('mock result');
+    createAxiosHeadersMock.mockReturnValue('some header');
+
+    const result = await deleteRow({
+      tableId: 1,
+      token: 'token',
+      rowId: 2,
+    });
+
+    expect(result).toBe('mock result');
+    expect(acquireMock).toBeCalledTimes(1);
+    expect(releaseMock).toBeCalledTimes(1);
+    expect(makeOpenOpsTablesDeleteMock).toBeCalledTimes(1);
   });
 
   test('Should delete row', async () => {

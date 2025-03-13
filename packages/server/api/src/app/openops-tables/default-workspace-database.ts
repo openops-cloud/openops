@@ -1,5 +1,5 @@
 import { OPENOPS_DEFAULT_DATABASE_NAME } from '@openops/common';
-import { openopsTables, SEED_OPENOPS_TABLE_NAME } from './index';
+import { openopsTables } from './index';
 
 export async function createDefaultWorkspaceAndDatabase(
   token: string,
@@ -14,15 +14,6 @@ export async function createDefaultWorkspaceAndDatabase(
     OPENOPS_DEFAULT_DATABASE_NAME,
     token,
   );
-
-  const table = await openopsTables.createTable(
-    database.id,
-    SEED_OPENOPS_TABLE_NAME,
-    [['ID']],
-    token,
-  );
-
-  await openopsTables.addFieldsToOpenopsDefaultTable(token, table.id);
 
   return {
     workspaceId: workspace.id,

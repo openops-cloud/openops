@@ -20,14 +20,14 @@ const KnowledgeBaseCard = ({
     <a
       href={link}
       className={cn(
-        'w-full h-[78px] min-w-[170px] py-[23px] pl-4 pr-2 flex items-center gap-3 border rounded-sm bg-background',
+        'w-full h-[86px] min-w-[121px] py-2 px-2 flex flex-col gap-1 border rounded-sm bg-background overflow-hidden',
         className,
       )}
       aria-label={text}
     >
       <div
         className={cn(
-          'min-w-8 w-8 h-8 flex items-center justify-center rounded-full bg-blue-300 text-background',
+          'min-w-6 h-6 w-6 flex items-center justify-center rounded-full bg-blue-300 text-background flex-shrink-0',
           iconWrapperClassName,
         )}
       >

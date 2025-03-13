@@ -1,15 +1,21 @@
+import { LeftSideBarType } from '@/app/features/builder/builder-hooks';
 import {
   Button,
+  cn,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
   RunsIcon,
   TooltipWrapper,
-  VerticalDivider,
 } from '@openops/components/ui';
 import { t } from 'i18next';
-import { History, Workflow } from 'lucide-react';
-import { useMemo } from 'react';
+import { EllipsisVertical, History, Workflow } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
-import { LeftSideBarType } from '@/app/features/builder/builder-hooks';
+const ICON_SIZE_SMALL = 16;
+const ICON_SIZE_LARGE = 24;
 
 type BuilderHeaderActionBarProps = {
   handleSidebarButtonClick: (type: LeftSideBarType) => void;
@@ -21,69 +27,68 @@ const BuilderHeaderActionBar = ({
   handleSidebarButtonClick,
 }: BuilderHeaderActionBarProps) => {
   const location = useLocation();
+  const [isOpen, setIsOpen] = useState(false);
 
   const isInRunsPage = useMemo(
     () => location.pathname.startsWith('/runs'),
     [location.pathname],
   );
 
-  const isFlowsIconActive = leftSidebar === LeftSideBarType.TREE_VIEW;
-
   return (
-    <div className="flex items-center justify-center gap-2 bg-background p-1 rounded-xl text-primary shadow-editor z-50 contain-layout">
-      <TooltipWrapper tooltipText={t('Tree view')} tooltipPlacement="bottom">
-        <Button
-          variant={isFlowsIconActive ? 'ghostActive' : 'ghost'}
-          onClick={() => {
-            handleSidebarButtonClick(LeftSideBarType.TREE_VIEW);
-          }}
-          className="px-2"
-          aria-label="Show Tree View"
-          data-testid="toggleTreeViewButton"
-        >
-          <Workflow className="w-6 h-6" />
-        </Button>
-      </TooltipWrapper>
-
-      <VerticalDivider height={24} />
-
-      {!isInRunsPage && (
-        <>
-          <TooltipWrapper
-            tooltipText={t('Versions History')}
-            tooltipPlacement="bottom"
-          >
+    <DropdownMenu modal={true} open={isOpen} onOpenChange={setIsOpen}>
+      <DropdownMenuTrigger className="focus:outline-none">
+        <div className="bg-background shadow-editor flex items-center justify-center rounded-lg z-50 p-1 h-[42px]">
+          <TooltipWrapper tooltipText={t('Actions')} tooltipPlacement="bottom">
             <Button
-              variant={
-                leftSidebar === LeftSideBarType.VERSIONS
-                  ? 'ghostActive'
-                  : 'ghost'
-              }
-              className="px-2"
-              onClick={() => handleSidebarButtonClick(LeftSideBarType.VERSIONS)}
-              aria-label="Version History"
-              data-testid="toggleHistoryButton"
+              variant={isOpen ? 'ghostActive' : 'ghost'}
+              className="p-0 h-[34px] min-w-[34px]"
+              aria-label="Actions"
             >
-              <History className="w-6 h-6" />
+              <EllipsisVertical size={ICON_SIZE_LARGE} />
             </Button>
           </TooltipWrapper>
-          <VerticalDivider height={24} />
-        </>
-      )}
-      <TooltipWrapper tooltipText={t('Run Logs')} tooltipPlacement="bottom">
-        <Button
-          variant={
-            leftSidebar === LeftSideBarType.RUNS ? 'ghostActive' : 'ghost'
-          }
-          onClick={() => handleSidebarButtonClick(LeftSideBarType.RUNS)}
-          className="px-2"
-          aria-label="Run Logs"
-          data-testid="toggleRunsButton"
+        </div>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        className="px-2 py-[6px] flex flex-col gap-2"
+        side="bottom"
+        align="start"
+      >
+        <DropdownMenuItem
+          onSelect={() => {
+            handleSidebarButtonClick(LeftSideBarType.TREE_VIEW);
+          }}
+          className={cn('flex items-center gap-2', {
+            'bg-secondary': leftSidebar === LeftSideBarType.TREE_VIEW,
+          })}
         >
-          <RunsIcon className="w-6 h-6" strokeWidth="1.5" />
-        </Button>
-      </TooltipWrapper>
-    </div>
+          <Workflow size={ICON_SIZE_SMALL} />
+          {t('Tree view')}
+        </DropdownMenuItem>
+
+        {!isInRunsPage && (
+          <DropdownMenuItem
+            onSelect={() => handleSidebarButtonClick(LeftSideBarType.VERSIONS)}
+            className={cn('flex items-center gap-2', {
+              'bg-secondary': leftSidebar === LeftSideBarType.VERSIONS,
+            })}
+          >
+            <History size={ICON_SIZE_SMALL} />
+            {t('Versions History')}
+          </DropdownMenuItem>
+        )}
+
+        <DropdownMenuItem
+          onSelect={() => handleSidebarButtonClick(LeftSideBarType.RUNS)}
+          className={cn('flex items-center gap-2', {
+            'bg-secondary': leftSidebar === LeftSideBarType.RUNS,
+          })}
+        >
+          <RunsIcon size={ICON_SIZE_SMALL} />
+          {t('Run Logs')}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 

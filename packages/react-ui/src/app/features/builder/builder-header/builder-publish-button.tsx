@@ -60,13 +60,13 @@ const BuilderPublishButton = React.memo(() => {
   const isValid = flowVersion.valid;
   return (
     <div
-      className={cn('h-12 flex items-center rounded-sm gap-3 z-50', {
-        'bg-background shadow-editor pl-3 pr-[5px]':
+      className={cn('h-[42px] flex items-center rounded-xl gap-2 z-50', {
+        'bg-background shadow-editor pl-4 pr-[5px]':
           !readonly && flow.publishedVersionId,
       })}
     >
       {!readonly && flow.publishedVersionId && (
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           <FlowVersionStateDot state={flowVersion.state}></FlowVersionStateDot>
           <FlowStatusToggle
             flow={flow}
@@ -82,16 +82,15 @@ const BuilderPublishButton = React.memo(() => {
             <Tooltip>
               <TooltipTrigger asChild className="disabled:pointer-events-auto">
                 <Button
-                  size={'lg'}
                   variant={'greenRounded'}
                   loading={isSaving || isLoading || isPublishingPending}
                   disabled={
                     isPublishedVersion || readonly || !isValid || isLoading
                   }
                   onClick={() => handleExecuting()}
-                  className={cn('w-[119px]', {
-                    'h-10': !!flow.publishedVersionId,
-                    'h-12': !flow.publishedVersionId,
+                  className={cn('text-sm', {
+                    'h-9': !!flow.publishedVersionId,
+                    'h-[42px]': !flow.publishedVersionId,
                   })}
                 >
                   {t('Publish')}
@@ -137,7 +136,7 @@ const BuilderPublishButton = React.memo(() => {
               });
             }
           }}
-          className="h-12 shadow-editor"
+          className="h-[42px] shadow-editor text-sm"
         >
           {t('Edit')}
         </Button>

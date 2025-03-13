@@ -26,7 +26,7 @@ const FlowSideMenuHeader = () => {
 
   return (
     <SideMenuHeader
-      className="justify-between"
+      className="h-[52px] justify-between pr-0"
       logo={<AppLogo className="h-6" />}
     >
       <TooltipWrapper
@@ -39,7 +39,7 @@ const FlowSideMenuHeader = () => {
           onClick={closeSidebar}
           aria-label="Toggle Sidebar"
         >
-          <PanelRight className="size-[18px]" strokeWidth="2.3" />
+          <PanelRight className="size-6" />
         </Button>
       </TooltipWrapper>
     </SideMenuHeader>

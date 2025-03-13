@@ -46,6 +46,8 @@ services:
       POSTGRES_PASSWORD: ${OPS_POSTGRES_PASSWORD}
       POSTGRES_DB: ${OPS_POSTGRES_DATABASE}
     ports: ['5432:5432']
+    command: >
+      postgres -c max_connections=${POSTGRES_MAX_CONNECTIONS:-300}
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./tools/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:ro

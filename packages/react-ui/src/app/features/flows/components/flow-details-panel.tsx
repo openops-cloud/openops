@@ -1,11 +1,11 @@
 import {
+  cn,
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-  cn,
 } from '@openops/components/ui';
 import { t } from 'i18next';
-import { ChevronDown, Folder as FolderIcon } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { createSearchParams, useNavigate } from 'react-router-dom';
 
 import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
@@ -56,17 +56,16 @@ const FlowDetailsPanel = ({ wrapNavItems }: Props) => {
                 }).toString(),
               })
             }
-            className="flex items-center gap-1 min-w-0"
+            className="items-center gap-1 min-w-0 hidden @[1000px]:flex"
           >
-            <FolderIcon className="h-4 w-4 flex-shrink-0" />
             <div
-              className={cn('max-w-36 truncate', {
+              className={cn('max-w-36 truncate font-medium text-sm', {
                 'max-w-64': wrapNavItems,
               })}
             >
               {folderData?.displayName ?? t('Uncategorized')}
-              <span>{' / '}</span>
             </div>
+            <span>{' / '}</span>
           </TooltipTrigger>
           <TooltipContent side="bottom">
             {t('Go to folder: ')} {folderName}
@@ -75,7 +74,7 @@ const FlowDetailsPanel = ({ wrapNavItems }: Props) => {
         <Tooltip>
           <TooltipTrigger className="min-w-0">
             <div
-              className={cn('font-bold max-w-72 truncate', {
+              className={cn('font-medium text-sm max-w-72 truncate', {
                 'max-w-64': wrapNavItems,
               })}
             >

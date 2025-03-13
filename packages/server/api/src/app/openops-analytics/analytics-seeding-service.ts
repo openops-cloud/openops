@@ -3,7 +3,7 @@ import {
   getTableIdByTableName,
 } from '@openops/common';
 import { AppSystemProp, logger, system } from '@openops/server-shared';
-import { SEED_OPENOPS_TABLE_NAME } from '../openops-tables';
+import { SEED_OPENOPS_TABLE_NAME } from '../openops-tables/template-tables/create-opportunities-table';
 import { getOrCreatePostgresDatabaseConnection } from './create-database-connection';
 import { getOrCreateDataset } from './create-dataset';
 import { createOrGetDashboard } from './dashboard';
