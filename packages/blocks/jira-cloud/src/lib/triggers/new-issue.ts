@@ -47,7 +47,7 @@ export const newIssue = createTrigger({
     sanitizeJql: Property.Checkbox({
       displayName: 'Sanitize JQL',
       required: false,
-      defaultValue: true,
+      defaultValue: false,
     }),
   },
   sampleData: {},
