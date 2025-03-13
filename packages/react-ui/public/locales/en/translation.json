@@ -217,7 +217,7 @@
   "There is no sample data available found for this trigger.": "There is no sample data available found for this trigger.",
   "Failed to run test step, please ensure settings are correct.": "Failed to run test step, please ensure settings are correct.",
   "Please click on Test URL to generate sample data": "Please click on Test URL to generate sample data",
-  "testBlockWebhookTriggerNote": "testBlockWebhookTriggerNote",
+  "Please go to {blockName} and trigger {triggerName}.": "Please go to {blockName} and trigger {triggerName}.",
   "No sample data available": "No sample data available",
   "Old results were removed, retest for new sample data": "Old results were removed, retest for new sample data",
   "Result #": "Result #",
