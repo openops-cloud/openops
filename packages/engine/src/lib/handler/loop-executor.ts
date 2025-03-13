@@ -1,5 +1,4 @@
 import { Store } from '@openops/blocks-framework';
-import { logger } from '@openops/server-shared';
 import {
   Action,
   ActionType,
@@ -85,11 +84,6 @@ export const loopExecutor: BaseExecutor<LoopOnItemsAction> = {
 
       if (payload && payload.path.includes(action.name)) {
         isFirstLoopExecution = false;
-      }
-
-      if (!payload) {
-        isFirstLoopExecution = true;
-        logger.info(`NO PAYLOAD!!! BUT COMPLETED?`);
       }
     }
 
@@ -209,15 +203,7 @@ async function waitForIterationsToFinishOrPause(
   const { iterationContext: lastIterationContext } =
     iterationResults[iterationResults.length - 1];
 
-  const { loopOutput } = getIterationOutput(lastIterationContext);
-  for (let i = 0; i < iterationResults.length - 1; ++i) {
-    const { iterationOutput } = getIterationOutput(
-      iterationResults[i].iterationContext,
-    );
-    if (loopOutput && iterationOutput) {
-      loopOutput.iterations[i] = iterationOutput;
-    }
-  }
+  populateLastIterationContext(lastIterationContext, iterationResults);
 
   const executionState = lastIterationContext.setCurrentPath(
     lastIterationContext.currentPath.removeLast(),
@@ -260,21 +246,6 @@ async function saveIterationResults(
   }
 }
 
-function getPathFromPayload(input: string, target: string): string {
-  const parts = input.split(',');
-  const filteredParts = [];
-
-  for (let i = 0; i < parts.length; i += 2) {
-    filteredParts.push(`${parts[i]},${parts[i + 1]}`);
-
-    if (parts[i] === target) {
-      break;
-    }
-  }
-
-  return filteredParts.join('.');
-}
-
 async function resumePausedIteration(
   store: Store,
   payload: { executionCorrelationId: string; path: string },
@@ -284,12 +255,7 @@ async function resumePausedIteration(
   actionName: string,
 ): Promise<void> {
   // Get which iteration is being resumed
-  let iterationKey = (await store.get(payload.path)) as string;
-
-  if (!iterationKey) {
-    const path = getPathFromPayload(payload.path, actionName);
-    iterationKey = (await store.get(path)) as string;
-  }
+  const iterationKey = await getIterationKey(store, actionName, payload.path);
 
   const previousIterationResult = (await store.get(
     iterationKey,
@@ -301,9 +267,9 @@ async function resumePausedIteration(
   });
   let newExecutionContext = loopExecutionState.setCurrentPath(newCurrentPath);
 
-  const { loopOutput } = getIterationOutput(newExecutionContext);
-  loopOutput.index = Number(previousIterationResult.index);
-  loopOutput.item = previousIterationResult.item;
+  const loopStepResult = getLoopStepResult(newExecutionContext);
+  loopStepResult.index = Number(previousIterationResult.index);
+  loopStepResult.item = previousIterationResult.item;
 
   newExecutionContext = await flowExecutor.execute({
     executionState: newExecutionContext,
@@ -360,8 +326,6 @@ async function generateNextFlowContext(
     }
   }
 
-  const x = loopExecutionState.currentState();
-  logger.info(JSON.stringify(x));
   return areAllStepsInLoopFinished
     ? loopExecutionState
     : pauseLoop(loopExecutionState);
@@ -376,13 +340,25 @@ function pauseLoop(executionState: FlowExecutorContext): FlowExecutorContext {
   });
 }
 
-function getIterationOutput(lastIterationContext: FlowExecutorContext): {
-  loopOutput: LoopStepResult;
-  iterationOutput: Readonly<Record<string, StepOutput>>;
-} {
+function populateLastIterationContext(
+  lastIterationContext: FlowExecutorContext,
+  iterationResults: {
+    iterationContext: FlowExecutorContext;
+    isPaused: boolean;
+  }[],
+): void {
+  const loopStepResult = getLoopStepResult(lastIterationContext);
+  for (let i = 0; i < iterationResults.length - 1; ++i) {
+    const iteration = getIterationOutput(iterationResults[i].iterationContext);
+
+    loopStepResult.iterations[i] = iteration;
+  }
+}
+
+function getIterationOutput(
+  lastIterationContext: FlowExecutorContext,
+): Readonly<Record<string, StepOutput>> {
   let targetMap = lastIterationContext.steps;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let loopOutput: any = undefined;
   lastIterationContext.currentPath.path.forEach(([stepName, iteration]) => {
     const stepOutput = targetMap[stepName];
     if (!stepOutput.output || stepOutput.type !== ActionType.LOOP_ON_ITEMS) {
@@ -391,13 +367,59 @@ function getIterationOutput(lastIterationContext: FlowExecutorContext): {
       );
     }
     targetMap = stepOutput.output.iterations[iteration];
-    loopOutput = stepOutput.output;
   });
 
-  return {
-    loopOutput,
-    iterationOutput: targetMap,
-  };
+  return targetMap;
+}
+
+function getLoopStepResult(
+  lastIterationContext: FlowExecutorContext,
+): LoopStepResult {
+  let targetMap = lastIterationContext.steps;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let loopStepResult: any = undefined;
+  lastIterationContext.currentPath.path.forEach(([stepName, iteration]) => {
+    const stepOutput = targetMap[stepName];
+    if (!stepOutput.output || stepOutput.type !== ActionType.LOOP_ON_ITEMS) {
+      throw new Error(
+        '[ExecutionState#getTargetMap] Not instance of Loop On Items step output',
+      );
+    }
+    targetMap = stepOutput.output.iterations[iteration];
+    loopStepResult = stepOutput.output;
+  });
+
+  return loopStepResult;
+}
+
+function buildPathKeyFromPayload(input: string, target: string): string {
+  const parts = input.split(',');
+  const filteredParts = [];
+
+  for (let i = 0; i < parts.length; i += 2) {
+    filteredParts.push(`${parts[i]},${parts[i + 1]}`);
+
+    if (parts[i] === target) {
+      break;
+    }
+  }
+
+  // "step_name,iteration.step_name,iteration"
+  return filteredParts.join('.');
+}
+
+async function getIterationKey(
+  store: Store,
+  actionName: string,
+  payloadPath: string,
+): Promise<string> {
+  let iterationKey = (await store.get(payloadPath)) as string;
+
+  if (!iterationKey) {
+    const path = buildPathKeyFromPayload(payloadPath, actionName);
+    iterationKey = (await store.get(path)) as string;
+  }
+  return iterationKey;
 }
 
 type IterationResult = {
