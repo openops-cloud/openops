@@ -10,7 +10,7 @@ import {
   TooltipWrapper,
 } from '@openops/components/ui';
 import { t } from 'i18next';
-import { EllipsisVertical, Workflow } from 'lucide-react';
+import { EllipsisVertical, History, Workflow } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
@@ -59,7 +59,7 @@ const BuilderHeaderActionBar = ({
             'bg-secondary': leftSidebar === LeftSideBarType.TREE_VIEW,
           })}
         >
-          <Workflow className="w-6 h-6" />
+          <Workflow size={16} />
           {t('Tree view')}
         </DropdownMenuItem>
 
@@ -70,7 +70,7 @@ const BuilderHeaderActionBar = ({
               'bg-secondary': leftSidebar === LeftSideBarType.VERSIONS,
             })}
           >
-            <Workflow className="w-6 h-6" />
+            <History size={16} />
             {t('Versions History')}
           </DropdownMenuItem>
         )}
@@ -81,7 +81,7 @@ const BuilderHeaderActionBar = ({
             'bg-secondary': leftSidebar === LeftSideBarType.RUNS,
           })}
         >
-          <RunsIcon className="w-6 h-6" />
+          <RunsIcon size={16} />
           {t('Run Logs')}
         </DropdownMenuItem>
       </DropdownMenuContent>
