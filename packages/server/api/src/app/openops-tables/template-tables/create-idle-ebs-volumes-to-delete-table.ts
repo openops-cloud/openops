@@ -34,6 +34,10 @@ export async function addFields(token: string, tableId: number) {
   const fields = await getFields(tableId, token);
   const primaryField = getPrimaryKeyFieldFromFields(fields);
 
+  logger.debug(
+    `[Seeding Idle EBS Volumes to delete table] Before adding primary field Arn with id: ${primaryField.id}`,
+  );
+
   await makeOpenOpsTablesPatch<unknown>(
     `api/database/fields/${primaryField.id}/`,
     {
@@ -43,7 +47,7 @@ export async function addFields(token: string, tableId: number) {
     createAxiosHeaders(token),
   );
   logger.debug(
-    `[Seeding Idle EBS Volumes to delete table] Added field Arn with id: ${primaryField.id}`,
+    `[Seeding Idle EBS Volumes to delete table] After adding primary field Arn with id: ${primaryField.id}`,
   );
 
   await addField(token, tableId, {
@@ -78,6 +82,10 @@ async function addField(
 ): Promise<{ id: number }> {
   const createFieldEndpoint = `api/database/fields/table/${tableId}/`;
 
+  logger.debug(
+    `[Seeding Idle EBS Volumes to delete table] Before adding field ${fieldBody.name}`,
+  );
+
   const field = await makeOpenOpsTablesPost<{ id: number }>(
     createFieldEndpoint,
     fieldBody,
@@ -85,7 +93,7 @@ async function addField(
   );
 
   logger.debug(
-    `[Seeding Idle EBS Volumes to delete table] Added field ${fieldBody.name} with id: ${field.id}`,
+    `[Seeding Idle EBS Volumes to delete table] After adding field ${fieldBody.name} with id: ${field.id}`,
   );
 
   return field;

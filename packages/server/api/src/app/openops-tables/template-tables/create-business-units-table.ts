@@ -34,6 +34,9 @@ export async function addFields(token: string, tableId: number) {
   const fields = await getFields(tableId, token);
   const primaryField = getPrimaryKeyFieldFromFields(fields);
 
+  logger.debug(
+    `[Seeding Business units table] Before adding primary field BU name with id: ${primaryField.id}`,
+  );
   await makeOpenOpsTablesPatch<unknown>(
     `api/database/fields/${primaryField.id}/`,
     {
@@ -43,7 +46,7 @@ export async function addFields(token: string, tableId: number) {
     createAxiosHeaders(token),
   );
   logger.debug(
-    `[Seeding Business units table] Added field BU name with id: ${primaryField.id}`,
+    `[Seeding Business units table] After adding primary field BU name with id: ${primaryField.id}`,
   );
 
   await addField(token, tableId, { name: 'BU code', type: 'text' });
@@ -57,6 +60,10 @@ async function addField(
 ): Promise<{ id: number }> {
   const createFieldEndpoint = `api/database/fields/table/${tableId}/`;
 
+  logger.debug(
+    `[Seeding Business units table] Before adding field ${fieldBody.name}`,
+  );
+
   const field = await makeOpenOpsTablesPost<{ id: number }>(
     createFieldEndpoint,
     fieldBody,
@@ -64,7 +71,7 @@ async function addField(
   );
 
   logger.debug(
-    `[Seeding Business units table] Added field ${fieldBody.name} with id: ${field.id}`,
+    `[Seeding Business units table] After adding field ${fieldBody.name} with id: ${field.id}`,
   );
 
   return field;

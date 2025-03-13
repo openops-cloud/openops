@@ -38,6 +38,9 @@ export async function addFields(
   const fields = await getFields(tableId, token);
   const primaryField = getPrimaryKeyFieldFromFields(fields);
 
+  logger.debug(
+    `[Seeding Resource BU tag assignment table] Before adding primary field Arn with id: ${primaryField.id}`,
+  );
   await makeOpenOpsTablesPatch<unknown>(
     `api/database/fields/${primaryField.id}/`,
     {
@@ -47,7 +50,7 @@ export async function addFields(
     createAxiosHeaders(token),
   );
   logger.debug(
-    `[Seeding Resource BU tag assignment table] Added field Resource identifier with id: ${primaryField.id}`,
+    `[Seeding Resource BU tag assignment table] After adding primary field Resource identifier with id: ${primaryField.id}`,
   );
 
   await addField(token, tableId, { name: 'Resource type', type: 'text' });
@@ -82,6 +85,10 @@ async function addField(
 ): Promise<{ id: number }> {
   const createFieldEndpoint = `api/database/fields/table/${tableId}/`;
 
+  logger.debug(
+    `[Seeding Resource BU tag assignment table] Before adding field ${fieldBody.name}`,
+  );
+
   const field = await makeOpenOpsTablesPost<{ id: number }>(
     createFieldEndpoint,
     fieldBody,
@@ -89,7 +96,7 @@ async function addField(
   );
 
   logger.debug(
-    `[Seeding Resource BU tag assignment table] Added field ${fieldBody.name} with id: ${field.id}`,
+    `[Seeding Resource BU tag assignment table] After adding field ${fieldBody.name} with id: ${field.id}`,
   );
 
   return field;

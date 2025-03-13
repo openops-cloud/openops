@@ -34,6 +34,9 @@ export async function addFields(token: string, tableId: number) {
   const fields = await getFields(tableId, token);
   const primaryField = getPrimaryKeyFieldFromFields(fields);
 
+  logger.debug(
+    `[Seeding Auto EC2 instances shutdown table] Before adding primary field Arn with id: ${primaryField.id}`,
+  );
   await makeOpenOpsTablesPatch<unknown>(
     `api/database/fields/${primaryField.id}/`,
     {
@@ -43,7 +46,7 @@ export async function addFields(token: string, tableId: number) {
     createAxiosHeaders(token),
   );
   logger.debug(
-    `[Seeding Auto EC2 instances shutdown table] Added field Arn with id: ${primaryField.id}`,
+    `[Seeding Auto EC2 instances shutdown table] After adding primary field Arn with id: ${primaryField.id}`,
   );
 
   await addField(token, tableId, {
@@ -61,6 +64,10 @@ async function addField(
 ): Promise<{ id: number }> {
   const createFieldEndpoint = `api/database/fields/table/${tableId}/`;
 
+  logger.debug(
+    `[Seeding Auto EC2 instances shutdown table] Before adding field ${fieldBody.name}`,
+  );
+
   const field = await makeOpenOpsTablesPost<{ id: number }>(
     createFieldEndpoint,
     fieldBody,
@@ -68,7 +75,7 @@ async function addField(
   );
 
   logger.debug(
-    `[Seeding Auto EC2 instances shutdown table] Added field ${fieldBody.name} with id: ${field.id}`,
+    `[Seeding Auto EC2 instances shutdown table] After adding field ${fieldBody.name} with id: ${field.id}`,
   );
 
   return field;
