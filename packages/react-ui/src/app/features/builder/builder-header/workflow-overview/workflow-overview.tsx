@@ -2,7 +2,6 @@ import { WorkflowOverviewContent } from '@/app/features/builder/builder-header/w
 import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
 import {
   Button,
-  cn,
   Popover,
   PopoverAnchor,
   PopoverContent,
@@ -15,7 +14,6 @@ import { debounce, FlowOperationType } from '@openops/shared';
 import { t } from 'i18next';
 import { BookOpen } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
-import { useIsLeftSideBarMenuCollapsed } from '../hooks/useIsLeftSideBarMenuCollapsed';
 
 const WorkflowOverview = () => {
   const [isWorkflowReadonly, savedOverview, applyOperation] =
@@ -47,8 +45,6 @@ const WorkflowOverview = () => {
     debouncedSaveDescription(currentOverview);
   }, [currentOverview, debouncedSaveDescription]);
 
-  const isSidebarCollapsed = useIsLeftSideBarMenuCollapsed();
-
   return (
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
       <PopoverAnchor className="absolute left-6 top-[58px]"></PopoverAnchor>
@@ -63,10 +59,9 @@ const WorkflowOverview = () => {
               <BookOpen size={20} />
 
               <span
-                className={cn('hidden text-[18px] font-normal leading-none', {
-                  '@[580px]:block': isSidebarCollapsed,
-                  '@[1000px]:block': !isSidebarCollapsed,
-                })}
+                className={
+                  'hidden text-sm font-normal leading-none @[870px]:block'
+                }
               >
                 {t('Notes')}
               </span>

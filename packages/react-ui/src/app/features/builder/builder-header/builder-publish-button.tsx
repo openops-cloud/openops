@@ -88,7 +88,7 @@ const BuilderPublishButton = React.memo(() => {
                     isPublishedVersion || readonly || !isValid || isLoading
                   }
                   onClick={() => handleExecuting()}
-                  className={cn({
+                  className={cn('text-sm', {
                     'h-9': !!flow.publishedVersionId,
                     'h-[42px]': !flow.publishedVersionId,
                   })}
@@ -136,7 +136,7 @@ const BuilderPublishButton = React.memo(() => {
               });
             }
           }}
-          className="h-[42px] shadow-editor"
+          className="h-[42px] shadow-editor text-sm"
         >
           {t('Edit')}
         </Button>

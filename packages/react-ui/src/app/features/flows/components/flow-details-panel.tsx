@@ -56,7 +56,7 @@ const FlowDetailsPanel = ({ wrapNavItems }: Props) => {
                 }).toString(),
               })
             }
-            className="flex items-center gap-1 min-w-0"
+            className="items-center gap-1 min-w-0 hidden @[773px]:flex"
           >
             <div
               className={cn('max-w-36 truncate font-medium text-sm', {
@@ -64,8 +64,8 @@ const FlowDetailsPanel = ({ wrapNavItems }: Props) => {
               })}
             >
               {folderData?.displayName ?? t('Uncategorized')}
-              <span>{' / '}</span>
             </div>
+            <span>{' / '}</span>
           </TooltipTrigger>
           <TooltipContent side="bottom">
             {t('Go to folder: ')} {folderName}
