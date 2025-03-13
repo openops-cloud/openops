@@ -1,8 +1,16 @@
-import { Property, Validators, createAction } from '@openops/blocks-framework';
+import {
+  ActionContext,
+  createAction,
+  Property,
+} from '@openops/blocks-framework';
 import { ExecutionType } from '@openops/shared';
 import { getMessageButtons } from '../common/actions-search';
 import { slackAuth } from '../common/authentication';
-import { getMessageObj, isMessageObj } from '../common/message-result';
+import {
+  getMessageObj,
+  isMessageObj,
+  MessageInfo,
+} from '../common/message-result';
 import { timeoutInDays } from '../common/props';
 import {
   onReceivedInteraction,
@@ -49,8 +57,39 @@ export const waitForAction = createAction({
     const { message, timeoutInDays, actions } = context.propsValue;
     const messageObj = getMessageObj(message);
 
+    const currentExecutionPath = getCurrentExecutionPath(context, messageObj);
+
     return context.executionType === ExecutionType.BEGIN
-      ? await waitForInteraction(messageObj, timeoutInDays, context)
-      : await onReceivedInteraction(messageObj, actions, context);
+      ? await waitForInteraction(
+          messageObj,
+          timeoutInDays,
+          context,
+          currentExecutionPath,
+        )
+      : await onReceivedInteraction(
+          messageObj,
+          actions,
+          context,
+          currentExecutionPath,
+        );
   },
 });
+
+function getCurrentExecutionPath(
+  context: ActionContext,
+  messageObj: MessageInfo,
+): string {
+  let currentExecutionPath = context.currentExecutionPath;
+  if (
+    typeof messageObj?.response_body?.message?.metadata?.event_payload
+      ?.resumeUrl === 'string'
+  ) {
+    const url = new URL(
+      messageObj.response_body.message.metadata.event_payload.resumeUrl,
+    );
+
+    currentExecutionPath = url.searchParams.get('path') ?? currentExecutionPath;
+  }
+
+  return currentExecutionPath;
+}

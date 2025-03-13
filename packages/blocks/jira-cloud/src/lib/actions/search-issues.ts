@@ -27,7 +27,7 @@ export const searchIssues = createAction({
     sanitizeJql: Property.Checkbox({
       displayName: 'Sanitize JQL',
       required: true,
-      defaultValue: true,
+      defaultValue: false,
     }),
   },
   run: async ({ auth, propsValue }) => {

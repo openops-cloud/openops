@@ -203,6 +203,7 @@ describe('requestActionMessageAction', () => {
         'some message',
         1,
         mockContextWithHeader,
+        mockContextWithHeader.currentExecutionPath,
       );
       expect(onReceivedInteractionMock).not.toHaveBeenCalled();
     });
@@ -269,6 +270,7 @@ describe('requestActionMessageAction', () => {
         'aaaa',
         ['Approve'],
         mockContextWithHeader,
+        mockContextWithHeader.currentExecutionPath,
       );
       expect(waitForInteractionMock).not.toHaveBeenCalled();
 
