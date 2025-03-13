@@ -201,7 +201,7 @@ const BuilderPage = () => {
 
   const isRightSidebarVisible =
     rightSidebar === RightSideBarType.BLOCK_SETTINGS &&
-    memorizedSelectedStep &&
+    !!memorizedSelectedStep &&
     memorizedSelectedStep.type !== TriggerType.EMPTY &&
     !isBlockLoading;
 
