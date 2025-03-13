@@ -54,12 +54,11 @@ const main = async (): Promise<void> => {
     await seedAdminData();
     // TODO: remove this when all environments are migrated
     await updateOpenopsTablesDatabase();
-    await analytics.seedAnalytics();
-
-    await seedDevData();
     await updateOpportunitiesTable();
+    await seedDevData();
 
     await seedTemplateTables();
+    await analytics.seedAnalytics();
 
     initializeLock();
   }
