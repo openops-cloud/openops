@@ -67,7 +67,7 @@ describe('waitForAction', () => {
     expect(pauseMock).toHaveBeenCalledTimes(1);
     expect(context.store.put).toHaveBeenCalledTimes(1);
     expect(context.store.put).toHaveBeenCalledWith(
-      'pauseMetadata_some step',
+      'pauseMetadata_step_1',
       expect.any(Object),
       StoreScope.FLOW_RUN,
     );
@@ -120,7 +120,7 @@ describe('waitForAction', () => {
         queryParams: {
           userName: 'some_user',
           actionClicked: 'some action',
-          path: 'some step',
+          path: 'step_1',
         },
       },
     });
@@ -180,7 +180,7 @@ describe('waitForAction', () => {
     expect(pauseMock).toHaveBeenCalledTimes(1);
     expect(context.store.get).toHaveBeenCalledTimes(1);
     expect(context.store.get).toHaveBeenCalledWith(
-      'pauseMetadata_some step',
+      'pauseMetadata_step_1',
       StoreScope.FLOW_RUN,
     );
     expect(context.store.put).not.toHaveBeenCalled();
@@ -211,7 +211,7 @@ describe('waitForAction', () => {
     expect(pauseMock).toHaveBeenCalledTimes(1);
     expect(context.store.get).toHaveBeenCalledTimes(1);
     expect(context.store.get).toHaveBeenCalledWith(
-      'pauseMetadata_some step',
+      'pauseMetadata_step_1',
       StoreScope.FLOW_RUN,
     );
     expect(context.store.put).not.toHaveBeenCalled();
@@ -227,7 +227,7 @@ describe('waitForAction', () => {
       },
       resumePayload: {
         queryParams: {
-          path: 'some other step',
+          path: 'step_2',
           userName: 'some_user',
           actionClicked: 'some action',
         },
@@ -237,12 +237,12 @@ describe('waitForAction', () => {
     context.store.get = jest.fn().mockResolvedValue(null);
 
     await expect(waitForAction.run(context)).rejects.toThrow(
-      'Could not fetch pause metadata: some step',
+      'Could not fetch pause metadata: step_1',
     );
 
     expect(context.store.get).toHaveBeenCalledTimes(1);
     expect(context.store.get).toHaveBeenCalledWith(
-      'pauseMetadata_some step',
+      'pauseMetadata_step_1',
       StoreScope.FLOW_RUN,
     );
     expect(context.store.put).not.toHaveBeenCalled();
@@ -287,7 +287,7 @@ const defaultMessage: MessageInfo = {
     message: {
       metadata: {
         event_payload: {
-          resumeUrl: 'some resume url',
+          resumeUrl: 'https://test.com/?path=step_1',
         },
       },
       blocks: [

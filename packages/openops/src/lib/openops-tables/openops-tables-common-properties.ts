@@ -220,13 +220,14 @@ function getNumberProperty(
 
 function getDateProperty(field: OpenOpsField, required = true) {
   const dateField = field as DateOpenOpsField;
+
   return Property.DateTime({
     displayName: field.name,
     description:
       field.description +
       (dateField.date_include_time
         ? ' (Time needs to be included)'
-        : '' + ' (Format: ' + dateField.date_format + ')'),
+        : '' + ' (Format: ISO YYYY-MM-DD) '),
     required: required,
   });
 }
