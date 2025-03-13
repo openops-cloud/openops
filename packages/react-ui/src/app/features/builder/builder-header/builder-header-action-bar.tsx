@@ -38,7 +38,7 @@ const BuilderHeaderActionBar = ({
           <TooltipWrapper tooltipText={t('Actions')} tooltipPlacement="bottom">
             <Button
               variant={isOpen ? 'ghostActive' : 'ghost'}
-              className="p-0 min-w-[34px]"
+              className="p-0 h-[34px] min-w-[34px]"
               aria-label="Actions"
             >
               <EllipsisVertical size={24} />

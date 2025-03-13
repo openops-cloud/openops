@@ -57,7 +57,7 @@ const WorkflowOverview = () => {
           <TooltipWrapper tooltipText={t('Notes')} tooltipPlacement="bottom">
             <Button
               variant={isPopoverOpen ? 'ghostActive' : 'ghost'}
-              className="p-2 gap-[10px]"
+              className="p-2 h-[34px] gap-[10px]"
               aria-label="Workflow notes"
             >
               <BookOpen size={20} />
