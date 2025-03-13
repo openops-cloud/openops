@@ -27,7 +27,7 @@ const KnowledgeBaseCard = ({
     >
       <div
         className={cn(
-          'min-w-8 w-8 h-8 flex items-center justify-center rounded-full bg-blue-300 text-background flex-shrink-0',
+          'min-w-6 h-6 w-6 flex items-center justify-center rounded-full bg-blue-300 text-background flex-shrink-0',
           iconWrapperClassName,
         )}
       >

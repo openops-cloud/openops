@@ -59,26 +59,26 @@ const HomeGetStarted = ({
               <KnowledgeBaseCard
                 link=""
                 text={t('What is OpenOps?')}
-                icon={<BookOpenText size={20} />}
+                icon={<BookOpenText size={15} />}
                 iconWrapperClassName="bg-warning"
                 className="max"
               />
               <KnowledgeBaseCard
                 link=""
                 text={t('Features and benefits')}
-                icon={<BookOpenText size={20} />}
+                icon={<BookOpenText size={15} />}
                 iconWrapperClassName="bg-blue-500"
               />
               <KnowledgeBaseCard
                 link=""
                 text={t('Quick start guide')}
-                icon={<BookOpenText size={20} />}
+                icon={<BookOpenText size={15} />}
                 iconWrapperClassName="bg-warning-200"
               />
               <KnowledgeBaseCard
                 link=""
                 text={t('Community')}
-                icon={<BookOpenText size={20} />}
+                icon={<BookOpenText size={15} />}
                 iconWrapperClassName="bg-teal-400"
               />
             </div>
