@@ -56,7 +56,7 @@ const FlowDetailsPanel = ({ wrapNavItems }: Props) => {
                 }).toString(),
               })
             }
-            className="items-center gap-1 min-w-0 hidden @[773px]:flex"
+            className="items-center gap-1 min-w-0 hidden @[1000px]:flex"
           >
             <div
               className={cn('max-w-36 truncate font-medium text-sm', {

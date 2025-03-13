@@ -60,7 +60,7 @@ const WorkflowOverview = () => {
 
               <span
                 className={
-                  'hidden text-sm font-normal leading-none @[870px]:block'
+                  'hidden text-sm font-normal leading-none @[1030px]:block'
                 }
               >
                 {t('Notes')}
