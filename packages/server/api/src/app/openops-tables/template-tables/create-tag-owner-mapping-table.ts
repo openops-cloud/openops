@@ -40,7 +40,7 @@ export async function addFields(
   const primaryField = getPrimaryKeyFieldFromFields(fields);
 
   logger.debug(
-    `[Seeding Tag-Owner mapping table] Before adding primary field Arn with id: ${primaryField.id}`,
+    `[Seeding Tag-Owner mapping table] Before adding primary field Owner tag value with id: ${primaryField.id}`,
   );
   await makeOpenOpsTablesPatch<unknown>(
     `api/database/fields/${primaryField.id}/`,
