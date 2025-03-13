@@ -25,13 +25,14 @@ describe('createOpportunityTable', () => {
     openopsCommonMock.createAxiosHeaders.mockReturnValue('some header');
     openopsCommonMock.getFields.mockReturnValue(['a field']);
     openopsCommonMock.getPrimaryKeyFieldFromFields.mockReturnValue({ id: 1 });
+    openopsCommonMock.makeOpenOpsTablesPost.mockReturnValue({ id: 1 });
 
     await createOpportunitiesTable('some token', 2);
 
     expect(createTableMock).toHaveBeenCalledTimes(1);
     expect(createTableMock).toHaveBeenCalledWith(
       2,
-      'Opportunity',
+      'Opportunities',
       [['ID']],
       'some token',
     );
@@ -65,14 +66,23 @@ describe('createOpportunityTable', () => {
           { value: 'Rate optimization', color: 'darker-orange' },
         ],
       },
+      {
+        name: 'Estimated savings USD per month',
+        type: 'number',
+        number_decimal_places: 2,
+      },
       { name: 'Resource ID', type: 'text' },
       { name: 'Workflow', type: 'text' },
       { name: 'Service', type: 'text' },
       { name: 'Region', type: 'text' },
       { name: 'Account', type: 'text' },
+      { name: 'Owner', type: 'text' },
+      { name: 'Follow-up task', type: 'text' },
+      { name: 'Opportunity source', type: 'text' },
+      { name: 'External Opportunity Id', type: 'text' },
       {
         name: 'Complexity',
-        type: 'text',
+        type: 'single_select',
         select_options: [
           { value: 'XS', color: 'darker-green' },
           { value: 'S', color: 'dark-cyan' },
@@ -83,17 +93,13 @@ describe('createOpportunityTable', () => {
       },
       {
         name: 'Risk',
-        type: 'text',
+        type: 'single_select',
         select_options: [
           { value: 'Low', color: 'darker-green' },
           { value: 'Medium', color: 'yellow' },
           { value: 'High', color: 'darker-red' },
         ],
       },
-      { name: 'Owner', type: 'text' },
-      { name: 'Follow-up task', type: 'text' },
-      { name: 'Opportunity generator', type: 'text' },
-      { name: 'External Opportunity Id', type: 'text' },
       { name: 'Opportunity details', type: 'long_text' },
       {
         name: 'Snoozed until',

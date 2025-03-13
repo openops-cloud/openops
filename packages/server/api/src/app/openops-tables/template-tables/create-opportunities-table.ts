@@ -62,6 +62,12 @@ export async function createOpportunitiesTable(
     ],
   });
 
+  await addField(token, table.id, {
+    name: 'Estimated savings USD per month',
+    type: 'number',
+    number_decimal_places: 2,
+  });
+
   const fieldNames = [
     'Resource ID',
     'Workflow',
@@ -70,10 +76,8 @@ export async function createOpportunitiesTable(
     'Account',
     'Owner',
     'Follow-up task',
-    'Opportunity generator',
+    'Opportunity source',
     'External Opportunity Id',
-    'Opportunity details',
-    'Resolution notes',
   ];
 
   for (const fieldName of fieldNames) {
@@ -103,10 +107,20 @@ export async function createOpportunitiesTable(
   });
 
   await addField(token, table.id, {
+    name: 'Opportunity details',
+    type: 'long_text',
+  });
+
+  await addField(token, table.id, {
     name: 'Snoozed until',
     type: 'date',
     date_format: 'ISO',
     date_include_time: true,
+  });
+
+  await addField(token, table.id, {
+    name: 'Resolution notes',
+    type: 'long_text',
   });
 
   await addField(token, table.id, {
