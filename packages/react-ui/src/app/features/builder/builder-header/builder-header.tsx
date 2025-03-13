@@ -45,11 +45,11 @@ export const BuilderHeader = () => {
           }}
         />
         <SideMenuCollapsed />
+        {(!readonly || flowVersion.description) && <WorkflowOverview />}
         <BuilderHeaderActionBar
           leftSidebar={leftSidebar}
           handleSidebarButtonClick={handleSidebarButtonClick}
         />
-        {(!readonly || flowVersion.description) && <WorkflowOverview />}
       </div>
       <div className="flex items-center gap-2">
         {readonly && <BuilderViewOnlyWidget></BuilderViewOnlyWidget>}
