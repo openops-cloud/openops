@@ -11,7 +11,7 @@ import { createTable } from '../create-table';
 
 export const SEED_OPENOPS_TABLE_NAME = 'Opportunities';
 
-export async function createOpportunityTable(
+export async function createOpportunitiesTable(
   token: string,
   databaseId: number,
 ) {
