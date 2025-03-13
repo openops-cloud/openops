@@ -206,10 +206,10 @@ const BuilderPage = () => {
     !isBlockLoading;
 
   useEffect(() => {
-    if (!isRightSidebarVisible) {
+    if (!memorizedSelectedStep) {
       rightHandleRef.current?.resize(0);
     }
-  }, [isRightSidebarVisible, rightHandleRef]);
+  }, [memorizedSelectedStep, rightHandleRef]);
 
   return (
     <div className="flex h-screen w-screen flex-col relative">
