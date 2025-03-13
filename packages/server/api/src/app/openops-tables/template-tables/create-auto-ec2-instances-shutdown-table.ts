@@ -9,11 +9,13 @@ import { logger } from '@openops/server-shared';
 import { openopsTables } from '../index';
 
 export async function createAutoEc2InstancesShutdownTable(
-  databseId: number,
+  databaseId: number,
   token: string,
 ): Promise<{ tableId: number }> {
+  logger.debug('[Seeding Auto EC2 instances shutdown table] Start');
+
   const table = await openopsTables.createTable(
-    databseId,
+    databaseId,
     'Auto EC2 instances shutdown',
     [['Arn']],
     token,
@@ -21,7 +23,7 @@ export async function createAutoEc2InstancesShutdownTable(
 
   await addFields(token, table.id);
 
-  logger.info('[Seeding Auto EC2 instances shutdown table] Done');
+  logger.debug('[Seeding Auto EC2 instances shutdown table] Done');
 
   return {
     tableId: table.id,
@@ -40,16 +42,34 @@ export async function addFields(token: string, tableId: number) {
     },
     createAxiosHeaders(token),
   );
+  logger.debug(
+    `[Seeding Auto EC2 instances shutdown table] Added field Arn with id: ${primaryField.id}`,
+  );
 
+  await addField(token, tableId, {
+    name: 'Shutdown time',
+    type: 'date',
+    date_format: 'ISO',
+    date_include_time: true,
+  });
+}
+
+async function addField(
+  token: string,
+  tableId: number,
+  fieldBody: Record<string, unknown>,
+): Promise<{ id: number }> {
   const createFieldEndpoint = `api/database/fields/table/${tableId}/`;
-  await makeOpenOpsTablesPost<unknown>(
+
+  const field = await makeOpenOpsTablesPost<{ id: number }>(
     createFieldEndpoint,
-    {
-      name: 'Shutdown time',
-      type: 'date',
-      date_format: 'ISO',
-      date_include_time: true,
-    },
+    fieldBody,
     createAxiosHeaders(token),
   );
+
+  logger.debug(
+    `[Seeding Auto EC2 instances shutdown table] Added field ${fieldBody.name} with id: ${field.id}`,
+  );
+
+  return field;
 }

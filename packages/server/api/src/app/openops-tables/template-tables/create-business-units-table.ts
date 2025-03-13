@@ -9,11 +9,13 @@ import { logger } from '@openops/server-shared';
 import { openopsTables } from '../index';
 
 export async function createBusinessUnitsTable(
-  databseId: number,
+  databaseId: number,
   token: string,
 ): Promise<{ tableId: number }> {
+  logger.debug('[Seeding Business units table] Start');
+
   const table = await openopsTables.createTable(
-    databseId,
+    databaseId,
     'Business units',
     [['BU name']],
     token,
@@ -21,7 +23,7 @@ export async function createBusinessUnitsTable(
 
   await addFields(token, table.id);
 
-  logger.info('[Seeding Business units table] Done');
+  logger.debug('[Seeding Business units table] Done');
 
   return {
     tableId: table.id,
@@ -40,23 +42,30 @@ export async function addFields(token: string, tableId: number) {
     },
     createAxiosHeaders(token),
   );
+  logger.debug(
+    `[Seeding Business units table] Added field BU name with id: ${primaryField.id}`,
+  );
 
+  await addField(token, tableId, { name: 'BU code', type: 'text' });
+  await addField(token, tableId, { name: 'Notes', type: 'long_text' });
+}
+
+async function addField(
+  token: string,
+  tableId: number,
+  fieldBody: Record<string, unknown>,
+): Promise<{ id: number }> {
   const createFieldEndpoint = `api/database/fields/table/${tableId}/`;
-  await makeOpenOpsTablesPost<unknown>(
+
+  const field = await makeOpenOpsTablesPost<{ id: number }>(
     createFieldEndpoint,
-    {
-      name: 'BU code',
-      type: 'text',
-    },
+    fieldBody,
     createAxiosHeaders(token),
   );
 
-  await makeOpenOpsTablesPost<unknown>(
-    createFieldEndpoint,
-    {
-      name: 'Notes',
-      type: 'long_text',
-    },
-    createAxiosHeaders(token),
+  logger.debug(
+    `[Seeding Business units table] Added field ${fieldBody.name} with id: ${field.id}`,
   );
+
+  return field;
 }

@@ -9,11 +9,13 @@ import { logger } from '@openops/server-shared';
 import { openopsTables } from '../index';
 
 export async function createIdleEbsVolumesToDeleteTable(
-  databseId: number,
+  databaseId: number,
   token: string,
 ): Promise<{ tableId: number }> {
+  logger.debug(`[Seeding Idle EBS Volumes to delete table] Start`);
+
   const table = await openopsTables.createTable(
-    databseId,
+    databaseId,
     'Idle EBS Volumes to delete',
     [['Arn']],
     token,
@@ -21,7 +23,7 @@ export async function createIdleEbsVolumesToDeleteTable(
 
   await addFields(token, table.id);
 
-  logger.info('[Seeding Idle EBS Volumes to delete table] Done');
+  logger.debug(`[Seeding Idle EBS Volumes to delete table] Done`);
 
   return {
     tableId: table.id,
@@ -40,93 +42,51 @@ export async function addFields(token: string, tableId: number) {
     },
     createAxiosHeaders(token),
   );
+  logger.debug(
+    `[Seeding Idle EBS Volumes to delete table] Added field Arn with id: ${primaryField.id}`,
+  );
 
+  await addField(token, tableId, {
+    name: 'Status',
+    type: 'single_select',
+    select_options: [
+      { value: 'New Opportunity', color: 'dark-yellow' },
+      { value: 'Delete', color: 'red' },
+      { value: 'Deleted', color: 'green' },
+      { value: 'Keep', color: 'dark-green' },
+    ],
+  });
+
+  await addField(token, tableId, { name: 'Region', type: 'text' });
+  await addField(token, tableId, { name: 'Account', type: 'text' });
+  await addField(token, tableId, {
+    name: 'Cost USD per month',
+    type: 'number',
+    number_decimal_places: 2,
+  });
+  await addField(token, tableId, { name: 'Name', type: 'text' });
+  await addField(token, tableId, { name: 'Owner', type: 'email' });
+  await addField(token, tableId, { name: 'Is attached?', type: 'boolean' });
+  await addField(token, tableId, { name: 'Volume details', type: 'long_text' });
+  await addField(token, tableId, { name: 'Notes', type: 'long_text' });
+}
+
+async function addField(
+  token: string,
+  tableId: number,
+  fieldBody: Record<string, unknown>,
+): Promise<{ id: number }> {
   const createFieldEndpoint = `api/database/fields/table/${tableId}/`;
-  await makeOpenOpsTablesPost<unknown>(
+
+  const field = await makeOpenOpsTablesPost<{ id: number }>(
     createFieldEndpoint,
-    {
-      name: 'Status',
-      type: 'single_select',
-      select_options: [
-        { value: 'New Opportunity', color: 'dark-yellow' },
-        { value: 'Delete', color: 'red' },
-        { value: 'Deleted', color: 'green' },
-        { value: 'Keep', color: 'dark-green' },
-      ],
-    },
+    fieldBody,
     createAxiosHeaders(token),
   );
 
-  await makeOpenOpsTablesPost<unknown>(
-    createFieldEndpoint,
-    {
-      name: 'Region',
-      type: 'text',
-    },
-    createAxiosHeaders(token),
+  logger.debug(
+    `[Seeding Idle EBS Volumes to delete table] Added field ${fieldBody.name} with id: ${field.id}`,
   );
 
-  await makeOpenOpsTablesPost<unknown>(
-    createFieldEndpoint,
-    {
-      name: 'Account',
-      type: 'text',
-    },
-    createAxiosHeaders(token),
-  );
-
-  await makeOpenOpsTablesPost<unknown>(
-    createFieldEndpoint,
-    {
-      name: 'Cost USD per month',
-      type: 'number',
-      number_decimal_places: 2,
-    },
-    createAxiosHeaders(token),
-  );
-
-  await makeOpenOpsTablesPost<unknown>(
-    createFieldEndpoint,
-    {
-      name: 'Name',
-      type: 'text',
-    },
-    createAxiosHeaders(token),
-  );
-
-  await makeOpenOpsTablesPost<unknown>(
-    createFieldEndpoint,
-    {
-      name: 'Owner',
-      type: 'email',
-    },
-    createAxiosHeaders(token),
-  );
-
-  await makeOpenOpsTablesPost<unknown>(
-    createFieldEndpoint,
-    {
-      name: 'Is attached?',
-      type: 'boolean',
-    },
-    createAxiosHeaders(token),
-  );
-
-  await makeOpenOpsTablesPost<unknown>(
-    createFieldEndpoint,
-    {
-      name: 'Volume details',
-      type: 'long_text',
-    },
-    createAxiosHeaders(token),
-  );
-
-  await makeOpenOpsTablesPost<unknown>(
-    createFieldEndpoint,
-    {
-      name: 'Notes',
-      type: 'long_text',
-    },
-    createAxiosHeaders(token),
-  );
+  return field;
 }
