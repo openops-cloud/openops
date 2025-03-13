@@ -22,7 +22,7 @@ const setTableSeedFlag = async (): Promise<void> => {
   });
 };
 
-export const seedOpportunityTemplateTable = async (): Promise<void> => {
+export const seedOpportunitesTemplateTable = async (): Promise<void> => {
   if (await tableAlreadyCreated()) {
     logger.info('Skip: Opportunity table already seeded', {
       name: 'seedOpportunityTable',
