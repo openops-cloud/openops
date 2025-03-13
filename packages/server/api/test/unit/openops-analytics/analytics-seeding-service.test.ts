@@ -119,7 +119,7 @@ describe('seedAnalyticsDashboards', () => {
     );
     expect(openopsCommonMock.getTableIdByTableName).toHaveBeenCalledTimes(1);
     expect(openopsCommonMock.getTableIdByTableName).toHaveBeenCalledWith(
-      'Opportunity',
+      'Opportunities',
     );
   });
 
@@ -144,7 +144,7 @@ describe('seedAnalyticsDashboards', () => {
     expect(createHomepageChartsMock).not.toHaveBeenCalled();
     expect(openopsCommonMock.getTableIdByTableName).toHaveBeenCalledTimes(1);
     expect(openopsCommonMock.getTableIdByTableName).toHaveBeenCalledWith(
-      'Opportunity',
+      'Opportunities',
     );
   });
 
