@@ -30,7 +30,7 @@ export function DashboardSideMenu() {
 
   const onAccept = useCallback(async () => {
     await updateUserSettings({
-      telemetryBannerInteractionTimestamp: new Date().toISOString(),
+      telemetryInteractionTimestamp: new Date().toISOString(),
     });
     await usersApi.setTelemetry({ ...userSettings, trackEvents: true });
     refetchUserSettings();
@@ -38,7 +38,7 @@ export function DashboardSideMenu() {
 
   const onDismiss = useCallback(async () => {
     await updateUserSettings({
-      telemetryBannerInteractionTimestamp: new Date().toISOString(),
+      telemetryInteractionTimestamp: new Date().toISOString(),
     });
     refetchUserSettings();
   }, [updateUserSettings, refetchUserSettings]);
@@ -47,7 +47,7 @@ export function DashboardSideMenu() {
     !isSidebarMinimized &&
     !isUserSettingsLoading &&
     userSettings !== undefined &&
-    !isValidISODate(userSettings?.telemetryBannerInteractionTimestamp || '');
+    !isValidISODate(userSettings?.telemetryInteractionTimestamp || '');
 
   return (
     <SideMenu MenuHeader={DashboardSideMenuHeader} MenuFooter={SideMenuFooter}>

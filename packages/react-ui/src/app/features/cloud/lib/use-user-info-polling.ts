@@ -1,7 +1,9 @@
+import { userSettingsHooks } from '@/app/common/hooks/user-settings-hooks';
 import {
   OPENOPS_CONNECT_MAX_POLL_ATTEMPTS,
   OPENOPS_CONNECT_TEMPLATES_POLL_INTERVAL_MS,
 } from '@/app/constants/cloud';
+import { usersApi } from '@/app/lib/users-api';
 import { AxiosError, HttpStatusCode } from 'axios';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useCloudProfile } from './use-cloud-profile';
@@ -11,6 +13,7 @@ export const useUserInfoPolling = () => {
   const attemptCountRef = useRef(0);
 
   const { refetchIsConnectedToCloudTemplates } = useCloudProfile();
+  const { updateUserSettings } = userSettingsHooks.useUpdateUserSettings();
 
   useEffect(() => {
     return () => {
@@ -33,6 +36,10 @@ export const useUserInfoPolling = () => {
         const { data } = await refetchIsConnectedToCloudTemplates();
 
         if (data) {
+          await updateUserSettings({
+            telemetryInteractionTimestamp: new Date().toISOString(),
+          });
+          await usersApi.setTelemetry({ trackEvents: true });
           clearInterval(interval);
         }
       } catch (error) {
@@ -52,7 +59,7 @@ export const useUserInfoPolling = () => {
     }, OPENOPS_CONNECT_TEMPLATES_POLL_INTERVAL_MS);
 
     setPollInterval(interval);
-  }, [refetchIsConnectedToCloudTemplates]);
+  }, [refetchIsConnectedToCloudTemplates, updateUserSettings]);
 
   return {
     createPollingInterval,

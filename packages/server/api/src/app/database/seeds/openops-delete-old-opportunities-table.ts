@@ -5,20 +5,18 @@ import {
   createAxiosHeaders,
   getTableIdByTableName,
   makeOpenOpsTablesDelete,
-  OPENOPS_DEFAULT_DATABASE_NAME,
 } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { FlagEntity } from '../../flags/flag.entity';
 import { SEED_OPENOPS_TABLE_NAME } from '../../openops-tables/template-tables/create-opportunities-table';
-import { seedTemplateTablesService } from '../../openops-tables/template-tables/seed-tables-for-templates';
 import { databaseConnection } from '../database-connection';
 
-const OPENOPS_OPPORTUNITIES_TABLE_RECREATED = 'OPPORTUNITIES_RECREATED';
+const OPENOPS_OLD_OPPORTUNITIES_TABLE_DELETED = 'OPPORTUNITYDEL';
 
-const isOpenopsOpportuntiesAlreadyRecreatred = async (): Promise<boolean> => {
+const isTableAlreadyDeleted = async (): Promise<boolean> => {
   const flagRepo = databaseConnection().getRepository(FlagEntity);
   const tablesSeedsFlag = await flagRepo.findOneBy({
-    id: OPENOPS_OPPORTUNITIES_TABLE_RECREATED,
+    id: OPENOPS_OLD_OPPORTUNITIES_TABLE_DELETED,
   });
   return tablesSeedsFlag?.value === true;
 };
@@ -27,15 +25,15 @@ const setOpportunitiesTableDeleted = async (): Promise<void> => {
   const flagRepo = databaseConnection().getRepository(FlagEntity);
 
   await flagRepo.save({
-    id: OPENOPS_DEFAULT_DATABASE_NAME,
+    id: OPENOPS_OLD_OPPORTUNITIES_TABLE_DELETED,
     value: true,
   });
 };
 
-export const updateOpportunitiesTable = async (): Promise<void> => {
-  if (await isOpenopsOpportuntiesAlreadyRecreatred()) {
-    logger.info('Skip: OpenOps Opportunities table already recreated.', {
-      name: 'openOpsOpportunitiesTableAlreadyRecreated',
+export const deleteOldOpportunitiesTable = async (): Promise<void> => {
+  if (await isTableAlreadyDeleted()) {
+    logger.info('Skip: OpenOps Old Opportunities table already deleted.', {
+      name: 'deleteOldOpportunitiesTable',
     });
     return;
   }
@@ -51,23 +49,18 @@ export const updateOpportunitiesTable = async (): Promise<void> => {
       `api/database/tables/${opportunitiesTableIdOld}/`,
       createAxiosHeaders(token),
     );
-    await seedTemplateTablesService.createOpportunityTemplateTable();
-
     await setOpportunitiesTableDeleted();
   } catch (error: unknown) {
     if (
       error instanceof Error &&
       error.message === `Table '${SEED_OPENOPS_TABLE_NAME}' not found`
     ) {
-      logger.info(
-        'Skip: OpenOps recreation of opportunities table, new environemnt.',
-        {
-          name: 'openOpsOpportunitiesTableAlreadyRecreated',
-        },
-      );
+      logger.info('Skip: OpenOps deletion of old opportunities table', {
+        name: 'deleteOldOpportunitiesTable',
+      });
     } else {
       logger.error(
-        'An error occurred recreating the opportunities table.',
+        'An error occurred deleting old opportunities table.',
         error,
       );
     }

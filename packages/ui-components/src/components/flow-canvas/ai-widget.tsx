@@ -35,8 +35,8 @@ const AiWidget = () => {
           <span>{t('Our AI copilot is coming soon!')}</span>
           <p>
             <Link
-              to="#"
-              className="font-bold text-primary-200 pointer-events-none"
+              to="https://openops.com/pricing"
+              className="font-bold text-primary-200"
             >
               {t('Learn how')}
             </Link>

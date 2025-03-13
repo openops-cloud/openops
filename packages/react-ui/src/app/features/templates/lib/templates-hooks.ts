@@ -74,7 +74,7 @@ export const templatesHooks = {
             domains,
             blocks,
             tags,
-            version: version && version !== 'local' ? version : undefined,
+            version: version ?? undefined,
           })
         ).filter(
           (template: FlowTemplateMetadata) =>

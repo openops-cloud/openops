@@ -3,7 +3,7 @@ import { FlagEntity } from '../../flags/flag.entity';
 import { seedTemplateTablesService } from '../../openops-tables/template-tables/seed-tables-for-templates';
 import { databaseConnection } from '../database-connection';
 
-const OPPORTUNITIES_TABLE_SEED = 'OPPORTUNITY_SEED';
+const OPPORTUNITIES_TABLE_SEED = 'OPPORTUNITYSEED';
 
 const tableAlreadyCreated = async (): Promise<boolean> => {
   const flagRepo = databaseConnection().getRepository(FlagEntity);
