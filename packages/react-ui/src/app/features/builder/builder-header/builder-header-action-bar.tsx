@@ -33,7 +33,7 @@ const BuilderHeaderActionBar = ({
 
   return (
     <DropdownMenu modal={true} open={isOpen} onOpenChange={setIsOpen}>
-      <DropdownMenuTrigger>
+      <DropdownMenuTrigger className="focus:outline-none">
         <div className="bg-background shadow-editor flex items-center justify-center rounded-lg z-50 p-1 h-[42px]">
           <TooltipWrapper tooltipText={t('Actions')} tooltipPlacement="bottom">
             <Button
