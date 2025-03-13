@@ -72,14 +72,14 @@ export async function createOpportunitiesTable(
   });
 
   const fieldNames = [
-    'Resource ID',
+    'Resource Id',
     'Workflow',
     'Service',
     'Region',
     'Account',
     'Owner',
     'Follow-up task',
-    'Opportunity source',
+    'Opportunity generator',
     'External Opportunity Id',
   ];
 
