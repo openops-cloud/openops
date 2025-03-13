@@ -14,6 +14,9 @@ import { EllipsisVertical, History, Workflow } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
+const ICON_SIZE_SMALL = 16;
+const ICON_SIZE_LARGE = 24;
+
 type BuilderHeaderActionBarProps = {
   handleSidebarButtonClick: (type: LeftSideBarType) => void;
   leftSidebar: LeftSideBarType;
@@ -41,7 +44,7 @@ const BuilderHeaderActionBar = ({
               className="p-0 h-[34px] min-w-[34px]"
               aria-label="Actions"
             >
-              <EllipsisVertical size={24} />
+              <EllipsisVertical size={ICON_SIZE_LARGE} />
             </Button>
           </TooltipWrapper>
         </div>
@@ -59,7 +62,7 @@ const BuilderHeaderActionBar = ({
             'bg-secondary': leftSidebar === LeftSideBarType.TREE_VIEW,
           })}
         >
-          <Workflow size={16} />
+          <Workflow size={ICON_SIZE_SMALL} />
           {t('Tree view')}
         </DropdownMenuItem>
 
@@ -70,7 +73,7 @@ const BuilderHeaderActionBar = ({
               'bg-secondary': leftSidebar === LeftSideBarType.VERSIONS,
             })}
           >
-            <History size={16} />
+            <History size={ICON_SIZE_SMALL} />
             {t('Versions History')}
           </DropdownMenuItem>
         )}
@@ -81,7 +84,7 @@ const BuilderHeaderActionBar = ({
             'bg-secondary': leftSidebar === LeftSideBarType.RUNS,
           })}
         >
-          <RunsIcon size={16} />
+          <RunsIcon size={ICON_SIZE_SMALL} />
           {t('Run Logs')}
         </DropdownMenuItem>
       </DropdownMenuContent>
