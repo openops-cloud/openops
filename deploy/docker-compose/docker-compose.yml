@@ -104,7 +104,7 @@ services:
     image: 'postgres:14.4'
     restart: unless-stopped
     command: >
-      postgres -c max_connections={POSTGRES_MAX_CONNECTIONS}
+      postgres -c max_connections=${POSTGRES_MAX_CONNECTIONS:-300}
     environment:
       POSTGRES_USER: ${OPS_POSTGRES_USERNAME}
       POSTGRES_PASSWORD: ${OPS_POSTGRES_PASSWORD}
