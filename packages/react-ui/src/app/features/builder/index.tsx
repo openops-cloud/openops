@@ -187,12 +187,13 @@ const BuilderPage = () => {
   }, [readonly, run, searchParams, setLeftSidebar, setReadOnly]);
 
   useEffect(() => {
-    if (!memorizedSelectedStep) {
-      rightHandleRef.current?.resize(0);
-    } else if (memorizedSelectedStep.type === TriggerType.EMPTY) {
+    if (
+      !memorizedSelectedStep ||
+      memorizedSelectedStep.type === TriggerType.EMPTY
+    ) {
       setRightSidebar(RightSideBarType.NONE);
     }
-  }, [memorizedSelectedStep, rightHandleRef, setRightSidebar]);
+  }, [memorizedSelectedStep, setRightSidebar]);
 
   const { switchToDraft, isSwitchingToDraftPending } = useSwitchToDraft();
 
