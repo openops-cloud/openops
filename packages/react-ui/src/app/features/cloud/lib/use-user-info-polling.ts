@@ -37,7 +37,7 @@ export const useUserInfoPolling = () => {
 
         if (data) {
           await updateUserSettings({
-            telemetryBannerInteractionTimestamp: new Date().toISOString(),
+            telemetryInteractionTimestamp: new Date().toISOString(),
           });
           await usersApi.setTelemetry({ trackEvents: true });
           clearInterval(interval);
