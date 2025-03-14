@@ -9,7 +9,7 @@ import {
   LoopStepResult,
   StepOutput,
 } from '@openops/shared';
-import cloneDeep from 'lodash/cloneDeep';
+import cloneDeep from 'lodash.clonedeep';
 import { nanoid } from 'nanoid';
 import { createContextStore } from '../services/storage.service';
 import { BaseExecutor } from './base-executor';

@@ -1,4 +1,4 @@
-jest.mock('lodash/cloneDeep', () => jest.fn((value) => value));
+jest.mock('lodash.clonedeep', () => jest.fn((value) => value));
 import { ExecutionVerdict, FlowExecutorContext } from '../../src/lib/handler/context/flow-execution-context'
 import { flowExecutor } from '../../src/lib/handler/flow-executor'
 import { buildCodeAction, buildSimpleLoopAction, generateMockEngineConstants } from './test-helper'
