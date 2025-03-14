@@ -198,7 +198,7 @@ export function filterTemplatesByVersion(
       ? compare(version, template.minSupportedVersion, '>=')
       : false;
     const meetsMax = template.maxSupportedVersion
-      ? compare(version, template.maxSupportedVersion, '<=')
+      ? compare(version, template.maxSupportedVersion, '<')
       : true;
 
     return meetsMin && meetsMax;
