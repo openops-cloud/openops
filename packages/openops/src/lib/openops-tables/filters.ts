@@ -18,6 +18,10 @@ export enum ViewFilterTypesEnum {
   lower_than_or_equal = 'Is lower than or equal',
   not_empty = 'Is not empty',
   not_equal = 'Is not equal',
+  single_select_equal = 'Single select is equal',
+  single_select_is_any_of = 'Single select is any of',
+  single_select_is_none_of = 'Single select is none of',
+  single_select_not_equal = 'Single select is not equal',
 }
 
 export function isSingleValueFilter(filterType: ViewFilterTypesEnum): boolean {
