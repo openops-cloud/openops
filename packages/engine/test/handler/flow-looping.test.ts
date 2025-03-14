@@ -8,6 +8,13 @@ jest.mock('../../src/lib/code-block/prepare-code-block.ts', () => ({
     prepareCodeBlock: jest.fn(),
 }))
 
+jest.mock('../../src/lib/services/storage.service', () => ({
+  createContextStore: jest.fn().mockImplementation(() => ({
+    get: jest.fn(),
+    put: jest.fn(),
+  })),
+}))
+
 describe('flow with looping', () => {
 
     it('should execute iterations', async () => {
