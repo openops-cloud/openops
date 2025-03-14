@@ -8,16 +8,24 @@ const mappingOfSelectOptionsIdToValuesInEveryTable = new Map<
   Map<string, Map<number, string>>
 >();
 
-export class testfsdasssssdasd1741636646001 implements MigrationInterface {
+export class ReplaceSelectOptionsIdsWithNames1741945618000
+  implements MigrationInterface
+{
   public async up(queryRunner: QueryRunner): Promise<void> {
     const workflows = await queryRunner.query(
       'SELECT "id", "trigger" FROM "flow_version"',
     );
-    const templates = await queryRunner.query(
-      'SELECT "id", "template" FROM "flow_template" where "minSupportedVersion" = "0.1.8"',
-    );
+    logger.info(`Fetched ${workflows.length} workflows from flow_version`);
 
-    if (!workflows.length && !templates.length) return;
+    const templates = await queryRunner.query(
+      'SELECT "id", "template" FROM "flow_template"',
+    );
+    logger.info(`Fetched ${templates.length} templates from flow_template`);
+
+    if (!workflows.length && !templates.length) {
+      logger.info('No workflows or templates found. Exiting migration.');
+      return;
+    }
 
     await updateRecords(queryRunner, workflows, 'flow_version');
     await updateRecords(queryRunner, templates, 'flow_template');
@@ -35,6 +43,7 @@ async function updateRecords(
 ) {
   for (const record of records) {
     const jsonData = await updateJsonObject(record.trigger ?? record.template);
+
     await queryRunner.query(
       `UPDATE "${tableName}" SET "${
         record.trigger ? 'trigger' : 'template'
@@ -46,21 +55,27 @@ async function updateRecords(
 
 const getFieldsFromCache = async (tableName: string) => {
   if (mappingOfSelectOptionsIdToValuesInEveryTable.has(tableName)) {
-    return mappingOfSelectOptionsIdToValuesInEveryTable.get(tableName);
+    const cachedFields =
+      mappingOfSelectOptionsIdToValuesInEveryTable.get(tableName);
+
+    return cachedFields;
   }
   const fields = (await getTableFields(tableName)) as SelectOpenOpsField[];
+
   const fieldMaps = new Map<string, Map<number, string>>();
+
   fields.forEach((field) => {
-    if (field.select_options) {
-      fieldMaps.set(
-        field.name,
-        new Map(
-          field.select_options.map((option) => [option.id, option.value]),
-        ),
+    if (field.select_options && field.select_options.length > 0) {
+      const optionsMap = new Map(
+        field.select_options.map((option) => [option.id, option.value]),
       );
+
+      fieldMaps.set(field.name, optionsMap);
     }
   });
+
   mappingOfSelectOptionsIdToValuesInEveryTable.set(tableName, fieldMaps);
+
   return fieldMaps;
 };
 
@@ -70,16 +85,26 @@ async function updateJsonObject(obj: any): Promise<any> {
   if (obj.input?.tableName) {
     const fields = await getFieldsFromCache(obj.input.tableName);
 
-    obj.input.fieldsProperties?.fieldsProperties?.forEach((field: any) => {
-      updateFieldValue(field, fields!.get(field.name));
-    });
+    if (!fields) {
+      return obj;
+    }
+
+    if (obj.input.fieldsProperties?.fieldsProperties) {
+      for (const field of obj.input.fieldsProperties.fieldsProperties) {
+        if (!field.fieldName) {
+          continue;
+        }
+
+        updateFieldValue(field, fields.get(field.fieldName));
+      }
+    }
   }
 
-  for (const key in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      obj[key] = Array.isArray(obj[key])
-        ? obj[key].map(async (item: any) => updateJsonObject(item))
-        : await updateJsonObject(obj[key]);
+  for (const key of Object.keys(obj)) {
+    if (Array.isArray(obj[key])) {
+      obj[key] = await Promise.all(obj[key].map(updateJsonObject));
+    } else if (typeof obj[key] === 'object') {
+      obj[key] = await updateJsonObject(obj[key]);
     }
   }
 
@@ -87,7 +112,9 @@ async function updateJsonObject(obj: any): Promise<any> {
 }
 
 function updateFieldValue(field: any, fieldMap?: Map<number, string>) {
-  if (!fieldMap) return;
+  if (!fieldMap || fieldMap.size === 0) {
+    return;
+  }
 
   const optionValue = fieldMap.get(field.newFieldValue?.newFieldValue);
   if (optionValue) {
