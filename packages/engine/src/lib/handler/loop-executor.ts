@@ -101,7 +101,7 @@ export const loopExecutor: BaseExecutor<LoopOnItemsAction> = {
       );
     }
 
-     executionState = await resumePausedIteration(
+    executionState = await resumePausedIteration(
       store,
       payload,
       executionState,
