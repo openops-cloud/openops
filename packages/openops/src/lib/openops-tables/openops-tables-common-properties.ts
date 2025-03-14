@@ -131,7 +131,7 @@ export function getPropertyFromField(field: OpenOpsField, required = true) {
         options: {
           options: options.map(
             (option: { id: number; value: any; color: string }) => {
-              return { label: option.value, value: option.id };
+              return { label: option.value, value: option.value };
             },
           ),
         },
@@ -146,7 +146,7 @@ export function getPropertyFromField(field: OpenOpsField, required = true) {
         options: {
           options: options.map(
             (option: { id: number; value: any; color: string }) => {
-              return { label: option.value, value: option.id };
+              return { label: option.value, value: option.value };
             },
           ),
         },
