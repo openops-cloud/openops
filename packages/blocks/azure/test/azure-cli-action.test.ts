@@ -273,7 +273,7 @@ describe('azureCliAction', () => {
     );
   });
 
-  test('should throw an error if runCommand fails', async () => {
+  test('should throw an error if runCommand fails and return the whole error when command does not contain login credentials', async () => {
     azureCliMock.runCommand.mockRejectedValue('error');
 
     const context = createContext({
@@ -284,6 +284,29 @@ describe('azureCliAction', () => {
 
     await expect(azureCliAction.run(context)).rejects.toThrow(
       'An error occurred while running an Azure CLI command: error',
+    );
+    expect(azureCliMock.runCommand).toHaveBeenCalledTimes(1);
+    expect(azureCliMock.runCommand).toHaveBeenCalledWith(
+      'az account list-locations --output table',
+      auth,
+      false,
+      'subscriptionId',
+    );
+  });
+
+  test('should throw an error if runCommand fails and return the redacted error when command contains login credentials', async () => {
+    azureCliMock.runCommand.mockRejectedValue(
+      'login --service-principal blah blah error',
+    );
+
+    const context = createContext({
+      commandToRun: 'az account list-locations --output table',
+      useHostSession: { useHostSessionCheckbox: false },
+      subscriptions: { subDropdown: 'subscriptionId' },
+    });
+
+    await expect(azureCliAction.run(context)).rejects.toThrow(
+      'An error occurred while running an Azure CLI command: login --service-principal ***REDACTED***',
     );
     expect(azureCliMock.runCommand).toHaveBeenCalledTimes(1);
     expect(azureCliMock.runCommand).toHaveBeenCalledWith(

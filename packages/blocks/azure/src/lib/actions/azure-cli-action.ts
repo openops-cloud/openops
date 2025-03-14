@@ -118,9 +118,13 @@ export const azureCliAction = createAction({
         command: context.propsValue['commandToRun'],
         error: error,
       });
-      throw new Error(
-        'An error occurred while running an Azure CLI command: ' + error,
-      );
+      let message = 'An error occurred while running an Azure CLI command: ';
+      if (String(error).includes('login --service-principal')) {
+        message += 'login --service-principal ***REDACTED***';
+      } else {
+        message += error;
+      }
+      throw new Error(message);
     }
   },
 });
