@@ -1,3 +1,5 @@
+jest.mock('lodash-es/cloneDeep', () => jest.fn((value) => value));
+
 import { ExecutionVerdict, FlowExecutorContext } from '../../src/lib/handler/context/flow-execution-context'
 import { StepExecutionPath } from '../../src/lib/handler/context/step-execution-path'
 import { flowExecutor } from '../../src/lib/handler/flow-executor'
@@ -108,6 +110,7 @@ describe('flow with pause', () => {
                 resumePayload: {
                     queryParams: {
                         action: 'approve',
+                        path: 'loop,0',
                     },
                     body: {},
                     headers: {},
@@ -154,6 +157,7 @@ describe('flow with pause', () => {
                 resumePayload: {
                     queryParams: {
                         action: 'approve',
+                        path: 'loop,0',
                     },
                     body: {},
                     headers: {},
@@ -187,6 +191,7 @@ describe('flow with pause', () => {
                 resumePayload: {
                     queryParams: {
                         action: 'approve',
+                        path: 'loop,0',
                     },
                     body: {},
                     headers: {},

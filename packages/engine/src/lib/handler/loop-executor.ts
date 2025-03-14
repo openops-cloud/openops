@@ -75,19 +75,12 @@ export const loopExecutor: BaseExecutor<LoopOnItemsAction> = {
       return executionState.upsertStep(action.name, stepOutput);
     }
 
-    let isFirstLoopExecution = true;
     const isCompleted = executionState.isCompleted({ stepName: action.name });
     if (isCompleted) {
-      if (payload && !payload.path.includes(action.name)) {
+      if (payload && !payload.path?.includes(action.name)) {
         return executionState;
       }
-
-      if (payload && payload.path.includes(action.name)) {
-        isFirstLoopExecution = false;
-      }
-    }
-
-    if (isFirstLoopExecution) {
+    } else {
       const loopIterations = triggerLoopIterations(
         resolvedInput,
         executionState,
@@ -108,7 +101,7 @@ export const loopExecutor: BaseExecutor<LoopOnItemsAction> = {
       );
     }
 
-    await resumePausedIteration(
+     executionState = await resumePausedIteration(
       store,
       payload,
       executionState,
@@ -148,12 +141,10 @@ function triggerLoopIterations(
       stepOutput = stepOutput.addIteration();
     }
 
-    const stepOutputCopy = cloneDeep(stepOutput);
-
     // Generate new pauseId for each iteration
     const newId = nanoid();
     const newExecutionContext = loopExecutionState
-      .upsertStep(action.name, stepOutputCopy)
+      .upsertStep(action.name, stepOutput)
       .setCurrentPath(newCurrentPath)
       .setPauseId(newId);
 
@@ -253,7 +244,7 @@ async function resumePausedIteration(
   constants: EngineConstants,
   firstLoopAction: Action,
   actionName: string,
-): Promise<void> {
+): Promise<FlowExecutorContext> {
   // Get which iteration is being resumed
   const iterationKey = await getIterationKey(store, actionName, payload.path);
 
@@ -286,6 +277,12 @@ async function resumePausedIteration(
     previousIterationResult.item,
     store,
   );
+
+  const executionState = newExecutionContext.setCurrentPath(
+    newExecutionContext.currentPath.removeLast(),
+  );
+
+  return executionState;
 }
 
 async function storeIterationResult(
