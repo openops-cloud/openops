@@ -185,11 +185,6 @@ describe('flowTemplateService', () => {
               maxSupportedVersion: '2.0.0',
             },
             {
-              id: 3,
-              minSupportedVersion: '1.0.0',
-              maxSupportedVersion: '1.5.0',
-            },
-            {
               id: 7,
               minSupportedVersion: '1.0.0',
             },
