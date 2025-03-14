@@ -14760,6 +14760,7 @@ IN THE SOFTWARE.
 The following npm packages may be included in this product:
 
  - lodash.assign@4.2.0
+ - lodash.clonedeep@4.5.0
  - lodash.curry@4.1.1
  - lodash.debounce@4.0.8
  - lodash.defaults@4.2.0
