@@ -86,14 +86,10 @@ const CloudConnectionPage = () => {
                 expires: getExpirationDate(auth.user.accessToken),
               });
 
-              const metadataObj = JSON.parse(auth.user.metadata || '{}');
-              const userHasOriginMetadata =
-                metadataObj['projectId'] && metadataObj['userId'];
               const originProjectId =
                 sessionStorage.getItem(ORGIN_PROJECT_ID_KEY);
               const originUserId = sessionStorage.getItem(ORGIN_USER_ID_KEY);
-              // If the user has origin metadata, we don't need to set it again
-              if (!userHasOriginMetadata && originProjectId && originUserId) {
+              if (originProjectId && originUserId) {
                 cloudUserApi.setUserOriginMetadata({
                   origin: {
                     projectId: originProjectId,
