@@ -175,6 +175,7 @@
     "jszip": "3.10.1",
     "jwt-decode": "4.0.0",
     "localforage": "1.10.0",
+    "lodash-commonjs-es": "1.2.0",
     "lodash-es": "4.17.21",
     "logzio-nodejs": "2.3.0",
     "lottie-web": "5.12.2",
