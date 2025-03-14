@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { getTableFields, SelectOpenOpsField } from '@openops/common';
-import { logger } from '@openops/server-shared';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
 const mappingOfSelectOptionsIdToValuesInEveryTable = new Map<
@@ -15,17 +14,11 @@ export class ReplaceSelectOptionsIdsWithNames1741945618000
     const workflows = await queryRunner.query(
       'SELECT "id", "trigger" FROM "flow_version"',
     );
-    logger.info(`Fetched ${workflows.length} workflows from flow_version`);
 
     const templates = await queryRunner.query(
-      'SELECT "id", "template" FROM "flow_template"',
+      `SELECT "id", "template" FROM "flow_template" WHERE "minSupportedVersion" = $1`,
+      ['0.1.8'],
     );
-    logger.info(`Fetched ${templates.length} templates from flow_template`);
-
-    if (!workflows.length && !templates.length) {
-      logger.info('No workflows or templates found. Exiting migration.');
-      return;
-    }
 
     await updateRecords(queryRunner, workflows, 'flow_version');
     await updateRecords(queryRunner, templates, 'flow_template');
