@@ -111,8 +111,3 @@ jobs:
           aws-access-key-id: ${{ secrets.RELEASE_S3_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.RELEASE_S3_SECRET_ACCESS_KEY }}
           aws-region: us-east-2
-      - name: Upload release to S3
-        run: |
-          LOCAL_PATH=deploy/docker-compose/docker-compose-release-$VERSION.zip
-          S3_PATH=s3://openops/releases/$VERSION/openops-docker-compose-$VERSION.zip
-          aws s3 cp $LOCAL_PATH $S3_PATH
