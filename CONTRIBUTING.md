@@ -14,7 +14,7 @@ Your involvement will help improve FinOps automation for everyone, and this guid
 * **Improving Documentation**: Notice any gaps or errors in our documentation? Submit a PR with your corrections or enhancements in our [docs repository](https://github.com/openops-cloud/docs).  
 * **Sharing Use Cases**: Real-world examples help others see the potential of OpenOps in their organizations.  
 * **Joining the Community:** We welcome you in the OpenOps [Slack community](https://slack.openops.com)**.**  
-* **Spreading the Word**: Tell others about OpenOps through blog posts, talks, or social media ❤️.
+* **Spreading the Word**: Tell others about OpenOps through blog posts, talks, or social media ❤️
 
 ## **🚀 Creating a Pull Request**
 
