@@ -63,20 +63,20 @@ OpenOps is available as:
 
 ## **📚 Documentation**
 
-For detailed documentation, visit our [documentation portal](https://openops.com/docs).
+For detailed documentation, visit our [documentation portal](https://docs.openops.com/).
 
 * [Getting Started Guide](https://docs.openops.com/getting-started/quick-start-guide)
 * [Workflow Templates & Management](https://docs.openops.com/workflow-management/workflow-templates)
-* Integration Setup // TODO: Add links
-* Reporting & Analytics // TODO: Add links
+* [OpenOps Tables](https://docs.openops.com/reporting-analytics/tables)
+* [OpenOps Analytics](https://docs.openops.com/reporting-analytics/data-visualization)
 
 ## **🤝 Contributing**
 
-We welcome contributions to OpenOps\! See our [contributing guide](./CONTRIBUTING.md) for details. // TODO: Add CONTRIBUTING.md and link
+We welcome contributions to OpenOps\! See our [contributing guide](./CONTRIBUTING.md) for details.
 
 ## **📄 License**
 
-OpenOps is licensed under the **Apache License 2.0**. //TODO: Do we need to configure the repo with the apache license / add the license to the repo
+OpenOps is licensed under the **Apache License 2.0**.
 
 ## **💬 Community**
 
