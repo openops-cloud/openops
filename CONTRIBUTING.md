@@ -101,7 +101,7 @@ We appreciate your contributions and look forward to collaborating with you\!
 
 ## **🙏 Many Thanks to other OSS projects!**
 
-OpenOps is built with the help of other open-source projects, such as ActivePieces, Baserow, Superset, Reactflow, and more. Thank you very much to the OSS community and we hope that our product could help as well!
+OpenOps utilizes other open-source projects, such as ActivePieces, Baserow, Superset, Reactflow, and more. Many thanks to the OSS community; we are thrilled to be a part of it and contribute back.
 
 ---
 
