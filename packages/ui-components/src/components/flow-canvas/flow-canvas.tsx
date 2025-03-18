@@ -49,7 +49,6 @@ const FlowCanvas = React.memo(
     );
 
     const { panningMode } = useCanvasContext();
-
     const inGrabPanningMode = panningMode === 'grab';
 
     return (
