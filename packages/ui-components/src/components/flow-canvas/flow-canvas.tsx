@@ -20,6 +20,8 @@ type FlowCanvasProps = {
   children?: ReactNode;
 };
 
+const SHIFT_KEY = 'Shift';
+
 const FlowCanvas = React.memo(
   ({
     edgeTypes,
@@ -74,8 +76,8 @@ const FlowCanvas = React.memo(
             elementsSelectable={true}
             nodesDraggable={false}
             nodesFocusable={false}
-            selectionKeyCode={inGrabPanningMode ? 'Shift' : null}
-            multiSelectionKeyCode={inGrabPanningMode ? 'Shift' : null}
+            selectionKeyCode={inGrabPanningMode ? SHIFT_KEY : null}
+            multiSelectionKeyCode={inGrabPanningMode ? SHIFT_KEY : null}
             selectionOnDrag={inGrabPanningMode ? false : true}
             proOptions={{
               hideAttribution: true,
