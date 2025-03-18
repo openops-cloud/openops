@@ -9,6 +9,7 @@ import '@xyflow/react/dist/style.css';
 import React, { ReactNode, useCallback, useRef } from 'react';
 import { Graph } from '../../lib/flow-canvas-utils';
 import { useCanvasContext } from './canvas-context';
+import { InitialZoom, SHIFT_KEY } from './constants';
 import { useResizeCanvas } from './use-resize-canvas';
 
 type FlowCanvasProps = {
@@ -19,8 +20,6 @@ type FlowCanvasProps = {
   allowCanvasPanning?: boolean;
   children?: ReactNode;
 };
-
-const SHIFT_KEY = 'Shift';
 
 function getPanOnDrag(allowCanvasPanning: boolean, inGrabPanningMode: boolean) {
   if (allowCanvasPanning) {
@@ -46,8 +45,8 @@ const FlowCanvas = React.memo(
       (reactFlow: ReactFlowInstance) => {
         reactFlow.fitView({
           nodes: reactFlow.getNodes().slice(0, 5),
-          minZoom: 0.5,
-          maxZoom: 1.2,
+          minZoom: InitialZoom.MIN,
+          maxZoom: InitialZoom.MAX,
         });
         if (topOffset) {
           const { x, zoom } = reactFlow.getViewport();
