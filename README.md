@@ -15,7 +15,7 @@ It also comes bundled with its own Excel-like database ([**OpenOps Tables**](htt
 
 At the same time, OpenOps enables collaboration between **FinOps teams, engineers, DevOps, finance, and leadership**, ensuring that cost-saving measures are not just identified but effectively implemented.
 
-OpenOps **integrates seamlessly** with major cloud providers, many third-party FinOps tools, varoious communication platforms and a handful of project management tools.
+OpenOps **integrates seamlessly** with major cloud providers, many third-party FinOps tools, various communication platforms and a handful of project management tools.
 
 > 🏁 Just want to get started? [Click here](https://docs.openops.com/getting-started/quick-start-guide).
 
