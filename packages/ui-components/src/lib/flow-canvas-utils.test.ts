@@ -1,4 +1,4 @@
-import { TriggerType } from '@openops/shared/src';
+import { TriggerType } from '@openops/shared';
 import {
   flowCanvasUtils,
   WorkflowNode,
