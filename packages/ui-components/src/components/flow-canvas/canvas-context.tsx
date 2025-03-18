@@ -1,4 +1,10 @@
-import { createContext, ReactNode, useContext, useState } from 'react';
+import {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useState,
+} from 'react';
 
 export type PanningMode = 'grab' | 'pan';
 
@@ -9,17 +15,38 @@ type CanvasContextState = {
 
 const CanvasContext = createContext<CanvasContextState | undefined>(undefined);
 
+const DEFAULT_PANNING_MODE_KEY_IN_LOCAL_STORAGE = 'defaultPanningMode';
+
+function getPanningModeFromLocalStorage(): PanningMode {
+  return localStorage.getItem(DEFAULT_PANNING_MODE_KEY_IN_LOCAL_STORAGE) ===
+    'pan'
+    ? 'pan'
+    : 'grab';
+}
+
+function setPanningModeFromLocalStorage(mode: PanningMode) {
+  localStorage.setItem(DEFAULT_PANNING_MODE_KEY_IN_LOCAL_STORAGE, mode);
+}
+
 export const CanvasContextProvider = ({
   children,
 }: {
   children: ReactNode;
 }) => {
-  const [panningMode, setPanningMode] = useState<PanningMode>('grab');
+  const initialPanningMode = getPanningModeFromLocalStorage();
+
+  const onSetPlanningNode = useCallback((mode: PanningMode) => {
+    setPanningMode(mode);
+    setPanningModeFromLocalStorage(mode);
+  }, []);
+
+  const [panningMode, setPanningMode] =
+    useState<PanningMode>(initialPanningMode);
   return (
     <CanvasContext.Provider
       value={{
         panningMode,
-        setPanningMode,
+        setPanningMode: onSetPlanningNode,
       }}
     >
       {children}
