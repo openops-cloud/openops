@@ -85,125 +85,118 @@ const CanvasContextMenu = memo(
     };
 
     return (
-      <div
-        onClick={(e) => {
-          e.stopPropagation();
-          e.preventDefault();
+      <DropdownMenu
+        open={openStepActionsMenu}
+        onOpenChange={(open) => {
+          setOpenStepActionsMenu(open);
         }}
+        modal={true}
       >
-        <DropdownMenu
-          open={openStepActionsMenu}
-          onOpenChange={(open) => {
-            setOpenStepActionsMenu(open);
-          }}
-          modal={true}
-        >
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="p-1 size-6"
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-              }}
-            >
-              <EllipsisVertical className="w-4 h-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className="w-44 absolute"
-            onCloseAutoFocus={(e) => e.preventDefault()}
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="p-1 size-6"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+            }}
           >
-            <DropdownMenuItem
-              onSelect={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
+            <EllipsisVertical className="w-4 h-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          className="w-44 absolute"
+          onCloseAutoFocus={(e) => e.preventDefault()}
+        >
+          <DropdownMenuItem
+            onSelect={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
 
-                setOpenStepActionsMenu(false);
-                setOpenBlockSelector(true);
+              setOpenStepActionsMenu(false);
+              setOpenBlockSelector(true);
 
-                if (data.step) {
-                  selectStepByName(data.step.name);
-                }
-              }}
-            >
-              <StepActionWrapper>
-                <ArrowRightLeft className=" h-4 w-4 " />
-                <span>{t('Replace')} </span>
-              </StepActionWrapper>
-            </DropdownMenuItem>
+              if (data.step) {
+                selectStepByName(data.step.name);
+              }
+            }}
+          >
+            <StepActionWrapper>
+              <ArrowRightLeft className=" h-4 w-4 " />
+              <span>{t('Replace')} </span>
+            </StepActionWrapper>
+          </DropdownMenuItem>
 
-            {isAction && showCopyPaste && (
-              <>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onSelect={(e) => {
-                    e.preventDefault();
-                    // https://linear.app/openops/issue/OPS-852/add-copy-logic
-                  }}
-                >
-                  <StepActionWrapper>
-                    <Copy className="mr-2 h-4 w-4" />
-                    <span className="">{t('Copy')}</span>
-                  </StepActionWrapper>
-                </DropdownMenuItem>
-              </>
-            )}
-
-            {isAction && (
+          {isAction && showCopyPaste && (
+            <>
+              <DropdownMenuSeparator />
               <DropdownMenuItem
                 onSelect={(e) => {
                   e.preventDefault();
-                  duplicateStep();
-                  setOpenStepActionsMenu(false);
+                  // https://linear.app/openops/issue/OPS-852/add-copy-logic
                 }}
               >
                 <StepActionWrapper>
-                  <CopyPlus className="h-4 w-4" />
-                  {t('Duplicate')}
+                  <Copy className="mr-2 h-4 w-4" />
+                  <span className="">{t('Copy')}</span>
                 </StepActionWrapper>
               </DropdownMenuItem>
-            )}
+            </>
+          )}
 
-            {isAction && showCopyPaste && (
-              <>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onSelect={(e) => {
-                    e.preventDefault();
-                    // https://linear.app/openops/issue/OPS-854/add-paste-logic
-                  }}
-                >
-                  <StepActionWrapper>
-                    <Copy className="mr-2 h-4 w-4" />
-                    <span className="">{t('Paste after')}</span>
-                  </StepActionWrapper>
-                </DropdownMenuItem>
-              </>
-            )}
+          {isAction && (
+            <DropdownMenuItem
+              onSelect={(e) => {
+                e.preventDefault();
+                duplicateStep();
+                setOpenStepActionsMenu(false);
+              }}
+            >
+              <StepActionWrapper>
+                <CopyPlus className="h-4 w-4" />
+                {t('Duplicate')}
+              </StepActionWrapper>
+            </DropdownMenuItem>
+          )}
 
-            {isAction && (
-              <>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onSelect={(e) => {
-                    e.preventDefault();
-                    deleteStep();
-                    setOpenStepActionsMenu(false);
-                    setAllowCanvasPanning(true);
-                  }}
-                >
-                  <StepActionWrapper>
-                    <Trash className="mr-2 h-4 w-4 text-destructive" />
-                    <span className="text-destructive">{t('Delete')}</span>
-                  </StepActionWrapper>
-                </DropdownMenuItem>
-              </>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+          {isAction && showCopyPaste && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onSelect={(e) => {
+                  e.preventDefault();
+                  // https://linear.app/openops/issue/OPS-854/add-paste-logic
+                }}
+              >
+                <StepActionWrapper>
+                  <Copy className="mr-2 h-4 w-4" />
+                  <span className="">{t('Paste after')}</span>
+                </StepActionWrapper>
+              </DropdownMenuItem>
+            </>
+          )}
+
+          {isAction && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onSelect={(e) => {
+                  e.preventDefault();
+                  deleteStep();
+                  setOpenStepActionsMenu(false);
+                  setAllowCanvasPanning(true);
+                }}
+              >
+                <StepActionWrapper>
+                  <Trash className="mr-2 h-4 w-4 text-destructive" />
+                  <span className="text-destructive">{t('Delete')}</span>
+                </StepActionWrapper>
+              </DropdownMenuItem>
+            </>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
     );
   },
 );
