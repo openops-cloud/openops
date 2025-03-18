@@ -179,7 +179,7 @@ const WorkflowStepNode = React.memo(
           width: `${OPS_NODE_SIZE.stepNode.width}px`,
         }}
         className={cn(
-          'transition-all border-box rounded-sm border border-solid  border-border-300 relative hover:border-primary-200 group',
+          'transition-all border-box rounded-sm border border-solid  border-border-300 relative hover:border-primary-200 group pointer-events-auto',
           {
             'shadow-step-container': !isDragging,
             'border-primary-200': isSelected,

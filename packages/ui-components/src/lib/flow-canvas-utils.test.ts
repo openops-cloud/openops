@@ -1,9 +1,31 @@
-import { flowCanvasUtils } from './flow-canvas-utils';
+import { TriggerType } from '@openops/shared';
+import {
+  flowCanvasUtils,
+  WorkflowNode,
+  WorkflowNodeType,
+} from './flow-canvas-utils';
 
 import {
   mockFlowVersionWithBranch,
+  mockFlowVersionWithLoop,
   mockFlowVersionWithSplit,
 } from './mockFlowVersion';
+
+export const checkNonSelectableNodes = (nodes: WorkflowNode[]) => {
+  nodes
+    .filter((node) => {
+      return (
+        node.type === WorkflowNodeType.PLACEHOLDER ||
+        node.type === WorkflowNodeType.LOOP_PLACEHOLDER ||
+        node.type === WorkflowNodeType.BIG_BUTTON ||
+        node.data.step?.type === TriggerType.EMPTY ||
+        node.data.step?.type === TriggerType.BLOCK
+      );
+    })
+    .forEach((node) => {
+      expect(node.selectable).toEqual(false);
+    });
+};
 
 describe('flowCanvasUtils', () => {
   describe('convertFlowVersionToGraph', () => {
@@ -75,6 +97,7 @@ describe('flowCanvasUtils', () => {
         ];
 
         expect(result.nodes.map((x) => x.data)).toEqual(expectedResultNodes);
+        checkNonSelectableNodes(result.nodes);
       });
 
       it('should convert flow version to graph with correct edges', () => {
@@ -116,6 +139,234 @@ describe('flowCanvasUtils', () => {
         ];
 
         expect(result.edges.map((x) => x.data)).toEqual(expectedResultEdges);
+        checkNonSelectableNodes(result.nodes);
+      });
+    });
+
+    describe('Loop', () => {
+      it('should convert flow version to graph with correct nodes', () => {
+        const result = flowCanvasUtils.convertFlowVersionToGraph(
+          mockFlowVersionWithLoop,
+        );
+
+        const expectedResultNodes = [
+          {
+            step: {
+              name: 'trigger',
+              valid: false,
+              displayName: 'Select Trigger',
+              type: 'EMPTY',
+              settings: {},
+              nextAction: {
+                name: 'step_1',
+                type: 'LOOP_ON_ITEMS',
+                valid: false,
+                settings: { items: '', inputUiInfo: { customizedInputs: {} } },
+                nextAction: {
+                  name: 'step_2',
+                  type: 'CODE',
+                  valid: true,
+                  settings: {
+                    input: {},
+                    sourceCode: {
+                      code: 'export const code = async (inputs) => {\n  return true;\n};',
+                      packageJson: '{}',
+                    },
+                    inputUiInfo: { customizedInputs: {} },
+                    errorHandlingOptions: {
+                      retryOnFailure: { value: false },
+                      continueOnFailure: { value: false },
+                    },
+                  },
+                  nextAction: {
+                    name: 'step_3',
+                    type: 'LOOP_ON_ITEMS',
+                    valid: false,
+                    settings: {
+                      items: '',
+                      inputUiInfo: { customizedInputs: {} },
+                    },
+                    displayName: 'Loop on Items',
+                    firstLoopAction: {
+                      name: 'step_4',
+                      type: 'CODE',
+                      valid: true,
+                      settings: {
+                        input: {},
+                        sourceCode: {
+                          code: 'export const code = async (inputs) => {\n  return true;\n};',
+                          packageJson: '{}',
+                        },
+                        inputUiInfo: { customizedInputs: {} },
+                        errorHandlingOptions: {
+                          retryOnFailure: { value: false },
+                          continueOnFailure: { value: false },
+                        },
+                      },
+                      displayName: 'Custom TypeScript Code',
+                    },
+                  },
+                  displayName: 'Custom TypeScript Code',
+                },
+                displayName: 'Loop on Items',
+              },
+            },
+          },
+          {
+            step: {
+              name: 'step_1',
+              type: 'LOOP_ON_ITEMS',
+              valid: false,
+              settings: { items: '', inputUiInfo: { customizedInputs: {} } },
+              nextAction: {
+                name: 'step_2',
+                type: 'CODE',
+                valid: true,
+                settings: {
+                  input: {},
+                  sourceCode: {
+                    code: 'export const code = async (inputs) => {\n  return true;\n};',
+                    packageJson: '{}',
+                  },
+                  inputUiInfo: { customizedInputs: {} },
+                  errorHandlingOptions: {
+                    retryOnFailure: { value: false },
+                    continueOnFailure: { value: false },
+                  },
+                },
+                nextAction: {
+                  name: 'step_3',
+                  type: 'LOOP_ON_ITEMS',
+                  valid: false,
+                  settings: {
+                    items: '',
+                    inputUiInfo: { customizedInputs: {} },
+                  },
+                  displayName: 'Loop on Items',
+                  firstLoopAction: {
+                    name: 'step_4',
+                    type: 'CODE',
+                    valid: true,
+                    settings: {
+                      input: {},
+                      sourceCode: {
+                        code: 'export const code = async (inputs) => {\n  return true;\n};',
+                        packageJson: '{}',
+                      },
+                      inputUiInfo: { customizedInputs: {} },
+                      errorHandlingOptions: {
+                        retryOnFailure: { value: false },
+                        continueOnFailure: { value: false },
+                      },
+                    },
+                    displayName: 'Custom TypeScript Code',
+                  },
+                },
+                displayName: 'Custom TypeScript Code',
+              },
+              displayName: 'Loop on Items',
+            },
+          },
+          {},
+          { parentStep: 'step_1', stepLocationRelativeToParent: 'INSIDE_LOOP' },
+          {
+            step: {
+              name: 'step_2',
+              type: 'CODE',
+              valid: true,
+              settings: {
+                input: {},
+                sourceCode: {
+                  code: 'export const code = async (inputs) => {\n  return true;\n};',
+                  packageJson: '{}',
+                },
+                inputUiInfo: { customizedInputs: {} },
+                errorHandlingOptions: {
+                  retryOnFailure: { value: false },
+                  continueOnFailure: { value: false },
+                },
+              },
+              nextAction: {
+                name: 'step_3',
+                type: 'LOOP_ON_ITEMS',
+                valid: false,
+                settings: { items: '', inputUiInfo: { customizedInputs: {} } },
+                displayName: 'Loop on Items',
+                firstLoopAction: {
+                  name: 'step_4',
+                  type: 'CODE',
+                  valid: true,
+                  settings: {
+                    input: {},
+                    sourceCode: {
+                      code: 'export const code = async (inputs) => {\n  return true;\n};',
+                      packageJson: '{}',
+                    },
+                    inputUiInfo: { customizedInputs: {} },
+                    errorHandlingOptions: {
+                      retryOnFailure: { value: false },
+                      continueOnFailure: { value: false },
+                    },
+                  },
+                  displayName: 'Custom TypeScript Code',
+                },
+              },
+              displayName: 'Custom TypeScript Code',
+            },
+          },
+          {
+            step: {
+              name: 'step_3',
+              type: 'LOOP_ON_ITEMS',
+              valid: false,
+              settings: { items: '', inputUiInfo: { customizedInputs: {} } },
+              displayName: 'Loop on Items',
+              firstLoopAction: {
+                name: 'step_4',
+                type: 'CODE',
+                valid: true,
+                settings: {
+                  input: {},
+                  sourceCode: {
+                    code: 'export const code = async (inputs) => {\n  return true;\n};',
+                    packageJson: '{}',
+                  },
+                  inputUiInfo: { customizedInputs: {} },
+                  errorHandlingOptions: {
+                    retryOnFailure: { value: false },
+                    continueOnFailure: { value: false },
+                  },
+                },
+                displayName: 'Custom TypeScript Code',
+              },
+            },
+          },
+          {},
+          {
+            step: {
+              name: 'step_4',
+              type: 'CODE',
+              valid: true,
+              settings: {
+                input: {},
+                sourceCode: {
+                  code: 'export const code = async (inputs) => {\n  return true;\n};',
+                  packageJson: '{}',
+                },
+                inputUiInfo: { customizedInputs: {} },
+                errorHandlingOptions: {
+                  retryOnFailure: { value: false },
+                  continueOnFailure: { value: false },
+                },
+              },
+              displayName: 'Custom TypeScript Code',
+            },
+          },
+          {},
+          {},
+        ];
+        expect(result.nodes.map((x) => x.data)).toEqual(expectedResultNodes);
+        checkNonSelectableNodes(result.nodes);
       });
     });
 
@@ -237,6 +488,7 @@ describe('flowCanvasUtils', () => {
         ];
 
         expect(result.nodes.map((x) => x.data)).toEqual(expectedResultNodes);
+        checkNonSelectableNodes(result.nodes);
       });
 
       it('should convert flow version to graph with correct edges', () => {
@@ -278,6 +530,7 @@ describe('flowCanvasUtils', () => {
         ];
 
         expect(result.edges.map((x) => x.data)).toEqual(expectedResultEdges);
+        checkNonSelectableNodes(result.nodes);
       });
 
       it('should convert flow version to graph with correct edges when has uneven number of branches', () => {
@@ -357,6 +610,7 @@ describe('flowCanvasUtils', () => {
         ];
 
         expect(result.edges.map((x) => x.data)).toEqual(expectedResultEdges);
+        checkNonSelectableNodes(result.nodes);
       });
     });
   });
