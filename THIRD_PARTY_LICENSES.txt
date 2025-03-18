@@ -16793,7 +16793,7 @@ The following npm packages may be included in this product:
  - pg-types@2.2.0
  - pgpass@1.0.5
  - product-fruits@1.0.23
- - react-remove-scroll-bar@2.3.6
+ - react-remove-scroll-bar@2.3.8
  - react-resizable-panels@2.0.20
  - react-ripples@2.2.1
  - redis-info@3.1.0
