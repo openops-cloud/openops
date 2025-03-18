@@ -22,6 +22,13 @@ type FlowCanvasProps = {
 
 const SHIFT_KEY = 'Shift';
 
+function getPanOnDrag(allowCanvasPanning: boolean, inGrabPanningMode: boolean) {
+  if (allowCanvasPanning) {
+    return inGrabPanningMode ? [0, 1] : [1];
+  }
+  return false;
+}
+
 const FlowCanvas = React.memo(
   ({
     edgeTypes,
@@ -52,11 +59,8 @@ const FlowCanvas = React.memo(
 
     const { panningMode } = useCanvasContext();
     const inGrabPanningMode = panningMode === 'grab';
-    const panOnDrag = allowCanvasPanning
-      ? inGrabPanningMode
-        ? [0, 1]
-        : [1]
-      : false;
+
+    const panOnDrag = getPanOnDrag(allowCanvasPanning, inGrabPanningMode);
 
     return (
       <div className="size-full bg-editorBackground" ref={containerRef}>
