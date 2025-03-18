@@ -9,6 +9,7 @@ export * from './dashboard-overview';
 export * from './dismissible-panel/dismissible-panel';
 export * from './explore-templates';
 export * from './flow-canvas/ai-widget';
+export * from './flow-canvas/canvas-context';
 export * from './flow-canvas/canvas-controls';
 export * from './flow-canvas/edges/branch-label';
 export * from './flow-canvas/edges/return-loop-edge';

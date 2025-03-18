@@ -1,6 +1,7 @@
 import {
   AiWidget,
   BuilderTreeViewProvider,
+  CanvasContextProvider,
   CanvasControls,
   cn,
   ResizableHandle,
@@ -261,25 +262,27 @@ const BuilderPage = () => {
                 'min-w-[830px]': leftSidebar === LeftSideBarType.NONE,
               })}
             >
-              <div ref={middlePanelRef} className="relative h-full w-full">
-                <BuilderHeader />
+              <CanvasContextProvider>
+                <div ref={middlePanelRef} className="relative h-full w-full">
+                  <BuilderHeader />
 
-                <CanvasControls
-                  topOffset={FLOW_CANVAS_Y_OFFESET}
-                ></CanvasControls>
-                <AiWidget />
-                <DataSelector
-                  parentHeight={middlePanelSize.height}
-                  parentWidth={middlePanelSize.width}
-                ></DataSelector>
+                  <CanvasControls
+                    topOffset={FLOW_CANVAS_Y_OFFESET}
+                  ></CanvasControls>
+                  <AiWidget />
+                  <DataSelector
+                    parentHeight={middlePanelSize.height}
+                    parentWidth={middlePanelSize.width}
+                  ></DataSelector>
 
-                <div
-                  className="h-screen w-full flex-1 z-10"
-                  id={FLOW_CANVAS_CONTAINER_ID}
-                >
-                  <FlowBuilderCanvas />
+                  <div
+                    className="h-screen w-full flex-1 z-10"
+                    id={FLOW_CANVAS_CONTAINER_ID}
+                  >
+                    <FlowBuilderCanvas />
+                  </div>
                 </div>
-              </div>
+              </CanvasContextProvider>
             </ResizablePanel>
 
             <>
