@@ -13,6 +13,7 @@ export * from './ui/checkbox';
 export * from './ui/collapsible';
 export * from './ui/color-picker';
 export * from './ui/command';
+export * from './ui/context-menu';
 export * from './ui/data-table';
 export * from './ui/data-table-column-header';
 export * from './ui/data-table-input-popover';
