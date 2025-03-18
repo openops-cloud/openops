@@ -2,7 +2,6 @@ name: CI
 
 on:
   push:
-    branches: [main]
   pull_request:
 
 concurrency:
@@ -11,6 +10,7 @@ concurrency:
 jobs:
   install:
     name: Install Dependencies
+    if: ${{ ! github.event.pull_request || github.event.pull_request.head.repo.owner != 'openops-cloud' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -77,7 +77,6 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: Update THIRD_PARTY_LICENSES.txt
-
   test:
     strategy:
         matrix:
@@ -149,7 +148,7 @@ jobs:
           path: dist
           key: dist-${{ github.sha }}
   build-images:
-    if: github.repository_owner == 'openops-cloud'
+    if: secrets.ECR_ACCESS_KEY_ID
     strategy:
         matrix:
             target:
@@ -206,7 +205,7 @@ jobs:
             type=registry,ref=${{ env.repository_uri }}:main-cache
           cache-to: mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${{ env.repository_uri }}:${{ env.sanitized_branch }}-cache
   build-images-for-forks:
-    if: github.repository_owner != 'openops-cloud'
+    if: ${{ secrets.ECR_ACCESS_KEY_ID }}
     strategy:
         matrix:
             target:
