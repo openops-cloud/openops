@@ -1,4 +1,4 @@
-# **OpenOps (Beta)**
+# **OpenOps!**
 
 ![Welcome to OpenOps!](./static/OpenOps-GitHub-Cover.png)
 
