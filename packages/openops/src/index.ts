@@ -58,4 +58,6 @@ export * from './lib/azure/subscription/get-subscription-dropdown';
 
 export * from './lib/axios-wrapper';
 
+export * from './lib/dry-run-property';
+
 export * from './lib/wrap-with-cache-guard';

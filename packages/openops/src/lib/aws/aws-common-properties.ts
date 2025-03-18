@@ -1,14 +1,6 @@
 import { DynamicPropsValue, Property } from '@openops/blocks-framework';
-import { getARNsProperty, parseArn } from './arn-handler';
+import { getARNsProperty } from './arn-handler';
 import { getRegionsDropdownState } from './regions';
-
-export function dryRunCheckBox(): any {
-  return Property.Checkbox({
-    displayName: 'Dry Run',
-    description: 'Run the operation in dry run mode',
-    required: false,
-  });
-}
 
 export function waitForProperties(): any {
   return {
