@@ -7,6 +7,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '../../../ui/tooltip';
 
 import { CenterFlowIcon } from '../../../icons';
 import { VerticalDivider } from '../../../ui/vertical-divider';
+import { InitialZoom } from '../constants';
 import { PanningModeControls } from './panning-mode-controls';
 
 const CanvasControls = ({ topOffset }: { topOffset?: number }) => {
@@ -31,8 +32,8 @@ const CanvasControls = ({ topOffset }: { topOffset?: number }) => {
   const handleFitToView = useCallback(async () => {
     await reactFlow.fitView({
       nodes: reactFlow.getNodes().slice(0, 5),
-      minZoom: 0.5,
-      maxZoom: 1.2,
+      minZoom: InitialZoom.MIN,
+      maxZoom: InitialZoom.MAX,
       duration: 0,
     });
 
