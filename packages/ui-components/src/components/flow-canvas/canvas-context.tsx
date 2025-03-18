@@ -4,7 +4,7 @@ export type PanningMode = 'grab' | 'pan';
 
 type CanvasContextState = {
   panningMode: PanningMode;
-  setPanningMode: (panningMode: PanningMode) => void;
+  setPanningMode: React.Dispatch<React.SetStateAction<PanningMode>>;
 };
 
 const CanvasContext = createContext<CanvasContextState | undefined>(undefined);
