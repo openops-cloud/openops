@@ -35,10 +35,10 @@ export const CanvasContextProvider = ({
 }) => {
   const initialPanningMode = getPanningModeFromLocalStorage();
 
-  const onSetPlanningNode = useCallback((mode: PanningMode) => {
+  const onSetPanningMode = (mode: PanningMode) => {
     setPanningMode(mode);
     setPanningModeFromLocalStorage(mode);
-  }, []);
+  };
 
   const [panningMode, setPanningMode] =
     useState<PanningMode>(initialPanningMode);
@@ -46,7 +46,7 @@ export const CanvasContextProvider = ({
     <CanvasContext.Provider
       value={{
         panningMode,
-        setPanningMode: onSetPlanningNode,
+        setPanningMode: onSetPanningMode,
       }}
     >
       {children}
