@@ -1,4 +1,11 @@
-import { createContext, ReactNode, useContext, useState } from 'react';
+import {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from 'react';
 
 export type PanningMode = 'grab' | 'pan';
 
@@ -29,20 +36,23 @@ export const CanvasContextProvider = ({
 }) => {
   const initialPanningMode = getPanningModeFromLocalStorage();
 
-  const onSetPanningMode = (mode: PanningMode) => {
+  const onSetPanningMode = useCallback((mode: PanningMode) => {
     setPanningMode(mode);
     setPanningModeFromLocalStorage(mode);
-  };
+  }, []);
 
   const [panningMode, setPanningMode] =
     useState<PanningMode>(initialPanningMode);
+
+  const contextValue = useMemo(
+    () => ({
+      panningMode,
+      setPanningMode: onSetPanningMode,
+    }),
+    [panningMode, onSetPanningMode],
+  );
   return (
-    <CanvasContext.Provider
-      value={{
-        panningMode,
-        setPanningMode: onSetPanningMode,
-      }}
-    >
+    <CanvasContext.Provider value={contextValue}>
       {children}
     </CanvasContext.Provider>
   );
