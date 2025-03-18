@@ -5,7 +5,7 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nx/js:tsc",
+      "executor": "nx:noop",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/blocks/sftp",
