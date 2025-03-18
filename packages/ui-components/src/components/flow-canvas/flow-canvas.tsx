@@ -81,7 +81,7 @@ const FlowCanvas = React.memo(
             nodesFocusable={false}
             selectionKeyCode={inGrabPanningMode ? SHIFT_KEY : null}
             multiSelectionKeyCode={inGrabPanningMode ? SHIFT_KEY : null}
-            selectionOnDrag={inGrabPanningMode ? false : true}
+            selectionOnDrag={!inGrabPanningMode}
             proOptions={{
               hideAttribution: true,
             }}
