@@ -8,6 +8,9 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
 
+env:
+  USE_OPENOPS_ECR: ${{ github.repository_owner == 'openops-cloud' && vars.ECR_REGION }}
+
 jobs:
   install:
     name: Install Dependencies
@@ -149,7 +152,7 @@ jobs:
           path: dist
           key: dist-${{ github.sha }}
   build-images:
-    if: github.repository_owner == 'openops-cloud'
+    if: env.USE_OPENOPS_ECR
     strategy:
         matrix:
             target:
@@ -159,7 +162,7 @@ jobs:
             - name: Engine
               file: engine.Dockerfile
               repository: openops-engine
-    name: Build ${{ matrix.target.name }} Image
+    name: ${{ matrix.target.name && format('Build {0} Image', matrix.target.name) || 'Build and Push Images' }}
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -206,7 +209,7 @@ jobs:
             type=registry,ref=${{ env.repository_uri }}:main-cache
           cache-to: mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${{ env.repository_uri }}:${{ env.sanitized_branch }}-cache
   build-images-for-forks:
-    if: github.repository_owner != 'openops-cloud'
+    if: ${{ !env.USE_OPENOPS_ECR }}
     strategy:
         matrix:
             target:
@@ -216,7 +219,7 @@ jobs:
             - name: Engine
               file: engine.Dockerfile
               repository: openops-engine
-    name: Build ${{ matrix.target.name }} Image
+    name: ${{ matrix.target.name && format('Build {0} Image', matrix.target.name) || 'Build Images' }}
     needs: build
     runs-on: ubuntu-latest
     steps:
