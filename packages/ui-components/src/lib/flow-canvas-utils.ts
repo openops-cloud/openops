@@ -6,6 +6,7 @@ import {
   isNil,
   StepLocationRelativeToParent,
   Trigger,
+  TriggerType,
 } from '@openops/shared';
 import { nanoid } from 'nanoid';
 
@@ -384,6 +385,7 @@ function buildBigButton(
           stepLocationRelativeToParent,
           branchNodeId,
         },
+        selectable: false,
       },
     ],
     edges: [],
@@ -405,6 +407,11 @@ function buildGraph(
           step,
           branchNodeId,
         },
+        selectable:
+          type !== WorkflowNodeType.PLACEHOLDER &&
+          type !== WorkflowNodeType.LOOP_PLACEHOLDER &&
+          step?.type !== TriggerType.EMPTY &&
+          step?.type !== TriggerType.BLOCK,
       },
     ],
     edges: [],
@@ -528,6 +535,7 @@ export type WorkflowNode = {
     stepLocationRelativeToParent?: StepLocationRelativeToParent;
     branchNodeId?: string;
   };
+  selectable?: boolean;
 };
 
 export type Edge = {

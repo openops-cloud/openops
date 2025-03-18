@@ -4,7 +4,7 @@ const commonMock = {
 
 jest.mock('@openops/common', () => commonMock);
 
-import { runCommand } from '../src/lib/actions/azure-cli';
+import { runCommand } from '../src/lib/azure-cli';
 
 const credentials = {
   clientId: 'some client id',

@@ -4,6 +4,7 @@
 [![Apache License](https://img.shields.io/badge/License-Apache%202.0-blue?logo=apache&style=for-the-badge)](https://www.apache.org/licenses/LICENSE-2.0) 
 [![Join Our Community](https://img.shields.io/badge/Slack-Join%20Community-blue?logo=slack&style=for-the-badge)](https://slack.openops.com)
 [![Docs](https://img.shields.io/badge/Docs-Read%20Now-orange?logo=readthedocs&style=for-the-badge)](https://docs.openops.com)
+[![Star on Github](https://img.shields.io/badge/Github-Stars?style=for-the-badge&logo=github&label=Star%20OpenOps)](https://github.com/openops-cloud/openops/stargazers)
 
 
 ## **😎 What is OpenOps?**
@@ -15,7 +16,7 @@ It also comes bundled with its own Excel-like database ([**OpenOps Tables**](htt
 
 At the same time, OpenOps enables collaboration between **FinOps teams, engineers, DevOps, finance, and leadership**, ensuring that cost-saving measures are not just identified but effectively implemented.
 
-OpenOps **integrates seamlessly** with major cloud providers, many third-party FinOps tools, varoious communication platforms and a handful of project management tools.
+OpenOps **integrates seamlessly** with major cloud providers, many third-party FinOps tools, various communication platforms and a handful of project management tools.
 
 > 🏁 Just want to get started? [Click here](https://docs.openops.com/getting-started/quick-start-guide).
 

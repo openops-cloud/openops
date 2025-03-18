@@ -47,7 +47,7 @@ const BigButton = React.memo(({ data }: { data: WorkflowNode['data'] }) => {
             height: `${OPS_NODE_SIZE.bigButton.height}px`,
             width: `${OPS_NODE_SIZE.stepNode.width}px`,
           }}
-          className="cursor-auto flex items-center justify-center relative "
+          className="cursor-auto flex items-center justify-center relative pointer-events-auto"
         >
           <BlockSelector
             operation={{
