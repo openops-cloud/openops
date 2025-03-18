@@ -1,3 +1,4 @@
+import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import {
   Button,
   DropdownMenuContent,
@@ -7,7 +8,7 @@ import {
   UNSAVED_CHANGES_TOAST,
   WorkflowNode,
 } from '@openops/components/ui';
-import { FlowOperationType } from '@openops/shared';
+import { FlagId, FlowOperationType } from '@openops/shared';
 import {
   DropdownMenu,
   DropdownMenuSeparator,
@@ -41,6 +42,9 @@ const CanvasContextMenu = memo(
     setOpenStepActionsMenu,
     setOpenBlockSelector,
   }: Props) => {
+    const showCopy =
+      flagsHooks.useFlag<boolean>(FlagId.COPY_PASTE_ACTIONS_ENABLED).data ||
+      false;
     const applyOperationAndPushToHistory = useApplyOperationAndPushToHistory();
 
     const [selectStepByName, removeStepSelection, setAllowCanvasPanning] =
@@ -51,11 +55,14 @@ const CanvasContextMenu = memo(
       ]);
 
     const deleteStep = () => {
+      if (!data.step) {
+        return;
+      }
       applyOperationAndPushToHistory(
         {
           type: FlowOperationType.DELETE_ACTION,
           request: {
-            name: data.step!.name,
+            name: data.step.name,
           },
         },
         () => toast(UNSAVED_CHANGES_TOAST),
@@ -63,16 +70,20 @@ const CanvasContextMenu = memo(
       removeStepSelection();
     };
 
-    const duplicateStep = () =>
-      applyOperationAndPushToHistory(
+    const duplicateStep = () => {
+      if (!data.step) {
+        return;
+      }
+      return applyOperationAndPushToHistory(
         {
           type: FlowOperationType.DUPLICATE_ACTION,
           request: {
-            stepName: data.step!.name,
+            stepName: data.step.name,
           },
         },
         () => toast(UNSAVED_CHANGES_TOAST),
       );
+    };
 
     return (
       <div
@@ -112,7 +123,10 @@ const CanvasContextMenu = memo(
 
                 setOpenStepActionsMenu(false);
                 setOpenBlockSelector(true);
-                selectStepByName(data.step!.name!);
+
+                if (data.step) {
+                  selectStepByName(data.step.name);
+                }
               }}
             >
               <StepActionWrapper>
@@ -121,14 +135,13 @@ const CanvasContextMenu = memo(
               </StepActionWrapper>
             </DropdownMenuItem>
 
-            {/* todo flag */}
-            {isAction && (
+            {isAction && showCopy && (
               <>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onSelect={(e) => {
-                    // implement copy logic
-                    // e.preventDefault();
+                    e.preventDefault();
+                    // https://linear.app/openops/issue/OPS-852/add-copy-logic
                   }}
                 >
                   <StepActionWrapper>
