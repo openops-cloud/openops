@@ -183,3 +183,94 @@ export const mockFlowVersionWithSplitWithBranches: FlowVersion = {
   valid: false,
   state: FlowVersionState.DRAFT,
 };
+
+export const mockFlowVersionWithLoop: FlowVersion = {
+  id: 'EQO4peVXcMUu1T4HTY4Vr',
+  created: '2025-03-18T12:46:38.492Z',
+  updated: '2025-03-18T12:46:57.200Z',
+  flowId: 'TG3TV63nSUT0A2f2nJXJN',
+  displayName: 'Untitled',
+  trigger: {
+    name: 'trigger',
+    valid: false,
+    displayName: 'Select Trigger',
+    type: TriggerType.EMPTY,
+    settings: {},
+    nextAction: {
+      name: 'step_1',
+      type: 'LOOP_ON_ITEMS',
+      valid: false,
+      settings: {
+        items: '',
+        inputUiInfo: {
+          customizedInputs: {},
+        },
+      },
+      nextAction: {
+        name: 'step_2',
+        type: 'CODE',
+        valid: true,
+        settings: {
+          input: {},
+          sourceCode: {
+            code: 'export const code = async (inputs) => {\n  return true;\n};',
+            packageJson: '{}',
+          },
+          inputUiInfo: {
+            customizedInputs: {},
+          },
+          errorHandlingOptions: {
+            retryOnFailure: {
+              value: false,
+            },
+            continueOnFailure: {
+              value: false,
+            },
+          },
+        },
+        nextAction: {
+          name: 'step_3',
+          type: 'LOOP_ON_ITEMS',
+          valid: false,
+          settings: {
+            items: '',
+            inputUiInfo: {
+              customizedInputs: {},
+            },
+          },
+          displayName: 'Loop on Items',
+          firstLoopAction: {
+            name: 'step_4',
+            type: 'CODE',
+            valid: true,
+            settings: {
+              input: {},
+              sourceCode: {
+                code: 'export const code = async (inputs) => {\n  return true;\n};',
+                packageJson: '{}',
+              },
+              inputUiInfo: {
+                customizedInputs: {},
+              },
+              errorHandlingOptions: {
+                retryOnFailure: {
+                  value: false,
+                },
+                continueOnFailure: {
+                  value: false,
+                },
+              },
+            },
+            displayName: 'Custom TypeScript Code',
+          },
+        },
+        displayName: 'Custom TypeScript Code',
+      },
+      displayName: 'Loop on Items',
+    },
+  },
+  valid: false,
+  state: FlowVersionState.DRAFT,
+  description: '',
+  updatedBy: 'cX7k098lKcqPuhk1K0bm0',
+};
