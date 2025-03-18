@@ -77,7 +77,7 @@ export const loopExecutor: BaseExecutor<LoopOnItemsAction> = {
 
     const isCompleted = executionState.isCompleted({ stepName: action.name });
     if (isCompleted) {
-      if (payload && !payload.path?.includes(action.name)) {
+      if (payload && !pathContainsAction(action.name, payload.path)) {
         return executionState;
       }
     } else {
@@ -417,6 +417,15 @@ async function getIterationKey(
     iterationKey = (await store.get(path)) as string;
   }
   return iterationKey;
+}
+
+function pathContainsAction(actionName: string, path: string): boolean {
+  if (!path) {
+    return false;
+  }
+
+  const regex = new RegExp(`\\b${actionName}\\b`);
+  return regex.test(path);
 }
 
 type IterationResult = {

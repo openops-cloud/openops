@@ -57,21 +57,21 @@ export const sftpAuth = BlockAuth.CustomAuth({
   required: true,
 });
 
-// export const sftp = createBlock({
-//   displayName: 'SFTP',
-//   description: 'Secure file transfer protocol',
+export const sftp = createBlock({
+  displayName: 'SFTP',
+  description: 'Secure file transfer protocol',
 
-//   minimumSupportedRelease: '0.7.1',
-//   logoUrl: 'https://static.openops.com/blocks/sftp.svg',
-//   categories: [BlockCategory.CORE, BlockCategory.DEVELOPER_TOOLS],
-//   authors: [
-//     'Abdallah-Alwarawreh',
-//     'kishanprmr',
-//     'AbdulTheActiveBlockr',
-//     'khaledmashaly',
-//     'abuaboud',
-//   ],
-//   auth: sftpAuth,
-//   actions: [createFile, readFileContent],
-//   triggers: [newOrModifiedFile],
-// });
+  minimumSupportedRelease: '0.7.1',
+  logoUrl: 'https://static.openops.com/blocks/sftp.svg',
+  categories: [BlockCategory.CORE, BlockCategory.DEVELOPER_TOOLS],
+  authors: [
+    'Abdallah-Alwarawreh',
+    'kishanprmr',
+    'AbdulTheActiveBlockr',
+    'khaledmashaly',
+    'abuaboud',
+  ],
+  auth: sftpAuth,
+  actions: [createFile, readFileContent],
+  triggers: [newOrModifiedFile],
+});
