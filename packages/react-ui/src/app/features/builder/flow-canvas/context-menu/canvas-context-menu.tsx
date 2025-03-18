@@ -1,18 +1,17 @@
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import {
   Button,
+  DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
   toast,
   UNSAVED_CHANGES_TOAST,
   WorkflowNode,
 } from '@openops/components/ui';
 import { FlagId, FlowOperationType } from '@openops/shared';
-import {
-  DropdownMenu,
-  DropdownMenuSeparator,
-} from '@radix-ui/react-dropdown-menu';
+
 import { t } from 'i18next';
 import {
   ArrowRightLeft,
@@ -42,7 +41,7 @@ const CanvasContextMenu = memo(
     setOpenStepActionsMenu,
     setOpenBlockSelector,
   }: Props) => {
-    const showCopy =
+    const showCopyPaste =
       flagsHooks.useFlag<boolean>(FlagId.COPY_PASTE_ACTIONS_ENABLED).data ||
       false;
     const applyOperationAndPushToHistory = useApplyOperationAndPushToHistory();
@@ -135,7 +134,7 @@ const CanvasContextMenu = memo(
               </StepActionWrapper>
             </DropdownMenuItem>
 
-            {isAction && showCopy && (
+            {isAction && showCopyPaste && (
               <>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -165,6 +164,23 @@ const CanvasContextMenu = memo(
                   {t('Duplicate')}
                 </StepActionWrapper>
               </DropdownMenuItem>
+            )}
+
+            {isAction && showCopyPaste && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onSelect={(e) => {
+                    e.preventDefault();
+                    // https://linear.app/openops/issue/OPS-854/add-paste-logic
+                  }}
+                >
+                  <StepActionWrapper>
+                    <Copy className="mr-2 h-4 w-4" />
+                    <span className="">{t('Paste after')}</span>
+                  </StepActionWrapper>
+                </DropdownMenuItem>
+              </>
             )}
 
             {isAction && (
