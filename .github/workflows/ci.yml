@@ -148,7 +148,7 @@ jobs:
           path: dist
           key: dist-${{ github.sha }}
   build-images:
-    if: secrets.ECR_ACCESS_KEY_ID
+    if: vars.ECR_REGION
     strategy:
         matrix:
             target:
@@ -205,7 +205,7 @@ jobs:
             type=registry,ref=${{ env.repository_uri }}:main-cache
           cache-to: mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${{ env.repository_uri }}:${{ env.sanitized_branch }}-cache
   build-images-for-forks:
-    if: ${{ secrets.ECR_ACCESS_KEY_ID }}
+    if: ${{ ! vars.ECR_REGIONS }}
     strategy:
         matrix:
             target:
