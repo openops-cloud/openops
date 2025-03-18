@@ -8,6 +8,7 @@ import {
 import '@xyflow/react/dist/style.css';
 import React, { ReactNode, useCallback, useRef } from 'react';
 import { Graph } from '../../lib/flow-canvas-utils';
+import { useCanvasContext } from './canvas-context';
 import { useResizeCanvas } from './use-resize-canvas';
 
 type FlowCanvasProps = {
@@ -47,6 +48,10 @@ const FlowCanvas = React.memo(
       [topOffset],
     );
 
+    const { panningMode } = useCanvasContext();
+
+    const inGrabPanningMode = panningMode === 'grab';
+
     return (
       <div className="size-full bg-editorBackground" ref={containerRef}>
         {!!graph && (
@@ -60,7 +65,9 @@ const FlowCanvas = React.memo(
             elevateEdgesOnSelect={false}
             maxZoom={1.5}
             minZoom={0.5}
-            panOnDrag={allowCanvasPanning}
+            panOnDrag={
+              allowCanvasPanning ? (inGrabPanningMode ? [0, 1] : [1]) : false
+            }
             zoomOnDoubleClick={false}
             panOnScroll={true}
             fitView={false}
@@ -68,6 +75,9 @@ const FlowCanvas = React.memo(
             elementsSelectable={true}
             nodesDraggable={false}
             nodesFocusable={false}
+            selectionKeyCode={inGrabPanningMode ? 'Shift' : null}
+            multiSelectionKeyCode={inGrabPanningMode ? 'Shift' : null}
+            selectionOnDrag={inGrabPanningMode ? false : true}
             proOptions={{
               hideAttribution: true,
             }}
