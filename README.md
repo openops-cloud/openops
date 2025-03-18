@@ -4,6 +4,7 @@
 [![Apache License](https://img.shields.io/badge/License-Apache%202.0-blue?logo=apache&style=for-the-badge)](https://www.apache.org/licenses/LICENSE-2.0) 
 [![Join Our Community](https://img.shields.io/badge/Slack-Join%20Community-blue?logo=slack&style=for-the-badge)](https://slack.openops.com)
 [![Docs](https://img.shields.io/badge/Docs-Read%20Now-orange?logo=readthedocs&style=for-the-badge)](https://docs.openops.com)
+[![Star on Github](https://img.shields.io/badge/Github-Stars?style=for-the-badge&logo=github&label=Star%20OpenOps)](https://github.com/openops-cloud/openops/stargazers)
 
 
 ## **😎 What is OpenOps?**
