@@ -52,6 +52,11 @@ const FlowCanvas = React.memo(
 
     const { panningMode } = useCanvasContext();
     const inGrabPanningMode = panningMode === 'grab';
+    const panOnDrag = allowCanvasPanning
+      ? inGrabPanningMode
+        ? [0, 1]
+        : [1]
+      : false;
 
     return (
       <div className="size-full bg-editorBackground" ref={containerRef}>
@@ -66,9 +71,7 @@ const FlowCanvas = React.memo(
             elevateEdgesOnSelect={false}
             maxZoom={1.5}
             minZoom={0.5}
-            panOnDrag={
-              allowCanvasPanning ? (inGrabPanningMode ? [0, 1] : [1]) : false
-            }
+            panOnDrag={panOnDrag}
             zoomOnDoubleClick={false}
             panOnScroll={true}
             fitView={false}
