@@ -41,6 +41,7 @@ const meta = {
   ),
   parameters: {
     layout: 'centered',
+    chromatic: { disable: true },
   },
 } satisfies Meta<typeof ContextMenu>;
 
