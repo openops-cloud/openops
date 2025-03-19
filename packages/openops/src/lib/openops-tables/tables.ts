@@ -31,6 +31,16 @@ export async function getTableIdByTableName(
   return table.id;
 }
 
+export async function getTableByName(
+  tableName: string,
+): Promise<OpenOpsTable | undefined> {
+  const tables = await getAvailableTablesInOpenopsTables();
+
+  const table = tables.find((t) => t.name === tableName);
+
+  return table;
+}
+
 export async function getTableNames(): Promise<string[]> {
   const tables = await getAvailableTablesInOpenopsTables();
 

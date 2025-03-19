@@ -3,7 +3,7 @@
 import {
   authenticateDefaultUserInOpenOpsTables,
   createAxiosHeaders,
-  getTableIdByTableName,
+  getTableByName,
   makeOpenOpsTablesDelete,
 } from '@openops/common';
 import { logger } from '@openops/server-shared';
@@ -41,29 +41,20 @@ export const deleteOldOpportunitiesTable = async (): Promise<void> => {
   try {
     const { token } = await authenticateDefaultUserInOpenOpsTables();
 
-    const opportunitiesTableIdOld = await getTableIdByTableName(
-      SEED_OPENOPS_TABLE_NAME,
-    );
-
-    await makeOpenOpsTablesDelete<unknown>(
-      `api/database/tables/${opportunitiesTableIdOld}/`,
-      createAxiosHeaders(token),
-    );
-  } catch (error: unknown) {
-    if (
-      error instanceof Error &&
-      error.message === `Table '${SEED_OPENOPS_TABLE_NAME}' not found`
-    ) {
+    const table = await getTableByName(SEED_OPENOPS_TABLE_NAME);
+    if (!table) {
       logger.info('Skip: OpenOps deletion of old opportunities table', {
         name: 'deleteOldOpportunitiesTable',
       });
     } else {
-      logger.error(
-        'An error occurred deleting old opportunities table.',
-        error,
+      await makeOpenOpsTablesDelete<unknown>(
+        `api/database/tables/${table.id}/`,
+        createAxiosHeaders(token),
       );
     }
-  }
 
-  await setOpportunitiesTableDeleted();
+    await setOpportunitiesTableDeleted();
+  } catch (error: unknown) {
+    logger.error('An error occurred deleting old opportunities table.', error);
+  }
 };
