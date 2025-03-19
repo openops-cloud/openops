@@ -2,7 +2,6 @@ import {
   Background,
   EdgeTypes,
   NodeTypes,
-  OnSelectionChangeFunc,
   ReactFlow,
   ReactFlowInstance,
 } from '@xyflow/react';
