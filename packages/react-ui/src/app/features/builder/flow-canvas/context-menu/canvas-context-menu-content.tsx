@@ -1,6 +1,5 @@
 import { t } from 'i18next';
 import {
-  ArrowLeftRight,
   ClipboardPaste,
   ClipboardPlus,
   Copy,
@@ -11,8 +10,10 @@ import {
 import {
   ContextMenuItem,
   ContextMenuSeparator,
+  ContextMenuType,
   toast,
   UNSAVED_CHANGES_TOAST,
+  useCanvasContext,
 } from '@openops/components/ui';
 import {
   ActionType,
@@ -26,7 +27,6 @@ import { useBuilderStateContext } from '../../builder-hooks';
 import { useApplyOperationAndPushToHistory } from '../../flow-version-undo-redo/hooks/apply-operation-and-push-to-history';
 import { CanvasShortcuts, ShortcutWrapper } from './canvas-shortcuts';
 import { CanvasContextMenuProps } from './context-menu-wrapper';
-import { ContextMenuType } from './types';
 
 export const CanvasContextMenuContent = ({
   contextMenuType,
@@ -36,32 +36,23 @@ export const CanvasContextMenuContent = ({
     false;
   const applyOperationAndPushToHistory = useApplyOperationAndPushToHistory();
 
-  const [
-    selectedNodes,
-    selectStepByName,
-    removeStepSelection,
-    setAllowCanvasPanning,
-    flowVersion,
-    actionsToPaste,
-    readonly,
-    setPieceSelectorStep,
-  ] = useBuilderStateContext((state) => [
-    state.selectedNodes,
-    state.selectStepByName,
-    state.removeStepSelection,
-    state.setAllowCanvasPanning,
-    state.flowVersion,
-    state.actionsToPaste,
-    state.readonly,
-    state.setPieceSelectorStep,
-  ]);
+  const { selectedActions } = useCanvasContext();
+  const selectedNodes = selectedActions.map((action) => action.name);
+
+  const [removeStepSelection, flowVersion, readonly] = useBuilderStateContext(
+    (state) => [state.removeStepSelection, state.flowVersion, state.readonly],
+  );
 
   const disabled = selectedNodes.length === 0;
 
   const doSelectedNodesIncludeTrigger = selectedNodes.some(
     (node: string) => node === flowVersion.trigger.name,
   );
-  const disabledPaste = actionsToPaste.length === 0;
+
+  console.log('selectedNodes', selectedNodes);
+
+  // to be implemented
+  const disabledPaste = true;
   const firstSelectedStep = flowHelper.getStep(flowVersion, selectedNodes[0]);
   const showPasteAfterLastStep =
     !readonly && contextMenuType === ContextMenuType.CANVAS;
@@ -71,15 +62,7 @@ export const CanvasContextMenuContent = ({
     !readonly &&
     contextMenuType === ContextMenuType.STEP;
 
-  // todo split handling
-  // const showPasteAsBranchChild =
-
   const showPasteAfterCurrentStep =
-    selectedNodes.length === 1 &&
-    !readonly &&
-    contextMenuType === ContextMenuType.STEP;
-
-  const showReplace =
     selectedNodes.length === 1 &&
     !readonly &&
     contextMenuType === ContextMenuType.STEP;
@@ -97,11 +80,14 @@ export const CanvasContextMenuContent = ({
 
   const isTriggerTheOnlySelectedNode =
     selectedNodes.length === 1 && doSelectedNodesIncludeTrigger;
+
   const showDelete =
     !readonly &&
     contextMenuType === ContextMenuType.STEP &&
-    !isTriggerTheOnlySelectedNode;
+    !isTriggerTheOnlySelectedNode &&
+    selectedActions.length === 1;
 
+  // todo we need to extract those action to a reusable hook
   // todo we need to change it to handle delete for multiple nodes
   const deleteStep = () => {
     if (selectedNodes.length !== 1) {
@@ -134,24 +120,17 @@ export const CanvasContextMenuContent = ({
     );
   };
 
+  if (!showCopyPaste) {
+    return null;
+  }
+
   return (
     <>
-      {showReplace && (
-        <ContextMenuItem
-          disabled={disabled}
-          onClick={() => {
-            setPieceSelectorStep(selectedNodes[0]);
-          }}
-          className="flex items-center gap-2"
-        >
-          <ArrowLeftRight className="w-4 h-4"></ArrowLeftRight> {t('Replace')}
-        </ContextMenuItem>
-      )}
       {showCopy && (
         <ContextMenuItem
           disabled={disabled}
           onClick={() => {
-            // copySelectedNodes({ selectedNodes, flowVersion });
+            // handle copy
           }}
         >
           <ShortcutWrapper shortcut={CanvasShortcuts['Copy']}>
@@ -169,12 +148,6 @@ export const CanvasContextMenuContent = ({
           >
             <CopyPlus className="w-4 h-4"></CopyPlus> {t('Duplicate')}
           </ContextMenuItem>
-        )}
-
-        {(showPasteAsFirstLoopAction ||
-          //   showPasteAsBranchChild ||
-          showPasteAfterCurrentStep) && (
-          <ContextMenuSeparator></ContextMenuSeparator>
         )}
 
         {showPasteAfterLastStep && showCopyPaste && (
@@ -223,7 +196,6 @@ export const CanvasContextMenuContent = ({
               disabled={disabled}
               onClick={() => {
                 deleteStep();
-                // todo add deleteSelectedNodes
               }}
             >
               <ShortcutWrapper shortcut={CanvasShortcuts['Delete']}>
