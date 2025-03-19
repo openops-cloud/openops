@@ -11,9 +11,9 @@ import { FlagEntity } from '../../flags/flag.entity';
 import { SEED_OPENOPS_TABLE_NAME } from '../../openops-tables/template-tables/create-opportunities-table';
 import { databaseConnection } from '../database-connection';
 
-const OPENOPS_OLD_OPPORTUNITIES_TABLE_DELETED = 'OPPORTUNITYDEL';
+const OPENOPS_OLD_OPPORTUNITIES_TABLE_DELETED = 'OPPORTUNITYDEL1';
 
-export const isTableAlreadyDeleted = async (): Promise<boolean> => {
+const isTableAlreadyDeleted = async (): Promise<boolean> => {
   const flagRepo = databaseConnection().getRepository(FlagEntity);
   const tablesSeedsFlag = await flagRepo.findOneBy({
     id: OPENOPS_OLD_OPPORTUNITIES_TABLE_DELETED,
@@ -29,7 +29,7 @@ const newTableWasAlreadyCreated = async (): Promise<boolean> => {
   return tablesSeedFlag?.value === true;
 };
 
-const setOpportunitiesTableDeleted = async (): Promise<void> => {
+const setOldOpportunitiesTableDeleted = async (): Promise<void> => {
   const flagRepo = databaseConnection().getRepository(FlagEntity);
 
   await flagRepo.save({
@@ -47,7 +47,7 @@ export const deleteOldOpportunitiesTable = async (): Promise<void> => {
   }
 
   if (await newTableWasAlreadyCreated()) {
-    await setOpportunitiesTableDeleted();
+    await setOldOpportunitiesTableDeleted();
     return;
   }
 
@@ -66,7 +66,7 @@ export const deleteOldOpportunitiesTable = async (): Promise<void> => {
       );
     }
 
-    await setOpportunitiesTableDeleted();
+    await setOldOpportunitiesTableDeleted();
   } catch (error: unknown) {
     logger.error('An error occurred deleting old opportunities table.', error);
   }

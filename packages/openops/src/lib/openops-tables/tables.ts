@@ -20,9 +20,7 @@ async function getTables(
 export async function getTableIdByTableName(
   tableName: string,
 ): Promise<number> {
-  const tables = await getAvailableTablesInOpenopsTables();
-
-  const table = tables.find((t) => t.name === tableName);
+  const table = await getTableByName(tableName);
 
   if (!table) {
     throw new Error(`Table '${tableName}' not found`);
