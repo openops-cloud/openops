@@ -49,7 +49,7 @@ export async function wrapWithCacheGuard<T, Args extends any[]>(
   }
 
   const { lock, semaphores } = CacheAccessSemaphore.getInstance();
-  let semaphore: Semaphore | undefined = undefined;
+  let semaphore = semaphores.get(cacheKey)?.semaphore;
   while (!semaphore) {
     try {
       await tryAcquire(lock, new Error(ALREADY_ACQUIRED_ERROR)).runExclusive(
@@ -66,6 +66,7 @@ export async function wrapWithCacheGuard<T, Args extends any[]>(
       );
     } catch (e) {
       result = await waitForUnlock(lock, e as Error, cacheKey);
+      semaphore = semaphores.get(cacheKey)?.semaphore;
       if (result) {
         return result;
       }
