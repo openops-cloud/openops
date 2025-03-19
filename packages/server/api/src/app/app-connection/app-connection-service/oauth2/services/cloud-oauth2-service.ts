@@ -31,7 +31,7 @@ async function refresh({
     tokenUrl: connectionValue.token_url,
   };
 
-  logger.info(`Refreshing token via Lambda for block: ${blockName}`);
+  logger.debug(`Refreshing token for block: ${blockName}`);
 
   try {
     const oauthProxyUrl = system.get<string>(
@@ -51,7 +51,7 @@ async function refresh({
       type: AppConnectionType.CLOUD_OAUTH2,
     };
   } catch (e: unknown) {
-    logger.error('Error refreshing token via Lambda', e);
+    logger.error(`Error refreshing token for block: ${blockName}`, e);
     throw new ApplicationError({
       code: ErrorCode.INVALID_CLOUD_REFRESH,
       params: { blockName },
