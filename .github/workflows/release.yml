@@ -96,8 +96,7 @@ jobs:
           tag_name: ${{ env.VERSION }}
           generate_release_notes: true
           draft: true
-          files:
-            - deploy/docker-compose/${{ env.RELEASE_DC_FILENAME }}
+          files: deploy/docker-compose/${{ env.RELEASE_DC_FILENAME }}
       - name: Write summary
         run: |
           RELEASE_URL="${{ steps.create-release.outputs.url }}"
