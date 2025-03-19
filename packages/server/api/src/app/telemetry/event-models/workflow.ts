@@ -1,14 +1,12 @@
+import { hashUtils } from '@openops/server-shared';
 import {
   Action,
-  ExecutionType,
   FlowId,
   FlowOperationRequest,
-  FlowRun,
   FlowRunStatus,
   ProjectId,
   Trigger,
 } from '@openops/shared';
-import { hashUtils } from '../../hash';
 import { telemetry } from '../telemetry';
 
 export type WorkflowBase = {
@@ -22,7 +20,6 @@ export enum WorkflowEventName {
   WORKFLOW_UPDATED = 'workflow_updated',
   WORKFLOW_EXPORTED = 'workflow_exported',
   WORKFLOW_TEST_BLOCK = 'workflow_test_block',
-  WORKFLOW_EXECUTION = 'workflow_execution',
   CREATED_WORKFLOW_FROM_TEMPLATE = 'workflow_created_from_template',
 }
 
@@ -123,58 +120,29 @@ export function sendWorkflowUpdatedEvent(eventParams: {
   });
 }
 
-export function sendWorkflowTestBlockEvent(
-  eventParams: {
-    userId: string;
-    projectId: string;
-    flowId: string;
-    success: boolean;
-    duration: number;
-    step: Action | Trigger;
-  },
-  trackEventsEnabled?: boolean,
-): void {
-  telemetry.trackEvent(
-    {
-      name: WorkflowEventName.WORKFLOW_TEST_BLOCK,
-      labels: {
-        userId: eventParams.userId,
-        flowId: eventParams.flowId,
-        projectId: eventParams.projectId,
-        status: eventParams.success
-          ? FlowRunStatus.SUCCEEDED
-          : FlowRunStatus.FAILED,
-        stepType: eventParams.step.type,
-        blockName: eventParams.step.settings?.blockName || '',
-        actionName: eventParams.step?.settings?.actionName || '',
-        duration: eventParams.duration.toString(),
-      },
-    },
-    trackEventsEnabled,
-  );
-}
-
-export function sendWorkflowExecutionEvent(
-  flowRun: Omit<FlowRun, 'status'> & {
-    status: ExecutionType | FlowRunStatus;
-  },
-): void {
+export function sendWorkflowTestBlockEvent(eventParams: {
+  userId: string;
+  projectId: string;
+  flowId: string;
+  success: boolean;
+  duration: number;
+  step: Action | Trigger;
+}): void {
   telemetry.trackEvent({
-    name: WorkflowEventName.WORKFLOW_EXECUTION,
+    name: WorkflowEventName.WORKFLOW_TEST_BLOCK,
     labels: {
-      flowRunId: flowRun.id,
-      flowId: flowRun.flowId,
-      status: flowRun.status,
-      runMode: flowRun.environment,
-      projectId: flowRun.projectId,
-      flowVersionId: flowRun.flowVersionId,
-      duration: flowRun.duration?.toString() || '',
+      userId: eventParams.userId,
+      flowId: eventParams.flowId,
+      projectId: eventParams.projectId,
+      status: eventParams.success
+        ? FlowRunStatus.SUCCEEDED
+        : FlowRunStatus.FAILED,
+      stepType: eventParams.step.type,
+      blockName: eventParams.step.settings?.blockName || '',
+      actionName: eventParams.step?.settings?.actionName || '',
+      duration: eventParams.duration.toString(),
     },
   });
-}
-
-function tablesEvent() {
-  return false;
 }
 
 function getUpdateEventLabels(

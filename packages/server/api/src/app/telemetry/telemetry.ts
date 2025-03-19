@@ -1,9 +1,13 @@
-import { requestContext } from '@fastify/request-context';
+import {
+  AppSystemProp,
+  logger,
+  SharedSystemProp,
+  system,
+} from '@openops/server-shared';
 import axios from 'axios';
 import { UUID } from 'node:crypto';
 import { Timeseries } from 'prometheus-remote-write';
-import { logger } from '../logger';
-import { AppSystemProp, SharedSystemProp, system } from '../system';
+import { userService } from '../user/user-service';
 import {
   flushMetricsCollector,
   saveMetric,
@@ -35,9 +39,9 @@ export const telemetry = {
 
     startMetricsCollector();
   },
-  trackEvent(event: TelemetryEvent, trackEventsEnabled?: boolean): void {
+  trackEvent(event: TelemetryEvent): void {
     try {
-      const isEnable = isTelemetryEnabledForCurrentUser(trackEventsEnabled);
+      const isEnable = isTelemetryEnabledForCurrentUser(event.labels.userId);
       if (!isEnable) {
         return;
       }
@@ -75,11 +79,6 @@ export const telemetry = {
 };
 
 function enrichEventLabels(event: TelemetryEvent): Timeseries {
-  const userId = requestContext.get('userId' as never);
-  if (userId) {
-    event.labels['userId'] = userId as string;
-  }
-
   const timestamp = new Date();
   return {
     labels: {
@@ -99,14 +98,14 @@ function enrichEventLabels(event: TelemetryEvent): Timeseries {
   };
 }
 
-function isTelemetryEnabledForCurrentUser(
-  trackEventsEnabled?: boolean,
-): boolean {
-  if (trackEventsEnabled) {
-    return true;
+async function isTelemetryEnabledForCurrentUser(
+  userId: string,
+): Promise<boolean> {
+  if (!userId) {
+    return false;
   }
 
-  return requestContext.get('trackEvents' as never) === 'true';
+  return (await userService.getTrackEventsConfig(userId)) === 'true';
 }
 
 async function sendToCollector(

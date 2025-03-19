@@ -21,7 +21,4 @@ export * from './lib/promise-handler';
 export * from './lib/semaphore';
 export * from './lib/stop-handlers';
 export * from './lib/system';
-export * from './lib/telemetry/event-models';
-export * from './lib/telemetry/telemetry';
-export * from './lib/telemetry/telemetry-event';
 export * from './lib/webhook-secrets-util';

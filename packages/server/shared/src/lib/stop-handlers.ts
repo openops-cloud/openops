@@ -2,10 +2,12 @@
 import { FastifyInstance } from 'fastify';
 import { logger, sendLogs } from './logger/index';
 import { SharedSystemProp, system } from './system';
-import { telemetry } from './telemetry/telemetry';
 
 let shuttingDown = false;
-const stop = async (app: FastifyInstance): Promise<void> => {
+const stop = async (
+  app: FastifyInstance,
+  cleanup?: () => Promise<void>,
+): Promise<void> => {
   if (shuttingDown) return;
   shuttingDown = true;
 
@@ -17,8 +19,10 @@ const stop = async (app: FastifyInstance): Promise<void> => {
   }
 
   try {
-    logger.info('Flushing telemetry...');
-    await telemetry.flush();
+    if (cleanup) {
+      await cleanup();
+    }
+
     logger.info('Closing Fastify....');
     await app.close();
     await sendLogs();
@@ -30,7 +34,10 @@ const stop = async (app: FastifyInstance): Promise<void> => {
   }
 };
 
-export function setStopHandlers(app: FastifyInstance) {
+export function setStopHandlers(
+  app: FastifyInstance,
+  cleanup?: () => Promise<void>,
+) {
   process.on('SIGINT', async () => {
     logger.warn('SIGINT received, shutting down');
     stop(app).catch((e) => console.info('Failed to stop the app', e));

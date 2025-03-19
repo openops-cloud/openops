@@ -1,4 +1,4 @@
-import { cacheWrapper, sendUserCreatedEvent } from '@openops/server-shared';
+import { cacheWrapper } from '@openops/server-shared';
 import {
   ApplicationError,
   ErrorCode,
@@ -17,6 +17,7 @@ import {
 import dayjs from 'dayjs';
 import { passwordHasher } from '../authentication/lib/password-hasher';
 import { repoFactory } from '../core/db/repo-factory';
+import { sendUserCreatedEvent } from '../telemetry/event-models';
 import { UserEntity } from './user-entity';
 
 export const userRepo = repoFactory(UserEntity);

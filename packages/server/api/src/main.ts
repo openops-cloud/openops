@@ -4,7 +4,6 @@ import {
   sendLogs,
   setStopHandlers,
   system,
-  telemetry,
 } from '@openops/server-shared';
 import { FastifyInstance } from 'fastify';
 import { appPostBoot } from './app/app';
@@ -18,6 +17,7 @@ import { seedAdminData } from './app/database/seeds/seed-admin';
 import { seedEnvironmentId } from './app/database/seeds/seed-env-id';
 import { seedTemplateTables } from './app/database/seeds/seed-template-tables';
 import { setupServer } from './app/server';
+import { telemetry } from './app/telemetry/telemetry';
 import { workerPostBoot } from './app/worker';
 
 const start = async (app: FastifyInstance): Promise<void> => {
@@ -68,7 +68,10 @@ const main = async (): Promise<void> => {
 
   const app = await setupServer();
 
-  setStopHandlers(app);
+  setStopHandlers(app, async () => {
+    logger.info('Flushing telemetry...');
+    await telemetry.flush();
+  });
 
   await telemetry.start(() => Promise.resolve(environmentId));
   await start(app);
