@@ -18,7 +18,7 @@ services:
     environment:
       OPS_COMPONENT: app
       OPS_VERSION: ${OPS_VERSION:-latest}
-      OPS_OPENOPS_TABLES_VERSION: 0.1.6
+      OPS_OPENOPS_TABLES_VERSION: 0.1.8
       OPS_ANALYTICS_VERSION: 0.12.15
     depends_on:
       openops-tables:
@@ -43,7 +43,7 @@ services:
     volumes:
       - ${HOST_AZURE_CONFIG_DIR:-openops_azure_cli_data}:/tmp/azure
   openops-tables:
-    image: public.ecr.aws/openops/openops-tables:0.1.6
+    image: public.ecr.aws/openops/openops-tables:0.1.8
     restart: unless-stopped
     environment:
       BASEROW_PUBLIC_URL: ${OPS_OPENOPS_TABLES_PUBLIC_URL}
