@@ -44,18 +44,11 @@ export const deleteOldOpportunitiesTable = async (): Promise<void> => {
     const opportunitiesTableIdOld = await getTableIdByTableName(
       SEED_OPENOPS_TABLE_NAME,
     );
-    if (!opportunitiesTableIdOld) {
-      logger.info('No old opportunities table found. Skipping deletion.', {
-        name: 'deleteOldOpportunitiesTable',
-      });
-    } else {
-      await makeOpenOpsTablesDelete<unknown>(
-        `api/database/tables/${opportunitiesTableIdOld}/`,
-        createAxiosHeaders(token),
-      );
-    }
 
-    await setOpportunitiesTableDeleted();
+    await makeOpenOpsTablesDelete<unknown>(
+      `api/database/tables/${opportunitiesTableIdOld}/`,
+      createAxiosHeaders(token),
+    );
   } catch (error: unknown) {
     if (
       error instanceof Error &&
@@ -71,4 +64,6 @@ export const deleteOldOpportunitiesTable = async (): Promise<void> => {
       );
     }
   }
+
+  await setOpportunitiesTableDeleted();
 };
