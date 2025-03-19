@@ -18,7 +18,7 @@ describe('advisorAction', () => {
   });
 
   test('should create action with correct properties', () => {
-    expect(Object.keys(advisorAction.props).length).toBe(5);
+    expect(Object.keys(advisorAction.props).length).toBe(4);
     expect(advisorAction.props).toMatchObject({
       useHostSession: {
         type: 'DYNAMIC',
