@@ -13,12 +13,20 @@ import { databaseConnection } from '../database-connection';
 
 const OPENOPS_OLD_OPPORTUNITIES_TABLE_DELETED = 'OPPORTUNITYDEL';
 
-const isTableAlreadyDeleted = async (): Promise<boolean> => {
+export const isTableAlreadyDeleted = async (): Promise<boolean> => {
   const flagRepo = databaseConnection().getRepository(FlagEntity);
   const tablesSeedsFlag = await flagRepo.findOneBy({
     id: OPENOPS_OLD_OPPORTUNITIES_TABLE_DELETED,
   });
   return tablesSeedsFlag?.value === true;
+};
+
+const newTableWasAlreadyCreated = async (): Promise<boolean> => {
+  const flagRepo = databaseConnection().getRepository(FlagEntity);
+  const tablesSeedFlag = await flagRepo.findOneBy({
+    id: 'OPPORTUNITYSEED',
+  });
+  return tablesSeedFlag?.value === true;
 };
 
 const setOpportunitiesTableDeleted = async (): Promise<void> => {
@@ -36,6 +44,10 @@ export const deleteOldOpportunitiesTable = async (): Promise<void> => {
       name: 'deleteOldOpportunitiesTable',
     });
     return;
+  }
+
+  if (await newTableWasAlreadyCreated()) {
+    await setOpportunitiesTableDeleted();
   }
 
   try {
