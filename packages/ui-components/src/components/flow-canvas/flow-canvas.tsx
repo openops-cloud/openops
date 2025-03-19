@@ -2,6 +2,7 @@ import {
   Background,
   EdgeTypes,
   NodeTypes,
+  OnSelectionChangeFunc,
   ReactFlow,
   ReactFlowInstance,
 } from '@xyflow/react';
@@ -19,6 +20,8 @@ type FlowCanvasProps = {
   topOffset?: number;
   allowCanvasPanning?: boolean;
   children?: ReactNode;
+  onSelectionChange?: OnSelectionChangeFunc;
+  onSelectionEnd?: (event: React.MouseEvent) => void;
 };
 
 function getPanOnDrag(allowCanvasPanning: boolean, inGrabPanningMode: boolean) {
@@ -36,6 +39,8 @@ const FlowCanvas = React.memo(
     topOffset,
     allowCanvasPanning = true,
     children,
+    onSelectionChange,
+    onSelectionEnd,
   }: FlowCanvasProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -89,6 +94,8 @@ const FlowCanvas = React.memo(
               hideAttribution: true,
             }}
             onInit={onInit}
+            onSelectionChange={onSelectionChange}
+            onSelectionEnd={onSelectionEnd}
           >
             <Background color="lightgray" />
             {children}

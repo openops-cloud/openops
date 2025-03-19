@@ -2,6 +2,7 @@ import { getNodesBounds } from '@xyflow/react';
 import React from 'react';
 
 import { FLOW_CANVAS_Y_OFFESET } from '@/app/constants/flow-canvas';
+import { useCanvasSelection } from '@/app/features/builder/flow-canvas/lib/canvas-selection';
 import {
   BelowFlowWidget,
   FlowCanvas,
@@ -36,6 +37,7 @@ const FlowBuilderCanvas = React.memo(() => {
       return [state.allowCanvasPanning, graph, getNodesBounds(graph.nodes)];
     },
   );
+  const { onSelectionChange, onSelectionEnd } = useCanvasSelection();
 
   return (
     <div className="size-full relative overflow-hidden bg-editorBackground">
@@ -46,6 +48,8 @@ const FlowBuilderCanvas = React.memo(() => {
           nodeTypes={nodeTypes}
           topOffset={FLOW_CANVAS_Y_OFFESET}
           graph={graph}
+          onSelectionChange={onSelectionChange}
+          onSelectionEnd={onSelectionEnd}
         >
           <AboveFlowWidgets></AboveFlowWidgets>
           <BelowFlowWidget graphHeight={graphHeight.height}></BelowFlowWidget>
