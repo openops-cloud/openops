@@ -15,12 +15,13 @@ export const advisorAction = createAction({
     ids: Property.Array({
       displayName: 'Resource IDs',
       description:
-        'One or more resource IDs (space-delimited). If provided, no other "Resource Id" arguments should be specified.',
+        'One or more resource IDs (space-delimited). If provided, "Resource Group" should not be specified.',
       required: false,
     }),
     resourceGroup: Property.ShortText({
       displayName: 'Resource Group',
-      description: 'Name of a resource group.',
+      description:
+        'Name of a resource group. . If provided, "Resource Ids" should not be specified.',
       required: false,
     }),
     dryRun: dryRunCheckBox(),
