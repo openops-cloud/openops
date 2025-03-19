@@ -84,11 +84,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: Update version in docker-compose
         run: |
+          cp THIRD_PARTY_LICENSES.txt LICENSE NOTICE deploy/docker-compose
           cd deploy/docker-compose
           sed -i "s/\${OPS_VERSION:-latest}/$VERSION/" docker-compose.yml
-          cp ../../THIRD_PARTY_LICENSES.txt .
-          cp ../../LICENSE .
-          cp ../../NOTICE .
           zip -r $RELEASE_DC_FILENAME .
       - name: Create a release
         id: create-release
