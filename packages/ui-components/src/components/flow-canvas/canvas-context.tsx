@@ -47,13 +47,13 @@ export const CanvasContextProvider = ({
     return 'grab';
   }, [panningMode, shiftPressed, spacePressed]);
 
-  const onSelectionChange = (ev: OnSelectionChangeParams) => {
+  const onSelectionChange = useCallback((ev: OnSelectionChangeParams) => {
     if (ev.nodes.length) {
       setSelectedActions(
         ev.nodes.map((node) => node.data.step).filter(Boolean) as Action[],
       );
     }
-  };
+  }, []);
 
   const onSelectionEnd = useCallback(() => {
     const firstStep = selectedActions[0];
@@ -86,7 +86,13 @@ export const CanvasContextProvider = ({
       .getAllSteps(truncatedFlow)
       .map((step) => step.name);
 
-    state.addSelectedNodes(selectedStepNames);
+    state.setNodes(
+      state.nodes.map((node) => ({
+        ...node,
+        selected: selectedStepNames.includes(node.id),
+      })),
+    );
+
     setSelectedActions([]);
   }, [selectedActions, state]);
 
@@ -94,7 +100,6 @@ export const CanvasContextProvider = ({
     () => ({
       panningMode: effectivePanningMode,
       setPanningMode,
-      selectedActions,
       onSelectionChange,
       onSelectionEnd,
     }),
