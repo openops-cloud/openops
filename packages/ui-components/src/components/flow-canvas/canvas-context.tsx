@@ -1,5 +1,4 @@
-import { WorkflowNode } from '@/lib/flow-canvas-utils';
-import { flowHelper } from '@openops/shared';
+import { Action, flowHelper } from '@openops/shared';
 import {
   OnSelectionChangeParams,
   useKeyPress,
@@ -15,6 +14,7 @@ import {
   useState,
 } from 'react';
 import { SHIFT_KEY, SPACE_KEY } from './constants';
+
 export type PanningMode = 'grab' | 'pan';
 
 type CanvasContextState = {
@@ -32,7 +32,7 @@ export const CanvasContextProvider = ({
   children: ReactNode;
 }) => {
   const [panningMode, setPanningMode] = useState<PanningMode>('grab');
-  const [selectedNodes, setSelectedNodes] = useState<WorkflowNode[]>([]);
+  const [selectedActions, setSelectedActions] = useState<Action[]>([]);
   const state = useStoreApi().getState();
 
   const spacePressed = useKeyPress(SPACE_KEY);
@@ -49,21 +49,22 @@ export const CanvasContextProvider = ({
 
   const onSelectionChange = (ev: OnSelectionChangeParams) => {
     if (ev.nodes.length) {
-      setSelectedNodes(ev.nodes as WorkflowNode[]);
+      setSelectedActions(
+        ev.nodes.map((node) => node.data.step).filter(Boolean) as Action[],
+      );
     }
   };
 
   const onSelectionEnd = useCallback(() => {
-    const firstStep = selectedNodes[0]?.data.step;
+    const firstStep = selectedActions[0];
     if (!firstStep) return;
 
     const topLevelSteps = flowHelper.getAllStepsAtFirstLevel(firstStep);
     if (!topLevelSteps.length) return;
 
-    const lastSelectedIndex = selectedNodes.reduceRight(
-      (foundIndex, node, i) =>
-        foundIndex === -1 &&
-        topLevelSteps.some((step) => step.name === node.data.step?.name)
+    const lastSelectedIndex = selectedActions.reduceRight(
+      (foundIndex, action, i) =>
+        foundIndex === -1 && topLevelSteps.some((s) => s.name === action.name)
           ? i
           : foundIndex,
       -1,
@@ -86,17 +87,17 @@ export const CanvasContextProvider = ({
       .map((step) => step.name);
 
     state.addSelectedNodes(selectedStepNames);
-  }, [selectedNodes, state]);
+  }, [selectedActions, state]);
 
   const contextValue = useMemo(
     () => ({
       panningMode: effectivePanningMode,
       setPanningMode,
-      selectedNodes,
+      selectedActions,
       onSelectionChange,
       onSelectionEnd,
     }),
-    [effectivePanningMode, selectedNodes, onSelectionEnd],
+    [effectivePanningMode, selectedActions, onSelectionEnd],
   );
   return (
     <CanvasContext.Provider value={contextValue}>
