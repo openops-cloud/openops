@@ -25,9 +25,7 @@ export const PanningModeToggleControl = () => {
   const { panningMode, setPanningMode } = useCanvasContext();
   const spacePressed = useKeyPress(SPACE_KEY);
   const shiftPressed = useKeyPress(SHIFT_KEY);
-  const isInGrabMode =
-    (spacePressed || panningMode === 'grab') && !shiftPressed;
-
+  const isInGrabMode = panningMode === 'grab';
   return (
     <Tooltip>
       <TooltipTrigger asChild>
