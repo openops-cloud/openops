@@ -1,5 +1,5 @@
 import { createAction, Property } from '@openops/blocks-framework';
-import { azureAuth, dryRunCheckBox } from '@openops/common';
+import { azureAuth } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { runCommand } from '../azure-cli';
 import { subDropdown, useHostSession } from '../common-properties';
@@ -12,7 +12,7 @@ export const advisorAction = createAction({
   props: {
     useHostSession: useHostSession,
     subscriptions: subDropdown,
-    ids: Property.Array({
+    resourceIds: Property.Array({
       displayName: 'Resource IDs',
       description:
         'One or more resource IDs (space-delimited). If provided, "Resource Group" should not be specified.',
@@ -24,18 +24,11 @@ export const advisorAction = createAction({
         'Name of a resource group. . If provided, "Resource Ids" should not be specified.',
       required: false,
     }),
-    dryRun: dryRunCheckBox(),
   },
   async run(context) {
     const command = buildCommand(context.propsValue);
     logger.info(`Running command: ${command}`);
     try {
-      const { dryRun } = context.propsValue;
-
-      if (dryRun) {
-        return 'Step execution skipped, dry run flag enabled. Azure get cost recommendations wont be run.';
-      }
-
       const result = await runCommand(
         command,
         context.auth,
@@ -67,17 +60,17 @@ export const advisorAction = createAction({
 });
 
 function buildCommand(propsValue: any) {
-  const { ids, resourceGroup } = propsValue;
+  const { resourceIds, resourceGroup } = propsValue;
   let command = `az advisor recommendation list --category 'cost' --output json`;
 
-  if (ids && ids.length > 0 && resourceGroup) {
+  if (resourceIds?.length > 0 && resourceGroup) {
     throw new Error(
       'Resource IDs and Resource Group cannot be specified together. Please only specify one of them.',
     );
   }
 
-  if (ids && ids.length > 0) {
-    command += ` --ids ${ids.map((id: string) => `"${id}"`).join(' ')}`;
+  if (resourceIds?.length > 0) {
+    command += ` --ids ${resourceIds.map((id: string) => `"${id}"`).join(' ')}`;
   }
 
   if (resourceGroup) {
