@@ -7,8 +7,8 @@ import {
 } from '@openops/shared';
 import { FastifyRequest } from 'fastify';
 import { accessTokenManager } from '../../../authentication/lib/access-token-manager';
-import { BaseSecurityHandler } from '../security-handler';
 import { userService } from '../../../user/user-service';
+import { BaseSecurityHandler } from '../security-handler';
 
 export class AccessTokenAuthnHandler extends BaseSecurityHandler {
   private static readonly HEADER_NAME = 'authorization';
