@@ -77,7 +77,7 @@ export const CanvasContextProvider = ({
     if (!selectedSteps.length) return;
 
     const truncatedFlow = flowHelper.truncateFlow(
-      cloneDeep(selectedSteps[0]), // Ensuring deep cloning before modifying
+      cloneDeep(selectedSteps[0]),
       selectedSteps[selectedSteps.length - 1].name,
     );
 
