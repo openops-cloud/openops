@@ -443,6 +443,7 @@ function needRefresh(connection: AppConnection): boolean {
   switch (connection.value.type) {
     case AppConnectionType.PLATFORM_OAUTH2:
     case AppConnectionType.CLOUD_OAUTH2:
+      return oauth2Util.isExpired(connection.value);
     case AppConnectionType.OAUTH2:
       return oauth2Util.isExpired(connection.value);
     default:

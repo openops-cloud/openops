@@ -33,6 +33,7 @@ export type ApplicationErrorParams =
   | InvalidBearerTokenParams
   | InvalidClaimParams
   | InvalidCloudClaimParams
+  | InvalidCloudRefreshParams
   | InvalidCredentialsErrorParams
   | InvalidJwtTokenErrorParams
   | InvalidOtpParams
@@ -83,6 +84,11 @@ export type InvalidClaimParams = BaseErrorParams<
 >;
 export type InvalidCloudClaimParams = BaseErrorParams<
   ErrorCode.INVALID_CLOUD_CLAIM,
+  { blockName: string }
+>;
+
+export type InvalidCloudRefreshParams = BaseErrorParams<
+  ErrorCode.INVALID_CLOUD_REFRESH,
   { blockName: string }
 >;
 
@@ -429,6 +435,7 @@ export enum ErrorCode {
   INVALID_BEARER_TOKEN = 'INVALID_BEARER_TOKEN',
   INVALID_CLAIM = 'INVALID_CLAIM',
   INVALID_CLOUD_CLAIM = 'INVALID_CLOUD_CLAIM',
+  INVALID_CLOUD_REFRESH = 'INVALID_CLOUD_REFRESH',
   INVALID_CREDENTIALS = 'INVALID_CREDENTIALS',
   INVALID_OR_EXPIRED_JWT_TOKEN = 'INVALID_OR_EXPIRED_JWT_TOKEN',
   INVALID_OTP = 'INVALID_OTP',

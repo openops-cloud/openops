@@ -31,21 +31,32 @@ async function refresh({
     tokenUrl: connectionValue.token_url,
   };
 
-  const oauthProxyUrl = system.get<string>(
-    SharedSystemProp.INTERNAL_OAUTH_PROXY_URL,
-  );
+  logger.info(`Refreshing token via Lambda for block: ${blockName}`);
 
-  const response = (
-    await axios.post(`${oauthProxyUrl}/refresh`, requestBody, {
-      timeout: 10000,
-    })
-  ).data;
-  return {
-    ...connectionValue,
-    ...response,
-    props: connectionValue.props,
-    type: AppConnectionType.CLOUD_OAUTH2,
-  };
+  try {
+    const oauthProxyUrl = system.get<string>(
+      SharedSystemProp.INTERNAL_OAUTH_PROXY_URL,
+    );
+
+    const response = (
+      await axios.post(`${oauthProxyUrl}/refresh`, requestBody, {
+        timeout: 10000,
+      })
+    ).data;
+
+    return {
+      ...connectionValue,
+      ...response,
+      props: connectionValue.props,
+      type: AppConnectionType.CLOUD_OAUTH2,
+    };
+  } catch (e: unknown) {
+    logger.error('Error refreshing token via Lambda', e);
+    throw new ApplicationError({
+      code: ErrorCode.INVALID_CLOUD_REFRESH,
+      params: { blockName },
+    });
+  }
 }
 
 async function claim({
