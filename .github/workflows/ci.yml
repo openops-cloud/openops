@@ -24,7 +24,7 @@ jobs:
           save-always: true
       - name: Install dependencies
         if: steps.node-modules-cache.outputs.cache-hit != 'true'
-        run: npm ci --no-audit --no-fund
+        run: npm ci --no-audit --no-fund && echo yalla balagan
   lint:
     name: Lint
     needs: install
