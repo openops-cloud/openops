@@ -205,7 +205,7 @@ jobs:
             type=registry,ref=${{ env.repository_uri }}:main-cache
           cache-to: mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${{ env.repository_uri }}:${{ env.sanitized_branch }}-cache
   build-images-for-forks:
-    if: ${{ ! vars.ECR_REGIONS }}
+    if: ${{ ! vars.ECR_REGION }}
     strategy:
         matrix:
             target:
