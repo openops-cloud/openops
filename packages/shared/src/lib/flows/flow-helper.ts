@@ -462,13 +462,20 @@ function moveAction(
   });
   return flowVersion;
 }
-
 function bulkAddActions(
   flowVersion: FlowVersion,
   request: PasteActionsRequest,
 ): FlowVersion {
   const action = request.action as unknown as Action;
-  return duplicateStepCascading(action, flowVersion, request.parentStep);
+
+  console.log('THE ACTION in bulkAddActions IS', action);
+  return duplicateStepCascading(
+    action,
+    flowVersion,
+    request.parentStep,
+    request.stepLocationRelativeToParent,
+    request.branchNodeId,
+  );
 }
 
 function addAction(
@@ -927,13 +934,20 @@ function duplicateStep(
     throw new Error(`step with name '${stepName}' not found`);
   }
 
-  return duplicateStepCascading(clonedStep, flowVersionWithArtifacts, stepName);
+  return duplicateStepCascading(
+    clonedStep,
+    flowVersionWithArtifacts,
+    stepName,
+    StepLocationRelativeToParent.AFTER,
+  );
 }
 
 function duplicateStepCascading(
   action: Action | Step,
   flowVersion: FlowVersion,
   parentStep: string,
+  stepLocationRelativeToParent: StepLocationRelativeToParent,
+  branchNodeId?: string,
 ): FlowVersion {
   const existingNames = getAllSteps(flowVersion.trigger).map(
     (step) => step.name,
@@ -974,7 +988,8 @@ function duplicateStepCascading(
   let finalFlow = addAction(flowVersion, {
     action: duplicatedStep as Action,
     parentStep,
-    stepLocationRelativeToParent: StepLocationRelativeToParent.AFTER,
+    stepLocationRelativeToParent,
+    branchNodeId,
   });
   const operations = getImportOperations(duplicatedStep);
   operations.forEach((operation) => {
@@ -1094,7 +1109,7 @@ export const flowHelper = {
       }
       case FlowOperationType.PASTE_ACTIONS: {
         clonedVersion = transferFlow(
-          bulkAddActions(clonedVersion, operation.request.action),
+          bulkAddActions(clonedVersion, operation.request),
           (step) => upgradeBlock(step, operation.request.action.name),
         );
         break;

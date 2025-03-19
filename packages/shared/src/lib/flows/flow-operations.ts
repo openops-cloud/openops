@@ -130,7 +130,7 @@ export const ChangeDescriptionRequest = Type.Object({
 export type ChangeDescriptionRequest = Static<typeof ChangeDescriptionRequest>;
 
 export const PasteActionsRequest = Type.Object({
-  action: Type.Any(Action),
+  action: Type.Any(),
   parentStep: Type.String(),
   stepLocationRelativeToParent: Type.Enum(StepLocationRelativeToParent),
   branchNodeId: Type.Optional(Type.String({})),
