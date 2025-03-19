@@ -5,7 +5,6 @@ const azureCliMock = {
 jest.mock('../src/lib/azure-cli', () => azureCliMock);
 
 import { advisorAction } from '../src/lib/actions/azure-advisor-action';
-import { useHostSession } from '../src/lib/common-properties';
 
 const auth = {
   accessKeyId: 'some accessKeyId',
@@ -29,7 +28,7 @@ describe('advisorAction', () => {
         type: 'DYNAMIC',
         required: true,
       },
-      ids: {
+      resourceIds: {
         type: 'ARRAY',
         required: false,
       },
@@ -37,27 +36,7 @@ describe('advisorAction', () => {
         type: 'SHORT_TEXT',
         required: false,
       },
-      dryRun: {
-        type: 'CHECKBOX',
-        required: false,
-      },
     });
-  });
-
-  test('should skip the execution when dry run is active', async () => {
-    const context = {
-      ...jest.requireActual('@openops/blocks-framework'),
-      propsValue: {
-        dryRun: true,
-      },
-    };
-
-    const result = await advisorAction.run(context);
-    expect(result).toEqual(
-      'Step execution skipped, dry run flag enabled. Azure get cost recommendations wont be run.',
-    );
-
-    expect(azureCliMock.runCommand).not.toHaveBeenCalled();
   });
 
   test('should return the output as-is', async () => {
@@ -95,7 +74,7 @@ describe('advisorAction', () => {
     ],
     [
       {
-        ids: ['id1', 'id2'],
+        resourceIds: ['id1', 'id2'],
       },
       `az advisor recommendation list --category 'cost' --output json --ids "id1" "id2"`,
     ],
@@ -134,7 +113,7 @@ describe('advisorAction', () => {
     const context = createContext({
       useHostSession: { useHostSessionCheckbox: false },
       subscriptions: { subDropdown: 'subscriptionId' },
-      ids: ['id1', 'id2'],
+      resourceIds: ['id1', 'id2'],
       resourceGroup: 'some resource group',
     });
 
