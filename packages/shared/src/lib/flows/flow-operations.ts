@@ -2,7 +2,6 @@ import { Static, Type } from '@sinclair/typebox';
 import { AppConnectionWithoutSensitiveData } from '../app-connection/app-connection';
 import { Nullable } from '../common';
 import {
-  Action,
   BlockActionSchema,
   BranchActionSchema,
   CodeActionSchema,
