@@ -468,7 +468,6 @@ function bulkAddActions(
 ): FlowVersion {
   const action = request.action as unknown as Action;
 
-  console.log('THE ACTION in bulkAddActions IS', action);
   return duplicateStepCascading(
     action,
     flowVersion,
