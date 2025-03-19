@@ -18,7 +18,7 @@ jobs:
         run: echo "$GITHUB_CONTEXT"
   install:
     name: Install Dependencies
-    if: ${{ ! github.event.pull_request || github.event.pull_request.head.repo.owner != 'openops-cloud' }}
+    if: ${{ ! github.event.pull_request || github.event.pull_request.head.repo.full_name != 'openops-cloud/openops' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
