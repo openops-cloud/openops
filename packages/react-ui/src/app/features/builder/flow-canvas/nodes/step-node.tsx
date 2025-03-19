@@ -1,34 +1,20 @@
 import { useDraggable } from '@dnd-kit/core';
 import {
   BlockIcon,
-  Button,
   cn,
   DRAGGED_STEP_TAG,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
   InvalidStepIcon,
   LoadingSpinner,
   OPS_NODE_SIZE,
   OverflowTooltip,
   Tooltip,
   TooltipContent,
-  UNSAVED_CHANGES_TOAST,
-  useToast,
   WorkflowNode,
 } from '@openops/components/ui';
 import { TooltipTrigger } from '@radix-ui/react-tooltip';
 import { Handle, Position } from '@xyflow/react';
 import { t } from 'i18next';
-import {
-  ArrowRightLeft,
-  CopyPlus,
-  EllipsisVertical,
-  Trash,
-} from 'lucide-react';
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
 import { BlockSelector } from '@/app/features/builder/blocks-selector';
@@ -44,7 +30,8 @@ import {
   TriggerType,
 } from '@openops/shared';
 
-import { useApplyOperationAndPushToHistory } from '@/app/features/builder/flow-version-undo-redo/hooks/apply-operation-and-push-to-history';
+import { CanvasContextMenu } from '../context-menu/canvas-context-menu';
+import { StepActionWrapper } from './step-action-wrapper';
 
 function getStepStatus(
   stepName: string | undefined,
@@ -64,17 +51,9 @@ function getStepStatus(
   return stepOutput?.status;
 }
 
-const StepActionWrapper = React.memo(
-  ({ children }: { children: React.ReactNode }) => {
-    return (
-      <div className="flex items-center gap-2 cursor-pointer">{children}</div>
-    );
-  },
-);
 StepActionWrapper.displayName = 'StepActionWrapper';
 const WorkflowStepNode = React.memo(
   ({ data }: { data: WorkflowNode['data'] }) => {
-    const { toast } = useToast();
     const [
       selectStepByName,
       setAllowCanvasPanning,
@@ -84,7 +63,6 @@ const WorkflowStepNode = React.memo(
       run,
       readonly,
       exitStepSettings,
-      removeStepSelection,
       flowVersion,
       loopIndexes,
     ] = useBuilderStateContext((state) => [
@@ -96,41 +74,14 @@ const WorkflowStepNode = React.memo(
       state.run,
       state.readonly,
       state.exitStepSettings,
-      state.removeStepSelection,
       state.flowVersion,
       state.loopsIndexes,
     ]);
-    const applyOperationAndPushToHistory = useApplyOperationAndPushToHistory();
-    const blockSelectorOperation = useRef<
-      FlowOperationType.UPDATE_ACTION | FlowOperationType.UPDATE_TRIGGER
-    >(FlowOperationType.UPDATE_ACTION);
-    const deleteStep = () => {
-      applyOperationAndPushToHistory(
-        {
-          type: FlowOperationType.DELETE_ACTION,
-          request: {
-            name: data.step!.name,
-          },
-        },
-        () => toast(UNSAVED_CHANGES_TOAST),
-      );
-      removeStepSelection();
-    };
-
-    const duplicateStep = () =>
-      applyOperationAndPushToHistory(
-        {
-          type: FlowOperationType.DUPLICATE_ACTION,
-          request: {
-            stepName: data.step!.name,
-          },
-        },
-        () => toast(UNSAVED_CHANGES_TOAST),
-      );
 
     const { stepMetadata } = blocksHooks.useStepMetadata({
       step: data.step!,
     });
+
     const stepIndex = useMemo(() => {
       const steps = flowHelper.getAllSteps(flowVersion.trigger);
       return steps.findIndex((step) => step.name === data.step!.name) + 1;
@@ -170,6 +121,10 @@ const WorkflowStepNode = React.memo(
       e.preventDefault();
       e.stopPropagation();
     };
+
+    const blockSelectorOperation = isAction
+      ? FlowOperationType.UPDATE_ACTION
+      : FlowOperationType.UPDATE_TRIGGER;
 
     return (
       <div
@@ -224,7 +179,7 @@ const WorkflowStepNode = React.memo(
               operation={{
                 type: isEmptyTriggerSelected
                   ? FlowOperationType.UPDATE_TRIGGER
-                  : blockSelectorOperation.current,
+                  : blockSelectorOperation,
                 stepName: data.step!.name!,
               }}
               open={openBlockSelector || (!readonly && isEmptyTriggerSelected)}
@@ -260,92 +215,13 @@ const WorkflowStepNode = React.memo(
                   </div>
 
                   {!readonly && (
-                    <div
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                      }}
-                    >
-                      <DropdownMenu
-                        open={openStepActionsMenu}
-                        onOpenChange={(open) => {
-                          setOpenStepActionsMenu(open);
-                        }}
-                        modal={true}
-                      >
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="p-1 size-6"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              e.preventDefault();
-                            }}
-                          >
-                            <EllipsisVertical className="w-4 h-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                          className="w-44 absolute"
-                          onCloseAutoFocus={(e) => e.preventDefault()}
-                        >
-                          <DropdownMenuItem
-                            onSelect={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              blockSelectorOperation.current = isAction
-                                ? FlowOperationType.UPDATE_ACTION
-                                : FlowOperationType.UPDATE_TRIGGER;
-                              setOpenStepActionsMenu(false);
-                              setOpenBlockSelector(true);
-                              selectStepByName(data.step!.name!);
-                            }}
-                          >
-                            <StepActionWrapper>
-                              <ArrowRightLeft className=" h-4 w-4 " />
-                              <span>Replace</span>
-                            </StepActionWrapper>
-                          </DropdownMenuItem>
-
-                          {isAction && (
-                            <DropdownMenuItem
-                              onSelect={(e) => {
-                                e.preventDefault();
-                                duplicateStep();
-                                setOpenStepActionsMenu(false);
-                              }}
-                            >
-                              <StepActionWrapper>
-                                <CopyPlus className="h-4 w-4" />
-                                {t('Duplicate')}
-                              </StepActionWrapper>
-                            </DropdownMenuItem>
-                          )}
-
-                          {isAction && (
-                            <>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem
-                                onSelect={(e) => {
-                                  e.preventDefault();
-                                  deleteStep();
-                                  setOpenStepActionsMenu(false);
-                                  setAllowCanvasPanning(true);
-                                }}
-                              >
-                                <StepActionWrapper>
-                                  <Trash className="mr-2 h-4 w-4 text-destructive" />
-                                  <span className="text-destructive">
-                                    Delete
-                                  </span>
-                                </StepActionWrapper>
-                              </DropdownMenuItem>
-                            </>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
+                    <CanvasContextMenu
+                      data={data}
+                      isAction={isAction}
+                      openStepActionsMenu={openStepActionsMenu}
+                      setOpenStepActionsMenu={setOpenStepActionsMenu}
+                      setOpenBlockSelector={setOpenBlockSelector}
+                    />
                   )}
                 </div>
 
