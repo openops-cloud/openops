@@ -1,3 +1,11 @@
+jest.mock('@openops/server-shared', () => ({
+  ...jest.requireActual('@openops/server-shared'),
+  cacheWrapper: {
+    getSerializedObject: jest.fn(),
+    setSerializedObject: jest.fn(),
+  },
+}));
+
 const openopsCommonMock = {
   ...jest.requireActual('@openops/common'),
   authenticateDefaultUserInOpenOpsTables: jest.fn(),
@@ -14,6 +22,7 @@ const openopsCommonMock = {
 };
 
 jest.mock('@openops/common', () => openopsCommonMock);
+import { nanoid } from 'nanoid';
 import { deleteRecordAction } from '../../src/actions/delete-record-action';
 
 describe('deleteRecordAction', () => {
@@ -43,6 +52,7 @@ describe('deleteRecordAction', () => {
     openopsCommonMock.authenticateDefaultUserInOpenOpsTables.mockResolvedValue({
       token: 'some databaseToken',
     });
+    openopsCommonMock.getFields.mockResolvedValue(['some field']);
     openopsCommonMock.deleteRow.mockResolvedValue('mock result');
 
     const context = createContext();
@@ -212,6 +222,9 @@ function createContext(params?: ContextParams) {
     propsValue: {
       tableName: params?.tableName ?? '1',
       rowPrimaryKey: params?.rowPrimaryKey ?? 'default primary key',
+    },
+    run: {
+      executionCorrelationId: nanoid(),
     },
   };
 }

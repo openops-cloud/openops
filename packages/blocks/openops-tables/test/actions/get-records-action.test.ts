@@ -1,3 +1,11 @@
+jest.mock('@openops/server-shared', () => ({
+  ...jest.requireActual('@openops/server-shared'),
+  cacheWrapper: {
+    getSerializedObject: jest.fn(),
+    setSerializedObject: jest.fn(),
+  },
+}));
+
 const openopsCommonMock = {
   ...jest.requireActual('@openops/common'),
   isSingleValueFilter: jest.fn(),
@@ -24,6 +32,7 @@ const openopsCommonMock = {
 jest.mock('@openops/common', () => openopsCommonMock);
 import { DynamicPropsValue } from '@openops/blocks-framework';
 import { FilterType, ViewFilterTypesEnum } from '@openops/common';
+import { nanoid } from 'nanoid';
 import { getRecordsAction } from '../../src/actions/get-records-action';
 
 describe('getRecordsAction test', () => {
@@ -299,6 +308,9 @@ function createContext(params?: ContextParams) {
       tableName: params?.tableName ?? 'Opportunity',
       filterType: params?.filterType,
       filters: { filters: params?.filters || [] },
+    },
+    run: {
+      executionCorrelationId: nanoid(),
     },
   };
 }
