@@ -2,6 +2,8 @@ name: CI
 
 on:
   push:
+    branches: [main]
+  pull_request:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -75,7 +77,6 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: Update THIRD_PARTY_LICENSES.txt
-
   test:
     strategy:
         matrix:
@@ -169,6 +170,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Configure AWS credentials
+        if: vars.ECR_REGION
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.ECR_ACCESS_KEY_ID }}
@@ -176,17 +178,19 @@ jobs:
           aws-region: ${{ vars.ECR_REGION }}
       - name: Login to Amazon ECR
         id: login-ecr
+        if: vars.ECR_REGION
         uses: aws-actions/amazon-ecr-login@v2
       - name: Format image tag parts
         env:
           BRANCH: ${{ github.ref_name }}
-          SHA: ${{ github.sha }}
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
           echo sanitized_branch=${BRANCH//[\/.:_]/-} >> "$GITHUB_ENV"
           echo repository_uri=${REGISTRY}/openops/${{ matrix.target.repository }} >> "$GITHUB_ENV"
           echo short_sha=${SHA::8} >> "$GITHUB_ENV"
       - name: Build image
+        if: vars.ECR_REGION
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -202,3 +206,13 @@ jobs:
             type=registry,ref=${{ env.repository_uri }}:${{ env.sanitized_branch }}-cache
             type=registry,ref=${{ env.repository_uri }}:main-cache
           cache-to: mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${{ env.repository_uri }}:${{ env.sanitized_branch }}-cache
+      - name: Build image
+        if: ${{ !vars.ECR_REGION }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./${{ matrix.target.file }}
+          build-args: VERSION=${{ env.short_sha }}
+          provenance: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

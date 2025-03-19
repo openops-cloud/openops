@@ -2,11 +2,13 @@ import { useReactFlow } from '@xyflow/react';
 import { t } from 'i18next';
 import { RefreshCcw, ZoomIn, ZoomOut } from 'lucide-react';
 import { useCallback } from 'react';
-import { Button } from '../../ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip';
+import { Button } from '../../../ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../../../ui/tooltip';
 
-import { CenterFlowIcon } from '../../icons';
-import { VerticalDivider } from '../../ui/vertical-divider';
+import { CenterFlowIcon } from '../../../icons';
+import { VerticalDivider } from '../../../ui/vertical-divider';
+import { InitialZoom } from '../constants';
+import { PanningModeToggleControl } from './panning-mode-toggle-control';
 
 const CanvasControls = ({ topOffset }: { topOffset?: number }) => {
   const reactFlow = useReactFlow();
@@ -30,8 +32,8 @@ const CanvasControls = ({ topOffset }: { topOffset?: number }) => {
   const handleFitToView = useCallback(async () => {
     await reactFlow.fitView({
       nodes: reactFlow.getNodes().slice(0, 5),
-      minZoom: 0.5,
-      maxZoom: 1.2,
+      minZoom: InitialZoom.MIN,
+      maxZoom: InitialZoom.MAX,
       duration: 0,
     });
 
@@ -42,7 +44,11 @@ const CanvasControls = ({ topOffset }: { topOffset?: number }) => {
   }, [reactFlow, topOffset]);
 
   return (
-    <div className="bg-background absolute left-[10px] bottom-[10px] z-50 rounded-xl flex flex-row items-center gap-1 shadow-editor py-[2px] px-[8px]">
+    <div className="bg-background absolute left-[10px] bottom-[10px] z-50 rounded-xl flex flex-row items-center gap-1 shadow-editor py-0.5 px-2">
+      <PanningModeToggleControl />
+
+      <VerticalDivider height={24} />
+
       <Tooltip>
         <TooltipTrigger asChild>
           <Button variant="ghost" size="sm" onClick={handleZoomReset}>

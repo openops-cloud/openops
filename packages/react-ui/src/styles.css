@@ -2,6 +2,10 @@
   display: none;
 }
 
+.react-flow__pane.selection {
+  cursor: default !important;
+}
+
 .react-flow {
   --xy-edge-stroke-selected-default: #b1b1b7 !important;
   --node-boxshadow-selected-default: 0 0 0 0 #b1b1b7;
