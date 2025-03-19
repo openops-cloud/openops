@@ -40,6 +40,7 @@ export * from './ui/resizable-panel';
 export * from './ui/scroll-area';
 export * from './ui/select';
 export * from './ui/seperator';
+export * from './ui/shortcut';
 export * from './ui/skeleton';
 export * from './ui/sortable';
 export * from './ui/spinner';
