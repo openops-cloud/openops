@@ -20,8 +20,6 @@ type FlowCanvasProps = {
   topOffset?: number;
   allowCanvasPanning?: boolean;
   children?: ReactNode;
-  onSelectionChange?: OnSelectionChangeFunc;
-  onSelectionEnd?: (event: React.MouseEvent) => void;
 };
 
 function getPanOnDrag(allowCanvasPanning: boolean, inGrabPanningMode: boolean) {
@@ -39,8 +37,6 @@ const FlowCanvas = React.memo(
     topOffset,
     allowCanvasPanning = true,
     children,
-    onSelectionChange,
-    onSelectionEnd,
   }: FlowCanvasProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -61,7 +57,8 @@ const FlowCanvas = React.memo(
       [topOffset],
     );
 
-    const { panningMode } = useCanvasContext();
+    const { panningMode, onSelectionChange, onSelectionEnd } =
+      useCanvasContext();
     const inGrabPanningMode = panningMode === 'grab';
 
     const panOnDrag = getPanOnDrag(allowCanvasPanning, inGrabPanningMode);
