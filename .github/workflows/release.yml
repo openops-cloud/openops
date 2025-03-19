@@ -79,6 +79,7 @@ jobs:
       contents: write
     env:
       VERSION: ${{ needs.get-version.outputs.version }}
+      RELEASE_DC_FILENAME: openops-dc-${{ needs.get-version.outputs.version }}.zip
     steps:
       - uses: actions/checkout@v4
       - name: Update version in docker-compose
@@ -88,7 +89,7 @@ jobs:
           cp ../../THIRD_PARTY_LICENSES.txt .
           cp ../../LICENSE .
           cp ../../NOTICE .
-          zip -r docker-compose-release-$VERSION.zip .
+          zip -r $RELEASE_DC_FILENAME .
       - name: Create a release
         id: create-release
         uses: softprops/action-gh-release@v2
@@ -97,8 +98,7 @@ jobs:
           tag_name: ${{ env.VERSION }}
           generate_release_notes: true
           draft: true
-          files: |
-            deploy/docker-compose/docker-compose-release-${{ env.VERSION }}.zip
+          files: [deploy/docker-compose/${{ env.RELEASE_DC_FILENAME }}]
       - name: Write summary
         run: |
           RELEASE_URL="${{ steps.create-release.outputs.url }}"
