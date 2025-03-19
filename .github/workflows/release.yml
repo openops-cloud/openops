@@ -79,16 +79,15 @@ jobs:
       contents: write
     env:
       VERSION: ${{ needs.get-version.outputs.version }}
+      RELEASE_DC_FILENAME: openops-dc-${{ needs.get-version.outputs.version }}.zip
     steps:
       - uses: actions/checkout@v4
       - name: Update version in docker-compose
         run: |
+          cp THIRD_PARTY_LICENSES.txt LICENSE NOTICE deploy/docker-compose
           cd deploy/docker-compose
           sed -i "s/\${OPS_VERSION:-latest}/$VERSION/" docker-compose.yml
-          cp ../../THIRD_PARTY_LICENSES.txt .
-          cp ../../LICENSE .
-          cp ../../NOTICE .
-          zip -r docker-compose-release-$VERSION.zip .
+          zip -r $RELEASE_DC_FILENAME .
       - name: Create a release
         id: create-release
         uses: softprops/action-gh-release@v2
@@ -97,22 +96,10 @@ jobs:
           tag_name: ${{ env.VERSION }}
           generate_release_notes: true
           draft: true
-          files: |
-            deploy/docker-compose/docker-compose-release-${{ env.VERSION }}.zip
+          files: deploy/docker-compose/${{ env.RELEASE_DC_FILENAME }}
       - name: Write summary
         run: |
           RELEASE_URL="${{ steps.create-release.outputs.url }}"
           echo "### Release $VERSION was created! 🎉" >> $GITHUB_STEP_SUMMARY
           echo "The release was created as a draft.\n" >> $GITHUB_STEP_SUMMARY
           echo "Please [review and publish it](${RELEASE_URL/\/tags\//\/edit\/})." >> $GITHUB_STEP_SUMMARY
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.RELEASE_S3_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.RELEASE_S3_SECRET_ACCESS_KEY }}
-          aws-region: us-east-2
-      - name: Upload release to S3
-        run: |
-          LOCAL_PATH=deploy/docker-compose/docker-compose-release-$VERSION.zip
-          S3_PATH=s3://openops/releases/$VERSION/openops-docker-compose-$VERSION.zip
-          aws s3 cp $LOCAL_PATH $S3_PATH
