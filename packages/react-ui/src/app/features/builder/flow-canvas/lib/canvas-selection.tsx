@@ -3,16 +3,14 @@ import { flowHelper } from '@openops/shared';
 import { OnSelectionChangeParams, useStoreApi } from '@xyflow/react';
 import { cloneDeep } from 'lodash-es';
 import { useCallback, useRef } from 'react';
-import { useBuilderStateContext } from '../../builder-hooks';
 
 export const useCanvasSelection = () => {
   const selectionRef = useRef<WorkflowNode[]>([]);
   const state = useStoreApi().getState();
-  const [flowVersion] = useBuilderStateContext((state) => [state.flowVersion]);
 
-  const onSelectionChange = (ev: OnSelectionChangeParams) => {
-    if (ev.nodes.length) {
-      selectionRef.current = ev.nodes as WorkflowNode[];
+  const onSelectionChange = (selectionParamas: OnSelectionChangeParams) => {
+    if (selectionParamas.nodes.length) {
+      selectionRef.current = selectionParamas.nodes as WorkflowNode[];
     }
   };
 
@@ -20,38 +18,36 @@ export const useCanvasSelection = () => {
     const firstStep = selectionRef.current[0]?.data.step;
     if (!firstStep) return;
 
-    const workflowTopLevelActions =
-      flowHelper.getAllStepsAtFirstLevel(firstStep);
-    if (!workflowTopLevelActions.length) return;
+    const topLevelSteps = flowHelper.getAllStepsAtFirstLevel(firstStep);
+    if (!topLevelSteps.length) return;
 
-    let lastTopLevelSelectedActionIndex = -1;
-
-    for (let i = selectionRef.current.length - 1; i >= 0; i--) {
-      lastTopLevelSelectedActionIndex = workflowTopLevelActions.findIndex(
-        (action) => action.name === selectionRef.current[i].data.step?.name,
-      );
-      if (lastTopLevelSelectedActionIndex !== -1) break;
-    }
-
-    const selectedActions =
-      lastTopLevelSelectedActionIndex !== -1
-        ? workflowTopLevelActions.slice(0, lastTopLevelSelectedActionIndex + 1)
-        : workflowTopLevelActions;
-
-    if (!selectedActions.length) return;
-
-    const firstStepInSelection = flowHelper.truncateFlow(
-      cloneDeep(selectedActions[0]),
-      selectedActions[selectedActions.length - 1].name,
+    const lastSelectedIndex = selectionRef.current.reduceRight(
+      (foundIndex, node, i) =>
+        foundIndex === -1 &&
+        topLevelSteps.some((step) => step.name === node.data.step?.name)
+          ? i
+          : foundIndex,
+      -1,
     );
 
-    const allSelectedStepNames = flowHelper
-      .getAllSteps(firstStepInSelection)
+    const selectedSteps =
+      lastSelectedIndex !== -1
+        ? topLevelSteps.slice(0, lastSelectedIndex + 1)
+        : topLevelSteps;
+
+    if (!selectedSteps.length) return;
+
+    const truncatedFlow = flowHelper.truncateFlow(
+      cloneDeep(selectedSteps[0]),
+      selectedSteps[selectedSteps.length - 1].name,
+    );
+
+    const selectedStepNames = flowHelper
+      .getAllSteps(truncatedFlow)
       .map((step) => step.name);
 
-    console.log(allSelectedStepNames);
-    state.addSelectedNodes(allSelectedStepNames);
-  }, [flowVersion, state]);
+    state.addSelectedNodes(selectedStepNames);
+  }, [state]);
 
   return { onSelectionChange, onSelectionEnd };
 };
