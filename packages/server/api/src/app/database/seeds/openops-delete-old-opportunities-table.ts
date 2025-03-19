@@ -48,6 +48,7 @@ export const deleteOldOpportunitiesTable = async (): Promise<void> => {
 
   if (await newTableWasAlreadyCreated()) {
     await setOpportunitiesTableDeleted();
+    return;
   }
 
   try {
