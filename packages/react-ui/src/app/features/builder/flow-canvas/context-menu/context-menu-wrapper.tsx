@@ -2,17 +2,17 @@ import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuTrigger,
+  ContextMenuType,
 } from '@openops/components/ui';
 
 import { CanvasContextMenuContent } from './canvas-context-menu-content';
-import { ContextMenuType } from './types';
 
 export type CanvasContextMenuProps = {
   contextMenuType: ContextMenuType;
   children?: React.ReactNode;
 };
 
-export const CanvasContextMenu = ({
+const CanvasContextMenuWrapper = ({
   children,
   contextMenuType,
 }: CanvasContextMenuProps) => {
@@ -27,3 +27,6 @@ export const CanvasContextMenu = ({
     </ContextMenu>
   );
 };
+
+CanvasContextMenuWrapper.displayName = 'CanvasContextMenuWrapper';
+export { CanvasContextMenuWrapper };

@@ -7,6 +7,7 @@ import {
   LoadingSpinner,
   OPS_NODE_SIZE,
   OverflowTooltip,
+  STEP_CONTEXT_MENU_ATTRIBUTE,
   Tooltip,
   TooltipContent,
   WorkflowNode,
@@ -154,6 +155,7 @@ const WorkflowStepNode = React.memo(
         ref={setNodeRef}
         {...attributes}
         {...listeners}
+        {...{ [`data-${STEP_CONTEXT_MENU_ATTRIBUTE}`]: data.step!.name }}
       >
         <div
           className="absolute text-accent-foreground text-sm opacity-0 transition-all duration-300 group-hover:opacity-100 "
