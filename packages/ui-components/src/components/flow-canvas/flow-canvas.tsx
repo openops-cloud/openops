@@ -71,7 +71,8 @@ const FlowCanvas = React.memo(
       [topOffset],
     );
 
-    const { panningMode } = useCanvasContext();
+    const { panningMode, onSelectionChange, onSelectionEnd } =
+      useCanvasContext();
     const inGrabPanningMode = panningMode === 'grab';
 
     const panOnDrag = getPanOnDrag(allowCanvasPanning, inGrabPanningMode);
@@ -113,7 +114,6 @@ const FlowCanvas = React.memo(
           // todo
           <ContextMenu contextMenuType={contextMenuType}>
             <ReactFlow
-              onContextMenu={onContextMenu}
               nodeTypes={nodeTypes}
               nodes={graph.nodes}
               edgeTypes={edgeTypes}
@@ -138,6 +138,9 @@ const FlowCanvas = React.memo(
                 hideAttribution: true,
               }}
               onInit={onInit}
+              onContextMenu={onContextMenu}
+              onSelectionChange={onSelectionChange}
+              onSelectionEnd={onSelectionEnd}
             >
               <Background color="lightgray" />
               {children}

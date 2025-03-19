@@ -315,6 +315,15 @@ function getSplitBranches(step: SplitActionSchema): SplitBranch[] {
   }));
 }
 
+function truncateFlow(firstStep: Step, lastStepName: string): Step {
+  if (firstStep.name !== lastStepName && firstStep.nextAction) {
+    truncateFlow(firstStep.nextAction, lastStepName);
+  } else {
+    firstStep.nextAction = undefined;
+  }
+  return firstStep;
+}
+
 const getStepFromSubFlow = ({
   subFlowStartStep,
   stepName,
@@ -1132,4 +1141,5 @@ export const flowHelper = {
   findAvailableStepName,
   doesActionHaveChildren,
   findPathToStep,
+  truncateFlow,
 };
