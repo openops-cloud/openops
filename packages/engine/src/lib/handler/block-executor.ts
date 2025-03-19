@@ -36,6 +36,7 @@ import {
   ExecutionVerdict,
   FlowExecutorContext,
 } from './context/flow-execution-context';
+import { nanoid } from 'nanoid';
 
 type HookResponse = {
   stopResponse: StopHookParams | undefined;
@@ -165,6 +166,7 @@ const executeAction: ActionHandler<BlockAction> = async ({
         id: constants.flowRunId,
         name: constants.flowName,
         pauseId: executionState.pauseId,
+        executionCorrelationId: constants.executionCorrelationId ?? nanoid(),
         stop: createStopHook(hookResponse),
         pause: createPauseHook(hookResponse, executionState.pauseId),
       },

@@ -11,6 +11,7 @@ import {
   OpenOpsField,
   openopsTablesDropdownProperty,
   updateRow,
+  wrapWithCacheGuard,
 } from '@openops/common';
 import { convertToStringWithValidation, isEmpty } from '@openops/shared';
 
@@ -27,7 +28,7 @@ export const updateRecordAction = createAction({
         'The primary key value of the row to update. If the row does not exist, a new row will be created.',
       required: true,
       refreshers: ['tableName'],
-      props: async ({ tableName }) => {
+      props: async ({ tableName, context }) => {
         if (!tableName) {
           return {};
         }
@@ -112,11 +113,24 @@ export const updateRecordAction = createAction({
   async run(context) {
     const { rowPrimaryKey, fieldsProperties } = context.propsValue;
     const tableName = context.propsValue.tableName as unknown as string;
-    const tableId = await getTableIdByTableName(tableName);
+
+    const tableCacheKey = `${context.run.executionCorrelationId}-table-${tableName}`;
+    const tableId = await wrapWithCacheGuard(
+      tableCacheKey,
+      getTableIdByTableName,
+      tableName,
+    );
 
     const { token } = await authenticateDefaultUserInOpenOpsTables();
 
-    const tableFields = await getFields(tableId, token);
+    const fieldsCacheKey = `${context.run.executionCorrelationId}-${tableId}-fields`;
+    const tableFields = await wrapWithCacheGuard(
+      fieldsCacheKey,
+      getFields,
+      tableId,
+      token,
+    );
+
     const fieldsToUpdate = mapFieldsToObject(
       tableName,
       tableFields,
