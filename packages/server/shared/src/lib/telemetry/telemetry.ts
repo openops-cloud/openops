@@ -35,9 +35,9 @@ export const telemetry = {
 
     startMetricsCollector();
   },
-  trackEvent(event: TelemetryEvent): void {
+  trackEvent(event: TelemetryEvent, trackEventsEnabled?: boolean): void {
     try {
-      const isEnable = isTelemetryEnabledForCurrentUser();
+      const isEnable = isTelemetryEnabledForCurrentUser(trackEventsEnabled);
       if (!isEnable) {
         return;
       }
@@ -99,7 +99,13 @@ function enrichEventLabels(event: TelemetryEvent): Timeseries {
   };
 }
 
-function isTelemetryEnabledForCurrentUser(): boolean {
+function isTelemetryEnabledForCurrentUser(
+  trackEventsEnabled?: boolean,
+): boolean {
+  if (trackEventsEnabled) {
+    return true;
+  }
+
   return requestContext.get('trackEvents' as never) === 'true';
 }
 

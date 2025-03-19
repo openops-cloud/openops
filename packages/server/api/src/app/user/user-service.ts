@@ -194,6 +194,24 @@ export const userService = {
     await cacheWrapper.setKey(`track-events-${id}`, trackEvents.toString());
   },
 
+  async getTrackEventsConfig(userId: string): Promise<string> {
+    const trackEventsKey = `track-events-${userId}`;
+
+    let trackEvents = await cacheWrapper.getKey(trackEventsKey);
+    if (trackEvents) {
+      return trackEvents;
+    }
+
+    const user = await userService.get({ id: userId });
+    if (!user) {
+      return 'false';
+    }
+
+    trackEvents = user.trackEvents?.toString() ?? 'false';
+    await cacheWrapper.setKey(trackEventsKey, trackEvents);
+    return trackEvents;
+  },
+
   async addOwnerToOrganization({
     id,
     organizationId,

@@ -12,6 +12,7 @@ import {
 } from '@openops/shared';
 import { engineRunner } from 'server-worker';
 import { accessTokenManager } from '../../authentication/lib/access-token-manager';
+import { userService } from '../../user/user-service';
 import { flowVersionService } from '../flow-version/flow-version.service';
 
 export const stepRunService = {
@@ -50,14 +51,18 @@ export const stepRunService = {
     const endTime = performance.now();
     const duration = endTime - startTime;
 
-    sendWorkflowTestBlockEvent({
-      flowId: flowVersion.flowId,
-      success: result.success,
-      projectId,
-      duration,
-      userId,
-      step,
-    });
+    const trackEventsEnabled = await userService.getTrackEventsConfig(userId);
+    sendWorkflowTestBlockEvent(
+      {
+        flowId: flowVersion.flowId,
+        success: result.success,
+        projectId,
+        duration,
+        userId,
+        step,
+      },
+      trackEventsEnabled === 'true',
+    );
 
     return {
       success: result.success,

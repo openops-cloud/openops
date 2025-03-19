@@ -123,29 +123,35 @@ export function sendWorkflowUpdatedEvent(eventParams: {
   });
 }
 
-export function sendWorkflowTestBlockEvent(eventParams: {
-  userId: string;
-  projectId: string;
-  flowId: string;
-  success: boolean;
-  duration: number;
-  step: Action | Trigger;
-}): void {
-  telemetry.trackEvent({
-    name: WorkflowEventName.WORKFLOW_TEST_BLOCK,
-    labels: {
-      userId: eventParams.userId,
-      flowId: eventParams.flowId,
-      projectId: eventParams.projectId,
-      status: eventParams.success
-        ? FlowRunStatus.SUCCEEDED
-        : FlowRunStatus.FAILED,
-      stepType: eventParams.step.type,
-      blockName: eventParams.step.settings?.blockName || '',
-      actionName: eventParams.step?.settings?.actionName || '',
-      duration: eventParams.duration.toString(),
+export function sendWorkflowTestBlockEvent(
+  eventParams: {
+    userId: string;
+    projectId: string;
+    flowId: string;
+    success: boolean;
+    duration: number;
+    step: Action | Trigger;
+  },
+  trackEventsEnabled?: boolean,
+): void {
+  telemetry.trackEvent(
+    {
+      name: WorkflowEventName.WORKFLOW_TEST_BLOCK,
+      labels: {
+        userId: eventParams.userId,
+        flowId: eventParams.flowId,
+        projectId: eventParams.projectId,
+        status: eventParams.success
+          ? FlowRunStatus.SUCCEEDED
+          : FlowRunStatus.FAILED,
+        stepType: eventParams.step.type,
+        blockName: eventParams.step.settings?.blockName || '',
+        actionName: eventParams.step?.settings?.actionName || '',
+        duration: eventParams.duration.toString(),
+      },
     },
-  });
+    trackEventsEnabled,
+  );
 }
 
 export function sendWorkflowExecutionEvent(
