@@ -15,6 +15,7 @@ import {
   FlowVersion,
   FlowVersionState,
   PackageType,
+  PasteActionsRequest,
   StepLocationRelativeToParent,
   Trigger,
   TriggerType,
@@ -2479,5 +2480,316 @@ describe('Split', () => {
         'Condition',
       );
     });
+  });
+});
+
+describe('bulkAddActions', () => {
+  const initialFlowVersion: FlowVersion = {
+    id: 'ep9PFPiqN5ibHqTwc9b7E',
+    created: '2025-03-19T15:58:50.098Z',
+    updated: '2025-03-19T16:58:37.259Z',
+    flowId: 'uRntBYGwAAf0Sy9eFdFmO',
+    description: '',
+    displayName: 'Untitled',
+    trigger: {
+      name: 'trigger',
+      type: TriggerType.EMPTY,
+      valid: false,
+      settings: {},
+      nextAction: {
+        name: 'step_4',
+        type: 'LOOP_ON_ITEMS',
+        valid: false,
+        settings: {
+          items: '',
+          inputUiInfo: {
+            customizedInputs: {},
+          },
+        },
+        nextAction: {
+          name: 'step_2',
+          type: 'SPLIT',
+          valid: true,
+          branches: [
+            {
+              optionId: '24MiXRtodWv89yyBRntcN',
+            },
+            {
+              optionId: 'HAiU9lCIo0LUIrBnzvBz5',
+            },
+            {
+              optionId: 'dPQh9gH75Y5JELFuGQlRM',
+            },
+          ],
+          settings: {
+            options: [
+              {
+                id: '24MiXRtodWv89yyBRntcN',
+                name: 'Branch 1',
+                conditions: [[]],
+              },
+              {
+                id: 'HAiU9lCIo0LUIrBnzvBz5',
+                name: 'Branch 2',
+                conditions: [
+                  [
+                    {
+                      operator: 'TEXT_EXACTLY_MATCHES',
+                      firstValue: '',
+                      secondValue: '',
+                      caseSensitive: false,
+                    },
+                  ],
+                ],
+              },
+              {
+                id: 'dPQh9gH75Y5JELFuGQlRM',
+                name: 'Branch 3',
+                conditions: [
+                  [
+                    {
+                      operator: 'TEXT_EXACTLY_MATCHES',
+                      firstValue: '',
+                      secondValue: '',
+                      caseSensitive: false,
+                    },
+                  ],
+                ],
+              },
+            ],
+            inputUiInfo: {
+              customizedInputs: {},
+            },
+            defaultBranch: '24MiXRtodWv89yyBRntcN',
+          },
+          nextAction: {
+            name: 'step_3',
+            type: 'BRANCH',
+            valid: false,
+            settings: {
+              conditions: [
+                [
+                  {
+                    operator: 'TEXT_CONTAINS',
+                    firstValue: '',
+                    secondValue: '',
+                    caseSensitive: false,
+                  },
+                ],
+              ],
+              inputUiInfo: {
+                customizedInputs: {},
+              },
+            },
+            nextAction: {
+              name: 'step_13',
+              type: 'SPLIT',
+              valid: true,
+              branches: [
+                {
+                  optionId: 'i2lL0q2t9YaF2-frdC9-k',
+                },
+                {
+                  optionId: 'c6jtOpzg4HiC7Lc2E7XEx',
+                },
+                {
+                  optionId: 'NkOGIbSzokL-EMTpasd0b',
+                },
+              ],
+              settings: {
+                options: [
+                  {
+                    id: 'i2lL0q2t9YaF2-frdC9-k',
+                    name: 'Branch 1',
+                    conditions: [[]],
+                  },
+                  {
+                    id: 'c6jtOpzg4HiC7Lc2E7XEx',
+                    name: 'Branch 2',
+                    conditions: [
+                      [
+                        {
+                          operator: 'TEXT_EXACTLY_MATCHES',
+                          firstValue: '',
+                          secondValue: '',
+                          caseSensitive: false,
+                        },
+                      ],
+                    ],
+                  },
+                  {
+                    id: 'NkOGIbSzokL-EMTpasd0b',
+                    name: 'Branch 3',
+                    conditions: [
+                      [
+                        {
+                          operator: 'TEXT_EXACTLY_MATCHES',
+                          firstValue: '',
+                          secondValue: '',
+                          caseSensitive: false,
+                        },
+                      ],
+                    ],
+                  },
+                ],
+                inputUiInfo: {
+                  customizedInputs: {},
+                },
+                defaultBranch: 'i2lL0q2t9YaF2-frdC9-k',
+              },
+              displayName: 'Split',
+            },
+            displayName: 'Condition',
+          },
+          displayName: 'Split',
+        },
+        displayName: 'Loop on Items',
+      },
+      displayName: 'Select Trigger',
+    },
+    updatedBy: 'hnQ6Ca6N1cHU6U6BBtNn2',
+    valid: false,
+    state: FlowVersionState.DRAFT,
+  };
+
+  const action = {
+    name: 'step_20',
+    type: 'CODE',
+    valid: true,
+    settings: {
+      input: {},
+      sourceCode: {
+        code: 'export const code = async (inputs) => {\n  return true;\n};',
+        packageJson: '{}',
+      },
+      inputUiInfo: {
+        customizedInputs: {},
+      },
+      errorHandlingOptions: {
+        retryOnFailure: {
+          value: false,
+        },
+        continueOnFailure: {
+          value: false,
+        },
+      },
+    },
+    nextAction: {
+      name: 'step_30',
+      type: 'CODE',
+      valid: true,
+      settings: {
+        input: {},
+        sourceCode: {
+          code: 'export const code = async (inputs) => {\n  return true;\n};',
+          packageJson: '{}',
+        },
+        inputUiInfo: {
+          customizedInputs: {},
+        },
+        errorHandlingOptions: {
+          retryOnFailure: {
+            value: false,
+          },
+          continueOnFailure: {
+            value: false,
+          },
+        },
+      },
+      displayName: 'COPY 2',
+    },
+    displayName: 'COPY 1',
+  };
+
+  const getPasteRequest = (
+    parentStep: string,
+    stepLocationRelativeToParent: StepLocationRelativeToParent,
+    branchNodeId?: string,
+  ): PasteActionsRequest => {
+    return {
+      action,
+      parentStep,
+      stepLocationRelativeToParent,
+      branchNodeId,
+    };
+  };
+
+  it('should paste AFTER', () => {
+    const result = flowHelper.apply(initialFlowVersion, {
+      type: FlowOperationType.PASTE_ACTIONS,
+      request: getPasteRequest('step_4', StepLocationRelativeToParent.AFTER),
+    });
+
+    const parent = flowHelper.getStep(result, 'step_4');
+
+    expect(parent?.nextAction.name).toEqual(action.name);
+    expect(parent?.nextAction.nextAction.name).toEqual(action.nextAction.name);
+  });
+
+  it('should paste INSIDE_LOOP', () => {
+    const result = flowHelper.apply(initialFlowVersion, {
+      type: FlowOperationType.PASTE_ACTIONS,
+      request: getPasteRequest(
+        'step_4',
+        StepLocationRelativeToParent.INSIDE_LOOP,
+      ),
+    });
+
+    const parent = flowHelper.getStep(result, 'step_4');
+
+    if (parent && parent.type === 'LOOP_ON_ITEMS') {
+      expect(parent.firstLoopAction?.name).toEqual(action.name);
+      expect(parent.firstLoopAction?.nextAction?.name).toEqual(
+        action.nextAction.name,
+      );
+    } else {
+      throw new Error('LOOP_ON_ITEMS block is not found');
+    }
+  });
+
+  it('should paste INSIDE_FALSE_BRANCH', () => {
+    const result = flowHelper.apply(initialFlowVersion, {
+      type: FlowOperationType.PASTE_ACTIONS,
+      request: getPasteRequest(
+        'step_3',
+        StepLocationRelativeToParent.INSIDE_FALSE_BRANCH,
+      ),
+    });
+
+    const parent = flowHelper.getStep(result, 'step_3');
+
+    if (parent && parent.type === 'BRANCH') {
+      expect(parent.onFailureAction?.name).toEqual(action.name);
+      expect(parent.onFailureAction?.nextAction?.name).toEqual(
+        action.nextAction.name,
+      );
+    } else {
+      throw new Error('BRANCH block is not found');
+    }
+  });
+
+  it('should paste INSIDE_SPLIT', () => {
+    const branchId = '24MiXRtodWv89yyBRntcN';
+    const result = flowHelper.apply(initialFlowVersion, {
+      type: FlowOperationType.PASTE_ACTIONS,
+      request: getPasteRequest(
+        'step_2',
+        StepLocationRelativeToParent.INSIDE_SPLIT,
+        branchId,
+      ),
+    });
+
+    const parent = flowHelper.getStep(result, 'step_2');
+
+    let branch;
+
+    if (parent && parent.type === 'SPLIT') {
+      branch = parent.branches.find((branch) => branch.optionId === branchId);
+    } else {
+      throw new Error('SPLIT block is not found');
+    }
+
+    expect(branch?.nextAction.name).toEqual(action.name);
+    expect(branch?.nextAction.nextAction.name).toEqual(action.nextAction.name);
   });
 });
