@@ -536,6 +536,7 @@ export type WorkflowNode = {
     branchNodeId?: string;
   };
   selectable?: boolean;
+  selected?: boolean;
 };
 
 export type Edge = {

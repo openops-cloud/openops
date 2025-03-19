@@ -1,9 +1,11 @@
+import { getTableByName } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { FlagEntity } from '../../flags/flag.entity';
+import { SEED_OPENOPS_TABLE_NAME } from '../../openops-tables/template-tables/create-opportunities-table';
 import { seedTemplateTablesService } from '../../openops-tables/template-tables/seed-tables-for-templates';
 import { databaseConnection } from '../database-connection';
 
-const OPPORTUNITIES_TABLE_SEED = 'OPPORTUNITYSEED';
+const OPPORTUNITIES_TABLE_SEED = 'OPPORTUNITIESSEED';
 
 const tableAlreadyCreated = async (): Promise<boolean> => {
   const flagRepo = databaseConnection().getRepository(FlagEntity);
@@ -30,7 +32,11 @@ export const seedOpportunitesTemplateTable = async (): Promise<void> => {
     return;
   }
 
-  await seedTemplateTablesService.createOpportunityTemplateTable();
+  const table = await getTableByName(SEED_OPENOPS_TABLE_NAME);
+
+  if (!table) {
+    await seedTemplateTablesService.createOpportunityTemplateTable();
+  }
 
   await setTableSeedFlag();
 };

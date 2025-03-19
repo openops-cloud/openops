@@ -103,7 +103,7 @@ export const CanvasContextProvider = ({
       onSelectionChange,
       onSelectionEnd,
     }),
-    [effectivePanningMode, selectedActions, onSelectionEnd],
+    [effectivePanningMode, onSelectionChange, onSelectionEnd],
   );
   return (
     <CanvasContext.Provider value={contextValue}>
