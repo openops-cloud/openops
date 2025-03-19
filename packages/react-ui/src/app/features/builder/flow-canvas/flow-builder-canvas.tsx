@@ -32,7 +32,9 @@ const FlowBuilderCanvas = React.memo(() => {
   const [allowCanvasPanning, graph, graphHeight] = useBuilderStateContext(
     (state) => {
       const previousNodes = getNodes();
-      let graph = flowCanvasUtils.convertFlowVersionToGraph(state.flowVersion);
+      const graph = flowCanvasUtils.convertFlowVersionToGraph(
+        state.flowVersion,
+      );
       graph.nodes = graph.nodes.map((node) => {
         const previousNode = previousNodes.find((n) => n.id === node.id);
 
