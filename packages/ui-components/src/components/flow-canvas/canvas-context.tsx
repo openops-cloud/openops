@@ -1,4 +1,6 @@
+import { useKeyPress } from '@xyflow/react';
 import { createContext, ReactNode, useContext, useMemo, useState } from 'react';
+import { SHIFT_KEY, SPACE_KEY } from './constants';
 
 export type PanningMode = 'grab' | 'pan';
 
@@ -16,12 +18,24 @@ export const CanvasContextProvider = ({
 }) => {
   const [panningMode, setPanningMode] = useState<PanningMode>('grab');
 
+  const spacePressed = useKeyPress(SPACE_KEY);
+  const shiftPressed = useKeyPress(SHIFT_KEY);
+
+  const effectivePanningMode: PanningMode = useMemo(() => {
+    if ((spacePressed || panningMode === 'grab') && !shiftPressed) {
+      return 'grab';
+    } else if ((shiftPressed || panningMode === 'pan') && !spacePressed) {
+      return 'pan';
+    }
+    return 'grab';
+  }, [panningMode, shiftPressed, spacePressed]);
+
   const contextValue = useMemo(
     () => ({
-      panningMode,
+      panningMode: effectivePanningMode,
       setPanningMode,
     }),
-    [panningMode],
+    [effectivePanningMode],
   );
   return (
     <CanvasContext.Provider value={contextValue}>
