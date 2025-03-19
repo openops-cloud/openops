@@ -87,6 +87,7 @@ export const CanvasContextProvider = ({
       .map((step) => step.name);
 
     state.addSelectedNodes(selectedStepNames);
+    setSelectedActions([]);
   }, [selectedActions, state]);
 
   const contextValue = useMemo(
