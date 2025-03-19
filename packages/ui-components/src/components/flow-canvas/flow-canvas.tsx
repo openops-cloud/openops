@@ -111,7 +111,6 @@ const FlowCanvas = React.memo(
     return (
       <div className="size-full bg-editorBackground" ref={containerRef}>
         {!!graph && (
-          // todo
           <ContextMenu contextMenuType={contextMenuType}>
             <ReactFlow
               nodeTypes={nodeTypes}

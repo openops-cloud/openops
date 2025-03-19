@@ -57,7 +57,6 @@ const WorkflowStepNode = React.memo(
   ({ data }: { data: WorkflowNode['data'] }) => {
     const [
       selectStepByName,
-      setAllowCanvasPanning,
       isSelected,
       isDragging,
       selectedStep,
@@ -68,7 +67,6 @@ const WorkflowStepNode = React.memo(
       loopIndexes,
     ] = useBuilderStateContext((state) => [
       state.selectStepByName,
-      state.setAllowCanvasPanning,
       state.selectedStep === data.step?.name,
       state.activeDraggingStep === data.step?.name,
       state.selectedStep,
@@ -145,12 +143,6 @@ const WorkflowStepNode = React.memo(
           },
         )}
         onClick={(e) => handleStepClick(e)}
-        onMouseEnter={() => {
-          setAllowCanvasPanning(false);
-        }}
-        onMouseLeave={() => {
-          setAllowCanvasPanning(true);
-        }}
         key={data.step?.name}
         ref={setNodeRef}
         {...attributes}
