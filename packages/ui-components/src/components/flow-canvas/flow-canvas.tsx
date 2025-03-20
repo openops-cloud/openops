@@ -88,7 +88,7 @@ const FlowCanvas = React.memo(
           `data-${STEP_CONTEXT_MENU_ATTRIBUTE}`,
         );
 
-        if (stepElement && stepName) {
+        if (stepName) {
           const reactFlowState = storeApi.getState();
           reactFlowState.setNodes(
             reactFlowState.nodes.map((node) => ({
