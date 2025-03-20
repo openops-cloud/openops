@@ -9,5 +9,4 @@ export const MAX_ZOOM = 1.5;
 export const MIN_ZOOM = 0.5;
 
 export const STEP_CONTEXT_MENU_ATTRIBUTE = 'step-context-menu';
-export const SELECTION_RECT_CHEVRON_ATTRIBUTE = 'selection-rect-chevron';
 export const NODE_SELECTION_RECT_CLASS_NAME = 'react-flow__nodesselection-rect';
