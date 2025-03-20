@@ -45,7 +45,7 @@ export const CanvasContextMenuContent = ({
     (node: string) => node === flowVersion.trigger.name,
   );
 
-  // todo
+  // https://linear.app/openops/issue/OPS-854/add-paste-logic
   const disabledPaste = true;
   const firstSelectedStep = flowHelper.getStep(flowVersion, selectedNodes[0]);
   const showPasteAfterLastStep =
@@ -72,7 +72,7 @@ export const CanvasContextMenuContent = ({
         <ContextMenuItem
           disabled={disabled}
           onClick={() => {
-            // handle copy
+            // https://linear.app/openops/issue/OPS-852/add-copy-logic
           }}
         >
           <ShortcutWrapper shortcut={CanvasShortcuts['Copy']}>
@@ -86,7 +86,7 @@ export const CanvasContextMenuContent = ({
           <ContextMenuItem
             disabled={disabledPaste}
             onClick={() => {
-              // todo paste logic
+              // // https://linear.app/openops/issue/OPS-854/add-paste-logic
             }}
             className="flex items-center gap-2"
           >
@@ -98,7 +98,7 @@ export const CanvasContextMenuContent = ({
           <ContextMenuItem
             disabled={disabledPaste}
             onClick={() => {
-              // todo paste logic
+              // https://linear.app/openops/issue/OPS-854/add-paste-logic
             }}
             className="flex items-center gap-2"
           >
@@ -110,7 +110,7 @@ export const CanvasContextMenuContent = ({
           <ContextMenuItem
             disabled={disabledPaste}
             onClick={() => {
-              // todo paste logic
+              // https://linear.app/openops/issue/OPS-854/add-paste-logic
             }}
             className="flex items-center gap-2"
           >

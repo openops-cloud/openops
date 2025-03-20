@@ -7,11 +7,6 @@ export const CanvasShortcuts: CanvasShortcutsProps = {
     withShift: false,
     shortcutKey: 'v',
   },
-  Delete: {
-    withCtrl: false,
-    withShift: true,
-    shortcutKey: 'Delete',
-  },
   Copy: {
     withCtrl: true,
     withShift: false,
