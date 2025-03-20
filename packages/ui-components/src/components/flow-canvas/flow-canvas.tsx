@@ -28,7 +28,7 @@ type FlowCanvasProps = {
   topOffset?: number;
   allowCanvasPanning?: boolean;
   children?: ReactNode;
-  ContextMenu: React.ComponentType<{
+  ContextMenu?: React.ComponentType<{
     contextMenuType: ContextMenuType;
     children: ReactNode;
   }>;
@@ -48,7 +48,7 @@ const FlowCanvas = React.memo(
     graph,
     topOffset,
     allowCanvasPanning = true,
-    ContextMenu,
+    ContextMenu = ({ children }) => children,
     children,
   }: FlowCanvasProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
