@@ -26,6 +26,7 @@ type CanvasContextState = {
   setPanningMode: React.Dispatch<React.SetStateAction<PanningMode>>;
   onSelectionChange: (ev: OnSelectionChangeParams) => void;
   onSelectionEnd: () => void;
+  copy: () => void;
 };
 
 const CanvasContext = createContext<CanvasContextState | undefined>(undefined);
@@ -140,8 +141,9 @@ export const CanvasContextProvider = ({
       setPanningMode,
       onSelectionChange,
       onSelectionEnd,
+      copy,
     }),
-    [effectivePanningMode, onSelectionChange, onSelectionEnd],
+    [effectivePanningMode, onSelectionChange, onSelectionEnd, copy],
   );
   return (
     <CanvasContext.Provider value={contextValue}>

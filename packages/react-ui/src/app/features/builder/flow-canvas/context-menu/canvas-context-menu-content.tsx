@@ -4,6 +4,7 @@ import { ClipboardPaste, ClipboardPlus, Copy } from 'lucide-react';
 import {
   ContextMenuItem,
   ContextMenuType,
+  useCanvasContext,
   WorkflowNode,
 } from '@openops/components/ui';
 import { ActionType, FlagId, flowHelper } from '@openops/shared';
@@ -39,6 +40,8 @@ export const CanvasContextMenuContent = ({
     state.readonly,
   ]);
 
+  const { copy } = useCanvasContext();
+
   const disabled = selectedNodes.length === 0;
 
   const doSelectedNodesIncludeTrigger = selectedNodes.some(
@@ -69,12 +72,7 @@ export const CanvasContextMenuContent = ({
   return (
     <>
       {showCopy && (
-        <ContextMenuItem
-          disabled={disabled}
-          onClick={() => {
-            // https://linear.app/openops/issue/OPS-852/add-copy-logic
-          }}
-        >
+        <ContextMenuItem disabled={disabled} onClick={copy}>
           <ShortcutWrapper shortcut={CanvasShortcuts['Copy']}>
             <Copy className="w-4 h-4"></Copy> {t('Copy')}
           </ShortcutWrapper>
