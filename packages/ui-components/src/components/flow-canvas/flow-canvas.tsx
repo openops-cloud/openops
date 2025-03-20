@@ -1,3 +1,4 @@
+import { Action } from '@openops/shared';
 import {
   Background,
   EdgeTypes,
@@ -8,8 +9,10 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import React, { ReactNode, useCallback, useRef, useState } from 'react';
+import { useEffectOnce } from 'react-use';
 import { Edge, Graph, WorkflowNode } from '../../lib/flow-canvas-utils';
 import { useCanvasContext } from './canvas-context';
+import { usePasteActionsInClipboard } from './clipboard';
 import {
   InitialZoom,
   MAX_ZOOM,
@@ -30,6 +33,7 @@ type FlowCanvasProps = {
   children?: ReactNode;
   ContextMenu?: React.ComponentType<{
     contextMenuType: ContextMenuType;
+    actionToPaste: Action | null;
     children: ReactNode;
   }>;
 };
@@ -56,7 +60,13 @@ const FlowCanvas = React.memo(
     const [contextMenuType, setContextMenuType] = useState<ContextMenuType>(
       ContextMenuType.CANVAS,
     );
+    const { actionToPaste, fetchClipboardOperations } =
+      usePasteActionsInClipboard();
     useResizeCanvas(containerRef);
+
+    useEffectOnce(() => {
+      fetchClipboardOperations();
+    });
 
     const onInit = useCallback(
       (reactFlow: ReactFlowInstance<WorkflowNode, Edge>) => {
@@ -79,7 +89,9 @@ const FlowCanvas = React.memo(
 
     const panOnDrag = getPanOnDrag(allowCanvasPanning, inGrabPanningMode);
 
-    const onContextMenu = (ev: React.MouseEvent<HTMLDivElement>) => {
+    const onContextMenu = async (ev: React.MouseEvent<HTMLDivElement>) => {
+      await fetchClipboardOperations();
+
       if (ev.target instanceof HTMLElement || ev.target instanceof SVGElement) {
         const stepElement = ev.target.closest(
           `[data-${STEP_CONTEXT_MENU_ATTRIBUTE}]`,
@@ -117,7 +129,10 @@ const FlowCanvas = React.memo(
     return (
       <div className="size-full bg-editorBackground" ref={containerRef}>
         {!!graph && (
-          <ContextMenu contextMenuType={contextMenuType}>
+          <ContextMenu
+            contextMenuType={contextMenuType}
+            actionToPaste={actionToPaste}
+          >
             <ReactFlow
               nodeTypes={nodeTypes}
               nodes={graph.nodes}

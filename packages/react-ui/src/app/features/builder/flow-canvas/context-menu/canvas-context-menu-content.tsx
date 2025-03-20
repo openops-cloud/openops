@@ -4,23 +4,38 @@ import { ClipboardPaste, ClipboardPlus, Copy } from 'lucide-react';
 import {
   ContextMenuItem,
   ContextMenuType,
+  toast,
+  UNSAVED_CHANGES_TOAST,
   useCanvasContext,
   WorkflowNode,
 } from '@openops/components/ui';
-import { ActionType, FlagId, flowHelper } from '@openops/shared';
+import {
+  ActionType,
+  FlagId,
+  flowHelper,
+  FlowOperationType,
+  FlowVersion,
+  isNil,
+  StepLocationRelativeToParent,
+} from '@openops/shared';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { useReactFlow } from '@xyflow/react';
+import { useCallback } from 'react';
 import { useBuilderStateContext } from '../../builder-hooks';
+import { useApplyOperationAndPushToHistory } from '../../flow-version-undo-redo/hooks/apply-operation-and-push-to-history';
 import { CanvasShortcuts, ShortcutWrapper } from './canvas-shortcuts';
 import { CanvasContextMenuProps } from './context-menu-wrapper';
 
 export const CanvasContextMenuContent = ({
   contextMenuType,
+  actionToPaste,
 }: CanvasContextMenuProps) => {
   const showCopyPaste =
     flagsHooks.useFlag<boolean>(FlagId.COPY_PASTE_ACTIONS_ENABLED).data ||
     false;
+
+  const applyOperationAndPushToHistory = useApplyOperationAndPushToHistory();
 
   const { getNodes } = useReactFlow();
   const nodes = getNodes() as WorkflowNode[];
@@ -35,10 +50,9 @@ export const CanvasContextMenuContent = ({
       return acc;
     }, [] as string[]);
 
-  const [flowVersion, readonly] = useBuilderStateContext((state) => [
-    state.flowVersion,
-    state.readonly,
-  ]);
+  const [flowVersion, readonly, selectedStep] = useBuilderStateContext(
+    (state) => [state.flowVersion, state.readonly, state.selectedStep],
+  );
 
   const { copy } = useCanvasContext();
 
@@ -48,8 +62,7 @@ export const CanvasContextMenuContent = ({
     (node: string) => node === flowVersion.trigger.name,
   );
 
-  // https://linear.app/openops/issue/OPS-854/add-paste-logic
-  const disabledPaste = true;
+  const disabledPaste = isNil(actionToPaste);
   const firstSelectedStep = flowHelper.getStep(flowVersion, selectedNodes[0]);
   const showPasteAfterLastStep =
     !readonly && contextMenuType === ContextMenuType.CANVAS;
@@ -60,14 +73,43 @@ export const CanvasContextMenuContent = ({
     contextMenuType === ContextMenuType.STEP;
 
   const showPasteAfterCurrentStep =
-    selectedNodes.length === 1 &&
+    (selectedNodes.length === 1 || selectedStep) &&
     !readonly &&
     contextMenuType === ContextMenuType.STEP;
+
+  const showPasteInConditionBranch =
+    contextMenuType === ContextMenuType.STEP &&
+    firstSelectedStep?.type === ActionType.BRANCH;
 
   const showCopy =
     showCopyPaste &&
     !doSelectedNodesIncludeTrigger &&
     contextMenuType === ContextMenuType.STEP;
+
+  const onPaste = useCallback(
+    (
+      stepLocationRelativeToParent: StepLocationRelativeToParent,
+      selectedStep: string | null,
+      branchNodeId?: string,
+    ) => {
+      if (isNil(actionToPaste)) {
+        return;
+      }
+      applyOperationAndPushToHistory(
+        {
+          type: FlowOperationType.PASTE_ACTIONS,
+          request: {
+            action: actionToPaste,
+            parentStep: getParentStepForPaste(flowVersion, selectedStep),
+            stepLocationRelativeToParent,
+            branchNodeId,
+          },
+        },
+        () => toast(UNSAVED_CHANGES_TOAST),
+      );
+    },
+    [actionToPaste, flowVersion],
+  );
 
   return (
     <>
@@ -80,12 +122,12 @@ export const CanvasContextMenuContent = ({
       )}
 
       <>
-        {showPasteAfterLastStep && showCopyPaste && (
+        {showPasteAfterLastStep && (
           <ContextMenuItem
             disabled={disabledPaste}
-            onClick={() => {
-              // // https://linear.app/openops/issue/OPS-854/add-paste-logic
-            }}
+            onClick={() =>
+              onPaste(StepLocationRelativeToParent.AFTER, selectedStep)
+            }
             className="flex items-center gap-2"
           >
             <ClipboardPlus className="w-4 h-4"></ClipboardPlus>{' '}
@@ -95,21 +137,36 @@ export const CanvasContextMenuContent = ({
         {showPasteAsFirstLoopAction && (
           <ContextMenuItem
             disabled={disabledPaste}
-            onClick={() => {
-              // https://linear.app/openops/issue/OPS-854/add-paste-logic
-            }}
+            onClick={() =>
+              onPaste(StepLocationRelativeToParent.INSIDE_LOOP, selectedStep)
+            }
             className="flex items-center gap-2"
           >
             <ClipboardPaste className="w-4 h-4"></ClipboardPaste>{' '}
-            {t('Paste Inside Loop')}
+            {t('Paste inside Loop')}
+          </ContextMenuItem>
+        )}
+        {showPasteInConditionBranch && (
+          <ContextMenuItem
+            disabled={disabledPaste}
+            onClick={() =>
+              onPaste(
+                StepLocationRelativeToParent.INSIDE_TRUE_BRANCH,
+                selectedStep,
+              )
+            }
+            className="flex items-center gap-2"
+          >
+            <ClipboardPaste className="w-4 h-4"></ClipboardPaste>{' '}
+            {t('Paste inside first Branch')}
           </ContextMenuItem>
         )}
         {showPasteAfterCurrentStep && (
           <ContextMenuItem
             disabled={disabledPaste}
-            onClick={() => {
-              // https://linear.app/openops/issue/OPS-854/add-paste-logic
-            }}
+            onClick={() =>
+              onPaste(StepLocationRelativeToParent.AFTER, selectedStep)
+            }
             className="flex items-center gap-2"
           >
             <ClipboardPlus className="w-4 h-4"></ClipboardPlus>{' '}
@@ -119,4 +176,18 @@ export const CanvasContextMenuContent = ({
       </>
     </>
   );
+};
+
+const getParentStepForPaste = (
+  flowVersion: FlowVersion,
+  selectedStep: string | null,
+) => {
+  if (selectedStep) {
+    return selectedStep;
+  }
+
+  const allSteps = flowHelper.getAllSteps(flowVersion.trigger);
+  const lastStep = allSteps[allSteps.length - 1];
+
+  return lastStep.name;
 };
