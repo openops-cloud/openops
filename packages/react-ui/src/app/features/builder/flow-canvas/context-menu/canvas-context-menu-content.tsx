@@ -1,30 +1,16 @@
 import { t } from 'i18next';
-import {
-  ClipboardPaste,
-  ClipboardPlus,
-  Copy,
-  CopyPlus,
-  Trash,
-} from 'lucide-react';
+import { ClipboardPaste, ClipboardPlus, Copy } from 'lucide-react';
 
 import {
   ContextMenuItem,
-  ContextMenuSeparator,
   ContextMenuType,
-  toast,
-  UNSAVED_CHANGES_TOAST,
-  useCanvasContext,
+  WorkflowNode,
 } from '@openops/components/ui';
-import {
-  ActionType,
-  FlagId,
-  flowHelper,
-  FlowOperationType,
-} from '@openops/shared';
+import { ActionType, FlagId, flowHelper } from '@openops/shared';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
+import { useReactFlow } from '@xyflow/react';
 import { useBuilderStateContext } from '../../builder-hooks';
-import { useApplyOperationAndPushToHistory } from '../../flow-version-undo-redo/hooks/apply-operation-and-push-to-history';
 import { CanvasShortcuts, ShortcutWrapper } from './canvas-shortcuts';
 import { CanvasContextMenuProps } from './context-menu-wrapper';
 
@@ -34,14 +20,24 @@ export const CanvasContextMenuContent = ({
   const showCopyPaste =
     flagsHooks.useFlag<boolean>(FlagId.COPY_PASTE_ACTIONS_ENABLED).data ||
     false;
-  const applyOperationAndPushToHistory = useApplyOperationAndPushToHistory();
 
-  const { selectedActions } = useCanvasContext();
-  const selectedNodes = selectedActions.map((action) => action.name);
+  const { getNodes } = useReactFlow();
+  const nodes = getNodes() as WorkflowNode[];
 
-  const [removeStepSelection, flowVersion, readonly] = useBuilderStateContext(
-    (state) => [state.removeStepSelection, state.flowVersion, state.readonly],
-  );
+  const selectedNodes = nodes
+    .filter((node) => node.selected)
+    .reduce((acc, node) => {
+      const name = node.data.step?.name;
+      if (name !== undefined) {
+        acc.push(name);
+      }
+      return acc;
+    }, [] as string[]);
+
+  const [flowVersion, readonly] = useBuilderStateContext((state) => [
+    state.flowVersion,
+    state.readonly,
+  ]);
 
   const disabled = selectedNodes.length === 0;
 
@@ -49,9 +45,7 @@ export const CanvasContextMenuContent = ({
     (node: string) => node === flowVersion.trigger.name,
   );
 
-  console.log('selectedNodes', selectedNodes);
-
-  // to be implemented
+  // todo
   const disabledPaste = true;
   const firstSelectedStep = flowHelper.getStep(flowVersion, selectedNodes[0]);
   const showPasteAfterLastStep =
@@ -72,58 +66,6 @@ export const CanvasContextMenuContent = ({
     !doSelectedNodesIncludeTrigger &&
     contextMenuType === ContextMenuType.STEP;
 
-  const showDuplicate =
-    selectedNodes.length === 1 &&
-    !doSelectedNodesIncludeTrigger &&
-    contextMenuType === ContextMenuType.STEP &&
-    !readonly;
-
-  const isTriggerTheOnlySelectedNode =
-    selectedNodes.length === 1 && doSelectedNodesIncludeTrigger;
-
-  const showDelete =
-    !readonly &&
-    contextMenuType === ContextMenuType.STEP &&
-    !isTriggerTheOnlySelectedNode &&
-    selectedActions.length === 1;
-
-  // todo we need to extract those action to a reusable hook
-  // todo we need to change it to handle delete for multiple nodes
-  const deleteStep = () => {
-    if (selectedNodes.length !== 1) {
-      return;
-    }
-    applyOperationAndPushToHistory(
-      {
-        type: FlowOperationType.DELETE_ACTION,
-        request: {
-          name: selectedNodes[0],
-        },
-      },
-      () => toast(UNSAVED_CHANGES_TOAST),
-    );
-    removeStepSelection();
-  };
-
-  const duplicateStep = () => {
-    if (selectedNodes.length !== 1) {
-      return;
-    }
-    return applyOperationAndPushToHistory(
-      {
-        type: FlowOperationType.DUPLICATE_ACTION,
-        request: {
-          stepName: selectedNodes[0],
-        },
-      },
-      () => toast(UNSAVED_CHANGES_TOAST),
-    );
-  };
-
-  if (!showCopyPaste) {
-    return null;
-  }
-
   return (
     <>
       {showCopy && (
@@ -140,16 +82,6 @@ export const CanvasContextMenuContent = ({
       )}
 
       <>
-        {showDuplicate && (
-          <ContextMenuItem
-            disabled={disabled}
-            onClick={duplicateStep}
-            className="flex items-center gap-2"
-          >
-            <CopyPlus className="w-4 h-4"></CopyPlus> {t('Duplicate')}
-          </ContextMenuItem>
-        )}
-
         {showPasteAfterLastStep && showCopyPaste && (
           <ContextMenuItem
             disabled={disabledPaste}
@@ -162,7 +94,6 @@ export const CanvasContextMenuContent = ({
             {t('Paste After Last Step')}
           </ContextMenuItem>
         )}
-
         {showPasteAsFirstLoopAction && (
           <ContextMenuItem
             disabled={disabledPaste}
@@ -175,7 +106,6 @@ export const CanvasContextMenuContent = ({
             {t('Paste Inside Loop')}
           </ContextMenuItem>
         )}
-
         {showPasteAfterCurrentStep && (
           <ContextMenuItem
             disabled={disabledPaste}
@@ -187,23 +117,6 @@ export const CanvasContextMenuContent = ({
             <ClipboardPlus className="w-4 h-4"></ClipboardPlus>{' '}
             {t('Paste After')}
           </ContextMenuItem>
-        )}
-
-        {showDelete && (
-          <>
-            <ContextMenuSeparator />
-            <ContextMenuItem
-              disabled={disabled}
-              onClick={() => {
-                deleteStep();
-              }}
-            >
-              <ShortcutWrapper shortcut={CanvasShortcuts['Delete']}>
-                <Trash className="w-4 stroke-destructive h-4"></Trash>{' '}
-                <div className="text-destructive">{t('Delete')}</div>
-              </ShortcutWrapper>
-            </ContextMenuItem>
-          </>
         )}
       </>
     </>
