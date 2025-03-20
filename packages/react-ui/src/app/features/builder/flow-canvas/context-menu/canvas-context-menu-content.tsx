@@ -81,6 +81,10 @@ export const CanvasContextMenuContent = ({
     contextMenuType === ContextMenuType.STEP &&
     firstSelectedStep?.type === ActionType.BRANCH;
 
+  const showPasteInSplitBranch =
+    contextMenuType === ContextMenuType.STEP &&
+    firstSelectedStep?.type === ActionType.SPLIT;
+
   const showCopy =
     showCopyPaste &&
     !doSelectedNodesIncludeTrigger &&
@@ -130,7 +134,7 @@ export const CanvasContextMenuContent = ({
             }
             className="flex items-center gap-2"
           >
-            <ClipboardPlus className="w-4 h-4"></ClipboardPlus>{' '}
+            <ClipboardPlus className="w-4 h-4"></ClipboardPlus>
             {t('Paste After Last Step')}
           </ContextMenuItem>
         )}
@@ -142,7 +146,7 @@ export const CanvasContextMenuContent = ({
             }
             className="flex items-center gap-2"
           >
-            <ClipboardPaste className="w-4 h-4"></ClipboardPaste>{' '}
+            <ClipboardPaste className="w-4 h-4"></ClipboardPaste>
             {t('Paste inside Loop')}
           </ContextMenuItem>
         )}
@@ -157,8 +161,25 @@ export const CanvasContextMenuContent = ({
             }
             className="flex items-center gap-2"
           >
-            <ClipboardPaste className="w-4 h-4"></ClipboardPaste>{' '}
-            {t('Paste inside first Branch')}
+            <ClipboardPaste className="w-4 h-4"></ClipboardPaste>
+            {t('Paste inside first branch')}
+          </ContextMenuItem>
+        )}
+        {showPasteInSplitBranch && (
+          <ContextMenuItem
+            disabled={disabledPaste}
+            onClick={() => {
+              const branchNodeId = firstSelectedStep?.settings.options[0].id;
+              return onPaste(
+                StepLocationRelativeToParent.INSIDE_SPLIT,
+                selectedStep,
+                branchNodeId,
+              );
+            }}
+            className="flex items-center gap-2"
+          >
+            <ClipboardPaste className="w-4 h-4"></ClipboardPaste>
+            {t('Paste inside default branch')}
           </ContextMenuItem>
         )}
         {showPasteAfterCurrentStep && (
@@ -169,7 +190,7 @@ export const CanvasContextMenuContent = ({
             }
             className="flex items-center gap-2"
           >
-            <ClipboardPlus className="w-4 h-4"></ClipboardPlus>{' '}
+            <ClipboardPlus className="w-4 h-4"></ClipboardPlus>
             {t('Paste After')}
           </ContextMenuItem>
         )}
