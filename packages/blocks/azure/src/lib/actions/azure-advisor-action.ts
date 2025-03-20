@@ -1,8 +1,4 @@
-import {
-  createAction,
-  DynamicPropsValue,
-  Property,
-} from '@openops/blocks-framework';
+import { createAction, Property } from '@openops/blocks-framework';
 import { azureAuth } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { runCommand } from '../azure-cli';
@@ -17,7 +13,7 @@ export const advisorAction = createAction({
     useHostSession: useHostSession,
     subscriptions: subDropdown,
     filterBySelection: Property.StaticDropdown<any>({
-      displayName: 'Choose which filter',
+      displayName: 'Choose filter',
       description: `Select whether to filter by resource group, resource IDs, or neither.`,
       required: true,
       options: {
