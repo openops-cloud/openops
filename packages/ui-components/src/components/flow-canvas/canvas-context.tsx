@@ -10,10 +10,13 @@ import {
   ReactNode,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
-import { SHIFT_KEY, SPACE_KEY } from './constants';
+import { useDebounceCallback } from 'usehooks-ts';
+import { COPY_KEYS, SHIFT_KEY, SPACE_KEY } from './constants';
 
 export type PanningMode = 'grab' | 'pan';
 
@@ -27,16 +30,26 @@ type CanvasContextState = {
 const CanvasContext = createContext<CanvasContextState | undefined>(undefined);
 
 export const CanvasContextProvider = ({
+  flowCanvasContainerId,
   children,
 }: {
+  flowCanvasContainerId?: string;
   children: ReactNode;
 }) => {
   const [panningMode, setPanningMode] = useState<PanningMode>('grab');
   const [selectedActions, setSelectedActions] = useState<Action[]>([]);
+  const truncatedFlowRef = useRef<Action | null>(null);
   const state = useStoreApi().getState();
 
   const spacePressed = useKeyPress(SPACE_KEY);
   const shiftPressed = useKeyPress(SHIFT_KEY);
+
+  const canvas = useMemo(() => {
+    return flowCanvasContainerId
+      ? document.getElementById(flowCanvasContainerId)
+      : null;
+  }, [flowCanvasContainerId]);
+  const copyPressed = useKeyPress(COPY_KEYS, { target: canvas });
 
   const effectivePanningMode: PanningMode = useMemo(() => {
     if ((spacePressed || panningMode === 'grab') && !shiftPressed) {
@@ -77,13 +90,13 @@ export const CanvasContextProvider = ({
 
     if (!selectedSteps.length) return;
 
-    const truncatedFlow = flowHelper.truncateFlow(
+    truncatedFlowRef.current = flowHelper.truncateFlow(
       cloneDeep(selectedSteps[0]),
       selectedSteps[selectedSteps.length - 1].name,
-    );
+    ) as Action;
 
     const selectedStepNames = flowHelper
-      .getAllSteps(truncatedFlow)
+      .getAllSteps(truncatedFlowRef.current)
       .map((step) => step.name);
 
     state.setNodes(
@@ -95,6 +108,21 @@ export const CanvasContextProvider = ({
 
     setSelectedActions([]);
   }, [selectedActions, state]);
+
+  const copy = useDebounceCallback(() => {
+    if (!truncatedFlowRef.current) {
+      return;
+    }
+    const flowString = JSON.stringify(truncatedFlowRef.current);
+
+    navigator.clipboard.writeText(flowString);
+  }, 300);
+
+  useEffect(() => {
+    if (copyPressed) {
+      copy();
+    }
+  }, [copyPressed, copy]);
 
   const contextValue = useMemo(
     () => ({
