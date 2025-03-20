@@ -74,6 +74,7 @@ const FlowDragLayer = ({ children }: FlowDragLayerProps) => {
   const handleDragCancel = () => {
     setActiveDraggingStep(null);
   };
+
   const handleDragEnd = (e: DragEndEvent) => {
     setActiveDraggingStep(null);
     setAllowCanvasPanning(true);

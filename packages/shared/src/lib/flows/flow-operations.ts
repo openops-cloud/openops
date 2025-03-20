@@ -27,6 +27,7 @@ export enum FlowOperationType {
   USE_AS_DRAFT = 'USE_AS_DRAFT',
   CHANGE_DESCRIPTION = 'CHANGE_DESCRIPTION',
   REMOVE_CONNECTIONS = 'REMOVE_CONNECTIONS',
+  PASTE_ACTIONS = 'PASTE_ACTIONS',
 }
 
 export enum StepLocationRelativeToParent {
@@ -126,6 +127,15 @@ export const ChangeDescriptionRequest = Type.Object({
 });
 
 export type ChangeDescriptionRequest = Static<typeof ChangeDescriptionRequest>;
+
+export const PasteActionsRequest = Type.Object({
+  action: Type.Any(),
+  parentStep: Type.String(),
+  stepLocationRelativeToParent: Type.Enum(StepLocationRelativeToParent),
+  branchNodeId: Type.Optional(Type.String({})),
+});
+
+export type PasteActionsRequest = Static<typeof PasteActionsRequest>;
 
 export const FlowOperationRequest = Type.Union([
   Type.Object(
@@ -261,6 +271,15 @@ export const FlowOperationRequest = Type.Union([
     },
     {
       title: 'Remove Connections',
+    },
+  ),
+  Type.Object(
+    {
+      type: Type.Literal(FlowOperationType.PASTE_ACTIONS),
+      request: PasteActionsRequest,
+    },
+    {
+      title: 'Paste Actions',
     },
   ),
 ]);
