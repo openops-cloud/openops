@@ -28,12 +28,35 @@ describe('advisorAction', () => {
         type: 'DYNAMIC',
         required: true,
       },
-      resourceIds: {
-        type: 'ARRAY',
-        required: false,
+      filterBySelection: {
+        type: 'STATIC_DROPDOWN',
+        required: true,
+        options: {
+          options: [
+            { label: 'No filter', value: {} },
+            {
+              label: 'Filter by Resource IDs',
+              value: {
+                resourceIds: {
+                  type: 'ARRAY',
+                  required: true,
+                },
+              },
+            },
+            {
+              label: 'Filter by Resource Group',
+              value: {
+                resourceGroup: {
+                  type: 'SHORT_TEXT',
+                  required: true,
+                },
+              },
+            },
+          ],
+        },
       },
-      resourceGroup: {
-        type: 'SHORT_TEXT',
+      filterByProperty: {
+        type: 'DYNAMIC',
         required: false,
       },
     });
@@ -74,13 +97,13 @@ describe('advisorAction', () => {
     ],
     [
       {
-        resourceIds: ['id1', 'id2'],
+        filterByProperty: { resourceIds: ['id1', 'id2'] },
       },
       `az advisor recommendation list --category 'cost' --output json --ids "id1" "id2"`,
     ],
     [
       {
-        resourceGroup: 'some resource group',
+        filterByProperty: { resourceGroup: 'some resource group' },
       },
       `az advisor recommendation list --category 'cost' --output json --resource-group some resource group`,
     ],
@@ -106,22 +129,6 @@ describe('advisorAction', () => {
       );
     },
   );
-
-  test('should throw an error if ids and resource group were specified together', async () => {
-    azureCliMock.runCommand.mockRejectedValue('error');
-
-    const context = createContext({
-      useHostSession: { useHostSessionCheckbox: false },
-      subscriptions: { subDropdown: 'subscriptionId' },
-      resourceIds: ['id1', 'id2'],
-      resourceGroup: 'some resource group',
-    });
-
-    await expect(advisorAction.run(context)).rejects.toThrow(
-      'Resource IDs and Resource Group cannot be specified together. Please only specify one of them.',
-    );
-    expect(azureCliMock.runCommand).not.toHaveBeenCalled();
-  });
 
   test('should throw an error if runCommand fails and return the whole error if command contains login credentials', async () => {
     azureCliMock.runCommand.mockRejectedValue('error');

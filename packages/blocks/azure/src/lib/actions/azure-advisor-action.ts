@@ -1,4 +1,8 @@
-import { createAction, Property } from '@openops/blocks-framework';
+import {
+  createAction,
+  DynamicPropsValue,
+  Property,
+} from '@openops/blocks-framework';
 import { azureAuth } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { runCommand } from '../azure-cli';
@@ -12,21 +16,51 @@ export const advisorAction = createAction({
   props: {
     useHostSession: useHostSession,
     subscriptions: subDropdown,
-    resourceIds: Property.Array({
-      displayName: 'Resource IDs',
-      description:
-        'One or more resource IDs (space-delimited). If provided, "Resource Group" should not be specified.',
-      required: false,
+    filterBySelection: Property.StaticDropdown<any>({
+      displayName: 'Choose which filter',
+      description: `Select whether to filter by resource group, resource IDs, or neither.`,
+      required: true,
+      options: {
+        options: [
+          { label: 'No filter', value: {} },
+          {
+            label: 'Filter by Resource IDs',
+            value: {
+              resourceIds: Property.Array({
+                displayName: 'Resource IDs',
+                description: 'One or more resource IDs (space-delimited).',
+                required: true,
+              }),
+            },
+          },
+          {
+            label: 'Filter by Resource Group',
+            value: {
+              resourceGroup: Property.ShortText({
+                displayName: 'Resource Group',
+                description: 'Name of a resource group.',
+                required: true,
+              }),
+            },
+          },
+        ],
+      },
     }),
-    resourceGroup: Property.ShortText({
-      displayName: 'Resource Group',
-      description:
-        'Name of a resource group. . If provided, "Resource Ids" should not be specified.',
+    filterByProperty: Property.DynamicProperties({
+      displayName: '',
       required: false,
+      refreshers: ['filterBySelection'],
+      props: async ({ filterBySelection }) => {
+        if (!filterBySelection) {
+          return {} as any;
+        }
+
+        return filterBySelection;
+      },
     }),
   },
   async run(context) {
-    const command = buildCommand(context.propsValue);
+    const command = buildCommand(context.propsValue.filterByProperty);
     logger.info(`Running command: ${command}`);
     try {
       const result = await runCommand(
@@ -59,22 +93,19 @@ export const advisorAction = createAction({
   },
 });
 
-function buildCommand(propsValue: any) {
-  const { resourceIds, resourceGroup } = propsValue;
+function buildCommand(filterByProperty: any) {
   let command = `az advisor recommendation list --category 'cost' --output json`;
-
-  if (resourceIds?.length > 0 && resourceGroup) {
-    throw new Error(
-      'Resource IDs and Resource Group cannot be specified together. Please only specify one of them.',
-    );
-  }
-
-  if (resourceIds?.length > 0) {
-    command += ` --ids ${resourceIds.map((id: string) => `"${id}"`).join(' ')}`;
-  }
-
-  if (resourceGroup) {
-    command += ` --resource-group ${resourceGroup}`;
+  console.log('LEYLA' + filterByProperty);
+  if (filterByProperty?.['resourceGroup']) {
+    if (filterByProperty['resourceGroup']) {
+      command += ` --resource-group ${filterByProperty['resourceGroup']}`;
+    }
+  } else if (filterByProperty?.['resourceIds']) {
+    if (filterByProperty['resourceIds']?.length > 0) {
+      command += ` --ids ${filterByProperty['resourceIds']
+        .map((id: string) => `"${id}"`)
+        .join(' ')}`;
+    }
   }
 
   return command;
