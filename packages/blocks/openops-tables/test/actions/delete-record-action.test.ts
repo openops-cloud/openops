@@ -11,8 +11,7 @@ const openopsCommonMock = {
   authenticateDefaultUserInOpenOpsTables: jest.fn(),
   getRowByPrimaryKeyValue: jest.fn(),
   getPrimaryKeyFieldFromFields: jest.fn(),
-  getFields: jest.fn(),
-  getTableIdByTableName: jest.fn().mockReturnValue(1),
+  wrapWithCacheGuard: jest.fn(),
   openopsTablesDropdownProperty: jest.fn().mockReturnValue({
     required: true,
     defaultValue: false,
@@ -24,6 +23,8 @@ const openopsCommonMock = {
 jest.mock('@openops/common', () => openopsCommonMock);
 import { nanoid } from 'nanoid';
 import { deleteRecordAction } from '../../src/actions/delete-record-action';
+
+import { getFields, getTableIdByTableName } from '@openops/common';
 
 describe('deleteRecordAction', () => {
   beforeEach(() => {
@@ -52,12 +53,16 @@ describe('deleteRecordAction', () => {
     openopsCommonMock.authenticateDefaultUserInOpenOpsTables.mockResolvedValue({
       token: 'some databaseToken',
     });
-    openopsCommonMock.getFields.mockResolvedValue(['some field']);
+    openopsCommonMock.wrapWithCacheGuard
+      .mockReturnValueOnce(1)
+      .mockReturnValue('mock result');
     openopsCommonMock.deleteRow.mockResolvedValue('mock result');
 
     const context = createContext();
 
     const result = (await deleteRecordAction.run(context)) as any;
+
+    validateWrapperCall(context);
 
     expect(result).toStrictEqual('mock result');
     expect(
@@ -74,7 +79,9 @@ describe('deleteRecordAction', () => {
       openopsCommonMock.getPrimaryKeyFieldFromFields.mockReturnValue({
         name: 'primary key field',
       });
-      openopsCommonMock.getFields.mockResolvedValue(['some field']);
+      openopsCommonMock.wrapWithCacheGuard
+        .mockReturnValueOnce(1)
+        .mockReturnValue(['some field']);
       openopsCommonMock.authenticateDefaultUserInOpenOpsTables.mockResolvedValue(
         { token: 'some databaseToken' },
       );
@@ -87,11 +94,8 @@ describe('deleteRecordAction', () => {
         'The primary key should be a string',
       );
 
-      expect(openopsCommonMock.getFields).toHaveBeenCalledTimes(1);
-      expect(openopsCommonMock.getFields).toHaveBeenCalledWith(
-        1,
-        'some databaseToken',
-      );
+      validateWrapperCall(context);
+
       expect(
         openopsCommonMock.getPrimaryKeyFieldFromFields,
       ).toHaveBeenCalledTimes(1);
@@ -108,7 +112,9 @@ describe('deleteRecordAction', () => {
       openopsCommonMock.getPrimaryKeyFieldFromFields.mockReturnValue({
         name: 'primary key field',
       });
-      openopsCommonMock.getFields.mockResolvedValue(['some field']);
+      openopsCommonMock.wrapWithCacheGuard
+        .mockReturnValueOnce(1)
+        .mockReturnValue(['some field']);
       openopsCommonMock.authenticateDefaultUserInOpenOpsTables.mockResolvedValue(
         { token: 'some databaseToken' },
       );
@@ -121,11 +127,8 @@ describe('deleteRecordAction', () => {
         'Record Primary Key is not defined.',
       );
 
-      expect(openopsCommonMock.getFields).toHaveBeenCalledTimes(1);
-      expect(openopsCommonMock.getFields).toHaveBeenCalledWith(
-        1,
-        'some databaseToken',
-      );
+      validateWrapperCall(context);
+
       expect(
         openopsCommonMock.getPrimaryKeyFieldFromFields,
       ).toHaveBeenCalledTimes(1);
@@ -140,7 +143,9 @@ describe('deleteRecordAction', () => {
     openopsCommonMock.getPrimaryKeyFieldFromFields.mockReturnValue({
       name: 'primary key field',
     });
-    openopsCommonMock.getFields.mockResolvedValue(['some field']);
+    openopsCommonMock.wrapWithCacheGuard
+      .mockReturnValueOnce(1)
+      .mockReturnValue(['some field']);
     openopsCommonMock.getRowByPrimaryKeyValue.mockResolvedValue(undefined);
     openopsCommonMock.authenticateDefaultUserInOpenOpsTables.mockResolvedValue({
       token: 'some databaseToken',
@@ -154,11 +159,8 @@ describe('deleteRecordAction', () => {
       'No record found with given primary key',
     );
 
-    expect(openopsCommonMock.getFields).toHaveBeenCalledTimes(1);
-    expect(openopsCommonMock.getFields).toHaveBeenCalledWith(
-      1,
-      'some databaseToken',
-    );
+    validateWrapperCall(context);
+
     expect(
       openopsCommonMock.getPrimaryKeyFieldFromFields,
     ).toHaveBeenCalledTimes(1);
@@ -178,7 +180,9 @@ describe('deleteRecordAction', () => {
     openopsCommonMock.getPrimaryKeyFieldFromFields.mockReturnValue({
       name: 'primary key field',
     });
-    openopsCommonMock.getFields.mockResolvedValue(['some field']);
+    openopsCommonMock.wrapWithCacheGuard
+      .mockReturnValueOnce(1)
+      .mockReturnValue(['some field']);
     openopsCommonMock.getRowByPrimaryKeyValue.mockResolvedValue({ id: 1 });
     openopsCommonMock.deleteRow.mockResolvedValue('mock result');
     const context = createContext({
@@ -189,6 +193,9 @@ describe('deleteRecordAction', () => {
     const result = (await deleteRecordAction.run(context)) as any;
 
     expect(result).toBe('mock result');
+
+    validateWrapperCall(context);
+
     expect(openopsCommonMock.getRowByPrimaryKeyValue).toHaveBeenCalledTimes(1);
     expect(openopsCommonMock.getRowByPrimaryKeyValue).toHaveBeenCalledWith(
       'some databaseToken',
@@ -210,6 +217,23 @@ describe('deleteRecordAction', () => {
     });
   });
 });
+
+function validateWrapperCall(context: any) {
+  expect(openopsCommonMock.wrapWithCacheGuard).toHaveBeenCalledTimes(2);
+  expect(openopsCommonMock.wrapWithCacheGuard).toHaveBeenNthCalledWith(
+    1,
+    `${context.run.executionCorrelationId}-table-${context.propsValue.tableName}`,
+    getTableIdByTableName,
+    context.propsValue.tableName,
+  );
+  expect(openopsCommonMock.wrapWithCacheGuard).toHaveBeenNthCalledWith(
+    2,
+    `${context.run.executionCorrelationId}-1-fields`,
+    getFields,
+    1,
+    'some databaseToken',
+  );
+}
 
 interface ContextParams {
   tableName?: string;
