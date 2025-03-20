@@ -95,7 +95,7 @@ export const advisorAction = createAction({
 
 function buildCommand(filterByProperty: any) {
   let command = `az advisor recommendation list --category 'cost' --output json`;
-  console.log('LEYLA' + filterByProperty);
+
   if (filterByProperty?.['resourceGroup']) {
     if (filterByProperty['resourceGroup']) {
       command += ` --resource-group ${filterByProperty['resourceGroup']}`;
