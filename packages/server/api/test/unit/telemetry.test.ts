@@ -60,7 +60,6 @@ describe('telemetry', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // jest.resetModules();
     getEnvironmentId = jest
       .fn()
       .mockResolvedValue('123e4567-e89b-12d3-a456-426614174000');
