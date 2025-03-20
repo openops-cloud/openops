@@ -1,4 +1,5 @@
 import { cn } from '../lib/cn';
+import { isMacUserAgent } from '../lib/user-agent-utils';
 
 export type ShortcutProps = {
   shortcutKey: string;
@@ -12,7 +13,7 @@ export const Shortcut = ({
   withShift,
   className,
 }: ShortcutProps & { className?: string }) => {
-  const isMac = /(Mac)/i.test(navigator.userAgent);
+  const isMac = isMacUserAgent();
   const isEscape = shortcutKey.toLocaleLowerCase() === 'esc';
   return (
     <span

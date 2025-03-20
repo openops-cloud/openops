@@ -72,6 +72,7 @@ export * from './lib/flow-canvas-utils';
 export * from './lib/types';
 export * from './lib/use-element-size';
 export * from './lib/use-forwarded-ref';
+export * from './lib/user-agent-utils';
 
 /* export custom components */
 export * from './components';
