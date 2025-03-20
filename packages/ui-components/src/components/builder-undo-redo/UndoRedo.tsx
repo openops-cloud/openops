@@ -10,13 +10,14 @@ import {
 } from '../../ui/tooltip';
 
 import { t } from 'i18next';
+import { isMacUserAgent } from '../../lib/user-agent-utils';
 
 type UndoRedoContainerProps = {
   children: React.ReactNode;
   className?: string;
 };
 
-const isMac = /(Mac)/i.test(navigator.userAgent);
+const isMac = isMacUserAgent();
 const undoShortcutLabel = isMac ? '⌘ + Z' : 'CTRL + Z';
 const redoShortcutLabel = isMac ? '⌘ + ⇧ + Z' : 'CTRL + ⇧ + Z';
 
