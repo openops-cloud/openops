@@ -20,15 +20,23 @@ async function getTables(
 export async function getTableIdByTableName(
   tableName: string,
 ): Promise<number> {
-  const tables = await getAvailableTablesInOpenopsTables();
-
-  const table = tables.find((t) => t.name === tableName);
+  const table = await getTableByName(tableName);
 
   if (!table) {
     throw new Error(`Table '${tableName}' not found`);
   }
 
   return table.id;
+}
+
+export async function getTableByName(
+  tableName: string,
+): Promise<OpenOpsTable | undefined> {
+  const tables = await getAvailableTablesInOpenopsTables();
+
+  const table = tables.find((t) => t.name === tableName);
+
+  return table;
 }
 
 export async function getTableNames(): Promise<string[]> {

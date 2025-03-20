@@ -8,6 +8,13 @@ import { SHIFT_KEY, SPACE_KEY } from './constants';
 // Mock the useKeyPress hook
 jest.mock('@xyflow/react', () => ({
   useKeyPress: jest.fn(),
+  useStoreApi: jest.fn(() => ({
+    getState: jest.fn(),
+  })),
+}));
+
+jest.mock('lodash-es', () => ({
+  cloneDeep: jest.fn(),
 }));
 
 // Test component to consume the context
