@@ -120,13 +120,22 @@ export const CanvasContextProvider = ({
     }
     const flowString = JSON.stringify(selectedFlowActionRef.current);
 
-    navigator.clipboard.writeText(flowString).then(() => {
-      copyPasteToast({
-        success: true,
-        isCopy: true,
-        itemsCounter: selectedNodeCounterRef.current,
+    navigator.clipboard
+      .writeText(flowString)
+      .then(() => {
+        copyPasteToast({
+          success: true,
+          isCopy: true,
+          itemsCounter: selectedNodeCounterRef.current,
+        });
+      })
+      .catch(() => {
+        copyPasteToast({
+          success: true,
+          isCopy: true,
+          itemsCounter: selectedNodeCounterRef.current,
+        });
       });
-    });
   }, 300);
 
   useEffect(() => {

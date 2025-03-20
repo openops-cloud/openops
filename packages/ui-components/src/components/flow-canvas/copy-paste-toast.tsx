@@ -30,7 +30,7 @@ const CopyPasteToastContent = ({
   } else {
     return (
       <>
-        <CircleCheckBig size={24} className="text-greenAccent-300" />
+        <CircleCheckBig size={24} className="text-warning-400" />
         <span className="font-bold text-normal">
           {t(
             isCopy ? 'Failed to copy {n} steps' : 'Failed to paste {n} steps',
