@@ -8,10 +8,12 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import React, { ReactNode, useCallback, useRef, useState } from 'react';
-import { Graph } from '../../lib/flow-canvas-utils';
+import { Edge, Graph, WorkflowNode } from '../../lib/flow-canvas-utils';
 import { useCanvasContext } from './canvas-context';
 import {
   InitialZoom,
+  MAX_ZOOM,
+  MIN_ZOOM,
   NODE_SELECTION_RECT_CLASS_NAME,
   SHIFT_KEY,
   STEP_CONTEXT_MENU_ATTRIBUTE,
@@ -57,7 +59,7 @@ const FlowCanvas = React.memo(
     useResizeCanvas(containerRef);
 
     const onInit = useCallback(
-      (reactFlow: ReactFlowInstance) => {
+      (reactFlow: ReactFlowInstance<WorkflowNode, Edge>) => {
         reactFlow.fitView({
           nodes: reactFlow.getNodes().slice(0, 5),
           minZoom: InitialZoom.MIN,
@@ -87,9 +89,13 @@ const FlowCanvas = React.memo(
         );
 
         if (stepElement && stepName) {
-          // todo
-          // selectStepByName(stepName);
-          storeApi.getState().addSelectedNodes([stepName]);
+          const reactFlowState = storeApi.getState();
+          reactFlowState.setNodes(
+            reactFlowState.nodes.map((node) => ({
+              ...node,
+              selected: node.id === stepName,
+            })),
+          );
         }
 
         const targetIsSelectionRect = ev.target.classList.contains(
@@ -120,8 +126,8 @@ const FlowCanvas = React.memo(
               draggable={false}
               edgesFocusable={false}
               elevateEdgesOnSelect={false}
-              maxZoom={1.5}
-              minZoom={0.5}
+              maxZoom={MAX_ZOOM}
+              minZoom={MIN_ZOOM}
               panOnDrag={panOnDrag}
               zoomOnDoubleClick={false}
               panOnScroll={true}
