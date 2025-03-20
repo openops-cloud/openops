@@ -1,10 +1,11 @@
-import { Redo, Undo, UndoRedoContainer, UndoRedoDevider } from '@/components';
 import { expect } from '@storybook/jest';
 import type { Meta, StoryObj } from '@storybook/react';
 import { fn, userEvent, waitFor } from '@storybook/test';
 import { fireEvent } from '@storybook/testing-library';
+import { Redo, Undo, UndoRedoContainer, UndoRedoDevider } from '../components';
+import { isMacUserAgent } from '../lib/user-agent-utils';
 import { selectLightOrDarkCanvas } from '../test-utils/select-themed-canvas.util';
-const isMac = /(Mac)/i.test(navigator.userAgent);
+const isMac = isMacUserAgent();
 
 /**
  * Showcase how to use build a redo undo navigation layout

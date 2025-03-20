@@ -11,6 +11,7 @@ import {
   StepPlaceHolder,
 } from '@openops/components/ui';
 import { useBuilderStateContext } from '../builder-hooks';
+import { CanvasContextMenuWrapper } from './context-menu/context-menu-wrapper';
 import { EdgeWithButton } from './edges/edge-with-button';
 import { FlowDragLayer } from './flow-drag-layer';
 import { BigButton } from './nodes/big-button';
@@ -56,6 +57,7 @@ const FlowBuilderCanvas = React.memo(() => {
           nodeTypes={nodeTypes}
           topOffset={FLOW_CANVAS_Y_OFFESET}
           graph={graph}
+          ContextMenu={CanvasContextMenuWrapper}
         >
           <AboveFlowWidgets></AboveFlowWidgets>
           <BelowFlowWidget graphHeight={graphHeight.height}></BelowFlowWidget>
