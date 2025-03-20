@@ -40,34 +40,35 @@ export const telemetry = {
     startMetricsCollector();
   },
   trackEvent(event: TelemetryEvent): void {
-    try {
-      const isEnable = isTelemetryEnabledForCurrentUser(event.labels.userId);
-      if (!isEnable) {
-        return;
-      }
+    isTelemetryEnabledForCurrentUser(event.labels.userId)
+      .then((isEnable) => {
+        if (!isEnable) {
+          return;
+        }
 
-      const timeseries = enrichEventLabels(event);
+        const timeseries = enrichEventLabels(event);
 
-      if (telemetryCollectorUrl) {
-        // Send to OpenOps Collector
-        sendToCollector(telemetryCollectorUrl, timeseries).catch((error) => {
-          logger.error(
-            'Error sending telemetry event to OpenOps Collector.',
-            error,
-          );
+        if (telemetryCollectorUrl) {
+          // Send to OpenOps Collector
+          sendToCollector(telemetryCollectorUrl, timeseries).catch((error) => {
+            logger.error(
+              'Error sending telemetry event to OpenOps Collector.',
+              error,
+            );
+          });
+          return;
+        }
+
+        saveMetric(timeseries).catch((error) => {
+          logger.error('Error sending telemetry event to Logzio.', error);
         });
-        return;
-      }
-
-      saveMetric(timeseries).catch((error) => {
-        logger.error('Error sending telemetry event to Logzio.', error);
+      })
+      .catch((error) => {
+        logger.error(`Failed to track telemetry event [${event.name}]`, {
+          error,
+          event,
+        });
       });
-    } catch (error) {
-      logger.error(`Failed to track telemetry event [${event.name}]`, {
-        error,
-        event,
-      });
-    }
   },
   async flush(): Promise<void> {
     if (telemetryCollectorUrl) {
