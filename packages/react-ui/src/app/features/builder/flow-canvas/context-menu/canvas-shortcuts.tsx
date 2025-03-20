@@ -11,7 +11,6 @@ export const CanvasShortcuts: CanvasShortcutsProps = {
     withCtrl: true,
     withShift: false,
     shortcutKey: 'c',
-    shouldNotPreventDefault: true,
   },
 };
 

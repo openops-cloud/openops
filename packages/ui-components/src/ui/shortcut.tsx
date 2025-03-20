@@ -4,7 +4,6 @@ export type ShortcutProps = {
   shortcutKey: string;
   withCtrl?: boolean;
   withShift?: boolean;
-  shouldNotPreventDefault?: boolean;
 };
 
 export const Shortcut = ({
