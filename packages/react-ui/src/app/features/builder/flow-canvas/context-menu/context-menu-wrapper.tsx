@@ -5,6 +5,8 @@ import {
   ContextMenuType,
 } from '@openops/components/ui';
 
+import { flagsHooks } from '@/app/common/hooks/flags-hooks';
+import { FlagId } from '@openops/shared';
 import { CanvasContextMenuContent } from './canvas-context-menu-content';
 
 export type CanvasContextMenuProps = {
@@ -16,6 +18,14 @@ const CanvasContextMenuWrapper = ({
   children,
   contextMenuType,
 }: CanvasContextMenuProps) => {
+  const enableContextMenu =
+    flagsHooks.useFlag<boolean>(FlagId.COPY_PASTE_ACTIONS_ENABLED).data ||
+    false;
+
+  if (!enableContextMenu) {
+    return children;
+  }
+
   return (
     <ContextMenu modal={false}>
       <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
