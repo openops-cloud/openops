@@ -12,7 +12,7 @@ const openopsCommonMock = {
   getPropertyFromField: jest.fn(),
   authenticateDefaultUserInOpenOpsTables: jest.fn(),
   getRows: jest.fn(),
-  getTableIdByTableName: jest.fn().mockReturnValue(123),
+  wrapWithCacheGuard: jest.fn().mockReturnValue(123),
   getTableFields: jest.fn().mockResolvedValue([
     {
       name: 'mock options',
@@ -31,7 +31,11 @@ const openopsCommonMock = {
 
 jest.mock('@openops/common', () => openopsCommonMock);
 import { DynamicPropsValue } from '@openops/blocks-framework';
-import { FilterType, ViewFilterTypesEnum } from '@openops/common';
+import {
+  FilterType,
+  getTableIdByTableName,
+  ViewFilterTypesEnum,
+} from '@openops/common';
 import { nanoid } from 'nanoid';
 import { getRecordsAction } from '../../src/actions/get-records-action';
 
@@ -102,6 +106,7 @@ describe('getRecordsAction test', () => {
 
     const result = (await getRecordsAction.run(context)) as any;
 
+    validateWrapperCall(context);
     expect(result).toStrictEqual({ items: [], count: 0 });
     expect(
       openopsCommonMock.authenticateDefaultUserInOpenOpsTables,
@@ -130,6 +135,7 @@ describe('getRecordsAction test', () => {
 
     const result = (await getRecordsAction.run(context)) as any;
 
+    validateWrapperCall(context);
     expect(result).toStrictEqual({
       items: [{ id: 1, name: 'row1' }],
       count: 1,
@@ -267,6 +273,7 @@ describe('getRecordsAction test', () => {
         count: 1,
       });
 
+      validateWrapperCall(context);
       expect(openopsCommonMock.getRows).toHaveBeenCalledTimes(1);
       expect(openopsCommonMock.getRows).toHaveBeenCalledWith({
         tableId: 123,
@@ -294,6 +301,16 @@ describe('getRecordsAction test', () => {
     },
   );
 });
+
+function validateWrapperCall(context: any) {
+  expect(openopsCommonMock.wrapWithCacheGuard).toHaveBeenCalledTimes(1);
+  expect(openopsCommonMock.wrapWithCacheGuard).toHaveBeenNthCalledWith(
+    1,
+    `${context.run.executionCorrelationId}-table-${context.propsValue.tableName}`,
+    getTableIdByTableName,
+    context.propsValue.tableName,
+  );
+}
 
 interface ContextParams {
   tableName?: string;

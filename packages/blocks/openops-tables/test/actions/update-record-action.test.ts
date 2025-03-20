@@ -11,8 +11,7 @@ const openopsCommonMock = {
   authenticateDefaultUserInOpenOpsTables: jest.fn(),
   getRowByPrimaryKeyValue: jest.fn(),
   getPrimaryKeyFieldFromFields: jest.fn(),
-  getFields: jest.fn(),
-  getTableIdByTableName: jest.fn().mockReturnValue(1),
+  wrapWithCacheGuard: jest.fn(),
   getTableFields: jest.fn().mockResolvedValue([{}]),
   openopsTablesDropdownProperty: jest.fn().mockReturnValue({
     required: true,
@@ -25,6 +24,7 @@ const openopsCommonMock = {
 
 jest.mock('@openops/common', () => openopsCommonMock);
 import { DynamicPropsValue } from '@openops/blocks-framework';
+import { getFields, getTableIdByTableName } from '@openops/common';
 import { nanoid } from 'nanoid';
 import { updateRecordAction } from '../../src/actions/update-record-action';
 
@@ -100,13 +100,17 @@ describe('updateRowAction', () => {
     openopsCommonMock.getPrimaryKeyFieldFromFields.mockReturnValue({
       name: 'primary key field',
     });
-    openopsCommonMock.getFields.mockResolvedValue([{ id: 1, primary: true }]);
+    openopsCommonMock.wrapWithCacheGuard
+      .mockReturnValueOnce(1)
+      .mockReturnValue([{ id: 1, primary: true }]);
+
     openopsCommonMock.addRow.mockResolvedValue('mock result');
 
     const context = createContext();
 
     const result = (await updateRecordAction.run(context)) as any;
 
+    validateWrapperCall(context);
     expect(result).toStrictEqual('mock result');
     expect(
       openopsCommonMock.authenticateDefaultUserInOpenOpsTables,
@@ -121,10 +125,13 @@ describe('updateRowAction', () => {
       name: 'primary key field',
     });
     openopsCommonMock.getRowByPrimaryKeyValue.mockResolvedValue({ id: 1 });
-    openopsCommonMock.getFields.mockResolvedValue([
-      { id: 1, primary: true, name: 'id' },
-      { id: 2, primary: false, name: 'field1' },
-    ]);
+
+    openopsCommonMock.wrapWithCacheGuard
+      .mockReturnValueOnce(1)
+      .mockReturnValue([
+        { id: 1, primary: true, name: 'id' },
+        { id: 2, primary: false, name: 'field1' },
+      ]);
 
     openopsCommonMock.updateRow.mockResolvedValue('mock result');
     const context = createContext({
@@ -140,6 +147,7 @@ describe('updateRowAction', () => {
 
     const result = (await updateRecordAction.run(context)) as any;
 
+    validateWrapperCall(context);
     expect(result).toBe('mock result');
     expect(openopsCommonMock.getRowByPrimaryKeyValue).toHaveBeenCalledTimes(1);
     expect(openopsCommonMock.getRowByPrimaryKeyValue).toHaveBeenCalledWith(
@@ -167,10 +175,12 @@ describe('updateRowAction', () => {
   });
 
   test('should create record if doesnt exist', async () => {
-    openopsCommonMock.getFields.mockResolvedValue([
-      { id: 1, primary: true, name: 'id' },
-      { id: 2, primary: false, name: 'field1' },
-    ]);
+    openopsCommonMock.wrapWithCacheGuard
+      .mockReturnValueOnce(1)
+      .mockReturnValue([
+        { id: 1, primary: true, name: 'id' },
+        { id: 2, primary: false, name: 'field1' },
+      ]);
     openopsCommonMock.getPrimaryKeyFieldFromFields.mockReturnValue({
       name: 'primary key field',
     });
@@ -189,6 +199,7 @@ describe('updateRowAction', () => {
 
     const result = (await updateRecordAction.run(context)) as any;
 
+    validateWrapperCall(context);
     expect(result).toBe('mock result');
     expect(openopsCommonMock.getRowByPrimaryKeyValue).toHaveBeenCalledTimes(1);
     expect(openopsCommonMock.getRowByPrimaryKeyValue).toHaveBeenCalledWith(
@@ -223,9 +234,9 @@ describe('updateRowAction', () => {
       name: 'primary key field',
     });
     openopsCommonMock.getRowByPrimaryKeyValue.mockResolvedValue({ id: 1 });
-    openopsCommonMock.getFields.mockResolvedValue([
-      { id: 1, primary: true, name: 'id' },
-    ]);
+    openopsCommonMock.wrapWithCacheGuard
+      .mockReturnValueOnce(1)
+      .mockReturnValue([{ id: 1, primary: true, name: 'id' }]);
 
     openopsCommonMock.updateRow.mockResolvedValue('mock result');
     const context = createContext({
@@ -257,10 +268,12 @@ describe('updateRowAction', () => {
   test.each([[[]], [{}]])(
     'should throw if the primary key is not a valid string',
     async (rowPrimaryKey: any) => {
-      openopsCommonMock.getFields.mockResolvedValue([
-        { id: 1, primary: true, name: 'id' },
-        { id: 2, primary: false, name: 'field1' },
-      ]);
+      openopsCommonMock.wrapWithCacheGuard
+        .mockReturnValueOnce(1)
+        .mockReturnValue([
+          { id: 1, primary: true, name: 'id' },
+          { id: 2, primary: false, name: 'field1' },
+        ]);
       openopsCommonMock.getPrimaryKeyFieldFromFields.mockReturnValue({
         name: 'primary key field',
       });
@@ -354,6 +367,23 @@ describe('fieldsProperties property', () => {
     );
   });
 });
+
+function validateWrapperCall(context: any) {
+  expect(openopsCommonMock.wrapWithCacheGuard).toHaveBeenCalledTimes(2);
+  expect(openopsCommonMock.wrapWithCacheGuard).toHaveBeenNthCalledWith(
+    1,
+    `${context.run.executionCorrelationId}-table-${context.propsValue.tableName}`,
+    getTableIdByTableName,
+    context.propsValue.tableName,
+  );
+  expect(openopsCommonMock.wrapWithCacheGuard).toHaveBeenNthCalledWith(
+    2,
+    `${context.run.executionCorrelationId}-1-fields`,
+    getFields,
+    1,
+    'some databaseToken',
+  );
+}
 
 interface ContextParams {
   tableName?: string;
