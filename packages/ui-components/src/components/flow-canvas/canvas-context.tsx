@@ -17,6 +17,7 @@ import {
 } from 'react';
 import { useDebounceCallback } from 'usehooks-ts';
 import { COPY_KEYS, SHIFT_KEY, SPACE_KEY } from './constants';
+import { copyPasteToast } from './copy-paste-toast';
 
 export type PanningMode = 'grab' | 'pan';
 
@@ -38,7 +39,8 @@ export const CanvasContextProvider = ({
 }) => {
   const [panningMode, setPanningMode] = useState<PanningMode>('grab');
   const [selectedActions, setSelectedActions] = useState<Action[]>([]);
-  const truncatedFlowRef = useRef<Action | null>(null);
+  const selectedFlowActionRef = useRef<Action | null>(null);
+  const selectedNodeCounterRef = useRef<number>(0);
   const state = useStoreApi().getState();
 
   const spacePressed = useKeyPress(SPACE_KEY);
@@ -90,14 +92,16 @@ export const CanvasContextProvider = ({
 
     if (!selectedSteps.length) return;
 
-    truncatedFlowRef.current = flowHelper.truncateFlow(
+    selectedFlowActionRef.current = flowHelper.truncateFlow(
       cloneDeep(selectedSteps[0]),
       selectedSteps[selectedSteps.length - 1].name,
     ) as Action;
 
     const selectedStepNames = flowHelper
-      .getAllSteps(truncatedFlowRef.current)
+      .getAllSteps(selectedFlowActionRef.current)
       .map((step) => step.name);
+
+    selectedNodeCounterRef.current = selectedStepNames.length;
 
     state.setNodes(
       state.nodes.map((node) => ({
@@ -110,12 +114,18 @@ export const CanvasContextProvider = ({
   }, [selectedActions, state]);
 
   const copy = useDebounceCallback(() => {
-    if (!truncatedFlowRef.current) {
+    if (!selectedFlowActionRef.current || !selectedNodeCounterRef.current) {
       return;
     }
-    const flowString = JSON.stringify(truncatedFlowRef.current);
+    const flowString = JSON.stringify(selectedFlowActionRef.current);
 
-    navigator.clipboard.writeText(flowString);
+    navigator.clipboard.writeText(flowString).then(() => {
+      copyPasteToast({
+        success: true,
+        isCopy: true,
+        itemsCounter: selectedNodeCounterRef.current,
+      });
+    });
   }, 300);
 
   useEffect(() => {

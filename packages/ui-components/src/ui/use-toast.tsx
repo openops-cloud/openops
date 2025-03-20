@@ -30,6 +30,7 @@ type ToasterUserProps = {
   title?: React.ReactNode;
   description?: React.ReactNode;
   action?: ToastActionElement;
+  closeButtonClassName?: string;
 };
 
 type ToasterToast = ToastProps & ToasterUserProps;
