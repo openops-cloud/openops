@@ -20,6 +20,7 @@ import {
   isNil,
   StepOutputStatus,
 } from '@openops/shared';
+import { nanoid } from 'nanoid';
 import { URL } from 'url';
 import { blockLoader } from '../helper/block-loader';
 import {
@@ -165,6 +166,7 @@ const executeAction: ActionHandler<BlockAction> = async ({
         id: constants.flowRunId,
         name: constants.flowName,
         pauseId: executionState.pauseId,
+        executionCorrelationId: constants.executionCorrelationId ?? nanoid(),
         stop: createStopHook(hookResponse),
         pause: createPauseHook(hookResponse, executionState.pauseId),
       },
