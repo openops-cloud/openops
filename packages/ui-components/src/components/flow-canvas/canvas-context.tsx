@@ -157,7 +157,7 @@ export const CanvasContextProvider = ({
       })
       .catch(() => {
         copyPasteToast({
-          success: true,
+          success: false,
           isCopy: true,
           itemsCounter: actionCounter,
         });
