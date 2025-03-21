@@ -1,14 +1,12 @@
+import { hashUtils } from '@openops/server-shared';
 import {
   Action,
-  ExecutionType,
   FlowId,
   FlowOperationRequest,
-  FlowRun,
   FlowRunStatus,
   ProjectId,
   Trigger,
 } from '@openops/shared';
-import { hashUtils } from '../../hash';
 import { telemetry } from '../telemetry';
 
 export type WorkflowBase = {
@@ -22,7 +20,6 @@ export enum WorkflowEventName {
   WORKFLOW_UPDATED = 'workflow_updated',
   WORKFLOW_EXPORTED = 'workflow_exported',
   WORKFLOW_TEST_BLOCK = 'workflow_test_block',
-  WORKFLOW_EXECUTION = 'workflow_execution',
   CREATED_WORKFLOW_FROM_TEMPLATE = 'workflow_created_from_template',
 }
 
@@ -146,29 +143,6 @@ export function sendWorkflowTestBlockEvent(eventParams: {
       duration: eventParams.duration.toString(),
     },
   });
-}
-
-export function sendWorkflowExecutionEvent(
-  flowRun: Omit<FlowRun, 'status'> & {
-    status: ExecutionType | FlowRunStatus;
-  },
-): void {
-  telemetry.trackEvent({
-    name: WorkflowEventName.WORKFLOW_EXECUTION,
-    labels: {
-      flowRunId: flowRun.id,
-      flowId: flowRun.flowId,
-      status: flowRun.status,
-      runMode: flowRun.environment,
-      projectId: flowRun.projectId,
-      flowVersionId: flowRun.flowVersionId,
-      duration: flowRun.duration?.toString() || '',
-    },
-  });
-}
-
-function tablesEvent() {
-  return false;
 }
 
 function getUpdateEventLabels(

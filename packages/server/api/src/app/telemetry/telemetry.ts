@@ -1,9 +1,13 @@
-import { requestContext } from '@fastify/request-context';
+import {
+  AppSystemProp,
+  logger,
+  SharedSystemProp,
+  system,
+} from '@openops/server-shared';
 import axios from 'axios';
 import { UUID } from 'node:crypto';
 import { Timeseries } from 'prometheus-remote-write';
-import { logger } from '../logger';
-import { AppSystemProp, SharedSystemProp, system } from '../system';
+import { userService } from '../user/user-service';
 import {
   flushMetricsCollector,
   saveMetric,
@@ -36,34 +40,35 @@ export const telemetry = {
     startMetricsCollector();
   },
   trackEvent(event: TelemetryEvent): void {
-    try {
-      const isEnable = isTelemetryEnabledForCurrentUser();
-      if (!isEnable) {
-        return;
-      }
+    isTelemetryEnabledForCurrentUser(event.labels.userId)
+      .then((isEnable) => {
+        if (!isEnable) {
+          return;
+        }
 
-      const timeseries = enrichEventLabels(event);
+        const timeseries = enrichEventLabels(event);
 
-      if (telemetryCollectorUrl) {
-        // Send to OpenOps Collector
-        sendToCollector(telemetryCollectorUrl, timeseries).catch((error) => {
-          logger.error(
-            'Error sending telemetry event to OpenOps Collector.',
-            error,
-          );
+        if (telemetryCollectorUrl) {
+          // Send to OpenOps Collector
+          sendToCollector(telemetryCollectorUrl, timeseries).catch((error) => {
+            logger.error(
+              'Error sending telemetry event to OpenOps Collector.',
+              error,
+            );
+          });
+          return;
+        }
+
+        saveMetric(timeseries).catch((error) => {
+          logger.error('Error sending telemetry event to Logzio.', error);
         });
-        return;
-      }
-
-      saveMetric(timeseries).catch((error) => {
-        logger.error('Error sending telemetry event to Logzio.', error);
+      })
+      .catch((error) => {
+        logger.error(`Failed to track telemetry event [${event.name}]`, {
+          error,
+          event,
+        });
       });
-    } catch (error) {
-      logger.error(`Failed to track telemetry event [${event.name}]`, {
-        error,
-        event,
-      });
-    }
   },
   async flush(): Promise<void> {
     if (telemetryCollectorUrl) {
@@ -75,11 +80,6 @@ export const telemetry = {
 };
 
 function enrichEventLabels(event: TelemetryEvent): Timeseries {
-  const userId = requestContext.get('userId' as never);
-  if (userId) {
-    event.labels['userId'] = userId as string;
-  }
-
   const timestamp = new Date();
   return {
     labels: {
@@ -99,8 +99,14 @@ function enrichEventLabels(event: TelemetryEvent): Timeseries {
   };
 }
 
-function isTelemetryEnabledForCurrentUser(): boolean {
-  return requestContext.get('trackEvents' as never) === 'true';
+async function isTelemetryEnabledForCurrentUser(
+  userId: string,
+): Promise<boolean> {
+  if (!userId) {
+    return false;
+  }
+
+  return (await userService.getTrackEventsConfig(userId)) === 'true';
 }
 
 async function sendToCollector(

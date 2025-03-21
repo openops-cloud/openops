@@ -7,7 +7,7 @@ import { UserBase, UserEventName } from './event-models/users';
 
 type EventName = WorkflowEventName | ConnectionEventName | UserEventName;
 
-type EventLabels<T> = Record<string, string> & { userId?: string } & (
+type EventLabels<T> = Record<string, string> & { userId: string } & (
     | (T extends WorkflowEventName ? WorkflowBase : never)
     | (T extends ConnectionEventName ? ConnectionBase : never)
     | (T extends UserEventName ? UserBase : never)

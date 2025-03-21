@@ -69,7 +69,7 @@ services:
       - 'redis_data:/data'
   analytics:
     container_name: analytics
-    image: public.ecr.aws/openops/openops-analytics:0.12.15
+    image: public.ecr.aws/openops/openops-analytics:0.12.16
     platform: linux/amd64 # Needed for M1 Macs until we have cross-platform CI builds(linux/adm64 and linux/arm64 images)
     ports: ['8088:8088']
     environment:

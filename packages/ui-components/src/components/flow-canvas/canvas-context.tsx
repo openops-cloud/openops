@@ -10,10 +10,19 @@ import {
   ReactNode,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
-import { SHIFT_KEY, SPACE_KEY } from './constants';
+import { useDebounceCallback } from 'usehooks-ts';
+import {
+  COPY_KEYS,
+  NODE_SELECTION_RECT_CLASS_NAME,
+  SHIFT_KEY,
+  SPACE_KEY,
+} from './constants';
+import { copyPasteToast } from './copy-paste-toast';
 
 export type PanningMode = 'grab' | 'pan';
 
@@ -22,21 +31,34 @@ type CanvasContextState = {
   setPanningMode: React.Dispatch<React.SetStateAction<PanningMode>>;
   onSelectionChange: (ev: OnSelectionChangeParams) => void;
   onSelectionEnd: () => void;
+  copySelectedArea: () => void;
+  copyAction: (action: Action) => void;
 };
 
 const CanvasContext = createContext<CanvasContextState | undefined>(undefined);
 
 export const CanvasContextProvider = ({
+  flowCanvasContainerId,
   children,
 }: {
+  flowCanvasContainerId?: string;
   children: ReactNode;
 }) => {
   const [panningMode, setPanningMode] = useState<PanningMode>('grab');
   const [selectedActions, setSelectedActions] = useState<Action[]>([]);
+  const selectedFlowActionRef = useRef<Action | null>(null);
+  const selectedNodeCounterRef = useRef<number>(0);
   const state = useStoreApi().getState();
 
   const spacePressed = useKeyPress(SPACE_KEY);
   const shiftPressed = useKeyPress(SHIFT_KEY);
+
+  const canvas = useMemo(() => {
+    return flowCanvasContainerId
+      ? document.getElementById(flowCanvasContainerId)
+      : null;
+  }, [flowCanvasContainerId]);
+  const copyPressed = useKeyPress(COPY_KEYS, { target: canvas });
 
   const effectivePanningMode: PanningMode = useMemo(() => {
     if ((spacePressed || panningMode === 'grab') && !shiftPressed) {
@@ -77,14 +99,16 @@ export const CanvasContextProvider = ({
 
     if (!selectedSteps.length) return;
 
-    const truncatedFlow = flowHelper.truncateFlow(
+    selectedFlowActionRef.current = flowHelper.truncateFlow(
       cloneDeep(selectedSteps[0]),
       selectedSteps[selectedSteps.length - 1].name,
-    );
+    ) as Action;
 
     const selectedStepNames = flowHelper
-      .getAllSteps(truncatedFlow)
+      .getAllSteps(selectedFlowActionRef.current)
       .map((step) => step.name);
+
+    selectedNodeCounterRef.current = selectedStepNames.length;
 
     state.setNodes(
       state.nodes.map((node) => ({
@@ -96,14 +120,66 @@ export const CanvasContextProvider = ({
     setSelectedActions([]);
   }, [selectedActions, state]);
 
+  const copySelectedArea = useDebounceCallback(() => {
+    const selectionArea = document.querySelector(
+      `.${NODE_SELECTION_RECT_CLASS_NAME}`,
+    );
+    if (!selectionArea) {
+      selectedFlowActionRef.current = null;
+      selectedNodeCounterRef.current = 0;
+      return;
+    }
+    if (!selectedFlowActionRef.current || !selectedNodeCounterRef.current) {
+      return;
+    }
+
+    handleCopy(selectedFlowActionRef.current, selectedNodeCounterRef.current);
+  }, 300);
+
+  const copyAction = (action: Action) => {
+    const actionToBeCopied = cloneDeep(action);
+    actionToBeCopied.nextAction = undefined;
+    const actionCounter = flowHelper.getAllSteps(actionToBeCopied).length;
+    handleCopy(actionToBeCopied, actionCounter);
+  };
+
+  const handleCopy = (action: Action, actionCounter: number) => {
+    const flowString = JSON.stringify(action);
+
+    navigator.clipboard
+      .writeText(flowString)
+      .then(() => {
+        copyPasteToast({
+          success: true,
+          isCopy: true,
+          itemsCounter: actionCounter,
+        });
+      })
+      .catch(() => {
+        copyPasteToast({
+          success: false,
+          isCopy: true,
+          itemsCounter: actionCounter,
+        });
+      });
+  };
+
+  useEffect(() => {
+    if (copyPressed) {
+      copySelectedArea();
+    }
+  }, [copyPressed, copySelectedArea]);
+
   const contextValue = useMemo(
     () => ({
       panningMode: effectivePanningMode,
       setPanningMode,
       onSelectionChange,
       onSelectionEnd,
+      copySelectedArea,
+      copyAction,
     }),
-    [effectivePanningMode, onSelectionChange, onSelectionEnd],
+    [effectivePanningMode, onSelectionChange, onSelectionEnd, copySelectedArea],
   );
   return (
     <CanvasContext.Provider value={contextValue}>

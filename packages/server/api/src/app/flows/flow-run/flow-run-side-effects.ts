@@ -3,14 +3,12 @@ import {
   LATEST_JOB_DATA_SCHEMA_VERSION,
   logger,
   RepeatableJobType,
-  sendWorkflowExecutionEvent,
 } from '@openops/server-shared';
 import {
   ApplicationError,
   ErrorCode,
   ExecutionType,
   FlowRun,
-  FlowRunStatus,
   isNil,
   ProgressUpdateType,
 } from '@openops/shared';
@@ -54,10 +52,6 @@ export const flowRunSideEffects = {
     await flowRunHooks
       .getHooks()
       .onFinish({ projectId: flowRun.projectId, tasks: flowRun.tasks! });
-
-    if (flowRun.status !== FlowRunStatus.RUNNING) {
-      sendWorkflowExecutionEvent(flowRun);
-    }
   },
   async start({
     flowRun,
@@ -88,13 +82,6 @@ export const flowRunSideEffects = {
         progressUpdateType,
       },
     });
-
-    if (jobAdded) {
-      sendWorkflowExecutionEvent({
-        ...flowRun,
-        status: executionType,
-      });
-    }
 
     return jobAdded;
   },
