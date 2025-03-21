@@ -4,6 +4,7 @@ import * as React from 'react';
 
 import { cn } from '../lib/cn';
 
+import { isMacUserAgent } from '../lib/user-agent-utils';
 import { LoadingSpinner } from './spinner';
 
 const buttonVariants = cva(
@@ -72,7 +73,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ) => {
     const Comp = asChild ? Slot : 'button';
 
-    const isMac = /(Mac)/i.test(navigator.userAgent);
+    const isMac = isMacUserAgent();
     const isEscape = keyboardShortcut?.toLocaleLowerCase() === 'esc';
     React.useEffect(() => {
       if (keyboardShortcut) {

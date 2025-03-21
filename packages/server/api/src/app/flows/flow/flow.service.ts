@@ -1,13 +1,4 @@
-import {
-  AppSystemProp,
-  distributedLock,
-  sendWorkflowCreatedEvent,
-  sendWorkflowCreatedFromTemplateEvent,
-  sendWorkflowDeletedEvent,
-  sendWorkflowExportedEvent,
-  sendWorkflowUpdatedEvent,
-  system,
-} from '@openops/server-shared';
+import { AppSystemProp, distributedLock, system } from '@openops/server-shared';
 import {
   ApplicationError,
   CreateEmptyFlowRequest,
@@ -37,6 +28,13 @@ import { appConnectionService } from '../../app-connection/app-connection-servic
 import { transaction } from '../../core/db/transaction';
 import { buildPaginator } from '../../helper/pagination/build-paginator';
 import { paginationHelper } from '../../helper/pagination/pagination-utils';
+import {
+  sendWorkflowCreatedEvent,
+  sendWorkflowCreatedFromTemplateEvent,
+  sendWorkflowDeletedEvent,
+  sendWorkflowExportedEvent,
+  sendWorkflowUpdatedEvent,
+} from '../../telemetry/event-models';
 import {
   flowVersionRepo,
   flowVersionService,
@@ -266,7 +264,7 @@ export const flowService = {
 
     sendWorkflowUpdatedEvent({
       id: result.id,
-      userId: params.userId || 'unknown',
+      userId: params.userId,
       projectId: result.projectId,
       operation: params.operation,
       flowVersionId: result.version.id,
@@ -673,7 +671,7 @@ type CountParams = {
 
 type UpdateParams = {
   id: FlowId;
-  userId: UserId | null;
+  userId: UserId;
   projectId: ProjectId;
   operation: FlowOperationRequest;
   lock?: boolean;

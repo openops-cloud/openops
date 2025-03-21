@@ -1,4 +1,4 @@
-import { cacheWrapper, sendUserCreatedEvent } from '@openops/server-shared';
+import { cacheWrapper } from '@openops/server-shared';
 import {
   ApplicationError,
   ErrorCode,
@@ -17,6 +17,7 @@ import {
 import dayjs from 'dayjs';
 import { passwordHasher } from '../authentication/lib/password-hasher';
 import { repoFactory } from '../core/db/repo-factory';
+import { sendUserCreatedEvent } from '../telemetry/event-models';
 import { UserEntity } from './user-entity';
 
 export const userRepo = repoFactory(UserEntity);
@@ -192,6 +193,24 @@ export const userService = {
     }
 
     await cacheWrapper.setKey(`track-events-${id}`, trackEvents.toString());
+  },
+
+  async getTrackEventsConfig(userId: string): Promise<string> {
+    const trackEventsKey = `track-events-${userId}`;
+
+    let trackEvents = await cacheWrapper.getKey(trackEventsKey);
+    if (trackEvents) {
+      return trackEvents;
+    }
+
+    const user = await userService.get({ id: userId });
+    if (!user) {
+      return 'false';
+    }
+
+    trackEvents = user.trackEvents?.toString() ?? 'false';
+    await cacheWrapper.setKey(trackEventsKey, trackEvents);
+    return trackEvents;
   },
 
   async addOwnerToOrganization({

@@ -5,15 +5,13 @@ const axiosMock = {
   post: jest.fn(),
 };
 
-const requestContextMock = {
-  requestContext: {
-    get: jest.fn(),
-  },
-};
-
 const systemMock = {
   get: jest.fn(),
   getBoolean: jest.fn(),
+};
+
+const userServiceMock = {
+  getTrackEventsConfig: jest.fn(),
 };
 
 const logzioCollectorMock = {
@@ -22,33 +20,53 @@ const logzioCollectorMock = {
   flushMetricsCollector: jest.fn(() => Promise.resolve()),
 };
 
-jest.mock('../src/lib/logger');
-jest.mock('axios', () => axiosMock);
-jest.mock('../src/lib/system', () => ({
-  ...jest.requireActual('../src/lib/system'),
-  system: systemMock,
-}));
-jest.mock('@fastify/request-context', () => requestContextMock);
-jest.mock('../src/lib/telemetry/logzio-collector', () => logzioCollectorMock);
+jest.mock('@openops/server-shared', () => {
+  const actual = jest.requireActual('@openops/server-shared');
+  return {
+    ...actual,
+    cacheWrapper: jest.fn(),
+    system: {
+      ...actual.system,
+      ...systemMock,
+    },
+    logger: {
+      info: jest.fn(),
+      error: jest.fn(),
+    },
+  };
+});
 
-import { WorkflowEventName } from '../src/lib/telemetry/event-models';
-import { TelemetryEvent } from '../src/lib/telemetry/telemetry-event';
+jest.mock('axios', () => axiosMock);
+jest.mock(
+  '../../src/app/telemetry/logzio-collector',
+  () => logzioCollectorMock,
+);
+jest.mock('../../src/app/user/user-service', () => ({
+  userService: userServiceMock,
+}));
+
+import { WorkflowEventName } from '../../src/app/telemetry/event-models';
+import { TelemetryEvent } from '../../src/app/telemetry/telemetry-event';
 
 function getSUT() {
+  jest.resetModules();
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  return require('../src/lib/telemetry/telemetry').telemetry;
+  return require('../../src/app/telemetry/telemetry').telemetry;
 }
 
 describe('telemetry', () => {
   let getEnvironmentId: jest.Mock;
-  let telemetry: typeof import('../src/lib/telemetry/telemetry').telemetry;
+  let telemetry: typeof import('../../src/app/telemetry/telemetry').telemetry;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.resetModules();
     getEnvironmentId = jest
       .fn()
       .mockResolvedValue('123e4567-e89b-12d3-a456-426614174000');
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   describe('start', () => {
@@ -79,12 +97,14 @@ describe('telemetry', () => {
     const event: TelemetryEvent = {
       name: WorkflowEventName.CREATED_WORKFLOW,
       labels: {
+        userId: 'value',
         flowId: 'value',
         projectId: 'projectId',
       },
     };
     const expectedTimeseries: Timeseries = {
       labels: {
+        userId: 'value',
         eventName: event.name,
         flowId: 'value',
         version: '0.0.1',
@@ -102,7 +122,7 @@ describe('telemetry', () => {
     };
 
     it('should not track event if telemetry is disabled', () => {
-      requestContextMock.requestContext.get.mockReturnValueOnce('false');
+      userServiceMock.getTrackEventsConfig.mockResolvedValueOnce('false');
       telemetry = getSUT();
       telemetry.trackEvent(event);
 
@@ -112,10 +132,12 @@ describe('telemetry', () => {
 
     it('should send event to collector if URL is provided', async () => {
       systemMock.get.mockReturnValue('https://collector.example.com');
-      requestContextMock.requestContext.get.mockReturnValueOnce('true');
+      userServiceMock.getTrackEventsConfig.mockResolvedValueOnce('true');
 
       telemetry = getSUT();
       telemetry.trackEvent(event);
+
+      await new Promise((r) => setTimeout(r, 500));
 
       expect(axiosMock.post).toHaveBeenCalledWith(
         'https://collector.example.com',
@@ -125,9 +147,7 @@ describe('telemetry', () => {
     });
 
     it('should save metric to Logzio if no telemetry URL', async () => {
-      const fixedDate = new Date('2023-11-25T12:00:00Z');
-      jest.spyOn(global, 'Date').mockImplementation(() => fixedDate);
-      requestContextMock.requestContext.get.mockReturnValueOnce('true');
+      userServiceMock.getTrackEventsConfig.mockResolvedValueOnce('true');
 
       systemMock.getBoolean.mockReturnValue(true);
       systemMock.get.mockImplementation((key) => {
@@ -142,7 +162,12 @@ describe('telemetry', () => {
       });
 
       telemetry = getSUT();
+
+      const fixedDate = new Date('2023-11-25T12:00:00Z');
+      jest.spyOn(global, 'Date').mockImplementation(() => fixedDate);
+
       telemetry.trackEvent(event);
+      await new Promise((r) => setTimeout(r, 500));
 
       expect(logzioCollectorMock.saveMetric).toHaveBeenCalledWith(
         expectedTimeseries,
