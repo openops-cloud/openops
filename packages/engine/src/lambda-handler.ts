@@ -1,14 +1,8 @@
-import {
-  logger,
-  runWithLogContext,
-  sendLogs,
-  telemetry,
-} from '@openops/server-shared';
+import { logger, runWithLogContext, sendLogs } from '@openops/server-shared';
 import { EngineResponseStatus } from '@openops/shared';
 import { APIGatewayEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
 import { nanoid } from 'nanoid';
 import { executeEngine } from './engine-executor';
-import { getEnvironmentId } from './get-environment-id';
 import { EngineRequest } from './main';
 
 export async function lambdaHandler(
@@ -41,10 +35,6 @@ async function handleEvent(
   data: EngineRequest,
 ): Promise<APIGatewayProxyResult | undefined> {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const engineToken = (data.engineInput as any).engineToken;
-    await telemetry.start(async () => getEnvironmentId(engineToken));
-
     logger.info('Request received in the engine.');
 
     if (!data.engineInput) {
@@ -60,7 +50,6 @@ async function handleEvent(
     const result = await executeEngine(data.engineInput, data.operationType);
 
     await sendLogs();
-    await telemetry.flush();
 
     return {
       statusCode: 200,
@@ -70,7 +59,6 @@ async function handleEvent(
     logger.error('Engine execution failed.', { error });
 
     await sendLogs();
-    await telemetry.flush();
 
     return {
       statusCode: 500,

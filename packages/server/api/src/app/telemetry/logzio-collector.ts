@@ -1,7 +1,6 @@
+import { logger, SharedSystemProp, system } from '@openops/server-shared';
 import { Mutex } from 'async-mutex';
 import { pushTimeseries, Timeseries } from 'prometheus-remote-write';
-import { logger } from '../logger';
-import { SharedSystemProp, system } from '../system';
 import { TelemetryEvent } from './telemetry-event';
 
 const logzioMetricToken = system.getOrThrow<string>(
