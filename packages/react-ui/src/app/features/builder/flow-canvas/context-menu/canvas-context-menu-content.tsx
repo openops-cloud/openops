@@ -40,7 +40,7 @@ export const CanvasContextMenuContent = ({
     state.readonly,
   ]);
 
-  const { copy } = useCanvasContext();
+  const { copySelectedArea } = useCanvasContext();
 
   const disabled = selectedNodes.length === 0;
 
@@ -72,7 +72,7 @@ export const CanvasContextMenuContent = ({
   return (
     <>
       {showCopy && (
-        <ContextMenuItem disabled={disabled} onClick={copy}>
+        <ContextMenuItem disabled={disabled} onClick={copySelectedArea}>
           <ShortcutWrapper shortcut={CanvasShortcuts['Copy']}>
             <Copy className="w-4 h-4"></Copy> {t('Copy')}
           </ShortcutWrapper>

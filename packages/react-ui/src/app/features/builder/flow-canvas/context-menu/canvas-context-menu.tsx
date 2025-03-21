@@ -11,7 +11,7 @@ import {
   useCanvasContext,
   WorkflowNode,
 } from '@openops/components/ui';
-import { FlagId, FlowOperationType } from '@openops/shared';
+import { Action, FlagId, FlowOperationType } from '@openops/shared';
 
 import { t } from 'i18next';
 import {
@@ -47,7 +47,7 @@ const CanvasContextMenu = memo(
       false;
     const applyOperationAndPushToHistory = useApplyOperationAndPushToHistory();
 
-    const { copy } = useCanvasContext();
+    const { copyAction } = useCanvasContext();
 
     const [selectStepByName, removeStepSelection, setAllowCanvasPanning] =
       useBuilderStateContext((state) => [
@@ -137,7 +137,7 @@ const CanvasContextMenu = memo(
               <DropdownMenuItem
                 onSelect={(e) => {
                   e.preventDefault();
-                  copy();
+                  copyAction(data.step as Action);
                 }}
               >
                 <StepActionWrapper>
