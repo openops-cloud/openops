@@ -89,20 +89,7 @@ services:
         condition: service_healthy
       tables:
         condition: service_healthy
-  localstack:
-    container_name: 'localstack'
-    image: localstack/localstack
-    ports:
-      - '4566:4566' # LocalStack Gateway
-      - '4510-4559:4510-4559' # external services port range
-    environment:
-      - LOCALSTACK_AUTH_TOKEN=${LOCALSTACK_AUTH_TOKEN}
-      - DEBUG=${DEBUG:-0}
-    volumes:
-      - 'localstack_data:/var/lib/localstack'
-      - '/var/run/docker.sock:/var/run/docker.sock'
 volumes:
   openops_tables_data:
   postgres_data:
   redis_data:
-  localstack_data:
