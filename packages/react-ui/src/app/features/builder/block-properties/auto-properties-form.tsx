@@ -280,7 +280,7 @@ const selectFormComponentForProperty = ({
           field={field}
           propertyName={propertyName}
           disabled={disabled}
-          allowDynamicValues={allowDynamicValues}
+          allowDynamicValues={false}
         >
           {useMentionTextInput ? (
             <TextInputWithMentions
