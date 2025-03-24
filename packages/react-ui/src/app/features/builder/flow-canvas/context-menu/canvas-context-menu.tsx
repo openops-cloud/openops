@@ -101,9 +101,9 @@ const CanvasContextMenu = memo(
     return (
       <DropdownMenu
         open={openStepActionsMenu}
-        onOpenChange={(open) => {
+        onOpenChange={async (open) => {
+          await fetchClipboardOperations();
           setOpenStepActionsMenu(open);
-          fetchClipboardOperations();
           if (open && data.step) {
             selectStepByName(data.step.name);
           }
@@ -176,29 +176,6 @@ const CanvasContextMenu = memo(
                 {t('Duplicate')}
               </StepActionWrapper>
             </DropdownMenuItem>
-          )}
-
-          {isAction && showCopyPaste && actionToPaste && (
-            <>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onSelect={(e) => {
-                  e.preventDefault();
-                  if (data.step) {
-                    onPaste(
-                      actionToPaste as Action,
-                      StepLocationRelativeToParent.AFTER,
-                      data.step.name,
-                    );
-                  }
-                }}
-              >
-                <StepActionWrapper>
-                  <Copy className="mr-2 h-4 w-4" />
-                  <span className="">{t('Paste after')}</span>
-                </StepActionWrapper>
-              </DropdownMenuItem>
-            </>
           )}
 
           {isAction &&
@@ -278,6 +255,29 @@ const CanvasContextMenu = memo(
                 </DropdownMenuItem>
               </>
             )}
+
+          {isAction && showCopyPaste && actionToPaste && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onSelect={(e) => {
+                  e.preventDefault();
+                  if (data.step) {
+                    onPaste(
+                      actionToPaste as Action,
+                      StepLocationRelativeToParent.AFTER,
+                      data.step.name,
+                    );
+                  }
+                }}
+              >
+                <StepActionWrapper>
+                  <Copy className="mr-2 h-4 w-4" />
+                  <span className="">{t('Paste after')}</span>
+                </StepActionWrapper>
+              </DropdownMenuItem>
+            </>
+          )}
 
           {isAction && (
             <>
