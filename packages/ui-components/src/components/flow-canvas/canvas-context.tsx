@@ -16,7 +16,12 @@ import {
   useState,
 } from 'react';
 import { useDebounceCallback } from 'usehooks-ts';
-import { COPY_KEYS, SHIFT_KEY, SPACE_KEY } from './constants';
+import {
+  COPY_KEYS,
+  NODE_SELECTION_RECT_CLASS_NAME,
+  SHIFT_KEY,
+  SPACE_KEY,
+} from './constants';
 import { copyPasteToast } from './copy-paste-toast';
 
 export type PanningMode = 'grab' | 'pan';
@@ -26,7 +31,8 @@ type CanvasContextState = {
   setPanningMode: React.Dispatch<React.SetStateAction<PanningMode>>;
   onSelectionChange: (ev: OnSelectionChangeParams) => void;
   onSelectionEnd: () => void;
-  copy: () => void;
+  copySelectedArea: () => void;
+  copyAction: (action: Action) => void;
 };
 
 const CanvasContext = createContext<CanvasContextState | undefined>(undefined);
@@ -114,11 +120,31 @@ export const CanvasContextProvider = ({
     setSelectedActions([]);
   }, [selectedActions, state]);
 
-  const copy = useDebounceCallback(() => {
+  const copySelectedArea = useDebounceCallback(() => {
+    const selectionArea = document.querySelector(
+      `.${NODE_SELECTION_RECT_CLASS_NAME}`,
+    );
+    if (!selectionArea) {
+      selectedFlowActionRef.current = null;
+      selectedNodeCounterRef.current = 0;
+      return;
+    }
     if (!selectedFlowActionRef.current || !selectedNodeCounterRef.current) {
       return;
     }
-    const flowString = JSON.stringify(selectedFlowActionRef.current);
+
+    handleCopy(selectedFlowActionRef.current, selectedNodeCounterRef.current);
+  }, 300);
+
+  const copyAction = (action: Action) => {
+    const actionToBeCopied = cloneDeep(action);
+    actionToBeCopied.nextAction = undefined;
+    const actionCounter = flowHelper.getAllSteps(actionToBeCopied).length;
+    handleCopy(actionToBeCopied, actionCounter);
+  };
+
+  const handleCopy = (action: Action, actionCounter: number) => {
+    const flowString = JSON.stringify(action);
 
     navigator.clipboard
       .writeText(flowString)
@@ -126,23 +152,23 @@ export const CanvasContextProvider = ({
         copyPasteToast({
           success: true,
           isCopy: true,
-          itemsCounter: selectedNodeCounterRef.current,
+          itemsCounter: actionCounter,
         });
       })
       .catch(() => {
         copyPasteToast({
-          success: true,
+          success: false,
           isCopy: true,
-          itemsCounter: selectedNodeCounterRef.current,
+          itemsCounter: actionCounter,
         });
       });
-  }, 300);
+  };
 
   useEffect(() => {
     if (copyPressed) {
-      copy();
+      copySelectedArea();
     }
-  }, [copyPressed, copy]);
+  }, [copyPressed, copySelectedArea]);
 
   const contextValue = useMemo(
     () => ({
@@ -150,9 +176,10 @@ export const CanvasContextProvider = ({
       setPanningMode,
       onSelectionChange,
       onSelectionEnd,
-      copy,
+      copySelectedArea,
+      copyAction,
     }),
-    [effectivePanningMode, onSelectionChange, onSelectionEnd, copy],
+    [effectivePanningMode, onSelectionChange, onSelectionEnd, copySelectedArea],
   );
   return (
     <CanvasContext.Provider value={contextValue}>

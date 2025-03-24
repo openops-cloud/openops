@@ -2,8 +2,6 @@ import {
   distributedLock,
   exceptionHandler,
   logger,
-  sendConnectionCreatedEvent,
-  sendConnectionUpdatedEvent,
   SharedSystemProp,
   system,
 } from '@openops/server-shared';
@@ -39,6 +37,10 @@ import { repoFactory } from '../../core/db/repo-factory';
 import { encryptUtils } from '../../helper/encryption';
 import { buildPaginator } from '../../helper/pagination/build-paginator';
 import { paginationHelper } from '../../helper/pagination/pagination-utils';
+import {
+  sendConnectionCreatedEvent,
+  sendConnectionUpdatedEvent,
+} from '../../telemetry/event-models';
 import { removeSensitiveData } from '../app-connection-utils';
 import {
   AppConnectionEntity,
