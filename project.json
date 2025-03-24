@@ -3,13 +3,21 @@
   "$schema": "node_modules/nx/schemas/project-schema.json",
   "targets": {
     "e2e": {
-        "executor": "nx:run-commands",
-        "options": {
-            "commands": [
-            "cp -uv packages/tests-e2e/.env.template packages/tests-e2e/.env",
-            "npx playwright test -c packages/tests-e2e/playwright.config.ts packages/tests-e2e/tests/*.spec.ts"
-            ]
-        }
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "cp -uv packages/tests-e2e/.env.template packages/tests-e2e/.env",
+          "npx playwright test -c packages/tests-e2e/playwright.config.ts packages/tests-e2e/tests/*.spec.ts"
+        ]
+      }
+    },
+    "local-registry": {
+      "executor": "@nx/js:verdaccio",
+      "options": {
+        "port": 4873,
+        "config": ".verdaccio/config.yml",
+        "storage": "tmp/local-registry/storage"
+      }
     }
   }
 }
