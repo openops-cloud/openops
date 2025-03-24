@@ -167,6 +167,7 @@ const executeAction: ActionHandler<BlockAction> = async ({
         pauseId: executionState.pauseId,
         stop: createStopHook(hookResponse),
         pause: createPauseHook(hookResponse, executionState.pauseId),
+        isTest: constants.testSingleStepMode,
       },
       project: {
         id: constants.projectId,
