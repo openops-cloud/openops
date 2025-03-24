@@ -1,5 +1,5 @@
 import { Type } from '@sinclair/typebox';
-import { FileProperty, StaticPropsValue } from '..';
+import { StaticPropsValue } from '..';
 import { ValidationInputType } from '../../validators/types';
 import { ArrayProperty } from '../input/array-property';
 import { CheckboxProperty } from '../input/checkbox-property';
