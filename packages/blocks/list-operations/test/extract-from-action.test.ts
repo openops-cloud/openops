@@ -4,7 +4,7 @@ describe('extractFromListAction', () => {
   test('should create action with correct properties', () => {
     expect(extractFromListAction.props).toMatchObject({
       listItems: {
-        type: 'SHORT_TEXT',
+        type: 'LONG_TEXT',
         required: true,
       },
       keyName: {

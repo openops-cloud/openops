@@ -7,7 +7,7 @@ export const groupByAction = createAction({
   description: 'Group items by a given key',
   displayName: 'Group By',
   props: {
-    listItems: Property.ShortText({
+    listItems: Property.LongText({
       displayName: 'Items',
       description: `A list of items to group`,
       required: true,

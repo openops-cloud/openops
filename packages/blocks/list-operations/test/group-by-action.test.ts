@@ -5,7 +5,7 @@ describe('groupByAction', () => {
   test('should create action with properties', () => {
     expect(groupByAction.props).toMatchObject({
       listItems: {
-        type: 'SHORT_TEXT',
+        type: 'LONG_TEXT',
         required: true,
       },
       keyName: {

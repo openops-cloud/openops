@@ -5,7 +5,7 @@ describe('toMapAction', () => {
   test('should create action with properties', () => {
     expect(toMapAction.props).toMatchObject({
       listItems: {
-        type: 'SHORT_TEXT',
+        type: 'LONG_TEXT',
         required: true,
       },
       keyName: {

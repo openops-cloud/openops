@@ -7,7 +7,7 @@ export const extractFromListAction = createAction({
   description: 'Extract items from a list with a given key',
   displayName: 'Extract From List',
   props: {
-    listItems: Property.ShortText({
+    listItems: Property.LongText({
       displayName: 'Items',
       description: `A list of items to extract from`,
       required: true,
