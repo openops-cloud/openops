@@ -6,7 +6,7 @@ export async function getActionsInClipboard(): Promise<Action | null> {
     const clipboardText = await navigator.clipboard.readText();
     const request = JSON.parse(clipboardText);
 
-    if (request && request.name && request.settings) {
+    if (request?.name && request?.settings) {
       return request;
     }
   } catch (error) {
