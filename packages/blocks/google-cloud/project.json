@@ -1,7 +1,7 @@
 {
-  "name": "blocks-gcp",
+  "name": "blocks-google-cloud",
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/blocks/gcp/src",
+  "sourceRoot": "packages/blocks/google-cloud/src",
   "projectType": "library",
   "release": {
     "version": {
@@ -14,17 +14,17 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/js:tsc",
+      "executor": "nx:noop",
       "outputs": [
         "{options.outputPath}"
       ],
       "options": {
-        "outputPath": "dist/packages/blocks/gcp",
-        "tsConfig": "packages/blocks/gcp/tsconfig.lib.json",
-        "packageJson": "packages/blocks/gcp/package.json",
-        "main": "packages/blocks/gcp/src/index.ts",
+        "outputPath": "dist/packages/blocks/google-cloud",
+        "tsConfig": "packages/blocks/google-cloud/tsconfig.lib.json",
+        "packageJson": "packages/blocks/google-cloud/package.json",
+        "main": "packages/blocks/google-cloud/src/index.ts",
         "assets": [
-          "packages/blocks/gcp/*.md"
+          "packages/blocks/google-cloud/*.md"
         ],
         "buildableProjectDepsInPackageJsonType": "dependencies",
         "updateBuildableProjectDepsInPackageJson": true
@@ -41,7 +41,7 @@
         "{workspaceRoot}/coverage/{projectRoot}"
       ],
       "options": {
-        "jestConfig": "packages/blocks/gcp/jest.config.ts"
+        "jestConfig": "packages/blocks/google-cloud/jest.config.ts"
       }
     },
     "lint": {

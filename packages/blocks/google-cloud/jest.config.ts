@@ -1,10 +1,10 @@
 export default {
-  displayName: 'blocks-gcp',
+  displayName: 'blocks-google-cloud',
   preset: '../../../jest.preset.js',
   testEnvironment: 'node',
   transform: {
     '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }],
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
-  coverageDirectory: '../../../coverage/packages/blocks/gcp',
+  coverageDirectory: '../../../coverage/packages/blocks/google-cloud',
 };
