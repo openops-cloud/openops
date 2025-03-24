@@ -48,7 +48,7 @@ export const CanvasContextMenuContent = ({
     (state) => [state.flowVersion, state.readonly, state.selectedStep],
   );
 
-  const { copySelectedArea } = useCanvasContext();
+  const { copySelectedArea, copyAction } = useCanvasContext();
 
   const disabled = selectedNodes.length === 0;
 
@@ -89,7 +89,18 @@ export const CanvasContextMenuContent = ({
   return (
     <>
       {showCopy && (
-        <ContextMenuItem disabled={disabled} onClick={copySelectedArea}>
+        <ContextMenuItem
+          disabled={disabled}
+          onClick={() => {
+            if (selectedStep) {
+              const step = flowHelper.getStep(flowVersion, selectedStep);
+              copyAction(step as Action);
+              return;
+            }
+
+            copySelectedArea();
+          }}
+        >
           <ShortcutWrapper shortcut={CanvasShortcuts['Copy']}>
             <Copy className="w-4 h-4"></Copy> {t('Copy')}
           </ShortcutWrapper>
