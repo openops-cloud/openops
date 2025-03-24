@@ -1,11 +1,11 @@
 import { createAction, Property } from '@openops/blocks-framework';
 import { dryRunCheckBox } from '@openops/common';
 import { logger } from '@openops/server-shared';
-import { gcpAuth } from '../gcp-auth';
+import { googleCloudAuth } from '../gcp-auth';
 import { runCommand } from '../gcp-cli';
 
 export const gcpCliAction = createAction({
-  auth: gcpAuth,
+  auth: googleCloudAuth,
   name: 'gcp_cli',
   description: 'Execute GCP CLI command',
   displayName: 'GCP CLI',

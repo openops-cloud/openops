@@ -1,5 +1,5 @@
 import { Type } from '@sinclair/typebox';
-import { StaticPropsValue } from '..';
+import { FileProperty, StaticPropsValue } from '..';
 import { ValidationInputType } from '../../validators/types';
 import { ArrayProperty } from '../input/array-property';
 import { CheckboxProperty } from '../input/checkbox-property';
@@ -20,6 +20,7 @@ const CustomAuthProps = Type.Record(
     CheckboxProperty,
     StaticDropdownProperty,
     ArrayProperty,
+    FileProperty,
   ]),
 );
 
@@ -32,6 +33,7 @@ export type CustomAuthProps = Record<
   | StaticDropdownProperty<unknown, boolean>
   | CheckboxProperty<boolean>
   | ArrayProperty<boolean>
+  | FileProperty<boolean>
 >;
 
 export const CustomAuthProperty = Type.Composite([
