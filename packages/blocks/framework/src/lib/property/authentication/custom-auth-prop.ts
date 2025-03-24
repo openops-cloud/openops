@@ -20,7 +20,6 @@ const CustomAuthProps = Type.Record(
     CheckboxProperty,
     StaticDropdownProperty,
     ArrayProperty,
-    FileProperty,
   ]),
 );
 
@@ -33,7 +32,6 @@ export type CustomAuthProps = Record<
   | StaticDropdownProperty<unknown, boolean>
   | CheckboxProperty<boolean>
   | ArrayProperty<boolean>
-  | FileProperty<boolean>
 >;
 
 export const CustomAuthProperty = Type.Composite([
