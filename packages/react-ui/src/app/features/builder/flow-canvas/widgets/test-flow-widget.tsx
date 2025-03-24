@@ -1,6 +1,7 @@
 import {
   Button,
   INTERNAL_ERROR_TOAST,
+  isMacUserAgent,
   toast,
   Tooltip,
   TooltipContent,
@@ -26,8 +27,7 @@ type TestFlowWidgetProps = {
 
 const TestFlowWidget = ({ flowVersion, setRun }: TestFlowWidgetProps) => {
   const socket = useSocket();
-
-  const isMac = /(Mac)/i.test(navigator.userAgent);
+  const isMac = isMacUserAgent();
 
   const triggerHasSampleData =
     flowVersion.trigger.type === TriggerType.BLOCK &&

@@ -8,9 +8,10 @@ import {
   DropdownMenuTrigger,
   toast,
   UNSAVED_CHANGES_TOAST,
+  useCanvasContext,
   WorkflowNode,
 } from '@openops/components/ui';
-import { FlagId, FlowOperationType } from '@openops/shared';
+import { Action, FlagId, FlowOperationType } from '@openops/shared';
 
 import { t } from 'i18next';
 import {
@@ -45,6 +46,8 @@ const CanvasContextMenu = memo(
       flagsHooks.useFlag<boolean>(FlagId.COPY_PASTE_ACTIONS_ENABLED).data ||
       false;
     const applyOperationAndPushToHistory = useApplyOperationAndPushToHistory();
+
+    const { copyAction } = useCanvasContext();
 
     const [selectStepByName, removeStepSelection, setAllowCanvasPanning] =
       useBuilderStateContext((state) => [
@@ -134,7 +137,7 @@ const CanvasContextMenu = memo(
               <DropdownMenuItem
                 onSelect={(e) => {
                   e.preventDefault();
-                  // https://linear.app/openops/issue/OPS-852/add-copy-logic
+                  copyAction(data.step as Action);
                 }}
               >
                 <StepActionWrapper>

@@ -2,7 +2,6 @@ import {
   FastifyPluginCallbackTypebox,
   Type,
 } from '@fastify/type-provider-typebox';
-import { sendConnectionDeletedEvent } from '@openops/server-shared';
 import {
   AppConnectionWithoutSensitiveData,
   ListAppConnectionsRequestQuery,
@@ -14,6 +13,7 @@ import {
   UpsertAppConnectionRequestBody,
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
+import { sendConnectionDeletedEvent } from '../telemetry/event-models';
 import { appConnectionService } from './app-connection-service/app-connection-service';
 import { removeSensitiveData } from './app-connection-utils';
 

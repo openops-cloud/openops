@@ -32,7 +32,7 @@ export class AccessTokenAuthnHandler extends BaseSecurityHandler {
         const userId = request.principal.id;
         request.requestContext.set('userId' as never, userId as never);
 
-        const trackEvents = await getTrackEventsConfigForUser(userId);
+        const trackEvents = await userService.getTrackEventsConfig(userId);
         request.requestContext.set(
           'trackEvents' as never,
           trackEvents as never,
@@ -65,22 +65,4 @@ export class AccessTokenAuthnHandler extends BaseSecurityHandler {
 
     return accessToken;
   }
-}
-
-async function getTrackEventsConfigForUser(userId: string): Promise<string> {
-  const trackEventsKey = `track-events-${userId}`;
-
-  let trackEvents = await cacheWrapper.getKey(trackEventsKey);
-  if (trackEvents) {
-    return trackEvents;
-  }
-
-  const user = await userService.get({ id: userId });
-  if (!user) {
-    return 'false';
-  }
-
-  trackEvents = user.trackEvents?.toString() ?? 'false';
-  await cacheWrapper.setKey(trackEventsKey, trackEvents);
-  return trackEvents;
 }

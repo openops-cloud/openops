@@ -1,4 +1,3 @@
-import { sendWorkflowTestBlockEvent } from '@openops/server-shared';
 import {
   ActionType,
   ApplicationError,
@@ -12,6 +11,7 @@ import {
 } from '@openops/shared';
 import { engineRunner } from 'server-worker';
 import { accessTokenManager } from '../../authentication/lib/access-token-manager';
+import { sendWorkflowTestBlockEvent } from '../../telemetry/event-models';
 import { flowVersionService } from '../flow-version/flow-version.service';
 
 export const stepRunService = {

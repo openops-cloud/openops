@@ -20,6 +20,7 @@ import {
   FlowOperationRequest,
   FlowOperationType,
   MoveActionRequest,
+  PasteActionsRequest,
   StepLocationRelativeToParent,
   UpdateActionRequest,
   UpdateTriggerRequest,
@@ -27,7 +28,6 @@ import {
 import { FlowVersion, FlowVersionState } from './flow-version';
 import { DEFAULT_SAMPLE_DATA_SETTINGS } from './sample-data';
 import { Trigger, TriggerType } from './triggers/trigger';
-
 type Step = Action | Trigger;
 
 type GetStepFromSubFlow = {
@@ -470,6 +470,20 @@ function moveAction(
     flowVersion = flowHelper.apply(flowVersion, operation);
   });
   return flowVersion;
+}
+function bulkAddActions(
+  flowVersion: FlowVersion,
+  request: PasteActionsRequest,
+): FlowVersion {
+  const action = request.action as unknown as Action;
+
+  return duplicateStepCascading(
+    action,
+    flowVersion,
+    request.parentStep,
+    request.stepLocationRelativeToParent,
+    request.branchNodeId,
+  );
 }
 
 function addAction(
@@ -922,16 +936,31 @@ function duplicateStep(
   const clonedStep = JSON.parse(
     JSON.stringify(flowHelper.getStep(flowVersionWithArtifacts, stepName)),
   );
+
   clonedStep.nextAction = undefined;
   if (!clonedStep) {
     throw new Error(`step with name '${stepName}' not found`);
   }
-  const existingNames = getAllSteps(flowVersionWithArtifacts.trigger).map(
+
+  return duplicateStepCascading(
+    clonedStep,
+    flowVersionWithArtifacts,
+    stepName,
+    StepLocationRelativeToParent.AFTER,
+  );
+}
+
+function duplicateStepCascading(
+  action: Action | Step,
+  flowVersion: FlowVersion,
+  parentStep: string,
+  stepLocationRelativeToParent: StepLocationRelativeToParent,
+  branchNodeId?: string,
+): FlowVersion {
+  const existingNames = getAllSteps(flowVersion.trigger).map(
     (step) => step.name,
   );
-  const oldStepsNameToReplace = getAllSteps(clonedStep).map(
-    (step) => step.name,
-  );
+  const oldStepsNameToReplace = getAllSteps(action).map((step) => step.name);
   const oldNameToNewName: Record<string, string> = {};
 
   oldStepsNameToReplace.forEach((name) => {
@@ -940,7 +969,7 @@ function duplicateStep(
     existingNames.push(newName);
   });
 
-  const duplicatedStep = transferStep(clonedStep, (step: Step) => {
+  const duplicatedStep = transferStep(action, (step: Step) => {
     step.displayName = `${step.displayName} Copy`;
     step.name = oldNameToNewName[step.name];
     if (step.settings.inputUiInfo) {
@@ -964,10 +993,11 @@ function duplicateStep(
     });
     return step;
   });
-  let finalFlow = addAction(flowVersionWithArtifacts, {
+  let finalFlow = addAction(flowVersion, {
     action: duplicatedStep as Action,
-    parentStep: stepName,
-    stepLocationRelativeToParent: StepLocationRelativeToParent.AFTER,
+    parentStep,
+    stepLocationRelativeToParent,
+    branchNodeId,
   });
   const operations = getImportOperations(duplicatedStep);
   operations.forEach((operation) => {
@@ -975,7 +1005,6 @@ function duplicateStep(
   });
   return finalFlow;
 }
-
 function replaceOldStepNameWithNewOne({
   input,
   oldStepName,
@@ -1082,6 +1111,13 @@ export const flowHelper = {
       case FlowOperationType.ADD_ACTION: {
         clonedVersion = transferFlow(
           addAction(clonedVersion, operation.request),
+          (step) => upgradeBlock(step, operation.request.action.name),
+        );
+        break;
+      }
+      case FlowOperationType.PASTE_ACTIONS: {
+        clonedVersion = transferFlow(
+          bulkAddActions(clonedVersion, operation.request),
           (step) => upgradeBlock(step, operation.request.action.name),
         );
         break;

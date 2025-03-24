@@ -40,6 +40,7 @@ export * from './ui/resizable-panel';
 export * from './ui/scroll-area';
 export * from './ui/select';
 export * from './ui/seperator';
+export * from './ui/shortcut';
 export * from './ui/skeleton';
 export * from './ui/sortable';
 export * from './ui/spinner';
@@ -71,6 +72,7 @@ export * from './lib/flow-canvas-utils';
 export * from './lib/types';
 export * from './lib/use-element-size';
 export * from './lib/use-forwarded-ref';
+export * from './lib/user-agent-utils';
 
 /* export custom components */
 export * from './components';
