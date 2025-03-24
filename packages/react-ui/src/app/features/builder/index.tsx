@@ -10,7 +10,7 @@ import {
   useElementSize,
 } from '@openops/components/ui';
 import { ReactFlowProvider } from '@xyflow/react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ImperativePanelHandle } from 'react-resizable-panels';
 import { useSearchParams } from 'react-router-dom';
 
@@ -101,6 +101,7 @@ const BuilderPage = () => {
     readonly,
     setReadOnly,
     setRightSidebar,
+    exitStepSettings,
   ] = useBuilderStateContext((state) => [
     state.selectedStep,
     state.leftSidebar,
@@ -111,7 +112,12 @@ const BuilderPage = () => {
     state.readonly,
     state.setReadOnly,
     state.setRightSidebar,
+    state.exitStepSettings,
   ]);
+
+  const clearSelectedStep = useCallback(() => {
+    exitStepSettings();
+  }, [exitStepSettings]);
 
   const { memorizedSelectedStep, containerKey } = useBuilderStateContext(
     (state) => {
@@ -262,7 +268,10 @@ const BuilderPage = () => {
                 'min-w-[830px]': leftSidebar === LeftSideBarType.NONE,
               })}
             >
-              <CanvasContextProvider>
+              <CanvasContextProvider
+                selectedStep={selectedStep}
+                clearSelectedStep={clearSelectedStep}
+              >
                 <div ref={middlePanelRef} className="relative h-full w-full">
                   <BuilderHeader />
 
