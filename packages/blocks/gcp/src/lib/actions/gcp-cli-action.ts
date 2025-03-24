@@ -10,7 +10,7 @@ export const gcpCliAction = createAction({
   description: 'Execute GCP CLI command',
   displayName: 'GCP CLI',
   props: {
-    project: Property.Dropdown<string>({
+    /*project: Property.Dropdown<string>({
       displayName: 'Project',
       description: 'Select a project to run the command in',
       refreshers: ['auth'],
@@ -23,7 +23,7 @@ export const gcpCliAction = createAction({
             placeholder: 'Please authenticate to see projects.',
           };
         }
-
+        logger.info('LEYLA');
         let projects = [];
         try {
           const projectsString = await runCommand(
@@ -55,7 +55,7 @@ export const gcpCliAction = createAction({
           ),
         };
       },
-    }),
+    }),*/
     commandToRun: Property.LongText({ displayName: 'Command', required: true }),
     dryRun: dryRunCheckBox(),
   },
@@ -67,7 +67,7 @@ export const gcpCliAction = createAction({
         return `Step execution skipped, dry run flag enabled. GCP CLI command will not be executed. Command: '${commandToRun}'`;
       }
 
-      const result = await runCommand(commandToRun, context.propsValue.project);
+      const result = await runCommand(commandToRun, undefined);
       try {
         const jsonObject = JSON.parse(result);
         return jsonObject;

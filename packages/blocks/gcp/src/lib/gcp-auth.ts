@@ -7,9 +7,9 @@ export type GCPCredentials = {
 export const gcpAuth = BlockAuth.CustomAuth({
   props: {
     keyFileContent: Property.LongText({
-      displayName: 'a',
+      displayName: 'Key file content',
       required: true,
-      description: 'b',
+      description: 'the content of the key file',
     }),
   },
   required: true,
