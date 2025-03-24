@@ -1,9 +1,10 @@
 import {
   AiWidget,
   BuilderTreeViewProvider,
-  CanvasContextProvider,
   CanvasControls,
   cn,
+  InteractiveContextProvider,
+  ReadonlyCanvasProvider,
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
@@ -262,27 +263,48 @@ const BuilderPage = () => {
                 'min-w-[830px]': leftSidebar === LeftSideBarType.NONE,
               })}
             >
-              <CanvasContextProvider>
-                <div ref={middlePanelRef} className="relative h-full w-full">
-                  <BuilderHeader />
+              {readonly ? (
+                <ReadonlyCanvasProvider>
+                  <div ref={middlePanelRef} className="relative h-full w-full">
+                    <BuilderHeader />
 
-                  <CanvasControls
-                    topOffset={FLOW_CANVAS_Y_OFFESET}
-                  ></CanvasControls>
-                  <AiWidget />
-                  <DataSelector
-                    parentHeight={middlePanelSize.height}
-                    parentWidth={middlePanelSize.width}
-                  ></DataSelector>
+                    <CanvasControls
+                      topOffset={FLOW_CANVAS_Y_OFFESET}
+                    ></CanvasControls>
 
-                  <div
-                    className="h-screen w-full flex-1 z-10"
-                    id={FLOW_CANVAS_CONTAINER_ID}
-                  >
-                    <FlowBuilderCanvas />
+                    <div
+                      className={cn('h-screen w-full flex-1 z-10', {
+                        'bg-background': !isDraggingHandle,
+                      })}
+                      id={FLOW_CANVAS_CONTAINER_ID}
+                    >
+                      <FlowBuilderCanvas />
+                    </div>
                   </div>
-                </div>
-              </CanvasContextProvider>
+                </ReadonlyCanvasProvider>
+              ) : (
+                <InteractiveContextProvider>
+                  <div ref={middlePanelRef} className="relative h-full w-full">
+                    <BuilderHeader />
+
+                    <CanvasControls
+                      topOffset={FLOW_CANVAS_Y_OFFESET}
+                    ></CanvasControls>
+                    <AiWidget />
+                    <DataSelector
+                      parentHeight={middlePanelSize.height}
+                      parentWidth={middlePanelSize.width}
+                    ></DataSelector>
+
+                    <div
+                      className="h-screen w-full flex-1 z-10"
+                      id={FLOW_CANVAS_CONTAINER_ID}
+                    >
+                      <FlowBuilderCanvas />
+                    </div>
+                  </div>
+                </InteractiveContextProvider>
+              )}
             </ResizablePanel>
 
             <>

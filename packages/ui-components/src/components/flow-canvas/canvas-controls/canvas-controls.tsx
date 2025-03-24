@@ -7,11 +7,13 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '../../../ui/tooltip';
 
 import { CenterFlowIcon } from '../../../icons';
 import { VerticalDivider } from '../../../ui/vertical-divider';
+import { useCanvasContext } from '../canvas-context';
 import { InitialZoom } from '../constants';
 import { PanningModeToggleControl } from './panning-mode-toggle-control';
 
 const CanvasControls = ({ topOffset }: { topOffset?: number }) => {
   const reactFlow = useReactFlow();
+  const { readonly } = useCanvasContext();
 
   const handleZoomIn = useCallback(() => {
     reactFlow.zoomIn({
@@ -45,7 +47,7 @@ const CanvasControls = ({ topOffset }: { topOffset?: number }) => {
 
   return (
     <div className="bg-background absolute left-[10px] bottom-[10px] z-50 rounded-xl flex flex-row items-center gap-1 shadow-editor py-0.5 px-2">
-      <PanningModeToggleControl />
+      {!readonly && <PanningModeToggleControl />}
 
       <VerticalDivider height={24} />
 
