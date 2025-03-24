@@ -237,7 +237,6 @@ const CanvasContextMenu = memo(
                   onSelect={(e) => {
                     e.preventDefault();
                     if (data.step) {
-                      console.log('data.step', data.step);
                       const branchNodeId = data.step.settings.options[0].id;
                       onPaste(
                         actionToPaste as Action,
