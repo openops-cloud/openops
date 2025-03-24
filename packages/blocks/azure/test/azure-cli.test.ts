@@ -161,4 +161,44 @@ describe('azureCli', () => {
     );
     process.env = originalEnv;
   });
+
+  test('should throw an error if runCliCommand fails and return the whole error when command does not contain login credentials', async () => {
+    commonMock.runCliCommand.mockRejectedValue('error');
+
+    await expect(
+      runCommand('some command', credentials, false),
+    ).rejects.toThrow('Error while login into azure: error');
+
+    expect(commonMock.runCliCommand).toHaveBeenCalledTimes(1);
+    expect(commonMock.runCliCommand).toHaveBeenCalledWith(
+      `login --service-principal --username ${credentials.clientId} --password ${credentials.clientSecret} --tenant ${credentials.tenantId}`,
+      'az',
+      {
+        PATH: process.env['PATH'],
+        AZURE_CONFIG_DIR: expect.any(String),
+      },
+    );
+  });
+
+  test('should throw an error if runCommand fails and return the redacted error when command contains login credentials', async () => {
+    commonMock.runCliCommand.mockRejectedValue(
+      'login --service-principal blah blah error',
+    );
+
+    await expect(
+      runCommand('some command', credentials, false),
+    ).rejects.toThrow(
+      'Error while login into azure: login --service-principal ***REDACTED***',
+    );
+
+    expect(commonMock.runCliCommand).toHaveBeenCalledTimes(1);
+    expect(commonMock.runCliCommand).toHaveBeenCalledWith(
+      `login --service-principal --username ${credentials.clientId} --password ${credentials.clientSecret} --tenant ${credentials.tenantId}`,
+      'az',
+      {
+        PATH: process.env['PATH'],
+        AZURE_CONFIG_DIR: expect.any(String),
+      },
+    );
+  });
 });
