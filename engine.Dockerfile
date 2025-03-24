@@ -31,18 +31,6 @@ RUN <<-```
     dnf -y clean all && rm -rf /var/cache
 ```
 
-RUN <<-EOF
-    set -ex
-    dnf install -y curl gnupg unzip libc6 libstdc++ binutils
-
-    curl -sSL https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-469.0.0-linux-x86_64.tar.gz -o /tmp/gcloud.tar.gz
-    mkdir -p /opt && tar -C /opt -xf /tmp/gcloud.tar.gz
-    /opt/google-cloud-sdk/install.sh --quiet
-    ln -s /opt/google-cloud-sdk/bin/gcloud /usr/bin/gcloud
-
-    rm /tmp/gcloud.tar.gz
-EOF
-
 
 RUN <<-```
     set -ex
