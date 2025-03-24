@@ -4,26 +4,22 @@ import { ClipboardPaste, ClipboardPlus, Copy } from 'lucide-react';
 import {
   ContextMenuItem,
   ContextMenuType,
-  toast,
-  UNSAVED_CHANGES_TOAST,
   useCanvasContext,
   WorkflowNode,
 } from '@openops/components/ui';
 import {
+  Action,
   ActionType,
   FlagId,
   flowHelper,
-  FlowOperationType,
-  FlowVersion,
   isNil,
   StepLocationRelativeToParent,
 } from '@openops/shared';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { useReactFlow } from '@xyflow/react';
-import { useCallback } from 'react';
 import { useBuilderStateContext } from '../../builder-hooks';
-import { useApplyOperationAndPushToHistory } from '../../flow-version-undo-redo/hooks/apply-operation-and-push-to-history';
+import { usePaste } from '../../hooks/use-paste';
 import { CanvasShortcuts, ShortcutWrapper } from './canvas-shortcuts';
 import { CanvasContextMenuProps } from './context-menu-wrapper';
 
@@ -34,8 +30,6 @@ export const CanvasContextMenuContent = ({
   const showCopyPaste =
     flagsHooks.useFlag<boolean>(FlagId.COPY_PASTE_ACTIONS_ENABLED).data ||
     false;
-
-  const applyOperationAndPushToHistory = useApplyOperationAndPushToHistory();
 
   const { getNodes } = useReactFlow();
   const nodes = getNodes() as WorkflowNode[];
@@ -90,30 +84,7 @@ export const CanvasContextMenuContent = ({
     !doSelectedNodesIncludeTrigger &&
     contextMenuType === ContextMenuType.STEP;
 
-  const onPaste = useCallback(
-    (
-      stepLocationRelativeToParent: StepLocationRelativeToParent,
-      selectedStep: string | null,
-      branchNodeId?: string,
-    ) => {
-      if (isNil(actionToPaste)) {
-        return;
-      }
-      applyOperationAndPushToHistory(
-        {
-          type: FlowOperationType.PASTE_ACTIONS,
-          request: {
-            action: actionToPaste,
-            parentStep: getParentStepForPaste(flowVersion, selectedStep),
-            stepLocationRelativeToParent,
-            branchNodeId,
-          },
-        },
-        () => toast(UNSAVED_CHANGES_TOAST),
-      );
-    },
-    [actionToPaste, flowVersion],
-  );
+  const { onPaste } = usePaste();
 
   return (
     <>
@@ -130,7 +101,11 @@ export const CanvasContextMenuContent = ({
           <ContextMenuItem
             disabled={disabledPaste}
             onClick={() =>
-              onPaste(StepLocationRelativeToParent.AFTER, selectedStep)
+              onPaste(
+                actionToPaste as Action,
+                StepLocationRelativeToParent.AFTER,
+                selectedStep,
+              )
             }
             className="flex items-center gap-2"
           >
@@ -142,7 +117,11 @@ export const CanvasContextMenuContent = ({
           <ContextMenuItem
             disabled={disabledPaste}
             onClick={() =>
-              onPaste(StepLocationRelativeToParent.INSIDE_LOOP, selectedStep)
+              onPaste(
+                actionToPaste as Action,
+                StepLocationRelativeToParent.INSIDE_LOOP,
+                selectedStep,
+              )
             }
             className="flex items-center gap-2"
           >
@@ -155,6 +134,7 @@ export const CanvasContextMenuContent = ({
             disabled={disabledPaste}
             onClick={() =>
               onPaste(
+                actionToPaste as Action,
                 StepLocationRelativeToParent.INSIDE_TRUE_BRANCH,
                 selectedStep,
               )
@@ -171,6 +151,7 @@ export const CanvasContextMenuContent = ({
             onClick={() => {
               const branchNodeId = firstSelectedStep?.settings.options[0].id;
               return onPaste(
+                actionToPaste as Action,
                 StepLocationRelativeToParent.INSIDE_SPLIT,
                 selectedStep,
                 branchNodeId,
@@ -186,7 +167,11 @@ export const CanvasContextMenuContent = ({
           <ContextMenuItem
             disabled={disabledPaste}
             onClick={() =>
-              onPaste(StepLocationRelativeToParent.AFTER, selectedStep)
+              onPaste(
+                actionToPaste as Action,
+                StepLocationRelativeToParent.AFTER,
+                selectedStep,
+              )
             }
             className="flex items-center gap-2"
           >
@@ -197,18 +182,4 @@ export const CanvasContextMenuContent = ({
       </>
     </>
   );
-};
-
-const getParentStepForPaste = (
-  flowVersion: FlowVersion,
-  selectedStep: string | null,
-) => {
-  if (selectedStep) {
-    return selectedStep;
-  }
-
-  const allSteps = flowHelper.getAllSteps(flowVersion.trigger);
-  const lastStep = allSteps[allSteps.length - 1];
-
-  return lastStep.name;
 };
