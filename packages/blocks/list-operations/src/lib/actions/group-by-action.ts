@@ -1,4 +1,5 @@
 import { BlockAuth, createAction, Property } from '@openops/blocks-framework';
+import { getItemsAsArray } from '../utils';
 
 export const groupByAction = createAction({
   auth: BlockAuth.None(),
@@ -6,7 +7,7 @@ export const groupByAction = createAction({
   description: 'Group items by a given key',
   displayName: 'Group By',
   props: {
-    listItems: Property.Array({
+    listItems: Property.LongText({
       displayName: 'Items',
       description: `A list of items to group`,
       required: true,
@@ -19,12 +20,9 @@ export const groupByAction = createAction({
   },
 
   async run(context) {
-    const resources = context.propsValue.listItems as unknown as any;
-    if (!Array.isArray(resources)) {
-      throw new Error('Resources should be an array');
-    }
+    const listItems = getItemsAsArray(context.propsValue.listItems) as any[];
 
-    return groupItemsByKey(resources, context.propsValue.keyName);
+    return groupItemsByKey(listItems, context.propsValue.keyName);
   },
 });
 

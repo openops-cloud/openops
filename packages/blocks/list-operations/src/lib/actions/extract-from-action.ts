@@ -1,4 +1,5 @@
 import { BlockAuth, createAction, Property } from '@openops/blocks-framework';
+import { getItemsAsArray } from '../utils';
 
 export const extractFromListAction = createAction({
   auth: BlockAuth.None(),
@@ -6,7 +7,7 @@ export const extractFromListAction = createAction({
   description: 'Extract items from a list with a given key',
   displayName: 'Extract From List',
   props: {
-    listItems: Property.Array({
+    listItems: Property.LongText({
       displayName: 'Items',
       description: `A list of items to extract from`,
       required: true,
@@ -19,11 +20,7 @@ export const extractFromListAction = createAction({
   },
 
   async run(context) {
-    const listItems = getItems(context) as any[];
-
-    if (!listItems.length) {
-      return [];
-    }
+    const listItems = getItemsAsArray(context.propsValue.listItems) as any[];
 
     return listItems.map((item) => {
       if (!(context.propsValue.keyName in item)) {
@@ -36,12 +33,3 @@ export const extractFromListAction = createAction({
     });
   },
 });
-
-function getItems(context: any) {
-  const { listItems } = context.propsValue;
-  if (!Array.isArray(listItems)) {
-    throw new Error('Given input is not an array');
-  }
-  const isObjectEmpty = (obj: object) => Object.keys(obj).length === 0;
-  return listItems.every(isObjectEmpty) ? [] : listItems;
-}
