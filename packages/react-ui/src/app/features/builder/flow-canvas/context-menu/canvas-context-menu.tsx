@@ -251,7 +251,6 @@ const CanvasContextMenu = memo(
 
           {isAction && showCopyPaste && actionToPaste && (
             <>
-              
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onSelect={(e) => {
