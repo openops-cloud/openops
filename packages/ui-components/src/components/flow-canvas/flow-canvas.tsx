@@ -30,12 +30,13 @@ type FlowCanvasProps = {
   graph?: Graph;
   topOffset?: number;
   allowCanvasPanning?: boolean;
-  children?: ReactNode;
+  selectStepByName?: (stepName: string) => void;
   ContextMenu?: React.ComponentType<{
     contextMenuType: ContextMenuType;
     actionToPaste: Action | null;
     children: ReactNode;
   }>;
+  children?: ReactNode;
 };
 
 function getPanOnDrag(allowCanvasPanning: boolean, inGrabPanningMode: boolean) {
@@ -52,6 +53,7 @@ const FlowCanvas = React.memo(
     graph,
     topOffset,
     allowCanvasPanning = true,
+    selectStepByName,
     ContextMenu = ({ children }) => children,
     children,
   }: FlowCanvasProps) => {
@@ -100,7 +102,8 @@ const FlowCanvas = React.memo(
           `data-${STEP_CONTEXT_MENU_ATTRIBUTE}`,
         );
 
-        if (stepName) {
+        if (stepName && typeof selectStepByName === 'function') {
+          selectStepByName(stepName);
           const reactFlowState = storeApi.getState();
           reactFlowState.setNodes(
             reactFlowState.nodes.map((node) => ({
