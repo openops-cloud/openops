@@ -10,14 +10,6 @@
           "npx playwright test -c packages/tests-e2e/playwright.config.ts packages/tests-e2e/tests/*.spec.ts"
         ]
       }
-    },
-    "local-registry": {
-      "executor": "@nx/js:verdaccio",
-      "options": {
-        "port": 4873,
-        "config": ".verdaccio/config.yml",
-        "storage": "tmp/local-registry/storage"
-      }
     }
   }
 }
