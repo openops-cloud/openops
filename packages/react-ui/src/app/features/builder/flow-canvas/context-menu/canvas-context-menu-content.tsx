@@ -122,7 +122,9 @@ export const CanvasContextMenuContent = ({
             className="flex items-center gap-2"
           >
             <ClipboardPlus className="w-4 h-4"></ClipboardPlus>{' '}
-            {t('Paste after selection')}
+            {selectedStep
+              ? t('Paste after selection')
+              : t('Paste after last step')}
           </ContextMenuItem>
         )}
         {showPasteAsFirstLoopAction && (

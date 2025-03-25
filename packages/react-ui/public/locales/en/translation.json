@@ -112,6 +112,7 @@
   "Go to Step": "Go to Step",
   "Copy": "Copy",
   "Paste after selection": "Paste after selection",
+  "Paste after last step": "Paste after last step",
   "Paste inside Loop": "Paste inside Loop",
   "Paste inside first branch": "Paste inside first branch",
   "Paste inside default branch": "Paste inside default branch",
