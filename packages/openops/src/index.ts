@@ -61,3 +61,4 @@ export * from './lib/axios-wrapper';
 export * from './lib/cloud-cli-common';
 export * from './lib/dry-run-property';
 export * from './lib/wrap-with-cache-guard';
+export * from './lib/google-cloud/auth';

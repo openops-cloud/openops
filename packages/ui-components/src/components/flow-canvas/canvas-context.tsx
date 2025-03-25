@@ -15,6 +15,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import { usePrevious } from 'react-use';
 import { useDebounceCallback } from 'usehooks-ts';
 import {
   COPY_KEYS,
@@ -65,12 +66,17 @@ export const ReadonlyCanvasProvider = ({
 
 export const InteractiveContextProvider = ({
   flowCanvasContainerId,
+  selectedStep,
+  clearSelectedStep,
   children,
 }: {
   flowCanvasContainerId?: string;
+  selectedStep: string | null;
+  clearSelectedStep: () => void;
   children: ReactNode;
 }) => {
   const [panningMode, setPanningMode] = useState<PanningMode>('grab');
+  const previousSelectedStep = usePrevious(selectedStep);
   const [selectedActions, setSelectedActions] = useState<Action[]>([]);
   const selectedFlowActionRef = useRef<Action | null>(null);
   const selectedNodeCounterRef = useRef<number>(0);
@@ -85,6 +91,19 @@ export const InteractiveContextProvider = ({
       : null;
   }, [flowCanvasContainerId]);
   const copyPressed = useKeyPress(COPY_KEYS, { target: canvas });
+
+  // clear multi-selection if we have a new selected step
+  useEffect(() => {
+    if (selectedStep && previousSelectedStep !== selectedStep) {
+      state.setNodes(
+        state.nodes.map((node) => ({
+          ...node,
+          selected: undefined,
+        })),
+      );
+      state.setEdges(state.edges);
+    }
+  }, [selectedStep, previousSelectedStep, state]);
 
   const effectivePanningMode: PanningMode = useMemo(() => {
     if ((spacePressed || panningMode === 'grab') && !shiftPressed) {
@@ -144,7 +163,8 @@ export const InteractiveContextProvider = ({
     );
 
     setSelectedActions([]);
-  }, [selectedActions, state]);
+    clearSelectedStep();
+  }, [clearSelectedStep, selectedActions, state]);
 
   const copySelectedArea = useDebounceCallback(() => {
     const selectionArea = document.querySelector(

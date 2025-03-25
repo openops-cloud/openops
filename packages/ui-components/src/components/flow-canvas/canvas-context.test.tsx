@@ -9,7 +9,16 @@ import { SHIFT_KEY, SPACE_KEY } from './constants';
 jest.mock('@xyflow/react', () => ({
   useKeyPress: jest.fn(),
   useStoreApi: jest.fn(() => ({
-    getState: jest.fn(),
+    getState: jest.fn().mockReturnValue({
+      setNodes: jest.fn(),
+      setEdges: jest.fn(),
+      nodes: [
+        {
+          id: 'step_1',
+          selected: true,
+        },
+      ],
+    }),
   })),
 }));
 
@@ -34,7 +43,10 @@ describe('InteractiveContextProvider', () => {
     useKeyPressMock.mockReturnValue(false); // Neither space nor shift pressed
 
     const { getByTestId } = render(
-      <InteractiveContextProvider>
+      <InteractiveContextProvider
+        selectedStep={'step_1'}
+        clearSelectedStep={() => {}}
+      >
         <TestComponent />
       </InteractiveContextProvider>,
     );
@@ -46,7 +58,10 @@ describe('InteractiveContextProvider', () => {
     useKeyPressMock.mockImplementation((key: string) => key === SPACE_KEY);
 
     const { getByTestId } = render(
-      <InteractiveContextProvider>
+      <InteractiveContextProvider
+        selectedStep={'step_1'}
+        clearSelectedStep={() => {}}
+      >
         <TestComponent />
       </InteractiveContextProvider>,
     );
@@ -58,7 +73,10 @@ describe('InteractiveContextProvider', () => {
     useKeyPressMock.mockImplementation((key: string) => key === SHIFT_KEY);
 
     const { getByTestId } = render(
-      <InteractiveContextProvider>
+      <InteractiveContextProvider
+        selectedStep={'step_1'}
+        clearSelectedStep={() => {}}
+      >
         <TestComponent />
       </InteractiveContextProvider>,
     );
@@ -70,7 +88,10 @@ describe('InteractiveContextProvider', () => {
     useKeyPressMock.mockReturnValue(true); // Simulate both keys pressed
 
     const { getByTestId } = render(
-      <InteractiveContextProvider>
+      <InteractiveContextProvider
+        selectedStep={'step_1'}
+        clearSelectedStep={() => {}}
+      >
         <TestComponent />
       </InteractiveContextProvider>,
     );
@@ -92,7 +113,10 @@ describe('InteractiveContextProvider', () => {
     };
 
     const { getByTestId } = render(
-      <InteractiveContextProvider>
+      <InteractiveContextProvider
+        selectedStep={'step_1'}
+        clearSelectedStep={() => {}}
+      >
         <ComponentWithSetter />
       </InteractiveContextProvider>,
     );
@@ -104,7 +128,10 @@ describe('InteractiveContextProvider', () => {
     useKeyPressMock.mockImplementation((key: string) => key === SHIFT_KEY);
 
     const { getByTestId } = render(
-      <InteractiveContextProvider>
+      <InteractiveContextProvider
+        selectedStep={'step_1'}
+        clearSelectedStep={() => {}}
+      >
         <TestComponent />
       </InteractiveContextProvider>,
     );
@@ -116,7 +143,10 @@ describe('InteractiveContextProvider', () => {
     useKeyPressMock.mockImplementation((key: string) => key === SPACE_KEY);
 
     const { getByTestId } = render(
-      <InteractiveContextProvider>
+      <InteractiveContextProvider
+        selectedStep={'step_1'}
+        clearSelectedStep={() => {}}
+      >
         <TestComponent />
       </InteractiveContextProvider>,
     );
