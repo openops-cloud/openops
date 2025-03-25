@@ -18,6 +18,7 @@ import {
 import { usePrevious } from 'react-use';
 import { useDebounceCallback } from 'usehooks-ts';
 import {
+  COPY_DEBOUNCE_DELAY_MS,
   COPY_KEYS,
   NODE_SELECTION_RECT_CLASS_NAME,
   SHIFT_KEY,
@@ -180,7 +181,7 @@ export const InteractiveContextProvider = ({
     }
 
     handleCopy(stepDetails as Action, 1);
-  }, 300);
+  }, COPY_DEBOUNCE_DELAY_MS);
 
   const copySelectedArea = useDebounceCallback(() => {
     const selectionArea = document.querySelector(
@@ -196,7 +197,7 @@ export const InteractiveContextProvider = ({
     }
 
     handleCopy(selectedFlowActionRef.current, selectedNodeCounterRef.current);
-  }, 300);
+  }, COPY_DEBOUNCE_DELAY_MS);
 
   const copyAction = (action: Action) => {
     const actionToBeCopied = cloneDeep(action);
