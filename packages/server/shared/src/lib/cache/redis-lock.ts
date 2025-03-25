@@ -1,6 +1,7 @@
 import RedLock from 'redlock';
 import { logger } from '../logger';
 import { Lock } from '../memory-lock';
+import { createSingleton } from '../singleton-factory';
 import { createRedisClient } from './redis-connection';
 
 // By default, the timeout is 30 seconds and the retry count is 35.
@@ -29,40 +30,20 @@ const generateRedlockRetryConfig = (
   };
 };
 
-class RedlockSingleton {
-  private static instance: RedLock | null = null;
-  private static initPromise: Promise<RedLock> | null = null;
+const redLockClient = createSingleton('redlock-client', async () => {
+  const redisClient = createRedisClient();
 
-  static getInstance(): Promise<RedLock> {
-    if (this.instance) {
-      return Promise.resolve(this.instance);
-    }
+  const { retryDelay, retryJitter } =
+    generateRedlockRetryConfig(DEFAULT_TIMEOUT_MS);
 
-    if (this.initPromise) {
-      return this.initPromise;
-    }
-
-    this.initPromise = (async () => {
-      const redisClient = createRedisClient();
-
-      const { retryDelay, retryJitter } =
-        generateRedlockRetryConfig(DEFAULT_TIMEOUT_MS);
-
-      const redlock = new RedLock([redisClient], {
-        driftFactor: 0.01,
-        retryCount: DEFAULT_RETRY_COUNT,
-        retryDelay,
-        retryJitter,
-        automaticExtensionThreshold: 500,
-      });
-
-      this.instance = redlock;
-      return redlock;
-    })();
-
-    return this.initPromise;
-  }
-}
+  return new RedLock([redisClient], {
+    driftFactor: 0.01,
+    retryCount: DEFAULT_RETRY_COUNT,
+    retryDelay,
+    retryJitter,
+    automaticExtensionThreshold: 500,
+  });
+});
 
 export async function acquireRedisLock(
   key: string,
@@ -73,7 +54,7 @@ export async function acquireRedisLock(
 
     logger.debug(`Acquiring lock for key [${key}]`, { key, timeout });
 
-    const redLock = await RedlockSingleton.getInstance();
+    const redLock = await redLockClient;
     const lock = await redLock.acquire([key], timeout, {
       retryDelay,
       retryJitter,

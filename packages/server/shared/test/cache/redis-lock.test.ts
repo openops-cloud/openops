@@ -15,7 +15,6 @@ jest.mock('../../src/lib/cache/redis-connection', () => ({
 jest.mock('redlock');
 
 import RedLock from 'redlock';
-import { acquireRedisLock } from '../../src/lib/cache/redis-lock';
 
 describe('acquireRedisLock', () => {
   const mockAcquire = jest.fn();
@@ -34,6 +33,8 @@ describe('acquireRedisLock', () => {
 
     const key = 'test-key';
     const timeout = 30000;
+
+    const { acquireRedisLock } = await import('../../src/lib/cache/redis-lock');
 
     const lock = await acquireRedisLock(key, timeout);
 
@@ -64,6 +65,8 @@ describe('acquireRedisLock', () => {
     const error = new Error('Failed to lock');
 
     mockAcquire.mockRejectedValue(error);
+
+    const { acquireRedisLock } = await import('../../src/lib/cache/redis-lock');
 
     await expect(acquireRedisLock(key, timeout)).rejects.toThrow(error);
 
