@@ -258,25 +258,23 @@ const CanvasContextMenu = memo(
             )}
 
           {isAction && showCopyPaste && actionToPaste && (
-            <>
-              <DropdownMenuItem
-                onSelect={(e) => {
-                  e.preventDefault();
-                  if (data.step) {
-                    onPaste(
-                      actionToPaste as Action,
-                      StepLocationRelativeToParent.AFTER,
-                      data.step.name,
-                    );
-                  }
-                }}
-              >
-                <StepActionWrapper>
-                  <Copy className="h-4 w-4" />
-                  <span className="">{t('Paste after')}</span>
-                </StepActionWrapper>
-              </DropdownMenuItem>
-            </>
+            <DropdownMenuItem
+              onSelect={(e) => {
+                e.preventDefault();
+                if (data.step) {
+                  onPaste(
+                    actionToPaste as Action,
+                    StepLocationRelativeToParent.AFTER,
+                    data.step.name,
+                  );
+                }
+              }}
+            >
+              <StepActionWrapper>
+                <Copy className="h-4 w-4" />
+                <span className="">{t('Paste after')}</span>
+              </StepActionWrapper>
+            </DropdownMenuItem>
           )}
 
           {isAction && (
