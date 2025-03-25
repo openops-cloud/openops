@@ -12,7 +12,7 @@ import { runCommand } from '../google-cloud-cli';
 export const googleCloudCliAction = createAction({
   auth: googleCloudAuth,
   name: 'google_cloud_cli',
-  description: 'Execute Google Cloud CLI command',
+  description: 'Execute a Google Cloud CLI command',
   displayName: 'Google Cloud CLI',
   props: {
     useHostSession: getUseHostSessionProperty(
@@ -28,7 +28,7 @@ export const googleCloudCliAction = createAction({
       const { commandToRun, dryRun } = context.propsValue;
 
       if (dryRun) {
-        return `Step execution skipped, dry run flag enabled. GCP CLI command will not be executed. Command: '${commandToRun}'`;
+        return `Step execution skipped, dry run flag enabled. Google Cloud CLI command will not be executed. Command: '${commandToRun}'`;
       }
 
       const result = await runCommand(

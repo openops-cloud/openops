@@ -13,9 +13,9 @@ export async function runCommand(
     PATH: process.env['PATH'] || '',
   };
 
-  const processAzureConfigDir = process.env['CLOUDSDK_CONFIG'];
-  if (processAzureConfigDir) {
-    envVars['CLOUDSDK_CONFIG'] = processAzureConfigDir;
+  const processGoogleCloudConfigDir = process.env['CLOUDSDK_CONFIG'];
+  if (processGoogleCloudConfigDir) {
+    envVars['CLOUDSDK_CONFIG'] = processGoogleCloudConfigDir;
   }
 
   if (!shouldUseHostCredentials) {
