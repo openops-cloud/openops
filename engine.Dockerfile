@@ -42,8 +42,6 @@ RUN <<-```
     chmod -R +x /opt/google-cloud-sdk/bin/
     ln -s /opt/google-cloud-sdk/bin/gcloud /usr/bin/gcloud
 
-    gcloud version
-
     rm /tmp/gcloud.tar.gz
     dnf -y clean all && rm -rf /var/cache
 ```
