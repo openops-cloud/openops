@@ -1,0 +1,59 @@
+import { FLOW_CANVAS_Y_OFFESET } from '@/app/constants/flow-canvas';
+import {
+  AiWidget,
+  CanvasControls,
+  InteractiveContextProvider,
+} from '@openops/components/ui';
+import { MutableRefObject } from 'react';
+import { BuilderHeader } from './builder-header/builder-header';
+import { DataSelector } from './data-selector';
+import { FlowBuilderCanvas } from './flow-canvas/flow-builder-canvas';
+import { FLOW_CANVAS_CONTAINER_ID } from './flow-version-undo-redo/constants';
+import { usePaste } from './hooks/use-paste';
+
+const InteractiveBuilder = ({
+  selectedStep,
+  clearSelectedStep,
+  middlePanelRef,
+  middlePanelSize,
+}: {
+  flowCanvasContainerId?: string;
+  selectedStep: string | null;
+  clearSelectedStep: () => void;
+  middlePanelRef: MutableRefObject<null>;
+  middlePanelSize: {
+    width: number;
+    height: number;
+  };
+}) => {
+  const { onPaste } = usePaste();
+
+  return (
+    <InteractiveContextProvider
+      selectedStep={selectedStep}
+      clearSelectedStep={clearSelectedStep}
+      onPaste={onPaste}
+    >
+      <div ref={middlePanelRef} className="relative h-full w-full">
+        <BuilderHeader />
+
+        <CanvasControls topOffset={FLOW_CANVAS_Y_OFFESET}></CanvasControls>
+        <AiWidget />
+        <DataSelector
+          parentHeight={middlePanelSize.height}
+          parentWidth={middlePanelSize.width}
+        ></DataSelector>
+
+        <div
+          className="h-screen w-full flex-1 z-10"
+          id={FLOW_CANVAS_CONTAINER_ID}
+        >
+          <FlowBuilderCanvas />
+        </div>
+      </div>
+    </InteractiveContextProvider>
+  );
+};
+
+InteractiveBuilder.displayName = 'InteractiveBuilder';
+export { InteractiveBuilder };

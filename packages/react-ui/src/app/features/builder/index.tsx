@@ -1,9 +1,7 @@
 import {
-  AiWidget,
   BuilderTreeViewProvider,
   CanvasControls,
   cn,
-  InteractiveContextProvider,
   ReadonlyCanvasProvider,
   ResizableHandle,
   ResizablePanel,
@@ -21,7 +19,6 @@ import {
   useBuilderStateContext,
   useSwitchToDraft,
 } from '@/app/features/builder/builder-hooks';
-import { DataSelector } from '@/app/features/builder/data-selector';
 import { DynamicFormValidationProvider } from '@/app/features/builder/dynamic-form-validation/dynamic-form-validation-context';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
@@ -30,11 +27,13 @@ import { useSocket } from '@/app/common/providers/socket-provider';
 import { FLOW_CANVAS_Y_OFFESET } from '@/app/constants/flow-canvas';
 import { SEARCH_PARAMS } from '@/app/constants/search-params';
 import {
+  Action,
   ActionType,
   BlockTrigger,
   FlagId,
   flowHelper,
   isNil,
+  StepLocationRelativeToParent,
   TriggerType,
   WebsocketClientEvent,
 } from '@openops/shared';
@@ -56,6 +55,7 @@ import { FlowBuilderCanvas } from './flow-canvas/flow-builder-canvas';
 import { FLOW_CANVAS_CONTAINER_ID } from './flow-version-undo-redo/constants';
 import { UndoRedo } from './flow-version-undo-redo/undo-redo';
 import { FlowVersionsList } from './flow-versions';
+import { InteractiveBuilder } from './interactive-builder';
 import { FlowRunDetails } from './run-details';
 import { FlowRecentRunsList } from './run-list';
 import { StepSettingsContainer } from './step-settings';
@@ -91,6 +91,7 @@ const constructContainerKey = (
 ) => {
   return flowVersionId + stepName + stepType + (triggerOrActionName ?? '');
 };
+
 const BuilderPage = () => {
   const [searchParams] = useSearchParams();
   const showCopyPaste =
@@ -296,31 +297,12 @@ const BuilderPage = () => {
                   </div>
                 </ReadonlyCanvasProvider>
               ) : (
-                <InteractiveContextProvider
+                <InteractiveBuilder
                   selectedStep={selectedStep}
                   clearSelectedStep={clearSelectedStep}
-                  flowVersion={flowVersion}
-                >
-                  <div ref={middlePanelRef} className="relative h-full w-full">
-                    <BuilderHeader />
-
-                    <CanvasControls
-                      topOffset={FLOW_CANVAS_Y_OFFESET}
-                    ></CanvasControls>
-                    <AiWidget />
-                    <DataSelector
-                      parentHeight={middlePanelSize.height}
-                      parentWidth={middlePanelSize.width}
-                    ></DataSelector>
-
-                    <div
-                      className="h-screen w-full flex-1 z-10"
-                      id={FLOW_CANVAS_CONTAINER_ID}
-                    >
-                      <FlowBuilderCanvas />
-                    </div>
-                  </div>
-                </InteractiveContextProvider>
+                  middlePanelRef={middlePanelRef}
+                  middlePanelSize={middlePanelSize}
+                />
               )}
             </ResizablePanel>
 
