@@ -19,6 +19,8 @@ const KnowledgeBaseCard = ({
   return (
     <a
       href={link}
+      target="_blank"
+      rel="noopener noreferrer"
       className={cn(
         'w-full h-[86px] min-w-[121px] py-2 px-2 flex flex-col gap-1 border rounded-sm bg-background overflow-hidden',
         className,

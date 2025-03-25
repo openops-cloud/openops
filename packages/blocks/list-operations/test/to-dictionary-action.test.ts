@@ -5,7 +5,7 @@ describe('toMapAction', () => {
   test('should create action with properties', () => {
     expect(toMapAction.props).toMatchObject({
       listItems: {
-        type: 'ARRAY',
+        type: 'LONG_TEXT',
         required: true,
       },
       keyName: {
@@ -61,7 +61,24 @@ describe('toMapAction', () => {
     expect(result).toEqual(output);
   });
 
-  test('should return empty object if resources are empty', async () => {
+  test.each([[null], [undefined], [{}], ['']])(
+    'should return empty object if items are empty %p',
+    async (items) => {
+      const context = {
+        ...jest.requireActual('@openops/blocks-framework'),
+        auth: BlockAuth.None(),
+        propsValue: {
+          listItems: items,
+          keyName: 'key',
+        },
+      };
+
+      const result = (await toMapAction.run(context)) as any;
+      expect(result).toEqual({});
+    },
+  );
+
+  test('should return empty object if items is an empty array', async () => {
     const context = {
       ...jest.requireActual('@openops/blocks-framework'),
       auth: BlockAuth.None(),
@@ -75,37 +92,20 @@ describe('toMapAction', () => {
     expect(result).toEqual({});
   });
 
-  test('should return empty object if items are ""', async () => {
+  test('should throw error if items are not an object array', async () => {
     const context = {
       ...jest.requireActual('@openops/blocks-framework'),
       auth: BlockAuth.None(),
       propsValue: {
-        listItems: '',
+        listItems: ['not an array'],
         keyName: 'key',
       },
     };
 
-    const result = (await toMapAction.run(context)) as any;
-    expect(result).toEqual({});
+    await expect(toMapAction.run(context)).rejects.toThrow(
+      `'Items' must be an array of objects`,
+    );
   });
-
-  test.each([[null], [undefined], [{}], ['not an array']])(
-    'should throw error if items are %s',
-    async (testCase: any) => {
-      const context = {
-        ...jest.requireActual('@openops/blocks-framework'),
-        auth: BlockAuth.None(),
-        propsValue: {
-          listItems: testCase,
-          keyName: 'key',
-        },
-      };
-
-      await expect(toMapAction.run(context)).rejects.toThrow(
-        'Resources should be an array',
-      );
-    },
-  );
 
   test('should not contains entry if key does not exist on some items', async () => {
     const context = {

@@ -4,7 +4,7 @@ describe('extractFromListAction', () => {
   test('should create action with correct properties', () => {
     expect(extractFromListAction.props).toMatchObject({
       listItems: {
-        type: 'ARRAY',
+        type: 'LONG_TEXT',
         required: true,
       },
       keyName: {
@@ -12,20 +12,6 @@ describe('extractFromListAction', () => {
         required: true,
       },
     });
-  });
-
-  test('should return an empty array if listItems are empty objects', async () => {
-    const context = {
-      ...jest.requireActual('@openops/blocks-framework'),
-      propsValue: {
-        listItems: [{}, {}],
-        keyName: 'key',
-      },
-    };
-
-    const result = await extractFromListAction.run(context);
-
-    expect(result).toEqual([]);
   });
 
   test('should return extracted items', async () => {
@@ -81,7 +67,7 @@ describe('extractFromListAction', () => {
     };
 
     await expect(extractFromListAction.run(context)).rejects.toThrow(
-      'Given input is not an array',
+      `Invalid JSON string provided for 'Items'`,
     );
   });
 });
