@@ -1,0 +1,48 @@
+import { runCliCommand } from '@openops/common';
+import fs from 'fs/promises';
+import os from 'os';
+import path from 'path';
+
+export async function runCommand(
+  command: string,
+  auth: any,
+  shouldUseHostCredentials: boolean,
+  project?: string,
+): Promise<string> {
+  const envVars: Record<string, string> = {
+    PATH: process.env['PATH'] || '',
+  };
+
+  const processAzureConfigDir = process.env['CLOUDSDK_CONFIG'];
+  if (processAzureConfigDir) {
+    envVars['CLOUDSDK_CONFIG'] = processAzureConfigDir;
+  }
+
+  if (!shouldUseHostCredentials) {
+    const gcpConfigDir = await fs.mkdtemp(
+      path.join(os.tmpdir(), 'gcloud-config'),
+    );
+    envVars['CLOUDSDK_CONFIG'] = gcpConfigDir;
+
+    await loginGCPWithKeyObject(auth.keyFileContent, envVars);
+  }
+
+  if (project) {
+    await runCliCommand(
+      `gcloud config set project ${project} --quiet`,
+      'gcloud',
+      envVars,
+    );
+  }
+
+  return await runCliCommand(command, 'gcloud', envVars);
+}
+
+async function loginGCPWithKeyObject(keyObject: string, envVars: any) {
+  const tmpKeyPath = path.join(os.tmpdir(), 'gcp-key.json');
+  await fs.writeFile(tmpKeyPath, keyObject);
+
+  const loginCommand = `gcloud auth activate-service-account --key-file=${tmpKeyPath} --quiet`;
+  const result = await runCliCommand(loginCommand, 'gcloud', envVars);
+  return result;
+}
