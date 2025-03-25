@@ -9,9 +9,16 @@ import {
   toast,
   UNSAVED_CHANGES_TOAST,
   useCanvasContext,
+  usePasteActionsInClipboard,
   WorkflowNode,
 } from '@openops/components/ui';
-import { Action, FlagId, FlowOperationType } from '@openops/shared';
+import {
+  Action,
+  ActionType,
+  FlagId,
+  FlowOperationType,
+  StepLocationRelativeToParent,
+} from '@openops/shared';
 
 import { t } from 'i18next';
 import {
@@ -24,6 +31,7 @@ import {
 import { memo } from 'react';
 import { useBuilderStateContext } from '../../builder-hooks';
 import { useApplyOperationAndPushToHistory } from '../../flow-version-undo-redo/hooks/apply-operation-and-push-to-history';
+import { usePaste } from '../../hooks/use-paste';
 import { StepActionWrapper } from '../nodes/step-action-wrapper';
 
 type Props = {
@@ -48,6 +56,9 @@ const CanvasContextMenu = memo(
     const applyOperationAndPushToHistory = useApplyOperationAndPushToHistory();
 
     const { copyAction } = useCanvasContext();
+    const { onPaste } = usePaste();
+    const { actionToPaste, fetchClipboardOperations } =
+      usePasteActionsInClipboard();
 
     const [selectStepByName, removeStepSelection, setAllowCanvasPanning] =
       useBuilderStateContext((state) => [
@@ -90,8 +101,12 @@ const CanvasContextMenu = memo(
     return (
       <DropdownMenu
         open={openStepActionsMenu}
-        onOpenChange={(open) => {
+        onOpenChange={async (open) => {
+          await fetchClipboardOperations();
           setOpenStepActionsMenu(open);
+          if (open && data.step) {
+            selectStepByName(data.step.name);
+          }
         }}
         modal={true}
       >
@@ -163,13 +178,90 @@ const CanvasContextMenu = memo(
             </DropdownMenuItem>
           )}
 
-          {isAction && showCopyPaste && (
+          {isAction &&
+            showCopyPaste &&
+            actionToPaste &&
+            data.step?.type === ActionType.LOOP_ON_ITEMS && (
+              <DropdownMenuItem
+                onSelect={(e) => {
+                  e.preventDefault();
+                  if (data.step) {
+                    onPaste(
+                      actionToPaste as Action,
+                      StepLocationRelativeToParent.INSIDE_LOOP,
+                      data.step.name,
+                    );
+                  }
+                }}
+              >
+                <StepActionWrapper>
+                  <Copy className="mr-2 h-4 w-4" />
+                  <span className=""> {t('Paste inside Loop')}</span>
+                </StepActionWrapper>
+              </DropdownMenuItem>
+            )}
+
+          {isAction &&
+            showCopyPaste &&
+            actionToPaste &&
+            data.step?.type === ActionType.BRANCH && (
+              <DropdownMenuItem
+                onSelect={(e) => {
+                  e.preventDefault();
+                  if (data.step) {
+                    onPaste(
+                      actionToPaste as Action,
+                      StepLocationRelativeToParent.INSIDE_TRUE_BRANCH,
+                      data.step.name,
+                    );
+                  }
+                }}
+              >
+                <StepActionWrapper>
+                  <Copy className="mr-2 h-4 w-4" />
+                  <span className=""> {t('Paste inside first branch')}</span>
+                </StepActionWrapper>
+              </DropdownMenuItem>
+            )}
+
+          {isAction &&
+            showCopyPaste &&
+            actionToPaste &&
+            data.step?.type === ActionType.SPLIT && (
+              <DropdownMenuItem
+                onSelect={(e) => {
+                  e.preventDefault();
+                  if (data.step) {
+                    const branchNodeId = data.step.settings.options[0].id;
+                    onPaste(
+                      actionToPaste as Action,
+                      StepLocationRelativeToParent.INSIDE_SPLIT,
+                      data.step.name,
+                      branchNodeId,
+                    );
+                  }
+                }}
+              >
+                <StepActionWrapper>
+                  <Copy className="mr-2 h-4 w-4" />
+                  <span className="">{t('Paste inside default branch')}</span>
+                </StepActionWrapper>
+              </DropdownMenuItem>
+            )}
+
+          {isAction && showCopyPaste && actionToPaste && (
             <>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onSelect={(e) => {
                   e.preventDefault();
-                  // https://linear.app/openops/issue/OPS-854/add-paste-logic
+                  if (data.step) {
+                    onPaste(
+                      actionToPaste as Action,
+                      StepLocationRelativeToParent.AFTER,
+                      data.step.name,
+                    );
+                  }
                 }}
               >
                 <StepActionWrapper>

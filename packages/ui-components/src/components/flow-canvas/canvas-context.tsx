@@ -1,4 +1,4 @@
-import { Action, flowHelper } from '@openops/shared';
+import { Action, flowHelper, FlowVersion } from '@openops/shared';
 import {
   OnSelectionChangeParams,
   useKeyPress,
@@ -18,6 +18,7 @@ import {
 import { usePrevious } from 'react-use';
 import { useDebounceCallback } from 'usehooks-ts';
 import {
+  COPY_DEBOUNCE_DELAY_MS,
   COPY_KEYS,
   NODE_SELECTION_RECT_CLASS_NAME,
   SHIFT_KEY,
@@ -68,11 +69,13 @@ export const InteractiveContextProvider = ({
   flowCanvasContainerId,
   selectedStep,
   clearSelectedStep,
+  flowVersion,
   children,
 }: {
   flowCanvasContainerId?: string;
   selectedStep: string | null;
   clearSelectedStep: () => void;
+  flowVersion: FlowVersion;
   children: ReactNode;
 }) => {
   const [panningMode, setPanningMode] = useState<PanningMode>('grab');
@@ -166,6 +169,20 @@ export const InteractiveContextProvider = ({
     clearSelectedStep();
   }, [clearSelectedStep, selectedActions, state]);
 
+  const copySelectedStep = useDebounceCallback(() => {
+    if (!selectedStep) {
+      return;
+    }
+
+    const stepDetails = flowHelper.getStep(flowVersion, selectedStep);
+
+    if (!stepDetails || !flowHelper.isAction(stepDetails.type)) {
+      return;
+    }
+
+    handleCopy(stepDetails as Action, 1);
+  }, COPY_DEBOUNCE_DELAY_MS);
+
   const copySelectedArea = useDebounceCallback(() => {
     const selectionArea = document.querySelector(
       `.${NODE_SELECTION_RECT_CLASS_NAME}`,
@@ -180,7 +197,7 @@ export const InteractiveContextProvider = ({
     }
 
     handleCopy(selectedFlowActionRef.current, selectedNodeCounterRef.current);
-  }, 300);
+  }, COPY_DEBOUNCE_DELAY_MS);
 
   const copyAction = (action: Action) => {
     const actionToBeCopied = cloneDeep(action);
@@ -211,10 +228,16 @@ export const InteractiveContextProvider = ({
   };
 
   useEffect(() => {
-    if (copyPressed) {
+    if (!copyPressed) {
+      return;
+    }
+
+    if (selectedStep) {
+      copySelectedStep();
+    } else {
       copySelectedArea();
     }
-  }, [copyPressed, copySelectedArea]);
+  }, [copyPressed, copySelectedArea, copySelectedStep, selectedStep]);
 
   const contextValue = useMemo(
     () => ({
