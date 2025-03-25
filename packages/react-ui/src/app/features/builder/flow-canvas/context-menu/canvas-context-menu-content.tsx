@@ -160,7 +160,7 @@ export const CanvasContextMenuContent = ({
           <ContextMenuItem
             disabled={disabledPaste}
             onClick={() => {
-              const branchNodeId = firstSelectedStep?.settings.options[0].id;
+              const branchNodeId = firstSelectedStep.settings.options[0].id;
               return onPaste(
                 actionToPaste as Action,
                 StepLocationRelativeToParent.INSIDE_SPLIT,
