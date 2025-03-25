@@ -5,6 +5,8 @@ const awsCliMock = {
 const openOpsMock = {
   ...jest.requireActual('@openops/common'),
   getCredentialsForAccount: jest.fn(),
+  tryParseJson: jest.fn((input) => input),
+  handleCliError: jest.fn(),
 };
 
 jest.mock('@openops/common', () => openOpsMock);
@@ -37,10 +39,8 @@ describe('awsCliAction single account', () => {
     });
   });
 
-  test('should return a parsed json object when the response is a json string', async () => {
-    awsCliMock.runCommand.mockResolvedValue(
-      '{"Owner":{"ID":"d15afcf7680d"},"Buckets":[{"Name":"bucket name","CreationDate":"2024-10-18T03:41:16+00:00"}]}',
-    );
+  test('should return expected result', async () => {
+    awsCliMock.runCommand.mockResolvedValue('result');
 
     const context = {
       ...jest.requireActual('@openops/blocks-framework'),
@@ -54,12 +54,7 @@ describe('awsCliAction single account', () => {
 
     const result = await awsCliAction.run(context);
 
-    expect(result).toStrictEqual({
-      Owner: { ID: 'd15afcf7680d' },
-      Buckets: [
-        { Name: 'bucket name', CreationDate: '2024-10-18T03:41:16+00:00' },
-      ],
-    });
+    expect(result).toStrictEqual('result');
     expect(openOpsMock.getCredentialsForAccount).toHaveBeenCalledTimes(1);
     expect(awsCliMock.runCommand).toHaveBeenCalledTimes(1);
     expect(awsCliMock.runCommand).toHaveBeenCalledWith(
@@ -67,32 +62,11 @@ describe('awsCliAction single account', () => {
       auth.defaultRegion,
       auth,
     );
+    expect(openOpsMock.tryParseJson).toHaveBeenCalledTimes(1);
+    expect(openOpsMock.tryParseJson).toHaveBeenCalledWith('result');
   });
 
-  test('should return the output as-is when the response is not a valid json', async () => {
-    awsCliMock.runCommand.mockResolvedValue('something here');
-
-    const context = {
-      ...jest.requireActual('@openops/blocks-framework'),
-      auth: auth,
-      propsValue: {
-        commandToRun: 'aws s3api list-buckets --output json',
-        account: { accounts: 'account' },
-      },
-    };
-
-    const result = await awsCliAction.run(context);
-
-    expect(result).toStrictEqual('something here');
-    expect(awsCliMock.runCommand).toHaveBeenCalledTimes(1);
-    expect(awsCliMock.runCommand).toHaveBeenCalledWith(
-      'aws s3api list-buckets --output json',
-      auth.defaultRegion,
-      auth,
-    );
-  });
-
-  test('should throw an error if runCommand fails', async () => {
+  test('should call handleCliError if something fails', async () => {
     awsCliMock.runCommand.mockRejectedValue('error');
 
     const context = {
@@ -104,15 +78,20 @@ describe('awsCliAction single account', () => {
       },
     };
 
-    await expect(awsCliAction.run(context)).rejects.toThrow(
-      'An error occurred while running an AWS CLI command: error',
-    );
+    await awsCliAction.run(context);
     expect(awsCliMock.runCommand).toHaveBeenCalledTimes(1);
     expect(awsCliMock.runCommand).toHaveBeenCalledWith(
       'aws s3api list-buckets --output json',
       auth.defaultRegion,
       auth,
     );
+
+    expect(openOpsMock.handleCliError).toHaveBeenCalledTimes(1);
+    expect(openOpsMock.handleCliError).toHaveBeenCalledWith({
+      provider: 'AWS',
+      command: 'aws s3api list-buckets --output json',
+      error: 'error',
+    });
   });
 
   test('should skip the execution when dry run is active', async () => {

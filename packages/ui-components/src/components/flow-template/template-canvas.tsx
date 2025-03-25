@@ -2,7 +2,7 @@ import { Trigger } from '@openops/shared';
 import { EdgeTypes, getNodesBounds, NodeTypes } from '@xyflow/react';
 import React, { ReactNode, useMemo } from 'react';
 import { flowCanvasUtils } from '../../lib/flow-canvas-utils';
-import { CanvasContextProvider } from '../flow-canvas/canvas-context';
+import { ReadonlyCanvasProvider } from '../flow-canvas/canvas-context';
 import { FlowCanvas } from '../flow-canvas/flow-canvas';
 import { BelowFlowWidget } from '../flow-canvas/widgets/below-flow-widget';
 import { TemplateCanvasProvider } from './template-canvas-context';
@@ -34,7 +34,7 @@ const TemplateCanvas = React.memo(
       <div className="w-full h-full relative">
         {!!graph && (
           <TemplateCanvasProvider template={template}>
-            <CanvasContextProvider>
+            <ReadonlyCanvasProvider>
               <FlowCanvas
                 edgeTypes={edgeTypes}
                 nodeTypes={nodeTypes}
@@ -47,7 +47,7 @@ const TemplateCanvas = React.memo(
                   graphHeight={graphHeight.height}
                 ></BelowFlowWidget>
               </FlowCanvas>
-            </CanvasContextProvider>
+            </ReadonlyCanvasProvider>
           </TemplateCanvasProvider>
         )}
       </div>

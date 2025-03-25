@@ -37,7 +37,18 @@ export async function runCommand(
 }
 
 async function login(credentials: any, envVars: any) {
-  const loginCommand = `login --service-principal --username ${credentials.clientId} --password ${credentials.clientSecret} --tenant ${credentials.tenantId}`;
+  try {
+    const loginCommand = `login --service-principal --username ${credentials.clientId} --password ${credentials.clientSecret} --tenant ${credentials.tenantId}`;
 
-  return await runCliCommand(loginCommand, 'az', envVars);
+    return await runCliCommand(loginCommand, 'az', envVars);
+  } catch (error) {
+    let message = 'Error while login into azure: ';
+    if (String(error).includes('login --service-principal')) {
+      message += 'login --service-principal ***REDACTED***';
+    } else {
+      message += error;
+    }
+
+    throw new Error(message);
+  }
 }

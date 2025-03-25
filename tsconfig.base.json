@@ -207,6 +207,9 @@
       "@openops/block-google-calendar": [
         "packages/blocks/google-calendar/src/index.ts"
       ],
+      "@openops/block-google-cloud": [
+        "packages/blocks/google-cloud/src/index.ts",
+      ],
       "@openops/block-google-contacts": [
         "packages/blocks/google-contacts/src/index.ts"
       ],

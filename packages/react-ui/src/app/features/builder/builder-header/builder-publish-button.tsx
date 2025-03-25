@@ -130,10 +130,13 @@ const BuilderPublishButton = React.memo(() => {
             } else {
               switchToDraft();
               setLeftSidebar(LeftSideBarType.NONE);
-              setSearchParams((params) => {
-                params.set(SEARCH_PARAMS.viewOnly, 'false');
-                return params;
-              });
+              setSearchParams(
+                (params) => {
+                  params.set(SEARCH_PARAMS.viewOnly, 'false');
+                  return params;
+                },
+                { replace: true },
+              );
             }
           }}
           className="h-[42px] shadow-editor text-sm"

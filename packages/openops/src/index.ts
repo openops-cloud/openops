@@ -57,4 +57,5 @@ export * from './lib/azure/auth';
 export * from './lib/azure/subscription/get-subscription-dropdown';
 
 export * from './lib/axios-wrapper';
+export * from './lib/cloud-cli-common';
 export * from './lib/dry-run-property';
