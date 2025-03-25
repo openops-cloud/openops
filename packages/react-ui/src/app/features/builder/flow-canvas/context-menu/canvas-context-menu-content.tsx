@@ -51,6 +51,7 @@ export const CanvasContextMenuContent = ({
   const { copySelectedArea, copyAction } = useCanvasContext();
 
   const disabled = selectedNodes.length === 0;
+  const isSingleSelectedNode = selectedNodes.length === 1;
 
   const doSelectedNodesIncludeTrigger = selectedNodes.some(
     (node: string) => node === flowVersion.trigger.name,
@@ -61,13 +62,13 @@ export const CanvasContextMenuContent = ({
   const showPasteAfterLastStep =
     !readonly && contextMenuType === ContextMenuType.CANVAS;
   const showPasteAsFirstLoopAction =
-    selectedNodes.length === 1 &&
+    isSingleSelectedNode &&
     firstSelectedStep?.type === ActionType.LOOP_ON_ITEMS &&
     !readonly &&
     contextMenuType === ContextMenuType.STEP;
 
   const showPasteAfterCurrentStep =
-    (selectedNodes.length === 1 || selectedStep) &&
+    (isSingleSelectedNode || selectedStep) &&
     !readonly &&
     contextMenuType === ContextMenuType.STEP;
 
