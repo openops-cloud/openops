@@ -5,7 +5,7 @@ describe('groupByAction', () => {
   test('should create action with properties', () => {
     expect(groupByAction.props).toMatchObject({
       listItems: {
-        type: 'ARRAY',
+        type: 'LONG_TEXT',
         required: true,
       },
       keyName: {
@@ -95,7 +95,7 @@ describe('groupByAction', () => {
     };
 
     await expect(groupByAction.run(context)).rejects.toThrow(
-      'Resources should be an array',
+      `Invalid JSON string provided for 'Items'`,
     );
   });
 });

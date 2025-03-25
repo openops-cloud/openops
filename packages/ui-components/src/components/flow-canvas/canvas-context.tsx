@@ -34,11 +34,37 @@ type CanvasContextState = {
   onSelectionEnd: () => void;
   copySelectedArea: () => void;
   copyAction: (action: Action) => void;
+  readonly: boolean;
 };
 
 const CanvasContext = createContext<CanvasContextState | undefined>(undefined);
 
-export const CanvasContextProvider = ({
+export const ReadonlyCanvasProvider = ({
+  children,
+}: {
+  children: ReactNode;
+}) => {
+  const contextValue = useMemo(
+    () => ({
+      panningMode: 'grab' as const,
+      setPanningMode: () => {},
+      onSelectionChange: () => {},
+      onSelectionEnd: () => {},
+      copySelectedArea: () => {},
+      copyAction: () => {},
+      readonly: true,
+    }),
+    [],
+  );
+
+  return (
+    <CanvasContext.Provider value={contextValue}>
+      {children}
+    </CanvasContext.Provider>
+  );
+};
+
+export const InteractiveContextProvider = ({
   flowCanvasContainerId,
   selectedStep,
   clearSelectedStep,
@@ -198,8 +224,15 @@ export const CanvasContextProvider = ({
       onSelectionEnd,
       copySelectedArea,
       copyAction,
+      readonly: false,
     }),
-    [effectivePanningMode, onSelectionChange, onSelectionEnd, copySelectedArea],
+    [
+      effectivePanningMode,
+      onSelectionChange,
+      onSelectionEnd,
+      copySelectedArea,
+      copyAction,
+    ],
   );
   return (
     <CanvasContext.Provider value={contextValue}>

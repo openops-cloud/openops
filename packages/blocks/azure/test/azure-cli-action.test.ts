@@ -4,6 +4,14 @@ const azureCliMock = {
 
 jest.mock('../src/lib/azure-cli', () => azureCliMock);
 
+const openOpsMock = {
+  ...jest.requireActual('@openops/common'),
+  tryParseJson: jest.fn((input) => input),
+  handleCliError: jest.fn(),
+};
+
+jest.mock('@openops/common', () => openOpsMock);
+
 import { azureCliAction } from '../src/lib/actions/azure-cli-action';
 
 const auth = {
@@ -74,6 +82,8 @@ describe('azureCliAction', () => {
       false,
       'subscriptionId',
     );
+    expect(openOpsMock.tryParseJson).toHaveBeenCalledTimes(1);
+    expect(openOpsMock.tryParseJson).toHaveBeenCalledWith('something here');
   });
 
   test('should pass useHostSession to runCommand', async () => {
@@ -97,7 +107,7 @@ describe('azureCliAction', () => {
     );
   });
 
-  test('should throw an error if runCommand fails and return the whole error when command does not contain login credentials', async () => {
+  test('should call handleCliError if something fails', async () => {
     azureCliMock.runCommand.mockRejectedValue('error');
 
     const context = createContext({
@@ -106,9 +116,8 @@ describe('azureCliAction', () => {
       subscriptions: { subDropdown: 'subscriptionId' },
     });
 
-    await expect(azureCliAction.run(context)).rejects.toThrow(
-      'An error occurred while running an Azure CLI command: error',
-    );
+    await azureCliAction.run(context);
+
     expect(azureCliMock.runCommand).toHaveBeenCalledTimes(1);
     expect(azureCliMock.runCommand).toHaveBeenCalledWith(
       'az account list-locations --output table',
@@ -116,29 +125,13 @@ describe('azureCliAction', () => {
       false,
       'subscriptionId',
     );
-  });
 
-  test('should throw an error if runCommand fails and return the redacted error when command contains login credentials', async () => {
-    azureCliMock.runCommand.mockRejectedValue(
-      'login --service-principal blah blah error',
-    );
-
-    const context = createContext({
-      commandToRun: 'az account list-locations --output table',
-      useHostSession: { useHostSessionCheckbox: false },
-      subscriptions: { subDropdown: 'subscriptionId' },
+    expect(openOpsMock.handleCliError).toHaveBeenCalledTimes(1);
+    expect(openOpsMock.handleCliError).toHaveBeenCalledWith({
+      provider: 'Azure',
+      command: 'az account list-locations --output table',
+      error: 'error',
     });
-
-    await expect(azureCliAction.run(context)).rejects.toThrow(
-      'An error occurred while running an Azure CLI command: login --service-principal ***REDACTED***',
-    );
-    expect(azureCliMock.runCommand).toHaveBeenCalledTimes(1);
-    expect(azureCliMock.runCommand).toHaveBeenCalledWith(
-      'az account list-locations --output table',
-      auth,
-      false,
-      'subscriptionId',
-    );
   });
 });
 

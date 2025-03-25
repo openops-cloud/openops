@@ -20,7 +20,12 @@ const FlowBuilderPage = () => {
     );
 
     if (viewOnly !== 'true' && viewOnly !== 'false') {
-      setSearchParams({ viewOnly: 'true' });
+      setSearchParams(
+        { viewOnly: 'true' },
+        {
+          replace: true,
+        },
+      );
     }
   }, [setSearchParams]);
 
