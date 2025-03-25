@@ -50,7 +50,7 @@ export const CanvasContextMenuContent = ({
 
   const { copySelectedArea, copyAction } = useCanvasContext();
 
-  const disabled = selectedNodes.length === 0;
+  const disabled = selectedNodes.length === 0 && !selectedStep;
   const isSingleSelectedNode = selectedNodes.length === 1;
 
   const doSelectedNodesIncludeTrigger = selectedNodes.some(
@@ -122,7 +122,9 @@ export const CanvasContextMenuContent = ({
             className="flex items-center gap-2"
           >
             <Copy className="w-4 h-4"></Copy>
-            {t('Paste after selection')}
+            {selectedStep
+              ? t('Paste after selection')
+              : t('Paste after last step')}
           </ContextMenuItem>
         )}
         {showPasteAsFirstLoopAction && (

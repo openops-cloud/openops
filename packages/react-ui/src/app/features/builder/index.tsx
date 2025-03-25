@@ -24,6 +24,7 @@ import {
 import { DataSelector } from '@/app/features/builder/data-selector';
 import { DynamicFormValidationProvider } from '@/app/features/builder/dynamic-form-validation/dynamic-form-validation-context';
 
+import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { useResizablePanelGroup } from '@/app/common/hooks/use-resizable-panel-group';
 import { useSocket } from '@/app/common/providers/socket-provider';
 import { FLOW_CANVAS_Y_OFFESET } from '@/app/constants/flow-canvas';
@@ -31,6 +32,7 @@ import { SEARCH_PARAMS } from '@/app/constants/search-params';
 import {
   ActionType,
   BlockTrigger,
+  FlagId,
   flowHelper,
   isNil,
   TriggerType,
@@ -91,6 +93,9 @@ const constructContainerKey = (
 };
 const BuilderPage = () => {
   const [searchParams] = useSearchParams();
+  const showCopyPaste =
+    flagsHooks.useFlag<boolean>(FlagId.COPY_PASTE_ACTIONS_ENABLED).data ||
+    false;
 
   const [
     selectedStep,
@@ -103,6 +108,7 @@ const BuilderPage = () => {
     setReadOnly,
     setRightSidebar,
     exitStepSettings,
+    flowVersion,
   ] = useBuilderStateContext((state) => [
     state.selectedStep,
     state.leftSidebar,
@@ -114,6 +120,7 @@ const BuilderPage = () => {
     state.setReadOnly,
     state.setRightSidebar,
     state.exitStepSettings,
+    state.flowVersion,
   ]);
 
   const clearSelectedStep = useCallback(() => {
@@ -269,7 +276,7 @@ const BuilderPage = () => {
                 'min-w-[830px]': leftSidebar === LeftSideBarType.NONE,
               })}
             >
-              {readonly ? (
+              {readonly && !showCopyPaste ? (
                 <ReadonlyCanvasProvider>
                   <div ref={middlePanelRef} className="relative h-full w-full">
                     <BuilderHeader />
@@ -292,6 +299,7 @@ const BuilderPage = () => {
                 <InteractiveContextProvider
                   selectedStep={selectedStep}
                   clearSelectedStep={clearSelectedStep}
+                  flowVersion={flowVersion}
                 >
                   <div ref={middlePanelRef} className="relative h-full w-full">
                     <BuilderHeader />
