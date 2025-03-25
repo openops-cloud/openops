@@ -9,7 +9,16 @@ import { SHIFT_KEY, SPACE_KEY } from './constants';
 jest.mock('@xyflow/react', () => ({
   useKeyPress: jest.fn(),
   useStoreApi: jest.fn(() => ({
-    getState: jest.fn(),
+    getState: jest.fn().mockReturnValue({
+      setNodes: jest.fn(),
+      setEdges: jest.fn(),
+      nodes: [
+        {
+          id: 'step_1',
+          selected: true,
+        },
+      ],
+    }),
   })),
 }));
 
