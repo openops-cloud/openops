@@ -71,7 +71,7 @@ describe('runCliCommand', () => {
       },
     );
 
-    expect(result).toEqual('output data');
+    expect(result).toEqual('some output');
   });
 });
 
