@@ -26,13 +26,14 @@ import {
   Copy,
   CopyPlus,
   EllipsisVertical,
-  Trash,
+  Trash2,
 } from 'lucide-react';
 import { memo } from 'react';
 import { useBuilderStateContext } from '../../builder-hooks';
 import { useApplyOperationAndPushToHistory } from '../../flow-version-undo-redo/hooks/apply-operation-and-push-to-history';
 import { usePaste } from '../../hooks/use-paste';
 import { StepActionWrapper } from '../nodes/step-action-wrapper';
+import { CanvasShortcuts, ShortcutWrapper } from './canvas-shortcuts';
 
 type Props = {
   data: WorkflowNode['data'];
@@ -124,7 +125,12 @@ const CanvasContextMenu = memo(
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent
-          className="w-44 absolute"
+          className="w-auto min-w-[110px] ml-2"
+          // sticky="always"
+          side="right"
+          align="start"
+          sideOffset={4}
+          alignOffset={-2}
           onCloseAutoFocus={(e) => e.preventDefault()}
         >
           <DropdownMenuItem
@@ -141,7 +147,7 @@ const CanvasContextMenu = memo(
             }}
           >
             <StepActionWrapper>
-              <ArrowRightLeft className=" h-4 w-4 " />
+              <ArrowRightLeft className="h-4 w-4 " />
               <span>{t('Replace')} </span>
             </StepActionWrapper>
           </DropdownMenuItem>
@@ -156,8 +162,10 @@ const CanvasContextMenu = memo(
                 }}
               >
                 <StepActionWrapper>
-                  <Copy className="mr-2 h-4 w-4" />
-                  <span className="">{t('Copy')}</span>
+                  <ShortcutWrapper shortcut={CanvasShortcuts['Copy']}>
+                    <Copy className="h-4 w-4" />
+                    <span className="">{t('Copy')}</span>
+                  </ShortcutWrapper>
                 </StepActionWrapper>
               </DropdownMenuItem>
             </>
@@ -195,7 +203,7 @@ const CanvasContextMenu = memo(
                 }}
               >
                 <StepActionWrapper>
-                  <Copy className="mr-2 h-4 w-4" />
+                  <Copy className="h-4 w-4" />
                   <span className=""> {t('Paste inside Loop')}</span>
                 </StepActionWrapper>
               </DropdownMenuItem>
@@ -218,7 +226,7 @@ const CanvasContextMenu = memo(
                 }}
               >
                 <StepActionWrapper>
-                  <Copy className="mr-2 h-4 w-4" />
+                  <Copy className="h-4 w-4" />
                   <span className=""> {t('Paste inside first branch')}</span>
                 </StepActionWrapper>
               </DropdownMenuItem>
@@ -243,7 +251,7 @@ const CanvasContextMenu = memo(
                 }}
               >
                 <StepActionWrapper>
-                  <Copy className="mr-2 h-4 w-4" />
+                  <Copy className="h-4 w-4" />
                   <span className="">{t('Paste inside default branch')}</span>
                 </StepActionWrapper>
               </DropdownMenuItem>
@@ -251,7 +259,6 @@ const CanvasContextMenu = memo(
 
           {isAction && showCopyPaste && actionToPaste && (
             <>
-              <DropdownMenuSeparator />
               <DropdownMenuItem
                 onSelect={(e) => {
                   e.preventDefault();
@@ -265,7 +272,7 @@ const CanvasContextMenu = memo(
                 }}
               >
                 <StepActionWrapper>
-                  <Copy className="mr-2 h-4 w-4" />
+                  <Copy className="h-4 w-4" />
                   <span className="">{t('Paste after')}</span>
                 </StepActionWrapper>
               </DropdownMenuItem>
@@ -284,7 +291,7 @@ const CanvasContextMenu = memo(
                 }}
               >
                 <StepActionWrapper>
-                  <Trash className="mr-2 h-4 w-4 text-destructive" />
+                  <Trash2 className="h-4 w-4 text-destructive" />
                   <span className="text-destructive">{t('Delete')}</span>
                 </StepActionWrapper>
               </DropdownMenuItem>
