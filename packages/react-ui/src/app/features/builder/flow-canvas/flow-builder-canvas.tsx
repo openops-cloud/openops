@@ -1,5 +1,5 @@
 import { getNodesBounds, useReactFlow } from '@xyflow/react';
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import { FLOW_CANVAS_Y_OFFESET } from '@/app/constants/flow-canvas';
 import {
@@ -10,7 +10,7 @@ import {
   ReturnLoopedgeButton,
   StepPlaceHolder,
 } from '@openops/components/ui';
-import { useBuilderStateContext } from '../builder-hooks';
+import { RightSideBarType, useBuilderStateContext } from '../builder-hooks';
 import { CanvasContextMenuWrapper } from './context-menu/context-menu-wrapper';
 import { EdgeWithButton } from './edges/edge-with-button';
 import { FlowDragLayer } from './flow-drag-layer';
@@ -30,22 +30,40 @@ const nodeTypes = {
 };
 const FlowBuilderCanvas = React.memo(() => {
   const { getNodes } = useReactFlow();
-  const [allowCanvasPanning, graph, graphHeight] = useBuilderStateContext(
-    (state) => {
-      const previousNodes = getNodes();
-      const graph = flowCanvasUtils.convertFlowVersionToGraph(
-        state.flowVersion,
-      );
-      graph.nodes = graph.nodes.map((node) => {
-        const previousNode = previousNodes.find((n) => n.id === node.id);
+  const [
+    allowCanvasPanning,
+    graph,
+    graphHeight,
+    selectStepByName,
+    rightSidebar,
+  ] = useBuilderStateContext((state) => {
+    const previousNodes = getNodes();
+    const graph = flowCanvasUtils.convertFlowVersionToGraph(state.flowVersion);
+    graph.nodes = graph.nodes.map((node) => {
+      const previousNode = previousNodes.find((n) => n.id === node.id);
 
-        if (previousNode) {
-          node.selected = previousNode.selected;
-        }
-        return node;
-      });
-      return [state.allowCanvasPanning, graph, getNodesBounds(graph.nodes)];
+      if (previousNode) {
+        node.selected = previousNode.selected;
+      }
+      return node;
+    });
+    return [
+      state.allowCanvasPanning,
+      graph,
+      getNodesBounds(graph.nodes),
+      state.selectStepByName,
+      state.rightSidebar,
+    ];
+  });
+
+  const isSidebarOpen = rightSidebar === RightSideBarType.BLOCK_SETTINGS;
+  const setSelectedStep = useCallback(
+    (stepName: string) => {
+      if (selectStepByName) {
+        selectStepByName(stepName, isSidebarOpen);
+      }
     },
+    [selectStepByName, isSidebarOpen],
   );
 
   return (
@@ -58,6 +76,7 @@ const FlowBuilderCanvas = React.memo(() => {
           topOffset={FLOW_CANVAS_Y_OFFESET}
           graph={graph}
           ContextMenu={CanvasContextMenuWrapper}
+          selectStepByName={setSelectedStep}
         >
           <AboveFlowWidgets></AboveFlowWidgets>
           <BelowFlowWidget graphHeight={graphHeight.height}></BelowFlowWidget>
