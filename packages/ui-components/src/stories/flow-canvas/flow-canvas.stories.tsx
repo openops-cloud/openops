@@ -2,7 +2,7 @@ import { Action, ActionType, Trigger, TriggerType } from '@openops/shared';
 import type { StoryObj } from '@storybook/react';
 import { getNodesBounds } from '@xyflow/react';
 import React, { useMemo } from 'react';
-import { CanvasContextProvider } from '../../components/flow-canvas/canvas-context';
+import { ReadonlyCanvasProvider } from '../../components/flow-canvas/canvas-context';
 import { CanvasControls } from '../../components/flow-canvas/canvas-controls';
 import { ReturnLoopedgeButton } from '../../components/flow-canvas/edges/return-loop-edge';
 import {
@@ -75,7 +75,7 @@ const FlowCanvasStory = (args: FlowCanvasProps) => {
   return (
     <div className="w-full h-[100vh] relative">
       <TemplateCanvasProvider template={template}>
-        <CanvasContextProvider>
+        <ReadonlyCanvasProvider>
           <TooltipProvider>
             <FlowCanvas {...args} graph={graph}>
               <BelowFlowWidget
@@ -84,7 +84,7 @@ const FlowCanvasStory = (args: FlowCanvasProps) => {
               <CanvasControls />
             </FlowCanvas>
           </TooltipProvider>
-        </CanvasContextProvider>
+        </ReadonlyCanvasProvider>
       </TemplateCanvasProvider>
     </div>
   );
