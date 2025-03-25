@@ -7,9 +7,7 @@ jest.mock('../src/lib/google-cloud-cli', () => runCommandMock);
 import { projectCliDropdown } from '../src/lib/common-properties';
 
 const auth = {
-  accessKeyId: 'someAccessKeyId',
-  secretAccessKey: 'someSecretAccessKey',
-  defaultRegion: 'someRegion',
+  someAuth: "secret"
 };
 
 describe('projectCliDropdown', () => {
