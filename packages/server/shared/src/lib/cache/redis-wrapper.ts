@@ -1,6 +1,8 @@
 import Redis from 'ioredis';
 import { logger } from '../logger';
+import { Lock } from '../memory-lock';
 import { createRedisClient } from './redis-connection';
+import { acquireRedisLock } from './redis-lock';
 
 let client: Redis | null = null;
 
@@ -40,6 +42,35 @@ async function setSerializedObject<T>(
   await setKey(key, JSON.stringify(obj), expireInSeconds);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function getOrSet<T, Args extends any[]>(
+  key: string,
+  fn: (...args: Args) => Promise<T>,
+  args: Args,
+  expireInSeconds?: number,
+): Promise<T> {
+  const value = await getSerializedObject<T>(key);
+
+  if (value) {
+    return value;
+  }
+
+  let lock: Lock | undefined;
+  try {
+    lock = await acquireRedisLock(`lock:${key}`);
+    const value = await getSerializedObject<T>(key);
+    if (value) {
+      return value;
+    }
+
+    const result = await fn(...args);
+    await setSerializedObject(key, result, expireInSeconds);
+    return result;
+  } finally {
+    await lock?.release();
+  }
+}
+
 async function getSerializedObject<T>(key: string): Promise<T | null> {
   const result = await getKey(key);
   return result ? (JSON.parse(result) as T) : null;
@@ -62,6 +93,7 @@ const getRedisClient = (): Redis => {
 };
 
 export const redisWrapper = {
+  getOrSet,
   setKey,
   getKey,
   deleteKey,
