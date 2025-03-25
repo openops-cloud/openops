@@ -50,7 +50,7 @@ export const CanvasContextMenuContent = ({
 
   const { copySelectedArea, copyAction } = useCanvasContext();
 
-  const disabled = selectedNodes.length === 0;
+  const disabled = selectedNodes.length === 0 && !selectedStep;
   const isSingleSelectedNode = selectedNodes.length === 1;
 
   const doSelectedNodesIncludeTrigger = selectedNodes.some(

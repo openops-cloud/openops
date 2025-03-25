@@ -103,6 +103,7 @@ const BuilderPage = () => {
     setReadOnly,
     setRightSidebar,
     exitStepSettings,
+    flowVersion,
   ] = useBuilderStateContext((state) => [
     state.selectedStep,
     state.leftSidebar,
@@ -114,6 +115,7 @@ const BuilderPage = () => {
     state.setReadOnly,
     state.setRightSidebar,
     state.exitStepSettings,
+    state.flowVersion,
   ]);
 
   const clearSelectedStep = useCallback(() => {
@@ -292,6 +294,7 @@ const BuilderPage = () => {
                 <InteractiveContextProvider
                   selectedStep={selectedStep}
                   clearSelectedStep={clearSelectedStep}
+                  flowVersion={flowVersion}
                 >
                   <div ref={middlePanelRef} className="relative h-full w-full">
                     <BuilderHeader />

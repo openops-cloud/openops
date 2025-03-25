@@ -1,4 +1,4 @@
-import { Action, flowHelper } from '@openops/shared';
+import { Action, flowHelper, FlowVersion } from '@openops/shared';
 import {
   OnSelectionChangeParams,
   useKeyPress,
@@ -68,11 +68,13 @@ export const InteractiveContextProvider = ({
   flowCanvasContainerId,
   selectedStep,
   clearSelectedStep,
+  flowVersion,
   children,
 }: {
   flowCanvasContainerId?: string;
   selectedStep: string | null;
   clearSelectedStep: () => void;
+  flowVersion: FlowVersion;
   children: ReactNode;
 }) => {
   const [panningMode, setPanningMode] = useState<PanningMode>('grab');
@@ -166,6 +168,20 @@ export const InteractiveContextProvider = ({
     clearSelectedStep();
   }, [clearSelectedStep, selectedActions, state]);
 
+  const copySelectedStep = useDebounceCallback(() => {
+    if (!selectedStep) {
+      return;
+    }
+
+    const stepDetails = flowHelper.getStep(flowVersion, selectedStep);
+
+    if (!stepDetails || !flowHelper.isAction(stepDetails.type)) {
+      return;
+    }
+
+    handleCopy(stepDetails as Action, 1);
+  }, 300);
+
   const copySelectedArea = useDebounceCallback(() => {
     const selectionArea = document.querySelector(
       `.${NODE_SELECTION_RECT_CLASS_NAME}`,
@@ -211,10 +227,16 @@ export const InteractiveContextProvider = ({
   };
 
   useEffect(() => {
-    if (copyPressed) {
+    if (!copyPressed) {
+      return;
+    }
+
+    if (selectedStep) {
+      copySelectedStep();
+    } else {
       copySelectedArea();
     }
-  }, [copyPressed, copySelectedArea]);
+  }, [copyPressed, copySelectedArea, copySelectedStep, selectedStep]);
 
   const contextValue = useMemo(
     () => ({
