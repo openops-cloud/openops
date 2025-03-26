@@ -3,8 +3,8 @@ import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { promises as fs } from 'fs';
 import { CodeSandbox } from '../../core/code/code-sandbox-common';
 
-const CODE_BLOCK_MEMORY_LIMIT = system.getNumberOrThrow(
-  AppSystemProp.CODE_BLOCK_MEMORY_LIMIT,
+const BLOCK_MEMORY_LIMIT_IN_MB = system.getNumberOrThrow(
+  AppSystemProp.CODE_BLOCK_MEMORY_LIMIT_IN_MB,
 );
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -24,7 +24,7 @@ export const v8IsolateCodeSandbox: CodeSandbox = {
   async runCodeModule({ codeFile, inputs }) {
     const ivm = getIvm();
     const isolate = new ivm.Isolate({
-      memoryLimit: CODE_BLOCK_MEMORY_LIMIT,
+      memoryLimit: BLOCK_MEMORY_LIMIT_IN_MB,
     });
 
     try {
@@ -52,7 +52,7 @@ export const v8IsolateCodeSandbox: CodeSandbox = {
   async runScript({ script, scriptContext }) {
     const ivm = getIvm();
     const isolate = new ivm.Isolate({
-      memoryLimit: CODE_BLOCK_MEMORY_LIMIT,
+      memoryLimit: BLOCK_MEMORY_LIMIT_IN_MB,
     });
 
     try {
