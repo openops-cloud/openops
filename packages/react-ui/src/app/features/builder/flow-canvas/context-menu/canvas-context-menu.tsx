@@ -126,7 +126,6 @@ const CanvasContextMenu = memo(
         </DropdownMenuTrigger>
         <DropdownMenuContent
           className="w-auto min-w-[110px] ml-2"
-          // sticky="always"
           side="right"
           align="start"
           sideOffset={4}
