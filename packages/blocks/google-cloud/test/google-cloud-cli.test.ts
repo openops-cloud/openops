@@ -46,7 +46,7 @@ describe('Google cloud runCommand', () => {
 
     expect(runCliCommandMock).toHaveBeenNthCalledWith(
       1,
-      'gcloud auth activate-service-account --key-file=/tmp/gcp-key.json --quiet',
+      'gcloud auth activate-service-account --key-file=/tmp/gcp-key.json',
       'gcloud',
       expect.objectContaining({
         CLOUDSDK_CONFIG: '/tmp/gcloud-config-abc',
@@ -56,7 +56,7 @@ describe('Google cloud runCommand', () => {
 
     expect(runCliCommandMock).toHaveBeenNthCalledWith(
       2,
-      'gcloud config set project my-project --quiet',
+      'gcloud config set project my-project',
       'gcloud',
       expect.objectContaining({
         CLOUDSDK_CONFIG: '/tmp/gcloud-config-abc',

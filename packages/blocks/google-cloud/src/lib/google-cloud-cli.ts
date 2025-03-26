@@ -29,7 +29,7 @@ export async function runCommand(
 
   if (project) {
     await runCliCommand(
-      `gcloud config set project ${project} --quiet`,
+      `gcloud config set project ${project}`,
       'gcloud',
       envVars,
     );
@@ -42,7 +42,7 @@ async function loginGCPWithKeyObject(keyObject: string, envVars: any) {
   const tmpKeyPath = path.join(os.tmpdir(), 'gcp-key.json');
   await fs.writeFile(tmpKeyPath, keyObject);
 
-  const loginCommand = `gcloud auth activate-service-account --key-file=${tmpKeyPath} --quiet`;
+  const loginCommand = `gcloud auth activate-service-account --key-file=${tmpKeyPath}`;
   const result = await runCliCommand(loginCommand, 'gcloud', envVars);
   return result;
 }

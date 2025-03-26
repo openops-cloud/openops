@@ -30,7 +30,7 @@ describe('projectCliDropdown', () => {
 
     expect(runCommandMock.runCommand).toHaveBeenCalledTimes(1);
     expect(runCommandMock.runCommand).toHaveBeenCalledWith(
-      'gcloud projects list --quiet --format=json',
+      'gcloud projects list --format=json',
       auth,
       false,
     );
@@ -55,7 +55,7 @@ describe('projectCliDropdown', () => {
     );
 
     expect(runCommandMock.runCommand).toHaveBeenCalledWith(
-      'gcloud projects list --quiet --format=json',
+      'gcloud projects list --format=json',
       auth,
       true,
     );

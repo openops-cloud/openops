@@ -33,11 +33,7 @@ export async function runCliCommand(
 ): Promise<string> {
   const commandResult = await executeCliCommand(command, cliTool, envVars);
 
-  if (
-    !commandResult ||
-    commandResult.exitCode !== 0 ||
-    commandResult.stdError
-  ) {
+  if (!commandResult || commandResult.exitCode !== 0) {
     logger.error(`Failed to run the ${cliTool} command.`, commandResult);
     throw new Error(
       `Failed to run the ${cliTool} command: '${command}'. Error: ${JSON.stringify(

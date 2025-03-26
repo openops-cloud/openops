@@ -30,7 +30,7 @@ export const projectCliDropdown = Property.Dropdown<string>({
           ?.useHostSessionCheckbox === true;
 
       const rawProjects = await runCommand(
-        'gcloud projects list --quiet --format=json',
+        'gcloud projects list --format=json',
         auth,
         shouldUseHostCredentials,
       );
