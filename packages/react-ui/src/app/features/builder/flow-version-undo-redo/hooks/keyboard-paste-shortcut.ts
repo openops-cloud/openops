@@ -9,7 +9,7 @@ import {
 } from '@openops/shared';
 import { useSelection } from '../../hooks/selection';
 import { usePaste } from '../../hooks/use-paste';
-import { useKeyboardShortcut } from './keyboard/use-keyboard-shortcut';
+import { useKeyboardShortcut } from './use-keyboard-shortcut';
 
 const operationKeyboardKeyCombinationMap = {
   paste: [

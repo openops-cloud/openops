@@ -1,6 +1,5 @@
 import { useEffect, useMemo } from 'react';
 
-// Define the shape of a key combination.
 export type KeyCombination = {
   key: string;
   modifiers: string[];
