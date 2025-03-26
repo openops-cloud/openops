@@ -8,6 +8,7 @@ import { PrincipalType } from '@openops/shared';
 import { Static, Type } from '@sinclair/typebox';
 import axios from 'axios';
 import { FastifyReply, FastifyRequest } from 'fastify';
+import { sendEphemeralMessage } from './ephemeral-message';
 import { verifySignature } from './slack-token-verifier';
 
 export const CreateSlackInteractionRequest = Type.Object({
@@ -106,6 +107,18 @@ async function evaluateUserInteraction(payload: any, reply: FastifyReply) {
     logger.debug('Ignoring a Slack interaction: not a button', { payload });
 
     return reply.code(200).send({ text: 'Received interaction' });
+  }
+
+  if (payload.message.metadata.event_payload.isTest) {
+    logger.debug('Ignoring a Slack interaction: test message', { payload });
+
+    const userId = payload.user.id;
+    const responseUrl = payload.response_url;
+    const ephemeralText =
+      'Slack interactions are only available when running the entire workflow.';
+    await sendEphemeralMessage({ responseUrl, ephemeralText, userId });
+
+    return reply.code(200).send({ text: 'Finished sending ephemeral' });
   }
 
   const resumeUrl: string = payload.message.metadata.event_payload.resumeUrl;
