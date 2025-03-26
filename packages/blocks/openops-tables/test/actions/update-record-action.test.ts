@@ -1,9 +1,12 @@
+const cacheWrapperMock = {
+  getSerializedObject: jest.fn(),
+  setSerializedObject: jest.fn(),
+  getOrAdd: jest.fn(),
+};
+
 jest.mock('@openops/server-shared', () => ({
   ...jest.requireActual('@openops/server-shared'),
-  cacheWrapper: {
-    getSerializedObject: jest.fn(),
-    setSerializedObject: jest.fn(),
-  },
+  cacheWrapper: cacheWrapperMock,
 }));
 
 const openopsCommonMock = {
@@ -11,7 +14,6 @@ const openopsCommonMock = {
   authenticateDefaultUserInOpenOpsTables: jest.fn(),
   getRowByPrimaryKeyValue: jest.fn(),
   getPrimaryKeyFieldFromFields: jest.fn(),
-  wrapWithCacheGuard: jest.fn(),
   getTableFields: jest.fn().mockResolvedValue([{}]),
   openopsTablesDropdownProperty: jest.fn().mockReturnValue({
     required: true,
@@ -100,7 +102,7 @@ describe('updateRowAction', () => {
     openopsCommonMock.getPrimaryKeyFieldFromFields.mockReturnValue({
       name: 'primary key field',
     });
-    openopsCommonMock.wrapWithCacheGuard
+    cacheWrapperMock.getOrAdd
       .mockReturnValueOnce(1)
       .mockReturnValue([{ id: 1, primary: true }]);
 
@@ -126,7 +128,7 @@ describe('updateRowAction', () => {
     });
     openopsCommonMock.getRowByPrimaryKeyValue.mockResolvedValue({ id: 1 });
 
-    openopsCommonMock.wrapWithCacheGuard
+    cacheWrapperMock.getOrAdd
       .mockReturnValueOnce(1)
       .mockReturnValue([
         { id: 1, primary: true, name: 'id' },
@@ -175,7 +177,7 @@ describe('updateRowAction', () => {
   });
 
   test('should create record if doesnt exist', async () => {
-    openopsCommonMock.wrapWithCacheGuard
+    cacheWrapperMock.getOrAdd
       .mockReturnValueOnce(1)
       .mockReturnValue([
         { id: 1, primary: true, name: 'id' },
@@ -234,7 +236,7 @@ describe('updateRowAction', () => {
       name: 'primary key field',
     });
     openopsCommonMock.getRowByPrimaryKeyValue.mockResolvedValue({ id: 1 });
-    openopsCommonMock.wrapWithCacheGuard
+    cacheWrapperMock.getOrAdd
       .mockReturnValueOnce(1)
       .mockReturnValue([{ id: 1, primary: true, name: 'id' }]);
 
@@ -268,7 +270,7 @@ describe('updateRowAction', () => {
   test.each([[[]], [{}]])(
     'should throw if the primary key is not a valid string',
     async (rowPrimaryKey: any) => {
-      openopsCommonMock.wrapWithCacheGuard
+      cacheWrapperMock.getOrAdd
         .mockReturnValueOnce(1)
         .mockReturnValue([
           { id: 1, primary: true, name: 'id' },
@@ -369,19 +371,18 @@ describe('fieldsProperties property', () => {
 });
 
 function validateWrapperCall(context: any) {
-  expect(openopsCommonMock.wrapWithCacheGuard).toHaveBeenCalledTimes(2);
-  expect(openopsCommonMock.wrapWithCacheGuard).toHaveBeenNthCalledWith(
+  expect(cacheWrapperMock.getOrAdd).toHaveBeenCalledTimes(2);
+  expect(cacheWrapperMock.getOrAdd).toHaveBeenNthCalledWith(
     1,
-    `${context.run.executionCorrelationId}-table-${context.propsValue.tableName}`,
+    `${context.run.id}-table-${context.propsValue.tableName}`,
     getTableIdByTableName,
-    context.propsValue.tableName,
+    [context.propsValue.tableName],
   );
-  expect(openopsCommonMock.wrapWithCacheGuard).toHaveBeenNthCalledWith(
+  expect(cacheWrapperMock.getOrAdd).toHaveBeenNthCalledWith(
     2,
-    `${context.run.executionCorrelationId}-1-fields`,
+    `${context.run.id}-1-fields`,
     getFields,
-    1,
-    'some databaseToken',
+    [1, 'some databaseToken'],
   );
 }
 
@@ -402,7 +403,7 @@ function createContext(params?: ContextParams) {
       fieldsProperties: { fieldsProperties: params?.fieldsProperties },
     },
     run: {
-      executionCorrelationId: nanoid(),
+      id: nanoid(),
     },
   };
 }

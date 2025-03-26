@@ -1,9 +1,12 @@
+const cacheWrapperMock = {
+  getSerializedObject: jest.fn(),
+  setSerializedObject: jest.fn(),
+  getOrAdd: jest.fn().mockReturnValue(123),
+};
+
 jest.mock('@openops/server-shared', () => ({
   ...jest.requireActual('@openops/server-shared'),
-  cacheWrapper: {
-    getSerializedObject: jest.fn(),
-    setSerializedObject: jest.fn(),
-  },
+  cacheWrapper: cacheWrapperMock,
 }));
 
 const openopsCommonMock = {
@@ -12,7 +15,6 @@ const openopsCommonMock = {
   getPropertyFromField: jest.fn(),
   authenticateDefaultUserInOpenOpsTables: jest.fn(),
   getRows: jest.fn(),
-  wrapWithCacheGuard: jest.fn().mockReturnValue(123),
   getTableFields: jest.fn().mockResolvedValue([
     {
       name: 'mock options',
@@ -303,12 +305,12 @@ describe('getRecordsAction test', () => {
 });
 
 function validateWrapperCall(context: any) {
-  expect(openopsCommonMock.wrapWithCacheGuard).toHaveBeenCalledTimes(1);
-  expect(openopsCommonMock.wrapWithCacheGuard).toHaveBeenNthCalledWith(
+  expect(cacheWrapperMock.getOrAdd).toHaveBeenCalledTimes(1);
+  expect(cacheWrapperMock.getOrAdd).toHaveBeenNthCalledWith(
     1,
-    `${context.run.executionCorrelationId}-table-${context.propsValue.tableName}`,
+    `${context.run.id}-table-${context.propsValue.tableName}`,
     getTableIdByTableName,
-    context.propsValue.tableName,
+    [context.propsValue.tableName],
   );
 }
 
@@ -327,7 +329,7 @@ function createContext(params?: ContextParams) {
       filters: { filters: params?.filters || [] },
     },
     run: {
-      executionCorrelationId: nanoid(),
+      id: nanoid(),
     },
   };
 }
