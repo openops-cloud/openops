@@ -41,7 +41,7 @@ async function getSerializedObject<T>(key: string): Promise<T | null> {
   return result ? (JSON.parse(result) as T) : null;
 }
 
-async function getOrSet<T, Args extends unknown[]>(
+async function getOrAdd<T, Args extends unknown[]>(
   key: string,
   fn: (...args: Args) => Promise<T>,
   args: Args,
@@ -51,7 +51,7 @@ async function getOrSet<T, Args extends unknown[]>(
 }
 
 export const memoryWrapper = {
-  getOrSet,
+  getOrAdd,
   setKey,
   getKey,
   deleteKey,

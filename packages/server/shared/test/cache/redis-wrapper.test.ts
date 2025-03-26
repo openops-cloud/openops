@@ -146,7 +146,7 @@ describe('Redis Wrapper', () => {
     });
   });
 
-  describe('getOrSet', () => {
+  describe('getOrAdd', () => {
     it.each([true, false, 'table name 1', 3232, { test: 'test' }, [1, 2, 3]])(
       'should call the set method only once within the cache period for each key',
       async (expectedResult: unknown) => {
@@ -162,12 +162,12 @@ describe('Redis Wrapper', () => {
         const numCalls = 50;
         const results = await Promise.all([
           ...Array.from({ length: numCalls }, (_) =>
-            redisWrapper.getOrSet('cacheKey-1', halfSecondSleep, [
+            redisWrapper.getOrAdd('cacheKey-1', halfSecondSleep, [
               expectedResult,
             ]),
           ),
           ...Array.from({ length: numCalls }, (_) =>
-            redisWrapper.getOrSet('cacheKey-2', halfSecondSleep, [
+            redisWrapper.getOrAdd('cacheKey-2', halfSecondSleep, [
               expectedResult,
             ]),
           ),

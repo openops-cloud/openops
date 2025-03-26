@@ -43,7 +43,7 @@ async function setSerializedObject<T>(
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function getOrSet<T, Args extends any[]>(
+async function getOrAdd<T, Args extends any[]>(
   key: string,
   fn: (...args: Args) => Promise<T>,
   args: Args,
@@ -93,7 +93,7 @@ const getRedisClient = (): Redis => {
 };
 
 export const redisWrapper = {
-  getOrSet,
+  getOrAdd,
   setKey,
   getKey,
   deleteKey,
