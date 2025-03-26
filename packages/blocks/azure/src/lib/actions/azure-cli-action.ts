@@ -2,11 +2,12 @@ import { createAction, Property } from '@openops/blocks-framework';
 import {
   azureAuth,
   dryRunCheckBox,
+  getUseHostSessionProperty,
   handleCliError,
   tryParseJson,
 } from '@openops/common';
 import { runCommand } from '../azure-cli';
-import { subDropdown, useHostSession } from '../common-properties';
+import { subDropdown } from '../common-properties';
 
 export const azureCliAction = createAction({
   auth: azureAuth,
@@ -14,7 +15,7 @@ export const azureCliAction = createAction({
   description: 'Execute Azure CLI command',
   displayName: 'Azure CLI',
   props: {
-    useHostSession: useHostSession,
+    useHostSession: getUseHostSessionProperty('Azure', 'az login'),
     subscriptions: subDropdown,
     commandToRun: Property.LongText({ displayName: 'Command', required: true }),
     dryRun: dryRunCheckBox(),

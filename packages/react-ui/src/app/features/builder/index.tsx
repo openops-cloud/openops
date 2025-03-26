@@ -276,7 +276,7 @@ const BuilderPage = () => {
                 'min-w-[830px]': leftSidebar === LeftSideBarType.NONE,
               })}
             >
-              {readonly && !showCopyPaste ? (
+              {readonly || !showCopyPaste ? (
                 <ReadonlyCanvasProvider>
                   <div ref={middlePanelRef} className="relative h-full w-full">
                     <BuilderHeader />

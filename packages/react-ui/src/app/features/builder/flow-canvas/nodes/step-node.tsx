@@ -32,7 +32,6 @@ import {
 } from '@openops/shared';
 
 import { CanvasContextMenu } from '../context-menu/canvas-context-menu';
-import { StepActionWrapper } from './step-action-wrapper';
 
 function getStepStatus(
   stepName: string | undefined,
@@ -52,7 +51,6 @@ function getStepStatus(
   return stepOutput?.status;
 }
 
-StepActionWrapper.displayName = 'StepActionWrapper';
 const WorkflowStepNode = React.memo(
   ({ data }: { data: WorkflowNode['data'] }) => {
     const [
