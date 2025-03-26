@@ -1,12 +1,14 @@
 const runCliCommandMock = jest.fn();
+const useTempFileMock = jest.fn();
+
 jest.mock('@openops/common', () => ({
   runCliCommand: runCliCommandMock,
+  useTempFile: useTempFileMock,
 }));
 
 const fsPromisesMock = {
   ...jest.requireActual('fs/promises'),
   mkdtemp: jest.fn(),
-  writeFile: jest.fn(),
 };
 jest.mock('fs/promises', () => fsPromisesMock);
 
@@ -21,6 +23,9 @@ describe('Google cloud runCommand', () => {
 
   test('calls login, sets project, and runs command', async () => {
     fsPromisesMock.mkdtemp.mockResolvedValue('/tmp/gcloud-config-abc');
+    useTempFileMock.mockImplementation(async (_contents, callback) => {
+      return callback('/tmp/mock-key-file.json');
+    });
 
     runCliCommandMock
       .mockResolvedValueOnce('login success')
@@ -39,14 +44,15 @@ describe('Google cloud runCommand', () => {
     expect(fsPromisesMock.mkdtemp).toHaveBeenCalledWith(
       expect.stringMatching(/^\/tmp\/gcloud-config/),
     );
-    expect(fsPromisesMock.writeFile).toHaveBeenCalledWith(
-      '/tmp/gcp-key.json',
+
+    expect(useTempFileMock).toHaveBeenCalledWith(
       keyFileContent,
+      expect.any(Function),
     );
 
     expect(runCliCommandMock).toHaveBeenNthCalledWith(
       1,
-      'gcloud auth activate-service-account --key-file=/tmp/gcp-key.json',
+      'gcloud auth activate-service-account --key-file=/tmp/mock-key-file.json',
       'gcloud',
       expect.objectContaining({
         CLOUDSDK_CONFIG: '/tmp/gcloud-config-abc',
@@ -87,6 +93,8 @@ describe('Google cloud runCommand', () => {
 
     expect(result).toBe('command output');
     expect(fsPromisesMock.mkdtemp).not.toHaveBeenCalled();
+    expect(useTempFileMock).not.toHaveBeenCalled();
+
     expect(runCliCommandMock).toHaveBeenCalledWith(
       'gcloud info',
       'gcloud',

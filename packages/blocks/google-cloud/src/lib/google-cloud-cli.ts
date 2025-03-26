@@ -1,4 +1,4 @@
-import { runCliCommand } from '@openops/common';
+import { runCliCommand, useTempFile } from '@openops/common';
 import fs from 'fs/promises';
 import os from 'os';
 import path from 'path';
@@ -39,10 +39,10 @@ export async function runCommand(
 }
 
 async function loginGCPWithKeyObject(keyObject: string, envVars: any) {
-  const tmpKeyPath = path.join(os.tmpdir(), 'gcp-key.json');
-  await fs.writeFile(tmpKeyPath, keyObject);
+  const result = await useTempFile(keyObject, async (filePath) => {
+    const loginCommand = `gcloud auth activate-service-account --key-file=${filePath}`;
+    return await runCliCommand(loginCommand, 'gcloud', envVars);
+  });
 
-  const loginCommand = `gcloud auth activate-service-account --key-file=${tmpKeyPath}`;
-  const result = await runCliCommand(loginCommand, 'gcloud', envVars);
   return result;
 }
