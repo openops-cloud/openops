@@ -32,9 +32,9 @@ const generateRedlockRetryConfig = (
 
 const redLockClient = (() => {
   // TODO: Remove this check when we have the unit tests fixed.
-  const redisIsNotConfigured =
-    system.get<QueueMode>(AppSystemProp.QUEUE_MODE) !== QueueMode.REDIS;
-  if (!redisIsNotConfigured) {
+  const shouldUseRedis =
+    system.get<QueueMode>(AppSystemProp.QUEUE_MODE) === QueueMode.REDIS;
+  if (!shouldUseRedis) {
     return;
   }
 
