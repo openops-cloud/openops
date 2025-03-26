@@ -1,33 +1,7 @@
 import { Property } from '@openops/blocks-framework';
 import { getAzureSubscriptionsStaticDropdown } from '@openops/common';
-import { SharedSystemProp, system } from '@openops/server-shared';
 import { runCommand } from './azure-cli';
 import { getAzureErrorMessage } from './error-helper';
-
-export const useHostSession = Property.DynamicProperties({
-  displayName: '',
-  required: true,
-  refreshers: [],
-  props: async () => {
-    const enableHostSession = system.getBoolean(
-      SharedSystemProp.ENABLE_HOST_SESSION,
-    );
-
-    if (!enableHostSession) {
-      return {};
-    }
-
-    const result: any = {
-      useHostSessionCheckbox: Property.Checkbox({
-        displayName: 'Use host machine Azure CLI session',
-        description: `(Advanced) Uses the host machine's Azure CLI session. Requires 'az login' to have been run on the machine.`,
-        required: false,
-      }),
-    };
-
-    return result;
-  },
-});
 
 export const subDropdown = Property.DynamicProperties({
   displayName: '',
