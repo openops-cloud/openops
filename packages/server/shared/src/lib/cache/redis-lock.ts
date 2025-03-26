@@ -3,6 +3,8 @@ import { logger } from '../logger';
 import { Lock } from '../memory-lock';
 import { AppSystemProp, QueueMode, system } from '../system';
 import { createRedisClient } from './redis-connection';
+import { redisWrapper } from './redis-wrapper';
+import { memoryWrapper } from './memory-wrapper';
 
 // By default, the timeout to wait to acquire a lock is 30 seconds
 const DEFAULT_TIMEOUT_MS = 30000;
@@ -30,18 +32,18 @@ const generateRedlockRetryConfig = (
   };
 };
 
-function redLockClient2(): RedLock | undefined {
+function createRedLockClient(): RedLock | undefined {
   // TODO: Remove this check when we have the unit tests fixed.
-  const shouldUseRedis =
-    system.get<QueueMode>(AppSystemProp.QUEUE_MODE) === QueueMode.REDIS;
-  if (!shouldUseRedis) {
-    /* eslint-disable no-console */
-    console.log('Queue mode is not Redis.', {
-      QUEUE_MODE: system.get<QueueMode>(AppSystemProp.QUEUE_MODE),
-    });
-
-    return;
-  }
+  // const shouldUseRedis =
+  //   system.get<QueueMode>(AppSystemProp.QUEUE_MODE) === QueueMode.REDIS;
+  // if (!shouldUseRedis) {
+  //   /* eslint-disable no-console */
+  //   console.log('Queue mode is not Redis.', {
+  //     QUEUE_MODE: system.get<QueueMode>(AppSystemProp.QUEUE_MODE),
+  //   });
+  //
+  //   return;
+  // }
 
   const redisClient = createRedisClient();
 
@@ -59,7 +61,10 @@ function redLockClient2(): RedLock | undefined {
   });
 }
 
-export const redLockClient = redLockClient2();
+const isRedisConfigured =
+  system.get<QueueMode>(AppSystemProp.QUEUE_MODE) === QueueMode.REDIS;
+
+export const redLockClient = isRedisConfigured ? createRedLockClient() : undefined;
 
 export async function acquireRedisLock(
   key: string,
