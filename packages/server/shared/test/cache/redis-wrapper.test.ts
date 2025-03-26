@@ -1,3 +1,23 @@
+let keyCallCounts: Record<string, number> = {};
+jest.mock('../../src/lib/cache/redis-lock', () => {
+  return {
+    acquireRedisLock: jest.fn(async (key: string, ttl: number) => {
+      keyCallCounts[key] = (keyCallCounts[key] || 0) + 1;
+
+      if (keyCallCounts[key] === 1) {
+        return {
+          release: jest.fn(),
+        };
+      } else {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        return {
+          release: jest.fn(),
+        };
+      }
+    }),
+  };
+});
+
 const mockRedisInstance = {
   set: jest.fn(),
   get: jest.fn(),
@@ -14,6 +34,7 @@ import { redisWrapper } from '../../src/lib/cache/redis-wrapper';
 
 describe('Redis Wrapper', () => {
   beforeEach(() => {
+    keyCallCounts = {};
     jest.clearAllMocks();
   });
 
@@ -124,4 +145,61 @@ describe('Redis Wrapper', () => {
       expect(mockRedisInstance.get).toHaveBeenCalledWith('nonExistingKey');
     });
   });
+
+  describe('getOrAdd', () => {
+    it.each([true, false, 'table name 1', 3232, { test: 'test' }, [1, 2, 3]])(
+      'should call the set method only once within the cache period for each key',
+      async (expectedResult: unknown) => {
+        const memoryStore: Record<string, unknown> = {};
+        mockRedisInstance.set = jest.fn((key: string, value: unknown) => {
+          memoryStore[key] = value;
+          return Promise.resolve('OK');
+        });
+        mockRedisInstance.get = jest.fn((key: string) => {
+          return Promise.resolve(memoryStore[key] ?? null);
+        });
+
+        const numCalls = 50;
+        const results = await Promise.all([
+          ...Array.from({ length: numCalls }, (_) =>
+            redisWrapper.getOrAdd('cacheKey-1', halfSecondSleep, [
+              expectedResult,
+            ]),
+          ),
+          ...Array.from({ length: numCalls }, (_) =>
+            redisWrapper.getOrAdd('cacheKey-2', halfSecondSleep, [
+              expectedResult,
+            ]),
+          ),
+        ]);
+
+        for (const result of results) {
+          expect(result).toStrictEqual(expectedResult);
+        }
+
+        expect(halfSecondSleep).toHaveBeenCalledTimes(2);
+        expect(mockRedisInstance.get).toHaveBeenCalledTimes(numCalls * 4);
+        expect(mockRedisInstance.set).toHaveBeenCalledTimes(2);
+        expect(mockRedisInstance.set).toHaveBeenNthCalledWith(
+          1,
+          'cacheKey-1',
+          JSON.stringify(expectedResult),
+          'EX',
+          60 * 60,
+        );
+        expect(mockRedisInstance.set).toHaveBeenNthCalledWith(
+          2,
+          'cacheKey-2',
+          JSON.stringify(expectedResult),
+          'EX',
+          60 * 60,
+        );
+      },
+    );
+  });
+});
+
+const halfSecondSleep = jest.fn(async (param: unknown) => {
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  return param;
 });

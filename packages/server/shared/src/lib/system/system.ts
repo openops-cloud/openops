@@ -88,6 +88,7 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [SharedSystemProp.ENABLE_HOST_SESSION]: 'false',
   [AppSystemProp.AZURE_API_VERSION]: '2024-07-01',
   [SharedSystemProp.INTERNAL_OAUTH_PROXY_URL]: 'https://oauth.openops.com',
+  [AppSystemProp.CODE_BLOCK_MEMORY_LIMIT_IN_MB]: '128',
 };
 
 export const system = {
