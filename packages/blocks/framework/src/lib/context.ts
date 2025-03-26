@@ -134,6 +134,7 @@ export type BaseActionContext<
     pauseId: string;
     stop: StopHook;
     pause: PauseHook;
+    isTest: boolean;
   };
   generateResumeUrl: (
     params: {
