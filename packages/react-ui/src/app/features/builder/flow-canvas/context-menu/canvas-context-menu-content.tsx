@@ -7,16 +7,25 @@ import {
   useCanvasContext,
   WorkflowNode,
 } from '@openops/components/ui';
-import { ActionType, FlagId, flowHelper } from '@openops/shared';
+import {
+  Action,
+  ActionType,
+  FlagId,
+  flowHelper,
+  isNil,
+  StepLocationRelativeToParent,
+} from '@openops/shared';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { useReactFlow } from '@xyflow/react';
 import { useBuilderStateContext } from '../../builder-hooks';
+import { usePaste } from '../../hooks/use-paste';
 import { CanvasShortcuts, ShortcutWrapper } from './canvas-shortcuts';
 import { CanvasContextMenuProps } from './context-menu-wrapper';
 
 export const CanvasContextMenuContent = ({
   contextMenuType,
+  actionToPaste,
 }: CanvasContextMenuProps) => {
   const showCopyPaste =
     flagsHooks.useFlag<boolean>(FlagId.COPY_PASTE_ACTIONS_ENABLED).data ||
@@ -35,44 +44,64 @@ export const CanvasContextMenuContent = ({
       return acc;
     }, [] as string[]);
 
-  const [flowVersion, readonly] = useBuilderStateContext((state) => [
-    state.flowVersion,
-    state.readonly,
-  ]);
+  const [flowVersion, readonly, selectedStep] = useBuilderStateContext(
+    (state) => [state.flowVersion, state.readonly, state.selectedStep],
+  );
 
-  const { copySelectedArea } = useCanvasContext();
+  const { copySelectedArea, copyAction } = useCanvasContext();
 
-  const disabled = selectedNodes.length === 0;
+  const disabled = selectedNodes.length === 0 && !selectedStep;
+  const isSingleSelectedNode = selectedNodes.length === 1;
 
   const doSelectedNodesIncludeTrigger = selectedNodes.some(
     (node: string) => node === flowVersion.trigger.name,
   );
 
-  // https://linear.app/openops/issue/OPS-854/add-paste-logic
-  const disabledPaste = true;
+  const disabledPaste = isNil(actionToPaste);
   const firstSelectedStep = flowHelper.getStep(flowVersion, selectedNodes[0]);
   const showPasteAfterLastStep =
     !readonly && contextMenuType === ContextMenuType.CANVAS;
   const showPasteAsFirstLoopAction =
-    selectedNodes.length === 1 &&
+    isSingleSelectedNode &&
     firstSelectedStep?.type === ActionType.LOOP_ON_ITEMS &&
     !readonly &&
     contextMenuType === ContextMenuType.STEP;
 
   const showPasteAfterCurrentStep =
-    selectedNodes.length === 1 &&
+    (isSingleSelectedNode || selectedStep) &&
     !readonly &&
     contextMenuType === ContextMenuType.STEP;
+
+  const showPasteInConditionBranch =
+    contextMenuType === ContextMenuType.STEP &&
+    firstSelectedStep?.type === ActionType.BRANCH;
+
+  const showPasteInSplitBranch =
+    contextMenuType === ContextMenuType.STEP &&
+    firstSelectedStep?.type === ActionType.SPLIT;
 
   const showCopy =
     showCopyPaste &&
     !doSelectedNodesIncludeTrigger &&
     contextMenuType === ContextMenuType.STEP;
 
+  const { onPaste } = usePaste();
+
   return (
     <>
       {showCopy && (
-        <ContextMenuItem disabled={disabled} onClick={copySelectedArea}>
+        <ContextMenuItem
+          disabled={disabled}
+          onClick={() => {
+            if (selectedStep) {
+              const step = flowHelper.getStep(flowVersion, selectedStep);
+              copyAction(step as Action);
+              return;
+            }
+
+            copySelectedArea();
+          }}
+        >
           <ShortcutWrapper shortcut={CanvasShortcuts['Copy']}>
             <Copy className="w-4 h-4"></Copy> {t('Copy')}
           </ShortcutWrapper>
@@ -80,39 +109,87 @@ export const CanvasContextMenuContent = ({
       )}
 
       <>
-        {showPasteAfterLastStep && showCopyPaste && (
+        {showPasteAfterLastStep && (
           <ContextMenuItem
             disabled={disabledPaste}
-            onClick={() => {
-              // // https://linear.app/openops/issue/OPS-854/add-paste-logic
-            }}
+            onClick={() =>
+              onPaste(
+                actionToPaste as Action,
+                StepLocationRelativeToParent.AFTER,
+                selectedStep,
+              )
+            }
             className="flex items-center gap-2"
           >
             <ClipboardPlus className="w-4 h-4"></ClipboardPlus>{' '}
-            {t('Paste After Last Step')}
+            {selectedStep
+              ? t('Paste after selection')
+              : t('Paste after last step')}
           </ContextMenuItem>
         )}
         {showPasteAsFirstLoopAction && (
           <ContextMenuItem
             disabled={disabledPaste}
+            onClick={() =>
+              onPaste(
+                actionToPaste as Action,
+                StepLocationRelativeToParent.INSIDE_LOOP,
+                selectedStep,
+              )
+            }
+            className="flex items-center gap-2"
+          >
+            <ClipboardPaste className="w-4 h-4"></ClipboardPaste>
+            {t('Paste inside Loop')}
+          </ContextMenuItem>
+        )}
+        {showPasteInConditionBranch && (
+          <ContextMenuItem
+            disabled={disabledPaste}
+            onClick={() =>
+              onPaste(
+                actionToPaste as Action,
+                StepLocationRelativeToParent.INSIDE_TRUE_BRANCH,
+                selectedStep,
+              )
+            }
+            className="flex items-center gap-2"
+          >
+            <ClipboardPaste className="w-4 h-4"></ClipboardPaste>
+            {t('Paste inside first branch')}
+          </ContextMenuItem>
+        )}
+        {showPasteInSplitBranch && (
+          <ContextMenuItem
+            disabled={disabledPaste}
             onClick={() => {
-              // https://linear.app/openops/issue/OPS-854/add-paste-logic
+              const branchNodeId = firstSelectedStep.settings.options[0].id;
+              return onPaste(
+                actionToPaste as Action,
+                StepLocationRelativeToParent.INSIDE_SPLIT,
+                selectedStep,
+                branchNodeId,
+              );
             }}
             className="flex items-center gap-2"
           >
-            <ClipboardPaste className="w-4 h-4"></ClipboardPaste>{' '}
-            {t('Paste Inside Loop')}
+            <ClipboardPaste className="w-4 h-4"></ClipboardPaste>
+            {t('Paste inside default branch')}
           </ContextMenuItem>
         )}
         {showPasteAfterCurrentStep && (
           <ContextMenuItem
             disabled={disabledPaste}
-            onClick={() => {
-              // https://linear.app/openops/issue/OPS-854/add-paste-logic
-            }}
+            onClick={() =>
+              onPaste(
+                actionToPaste as Action,
+                StepLocationRelativeToParent.AFTER,
+                selectedStep,
+              )
+            }
             className="flex items-center gap-2"
           >
-            <ClipboardPlus className="w-4 h-4"></ClipboardPlus>{' '}
+            <ClipboardPlus className="w-4 h-4"></ClipboardPlus>
             {t('Paste After')}
           </ContextMenuItem>
         )}
