@@ -1,12 +1,5 @@
 import { Action } from '@openops/shared';
-import {
-  createContext,
-  ReactNode,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import { createContext, ReactNode, useContext, useMemo, useState } from 'react';
 
 type ClipboardContextState = {
   actionToPaste: Action | null;
@@ -58,10 +51,6 @@ export const ClipboardContextProvider = ({
     }),
     [actionToPaste],
   );
-
-  useEffect(() => {
-    fetchClipboardOperations();
-  }, []);
 
   return (
     <ClipboardContext.Provider value={contextValue}>

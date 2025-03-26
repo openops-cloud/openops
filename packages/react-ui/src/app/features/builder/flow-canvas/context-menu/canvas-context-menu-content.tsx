@@ -17,8 +17,8 @@ import {
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { useBuilderStateContext } from '../../builder-hooks';
-import { useSelection } from '../../hooks/selection';
 import { usePaste } from '../../hooks/use-paste';
+import { useSelection } from '../../hooks/use-selection';
 import { CanvasShortcuts, ShortcutWrapper } from './canvas-shortcuts';
 import { CanvasContextMenuProps } from './context-menu-wrapper';
 

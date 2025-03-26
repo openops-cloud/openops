@@ -7,8 +7,8 @@ import {
   isNil,
   StepLocationRelativeToParent,
 } from '@openops/shared';
-import { useSelection } from '../../hooks/selection';
 import { usePaste } from '../../hooks/use-paste';
+import { useSelection } from '../../hooks/use-selection';
 import { useKeyboardShortcut } from './use-keyboard-shortcut';
 
 const operationKeyboardKeyCombinationMap = {
