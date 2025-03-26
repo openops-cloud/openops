@@ -1,5 +1,5 @@
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
-import { usePasteActionsInClipboard } from '@openops/components/ui';
+import { useClipboardContext } from '@openops/components/ui';
 import {
   Action,
   ActionType,
@@ -23,22 +23,12 @@ const useKeyboardPasteShortcut = () => {
     flagsHooks.useFlag<boolean>(FlagId.COPY_PASTE_ACTIONS_ENABLED).data ||
     false;
 
-  //   const isAction = flowHelper.isAction(data.step!.type);
-
-  const {
-    disabled: hasNoSelection,
-    selectedStep,
-    doSelectedNodesIncludeTrigger,
-    selectedNodes,
-    readonly,
-    firstSelectedNode,
-    getStepDetails,
-  } = useSelection();
+  const { selectedStep, selectedNodes, firstSelectedNode, getStepDetails } =
+    useSelection();
 
   const { onPaste } = usePaste();
-  const { actionToPaste } = usePasteActionsInClipboard();
+  const { actionToPaste } = useClipboardContext();
   const disabledPaste = isNil(actionToPaste);
-  console.log('disabledPaste', disabledPaste);
   const canPerformOperation = () =>
     showCopyPaste && !disabledPaste && selectedNodes.length <= 1;
 
@@ -47,40 +37,35 @@ const useKeyboardPasteShortcut = () => {
     const effectiveSingleSelectedNode =
       firstSelectedNode || selectedStepDetails;
 
-    if (effectiveSingleSelectedNode?.type === ActionType.LOOP_ON_ITEMS) {
-      onPaste(
-        actionToPaste as Action,
-        StepLocationRelativeToParent.INSIDE_LOOP,
-        effectiveSingleSelectedNode.name,
-      );
-      console.warn('onPaste inside loop');
+    const pasteMapping: Partial<
+      Record<ActionType, StepLocationRelativeToParent>
+    > = {
+      [ActionType.LOOP_ON_ITEMS]: StepLocationRelativeToParent.INSIDE_LOOP,
+      [ActionType.BRANCH]: StepLocationRelativeToParent.INSIDE_TRUE_BRANCH,
+      [ActionType.SPLIT]: StepLocationRelativeToParent.INSIDE_SPLIT,
+    };
+
+    const location =
+      effectiveSingleSelectedNode &&
+      effectiveSingleSelectedNode.type in pasteMapping
+        ? pasteMapping[effectiveSingleSelectedNode.type as ActionType]
+        : StepLocationRelativeToParent.AFTER;
+
+    if (!location) {
+      return;
     }
 
-    //paste after, piece is selected paste the data right after the step.
-    //   onPaste(
-    //     actionToPaste as Action,
-    //     StepLocationRelativeToParent.AFTER,
-    //     selectedStep,
-    //   );
-    //paste inside loop
-    //   onPaste(
-    //     actionToPaste as Action,
-    //     StepLocationRelativeToParent.INSIDE_LOOP,
-    //     data.step.name,
-    //   );
-    //paste inside true branch
-    //   onPaste(
-    //     actionToPaste as Action,
-    //     StepLocationRelativeToParent.INSIDE_TRUE_BRANCH,
-    //     data.step.name,
-    //   );
-    //paste inside default branch
-    //   onPaste(
-    //     actionToPaste as Action,
-    //     StepLocationRelativeToParent.INSIDE_SPLIT,
-    //     data.step.name,
-    //     branchNodeId,
-    //   );
+    const additionalParam =
+      effectiveSingleSelectedNode?.type === ActionType.SPLIT
+        ? effectiveSingleSelectedNode.settings.options[0].id
+        : undefined;
+
+    onPaste(
+      actionToPaste as Action,
+      location,
+      effectiveSingleSelectedNode?.name || null,
+      additionalParam,
+    );
   };
 
   const operationMap = {
@@ -92,7 +77,6 @@ const useKeyboardPasteShortcut = () => {
     operationMap,
     keyCombinationMap: operationKeyboardKeyCombinationMap,
     canPerformOperation,
-    containerId: 'flow-canvas-container',
   });
 };
 

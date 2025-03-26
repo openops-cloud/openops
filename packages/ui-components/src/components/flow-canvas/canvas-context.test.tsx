@@ -1,3 +1,4 @@
+import { FlowVersion } from '@openops/shared';
 import '@testing-library/jest-dom';
 import { render } from '@testing-library/react';
 import { useKeyPress } from '@xyflow/react';
@@ -26,6 +27,15 @@ jest.mock('lodash-es', () => ({
   cloneDeep: jest.fn(),
 }));
 
+jest.mock('./clipboard-context', () => ({
+  useClipboardContext: () => ({
+    actionToPaste: jest.fn(),
+    fetchClipboardOperations: () => jest.fn(),
+  }),
+}));
+
+const mockFlowVersion = {} as FlowVersion;
+
 // Test component to consume the context
 const TestComponent = () => {
   const { panningMode } = useCanvasContext();
@@ -46,6 +56,7 @@ describe('InteractiveContextProvider', () => {
       <InteractiveContextProvider
         selectedStep={'step_1'}
         clearSelectedStep={() => {}}
+        flowVersion={mockFlowVersion}
       >
         <TestComponent />
       </InteractiveContextProvider>,
@@ -61,6 +72,7 @@ describe('InteractiveContextProvider', () => {
       <InteractiveContextProvider
         selectedStep={'step_1'}
         clearSelectedStep={() => {}}
+        flowVersion={mockFlowVersion}
       >
         <TestComponent />
       </InteractiveContextProvider>,
@@ -76,6 +88,7 @@ describe('InteractiveContextProvider', () => {
       <InteractiveContextProvider
         selectedStep={'step_1'}
         clearSelectedStep={() => {}}
+        flowVersion={mockFlowVersion}
       >
         <TestComponent />
       </InteractiveContextProvider>,
@@ -91,6 +104,7 @@ describe('InteractiveContextProvider', () => {
       <InteractiveContextProvider
         selectedStep={'step_1'}
         clearSelectedStep={() => {}}
+        flowVersion={mockFlowVersion}
       >
         <TestComponent />
       </InteractiveContextProvider>,
@@ -116,6 +130,7 @@ describe('InteractiveContextProvider', () => {
       <InteractiveContextProvider
         selectedStep={'step_1'}
         clearSelectedStep={() => {}}
+        flowVersion={mockFlowVersion}
       >
         <ComponentWithSetter />
       </InteractiveContextProvider>,
@@ -131,6 +146,7 @@ describe('InteractiveContextProvider', () => {
       <InteractiveContextProvider
         selectedStep={'step_1'}
         clearSelectedStep={() => {}}
+        flowVersion={mockFlowVersion}
       >
         <TestComponent />
       </InteractiveContextProvider>,
@@ -146,6 +162,7 @@ describe('InteractiveContextProvider', () => {
       <InteractiveContextProvider
         selectedStep={'step_1'}
         clearSelectedStep={() => {}}
+        flowVersion={mockFlowVersion}
       >
         <TestComponent />
       </InteractiveContextProvider>,

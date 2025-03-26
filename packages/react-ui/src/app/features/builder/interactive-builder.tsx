@@ -10,7 +10,6 @@ import { BuilderHeader } from './builder-header/builder-header';
 import { DataSelector } from './data-selector';
 import { FlowBuilderCanvas } from './flow-canvas/flow-builder-canvas';
 import { FLOW_CANVAS_CONTAINER_ID } from './flow-version-undo-redo/constants';
-import { usePaste } from './hooks/use-paste';
 
 const InteractiveBuilder = ({
   selectedStep,

@@ -1,9 +1,4 @@
-import {
-  Action,
-  flowHelper,
-  FlowVersion,
-  StepLocationRelativeToParent,
-} from '@openops/shared';
+import { Action, flowHelper, FlowVersion } from '@openops/shared';
 import {
   OnSelectionChangeParams,
   useKeyPress,
@@ -22,7 +17,7 @@ import {
 } from 'react';
 import { usePrevious } from 'react-use';
 import { useDebounceCallback } from 'usehooks-ts';
-import { usePasteActionsInClipboard } from './clipboard';
+import { useClipboardContext } from './clipboard-context';
 import {
   COPY_DEBOUNCE_DELAY_MS,
   COPY_KEYS,
@@ -100,7 +95,7 @@ export const InteractiveContextProvider = ({
       : null;
   }, [flowCanvasContainerId]);
   const copyPressed = useKeyPress(COPY_KEYS, { target: canvas });
-  const { fetchClipboardOperations } = usePasteActionsInClipboard();
+  const { fetchClipboardOperations } = useClipboardContext();
 
   // clear multi-selection if we have a new selected step
   useEffect(() => {

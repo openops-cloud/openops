@@ -32,6 +32,8 @@ const isKeyCombinationPressed = (
   );
 };
 
+const CONTAINER_ID = 'flow-canvas-container';
+
 export function useKeyboardShortcut<T extends string>(params: {
   operationName: T;
   // Mapping from operation names to functions
@@ -40,15 +42,12 @@ export function useKeyboardShortcut<T extends string>(params: {
   keyCombinationMap: Record<T, KeyCombination[]>;
   // Function that returns whether the operation can be performed
   canPerformOperation: (operationName: T) => boolean;
-  // Optional container element ID within which the keyboard event should be processed
-  containerId?: string;
 }) {
   const {
     operationName,
     operationMap,
     keyCombinationMap,
     canPerformOperation,
-    containerId,
   } = params;
 
   // Memoize the key combinations for this operation.
@@ -64,12 +63,7 @@ export function useKeyboardShortcut<T extends string>(params: {
         return;
       }
 
-      // If a containerId is provided, restrict events to within that container or the body.
-      if (
-        containerId &&
-        target !== document.body &&
-        !target.closest(`#${containerId}`)
-      ) {
+      if (target !== document.body && !target.closest(`#${CONTAINER_ID}`)) {
         return;
       }
 
@@ -93,11 +87,5 @@ export function useKeyboardShortcut<T extends string>(params: {
 
     window.addEventListener('keydown', handleOperation);
     return () => window.removeEventListener('keydown', handleOperation);
-  }, [
-    combinations,
-    containerId,
-    operationMap,
-    operationName,
-    canPerformOperation,
-  ]);
+  }, [combinations, operationMap, operationName, canPerformOperation]);
 }

@@ -41,7 +41,6 @@ const useKeyboardHistoryShortcuts = (operationName: 'undo' | 'redo') => {
     operationMap,
     keyCombinationMap: operationKeyboardKeyCombinationMap,
     canPerformOperation,
-    containerId: 'flow-canvas-container',
   });
 };
 
