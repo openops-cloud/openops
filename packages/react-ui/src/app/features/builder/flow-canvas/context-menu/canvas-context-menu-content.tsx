@@ -30,16 +30,21 @@ export const CanvasContextMenuContent = ({
     flagsHooks.useFlag<boolean>(FlagId.COPY_PASTE_ACTIONS_ENABLED).data ||
     false;
 
+  const [flowVersion, readonly] = useBuilderStateContext((state) => [
+    state.flowVersion,
+    state.readonly,
+  ]);
+
   const { copySelectedArea, copyAction } = useCanvasContext();
 
-  const {
-    disabled,
-    selectedStep,
-    doSelectedNodesIncludeTrigger,
-    isSingleSelectedNode,
-    readonly,
-    firstSelectedNode,
-  } = useSelection();
+  const { selectedStep, selectedNodes, firstSelectedNode } = useSelection();
+
+  const disabled = selectedNodes.length === 0 && !selectedStep;
+  const isSingleSelectedNode = selectedNodes.length === 1;
+
+  const doSelectedNodesIncludeTrigger = selectedNodes.some(
+    (node: string) => node === flowVersion.trigger.name,
+  );
 
   const disabledPaste = isNil(actionToPaste);
   const showPasteAfterLastStep =
@@ -67,8 +72,6 @@ export const CanvasContextMenuContent = ({
     showCopyPaste &&
     !doSelectedNodesIncludeTrigger &&
     contextMenuType === ContextMenuType.STEP;
-
-  const [flowVersion] = useBuilderStateContext((state) => [state.flowVersion]);
 
   const { onPaste } = usePaste();
 

@@ -17,16 +17,10 @@ export const useSelection = () => {
       return acc;
     }, [] as string[]);
 
-  const [flowVersion, readonly, selectedStep] = useBuilderStateContext(
-    (state) => [state.flowVersion, state.readonly, state.selectedStep],
-  );
-
-  const disabled = selectedNodes.length === 0 && !selectedStep;
-  const isSingleSelectedNode = selectedNodes.length === 1;
-
-  const doSelectedNodesIncludeTrigger = selectedNodes.some(
-    (node: string) => node === flowVersion.trigger.name,
-  );
+  const [flowVersion, selectedStep] = useBuilderStateContext((state) => [
+    state.flowVersion,
+    state.selectedStep,
+  ]);
 
   const firstSelectedNode = flowHelper.getStep(flowVersion, selectedNodes[0]);
   const getStepDetails = (stepName: string | null) => {
@@ -35,12 +29,8 @@ export const useSelection = () => {
   };
 
   return {
-    disabled,
     selectedStep,
-    readonly,
     selectedNodes,
-    isSingleSelectedNode,
-    doSelectedNodesIncludeTrigger,
     firstSelectedNode,
     getStepDetails,
   };
