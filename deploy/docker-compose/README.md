@@ -30,4 +30,4 @@ To use the Google Cloud CLI block, you need to create a connection to Google Clo
 However, it is possible to share your local session with the platform for local applications.
 To do this, you need to set two environment variables:
 - `OPS_ENABLE_HOST_SESSION=true`: enables sharing of the host session with the platform container.
-- `CLOUDSDK_CONFIG=/root/.config/gcloud`: defines the path to the host machine's Google Cloud configuration folder that will be shared with the platform container
+- `HOST_CLOUDSDK_CONFIG=/root/.config/gcloud`: defines the path to the host machine's Google Cloud configuration folder that will be shared with the platform container

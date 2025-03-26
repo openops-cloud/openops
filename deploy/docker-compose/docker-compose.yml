@@ -42,7 +42,7 @@ services:
       - openops-app
     volumes:
       - ${HOST_AZURE_CONFIG_DIR:-openops_azure_cli_data}:/tmp/azure
-      - ${HOST_GCLOUD_CONFIG_DIR:-openops_gcloud_cli_data}:/tmp/gcloud
+      - ${HOST_CLOUDSDK_CONFIG:-openops_gcloud_cli_data}:/tmp/gcloud
   openops-tables:
     image: public.ecr.aws/openops/openops-tables:0.1.8
     restart: unless-stopped
