@@ -45,7 +45,7 @@ async function setSerializedObject<T>(
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function getOrAdd<T, Args extends any[]>(
   key: string,
-  fn: (...args: Args) => Promise<T>,
+  createCallback: (...args: Args) => Promise<T>,
   args: Args,
   expireInSeconds?: number,
 ): Promise<T> {
@@ -63,7 +63,7 @@ async function getOrAdd<T, Args extends any[]>(
       return value;
     }
 
-    const result = await fn(...args);
+    const result = await createCallback(...args);
     await setSerializedObject(key, result, expireInSeconds);
     return result;
   } finally {
