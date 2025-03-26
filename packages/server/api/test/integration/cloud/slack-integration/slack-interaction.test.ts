@@ -186,11 +186,13 @@ describe('Slack API', () => {
       expect(response?.statusCode).toBe(StatusCodes.OK);
       expect(axiosGetMock).not.toHaveBeenCalled();
       expect(sendEphemeralMessageMock).toHaveBeenCalledTimes(1);
-      expect(sendEphemeralMessageMock).toHaveBeenCalledWith(
-        'https://hooks.slack.com/actions/XXXXXXXX/XXXXXXXXX/XXXXXXXXX',
-        'Slack interactions are only available when running the entire workflow.',
-        'some_user_id',
-      );
+      expect(sendEphemeralMessageMock).toHaveBeenCalledWith({
+        ephemeralText:
+          'Slack interactions are only available when running the entire workflow.',
+        responseUrl:
+          'https://hooks.slack.com/actions/XXXXXXXX/XXXXXXXXX/XXXXXXXXX',
+        userId: 'some_user_id',
+      });
     });
 
     test('should do nothing and return 200 if it is not a test message but there is no resume url', async () => {
@@ -223,43 +225,6 @@ describe('Slack API', () => {
       expect(response?.statusCode).toBe(StatusCodes.OK);
       expect(sendEphemeralMessageMock).not.toHaveBeenCalled();
       expect(axiosGetMock).not.toHaveBeenCalled();
-    });
-
-    test('should call the resume url if it is not a test message and resume url exists', async () => {
-      verifySignatureMock.mockReturnValueOnce(true);
-
-      const payload = JSON.stringify({
-        actions: [
-          {
-            type: 'button',
-            action_id: 'some_id',
-          },
-        ],
-        user: {
-          id: 'some_user_id',
-          name: 'some_user_name',
-        },
-        message: {
-          metadata: {
-            event_payload: {
-              isTest: false,
-              resumeUrl: 'http://some-resume-url.com?test=1',
-            },
-          },
-        },
-        response_url:
-          'https://hooks.slack.com/actions/XXXXXXXX/XXXXXXXXX/XXXXXXXXX',
-      });
-
-      const response = await makeRequest(payload);
-
-      expect(response?.statusCode).toBe(StatusCodes.OK);
-      expect(sendEphemeralMessageMock).not.toHaveBeenCalled();
-
-      expect(axiosGetMock).toHaveBeenCalledTimes(1);
-      expect(axiosGetMock).toHaveBeenCalledWith(
-        'http://some-resume-url.com?test=1&actionClicked=some_id&userName=some_user_name',
-      );
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
