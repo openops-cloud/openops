@@ -180,7 +180,10 @@ export const InteractiveContextProvider = ({
       return;
     }
 
-    handleCopy(stepDetails as Action, 1);
+    const stepToBeCopied = cloneDeep(stepDetails);
+    stepToBeCopied.nextAction = undefined;
+
+    handleCopy(stepToBeCopied as Action, 1);
   }, COPY_DEBOUNCE_DELAY_MS);
 
   const copySelectedArea = useDebounceCallback(() => {
