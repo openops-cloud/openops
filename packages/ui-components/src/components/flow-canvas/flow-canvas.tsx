@@ -12,7 +12,7 @@ import React, { ReactNode, useCallback, useRef, useState } from 'react';
 import { useEffectOnce } from 'react-use';
 import { Edge, Graph, WorkflowNode } from '../../lib/flow-canvas-utils';
 import { useCanvasContext } from './canvas-context';
-import { usePasteActionsInClipboard } from './clipboard';
+import { useClipboardContext } from './clipboard-context';
 import {
   InitialZoom,
   MAX_ZOOM,
@@ -62,8 +62,7 @@ const FlowCanvas = React.memo(
     const [contextMenuType, setContextMenuType] = useState<ContextMenuType>(
       ContextMenuType.CANVAS,
     );
-    const { actionToPaste, fetchClipboardOperations } =
-      usePasteActionsInClipboard();
+    const { actionToPaste, fetchClipboardOperations } = useClipboardContext();
     useResizeCanvas(containerRef);
 
     useEffectOnce(() => {

@@ -9,7 +9,7 @@ import {
   toast,
   UNSAVED_CHANGES_TOAST,
   useCanvasContext,
-  usePasteActionsInClipboard,
+  useClipboardContext,
   WorkflowNode,
 } from '@openops/components/ui';
 import {
@@ -58,8 +58,7 @@ const CanvasContextMenu = memo(
 
     const { copyAction } = useCanvasContext();
     const { onPaste } = usePaste();
-    const { actionToPaste, fetchClipboardOperations } =
-      usePasteActionsInClipboard();
+    const { actionToPaste, fetchClipboardOperations } = useClipboardContext();
 
     const [selectStepByName, removeStepSelection, setAllowCanvasPanning] =
       useBuilderStateContext((state) => [
