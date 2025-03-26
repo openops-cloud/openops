@@ -128,12 +128,10 @@ describe('updateRowAction', () => {
     });
     openopsCommonMock.getRowByPrimaryKeyValue.mockResolvedValue({ id: 1 });
 
-    cacheWrapperMock.getOrAdd
-      .mockReturnValueOnce(1)
-      .mockReturnValue([
-        { id: 1, primary: true, name: 'id' },
-        { id: 2, primary: false, name: 'field1' },
-      ]);
+    cacheWrapperMock.getOrAdd.mockReturnValueOnce(1).mockReturnValue([
+      { id: 1, primary: true, name: 'id' },
+      { id: 2, primary: false, name: 'field1' },
+    ]);
 
     openopsCommonMock.updateRow.mockResolvedValue('mock result');
     const context = createContext({
@@ -177,12 +175,10 @@ describe('updateRowAction', () => {
   });
 
   test('should create record if doesnt exist', async () => {
-    cacheWrapperMock.getOrAdd
-      .mockReturnValueOnce(1)
-      .mockReturnValue([
-        { id: 1, primary: true, name: 'id' },
-        { id: 2, primary: false, name: 'field1' },
-      ]);
+    cacheWrapperMock.getOrAdd.mockReturnValueOnce(1).mockReturnValue([
+      { id: 1, primary: true, name: 'id' },
+      { id: 2, primary: false, name: 'field1' },
+    ]);
     openopsCommonMock.getPrimaryKeyFieldFromFields.mockReturnValue({
       name: 'primary key field',
     });
@@ -270,12 +266,10 @@ describe('updateRowAction', () => {
   test.each([[[]], [{}]])(
     'should throw if the primary key is not a valid string',
     async (rowPrimaryKey: any) => {
-      cacheWrapperMock.getOrAdd
-        .mockReturnValueOnce(1)
-        .mockReturnValue([
-          { id: 1, primary: true, name: 'id' },
-          { id: 2, primary: false, name: 'field1' },
-        ]);
+      cacheWrapperMock.getOrAdd.mockReturnValueOnce(1).mockReturnValue([
+        { id: 1, primary: true, name: 'id' },
+        { id: 2, primary: false, name: 'field1' },
+      ]);
       openopsCommonMock.getPrimaryKeyFieldFromFields.mockReturnValue({
         name: 'primary key field',
       });
