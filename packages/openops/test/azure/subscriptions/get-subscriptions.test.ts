@@ -3,6 +3,7 @@ const systemMock = {
 };
 
 jest.mock('@openops/server-shared', () => ({
+  ...jest.requireActual('@openops/server-shared'),
   AppSystemProp: {
     AZURE_API_VERSION: 'AZURE_API_VERSION',
   },

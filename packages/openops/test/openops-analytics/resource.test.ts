@@ -16,16 +16,6 @@ jest.mock(
   () => requestHelpers,
 );
 
-jest.mock('@openops/server-shared', () => {
-  return {
-    logger: {
-      info: jest.fn(),
-      error: jest.fn(),
-      debug: jest.fn(),
-    },
-  };
-});
-
 import { tryGetResource } from '../../src/lib/openops-analytics/resource';
 
 describe('try get resource', () => {

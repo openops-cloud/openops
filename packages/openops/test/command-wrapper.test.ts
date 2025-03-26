@@ -9,16 +9,6 @@ jest.mock('node:child_process', () => {
   };
 });
 
-jest.mock('@openops/server-shared', () => {
-  return {
-    logger: {
-      info: jest.fn(),
-      error: jest.fn(),
-      debug: jest.fn(),
-    },
-  };
-});
-
 import { executeCommand, executeFile } from '../src/lib/command-wrapper';
 
 describe('Execute Command', () => {

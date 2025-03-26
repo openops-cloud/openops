@@ -8,7 +8,8 @@ const systemMock = {
 };
 
 jest.mock('@openops/server-shared', () => ({
-  SharedSystemProp: {
+  ...jest.requireActual('@openops/server-shared'),
+  AppSystemProp: {
     OPS_ENABLE_HOST_SESSION: 'OPS_ENABLE_HOST_SESSION',
   },
   system: systemMock,
