@@ -31,6 +31,7 @@ RUN <<-```
     dnf -y clean all && rm -rf /var/cache
 ```
 
+ENV CLOUDSDK_CONFIG="/tmp/gcloud"
 RUN <<-```
     set -ex
     dnf install -y gnupg unzip libstdc++ binutils python3

@@ -1,9 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { logger } from '@openops/server-shared';
+import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { promises as fs } from 'fs';
 import { CodeSandbox } from '../../core/code/code-sandbox-common';
 
-const ONE_HUNDRED_TWENTY_EIGHT_MEGABYTES = 128;
+const BLOCK_MEMORY_LIMIT_IN_MB = system.getNumberOrThrow(
+  AppSystemProp.CODE_BLOCK_MEMORY_LIMIT_IN_MB,
+);
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 // Check this https://github.com/laverdet/isolated-vm/issues/258#issuecomment-2134341086
@@ -22,7 +24,7 @@ export const v8IsolateCodeSandbox: CodeSandbox = {
   async runCodeModule({ codeFile, inputs }) {
     const ivm = getIvm();
     const isolate = new ivm.Isolate({
-      memoryLimit: ONE_HUNDRED_TWENTY_EIGHT_MEGABYTES,
+      memoryLimit: BLOCK_MEMORY_LIMIT_IN_MB,
     });
 
     try {
@@ -50,7 +52,7 @@ export const v8IsolateCodeSandbox: CodeSandbox = {
   async runScript({ script, scriptContext }) {
     const ivm = getIvm();
     const isolate = new ivm.Isolate({
-      memoryLimit: ONE_HUNDRED_TWENTY_EIGHT_MEGABYTES,
+      memoryLimit: BLOCK_MEMORY_LIMIT_IN_MB,
     });
 
     try {
