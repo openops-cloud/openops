@@ -4,12 +4,12 @@ import {
   Action,
   ActionType,
   FlagId,
-  isNil,
   StepLocationRelativeToParent,
 } from '@openops/shared';
-import { usePaste } from '../../hooks/use-paste';
-import { useSelection } from '../../hooks/use-selection';
-import { useKeyboardShortcut } from './use-keyboard-shortcut';
+import { isNil } from 'lodash-es';
+import { useKeyboardShortcut } from '../hooks/use-keyboard-shortcut';
+import { usePaste } from '../hooks/use-paste';
+import { useSelection } from '../hooks/use-selection';
 
 const operationKeyboardKeyCombinationMap = {
   paste: [

@@ -1,7 +1,7 @@
 import { useClipboardContext } from '@openops/components/ui';
 import { useEffect } from 'react';
+import { useKeyboardPasteShortcut } from '../flow-canvas/keyboard-paste-shortcut';
 import { usePageVisibility } from '../hooks/use-page-visibility';
-import { useKeyboardPasteShortcut } from './hooks/keyboard-paste-shortcut';
 
 const Paste = () => {
   // cannot be used in BuilderPage directly because it requires ReactFlowProvider

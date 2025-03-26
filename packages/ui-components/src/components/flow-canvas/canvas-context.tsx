@@ -251,7 +251,8 @@ export const InteractiveContextProvider = ({
     } else {
       copySelectedArea();
     }
-  }, [copyPressed, copySelectedArea, copySelectedStep, selectedStep]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [copyPressed, selectedStep]);
 
   const contextValue = useMemo(
     () => ({

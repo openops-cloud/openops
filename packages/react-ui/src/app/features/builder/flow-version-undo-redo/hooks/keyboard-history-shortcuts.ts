@@ -1,8 +1,8 @@
+import { useKeyboardShortcut } from '../../hooks/use-keyboard-shortcut';
 import {
   FlowVersionUndoRedo,
   useFlowVersionUndoRedo,
 } from './flow-version-undo-redo';
-import { useKeyboardShortcut } from './use-keyboard-shortcut';
 
 const operationKeyboardKeyCombinationMap = {
   undo: [
