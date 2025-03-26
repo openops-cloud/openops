@@ -12,3 +12,4 @@ curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo 
 gh codespace ports visibility 3000:public -c $CODESPACE_NAME
 gh codespace ports visibility 3001:public -c $CODESPACE_NAME
 gh codespace ports visibility 3005:public -c $CODESPACE_NAME
+gh codespace ports visibility 4200:public -c $CODESPACE_NAME
