@@ -9,10 +9,6 @@ jest.mock('../src/lib/common/recommendations', () => ({
   getAnodotRecommendations: getAnodotRecommendationsMock,
 }));
 
-jest.mock('@openops/common', () => ({
-  makeHttpRequest: jest.fn(),
-}));
-
 import { getRecommendationsCustomAction } from '../src/lib/get-recommendations-action-custom';
 
 describe('getRecommendationsCustomAction', () => {

@@ -1,4 +1,5 @@
 const commonMock = {
+  ...jest.requireActual('@openops/common'),
   getAzureSubscriptionsStaticDropdown: jest.fn(),
 };
 

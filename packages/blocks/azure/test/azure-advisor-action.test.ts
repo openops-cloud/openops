@@ -1,4 +1,5 @@
 const openOpsMock = {
+  ...jest.requireActual('@openops/common'),
   getUseHostSessionProperty: jest.fn().mockReturnValue({
     type: 'DYNAMIC',
     required: true,
@@ -6,14 +7,6 @@ const openOpsMock = {
 };
 
 jest.mock('@openops/common', () => openOpsMock);
-
-jest.mock('@openops/server-shared', () => ({
-  logger: {
-    info: jest.fn(),
-    error: jest.fn(),
-    debug: jest.fn(),
-  },
-}));
 
 const azureCliMock = {
   runCommand: jest.fn(),
