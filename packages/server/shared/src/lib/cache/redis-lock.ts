@@ -30,7 +30,7 @@ const generateRedlockRetryConfig = (
   };
 };
 
-const redLockClient = (() => {
+function redLockClient2(): RedLock | undefined {
   // TODO: Remove this check when we have the unit tests fixed.
   const shouldUseRedis =
     system.get<QueueMode>(AppSystemProp.QUEUE_MODE) === QueueMode.REDIS;
@@ -56,7 +56,9 @@ const redLockClient = (() => {
     retryJitter,
     automaticExtensionThreshold: 500,
   });
-})();
+}
+
+export const redLockClient = redLockClient2();
 
 export async function acquireRedisLock(
   key: string,
