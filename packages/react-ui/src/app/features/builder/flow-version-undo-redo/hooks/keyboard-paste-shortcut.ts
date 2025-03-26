@@ -23,19 +23,17 @@ const useKeyboardPasteShortcut = () => {
     flagsHooks.useFlag<boolean>(FlagId.COPY_PASTE_ACTIONS_ENABLED).data ||
     false;
 
-  const { selectedStep, selectedNodes, firstSelectedNode, getStepDetails } =
-    useSelection();
+  const { selectedStep, selectedNodes, getStepDetails } = useSelection();
 
   const { onPaste } = usePaste();
   const { actionToPaste } = useClipboardContext();
   const disabledPaste = isNil(actionToPaste);
+
   const canPerformOperation = () =>
-    showCopyPaste && !disabledPaste && selectedNodes.length <= 1;
+    showCopyPaste && !disabledPaste && selectedNodes.length === 0;
 
   const onPasteOperation = (): void => {
     const selectedStepDetails = getStepDetails(selectedStep);
-    const effectiveSingleSelectedNode =
-      firstSelectedNode || selectedStepDetails;
 
     const pasteMapping: Partial<
       Record<ActionType, StepLocationRelativeToParent>
@@ -46,9 +44,8 @@ const useKeyboardPasteShortcut = () => {
     };
 
     const location =
-      effectiveSingleSelectedNode &&
-      effectiveSingleSelectedNode.type in pasteMapping
-        ? pasteMapping[effectiveSingleSelectedNode.type as ActionType]
+      selectedStepDetails && selectedStepDetails.type in pasteMapping
+        ? pasteMapping[selectedStepDetails.type as ActionType]
         : StepLocationRelativeToParent.AFTER;
 
     if (!location) {
@@ -56,16 +53,11 @@ const useKeyboardPasteShortcut = () => {
     }
 
     const additionalParam =
-      effectiveSingleSelectedNode?.type === ActionType.SPLIT
-        ? effectiveSingleSelectedNode.settings.options[0].id
+      selectedStepDetails?.type === ActionType.SPLIT
+        ? selectedStepDetails.settings.options[0].id
         : undefined;
 
-    onPaste(
-      actionToPaste as Action,
-      location,
-      effectiveSingleSelectedNode?.name || null,
-      additionalParam,
-    );
+    onPaste(actionToPaste as Action, location, selectedStep, additionalParam);
   };
 
   const operationMap = {
