@@ -43,7 +43,7 @@ async function getSerializedObject<T>(key: string): Promise<T | null> {
 
 async function getOrAdd<T, Args extends unknown[]>(
   key: string,
-  fn: (...args: Args) => Promise<T>,
+  createCallback: (...args: Args) => Promise<T>,
   args: Args,
   expireInSeconds?: number,
 ): Promise<T> {
