@@ -18,7 +18,6 @@ const InteractiveBuilder = ({
   middlePanelSize,
   flowVersion,
 }: {
-  flowCanvasContainerId?: string;
   selectedStep: string | null;
   clearSelectedStep: () => void;
   middlePanelRef: MutableRefObject<null>;
@@ -28,8 +27,6 @@ const InteractiveBuilder = ({
   };
   flowVersion: FlowVersion;
 }) => {
-  // const { onPaste } = usePaste();
-
   return (
     <InteractiveContextProvider
       selectedStep={selectedStep}
