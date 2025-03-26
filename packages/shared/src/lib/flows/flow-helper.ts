@@ -279,6 +279,12 @@ function getAllStepsAtFirstLevel(step: Step): Step[] {
   return steps;
 }
 
+function clearStepTestData(step: Step): void {
+  if (step.settings.inputUiInfo) {
+    step.settings.inputUiInfo.currentSelectedData = undefined;
+    step.settings.inputUiInfo.lastTestDate = undefined;
+  }
+}
 function getAllChildSteps(
   action: LoopOnItemsAction | BranchAction | SplitAction,
 ): Action[] {
@@ -972,10 +978,7 @@ function duplicateStepCascading(
   const duplicatedStep = transferStep(action, (step: Step) => {
     step.displayName = `${step.displayName} Copy`;
     step.name = oldNameToNewName[step.name];
-    if (step.settings.inputUiInfo) {
-      step.settings.inputUiInfo.currentSelectedData = undefined;
-      step.settings.inputUiInfo.lastTestDate = undefined;
-    }
+    clearStepTestData(step);
     oldStepsNameToReplace.forEach((oldName) => {
       step.settings.input = applyFunctionToValuesSync(
         step.settings.input,
@@ -1178,4 +1181,5 @@ export const flowHelper = {
   doesActionHaveChildren,
   findPathToStep,
   truncateFlow,
+  clearStepTestData,
 };
