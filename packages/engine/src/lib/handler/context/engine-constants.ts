@@ -4,7 +4,8 @@ import {
   ExecuteStepOperation,
   ExecuteTriggerOperation,
   ExecutionType,
-  FlowVersionState, openOpsId, OpenOpsId,
+  FlowVersionState,
+  openOpsId,
   ProgressUpdateType,
   Project,
   ProjectId,
@@ -12,7 +13,6 @@ import {
   TriggerHookType,
 } from '@openops/shared';
 import { VariableService } from '../../variables/variable-service';
-import { nanoid } from 'nanoid';
 
 type RetryConstants = {
   maxAttempts: number;
