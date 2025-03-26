@@ -20,7 +20,5 @@ export * from './lib/package-manager';
 export * from './lib/promise-handler';
 export * from './lib/semaphore';
 export * from './lib/stop-handlers';
-
 export * from './lib/system';
-
 export * from './lib/webhook-secrets-util';

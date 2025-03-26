@@ -30,7 +30,14 @@ const generateRedlockRetryConfig = (
   };
 };
 
-function createRedLockClient(): RedLock {
+const redLockClient = (() => {
+  // TODO: Remove this check when we have the unit tests fixed.
+  const isRedisConfigured =
+    system.get<QueueMode>(AppSystemProp.QUEUE_MODE) === QueueMode.REDIS;
+  if (!isRedisConfigured) {
+    return;
+  }
+
   const redisClient = createRedisClient();
 
   const { retryDelay, retryJitter } =
@@ -45,12 +52,7 @@ function createRedLockClient(): RedLock {
     retryJitter,
     automaticExtensionThreshold: 500,
   });
-}
-
-const isRedisConfigured =
-  system.get<QueueMode>(AppSystemProp.QUEUE_MODE) === QueueMode.REDIS;
-
-let redLockClient = isRedisConfigured ? createRedLockClient() : undefined;
+})();
 
 export async function acquireRedisLock(
   key: string,
@@ -62,7 +64,7 @@ export async function acquireRedisLock(
     logger.debug(`Acquiring lock for key [${key}]`, { key, timeout });
 
     if (!redLockClient) {
-      redLockClient = createRedLockClient();
+      throw new Error('Redlock client is not created.');
     }
 
     const lock = await redLockClient.acquire([key], timeout, {
@@ -73,12 +75,7 @@ export async function acquireRedisLock(
     logger.info(`Acquired lock for key [${key}]`, { key, timeout });
     return lock;
   } catch (error) {
-    logger.error(`Failed to acquire lock for key [${key}]`, {
-      key,
-      timeout,
-      QUEUE_MODE1: system.get<QueueMode>(AppSystemProp.QUEUE_MODE),
-      QUEUE_MODE2: system.get(AppSystemProp.QUEUE_MODE),
-    });
+    logger.error(`Failed to acquire lock for key [${key}]`, { key, timeout });
     throw error;
   }
 }

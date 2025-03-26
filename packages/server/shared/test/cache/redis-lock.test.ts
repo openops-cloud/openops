@@ -1,5 +1,3 @@
-import { QueueMode } from '@openops/server-shared';
-
 const loggerMock = {
   debug: jest.fn(),
   info: jest.fn(),
@@ -15,7 +13,7 @@ jest.mock('../../src/lib/system/system', () => ({
     MEMORY: 'MEMORY',
   },
   system: {
-    get: jest.fn().mockReturnValue(QueueMode.REDIS) as unknown as QueueMode,
+    get: jest.fn().mockReturnValue('REDIS'),
   },
 }));
 
@@ -48,13 +46,7 @@ describe('acquireRedisLock', () => {
 
     const { acquireRedisLock } = await import('../../src/lib/cache/redis-lock');
 
-    const lock = acquireRedisLock(key, timeout);
-    const lock1 = acquireRedisLock(key, timeout);
-    const lock2 = acquireRedisLock(key, timeout);
-    const lock23 = acquireRedisLock(key, timeout);
-    const lock221 = acquireRedisLock(key, timeout);
-
-    await Promise.all([lock, lock1, lock2, lock23, lock221]);
+    const lock = await acquireRedisLock(key, timeout);
 
     expect(createRedisClientMock).toHaveBeenCalled();
     expect(mockAcquire).toHaveBeenCalledWith(
@@ -66,7 +58,7 @@ describe('acquireRedisLock', () => {
       }),
     );
 
-    // expect(lock).toBe(fakeLock);
+    expect(lock).toBe(fakeLock);
     expect(loggerMock.debug).toHaveBeenCalledWith(
       expect.stringContaining('Acquiring lock'),
       { key, timeout },
