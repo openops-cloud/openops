@@ -238,7 +238,7 @@ const BuilderPage = () => {
       )}
 
       <ReactFlowProvider>
-        <ClipboardContextProvider>
+        <ClipboardContextProvider copyPasteActionsEnabled={showCopyPaste}>
           <BuilderTreeViewProvider selectedId={selectedStep || undefined}>
             <ResizablePanelGroup
               direction="horizontal"
