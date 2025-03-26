@@ -7,6 +7,12 @@ jest.mock('../../src/lib/logger', () => ({
   logger: loggerMock,
 }));
 
+jest.mock('../../src/lib/system/system', () => ({
+  system: {
+    get: jest.fn().mockReturnValue('mockedSigningSecret'),
+  },
+}));
+
 const createRedisClientMock = jest.fn().mockReturnValue({});
 jest.mock('../../src/lib/cache/redis-connection', () => ({
   createRedisClient: createRedisClientMock,
