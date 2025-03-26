@@ -298,7 +298,7 @@ export const flagService = {
       },
       {
         id: FlagId.COPY_PASTE_ACTIONS_ENABLED,
-        value: true,
+        value: false,
         created,
         updated,
       },
