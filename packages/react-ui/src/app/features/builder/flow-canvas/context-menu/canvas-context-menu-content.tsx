@@ -1,5 +1,5 @@
 import { t } from 'i18next';
-import { ClipboardPaste, ClipboardPlus, Copy } from 'lucide-react';
+import { Copy } from 'lucide-react';
 
 import {
   ContextMenuItem,
@@ -121,7 +121,7 @@ export const CanvasContextMenuContent = ({
             }
             className="flex items-center gap-2"
           >
-            <ClipboardPlus className="w-4 h-4"></ClipboardPlus>{' '}
+            <Copy className="w-4 h-4"></Copy>
             {selectedStep
               ? t('Paste after selection')
               : t('Paste after last step')}
@@ -139,7 +139,7 @@ export const CanvasContextMenuContent = ({
             }
             className="flex items-center gap-2"
           >
-            <ClipboardPaste className="w-4 h-4"></ClipboardPaste>
+            <Copy className="w-4 h-4"></Copy>
             {t('Paste inside Loop')}
           </ContextMenuItem>
         )}
@@ -155,7 +155,7 @@ export const CanvasContextMenuContent = ({
             }
             className="flex items-center gap-2"
           >
-            <ClipboardPaste className="w-4 h-4"></ClipboardPaste>
+            <Copy className="w-4 h-4"></Copy>
             {t('Paste inside first branch')}
           </ContextMenuItem>
         )}
@@ -173,7 +173,7 @@ export const CanvasContextMenuContent = ({
             }}
             className="flex items-center gap-2"
           >
-            <ClipboardPaste className="w-4 h-4"></ClipboardPaste>
+            <Copy className="w-4 h-4"></Copy>
             {t('Paste inside default branch')}
           </ContextMenuItem>
         )}
@@ -189,7 +189,7 @@ export const CanvasContextMenuContent = ({
             }
             className="flex items-center gap-2"
           >
-            <ClipboardPlus className="w-4 h-4"></ClipboardPlus>
+            <Copy className="w-4 h-4"></Copy>
             {t('Paste After')}
           </ContextMenuItem>
         )}
