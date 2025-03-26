@@ -80,7 +80,7 @@ export async function acquireRedisLock(
     logger.error(`Failed to acquire lock for key [${key}]`, {
       key,
       timeout,
-      system.get<QueueMode>(AppSystemProp.QUEUE_MODE),
+      QUEUE_MODE: system.get<QueueMode>(AppSystemProp.QUEUE_MODE),
     });
     throw error;
   }
