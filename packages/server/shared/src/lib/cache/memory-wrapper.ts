@@ -1,4 +1,3 @@
-import { Mutex } from 'async-mutex';
 import LRUCache from 'lru-cache';
 
 const DEFAULT_EXPIRE_TIME = 60 * 60 * 1000; // 1 hour in milliseconds
@@ -8,8 +7,6 @@ const cache = new LRUCache<string, string>({
   ttl: DEFAULT_EXPIRE_TIME,
   updateAgeOnGet: true,
 });
-
-const lock = new Mutex();
 
 const setKey = async (
   key: string,
