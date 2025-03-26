@@ -50,25 +50,7 @@ async function getOrAdd<T, Args extends unknown[]>(
   args: Args,
   expireInSeconds?: number,
 ): Promise<T> {
-  const value = await getSerializedObject<T>(key);
-
-  if (value !== null) {
-    return value;
-  }
-
-  try {
-    await lock.acquire();
-    const value = await getSerializedObject<T>(key);
-    if (value !== null) {
-      return value;
-    }
-
-    const result = await createCallback(...args);
-    await setSerializedObject(key, result, expireInSeconds);
-    return result;
-  } finally {
-    lock.release();
-  }
+  throw new Error('Not implemented');
 }
 
 export const memoryWrapper = {
