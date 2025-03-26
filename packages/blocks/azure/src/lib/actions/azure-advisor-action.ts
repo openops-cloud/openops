@@ -1,8 +1,8 @@
 import { createAction, Property } from '@openops/blocks-framework';
-import { azureAuth } from '@openops/common';
+import { azureAuth, getUseHostSessionProperty } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { runCommand } from '../azure-cli';
-import { subDropdown, useHostSession } from '../common-properties';
+import { subDropdown } from '../common-properties';
 
 export const advisorAction = createAction({
   auth: azureAuth,
@@ -10,7 +10,7 @@ export const advisorAction = createAction({
   description: 'Get Azure Advisor Cost Recommendations',
   displayName: 'Get Advisor Cost Recommendations',
   props: {
-    useHostSession: useHostSession,
+    useHostSession: getUseHostSessionProperty('Azure', 'az login'),
     subscriptions: subDropdown,
     filterBySelection: Property.StaticDropdown<any>({
       displayName: 'Choose filter',

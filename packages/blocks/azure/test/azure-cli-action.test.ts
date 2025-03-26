@@ -8,6 +8,10 @@ const openOpsMock = {
   ...jest.requireActual('@openops/common'),
   tryParseJson: jest.fn((input) => input),
   handleCliError: jest.fn(),
+  getUseHostSessionProperty: jest.fn().mockReturnValue({
+    type: 'DYNAMIC',
+    required: true,
+  }),
 };
 
 jest.mock('@openops/common', () => openOpsMock);

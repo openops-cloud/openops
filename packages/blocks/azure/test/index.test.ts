@@ -1,3 +1,13 @@
+const openOpsMock = {
+  ...jest.requireActual('@openops/common'),
+  getUseHostSessionProperty: jest.fn().mockReturnValue({
+    type: 'DYNAMIC',
+    required: true,
+  }),
+};
+
+jest.mock('@openops/common', () => openOpsMock);
+
 import { azure } from '../src/index';
 
 describe('block declaration tests', () => {
