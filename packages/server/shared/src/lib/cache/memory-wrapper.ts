@@ -41,7 +41,17 @@ async function getSerializedObject<T>(key: string): Promise<T | null> {
   return result ? (JSON.parse(result) as T) : null;
 }
 
+async function getOrAdd<T, Args extends unknown[]>(
+  key: string,
+  fn: (...args: Args) => Promise<T>,
+  args: Args,
+  expireInSeconds?: number,
+): Promise<T> {
+  throw new Error('Not implemented');
+}
+
 export const memoryWrapper = {
+  getOrAdd,
   setKey,
   getKey,
   deleteKey,

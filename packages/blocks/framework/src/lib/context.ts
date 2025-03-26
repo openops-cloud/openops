@@ -135,6 +135,7 @@ export type BaseActionContext<
     executionCorrelationId: string;
     stop: StopHook;
     pause: PauseHook;
+    isTest: boolean;
   };
   generateResumeUrl: (
     params: {

@@ -116,6 +116,7 @@ const sendMessageAskingForAction = async (
     blocks: blocks,
     eventPayload: {
       domain: context.server.publicUrl,
+      isTest: context.run.isTest,
       resumeUrl: context.generateResumeUrl({
         queryParams: {
           executionCorrelationId: context.run.pauseId,

@@ -169,6 +169,7 @@ const executeAction: ActionHandler<BlockAction> = async ({
         executionCorrelationId: constants.executionCorrelationId ?? nanoid(),
         stop: createStopHook(hookResponse),
         pause: createPauseHook(hookResponse, executionState.pauseId),
+        isTest: constants.testSingleStepMode,
       },
       project: {
         id: constants.projectId,

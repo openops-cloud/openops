@@ -4,8 +4,9 @@ import {
   dryRunCheckBox,
   getAwsAccountsSingleSelectDropdown,
   getCredentialsForAccount,
+  handleCliError,
+  tryParseJson,
 } from '@openops/common';
-import { logger } from '@openops/server-shared';
 import { runCommand } from './aws-cli';
 
 export const awsCliAction = createAction({
@@ -35,20 +36,14 @@ export const awsCliAction = createAction({
         context.auth.defaultRegion,
         credential,
       );
-      try {
-        const jsonObject = JSON.parse(result);
-        return jsonObject;
-      } catch (error) {
-        return result;
-      }
+
+      return tryParseJson(result);
     } catch (error) {
-      logger.error('AWS CLI execution failed.', {
+      handleCliError({
+        provider: 'AWS',
         command: context.propsValue['commandToRun'],
-        error: error,
+        error,
       });
-      throw new Error(
-        'An error occurred while running an AWS CLI command: ' + error,
-      );
     }
   },
 });

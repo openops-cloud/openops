@@ -1,4 +1,5 @@
 import { BlockAuth, createAction, Property } from '@openops/blocks-framework';
+import { getItemsAsArray } from '../utils';
 
 export const toMapAction = createAction({
   auth: BlockAuth.None(),
@@ -6,7 +7,7 @@ export const toMapAction = createAction({
   description: 'Map items by a given key',
   displayName: 'Map list items',
   props: {
-    listItems: Property.Array({
+    listItems: Property.LongText({
       displayName: 'Items',
       description: 'A list of items to map',
       required: true,
@@ -19,19 +20,18 @@ export const toMapAction = createAction({
   },
 
   async run(context) {
-    const items = context.propsValue.listItems as unknown as any;
-    if (!Array.isArray(items)) {
-      if (items === '') {
-        return {};
-      }
-      throw new Error('Resources should be an array');
-    }
+    const items = getItemsAsArray(context.propsValue.listItems) as any[];
+
     return toMap(items, context.propsValue.keyName);
   },
 });
 
 function toMap(array: any[], prop: string) {
   return array.reduce((dict, item) => {
+    if (typeof item !== 'object') {
+      throw new Error(`'Items' must be an array of objects`);
+    }
+
     if (item[prop] !== undefined) {
       const key = item[prop];
       if (!dict[key]) {

@@ -137,13 +137,16 @@ const FlowVersionDetailsCard = React.memo(
       onSuccess: (populatedFlowVersion) => {
         setBuilderVersion(populatedFlowVersion);
         setReadonly(populatedFlowVersion.state === FlowVersionState.LOCKED);
-        setSearchParams((params) => {
-          params.set(
-            SEARCH_PARAMS.viewOnly,
-            String(populatedFlowVersion.state === FlowVersionState.LOCKED),
-          );
-          return params;
-        });
+        setSearchParams(
+          (params) => {
+            params.set(
+              SEARCH_PARAMS.viewOnly,
+              String(populatedFlowVersion.state === FlowVersionState.LOCKED),
+            );
+            return params;
+          },
+          { replace: true },
+        );
       },
       onError: (error) => {
         toast(INTERNAL_ERROR_TOAST);
@@ -166,10 +169,15 @@ const FlowVersionDetailsCard = React.memo(
           setBuilderVersion(populatedFlowVersion.version);
           setLeftSidebar(LeftSideBarType.NONE);
           setReadonly(false);
-          setSearchParams((params) => {
-            params.set(SEARCH_PARAMS.viewOnly, 'false');
-            return params;
-          });
+          setSearchParams(
+            (params) => {
+              params.set(SEARCH_PARAMS.viewOnly, 'false');
+              return params;
+            },
+            {
+              replace: true,
+            },
+          );
         },
         onError: (error) => {
           toast(INTERNAL_ERROR_TOAST);

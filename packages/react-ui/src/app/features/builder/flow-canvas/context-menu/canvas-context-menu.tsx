@@ -9,9 +9,16 @@ import {
   toast,
   UNSAVED_CHANGES_TOAST,
   useCanvasContext,
+  usePasteActionsInClipboard,
   WorkflowNode,
 } from '@openops/components/ui';
-import { Action, FlagId, FlowOperationType } from '@openops/shared';
+import {
+  Action,
+  ActionType,
+  FlagId,
+  FlowOperationType,
+  StepLocationRelativeToParent,
+} from '@openops/shared';
 
 import { t } from 'i18next';
 import {
@@ -19,12 +26,14 @@ import {
   Copy,
   CopyPlus,
   EllipsisVertical,
-  Trash,
+  Trash2,
 } from 'lucide-react';
 import { memo } from 'react';
 import { useBuilderStateContext } from '../../builder-hooks';
 import { useApplyOperationAndPushToHistory } from '../../flow-version-undo-redo/hooks/apply-operation-and-push-to-history';
+import { usePaste } from '../../hooks/use-paste';
 import { StepActionWrapper } from '../nodes/step-action-wrapper';
+import { CanvasShortcuts, ShortcutWrapper } from './canvas-shortcuts';
 
 type Props = {
   data: WorkflowNode['data'];
@@ -48,6 +57,9 @@ const CanvasContextMenu = memo(
     const applyOperationAndPushToHistory = useApplyOperationAndPushToHistory();
 
     const { copyAction } = useCanvasContext();
+    const { onPaste } = usePaste();
+    const { actionToPaste, fetchClipboardOperations } =
+      usePasteActionsInClipboard();
 
     const [selectStepByName, removeStepSelection, setAllowCanvasPanning] =
       useBuilderStateContext((state) => [
@@ -90,8 +102,12 @@ const CanvasContextMenu = memo(
     return (
       <DropdownMenu
         open={openStepActionsMenu}
-        onOpenChange={(open) => {
+        onOpenChange={async (open) => {
+          await fetchClipboardOperations();
           setOpenStepActionsMenu(open);
+          if (open && data.step) {
+            selectStepByName(data.step.name);
+          }
         }}
         modal={true}
       >
@@ -109,7 +125,11 @@ const CanvasContextMenu = memo(
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent
-          className="w-44 absolute"
+          className="w-auto min-w-[110px] ml-2"
+          side="right"
+          align="start"
+          sideOffset={4}
+          alignOffset={-2}
           onCloseAutoFocus={(e) => e.preventDefault()}
         >
           <DropdownMenuItem
@@ -126,7 +146,7 @@ const CanvasContextMenu = memo(
             }}
           >
             <StepActionWrapper>
-              <ArrowRightLeft className=" h-4 w-4 " />
+              <ArrowRightLeft className="h-4 w-4 " />
               <span>{t('Replace')} </span>
             </StepActionWrapper>
           </DropdownMenuItem>
@@ -141,8 +161,10 @@ const CanvasContextMenu = memo(
                 }}
               >
                 <StepActionWrapper>
-                  <Copy className="mr-2 h-4 w-4" />
-                  <span className="">{t('Copy')}</span>
+                  <ShortcutWrapper shortcut={CanvasShortcuts['Copy']}>
+                    <Copy className="h-4 w-4" />
+                    <span className="">{t('Copy')}</span>
+                  </ShortcutWrapper>
                 </StepActionWrapper>
               </DropdownMenuItem>
             </>
@@ -163,21 +185,95 @@ const CanvasContextMenu = memo(
             </DropdownMenuItem>
           )}
 
-          {isAction && showCopyPaste && (
-            <>
-              <DropdownMenuSeparator />
+          {isAction &&
+            showCopyPaste &&
+            actionToPaste &&
+            data.step?.type === ActionType.LOOP_ON_ITEMS && (
               <DropdownMenuItem
                 onSelect={(e) => {
                   e.preventDefault();
-                  // https://linear.app/openops/issue/OPS-854/add-paste-logic
+                  if (data.step) {
+                    onPaste(
+                      actionToPaste as Action,
+                      StepLocationRelativeToParent.INSIDE_LOOP,
+                      data.step.name,
+                    );
+                  }
                 }}
               >
                 <StepActionWrapper>
-                  <Copy className="mr-2 h-4 w-4" />
-                  <span className="">{t('Paste after')}</span>
+                  <Copy className="h-4 w-4" />
+                  <span className=""> {t('Paste inside Loop')}</span>
                 </StepActionWrapper>
               </DropdownMenuItem>
-            </>
+            )}
+
+          {isAction &&
+            showCopyPaste &&
+            actionToPaste &&
+            data.step?.type === ActionType.BRANCH && (
+              <DropdownMenuItem
+                onSelect={(e) => {
+                  e.preventDefault();
+                  if (data.step) {
+                    onPaste(
+                      actionToPaste as Action,
+                      StepLocationRelativeToParent.INSIDE_TRUE_BRANCH,
+                      data.step.name,
+                    );
+                  }
+                }}
+              >
+                <StepActionWrapper>
+                  <Copy className="h-4 w-4" />
+                  <span className=""> {t('Paste inside first branch')}</span>
+                </StepActionWrapper>
+              </DropdownMenuItem>
+            )}
+
+          {isAction &&
+            showCopyPaste &&
+            actionToPaste &&
+            data.step?.type === ActionType.SPLIT && (
+              <DropdownMenuItem
+                onSelect={(e) => {
+                  e.preventDefault();
+                  if (data.step) {
+                    const branchNodeId = data.step.settings.options[0].id;
+                    onPaste(
+                      actionToPaste as Action,
+                      StepLocationRelativeToParent.INSIDE_SPLIT,
+                      data.step.name,
+                      branchNodeId,
+                    );
+                  }
+                }}
+              >
+                <StepActionWrapper>
+                  <Copy className="h-4 w-4" />
+                  <span className="">{t('Paste inside default branch')}</span>
+                </StepActionWrapper>
+              </DropdownMenuItem>
+            )}
+
+          {isAction && showCopyPaste && actionToPaste && (
+            <DropdownMenuItem
+              onSelect={(e) => {
+                e.preventDefault();
+                if (data.step) {
+                  onPaste(
+                    actionToPaste as Action,
+                    StepLocationRelativeToParent.AFTER,
+                    data.step.name,
+                  );
+                }
+              }}
+            >
+              <StepActionWrapper>
+                <Copy className="h-4 w-4" />
+                <span className="">{t('Paste after')}</span>
+              </StepActionWrapper>
+            </DropdownMenuItem>
           )}
 
           {isAction && (
@@ -192,7 +288,7 @@ const CanvasContextMenu = memo(
                 }}
               >
                 <StepActionWrapper>
-                  <Trash className="mr-2 h-4 w-4 text-destructive" />
+                  <Trash2 className="h-4 w-4 text-destructive" />
                   <span className="text-destructive">{t('Delete')}</span>
                 </StepActionWrapper>
               </DropdownMenuItem>
