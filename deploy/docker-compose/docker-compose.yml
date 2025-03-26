@@ -42,6 +42,7 @@ services:
       - openops-app
     volumes:
       - ${HOST_AZURE_CONFIG_DIR:-openops_azure_cli_data}:/tmp/azure
+      - ${HOST_CLOUDSDK_CONFIG:-openops_gcloud_cli_data}:/tmp/gcloud
   openops-tables:
     image: public.ecr.aws/openops/openops-tables:0.1.8
     restart: unless-stopped
@@ -132,6 +133,7 @@ services:
       - 'redis_data:/data'
 volumes:
   openops_azure_cli_data:
+  openops_gcloud_cli_data:
   openops_tables_data:
   postgres_data:
   redis_data:
