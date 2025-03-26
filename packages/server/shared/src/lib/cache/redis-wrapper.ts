@@ -51,7 +51,7 @@ async function getOrSet<T, Args extends any[]>(
 ): Promise<T> {
   const value = await getSerializedObject<T>(key);
 
-  if (value) {
+  if (value !== null) {
     return value;
   }
 
@@ -59,7 +59,7 @@ async function getOrSet<T, Args extends any[]>(
   try {
     lock = await acquireRedisLock(`lock:${key}`);
     const value = await getSerializedObject<T>(key);
-    if (value) {
+    if (value !== null) {
       return value;
     }
 

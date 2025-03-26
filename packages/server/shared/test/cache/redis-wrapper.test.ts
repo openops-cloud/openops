@@ -1,6 +1,5 @@
+let keyCallCounts: Record<string, number> = {};
 jest.mock('../../src/lib/cache/redis-lock', () => {
-  const keyCallCounts: Record<string, number> = {};
-
   return {
     acquireRedisLock: jest.fn(async (key: string, ttl: number) => {
       keyCallCounts[key] = (keyCallCounts[key] || 0) + 1;
@@ -35,6 +34,7 @@ import { redisWrapper } from '../../src/lib/cache/redis-wrapper';
 
 describe('Redis Wrapper', () => {
   beforeEach(() => {
+    keyCallCounts = {};
     jest.clearAllMocks();
   });
 
@@ -147,58 +147,59 @@ describe('Redis Wrapper', () => {
   });
 
   describe('getOrSet', () => {
-    it('should call the set method only once within the cache period for each key', async () => {
-      const memoryStore: Record<string, string> = {};
-      mockRedisInstance.set = jest.fn((key: string, value: string) => {
-        memoryStore[key] = value;
-        return Promise.resolve('OK');
-      });
-      mockRedisInstance.get = jest.fn((key: string) => {
-        return Promise.resolve(memoryStore[key] ?? null);
-      });
+    it.each([true, false, 'table name 1', 3232, { test: 'test' }, [1, 2, 3]])(
+      'should call the set method only once within the cache period for each key',
+      async (expectedResult: unknown) => {
+        const memoryStore: Record<string, unknown> = {};
+        mockRedisInstance.set = jest.fn((key: string, value: unknown) => {
+          memoryStore[key] = value;
+          return Promise.resolve('OK');
+        });
+        mockRedisInstance.get = jest.fn((key: string) => {
+          return Promise.resolve(memoryStore[key] ?? null);
+        });
 
-      const expectedResult = 'table name 1';
+        const numCalls = 50;
+        const results = await Promise.all([
+          ...Array.from({ length: numCalls }, (_) =>
+            redisWrapper.getOrSet('cacheKey-1', halfSecondSleep, [
+              expectedResult,
+            ]),
+          ),
+          ...Array.from({ length: numCalls }, (_) =>
+            redisWrapper.getOrSet('cacheKey-2', halfSecondSleep, [
+              expectedResult,
+            ]),
+          ),
+        ]);
 
-      const numCalls = 50;
-      const results = await Promise.all([
-        ...Array.from({ length: numCalls }, (_) =>
-          redisWrapper.getOrSet('cacheKey-1', halfSecondSleep, [
-            expectedResult,
-          ]),
-        ),
-        ...Array.from({ length: numCalls }, (_) =>
-          redisWrapper.getOrSet('cacheKey-2', halfSecondSleep, [
-            expectedResult,
-          ]),
-        ),
-      ]);
+        for (const result of results) {
+          expect(result).toStrictEqual(expectedResult);
+        }
 
-      for (const result of results) {
-        expect(result).toBe(expectedResult);
-      }
-
-      expect(halfSecondSleep).toHaveBeenCalledTimes(2);
-      expect(mockRedisInstance.get).toHaveBeenCalledTimes(numCalls * 4);
-      expect(mockRedisInstance.set).toHaveBeenCalledTimes(2);
-      expect(mockRedisInstance.set).toHaveBeenNthCalledWith(
-        1,
-        'cacheKey-1',
-        '"table name 1"',
-        'EX',
-        60 * 60,
-      );
-      expect(mockRedisInstance.set).toHaveBeenNthCalledWith(
-        2,
-        'cacheKey-2',
-        '"table name 1"',
-        'EX',
-        60 * 60,
-      );
-    });
+        expect(halfSecondSleep).toHaveBeenCalledTimes(2);
+        expect(mockRedisInstance.get).toHaveBeenCalledTimes(numCalls * 4);
+        expect(mockRedisInstance.set).toHaveBeenCalledTimes(2);
+        expect(mockRedisInstance.set).toHaveBeenNthCalledWith(
+          1,
+          'cacheKey-1',
+          JSON.stringify(expectedResult),
+          'EX',
+          60 * 60,
+        );
+        expect(mockRedisInstance.set).toHaveBeenNthCalledWith(
+          2,
+          'cacheKey-2',
+          JSON.stringify(expectedResult),
+          'EX',
+          60 * 60,
+        );
+      },
+    );
   });
 });
 
-const halfSecondSleep = jest.fn(async (param: string) => {
+const halfSecondSleep = jest.fn(async (param: unknown) => {
   await new Promise((resolve) => setTimeout(resolve, 500));
   return param;
 });
