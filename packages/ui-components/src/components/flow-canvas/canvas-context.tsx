@@ -27,7 +27,6 @@ import {
   COPY_DEBOUNCE_DELAY_MS,
   COPY_KEYS,
   NODE_SELECTION_RECT_CLASS_NAME,
-  PASTE_KEYS,
   SHIFT_KEY,
   SPACE_KEY,
 } from './constants';
@@ -77,19 +76,12 @@ export const InteractiveContextProvider = ({
   selectedStep,
   clearSelectedStep,
   flowVersion,
-  onPaste,
   children,
 }: {
   flowCanvasContainerId?: string;
   selectedStep: string | null;
   clearSelectedStep: () => void;
   flowVersion: FlowVersion;
-  onPaste: (
-    actionToPaste: Action,
-    stepLocationRelativeToParent: StepLocationRelativeToParent,
-    selectedStep: string | null,
-    branchNodeId?: string,
-  ) => void;
   children: ReactNode;
 }) => {
   const [panningMode, setPanningMode] = useState<PanningMode>('grab');
@@ -108,8 +100,7 @@ export const InteractiveContextProvider = ({
       : null;
   }, [flowCanvasContainerId]);
   const copyPressed = useKeyPress(COPY_KEYS, { target: canvas });
-  const pastePressed = useKeyPress(PASTE_KEYS, { target: canvas });
-  const { actionToPaste } = usePasteActionsInClipboard();
+  const { fetchClipboardOperations } = usePasteActionsInClipboard();
 
   // clear multi-selection if we have a new selected step
   useEffect(() => {
@@ -233,6 +224,7 @@ export const InteractiveContextProvider = ({
           isCopy: true,
           itemsCounter: actionCounter,
         });
+        fetchClipboardOperations();
       })
       .catch(() => {
         copyPasteToast({
@@ -254,16 +246,6 @@ export const InteractiveContextProvider = ({
       copySelectedArea();
     }
   }, [copyPressed, copySelectedArea, copySelectedStep, selectedStep]);
-
-  useEffect(() => {
-    if (pastePressed) {
-      onPaste(
-        actionToPaste as Action,
-        StepLocationRelativeToParent.AFTER,
-        selectedStep,
-      );
-    }
-  }, [actionToPaste, onPaste, pastePressed, selectedStep]);
 
   const contextValue = useMemo(
     () => ({

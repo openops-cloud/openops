@@ -4,6 +4,7 @@ import {
   CanvasControls,
   InteractiveContextProvider,
 } from '@openops/components/ui';
+import { FlowVersion } from '@openops/shared';
 import { MutableRefObject } from 'react';
 import { BuilderHeader } from './builder-header/builder-header';
 import { DataSelector } from './data-selector';
@@ -16,6 +17,7 @@ const InteractiveBuilder = ({
   clearSelectedStep,
   middlePanelRef,
   middlePanelSize,
+  flowVersion,
 }: {
   flowCanvasContainerId?: string;
   selectedStep: string | null;
@@ -25,14 +27,15 @@ const InteractiveBuilder = ({
     width: number;
     height: number;
   };
+  flowVersion: FlowVersion;
 }) => {
-  const { onPaste } = usePaste();
+  // const { onPaste } = usePaste();
 
   return (
     <InteractiveContextProvider
       selectedStep={selectedStep}
       clearSelectedStep={clearSelectedStep}
-      onPaste={onPaste}
+      flowVersion={flowVersion}
     >
       <div ref={middlePanelRef} className="relative h-full w-full">
         <BuilderHeader />

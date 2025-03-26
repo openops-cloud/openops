@@ -5,7 +5,6 @@ import {
   ContextMenuItem,
   ContextMenuType,
   useCanvasContext,
-  WorkflowNode,
 } from '@openops/components/ui';
 import {
   Action,
@@ -17,8 +16,8 @@ import {
 } from '@openops/shared';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
-import { useReactFlow } from '@xyflow/react';
 import { useBuilderStateContext } from '../../builder-hooks';
+import { useSelection } from '../../hooks/selection';
 import { usePaste } from '../../hooks/use-paste';
 import { CanvasShortcuts, ShortcutWrapper } from './canvas-shortcuts';
 import { CanvasContextMenuProps } from './context-menu-wrapper';
@@ -31,39 +30,23 @@ export const CanvasContextMenuContent = ({
     flagsHooks.useFlag<boolean>(FlagId.COPY_PASTE_ACTIONS_ENABLED).data ||
     false;
 
-  const { getNodes } = useReactFlow();
-  const nodes = getNodes() as WorkflowNode[];
-
-  const selectedNodes = nodes
-    .filter((node) => node.selected)
-    .reduce((acc, node) => {
-      const name = node.data.step?.name;
-      if (name !== undefined) {
-        acc.push(name);
-      }
-      return acc;
-    }, [] as string[]);
-
-  const [flowVersion, readonly, selectedStep] = useBuilderStateContext(
-    (state) => [state.flowVersion, state.readonly, state.selectedStep],
-  );
-
   const { copySelectedArea, copyAction } = useCanvasContext();
 
-  const disabled = selectedNodes.length === 0 && !selectedStep;
-  const isSingleSelectedNode = selectedNodes.length === 1;
-
-  const doSelectedNodesIncludeTrigger = selectedNodes.some(
-    (node: string) => node === flowVersion.trigger.name,
-  );
+  const {
+    disabled,
+    selectedStep,
+    doSelectedNodesIncludeTrigger,
+    isSingleSelectedNode,
+    readonly,
+    firstSelectedNode,
+  } = useSelection();
 
   const disabledPaste = isNil(actionToPaste);
-  const firstSelectedStep = flowHelper.getStep(flowVersion, selectedNodes[0]);
   const showPasteAfterLastStep =
     !readonly && contextMenuType === ContextMenuType.CANVAS;
   const showPasteAsFirstLoopAction =
     isSingleSelectedNode &&
-    firstSelectedStep?.type === ActionType.LOOP_ON_ITEMS &&
+    firstSelectedNode?.type === ActionType.LOOP_ON_ITEMS &&
     !readonly &&
     contextMenuType === ContextMenuType.STEP;
 
@@ -74,16 +57,18 @@ export const CanvasContextMenuContent = ({
 
   const showPasteInConditionBranch =
     contextMenuType === ContextMenuType.STEP &&
-    firstSelectedStep?.type === ActionType.BRANCH;
+    firstSelectedNode?.type === ActionType.BRANCH;
 
   const showPasteInSplitBranch =
     contextMenuType === ContextMenuType.STEP &&
-    firstSelectedStep?.type === ActionType.SPLIT;
+    firstSelectedNode?.type === ActionType.SPLIT;
 
   const showCopy =
     showCopyPaste &&
     !doSelectedNodesIncludeTrigger &&
     contextMenuType === ContextMenuType.STEP;
+
+  const [flowVersion] = useBuilderStateContext((state) => [state.flowVersion]);
 
   const { onPaste } = usePaste();
 
@@ -163,7 +148,7 @@ export const CanvasContextMenuContent = ({
           <ContextMenuItem
             disabled={disabledPaste}
             onClick={() => {
-              const branchNodeId = firstSelectedStep.settings.options[0].id;
+              const branchNodeId = firstSelectedNode.settings.options[0].id;
               return onPaste(
                 actionToPaste as Action,
                 StepLocationRelativeToParent.INSIDE_SPLIT,

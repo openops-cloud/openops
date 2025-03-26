@@ -27,13 +27,11 @@ import { useSocket } from '@/app/common/providers/socket-provider';
 import { FLOW_CANVAS_Y_OFFESET } from '@/app/constants/flow-canvas';
 import { SEARCH_PARAMS } from '@/app/constants/search-params';
 import {
-  Action,
   ActionType,
   BlockTrigger,
   FlagId,
   flowHelper,
   isNil,
-  StepLocationRelativeToParent,
   TriggerType,
   WebsocketClientEvent,
 } from '@openops/shared';
@@ -53,6 +51,7 @@ import { BuilderHeader } from './builder-header/builder-header';
 import { CopilotSidebar } from './copilot';
 import { FlowBuilderCanvas } from './flow-canvas/flow-builder-canvas';
 import { FLOW_CANVAS_CONTAINER_ID } from './flow-version-undo-redo/constants';
+import { Paste } from './flow-version-undo-redo/paste';
 import { UndoRedo } from './flow-version-undo-redo/undo-redo';
 import { FlowVersionsList } from './flow-versions';
 import { InteractiveBuilder } from './interactive-builder';
@@ -302,6 +301,7 @@ const BuilderPage = () => {
                   clearSelectedStep={clearSelectedStep}
                   middlePanelRef={middlePanelRef}
                   middlePanelSize={middlePanelSize}
+                  flowVersion={flowVersion}
                 />
               )}
             </ResizablePanel>
@@ -341,6 +341,7 @@ const BuilderPage = () => {
           </ResizablePanelGroup>
         </BuilderTreeViewProvider>
         <UndoRedo />
+        <Paste />
       </ReactFlowProvider>
     </div>
   );
