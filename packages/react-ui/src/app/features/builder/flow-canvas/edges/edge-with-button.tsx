@@ -10,6 +10,10 @@ import {
   getPositionRelativeToParent,
   getSplitEdgeData,
   LINE_WIDTH,
+  PLUS_CONTEXT_MENU_ATTRIBUTE,
+  PLUS_CONTEXT_MENU_BRANCH_NODE_ID_ATTRIBUTE,
+  PLUS_CONTEXT_MENU_PARENT_ATTRIBUTE,
+  PLUS_CONTEXT_MENU_STEP_LOCATION_ATTRIBUTE,
 } from '@openops/components/ui';
 import {
   FlowOperationType,
@@ -72,6 +76,8 @@ const EdgeWithButton = React.memo((props: EdgePath) => {
     },
   });
 
+  const branchNodeId = getBranchNodeId(props.target, nodes);
+
   return (
     <>
       <BaseEdge
@@ -106,7 +112,7 @@ const EdgeWithButton = React.memo((props: EdgePath) => {
               parentStep: props.data.parentStep!,
               stepLocationRelativeToParent:
                 props.data.stepLocationRelativeToParent!,
-              branchNodeId: getBranchNodeId(props.target, nodes),
+              branchNodeId,
             },
           }}
           open={actionMenuOpen}
@@ -124,6 +130,15 @@ const EdgeWithButton = React.memo((props: EdgePath) => {
             className={cn('rounded-full transition-all', {
               'shadow-add-button': isStepInsideDropzone,
             })}
+            {...{
+              [`data-${PLUS_CONTEXT_MENU_ATTRIBUTE}`]: 'plus-button',
+              [`data-${PLUS_CONTEXT_MENU_PARENT_ATTRIBUTE}`]:
+                props.data.parentStep!,
+              [`data-${PLUS_CONTEXT_MENU_STEP_LOCATION_ATTRIBUTE}`]:
+                props.data.stepLocationRelativeToParent,
+              [`data-${PLUS_CONTEXT_MENU_BRANCH_NODE_ID_ATTRIBUTE}`]:
+                branchNodeId,
+            }}
           >
             <FlowAddButton
               ref={setNodeRef}

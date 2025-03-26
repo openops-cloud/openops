@@ -1,4 +1,4 @@
-import { Action } from '@openops/shared';
+import { Action, StepLocationRelativeToParent } from '@openops/shared';
 import {
   Background,
   EdgeTypes,
@@ -18,6 +18,10 @@ import {
   MAX_ZOOM,
   MIN_ZOOM,
   NODE_SELECTION_RECT_CLASS_NAME,
+  PLUS_CONTEXT_MENU_ATTRIBUTE,
+  PLUS_CONTEXT_MENU_BRANCH_NODE_ID_ATTRIBUTE,
+  PLUS_CONTEXT_MENU_PARENT_ATTRIBUTE,
+  PLUS_CONTEXT_MENU_STEP_LOCATION_ATTRIBUTE,
   SHIFT_KEY,
   STEP_CONTEXT_MENU_ATTRIBUTE,
 } from './constants';
@@ -84,8 +88,14 @@ const FlowCanvas = React.memo(
       [topOffset],
     );
 
-    const { readonly, panningMode, onSelectionChange, onSelectionEnd } =
-      useCanvasContext();
+    const {
+      readonly,
+      panningMode,
+      onSelectionChange,
+      onSelectionEnd,
+      pastePlusButton,
+      setPastePlusButton,
+    } = useCanvasContext();
     const inGrabPanningMode = panningMode === 'grab';
 
     const panOnDrag = getPanOnDrag(allowCanvasPanning, inGrabPanningMode);
@@ -101,6 +111,19 @@ const FlowCanvas = React.memo(
           `data-${STEP_CONTEXT_MENU_ATTRIBUTE}`,
         );
 
+        const plusElement = ev.target.closest(
+          `[data-${PLUS_CONTEXT_MENU_ATTRIBUTE}]`,
+        );
+        const plusParentStep = plusElement?.getAttribute(
+          `data-${PLUS_CONTEXT_MENU_PARENT_ATTRIBUTE}`,
+        );
+        const plusStepLocation = plusElement?.getAttribute(
+          `data-${PLUS_CONTEXT_MENU_STEP_LOCATION_ATTRIBUTE}`,
+        );
+        const plusBranchNodeId = plusElement?.getAttribute(
+          `data-${PLUS_CONTEXT_MENU_BRANCH_NODE_ID_ATTRIBUTE}`,
+        );
+
         if (stepName && typeof selectStepByName === 'function') {
           selectStepByName(stepName);
           const reactFlowState = storeApi.getState();
@@ -110,6 +133,16 @@ const FlowCanvas = React.memo(
               selected: node.id === stepName,
             })),
           );
+        }
+
+        if (plusElement && plusParentStep) {
+          setPastePlusButton({
+            parentStep: plusParentStep,
+            plusStepLocation: plusStepLocation as StepLocationRelativeToParent,
+            branchNodeId: plusBranchNodeId as string | undefined,
+          });
+        } else if (pastePlusButton) {
+          setPastePlusButton(null);
         }
 
         const targetIsSelectionRect = ev.target.classList.contains(

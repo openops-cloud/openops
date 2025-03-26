@@ -1,4 +1,9 @@
-import { Action, flowHelper, FlowVersion } from '@openops/shared';
+import {
+  Action,
+  flowHelper,
+  FlowVersion,
+  StepLocationRelativeToParent,
+} from '@openops/shared';
 import {
   OnSelectionChangeParams,
   useKeyPress,
@@ -28,6 +33,11 @@ import {
 import { copyPasteToast } from './copy-paste-toast';
 
 export type PanningMode = 'grab' | 'pan';
+export type PlusButtonPostion = {
+  parentStep: string;
+  plusStepLocation: StepLocationRelativeToParent;
+  branchNodeId?: string;
+};
 
 type CanvasContextState = {
   panningMode: PanningMode;
@@ -37,6 +47,10 @@ type CanvasContextState = {
   copySelectedArea: () => void;
   copyAction: (action: Action) => void;
   readonly: boolean;
+  pastePlusButton: PlusButtonPostion | null;
+  setPastePlusButton: React.Dispatch<
+    React.SetStateAction<PlusButtonPostion | null>
+  >;
 };
 
 const CanvasContext = createContext<CanvasContextState | undefined>(undefined);
@@ -55,6 +69,8 @@ export const ReadonlyCanvasProvider = ({
       copySelectedArea: () => {},
       copyAction: () => {},
       readonly: true,
+      pastePlusButton: null,
+      setPastePlusButton: () => {},
     }),
     [],
   );
@@ -82,6 +98,8 @@ export const InteractiveContextProvider = ({
   const [panningMode, setPanningMode] = useState<PanningMode>('grab');
   const previousSelectedStep = usePrevious(selectedStep);
   const [selectedActions, setSelectedActions] = useState<Action[]>([]);
+  const [pastePlusButton, setPastePlusButton] =
+    useState<PlusButtonPostion | null>(null);
   const selectedFlowActionRef = useRef<Action | null>(null);
   const selectedNodeCounterRef = useRef<number>(0);
   const state = useStoreApi().getState();
@@ -262,6 +280,8 @@ export const InteractiveContextProvider = ({
       onSelectionEnd,
       copySelectedArea,
       copyAction,
+      pastePlusButton,
+      setPastePlusButton,
       readonly: false,
     }),
     [
@@ -270,6 +290,7 @@ export const InteractiveContextProvider = ({
       onSelectionEnd,
       copySelectedArea,
       copyAction,
+      pastePlusButton,
     ],
   );
   return (

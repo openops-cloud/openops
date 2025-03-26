@@ -35,7 +35,7 @@ export const CanvasContextMenuContent = ({
     state.readonly,
   ]);
 
-  const { copySelectedArea, copyAction } = useCanvasContext();
+  const { copySelectedArea, copyAction, pastePlusButton } = useCanvasContext();
 
   const { selectedStep, selectedNodes, firstSelectedNode } = useSelection();
 
@@ -97,7 +97,7 @@ export const CanvasContextMenuContent = ({
       )}
 
       <>
-        {showPasteAfterLastStep && (
+        {showPasteAfterLastStep && !pastePlusButton && (
           <ContextMenuItem
             disabled={disabledPaste}
             onClick={() =>
@@ -178,7 +178,24 @@ export const CanvasContextMenuContent = ({
             className="flex items-center gap-2"
           >
             <Copy className="w-4 h-4"></Copy>
-            {t('Paste After')}
+            {t('Paste after')}
+          </ContextMenuItem>
+        )}
+        {pastePlusButton && (
+          <ContextMenuItem
+            disabled={disabledPaste}
+            onClick={() =>
+              onPaste(
+                actionToPaste as Action,
+                pastePlusButton.plusStepLocation,
+                pastePlusButton.parentStep,
+                pastePlusButton.branchNodeId,
+              )
+            }
+            className="flex items-center gap-2"
+          >
+            <Copy className="w-4 h-4"></Copy>
+            {t('Paste here')}
           </ContextMenuItem>
         )}
       </>
