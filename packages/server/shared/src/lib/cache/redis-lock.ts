@@ -4,9 +4,9 @@ import { Lock } from '../memory-lock';
 import { AppSystemProp, system } from '../system';
 import { createRedisClient } from './redis-connection';
 
-// By default, the timeout is 30 seconds and the retry count is 35.
-// So, we are assuming we don't need a lock for more than 30 seconds.
+// By default, the timeout to wait to acquire a lock is 30 seconds
 const DEFAULT_TIMEOUT_MS = 30000;
+// So, we will try to acquire the lock 35 times during the timeout window before giving up
 const DEFAULT_RETRY_COUNT = 35;
 const DEFAULT_RETRY_DELAY = 700;
 const DEFAULT_JITTER = 300;

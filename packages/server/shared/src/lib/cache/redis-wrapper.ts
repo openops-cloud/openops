@@ -93,9 +93,9 @@ const getRedisClient = (): Redis => {
 };
 
 export const redisWrapper = {
-  getOrAdd,
   setKey,
   getKey,
+  getOrAdd,
   deleteKey,
   keyExists,
   setSerializedObject,
