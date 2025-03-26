@@ -28,7 +28,7 @@ export const updateRecordAction = createAction({
         'The primary key value of the row to update. If the row does not exist, a new row will be created.',
       required: true,
       refreshers: ['tableName'],
-      props: async ({ tableName, context }) => {
+      props: async ({ tableName }) => {
         if (!tableName) {
           return {};
         }
