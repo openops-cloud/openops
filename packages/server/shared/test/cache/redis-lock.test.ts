@@ -1,3 +1,5 @@
+import { QueueMode } from '@openops/server-shared';
+
 const loggerMock = {
   debug: jest.fn(),
   info: jest.fn(),
@@ -8,8 +10,12 @@ jest.mock('../../src/lib/logger', () => ({
 }));
 
 jest.mock('../../src/lib/system/system', () => ({
+  QueueMode: {
+    REDIS: 'REDIS',
+    MEMORY: 'MEMORY',
+  },
   system: {
-    get: jest.fn().mockReturnValue('mockedSigningSecret'),
+    get: jest.fn().mockReturnValue(QueueMode.REDIS) as unknown as QueueMode,
   },
 }));
 
@@ -43,6 +49,10 @@ describe('acquireRedisLock', () => {
     const { acquireRedisLock } = await import('../../src/lib/cache/redis-lock');
 
     const lock = await acquireRedisLock(key, timeout);
+    const lock1 = await acquireRedisLock(key, timeout);
+    const lock2 = await acquireRedisLock(key, timeout);
+    const lock23 = await acquireRedisLock(key, timeout);
+    const lock221 = await acquireRedisLock(key, timeout);
 
     expect(createRedisClientMock).toHaveBeenCalled();
     expect(mockAcquire).toHaveBeenCalledWith(
