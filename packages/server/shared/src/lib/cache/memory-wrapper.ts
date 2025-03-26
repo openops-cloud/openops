@@ -72,9 +72,9 @@ async function getOrAdd<T, Args extends unknown[]>(
 }
 
 export const memoryWrapper = {
-  getOrAdd,
   setKey,
   getKey,
+  getOrAdd,
   deleteKey,
   keyExists,
   setSerializedObject,

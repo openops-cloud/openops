@@ -17,6 +17,7 @@ import {
 } from 'react';
 import { usePrevious } from 'react-use';
 import { useDebounceCallback } from 'usehooks-ts';
+import { useClipboardContext } from './clipboard-context';
 import {
   COPY_DEBOUNCE_DELAY_MS,
   COPY_KEYS,
@@ -94,6 +95,7 @@ export const InteractiveContextProvider = ({
       : null;
   }, [flowCanvasContainerId]);
   const copyPressed = useKeyPress(COPY_KEYS, { target: canvas });
+  const { fetchClipboardOperations } = useClipboardContext();
 
   // clear multi-selection if we have a new selected step
   useEffect(() => {
@@ -228,6 +230,7 @@ export const InteractiveContextProvider = ({
           isCopy: true,
           itemsCounter: actionCounter,
         });
+        fetchClipboardOperations();
       })
       .catch(() => {
         copyPasteToast({
@@ -248,7 +251,8 @@ export const InteractiveContextProvider = ({
     } else {
       copySelectedArea();
     }
-  }, [copyPressed, copySelectedArea, copySelectedStep, selectedStep]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [copyPressed, selectedStep]);
 
   const contextValue = useMemo(
     () => ({

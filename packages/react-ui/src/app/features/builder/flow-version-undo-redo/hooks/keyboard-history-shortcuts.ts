@@ -1,6 +1,4 @@
-import { useEffect, useMemo } from 'react';
-
-import { FLOW_CANVAS_CONTAINER_ID } from '../constants';
+import { useKeyboardShortcut } from '../../hooks/use-keyboard-shortcut';
 import {
   FlowVersionUndoRedo,
   useFlowVersionUndoRedo,
@@ -28,74 +26,22 @@ const operationToCapabilityMap: Record<
   redo: 'canRedo',
 };
 
-function isModifierKey(key: string): key is keyof KeyboardEvent {
-  return key in document.createEvent('KeyboardEvent');
-}
-
-const isKeyCombinationPressed = (
-  e: KeyboardEvent,
-  keyCombination: {
-    key: string;
-    modifiers: string[];
-    shortCircuitModifiers?: string[];
-  },
-) => {
-  const isKeyModifierPressed = (modifier: string) =>
-    isModifierKey(modifier) && e[modifier];
-
-  if (keyCombination.shortCircuitModifiers?.some(isKeyModifierPressed)) {
-    return false;
-  }
-
-  return (
-    keyCombination.modifiers.every(isKeyModifierPressed) &&
-    e.key.toLowerCase() === keyCombination.key.toLowerCase()
-  );
-};
-
 const useKeyboardHistoryShortcuts = (operationName: 'undo' | 'redo') => {
   const flowVersionUndoRedo = useFlowVersionUndoRedo();
-  const operation = flowVersionUndoRedo[operationName];
-  const combinations = useMemo(
-    () => operationKeyboardKeyCombinationMap[operationName],
-    [operationName],
-  );
+  const operationMap = {
+    undo: flowVersionUndoRedo.undo,
+    redo: flowVersionUndoRedo.redo,
+  };
 
-  useEffect(() => {
-    const handleOperation = (e: KeyboardEvent) => {
-      const target = e.target;
-      if (!(target instanceof Element)) {
-        return;
-      }
+  const canPerformOperation = () =>
+    flowVersionUndoRedo[operationToCapabilityMap[operationName]];
 
-      if (
-        target !== document.body &&
-        !target.closest(`#${FLOW_CANVAS_CONTAINER_ID}`)
-      ) {
-        return;
-      }
-
-      const canPerformOperation =
-        flowVersionUndoRedo[operationToCapabilityMap[operationName]];
-      if (!canPerformOperation) {
-        return;
-      }
-
-      if (
-        combinations.every(
-          (combination) => !isKeyCombinationPressed(e, combination),
-        )
-      ) {
-        return;
-      }
-
-      e.preventDefault();
-      operation();
-    };
-
-    window.addEventListener('keydown', handleOperation);
-    return () => window.removeEventListener('keydown', handleOperation);
-  }, [combinations, flowVersionUndoRedo, operation, operationName]);
+  useKeyboardShortcut({
+    operationName: operationName,
+    operationMap,
+    keyCombinationMap: operationKeyboardKeyCombinationMap,
+    canPerformOperation,
+  });
 };
 
 const useKeyboardFlowVersionUndoRedo = () => {
