@@ -14,7 +14,7 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "nx:noop",
+      "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/blocks/google-cloud",

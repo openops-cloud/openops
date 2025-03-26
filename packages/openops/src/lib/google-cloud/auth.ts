@@ -1,4 +1,8 @@
 import { BlockAuth } from '@openops/blocks-framework';
+import { SharedSystemProp, system } from '@openops/server-shared';
+
+const enableHostSession =
+  system.getBoolean(SharedSystemProp.ENABLE_HOST_SESSION) ?? false;
 
 export const googleCloudAuth = BlockAuth.CustomAuth({
   props: {
@@ -8,5 +12,5 @@ export const googleCloudAuth = BlockAuth.CustomAuth({
       required: true,
     }),
   },
-  required: true,
+  required: !enableHostSession,
 });
