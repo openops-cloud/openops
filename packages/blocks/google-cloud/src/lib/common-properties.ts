@@ -48,7 +48,8 @@ export const projectCliDropdown = Property.Dropdown<string>({
       return {
         disabled: true,
         options: [],
-        placeholder: `Error fetching projects: ${error}`,
+        placeholder: `Error fetching projects`,
+        error: `${error}`,
       };
     }
   },

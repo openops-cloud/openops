@@ -78,7 +78,8 @@ describe('projectCliDropdown', () => {
     expect(result).toStrictEqual({
       disabled: true,
       options: [],
-      placeholder: 'Error fetching projects: Error: some gcloud error',
+      placeholder: 'Error fetching projects',
+      error: 'Error: some gcloud error',
     });
   });
 
