@@ -1,0 +1,101 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-configmap
+  namespace: {{ .Values.environment }}
+  labels:
+    app: postgres
+    environment: {{ .Values.environment }}
+data:
+  {{- range $key, $value := .Values.postgres.variables }}
+    {{ $key }}: {{ $value | quote }}
+  {{- end }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: {{ .Values.environment }}
+  labels:
+    app: postgres
+    environment: {{ .Values.environment }}
+spec:
+  replicas: {{ .Values.postgres.replicas }}
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+        environment: {{ .Values.environment }}
+    spec:
+      containers:
+        - name: postgres
+          image: {{ .Values.postgres.image }}
+          envFrom:
+            - configMapRef:
+                name: postgres-configmap
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: init-db-script
+              mountPath: /docker-entrypoint-initdb.d/init-db.sh
+              subPath: init-db.sh
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "{{ .Values.postgres.variables.POSTGRES_USER }}"]
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "{{ .Values.postgres.variables.POSTGRES_USER }}"]
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+      securityContext:
+        runAsUser: 999
+        fsGroup: 999
+      volumes:
+        - name: init-db-script
+          configMap:
+            name: postgres-init-script-configmap
+            defaultMode: 0755
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init-script-configmap
+  namespace: {{ .Values.environment }}
+  labels:
+    app: postgres
+    environment: {{ .Values.environment }}
+data:
+  init-db.sh: |
+    #!/bin/bash
+    set -e
+
+    echo "[START] creating database for analytics and tables..."
+
+    psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
+        CREATE DATABASE analytics;
+        CREATE DATABASE tables;
+    EOSQL
+
+    echo "[COMPLETE] creating database for analytics and tables ..."
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: {{ .Values.environment }}
+  labels:
+    app: postgres
+spec:
+  ports:
+    - port: 5432
+      targetPort: 5432
+      protocol: TCP
+      name: postgres
+  selector:
+    app: postgres

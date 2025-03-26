@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: openops-tables-configmap
+  namespace: {{ .Values.environment }}
+  labels:
+    app: openops-tables
+    environment: {{ .Values.environment }}
+data:
+  {{- range $key, $value := .Values.openopsTables.variables }}
+    {{ $key }}: {{ $value | quote }}
+  {{- end }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openops-tables
+  namespace: {{ .Values.environment }}
+  labels:
+    app: openops-tables
+    environment: {{ .Values.environment }}
+spec:
+  replicas: {{ .Values.openopsTables.replicas }}
+  selector:
+    matchLabels:
+      app: openops-tables
+  template:
+    metadata:
+      labels:
+        app: openops-tables
+        environment: {{ .Values.environment }}
+    spec:
+      containers:
+        - name: openops-tables
+          image: {{ .Values.openopsTables.image }}
+          imagePullPolicy: IfNotPresent
+          envFrom:
+          - configMapRef:
+              name: openops-tables-configmap
+          - configMapRef:
+              name: global-variables-configmap
+          resources:
+            limits:
+              memory: {{ .Values.openopsTables.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.openopsTables.resources.requests.cpu }}
+              memory: {{ .Values.openopsTables.resources.requests.memory }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: openops-tables
+  namespace: {{ .Values.environment }}
+  labels:
+    app: openops-tables
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+      name: http
+  selector:
+    app: openops-tables

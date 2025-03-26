@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: openops-app-configmap
+  namespace: {{ .Values.environment }}
+  labels:
+    app: openops-app
+    environment: {{ .Values.environment }}
+data:
+  {{- range $key, $value := .Values.openopsApp.variables }}
+    {{ $key }}: {{ $value | quote }}
+  {{- end }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openops-app
+  namespace: {{ .Values.environment }}
+  labels:
+    app: openops-app
+    environment: {{ .Values.environment }}
+spec:
+  replicas: {{ .Values.openopsApp.replicas }}
+  selector:
+    matchLabels:
+      app: openops-app
+  template:
+    metadata:
+      labels:
+        app: openops-app
+        environment: {{ .Values.environment }}
+    spec:
+      containers:
+        - name: openops-app
+          image: {{ .Values.openopsApp.image }}
+          imagePullPolicy: IfNotPresent
+          envFrom:
+          - configMapRef:
+              name: openops-app-configmap
+          - configMapRef:
+              name: global-variables-configmap
+          resources:
+            limits:
+              memory: {{ .Values.openopsApp.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.openopsApp.resources.requests.cpu }}
+              memory: {{ .Values.openopsApp.resources.requests.memory }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: openops-app
+  namespace: {{ .Values.environment }}
+  labels:
+    app: openops-app
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+      name: http
+  selector:
+    app: openops-app

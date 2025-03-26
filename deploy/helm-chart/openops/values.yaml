@@ -1,0 +1,178 @@
+environment: openops
+deploy: true
+nginx:
+  image: nginx:1.27.4
+  replicas: 1
+
+openopsApp:
+  image: public.ecr.aws/openops/openops-app:0.2.1
+  replicas: 1
+  resources:
+    limits:
+      memory: "600Mi"
+    requests:
+      cpu: "0.5"
+      memory: "400Mi"
+  variables:
+    OPS_COMPONENT: "app"
+    OPS_VERSION: "0.2.1"
+    OPS_OPENOPS_TABLES_VERSION: "0.1.8"
+    OPS_ANALYTICS_VERSION: "0.12.15"
+
+openopsEngine:
+  image: public.ecr.aws/openops/openops-engine:0.2.1
+  replicas: 1
+  resources:
+    limits:
+      memory: "600Mi"
+    requests:
+      cpu: "0.5"
+      memory: "400Mi"
+  variables:
+    OPS_BASE_CODE_DIRECTORY: "/tmp/codes"
+    OPS_COMPONENT: "engine"
+    OPS_SERVER_API_URL: "http://openops-app.openops.svc.cluster.local/api/"
+  azureConfigDir: "/tmp/azure"
+
+openopsAnalytics:
+  image: public.ecr.aws/openops/openops-analytics:0.12.15
+  replicas: 1
+  resources:
+    limits:
+      memory: "600Mi"
+    requests:
+      cpu: "0.5"
+      memory: "400Mi"
+  variables:
+    ADMIN_PASSWORD: "please-change-this-password-1"
+    POWERUSER_PASSWORD: "please-change-this-password-1"
+    GUNICORN_LOGLEVEL: "debug"
+    DATABASE_DIALECT: "postgresql"
+    DATABASE_DB: "analytics"
+    DATABASE_HOST: "postgres.openops.svc.cluster.local"
+    DATABASE_PORT: "5432"
+    DATABASE_USER: "postgres"
+    DATABASE_PASSWORD: "please-change-this-password-1"
+    DATABASE_HOST_ALT: "postgres"
+    SUPERSET_SECRET_KEY: "abcdef123456789abcdef123456789ab"
+    SUPERSET_FEATURE_ALLOW_ADHOC_SUBQUERY: "${ANALYTICS_ALLOW_ADHOC_SUBQUERY}"
+
+openopsTables:
+  image: public.ecr.aws/openops/openops-tables:0.1.8
+  replicas: 1
+  resources:
+    limits:
+      memory: "600Mi"
+    requests:
+      cpu: "0.5"
+      memory: "400Mi"
+  variables:
+    BASEROW_PUBLIC_URL: "http://openops-tables"
+    BASEROW_PRIVATE_URL: "http://openops-tables"
+    BASEROW_EXTRA_ALLOWED_HOSTS: "*"
+    SECRET_KEY: "your-encryption-key"
+    BASEROW_JWT_SIGNING_KEY: "your-jwt-signing-key"
+    BASEROW_REFRESH_TOKEN_LIFETIME_HOURS: "12"
+    BASEROW_ACCESS_TOKEN_LIFETIME_MINUTES: "30"
+    SYNC_TEMPLATES_ON_STARTUP: "false"
+    MIGRATE_ON_STARTUP: "true"
+    DISABLE_VOLUME_CHECK: "yes"
+    DATABASE_NAME: "tables"
+    DATABASE_HOST: "postgres.openops.svc.cluster.local"
+    DATABASE_PORT: "5432"
+    DATABASE_USER: "postgres"
+    DATABASE_PASSWORD: "please-change-this-password-1"
+    REDIS_URL: "redis.openops.svc.cluster.local:6379/0"
+
+postgres:
+  image: "postgres:14.4"
+  replicas: 1
+  variables:
+    POSTGRES_USER: "postgres"
+    POSTGRES_PASSWORD: "please-change-this-password-1"
+    POSTGRES_DB: "openops"
+    POSTGRES_MAX_CONNECTIONS: "300"
+  resources:
+    limits:
+      memory: "600Mi"
+    requests:
+      cpu: "0.5"
+      memory: "400Mi"
+redis:
+  image: "redis:7.4.0"
+  replicas: 1
+  variables: {}
+  resources:
+    limits:
+      memory: "400Mi"
+    requests:
+      cpu: "0.3"
+      memory: "300Mi"
+  volumes:
+    - name: redis-data
+      mountPath: /data
+
+globalvariables:
+  OPS_PUBLIC_URL: "http://nginx-service.openops.svc.cluster.local"
+  OPS_ENVIRONMENT: "prod"
+  OPS_ENVIRONMENT_NAME: "docker-compose"
+  OPS_ENRICH_ERROR_CONTEXT: true
+  OPS_FRONTEND_URL: "http://nginx-service.openops.svc.cluster.local"
+  OPS_TRIGGER_DEFAULT_POLL_INTERVAL: 1
+  OPS_WEBHOOK_TIMEOUT_SECONDS: 30
+  OPS_BLOCKS_SOURCE: 'FILE'
+  OPS_BLOCKS_SYNC_MODE: NONE
+
+  # Authentication
+  OPS_API_KEY: "api-key"
+  OPS_ENCRYPTION_KEY: "abcdef123456789abcdef123456789ab"
+  OPS_JWT_SECRET: "please-change-this-secret"
+  OPS_OPENOPS_ADMIN_EMAIL: "admin@openops.com"
+  OPS_OPENOPS_ADMIN_PASSWORD: "please-change-this-password-1"
+
+  # Telemetry
+  OPS_LOGZIO_TOKEN: ""
+  OPS_LOGZIO_METRICS_TOKEN: ""
+  OPS_LOG_LEVEL: "info"
+  OPS_LOG_PRETTY: false
+  OPS_TELEMETRY_COLLECTOR_URL: ""
+
+  # Engine
+  OPS_ENGINE_URL: "http://openops-engine.openops.svc.cluster.local:3005/execute"
+  OPS_EXECUTION_MODE: "SANDBOX_CODE_ONLY"
+
+  # Queue
+  OPS_QUEUE_MODE: "REDIS"
+  OPS_REDIS_HOST: "redis.openops.svc.cluster.local"
+  OPS_REDIS_PORT: 6379
+
+  # Database
+  OPS_DB_TYPE: "POSTGRES"
+  OPS_POSTGRES_DATABASE: "openops"
+  OPS_POSTGRES_HOST: "postgres.openops.svc.cluster.local"
+  OPS_POSTGRES_PASSWORD: "please-change-this-password-1"
+  OPS_POSTGRES_PORT: 5432
+  OPS_POSTGRES_USERNAME: "postgres"
+  OPS_OPENOPS_TABLES_DB_HOST: "postgres"
+
+  # Tables
+  OPS_OPENOPS_TABLES_DATABASE_NAME: "tables"
+  OPS_OPENOPS_TABLES_API_URL: "http://openops-tables.openops.svc.cluster.local"
+  OPS_OPENOPS_TABLES_PUBLIC_URL: "http://nginx-service.openops.svc.cluster.local"
+  OPS_TABLES_TOKEN_LIFETIME_MINUTES: 60
+  OPS_JWT_TOKEN_LIFETIME_HOURS: 168
+  OPS_MAX_CONCURRENT_TABLES_REQUESTS: 100
+
+  # Analytics
+  OPS_ANALYTICS_PUBLIC_URL: "http://nginx-service.openops.svc.cluster.local"
+  OPS_ANALYTICS_PRIVATE_URL: "http://openops-analytics.openops.svc.cluster.local:8088"
+  OPS_ANALYTICS_ADMIN_PASSWORD: "please-change-this-password-1"
+  ANALYTICS_POWERUSER_PASSWORD: "please-change-this-password-1"
+  ANALYTICS_ALLOW_ADHOC_SUBQUERY: true
+
+  # Connections
+  OPS_SLACK_APP_SIGNING_SECRET: ""
+  OPS_AWS_PRICING_ACCESS_KEY_ID: ""
+  OPS_AWS_PRICING_SECRET_ACCESS_KEY: ""
+  OPS_ENABLE_HOST_SESSION: ""
+  HOST_AZURE_CONFIG_DIR: ""

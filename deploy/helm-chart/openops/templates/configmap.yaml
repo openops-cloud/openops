@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: global-variables-configmap
+  namespace: {{ .Values.environment }}
+  labels:
+    environment: {{ .Values.environment }}
+data:
+  {{- range $key, $value := .Values.globalvariables }}
+    {{ $key }}: {{ $value | quote }}
+  {{- end }}

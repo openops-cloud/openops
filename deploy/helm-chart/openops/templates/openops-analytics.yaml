@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: openops-analytics-configmap
+  namespace: {{ .Values.environment }}
+  labels:
+    app: openops-analytics
+    environment: {{ .Values.environment }}
+data:
+  {{- range $key, $value := .Values.openopsAnalytics.variables }}
+    {{ $key }}: {{ $value | quote }}
+  {{- end }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openops-analytics
+  namespace: {{ .Values.environment }}
+  labels:
+    app: openops-analytics
+    environment: {{ .Values.environment }}
+spec:
+  replicas: {{ .Values.openopsAnalytics.replicas }}
+  selector:
+    matchLabels:
+      app: openops-analytics
+  template:
+    metadata:
+      labels:
+        app: openops-analytics
+        environment: {{ .Values.environment }}
+    spec:
+      containers:
+        - name: openops-analytics
+          image: {{ .Values.openopsAnalytics.image }}
+          imagePullPolicy: IfNotPresent
+          envFrom:
+          - configMapRef:
+              name: openops-analytics-configmap
+          resources:
+            limits:
+              memory: {{ .Values.openopsAnalytics.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.openopsAnalytics.resources.requests.cpu }}
+              memory: {{ .Values.openopsAnalytics.resources.requests.memory }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: openops-analytics
+  namespace: {{ .Values.environment }}
+  labels:
+    app: openops-analytics
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+      name: http
+  selector:
+    app: openops-analytics
