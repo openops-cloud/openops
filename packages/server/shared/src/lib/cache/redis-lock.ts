@@ -35,6 +35,10 @@ const redLockClient = (() => {
   const shouldUseRedis =
     system.get<QueueMode>(AppSystemProp.QUEUE_MODE) === QueueMode.REDIS;
   if (!shouldUseRedis) {
+    logger.debug('Queue mode is not Redis.', {
+      QUEUE_MODE: system.get<QueueMode>(AppSystemProp.QUEUE_MODE),
+    });
+
     return;
   }
 
