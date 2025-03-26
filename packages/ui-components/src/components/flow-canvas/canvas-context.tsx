@@ -147,15 +147,19 @@ export const InteractiveContextProvider = ({
 
     if (!selectedSteps.length) return;
 
-    selectedFlowActionRef.current = flowHelper.truncateFlow(
+    const selectedFlowAction = flowHelper.truncateFlow(
       cloneDeep(selectedSteps[0]),
       selectedSteps[selectedSteps.length - 1].name,
     ) as Action;
 
-    const selectedStepNames = flowHelper
-      .getAllSteps(selectedFlowActionRef.current)
-      .map((step) => step.name);
+    const selectedStepNames: string[] = [];
 
+    flowHelper.getAllSteps(selectedFlowAction).forEach((step) => {
+      flowHelper.clearStepTestData(step);
+      selectedStepNames.push(step.name);
+    });
+
+    selectedFlowActionRef.current = selectedFlowAction;
     selectedNodeCounterRef.current = selectedStepNames.length;
 
     state.setNodes(
@@ -182,6 +186,7 @@ export const InteractiveContextProvider = ({
 
     const stepToBeCopied = cloneDeep(stepDetails);
     stepToBeCopied.nextAction = undefined;
+    flowHelper.clearStepTestData(stepToBeCopied);
 
     handleCopy(stepToBeCopied as Action, 1);
   }, COPY_DEBOUNCE_DELAY_MS);
@@ -205,8 +210,11 @@ export const InteractiveContextProvider = ({
   const copyAction = (action: Action) => {
     const actionToBeCopied = cloneDeep(action);
     actionToBeCopied.nextAction = undefined;
-    const actionCounter = flowHelper.getAllSteps(actionToBeCopied).length;
-    handleCopy(actionToBeCopied, actionCounter);
+    const allNestedSteps = flowHelper.getAllSteps(actionToBeCopied);
+    allNestedSteps.forEach((step) => {
+      flowHelper.clearStepTestData(step);
+    });
+    handleCopy(actionToBeCopied, allNestedSteps.length);
   };
 
   const handleCopy = (action: Action, actionCounter: number) => {
