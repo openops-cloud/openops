@@ -7,7 +7,6 @@ const loggerMock = {
 };
 
 jest.mock('@openops/server-shared', () => ({
-  ...jest.requireActual('@openops/server-shared'),
   SharedSystemProp: {
     OPS_ENABLE_HOST_SESSION: 'OPS_ENABLE_HOST_SESSION',
   },

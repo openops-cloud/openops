@@ -12,6 +12,20 @@ jest.mock('../../src/lib/openops-tables/requests-helpers', () => ({
   createAxiosHeaders: createAxiosHeadersMock,
 }));
 
+jest.mock('@openops/server-shared', () => ({
+  AppSystemProp: {
+    MAX_CONCURRENT_TABLES_REQUESTS: 'MAX_CONCURRENT_TABLES_REQUESTS',
+  },
+  system: {
+    getNumber: jest.fn().mockReturnValue(10),
+  },
+  logger: {
+    info: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn(),
+  },
+}));
+
 const acquireMock = jest.fn(async () => [null, releaseMock]);
 const releaseMock = jest.fn();
 
