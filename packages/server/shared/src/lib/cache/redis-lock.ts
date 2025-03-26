@@ -32,7 +32,6 @@ const generateRedlockRetryConfig = (
 
 function createRedLockClient(): RedLock {
   const redisClient = createRedisClient();
-  console.log("createRedLockClient");
 
   const { retryDelay, retryJitter } =
     generateRedlockRetryConfig(DEFAULT_TIMEOUT_MS);
@@ -51,9 +50,7 @@ function createRedLockClient(): RedLock {
 const isRedisConfigured =
   system.get<QueueMode>(AppSystemProp.QUEUE_MODE) === QueueMode.REDIS;
 
-export let redLockClient = isRedisConfigured
-  ? createRedLockClient()
-  : undefined;
+let redLockClient = isRedisConfigured ? createRedLockClient() : undefined;
 
 export async function acquireRedisLock(
   key: string,
@@ -66,7 +63,6 @@ export async function acquireRedisLock(
 
     if (!redLockClient) {
       redLockClient = createRedLockClient();
-      logger.debug(`Created a new RedLock Client.`);
     }
 
     const lock = await redLockClient.acquire([key], timeout, {
@@ -80,7 +76,8 @@ export async function acquireRedisLock(
     logger.error(`Failed to acquire lock for key [${key}]`, {
       key,
       timeout,
-      QUEUE_MODE: system.get<QueueMode>(AppSystemProp.QUEUE_MODE),
+      QUEUE_MODE1: system.get<QueueMode>(AppSystemProp.QUEUE_MODE),
+      QUEUE_MODE2: system.get(AppSystemProp.QUEUE_MODE),
     });
     throw error;
   }
