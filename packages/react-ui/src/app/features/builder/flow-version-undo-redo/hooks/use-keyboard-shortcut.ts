@@ -66,12 +66,10 @@ export function useKeyboardShortcut<T extends string>(params: {
         return;
       }
 
-      // Check if the operation can be performed.
       if (!canPerformOperation(operationName)) {
         return;
       }
 
-      // Check if any of the key combinations match.
       if (
         combinations.every(
           (combination) => !isKeyCombinationPressed(e, combination),
