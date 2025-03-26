@@ -45,6 +45,11 @@ jest.mock('@openops/server-shared', () => ({
   },
 }));
 
+const sendEphemeralMessageMock = jest.fn();
+jest.mock('../../../../src/app/slack/ephemeral-message', () => ({
+  sendEphemeralMessage: sendEphemeralMessageMock,
+}));
+
 import { FastifyInstance } from 'fastify';
 import { StatusCodes } from 'http-status-codes';
 import { databaseConnection } from '../../../../src/app/database/database-connection';
@@ -147,6 +152,79 @@ describe('Slack API', () => {
 
       expect(response?.statusCode).toBe(StatusCodes.OK);
       expect(response?.json()).toEqual({ text: 'Received interaction' });
+    });
+
+    test('should return 200 and send an ephemeral message if the message is a test message', async () => {
+      verifySignatureMock.mockReturnValueOnce(true);
+      sendEphemeralMessageMock.mockResolvedValueOnce({});
+
+      const payload = JSON.stringify({
+        actions: [
+          {
+            type: 'button',
+            action_id: 'some_id',
+          },
+        ],
+        user: {
+          id: 'some_user_id',
+          name: 'some_user_name',
+        },
+        message: {
+          metadata: {
+            event_payload: {
+              isTest: true,
+              resumeUrl: 'http://some-resume-url.com?test=1',
+            },
+          },
+        },
+        response_url:
+          'https://hooks.slack.com/actions/XXXXXXXX/XXXXXXXXX/XXXXXXXXX',
+      });
+
+      const response = await makeRequest(payload);
+
+      expect(response?.statusCode).toBe(StatusCodes.OK);
+      expect(axiosGetMock).not.toHaveBeenCalled();
+      expect(sendEphemeralMessageMock).toHaveBeenCalledTimes(1);
+      expect(sendEphemeralMessageMock).toHaveBeenCalledWith({
+        ephemeralText:
+          'Slack interactions are only available when running the entire workflow.',
+        responseUrl:
+          'https://hooks.slack.com/actions/XXXXXXXX/XXXXXXXXX/XXXXXXXXX',
+        userId: 'some_user_id',
+      });
+    });
+
+    test('should do nothing and return 200 if it is not a test message but there is no resume url', async () => {
+      verifySignatureMock.mockReturnValueOnce(true);
+
+      const payload = JSON.stringify({
+        actions: [
+          {
+            type: 'button',
+            action_id: 'some_id',
+          },
+        ],
+        user: {
+          id: 'some_user_id',
+          name: 'some_user_name',
+        },
+        message: {
+          metadata: {
+            event_payload: {
+              isTest: false,
+            },
+          },
+        },
+        response_url:
+          'https://hooks.slack.com/actions/XXXXXXXX/XXXXXXXXX/XXXXXXXXX',
+      });
+
+      const response = await makeRequest(payload);
+
+      expect(response?.statusCode).toBe(StatusCodes.OK);
+      expect(sendEphemeralMessageMock).not.toHaveBeenCalled();
+      expect(axiosGetMock).not.toHaveBeenCalled();
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
