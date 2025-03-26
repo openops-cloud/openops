@@ -1,3 +1,15 @@
+jest.mock('@openops/common', () => ({
+  makeHttpRequest: jest.fn(),
+}));
+
+jest.mock('@openops/server-shared', () => ({
+  logger: {
+    info: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn(),
+  },
+}));
+
 import { anodot } from '../src/index';
 
 describe('block declaration tests', () => {

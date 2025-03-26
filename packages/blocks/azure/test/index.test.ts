@@ -1,12 +1,23 @@
 const openOpsMock = {
-  ...jest.requireActual('@openops/common'),
   getUseHostSessionProperty: jest.fn().mockReturnValue({
     type: 'DYNAMIC',
     required: true,
   }),
+  dryRunCheckBox: jest.fn().mockReturnValue({
+    required: false,
+    defaultValue: false,
+    type: 'CHECKBOX',
+  }),
 };
 
 jest.mock('@openops/common', () => openOpsMock);
+jest.mock('@openops/server-shared', () => ({
+  logger: {
+    info: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn(),
+  },
+}));
 
 import { azure } from '../src/index';
 

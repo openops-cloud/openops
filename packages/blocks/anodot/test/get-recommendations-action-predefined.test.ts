@@ -9,6 +9,18 @@ jest.mock('../src/lib/common/recommendations', () => ({
   getAnodotRecommendations: getAnodotRecommendationsMock,
 }));
 
+jest.mock('@openops/common', () => ({
+  makeHttpRequest: jest.fn(),
+}));
+
+jest.mock('@openops/server-shared', () => ({
+  logger: {
+    info: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn(),
+  },
+}));
+
 import { getRecommendationsAction } from '../src/lib/get-recommendations-action-predefined';
 
 describe('getRecommendationsAction', () => {

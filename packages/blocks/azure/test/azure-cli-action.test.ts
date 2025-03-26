@@ -5,9 +5,13 @@ const azureCliMock = {
 jest.mock('../src/lib/azure-cli', () => azureCliMock);
 
 const openOpsMock = {
-  ...jest.requireActual('@openops/common'),
   tryParseJson: jest.fn((input) => input),
   handleCliError: jest.fn(),
+  dryRunCheckBox: jest.fn().mockReturnValue({
+    required: false,
+    defaultValue: false,
+    type: 'CHECKBOX',
+  }),
   getUseHostSessionProperty: jest.fn().mockReturnValue({
     type: 'DYNAMIC',
     required: true,

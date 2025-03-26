@@ -14,6 +14,18 @@ jest.mock('../src/lib/common/account', () => ({
   getAccountApiKey: getAccountApiKeyMock,
 }));
 
+jest.mock('@openops/common', () => ({
+  makeHttpRequest: jest.fn(),
+}));
+
+jest.mock('@openops/server-shared', () => ({
+  logger: {
+    info: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn(),
+  },
+}));
+
 import { DynamicPropsValue } from '@openops/blocks-framework';
 import { updateUserStatusAction } from '../src/lib/update-user-status-action';
 

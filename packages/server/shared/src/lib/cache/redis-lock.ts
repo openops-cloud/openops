@@ -1,6 +1,7 @@
 import RedLock from 'redlock';
 import { logger } from '../logger';
 import { Lock } from '../memory-lock';
+import { AppSystemProp, system } from '../system';
 import { createRedisClient } from './redis-connection';
 
 // By default, the timeout is 30 seconds and the retry count is 35.
@@ -30,6 +31,12 @@ const generateRedlockRetryConfig = (
 };
 
 const redLockClient = (() => {
+  // TODO: Remove this check when we have the unit tests fixed.
+  const host = system.get(AppSystemProp.REDIS_HOST);
+  if (!host) {
+    return;
+  }
+
   const redisClient = createRedisClient();
 
   const { retryDelay, retryJitter } =
@@ -54,6 +61,10 @@ export async function acquireRedisLock(
     const { retryDelay, retryJitter } = generateRedlockRetryConfig(timeout);
 
     logger.debug(`Acquiring lock for key [${key}]`, { key, timeout });
+
+    if (!redLockClient) {
+      throw new Error('Redlock client is not created.');
+    }
 
     const lock = await redLockClient.acquire([key], timeout, {
       retryDelay,
