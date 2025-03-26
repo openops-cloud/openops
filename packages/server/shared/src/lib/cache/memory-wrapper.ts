@@ -1,3 +1,4 @@
+import { Mutex } from 'async-mutex';
 import LRUCache from 'lru-cache';
 
 const DEFAULT_EXPIRE_TIME = 60 * 60 * 1000; // 1 hour in milliseconds
@@ -7,6 +8,8 @@ const cache = new LRUCache<string, string>({
   ttl: DEFAULT_EXPIRE_TIME,
   updateAgeOnGet: true,
 });
+
+const lock = new Mutex();
 
 const setKey = async (
   key: string,
@@ -47,7 +50,25 @@ async function getOrAdd<T, Args extends unknown[]>(
   args: Args,
   expireInSeconds?: number,
 ): Promise<T> {
-  throw new Error('Not implemented');
+  const value = await getSerializedObject<T>(key);
+
+  if (value !== null) {
+    return value;
+  }
+
+  try {
+    await lock.acquire();
+    const value = await getSerializedObject<T>(key);
+    if (value !== null) {
+      return value;
+    }
+
+    const result = await createCallback(...args);
+    await setSerializedObject(key, result, expireInSeconds);
+    return result;
+  } finally {
+    lock.release();
+  }
 }
 
 export const memoryWrapper = {
