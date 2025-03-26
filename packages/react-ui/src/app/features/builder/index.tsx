@@ -1,16 +1,17 @@
 import {
   AiWidget,
   BuilderTreeViewProvider,
-  CanvasContextProvider,
   CanvasControls,
   cn,
+  InteractiveContextProvider,
+  ReadonlyCanvasProvider,
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
   useElementSize,
 } from '@openops/components/ui';
 import { ReactFlowProvider } from '@xyflow/react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ImperativePanelHandle } from 'react-resizable-panels';
 import { useSearchParams } from 'react-router-dom';
 
@@ -23,6 +24,7 @@ import {
 import { DataSelector } from '@/app/features/builder/data-selector';
 import { DynamicFormValidationProvider } from '@/app/features/builder/dynamic-form-validation/dynamic-form-validation-context';
 
+import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { useResizablePanelGroup } from '@/app/common/hooks/use-resizable-panel-group';
 import { useSocket } from '@/app/common/providers/socket-provider';
 import { FLOW_CANVAS_Y_OFFESET } from '@/app/constants/flow-canvas';
@@ -30,6 +32,7 @@ import { SEARCH_PARAMS } from '@/app/constants/search-params';
 import {
   ActionType,
   BlockTrigger,
+  FlagId,
   flowHelper,
   isNil,
   TriggerType,
@@ -90,6 +93,9 @@ const constructContainerKey = (
 };
 const BuilderPage = () => {
   const [searchParams] = useSearchParams();
+  const showCopyPaste =
+    flagsHooks.useFlag<boolean>(FlagId.COPY_PASTE_ACTIONS_ENABLED).data ||
+    false;
 
   const [
     selectedStep,
@@ -101,6 +107,8 @@ const BuilderPage = () => {
     readonly,
     setReadOnly,
     setRightSidebar,
+    exitStepSettings,
+    flowVersion,
   ] = useBuilderStateContext((state) => [
     state.selectedStep,
     state.leftSidebar,
@@ -111,7 +119,13 @@ const BuilderPage = () => {
     state.readonly,
     state.setReadOnly,
     state.setRightSidebar,
+    state.exitStepSettings,
+    state.flowVersion,
   ]);
+
+  const clearSelectedStep = useCallback(() => {
+    exitStepSettings();
+  }, [exitStepSettings]);
 
   const { memorizedSelectedStep, containerKey } = useBuilderStateContext(
     (state) => {
@@ -262,27 +276,52 @@ const BuilderPage = () => {
                 'min-w-[830px]': leftSidebar === LeftSideBarType.NONE,
               })}
             >
-              <CanvasContextProvider>
-                <div ref={middlePanelRef} className="relative h-full w-full">
-                  <BuilderHeader />
+              {readonly || !showCopyPaste ? (
+                <ReadonlyCanvasProvider>
+                  <div ref={middlePanelRef} className="relative h-full w-full">
+                    <BuilderHeader />
 
-                  <CanvasControls
-                    topOffset={FLOW_CANVAS_Y_OFFESET}
-                  ></CanvasControls>
-                  <AiWidget />
-                  <DataSelector
-                    parentHeight={middlePanelSize.height}
-                    parentWidth={middlePanelSize.width}
-                  ></DataSelector>
+                    <CanvasControls
+                      topOffset={FLOW_CANVAS_Y_OFFESET}
+                    ></CanvasControls>
 
-                  <div
-                    className="h-screen w-full flex-1 z-10"
-                    id={FLOW_CANVAS_CONTAINER_ID}
-                  >
-                    <FlowBuilderCanvas />
+                    <div
+                      className={cn('h-screen w-full flex-1 z-10', {
+                        'bg-background': !isDraggingHandle,
+                      })}
+                      id={FLOW_CANVAS_CONTAINER_ID}
+                    >
+                      <FlowBuilderCanvas />
+                    </div>
                   </div>
-                </div>
-              </CanvasContextProvider>
+                </ReadonlyCanvasProvider>
+              ) : (
+                <InteractiveContextProvider
+                  selectedStep={selectedStep}
+                  clearSelectedStep={clearSelectedStep}
+                  flowVersion={flowVersion}
+                >
+                  <div ref={middlePanelRef} className="relative h-full w-full">
+                    <BuilderHeader />
+
+                    <CanvasControls
+                      topOffset={FLOW_CANVAS_Y_OFFESET}
+                    ></CanvasControls>
+                    <AiWidget />
+                    <DataSelector
+                      parentHeight={middlePanelSize.height}
+                      parentWidth={middlePanelSize.width}
+                    ></DataSelector>
+
+                    <div
+                      className="h-screen w-full flex-1 z-10"
+                      id={FLOW_CANVAS_CONTAINER_ID}
+                    >
+                      <FlowBuilderCanvas />
+                    </div>
+                  </div>
+                </InteractiveContextProvider>
+              )}
             </ResizablePanel>
 
             <>

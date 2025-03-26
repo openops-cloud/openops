@@ -6,6 +6,22 @@
   cursor: default !important;
 }
 
+.react-flow__nodesselection-rect {
+  border: none !important;
+}
+
+.react-flow__nodesselection-rect::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  bottom: -2px;
+  left: -2px;
+  border: 1px solid theme('colors.blue.500');
+  border-radius: 8px;
+  cursor: initial;
+}
+
 .react-flow {
   --xy-edge-stroke-selected-default: #b1b1b7 !important;
   --node-boxshadow-selected-default: 0 0 0 0 #b1b1b7;
@@ -13,6 +29,6 @@
   --node-border-default: 0px solid #b1b1b7;
 }
 
-input[type="search"]::-webkit-search-cancel-button {
+input[type='search']::-webkit-search-cancel-button {
   cursor: pointer;
 }

@@ -1,16 +1,3 @@
-const systemMock = {
-  getNumber: jest.fn(),
-  getBoolean: jest.fn(),
-};
-
-jest.mock('@openops/server-shared', () => ({
-  ...jest.requireActual('@openops/server-shared'),
-  SharedSystemProp: {
-    OPS_ENABLE_HOST_SESSION: 'OPS_ENABLE_HOST_SESSION',
-  },
-  system: systemMock,
-}));
-
 const commonMock = {
   ...jest.requireActual('@openops/common'),
   getAzureSubscriptionsStaticDropdown: jest.fn(),
@@ -24,40 +11,13 @@ const azureCliMock = {
 
 jest.mock('../src/lib/azure-cli', () => azureCliMock);
 
-import { subDropdown, useHostSession } from '../src/lib/common-properties';
+import { subDropdown } from '../src/lib/common-properties';
 
 const auth = {
   accessKeyId: 'some accessKeyId',
   secretAccessKey: 'some secretAccessKey',
   defaultRegion: 'some region',
 };
-
-describe('useHostSession', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  test('useHostSession should have checkbox if OPS_ENABLE_HOST_SESSION=true', async () => {
-    systemMock.getBoolean.mockReturnValue(true);
-    const context = createContext();
-
-    const result = await useHostSession.props({}, context);
-
-    expect(result['useHostSessionCheckbox']).toMatchObject({
-      displayName: 'Use host machine Azure CLI session',
-      type: 'CHECKBOX',
-    });
-  });
-
-  test('useHostSession should be empty if OPS_ENABLE_HOST_SESSION=false', async () => {
-    systemMock.getBoolean.mockReturnValue(false);
-    const context = createContext();
-
-    const result = (await useHostSession.props({}, context)) as any;
-
-    expect(result).toStrictEqual({});
-  });
-});
 
 describe('subDropdown', () => {
   beforeEach(() => {
