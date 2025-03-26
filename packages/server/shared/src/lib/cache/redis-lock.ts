@@ -3,8 +3,6 @@ import { logger } from '../logger';
 import { Lock } from '../memory-lock';
 import { AppSystemProp, QueueMode, system } from '../system';
 import { createRedisClient } from './redis-connection';
-import { redisWrapper } from './redis-wrapper';
-import { memoryWrapper } from './memory-wrapper';
 
 // By default, the timeout to wait to acquire a lock is 30 seconds
 const DEFAULT_TIMEOUT_MS = 30000;
@@ -32,20 +30,9 @@ const generateRedlockRetryConfig = (
   };
 };
 
-function createRedLockClient(): RedLock | undefined {
-  // TODO: Remove this check when we have the unit tests fixed.
-  // const shouldUseRedis =
-  //   system.get<QueueMode>(AppSystemProp.QUEUE_MODE) === QueueMode.REDIS;
-  // if (!shouldUseRedis) {
-  //   /* eslint-disable no-console */
-  //   console.log('Queue mode is not Redis.', {
-  //     QUEUE_MODE: system.get<QueueMode>(AppSystemProp.QUEUE_MODE),
-  //   });
-  //
-  //   return;
-  // }
-
+function createRedLockClient(): RedLock {
   const redisClient = createRedisClient();
+  console.log("createRedLockClient");
 
   const { retryDelay, retryJitter } =
     generateRedlockRetryConfig(DEFAULT_TIMEOUT_MS);
@@ -64,7 +51,9 @@ function createRedLockClient(): RedLock | undefined {
 const isRedisConfigured =
   system.get<QueueMode>(AppSystemProp.QUEUE_MODE) === QueueMode.REDIS;
 
-export const redLockClient = isRedisConfigured ? createRedLockClient() : undefined;
+export let redLockClient = isRedisConfigured
+  ? createRedLockClient()
+  : undefined;
 
 export async function acquireRedisLock(
   key: string,
@@ -76,7 +65,8 @@ export async function acquireRedisLock(
     logger.debug(`Acquiring lock for key [${key}]`, { key, timeout });
 
     if (!redLockClient) {
-      throw new Error('Redlock client is not created.');
+      redLockClient = createRedLockClient();
+      logger.debug(`Created a new RedLock Client.`);
     }
 
     const lock = await redLockClient.acquire([key], timeout, {
@@ -87,7 +77,11 @@ export async function acquireRedisLock(
     logger.info(`Acquired lock for key [${key}]`, { key, timeout });
     return lock;
   } catch (error) {
-    logger.error(`Failed to acquire lock for key [${key}]`, { key, timeout });
+    logger.error(`Failed to acquire lock for key [${key}]`, {
+      key,
+      timeout,
+      system.get<QueueMode>(AppSystemProp.QUEUE_MODE),
+    });
     throw error;
   }
 }
