@@ -16,7 +16,11 @@ export const projectCliDropdown = Property.Dropdown<string>({
   ],
   required: true,
   options: async ({ auth, useHostSession }) => {
-    if (!auth) {
+    const shouldUseHostCredentials =
+      (useHostSession as { useHostSessionCheckbox?: boolean })
+        ?.useHostSessionCheckbox === true;
+
+    if (!auth && !shouldUseHostCredentials) {
       return {
         disabled: true,
         options: [],
@@ -25,10 +29,6 @@ export const projectCliDropdown = Property.Dropdown<string>({
     }
 
     try {
-      const shouldUseHostCredentials =
-        (useHostSession as { useHostSessionCheckbox?: boolean })
-          ?.useHostSessionCheckbox === true;
-
       const rawProjects = await runCommand(
         'gcloud projects list --format=json',
         auth,

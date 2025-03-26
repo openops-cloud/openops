@@ -83,11 +83,11 @@ describe('projectCliDropdown', () => {
     });
   });
 
-  test('returns disabled dropdown if no auth is provided', async () => {
+  test('returns disabled dropdown if no auth is provided and use host session is false', async () => {
     const context = createContext();
 
     const result = await projectCliDropdown.options(
-      { useHostSession: {} },
+      { useHostSession: { useHostSessionCheckbox: false } },
       context,
     );
 
