@@ -7,8 +7,8 @@ import {
   getRowByPrimaryKeyValue,
   getTableIdByTableName,
   openopsTablesDropdownProperty,
-  wrapWithCacheGuard,
 } from '@openops/common';
+import { cacheWrapper } from '@openops/server-shared';
 import { convertToStringWithValidation, isEmpty } from '@openops/shared';
 
 export const deleteRecordAction = createAction({
@@ -26,22 +26,20 @@ export const deleteRecordAction = createAction({
   },
   async run(context) {
     const tableName = context.propsValue.tableName as unknown as string;
-    const tableCacheKey = `${context.run.executionCorrelationId}-table-${tableName}`;
-    const tableId = await wrapWithCacheGuard(
+    const tableCacheKey = `${context.run.id}-table-${tableName}`;
+    const tableId = await cacheWrapper.getOrAdd(
       tableCacheKey,
       getTableIdByTableName,
-      tableName,
+      [tableName],
     );
 
     const { token } = await authenticateDefaultUserInOpenOpsTables();
 
-    const fieldsCacheKey = `${context.run.executionCorrelationId}-${tableId}-fields`;
-    const fields = await wrapWithCacheGuard(
-      fieldsCacheKey,
-      getFields,
+    const fieldsCacheKey = `${context.run.id}-${tableId}-fields`;
+    const fields = await cacheWrapper.getOrAdd(fieldsCacheKey, getFields, [
       tableId,
       token,
-    );
+    ]);
 
     const primaryKeyField = getPrimaryKeyFieldFromFields(fields);
     const rowPrimaryKey = getPrimaryKey(context.propsValue.rowPrimaryKey);

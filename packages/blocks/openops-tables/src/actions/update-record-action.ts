@@ -11,8 +11,8 @@ import {
   OpenOpsField,
   openopsTablesDropdownProperty,
   updateRow,
-  wrapWithCacheGuard,
 } from '@openops/common';
+import { cacheWrapper } from '@openops/server-shared';
 import { convertToStringWithValidation, isEmpty } from '@openops/shared';
 
 export const updateRecordAction = createAction({
@@ -114,22 +114,20 @@ export const updateRecordAction = createAction({
     const { rowPrimaryKey, fieldsProperties } = context.propsValue;
     const tableName = context.propsValue.tableName as unknown as string;
 
-    const tableCacheKey = `${context.run.executionCorrelationId}-table-${tableName}`;
-    const tableId = await wrapWithCacheGuard(
+    const tableCacheKey = `${context.run.id}-table-${tableName}`;
+    const tableId = await cacheWrapper.getOrAdd(
       tableCacheKey,
       getTableIdByTableName,
-      tableName,
+      [tableName],
     );
 
     const { token } = await authenticateDefaultUserInOpenOpsTables();
 
-    const fieldsCacheKey = `${context.run.executionCorrelationId}-${tableId}-fields`;
-    const tableFields = await wrapWithCacheGuard(
-      fieldsCacheKey,
-      getFields,
+    const fieldsCacheKey = `${context.run.id}-${tableId}-fields`;
+    const tableFields = await cacheWrapper.getOrAdd(fieldsCacheKey, getFields, [
       tableId,
       token,
-    );
+    ]);
 
     const fieldsToUpdate = mapFieldsToObject(
       tableName,

@@ -4,7 +4,7 @@ import {
   ExecuteStepOperation,
   ExecuteTriggerOperation,
   ExecutionType,
-  FlowVersionState,
+  FlowVersionState, openOpsId, OpenOpsId,
   ProgressUpdateType,
   Project,
   ProjectId,
@@ -12,6 +12,7 @@ import {
   TriggerHookType,
 } from '@openops/shared';
 import { VariableService } from '../../variables/variable-service';
+import { nanoid } from 'nanoid';
 
 type RetryConstants = {
   maxAttempts: number;
@@ -102,7 +103,7 @@ export class EngineConstants {
       input.flowVersion.displayName,
       input.flowVersion.id,
       input.flowVersion.state,
-      'test-run',
+      openOpsId(),
       input.publicUrl,
       addTrailingSlashIfMissing(input.internalApiUrl),
       DEFAULT_RETRY_CONSTANTS,

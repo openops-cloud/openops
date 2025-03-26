@@ -9,8 +9,8 @@ import {
   isSingleValueFilter,
   openopsTablesDropdownProperty,
   ViewFilterTypesEnum,
-  wrapWithCacheGuard,
 } from '@openops/common';
+import { cacheWrapper } from '@openops/server-shared';
 
 export const getRecordsAction = createAction({
   auth: BlockAuth.None(),
@@ -109,11 +109,11 @@ export const getRecordsAction = createAction({
 
     const tableName = context.propsValue.tableName as unknown as string;
 
-    const tableCacheKey = `${context.run.executionCorrelationId}-table-${tableName}`;
-    const tableId = await wrapWithCacheGuard(
+    const tableCacheKey = `${context.run.id}-table-${tableName}`;
+    const tableId = await cacheWrapper.getOrAdd(
       tableCacheKey,
       getTableIdByTableName,
-      tableName,
+      [tableName],
     );
 
     const filtersProps = context.propsValue.filters['filters'] as unknown as {

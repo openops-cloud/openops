@@ -132,7 +132,6 @@ export type BaseActionContext<
     id: FlowRunId;
     name: string;
     pauseId: string;
-    executionCorrelationId: string;
     stop: StopHook;
     pause: PauseHook;
     isTest: boolean;
