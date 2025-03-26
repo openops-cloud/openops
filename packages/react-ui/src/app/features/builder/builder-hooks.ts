@@ -422,7 +422,8 @@ export type UndoHistoryRelevantFlowOperationRequest = Extract<
       | FlowOperationType.UPDATE_TRIGGER
       | FlowOperationType.UPDATE_ACTION
       | FlowOperationType.DUPLICATE_ACTION
-      | FlowOperationType.ADD_ACTION;
+      | FlowOperationType.ADD_ACTION
+      | FlowOperationType.PASTE_ACTIONS;
   }
 >;
 
@@ -439,6 +440,13 @@ const updateFlowVersion = (
   ) => void,
 ) => {
   const newFlowVersion = flowHelper.apply(state.flowVersion, operation);
+  if (
+    operation.type === FlowOperationType.DELETE_ACTION &&
+    operation.request.name === state.selectedStep
+  ) {
+    set({ selectedStep: undefined });
+  }
+
   const updateRequest = async () => {
     set({ saving: true });
     try {
