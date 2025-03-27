@@ -1,4 +1,5 @@
 import {
+  AiWidget,
   BuilderTreeViewProvider,
   CanvasControls,
   ClipboardContextProvider,
@@ -50,6 +51,7 @@ import { FlowSideMenu } from '../navigation/side-menu/flow/flow-side-menu';
 import LeftSidebarResizablePanel from '../navigation/side-menu/left-sidebar';
 import { BuilderHeader } from './builder-header/builder-header';
 import { CopilotSidebar } from './copilot';
+import { DataSelector } from './data-selector';
 import { FlowBuilderCanvas } from './flow-canvas/flow-builder-canvas';
 import { FLOW_CANVAS_CONTAINER_ID } from './flow-version-undo-redo/constants';
 import { Paste } from './flow-version-undo-redo/paste';
@@ -293,7 +295,11 @@ const BuilderPage = () => {
                       <CanvasControls
                         topOffset={FLOW_CANVAS_Y_OFFESET}
                       ></CanvasControls>
-
+                      <AiWidget />
+                      <DataSelector
+                        parentHeight={middlePanelSize.height}
+                        parentWidth={middlePanelSize.width}
+                      ></DataSelector>
                       <div
                         className={cn('h-screen w-full flex-1 z-10', {
                           'bg-background': !isDraggingHandle,

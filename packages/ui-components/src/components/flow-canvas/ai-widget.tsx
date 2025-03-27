@@ -12,7 +12,7 @@ const AiWidget = () => {
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
-          className="w-[40px] h-[40px] absolute left-[282px] bottom-[10px] flex items-center justify-center z-50 bg-background shadow-editor rounded-xl"
+          className="w-[40px] h-[40px] absolute left-[242px] bottom-[10px] flex items-center justify-center z-50 bg-background shadow-editor rounded-xl"
           size="icon"
           onClick={() => {
             setIsOpen(true);
