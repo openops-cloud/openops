@@ -1,4 +1,9 @@
+import { t } from 'i18next';
+
 function formatErrorMessage(errorMessage: string): string {
+  if (!errorMessage) {
+    return t('Some error occurred...');
+  }
   const errorMessagesSplit = errorMessage.split('Error:');
   if (errorMessagesSplit.length < 2) {
     return errorMessage;

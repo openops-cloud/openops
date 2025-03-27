@@ -1,8 +1,8 @@
-import { runCliCommand, useTempFile } from '@openops/common';
-import fs from 'fs/promises';
-import os from 'os';
-import path from 'path';
-
+import {
+  getDefaultCloudSDKConfig,
+  loginGCPWithKeyObject,
+  runCliCommand,
+} from '@openops/common';
 export async function runCommand(
   command: string,
   auth: any,
@@ -20,11 +20,8 @@ export async function runCommand(
   }
 
   if (!shouldUseHostCredentials) {
-    const gcpConfigDir = await fs.mkdtemp(
-      path.join(os.tmpdir(), 'gcloud-config'),
-    );
+    const gcpConfigDir = await getDefaultCloudSDKConfig();
     envVars['CLOUDSDK_CONFIG'] = gcpConfigDir;
-
     await loginGCPWithKeyObject(auth.keyFileContent, envVars);
   }
 
@@ -37,13 +34,4 @@ export async function runCommand(
   }
 
   return await runCliCommand(command, 'gcloud', envVars);
-}
-
-async function loginGCPWithKeyObject(keyObject: string, envVars: any) {
-  const result = await useTempFile(keyObject, async (filePath) => {
-    const loginCommand = `gcloud auth activate-service-account --key-file=${filePath}`;
-    return await runCliCommand(loginCommand, 'gcloud', envVars);
-  });
-
-  return result;
 }

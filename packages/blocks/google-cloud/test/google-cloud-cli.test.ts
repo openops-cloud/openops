@@ -1,16 +1,14 @@
+const getDefaultCloudSDKConfigMock = jest
+  .fn()
+  .mockResolvedValue('/tmp/gcloud-config-abc');
+const loginGCPWithKeyObjectMock = jest.fn();
 const runCliCommandMock = jest.fn();
-const useTempFileMock = jest.fn();
 
 jest.mock('@openops/common', () => ({
+  getDefaultCloudSDKConfig: getDefaultCloudSDKConfigMock,
+  loginGCPWithKeyObject: loginGCPWithKeyObjectMock,
   runCliCommand: runCliCommandMock,
-  useTempFile: useTempFileMock,
 }));
-
-const fsPromisesMock = {
-  ...jest.requireActual('fs/promises'),
-  mkdtemp: jest.fn(),
-};
-jest.mock('fs/promises', () => fsPromisesMock);
 
 import { runCommand } from '../src/lib/google-cloud-cli';
 
@@ -22,13 +20,9 @@ describe('Google cloud runCommand', () => {
   });
 
   test('calls login, sets project, and runs command', async () => {
-    fsPromisesMock.mkdtemp.mockResolvedValue('/tmp/gcloud-config-abc');
-    useTempFileMock.mockImplementation(async (_contents, callback) => {
-      return callback('/tmp/mock-key-file.json');
-    });
+    loginGCPWithKeyObjectMock.mockResolvedValue('login success');
 
     runCliCommandMock
-      .mockResolvedValueOnce('login success')
       .mockResolvedValueOnce('project set success')
       .mockResolvedValueOnce('command output');
 
@@ -41,27 +35,12 @@ describe('Google cloud runCommand', () => {
 
     expect(result).toBe('command output');
 
-    expect(fsPromisesMock.mkdtemp).toHaveBeenCalledWith(
-      expect.stringMatching(/^\/tmp\/gcloud-config/),
-    );
-
-    expect(useTempFileMock).toHaveBeenCalledWith(
-      keyFileContent,
-      expect.any(Function),
-    );
+    expect(runCliCommandMock).toHaveBeenCalledTimes(2);
+    expect(loginGCPWithKeyObjectMock).toHaveBeenCalledTimes(1);
+    expect(getDefaultCloudSDKConfigMock).toHaveBeenCalledTimes(1);
 
     expect(runCliCommandMock).toHaveBeenNthCalledWith(
       1,
-      'gcloud auth activate-service-account --key-file=/tmp/mock-key-file.json',
-      'gcloud',
-      expect.objectContaining({
-        CLOUDSDK_CONFIG: '/tmp/gcloud-config-abc',
-        PATH: expect.any(String),
-      }),
-    );
-
-    expect(runCliCommandMock).toHaveBeenNthCalledWith(
-      2,
       'gcloud config set project my-project',
       'gcloud',
       expect.objectContaining({
@@ -71,7 +50,7 @@ describe('Google cloud runCommand', () => {
     );
 
     expect(runCliCommandMock).toHaveBeenNthCalledWith(
-      3,
+      2,
       'gcloud compute instances list',
       'gcloud',
       expect.objectContaining({
@@ -92,8 +71,7 @@ describe('Google cloud runCommand', () => {
     );
 
     expect(result).toBe('command output');
-    expect(fsPromisesMock.mkdtemp).not.toHaveBeenCalled();
-    expect(useTempFileMock).not.toHaveBeenCalled();
+    expect(loginGCPWithKeyObjectMock).not.toHaveBeenCalled();
 
     expect(runCliCommandMock).toHaveBeenCalledWith(
       'gcloud info',
