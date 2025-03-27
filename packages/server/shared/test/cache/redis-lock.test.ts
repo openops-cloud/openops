@@ -8,8 +8,12 @@ jest.mock('../../src/lib/logger', () => ({
 }));
 
 jest.mock('../../src/lib/system/system', () => ({
+  QueueMode: {
+    REDIS: 'REDIS',
+    MEMORY: 'MEMORY',
+  },
   system: {
-    get: jest.fn().mockReturnValue('mockedSigningSecret'),
+    get: jest.fn().mockReturnValue('REDIS'),
   },
 }));
 

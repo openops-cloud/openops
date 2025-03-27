@@ -1,7 +1,7 @@
 import RedLock from 'redlock';
 import { logger } from '../logger';
 import { Lock } from '../memory-lock';
-import { AppSystemProp, system } from '../system';
+import { AppSystemProp, QueueMode, system } from '../system';
 import { createRedisClient } from './redis-connection';
 
 // By default, the timeout to wait to acquire a lock is 30 seconds
@@ -32,8 +32,9 @@ const generateRedlockRetryConfig = (
 
 const redLockClient = (() => {
   // TODO: Remove this check when we have the unit tests fixed.
-  const host = system.get(AppSystemProp.REDIS_HOST);
-  if (!host) {
+  const isRedisConfigured =
+    system.get<QueueMode>(AppSystemProp.QUEUE_MODE) === QueueMode.REDIS;
+  if (!isRedisConfigured) {
     return;
   }
 

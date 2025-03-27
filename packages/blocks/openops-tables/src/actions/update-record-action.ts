@@ -12,6 +12,7 @@ import {
   openopsTablesDropdownProperty,
   updateRow,
 } from '@openops/common';
+import { cacheWrapper } from '@openops/server-shared';
 import { convertToStringWithValidation, isEmpty } from '@openops/shared';
 
 export const updateRecordAction = createAction({
@@ -112,11 +113,22 @@ export const updateRecordAction = createAction({
   async run(context) {
     const { rowPrimaryKey, fieldsProperties } = context.propsValue;
     const tableName = context.propsValue.tableName as unknown as string;
-    const tableId = await getTableIdByTableName(tableName);
+
+    const tableCacheKey = `${context.run.id}-table-${tableName}`;
+    const tableId = await cacheWrapper.getOrAdd(
+      tableCacheKey,
+      getTableIdByTableName,
+      [tableName],
+    );
 
     const { token } = await authenticateDefaultUserInOpenOpsTables();
 
-    const tableFields = await getFields(tableId, token);
+    const fieldsCacheKey = `${context.run.id}-${tableId}-fields`;
+    const tableFields = await cacheWrapper.getOrAdd(fieldsCacheKey, getFields, [
+      tableId,
+      token,
+    ]);
+
     const fieldsToUpdate = mapFieldsToObject(
       tableName,
       tableFields,

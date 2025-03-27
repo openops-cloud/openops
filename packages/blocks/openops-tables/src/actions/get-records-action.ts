@@ -10,6 +10,7 @@ import {
   openopsTablesDropdownProperty,
   ViewFilterTypesEnum,
 } from '@openops/common';
+import { cacheWrapper } from '@openops/server-shared';
 
 export const getRecordsAction = createAction({
   auth: BlockAuth.None(),
@@ -107,7 +108,13 @@ export const getRecordsAction = createAction({
     const { token } = await authenticateDefaultUserInOpenOpsTables();
 
     const tableName = context.propsValue.tableName as unknown as string;
-    const tableId = await getTableIdByTableName(tableName);
+
+    const tableCacheKey = `${context.run.id}-table-${tableName}`;
+    const tableId = await cacheWrapper.getOrAdd(
+      tableCacheKey,
+      getTableIdByTableName,
+      [tableName],
+    );
 
     const filtersProps = context.propsValue.filters['filters'] as unknown as {
       fieldName: string;

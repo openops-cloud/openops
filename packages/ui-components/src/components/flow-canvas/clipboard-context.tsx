@@ -29,12 +29,14 @@ async function getActionsInClipboard(): Promise<Action | null> {
 
 export const ClipboardContextProvider = ({
   children,
+  copyPasteActionsEnabled = true,
 }: {
   children: ReactNode;
+  copyPasteActionsEnabled?: boolean;
 }) => {
   const [actionToPaste, setActionToPaste] = useState<Action | null>(null);
   const fetchClipboardOperations = async () => {
-    if (document.hasFocus()) {
+    if (document.hasFocus() && copyPasteActionsEnabled) {
       const clipboardAction = await getActionsInClipboard();
       if (clipboardAction) {
         setActionToPaste(clipboardAction);
