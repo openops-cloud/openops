@@ -157,6 +157,7 @@ const CanvasContextMenu = memo(
                 onSelect={(e) => {
                   e.preventDefault();
                   copyAction(data.step as Action);
+                  setOpenStepActionsMenu(false);
                 }}
               >
                 <StepActionWrapper>
@@ -197,6 +198,7 @@ const CanvasContextMenu = memo(
                       StepLocationRelativeToParent.INSIDE_LOOP,
                       data.step.name,
                     );
+                    setOpenStepActionsMenu(false);
                   }
                 }}
               >
@@ -220,6 +222,7 @@ const CanvasContextMenu = memo(
                       StepLocationRelativeToParent.INSIDE_TRUE_BRANCH,
                       data.step.name,
                     );
+                    setOpenStepActionsMenu(false);
                   }
                 }}
               >
@@ -245,6 +248,7 @@ const CanvasContextMenu = memo(
                       data.step.name,
                       branchNodeId,
                     );
+                    setOpenStepActionsMenu(false);
                   }
                 }}
               >
@@ -258,13 +262,13 @@ const CanvasContextMenu = memo(
           {isAction && showCopyPaste && actionToPaste && (
             <DropdownMenuItem
               onSelect={(e) => {
-                e.preventDefault();
                 if (data.step) {
                   onPaste(
                     actionToPaste as Action,
                     StepLocationRelativeToParent.AFTER,
                     data.step.name,
                   );
+                  setOpenStepActionsMenu(false);
                 }
               }}
             >
