@@ -13,6 +13,7 @@ export * from './flow-canvas/canvas-context';
 export * from './flow-canvas/canvas-controls';
 export * from './flow-canvas/clipboard-context';
 export * from './flow-canvas/constants';
+export * from './flow-canvas/copy-paste-toast';
 export * from './flow-canvas/edges/branch-label';
 export * from './flow-canvas/edges/return-loop-edge';
 export * from './flow-canvas/edges/utils';
