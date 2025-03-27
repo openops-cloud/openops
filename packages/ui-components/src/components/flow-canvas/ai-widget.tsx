@@ -36,6 +36,7 @@ const AiWidget = () => {
           <p>
             <Link
               to="https://openops.com/pricing"
+              target="_blank"
               className="font-bold text-primary-200"
             >
               {t('Learn how')}
