@@ -1,7 +1,9 @@
+import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { useClipboardContext } from '@openops/components/ui';
 import {
   Action,
   ActionType,
+  FlagId,
   StepLocationRelativeToParent,
 } from '@openops/shared';
 import { isNil } from 'lodash-es';
@@ -17,6 +19,10 @@ const operationKeyboardKeyCombinationMap = {
 };
 
 const useKeyboardPasteShortcut = () => {
+  const showCopyPaste =
+    flagsHooks.useFlag<boolean>(FlagId.COPY_PASTE_ACTIONS_ENABLED).data ||
+    false;
+
   const { selectedStep, selectedNodes, getStepDetails } = useSelection();
 
   const { onPaste } = usePaste();
@@ -24,7 +30,7 @@ const useKeyboardPasteShortcut = () => {
   const disabledPaste = isNil(actionToPaste);
 
   const canPerformOperation = () =>
-    !disabledPaste && selectedNodes.length === 0;
+    showCopyPaste && !disabledPaste && selectedNodes.length === 0;
 
   const onPasteOperation = (): void => {
     const selectedStepDetails = getStepDetails(selectedStep);

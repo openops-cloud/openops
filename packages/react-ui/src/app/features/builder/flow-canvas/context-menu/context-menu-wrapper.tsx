@@ -5,7 +5,8 @@ import {
   ContextMenuType,
 } from '@openops/components/ui';
 
-import { Action } from '@openops/shared';
+import { flagsHooks } from '@/app/common/hooks/flags-hooks';
+import { Action, FlagId } from '@openops/shared';
 import { useBuilderStateContext } from '../../builder-hooks';
 import { CanvasContextMenuContent } from './canvas-context-menu-content';
 
@@ -21,8 +22,11 @@ const CanvasContextMenuWrapper = ({
   contextMenuType,
 }: CanvasContextMenuProps) => {
   const readonly = useBuilderStateContext((state) => state.readonly);
+  const enableContextMenu =
+    flagsHooks.useFlag<boolean>(FlagId.COPY_PASTE_ACTIONS_ENABLED).data ||
+    false;
 
-  if (readonly) {
+  if (!enableContextMenu || readonly) {
     return children;
   }
 
