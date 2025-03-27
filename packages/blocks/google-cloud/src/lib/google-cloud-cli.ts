@@ -1,5 +1,8 @@
-import { getDefaultCloudSDKConfig, loginGCPWithKeyObject, runCliCommand } from '@openops/common';
-import path from 'path';
+import {
+  getDefaultCloudSDKConfig,
+  loginGCPWithKeyObject,
+  runCliCommand,
+} from '@openops/common';
 export async function runCommand(
   command: string,
   auth: any,
