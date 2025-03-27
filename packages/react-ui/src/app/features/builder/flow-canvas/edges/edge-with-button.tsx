@@ -10,10 +10,6 @@ import {
   getPositionRelativeToParent,
   getSplitEdgeData,
   LINE_WIDTH,
-  PLUS_CONTEXT_MENU_ATTRIBUTE,
-  PLUS_CONTEXT_MENU_BRANCH_NODE_ID_ATTRIBUTE,
-  PLUS_CONTEXT_MENU_PARENT_ATTRIBUTE,
-  PLUS_CONTEXT_MENU_STEP_LOCATION_ATTRIBUTE,
 } from '@openops/components/ui';
 import {
   FlowOperationType,
