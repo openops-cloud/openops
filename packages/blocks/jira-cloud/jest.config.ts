@@ -2,6 +2,7 @@
 export default {
   displayName: 'blocks-jira-cloud',
   preset: '../../../jest.preset.js',
+  setupFiles: ['../../../jest.env.js'],
   testEnvironment: 'node',
   transform: {
     '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }],

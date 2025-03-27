@@ -2,6 +2,7 @@
 export default {
   displayName: 'server-api',
   preset: '../../../jest.preset.js',
+  setupFiles: ['../../../jest.env.js'],
   globals: {},
   testEnvironment: 'node',
   transform: {
