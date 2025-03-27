@@ -1,7 +1,4 @@
-import {
-  loginGCPWithKeyObject,
-  runCliCommand,
-} from '@openops/common';
+import { loginGCPWithKeyObject, runCliCommand } from '@openops/common';
 export async function runCommand(
   command: string,
   auth: any,
