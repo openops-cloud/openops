@@ -1,4 +1,8 @@
-import { toast, UNSAVED_CHANGES_TOAST } from '@openops/components/ui';
+import {
+  copyPasteToast,
+  toast,
+  UNSAVED_CHANGES_TOAST,
+} from '@openops/components/ui';
 import {
   Action,
   flowHelper,
@@ -25,6 +29,8 @@ export const usePaste = () => {
       if (isNil(actionToPaste)) {
         return;
       }
+
+      const itemsCount = flowHelper.getAllSteps(actionToPaste).length;
       applyOperationAndPushToHistory(
         {
           type: FlowOperationType.PASTE_ACTIONS,
@@ -36,7 +42,13 @@ export const usePaste = () => {
           },
         },
         () => toast(UNSAVED_CHANGES_TOAST),
-      );
+      ).then(() => {
+        copyPasteToast({
+          success: true,
+          isCopy: false,
+          itemsCount,
+        });
+      });
     },
     [applyOperationAndPushToHistory, flowVersion],
   );

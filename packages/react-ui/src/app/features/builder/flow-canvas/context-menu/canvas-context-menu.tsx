@@ -1,4 +1,3 @@
-import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import {
   Button,
   DropdownMenu,
@@ -15,7 +14,6 @@ import {
 import {
   Action,
   ActionType,
-  FlagId,
   FlowOperationType,
   StepLocationRelativeToParent,
 } from '@openops/shared';
@@ -51,9 +49,6 @@ const CanvasContextMenu = memo(
     setOpenStepActionsMenu,
     setOpenBlockSelector,
   }: Props) => {
-    const showCopyPaste =
-      flagsHooks.useFlag<boolean>(FlagId.COPY_PASTE_ACTIONS_ENABLED).data ||
-      false;
     const applyOperationAndPushToHistory = useApplyOperationAndPushToHistory();
 
     const { copyAction } = useCanvasContext();
@@ -150,13 +145,14 @@ const CanvasContextMenu = memo(
             </StepActionWrapper>
           </DropdownMenuItem>
 
-          {isAction && showCopyPaste && (
+          {isAction && (
             <>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onSelect={(e) => {
                   e.preventDefault();
                   copyAction(data.step as Action);
+                  setOpenStepActionsMenu(false);
                 }}
               >
                 <StepActionWrapper>
@@ -185,7 +181,6 @@ const CanvasContextMenu = memo(
           )}
 
           {isAction &&
-            showCopyPaste &&
             actionToPaste &&
             data.step?.type === ActionType.LOOP_ON_ITEMS && (
               <DropdownMenuItem
@@ -197,6 +192,7 @@ const CanvasContextMenu = memo(
                       StepLocationRelativeToParent.INSIDE_LOOP,
                       data.step.name,
                     );
+                    setOpenStepActionsMenu(false);
                   }
                 }}
               >
@@ -208,7 +204,6 @@ const CanvasContextMenu = memo(
             )}
 
           {isAction &&
-            showCopyPaste &&
             actionToPaste &&
             data.step?.type === ActionType.BRANCH && (
               <DropdownMenuItem
@@ -220,6 +215,7 @@ const CanvasContextMenu = memo(
                       StepLocationRelativeToParent.INSIDE_TRUE_BRANCH,
                       data.step.name,
                     );
+                    setOpenStepActionsMenu(false);
                   }
                 }}
               >
@@ -231,7 +227,6 @@ const CanvasContextMenu = memo(
             )}
 
           {isAction &&
-            showCopyPaste &&
             actionToPaste &&
             data.step?.type === ActionType.SPLIT && (
               <DropdownMenuItem
@@ -245,6 +240,7 @@ const CanvasContextMenu = memo(
                       data.step.name,
                       branchNodeId,
                     );
+                    setOpenStepActionsMenu(false);
                   }
                 }}
               >
@@ -255,16 +251,16 @@ const CanvasContextMenu = memo(
               </DropdownMenuItem>
             )}
 
-          {isAction && showCopyPaste && actionToPaste && (
+          {isAction && actionToPaste && (
             <DropdownMenuItem
               onSelect={(e) => {
-                e.preventDefault();
                 if (data.step) {
                   onPaste(
                     actionToPaste as Action,
                     StepLocationRelativeToParent.AFTER,
                     data.step.name,
                   );
+                  setOpenStepActionsMenu(false);
                 }
               }}
             >

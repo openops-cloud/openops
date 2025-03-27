@@ -67,7 +67,8 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [SharedSystemProp.LOG_PRETTY]: 'false',
   [SharedSystemProp.PACKAGE_ARCHIVE_PATH]: 'cache/archives',
   [SharedSystemProp.BLOCKS_SOURCE]: BlocksSource.FILE,
-  [AppSystemProp.QUEUE_MODE]: QueueMode.REDIS,
+  [AppSystemProp.QUEUE_MODE]:
+    process.env['NODE_ENV'] === 'test' ? QueueMode.MEMORY : QueueMode.REDIS,
   [SharedSystemProp.FLOW_TIMEOUT_SECONDS]: '600',
   [SharedSystemProp.TRIGGER_TIMEOUT_SECONDS]: '60',
   [AppSystemProp.TEMPLATES_SOURCE_URL]: '/api/v1/flow-templates',
