@@ -34,20 +34,22 @@ export const googleCloudAuth = BlockAuth.CustomAuth({
 });
 
 async function runAuthCommand(keyObject: string): Promise<string> {
+  const gcpConfigDir = await getDefaultCloudSDKConfig();
+
   const envVars: Record<string, string> = {
     PATH: process.env['PATH'] || '',
     CLOUDSDK_CORE_DISABLE_PROMPTS: '1',
+    CLOUDSDK_CONFIG: gcpConfigDir,
   };
 
   return await loginGCPWithKeyObject(keyObject, envVars);
 }
 
-export async function loginGCPWithKeyObject(keyObject: string, envVars: any) {
-  const gcpConfigDir = await fs.mkdtemp(
-    path.join(os.tmpdir(), 'gcloud-config'),
-  );
+export async function getDefaultCloudSDKConfig(): Promise<string> {
+  return await fs.mkdtemp(path.join(os.tmpdir(), 'gcloud-config'));
+}
 
-  envVars['CLOUDSDK_CONFIG'] = gcpConfigDir;
+export async function loginGCPWithKeyObject(keyObject: string, envVars: any) {
   const result = await useTempFile(keyObject, async (filePath) => {
     const loginCommand = `gcloud auth activate-service-account --key-file=${filePath}`;
     return await runCliCommand(loginCommand, 'gcloud', envVars);

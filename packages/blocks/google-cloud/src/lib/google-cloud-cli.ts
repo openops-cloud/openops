@@ -1,4 +1,5 @@
-import { loginGCPWithKeyObject, runCliCommand } from '@openops/common';
+import { getDefaultCloudSDKConfig, loginGCPWithKeyObject, runCliCommand } from '@openops/common';
+import path from 'path';
 export async function runCommand(
   command: string,
   auth: any,
@@ -16,6 +17,8 @@ export async function runCommand(
   }
 
   if (!shouldUseHostCredentials) {
+    const gcpConfigDir = await getDefaultCloudSDKConfig();
+    envVars['CLOUDSDK_CONFIG'] = gcpConfigDir;
     await loginGCPWithKeyObject(auth.keyFileContent, envVars);
   }
 
