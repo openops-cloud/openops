@@ -11,6 +11,7 @@ export async function runCommand(
 ): Promise<string> {
   const envVars: Record<string, string> = {
     PATH: process.env['PATH'] || '',
+    CLOUDSDK_CORE_DISABLE_PROMPTS: '1',
   };
 
   const processGoogleCloudConfigDir = process.env['CLOUDSDK_CONFIG'];
