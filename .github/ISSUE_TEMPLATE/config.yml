@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Custom Issue Template
+    url: https://github.com/kamrajshahapure/openops/issues/new?template=custom_template.md
+    about: Use this template for all new issues.
