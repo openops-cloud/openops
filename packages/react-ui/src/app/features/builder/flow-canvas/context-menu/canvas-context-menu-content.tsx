@@ -9,13 +9,11 @@ import {
 import {
   Action,
   ActionType,
-  FlagId,
   flowHelper,
   isNil,
   StepLocationRelativeToParent,
 } from '@openops/shared';
 
-import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { useBuilderStateContext } from '../../builder-hooks';
 import { usePaste } from '../../hooks/use-paste';
 import { useSelection } from '../../hooks/use-selection';
@@ -26,16 +24,12 @@ export const CanvasContextMenuContent = ({
   contextMenuType,
   actionToPaste,
 }: CanvasContextMenuProps) => {
-  const showCopyPaste =
-    flagsHooks.useFlag<boolean>(FlagId.COPY_PASTE_ACTIONS_ENABLED).data ||
-    false;
-
   const [flowVersion, readonly] = useBuilderStateContext((state) => [
     state.flowVersion,
     state.readonly,
   ]);
 
-  const { copySelectedArea, copyAction } = useCanvasContext();
+  const { copySelectedArea, copyAction, pastePlusButton } = useCanvasContext();
 
   const { selectedStep, selectedNodes, firstSelectedNode } = useSelection();
 
@@ -69,9 +63,7 @@ export const CanvasContextMenuContent = ({
     firstSelectedNode?.type === ActionType.SPLIT;
 
   const showCopy =
-    showCopyPaste &&
-    !doSelectedNodesIncludeTrigger &&
-    contextMenuType === ContextMenuType.STEP;
+    !doSelectedNodesIncludeTrigger && contextMenuType === ContextMenuType.STEP;
 
   const { onPaste } = usePaste();
 
@@ -97,7 +89,7 @@ export const CanvasContextMenuContent = ({
       )}
 
       <>
-        {showPasteAfterLastStep && (
+        {showPasteAfterLastStep && !pastePlusButton && (
           <ContextMenuItem
             disabled={disabledPaste}
             onClick={() =>
@@ -178,7 +170,24 @@ export const CanvasContextMenuContent = ({
             className="flex items-center gap-2"
           >
             <Copy className="w-4 h-4"></Copy>
-            {t('Paste After')}
+            {t('Paste after')}
+          </ContextMenuItem>
+        )}
+        {pastePlusButton && (
+          <ContextMenuItem
+            disabled={disabledPaste}
+            onClick={() =>
+              onPaste(
+                actionToPaste as Action,
+                pastePlusButton.plusStepLocation,
+                pastePlusButton.parentStep,
+                pastePlusButton.branchNodeId,
+              )
+            }
+            className="flex items-center gap-2"
+          >
+            <Copy className="w-4 h-4"></Copy>
+            {t('Paste here')}
           </ContextMenuItem>
         )}
       </>

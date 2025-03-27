@@ -22,7 +22,6 @@ import {
 } from '@/app/features/builder/builder-hooks';
 import { DynamicFormValidationProvider } from '@/app/features/builder/dynamic-form-validation/dynamic-form-validation-context';
 
-import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { useResizablePanelGroup } from '@/app/common/hooks/use-resizable-panel-group';
 import { useSocket } from '@/app/common/providers/socket-provider';
 import { FLOW_CANVAS_Y_OFFESET } from '@/app/constants/flow-canvas';
@@ -30,7 +29,6 @@ import { SEARCH_PARAMS } from '@/app/constants/search-params';
 import {
   ActionType,
   BlockTrigger,
-  FlagId,
   flowHelper,
   isNil,
   TriggerType,
@@ -94,9 +92,6 @@ const constructContainerKey = (
 
 const BuilderPage = () => {
   const [searchParams] = useSearchParams();
-  const showCopyPaste =
-    flagsHooks.useFlag<boolean>(FlagId.COPY_PASTE_ACTIONS_ENABLED).data ||
-    false;
 
   const [
     selectedStep,
@@ -238,7 +233,7 @@ const BuilderPage = () => {
       )}
 
       <ReactFlowProvider>
-        <ClipboardContextProvider copyPasteActionsEnabled={showCopyPaste}>
+        <ClipboardContextProvider copyPasteActionsEnabled={true}>
           <BuilderTreeViewProvider selectedId={selectedStep || undefined}>
             <ResizablePanelGroup
               direction="horizontal"
@@ -282,7 +277,7 @@ const BuilderPage = () => {
                   'min-w-[830px]': leftSidebar === LeftSideBarType.NONE,
                 })}
               >
-                {readonly || !showCopyPaste ? (
+                {readonly ? (
                   <ReadonlyCanvasProvider>
                     <div
                       ref={middlePanelRef}
