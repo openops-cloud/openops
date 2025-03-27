@@ -8,13 +8,10 @@ import {
   DRAGGED_STEP_TAG,
   LINE_WIDTH,
   OPS_NODE_SIZE,
-  PLUS_CONTEXT_MENU_ATTRIBUTE,
-  PLUS_CONTEXT_MENU_BRANCH_NODE_ID_ATTRIBUTE,
-  PLUS_CONTEXT_MENU_PARENT_ATTRIBUTE,
-  PLUS_CONTEXT_MENU_STEP_LOCATION_ATTRIBUTE,
   WorkflowNode,
 } from '@openops/components/ui';
 import { useBuilderStateContext } from '../../builder-hooks';
+import { attributesHelper } from '../attributes-helper';
 import { FlowAddButton } from '../flow-add-button';
 
 const BigButton = React.memo(({ data }: { data: WorkflowNode['data'] }) => {
@@ -67,14 +64,11 @@ const BigButton = React.memo(({ data }: { data: WorkflowNode['data'] }) => {
             onOpenChange={setActionMenuOpen}
           >
             <div
-              {...{
-                [`data-${PLUS_CONTEXT_MENU_ATTRIBUTE}`]: 'plus-button',
-                [`data-${PLUS_CONTEXT_MENU_PARENT_ATTRIBUTE}`]: data.parentStep,
-                [`data-${PLUS_CONTEXT_MENU_STEP_LOCATION_ATTRIBUTE}`]:
-                  data.stepLocationRelativeToParent,
-                [`data-${PLUS_CONTEXT_MENU_BRANCH_NODE_ID_ATTRIBUTE}`]:
-                  data.branchNodeId,
-              }}
+              {...attributesHelper.addPlusButtonAttribute(
+                data.parentStep!,
+                data.stepLocationRelativeToParent!,
+                data.branchNodeId,
+              )}
             >
               <FlowAddButton
                 ref={(ref) => setNodeRef(ref)}
