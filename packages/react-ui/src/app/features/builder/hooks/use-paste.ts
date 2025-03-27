@@ -30,7 +30,7 @@ export const usePaste = () => {
         return;
       }
 
-      const itemsCounter = flowHelper.getAllSteps(actionToPaste).length;
+      const itemsCount = flowHelper.getAllSteps(actionToPaste).length;
       applyOperationAndPushToHistory(
         {
           type: FlowOperationType.PASTE_ACTIONS,
@@ -46,7 +46,7 @@ export const usePaste = () => {
         copyPasteToast({
           success: true,
           isCopy: false,
-          itemsCounter: itemsCounter,
+          itemsCount,
         });
       });
     },

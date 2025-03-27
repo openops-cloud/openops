@@ -5,13 +5,13 @@ import { toast } from '../../ui/use-toast';
 type CopyPasteToastProps = {
   success: boolean;
   isCopy: boolean;
-  itemsCounter: number;
+  itemsCount: number;
 };
 
 const CopyPasteToastContent = ({
   success,
   isCopy,
-  itemsCounter,
+  itemsCount,
 }: CopyPasteToastProps) => {
   if (success) {
     return (
@@ -22,7 +22,7 @@ const CopyPasteToastContent = ({
             isCopy
               ? '{n} Steps copied to clipboard'
               : '{n} Steps successfully pasted',
-            { n: itemsCounter },
+            { n: itemsCount },
           )}
         </span>
       </>
@@ -34,7 +34,7 @@ const CopyPasteToastContent = ({
         <span className="font-bold text-normal">
           {t(
             isCopy ? 'Failed to copy {n} steps' : 'Failed to paste {n} steps',
-            { n: itemsCounter },
+            { n: itemsCount },
           )}
         </span>
       </>

@@ -219,7 +219,7 @@ export const InteractiveContextProvider = ({
     handleCopy(actionToBeCopied, allNestedSteps.length);
   };
 
-  const handleCopy = (action: Action, actionCounter: number) => {
+  const handleCopy = (action: Action, actionCount: number) => {
     const flowString = JSON.stringify(action);
 
     navigator.clipboard
@@ -228,7 +228,7 @@ export const InteractiveContextProvider = ({
         copyPasteToast({
           success: true,
           isCopy: true,
-          itemsCounter: actionCounter,
+          itemsCount: actionCount,
         });
         fetchClipboardOperations();
       })
@@ -236,7 +236,7 @@ export const InteractiveContextProvider = ({
         copyPasteToast({
           success: false,
           isCopy: true,
-          itemsCounter: actionCounter,
+          itemsCount: actionCount,
         });
       });
   };
