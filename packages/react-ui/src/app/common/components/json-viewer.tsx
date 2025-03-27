@@ -98,7 +98,7 @@ const JsonViewer = React.memo(({ json, title }: JsonViewerProps) => {
         const root = createRoot(rootElem);
 
         el.parentElement!.replaceChildren(el as Node, rootElem as Node);
-        const isProductionFile = fileUrl.includes('file://');
+        const isProductionFile = fileUrl.startsWith('file://');
 
         root.render(
           <div data-file-root="true">
