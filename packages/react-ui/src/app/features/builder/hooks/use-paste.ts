@@ -19,6 +19,7 @@ export const usePaste = () => {
   const applyOperationAndPushToHistory = useApplyOperationAndPushToHistory();
   const flowVersion = useBuilderStateContext((state) => state.flowVersion);
 
+  // todo - if there is no action to paste -> try to read the clipboard
   const onPaste = useCallback(
     (
       actionToPaste: Action,
@@ -42,13 +43,21 @@ export const usePaste = () => {
           },
         },
         () => toast(UNSAVED_CHANGES_TOAST),
-      ).then(() => {
-        copyPasteToast({
-          success: true,
-          isCopy: false,
-          itemsCount,
+      )
+        .then(() => {
+          copyPasteToast({
+            success: true,
+            isCopy: false,
+            itemsCount,
+          });
+        })
+        .catch(() => {
+          copyPasteToast({
+            success: false,
+            isCopy: false,
+            itemsCount,
+          });
         });
-      });
     },
     [applyOperationAndPushToHistory, flowVersion],
   );
