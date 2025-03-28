@@ -161,6 +161,11 @@ const FlowCanvas = React.memo(
       }
     };
 
+    const onClickOutsideSelection = useCallback(() => {
+      const { setNodes, nodes } = storeApi.getState();
+      setNodes(nodes.map((node) => ({ ...node, selected: false })));
+    }, [storeApi]);
+
     return (
       <div className="size-full bg-editorBackground" ref={containerRef}>
         {!!graph && (
@@ -200,6 +205,7 @@ const FlowCanvas = React.memo(
               onContextMenu={onContextMenu}
               onSelectionChange={readonly ? undefined : onSelectionChange}
               onSelectionEnd={readonly ? undefined : onSelectionEnd}
+              onPaneClick={onClickOutsideSelection}
             >
               <Background color="lightgray" />
               {children}
