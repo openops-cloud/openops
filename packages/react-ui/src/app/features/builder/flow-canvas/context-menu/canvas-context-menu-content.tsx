@@ -42,9 +42,9 @@ export const CanvasContextMenuContent = ({
   const disabled = selectedNodes.length === 0 && !selectedStep;
   const isSingleSelectedNode = selectedNodes.length === 1;
 
-  const doSelectedNodesIncludeTrigger = selectedNodes.some(
-    (node: string) => node === flowVersion.trigger.name,
-  );
+  const doSelectedNodesIncludeTrigger =
+    selectedNodes.some((node: string) => node === flowVersion.trigger.name) ||
+    selectedStep === flowVersion.trigger.name;
 
   const disabledPaste = isNil(actionToPaste);
   const showPasteAfterLastStep =
