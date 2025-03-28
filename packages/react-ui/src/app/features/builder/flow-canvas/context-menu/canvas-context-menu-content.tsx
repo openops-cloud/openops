@@ -46,7 +46,8 @@ export const CanvasContextMenuContent = ({
     (node: string) => node === flowVersion.trigger.name,
   );
 
-  const disabledPaste = isNil(actionToPaste);
+  // todo - check clipboard permissions
+  const disabledPaste = false; // isNil(actionToPaste);
   const showPasteAfterLastStep =
     !readonly && contextMenuType === ContextMenuType.CANVAS;
   const showPasteAsFirstLoopAction =

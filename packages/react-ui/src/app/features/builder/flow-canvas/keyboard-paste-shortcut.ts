@@ -1,5 +1,5 @@
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
-import { useClipboardContext } from '@openops/components/ui';
+// import { useClipboardContext } from '@openops/components/ui';
 import {
   Action,
   ActionType,
@@ -18,6 +18,7 @@ const operationKeyboardKeyCombinationMap = {
   ],
 };
 
+// todo remove
 const useKeyboardPasteShortcut = () => {
   const showCopyPaste =
     flagsHooks.useFlag<boolean>(FlagId.COPY_PASTE_ACTIONS_ENABLED).data ||
@@ -26,14 +27,20 @@ const useKeyboardPasteShortcut = () => {
   const { selectedStep, selectedNodes, getStepDetails } = useSelection();
 
   const { onPaste } = usePaste();
-  const { actionToPaste } = useClipboardContext();
-  const disabledPaste = isNil(actionToPaste);
+  // const { actionToPaste } = useClipboardContext();
+  // const disabledPaste = isNil(actionToPaste);
 
-  const canPerformOperation = () =>
-    showCopyPaste && !disabledPaste && selectedNodes.length === 0;
+  const canPerformOperation = () => {
+    console.log(
+      'canPerformOperation',
+      showCopyPaste && selectedNodes.length === 0,
+    );
+    return showCopyPaste && selectedNodes.length === 0;
+  };
 
   const onPasteOperation = (): void => {
     const selectedStepDetails = getStepDetails(selectedStep);
+    console.log('onPasteOperation', selectedStepDetails);
 
     const pasteMapping: Partial<
       Record<ActionType, StepLocationRelativeToParent>
@@ -57,7 +64,7 @@ const useKeyboardPasteShortcut = () => {
         ? selectedStepDetails.settings.options[0].id
         : undefined;
 
-    onPaste(actionToPaste as Action, location, selectedStep, additionalParam);
+    // onPaste(actionToPaste as Action, location, selectedStep, additionalParam);
   };
 
   const operationMap = {
