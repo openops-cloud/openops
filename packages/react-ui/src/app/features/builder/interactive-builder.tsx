@@ -78,7 +78,7 @@ const InteractiveBuilder = ({
         <BuilderHeader />
 
         <CanvasControls topOffset={FLOW_CANVAS_Y_OFFESET}></CanvasControls>
-        <AiWidget />
+        <AiWidget classname="left-[282px]" />
         <DataSelector
           parentHeight={middlePanelSize.height}
           parentWidth={middlePanelSize.width}
