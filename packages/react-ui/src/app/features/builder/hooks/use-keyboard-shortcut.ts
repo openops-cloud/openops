@@ -78,7 +78,7 @@ export function useKeyboardShortcut<T extends string>(params: {
         return;
       }
 
-      // e.preventDefault();
+      e.preventDefault();
       operationMap[operationName]();
     };
 
