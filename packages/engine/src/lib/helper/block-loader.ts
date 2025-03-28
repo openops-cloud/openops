@@ -7,6 +7,7 @@ import {
   getPackageAliasForBlock,
   isNil,
 } from '@openops/shared';
+import importFresh from 'import-fresh';
 
 const loadBlockOrThrow = async ({
   blockName,
@@ -23,7 +24,9 @@ const loadBlockOrThrow = async ({
     blocksSource,
   });
 
-  const module = await import(packageName);
+  // const module = await import(packageName);
+
+  const module: Record<string, unknown> = await importFresh(packageName);
   const block = extractBlockFromModule<Block>({
     module,
     blockName,
