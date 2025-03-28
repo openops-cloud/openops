@@ -130,6 +130,7 @@ export const InteractiveContextProvider = ({
     const selectionArea = document.querySelector(
       `.${NODE_SELECTION_RECT_CLASS_NAME}`,
     );
+
     if (!selectionArea) {
       selectedFlowActionRef.current = null;
       selectedNodeCounterRef.current = 0;
@@ -142,14 +143,34 @@ export const InteractiveContextProvider = ({
     handleCopy(selectedFlowActionRef.current, selectedNodeCounterRef.current);
   }, COPY_DEBOUNCE_DELAY_MS);
 
-  const canvas = useMemo(() => {
-    return flowCanvasContainerId
-      ? document.getElementById(flowCanvasContainerId)
-      : null;
-  }, [flowCanvasContainerId]);
-  // const copyPressed = useKeyPress(COPY_KEYS, { target: canvas });
+  useEffect(() => {
+    if (!flowCanvasContainerId) return;
 
-  // const { fetchClipboardOperations } = useClipboardContext();
+    const copyHandler = () => {
+      if (selectedStep) {
+        copySelectedStep();
+      } else {
+        copySelectedArea();
+      }
+    };
+
+    const intervalId = setInterval(() => {
+      const canvas = document.getElementById(flowCanvasContainerId);
+      if (canvas) {
+        canvas.removeEventListener('copy', copyHandler);
+        canvas.addEventListener('copy', copyHandler);
+        clearInterval(intervalId);
+      }
+    }, 200);
+
+    return () => {
+      clearInterval(intervalId);
+      const canvas = document.getElementById(flowCanvasContainerId);
+      if (canvas) {
+        canvas.removeEventListener('copy', copyHandler);
+      }
+    };
+  }, [flowCanvasContainerId, copySelectedArea, copySelectedStep, selectedStep]);
 
   // clear multi-selection if we have a new selected step
   useEffect(() => {
@@ -165,32 +186,14 @@ export const InteractiveContextProvider = ({
   }, [selectedStep, previousSelectedStep, state]);
 
   useEffect(() => {
-    if (!canvas) {
-      return;
-    }
-    const copyHandler = () => {
-      if (selectedStep) {
-        copySelectedStep();
-      } else {
-        copySelectedArea();
-      }
-    };
-
-    canvas.addEventListener('copy', copyHandler);
-    return () => canvas.removeEventListener('copy', copyHandler);
-  }, [canvas, copySelectedArea, copySelectedStep, selectedStep]);
-
-  useEffect(() => {
     function handler(e: ClipboardEvent) {
       const text = e.clipboardData?.getData('text/plain') || '';
       try {
-        console.log('copied text', text);
         const parsedAction = JSON.parse(text);
         if (parsedAction?.name && parsedAction?.settings) {
-          console.log('parsed', parsedAction);
           setActionToPaste(parsedAction);
         }
-      } catch (err: any) {
+      } catch (err) {
         // eslint-disable-next-line no-console
         console.error(err);
       }
@@ -302,19 +305,6 @@ export const InteractiveContextProvider = ({
     },
     [handleCopy],
   );
-
-  // useEffect(() => {
-  //   if (!copyPressed) {
-  //     return;
-  //   }
-
-  //   if (selectedStep) {
-  //     copySelectedStep();
-  //   } else {
-  //     copySelectedArea();
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [copyPressed, selectedStep]);
 
   const contextValue = useMemo(
     () => ({
