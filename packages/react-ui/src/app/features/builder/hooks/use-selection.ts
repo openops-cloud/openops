@@ -1,7 +1,7 @@
 import { WorkflowNode } from '@openops/components/ui';
 import { flowHelper } from '@openops/shared';
 import { useReactFlow } from '@xyflow/react';
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useBuilderStateContext } from '../builder-hooks';
 
 export const useSelection = () => {
@@ -28,18 +28,10 @@ export const useSelection = () => {
   ]);
 
   const firstSelectedNode = flowHelper.getStep(flowVersion, selectedNodes[0]);
-  const getStepDetails = useCallback(
-    (stepName: string | null) => {
-      if (!stepName) return;
-      return flowHelper.getStep(flowVersion, stepName);
-    },
-    [flowVersion],
-  );
 
   return {
     selectedStep,
     selectedNodes,
     firstSelectedNode,
-    getStepDetails,
   };
 };

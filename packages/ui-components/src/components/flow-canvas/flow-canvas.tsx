@@ -9,10 +9,8 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import React, { ReactNode, useCallback, useRef, useState } from 'react';
-import { useEffectOnce } from 'react-use';
 import { Edge, Graph, WorkflowNode } from '../../lib/flow-canvas-utils';
 import { useCanvasContext } from './canvas-context';
-import { useClipboardContext } from './clipboard-context';
 import {
   InitialZoom,
   MAX_ZOOM,
@@ -66,12 +64,8 @@ const FlowCanvas = React.memo(
     const [contextMenuType, setContextMenuType] = useState<ContextMenuType>(
       ContextMenuType.CANVAS,
     );
-    const { actionToPaste, fetchClipboardOperations } = useClipboardContext();
+    const { actionToPaste } = useCanvasContext();
     useResizeCanvas(containerRef);
-
-    useEffectOnce(() => {
-      fetchClipboardOperations();
-    });
 
     const onInit = useCallback(
       (reactFlow: ReactFlowInstance<WorkflowNode, Edge>) => {
@@ -100,9 +94,7 @@ const FlowCanvas = React.memo(
 
     const panOnDrag = getPanOnDrag(allowCanvasPanning, inGrabPanningMode);
 
-    const onContextMenu = async (ev: React.MouseEvent<HTMLDivElement>) => {
-      await fetchClipboardOperations();
-
+    const onContextMenu = (ev: React.MouseEvent<HTMLDivElement>) => {
       if (ev.target instanceof HTMLElement || ev.target instanceof SVGElement) {
         const stepElement = ev.target.closest(
           `[data-${STEP_CONTEXT_MENU_ATTRIBUTE}]`,

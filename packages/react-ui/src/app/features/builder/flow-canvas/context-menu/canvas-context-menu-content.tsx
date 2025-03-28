@@ -11,7 +11,6 @@ import {
   ActionType,
   FlagId,
   flowHelper,
-  isNil,
   StepLocationRelativeToParent,
 } from '@openops/shared';
 
@@ -46,7 +45,8 @@ export const CanvasContextMenuContent = ({
     selectedNodes.some((node: string) => node === flowVersion.trigger.name) ||
     selectedStep === flowVersion.trigger.name;
 
-  const disabledPaste = isNil(actionToPaste);
+  // todo - check clipboard permissions
+  const disabledPaste = false; // isNil(actionToPaste);
   const showPasteAfterLastStep =
     !readonly && contextMenuType === ContextMenuType.CANVAS;
   const showPasteAsFirstLoopAction =
