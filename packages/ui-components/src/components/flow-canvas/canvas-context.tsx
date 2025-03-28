@@ -87,12 +87,14 @@ export const InteractiveContextProvider = ({
   selectedStep,
   clearSelectedStep,
   flowVersion,
+  onPaste,
   children,
 }: {
   flowCanvasContainerId?: string;
   selectedStep: string | null;
   clearSelectedStep: () => void;
   flowVersion: FlowVersion;
+  onPaste: (actionToPaste: Action) => void;
   children: ReactNode;
 }) => {
   const [panningMode, setPanningMode] = useState<PanningMode>('grab');
@@ -192,6 +194,7 @@ export const InteractiveContextProvider = ({
         const parsedAction = JSON.parse(text);
         if (parsedAction?.name && parsedAction?.settings) {
           setActionToPaste(parsedAction);
+          onPaste(parsedAction);
         }
       } catch (err) {
         // eslint-disable-next-line no-console
@@ -204,7 +207,7 @@ export const InteractiveContextProvider = ({
     return () => {
       document.removeEventListener('paste', handler);
     };
-  }, []);
+  }, [onPaste, selectedStep]);
 
   const effectivePanningMode: PanningMode = useMemo(() => {
     if ((spacePressed || panningMode === 'grab') && !shiftPressed) {

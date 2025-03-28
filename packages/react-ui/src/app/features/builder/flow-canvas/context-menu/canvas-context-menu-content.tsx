@@ -11,7 +11,6 @@ import {
   ActionType,
   FlagId,
   flowHelper,
-  isNil,
   StepLocationRelativeToParent,
 } from '@openops/shared';
 
