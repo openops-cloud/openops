@@ -9,10 +9,8 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import React, { ReactNode, useCallback, useRef, useState } from 'react';
-import { useEffectOnce } from 'react-use';
 import { Edge, Graph, WorkflowNode } from '../../lib/flow-canvas-utils';
 import { useCanvasContext } from './canvas-context';
-// import { useClipboardContext } from './clipboard-context';
 import {
   InitialZoom,
   MAX_ZOOM,
@@ -97,7 +95,7 @@ const FlowCanvas = React.memo(
     const panOnDrag = getPanOnDrag(allowCanvasPanning, inGrabPanningMode);
 
     const onContextMenu = (ev: React.MouseEvent<HTMLDivElement>) => {
-      fetchClipboardOperations();
+      // fetchClipboardOperations();
 
       if (ev.target instanceof HTMLElement || ev.target instanceof SVGElement) {
         const stepElement = ev.target.closest(
