@@ -277,12 +277,12 @@ export const InteractiveContextProvider = ({
     navigator.clipboard
       .writeText(flowString)
       .then(() => {
+        setActionToPaste(action);
         copyPasteToast({
           success: true,
           isCopy: true,
           itemsCount: actionCount,
         });
-        // fetchClipboardOperations();
       })
       .catch(() => {
         copyPasteToast({
