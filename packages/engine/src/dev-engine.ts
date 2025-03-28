@@ -44,6 +44,16 @@ export function startEngineListener() {
       debouncedRestart();
     }
   });
+
+  process.on('SIGTERM', async () => {
+    await stopEngineSubProcess();
+    process.exit(0);
+  });
+
+  process.on('SIGINT', async () => {
+    await stopEngineSubProcess();
+    process.exit(0);
+  });
 }
 
 function startEngineSubProcess(): void {
@@ -52,10 +62,6 @@ function startEngineSubProcess(): void {
   engineSubProcess = spawn('node', [startJs, ENGINE_SUBPROCESS_FLAG], {
     stdio: 'inherit',
     env: process.env,
-  });
-
-  engineSubProcess.on('exit', () => {
-    logger.info('The Engine dev subprocess is shutting down.');
   });
 
   initialized = true;
