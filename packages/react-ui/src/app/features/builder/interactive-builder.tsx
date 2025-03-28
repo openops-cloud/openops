@@ -32,6 +32,7 @@ const InteractiveBuilder = ({
       selectedStep={selectedStep}
       clearSelectedStep={clearSelectedStep}
       flowVersion={flowVersion}
+      flowCanvasContainerId="flow-canvas-container"
     >
       <div ref={middlePanelRef} className="relative h-full w-full">
         <BuilderHeader />

@@ -142,11 +142,11 @@ export const InteractiveContextProvider = ({
     handleCopy(selectedFlowActionRef.current, selectedNodeCounterRef.current);
   }, COPY_DEBOUNCE_DELAY_MS);
 
-  // const canvas = useMemo(() => {
-  //   return flowCanvasContainerId
-  //     ? document.getElementById(flowCanvasContainerId)
-  //     : null;
-  // }, [flowCanvasContainerId]);
+  const canvas = useMemo(() => {
+    return flowCanvasContainerId
+      ? document.getElementById(flowCanvasContainerId)
+      : null;
+  }, [flowCanvasContainerId]);
   // const copyPressed = useKeyPress(COPY_KEYS, { target: canvas });
 
   // const { fetchClipboardOperations } = useClipboardContext();
@@ -165,6 +165,9 @@ export const InteractiveContextProvider = ({
   }, [selectedStep, previousSelectedStep, state]);
 
   useEffect(() => {
+    if (!canvas) {
+      return;
+    }
     const copyHandler = () => {
       if (selectedStep) {
         copySelectedStep();
@@ -173,9 +176,9 @@ export const InteractiveContextProvider = ({
       }
     };
 
-    window.addEventListener('copy', copyHandler);
-    return () => window.removeEventListener('copy', copyHandler);
-  }, [copySelectedArea, copySelectedStep, selectedStep]);
+    canvas.addEventListener('copy', copyHandler);
+    return () => canvas.removeEventListener('copy', copyHandler);
+  }, [canvas, copySelectedArea, copySelectedStep, selectedStep]);
 
   useEffect(() => {
     function handler(e: ClipboardEvent) {
