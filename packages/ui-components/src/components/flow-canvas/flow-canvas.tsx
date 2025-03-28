@@ -95,8 +95,6 @@ const FlowCanvas = React.memo(
     const panOnDrag = getPanOnDrag(allowCanvasPanning, inGrabPanningMode);
 
     const onContextMenu = (ev: React.MouseEvent<HTMLDivElement>) => {
-      // fetchClipboardOperations();
-
       if (ev.target instanceof HTMLElement || ev.target instanceof SVGElement) {
         const stepElement = ev.target.closest(
           `[data-${STEP_CONTEXT_MENU_ATTRIBUTE}]`,

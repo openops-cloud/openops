@@ -57,7 +57,6 @@ const CanvasContextMenu = memo(
 
     const { copyAction, actionToPaste } = useCanvasContext();
     const { onPaste } = usePaste();
-    // const { actionToPaste, fetchClipboardOperations } = useClipboardContext();
 
     const [selectStepByName, removeStepSelection, setAllowCanvasPanning] =
       useBuilderStateContext((state) => [
@@ -101,7 +100,6 @@ const CanvasContextMenu = memo(
       <DropdownMenu
         open={openStepActionsMenu}
         onOpenChange={(open) => {
-          // fetchClipboardOperations();
           setOpenStepActionsMenu(open);
           if (open && data.step) {
             selectStepByName(data.step.name);

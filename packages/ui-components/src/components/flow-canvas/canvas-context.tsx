@@ -110,7 +110,29 @@ export const InteractiveContextProvider = ({
   const spacePressed = useKeyPress(SPACE_KEY);
   const shiftPressed = useKeyPress(SHIFT_KEY);
 
-  const copySelectedStep = useDebounceCallback(() => {
+  const handleCopy = useCallback((action: Action, actionCount: number) => {
+    const flowString = JSON.stringify(action);
+
+    navigator.clipboard
+      .writeText(flowString)
+      .then(() => {
+        setActionToPaste(action);
+        copyPasteToast({
+          success: true,
+          isCopy: true,
+          itemsCount: actionCount,
+        });
+      })
+      .catch(() => {
+        copyPasteToast({
+          success: false,
+          isCopy: true,
+          itemsCount: actionCount,
+        });
+      });
+  }, []);
+
+  const copySelectedStep = useCallback(() => {
     if (!selectedStep) {
       return;
     }
@@ -126,9 +148,9 @@ export const InteractiveContextProvider = ({
     flowHelper.clearStepTestData(stepToBeCopied);
 
     handleCopy(stepToBeCopied as Action, 1);
-  }, COPY_DEBOUNCE_DELAY_MS);
+  }, [flowVersion, handleCopy, selectedStep]);
 
-  const copySelectedArea = useDebounceCallback(() => {
+  const copySelectedArea = useCallback(() => {
     const selectionArea = document.querySelector(
       `.${NODE_SELECTION_RECT_CLASS_NAME}`,
     );
@@ -143,12 +165,13 @@ export const InteractiveContextProvider = ({
     }
 
     handleCopy(selectedFlowActionRef.current, selectedNodeCounterRef.current);
-  }, COPY_DEBOUNCE_DELAY_MS);
+  }, [handleCopy]);
 
   useEffect(() => {
     if (!flowCanvasContainerId) return;
 
-    const copyHandler = () => {
+    const copyHandler = (event: ClipboardEvent) => {
+      event.preventDefault();
       if (selectedStep) {
         copySelectedStep();
       } else {
@@ -156,20 +179,34 @@ export const InteractiveContextProvider = ({
       }
     };
 
-    const intervalId = setInterval(() => {
-      const canvas = document.getElementById(flowCanvasContainerId);
-      if (canvas) {
-        canvas.removeEventListener('copy', copyHandler);
-        canvas.addEventListener('copy', copyHandler);
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    let targetEl: HTMLElement | Document | null = null;
+
+    if (isSafari) {
+      document.addEventListener('copy', copyHandler);
+      targetEl = document;
+    } else {
+      const intervalId = setInterval(() => {
+        const canvas = document.getElementById(flowCanvasContainerId);
+        if (canvas) {
+          canvas.removeEventListener('copy', copyHandler);
+          canvas.addEventListener('copy', copyHandler);
+          targetEl = canvas;
+          clearInterval(intervalId);
+        }
+      }, 200);
+
+      return () => {
         clearInterval(intervalId);
-      }
-    }, 200);
+        if (targetEl && targetEl !== document) {
+          targetEl.removeEventListener('copy', copyHandler as EventListener);
+        }
+      };
+    }
 
     return () => {
-      clearInterval(intervalId);
-      const canvas = document.getElementById(flowCanvasContainerId);
-      if (canvas) {
-        canvas.removeEventListener('copy', copyHandler);
+      if (isSafari && targetEl === document) {
+        document.removeEventListener('copy', copyHandler);
       }
     };
   }, [flowCanvasContainerId, copySelectedArea, copySelectedStep, selectedStep]);
@@ -273,28 +310,6 @@ export const InteractiveContextProvider = ({
     setSelectedActions([]);
     clearSelectedStep();
   }, [clearSelectedStep, selectedActions, state]);
-
-  const handleCopy = useCallback((action: Action, actionCount: number) => {
-    const flowString = JSON.stringify(action);
-
-    navigator.clipboard
-      .writeText(flowString)
-      .then(() => {
-        setActionToPaste(action);
-        copyPasteToast({
-          success: true,
-          isCopy: true,
-          itemsCount: actionCount,
-        });
-      })
-      .catch(() => {
-        copyPasteToast({
-          success: false,
-          isCopy: true,
-          itemsCount: actionCount,
-        });
-      });
-  }, []);
 
   const copyAction = useCallback(
     (action: Action) => {
