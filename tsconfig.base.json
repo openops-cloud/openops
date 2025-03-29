@@ -17,100 +17,47 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@openops/common": ["packages/openops/src/index.ts"],
-      "@openops/components/ui": ["packages/ui-components/src/index.ts"],
-      "@openops/engine": ["packages/engine/src/main.ts"],
-      "@openops/block-amazon-s3": [
-        "packages/blocks/amazon-s3/src/index.ts"
-      ],
-      "@openops/block-amazon-sqs": [
-        "packages/blocks/amazon-sqs/src/index.ts"
-      ],
-      "@openops/block-aminos": [
-        "packages/blocks/aminos/src/index.ts"
-      ],
+      "@openops/block-amazon-s3": ["packages/blocks/amazon-s3/src/index.ts"],
+      "@openops/block-amazon-sqs": ["packages/blocks/amazon-sqs/src/index.ts"],
+      "@openops/block-aminos": ["packages/blocks/aminos/src/index.ts"],
       "@openops/block-anodot": ["packages/blocks/anodot/src/index.ts"],
-      "@openops/block-apitable": [
-        "packages/blocks/apitable/src/index.ts"
-      ],
-      "@openops/block-apollo": [
-        "packages/blocks/apollo/src/index.ts"
-      ],
-      "@openops/block-approval": [
-        "packages/blocks/approval/src/index.ts"
-      ],
+      "@openops/block-apitable": ["packages/blocks/apitable/src/index.ts"],
+      "@openops/block-apollo": ["packages/blocks/apollo/src/index.ts"],
+      "@openops/block-approval": ["packages/blocks/approval/src/index.ts"],
       "@openops/block-asana": ["packages/blocks/asana/src/index.ts"],
-      "@openops/block-assemblyai": [
-        "packages/blocks/assemblyai/src/index.ts"
-      ],
+      "@openops/block-assemblyai": ["packages/blocks/assemblyai/src/index.ts"],
       "@openops/block-aws": ["packages/blocks/aws/src/index.ts"],
-      "@openops/block-aws-athena": [
-        "packages/blocks/aws-athena/src/index.ts"
-      ],
+      "@openops/block-aws-athena": ["packages/blocks/aws-athena/src/index.ts"],
       "@openops/block-aws-compute-optimizer": [
         "packages/blocks/aws-compute-optimizer/src/index.ts"
       ],
       "@openops/block-azure-openai": [
         "packages/blocks/azure-openai/src/index.ts"
       ],
-      "@openops/block-bannerbear": [
-        "packages/blocks/bannerbear/src/index.ts"
-      ],
-      "@openops/block-baserow": [
-        "packages/blocks/baserow/src/index.ts"
-      ],
-      "@openops/block-beamer": [
-        "packages/blocks/beamer/src/index.ts"
-      ],
-      "@openops/block-bettermode": [
-        "packages/blocks/bettermode/src/index.ts"
-      ],
-      "@openops/block-binance": [
-        "packages/blocks/binance/src/index.ts"
-      ],
-      "@openops/block-bonjoro": [
-        "packages/blocks/bonjoro/src/index.ts"
-      ],
+      "@openops/block-bannerbear": ["packages/blocks/bannerbear/src/index.ts"],
+      "@openops/block-baserow": ["packages/blocks/baserow/src/index.ts"],
+      "@openops/block-beamer": ["packages/blocks/beamer/src/index.ts"],
+      "@openops/block-bettermode": ["packages/blocks/bettermode/src/index.ts"],
+      "@openops/block-binance": ["packages/blocks/binance/src/index.ts"],
+      "@openops/block-bonjoro": ["packages/blocks/bonjoro/src/index.ts"],
       "@openops/block-box": ["packages/blocks/box/src/index.ts"],
       "@openops/block-brilliant-directories": [
         "packages/blocks/brilliant-directories/src/index.ts"
       ],
-      "@openops/block-bubble": [
-        "packages/blocks/bubble/src/index.ts"
-      ],
-      "@openops/block-cal-com": [
-        "packages/blocks/cal-com/src/index.ts"
-      ],
-      "@openops/block-calendly": [
-        "packages/blocks/calendly/src/index.ts"
-      ],
+      "@openops/block-bubble": ["packages/blocks/bubble/src/index.ts"],
+      "@openops/block-cal-com": ["packages/blocks/cal-com/src/index.ts"],
+      "@openops/block-calendly": ["packages/blocks/calendly/src/index.ts"],
       "@openops/block-captain-data": [
         "packages/blocks/captain-data/src/index.ts"
       ],
-      "@openops/block-cartloom": [
-        "packages/blocks/cartloom/src/index.ts"
-      ],
-      "@openops/block-certopus": [
-        "packages/blocks/certopus/src/index.ts"
-      ],
-      "@openops/block-chargekeep": [
-        "packages/blocks/chargekeep/src/index.ts"
-      ],
-      "@openops/block-clarifai": [
-        "packages/blocks/clarifai/src/index.ts"
-      ],
-      "@openops/block-claude": [
-        "packages/blocks/claude/src/index.ts"
-      ],
-      "@openops/block-clearout": [
-        "packages/blocks/clearout/src/index.ts"
-      ],
-      "@openops/block-clickup": [
-        "packages/blocks/clickup/src/index.ts"
-      ],
-      "@openops/block-clockodo": [
-        "packages/blocks/clockodo/src/index.ts"
-      ],
+      "@openops/block-cartloom": ["packages/blocks/cartloom/src/index.ts"],
+      "@openops/block-certopus": ["packages/blocks/certopus/src/index.ts"],
+      "@openops/block-chargekeep": ["packages/blocks/chargekeep/src/index.ts"],
+      "@openops/block-clarifai": ["packages/blocks/clarifai/src/index.ts"],
+      "@openops/block-claude": ["packages/blocks/claude/src/index.ts"],
+      "@openops/block-clearout": ["packages/blocks/clearout/src/index.ts"],
+      "@openops/block-clickup": ["packages/blocks/clickup/src/index.ts"],
+      "@openops/block-clockodo": ["packages/blocks/clockodo/src/index.ts"],
       "@openops/block-cloudformation": [
         "packages/blocks/cloudformation/src/index.ts"
       ],
@@ -120,18 +67,10 @@
       "@openops/block-constant-contact": [
         "packages/blocks/constant-contact/src/index.ts"
       ],
-      "@openops/block-contentful": [
-        "packages/blocks/contentful/src/index.ts"
-      ],
-      "@openops/block-contiguity": [
-        "packages/blocks/contiguity/src/index.ts"
-      ],
-      "@openops/block-convertkit": [
-        "packages/blocks/convertkit/src/index.ts"
-      ],
-      "@openops/block-crypto": [
-        "packages/blocks/crypto/src/index.ts"
-      ],
+      "@openops/block-contentful": ["packages/blocks/contentful/src/index.ts"],
+      "@openops/block-contiguity": ["packages/blocks/contiguity/src/index.ts"],
+      "@openops/block-convertkit": ["packages/blocks/convertkit/src/index.ts"],
+      "@openops/block-crypto": ["packages/blocks/crypto/src/index.ts"],
       "@openops/block-csv": ["packages/blocks/csv/src/index.ts"],
       "@openops/block-data-summarizer": [
         "packages/blocks/data-summarizer/src/index.ts"
@@ -139,27 +78,15 @@
       "@openops/block-date-helper": [
         "packages/blocks/date-helper/src/index.ts"
       ],
-      "@openops/block-datocms": [
-        "packages/blocks/datocms/src/index.ts"
-      ],
+      "@openops/block-datocms": ["packages/blocks/datocms/src/index.ts"],
       "@openops/block-deepl": ["packages/blocks/deepl/src/index.ts"],
       "@openops/block-delay": ["packages/blocks/delay/src/index.ts"],
-      "@openops/block-discord": [
-        "packages/blocks/discord/src/index.ts"
-      ],
-      "@openops/block-discourse": [
-        "packages/blocks/discourse/src/index.ts"
-      ],
+      "@openops/block-discord": ["packages/blocks/discord/src/index.ts"],
+      "@openops/block-discourse": ["packages/blocks/discourse/src/index.ts"],
       "@openops/block-drip": ["packages/blocks/drip/src/index.ts"],
-      "@openops/block-dropbox": [
-        "packages/blocks/dropbox/src/index.ts"
-      ],
-      "@openops/block-elevenlabs": [
-        "packages/blocks/elevenlabs/src/index.ts"
-      ],
-      "@openops/block-end-flow": [
-        "packages/blocks/end-flow/src/index.ts"
-      ],
+      "@openops/block-dropbox": ["packages/blocks/dropbox/src/index.ts"],
+      "@openops/block-elevenlabs": ["packages/blocks/elevenlabs/src/index.ts"],
+      "@openops/block-end-flow": ["packages/blocks/end-flow/src/index.ts"],
       "@openops/block-facebook-leads": [
         "packages/blocks/facebook-leads/src/index.ts"
       ],
@@ -170,45 +97,27 @@
       "@openops/block-file-helper": [
         "packages/blocks/file-helper/src/index.ts"
       ],
-      "@openops/block-fliqr-ai": [
-        "packages/blocks/fliqr-ai/src/index.ts"
-      ],
-      "@openops/block-flowise": [
-        "packages/blocks/flowise/src/index.ts"
-      ],
-      "@openops/block-flowlu": [
-        "packages/blocks/flowlu/src/index.ts"
-      ],
-      "@openops/block-formbricks": [
-        "packages/blocks/formbricks/src/index.ts"
-      ],
+      "@openops/block-fliqr-ai": ["packages/blocks/fliqr-ai/src/index.ts"],
+      "@openops/block-flowise": ["packages/blocks/flowise/src/index.ts"],
+      "@openops/block-flowlu": ["packages/blocks/flowlu/src/index.ts"],
+      "@openops/block-formbricks": ["packages/blocks/formbricks/src/index.ts"],
       "@openops/block-forms": ["packages/blocks/forms/src/index.ts"],
       "@openops/block-frame": ["packages/blocks/frame/src/index.ts"],
-      "@openops/block-freshdesk": [
-        "packages/blocks/freshdesk/src/index.ts"
-      ],
-      "@openops/block-freshsales": [
-        "packages/blocks/freshsales/src/index.ts"
-      ],
-      "@openops/block-gameball": [
-        "packages/blocks/gameball/src/index.ts"
-      ],
+      "@openops/block-freshdesk": ["packages/blocks/freshdesk/src/index.ts"],
+      "@openops/block-freshsales": ["packages/blocks/freshsales/src/index.ts"],
+      "@openops/block-gameball": ["packages/blocks/gameball/src/index.ts"],
       "@openops/block-gcloud-pubsub": [
         "packages/blocks/gcloud-pubsub/src/index.ts"
       ],
-      "@openops/block-gelato": [
-        "packages/blocks/gelato/src/index.ts"
-      ],
+      "@openops/block-gelato": ["packages/blocks/gelato/src/index.ts"],
       "@openops/block-github": ["packages/blocks/github/src/index.ts"],
-      "@openops/block-gitlab": [
-        "packages/blocks/gitlab/src/index.ts"
-      ],
+      "@openops/block-gitlab": ["packages/blocks/gitlab/src/index.ts"],
       "@openops/block-gmail": ["packages/blocks/gmail/src/index.ts"],
       "@openops/block-google-calendar": [
         "packages/blocks/google-calendar/src/index.ts"
       ],
       "@openops/block-google-cloud": [
-        "packages/blocks/google-cloud/src/index.ts",
+        "packages/blocks/google-cloud/src/index.ts"
       ],
       "@openops/block-google-contacts": [
         "packages/blocks/google-contacts/src/index.ts"
@@ -234,23 +143,15 @@
       "@openops/block-google-tasks": [
         "packages/blocks/google-tasks/src/index.ts"
       ],
-      "@openops/block-gotify": [
-        "packages/blocks/gotify/src/index.ts"
-      ],
+      "@openops/block-gotify": ["packages/blocks/gotify/src/index.ts"],
       "@openops/block-gravityforms": [
         "packages/blocks/gravityforms/src/index.ts"
       ],
       "@openops/block-grist": ["packages/blocks/grist/src/index.ts"],
-      "@openops/block-hackernews": [
-        "packages/blocks/hackernews/src/index.ts"
-      ],
-      "@openops/block-heartbeat": [
-        "packages/blocks/heartbeat/src/index.ts"
-      ],
+      "@openops/block-hackernews": ["packages/blocks/hackernews/src/index.ts"],
+      "@openops/block-heartbeat": ["packages/blocks/heartbeat/src/index.ts"],
       "@openops/block-http": ["packages/blocks/http/src/index.ts"],
-      "@openops/block-hubspot": [
-        "packages/blocks/hubspot/src/index.ts"
-      ],
+      "@openops/block-hubspot": ["packages/blocks/hubspot/src/index.ts"],
       "@openops/block-image-helper": [
         "packages/blocks/image-helper/src/index.ts"
       ],
@@ -258,69 +159,39 @@
       "@openops/block-instagram-business": [
         "packages/blocks/instagram-business/src/index.ts"
       ],
-      "@openops/block-intercom": [
-        "packages/blocks/intercom/src/index.ts"
-      ],
+      "@openops/block-intercom": ["packages/blocks/intercom/src/index.ts"],
       "@openops/block-invoiceninja": [
         "packages/blocks/invoiceninja/src/index.ts"
       ],
-      "@openops/block-jira-cloud": [
-        "packages/blocks/jira-cloud/src/index.ts"
-      ],
-      "@openops/block-jotform": [
-        "packages/blocks/jotform/src/index.ts"
-      ],
+      "@openops/block-jira-cloud": ["packages/blocks/jira-cloud/src/index.ts"],
+      "@openops/block-jotform": ["packages/blocks/jotform/src/index.ts"],
       "@openops/block-json": ["packages/blocks/json/src/index.ts"],
       "@openops/block-kimai": ["packages/blocks/kimai/src/index.ts"],
       "@openops/block-kizeo-forms": [
         "packages/blocks/kizeo-forms/src/index.ts"
       ],
-      "@openops/block-krisp-call": [
-        "packages/blocks/krisp-call/src/index.ts"
-      ],
+      "@openops/block-krisp-call": ["packages/blocks/krisp-call/src/index.ts"],
       "@openops/block-lead-connector": [
         "packages/blocks/lead-connector/src/index.ts"
       ],
       "@openops/block-line": ["packages/blocks/line/src/index.ts"],
-      "@openops/block-linear": [
-        "packages/blocks/linear/src/index.ts"
-      ],
-      "@openops/block-linkedin": [
-        "packages/blocks/linkedin/src/index.ts"
-      ],
-      "@openops/block-llmrails": [
-        "packages/blocks/llmrails/src/index.ts"
-      ],
-      "@openops/block-localai": [
-        "packages/blocks/localai/src/index.ts"
-      ],
-      "@openops/block-mailchimp": [
-        "packages/blocks/mailchimp/src/index.ts"
-      ],
+      "@openops/block-linear": ["packages/blocks/linear/src/index.ts"],
+      "@openops/block-linkedin": ["packages/blocks/linkedin/src/index.ts"],
+      "@openops/block-llmrails": ["packages/blocks/llmrails/src/index.ts"],
+      "@openops/block-localai": ["packages/blocks/localai/src/index.ts"],
+      "@openops/block-mailchimp": ["packages/blocks/mailchimp/src/index.ts"],
       "@openops/block-mailer-lite": [
         "packages/blocks/mailer-lite/src/index.ts"
       ],
-      "@openops/block-maileroo": [
-        "packages/blocks/maileroo/src/index.ts"
-      ],
-      "@openops/block-mastodon": [
-        "packages/blocks/mastodon/src/index.ts"
-      ],
+      "@openops/block-maileroo": ["packages/blocks/maileroo/src/index.ts"],
+      "@openops/block-mastodon": ["packages/blocks/mastodon/src/index.ts"],
       "@openops/block-math-helper": [
         "packages/blocks/math-helper/src/index.ts"
       ],
-      "@openops/block-matomo": [
-        "packages/blocks/matomo/src/index.ts"
-      ],
-      "@openops/block-matrix": [
-        "packages/blocks/matrix/src/index.ts"
-      ],
-      "@openops/block-mattermost": [
-        "packages/blocks/mattermost/src/index.ts"
-      ],
-      "@openops/block-mautic": [
-        "packages/blocks/mautic/src/index.ts"
-      ],
+      "@openops/block-matomo": ["packages/blocks/matomo/src/index.ts"],
+      "@openops/block-matrix": ["packages/blocks/matrix/src/index.ts"],
+      "@openops/block-mattermost": ["packages/blocks/mattermost/src/index.ts"],
+      "@openops/block-mautic": ["packages/blocks/mautic/src/index.ts"],
       "@openops/block-messagebird": [
         "packages/blocks/messagebird/src/index.ts"
       ],
@@ -333,140 +204,70 @@
       "@openops/block-microsoft-teams": [
         "packages/blocks/microsoft-teams/src/index.ts"
       ],
-      "@openops/block-mindee": [
-        "packages/blocks/mindee/src/index.ts"
-      ],
-      "@openops/block-mixpanel": [
-        "packages/blocks/mixpanel/src/index.ts"
-      ],
-      "@openops/block-monday": [
-        "packages/blocks/monday/src/index.ts"
-      ],
-      "@openops/block-moxie-crm": [
-        "packages/blocks/moxie-crm/src/index.ts"
-      ],
+      "@openops/block-mindee": ["packages/blocks/mindee/src/index.ts"],
+      "@openops/block-mixpanel": ["packages/blocks/mixpanel/src/index.ts"],
+      "@openops/block-monday": ["packages/blocks/monday/src/index.ts"],
+      "@openops/block-moxie-crm": ["packages/blocks/moxie-crm/src/index.ts"],
       "@openops/block-mysql": ["packages/blocks/mysql/src/index.ts"],
       "@openops/block-nifty": ["packages/blocks/nifty/src/index.ts"],
-      "@openops/block-nocodb": [
-        "packages/blocks/nocodb/src/index.ts"
-      ],
-      "@openops/block-notion": [
-        "packages/blocks/notion/src/index.ts"
-      ],
+      "@openops/block-nocodb": ["packages/blocks/nocodb/src/index.ts"],
+      "@openops/block-notion": ["packages/blocks/notion/src/index.ts"],
       "@openops/block-ntfy": ["packages/blocks/ntfy/src/index.ts"],
       "@openops/block-odoo": ["packages/blocks/odoo/src/index.ts"],
-      "@openops/block-onfleet": [
-        "packages/blocks/onfleet/src/index.ts"
-      ],
+      "@openops/block-onfleet": ["packages/blocks/onfleet/src/index.ts"],
       "@openops/block-open-router": [
         "packages/blocks/open-router/src/index.ts"
       ],
-      "@openops/block-openai": [
-        "packages/blocks/openai/src/index.ts"
-      ],
+      "@openops/block-openai": ["packages/blocks/openai/src/index.ts"],
       "@openops/block-openops-tables": [
         "packages/blocks/openops-tables/src/index.ts"
       ],
-      "@openops/block-pastebin": [
-        "packages/blocks/pastebin/src/index.ts"
-      ],
-      "@openops/block-pastefy": [
-        "packages/blocks/pastefy/src/index.ts"
-      ],
+      "@openops/block-pastebin": ["packages/blocks/pastebin/src/index.ts"],
+      "@openops/block-pastefy": ["packages/blocks/pastefy/src/index.ts"],
       "@openops/block-pdf": ["packages/blocks/pdf/src/index.ts"],
       "@openops/block-perplexity-ai": [
         "packages/blocks/perplexity-ai/src/index.ts"
       ],
-      "@openops/block-photoroom": [
-        "packages/blocks/photoroom/src/index.ts"
-      ],
-      "@openops/block-pipedrive": [
-        "packages/blocks/pipedrive/src/index.ts"
-      ],
+      "@openops/block-photoroom": ["packages/blocks/photoroom/src/index.ts"],
+      "@openops/block-pipedrive": ["packages/blocks/pipedrive/src/index.ts"],
       "@openops/block-poper": ["packages/blocks/poper/src/index.ts"],
-      "@openops/block-postgres": [
-        "packages/blocks/postgres/src/index.ts"
-      ],
-      "@openops/block-posthog": [
-        "packages/blocks/posthog/src/index.ts"
-      ],
-      "@openops/block-pushover": [
-        "packages/blocks/pushover/src/index.ts"
-      ],
-      "@openops/block-qdrant": [
-        "packages/blocks/qdrant/src/index.ts"
-      ],
-      "@openops/block-qrcode": [
-        "packages/blocks/qrcode/src/index.ts"
-      ],
+      "@openops/block-postgres": ["packages/blocks/postgres/src/index.ts"],
+      "@openops/block-posthog": ["packages/blocks/posthog/src/index.ts"],
+      "@openops/block-pushover": ["packages/blocks/pushover/src/index.ts"],
+      "@openops/block-qdrant": ["packages/blocks/qdrant/src/index.ts"],
+      "@openops/block-qrcode": ["packages/blocks/qrcode/src/index.ts"],
       "@openops/block-queue": ["packages/blocks/queue/src/index.ts"],
-      "@openops/block-quickzu": [
-        "packages/blocks/quickzu/src/index.ts"
-      ],
-      "@openops/block-rabbitmq": [
-        "packages/blocks/rabbitmq/src/index.ts"
-      ],
-      "@openops/block-razorpay": [
-        "packages/blocks/razorpay/src/index.ts"
-      ],
+      "@openops/block-quickzu": ["packages/blocks/quickzu/src/index.ts"],
+      "@openops/block-rabbitmq": ["packages/blocks/rabbitmq/src/index.ts"],
+      "@openops/block-razorpay": ["packages/blocks/razorpay/src/index.ts"],
       "@openops/block-read-file": ["packages/blocks/read-file/src/index.ts"],
       "@openops/block-reoon-verifier": [
         "packages/blocks/reoon-verifier/src/index.ts"
       ],
-      "@openops/block-resend": [
-        "packages/blocks/resend/src/index.ts"
-      ],
-      "@openops/block-retable": [
-        "packages/blocks/retable/src/index.ts"
-      ],
-      "@openops/block-retune": [
-        "packages/blocks/retune/src/index.ts"
-      ],
-      "@openops/block-robolly": [
-        "packages/blocks/robolly/src/index.ts"
-      ],
+      "@openops/block-resend": ["packages/blocks/resend/src/index.ts"],
+      "@openops/block-retable": ["packages/blocks/retable/src/index.ts"],
+      "@openops/block-retune": ["packages/blocks/retune/src/index.ts"],
+      "@openops/block-robolly": ["packages/blocks/robolly/src/index.ts"],
       "@openops/block-rss": ["packages/blocks/rss/src/index.ts"],
-      "@openops/block-saastic": [
-        "packages/blocks/saastic/src/index.ts"
-      ],
-      "@openops/block-salesforce": [
-        "packages/blocks/salesforce/src/index.ts"
-      ],
-      "@openops/block-schedule": [
-        "packages/blocks/schedule/src/index.ts"
-      ],
-      "@openops/block-segment": [
-        "packages/blocks/segment/src/index.ts"
-      ],
-      "@openops/block-sendfox": [
-        "packages/blocks/sendfox/src/index.ts"
-      ],
-      "@openops/block-sendgrid": [
-        "packages/blocks/sendgrid/src/index.ts"
-      ],
-      "@openops/block-sendinblue": [
-        "packages/blocks/sendinblue/src/index.ts"
-      ],
+      "@openops/block-saastic": ["packages/blocks/saastic/src/index.ts"],
+      "@openops/block-salesforce": ["packages/blocks/salesforce/src/index.ts"],
+      "@openops/block-schedule": ["packages/blocks/schedule/src/index.ts"],
+      "@openops/block-segment": ["packages/blocks/segment/src/index.ts"],
+      "@openops/block-sendfox": ["packages/blocks/sendfox/src/index.ts"],
+      "@openops/block-sendgrid": ["packages/blocks/sendgrid/src/index.ts"],
+      "@openops/block-sendinblue": ["packages/blocks/sendinblue/src/index.ts"],
       "@openops/block-sendy": ["packages/blocks/sendy/src/index.ts"],
       "@openops/block-sessions-us": [
         "packages/blocks/sessions-us/src/index.ts"
       ],
       "@openops/block-sftp": ["packages/blocks/sftp/src/index.ts"],
-      "@openops/block-shopify": [
-        "packages/blocks/shopify/src/index.ts"
-      ],
-      "@openops/block-simplepdf": [
-        "packages/blocks/simplepdf/src/index.ts"
-      ],
+      "@openops/block-shopify": ["packages/blocks/shopify/src/index.ts"],
+      "@openops/block-simplepdf": ["packages/blocks/simplepdf/src/index.ts"],
       "@openops/block-slack": ["packages/blocks/slack/src/index.ts"],
-      "@openops/block-smaily": [
-        "packages/blocks/smaily/src/index.ts"
-      ],
+      "@openops/block-smaily": ["packages/blocks/smaily/src/index.ts"],
       "@openops/block-smtp": ["packages/blocks/smtp/src/index.ts"],
       "@openops/block-soap": ["packages/blocks/soap/src/index.ts"],
-      "@openops/block-spotify": [
-        "packages/blocks/spotify/src/index.ts"
-      ],
+      "@openops/block-spotify": ["packages/blocks/spotify/src/index.ts"],
       "@openops/block-stability-ai": [
         "packages/blocks/stability-ai/src/index.ts"
       ],
@@ -474,112 +275,60 @@
         "packages/blocks/stable-diffusion-webui/src/index.ts"
       ],
       "@openops/block-store": ["packages/blocks/store/src/index.ts"],
-      "@openops/block-straico": [
-        "packages/blocks/straico/src/index.ts"
-      ],
-      "@openops/block-stripe": [
-        "packages/blocks/stripe/src/index.ts"
-      ],
-      "@openops/block-subflows": [
-        "packages/blocks/subflows/src/index.ts"
-      ],
-      "@openops/block-supabase": [
-        "packages/blocks/supabase/src/index.ts"
-      ],
+      "@openops/block-straico": ["packages/blocks/straico/src/index.ts"],
+      "@openops/block-stripe": ["packages/blocks/stripe/src/index.ts"],
+      "@openops/block-subflows": ["packages/blocks/subflows/src/index.ts"],
+      "@openops/block-supabase": ["packages/blocks/supabase/src/index.ts"],
       "@openops/block-surveymonkey": [
         "packages/blocks/surveymonkey/src/index.ts"
       ],
-      "@openops/block-talkable": [
-        "packages/blocks/talkable/src/index.ts"
-      ],
+      "@openops/block-talkable": ["packages/blocks/talkable/src/index.ts"],
       "@openops/block-tally": ["packages/blocks/tally/src/index.ts"],
-      "@openops/block-taskade": [
-        "packages/blocks/taskade/src/index.ts"
-      ],
+      "@openops/block-taskade": ["packages/blocks/taskade/src/index.ts"],
       "@openops/block-telegram-bot": [
         "packages/blocks/telegram-bot/src/index.ts"
       ],
-      "@openops/block-terraform": [
-        "packages/blocks/terraform/src/index.ts"
-      ],
+      "@openops/block-ternary": ["packages/blocks/ternary/src/index.ts"],
+      "@openops/block-terraform": ["packages/blocks/terraform/src/index.ts"],
       "@openops/block-text-helper": [
         "packages/blocks/text-helper/src/index.ts"
       ],
-      "@openops/block-tidycal": [
-        "packages/blocks/tidycal/src/index.ts"
-      ],
-      "@openops/block-todoist": [
-        "packages/blocks/todoist/src/index.ts"
-      ],
-      "@openops/block-totalcms": [
-        "packages/blocks/totalcms/src/index.ts"
-      ],
-      "@openops/block-trello": [
-        "packages/blocks/trello/src/index.ts"
-      ],
-      "@openops/block-twilio": [
-        "packages/blocks/twilio/src/index.ts"
-      ],
-      "@openops/block-twitter": [
-        "packages/blocks/twitter/src/index.ts"
-      ],
-      "@openops/block-typeform": [
-        "packages/blocks/typeform/src/index.ts"
-      ],
+      "@openops/block-tidycal": ["packages/blocks/tidycal/src/index.ts"],
+      "@openops/block-todoist": ["packages/blocks/todoist/src/index.ts"],
+      "@openops/block-totalcms": ["packages/blocks/totalcms/src/index.ts"],
+      "@openops/block-trello": ["packages/blocks/trello/src/index.ts"],
+      "@openops/block-twilio": ["packages/blocks/twilio/src/index.ts"],
+      "@openops/block-twitter": ["packages/blocks/twitter/src/index.ts"],
+      "@openops/block-typeform": ["packages/blocks/typeform/src/index.ts"],
       "@openops/block-vbout": ["packages/blocks/vbout/src/index.ts"],
       "@openops/block-vtex": ["packages/blocks/vtex/src/index.ts"],
-      "@openops/block-vtiger": [
-        "packages/blocks/vtiger/src/index.ts"
-      ],
-      "@openops/block-webflow": [
-        "packages/blocks/webflow/src/index.ts"
-      ],
-      "@openops/block-webhook": [
-        "packages/blocks/webhook/src/index.ts"
-      ],
+      "@openops/block-vtiger": ["packages/blocks/vtiger/src/index.ts"],
+      "@openops/block-webflow": ["packages/blocks/webflow/src/index.ts"],
+      "@openops/block-webhook": ["packages/blocks/webhook/src/index.ts"],
       "@openops/block-wedof": ["packages/blocks/wedof/src/index.ts"],
-      "@openops/block-whatsable": [
-        "packages/blocks/whatsable/src/index.ts"
-      ],
-      "@openops/block-whatsapp": [
-        "packages/blocks/whatsapp/src/index.ts"
-      ],
+      "@openops/block-whatsable": ["packages/blocks/whatsable/src/index.ts"],
+      "@openops/block-whatsapp": ["packages/blocks/whatsapp/src/index.ts"],
       "@openops/block-woocommerce": [
         "packages/blocks/woocommerce/src/index.ts"
       ],
-      "@openops/block-wootric": [
-        "packages/blocks/wootric/src/index.ts"
-      ],
-      "@openops/block-wordpress": [
-        "packages/blocks/wordpress/src/index.ts"
-      ],
+      "@openops/block-wootric": ["packages/blocks/wootric/src/index.ts"],
+      "@openops/block-wordpress": ["packages/blocks/wordpress/src/index.ts"],
       "@openops/block-xero": ["packages/blocks/xero/src/index.ts"],
       "@openops/block-xml": ["packages/blocks/xml/src/index.ts"],
-      "@openops/block-youtube": [
-        "packages/blocks/youtube/src/index.ts"
-      ],
-      "@openops/block-zendesk": [
-        "packages/blocks/zendesk/src/index.ts"
-      ],
-      "@openops/block-zerobounce": [
-        "packages/blocks/zerobounce/src/index.ts"
-      ],
-      "@openops/block-zoho-books": [
-        "packages/blocks/zoho-books/src/index.ts"
-      ],
-      "@openops/block-zoho-crm": [
-        "packages/blocks/zoho-crm/src/index.ts"
-      ],
+      "@openops/block-youtube": ["packages/blocks/youtube/src/index.ts"],
+      "@openops/block-zendesk": ["packages/blocks/zendesk/src/index.ts"],
+      "@openops/block-zerobounce": ["packages/blocks/zerobounce/src/index.ts"],
+      "@openops/block-zoho-books": ["packages/blocks/zoho-books/src/index.ts"],
+      "@openops/block-zoho-crm": ["packages/blocks/zoho-crm/src/index.ts"],
       "@openops/block-zoho-invoice": [
         "packages/blocks/zoho-invoice/src/index.ts"
       ],
       "@openops/block-zoom": ["packages/blocks/zoom/src/index.ts"],
-      "@openops/blocks-common": [
-        "packages/blocks/common/src/index.ts"
-      ],
-      "@openops/blocks-framework": [
-        "packages/blocks/framework/src/index.ts"
-      ],
+      "@openops/blocks-common": ["packages/blocks/common/src/index.ts"],
+      "@openops/blocks-framework": ["packages/blocks/framework/src/index.ts"],
+      "@openops/common": ["packages/openops/src/index.ts"],
+      "@openops/components/ui": ["packages/ui-components/src/index.ts"],
+      "@openops/engine": ["packages/engine/src/main.ts"],
       "@openops/server-shared": ["packages/server/shared/src/index.ts"],
       "@openops/shared": ["packages/shared/src/index.ts"],
       "Aminos": ["packages/blocks/Aminos/src/index.ts"],
