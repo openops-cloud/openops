@@ -1,10 +1,11 @@
-import { logger } from '@openops/server-shared';
+import { logger, SharedSystemProp, system } from '@openops/server-shared';
 import { EngineOperationType } from '@openops/shared';
 import { Static, Type } from '@sinclair/typebox';
 import { execSync } from 'child_process';
 import { existsSync, mkdirSync } from 'fs';
 import * as process from 'node:process';
 import { start } from './api-handler';
+import { isDevEngine, startEngineListener } from './dev-engine';
 import { lambdaHandler } from './lambda-handler';
 import { EngineConstants } from './lib/handler/context/engine-constants';
 
@@ -27,9 +28,12 @@ function installCodeBlockDependencies(): void {
   );
 }
 
+const isDevEnv = system.getOrThrow(SharedSystemProp.ENVIRONMENT) === 'dev';
 if (process.env.AWS_LAMBDA_FUNCTION_NAME) {
   logger.info('Running in a lambda environment, calling lambdaHandler...');
   exports.handler = lambdaHandler;
+} else if (isDevEnv && !isDevEngine()) {
+  startEngineListener();
 } else {
   installCodeBlockDependencies();
   start().catch((err) => {

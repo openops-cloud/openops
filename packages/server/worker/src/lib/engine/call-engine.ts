@@ -24,8 +24,8 @@ import {
 
 const ENGINE_URL = system.getOrThrow(AppSystemProp.ENGINE_URL);
 const cacheEnabledOperations: EngineOperationType[] = [
-  EngineOperationType.EXECUTE_PROPERTY,
-  EngineOperationType.EXTRACT_BLOCK_METADATA,
+  // EngineOperationType.EXECUTE_PROPERTY,
+  // EngineOperationType.EXTRACT_BLOCK_METADATA,
 ];
 
 export async function callEngineLambda<Result extends EngineHelperResult>(
