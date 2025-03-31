@@ -16,6 +16,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -96,6 +97,7 @@ export const InteractiveContextProvider = ({
   onPaste: (actionToPaste: Action) => void;
   children: ReactNode;
 }) => {
+  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
   const [panningMode, setPanningMode] = useState<PanningMode>('grab');
   const previousSelectedStep = usePrevious(selectedStep);
   const [selectedActions, setSelectedActions] = useState<Action[]>([]);
@@ -105,17 +107,32 @@ export const InteractiveContextProvider = ({
   const selectedNodeCounterRef = useRef<number>(0);
   const state = useStoreApi().getState();
   const [actionToPaste, setActionToPaste] = useState<Action | null>(null);
+  const canvasRef = useRef<HTMLElement | null>(null);
 
   const spacePressed = useKeyPress(SPACE_KEY);
   const shiftPressed = useKeyPress(SHIFT_KEY);
+  const copyPressed = useKeyPress(COPY_KEYS, { target: canvasRef.current });
 
-  const canvas = useMemo(() => {
-    return flowCanvasContainerId
-      ? document.getElementById(flowCanvasContainerId)
-      : null;
+  useEffect(() => {
+    if (!flowCanvasContainerId) {
+      canvasRef.current = null;
+      return;
+    }
+
+    canvasRef.current = document.getElementById(flowCanvasContainerId);
+
+    const interval = setInterval(() => {
+      const element = document.getElementById(flowCanvasContainerId);
+      if (element) {
+        canvasRef.current = element;
+        clearInterval(interval);
+      }
+    }, 100);
+
+    return () => {
+      clearInterval(interval);
+    };
   }, [flowCanvasContainerId]);
-
-  const copyPressed = useKeyPress(COPY_KEYS, { target: canvas });
 
   const fallbackCopy = (
     text: string,
@@ -222,7 +239,7 @@ export const InteractiveContextProvider = ({
   }, [handleCopy]);
 
   useEffect(() => {
-    if (!copyPressed) {
+    if (!copyPressed && !isSafari) {
       return;
     }
 
@@ -231,7 +248,43 @@ export const InteractiveContextProvider = ({
     } else {
       copySelectedArea();
     }
-  }, [copyPressed, copySelectedArea, copySelectedStep, selectedStep]);
+  }, [copyPressed, copySelectedArea, copySelectedStep, isSafari, selectedStep]);
+
+  // safari doesn't work well with events on the canvas
+  // so we need to document to support copy properly on Safari as well
+  useLayoutEffect(() => {
+    const copyHandler = (event: ClipboardEvent) => {
+      if (!flowCanvasContainerId || !isSafari) return;
+
+      const canvas = document.getElementById(flowCanvasContainerId);
+      if (!canvas) return;
+
+      const isWithinCanvas =
+        event.target === canvas || canvas.contains(event.target as Node);
+      if (!isWithinCanvas) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (selectedStep) {
+        copySelectedStep();
+      } else {
+        copySelectedArea();
+      }
+    };
+
+    document.addEventListener('copy', copyHandler);
+
+    return () => {
+      document.removeEventListener('copy', copyHandler);
+    };
+  }, [
+    copySelectedArea,
+    copySelectedStep,
+    flowCanvasContainerId,
+    isSafari,
+    selectedStep,
+  ]);
 
   // clear multi-selection if we have a new selected step
   useEffect(() => {
