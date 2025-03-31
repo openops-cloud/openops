@@ -21,9 +21,7 @@ import {
   useState,
 } from 'react';
 import { usePrevious } from 'react-use';
-import { useDebounceCallback } from 'usehooks-ts';
 import {
-  COPY_DEBOUNCE_DELAY_MS,
   NODE_SELECTION_RECT_CLASS_NAME,
   SHIFT_KEY,
   SPACE_KEY,
@@ -226,7 +224,7 @@ export const InteractiveContextProvider = ({
 
   useEffect(() => {
     function handler(e: ClipboardEvent) {
-      const text = e.clipboardData?.getData('text/plain') || '';
+      const text = e.clipboardData?.getData('text/plain') ?? '';
       try {
         const parsedAction = JSON.parse(text);
         if (parsedAction?.name && parsedAction?.settings) {

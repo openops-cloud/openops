@@ -43,8 +43,8 @@ export const usePaste = () => {
             success: false,
             isCopy: false,
           });
+          return;
         }
-        return;
       }
 
       const itemsCount = flowHelper.getAllSteps(actionToPaste).length;
