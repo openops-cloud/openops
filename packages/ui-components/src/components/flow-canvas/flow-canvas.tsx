@@ -38,7 +38,7 @@ type FlowCanvasProps = {
     actionToPaste: Action | null;
     children: ReactNode;
   }>;
-  onNodeDrag?: OnNodeDrag<WorkflowNode> | undefined;
+  onNodeDrag?: OnNodeDrag<WorkflowNode>;
   children?: ReactNode;
 };
 
