@@ -32,7 +32,6 @@ type FlowCanvasProps = {
   nodeTypes?: NodeTypes;
   graph?: Graph;
   topOffset?: number;
-  allowCanvasPanning?: boolean;
   selectStepByName?: (stepName: string) => void;
   ContextMenu?: React.ComponentType<{
     contextMenuType: ContextMenuType;
