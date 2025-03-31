@@ -95,6 +95,7 @@ export const InteractiveContextProvider = ({
   onPaste: (actionToPaste: Action) => void;
   children: ReactNode;
 }) => {
+  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
   const [panningMode, setPanningMode] = useState<PanningMode>('grab');
   const previousSelectedStep = usePrevious(selectedStep);
   const [selectedActions, setSelectedActions] = useState<Action[]>([]);
@@ -108,7 +109,11 @@ export const InteractiveContextProvider = ({
   const spacePressed = useKeyPress(SPACE_KEY);
   const shiftPressed = useKeyPress(SHIFT_KEY);
 
-  const fallbackCopy = (text: string, action: Action, actionCount: number) => {
+  const fallbackCopy = (
+    text: string,
+    action: Action | null,
+    actionCount?: number,
+  ) => {
     const textarea = document.createElement('textarea');
     textarea.value = text;
     textarea.style.position = 'fixed';
@@ -117,12 +122,14 @@ export const InteractiveContextProvider = ({
     textarea.select();
 
     try {
+      if (action) {
+        setActionToPaste(action);
+      }
       // eslint-disable-next-line
       if (document.execCommand) {
         // eslint-disable-next-line
         document.execCommand('copy');
       }
-      setActionToPaste(action);
       copyPasteToast({
         success: true,
         isCopy: true,
@@ -138,30 +145,38 @@ export const InteractiveContextProvider = ({
     }
   };
 
-  const handleCopy = useCallback((action: Action, actionCount: number) => {
-    const flowString = JSON.stringify(action);
+  const handleCopy = useCallback(
+    (action: Action, actionCount: number) => {
+      const flowString = JSON.stringify(action);
 
-    if (navigator.clipboard) {
-      navigator.clipboard
-        .writeText(flowString)
-        .then(() => {
-          setActionToPaste(action);
-          copyPasteToast({
-            success: true,
-            isCopy: true,
-            itemsCount: actionCount,
+      if (navigator.clipboard) {
+        navigator.clipboard
+          .writeText(flowString)
+          .then(() => {
+            setActionToPaste(action);
+            copyPasteToast({
+              success: true,
+              isCopy: true,
+              itemsCount: actionCount,
+            });
+          })
+          .catch(() => {
+            copyPasteToast({
+              success: false,
+              isCopy: true,
+            });
           });
-        })
-        .catch(() => {
-          copyPasteToast({
-            success: false,
-            isCopy: true,
-          });
-        });
-    } else {
-      fallbackCopy(flowString, action, actionCount);
-    }
-  }, []);
+      } else {
+        if (isSafari) {
+          fallbackCopy('-', null, 0);
+          return;
+        }
+
+        fallbackCopy(flowString, action, actionCount);
+      }
+    },
+    [isSafari],
+  );
 
   const copySelectedStep = useCallback(() => {
     if (!selectedStep) {
@@ -210,7 +225,6 @@ export const InteractiveContextProvider = ({
       }
     };
 
-    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
     let targetEl: HTMLElement | Document | null = null;
 
     if (isSafari) {
@@ -240,7 +254,13 @@ export const InteractiveContextProvider = ({
         document.removeEventListener('copy', copyHandler);
       }
     };
-  }, [flowCanvasContainerId, copySelectedArea, copySelectedStep, selectedStep]);
+  }, [
+    flowCanvasContainerId,
+    copySelectedArea,
+    copySelectedStep,
+    selectedStep,
+    isSafari,
+  ]);
 
   // clear multi-selection if we have a new selected step
   useEffect(() => {
@@ -257,9 +277,20 @@ export const InteractiveContextProvider = ({
 
   useEffect(() => {
     function handler(e: ClipboardEvent) {
-      const text = e.clipboardData?.getData('text/plain') ?? '';
+      const clipboardText = e.clipboardData?.getData('text/plain') ?? '';
+
+      if (!clipboardText) {
+        // eslint-disable-next-line no-console
+        console.log('No text data found in clipboard event');
+        copyPasteToast({
+          success: false,
+          isCopy: false,
+        });
+        return;
+      }
+
       try {
-        const parsedAction = JSON.parse(text);
+        const parsedAction = JSON.parse(clipboardText);
         if (parsedAction?.name && parsedAction?.settings) {
           setActionToPaste(parsedAction);
           onPaste(parsedAction);
@@ -267,6 +298,10 @@ export const InteractiveContextProvider = ({
       } catch (err) {
         // eslint-disable-next-line no-console
         console.error(err);
+
+        if (actionToPaste) {
+          onPaste(actionToPaste);
+        }
       }
     }
 
@@ -275,7 +310,7 @@ export const InteractiveContextProvider = ({
     return () => {
       document.removeEventListener('paste', handler);
     };
-  }, [onPaste, selectedStep]);
+  }, [actionToPaste, onPaste, selectedStep]);
 
   const effectivePanningMode: PanningMode = useMemo(() => {
     if ((spacePressed || panningMode === 'grab') && !shiftPressed) {
