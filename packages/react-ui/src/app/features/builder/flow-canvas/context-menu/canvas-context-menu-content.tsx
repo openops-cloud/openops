@@ -11,7 +11,6 @@ import {
   ActionType,
   FlagId,
   flowHelper,
-  isNil,
   StepLocationRelativeToParent,
 } from '@openops/shared';
 
@@ -46,7 +45,6 @@ export const CanvasContextMenuContent = ({
     selectedNodes.some((node: string) => node === flowVersion.trigger.name) ||
     selectedStep === flowVersion.trigger.name;
 
-  const disabledPaste = isNil(actionToPaste);
   const showPasteAfterLastStep =
     !readonly && contextMenuType === ContextMenuType.CANVAS;
   const showPasteAsFirstLoopAction =
@@ -99,7 +97,6 @@ export const CanvasContextMenuContent = ({
       <>
         {showPasteAfterLastStep && !pastePlusButton && (
           <ContextMenuItem
-            disabled={disabledPaste}
             onClick={() =>
               onPaste(
                 actionToPaste as Action,
@@ -117,7 +114,6 @@ export const CanvasContextMenuContent = ({
         )}
         {showPasteAsFirstLoopAction && (
           <ContextMenuItem
-            disabled={disabledPaste}
             onClick={() =>
               onPaste(
                 actionToPaste as Action,
@@ -133,7 +129,6 @@ export const CanvasContextMenuContent = ({
         )}
         {showPasteInConditionBranch && (
           <ContextMenuItem
-            disabled={disabledPaste}
             onClick={() =>
               onPaste(
                 actionToPaste as Action,
@@ -149,7 +144,6 @@ export const CanvasContextMenuContent = ({
         )}
         {showPasteInSplitBranch && (
           <ContextMenuItem
-            disabled={disabledPaste}
             onClick={() => {
               const branchNodeId = firstSelectedNode.settings.options[0].id;
               return onPaste(
@@ -167,7 +161,6 @@ export const CanvasContextMenuContent = ({
         )}
         {showPasteAfterCurrentStep && (
           <ContextMenuItem
-            disabled={disabledPaste}
             onClick={() =>
               onPaste(
                 actionToPaste as Action,
@@ -183,7 +176,6 @@ export const CanvasContextMenuContent = ({
         )}
         {pastePlusButton && (
           <ContextMenuItem
-            disabled={disabledPaste}
             onClick={() =>
               onPaste(
                 actionToPaste as Action,

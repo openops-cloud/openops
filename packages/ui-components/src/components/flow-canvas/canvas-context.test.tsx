@@ -27,13 +27,6 @@ jest.mock('lodash-es', () => ({
   cloneDeep: jest.fn(),
 }));
 
-jest.mock('./clipboard-context', () => ({
-  useClipboardContext: () => ({
-    actionToPaste: jest.fn(),
-    fetchClipboardOperations: () => jest.fn(),
-  }),
-}));
-
 const mockFlowVersion = {} as FlowVersion;
 
 // Test component to consume the context

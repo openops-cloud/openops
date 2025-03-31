@@ -20,35 +20,54 @@ export const usePaste = () => {
   const flowVersion = useBuilderStateContext((state) => state.flowVersion);
 
   const onPaste = useCallback(
-    (
+    async (
       actionToPaste: Action,
       stepLocationRelativeToParent: StepLocationRelativeToParent,
       selectedStep: string | null,
       branchNodeId?: string,
     ) => {
-      if (isNil(actionToPaste)) {
-        return;
+      if (isNil(actionToPaste) && navigator.clipboard) {
+        try {
+          const text = await navigator.clipboard.readText();
+          const parsedAction = JSON.parse(text);
+          if (parsedAction?.name && parsedAction?.settings) {
+            actionToPaste = parsedAction;
+          }
+        } catch (err: any) {
+          if (err.name === 'NotAllowedError' || err.name === 'SecurityError') {
+            console.error('Clipboard permission denied');
+          } else {
+            console.error('Failed to copy:', err);
+          }
+          copyPasteToast({
+            success: false,
+            isCopy: false,
+          });
+          return;
+        }
       }
 
-      const itemsCount = flowHelper.getAllSteps(actionToPaste).length;
-      applyOperationAndPushToHistory(
-        {
-          type: FlowOperationType.PASTE_ACTIONS,
-          request: {
-            action: actionToPaste,
-            parentStep: getParentStepForPaste(flowVersion, selectedStep),
-            stepLocationRelativeToParent,
-            branchNodeId,
+      if (actionToPaste) {
+        const itemsCount = flowHelper.getAllSteps(actionToPaste).length;
+        applyOperationAndPushToHistory(
+          {
+            type: FlowOperationType.PASTE_ACTIONS,
+            request: {
+              action: actionToPaste,
+              parentStep: getParentStepForPaste(flowVersion, selectedStep),
+              stepLocationRelativeToParent,
+              branchNodeId,
+            },
           },
-        },
-        () => toast(UNSAVED_CHANGES_TOAST),
-      ).then(() => {
-        copyPasteToast({
-          success: true,
-          isCopy: false,
-          itemsCount,
+          () => toast(UNSAVED_CHANGES_TOAST),
+        ).then(() => {
+          copyPasteToast({
+            success: true,
+            isCopy: false,
+            itemsCount,
+          });
         });
-      });
+      }
     },
     [applyOperationAndPushToHistory, flowVersion],
   );
