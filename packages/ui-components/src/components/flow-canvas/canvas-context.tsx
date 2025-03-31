@@ -96,7 +96,6 @@ export const InteractiveContextProvider = ({
   onPaste: (actionToPaste: Action) => void;
   children: ReactNode;
 }) => {
-  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
   const [panningMode, setPanningMode] = useState<PanningMode>('grab');
   const previousSelectedStep = usePrevious(selectedStep);
   const [selectedActions, setSelectedActions] = useState<Action[]>([]);
@@ -151,37 +150,33 @@ export const InteractiveContextProvider = ({
     }
   };
 
-  const handleCopy = useCallback(
-    (action: Action, actionCount: number) => {
-      const flowString = JSON.stringify(action);
+  const handleCopy = useCallback((action: Action, actionCount: number) => {
+    const flowString = JSON.stringify(action);
 
-      if (navigator.clipboard) {
-        navigator.clipboard
-          .writeText(flowString)
-          .then(() => {
-            setActionToPaste(action);
-            copyPasteToast({
-              success: true,
-              isCopy: true,
-              itemsCount: actionCount,
-            });
-          })
-          .catch(() => {
-            copyPasteToast({
-              success: false,
-              isCopy: true,
-            });
+    if (navigator.clipboard) {
+      navigator.clipboard
+        .writeText(flowString)
+        .then(() => {
+          setActionToPaste(action);
+          copyPasteToast({
+            success: true,
+            isCopy: true,
+            itemsCount: actionCount,
           });
-      } else {
-        if (isSafari) {
-          fallbackCopy('-', null, 0);
-        }
-
-        fallbackCopy(flowString, action, actionCount);
-      }
-    },
-    [isSafari],
-  );
+        })
+        .catch((error) => {
+          // eslint-disable-next-line no-console
+          console.error(error);
+          fallbackCopy(flowString, action, actionCount);
+          copyPasteToast({
+            success: false,
+            isCopy: true,
+          });
+        });
+    } else {
+      fallbackCopy(flowString, action, actionCount);
+    }
+  }, []);
 
   const copySelectedStep = useCallback(() => {
     if (!selectedStep) {
@@ -219,14 +214,19 @@ export const InteractiveContextProvider = ({
   }, [handleCopy]);
 
   useLayoutEffect(() => {
-    if (!flowCanvasContainerId) return;
-
-    const canvas = document.getElementById(flowCanvasContainerId);
-    if (!canvas) return;
-
     const copyHandler = (event: ClipboardEvent) => {
+      if (!flowCanvasContainerId) return;
+
+      const canvas = document.getElementById(flowCanvasContainerId);
+      if (!canvas) return;
+
+      const isWithinCanvas =
+        event.target === canvas || canvas.contains(event.target as Node);
+      if (!isWithinCanvas) return;
+
       event.preventDefault();
       event.stopPropagation();
+
       if (selectedStep) {
         copySelectedStep();
       } else {
@@ -234,26 +234,12 @@ export const InteractiveContextProvider = ({
       }
     };
 
-    if (isSafari) {
-      document.addEventListener('copy', copyHandler);
-    } else {
-      canvas.addEventListener('copy', copyHandler);
-    }
+    document.addEventListener('copy', copyHandler);
 
     return () => {
-      if (isSafari) {
-        document.removeEventListener('copy', copyHandler);
-      } else {
-        canvas.removeEventListener('copy', copyHandler);
-      }
+      document.removeEventListener('copy', copyHandler);
     };
-  }, [
-    flowCanvasContainerId,
-    copySelectedArea,
-    copySelectedStep,
-    selectedStep,
-    isSafari,
-  ]);
+  }, [copySelectedArea, copySelectedStep, flowCanvasContainerId, selectedStep]);
 
   // clear multi-selection if we have a new selected step
   useEffect(() => {
