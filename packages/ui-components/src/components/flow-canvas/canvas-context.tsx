@@ -108,26 +108,59 @@ export const InteractiveContextProvider = ({
   const spacePressed = useKeyPress(SPACE_KEY);
   const shiftPressed = useKeyPress(SHIFT_KEY);
 
+  const fallbackCopy = (text: string, action: Action, actionCount: number) => {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+
+    try {
+      if (document.execCommand) {
+        document.execCommand('copy');
+      }
+      setActionToPaste(action);
+      copyPasteToast({
+        success: true,
+        isCopy: true,
+        itemsCount: actionCount,
+      });
+    } catch (err) {
+      copyPasteToast({
+        success: false,
+        isCopy: true,
+        itemsCount: actionCount,
+      });
+    } finally {
+      document.body.removeChild(textarea);
+    }
+  };
+
   const handleCopy = useCallback((action: Action, actionCount: number) => {
     const flowString = JSON.stringify(action);
 
-    navigator.clipboard
-      .writeText(flowString)
-      .then(() => {
-        setActionToPaste(action);
-        copyPasteToast({
-          success: true,
-          isCopy: true,
-          itemsCount: actionCount,
+    if (navigator.clipboard) {
+      navigator.clipboard
+        .writeText(flowString)
+        .then(() => {
+          setActionToPaste(action);
+          copyPasteToast({
+            success: true,
+            isCopy: true,
+            itemsCount: actionCount,
+          });
+        })
+        .catch(() => {
+          copyPasteToast({
+            success: false,
+            isCopy: true,
+            itemsCount: actionCount,
+          });
         });
-      })
-      .catch(() => {
-        copyPasteToast({
-          success: false,
-          isCopy: true,
-          itemsCount: actionCount,
-        });
-      });
+    } else {
+      fallbackCopy(flowString, action, actionCount);
+    }
   }, []);
 
   const copySelectedStep = useCallback(() => {
@@ -170,6 +203,8 @@ export const InteractiveContextProvider = ({
 
     const copyHandler = (event: ClipboardEvent) => {
       event.preventDefault();
+      const data = event.clipboardData?.getData('text/plain') ?? '';
+      console.log('data', data);
       if (selectedStep) {
         copySelectedStep();
       } else {
