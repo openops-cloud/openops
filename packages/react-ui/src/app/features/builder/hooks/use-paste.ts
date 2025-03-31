@@ -19,15 +19,31 @@ export const usePaste = () => {
   const applyOperationAndPushToHistory = useApplyOperationAndPushToHistory();
   const flowVersion = useBuilderStateContext((state) => state.flowVersion);
 
-  // todo - if there is no action to paste -> try to read the clipboard
   const onPaste = useCallback(
-    (
+    async (
       actionToPaste: Action,
       stepLocationRelativeToParent: StepLocationRelativeToParent,
       selectedStep: string | null,
       branchNodeId?: string,
     ) => {
-      if (isNil(actionToPaste)) {
+      if (isNil(actionToPaste) && navigator.clipboard) {
+        try {
+          const text = await navigator.clipboard.readText();
+          const parsedAction = JSON.parse(text);
+          if (parsedAction?.name && parsedAction?.settings) {
+            actionToPaste = parsedAction;
+          }
+        } catch (err: any) {
+          if (err.name === 'NotAllowedError' || err.name === 'SecurityError') {
+            console.error('Clipboard permission denied');
+          } else {
+            console.error('Failed to copy:', err);
+          }
+          copyPasteToast({
+            success: false,
+            isCopy: false,
+          });
+        }
         return;
       }
 
