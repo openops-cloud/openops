@@ -205,8 +205,6 @@ export const InteractiveContextProvider = ({
 
     const copyHandler = (event: ClipboardEvent) => {
       event.preventDefault();
-      const data = event.clipboardData?.getData('text/plain') ?? '';
-      console.log('data', data);
       if (selectedStep) {
         copySelectedStep();
       } else {
