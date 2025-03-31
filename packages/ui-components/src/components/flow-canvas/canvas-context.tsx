@@ -16,6 +16,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -130,6 +131,11 @@ export const InteractiveContextProvider = ({
         // eslint-disable-next-line
         document.execCommand('copy');
       }
+
+      if (!action || !actionCount) {
+        return;
+      }
+
       copyPasteToast({
         success: true,
         isCopy: true,
@@ -169,7 +175,6 @@ export const InteractiveContextProvider = ({
       } else {
         if (isSafari) {
           fallbackCopy('-', null, 0);
-          return;
         }
 
         fallbackCopy(flowString, action, actionCount);
@@ -213,11 +218,15 @@ export const InteractiveContextProvider = ({
     handleCopy(selectedFlowActionRef.current, selectedNodeCounterRef.current);
   }, [handleCopy]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!flowCanvasContainerId) return;
+
+    const canvas = document.getElementById(flowCanvasContainerId);
+    if (!canvas) return;
 
     const copyHandler = (event: ClipboardEvent) => {
       event.preventDefault();
+      event.stopPropagation();
       if (selectedStep) {
         copySelectedStep();
       } else {
@@ -225,33 +234,17 @@ export const InteractiveContextProvider = ({
       }
     };
 
-    let targetEl: HTMLElement | Document | null = null;
-
     if (isSafari) {
       document.addEventListener('copy', copyHandler);
-      targetEl = document;
     } else {
-      const intervalId = setInterval(() => {
-        const canvas = document.getElementById(flowCanvasContainerId);
-        if (canvas) {
-          canvas.removeEventListener('copy', copyHandler);
-          canvas.addEventListener('copy', copyHandler);
-          targetEl = canvas;
-          clearInterval(intervalId);
-        }
-      }, 200);
-
-      return () => {
-        clearInterval(intervalId);
-        if (targetEl && targetEl !== document) {
-          targetEl.removeEventListener('copy', copyHandler as EventListener);
-        }
-      };
+      canvas.addEventListener('copy', copyHandler);
     }
 
     return () => {
-      if (isSafari && targetEl === document) {
+      if (isSafari) {
         document.removeEventListener('copy', copyHandler);
+      } else {
+        canvas.removeEventListener('copy', copyHandler);
       }
     };
   }, [
