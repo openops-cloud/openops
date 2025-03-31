@@ -16,13 +16,13 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from 'react';
 import { usePrevious } from 'react-use';
 import {
+  COPY_KEYS,
   NODE_SELECTION_RECT_CLASS_NAME,
   SHIFT_KEY,
   SPACE_KEY,
@@ -108,6 +108,14 @@ export const InteractiveContextProvider = ({
 
   const spacePressed = useKeyPress(SPACE_KEY);
   const shiftPressed = useKeyPress(SHIFT_KEY);
+
+  const canvas = useMemo(() => {
+    return flowCanvasContainerId
+      ? document.getElementById(flowCanvasContainerId)
+      : null;
+  }, [flowCanvasContainerId]);
+
+  const copyPressed = useKeyPress(COPY_KEYS, { target: canvas });
 
   const fallbackCopy = (
     text: string,
@@ -213,33 +221,17 @@ export const InteractiveContextProvider = ({
     handleCopy(selectedFlowActionRef.current, selectedNodeCounterRef.current);
   }, [handleCopy]);
 
-  useLayoutEffect(() => {
-    const copyHandler = (event: ClipboardEvent) => {
-      if (!flowCanvasContainerId) return;
+  useEffect(() => {
+    if (!copyPressed) {
+      return;
+    }
 
-      const canvas = document.getElementById(flowCanvasContainerId);
-      if (!canvas) return;
-
-      const isWithinCanvas =
-        event.target === canvas || canvas.contains(event.target as Node);
-      if (!isWithinCanvas) return;
-
-      event.preventDefault();
-      event.stopPropagation();
-
-      if (selectedStep) {
-        copySelectedStep();
-      } else {
-        copySelectedArea();
-      }
-    };
-
-    document.addEventListener('copy', copyHandler);
-
-    return () => {
-      document.removeEventListener('copy', copyHandler);
-    };
-  }, [copySelectedArea, copySelectedStep, flowCanvasContainerId, selectedStep]);
+    if (selectedStep) {
+      copySelectedStep();
+    } else {
+      copySelectedArea();
+    }
+  }, [copyPressed, copySelectedArea, copySelectedStep, selectedStep]);
 
   // clear multi-selection if we have a new selected step
   useEffect(() => {
@@ -260,7 +252,7 @@ export const InteractiveContextProvider = ({
 
       if (!clipboardText) {
         // eslint-disable-next-line no-console
-        console.log('No text data found in clipboard event');
+        console.log('No data found in the clipboard event');
         copyPasteToast({
           success: false,
           isCopy: false,
@@ -280,6 +272,11 @@ export const InteractiveContextProvider = ({
 
         if (actionToPaste) {
           onPaste(actionToPaste);
+        } else {
+          copyPasteToast({
+            success: false,
+            isCopy: false,
+          });
         }
       }
     }
