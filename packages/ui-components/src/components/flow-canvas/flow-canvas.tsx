@@ -3,6 +3,7 @@ import {
   Background,
   EdgeTypes,
   NodeTypes,
+  OnNodeDrag,
   ReactFlow,
   ReactFlowInstance,
   useStoreApi,
@@ -40,15 +41,9 @@ type FlowCanvasProps = {
     actionToPaste: Action | null;
     children: ReactNode;
   }>;
+  onNodeDrag?: OnNodeDrag<WorkflowNode> | undefined;
   children?: ReactNode;
 };
-
-function getPanOnDrag(allowCanvasPanning: boolean, inGrabPanningMode: boolean) {
-  if (allowCanvasPanning) {
-    return inGrabPanningMode ? [0, 1] : [1];
-  }
-  return false;
-}
 
 const FlowCanvas = React.memo(
   ({
@@ -56,9 +51,9 @@ const FlowCanvas = React.memo(
     nodeTypes,
     graph,
     topOffset,
-    allowCanvasPanning = true,
     selectStepByName,
     ContextMenu = ({ children }) => children,
+    onNodeDrag,
     children,
   }: FlowCanvasProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -97,8 +92,6 @@ const FlowCanvas = React.memo(
       setPastePlusButton,
     } = useCanvasContext();
     const inGrabPanningMode = panningMode === 'grab';
-
-    const panOnDrag = getPanOnDrag(allowCanvasPanning, inGrabPanningMode);
 
     const onContextMenu = async (ev: React.MouseEvent<HTMLDivElement>) => {
       await fetchClipboardOperations();
@@ -183,7 +176,7 @@ const FlowCanvas = React.memo(
               elevateEdgesOnSelect={false}
               maxZoom={MAX_ZOOM}
               minZoom={MIN_ZOOM}
-              panOnDrag={panOnDrag}
+              panOnDrag={inGrabPanningMode ? [0, 1] : [1]}
               zoomOnDoubleClick={false}
               panOnScroll={true}
               fitView={false}
@@ -201,6 +194,7 @@ const FlowCanvas = React.memo(
               proOptions={{
                 hideAttribution: true,
               }}
+              onNodeDrag={onNodeDrag}
               onInit={onInit}
               onContextMenu={onContextMenu}
               onSelectionChange={readonly ? undefined : onSelectionChange}

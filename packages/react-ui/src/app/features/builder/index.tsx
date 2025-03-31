@@ -161,6 +161,8 @@ const BuilderPage = () => {
   );
   const middlePanelRef = useRef(null);
   const middlePanelSize = useElementSize(middlePanelRef);
+  const leftSidePanelRef = useRef(null);
+  const leftSidePanelSize = useElementSize(leftSidePanelRef);
   const [isDraggingHandle, setIsDraggingHandle] = useState(false);
   const rightHandleRef = useAnimateSidebar(rightSidebar);
   const {
@@ -258,18 +260,22 @@ const BuilderPage = () => {
                 })}
                 isDragging={isDraggingHandle}
               >
-                {leftSidebar === LeftSideBarType.RUNS && <FlowRecentRunsList />}
-                {leftSidebar === LeftSideBarType.RUN_DETAILS && (
-                  <FlowRunDetails />
-                )}
-                {leftSidebar === LeftSideBarType.VERSIONS && (
-                  <FlowVersionsList />
-                )}
-                {leftSidebar === LeftSideBarType.AI_COPILOT && (
-                  <CopilotSidebar />
-                )}
-                {leftSidebar === LeftSideBarType.MENU && <FlowSideMenu />}
-                {leftSidebar === LeftSideBarType.TREE_VIEW && <TreeView />}
+                <div className="h-full w-full" ref={leftSidePanelRef}>
+                  {leftSidebar === LeftSideBarType.RUNS && (
+                    <FlowRecentRunsList />
+                  )}
+                  {leftSidebar === LeftSideBarType.RUN_DETAILS && (
+                    <FlowRunDetails />
+                  )}
+                  {leftSidebar === LeftSideBarType.VERSIONS && (
+                    <FlowVersionsList />
+                  )}
+                  {leftSidebar === LeftSideBarType.AI_COPILOT && (
+                    <CopilotSidebar />
+                  )}
+                  {leftSidebar === LeftSideBarType.MENU && <FlowSideMenu />}
+                  {leftSidebar === LeftSideBarType.TREE_VIEW && <TreeView />}
+                </div>
               </LeftSidebarResizablePanel>
               <ResizableHandle
                 className="w-0"
@@ -317,6 +323,7 @@ const BuilderPage = () => {
                     middlePanelRef={middlePanelRef}
                     middlePanelSize={middlePanelSize}
                     flowVersion={flowVersion}
+                    lefSideBarContainerWidth={leftSidePanelSize?.width || 0}
                   />
                 )}
               </ResizablePanel>

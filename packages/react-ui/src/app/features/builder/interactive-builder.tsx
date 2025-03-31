@@ -17,6 +17,7 @@ const InteractiveBuilder = ({
   middlePanelRef,
   middlePanelSize,
   flowVersion,
+  lefSideBarContainerWidth,
 }: {
   selectedStep: string | null;
   clearSelectedStep: () => void;
@@ -25,6 +26,7 @@ const InteractiveBuilder = ({
     width: number;
     height: number;
   };
+  lefSideBarContainerWidth: number;
   flowVersion: FlowVersion;
 }) => {
   return (
@@ -47,7 +49,9 @@ const InteractiveBuilder = ({
           className="h-screen w-full flex-1 z-10"
           id={FLOW_CANVAS_CONTAINER_ID}
         >
-          <FlowBuilderCanvas />
+          <FlowBuilderCanvas
+            lefSideBarContainerWidth={lefSideBarContainerWidth}
+          />
         </div>
       </div>
     </InteractiveContextProvider>
