@@ -296,54 +296,72 @@ describe('getRowByPrimaryKeyValue', () => {
     jest.clearAllMocks();
   });
 
-  test('Should get row by primary key value', async () => {
-    makeOpenOpsTablesGetMock.mockResolvedValue([
-      { results: [{ id: 1, order: 1234 }] },
-    ]);
-    createAxiosHeadersMock.mockReturnValue('some header');
+  test.each([
+    ['text', 'equal'],
+    ['rating', 'equal'],
+    ['email', 'equal'],
+    ['date', 'date_equal'],
+  ])(
+    'Should get row by primary key value',
+    async (fieldType: string, expected: string) => {
+      makeOpenOpsTablesGetMock.mockResolvedValue([
+        { results: [{ id: 1, order: 1234 }] },
+      ]);
+      createAxiosHeadersMock.mockReturnValue('some header');
 
-    const result = await getRowByPrimaryKeyValue(
-      'token',
-      1,
-      'primaryKeyValue',
-      'primaryFieldName',
-    );
-
-    expect(result).toStrictEqual({ id: 1, order: 1234 });
-    expect(makeOpenOpsTablesGetMock).toBeCalledTimes(1);
-    expect(makeOpenOpsTablesGetMock).toHaveBeenCalledWith(
-      'api/database/rows/table/1/?user_field_names=true&filter__primaryFieldName__equal=primaryKeyValue',
-      'some header',
-    );
-    expect(createAxiosHeadersMock).toBeCalledTimes(1);
-    expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
-  });
-
-  test('should throw if more than one row was found', async () => {
-    makeOpenOpsTablesGetMock.mockResolvedValue([
-      {
-        results: [
-          { id: 1, order: 1234 },
-          { id: 2, order: 1234 },
-        ],
-      },
-    ]);
-    createAxiosHeadersMock.mockReturnValue('some header');
-    await expect(
-      getRowByPrimaryKeyValue(
+      const result = await getRowByPrimaryKeyValue(
         'token',
         1,
         'primaryKeyValue',
         'primaryFieldName',
-      ),
-    ).rejects.toThrow('More than one row found with given primary key');
+        fieldType,
+      );
 
-    expect(makeOpenOpsTablesGetMock).toBeCalledTimes(1);
-    expect(makeOpenOpsTablesGetMock).toHaveBeenCalledWith(
-      'api/database/rows/table/1/?user_field_names=true&filter__primaryFieldName__equal=primaryKeyValue',
-      'some header',
-    );
-    expect(createAxiosHeadersMock).toBeCalledTimes(1);
-    expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
-  });
+      expect(result).toStrictEqual({ id: 1, order: 1234 });
+      expect(makeOpenOpsTablesGetMock).toBeCalledTimes(1);
+      expect(makeOpenOpsTablesGetMock).toHaveBeenCalledWith(
+        `api/database/rows/table/1/?user_field_names=true&filter__primaryFieldName__${expected}=primaryKeyValue`,
+        'some header',
+      );
+      expect(createAxiosHeadersMock).toBeCalledTimes(1);
+      expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
+    },
+  );
+
+  test.each([
+    ['text', 'equal'],
+    ['rating', 'equal'],
+    ['email', 'equal'],
+    ['date', 'date_equal'],
+  ])(
+    'should throw if more than one row was found',
+    async (fieldType: string, expected: string) => {
+      makeOpenOpsTablesGetMock.mockResolvedValue([
+        {
+          results: [
+            { id: 1, order: 1234 },
+            { id: 2, order: 1234 },
+          ],
+        },
+      ]);
+      createAxiosHeadersMock.mockReturnValue('some header');
+      await expect(
+        getRowByPrimaryKeyValue(
+          'token',
+          1,
+          'primaryKeyValue',
+          'primaryFieldName',
+          fieldType,
+        ),
+      ).rejects.toThrow('More than one row found with given primary key');
+
+      expect(makeOpenOpsTablesGetMock).toBeCalledTimes(1);
+      expect(makeOpenOpsTablesGetMock).toHaveBeenCalledWith(
+        `api/database/rows/table/1/?user_field_names=true&filter__primaryFieldName__${expected}=primaryKeyValue`,
+        'some header',
+      );
+      expect(createAxiosHeadersMock).toBeCalledTimes(1);
+      expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
+    },
+  );
 });

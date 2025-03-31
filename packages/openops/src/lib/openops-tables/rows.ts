@@ -144,6 +144,7 @@ export async function getRowByPrimaryKeyValue(
   tableId: number,
   primaryKeyFieldValue: string,
   primaryKeyFieldName: any,
+  primaryKeyFieldType: string,
 ) {
   const rows = await getRows({
     tableId: tableId,
@@ -152,7 +153,7 @@ export async function getRowByPrimaryKeyValue(
       {
         fieldName: primaryKeyFieldName,
         value: primaryKeyFieldValue,
-        type: ViewFilterTypesEnum.equal,
+        type: getFilterTypesEnum(primaryKeyFieldType),
       },
     ],
   });
@@ -162,4 +163,12 @@ export async function getRowByPrimaryKeyValue(
   }
 
   return rows[0];
+}
+
+function getFilterTypesEnum(primaryKeyFieldType: string): ViewFilterTypesEnum {
+  if (primaryKeyFieldType === 'date') {
+    return ViewFilterTypesEnum.date_equal;
+  }
+
+  return ViewFilterTypesEnum.equal;
 }

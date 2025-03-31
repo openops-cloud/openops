@@ -49,6 +49,7 @@ export const deleteRecordAction = createAction({
       tableId,
       rowPrimaryKey,
       primaryKeyField.name,
+      primaryKeyField.type,
     );
     if (!rowToDelete) {
       throw new Error('No record found with given primary key');
