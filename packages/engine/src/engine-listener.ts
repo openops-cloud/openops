@@ -63,7 +63,7 @@ async function startEngineSubProcess(): Promise<void> {
 
   logger.info(`Start the engine subprocess`);
 
-  engineSubProcess = spawn('node', [startJs, ENGINE_SUBPROCESS_FLAG], {
+  engineSubProcess = spawn(process.argv[0], [startJs, ENGINE_SUBPROCESS_FLAG], {
     stdio: 'inherit',
     env: process.env,
   });
