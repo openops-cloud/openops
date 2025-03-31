@@ -16,7 +16,6 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -97,7 +96,6 @@ export const InteractiveContextProvider = ({
   onPaste: (actionToPaste: Action) => void;
   children: ReactNode;
 }) => {
-  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
   const [panningMode, setPanningMode] = useState<PanningMode>('grab');
   const previousSelectedStep = usePrevious(selectedStep);
   const [selectedActions, setSelectedActions] = useState<Action[]>([]);
@@ -239,7 +237,7 @@ export const InteractiveContextProvider = ({
   }, [handleCopy]);
 
   useEffect(() => {
-    if (!copyPressed && !isSafari) {
+    if (!copyPressed) {
       return;
     }
 
@@ -248,43 +246,7 @@ export const InteractiveContextProvider = ({
     } else {
       copySelectedArea();
     }
-  }, [copyPressed, copySelectedArea, copySelectedStep, isSafari, selectedStep]);
-
-  // safari doesn't work well with events on the canvas
-  // so we need to document to support copy properly on Safari as well
-  useLayoutEffect(() => {
-    const copyHandler = (event: ClipboardEvent) => {
-      if (!flowCanvasContainerId || !isSafari) return;
-
-      const canvas = document.getElementById(flowCanvasContainerId);
-      if (!canvas) return;
-
-      const isWithinCanvas =
-        event.target === canvas || canvas.contains(event.target as Node);
-      if (!isWithinCanvas) return;
-
-      event.preventDefault();
-      event.stopPropagation();
-
-      if (selectedStep) {
-        copySelectedStep();
-      } else {
-        copySelectedArea();
-      }
-    };
-
-    document.addEventListener('copy', copyHandler);
-
-    return () => {
-      document.removeEventListener('copy', copyHandler);
-    };
-  }, [
-    copySelectedArea,
-    copySelectedStep,
-    flowCanvasContainerId,
-    isSafari,
-    selectedStep,
-  ]);
+  }, [copyPressed, copySelectedArea, copySelectedStep, selectedStep]);
 
   // clear multi-selection if we have a new selected step
   useEffect(() => {
