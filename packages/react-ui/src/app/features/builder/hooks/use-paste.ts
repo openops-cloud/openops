@@ -47,25 +47,27 @@ export const usePaste = () => {
         }
       }
 
-      const itemsCount = flowHelper.getAllSteps(actionToPaste).length;
-      applyOperationAndPushToHistory(
-        {
-          type: FlowOperationType.PASTE_ACTIONS,
-          request: {
-            action: actionToPaste,
-            parentStep: getParentStepForPaste(flowVersion, selectedStep),
-            stepLocationRelativeToParent,
-            branchNodeId,
+      if (actionToPaste) {
+        const itemsCount = flowHelper.getAllSteps(actionToPaste).length;
+        applyOperationAndPushToHistory(
+          {
+            type: FlowOperationType.PASTE_ACTIONS,
+            request: {
+              action: actionToPaste,
+              parentStep: getParentStepForPaste(flowVersion, selectedStep),
+              stepLocationRelativeToParent,
+              branchNodeId,
+            },
           },
-        },
-        () => toast(UNSAVED_CHANGES_TOAST),
-      ).then(() => {
-        copyPasteToast({
-          success: true,
-          isCopy: false,
-          itemsCount,
+          () => toast(UNSAVED_CHANGES_TOAST),
+        ).then(() => {
+          copyPasteToast({
+            success: true,
+            isCopy: false,
+            itemsCount,
+          });
         });
-      });
+      }
     },
     [applyOperationAndPushToHistory, flowVersion],
   );

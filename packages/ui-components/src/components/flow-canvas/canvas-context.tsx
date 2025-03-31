@@ -132,7 +132,6 @@ export const InteractiveContextProvider = ({
       copyPasteToast({
         success: false,
         isCopy: true,
-        itemsCount: actionCount,
       });
     } finally {
       document.body.removeChild(textarea);
@@ -157,7 +156,6 @@ export const InteractiveContextProvider = ({
           copyPasteToast({
             success: false,
             isCopy: true,
-            itemsCount: actionCount,
           });
         });
     } else {
