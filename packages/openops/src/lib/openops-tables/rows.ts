@@ -153,7 +153,7 @@ export async function getRowByPrimaryKeyValue(
       {
         fieldName: primaryKeyFieldName,
         value: primaryKeyFieldValue,
-        type: getFilterTypesEnum(primaryKeyFieldType),
+        type: getEqualityFilterType(primaryKeyFieldType),
       },
     ],
   });
@@ -165,7 +165,9 @@ export async function getRowByPrimaryKeyValue(
   return rows[0];
 }
 
-function getFilterTypesEnum(primaryKeyFieldType: string): ViewFilterTypesEnum {
+function getEqualityFilterType(
+  primaryKeyFieldType: string,
+): ViewFilterTypesEnum {
   if (primaryKeyFieldType === 'date') {
     return ViewFilterTypesEnum.date_equal;
   }
