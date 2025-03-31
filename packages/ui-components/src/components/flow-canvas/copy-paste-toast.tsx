@@ -50,6 +50,6 @@ export const copyPasteToast = (props: CopyPasteToastProps) => {
       </div>
     ),
     closeButtonClassName: 'top-6 right-4 opacity-1 text-black dark:text-white',
-    duration: 7000,
+    duration: 2000,
   });
 };
