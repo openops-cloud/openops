@@ -117,7 +117,9 @@ export const InteractiveContextProvider = ({
     textarea.select();
 
     try {
+      // eslint-disable-next-line
       if (document.execCommand) {
+        // eslint-disable-next-line
         document.execCommand('copy');
       }
       setActionToPaste(action);

@@ -59,21 +59,13 @@ export const usePaste = () => {
           },
         },
         () => toast(UNSAVED_CHANGES_TOAST),
-      )
-        .then(() => {
-          copyPasteToast({
-            success: true,
-            isCopy: false,
-            itemsCount,
-          });
-        })
-        .catch(() => {
-          copyPasteToast({
-            success: false,
-            isCopy: false,
-            itemsCount,
-          });
+      ).then(() => {
+        copyPasteToast({
+          success: true,
+          isCopy: false,
+          itemsCount,
         });
+      });
     },
     [applyOperationAndPushToHistory, flowVersion],
   );
