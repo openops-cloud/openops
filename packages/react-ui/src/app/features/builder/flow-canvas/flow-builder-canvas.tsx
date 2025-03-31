@@ -1,5 +1,5 @@
 import { getNodesBounds, useReactFlow } from '@xyflow/react';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import { FLOW_CANVAS_Y_OFFESET } from '@/app/constants/flow-canvas';
 import {
@@ -31,27 +31,33 @@ const nodeTypes = {
 const FlowBuilderCanvas = React.memo(
   ({ lefSideBarContainerWidth = 0 }: { lefSideBarContainerWidth?: number }) => {
     const { getNodes } = useReactFlow();
-    const [graph, graphHeight, selectStepByName, rightSidebar] =
-      useBuilderStateContext((state) => {
-        const previousNodes = getNodes();
-        const graph = flowCanvasUtils.convertFlowVersionToGraph(
-          state.flowVersion,
-        );
-        graph.nodes = graph.nodes.map((node) => {
-          const previousNode = previousNodes.find((n) => n.id === node.id);
+    const [flowVersion, selectStepByName, rightSidebar] =
+      useBuilderStateContext((state) => [
+        state.flowVersion,
+        state.selectStepByName,
+        state.rightSidebar,
+      ]);
 
-          if (previousNode) {
-            node.selected = previousNode.selected;
-          }
-          return node;
-        });
-        return [
-          graph,
-          getNodesBounds(graph.nodes),
-          state.selectStepByName,
-          state.rightSidebar,
-        ];
+    // Memoize graph so it only recalculates when flowVersion changes
+    const graph = useMemo(() => {
+      const convertedGraph =
+        flowCanvasUtils.convertFlowVersionToGraph(flowVersion);
+      const previousNodes = getNodes();
+
+      convertedGraph.nodes = convertedGraph.nodes.map((node) => {
+        const previousNode = previousNodes.find((n) => n.id === node.id);
+        if (previousNode) node.selected = previousNode.selected;
+        return node;
       });
+
+      return convertedGraph;
+    }, [flowVersion, getNodes]);
+
+    const graphHeight = useMemo(
+      () => getNodesBounds(graph.nodes),
+      [graph.nodes],
+    );
+
     const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
 
     const isSidebarOpen = rightSidebar === RightSideBarType.BLOCK_SETTINGS;
