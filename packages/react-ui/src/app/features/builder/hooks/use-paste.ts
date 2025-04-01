@@ -14,10 +14,12 @@ import {
 import { useCallback } from 'react';
 import { useBuilderStateContext } from '../builder-hooks';
 import { useApplyOperationAndPushToHistory } from '../flow-version-undo-redo/hooks/apply-operation-and-push-to-history';
+import { useCenterWorkflowViewOntoStep } from './center-workflow-view-onto-step';
 
 export const usePaste = () => {
   const applyOperationAndPushToHistory = useApplyOperationAndPushToHistory();
   const flowVersion = useBuilderStateContext((state) => state.flowVersion);
+  const centerWorkflowViewOntoStep = useCenterWorkflowViewOntoStep();
 
   const onPaste = useCallback(
     async (
@@ -61,6 +63,7 @@ export const usePaste = () => {
           },
           () => toast(UNSAVED_CHANGES_TOAST),
         ).then(() => {
+          centerWorkflowViewOntoStep(actionToPaste.name);
           copyPasteToast({
             success: true,
             isCopy: false,
@@ -69,7 +72,7 @@ export const usePaste = () => {
         });
       }
     },
-    [applyOperationAndPushToHistory, flowVersion],
+    [applyOperationAndPushToHistory, centerWorkflowViewOntoStep, flowVersion],
   );
 
   return {
