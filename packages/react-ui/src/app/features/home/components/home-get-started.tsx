@@ -21,6 +21,10 @@ const HomeGetStarted = ({
   onSampleTemplateClick,
   close,
 }: HomeGetStartedProps) => {
+  const displayedTemplates = [...sampleTemplates, ...sampleTemplates].slice(
+    0,
+    3,
+  );
   return (
     <DismissiblePanel
       className="min-h-fit h-fit"
@@ -30,27 +34,17 @@ const HomeGetStarted = ({
     >
       <div className="p-6 flex flex-col gap-4 bg-secondary font-bold">
         <h2 className="text-[24px]">{t('Get started')}</h2>
-        <div className="flex items-center justify-between gap-4 flex-wrap @[1120px]:flex-nowrap">
+        <div className="flex items-center justify-between gap-4 flex-wrap @[1160px]:flex-nowrap">
           <div className="w-full flex flex-col gap-[10px]">
             <h3>{t('Start with our Sample template')}</h3>
-            <div className="flex gap-4 font-normal">
-              {sampleTemplates && (
-                <>
-                  <SampleTemplateCard
-                    templateMetadata={sampleTemplates[0]}
-                    onClick={() => {
-                      onSampleTemplateClick(sampleTemplates[0]);
-                    }}
-                  ></SampleTemplateCard>
-
-                  <SampleTemplateCard
-                    templateMetadata={sampleTemplates[1]}
-                    onClick={() => {
-                      onSampleTemplateClick(sampleTemplates[1]);
-                    }}
-                  ></SampleTemplateCard>
-                </>
-              )}
+            <div className="flex gap-2">
+              {displayedTemplates.map((template, index) => (
+                <SampleTemplateCard
+                  key={index}
+                  templateMetadata={template}
+                  onClick={() => onSampleTemplateClick(template)}
+                />
+              ))}
             </div>
           </div>
           <div className="w-full flex flex-col gap-[10px]">

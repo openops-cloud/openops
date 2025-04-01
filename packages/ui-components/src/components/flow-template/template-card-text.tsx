@@ -1,17 +1,22 @@
 import removeMarkdown from 'markdown-to-text';
 import { useEffect, useRef, useState } from 'react';
+import { cn } from '../../lib/cn';
 import { FlowTemplateMetadataWithIntegrations } from './types';
 
 type TemplateCardTextProps = {
   templateMetadata: FlowTemplateMetadataWithIntegrations;
   headerMaxLines?: number;
   totalMaxLines?: number;
+  headerClassName?: string;
+  descriptionClassName?: string;
 };
 
 export const TemplateCardText = ({
   templateMetadata,
   headerMaxLines = 2,
   totalMaxLines = 4,
+  headerClassName,
+  descriptionClassName,
 }: TemplateCardTextProps) => {
   const [descriptionLines, setDescriptionLines] = useState(0);
   const templateNameRef = useRef<HTMLHeadingElement>(null);
@@ -31,7 +36,7 @@ export const TemplateCardText = ({
     <div className="flex flex-col gap-1">
       <h3
         ref={templateNameRef}
-        className="font-bold overflow-hidden"
+        className={cn('font-bold overflow-hidden', headerClassName)}
         style={{
           display: '-webkit-box',
           WebkitBoxOrient: 'vertical',
@@ -42,7 +47,10 @@ export const TemplateCardText = ({
       </h3>
       {descriptionLines && (
         <p
-          className="text-sm font-normal overflow-hidden"
+          className={cn(
+            'text-sm font-normal overflow-hidden',
+            descriptionClassName,
+          )}
           style={{
             display: '-webkit-box',
             WebkitBoxOrient: 'vertical',
