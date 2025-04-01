@@ -33,7 +33,7 @@ import { useApplyOperationAndPushToHistory } from '../../flow-version-undo-redo/
 import { usePaste } from '../../hooks/use-paste';
 import { StepActionWrapper } from '../nodes/step-action-wrapper';
 import { CanvasShortcuts, ShortcutWrapper } from './canvas-shortcuts';
-import { isProtocolHttps } from './utils';
+import { hasSecureClipboardAccess } from './utils';
 
 type Props = {
   data: WorkflowNode['data'];
@@ -180,7 +180,7 @@ const CanvasContextMenu = memo(
             </DropdownMenuItem>
           )}
 
-          {isProtocolHttps && (
+          {hasSecureClipboardAccess && (
             <>
               {isAction &&
                 showCopyPaste &&

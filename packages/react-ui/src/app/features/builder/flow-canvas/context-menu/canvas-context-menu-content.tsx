@@ -20,7 +20,7 @@ import { usePaste } from '../../hooks/use-paste';
 import { useSelection } from '../../hooks/use-selection';
 import { CanvasShortcuts, ShortcutWrapper } from './canvas-shortcuts';
 import { CanvasContextMenuProps } from './context-menu-wrapper';
-import { isProtocolHttps } from './utils';
+import { hasSecureClipboardAccess } from './utils';
 
 export const CanvasContextMenuContent = ({
   contextMenuType,
@@ -74,7 +74,7 @@ export const CanvasContextMenuContent = ({
 
   const { onPaste } = usePaste();
 
-  if (!showCopy && !isProtocolHttps) {
+  if (!showCopy && !hasSecureClipboardAccess) {
     return (
       <span className="text-sm select-none px-2 py-1.5">
         {t('No actions available')}
@@ -103,7 +103,7 @@ export const CanvasContextMenuContent = ({
         </ContextMenuItem>
       )}
 
-      {isProtocolHttps && (
+      {hasSecureClipboardAccess && (
         <>
           {showPasteAfterLastStep && !pastePlusButton && (
             <ContextMenuItem
