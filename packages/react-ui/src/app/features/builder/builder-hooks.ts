@@ -61,7 +61,6 @@ export type BuilderState = {
   selectedStep: string | null;
   canExitRun: boolean;
   activeDraggingStep: string | null;
-  allowCanvasPanning: boolean;
   saving: boolean;
   refreshBlockFormSettings: boolean;
   refreshSettings: () => void;
@@ -79,7 +78,6 @@ export type BuilderState = {
   removeStepSelection: () => void;
   selectStepByName: (stepName: string, openRightSideBar?: boolean) => void;
   startSaving: () => void;
-  setAllowCanvasPanning: (allowCanvasPanning: boolean) => void;
   setActiveDraggingStep: (stepName: string | null) => void;
   setFlow: (flow: Flow) => void;
   exitBlockSelector: () => void;
@@ -128,7 +126,6 @@ export const createBuilderStore = (initialState: BuilderInitialState) =>
           : null,
         canExitRun: initialState.canExitRun,
         activeDraggingStep: null,
-        allowCanvasPanning: true,
         rightSidebar: initialState.run
           ? RightSideBarType.BLOCK_SETTINGS
           : RightSideBarType.NONE,
@@ -139,14 +136,6 @@ export const createBuilderStore = (initialState: BuilderInitialState) =>
             { selectedStep: null, rightSidebar: RightSideBarType.NONE },
             false,
             'removeStepSelection',
-          ),
-        setAllowCanvasPanning: (allowCanvasPanning: boolean) =>
-          set(
-            {
-              allowCanvasPanning,
-            },
-            false,
-            'setAllowCanvasPanning',
           ),
         setActiveDraggingStep: (stepName: string | null) =>
           set(

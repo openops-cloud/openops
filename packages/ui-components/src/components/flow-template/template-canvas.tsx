@@ -39,7 +39,6 @@ const TemplateCanvas = React.memo(
                 edgeTypes={edgeTypes}
                 nodeTypes={nodeTypes}
                 graph={graph}
-                allowCanvasPanning={true}
                 topOffset={topOffset}
               >
                 {children}

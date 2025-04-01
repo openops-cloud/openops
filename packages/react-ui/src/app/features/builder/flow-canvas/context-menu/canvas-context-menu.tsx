@@ -58,12 +58,9 @@ const CanvasContextMenu = memo(
     const { copyAction, actionToPaste } = useCanvasContext();
     const { onPaste } = usePaste();
 
-    const [selectStepByName, removeStepSelection, setAllowCanvasPanning] =
-      useBuilderStateContext((state) => [
-        state.selectStepByName,
-        state.removeStepSelection,
-        state.setAllowCanvasPanning,
-      ]);
+    const [selectStepByName, removeStepSelection] = useBuilderStateContext(
+      (state) => [state.selectStepByName, state.removeStepSelection],
+    );
 
     const deleteStep = () => {
       if (!data.step) {
@@ -284,7 +281,6 @@ const CanvasContextMenu = memo(
                   e.preventDefault();
                   deleteStep();
                   setOpenStepActionsMenu(false);
-                  setAllowCanvasPanning(true);
                 }}
               >
                 <StepActionWrapper>
