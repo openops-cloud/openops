@@ -9,12 +9,10 @@ import {
 import {
   Action,
   ActionType,
-  FlagId,
   flowHelper,
   StepLocationRelativeToParent,
 } from '@openops/shared';
 
-import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { useBuilderStateContext } from '../../builder-hooks';
 import { usePaste } from '../../hooks/use-paste';
 import { useSelection } from '../../hooks/use-selection';
@@ -26,10 +24,6 @@ export const CanvasContextMenuContent = ({
   contextMenuType,
   actionToPaste,
 }: CanvasContextMenuProps) => {
-  const showCopyPaste =
-    flagsHooks.useFlag<boolean>(FlagId.COPY_PASTE_ACTIONS_ENABLED).data ||
-    false;
-
   const [flowVersion, readonly] = useBuilderStateContext((state) => [
     state.flowVersion,
     state.readonly,
@@ -68,9 +62,7 @@ export const CanvasContextMenuContent = ({
     firstSelectedNode?.type === ActionType.SPLIT;
 
   const showCopy =
-    showCopyPaste &&
-    !doSelectedNodesIncludeTrigger &&
-    contextMenuType === ContextMenuType.STEP;
+    !doSelectedNodesIncludeTrigger && contextMenuType === ContextMenuType.STEP;
 
   const { onPaste } = usePaste();
 

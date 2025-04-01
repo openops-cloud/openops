@@ -1,4 +1,3 @@
-import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import {
   Button,
   DropdownMenu,
@@ -14,7 +13,6 @@ import {
 import {
   Action,
   ActionType,
-  FlagId,
   FlowOperationType,
   StepLocationRelativeToParent,
 } from '@openops/shared';
@@ -51,9 +49,6 @@ const CanvasContextMenu = memo(
     setOpenStepActionsMenu,
     setOpenBlockSelector,
   }: Props) => {
-    const showCopyPaste =
-      flagsHooks.useFlag<boolean>(FlagId.COPY_PASTE_ACTIONS_ENABLED).data ||
-      false;
     const applyOperationAndPushToHistory = useApplyOperationAndPushToHistory();
 
     const { copyAction, actionToPaste } = useCanvasContext();
@@ -145,7 +140,7 @@ const CanvasContextMenu = memo(
             </StepActionWrapper>
           </DropdownMenuItem>
 
-          {isAction && showCopyPaste && (
+          {isAction && (
             <>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -183,7 +178,6 @@ const CanvasContextMenu = memo(
           {hasSecureClipboardAccess && (
             <>
               {isAction &&
-                showCopyPaste &&
                 actionToPaste &&
                 data.step?.type === ActionType.LOOP_ON_ITEMS && (
                   <DropdownMenuItem
@@ -207,7 +201,6 @@ const CanvasContextMenu = memo(
                 )}
 
               {isAction &&
-                showCopyPaste &&
                 actionToPaste &&
                 data.step?.type === ActionType.BRANCH && (
                   <DropdownMenuItem
@@ -234,7 +227,6 @@ const CanvasContextMenu = memo(
                 )}
 
               {isAction &&
-                showCopyPaste &&
                 actionToPaste &&
                 data.step?.type === ActionType.SPLIT && (
                   <DropdownMenuItem
@@ -261,9 +253,9 @@ const CanvasContextMenu = memo(
                   </DropdownMenuItem>
                 )}
 
-              {isAction && showCopyPaste && actionToPaste && (
+              {isAction && actionToPaste && (
                 <DropdownMenuItem
-                  onSelect={(e) => {
+                  onSelect={() => {
                     if (data.step) {
                       onPaste(
                         actionToPaste as Action,
