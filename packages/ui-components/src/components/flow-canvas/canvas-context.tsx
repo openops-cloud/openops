@@ -263,6 +263,17 @@ export const InteractiveContextProvider = ({
 
   useEffect(() => {
     function handler(e: ClipboardEvent) {
+      const activeElement = document.activeElement;
+
+      const isEditableElement =
+        activeElement instanceof HTMLInputElement ||
+        activeElement instanceof HTMLTextAreaElement ||
+        activeElement?.hasAttribute('contenteditable');
+
+      if (isEditableElement) {
+        return;
+      }
+
       const clipboardText = e.clipboardData?.getData('text/plain') ?? '';
 
       if (!clipboardText) {
