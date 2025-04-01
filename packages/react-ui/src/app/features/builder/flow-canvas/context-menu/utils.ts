@@ -1,1 +1,1 @@
-export const isProtocolHttp = window.location.protocol === 'http:';
+export const isProtocolHttps = window.location.protocol === 'https:';
