@@ -8,7 +8,7 @@ import {
 import { logger } from '@openops/server-shared';
 import { openopsTables } from '../index';
 
-export const SEED_TABLE_NAME = 'AggregatedCosts';
+export const SEED_TABLE_NAME = 'Aggregated Costs';
 const SEED_LOG_HEADER = `[Seeding ${SEED_TABLE_NAME} table]`;
 
 export async function createAggregatedCostsTable(
@@ -19,7 +19,7 @@ export async function createAggregatedCostsTable(
 
   const table = await openopsTables.createTable(
     databaseId,
-    'AggregatedCosts',
+    SEED_TABLE_NAME,
     [['Group Key']],
     token,
   );
@@ -52,16 +52,20 @@ export async function addFields(token: string, tableId: number) {
     `${SEED_LOG_HEADER} After adding primary field ${primaryField.name} with id: ${primaryField.id}`,
   );
 
-  const fieldNamesToAdd = [
-    'Date',
-    'Application',
-    'TotalBilledCost',
-    'TotalEffectiveCost',
-    'TotalConsumedQuantity',
+  const fieldsToAdd = [
+    { name: 'Date', type: 'date', date_format: 'ISO' },
+    { name: 'Application', type: 'text' },
+    { name: 'Total Billed Cost', type: 'number', number_decimal_places: 10 },
+    { name: 'Total Effective Cost', type: 'number', number_decimal_places: 10 },
+    {
+      name: 'Total Consumed Quantity',
+      type: 'number',
+      number_decimal_places: 1,
+    },
   ];
 
-  for (const name of fieldNamesToAdd) {
-    await addField(token, tableId, { name, type: 'text' });
+  for (const field of fieldsToAdd) {
+    await addField(token, tableId, field);
   }
 }
 
