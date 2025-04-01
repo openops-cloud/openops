@@ -125,6 +125,7 @@ describe('updateRowAction', () => {
   test('should update fields', async () => {
     openopsCommonMock.getPrimaryKeyFieldFromFields.mockReturnValue({
       name: 'primary key field',
+      type: 'text',
     });
     openopsCommonMock.getRowByPrimaryKeyValue.mockResolvedValue({ id: 1 });
 
@@ -155,6 +156,7 @@ describe('updateRowAction', () => {
       1,
       'some primary key value',
       'primary key field',
+      'text',
     );
     expect(
       openopsCommonMock.getPrimaryKeyFieldFromFields,
@@ -181,6 +183,7 @@ describe('updateRowAction', () => {
     ]);
     openopsCommonMock.getPrimaryKeyFieldFromFields.mockReturnValue({
       name: 'primary key field',
+      type: 'text',
     });
     openopsCommonMock.getRowByPrimaryKeyValue.mockResolvedValue(undefined);
     openopsCommonMock.addRow.mockResolvedValue('mock result');
@@ -205,6 +208,7 @@ describe('updateRowAction', () => {
       1,
       'some primary key value',
       'primary key field',
+      'text',
     );
     expect(openopsCommonMock.updateRow).not.toHaveBeenCalled();
     expect(

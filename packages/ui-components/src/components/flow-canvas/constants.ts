@@ -17,4 +17,3 @@ export const PLUS_CONTEXT_MENU_STEP_LOCATION_ATTRIBUTE =
 export const PLUS_CONTEXT_MENU_BRANCH_NODE_ID_ATTRIBUTE =
   'plus-context-menu-branch-node-id';
 export const NODE_SELECTION_RECT_CLASS_NAME = 'react-flow__nodesselection-rect';
-export const COPY_DEBOUNCE_DELAY_MS = 300;

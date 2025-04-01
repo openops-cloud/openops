@@ -407,6 +407,7 @@ function buildGraph(
           step,
           branchNodeId,
         },
+        draggable: true,
         selectable:
           type !== WorkflowNodeType.PLACEHOLDER &&
           type !== WorkflowNodeType.LOOP_PLACEHOLDER &&
@@ -537,6 +538,7 @@ export type WorkflowNode = {
   };
   selectable?: boolean;
   selected?: boolean;
+  draggable?: boolean;
 };
 
 export type Edge = {

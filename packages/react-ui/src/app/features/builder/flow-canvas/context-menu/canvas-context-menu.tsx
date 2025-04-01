@@ -9,7 +9,6 @@ import {
   toast,
   UNSAVED_CHANGES_TOAST,
   useCanvasContext,
-  useClipboardContext,
   WorkflowNode,
 } from '@openops/components/ui';
 import {
@@ -56,16 +55,12 @@ const CanvasContextMenu = memo(
       false;
     const applyOperationAndPushToHistory = useApplyOperationAndPushToHistory();
 
-    const { copyAction } = useCanvasContext();
+    const { copyAction, actionToPaste } = useCanvasContext();
     const { onPaste } = usePaste();
-    const { actionToPaste, fetchClipboardOperations } = useClipboardContext();
 
-    const [selectStepByName, removeStepSelection, setAllowCanvasPanning] =
-      useBuilderStateContext((state) => [
-        state.selectStepByName,
-        state.removeStepSelection,
-        state.setAllowCanvasPanning,
-      ]);
+    const [selectStepByName, removeStepSelection] = useBuilderStateContext(
+      (state) => [state.selectStepByName, state.removeStepSelection],
+    );
 
     const deleteStep = () => {
       if (!data.step) {
@@ -101,8 +96,7 @@ const CanvasContextMenu = memo(
     return (
       <DropdownMenu
         open={openStepActionsMenu}
-        onOpenChange={async (open) => {
-          await fetchClipboardOperations();
+        onOpenChange={(open) => {
           setOpenStepActionsMenu(open);
           if (open && data.step) {
             selectStepByName(data.step.name);
@@ -287,7 +281,6 @@ const CanvasContextMenu = memo(
                   e.preventDefault();
                   deleteStep();
                   setOpenStepActionsMenu(false);
-                  setAllowCanvasPanning(true);
                 }}
               >
                 <StepActionWrapper>
