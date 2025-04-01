@@ -33,7 +33,7 @@ const SampleTemplateCard = ({
         <TemplateCardText
           templateMetadata={templateMetadata}
           headerMaxLines={2}
-          totalMaxLines={5}
+          totalMaxLines={4}
           headerClassName="text-sm leading-5"
           descriptionClassName="text-xs leading-5 tracking-normal"
         />
