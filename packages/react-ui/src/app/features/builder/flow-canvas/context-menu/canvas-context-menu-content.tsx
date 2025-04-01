@@ -20,6 +20,7 @@ import { usePaste } from '../../hooks/use-paste';
 import { useSelection } from '../../hooks/use-selection';
 import { CanvasShortcuts, ShortcutWrapper } from './canvas-shortcuts';
 import { CanvasContextMenuProps } from './context-menu-wrapper';
+import { isProtocolHttp } from './utils';
 
 export const CanvasContextMenuContent = ({
   contextMenuType,
@@ -104,6 +105,7 @@ export const CanvasContextMenuContent = ({
                 selectedStep,
               )
             }
+            disabled={isProtocolHttp}
             className="flex items-center gap-2"
           >
             <Copy className="w-4 h-4"></Copy>
@@ -121,6 +123,7 @@ export const CanvasContextMenuContent = ({
                 selectedStep,
               )
             }
+            disabled={isProtocolHttp}
             className="flex items-center gap-2"
           >
             <Copy className="w-4 h-4"></Copy>
@@ -136,6 +139,7 @@ export const CanvasContextMenuContent = ({
                 selectedStep,
               )
             }
+            disabled={isProtocolHttp}
             className="flex items-center gap-2"
           >
             <Copy className="w-4 h-4"></Copy>
@@ -153,6 +157,7 @@ export const CanvasContextMenuContent = ({
                 branchNodeId,
               );
             }}
+            disabled={isProtocolHttp}
             className="flex items-center gap-2"
           >
             <Copy className="w-4 h-4"></Copy>
@@ -168,6 +173,7 @@ export const CanvasContextMenuContent = ({
                 selectedStep,
               )
             }
+            disabled={isProtocolHttp}
             className="flex items-center gap-2"
           >
             <Copy className="w-4 h-4"></Copy>
@@ -184,6 +190,7 @@ export const CanvasContextMenuContent = ({
                 pastePlusButton.branchNodeId,
               )
             }
+            disabled={isProtocolHttp}
             className="flex items-center gap-2"
           >
             <Copy className="w-4 h-4"></Copy>

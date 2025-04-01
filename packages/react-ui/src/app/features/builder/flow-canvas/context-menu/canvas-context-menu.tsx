@@ -33,6 +33,7 @@ import { useApplyOperationAndPushToHistory } from '../../flow-version-undo-redo/
 import { usePaste } from '../../hooks/use-paste';
 import { StepActionWrapper } from '../nodes/step-action-wrapper';
 import { CanvasShortcuts, ShortcutWrapper } from './canvas-shortcuts';
+import { isProtocolHttp } from './utils';
 
 type Props = {
   data: WorkflowNode['data'];
@@ -195,6 +196,7 @@ const CanvasContextMenu = memo(
                     setOpenStepActionsMenu(false);
                   }
                 }}
+                disabled={isProtocolHttp}
               >
                 <StepActionWrapper>
                   <Copy className="h-4 w-4" />
@@ -219,6 +221,7 @@ const CanvasContextMenu = memo(
                     setOpenStepActionsMenu(false);
                   }
                 }}
+                disabled={isProtocolHttp}
               >
                 <StepActionWrapper>
                   <Copy className="h-4 w-4" />
@@ -245,6 +248,7 @@ const CanvasContextMenu = memo(
                     setOpenStepActionsMenu(false);
                   }
                 }}
+                disabled={isProtocolHttp}
               >
                 <StepActionWrapper>
                   <Copy className="h-4 w-4" />
@@ -265,6 +269,7 @@ const CanvasContextMenu = memo(
                   setOpenStepActionsMenu(false);
                 }
               }}
+              disabled={isProtocolHttp}
             >
               <StepActionWrapper>
                 <Copy className="h-4 w-4" />
