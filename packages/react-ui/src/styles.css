@@ -27,6 +27,7 @@
   --node-boxshadow-selected-default: 0 0 0 0 #b1b1b7;
   --selection-border-default: 0px solid #b1b1b7;
   --node-border-default: 0px solid #b1b1b7;
+  user-select: none;
 }
 
 input[type='search']::-webkit-search-cancel-button {
