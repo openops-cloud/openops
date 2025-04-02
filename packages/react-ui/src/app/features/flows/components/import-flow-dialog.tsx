@@ -1,5 +1,6 @@
 import {
   Button,
+  cn,
   Dialog,
   DialogContent,
   DialogFooter,
@@ -11,9 +12,9 @@ import {
   toast,
 } from '@openops/components/ui';
 import {
+  AppConnectionWithoutSensitiveData,
   FlowImportTemplate,
   FlowOperationType,
-  PopulatedFlow,
 } from '@openops/shared';
 import { useMutation } from '@tanstack/react-query';
 import { t } from 'i18next';
@@ -24,33 +25,40 @@ import { flowsApi } from '../lib/flows-api';
 
 import { userSettingsHooks } from '@/app/common/hooks/user-settings-hooks';
 import { SEARCH_PARAMS } from '@/app/constants/search-params';
+import { ConnectionsPicker } from '@/app/features/templates/components/connections-picker/connections-picker';
+import { templatesHooks } from '@/app/features/templates/lib/templates-hooks';
 import { authenticationSession } from '@/app/lib/authentication-session';
+import { BlockMetadataModelSummary } from '@openops/blocks-framework';
 
 const ImportFlowDialog = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
   const [file, setFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [importedWorkflow, setImportedWorkflow] =
+    useState<FlowImportTemplate | null>(null);
   const { updateHomePageOperationalViewFlag } =
     userSettingsHooks.useHomePageOperationalView();
+  const { templateWithIntegrations, isLoading } =
+    templatesHooks.useTemplateMetadataWithIntegrations(importedWorkflow);
 
-  const { mutate: createFlow, isPending } = useMutation<
-    PopulatedFlow,
-    Error,
-    FlowImportTemplate
-  >({
-    mutationFn: async (template: FlowImportTemplate) => {
-      const newFlow = await flowsApi.create({
-        displayName: template.name,
-        projectId: authenticationSession.getProjectId()!,
-      });
-      return await flowsApi.update(newFlow.id, {
-        type: FlowOperationType.IMPORT_FLOW,
-        request: {
-          displayName: template.name,
-          description: template.template.description,
-          trigger: template.template.trigger,
-        },
-      });
+  const { mutate: createFlow, isPending } = useMutation({
+    mutationFn: async (connections: AppConnectionWithoutSensitiveData[]) => {
+      if (importedWorkflow) {
+        const newFlow = await flowsApi.create({
+          displayName: importedWorkflow.name,
+          projectId: authenticationSession.getProjectId()!,
+        });
+        return await flowsApi.update(newFlow.id, {
+          type: FlowOperationType.IMPORT_FLOW,
+          request: {
+            displayName: importedWorkflow.name,
+            description: importedWorkflow.description,
+            trigger: importedWorkflow.template.trigger,
+            connections,
+          },
+        });
+      }
+      return Promise.reject();
     },
     onSuccess: (flow) => {
       updateHomePageOperationalViewFlag();
@@ -75,7 +83,9 @@ const ImportFlowDialog = ({ children }: { children: React.ReactNode }) => {
           reader.result as string,
         ) as FlowImportTemplate;
         // TODO handle overwriting flow when using actions in builder
-        createFlow(template);
+        if (template && template.name && template.template) {
+          setImportedWorkflow(template);
+        }
       } catch (error) {
         toast(INTERNAL_ERROR_TOAST);
       }
@@ -83,29 +93,61 @@ const ImportFlowDialog = ({ children }: { children: React.ReactNode }) => {
     reader.readAsText(file);
   };
 
+  const resetDialog = () => {
+    setFile(null);
+    setImportedWorkflow(null);
+  };
+
   return (
-    <Dialog>
+    <Dialog onOpenChange={resetDialog}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>{t('Import Workflow')}</DialogTitle>
-        </DialogHeader>
-        <DialogFooter>
-          <Input
-            type="file"
-            accept=".json"
-            ref={fileInputRef}
-            onChange={handleFileChange}
-            data-testid="importFlowFileInput"
-          />
-          <Button
-            onClick={handleSubmit}
-            loading={isPending}
-            data-testid="importFlowButton"
-          >
-            {t('Import')}
-          </Button>
-        </DialogFooter>
+      <DialogContent
+        className={cn({
+          'flex flex-col p-0 transition-none max-2xl:max-w-[1010px] max-w-[846px] max-h-[70vh] overflow-y-auto':
+            templateWithIntegrations,
+        })}
+        onInteractOutside={(e) => {
+          e.preventDefault();
+        }}
+      >
+        {templateWithIntegrations ? (
+          <ConnectionsPicker
+            close={() => {
+              resetDialog();
+            }}
+            templateName={templateWithIntegrations?.name ?? ''}
+            integrations={
+              templateWithIntegrations?.integrations.filter(
+                (integration) => !!integration.auth,
+              ) as BlockMetadataModelSummary[]
+            }
+            onUseTemplate={createFlow}
+            isUseTemplateLoading={isPending}
+          ></ConnectionsPicker>
+        ) : (
+          <>
+            <DialogHeader>
+              <DialogTitle>{t('Import Workflow')}</DialogTitle>
+            </DialogHeader>
+            <DialogFooter>
+              <Input
+                ref={fileInputRef}
+                type="file"
+                accept=".json"
+                onChange={handleFileChange}
+                data-testid="importFlowFileInput"
+              />
+              <Button
+                onClick={handleSubmit}
+                loading={isLoading}
+                data-testid="importFlowButton"
+                disabled={!file}
+              >
+                {t('Import')}
+              </Button>
+            </DialogFooter>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );

@@ -8,7 +8,6 @@ import {
   templatesApi,
 } from '@/app/features/templates/lib/templates-api';
 import { BlockMetadataModelSummary } from '@openops/blocks-framework';
-import { FlowTemplateMetadataWithIntegrations } from '@openops/components/ui';
 import { AxiosError } from 'axios';
 import { useMemo } from 'react';
 import { cloudTemplatesApi } from './cloud-templates-api';
@@ -130,6 +129,25 @@ export const templatesHooks = {
       isError,
     };
   },
+
+  useBlocksLookup: () => {
+    const { blocks: blocksMetadata, isLoading } = blocksHooks.useBlocks({
+      searchQuery: '',
+    });
+
+    const blocksLookup = useMemo(() => {
+      if (!blocksMetadata) return {};
+      return blocksMetadata.reduce((map, blockMetadata) => {
+        if (!blockMetadata.categories?.includes(BlockCategory.CORE)) {
+          map[blockMetadata.name] = blockMetadata;
+        }
+        return map;
+      }, {} as Record<string, BlockMetadataModelSummary>);
+    }, [blocksMetadata]);
+
+    return { blocksLookup, isLoading };
+  },
+
   useTemplatesMetadataWithIntegrations: ({
     enabled = true,
     useCloudTemplates = false,
@@ -156,40 +174,42 @@ export const templatesHooks = {
       tags,
       gettingStartedTemplateFilter,
     });
-    const { blocks: blocksMetadata, isLoading: isBlocksLoading } =
-      blocksHooks.useBlocks({
-        searchQuery: '',
-      });
+    const { blocksLookup, isLoading: isBlocksLoading } =
+      templatesHooks.useBlocksLookup();
 
-    const templatesWithIntegrations: FlowTemplateMetadataWithIntegrations[] =
-      useMemo(() => {
-        if (!templates || !blocksMetadata) {
-          return [];
-        }
-
-        const blocksLookup = blocksMetadata.reduce((map, blockMetadata) => {
-          if (!blockMetadata.categories?.includes(BlockCategory.CORE)) {
-            map[blockMetadata.name] = blockMetadata;
-          }
-          return map;
-        }, {} as Record<string, BlockMetadataModelSummary>);
-
-        return templates.map((template) => {
-          const updatedIntegrations = (template.blocks || [])
-            .map((blockName) => blocksLookup[blockName])
-            .filter(Boolean);
-
-          return {
-            ...template,
-            integrations: updatedIntegrations,
-          };
-        });
-      }, [templates, blocksMetadata]);
+    const templatesWithIntegrations = useMemo(() => {
+      if (!templates) return [];
+      return templates.map((template) => ({
+        ...template,
+        integrations: (template.blocks || [])
+          .map((blockName) => blocksLookup[blockName])
+          .filter(Boolean),
+      }));
+    }, [templates, blocksLookup]);
 
     return {
       templatesWithIntegrations,
       isLoading: isTemplatesLoading || isBlocksLoading,
       refetch,
     };
+  },
+
+  useTemplateMetadataWithIntegrations: (
+    template: FlowTemplateMetadata | null,
+  ) => {
+    const { blocksLookup, isLoading: isBlocksLoading } =
+      templatesHooks.useBlocksLookup();
+
+    const templateWithIntegrations = useMemo(() => {
+      if (!template) return null;
+      return {
+        ...template,
+        integrations: (template.blocks || [])
+          .map((blockName) => blocksLookup[blockName])
+          .filter(Boolean),
+      };
+    }, [template, blocksLookup]);
+
+    return { templateWithIntegrations, isLoading: isBlocksLoading };
   },
 };

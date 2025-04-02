@@ -27,7 +27,7 @@ type ConnectionsPickerProps = {
   integrations: BlockMetadataModelSummary[];
   isUseTemplateLoading: boolean;
   close: () => void;
-  onUseTemplate: (connectionIds: string[]) => void;
+  onUseTemplate: (connections: AppConnectionWithoutSensitiveData[]) => void;
 };
 
 const ConnectionsPicker = ({
@@ -133,11 +133,7 @@ const ConnectionsPicker = ({
   };
 
   const onUseTemplateClick = () => {
-    onUseTemplate(
-      Object.values(selectedConnections)
-        .filter((c) => !!c)
-        .map((c) => c.id),
-    );
+    onUseTemplate(Object.values(selectedConnections).filter((c) => !!c));
   };
 
   return (
