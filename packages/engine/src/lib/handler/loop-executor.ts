@@ -1,5 +1,6 @@
 import { Store } from '@openops/blocks-framework';
 import { promisePool } from '@openops/common';
+import { SharedSystemProp, system } from '@openops/server-shared';
 import {
   Action,
   ActionType,
@@ -24,6 +25,10 @@ import { flowExecutor } from './flow-executor';
 type LoopOnActionResolvedSettings = {
   items: readonly unknown[];
 };
+
+const poolSize = system.getNumberOrThrow(
+  SharedSystemProp.INTERNAL_PARALLEL_LOOP_ITERATIONS_LIMIT,
+);
 
 export const loopExecutor: BaseExecutor<LoopOnItemsAction> = {
   async handle({
@@ -172,7 +177,7 @@ async function waitForIterationsToFinishOrPause(
   }[] = [];
   let noPausedIterations = true;
 
-  const iterations = await promisePool(loopIterations, 30);
+  const iterations = await promisePool(loopIterations, poolSize);
 
   for (const iterationResult of iterations) {
     if (iterationResult.status === 'rejected') {
