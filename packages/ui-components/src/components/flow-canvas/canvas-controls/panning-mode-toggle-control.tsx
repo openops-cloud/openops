@@ -42,7 +42,7 @@ export const PanningModeToggleControl = () => {
           <MousePointer className="w-5 h-5 dark:text-primary"></MousePointer>
         </Button>
       </TooltipTrigger>
-      <TooltipContent side="right">{t('Select Mode')}</TooltipContent>
+      <TooltipContent side="top">{t('Select Mode')}</TooltipContent>
     </Tooltip>
   );
 };

@@ -5,7 +5,7 @@ import { toast } from '../../ui/use-toast';
 type CopyPasteToastProps = {
   success: boolean;
   isCopy: boolean;
-  itemsCount: number;
+  itemsCount?: number;
 };
 
 const CopyPasteToastContent = ({
@@ -31,12 +31,18 @@ const CopyPasteToastContent = ({
     return (
       <>
         <CircleCheckBig size={24} className="text-warning-400" />
-        <span className="font-bold text-normal">
-          {t(
-            isCopy ? 'Failed to copy {n} steps' : 'Failed to paste {n} steps',
-            { n: itemsCount },
-          )}
-        </span>
+        {itemsCount ? (
+          <span className="font-bold text-normal">
+            {t(
+              isCopy ? 'Failed to copy {n} steps' : 'Failed to paste {n} steps',
+              { n: itemsCount },
+            )}
+          </span>
+        ) : (
+          <span className="font-bold text-normal">
+            {t(isCopy ? 'Failed to copy' : 'Failed to paste')}
+          </span>
+        )}
       </>
     );
   }
@@ -50,6 +56,6 @@ export const copyPasteToast = (props: CopyPasteToastProps) => {
       </div>
     ),
     closeButtonClassName: 'top-6 right-4 opacity-1 text-black dark:text-white',
-    duration: 7000,
+    duration: 2000,
   });
 };
