@@ -1,5 +1,5 @@
 import removeMarkdown from 'markdown-to-text';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { cn } from '../../lib/cn';
 import { FlowTemplateMetadataWithIntegrations } from './types';
 
@@ -20,20 +20,37 @@ export const TemplateCardText = ({
 }: TemplateCardTextProps) => {
   const [descriptionLines, setDescriptionLines] = useState(0);
   const templateNameRef = useRef<HTMLHeadingElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  const calculateLines = useCallback(() => {
     if (templateNameRef.current) {
       const lineHeight = parseFloat(
         getComputedStyle(templateNameRef.current).lineHeight,
       );
       const titleHeight = templateNameRef.current.clientHeight;
       const titleLines = Math.round(titleHeight / lineHeight);
-      setDescriptionLines(totalMaxLines - titleLines);
+      setDescriptionLines(Math.max(totalMaxLines - titleLines, 0));
     }
-  }, [templateMetadata.name, totalMaxLines]);
+  }, [totalMaxLines]);
+
+  useEffect(() => {
+    calculateLines();
+
+    const resizeObserver = new ResizeObserver(() => {
+      calculateLines();
+    });
+
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [calculateLines, templateMetadata.name, totalMaxLines]);
 
   return (
-    <div className="flex flex-col gap-1">
+    <div ref={containerRef} className="flex flex-col gap-1">
       <h3
         ref={templateNameRef}
         className={cn('font-bold overflow-hidden', headerClassName)}
@@ -45,7 +62,7 @@ export const TemplateCardText = ({
       >
         {templateMetadata.name}
       </h3>
-      {descriptionLines && (
+      {descriptionLines > 0 && (
         <p
           className={cn(
             'text-sm font-normal overflow-hidden',
