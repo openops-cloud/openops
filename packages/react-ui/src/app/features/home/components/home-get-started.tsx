@@ -7,6 +7,7 @@ import {
 } from '@openops/components/ui';
 import { t } from 'i18next';
 import { BookOpenText } from 'lucide-react';
+import { useMemo } from 'react';
 
 type HomeGetStartedProps = {
   sampleTemplates: FlowTemplateMetadataWithIntegrations[];
@@ -21,6 +22,11 @@ const HomeGetStarted = ({
   onSampleTemplateClick,
   close,
 }: HomeGetStartedProps) => {
+  const displayedTemplates = useMemo(
+    () => sampleTemplates.slice(0, 3),
+    [sampleTemplates],
+  );
+
   return (
     <DismissiblePanel
       className="min-h-fit h-fit"
@@ -34,7 +40,7 @@ const HomeGetStarted = ({
           <div className="w-full @[1160px]:w-[50%] flex flex-col gap-[10px]">
             <h3>{t('Start with our Sample template')}</h3>
             <div className="flex gap-2">
-              {sampleTemplates.map((template, index) => (
+              {displayedTemplates.map((template, index) => (
                 <SampleTemplateCard
                   key={template.id}
                   templateMetadata={template}
