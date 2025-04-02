@@ -1,4 +1,5 @@
 import { Store } from '@openops/blocks-framework';
+import { promisePool } from '@openops/common';
 import {
   Action,
   ActionType,
@@ -123,8 +124,8 @@ function triggerLoopIterations(
   constants: EngineConstants,
   action: LoopOnItemsAction,
   firstLoopAction: Action,
-): Promise<FlowExecutorContext>[] {
-  const loopIterations: Promise<FlowExecutorContext>[] = [];
+): (() => Promise<FlowExecutorContext>)[] {
+  const loopIterations = [];
 
   for (let i = 0; i < resolvedInput.items.length; ++i) {
     const newCurrentPath = loopExecutionState.currentPath.loopIteration({
@@ -149,18 +150,19 @@ function triggerLoopIterations(
       .setPauseId(newId);
 
     const executionContextCopy = cloneDeep(newExecutionContext);
-    loopIterations[i] = flowExecutor.execute({
-      executionState: executionContextCopy,
-      action: firstLoopAction,
-      constants,
-    });
+    loopIterations[i] = () =>
+      flowExecutor.execute({
+        executionState: executionContextCopy,
+        action: firstLoopAction,
+        constants,
+      });
   }
 
   return loopIterations;
 }
 
 async function waitForIterationsToFinishOrPause(
-  loopIterations: Promise<FlowExecutorContext>[],
+  loopIterations: (() => Promise<FlowExecutorContext>)[],
   actionName: string,
   store: Store,
 ): Promise<FlowExecutorContext> {
@@ -170,8 +172,14 @@ async function waitForIterationsToFinishOrPause(
   }[] = [];
   let noPausedIterations = true;
 
-  for (const iteration of loopIterations) {
-    const iterationContext = await iteration;
+  const iterations = await promisePool(loopIterations, 30);
+
+  for (const iterationResult of iterations) {
+    if (iterationResult.status === 'rejected') {
+      throw new Error('Iteration promise was rejected.');
+    }
+
+    const iterationContext = iterationResult.value;
     const { verdict, verdictResponse } = iterationContext;
 
     if (verdict === ExecutionVerdict.FAILED) {
