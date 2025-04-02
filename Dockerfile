@@ -36,7 +36,7 @@ LABEL service=openops
 
 # Copy Nginx configuration template and static files
 COPY nginx.standard.conf /etc/nginx/nginx.conf
-# Send logs to console instead of writing to fileystem.
+# Send nginx logs to console instead of writing to fileystem.
 RUN ln -sf /dev/stdout /var/log/nginx/access.log \
   && ln -sf /dev/stderr /var/log/nginx/error.log
 COPY dist/packages/react-ui/ /usr/share/nginx/html/
