@@ -181,7 +181,7 @@ export const templatesHooks = {
       if (!templates) return [];
       return templates.map((template) => ({
         ...template,
-        integrations: (template.blocks || [])
+        integrations: (template.blocks ?? [])
           .map((blockName) => blocksLookup[blockName])
           .filter(Boolean),
       }));
@@ -189,7 +189,7 @@ export const templatesHooks = {
 
     return {
       templatesWithIntegrations,
-      isLoading: isTemplatesLoading || isBlocksLoading,
+      isLoading: isTemplatesLoading ?? isBlocksLoading,
       refetch,
     };
   },
@@ -202,7 +202,7 @@ export const templatesHooks = {
       if (!template) return null;
       return {
         ...template,
-        integrations: (template.blocks || [])
+        integrations: (template.blocks ?? [])
           .map((blockName) => blocksLookup[blockName])
           .filter(Boolean),
       };

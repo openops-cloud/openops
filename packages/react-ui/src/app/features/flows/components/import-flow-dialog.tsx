@@ -70,7 +70,7 @@ const ImportFlowDialog = ({ children }: { children: React.ReactNode }) => {
   });
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setFile(event.target.files?.[0] || null);
+    setFile(event.target.files?.[0] ?? null);
   };
 
   const handleSubmit = async () => {
@@ -88,7 +88,7 @@ const ImportFlowDialog = ({ children }: { children: React.ReactNode }) => {
         } else {
           toast(INTERNAL_ERROR_TOAST);
         }
-      } catch (error) {
+      } catch {
         toast(INTERNAL_ERROR_TOAST);
       }
     };

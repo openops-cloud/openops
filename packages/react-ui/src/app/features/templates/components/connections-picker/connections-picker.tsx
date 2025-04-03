@@ -102,13 +102,13 @@ const ConnectionsPicker = ({
         AppConnectionWithoutSensitiveData | null
       > = {};
       integrations.forEach((integration) => {
-        const options = groupedConnections[integration.name] || [];
+        const options = groupedConnections[integration.name] ?? [];
         const usedConnection = usedConnectionNames[integration.name]
           ? options.find((connection) => {
               return connection.name === usedConnectionNames[integration.name];
             })
           : null;
-        connections[integration.name] = usedConnection || options[0] || null;
+        connections[integration.name] = usedConnection ?? options[0] ?? null;
       });
 
       setSelectedConnections(connections);

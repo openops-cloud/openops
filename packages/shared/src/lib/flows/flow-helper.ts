@@ -581,7 +581,7 @@ function addAction(
           );
         }
 
-        parentStep.branches = parentStep.branches || [];
+        parentStep.branches = parentStep.branches ?? [];
         const branch: SplitBranch | undefined = parentStep.branches.find(
           (x) => x.optionId == request.branchNodeId,
         );
