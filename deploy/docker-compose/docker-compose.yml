@@ -12,7 +12,7 @@ services:
       openops-analytics:
         condition: service_healthy
   openops-app:
-    image: public.ecr.aws/openops/openops-app:${OPS_VERSION:-latest}
+    image: 535002847982.dkr.ecr.us-east-2.amazonaws.com/openops/openops-app:c677c5df
     restart: unless-stopped
     env_file: .env
     environment:
@@ -20,6 +20,7 @@ services:
       OPS_VERSION: ${OPS_VERSION:-latest}
       OPS_OPENOPS_TABLES_VERSION: 0.1.8
       OPS_ANALYTICS_VERSION: 0.12.16
+    mem_limit: 2g
     depends_on:
       openops-tables:
         condition: service_healthy
@@ -30,7 +31,7 @@ services:
       postgres:
         condition: service_healthy
   openops-engine:
-    image: public.ecr.aws/openops/openops-engine:${OPS_VERSION:-latest}
+    image: 535002847982.dkr.ecr.us-east-2.amazonaws.com/openops/openops-engine:c677c5df
     restart: unless-stopped
     env_file: .env
     command: ["cp -r /var/tmp-base/. /tmp/ && node main.js"]
@@ -38,6 +39,7 @@ services:
       OPS_BASE_CODE_DIRECTORY: /tmp/codes
       OPS_COMPONENT: engine
       OPS_SERVER_API_URL: http://openops-app/api/
+    mem_limit: 2g
     depends_on:
       - openops-app
     volumes:
@@ -63,7 +65,9 @@ services:
       DATABASE_USER: ${OPS_POSTGRES_USERNAME}
       DATABASE_PASSWORD: ${OPS_POSTGRES_PASSWORD}
       REDIS_URL: redis://redis:6379/0
+      BASEROW_MAX_CONCURRENT_USER_REQUESTS: 10
     shm_size: '512mb'
+    mem_limit: 2g
     volumes:
       - 'openops_tables_data:/baserow/data'
     healthcheck:

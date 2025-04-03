@@ -41,32 +41,29 @@ export interface DeleteRowParams extends RowParams {
   rowId: number;
 }
 
-const maxConcurrentJobs = system.getNumber(
-  AppSystemProp.MAX_CONCURRENT_TABLES_REQUESTS,
-);
-class TablesAccessSemaphore {
-  private static instance: Semaphore;
-  static getInstance(): Semaphore {
-    if (!TablesAccessSemaphore.instance) {
-      TablesAccessSemaphore.instance = new Semaphore(maxConcurrentJobs ?? 100);
-    }
-    return TablesAccessSemaphore.instance;
-  }
-}
+// const maxConcurrentJobs = system.getNumber(
+//   AppSystemProp.MAX_CONCURRENT_TABLES_REQUESTS,
+// );
+// class TablesAccessSemaphore {
+//   private static instance: Semaphore;
+//   static getInstance(): Semaphore {
+//     if (!TablesAccessSemaphore.instance) {
+//       TablesAccessSemaphore.instance = new Semaphore(maxConcurrentJobs ?? 100);
+//     }
+//     return TablesAccessSemaphore.instance;
+//   }
+// }
 
-const semaphore = TablesAccessSemaphore.getInstance();
+// const semaphore = TablesAccessSemaphore.getInstance();
 
 async function executeWithConcurrencyLimit<T>(
   fn: () => Promise<T>,
 ): Promise<T> {
-  const [value, release] = await semaphore.acquire();
   try {
     return await fn();
   } catch (error) {
     logger.error('Error in locked row operation:', error);
     throw error;
-  } finally {
-    release();
   }
 }
 
