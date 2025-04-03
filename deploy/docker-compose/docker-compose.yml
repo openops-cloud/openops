@@ -58,8 +58,8 @@ services:
       MIGRATE_ON_STARTUP: 'true'
       DISABLE_VOLUME_CHECK: 'yes'
       DATABASE_NAME: ${OPS_OPENOPS_TABLES_DATABASE_NAME}
-      DATABASE_HOST: ${OPS_POSTGRES_HOST}
-      DATABASE_PORT: ${OPS_POSTGRES_PORT}
+      DATABASE_HOST: pgbouncer
+      DATABASE_PORT: 6432
       DATABASE_USER: ${OPS_POSTGRES_USERNAME}
       DATABASE_PASSWORD: ${OPS_POSTGRES_PASSWORD}
       REDIS_URL: redis://redis:6379/0
@@ -79,6 +79,8 @@ services:
       redis:
         condition: service_healthy
       postgres:
+        condition: service_healthy
+      pgbouncer:
         condition: service_healthy
   openops-analytics:
     image: public.ecr.aws/openops/openops-analytics:0.12.16
@@ -120,6 +122,30 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+  pgbouncer:
+    image: bitnami/pgbouncer:latest
+    restart: always
+    ports:
+      - "6432:5432"
+    environment:
+      DATABASE_HOST: ${OPS_POSTGRES_HOST}
+      DATABASE_PORT: ${OPS_POSTGRES_PORT}
+      POSTGRESQL_USERNAME: ${OPS_POSTGRES_USERNAME}
+      POSTGRESQL_PASSWORD: ${OPS_POSTGRES_PASSWORD}
+      PGBOUNCER_DATABASE: ${OPS_OPENOPS_TABLES_DATABASE_NAME}
+      PGBOUNCER_AUTH_TYPE: md5
+      PGBOUNCER_POOL_MODE: transaction
+      PGBOUNCER_MAX_CLIENT_CONN: 300
+      PGBOUNCER_DEFAULT_POOL_SIZE: 100
+      PGBOUNCER_STATS_USERS: ${OPS_POSTGRES_USERNAME}
+    depends_on:
+      - postgres
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/127.0.0.1/6432'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   redis:
     image: 'redis:7.4.0'
     restart: unless-stopped
