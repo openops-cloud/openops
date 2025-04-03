@@ -1,6 +1,6 @@
 import { BlockAuth, Property } from '@openops/blocks-framework';
 
-export const snowflakeAuth = BlockAuth.CustomAuth({
+export const customAuth = BlockAuth.CustomAuth({
   props: {
     account: Property.ShortText({
       displayName: 'Account',

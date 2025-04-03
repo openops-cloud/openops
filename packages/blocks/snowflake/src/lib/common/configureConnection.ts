@@ -1,10 +1,10 @@
 import { BlockPropValueSchema } from '@openops/blocks-framework';
 import snowflakeSdk from 'snowflake-sdk';
 import { DEFAULT_APPLICATION_NAME, DEFAULT_QUERY_TIMEOUT } from './constants';
-import { snowflakeAuth } from './snowflakeAuth';
+import { customAuth } from './custom-auth';
 
 export function configureConnection(
-  auth: BlockPropValueSchema<typeof snowflakeAuth>,
+  auth: BlockPropValueSchema<typeof customAuth>,
 ) {
   return snowflakeSdk.createConnection({
     application: DEFAULT_APPLICATION_NAME,

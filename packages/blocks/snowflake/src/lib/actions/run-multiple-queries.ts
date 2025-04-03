@@ -4,7 +4,7 @@ import {
   DEFAULT_APPLICATION_NAME,
   DEFAULT_QUERY_TIMEOUT,
 } from '../common/constants';
-import { snowflakeAuth } from '../common/snowflakeAuth';
+import { customAuth } from '../common/custom-auth';
 
 type QueryResult = unknown[] | undefined;
 type QueryResults = { query: string; result: QueryResult }[];
@@ -53,7 +53,7 @@ export const runMultipleQueries = createAction({
   name: 'runMultipleQueries',
   displayName: 'Run Multiple Queries',
   description: 'Run Multiple Queries',
-  auth: snowflakeAuth,
+  auth: customAuth,
   props,
 
   async run(context) {
@@ -158,7 +158,7 @@ export const runMultipleQueries = createAction({
               resolve(queryResults);
             });
           } catch (err) {
-            handleError(err as SnowflakeError); // Reject with the original error!
+            handleError(err as SnowflakeError);
           }
         }
 

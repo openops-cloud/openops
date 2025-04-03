@@ -4,7 +4,7 @@ import {
   DEFAULT_APPLICATION_NAME,
   DEFAULT_QUERY_TIMEOUT,
 } from '../common/constants';
-import { snowflakeAuth } from '../common/snowflakeAuth';
+import { customAuth } from '../common/custom-auth';
 
 const props = {
   sqlText: Property.ShortText({
@@ -38,15 +38,18 @@ export const runQuery = createAction({
   name: 'runQuery',
   displayName: 'Run Query',
   description: 'Run Query',
-  auth: snowflakeAuth,
+  auth: customAuth,
   props,
   async run(context) {
+    const logger = (context as any).logger;
+
     const { username, password, role, database, warehouse, account } =
       context.auth;
+    const { sqlText, binds, timeout, application } = context.propsValue;
 
     const connection = snowflakeSdk.createConnection({
-      application: context.propsValue.application,
-      timeout: context.propsValue.timeout,
+      application,
+      timeout,
       username,
       password,
       role,
@@ -55,30 +58,93 @@ export const runQuery = createAction({
       account,
     });
 
-    return new Promise((resolve, reject) => {
-      connection.connect(function (err) {
-        if (err) {
-          reject(err);
-        }
-      });
+    let connectionActive = false; // Flag to track if destroy is needed
 
-      const { sqlText, binds } = context.propsValue;
-
-      connection.execute({
-        sqlText,
-        binds: binds as snowflakeSdk.Binds,
-        complete: (err, _, rows) => {
+    try {
+      // Connect (Promisified)
+      await new Promise<void>((resolve, reject) => {
+        connection.connect((err) => {
           if (err) {
+            logger?.error({ err }, 'Snowflake Connection Error');
             reject(err);
+          } else {
+            connectionActive = true; // Mark active ONLY on success
+            resolve();
           }
-          connection.destroy((err) => {
-            if (err) {
-              reject(err);
-            }
-          });
-          resolve(rows);
-        },
+        });
       });
-    });
+
+      // Execute (Promisified) - Only runs if connect succeeded
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const rows = await new Promise<any[] | undefined>((resolve, reject) => {
+        connection.execute({
+          sqlText,
+          binds: binds as snowflakeSdk.Binds, // Use resolved binds
+          complete: (err, _, rows) => {
+            if (err) {
+              logger?.error({ err, sqlText }, 'Snowflake Execution Error');
+              reject(err);
+            } else {
+              resolve(rows);
+            }
+          },
+        });
+      });
+
+      // Destroy (Promisified) - Runs after successful execution
+      // Note: We destroy before returning the rows from execute
+      await new Promise<void>((resolve, reject) => {
+        connection.destroy((err) => {
+          connectionActive = false; // Connection is no longer active
+          if (err) {
+            logger?.error({ err }, 'Snowflake Destruction Error');
+            // Decide if destroy failure should prevent returning results
+            // Rejecting here means a destroy error overrides a successful query
+            reject(err);
+          } else {
+            resolve();
+          }
+        });
+      });
+
+      // Return results only if ALL steps succeeded
+      return rows;
+    } catch (error) {
+      // Error occurred in connect, execute, or destroy promise
+
+      // Attempt cleanup only if connection was successfully established
+      // and destroy hasn't already run (or failed)
+      if (
+        connectionActive &&
+        connection &&
+        typeof connection.destroy === 'function'
+      ) {
+        try {
+          // Use a separate promise for cleanup destroy to avoid masking original error
+          await new Promise<void>((resolve) => {
+            // Don't reject outer promise on cleanup failure
+            connection.destroy((destroyErr) => {
+              if (destroyErr) {
+                if (destroyErr) {
+                  logger?.error(
+                    { err: destroyErr },
+                    'Snowflake Error during cleanup destroy',
+                  );
+                }
+              }
+              // Always resolve cleanup promise
+              resolve();
+            });
+          });
+        } catch (cleanupError) {
+          logger?.error(
+            { err: cleanupError },
+            'Exception during connection cleanup',
+          );
+        }
+      }
+      // Re-throw the original error that caused the catch block
+      throw error;
+    }
   },
 });
