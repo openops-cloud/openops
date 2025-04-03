@@ -20,7 +20,7 @@ services:
       DATABASE_PASSWORD: ${OPS_POSTGRES_PASSWORD}
       REDIS_URL: redis://redis:6379/0
       EDITOR_URL: ${OPS_FRONTEND_URL}/sign-in
-    ports: ['3001:8080']
+    ports: ['3001:80']
     volumes:
       - 'openops_tables_data:/baserow/data'
     healthcheck:
