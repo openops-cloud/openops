@@ -8,6 +8,7 @@ import {
   templatesApi,
 } from '@/app/features/templates/lib/templates-api';
 import { BlockMetadataModelSummary } from '@openops/blocks-framework';
+import { FlowTemplateMetadataWithIntegrations } from '@openops/components/ui';
 import { AxiosError } from 'axios';
 import { useMemo } from 'react';
 import { cloudTemplatesApi } from './cloud-templates-api';
@@ -198,15 +199,16 @@ export const templatesHooks = {
     const { blocksLookup, isLoading: isBlocksLoading } =
       templatesHooks.useBlocksLookup();
 
-    const templateWithIntegrations = useMemo(() => {
-      if (!template) return null;
-      return {
-        ...template,
-        integrations: (template.blocks ?? [])
-          .map((blockName) => blocksLookup[blockName])
-          .filter(Boolean),
-      };
-    }, [template, blocksLookup]);
+    const templateWithIntegrations: FlowTemplateMetadataWithIntegrations | null =
+      useMemo(() => {
+        if (!template) return null;
+        return {
+          ...template,
+          integrations: (template.blocks ?? [])
+            .map((blockName) => blocksLookup[blockName])
+            .filter(Boolean),
+        };
+      }, [template, blocksLookup]);
 
     return { templateWithIntegrations, isLoading: isBlocksLoading };
   },

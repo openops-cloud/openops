@@ -1,13 +1,8 @@
 import {
-  Button,
   cn,
   Dialog,
   DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
   DialogTrigger,
-  Input,
   INTERNAL_ERROR_TOAST,
   toast,
 } from '@openops/components/ui';
@@ -17,31 +12,27 @@ import {
   FlowOperationType,
 } from '@openops/shared';
 import { useMutation } from '@tanstack/react-query';
-import { t } from 'i18next';
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { flowsApi } from '../lib/flows-api';
+import { flowsApi } from '../../lib/flows-api';
 
 import { userSettingsHooks } from '@/app/common/hooks/user-settings-hooks';
 import { SEARCH_PARAMS } from '@/app/constants/search-params';
-import { ConnectionsPicker } from '@/app/features/templates/components/connections-picker/connections-picker';
+import { ImportFlowDialogContent } from '@/app/features/flows/components/import-flow-dialog/import-flow-dialog-content';
 import { templatesHooks } from '@/app/features/templates/lib/templates-hooks';
 import { authenticationSession } from '@/app/lib/authentication-session';
-import { BlockMetadataModelSummary } from '@openops/blocks-framework';
 
 const ImportFlowDialog = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
-  const [file, setFile] = useState<File | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [importedWorkflow, setImportedWorkflow] =
     useState<FlowImportTemplate | null>(null);
   const { updateHomePageOperationalViewFlag } =
     userSettingsHooks.useHomePageOperationalView();
-  const { templateWithIntegrations, isLoading } =
+  const { templateWithIntegrations, isLoading: isImportLoading } =
     templatesHooks.useSetTemplateIntegrations(importedWorkflow);
 
-  const { mutate: createFlow, isPending } = useMutation({
+  const { mutate: createFlow, isPending: isUseTemplateLoading } = useMutation({
     mutationFn: async (connections: AppConnectionWithoutSensitiveData[]) => {
       if (importedWorkflow) {
         const newFlow = await flowsApi.create({
@@ -69,11 +60,7 @@ const ImportFlowDialog = ({ children }: { children: React.ReactNode }) => {
     },
   });
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setFile(event.target.files?.[0] ?? null);
-  };
-
-  const handleSubmit = async () => {
+  const handleFileParsing = async (file: File | null) => {
     if (!file) return;
 
     const reader = new FileReader();
@@ -96,7 +83,6 @@ const ImportFlowDialog = ({ children }: { children: React.ReactNode }) => {
   };
 
   const resetDialog = () => {
-    setFile(null);
     setImportedWorkflow(null);
   };
 
@@ -112,45 +98,15 @@ const ImportFlowDialog = ({ children }: { children: React.ReactNode }) => {
           e.preventDefault();
         }}
       >
-        {templateWithIntegrations ? (
-          <ConnectionsPicker
-            close={() => {
-              resetDialog();
-            }}
-            templateName={templateWithIntegrations?.name ?? ''}
-            templateTrigger={importedWorkflow?.template.trigger}
-            integrations={
-              templateWithIntegrations?.integrations.filter(
-                (integration) => !!integration.auth,
-              ) as BlockMetadataModelSummary[]
-            }
-            onUseTemplate={createFlow}
-            isUseTemplateLoading={isPending}
-          ></ConnectionsPicker>
-        ) : (
-          <>
-            <DialogHeader>
-              <DialogTitle>{t('Import Workflow')}</DialogTitle>
-            </DialogHeader>
-            <DialogFooter>
-              <Input
-                ref={fileInputRef}
-                type="file"
-                accept=".json"
-                onChange={handleFileChange}
-                data-testid="importFlowFileInput"
-              />
-              <Button
-                onClick={handleSubmit}
-                loading={isLoading}
-                data-testid="importFlowButton"
-                disabled={!file}
-              >
-                {t('Import')}
-              </Button>
-            </DialogFooter>
-          </>
-        )}
+        <ImportFlowDialogContent
+          templateWithIntegrations={templateWithIntegrations}
+          templateTrigger={importedWorkflow?.template.trigger}
+          resetDialog={resetDialog}
+          isUseTemplateLoading={isUseTemplateLoading}
+          onUseTemplate={createFlow}
+          handleFileParsing={handleFileParsing}
+          isImportLoading={isImportLoading}
+        />
       </DialogContent>
     </Dialog>
   );
