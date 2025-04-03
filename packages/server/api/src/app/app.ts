@@ -159,13 +159,6 @@ export const setupApp = async (
     transports: ['websocket'],
   });
 
-  app.addHook('onClose', async () => {
-    logger.info('App shutting down');
-    await flowConsumer.close();
-    await systemJobsSchedule.close();
-    await webhookResponseWatcher.shutdown();
-  });
-
   app.io.on('connection', (socket: Socket) => {
     rejectedPromiseHandler(websocketService.init(socket));
   });
