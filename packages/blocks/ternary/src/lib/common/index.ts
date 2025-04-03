@@ -1,9 +1,7 @@
 import {
   AuthenticationType,
-  // HttpMessageBody,
   HttpMethod,
   HttpRequest,
-  // QueryParams,
   httpClient,
 } from '@openops/blocks-common';
 import dayjs from 'dayjs';
@@ -32,10 +30,9 @@ function validateJwt(token: string): boolean {
   }
   try {
     const decoded = jwtDecode(token);
-    if (decoded && decoded.exp && dayjs().isAfter(dayjs.unix(decoded.exp))) {
-      return false;
-    }
-    return true;
+    const isValid =
+      decoded && decoded.exp && dayjs().isBefore(dayjs.unix(decoded.exp));
+    return isValid ? true : false;
   } catch (e) {
     return false;
   }
