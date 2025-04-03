@@ -1405,7 +1405,7 @@ describe('getImportOperations', () => {
     );
   });
 
-  it('should not change connection when block name does not match', () => {
+  it('should unset connection when block name does not match and connections are provided', () => {
     const actionWithoutBlockName = {
       ...mockSlackAction,
       settings: { ...mockSlackAction.settings, blockName: 'something-else' },
@@ -1418,6 +1418,20 @@ describe('getImportOperations', () => {
       },
       [mockConnection],
     ) as OperationsResponse;
+
+    expect(result[0].request.action.settings.input['auth']).toBe(undefined);
+  });
+
+  it('should not change connection when connections are not provided', () => {
+    const actionWithoutBlockName = {
+      ...mockSlackAction,
+      settings: { ...mockSlackAction.settings, blockName: 'something-else' },
+    };
+
+    const result = flowHelper.getImportOperations({
+      ...mockTrigger,
+      nextAction: actionWithoutBlockName,
+    }) as OperationsResponse;
 
     expect(result[0].request.action.settings.input['auth']).toBe(
       "{{connections['initial-slack-connection']}}",
