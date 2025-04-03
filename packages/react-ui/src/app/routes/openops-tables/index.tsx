@@ -3,12 +3,14 @@ import { useLocation } from 'react-router-dom';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { useDefaultSidebarState } from '@/app/common/hooks/use-default-sidebar-state';
+import { useCandu } from '@/app/features/extensions/candu/use-candu';
 import { FlagId } from '@openops/shared';
 
 const OpenOpsTablesPage = () => {
-  //   const extraData = encodeURIComponent(JSON.stringify({ telemetryEnabled: true }));
-  // const iframeSrc = `${openopsTablesUrl}/openops-tables${pathParam}?data=${extraData}`;
   useDefaultSidebarState('minimized');
+  const { isCanduEnabled } = useCandu();
+  const parentData = encodeURIComponent(JSON.stringify({ isCanduEnabled }));
+
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const pathParam = params.get('path') || '';
@@ -23,7 +25,7 @@ const OpenOpsTablesPage = () => {
     return null;
   }
 
-  const iframeSrc = openopsTablesUrl + '/openops-tables' + pathParam;
+  const iframeSrc = `${openopsTablesUrl}/openops-tables${pathParam}?parentData=${parentData}`;
 
   return (
     <div className="flex flex-col size-full">
