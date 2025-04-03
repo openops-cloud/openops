@@ -10,7 +10,8 @@ import { connect, destroy, execute } from './utils';
 export const commonProps = {
   database: Property.Dropdown({
     displayName: 'Database',
-    refreshers: [],
+    refreshers: ['auth'],
+
     required: true,
     options: async ({ auth }) => {
       if (!auth) {
