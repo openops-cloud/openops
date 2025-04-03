@@ -116,90 +116,93 @@ export function useKeyPress(
   }, [keyCode]);
 
   useEffect(() => {
-    const target = options?.target || defaultDoc;
+    setTimeout(() => {
+      const target = options?.target || defaultDoc;
 
-    if (keyCode !== null) {
-      const downHandler = (event: KeyboardEvent) => {
-        modifierPressed.current =
-          event.ctrlKey || event.metaKey || event.shiftKey || event.altKey;
-        const preventAction =
-          (!modifierPressed.current ||
-            (modifierPressed.current && !options.actInsideInputWithModifier)) &&
-          isInputDOMNode(event);
+      if (keyCode !== null) {
+        const downHandler = (event: KeyboardEvent) => {
+          modifierPressed.current =
+            event.ctrlKey || event.metaKey || event.shiftKey || event.altKey;
+          const preventAction =
+            (!modifierPressed.current ||
+              (modifierPressed.current &&
+                !options.actInsideInputWithModifier)) &&
+            isInputDOMNode(event);
 
-        if (preventAction) {
-          return false;
-        }
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        const keyOrCode = useKeyOrCode(event.code, keysToWatch);
-        pressedKeys.current.add(event[keyOrCode]);
+          if (preventAction) {
+            return false;
+          }
+          // eslint-disable-next-line react-hooks/rules-of-hooks
+          const keyOrCode = useKeyOrCode(event.code, keysToWatch);
+          pressedKeys.current.add(event[keyOrCode]);
 
-        if (isMatchingKey(keyCodes, pressedKeys.current, false)) {
-          const target = (event.composedPath?.()?.[0] ||
-            event.target) as Element | null;
-          const isInteractiveElement =
-            target?.nodeName === 'BUTTON' || target?.nodeName === 'A';
+          if (isMatchingKey(keyCodes, pressedKeys.current, false)) {
+            const target = (event.composedPath?.()?.[0] ||
+              event.target) as Element | null;
+            const isInteractiveElement =
+              target?.nodeName === 'BUTTON' || target?.nodeName === 'A';
 
-          if (
-            options.preventDefault !== false &&
-            (modifierPressed.current || !isInteractiveElement)
-          ) {
-            event.preventDefault();
+            if (
+              options.preventDefault !== false &&
+              (modifierPressed.current || !isInteractiveElement)
+            ) {
+              event.preventDefault();
+            }
+
+            setKeyPressed(true);
+          }
+        };
+
+        const upHandler = (event: KeyboardEvent) => {
+          // eslint-disable-next-line react-hooks/rules-of-hooks
+          const keyOrCode = useKeyOrCode(event.code, keysToWatch);
+
+          if (isMatchingKey(keyCodes, pressedKeys.current, true)) {
+            setKeyPressed(false);
+            pressedKeys.current.clear();
+          } else {
+            pressedKeys.current.delete(event[keyOrCode]);
           }
 
-          setKeyPressed(true);
-        }
-      };
+          // fix for Mac: when cmd key is pressed, keyup is not triggered for any other key, see: https://stackoverflow.com/questions/27380018/when-cmd-key-is-kept-pressed-keyup-is-not-triggered-for-any-other-key
+          if (event.key === 'Meta') {
+            pressedKeys.current.clear();
+          }
 
-      const upHandler = (event: KeyboardEvent) => {
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        const keyOrCode = useKeyOrCode(event.code, keysToWatch);
+          modifierPressed.current = false;
+        };
 
-        if (isMatchingKey(keyCodes, pressedKeys.current, true)) {
+        const resetHandler = () => {
+          pressedKeys.current.clear();
           setKeyPressed(false);
-          pressedKeys.current.clear();
-        } else {
-          pressedKeys.current.delete(event[keyOrCode]);
-        }
+        };
 
-        // fix for Mac: when cmd key is pressed, keyup is not triggered for any other key, see: https://stackoverflow.com/questions/27380018/when-cmd-key-is-kept-pressed-keyup-is-not-triggered-for-any-other-key
-        if (event.key === 'Meta') {
-          pressedKeys.current.clear();
-        }
-
-        modifierPressed.current = false;
-      };
-
-      const resetHandler = () => {
-        pressedKeys.current.clear();
-        setKeyPressed(false);
-      };
-
-      target?.addEventListener(
-        'keydown',
-        downHandler as EventListenerOrEventListenerObject,
-      );
-      target?.addEventListener(
-        'keyup',
-        upHandler as EventListenerOrEventListenerObject,
-      );
-      window.addEventListener('blur', resetHandler);
-      window.addEventListener('contextmenu', resetHandler);
-
-      return () => {
-        target?.removeEventListener(
+        target?.addEventListener(
           'keydown',
           downHandler as EventListenerOrEventListenerObject,
         );
-        target?.removeEventListener(
+        target?.addEventListener(
           'keyup',
           upHandler as EventListenerOrEventListenerObject,
         );
-        window.removeEventListener('blur', resetHandler);
-        window.removeEventListener('contextmenu', resetHandler);
-      };
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        window.addEventListener('blur', resetHandler);
+        window.addEventListener('contextmenu', resetHandler);
+
+        return () => {
+          target?.removeEventListener(
+            'keydown',
+            downHandler as EventListenerOrEventListenerObject,
+          );
+          target?.removeEventListener(
+            'keyup',
+            upHandler as EventListenerOrEventListenerObject,
+          );
+          window.removeEventListener('blur', resetHandler);
+          window.removeEventListener('contextmenu', resetHandler);
+        };
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    });
   }, [keyCode, setKeyPressed, options.target]);
 
   return keyPressed;

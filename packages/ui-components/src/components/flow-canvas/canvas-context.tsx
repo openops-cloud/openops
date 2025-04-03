@@ -102,14 +102,36 @@ export const InteractiveContextProvider = ({
   const selectedNodeCounterRef = useRef<number>(0);
   const state = useStoreApi().getState();
   const [actionToPaste, setActionToPaste] = useState<Action | null>(null);
+  const canvasRef = useRef<HTMLElement | null>(null);
 
   const spacePressed = useKeyPress(SPACE_KEY);
   const shiftPressed = useKeyPress(SHIFT_KEY);
   const copyPressed = useKeyPress(COPY_KEYS, {
-    target: document,
+    target: canvasRef.current,
     preventDefault: false,
     actInsideInputWithModifier: false,
   });
+
+  useEffect(() => {
+    if (!flowCanvasContainerId) {
+      canvasRef.current = null;
+      return;
+    }
+
+    canvasRef.current = document.getElementById(flowCanvasContainerId);
+
+    const interval = setInterval(() => {
+      const element = document.getElementById(flowCanvasContainerId);
+      if (element) {
+        canvasRef.current = element;
+        clearInterval(interval);
+      }
+    }, 10);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [flowCanvasContainerId]);
 
   const fallbackCopy = (
     text: string,
