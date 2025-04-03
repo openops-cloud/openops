@@ -90,6 +90,7 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [AppSystemProp.AZURE_API_VERSION]: '2024-07-01',
   [SharedSystemProp.INTERNAL_OAUTH_PROXY_URL]: 'https://oauth.openops.com',
   [AppSystemProp.CODE_BLOCK_MEMORY_LIMIT_IN_MB]: '128',
+  [SharedSystemProp.INTERNAL_PARALLEL_LOOP_ITERATIONS_LIMIT]: '20',
 };
 
 export const system = {
