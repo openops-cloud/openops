@@ -194,9 +194,7 @@ export const templatesHooks = {
     };
   },
 
-  useTemplateMetadataWithIntegrations: (
-    template: FlowTemplateMetadata | null,
-  ) => {
+  useSetTemplateIntegrations: (template: FlowTemplateMetadata | null) => {
     const { blocksLookup, isLoading: isBlocksLoading } =
       templatesHooks.useBlocksLookup();
 

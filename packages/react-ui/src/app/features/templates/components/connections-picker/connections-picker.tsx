@@ -12,7 +12,13 @@ import {
   DialogFooter,
   OverflowTooltip,
 } from '@openops/components/ui';
-import { AppConnectionWithoutSensitiveData, isNil } from '@openops/shared';
+import {
+  AppConnectionWithoutSensitiveData,
+  flowHelper,
+  isNil,
+  removeConnectionBrackets,
+  Trigger,
+} from '@openops/shared';
 import { t } from 'i18next';
 import { ArrowLeft, TriangleAlert } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -24,6 +30,7 @@ import {
 
 type ConnectionsPickerProps = {
   templateName: string;
+  templateTrigger?: Trigger;
   integrations: BlockMetadataModelSummary[];
   isUseTemplateLoading: boolean;
   close: () => void;
@@ -32,6 +39,7 @@ type ConnectionsPickerProps = {
 
 const ConnectionsPicker = ({
   templateName,
+  templateTrigger,
   integrations,
   isUseTemplateLoading,
   close,
@@ -75,6 +83,19 @@ const ConnectionsPicker = ({
       groupedConnections
     ) {
       isConnectionListPreselected.current = true;
+      const usedConnectionNames: { [key: string]: string | undefined } = {};
+
+      if (templateTrigger) {
+        flowHelper
+          .getAllSteps(templateTrigger)
+          .filter((step) => {
+            return step.settings.blockName && step.settings.input.auth;
+          })
+          .forEach((step) => {
+            usedConnectionNames[step.settings.blockName] =
+              removeConnectionBrackets(step.settings.input.auth);
+          });
+      }
 
       const connections: Record<
         string,
@@ -82,8 +103,14 @@ const ConnectionsPicker = ({
       > = {};
       integrations.forEach((integration) => {
         const options = groupedConnections[integration.name] || [];
-        connections[integration.name] = options[0] || null;
+        const usedConnection = usedConnectionNames[integration.name]
+          ? options.find((connection) => {
+              return connection.name === usedConnectionNames[integration.name];
+            })
+          : null;
+        connections[integration.name] = usedConnection || options[0] || null;
       });
+
       setSelectedConnections(connections);
     }
   }, [integrations, groupedConnections, setSelectedConnections]);

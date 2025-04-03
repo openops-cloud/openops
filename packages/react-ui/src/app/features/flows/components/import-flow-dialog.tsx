@@ -39,7 +39,7 @@ const ImportFlowDialog = ({ children }: { children: React.ReactNode }) => {
   const { updateHomePageOperationalViewFlag } =
     userSettingsHooks.useHomePageOperationalView();
   const { templateWithIntegrations, isLoading } =
-    templatesHooks.useTemplateMetadataWithIntegrations(importedWorkflow);
+    templatesHooks.useSetTemplateIntegrations(importedWorkflow);
 
   const { mutate: createFlow, isPending } = useMutation({
     mutationFn: async (connections: AppConnectionWithoutSensitiveData[]) => {
@@ -83,8 +83,10 @@ const ImportFlowDialog = ({ children }: { children: React.ReactNode }) => {
           reader.result as string,
         ) as FlowImportTemplate;
         // TODO handle overwriting flow when using actions in builder
-        if (template && template.name && template.template) {
+        if (template?.name && template?.template?.trigger) {
           setImportedWorkflow(template);
+        } else {
+          toast(INTERNAL_ERROR_TOAST);
         }
       } catch (error) {
         toast(INTERNAL_ERROR_TOAST);
@@ -116,6 +118,7 @@ const ImportFlowDialog = ({ children }: { children: React.ReactNode }) => {
               resetDialog();
             }}
             templateName={templateWithIntegrations?.name ?? ''}
+            templateTrigger={importedWorkflow?.template.trigger}
             integrations={
               templateWithIntegrations?.integrations.filter(
                 (integration) => !!integration.auth,
