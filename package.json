@@ -210,6 +210,7 @@
     "react-day-picker": "8.10.1",
     "react-dom": "18.3.1",
     "react-error-boundary": "4.1.2",
+    "react-helmet-async": "2.0.5",
     "react-hook-form": "7.52.2",
     "react-i18next": "15.0.1",
     "react-json-view": "1.21.3",

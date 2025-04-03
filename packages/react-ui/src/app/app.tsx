@@ -10,7 +10,7 @@ import { ThemeProvider } from '@/app/common/providers/theme-provider';
 import { HelmetProvider } from 'react-helmet-async';
 import { OpsErrorBoundary } from './common/error-boundaries/ops-error-boundary';
 import { InitialDataGuard } from './common/guards/intial-data-guard';
-import { Candu } from './features/extensions/candu/candu';
+import { Extensions } from './features/extensions';
 import './interceptors';
 import { ApplicationRouter } from './router';
 
@@ -36,7 +36,7 @@ export function App() {
                 <Toaster />
               </ThemeProvider>
             </TooltipProvider>
-            <Candu />
+            <Extensions />
           </InitialDataGuard>
         </QueryClientProvider>
       </OpsErrorBoundary>
