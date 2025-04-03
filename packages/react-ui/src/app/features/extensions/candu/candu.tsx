@@ -1,24 +1,15 @@
-import { flagsHooks } from '@/app/common/hooks/flags-hooks';
-import { userHooks } from '@/app/common/hooks/user-hooks';
-import { authenticationSession } from '@/app/lib/authentication-session';
-import { FlagId } from '@openops/shared';
 import { Helmet } from 'react-helmet-async';
+import { useCandu } from './use-candu';
 
 const Candu = () => {
-  const userId = authenticationSession.getCurrentUser()?.id;
-  const clientToken = flagsHooks.useFlag<string>(
-    FlagId.CANDU_CLIENT_TOKEN,
-  ).data;
-  const { userMeta } = userHooks.useUserMeta();
-  const enableCandu = clientToken && userId && userMeta?.trackEvents;
-
-  if (!enableCandu) {
+  const { isCanduEnabled, canduClientToken, canduUserId } = useCandu();
+  if (!isCanduEnabled) {
     return null;
   }
 
   return (
     <Helmet>
-      <script type="text/javascript" async={true}>
+      <script type="text/javascript">
         {`
           (function (d, params) {
             var script = d.createElement('script');
@@ -32,8 +23,8 @@ const Candu = () => {
             };
             d.head.appendChild(script);
           })(document, {
-            userId: "${userId}",
-            clientToken: "${clientToken}"
+            userId: "${canduUserId}",
+            clientToken: "${canduClientToken}"
           });
         `}
       </script>
