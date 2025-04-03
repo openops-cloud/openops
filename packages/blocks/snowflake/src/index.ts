@@ -1,4 +1,5 @@
 import { createBlock } from '@openops/blocks-framework';
+import { runQuery } from './lib/actions/run-query';
 import { snowflakeAuth } from './lib/common/snowflakeAuth';
 
 export const snowflake = createBlock({
@@ -8,6 +9,6 @@ export const snowflake = createBlock({
   minimumSupportedRelease: '0.20.0',
   logoUrl: 'https://static.openops.com/blocks/snowflake.svg',
   authors: [],
-  actions: [],
+  actions: [runQuery],
   triggers: [],
 });
