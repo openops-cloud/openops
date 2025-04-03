@@ -3,7 +3,9 @@ import {
   Type,
 } from '@fastify/type-provider-typebox';
 import {
+  ApplicationError,
   EndpointScope,
+  ErrorCode,
   PrincipalType,
   Project,
   UpdateProjectRequestInCommunity,
@@ -17,8 +19,16 @@ export const userProjectController: FastifyPluginCallbackTypebox = (
   _opts,
   done,
 ) => {
-  fastify.get('/:id', async (request) => {
-    return projectService.getOneOrThrow(request.principal.projectId);
+  fastify.get('/:id', async (request, response) => {
+    try {
+      return await projectService.getOneOrThrow(request.principal.projectId);
+    } catch (err) {
+      if (err instanceof ApplicationError) {
+        err.error.code = ErrorCode.ENTITY_NOT_FOUND;
+        return response.code(401).send();
+      }
+      throw err;
+    }
   });
 
   fastify.get('/', async (request) => {

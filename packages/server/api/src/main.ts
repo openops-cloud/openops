@@ -9,6 +9,7 @@ import { FastifyInstance } from 'fastify';
 import { appPostBoot } from './app/app';
 import { databaseConnection } from './app/database/database-connection';
 import { seedDevData } from './app/database/seeds/dev-seeds';
+import { seedFocusDataAggregationTemplateTable } from './app/database/seeds/openops-aggregated-costs-seed';
 import * as analytics from './app/database/seeds/openops-analytics-seed';
 import { deleteOldOpportunitiesTable } from './app/database/seeds/openops-delete-old-opportunities-table';
 import { seedOpportunitesTemplateTable } from './app/database/seeds/openops-opportunities-table-seed';
@@ -59,6 +60,7 @@ const main = async (): Promise<void> => {
 
     await seedTemplateTables();
     await seedOpportunitesTemplateTable();
+    await seedFocusDataAggregationTemplateTable();
     await analytics.seedAnalytics();
 
     initializeLock();
