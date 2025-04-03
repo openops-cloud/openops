@@ -4,11 +4,7 @@ import {
   FlowVersion,
   StepLocationRelativeToParent,
 } from '@openops/shared';
-import {
-  OnSelectionChangeParams,
-  useKeyPress,
-  useStoreApi,
-} from '@xyflow/react';
+import { OnSelectionChangeParams, useStoreApi } from '@xyflow/react';
 import { cloneDeep } from 'lodash-es';
 import {
   createContext,
@@ -21,6 +17,7 @@ import {
   useState,
 } from 'react';
 import { usePrevious } from 'react-use';
+import { useKeyPress } from '../../hooks/use-key-press';
 import {
   COPY_KEYS,
   NODE_SELECTION_RECT_CLASS_NAME,
@@ -105,34 +102,14 @@ export const InteractiveContextProvider = ({
   const selectedNodeCounterRef = useRef<number>(0);
   const state = useStoreApi().getState();
   const [actionToPaste, setActionToPaste] = useState<Action | null>(null);
-  const canvasRef = useRef<HTMLElement | null>(null);
 
   const spacePressed = useKeyPress(SPACE_KEY);
   const shiftPressed = useKeyPress(SHIFT_KEY);
   const copyPressed = useKeyPress(COPY_KEYS, {
-    target: canvasRef.current,
+    target: document,
+    preventDefault: false,
+    actInsideInputWithModifier: false,
   });
-
-  useEffect(() => {
-    if (!flowCanvasContainerId) {
-      canvasRef.current = null;
-      return;
-    }
-
-    canvasRef.current = document.getElementById(flowCanvasContainerId);
-
-    const interval = setInterval(() => {
-      const element = document.getElementById(flowCanvasContainerId);
-      if (element) {
-        canvasRef.current = element;
-        clearInterval(interval);
-      }
-    }, 100);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, [flowCanvasContainerId]);
 
   const fallbackCopy = (
     text: string,
@@ -245,7 +222,7 @@ export const InteractiveContextProvider = ({
     const activeElement = document.activeElement;
     const isInsideCanvas = activeElement?.closest(`#${flowCanvasContainerId}`);
 
-    if (!isInsideCanvas) {
+    if (!isInsideCanvas && selectedStep) {
       return;
     }
 
