@@ -12,7 +12,7 @@ services:
       openops-analytics:
         condition: service_healthy
   openops-app:
-    image: 535002847982.dkr.ecr.us-east-2.amazonaws.com/openops/openops-app:c677c5df
+    image: 535002847982.dkr.ecr.us-east-2.amazonaws.com/openops/openops-app:39cb766e
     restart: unless-stopped
     env_file: .env
     environment:
@@ -31,7 +31,7 @@ services:
       postgres:
         condition: service_healthy
   openops-engine:
-    image: 535002847982.dkr.ecr.us-east-2.amazonaws.com/openops/openops-engine:c677c5df
+    image: 535002847982.dkr.ecr.us-east-2.amazonaws.com/openops/openops-engine:39cb766e
     restart: unless-stopped
     env_file: .env
     command: ["cp -r /var/tmp-base/. /tmp/ && node main.js"]
