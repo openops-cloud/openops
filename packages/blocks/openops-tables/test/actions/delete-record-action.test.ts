@@ -142,6 +142,7 @@ describe('deleteRecordAction', () => {
   test('should throw if no row was found with primary key', async () => {
     openopsCommonMock.getPrimaryKeyFieldFromFields.mockReturnValue({
       name: 'primary key field',
+      type: 'text',
     });
     cacheWrapperMock.getOrAdd
       .mockReturnValueOnce(1)
@@ -173,12 +174,14 @@ describe('deleteRecordAction', () => {
       1,
       'some primary key value',
       'primary key field',
+      'text',
     );
   });
 
   test('should delete record', async () => {
     openopsCommonMock.getPrimaryKeyFieldFromFields.mockReturnValue({
       name: 'primary key field',
+      type: 'text',
     });
     cacheWrapperMock.getOrAdd
       .mockReturnValueOnce(1)
@@ -188,6 +191,9 @@ describe('deleteRecordAction', () => {
     const context = createContext({
       tableName: 'Opportunity',
       rowPrimaryKey: 'some primary key value',
+    });
+    openopsCommonMock.authenticateDefaultUserInOpenOpsTables.mockResolvedValue({
+      token: 'some databaseToken',
     });
 
     const result = (await deleteRecordAction.run(context)) as any;
@@ -202,6 +208,7 @@ describe('deleteRecordAction', () => {
       1,
       'some primary key value',
       'primary key field',
+      'text',
     );
     expect(
       openopsCommonMock.getPrimaryKeyFieldFromFields,

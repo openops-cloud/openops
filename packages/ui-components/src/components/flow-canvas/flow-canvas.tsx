@@ -3,16 +3,15 @@ import {
   Background,
   EdgeTypes,
   NodeTypes,
+  OnNodeDrag,
   ReactFlow,
   ReactFlowInstance,
   useStoreApi,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import React, { ReactNode, useCallback, useRef, useState } from 'react';
-import { useEffectOnce } from 'react-use';
 import { Edge, Graph, WorkflowNode } from '../../lib/flow-canvas-utils';
 import { useCanvasContext } from './canvas-context';
-import { useClipboardContext } from './clipboard-context';
 import {
   InitialZoom,
   MAX_ZOOM,
@@ -33,22 +32,15 @@ type FlowCanvasProps = {
   nodeTypes?: NodeTypes;
   graph?: Graph;
   topOffset?: number;
-  allowCanvasPanning?: boolean;
   selectStepByName?: (stepName: string) => void;
   ContextMenu?: React.ComponentType<{
     contextMenuType: ContextMenuType;
     actionToPaste: Action | null;
     children: ReactNode;
   }>;
+  onNodeDrag?: OnNodeDrag<WorkflowNode>;
   children?: ReactNode;
 };
-
-function getPanOnDrag(allowCanvasPanning: boolean, inGrabPanningMode: boolean) {
-  if (allowCanvasPanning) {
-    return inGrabPanningMode ? [0, 1] : [1];
-  }
-  return false;
-}
 
 const FlowCanvas = React.memo(
   ({
@@ -56,9 +48,9 @@ const FlowCanvas = React.memo(
     nodeTypes,
     graph,
     topOffset,
-    allowCanvasPanning = true,
     selectStepByName,
     ContextMenu = ({ children }) => children,
+    onNodeDrag,
     children,
   }: FlowCanvasProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -66,12 +58,8 @@ const FlowCanvas = React.memo(
     const [contextMenuType, setContextMenuType] = useState<ContextMenuType>(
       ContextMenuType.CANVAS,
     );
-    const { actionToPaste, fetchClipboardOperations } = useClipboardContext();
+    const { actionToPaste } = useCanvasContext();
     useResizeCanvas(containerRef);
-
-    useEffectOnce(() => {
-      fetchClipboardOperations();
-    });
 
     const onInit = useCallback(
       (reactFlow: ReactFlowInstance<WorkflowNode, Edge>) => {
@@ -98,11 +86,7 @@ const FlowCanvas = React.memo(
     } = useCanvasContext();
     const inGrabPanningMode = panningMode === 'grab';
 
-    const panOnDrag = getPanOnDrag(allowCanvasPanning, inGrabPanningMode);
-
-    const onContextMenu = async (ev: React.MouseEvent<HTMLDivElement>) => {
-      await fetchClipboardOperations();
-
+    const onContextMenu = (ev: React.MouseEvent<HTMLDivElement>) => {
       if (ev.target instanceof HTMLElement || ev.target instanceof SVGElement) {
         const stepElement = ev.target.closest(
           `[data-${STEP_CONTEXT_MENU_ATTRIBUTE}]`,
@@ -161,6 +145,11 @@ const FlowCanvas = React.memo(
       }
     };
 
+    const onClickOutsideSelection = useCallback(() => {
+      const { setNodes, nodes } = storeApi.getState();
+      setNodes(nodes.map((node) => ({ ...node, selected: false })));
+    }, [storeApi]);
+
     return (
       <div className="size-full bg-editorBackground" ref={containerRef}>
         {!!graph && (
@@ -178,7 +167,7 @@ const FlowCanvas = React.memo(
               elevateEdgesOnSelect={false}
               maxZoom={MAX_ZOOM}
               minZoom={MIN_ZOOM}
-              panOnDrag={panOnDrag}
+              panOnDrag={inGrabPanningMode ? [0, 1] : [1]}
               zoomOnDoubleClick={false}
               panOnScroll={true}
               fitView={false}
@@ -196,10 +185,12 @@ const FlowCanvas = React.memo(
               proOptions={{
                 hideAttribution: true,
               }}
+              onNodeDrag={onNodeDrag}
               onInit={onInit}
               onContextMenu={onContextMenu}
               onSelectionChange={readonly ? undefined : onSelectionChange}
               onSelectionEnd={readonly ? undefined : onSelectionEnd}
+              onPaneClick={onClickOutsideSelection}
             >
               <Background color="lightgray" />
               {children}

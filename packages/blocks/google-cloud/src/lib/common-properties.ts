@@ -7,8 +7,8 @@ type Project = {
 };
 
 export const projectCliDropdown = Property.Dropdown<string>({
-  displayName: 'Project',
-  description: 'Select a project to run the command in',
+  displayName: 'Default Project',
+  description: 'Select a default project to run the command in',
   refreshers: [
     'auth',
     'useHostSession',

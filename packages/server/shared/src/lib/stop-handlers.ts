@@ -12,10 +12,10 @@ const stop = async (
   shuttingDown = true;
 
   if (system.getOrThrow(SharedSystemProp.ENVIRONMENT) === 'dev') {
-    setTimeout(() => {
-      console.log('Dev mode, forcing shutdown after 500 ms');
-      process.exit(0);
-    }, 500);
+    console.log('Dev mode, forcing shutdown after 500 ms');
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    await app.close();
+    process.exit(0);
   }
 
   try {
@@ -40,11 +40,11 @@ export function setStopHandlers(
 ) {
   process.on('SIGINT', async () => {
     logger.warn('SIGINT received, shutting down');
-    stop(app).catch((e) => console.info('Failed to stop the app', e));
+    stop(app, cleanup).catch((e) => console.info('Failed to stop the app', e));
   });
 
   process.on('SIGTERM', async () => {
     logger.warn('SIGTERM received, shutting down');
-    stop(app).catch((e) => console.info('Failed to stop the app', e));
+    stop(app, cleanup).catch((e) => console.info('Failed to stop the app', e));
   });
 }
