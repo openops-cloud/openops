@@ -11,7 +11,6 @@ export const commonProps = {
   database: Property.Dropdown({
     displayName: 'Database',
     refreshers: ['auth'],
-
     required: true,
     options: async ({ auth }) => {
       if (!auth) {
@@ -74,7 +73,7 @@ export const commonProps = {
 
       const response = await execute(
         connection,
-        `SHOW SCHEMAS IN DATABASE ${database}`,
+        `SHOW SCHEMAS IN DATABASE "${database}"`,
         [],
       );
 
@@ -129,7 +128,7 @@ export const commonProps = {
 
       const response = await execute(
         connection,
-        `SHOW TABLES IN SCHEMA ${database}.${schema}`,
+        `SHOW TABLES IN SCHEMA "${database}"."${schema}"`,
         [],
       );
 
@@ -142,7 +141,7 @@ export const commonProps = {
             response.map((table: any) => {
               return {
                 label: table.name,
-                value: `${database}.${schema}.${table.name}`,
+                value: `"${database}"."${schema}"."${table.name}"`,
               };
             })
           : [],
