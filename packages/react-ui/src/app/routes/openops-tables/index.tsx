@@ -6,6 +6,8 @@ import { useDefaultSidebarState } from '@/app/common/hooks/use-default-sidebar-s
 import { FlagId } from '@openops/shared';
 
 const OpenOpsTablesPage = () => {
+  //   const extraData = encodeURIComponent(JSON.stringify({ telemetryEnabled: true }));
+  // const iframeSrc = `${openopsTablesUrl}/openops-tables${pathParam}?data=${extraData}`;
   useDefaultSidebarState('minimized');
   const location = useLocation();
   const params = new URLSearchParams(location.search);
