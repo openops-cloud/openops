@@ -36,9 +36,6 @@ LABEL service=openops
 
 # Copy Nginx configuration template and static files
 COPY nginx.standard.conf /etc/nginx/nginx.conf
-# Send nginx logs to console instead of writing to fileystem.
-RUN ln -sf /dev/stdout /var/log/nginx/access.log \
-  && ln -sf /dev/stderr /var/log/nginx/error.log
 COPY dist/packages/react-ui/ /usr/share/nginx/html/
 
 ARG VERSION=unknown
@@ -49,4 +46,4 @@ COPY docker-entrypoint.sh .
 RUN chmod +x docker-entrypoint.sh
 ENTRYPOINT ["./docker-entrypoint.sh"]
 
-EXPOSE 8080
+EXPOSE 80
