@@ -109,7 +109,9 @@ export const InteractiveContextProvider = ({
 
   const spacePressed = useKeyPress(SPACE_KEY);
   const shiftPressed = useKeyPress(SHIFT_KEY);
-  const copyPressed = useKeyPress(COPY_KEYS, { target: canvasRef.current });
+  const copyPressed = useKeyPress(COPY_KEYS, {
+    target: canvasRef.current,
+  });
 
   useEffect(() => {
     if (!flowCanvasContainerId) {
@@ -240,13 +242,25 @@ export const InteractiveContextProvider = ({
     if (!copyPressed) {
       return;
     }
+    const activeElement = document.activeElement;
+    const isInsideCanvas = activeElement?.closest(`#${flowCanvasContainerId}`);
+
+    if (!isInsideCanvas) {
+      return;
+    }
 
     if (selectedStep) {
       copySelectedStep();
     } else {
       copySelectedArea();
     }
-  }, [copyPressed, copySelectedArea, copySelectedStep, selectedStep]);
+  }, [
+    copyPressed,
+    copySelectedArea,
+    copySelectedStep,
+    flowCanvasContainerId,
+    selectedStep,
+  ]);
 
   // clear multi-selection if we have a new selected step
   useEffect(() => {
