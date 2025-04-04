@@ -4,11 +4,7 @@ import {
   FlowVersion,
   StepLocationRelativeToParent,
 } from '@openops/shared';
-import {
-  OnSelectionChangeParams,
-  useKeyPress,
-  useStoreApi,
-} from '@xyflow/react';
+import { OnSelectionChangeParams, useStoreApi } from '@xyflow/react';
 import { cloneDeep } from 'lodash-es';
 import {
   createContext,
@@ -21,6 +17,7 @@ import {
   useState,
 } from 'react';
 import { usePrevious } from 'react-use';
+import { useKeyPress } from '../../hooks/use-key-press';
 import {
   COPY_KEYS,
   NODE_SELECTION_RECT_CLASS_NAME,
@@ -109,7 +106,11 @@ export const InteractiveContextProvider = ({
 
   const spacePressed = useKeyPress(SPACE_KEY);
   const shiftPressed = useKeyPress(SHIFT_KEY);
-  const copyPressed = useKeyPress(COPY_KEYS, { target: canvasRef.current });
+  const copyPressed = useKeyPress(COPY_KEYS, {
+    target: canvasRef.current,
+    preventDefault: false,
+    actInsideInputWithModifier: false,
+  });
 
   useEffect(() => {
     if (!flowCanvasContainerId) {
@@ -125,7 +126,7 @@ export const InteractiveContextProvider = ({
         canvasRef.current = element;
         clearInterval(interval);
       }
-    }, 100);
+    }, 10);
 
     return () => {
       clearInterval(interval);
@@ -240,13 +241,25 @@ export const InteractiveContextProvider = ({
     if (!copyPressed) {
       return;
     }
+    const activeElement = document.activeElement;
+    const isInsideCanvas = activeElement?.closest(`#${flowCanvasContainerId}`);
+
+    if (!isInsideCanvas && selectedStep) {
+      return;
+    }
 
     if (selectedStep) {
       copySelectedStep();
     } else {
       copySelectedArea();
     }
-  }, [copyPressed, copySelectedArea, copySelectedStep, selectedStep]);
+  }, [
+    copyPressed,
+    copySelectedArea,
+    copySelectedStep,
+    flowCanvasContainerId,
+    selectedStep,
+  ]);
 
   // clear multi-selection if we have a new selected step
   useEffect(() => {
@@ -263,6 +276,17 @@ export const InteractiveContextProvider = ({
 
   useEffect(() => {
     function handler(e: ClipboardEvent) {
+      const activeElement = document.activeElement;
+
+      const isEditableElement =
+        activeElement instanceof HTMLInputElement ||
+        activeElement instanceof HTMLTextAreaElement ||
+        activeElement?.hasAttribute('contenteditable');
+
+      if (isEditableElement) {
+        return;
+      }
+
       const clipboardText = e.clipboardData?.getData('text/plain') ?? '';
 
       if (!clipboardText) {
