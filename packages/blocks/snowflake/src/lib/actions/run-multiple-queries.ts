@@ -157,7 +157,7 @@ export const runMultipleQueries = createAction({
               resolve(queryResults);
             });
           } catch (err) {
-            handleError(err as SnowflakeError); // Reject with the original error!
+            handleError(err as SnowflakeError);
           }
         }
 

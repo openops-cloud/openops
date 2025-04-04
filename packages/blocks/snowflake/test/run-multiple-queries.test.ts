@@ -10,7 +10,6 @@ const mockConnect = jest.fn();
 const mockExecute = jest.fn();
 const mockDestroy = jest.fn();
 
-// Keep track of whether the connection thinks it's active for destroy logic
 let isConnectionActive = false;
 
 jest.mock('snowflake-sdk', () => ({
@@ -18,10 +17,9 @@ jest.mock('snowflake-sdk', () => ({
     connect: mockConnect,
     execute: mockExecute,
     destroy: mockDestroy,
-    // Simulate isUp based on our tracked state for potential future use
     isUp: jest.fn(() => isConnectionActive),
   })),
-  // Expose SnowflakeError type if needed for mocking errors
+
   SnowflakeError: class MockSnowflakeError extends Error {
     code: string | undefined;
     constructor(message: string, code?: string) {
@@ -79,15 +77,13 @@ describe('Snowflake: runMultipleQueries Action', () => {
     jest.clearAllMocks();
     isConnectionActive = false;
 
-    // Default successful connect behavior
     mockConnect.mockImplementation((callback) => {
       process.nextTick(() => {
-        isConnectionActive = true; // Mark active on successful connect
+        isConnectionActive = true;
         callback(undefined);
       });
     });
 
-    // Default successful execute behavior (handles BEGIN/COMMIT/ROLLBACK returning no rows)
     mockExecute.mockImplementation(
       ({
         sqlText,
@@ -113,17 +109,15 @@ describe('Snowflake: runMultipleQueries Action', () => {
       },
     );
 
-    // Default successful destroy behavior
     mockDestroy.mockImplementation((callback) => {
       process.nextTick(() => {
-        isConnectionActive = false; // Mark inactive on destroy
+        isConnectionActive = false;
         callback(undefined);
       });
     });
   });
 
   it('should successfully execute multiple queries without transaction', async () => {
-    // Type of 'props' now matches MockPropsValueInput (sqlTexts required)
     const props: MockPropsValueInput = {
       sqlTexts: ['SELECT 1', 'SELECT 2'],
       useTransaction: false,
@@ -135,7 +129,6 @@ describe('Snowflake: runMultipleQueries Action', () => {
       { query: 'SELECT 2', result: [{ RESULT: 'Success: SELECT 2' }] },
     ];
 
-    // Use type assertion 'as RunMultipleQueriesContext' or 'as any' is fine here
     await expect(
       runMultipleQueries.run(context as RunMultipleQueriesContext),
     ).resolves.toEqual(expectedResults);
@@ -164,7 +157,6 @@ describe('Snowflake: runMultipleQueries Action', () => {
       expect.objectContaining({ sqlText: 'SELECT 2' }),
     );
     expect(mockDestroy).toHaveBeenCalledTimes(1);
-    // Verify transaction commands were NOT called
     expect(mockExecute).not.toHaveBeenCalledWith(
       expect.objectContaining({ sqlText: 'BEGIN' }),
     );
@@ -199,7 +191,6 @@ describe('Snowflake: runMultipleQueries Action', () => {
     ).resolves.toEqual(expectedResults);
 
     expect(mockConnect).toHaveBeenCalledTimes(1);
-    // BEGIN + 2 queries + COMMIT = 4 execute calls
     expect(mockExecute).toHaveBeenCalledTimes(4);
     expect(mockExecute).toHaveBeenNthCalledWith(
       1,
@@ -312,14 +303,13 @@ describe('Snowflake: runMultipleQueries Action', () => {
     const context = createMockContext(props);
     const executionError = new Error('SQL compilation error');
 
-    // Fail on the second execute call
     mockExecute.mockImplementationOnce(({ complete }) =>
       process.nextTick(() =>
         complete(undefined, {}, [{ RESULT: 'Success: SELECT 1' }]),
       ),
     );
-    mockExecute.mockImplementationOnce(
-      ({ complete }) => process.nextTick(() => complete(executionError)), // Fail for INVALID SYNTAX
+    mockExecute.mockImplementationOnce(({ complete }) =>
+      process.nextTick(() => complete(executionError)),
     );
 
     await expect(
@@ -327,7 +317,7 @@ describe('Snowflake: runMultipleQueries Action', () => {
     ).rejects.toThrow(executionError);
 
     expect(mockConnect).toHaveBeenCalledTimes(1);
-    expect(mockExecute).toHaveBeenCalledTimes(2); // Called for SELECT 1 and INVALID SYNTAX
+    expect(mockExecute).toHaveBeenCalledTimes(2);
     expect(mockExecute).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({ sqlText: 'SELECT 1' }),
@@ -336,7 +326,6 @@ describe('Snowflake: runMultipleQueries Action', () => {
       2,
       expect.objectContaining({ sqlText: 'INVALID SYNTAX' }),
     );
-    // Should NOT have called SELECT 3 or any transaction commands
     expect(mockExecute).not.toHaveBeenCalledWith(
       expect.objectContaining({ sqlText: 'SELECT 3' }),
     );
@@ -349,7 +338,6 @@ describe('Snowflake: runMultipleQueries Action', () => {
     expect(mockExecute).not.toHaveBeenCalledWith(
       expect.objectContaining({ sqlText: 'ROLLBACK' }),
     );
-    // Destroy should be called for cleanup
     expect(mockDestroy).toHaveBeenCalledTimes(1);
   });
 
@@ -361,27 +349,21 @@ describe('Snowflake: runMultipleQueries Action', () => {
     const context = createMockContext(props);
     const executionError = new Error('SQL compilation error');
 
-    // Mock sequence: BEGIN -> INSERT 1 (Ok) -> INVALID SYNTAX (Fail) -> ROLLBACK (Ok)
-    mockExecute.mockReset(); // Clear default implementation for specific sequence
+    mockExecute.mockReset();
     mockExecute
-      .mockImplementationOnce(
-        // BEGIN
-        ({ complete }) => process.nextTick(() => complete(undefined)),
+      .mockImplementationOnce(({ complete }) =>
+        process.nextTick(() => complete(undefined)),
       )
-      .mockImplementationOnce(
-        // INSERT 1
-        ({ complete }) =>
-          process.nextTick(() =>
-            complete(undefined, {}, [{ RESULT: 'Success: INSERT 1' }]),
-          ),
+      .mockImplementationOnce(({ complete }) =>
+        process.nextTick(() =>
+          complete(undefined, {}, [{ RESULT: 'Success: INSERT 1' }]),
+        ),
       )
-      .mockImplementationOnce(
-        // INVALID SYNTAX (Fail)
-        ({ complete }) => process.nextTick(() => complete(executionError)),
+      .mockImplementationOnce(({ complete }) =>
+        process.nextTick(() => complete(executionError)),
       )
-      .mockImplementationOnce(
-        // ROLLBACK
-        ({ complete }) => process.nextTick(() => complete(undefined)),
+      .mockImplementationOnce(({ complete }) =>
+        process.nextTick(() => complete(undefined)),
       );
 
     await expect(
@@ -389,7 +371,6 @@ describe('Snowflake: runMultipleQueries Action', () => {
     ).rejects.toThrow(executionError);
 
     expect(mockConnect).toHaveBeenCalledTimes(1);
-    // BEGIN, INSERT 1, INVALID SYNTAX, ROLLBACK
     expect(mockExecute).toHaveBeenCalledTimes(4);
     expect(mockExecute).toHaveBeenNthCalledWith(
       1,
@@ -407,18 +388,15 @@ describe('Snowflake: runMultipleQueries Action', () => {
       4,
       expect.objectContaining({ sqlText: 'ROLLBACK' }),
     );
-    // Should NOT have called INSERT 2 or COMMIT
     expect(mockExecute).not.toHaveBeenCalledWith(
       expect.objectContaining({ sqlText: 'INSERT 2' }),
     );
     expect(mockExecute).not.toHaveBeenCalledWith(
       expect.objectContaining({ sqlText: 'COMMIT' }),
     );
-    // Destroy should be called after ROLLBACK attempt
     expect(mockDestroy).toHaveBeenCalledTimes(1);
   });
 
-  // Test that failed previously due to timeout
   it('should reject if BEGIN fails (WITH transaction)', async () => {
     const props: MockPropsValueInput = {
       sqlTexts: ['SELECT 1'],
@@ -427,27 +405,20 @@ describe('Snowflake: runMultipleQueries Action', () => {
     const context = createMockContext(props);
     const beginError = new Error('Failed to start transaction');
 
-    // Mock sequence: BEGIN (Fail) -> ROLLBACK (Ok during cleanup) -> Destroy (Ok during cleanup)
     mockExecute.mockReset();
     mockExecute
-      .mockImplementationOnce(
-        // BEGIN fails
-        ({ complete }) => process.nextTick(() => complete(beginError)),
+      .mockImplementationOnce(({ complete }) =>
+        process.nextTick(() => complete(beginError)),
       )
-      // Add mock for ROLLBACK called during handleError
-      .mockImplementationOnce(
-        // ROLLBACK (Ok)
-        ({ sqlText, complete }) => {
-          expect(sqlText).toBe('ROLLBACK');
-          process.nextTick(() => complete(undefined));
-        },
-      );
+      .mockImplementationOnce(({ sqlText, complete }) => {
+        expect(sqlText).toBe('ROLLBACK');
+        process.nextTick(() => complete(undefined));
+      });
 
-    // Ensure destroy mock is ready for the cleanup call
     mockDestroy.mockImplementationOnce((callback) => {
       process.nextTick(() => {
         isConnectionActive = false;
-        callback(undefined); // Successful destroy
+        callback(undefined);
       });
     });
 
@@ -456,7 +427,6 @@ describe('Snowflake: runMultipleQueries Action', () => {
     ).rejects.toThrow(beginError);
 
     expect(mockConnect).toHaveBeenCalledTimes(1);
-    // BEGIN (attempted) + ROLLBACK (attempted during cleanup)
     expect(mockExecute).toHaveBeenCalledTimes(2);
     expect(mockExecute).toHaveBeenNthCalledWith(
       1,
@@ -466,18 +436,15 @@ describe('Snowflake: runMultipleQueries Action', () => {
       2,
       expect.objectContaining({ sqlText: 'ROLLBACK' }),
     );
-    // No other queries or COMMIT should be called
     expect(mockExecute).not.toHaveBeenCalledWith(
       expect.objectContaining({ sqlText: 'SELECT 1' }),
     );
     expect(mockExecute).not.toHaveBeenCalledWith(
       expect.objectContaining({ sqlText: 'COMMIT' }),
     );
-    // Destroy should be called for cleanup after ROLLBACK
     expect(mockDestroy).toHaveBeenCalledTimes(1);
   }, 10000);
 
-  // Test that failed previously due to timeout
   it('should reject if COMMIT fails (WITH transaction)', async () => {
     const props: MockPropsValueInput = {
       sqlTexts: ['SELECT 1'],
@@ -486,37 +453,28 @@ describe('Snowflake: runMultipleQueries Action', () => {
     const context = createMockContext(props);
     const commitError = new Error('Failed to commit transaction');
 
-    // Mock Sequence: BEGIN (Ok) -> SELECT 1 (Ok) -> COMMIT (Fail) -> ROLLBACK (Ok during cleanup) -> Destroy (Ok during cleanup)
     mockExecute.mockReset();
     mockExecute
-      .mockImplementationOnce(
-        // BEGIN (Ok)
-        ({ complete }) => process.nextTick(() => complete(undefined)),
+      .mockImplementationOnce(({ complete }) =>
+        process.nextTick(() => complete(undefined)),
       )
-      .mockImplementationOnce(
-        // SELECT 1 (Ok)
-        ({ complete }) =>
-          process.nextTick(() =>
-            complete(undefined, {}, [{ RESULT: 'Success: SELECT 1' }]),
-          ),
+      .mockImplementationOnce(({ complete }) =>
+        process.nextTick(() =>
+          complete(undefined, {}, [{ RESULT: 'Success: SELECT 1' }]),
+        ),
       )
-      .mockImplementationOnce(
-        // COMMIT (Fail)
-        ({ complete }) => process.nextTick(() => complete(commitError)),
+      .mockImplementationOnce(({ complete }) =>
+        process.nextTick(() => complete(commitError)),
       )
-      .mockImplementationOnce(
-        // ROLLBACK (Ok)
-        ({ sqlText, complete }) => {
-          expect(sqlText).toBe('ROLLBACK');
-          process.nextTick(() => complete(undefined));
-        },
-      );
+      .mockImplementationOnce(({ sqlText, complete }) => {
+        expect(sqlText).toBe('ROLLBACK');
+        process.nextTick(() => complete(undefined));
+      });
 
-    // Ensure destroy mock is ready for the cleanup call
     mockDestroy.mockImplementationOnce((callback) => {
       process.nextTick(() => {
         isConnectionActive = false;
-        callback(undefined); // Successful destroy
+        callback(undefined);
       });
     });
 
@@ -525,7 +483,6 @@ describe('Snowflake: runMultipleQueries Action', () => {
     ).rejects.toThrow(commitError);
 
     expect(mockConnect).toHaveBeenCalledTimes(1);
-    // BEGIN, SELECT 1, COMMIT (attempted), ROLLBACK (attempted during cleanup)
     expect(mockExecute).toHaveBeenCalledTimes(4);
     expect(mockExecute).toHaveBeenNthCalledWith(
       1,
@@ -543,7 +500,6 @@ describe('Snowflake: runMultipleQueries Action', () => {
       4,
       expect.objectContaining({ sqlText: 'ROLLBACK' }),
     );
-    // Destroy should be called for cleanup after ROLLBACK
     expect(mockDestroy).toHaveBeenCalledTimes(1);
   }, 10000);
 
@@ -556,29 +512,24 @@ describe('Snowflake: runMultipleQueries Action', () => {
     const executionError = new Error('SQL compilation error');
     const rollbackError = new Error('Failed to rollback');
 
-    // Mock: BEGIN (Ok) -> INSERT 1 (Fail) -> ROLLBACK (Fail)
     mockExecute.mockReset();
     mockExecute
-      .mockImplementationOnce(
-        // BEGIN
-        ({ complete }) => process.nextTick(() => complete(undefined)),
+      .mockImplementationOnce(({ complete }) =>
+        process.nextTick(() => complete(undefined)),
       )
-      .mockImplementationOnce(
-        // INSERT 1 (Fail)
-        ({ complete }) => process.nextTick(() => complete(executionError)),
+      .mockImplementationOnce(({ complete }) =>
+        process.nextTick(() => complete(executionError)),
       )
-      .mockImplementationOnce(
-        // ROLLBACK (Fail)
-        ({ complete }) => process.nextTick(() => complete(rollbackError)),
+      .mockImplementationOnce(({ complete }) =>
+        process.nextTick(() => complete(rollbackError)),
       );
 
-    // Should reject with the *original* executionError, not the rollbackError
     await expect(
       runMultipleQueries.run(context as RunMultipleQueriesContext),
     ).rejects.toThrow(executionError);
 
     expect(mockConnect).toHaveBeenCalledTimes(1);
-    expect(mockExecute).toHaveBeenCalledTimes(3); // BEGIN, INSERT 1, ROLLBACK
+    expect(mockExecute).toHaveBeenCalledTimes(3);
     expect(mockExecute).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({ sqlText: 'BEGIN' }),
@@ -594,7 +545,6 @@ describe('Snowflake: runMultipleQueries Action', () => {
     expect(mockExecute).not.toHaveBeenCalledWith(
       expect.objectContaining({ sqlText: 'COMMIT' }),
     );
-    // Destroy should still be called after failed ROLLBACK attempt
     expect(mockDestroy).toHaveBeenCalledTimes(1);
   });
 
@@ -606,54 +556,12 @@ describe('Snowflake: runMultipleQueries Action', () => {
     const context = createMockContext(props);
     const destroyError = new Error('Failed to destroy connection');
 
-    // Ensure execute succeeds
     mockExecute.mockReset();
     mockExecute.mockImplementationOnce(({ complete }) =>
       process.nextTick(() =>
         complete(undefined, {}, [{ RESULT: 'Success: SELECT 1' }]),
       ),
     );
-    // Make destroy fail
-    mockDestroy.mockImplementationOnce((callback) => {
-      process.nextTick(() => {
-        isConnectionActive = false; // Still mark as inactive even if destroy errors
-        callback(destroyError);
-      });
-    });
-
-    await expect(
-      runMultipleQueries.run(context as RunMultipleQueriesContext),
-    ).rejects.toThrow(destroyError);
-
-    // Verify all main steps were attempted
-    expect(mockConnect).toHaveBeenCalledTimes(1);
-    expect(mockExecute).toHaveBeenCalledTimes(1); // Only SELECT 1
-    expect(mockDestroy).toHaveBeenCalledTimes(1);
-  });
-
-  it('should reject if destroy fails after successful execution (WITH transaction)', async () => {
-    const props: MockPropsValueInput = {
-      sqlTexts: ['SELECT 1'],
-      useTransaction: true,
-    };
-    const context = createMockContext(props);
-    const destroyError = new Error('Failed to destroy connection');
-
-    // Ensure BEGIN, SELECT 1, COMMIT succeed
-    mockExecute.mockReset();
-    mockExecute
-      .mockImplementationOnce(({ complete }) =>
-        process.nextTick(() => complete(undefined)),
-      ) // BEGIN
-      .mockImplementationOnce(({ complete }) =>
-        process.nextTick(() =>
-          complete(undefined, {}, [{ RESULT: 'Success: SELECT 1' }]),
-        ),
-      ) // SELECT 1
-      .mockImplementationOnce(({ complete }) =>
-        process.nextTick(() => complete(undefined)),
-      ); // COMMIT
-    // Make destroy fail
     mockDestroy.mockImplementationOnce((callback) => {
       process.nextTick(() => {
         isConnectionActive = false;
@@ -665,9 +573,45 @@ describe('Snowflake: runMultipleQueries Action', () => {
       runMultipleQueries.run(context as RunMultipleQueriesContext),
     ).rejects.toThrow(destroyError);
 
-    // Verify all main steps were attempted
     expect(mockConnect).toHaveBeenCalledTimes(1);
-    expect(mockExecute).toHaveBeenCalledTimes(3); // BEGIN, SELECT 1, COMMIT
+    expect(mockExecute).toHaveBeenCalledTimes(1);
+    expect(mockDestroy).toHaveBeenCalledTimes(1);
+  });
+
+  it('should reject if destroy fails after successful execution (WITH transaction)', async () => {
+    const props: MockPropsValueInput = {
+      sqlTexts: ['SELECT 1'],
+      useTransaction: true,
+    };
+    const context = createMockContext(props);
+    const destroyError = new Error('Failed to destroy connection');
+
+    mockExecute.mockReset();
+    mockExecute
+      .mockImplementationOnce(({ complete }) =>
+        process.nextTick(() => complete(undefined)),
+      )
+      .mockImplementationOnce(({ complete }) =>
+        process.nextTick(() =>
+          complete(undefined, {}, [{ RESULT: 'Success: SELECT 1' }]),
+        ),
+      )
+      .mockImplementationOnce(({ complete }) =>
+        process.nextTick(() => complete(undefined)),
+      );
+    mockDestroy.mockImplementationOnce((callback) => {
+      process.nextTick(() => {
+        isConnectionActive = false;
+        callback(destroyError);
+      });
+    });
+
+    await expect(
+      runMultipleQueries.run(context as RunMultipleQueriesContext),
+    ).rejects.toThrow(destroyError);
+
+    expect(mockConnect).toHaveBeenCalledTimes(1);
+    expect(mockExecute).toHaveBeenCalledTimes(3);
     expect(mockDestroy).toHaveBeenCalledTimes(1);
   });
 });
