@@ -1,14 +1,16 @@
 import { FlowVersion } from '@openops/shared';
 import '@testing-library/jest-dom';
 import { render } from '@testing-library/react';
-import { useKeyPress } from '@xyflow/react';
 import React from 'react';
+import { useKeyPress } from '../../hooks/use-key-press';
 import { InteractiveContextProvider, useCanvasContext } from './canvas-context';
 import { SHIFT_KEY, SPACE_KEY } from './constants';
 
-// Mock the useKeyPress hook
-jest.mock('@xyflow/react', () => ({
+jest.mock('../../hooks/use-key-press', () => ({
   useKeyPress: jest.fn(),
+}));
+
+jest.mock('@xyflow/react', () => ({
   useStoreApi: jest.fn(() => ({
     getState: jest.fn().mockReturnValue({
       setNodes: jest.fn(),

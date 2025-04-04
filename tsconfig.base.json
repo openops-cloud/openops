@@ -289,6 +289,7 @@
       "@openops/block-telegram-bot": [
         "packages/blocks/telegram-bot/src/index.ts"
       ],
+      "@openops/block-ternary": ["packages/blocks/ternary/src/index.ts"],
       "@openops/block-terraform": ["packages/blocks/terraform/src/index.ts"],
       "@openops/block-text-helper": [
         "packages/blocks/text-helper/src/index.ts"
