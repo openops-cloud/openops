@@ -9,6 +9,7 @@ import { useLocation } from 'react-router-dom';
 
 import { userSettingsHooks } from '@/app/common/hooks/user-settings-hooks';
 import { MENU_LINKS } from '@/app/constants/menu-links';
+import { QueryKeys } from '@/app/constants/query-keys';
 import { FolderFilterList } from '@/app/features/folders/component/folder-filter-list';
 import { DashboardSideMenuHeader } from '@/app/features/navigation/side-menu/dashboard/dashboard-side-menu-header';
 import { SideMenuFooter } from '@/app/features/navigation/side-menu/side-menu-footer';
@@ -36,7 +37,7 @@ export function DashboardSideMenu() {
     });
     await usersApi.setTelemetry({ ...userSettings, trackEvents: true });
     queryClient.invalidateQueries({
-      queryKey: ['user-meta'],
+      queryKey: [QueryKeys.userMetadata],
     });
     refetchUserSettings();
   }, [updateUserSettings, userSettings, queryClient, refetchUserSettings]);

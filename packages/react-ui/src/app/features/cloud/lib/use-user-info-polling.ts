@@ -3,6 +3,7 @@ import {
   OPENOPS_CONNECT_MAX_POLL_ATTEMPTS,
   OPENOPS_CONNECT_TEMPLATES_POLL_INTERVAL_MS,
 } from '@/app/constants/cloud';
+import { QueryKeys } from '@/app/constants/query-keys';
 import { usersApi } from '@/app/lib/users-api';
 import { useQueryClient } from '@tanstack/react-query';
 import { AxiosError, HttpStatusCode } from 'axios';
@@ -43,7 +44,7 @@ export const useUserInfoPolling = () => {
           });
           await usersApi.setTelemetry({ trackEvents: true });
           queryClient.invalidateQueries({
-            queryKey: ['user-meta'],
+            queryKey: [QueryKeys.userMetadata],
           });
           clearInterval(interval);
         }
