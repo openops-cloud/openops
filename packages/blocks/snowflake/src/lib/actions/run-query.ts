@@ -126,12 +126,10 @@ export const runQuery = createAction({
             // Don't reject outer promise on cleanup failure
             connection.destroy((destroyErr) => {
               if (destroyErr) {
-                if (destroyErr) {
-                  logger?.error(
-                    { err: destroyErr },
-                    'Snowflake Error during cleanup destroy',
-                  );
-                }
+                logger?.error(
+                  { err: destroyErr },
+                  'Snowflake Error during cleanup destroy',
+                );
               }
               // Always resolve cleanup promise
               resolve();
