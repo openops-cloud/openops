@@ -10,6 +10,7 @@ import { projectHooks } from '@/app/common/hooks/project-hooks';
 import { userSettingsHooks } from '@/app/common/hooks/user-settings-hooks';
 import { SocketProvider } from '@/app/common/providers/socket-provider';
 import { authenticationSession } from '@/app/lib/authentication-session';
+import { userHooks } from '../hooks/user-hooks';
 
 function isJwtExpired(token: string): boolean {
   if (!token) {
@@ -44,6 +45,7 @@ export const AllowOnlyLoggedInUserOnlyGuard = ({
   platformHooks.prefetchPlatform();
   flagsHooks.useFlags();
   userSettingsHooks.useUserSettings();
+  userHooks.useUserMeta();
 
   return (
     <Suspense
