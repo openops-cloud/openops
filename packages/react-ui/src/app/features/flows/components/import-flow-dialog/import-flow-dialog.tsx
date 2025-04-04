@@ -69,7 +69,6 @@ const ImportFlowDialog = ({ children }: { children: React.ReactNode }) => {
         const template = JSON.parse(
           reader.result as string,
         ) as FlowImportTemplate;
-        // TODO handle overwriting flow when using actions in builder
         if (template?.name && template?.template?.trigger) {
           setImportedWorkflow(template);
         } else {
