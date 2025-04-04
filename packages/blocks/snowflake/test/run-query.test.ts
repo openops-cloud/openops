@@ -88,17 +88,14 @@ describe('Snowflake: runQuery Action', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // Reset isUp to default 'true' before each test assuming connection starts 'up'
     mockIsUp.mockReturnValue(true);
 
-    // Default successful async behavior
     mockConnect.mockImplementation((callback) =>
       process.nextTick(() => callback(undefined)),
     );
     mockExecute.mockImplementation(({ complete }) =>
       process.nextTick(() => complete(undefined, {}, [])),
     );
-    // Default destroy marks connection as 'down'
     mockDestroy.mockImplementation((callback) => {
       mockIsUp.mockReturnValue(false); // Simulate connection going down
       process.nextTick(() => callback(undefined));
@@ -196,7 +193,6 @@ describe('Snowflake: runQuery Action', () => {
     const context = createMockContext(propsInput);
     const connectionError = new Error('Failed to connect');
 
-    // Simulate connection failure and staying 'down'
     mockIsUp.mockReturnValue(false);
     mockConnect.mockImplementationOnce((callback) => {
       process.nextTick(() => callback(connectionError));
@@ -207,8 +203,6 @@ describe('Snowflake: runQuery Action', () => {
     expect(snowflakeSdk.createConnection).toHaveBeenCalledTimes(1);
     expect(mockConnect).toHaveBeenCalledTimes(1);
     expect(mockExecute).not.toHaveBeenCalled();
-    // Destroy should ideally not be called by main logic,
-    // though cleanup *might* attempt it. Let's assert it wasn't called here.
     expect(mockDestroy).not.toHaveBeenCalled();
   });
 
@@ -226,7 +220,6 @@ describe('Snowflake: runQuery Action', () => {
     expect(snowflakeSdk.createConnection).toHaveBeenCalledTimes(1);
     expect(mockConnect).toHaveBeenCalledTimes(1);
     expect(mockExecute).toHaveBeenCalledTimes(1);
-    // Destroy should be called in the finally/catch block for cleanup
     expect(mockDestroy).toHaveBeenCalledTimes(1);
   });
 
@@ -237,20 +230,17 @@ describe('Snowflake: runQuery Action', () => {
     const destroyError = new Error('Failed to destroy connection');
     const mockResultRows = [{ '1': 1 }];
 
-    // Ensure connection is considered 'up' before destroy is attempted
     mockIsUp.mockReturnValue(true);
 
     mockExecute.mockImplementationOnce(({ complete }) => {
       process.nextTick(() => complete(undefined, {}, mockResultRows));
     });
-    // Simulate destroy failing
     mockDestroy.mockImplementationOnce((callback) => {
       process.nextTick(() => callback(destroyError));
     });
 
     await expect(runQuery.run(context)).rejects.toThrow(destroyError);
 
-    // Verify all main steps were attempted
     expect(snowflakeSdk.createConnection).toHaveBeenCalledTimes(1);
     expect(mockConnect).toHaveBeenCalledTimes(1);
     expect(mockExecute).toHaveBeenCalledTimes(1);
