@@ -8,8 +8,10 @@ import { FlagId } from '@openops/shared';
 
 const OpenOpsTablesPage = () => {
   useDefaultSidebarState('minimized');
-  const { isCanduEnabled } = useCandu();
-  const parentData = encodeURIComponent(JSON.stringify({ isCanduEnabled }));
+  const { isCanduEnabled, canduClientToken, canduUserId } = useCandu();
+  const parentData = encodeURIComponent(
+    JSON.stringify({ isCanduEnabled, userId: canduUserId, canduClientToken }),
+  );
 
   const location = useLocation();
   const params = new URLSearchParams(location.search);

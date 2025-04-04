@@ -26,8 +26,10 @@ const createDashboardConfig = (urlParams: Record<string, string>) => {
 const OpenOpsAnalyticsPage = () => {
   useDefaultSidebarState('minimized');
 
-  const { isCanduEnabled } = useCandu();
-  const parentData = encodeURIComponent(JSON.stringify({ isCanduEnabled }));
+  const { isCanduEnabled, canduClientToken, canduUserId } = useCandu();
+  const parentData = encodeURIComponent(
+    JSON.stringify({ isCanduEnabled, userId: canduUserId, canduClientToken }),
+  );
 
   const iframeContainerRef = useRef<HTMLDivElement>(null);
   const { data: analyticsPublicUrl } = flagsHooks.useFlag<string | undefined>(
