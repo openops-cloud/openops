@@ -41,6 +41,7 @@ export const runQuery = createAction({
   auth: customAuth,
   props,
   async run(context) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const logger = (context as any).logger;
 
     const { username, password, role, database, warehouse, account } =
