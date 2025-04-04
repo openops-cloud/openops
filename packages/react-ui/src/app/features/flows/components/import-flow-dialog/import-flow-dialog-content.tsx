@@ -42,10 +42,13 @@ const ImportFlowDialogContent = ({
     resetDialog();
   };
 
-  const integrations = useMemo(() => {
-    return templateWithIntegrations?.integrations.filter(
-      (integration) => !!integration.auth,
-    ) as BlockMetadataModelSummary[];
+  const integrations: BlockMetadataModelSummary[] = useMemo(() => {
+    return (
+      templateWithIntegrations?.integrations.filter(
+        (integration): integration is BlockMetadataModelSummary =>
+          !!integration.auth,
+      ) ?? []
+    );
   }, [templateWithIntegrations]);
 
   if (templateWithIntegrations && templateTrigger) {

@@ -138,12 +138,15 @@ export const templatesHooks = {
 
     const blocksLookup = useMemo(() => {
       if (!blocksMetadata) return {};
-      return blocksMetadata.reduce((map, blockMetadata) => {
-        if (!blockMetadata.categories?.includes(BlockCategory.CORE)) {
-          map[blockMetadata.name] = blockMetadata;
-        }
-        return map;
-      }, {} as Record<string, BlockMetadataModelSummary>);
+      return blocksMetadata.reduce<Record<string, BlockMetadataModelSummary>>(
+        (map, blockMetadata) => {
+          if (!blockMetadata.categories?.includes(BlockCategory.CORE)) {
+            map[blockMetadata.name] = blockMetadata;
+          }
+          return map;
+        },
+        {},
+      );
     }, [blocksMetadata]);
 
     return { blocksLookup, isLoading };
