@@ -1,5 +1,7 @@
 import { createAction, Property } from '@openops/blocks-framework';
+import { logger } from '@openops/server-shared';
 import snowflakeSdk from 'snowflake-sdk';
+
 import {
   DEFAULT_APPLICATION_NAME,
   DEFAULT_QUERY_TIMEOUT,
@@ -41,9 +43,6 @@ export const runQuery = createAction({
   auth: customAuth,
   props,
   async run(context) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const logger = (context as any).logger;
-
     const { username, password, role, database, warehouse, account } =
       context.auth;
     const { sqlText, binds, timeout, application } = context.propsValue;
@@ -66,7 +65,7 @@ export const runQuery = createAction({
       await new Promise<void>((resolve, reject) => {
         connection.connect((err) => {
           if (err) {
-            logger?.error({ err }, 'Snowflake Connection Error');
+            logger.error('Snowflake Connection Error', { err });
             reject(err);
           } else {
             connectionActive = true; // Mark active ONLY on success
@@ -83,7 +82,8 @@ export const runQuery = createAction({
           binds: binds as snowflakeSdk.Binds, // Use resolved binds
           complete: (err, _, rows) => {
             if (err) {
-              logger?.error({ err, sqlText }, 'Snowflake Execution Error');
+              logger.error('Snowflake Connection Error', { err, sqlText });
+
               reject(err);
             } else {
               resolve(rows);
@@ -98,7 +98,8 @@ export const runQuery = createAction({
         connection.destroy((err) => {
           connectionActive = false; // Connection is no longer active
           if (err) {
-            logger?.error({ err }, 'Snowflake Destruction Error');
+            logger.error('Snowflake Connection Error', { err });
+
             // Decide if destroy failure should prevent returning results
             // Rejecting here means a destroy error overrides a successful query
             reject(err);
@@ -126,20 +127,18 @@ export const runQuery = createAction({
             // Don't reject outer promise on cleanup failure
             connection.destroy((destroyErr) => {
               if (destroyErr) {
-                logger?.error(
-                  { err: destroyErr },
-                  'Snowflake Error during cleanup destroy',
-                );
+                logger.error('Snowflake Error during cleanup destroy', {
+                  err: destroyErr,
+                });
               }
               // Always resolve cleanup promise
               resolve();
             });
           });
         } catch (cleanupError) {
-          logger?.error(
-            { err: cleanupError },
-            'Exception during connection cleanup',
-          );
+          logger.error('Exception during connection cleanup', {
+            err: cleanupError,
+          });
         }
       }
       // Re-throw the original error that caused the catch block

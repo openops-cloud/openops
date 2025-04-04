@@ -1,5 +1,11 @@
 import { createAction, Property } from '@openops/blocks-framework';
-import snowflakeSdk, { SnowflakeError, Statement } from 'snowflake-sdk';
+import { logger } from '@openops/server-shared';
+import snowflakeSdk, {
+  Binds,
+  Connection,
+  SnowflakeError,
+  Statement,
+} from 'snowflake-sdk';
 import {
   DEFAULT_APPLICATION_NAME,
   DEFAULT_QUERY_TIMEOUT,
@@ -49,6 +55,142 @@ const props = {
   }),
 };
 
+function handleExecutionError(
+  error: SnowflakeError,
+  connection: Connection,
+  useTransaction: boolean,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  reject: (reason?: any) => void,
+): void {
+  const performDestroy = () => {
+    connection.destroy((destroyErr) => {
+      if (destroyErr) {
+        logger.error('Error destroying connection during error handling:', {
+          err: destroyErr,
+        });
+      }
+      reject(error);
+    });
+  };
+
+  if (useTransaction) {
+    connection.execute({
+      sqlText: 'ROLLBACK',
+      complete: (rollbackErr) => {
+        if (rollbackErr) {
+          logger.error('Error executing ROLLBACK:', { err: rollbackErr });
+        }
+        performDestroy();
+      },
+    });
+  } else {
+    performDestroy();
+  }
+}
+
+function executeSingleQuery(
+  connection: Connection,
+  sqlText: string,
+  binds: Binds | undefined,
+): Promise<QueryResult> {
+  return new Promise<QueryResult>((resolveQuery, rejectQuery) => {
+    connection.execute({
+      sqlText: sqlText,
+      binds: binds,
+      complete: (
+        err: SnowflakeError | undefined,
+        stmt: Statement,
+        rows: QueryResult,
+      ) => {
+        if (err) {
+          rejectQuery(err);
+        } else {
+          resolveQuery(rows);
+        }
+      },
+    });
+  });
+}
+
+function executeTransactionCommand(
+  connection: Connection,
+  command: 'BEGIN' | 'COMMIT',
+): Promise<void> {
+  return new Promise<void>((resolveCommand, rejectCommand) => {
+    connection.execute({
+      sqlText: command,
+      complete: (err: SnowflakeError | undefined) => {
+        if (err) {
+          rejectCommand(err);
+        } else {
+          resolveCommand();
+        }
+      },
+    });
+  });
+}
+
+/**
+ * Core logic for executing queries sequentially after connection is established.
+ * Accepts a generally typed propsValue object, relying on the caller (run)
+ * for correctness based on inference.
+ */
+async function processQueries(
+  connection: Connection,
+  propsValue: {
+    sqlTexts: unknown;
+    binds: unknown;
+    useTransaction: unknown;
+  },
+  resolve: (value: QueryResults | PromiseLike<QueryResults>) => void,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  reject: (reason?: any) => void,
+) {
+  const sqlTexts = propsValue.sqlTexts as string[] | undefined;
+  const binds = propsValue.binds as Binds | undefined;
+  const useTransaction = Boolean(propsValue.useTransaction);
+
+  const queryResults: QueryResults = [];
+
+  try {
+    if (useTransaction) {
+      await executeTransactionCommand(connection, 'BEGIN');
+    }
+
+    const sqlStrings = Array.isArray(sqlTexts) ? sqlTexts : [];
+    for (const sqlText of sqlStrings) {
+      if (typeof sqlText !== 'string') {
+        reject(new Error(`Invalid non-string SQL query found: ${sqlText}`));
+        return;
+      }
+      const result = await executeSingleQuery(connection, sqlText, binds);
+      queryResults.push({
+        query: sqlText,
+        result,
+      });
+    }
+
+    if (useTransaction) {
+      await executeTransactionCommand(connection, 'COMMIT');
+    }
+
+    connection.destroy((destroyErr: SnowflakeError | undefined) => {
+      if (destroyErr) {
+        reject(destroyErr);
+      } else {
+        resolve(queryResults);
+      }
+    });
+  } catch (error) {
+    handleExecutionError(
+      error as SnowflakeError,
+      connection,
+      useTransaction,
+      reject,
+    );
+  }
+}
+
 export const runMultipleQueries = createAction({
   name: 'runMultipleQueries',
   displayName: 'Run Multiple Queries',
@@ -56,13 +198,14 @@ export const runMultipleQueries = createAction({
   auth: customAuth,
   props,
 
-  async run(context) {
+  run(context): Promise<QueryResults> {
     const { username, password, role, database, warehouse, account } =
       context.auth;
+    const { application, timeout } = context.propsValue;
 
     const connection = snowflakeSdk.createConnection({
-      application: context.propsValue.application,
-      timeout: context.propsValue.timeout,
+      application,
+      timeout,
       username,
       password,
       role,
@@ -72,97 +215,12 @@ export const runMultipleQueries = createAction({
     });
 
     return new Promise<QueryResults>((resolve, reject) => {
-      connection.connect(async function (err: SnowflakeError | undefined) {
-        if (err) {
-          reject(err);
+      connection.connect((connectErr: SnowflakeError | undefined) => {
+        if (connectErr) {
+          reject(connectErr);
           return;
         }
-
-        const { sqlTexts, binds, useTransaction } = context.propsValue;
-        const queryResults: QueryResults = [];
-
-        function handleError(err: SnowflakeError) {
-          if (useTransaction) {
-            connection.execute({
-              sqlText: 'ROLLBACK',
-              complete: () => {
-                connection.destroy(() => {
-                  reject(err);
-                });
-              },
-            });
-          } else {
-            connection.destroy(() => {
-              reject(err);
-            });
-          }
-        }
-
-        async function executeQueriesSequentially() {
-          try {
-            if (useTransaction) {
-              await new Promise<void>((resolveBegin, rejectBegin) => {
-                connection.execute({
-                  sqlText: 'BEGIN',
-                  complete: (err: SnowflakeError | undefined) => {
-                    if (err) rejectBegin(err);
-                    else resolveBegin();
-                  },
-                });
-              });
-            }
-            for (const sqlText of sqlTexts) {
-              const result = await new Promise<QueryResult>(
-                (resolveQuery, rejectQuery) => {
-                  connection.execute({
-                    sqlText: sqlText as string,
-                    binds: binds as snowflakeSdk.Binds,
-                    complete: (
-                      err: SnowflakeError | undefined,
-                      stmt: Statement,
-                      rows: QueryResult,
-                    ) => {
-                      if (err) {
-                        rejectQuery(err);
-                        return;
-                      }
-                      resolveQuery(rows);
-                    },
-                  });
-                },
-              );
-
-              queryResults.push({
-                query: sqlText as string,
-                result,
-              });
-            }
-
-            if (useTransaction) {
-              await new Promise<void>((resolveCommit, rejectCommit) => {
-                connection.execute({
-                  sqlText: 'COMMIT',
-                  complete: (err: SnowflakeError | undefined) => {
-                    if (err) rejectCommit(err);
-                    else resolveCommit();
-                  },
-                });
-              });
-            }
-
-            connection.destroy((err: SnowflakeError | undefined) => {
-              if (err) {
-                reject(err);
-                return;
-              }
-              resolve(queryResults);
-            });
-          } catch (err) {
-            handleError(err as SnowflakeError);
-          }
-        }
-
-        executeQueriesSequentially();
+        processQueries(connection, context.propsValue, resolve, reject);
       });
     });
   },
