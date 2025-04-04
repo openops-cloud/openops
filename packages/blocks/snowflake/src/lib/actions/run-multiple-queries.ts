@@ -95,7 +95,7 @@ function executeSingleQuery(
 ): Promise<QueryResult> {
   return new Promise<QueryResult>((resolveQuery, rejectQuery) => {
     connection.execute({
-      sqlText: sqlText,
+      sqlText: sqlText.replace(/\s+/g, ' '),
       binds: binds,
       complete: (
         err: SnowflakeError | undefined,

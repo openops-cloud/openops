@@ -77,12 +77,16 @@ export const runQuery = createAction({
       // Execute (Promisified) - Only runs if connect succeeded
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const rows = await new Promise<any[] | undefined>((resolve, reject) => {
+        const inlinedSqlText = sqlText.replace(/\s+/g, ' ');
         connection.execute({
-          sqlText,
+          sqlText: inlinedSqlText,
           binds: binds as snowflakeSdk.Binds, // Use resolved binds
           complete: (err, _, rows) => {
             if (err) {
-              logger.error('Snowflake Connection Error', { err, sqlText });
+              logger.error('Snowflake Connection Error', {
+                err,
+                sqlText: inlinedSqlText,
+              });
 
               reject(err);
             } else {
