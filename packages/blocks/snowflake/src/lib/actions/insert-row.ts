@@ -1,5 +1,5 @@
 import { createAction } from '@openops/blocks-framework';
-import { configureConnection } from '../common/configureConnection';
+import { configureConnection } from '../common/configure-connection';
 import { customAuth } from '../common/custom-auth';
 import { commonProps } from '../common/props';
 import { connect, destroy, execute } from '../common/utils';

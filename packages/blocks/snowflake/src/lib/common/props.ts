@@ -3,7 +3,7 @@ import {
   DynamicPropsValue,
   Property,
 } from '@openops/blocks-framework';
-import { configureConnection } from './configureConnection';
+import { configureConnection } from './configure-connection';
 import { customAuth } from './custom-auth';
 import { connect, destroy, execute } from './utils';
 

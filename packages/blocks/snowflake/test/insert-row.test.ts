@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ActionContext } from '@openops/blocks-framework';
 import { insertRow } from '../src/lib/actions/insert-row';
-import { configureConnection } from '../src/lib/common/configureConnection';
+import { configureConnection } from '../src/lib/common/configure-connection';
 import { connect, destroy, execute } from '../src/lib/common/utils';
 
-jest.mock('../src/lib/common/configureConnection');
+jest.mock('../src/lib/common/configure-connection');
 jest.mock('../src/lib/common/utils', () => ({
   connect: jest.fn(),
   destroy: jest.fn(),
