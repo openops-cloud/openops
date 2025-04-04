@@ -1,5 +1,6 @@
 import { createBlock } from '@openops/blocks-framework';
 import { insertRow } from './lib/actions/insert-row';
+import { runMultipleQueries } from './lib/actions/run-multiple-queries';
 import { customAuth } from './lib/common/custom-auth';
 
 export const snowflake = createBlock({
@@ -9,6 +10,6 @@ export const snowflake = createBlock({
   minimumSupportedRelease: '0.20.0',
   logoUrl: 'https://static.openops.com/blocks/snowflake-logo.svg',
   authors: [],
-  actions: [insertRow],
+  actions: [runMultipleQueries, insertRow],
   triggers: [],
 });
