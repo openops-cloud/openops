@@ -1,7 +1,10 @@
 import { TypeCompiler } from '@sinclair/typebox/compiler';
 import semver from 'semver';
 import { AppConnectionWithoutSensitiveData } from '../app-connection/app-connection';
-import { addConnectionBrackets } from '../app-connection/connections-utils';
+import {
+  addConnectionBrackets,
+  removeConnectionBrackets,
+} from '../app-connection/connections-utils';
 import { applyFunctionToValuesSync, isNil, isString } from '../common';
 import { ApplicationError, ErrorCode } from '../common/application-error';
 import {
@@ -1089,6 +1092,23 @@ const removeConnection = (step: Step): Step => {
   return step;
 };
 
+function getUsedConnections(step: Trigger | Action) {
+  return flowHelper
+    .getAllSteps(step)
+    .filter((step) => {
+      return step.settings.blockName && step.settings.input.auth;
+    })
+    .reduce((usedConnectionNames: { [key: string]: string }, step) => {
+      const connection = removeConnectionBrackets(step.settings.input.auth);
+
+      if (connection) {
+        usedConnectionNames[step.settings.blockName] = connection;
+      }
+
+      return usedConnectionNames;
+    }, {});
+}
+
 export const flowHelper = {
   isValid,
   apply(
@@ -1180,4 +1200,5 @@ export const flowHelper = {
   findPathToStep,
   truncateFlow,
   clearStepTestData,
+  getUsedConnections,
 };

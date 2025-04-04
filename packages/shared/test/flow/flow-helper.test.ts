@@ -2807,3 +2807,56 @@ describe('bulkAddActions', () => {
     expect(branch?.nextAction.nextAction.name).toEqual(action.nextAction.name);
   });
 });
+
+describe('getUsedConnections', () => {
+  const actionWithBrokenConnections = {
+    settings: {
+      blockName: '',
+      input: { auth: "{{connections['connection1']}}" },
+    },
+    nextAction: {
+      settings: {
+        blockName: 'step2',
+        input: {},
+      },
+    },
+  } as unknown as Action;
+  it('returns used connection names mapped by block name', () => {
+    const action = {
+      settings: {
+        blockName: 'step1',
+        input: { auth: "{{connections['connection1']}}" },
+      },
+      nextAction: {
+        settings: {
+          blockName: 'step2',
+          input: { auth: "{{connections['connection2']}}" },
+        },
+      },
+    } as unknown as Action;
+
+    const result = flowHelper.getUsedConnections(action);
+
+    expect(result).toEqual({
+      step1: 'connection1',
+      step2: 'connection2',
+    });
+  });
+
+  it('ignores steps without blockName or auth', () => {
+    const result = flowHelper.getUsedConnections(actionWithBrokenConnections);
+
+    expect(result).toEqual({});
+  });
+
+  it('ignores steps where removeConnectionBrackets returns falsy', () => {
+    const result = flowHelper.getUsedConnections(actionWithBrokenConnections);
+
+    expect(result).toEqual({});
+  });
+
+  it('returns an empty object if getAllSteps returns empty', () => {
+    const result = flowHelper.getUsedConnections(actionWithBrokenConnections);
+    expect(result).toEqual({});
+  });
+});

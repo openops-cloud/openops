@@ -16,7 +16,6 @@ import {
   AppConnectionWithoutSensitiveData,
   flowHelper,
   isNil,
-  removeConnectionBrackets,
   Trigger,
 } from '@openops/shared';
 import { t } from 'i18next';
@@ -83,19 +82,8 @@ const ConnectionsPicker = ({
       groupedConnections
     ) {
       isConnectionListPreselected.current = true;
-      const usedConnectionNames: { [key: string]: string | undefined } = {};
-
-      if (templateTrigger) {
-        flowHelper
-          .getAllSteps(templateTrigger)
-          .filter((step) => {
-            return step.settings.blockName && step.settings.input.auth;
-          })
-          .forEach((step) => {
-            usedConnectionNames[step.settings.blockName] =
-              removeConnectionBrackets(step.settings.input.auth);
-          });
-      }
+      const usedConnectionNames: { [key: string]: string | undefined } =
+        templateTrigger ? flowHelper.getUsedConnections(templateTrigger) : {};
 
       const connections: Record<
         string,
@@ -113,7 +101,12 @@ const ConnectionsPicker = ({
 
       setSelectedConnections(connections);
     }
-  }, [integrations, groupedConnections, setSelectedConnections]);
+  }, [
+    integrations,
+    groupedConnections,
+    setSelectedConnections,
+    templateTrigger,
+  ]);
 
   const tableData: TemplateConnectionTableData[] = useMemo(() => {
     return integrations.map((integration, index) => ({
