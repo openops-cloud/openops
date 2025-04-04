@@ -12,13 +12,8 @@ import { expiredFlowRunCleaner } from './flow-run-cleaner';
 import { redisMigrations } from './redis-migration';
 import { redisRateLimiter } from './redis-rate-limiter';
 
-const TWO_MINUTES_IN_MILLISECONDS = 2 * 60 * 1000;
 const defaultJobOptions: DefaultJobOptions = {
-  attempts: 3,
-  backoff: {
-    type: 'exponential',
-    delay: TWO_MINUTES_IN_MILLISECONDS,
-  },
+  attempts: 0,
   removeOnComplete: true,
   removeOnFail: true,
 };
