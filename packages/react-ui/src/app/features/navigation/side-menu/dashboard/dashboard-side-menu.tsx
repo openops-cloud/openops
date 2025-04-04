@@ -15,10 +15,12 @@ import { SideMenuFooter } from '@/app/features/navigation/side-menu/side-menu-fo
 import { usersApi } from '@/app/lib/users-api';
 import { isValidISODate } from '@/app/lib/utils';
 import { useAppStore } from '@/app/store/app-store';
+import { useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
 
 export function DashboardSideMenu() {
   const location = useLocation();
+  const queryClient = useQueryClient();
   const isWorkflowsPage = location.pathname.includes('flows');
   const isSidebarMinimized = useAppStore((state) => state.isSidebarMinimized);
 
@@ -33,8 +35,11 @@ export function DashboardSideMenu() {
       telemetryInteractionTimestamp: new Date().toISOString(),
     });
     await usersApi.setTelemetry({ ...userSettings, trackEvents: true });
+    queryClient.invalidateQueries({
+      queryKey: ['user-meta'],
+    });
     refetchUserSettings();
-  }, [updateUserSettings, refetchUserSettings, userSettings]);
+  }, [updateUserSettings, userSettings, queryClient, refetchUserSettings]);
 
   const onDismiss = useCallback(async () => {
     await updateUserSettings({
