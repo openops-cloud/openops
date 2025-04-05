@@ -72,4 +72,4 @@ COPY tools/link-packages-to-root.sh tools/link-packages-to-root.sh
 RUN ./tools/link-packages-to-root.sh
 
 ENTRYPOINT [ "/bin/bash", "-c" ]
-CMD [ "cp -r /var/tmp-base/. /tmp/ && /lambda-entrypoint.sh main.handler" ]
+CMD [ "cp -r /var/tmp-base/. /tmp/ && /lambda-entrypoint.sh main.handler; exit $?" ]
