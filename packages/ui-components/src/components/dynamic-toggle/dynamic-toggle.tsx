@@ -29,7 +29,7 @@ const DynamicToggle = ({
   className,
 }: Props) => {
   const [selectedValue, setSelectedValue] = useState<string>(
-    defaultValue || (options.length > 0 ? options[0].value : ''),
+    defaultValue ?? (options.length > 0 ? options[0].value : ''),
   );
 
   const handleValueChange = (value: string) => {
@@ -55,7 +55,7 @@ const DynamicToggle = ({
       {options.map((option) => (
         <TooltipWrapper
           key={option.value}
-          tooltipText={option.tooltipText || ''}
+          tooltipText={option.tooltipText ?? ''}
           tooltipPlacement="bottom"
         >
           <DataStatePropInterceptor>
