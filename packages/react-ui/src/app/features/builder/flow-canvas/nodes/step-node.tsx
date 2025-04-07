@@ -60,9 +60,9 @@ const WorkflowStepNode = React.memo(
       selectedStep,
       run,
       readonly,
+      exitStepSettings,
       flowVersion,
       loopIndexes,
-      exitStepSettings,
     ] = useBuilderStateContext((state) => [
       state.selectStepByName,
       state.selectedStep === data.step?.name,
@@ -70,9 +70,9 @@ const WorkflowStepNode = React.memo(
       state.selectedStep,
       state.run,
       state.readonly,
+      state.exitStepSettings,
       state.flowVersion,
       state.loopsIndexes,
-      state.exitStepSettings,
     ]);
 
     const { stepMetadata } = blocksHooks.useStepMetadata({
