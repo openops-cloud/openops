@@ -28,7 +28,6 @@ export const subtraction = createAction({
   },
   async run(context) {
     const { first_number, second_number } = context.propsValue;
-
     return Decimal.sub(second_number, first_number).toNumber();
   },
 });

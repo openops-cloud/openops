@@ -34,7 +34,6 @@ export const division = createAction({
   },
   async run(context) {
     const { first_number, second_number } = context.propsValue;
-
     return Decimal.div(first_number, second_number).toNumber();
   },
 });

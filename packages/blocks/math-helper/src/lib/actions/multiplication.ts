@@ -28,7 +28,6 @@ export const multiplication = createAction({
   },
   async run(context) {
     const { first_number, second_number } = context.propsValue;
-
     return Decimal.mul(first_number, second_number).toNumber();
   },
 });
