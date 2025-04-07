@@ -181,8 +181,8 @@ export const createBuilderStore = (initialState: BuilderInitialState) =>
               return {
                 selectedStep: stepName,
                 rightSidebar: openRightSideBar
-                  ? RightSideBarType.NONE
-                  : RightSideBarType.BLOCK_SETTINGS,
+                  ? RightSideBarType.BLOCK_SETTINGS
+                  : RightSideBarType.NONE,
                 leftSidebar: getLeftSidebarOnSelectStep(state),
               };
             },
