@@ -48,3 +48,9 @@ node_modules
 
 #############################################
 # Please do not add rules here without a proper category.
+
+# Ignore the Google Cloud SDK tarball
+google-cloud-cli-*.tar.gz
+
+# Ignore the unpacked Google Cloud SDK directory
+google-cloud-sdk/
