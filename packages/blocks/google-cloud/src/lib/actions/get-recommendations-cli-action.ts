@@ -189,7 +189,6 @@ async function getScopeOptions(auth: any, useHostSession: boolean) {
 
 function getScopeOptionsReturnStructure(dropdowns: Record<string, any>) {
   return [
-    { label: 'No filter', value: {} },
     {
       label: 'Filter by Billing Account',
       value: { billingAccount: dropdowns['billingAccount'] },
