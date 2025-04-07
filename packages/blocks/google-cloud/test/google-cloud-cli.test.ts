@@ -1,3 +1,5 @@
+import 'jest';
+
 const getDefaultCloudSDKConfigMock = jest
   .fn()
   .mockResolvedValue('/tmp/gcloud-config-abc');
@@ -10,10 +12,10 @@ jest.mock('@openops/common', () => ({
   runCliCommand: runCliCommandMock,
 }));
 
-import { runCommand } from '../src/lib/google-cloud-cli';
+import { runCommand, runCommands } from '../src/lib/google-cloud-cli';
 
-describe('Google cloud runCommand', () => {
-  const keyFileContent = 'key file content';
+describe('runCommand', () => {
+  const auth = { keyFileContent: 'mock-key' };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -28,7 +30,7 @@ describe('Google cloud runCommand', () => {
 
     const result = await runCommand(
       'gcloud compute instances list',
-      { keyFileContent },
+      auth,
       false,
       'my-project',
     );
@@ -60,57 +62,133 @@ describe('Google cloud runCommand', () => {
     );
   });
 
-  test('skips temp config if shouldUseHostCredentials is true', async () => {
-    runCliCommandMock.mockResolvedValueOnce('command output');
-
-    const result = await runCommand(
-      'gcloud info',
-      { keyFileContent },
-      true,
-      undefined,
-    );
-
-    expect(result).toBe('command output');
-    expect(loginGCPWithKeyObjectMock).not.toHaveBeenCalled();
-
-    expect(runCliCommandMock).toHaveBeenCalledWith(
-      'gcloud info',
-      'gcloud',
-      expect.objectContaining({
-        PATH: expect.any(String),
-      }),
+  test('should throw if runCommand receives an empty array', async () => {
+    await expect(runCommand('gcloud info', auth, true)).rejects.toThrow(
+      'Expected exactly one result, but got 0.',
     );
   });
 
-  test('sets CLOUDSDK_CONFIG if defined', async () => {
+  test('throws if runCommands throws', async () => {
+    runCliCommandMock.mockRejectedValue(new Error('something broke'));
+
+    await expect(runCommand('gcloud info', auth, true)).rejects.toThrow(
+      'something broke',
+    );
+  });
+});
+
+describe('Google cloud runCommands', () => {
+  const keyFileContent = 'key file content';
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('calls login, sets project, and runs all commands', async () => {
+    loginGCPWithKeyObjectMock.mockResolvedValue(undefined);
+
+    runCliCommandMock
+      .mockResolvedValueOnce('project set success')
+      .mockResolvedValueOnce('result-1')
+      .mockResolvedValueOnce('result-2');
+
+    const results = await runCommands(
+      ['cmd-1', 'cmd-2'],
+      { keyFileContent },
+      false,
+      'my-project',
+    );
+
+    expect(results).toEqual(['result-1', 'result-2']);
+
+    expect(getDefaultCloudSDKConfigMock).toHaveBeenCalled();
+    expect(loginGCPWithKeyObjectMock).toHaveBeenCalledWith(
+      keyFileContent,
+      expect.objectContaining({
+        CLOUDSDK_CONFIG: '/tmp/gcloud-config-abc',
+      }),
+    );
+
+    expect(runCliCommandMock).toHaveBeenNthCalledWith(
+      1,
+      'gcloud config set project my-project',
+      'gcloud',
+      expect.any(Object),
+    );
+
+    expect(runCliCommandMock).toHaveBeenNthCalledWith(
+      2,
+      'cmd-1',
+      'gcloud',
+      expect.any(Object),
+    );
+
+    expect(runCliCommandMock).toHaveBeenNthCalledWith(
+      3,
+      'cmd-2',
+      'gcloud',
+      expect.any(Object),
+    );
+  });
+
+  test('skips login and config dir if using host credentials', async () => {
+    runCliCommandMock
+      .mockResolvedValueOnce('res1')
+      .mockResolvedValueOnce('res2');
+
+    const result = await runCommands(
+      ['cmd-a', 'cmd-b'],
+      { keyFileContent },
+      true,
+    );
+
+    expect(result).toEqual(['res1', 'res2']);
+    expect(getDefaultCloudSDKConfigMock).not.toHaveBeenCalled();
+    expect(loginGCPWithKeyObjectMock).not.toHaveBeenCalled();
+
+    expect(runCliCommandMock).toHaveBeenCalledWith(
+      'cmd-a',
+      'gcloud',
+      expect.any(Object),
+    );
+
+    expect(runCliCommandMock).toHaveBeenCalledWith(
+      'cmd-b',
+      'gcloud',
+      expect.any(Object),
+    );
+  });
+
+  test('uses CLOUDSDK_CONFIG from process.env if set', async () => {
     const originalEnv = process.env;
     process.env = {
       ...originalEnv,
-      PATH: '/mock/path',
-      CLOUDSDK_CONFIG: '/mock/config/dir',
+      CLOUDSDK_CONFIG: '/env/config',
     };
 
-    runCliCommandMock.mockResolvedValueOnce('command output');
+    runCliCommandMock.mockResolvedValueOnce('res');
 
-    const result = await runCommand('gcloud info', { keyFileContent }, true);
+    const result = await runCommands(['gcloud info'], { keyFileContent }, true);
+    expect(result).toEqual(['res']);
 
-    expect(result).toBe('command output');
     expect(runCliCommandMock).toHaveBeenCalledWith(
-      expect.any(String),
+      'gcloud info',
       'gcloud',
       expect.objectContaining({
-        CLOUDSDK_CONFIG: '/mock/config/dir',
+        CLOUDSDK_CONFIG: '/env/config',
       }),
     );
 
     process.env = originalEnv;
   });
 
-  test('throws error when runCliCommand fails', async () => {
-    runCliCommandMock.mockRejectedValueOnce(new Error('auth failed'));
+  test('throws if any command fails', async () => {
+    runCliCommandMock
+      .mockResolvedValueOnce('ok')
+      .mockRejectedValueOnce(new Error('failure'));
 
     await expect(
-      runCommand('gcloud info', { keyFileContent }, true, undefined),
-    ).rejects.toThrow('auth failed');
+      runCommands(['cmd1', 'cmd2'], { keyFileContent }, true),
+    ).rejects.toThrow('failure');
   });
 });
