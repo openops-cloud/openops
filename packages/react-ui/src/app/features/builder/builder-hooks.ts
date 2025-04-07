@@ -164,13 +164,19 @@ export const createBuilderStore = (initialState: BuilderInitialState) =>
         selectStepByName: (stepName: string, openRightSideBar = true) => {
           set(
             (state) => {
-              if (state.flowVersion.trigger.type === TriggerType.EMPTY) {
+              if (
+                stepName === 'trigger' &&
+                state.flowVersion.trigger.type === TriggerType.EMPTY
+              ) {
                 return {
                   selectedStep: stepName,
                   rightSidebar: RightSideBarType.NONE,
                   leftSidebar: getLeftSidebarOnSelectStep(state),
                 };
-              } else if (state.flowVersion.trigger.type === TriggerType.BLOCK) {
+              } else if (
+                stepName === 'trigger' &&
+                state.flowVersion.trigger.type === TriggerType.BLOCK
+              ) {
                 return {
                   selectedStep: stepName,
                   rightSidebar: RightSideBarType.BLOCK_SETTINGS,
