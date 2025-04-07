@@ -266,6 +266,7 @@
       "@openops/block-slack": ["packages/blocks/slack/src/index.ts"],
       "@openops/block-smaily": ["packages/blocks/smaily/src/index.ts"],
       "@openops/block-smtp": ["packages/blocks/smtp/src/index.ts"],
+      "@openops/block-snowflake": ["packages/blocks/snowflake/src/index.ts"],
       "@openops/block-soap": ["packages/blocks/soap/src/index.ts"],
       "@openops/block-spotify": ["packages/blocks/spotify/src/index.ts"],
       "@openops/block-stability-ai": [
