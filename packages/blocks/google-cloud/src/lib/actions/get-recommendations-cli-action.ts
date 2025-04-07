@@ -238,6 +238,9 @@ function getRecommendersDropdown() {
       'useHostSession',
       'useHostSession.useHostSessionCheckbox',
       'filterByProperty',
+      'filterByProperty.project',
+      'filterByProperty.organization',
+      'filterByProperty.billingAccount',
     ],
     options: async ({ auth, useHostSession, filterByProperty }) => {
       const shouldUseHostCredentials =
