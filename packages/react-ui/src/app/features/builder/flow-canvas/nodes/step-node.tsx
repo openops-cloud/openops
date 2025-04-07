@@ -62,6 +62,7 @@ const WorkflowStepNode = React.memo(
       readonly,
       flowVersion,
       loopIndexes,
+      exitStepSettings,
     ] = useBuilderStateContext((state) => [
       state.selectStepByName,
       state.selectedStep === data.step?.name,
@@ -71,6 +72,7 @@ const WorkflowStepNode = React.memo(
       state.readonly,
       state.flowVersion,
       state.loopsIndexes,
+      state.exitStepSettings,
     ]);
 
     const { stepMetadata } = blocksHooks.useStepMetadata({
@@ -177,6 +179,8 @@ const WorkflowStepNode = React.memo(
                 setOpenBlockSelector(open);
                 if (open) {
                   setOpenStepActionsMenu(false);
+                } else if (data.step?.type === TriggerType.EMPTY) {
+                  exitStepSettings();
                 }
               }}
               asChild={true}
