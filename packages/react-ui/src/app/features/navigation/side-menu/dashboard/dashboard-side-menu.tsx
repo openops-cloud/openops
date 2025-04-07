@@ -9,16 +9,19 @@ import { useLocation } from 'react-router-dom';
 
 import { userSettingsHooks } from '@/app/common/hooks/user-settings-hooks';
 import { MENU_LINKS } from '@/app/constants/menu-links';
+import { QueryKeys } from '@/app/constants/query-keys';
 import { FolderFilterList } from '@/app/features/folders/component/folder-filter-list';
 import { DashboardSideMenuHeader } from '@/app/features/navigation/side-menu/dashboard/dashboard-side-menu-header';
 import { SideMenuFooter } from '@/app/features/navigation/side-menu/side-menu-footer';
 import { usersApi } from '@/app/lib/users-api';
 import { isValidISODate } from '@/app/lib/utils';
 import { useAppStore } from '@/app/store/app-store';
+import { useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
 
 export function DashboardSideMenu() {
   const location = useLocation();
+  const queryClient = useQueryClient();
   const isWorkflowsPage = location.pathname.includes('flows');
   const isSidebarMinimized = useAppStore((state) => state.isSidebarMinimized);
 
@@ -33,8 +36,11 @@ export function DashboardSideMenu() {
       telemetryInteractionTimestamp: new Date().toISOString(),
     });
     await usersApi.setTelemetry({ ...userSettings, trackEvents: true });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKeys.userMetadata],
+    });
     refetchUserSettings();
-  }, [updateUserSettings, refetchUserSettings, userSettings]);
+  }, [updateUserSettings, userSettings, queryClient, refetchUserSettings]);
 
   const onDismiss = useCallback(async () => {
     await updateUserSettings({

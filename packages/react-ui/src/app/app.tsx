@@ -7,8 +7,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { ThemeProvider } from '@/app/common/providers/theme-provider';
 
+import { HelmetProvider } from 'react-helmet-async';
 import { OpsErrorBoundary } from './common/error-boundaries/ops-error-boundary';
 import { InitialDataGuard } from './common/guards/intial-data-guard';
+import { Extensions } from './features/extensions';
 import './interceptors';
 import { ApplicationRouter } from './router';
 
@@ -24,18 +26,21 @@ if (!typesFormatsAdded) {
 
 export function App() {
   return (
-    <OpsErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <InitialDataGuard>
-          <TooltipProvider>
-            <ThemeProvider storageKey="vite-ui-theme">
-              <ApplicationRouter />
-              <Toaster />
-            </ThemeProvider>
-          </TooltipProvider>
-        </InitialDataGuard>
-      </QueryClientProvider>
-    </OpsErrorBoundary>
+    <HelmetProvider>
+      <OpsErrorBoundary>
+        <QueryClientProvider client={queryClient}>
+          <InitialDataGuard>
+            <TooltipProvider>
+              <ThemeProvider storageKey="vite-ui-theme">
+                <ApplicationRouter />
+                <Toaster />
+              </ThemeProvider>
+            </TooltipProvider>
+            <Extensions />
+          </InitialDataGuard>
+        </QueryClientProvider>
+      </OpsErrorBoundary>
+    </HelmetProvider>
   );
 }
 
