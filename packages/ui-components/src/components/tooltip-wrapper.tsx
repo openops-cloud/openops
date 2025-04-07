@@ -12,14 +12,19 @@ const TooltipWrapper = ({
   tooltipPlacement,
   children,
   delayDuration,
-}: Props) => (
-  <Tooltip delayDuration={delayDuration}>
-    <TooltipTrigger asChild>{children}</TooltipTrigger>
-    <TooltipContent avoidCollisions hideWhenDetached side={tooltipPlacement}>
-      {tooltipText}
-    </TooltipContent>
-  </Tooltip>
-);
+}: Props) => {
+  if (!tooltipText) {
+    return children;
+  }
+  return (
+    <Tooltip delayDuration={delayDuration}>
+      <TooltipTrigger asChild>{children}</TooltipTrigger>
+      <TooltipContent avoidCollisions hideWhenDetached side={tooltipPlacement}>
+        {tooltipText}
+      </TooltipContent>
+    </Tooltip>
+  );
+};
 
 TooltipWrapper.displayName = 'TooltipWrapper';
 export { TooltipWrapper };
