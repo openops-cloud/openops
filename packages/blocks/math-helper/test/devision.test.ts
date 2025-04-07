@@ -17,7 +17,7 @@ describe('division tests', () => {
           second_number,
         },
       });
-      expect(result).toEqual(expectedResult);
+      expect(result).toBe(expectedResult);
     },
   );
 
