@@ -13,12 +13,12 @@ import {
   StepLocationRelativeToParent,
 } from '@openops/shared';
 
+import { hasSecureClipboardAccess } from '@/app/lib/secure-clipboard-access-utils';
 import { useBuilderStateContext } from '../../builder-hooks';
 import { usePaste } from '../../hooks/use-paste';
 import { useSelection } from '../../hooks/use-selection';
 import { CanvasShortcuts, ShortcutWrapper } from './canvas-shortcuts';
 import { CanvasContextMenuProps } from './context-menu-wrapper';
-import { hasSecureClipboardAccess } from './utils';
 
 export const CanvasContextMenuContent = ({
   contextMenuType,
