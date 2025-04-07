@@ -20,14 +20,21 @@ export type FlowVersionUndoRedo = {
 };
 
 const useFlowVersionUndoRedo = (): FlowVersionUndoRedo => {
-  const [flowVersion, setVersion, canUndo, canRedo, setVersionUpdateTimestamp] =
-    useBuilderStateContext((state) => [
-      state.flowVersion,
-      state.setVersion,
-      state.canUndo,
-      state.canRedo,
-      state.setVersionUpdateTimestamp,
-    ]);
+  const [
+    flowVersion,
+    setVersion,
+    canUndo,
+    canRedo,
+    setVersionUpdateTimestamp,
+    exitStepSettings,
+  ] = useBuilderStateContext((state) => [
+    state.flowVersion,
+    state.setVersion,
+    state.canUndo,
+    state.canRedo,
+    state.setVersionUpdateTimestamp,
+    state.exitStepSettings,
+  ]);
   const centerWorkflowViewOntoStep = useCenterWorkflowViewOntoStep();
 
   const { initializeUndoRedoDB, addToUndo, bulkMoveAction, clearUndoRedoDB } =
@@ -113,6 +120,8 @@ const useFlowVersionUndoRedo = (): FlowVersionUndoRedo => {
   }, [debouncedProcessQueue]);
 
   const enqueueAction = (action: MoveActionType) => {
+    exitStepSettings();
+
     actionQueue.current.push(action);
     if (!isBulkActionInProgress.current) {
       processQueue(); // Start processing if no request is currently running

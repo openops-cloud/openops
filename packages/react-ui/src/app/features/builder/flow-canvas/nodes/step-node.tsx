@@ -60,7 +60,6 @@ const WorkflowStepNode = React.memo(
       selectedStep,
       run,
       readonly,
-      exitStepSettings,
       flowVersion,
       loopIndexes,
     ] = useBuilderStateContext((state) => [
@@ -70,7 +69,6 @@ const WorkflowStepNode = React.memo(
       state.selectedStep,
       state.run,
       state.readonly,
-      state.exitStepSettings,
       state.flowVersion,
       state.loopsIndexes,
     ]);
@@ -179,8 +177,6 @@ const WorkflowStepNode = React.memo(
                 setOpenBlockSelector(open);
                 if (open) {
                   setOpenStepActionsMenu(false);
-                } else if (data.step?.type === TriggerType.EMPTY) {
-                  exitStepSettings();
                 }
               }}
               asChild={true}
