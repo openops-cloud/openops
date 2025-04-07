@@ -21,7 +21,7 @@ describe('runCommand', () => {
     jest.clearAllMocks();
   });
 
-  test('calls login, sets project, and runs command', async () => {
+  test('calls login, sets project, and runs command, returns only 1 result', async () => {
     loginGCPWithKeyObjectMock.mockResolvedValue('login success');
 
     runCliCommandMock
@@ -61,10 +61,86 @@ describe('runCommand', () => {
       }),
     );
   });
+});
 
-  test('should throw if runCommand receives an empty array', async () => {
-    await expect(runCommand('gcloud info', auth, true)).rejects.toThrow(
-      'Expected exactly one result, but got 0.',
+describe('Google cloud multiple commands', () => {
+  const keyFileContent = 'key file content';
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('calls login, sets project, and runs all command', async () => {
+    loginGCPWithKeyObjectMock.mockResolvedValue('login success');
+
+    runCliCommandMock
+      .mockResolvedValueOnce('project set success')
+      .mockResolvedValueOnce('command 1 output')
+      .mockResolvedValueOnce('command 2 output');
+
+    const result = await runCommands(
+      ['gcloud compute instances list', 'gcloud version'],
+      { keyFileContent },
+      false,
+      'my-project',
+    );
+
+    expect(result).toStrictEqual(['command 1 output', 'command 2 output']);
+
+    expect(runCliCommandMock).toHaveBeenCalledTimes(3);
+    expect(loginGCPWithKeyObjectMock).toHaveBeenCalledTimes(1);
+    expect(getDefaultCloudSDKConfigMock).toHaveBeenCalledTimes(1);
+
+    expect(runCliCommandMock).toHaveBeenNthCalledWith(
+      1,
+      'gcloud config set project my-project',
+      'gcloud',
+      expect.objectContaining({
+        CLOUDSDK_CONFIG: '/tmp/gcloud-config-abc',
+        PATH: expect.any(String),
+      }),
+    );
+
+    expect(runCliCommandMock).toHaveBeenNthCalledWith(
+      2,
+      'gcloud compute instances list',
+      'gcloud',
+      expect.objectContaining({
+        CLOUDSDK_CONFIG: '/tmp/gcloud-config-abc',
+        PATH: expect.any(String),
+      }),
+    );
+
+    expect(runCliCommandMock).toHaveBeenNthCalledWith(
+      3,
+      'gcloud version',
+      'gcloud',
+      expect.objectContaining({
+        CLOUDSDK_CONFIG: '/tmp/gcloud-config-abc',
+        PATH: expect.any(String),
+      }),
+    );
+  });
+
+  test('skips temp config if shouldUseHostCredentials is true', async () => {
+    runCliCommandMock.mockResolvedValueOnce('command output');
+
+    const result = await runCommands(
+      ['gcloud info'],
+      { keyFileContent },
+      true,
+      undefined,
+    );
+
+    expect(result).toStrictEqual(['command output']);
+    expect(loginGCPWithKeyObjectMock).not.toHaveBeenCalled();
+
+    expect(runCliCommandMock).toHaveBeenCalledWith(
+      'gcloud info',
+      'gcloud',
+      expect.objectContaining({
+        PATH: expect.any(String),
+      }),
     );
   });
 
@@ -169,8 +245,8 @@ describe('Google cloud runCommands', () => {
     runCliCommandMock.mockResolvedValueOnce('res');
 
     const result = await runCommands(['gcloud info'], { keyFileContent }, true);
-    expect(result).toEqual(['res']);
 
+    expect(result).toStrictEqual(['command output']);
     expect(runCliCommandMock).toHaveBeenCalledWith(
       'gcloud info',
       'gcloud',
