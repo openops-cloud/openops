@@ -72,8 +72,8 @@ jobs:
             echo "Please update THIRD_PARTY_LICENSES.txt by running 'npm run license-check'" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
-      - name: Commit changes
-        if: failure()
+      - name: Commit changes for dependabot
+        if: failure() && startsWith(github.head_ref, 'dependabot/')
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: Update THIRD_PARTY_LICENSES.txt
