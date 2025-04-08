@@ -255,8 +255,11 @@ function getRecommendersDropdown() {
           error: undefined,
         };
       }
-
-      const filterFlag = getFilterByPropertyCommandParam(filterByProperty);
+      
+      let filterFlag = '';
+      if (!filterByProperty['billingAccount']) {
+        filterFlag = getFilterByPropertyCommandParam(filterByProperty);
+      }
       const command = `gcloud beta recommender recommenders list ${filterFlag} --format=json`;
 
       try {

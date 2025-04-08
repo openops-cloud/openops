@@ -153,39 +153,61 @@ describe('getRecommendationsAction', () => {
     expect(result).toEqual({});
   });
 
-  test('should return recommenders list if authenticated or using host session', async () => {
-    const mockOutput = JSON.stringify([
-      { name: 'recommender-1' },
-      { name: 'recommender-2' },
-    ]);
-
-    gcloudCliMock.runCommand.mockResolvedValue(mockOutput);
-
-    const context = createContext({});
-
-    const result = await getRecommendationsAction.props['recommenders'].options(
-      {
-        auth,
-        useHostSession: { useHostSessionCheckbox: true },
-        filterByProperty: { project: 'proj-123' },
-      },
-      context,
-    );
-
-    expect(gcloudCliMock.runCommand).toHaveBeenCalledWith(
+  test.each([
+    [
+      { project: 'proj-123' },
       'gcloud beta recommender recommenders list --project=proj-123 --format=json',
-      auth,
-      true,
-    );
+    ],
+    [
+      { organization: 'org-123' },
+      'gcloud beta recommender recommenders list --organization=org-123 --format=json',
+    ],
+    [
+      { folder: 'folder-123' },
+      'gcloud beta recommender recommenders list --folder=folder-123 --format=json',
+    ],
+    [
+      { billingAccount: 'billingAccount-123' },
+      'gcloud beta recommender recommenders list --format=json',
+    ],
+  ])(
+    'should return recommenders list if authenticated or using host session',
+    async (filterByProperty: any, command: string) => {
+      const mockOutput = JSON.stringify([
+        { name: 'recommender-1' },
+        { name: 'recommender-2' },
+      ]);
 
-    expect(result).toEqual({
-      disabled: false,
-      options: [
-        { label: 'recommender-1', value: 'recommender-1' },
-        { label: 'recommender-2', value: 'recommender-2' },
-      ],
-    });
-  });
+      gcloudCliMock.runCommand.mockResolvedValue(mockOutput);
+
+      const context = createContext({});
+
+      const result = await getRecommendationsAction.props[
+        'recommenders'
+      ].options(
+        {
+          auth,
+          useHostSession: { useHostSessionCheckbox: true },
+          filterByProperty,
+        },
+        context,
+      );
+
+      expect(gcloudCliMock.runCommand).toHaveBeenCalledWith(
+        command,
+        auth,
+        true,
+      );
+
+      expect(result).toEqual({
+        disabled: false,
+        options: [
+          { label: 'recommender-1', value: 'recommender-1' },
+          { label: 'recommender-2', value: 'recommender-2' },
+        ],
+      });
+    },
+  );
 
   test('should construct and run multiple gcloud commands for recommenders', async () => {
     const context = createContext({
