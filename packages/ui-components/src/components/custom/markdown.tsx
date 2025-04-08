@@ -3,13 +3,13 @@ import { Alert, AlertDescription } from '../../ui/alert';
 import { Button } from '../../ui/button';
 import { useToast } from '../../ui/use-toast';
 
-import { COPY_PASTE_TOAST_DURATION } from '@/lib/constants';
 import { t } from 'i18next';
 import { Copy } from 'lucide-react';
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import validator from 'validator';
 import { clipboardUtils } from '../../lib/clipboard-utils';
+import { COPY_PASTE_TOAST_DURATION } from '../../lib/constants';
 
 function applyVariables(markdown: string, variables: Record<string, string>) {
   return markdown
