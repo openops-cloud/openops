@@ -4,22 +4,32 @@ import { useEffect, useRef } from 'react';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { useDefaultSidebarState } from '@/app/common/hooks/use-default-sidebar-state';
+import { useCandu } from '@/app/features/extensions/candu/use-candu';
 import { authenticationApi } from '@/app/lib/authentication-api';
 import { FlagId } from '@openops/shared';
 import './openops-analytics.css';
 
-const dashboardUiConfig = {
-  hideTitle: true,
-  hideChartControls: false,
-  hideTab: false,
-  filters: {
-    expanded: false,
-    visible: false,
-  },
+const createDashboardConfig = (urlParams: Record<string, string>) => {
+  const dashboardUiConfig = {
+    hideTitle: true,
+    hideChartControls: false,
+    hideTab: false,
+    filters: {
+      expanded: false,
+      visible: false,
+    },
+    urlParams,
+  };
+  return dashboardUiConfig;
 };
 
 const OpenOpsAnalyticsPage = () => {
   useDefaultSidebarState('minimized');
+
+  const { isCanduEnabled, canduClientToken, canduUserId } = useCandu();
+  const parentData = encodeURIComponent(
+    JSON.stringify({ isCanduEnabled, userId: canduUserId, canduClientToken }),
+  );
 
   const iframeContainerRef = useRef<HTMLDivElement>(null);
   const { data: analyticsPublicUrl } = flagsHooks.useFlag<string | undefined>(
@@ -43,15 +53,17 @@ const OpenOpsAnalyticsPage = () => {
 
         embedDashboard({
           id: dashboardEmbedId,
-          supersetDomain: analyticsPublicUrl + '/openops-analytics',
+          supersetDomain: `${analyticsPublicUrl}/openops-analytics`,
           mountPoint: mountPoint,
           fetchGuestToken: () =>
             authenticationApi.fetchAnalyticsGuestToken(dashboardEmbedId),
-          dashboardUiConfig,
+          dashboardUiConfig: createDashboardConfig({
+            parentData,
+          }),
         });
       }
     }
-  }, [isSuccess, analyticsPublicUrl, dashboardEmbedId]);
+  }, [isSuccess, analyticsPublicUrl, dashboardEmbedId, parentData]);
 
   if (!analyticsPublicUrl) {
     console.error('OpenOps Analytics URL is not defined');

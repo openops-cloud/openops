@@ -1,5 +1,5 @@
 import { CreateNewFlowInFolder } from '@/app/features/flows/components/create-new-flow-in-folder';
-import { ImportFlowDialog } from '@/app/features/flows/components/import-flow-dialog';
+import { ImportFlowDialog } from '@/app/features/flows/components/import-flow-dialog/import-flow-dialog';
 import { SelectFlowTemplateDialog } from '@/app/features/templates/components/select-flow-template-dialog';
 import { Button, PageHeader } from '@openops/components/ui';
 import { t } from 'i18next';
@@ -21,7 +21,7 @@ const FlowsPageHeader = ({
       <PageHeader title={title}>
         <div className="ml-auto flex flex-row gap-2 pr-7">
           {children}
-          <ImportFlowDialog insideBuilder={false}>
+          <ImportFlowDialog>
             <Button variant="outline" className="flex gap-2 items-center">
               <Import className="w-4 h-4" />
               {t('Import Workflow')}
