@@ -31,12 +31,14 @@ const ActionErrorHandlingForm = React.memo(
     disabled,
   }: ActionErrorHandlingFormProps) => {
     const form = useFormContext<Action | Trigger>();
+
     const showShowForBlock =
       !isNil(form.getValues().settings.actionName) ||
       !isNil(form.getValues().settings.triggerName);
     const isBlockType = [ActionType.BLOCK, TriggerType.BLOCK].includes(
       form.getValues().type,
     );
+
     return (
       <>
         {(!isBlockType || showShowForBlock) && (
