@@ -18,6 +18,7 @@ import {
 } from 'react';
 import { usePrevious } from 'react-use';
 import { useKeyPress } from '../../hooks/use-key-press';
+import { clipboardUtils } from '../../lib/clipboard-utils';
 import {
   COPY_KEYS,
   NODE_SELECTION_RECT_CLASS_NAME,
@@ -138,40 +139,29 @@ export const InteractiveContextProvider = ({
     action: Action | null,
     actionCount?: number,
   ) => {
-    const textarea = document.createElement('textarea');
-    textarea.value = text;
-    textarea.style.position = 'fixed';
-    textarea.style.opacity = '0';
-    document.body.appendChild(textarea);
-    textarea.select();
+    clipboardUtils.copyInInsecureContext({
+      text,
+      onSuccess: () => {
+        if (action) {
+          setActionToPaste(action);
+        }
+        if (!action || !actionCount) {
+          return;
+        }
 
-    try {
-      if (action) {
-        setActionToPaste(action);
-      }
-      // eslint-disable-next-line
-      if (document.execCommand) {
-        // eslint-disable-next-line
-        document.execCommand('copy');
-      }
-
-      if (!action || !actionCount) {
-        return;
-      }
-
-      copyPasteToast({
-        success: true,
-        isCopy: true,
-        itemsCount: actionCount,
-      });
-    } catch (err) {
-      copyPasteToast({
-        success: false,
-        isCopy: true,
-      });
-    } finally {
-      document.body.removeChild(textarea);
-    }
+        copyPasteToast({
+          success: true,
+          isCopy: true,
+          itemsCount: actionCount,
+        });
+      },
+      onError: () => {
+        copyPasteToast({
+          success: false,
+          isCopy: true,
+        });
+      },
+    });
   };
 
   const handleCopy = useCallback((action: Action, actionCount: number) => {
