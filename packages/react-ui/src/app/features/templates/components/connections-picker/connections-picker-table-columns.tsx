@@ -95,7 +95,7 @@ const ConnectionPickerTableActions = ({
             <Plus size={16} />
             {t('Create Connection')}
           </DropdownMenuItem>
-          {connectionOptions.map((connection) => {
+          {connectionOptions?.map((connection) => {
             return (
               <DropdownMenuItem
                 key={connection.id}
