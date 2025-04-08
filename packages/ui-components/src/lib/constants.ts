@@ -33,3 +33,5 @@ export const PRIMITIVE_STEP_METADATA = {
     type: TriggerType.EMPTY,
   },
 };
+
+export const COPY_PASTE_TOAST_DURATION = 2000;
