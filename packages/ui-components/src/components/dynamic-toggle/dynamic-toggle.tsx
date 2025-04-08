@@ -7,14 +7,16 @@ import {
 } from '../../ui/toggle-group';
 import { TooltipWrapper } from '../tooltip-wrapper';
 
-type ToggleOption = {
-  value: string;
+export type DynamicToggleValue = 'Static' | 'Dynamic';
+
+export type DynamicToggleOption = {
+  value: DynamicToggleValue;
   label: string;
   tooltipText?: string;
 };
 
 type Props = {
-  options: ToggleOption[];
+  options: DynamicToggleOption[];
   defaultValue?: string;
   onChange?: (value: string) => void;
   disabled?: boolean;
