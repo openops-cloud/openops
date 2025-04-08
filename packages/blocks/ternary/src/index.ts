@@ -1,5 +1,10 @@
 import { createBlock } from '@openops/blocks-framework';
 import { getBudgets } from './lib/actions/get-budgets';
+import { getDataIntegrations } from './lib/actions/get-data-integrations';
+import {
+  getUsageRecommendations,
+  updateUsageRecommendations,
+} from './lib/actions/usage-recommendations';
 import { ternaryCloudAuth } from './lib/common/auth';
 
 export const ternary = createBlock({
@@ -10,6 +15,11 @@ export const ternary = createBlock({
   logoUrl: 'https://static.openops.com/blocks/ternary.png',
   categories: [],
   authors: ['Quilyx'],
-  actions: [getBudgets],
+  actions: [
+    // getDataIntegrations,
+    // getUsageRecommendations,
+    // updateUsageRecommendations,
+    getBudgets,
+  ],
   triggers: [],
 });
