@@ -1,5 +1,6 @@
 import { BlockProperty } from '@openops/blocks-framework';
 import {
+  DYNAMIC_TOGGLE_VALUES,
   DynamicToggle,
   DynamicToggleOption,
   DynamicToggleValue,
@@ -114,7 +115,7 @@ const AutoFormFieldWrapper = ({
 
   // array fields use the dynamicViewToggled property to specify if a property is toggled
   function handleChange(value: DynamicToggleValue) {
-    const isInDynamicView = value === 'Dynamic';
+    const isInDynamicView = value === DYNAMIC_TOGGLE_VALUES.DYNAMIC;
     if (arrayFieldContext) {
       form.setValue(
         `${arrayFieldContext.inputName}.dynamicViewToggled.${propertyName}`,
@@ -168,7 +169,11 @@ const AutoFormFieldWrapper = ({
           <DynamicToggle
             options={toggleOptions}
             onChange={handleChange}
-            defaultValue={dynamicViewToggled ? 'Dynamic' : 'Static'}
+            defaultValue={
+              dynamicViewToggled
+                ? DYNAMIC_TOGGLE_VALUES.DYNAMIC
+                : DYNAMIC_TOGGLE_VALUES.STATIC
+            }
             disabled={disabled}
           />
         )}

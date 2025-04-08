@@ -8,6 +8,10 @@ import {
 import { TooltipWrapper } from '../tooltip-wrapper';
 
 export type DynamicToggleValue = 'Static' | 'Dynamic';
+export const DYNAMIC_TOGGLE_VALUES: Record<string, DynamicToggleValue> = {
+  STATIC: 'Static',
+  DYNAMIC: 'Dynamic',
+};
 
 export type DynamicToggleOption = {
   value: DynamicToggleValue;
