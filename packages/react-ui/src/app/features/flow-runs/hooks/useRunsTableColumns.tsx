@@ -78,12 +78,14 @@ export const useRunsTableColumns = (): Column[] => {
           cell: ({ row }) => {
             const status = row.original.status;
             const { variant, Icon } = flowRunUtils.getStatusIcon(status);
+            const explanation = flowRunUtils.getStatusExplanation(status);
             return (
               <div className="text-left">
                 <StatusIconWithText
                   icon={Icon}
                   text={formatUtils.convertEnumToHumanReadable(status)}
                   variant={variant}
+                  explanation={explanation}
                 />
               </div>
             );

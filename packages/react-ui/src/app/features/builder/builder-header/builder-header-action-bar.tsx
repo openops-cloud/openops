@@ -11,7 +11,7 @@ import {
 } from '@openops/components/ui';
 import { t } from 'i18next';
 import { EllipsisVertical, History, Workflow } from 'lucide-react';
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
 const ICON_SIZE_SMALL = 16;

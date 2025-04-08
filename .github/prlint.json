@@ -15,7 +15,7 @@
   ],
   "body": [
     {
-      "pattern": "(?:Fixes|Resolves|Closes|Part of) (?:#|OPS-)[1-9]\\d*|Dependabot commands and options",
+      "pattern": "(?:Fixes|Resolves|Closes|Part of) (?:#|OPS-|OPC-|CI-)[1-9]\\d*|Dependabot commands and options",
       "message": "Add a GitHub or Linear issue ID to your PR body, e.g. \"Fixes #1002\""
     }
   ]

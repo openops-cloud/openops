@@ -98,7 +98,7 @@ const BlockSelector = ({
     setSelectedTag(BlockTagEnum.ALL);
   };
 
-  const handleSelect = (
+  const handleSelect = async (
     block: StepMetadata | undefined,
     item: ItemListMetadata,
   ) => {
@@ -117,7 +117,7 @@ const BlockSelector = ({
 
     switch (operation.type) {
       case FlowOperationType.UPDATE_TRIGGER: {
-        applyOperationAndPushToHistory(
+        await applyOperationAndPushToHistory(
           {
             type: FlowOperationType.UPDATE_TRIGGER,
             request: stepData as Trigger,

@@ -17,6 +17,7 @@ import {
   StepLocationRelativeToParent,
 } from '@openops/shared';
 
+import { hasSecureClipboardAccess } from '@/app/lib/secure-clipboard-access-utils';
 import { t } from 'i18next';
 import {
   ArrowRightLeft,
@@ -31,7 +32,6 @@ import { useApplyOperationAndPushToHistory } from '../../flow-version-undo-redo/
 import { usePaste } from '../../hooks/use-paste';
 import { StepActionWrapper } from '../nodes/step-action-wrapper';
 import { CanvasShortcuts, ShortcutWrapper } from './canvas-shortcuts';
-import { hasSecureClipboardAccess } from './utils';
 
 type Props = {
   data: WorkflowNode['data'];

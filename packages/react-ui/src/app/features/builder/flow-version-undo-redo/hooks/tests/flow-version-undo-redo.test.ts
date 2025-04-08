@@ -45,6 +45,7 @@ describe('useFlowVersionUndoRedo', () => {
   let mockSetVersionUpdateTimestamp: jest.Mock;
   let mockInitializeUndoRedoDB: jest.Mock;
   let mockBulkMoveAction: jest.Mock;
+  let mockExitStepSettings: jest.Mock;
 
   beforeEach(() => {
     mockFlowVersion = {
@@ -60,6 +61,7 @@ describe('useFlowVersionUndoRedo', () => {
 
     mockInitializeUndoRedoDB = jest.fn();
     mockBulkMoveAction = jest.fn();
+    mockExitStepSettings = jest.fn();
 
     (useBuilderStateContext as jest.Mock).mockImplementation((selector) =>
       selector({
@@ -68,6 +70,7 @@ describe('useFlowVersionUndoRedo', () => {
         canUndo: true,
         canRedo: false,
         setVersionUpdateTimestamp: mockSetVersionUpdateTimestamp,
+        exitStepSettings: mockExitStepSettings,
       }),
     );
 
@@ -84,6 +87,7 @@ describe('useFlowVersionUndoRedo', () => {
     renderHook(() => useFlowVersionUndoRedo());
 
     expect(mockInitializeUndoRedoDB).toHaveBeenCalledTimes(1);
+    expect(mockExitStepSettings).not.toHaveBeenCalled();
   });
 
   it('should enqueue an undo action and process it correctly', async () => {
@@ -115,6 +119,7 @@ describe('useFlowVersionUndoRedo', () => {
     expect(mockCenterWorkflowViewOntoStep).toHaveBeenCalledWith(
       'previous-step',
     );
+    expect(mockExitStepSettings).toHaveBeenCalled();
   });
 
   it('should enqueue a redo action and process it correctly', async () => {
@@ -144,6 +149,7 @@ describe('useFlowVersionUndoRedo', () => {
       trigger: { name: 'future-trigger' },
     });
     expect(mockCenterWorkflowViewOntoStep).toHaveBeenCalledWith('future-step');
+    expect(mockExitStepSettings).toHaveBeenCalled();
   });
 
   it('should handle API update failures gracefully', async () => {
@@ -164,6 +170,7 @@ describe('useFlowVersionUndoRedo', () => {
     });
 
     expect(toast).toHaveBeenCalledWith('Unsaved changes');
+    expect(mockExitStepSettings).toHaveBeenCalled();
   });
 
   it('should correctly report canUndo and canRedo states', () => {

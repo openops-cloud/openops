@@ -49,6 +49,44 @@ describe('ARN Handler Tests', () => {
       },
     );
   });
+
+  describe('parseArn tests', () => {
+    test.each([
+      [
+        'arn:aws:iam::123456789012:user/roleName',
+        {
+          accountId: '123456789012',
+          resourceId: 'roleName',
+          region: '',
+          service: 'iam',
+          partition: 'aws',
+        },
+      ],
+      [
+        'arn:aws:ec2:us-east-1:123456789012:instance/i-1234567890abcdef0',
+        {
+          accountId: '123456789012',
+          resourceId: 'i-1234567890abcdef0',
+          region: 'us-east-1',
+          service: 'ec2',
+          partition: 'aws',
+        },
+      ],
+      [
+        'arn:aws:s3:::my-bucket',
+        {
+          accountId: '',
+          resourceId: 'my-bucket',
+          region: '',
+          service: 's3',
+          partition: 'aws',
+        },
+      ],
+    ])('should parse ARN %s correctly', (arn: string, expectedResult: any) => {
+      const result = getResourceIdFromArn(arn);
+      expect(result).toEqual(expectedResult.resourceId);
+    });
+  });
 });
 
 describe('groupARNsByAccount', () => {
