@@ -2,11 +2,11 @@ import {
   createAxiosHeaders,
   getFields,
   getPrimaryKeyFieldFromFields,
-  makeOpenOpsTablesPatch,
   makeOpenOpsTablesPost,
 } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { openopsTables } from '../index';
+import { resilientPatch, resilientPost } from './utils';
 
 export async function createResourceBuTagAssignmentTable(
   databaseId: number,
@@ -41,7 +41,7 @@ export async function addFields(
   logger.debug(
     `[Seeding Resource BU tag assignment table] Before adding primary field Arn with id: ${primaryField.id}`,
   );
-  await makeOpenOpsTablesPatch<unknown>(
+  await resilientPatch(
     `api/database/fields/${primaryField.id}/`,
     {
       name: 'Resource identifier',
@@ -89,11 +89,11 @@ async function addField(
     `[Seeding Resource BU tag assignment table] Before adding field ${fieldBody.name}`,
   );
 
-  const field = await makeOpenOpsTablesPost<{ id: number }>(
+  const field = (await resilientPost(
     createFieldEndpoint,
     fieldBody,
     createAxiosHeaders(token),
-  );
+  )) as { id: number };
 
   logger.debug(
     `[Seeding Resource BU tag assignment table] After adding field ${fieldBody.name} with id: ${field.id}`,
