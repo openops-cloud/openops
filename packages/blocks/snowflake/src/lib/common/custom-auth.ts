@@ -1,9 +1,6 @@
 import { BlockAuth, Property } from '@openops/blocks-framework';
 
-const markdown = `## Snowflake connections
-
-To configure a Snowflake connection, you will need the following credentials: Account Identifier, Username, and Password. Here's how to locate your Account Identifier and Username:
-
+const markdown = `
 1.  Go to the [Snowflake Login Page](https://app.snowflake.com/) and log in to your account.
 2.  From the left sidebar, expand your account information located in the bottom menu.
 3.  Click on the menu item labeled "**Account**" to expand a side menu.
