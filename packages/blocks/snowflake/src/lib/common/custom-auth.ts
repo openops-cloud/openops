@@ -1,6 +1,26 @@
 import { BlockAuth, Property } from '@openops/blocks-framework';
 
+const markdown = `## Snowflake connections
+
+To configure a Snowflake connection, you will need the following credentials: Account Identifier, Username, and Password. Here's how to locate your Account Identifier and Username:
+
+1.  Go to the [Snowflake Login Page](https://app.snowflake.com/) and log in to your account.
+2.  From the left sidebar, expand your account information located in the bottom menu.
+3.  Click on the menu item labeled "**Account**" to expand a side menu.
+4.  In the expanded side menu, select "**View Account Details**" (it might be listed under a heading like "Admin").
+5.  On the resulting page, you will find both the **Account Identifier** (typically in the format \`<organization_name>-<account_name>\` or a shorter alphanumeric string depending on your Snowflake region) and your **Username**.
+
+![Snowflake Account Details Location](/images/access-snowflake-account-details.png)
+
+For the **Password**, you will need to provide the same password you use to log in to your Snowflake account.
+
+Once you have your Account Identifier, Username, and Password, you can configure the Snowflake connection in OpenOps.
+
+**Important:** Please note that providing an incorrect Account Identifier will not result in an immediate connection failure. The system will attempt to connect for approximately 5 minutes before timing out with a generic error message: "Request to Snowflake failed.". Ensure you have accurately copied your Account Identifier to avoid these delays.
+`;
+
 export const customAuth = BlockAuth.CustomAuth({
+  description: markdown,
   props: {
     account: Property.ShortText({
       displayName: 'Account',
