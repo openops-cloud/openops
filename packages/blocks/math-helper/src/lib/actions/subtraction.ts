@@ -1,4 +1,5 @@
 import { BlockAuth, createAction, Property } from '@openops/blocks-framework';
+import Decimal from 'decimal.js';
 
 export const subtraction = createAction({
   name: 'subtraction_math',
@@ -26,8 +27,7 @@ export const subtraction = createAction({
     }),
   },
   async run(context) {
-    return (
-      context.propsValue['second_number'] - context.propsValue['first_number']
-    );
+    const { first_number, second_number } = context.propsValue;
+    return Decimal.sub(second_number, first_number).toNumber();
   },
 });

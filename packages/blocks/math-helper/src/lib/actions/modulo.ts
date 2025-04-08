@@ -1,4 +1,5 @@
 import { BlockAuth, createAction, Property } from '@openops/blocks-framework';
+import Decimal from 'decimal.js';
 
 export const modulo = createAction({
   name: 'modulo_math',
@@ -26,8 +27,7 @@ export const modulo = createAction({
     }),
   },
   async run(context) {
-    return (
-      context.propsValue['first_number'] % context.propsValue['second_number']
-    );
+    const { first_number, second_number } = context.propsValue;
+    return Decimal.mod(first_number, second_number).toNumber();
   },
 });
