@@ -7,8 +7,6 @@ const markdown = `
 4.  In the expanded side menu, select "**View Account Details**" (it might be listed under a heading like "Admin").
 5.  On the resulting page, you will find both the **Account Identifier** (typically in the format \`<organization_name>-<account_name>\` or a shorter alphanumeric string depending on your Snowflake region) and your **Username**.
 
-![Snowflake Account Details Location](/images/access-snowflake-account-details.png)
-
 For the **Password**, you will need to provide the same password you use to log in to your Snowflake account.
 
 Once you have your Account Identifier, Username, and Password, you can configure the Snowflake connection in OpenOps.
