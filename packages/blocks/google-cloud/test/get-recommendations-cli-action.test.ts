@@ -154,25 +154,13 @@ describe('getRecommendationsAction', () => {
   });
 
   test.each([
-    [
-      { project: 'proj-123' },
-      'gcloud beta recommender recommenders list --format=json --project=proj-123',
-    ],
-    [
-      { organization: 'org-123' },
-      'gcloud beta recommender recommenders list --format=json',
-    ],
-    [
-      { folder: 'folder-123' },
-      'gcloud beta recommender recommenders list --format=json',
-    ],
-    [
-      { billingAccount: 'billingAccount-123' },
-      'gcloud beta recommender recommenders list --format=json',
-    ],
+    [{ project: 'proj-123' }],
+    [{ organization: 'org-123' }],
+    [{ folder: 'folder-123' }],
+    [{ billingAccount: 'billingAccount-123' }],
   ])(
     'should return recommenders list if authenticated or using host session',
-    async (filterByProperty: any, command: string) => {
+    async (filterByProperty: any) => {
       const mockOutput = JSON.stringify([
         { name: 'recommender-1' },
         { name: 'recommender-2' },
@@ -194,7 +182,7 @@ describe('getRecommendationsAction', () => {
       );
 
       expect(gcloudCliMock.runCommand).toHaveBeenCalledWith(
-        command,
+        'gcloud beta recommender recommenders list --format=json',
         auth,
         true,
       );

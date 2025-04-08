@@ -237,12 +237,8 @@ function getRecommendersDropdown() {
       'auth',
       'useHostSession',
       'useHostSession.useHostSessionCheckbox',
-      'filterByProperty',
-      'filterByProperty.project',
-      'filterByProperty.organization',
-      'filterByProperty.billingAccount',
     ],
-    options: async ({ auth, useHostSession, filterByProperty }) => {
+    options: async ({ auth, useHostSession }) => {
       const shouldUseHostCredentials =
         (useHostSession as { useHostSessionCheckbox?: boolean })
           ?.useHostSessionCheckbox === true;
@@ -256,15 +252,9 @@ function getRecommendersDropdown() {
         };
       }
 
-      let command = `gcloud beta recommender recommenders list --format=json`;
-      if (!(filterByProperty as any)?.['project']) {
-        const filterFlag = getFilterByPropertyCommandParam(filterByProperty);
-        command += ` ${filterFlag}`;
-      }
-
       try {
         const output = await runCommand(
-          command,
+          `gcloud beta recommender recommenders list --format=json`,
           auth,
           shouldUseHostCredentials,
         );
