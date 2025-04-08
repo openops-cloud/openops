@@ -156,15 +156,15 @@ describe('getRecommendationsAction', () => {
   test.each([
     [
       { project: 'proj-123' },
-      'gcloud beta recommender recommenders list --project=proj-123 --format=json',
+      'gcloud beta recommender recommenders list --format=json --project=proj-123',
     ],
     [
       { organization: 'org-123' },
-      'gcloud beta recommender recommenders list --organization=org-123 --format=json',
+      'gcloud beta recommender recommenders list --format=json --organization=org-123',
     ],
     [
       { folder: 'folder-123' },
-      'gcloud beta recommender recommenders list --folder=folder-123 --format=json',
+      'gcloud beta recommender recommenders list --format=json --folder=folder-123',
     ],
     [
       { billingAccount: 'billingAccount-123' },
