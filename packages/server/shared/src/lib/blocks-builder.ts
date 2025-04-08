@@ -18,7 +18,7 @@ export async function blocksBuilder(): Promise<void> {
 
   let lock: Lock | undefined;
   try {
-    lock = await acquireRedisLock(`build-blocks`);
+    lock = await acquireRedisLock(`build-blocks`, 60000);
     const startTime = performance.now();
     await execAsync('nx run-many -t build -p blocks-*');
     const buildDuration = Math.floor(performance.now() - startTime);
