@@ -17,8 +17,8 @@ export type DynamicToggleOption = {
 
 type Props = {
   options: DynamicToggleOption[];
-  defaultValue?: string;
-  onChange?: (value: string) => void;
+  defaultValue?: DynamicToggleValue;
+  onChange?: (value: DynamicToggleValue) => void;
   disabled?: boolean;
   className?: string;
 };
@@ -30,11 +30,11 @@ const DynamicToggle = ({
   disabled,
   className,
 }: Props) => {
-  const [selectedValue, setSelectedValue] = useState<string>(
-    defaultValue ?? (options.length > 0 ? options[0].value : ''),
+  const [selectedValue, setSelectedValue] = useState<DynamicToggleValue>(
+    defaultValue ?? (options.length > 0 ? options[0].value : 'Static'),
   );
 
-  const handleValueChange = (value: string) => {
+  const handleValueChange = (value: DynamicToggleValue) => {
     if (value) {
       setSelectedValue(value);
       onChange?.(value);
