@@ -1,10 +1,11 @@
 import {
   Button,
+  clipboardUtils,
+  toast,
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-  toast,
 } from '@openops/components/ui';
 import { t } from 'i18next';
 import { Copy, Download, Eye, EyeOff } from 'lucide-react';
@@ -13,7 +14,6 @@ import { createRoot } from 'react-dom/client';
 import ReactJson from 'react-json-view';
 
 import { useTheme } from '@/app/common/providers/theme-provider';
-import { hasSecureClipboardAccess } from '@/app/lib/secure-clipboard-access-utils';
 import { isStepFileUrl } from '@/app/lib/utils';
 import { isNil } from '@openops/shared';
 
@@ -54,12 +54,33 @@ const JsonViewer = React.memo(({ json, title }: JsonViewerProps) => {
   const { theme } = useTheme();
 
   const viewerTheme = theme === 'dark' ? 'pop' : 'rjv-default';
-  const handleCopy = () => {
-    navigator.clipboard.writeText(JSON.stringify(json, null, 2));
+
+  const showCopySuccessToast = () =>
     toast({
       title: t('Copied to clipboard'),
-      duration: 1000,
+      duration: 3000,
     });
+
+  const showCopyFailureToast = () =>
+    toast({
+      title: t('Failed to copy to clipboard'),
+      duration: 3000,
+    });
+
+  const handleCopy = () => {
+    const text = JSON.stringify(json, null, 2);
+    if (navigator.clipboard) {
+      navigator.clipboard
+        .writeText(text)
+        .then(showCopySuccessToast)
+        .catch(showCopyFailureToast);
+    } else {
+      clipboardUtils.copyInInsecureContext({
+        text,
+        onSuccess: showCopySuccessToast,
+        onError: showCopyFailureToast,
+      });
+    }
   };
 
   const handleDownload = () => {
@@ -145,11 +166,9 @@ const JsonViewer = React.memo(({ json, title }: JsonViewerProps) => {
           <Button variant={'ghost'} size={'sm'} onClick={handleDownload}>
             <Download className="w-4 h-4" />
           </Button>
-          {hasSecureClipboardAccess && (
-            <Button variant={'ghost'} size={'sm'} onClick={handleCopy}>
-              <Copy className="w-4 h-4" />
-            </Button>
-          )}
+          <Button variant={'ghost'} size={'sm'} onClick={handleCopy}>
+            <Copy className="w-4 h-4" />
+          </Button>
         </div>
       </div>
 
