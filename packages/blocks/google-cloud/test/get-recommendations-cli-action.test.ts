@@ -160,11 +160,11 @@ describe('getRecommendationsAction', () => {
     ],
     [
       { organization: 'org-123' },
-      'gcloud beta recommender recommenders list --format=json --organization=org-123',
+      'gcloud beta recommender recommenders list --format=json',
     ],
     [
       { folder: 'folder-123' },
-      'gcloud beta recommender recommenders list --format=json --folder=folder-123',
+      'gcloud beta recommender recommenders list --format=json',
     ],
     [
       { billingAccount: 'billingAccount-123' },

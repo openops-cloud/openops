@@ -257,7 +257,7 @@ function getRecommendersDropdown() {
       }
 
       let command = `gcloud beta recommender recommenders list --format=json`;
-      if (!(filterByProperty as any)?.['billingAccount']) {
+      if (!(filterByProperty as any)?.['project']) {
         const filterFlag = getFilterByPropertyCommandParam(filterByProperty);
         command += ` ${filterFlag}`;
       }
