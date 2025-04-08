@@ -102,7 +102,6 @@ const BuilderPage = () => {
     canExitRun,
     readonly,
     setReadOnly,
-    setRightSidebar,
     exitStepSettings,
     flowVersion,
   ] = useBuilderStateContext((state) => [
@@ -114,7 +113,6 @@ const BuilderPage = () => {
     state.canExitRun,
     state.readonly,
     state.setReadOnly,
-    state.setRightSidebar,
     state.exitStepSettings,
     state.flowVersion,
   ]);
@@ -198,15 +196,6 @@ const BuilderPage = () => {
       setReadOnly(viewOnlyParam);
     }
   }, [readonly, run, searchParams, setLeftSidebar, setReadOnly]);
-
-  useEffect(() => {
-    if (
-      !memorizedSelectedStep ||
-      memorizedSelectedStep.type === TriggerType.EMPTY
-    ) {
-      setRightSidebar(RightSideBarType.NONE);
-    }
-  }, [memorizedSelectedStep, setRightSidebar]);
 
   const { switchToDraft, isSwitchingToDraftPending } = useSwitchToDraft();
 
