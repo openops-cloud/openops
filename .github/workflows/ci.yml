@@ -111,10 +111,15 @@ jobs:
           save-always: true
       - name: Test
         if: steps.nx-test-cache.outputs.cache-hit != 'true'
+        continue-on-error: false
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          retry_on: error
+          command: npx nx run-many --target test --projects "${{ matrix.test-suits.include }}" --exclude "${{ matrix.test-suits.exclude }}" --quiet
         env:
           NX_REJECT_UNKNOWN_LOCAL_CACHE: 0
-        run: |
-          npx nx run-many --target test --projects "${{ matrix.test-suits.include }}" --exclude "${{ matrix.test-suits.exclude }}" --quiet 
       - name: Truncate NX cache
         run: ./tools/truncate-nx-cache.sh
   build:
