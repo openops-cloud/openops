@@ -103,52 +103,46 @@ export const getRecommendationsAction = createAction({
 });
 
 async function getScopeOptions(auth: any, useHostSession: boolean) {
-  const dropdowns = {
-    billingAccount: createDropdown(
-      'Billing Account',
-      'The Google Cloud Platform billing account ID to use for this invocation.',
-      true,
-    ),
-    organization: createDropdown(
-      'Organization ID',
-      'The Google Cloud Platform organization ID to use for this invocation.',
-      true,
-    ),
-    project: createDropdown(
-      'Project ID',
-      'The Google Cloud Platform project ID.',
-      true,
-    ),
-  };
-
-  const scopeConfigs = [
-    {
-      key: 'billingAccount',
+  const scopeConfigs = {
+    billingAccount: {
       command: 'gcloud billing accounts list',
       extractLabelAndValue: (item: { name: string; displayName: string }) => ({
         label: item.displayName,
         value: item.name.split('/')[1],
       }),
+      dropdown: createDropdown(
+        'Billing Account',
+        'The Google Cloud Platform billing account ID to use for this invocation.',
+        true,
+      ),
     },
-    {
-      key: 'organization',
+    organization: {
       command: 'gcloud organizations list',
       extractLabelAndValue: (item: { name: string; displayName: string }) => ({
         label: item.displayName,
         value: item.name.split('/')[1],
       }),
+      dropdown: createDropdown(
+        'Organization ID',
+        'The Google Cloud Platform organization ID to use for this invocation.',
+        true,
+      ),
     },
-    {
-      key: 'project',
+    project: {
       command: 'gcloud projects list',
       extractLabelAndValue: (item: { name: string; projectId: string }) => ({
         label: item.name,
         value: item.projectId,
       }),
+      dropdown: createDropdown(
+        'Project ID',
+        'The Google Cloud Platform project ID.',
+        true,
+      ),
     },
-  ];
+  };
 
-  const commands = scopeConfigs.map(
+  const commands = Object.values(scopeConfigs).map(
     ({ command }) => `${command} --format=json`,
   );
 
@@ -156,26 +150,30 @@ async function getScopeOptions(auth: any, useHostSession: boolean) {
   try {
     results = await runCommands(commands, auth, useHostSession);
   } catch (error) {
-    for (const { key } of scopeConfigs) {
-      dropdowns[key as keyof typeof dropdowns].options = {
+    for (const key in scopeConfigs) {
+      scopeConfigs[key as keyof typeof scopeConfigs].dropdown.options = {
         disabled: true,
         options: [],
         placeholder: `Error fetching ${key}s`,
         error: `${error}`,
       };
     }
-    return getScopeOptionsReturnStructure(dropdowns);
+    return getScopeOptionsReturnStructure({
+      billingAccount: scopeConfigs.billingAccount.dropdown,
+      organization: scopeConfigs.organization.dropdown,
+      project: scopeConfigs.project.dropdown,
+    });
   }
 
-  scopeConfigs.forEach(({ key, extractLabelAndValue }, index) => {
+  Object.entries(scopeConfigs).forEach(([key, config], index) => {
     try {
       const parsedItems = JSON.parse(results[index] ?? '[]');
-      dropdowns[key as keyof typeof dropdowns].options = {
+      config.dropdown.options = {
         disabled: false,
-        options: parsedItems.map(extractLabelAndValue),
+        options: parsedItems.map(config.extractLabelAndValue),
       };
     } catch (error) {
-      dropdowns[key as keyof typeof dropdowns].options = {
+      config.dropdown.options = {
         disabled: true,
         options: [],
         placeholder: `Error parsing ${key} results`,
@@ -184,7 +182,11 @@ async function getScopeOptions(auth: any, useHostSession: boolean) {
     }
   });
 
-  return getScopeOptionsReturnStructure(dropdowns);
+  return getScopeOptionsReturnStructure({
+    billingAccount: scopeConfigs.billingAccount.dropdown,
+    organization: scopeConfigs.organization.dropdown,
+    project: scopeConfigs.project.dropdown,
+  });
 }
 
 function getScopeOptionsReturnStructure(dropdowns: Record<string, any>) {
