@@ -120,7 +120,6 @@ export const flowRunUtils = {
     if (status === FlowRunStatus.IGNORED) {
       return t('Previous scheduled run is still in progress');
     }
-    return;
   },
 };
 
