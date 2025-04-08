@@ -65,7 +65,8 @@ const DynamicToggle = ({
               value={option.value}
               size="xs"
               className={cn(
-                'px-2 py-1 rounded text-sm font-medium transition-colors data-[state=on]:bg-gray-200 dark:data-[state=on]:bg-gray-800 data-[state=on]:shadow-sm',
+                'w-[66px] px-2 py-1',
+                'rounded text-sm font-medium transition-colors data-[state=on]:bg-gray-200 dark:data-[state=on]:bg-gray-800 data-[state=on]:shadow-sm',
                 'border-0 data-[state=on]:text-foreground data-[state=off]:text-gray-700 dark:data-[state=off]:text-gray-400 data-[state=off]:hover:bg-gray-200 dark:data-[state=off]:hover:bg-gray-800',
                 'rounded-[4px]',
               )}
