@@ -5,7 +5,7 @@ const markdown = `
 2.  From the left sidebar, expand your account information located in the bottom menu.
 3.  Click on the menu item labeled "**Account**" to expand a side menu.
 4.  In the expanded side menu, select "**View Account Details**" (it might be listed under a heading like "Admin").
-5.  On the resulting page, you will find both the **Account Identifier** (typically in the format \`<organization_name>-<account_name>\` or a shorter alphanumeric string depending on your Snowflake region) and your **Username**.
+5.  On the resulting page, you will find both the **Account Identifier** and your **Username**.
 
 For the **Password**, you will need to provide the same password you use to log in to your Snowflake account.
 
