@@ -7,6 +7,7 @@ import {
 } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { openopsTables } from '../index';
+import { resilientPatch, resilientPost } from './utils';
 
 export async function createTagOwnerMappingTable(
   databaseId: number,
@@ -42,7 +43,7 @@ export async function addFields(
   logger.debug(
     `[Seeding Tag-Owner mapping table] Before adding primary field Owner tag value with id: ${primaryField.id}`,
   );
-  await makeOpenOpsTablesPatch<unknown>(
+  await resilientPatch(
     `api/database/fields/${primaryField.id}/`,
     {
       name: 'Owner tag value',
@@ -74,11 +75,11 @@ async function addField(
     `[Seeding Tag-Owner mapping table] Before adding field ${fieldBody.name}`,
   );
 
-  const field = await makeOpenOpsTablesPost<{ id: number }>(
+  const field = (await resilientPost(
     createFieldEndpoint,
     fieldBody,
     createAxiosHeaders(token),
-  );
+  )) as { id: number };
 
   logger.debug(
     `[Seeding Tag-Owner mapping table] After adding field ${fieldBody.name} with id: ${field.id}`,

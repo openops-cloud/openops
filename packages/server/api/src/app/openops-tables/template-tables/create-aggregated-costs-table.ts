@@ -2,11 +2,10 @@ import {
   createAxiosHeaders,
   getFields,
   getPrimaryKeyFieldFromFields,
-  makeOpenOpsTablesPatch,
-  makeOpenOpsTablesPost,
 } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { openopsTables } from '../index';
+import { resilientPatch, resilientPost } from './utils';
 
 export const SEED_TABLE_NAME = 'Aggregated Costs';
 const SEED_LOG_HEADER = `[Seeding ${SEED_TABLE_NAME} table]`;
@@ -40,7 +39,7 @@ export async function addFields(token: string, tableId: number) {
   logger.debug(
     `${SEED_LOG_HEADER} Before adding primary field ${primaryField.name} with id: ${primaryField.id}`,
   );
-  await makeOpenOpsTablesPatch<unknown>(
+  await resilientPatch(
     `api/database/fields/${primaryField.id}/`,
     {
       name: 'Group Key',
@@ -78,11 +77,11 @@ async function addField(
 
   logger.debug(`${SEED_LOG_HEADER} Before adding field ${fieldBody.name}`);
 
-  const field = await makeOpenOpsTablesPost<{ id: number }>(
+  const field = (await resilientPost(
     createFieldEndpoint,
     fieldBody,
     createAxiosHeaders(token),
-  );
+  )) as { id: number };
 
   logger.debug(
     `${SEED_LOG_HEADER} After adding field ${fieldBody.name} with id: ${field.id}`,

@@ -2,11 +2,10 @@ import {
   createAxiosHeaders,
   getFields,
   getPrimaryKeyFieldFromFields,
-  makeOpenOpsTablesPatch,
-  makeOpenOpsTablesPost,
 } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { openopsTables } from '../index';
+import { resilientPatch, resilientPost } from './utils';
 
 export async function createIdleEbsVolumesToDeleteTable(
   databaseId: number,
@@ -38,7 +37,7 @@ export async function addFields(token: string, tableId: number) {
     `[Seeding Idle EBS Volumes to delete table] Before adding primary field Arn with id: ${primaryField.id}`,
   );
 
-  await makeOpenOpsTablesPatch<unknown>(
+  await resilientPatch(
     `api/database/fields/${primaryField.id}/`,
     {
       name: 'Arn',
@@ -86,11 +85,11 @@ async function addField(
     `[Seeding Idle EBS Volumes to delete table] Before adding field ${fieldBody.name}`,
   );
 
-  const field = await makeOpenOpsTablesPost<{ id: number }>(
+  const field = (await resilientPost(
     createFieldEndpoint,
     fieldBody,
     createAxiosHeaders(token),
-  );
+  )) as { id: number };
 
   logger.debug(
     `[Seeding Idle EBS Volumes to delete table] After adding field ${fieldBody.name} with id: ${field.id}`,
