@@ -1,6 +1,7 @@
 import {
   Button,
   clipboardUtils,
+  COPY_PASTE_TOAST_DURATION,
   toast,
   Tooltip,
   TooltipContent,
@@ -58,13 +59,13 @@ const JsonViewer = React.memo(({ json, title }: JsonViewerProps) => {
   const showCopySuccessToast = () =>
     toast({
       title: t('Copied to clipboard'),
-      duration: 3000,
+      duration: COPY_PASTE_TOAST_DURATION,
     });
 
   const showCopyFailureToast = () =>
     toast({
       title: t('Failed to copy to clipboard'),
-      duration: 3000,
+      duration: COPY_PASTE_TOAST_DURATION,
     });
 
   const handleCopy = () => {

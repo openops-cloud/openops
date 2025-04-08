@@ -3,6 +3,7 @@ import { Alert, AlertDescription } from '../../ui/alert';
 import { Button } from '../../ui/button';
 import { useToast } from '../../ui/use-toast';
 
+import { COPY_PASTE_TOAST_DURATION } from '@/lib/constants';
 import { t } from 'i18next';
 import { Copy } from 'lucide-react';
 import React from 'react';
@@ -86,13 +87,13 @@ const Markdown = React.memo(
     const showCopySuccessToast = () =>
       toast({
         title: t('Copied to clipboard'),
-        duration: 3000,
+        duration: COPY_PASTE_TOAST_DURATION,
       });
 
     const showCopyFailureToast = () =>
       toast({
         title: t('Failed to copy to clipboard'),
-        duration: 3000,
+        duration: COPY_PASTE_TOAST_DURATION,
       });
 
     const copyToClipboard = (text: string) => {
