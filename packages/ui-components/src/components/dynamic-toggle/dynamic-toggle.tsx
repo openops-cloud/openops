@@ -62,7 +62,6 @@ const DynamicToggle = ({
         >
           <DataStatePropInterceptor>
             <ToggleGroupItem
-              key={option.value}
               value={option.value}
               size="xs"
               className={cn(
