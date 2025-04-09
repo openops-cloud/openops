@@ -1,4 +1,7 @@
+import { HttpError } from '@openops/blocks-common';
 import { BlockAuth, Property, Validators } from '@openops/blocks-framework';
+import { configureConnection } from './configure-connection';
+import { connect } from './utils';
 
 const markdown = `
 1.  Go to the [Snowflake Login Page](https://app.snowflake.com/) and log in to your account.
@@ -61,4 +64,20 @@ export const customAuth = BlockAuth.CustomAuth({
     }),
   },
   required: true,
+  validate: async ({ auth }) => {
+    const connection = configureConnection(auth);
+    try {
+      await connect(connection);
+
+      return {
+        valid: true,
+      };
+    } catch (e) {
+      return {
+        valid: false,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        error: ((e as HttpError).response.body as any).message,
+      };
+    }
+  },
 });
