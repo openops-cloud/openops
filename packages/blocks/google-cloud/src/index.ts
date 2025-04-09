@@ -1,6 +1,7 @@
 import { createBlock } from '@openops/blocks-framework';
 import { googleCloudAuth } from '@openops/common';
 import { getRecommendationsAction } from './lib/actions/get-recommendations-cli-action';
+import { BlockCategory } from '@openops/shared';
 import { googleCloudCliAction } from './lib/actions/google-cloud-cli-action';
 
 export const googleCloud = createBlock({
@@ -10,5 +11,6 @@ export const googleCloud = createBlock({
   logoUrl: 'https://static.openops.com/blocks/google-cloud.svg',
   authors: [],
   actions: [googleCloudCliAction, getRecommendationsAction],
+  categories: [BlockCategory.CLOUD],
   triggers: [],
 });
