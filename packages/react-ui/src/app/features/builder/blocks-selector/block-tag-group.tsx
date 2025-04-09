@@ -18,21 +18,25 @@ const tags: Record<
     title: 'All',
     color: 'blue',
   },
+  [BlockCategory.WORKFLOW]: {
+    title: 'Workflow',
+    color: 'green',
+  },
   [BlockCategory.CLOUD]: {
     title: 'Cloud',
-    color: 'green',
+    color: 'purple',
   },
   [BlockCategory.COMMUNICATION]: {
     title: 'Communication',
-    color: 'purple',
+    color: 'yellow',
   },
   [BlockCategory.CORE]: {
     title: 'Utils',
-    color: 'yellow',
+    color: 'pink',
   },
   [BlockCategory.DATA]: {
     title: 'Data',
-    color: 'pink',
+    color: 'blue',
   },
   [BlockCategory.FINOPS]: {
     title: 'FinOps',
@@ -40,19 +44,15 @@ const tags: Record<
   },
   [BlockCategory.IaC]: {
     title: 'IaC',
-    color: 'blue',
+    color: 'purple',
   },
   [BlockCategory.NETWORK]: {
     title: 'Network',
-    color: 'purple',
+    color: 'yellow',
   },
   [BlockCategory.PROJECT_MANAGEMENT]: {
     title: 'Project Management',
-    color: 'yellow',
-  },
-  [BlockCategory.WORKFLOW]: {
-    title: 'Workflow',
-    color: 'green',
+    color: 'blue',
   },
 };
 type BlockTagGroupProps = {
