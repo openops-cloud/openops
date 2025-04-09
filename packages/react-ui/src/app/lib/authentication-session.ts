@@ -4,7 +4,7 @@ import { jwtDecode } from 'jwt-decode';
 import { authenticationApi } from '@/app/lib/authentication-api';
 import { AuthenticationResponse, isNil } from '@openops/shared';
 import { NavigateFunction } from 'react-router-dom';
-import { navigationUtil } from './navogation-util';
+import { navigationUtil } from './navigation-util';
 import { projectAuth } from './project-auth';
 
 const tokenKey = 'token';

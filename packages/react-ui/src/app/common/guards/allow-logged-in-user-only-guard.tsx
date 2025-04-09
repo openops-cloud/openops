@@ -10,7 +10,7 @@ import { projectHooks } from '@/app/common/hooks/project-hooks';
 import { userSettingsHooks } from '@/app/common/hooks/user-settings-hooks';
 import { SocketProvider } from '@/app/common/providers/socket-provider';
 import { authenticationSession } from '@/app/lib/authentication-session';
-import { navigationUtil } from '@/app/lib/navogation-util';
+import { navigationUtil } from '@/app/lib/navigation-util';
 import { userHooks } from '../hooks/user-hooks';
 
 function isJwtExpired(token: string): boolean {
