@@ -86,11 +86,7 @@ export const getRecommendationsAction = createAction({
       },
     }),
     recommenders: getRecommendersDropdown(),
-    location: Property.ShortText({
-      displayName: 'Location',
-      description: 'Location to list recommendations for.',
-      required: true,
-    }),
+    location: getLocationsDropdown(),
   },
   async run(context) {
     const currentCommand = '';
@@ -228,6 +224,15 @@ async function getScopeOptionProperty(
 }
 
 function getRecommendersDropdown() {
+  const blockedRecommenders = new Set([
+    'google.accounts.security.SecurityKeyRecommender',
+    'google.bigquery.jobs.ErrorMitigationRecommender',
+    'google.cloudbilling.commitment.SpendBasedCommitmentRecommender',
+    'google.cloudplatform.productledgrowth.Recommender',
+    'google.composer.environment.Recommender',
+    'google.di.productx.Recommender',
+  ]);
+
   return Property.MultiSelectDropdown({
     displayName: 'Recommender',
     description:
@@ -262,16 +267,72 @@ function getRecommendersDropdown() {
 
         return {
           disabled: false,
-          options: recommenders.map(({ name }) => ({
-            label: name,
-            value: name,
-          })),
+          options: recommenders
+            .filter(({ name }) => !blockedRecommenders.has(name))
+            .map(({ name }) => ({
+              label: name,
+              value: name,
+            })),
         };
       } catch (error) {
         return {
           disabled: true,
           options: [],
           placeholder: `Error fetching recommenders`,
+          error: `${error}`,
+        };
+      }
+    },
+  });
+}
+
+function getLocationsDropdown() {
+  return Property.Dropdown<string>({
+    displayName: 'Location',
+    description: 'Location to list recommendations for.',
+    refreshers: [
+      'auth',
+      'useHostSession',
+      'useHostSession.useHostSessionCheckbox',
+    ],
+    required: true,
+    options: async ({ auth, useHostSession }) => {
+      const shouldUseHostCredentials =
+        (useHostSession as { useHostSessionCheckbox?: boolean })
+          ?.useHostSessionCheckbox === true;
+
+      if (!auth && !shouldUseHostCredentials) {
+        return {
+          disabled: true,
+          options: [],
+          placeholder: 'Please authenticate to see locations.',
+        };
+      }
+
+      try {
+        const rawLocations = await runCommand(
+          'gcloud compute regions list --format=json',
+          auth,
+          shouldUseHostCredentials,
+        );
+
+        const locations: { name: string }[] = JSON.parse(rawLocations) ?? [];
+
+        return {
+          disabled: false,
+          options: [
+            { label: 'global', value: 'global' },
+            ...locations.map(({ name }) => ({
+              label: name,
+              value: name,
+            })),
+          ],
+        };
+      } catch (error) {
+        return {
+          disabled: true,
+          options: [],
+          placeholder: `Error fetching locations`,
           error: `${error}`,
         };
       }

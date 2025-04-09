@@ -39,6 +39,84 @@ describe('getRecommendationsAction', () => {
     expect(getRecommendationsAction.props).toHaveProperty('location');
   });
 
+  test('should exclude blocked recommenders from dropdown', async () => {
+    const context = createContext({});
+
+    const allRecommenders = [
+      { name: 'google.accounts.security.SecurityKeyRecommender' },
+      { name: 'google.bigquery.jobs.ErrorMitigationRecommender' },
+      {
+        name: 'google.cloudbilling.commitment.SpendBasedCommitmentRecommender',
+      },
+      { name: 'google.cloudplatform.productledgrowth.Recommender' },
+      { name: 'google.composer.environment.Recommender' },
+      { name: 'google.di.productx.Recommender' },
+      { name: 'google.compute.instance.IdleResourceRecommender' },
+      { name: 'google.iam.policy.LintRecommender' },
+    ];
+
+    gcloudCliMock.runCommand.mockResolvedValueOnce(
+      JSON.stringify(allRecommenders),
+    );
+
+    const recommenderOptions = await getRecommendationsAction.props[
+      'recommenders'
+    ].options(
+      {
+        auth,
+        useHostSession: { useHostSessionCheckbox: true },
+      },
+      context,
+    );
+
+    const labels = recommenderOptions.options.map((opt: any) => opt.label);
+    expect(labels).toContain('google.compute.instance.IdleResourceRecommender');
+    expect(labels).toContain('google.iam.policy.LintRecommender');
+
+    expect(labels).not.toContain(
+      'google.accounts.security.SecurityKeyRecommender',
+    );
+    expect(labels).not.toContain(
+      'google.bigquery.jobs.ErrorMitigationRecommender',
+    );
+    expect(labels).not.toContain(
+      'google.cloudbilling.commitment.SpendBasedCommitmentRecommender',
+    );
+    expect(labels).not.toContain(
+      'google.cloudplatform.productledgrowth.Recommender',
+    );
+    expect(labels).not.toContain('google.composer.environment.Recommender');
+    expect(labels).not.toContain('google.di.productx.Recommender');
+  });
+
+  test('should return locations including global', async () => {
+    const context = createContext({});
+    const mockRegions = [
+      { name: 'us-central1' },
+      { name: 'europe-west1' },
+      { name: 'asia-east1' },
+    ];
+
+    gcloudCliMock.runCommand.mockResolvedValueOnce(JSON.stringify(mockRegions));
+
+    const result = await getRecommendationsAction.props['location'].options(
+      {
+        auth,
+        useHostSession: { useHostSessionCheckbox: true },
+      },
+      context,
+    );
+
+    expect(result.options).toEqual(
+      expect.arrayContaining([
+        { label: 'global', value: 'global' },
+        { label: 'us-central1', value: 'us-central1' },
+        { label: 'europe-west1', value: 'europe-west1' },
+        { label: 'asia-east1', value: 'asia-east1' },
+      ]),
+    );
+  });
+
   test('should throw error if recommenders are not set', async () => {
     const context = createContext({
       filterByProperty: { project: 'abc' },
