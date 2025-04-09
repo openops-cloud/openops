@@ -79,12 +79,20 @@ export async function callEngineLambda<Result extends EngineHelperResult>(
       timeoutSeconds: timeout,
     });
 
-    const requestResponse = await axios.post(`${ENGINE_URL}`, requestInput, {
-      headers: {
-        requestId,
+    const deadlineTimestamp = Date.now() + timeout * 1000;
+    const requestResponse = await axios.post(
+      `${ENGINE_URL}`,
+      {
+        ...requestInput,
+        deadlineTimestamp,
       },
-      timeout: timeout * 1000,
-    });
+      {
+        headers: {
+          requestId,
+        },
+        timeout: timeout * 1000,
+      },
+    );
 
     const responseData = requestResponse.data.body || requestResponse.data;
 
