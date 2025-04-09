@@ -42,6 +42,8 @@ export function parseArn(arn: string): {
   accountId: string;
   resourceId: string;
   region: string;
+  service: string;
+  partition: string;
 } {
   const arnObj = ArnParser.parse(arn);
 
@@ -52,7 +54,13 @@ export function parseArn(arn: string): {
       ? resourceFields[resourceFields.length - 1]
       : arnObj.resource;
 
-  return { resourceId, accountId: arnObj.accountId, region: arnObj.region };
+  return {
+    resourceId,
+    accountId: arnObj.accountId,
+    region: arnObj.region,
+    service: arnObj.service,
+    partition: arnObj.partition,
+  };
 }
 
 export function groupARNsByAccount(arns: string[]): Record<string, string[]> {

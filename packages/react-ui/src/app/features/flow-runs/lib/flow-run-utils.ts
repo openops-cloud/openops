@@ -25,6 +25,7 @@ import {
   StepOutputStatus,
   Trigger,
 } from '@openops/shared';
+import { t } from 'i18next';
 
 export const flowRunUtils = {
   findFailedStep,
@@ -113,6 +114,11 @@ export const flowRunUtils = {
           variant: 'error',
           Icon: X,
         };
+    }
+  },
+  getStatusExplanation(status: FlowRunStatus): string | undefined {
+    if (status === FlowRunStatus.IGNORED) {
+      return t('Previous scheduled run is still in progress');
     }
   },
 };

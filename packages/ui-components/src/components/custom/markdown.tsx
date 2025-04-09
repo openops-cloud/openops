@@ -3,12 +3,13 @@ import { Alert, AlertDescription } from '../../ui/alert';
 import { Button } from '../../ui/button';
 import { useToast } from '../../ui/use-toast';
 
-import { useMutation } from '@tanstack/react-query';
 import { t } from 'i18next';
-import { Check, Copy } from 'lucide-react';
-import React, { useState } from 'react';
+import { Copy } from 'lucide-react';
+import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import validator from 'validator';
+import { clipboardUtils } from '../../lib/clipboard-utils';
+import { COPY_PASTE_TOAST_DURATION } from '../../lib/constants';
 
 function applyVariables(markdown: string, variables: Record<string, string>) {
   return markdown
@@ -81,23 +82,34 @@ const LanguageUrl = ({ content }: { content: string }) => {
 */
 const Markdown = React.memo(
   ({ markdown, variables, withBorder = true }: MarkdownProps) => {
-    const [copiedText, setCopiedText] = useState<string | null>(null);
     const { toast } = useToast();
 
-    const { mutate: copyToClipboard } = useMutation({
-      mutationFn: async (text: string) => {
-        await navigator.clipboard.writeText(text);
-        setCopiedText(text);
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        setCopiedText(null);
-      },
-      onError: () => {
-        toast({
-          title: t('Failed to copy to clipboard'),
-          duration: 3000,
+    const showCopySuccessToast = () =>
+      toast({
+        title: t('Copied to clipboard'),
+        duration: COPY_PASTE_TOAST_DURATION,
+      });
+
+    const showCopyFailureToast = () =>
+      toast({
+        title: t('Failed to copy to clipboard'),
+        duration: COPY_PASTE_TOAST_DURATION,
+      });
+
+    const copyToClipboard = (text: string) => {
+      if (navigator.clipboard) {
+        navigator.clipboard
+          .writeText(text)
+          .then(showCopySuccessToast)
+          .catch(showCopyFailureToast);
+      } else {
+        clipboardUtils.copyInInsecureContext({
+          text,
+          onSuccess: showCopySuccessToast,
+          onError: showCopyFailureToast,
         });
-      },
-    });
+      }
+    };
 
     if (!markdown) {
       return null;
@@ -117,7 +129,6 @@ const Markdown = React.memo(
               }
 
               const codeContent = String(props.children).trim();
-              const isCopying = codeContent === copiedText;
               return (
                 <div className="relative py-2 w-full">
                   {isLanguageUrl ? (
@@ -130,11 +141,7 @@ const Markdown = React.memo(
                     className="absolute right-2 top-1/2 -translate-y-1/2 bg-background rounded p-2 inline-flex items-center justify-center"
                     onClick={() => copyToClipboard(codeContent)}
                   >
-                    {isCopying ? (
-                      <Check className="w-4 h-4" />
-                    ) : (
-                      <Copy className="w-4 h-4" />
-                    )}
+                    <Copy className="w-4 h-4" />
                   </Button>
                 </div>
               );

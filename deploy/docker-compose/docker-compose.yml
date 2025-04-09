@@ -33,7 +33,7 @@ services:
     image: public.ecr.aws/openops/openops-engine:${OPS_VERSION:-latest}
     restart: unless-stopped
     env_file: .env
-    command: ["cp -r /var/tmp-base/. /tmp/ && node main.js"]
+    command: ["cp -r /var/tmp-base/. /tmp/ && node main.js; exit $?"]
     environment:
       OPS_BASE_CODE_DIRECTORY: /tmp/codes
       OPS_COMPONENT: engine

@@ -73,8 +73,3 @@ export interface User {
 }
 
 export type BoardResponse = { data: { boards: Board[] }; account_id: number };
-
-export interface WebhookInformation {
-  id: string;
-  board_id: string;
-}

@@ -1,5 +1,6 @@
 import { createBlock } from '@openops/blocks-framework';
 import { amazonAuth, getAccountAlias } from '@openops/common';
+import { BlockCategory } from '@openops/shared';
 import { addTagsAction } from './lib/actions/add-tags-action';
 import { buildArnAction } from './lib/actions/arn/build-arn-action';
 import { parseArnAction } from './lib/actions/arn/parse-arn-action';
@@ -30,6 +31,7 @@ export const aws = createBlock({
   minimumSupportedRelease: '0.8.0',
   authors: ['OpenOps'],
   auth: amazonAuth,
+  categories: [BlockCategory.CLOUD],
   actions: [
     buildArnAction,
     parseArnAction,

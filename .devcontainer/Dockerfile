@@ -31,3 +31,22 @@ RUN wget https://github.com/minamijoyo/hcledit/releases/download/v0.2.15/hcledit
   tar -C /usr/bin -xf /tmp/hcledit_0.2.15_linux_amd64.tar.gz && \
   chmod +x /usr/bin/hcledit && \
   rm /tmp/hcledit_0.2.15_linux_amd64.tar.gz
+
+# Install AWS CLI
+RUN curl -L "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
+&& unzip awscliv2.zip \
+&& ./aws/install \
+&& rm -rf aws awscliv2.zip
+
+# Install Azure CLI
+RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+
+# Install Google Cloud CLI
+RUN curl -sSL https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-516.0.0-linux-x86_64.tar.gz -o /tmp/gcloud.tar.gz \
+&& mkdir -p /opt && tar -C /opt -xf /tmp/gcloud.tar.gz \
+&& /opt/google-cloud-sdk/install.sh --quiet \
+&& /opt/google-cloud-sdk/bin/gcloud components install beta --quiet \
+&& ln -s /opt/google-cloud-sdk/bin/gcloud /usr/bin/gcloud \
+&& rm /tmp/gcloud.tar.gz
+
+ENV PATH="/opt/google-cloud-sdk/bin:$PATH"

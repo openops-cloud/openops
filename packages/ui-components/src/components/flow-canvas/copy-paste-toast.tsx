@@ -1,5 +1,6 @@
 import { t } from 'i18next';
 import { CircleCheckBig } from 'lucide-react';
+import { COPY_PASTE_TOAST_DURATION } from '../../lib/constants';
 import { toast } from '../../ui/use-toast';
 
 type CopyPasteToastProps = {
@@ -56,6 +57,6 @@ export const copyPasteToast = (props: CopyPasteToastProps) => {
       </div>
     ),
     closeButtonClassName: 'top-6 right-4 opacity-1 text-black dark:text-white',
-    duration: 2000,
+    duration: COPY_PASTE_TOAST_DURATION,
   });
 };

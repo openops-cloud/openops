@@ -164,14 +164,31 @@ export const createBuilderStore = (initialState: BuilderInitialState) =>
         selectStepByName: (stepName: string, openRightSideBar = true) => {
           set(
             (state) => {
+              if (
+                stepName === 'trigger' &&
+                state.flowVersion.trigger.type === TriggerType.EMPTY
+              ) {
+                return {
+                  selectedStep: stepName,
+                  rightSidebar: RightSideBarType.NONE,
+                  leftSidebar: getLeftSidebarOnSelectStep(state),
+                };
+              } else if (
+                stepName === 'trigger' &&
+                state.flowVersion.trigger.type === TriggerType.BLOCK
+              ) {
+                return {
+                  selectedStep: stepName,
+                  rightSidebar: RightSideBarType.BLOCK_SETTINGS,
+                  leftSidebar: getLeftSidebarOnSelectStep(state),
+                };
+              }
+
               return {
                 selectedStep: stepName,
-                rightSidebar:
-                  (stepName === 'trigger' &&
-                    state.flowVersion.trigger.type === TriggerType.EMPTY) ||
-                  !openRightSideBar
-                    ? RightSideBarType.NONE
-                    : RightSideBarType.BLOCK_SETTINGS,
+                rightSidebar: openRightSideBar
+                  ? RightSideBarType.BLOCK_SETTINGS
+                  : RightSideBarType.NONE,
                 leftSidebar: getLeftSidebarOnSelectStep(state),
               };
             },
@@ -434,6 +451,7 @@ const updateFlowVersion = (
     operation.request.name === state.selectedStep
   ) {
     set({ selectedStep: undefined });
+    set({ rightSidebar: RightSideBarType.NONE });
   }
 
   const updateRequest = async () => {

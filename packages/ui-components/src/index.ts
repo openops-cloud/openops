@@ -64,6 +64,7 @@ export * from './ui/warning-with-icon';
 export * from './ui/big-number-chart';
 
 /* export utils */
+export * from './lib/clipboard-utils';
 export * from './lib/cn';
 export * from './lib/color-util';
 export * from './lib/compose-refs';

@@ -1,5 +1,6 @@
 import { createBlock } from '@openops/blocks-framework';
 import { amazonAuth } from '@openops/common';
+import { BlockCategory } from '@openops/shared';
 import { getStack } from './lib/get/get-stack';
 import { deleteResourceFromTemplate } from './lib/modify/delete-resource-from-template';
 import { modifyTemplate } from './lib/modify/modify-template';
@@ -11,6 +12,7 @@ export const cloudformation = createBlock({
   minimumSupportedRelease: '0.20.0',
   logoUrl: 'https://static.openops.com/blocks/cloudformation.png',
   authors: ['OpenOps'],
+  categories: [BlockCategory.IaC, BlockCategory.CLOUD],
   actions: [getStack, updateStack, modifyTemplate, deleteResourceFromTemplate],
   triggers: [],
 });

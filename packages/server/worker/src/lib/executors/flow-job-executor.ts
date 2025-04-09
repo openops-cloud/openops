@@ -108,16 +108,21 @@ async function executeFlow(
       status !== EngineResponseStatus.OK ||
       result.status === FlowRunStatus.INTERNAL_ERROR
     ) {
-      await handleInternalError(
-        jobData,
-        engineToken,
-        new ApplicationError({
-          code: ErrorCode.ENGINE_OPERATION_FAILURE,
-          params: {
-            message: result.error?.message ?? 'internal error',
-          },
-        }),
-      );
+      const isTimeoutError = status === EngineResponseStatus.TIMEOUT;
+      if (isTimeoutError) {
+        await handleTimeoutError(jobData, engineToken);
+      } else {
+        await handleInternalError(
+          jobData,
+          engineToken,
+          new ApplicationError({
+            code: ErrorCode.ENGINE_OPERATION_FAILURE,
+            params: {
+              message: result.error?.message ?? 'internal error',
+            },
+          }),
+        );
+      }
     }
   } catch (e) {
     const isTimeoutError =

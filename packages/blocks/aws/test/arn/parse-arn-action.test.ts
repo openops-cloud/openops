@@ -21,6 +21,8 @@ describe('parseArnAction', () => {
       region: 'us-west-2',
       accountId: '123456789012',
       resourceId: 'i-1234567890abcdef0',
+      service: 'ec2',
+      partition: 'aws',
     });
   });
 });

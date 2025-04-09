@@ -64,6 +64,7 @@ module.exports = {
           200: 'hsl(var(--primary-200))',
           300: 'hsl(var(--primary-300))',
           400: 'hsl(var(--primary-400))',
+          800: 'hsl(var(--primary-800))',
         },
         blue: {
           50: 'hsl(var(--blue-50))',

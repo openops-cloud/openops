@@ -1,10 +1,5 @@
-import {
-  createAction,
-  Property,
-  StoreScope,
-  Validators,
-} from '@openops/blocks-framework';
-import { BlockStoreScope, getScopeAndKey } from './common';
+import { createAction, Property, Validators } from '@openops/blocks-framework';
+import { common, getScopeAndKey } from './common';
 
 export const storageGetAction = createAction({
   name: 'get',
@@ -28,28 +23,7 @@ export const storageGetAction = createAction({
       displayName: 'Default Value',
       required: false,
     }),
-    store_scope: Property.StaticDropdown({
-      displayName: 'Store Scope',
-      description: 'The storage scope of the value.',
-      required: true,
-      options: {
-        options: [
-          {
-            label: 'Project',
-            value: BlockStoreScope.PROJECT,
-          },
-          {
-            label: 'Flow',
-            value: BlockStoreScope.FLOW,
-          },
-          {
-            label: 'Run',
-            value: BlockStoreScope.RUN,
-          },
-        ],
-      },
-      defaultValue: StoreScope.PROJECT,
-    }),
+    store_scope: common.store_scope,
   },
   async run(context) {
     const { key, scope } = getScopeAndKey({

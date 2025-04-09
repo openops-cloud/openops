@@ -4,6 +4,7 @@ import {
   Property,
   Validators,
 } from '@openops/blocks-framework';
+import Decimal from 'decimal.js';
 
 export const division = createAction({
   name: 'division_math',
@@ -32,8 +33,7 @@ export const division = createAction({
     }),
   },
   async run(context) {
-    return (
-      context.propsValue['first_number'] / context.propsValue['second_number']
-    );
+    const { first_number, second_number } = context.propsValue;
+    return Decimal.div(first_number, second_number).toNumber();
   },
 });

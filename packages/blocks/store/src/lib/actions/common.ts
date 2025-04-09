@@ -37,19 +37,19 @@ export const common = {
     options: {
       options: [
         {
-          label: 'Project',
-          value: BlockStoreScope.PROJECT,
+          label: 'Within a single run of this workflow',
+          value: BlockStoreScope.RUN,
         },
         {
-          label: 'Flow',
+          label: 'Between all runs of this workflow',
           value: BlockStoreScope.FLOW,
         },
         {
-          label: 'Run',
-          value: BlockStoreScope.RUN,
+          label: 'Between all runs of all workflows',
+          value: BlockStoreScope.PROJECT,
         },
       ],
     },
-    defaultValue: BlockStoreScope.PROJECT,
+    defaultValue: BlockStoreScope.RUN,
   }),
 };
