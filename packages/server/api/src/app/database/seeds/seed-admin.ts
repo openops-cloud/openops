@@ -1,8 +1,12 @@
 import { AppSystemProp, logger, system } from '@openops/server-shared';
-import { User } from '@openops/shared';
+import { OrganizationRole, User } from '@openops/shared';
 import { authenticationService } from '../../authentication/authentication-service';
 import { Provider } from '../../authentication/authentication-service/hooks/authentication-service-hooks';
 import { userService } from '../../user/user-service';
+import { openopsTables } from '../../openops-tables';
+import { authenticateDefaultUserInOpenOpsTables } from '@openops/common';
+import { organizationService } from '../../organization/organization.service';
+import { projectService } from '../../project/project-service';
 
 async function signIn(email: string, password: string) {
   await authenticationService.signIn({
@@ -24,6 +28,40 @@ async function upsertAdminEmail(user: User, email: string) {
   logger.info(`Updating admin email from [${user.email}] to [${email}]`, email);
   await userService.updateEmail({ id: user.id, newEmail: email });
   user.email = email;
+}
+
+const DEFAULT_ORGANIZATION_NAME = 'organization';
+
+async function createAdmin(email: string, password: string) {
+  const user = await userService.create({
+    email,
+    password,
+    organizationRole: OrganizationRole.ADMIN,
+    organizationId: null,
+    verified: true,
+    firstName: 'OpenOps',
+    lastName: 'Admin',
+    trackEvents: false,
+    newsLetter: false,
+  })
+
+  const { token } = await authenticateDefaultUserInOpenOpsTables();
+
+  const { workspaceId, databaseId } =
+    await openopsTables.createDefaultWorkspaceAndDatabase(token);
+
+  const organization = await organizationService.create({
+    ownerId: user.id,
+    name: DEFAULT_ORGANIZATION_NAME,
+    tablesWorkspaceId: workspaceId,
+  });
+
+  await projectService.create({
+    displayName: `${user.firstName}'s Project`,
+    ownerId: user.id,
+    organizationId: organization.id,
+    tablesDatabaseId: databaseId,
+  });
 }
 
 export const upsertAdminUser = async (): Promise<void> => {
@@ -52,18 +90,8 @@ export const upsertAdminUser = async (): Promise<void> => {
       return;
     }
 
-    logger.info(`Admin user does not exist, signing up`);
-    await authenticationService.signUp({
-      email,
-      password,
-      firstName: 'OpenOps',
-      lastName: 'Admin',
-      trackEvents: false,
-      newsLetter: false,
-      verified: true,
-      organizationId: null,
-      provider: Provider.EMAIL,
-    });
-    logger.info(`Successfully signed up as admin [${email}]`, email);
+    logger.info(`Admin user does not exist, creating it`);
+    await createAdmin(email, password);
+    logger.info(`Successfully created admin [${email}]`, email);
   }
 };
