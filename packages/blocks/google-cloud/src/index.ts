@@ -1,7 +1,7 @@
 import { createBlock } from '@openops/blocks-framework';
 import { googleCloudAuth } from '@openops/common';
-import { getRecommendationsAction } from './lib/actions/get-recommendations-cli-action';
 import { BlockCategory } from '@openops/shared';
+import { getRecommendationsAction } from './lib/actions/get-recommendations-cli-action';
 import { googleCloudCliAction } from './lib/actions/google-cloud-cli-action';
 
 export const googleCloud = createBlock({
