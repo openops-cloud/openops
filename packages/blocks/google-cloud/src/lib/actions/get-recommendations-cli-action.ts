@@ -10,7 +10,7 @@ import { runCommand, runCommands } from '../google-cloud-cli';
 export const getRecommendationsAction = createAction({
   auth: googleCloudAuth,
   name: 'google_get_recommendations_cli',
-  description: 'Fetch the recommendations for the provided recommenders',
+  description: 'Fetch the recommendations for the selected recommenders',
   displayName: 'Get Recommendations',
   props: {
     useHostSession: getUseHostSessionProperty(
