@@ -15,7 +15,7 @@ export const navigationUtil = {
   },
 
   get: () => {
-    return localStorage.getItem(LAST_VISITED_KEY) || '/';
+    return localStorage.getItem(LAST_VISITED_KEY) ?? '/';
   },
 
   clear: () => {
