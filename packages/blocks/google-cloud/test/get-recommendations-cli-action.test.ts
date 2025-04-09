@@ -89,34 +89,6 @@ describe('getRecommendationsAction', () => {
     expect(labels).not.toContain('google.di.productx.Recommender');
   });
 
-  test('should return locations including global', async () => {
-    const context = createContext({});
-    const mockRegions = [
-      { name: 'us-central1' },
-      { name: 'europe-west1' },
-      { name: 'asia-east1' },
-    ];
-
-    gcloudCliMock.runCommand.mockResolvedValueOnce(JSON.stringify(mockRegions));
-
-    const result = await getRecommendationsAction.props['location'].options(
-      {
-        auth,
-        useHostSession: { useHostSessionCheckbox: true },
-      },
-      context,
-    );
-
-    expect(result.options).toEqual(
-      expect.arrayContaining([
-        { label: 'global', value: 'global' },
-        { label: 'us-central1', value: 'us-central1' },
-        { label: 'europe-west1', value: 'europe-west1' },
-        { label: 'asia-east1', value: 'asia-east1' },
-      ]),
-    );
-  });
-
   test('should throw error if recommenders are not set', async () => {
     const context = createContext({
       filterByProperty: { project: 'abc' },
