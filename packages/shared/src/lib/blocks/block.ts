@@ -34,7 +34,7 @@ export type BlockPackage = PrivateBlockPackage | PublicBlockPackage;
 
 export enum BlockCategory {
   CLOUD = 'CLOUD',
-  COLLABORATION = 'COLLABORATION',
+  COMMUNICATION = 'COMMUNICATION',
   CORE = 'CORE',
   DATA = 'DATA',
   FINOPS = 'FINOPS',
