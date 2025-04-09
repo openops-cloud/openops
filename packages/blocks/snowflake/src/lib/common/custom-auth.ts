@@ -1,4 +1,4 @@
-import { BlockAuth, Property } from '@openops/blocks-framework';
+import { BlockAuth, Property, Validators } from '@openops/blocks-framework';
 
 const markdown = `
 1.  Go to the [Snowflake Login Page](https://app.snowflake.com/) and log in to your account.
@@ -29,6 +29,17 @@ export const customAuth = BlockAuth.CustomAuth({
       displayName: 'Password',
       description: 'Password for the user.',
       required: true,
+    }),
+    maxLoginRetries: Property.Number({
+      displayName: 'Max Login Retries',
+      description: 'The maximum number of times to retry login',
+      required: true,
+      defaultValue: 2,
+      validators: [
+        Validators.number,
+        Validators.minValue(0),
+        Validators.maxValue(7),
+      ],
     }),
     database: Property.ShortText({
       displayName: 'Database',
