@@ -18,7 +18,7 @@ services:
     environment:
       OPS_COMPONENT: app
       OPS_VERSION: ${OPS_VERSION:-latest}
-      OPS_OPENOPS_TABLES_VERSION: 0.1.8
+      OPS_OPENOPS_TABLES_VERSION: 0.1.10
       OPS_ANALYTICS_VERSION: 0.12.18
     depends_on:
       openops-tables:
@@ -44,7 +44,7 @@ services:
       - ${HOST_AZURE_CONFIG_DIR:-openops_azure_cli_data}:/tmp/azure
       - ${HOST_CLOUDSDK_CONFIG:-openops_gcloud_cli_data}:/tmp/gcloud
   openops-tables:
-    image: 586998899304.dkr.ecr.us-east-2.amazonaws.com/openops-tables:support-admin-env-credentials-latest
+    image: public.ecr.aws/openops/openops-tables:0.1.10
     restart: unless-stopped
     environment:
       BASEROW_PUBLIC_URL: ${OPS_OPENOPS_TABLES_PUBLIC_URL}
