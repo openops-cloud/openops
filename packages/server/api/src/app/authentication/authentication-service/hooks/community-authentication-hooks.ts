@@ -16,7 +16,6 @@ import { userService } from '../../../user/user-service';
 import { accessTokenManager } from '../../lib/access-token-manager';
 import { AuthenticationServiceHooks } from './authentication-service-hooks';
 
-
 export const communityAuthenticationServiceHooks: AuthenticationServiceHooks = {
   async preSignIn() {
     // Empty

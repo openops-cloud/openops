@@ -1,12 +1,12 @@
+import { authenticateDefaultUserInOpenOpsTables } from '@openops/common';
 import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { OrganizationRole, User } from '@openops/shared';
 import { authenticationService } from '../../authentication/authentication-service';
 import { Provider } from '../../authentication/authentication-service/hooks/authentication-service-hooks';
-import { userService } from '../../user/user-service';
 import { openopsTables } from '../../openops-tables';
-import { authenticateDefaultUserInOpenOpsTables } from '@openops/common';
 import { organizationService } from '../../organization/organization.service';
 import { projectService } from '../../project/project-service';
+import { userService } from '../../user/user-service';
 
 async function signIn(email: string, password: string) {
   await authenticationService.signIn({
@@ -43,7 +43,7 @@ async function createAdmin(email: string, password: string) {
     lastName: 'Admin',
     trackEvents: false,
     newsLetter: false,
-  })
+  });
 
   const { token } = await authenticateDefaultUserInOpenOpsTables();
 
