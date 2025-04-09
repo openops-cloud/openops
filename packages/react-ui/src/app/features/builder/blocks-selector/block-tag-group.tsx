@@ -56,7 +56,6 @@ const tags: Record<
   },
 };
 type BlockTagGroupProps = {
-  type: 'action' | 'trigger';
   selectedTag?: TagKey;
   onSelectTag: (tag: TagKey) => void;
 };

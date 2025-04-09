@@ -291,19 +291,17 @@ const BlockSelector = ({
             }}
           />
         </div>
-        <BlockTagGroup
-          selectedTag={selectedTag}
-          type={
-            operation.type === FlowOperationType.UPDATE_TRIGGER
-              ? 'trigger'
-              : 'action'
-          }
-          onSelectTag={(value) => {
-            setSelectedTag(value);
-            setSelectedSubItems(undefined);
-            setSelectedMetadata(undefined);
-          }}
-        />
+        {operation.type !== FlowOperationType.UPDATE_TRIGGER && (
+          <BlockTagGroup
+            selectedTag={selectedTag}
+            onSelectTag={(value) => {
+              setSelectedTag(value);
+              setSelectedSubItems(undefined);
+              setSelectedMetadata(undefined);
+            }}
+          />
+        )}
+
         <Separator orientation="horizontal" />
         <div className="flex overflow-y-auto max-h-[300px] h-[300px]">
           <CardList className="w-[250px] min-w-[250px]">
