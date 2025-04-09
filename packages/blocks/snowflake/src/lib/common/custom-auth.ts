@@ -12,7 +12,7 @@ const markdown = `
 
 For the **Password**, you will need to provide the same password you use to log in to your Snowflake account.
 
-**Important:** Please note that providing an incorrect Account Identifier will not result in an immediate connection failure. The system will attempt to connect for approximately 5 minutes before timing out with a generic error message: "Request to Snowflake failed.". Ensure you have accurately copied your Account Identifier to avoid these delays.
+**Important:** Increasing the default \`maxLoginRetries\` setting can significantly extend response times if the **Account Identifier** is incorrect. The system will repeatedly attempt to connect, potentially delaying feedback before ultimately failing with a generic error message: "Request to Snowflake failed.".
 `;
 
 export const customAuth = BlockAuth.CustomAuth({
