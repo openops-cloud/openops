@@ -8,8 +8,6 @@ import { getItemsColumnValuesAction } from './lib/actions/get-column-values';
 import { updateColumnValuesOfItemAction } from './lib/actions/update-column-values-of-item';
 import { updateItemNameAction } from './lib/actions/update-item-name';
 import { uploadFileToColumnAction } from './lib/actions/upload-file-to-column';
-import { newItemInBoardTrigger } from './lib/triggers/new-item-in-board';
-import { specificColumnValueUpdatedTrigger } from './lib/triggers/specific-column-updated';
 
 const markdown = `
 1.Log into your monday.com account.\n
@@ -52,5 +50,5 @@ export const monday = createBlock({
     updateItemNameAction,
     uploadFileToColumnAction,
   ],
-  triggers: [newItemInBoardTrigger, specificColumnValueUpdatedTrigger],
+  triggers: [],
 });
