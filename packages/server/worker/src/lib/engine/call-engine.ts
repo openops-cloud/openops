@@ -15,7 +15,7 @@ import {
   EngineResponse,
   EngineResponseStatus,
 } from '@openops/shared';
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import { nanoid } from 'nanoid';
 import {
   EngineHelperFlowResult,
