@@ -1,8 +1,5 @@
-import {
-  Application,
-  createAxiosHeaders,
-  makeOpenOpsTablesPost,
-} from '@openops/common';
+import { Application, createAxiosHeaders } from '@openops/common';
+import { resilientPost } from './utils';
 
 export async function createDatabase(
   workspaceId: number,
@@ -15,9 +12,10 @@ export async function createDatabase(
     init_with_data: false,
   };
 
-  return makeOpenOpsTablesPost<Application>(
-    `api/applications/workspace/${workspaceId}/`,
+  const createDatabaseEndpoint = `api/applications/workspace/${workspaceId}/`;
+  return resilientPost(
+    createDatabaseEndpoint,
     requestBody,
     createAxiosHeaders(token),
-  );
+  ) as Promise<Application>;
 }

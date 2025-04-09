@@ -1,4 +1,5 @@
-import { createAxiosHeaders, makeOpenOpsTablesPost } from '@openops/common';
+import { createAxiosHeaders } from '@openops/common';
+import { resilientPost } from './utils';
 
 export async function addUserToWorkspace(
   token: string,
@@ -13,9 +14,10 @@ export async function addUserToWorkspace(
     permissions: values.permissions ?? 'MEMBER',
   };
 
-  return makeOpenOpsTablesPost<{ name: string; id: number }>(
-    `api/workspaces/${values.workspaceId}/user/`,
+  const addUserToWorkspaceEndpoint = `api/workspaces/${values.workspaceId}/user/`;
+  return resilientPost(
+    addUserToWorkspaceEndpoint,
     requestBody,
     createAxiosHeaders(token),
-  );
+  ) as Promise<{ name: string; id: number }>;
 }

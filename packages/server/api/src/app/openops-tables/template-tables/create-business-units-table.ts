@@ -5,7 +5,7 @@ import {
 } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { openopsTables } from '../index';
-import { resilientPatch, resilientPost } from './utils';
+import { resilientPatch, resilientPost } from '../utils';
 
 export async function createBusinessUnitsTable(
   databaseId: number,

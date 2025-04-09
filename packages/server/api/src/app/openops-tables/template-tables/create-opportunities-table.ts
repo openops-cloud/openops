@@ -6,7 +6,7 @@ import {
 } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { createTable } from '../create-table';
-import { resilientPatch, resilientPost } from './utils';
+import { resilientPatch, resilientPost } from '../utils';
 
 export const SEED_OPENOPS_TABLE_NAME = 'Opportunities';
 

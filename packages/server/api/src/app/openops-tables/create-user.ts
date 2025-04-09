@@ -1,4 +1,5 @@
-import { AuthUser, makeOpenOpsTablesPost } from '@openops/common';
+import { AuthUser } from '@openops/common';
+import { resilientPost } from './utils';
 
 export async function createUser(values: {
   name: string;
@@ -13,5 +14,6 @@ export async function createUser(values: {
     authenticate: values.authenticate ?? false,
   };
 
-  return makeOpenOpsTablesPost<AuthUser>('api/user/', requestBody);
+  const createUserEndpoint = 'api/user/';
+  return resilientPost(createUserEndpoint, requestBody) as Promise<AuthUser>;
 }
