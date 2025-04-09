@@ -2,13 +2,14 @@ import { LoadingSpinner } from '@openops/components/ui';
 import dayjs from 'dayjs';
 import { jwtDecode } from 'jwt-decode';
 import { Suspense } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { platformHooks } from '@/app/common/hooks/platform-hooks';
 import { projectHooks } from '@/app/common/hooks/project-hooks';
 import { userSettingsHooks } from '@/app/common/hooks/user-settings-hooks';
 import { SocketProvider } from '@/app/common/providers/socket-provider';
+import { lastVisitedUtils } from '@/app/features/authentication/lib/last-visited';
 import { authenticationSession } from '@/app/lib/authentication-session';
 import { userHooks } from '../hooks/user-hooks';
 
@@ -33,7 +34,10 @@ type AllowOnlyLoggedInUserOnlyGuardProps = {
 export const AllowOnlyLoggedInUserOnlyGuard = ({
   children,
 }: AllowOnlyLoggedInUserOnlyGuardProps) => {
+  const location = useLocation();
   if (!authenticationSession.isLoggedIn()) {
+    // todo - clear this on explicit sign-out
+    lastVisitedUtils.save(location.pathname + location.search);
     return <Navigate to="/sign-in" replace />;
   }
   const token = authenticationSession.getToken();

@@ -25,6 +25,7 @@ import {
   OpsEdition,
   SignInRequest,
 } from '@openops/shared';
+import { lastVisitedUtils } from '../lib/last-visited';
 import { emailRegex } from '../lib/password-validation-utils';
 
 const SignInSchema = Type.Object({
@@ -62,7 +63,11 @@ const SignInForm: React.FC = () => {
     mutationFn: authenticationApi.signIn,
     onSuccess: (data) => {
       authenticationSession.saveResponse(data);
-      navigate('/');
+
+      const lastVisitedPage = lastVisitedUtils.get();
+      lastVisitedUtils.clear();
+      const nextPage = lastVisitedPage ?? '/';
+      navigate(nextPage);
     },
     onError: (error) => {
       if (api.isError(error)) {

@@ -3,6 +3,7 @@ import { jwtDecode } from 'jwt-decode';
 
 import { authenticationApi } from '@/app/lib/authentication-api';
 import { AuthenticationResponse, isNil } from '@openops/shared';
+import { lastVisitedUtils } from '../features/authentication/lib/last-visited';
 import { projectAuth } from './project-auth';
 
 const tokenKey = 'token';
@@ -76,6 +77,7 @@ export const authenticationSession = {
   async logOut() {
     await authenticationApi.signOut();
     localStorage.removeItem(currentUserKey);
+    lastVisitedUtils.clear();
 
     if (
       !(
