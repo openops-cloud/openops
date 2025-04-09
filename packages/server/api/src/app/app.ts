@@ -26,6 +26,7 @@ import {
   UserInvitation,
 } from '@openops/shared';
 import { createAdapter } from '@socket.io/redis-adapter';
+import chalk from 'chalk';
 import { FastifyInstance, FastifyRequest, HTTPMethods } from 'fastify';
 import fastifySocketIO from 'fastify-socket.io';
 import * as process from 'node:process';
@@ -307,7 +308,7 @@ async function getAdapter() {
 }
 
 export async function appPostBoot(): Promise<void> {
-  logger.info(`
+  logger.info(`${chalk.greenBright(`
 
     _______                    _______
     __  __ \\_____________________  __ \\_______________
@@ -315,19 +316,19 @@ export async function appPostBoot(): Promise<void> {
     / /_/ /__  /_/ /  __/  / / / /_/ /__  /_/ /(__  )
     \\____/ _  .___/\\___//_/ /_/\\____/ _  .___//____/
            /_/                        /_/
-
+`)}
 The application started on ${system.get(
     SharedSystemProp.FRONTEND_URL,
   )}, as specified by the OPS_FRONTEND_URL variables.
 `);
 
-  const environment = system.get(SharedSystemProp.ENVIRONMENT);
   const blocksSource = system.getOrThrow(SharedSystemProp.BLOCKS_SOURCE);
 
-  logger.info(`Application version: ${process.env.OPS_VERSION}`);
+  logger.info(`Application version: ${system.get(SharedSystemProp.VERSION)}`);
   logger.info(`Node version: ${process.version}`);
   logger.info(`Blocks will be loaded from source type ${blocksSource}`);
 
+  const environment = system.get(SharedSystemProp.ENVIRONMENT);
   if (environment === EnvironmentType.DEVELOPMENT) {
     logger.warn(
       `[WARNING]: The application is running in ${environment} mode.`,

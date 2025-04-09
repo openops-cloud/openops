@@ -1,5 +1,10 @@
 import { authenticateUserInOpenOpsTables } from '@openops/common';
-import { logger, SharedSystemProp, system } from '@openops/server-shared';
+import {
+  AppSystemProp,
+  logger,
+  SharedSystemProp,
+  system,
+} from '@openops/server-shared';
 import {
   ApplicationError,
   AuthenticationResponse,
@@ -24,12 +29,18 @@ export const authenticationService = {
     await hooks.get().preSignUp(params);
     const user = await createUser(params);
 
-    const { token, refresh_token } = await openopsTables.createUser({
-      name: `${params.firstName} ${params.lastName}`,
-      email: params.email,
-      password: params.password,
-      authenticate: true,
-    });
+    // The default superuser should already exist, since the tables container
+    // creates it on startup, and update its password if it was changed.
+    const isSuperuser =
+      params.email == system.getOrThrow(AppSystemProp.OPENOPS_ADMIN_EMAIL);
+    const { token, refresh_token } = isSuperuser
+      ? await authenticateUserInOpenOpsTables(params.email, params.password)
+      : await openopsTables.createUser({
+          name: `${params.firstName} ${params.lastName}`,
+          email: params.email,
+          password: params.password,
+          authenticate: true,
+        });
 
     return this.signUpResponse({
       user,
