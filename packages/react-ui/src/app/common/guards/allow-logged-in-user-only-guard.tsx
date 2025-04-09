@@ -9,8 +9,8 @@ import { platformHooks } from '@/app/common/hooks/platform-hooks';
 import { projectHooks } from '@/app/common/hooks/project-hooks';
 import { userSettingsHooks } from '@/app/common/hooks/user-settings-hooks';
 import { SocketProvider } from '@/app/common/providers/socket-provider';
-import { lastVisitedUtils } from '@/app/features/authentication/lib/last-visited';
 import { authenticationSession } from '@/app/lib/authentication-session';
+import { lastVisitedUtils } from '@/app/lib/last-visited';
 import { userHooks } from '../hooks/user-hooks';
 
 function isJwtExpired(token: string): boolean {
