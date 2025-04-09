@@ -40,7 +40,6 @@ RUN <<-```
     mkdir -p /opt && tar -C /opt -xf /tmp/gcloud.tar.gz
     /opt/google-cloud-sdk/install.sh --quiet
     /opt/google-cloud-sdk/bin/gcloud components install beta --quiet
-    /opt/google-cloud-sdk/bin/gcloud beta --help
 
     chmod -R +x /opt/google-cloud-sdk/bin/
     ln -s /opt/google-cloud-sdk/bin/gcloud /usr/bin/gcloud
