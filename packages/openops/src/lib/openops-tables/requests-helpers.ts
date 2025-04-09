@@ -1,4 +1,4 @@
-import { AppSystemProp, system } from '@openops/server-shared';
+import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { AxiosHeaders, AxiosResponse, Method } from 'axios';
 import { makeHttpRequest } from '../axios-wrapper';
 
@@ -75,12 +75,23 @@ async function makeOpenOpsTablesRequest<T>(
   headers?: AxiosHeaders,
   url?: string,
 ): Promise<T> {
+  const startTime = performance.now();
+
   const baseUrl = system.get(AppSystemProp.OPENOPS_TABLES_API_URL);
 
-  return await makeHttpRequest(
+  const response = await makeHttpRequest<T>(
     method,
     url ?? `${baseUrl}/openops-tables/${route}`,
     headers,
     body,
   );
+
+  const endTime = performance.now();
+
+  logger.info(`Tables request took ${(endTime - startTime).toFixed(2)} ms`, {
+    route: url ?? `${baseUrl}/openops-tables/${route}`,
+    method,
+  });
+
+  return response;
 }
