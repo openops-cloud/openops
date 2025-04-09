@@ -1,4 +1,5 @@
 import { createBlock } from '@openops/blocks-framework';
+import { BlockCategory } from '@openops/shared';
 import { createPullRequestAction } from './lib/actions/create-pull-request-action';
 import { getFileAction } from './lib/actions/get-file-action';
 import { runWorkflowAction } from './lib/actions/run-workflow-action';
@@ -11,5 +12,6 @@ export const github = createBlock({
   logoUrl: 'https://static.openops.com/blocks/github.png',
   authors: [],
   actions: [getFileAction, createPullRequestAction, runWorkflowAction],
+  categories: [BlockCategory.IaC],
   triggers: [],
 });

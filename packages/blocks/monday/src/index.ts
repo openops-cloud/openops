@@ -29,7 +29,7 @@ export const monday = createBlock({
 
   minimumSupportedRelease: '0.5.0',
   logoUrl: 'https://static.openops.com/blocks/monday.png',
-  categories: [BlockCategory.PRODUCTIVITY],
+  categories: [BlockCategory.PROJECT_MANAGEMENT],
   authors: [
     'kanarelo',
     'haseebrehmanpc',
