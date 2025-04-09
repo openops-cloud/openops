@@ -277,6 +277,9 @@ const BlockSelector = ({
       <PopoverContent
         className="w-[600px] p-0 shadow-lg"
         onClick={(e) => e.stopPropagation()}
+        onContextMenu={(e) => {
+          e.stopPropagation();
+        }}
       >
         <div className="p-2">
           <Input
