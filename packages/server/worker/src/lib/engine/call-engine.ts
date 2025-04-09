@@ -15,7 +15,7 @@ import {
   EngineResponse,
   EngineResponseStatus,
 } from '@openops/shared';
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import { nanoid } from 'nanoid';
 import {
   EngineHelperFlowResult,
@@ -58,6 +58,7 @@ export async function callEngineLambda<Result extends EngineHelperResult>(
     lock = await memoryLock.acquire(`engine-${requestKey}`);
   }
 
+  const deadlineTimestamp = Date.now() + timeout * 1000;
   try {
     if (shouldUseCache(operation) && requestKey) {
       engineResult = await cacheWrapper.getSerializedObject<unknown>(
@@ -79,7 +80,6 @@ export async function callEngineLambda<Result extends EngineHelperResult>(
       timeoutSeconds: timeout,
     });
 
-    const deadlineTimestamp = Date.now() + timeout * 1000;
     const requestResponse = await axios.post(
       `${ENGINE_URL}`,
       {
@@ -107,11 +107,7 @@ export async function callEngineLambda<Result extends EngineHelperResult>(
     let status = EngineResponseStatus.ERROR;
     let errorMessage =
       'An unexpected error occurred while making a request to the engine.';
-    if (
-      axios.isAxiosError(error) &&
-      (error as AxiosError).code === 'ECONNABORTED' &&
-      (error as AxiosError).message.includes('timeout')
-    ) {
+    if (Date.now() > deadlineTimestamp) {
       errorMessage = 'Engine execution timed out.';
       status = EngineResponseStatus.TIMEOUT;
     }
