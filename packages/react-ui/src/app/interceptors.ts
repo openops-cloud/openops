@@ -43,7 +43,10 @@ axios.interceptors.response.use(
 
       if (axiosError.request.responseURL !== OPENOPS_CLOUD_USER_INFO_API_URL) {
         console.warn('JWT expired logging out');
-        authenticationSession.logOut();
+        authenticationSession.logOut({
+          userInitiated: false,
+        });
+        window.location.reload();
       }
     }
     return Promise.reject(error);

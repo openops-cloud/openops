@@ -1,6 +1,6 @@
 const LAST_VISITED_KEY = 'last_visited_page';
 
-export const lastVisitedUtils = {
+export const navigationUtil = {
   save: (path: string) => {
     const authPages = [
       '/sign-in',

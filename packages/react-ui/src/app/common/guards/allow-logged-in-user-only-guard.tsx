@@ -2,7 +2,7 @@ import { LoadingSpinner } from '@openops/components/ui';
 import dayjs from 'dayjs';
 import { jwtDecode } from 'jwt-decode';
 import { Suspense } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { platformHooks } from '@/app/common/hooks/platform-hooks';
@@ -10,7 +10,7 @@ import { projectHooks } from '@/app/common/hooks/project-hooks';
 import { userSettingsHooks } from '@/app/common/hooks/user-settings-hooks';
 import { SocketProvider } from '@/app/common/providers/socket-provider';
 import { authenticationSession } from '@/app/lib/authentication-session';
-import { lastVisitedUtils } from '@/app/lib/last-visited';
+import { navigationUtil } from '@/app/lib/navogation-util';
 import { userHooks } from '../hooks/user-hooks';
 
 function isJwtExpired(token: string): boolean {
@@ -35,16 +35,23 @@ export const AllowOnlyLoggedInUserOnlyGuard = ({
   children,
 }: AllowOnlyLoggedInUserOnlyGuardProps) => {
   const location = useLocation();
+  const navigate = useNavigate();
+
   if (!authenticationSession.isLoggedIn()) {
-    // todo - clear this on explicit sign-out
-    lastVisitedUtils.save(location.pathname + location.search);
+    navigationUtil.save(location.pathname + location.search);
     return <Navigate to="/sign-in" replace />;
   }
+
   const token = authenticationSession.getToken();
   if (!token || isJwtExpired(token)) {
-    authenticationSession.logOut();
+    navigationUtil.save(location.pathname + location.search);
+    authenticationSession.logOut({
+      userInitiated: false,
+      navigate,
+    });
     return <Navigate to="/sign-in" replace />;
   }
+
   projectHooks.prefetchProject();
   platformHooks.prefetchPlatform();
   flagsHooks.useFlags();
