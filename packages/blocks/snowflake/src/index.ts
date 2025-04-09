@@ -1,4 +1,5 @@
 import { createBlock } from '@openops/blocks-framework';
+import { BlockCategory } from '@openops/shared';
 import { insertRow } from './lib/actions/insert-row';
 import { runMultipleQueries } from './lib/actions/run-multiple-queries';
 import { runQuery } from './lib/actions/run-query';
@@ -11,6 +12,7 @@ export const snowflake = createBlock({
   minimumSupportedRelease: '0.20.0',
   logoUrl: 'https://static.openops.com/blocks/snowflake-logo.svg',
   authors: [],
+  categories: [BlockCategory.DATA],
   actions: [runQuery, runMultipleQueries, insertRow],
   triggers: [],
 });

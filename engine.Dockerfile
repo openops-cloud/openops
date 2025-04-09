@@ -39,6 +39,7 @@ RUN <<-```
     curl -sSL https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-516.0.0-linux-x86_64.tar.gz -o /tmp/gcloud.tar.gz
     mkdir -p /opt && tar -C /opt -xf /tmp/gcloud.tar.gz
     /opt/google-cloud-sdk/install.sh --quiet
+    /opt/google-cloud-sdk/bin/gcloud components install beta --quiet
 
     chmod -R +x /opt/google-cloud-sdk/bin/
     ln -s /opt/google-cloud-sdk/bin/gcloud /usr/bin/gcloud

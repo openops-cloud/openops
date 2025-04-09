@@ -3,7 +3,6 @@ import {
   Action,
   ActionType,
   BlockAction,
-  BlockCategory,
   BlockTrigger,
   BranchOperator,
   CodeAction,
@@ -33,11 +32,6 @@ function toKey(stepMetadata: StepMetadata): string {
   }
 }
 
-const isCoreBlock = (block: StepMetadata) =>
-  block.type !== TriggerType.BLOCK && block.type !== ActionType.BLOCK
-    ? true
-    : (block as BlockStepMetadata).categories.includes(BlockCategory.CORE);
-
 const getStepName = (block: StepMetadata, flowVersion: FlowVersion) => {
   if (block.type === TriggerType.BLOCK) {
     return 'trigger';
@@ -50,16 +44,6 @@ const getStepName = (block: StepMetadata, flowVersion: FlowVersion) => {
   }
   return `${baseName}${number}`;
 };
-
-const isAiBlock = (block: StepMetadata) =>
-  block.type === TriggerType.BLOCK || block.type === ActionType.BLOCK
-    ? (block as BlockStepMetadata).categories.includes(
-        BlockCategory.ARTIFICIAL_INTELLIGENCE,
-      )
-    : false;
-
-const isAppBlock = (block: StepMetadata) =>
-  !isAiBlock(block) && !isCoreBlock(block);
 
 const getDefaultStep = ({
   stepName,
@@ -208,9 +192,6 @@ const getDefaultStep = ({
 
 export const blockSelectorUtils = {
   getDefaultStep,
-  isCoreBlock,
   getStepName,
-  isAiBlock,
-  isAppBlock,
   toKey,
 };

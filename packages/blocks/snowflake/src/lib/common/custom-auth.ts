@@ -1,4 +1,7 @@
-import { BlockAuth, Property } from '@openops/blocks-framework';
+import { HttpError } from '@openops/blocks-common';
+import { BlockAuth, Property, Validators } from '@openops/blocks-framework';
+import { configureConnection } from './configure-connection';
+import { connect } from './utils';
 
 const markdown = `
 1.  Go to the [Snowflake Login Page](https://app.snowflake.com/) and log in to your account.
@@ -9,7 +12,7 @@ const markdown = `
 
 For the **Password**, you will need to provide the same password you use to log in to your Snowflake account.
 
-**Important:** Please note that providing an incorrect Account Identifier will not result in an immediate connection failure. The system will attempt to connect for approximately 5 minutes before timing out with a generic error message: "Request to Snowflake failed.". Ensure you have accurately copied your Account Identifier to avoid these delays.
+If you're experiencing delays, double-check that your **Account Identifier** is correct. An incorrect identifier combined with an increased **Max Login Retries** value will cause the system to repeatedly try connecting, resulting in longer wait times before it eventually fails with the error: "Request to Snowflake failed."
 `;
 
 export const customAuth = BlockAuth.CustomAuth({
@@ -29,6 +32,17 @@ export const customAuth = BlockAuth.CustomAuth({
       displayName: 'Password',
       description: 'Password for the user.',
       required: true,
+    }),
+    maxLoginRetries: Property.Number({
+      displayName: 'Max Login Retries',
+      description: 'The maximum number of times to retry login',
+      required: true,
+      defaultValue: 2,
+      validators: [
+        Validators.number,
+        Validators.minValue(0),
+        Validators.maxValue(7),
+      ],
     }),
     database: Property.ShortText({
       displayName: 'Database',
@@ -50,4 +64,20 @@ export const customAuth = BlockAuth.CustomAuth({
     }),
   },
   required: true,
+  validate: async ({ auth }) => {
+    const connection = configureConnection(auth);
+    try {
+      await connect(connection);
+
+      return {
+        valid: true,
+      };
+    } catch (e) {
+      return {
+        valid: false,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        error: ((e as HttpError).response.body as any).message,
+      };
+    }
+  },
 });

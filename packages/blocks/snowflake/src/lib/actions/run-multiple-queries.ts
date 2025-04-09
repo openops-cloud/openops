@@ -56,14 +56,23 @@ export const runMultipleQueries = createAction({
   auth: customAuth,
   props,
   async run(context) {
-    const { username, password, role, database, warehouse, account } =
-      context.auth;
+    const {
+      username,
+      password,
+      maxLoginRetries,
+      role,
+      database,
+      warehouse,
+      account,
+    } = context.auth;
 
     const connection = snowflake.createConnection({
       application: context.propsValue.application,
       timeout: context.propsValue.timeout,
       username,
       password,
+      // @ts-expect-error ConnectionOptions interface definition in @types/snowflake-sdk is missing this property
+      sfRetryMaxLoginRetries: maxLoginRetries,
       role,
       database,
       warehouse,

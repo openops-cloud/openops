@@ -1,3 +1,5 @@
+import { accessTokenManager } from '../../../../src/app/authentication/lib/access-token-manager';
+
 const authUserMock = jest.fn().mockResolvedValue({
   token: 'token',
   refresh_token: 'refresh_token',
@@ -32,7 +34,7 @@ jest.mock('../../../../src/app/openops-tables/index', () => ({
   },
 }));
 
-import { PrincipalType } from '@openops/shared';
+import { PrincipalType, UserStatus } from '@openops/shared';
 import { FastifyInstance } from 'fastify';
 import { StatusCodes } from 'http-status-codes';
 import { authenticationService } from '../../../../src/app/authentication/authentication-service';
@@ -40,7 +42,11 @@ import { Provider } from '../../../../src/app/authentication/authentication-serv
 import { databaseConnection } from '../../../../src/app/database/database-connection';
 import { setupServer } from '../../../../src/app/server';
 import { generateMockToken } from '../../../helpers/auth';
-import { createMockUser } from '../../../helpers/mocks';
+import {
+  createMockOrganization,
+  createMockProject,
+  createMockUser,
+} from '../../../helpers/mocks';
 import { createMockSignUpRequest } from '../../../helpers/mocks/authn';
 
 let app: FastifyInstance | null = null;
@@ -50,16 +56,41 @@ beforeAll(async () => {
   await databaseConnection().initialize();
   app = await setupServer();
 
-  const adminUser = createMockUser({
-    email: 'local-admin@openops.com',
+  const adminEmail = 'local-admin@openops.com';
+  const adminPassword = 'password';
+  const mockAdminUser = createMockUser({
+    email: adminEmail,
+    password: adminPassword,
+    verified: true,
+    status: UserStatus.ACTIVE,
+  });
+  await databaseConnection().getRepository('user').save(mockAdminUser);
+
+  const mockOrganization = createMockOrganization({
+    ownerId: mockAdminUser.id,
+  });
+  await databaseConnection()
+    .getRepository('organization')
+    .save(mockOrganization);
+
+  await databaseConnection().getRepository('user').update(mockAdminUser.id, {
+    organizationId: mockOrganization.id,
   });
 
-  const user = await authenticationService.signUp({
-    ...adminUser,
-    provider: Provider.EMAIL,
+  const mockProject = createMockProject({
+    ownerId: mockAdminUser.id,
+    organizationId: mockOrganization.id,
   });
+  await databaseConnection().getRepository('project').save(mockProject);
 
-  adminToken = user.token;
+  adminToken = await accessTokenManager.generateToken({
+    id: mockAdminUser.id,
+    type: PrincipalType.USER,
+    projectId: mockProject.id,
+    organization: {
+      id: mockOrganization.id,
+    },
+  });
 });
 
 beforeEach(async () => {

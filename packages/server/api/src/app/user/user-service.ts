@@ -103,6 +103,21 @@ export const userService = {
     return userRepo().findOneByOrFail({ id });
   },
 
+  async getDefaultAdmin(): Promise<User | null> {
+    const adminUsers = await userRepo().findBy({
+      organizationRole: OrganizationRole.ADMIN,
+    });
+    if (adminUsers.length === 0) {
+      return null;
+    }
+    if (adminUsers.length > 1) {
+      throw new Error(
+        'More than one admin user found. Please delete admin users manually.',
+      );
+    }
+    return adminUsers[0];
+  },
+
   async getMetaInfo({ id }: IdParams): Promise<UserMeta | null> {
     const user = await this.get({ id });
 
@@ -171,6 +186,13 @@ export const userService = {
     await userRepo().update(id, {
       updated: dayjs().toISOString(),
       password: hashedPassword,
+    });
+  },
+
+  async updateEmail({ id, newEmail }: UpdateEmailParams): Promise<void> {
+    await userRepo().update(id, {
+      updated: dayjs().toISOString(),
+      email: newEmail,
     });
   },
 
@@ -278,6 +300,11 @@ type IdParams = {
 type UpdatePasswordParams = {
   id: UserId;
   newPassword: string;
+};
+
+type UpdateEmailParams = {
+  id: UserId;
+  newEmail: string;
 };
 
 type UpdateTrackingParams = {

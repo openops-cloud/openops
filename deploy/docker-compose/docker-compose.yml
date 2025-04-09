@@ -18,8 +18,8 @@ services:
     environment:
       OPS_COMPONENT: app
       OPS_VERSION: ${OPS_VERSION:-latest}
-      OPS_OPENOPS_TABLES_VERSION: 0.1.8
-      OPS_ANALYTICS_VERSION: 0.12.16
+      OPS_OPENOPS_TABLES_VERSION: 0.1.10
+      OPS_ANALYTICS_VERSION: 0.12.18
     depends_on:
       openops-tables:
         condition: service_healthy
@@ -44,7 +44,7 @@ services:
       - ${HOST_AZURE_CONFIG_DIR:-openops_azure_cli_data}:/tmp/azure
       - ${HOST_CLOUDSDK_CONFIG:-openops_gcloud_cli_data}:/tmp/gcloud
   openops-tables:
-    image: public.ecr.aws/openops/openops-tables:0.1.8
+    image: public.ecr.aws/openops/openops-tables:0.1.10
     restart: unless-stopped
     environment:
       BASEROW_PUBLIC_URL: ${OPS_OPENOPS_TABLES_PUBLIC_URL}
@@ -52,6 +52,8 @@ services:
       BASEROW_EXTRA_ALLOWED_HOSTS: '*'
       SECRET_KEY: ${OPS_ENCRYPTION_KEY}
       BASEROW_JWT_SIGNING_KEY: ${OPS_JWT_SECRET}
+      BASEROW_ADMIN_USERNAME: ${OPS_OPENOPS_ADMIN_EMAIL}
+      BASEROW_ADMIN_PASSWORD: ${OPS_OPENOPS_ADMIN_PASSWORD}
       BASEROW_REFRESH_TOKEN_LIFETIME_HOURS: ${OPS_JWT_TOKEN_LIFETIME_HOURS}
       BASEROW_ACCESS_TOKEN_LIFETIME_MINUTES: ${OPS_TABLES_TOKEN_LIFETIME_MINUTES}
       SYNC_TEMPLATES_ON_STARTUP: 'false'
@@ -81,7 +83,7 @@ services:
       postgres:
         condition: service_healthy
   openops-analytics:
-    image: public.ecr.aws/openops/openops-analytics:0.12.16
+    image: public.ecr.aws/openops/openops-analytics:0.12.18
     restart: unless-stopped
     platform: linux/amd64 # Needed for M1 Macs until we have cross-platform CI builds(linux/adm64 and linux/arm64 images)
     environment:

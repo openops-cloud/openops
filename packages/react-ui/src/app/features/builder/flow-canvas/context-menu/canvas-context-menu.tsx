@@ -120,6 +120,9 @@ const CanvasContextMenu = memo(
           sideOffset={4}
           alignOffset={-2}
           onCloseAutoFocus={(e) => e.preventDefault()}
+          onContextMenu={(e) => {
+            e.stopPropagation();
+          }}
         >
           <DropdownMenuItem
             onSelect={(e) => {
