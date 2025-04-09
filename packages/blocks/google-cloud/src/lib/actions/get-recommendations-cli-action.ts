@@ -17,34 +17,30 @@ export const getRecommendationsAction = createAction({
       'Google Cloud',
       'gcloud auth login',
     ),
-    filterBySelection: Property.Dropdown<string>({
+    filterBySelection: Property.StaticDropdown({
       displayName: 'Choose filter',
       description:
         'Select whether to filter by billing account, folder ID, organization ID, or project ID.',
       required: true,
-      refreshers: [],
-      options: async () => {
-        return {
-          disabled: false,
-          options: [
-            {
-              label: 'Filter by Billing Account',
-              value: 'billingAccount',
-            },
-            {
-              label: 'Filter by Organization ID',
-              value: 'organization',
-            },
-            {
-              label: 'Filter by Project ID',
-              value: 'project',
-            },
-            {
-              label: 'Filter by Folder ID',
-              value: 'folder',
-            },
-          ],
-        };
+      options: {
+        options: [
+          {
+            label: 'Filter by Billing Account',
+            value: 'billingAccount',
+          },
+          {
+            label: 'Filter by Organization ID',
+            value: 'organization',
+          },
+          {
+            label: 'Filter by Project ID',
+            value: 'project',
+          },
+          {
+            label: 'Filter by Folder ID',
+            value: 'folder',
+          },
+        ],
       },
     }),
     filterByProperty: Property.DynamicProperties({
