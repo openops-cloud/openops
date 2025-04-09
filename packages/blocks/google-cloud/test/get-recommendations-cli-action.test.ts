@@ -67,7 +67,33 @@ describe('getRecommendationsAction', () => {
       context,
     );
 
-    expect(result).toStrictEqual({});
+    expect(result['markdown']).toMatchObject({
+      type: 'MARKDOWN',
+      description: 'Please authenticate to see the filter options.',
+    });
+  });
+
+  test('should return markdown property if no filterBySelection is selected', async () => {
+    const context = createContext({});
+
+    const result = await getRecommendationsAction.props[
+      'filterByProperty'
+    ].props(
+      {
+        auth,
+        useHostSession: { useHostSessionCheckbox: true },
+        filterBySelection: undefined as any,
+      },
+      context,
+    );
+
+    expect(result).toMatchObject({
+      markdown: {
+        type: 'MARKDOWN',
+        description:
+          'Please select a filter from the dropdown to see the options.',
+      },
+    });
   });
 
   test('should return dynamic dropdown property for billingAccount', async () => {
@@ -121,22 +147,6 @@ describe('getRecommendationsAction', () => {
     });
 
     expect(gcloudCliMock.runCommand).not.toHaveBeenCalled();
-  });
-
-  test('should return empty object if no filterBySelection', async () => {
-    const context = createContext({});
-
-    const result = await getRecommendationsAction.props[
-      'filterByProperty'
-    ].props(
-      {
-        auth,
-        useHostSession: { useHostSessionCheckbox: true },
-      },
-      context,
-    );
-
-    expect(result).toEqual({});
   });
 
   test('should build correct command and parse responses for multiple recommenders', async () => {

@@ -65,8 +65,21 @@ export const getRecommendationsAction = createAction({
           (useHostSession as { useHostSessionCheckbox?: boolean })
             ?.useHostSessionCheckbox === true;
 
-        if ((!auth && !shouldUseHostCredentials) || !filterBySelection) {
-          return {} as any;
+        if (!auth && !shouldUseHostCredentials) {
+          return {
+            markdown: Property.MarkDown({
+              value: 'Please authenticate to see the filter options.',
+            }),
+          };
+        }
+
+        if (!filterBySelection) {
+          return {
+            markdown: Property.MarkDown({
+              value:
+                'Please select a filter from the dropdown to see the options.',
+            }),
+          };
         }
 
         return await getScopeOptionProperty(
