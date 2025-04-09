@@ -17,44 +17,63 @@ export const getRecommendationsAction = createAction({
       'Google Cloud',
       'gcloud auth login',
     ),
-    filterBySelection: Property.Dropdown<any>({
+    filterBySelection: Property.Dropdown<string>({
       displayName: 'Choose filter',
       description:
         'Select whether to filter by billing account, folder ID, organization ID, or project ID.',
       required: true,
-      refreshers: [
-        'auth',
-        'useHostSession',
-        'useHostSession.useHostSessionCheckbox',
-      ],
-      options: async ({ auth, useHostSession }) => {
-        const shouldUseHostCredentials =
-          (useHostSession as { useHostSessionCheckbox?: boolean })
-            ?.useHostSessionCheckbox === true;
-
-        if (!auth && !shouldUseHostCredentials) {
-          return {
-            disabled: true,
-            options: [],
-            placeholder: 'Please authenticate to see filters.',
-          };
-        }
-
+      refreshers: [],
+      options: async () => {
         return {
           disabled: false,
-          options: await getScopeOptions(auth, shouldUseHostCredentials),
+          options: [
+            {
+              label: 'Filter by Billing Account',
+              value: 'billingAccount',
+            },
+            {
+              label: 'Filter by Organization ID',
+              value: 'organization',
+            },
+            {
+              label: 'Filter by Project ID',
+              value: 'project',
+            },
+            {
+              label: 'Filter by Folder ID',
+              value: 'folder',
+            },
+          ],
         };
       },
     }),
     filterByProperty: Property.DynamicProperties({
       displayName: '',
-      required: false,
-      refreshers: ['filterBySelection'],
-      props: async ({ filterBySelection }) => {
-        if (!filterBySelection) {
+      required: true,
+      refreshers: [
+        'auth',
+        'useHostSession',
+        'useHostSession.useHostSessionCheckbox',
+        'filterBySelection',
+      ],
+      props: async ({
+        auth,
+        useHostSession,
+        filterBySelection,
+      }): Promise<{ [key: string]: any }> => {
+        const shouldUseHostCredentials =
+          (useHostSession as { useHostSessionCheckbox?: boolean })
+            ?.useHostSessionCheckbox === true;
+
+        if ((!auth && !shouldUseHostCredentials) || !filterBySelection) {
           return {} as any;
         }
-        return filterBySelection;
+
+        return await getScopeOptionProperty(
+          auth,
+          shouldUseHostCredentials,
+          filterBySelection,
+        );
       },
     }),
     recommenders: getRecommendersDropdown(),
@@ -82,7 +101,7 @@ export const getRecommendationsAction = createAction({
       }
 
       const commands = recommenders.map(
-        (recommender: string) => `${baseCommand} --recommender=${recommender}`,
+        (recommender) => `${baseCommand} --recommender=${recommender}`,
       );
 
       const results = await runCommands(
@@ -91,7 +110,17 @@ export const getRecommendationsAction = createAction({
         context.propsValue.useHostSession?.['useHostSessionCheckbox'],
       );
 
-      return results.map(tryParseJson);
+      const allRecommendations = results.flatMap((result, i) => {
+        const parsed = tryParseJson(result);
+        return Array.isArray(parsed)
+          ? parsed.map((item) => ({
+              ...item,
+              source: recommenders[i],
+            }))
+          : [];
+      });
+
+      return allRecommendations;
     } catch (error) {
       handleCliError({
         provider: 'Google Cloud',
@@ -102,7 +131,22 @@ export const getRecommendationsAction = createAction({
   },
 });
 
-async function getScopeOptions(auth: any, useHostSession: boolean) {
+async function getScopeOptionProperty(
+  auth: any,
+  useHostSession: any,
+  filterSelection: any,
+) {
+  if (filterSelection === 'folder') {
+    return {
+      folder: Property.ShortText({
+        displayName: 'Folder ID',
+        description:
+          'The Google Cloud Platform folder ID to use for this invocation.',
+        required: true,
+      }),
+    };
+  }
+
   const scopeConfigs = {
     billingAccount: {
       command: 'gcloud billing accounts list',
@@ -110,11 +154,9 @@ async function getScopeOptions(auth: any, useHostSession: boolean) {
         label: item.displayName,
         value: item.name.split('/')[1],
       }),
-      dropdown: createDropdown(
-        'Billing Account',
+      displayName: 'Billing Account',
+      description:
         'The Google Cloud Platform billing account ID to use for this invocation.',
-        true,
-      ),
     },
     organization: {
       command: 'gcloud organizations list',
@@ -122,11 +164,9 @@ async function getScopeOptions(auth: any, useHostSession: boolean) {
         label: item.displayName,
         value: item.name.split('/')[1],
       }),
-      dropdown: createDropdown(
-        'Organization ID',
+      displayName: 'Organization ID',
+      description:
         'The Google Cloud Platform organization ID to use for this invocation.',
-        true,
-      ),
     },
     project: {
       command: 'gcloud projects list',
@@ -134,99 +174,48 @@ async function getScopeOptions(auth: any, useHostSession: boolean) {
         label: item.name,
         value: item.projectId,
       }),
-      dropdown: createDropdown(
-        'Project ID',
-        'The Google Cloud Platform project ID.',
-        true,
-      ),
+      displayName: 'Project ID',
+      description: 'The Google Cloud Platform project ID.',
     },
   };
 
-  const commands = Object.values(scopeConfigs).map(
-    ({ command }) => `${command} --format=json`,
-  );
+  const config = scopeConfigs[filterSelection as keyof typeof scopeConfigs];
+  if (!config) return {};
 
-  let results: string[] = [];
   try {
-    results = await runCommands(commands, auth, useHostSession);
+    const result = await runCommand(
+      `${config.command} --format=json`,
+      auth,
+      useHostSession,
+    );
+    const parsedItems = JSON.parse(result ?? '[]');
+
+    return {
+      [filterSelection]: Property.StaticDropdown({
+        displayName: config.displayName,
+        description: config.description,
+        required: true,
+        options: {
+          disabled: false,
+          options: parsedItems.map(config.extractLabelAndValue),
+        },
+      }),
+    };
   } catch (error) {
-    for (const key in scopeConfigs) {
-      scopeConfigs[key as keyof typeof scopeConfigs].dropdown.options = {
-        disabled: true,
-        options: [],
-        placeholder: `Error fetching ${key}s`,
-        error: `${error}`,
-      };
-    }
-    return getScopeOptionsReturnStructure({
-      billingAccount: scopeConfigs.billingAccount.dropdown,
-      organization: scopeConfigs.organization.dropdown,
-      project: scopeConfigs.project.dropdown,
-    });
+    return {
+      [filterSelection]: Property.StaticDropdown({
+        displayName: config.displayName,
+        description: config.description,
+        required: true,
+        options: {
+          disabled: true,
+          options: [],
+          placeholder: `Error fetching ${filterSelection}s`,
+          error: `${error}`,
+        },
+      }),
+    };
   }
-
-  Object.entries(scopeConfigs).forEach(([key, config], index) => {
-    try {
-      const parsedItems = JSON.parse(results[index] ?? '[]');
-      config.dropdown.options = {
-        disabled: false,
-        options: parsedItems.map(config.extractLabelAndValue),
-      };
-    } catch (error) {
-      config.dropdown.options = {
-        disabled: true,
-        options: [],
-        placeholder: `Error parsing ${key} results`,
-        error: `${error}`,
-      };
-    }
-  });
-
-  return getScopeOptionsReturnStructure({
-    billingAccount: scopeConfigs.billingAccount.dropdown,
-    organization: scopeConfigs.organization.dropdown,
-    project: scopeConfigs.project.dropdown,
-  });
-}
-
-function getScopeOptionsReturnStructure(dropdowns: Record<string, any>) {
-  return [
-    {
-      label: 'Filter by Billing Account',
-      value: { billingAccount: dropdowns['billingAccount'] },
-    },
-    {
-      label: 'Filter by Organization ID',
-      value: { organization: dropdowns['organization'] },
-    },
-    { label: 'Filter by Project ID', value: { project: dropdowns['project'] } },
-    {
-      label: 'Filter by Folder ID',
-      value: {
-        folder: Property.ShortText({
-          displayName: 'Folder ID',
-          description:
-            'The Google Cloud Platform folder ID to use for this invocation.',
-          required: true,
-        }),
-      },
-    },
-  ];
-}
-
-function createDropdown(
-  displayName: string,
-  description: string,
-  required: boolean,
-) {
-  return Property.StaticDropdown({
-    displayName,
-    description,
-    required,
-    options: {
-      options: [],
-    },
-  });
 }
 
 function getRecommendersDropdown() {

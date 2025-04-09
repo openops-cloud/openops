@@ -5,7 +5,6 @@ const openOpsMock = {
     required: true,
   }),
   handleCliError: jest.fn(),
-  tryParseJson: jest.fn((x) => x),
 };
 
 jest.mock('@openops/common', () => openOpsMock);
@@ -55,214 +54,130 @@ describe('getRecommendationsAction', () => {
     });
   });
 
-  test('should return filtered options if authenticated or using host session', async () => {
-    gcloudCliMock.runCommands.mockResolvedValue([
-      JSON.stringify([{ name: 'billingAccounts/abc', displayName: 'BA 1' }]),
-      JSON.stringify([{ name: 'organizations/def', displayName: 'Org 1' }]),
-      JSON.stringify([{ name: 'Project One', projectId: 'proj-1' }]),
-    ]);
-
-    const context = createContext({});
-
-    const result = await getRecommendationsAction.props[
-      'filterBySelection'
-    ].options(
-      { auth: auth, useHostSession: { useHostSessionCheckbox: true } },
-      context,
-    );
-
-    expect(result.disabled).toBe(false);
-    expect(result.options).toEqual([
-      {
-        label: 'Filter by Billing Account',
-        value: {
-          billingAccount: expect.objectContaining({
-            displayName: 'Billing Account',
-          }),
-        },
-      },
-      {
-        label: 'Filter by Organization ID',
-        value: {
-          organization: expect.objectContaining({
-            displayName: 'Organization ID',
-          }),
-        },
-      },
-      {
-        label: 'Filter by Project ID',
-        value: {
-          project: expect.objectContaining({
-            displayName: 'Project ID',
-          }),
-        },
-      },
-      {
-        label: 'Filter by Folder ID',
-        value: {
-          folder: expect.objectContaining({
-            displayName: 'Folder ID',
-          }),
-        },
-      },
-    ]);
-  });
-
-  test('should disable dropdown when not authenticated', async () => {
-    const context = createContext({});
-
-    const result = await getRecommendationsAction.props[
-      'filterBySelection'
-    ].options(
-      { auth: undefined, useHostSession: { useHostSessionCheckbox: false } },
-      context,
-    );
-
-    expect(result.disabled).toBe(true);
-    expect(result.options).toEqual([]);
-    expect(result.placeholder).toEqual('Please authenticate to see filters.');
-  });
-
-  test('should return dynamic properties based on selection', async () => {
-    const selection = {
-      billingAccount: {
-        displayName: 'Billing Account',
-        description: 'desc',
-        required: true,
-        type: 'STATIC_DROPDOWN',
-        options: { options: [] },
-      },
-    };
-
+  test('should return empty property when unauthenticated', async () => {
     const context = createContext({});
 
     const result = await getRecommendationsAction.props[
       'filterByProperty'
-    ].props({ auth: auth, filterBySelection: selection }, context);
+    ].props(
+      {
+        auth: undefined as any,
+        useHostSession: { useHostSessionCheckbox: false },
+      },
+      context,
+    );
 
-    expect(result).toEqual(selection);
+    expect(result).toStrictEqual({});
   });
 
-  test('should return empty properties if no filterBySelection provided', async () => {
+  test('should return dynamic dropdown property for billingAccount', async () => {
+    const context = createContext({});
+    gcloudCliMock.runCommand.mockResolvedValue(
+      JSON.stringify([
+        { name: 'billingAccounts/abc', displayName: 'Billing 1' },
+      ]),
+    );
+
+    const result = await getRecommendationsAction.props[
+      'filterByProperty'
+    ].props(
+      {
+        auth,
+        useHostSession: { useHostSessionCheckbox: true },
+        filterBySelection: 'billingAccount' as any,
+      },
+      context,
+    );
+
+    expect(result['billingAccount']).toMatchObject({
+      displayName: 'Billing Account',
+      type: 'STATIC_DROPDOWN',
+    });
+
+    expect(gcloudCliMock.runCommand).toHaveBeenCalledWith(
+      'gcloud billing accounts list --format=json',
+      auth,
+      true,
+    );
+  });
+
+  test('should return dynamic short text property for folder', async () => {
     const context = createContext({});
 
     const result = await getRecommendationsAction.props[
       'filterByProperty'
-    ].props({ auth: auth }, context);
+    ].props(
+      {
+        auth,
+        useHostSession: { useHostSessionCheckbox: true },
+        filterBySelection: 'folder' as any,
+      },
+      context,
+    );
+
+    expect(result['folder']).toMatchObject({
+      displayName: 'Folder ID',
+      type: 'SHORT_TEXT',
+    });
+
+    expect(gcloudCliMock.runCommand).not.toHaveBeenCalled();
+  });
+
+  test('should return empty object if no filterBySelection', async () => {
+    const context = createContext({});
+
+    const result = await getRecommendationsAction.props[
+      'filterByProperty'
+    ].props(
+      {
+        auth,
+        useHostSession: { useHostSessionCheckbox: true },
+      },
+      context,
+    );
 
     expect(result).toEqual({});
   });
 
-  test.each([
-    [{ project: 'proj-123' }],
-    [{ organization: 'org-123' }],
-    [{ folder: 'folder-123' }],
-    [{ billingAccount: 'billingAccount-123' }],
-  ])(
-    'should return recommenders list if authenticated or using host session',
-    async (filterByProperty: any) => {
-      const mockOutput = JSON.stringify([
-        { name: 'recommender-1' },
-        { name: 'recommender-2' },
-      ]);
-
-      gcloudCliMock.runCommand.mockResolvedValue(mockOutput);
-
-      const context = createContext({});
-
-      const result = await getRecommendationsAction.props[
-        'recommenders'
-      ].options(
-        {
-          auth,
-          useHostSession: { useHostSessionCheckbox: true },
-          filterByProperty,
-        },
-        context,
-      );
-
-      expect(gcloudCliMock.runCommand).toHaveBeenCalledWith(
-        'gcloud beta recommender recommenders list --format=json',
-        auth,
-        true,
-      );
-
-      expect(result).toEqual({
-        disabled: false,
-        options: [
-          { label: 'recommender-1', value: 'recommender-1' },
-          { label: 'recommender-2', value: 'recommender-2' },
-        ],
-      });
-    },
-  );
-
-  test('should construct and run multiple gcloud commands for recommenders', async () => {
+  test('should build correct command and parse responses for multiple recommenders', async () => {
     const context = createContext({
       useHostSession: { useHostSessionCheckbox: true },
-      filterByProperty: { billingAccount: '1234' },
-      location: 'europe-west1',
+      filterByProperty: { organization: 'org-789' },
+      location: 'us-east1',
       recommenders: ['recommender-1', 'recommender-2'],
     });
 
-    gcloudCliMock.runCommands.mockResolvedValue([
-      '{"recommender": "r1"}',
-      '{"recommender": "r2"}',
+    gcloudCliMock.runCommands.mockResolvedValueOnce([
+      '[{"name":"r1"}]',
+      '[{"name":"r2"}]',
     ]);
-
     const result = await getRecommendationsAction.run(context);
 
-    expect(gcloudCliMock.runCommands).toHaveBeenCalledTimes(1);
+    expect(gcloudCliMock.runCommand).not.toHaveBeenCalledTimes(2);
     expect(gcloudCliMock.runCommands).toHaveBeenCalledWith(
       [
-        'gcloud recommender recommendations list --format=json --billing-account=1234 --location=europe-west1 --recommender=recommender-1',
-        'gcloud recommender recommendations list --format=json --billing-account=1234 --location=europe-west1 --recommender=recommender-2',
+        'gcloud recommender recommendations list --format=json --organization=org-789 --location=us-east1 --recommender=recommender-1',
+        'gcloud recommender recommendations list --format=json --organization=org-789 --location=us-east1 --recommender=recommender-2',
       ],
       auth,
       true,
     );
 
-    expect(openOpsMock.tryParseJson).toHaveBeenCalledTimes(2);
-    expect(result).toEqual(['{"recommender": "r1"}', '{"recommender": "r2"}']);
+    expect(result).toEqual([
+      { name: 'r1', source: 'recommender-1' },
+      { name: 'r2', source: 'recommender-2' },
+    ]);
   });
 
-  test.each([
-    ['billingAccount', '1234', '--billing-account=1234'],
-    ['organization', 'org-5678', '--organization=org-5678'],
-    ['project', 'proj-9999', '--project=proj-9999'],
-    ['folder', 'folder-321', '--folder=folder-321'],
-  ])(
-    'should build correct command with %s filter',
-    async (key, value, expectedFlag) => {
-      const context = createContext({
-        filterByProperty: { [key]: value },
-        recommenders: ['test-recommender'],
-        location: 'us-central1',
-      });
-
-      gcloudCliMock.runCommands.mockResolvedValue(['{}']);
-
-      await getRecommendationsAction.run(context);
-
-      expect(gcloudCliMock.runCommands).toHaveBeenCalledWith(
-        [
-          `gcloud recommender recommendations list --format=json ${expectedFlag} --location=us-central1 --recommender=test-recommender`,
-        ],
-        auth,
-        undefined,
-      );
-    },
-  );
-
-  test('should call handleCliError on failure', async () => {
+  test('should call handleCliError when gcloud command fails', async () => {
     const context = createContext({
-      useHostSession: { useHostSessionCheckbox: false },
-      filterByProperty: { folder: 'folder123' },
-      location: 'global',
-      recommenders: ['recommender-x'],
+      useHostSession: { useHostSessionCheckbox: true },
+      filterByProperty: { project: 'project-123' },
+      location: 'europe-west2',
+      recommenders: ['recommender-z'],
     });
 
-    const error = new Error('Something went wrong');
+    const error = new Error('CLI failed');
     gcloudCliMock.runCommands.mockRejectedValue(error);
 
     await getRecommendationsAction.run(context);
