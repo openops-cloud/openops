@@ -37,7 +37,6 @@ export enum BlockCategory {
   COLLABORATION = 'COLLABORATION',
   CORE = 'CORE',
   DATA = 'DATA',
-  DEVELOPER_TOOLS = 'DEVELOPER_TOOLS',
   FINOPS = 'FINOPS',
   IaC = 'IaC',
   NETWORK = 'NETWORK',
