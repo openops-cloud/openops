@@ -42,7 +42,11 @@ import { Provider } from '../../../../src/app/authentication/authentication-serv
 import { databaseConnection } from '../../../../src/app/database/database-connection';
 import { setupServer } from '../../../../src/app/server';
 import { generateMockToken } from '../../../helpers/auth';
-import { createMockOrganization, createMockProject, createMockUser } from '../../../helpers/mocks';
+import {
+  createMockOrganization,
+  createMockProject,
+  createMockUser,
+} from '../../../helpers/mocks';
 import { createMockSignUpRequest } from '../../../helpers/mocks/authn';
 
 let app: FastifyInstance | null = null;
@@ -52,8 +56,8 @@ beforeAll(async () => {
   await databaseConnection().initialize();
   app = await setupServer();
 
-  let adminEmail = 'local-admin@openops.com';
-  let adminPassword = 'password';
+  const adminEmail = 'local-admin@openops.com';
+  const adminPassword = 'password';
   const mockAdminUser = createMockUser({
     email: adminEmail,
     password: adminPassword,
@@ -62,7 +66,9 @@ beforeAll(async () => {
   });
   await databaseConnection().getRepository('user').save(mockAdminUser);
 
-  const mockOrganization = createMockOrganization({ ownerId: mockAdminUser.id });
+  const mockOrganization = createMockOrganization({
+    ownerId: mockAdminUser.id,
+  });
   await databaseConnection()
     .getRepository('organization')
     .save(mockOrganization);
