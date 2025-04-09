@@ -12,7 +12,7 @@ const markdown = `
 
 For the **Password**, you will need to provide the same password you use to log in to your Snowflake account.
 
-**Important:** Increasing the default **maxLoginRetries** setting can significantly extend response times if the **Account Identifier** is incorrect. The system will repeatedly attempt to connect, potentially delaying feedback before ultimately failing with a generic error message: "Request to Snowflake failed.".
+If you're experiencing delays, double-check that your Account Identifier is correct. An incorrect identifier combined with an increasedMax Login Retries value will cause the system to repeatedly try connecting, resulting in longer wait times before it eventually fails with the error: "Request to Snowflake failed."
 `;
 
 export const customAuth = BlockAuth.CustomAuth({
