@@ -2,7 +2,7 @@ import { LoadingSpinner } from '@openops/components/ui';
 import dayjs from 'dayjs';
 import { jwtDecode } from 'jwt-decode';
 import { Suspense } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { platformHooks } from '@/app/common/hooks/platform-hooks';
@@ -10,6 +10,7 @@ import { projectHooks } from '@/app/common/hooks/project-hooks';
 import { userSettingsHooks } from '@/app/common/hooks/user-settings-hooks';
 import { SocketProvider } from '@/app/common/providers/socket-provider';
 import { authenticationSession } from '@/app/lib/authentication-session';
+import { navigationUtil } from '@/app/lib/navigation-util';
 import { userHooks } from '../hooks/user-hooks';
 
 function isJwtExpired(token: string): boolean {
@@ -33,14 +34,24 @@ type AllowOnlyLoggedInUserOnlyGuardProps = {
 export const AllowOnlyLoggedInUserOnlyGuard = ({
   children,
 }: AllowOnlyLoggedInUserOnlyGuardProps) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
   if (!authenticationSession.isLoggedIn()) {
+    navigationUtil.save(location.pathname + location.search);
     return <Navigate to="/sign-in" replace />;
   }
+
   const token = authenticationSession.getToken();
   if (!token || isJwtExpired(token)) {
-    authenticationSession.logOut();
+    navigationUtil.save(location.pathname + location.search);
+    authenticationSession.logOut({
+      userInitiated: false,
+      navigate,
+    });
     return <Navigate to="/sign-in" replace />;
   }
+
   projectHooks.prefetchProject();
   platformHooks.prefetchPlatform();
   flagsHooks.useFlags();

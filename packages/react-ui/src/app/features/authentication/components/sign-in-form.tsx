@@ -25,6 +25,8 @@ import {
   OpsEdition,
   SignInRequest,
 } from '@openops/shared';
+import { useEffectOnce } from 'react-use';
+import { navigationUtil } from '../../../lib/navigation-util';
 import { emailRegex } from '../lib/password-validation-utils';
 
 const SignInSchema = Type.Object({
@@ -50,6 +52,12 @@ const SignInForm: React.FC = () => {
     mode: 'onChange',
   });
 
+  useEffectOnce(() => {
+    authenticationSession.logOut({
+      userInitiated: false,
+    });
+  });
+
   const { data: edition } = flagsHooks.useFlag(FlagId.EDITION);
   const { data: showSignUpLink } = flagsHooks.useFlag(FlagId.SHOW_SIGN_UP_LINK);
   const navigate = useNavigate();
@@ -62,7 +70,11 @@ const SignInForm: React.FC = () => {
     mutationFn: authenticationApi.signIn,
     onSuccess: (data) => {
       authenticationSession.saveResponse(data);
-      navigate('/');
+
+      const lastVisitedPage = navigationUtil.get();
+      navigationUtil.clear();
+      const nextPage = lastVisitedPage ?? '/';
+      navigate(nextPage);
     },
     onError: (error) => {
       if (api.isError(error)) {

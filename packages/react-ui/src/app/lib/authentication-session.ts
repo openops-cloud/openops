@@ -3,6 +3,8 @@ import { jwtDecode } from 'jwt-decode';
 
 import { authenticationApi } from '@/app/lib/authentication-api';
 import { AuthenticationResponse, isNil } from '@openops/shared';
+import { NavigateFunction } from 'react-router-dom';
+import { navigationUtil } from './navigation-util';
 import { projectAuth } from './project-auth';
 
 const tokenKey = 'token';
@@ -73,17 +75,30 @@ export const authenticationSession = {
     return !!this.getToken() && !!this.getCurrentUser();
   },
 
-  async logOut() {
+  async logOut({
+    userInitiated = false,
+    navigate,
+  }: {
+    userInitiated: boolean;
+    navigate?: NavigateFunction;
+  }) {
     await authenticationApi.signOut();
     localStorage.removeItem(currentUserKey);
 
+    // we don't want to redirect to the same page after explicit logout
+    if (userInitiated) {
+      navigationUtil.clear();
+    }
+
     if (
-      !(
-        window.location.pathname === '/sign-in' ||
-        window.location.pathname === '/sign-up'
-      )
+      window.location.pathname === '/sign-in' ||
+      window.location.pathname === '/sign-up'
     ) {
-      window.location.reload();
+      return;
+    }
+
+    if (navigate) {
+      navigate('/sign-in');
     }
   },
 
