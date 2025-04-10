@@ -1405,7 +1405,7 @@ describe('getImportOperations', () => {
     );
   });
 
-  it('should not change connection when block name does not match', () => {
+  it('should unset connection when block name does not match and connections are provided', () => {
     const actionWithoutBlockName = {
       ...mockSlackAction,
       settings: { ...mockSlackAction.settings, blockName: 'something-else' },
@@ -1418,6 +1418,20 @@ describe('getImportOperations', () => {
       },
       [mockConnection],
     ) as OperationsResponse;
+
+    expect(result[0].request.action.settings.input['auth']).toBe(undefined);
+  });
+
+  it('should not change connection when connections are not provided', () => {
+    const actionWithoutBlockName = {
+      ...mockSlackAction,
+      settings: { ...mockSlackAction.settings, blockName: 'something-else' },
+    };
+
+    const result = flowHelper.getImportOperations({
+      ...mockTrigger,
+      nextAction: actionWithoutBlockName,
+    }) as OperationsResponse;
 
     expect(result[0].request.action.settings.input['auth']).toBe(
       "{{connections['initial-slack-connection']}}",
@@ -2791,5 +2805,58 @@ describe('bulkAddActions', () => {
 
     expect(branch?.nextAction.name).toEqual(action.name);
     expect(branch?.nextAction.nextAction.name).toEqual(action.nextAction.name);
+  });
+});
+
+describe('getUsedConnections', () => {
+  const actionWithBrokenConnections = {
+    settings: {
+      blockName: '',
+      input: { auth: "{{connections['connection1']}}" },
+    },
+    nextAction: {
+      settings: {
+        blockName: 'step2',
+        input: {},
+      },
+    },
+  } as unknown as Action;
+  it('returns used connection names mapped by block name', () => {
+    const action = {
+      settings: {
+        blockName: 'step1',
+        input: { auth: "{{connections['connection1']}}" },
+      },
+      nextAction: {
+        settings: {
+          blockName: 'step2',
+          input: { auth: "{{connections['connection2']}}" },
+        },
+      },
+    } as unknown as Action;
+
+    const result = flowHelper.getUsedConnections(action);
+
+    expect(result).toEqual({
+      step1: 'connection1',
+      step2: 'connection2',
+    });
+  });
+
+  it('ignores steps without blockName or auth', () => {
+    const result = flowHelper.getUsedConnections(actionWithBrokenConnections);
+
+    expect(result).toEqual({});
+  });
+
+  it('ignores steps where removeConnectionBrackets returns falsy', () => {
+    const result = flowHelper.getUsedConnections(actionWithBrokenConnections);
+
+    expect(result).toEqual({});
+  });
+
+  it('returns an empty object if getAllSteps returns empty', () => {
+    const result = flowHelper.getUsedConnections(actionWithBrokenConnections);
+    expect(result).toEqual({});
   });
 });

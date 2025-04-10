@@ -1,17 +1,15 @@
 import { BlockProperty } from '@openops/blocks-framework';
 import {
-  cn,
+  DYNAMIC_TOGGLE_VALUES,
+  DynamicToggle,
+  DynamicToggleOption,
+  DynamicToggleValue,
   FormItem,
   FormLabel,
   ReadMoreDescription,
-  Toggle,
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
 } from '@openops/components/ui';
 import { Action, isNil, Trigger } from '@openops/shared';
 import { t } from 'i18next';
-import { SquareFunction } from 'lucide-react';
 import { useContext, useEffect } from 'react';
 import { ControllerRenderProps, useFormContext } from 'react-hook-form';
 
@@ -51,6 +49,21 @@ const getInitialFieldValue = (
 
   return fieldValue ?? defaultValue ?? null;
 };
+
+const toggleOptions: DynamicToggleOption[] = [
+  {
+    value: 'Static',
+    label: t('Static'),
+    tooltipText: t('Use a static pre-defined value'),
+  },
+  {
+    value: 'Dynamic',
+    label: t('Dynamic'),
+    tooltipText: t(
+      'Static values stay the same, while dynamic values update based on data from other steps',
+    ),
+  },
+];
 
 const AutoFormFieldWrapper = ({
   placeBeforeLabelText = false,
@@ -101,7 +114,8 @@ const AutoFormFieldWrapper = ({
   }, [propertyName, inputName, arrayFieldContext]);
 
   // array fields use the dynamicViewToggled property to specify if a property is toggled
-  function handleChange(isInDynamicView: boolean) {
+  function handleChange(value: DynamicToggleValue) {
+    const isInDynamicView = value === DYNAMIC_TOGGLE_VALUES.DYNAMIC;
     if (arrayFieldContext) {
       form.setValue(
         `${arrayFieldContext.inputName}.dynamicViewToggled.${propertyName}`,
@@ -152,25 +166,16 @@ const AutoFormFieldWrapper = ({
         {property.required && <span className="text-destructive">*</span>}
         <span className="grow"></span>
         {allowDynamicValues && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Toggle
-                pressed={dynamicViewToggled}
-                onPressedChange={(e) => handleChange(e)}
-                disabled={disabled}
-              >
-                <SquareFunction
-                  className={cn('size-5', {
-                    'text-foreground': dynamicViewToggled,
-                    'text-muted-foreground': !dynamicViewToggled,
-                  })}
-                />
-              </Toggle>
-            </TooltipTrigger>
-            <TooltipContent side="top" className="bg-background">
-              {t('Dynamic value')}
-            </TooltipContent>
-          </Tooltip>
+          <DynamicToggle
+            options={toggleOptions}
+            onChange={handleChange}
+            defaultValue={
+              dynamicViewToggled
+                ? DYNAMIC_TOGGLE_VALUES.DYNAMIC
+                : DYNAMIC_TOGGLE_VALUES.STATIC
+            }
+            disabled={disabled}
+          />
         )}
       </FormLabel>
 

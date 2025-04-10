@@ -29,7 +29,10 @@ import {
   toast,
   VerticalDivider,
 } from '@openops/components/ui';
-import { FlowTemplateDto } from '@openops/shared';
+import {
+  AppConnectionWithoutSensitiveData,
+  FlowTemplateDto,
+} from '@openops/shared';
 import { useMutation } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -352,7 +355,7 @@ const SelectFlowTemplateDialog = ({
   });
 
   const { mutate: useTemplate, isPending: isUseTemplatePending } = useMutation({
-    mutationFn: async (connectionIds: string[]) => {
+    mutationFn: async (connections: AppConnectionWithoutSensitiveData[]) => {
       if (!selectedTemplate) {
         return Promise.reject();
       }
@@ -363,10 +366,10 @@ const SelectFlowTemplateDialog = ({
           id: template.id,
           displayName: template.name,
           description: template.description,
-          isSample: template.isSample,
+          isSample: template.isSample ?? false,
           trigger: template.template,
         },
-        connectionIds,
+        connectionIds: connections.map((c) => c.id),
       });
     },
     onSuccess: (flow) => {

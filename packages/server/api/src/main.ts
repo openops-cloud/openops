@@ -14,7 +14,7 @@ import * as analytics from './app/database/seeds/openops-analytics-seed';
 import { deleteOldOpportunitiesTable } from './app/database/seeds/openops-delete-old-opportunities-table';
 import { seedOpportunitesTemplateTable } from './app/database/seeds/openops-opportunities-table-seed';
 import { updateOpenopsTablesDatabase } from './app/database/seeds/openops-tables-rename-database';
-import { seedAdminData } from './app/database/seeds/seed-admin';
+import { upsertAdminUser } from './app/database/seeds/seed-admin';
 import { seedEnvironmentId } from './app/database/seeds/seed-env-id';
 import { seedTemplateTables } from './app/database/seeds/seed-template-tables';
 import { setupServer } from './app/server';
@@ -53,7 +53,7 @@ const main = async (): Promise<void> => {
     await databaseConnection().initialize();
     await databaseConnection().runMigrations();
 
-    await seedAdminData();
+    await upsertAdminUser();
     await updateOpenopsTablesDatabase();
     await deleteOldOpportunitiesTable();
     await seedDevData();

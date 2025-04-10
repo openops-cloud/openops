@@ -296,6 +296,12 @@ export const flagService = {
         created,
         updated,
       },
+      {
+        id: FlagId.CANDU_CLIENT_TOKEN,
+        value: system.get<string>(AppSystemProp.CANDU_CLIENT_TOKEN),
+        created,
+        updated,
+      },
     );
 
     return flags;

@@ -21,14 +21,21 @@ interface StatusIconWithTextProps
   extends VariantProps<typeof statusCodeVariants> {
   icon: any;
   text: string;
+  explanation?: string;
 }
 
 const StatusIconWithText = React.memo(
-  ({ icon: Icon, text, variant }: StatusIconWithTextProps) => {
+  ({ icon: Icon, text, explanation, variant }: StatusIconWithTextProps) => {
     return (
       <span className={statusCodeVariants({ variant })}>
         <Icon className="size-4" />
-        <span>{text}</span>
+        <span className="font-bold text-[13px]">{text}</span>
+        {explanation && (
+          <>
+            <span className="font-light text-[15px]">|</span>
+            <span className="text-xs font-medium italic"> {explanation}</span>
+          </>
+        )}
       </span>
     );
   },

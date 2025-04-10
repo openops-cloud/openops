@@ -12,7 +12,12 @@ import {
   DialogFooter,
   OverflowTooltip,
 } from '@openops/components/ui';
-import { AppConnectionWithoutSensitiveData, isNil } from '@openops/shared';
+import {
+  AppConnectionWithoutSensitiveData,
+  flowHelper,
+  isNil,
+  Trigger,
+} from '@openops/shared';
 import { t } from 'i18next';
 import { ArrowLeft, TriangleAlert } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -24,14 +29,16 @@ import {
 
 type ConnectionsPickerProps = {
   templateName: string;
+  templateTrigger?: Trigger;
   integrations: BlockMetadataModelSummary[];
   isUseTemplateLoading: boolean;
   close: () => void;
-  onUseTemplate: (connectionIds: string[]) => void;
+  onUseTemplate: (connections: AppConnectionWithoutSensitiveData[]) => void;
 };
 
 const ConnectionsPicker = ({
   templateName,
+  templateTrigger,
   integrations,
   isUseTemplateLoading,
   close,
@@ -75,18 +82,31 @@ const ConnectionsPicker = ({
       groupedConnections
     ) {
       isConnectionListPreselected.current = true;
+      const usedConnectionNames: { [key: string]: string | undefined } =
+        templateTrigger ? flowHelper.getUsedConnections(templateTrigger) : {};
 
       const connections: Record<
         string,
         AppConnectionWithoutSensitiveData | null
       > = {};
       integrations.forEach((integration) => {
-        const options = groupedConnections[integration.name] || [];
-        connections[integration.name] = options[0] || null;
+        const options = groupedConnections[integration.name] ?? [];
+        const usedConnection = usedConnectionNames[integration.name]
+          ? options.find((connection) => {
+              return connection.name === usedConnectionNames[integration.name];
+            })
+          : null;
+        connections[integration.name] = usedConnection ?? options[0] ?? null;
       });
+
       setSelectedConnections(connections);
     }
-  }, [integrations, groupedConnections, setSelectedConnections]);
+  }, [
+    integrations,
+    groupedConnections,
+    setSelectedConnections,
+    templateTrigger,
+  ]);
 
   const tableData: TemplateConnectionTableData[] = useMemo(() => {
     return integrations.map((integration, index) => ({
@@ -133,11 +153,7 @@ const ConnectionsPicker = ({
   };
 
   const onUseTemplateClick = () => {
-    onUseTemplate(
-      Object.values(selectedConnections)
-        .filter((c) => !!c)
-        .map((c) => c.id),
-    );
+    onUseTemplate(Object.values(selectedConnections).filter((c) => !!c));
   };
 
   return (

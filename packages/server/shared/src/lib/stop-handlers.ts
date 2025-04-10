@@ -14,7 +14,6 @@ const stop = async (
   if (system.getOrThrow(SharedSystemProp.ENVIRONMENT) === 'dev') {
     console.log('Dev mode, forcing shutdown after 500 ms');
     await new Promise((resolve) => setTimeout(resolve, 500));
-    await app.close();
     process.exit(0);
   }
 

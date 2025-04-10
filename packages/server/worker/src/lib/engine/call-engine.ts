@@ -7,6 +7,7 @@ import {
   hashUtils,
   logger,
   memoryLock,
+  SharedSystemProp,
   system,
 } from '@openops/server-shared';
 import {
@@ -14,7 +15,7 @@ import {
   EngineResponse,
   EngineResponseStatus,
 } from '@openops/shared';
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import { nanoid } from 'nanoid';
 import {
   EngineHelperFlowResult,
@@ -23,10 +24,11 @@ import {
 } from './engine-runner';
 
 const ENGINE_URL = system.getOrThrow(AppSystemProp.ENGINE_URL);
-const cacheEnabledOperations: EngineOperationType[] = [
-  EngineOperationType.EXECUTE_PROPERTY,
-  EngineOperationType.EXTRACT_BLOCK_METADATA,
-];
+
+const cacheEnabledOperations: EngineOperationType[] =
+  system.getOrThrow(SharedSystemProp.ENVIRONMENT) === 'dev'
+    ? []
+    : [EngineOperationType.EXTRACT_BLOCK_METADATA];
 
 export async function callEngineLambda<Result extends EngineHelperResult>(
   operation: EngineOperationType,
@@ -53,6 +55,7 @@ export async function callEngineLambda<Result extends EngineHelperResult>(
     lock = await memoryLock.acquire(`engine-${requestKey}`);
   }
 
+  const deadlineTimestamp = Date.now() + timeout * 1000;
   try {
     if (shouldUseCache(operation) && requestKey) {
       engineResult = await cacheWrapper.getSerializedObject<unknown>(
@@ -74,12 +77,19 @@ export async function callEngineLambda<Result extends EngineHelperResult>(
       timeoutSeconds: timeout,
     });
 
-    const requestResponse = await axios.post(`${ENGINE_URL}`, requestInput, {
-      headers: {
-        requestId,
+    const requestResponse = await axios.post(
+      `${ENGINE_URL}`,
+      {
+        ...requestInput,
+        deadlineTimestamp,
       },
-      timeout: timeout * 1000,
-    });
+      {
+        headers: {
+          requestId,
+        },
+        timeout: timeout * 1000,
+      },
+    );
 
     const responseData = requestResponse.data.body || requestResponse.data;
 
@@ -94,11 +104,7 @@ export async function callEngineLambda<Result extends EngineHelperResult>(
     let status = EngineResponseStatus.ERROR;
     let errorMessage =
       'An unexpected error occurred while making a request to the engine.';
-    if (
-      axios.isAxiosError(error) &&
-      (error as AxiosError).code === 'ECONNABORTED' &&
-      (error as AxiosError).message.includes('timeout')
-    ) {
+    if (Date.now() > deadlineTimestamp) {
       errorMessage = 'Engine execution timed out.';
       status = EngineResponseStatus.TIMEOUT;
     }

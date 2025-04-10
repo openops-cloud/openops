@@ -3,7 +3,9 @@ import {
   OPENOPS_CONNECT_MAX_POLL_ATTEMPTS,
   OPENOPS_CONNECT_TEMPLATES_POLL_INTERVAL_MS,
 } from '@/app/constants/cloud';
+import { QueryKeys } from '@/app/constants/query-keys';
 import { usersApi } from '@/app/lib/users-api';
+import { useQueryClient } from '@tanstack/react-query';
 import { AxiosError, HttpStatusCode } from 'axios';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useCloudProfile } from './use-cloud-profile';
@@ -11,6 +13,7 @@ import { useCloudProfile } from './use-cloud-profile';
 export const useUserInfoPolling = () => {
   const [pollInterval, setPollInterval] = useState<NodeJS.Timeout | null>(null);
   const attemptCountRef = useRef(0);
+  const queryClient = useQueryClient();
 
   const { refetchIsConnectedToCloudTemplates } = useCloudProfile();
   const { updateUserSettings } = userSettingsHooks.useUpdateUserSettings();
@@ -40,6 +43,9 @@ export const useUserInfoPolling = () => {
             telemetryInteractionTimestamp: new Date().toISOString(),
           });
           await usersApi.setTelemetry({ trackEvents: true });
+          queryClient.invalidateQueries({
+            queryKey: [QueryKeys.userMetadata],
+          });
           clearInterval(interval);
         }
       } catch (error) {
@@ -59,7 +65,7 @@ export const useUserInfoPolling = () => {
     }, OPENOPS_CONNECT_TEMPLATES_POLL_INTERVAL_MS);
 
     setPollInterval(interval);
-  }, [refetchIsConnectedToCloudTemplates, updateUserSettings]);
+  }, [queryClient, refetchIsConnectedToCloudTemplates, updateUserSettings]);
 
   return {
     createPollingInterval,
