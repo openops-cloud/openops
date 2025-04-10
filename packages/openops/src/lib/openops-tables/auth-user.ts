@@ -1,7 +1,10 @@
 import { AppSystemProp, cacheWrapper, system } from '@openops/server-shared';
 import { AxiosHeaders } from 'axios';
-import { makeOpenOpsTablesPost } from './requests-helpers';
-
+import { IAxiosRetryConfig } from 'axios-retry';
+import {
+  axiosTablesSeedRetryConfig,
+  makeOpenOpsTablesPost,
+} from './requests-helpers';
 const tokenLifetimeMinutes = system.getNumber(
   AppSystemProp.TABLES_TOKEN_LIFETIME_MINUTES,
 );
@@ -18,6 +21,7 @@ export interface AuthTokens {
 export async function authenticateUserInOpenOpsTables(
   email: string,
   password: string,
+  axiosRetryConfig?: IAxiosRetryConfig,
 ): Promise<AuthTokens> {
   const requestBody = {
     email,
@@ -32,6 +36,7 @@ export async function authenticateUserInOpenOpsTables(
     'api/user/token-auth/',
     requestBody,
     headers,
+    axiosRetryConfig,
   );
 }
 
@@ -44,7 +49,11 @@ export async function authenticateDefaultUserInOpenOpsTables(): Promise<AuthToke
     const email = system.getOrThrow(AppSystemProp.OPENOPS_ADMIN_EMAIL);
     const password = system.getOrThrow(AppSystemProp.OPENOPS_ADMIN_PASSWORD);
 
-    tokens = await authenticateUserInOpenOpsTables(email, password);
+    tokens = await authenticateUserInOpenOpsTables(
+      email,
+      password,
+      axiosTablesSeedRetryConfig,
+    );
     await cacheWrapper.setSerializedObject(
       cacheKey,
       tokens,

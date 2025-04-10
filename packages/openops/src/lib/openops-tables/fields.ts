@@ -1,4 +1,5 @@
 import {
+  axiosTablesSeedRetryConfig,
   createAxiosHeaders,
   makeOpenOpsTablesGet,
 } from '../openops-tables/requests-helpers';
@@ -12,6 +13,7 @@ export async function getFields(
   const fields = await makeOpenOpsTablesGet<any[]>(
     `api/database/fields/table/${tableId}/?user_field_names=${userFieldNames}`,
     authenticationHeader,
+    axiosTablesSeedRetryConfig,
   );
 
   return fields.flatMap((item) => item);

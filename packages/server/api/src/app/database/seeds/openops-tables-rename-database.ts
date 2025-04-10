@@ -10,7 +10,6 @@ import {
   getDefaultDatabaseId,
   OPENOPS_DEFAULT_DATABASE_NAME,
 } from '@openops/common';
-import { error } from 'console';
 
 const OPENOPS_TABLES_DATABASE_RENAMED_FLAG = 'TABLES_DB_RENAMED';
 const isOpenopsTablesDatabaseAlreadyRenamed = async (): Promise<boolean> => {

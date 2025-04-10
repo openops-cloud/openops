@@ -41,6 +41,7 @@ describe('axios request', () => {
       'http://mockapi.com/openops-tables/test/route/api',
       header,
       undefined,
+      undefined,
     );
   });
 
@@ -59,6 +60,7 @@ describe('axios request', () => {
       'http://mockapi.com/openops-tables/test/route/api',
       header,
       { body: 'info' },
+      undefined,
     );
   });
 
@@ -77,6 +79,7 @@ describe('axios request', () => {
       'http://mockapi.com/openops-tables/test/route/api',
       header,
       { body: 'info' },
+      undefined,
     );
   });
 
@@ -109,6 +112,7 @@ describe('axios request', () => {
       'http://mockapi.com/openops-tables/test/route/api',
       header,
       undefined,
+      undefined,
     );
 
     expect(httpRequestMock).toHaveBeenNthCalledWith(
@@ -117,6 +121,7 @@ describe('axios request', () => {
       'next url',
       header,
       undefined,
+      undefined,
     );
 
     expect(httpRequestMock).toHaveBeenNthCalledWith(
@@ -124,6 +129,7 @@ describe('axios request', () => {
       'GET',
       'next url two',
       header,
+      undefined,
       undefined,
     );
   });

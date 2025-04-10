@@ -1,22 +1,39 @@
 import { logger } from '@openops/server-shared';
 import axios, { AxiosError, AxiosHeaders, Method } from 'axios';
+import axiosRetry, { IAxiosRetryConfig } from 'axios-retry';
+
+const standardAxiosInstance = axios;
+
+let retryAxiosInstance: ReturnType<typeof axios.create> | null = null;
+
+function getRetryAxiosInstance(retryConfigs: IAxiosRetryConfig) {
+  if (!retryAxiosInstance) {
+    retryAxiosInstance = axios.create();
+    axiosRetry(retryAxiosInstance, retryConfigs);
+  }
+  return retryAxiosInstance;
+}
 
 export async function makeHttpRequest<T>(
   method: Method,
   url: string,
   headers?: AxiosHeaders,
   body?: any,
+  retryConfigs?: IAxiosRetryConfig,
 ): Promise<T> {
   try {
     const config = {
-      data: body,
-      headers,
       method,
       url,
+      headers,
+      data: body,
     };
 
-    const response = await axios(config);
+    const axiosInstance = retryConfigs
+      ? getRetryAxiosInstance(retryConfigs)
+      : standardAxiosInstance;
 
+    const response = await axiosInstance.request(config);
     return response.data;
   } catch (error) {
     const axiosError = error as AxiosError;

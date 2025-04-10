@@ -2,6 +2,7 @@
 
 import {
   authenticateDefaultUserInOpenOpsTables,
+  axiosTablesSeedRetryConfig,
   createAxiosHeaders,
   getTableByName,
   makeOpenOpsTablesDelete,
@@ -63,6 +64,7 @@ export const deleteOldOpportunitiesTable = async (): Promise<void> => {
       await makeOpenOpsTablesDelete<unknown>(
         `api/database/tables/${table.id}/`,
         createAxiosHeaders(token),
+        axiosTablesSeedRetryConfig,
       );
     }
 
