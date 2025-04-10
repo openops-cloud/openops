@@ -1,7 +1,8 @@
 import {
   createRedisClient,
   exceptionHandler,
-  JobStatus, logger,
+  JobStatus,
+  logger,
   memoryLock,
   QueueName,
   rejectedPromiseHandler,
