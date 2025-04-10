@@ -1,5 +1,4 @@
 import { BlockAuth, Property, createBlock } from '@openops/blocks-framework';
-import { BlockCategory } from '@openops/shared';
 import Client from 'ssh2-sftp-client';
 import { createFile } from './lib/actions/create-file';
 import { readFileContent } from './lib/actions/read-file';
@@ -63,7 +62,7 @@ export const sftp = createBlock({
 
   minimumSupportedRelease: '0.7.1',
   logoUrl: 'https://static.openops.com/blocks/sftp.svg',
-  categories: [BlockCategory.NETWORK],
+  categories: [],
   authors: [
     'Abdallah-Alwarawreh',
     'kishanprmr',

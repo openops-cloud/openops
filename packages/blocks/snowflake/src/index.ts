@@ -12,7 +12,7 @@ export const snowflake = createBlock({
   minimumSupportedRelease: '0.20.0',
   logoUrl: 'https://static.openops.com/blocks/snowflake-logo.svg',
   authors: [],
-  categories: [BlockCategory.DATA],
+  categories: [BlockCategory.DATA_SOURCES],
   actions: [runQuery, runMultipleQueries, insertRow],
   triggers: [],
 });

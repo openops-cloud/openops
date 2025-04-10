@@ -15,7 +15,7 @@ import {
   EngineResponse,
   EngineResponseStatus,
 } from '@openops/shared';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { nanoid } from 'nanoid';
 import {
   EngineHelperFlowResult,
@@ -101,22 +101,13 @@ export async function callEngineLambda<Result extends EngineHelperResult>(
 
     return parseEngineResponse(responseData);
   } catch (error) {
-    let status = EngineResponseStatus.ERROR;
-    let errorMessage =
-      'An unexpected error occurred while making a request to the engine.';
-    if (Date.now() > deadlineTimestamp) {
-      errorMessage = 'Engine execution timed out.';
-      status = EngineResponseStatus.TIMEOUT;
-    }
-
-    logger.error(errorMessage, { error });
+    const { status, errorMessage } = logEngineError(deadlineTimestamp, error);
 
     return {
       status,
       result: {
         success: false,
-        message:
-          'An unexpected error occurred while making a request to the engine.',
+        message: errorMessage,
       } as Result,
     };
   } finally {
@@ -157,4 +148,35 @@ function replaceVolatileValues(key: string, value: unknown): unknown {
   }
 
   return value;
+}
+
+function logEngineError(
+  deadlineTimestamp: number,
+  error: unknown,
+): { status: EngineResponseStatus; errorMessage: string } {
+  const errorTimestamp = Date.now();
+  let status = EngineResponseStatus.ERROR;
+  let errorMessage =
+    'An unexpected error occurred while making a request to the engine.';
+  if (
+    errorTimestamp > deadlineTimestamp ||
+    (axios.isAxiosError(error) &&
+      (error as AxiosError).response?.status === 504)
+  ) {
+    status = EngineResponseStatus.TIMEOUT;
+    errorMessage = 'Engine execution timed out.';
+
+    logger.debug(errorMessage, {
+      error,
+      errorTimestamp,
+      deadlineTimestamp,
+    });
+  } else {
+    logger.error(errorMessage, { error, errorTimestamp, deadlineTimestamp });
+  }
+
+  return {
+    status,
+    errorMessage,
+  };
 }

@@ -245,17 +245,29 @@ const BlockSelector = ({
       metadata?.filter((stepMetadata) => {
         if (selectedTag === ALL_KEY) return true;
 
-        if (selectedTag === BlockCategory.WORKFLOW) {
-          return [
-            ActionType.LOOP_ON_ITEMS,
-            ActionType.SPLIT,
-            ActionType.BRANCH,
-          ].includes(stepMetadata.type as ActionType);
+        if (
+          selectedTag === BlockCategory.CORE &&
+          stepMetadata.type === ActionType.CODE
+        ) {
+          return true;
         }
 
-        return (stepMetadata as BlockStepMetadata).categories?.includes(
-          selectedTag,
-        );
+        const includesTag = (
+          stepMetadata as BlockStepMetadata
+        ).categories?.includes(selectedTag);
+
+        if (selectedTag === BlockCategory.WORKFLOW) {
+          return (
+            includesTag ||
+            [
+              ActionType.LOOP_ON_ITEMS,
+              ActionType.SPLIT,
+              ActionType.BRANCH,
+            ].includes(stepMetadata.type as ActionType)
+          );
+        }
+
+        return includesTag;
       }),
     [metadata, selectedTag],
   );
@@ -275,7 +287,7 @@ const BlockSelector = ({
     >
       <PopoverTrigger asChild={asChild}>{children}</PopoverTrigger>
       <PopoverContent
-        className="w-[600px] p-0 shadow-lg"
+        className="w-[634px] p-0 shadow-lg"
         onClick={(e) => e.stopPropagation()}
         onContextMenu={(e) => {
           e.stopPropagation();

@@ -18,41 +18,33 @@ const tags: Record<
     title: 'All',
     color: 'blue',
   },
-  [BlockCategory.WORKFLOW]: {
-    title: 'Workflow',
+  [BlockCategory.FINOPS]: {
+    title: 'FinOps',
     color: 'green',
   },
   [BlockCategory.CLOUD]: {
     title: 'Cloud',
     color: 'purple',
   },
-  [BlockCategory.COMMUNICATION]: {
-    title: 'Communication',
+  [BlockCategory.WORKFLOW]: {
+    title: 'Workflow',
     color: 'yellow',
+  },
+  [BlockCategory.COLLABORATION]: {
+    title: 'Collaboration',
+    color: 'pink',
+  },
+  [BlockCategory.DATA_SOURCES]: {
+    title: 'Data Sources',
+    color: 'blue',
+  },
+  [BlockCategory.DEVOPS]: {
+    title: 'DevOps',
+    color: 'purple',
   },
   [BlockCategory.CORE]: {
     title: 'Utils',
-    color: 'pink',
-  },
-  [BlockCategory.DATA]: {
-    title: 'Data',
-    color: 'blue',
-  },
-  [BlockCategory.FINOPS]: {
-    title: 'FinOps',
-    color: 'green',
-  },
-  [BlockCategory.IaC]: {
-    title: 'IaC',
-    color: 'purple',
-  },
-  [BlockCategory.NETWORK]: {
-    title: 'Network',
     color: 'yellow',
-  },
-  [BlockCategory.PROJECT_MANAGEMENT]: {
-    title: 'Project Management',
-    color: 'blue',
   },
 };
 type BlockTagGroupProps = {
