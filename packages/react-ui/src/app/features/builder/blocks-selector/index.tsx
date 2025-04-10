@@ -245,6 +245,13 @@ const BlockSelector = ({
       metadata?.filter((stepMetadata) => {
         if (selectedTag === ALL_KEY) return true;
 
+        if (
+          selectedTag === BlockCategory.CORE &&
+          stepMetadata.type === ActionType.CODE
+        ) {
+          return true;
+        }
+
         const includesTag = (
           stepMetadata as BlockStepMetadata
         ).categories?.includes(selectedTag);
