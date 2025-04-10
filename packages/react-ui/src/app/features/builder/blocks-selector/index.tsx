@@ -245,17 +245,22 @@ const BlockSelector = ({
       metadata?.filter((stepMetadata) => {
         if (selectedTag === ALL_KEY) return true;
 
+        const includesTag = (
+          stepMetadata as BlockStepMetadata
+        ).categories?.includes(selectedTag);
+
         if (selectedTag === BlockCategory.WORKFLOW) {
-          return [
-            ActionType.LOOP_ON_ITEMS,
-            ActionType.SPLIT,
-            ActionType.BRANCH,
-          ].includes(stepMetadata.type as ActionType);
+          return (
+            includesTag ||
+            [
+              ActionType.LOOP_ON_ITEMS,
+              ActionType.SPLIT,
+              ActionType.BRANCH,
+            ].includes(stepMetadata.type as ActionType)
+          );
         }
 
-        return (stepMetadata as BlockStepMetadata).categories?.includes(
-          selectedTag,
-        );
+        return includesTag;
       }),
     [metadata, selectedTag],
   );
