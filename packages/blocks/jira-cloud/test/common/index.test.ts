@@ -1,11 +1,15 @@
 const sendRequestMock = jest.fn();
-import { AuthenticationType, HttpMethod } from '@openops/blocks-common';
-import { JiraUser, searchUserByCriteria } from '../../src/lib/common/index';
-
 jest.mock('@openops/blocks-common', () => ({
   ...jest.requireActual('@openops/blocks-common'),
   httpClient: { sendRequest: sendRequestMock },
 }));
+
+import { AuthenticationType, HttpMethod } from '@openops/blocks-common';
+import {
+  JiraUser,
+  searchUserByCriteria,
+  sendJiraRequest,
+} from '../../src/lib/common/index';
 
 describe('searchUserByCriteria', () => {
   const auth = {
@@ -80,4 +84,97 @@ describe('searchUserByCriteria', () => {
       });
     },
   );
+});
+
+describe('sendJiraRequest', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const auth = {
+    instanceUrl: 'https://example.atlassian.net',
+    email: 'email@example.com',
+    apiToken: 'secret',
+  };
+
+  const baseRequest = {
+    url: 'some/endpoint',
+    method: HttpMethod.GET,
+    auth,
+  };
+
+  test('throws Jira-specific message when screen config error is returned', async () => {
+    const errorMessage = 'It is not on the appropriate screen, or unknown.';
+    const axiosError = {
+      isAxiosError: true,
+      response: {
+        data: {
+          errorMessages: [errorMessage],
+        },
+      },
+    };
+
+    sendRequestMock.mockImplementation(() => {
+      throw axiosError;
+    });
+
+    const expectedRawError = JSON.stringify(axiosError.response.data);
+    const expectedErrorMessage = `Jira Error: The field you're trying to set (e.g., 'priority') is not configured on the project's create/edit screen. You need to add it in Jira's screen settings.\n\nOriginal error: ${expectedRawError}`;
+
+    await expect(sendJiraRequest(baseRequest)).rejects.toThrow(
+      expectedErrorMessage,
+    );
+  });
+
+  test('throws stringified Axios error if not screen config issue', async () => {
+    const axiosError = {
+      isAxiosError: true,
+      response: {
+        data: {
+          errorMessages: ['Some other Jira error'],
+        },
+      },
+    };
+
+    sendRequestMock.mockImplementation(() => {
+      throw axiosError;
+    });
+
+    await expect(sendJiraRequest(baseRequest)).rejects.toThrow(
+      JSON.stringify(axiosError.response.data),
+    );
+  });
+
+  test('throws raw non-Axios error', async () => {
+    const nonAxiosError = new Error('unexpected crash');
+
+    sendRequestMock.mockImplementation(() => {
+      throw nonAxiosError;
+    });
+
+    await expect(sendJiraRequest(baseRequest)).rejects.toThrow(
+      'unexpected crash',
+    );
+  });
+
+  test('returns successful response if no errors', async () => {
+    const mockResponse = {
+      status: 200,
+      body: { result: 'success' },
+    };
+    sendRequestMock.mockResolvedValue(mockResponse);
+
+    const response = await sendJiraRequest(baseRequest);
+
+    expect(response).toEqual(mockResponse);
+    expect(sendRequestMock).toHaveBeenCalledWith({
+      ...baseRequest,
+      url: `${auth.instanceUrl}/rest/api/3/${baseRequest.url}`,
+      authentication: {
+        type: AuthenticationType.BASIC,
+        username: auth.email,
+        password: auth.apiToken,
+      },
+    });
+  });
 });

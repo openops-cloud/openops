@@ -6,20 +6,39 @@ import {
   QueryParams,
   httpClient,
 } from '@openops/blocks-common';
+import axios from 'axios';
 import { JiraAuth } from '../../auth';
 
 export async function sendJiraRequest(
   request: HttpRequest & { auth: JiraAuth },
 ) {
-  return httpClient.sendRequest({
-    ...request,
-    url: `${request.auth.instanceUrl}/rest/api/3/${request.url}`,
-    authentication: {
-      type: AuthenticationType.BASIC,
-      username: request.auth.email,
-      password: request.auth.apiToken,
-    },
-  });
+  try {
+    return httpClient.sendRequest({
+      ...request,
+      url: `${request.auth.instanceUrl}/rest/api/3/${request.url}`,
+      authentication: {
+        type: AuthenticationType.BASIC,
+        username: request.auth.email,
+        password: request.auth.apiToken,
+      },
+    });
+  } catch (e) {
+    if (axios.isAxiosError(e)) {
+      const rawError = JSON.stringify(e.response?.data || e.response || e);
+
+      if (
+        rawError.includes('It is not on the appropriate screen, or unknown.')
+      ) {
+        throw new Error(
+          `Jira Error: The field you're trying to set (e.g., 'priority') is not configured on the project's create/edit screen. You need to add it in Jira's screen settings.\n\nOriginal error: ${rawError}`,
+        );
+      }
+
+      throw new Error(rawError);
+    }
+
+    throw new Error(e as any);
+  }
 }
 
 export async function getUsers(auth: JiraAuth) {
