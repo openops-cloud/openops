@@ -2,6 +2,7 @@ import {
   createRedisClient,
   exceptionHandler,
   JobStatus,
+  logger,
   memoryLock,
   QueueName,
   rejectedPromiseHandler,
@@ -51,7 +52,16 @@ export const redisConsumer: ConsumerManager = {
   }): Promise<void> {
     const worker = await ensureWorkerExists(queueName);
     const job = await Job.fromId(worker, executionCorrelationId);
-    assertNotNullOrUndefined(job, 'Job not found');
+
+    if (!job) {
+      logger.debug('Job is null or undefined', {
+        queueName,
+        executionCorrelationId,
+        status,
+      });
+      return;
+    }
+
     assertNotNullOrUndefined(token, 'Token not found');
     rejectedPromiseHandler(
       redisRateLimiter.onCompleteOrFailedJob(queueName, job),
