@@ -63,7 +63,7 @@ export const sftp = createBlock({
 
   minimumSupportedRelease: '0.7.1',
   logoUrl: 'https://static.openops.com/blocks/sftp.svg',
-  categories: [BlockCategory.NETWORK],
+  categories: [BlockCategory.CORE],
   authors: [
     'Abdallah-Alwarawreh',
     'kishanprmr',
