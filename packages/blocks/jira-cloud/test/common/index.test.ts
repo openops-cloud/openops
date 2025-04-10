@@ -4,7 +4,11 @@ jest.mock('@openops/blocks-common', () => ({
   httpClient: { sendRequest: sendRequestMock },
 }));
 
-import { AuthenticationType, HttpMethod } from '@openops/blocks-common';
+import {
+  AuthenticationType,
+  HttpError,
+  HttpMethod,
+} from '@openops/blocks-common';
 import {
   JiraUser,
   searchUserByCriteria,
@@ -114,16 +118,15 @@ describe('sendJiraRequest', () => {
       },
     };
 
+    const httpError = new HttpError(undefined, axiosError as any);
     sendRequestMock.mockImplementation(() => {
-      throw axiosError;
+      throw httpError;
     });
 
     const expectedRawError = JSON.stringify(axiosError.response.data);
-    const expectedErrorMessage = `Jira Error: The field you're trying to set (e.g., 'priority') is not configured on the project's create/edit screen. You need to add it in Jira's screen settings.\n\nOriginal error: ${expectedRawError}`;
+    const expectedMessage = `Jira Error: The field you're trying to set (e.g., 'priority') is not configured on the project's create/edit screen. You need to add it in Jira's screen settings.\n\nOriginal error: ${expectedRawError}`;
 
-    await expect(sendJiraRequest(baseRequest)).rejects.toThrow(
-      expectedErrorMessage,
-    );
+    await expect(sendJiraRequest(baseRequest)).rejects.toThrow(expectedMessage);
   });
 
   test('throws stringified Axios error if not screen config issue', async () => {
@@ -136,20 +139,23 @@ describe('sendJiraRequest', () => {
       },
     };
 
+    const httpError = new HttpError(undefined, axiosError as any);
     sendRequestMock.mockImplementation(() => {
-      throw axiosError;
+      throw httpError;
     });
 
+    const expectedRawError = JSON.stringify(axiosError.response.data);
+
     await expect(sendJiraRequest(baseRequest)).rejects.toThrow(
-      JSON.stringify(axiosError.response.data),
+      expectedRawError,
     );
   });
 
-  test('throws raw non-Axios error', async () => {
-    const nonAxiosError = new Error('unexpected crash');
+  test('throws raw non-HttpError error', async () => {
+    const nonHttpError = new Error('unexpected crash');
 
     sendRequestMock.mockImplementation(() => {
-      throw nonAxiosError;
+      throw nonHttpError;
     });
 
     await expect(sendJiraRequest(baseRequest)).rejects.toThrow(
@@ -162,11 +168,12 @@ describe('sendJiraRequest', () => {
       status: 200,
       body: { result: 'success' },
     };
+
     sendRequestMock.mockResolvedValue(mockResponse);
 
-    const response = await sendJiraRequest(baseRequest);
+    const result = await sendJiraRequest(baseRequest);
 
-    expect(response).toEqual(mockResponse);
+    expect(result).toEqual(mockResponse);
     expect(sendRequestMock).toHaveBeenCalledWith({
       ...baseRequest,
       url: `${auth.instanceUrl}/rest/api/3/${baseRequest.url}`,

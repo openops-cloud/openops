@@ -1,19 +1,19 @@
 import {
   AuthenticationType,
+  httpClient,
+  HttpError,
   HttpMessageBody,
   HttpMethod,
   HttpRequest,
   QueryParams,
-  httpClient,
 } from '@openops/blocks-common';
-import axios from 'axios';
 import { JiraAuth } from '../../auth';
 
 export async function sendJiraRequest(
   request: HttpRequest & { auth: JiraAuth },
 ) {
   try {
-    return httpClient.sendRequest({
+    return await httpClient.sendRequest({
       ...request,
       url: `${request.auth.instanceUrl}/rest/api/3/${request.url}`,
       authentication: {
@@ -23,21 +23,22 @@ export async function sendJiraRequest(
       },
     });
   } catch (e) {
-    if (axios.isAxiosError(e)) {
-      const rawError = JSON.stringify(e.response?.data || e.response || e);
+    if (e instanceof HttpError) {
+      const errorBody = e.response?.body || {};
+      const fullError = JSON.stringify(errorBody);
 
       if (
-        rawError.includes('It is not on the appropriate screen, or unknown.')
+        fullError.includes('It is not on the appropriate screen, or unknown.')
       ) {
-        throw new Error(
-          `Jira Error: The field you're trying to set (e.g., 'priority') is not configured on the project's create/edit screen. You need to add it in Jira's screen settings.\n\nOriginal error: ${rawError}`,
+        throw Error(
+          `Jira Error: The field you're trying to set (e.g., 'priority') is not configured on the project's create/edit screen. You need to add it in Jira's screen settings.\n\nOriginal error: ${fullError}`,
         );
       }
 
-      throw new Error(rawError);
+      throw Error(fullError);
     }
 
-    throw new Error(e as any);
+    throw e;
   }
 }
 
@@ -226,6 +227,7 @@ export async function createJiraIssue(data: CreateIssueParams) {
       fields: fields,
     },
   });
+
   return response.body;
 }
 
