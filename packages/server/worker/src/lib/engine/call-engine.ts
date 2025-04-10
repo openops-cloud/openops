@@ -166,7 +166,7 @@ function logEngineError(
     status = EngineResponseStatus.TIMEOUT;
     errorMessage = 'Engine execution timed out.';
 
-    logger.info(errorMessage, {
+    logger.debug(errorMessage, {
       error,
       errorTimestamp,
       deadlineTimestamp,
