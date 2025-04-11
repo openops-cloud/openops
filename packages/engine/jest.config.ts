@@ -1,7 +1,9 @@
+
 /* eslint-disable */
 export default {
   displayName: 'engine',
   preset: '../../jest.preset.js',
+  setupFiles: ['../../jest.config'],
   testEnvironment: 'node',
   transform: {
     '^.+\\.[tj]s$': [
