@@ -7,6 +7,7 @@ import { databaseConnection } from '../database-connection';
 
 import {
   authenticateDefaultUserInOpenOpsTables,
+  axiosTablesSeedRetryConfig,
   getDefaultDatabaseId,
   OPENOPS_DEFAULT_DATABASE_NAME,
 } from '@openops/common';
@@ -39,7 +40,9 @@ export const updateOpenopsTablesDatabase = async (): Promise<void> => {
     return;
   }
 
-  const { token } = await authenticateDefaultUserInOpenOpsTables();
+  const { token } = await authenticateDefaultUserInOpenOpsTables(
+    axiosTablesSeedRetryConfig,
+  );
 
   try {
     const tablesDatabaseId = await getDefaultDatabaseId(

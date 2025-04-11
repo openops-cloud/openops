@@ -53,7 +53,9 @@ export const deleteOldOpportunitiesTable = async (): Promise<void> => {
   }
 
   try {
-    const { token } = await authenticateDefaultUserInOpenOpsTables();
+    const { token } = await authenticateDefaultUserInOpenOpsTables(
+      axiosTablesSeedRetryConfig,
+    );
 
     const table = await getTableByName(SEED_OPENOPS_TABLE_NAME);
     if (!table) {
