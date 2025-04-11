@@ -1,8 +1,10 @@
+import baseConfig from '../../../jest.config';
+
 /* eslint-disable */
 export default {
+  ...baseConfig,
   displayName: '@openops/server-shared',
   preset: '../../../jest.preset.js',
-  setupFiles: ['../../../jest.env.js'],
   globals: {},
   testEnvironment: 'node',
   transform: {

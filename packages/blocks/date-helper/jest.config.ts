@@ -1,8 +1,10 @@
+import baseConfig from '../../../jest.config';
+
 /* eslint-disable */
 export default {
+  ...baseConfig,
   displayName: 'blocks-common',
   preset: '../../../jest.preset.js',
-  setupFiles: ['../../../jest.env.js'],
   testEnvironment: 'node',
   transform: {
     '^.+\\.ts$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }],

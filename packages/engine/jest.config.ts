@@ -1,8 +1,10 @@
+import baseConfig from '../../jest.config';
+
 /* eslint-disable */
 export default {
+  ...baseConfig,
   displayName: 'engine',
   preset: '../../jest.preset.js',
-  setupFiles: ['../../jest.env.js'],
   testEnvironment: 'node',
   transform: {
     '^.+\\.[tj]s$': [

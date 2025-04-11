@@ -1,4 +1,8 @@
+import baseConfig from '../../../jest.config';
+
+/* eslint-disable */
 export default {
+  ...baseConfig,
   displayName: 'blocks-snowflake',
   preset: '../../../jest.preset.js',
   testEnvironment: 'node',
