@@ -1,10 +1,9 @@
-import baseConfig from '../../jest.config';
 
 /* eslint-disable */
 export default {
-  ...baseConfig,
   displayName: 'shared',
   preset: '../../jest.preset.js',
+  setupFiles: ['../../jest.config'],
   globals: {},
   testEnvironment: 'node',
   transform: {
