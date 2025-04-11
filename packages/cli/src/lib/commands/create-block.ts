@@ -146,14 +146,12 @@ const updateEslintFile = async (blockName: string) => {
 
 const updateJestConfigFile = async (blockName: string) => {
   let jestConfig = await readJestConfig(`packages/blocks/${blockName}`);
-  const importStatement = `import baseConfig from '../../../jest.config';`;
-  if (!jestConfig.includes(importStatement)) {
-    jestConfig = `${importStatement}\n\n/* eslint-disable */\n${jestConfig}`;
-  }
+
+  jestConfig = `/* eslint-disable */\n${jestConfig}`;
 
   jestConfig = jestConfig.replace(
-    /export\s+default\s+{/,
-    match => `${match}\n  setupFiles: ['../../../jest.config'],`
+    /preset:\s'..\/..\/..\/jest.preset.js',/,
+    (match) => `${match}\n  setupFiles: ['../../../jest.config'],`,
   );
 
   await writeJestConfig(`packages/blocks/${blockName}`, jestConfig);
