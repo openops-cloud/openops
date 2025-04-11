@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { AppSystemProp, system } from '@openops/server-shared';
+import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { AxiosError, AxiosHeaders, AxiosResponse, Method } from 'axios';
 import { IAxiosRetryConfig } from 'axios-retry';
 import { StatusCodes } from 'http-status-codes';
@@ -15,6 +15,7 @@ export function createAxiosHeaders(token: string): AxiosHeaders {
 export const axiosTablesSeedRetryConfig: IAxiosRetryConfig = {
   retries: 3,
   retryDelay: (retryCount: number) => {
+    logger.debug(`Retrying conflict request count: ${retryCount}`);
     return retryCount * 1000;
   },
   retryCondition: (error: AxiosError) => {
