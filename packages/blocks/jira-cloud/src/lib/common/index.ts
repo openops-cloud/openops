@@ -24,14 +24,14 @@ export async function sendJiraRequest(
     });
   } catch (e) {
     if (e instanceof HttpError) {
-      const errorBody = e.response?.body || {};
+      const errorBody = e.response?.body ?? {};
       const fullError = JSON.stringify(errorBody);
 
       if (
         fullError.includes('It is not on the appropriate screen, or unknown.')
       ) {
         throw Error(
-          `Jira Error: The field you're trying to set (e.g., 'priority') is not configured on the project's create/edit screen. You need to add it in Jira's screen settings.\n\nOriginal error: ${fullError}`,
+          `One or more fields you're trying to set is not configured on the project's create/edit screen. You need to add it in Jira's screen settings.\n\nOriginal error: ${fullError}`,
         );
       }
 

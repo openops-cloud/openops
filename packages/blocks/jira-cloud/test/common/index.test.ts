@@ -124,7 +124,7 @@ describe('sendJiraRequest', () => {
     });
 
     const expectedRawError = JSON.stringify(axiosError.response.data);
-    const expectedMessage = `Jira Error: The field you're trying to set (e.g., 'priority') is not configured on the project's create/edit screen. You need to add it in Jira's screen settings.\n\nOriginal error: ${expectedRawError}`;
+    const expectedMessage = `One or more fields you're trying to set is not configured on the project's create/edit screen. You need to add it in Jira's screen settings.\n\nOriginal error: ${expectedRawError}`;
 
     await expect(sendJiraRequest(baseRequest)).rejects.toThrow(expectedMessage);
   });
