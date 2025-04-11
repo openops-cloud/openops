@@ -1,0 +1,48 @@
+import {
+  BlockPropValueSchema,
+  DropdownOption,
+  Property,
+} from '@openops/blocks-framework';
+import { makeHttpRequest } from '@openops/common';
+import { AxiosHeaders } from 'axios';
+import { databricksAuth } from './auth';
+import { getDatabricsToken } from './get-databrics-token';
+
+export const workspaceDeploymentName = Property.Dropdown({
+  displayName: 'Workspace',
+  refreshers: ['auth'],
+  required: true,
+  options: async ({ auth }) => {
+    if (!auth) {
+      return {
+        disabled: true,
+        placeholder: 'Please select a connection',
+        options: [],
+      };
+    }
+    const authValue = auth as BlockPropValueSchema<typeof databricksAuth>;
+    const accessToken = await getDatabricsToken(authValue);
+
+    const workspaceListUrl = `https://accounts.cloud.databricks.com/api/2.0/accounts/${authValue.accountId}/workspaces`;
+
+    const headers = new AxiosHeaders({
+      Authorization: `Bearer ${accessToken}`,
+    });
+
+    const workspaces = await makeHttpRequest<any[]>(
+      'GET',
+      workspaceListUrl,
+      headers,
+    );
+
+    const options: DropdownOption<any>[] = workspaces.map((workspace) => ({
+      label: workspace.workspace_name,
+      value: workspace.deployment_name,
+    }));
+
+    return {
+      disabled: false,
+      options: options,
+    };
+  },
+});
