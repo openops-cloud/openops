@@ -4,13 +4,10 @@ import axiosRetry, { IAxiosRetryConfig } from 'axios-retry';
 
 const standardAxiosInstance = axios;
 
-let retryAxiosInstance: ReturnType<typeof axios.create> | null = null;
-
 function getRetryAxiosInstance(retryConfigs: IAxiosRetryConfig) {
-  if (!retryAxiosInstance) {
-    retryAxiosInstance = axios.create();
-    axiosRetry(retryAxiosInstance, retryConfigs);
-  }
+  const retryAxiosInstance = axios.create();
+
+  axiosRetry(retryAxiosInstance, retryConfigs);
   return retryAxiosInstance;
 }
 
