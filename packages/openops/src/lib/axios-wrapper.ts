@@ -2,8 +2,6 @@ import { logger } from '@openops/server-shared';
 import axios, { AxiosError, AxiosHeaders, Method } from 'axios';
 import axiosRetry, { IAxiosRetryConfig } from 'axios-retry';
 
-const standardAxiosInstance = axios;
-
 function getRetryAxiosInstance(retryConfigs: IAxiosRetryConfig) {
   const retryAxiosInstance = axios.create();
 
@@ -28,7 +26,7 @@ export async function makeHttpRequest<T>(
 
     const axiosInstance = retryConfigs
       ? getRetryAxiosInstance(retryConfigs)
-      : standardAxiosInstance;
+      : axios;
 
     const response = await axiosInstance.request(config);
     return response.data;
