@@ -1,4 +1,5 @@
-import { createAxiosHeaders, makeOpenOpsTablesPost } from '@openops/common';
+import { createAxiosHeaders } from '@openops/common';
+import { resilientPost } from './utils';
 
 export type Workspace = {
   id: number;
@@ -15,9 +16,10 @@ export async function createWorkspace(
     name: workspaceName,
   };
 
-  return makeOpenOpsTablesPost<Workspace>(
-    'api/workspaces/',
+  const createWorkspaceEndpoint = 'api/workspaces/';
+  return resilientPost(
+    createWorkspaceEndpoint,
     requestBody,
     createAxiosHeaders(token),
-  );
+  ) as Promise<Workspace>;
 }

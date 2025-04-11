@@ -1,4 +1,5 @@
-import { createAxiosHeaders, makeOpenOpsTablesPost } from '@openops/common';
+import { createAxiosHeaders } from '@openops/common';
+import { resilientPost } from './utils';
 
 export type Table = {
   id: number;
@@ -19,9 +20,10 @@ export async function createTable(
     first_row_header: true,
   };
 
-  return makeOpenOpsTablesPost<Table>(
-    `api/database/tables/database/${databaseId}/`,
+  const createTableEndpoint = `api/database/tables/database/${databaseId}/`;
+  return resilientPost(
+    createTableEndpoint,
     requestBody,
     createAxiosHeaders(token),
-  );
+  ) as Promise<Table>;
 }

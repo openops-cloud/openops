@@ -1,8 +1,5 @@
-import {
-  Application,
-  createAxiosHeaders,
-  makeOpenOpsTablesPatch,
-} from '@openops/common';
+import { Application, createAxiosHeaders } from '@openops/common';
+import { resilientPatch } from './utils';
 
 // TODO: remove this when all environments are migrated
 export async function renameDatabase(
@@ -14,9 +11,10 @@ export async function renameDatabase(
     name: databaseName,
   };
 
-  return makeOpenOpsTablesPatch<Application>(
-    `api/applications/${databaseId}/`,
+  const renameDatabaseEndpoint = `api/applications/${databaseId}/`;
+  return resilientPatch(
+    renameDatabaseEndpoint,
     requestBody,
     createAxiosHeaders(token),
-  );
+  ) as Promise<Application>;
 }
