@@ -1,0 +1,1 @@
+export const DEFAULT_QUERY_TIMEOUT = 30000;

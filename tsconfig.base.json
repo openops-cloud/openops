@@ -75,6 +75,7 @@
       "@openops/block-data-summarizer": [
         "packages/blocks/data-summarizer/src/index.ts"
       ],
+      "@openops/block-databricks": ["packages/blocks/databricks/src/index.ts"],
       "@openops/block-date-helper": [
         "packages/blocks/date-helper/src/index.ts"
       ],
