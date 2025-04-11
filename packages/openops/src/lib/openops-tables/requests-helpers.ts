@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { AppSystemProp, system } from '@openops/server-shared';
 import { AxiosError, AxiosHeaders, AxiosResponse, Method } from 'axios';
 import { IAxiosRetryConfig } from 'axios-retry';
@@ -25,7 +26,6 @@ export const axiosTablesSeedRetryConfig: IAxiosRetryConfig = {
   },
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function makeOpenOpsTablesPost<T>(
   route: string,
   body: any,
@@ -57,7 +57,6 @@ export async function makeOpenOpsTablesDelete<T>(
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function makeOpenOpsTablesPatch<T>(
   route: string,
   body: any,
@@ -109,7 +108,6 @@ export async function makeOpenOpsTablesGet<T>(
   return responses;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function makeOpenOpsTablesRequest<T>(
   method: Method,
   route: string,
