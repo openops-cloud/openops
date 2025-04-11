@@ -11,6 +11,7 @@ import { EngineConstants } from './lib/handler/context/engine-constants';
 export const EngineRequest = Type.Object({
   operationType: Type.Enum(EngineOperationType),
   engineInput: Type.Object({}),
+  deadlineTimestamp: Type.Number(),
 });
 
 export type EngineRequest = Static<typeof EngineRequest>;

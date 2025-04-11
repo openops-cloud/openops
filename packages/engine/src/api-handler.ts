@@ -1,5 +1,6 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import {
+  blocksBuilder,
   logger,
   runWithLogContext,
   setStopHandlers,
@@ -25,6 +26,7 @@ const engineController: FastifyPluginAsyncTypebox = async (fastify) => {
     async (request, reply) => {
       await runWithLogContext(
         {
+          deadlineTimestamp: request.body.deadlineTimestamp.toString(),
           requestId: request.headers?.['requestid'] ?? request.id,
           operationType: request.body.operationType,
         },
@@ -63,6 +65,8 @@ export const start = async (): Promise<void> => {
     logger.info('Starting Engine API...');
 
     setStopHandlers(app);
+
+    await blocksBuilder();
 
     await app.register(engineController);
 

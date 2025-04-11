@@ -1,9 +1,10 @@
-import { Action, flowHelper, FlowVersion } from '@openops/shared';
 import {
-  OnSelectionChangeParams,
-  useKeyPress,
-  useStoreApi,
-} from '@xyflow/react';
+  Action,
+  flowHelper,
+  FlowVersion,
+  StepLocationRelativeToParent,
+} from '@openops/shared';
+import { OnSelectionChangeParams, useStoreApi } from '@xyflow/react';
 import { cloneDeep } from 'lodash-es';
 import {
   createContext,
@@ -16,10 +17,9 @@ import {
   useState,
 } from 'react';
 import { usePrevious } from 'react-use';
-import { useDebounceCallback } from 'usehooks-ts';
-import { useClipboardContext } from './clipboard-context';
+import { useKeyPress } from '../../hooks/use-key-press';
+import { clipboardUtils } from '../../lib/clipboard-utils';
 import {
-  COPY_DEBOUNCE_DELAY_MS,
   COPY_KEYS,
   NODE_SELECTION_RECT_CLASS_NAME,
   SHIFT_KEY,
@@ -28,6 +28,11 @@ import {
 import { copyPasteToast } from './copy-paste-toast';
 
 export type PanningMode = 'grab' | 'pan';
+export type PlusButtonPostion = {
+  parentStep: string;
+  plusStepLocation: StepLocationRelativeToParent;
+  branchNodeId?: string;
+};
 
 type CanvasContextState = {
   panningMode: PanningMode;
@@ -37,6 +42,11 @@ type CanvasContextState = {
   copySelectedArea: () => void;
   copyAction: (action: Action) => void;
   readonly: boolean;
+  pastePlusButton: PlusButtonPostion | null;
+  actionToPaste: Action | null;
+  setPastePlusButton: React.Dispatch<
+    React.SetStateAction<PlusButtonPostion | null>
+  >;
 };
 
 const CanvasContext = createContext<CanvasContextState | undefined>(undefined);
@@ -55,6 +65,9 @@ export const ReadonlyCanvasProvider = ({
       copySelectedArea: () => {},
       copyAction: () => {},
       readonly: true,
+      pastePlusButton: null,
+      setPastePlusButton: () => {},
+      actionToPaste: null,
     }),
     [],
   );
@@ -71,31 +84,172 @@ export const InteractiveContextProvider = ({
   selectedStep,
   clearSelectedStep,
   flowVersion,
+  onPaste,
   children,
 }: {
   flowCanvasContainerId?: string;
   selectedStep: string | null;
   clearSelectedStep: () => void;
   flowVersion: FlowVersion;
+  onPaste: (actionToPaste: Action) => void;
   children: ReactNode;
 }) => {
   const [panningMode, setPanningMode] = useState<PanningMode>('grab');
   const previousSelectedStep = usePrevious(selectedStep);
   const [selectedActions, setSelectedActions] = useState<Action[]>([]);
+  const [pastePlusButton, setPastePlusButton] =
+    useState<PlusButtonPostion | null>(null);
   const selectedFlowActionRef = useRef<Action | null>(null);
   const selectedNodeCounterRef = useRef<number>(0);
   const state = useStoreApi().getState();
+  const [actionToPaste, setActionToPaste] = useState<Action | null>(null);
+  const canvasRef = useRef<HTMLElement | null>(null);
 
   const spacePressed = useKeyPress(SPACE_KEY);
   const shiftPressed = useKeyPress(SHIFT_KEY);
+  const copyPressed = useKeyPress(COPY_KEYS, {
+    target: canvasRef.current,
+    preventDefault: false,
+    actInsideInputWithModifier: false,
+  });
 
-  const canvas = useMemo(() => {
-    return flowCanvasContainerId
-      ? document.getElementById(flowCanvasContainerId)
-      : null;
+  useEffect(() => {
+    if (!flowCanvasContainerId) {
+      canvasRef.current = null;
+      return;
+    }
+
+    canvasRef.current = document.getElementById(flowCanvasContainerId);
+
+    const interval = setInterval(() => {
+      const element = document.getElementById(flowCanvasContainerId);
+      if (element) {
+        canvasRef.current = element;
+        clearInterval(interval);
+      }
+    }, 10);
+
+    return () => {
+      clearInterval(interval);
+    };
   }, [flowCanvasContainerId]);
-  const copyPressed = useKeyPress(COPY_KEYS, { target: canvas });
-  const { fetchClipboardOperations } = useClipboardContext();
+
+  const fallbackCopy = (
+    text: string,
+    action: Action | null,
+    actionCount?: number,
+  ) => {
+    clipboardUtils.copyInInsecureContext({
+      text,
+      onSuccess: () => {
+        if (action) {
+          setActionToPaste(action);
+        }
+        if (!action || !actionCount) {
+          return;
+        }
+
+        copyPasteToast({
+          success: true,
+          isCopy: true,
+          itemsCount: actionCount,
+        });
+      },
+      onError: () => {
+        copyPasteToast({
+          success: false,
+          isCopy: true,
+        });
+      },
+    });
+  };
+
+  const handleCopy = useCallback((action: Action, actionCount: number) => {
+    const flowString = JSON.stringify(action);
+
+    if (navigator.clipboard) {
+      navigator.clipboard
+        .writeText(flowString)
+        .then(() => {
+          setActionToPaste(action);
+          copyPasteToast({
+            success: true,
+            isCopy: true,
+            itemsCount: actionCount,
+          });
+        })
+        .catch((error) => {
+          // eslint-disable-next-line no-console
+          console.error(error);
+          fallbackCopy(flowString, action, actionCount);
+          copyPasteToast({
+            success: false,
+            isCopy: true,
+          });
+        });
+    } else {
+      fallbackCopy(flowString, action, actionCount);
+    }
+  }, []);
+
+  const copySelectedStep = useCallback(() => {
+    if (!selectedStep) {
+      return;
+    }
+
+    const stepDetails = flowHelper.getStep(flowVersion, selectedStep);
+
+    if (!stepDetails || !flowHelper.isAction(stepDetails.type)) {
+      return;
+    }
+
+    const stepToBeCopied = cloneDeep(stepDetails);
+    stepToBeCopied.nextAction = undefined;
+    flowHelper.clearStepTestData(stepToBeCopied);
+
+    handleCopy(stepToBeCopied as Action, 1);
+  }, [flowVersion, handleCopy, selectedStep]);
+
+  const copySelectedArea = useCallback(() => {
+    const selectionArea = document.querySelector(
+      `.${NODE_SELECTION_RECT_CLASS_NAME}`,
+    );
+
+    if (!selectionArea) {
+      selectedFlowActionRef.current = null;
+      selectedNodeCounterRef.current = 0;
+      return;
+    }
+    if (!selectedFlowActionRef.current || !selectedNodeCounterRef.current) {
+      return;
+    }
+
+    handleCopy(selectedFlowActionRef.current, selectedNodeCounterRef.current);
+  }, [handleCopy]);
+
+  useEffect(() => {
+    if (!copyPressed) {
+      return;
+    }
+    const activeElement = document.activeElement;
+    const isInsideCanvas = activeElement?.closest(`#${flowCanvasContainerId}`);
+
+    if (!isInsideCanvas && selectedStep) {
+      return;
+    }
+
+    if (selectedStep) {
+      copySelectedStep();
+    } else {
+      copySelectedArea();
+    }
+  }, [
+    copyPressed,
+    copySelectedArea,
+    copySelectedStep,
+    flowCanvasContainerId,
+    selectedStep,
+  ]);
 
   // clear multi-selection if we have a new selected step
   useEffect(() => {
@@ -109,6 +263,59 @@ export const InteractiveContextProvider = ({
       state.setEdges(state.edges);
     }
   }, [selectedStep, previousSelectedStep, state]);
+
+  useEffect(() => {
+    function handler(e: ClipboardEvent) {
+      const activeElement = document.activeElement;
+
+      const isEditableElement =
+        activeElement instanceof HTMLInputElement ||
+        activeElement instanceof HTMLTextAreaElement ||
+        activeElement?.hasAttribute('contenteditable');
+
+      if (isEditableElement) {
+        return;
+      }
+
+      const clipboardText = e.clipboardData?.getData('text/plain') ?? '';
+
+      if (!clipboardText) {
+        // eslint-disable-next-line no-console
+        console.log('No data found in the clipboard event');
+        copyPasteToast({
+          success: false,
+          isCopy: false,
+        });
+        return;
+      }
+
+      try {
+        const parsedAction = JSON.parse(clipboardText);
+        if (parsedAction?.name && parsedAction?.settings) {
+          setActionToPaste(parsedAction);
+          onPaste(parsedAction);
+        }
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error(err);
+
+        if (actionToPaste) {
+          onPaste(actionToPaste);
+        } else {
+          copyPasteToast({
+            success: false,
+            isCopy: false,
+          });
+        }
+      }
+    }
+
+    document.addEventListener('paste', handler);
+
+    return () => {
+      document.removeEventListener('paste', handler);
+    };
+  }, [actionToPaste, onPaste, selectedStep]);
 
   const effectivePanningMode: PanningMode = useMemo(() => {
     if ((spacePressed || panningMode === 'grab') && !shiftPressed) {
@@ -175,84 +382,18 @@ export const InteractiveContextProvider = ({
     clearSelectedStep();
   }, [clearSelectedStep, selectedActions, state]);
 
-  const copySelectedStep = useDebounceCallback(() => {
-    if (!selectedStep) {
-      return;
-    }
-
-    const stepDetails = flowHelper.getStep(flowVersion, selectedStep);
-
-    if (!stepDetails || !flowHelper.isAction(stepDetails.type)) {
-      return;
-    }
-
-    const stepToBeCopied = cloneDeep(stepDetails);
-    stepToBeCopied.nextAction = undefined;
-    flowHelper.clearStepTestData(stepToBeCopied);
-
-    handleCopy(stepToBeCopied as Action, 1);
-  }, COPY_DEBOUNCE_DELAY_MS);
-
-  const copySelectedArea = useDebounceCallback(() => {
-    const selectionArea = document.querySelector(
-      `.${NODE_SELECTION_RECT_CLASS_NAME}`,
-    );
-    if (!selectionArea) {
-      selectedFlowActionRef.current = null;
-      selectedNodeCounterRef.current = 0;
-      return;
-    }
-    if (!selectedFlowActionRef.current || !selectedNodeCounterRef.current) {
-      return;
-    }
-
-    handleCopy(selectedFlowActionRef.current, selectedNodeCounterRef.current);
-  }, COPY_DEBOUNCE_DELAY_MS);
-
-  const copyAction = (action: Action) => {
-    const actionToBeCopied = cloneDeep(action);
-    actionToBeCopied.nextAction = undefined;
-    const allNestedSteps = flowHelper.getAllSteps(actionToBeCopied);
-    allNestedSteps.forEach((step) => {
-      flowHelper.clearStepTestData(step);
-    });
-    handleCopy(actionToBeCopied, allNestedSteps.length);
-  };
-
-  const handleCopy = (action: Action, actionCounter: number) => {
-    const flowString = JSON.stringify(action);
-
-    navigator.clipboard
-      .writeText(flowString)
-      .then(() => {
-        copyPasteToast({
-          success: true,
-          isCopy: true,
-          itemsCounter: actionCounter,
-        });
-        fetchClipboardOperations();
-      })
-      .catch(() => {
-        copyPasteToast({
-          success: false,
-          isCopy: true,
-          itemsCounter: actionCounter,
-        });
+  const copyAction = useCallback(
+    (action: Action) => {
+      const actionToBeCopied = cloneDeep(action);
+      actionToBeCopied.nextAction = undefined;
+      const allNestedSteps = flowHelper.getAllSteps(actionToBeCopied);
+      allNestedSteps.forEach((step) => {
+        flowHelper.clearStepTestData(step);
       });
-  };
-
-  useEffect(() => {
-    if (!copyPressed) {
-      return;
-    }
-
-    if (selectedStep) {
-      copySelectedStep();
-    } else {
-      copySelectedArea();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [copyPressed, selectedStep]);
+      handleCopy(actionToBeCopied, allNestedSteps.length);
+    },
+    [handleCopy],
+  );
 
   const contextValue = useMemo(
     () => ({
@@ -262,7 +403,10 @@ export const InteractiveContextProvider = ({
       onSelectionEnd,
       copySelectedArea,
       copyAction,
+      pastePlusButton,
+      setPastePlusButton,
       readonly: false,
+      actionToPaste,
     }),
     [
       effectivePanningMode,
@@ -270,6 +414,8 @@ export const InteractiveContextProvider = ({
       onSelectionEnd,
       copySelectedArea,
       copyAction,
+      pastePlusButton,
+      actionToPaste,
     ],
   );
   return (

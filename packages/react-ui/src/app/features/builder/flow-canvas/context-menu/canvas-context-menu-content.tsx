@@ -9,13 +9,11 @@ import {
 import {
   Action,
   ActionType,
-  FlagId,
   flowHelper,
-  isNil,
   StepLocationRelativeToParent,
 } from '@openops/shared';
 
-import { flagsHooks } from '@/app/common/hooks/flags-hooks';
+import { hasSecureClipboardAccess } from '@/app/lib/secure-clipboard-access-utils';
 import { useBuilderStateContext } from '../../builder-hooks';
 import { usePaste } from '../../hooks/use-paste';
 import { useSelection } from '../../hooks/use-selection';
@@ -26,27 +24,22 @@ export const CanvasContextMenuContent = ({
   contextMenuType,
   actionToPaste,
 }: CanvasContextMenuProps) => {
-  const showCopyPaste =
-    flagsHooks.useFlag<boolean>(FlagId.COPY_PASTE_ACTIONS_ENABLED).data ||
-    false;
-
   const [flowVersion, readonly] = useBuilderStateContext((state) => [
     state.flowVersion,
     state.readonly,
   ]);
 
-  const { copySelectedArea, copyAction } = useCanvasContext();
+  const { copySelectedArea, copyAction, pastePlusButton } = useCanvasContext();
 
   const { selectedStep, selectedNodes, firstSelectedNode } = useSelection();
 
   const disabled = selectedNodes.length === 0 && !selectedStep;
   const isSingleSelectedNode = selectedNodes.length === 1;
 
-  const doSelectedNodesIncludeTrigger = selectedNodes.some(
-    (node: string) => node === flowVersion.trigger.name,
-  );
+  const doSelectedNodesIncludeTrigger =
+    selectedNodes.some((node: string) => node === flowVersion.trigger.name) ||
+    selectedStep === flowVersion.trigger.name;
 
-  const disabledPaste = isNil(actionToPaste);
   const showPasteAfterLastStep =
     !readonly && contextMenuType === ContextMenuType.CANVAS;
   const showPasteAsFirstLoopAction =
@@ -69,11 +62,17 @@ export const CanvasContextMenuContent = ({
     firstSelectedNode?.type === ActionType.SPLIT;
 
   const showCopy =
-    showCopyPaste &&
-    !doSelectedNodesIncludeTrigger &&
-    contextMenuType === ContextMenuType.STEP;
+    !doSelectedNodesIncludeTrigger && contextMenuType === ContextMenuType.STEP;
 
   const { onPaste } = usePaste();
+
+  if (!showCopy && !hasSecureClipboardAccess) {
+    return (
+      <span className="text-sm select-none px-2 py-1.5">
+        {t('No actions available')}
+      </span>
+    );
+  }
 
   return (
     <>
@@ -96,92 +95,105 @@ export const CanvasContextMenuContent = ({
         </ContextMenuItem>
       )}
 
-      <>
-        {showPasteAfterLastStep && (
-          <ContextMenuItem
-            disabled={disabledPaste}
-            onClick={() =>
-              onPaste(
-                actionToPaste as Action,
-                StepLocationRelativeToParent.AFTER,
-                selectedStep,
-              )
-            }
-            className="flex items-center gap-2"
-          >
-            <Copy className="w-4 h-4"></Copy>
-            {selectedStep
-              ? t('Paste after selection')
-              : t('Paste after last step')}
-          </ContextMenuItem>
-        )}
-        {showPasteAsFirstLoopAction && (
-          <ContextMenuItem
-            disabled={disabledPaste}
-            onClick={() =>
-              onPaste(
-                actionToPaste as Action,
-                StepLocationRelativeToParent.INSIDE_LOOP,
-                selectedStep,
-              )
-            }
-            className="flex items-center gap-2"
-          >
-            <Copy className="w-4 h-4"></Copy>
-            {t('Paste inside Loop')}
-          </ContextMenuItem>
-        )}
-        {showPasteInConditionBranch && (
-          <ContextMenuItem
-            disabled={disabledPaste}
-            onClick={() =>
-              onPaste(
-                actionToPaste as Action,
-                StepLocationRelativeToParent.INSIDE_TRUE_BRANCH,
-                selectedStep,
-              )
-            }
-            className="flex items-center gap-2"
-          >
-            <Copy className="w-4 h-4"></Copy>
-            {t('Paste inside first branch')}
-          </ContextMenuItem>
-        )}
-        {showPasteInSplitBranch && (
-          <ContextMenuItem
-            disabled={disabledPaste}
-            onClick={() => {
-              const branchNodeId = firstSelectedNode.settings.options[0].id;
-              return onPaste(
-                actionToPaste as Action,
-                StepLocationRelativeToParent.INSIDE_SPLIT,
-                selectedStep,
-                branchNodeId,
-              );
-            }}
-            className="flex items-center gap-2"
-          >
-            <Copy className="w-4 h-4"></Copy>
-            {t('Paste inside default branch')}
-          </ContextMenuItem>
-        )}
-        {showPasteAfterCurrentStep && (
-          <ContextMenuItem
-            disabled={disabledPaste}
-            onClick={() =>
-              onPaste(
-                actionToPaste as Action,
-                StepLocationRelativeToParent.AFTER,
-                selectedStep,
-              )
-            }
-            className="flex items-center gap-2"
-          >
-            <Copy className="w-4 h-4"></Copy>
-            {t('Paste After')}
-          </ContextMenuItem>
-        )}
-      </>
+      {hasSecureClipboardAccess && (
+        <>
+          {showPasteAfterLastStep && !pastePlusButton && (
+            <ContextMenuItem
+              onClick={() =>
+                onPaste(
+                  actionToPaste as Action,
+                  StepLocationRelativeToParent.AFTER,
+                  selectedStep,
+                )
+              }
+              className="flex items-center gap-2"
+            >
+              <Copy className="w-4 h-4"></Copy>
+              {selectedStep
+                ? t('Paste after selection')
+                : t('Paste after last step')}
+            </ContextMenuItem>
+          )}
+          {showPasteAsFirstLoopAction && (
+            <ContextMenuItem
+              onClick={() =>
+                onPaste(
+                  actionToPaste as Action,
+                  StepLocationRelativeToParent.INSIDE_LOOP,
+                  selectedStep,
+                )
+              }
+              className="flex items-center gap-2"
+            >
+              <Copy className="w-4 h-4"></Copy>
+              {t('Paste inside Loop')}
+            </ContextMenuItem>
+          )}
+          {showPasteInConditionBranch && (
+            <ContextMenuItem
+              onClick={() =>
+                onPaste(
+                  actionToPaste as Action,
+                  StepLocationRelativeToParent.INSIDE_TRUE_BRANCH,
+                  selectedStep,
+                )
+              }
+              className="flex items-center gap-2"
+            >
+              <Copy className="w-4 h-4"></Copy>
+              {t('Paste inside first branch')}
+            </ContextMenuItem>
+          )}
+          {showPasteInSplitBranch && (
+            <ContextMenuItem
+              onClick={() => {
+                const branchNodeId = firstSelectedNode.settings.options[0].id;
+                return onPaste(
+                  actionToPaste as Action,
+                  StepLocationRelativeToParent.INSIDE_SPLIT,
+                  selectedStep,
+                  branchNodeId,
+                );
+              }}
+              className="flex items-center gap-2"
+            >
+              <Copy className="w-4 h-4"></Copy>
+              {t('Paste inside default branch')}
+            </ContextMenuItem>
+          )}
+          {showPasteAfterCurrentStep && (
+            <ContextMenuItem
+              onClick={() =>
+                onPaste(
+                  actionToPaste as Action,
+                  StepLocationRelativeToParent.AFTER,
+                  selectedStep,
+                )
+              }
+              className="flex items-center gap-2"
+            >
+              <Copy className="w-4 h-4"></Copy>
+              {t('Paste after')}
+            </ContextMenuItem>
+          )}
+          {pastePlusButton && (
+            <ContextMenuItem
+              onClick={() =>
+                onPaste(
+                  actionToPaste as Action,
+                  pastePlusButton.plusStepLocation,
+                  pastePlusButton.parentStep,
+                  pastePlusButton.branchNodeId,
+                )
+              }
+              className="flex items-center gap-2"
+            >
+              <Copy className="w-4 h-4"></Copy>
+              {t('Paste here')}
+            </ContextMenuItem>
+          )}
+        </>
+      )}
     </>
   );
 };

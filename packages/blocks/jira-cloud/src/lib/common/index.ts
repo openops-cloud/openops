@@ -1,25 +1,45 @@
 import {
   AuthenticationType,
+  httpClient,
+  HttpError,
   HttpMessageBody,
   HttpMethod,
   HttpRequest,
   QueryParams,
-  httpClient,
 } from '@openops/blocks-common';
 import { JiraAuth } from '../../auth';
 
 export async function sendJiraRequest(
   request: HttpRequest & { auth: JiraAuth },
 ) {
-  return httpClient.sendRequest({
-    ...request,
-    url: `${request.auth.instanceUrl}/rest/api/3/${request.url}`,
-    authentication: {
-      type: AuthenticationType.BASIC,
-      username: request.auth.email,
-      password: request.auth.apiToken,
-    },
-  });
+  try {
+    return await httpClient.sendRequest({
+      ...request,
+      url: `${request.auth.instanceUrl}/rest/api/3/${request.url}`,
+      authentication: {
+        type: AuthenticationType.BASIC,
+        username: request.auth.email,
+        password: request.auth.apiToken,
+      },
+    });
+  } catch (e) {
+    if (e instanceof HttpError) {
+      const errorBody = e.response?.body ?? {};
+      const fullError = JSON.stringify(errorBody);
+
+      if (
+        fullError.includes('It is not on the appropriate screen, or unknown.')
+      ) {
+        throw Error(
+          `One or more fields you're trying to set is not configured on the project's create/edit screen. You need to add it in Jira's screen settings.\n\nOriginal error: ${fullError}`,
+        );
+      }
+
+      throw Error(fullError);
+    }
+
+    throw e;
+  }
 }
 
 export async function getUsers(auth: JiraAuth) {
@@ -207,6 +227,7 @@ export async function createJiraIssue(data: CreateIssueParams) {
       fields: fields,
     },
   });
+
   return response.body;
 }
 

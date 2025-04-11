@@ -1,4 +1,5 @@
 import { createBlock } from '@openops/blocks-framework';
+import { BlockCategory } from '@openops/shared';
 import { anadotAuth } from './lib/anodot-auth-property';
 import { addCommentAction } from './lib/comments/add-comment-action';
 import { deleteCommentAction } from './lib/comments/delete-comment-action';
@@ -12,6 +13,7 @@ export const anodot = createBlock({
   auth: anadotAuth,
   minimumSupportedRelease: '0.20.0',
   logoUrl: 'https://static.openops.com/blocks/anodot.png',
+  categories: [BlockCategory.FINOPS],
   authors: ['OpenOps'],
   actions: [
     getRecommendationsAction,

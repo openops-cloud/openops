@@ -1,7 +1,8 @@
-import { runCliCommand, useTempFile } from '@openops/common';
-import fs from 'fs/promises';
-import os from 'os';
-import path from 'path';
+import {
+  getDefaultCloudSDKConfig,
+  loginGCPWithKeyObject,
+  runCliCommand,
+} from '@openops/common';
 
 export async function runCommand(
   command: string,
@@ -9,8 +10,29 @@ export async function runCommand(
   shouldUseHostCredentials: boolean,
   project?: string,
 ): Promise<string> {
+  const result = await runCommands(
+    [command],
+    auth,
+    shouldUseHostCredentials,
+    project,
+  );
+
+  if (result.length !== 1) {
+    throw new Error(`Expected exactly one result, but got ${result.length}.`);
+  }
+
+  return result[0];
+}
+
+export async function runCommands(
+  commands: string[],
+  auth: any,
+  shouldUseHostCredentials: boolean,
+  project?: string,
+): Promise<string[]> {
   const envVars: Record<string, string> = {
     PATH: process.env['PATH'] || '',
+    CLOUDSDK_CORE_DISABLE_PROMPTS: '1',
   };
 
   const processGoogleCloudConfigDir = process.env['CLOUDSDK_CONFIG'];
@@ -19,11 +41,8 @@ export async function runCommand(
   }
 
   if (!shouldUseHostCredentials) {
-    const gcpConfigDir = await fs.mkdtemp(
-      path.join(os.tmpdir(), 'gcloud-config'),
-    );
+    const gcpConfigDir = await getDefaultCloudSDKConfig();
     envVars['CLOUDSDK_CONFIG'] = gcpConfigDir;
-
     await loginGCPWithKeyObject(auth.keyFileContent, envVars);
   }
 
@@ -35,14 +54,11 @@ export async function runCommand(
     );
   }
 
-  return await runCliCommand(command, 'gcloud', envVars);
-}
+  const results: string[] = [];
+  for (const command of commands) {
+    const output = await runCliCommand(command, 'gcloud', envVars);
+    results.push(output);
+  }
 
-async function loginGCPWithKeyObject(keyObject: string, envVars: any) {
-  const result = await useTempFile(keyObject, async (filePath) => {
-    const loginCommand = `gcloud auth activate-service-account --key-file=${filePath}`;
-    return await runCliCommand(loginCommand, 'gcloud', envVars);
-  });
-
-  return result;
+  return results;
 }

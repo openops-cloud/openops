@@ -10,22 +10,22 @@ const cacheManagerMock = {
   () => cacheManagerMock,
 );
 
+let getOrThrowMock = jest.fn().mockImplementation((key: AppSystemProp) => {
+  if (key === AppSystemProp.AWS_PRICING_ACCESS_KEY_ID) {
+    return 'access key';
+  }
+  if (key === AppSystemProp.AWS_PRICING_SECRET_ACCESS_KEY) {
+    return 'secret access key';
+  }
+
+  return jest.requireActual('@openops/server-shared').system.getOrThrow(key);
+});
+
 jest.mock('@openops/server-shared', () => ({
   ...jest.requireActual('@openops/server-shared'),
   system: {
     ...jest.requireActual('@openops/server-shared').system,
-    getOrThrow: jest.fn().mockImplementation((key: AppSystemProp) => {
-      if (key === AppSystemProp.AWS_PRICING_ACCESS_KEY_ID) {
-        return 'access key';
-      }
-      if (key === AppSystemProp.AWS_PRICING_SECRET_ACCESS_KEY) {
-        return 'secret access key';
-      }
-
-      return jest
-        .requireActual('@openops/server-shared')
-        .system.getOrThrow(key);
-    }),
+    getOrThrow: getOrThrowMock,
   },
 }));
 
@@ -87,5 +87,48 @@ describe('Pricing service', () => {
         [{ Field: 'location', Value: 'US East (N. Virginia)' }],
       );
     });
+
+    test.each([
+      [AppSystemProp.AWS_PRICING_ACCESS_KEY_ID, ''],
+      [AppSystemProp.AWS_PRICING_SECRET_ACCESS_KEY, ''],
+      [AppSystemProp.AWS_PRICING_ACCESS_KEY_ID, undefined],
+      [AppSystemProp.AWS_PRICING_SECRET_ACCESS_KEY, undefined],
+    ])(
+      'should return an error if credentials are not defined',
+      async (prop: AppSystemProp, value: string | undefined) => {
+        getOrThrowMock = jest.fn().mockImplementation((key: AppSystemProp) => {
+          if (key === prop) {
+            return value;
+          }
+
+          if (
+            key === AppSystemProp.AWS_PRICING_ACCESS_KEY_ID ||
+            key === AppSystemProp.AWS_PRICING_SECRET_ACCESS_KEY
+          ) {
+            return 'some key';
+          }
+
+          return jest
+            .requireActual('@openops/server-shared')
+            .system.getOrThrow(key);
+        });
+
+        jest.resetModules();
+
+        const { getPrice } = await import(
+          '../../../../src/app/aws/pricing-service'
+        );
+
+        await expect(
+          getPrice(
+            'EBS',
+            [{ Field: 'location', Value: 'some value' }] as Filter[],
+            'us-east-1',
+          ),
+        ).rejects.toThrow(
+          `System property OPS_${prop} is not defined in the .env file`,
+        );
+      },
+    );
   });
 });

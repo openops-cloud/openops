@@ -3,6 +3,7 @@ import {
   getDefaultDatabaseId,
 } from '@openops/common';
 import { logger } from '@openops/server-shared';
+import { createAggregatedCostsTable } from './create-aggregated-costs-table';
 import { createAutoEc2InstancesShutdownTable } from './create-auto-ec2-instances-shutdown-table';
 import { createBusinessUnitsTable } from './create-business-units-table';
 import { createIdleEbsVolumesToDeleteTable } from './create-idle-ebs-volumes-to-delete-table';
@@ -35,5 +36,12 @@ export const seedTemplateTablesService = {
     await createOpportunitiesTable(token, databaseId);
 
     logger.info('[Seeding opportunity template table] Done');
+  },
+
+  async createAggregatedCostsTable() {
+    const { token } = await authenticateDefaultUserInOpenOpsTables();
+    const databaseId = await getDefaultDatabaseId(token);
+
+    await createAggregatedCostsTable(databaseId, token);
   },
 };

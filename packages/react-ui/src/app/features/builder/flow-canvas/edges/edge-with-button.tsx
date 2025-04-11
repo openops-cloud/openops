@@ -23,6 +23,7 @@ import React, { useState } from 'react';
 import { useBuilderStateContext } from '../../builder-hooks';
 
 import { BlockSelector } from '@/app/features/builder/blocks-selector';
+import { attributesHelper } from '../attributes-helper';
 import { FlowAddButton } from '../flow-add-button';
 
 const BUTTON_SIZE = {
@@ -72,6 +73,8 @@ const EdgeWithButton = React.memo((props: EdgePath) => {
     },
   });
 
+  const branchNodeId = getBranchNodeId(props.target, nodes);
+
   return (
     <>
       <BaseEdge
@@ -106,7 +109,7 @@ const EdgeWithButton = React.memo((props: EdgePath) => {
               parentStep: props.data.parentStep!,
               stepLocationRelativeToParent:
                 props.data.stepLocationRelativeToParent!,
-              branchNodeId: getBranchNodeId(props.target, nodes),
+              branchNodeId,
             },
           }}
           open={actionMenuOpen}
@@ -124,6 +127,11 @@ const EdgeWithButton = React.memo((props: EdgePath) => {
             className={cn('rounded-full transition-all', {
               'shadow-add-button': isStepInsideDropzone,
             })}
+            {...attributesHelper.addPlusButtonAttribute(
+              props.data.parentStep!,
+              props.data.stepLocationRelativeToParent!,
+              branchNodeId,
+            )}
           >
             <FlowAddButton
               ref={setNodeRef}

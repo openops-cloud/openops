@@ -11,6 +11,7 @@ import {
   WorkflowNode,
 } from '@openops/components/ui';
 import { useBuilderStateContext } from '../../builder-hooks';
+import { attributesHelper } from '../attributes-helper';
 import { FlowAddButton } from '../flow-add-button';
 
 const BigButton = React.memo(({ data }: { data: WorkflowNode['data'] }) => {
@@ -62,7 +63,13 @@ const BigButton = React.memo(({ data }: { data: WorkflowNode['data'] }) => {
             open={actionMenuOpen}
             onOpenChange={setActionMenuOpen}
           >
-            <div>
+            <div
+              {...attributesHelper.addPlusButtonAttribute(
+                data.parentStep!,
+                data.stepLocationRelativeToParent!,
+                data.branchNodeId,
+              )}
+            >
               <FlowAddButton
                 ref={(ref) => setNodeRef(ref)}
                 showDropIndicator={showDropIndicator}

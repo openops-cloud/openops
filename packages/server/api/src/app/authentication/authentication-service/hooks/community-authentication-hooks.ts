@@ -16,8 +16,6 @@ import { userService } from '../../../user/user-service';
 import { accessTokenManager } from '../../lib/access-token-manager';
 import { AuthenticationServiceHooks } from './authentication-service-hooks';
 
-const DEFAULT_ORGANIZATION_NAME = 'organization';
-
 export const communityAuthenticationServiceHooks: AuthenticationServiceHooks = {
   async preSignIn() {
     // Empty
@@ -25,26 +23,11 @@ export const communityAuthenticationServiceHooks: AuthenticationServiceHooks = {
   async preSignUp() {
     // Empty
   },
-  async postSignUp({ user, tablesAccessToken, tablesRefreshToken }) {
-    const adminEmail = system.getOrThrow(AppSystemProp.OPENOPS_ADMIN_EMAIL);
-
+  async postSignUp({ user, tablesRefreshToken }) {
     let organization = await organizationService.getOldestOrganization();
 
-    const isAdminUser = user.email === adminEmail;
-    if (isAdminUser) {
-      if (organization) {
-        throw Error(
-          'There is already an organization. You cannot create an admin user if an organization already exists.',
-        );
-      } else {
-        await createOrganizationAndProject(user, tablesAccessToken);
-      }
-
-      return getProjectAndToken(user, tablesRefreshToken);
-    }
-
     const adminUser = await userService.getUserByEmailOrFail({
-      email: adminEmail,
+      email: system.getOrThrow(AppSystemProp.OPENOPS_ADMIN_EMAIL),
     });
 
     organization = !isNil(adminUser.organizationId)
@@ -120,27 +103,6 @@ async function getProjectAndToken(
     tablesRefreshToken,
     projectRole: ProjectMemberRole.ADMIN,
   };
-}
-
-async function createOrganizationAndProject(
-  user: User,
-  tablesToken: string,
-): Promise<void> {
-  const { workspaceId, databaseId } =
-    await openopsTables.createDefaultWorkspaceAndDatabase(tablesToken);
-
-  const organization = await organizationService.create({
-    ownerId: user.id,
-    name: DEFAULT_ORGANIZATION_NAME,
-    tablesWorkspaceId: workspaceId,
-  });
-
-  await projectService.create({
-    displayName: `${user.firstName}'s Project`,
-    ownerId: user.id,
-    organizationId: organization.id,
-    tablesDatabaseId: databaseId,
-  });
 }
 
 async function addUserToDefaultWorkspace(values: {

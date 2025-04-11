@@ -31,14 +31,16 @@ import { blocksApi } from '@/app/features/blocks/lib/blocks-api';
 import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
 import { blockSelectorUtils } from '@/app/features/builder/blocks-selector/block-selector-utils';
 import {
-  BlockTagEnum,
+  ALL_KEY,
   BlockTagGroup,
+  TagKey,
 } from '@/app/features/builder/blocks-selector/block-tag-group';
 import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
 import { useApplyOperationAndPushToHistory } from '@/app/features/builder/flow-version-undo-redo/hooks/apply-operation-and-push-to-history';
 import {
   Action,
   ActionType,
+  BlockCategory,
   FlagId,
   FlowOperationType,
   isNil,
@@ -74,9 +76,7 @@ const BlockSelector = ({
     ItemListMetadata[] | undefined
   >(undefined);
 
-  const [selectedTag, setSelectedTag] = useState<BlockTagEnum>(
-    BlockTagEnum.ALL,
-  );
+  const [selectedTag, setSelectedTag] = useState<TagKey>(ALL_KEY);
   const [selectStepByName, flowVersion] = useBuilderStateContext((state) => [
     state.selectStepByName,
     state.flowVersion,
@@ -95,10 +95,10 @@ const BlockSelector = ({
     setSearchQuery('');
     setSelectedSubItems(undefined);
     setSelectedMetadata(undefined);
-    setSelectedTag(BlockTagEnum.ALL);
+    setSelectedTag(ALL_KEY);
   };
 
-  const handleSelect = (
+  const handleSelect = async (
     block: StepMetadata | undefined,
     item: ItemListMetadata,
   ) => {
@@ -117,7 +117,7 @@ const BlockSelector = ({
 
     switch (operation.type) {
       case FlowOperationType.UPDATE_TRIGGER: {
-        applyOperationAndPushToHistory(
+        await applyOperationAndPushToHistory(
           {
             type: FlowOperationType.UPDATE_TRIGGER,
             request: stepData as Trigger,
@@ -243,17 +243,31 @@ const BlockSelector = ({
   const blocksMetadata = useMemo(
     () =>
       metadata?.filter((stepMetadata) => {
-        switch (selectedTag) {
-          case BlockTagEnum.CORE:
-            return blockSelectorUtils.isCoreBlock(stepMetadata);
-          case BlockTagEnum.AI:
-            return blockSelectorUtils.isAiBlock(stepMetadata);
-          case BlockTagEnum.APPS:
-            return blockSelectorUtils.isAppBlock(stepMetadata);
-          case BlockTagEnum.ALL:
-          default:
-            return true;
+        if (selectedTag === ALL_KEY) return true;
+
+        if (
+          selectedTag === BlockCategory.CORE &&
+          stepMetadata.type === ActionType.CODE
+        ) {
+          return true;
         }
+
+        const includesTag = (
+          stepMetadata as BlockStepMetadata
+        ).categories?.includes(selectedTag);
+
+        if (selectedTag === BlockCategory.WORKFLOW) {
+          return (
+            includesTag ||
+            [
+              ActionType.LOOP_ON_ITEMS,
+              ActionType.SPLIT,
+              ActionType.BRANCH,
+            ].includes(stepMetadata.type as ActionType)
+          );
+        }
+
+        return includesTag;
       }),
     [metadata, selectedTag],
   );
@@ -273,8 +287,11 @@ const BlockSelector = ({
     >
       <PopoverTrigger asChild={asChild}>{children}</PopoverTrigger>
       <PopoverContent
-        className="w-[600px] p-0 shadow-lg"
+        className="w-[634px] p-0 shadow-lg"
         onClick={(e) => e.stopPropagation()}
+        onContextMenu={(e) => {
+          e.stopPropagation();
+        }}
       >
         <div className="p-2">
           <Input
@@ -283,25 +300,23 @@ const BlockSelector = ({
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);
-              setSelectedTag(BlockTagEnum.ALL);
+              setSelectedTag(ALL_KEY);
               setSelectedSubItems(undefined);
               setSelectedMetadata(undefined);
             }}
           />
         </div>
-        <BlockTagGroup
-          selectedTag={selectedTag}
-          type={
-            operation.type === FlowOperationType.UPDATE_TRIGGER
-              ? 'trigger'
-              : 'action'
-          }
-          onSelectTag={(value) => {
-            setSelectedTag(value);
-            setSelectedSubItems(undefined);
-            setSelectedMetadata(undefined);
-          }}
-        />
+        {operation.type !== FlowOperationType.UPDATE_TRIGGER && (
+          <BlockTagGroup
+            selectedTag={selectedTag}
+            onSelectTag={(value) => {
+              setSelectedTag(value);
+              setSelectedSubItems(undefined);
+              setSelectedMetadata(undefined);
+            }}
+          />
+        )}
+
         <Separator orientation="horizontal" />
         <div className="flex overflow-y-auto max-h-[300px] h-[300px]">
           <CardList className="w-[250px] min-w-[250px]">

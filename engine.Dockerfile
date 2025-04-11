@@ -36,9 +36,10 @@ RUN <<-```
     set -ex
     dnf install -y gnupg unzip libstdc++ binutils python3
 
-    curl -sSL https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-469.0.0-linux-x86_64.tar.gz -o /tmp/gcloud.tar.gz
+    curl -sSL https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-516.0.0-linux-x86_64.tar.gz -o /tmp/gcloud.tar.gz
     mkdir -p /opt && tar -C /opt -xf /tmp/gcloud.tar.gz
     /opt/google-cloud-sdk/install.sh --quiet
+    /opt/google-cloud-sdk/bin/gcloud components install beta --quiet
 
     chmod -R +x /opt/google-cloud-sdk/bin/
     ln -s /opt/google-cloud-sdk/bin/gcloud /usr/bin/gcloud
@@ -72,4 +73,4 @@ COPY tools/link-packages-to-root.sh tools/link-packages-to-root.sh
 RUN ./tools/link-packages-to-root.sh
 
 ENTRYPOINT [ "/bin/bash", "-c" ]
-CMD [ "cp -r /var/tmp-base/. /tmp/ && /lambda-entrypoint.sh main.handler" ]
+CMD [ "cp -r /var/tmp-base/. /tmp/ && /lambda-entrypoint.sh main.handler; exit $?" ]

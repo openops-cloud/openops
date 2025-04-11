@@ -2,17 +2,25 @@ import { t } from 'i18next';
 import { Sparkles } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { cn } from '../../lib/cn';
 import { Button } from '../../ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '../../ui/popover';
 
-const AiWidget = () => {
+type Props = {
+  classname?: string;
+};
+
+const AiWidget = ({ classname }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
-          className="w-[40px] h-[40px] absolute left-[282px] bottom-[10px] flex items-center justify-center z-50 bg-background shadow-editor rounded-xl"
+          className={cn(
+            'w-[40px] h-[40px] absolute left-[242px] bottom-[10px] flex items-center justify-center z-50 bg-background shadow-editor rounded-xl',
+            classname,
+          )}
           size="icon"
           onClick={() => {
             setIsOpen(true);
@@ -36,6 +44,7 @@ const AiWidget = () => {
           <p>
             <Link
               to="https://openops.com/pricing"
+              target="_blank"
               className="font-bold text-primary-200"
             >
               {t('Learn how')}

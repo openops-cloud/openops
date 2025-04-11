@@ -67,7 +67,8 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [SharedSystemProp.LOG_PRETTY]: 'false',
   [SharedSystemProp.PACKAGE_ARCHIVE_PATH]: 'cache/archives',
   [SharedSystemProp.BLOCKS_SOURCE]: BlocksSource.FILE,
-  [AppSystemProp.QUEUE_MODE]: QueueMode.REDIS,
+  [AppSystemProp.QUEUE_MODE]:
+    process.env['NODE_ENV'] === 'test' ? QueueMode.MEMORY : QueueMode.REDIS,
   [SharedSystemProp.FLOW_TIMEOUT_SECONDS]: '600',
   [SharedSystemProp.TRIGGER_TIMEOUT_SECONDS]: '60',
   [AppSystemProp.TEMPLATES_SOURCE_URL]: '/api/v1/flow-templates',
@@ -89,6 +90,7 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [AppSystemProp.AZURE_API_VERSION]: '2024-07-01',
   [SharedSystemProp.INTERNAL_OAUTH_PROXY_URL]: 'https://oauth.openops.com',
   [AppSystemProp.CODE_BLOCK_MEMORY_LIMIT_IN_MB]: '128',
+  [SharedSystemProp.INTERNAL_PARALLEL_LOOP_ITERATIONS_LIMIT]: '1',
 };
 
 export const system = {

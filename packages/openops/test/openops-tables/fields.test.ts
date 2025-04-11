@@ -45,6 +45,7 @@ describe('getFields', () => {
     expect(makeOpenOpsTablesGetMock).toHaveBeenCalledWith(
       'api/database/fields/table/1/?user_field_names=true',
       'some header',
+      undefined,
     );
     expect(createAxiosHeadersMock).toBeCalledTimes(1);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
@@ -99,6 +100,7 @@ describe('getFields', () => {
     expect(makeOpenOpsTablesGetMock).toHaveBeenCalledWith(
       'api/database/fields/table/1/?user_field_names=true',
       'some header',
+      undefined,
     );
     expect(createAxiosHeadersMock).toBeCalledTimes(1);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');

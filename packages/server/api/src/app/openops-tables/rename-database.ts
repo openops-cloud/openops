@@ -1,5 +1,6 @@
 import {
   Application,
+  axiosTablesSeedRetryConfig,
   createAxiosHeaders,
   makeOpenOpsTablesPatch,
 } from '@openops/common';
@@ -18,5 +19,6 @@ export async function renameDatabase(
     `api/applications/${databaseId}/`,
     requestBody,
     createAxiosHeaders(token),
+    axiosTablesSeedRetryConfig,
   );
 }

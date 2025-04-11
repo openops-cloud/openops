@@ -63,7 +63,6 @@ const WorkflowStepNode = React.memo(
       exitStepSettings,
       flowVersion,
       loopIndexes,
-      setAllowCanvasPanning,
     ] = useBuilderStateContext((state) => [
       state.selectStepByName,
       state.selectedStep === data.step?.name,
@@ -74,7 +73,6 @@ const WorkflowStepNode = React.memo(
       state.exitStepSettings,
       state.flowVersion,
       state.loopsIndexes,
-      state.setAllowCanvasPanning,
     ]);
 
     const { stepMetadata } = blocksHooks.useStepMetadata({
@@ -143,12 +141,6 @@ const WorkflowStepNode = React.memo(
           },
         )}
         onClick={(e) => handleStepClick(e)}
-        onMouseEnter={() => {
-          setAllowCanvasPanning(false);
-        }}
-        onMouseLeave={() => {
-          setAllowCanvasPanning(true);
-        }}
         key={data.step?.name}
         ref={setNodeRef}
         {...attributes}

@@ -1,10 +1,12 @@
 import {
   Button,
+  clipboardUtils,
+  COPY_PASTE_TOAST_DURATION,
+  toast,
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-  toast,
 } from '@openops/components/ui';
 import { t } from 'i18next';
 import { Copy, Download, Eye, EyeOff } from 'lucide-react';
@@ -53,12 +55,33 @@ const JsonViewer = React.memo(({ json, title }: JsonViewerProps) => {
   const { theme } = useTheme();
 
   const viewerTheme = theme === 'dark' ? 'pop' : 'rjv-default';
-  const handleCopy = () => {
-    navigator.clipboard.writeText(JSON.stringify(json, null, 2));
+
+  const showCopySuccessToast = () =>
     toast({
       title: t('Copied to clipboard'),
-      duration: 1000,
+      duration: COPY_PASTE_TOAST_DURATION,
     });
+
+  const showCopyFailureToast = () =>
+    toast({
+      title: t('Failed to copy to clipboard'),
+      duration: COPY_PASTE_TOAST_DURATION,
+    });
+
+  const handleCopy = () => {
+    const text = JSON.stringify(json, null, 2);
+    if (navigator.clipboard) {
+      navigator.clipboard
+        .writeText(text)
+        .then(showCopySuccessToast)
+        .catch(showCopyFailureToast);
+    } else {
+      clipboardUtils.copyInInsecureContext({
+        text,
+        onSuccess: showCopySuccessToast,
+        onError: showCopyFailureToast,
+      });
+    }
   };
 
   const handleDownload = () => {
@@ -98,7 +121,7 @@ const JsonViewer = React.memo(({ json, title }: JsonViewerProps) => {
         const root = createRoot(rootElem);
 
         el.parentElement!.replaceChildren(el as Node, rootElem as Node);
-        const isProductionFile = fileUrl.includes('file://');
+        const isProductionFile = fileUrl.startsWith('file://');
 
         root.render(
           <div data-file-root="true">

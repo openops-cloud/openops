@@ -297,8 +297,8 @@ export const flagService = {
         updated,
       },
       {
-        id: FlagId.COPY_PASTE_ACTIONS_ENABLED,
-        value: false,
+        id: FlagId.CANDU_CLIENT_TOKEN,
+        value: system.get<string>(AppSystemProp.CANDU_CLIENT_TOKEN),
         created,
         updated,
       },

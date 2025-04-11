@@ -1,17 +1,18 @@
 import { t } from 'i18next';
 import { CircleCheckBig } from 'lucide-react';
+import { COPY_PASTE_TOAST_DURATION } from '../../lib/constants';
 import { toast } from '../../ui/use-toast';
 
 type CopyPasteToastProps = {
   success: boolean;
   isCopy: boolean;
-  itemsCounter: number;
+  itemsCount?: number;
 };
 
 const CopyPasteToastContent = ({
   success,
   isCopy,
-  itemsCounter,
+  itemsCount,
 }: CopyPasteToastProps) => {
   if (success) {
     return (
@@ -22,7 +23,7 @@ const CopyPasteToastContent = ({
             isCopy
               ? '{n} Steps copied to clipboard'
               : '{n} Steps successfully pasted',
-            { n: itemsCounter },
+            { n: itemsCount },
           )}
         </span>
       </>
@@ -31,12 +32,18 @@ const CopyPasteToastContent = ({
     return (
       <>
         <CircleCheckBig size={24} className="text-warning-400" />
-        <span className="font-bold text-normal">
-          {t(
-            isCopy ? 'Failed to copy {n} steps' : 'Failed to paste {n} steps',
-            { n: itemsCounter },
-          )}
-        </span>
+        {itemsCount ? (
+          <span className="font-bold text-normal">
+            {t(
+              isCopy ? 'Failed to copy {n} steps' : 'Failed to paste {n} steps',
+              { n: itemsCount },
+            )}
+          </span>
+        ) : (
+          <span className="font-bold text-normal">
+            {t(isCopy ? 'Failed to copy' : 'Failed to paste')}
+          </span>
+        )}
       </>
     );
   }
@@ -50,6 +57,6 @@ export const copyPasteToast = (props: CopyPasteToastProps) => {
       </div>
     ),
     closeButtonClassName: 'top-6 right-4 opacity-1 text-black dark:text-white',
-    duration: 7000,
+    duration: COPY_PASTE_TOAST_DURATION,
   });
 };

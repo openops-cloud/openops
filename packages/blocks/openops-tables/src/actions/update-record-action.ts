@@ -144,6 +144,7 @@ export const updateRecordAction = createAction({
           tableId,
           primaryKeyValue,
           primaryKeyField.name,
+          primaryKeyField.type,
         )
       : undefined;
 
