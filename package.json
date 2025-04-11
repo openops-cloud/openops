@@ -89,7 +89,6 @@
     "@rollup/plugin-node-resolve": "15.3.0",
     "@segment/analytics-next": "1.72.0",
     "@segment/analytics-node": "2.1.0",
-    "@sentry/node": "7.64.0",
     "@sinclair/typebox": "0.32.35",
     "@socket.io/redis-adapter": "8.2.1",
     "@superset-ui/embedded-sdk": "0.1.2",
