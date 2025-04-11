@@ -14,7 +14,7 @@ export function createAxiosHeaders(token: string): AxiosHeaders {
 export const axiosTablesSeedRetryConfig: IAxiosRetryConfig = {
   retries: 3,
   retryDelay: (retryCount: number) => {
-    return retryCount * 10000;
+    return retryCount * 1000;
   },
   retryCondition: (error: AxiosError) => {
     return (
