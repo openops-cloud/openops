@@ -15,7 +15,9 @@ export function createAxiosHeaders(token: string): AxiosHeaders {
 export const axiosTablesSeedRetryConfig: IAxiosRetryConfig = {
   retries: 3,
   retryDelay: (retryCount: number) => {
-    logger.debug(`Retrying conflict request count: ${retryCount}`);
+    logger.debug(
+      `The request failed due to a conflict. Request count: ${retryCount}`,
+    );
     return retryCount * 1000;
   },
   retryCondition: (error: AxiosError) => {
