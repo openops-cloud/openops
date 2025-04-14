@@ -33,8 +33,8 @@ jest.mock('@openops/server-shared', () => ({
 import { Filter, FilterType, Pricing } from '@aws-sdk/client-pricing';
 import {
   getAttributeValues,
-  getPriceList,
-  getPriceListFromAws,
+  getPriceListWithCache,
+  getPriceListWithCacheFromAws,
   getServices,
 } from '../../src/lib/aws/pricing';
 
@@ -150,7 +150,7 @@ describe('pricing tests', () => {
     });
   });
 
-  describe('getPriceListFromAws', () => {
+  describe('getPriceListWithCacheFromAws', () => {
     test('should return price list for the given filters and append extracted price without random ids', async () => {
       getAwsClientMock.mockReturnValue({
         getProducts: getProductsCommandMock,
@@ -182,7 +182,7 @@ describe('pricing tests', () => {
           Value: 'some value',
         },
       ];
-      const result = await getPriceListFromAws(
+      const result = await getPriceListWithCacheFromAws(
         'credentials',
         'us-east-1',
         'some service',
@@ -230,7 +230,7 @@ describe('pricing tests', () => {
           getProducts: getProductsCommandMock,
         });
 
-        const result = await getPriceListFromAws(
+        const result = await getPriceListWithCacheFromAws(
           'credentials',
           'us-east-1',
           'some service',
@@ -251,7 +251,7 @@ describe('pricing tests', () => {
   describe('getPrice', () => {
     test('should get or add to cache wrapper', async () => {
       cacheWrapperMock.getOrAdd.mockReturnValueOnce('some cached value');
-      const result = await getPriceList(
+      const result = await getPriceListWithCache(
         auth,
         'EBS',
         [{ Field: 'location', Value: 'some value' }] as Filter[],
