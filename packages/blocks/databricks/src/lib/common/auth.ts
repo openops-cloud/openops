@@ -15,6 +15,11 @@ https://accounts.cloud.databricks.com/
 > These credentials will be used to generate a secure OAuth token to access Databricks REST APIs.
 `;
 
+const failedValidationResponse = {
+  valid: false,
+  error: 'Error validating API access.',
+};
+
 export const databricksAuth = BlockAuth.CustomAuth({
   required: true,
   description,
@@ -34,10 +39,10 @@ export const databricksAuth = BlockAuth.CustomAuth({
   },
   validate: async ({ auth }) => {
     try {
-      await getDatabricsToken(auth);
-      return { valid: true };
+      const token = await getDatabricsToken(auth);
+      return token ? { valid: true } : failedValidationResponse;
     } catch {
-      return { valid: false, error: '' };
+      return failedValidationResponse;
     }
   },
 });
