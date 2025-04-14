@@ -35,7 +35,7 @@ export const workspaceDeploymentName = Property.Dropdown({
       headers,
     );
 
-    const options: DropdownOption<any>[] = workspaces.map((workspace) => ({
+    const options: DropdownOption<string>[] = workspaces.map((workspace) => ({
       label: workspace.workspace_name,
       value: workspace.deployment_name,
     }));

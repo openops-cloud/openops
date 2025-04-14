@@ -1,6 +1,5 @@
 import { createAction, Property, Validators } from '@openops/blocks-framework';
 import { makeHttpRequest } from '@openops/common';
-import { SharedSystemProp, system } from '@openops/server-shared';
 import { AxiosHeaders } from 'axios';
 import { databricksAuth } from '../common/auth';
 import { getDatabricsToken } from '../common/get-databrics-token';

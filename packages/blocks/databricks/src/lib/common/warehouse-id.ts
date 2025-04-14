@@ -37,7 +37,7 @@ export const warehouseId = Property.Dropdown({
       headers,
     );
 
-    const options: DropdownOption<any>[] = warehouses.map((warehouse) => ({
+    const options: DropdownOption<string>[] = warehouses.map((warehouse) => ({
       label: warehouse.name,
       value: warehouse.id,
     }));
