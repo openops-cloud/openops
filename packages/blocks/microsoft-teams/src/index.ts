@@ -10,7 +10,7 @@ export const microsoftTeams = createBlock({
   auth: microsoftTeamsAuth,
   minimumSupportedRelease: '0.20.0',
   logoUrl: 'https://static.openops.com/blocks/microsoft-teams.png',
-  categories: [BlockCategory.COMMUNICATION],
+  categories: [BlockCategory.COLLABORATION],
   authors: [],
   actions: [
     sendChannelMessageAction,

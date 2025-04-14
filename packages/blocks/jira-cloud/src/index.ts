@@ -23,7 +23,7 @@ export const jiraCloud = createBlock({
   auth: jiraCloudAuth,
   minimumSupportedRelease: '0.9.0',
   logoUrl: 'https://static.openops.com/blocks/jira.png',
-  categories: [BlockCategory.PROJECT_MANAGEMENT],
+  categories: [BlockCategory.COLLABORATION],
   authors: ['kishanprmr', 'MoShizzle', 'abuaboud'],
   actions: [
     createIssue,

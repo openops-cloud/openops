@@ -1,4 +1,5 @@
 import {
+  axiosTablesSeedRetryConfig,
   createAxiosHeaders,
   getFields,
   getPrimaryKeyFieldFromFields,
@@ -45,6 +46,7 @@ export async function addFields(token: string, tableId: number) {
       type: 'text',
     },
     createAxiosHeaders(token),
+    axiosTablesSeedRetryConfig,
   );
   logger.debug(
     `[Seeding Idle EBS Volumes to delete table] After adding primary field Arn with id: ${primaryField.id}`,
@@ -90,6 +92,7 @@ async function addField(
     createFieldEndpoint,
     fieldBody,
     createAxiosHeaders(token),
+    axiosTablesSeedRetryConfig,
   );
 
   logger.debug(
