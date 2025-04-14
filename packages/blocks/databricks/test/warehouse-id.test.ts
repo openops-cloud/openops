@@ -78,7 +78,7 @@ describe('warehouseId.options', () => {
 
   it('should be disabled if makeHttpRequest fails', async () => {
     mockedGetToken.mockResolvedValue('mock-token');
-    mockedHttpRequest.mockRejectedValue(new Error('Request failed'));
+    mockedHttpRequest.mockRejectedValue(new Error('Error'));
 
     const result = await warehouseId.options(
       {
@@ -89,7 +89,8 @@ describe('warehouseId.options', () => {
     );
     expect(result).toEqual({
       disabled: true,
-      placeholder: 'Failed to load warehouse options. Please try again.',
+      placeholder: 'An error occurred while fetching warehouses',
+      error: 'Error',
       options: [],
     });
   });

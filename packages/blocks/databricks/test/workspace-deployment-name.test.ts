@@ -74,9 +74,9 @@ describe('workspaceDeploymentName.options', () => {
     });
   });
 
-  it('should throw if makeHttpRequest fails', async () => {
+  it('Should return error and placeholder if makeHttpRequest fails', async () => {
     mockedGetToken.mockResolvedValue('mock-token');
-    mockedHttpRequest.mockRejectedValue(new Error('Request failed'));
+    mockedHttpRequest.mockRejectedValue(new Error('Error'));
 
     const result = await workspaceDeploymentName.options(
       { auth },
@@ -85,7 +85,8 @@ describe('workspaceDeploymentName.options', () => {
 
     expect(result).toEqual({
       disabled: true,
-      placeholder: 'Failed to load workspace options. Please try again.',
+      placeholder: 'An error occurred while fetching workspaces',
+      error: 'Error',
       options: [],
     });
   });

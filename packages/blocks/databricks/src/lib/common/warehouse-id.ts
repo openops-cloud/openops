@@ -47,10 +47,11 @@ export const warehouseId = Property.Dropdown({
         disabled: false,
         options: options,
       };
-    } catch {
+    } catch (error: any) {
       return {
         disabled: true,
-        placeholder: 'Failed to load warehouse options. Please try again.',
+        placeholder: 'An error occurred while fetching warehouses',
+        error: String(error?.message),
         options: [],
       };
     }
