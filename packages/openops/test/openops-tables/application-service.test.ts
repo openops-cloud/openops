@@ -46,6 +46,7 @@ describe('getDefaultDatabaseId', () => {
     expect(makeOpenOpsTablesGetMock).toHaveBeenCalledWith(
       'api/applications/',
       'some header',
+      undefined,
     );
     expect(createAxiosHeadersMock).toBeCalledTimes(1);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
@@ -73,6 +74,7 @@ describe('getDefaultDatabaseId', () => {
     expect(makeOpenOpsTablesGetMock).toHaveBeenCalledWith(
       'api/applications/',
       'some header',
+      undefined,
     );
     expect(createAxiosHeadersMock).toBeCalledTimes(1);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');

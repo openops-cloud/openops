@@ -11,6 +11,7 @@ import { authenticationSession } from '@/app/lib/authentication-session';
 import { useAppStore } from '@/app/store/app-store';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { popupFeatures } from '../../cloud/lib/popup';
 import { useUserInfoPolling } from '../../cloud/lib/use-user-info-polling';
 
@@ -21,6 +22,7 @@ const settingsLink: MenuLink = {
 };
 
 const SideMenuFooter = () => {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const { cloudUser, setCloudUser } = useAppStore((s) => ({
@@ -76,11 +78,18 @@ const SideMenuFooter = () => {
     }
   }, [cloudLogin, cloudLogout, cloudUser]);
 
+  const onLogout = useCallback(() => {
+    authenticationSession.logOut({
+      userInitiated: true,
+      navigate,
+    });
+  }, [navigate]);
+
   return (
     <MenuFooter
       settingsLink={settingsLink}
       user={user}
-      onLogout={authenticationSession.logOut}
+      onLogout={onLogout}
       isMinimized={isSidebarMinimized}
       cloudConfig={{
         user: cloudUser

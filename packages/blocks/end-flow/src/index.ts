@@ -12,5 +12,5 @@ export const endFlow = createBlock({
   authors: [],
   actions: [endFlowAction],
   triggers: [],
-  categories: [BlockCategory.CORE],
+  categories: [BlockCategory.WORKFLOW],
 });

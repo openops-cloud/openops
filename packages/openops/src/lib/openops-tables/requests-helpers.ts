@@ -1,5 +1,8 @@
-import { AppSystemProp, system } from '@openops/server-shared';
-import { AxiosHeaders, AxiosResponse, Method } from 'axios';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { AppSystemProp, logger, system } from '@openops/server-shared';
+import { AxiosError, AxiosHeaders, AxiosResponse, Method } from 'axios';
+import { IAxiosRetryConfig } from 'axios-retry';
+import { StatusCodes } from 'http-status-codes';
 import { makeHttpRequest } from '../axios-wrapper';
 
 export function createAxiosHeaders(token: string): AxiosHeaders {
@@ -9,34 +12,74 @@ export function createAxiosHeaders(token: string): AxiosHeaders {
   });
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const axiosTablesSeedRetryConfig: IAxiosRetryConfig = {
+  retries: 3,
+  retryDelay: (retryCount: number) => {
+    logger.debug(
+      `The request failed due to a conflict. Request count: ${retryCount}`,
+    );
+    return retryCount * 1000;
+  },
+  retryCondition: (error: AxiosError) => {
+    return (
+      (error?.response?.status &&
+        error?.response?.status === StatusCodes.CONFLICT) ||
+      false
+    );
+  },
+};
+
 export async function makeOpenOpsTablesPost<T>(
   route: string,
   body: any,
   headers?: AxiosHeaders,
+  retryConfigs?: IAxiosRetryConfig,
 ): Promise<T> {
-  return makeOpenOpsTablesRequest<T>('POST', route, body, headers);
+  return makeOpenOpsTablesRequest<T>(
+    'POST',
+    route,
+    body,
+    headers,
+    undefined,
+    retryConfigs,
+  );
 }
 
 export async function makeOpenOpsTablesDelete<T>(
   route: string,
   headers?: AxiosHeaders,
+  retryConfigs?: IAxiosRetryConfig,
 ): Promise<T> {
-  return makeOpenOpsTablesRequest<T>('DELETE', route, undefined, headers);
+  return makeOpenOpsTablesRequest<T>(
+    'DELETE',
+    route,
+    undefined,
+    headers,
+    undefined,
+    retryConfigs,
+  );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function makeOpenOpsTablesPatch<T>(
   route: string,
   body: any,
   headers?: AxiosHeaders,
+  retryConfigs?: IAxiosRetryConfig,
 ): Promise<T> {
-  return makeOpenOpsTablesRequest<T>('PATCH', route, body, headers);
+  return makeOpenOpsTablesRequest<T>(
+    'PATCH',
+    route,
+    body,
+    headers,
+    undefined,
+    retryConfigs,
+  );
 }
 
 export async function makeOpenOpsTablesGet<T>(
   route: string,
   headers?: AxiosHeaders,
+  retryConfigs?: IAxiosRetryConfig,
 ): Promise<T[]> {
   const responses: T[] = [];
   let url;
@@ -48,6 +91,7 @@ export async function makeOpenOpsTablesGet<T>(
       undefined,
       headers,
       url,
+      retryConfigs,
     );
 
     if (!response) {
@@ -67,13 +111,13 @@ export async function makeOpenOpsTablesGet<T>(
   return responses;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function makeOpenOpsTablesRequest<T>(
   method: Method,
   route: string,
   body?: any,
   headers?: AxiosHeaders,
   url?: string,
+  retryConfigs?: IAxiosRetryConfig,
 ): Promise<T> {
   const baseUrl = system.get(AppSystemProp.OPENOPS_TABLES_API_URL);
 
@@ -82,5 +126,6 @@ async function makeOpenOpsTablesRequest<T>(
     url ?? `${baseUrl}/openops-tables/${route}`,
     headers,
     body,
+    retryConfigs,
   );
 }

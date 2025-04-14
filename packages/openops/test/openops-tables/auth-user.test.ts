@@ -41,6 +41,7 @@ describe('authUser', () => {
       'api/user/token-auth/',
       { email, password },
       new AxiosHeaders({ 'Content-Type': 'application/json' }),
+      undefined,
     );
   });
 
@@ -59,6 +60,7 @@ describe('authUser', () => {
       'api/user/token-auth/',
       { email, password },
       new AxiosHeaders({ 'Content-Type': 'application/json' }),
+      undefined,
     );
   });
 });
