@@ -1,5 +1,5 @@
 import { Filter } from '@aws-sdk/client-pricing';
-import { getPriceList, SupportedPricingRegion } from '@openops/common';
+import { getPriceListFromAws, SupportedPricingRegion } from '@openops/common';
 import { AppSystemProp, system } from '@openops/server-shared';
 import { ApplicationError, ErrorCode } from '@openops/shared';
 import LRUCache from 'lru-cache';
@@ -15,7 +15,12 @@ export async function getPrice(
   let priceList = cache.get(cacheKey);
   if (!priceList) {
     const credentials = getCredentials();
-    priceList = await getPriceList(credentials, region, serviceCode, filters);
+    priceList = await getPriceListFromAws(
+      credentials,
+      region,
+      serviceCode,
+      filters,
+    );
     cache.set(cacheKey, priceList);
   }
 
