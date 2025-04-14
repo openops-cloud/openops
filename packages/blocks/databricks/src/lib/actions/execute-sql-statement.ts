@@ -34,9 +34,9 @@ export const executeSqlStatement = createAction({
     timeout: Property.Number({
       displayName: 'Query timeout',
       description:
-        'Maximum number of seconds to wait for a query to complete before timing out. Min value is 5s',
+        'Maximum number of seconds to wait for a query to complete before timing out. Min value is 5',
       required: true,
-      validators: [Validators.minValue(5)],
+      validators: [Validators.number, Validators.minValue(5)],
       defaultValue: 50,
     }),
   },
