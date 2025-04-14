@@ -2,8 +2,8 @@ const openopsCommonMock = {
   ...jest.requireActual('@openops/common'),
   getCredentialsFromAuth: jest.fn(),
   getAttributeValues: jest.fn(),
-  getPriceListFromClient: jest.fn(),
   getServices: jest.fn(),
+  getPriceList: jest.fn(),
 };
 
 jest.mock('@openops/common', () => openopsCommonMock);
@@ -70,7 +70,7 @@ describe('getPriceAction', () => {
   ])(
     'should use the correct filters and predefined region %p',
     async (selectedAttributes: any, expectedFilters: any[]) => {
-      openopsCommonMock.getPriceListFromClient.mockResolvedValue('mockResult');
+      openopsCommonMock.getPriceList.mockResolvedValue('mockResult');
 
       context.propsValue.service = { ServiceCode: 'some service' };
       context.propsValue.queryFilters = { queryFilters: selectedAttributes };
@@ -78,10 +78,9 @@ describe('getPriceAction', () => {
       const result = (await getPriceAction.run(context)) as any;
       expect(result).toEqual('mockResult');
 
-      expect(openopsCommonMock.getPriceListFromClient).toHaveBeenCalledTimes(1);
-      expect(openopsCommonMock.getPriceListFromClient).toHaveBeenCalledWith(
-        'some url',
-        'some token',
+      expect(openopsCommonMock.getPriceList).toHaveBeenCalledTimes(1);
+      expect(openopsCommonMock.getPriceList).toHaveBeenCalledWith(
+        auth,
         'us-east-1',
         'some service',
         expectedFilters,

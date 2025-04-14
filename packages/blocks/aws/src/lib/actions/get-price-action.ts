@@ -4,7 +4,7 @@ import {
   amazonAuth,
   getAttributeValues,
   getCredentialsFromAuth,
-  getPriceListFromClient,
+  getPriceList,
   getServices,
 } from '@openops/common';
 
@@ -147,9 +147,8 @@ export const getPriceAction = createAction({
         };
       });
 
-      const priceList = getPriceListFromClient(
-        context.server.apiUrl,
-        context.server.token,
+      const priceList = getPriceList(
+        context.auth,
         PRICING_REGION,
         service.ServiceCode!,
         filters,
