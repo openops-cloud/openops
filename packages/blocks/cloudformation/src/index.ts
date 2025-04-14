@@ -12,7 +12,7 @@ export const cloudformation = createBlock({
   minimumSupportedRelease: '0.20.0',
   logoUrl: 'https://static.openops.com/blocks/cloudformation.png',
   authors: ['OpenOps'],
-  categories: [BlockCategory.IaC, BlockCategory.CLOUD],
+  categories: [BlockCategory.DEVOPS, BlockCategory.CLOUD],
   actions: [getStack, updateStack, modifyTemplate, deleteResourceFromTemplate],
   triggers: [],
 });

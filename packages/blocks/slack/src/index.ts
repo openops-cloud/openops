@@ -13,7 +13,7 @@ export const slack = createBlock({
   description: 'Channel-based messaging platform',
   minimumSupportedRelease: '0.5.0',
   logoUrl: 'https://static.openops.com/blocks/slack.png',
-  categories: [BlockCategory.COMMUNICATION],
+  categories: [BlockCategory.COLLABORATION],
   auth: slackAuth,
   events: {
     parseAndReply: ({ payload }) => {
