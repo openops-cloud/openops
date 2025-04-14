@@ -11,7 +11,7 @@ export const openopsTables = createBlock({
   minimumSupportedRelease: '0.20.0',
   logoUrl: 'https://static.openops.com/blocks/tables.svg',
   authors: [],
-  categories: [BlockCategory.DATA],
+  categories: [BlockCategory.DATA_SOURCES],
   actions: [
     getRecordsAction,
     updateRecordAction,

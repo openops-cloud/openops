@@ -12,6 +12,6 @@ export const github = createBlock({
   logoUrl: 'https://static.openops.com/blocks/github.png',
   authors: [],
   actions: [getFileAction, createPullRequestAction, runWorkflowAction],
-  categories: [BlockCategory.IaC],
+  categories: [BlockCategory.DEVOPS],
   triggers: [],
 });

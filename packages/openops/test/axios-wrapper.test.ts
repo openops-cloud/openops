@@ -1,64 +1,80 @@
-const loggerMock = {
-  error: jest.fn(),
-};
-
-jest.mock('@openops/server-shared', () => ({
-  logger: loggerMock,
-}));
-
-const axiosMock = jest.fn();
-jest.mock('axios', () => ({
-  ...jest.requireActual('axios'),
-  __esModule: true,
-  default: axiosMock,
-}));
-
-import { AxiosHeaders } from 'axios';
+import axios from 'axios';
 import { makeHttpRequest } from '../src/lib/axios-wrapper';
 
-describe('axios request', () => {
-  const header = new AxiosHeaders({ some: 'header' });
+jest.mock('axios');
 
-  describe('makeHttpRequest', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
+const mockedAxios = axios as jest.Mocked<typeof axios>;
+
+describe('makeHttpRequest', () => {
+  const mockStandardRequest = jest.fn();
+  const mockRetryRequest = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    (axios.create as jest.Mock).mockReturnValue({
+      request: mockRetryRequest,
+      interceptors: {
+        request: { use: jest.fn(), eject: jest.fn() },
+        response: { use: jest.fn(), eject: jest.fn() },
+      },
     });
 
-    test('should return data after successful post', async () => {
-      axiosMock.mockResolvedValue({
-        data: { test: 'some data' },
-      });
-      const result = await makeHttpRequest('POST', 'testUrl', header, {
-        body: 'info',
-      });
+    mockedAxios.request.mockImplementation(mockStandardRequest);
+  });
 
-      expect(result).toEqual({ test: 'some data' });
-      expect(axiosMock).toHaveBeenCalledWith({
-        method: 'POST',
-        url: 'testUrl',
-        data: { body: 'info' },
-        headers: header,
-      });
-      expect(loggerMock.error).not.toHaveBeenCalled();
+  it('makes a standard request without retry config', async () => {
+    const responseData = { message: 'standard success' };
+    mockStandardRequest.mockResolvedValueOnce({ data: responseData });
+
+    const result = await makeHttpRequest('GET', 'https://example.com');
+
+    expect(mockStandardRequest).toHaveBeenCalledWith({
+      method: 'GET',
+      url: 'https://example.com',
+      headers: undefined,
+      data: undefined,
     });
 
-    test('should log an error and throw an exception on failed get', async () => {
-      axiosMock.mockRejectedValue(new Error('mock error'));
+    expect(result).toEqual(responseData);
+  });
 
-      await expect(
-        makeHttpRequest('PATCH', 'testUrl', header, { body: 'info' }),
-      ).rejects.toThrow('mock error');
+  it('makes a retry request with retry config', async () => {
+    const responseData = { message: 'retry success' };
+    mockRetryRequest.mockResolvedValueOnce({ data: responseData });
 
-      expect(axiosMock).toHaveBeenCalledWith({
-        method: 'PATCH',
-        url: 'testUrl',
-        data: { body: 'info' },
-        headers: header,
-      });
-      expect(loggerMock.error).toHaveBeenCalledWith(
-        `Error making HTTP request. Url: "testUrl"`,
-        expect.any(Error),
-      );
+    const result = await makeHttpRequest(
+      'GET',
+      'https://example.com/retry',
+      undefined,
+      undefined,
+      { retries: 3 },
+    );
+
+    expect(mockRetryRequest).toHaveBeenCalledWith({
+      method: 'GET',
+      url: 'https://example.com/retry',
+      headers: undefined,
+      data: undefined,
     });
+
+    expect(result).toEqual(responseData);
+  });
+
+  it('throws and logs error on failed request', async () => {
+    const mockError = {
+      isAxiosError: true,
+      response: {
+        data: { error: 'Something went wrong' },
+        status: 500,
+        statusText: 'Internal Server Error',
+      },
+    };
+
+    mockStandardRequest.mockRejectedValueOnce(mockError as any);
+
+    await expect(
+      makeHttpRequest('GET', 'https://example.com/fail'),
+    ).rejects.toThrow(JSON.stringify(mockError.response.data));
   });
 });

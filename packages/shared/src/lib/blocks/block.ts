@@ -33,14 +33,12 @@ export type PublicBlockPackage = Static<typeof PublicBlockPackage>;
 export type BlockPackage = PrivateBlockPackage | PublicBlockPackage;
 
 export enum BlockCategory {
-  CLOUD = 'CLOUD',
-  COMMUNICATION = 'COMMUNICATION',
-  CORE = 'CORE',
-  DATA = 'DATA',
   FINOPS = 'FINOPS',
-  IaC = 'IaC',
-  NETWORK = 'NETWORK',
-  PREMIUM = 'PREMIUM',
-  PROJECT_MANAGEMENT = 'PROJECT_MANAGEMENT',
+  CLOUD = 'CLOUD',
   WORKFLOW = 'WORKFLOW',
+  COLLABORATION = 'COLLABORATION',
+  DATA_SOURCES = 'DATA_SOURCES',
+  DEVOPS = 'DEVOPS',
+  CORE = 'CORE',
+  PREMIUM = 'PREMIUM',
 }

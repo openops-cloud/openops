@@ -16,7 +16,7 @@ export const delay = createBlock({
     'khaledmashaly',
     'abuaboud',
   ],
-  categories: [BlockCategory.CORE],
+  categories: [BlockCategory.WORKFLOW],
   auth: BlockAuth.None(),
   actions: [
     delayForAction, // Delay for a fixed duration
