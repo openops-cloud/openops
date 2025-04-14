@@ -76,18 +76,21 @@ describe('warehouseId.options', () => {
     });
   });
 
-  it('should throw if makeHttpRequest fails', async () => {
+  it('should be disabled if makeHttpRequest fails', async () => {
     mockedGetToken.mockResolvedValue('mock-token');
     mockedHttpRequest.mockRejectedValue(new Error('Request failed'));
 
-    await expect(
-      warehouseId.options(
-        {
-          auth,
-          workspaceDeploymentName: 'my-workspace',
-        },
-        {} as PropertyContext,
-      ),
-    ).rejects.toThrow('Request failed');
+    const result = await warehouseId.options(
+      {
+        auth,
+        workspaceDeploymentName: 'my-workspace',
+      },
+      {} as PropertyContext,
+    );
+    expect(result).toEqual({
+      disabled: true,
+      placeholder: 'Failed to load warehouse options. Please try again.',
+      options: [],
+    });
   });
 });

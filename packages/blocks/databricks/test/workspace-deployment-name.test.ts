@@ -78,8 +78,15 @@ describe('workspaceDeploymentName.options', () => {
     mockedGetToken.mockResolvedValue('mock-token');
     mockedHttpRequest.mockRejectedValue(new Error('Request failed'));
 
-    await expect(
-      workspaceDeploymentName.options({ auth }, {} as PropertyContext),
-    ).rejects.toThrow('Request failed');
+    const result = await workspaceDeploymentName.options(
+      { auth },
+      {} as PropertyContext,
+    );
+
+    expect(result).toEqual({
+      disabled: true,
+      placeholder: 'Failed to load workspace options. Please try again.',
+      options: [],
+    });
   });
 });
