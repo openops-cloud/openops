@@ -63,7 +63,7 @@ export async function getAttributeValues(
   return attributeValues;
 }
 
-export async function getPriceListWithCacheFromAws(
+export async function getPriceListFromAws(
   credentials: any,
   region: SupportedPricingRegion,
   serviceCode: string,
@@ -116,7 +116,7 @@ export async function getPriceListWithCache(
 ): Promise<unknown> {
   const cacheKey = createCacheKey(serviceCode, filters);
 
-  return await cacheWrapper.getOrAdd(cacheKey, getPriceListWithCacheFromAws, [
+  return await cacheWrapper.getOrAdd(cacheKey, getPriceListFromAws, [
     credentials,
     region,
     serviceCode,
