@@ -31,7 +31,7 @@ jest.mock('@openops/server-shared', () => ({
 
 const common = {
   ...jest.requireActual('@openops/common'),
-  getPriceList: jest.fn(),
+  getPriceListFromAws: jest.fn(),
 };
 
 jest.mock('@openops/common', () => common);
@@ -48,7 +48,7 @@ describe('Pricing service', () => {
   describe('getPrice', () => {
     test('should return cached value', async () => {
       cacheManagerMock.get.mockReturnValueOnce('some cached value');
-      common.getPriceList.mockResolvedValue('a price list');
+      common.getPriceListFromAws.mockResolvedValue('a price list');
       const result = await getPrice(
         'EBS',
         [{ Field: 'location', Value: 'some value' }] as Filter[],
@@ -62,7 +62,7 @@ describe('Pricing service', () => {
 
     test('should update cache if value is not already defined', async () => {
       cacheManagerMock.get.mockReturnValue(undefined);
-      common.getPriceList.mockResolvedValue('a price list');
+      common.getPriceListFromAws.mockResolvedValue('a price list');
       const result = await getPrice(
         'EBS',
         [{ Field: 'location', Value: 'US East (N. Virginia)' }] as Filter[],
@@ -79,8 +79,8 @@ describe('Pricing service', () => {
         'EBS-US East (N. Virginia)',
         'a price list',
       );
-      expect(common.getPriceList).toHaveBeenCalledTimes(1);
-      expect(common.getPriceList).toHaveBeenCalledWith(
+      expect(common.getPriceListFromAws).toHaveBeenCalledTimes(1);
+      expect(common.getPriceListFromAws).toHaveBeenCalledWith(
         { accessKeyId: 'access key', secretAccessKey: 'secret access key' },
         'us-east-1',
         'EBS',
