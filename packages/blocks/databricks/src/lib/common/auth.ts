@@ -1,5 +1,5 @@
 import { BlockAuth, Property } from '@openops/blocks-framework';
-import { getDatabricsToken } from './get-databrics-token';
+import { getDatabricksToken } from './get-databricks-token';
 
 const description = `
 1. Go to the Databricks Account Console:
@@ -39,7 +39,7 @@ export const databricksAuth = BlockAuth.CustomAuth({
   },
   validate: async ({ auth }) => {
     try {
-      const token = await getDatabricsToken(auth);
+      const token = await getDatabricksToken(auth);
       return token ? { valid: true } : failedValidationResponse;
     } catch {
       return failedValidationResponse;

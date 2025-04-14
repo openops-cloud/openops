@@ -2,7 +2,7 @@ import { createAction, Property, Validators } from '@openops/blocks-framework';
 import { makeHttpRequest } from '@openops/common';
 import { AxiosHeaders } from 'axios';
 import { databricksAuth } from '../common/auth';
-import { getDatabricsToken } from '../common/get-databrics-token';
+import { getDatabricksToken } from '../common/get-databricks-token';
 import { DatabricksSqlExecutionResult } from '../common/sql-execution-result';
 import { warehouseId } from '../common/warehouse-id';
 import { workspaceDeploymentName } from '../common/workspace-deployment-name';
@@ -42,7 +42,7 @@ export const executeSqlStatement = createAction({
   },
 
   async run({ auth, propsValue }) {
-    const accessToken = await getDatabricsToken(auth);
+    const accessToken = await getDatabricksToken(auth);
     const statementUrl = `https://${propsValue.workspaceDeploymentName}.cloud.databricks.com/api/2.0/sql/statements`;
 
     const headers = new AxiosHeaders({

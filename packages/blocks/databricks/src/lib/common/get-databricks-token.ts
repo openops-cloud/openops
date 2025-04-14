@@ -1,7 +1,7 @@
 import { makeHttpRequest } from '@openops/common';
 import { AxiosHeaders } from 'axios';
 
-export async function getDatabricsToken({
+export async function getDatabricksToken({
   accountId,
   clientId,
   clientSecret,

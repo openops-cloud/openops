@@ -6,7 +6,7 @@ import {
 import { makeHttpRequest } from '@openops/common';
 import { AxiosHeaders } from 'axios';
 import { databricksAuth } from './auth';
-import { getDatabricsToken } from './get-databrics-token';
+import { getDatabricksToken } from './get-databricks-token';
 
 export const workspaceDeploymentName = Property.Dropdown({
   displayName: 'Workspace',
@@ -21,7 +21,7 @@ export const workspaceDeploymentName = Property.Dropdown({
       };
     }
     const authValue = auth as BlockPropValueSchema<typeof databricksAuth>;
-    const accessToken = await getDatabricsToken(authValue);
+    const accessToken = await getDatabricksToken(authValue);
 
     const workspaceListUrl = `https://accounts.cloud.databricks.com/api/2.0/accounts/${authValue.accountId}/workspaces`;
 
