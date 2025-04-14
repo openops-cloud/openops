@@ -15,10 +15,16 @@ jest.mock(
   () => dashboardCommonMock,
 );
 
-const enableEmbeddedModeMock = jest.fn();
-jest.mock('../../../src/app/openops-analytics/enable-embedded-mode', () => {
+jest.mock('@openops/server-shared', () => {
+  const originalModule = jest.requireActual('@openops/server-shared');
   return {
-    enableEmbeddedMode: enableEmbeddedModeMock,
+    __esModule: true,
+    ...originalModule,
+
+    system: {
+      ...originalModule.system,
+      getBoolean: jest.fn(() => true),
+    },
   };
 });
 
@@ -78,21 +84,13 @@ describe('seedAnalyticsDashboards', () => {
     expect(
       openopsCommonMock.authenticateOpenOpsAnalyticsAdmin,
     ).toHaveBeenCalledWith();
-    expect(dashboardCommonMock.createOrGetDashboard).toHaveBeenCalledTimes(2);
+    expect(dashboardCommonMock.createOrGetDashboard).toHaveBeenCalledTimes(1);
     expect(dashboardCommonMock.createOrGetDashboard).toHaveBeenNthCalledWith(
       1,
-      'some token',
-      'FinOps',
-      'finops',
-    );
-    expect(dashboardCommonMock.createOrGetDashboard).toHaveBeenNthCalledWith(
-      2,
       'some token',
       'Homepage',
       'homepage',
     );
-    expect(enableEmbeddedModeMock).toHaveBeenCalledTimes(1);
-    expect(enableEmbeddedModeMock).toHaveBeenNthCalledWith(1, 'some token', 1);
     expect(createDbMock).toHaveBeenCalledTimes(1);
     expect(createDbMock).toHaveBeenCalledWith(
       'some token',
@@ -114,7 +112,7 @@ describe('seedAnalyticsDashboards', () => {
     expect(createHomepageChartsMock).toHaveBeenCalledWith(
       'some token',
       1,
-      2,
+      1,
       1,
     );
     expect(openopsCommonMock.getTableIdByTableName).toHaveBeenCalledTimes(1);
@@ -174,7 +172,6 @@ describe('seedAnalyticsDashboards', () => {
       'alternative host',
       'openops_tables_connection',
     );
-    expect(enableEmbeddedModeMock).toHaveBeenCalledWith('some token', 1);
   });
 
   it('should throw if something fails', async () => {
