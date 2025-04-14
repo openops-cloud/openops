@@ -46,10 +46,17 @@ export const workspaceDeploymentName = Property.Dropdown({
         options: options,
       };
     } catch (error: any) {
+      let errorMessage;
+      try {
+        errorMessage = JSON.parse(error.message)?.message;
+      } catch {
+        errorMessage = String(error.message);
+      }
+
       return {
         disabled: true,
         placeholder: 'An error occurred while fetching workspaces',
-        error: String(error?.message),
+        error: errorMessage,
         options: [],
       };
     }
