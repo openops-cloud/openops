@@ -22,29 +22,37 @@ export const warehouseId = Property.Dropdown({
         options: [],
       };
     }
-    const authValue = auth as BlockPropValueSchema<typeof databricksAuth>;
-    const accessToken = await getDatabricksToken(authValue);
+    try {
+      const authValue = auth as BlockPropValueSchema<typeof databricksAuth>;
+      const accessToken = await getDatabricksToken(authValue);
 
-    const workspaceListUrl = `https://${workspaceDeploymentName}.cloud.databricks.com/api/2.0/sql/warehouses`;
+      const workspaceListUrl = `https://${workspaceDeploymentName}.cloud.databricks.com/api/2.0/sql/warehouses`;
 
-    const headers = new AxiosHeaders({
-      Authorization: `Bearer ${accessToken}`,
-    });
+      const headers = new AxiosHeaders({
+        Authorization: `Bearer ${accessToken}`,
+      });
 
-    const { warehouses } = await makeHttpRequest<{ warehouses: any[] }>(
-      'GET',
-      workspaceListUrl,
-      headers,
-    );
+      const { warehouses } = await makeHttpRequest<{ warehouses: any[] }>(
+        'GET',
+        workspaceListUrl,
+        headers,
+      );
 
-    const options: DropdownOption<string>[] = warehouses.map((warehouse) => ({
-      label: warehouse.name,
-      value: warehouse.id,
-    }));
+      const options: DropdownOption<string>[] = warehouses.map((warehouse) => ({
+        label: warehouse.name,
+        value: warehouse.id,
+      }));
 
-    return {
-      disabled: false,
-      options: options,
-    };
+      return {
+        disabled: false,
+        options: options,
+      };
+    } catch {
+      return {
+        disabled: true,
+        placeholder: 'Failed to load warehouse options. Please try again.',
+        options: [],
+      };
+    }
   },
 });

@@ -20,29 +20,37 @@ export const workspaceDeploymentName = Property.Dropdown({
         options: [],
       };
     }
-    const authValue = auth as BlockPropValueSchema<typeof databricksAuth>;
-    const accessToken = await getDatabricksToken(authValue);
+    try {
+      const authValue = auth as BlockPropValueSchema<typeof databricksAuth>;
+      const accessToken = await getDatabricksToken(authValue);
 
-    const workspaceListUrl = `https://accounts.cloud.databricks.com/api/2.0/accounts/${authValue.accountId}/workspaces`;
+      const workspaceListUrl = `https://accounts.cloud.databricks.com/api/2.0/accounts/${authValue.accountId}/workspaces`;
 
-    const headers = new AxiosHeaders({
-      Authorization: `Bearer ${accessToken}`,
-    });
+      const headers = new AxiosHeaders({
+        Authorization: `Bearer ${accessToken}`,
+      });
 
-    const workspaces = await makeHttpRequest<any[]>(
-      'GET',
-      workspaceListUrl,
-      headers,
-    );
+      const workspaces = await makeHttpRequest<any[]>(
+        'GET',
+        workspaceListUrl,
+        headers,
+      );
 
-    const options: DropdownOption<string>[] = workspaces.map((workspace) => ({
-      label: workspace.workspace_name,
-      value: workspace.deployment_name,
-    }));
+      const options: DropdownOption<string>[] = workspaces.map((workspace) => ({
+        label: workspace.workspace_name,
+        value: workspace.deployment_name,
+      }));
 
-    return {
-      disabled: false,
-      options: options,
-    };
+      return {
+        disabled: false,
+        options: options,
+      };
+    } catch {
+      return {
+        disabled: true,
+        placeholder: 'Failed to load workspace options. Please try again.',
+        options: [],
+      };
+    }
   },
 });
