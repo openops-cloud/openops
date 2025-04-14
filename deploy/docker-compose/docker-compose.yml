@@ -83,7 +83,7 @@ services:
       postgres:
         condition: service_healthy
   openops-analytics:
-    image: public.ecr.aws/openops/openops-analytics:0.12.18
+    image: public.ecr.aws/openops/openops-analytics:0.12.19
     restart: unless-stopped
     platform: linux/amd64 # Needed for M1 Macs until we have cross-platform CI builds(linux/adm64 and linux/arm64 images)
     environment:
