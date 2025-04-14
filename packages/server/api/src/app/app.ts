@@ -34,7 +34,6 @@ import { Socket } from 'socket.io';
 import { appConnectionModule } from './app-connection/app-connection.module';
 import { appEventRoutingModule } from './app-event-routing/app-event-routing.module';
 import { authenticationModule } from './authentication/authentication.module';
-import { pricingModule } from './aws/pricing-module';
 import { blockModule } from './blocks/base-block-module';
 import { blockSyncService } from './blocks/block-sync-service';
 import { communityBlocksModule } from './blocks/community-block-module';
@@ -200,7 +199,6 @@ export const setupApp = async (
   await app.register(formModule);
   await blockSyncService.setup();
   await app.register(workerModule);
-  await app.register(pricingModule);
   await app.register(slackInteractionModule);
   await app.register(dashboardsModule);
   await app.register(userInfoModule);
