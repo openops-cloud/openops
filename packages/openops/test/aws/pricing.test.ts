@@ -260,7 +260,16 @@ describe('pricing tests', () => {
 
       expect(result).toEqual('some cached value');
       expect(cacheWrapperMock.getOrAdd).toHaveBeenCalledTimes(1);
-      expect(cacheWrapperMock.getOrAdd).toHaveBeenCalledWith('EBS-some value');
+      expect(cacheWrapperMock.getOrAdd).toHaveBeenCalledWith(
+        'EBS-some value',
+        getPriceListFromAws,
+        [
+          { someUser: 'some value' },
+          'us-east-1',
+          'EBS',
+          [{ Field: 'location', Value: 'some value' }],
+        ],
+      );
     });
   });
 });

@@ -127,7 +127,7 @@ export async function getPriceListWithCache(
 function createCacheKey(serviceCode: string, filters: Filter[]): string {
   let cacheKey = `${serviceCode}`;
 
-  filters.map((filter) => {
+  filters.forEach((filter) => {
     cacheKey += `-${filter.Value}`;
   });
 
