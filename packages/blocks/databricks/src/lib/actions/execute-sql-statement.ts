@@ -86,7 +86,7 @@ export const executeSqlStatement = createAction({
     const pollUrl = `https://${propsValue.workspaceDeploymentName}.cloud.databricks.com//api/2.0/sql/statements/${statementId}`;
 
     const maxAttempts = Math.ceil(
-      (timeout - MAX_QUERY_TIMEOUT_SECONDS * 1000) / RETRY_TIMEOUT,
+      ((timeout - MAX_QUERY_TIMEOUT_SECONDS) * 1000) / RETRY_TIMEOUT,
     );
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       const statusResponse =
