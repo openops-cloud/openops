@@ -8,7 +8,7 @@ import { warehouseId } from '../common/warehouse-id';
 import { workspaceDeploymentName } from '../common/workspace-deployment-name';
 
 const MAX_QUERY_TIMEOUT_SECONDS = 50;
-const RETRY_TIMEOUT = 15000;
+const RETRY_TIMEOUT_MILLISECONDS = 15000;
 
 export const executeSqlStatement = createAction({
   name: 'executeSqlStatement',
@@ -86,7 +86,8 @@ export const executeSqlStatement = createAction({
     const pollUrl = `https://${propsValue.workspaceDeploymentName}.cloud.databricks.com//api/2.0/sql/statements/${statementId}`;
 
     const maxAttempts = Math.ceil(
-      ((timeout - MAX_QUERY_TIMEOUT_SECONDS) * 1000) / RETRY_TIMEOUT,
+      ((timeout - MAX_QUERY_TIMEOUT_SECONDS) * 1000) /
+        RETRY_TIMEOUT_MILLISECONDS,
     );
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       const statusResponse =
@@ -101,7 +102,9 @@ export const executeSqlStatement = createAction({
         return statusResponse;
       }
 
-      await new Promise((resolve) => setTimeout(resolve, RETRY_TIMEOUT));
+      await new Promise((resolve) =>
+        setTimeout(resolve, RETRY_TIMEOUT_MILLISECONDS),
+      );
     }
 
     return submission;
