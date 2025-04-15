@@ -17497,7 +17497,6 @@ The following npm packages may be included in this product:
  - isarray@0.0.1
  - isarray@1.0.0
  - javascript-natural-sort@0.7.1
- - lru_map@0.3.3
  - micromark-factory-destination@2.0.0
  - micromark-factory-label@2.0.0
  - micromark-factory-space@2.0.0
