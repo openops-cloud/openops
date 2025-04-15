@@ -59,14 +59,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
       - name: Restore node_modules cache
         id: node-modules-cache
         uses: actions/cache/restore@v4
         with:
           path: node_modules
           key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
       - name: Check licenses
         run: |
           npm run license-check
