@@ -302,6 +302,12 @@ export const flagService = {
         created,
         updated,
       },
+      {
+        id: FlagId.SHOW_AI_SETTINGS,
+        value: false,
+        created,
+        updated,
+      },
     );
 
     return flags;
