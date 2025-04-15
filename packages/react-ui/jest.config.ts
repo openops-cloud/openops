@@ -6,9 +6,7 @@ export default {
     '^(?!.*\\.(js|jsx|ts|tsx|css|json)$)': '@nx/react/plugins/jest',
     '^.+\\.[tj]sx?$': ['babel-jest', { presets: ['@nx/react/babel'] }],
   },
-  transformIgnorePatterns: [
-    'node_modules/(?!(lodash-es)/)',
-  ],
+  transformIgnorePatterns: ['node_modules/(?!(lodash-es)/)'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
   coverageDirectory: '../../coverage/packages/react-ui',
   moduleNameMapper: {
