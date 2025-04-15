@@ -14,7 +14,7 @@ export class CreateAiConfigTable1744641502000 implements MigrationInterface {
           "provider" character varying NOT NULL,
           "model" character varying NOT NULL,
           "apiKey" character varying NOT NULL,
-          "config" jsonb,
+          "modelSettings" jsonb,
           "enabled" boolean,
           CONSTRAINT "PK_ai_config_id" PRIMARY KEY ("id")
         );
