@@ -2,14 +2,12 @@ import { Command } from 'commander';
 import { createActionCommand } from './lib/commands/create-action';
 import { createBlockCommand } from './lib/commands/create-block';
 import { createTriggerCommand } from './lib/commands/create-trigger';
-import { scaleBlocksCommand } from './lib/commands/scale-blocks';
 import { syncBlockCommand } from './lib/commands/sync-blocks';
 
 const blockCommand = new Command('blocks').description('Manage blocks');
 
 blockCommand.addCommand(createBlockCommand);
 blockCommand.addCommand(syncBlockCommand);
-blockCommand.addCommand(scaleBlocksCommand);
 
 const actionCommand = new Command('actions').description('Manage actions');
 

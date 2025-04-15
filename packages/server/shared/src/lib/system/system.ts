@@ -14,11 +14,6 @@ import {
   WorkerSystemProps,
 } from './system-prop';
 
-export enum CopilotInstanceTypes {
-  AZURE_OPENAI = 'AZURE_OPENAI',
-  OPENAI = 'OPENAI',
-}
-
 export enum BlocksSource {
   /**
    * @deprecated Use `DB`, as `CLOUD_AND_DB` is no longer supported.
@@ -56,8 +51,6 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [SharedSystemProp.CONTAINER_TYPE]: ContainerType.WORKER_AND_APP,
   [AppSystemProp.EXECUTION_DATA_RETENTION_DAYS]: '30',
   [AppSystemProp.BLOCKS_SYNC_MODE]: BlockSyncMode.NONE,
-  [AppSystemProp.COPILOT_INSTANCE_TYPE]: CopilotInstanceTypes.OPENAI,
-  [AppSystemProp.AZURE_OPENAI_API_VERSION]: '2023-06-01-preview',
   [AppSystemProp.TRIGGER_FAILURES_THRESHOLD]: '576',
   [SharedSystemProp.ENVIRONMENT]: 'prod',
   [WorkerSystemProps.FLOW_WORKER_CONCURRENCY]: '10',
