@@ -73,6 +73,7 @@ jobs:
             exit 1
           fi
       - uses: actions/checkout@v4
+        if: failure() && startsWith(github.head_ref, 'dependabot/')
         with:
           clean: false
           ref: ${{ github.head_ref }}
