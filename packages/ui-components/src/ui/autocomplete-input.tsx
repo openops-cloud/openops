@@ -1,6 +1,12 @@
 import { t } from 'i18next';
 import { Check, ChevronsUpDown } from 'lucide-react';
-import { ChangeEvent, forwardRef, useCallback, useState } from 'react';
+import {
+  ChangeEvent,
+  forwardRef,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
 import { cn } from '../lib/cn';
 import { Button } from './button';
 import {
@@ -40,6 +46,11 @@ const AutocompleteInput = forwardRef<HTMLInputElement, AutocompleteInputProps>(
     const [open, setOpen] = useState(false);
     const [inputValue, setInputValue] = useState(value);
     const [selectValue, setSelectValue] = useState(value);
+
+    useEffect(() => {
+      setInputValue(value);
+      setSelectValue(value);
+    }, [value]);
 
     const handleSelect = useCallback(
       (currentValue: AutocompleteOption) => {

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { useEffect, useState } from 'react';
 import { AutocompleteInput } from '../ui/autocomplete-input';
 
 /**
@@ -45,4 +46,21 @@ export const WithPreselectedValue: Story = {
  */
 export const Disabled: Story = {
   args: { disabled: true },
+};
+
+/**
+ * Update the value dynamically after initial render
+ */
+export const WithDynamicValueAfterInitialRender: Story = {
+  render: (args) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const [value, setValue] = useState('');
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useEffect(() => {
+      setTimeout(() => {
+        setValue('Apple');
+      }, 1000);
+    }, []);
+    return <AutocompleteInput {...args} value={value} />;
+  },
 };
