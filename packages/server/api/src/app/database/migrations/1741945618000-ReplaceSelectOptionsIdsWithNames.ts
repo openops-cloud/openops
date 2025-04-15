@@ -1,5 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { getTableFields, SelectOpenOpsField } from '@openops/common';
+import {
+  axiosTablesSeedRetryConfig,
+  getTableFields,
+  SelectOpenOpsField,
+} from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
@@ -57,7 +61,10 @@ const getFieldsFromCache = async (tableName: string) => {
 
   let fields: SelectOpenOpsField[] = [];
   try {
-    fields = (await getTableFields(tableName)) as SelectOpenOpsField[];
+    fields = (await getTableFields(
+      tableName,
+      axiosTablesSeedRetryConfig,
+    )) as SelectOpenOpsField[];
   } catch (e) {
     logger.error(`Failed to get fields for table ${tableName}`, e);
   }

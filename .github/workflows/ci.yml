@@ -59,12 +59,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
       - name: Restore node_modules cache
         id: node-modules-cache
         uses: actions/cache/restore@v4
         with:
           path: node_modules
           key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
+          fail-on-cache-miss: true
       - name: Check licenses
         run: |
           npm run license-check
@@ -73,7 +76,7 @@ jobs:
             exit 1
           fi
       - name: Commit changes for dependabot
-        if: failure() && startsWith(github.ref, 'refs/heads/dependabot/')
+        if: failure() && startsWith(github.head_ref, 'dependabot/')
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: Update THIRD_PARTY_LICENSES.txt

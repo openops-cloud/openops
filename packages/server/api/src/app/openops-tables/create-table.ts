@@ -1,4 +1,8 @@
-import { createAxiosHeaders, makeOpenOpsTablesPost } from '@openops/common';
+import {
+  axiosTablesSeedRetryConfig,
+  createAxiosHeaders,
+  makeOpenOpsTablesPost,
+} from '@openops/common';
 
 export type Table = {
   id: number;
@@ -23,5 +27,6 @@ export async function createTable(
     `api/database/tables/database/${databaseId}/`,
     requestBody,
     createAxiosHeaders(token),
+    axiosTablesSeedRetryConfig,
   );
 }

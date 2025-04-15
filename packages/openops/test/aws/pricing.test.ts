@@ -23,14 +23,26 @@ jest.mock('../../src/lib/aws/get-client', () => {
   };
 });
 
-import { FilterType, Pricing } from '@aws-sdk/client-pricing';
+const cacheWrapperMock = {
+  getOrAdd: jest.fn(),
+};
+jest.mock('@openops/server-shared', () => ({
+  cacheWrapper: cacheWrapperMock,
+}));
+
+import { Filter, FilterType, Pricing } from '@aws-sdk/client-pricing';
 import {
   getAttributeValues,
-  getPriceList,
+  getPriceListFromAws,
+  getPriceListWithCache,
   getServices,
 } from '../../src/lib/aws/pricing';
 
 describe('pricing tests', () => {
+  const auth = {
+    someUser: 'some value',
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
     getAwsClientMock.mockReturnValue('mockClient');
@@ -138,7 +150,7 @@ describe('pricing tests', () => {
     });
   });
 
-  describe('getPriceList', () => {
+  describe('getPriceListFromAws', () => {
     test('should return price list for the given filters and append extracted price without random ids', async () => {
       getAwsClientMock.mockReturnValue({
         getProducts: getProductsCommandMock,
@@ -170,7 +182,7 @@ describe('pricing tests', () => {
           Value: 'some value',
         },
       ];
-      const result = await getPriceList(
+      const result = await getPriceListFromAws(
         'credentials',
         'us-east-1',
         'some service',
@@ -218,7 +230,7 @@ describe('pricing tests', () => {
           getProducts: getProductsCommandMock,
         });
 
-        const result = await getPriceList(
+        const result = await getPriceListFromAws(
           'credentials',
           'us-east-1',
           'some service',
@@ -234,5 +246,30 @@ describe('pricing tests', () => {
         });
       },
     );
+  });
+
+  describe('getPrice', () => {
+    test('should get or add to cache wrapper', async () => {
+      cacheWrapperMock.getOrAdd.mockReturnValueOnce('some cached value');
+      const result = await getPriceListWithCache(
+        auth,
+        'EBS',
+        [{ Field: 'location', Value: 'some value' }] as Filter[],
+        'us-east-1',
+      );
+
+      expect(result).toEqual('some cached value');
+      expect(cacheWrapperMock.getOrAdd).toHaveBeenCalledTimes(1);
+      expect(cacheWrapperMock.getOrAdd).toHaveBeenCalledWith(
+        'EBS-some value',
+        getPriceListFromAws,
+        [
+          { someUser: 'some value' },
+          'us-east-1',
+          'EBS',
+          [{ Field: 'location', Value: 'some value' }],
+        ],
+      );
+    });
   });
 });
