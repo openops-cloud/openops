@@ -37,8 +37,6 @@ import { authenticationModule } from './authentication/authentication.module';
 import { blockModule } from './blocks/base-block-module';
 import { blockSyncService } from './blocks/block-sync-service';
 import { communityBlocksModule } from './blocks/community-block-module';
-import { copilotModule } from './copilot/copilot.module';
-import { requestWriterModule } from './copilot/request-writer/request-writer.module';
 import { rateLimitModule } from './core/security/rate-limit';
 import { securityHandlerChain } from './core/security/security-handler-chain';
 import { dashboardsModule } from './dashboards/dashboards-module';
@@ -193,8 +191,6 @@ export const setupApp = async (
   await app.register(appEventRoutingModule);
   await app.register(userModule);
   await app.register(authenticationModule);
-  await app.register(copilotModule);
-  await app.register(requestWriterModule);
   await app.register(organizationModule);
   await app.register(formModule);
   await blockSyncService.setup();
