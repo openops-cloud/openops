@@ -85,7 +85,6 @@ const AutocompleteInput = forwardRef<HTMLInputElement, AutocompleteInputProps>(
               />
               <Button
                 variant="ghost"
-                role="combobox"
                 aria-expanded={open}
                 disabled={disabled}
                 className="absolute right-0 h-full px-3"
