@@ -34,6 +34,7 @@ describe('azureCliAction', () => {
       commandToRun: {
         type: 'LONG_TEXT',
         required: true,
+        showAIButton: true,
       },
       useHostSession: {
         type: 'DYNAMIC',
