@@ -7,12 +7,18 @@ import { SEED_OPENOPS_TABLE_NAME } from '../openops-tables/template-tables/creat
 import { getOrCreatePostgresDatabaseConnection } from './create-database-connection';
 import { getOrCreateDataset } from './create-dataset';
 import { createOrGetDashboard } from './dashboard';
-import { enableEmbeddedMode } from './enable-embedded-mode';
 import { createHomepageCharts } from './populate-homepage';
 
 export const HOME_PAGE_DASHBOARD_SLUG = 'homepage';
 
 export async function seedAnalyticsDashboards(): Promise<void> {
+  if (!system.getBoolean(AppSystemProp.SHOW_DEMO_HOME_PAGE)) {
+    logger.info(
+      'SHOW_DEMO_HOME_PAGE flag is not set. Skipping seeding of HomePage (demo) dashboard.',
+    );
+    return;
+  }
+
   const { access_token } = await authenticateOpenOpsAnalyticsAdmin();
 
   const dbConnection = await getOrCreatePostgresDatabaseConnection(
@@ -25,13 +31,6 @@ export async function seedAnalyticsDashboards(): Promise<void> {
       system.getOrThrow(AppSystemProp.POSTGRES_HOST),
     'openops_tables_connection',
   );
-
-  const finopsDashboard = await createOrGetDashboard(
-    access_token,
-    'FinOps',
-    'finops',
-  );
-  await enableEmbeddedMode(access_token, finopsDashboard.id);
 
   const homepage = await createOrGetDashboard(
     access_token,
