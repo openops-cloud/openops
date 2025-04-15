@@ -149,7 +149,7 @@ const updateJestConfigFile = async (blockName: string) => {
 
   jestConfig = jestConfig.replace(
     /preset:\s'..\/..\/..\/jest.preset.js',/,
-    (match) => `${match}\n  setupFiles: ['../../../jest.config'],`,
+    (match) => `${match}\n  setupFiles: ['../../../jest.env.js'],`,
   );
 
   await writeJestConfig(`packages/blocks/${blockName}`, jestConfig);

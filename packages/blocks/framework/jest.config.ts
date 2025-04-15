@@ -1,7 +1,7 @@
 export default {
   displayName: 'blocks-framework',
   preset: '../../../jest.preset.js',
-  setupFiles: ['../../../jest.config'],
+  setupFiles: ['../../../jest.env.js'],
   globals: {},
   testEnvironment: 'node',
   transform: {

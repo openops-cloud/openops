@@ -1,7 +1,7 @@
 export default {
   displayName: 'engine',
   preset: '../../jest.preset.js',
-  setupFiles: ['../../jest.config'],
+  setupFiles: ['../../jest.env.js'],
   testEnvironment: 'node',
   transform: {
     '^.+\\.[tj]s$': [
