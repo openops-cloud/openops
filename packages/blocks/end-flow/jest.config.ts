@@ -1,4 +1,3 @@
-/* eslint-disable */
 export default {
   displayName: 'blocks-end-flow',
   preset: '../../../jest.preset.js',

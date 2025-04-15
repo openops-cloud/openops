@@ -1,4 +1,3 @@
-/* eslint-disable */
 export default {
   displayName: '@openops/common',
   preset: '../../jest.preset.js',

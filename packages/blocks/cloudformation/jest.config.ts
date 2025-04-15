@@ -1,4 +1,3 @@
-/* eslint-disable */
 export default {
   displayName: 'blocks-cloudformation',
   preset: '../../../jest.preset.js',

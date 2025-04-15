@@ -1,4 +1,3 @@
-/* eslint-disable */
 export default {
   displayName: 'blocks-terraform',
   preset: '../../../jest.preset.js',

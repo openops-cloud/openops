@@ -1,4 +1,3 @@
-/* eslint-disable */
 export default {
   displayName: 'blocks-azure',
   preset: '../../../jest.preset.js',

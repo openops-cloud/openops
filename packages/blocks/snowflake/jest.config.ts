@@ -1,4 +1,3 @@
-/* eslint-disable */
 export default {
   displayName: 'blocks-snowflake',
   preset: '../../../jest.preset.js',

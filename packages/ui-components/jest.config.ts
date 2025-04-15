@@ -1,4 +1,3 @@
-/* eslint-disable */
 export default {
   displayName: 'ui-components',
   preset: '../../jest.preset.js',

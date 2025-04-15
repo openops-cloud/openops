@@ -1,4 +1,3 @@
-/* eslint-disable */
 export default {
   displayName: 'blocks-ternary',
   preset: '../../../jest.preset.js',

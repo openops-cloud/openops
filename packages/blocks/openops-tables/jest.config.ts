@@ -1,4 +1,3 @@
-/* eslint-disable */
 export default {
   displayName: 'blocks-openops-tables',
   preset: '../../../jest.preset.js',

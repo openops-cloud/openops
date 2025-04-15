@@ -1,4 +1,3 @@
-/* eslint-disable */
 export default {
   displayName: 'blocks-google-cloud',
   preset: '../../../jest.preset.js',

@@ -1,4 +1,3 @@
-/* eslint-disable */
 export default {
     displayName: 'blocks-slack',
     preset: '../../../jest.preset.js',

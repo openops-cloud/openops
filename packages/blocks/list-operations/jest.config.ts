@@ -1,4 +1,3 @@
-/* eslint-disable */
 export default {
   displayName: 'blocks-list-operations',
   preset: '../../../jest.preset.js',

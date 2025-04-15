@@ -1,4 +1,3 @@
-/* eslint-disable */
 export default {
   displayName: '@openops/server-shared',
   preset: '../../../jest.preset.js',
