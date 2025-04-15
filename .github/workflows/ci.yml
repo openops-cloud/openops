@@ -65,9 +65,6 @@ jobs:
         with:
           path: node_modules
           key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
       - name: Check licenses
         run: |
           npm run license-check
@@ -75,6 +72,10 @@ jobs:
             echo "Please update THIRD_PARTY_LICENSES.txt by running 'npm run license-check'" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
+      - uses: actions/checkout@v4
+        with:
+          clean: false
+          ref: ${{ github.head_ref }}
       - name: Commit changes for dependabot
         if: failure() && startsWith(github.head_ref, 'dependabot/')
         uses: stefanzweifel/git-auto-commit-action@v5
