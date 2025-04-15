@@ -1,11 +1,11 @@
 export default {
-    displayName: 'blocks-slack',
-    preset: '../../../jest.preset.js',
-    setupFiles: ['../../../jest.config'],
-    testEnvironment: 'node',
-    transform: {
-      '^.+\\.ts$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }],
-    },
-    moduleFileExtensions: ['ts', 'js', 'html'],
-    coverageDirectory: '../../../coverage/packages/blocks/slack',
-  };
+  displayName: 'blocks-slack',
+  preset: '../../../jest.preset.js',
+  setupFiles: ['../../../jest.config'],
+  testEnvironment: 'node',
+  transform: {
+    '^.+\\.ts$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }],
+  },
+  moduleFileExtensions: ['ts', 'js', 'html'],
+  coverageDirectory: '../../../coverage/packages/blocks/slack',
+};

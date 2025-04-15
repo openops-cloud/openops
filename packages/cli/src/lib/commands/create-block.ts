@@ -147,8 +147,6 @@ const updateEslintFile = async (blockName: string) => {
 const updateJestConfigFile = async (blockName: string) => {
   let jestConfig = await readJestConfig(`packages/blocks/${blockName}`);
 
-  jestConfig = `/* eslint-disable */\n${jestConfig}`;
-
   jestConfig = jestConfig.replace(
     /preset:\s'..\/..\/..\/jest.preset.js',/,
     (match) => `${match}\n  setupFiles: ['../../../jest.config'],`,

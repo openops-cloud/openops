@@ -7,6 +7,5 @@ export default {
     '^.+\\.ts$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }],
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
-  coverageDirectory:
-    '../../../coverage/packages/blocks/openops-tables',
+  coverageDirectory: '../../../coverage/packages/blocks/openops-tables',
 };
