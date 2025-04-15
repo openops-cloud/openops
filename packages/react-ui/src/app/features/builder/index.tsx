@@ -47,7 +47,6 @@ import { RunDetailsBar } from '../flow-runs/components/run-details-bar';
 import { FlowSideMenu } from '../navigation/side-menu/flow/flow-side-menu';
 import LeftSidebarResizablePanel from '../navigation/side-menu/left-sidebar';
 import { BuilderHeader } from './builder-header/builder-header';
-import { CopilotSidebar } from './copilot';
 import { DataSelector } from './data-selector';
 import { FlowBuilderCanvas } from './flow-canvas/flow-builder-canvas';
 import { FLOW_CANVAS_CONTAINER_ID } from './flow-version-undo-redo/constants';
@@ -179,10 +178,6 @@ const BuilderPage = () => {
       socket.removeAllListeners(WebsocketClientEvent.TEST_FLOW_RUN_PROGRESS);
       socket.removeAllListeners(WebsocketClientEvent.TEST_STEP_FINISHED);
       socket.removeAllListeners(WebsocketClientEvent.TEST_FLOW_RUN_STARTED);
-      socket.removeAllListeners(WebsocketClientEvent.GENERATE_CODE_FINISHED);
-      socket.removeAllListeners(
-        WebsocketClientEvent.GENERATE_HTTP_REQUEST_FINISHED,
-      );
     };
   }, [socket, refetchBlock]);
 
@@ -248,9 +243,6 @@ const BuilderPage = () => {
                 )}
                 {leftSidebar === LeftSideBarType.VERSIONS && (
                   <FlowVersionsList />
-                )}
-                {leftSidebar === LeftSideBarType.AI_COPILOT && (
-                  <CopilotSidebar />
                 )}
                 {leftSidebar === LeftSideBarType.MENU && <FlowSideMenu />}
                 {leftSidebar === LeftSideBarType.TREE_VIEW && <TreeView />}

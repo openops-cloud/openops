@@ -45,14 +45,6 @@ const CodeSettings = React.memo(({ readonly }: CodeSettingsProps) => {
 
             <div className="flex items-center justify-between">
               <FormLabel>{t('Inputs')}</FormLabel>
-              {/*<Button*/}
-              {/*  variant="ghost"*/}
-              {/*  onClick={() => setLeftSidebar(LeftSideBarType.AI_COPILOT)}*/}
-              {/*  className="flex items-right max-w-max"*/}
-              {/*>*/}
-              {/*  <Bot />*/}
-              {/*  <span className="ml-2">{t('Ask AI')}</span>*/}
-              {/*</Button>*/}
             </div>
 
             <DictionaryProperty

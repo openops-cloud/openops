@@ -36,7 +36,6 @@ export enum LeftSideBarType {
   RUNS = 'runs',
   VERSIONS = 'versions',
   RUN_DETAILS = 'run-details',
-  AI_COPILOT = 'chat',
   MENU = 'menu',
   TREE_VIEW = 'tree-view',
   NONE = 'none',
