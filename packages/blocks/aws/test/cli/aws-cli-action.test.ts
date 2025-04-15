@@ -31,7 +31,7 @@ describe('awsCliAction single account', () => {
       commandToRun: {
         type: 'LONG_TEXT',
         required: true,
-        showAIButton: true,
+        supportsAI: true,
       },
       dryRun: {
         type: 'CHECKBOX',

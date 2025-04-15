@@ -6,10 +6,15 @@ import { PropertyType } from './property-type';
 export const BasePropertySchema = Type.Object({
   displayName: Type.String(),
   description: Type.Optional(Type.String()),
-  showAIButton: Type.Optional(Type.Boolean()),
 });
 
 export type BasePropertySchema = Static<typeof BasePropertySchema>;
+
+export const SupportsAISchema = Type.Object({
+  supportsAI: Type.Optional(Type.Boolean()),
+});
+
+export type SupportsAISchema = Static<typeof SupportsAISchema>;
 
 export const TPropertyValue = <T extends TSchema, U extends PropertyType>(
   T: T,

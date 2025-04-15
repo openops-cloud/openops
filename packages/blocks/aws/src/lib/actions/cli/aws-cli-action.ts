@@ -19,7 +19,7 @@ export const awsCliAction = createAction({
     commandToRun: Property.LongText({
       displayName: 'Command',
       required: true,
-      showAIButton: true,
+      supportsAI: true,
     }),
     dryRun: dryRunCheckBox(),
   },

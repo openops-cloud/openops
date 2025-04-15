@@ -23,7 +23,7 @@ export const googleCloudCliAction = createAction({
     commandToRun: Property.LongText({
       displayName: 'Command',
       required: true,
-      showAIButton: true,
+      supportsAI: true,
     }),
     dryRun: dryRunCheckBox(),
   },

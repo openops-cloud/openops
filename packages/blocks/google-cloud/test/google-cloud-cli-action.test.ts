@@ -32,7 +32,7 @@ describe('googleCloudCliAction', () => {
       commandToRun: {
         type: 'LONG_TEXT',
         required: true,
-        showAIButton: true,
+        supportsAI: true,
       },
       useHostSession: {
         type: 'DYNAMIC',
