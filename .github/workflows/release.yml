@@ -111,6 +111,4 @@ jobs:
           aws-region: us-east-2
       - name: Upload release to S3
         run: |
-          LOCAL_PATH=deploy/docker-compose/docker-compose-release-$VERSION.zip
-          S3_PATH=s3://openops/releases/$VERSION/openops-docker-compose-$VERSION.zip
-          aws s3 cp $LOCAL_PATH $S3_PATH
+          aws s3 cp $deploy/docker-compose/$RELEASE_DC_FILENAME s3://openops/releases/$VERSION/$RELEASE_DC_FILENAME
