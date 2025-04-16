@@ -27,7 +27,7 @@ export const runJob = createAction({
     const { workspaceDeploymentName, jobId, parameters } = propsValue;
 
     const token = await getDatabricksToken(auth);
-    const url = `https://${workspaceDeploymentName}.cloud.databricks.com/api/2.1/jobs/run-now`;
+    const url = `https://${workspaceDeploymentName}.cloud.databricks.com/api/2.2/jobs/run-now`;
 
     const headers = new AxiosHeaders({
       Authorization: `Bearer ${token}`,

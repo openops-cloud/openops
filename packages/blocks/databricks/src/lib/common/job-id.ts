@@ -39,8 +39,6 @@ export const jobId = Property.Dropdown({
         }[];
       }>('GET', jobListUrl, headers);
 
-      console.log('THE RESPONSE IS', resp);
-
       const options: DropdownOption<string>[] = resp.jobs.map((job) => ({
         label: job.settings.name || `Job ${job.job_id}`,
         value: job.job_id,
