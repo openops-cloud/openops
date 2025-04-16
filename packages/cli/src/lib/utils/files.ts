@@ -64,11 +64,22 @@ export const readPackageEslint = async (path: string): Promise<any> => {
   return await readJsonFile(`${path}/.eslintrc.json`);
 };
 
+export const readJestConfig = async (path: string): Promise<any> => {
+  return await readFile(`${path}/jest.config.ts`);
+};
+
 export const writePackageEslint = async (
   path: string,
   eslint: any,
 ): Promise<void> => {
   return await writeJsonFile(`${path}/.eslintrc.json`, eslint);
+};
+
+export const writeJestConfig = async (
+  path: string,
+  jestConfig: any,
+): Promise<void> => {
+  return await writeFile(`${path}/jest.config.ts`, jestConfig);
 };
 
 export const writeProjectJson = async (
