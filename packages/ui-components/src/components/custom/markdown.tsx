@@ -24,6 +24,7 @@ type MarkdownProps = {
   variables?: Record<string, string>;
   className?: string;
   withBorder?: boolean;
+  showCopyButton?: boolean;
 };
 
 const Container = ({
@@ -81,7 +82,12 @@ const LanguageUrl = ({ content }: { content: string }) => {
   Renders a markdown component with support for variables and language text.
 */
 const Markdown = React.memo(
-  ({ markdown, variables, withBorder = true }: MarkdownProps) => {
+  ({
+    markdown,
+    variables,
+    withBorder = true,
+    showCopyButton = true,
+  }: MarkdownProps) => {
     const { toast } = useToast();
 
     const showCopySuccessToast = () =>
@@ -136,13 +142,15 @@ const Markdown = React.memo(
                   ) : (
                     <LanguageText content={codeContent} />
                   )}
-                  <Button
-                    variant="ghost"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-background rounded p-2 inline-flex items-center justify-center"
-                    onClick={() => copyToClipboard(codeContent)}
-                  >
-                    <Copy className="w-4 h-4" />
-                  </Button>
+                  {showCopyButton && (
+                    <Button
+                      variant="ghost"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-background rounded p-2 inline-flex items-center justify-center"
+                      onClick={() => copyToClipboard(codeContent)}
+                    >
+                      <Copy className="w-4 h-4" />
+                    </Button>
+                  )}
                 </div>
               );
             },

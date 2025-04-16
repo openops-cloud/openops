@@ -1,7 +1,7 @@
-/* eslint-disable */
 export default {
   displayName: 'blocks-end-flow',
   preset: '../../../jest.preset.js',
+  setupFiles: ['../../../jest.env.js'],
   testEnvironment: 'node',
   transform: {
     '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }],
