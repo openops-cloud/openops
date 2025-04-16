@@ -2,13 +2,14 @@ import { createAction, Property, Validators } from '@openops/blocks-framework';
 import { makeHttpRequest } from '@openops/common';
 import { AxiosHeaders } from 'axios';
 import { databricksAuth } from '../common/auth';
+import {
+  MAX_QUERY_TIMEOUT_SECONDS,
+  RETRY_TIMEOUT_MILLISECONDS,
+} from '../common/constants';
 import { getDatabricksToken } from '../common/get-databricks-token';
 import { DatabricksSqlExecutionResult } from '../common/sql-execution-result';
 import { warehouseId } from '../common/warehouse-id';
 import { workspaceDeploymentName } from '../common/workspace-deployment-name';
-
-const MAX_QUERY_TIMEOUT_SECONDS = 50;
-const RETRY_TIMEOUT_MILLISECONDS = 15000;
 
 export const executeSqlStatement = createAction({
   name: 'executeSqlStatement',

@@ -1,7 +1,7 @@
 import { createBlock } from '@openops/blocks-framework';
 import { BlockCategory } from '@openops/shared';
 import { executeSqlStatement } from './lib/actions/execute-sql-statement';
-import { runJob } from './lib/actions/run_job';
+import { runJob } from './lib/actions/run-job';
 import { databricksAuth } from './lib/common/auth';
 
 export const databricks = createBlock({
