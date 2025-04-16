@@ -304,7 +304,7 @@ export const flagService = {
       },
       {
         id: FlagId.SHOW_AI_SETTINGS,
-        value: false,
+        value: true,
         created,
         updated,
       },

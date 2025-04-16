@@ -96,10 +96,14 @@ const AutocompleteInput = forwardRef<HTMLInputElement, AutocompleteInputProps>(
               />
               <Button
                 variant="ghost"
+                role="combobox"
                 aria-expanded={open}
                 disabled={disabled}
-                className="absolute right-0 h-full px-3"
-                onClick={() => setOpen(!open)}
+                className="absolute right-1 h-full px-3 "
+                onClick={(e) => {
+                  e.preventDefault();
+                  setOpen(!open);
+                }}
                 tabIndex={-1}
               >
                 <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50 text-foreground" />
