@@ -42,5 +42,5 @@ const openAiModels = [
 ];
 
 export const openAiProvider: AiProvider = {
-  getModels: () => openAiModels,
+  models: openAiModels,
 };

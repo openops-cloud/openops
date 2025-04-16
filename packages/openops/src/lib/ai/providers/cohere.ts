@@ -15,5 +15,5 @@ const cohereModels = [
 ];
 
 export const cohereProvider: AiProvider = {
-  getModels: () => cohereModels,
+  models: cohereModels,
 };

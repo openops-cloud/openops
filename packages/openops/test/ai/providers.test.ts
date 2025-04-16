@@ -77,7 +77,7 @@ describe('getAiProvider tests', () => {
 
   test('should return requested provider', () => {
     const result = getAiProvider(AiProviderEnum.OPENAI);
-    const models = result.getModels();
+    const models = result.models;
 
     expect(models).toStrictEqual(['openAiModel']);
   });

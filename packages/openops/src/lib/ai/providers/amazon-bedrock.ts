@@ -34,5 +34,5 @@ const bedrockModels = [
 ];
 
 export const amazonBedrockProvider: AiProvider = {
-  getModels: () => bedrockModels,
+  models: bedrockModels,
 };

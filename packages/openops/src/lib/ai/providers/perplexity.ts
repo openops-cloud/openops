@@ -8,5 +8,5 @@ const perplexityModels = [
 ];
 
 export const perplexityProvider: AiProvider = {
-  getModels: () => perplexityModels,
+  models: perplexityModels,
 };

@@ -14,5 +14,5 @@ const anthropicModels = [
 ];
 
 export const anthropicProvider: AiProvider = {
-  getModels: () => anthropicModels,
+  models: anthropicModels,
 };

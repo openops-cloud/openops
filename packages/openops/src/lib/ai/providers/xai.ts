@@ -23,5 +23,5 @@ const xaiModels = [
 ];
 
 export const xaiProvider: AiProvider = {
-  getModels: () => xaiModels,
+  models: xaiModels,
 };

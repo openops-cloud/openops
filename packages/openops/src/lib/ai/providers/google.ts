@@ -24,5 +24,5 @@ const googleModels = [
 ];
 
 export const googleProvider: AiProvider = {
-  getModels: () => googleModels,
+  models: googleModels,
 };

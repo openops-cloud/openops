@@ -13,5 +13,5 @@ const mistralModels = [
 ];
 
 export const mistralProvider: AiProvider = {
-  getModels: () => mistralModels,
+  models: mistralModels,
 };

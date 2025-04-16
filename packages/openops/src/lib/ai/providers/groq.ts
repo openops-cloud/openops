@@ -17,5 +17,5 @@ const groqModels = [
 ];
 
 export const groqProvider: AiProvider = {
-  getModels: () => groqModels,
+  models: groqModels,
 };

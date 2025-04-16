@@ -37,5 +37,5 @@ const togetherAiModels = [
 ];
 
 export const togetherAiProvider: AiProvider = {
-  getModels: () => togetherAiModels,
+  models: togetherAiModels,
 };

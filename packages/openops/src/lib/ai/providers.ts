@@ -16,7 +16,7 @@ import { togetherAiProvider } from './providers/together-ai';
 import { xaiProvider } from './providers/xai';
 
 export interface AiProvider {
-  getModels(): string[];
+  models: string[];
 }
 
 export enum AiProviderEnum {
@@ -71,7 +71,7 @@ export function getAvailableProvidersWithModels(): {
 }[] {
   return Object.values(AiProviderEnum).map((aiProvider) => {
     const provider = getAiProvider(aiProvider);
-    const models = provider.getModels();
+    const models = provider.models;
     return { aiProvider, models };
   });
 }

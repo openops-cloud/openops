@@ -70,5 +70,5 @@ const deepInfraModels = [
 ];
 
 export const deepinfraProvider: AiProvider = {
-  getModels: () => deepInfraModels,
+  models: deepInfraModels,
 };
