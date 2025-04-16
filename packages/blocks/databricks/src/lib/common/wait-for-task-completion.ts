@@ -1,9 +1,6 @@
 import { makeHttpRequest } from '@openops/common';
 import { AxiosHeaders } from 'axios';
-import {
-  MAX_QUERY_TIMEOUT_SECONDS,
-  RETRY_TIMEOUT_MILLISECONDS,
-} from './constants';
+import { RETRY_TIMEOUT_MILLISECONDS } from './constants';
 
 export async function waitForTaskCompletion({
   workspaceDeploymentName,
