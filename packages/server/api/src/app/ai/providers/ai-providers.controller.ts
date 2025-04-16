@@ -1,4 +1,5 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
+
 import {
   AiProviderEnum,
   getAvailableProvidersWithModels,

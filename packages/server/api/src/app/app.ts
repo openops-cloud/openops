@@ -31,6 +31,7 @@ import { FastifyInstance, FastifyRequest, HTTPMethods } from 'fastify';
 import fastifySocketIO from 'fastify-socket.io';
 import * as process from 'node:process';
 import { Socket } from 'socket.io';
+import { aiModule } from './ai/ai.module';
 import { appConnectionModule } from './app-connection/app-connection.module';
 import { appEventRoutingModule } from './app-event-routing/app-event-routing.module';
 import { authenticationModule } from './authentication/authentication.module';
@@ -199,6 +200,7 @@ export const setupApp = async (
   await app.register(dashboardsModule);
   await app.register(userInfoModule);
   await app.register(userSettingsModule);
+  await app.register(aiModule);
 
   app.get(
     '/redirect',

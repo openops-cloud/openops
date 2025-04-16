@@ -1,67 +1,67 @@
 jest.mock('../../src/lib/ai/providers/amazon-bedrock', () => ({
-  amazonBedrockProvider: { getModels: jest.fn(() => ['bedrockModel']) },
+  amazonBedrockProvider: { models: ['bedrockModel'] },
 }));
 
 jest.mock('../../src/lib/ai/providers/anthropic', () => ({
-  anthropicProvider: { getModels: jest.fn(() => ['anthropicModel']) },
+  anthropicProvider: { models: ['anthropicModel'] },
 }));
 
 jest.mock('../../src/lib/ai/providers/azure-openai', () => ({
-  azureProvider: { getModels: jest.fn(() => ['azureModel']) },
+  azureProvider: { models: ['azureModel'] },
 }));
 
 jest.mock('../../src/lib/ai/providers/cerebras', () => ({
-  cerebrasProvider: { getModels: jest.fn(() => ['cerebrasModel']) },
+  cerebrasProvider: { models: ['cerebrasModel'] },
 }));
 
 jest.mock('../../src/lib/ai/providers/cohere', () => ({
-  cohereProvider: { getModels: jest.fn(() => ['cohereModel']) },
+  cohereProvider: { models: ['cohereModel'] },
 }));
 
 jest.mock('../../src/lib/ai/providers/deep-infra', () => ({
-  deepinfraProvider: { getModels: jest.fn(() => ['deepinfraModel']) },
+  deepinfraProvider: { models: ['deepinfraModel'] },
 }));
 
 jest.mock('../../src/lib/ai/providers/deep-seek', () => ({
-  deepseekProvider: { getModels: jest.fn(() => ['deepseekModel']) },
+  deepseekProvider: { models: ['deepseekModel'] },
 }));
 
 jest.mock('../../src/lib/ai/providers/google', () => ({
-  googleProvider: { getModels: jest.fn(() => ['googleModel']) },
+  googleProvider: { models: ['googleModel'] },
 }));
 
 jest.mock('../../src/lib/ai/providers/groq', () => ({
-  groqProvider: { getModels: jest.fn(() => ['groqModel']) },
+  groqProvider: { models: ['groqModel'] },
 }));
 
 jest.mock('../../src/lib/ai/providers/lmnt', () => ({
-  lmntProvider: { getModels: jest.fn(() => ['lmntModel']) },
+  lmntProvider: { models: ['lmntModel'] },
 }));
 
 jest.mock('../../src/lib/ai/providers/openai-compatible', () => ({
   openaiCompatibleProvider: {
-    getModels: jest.fn(() => ['openaiCompatibleModel']),
+    models: ['openaiCompatibleModel'],
   },
 }));
 
 jest.mock('../../src/lib/ai/providers/mistral', () => ({
-  mistralProvider: { getModels: jest.fn(() => ['mistralModel']) },
+  mistralProvider: { models: ['mistralModel'] },
 }));
 
 jest.mock('../../src/lib/ai/providers/openai', () => ({
-  openAiProvider: { getModels: jest.fn(() => ['openAiModel']) },
+  openAiProvider: { models: ['openAiModel'] },
 }));
 
 jest.mock('../../src/lib/ai/providers/perplexity', () => ({
-  perplexityProvider: { getModels: jest.fn(() => ['perplexityModel']) },
+  perplexityProvider: { models: ['perplexityModel'] },
 }));
 
 jest.mock('../../src/lib/ai/providers/together-ai', () => ({
-  togetherAiProvider: { getModels: jest.fn(() => ['togetherModel']) },
+  togetherAiProvider: { models: ['togetherModel'] },
 }));
 
 jest.mock('../../src/lib/ai/providers/xai', () => ({
-  xaiProvider: { getModels: jest.fn(() => ['xaiModel']) },
+  xaiProvider: { models: ['xaiModel'] },
 }));
 
 import {
