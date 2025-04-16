@@ -1,5 +1,5 @@
 import { AiProvider } from '../providers';
 
-export const nimProvider: AiProvider = {
+export const openaiCompatibleProvider: AiProvider = {
   getModels: () => [],
 };
