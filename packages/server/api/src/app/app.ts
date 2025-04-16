@@ -31,6 +31,7 @@ import { FastifyInstance, FastifyRequest, HTTPMethods } from 'fastify';
 import fastifySocketIO from 'fastify-socket.io';
 import * as process from 'node:process';
 import { Socket } from 'socket.io';
+import { aiModule } from './ai/ai.module';
 import { appConnectionModule } from './app-connection/app-connection.module';
 import { appEventRoutingModule } from './app-event-routing/app-event-routing.module';
 import { authenticationModule } from './authentication/authentication.module';
@@ -63,7 +64,6 @@ import { websocketService } from './websockets/websockets.service';
 import { flowConsumer } from './workers/consumer';
 import { webhookResponseWatcher } from './workers/helper/webhook-response-watcher';
 import { workerModule } from './workers/worker-module';
-import { aiModule } from './ai/ai.module';
 
 export const setupApp = async (
   app: FastifyInstance,

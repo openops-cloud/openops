@@ -1,3 +1,6 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 
-export const aiProvidersController: FastifyPluginAsyncTypebox = async (app) => {};
+/* eslint-disable @typescript-eslint/no-empty-function */
+export const aiProvidersController: FastifyPluginAsyncTypebox = async (
+  app,
+) => {};
