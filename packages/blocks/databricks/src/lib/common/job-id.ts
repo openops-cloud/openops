@@ -16,8 +16,7 @@ export const jobId = Property.Dropdown({
     if (!auth || !workspaceDeploymentName) {
       return {
         disabled: true,
-        placeholder:
-          'Please connect your account and select a workspace first.',
+        placeholder: 'Please select a workspace',
         options: [],
       };
     }
@@ -58,7 +57,7 @@ export const jobId = Property.Dropdown({
 
       return {
         disabled: true,
-        placeholder: 'An error occurred while fetching warehouses',
+        placeholder: 'An error occurred while fetching jobs',
         error: errorMessage,
         options: [],
       };
