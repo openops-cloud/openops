@@ -14,6 +14,7 @@ import { openaiCompatibleProvider } from './providers/openai-compatible';
 import { perplexityProvider } from './providers/perplexity';
 import { togetherAiProvider } from './providers/together-ai';
 import { xaiProvider } from './providers/xai';
+
 export interface AiProvider {
   getModels(): string[];
 }
