@@ -19,8 +19,7 @@ export const runJob = createAction({
     parameters: Property.Object({
       displayName: 'Parameters',
       required: false,
-      description:
-        'Optional parameter values to bind to the SQL query. Use a key-value structure where keys match named parameters or position indices.',
+      description: 'Optional parameter values to bind job.',
     }),
     timeout: Property.Number({
       displayName: 'Task timeout',
