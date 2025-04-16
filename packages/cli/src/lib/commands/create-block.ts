@@ -6,8 +6,10 @@ import assert from 'node:assert';
 import { findBlockSourceDirectory } from '../utils/block-utils';
 import { exec } from '../utils/exec';
 import {
+  readJestConfig,
   readPackageEslint,
   readProjectJson,
+  writeJestConfig,
   writePackageEslint,
   writeProjectJson,
 } from '../utils/files';
@@ -141,11 +143,24 @@ const updateEslintFile = async (blockName: string) => {
   );
   await writePackageEslint(`packages/blocks/${blockName}`, eslintFile);
 };
+
+const updateJestConfigFile = async (blockName: string) => {
+  let jestConfig = await readJestConfig(`packages/blocks/${blockName}`);
+
+  jestConfig = jestConfig.replace(
+    /preset:\s'..\/..\/..\/jest.preset.js',/,
+    (match) => `${match}\n  setupFiles: ['../../../jest.env.js'],`,
+  );
+
+  await writeJestConfig(`packages/blocks/${blockName}`, jestConfig);
+};
+
 const setupGeneratedLibrary = async (blockName: string) => {
   await removeUnusedFiles(blockName);
   await generateIndexTsFile(blockName);
   await updateProjectJsonConfig(blockName);
   await updateEslintFile(blockName);
+  await updateJestConfigFile(blockName);
 };
 
 export const createBlock = async (blockName: string, packageName: string) => {

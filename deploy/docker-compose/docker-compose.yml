@@ -19,7 +19,7 @@ services:
       OPS_COMPONENT: app
       OPS_VERSION: ${OPS_VERSION:-latest}
       OPS_OPENOPS_TABLES_VERSION: 0.1.10
-      OPS_ANALYTICS_VERSION: 0.12.18
+      OPS_ANALYTICS_VERSION: 0.12.19
     depends_on:
       openops-tables:
         condition: service_healthy
@@ -83,7 +83,7 @@ services:
       postgres:
         condition: service_healthy
   openops-analytics:
-    image: public.ecr.aws/openops/openops-analytics:0.12.18
+    image: public.ecr.aws/openops/openops-analytics:0.12.19
     restart: unless-stopped
     platform: linux/amd64 # Needed for M1 Macs until we have cross-platform CI builds(linux/adm64 and linux/arm64 images)
     environment:
