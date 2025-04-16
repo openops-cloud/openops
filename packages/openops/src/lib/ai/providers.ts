@@ -1,20 +1,22 @@
-import {
-  anthropicModels,
-  bedrockModels,
-  cerebrasModels,
-  cohereModels,
-  deepInfraModels,
-  deepSeekModels,
-  googleModels,
-  groqModels,
-  lmntModels,
-  mistralModels,
-  openAiModels,
-  perplexityModels,
-  togetherAiModels,
-  xaiModels,
-} from './provider-models';
-
+import {} from '@ai-sdk/openai-compatible';
+import { amazonBedrockProvider } from './providers/amazon-bedrock';
+import { anthropicProvider } from './providers/anthropic';
+import { azureProvider } from './providers/azure-openai';
+import { basetenProvider } from './providers/baseten-openai-compatible';
+import { cerebrasProvider } from './providers/cerebras';
+import { cohereProvider } from './providers/cohere';
+import { deepinfraProvider } from './providers/deep-infra';
+import { deepseekProvider } from './providers/deep-seek';
+import { googleProvider } from './providers/google';
+import { groqProvider } from './providers/groq';
+import { lmntProvider } from './providers/lmnt';
+import { lmstudioProvider } from './providers/lmstudio-openai-compatible';
+import { mistralProvider } from './providers/mistral';
+import { nimProvider } from './providers/nim-openai-compatible';
+import { openAiProvider } from './providers/openai';
+import { perplexityProvider } from './providers/perplexity';
+import { togetherAiProvider } from './providers/together-ai';
+import { xaiProvider } from './providers/xai';
 export interface AiProvider {
   getModels(): string[];
 }
@@ -35,12 +37,16 @@ export enum AiProviderEnum {
   PERPLEXITY = 'Perplexity',
   TOGETHER_AI = 'Together.ai',
   XAI = 'xAI Grok',
+  NIM = 'Nim',
+  LMSTUDIO = 'LM Studio',
+  BASETEN = 'Baseten',
 }
 
-const PROVIDER_MAP: Record<AiProviderEnum, () => AiProvider> = {
+const PROVIDER_MAP: Record<AiProviderEnum, AiProvider> = {
   [AiProviderEnum.AMAZON_BEDROCK]: amazonBedrockProvider,
   [AiProviderEnum.ANTHROPIC]: anthropicProvider,
-  [AiProviderEnum.AZURE_OPENAI]: azureOpenAiProvider,
+  [AiProviderEnum.AZURE_OPENAI]: azureProvider,
+  [AiProviderEnum.BASETEN]: basetenProvider,
   [AiProviderEnum.CEREBRAS]: cerebrasProvider,
   [AiProviderEnum.COHERE]: cohereProvider,
   [AiProviderEnum.DEEPINFRA]: deepinfraProvider,
@@ -48,6 +54,8 @@ const PROVIDER_MAP: Record<AiProviderEnum, () => AiProvider> = {
   [AiProviderEnum.GOOGLE]: googleProvider,
   [AiProviderEnum.GROQ]: groqProvider,
   [AiProviderEnum.LMNT]: lmntProvider,
+  [AiProviderEnum.LMSTUDIO]: lmstudioProvider,
+  [AiProviderEnum.NIM]: nimProvider,
   [AiProviderEnum.MISTRAL]: mistralProvider,
   [AiProviderEnum.OPENAI]: openAiProvider,
   [AiProviderEnum.PERPLEXITY]: perplexityProvider,
@@ -60,7 +68,7 @@ export function getAiProvider(aiProvider: AiProviderEnum): AiProvider {
   if (!providerFn) {
     throw new Error(`Unsupported provider: ${aiProvider}`);
   }
-  return providerFn();
+  return providerFn;
 }
 
 export function getAvailableProvidersWithModels(): {
@@ -72,94 +80,4 @@ export function getAvailableProvidersWithModels(): {
     const models = provider.getModels();
     return { aiProvider, models };
   });
-}
-
-function openAiProvider(): AiProvider {
-  return {
-    getModels: () => openAiModels,
-  };
-}
-
-function azureOpenAiProvider(): AiProvider {
-  return {
-    getModels: () => [],
-  };
-}
-
-function anthropicProvider(): AiProvider {
-  return {
-    getModels: () => anthropicModels,
-  };
-}
-
-function amazonBedrockProvider(): AiProvider {
-  return {
-    getModels: () => bedrockModels,
-  };
-}
-
-function xaiProvider(): AiProvider {
-  return {
-    getModels: () => xaiModels,
-  };
-}
-
-function googleProvider(): AiProvider {
-  return {
-    getModels: () => googleModels,
-  };
-}
-
-function mistralProvider(): AiProvider {
-  return {
-    getModels: () => mistralModels,
-  };
-}
-
-function togetherAiProvider(): AiProvider {
-  return {
-    getModels: () => togetherAiModels,
-  };
-}
-
-function cohereProvider(): AiProvider {
-  return {
-    getModels: () => cohereModels,
-  };
-}
-
-function deepinfraProvider(): AiProvider {
-  return {
-    getModels: () => deepInfraModels,
-  };
-}
-
-function deepseekProvider(): AiProvider {
-  return {
-    getModels: () => deepSeekModels,
-  };
-}
-
-function cerebrasProvider(): AiProvider {
-  return {
-    getModels: () => cerebrasModels,
-  };
-}
-
-function groqProvider(): AiProvider {
-  return {
-    getModels: () => groqModels,
-  };
-}
-
-function perplexityProvider(): AiProvider {
-  return {
-    getModels: () => perplexityModels,
-  };
-}
-
-function lmntProvider(): AiProvider {
-  return {
-    getModels: () => lmntModels,
-  };
 }
