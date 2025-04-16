@@ -144,7 +144,7 @@ describe('executeSqlStatement', () => {
       propsValue: propsWithLongTimeout,
     });
 
-    expect(makeHttpRequest).toHaveBeenCalledTimes(2);
+    expect(makeHttpRequest).toHaveBeenCalledTimes(3);
     expect(result).toEqual(pendingResult);
   });
 });
