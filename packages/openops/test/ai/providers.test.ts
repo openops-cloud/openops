@@ -61,7 +61,7 @@ jest.mock('../../src/lib/ai/providers/together-ai', () => ({
 }));
 
 jest.mock('../../src/lib/ai/providers/xai', () => ({
-  xaiProvider: { getModels: ['xaiModel'] },
+  xaiProvider: { models: ['xaiModel'] },
 }));
 
 import {
