@@ -39,7 +39,6 @@ export type ApplicationErrorParams =
   | InvalidSAMLResponseParams
   | InvitationOnlySignUpParams
   | JobRemovalFailureErrorParams
-  | OpenAiFailedErrorParams
   | PauseMetadataMissingErrorParams
   | PermissionDeniedErrorParams
   | BlockNotFoundErrorParams
@@ -234,11 +233,6 @@ export type SystemPropNotDefinedErrorParams = BaseErrorParams<
   {
     prop: string;
   }
->;
-
-export type OpenAiFailedErrorParams = BaseErrorParams<
-  ErrorCode.OPEN_AI_FAILED,
-  Record<string, never>
 >;
 
 export type FlowOperationErrorParams = BaseErrorParams<
