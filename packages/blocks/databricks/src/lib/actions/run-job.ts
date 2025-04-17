@@ -21,9 +21,9 @@ export const runJob = createAction({
       description: 'Optional parameter values to bind job.',
     }),
     timeout: Property.Number({
-      displayName: 'Task timeout',
+      displayName: 'Job timeout',
       description:
-        'Maximum number of seconds to wait for a task to complete before timing out.',
+        'Maximum number of seconds to wait for all task in the job to complete before timing out.',
       required: true,
       validators: [Validators.number, Validators.minValue(0)],
       defaultValue: 50,
@@ -62,8 +62,7 @@ export const runJob = createAction({
       },
     });
 
-    const taskOutputs = [];
-    for (const task of runDetails.tasks) {
+    const taskPromises = runDetails.tasks.map(async (task) => {
       try {
         const output = await waitForTaskCompletion({
           workspaceDeploymentName,
@@ -72,17 +71,19 @@ export const runJob = createAction({
           timeoutInSeconds: timeout ?? 0,
         });
 
-        taskOutputs.push({
+        return {
           task: task.task_key,
           output,
-        });
+        };
       } catch (err) {
-        taskOutputs.push({
+        return {
           task: task.task_key,
           error: (err as Error)?.message,
-        });
+        };
       }
-    }
+    });
+
+    const taskOutputs = await Promise.all(taskPromises);
 
     return {
       run_id: runId,

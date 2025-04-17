@@ -41,9 +41,12 @@ export async function waitForTaskCompletion({
       return output;
     }
 
-    await new Promise((resolve) =>
-      setTimeout(resolve, RETRY_TIMEOUT_MILLISECONDS),
-    );
+    // Only wait if not the last attempt
+    if (attempt < maxAttempts) {
+      await new Promise((resolve) =>
+        setTimeout(resolve, RETRY_TIMEOUT_MILLISECONDS),
+      );
+    }
   }
 
   return output;
