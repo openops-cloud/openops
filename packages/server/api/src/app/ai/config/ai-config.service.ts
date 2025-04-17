@@ -7,7 +7,6 @@ const repo = repoFactory(AiConfigEntity);
 export const aiConfigService = {
   async upsert(params: {
     projectId: string;
-    userId: string;
     request: SaveAiConfigRequest;
   }): Promise<AiConfig> {
     const { projectId, request } = params;

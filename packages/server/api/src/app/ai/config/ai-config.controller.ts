@@ -13,7 +13,6 @@ export const aiConfigController: FastifyPluginAsyncTypebox = async (app) => {
     async (request, reply): Promise<AiConfig> => {
       const aiConfig = await aiConfigService.upsert({
         projectId: request.principal.projectId,
-        userId: request.principal.id,
         request: request.body,
       });
 
