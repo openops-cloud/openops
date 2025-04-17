@@ -1,11 +1,11 @@
-import { GetProvidersResponse } from '@openops/shared';
-import { FastifyInstance } from 'fastify';
-import { setupServer } from '../../../../src/app/server';
-
 const getAvailableProvidersWithModelsMock = jest.fn();
 jest.mock('@openops/common', () => ({
   getAvailableProvidersWithModels: getAvailableProvidersWithModelsMock,
 }));
+
+import { GetProvidersResponse } from '@openops/shared';
+import { FastifyInstance } from 'fastify';
+import { setupServer } from '../../../../src/app/server';
 
 describe('GET /v1/ai/providers', () => {
   let app: FastifyInstance;
