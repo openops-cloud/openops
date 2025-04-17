@@ -3,6 +3,7 @@ import { useArgs } from '@storybook/preview-api';
 import type { Meta, StoryObj } from '@storybook/react';
 import { fn } from '@storybook/test';
 import { AiChatContainer } from '../../components';
+import { Button } from '../../ui/button';
 
 const meta = {
   title: 'Components/AiChatContainer',
@@ -38,14 +39,19 @@ const meta = {
     };
 
     return (
-      <AiChatContainer
-        {...args}
-        containerSize={containerSize}
-        toggleContainerSizeState={onToggleContainerSizeState}
-        showAiChat={showAiChat}
-        setShowAiChat={onSetShowAiChat}
-        className="static"
-      />
+      <>
+        {!showAiChat && (
+          <Button onClick={() => onSetShowAiChat(true)}>Show AI Chat</Button>
+        )}
+        <AiChatContainer
+          {...args}
+          containerSize={containerSize}
+          toggleContainerSizeState={onToggleContainerSizeState}
+          showAiChat={showAiChat}
+          setShowAiChat={onSetShowAiChat}
+          className="static"
+        />
+      </>
     );
   },
 } satisfies Meta<typeof AiChatContainer>;
