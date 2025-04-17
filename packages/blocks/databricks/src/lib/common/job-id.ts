@@ -7,36 +7,38 @@ import { databricksAuth } from './auth';
 import { getDatabricksToken } from './get-databricks-token';
 import { makeDatabricksHttpRequest } from './make-databricks-http-request';
 
-export const warehouseId = Property.Dropdown({
-  displayName: 'Warehouse',
-  description:
-    'Specifies which SQL warehouse in your Databricks workspace should be used to run the query. You must have access to this warehouse.',
-  refreshers: ['workspaceDeploymentName'],
+export const jobId = Property.Dropdown({
+  displayName: 'Job',
   required: true,
+  refreshers: ['auth', 'workspaceDeploymentName'],
   options: async ({ auth, workspaceDeploymentName }) => {
-    if (!workspaceDeploymentName) {
+    if (!auth || !workspaceDeploymentName) {
       return {
         disabled: true,
         placeholder: 'Please select a workspace',
         options: [],
       };
     }
+
     try {
       const authValue = auth as BlockPropValueSchema<typeof databricksAuth>;
       const accessToken = await getDatabricksToken(authValue);
 
-      const { warehouses } = await makeDatabricksHttpRequest<{
-        warehouses: any[];
+      const resp = await makeDatabricksHttpRequest<{
+        jobs: {
+          job_id: string;
+          settings: { name: string };
+        }[];
       }>({
         deploymentName: workspaceDeploymentName as string,
         token: accessToken,
         method: 'GET',
-        path: '/api/2.0/sql/warehouses',
+        path: '/api/2.2/jobs/list',
       });
 
-      const options: DropdownOption<string>[] = warehouses.map((warehouse) => ({
-        label: warehouse.name,
-        value: warehouse.id,
+      const options: DropdownOption<string>[] = resp.jobs.map((job) => ({
+        label: job.settings.name || `Job ${job.job_id}`,
+        value: job.job_id,
       }));
 
       return {
@@ -46,7 +48,7 @@ export const warehouseId = Property.Dropdown({
     } catch (error: any) {
       return {
         disabled: true,
-        placeholder: 'An error occurred while fetching warehouses',
+        placeholder: 'An error occurred while fetching jobs',
         error: error?.message,
         options: [],
       };

@@ -1,7 +1,6 @@
-import cors from '@fastify/cors';
 import formBody from '@fastify/formbody';
 import fastifyMultipart from '@fastify/multipart';
-import { initializeSentry, logger, system } from '@openops/server-shared';
+import { logger, system } from '@openops/server-shared';
 import { openOpsId } from '@openops/shared';
 import fastify, { FastifyInstance } from 'fastify';
 import fastifyFavicon from 'fastify-favicon';
@@ -53,7 +52,6 @@ async function setupBaseApp(): Promise<FastifyInstance> {
       part.value = buffer;
     },
   });
-  initializeSentry();
 
   await app.register(fastifyRawBody, {
     field: 'rawBody',

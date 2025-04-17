@@ -1,0 +1,62 @@
+const hashObjectMock = jest.fn();
+const getSerializedObjectMock = jest.fn();
+jest.mock('@openops/server-shared', () => ({
+  hashUtils: {
+    hashObject: hashObjectMock,
+  },
+  cacheWrapper: {
+    getSerializedObject: getSerializedObjectMock,
+  },
+}));
+
+import { CoreMessage } from 'ai';
+import {
+  generateChatId,
+  getChatHistory,
+} from '../../../src/app/ai/chat/ai-chat.service';
+
+describe('generateChatId', () => {
+  it('should hash the correct object', () => {
+    const params = {
+      workflowId: 'workflow1',
+      blockName: 'blockA',
+      stepName: 'stepX',
+      userId: 'user123',
+    };
+
+    const expectedHash = 'fakeHash123';
+    hashObjectMock.mockReturnValue(expectedHash);
+
+    const result = generateChatId(params);
+
+    expect(hashObjectMock).toHaveBeenCalledWith(params);
+    expect(result).toBe(expectedHash);
+  });
+});
+
+describe('getChatHistory', () => {
+  it('should return messages from cache if they exist', async () => {
+    const chatId = 'chat-123';
+    const mockMessages: CoreMessage[] = [
+      { role: 'user', content: 'Hi' },
+      { role: 'assistant', content: 'Hello there!' },
+    ];
+
+    getSerializedObjectMock.mockResolvedValue(mockMessages);
+
+    const result = await getChatHistory(chatId);
+
+    expect(getSerializedObjectMock).toHaveBeenCalledWith(chatId);
+    expect(result).toEqual(mockMessages);
+  });
+
+  it('should return an empty array if no messages are found', async () => {
+    const chatId = 'chat-456';
+
+    getSerializedObjectMock.mockResolvedValue(null);
+
+    const result = await getChatHistory(chatId);
+
+    expect(result).toEqual([]);
+  });
+});
