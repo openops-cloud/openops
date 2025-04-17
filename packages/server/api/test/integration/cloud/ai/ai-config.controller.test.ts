@@ -2,16 +2,18 @@ import { AiConfig } from '@openops/shared';
 import { FastifyInstance } from 'fastify';
 import { StatusCodes } from 'http-status-codes';
 import { setupServer } from '../../../../src/app/server';
-
-const upsertMock = jest.fn();
-jest.mock('../../../../src/modules/ai-config/ai-config.service', () => ({
-  aiConfigService: {
-    upsert: upsertMock,
-  },
-}));
+import { generateMockToken } from '../../../helpers/auth';
+import {
+  createMockOrganization,
+  createMockProject,
+  createMockUser,
+} from '../../../helpers/mocks';
 
 describe('POST /v1/ai-config', () => {
   let app: FastifyInstance;
+  const projectId = openOpsId();
+  const organizationId = openOpsId();
+  let testToken: string;
 
   beforeAll(async () => {
     app = await setupServer();
@@ -21,8 +23,32 @@ describe('POST /v1/ai-config', () => {
     await app?.close();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.resetAllMocks();
+
+    const mockUser = createMockUser({ organizationId });
+    await databaseConnection().getRepository('user').save(mockUser);
+
+    const mockOrganization = createMockOrganization({
+      id: organizationId,
+      ownerId: mockUser.id,
+    });
+    await databaseConnection()
+      .getRepository('organization')
+      .save(mockOrganization);
+
+    const mockProject = createMockProject({
+      id: projectId,
+      ownerId: mockUser.id,
+      organizationId,
+    });
+    await databaseConnection().getRepository('project').save(mockProject);
+
+    testToken = await generateMockToken({
+      type: PrincipalType.USER,
+      id: mockUser.id,
+      projectId,
+    });
   });
 
   const mockPrincipal = {
@@ -55,13 +81,13 @@ describe('POST /v1/ai-config', () => {
         ...body,
       },
       headers: {
-        authorization: 'Bearer fake-token',
+        authorization: `Bearer ${testToken}`,
       },
     });
   };
 
   test('should upsert and return ai config with status 201', async () => {
-    upsertMock.mockResolvedValueOnce(mockAiConfig);
+    await databaseConnection().getRepository('flow_template').save(mockUpsert);
 
     const response = await makeRequest();
 
