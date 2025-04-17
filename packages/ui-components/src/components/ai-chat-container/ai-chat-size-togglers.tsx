@@ -1,5 +1,4 @@
 import { PanelRightDashedIcon, X as XIcon } from 'lucide-react';
-import { cn } from '../../lib/cn';
 import { Button } from '../../ui/button';
 import { AiChatContainerSizeState } from './types';
 
@@ -18,20 +17,9 @@ const AiChatSizeTogglers = ({
     setContainerSizeState(newState);
   };
 
-  const buttonClassName = (btnState: AiChatContainerSizeState) =>
-    cn('', {
-      'text-outline': state === btnState,
-      'text-outline opacity-50': state !== btnState,
-    });
-
   return (
     <>
-      <Button
-        size="icon"
-        className={buttonClassName('docked')}
-        onClick={() => handleClick('docked')}
-        variant="basic"
-      >
+      <Button size="icon" onClick={() => handleClick('docked')} variant="basic">
         <PanelRightDashedIcon></PanelRightDashedIcon>
       </Button>
       <Button size="icon" variant="basic" onClick={onCloseClick}>
