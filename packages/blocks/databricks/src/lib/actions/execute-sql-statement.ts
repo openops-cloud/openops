@@ -1,6 +1,4 @@
 import { createAction, Property, Validators } from '@openops/blocks-framework';
-import { makeHttpRequest } from '@openops/common';
-import { AxiosHeaders } from 'axios';
 import { databricksAuth } from '../common/auth';
 import {
   MAX_QUERY_TIMEOUT_SECONDS,

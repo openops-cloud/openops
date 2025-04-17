@@ -24,7 +24,10 @@ export function makeDatabricksHttpRequest<TResponse, TBody = unknown>(
 
   const baseUrl = `https://${deploymentName}.cloud.databricks.com`;
   const queryString = new URLSearchParams(queryParams).toString();
-  const url = `${baseUrl}${path}${queryString ? `?${queryString}` : ''}`;
+  let url = baseUrl + path;
+  if (queryString) {
+    url += '?' + queryString;
+  }
 
   const headers = new AxiosHeaders({
     Authorization: `Bearer ${token}`,

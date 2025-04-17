@@ -1,4 +1,3 @@
-import { makeHttpRequest } from '@openops/common';
 import { runJob } from '../src/lib/actions/run-job';
 import { getDatabricksToken } from '../src/lib/common/get-databricks-token';
 import { makeDatabricksHttpRequest } from '../src/lib/common/make-databricks-http-request';
