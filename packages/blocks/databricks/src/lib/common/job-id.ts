@@ -3,10 +3,9 @@ import {
   DropdownOption,
   Property,
 } from '@openops/blocks-framework';
-import { makeHttpRequest } from '@openops/common';
-import { AxiosHeaders } from 'axios';
 import { databricksAuth } from './auth';
 import { getDatabricksToken } from './get-databricks-token';
+import { makeDatabricksHttpRequest } from './make-databricks-http-request';
 
 export const jobId = Property.Dropdown({
   displayName: 'Job',
@@ -25,18 +24,17 @@ export const jobId = Property.Dropdown({
       const authValue = auth as BlockPropValueSchema<typeof databricksAuth>;
       const accessToken = await getDatabricksToken(authValue);
 
-      const jobListUrl = `https://${workspaceDeploymentName}.cloud.databricks.com/api/2.2/jobs/list`;
-
-      const headers = new AxiosHeaders({
-        Authorization: `Bearer ${accessToken}`,
-      });
-
-      const resp = await makeHttpRequest<{
+      const resp = await makeDatabricksHttpRequest<{
         jobs: {
           job_id: string;
           settings: { name: string };
         }[];
-      }>('GET', jobListUrl, headers);
+      }>({
+        deploymentName: workspaceDeploymentName as string,
+        token: accessToken,
+        method: 'GET',
+        path: '/api/2.2/jobs/list',
+      });
 
       const options: DropdownOption<string>[] = resp.jobs.map((job) => ({
         label: job.settings.name || `Job ${job.job_id}`,

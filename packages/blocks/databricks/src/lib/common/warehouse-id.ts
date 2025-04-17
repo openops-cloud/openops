@@ -3,10 +3,9 @@ import {
   DropdownOption,
   Property,
 } from '@openops/blocks-framework';
-import { makeHttpRequest } from '@openops/common';
-import { AxiosHeaders } from 'axios';
 import { databricksAuth } from './auth';
 import { getDatabricksToken } from './get-databricks-token';
+import { makeDatabricksHttpRequest } from './make-databricks-http-request';
 
 export const warehouseId = Property.Dropdown({
   displayName: 'Warehouse',
@@ -26,17 +25,14 @@ export const warehouseId = Property.Dropdown({
       const authValue = auth as BlockPropValueSchema<typeof databricksAuth>;
       const accessToken = await getDatabricksToken(authValue);
 
-      const workspaceListUrl = `https://${workspaceDeploymentName}.cloud.databricks.com/api/2.0/sql/warehouses`;
-
-      const headers = new AxiosHeaders({
-        Authorization: `Bearer ${accessToken}`,
+      const { warehouses } = await makeDatabricksHttpRequest<{
+        warehouses: any[];
+      }>({
+        deploymentName: workspaceDeploymentName as string,
+        token: accessToken,
+        method: 'GET',
+        path: '/api/2.0/sql/warehouses',
       });
-
-      const { warehouses } = await makeHttpRequest<{ warehouses: any[] }>(
-        'GET',
-        workspaceListUrl,
-        headers,
-      );
 
       const options: DropdownOption<string>[] = warehouses.map((warehouse) => ({
         label: warehouse.name,

@@ -1,18 +1,18 @@
 import { PropertyContext } from '@openops/blocks-framework';
-import { makeHttpRequest } from '@openops/common';
 import { getDatabricksToken } from '../src/lib/common/get-databricks-token';
+import { makeDatabricksHttpRequest } from '../src/lib/common/make-databricks-http-request';
 import { warehouseId } from '../src/lib/common/warehouse-id';
 
-jest.mock('@openops/common', () => ({
-  makeHttpRequest: jest.fn(),
+jest.mock('../src/lib/common/make-databricks-http-request', () => ({
+  makeDatabricksHttpRequest: jest.fn(),
 }));
 
 jest.mock('../src/lib/common/get-databricks-token', () => ({
-  getDatabricksToken: jest.fn(),
+  getDatabricksToken: jest.fn().mockResolvedValue('fake-token'),
 }));
 
+const mockedDatabricksHttpRequest = makeDatabricksHttpRequest as jest.Mock;
 const mockedGetToken = getDatabricksToken as jest.Mock;
-const mockedHttpRequest = makeHttpRequest as jest.Mock;
 
 const auth = {
   accountId: 'test-account-id',
@@ -44,7 +44,7 @@ describe('warehouseId.options', () => {
   it('should return dropdown options when warehouses are fetched successfully', async () => {
     mockedGetToken.mockResolvedValue('mock-token');
 
-    mockedHttpRequest.mockResolvedValue({
+    mockedDatabricksHttpRequest.mockResolvedValue({
       warehouses: [
         { id: 'wh-1', name: 'Warehouse One' },
         { id: 'wh-2', name: 'Warehouse Two' },
@@ -61,11 +61,12 @@ describe('warehouseId.options', () => {
 
     expect(mockedGetToken).toHaveBeenCalledWith(auth);
 
-    expect(mockedHttpRequest).toHaveBeenCalledWith(
-      'GET',
-      'https://my-workspace.cloud.databricks.com/api/2.0/sql/warehouses',
-      expect.anything(),
-    );
+    expect(mockedDatabricksHttpRequest).toHaveBeenCalledWith({
+      deploymentName: 'my-workspace',
+      method: 'GET',
+      path: '/api/2.0/sql/warehouses',
+      token: 'mock-token',
+    });
 
     expect(result).toEqual({
       disabled: false,
@@ -78,7 +79,7 @@ describe('warehouseId.options', () => {
 
   it('should be disabled if makeHttpRequest fails', async () => {
     mockedGetToken.mockResolvedValue('mock-token');
-    mockedHttpRequest.mockRejectedValue(new Error('Error'));
+    mockedDatabricksHttpRequest.mockRejectedValue(new Error('Error'));
 
     const result = await warehouseId.options(
       {

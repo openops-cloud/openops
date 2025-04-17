@@ -1,19 +1,19 @@
-import { makeHttpRequest } from '@openops/common';
-import { AxiosHeaders } from 'axios';
 import { RETRY_TIMEOUT_MILLISECONDS } from './constants';
+import { makeDatabricksHttpRequest } from './make-databricks-http-request';
 
 export async function waitForTaskCompletion({
   workspaceDeploymentName,
   runId,
-  headers,
+  token,
   timeoutInSeconds,
 }: {
   workspaceDeploymentName: string;
   runId: number;
-  headers: AxiosHeaders;
+  token: string;
   timeoutInSeconds: number;
 }) {
-  const url = `https://${workspaceDeploymentName}.cloud.databricks.com/api/2.2/jobs/runs/get-output?run_id=${runId}`;
+  const path = `/api/2.2/jobs/runs/get-output`;
+  const queryParams = { run_id: runId.toString() };
 
   const maxAttempts = Math.ceil(
     (timeoutInSeconds * 1000) / RETRY_TIMEOUT_MILLISECONDS,
@@ -22,7 +22,13 @@ export async function waitForTaskCompletion({
   let output: any;
 
   for (let attempt = 0; attempt <= maxAttempts; attempt++) {
-    output = await makeHttpRequest('GET', url, headers);
+    output = await makeDatabricksHttpRequest<any>({
+      deploymentName: workspaceDeploymentName,
+      token,
+      method: 'GET',
+      path,
+      queryParams,
+    });
 
     const state = output?.metadata?.state?.life_cycle_state;
 

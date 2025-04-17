@@ -1,22 +1,23 @@
 import { makeHttpRequest } from '@openops/common';
 import { runJob } from '../src/lib/actions/run-job';
 import { getDatabricksToken } from '../src/lib/common/get-databricks-token';
+import { makeDatabricksHttpRequest } from '../src/lib/common/make-databricks-http-request';
 import { waitForTaskCompletion } from '../src/lib/common/wait-for-task-completion';
 
-jest.mock('@openops/common', () => ({
-  makeHttpRequest: jest.fn(),
+jest.mock('../src/lib/common/make-databricks-http-request', () => ({
+  makeDatabricksHttpRequest: jest.fn(),
 }));
 
 jest.mock('../src/lib/common/get-databricks-token', () => ({
-  getDatabricksToken: jest.fn(),
+  getDatabricksToken: jest.fn().mockResolvedValue('fake-token'),
 }));
 
 jest.mock('../src/lib/common/wait-for-task-completion', () => ({
   waitForTaskCompletion: jest.fn(),
 }));
 
-const mockMakeHttpRequest = makeHttpRequest as jest.Mock;
-const mockGetDatabricksToken = getDatabricksToken as jest.Mock;
+const mockedDatabricksHttpRequest = makeDatabricksHttpRequest as jest.Mock;
+const mockedGetToken = getDatabricksToken as jest.Mock;
 const mockWaitForTaskCompletion = waitForTaskCompletion as jest.Mock;
 
 const fakeToken = 'fake-token';
@@ -38,11 +39,11 @@ const propsValue = {
 describe('runJob action', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockGetDatabricksToken.mockResolvedValue(fakeToken);
+    mockedGetToken.mockResolvedValue(fakeToken);
   });
 
   it('triggers a job, waits for task completion, and returns outputs', async () => {
-    mockMakeHttpRequest
+    mockedDatabricksHttpRequest
       .mockResolvedValueOnce({ run_id: fakeRunId, number_in_job: 1 })
       .mockResolvedValueOnce({
         tasks: [{ run_id: 2001, task_key: 'firstTask' }],
@@ -56,30 +57,28 @@ describe('runJob action', () => {
       propsValue,
     });
 
-    expect(mockGetDatabricksToken).toHaveBeenCalledWith(auth);
+    expect(mockedGetToken).toHaveBeenCalledWith(auth);
 
-    expect(mockMakeHttpRequest).toHaveBeenNthCalledWith(
-      1,
-      'POST',
-      expect.stringContaining('/jobs/run-now'),
-      expect.anything(),
-      {
-        job_id: propsValue.jobId,
-        notebook_params: propsValue.parameters,
-      },
-    );
+    expect(mockedDatabricksHttpRequest).toHaveBeenCalledWith({
+      body: { job_id: '999', notebook_params: { foo: 'bar' } },
+      deploymentName: 'demo-ws',
+      method: 'POST',
+      path: '/api/2.2/jobs/run-now',
+      token: 'fake-token',
+    });
 
-    expect(mockMakeHttpRequest).toHaveBeenNthCalledWith(
-      2,
-      'GET',
-      expect.stringContaining('/jobs/runs/get?'),
-      expect.anything(),
-    );
+    expect(mockedDatabricksHttpRequest).toHaveBeenCalledWith({
+      deploymentName: 'demo-ws',
+      method: 'GET',
+      path: '/api/2.2/jobs/runs/get',
+      queryParams: { include_resolved_values: 'true', run_id: '1001' },
+      token: 'fake-token',
+    });
 
     expect(mockWaitForTaskCompletion).toHaveBeenCalledWith({
       workspaceDeploymentName: fakeWorkspace,
       runId: 2001,
-      headers: expect.anything(),
+      token: 'fake-token',
       timeoutInSeconds: propsValue.timeout,
     });
 
@@ -90,7 +89,7 @@ describe('runJob action', () => {
   });
 
   it('returns error for task if waitForTaskCompletion throws', async () => {
-    mockMakeHttpRequest
+    mockedDatabricksHttpRequest
       .mockResolvedValueOnce({ run_id: fakeRunId })
       .mockResolvedValueOnce({
         tasks: [{ run_id: 3001, task_key: 'failingTask' }],
@@ -111,7 +110,7 @@ describe('runJob action', () => {
   });
 
   it('handles multiple tasks correctly', async () => {
-    mockMakeHttpRequest
+    mockedDatabricksHttpRequest
       .mockResolvedValueOnce({ run_id: fakeRunId })
       .mockResolvedValueOnce({
         tasks: [

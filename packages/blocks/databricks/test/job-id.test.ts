@@ -1,18 +1,18 @@
 import { PropertyContext } from '@openops/blocks-framework';
-import { makeHttpRequest } from '@openops/common';
 import { getDatabricksToken } from '../src/lib/common/get-databricks-token';
 import { jobId } from '../src/lib/common/job-id';
+import { makeDatabricksHttpRequest } from '../src/lib/common/make-databricks-http-request';
 
-jest.mock('@openops/common', () => ({
-  makeHttpRequest: jest.fn(),
+jest.mock('../src/lib/common/make-databricks-http-request', () => ({
+  makeDatabricksHttpRequest: jest.fn(),
 }));
 
 jest.mock('../src/lib/common/get-databricks-token', () => ({
-  getDatabricksToken: jest.fn(),
+  getDatabricksToken: jest.fn().mockResolvedValue('fake-token'),
 }));
 
+const mockedDatabricksHttpRequest = makeDatabricksHttpRequest as jest.Mock;
 const mockedGetToken = getDatabricksToken as jest.Mock;
-const mockedHttpRequest = makeHttpRequest as jest.Mock;
 
 const auth = {
   accountId: 'test-account-id',
@@ -44,7 +44,7 @@ describe('jobId.options', () => {
   it('should return dropdown options when jobs are fetched successfully', async () => {
     mockedGetToken.mockResolvedValue('mock-token');
 
-    mockedHttpRequest.mockResolvedValue({
+    mockedDatabricksHttpRequest.mockResolvedValue({
       jobs: [
         { job_id: 'job-1', settings: { name: 'Job One' } },
         { job_id: 'job-2', settings: { name: 'Job Two' } },
@@ -60,11 +60,12 @@ describe('jobId.options', () => {
     );
 
     expect(mockedGetToken).toHaveBeenCalledWith(auth);
-    expect(mockedHttpRequest).toHaveBeenCalledWith(
-      'GET',
-      'https://my-workspace.cloud.databricks.com/api/2.2/jobs/list',
-      expect.anything(),
-    );
+    expect(mockedDatabricksHttpRequest).toHaveBeenCalledWith({
+      deploymentName: 'my-workspace',
+      method: 'GET',
+      path: '/api/2.2/jobs/list',
+      token: 'mock-token',
+    });
 
     expect(result).toEqual({
       disabled: false,
@@ -75,9 +76,9 @@ describe('jobId.options', () => {
     });
   });
 
-  it('should be disabled if makeHttpRequest fails', async () => {
+  it('should be disabled if makeDatabricksHttpRequest fails', async () => {
     mockedGetToken.mockResolvedValue('mock-token');
-    mockedHttpRequest.mockRejectedValue(new Error('Request failed'));
+    mockedDatabricksHttpRequest.mockRejectedValue(new Error('Request failed'));
 
     const result = await jobId.options(
       {

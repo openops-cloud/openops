@@ -1,15 +1,15 @@
-import { makeHttpRequest } from '@openops/common';
 import { RETRY_TIMEOUT_MILLISECONDS } from '../src/lib/common/constants';
+import { makeDatabricksHttpRequest } from '../src/lib/common/make-databricks-http-request';
 import { waitForTaskCompletion } from '../src/lib/common/wait-for-task-completion';
 
-jest.mock('@openops/common', () => ({
-  makeHttpRequest: jest.fn(),
+jest.mock('../src/lib/common/make-databricks-http-request', () => ({
+  makeDatabricksHttpRequest: jest.fn(),
 }));
 
-const mockMakeHttpRequest = makeHttpRequest as jest.Mock;
+const mockedDatabricksHttpRequest = makeDatabricksHttpRequest as jest.Mock;
 
 describe('waitForTaskCompletion', () => {
-  const headers = {} as any;
+  const token = 'fake-token';
   const runId = 123;
   const workspaceDeploymentName = 'my-workspace';
 
@@ -24,7 +24,7 @@ describe('waitForTaskCompletion', () => {
   });
 
   it('returns output when job completes successfully', async () => {
-    mockMakeHttpRequest
+    mockedDatabricksHttpRequest
       .mockResolvedValueOnce({
         metadata: { state: { life_cycle_state: 'RUNNING' } },
       })
@@ -35,28 +35,28 @@ describe('waitForTaskCompletion', () => {
     const result = await waitForTaskCompletion({
       workspaceDeploymentName,
       runId,
-      headers,
+      token,
       timeoutInSeconds: 10,
     });
 
     expect(result.metadata.state.life_cycle_state).toBe('TERMINATED');
-    expect(mockMakeHttpRequest).toHaveBeenCalledTimes(2);
+    expect(mockedDatabricksHttpRequest).toHaveBeenCalledTimes(2);
   });
 
   it('returns immediately if job is already completed', async () => {
-    mockMakeHttpRequest.mockResolvedValueOnce({
+    mockedDatabricksHttpRequest.mockResolvedValueOnce({
       metadata: { state: { life_cycle_state: 'TERMINATED' } },
     });
 
     const result = await waitForTaskCompletion({
       workspaceDeploymentName,
       runId,
-      headers,
+      token,
       timeoutInSeconds: 5,
     });
 
     expect(result.metadata.state.life_cycle_state).toBe('TERMINATED');
-    expect(mockMakeHttpRequest).toHaveBeenCalledTimes(1);
+    expect(mockedDatabricksHttpRequest).toHaveBeenCalledTimes(1);
   });
 
   it('keeps retrying until timeout and returns last output', async () => {
@@ -64,18 +64,18 @@ describe('waitForTaskCompletion', () => {
     const timeoutInSeconds =
       ((attempts - 1) * RETRY_TIMEOUT_MILLISECONDS) / 1000;
 
-    mockMakeHttpRequest.mockResolvedValue({
+    mockedDatabricksHttpRequest.mockResolvedValue({
       metadata: { state: { life_cycle_state: 'RUNNING' } },
     });
 
     const result = await waitForTaskCompletion({
       workspaceDeploymentName,
       runId,
-      headers,
+      token,
       timeoutInSeconds,
     });
 
-    expect(mockMakeHttpRequest).toHaveBeenCalledTimes(attempts);
+    expect(mockedDatabricksHttpRequest).toHaveBeenCalledTimes(attempts);
     expect(result.metadata.state.life_cycle_state).toBe('RUNNING');
   });
 });

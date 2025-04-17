@@ -1,18 +1,18 @@
 import { PropertyContext } from '@openops/blocks-framework';
-import { makeHttpRequest } from '@openops/common';
 import { getDatabricksToken } from '../src/lib/common/get-databricks-token';
+import { makeDatabricksHttpRequest } from '../src/lib/common/make-databricks-http-request';
 import { workspaceDeploymentName } from '../src/lib/common/workspace-deployment-name';
 
-jest.mock('@openops/common', () => ({
-  makeHttpRequest: jest.fn(),
+jest.mock('../src/lib/common/make-databricks-http-request', () => ({
+  makeDatabricksHttpRequest: jest.fn(),
 }));
 
 jest.mock('../src/lib/common/get-databricks-token', () => ({
-  getDatabricksToken: jest.fn(),
+  getDatabricksToken: jest.fn().mockResolvedValue('fake-token'),
 }));
 
+const mockedDatabricksHttpRequest = makeDatabricksHttpRequest as jest.Mock;
 const mockedGetToken = getDatabricksToken as jest.Mock;
-const mockedHttpRequest = makeHttpRequest as jest.Mock;
 
 const auth = {
   accountId: 'test-account-id',
@@ -41,7 +41,7 @@ describe('workspaceDeploymentName.options', () => {
   it('should return dropdown options when workspaces are fetched successfully', async () => {
     mockedGetToken.mockResolvedValue('mock-token');
 
-    mockedHttpRequest.mockResolvedValue([
+    mockedDatabricksHttpRequest.mockResolvedValue([
       {
         workspace_name: 'Workspace One',
         deployment_name: 'workspace-1',
@@ -59,11 +59,12 @@ describe('workspaceDeploymentName.options', () => {
 
     expect(mockedGetToken).toHaveBeenCalledWith(auth);
 
-    expect(mockedHttpRequest).toHaveBeenCalledWith(
-      'GET',
-      'https://accounts.cloud.databricks.com/api/2.0/accounts/test-account-id/workspaces',
-      expect.anything(),
-    );
+    expect(mockedDatabricksHttpRequest).toHaveBeenCalledWith({
+      deploymentName: 'accounts',
+      method: 'GET',
+      path: '/api/2.0/accounts/test-account-id/workspaces',
+      token: 'mock-token',
+    });
 
     expect(result).toEqual({
       disabled: false,
@@ -76,7 +77,7 @@ describe('workspaceDeploymentName.options', () => {
 
   it('Should return error and placeholder if makeHttpRequest fails', async () => {
     mockedGetToken.mockResolvedValue('mock-token');
-    mockedHttpRequest.mockRejectedValue(new Error('Error'));
+    mockedDatabricksHttpRequest.mockRejectedValue(new Error('Error'));
 
     const result = await workspaceDeploymentName.options(
       { auth },
