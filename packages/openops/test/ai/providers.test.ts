@@ -84,29 +84,90 @@ describe('getAiProvider tests', () => {
 });
 
 describe('getAvailableProvidersWithModels', () => {
-  it('should return a list of all providers with mocked model arrays', () => {
+  it('should return a list of all providers with their display names and mocked model arrays', () => {
     const result = getAvailableProvidersWithModels();
 
     const expected = [
-      { aiProvider: AiProviderEnum.AMAZON_BEDROCK, models: ['bedrockModel'] },
-      { aiProvider: AiProviderEnum.ANTHROPIC, models: ['anthropicModel'] },
-      { aiProvider: AiProviderEnum.AZURE_OPENAI, models: ['azureModel'] },
-      { aiProvider: AiProviderEnum.CEREBRAS, models: ['cerebrasModel'] },
-      { aiProvider: AiProviderEnum.COHERE, models: ['cohereModel'] },
-      { aiProvider: AiProviderEnum.DEEPINFRA, models: ['deepinfraModel'] },
-      { aiProvider: AiProviderEnum.DEEPSEEK, models: ['deepseekModel'] },
-      { aiProvider: AiProviderEnum.GOOGLE, models: ['googleModel'] },
-      { aiProvider: AiProviderEnum.GROQ, models: ['groqModel'] },
-      { aiProvider: AiProviderEnum.LMNT, models: ['lmntModel'] },
-      { aiProvider: AiProviderEnum.MISTRAL, models: ['mistralModel'] },
-      { aiProvider: AiProviderEnum.OPENAI, models: ['openAiModel'] },
       {
-        aiProvider: AiProviderEnum.OPENAI_COMPATIBLE,
+        provider: 'AMAZON_BEDROCK',
+        displayName: AiProviderEnum.AMAZON_BEDROCK,
+        models: ['bedrockModel'],
+      },
+      {
+        provider: 'ANTHROPIC',
+        displayName: AiProviderEnum.ANTHROPIC,
+        models: ['anthropicModel'],
+      },
+      {
+        provider: 'AZURE_OPENAI',
+        displayName: AiProviderEnum.AZURE_OPENAI,
+        models: ['azureModel'],
+      },
+      {
+        provider: 'CEREBRAS',
+        displayName: AiProviderEnum.CEREBRAS,
+        models: ['cerebrasModel'],
+      },
+      {
+        provider: 'COHERE',
+        displayName: AiProviderEnum.COHERE,
+        models: ['cohereModel'],
+      },
+      {
+        provider: 'DEEPINFRA',
+        displayName: AiProviderEnum.DEEPINFRA,
+        models: ['deepinfraModel'],
+      },
+      {
+        provider: 'DEEPSEEK',
+        displayName: AiProviderEnum.DEEPSEEK,
+        models: ['deepseekModel'],
+      },
+      {
+        provider: 'GOOGLE',
+        displayName: AiProviderEnum.GOOGLE,
+        models: ['googleModel'],
+      },
+      {
+        provider: 'GROQ',
+        displayName: AiProviderEnum.GROQ,
+        models: ['groqModel'],
+      },
+      {
+        provider: 'LMNT',
+        displayName: AiProviderEnum.LMNT,
+        models: ['lmntModel'],
+      },
+      {
+        provider: 'MISTRAL',
+        displayName: AiProviderEnum.MISTRAL,
+        models: ['mistralModel'],
+      },
+      {
+        provider: 'OPENAI',
+        displayName: AiProviderEnum.OPENAI,
+        models: ['openAiModel'],
+      },
+      {
+        provider: 'OPENAI_COMPATIBLE',
+        displayName: AiProviderEnum.OPENAI_COMPATIBLE,
         models: ['openaiCompatibleModel'],
       },
-      { aiProvider: AiProviderEnum.PERPLEXITY, models: ['perplexityModel'] },
-      { aiProvider: AiProviderEnum.TOGETHER_AI, models: ['togetherModel'] },
-      { aiProvider: AiProviderEnum.XAI, models: ['xaiModel'] },
+      {
+        provider: 'PERPLEXITY',
+        displayName: AiProviderEnum.PERPLEXITY,
+        models: ['perplexityModel'],
+      },
+      {
+        provider: 'TOGETHER_AI',
+        displayName: AiProviderEnum.TOGETHER_AI,
+        models: ['togetherModel'],
+      },
+      {
+        provider: 'XAI',
+        displayName: AiProviderEnum.XAI,
+        models: ['xaiModel'],
+      },
     ];
 
     expect(result).toHaveLength(16);
