@@ -29,6 +29,12 @@ const AiChatContainer = ({
 }: AiChatContainerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [promptValue, setPromptValue] = useState('');
+  const height =
+    containerSize === 'collapsed'
+      ? '0px'
+      : containerSize === 'docked'
+      ? '450px'
+      : `${parentHeight - 100}px`;
 
   return (
     <div
@@ -64,12 +70,7 @@ const AiChatContainer = ({
 
       <div
         style={{
-          height:
-            containerSize === 'collapsed'
-              ? '0px'
-              : containerSize === 'docked'
-              ? '450px'
-              : `${parentHeight - 100}px`,
+          height,
           width: `${parentWidth}px`,
         }}
         className="transition-all overflow-hidden"
