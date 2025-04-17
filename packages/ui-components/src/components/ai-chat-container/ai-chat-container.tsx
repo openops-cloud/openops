@@ -1,9 +1,9 @@
-import { Button } from '@/ui/button';
 import { t } from 'i18next';
 import { Send as SendIcon, Sparkles } from 'lucide-react';
 import { useRef, useState } from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
 import { cn } from '../../lib/cn';
+import { Button } from '../../ui/button';
 import { ScrollArea } from '../../ui/scroll-area';
 import { AiChatSizeTogglers } from './ai-chat-size-togglers';
 import { AiChatContainerSizeState } from './types';
