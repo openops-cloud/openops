@@ -3,12 +3,11 @@ import { BaseModelSchema } from '../../common/base-model';
 
 export const AiConfig = Type.Object({
   ...BaseModelSchema,
-  id: Type.String(),
   projectId: Type.String(),
   provider: Type.String(),
   model: Type.String(),
   apiKey: Type.String(),
-  modelSettings: Type.Optional(Type.Record(Type.String(), Type.Any())),
+  modelSettings: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
   enabled: Type.Optional(Type.Boolean()),
 });
 
@@ -18,7 +17,7 @@ export const SaveAiConfigRequest = Type.Object({
   provider: Type.String(),
   model: Type.String(),
   apiKey: Type.String(),
-  modelSettings: Type.Optional(Type.Record(Type.String(), Type.Any())),
+  modelSettings: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
   enabled: Type.Optional(Type.Boolean()),
 });
 

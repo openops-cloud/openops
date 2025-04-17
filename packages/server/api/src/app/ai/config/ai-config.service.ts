@@ -19,11 +19,14 @@ export const aiConfigService = {
 
     const aiConfig: Partial<AiConfig> = {
       ...request,
-      id: existing?.id ?? openOpsId(),
       projectId,
+      id: existing?.id ?? openOpsId(),
+      created: new Date().toISOString(),
+      updated: new Date().toISOString(),
     };
 
-    await repo().upsert(aiConfig, ['projectId', 'provider']);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await repo().upsert(aiConfig as any, ['projectId', 'provider']);
 
     return repo().findOneByOrFail({
       projectId,
