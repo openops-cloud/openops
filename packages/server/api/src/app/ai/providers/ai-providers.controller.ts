@@ -1,16 +1,13 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 
-import {
-  AiProviderEnum,
-  getAvailableProvidersWithModels,
-} from '@openops/common';
-import { PrincipalType } from '@openops/shared';
+import { getAvailableProvidersWithModels } from '@openops/common';
+import { GetProvidersResponse, PrincipalType } from '@openops/shared';
 
 export const aiProvidersController: FastifyPluginAsyncTypebox = async (app) => {
   app.get(
     '/',
     ListAiProvidersRequest,
-    async (): Promise<{ aiProvider: AiProviderEnum; models: string[] }[]> => {
+    async (): Promise<GetProvidersResponse[]> => {
       return getAvailableProvidersWithModels();
     },
   );
