@@ -29,12 +29,15 @@ const AiChatContainer = ({
 }: AiChatContainerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [promptValue, setPromptValue] = useState('');
-  const height =
-    containerSize === 'collapsed'
-      ? '0px'
-      : containerSize === 'docked'
-      ? '450px'
-      : `${parentHeight - 100}px`;
+
+  let height: string;
+  if (containerSize === 'collapsed') {
+    height = '0px';
+  } else if (containerSize === 'docked') {
+    height = '450px';
+  } else {
+    height = `${parentHeight - 100}px`;
+  }
 
   return (
     <div
