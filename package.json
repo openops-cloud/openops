@@ -110,6 +110,7 @@
     "@uiw/codemirror-theme-github": "4.23.0",
     "@uiw/react-codemirror": "4.23.0",
     "@xyflow/react": "12.4.4",
+    "ai": "4.3.8",
     "ajv": "8.12.0",
     "async-mutex": "0.4.0",
     "aws-lambda": "1.0.7",
