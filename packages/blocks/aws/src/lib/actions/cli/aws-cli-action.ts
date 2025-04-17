@@ -16,7 +16,11 @@ export const awsCliAction = createAction({
   displayName: 'AWS CLI',
   props: {
     account: getAwsAccountsSingleSelectDropdown().accounts,
-    commandToRun: Property.LongText({ displayName: 'Command', required: true }),
+    commandToRun: Property.LongText({
+      displayName: 'Command',
+      required: true,
+      supportsAI: true,
+    }),
     dryRun: dryRunCheckBox(),
   },
   async run(context) {

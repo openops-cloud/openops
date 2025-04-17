@@ -20,7 +20,11 @@ export const googleCloudCliAction = createAction({
       'gcloud auth login',
     ),
     project: projectCliDropdown,
-    commandToRun: Property.LongText({ displayName: 'Command', required: true }),
+    commandToRun: Property.LongText({
+      displayName: 'Command',
+      required: true,
+      supportsAI: true,
+    }),
     dryRun: dryRunCheckBox(),
   },
   async run(context) {

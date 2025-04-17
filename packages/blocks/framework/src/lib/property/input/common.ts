@@ -10,6 +10,12 @@ export const BasePropertySchema = Type.Object({
 
 export type BasePropertySchema = Static<typeof BasePropertySchema>;
 
+export const SupportsAISchema = Type.Object({
+  supportsAI: Type.Optional(Type.Boolean()),
+});
+
+export type SupportsAISchema = Static<typeof SupportsAISchema>;
+
 export const TPropertyValue = <T extends TSchema, U extends PropertyType>(
   T: T,
   propertyType: U,
