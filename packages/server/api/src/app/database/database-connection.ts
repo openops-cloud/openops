@@ -12,6 +12,7 @@ import {
   ObjectLiteral,
   SelectQueryBuilder,
 } from 'typeorm';
+import { AiConfigEntity } from '../ai/config/ai-config.entity';
 import { AppConnectionEntity } from '../app-connection/app-connection.entity';
 import { AppEventRoutingEntity } from '../app-event-routing/app-event-routing.entity';
 import { BlockMetadataEntity } from '../blocks/block-metadata-entity';
@@ -55,6 +56,7 @@ function getEntities(): EntitySchema<unknown>[] {
     WorkerMachineEntity,
     FlowTemplateEntity,
     UserSettingsEntity,
+    AiConfigEntity,
   ];
 
   return entities;

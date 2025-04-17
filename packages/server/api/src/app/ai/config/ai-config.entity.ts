@@ -1,5 +1,5 @@
 // src/modules/ai-config/ai-config.entity.ts
-import { Project } from '@openops/shared';
+import { AiConfig, Project } from '@openops/shared';
 import { EntitySchema } from 'typeorm';
 import {
   BaseColumnSchemaPart,
@@ -7,28 +7,18 @@ import {
   OpenOpsIdSchema,
 } from '../../database/database-common';
 
-export type AiConfig = {
-  id: string;
-  created: string;
-  updated: string;
-  projectId: string;
+export type AiConfigSchema = AiConfig & {
   project: Project;
-  provider: string;
-  model: string;
-  apiKey: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  modelSettings?: Record<string, any>;
-  enabled?: boolean;
 };
 
-export const AiConfigEntity = new EntitySchema<AiConfig>({
+export const AiConfigEntity = new EntitySchema<AiConfigSchema>({
   name: 'ai_config',
   columns: {
     ...BaseColumnSchemaPart,
-    projectId: OpenOpsIdSchema,
     provider: {
       type: String,
     },
+    projectId: OpenOpsIdSchema,
     model: {
       type: String,
     },

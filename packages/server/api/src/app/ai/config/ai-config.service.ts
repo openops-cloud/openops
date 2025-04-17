@@ -1,20 +1,8 @@
-// src/modules/ai-config/ai-config.service.ts
-import { Type } from '@fastify/type-provider-typebox';
-import { openOpsId } from '@openops/shared';
+import { AiConfig, openOpsId } from '@openops/shared';
 import { repoFactory } from '../../core/db/repo-factory';
-import { AiConfig, AiConfigEntity } from './ai-config.entity';
+import { AiConfigEntity } from './ai-config.entity';
 
 const repo = repoFactory(AiConfigEntity);
-
-export const AiConfigResponse = Type.Object({
-  id: Type.String(),
-  projectId: Type.String(),
-  provider: Type.String(),
-  model: Type.String(),
-  apiKey: Type.String(),
-  modelSettings: Type.Optional(Type.Record(Type.String(), Type.Any())),
-  enabled: Type.Optional(Type.Boolean()),
-});
 
 export const aiConfigService = {
   async upsert(params: {
