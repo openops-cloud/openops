@@ -48,17 +48,10 @@ export const jobId = Property.Dropdown({
         options: options,
       };
     } catch (error: any) {
-      let errorMessage;
-      try {
-        errorMessage = JSON.parse(error.message)?.message;
-      } catch {
-        errorMessage = String(error.message);
-      }
-
       return {
         disabled: true,
         placeholder: 'An error occurred while fetching jobs',
-        error: errorMessage,
+        error: error?.message,
         options: [],
       };
     }
