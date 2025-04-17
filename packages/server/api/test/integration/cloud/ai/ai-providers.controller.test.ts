@@ -16,7 +16,7 @@ describe('GET /v1/ai/providers', () => {
   });
 
   afterAll(async () => {
-    await app.close();
+    await app?.close();
   });
 
   beforeEach(() => {
@@ -37,7 +37,7 @@ describe('GET /v1/ai/providers', () => {
 
     getAvailableProvidersWithModelsMock.mockReturnValueOnce(mockResponse);
 
-    const response = await app.inject({
+    const response = await app?.inject({
       method: 'GET',
       url: '/v1/ai/providers',
     });
@@ -52,7 +52,7 @@ describe('GET /v1/ai/providers', () => {
       throw new Error('Unexpected failure');
     });
 
-    const response = await app.inject({
+    const response = await app?.inject({
       method: 'GET',
       url: '/v1/ai/providers',
     });
