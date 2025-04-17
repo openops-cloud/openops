@@ -1,0 +1,103 @@
+import { openOpsId, SaveAiConfigRequest } from '@openops/shared';
+import { aiConfigService } from '../../../src/app/ai/config/ai-config.service';
+import { repoFactory } from '../../../src/app/core/db/repo-factory';
+
+const findOneByMock = jest.fn();
+const upsertMock = jest.fn();
+const findOneByOrFailMock = jest.fn();
+
+jest.mock('../../../src/app/core/db/repo-factory', () => ({
+  repoFactory: () => () => ({
+    findOneBy: findOneByMock,
+    upsert: upsertMock,
+    findOneByOrFail: findOneByOrFailMock,
+  }),
+}));
+
+describe('aiConfigService.upsert', () => {
+  const baseRequest: SaveAiConfigRequest = {
+    provider: 'openai',
+    apiKey: 'test-key',
+    model: 'gpt-4',
+    modelSettings: { temperature: 0.7 },
+  };
+
+  const projectId = 'test-project';
+  const userId = 'test-user';
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should insert a new ai config when one does not exist', async () => {
+    findOneByMock.mockResolvedValue(null);
+    const expectedId = openOpsId();
+    findOneByOrFailMock.mockResolvedValue({
+      ...baseRequest,
+      projectId,
+      id: expectedId,
+    });
+
+    const result = await aiConfigService.upsert({
+      projectId,
+      userId,
+      request: baseRequest,
+    });
+
+    expect(findOneByMock).toHaveBeenCalledWith({
+      projectId,
+      provider: baseRequest.provider,
+    });
+
+    expect(upsertMock).toHaveBeenCalledWith(
+      {
+        ...baseRequest,
+        projectId,
+        id: expectedId,
+      },
+      ['projectId', 'provider'],
+    );
+
+    expect(findOneByOrFailMock).toHaveBeenCalledWith({
+      projectId,
+      provider: baseRequest.provider,
+    });
+
+    expect(result).toEqual({
+      ...baseRequest,
+      projectId,
+      id: expectedId,
+    });
+  });
+
+  it('should update existing ai config if it exists', async () => {
+    const existingId = 'existing-id';
+    findOneByMock.mockResolvedValue({ id: existingId });
+    findOneByOrFailMock.mockResolvedValue({
+      ...baseRequest,
+      id: existingId,
+      projectId,
+    });
+
+    const result = await aiConfigService.upsert({
+      projectId,
+      userId,
+      request: baseRequest,
+    });
+
+    expect(upsertMock).toHaveBeenCalledWith(
+      {
+        ...baseRequest,
+        id: existingId,
+        projectId,
+      },
+      ['projectId', 'provider'],
+    );
+
+    expect(result).toEqual({
+      ...baseRequest,
+      id: existingId,
+      projectId,
+    });
+  });
+});

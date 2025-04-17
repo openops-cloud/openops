@@ -1,4 +1,4 @@
-import { AiConfig, openOpsId } from '@openops/shared';
+import { AiConfig, openOpsId, SaveAiConfigRequest } from '@openops/shared';
 import { repoFactory } from '../../core/db/repo-factory';
 import { AiConfigEntity } from './ai-config.entity';
 
@@ -8,14 +8,7 @@ export const aiConfigService = {
   async upsert(params: {
     projectId: string;
     userId: string;
-    request: {
-      provider: string;
-      model: string;
-      apiKey: string;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      modelSettings?: Record<string, any>;
-      enabled?: boolean;
-    };
+    request: SaveAiConfigRequest;
   }): Promise<AiConfig> {
     const { projectId, request } = params;
 
