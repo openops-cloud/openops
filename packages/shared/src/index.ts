@@ -1,3 +1,4 @@
+export * from './lib/ai/chat';
 export * from './lib/ai/config';
 export * from './lib/analytics';
 export * from './lib/app-connection/app-connection';
@@ -16,7 +17,6 @@ export * from './lib/common/application-error';
 export * from './lib/common/base-model';
 export * from './lib/common/id-generator';
 export * from './lib/common/seek-page';
-export * from './lib/copilot';
 export * from './lib/engine';
 export * from './lib/file';
 export * from './lib/flag/flag';
