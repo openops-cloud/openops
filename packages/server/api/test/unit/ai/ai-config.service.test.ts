@@ -1,6 +1,9 @@
-import { openOpsId, SaveAiConfigRequest } from '@openops/shared';
-import { aiConfigService } from '../../../src/app/ai/config/ai-config.service';
-import { repoFactory } from '../../../src/app/core/db/repo-factory';
+const mockedOpenOpsId = jest.fn().mockReturnValue('mocked-id');
+
+jest.mock('@openops/shared', () => ({
+  ...jest.requireActual('@openops/shared'),
+  openOpsId: mockedOpenOpsId,
+}));
 
 const findOneByMock = jest.fn();
 const upsertMock = jest.fn();
@@ -13,6 +16,10 @@ jest.mock('../../../src/app/core/db/repo-factory', () => ({
     findOneByOrFail: findOneByOrFailMock,
   }),
 }));
+
+import { SaveAiConfigRequest } from '@openops/shared';
+import { aiConfigService } from '../../../src/app/ai/config/ai-config.service';
+import { repoFactory } from '../../../src/app/core/db/repo-factory';
 
 describe('aiConfigService.upsert', () => {
   const baseRequest: SaveAiConfigRequest = {
@@ -31,11 +38,10 @@ describe('aiConfigService.upsert', () => {
 
   it('should insert a new ai config when one does not exist', async () => {
     findOneByMock.mockResolvedValue(null);
-    const expectedId = openOpsId();
     findOneByOrFailMock.mockResolvedValue({
       ...baseRequest,
       projectId,
-      id: expectedId,
+      id: 'mocked-id',
     });
 
     const result = await aiConfigService.upsert({
@@ -53,7 +59,7 @@ describe('aiConfigService.upsert', () => {
       {
         ...baseRequest,
         projectId,
-        id: expectedId,
+        id: 'mocked-id',
       },
       ['projectId', 'provider'],
     );
@@ -66,7 +72,7 @@ describe('aiConfigService.upsert', () => {
     expect(result).toEqual({
       ...baseRequest,
       projectId,
-      id: expectedId,
+      id: 'mocked-id',
     });
   });
 
