@@ -86,7 +86,7 @@ const AiChatContainer = ({
 
             <div className="w-full rounded-tl rounded-tr px-4 relative">
               <TextareaAutosize
-                className="w-full h-full rounded-lg border-gray-200 border-[1px] text-primary-700 text-base font-normal leading-normal p-4 pt-5 pr-14 outline-none dark:bg-accent"
+                className="w-full h-full min-h-[69px] resize-none rounded-lg border-gray-200 border-[1px] text-primary-700 text-base font-normal leading-normal p-4 pt-5 pr-14 outline-none dark:bg-accent"
                 minRows={2}
                 maxRows={4}
                 placeholder="Ask a question about the command you need"
