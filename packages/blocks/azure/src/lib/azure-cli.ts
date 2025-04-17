@@ -10,6 +10,7 @@ export async function runCommand(
   subscription?: string,
 ): Promise<string> {
   const envVars: Record<string, string> = {
+    ...process.env,
     PATH: process.env['PATH'] || '',
   };
 
