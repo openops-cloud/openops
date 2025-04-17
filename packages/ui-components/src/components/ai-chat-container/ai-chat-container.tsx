@@ -78,7 +78,7 @@ const AiChatContainer = ({
         }}
         className="transition-all overflow-hidden"
       >
-        <ScrollArea className="transition-all h-full w-full ">
+        <ScrollArea className="transition-all h-full w-full">
           <div className="py-8 flex flex-col h-full">
             <div className="justify-center text-primary text-base font-bold leading-[25px] flex-1 px-6">
               <span>Welcome to OpenOps AI Chat!</span>
