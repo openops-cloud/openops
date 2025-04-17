@@ -14,8 +14,9 @@ type AiChatContainerProps = {
   showAiChat: boolean;
   setShowAiChat: (showAiChat: boolean) => void;
   containerSize: AiChatContainerSizeState;
-  setContainerSizeState: (state: AiChatContainerSizeState) => void;
+  toggleContainerSizeState: () => void;
   onSubmitChat: (message: string) => void;
+  className?: string;
 };
 
 const AiChatContainer = ({
@@ -24,8 +25,9 @@ const AiChatContainer = ({
   showAiChat,
   setShowAiChat,
   containerSize,
-  setContainerSizeState,
+  toggleContainerSizeState,
   onSubmitChat,
+  className,
 }: AiChatContainerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [promptValue, setPromptValue] = useState('');
@@ -48,6 +50,7 @@ const AiChatContainer = ({
         {
           'opacity-0 pointer-events-none': !showAiChat,
         },
+        className,
       )}
       onKeyDown={(e) => {
         if (
@@ -65,7 +68,7 @@ const AiChatContainer = ({
         {t('AI Chat')} <div className="flex-grow"></div>
         <AiChatSizeTogglers
           state={containerSize}
-          setContainerSizeState={setContainerSizeState}
+          toggleContainerSizeState={toggleContainerSizeState}
           onCloseClick={() => setShowAiChat(false)}
         ></AiChatSizeTogglers>
       </div>

@@ -4,22 +4,18 @@ import { AiChatContainerSizeState } from './types';
 
 type AiChatSizeTogglersProps = {
   state: AiChatContainerSizeState;
-  setContainerSizeState: (state: AiChatContainerSizeState) => void;
+  toggleContainerSizeState: () => void;
   onCloseClick: () => void;
 };
 
 const AiChatSizeTogglers = ({
   state,
-  setContainerSizeState,
+  toggleContainerSizeState,
   onCloseClick,
 }: AiChatSizeTogglersProps) => {
-  const handleClick = (newState: AiChatContainerSizeState) => {
-    setContainerSizeState(newState);
-  };
-
   return (
     <>
-      <Button size="icon" onClick={() => handleClick('docked')} variant="basic">
+      <Button size="icon" onClick={toggleContainerSizeState} variant="basic">
         <PanelRightDashedIcon></PanelRightDashedIcon>
       </Button>
       <Button size="icon" variant="basic" onClick={onCloseClick}>

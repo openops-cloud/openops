@@ -1,14 +1,14 @@
 /* eslint-disable react-hooks/rules-of-hooks */
+import { useArgs } from '@storybook/preview-api';
 import type { Meta, StoryObj } from '@storybook/react';
 import { fn } from '@storybook/test';
-import { useEffect, useState } from 'react';
-import { AiChatContainer, AiChatContainerSizeState } from '../../components';
+import { AiChatContainer } from '../../components';
 
 const meta = {
   title: 'Components/AiChatContainer',
   component: AiChatContainer,
   parameters: {
-    layout: 'fullscreen',
+    layout: 'centered',
   },
   argTypes: {
     containerSize: {
@@ -20,45 +20,32 @@ const meta = {
   },
   tags: ['autodocs'],
   render: (args) => {
-    const [containerSizeState, setContainerSizeState] =
-      useState<AiChatContainerSizeState>(args.containerSize);
+    const [
+      { containerSize, showAiChat, setContainerSizeState, setShowAiChat },
+      updateArgs,
+    ] = useArgs();
 
-    useEffect(() => {
-      setContainerSizeState(args.containerSize);
-    }, [args.containerSize]);
-
-    const [showAiChat, setShowAiChat] = useState<boolean>(args.showAiChat);
-    useEffect(() => {
-      setShowAiChat(args.showAiChat);
-    }, [args.showAiChat]);
-
-    const onSetContainerSizeState = (state: AiChatContainerSizeState) => {
-      setContainerSizeState(state);
-      args.setContainerSizeState(state);
+    const onToggleContainerSizeState = () => {
+      const newContainerSizeState =
+        containerSize === 'docked' ? 'collapsed' : 'docked';
+      setContainerSizeState(newContainerSizeState);
+      updateArgs({ containerSize: newContainerSizeState });
     };
 
     const onSetShowAiChat = (showAiChat: boolean) => {
       setShowAiChat(showAiChat);
-      args.setShowAiChat(showAiChat);
+      updateArgs({ showAiChat: showAiChat });
     };
 
     return (
-      <div
-        style={{
-          position: 'relative',
-          width: '100vw',
-          height: '100vh',
-          overflow: 'hidden',
-        }}
-      >
-        <AiChatContainer
-          {...args}
-          containerSize={containerSizeState}
-          setContainerSizeState={onSetContainerSizeState}
-          showAiChat={showAiChat}
-          setShowAiChat={onSetShowAiChat}
-        />
-      </div>
+      <AiChatContainer
+        {...args}
+        containerSize={containerSize}
+        toggleContainerSizeState={onToggleContainerSizeState}
+        showAiChat={showAiChat}
+        setShowAiChat={onSetShowAiChat}
+        className="static"
+      />
     );
   },
 } satisfies Meta<typeof AiChatContainer>;
