@@ -1,5 +1,6 @@
 const getAvailableProvidersWithModelsMock = jest.fn();
 jest.mock('@openops/common', () => ({
+  ...jest.requireActual('@openops/common'),
   getAvailableProvidersWithModels: getAvailableProvidersWithModelsMock,
 }));
 
