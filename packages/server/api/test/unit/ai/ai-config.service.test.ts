@@ -59,6 +59,8 @@ describe('aiConfigService.upsert', () => {
       {
         ...baseRequest,
         projectId,
+        created: expect.any(String),
+        updated: expect.any(String),
         id: 'mocked-id',
       },
       ['projectId', 'provider'],
@@ -69,7 +71,7 @@ describe('aiConfigService.upsert', () => {
       provider: baseRequest.provider,
     });
 
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       ...baseRequest,
       projectId,
       id: 'mocked-id',
@@ -96,11 +98,13 @@ describe('aiConfigService.upsert', () => {
         ...baseRequest,
         id: existingId,
         projectId,
+        created: expect.any(String),
+        updated: expect.any(String),
       },
       ['projectId', 'provider'],
     );
 
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       ...baseRequest,
       id: existingId,
       projectId,
