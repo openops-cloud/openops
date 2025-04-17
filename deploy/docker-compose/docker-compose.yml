@@ -13,6 +13,7 @@ services:
         condition: service_healthy
   openops-app:
     image: public.ecr.aws/openops/openops-app:${OPS_VERSION:-latest}
+    platform: linux/amd64
     restart: unless-stopped
     env_file: .env
     environment:
@@ -31,6 +32,7 @@ services:
         condition: service_healthy
   openops-engine:
     image: public.ecr.aws/openops/openops-engine:${OPS_VERSION:-latest}
+    platform: linux/amd64
     restart: unless-stopped
     env_file: .env
     command: ["cp -r /var/tmp-base/. /tmp/ && node main.js; exit $?"]
@@ -45,6 +47,7 @@ services:
       - ${HOST_CLOUDSDK_CONFIG:-openops_gcloud_cli_data}:/tmp/gcloud
   openops-tables:
     image: public.ecr.aws/openops/openops-tables:0.1.10
+    platform: linux/amd64
     restart: unless-stopped
     environment:
       BASEROW_PUBLIC_URL: ${OPS_OPENOPS_TABLES_PUBLIC_URL}
