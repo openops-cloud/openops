@@ -88,6 +88,13 @@ const AiChatContainer = ({
                 placeholder="Ask a question about the command you need"
                 value={promptValue}
                 onChange={(ev) => setPromptValue(ev.target.value)}
+                onKeyDown={(ev) => {
+                  if (ev.key === 'Enter' && !ev.shiftKey) {
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    onSubmitChat(promptValue);
+                  }
+                }}
               />
 
               <Button
