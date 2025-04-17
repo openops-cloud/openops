@@ -18,7 +18,7 @@ describe('POST /v1/ai-config', () => {
   });
 
   afterAll(async () => {
-    await app.close();
+    await app?.close();
   });
 
   beforeEach(() => {
@@ -43,7 +43,7 @@ describe('POST /v1/ai-config', () => {
   };
 
   const makeRequest = (body = {}) => {
-    return app.inject({
+    return app?.inject({
       method: 'POST',
       url: '/v1/ai/config',
       payload: {
