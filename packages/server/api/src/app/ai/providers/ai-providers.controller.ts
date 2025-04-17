@@ -15,7 +15,7 @@ export const aiProvidersController: FastifyPluginAsyncTypebox = async (app) => {
 
 const ListAiProvidersRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+    allowedPrincipals: [PrincipalType.USER],
   },
   schema: {
     tags: ['ai-providers'],
