@@ -1,9 +1,9 @@
-import { cn } from '@/lib/cn';
 import { Button } from '@/ui/button';
 import { t } from 'i18next';
 import { Send as SendIcon, Sparkles } from 'lucide-react';
 import { useRef, useState } from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
+import { cn } from '../../lib/cn';
 import { ScrollArea } from '../../ui/scroll-area';
 import { AiChatSizeTogglers } from './ai-chat-size-togglers';
 import { AiChatContainerSizeState } from './types';
@@ -40,6 +40,16 @@ const AiChatContainer = ({
           'opacity-0 pointer-events-none': !showAiChat,
         },
       )}
+      onKeyDown={(e) => {
+        if (
+          document.activeElement === containerRef.current &&
+          e.key === 'Enter'
+        ) {
+          e.preventDefault();
+          e.stopPropagation();
+          onSubmitChat(promptValue);
+        }
+      }}
     >
       <div className="text-md text-primary items-center font-bold pl-8 pr-2 py-2 flex gap-2">
         <Sparkles />

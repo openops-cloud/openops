@@ -1,5 +1,5 @@
-import { cn } from '@/lib/cn';
 import { PanelRightDashedIcon, X as XIcon } from 'lucide-react';
+import { cn } from '../../lib/cn';
 import { Button } from '../../ui/button';
 import { AiChatContainerSizeState } from './types';
 
