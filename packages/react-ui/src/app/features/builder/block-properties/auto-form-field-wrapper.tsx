@@ -85,8 +85,8 @@ const FormLabelButton = ({
   handleDynamicValueChange,
   onGenerateWithAIClick,
 }: FormLabelButtonProps) => {
-  const { data: isAIEnbaled } = flagsHooks.useFlag(FlagId.SHOW_AI_SETTINGS);
-  if (property?.supportsAI && isAIEnbaled) {
+  const { data: isAIEnabled } = flagsHooks.useFlag(FlagId.SHOW_AI_SETTINGS);
+  if (property?.supportsAI && isAIEnabled) {
     return (
       <Button
         variant="link"
