@@ -17,10 +17,12 @@ export const ternary = createBlock({
   categories: [BlockCategory.FINOPS],
   authors: ['Quilyx'],
   actions: [
-    // getDataIntegrations,
-    // getUsageRecommendations,
-    // updateUsageRecommendations,
+    getDataIntegrations,
     getBudgets,
+    // forecasting
+    // cost allocation?
+    getUsageRecommendations,
+    updateUsageRecommendations,
   ],
   triggers: [],
 });

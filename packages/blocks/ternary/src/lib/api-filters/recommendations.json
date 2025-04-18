@@ -1,9 +1,30 @@
 {
   "providers": [
     {
-      "label": "All",
-      "value": "",
-      "categories": []
+      "label": "AWS",
+      "value": "AWS",
+      "categories": [
+        {
+          "label": "Amazon Elastic Compute Cloud (EC2)",
+          "value": "COMPUTE",
+          "serviceType": "EC2"
+        },
+        {
+          "label": "Amazon Elastic Block Store (EBS)",
+          "value": "COMPUTE",
+          "serviceType": "EBS"
+        },
+        {
+          "label": "Amazon Relational Database Service (RDS)",
+          "value": "DATABASE",
+          "serviceType": "RDS"
+        },
+        {
+          "label": "Amazon Simple Storage Service (S3)",
+          "value": "STORAGE",
+          "serviceType": "S3"
+        }
+      ]
     },
     {
       "label": "Azure",
@@ -12,48 +33,22 @@
         {
           "label": "Azure Virutal Machines (VMs)",
           "value": "COMPUTE",
-          "serviceTypes": ["AZURE_VM"]
+          "serviceType": "AZURE_VM"
         },
         {
           "label": "Azure SQL",
           "value": "DATABASE",
-          "serviceTypes": ["AZURE_SQL"]
+          "serviceType": "AZURE_SQL"
         },
         {
           "label": "Azure Kubernetes Service (AKS)",
           "value": "KUBERNETES",
-          "serviceTypes": ["AKS"]
+          "serviceType": "AKS"
         },
         {
           "label": "Azure Blob Storage",
           "value": "STORAGE",
-          "serviceTypes": ["AZURE_BLOB"]
-        }
-      ]
-    },
-    {
-      "label": "AWS",
-      "value": "AWS",
-      "categories": [
-        {
-          "label": "Amazon Elastic Compute Cloud (EC2)",
-          "value": "COMPUTE",
-          "serviceTypes": ["EC2"]
-        },
-        {
-          "label": "Amazon Relational Database Service (RDS)",
-          "value": "DATABASE",
-          "serviceTypes": ["RDS"]
-        },
-        {
-          "label": "Amazon Simple Storage Service (S3)",
-          "value": "STORAGE",
-          "serviceTypes": ["S3"]
-        },
-        {
-          "label": "Amazon Elastic Block Store (EBS)",
-          "value": "COMPUTE",
-          "serviceTypes": ["EBS"]
+          "serviceType": "AZURE_BLOB"
         }
       ]
     },
@@ -64,27 +59,27 @@
         {
           "label": "Google Compute Engine",
           "value": "COMPUTE",
-          "serviceTypes": []
+          "serviceType": "GCE"
         },
         {
           "label": "Google Cloud Run",
           "value": "COMPUTE",
-          "serviceTypes": ["CLOUD_RUN"]
+          "serviceType": "CLOUD_RUN"
         },
         {
           "label": "Google Cloud SQL",
           "value": "DATABASE",
-          "serviceTypes": ["CLOUDSQL"]
+          "serviceType": "CLOUDSQL"
         },
         {
           "label": "Google Kubernetes Engine (GKE)",
           "value": "KUBERNETES",
-          "serviceTypes": ["GKE"]
+          "serviceType": "GKE"
         },
         {
           "label": "Google Cloud Storage",
           "value": "STORAGE",
-          "serviceTypes": ["GCS"]
+          "serviceType": "GCS"
         }
       ]
     }
