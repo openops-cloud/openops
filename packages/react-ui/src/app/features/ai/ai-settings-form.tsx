@@ -20,49 +20,61 @@ import React, { useEffect, useMemo } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 
 type AiSettingsFormProps = {
-  aiProviders: {
+  aiProviders?: {
     displayName: string;
-    key: string;
+    provider: string;
     models: string[];
   }[];
+  currentSettings?: AiSettingsFormSchema;
+  onSave: (settings: AiSettingsFormSchema) => void;
+  isSaving: boolean;
 };
 
-const AiSettingsForm = ({ aiProviders }: AiSettingsFormProps) => {
+const EMPTY_FORM_VALUE = {
+  enabled: false,
+  provider: '',
+  model: '',
+  apiKey: '',
+  baseUrl: '',
+  config: '',
+};
+
+const AiSettingsForm = ({
+  aiProviders,
+  currentSettings,
+  onSave,
+  isSaving,
+}: AiSettingsFormProps) => {
   const form = useForm<AiSettingsFormSchema>({
     resolver: typeboxResolver(AI_SETTINGS_FORM_SCHEMA),
-    defaultValues: {
-      enabled: false,
-      provider: '',
-      model: '',
-      apiKey: '',
-      baseUrl: '',
-      config: '',
-    },
+    defaultValues: EMPTY_FORM_VALUE,
     mode: 'onChange',
   });
+
+  useEffect(() => {
+    if (currentSettings) {
+      form.reset(currentSettings);
+    }
+  }, [currentSettings, form]);
 
   const provider = useWatch({ control: form.control, name: 'provider' });
 
   const providerOptions = useMemo(
     () =>
-      aiProviders.map((p) => ({
+      aiProviders?.map((p) => ({
         label: p.displayName,
-        value: p.key,
-      })),
+        value: p.provider,
+      })) ?? [],
     [aiProviders],
   );
 
   const modelOptions = useMemo(() => {
-    const selected = aiProviders.find((p) => p.key === provider);
+    const selected = aiProviders?.find((p) => p.provider === provider);
     return selected?.models.map((m) => ({ label: m, value: m })) || [];
   }, [provider, aiProviders]);
 
-  useEffect(() => {
-    form.setValue('model', '');
-  }, [provider, form]);
-
   const resetForm = () => {
-    form.reset();
+    form.reset(EMPTY_FORM_VALUE);
   };
 
   return (
@@ -92,8 +104,12 @@ const AiSettingsForm = ({ aiProviders }: AiSettingsFormProps) => {
                 <span className="text-destructive">*</span>
               </Label>
               <SearchableSelect
+                loading={!providerOptions?.length}
                 options={providerOptions}
-                onChange={field.onChange}
+                onChange={(v) => {
+                  field.onChange(v);
+                  form.setValue('model', '');
+                }}
                 value={field.value}
                 placeholder={t('Select an option')}
               ></SearchableSelect>
@@ -160,13 +176,20 @@ const AiSettingsForm = ({ aiProviders }: AiSettingsFormProps) => {
         />
 
         <div className="flex gap-2">
-          <Button variant="outline" type="button" onClick={resetForm}>
+          <Button
+            variant="outline"
+            type="button"
+            onClick={resetForm}
+            disabled={isSaving}
+          >
             {t('Cancel')}
           </Button>
           <Button
             className="w-[95px]"
             type="button"
             disabled={!form.formState.isValid}
+            onClick={() => onSave(form.getValues())}
+            loading={isSaving}
           >
             {t('Save')}
           </Button>

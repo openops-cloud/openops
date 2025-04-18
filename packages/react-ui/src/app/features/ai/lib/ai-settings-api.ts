@@ -1,18 +1,24 @@
+import { AiSettingsFormSchema } from '@/app/features/ai/lib/ai-form-utils';
+import { api } from '@/app/lib/api';
+import { GetProvidersResponse } from '@openops/shared';
+
 export const aiSettingsApi = {
   getProviderOptions(): Promise<any> {
-    return new Promise<any>((resolve) =>
-      resolve([
-        {
-          displayName: 'OpenAI',
-          key: 'openai',
-          models: ['gpt-4-turbo', 'gpt-3.5-turbo'],
-        },
-        {
-          displayName: 'Gemini',
-          key: 'gemini',
-          models: ['gemini-1.5-pro-latest', 'gemini-1.5-flash'],
-        },
-      ]),
-    );
+    return api.get<GetProvidersResponse>('/v1/ai/providers');
+  },
+  saveAiSettings(payload: any): Promise<void> {
+    localStorage.setItem('ai-settings', JSON.stringify(payload));
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, 3000);
+    });
+  },
+  getAiSettings(): Promise<AiSettingsFormSchema> {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(JSON.parse(localStorage.getItem('ai-settings') || '{}'));
+      }, 3000);
+    });
   },
 };
