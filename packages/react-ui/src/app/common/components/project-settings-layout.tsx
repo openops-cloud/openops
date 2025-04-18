@@ -1,6 +1,6 @@
 import { FlagId } from '@openops/shared';
 import { t } from 'i18next';
-import { Puzzle, Settings, SunMoon } from 'lucide-react';
+import { Puzzle, Settings, Sparkles, SunMoon } from 'lucide-react';
 
 import SidebarLayout from '@/app/common/components/sidebar-layout';
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
@@ -22,6 +22,11 @@ const sidebarNavItems = [
     title: t('Appearance'),
     href: '/settings/appearance',
     icon: <SunMoon size={iconSize} />,
+  },
+  {
+    title: t('AI'),
+    href: '/settings/ai',
+    icon: <Sparkles size={iconSize} />,
   },
 ];
 
