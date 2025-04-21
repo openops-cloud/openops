@@ -1,3 +1,5 @@
+import { createOpenAI } from '@ai-sdk/openai';
+import { LanguageModelV1 } from 'ai';
 import { AiProvider } from '../providers';
 
 const openAiModels = [
@@ -41,6 +43,18 @@ const openAiModels = [
   'chatgpt-4o-latest',
 ];
 
+function createLanguageModel(params: {
+  apiKey: string;
+  model: string;
+  baseUrl?: string;
+}): LanguageModelV1 {
+  return createOpenAI({
+    apiKey: params.apiKey,
+    baseURL: params.baseUrl,
+  })(params.model);
+}
+
 export const openAiProvider: AiProvider = {
   models: openAiModels,
+  createLanguageModel,
 };
