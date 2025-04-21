@@ -1,5 +1,4 @@
 export * from './lib/ai/chat';
-export * from './lib/ai/config';
 export * from './lib/ai/providers';
 export * from './lib/analytics';
 export * from './lib/app-connection/app-connection';
