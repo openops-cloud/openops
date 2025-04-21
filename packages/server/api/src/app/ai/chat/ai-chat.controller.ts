@@ -1,15 +1,22 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import {
+  NewMessageRequest,
   OpenChatRequest,
   OpenChatResponse,
   PrincipalType,
 } from '@openops/shared';
+import { CoreMessage, pipeDataStreamToResponse, streamText } from 'ai';
+import { aiConfigService } from '../config/ai-config.service';
 import {
   ChatContext,
   createChatContext,
   generateChatId,
+  getChatContext,
   getChatHistory,
+  getLanguageModel,
+  saveChatHistory,
 } from './ai-chat.service';
+import { getSystemPrompt } from './prompts.service';
 
 export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
   app.post(
@@ -39,6 +46,63 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
       });
     },
   );
+
+  app.post('/conversation', NewMessageOptions, async (request, reply) => {
+    const chatId = request.body.chatId;
+    const projectId = request.principal.projectId;
+    const chatContext = await getChatContext(chatId);
+    if (!chatContext) {
+      return reply
+        .code(404)
+        .send('No chat session found for the provided chat ID.');
+    }
+
+    const aiConfig = await aiConfigService.getAiConfig({ projectId });
+    if (!aiConfig) {
+      return reply
+        .code(404)
+        .send('No active AI configuration found for the project.');
+    }
+
+    const languageModel = await getLanguageModel(aiConfig);
+    if (!languageModel) {
+      return reply.code(500).send('Failed to get language model.');
+    }
+
+    const messages = await getChatHistory(chatId);
+    messages.push({
+      role: 'user',
+      content: request.body.message,
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { baseUrl, ...filteredModelSettings } = aiConfig.modelSettings ?? {};
+    pipeDataStreamToResponse(reply.raw, {
+      execute: async (dataStreamWriter) => {
+        const result = streamText({
+          model: languageModel,
+          system: getSystemPrompt(chatContext),
+          messages,
+          ...filteredModelSettings,
+          async onFinish({ response }) {
+            response.messages.forEach((r) => {
+              messages.push({
+                role: r.role,
+                content: r.content,
+              } as CoreMessage);
+            });
+
+            await saveChatHistory(chatId, messages);
+          },
+        });
+
+        result.mergeIntoDataStream(dataStreamWriter);
+      },
+      onError: (error) => {
+        return error instanceof Error ? error.message : String(error);
+      },
+    });
+  });
 };
 
 const OpenChatOptions = {
@@ -50,5 +114,16 @@ const OpenChatOptions = {
     description:
       'Opens a chat session, either starting fresh or resuming prior messages if the conversation has history.',
     body: OpenChatRequest,
+  },
+};
+
+const NewMessageOptions = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
+  },
+  schema: {
+    tags: ['ai', 'ai-chat'],
+    description: 'Sends a message to the chat session',
+    body: NewMessageRequest,
   },
 };

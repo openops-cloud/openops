@@ -1,4 +1,9 @@
-import { AiConfig, openOpsId, SaveAiConfigRequest } from '@openops/shared';
+import {
+  AiConfig,
+  openOpsId,
+  ProjectId,
+  SaveAiConfigRequest,
+} from '@openops/shared';
 import { repoFactory } from '../../core/db/repo-factory';
 import { AiConfigEntity } from './ai-config.entity';
 
@@ -32,4 +37,16 @@ export const aiConfigService = {
       provider: request.provider,
     });
   },
+  async getAiConfig(params: GetOneParams): Promise<AiConfig | null> {
+    const { projectId } = params;
+
+    return repo().findOneBy({
+      projectId,
+      enabled: true,
+    });
+  },
+};
+
+type GetOneParams = {
+  projectId: ProjectId;
 };
