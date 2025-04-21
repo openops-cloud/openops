@@ -1,3 +1,4 @@
+import { LanguageModelV1 } from 'ai';
 import { amazonBedrockProvider } from './providers/amazon-bedrock';
 import { anthropicProvider } from './providers/anthropic';
 import { azureProvider } from './providers/azure-openai';
@@ -17,6 +18,11 @@ import { xaiProvider } from './providers/xai';
 
 export interface AiProvider {
   models: string[];
+  createLanguageModel(params: {
+    apiKey: string;
+    model: string;
+    baseUrl?: string;
+  }): LanguageModelV1;
 }
 
 export enum AiProviderEnum {

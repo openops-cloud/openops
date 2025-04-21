@@ -1,3 +1,5 @@
+import { createTogetherAI } from '@ai-sdk/togetherai';
+import { LanguageModelV1 } from 'ai';
 import { AiProvider } from '../providers';
 
 const togetherAiModels = [
@@ -36,6 +38,18 @@ const togetherAiModels = [
   'upstage/SOLAR-10.7B-Instruct-v1.0',
 ];
 
+function createLanguageModel(params: {
+  apiKey: string;
+  model: string;
+  baseUrl?: string;
+}): LanguageModelV1 {
+  return createTogetherAI({
+    apiKey: params.apiKey,
+    baseURL: params.baseUrl,
+  })(params.model);
+}
+
 export const togetherAiProvider: AiProvider = {
   models: togetherAiModels,
+  createLanguageModel,
 };

@@ -1,3 +1,5 @@
+import { createMistral } from '@ai-sdk/mistral';
+import { LanguageModelV1 } from 'ai';
 import { AiProvider } from '../providers';
 
 const mistralModels = [
@@ -12,6 +14,18 @@ const mistralModels = [
   'open-mixtral-8x22b',
 ];
 
+function createLanguageModel(params: {
+  apiKey: string;
+  model: string;
+  baseUrl?: string;
+}): LanguageModelV1 {
+  return createMistral({
+    apiKey: params.apiKey,
+    baseURL: params.baseUrl,
+  })(params.model);
+}
+
 export const mistralProvider: AiProvider = {
   models: mistralModels,
+  createLanguageModel,
 };

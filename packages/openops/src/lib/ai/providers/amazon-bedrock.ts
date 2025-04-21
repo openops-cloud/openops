@@ -1,3 +1,4 @@
+import { LanguageModelV1 } from 'ai';
 import { AiProvider } from '../providers';
 
 const bedrockModels = [
@@ -33,6 +34,15 @@ const bedrockModels = [
   'amazon.titan-text-lite-v1',
 ];
 
+function createLanguageModel(params: {
+  apiKey: string;
+  model: string;
+  baseUrl?: string;
+}): LanguageModelV1 {
+  throw new Error('Not implemented');
+}
+
 export const amazonBedrockProvider: AiProvider = {
   models: bedrockModels,
+  createLanguageModel,
 };

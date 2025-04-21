@@ -1,3 +1,5 @@
+import { createCohere } from '@ai-sdk/cohere';
+import { LanguageModelV1 } from 'ai';
 import { AiProvider } from '../providers';
 
 const cohereModels = [
@@ -14,6 +16,18 @@ const cohereModels = [
   'command-light-nightly',
 ];
 
+function createLanguageModel(params: {
+  apiKey: string;
+  model: string;
+  baseUrl?: string;
+}): LanguageModelV1 {
+  return createCohere({
+    apiKey: params.apiKey,
+    baseURL: params.baseUrl,
+  })(params.model);
+}
+
 export const cohereProvider: AiProvider = {
   models: cohereModels,
+  createLanguageModel,
 };
