@@ -1,7 +1,7 @@
 import { PropertyContext } from '@openops/blocks-framework';
 import { getDatabricksToken } from '../src/lib/common/get-databricks-token';
+import { jobId } from '../src/lib/common/job-id';
 import { makeDatabricksHttpRequest } from '../src/lib/common/make-databricks-http-request';
-import { workspaceDeploymentName } from '../src/lib/common/workspace-deployment-name';
 
 jest.mock('../src/lib/common/make-databricks-http-request', () => ({
   makeDatabricksHttpRequest: jest.fn(),
@@ -20,74 +20,78 @@ const auth = {
   clientSecret: 'test-client-secret',
 };
 
-describe('workspaceDeploymentName.options', () => {
+describe('jobId.options', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should return disabled options if auth is not provided', async () => {
-    const result = await workspaceDeploymentName.options(
-      { auth: undefined },
+  it('should return disabled options if workspaceDeploymentName is not provided', async () => {
+    const result = await jobId.options(
+      {
+        auth,
+        workspaceDeploymentName: undefined,
+      },
       {} as PropertyContext,
     );
 
     expect(result).toEqual({
       disabled: true,
-      placeholder: 'Please select a connection',
+      placeholder: 'Please select a workspace',
       options: [],
     });
   });
 
-  it('should return dropdown options when workspaces are fetched successfully', async () => {
+  it('should return dropdown options when jobs are fetched successfully', async () => {
     mockedGetToken.mockResolvedValue('mock-token');
 
-    mockedDatabricksHttpRequest.mockResolvedValue([
-      {
-        workspace_name: 'Workspace One',
-        deployment_name: 'workspace-1',
-      },
-      {
-        workspace_name: 'Workspace Two',
-        deployment_name: 'workspace-2',
-      },
-    ]);
+    mockedDatabricksHttpRequest.mockResolvedValue({
+      jobs: [
+        { job_id: 'job-1', settings: { name: 'Job One' } },
+        { job_id: 'job-2', settings: { name: 'Job Two' } },
+      ],
+    });
 
-    const result = await workspaceDeploymentName.options(
-      { auth },
+    const result = await jobId.options(
+      {
+        auth,
+        workspaceDeploymentName: 'my-workspace',
+      },
       {} as PropertyContext,
     );
 
     expect(mockedGetToken).toHaveBeenCalledWith(auth);
-
     expect(mockedDatabricksHttpRequest).toHaveBeenCalledWith({
-      deploymentName: 'accounts',
+      deploymentName: 'my-workspace',
       method: 'GET',
-      path: '/api/2.0/accounts/test-account-id/workspaces',
+      path: '/api/2.2/jobs/list',
       token: 'mock-token',
     });
 
     expect(result).toEqual({
       disabled: false,
       options: [
-        { label: 'Workspace One', value: 'workspace-1' },
-        { label: 'Workspace Two', value: 'workspace-2' },
+        { label: 'Job One', value: 'job-1' },
+        { label: 'Job Two', value: 'job-2' },
       ],
     });
   });
 
-  it('Should return error and placeholder if makeHttpRequest fails', async () => {
+  it('should be disabled if makeDatabricksHttpRequest fails', async () => {
     mockedGetToken.mockResolvedValue('mock-token');
-    mockedDatabricksHttpRequest.mockRejectedValue(new Error('Error'));
+    mockedDatabricksHttpRequest.mockRejectedValue(new Error('Request failed'));
 
-    const result = await workspaceDeploymentName.options(
-      { auth },
+    const result = await jobId.options(
+      {
+        auth,
+        workspaceDeploymentName: 'my-workspace',
+      },
       {} as PropertyContext,
     );
 
     expect(result).toEqual({
       disabled: true,
-      placeholder: 'An error occurred while fetching workspaces',
-      error: 'Error',
+      placeholder: 'An error occurred while fetching jobs',
+      error: 'Request failed',
       options: [],
     });
   });

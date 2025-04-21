@@ -1,17 +1,17 @@
-import { makeHttpRequest } from '@openops/common';
 import { executeSqlStatement } from '../src/lib/actions/execute-sql-statement';
 import { getDatabricksToken } from '../src/lib/common/get-databricks-token';
+import { makeDatabricksHttpRequest } from '../src/lib/common/make-databricks-http-request';
 import { DatabricksSqlExecutionResult } from '../src/lib/common/sql-execution-result';
 
-jest.mock('@openops/common', () => ({
-  makeHttpRequest: jest.fn(),
+jest.mock('../src/lib/common/make-databricks-http-request', () => ({
+  makeDatabricksHttpRequest: jest.fn(),
 }));
 
 jest.mock('../src/lib/common/get-databricks-token', () => ({
   getDatabricksToken: jest.fn().mockResolvedValue('fake-token'),
 }));
 
-const mockedHttpRequest = makeHttpRequest as jest.Mock;
+const mockedDatabricksHttpRequest = makeDatabricksHttpRequest as jest.Mock;
 
 const auth = {
   accountId: 'test-account-id',
@@ -51,7 +51,7 @@ describe('executeSqlStatement', () => {
   });
 
   test('should execute SQL and return result without polling when timeout <= 50s', async () => {
-    mockedHttpRequest.mockResolvedValueOnce(successResult);
+    mockedDatabricksHttpRequest.mockResolvedValueOnce(successResult);
 
     const result = await executeSqlStatement.run({
       ...jest.requireActual('@openops/blocks-framework'),
@@ -60,17 +60,18 @@ describe('executeSqlStatement', () => {
     });
 
     expect(getDatabricksToken).toHaveBeenCalledWith(auth);
-    expect(makeHttpRequest).toHaveBeenCalledWith(
-      'POST',
-      'https://workspace-test.cloud.databricks.com/api/2.0/sql/statements',
-      expect.anything(),
-      expect.objectContaining({
+    expect(mockedDatabricksHttpRequest).toHaveBeenCalledWith({
+      method: 'POST',
+      deploymentName: 'workspace-test',
+      path: '/api/2.0/sql/statements',
+      token: 'fake-token',
+      body: {
         statement: 'SELECT * FROM test_table',
         warehouse_id: 'warehouse-1',
         wait_timeout: '30s',
         parameters: [{ name: 'name', value: 'test' }],
-      }),
-    );
+      },
+    });
 
     expect(result).toEqual(successResult);
   });
@@ -79,7 +80,7 @@ describe('executeSqlStatement', () => {
     const longTimeout = 80;
     const propsWithLongTimeout = { ...propsValue, timeout: longTimeout };
 
-    mockedHttpRequest
+    mockedDatabricksHttpRequest
       .mockResolvedValueOnce(pendingResult)
       .mockResolvedValueOnce(successResult);
 
@@ -89,7 +90,7 @@ describe('executeSqlStatement', () => {
       propsValue: propsWithLongTimeout,
     });
 
-    expect(makeHttpRequest).toHaveBeenCalledTimes(2);
+    expect(mockedDatabricksHttpRequest).toHaveBeenCalledTimes(2);
     expect(result).toEqual(successResult);
   });
 
@@ -97,7 +98,7 @@ describe('executeSqlStatement', () => {
     const longTimeout = 90;
     const propsWithLongTimeout = { ...propsValue, timeout: longTimeout };
 
-    mockedHttpRequest
+    mockedDatabricksHttpRequest
       .mockResolvedValueOnce(pendingResult)
       .mockResolvedValueOnce(pendingResult)
       .mockResolvedValueOnce(successResult);
@@ -108,7 +109,7 @@ describe('executeSqlStatement', () => {
       propsValue: propsWithLongTimeout,
     });
 
-    expect(makeHttpRequest).toHaveBeenCalledTimes(3);
+    expect(mockedDatabricksHttpRequest).toHaveBeenCalledTimes(3);
     expect(result).toEqual(successResult);
   }, 16000);
 
@@ -120,7 +121,7 @@ describe('executeSqlStatement', () => {
       result: {},
     } as DatabricksSqlExecutionResult;
 
-    mockedHttpRequest.mockResolvedValue(nonPendingResponse);
+    mockedDatabricksHttpRequest.mockResolvedValue(nonPendingResponse);
 
     const result = await executeSqlStatement.run({
       ...jest.requireActual('@openops/blocks-framework'),
@@ -129,14 +130,14 @@ describe('executeSqlStatement', () => {
     });
 
     expect(result).toEqual(nonPendingResponse);
-    expect(makeHttpRequest).toHaveBeenCalledTimes(1);
+    expect(mockedDatabricksHttpRequest).toHaveBeenCalledTimes(1);
   });
 
   test('should return initial result if timeout exceed', async () => {
     const longTimeout = 60;
     const propsWithLongTimeout = { ...propsValue, timeout: longTimeout };
 
-    mockedHttpRequest.mockResolvedValue(pendingResult);
+    mockedDatabricksHttpRequest.mockResolvedValue(pendingResult);
 
     const result = await executeSqlStatement.run({
       ...jest.requireActual('@openops/blocks-framework'),
@@ -144,7 +145,7 @@ describe('executeSqlStatement', () => {
       propsValue: propsWithLongTimeout,
     });
 
-    expect(makeHttpRequest).toHaveBeenCalledTimes(2);
+    expect(mockedDatabricksHttpRequest).toHaveBeenCalledTimes(3);
     expect(result).toEqual(pendingResult);
   });
 });
