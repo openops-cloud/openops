@@ -1,4 +1,5 @@
 export * from './lib/ai/chat';
+export * from './lib/ai/providers';
 export * from './lib/analytics';
 export * from './lib/app-connection/app-connection';
 export * from './lib/app-connection/connections-utils';
@@ -56,7 +57,6 @@ export * from './lib/user-settings';
 export * from './lib/webhook';
 export * from './lib/websocket';
 export * from './lib/workers';
-
 export * from './lib/workflow-stats';
 // Look at https://github.com/sinclairzx81/typebox/issues/350
 import { TypeSystemPolicy } from '@sinclair/typebox/system';
