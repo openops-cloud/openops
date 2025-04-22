@@ -26,8 +26,8 @@ export const aiConfigService = {
     const aiConfig: Partial<AiConfig> = {
       ...request,
       projectId,
-      id: existing?.id ?? openOpsId(),
-      created: new Date().toISOString(),
+      id: request.id ?? existing?.id ?? openOpsId(),
+      created: existing?.created ?? new Date().toISOString(),
       updated: new Date().toISOString(),
     };
 
@@ -35,6 +35,8 @@ export const aiConfigService = {
       aiConfig.apiKey = JSON.stringify(
         encryptUtils.encryptString(request.apiKey),
       );
+    } else {
+      delete aiConfig.apiKey;
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

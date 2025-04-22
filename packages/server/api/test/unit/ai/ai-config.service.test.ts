@@ -107,10 +107,13 @@ describe('aiConfigService.upsert', () => {
   test('should update existing ai config if it exists', async () => {
     const existingId = 'existing-id';
     findOneByMock.mockResolvedValue({ id: existingId });
+    const fakeTimestamp = '2025-04-22T12:00:00Z';
     findOneByOrFailMock.mockResolvedValue({
       ...baseRequest,
       id: existingId,
       projectId,
+      created: fakeTimestamp,
+      updated: fakeTimestamp,
     });
 
     const result = await aiConfigService.upsert({
@@ -134,6 +137,8 @@ describe('aiConfigService.upsert', () => {
       ...baseRequest,
       id: existingId,
       projectId,
+      created: expect.any(String),
+      updated: expect.any(String),
     });
   });
 
@@ -160,10 +165,14 @@ describe('aiConfigService.upsert', () => {
     });
 
     expect(upsertMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        apiKey: undefined,
+      {
+        ...baseRequest,
         id: existingId,
-      }),
+        apiKey: undefined,
+        projectId,
+        created: expect.any(String),
+        updated: expect.any(String),
+      },
       ['projectId', 'provider'],
     );
 
@@ -195,10 +204,14 @@ describe('aiConfigService.upsert', () => {
     });
 
     expect(upsertMock).toHaveBeenCalledWith(
-      expect.objectContaining({
+      {
+        ...baseRequest,
         id: 'explicit-request-id',
         projectId,
-      }),
+        apiKey: JSON.stringify('test-encrypt'),
+        created: expect.any(String),
+        updated: expect.any(String),
+      },
       ['projectId', 'provider'],
     );
 
