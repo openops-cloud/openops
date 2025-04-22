@@ -5,6 +5,13 @@ jest.mock('@openops/shared', () => ({
   openOpsId: mockedOpenOpsId,
 }));
 
+jest.mock('../../../src/app/helper/encryption', () => ({
+  ...jest.requireActual('../../../src/app/helper/encryption'),
+  encryptUtils: jest.fn(() => ({
+    encryptString: jest.fn((input: string) => 'test-encrypt'),
+  })),
+}));
+
 const findOneByMock = jest.fn();
 const upsertMock = jest.fn();
 const findOneByOrFailMock = jest.fn();
@@ -56,6 +63,7 @@ describe('aiConfigService.upsert', () => {
       {
         ...baseRequest,
         projectId,
+        apiKey: 'test-encrypt',
         created: expect.any(String),
         updated: expect.any(String),
         id: 'mocked-id',
@@ -94,6 +102,7 @@ describe('aiConfigService.upsert', () => {
         ...baseRequest,
         id: existingId,
         projectId,
+        apiKey: 'test-encrypt',
         created: expect.any(String),
         updated: expect.any(String),
       },

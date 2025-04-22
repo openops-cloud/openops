@@ -1,5 +1,6 @@
 import { AiConfig, openOpsId, SaveAiConfigRequest } from '@openops/shared';
 import { repoFactory } from '../../core/db/repo-factory';
+import { encryptUtils } from '../../helper/encryption';
 import { AiConfigEntity } from './ai-config.entity';
 
 const repo = repoFactory(AiConfigEntity);
@@ -19,6 +20,7 @@ export const aiConfigService = {
     const aiConfig: Partial<AiConfig> = {
       ...request,
       projectId,
+      apiKey: encryptUtils.encryptString(request.apiKey),
       id: existing?.id ?? openOpsId(),
       created: new Date().toISOString(),
       updated: new Date().toISOString(),
