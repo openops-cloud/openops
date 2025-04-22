@@ -1,7 +1,5 @@
-import { AiProviderEnum, getAiProvider } from '@openops/common';
-import { cacheWrapper, hashUtils, logger } from '@openops/server-shared';
-import { AiConfig } from '@openops/shared';
-import { CoreMessage, LanguageModelV1 } from 'ai';
+import { cacheWrapper, hashUtils } from '@openops/server-shared';
+import { CoreMessage } from 'ai';
 
 // Chat expiration time is 24 hour
 const DEFAULT_EXPIRE_TIME = 86400;
@@ -70,24 +68,4 @@ export const saveChatHistory = async (
     messages,
     DEFAULT_EXPIRE_TIME,
   );
-};
-
-export const getLanguageModel = async (
-  aiConfig: AiConfig,
-): Promise<LanguageModelV1 | null> => {
-  try {
-    const aiProvider = getAiProvider(aiConfig.provider as AiProviderEnum);
-
-    return aiProvider.createLanguageModel({
-      apiKey: aiConfig.apiKey, // Decrypted API key
-      model: aiConfig.model,
-      baseUrl: aiConfig.providerSettings?.baseUrl as string | undefined,
-    });
-  } catch (error) {
-    logger.error('Error getting AI provider.', {
-      provider: aiConfig.provider,
-      error,
-    });
-    return null;
-  }
 };

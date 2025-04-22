@@ -1,4 +1,5 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
+import { AiProviderEnum, getAiProviderLanguageModel } from '@openops/common';
 import {
   NewMessageRequest,
   OpenChatRequest,
@@ -6,6 +7,7 @@ import {
   PrincipalType,
 } from '@openops/shared';
 import { CoreMessage, pipeDataStreamToResponse, streamText } from 'ai';
+import { encryptUtils } from '../../helper/encryption';
 import { aiConfigService } from '../config/ai-config.service';
 import {
   ChatContext,
@@ -13,7 +15,6 @@ import {
   generateChatId,
   getChatContext,
   getChatHistory,
-  getLanguageModel,
   saveChatHistory,
 } from './ai-chat.service';
 import { getSystemPrompt } from './prompts.service';
@@ -64,10 +65,13 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
         .send('No active AI configuration found for the project.');
     }
 
-    const languageModel = await getLanguageModel(aiConfig);
-    if (!languageModel) {
-      return reply.code(500).send('Failed to get language model.');
-    }
+    const apiKey = encryptUtils.decryptString(JSON.parse(aiConfig.apiKey));
+    const languageModel = await getAiProviderLanguageModel({
+      apiKey,
+      model: aiConfig.model,
+      provider: aiConfig.provider as AiProviderEnum,
+      providerSettings: aiConfig.providerSettings,
+    });
 
     const messages = await getChatHistory(chatId);
     messages.push({

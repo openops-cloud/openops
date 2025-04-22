@@ -1,3 +1,4 @@
+import { logger } from '@openops/server-shared';
 import { LanguageModelV1 } from 'ai';
 import { amazonBedrockProvider } from './providers/amazon-bedrock';
 import { anthropicProvider } from './providers/anthropic';
@@ -87,3 +88,27 @@ export function getAvailableProvidersWithModels(): {
     };
   });
 }
+
+export const getAiProviderLanguageModel = async (aiConfig: {
+  provider: AiProviderEnum;
+  apiKey: string;
+  model: string;
+  providerSettings?: Record<string, unknown>;
+}): Promise<LanguageModelV1> => {
+  const aiProvider = getAiProvider(aiConfig.provider);
+
+  return aiProvider.createLanguageModel({
+    apiKey: aiConfig.apiKey,
+    model: aiConfig.model,
+    baseUrl: sanitizeBaseUrl(aiConfig.providerSettings),
+  });
+};
+
+const sanitizeBaseUrl = (
+  providerSettings?: Record<string, unknown>,
+): string | undefined => {
+  const rawBaseUrl = providerSettings?.['baseUrl'];
+  return typeof rawBaseUrl === 'string' && rawBaseUrl.trim() !== ''
+    ? rawBaseUrl
+    : undefined;
+};

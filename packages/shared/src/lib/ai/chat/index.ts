@@ -21,3 +21,10 @@ export const OpenChatResponse = Type.Object({
 });
 
 export type OpenChatResponse = Static<typeof OpenChatResponse>;
+
+export const NewMessageRequest = Type.Object({
+  chatId: Type.String(),
+  message: Type.String(),
+});
+
+export type NewMessageRequest = Static<typeof NewMessageRequest>;
