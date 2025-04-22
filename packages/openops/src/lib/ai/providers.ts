@@ -1,3 +1,4 @@
+import { AiProviderEnum } from '@openops/shared';
 import { LanguageModelV1 } from 'ai';
 import { amazonBedrockProvider } from './providers/amazon-bedrock';
 import { anthropicProvider } from './providers/anthropic';
@@ -23,25 +24,6 @@ export interface AiProvider {
     model: string;
     baseUrl?: string;
   }): LanguageModelV1;
-}
-
-export enum AiProviderEnum {
-  AMAZON_BEDROCK = 'Amazon Bedrock',
-  ANTHROPIC = 'Anthropic',
-  AZURE_OPENAI = 'Azure OpenAI',
-  CEREBRAS = 'Cerebras',
-  COHERE = 'Cohere',
-  DEEPINFRA = 'Deep Infra',
-  DEEPSEEK = 'Deep Seek',
-  GOOGLE = 'Google Generative AI',
-  GROQ = 'Groq',
-  LMNT = 'LMNT',
-  MISTRAL = 'Mistral',
-  OPENAI = 'OpenAI',
-  OPENAI_COMPATIBLE = 'OpenAI Compatible',
-  PERPLEXITY = 'Perplexity',
-  TOGETHER_AI = 'Together.ai',
-  XAI = 'xAI Grok',
 }
 
 const PROVIDER_MAP: Record<AiProviderEnum, AiProvider> = {

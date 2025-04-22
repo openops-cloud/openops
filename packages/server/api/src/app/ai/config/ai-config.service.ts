@@ -1,4 +1,3 @@
-import { AiProviderEnum } from '@openops/common';
 import { AiConfig, openOpsId, SaveAiConfigRequest } from '@openops/shared';
 import { repoFactory } from '../../core/db/repo-factory';
 import { encryptUtils } from '../../helper/encryption';
@@ -12,11 +11,6 @@ export const aiConfigService = {
     request: SaveAiConfigRequest;
   }): Promise<AiConfig> {
     const { projectId, request } = params;
-
-    const providerValues = Object.values(AiProviderEnum);
-    if (!providerValues.includes(request.provider as AiProviderEnum)) {
-      throw new Error(`Invalid AI provider: ${request.provider}`);
-    }
 
     const existing = await repo().findOneBy({
       projectId,
