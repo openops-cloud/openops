@@ -17,7 +17,11 @@ export const azureCliAction = createAction({
   props: {
     useHostSession: getUseHostSessionProperty('Azure', 'az login'),
     subscriptions: subDropdown,
-    commandToRun: Property.LongText({ displayName: 'Command', required: true }),
+    commandToRun: Property.LongText({
+      displayName: 'Command',
+      required: true,
+      supportsAI: true,
+    }),
     dryRun: dryRunCheckBox(),
   },
   async run(context) {
