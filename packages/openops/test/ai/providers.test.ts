@@ -152,7 +152,7 @@ describe('getAvailableProvidersWithModels', () => {
       },
     ];
 
-    expect(result).toHaveLength(16);
+    expect(result).toHaveLength(14);
     expect(result).toEqual(expected);
   });
 });
