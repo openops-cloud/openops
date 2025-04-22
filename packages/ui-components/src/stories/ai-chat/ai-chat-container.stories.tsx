@@ -22,14 +22,14 @@ const meta = {
   tags: ['autodocs'],
   render: (args) => {
     const [
-      { containerSize, showAiChat, setContainerSizeState, setShowAiChat },
+      { containerSize, showAiChat, setShowAiChat, toggleContainerSizeState },
       updateArgs,
     ] = useArgs();
 
     const onToggleContainerSizeState = () => {
       const newContainerSizeState =
         containerSize === 'docked' ? 'collapsed' : 'docked';
-      setContainerSizeState(newContainerSizeState);
+      toggleContainerSizeState();
       updateArgs({ containerSize: newContainerSizeState });
     };
 
@@ -63,10 +63,9 @@ type Story = StoryObj<typeof meta>;
 export const Docked: Story = {
   args: {
     parentHeight: 500,
-    parentWidth: 500,
     containerSize: 'docked',
     showAiChat: true,
-    setContainerSizeState: fn(),
+    toggleContainerSizeState: fn(),
     setShowAiChat: fn(),
     onSubmitChat: fn(),
   },

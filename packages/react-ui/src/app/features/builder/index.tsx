@@ -270,10 +270,6 @@ const BuilderPage = () => {
                       topOffset={FLOW_CANVAS_Y_OFFESET}
                     ></CanvasControls>
                     <AiWidget />
-                    <DataSelector
-                      parentHeight={middlePanelSize.height}
-                      parentWidth={middlePanelSize.width}
-                    ></DataSelector>
                     <div
                       className={cn('h-screen w-full flex-1 z-10', {
                         'bg-background': !isDraggingHandle,
