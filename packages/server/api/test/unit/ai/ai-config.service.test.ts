@@ -32,7 +32,7 @@ import { aiConfigService } from '../../../src/app/ai/config/ai-config.service';
 
 describe('aiConfigService.upsert', () => {
   const baseRequest: SaveAiConfigRequest = {
-    provider: 'openai',
+    provider: 'OpenAI',
     apiKey: 'test-key',
     model: 'gpt-4',
     modelSettings: { temperature: 0.7 },
@@ -83,6 +83,24 @@ describe('aiConfigService.upsert', () => {
       id: 'mocked-id',
     });
     expect(encryptStringMock).toHaveBeenCalledWith(baseRequest.apiKey);
+  });
+
+  test('should throw an error if provider is invalid', async () => {
+    const invalidRequest = {
+      ...baseRequest,
+      provider: 'InvalidProvider',
+    };
+
+    await expect(
+      aiConfigService.upsert({
+        projectId,
+        request: invalidRequest,
+      }),
+    ).rejects.toThrow('Invalid AI provider: InvalidProvider');
+
+    expect(findOneByMock).not.toHaveBeenCalled();
+    expect(upsertMock).not.toHaveBeenCalled();
+    expect(encryptStringMock).not.toHaveBeenCalled();
   });
 
   test('should update existing ai config if it exists', async () => {
