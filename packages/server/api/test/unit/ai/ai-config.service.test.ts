@@ -19,7 +19,6 @@ jest.mock('../../../src/app/core/db/repo-factory', () => ({
 
 import { SaveAiConfigRequest } from '@openops/shared';
 import { aiConfigService } from '../../../src/app/ai/config/ai-config.service';
-import { repoFactory } from '../../../src/app/core/db/repo-factory';
 
 describe('aiConfigService.upsert', () => {
   const baseRequest: SaveAiConfigRequest = {
@@ -30,7 +29,6 @@ describe('aiConfigService.upsert', () => {
   };
 
   const projectId = 'test-project';
-  const userId = 'test-user';
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -46,7 +44,6 @@ describe('aiConfigService.upsert', () => {
 
     const result = await aiConfigService.upsert({
       projectId,
-      userId,
       request: baseRequest,
     });
 
@@ -89,7 +86,6 @@ describe('aiConfigService.upsert', () => {
 
     const result = await aiConfigService.upsert({
       projectId,
-      userId,
       request: baseRequest,
     });
 
