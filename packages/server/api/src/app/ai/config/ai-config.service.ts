@@ -36,9 +36,13 @@ export const aiConfigService = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await repo().upsert(aiConfig as any, ['projectId', 'provider']);
 
-    return repo().findOneByOrFail({
+    const config = await repo().findOneByOrFail({
       projectId,
       provider: request.provider,
     });
+    return {
+      ...config,
+      apiKey: AiApiKeyRedactionMessage,
+    };
   },
 };
