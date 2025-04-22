@@ -16,14 +16,14 @@ export const aiConfigController: FastifyPluginAsyncTypebox = async (app) => {
         request: request.body,
       });
 
-      return reply.status(StatusCodes.CREATED).send(aiConfig);
+      return reply.status(StatusCodes.OK).send(aiConfig);
     },
   );
 };
 
 const SaveAiConfigOptions = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+    allowedPrincipals: [PrincipalType.USER],
   },
   schema: {
     tags: ['ai-config'],
