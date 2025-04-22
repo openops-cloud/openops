@@ -1,5 +1,5 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { AiProviderEnum, getAiProviderLanguageModel } from '@openops/common';
+import { getAiProviderLanguageModel } from '@openops/common';
 import {
   NewMessageRequest,
   OpenChatRequest,
@@ -69,7 +69,7 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
     const languageModel = await getAiProviderLanguageModel({
       apiKey,
       model: aiConfig.model,
-      provider: aiConfig.provider as AiProviderEnum,
+      provider: aiConfig.provider,
       providerSettings: aiConfig.providerSettings,
     });
 
