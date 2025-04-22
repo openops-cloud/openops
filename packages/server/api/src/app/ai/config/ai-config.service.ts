@@ -2,7 +2,7 @@ import { AiProviderEnum } from '@openops/common';
 import { AiConfig, openOpsId, SaveAiConfigRequest } from '@openops/shared';
 import { repoFactory } from '../../core/db/repo-factory';
 import { encryptUtils } from '../../helper/encryption';
-import { AiConfigEntity } from './ai-config.entity';
+import { AiApiKeyRedactionMessage, AiConfigEntity } from './ai-config.entity';
 
 const repo = repoFactory(AiConfigEntity);
 
@@ -26,11 +26,16 @@ export const aiConfigService = {
     const aiConfig: Partial<AiConfig> = {
       ...request,
       projectId,
-      apiKey: JSON.stringify(encryptUtils.encryptString(request.apiKey)),
       id: existing?.id ?? openOpsId(),
       created: new Date().toISOString(),
       updated: new Date().toISOString(),
     };
+
+    if (request.apiKey !== AiApiKeyRedactionMessage) {
+      aiConfig.apiKey = JSON.stringify(
+        encryptUtils.encryptString(request.apiKey),
+      );
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await repo().upsert(aiConfig as any, ['projectId', 'provider']);

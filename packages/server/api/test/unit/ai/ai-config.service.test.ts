@@ -28,6 +28,7 @@ jest.mock('../../../src/app/helper/encryption', () => ({
 }));
 
 import { SaveAiConfigRequest } from '@openops/shared';
+import { AiApiKeyRedactionMessage } from '../../../src/app/ai/config/ai-config.entity';
 import { aiConfigService } from '../../../src/app/ai/config/ai-config.service';
 
 describe('aiConfigService.upsert', () => {
@@ -132,6 +133,79 @@ describe('aiConfigService.upsert', () => {
     expect(result).toMatchObject({
       ...baseRequest,
       id: existingId,
+      projectId,
+    });
+  });
+
+  test('should not overwrite apiKey if redacted message is received', async () => {
+    const existingId = 'existing-id';
+    const existingApiKey = 'already-encrypted-key';
+
+    findOneByMock.mockResolvedValue({ id: existingId, apiKey: existingApiKey });
+    findOneByOrFailMock.mockResolvedValue({
+      ...baseRequest,
+      id: existingId,
+      projectId,
+      apiKey: existingApiKey,
+    });
+
+    const redactedRequest = {
+      ...baseRequest,
+      apiKey: AiApiKeyRedactionMessage,
+    };
+
+    const result = await aiConfigService.upsert({
+      projectId,
+      request: redactedRequest,
+    });
+
+    expect(upsertMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        apiKey: undefined,
+        id: existingId,
+      }),
+      ['projectId', 'provider'],
+    );
+
+    expect(encryptStringMock).not.toHaveBeenCalled();
+    expect(result).toMatchObject({
+      ...baseRequest,
+      apiKey: existingApiKey,
+      id: existingId,
+      projectId,
+    });
+  });
+
+  test('should use request.id if provided explicitly', async () => {
+    findOneByMock.mockResolvedValue(null);
+    findOneByOrFailMock.mockResolvedValue({
+      ...baseRequest,
+      id: 'explicit-request-id',
+      projectId,
+    });
+
+    const requestWithId = {
+      ...baseRequest,
+      id: 'explicit-request-id',
+    };
+
+    const result = await aiConfigService.upsert({
+      projectId,
+      request: requestWithId,
+    });
+
+    expect(upsertMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'explicit-request-id',
+        projectId,
+      }),
+      ['projectId', 'provider'],
+    );
+
+    expect(mockedOpenOpsId).not.toHaveBeenCalled();
+    expect(result).toMatchObject({
+      ...baseRequest,
+      id: 'explicit-request-id',
       projectId,
     });
   });

@@ -15,6 +15,7 @@ export const AiConfig = Type.Object({
 export type AiConfig = Static<typeof AiConfig>;
 
 export const SaveAiConfigRequest = Type.Object({
+  id: Type.Optional(Type.String()),
   provider: Type.String(),
   model: Type.String(),
   apiKey: Type.String(),
