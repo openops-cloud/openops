@@ -105,6 +105,7 @@ type DataSelectorProps = {
   showDataSelector: boolean;
   dataSelectorSize: DataSelectorSizeState;
   setDataSelectorSize: (dataSelectorSize: DataSelectorSizeState) => void;
+  className?: string;
 };
 
 const DataSelector = ({
@@ -113,6 +114,7 @@ const DataSelector = ({
   showDataSelector,
   dataSelectorSize: DataSelectorSize,
   setDataSelectorSize,
+  className,
 }: DataSelectorProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const mentions = useBuilderStateContext(getAllStepsMentions);
@@ -126,6 +128,7 @@ const DataSelector = ({
         {
           hidden: !showDataSelector,
         },
+        className,
       )}
     >
       <div className="text-lg items-center font-semibold px-5 py-2 flex gap-2">

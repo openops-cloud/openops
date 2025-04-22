@@ -3,6 +3,7 @@ import {
   AiChatContainer,
   AiWidget,
   CanvasControls,
+  cn,
   InteractiveContextProvider,
 } from '@openops/components/ui';
 import {
@@ -164,7 +165,13 @@ const InteractiveBuilder = ({
             onSubmitChat={function (message: string): void {
               throw new Error('Function not implemented.');
             }}
-            className="right-0 static"
+            className={cn('right-0 static', {
+              'children:transition-none':
+                state.showDataSelector &&
+                state.showAiChat &&
+                state.aiContainerSize === 'collapsed' &&
+                state.dataSelectorSize === DataSelectorSizeState.DOCKED,
+            })}
           />
           <DataSelector
             parentHeight={middlePanelSize.height}
@@ -172,6 +179,12 @@ const InteractiveBuilder = ({
             showDataSelector={state.showDataSelector}
             dataSelectorSize={state.dataSelectorSize}
             setDataSelectorSize={onSetShowDataSelector}
+            className={cn({
+              'children:transition-none':
+                state.dataSelectorSize === DataSelectorSizeState.COLLAPSED &&
+                state.showAiChat &&
+                state.aiContainerSize === 'docked',
+            })}
           ></DataSelector>
         </div>
 
