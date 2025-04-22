@@ -20,7 +20,7 @@ export const aiConfigService = {
     const aiConfig: Partial<AiConfig> = {
       ...request,
       projectId,
-      apiKey: encryptUtils.encryptString(request.apiKey),
+      apiKey: JSON.stringify(encryptUtils.encryptString(request.apiKey)),
       id: existing?.id ?? openOpsId(),
       created: new Date().toISOString(),
       updated: new Date().toISOString(),
