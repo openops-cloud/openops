@@ -10,6 +10,7 @@ const upsertMock = jest.fn();
 const findOneByOrFailMock = jest.fn();
 
 jest.mock('../../../src/app/core/db/repo-factory', () => ({
+  ...jest.requireActual('../../../src/app/core/db/repo-factory'),
   repoFactory: () => () => ({
     findOneBy: findOneByMock,
     upsert: upsertMock,
@@ -20,6 +21,7 @@ jest.mock('../../../src/app/core/db/repo-factory', () => ({
 const encryptStringMock = jest.fn().mockReturnValue('test-encrypt');
 
 jest.mock('../../../src/app/helper/encryption', () => ({
+  ...jest.requireActual('../../../src/app/helper/encryption'),
   encryptUtils: {
     encryptString: encryptStringMock,
   },
@@ -43,7 +45,7 @@ describe('aiConfigService.upsert', () => {
     jest.clearAllMocks();
   });
 
-  it('should insert a new ai config when one does not exist', async () => {
+  test('should insert a new ai config when one does not exist', async () => {
     findOneByMock.mockResolvedValue(null);
     findOneByOrFailMock.mockResolvedValue({
       ...baseRequest,
@@ -83,7 +85,7 @@ describe('aiConfigService.upsert', () => {
     expect(encryptStringMock).toHaveBeenCalledWith(baseRequest.apiKey);
   });
 
-  it('should update existing ai config if it exists', async () => {
+  test('should update existing ai config if it exists', async () => {
     const existingId = 'existing-id';
     findOneByMock.mockResolvedValue({ id: existingId });
     findOneByOrFailMock.mockResolvedValue({
