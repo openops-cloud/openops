@@ -5,13 +5,6 @@ jest.mock('@openops/shared', () => ({
   openOpsId: mockedOpenOpsId,
 }));
 
-jest.mock('../../../src/app/helper/encryption', () => ({
-  ...jest.requireActual('../../../src/app/helper/encryption'),
-  encryptUtils: jest.fn(() => ({
-    encryptString: jest.fn((input: string) => 'test-encrypt'),
-  })),
-}));
-
 const findOneByMock = jest.fn();
 const upsertMock = jest.fn();
 const findOneByOrFailMock = jest.fn();
@@ -24,6 +17,14 @@ jest.mock('../../../src/app/core/db/repo-factory', () => ({
   }),
 }));
 
+const encryptStringMock = jest.fn().mockReturnValue('test-encrypt');
+
+jest.mock('../../../src/app/helper/encryption', () => ({
+  encryptUtils: {
+    encryptString: encryptStringMock,
+  },
+}));
+
 import { SaveAiConfigRequest } from '@openops/shared';
 import { aiConfigService } from '../../../src/app/ai/config/ai-config.service';
 
@@ -33,6 +34,7 @@ describe('aiConfigService.upsert', () => {
     apiKey: 'test-key',
     model: 'gpt-4',
     modelSettings: { temperature: 0.7 },
+    providerSettings: { baseUrl: 'url' },
   };
 
   const projectId = 'test-project';
@@ -58,29 +60,27 @@ describe('aiConfigService.upsert', () => {
       projectId,
       provider: baseRequest.provider,
     });
-
     expect(upsertMock).toHaveBeenCalledWith(
       {
         ...baseRequest,
         projectId,
-        apiKey: 'test-encrypt',
+        apiKey: JSON.stringify('test-encrypt'),
         created: expect.any(String),
         updated: expect.any(String),
         id: 'mocked-id',
       },
       ['projectId', 'provider'],
     );
-
     expect(findOneByOrFailMock).toHaveBeenCalledWith({
       projectId,
       provider: baseRequest.provider,
     });
-
     expect(result).toMatchObject({
       ...baseRequest,
       projectId,
       id: 'mocked-id',
     });
+    expect(encryptStringMock).toHaveBeenCalledWith(baseRequest.apiKey);
   });
 
   it('should update existing ai config if it exists', async () => {
@@ -102,13 +102,13 @@ describe('aiConfigService.upsert', () => {
         ...baseRequest,
         id: existingId,
         projectId,
-        apiKey: 'test-encrypt',
+        apiKey: JSON.stringify('test-encrypt'),
         created: expect.any(String),
         updated: expect.any(String),
       },
       ['projectId', 'provider'],
     );
-
+    expect(encryptStringMock).toHaveBeenCalledWith(baseRequest.apiKey);
     expect(result).toMatchObject({
       ...baseRequest,
       id: existingId,
