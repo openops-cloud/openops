@@ -17,9 +17,16 @@ jest.mock('../../../src/app/core/db/repo-factory', () => ({
   }),
 }));
 
+const encryptStringMock = jest.fn().mockReturnValue('test-encrypt');
+
+jest.mock('../../../src/app/helper/encryption', () => ({
+  encryptUtils: {
+    encryptString: encryptStringMock,
+  },
+}));
+
 import { SaveAiConfigRequest } from '@openops/shared';
 import { aiConfigService } from '../../../src/app/ai/config/ai-config.service';
-import { repoFactory } from '../../../src/app/core/db/repo-factory';
 
 describe('aiConfigService.upsert', () => {
   const baseRequest: SaveAiConfigRequest = {
@@ -27,10 +34,10 @@ describe('aiConfigService.upsert', () => {
     apiKey: 'test-key',
     model: 'gpt-4',
     modelSettings: { temperature: 0.7 },
+    providerSettings: { baseUrl: 'url' },
   };
 
   const projectId = 'test-project';
-  const userId = 'test-user';
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -46,7 +53,6 @@ describe('aiConfigService.upsert', () => {
 
     const result = await aiConfigService.upsert({
       projectId,
-      userId,
       request: baseRequest,
     });
 
@@ -54,28 +60,27 @@ describe('aiConfigService.upsert', () => {
       projectId,
       provider: baseRequest.provider,
     });
-
     expect(upsertMock).toHaveBeenCalledWith(
       {
         ...baseRequest,
         projectId,
+        apiKey: JSON.stringify('test-encrypt'),
         created: expect.any(String),
         updated: expect.any(String),
         id: 'mocked-id',
       },
       ['projectId', 'provider'],
     );
-
     expect(findOneByOrFailMock).toHaveBeenCalledWith({
       projectId,
       provider: baseRequest.provider,
     });
-
     expect(result).toMatchObject({
       ...baseRequest,
       projectId,
       id: 'mocked-id',
     });
+    expect(encryptStringMock).toHaveBeenCalledWith(baseRequest.apiKey);
   });
 
   it('should update existing ai config if it exists', async () => {
@@ -89,7 +94,6 @@ describe('aiConfigService.upsert', () => {
 
     const result = await aiConfigService.upsert({
       projectId,
-      userId,
       request: baseRequest,
     });
 
@@ -98,12 +102,13 @@ describe('aiConfigService.upsert', () => {
         ...baseRequest,
         id: existingId,
         projectId,
+        apiKey: JSON.stringify('test-encrypt'),
         created: expect.any(String),
         updated: expect.any(String),
       },
       ['projectId', 'provider'],
     );
-
+    expect(encryptStringMock).toHaveBeenCalledWith(baseRequest.apiKey);
     expect(result).toMatchObject({
       ...baseRequest,
       id: existingId,

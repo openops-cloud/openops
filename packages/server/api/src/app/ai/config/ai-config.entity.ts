@@ -29,6 +29,10 @@ export const AiConfigEntity = new EntitySchema<AiConfigSchema>({
       type: JSONB_COLUMN_TYPE,
       nullable: true,
     },
+    providerSettings: {
+      type: JSONB_COLUMN_TYPE,
+      nullable: true,
+    },
     enabled: {
       type: Boolean,
       default: true,

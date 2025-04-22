@@ -7,6 +7,7 @@ export const AiConfig = Type.Object({
   provider: Type.String(),
   model: Type.String(),
   apiKey: Type.String(),
+  providerSettings: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
   modelSettings: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
   enabled: Type.Optional(Type.Boolean()),
 });
@@ -17,6 +18,7 @@ export const SaveAiConfigRequest = Type.Object({
   provider: Type.String(),
   model: Type.String(),
   apiKey: Type.String(),
+  providerSettings: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
   modelSettings: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
   enabled: Type.Optional(Type.Boolean()),
 });

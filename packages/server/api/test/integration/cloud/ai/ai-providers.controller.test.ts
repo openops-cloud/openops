@@ -26,7 +26,7 @@ describe('GET /v1/ai/providers', () => {
   test('should return list of AI providers with models', async () => {
     const mockResponse: GetProvidersResponse[] = [
       {
-        aiProvider: 'OPENAI',
+        provider: 'OPENAI',
         displayName: 'openai',
         models: ['gpt-3.5-turbo', 'gpt-4'],
       },
