@@ -1,6 +1,5 @@
 import { AiProviderEnum } from '@openops/shared';
 import { LanguageModelV1 } from 'ai';
-import { amazonBedrockProvider } from './providers/amazon-bedrock';
 import { anthropicProvider } from './providers/anthropic';
 import { azureProvider } from './providers/azure-openai';
 import { cerebrasProvider } from './providers/cerebras';
@@ -9,7 +8,6 @@ import { deepinfraProvider } from './providers/deep-infra';
 import { deepseekProvider } from './providers/deep-seek';
 import { googleProvider } from './providers/google';
 import { groqProvider } from './providers/groq';
-import { lmntProvider } from './providers/lmnt';
 import { mistralProvider } from './providers/mistral';
 import { openAiProvider } from './providers/openai';
 import { openaiCompatibleProvider } from './providers/openai-compatible';
@@ -27,7 +25,6 @@ export interface AiProvider {
 }
 
 const PROVIDER_MAP: Record<AiProviderEnum, AiProvider> = {
-  [AiProviderEnum.AMAZON_BEDROCK]: amazonBedrockProvider,
   [AiProviderEnum.ANTHROPIC]: anthropicProvider,
   [AiProviderEnum.AZURE_OPENAI]: azureProvider,
   [AiProviderEnum.CEREBRAS]: cerebrasProvider,
@@ -36,7 +33,6 @@ const PROVIDER_MAP: Record<AiProviderEnum, AiProvider> = {
   [AiProviderEnum.DEEPSEEK]: deepseekProvider,
   [AiProviderEnum.GOOGLE]: googleProvider,
   [AiProviderEnum.GROQ]: groqProvider,
-  [AiProviderEnum.LMNT]: lmntProvider,
   [AiProviderEnum.MISTRAL]: mistralProvider,
   [AiProviderEnum.OPENAI]: openAiProvider,
   [AiProviderEnum.OPENAI_COMPATIBLE]: openaiCompatibleProvider,
