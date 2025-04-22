@@ -66,12 +66,18 @@ export function getAiProvider(aiProvider: AiProviderEnum): AiProvider {
 }
 
 export function getAvailableProvidersWithModels(): {
-  aiProvider: AiProviderEnum;
+  provider: keyof typeof AiProviderEnum;
+  displayName: string;
   models: string[];
 }[] {
-  return Object.values(AiProviderEnum).map((aiProvider) => {
-    const provider = getAiProvider(aiProvider);
-    const models = provider.models;
-    return { aiProvider, models };
+  return Object.entries(AiProviderEnum).map(([key, displayName]) => {
+    const provider = getAiProvider(
+      AiProviderEnum[key as keyof typeof AiProviderEnum],
+    );
+    return {
+      provider: key as keyof typeof AiProviderEnum,
+      displayName,
+      models: provider.models,
+    };
   });
 }

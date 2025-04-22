@@ -3,10 +3,9 @@ import {
   DropdownOption,
   Property,
 } from '@openops/blocks-framework';
-import { makeHttpRequest } from '@openops/common';
-import { AxiosHeaders } from 'axios';
 import { databricksAuth } from './auth';
 import { getDatabricksToken } from './get-databricks-token';
+import { makeDatabricksHttpRequest } from './make-databricks-http-request';
 
 export const workspaceDeploymentName = Property.Dropdown({
   displayName: 'Workspace',
@@ -24,17 +23,12 @@ export const workspaceDeploymentName = Property.Dropdown({
       const authValue = auth as BlockPropValueSchema<typeof databricksAuth>;
       const accessToken = await getDatabricksToken(authValue);
 
-      const workspaceListUrl = `https://accounts.cloud.databricks.com/api/2.0/accounts/${authValue.accountId}/workspaces`;
-
-      const headers = new AxiosHeaders({
-        Authorization: `Bearer ${accessToken}`,
+      const workspaces = await makeDatabricksHttpRequest<any[]>({
+        deploymentName: 'accounts',
+        token: accessToken,
+        method: 'GET',
+        path: `/api/2.0/accounts/${authValue.accountId}/workspaces`,
       });
-
-      const workspaces = await makeHttpRequest<any[]>(
-        'GET',
-        workspaceListUrl,
-        headers,
-      );
 
       const options: DropdownOption<string>[] = workspaces.map((workspace) => ({
         label: workspace.workspace_name,
@@ -46,17 +40,10 @@ export const workspaceDeploymentName = Property.Dropdown({
         options: options,
       };
     } catch (error: any) {
-      let errorMessage;
-      try {
-        errorMessage = JSON.parse(error.message)?.message;
-      } catch {
-        errorMessage = String(error.message);
-      }
-
       return {
         disabled: true,
         placeholder: 'An error occurred while fetching workspaces',
-        error: errorMessage,
+        error: error?.message,
         options: [],
       };
     }

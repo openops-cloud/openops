@@ -1,14 +1,14 @@
 import { createAction, Property, Validators } from '@openops/blocks-framework';
-import { makeHttpRequest } from '@openops/common';
-import { AxiosHeaders } from 'axios';
 import { databricksAuth } from '../common/auth';
+import {
+  MAX_QUERY_TIMEOUT_SECONDS,
+  RETRY_TIMEOUT_MILLISECONDS,
+} from '../common/constants';
 import { getDatabricksToken } from '../common/get-databricks-token';
+import { makeDatabricksHttpRequest } from '../common/make-databricks-http-request';
 import { DatabricksSqlExecutionResult } from '../common/sql-execution-result';
 import { warehouseId } from '../common/warehouse-id';
 import { workspaceDeploymentName } from '../common/workspace-deployment-name';
-
-const MAX_QUERY_TIMEOUT_SECONDS = 50;
-const RETRY_TIMEOUT_MILLISECONDS = 15000;
 
 export const executeSqlStatement = createAction({
   name: 'executeSqlStatement',
@@ -43,36 +43,35 @@ export const executeSqlStatement = createAction({
 
   async run({ auth, propsValue }) {
     const accessToken = await getDatabricksToken(auth);
-    const statementUrl = `https://${propsValue.workspaceDeploymentName}.cloud.databricks.com/api/2.0/sql/statements`;
-
-    const headers = new AxiosHeaders({
-      Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-    });
-
-    const { sqlText, parameters, warehouseId, timeout } = propsValue;
+    const {
+      sqlText,
+      parameters,
+      warehouseId,
+      timeout,
+      workspaceDeploymentName,
+    } = propsValue;
 
     const timeoutString =
       timeout <= MAX_QUERY_TIMEOUT_SECONDS
         ? `${timeout}s`
         : `${MAX_QUERY_TIMEOUT_SECONDS}s`;
 
-    const submission = await makeHttpRequest<DatabricksSqlExecutionResult>(
-      'POST',
-      statementUrl,
-      headers,
-      {
-        statement: sqlText,
-        warehouse_id: warehouseId,
-        wait_timeout: timeoutString,
-        parameters: Object.entries(parameters ?? {}).map(([name, value]) => {
-          return {
+    const submission =
+      await makeDatabricksHttpRequest<DatabricksSqlExecutionResult>({
+        deploymentName: workspaceDeploymentName,
+        token: accessToken,
+        method: 'POST',
+        path: '/api/2.0/sql/statements',
+        body: {
+          statement: sqlText,
+          warehouse_id: warehouseId,
+          wait_timeout: timeoutString,
+          parameters: Object.entries(parameters ?? {}).map(([name, value]) => ({
             name,
             value,
-          };
-        }),
-      },
-    );
+          })),
+        },
+      });
 
     if (
       (submission.status.state !== 'RUNNING' &&
@@ -83,19 +82,20 @@ export const executeSqlStatement = createAction({
     }
 
     const statementId = submission.statement_id;
-    const pollUrl = `https://${propsValue.workspaceDeploymentName}.cloud.databricks.com//api/2.0/sql/statements/${statementId}`;
 
     const maxAttempts = Math.ceil(
       ((timeout - MAX_QUERY_TIMEOUT_SECONDS) * 1000) /
         RETRY_TIMEOUT_MILLISECONDS,
     );
+
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       const statusResponse =
-        await makeHttpRequest<DatabricksSqlExecutionResult>(
-          'GET',
-          pollUrl,
-          headers,
-        );
+        await makeDatabricksHttpRequest<DatabricksSqlExecutionResult>({
+          deploymentName: workspaceDeploymentName,
+          token: accessToken,
+          method: 'GET',
+          path: `/api/2.0/sql/statements/${statementId}`,
+        });
 
       const status = statusResponse.status?.state;
       if (status !== 'PENDING' && status !== 'RUNNING') {

@@ -1,3 +1,4 @@
+export * from './ai-chat-container';
 export * from './block-icon';
 export * from './builder-sidebar/sidebar-header';
 export * from './builder-tree-view';
