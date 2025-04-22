@@ -6,7 +6,7 @@ export class AddProviderSettingsAndConstraintForAiConfig1745309649736
 {
   public async up(queryRunner: QueryRunner): Promise<void> {
     logger.info(
-      'AddProjectIdToProviderConstraintForAiConfig1744904465001: starting',
+      'AddProviderSettingsAndConstraintForAiConfig1745309649736: starting',
     );
 
     await queryRunner.query(`
