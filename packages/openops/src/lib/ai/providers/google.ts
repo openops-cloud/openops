@@ -1,3 +1,5 @@
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { LanguageModelV1 } from 'ai';
 import { AiProvider } from '../providers';
 
 const googleModels = [
@@ -23,6 +25,18 @@ const googleModels = [
   'learnlm-1.5-pro-experimental',
 ];
 
+function createLanguageModel(params: {
+  apiKey: string;
+  model: string;
+  baseUrl?: string;
+}): LanguageModelV1 {
+  return createGoogleGenerativeAI({
+    apiKey: params.apiKey,
+    baseURL: params.baseUrl,
+  })(params.model);
+}
+
 export const googleProvider: AiProvider = {
   models: googleModels,
+  createLanguageModel,
 };

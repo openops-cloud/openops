@@ -14,6 +14,7 @@ import { RenamePieceToBlockMigration1741475952000 } from './migrations/174147595
 import { AddVersionToTemplates1741636646000 } from './migrations/1741636646000-AddVersionToTemplates';
 import { ReplaceSelectOptionsIdsWithNames1741945618000 } from './migrations/1741945618000-ReplaceSelectOptionsIdsWithNames';
 import { CreateAiConfigTable1744641502000 } from './migrations/1744641502000-CreateAiConfigTable';
+import { AddProviderSettingsAndConstraintForAiConfig1745309649736 } from './migrations/1745309649736-AddProviderSettingsAndConstraintForAiConfig';
 
 const getSslConfig = (): boolean | TlsOptions => {
   const useSsl = system.get(AppSystemProp.POSTGRES_USE_SSL);
@@ -36,6 +37,7 @@ const getMigrations = (): (new () => MigrationInterface)[] => {
     AddVersionToTemplates1741636646000,
     ReplaceSelectOptionsIdsWithNames1741945618000,
     CreateAiConfigTable1744641502000,
+    AddProviderSettingsAndConstraintForAiConfig1745309649736,
   ];
 };
 

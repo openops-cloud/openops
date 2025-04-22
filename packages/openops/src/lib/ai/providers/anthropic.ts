@@ -1,3 +1,5 @@
+import { createAnthropic } from '@ai-sdk/anthropic';
+import { LanguageModelV1 } from 'ai';
 import { AiProvider } from '../providers';
 
 const anthropicModels = [
@@ -13,6 +15,18 @@ const anthropicModels = [
   'claude-3-haiku-20240307',
 ];
 
+function createLanguageModel(params: {
+  apiKey: string;
+  model: string;
+  baseUrl?: string;
+}): LanguageModelV1 {
+  return createAnthropic({
+    apiKey: params.apiKey,
+    baseURL: params.baseUrl,
+  })(params.model);
+}
+
 export const anthropicProvider: AiProvider = {
   models: anthropicModels,
+  createLanguageModel,
 };

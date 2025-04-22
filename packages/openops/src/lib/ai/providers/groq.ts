@@ -1,3 +1,5 @@
+import { createGroq } from '@ai-sdk/groq';
+import { LanguageModelV1 } from 'ai';
 import { AiProvider } from '../providers';
 
 const groqModels = [
@@ -16,6 +18,18 @@ const groqModels = [
   'deepseek-r1-distill-llama-70b',
 ];
 
+function createLanguageModel(params: {
+  apiKey: string;
+  model: string;
+  baseUrl?: string;
+}): LanguageModelV1 {
+  return createGroq({
+    apiKey: params.apiKey,
+    baseURL: params.baseUrl,
+  })(params.model);
+}
+
 export const groqProvider: AiProvider = {
   models: groqModels,
+  createLanguageModel,
 };
