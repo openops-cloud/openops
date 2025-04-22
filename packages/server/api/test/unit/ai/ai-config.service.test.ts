@@ -81,6 +81,7 @@ describe('aiConfigService.upsert', () => {
     expect(result).toMatchObject({
       ...baseRequest,
       projectId,
+      apiKey: '**REDACTED**',
       id: 'mocked-id',
     });
     expect(encryptStringMock).toHaveBeenCalledWith(baseRequest.apiKey);
@@ -119,6 +120,7 @@ describe('aiConfigService.upsert', () => {
       ...baseRequest,
       id: existingId,
       projectId,
+      apiKey: '**REDACTED**',
       created: expect.any(String),
       updated: expect.any(String),
     });
@@ -161,7 +163,7 @@ describe('aiConfigService.upsert', () => {
     expect(encryptStringMock).not.toHaveBeenCalled();
     expect(result).toMatchObject({
       ...baseRequest,
-      apiKey: existingApiKey,
+      apiKey: '**REDACTED**',
       id: existingId,
       projectId,
     });
@@ -200,6 +202,7 @@ describe('aiConfigService.upsert', () => {
     expect(mockedOpenOpsId).not.toHaveBeenCalled();
     expect(result).toMatchObject({
       ...baseRequest,
+      apiKey: '**REDACTED**',
       id: 'explicit-request-id',
       projectId,
     });
