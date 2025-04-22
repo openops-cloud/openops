@@ -75,15 +75,13 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
       content: request.body.message,
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { baseUrl, ...filteredModelSettings } = aiConfig.modelSettings ?? {};
     pipeDataStreamToResponse(reply.raw, {
       execute: async (dataStreamWriter) => {
         const result = streamText({
           model: languageModel,
           system: getSystemPrompt(chatContext),
           messages,
-          ...filteredModelSettings,
+          ...aiConfig.modelSettings,
           async onFinish({ response }) {
             response.messages.forEach((r) => {
               messages.push({

@@ -81,7 +81,7 @@ export const getLanguageModel = async (
     return aiProvider.createLanguageModel({
       apiKey: aiConfig.apiKey, // Decrypted API key
       model: aiConfig.model,
-      baseUrl: aiConfig.modelSettings?.baseUrl as string | undefined,
+      baseUrl: aiConfig.providerSettings?.baseUrl as string | undefined,
     });
   } catch (error) {
     logger.error('Error getting AI provider.', {
