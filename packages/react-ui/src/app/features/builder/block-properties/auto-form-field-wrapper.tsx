@@ -1,5 +1,6 @@
 import { BlockProperty } from '@openops/blocks-framework';
 import {
+  Button,
   DYNAMIC_TOGGLE_VALUES,
   DynamicToggle,
   DynamicToggleOption,
@@ -8,14 +9,16 @@ import {
   FormLabel,
   ReadMoreDescription,
 } from '@openops/components/ui';
-import { Action, isNil, Trigger } from '@openops/shared';
+import { Action, FlagId, isNil, Trigger } from '@openops/shared';
 import { t } from 'i18next';
+import { Sparkles } from 'lucide-react';
 import { useContext, useEffect } from 'react';
 import { ControllerRenderProps, useFormContext } from 'react-hook-form';
 
 import { TextInputWithMentions } from './text-input-with-mentions';
 import { CUSTOMIZED_INPUT_KEY, isDynamicViewToggled } from './utils';
 
+import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { ArrayFieldContext } from '@/app/features/builder/block-properties/dynamic-array/array-field-context';
 
 type inputNameLiteral = `settings.input.${string}`;
@@ -64,6 +67,57 @@ const toggleOptions: DynamicToggleOption[] = [
     ),
   },
 ];
+
+type FormLabelButtonProps = {
+  property?: BlockProperty;
+  allowDynamicValues: boolean;
+  disabled: boolean;
+  dynamicViewToggled: boolean;
+  handleDynamicValueChange: (value: DynamicToggleValue) => void;
+  onGenerateWithAIClick: () => void;
+};
+
+const FormLabelButton = ({
+  property,
+  allowDynamicValues,
+  disabled,
+  dynamicViewToggled,
+  handleDynamicValueChange,
+  onGenerateWithAIClick,
+}: FormLabelButtonProps) => {
+  const { data: isAIEnabled } = flagsHooks.useFlag(FlagId.SHOW_AI_SETTINGS);
+  if (
+    property &&
+    'supportsAI' in property &&
+    property.supportsAI &&
+    isAIEnabled
+  ) {
+    return (
+      <Button
+        variant="link"
+        className="h-5 pr-0 py-0 text-blueAccent-300 gap-[5px]"
+        onClick={onGenerateWithAIClick}
+      >
+        <Sparkles size={20} />
+        {t('Generate with AI')}
+      </Button>
+    );
+  } else if (allowDynamicValues) {
+    return (
+      <DynamicToggle
+        options={toggleOptions}
+        onChange={handleDynamicValueChange}
+        defaultValue={
+          dynamicViewToggled
+            ? DYNAMIC_TOGGLE_VALUES.DYNAMIC
+            : DYNAMIC_TOGGLE_VALUES.STATIC
+        }
+        disabled={disabled}
+      />
+    );
+  }
+  return null;
+};
 
 const AutoFormFieldWrapper = ({
   placeBeforeLabelText = false,
@@ -165,18 +219,14 @@ const AutoFormFieldWrapper = ({
         <span>{t(property.displayName)}</span>
         {property.required && <span className="text-destructive">*</span>}
         <span className="grow"></span>
-        {allowDynamicValues && (
-          <DynamicToggle
-            options={toggleOptions}
-            onChange={handleChange}
-            defaultValue={
-              dynamicViewToggled
-                ? DYNAMIC_TOGGLE_VALUES.DYNAMIC
-                : DYNAMIC_TOGGLE_VALUES.STATIC
-            }
-            disabled={disabled}
-          />
-        )}
+        <FormLabelButton
+          property={property}
+          allowDynamicValues={allowDynamicValues}
+          disabled={disabled}
+          dynamicViewToggled={dynamicViewToggled}
+          handleDynamicValueChange={handleChange}
+          onGenerateWithAIClick={() => {}}
+        />
       </FormLabel>
 
       {dynamicViewToggled && (

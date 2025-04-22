@@ -3,10 +3,6 @@ const openAIProviderMock = {
   createLanguageModel: jest.fn(),
 };
 
-jest.mock('../../src/lib/ai/providers/amazon-bedrock', () => ({
-  amazonBedrockProvider: { models: ['bedrockModel'] },
-}));
-
 jest.mock('../../src/lib/ai/providers/anthropic', () => ({
   anthropicProvider: { models: ['anthropicModel'] },
 }));
@@ -39,10 +35,6 @@ jest.mock('../../src/lib/ai/providers/groq', () => ({
   groqProvider: { models: ['groqModel'] },
 }));
 
-jest.mock('../../src/lib/ai/providers/lmnt', () => ({
-  lmntProvider: { models: ['lmntModel'] },
-}));
-
 jest.mock('../../src/lib/ai/providers/openai-compatible', () => ({
   openaiCompatibleProvider: {
     models: ['openaiCompatibleModel'],
@@ -69,8 +61,8 @@ jest.mock('../../src/lib/ai/providers/xai', () => ({
   xaiProvider: { models: ['xaiModel'] },
 }));
 
+import { AiProviderEnum } from '@openops/shared';
 import {
-  AiProviderEnum,
   getAiProvider,
   getAiProviderLanguageModel,
   getAvailableProvidersWithModels,
@@ -94,11 +86,6 @@ describe('getAvailableProvidersWithModels', () => {
     const result = getAvailableProvidersWithModels();
 
     const expected = [
-      {
-        provider: 'AMAZON_BEDROCK',
-        displayName: AiProviderEnum.AMAZON_BEDROCK,
-        models: ['bedrockModel'],
-      },
       {
         provider: 'ANTHROPIC',
         displayName: AiProviderEnum.ANTHROPIC,
@@ -140,11 +127,6 @@ describe('getAvailableProvidersWithModels', () => {
         models: ['groqModel'],
       },
       {
-        provider: 'LMNT',
-        displayName: AiProviderEnum.LMNT,
-        models: ['lmntModel'],
-      },
-      {
         provider: 'MISTRAL',
         displayName: AiProviderEnum.MISTRAL,
         models: ['mistralModel'],
@@ -176,7 +158,7 @@ describe('getAvailableProvidersWithModels', () => {
       },
     ];
 
-    expect(result).toHaveLength(16);
+    expect(result).toHaveLength(14);
     expect(result).toEqual(expected);
   });
 });

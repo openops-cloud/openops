@@ -1,6 +1,5 @@
-import { logger } from '@openops/server-shared';
+import { AiProviderEnum } from '@openops/shared';
 import { LanguageModelV1 } from 'ai';
-import { amazonBedrockProvider } from './providers/amazon-bedrock';
 import { anthropicProvider } from './providers/anthropic';
 import { azureProvider } from './providers/azure-openai';
 import { cerebrasProvider } from './providers/cerebras';
@@ -9,7 +8,6 @@ import { deepinfraProvider } from './providers/deep-infra';
 import { deepseekProvider } from './providers/deep-seek';
 import { googleProvider } from './providers/google';
 import { groqProvider } from './providers/groq';
-import { lmntProvider } from './providers/lmnt';
 import { mistralProvider } from './providers/mistral';
 import { openAiProvider } from './providers/openai';
 import { openaiCompatibleProvider } from './providers/openai-compatible';
@@ -26,27 +24,7 @@ export interface AiProvider {
   }): LanguageModelV1;
 }
 
-export enum AiProviderEnum {
-  AMAZON_BEDROCK = 'Amazon Bedrock',
-  ANTHROPIC = 'Anthropic',
-  AZURE_OPENAI = 'Azure OpenAI',
-  CEREBRAS = 'Cerebras',
-  COHERE = 'Cohere',
-  DEEPINFRA = 'Deep Infra',
-  DEEPSEEK = 'Deep Seek',
-  GOOGLE = 'Google Generative AI',
-  GROQ = 'Groq',
-  LMNT = 'LMNT',
-  MISTRAL = 'Mistral',
-  OPENAI = 'OpenAI',
-  OPENAI_COMPATIBLE = 'OpenAI Compatible',
-  PERPLEXITY = 'Perplexity',
-  TOGETHER_AI = 'Together.ai',
-  XAI = 'xAI Grok',
-}
-
 const PROVIDER_MAP: Record<AiProviderEnum, AiProvider> = {
-  [AiProviderEnum.AMAZON_BEDROCK]: amazonBedrockProvider,
   [AiProviderEnum.ANTHROPIC]: anthropicProvider,
   [AiProviderEnum.AZURE_OPENAI]: azureProvider,
   [AiProviderEnum.CEREBRAS]: cerebrasProvider,
@@ -55,7 +33,6 @@ const PROVIDER_MAP: Record<AiProviderEnum, AiProvider> = {
   [AiProviderEnum.DEEPSEEK]: deepseekProvider,
   [AiProviderEnum.GOOGLE]: googleProvider,
   [AiProviderEnum.GROQ]: groqProvider,
-  [AiProviderEnum.LMNT]: lmntProvider,
   [AiProviderEnum.MISTRAL]: mistralProvider,
   [AiProviderEnum.OPENAI]: openAiProvider,
   [AiProviderEnum.OPENAI_COMPATIBLE]: openaiCompatibleProvider,
