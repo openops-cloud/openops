@@ -47,7 +47,6 @@ import { RunDetailsBar } from '../flow-runs/components/run-details-bar';
 import { FlowSideMenu } from '../navigation/side-menu/flow/flow-side-menu';
 import LeftSidebarResizablePanel from '../navigation/side-menu/left-sidebar';
 import { BuilderHeader } from './builder-header/builder-header';
-import { DataSelector } from './data-selector';
 import { FlowBuilderCanvas } from './flow-canvas/flow-builder-canvas';
 import { FLOW_CANVAS_CONTAINER_ID } from './flow-version-undo-redo/constants';
 import { UndoRedo } from './flow-version-undo-redo/undo-redo';
