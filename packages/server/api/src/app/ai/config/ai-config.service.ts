@@ -11,16 +11,20 @@ export const aiConfigService = {
     request: SaveAiConfigRequest;
   }): Promise<AiConfig> {
     const { projectId, request } = params;
+    let existing: AiConfig | null = null;
 
-    const existing = await repo().findOneBy({
-      projectId,
-      provider: request.provider,
-    });
-
+    if (request.id) {
+      existing = await this.get({ projectId, id: request.id });
+    } else {
+      existing = await repo().findOneBy({
+        projectId,
+        provider: request.provider,
+      });
+    }
     const aiConfig: Partial<AiConfig> = {
       ...request,
       projectId,
-      id: request.id ?? existing?.id ?? openOpsId(),
+      id: existing?.id ?? openOpsId(),
       created: existing?.created ?? new Date().toISOString(),
       updated: new Date().toISOString(),
     };
@@ -64,6 +68,18 @@ export const aiConfigService = {
     const config = await repo().findOneByOrFail({
       id,
       projectId,
+    });
+
+    return {
+      ...config,
+      apiKey: AiApiKeyRedactionMessage,
+    };
+  },
+
+  async getActiveConfig(projectId: string): Promise<AiConfig> {
+    const config = await repo().findOneByOrFail({
+      projectId,
+      enabled: true,
     });
 
     return {

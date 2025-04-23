@@ -296,3 +296,53 @@ describe('aiConfigService.get', () => {
     });
   });
 });
+
+describe('aiConfigService.getActiveConfig', () => {
+  const projectId = 'active-project';
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('should return the enabled AI config with redacted API key', async () => {
+    const activeConfig = {
+      id: 'active-id',
+      projectId,
+      provider: AiProviderEnum.OPENAI,
+      apiKey: 'encrypted-key',
+      model: 'gpt-4',
+      modelSettings: { temperature: 0.9 },
+      providerSettings: { baseUrl: 'https://api.openai.com' },
+      created: '2025-04-01T10:00:00Z',
+      updated: '2025-04-21T14:00:00Z',
+      enabled: true,
+    };
+
+    findOneByOrFailMock.mockResolvedValue(activeConfig);
+
+    const result = await aiConfigService.getActiveConfig(projectId);
+
+    expect(findOneByOrFailMock).toHaveBeenCalledWith({
+      projectId,
+      enabled: true,
+    });
+
+    expect(result).toEqual({
+      ...activeConfig,
+      apiKey: AiApiKeyRedactionMessage,
+    });
+  });
+
+  test('should throw if no active config is found', async () => {
+    findOneByOrFailMock.mockRejectedValue(new Error('Not found'));
+
+    await expect(aiConfigService.getActiveConfig(projectId)).rejects.toThrow(
+      'Not found',
+    );
+
+    expect(findOneByOrFailMock).toHaveBeenCalledWith({
+      projectId,
+      enabled: true,
+    });
+  });
+});

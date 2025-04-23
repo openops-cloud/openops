@@ -25,7 +25,7 @@ export const aiConfigController: FastifyPluginAsyncTypebox = async (app) => {
 
   app.get(
     '/:id',
-    getAiConfigRequest,
+    getAiConfigByIdRequest,
     async (request, reply): Promise<AiConfig> => {
       const config = await aiConfigService.get({
         projectId: request.principal.projectId,
@@ -42,11 +42,23 @@ export const aiConfigController: FastifyPluginAsyncTypebox = async (app) => {
 
   app.get(
     '/',
-    getAiConfigsListRequest,
+    getAiConfigRequest,
     async (request, reply): Promise<AiConfig[]> => {
       const configs = await aiConfigService.list(request.principal.projectId);
 
       return reply.status(StatusCodes.OK).send(configs);
+    },
+  );
+
+  app.get(
+    '/active',
+    getAiConfigRequest,
+    async (request, reply): Promise<AiConfig[]> => {
+      const config = await aiConfigService.getActiveConfig(
+        request.principal.projectId,
+      );
+
+      return reply.status(StatusCodes.OK).send(config);
     },
   );
 };
@@ -63,7 +75,7 @@ const SaveAiConfigOptions = {
   },
 };
 
-const getAiConfigsListRequest = {
+const getAiConfigRequest = {
   config: {
     allowedPrincipals: [PrincipalType.USER],
   },
@@ -73,7 +85,7 @@ const getAiConfigsListRequest = {
   },
 };
 
-const getAiConfigRequest = {
+const getAiConfigByIdRequest = {
   config: {
     allowedPrincipals: [PrincipalType.USER],
   },
