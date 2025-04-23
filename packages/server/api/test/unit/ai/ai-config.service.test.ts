@@ -282,11 +282,11 @@ describe('aiConfigService.get', () => {
   });
 
   test('should return config with redacted apiKey if shouldRedact is true', async () => {
-    findOneByOrFailMock.mockResolvedValue({ ...config });
+    findOneByMock.mockResolvedValue({ ...config });
 
     const result = await aiConfigService.get({ projectId, id: configId }, true);
 
-    expect(findOneByOrFailMock).toHaveBeenCalledWith({
+    expect(findOneByMock).toHaveBeenCalledWith({
       id: configId,
       projectId,
     });
@@ -298,14 +298,14 @@ describe('aiConfigService.get', () => {
   });
 
   test('should return config with original apiKey if shouldRedact is false', async () => {
-    findOneByOrFailMock.mockResolvedValue({ ...config });
+    findOneByMock.mockResolvedValue({ ...config });
 
     const result = await aiConfigService.get(
       { projectId, id: configId },
       false,
     );
 
-    expect(findOneByOrFailMock).toHaveBeenCalledWith({
+    expect(findOneByMock).toHaveBeenCalledWith({
       id: configId,
       projectId,
     });
