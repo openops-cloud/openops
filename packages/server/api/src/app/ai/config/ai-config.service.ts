@@ -106,4 +106,15 @@ export const aiConfigService = {
 
     return redacted ? redactApiKey(config) : (config as AiConfigModel<T>);
   },
+
+  async delete(params: { projectId: string; id: string }): Promise<void> {
+    const { projectId, id } = params;
+
+    const config = await repo().findOneBy({ id, projectId });
+    if (!config) {
+      throw new Error('Config not found or does not belong to this project');
+    }
+
+    await repo().delete({ id });
+  },
 };
