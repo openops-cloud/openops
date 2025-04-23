@@ -100,7 +100,7 @@ const AutocompleteInput = forwardRef<HTMLInputElement, AutocompleteInputProps>(
                 role="combobox"
                 aria-expanded={open}
                 disabled={disabled}
-                className="absolute right-1 h-full px-3 "
+                className="absolute right-1 h-full px-3"
                 onClick={(e) => {
                   e.preventDefault();
                   setOpen(!open);
