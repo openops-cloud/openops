@@ -1,15 +1,12 @@
 import { PanelRightDashedIcon, X as XIcon } from 'lucide-react';
 import { Button } from '../../ui/button';
-import { AiChatContainerSizeState } from './types';
 
 type AiChatSizeTogglersProps = {
-  state: AiChatContainerSizeState;
   toggleContainerSizeState: () => void;
   onCloseClick: () => void;
 };
 
 const AiChatSizeTogglers = ({
-  state,
   toggleContainerSizeState,
   onCloseClick,
 }: AiChatSizeTogglersProps) => {

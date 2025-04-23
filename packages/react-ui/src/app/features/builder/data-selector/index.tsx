@@ -1,9 +1,8 @@
 import { cn, Input, ScrollArea } from '@openops/components/ui';
 import { t } from 'i18next';
 import { SearchXIcon } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 
-import { textMentionUtils } from '@/app/features/builder/block-properties/text-input-with-mentions/text-input-utils';
 import { Action, flowHelper, isNil, Trigger } from '@openops/shared';
 
 import { BuilderState, useBuilderStateContext } from '../builder-hooks';
@@ -103,61 +102,33 @@ const getAllStepsMentions: (state: BuilderState) => MentionTreeNode[] = (
 type DataSelectorProps = {
   parentHeight: number;
   parentWidth: number;
+  showDataSelector: boolean;
+  dataSelectorSize: DataSelectorSizeState;
+  setDataSelectorSize: (dataSelectorSize: DataSelectorSizeState) => void;
+  className?: string;
 };
 
-const doesHaveInputThatUsesMentionClass = (
-  element: Element | null,
-): boolean => {
-  if (isNil(element)) {
-    return false;
-  }
-  if (element.classList.contains(textMentionUtils.inputThatUsesMentionClass)) {
-    return true;
-  }
-  const parent = element.parentElement;
-  if (parent) {
-    return doesHaveInputThatUsesMentionClass(parent);
-  }
-  return false;
-};
-
-const DataSelector = ({ parentHeight, parentWidth }: DataSelectorProps) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [DataSelectorSize, setDataSelectorSize] =
-    useState<DataSelectorSizeState>(DataSelectorSizeState.DOCKED);
+const DataSelector = ({
+  parentHeight,
+  parentWidth,
+  showDataSelector,
+  dataSelectorSize: DataSelectorSize,
+  setDataSelectorSize,
+  className,
+}: DataSelectorProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const mentions = useBuilderStateContext(getAllStepsMentions);
   const filteredMentions = filterBy(structuredClone(mentions), searchTerm);
-  const [showDataSelector, setShowDataSelector] = useState(false);
-
-  const checkFocus = useCallback(() => {
-    const isTextMentionInputFocused =
-      (!isNil(containerRef.current) &&
-        containerRef.current.contains(document.activeElement)) ||
-      doesHaveInputThatUsesMentionClass(document.activeElement);
-
-    setShowDataSelector(isTextMentionInputFocused);
-  }, []);
-
-  useEffect(() => {
-    document.addEventListener('focusin', checkFocus);
-    document.addEventListener('focusout', checkFocus);
-
-    return () => {
-      document.removeEventListener('focusin', checkFocus);
-      document.removeEventListener('focusout', checkFocus);
-    };
-  }, [checkFocus]);
 
   return (
     <div
-      ref={containerRef}
       tabIndex={0}
       className={cn(
-        'absolute bottom-[0px]  mr-5 mb-5  right-[0px]  z-50 transition-all  border border-solid border-outline overflow-x-hidden bg-background shadow-lg rounded-md',
+        'mr-5 mb-5 z-50 transition-all border border-solid border-outline overflow-x-hidden bg-background shadow-lg rounded-md',
         {
-          'opacity-0 pointer-events-none': !showDataSelector,
+          hidden: !showDataSelector,
         },
+        className,
       )}
     >
       <div className="text-lg items-center font-semibold px-5 py-2 flex gap-2">

@@ -186,5 +186,8 @@ module.exports = {
         body: { letterSpacing: '0.01em' },
       });
     },
+    function ({ addVariant }) {
+      addVariant('children', '& *');
+    },
   ],
 };
