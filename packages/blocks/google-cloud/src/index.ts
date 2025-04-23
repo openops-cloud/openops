@@ -16,6 +16,6 @@ export const googleCloud = createBlock({
     getRecommendationsAction,
     executeSqlQueryAction,
   ],
-  categories: [BlockCategory.CLOUD],
+  categories: [BlockCategory.CLOUD, BlockCategory.DATA_SOURCES],
   triggers: [],
 });
