@@ -23,7 +23,10 @@ export const aiConfigService = {
     let existing: AiConfig | null = null;
 
     if (request.id) {
-      existing = await this.get({ projectId, id: request.id });
+      existing = await repo().findOneBy({
+        id: request.id,
+        projectId,
+      });
     } else {
       existing = await repo().findOneBy({
         projectId,
