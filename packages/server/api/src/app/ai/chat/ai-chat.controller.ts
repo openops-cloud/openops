@@ -109,7 +109,7 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
     });
   });
 
-  app.delete('/:chatId', DeleteChatOptions, async (request, reply) => {
+  app.delete('/conversation/:chatId', DeleteChatOptions, async (request, reply) => {
     const { chatId } = request.params;
 
     try {
