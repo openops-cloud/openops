@@ -2,7 +2,6 @@ import { createAction, Property } from '@openops/blocks-framework';
 import {
   BqColumnTypesEnum,
   dryRunCheckBox,
-  getTableFields,
   getUseHostSessionProperty,
   googleCloudAuth,
   handleCliError,
@@ -19,7 +18,7 @@ type SqlQueryParams =
     }
   | undefined;
 
-export const executeSqlQuery = createAction({
+export const executeSqlQueryAction = createAction({
   auth: googleCloudAuth,
   name: 'google_execute_sql_query',
   displayName: 'Run BigQuery SQL Query',
