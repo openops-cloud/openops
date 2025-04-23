@@ -135,9 +135,6 @@ const invalidConfigError = (
 } => {
   return {
     valid: false,
-    error: {
-      errorName: errorName,
-      errorMessage: errorMessage,
-    },
+    error: { errorName, errorMessage },
   };
 };
