@@ -45,4 +45,30 @@ export const aiConfigService = {
       apiKey: AiApiKeyRedactionMessage,
     };
   },
+
+  async list(projectId: string): Promise<AiConfig[]> {
+    const configs = await repo().findBy({
+      projectId,
+    });
+
+    const redactedConfigs = configs.map((config) => ({
+      ...config,
+      apiKey: AiApiKeyRedactionMessage,
+    }));
+
+    return redactedConfigs;
+  },
+
+  async get(params: { projectId: string; id: string }): Promise<AiConfig> {
+    const { projectId, id } = params;
+    const config = await repo().findOneByOrFail({
+      id,
+      projectId,
+    });
+
+    return {
+      ...config,
+      apiKey: AiApiKeyRedactionMessage,
+    };
+  },
 };
