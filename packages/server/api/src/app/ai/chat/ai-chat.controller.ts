@@ -1,17 +1,20 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { getAiProviderLanguageModel } from '@openops/common';
 import {
+  DeleteChatHistoryRequest,
   NewMessageRequest,
   OpenChatRequest,
   OpenChatResponse,
   PrincipalType,
 } from '@openops/shared';
 import { CoreMessage, pipeDataStreamToResponse, streamText } from 'ai';
+import { StatusCodes } from 'http-status-codes';
 import { encryptUtils } from '../../helper/encryption';
 import { aiConfigService } from '../config/ai-config.service';
 import {
   ChatContext,
   createChatContext,
+  deleteChatHistory,
   generateChatId,
   getChatContext,
   getChatHistory,
@@ -105,6 +108,20 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
       },
     });
   });
+
+  app.delete('/:chatId', DeleteChatOptions, async (request, reply) => {
+    const { chatId } = request.params;
+
+    try {
+      await deleteChatHistory(chatId);
+      return await reply.code(StatusCodes.OK).send();
+    } catch (error) {
+      request.log.error(error);
+      return reply.code(StatusCodes.INTERNAL_SERVER_ERROR).send({
+        message: 'Failed to delete chat history',
+      });
+    }
+  });
 };
 
 const OpenChatOptions = {
@@ -127,5 +144,16 @@ const NewMessageOptions = {
     tags: ['ai', 'ai-chat'],
     description: 'Sends a message to the chat session',
     body: NewMessageRequest,
+  },
+};
+
+const DeleteChatOptions = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
+  },
+  schema: {
+    tags: ['ai', 'ai-chat'],
+    description: 'Deletes a chat history chat ID.',
+    params: DeleteChatHistoryRequest,
   },
 };
