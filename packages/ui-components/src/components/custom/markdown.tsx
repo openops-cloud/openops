@@ -11,6 +11,7 @@ import validator from 'validator';
 import { clipboardUtils } from '../../lib/clipboard-utils';
 import { cn } from '../../lib/cn';
 import { COPY_PASTE_TOAST_DURATION } from '../../lib/constants';
+import { CodeVariations, MarkdownCodeVariations } from './types';
 
 function applyVariables(markdown: string, variables: Record<string, string>) {
   return markdown
@@ -20,19 +21,12 @@ function applyVariables(markdown: string, variables: Record<string, string>) {
     });
 }
 
-const CODE_VARIATION_MAP = {
-  'without-copy': 'without-copy',
-  'with-copy': 'with-copy',
-  'with-copy-and-inject': 'with-copy-and-inject',
-};
-
 type MarkdownProps = {
   markdown: string | undefined;
   variables?: Record<string, string>;
   className?: string;
   withBorder?: boolean;
-  // todo values of the map
-  codeVariation?: keyof typeof CODE_VARIATION_MAP;
+  codeVariation?: CodeVariations;
   handleInject?: (codeContent: string) => void;
 };
 
@@ -56,14 +50,12 @@ const LanguageText = ({
   codeVariation,
 }: {
   content: string;
-  // todo type
-  codeVariation?: keyof typeof CODE_VARIATION_MAP;
+  codeVariation?: CodeVariations;
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // todo better name
   const isInjectVariation =
-    codeVariation === CODE_VARIATION_MAP['with-copy-and-inject'];
+    codeVariation === MarkdownCodeVariations.WithCopyAndInject;
 
   useEffect(() => {
     const textarea = textareaRef.current;
@@ -149,7 +141,7 @@ const Markdown = React.memo(
     markdown,
     variables,
     withBorder = true,
-    codeVariation = 'with-copy',
+    codeVariation = MarkdownCodeVariations.WithCopy,
     handleInject,
   }: MarkdownProps) => {
     const { toast } = useToast();
@@ -223,8 +215,7 @@ const Markdown = React.memo(
                       codeVariation={codeVariation}
                     />
                   )}
-                  {/* todo */}
-                  {codeVariation === CODE_VARIATION_MAP['with-copy'] && (
+                  {codeVariation === MarkdownCodeVariations.WithCopy && (
                     <Button
                       variant="ghost"
                       className="absolute right-2 top-1/2 -translate-y-1/2 bg-background rounded p-2 inline-flex items-center justify-center"
@@ -234,7 +225,7 @@ const Markdown = React.memo(
                     </Button>
                   )}
                   {codeVariation ===
-                    CODE_VARIATION_MAP['with-copy-and-inject'] && (
+                    MarkdownCodeVariations.WithCopyAndInject && (
                     <div className="flex gap-2 items-center justify-end mt-1">
                       <Button
                         size="sm"
