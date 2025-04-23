@@ -190,7 +190,8 @@ const CreateEditConnectionDialogContent = ({
       <ScrollArea className="h-full">
         <Markdown
           markdown={auth?.description}
-          showCopyButton={false}
+          // todo
+          codeVariation="without-copy"
         ></Markdown>
         {auth?.description && <Separator className="my-4" />}
         <Form {...form}>

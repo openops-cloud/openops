@@ -4,11 +4,12 @@ import { Button } from '../../ui/button';
 import { useToast } from '../../ui/use-toast';
 
 import { t } from 'i18next';
-import { Copy } from 'lucide-react';
-import React from 'react';
+import { Copy, Plus } from 'lucide-react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import validator from 'validator';
 import { clipboardUtils } from '../../lib/clipboard-utils';
+import { cn } from '../../lib/cn';
 import { COPY_PASTE_TOAST_DURATION } from '../../lib/constants';
 
 function applyVariables(markdown: string, variables: Record<string, string>) {
@@ -19,12 +20,20 @@ function applyVariables(markdown: string, variables: Record<string, string>) {
     });
 }
 
+const CODE_VARIATION_MAP = {
+  'without-copy': 'without-copy',
+  'with-copy': 'with-copy',
+  'with-copy-and-inject': 'with-copy-and-inject',
+};
+
 type MarkdownProps = {
   markdown: string | undefined;
   variables?: Record<string, string>;
   className?: string;
   withBorder?: boolean;
-  showCopyButton?: boolean;
+  // todo values of the map
+  codeVariation?: keyof typeof CODE_VARIATION_MAP;
+  handleInject?: (codeContent: string) => void;
 };
 
 const Container = ({
@@ -42,7 +51,61 @@ const Container = ({
     children
   );
 
-const LanguageText = ({ content }: { content: string }) => {
+const LanguageText = ({
+  content,
+  codeVariation,
+}: {
+  content: string;
+  // todo type
+  codeVariation?: keyof typeof CODE_VARIATION_MAP;
+}) => {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // todo better name
+  const isInjectVariation =
+    codeVariation === CODE_VARIATION_MAP['with-copy-and-inject'];
+
+  useEffect(() => {
+    const textarea = textareaRef.current;
+
+    if (textarea) {
+      const lineCount = textarea.value.split('\n').length;
+      const isSingleLine = lineCount === 1;
+
+      textarea.style.height = 'auto';
+      const newHeight = isSingleLine
+        ? textarea.scrollHeight
+        : textarea.scrollHeight + 16; // adding the extra padding
+      textarea.style.height = `${newHeight}px`;
+
+      if (isSingleLine) {
+        textarea.style.lineHeight = `32px`;
+        textarea.style.paddingTop = '0';
+        textarea.style.paddingBottom = '0';
+      } else {
+        textarea.style.lineHeight = '';
+        textarea.style.paddingTop = '8px';
+        textarea.style.paddingBottom = '8px';
+      }
+    }
+  }, [content]);
+
+  if (isInjectVariation) {
+    return (
+      <textarea
+        ref={textareaRef}
+        className={cn(
+          'px-3 border border-solid text-sm rounded block w-full resize-none leading-tight bg-background',
+          {
+            'bg-input rounded-lg border-none': isInjectVariation,
+          },
+        )}
+        value={content}
+        disabled
+      />
+    );
+  }
+
   return (
     <input
       type="text"
@@ -86,7 +149,8 @@ const Markdown = React.memo(
     markdown,
     variables,
     withBorder = true,
-    showCopyButton = true,
+    codeVariation = 'with-copy',
+    handleInject,
   }: MarkdownProps) => {
     const { toast } = useToast();
 
@@ -117,6 +181,15 @@ const Markdown = React.memo(
       }
     };
 
+    const onInjectCode = useCallback(
+      (codeContent: string) => {
+        if (codeContent && handleInject && typeof handleInject === 'function') {
+          handleInject(codeContent);
+        }
+      },
+      [handleInject],
+    );
+
     if (!markdown) {
       return null;
     }
@@ -136,13 +209,17 @@ const Markdown = React.memo(
 
               const codeContent = String(props.children).trim();
               return (
-                <div className="relative py-2 w-full">
+                <div className={cn('relative py-2 w-full')}>
                   {isLanguageUrl ? (
                     <LanguageUrl content={codeContent} />
                   ) : (
-                    <LanguageText content={codeContent} />
+                    <LanguageText
+                      content={codeContent}
+                      codeVariation={codeVariation}
+                    />
                   )}
-                  {showCopyButton && (
+                  {/* todo */}
+                  {codeVariation === CODE_VARIATION_MAP['with-copy'] && (
                     <Button
                       variant="ghost"
                       className="absolute right-2 top-1/2 -translate-y-1/2 bg-background rounded p-2 inline-flex items-center justify-center"
@@ -150,6 +227,28 @@ const Markdown = React.memo(
                     >
                       <Copy className="w-4 h-4" />
                     </Button>
+                  )}
+                  {codeVariation ===
+                    CODE_VARIATION_MAP['with-copy-and-inject'] && (
+                    <div className="flex gap-2 items-center justify-end mt-1">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="bg-background rounded p-2 inline-flex items-center justify-center text-xs font-sans"
+                        onClick={() => onInjectCode(codeContent)}
+                      >
+                        <Plus className="w-4 h-4" />
+                        {t('Inject command')}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="bg-background rounded p-2 inline-flex items-center justify-center"
+                        onClick={() => copyToClipboard(codeContent)}
+                      >
+                        <Copy className="w-4 h-4" />
+                      </Button>
+                    </div>
                   )}
                 </div>
               );
@@ -193,6 +292,9 @@ const Markdown = React.memo(
             ),
             blockquote: ({ node, ...props }) => (
               <blockquote className="mt-6 border-l-2 pl-6 italic" {...props} />
+            ),
+            input: ({ node, ...props }) => (
+              <input className="bg-input" {...props} />
             ),
           }}
         >

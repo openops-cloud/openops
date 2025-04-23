@@ -109,6 +109,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
  */
 export const CodeBlocks: Story = {
   args: {
+    codeVariation: 'with-copy',
     markdown: `
 ### Code blocks with variables
 Language json 👇
@@ -138,5 +139,110 @@ Language URL, valid URL 👇
     expect(links).toHaveLength(1);
     expect(links[0]).toHaveAttribute('href', 'https://some.clickable.url');
     expect(links[0]).toHaveAttribute('target', '_blank');
+  },
+};
+
+export const InjectCommand: Story = {
+  args: {
+    codeVariation: 'with-copy-and-inject',
+    markdown: `
+### Describe EC2 Instances
+\`\`\`text
+aws ec2 describe-instances
+`,
+  },
+};
+
+export const InjectCommandMultiLine: Story = {
+  args: {
+    codeVariation: 'with-copy-and-inject',
+    markdown: `
+### S3 Sync
+\`\`\`text
+aws s3 sync\n  --exclude "*"\n  --include "*.jpg"\n  <local-dir> s3://<bucket-name>
+\`\`\`
+`,
+  },
+};
+
+export const ComplexExample: Story = {
+  args: {
+    codeVariation: 'with-copy-and-inject',
+    markdown: `
+## AWS Infrastructure Management Guide
+
+This guide covers common AWS infrastructure management tasks and their corresponding CLI commands.
+
+### S3 Operations
+
+Basic S3 sync with multiple flags:
+\`\`\`text
+aws s3 sync
+  --delete
+  --exclude "*"
+  --include "*.jpg"
+  --include "*.png"
+  --acl public-read
+  /local/path s3://my-bucket/
+\`\`\`
+
+### EC2 Instance Management
+
+List all running instances with custom output format:
+\`\`\`text
+aws ec2 describe-instances
+  --filters "Name=instance-state-name,Values=running"
+  --query 'Reservations[*].Instances[*].[InstanceId,InstanceType,State.Name,Tags[?Key==\`Name\`].Value|[0]]'
+  --output table
+\`\`\`
+
+### URL Examples
+Valid AWS Console URL:
+\`\`\`url
+https://console.aws.amazon.com/ec2/v2/home?region=us-west-2
+\`\`\`
+
+> **Note**: Always verify your region and account settings before running destructive commands.
+
+### Complex Commands
+
+Start EC2 instance with detailed monitoring and tags:
+\`\`\`text
+aws ec2 run-instances
+  --image-id ami-0123456789abcdef0
+  --instance-type t3.micro
+  --monitoring Enabled=true
+  --tag-specifications 'ResourceType=instance,Tags=[{Key=Environment,Value=Production},{Key=Team,Value=DevOps}]'
+  --user-data file://startup-script.sh
+\`\`\`
+
+### Single Line Commands
+Simple status check:
+\`\`\`text
+aws ec2 describe-instance-status --instance-ids i-1234567890abcdef0
+\`\`\`
+
+### Variable Example
+Using environment variables:
+\`\`\`text
+aws s3 cp {{file_path}} s3://{{bucket_name}}/{{target_path}}
+\`\`\`
+
+### Edge Cases
+Empty command (should handle gracefully):
+\`\`\`text
+
+\`\`\`
+
+Very long single line (should handle overflow):
+\`\`\`text
+aws iam create-role --role-name very-long-role-name-that-might-overflow --assume-role-policy-document file://trust-policy.json --description "This is a very long description that might cause text wrapping issues in the UI component and should be handled gracefully without breaking the layout or making the text unreadable"
+\`\`\`
+`,
+    variables: {
+      file_path: '/path/to/file.zip',
+      bucket_name: 'my-deployment-bucket',
+      target_path: 'releases/v1.0.0/file.zip',
+    },
   },
 };
