@@ -53,7 +53,7 @@ export const aiConfigController: FastifyPluginAsyncTypebox = async (app) => {
   app.get(
     '/active',
     getAiConfigRequest,
-    async (request, reply): Promise<AiConfig[]> => {
+    async (request, reply): Promise<AiConfig> => {
       const config = await aiConfigService.getActiveConfig(
         request.principal.projectId,
       );

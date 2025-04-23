@@ -13,9 +13,17 @@ const repo = repoFactory(AiConfigEntity);
 type AiConfigRedacted = Omit<AiConfig, 'apiKey'> & {
   apiKey: typeof AiApiKeyRedactionMessage;
 };
+
 type AiConfigModel<T extends boolean> = T extends true
   ? AiConfigRedacted
   : AiConfig;
+
+function redactApiKey(config: AiConfig): AiConfigRedacted {
+  return {
+    ...config,
+    apiKey: AiApiKeyRedactionMessage,
+  };
+}
 
 export const aiConfigService = {
   async upsert(params: {
@@ -36,6 +44,7 @@ export const aiConfigService = {
         provider: request.provider,
       });
     }
+
     const aiConfig: Partial<AiConfig> = {
       ...request,
       projectId,
@@ -59,23 +68,13 @@ export const aiConfigService = {
       projectId,
       provider: request.provider,
     });
-    return {
-      ...config,
-      apiKey: AiApiKeyRedactionMessage,
-    };
+
+    return redactApiKey(config);
   },
 
   async list(projectId: string): Promise<AiConfigRedacted[]> {
-    const configs = await repo().findBy({
-      projectId,
-    });
-
-    const redactedConfigs = configs.map((config) => ({
-      ...config,
-      apiKey: AiApiKeyRedactionMessage,
-    }));
-
-    return redactedConfigs;
+    const configs = await repo().findBy({ projectId });
+    return configs.map(redactApiKey);
   },
 
   async get<T extends boolean>(
@@ -83,18 +82,13 @@ export const aiConfigService = {
     redacted: T = true as T,
   ): Promise<AiConfigModel<T> | undefined> {
     const { projectId, id } = params;
-    const config = await repo().findOneBy({
-      id,
-      projectId,
-    });
+    const config = await repo().findOneBy({ id, projectId });
 
     if (isNil(config)) {
       return undefined;
     }
 
-    return redacted
-      ? { ...config, apiKey: AiApiKeyRedactionMessage }
-      : (config as AiConfigModel<T>);
+    return redacted ? redactApiKey(config) : (config as AiConfigModel<T>);
   },
 
   async getActiveConfig<T extends boolean>(
@@ -110,8 +104,6 @@ export const aiConfigService = {
       return undefined;
     }
 
-    return redacted
-      ? { ...config, apiKey: AiApiKeyRedactionMessage }
-      : (config as AiConfigModel<T>);
+    return redacted ? redactApiKey(config) : (config as AiConfigModel<T>);
   },
 };
