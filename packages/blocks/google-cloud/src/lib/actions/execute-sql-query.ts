@@ -1,6 +1,8 @@
-import { createAction, Property, Validators } from '@openops/blocks-framework';
+import { createAction, Property } from '@openops/blocks-framework';
 import {
+  BqColumnTypesEnum,
   dryRunCheckBox,
+  getTableFields,
   getUseHostSessionProperty,
   googleCloudAuth,
   handleCliError,
@@ -8,6 +10,14 @@ import {
 } from '@openops/common';
 import { projectCliDropdown } from '../common-properties';
 import { runCommand } from '../google-cloud-cli';
+
+type SqlQueryParams =
+  | {
+      paramName: string;
+      columnType: { label: BqColumnTypesEnum; value: BqColumnTypesEnum };
+      value: string;
+    }
+  | undefined;
 
 export const executeSqlQuery = createAction({
   auth: googleCloudAuth,
@@ -26,37 +36,71 @@ export const executeSqlQuery = createAction({
       description:
         'The SQL statement to execute. You can use named parameters like `:name` or numbered placeholders like `:1`, `:2`, etc.',
     }),
-    params: Property.Object({
-      displayName: 'Parameters',
+    params: Property.DynamicProperties({
+      displayName: '',
       required: false,
-      description:
-        'Optional parameter values to bind to the SQL query. Use a key-value structure where keys match named parameters or position indices.',
-    }),
-    timeout: Property.Number({
-      displayName: 'Query timeout',
-      description:
-        'Maximum number of seconds to wait for a query to complete before timing out. Min value is 5',
-      required: true,
-      validators: [Validators.number, Validators.minValue(0)],
-      defaultValue: 60,
+      refreshers: [],
+      props: async () => {
+        return {
+          items: Property.Array({
+            displayName: 'Parameters',
+            required: false,
+            properties: {
+              paramName: Property.ShortText({
+                displayName: 'Parameter name',
+                required: true,
+              }),
+              columnType: Property.StaticDropdown({
+                displayName: 'Column type',
+                required: true,
+                options: {
+                  options: Object.keys(BqColumnTypesEnum).map((key) => ({
+                    label:
+                      BqColumnTypesEnum[key as keyof typeof BqColumnTypesEnum],
+                    value: key,
+                  })),
+                },
+              }),
+              value: Property.ShortText({
+                displayName: 'Parameter value',
+                required: true,
+              }),
+            },
+          }),
+        } as { [key: string]: any };
+      },
     }),
     dryRun: dryRunCheckBox(),
   },
   async run({ propsValue, auth }) {
-    const { project, sqlText, timeout, params, dryRun } = propsValue;
+    const { project, sqlText, dryRun } = propsValue;
 
-    if (dryRun) {
-      return `Step execution skipped, dry run flag enabled. Google Cloud CLI command will not be executed. Command: '${sqlText}'`;
-    }
+    const params: SqlQueryParams[] = propsValue.params?.['items'] ?? [];
 
     try {
+      const paramFlags =
+        params.map(
+          (param) =>
+            `--parameter='${param?.paramName}:${param?.columnType}:${param?.value}'`,
+        ) ?? [];
+
+      const command = [
+        'bq query',
+        '--nouse_legacy_sql',
+        '--format=json',
+        ...(dryRun ? ['--dry_run'] : []),
+        ...paramFlags,
+        `'${sqlText}'`,
+      ].join(' ');
+
       const result = await runCommand(
-        `bq query --nouse_legacy_sql '${sqlText}'`,
+        command,
         auth,
         propsValue.useHostSession?.['useHostSessionCheckbox'],
         project,
         'bq',
       );
+
       return tryParseJson(result);
     } catch (error) {
       handleCliError({
