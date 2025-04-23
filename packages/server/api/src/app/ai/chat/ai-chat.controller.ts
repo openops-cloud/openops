@@ -1,5 +1,6 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { getAiProviderLanguageModel } from '@openops/common';
+import { logger } from '@openops/server-shared';
 import {
   DeleteChatHistoryRequest,
   NewMessageRequest,
@@ -109,19 +110,23 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
     });
   });
 
-  app.delete('/conversation/:chatId', DeleteChatOptions, async (request, reply) => {
-    const { chatId } = request.params;
+  app.delete(
+    '/conversation/:chatId',
+    DeleteChatOptions,
+    async (request, reply) => {
+      const { chatId } = request.params;
 
-    try {
-      await deleteChatHistory(chatId);
-      return await reply.code(StatusCodes.OK).send();
-    } catch (error) {
-      request.log.error(error);
-      return reply.code(StatusCodes.INTERNAL_SERVER_ERROR).send({
-        message: 'Failed to delete chat history',
-      });
-    }
-  });
+      try {
+        await deleteChatHistory(chatId);
+        return await reply.code(StatusCodes.OK).send();
+      } catch (error) {
+        logger.error('', error);
+        return reply.code(StatusCodes.INTERNAL_SERVER_ERROR).send({
+          message: 'Failed to delete chat history',
+        });
+      }
+    },
+  );
 };
 
 const OpenChatOptions = {
