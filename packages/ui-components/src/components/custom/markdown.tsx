@@ -203,11 +203,16 @@ const Markdown = React.memo(
               const isLanguageText = props.className?.includes('language-text');
               const isLanguageUrl = props.className?.includes('language-url');
 
+              if (!props.children) {
+                return null;
+              }
+
               if (!isLanguageText && !isLanguageUrl) {
                 return <code {...props} className="text-wrap" />;
               }
 
               const codeContent = String(props.children).trim();
+
               return (
                 <div className={cn('relative py-2 w-full')}>
                   {isLanguageUrl ? (
