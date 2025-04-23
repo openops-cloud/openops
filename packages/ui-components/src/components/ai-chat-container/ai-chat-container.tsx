@@ -86,7 +86,7 @@ const AiChatContainer = ({
           <div className="py-8 flex flex-col h-full">
             <div className="flex-1 px-6">
               <div className="justify-center dark:text-primary text-base font-bold leading-[25px]">
-                <span>Welcome to OpenOps AI Chat!</span>
+                <span>{t('Welcome to OpenOps AI Chat!')}</span>
               </div>
               {children}
             </div>
