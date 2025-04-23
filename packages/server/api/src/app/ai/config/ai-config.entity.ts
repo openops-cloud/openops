@@ -7,7 +7,7 @@ import {
   OpenOpsIdSchema,
 } from '../../database/database-common';
 
-export const AiApiKeyRedactionMessage = '**REDACTED**' as const;
+export const AiApiKeyRedactionMessage = '**REDACTED**';
 
 export type AiConfigSchema = AiConfig & {
   project: Project;
