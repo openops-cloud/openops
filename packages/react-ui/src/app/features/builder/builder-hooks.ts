@@ -1,4 +1,9 @@
-import { INTERNAL_ERROR_TOAST, toast } from '@openops/components/ui';
+import {
+  AI_CHAT_CONTAINER_SIZES,
+  AiChatContainerSizeState,
+  INTERNAL_ERROR_TOAST,
+  toast,
+} from '@openops/components/ui';
 import { useMutation } from '@tanstack/react-query';
 import { createContext, useContext } from 'react';
 import { create, StateCreator, useStore } from 'zustand';
@@ -18,6 +23,7 @@ import {
   TriggerType,
 } from '@openops/shared';
 import { flowRunUtils } from '../flow-runs/lib/flow-run-utils';
+import { DataSelectorSizeState } from './data-selector/data-selector-size-togglers';
 
 const flowUpdatesQueue = new PromiseQueue();
 
@@ -47,6 +53,23 @@ export enum RightSideBarType {
 }
 
 type InsertMentionHandler = (propertyPath: string) => void;
+
+type MidpanelState = {
+  showDataSelector: boolean;
+  dataSelectorSize: DataSelectorSizeState;
+  showAiChat: boolean;
+  aiContainerSize: AiChatContainerSizeState;
+};
+
+type MidpanelAction =
+  | { type: 'FOCUS_INPUT_WITH_MENTIONS' }
+  | { type: 'DATASELECTOR_MIMIZE_CLICK' }
+  | { type: 'DATASELECTOR_DOCK_CLICK' }
+  | { type: 'DATASELECTOR_EXPAND_CLICK' }
+  | { type: 'AICHAT_CLOSE_CLICK' }
+  | { type: 'AICHAT_TOGGLE_SIZE' }
+  | { type: 'PANEL_CLICK_AWAY' }
+  | { type: 'GENERATE_WITH_AI_CLICK' };
 
 export type BuilderState = {
   flow: Flow;
@@ -92,6 +115,8 @@ export type BuilderState = {
   setCanRedo: (canUndo: boolean) => void;
   dynamicPropertiesAuthReconnectCounter: number;
   refreshDynamicPropertiesForAuth: () => void;
+  midpanelState: MidpanelState;
+  applyMidpanelAction: (midpanelAction: MidpanelAction) => void;
 };
 
 export type BuilderInitialState = Pick<
@@ -364,6 +389,18 @@ export const createBuilderStore = (initialState: BuilderInitialState) =>
             false,
             'refreshDynamicProperties',
           ),
+        midpanelState: {
+          showDataSelector: false,
+          dataSelectorSize: DataSelectorSizeState.DOCKED,
+          showAiChat: false,
+          aiContainerSize: AI_CHAT_CONTAINER_SIZES.COLLAPSED,
+        },
+        applyMidpanelAction: (midpanelAction: MidpanelAction) =>
+          set(
+            (state) => applyMidpanelAction(state, midpanelAction),
+            false,
+            'applyMidpanelAction',
+          ),
       }),
       {
         enabled: process.env.NODE_ENV !== 'production',
@@ -431,6 +468,80 @@ export type UndoHistoryRelevantFlowOperationRequest = Extract<
       | FlowOperationType.PASTE_ACTIONS;
   }
 >;
+
+const applyMidpanelAction = (state: BuilderState, action: MidpanelAction) => {
+  let newMidpanelState: Partial<MidpanelState>;
+  const oldDataSelectorSize = state.midpanelState.dataSelectorSize;
+  const oldShowAiChat = state.midpanelState.showAiChat;
+
+  switch (action.type) {
+    case 'FOCUS_INPUT_WITH_MENTIONS':
+      newMidpanelState = {
+        showDataSelector: true,
+        dataSelectorSize: oldShowAiChat
+          ? DataSelectorSizeState.DOCKED
+          : oldDataSelectorSize,
+        aiContainerSize: AI_CHAT_CONTAINER_SIZES.COLLAPSED,
+      };
+      break;
+    case 'DATASELECTOR_MIMIZE_CLICK':
+      newMidpanelState = {
+        dataSelectorSize: DataSelectorSizeState.COLLAPSED,
+        aiContainerSize: AI_CHAT_CONTAINER_SIZES.DOCKED,
+      };
+      break;
+    case 'DATASELECTOR_DOCK_CLICK':
+      newMidpanelState = {
+        dataSelectorSize: DataSelectorSizeState.DOCKED,
+        aiContainerSize: AI_CHAT_CONTAINER_SIZES.COLLAPSED,
+      };
+      break;
+    case 'DATASELECTOR_EXPAND_CLICK':
+      newMidpanelState = {
+        dataSelectorSize: DataSelectorSizeState.EXPANDED,
+        aiContainerSize: AI_CHAT_CONTAINER_SIZES.COLLAPSED,
+      };
+      break;
+    case 'AICHAT_CLOSE_CLICK':
+      newMidpanelState = {
+        showAiChat: false,
+        dataSelectorSize: DataSelectorSizeState.DOCKED,
+      };
+      break;
+    case 'AICHAT_TOGGLE_SIZE':
+      newMidpanelState = {
+        aiContainerSize:
+          state.midpanelState.aiContainerSize === AI_CHAT_CONTAINER_SIZES.DOCKED
+            ? AI_CHAT_CONTAINER_SIZES.COLLAPSED
+            : AI_CHAT_CONTAINER_SIZES.DOCKED,
+        dataSelectorSize:
+          state.midpanelState.dataSelectorSize ===
+          DataSelectorSizeState.COLLAPSED
+            ? DataSelectorSizeState.DOCKED
+            : DataSelectorSizeState.COLLAPSED,
+      };
+      break;
+    case 'PANEL_CLICK_AWAY':
+      newMidpanelState = {
+        showDataSelector: false,
+        aiContainerSize: AI_CHAT_CONTAINER_SIZES.DOCKED,
+      };
+      break;
+    case 'GENERATE_WITH_AI_CLICK':
+      newMidpanelState = {
+        showAiChat: true,
+        aiContainerSize: AI_CHAT_CONTAINER_SIZES.DOCKED,
+        dataSelectorSize: DataSelectorSizeState.COLLAPSED,
+      };
+      break;
+    default:
+      newMidpanelState = state.midpanelState;
+      break;
+  }
+  return {
+    midpanelState: { ...state.midpanelState, ...newMidpanelState },
+  };
+};
 
 const updateFlowVersion = (
   state: BuilderState,

@@ -1,7 +1,7 @@
 import {
   AiConfig,
+  isNil,
   openOpsId,
-  ProjectId,
   SaveAiConfigRequest,
 } from '@openops/shared';
 import { repoFactory } from '../../core/db/repo-factory';
@@ -10,22 +10,45 @@ import { AiApiKeyRedactionMessage, AiConfigEntity } from './ai-config.entity';
 
 const repo = repoFactory(AiConfigEntity);
 
+type AiConfigRedacted = Omit<AiConfig, 'apiKey'> & {
+  apiKey: typeof AiApiKeyRedactionMessage;
+};
+
+type AiConfigModel<T extends boolean> = T extends true
+  ? AiConfigRedacted
+  : AiConfig;
+
+function redactApiKey(config: AiConfig): AiConfigRedacted {
+  return {
+    ...config,
+    apiKey: AiApiKeyRedactionMessage,
+  };
+}
+
 export const aiConfigService = {
   async upsert(params: {
     projectId: string;
     request: SaveAiConfigRequest;
-  }): Promise<AiConfig> {
+  }): Promise<AiConfigRedacted> {
     const { projectId, request } = params;
+    let existing: AiConfig | null = null;
 
-    const existing = await repo().findOneBy({
-      projectId,
-      provider: request.provider,
-    });
+    if (request.id) {
+      existing = await repo().findOneBy({
+        id: request.id,
+        projectId,
+      });
+    } else {
+      existing = await repo().findOneBy({
+        projectId,
+        provider: request.provider,
+      });
+    }
 
     const aiConfig: Partial<AiConfig> = {
       ...request,
       projectId,
-      id: request.id ?? existing?.id ?? openOpsId(),
+      id: existing?.id ?? openOpsId(),
       created: existing?.created ?? new Date().toISOString(),
       updated: new Date().toISOString(),
     };
@@ -45,21 +68,42 @@ export const aiConfigService = {
       projectId,
       provider: request.provider,
     });
-    return {
-      ...config,
-      apiKey: AiApiKeyRedactionMessage,
-    };
-  },
-  async getAiConfig(params: GetOneParams): Promise<AiConfig | null> {
-    const { projectId } = params;
 
-    return repo().findOneBy({
+    return redactApiKey(config);
+  },
+
+  async list(projectId: string): Promise<AiConfigRedacted[]> {
+    const configs = await repo().findBy({ projectId });
+    return configs.map(redactApiKey);
+  },
+
+  async get<T extends boolean>(
+    params: { projectId: string; id: string },
+    redacted: T = true as T,
+  ): Promise<AiConfigModel<T> | undefined> {
+    const { projectId, id } = params;
+    const config = await repo().findOneBy({ id, projectId });
+
+    if (isNil(config)) {
+      return undefined;
+    }
+
+    return redacted ? redactApiKey(config) : (config as AiConfigModel<T>);
+  },
+
+  async getActiveConfig<T extends boolean>(
+    projectId: string,
+    redacted: T = true as T,
+  ): Promise<AiConfigModel<T> | undefined> {
+    const config = await repo().findOneBy({
       projectId,
       enabled: true,
     });
-  },
-};
 
-type GetOneParams = {
-  projectId: ProjectId;
+    if (isNil(config)) {
+      return undefined;
+    }
+
+    return redacted ? redactApiKey(config) : (config as AiConfigModel<T>);
+  },
 };

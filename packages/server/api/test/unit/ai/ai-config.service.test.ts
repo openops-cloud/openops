@@ -8,6 +8,7 @@ jest.mock('@openops/shared', () => ({
 const findOneByMock = jest.fn();
 const upsertMock = jest.fn();
 const findOneByOrFailMock = jest.fn();
+const findByMock = jest.fn();
 
 jest.mock('../../../src/app/core/db/repo-factory', () => ({
   ...jest.requireActual('../../../src/app/core/db/repo-factory'),
@@ -15,6 +16,7 @@ jest.mock('../../../src/app/core/db/repo-factory', () => ({
     findOneBy: findOneByMock,
     upsert: upsertMock,
     findOneByOrFail: findOneByOrFailMock,
+    findBy: findByMock,
   }),
 }));
 
@@ -170,7 +172,11 @@ describe('aiConfigService.upsert', () => {
   });
 
   test('should use request.id if provided explicitly', async () => {
-    findOneByMock.mockResolvedValue(null);
+    findOneByMock.mockResolvedValue({
+      ...baseRequest,
+      id: 'explicit-request-id',
+      projectId,
+    });
     findOneByOrFailMock.mockResolvedValue({
       ...baseRequest,
       id: 'explicit-request-id',
@@ -205,6 +211,183 @@ describe('aiConfigService.upsert', () => {
       apiKey: '**REDACTED**',
       id: 'explicit-request-id',
       projectId,
+    });
+  });
+});
+
+describe('aiConfigService.list', () => {
+  const projectId = 'test-project';
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('should return redacted apiKeys for all configs in the list', async () => {
+    const configs = [
+      {
+        id: 'id1',
+        projectId,
+        provider: AiProviderEnum.OPENAI,
+        apiKey: 'encrypted-key-1',
+        model: 'gpt-4',
+        modelSettings: {},
+        providerSettings: {},
+        created: '2025-04-22T12:00:00Z',
+        updated: '2025-04-22T12:00:00Z',
+      },
+      {
+        id: 'id2',
+        projectId,
+        provider: AiProviderEnum.ANTHROPIC,
+        apiKey: 'encrypted-key-2',
+        model: 'claude',
+        modelSettings: {},
+        providerSettings: {},
+        created: '2025-04-22T12:00:00Z',
+        updated: '2025-04-22T12:00:00Z',
+      },
+    ];
+
+    findByMock.mockResolvedValue(configs);
+
+    const result = await aiConfigService.list(projectId);
+
+    expect(findByMock).toHaveBeenCalledWith({ projectId });
+    expect(result).toHaveLength(2);
+    expect(result[0]).toEqual({
+      ...configs[0],
+      apiKey: AiApiKeyRedactionMessage,
+    });
+    expect(result[1]).toEqual({
+      ...configs[1],
+      apiKey: AiApiKeyRedactionMessage,
+    });
+  });
+});
+
+describe('aiConfigService.get', () => {
+  const projectId = 'test-project';
+  const configId = 'config-id-123';
+
+  const config = {
+    id: configId,
+    projectId,
+    provider: AiProviderEnum.OPENAI,
+    apiKey: 'encrypted-key',
+    model: 'gpt-4',
+    modelSettings: {},
+    providerSettings: {},
+    created: '2025-04-22T12:00:00Z',
+    updated: '2025-04-22T12:00:00Z',
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('should return config with redacted apiKey if shouldRedact is true', async () => {
+    findOneByMock.mockResolvedValue({ ...config });
+
+    const result = await aiConfigService.get({ projectId, id: configId }, true);
+
+    expect(findOneByMock).toHaveBeenCalledWith({
+      id: configId,
+      projectId,
+    });
+
+    expect(result).toEqual({
+      ...config,
+      apiKey: AiApiKeyRedactionMessage,
+    });
+  });
+
+  test('should return config with original apiKey if shouldRedact is false', async () => {
+    findOneByMock.mockResolvedValue({ ...config });
+
+    const result = await aiConfigService.get(
+      { projectId, id: configId },
+      false,
+    );
+
+    expect(findOneByMock).toHaveBeenCalledWith({
+      id: configId,
+      projectId,
+    });
+
+    expect(result).toEqual(config);
+  });
+
+  test('should return undefined if config is not found', async () => {
+    findOneByMock.mockResolvedValue(undefined);
+
+    const result = await aiConfigService.get({ projectId, id: configId }, true);
+
+    expect(result).toBeUndefined();
+    expect(findOneByMock).toHaveBeenCalledWith({
+      id: configId,
+      projectId,
+    });
+  });
+});
+
+describe('aiConfigService.getActiveConfig', () => {
+  const projectId = 'active-project';
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const activeConfig = {
+    id: 'active-id',
+    projectId,
+    provider: AiProviderEnum.OPENAI,
+    apiKey: 'encrypted-key',
+    model: 'gpt-4',
+    modelSettings: { temperature: 0.9 },
+    providerSettings: { baseUrl: 'https://api.openai.com' },
+    created: '2025-04-01T10:00:00Z',
+    updated: '2025-04-21T14:00:00Z',
+    enabled: true,
+  };
+
+  test('should return the enabled AI config with redacted API key if redacted=true', async () => {
+    findOneByMock.mockResolvedValue(activeConfig);
+
+    const result = await aiConfigService.getActiveConfig(projectId, true);
+
+    expect(findOneByMock).toHaveBeenCalledWith({
+      projectId,
+      enabled: true,
+    });
+
+    expect(result).toEqual({
+      ...activeConfig,
+      apiKey: AiApiKeyRedactionMessage,
+    });
+  });
+
+  test('should return the enabled AI config with original API key if redacted=false', async () => {
+    findOneByMock.mockResolvedValue(activeConfig);
+
+    const result = await aiConfigService.getActiveConfig(projectId, false);
+
+    expect(findOneByMock).toHaveBeenCalledWith({
+      projectId,
+      enabled: true,
+    });
+
+    expect(result).toEqual(activeConfig);
+  });
+
+  test('should return undefined if no config is found', async () => {
+    findOneByMock.mockResolvedValue(undefined);
+
+    const result = await aiConfigService.getActiveConfig(projectId);
+
+    expect(result).toBeUndefined();
+    expect(findOneByMock).toHaveBeenCalledWith({
+      projectId,
+      enabled: true,
     });
   });
 });
