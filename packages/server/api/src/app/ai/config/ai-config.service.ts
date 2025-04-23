@@ -13,6 +13,9 @@ const repo = repoFactory(AiConfigEntity);
 type AiConfigRedacted = Omit<AiConfig, 'apiKey'> & {
   apiKey: typeof AiApiKeyRedactionMessage;
 };
+type AiConfigModel<T extends boolean> = T extends true
+  ? AiConfigRedacted
+  : AiConfig;
 
 export const aiConfigService = {
   async upsert(params: {
@@ -75,10 +78,10 @@ export const aiConfigService = {
     return redactedConfigs;
   },
 
-  async get(
+  async get<T extends boolean>(
     params: { projectId: string; id: string },
-    redacted = true,
-  ): Promise<AiConfigRedacted | AiConfig | undefined> {
+    redacted: T = true as T,
+  ): Promise<AiConfigModel<T> | undefined> {
     const { projectId, id } = params;
     const config = await repo().findOneBy({
       id,
@@ -89,13 +92,15 @@ export const aiConfigService = {
       return undefined;
     }
 
-    return redacted ? { ...config, apiKey: AiApiKeyRedactionMessage } : config;
+    return redacted
+      ? { ...config, apiKey: AiApiKeyRedactionMessage }
+      : (config as AiConfigModel<T>);
   },
 
-  async getActiveConfig(
+  async getActiveConfig<T extends boolean>(
     projectId: string,
-    redacted = true,
-  ): Promise<AiConfigRedacted | AiConfig | undefined> {
+    redacted: T = true as T,
+  ): Promise<AiConfigModel<T> | undefined> {
     const config = await repo().findOneBy({
       projectId,
       enabled: true,
@@ -105,6 +110,8 @@ export const aiConfigService = {
       return undefined;
     }
 
-    return redacted ? { ...config, apiKey: AiApiKeyRedactionMessage } : config;
+    return redacted
+      ? { ...config, apiKey: AiApiKeyRedactionMessage }
+      : (config as AiConfigModel<T>);
   },
 };
