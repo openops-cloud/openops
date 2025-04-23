@@ -70,7 +70,7 @@ export const getAiProviderLanguageModel = async (aiConfig: {
   provider: AiProviderEnum;
   apiKey: string;
   model: string;
-  providerSettings?: Record<string, unknown>;
+  providerSettings?: Record<string, unknown> | null;
 }): Promise<LanguageModelV1> => {
   const aiProvider = getAiProvider(aiConfig.provider);
 
@@ -82,7 +82,7 @@ export const getAiProviderLanguageModel = async (aiConfig: {
 };
 
 const sanitizeBaseUrl = (
-  providerSettings?: Record<string, unknown>,
+  providerSettings?: Record<string, unknown> | null,
 ): string | undefined => {
   const rawBaseUrl = providerSettings?.['baseUrl'];
   return typeof rawBaseUrl === 'string' && rawBaseUrl.trim() !== ''
