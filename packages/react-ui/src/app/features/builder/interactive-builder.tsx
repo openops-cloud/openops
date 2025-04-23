@@ -16,7 +16,9 @@ import {
   StepLocationRelativeToParent,
 } from '@openops/shared';
 import { MutableRefObject, useCallback, useEffect, useRef } from 'react';
+import { useUpdateEffect } from 'react-use';
 import { useDebounceCallback } from 'usehooks-ts';
+import { Conversation } from './ai-chat/conversation';
 import { textMentionUtils } from './block-properties/text-input-with-mentions/text-input-utils';
 import { BuilderHeader } from './builder-header/builder-header';
 import { useBuilderStateContext } from './builder-hooks';
@@ -139,6 +141,10 @@ const InteractiveBuilder = ({
     }
   };
 
+  useUpdateEffect(() => {
+    dispatch({ type: 'AICHAT_CLOSE_CLICK' });
+  }, [selectedStep]);
+
   return (
     <InteractiveContextProvider
       selectedStep={selectedStep}
@@ -173,7 +179,11 @@ const InteractiveBuilder = ({
                 state.aiContainerSize === AI_CHAT_CONTAINER_SIZES.COLLAPSED &&
                 state.dataSelectorSize === DataSelectorSizeState.DOCKED,
             })}
-          />
+          >
+            {selectedStep && state.showAiChat && (
+              <Conversation stepName={selectedStep} flowVersion={flowVersion} />
+            )}
+          </AiChatContainer>
           <DataSelector
             parentHeight={middlePanelSize.height}
             parentWidth={middlePanelSize.width}
