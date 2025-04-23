@@ -19,6 +19,7 @@ import {
 } from './command';
 import { Input } from './input';
 import { Popover, PopoverContent, PopoverTrigger } from './popover';
+import { ScrollArea } from './scroll-area';
 
 type AutocompleteOption = { value: string; label: string };
 
@@ -82,7 +83,7 @@ const AutocompleteInput = forwardRef<HTMLInputElement, AutocompleteInputProps>(
     );
 
     return (
-      <div className={cn('relative w-fit', className)}>
+      <div className={cn('relative w-full', className)}>
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild disabled={disabled}>
             <div className="flex w-full items-center">
@@ -96,10 +97,14 @@ const AutocompleteInput = forwardRef<HTMLInputElement, AutocompleteInputProps>(
               />
               <Button
                 variant="ghost"
+                role="combobox"
                 aria-expanded={open}
                 disabled={disabled}
-                className="absolute right-0 h-full px-3"
-                onClick={() => setOpen(!open)}
+                className="absolute right-1 h-full px-3"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setOpen(!open);
+                }}
                 tabIndex={-1}
               >
                 <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50 text-foreground" />
@@ -111,24 +116,29 @@ const AutocompleteInput = forwardRef<HTMLInputElement, AutocompleteInputProps>(
               <CommandInput placeholder={placeholder} />
               <CommandList>
                 <CommandEmpty>{t('No results found')}</CommandEmpty>
-                <CommandGroup className="max-h-60 overflow-auto ">
-                  {options.map((option) => (
-                    <CommandItem
-                      key={option.value}
-                      value={option.value}
-                      onSelect={() => handleSelect(option)}
-                    >
-                      <Check
-                        className={cn(
-                          'mr-2 h-4 w-4',
-                          selectValue === option.value
-                            ? 'opacity-100'
-                            : 'opacity-0',
-                        )}
-                      />
-                      {option.label}
-                    </CommandItem>
-                  ))}
+                <CommandGroup>
+                  <ScrollArea
+                    className="h-full"
+                    viewPortClassName={'max-h-[200px]'}
+                  >
+                    {options.map((option) => (
+                      <CommandItem
+                        key={option.value}
+                        value={option.value}
+                        onSelect={() => handleSelect(option)}
+                      >
+                        <Check
+                          className={cn(
+                            'mr-2 h-4 w-4',
+                            selectValue === option.value
+                              ? 'opacity-100'
+                              : 'opacity-0',
+                          )}
+                        />
+                        {option.label}
+                      </CommandItem>
+                    ))}
+                  </ScrollArea>
                 </CommandGroup>
               </CommandList>
             </Command>

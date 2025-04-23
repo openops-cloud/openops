@@ -56,8 +56,8 @@ jest.mock('../../src/lib/ai/providers/xai', () => ({
   xaiProvider: { models: ['xaiModel'] },
 }));
 
+import { AiProviderEnum } from '@openops/shared';
 import {
-  AiProviderEnum,
   getAiProvider,
   getAvailableProvidersWithModels,
 } from '../../src/lib/ai/providers';
