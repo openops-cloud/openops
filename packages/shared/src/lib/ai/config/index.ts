@@ -8,8 +8,12 @@ export const AiConfig = Type.Object({
   provider: Type.Enum(AiProviderEnum),
   model: Type.String(),
   apiKey: Type.String(),
-  providerSettings: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
-  modelSettings: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
+  providerSettings: Type.Optional(
+    Type.Union([Type.Record(Type.String(), Type.Unknown()), Type.Null()]),
+  ),
+  modelSettings: Type.Optional(
+    Type.Union([Type.Record(Type.String(), Type.Unknown()), Type.Null()]),
+  ),
   enabled: Type.Optional(Type.Boolean()),
 });
 
@@ -20,8 +24,12 @@ export const SaveAiConfigRequest = Type.Object({
   provider: Type.Enum(AiProviderEnum),
   model: Type.String(),
   apiKey: Type.String(),
-  providerSettings: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
-  modelSettings: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
+  providerSettings: Type.Optional(
+    Type.Union([Type.Record(Type.String(), Type.Unknown()), Type.Null()]),
+  ),
+  modelSettings: Type.Optional(
+    Type.Union([Type.Record(Type.String(), Type.Unknown()), Type.Null()]),
+  ),
   enabled: Type.Optional(Type.Boolean()),
 });
 
