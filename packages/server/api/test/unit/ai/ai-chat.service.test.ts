@@ -12,6 +12,7 @@ jest.mock('@openops/server-shared', () => ({
 import { CoreMessage } from 'ai';
 import {
   generateChatId,
+  getChatContext,
   getChatHistory,
 } from '../../../src/app/ai/chat/ai-chat.service';
 
@@ -46,7 +47,7 @@ describe('getChatHistory', () => {
 
     const result = await getChatHistory(chatId);
 
-    expect(getSerializedObjectMock).toHaveBeenCalledWith(chatId);
+    expect(getSerializedObjectMock).toHaveBeenCalledWith(`${chatId}:history`);
     expect(result).toEqual(mockMessages);
   });
 
@@ -58,5 +59,32 @@ describe('getChatHistory', () => {
     const result = await getChatHistory(chatId);
 
     expect(result).toEqual([]);
+  });
+});
+
+describe('getChatContext', () => {
+  it('should return chat context from cache if they exist', async () => {
+    const chatId = 'chat-123';
+    const mockMessages: CoreMessage[] = [
+      { role: 'user', content: 'Hi' },
+      { role: 'assistant', content: 'Hello there!' },
+    ];
+
+    getSerializedObjectMock.mockResolvedValue(mockMessages);
+
+    const result = await getChatContext(chatId);
+
+    expect(getSerializedObjectMock).toHaveBeenCalledWith(`${chatId}:context`);
+    expect(result).toEqual(mockMessages);
+  });
+
+  it('should return null if no context found', async () => {
+    const chatId = 'chat-456';
+
+    getSerializedObjectMock.mockResolvedValue(null);
+
+    const result = await getChatContext(chatId);
+
+    expect(result).toEqual(null);
   });
 });
