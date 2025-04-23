@@ -2,6 +2,7 @@ import {
   FastifyPluginAsyncTypebox,
   Type,
 } from '@fastify/type-provider-typebox';
+import { validateAiProviderConfig } from '@openops/common';
 import { AiConfig, PrincipalType, SaveAiConfigRequest } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
 import { entitiesMustBeOwnedByCurrentProject } from '../../authentication/authorization';
@@ -14,6 +15,11 @@ export const aiConfigController: FastifyPluginAsyncTypebox = async (app) => {
     '/',
     SaveAiConfigOptions,
     async (request, reply): Promise<AiConfig> => {
+      const { valid, error } = await validateAiProviderConfig(request.body);
+      if (!valid) {
+        return reply.status(StatusCodes.BAD_REQUEST).send(error);
+      }
+
       const aiConfig = await aiConfigService.upsert({
         projectId: request.principal.projectId,
         request: request.body,
