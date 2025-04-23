@@ -58,6 +58,10 @@ export const aiConfigController: FastifyPluginAsyncTypebox = async (app) => {
         request.principal.projectId,
       );
 
+      if (!config) {
+        return reply.status(StatusCodes.NOT_FOUND).send();
+      }
+
       return reply.status(StatusCodes.OK).send(config);
     },
   );

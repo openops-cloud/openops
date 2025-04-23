@@ -172,7 +172,11 @@ describe('aiConfigService.upsert', () => {
   });
 
   test('should use request.id if provided explicitly', async () => {
-    findOneByMock.mockResolvedValue(null);
+    findOneByMock.mockResolvedValue({
+      ...baseRequest,
+      id: 'explicit-request-id',
+      projectId,
+    });
     findOneByOrFailMock.mockResolvedValue({
       ...baseRequest,
       id: 'explicit-request-id',
