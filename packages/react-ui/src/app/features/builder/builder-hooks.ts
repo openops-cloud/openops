@@ -214,6 +214,10 @@ export const createBuilderStore = (initialState: BuilderInitialState) =>
                   ? RightSideBarType.BLOCK_SETTINGS
                   : RightSideBarType.NONE,
                 leftSidebar: getLeftSidebarOnSelectStep(state),
+                midpanelState: {
+                  ...state.midpanelState,
+                  showAiChat: false,
+                },
               };
             },
             false,
