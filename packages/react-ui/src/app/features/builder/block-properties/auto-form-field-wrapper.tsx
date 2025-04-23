@@ -20,6 +20,7 @@ import { CUSTOMIZED_INPUT_KEY, isDynamicViewToggled } from './utils';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { ArrayFieldContext } from '@/app/features/builder/block-properties/dynamic-array/array-field-context';
+import { useBuilderStateContext } from '../builder-hooks';
 
 type inputNameLiteral = `settings.input.${string}`;
 
@@ -212,6 +213,10 @@ const AutoFormFieldWrapper = ({
     }
   }
 
+  const [dispatch] = useBuilderStateContext((state) => [
+    state.applyMidpanelAction,
+  ]);
+
   return (
     <FormItem className="flex flex-col gap-1">
       <FormLabel className="flex items-center gap-1">
@@ -225,7 +230,9 @@ const AutoFormFieldWrapper = ({
           disabled={disabled}
           dynamicViewToggled={dynamicViewToggled}
           handleDynamicValueChange={handleChange}
-          onGenerateWithAIClick={() => {}}
+          onGenerateWithAIClick={() => {
+            dispatch({ type: 'GENERATE_WITH_AI_CLICK' });
+          }}
         />
       </FormLabel>
 
