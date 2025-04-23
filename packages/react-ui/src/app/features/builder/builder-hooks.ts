@@ -1,4 +1,5 @@
 import {
+  AI_CHAT_CONTAINER_SIZES,
   AiChatContainerSizeState,
   INTERNAL_ERROR_TOAST,
   toast,
@@ -392,7 +393,7 @@ export const createBuilderStore = (initialState: BuilderInitialState) =>
           showDataSelector: false,
           dataSelectorSize: DataSelectorSizeState.DOCKED,
           showAiChat: false,
-          aiContainerSize: 'collapsed',
+          aiContainerSize: AI_CHAT_CONTAINER_SIZES.COLLAPSED,
         },
         applyMidpanelAction: (midpanelAction: MidpanelAction) =>
           set(
@@ -480,25 +481,25 @@ const applyMidpanelAction = (state: BuilderState, action: MidpanelAction) => {
         dataSelectorSize: oldShowAiChat
           ? DataSelectorSizeState.DOCKED
           : oldDataSelectorSize,
-        aiContainerSize: 'collapsed',
+        aiContainerSize: AI_CHAT_CONTAINER_SIZES.COLLAPSED,
       };
       break;
     case 'DATASELECTOR_MIMIZE_CLICK':
       newMidpanelState = {
         dataSelectorSize: DataSelectorSizeState.COLLAPSED,
-        aiContainerSize: 'docked',
+        aiContainerSize: AI_CHAT_CONTAINER_SIZES.DOCKED,
       };
       break;
     case 'DATASELECTOR_DOCK_CLICK':
       newMidpanelState = {
         dataSelectorSize: DataSelectorSizeState.DOCKED,
-        aiContainerSize: 'collapsed',
+        aiContainerSize: AI_CHAT_CONTAINER_SIZES.COLLAPSED,
       };
       break;
     case 'DATASELECTOR_EXPAND_CLICK':
       newMidpanelState = {
         dataSelectorSize: DataSelectorSizeState.EXPANDED,
-        aiContainerSize: 'collapsed',
+        aiContainerSize: AI_CHAT_CONTAINER_SIZES.COLLAPSED,
       };
       break;
     case 'AICHAT_CLOSE_CLICK':
@@ -510,9 +511,9 @@ const applyMidpanelAction = (state: BuilderState, action: MidpanelAction) => {
     case 'AICHAT_TOGGLE_SIZE':
       newMidpanelState = {
         aiContainerSize:
-          state.midpanelState.aiContainerSize === 'docked'
-            ? 'collapsed'
-            : 'docked',
+          state.midpanelState.aiContainerSize === AI_CHAT_CONTAINER_SIZES.DOCKED
+            ? AI_CHAT_CONTAINER_SIZES.COLLAPSED
+            : AI_CHAT_CONTAINER_SIZES.DOCKED,
         dataSelectorSize:
           state.midpanelState.dataSelectorSize ===
           DataSelectorSizeState.COLLAPSED
@@ -523,13 +524,13 @@ const applyMidpanelAction = (state: BuilderState, action: MidpanelAction) => {
     case 'PANEL_CLICK_AWAY':
       newMidpanelState = {
         showDataSelector: false,
-        aiContainerSize: 'docked',
+        aiContainerSize: AI_CHAT_CONTAINER_SIZES.DOCKED,
       };
       break;
     case 'GENERATE_WITH_AI_CLICK':
       newMidpanelState = {
         showAiChat: true,
-        aiContainerSize: 'docked',
+        aiContainerSize: AI_CHAT_CONTAINER_SIZES.DOCKED,
         dataSelectorSize: DataSelectorSizeState.COLLAPSED,
       };
       break;

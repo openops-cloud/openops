@@ -6,7 +6,7 @@ import { cn } from '../../lib/cn';
 import { Button } from '../../ui/button';
 import { ScrollArea } from '../../ui/scroll-area';
 import { AiChatSizeTogglers } from './ai-chat-size-togglers';
-import { AiChatContainerSizeState } from './types';
+import { AI_CHAT_CONTAINER_SIZES, AiChatContainerSizeState } from './types';
 
 type AiChatContainerProps = {
   parentHeight: number;
@@ -31,9 +31,9 @@ const AiChatContainer = ({
   const [promptValue, setPromptValue] = useState('');
 
   let height: string;
-  if (containerSize === 'collapsed') {
+  if (containerSize === AI_CHAT_CONTAINER_SIZES.COLLAPSED) {
     height = '0px';
-  } else if (containerSize === 'docked') {
+  } else if (containerSize === AI_CHAT_CONTAINER_SIZES.DOCKED) {
     height = '450px';
   } else {
     height = `${parentHeight - 100}px`;

@@ -2,7 +2,7 @@
 import { useArgs } from '@storybook/preview-api';
 import type { Meta, StoryObj } from '@storybook/react';
 import { fn } from '@storybook/test';
-import { AiChatContainer } from '../../components';
+import { AI_CHAT_CONTAINER_SIZES, AiChatContainer } from '../../components';
 import { Button } from '../../ui/button';
 
 const meta = {
@@ -15,7 +15,10 @@ const meta = {
     containerSize: {
       control: {
         type: 'select',
-        options: ['collapsed', 'docked'],
+        options: [
+          AI_CHAT_CONTAINER_SIZES.COLLAPSED,
+          AI_CHAT_CONTAINER_SIZES.DOCKED,
+        ],
       },
     },
   },
@@ -28,7 +31,9 @@ const meta = {
 
     const onToggleContainerSizeState = () => {
       const newContainerSizeState =
-        containerSize === 'docked' ? 'collapsed' : 'docked';
+        containerSize === AI_CHAT_CONTAINER_SIZES.DOCKED
+          ? AI_CHAT_CONTAINER_SIZES.COLLAPSED
+          : AI_CHAT_CONTAINER_SIZES.DOCKED;
       toggleContainerSizeState();
       updateArgs({ containerSize: newContainerSizeState });
     };
@@ -48,7 +53,6 @@ const meta = {
           containerSize={containerSize}
           toggleContainerSizeState={onToggleContainerSizeState}
           showAiChat={showAiChat}
-          setShowAiChat={onSetShowAiChat}
           className="static"
         />
       </>
@@ -63,10 +67,9 @@ type Story = StoryObj<typeof meta>;
 export const Docked: Story = {
   args: {
     parentHeight: 500,
-    containerSize: 'docked',
+    containerSize: AI_CHAT_CONTAINER_SIZES.DOCKED,
     showAiChat: true,
     toggleContainerSizeState: fn(),
-    setShowAiChat: fn(),
     onSubmitChat: fn(),
   },
 };
@@ -74,6 +77,6 @@ export const Docked: Story = {
 export const Collapsed: Story = {
   args: {
     ...Docked.args,
-    containerSize: 'collapsed',
+    containerSize: AI_CHAT_CONTAINER_SIZES.COLLAPSED,
   },
 };

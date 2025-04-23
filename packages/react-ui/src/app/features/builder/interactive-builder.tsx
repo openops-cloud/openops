@@ -1,5 +1,6 @@
 import { FLOW_CANVAS_Y_OFFESET } from '@/app/constants/flow-canvas';
 import {
+  AI_CHAT_CONTAINER_SIZES,
   AiChatContainer,
   AiWidget,
   CanvasControls,
@@ -169,7 +170,7 @@ const InteractiveBuilder = ({
               'children:transition-none':
                 state.showDataSelector &&
                 state.showAiChat &&
-                state.aiContainerSize === 'collapsed' &&
+                state.aiContainerSize === AI_CHAT_CONTAINER_SIZES.COLLAPSED &&
                 state.dataSelectorSize === DataSelectorSizeState.DOCKED,
             })}
           />
@@ -183,7 +184,7 @@ const InteractiveBuilder = ({
               'children:transition-none':
                 state.dataSelectorSize === DataSelectorSizeState.COLLAPSED &&
                 state.showAiChat &&
-                state.aiContainerSize === 'docked',
+                state.aiContainerSize === AI_CHAT_CONTAINER_SIZES.DOCKED,
             })}
           ></DataSelector>
         </div>
