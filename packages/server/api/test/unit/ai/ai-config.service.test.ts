@@ -9,6 +9,7 @@ const findOneByMock = jest.fn();
 const upsertMock = jest.fn();
 const findOneByOrFailMock = jest.fn();
 const findByMock = jest.fn();
+const deleteMock = jest.fn();
 
 jest.mock('../../../src/app/core/db/repo-factory', () => ({
   ...jest.requireActual('../../../src/app/core/db/repo-factory'),
@@ -17,6 +18,7 @@ jest.mock('../../../src/app/core/db/repo-factory', () => ({
     upsert: upsertMock,
     findOneByOrFail: findOneByOrFailMock,
     findBy: findByMock,
+    delete: deleteMock,
   }),
 }));
 
@@ -389,5 +391,49 @@ describe('aiConfigService.getActiveConfig', () => {
       projectId,
       enabled: true,
     });
+  });
+});
+
+describe('aiConfigService.delete', () => {
+  const projectId = 'test-project';
+  const configId = 'config-id-456';
+
+  const config = {
+    id: configId,
+    projectId,
+    provider: AiProviderEnum.OPENAI,
+    apiKey: 'encrypted-key',
+    model: 'gpt-4',
+    modelSettings: {},
+    providerSettings: {},
+    created: '2025-04-22T12:00:00Z',
+    updated: '2025-04-22T12:00:00Z',
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('should delete the config if it exists', async () => {
+    findOneByMock.mockResolvedValue(config);
+    deleteMock.mockResolvedValue(undefined);
+
+    await expect(
+      aiConfigService.delete({ projectId, id: configId }),
+    ).resolves.not.toThrow();
+
+    expect(findOneByMock).toHaveBeenCalledWith({ id: configId, projectId });
+    expect(deleteMock).toHaveBeenCalledWith({ id: configId });
+  });
+
+  test('should throw an error if the config does not exist', async () => {
+    findOneByMock.mockResolvedValue(undefined);
+
+    await expect(
+      aiConfigService.delete({ projectId, id: configId }),
+    ).rejects.toThrow('Config not found or does not belong to this project');
+
+    expect(findOneByMock).toHaveBeenCalledWith({ id: configId, projectId });
+    expect(deleteMock).not.toHaveBeenCalled();
   });
 });
