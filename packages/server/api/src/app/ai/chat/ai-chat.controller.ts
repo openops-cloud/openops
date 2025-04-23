@@ -58,7 +58,7 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
         .send('No chat session found for the provided chat ID.');
     }
 
-    const aiConfig = await aiConfigService.getAiConfig({ projectId });
+    const aiConfig = await aiConfigService.getActiveConfig(projectId, false);
     if (!aiConfig) {
       return reply
         .code(404)
