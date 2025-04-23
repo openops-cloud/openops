@@ -1,3 +1,4 @@
+import { BlockProperty } from '@openops/blocks-framework';
 import { LoadingSpinner } from '@openops/components/ui';
 import { flowHelper, FlowVersion } from '@openops/shared';
 import { useQuery } from '@tanstack/react-query';
@@ -6,9 +7,14 @@ import { aiChatApi } from './lib/chat-api';
 type ConversationProps = {
   stepName: string;
   flowVersion: FlowVersion;
+  property: BlockProperty;
 };
 
-const Conversation = ({ flowVersion, stepName }: ConversationProps) => {
+const Conversation = ({
+  flowVersion,
+  stepName,
+  property,
+}: ConversationProps) => {
   const stepDetails = flowHelper.getStep(flowVersion, stepName);
   const blockName = stepDetails?.settings?.blockName;
 
@@ -30,6 +36,7 @@ const Conversation = ({ flowVersion, stepName }: ConversationProps) => {
 
   return (
     <div className="flex flex-col gap-2">
+      <span>Context Property name: {property.displayName}</span>
       <span className="truncate">ChatId: {data?.chatId}</span>
       {data?.messages?.map((message) => (
         <div key={message.role}>

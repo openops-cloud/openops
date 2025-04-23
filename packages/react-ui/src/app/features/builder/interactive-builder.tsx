@@ -140,10 +140,6 @@ const InteractiveBuilder = ({
     }
   };
 
-  // useUpdateEffect(() => {
-  //   dispatch({ type: 'AICHAT_CLOSE_CLICK' });
-  // }, [selectedStep]);
-
   return (
     <InteractiveContextProvider
       selectedStep={selectedStep}
@@ -179,8 +175,12 @@ const InteractiveBuilder = ({
                 state.dataSelectorSize === DataSelectorSizeState.DOCKED,
             })}
           >
-            {selectedStep && state.showAiChat && (
-              <Conversation stepName={selectedStep} flowVersion={flowVersion} />
+            {selectedStep && state.showAiChat && state.aiChatProperty && (
+              <Conversation
+                stepName={selectedStep}
+                flowVersion={flowVersion}
+                property={state.aiChatProperty}
+              />
             )}
           </AiChatContainer>
           <DataSelector
