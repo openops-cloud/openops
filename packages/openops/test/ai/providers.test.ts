@@ -61,11 +61,20 @@ jest.mock('../../src/lib/ai/providers/xai', () => ({
   xaiProvider: { models: ['xaiModel'] },
 }));
 
+const isInstanceMock = jest.fn();
+const generateTextMock = jest.fn();
+jest.mock('ai', () => ({
+  AISDKError: { isInstance: isInstanceMock },
+  generateText: generateTextMock,
+  LanguageModelV1: jest.fn(),
+}));
+
 import { AiProviderEnum } from '@openops/shared';
 import {
   getAiProvider,
   getAiProviderLanguageModel,
   getAvailableProvidersWithModels,
+  validateAiProviderConfig,
 } from '../../src/lib/ai/providers';
 
 describe('getAiProvider tests', () => {
@@ -212,4 +221,82 @@ describe('getAiProviderLanguageModel tests', () => {
       expect(result).toEqual(fakeModel);
     },
   );
+});
+
+describe('validateAiProviderConfig tests', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should return success if we are able to send the message', async () => {
+    const aiConfig = {
+      provider: AiProviderEnum.OPENAI,
+      apiKey: 'test-api-key',
+      model: 'gpt-4',
+      providerSettings: { baseUrl: 'https://api.example.com' },
+    };
+
+    const fakeModel = { id: 'mock-model', type: 'LanguageModelV1' };
+    openAIProviderMock.createLanguageModel.mockResolvedValue(fakeModel);
+    generateTextMock.mockResolvedValue('mocked response');
+
+    const result = await validateAiProviderConfig(aiConfig);
+
+    expect(result.valid).toBeTruthy();
+    expect(openAIProviderMock.createLanguageModel).toHaveBeenCalledWith({
+      apiKey: aiConfig.apiKey,
+      model: aiConfig.model,
+      baseUrl: 'https://api.example.com',
+    });
+  });
+
+  it('should return an error if we are unable to send the message', async () => {
+    const error = new Error('Mocked error');
+    error.name = 'Error name';
+    const aiConfig = {
+      provider: AiProviderEnum.OPENAI,
+      apiKey: 'test-api-key',
+      model: 'gpt-4',
+    };
+
+    const fakeModel = { id: 'mock-model', type: 'LanguageModelV1' };
+    openAIProviderMock.createLanguageModel.mockResolvedValue(fakeModel);
+    generateTextMock.mockRejectedValue(error);
+    isInstanceMock.mockReturnValue(false);
+    const result = await validateAiProviderConfig(aiConfig);
+
+    expect(result.valid).toBeFalsy();
+    expect(result.error?.errorName).toBe('Error name');
+    expect(result.error?.errorMessage).toBe('Mocked error');
+    expect(openAIProviderMock.createLanguageModel).toHaveBeenCalledWith({
+      apiKey: aiConfig.apiKey,
+      model: aiConfig.model,
+      baseUrl: undefined,
+    });
+  });
+
+  it('should return an error with a redacted message if the error message has the apiKey', async () => {
+    const error = new Error('Mocked error test-api-key');
+    error.name = 'Error name';
+    const aiConfig = {
+      provider: AiProviderEnum.OPENAI,
+      apiKey: 'test-api-key',
+      model: 'gpt-4',
+    };
+
+    const fakeModel = { id: 'mock-model', type: 'LanguageModelV1' };
+    openAIProviderMock.createLanguageModel.mockResolvedValue(fakeModel);
+    generateTextMock.mockRejectedValue(error);
+    isInstanceMock.mockReturnValue(true);
+    const result = await validateAiProviderConfig(aiConfig);
+
+    expect(result.valid).toBeFalsy();
+    expect(result.error?.errorName).toBe('Error name');
+    expect(result.error?.errorMessage).toBe('Mocked error **REDACTED**');
+    expect(openAIProviderMock.createLanguageModel).toHaveBeenCalledWith({
+      apiKey: aiConfig.apiKey,
+      model: aiConfig.model,
+      baseUrl: undefined,
+    });
+  });
 });

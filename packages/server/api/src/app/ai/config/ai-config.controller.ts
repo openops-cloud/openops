@@ -2,6 +2,7 @@ import {
   FastifyPluginAsyncTypebox,
   Type,
 } from '@fastify/type-provider-typebox';
+import { validateAiProviderConfig } from '@openops/common';
 import { AiConfig, PrincipalType, SaveAiConfigRequest } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
 import { entitiesMustBeOwnedByCurrentProject } from '../../authentication/authorization';
@@ -14,6 +15,11 @@ export const aiConfigController: FastifyPluginAsyncTypebox = async (app) => {
     '/',
     SaveAiConfigOptions,
     async (request, reply): Promise<AiConfig> => {
+      const { valid, error } = await validateAiProviderConfig(request.body);
+      if (!valid) {
+        return reply.status(StatusCodes.BAD_REQUEST).send(error);
+      }
+
       const aiConfig = await aiConfigService.upsert({
         projectId: request.principal.projectId,
         request: request.body,
@@ -25,7 +31,7 @@ export const aiConfigController: FastifyPluginAsyncTypebox = async (app) => {
 
   app.get(
     '/:id',
-    getAiConfigByIdRequest,
+    aiConfigIdRequest,
     async (request, reply): Promise<AiConfig> => {
       const config = await aiConfigService.get({
         projectId: request.principal.projectId,
@@ -65,6 +71,18 @@ export const aiConfigController: FastifyPluginAsyncTypebox = async (app) => {
       return reply.status(StatusCodes.OK).send(config);
     },
   );
+
+  app.delete('/:id', aiConfigIdRequest, async (request, reply) => {
+    try {
+      await aiConfigService.delete({
+        projectId: request.principal.projectId,
+        id: request.params.id,
+      });
+      return await reply.status(StatusCodes.OK).send();
+    } catch (error) {
+      return reply.status(StatusCodes.NOT_FOUND).send({ message: error });
+    }
+  });
 };
 
 const SaveAiConfigOptions = {
@@ -89,7 +107,7 @@ const getAiConfigRequest = {
   },
 };
 
-const getAiConfigByIdRequest = {
+const aiConfigIdRequest = {
   config: {
     allowedPrincipals: [PrincipalType.USER],
   },
