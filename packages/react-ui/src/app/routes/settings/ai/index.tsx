@@ -43,7 +43,7 @@ const AiSettingsPage = () => {
     },
   });
 
-  const { mutate: onDelete, isPending: isDeleting } = useMutation({
+  const { mutate: onDelete } = useMutation({
     mutationFn: async (id: string) => {
       return aiSettingsApi.deleteAiSettings(id);
     },

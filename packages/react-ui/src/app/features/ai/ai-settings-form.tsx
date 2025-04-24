@@ -175,9 +175,7 @@ const AiSettingsForm = ({
           name="modelSettings"
           render={({ field }) => (
             <FormItem className="flex flex-col gap-2">
-              <Label htmlFor="modelSettings" className="text-base">
-                {t('Model Settings')}
-              </Label>
+              <Label htmlFor="modelSettings">{t('Model Settings')}</Label>
               <DictionaryProperty
                 values={field.value ?? {}}
                 onChange={field.onChange}

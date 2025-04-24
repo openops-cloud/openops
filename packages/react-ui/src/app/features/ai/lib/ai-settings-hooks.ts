@@ -9,7 +9,6 @@ export const aiSettingsHooks = {
       queryFn: () => aiSettingsApi.getProviderOptions(),
     });
   },
-  //TODO update type
   useAiSettings: () => {
     return useQuery<AiConfig[], Error>({
       queryKey: ['ai-settings'],
