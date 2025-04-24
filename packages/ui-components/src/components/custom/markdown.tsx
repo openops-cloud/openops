@@ -9,7 +9,6 @@ import React, { useCallback, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import validator from 'validator';
 import { clipboardUtils } from '../../lib/clipboard-utils';
-import { cn } from '../../lib/cn';
 import { COPY_PASTE_TOAST_DURATION } from '../../lib/constants';
 import { CodeVariations, MarkdownCodeVariations } from './types';
 
@@ -86,12 +85,7 @@ const LanguageText = ({
     return (
       <textarea
         ref={textareaRef}
-        className={cn(
-          'px-3 border border-solid text-sm rounded block w-full resize-none leading-tight bg-background',
-          {
-            'bg-input rounded-lg border-none': isInjectVariation,
-          },
-        )}
+        className="px-3 border  text-sm block w-full resize-none leading-tight bg-input rounded-lg border-none"
         value={content}
         disabled
       />
@@ -206,7 +200,7 @@ const Markdown = React.memo(
               const codeContent = String(props.children).trim();
 
               return (
-                <div className={cn('relative py-2 w-full')}>
+                <div className="relative py-2 w-full">
                   {isLanguageUrl ? (
                     <LanguageUrl content={codeContent} />
                   ) : (
@@ -288,9 +282,6 @@ const Markdown = React.memo(
             ),
             blockquote: ({ node, ...props }) => (
               <blockquote className="mt-6 border-l-2 pl-6 italic" {...props} />
-            ),
-            input: ({ node, ...props }) => (
-              <input className="bg-input" {...props} />
             ),
           }}
         >
