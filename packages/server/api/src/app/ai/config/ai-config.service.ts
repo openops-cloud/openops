@@ -58,7 +58,7 @@ export const aiConfigService = {
         encryptUtils.encryptString(request.apiKey),
       );
     } else {
-      delete aiConfig.apiKey;
+      aiConfig.apiKey = existing?.apiKey;
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
