@@ -11,7 +11,7 @@ export const getSystemPrompt = async (
       case '@openops/aws':
         return await loadFile('aws.txt');
       case '@openops/azure':
-        return '';
+        return await loadFile('azure-cli.txt');
       case '@openops/google-cloud':
         return '';
       default:
