@@ -2,7 +2,6 @@ import { logger } from '@openops/server-shared';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 import { ChatContext } from './ai-chat.service';
-import { azureCliPrompt } from './prompts/azure-cli-prompt';
 
 export const getSystemPrompt = async (
   context: ChatContext,
@@ -12,7 +11,7 @@ export const getSystemPrompt = async (
       case '@openops/aws':
         return await loadFile('aws.txt');
       case '@openops/azure':
-        return '';
+        return await loadFile('azure-cli.txt');
       case '@openops/google-cloud':
         return '';
       default:
