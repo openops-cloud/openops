@@ -21,6 +21,6 @@
         - Emit a plain-text warning: Note: This operation requires multiple Azure CLI commands.
         - Then list each command in its own Markdown code block, in the exact order they must be run.
       - Use consistent placeholders across all commands in a multi-step flow
-    Interactive vs Non-interactive Mode
+    Non-interactive Mode
       - Always use non-interactive mode where applicable (e.g., --yes, --no-wait, --confirm-with-yes).
       - Never rely on user input during command execution.
