@@ -51,7 +51,6 @@ describe('aiConfigService.upsert', () => {
   });
 
   test('should insert a new ai config when one does not exist', async () => {
-    findOneByMock.mockResolvedValue(null);
     findOneByOrFailMock.mockResolvedValue({
       ...baseRequest,
       projectId,
@@ -63,10 +62,7 @@ describe('aiConfigService.upsert', () => {
       request: baseRequest,
     });
 
-    expect(findOneByMock).toHaveBeenCalledWith({
-      projectId,
-      provider: baseRequest.provider,
-    });
+    expect(findOneByMock).not.toHaveBeenCalled();
     expect(upsertMock).toHaveBeenCalledWith(
       {
         ...baseRequest,
@@ -76,7 +72,7 @@ describe('aiConfigService.upsert', () => {
         updated: expect.any(String),
         id: 'mocked-id',
       },
-      ['projectId', 'provider'],
+      ['id'],
     );
     expect(findOneByOrFailMock).toHaveBeenCalledWith({
       projectId,
@@ -105,7 +101,7 @@ describe('aiConfigService.upsert', () => {
 
     const result = await aiConfigService.upsert({
       projectId,
-      request: baseRequest,
+      request: { id: existingId, ...baseRequest },
     });
 
     expect(upsertMock).toHaveBeenCalledWith(
@@ -117,7 +113,7 @@ describe('aiConfigService.upsert', () => {
         created: expect.any(String),
         updated: expect.any(String),
       },
-      ['projectId', 'provider'],
+      ['id'],
     );
     expect(encryptStringMock).toHaveBeenCalledWith(baseRequest.apiKey);
     expect(result).toMatchObject({
@@ -144,6 +140,7 @@ describe('aiConfigService.upsert', () => {
 
     const redactedRequest = {
       ...baseRequest,
+      id: existingId,
       apiKey: AiApiKeyRedactionMessage,
     };
 
@@ -161,7 +158,7 @@ describe('aiConfigService.upsert', () => {
         created: expect.any(String),
         updated: expect.any(String),
       },
-      ['projectId', 'provider'],
+      ['id'],
     );
 
     expect(encryptStringMock).not.toHaveBeenCalled();
@@ -169,49 +166,6 @@ describe('aiConfigService.upsert', () => {
       ...baseRequest,
       apiKey: '**REDACTED**',
       id: existingId,
-      projectId,
-    });
-  });
-
-  test('should use request.id if provided explicitly', async () => {
-    findOneByMock.mockResolvedValue({
-      ...baseRequest,
-      id: 'explicit-request-id',
-      projectId,
-    });
-    findOneByOrFailMock.mockResolvedValue({
-      ...baseRequest,
-      id: 'explicit-request-id',
-      projectId,
-    });
-
-    const requestWithId = {
-      ...baseRequest,
-      id: 'explicit-request-id',
-    };
-
-    const result = await aiConfigService.upsert({
-      projectId,
-      request: requestWithId,
-    });
-
-    expect(upsertMock).toHaveBeenCalledWith(
-      {
-        ...baseRequest,
-        id: 'explicit-request-id',
-        projectId,
-        apiKey: JSON.stringify('test-encrypt'),
-        created: expect.any(String),
-        updated: expect.any(String),
-      },
-      ['projectId', 'provider'],
-    );
-
-    expect(mockedOpenOpsId).not.toHaveBeenCalled();
-    expect(result).toMatchObject({
-      ...baseRequest,
-      apiKey: '**REDACTED**',
-      id: 'explicit-request-id',
       projectId,
     });
   });
