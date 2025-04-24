@@ -27,7 +27,7 @@ type AiSettingsFormProps = {
     provider: string;
     models: string[];
   }[];
-  currentSettings?: AiConfig;
+  savedSettings?: AiConfig;
   onSave: (settings: AiSettingsFormSchema) => void;
   isSaving: boolean;
 };
@@ -43,7 +43,7 @@ const EMPTY_FORM_VALUE: AiSettingsFormSchema = {
 
 const AiSettingsForm = ({
   aiProviders,
-  currentSettings,
+  savedSettings,
   onSave,
   isSaving,
 }: AiSettingsFormProps) => {
@@ -54,15 +54,10 @@ const AiSettingsForm = ({
   });
 
   useEffect(() => {
-    form.reset((currentSettings as AiSettingsFormSchema) ?? EMPTY_FORM_VALUE);
-  }, [currentSettings, form]);
+    form.reset((savedSettings as AiSettingsFormSchema) ?? EMPTY_FORM_VALUE);
+  }, [savedSettings, form]);
 
   const currentFormValue = form.watch();
-
-  const isFormUnchanged = useMemo(() => {
-    return isEqual(currentFormValue, currentSettings ?? EMPTY_FORM_VALUE);
-  }, [currentFormValue, currentSettings]);
-
   const provider = useWatch({ control: form.control, name: 'provider' });
 
   const providerOptions = useMemo(
@@ -78,6 +73,22 @@ const AiSettingsForm = ({
     const selected = aiProviders?.find((p) => p.provider === provider);
     return selected?.models.map((m) => ({ label: m, value: m })) || [];
   }, [provider, aiProviders]);
+
+  const isFormUnchanged = useMemo(() => {
+    return isEqual(currentFormValue, savedSettings);
+  }, [currentFormValue, savedSettings]);
+
+  const isValidConnection = useMemo(() => {
+    const omit = (obj?: AiSettingsFormSchema) => {
+      const { enabled, ...rest } = obj ?? EMPTY_FORM_VALUE;
+      return rest;
+    };
+
+    return isEqual(
+      omit(currentFormValue),
+      omit(savedSettings as AiSettingsFormSchema),
+    );
+  }, [currentFormValue, savedSettings]);
 
   const resetForm = () => {
     form.reset();
@@ -166,6 +177,8 @@ const AiSettingsForm = ({
               <DictionaryProperty
                 values={field.value ?? {}}
                 onChange={field.onChange}
+                keyPlaceholder={t('Key')}
+                valuePlaceholder={t('Value')}
               ></DictionaryProperty>
             </FormItem>
           )}
@@ -179,6 +192,8 @@ const AiSettingsForm = ({
               <DictionaryProperty
                 values={field.value ?? {}}
                 onChange={field.onChange}
+                keyPlaceholder={t('Key')}
+                valuePlaceholder={t('Value')}
               ></DictionaryProperty>
             </FormItem>
           )}
@@ -204,7 +219,7 @@ const AiSettingsForm = ({
               {t('Save')}
             </Button>
           </div>
-          {currentSettings?.id && isFormUnchanged && (
+          {savedSettings?.id && isValidConnection && (
             <div className="flex items-center gap-2">
               <CircleCheck size={24} className="text-success-300" />
               <span>{t('Valid Connection')}</span>

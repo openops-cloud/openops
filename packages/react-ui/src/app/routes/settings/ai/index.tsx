@@ -67,7 +67,7 @@ const AiSettingsPage = () => {
         <div className="flex justify-between p-6 border rounded-[11px]">
           <AiSettingsForm
             aiProviders={aiProviders}
-            currentSettings={aiSettings?.[0]}
+            savedSettings={aiSettings?.[0]}
             onSave={onSave}
             isSaving={isSaving}
           />
