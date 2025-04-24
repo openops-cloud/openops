@@ -69,3 +69,7 @@ export const saveChatHistory = async (
     DEFAULT_EXPIRE_TIME,
   );
 };
+
+export const deleteChatHistory = async (chatId: string): Promise<void> => {
+  await cacheWrapper.deleteKey(chatHistoryKey(chatId));
+};

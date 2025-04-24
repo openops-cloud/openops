@@ -231,7 +231,7 @@ const AutoFormFieldWrapper = ({
           dynamicViewToggled={dynamicViewToggled}
           handleDynamicValueChange={handleChange}
           onGenerateWithAIClick={() => {
-            dispatch({ type: 'GENERATE_WITH_AI_CLICK' });
+            dispatch({ type: 'GENERATE_WITH_AI_CLICK', property });
           }}
         />
       </FormLabel>
