@@ -21,6 +21,7 @@ import { CUSTOMIZED_INPUT_KEY, isDynamicViewToggled } from './utils';
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { ArrayFieldContext } from '@/app/features/builder/block-properties/dynamic-array/array-field-context';
 import { useBuilderStateContext } from '../builder-hooks';
+import { StepSettingsContext } from '../step-settings/step-settings-context';
 
 type inputNameLiteral = `settings.input.${string}`;
 
@@ -87,10 +88,14 @@ const FormLabelButton = ({
   onGenerateWithAIClick,
 }: FormLabelButtonProps) => {
   const { data: isAIEnabled } = flagsHooks.useFlag(FlagId.SHOW_AI_SETTINGS);
+  const stepSettingsContext = useContext(StepSettingsContext);
+  const readonly = !!stepSettingsContext?.readonly;
+
   if (
     property &&
     'supportsAI' in property &&
     property.supportsAI &&
+    !readonly &&
     isAIEnabled
   ) {
     return (

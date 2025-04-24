@@ -268,6 +268,7 @@ const BuilderPage = () => {
                     <CanvasControls
                       topOffset={FLOW_CANVAS_Y_OFFESET}
                     ></CanvasControls>
+                    {/* todo disable based on flag*/}
                     <AiWidget />
                     <div
                       className={cn('h-screen w-full flex-1 z-10', {
@@ -314,6 +315,7 @@ const BuilderPage = () => {
                   <StepSettingsProvider
                     blockModel={blockModel}
                     selectedStep={memorizedSelectedStep}
+                    readonly={readonly}
                     key={containerKey}
                   >
                     <DynamicFormValidationProvider>
