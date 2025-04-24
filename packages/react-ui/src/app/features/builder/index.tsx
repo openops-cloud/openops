@@ -22,6 +22,7 @@ import {
 } from '@/app/features/builder/builder-hooks';
 import { DynamicFormValidationProvider } from '@/app/features/builder/dynamic-form-validation/dynamic-form-validation-context';
 
+import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { useResizablePanelGroup } from '@/app/common/hooks/use-resizable-panel-group';
 import { useSocket } from '@/app/common/providers/socket-provider';
 import { FLOW_CANVAS_Y_OFFESET } from '@/app/constants/flow-canvas';
@@ -29,6 +30,7 @@ import { SEARCH_PARAMS } from '@/app/constants/search-params';
 import {
   ActionType,
   BlockTrigger,
+  FlagId,
   flowHelper,
   isNil,
   TriggerType,
@@ -90,6 +92,7 @@ const constructContainerKey = (
 
 const BuilderPage = () => {
   const [searchParams] = useSearchParams();
+  const { data: isAIEnabled } = flagsHooks.useFlag(FlagId.SHOW_AI_SETTINGS);
 
   const [
     selectedStep,
@@ -268,7 +271,7 @@ const BuilderPage = () => {
                     <CanvasControls
                       topOffset={FLOW_CANVAS_Y_OFFESET}
                     ></CanvasControls>
-                    <AiWidget />
+                    {!isAIEnabled && <AiWidget />}
                     <div
                       className={cn('h-screen w-full flex-1 z-10', {
                         'bg-background': !isDraggingHandle,

@@ -39,6 +39,22 @@ export function useBuilderStateContext<T>(
   return useStore(store, selector);
 }
 
+const noopStore = {
+  getState: () => ({}),
+  setState: () => {},
+  subscribe: () => () => {},
+};
+
+export function useSafeBuilderStateContext<T>(
+  selector: (state: BuilderState) => T,
+): T | undefined {
+  const store = useContext(BuilderStateContext) ?? noopStore;
+  const result = useStore(store, selector);
+
+  if (store === noopStore) return undefined;
+  return result;
+}
+
 export enum LeftSideBarType {
   RUNS = 'runs',
   VERSIONS = 'versions',
