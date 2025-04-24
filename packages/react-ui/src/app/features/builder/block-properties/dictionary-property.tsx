@@ -25,48 +25,29 @@ export const DictionaryProperty = ({
   useMentionTextInput,
 }: DictionaryInputProps) => {
   const id = useRef(1);
-  const valuesArray = Object.entries(values ?? {}).map((el) => {
-    id.current++;
-    return {
-      key: el[0],
-      value: el[1],
-      id: `${id.current}`,
-    };
-  });
-  const valuesArrayRef = useRef(valuesArray);
-  // To allow keys that have the same prefix to be added in any order
-  const valuesArrayRefUnique = valuesArrayRef.current
-    .toReversed()
-    .filter(
-      (el, index, self) => self.findIndex((t) => t.key === el.key) === index,
-    )
-    .toReversed();
-  const haveValuesChangedFromOutside =
-    valuesArrayRefUnique.length !== valuesArray.length ||
-    valuesArray.reduce((acc, _, index) => {
-      return (
-        acc ||
-        valuesArrayRefUnique[index].key !== valuesArray[index].key ||
-        valuesArrayRefUnique[index].value !== valuesArray[index].value
-      );
-    }, false);
-
-  if (haveValuesChangedFromOutside) {
-    valuesArrayRef.current = valuesArray;
-  }
-
+  const valuesArray = useRef(
+    Object.entries(values ?? {}).map((el) => {
+      id.current++;
+      return {
+        key: el[0],
+        value: el[1],
+        id: `${id.current}`,
+      };
+    }),
+  );
   const remove = (index: number) => {
-    const newValues = valuesArrayRef.current.filter((_, i) => i !== index);
-    valuesArrayRef.current = newValues;
+    const newValues = valuesArray.current.filter((_, i) => i !== index);
+    valuesArray.current = newValues;
     updateValue(newValues);
   };
+
   const add = () => {
     id.current++;
     const newValues = [
-      ...valuesArrayRef.current,
+      ...valuesArray.current,
       { key: '', value: '', id: `${id.current}` },
     ];
-    valuesArrayRef.current = newValues;
+    valuesArray.current = newValues;
     updateValue(newValues);
   };
 
@@ -75,14 +56,13 @@ export const DictionaryProperty = ({
     value: string | undefined,
     key: string | undefined,
   ) => {
-    const newValues = [...valuesArrayRef.current];
+    const newValues = [...valuesArray.current];
     if (value !== undefined) {
       newValues[index].value = value;
     }
     if (key !== undefined) {
       newValues[index].key = key;
     }
-    valuesArrayRef.current = newValues;
     updateValue(newValues);
   };
 
@@ -96,7 +76,7 @@ export const DictionaryProperty = ({
   };
   return (
     <div className="flex w-full flex-col gap-4">
-      {valuesArrayRef.current.map(({ key, value, id }, index) => (
+      {valuesArray.current.map(({ key, value, id }, index) => (
         <div
           key={'dictionary-input-' + id}
           className="flex items-center gap-3 items-center"
