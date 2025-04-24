@@ -11,6 +11,7 @@ import { devtools } from 'zustand/middleware';
 
 import { flowsApi } from '@/app/features/flows/lib/flows-api';
 import { PromiseQueue } from '@/app/lib/promise-queue';
+import { BlockProperty } from '@openops/blocks-framework';
 import {
   Flow,
   flowHelper,
@@ -38,6 +39,22 @@ export function useBuilderStateContext<T>(
   return useStore(store, selector);
 }
 
+const noopStore = {
+  getState: () => ({}),
+  setState: () => {},
+  subscribe: () => () => {},
+};
+
+export function useSafeBuilderStateContext<T>(
+  selector: (state: BuilderState) => T,
+): T | undefined {
+  const store = useContext(BuilderStateContext) ?? noopStore;
+  const result = useStore(store, selector);
+
+  if (store === noopStore) return undefined;
+  return result;
+}
+
 export enum LeftSideBarType {
   RUNS = 'runs',
   VERSIONS = 'versions',
@@ -59,6 +76,7 @@ type MidpanelState = {
   dataSelectorSize: DataSelectorSizeState;
   showAiChat: boolean;
   aiContainerSize: AiChatContainerSizeState;
+  aiChatProperty?: BlockProperty;
 };
 
 type MidpanelAction =
@@ -69,7 +87,7 @@ type MidpanelAction =
   | { type: 'AICHAT_CLOSE_CLICK' }
   | { type: 'AICHAT_TOGGLE_SIZE' }
   | { type: 'PANEL_CLICK_AWAY' }
-  | { type: 'GENERATE_WITH_AI_CLICK' };
+  | { type: 'GENERATE_WITH_AI_CLICK'; property?: BlockProperty };
 
 export type BuilderState = {
   flow: Flow;
@@ -214,6 +232,11 @@ export const createBuilderStore = (initialState: BuilderInitialState) =>
                   ? RightSideBarType.BLOCK_SETTINGS
                   : RightSideBarType.NONE,
                 leftSidebar: getLeftSidebarOnSelectStep(state),
+                midpanelState: {
+                  ...state.midpanelState,
+                  showAiChat: false,
+                  aiChatProperty: undefined,
+                },
               };
             },
             false,
@@ -393,6 +416,7 @@ export const createBuilderStore = (initialState: BuilderInitialState) =>
           showDataSelector: false,
           dataSelectorSize: DataSelectorSizeState.DOCKED,
           showAiChat: false,
+          aiChatProperty: undefined,
           aiContainerSize: AI_CHAT_CONTAINER_SIZES.COLLAPSED,
         },
         applyMidpanelAction: (midpanelAction: MidpanelAction) =>
@@ -505,6 +529,7 @@ const applyMidpanelAction = (state: BuilderState, action: MidpanelAction) => {
     case 'AICHAT_CLOSE_CLICK':
       newMidpanelState = {
         showAiChat: false,
+        aiChatProperty: undefined,
         dataSelectorSize: DataSelectorSizeState.DOCKED,
       };
       break;
@@ -532,6 +557,7 @@ const applyMidpanelAction = (state: BuilderState, action: MidpanelAction) => {
         showAiChat: true,
         aiContainerSize: AI_CHAT_CONTAINER_SIZES.DOCKED,
         dataSelectorSize: DataSelectorSizeState.COLLAPSED,
+        aiChatProperty: action.property,
       };
       break;
     default:

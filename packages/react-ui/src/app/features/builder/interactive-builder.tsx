@@ -1,3 +1,4 @@
+import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { FLOW_CANVAS_Y_OFFESET } from '@/app/constants/flow-canvas';
 import {
   AI_CHAT_CONTAINER_SIZES,
@@ -10,6 +11,7 @@ import {
 import {
   Action,
   ActionType,
+  FlagId,
   flowHelper,
   FlowVersion,
   isNil,
@@ -17,6 +19,7 @@ import {
 } from '@openops/shared';
 import { MutableRefObject, useCallback, useEffect, useRef } from 'react';
 import { useDebounceCallback } from 'usehooks-ts';
+import { Conversation } from './ai-chat/conversation';
 import { textMentionUtils } from './block-properties/text-input-with-mentions/text-input-utils';
 import { BuilderHeader } from './builder-header/builder-header';
 import { useBuilderStateContext } from './builder-hooks';
@@ -60,6 +63,7 @@ const InteractiveBuilder = ({
   lefSideBarContainerWidth: number;
   flowVersion: FlowVersion;
 }) => {
+  const { data: isAIEnabled } = flagsHooks.useFlag(FlagId.SHOW_AI_SETTINGS);
   const { onPaste } = usePaste();
 
   const onPasteOperation = (actionToPaste: Action): void => {
@@ -150,7 +154,7 @@ const InteractiveBuilder = ({
       <div ref={middlePanelRef} className="relative h-full w-full">
         <BuilderHeader />
         <CanvasControls topOffset={FLOW_CANVAS_Y_OFFESET}></CanvasControls>
-        <AiWidget classname="left-[282px]" />
+        {!isAIEnabled && <AiWidget classname="left-[282px]" />}
         <div
           className="flex flex-col absolute bottom-0 right-0"
           ref={containerRef}
@@ -173,7 +177,15 @@ const InteractiveBuilder = ({
                 state.aiContainerSize === AI_CHAT_CONTAINER_SIZES.COLLAPSED &&
                 state.dataSelectorSize === DataSelectorSizeState.DOCKED,
             })}
-          />
+          >
+            {selectedStep && state.showAiChat && state.aiChatProperty && (
+              <Conversation
+                stepName={selectedStep}
+                flowVersion={flowVersion}
+                property={state.aiChatProperty}
+              />
+            )}
+          </AiChatContainer>
           <DataSelector
             parentHeight={middlePanelSize.height}
             parentWidth={middlePanelSize.width}
