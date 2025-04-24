@@ -1,4 +1,8 @@
-import { AiProviderEnum, SaveAiConfigRequest } from '@openops/shared';
+import {
+  AiProviderEnum,
+  GetProvidersResponse,
+  SaveAiConfigRequest,
+} from '@openops/shared';
 import { AISDKError, generateText, LanguageModelV1 } from 'ai';
 import { anthropicProvider } from './providers/anthropic';
 import { azureProvider } from './providers/azure-openai';
@@ -49,18 +53,13 @@ export function getAiProvider(aiProvider: AiProviderEnum): AiProvider {
   return providerFn;
 }
 
-export function getAvailableProvidersWithModels(): {
-  provider: keyof typeof AiProviderEnum;
-  displayName: string;
-  models: string[];
-}[] {
-  return Object.entries(AiProviderEnum).map(([key, displayName]) => {
+export function getAvailableProvidersWithModels(): GetProvidersResponse[] {
+  return Object.entries(AiProviderEnum).map(([key, value]) => {
     const provider = getAiProvider(
       AiProviderEnum[key as keyof typeof AiProviderEnum],
     );
     return {
-      provider: key as keyof typeof AiProviderEnum,
-      displayName,
+      provider: value,
       models: provider.models,
     };
   });

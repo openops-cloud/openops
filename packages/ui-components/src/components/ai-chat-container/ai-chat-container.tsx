@@ -1,6 +1,6 @@
 import { t } from 'i18next';
 import { Send as SendIcon, Sparkles } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { ReactNode, useRef, useState } from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
 import { cn } from '../../lib/cn';
 import { Button } from '../../ui/button';
@@ -16,6 +16,7 @@ type AiChatContainerProps = {
   toggleContainerSizeState: () => void;
   onSubmitChat: (message: string) => void;
   className?: string;
+  children?: ReactNode;
 };
 
 const AiChatContainer = ({
@@ -26,6 +27,7 @@ const AiChatContainer = ({
   toggleContainerSizeState,
   onSubmitChat,
   className,
+  children,
 }: AiChatContainerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [promptValue, setPromptValue] = useState('');
@@ -82,8 +84,11 @@ const AiChatContainer = ({
       >
         <ScrollArea className="transition-all h-full w-full">
           <div className="py-8 flex flex-col h-full">
-            <div className="justify-center dark:text-primary text-base font-bold leading-[25px] flex-1 px-6">
-              <span>Welcome to OpenOps AI Chat!</span>
+            <div className="flex-1 px-6">
+              <div className="justify-center dark:text-primary text-base font-bold leading-[25px]">
+                <span>{t('Welcome to OpenOps AI Chat!')}</span>
+              </div>
+              {children}
             </div>
 
             <div className="w-full rounded-tl rounded-tr px-4 relative">
