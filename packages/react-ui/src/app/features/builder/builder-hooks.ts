@@ -39,6 +39,14 @@ export function useBuilderStateContext<T>(
   return useStore(store, selector);
 }
 
+export function useSafeBuilderStateContext<T>(
+  selector: (state: BuilderState) => T,
+): T | undefined {
+  const store = useContext(BuilderStateContext);
+  if (!store) return undefined;
+  return useStore(store, selector);
+}
+
 export enum LeftSideBarType {
   RUNS = 'runs',
   VERSIONS = 'versions',
