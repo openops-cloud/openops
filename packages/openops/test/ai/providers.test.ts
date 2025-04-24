@@ -96,73 +96,59 @@ describe('getAvailableProvidersWithModels', () => {
 
     const expected = [
       {
-        provider: 'ANTHROPIC',
-        displayName: AiProviderEnum.ANTHROPIC,
+        provider: AiProviderEnum.ANTHROPIC,
         models: ['anthropicModel'],
       },
       {
-        provider: 'AZURE_OPENAI',
-        displayName: AiProviderEnum.AZURE_OPENAI,
+        provider: AiProviderEnum.AZURE_OPENAI,
         models: ['azureModel'],
       },
       {
-        provider: 'CEREBRAS',
-        displayName: AiProviderEnum.CEREBRAS,
+        provider: AiProviderEnum.CEREBRAS,
         models: ['cerebrasModel'],
       },
       {
-        provider: 'COHERE',
-        displayName: AiProviderEnum.COHERE,
+        provider: AiProviderEnum.COHERE,
         models: ['cohereModel'],
       },
       {
-        provider: 'DEEPINFRA',
-        displayName: AiProviderEnum.DEEPINFRA,
+        provider: AiProviderEnum.DEEPINFRA,
         models: ['deepinfraModel'],
       },
       {
-        provider: 'DEEPSEEK',
-        displayName: AiProviderEnum.DEEPSEEK,
+        provider: AiProviderEnum.DEEPSEEK,
         models: ['deepseekModel'],
       },
       {
-        provider: 'GOOGLE',
-        displayName: AiProviderEnum.GOOGLE,
+        provider: AiProviderEnum.GOOGLE,
         models: ['googleModel'],
       },
       {
-        provider: 'GROQ',
-        displayName: AiProviderEnum.GROQ,
+        provider: AiProviderEnum.GROQ,
         models: ['groqModel'],
       },
       {
-        provider: 'MISTRAL',
-        displayName: AiProviderEnum.MISTRAL,
+        provider: AiProviderEnum.MISTRAL,
         models: ['mistralModel'],
       },
       {
-        provider: 'OPENAI',
-        displayName: AiProviderEnum.OPENAI,
+        provider: AiProviderEnum.OPENAI,
         models: ['openAiModel'],
       },
       {
-        provider: 'OPENAI_COMPATIBLE',
-        displayName: AiProviderEnum.OPENAI_COMPATIBLE,
+        provider: AiProviderEnum.OPENAI_COMPATIBLE,
         models: ['openaiCompatibleModel'],
       },
       {
-        provider: 'PERPLEXITY',
-        displayName: AiProviderEnum.PERPLEXITY,
+        provider: AiProviderEnum.PERPLEXITY,
         models: ['perplexityModel'],
       },
       {
-        provider: 'TOGETHER_AI',
-        displayName: AiProviderEnum.TOGETHER_AI,
+        provider: AiProviderEnum.TOGETHER_AI,
         models: ['togetherModel'],
       },
       {
-        provider: 'XAI',
-        displayName: AiProviderEnum.XAI,
+        provider: AiProviderEnum.XAI,
         models: ['xaiModel'],
       },
     ];
