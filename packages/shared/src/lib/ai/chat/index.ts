@@ -14,7 +14,15 @@ export const OpenChatResponse = Type.Object({
     Type.Array(
       Type.Object({
         role: Type.String(),
-        content: Type.String(),
+        content: Type.Union([
+          Type.String(),
+          Type.Array(
+            Type.Object({
+              type: Type.Literal('text'),
+              text: Type.String(),
+            }),
+          ),
+        ]),
       }),
     ),
   ),
