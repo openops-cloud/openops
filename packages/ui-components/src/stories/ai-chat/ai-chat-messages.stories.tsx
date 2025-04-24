@@ -28,7 +28,7 @@ export const AWSCliExample: Story = {
 aws ec2 describe-instances \\
   --region us-east-1 \\
   --filters "Name=tag:Environment,Values=Production" \\
-  --query 'Reservations[].Instances[].[InstanceId,InstanceType,State.Name,Tags[?Key==\'Name\'].Value|[0]]' \\
+  --query 'Reservations[].Instances[].[InstanceId,InstanceType,State.Name,Tags[?Key=='Name'].Value|[0]]' \\
   --output table
 \`\`\`
 
@@ -62,46 +62,6 @@ aws ce get-cost-and-usage \\
 - Costs grouped by AWS service
 - Only for resources tagged with \`Environment=Production\`
 - Data for the previous month`,
-      },
-    ],
-  },
-};
-
-export const CostOptimizationAdvice: Story = {
-  args: {
-    messages: [
-      {
-        id: '1',
-        role: 'user',
-        content: 'What are some quick ways to reduce our cloud costs?',
-      },
-      {
-        id: '2',
-        role: 'assistant',
-        content: `# Cost Optimization Strategies
-
-### 1. Right-size your instances
-\`\`\`bash
-aws compute-optimizer get-ec2-instance-recommendations
-\`\`\`
-
-### 2. Find and remove idle resources
-- **Unattached EBS volumes:**
-\`\`\`bash
-aws ec2 describe-volumes --filters Name=status,Values=available
-\`\`\`
-- **Unused Elastic IPs:**
-\`\`\`bash
-aws ec2 describe-addresses --filters Name=instance-id,Values=
-\`\`\`
-
-### 3. Enable cost allocation tags
-\`\`\`bash
-aws resourcegroupstaggingapi get-resources \\
-  --query 'ResourceTagMappingList[?Tags[?Key==\`CostCenter\`]]'
-\`\`\`
-
-Would you like specific implementation details for any of these strategies?`,
       },
     ],
   },

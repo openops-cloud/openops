@@ -32,9 +32,9 @@ const Message = ({
   const isUser = message.role === 'user';
   return (
     <div
-      className={cn('p-4 rounded-lg', {
-        'bg-blue-50 text-gray-900 self-start': isUser,
-        'bg-gray-100 text-gray-900 self-end ml-auto': !isUser,
+      className={cn('p-4 pb-6 rounded-lg text-black dark:text-white', {
+        'bg-blue-50 dark:bg-slate-900 self-start': isUser,
+        'bg-gray-100 dark:bg-background self-end ml-auto': !isUser,
       })}
     >
       <Markdown
