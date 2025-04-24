@@ -156,7 +156,7 @@ describe('aiConfigService.upsert', () => {
       {
         ...baseRequest,
         id: existingId,
-        apiKey: undefined,
+        apiKey: existingApiKey,
         projectId,
         created: expect.any(String),
         updated: expect.any(String),

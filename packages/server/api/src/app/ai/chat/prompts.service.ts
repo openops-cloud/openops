@@ -1,30 +1,33 @@
+import { logger } from '@openops/server-shared';
+import { readFile } from 'fs/promises';
+import { join } from 'path';
 import { ChatContext } from './ai-chat.service';
 import { azureCliPrompt } from './prompts/azure-cli-prompt';
 
-export const getSystemPrompt = (context: ChatContext): string => {
-  switch (context.blockName) {
-    case 'aws':
-      return awsCliPrompt;
-    case 'azure':
-      return azureCliPrompt;
-    case 'gcp':
-      return gcpCliPrompt;
-    default:
-      return '';
+export const getSystemPrompt = async (
+  context: ChatContext,
+): Promise<string> => {
+  try {
+    switch (context.blockName) {
+      case '@openops/aws':
+        return await loadFile('aws.txt');
+      case '@openops/azure':
+        return '';
+      case '@openops/google-cloud':
+        return '';
+      default:
+        return '';
+    }
+  } catch (error) {
+    logger.error('', error);
+    return '';
   }
 };
 
-const awsCliPrompt = `
-You are a cloud infrastructure assistant skilled in AWS.
-Your job is to help users generate correct and efficient CLI commands for any of these cloud providers.
+async function loadFile(filename: string): Promise<string> {
+  const projectRoot = process.cwd();
 
-- Always return only the command(s), unless the user asks for an explanation.
-- Use the latest version of each CLI tool.
-- Include all relevant flags and parameters for each command.
-- Use clear placeholder values like <bucket-name>, <region>, <project-id>, <resource-group>, etc.
-- If a task requires multiple steps, list the commands in the order they should be run.
-- When the cloud provider isn't specified, ask the user to clarify.
+  const filePath = join(projectRoot, 'ai-prompts', filename);
 
-Format your responses cleanly using code blocks for the commands.`;
-
-const gcpCliPrompt = '';
+  return readFile(filePath, 'utf-8');
+}
