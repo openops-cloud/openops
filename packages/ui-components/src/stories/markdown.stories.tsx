@@ -1,7 +1,10 @@
+import { action } from '@storybook/addon-actions';
 import { expect } from '@storybook/jest';
 import type { Meta, StoryObj } from '@storybook/react';
+import { fn } from '@storybook/test';
+import { fireEvent } from '@storybook/testing-library';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Markdown } from '../components';
+import { Markdown, MarkdownCodeVariations } from '../components';
 import { selectLightOrDarkCanvas } from '../test-utils/select-themed-canvas.util';
 
 const queryClient = new QueryClient();
@@ -11,6 +14,28 @@ const meta = {
   title: 'components/Markdown',
   component: Markdown,
   tags: ['autodocs'],
+  args: {
+    handleInject: action('Inject command'),
+  },
+  argTypes: {
+    handleInject: {
+      description: 'function to handle the injection of a command',
+    },
+    markdown: {
+      description: 'The markdown content to render',
+      control: 'text',
+    },
+    variables: {
+      description: 'The variables to replace in the markdown content',
+      control: 'object',
+    },
+    codeVariation: {
+      description: 'The code variation to use',
+      control: 'select',
+      options: Object.values(MarkdownCodeVariations),
+      defaultValue: MarkdownCodeVariations.WithCopy,
+    },
+  },
   decorators: [
     (Story) => (
       <QueryClientProvider client={queryClient}>
@@ -142,14 +167,50 @@ Language URL, valid URL 👇
   },
 };
 
+export const CodeWithoutCopy: Story = {
+  args: {
+    codeVariation: 'without-copy',
+    markdown: `
+### Without Copy
+\`\`\`text
+  {{someCLICommand}}
+\`\`\`
+`,
+    variables: {
+      someCLICommand: 'aws s3 sync',
+    },
+  },
+};
+
 export const InjectCommand: Story = {
   args: {
+    handleInject: fn(),
     codeVariation: 'with-copy-and-inject',
     markdown: `
 ### Describe EC2 Instances
 \`\`\`text
 aws ec2 describe-instances
 `,
+  },
+  play: async ({ canvasElement, args }) => {
+    const textarea =
+      selectLightOrDarkCanvas(canvasElement).getByRole('textbox');
+    expect(textarea).toHaveValue('aws ec2 describe-instances');
+    expect(textarea).toBeDisabled();
+    expect(textarea).toHaveClass('bg-input');
+
+    expect(args.handleInject).not.toHaveBeenCalled();
+
+    const injectButton = selectLightOrDarkCanvas(canvasElement).getByRole(
+      'button',
+      { name: 'Inject command' },
+    );
+
+    fireEvent.click(injectButton);
+
+    expect(args.handleInject).toHaveBeenCalledWith(
+      'aws ec2 describe-instances',
+    );
   },
 };
 
@@ -162,6 +223,15 @@ export const InjectCommandMultiLine: Story = {
 aws s3 sync\n  --exclude "*"\n  --include "*.jpg"\n  <local-dir> s3://<bucket-name>
 \`\`\`
 `,
+  },
+  play: async ({ canvasElement }) => {
+    const textarea =
+      selectLightOrDarkCanvas(canvasElement).getByRole('textbox');
+    expect(textarea).toHaveValue(
+      'aws s3 sync\n  --exclude "*"\n  --include "*.jpg"\n  <local-dir> s3://<bucket-name>',
+    );
+    expect(textarea).toBeDisabled();
+    expect(textarea).toHaveClass('bg-input');
   },
 };
 
