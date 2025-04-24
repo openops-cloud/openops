@@ -1,16 +1,19 @@
 const hashObjectMock = jest.fn();
 const getSerializedObjectMock = jest.fn();
+const deleteKeyMock = jest.fn();
 jest.mock('@openops/server-shared', () => ({
   hashUtils: {
     hashObject: hashObjectMock,
   },
   cacheWrapper: {
     getSerializedObject: getSerializedObjectMock,
+    deleteKey: deleteKeyMock,
   },
 }));
 
 import { CoreMessage } from 'ai';
 import {
+  deleteChatHistory,
   generateChatId,
   getChatContext,
   getChatHistory,
@@ -86,5 +89,20 @@ describe('getChatContext', () => {
     const result = await getChatContext(chatId);
 
     expect(result).toEqual(null);
+  });
+});
+
+describe('deleteChatHistory', () => {
+  const chatId = 'chat-delete-test';
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should call deleteKey for history', async () => {
+    await deleteChatHistory(chatId);
+
+    expect(deleteKeyMock).toHaveBeenCalledTimes(1);
+    expect(deleteKeyMock).toHaveBeenCalledWith(`${chatId}:history`);
   });
 });

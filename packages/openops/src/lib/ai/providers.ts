@@ -1,5 +1,5 @@
-import { AiProviderEnum } from '@openops/shared';
-import { LanguageModelV1 } from 'ai';
+import { AiProviderEnum, SaveAiConfigRequest } from '@openops/shared';
+import { AISDKError, generateText, LanguageModelV1 } from 'ai';
 import { anthropicProvider } from './providers/anthropic';
 import { azureProvider } from './providers/azure-openai';
 import { cerebrasProvider } from './providers/cerebras';
@@ -81,6 +81,42 @@ export const getAiProviderLanguageModel = async (aiConfig: {
   });
 };
 
+export const validateAiProviderConfig = async (
+  config: SaveAiConfigRequest,
+): Promise<{
+  valid: boolean;
+  error?: { errorMessage: string; errorName: string };
+}> => {
+  const languageModel = await getAiProviderLanguageModel({
+    apiKey: config.apiKey,
+    model: config.model,
+    provider: config.provider,
+    providerSettings: config.providerSettings,
+  });
+
+  try {
+    await generateText({
+      model: languageModel,
+      prompt: '',
+      ...config.modelSettings,
+    });
+  } catch (error) {
+    if (AISDKError.isInstance(error)) {
+      return invalidConfigError(
+        error.name,
+        error.message.replace(config.apiKey, '**REDACTED**'),
+      );
+    }
+
+    return invalidConfigError(
+      error instanceof Error ? error.name : 'UnknownError',
+      error instanceof Error ? error.message : 'Unknown error occurred',
+    );
+  }
+
+  return { valid: true };
+};
+
 const sanitizeBaseUrl = (
   providerSettings?: Record<string, unknown> | null,
 ): string | undefined => {
@@ -88,4 +124,17 @@ const sanitizeBaseUrl = (
   return typeof rawBaseUrl === 'string' && rawBaseUrl.trim() !== ''
     ? rawBaseUrl
     : undefined;
+};
+
+const invalidConfigError = (
+  errorName: string,
+  errorMessage: string,
+): {
+  valid: boolean;
+  error: { errorMessage: string; errorName: string };
+} => {
+  return {
+    valid: false,
+    error: { errorName, errorMessage },
+  };
 };
