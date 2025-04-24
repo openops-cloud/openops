@@ -12,13 +12,11 @@ export type StepSettingsContextState = {
   selectedStep: Action | Trigger;
   selectedStepTemplateModel: ActionBase | TriggerBase | undefined;
   blockModel: BlockMetadataModel | undefined;
-  readonly: boolean;
 };
 
 export type StepSettingsProviderProps = {
   selectedStep: Action | Trigger;
   blockModel: BlockMetadataModel | undefined;
-  readonly: boolean;
   children: ReactNode;
 };
 
@@ -29,7 +27,6 @@ export const StepSettingsContext = createContext<
 export const StepSettingsProvider = ({
   selectedStep,
   blockModel,
-  readonly,
   children,
 }: StepSettingsProviderProps) => {
   const selectedStepTemplateModel = getStepTemplateModel(
@@ -43,7 +40,6 @@ export const StepSettingsProvider = ({
         selectedStep,
         blockModel,
         selectedStepTemplateModel,
-        readonly,
       }}
     >
       {children}

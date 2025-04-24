@@ -315,7 +315,6 @@ const BuilderPage = () => {
                   <StepSettingsProvider
                     blockModel={blockModel}
                     selectedStep={memorizedSelectedStep}
-                    readonly={readonly}
                     key={containerKey}
                   >
                     <DynamicFormValidationProvider>
