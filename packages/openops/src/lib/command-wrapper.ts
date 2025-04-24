@@ -2,8 +2,6 @@ import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { ChildProcess } from 'child_process';
 import { execFile, ExecFileOptions, spawn } from 'node:child_process';
 
-const maxBuffer = system.getNumber(AppSystemProp.EXECFILE_MAX_BUFFERSIZE);
-
 export interface CommandResult {
   stdOut: string;
   stdError: string;
@@ -29,9 +27,12 @@ export async function executeFile(
 ): Promise<CommandResult> {
   const options: ExecFileOptions = {
     env: envVariables,
-    maxBuffer:
-      system.getNumber(AppSystemProp.EXECFILE_MAX_BUFFERSIZE) ?? undefined,
   };
+
+  const maxBuffer = system.getNumber(AppSystemProp.EXECFILE_MAX_BUFFERSIZE_MB);
+  if (maxBuffer) {
+    options.maxBuffer = maxBuffer * 1024 * 1024;
+  }
 
   const childProcess = execFile(file, args, options);
   return await getResult(childProcess, file);
