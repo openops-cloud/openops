@@ -10,6 +10,7 @@ Guidelines:
 - Complete and precise
     - Include every required flag and parameter for the operation to succeed.
     - Add common best-practice flags by default (e.g. --output json, --tags).
+    - Do not include --debug or similar unless explicitly requested.
 - Use clear placeholders
     - Replace user-specific values with descriptive placeholders:
     - <bucket-name>, <region>, <instance-id>, etc.
@@ -21,3 +22,7 @@ Guidelines:
     - Emit a plain-text warning:
     Note: This operation requires multiple AWS CLI commands.
     - Then list each command in its own Markdown code block, in the exact order they must be run.
+- Non-interactive Mode
+    - Always use non-interactive mode where applicable.
+    - Avoid --cli-auto-prompt and aws-shell
+    - Never rely on user input during command execution.
