@@ -2,23 +2,56 @@ import { AiSettingsForm } from '@/app/features/ai/ai-settings-form';
 import { AiSettingsFormSchema } from '@/app/features/ai/lib/ai-form-utils';
 import { aiSettingsApi } from '@/app/features/ai/lib/ai-settings-api';
 import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
-import { INTERNAL_ERROR_TOAST, toast } from '@openops/components/ui';
+import { authenticationSession } from '@/app/lib/authentication-session';
+import {
+  INTERNAL_ERROR_TOAST,
+  toast,
+  TooltipWrapper,
+} from '@openops/components/ui';
 import { useMutation } from '@tanstack/react-query';
 import { t } from 'i18next';
+import { Trash } from 'lucide-react';
 
 const AiSettingsPage = () => {
   const { data: aiProviders } = aiSettingsHooks.useAiSettingsProviders();
 
-  const { data: aiSettings } = aiSettingsHooks.useAiSettings();
+  const { data: aiSettings, refetch: refetchAiSettings } =
+    aiSettingsHooks.useAiSettings();
 
   const { mutate: onSave, isPending: isSaving } = useMutation({
     mutationFn: async (aiSettings: AiSettingsFormSchema) => {
-      return aiSettingsApi.saveAiSettings(aiSettings);
+      return aiSettingsApi.saveAiSettings({
+        ...aiSettings,
+        projectId: authenticationSession.getProjectId()!,
+      });
     },
     onSuccess: () => {
+      refetchAiSettings();
       toast({
         title: 'Success',
         description: 'AI settings are saved successfully ',
+        duration: 3000,
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Error',
+        variant: 'destructive',
+        description: error.message,
+        duration: 3000,
+      });
+    },
+  });
+
+  const { mutate: onDelete, isPending: isDeleting } = useMutation({
+    mutationFn: async (id: string) => {
+      return aiSettingsApi.deleteAiSettings(id);
+    },
+    onSuccess: () => {
+      refetchAiSettings();
+      toast({
+        title: 'Success',
+        description: 'AI settings are deleted successfully ',
         duration: 3000,
       });
     },
@@ -31,13 +64,24 @@ const AiSettingsPage = () => {
     <div className="flex w-full flex-col items-center justify-center gap-4">
       <div className="mx-auto w-full flex-col">
         <h1 className="text-[24px] font-bold mb-[35px]">{t('Ai providers')}</h1>
-        <div className="py-6 px-[60px] border rounded-[11px]">
+        <div className="flex justify-between p-6 border rounded-[11px]">
           <AiSettingsForm
             aiProviders={aiProviders}
-            currentSettings={aiSettings}
+            currentSettings={aiSettings?.[0]}
             onSave={onSave}
             isSaving={isSaving}
           />
+          {aiSettings?.[0]?.id && (
+            <TooltipWrapper tooltipText={t('Delete')}>
+              <Trash
+                size={24}
+                role="button"
+                className="text-destructive"
+                aria-label="Delete"
+                onClick={() => onDelete(aiSettings?.[0].id)}
+              />
+            </TooltipWrapper>
+          )}
         </div>
       </div>
     </div>

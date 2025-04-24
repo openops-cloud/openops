@@ -1,24 +1,17 @@
-import { AiSettingsFormSchema } from '@/app/features/ai/lib/ai-form-utils';
 import { api } from '@/app/lib/api';
-import { GetProvidersResponse } from '@openops/shared';
+import { AiConfig, GetProvidersResponse } from '@openops/shared';
 
 export const aiSettingsApi = {
-  getProviderOptions(): Promise<any> {
-    return api.get<GetProvidersResponse>('/v1/ai/providers');
+  getProviderOptions(): Promise<GetProvidersResponse[]> {
+    return api.get<GetProvidersResponse[]>('/v1/ai/providers');
   },
-  saveAiSettings(payload: any): Promise<void> {
-    localStorage.setItem('ai-settings', JSON.stringify(payload));
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve();
-      }, 3000);
-    });
+  saveAiSettings(payload: any): Promise<GetProvidersResponse> {
+    return api.post<GetProvidersResponse>('/v1/ai/config', payload);
   },
-  getAiSettings(): Promise<AiSettingsFormSchema> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(JSON.parse(localStorage.getItem('ai-settings') || '{}'));
-      }, 3000);
-    });
+  deleteAiSettings(id: string): Promise<any> {
+    return api.delete<any>('/v1/ai/config/' + id);
+  },
+  getAiSettings(): Promise<AiConfig[]> {
+    return api.get<AiConfig[]>('/v1/ai/config/');
   },
 };

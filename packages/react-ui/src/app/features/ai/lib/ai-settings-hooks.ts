@@ -1,6 +1,5 @@
-import { AiSettingsFormSchema } from '@/app/features/ai/lib/ai-form-utils';
 import { aiSettingsApi } from '@/app/features/ai/lib/ai-settings-api';
-import { GetProvidersResponse } from '@openops/shared';
+import { AiConfig, GetProvidersResponse } from '@openops/shared';
 import { useQuery } from '@tanstack/react-query';
 
 export const aiSettingsHooks = {
@@ -12,7 +11,7 @@ export const aiSettingsHooks = {
   },
   //TODO update type
   useAiSettings: () => {
-    return useQuery<AiSettingsFormSchema, Error>({
+    return useQuery<AiConfig[], Error>({
       queryKey: ['ai-settings'],
       queryFn: () => aiSettingsApi.getAiSettings(),
     });

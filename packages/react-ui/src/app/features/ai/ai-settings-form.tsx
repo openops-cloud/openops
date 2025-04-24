@@ -3,6 +3,7 @@ import {
   AI_SETTINGS_FORM_SCHEMA,
   AiSettingsFormSchema,
 } from '@/app/features/ai/lib/ai-form-utils';
+import { DictionaryProperty } from '@/app/features/builder/block-properties/dictionary-property';
 import { typeboxResolver } from '@hookform/resolvers/typebox';
 import {
   AutocompleteInput,
@@ -13,30 +14,31 @@ import {
   Input,
   Label,
   Switch,
-  Textarea,
 } from '@openops/components/ui';
+import { AiConfig } from '@openops/shared';
 import { t } from 'i18next';
+import isEqual from 'lodash-es/isEqual';
+import { CircleCheck } from 'lucide-react';
 import React, { useEffect, useMemo } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 
 type AiSettingsFormProps = {
   aiProviders?: {
-    displayName: string;
     provider: string;
     models: string[];
   }[];
-  currentSettings?: AiSettingsFormSchema;
+  currentSettings?: AiConfig;
   onSave: (settings: AiSettingsFormSchema) => void;
   isSaving: boolean;
 };
 
-const EMPTY_FORM_VALUE = {
+const EMPTY_FORM_VALUE: AiSettingsFormSchema = {
   enabled: false,
   provider: '',
-  model: '',
   apiKey: '',
-  baseUrl: '',
-  config: '',
+  modelSettings: {},
+  providerSettings: {},
+  model: '',
 };
 
 const AiSettingsForm = ({
@@ -52,17 +54,21 @@ const AiSettingsForm = ({
   });
 
   useEffect(() => {
-    if (currentSettings) {
-      form.reset(currentSettings);
-    }
+    form.reset((currentSettings as AiSettingsFormSchema) ?? EMPTY_FORM_VALUE);
   }, [currentSettings, form]);
+
+  const currentFormValue = form.watch();
+
+  const isFormUnchanged = useMemo(() => {
+    return isEqual(currentFormValue, currentSettings ?? EMPTY_FORM_VALUE);
+  }, [currentFormValue, currentSettings]);
 
   const provider = useWatch({ control: form.control, name: 'provider' });
 
   const providerOptions = useMemo(
     () =>
       aiProviders?.map((p) => ({
-        label: p.displayName,
+        label: p.provider,
         value: p.provider,
       })) ?? [],
     [aiProviders],
@@ -74,12 +80,12 @@ const AiSettingsForm = ({
   }, [provider, aiProviders]);
 
   const resetForm = () => {
-    form.reset(EMPTY_FORM_VALUE);
+    form.reset();
   };
 
   return (
     <Form {...form}>
-      <form className="grid space-y-4 max-w-[516px]">
+      <form className="flex-1 flex flex-col gap-4 max-w-[516px]">
         <FormField
           control={form.control}
           name="enabled"
@@ -98,9 +104,9 @@ const AiSettingsForm = ({
           control={form.control}
           name="provider"
           render={({ field }) => (
-            <FormItem className="grid space-y-2">
+            <FormItem className="flex flex-col gap-2">
               <Label htmlFor="provider">
-                {t('Provider')}
+                {t('Choose your AI provider')}
                 <span className="text-destructive">*</span>
               </Label>
               <SearchableSelect
@@ -120,7 +126,7 @@ const AiSettingsForm = ({
           control={form.control}
           name="model"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="flex flex-col gap-2">
               <Label htmlFor="model">
                 {t('Model')} <span className="text-destructive">*</span>
               </Label>
@@ -138,7 +144,7 @@ const AiSettingsForm = ({
           control={form.control}
           name="apiKey"
           render={({ field }) => (
-            <FormItem className="grid space-y-2">
+            <FormItem className="flex flex-col gap-2">
               <Label htmlFor="apiKey">
                 {t('API key')} <span className="text-destructive">*</span>
               </Label>
@@ -153,46 +159,59 @@ const AiSettingsForm = ({
         />
         <FormField
           control={form.control}
-          name="baseUrl"
+          name="providerSettings"
           render={({ field }) => (
-            <FormItem className="grid space-y-2">
-              <Label htmlFor="baseUrl">{t('Base URL')}</Label>
-              <Input onChange={field.onChange} value={field.value}></Input>
+            <FormItem className="flex flex-col gap-2">
+              <Label htmlFor="providerSettings">{t('Provider Settings')}</Label>
+              <DictionaryProperty
+                values={field.value ?? {}}
+                onChange={field.onChange}
+              ></DictionaryProperty>
             </FormItem>
           )}
         />
         <FormField
           control={form.control}
-          name="config"
+          name="modelSettings"
           render={({ field }) => (
-            <FormItem className="grid space-y-2">
-              <Label htmlFor="config">{t('Model configuration')}</Label>
-              <Textarea
+            <FormItem className="flex flex-col gap-2">
+              <Label htmlFor="modelSettings" className="text-base">
+                {t('Model Settings')}
+              </Label>
+              <DictionaryProperty
+                values={field.value ?? {}}
                 onChange={field.onChange}
-                value={field.value}
-              ></Textarea>
+              ></DictionaryProperty>
             </FormItem>
           )}
         />
 
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            type="button"
-            onClick={resetForm}
-            disabled={isSaving}
-          >
-            {t('Cancel')}
-          </Button>
-          <Button
-            className="w-[95px]"
-            type="button"
-            disabled={!form.formState.isValid}
-            onClick={() => onSave(form.getValues())}
-            loading={isSaving}
-          >
-            {t('Save')}
-          </Button>
+        <div className="flex items-center justify-between ">
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              type="button"
+              onClick={resetForm}
+              disabled={isSaving || isFormUnchanged}
+            >
+              {t('Cancel')}
+            </Button>
+            <Button
+              className="w-[95px]"
+              type="button"
+              disabled={!form.formState.isValid || isFormUnchanged}
+              onClick={() => onSave(form.getValues())}
+              loading={isSaving}
+            >
+              {t('Save')}
+            </Button>
+          </div>
+          {currentSettings?.id && isFormUnchanged && (
+            <div className="flex items-center gap-2">
+              <CircleCheck size={24} className="text-success-300" />
+              <span>{t('Valid Connection')}</span>
+            </div>
+          )}
         </div>
       </form>
     </Form>
