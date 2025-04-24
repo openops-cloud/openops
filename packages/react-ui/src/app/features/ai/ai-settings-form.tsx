@@ -16,8 +16,8 @@ import {
   Switch,
 } from '@openops/components/ui';
 import { AiConfig } from '@openops/shared';
+import equal from 'fast-deep-equal';
 import { t } from 'i18next';
-import isEqual from 'lodash-es/isEqual';
 import { CircleCheck } from 'lucide-react';
 import React, { useEffect, useMemo } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
@@ -75,7 +75,7 @@ const AiSettingsForm = ({
   }, [provider, aiProviders]);
 
   const isFormUnchanged = useMemo(() => {
-    return isEqual(currentFormValue, savedSettings);
+    return equal(currentFormValue, savedSettings);
   }, [currentFormValue, savedSettings]);
 
   const isValidConnection = useMemo(() => {
@@ -84,7 +84,7 @@ const AiSettingsForm = ({
       return rest;
     };
 
-    return isEqual(
+    return equal(
       omit(currentFormValue),
       omit(savedSettings as AiSettingsFormSchema),
     );
@@ -92,6 +92,11 @@ const AiSettingsForm = ({
 
   const resetForm = () => {
     form.reset();
+  };
+
+  const resetModel = () => {
+    form.setValue('model', '');
+    form.trigger('model');
   };
 
   return (
@@ -125,7 +130,7 @@ const AiSettingsForm = ({
                 options={providerOptions}
                 onChange={(v) => {
                   field.onChange(v);
-                  form.setValue('model', '');
+                  resetModel();
                 }}
                 value={field.value}
                 placeholder={t('Select an option')}
