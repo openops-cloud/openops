@@ -1,6 +1,7 @@
+import { UseChatHelpers } from '@ai-sdk/react';
 import { t } from 'i18next';
 import { Send as SendIcon, Sparkles } from 'lucide-react';
-import { ReactNode, useRef, useState } from 'react';
+import { ReactNode, useRef } from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
 import { cn } from '../../lib/cn';
 import { Button } from '../../ui/button';
@@ -14,10 +15,9 @@ type AiChatContainerProps = {
   onCloseClick: () => void;
   containerSize: AiChatContainerSizeState;
   toggleContainerSizeState: () => void;
-  onSubmitChat: (message: string) => void;
   className?: string;
   children?: ReactNode;
-};
+} & Pick<UseChatHelpers, 'input' | 'handleInputChange' | 'handleSubmit'>;
 
 const AiChatContainer = ({
   parentHeight,
@@ -25,12 +25,13 @@ const AiChatContainer = ({
   onCloseClick,
   containerSize,
   toggleContainerSizeState,
-  onSubmitChat,
   className,
   children,
+  handleInputChange,
+  handleSubmit,
+  input,
 }: AiChatContainerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [promptValue, setPromptValue] = useState('');
 
   let height: string;
   if (containerSize === AI_CHAT_CONTAINER_SIZES.COLLAPSED) {
@@ -59,7 +60,7 @@ const AiChatContainer = ({
         ) {
           e.preventDefault();
           e.stopPropagation();
-          onSubmitChat(promptValue);
+          handleSubmit();
         }
       }}
     >
@@ -97,13 +98,13 @@ const AiChatContainer = ({
                 minRows={2}
                 maxRows={4}
                 placeholder="Ask a question about the command you need"
-                value={promptValue}
-                onChange={(ev) => setPromptValue(ev.target.value)}
+                value={input}
+                onChange={handleInputChange}
                 onKeyDown={(ev) => {
                   if (ev.key === 'Enter' && !ev.shiftKey) {
                     ev.preventDefault();
                     ev.stopPropagation();
-                    onSubmitChat(promptValue);
+                    handleSubmit();
                   }
                 }}
               />
@@ -112,7 +113,7 @@ const AiChatContainer = ({
                 size="icon"
                 variant="transparent"
                 className="absolute right-10 bottom-7"
-                onClick={() => onSubmitChat(promptValue)}
+                onClick={handleSubmit}
               >
                 <SendIcon className="text-gray-400 hover:text-gray-600" />
               </Button>

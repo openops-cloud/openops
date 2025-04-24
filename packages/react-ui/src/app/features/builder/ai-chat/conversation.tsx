@@ -1,6 +1,7 @@
+import { UseChatHelpers } from '@ai-sdk/react';
 import { BlockProperty } from '@openops/blocks-framework';
 import { LoadingSpinner } from '@openops/components/ui';
-import { flowHelper, FlowVersion } from '@openops/shared';
+import { flowHelper, FlowVersion, OpenChatResponse } from '@openops/shared';
 import { useQuery } from '@tanstack/react-query';
 import { aiChatApi } from './lib/chat-api';
 
@@ -8,12 +9,16 @@ type ConversationProps = {
   stepName: string;
   flowVersion: FlowVersion;
   property: BlockProperty;
-};
+  onConversationRetrieved: (conversation: OpenChatResponse) => void;
+} & Pick<UseChatHelpers, 'messages' | 'status'>;
 
 const Conversation = ({
   flowVersion,
   stepName,
   property,
+  onConversationRetrieved,
+  messages,
+  status,
 }: ConversationProps) => {
   const stepDetails = flowHelper.getStep(flowVersion, stepName);
   const blockName = stepDetails?.settings?.blockName;
@@ -24,10 +29,18 @@ const Conversation = ({
       if (!stepDetails) {
         throw new Error('Step not found');
       }
-      return aiChatApi.open(flowVersion.flowId, blockName, stepName);
+      const data = await aiChatApi.open(
+        flowVersion.flowId,
+        blockName,
+        stepName,
+      );
+      onConversationRetrieved(data);
+      return data;
     },
     enabled: !!stepDetails && !!stepDetails.settings.blockName,
   });
+
+  const messagesToDisplay = messages.length > 0 ? messages : data?.messages;
 
   if (isPending) {
     return <LoadingSpinner />;
@@ -35,17 +48,24 @@ const Conversation = ({
 
   return (
     <div className="flex flex-col gap-2">
-      <span>Context Property name: {property.displayName}</span>
-      <span className="truncate">ChatId: {data?.chatId}</span>
-      {data?.messages?.map((message) => (
-        <div className="w-full flex flex-col truncate" key={message.role}>
+      <span className="text-sm italic">
+        Context Property name: &quot;{property.displayName}&quot;
+      </span>
+      <span className="truncate text-sm italic">
+        ChatId: &quot;{data?.chatId}&quot;
+      </span>
+      {messagesToDisplay?.map((message, idx) => (
+        <div className="w-full flex flex-col" key={message.role + idx}>
           <span className="uppercase font-semibold">{message.role}:</span>
-          <span className="truncate">{JSON.stringify(message.content)}</span>
+          <span className="whitespace-pre-line break-words">
+            {JSON.stringify(message.content)}
+          </span>
         </div>
       ))}
-      {!data?.messages?.length && <span>No messages yet</span>}
+      {['streaming', 'submitted'].includes(status) && <LoadingSpinner />}
     </div>
   );
 };
+
 Conversation.displayName = 'Conversation';
 export { Conversation };

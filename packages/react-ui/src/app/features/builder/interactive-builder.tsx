@@ -2,7 +2,6 @@ import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { FLOW_CANVAS_Y_OFFESET } from '@/app/constants/flow-canvas';
 import {
   AI_CHAT_CONTAINER_SIZES,
-  AiChatContainer,
   AiWidget,
   CanvasControls,
   cn,
@@ -19,7 +18,7 @@ import {
 } from '@openops/shared';
 import { MutableRefObject, useCallback, useEffect, useRef } from 'react';
 import { useDebounceCallback } from 'usehooks-ts';
-import { Conversation } from './ai-chat/conversation';
+import { AiChat } from './ai-chat/ai-chat';
 import { textMentionUtils } from './block-properties/text-input-with-mentions/text-input-utils';
 import { BuilderHeader } from './builder-header/builder-header';
 import { useBuilderStateContext } from './builder-hooks';
@@ -159,33 +158,11 @@ const InteractiveBuilder = ({
           className="flex flex-col absolute bottom-0 right-0"
           ref={containerRef}
         >
-          <AiChatContainer
-            parentHeight={middlePanelSize.height}
-            showAiChat={state.showAiChat}
-            onCloseClick={() => dispatch({ type: 'AICHAT_CLOSE_CLICK' })}
-            containerSize={state.aiContainerSize}
-            toggleContainerSizeState={() =>
-              dispatch({ type: 'AICHAT_TOGGLE_SIZE' })
-            }
-            onSubmitChat={function (message: string): void {
-              throw new Error('Function not implemented.');
-            }}
-            className={cn('right-0 static', {
-              'children:transition-none':
-                state.showDataSelector &&
-                state.showAiChat &&
-                state.aiContainerSize === AI_CHAT_CONTAINER_SIZES.COLLAPSED &&
-                state.dataSelectorSize === DataSelectorSizeState.DOCKED,
-            })}
-          >
-            {selectedStep && state.showAiChat && state.aiChatProperty && (
-              <Conversation
-                stepName={selectedStep}
-                flowVersion={flowVersion}
-                property={state.aiChatProperty}
-              />
-            )}
-          </AiChatContainer>
+          <AiChat
+            middlePanelSize={middlePanelSize}
+            selectedStep={selectedStep}
+            flowVersion={flowVersion}
+          />
           <DataSelector
             parentHeight={middlePanelSize.height}
             parentWidth={middlePanelSize.width}
