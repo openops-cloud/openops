@@ -186,7 +186,7 @@ const Markdown = React.memo(
         <ReactMarkdown
           components={{
             code(props) {
-              const isLanguageText = props.className?.includes('language-text');
+              const isLanguageText = props.className?.includes('language');
               const isLanguageUrl = props.className?.includes('language-url');
 
               if (!props.children) {
@@ -224,7 +224,7 @@ const Markdown = React.memo(
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="bg-background rounded p-2 inline-flex items-center justify-center text-xs font-sans"
+                        className="rounded p-2 inline-flex items-center justify-center text-xs font-sans"
                         onClick={() => onInjectCode(codeContent)}
                       >
                         <Plus className="w-4 h-4" />
@@ -233,7 +233,7 @@ const Markdown = React.memo(
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="bg-background rounded p-2 inline-flex items-center justify-center"
+                        className="rounded p-2 inline-flex items-center justify-center"
                         onClick={() => copyToClipboard(codeContent)}
                       >
                         <Copy className="w-4 h-4" />
