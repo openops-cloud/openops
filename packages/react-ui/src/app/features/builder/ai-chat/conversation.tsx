@@ -39,9 +39,9 @@ const Conversation = ({
       <span>Context Property name: {property.displayName}</span>
       <span className="truncate">ChatId: {data?.chatId}</span>
       {data?.messages?.map((message) => (
-        <div key={message.role}>
-          <span>{message.role}</span>
-          <span>{message.content}</span>
+        <div className="w-full flex flex-col truncate" key={message.role}>
+          <span className="uppercase font-semibold">{message.role}:</span>
+          <span className="truncate">{JSON.stringify(message.content)}</span>
         </div>
       ))}
       {!data?.messages?.length && <span>No messages yet</span>}
