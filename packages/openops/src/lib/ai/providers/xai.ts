@@ -1,3 +1,5 @@
+import { createXai } from '@ai-sdk/xai';
+import { LanguageModelV1 } from 'ai';
 import { AiProvider } from '../providers';
 
 const xaiModels = [
@@ -22,6 +24,18 @@ const xaiModels = [
   'grok-beta',
 ];
 
+function createLanguageModel(params: {
+  apiKey: string;
+  model: string;
+  baseUrl?: string;
+}): LanguageModelV1 {
+  return createXai({
+    apiKey: params.apiKey,
+    baseURL: params.baseUrl,
+  })(params.model);
+}
+
 export const xaiProvider: AiProvider = {
   models: xaiModels,
+  createLanguageModel,
 };

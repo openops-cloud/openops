@@ -1,7 +1,10 @@
 import { FLOW_CANVAS_Y_OFFESET } from '@/app/constants/flow-canvas';
 import {
+  AI_CHAT_CONTAINER_SIZES,
+  AiChatContainer,
   AiWidget,
   CanvasControls,
+  cn,
   InteractiveContextProvider,
 } from '@openops/components/ui';
 import {
@@ -9,14 +12,35 @@ import {
   ActionType,
   flowHelper,
   FlowVersion,
+  isNil,
   StepLocationRelativeToParent,
 } from '@openops/shared';
-import { MutableRefObject } from 'react';
+import { MutableRefObject, useCallback, useEffect, useRef } from 'react';
+import { useDebounceCallback } from 'usehooks-ts';
+import { textMentionUtils } from './block-properties/text-input-with-mentions/text-input-utils';
 import { BuilderHeader } from './builder-header/builder-header';
+import { useBuilderStateContext } from './builder-hooks';
 import { DataSelector } from './data-selector';
+import { DataSelectorSizeState } from './data-selector/data-selector-size-togglers';
 import { FlowBuilderCanvas } from './flow-canvas/flow-builder-canvas';
 import { FLOW_CANVAS_CONTAINER_ID } from './flow-version-undo-redo/constants';
 import { usePaste } from './hooks/use-paste';
+
+const doesHaveInputThatUsesMentionClass = (
+  element: Element | null,
+): boolean => {
+  if (isNil(element)) {
+    return false;
+  }
+  if (element.classList.contains(textMentionUtils.inputThatUsesMentionClass)) {
+    return true;
+  }
+  const parent = element.parentElement;
+  if (parent) {
+    return doesHaveInputThatUsesMentionClass(parent);
+  }
+  return false;
+};
 
 const InteractiveBuilder = ({
   selectedStep,
@@ -68,6 +92,53 @@ const InteractiveBuilder = ({
     }
   };
 
+  const [state, dispatch] = useBuilderStateContext((state) => [
+    state.midpanelState,
+    state.applyMidpanelAction,
+  ]);
+
+  const checkFocus = useCallback(() => {
+    const isTextMentionInputFocused = doesHaveInputThatUsesMentionClass(
+      document.activeElement,
+    );
+
+    if (isTextMentionInputFocused) {
+      dispatch({ type: 'FOCUS_INPUT_WITH_MENTIONS' });
+      return;
+    }
+
+    const isClickAway =
+      !isNil(containerRef.current) &&
+      !containerRef.current.contains(document.activeElement);
+
+    if (isClickAway) {
+      dispatch({ type: 'PANEL_CLICK_AWAY' });
+    }
+  }, [dispatch]);
+
+  const debouncedCheckFocus = useDebounceCallback(checkFocus, 100);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    document.addEventListener('focusin', debouncedCheckFocus);
+    document.addEventListener('focusout', debouncedCheckFocus);
+
+    return () => {
+      document.removeEventListener('focusin', debouncedCheckFocus);
+      document.removeEventListener('focusout', debouncedCheckFocus);
+    };
+  }, [debouncedCheckFocus]);
+
+  const onSetShowDataSelector = (dataSelectorSize: DataSelectorSizeState) => {
+    if (dataSelectorSize === DataSelectorSizeState.COLLAPSED) {
+      dispatch({ type: 'DATASELECTOR_MIMIZE_CLICK' });
+    } else if (dataSelectorSize === DataSelectorSizeState.DOCKED) {
+      dispatch({ type: 'DATASELECTOR_DOCK_CLICK' });
+    } else {
+      dispatch({ type: 'DATASELECTOR_EXPAND_CLICK' });
+    }
+  };
+
   return (
     <InteractiveContextProvider
       selectedStep={selectedStep}
@@ -78,13 +149,45 @@ const InteractiveBuilder = ({
     >
       <div ref={middlePanelRef} className="relative h-full w-full">
         <BuilderHeader />
-
         <CanvasControls topOffset={FLOW_CANVAS_Y_OFFESET}></CanvasControls>
         <AiWidget classname="left-[282px]" />
-        <DataSelector
-          parentHeight={middlePanelSize.height}
-          parentWidth={middlePanelSize.width}
-        ></DataSelector>
+        <div
+          className="flex flex-col absolute bottom-0 right-0"
+          ref={containerRef}
+        >
+          <AiChatContainer
+            parentHeight={middlePanelSize.height}
+            showAiChat={state.showAiChat}
+            onCloseClick={() => dispatch({ type: 'AICHAT_CLOSE_CLICK' })}
+            containerSize={state.aiContainerSize}
+            toggleContainerSizeState={() =>
+              dispatch({ type: 'AICHAT_TOGGLE_SIZE' })
+            }
+            onSubmitChat={function (message: string): void {
+              throw new Error('Function not implemented.');
+            }}
+            className={cn('right-0 static', {
+              'children:transition-none':
+                state.showDataSelector &&
+                state.showAiChat &&
+                state.aiContainerSize === AI_CHAT_CONTAINER_SIZES.COLLAPSED &&
+                state.dataSelectorSize === DataSelectorSizeState.DOCKED,
+            })}
+          />
+          <DataSelector
+            parentHeight={middlePanelSize.height}
+            parentWidth={middlePanelSize.width}
+            showDataSelector={state.showDataSelector}
+            dataSelectorSize={state.dataSelectorSize}
+            setDataSelectorSize={onSetShowDataSelector}
+            className={cn({
+              'children:transition-none':
+                state.dataSelectorSize === DataSelectorSizeState.COLLAPSED &&
+                state.showAiChat &&
+                state.aiContainerSize === AI_CHAT_CONTAINER_SIZES.DOCKED,
+            })}
+          ></DataSelector>
+        </div>
 
         <div
           className="h-screen w-full flex-1 z-10"

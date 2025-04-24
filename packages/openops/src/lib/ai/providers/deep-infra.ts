@@ -1,3 +1,5 @@
+import { createDeepInfra } from '@ai-sdk/deepinfra';
+import { LanguageModelV1 } from 'ai';
 import { AiProvider } from '../providers';
 
 const deepInfraModels = [
@@ -69,6 +71,18 @@ const deepInfraModels = [
   'openchat/openchat_3.5',
 ];
 
+function createLanguageModel(params: {
+  apiKey: string;
+  model: string;
+  baseUrl?: string;
+}): LanguageModelV1 {
+  return createDeepInfra({
+    apiKey: params.apiKey,
+    baseURL: params.baseUrl,
+  })(params.model);
+}
+
 export const deepinfraProvider: AiProvider = {
   models: deepInfraModels,
+  createLanguageModel,
 };

@@ -1,4 +1,5 @@
-import { amazonBedrockProvider } from './providers/amazon-bedrock';
+import { AiProviderEnum, SaveAiConfigRequest } from '@openops/shared';
+import { AISDKError, generateText, LanguageModelV1 } from 'ai';
 import { anthropicProvider } from './providers/anthropic';
 import { azureProvider } from './providers/azure-openai';
 import { cerebrasProvider } from './providers/cerebras';
@@ -7,7 +8,6 @@ import { deepinfraProvider } from './providers/deep-infra';
 import { deepseekProvider } from './providers/deep-seek';
 import { googleProvider } from './providers/google';
 import { groqProvider } from './providers/groq';
-import { lmntProvider } from './providers/lmnt';
 import { mistralProvider } from './providers/mistral';
 import { openAiProvider } from './providers/openai';
 import { openaiCompatibleProvider } from './providers/openai-compatible';
@@ -17,29 +17,14 @@ import { xaiProvider } from './providers/xai';
 
 export interface AiProvider {
   models: string[];
-}
-
-export enum AiProviderEnum {
-  AMAZON_BEDROCK = 'Amazon Bedrock',
-  ANTHROPIC = 'Anthropic',
-  AZURE_OPENAI = 'Azure OpenAI',
-  CEREBRAS = 'Cerebras',
-  COHERE = 'Cohere',
-  DEEPINFRA = 'Deep Infra',
-  DEEPSEEK = 'Deep Seek',
-  GOOGLE = 'Google Generative AI',
-  GROQ = 'Groq',
-  LMNT = 'LMNT',
-  MISTRAL = 'Mistral',
-  OPENAI = 'OpenAI',
-  OPENAI_COMPATIBLE = 'OpenAI Compatible',
-  PERPLEXITY = 'Perplexity',
-  TOGETHER_AI = 'Together.ai',
-  XAI = 'xAI Grok',
+  createLanguageModel(params: {
+    apiKey: string;
+    model: string;
+    baseUrl?: string;
+  }): LanguageModelV1;
 }
 
 const PROVIDER_MAP: Record<AiProviderEnum, AiProvider> = {
-  [AiProviderEnum.AMAZON_BEDROCK]: amazonBedrockProvider,
   [AiProviderEnum.ANTHROPIC]: anthropicProvider,
   [AiProviderEnum.AZURE_OPENAI]: azureProvider,
   [AiProviderEnum.CEREBRAS]: cerebrasProvider,
@@ -48,7 +33,6 @@ const PROVIDER_MAP: Record<AiProviderEnum, AiProvider> = {
   [AiProviderEnum.DEEPSEEK]: deepseekProvider,
   [AiProviderEnum.GOOGLE]: googleProvider,
   [AiProviderEnum.GROQ]: groqProvider,
-  [AiProviderEnum.LMNT]: lmntProvider,
   [AiProviderEnum.MISTRAL]: mistralProvider,
   [AiProviderEnum.OPENAI]: openAiProvider,
   [AiProviderEnum.OPENAI_COMPATIBLE]: openaiCompatibleProvider,
@@ -81,3 +65,76 @@ export function getAvailableProvidersWithModels(): {
     };
   });
 }
+
+export const getAiProviderLanguageModel = async (aiConfig: {
+  provider: AiProviderEnum;
+  apiKey: string;
+  model: string;
+  providerSettings?: Record<string, unknown> | null;
+}): Promise<LanguageModelV1> => {
+  const aiProvider = getAiProvider(aiConfig.provider);
+
+  return aiProvider.createLanguageModel({
+    apiKey: aiConfig.apiKey,
+    model: aiConfig.model,
+    baseUrl: sanitizeBaseUrl(aiConfig.providerSettings),
+  });
+};
+
+export const validateAiProviderConfig = async (
+  config: SaveAiConfigRequest,
+): Promise<{
+  valid: boolean;
+  error?: { errorMessage: string; errorName: string };
+}> => {
+  const languageModel = await getAiProviderLanguageModel({
+    apiKey: config.apiKey,
+    model: config.model,
+    provider: config.provider,
+    providerSettings: config.providerSettings,
+  });
+
+  try {
+    await generateText({
+      model: languageModel,
+      prompt: '',
+      ...config.modelSettings,
+    });
+  } catch (error) {
+    if (AISDKError.isInstance(error)) {
+      return invalidConfigError(
+        error.name,
+        error.message.replace(config.apiKey, '**REDACTED**'),
+      );
+    }
+
+    return invalidConfigError(
+      error instanceof Error ? error.name : 'UnknownError',
+      error instanceof Error ? error.message : 'Unknown error occurred',
+    );
+  }
+
+  return { valid: true };
+};
+
+const sanitizeBaseUrl = (
+  providerSettings?: Record<string, unknown> | null,
+): string | undefined => {
+  const rawBaseUrl = providerSettings?.['baseUrl'];
+  return typeof rawBaseUrl === 'string' && rawBaseUrl.trim() !== ''
+    ? rawBaseUrl
+    : undefined;
+};
+
+const invalidConfigError = (
+  errorName: string,
+  errorMessage: string,
+): {
+  valid: boolean;
+  error: { errorMessage: string; errorName: string };
+} => {
+  return {
+    valid: false,
+    error: { errorName, errorMessage },
+  };
+};
