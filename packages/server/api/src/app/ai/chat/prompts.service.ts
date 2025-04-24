@@ -1,4 +1,5 @@
 import { ChatContext } from './ai-chat.service';
+import { azureCliPrompt } from './prompts/azure-cli-prompt';
 
 export const getSystemPrompt = (context: ChatContext): string => {
   switch (context.blockName) {
@@ -25,7 +26,5 @@ Your job is to help users generate correct and efficient CLI commands for any of
 - When the cloud provider isn't specified, ask the user to clarify.
 
 Format your responses cleanly using code blocks for the commands.`;
-
-const azureCliPrompt = '';
 
 const gcpCliPrompt = '';
