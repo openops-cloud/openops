@@ -27,7 +27,6 @@ const Conversation = ({
       return aiChatApi.open(flowVersion.flowId, blockName, stepName);
     },
     enabled: !!stepDetails && !!stepDetails.settings.blockName,
-    staleTime: Infinity,
   });
 
   if (isPending) {
