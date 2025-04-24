@@ -3,7 +3,7 @@ import { t } from 'i18next';
 import { Plus, TrashIcon } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 
-import { isEqual } from 'lodash-es';
+import equal from 'fast-deep-equal';
 import { TextInputWithMentions } from './text-input-with-mentions';
 
 type DictionaryInputItem = {
@@ -45,7 +45,7 @@ export const DictionaryProperty = ({
   const valuesArray = useRef(getValuesArray(values));
 
   useEffect(() => {
-    if (!isEqual(values, valueRef.current)) {
+    if (!equal(values, valueRef.current)) {
       valuesArray.current = getValuesArray(values);
     }
   }, [values]);
