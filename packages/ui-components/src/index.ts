@@ -1,5 +1,6 @@
 /* export shadcn ui components */
 export * from './ui/alert';
+export * from './ui/autocomplete-input';
 export * from './ui/avatar';
 export * from './ui/avatar-letter';
 export * from './ui/badge';
