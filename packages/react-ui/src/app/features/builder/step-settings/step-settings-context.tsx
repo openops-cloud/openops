@@ -20,9 +20,9 @@ export type StepSettingsProviderProps = {
   children: ReactNode;
 };
 
-export const StepSettingsContext = createContext<
-  StepSettingsContextState | undefined
->(undefined);
+const StepSettingsContext = createContext<StepSettingsContextState | undefined>(
+  undefined,
+);
 
 export const StepSettingsProvider = ({
   selectedStep,
