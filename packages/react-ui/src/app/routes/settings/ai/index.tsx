@@ -57,7 +57,7 @@ const AiSettingsPage = () => {
       refetchAiSettings();
       toast({
         title: 'Success',
-        description: 'AI settings are deleted successfully ',
+        description: t('AI settings are deleted successfully'),
         duration: 3000,
       });
     },
