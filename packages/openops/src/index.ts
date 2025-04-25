@@ -60,6 +60,7 @@ export * from './lib/cloud-cli-common';
 export * from './lib/dry-run-property';
 
 export * from './lib/google-cloud/auth';
+export * from './lib/google-cloud/bq-column-types';
 export * from './lib/promise-pool';
 
 export * from './lib/ai/providers';
