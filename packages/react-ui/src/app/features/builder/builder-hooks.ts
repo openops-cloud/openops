@@ -71,7 +71,7 @@ export enum RightSideBarType {
 
 type InsertMentionHandler = (propertyPath: string) => void;
 
-type MidpanelState = {
+export type MidpanelState = {
   showDataSelector: boolean;
   dataSelectorSize: DataSelectorSizeState;
   showAiChat: boolean;
