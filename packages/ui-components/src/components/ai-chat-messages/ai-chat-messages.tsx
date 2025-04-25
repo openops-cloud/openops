@@ -1,11 +1,6 @@
 import { cn } from '../../lib/cn';
 import { Markdown, MarkdownCodeVariations } from '../custom';
-
-export type AIChatMessage = {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-};
+import { AIChatMessage, AIChatMessageRole } from './types';
 
 type AIChatMessagesProps = {
   messages: AIChatMessage[];
@@ -27,7 +22,7 @@ const Message = ({
   message: AIChatMessage;
   onInject: (code: string) => void;
 }) => {
-  const isUser = message.role === 'user';
+  const isUser = message.role === AIChatMessageRole.user;
 
   if (!isUser) {
     return (
