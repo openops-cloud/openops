@@ -1,69 +1,49 @@
+import { action } from '@storybook/addon-actions';
+import { expect } from '@storybook/jest';
 import type { Meta, StoryObj } from '@storybook/react';
+import { fn } from '@storybook/test';
+import { fireEvent } from '@storybook/testing-library';
 import { AIChatMessages } from '../../components/ai-chat-messages/ai-chat-messages';
+import { selectLightOrDarkCanvas } from '../../test-utils/select-themed-canvas.util';
+import { sampleAIChatMessages } from './sample-messages';
 
 const meta: Meta<typeof AIChatMessages> = {
   title: 'Components/AIChatMessages',
   component: AIChatMessages,
+  args: {
+    onInject: action('Inject command'),
+  },
   tags: ['autodocs'],
 };
 
 export default meta;
 type Story = StoryObj<typeof AIChatMessages>;
 
-export const AWSCliExample: Story = {
+export const CLIExample: Story = {
   args: {
-    messages: [
-      {
-        id: '1',
-        role: 'user',
-        content:
-          'How do I list all EC2 instances in us-east-1 region that are tagged with Environment=Production?',
-      },
-      {
-        id: '2',
-        role: 'assistant',
-        content: `Here's the AWS CLI command to list those EC2 instances:
+    onInject: fn(),
+    messages: sampleAIChatMessages,
+  },
+  play: async ({ canvasElement, args }) => {
+    const firstInjectButton = selectLightOrDarkCanvas(
+      canvasElement,
+    ).getAllByRole('button', { name: 'Inject command' })[0];
 
-\`\`\`bash
-aws ec2 describe-instances \\
-  --region us-east-1 \\
-  --filters "Name=tag:Environment,Values=Production" \\
-  --query 'Reservations[].Instances[].[InstanceId,InstanceType,State.Name,Tags[?Key=='Name'].Value|[0]]' \\
-  --output table
-\`\`\`
+    fireEvent.click(firstInjectButton);
 
-This will show you:
-- Instance ID
-- Instance Type
-- Current State
-- Name tag value (if exists)`,
-      },
-      {
-        id: '3',
-        role: 'user',
-        content:
-          'Can you also show me how to get the cost for these instances for the last month?',
-      },
-      {
-        id: '4',
-        role: 'assistant',
-        content: `Here's the AWS CLI command to get the cost data:
+    expect(args.onInject).toHaveBeenCalledWith(
+      "aws ec2 describe-instances \\\n  --region us-east-1 \\\n  --filters \"Name=tag:Environment,Values=Production\" \\\n  --query 'Reservations[].Instances[].[InstanceId,InstanceType,State.Name,Tags[?Key=='Name'].Value|[0]]' \\\n  --output table",
+    );
 
-\`\`\`text
-aws ce get-cost-and-usage \\
-  --time-period Start=$(date -d "last month" '+%Y-%m-01'),End=$(date '+%Y-%m-01') \\
-  --granularity MONTHLY \\
-  --metrics "UnblendedCost" \\
-  --filter '{"Tags": {"Key": "Environment", "Values": ["Production"]}}' \\
-  --group-by Type=DIMENSION,Key=SERVICE
-\`\`\`
+    const secondInjectButton = selectLightOrDarkCanvas(
+      canvasElement,
+    ).getAllByRole('button', { name: 'Inject command' })[1];
 
-**Note:** This will return:
-- Costs grouped by AWS service
-- Only for resources tagged with \`Environment=Production\`
-- Data for the previous month`,
-      },
-    ],
+    fireEvent.click(secondInjectButton);
+
+    expect(args.onInject).toHaveBeenCalledWith(
+      'aws ce get-cost-and-usage \\\n  --time-period Start=$(date -d "last month" \'+%Y-%m-01\'),End=$(date \'+%Y-%m-01\') \\\n  --granularity MONTHLY \\\n  --metrics "UnblendedCost" \\\n  --filter \'{"Tags": {"Key": "Environment", "Values": ["Production"]}}\' \\\n  --group-by Type=DIMENSION,Key=SERVICE',
+    );
   },
 };
 
