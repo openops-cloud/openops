@@ -47,7 +47,7 @@ export const aiConfigService = {
 
     const aiConfig: Partial<AiConfig> = {
       ...request,
-      id: existing?.id ?? openOpsId(),
+      id: request?.id ?? openOpsId(),
       projectId,
       created: existing?.created ?? new Date().toISOString(),
       updated: new Date().toISOString(),
