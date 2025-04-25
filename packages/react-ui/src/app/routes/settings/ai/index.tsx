@@ -1,5 +1,9 @@
 import { AiSettingsForm } from '@/app/features/ai/ai-settings-form';
-import { AiSettingsFormSchema } from '@/app/features/ai/lib/ai-form-utils';
+import {
+  AI_SETTINGS_DELETED_SUCCESSFULLY_TOAST,
+  AI_SETTINGS_SAVED_SUCCESSFULLY_TOAST,
+  AiSettingsFormSchema,
+} from '@/app/features/ai/lib/ai-form-utils';
 import { aiSettingsApi } from '@/app/features/ai/lib/ai-settings-api';
 import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
 import { authenticationSession } from '@/app/lib/authentication-session';
@@ -29,11 +33,7 @@ const AiSettingsPage = () => {
     },
     onSuccess: () => {
       refetchAiSettings();
-      toast({
-        title: t('Success'),
-        description: t('AI settings are saved successfully'),
-        duration: 3000,
-      });
+      toast(AI_SETTINGS_SAVED_SUCCESSFULLY_TOAST);
     },
     onError: (error: AxiosError) => {
       const message =
@@ -55,11 +55,7 @@ const AiSettingsPage = () => {
     },
     onSuccess: () => {
       refetchAiSettings();
-      toast({
-        title: t('Success'),
-        description: t('AI settings are deleted successfully'),
-        duration: 3000,
-      });
+      toast(AI_SETTINGS_DELETED_SUCCESSFULLY_TOAST);
     },
     onError: () => {
       toast(INTERNAL_ERROR_TOAST);
