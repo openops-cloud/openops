@@ -35,38 +35,28 @@ export const executeSqlQueryAction = createAction({
       description:
         'The SQL statement to execute. You can use named parameters like `:name` or numbered placeholders like `:1`, `:2`, etc.',
     }),
-    params: Property.DynamicProperties({
-      displayName: '',
+    params: Property.Array({
+      displayName: 'Parameters',
       required: false,
-      refreshers: [],
-      props: async () => {
-        return {
-          items: Property.Array({
-            displayName: 'Parameters',
-            required: false,
-            properties: {
-              paramName: Property.ShortText({
-                displayName: 'Parameter name',
-                required: true,
-              }),
-              columnType: Property.StaticDropdown({
-                displayName: 'Column type',
-                required: true,
-                options: {
-                  options: Object.keys(BqColumnTypesEnum).map((key) => ({
-                    label:
-                      BqColumnTypesEnum[key as keyof typeof BqColumnTypesEnum],
-                    value: key,
-                  })),
-                },
-              }),
-              value: Property.ShortText({
-                displayName: 'Parameter value',
-                required: true,
-              }),
-            },
-          }),
-        } as { [key: string]: any };
+      properties: {
+        paramName: Property.ShortText({
+          displayName: 'Parameter name',
+          required: true,
+        }),
+        columnType: Property.StaticDropdown({
+          displayName: 'Column type',
+          required: true,
+          options: {
+            options: Object.keys(BqColumnTypesEnum).map((key) => ({
+              label: BqColumnTypesEnum[key as keyof typeof BqColumnTypesEnum],
+              value: key,
+            })),
+          },
+        }),
+        value: Property.ShortText({
+          displayName: 'Parameter value',
+          required: true,
+        }),
       },
     }),
     dryRun: dryRunCheckBox(),
@@ -74,7 +64,8 @@ export const executeSqlQueryAction = createAction({
   async run({ propsValue, auth }) {
     const { project, sqlText, dryRun } = propsValue;
 
-    const params: SqlQueryParams[] = propsValue.params?.['items'] ?? [];
+    const params: SqlQueryParams[] =
+      (propsValue.params as SqlQueryParams[]) ?? [];
 
     try {
       const paramFlags =

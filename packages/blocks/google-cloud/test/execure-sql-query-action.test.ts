@@ -42,7 +42,7 @@ describe('executeSqlQueryAction', () => {
         required: true,
       },
       params: {
-        type: 'DYNAMIC',
+        type: 'ARRAY',
         required: false,
       },
       dryRun: {
@@ -59,15 +59,13 @@ describe('executeSqlQueryAction', () => {
       project: 'test-project',
       useHostSession: { useHostSessionCheckbox: true },
       sqlText: 'SELECT * FROM my_table',
-      params: {
-        items: [
-          {
-            paramName: 'param1',
-            columnType: 'STRING',
-            value: 'value1',
-          },
-        ],
-      },
+      params: [
+        {
+          paramName: 'param1',
+          columnType: 'STRING',
+          value: 'value1',
+        },
+      ],
     });
 
     const result = await executeSqlQueryAction.run(context);
