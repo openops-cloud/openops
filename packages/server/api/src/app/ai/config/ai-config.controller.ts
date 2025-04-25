@@ -17,7 +17,7 @@ export const aiConfigController: FastifyPluginAsyncTypebox = async (app) => {
     async (request, reply): Promise<AiConfig> => {
       const { valid, error } = await validateAiProviderConfig(request.body);
       if (!valid) {
-        // return reply.status(StatusCodes.BAD_REQUEST).send(error);
+        return reply.status(StatusCodes.BAD_REQUEST).send(error);
       }
 
       const aiConfig = await aiConfigService.upsert({
