@@ -7,6 +7,7 @@ export const aiSettingsHooks = {
     return useQuery<GetProvidersResponse[], Error>({
       queryKey: ['ai-settings-providers'],
       queryFn: () => aiSettingsApi.getProviderOptions(),
+      staleTime: Infinity,
     });
   },
   useAiSettings: () => {
