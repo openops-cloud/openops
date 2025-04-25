@@ -20,6 +20,7 @@ import { t } from 'i18next';
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { FlowsPageHeader } from '@/app/features/flows/components/flows-page-header';
 import { HomeHelpDropdown } from '@/app/features/home/components/home-help-dropdown';
+import { AiSettingsPage } from '@/app/routes/settings/ai';
 import { FlagId } from '@openops/shared';
 import { lazy, Suspense } from 'react';
 import {
@@ -62,6 +63,10 @@ const createRoutes = () => {
 
   const { data: isDemoHomePage } = flagsHooks.useFlag<any>(
     FlagId.SHOW_DEMO_HOME_PAGE,
+  );
+
+  const { data: isAiSettingsEnabled } = flagsHooks.useFlag<any>(
+    FlagId.SHOW_AI_SETTINGS,
   );
 
   const routes = [
@@ -370,6 +375,24 @@ const createRoutes = () => {
               <HomeDemoPage />
             </PageTitle>
           </OpsErrorBoundary>
+        </DashboardContainer>
+      ),
+      errorElement: <RouteErrorBoundary />,
+    });
+  }
+
+  if (isAiSettingsEnabled) {
+    routes.push({
+      path: '/settings/ai',
+      element: (
+        <DashboardContainer pageHeader={<PageHeader title={t('Settings')} />}>
+          <ProjectSettingsLayout>
+            <OpsErrorBoundary>
+              <PageTitle title="AI providers">
+                <AiSettingsPage />
+              </PageTitle>
+            </OpsErrorBoundary>
+          </ProjectSettingsLayout>
         </DashboardContainer>
       ),
       errorElement: <RouteErrorBoundary />,
