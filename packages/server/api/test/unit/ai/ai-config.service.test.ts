@@ -6,7 +6,7 @@ jest.mock('@openops/shared', () => ({
 }));
 
 const findOneByMock = jest.fn();
-const upsertMock = jest.fn();
+const saveMock = jest.fn();
 const findOneByOrFailMock = jest.fn();
 const findByMock = jest.fn();
 const deleteMock = jest.fn();
@@ -15,7 +15,7 @@ jest.mock('../../../src/app/core/db/repo-factory', () => ({
   ...jest.requireActual('../../../src/app/core/db/repo-factory'),
   repoFactory: () => () => ({
     findOneBy: findOneByMock,
-    upsert: upsertMock,
+    save: saveMock,
     findOneByOrFail: findOneByOrFailMock,
     findBy: findByMock,
     delete: deleteMock,
@@ -35,7 +35,7 @@ import { AiProviderEnum, SaveAiConfigRequest } from '@openops/shared';
 import { AiApiKeyRedactionMessage } from '../../../src/app/ai/config/ai-config.entity';
 import { aiConfigService } from '../../../src/app/ai/config/ai-config.service';
 
-describe('aiConfigService.upsert', () => {
+describe('aiConfigService.save', () => {
   const baseRequest: SaveAiConfigRequest = {
     provider: AiProviderEnum.OPENAI,
     apiKey: 'test-key',
@@ -51,87 +51,81 @@ describe('aiConfigService.upsert', () => {
   });
 
   test('should insert a new ai config when one does not exist', async () => {
-    findOneByOrFailMock.mockResolvedValue({
+    findOneByMock.mockResolvedValue(null);
+    saveMock.mockResolvedValue({
       ...baseRequest,
-      projectId,
       id: 'mocked-id',
+      projectId,
+      apiKey: 'test-encrypt',
     });
 
-    const result = await aiConfigService.upsert({
+    const result = await aiConfigService.save({
       projectId,
       request: baseRequest,
     });
 
     expect(findOneByMock).not.toHaveBeenCalled();
-    expect(upsertMock).toHaveBeenCalledWith(
-      {
-        ...baseRequest,
-        projectId,
-        apiKey: JSON.stringify('test-encrypt'),
-        created: expect.any(String),
-        updated: expect.any(String),
-        id: 'mocked-id',
-      },
-      ['id'],
-    );
-    expect(findOneByOrFailMock).toHaveBeenCalledWith({
-      projectId,
-      provider: baseRequest.provider,
-    });
-    expect(result).toMatchObject({
+    expect(saveMock).toHaveBeenCalledWith({
       ...baseRequest,
-      projectId,
-      apiKey: '**REDACTED**',
       id: 'mocked-id',
+      projectId,
+      apiKey: JSON.stringify('test-encrypt'),
+      created: expect.any(String),
+      updated: expect.any(String),
     });
     expect(encryptStringMock).toHaveBeenCalledWith(baseRequest.apiKey);
+    expect(result).toMatchObject({
+      ...baseRequest,
+      id: 'mocked-id',
+      projectId,
+      apiKey: '**REDACTED**',
+    });
   });
 
   test('should update existing ai config if it exists', async () => {
     const existingId = 'existing-id';
-    findOneByMock.mockResolvedValue({ id: existingId });
-    const fakeTimestamp = '2025-04-22T12:00:00Z';
-    findOneByOrFailMock.mockResolvedValue({
+    findOneByMock.mockResolvedValue({
+      id: existingId,
+      created: '2025-04-22T12:00:00Z',
+    });
+    saveMock.mockResolvedValue({
       ...baseRequest,
       id: existingId,
       projectId,
-      created: fakeTimestamp,
-      updated: fakeTimestamp,
+      apiKey: 'test-encrypt',
     });
 
-    const result = await aiConfigService.upsert({
+    const result = await aiConfigService.save({
       projectId,
       request: { id: existingId, ...baseRequest },
     });
 
-    expect(upsertMock).toHaveBeenCalledWith(
-      {
-        ...baseRequest,
-        id: existingId,
-        projectId,
-        apiKey: JSON.stringify('test-encrypt'),
-        created: expect.any(String),
-        updated: expect.any(String),
-      },
-      ['id'],
-    );
-    expect(encryptStringMock).toHaveBeenCalledWith(baseRequest.apiKey);
+    expect(findOneByMock).toHaveBeenCalledWith({ id: existingId, projectId });
+    expect(saveMock).toHaveBeenCalledWith({
+      ...baseRequest,
+      id: existingId,
+      projectId,
+      created: '2025-04-22T12:00:00Z',
+      updated: expect.any(String),
+      apiKey: JSON.stringify('test-encrypt'),
+    });
     expect(result).toMatchObject({
       ...baseRequest,
       id: existingId,
       projectId,
       apiKey: '**REDACTED**',
-      created: expect.any(String),
-      updated: expect.any(String),
     });
   });
 
   test('should not overwrite apiKey if redacted message is received', async () => {
     const existingId = 'existing-id';
     const existingApiKey = 'already-encrypted-key';
-
-    findOneByMock.mockResolvedValue({ id: existingId, apiKey: existingApiKey });
-    findOneByOrFailMock.mockResolvedValue({
+    findOneByMock.mockResolvedValue({
+      id: existingId,
+      apiKey: existingApiKey,
+      created: '2025-04-22T12:00:00Z',
+    });
+    saveMock.mockResolvedValue({
       ...baseRequest,
       id: existingId,
       projectId,
@@ -144,24 +138,21 @@ describe('aiConfigService.upsert', () => {
       apiKey: AiApiKeyRedactionMessage,
     };
 
-    const result = await aiConfigService.upsert({
+    const result = await aiConfigService.save({
       projectId,
       request: redactedRequest,
     });
 
-    expect(upsertMock).toHaveBeenCalledWith(
-      {
-        ...baseRequest,
-        id: existingId,
-        apiKey: existingApiKey,
-        projectId,
-        created: expect.any(String),
-        updated: expect.any(String),
-      },
-      ['id'],
-    );
-
     expect(encryptStringMock).not.toHaveBeenCalled();
+    expect(saveMock).toHaveBeenCalledWith({
+      ...baseRequest,
+      id: existingId,
+      projectId,
+      created: '2025-04-22T12:00:00Z',
+      updated: expect.any(String),
+      apiKey: existingApiKey,
+    });
+
     expect(result).toMatchObject({
       ...baseRequest,
       apiKey: '**REDACTED**',
