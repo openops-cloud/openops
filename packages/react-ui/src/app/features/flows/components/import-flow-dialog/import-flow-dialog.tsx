@@ -39,7 +39,6 @@ const ImportFlowDialog = ({ children }: { children: React.ReactNode }) => {
           displayName: importedWorkflow.name,
           projectId: authenticationSession.getProjectId()!,
         });
-        console.log(importedWorkflow);
         return await flowsApi.update(newFlow.id, {
           type: FlowOperationType.IMPORT_FLOW,
           request: {
