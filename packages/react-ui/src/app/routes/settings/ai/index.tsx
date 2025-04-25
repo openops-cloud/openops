@@ -31,7 +31,7 @@ const AiSettingsPage = () => {
       refetchAiSettings();
       toast({
         title: 'Success',
-        description: 'AI settings are saved successfully ',
+        description: t('AI settings are saved successfully'),
         duration: 3000,
       });
     },
