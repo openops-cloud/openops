@@ -41,7 +41,7 @@ const AiSettingsPage = () => {
           ? (error.response?.data as { errorMessage: string })?.errorMessage
           : error.message;
       toast({
-        title: 'Error',
+        title: t('Error'),
         variant: 'destructive',
         description: message,
         duration: 3000,
