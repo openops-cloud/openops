@@ -63,7 +63,7 @@ const AiSettingsPage = () => {
   return (
     <div className="flex w-full flex-col items-center justify-center gap-4">
       <div className="mx-auto w-full flex-col">
-        <h1 className="text-[24px] font-bold mb-[35px]">{t('Ai providers')}</h1>
+        <h1 className="text-2xl font-bold mb-[35px]">{t('Ai providers')}</h1>
         <div className="flex justify-between p-6 border rounded-[11px]">
           <AiSettingsForm
             aiProviders={aiProviders}
