@@ -1,3 +1,4 @@
+import { DEFAULT_TOAST_DURATION } from '@openops/components/ui';
 import { Static, Type } from '@sinclair/typebox';
 import { t } from 'i18next';
 
@@ -25,11 +26,11 @@ export type AiSettingsFormSchema = Static<typeof AI_SETTINGS_FORM_SCHEMA>;
 export const AI_SETTINGS_SAVED_SUCCESSFULLY_TOAST = {
   title: t('Success'),
   description: t('AI settings are deleted successfully'),
-  duration: 3000,
+  duration: DEFAULT_TOAST_DURATION,
 };
 
 export const AI_SETTINGS_DELETED_SUCCESSFULLY_TOAST = {
   title: t('Success'),
   description: t('AI settings are deleted successfully'),
-  duration: 3000,
+  duration: DEFAULT_TOAST_DURATION,
 };
