@@ -6,7 +6,6 @@ import {
   cn,
 } from '@openops/components/ui';
 import { FlowVersion, OpenChatResponse } from '@openops/shared';
-import { set } from 'date-fns';
 import { useEffect, useRef } from 'react';
 import { useBuilderStateContext } from '../builder-hooks';
 import { DataSelectorSizeState } from '../data-selector/data-selector-size-togglers';
