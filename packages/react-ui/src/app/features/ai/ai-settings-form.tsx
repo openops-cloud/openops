@@ -27,6 +27,7 @@ type AiSettingsFormProps = {
     provider: string;
     models: string[];
   }[];
+  isAiProvidersLoading: boolean;
   savedSettings?: AiConfig;
   onSave: (settings: AiSettingsFormSchema) => void;
   isSaving: boolean;
@@ -43,6 +44,7 @@ const EMPTY_FORM_VALUE: AiSettingsFormSchema = {
 
 const AiSettingsForm = ({
   aiProviders,
+  isAiProvidersLoading,
   savedSettings,
   onSave,
   isSaving,
@@ -126,7 +128,7 @@ const AiSettingsForm = ({
                 <span className="text-destructive">*</span>
               </Label>
               <SearchableSelect
-                loading={!providerOptions?.length}
+                loading={isAiProvidersLoading}
                 options={providerOptions}
                 onChange={(v) => {
                   field.onChange(v);

@@ -9,11 +9,13 @@ import {
   TooltipWrapper,
 } from '@openops/components/ui';
 import { useMutation } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
 import { t } from 'i18next';
 import { Trash } from 'lucide-react';
 
 const AiSettingsPage = () => {
-  const { data: aiProviders } = aiSettingsHooks.useAiSettingsProviders();
+  const { data: aiProviders, isPending: isAiProvidersLoading } =
+    aiSettingsHooks.useAiSettingsProviders();
 
   const { data: aiSettings, refetch: refetchAiSettings } =
     aiSettingsHooks.useAiSettings();
@@ -33,11 +35,15 @@ const AiSettingsPage = () => {
         duration: 3000,
       });
     },
-    onError: (error) => {
+    onError: (error: AxiosError) => {
+      const message =
+        error.status === 400
+          ? (error.response?.data as { errorMessage: string })?.errorMessage
+          : error.message;
       toast({
         title: 'Error',
         variant: 'destructive',
-        description: error.message,
+        description: message,
         duration: 3000,
       });
     },
@@ -67,6 +73,7 @@ const AiSettingsPage = () => {
         <div className="flex justify-between p-6 border rounded-[11px]">
           <AiSettingsForm
             aiProviders={aiProviders}
+            isAiProvidersLoading={isAiProvidersLoading}
             savedSettings={aiSettings?.[0]}
             onSave={onSave}
             isSaving={isSaving}
