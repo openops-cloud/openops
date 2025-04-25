@@ -1,4 +1,5 @@
-import { Message, UseChatHelpers } from '@ai-sdk/react';
+import { UseChatHelpers } from '@ai-sdk/react';
+import { UIMessage } from '@ai-sdk/ui-utils';
 import { BlockProperty } from '@openops/blocks-framework';
 import { LoadingSpinner } from '@openops/components/ui';
 import { flowHelper, FlowVersion, OpenChatResponse } from '@openops/shared';
@@ -11,6 +12,9 @@ type ConversationProps = {
   property: BlockProperty;
   onConversationRetrieved: (conversation: OpenChatResponse) => void;
 } & Pick<UseChatHelpers, 'messages' | 'status'>;
+
+type ServerMessage = NonNullable<OpenChatResponse['messages']>[number];
+type MessageType = ServerMessage | UIMessage;
 
 const ChatStatus = {
   STREAMING: 'streaming',
@@ -45,8 +49,8 @@ const Conversation = ({
     enabled: !!stepDetails && !!stepDetails.settings.blockName,
   });
 
-  const messagesToDisplay =
-    messages.length > 0 ? messages : (data?.messages as Message[]);
+  const messagesToDisplay: MessageType[] =
+    messages.length > 0 ? messages : data?.messages || [];
 
   if (isPending) {
     return <LoadingSpinner />;
@@ -60,8 +64,11 @@ const Conversation = ({
       <span className="truncate text-sm italic">
         ChatId: &quot;{data?.chatId}&quot;
       </span>
-      {messagesToDisplay?.map((message) => (
-        <div className="w-full flex flex-col" key={message.id}>
+      {messagesToDisplay.map((message: MessageType, idx) => (
+        <div
+          className="w-full flex flex-col"
+          key={message && 'id' in message ? message.id : String(idx)}
+        >
           <span className="uppercase font-semibold">{message.role}:</span>
           <span className="whitespace-pre-line break-words">
             {JSON.stringify(message.content)}
