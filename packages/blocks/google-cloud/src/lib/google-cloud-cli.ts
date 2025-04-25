@@ -9,12 +9,14 @@ export async function runCommand(
   auth: any,
   shouldUseHostCredentials: boolean,
   project?: string,
+  executeCliTool = 'gcloud',
 ): Promise<string> {
   const result = await runCommands(
     [command],
     auth,
     shouldUseHostCredentials,
     project,
+    executeCliTool,
   );
 
   if (result.length !== 1) {
@@ -29,6 +31,7 @@ export async function runCommands(
   auth: any,
   shouldUseHostCredentials: boolean,
   project?: string,
+  executeCliTool = 'gcloud',
 ): Promise<string[]> {
   const envVars: Record<string, string> = {
     PATH: process.env['PATH'] || '',
@@ -56,7 +59,7 @@ export async function runCommands(
 
   const results: string[] = [];
   for (const command of commands) {
-    const output = await runCliCommand(command, 'gcloud', envVars);
+    const output = await runCliCommand(command, executeCliTool, envVars);
     results.push(output);
   }
 
