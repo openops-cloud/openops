@@ -59,9 +59,7 @@ const LoopIterationInput = ({
   }, [run, stepName, loopsIndexes, flowVersion.trigger]);
 
   const totalIterations = useMemo(() => {
-    return stepOutput &&
-      stepOutput.output &&
-      stepOutput.type === ActionType.LOOP_ON_ITEMS
+    return stepOutput?.output && stepOutput.type === ActionType.LOOP_ON_ITEMS
       ? stepOutput.output.iterations.length
       : 0;
   }, [stepOutput]);
@@ -161,7 +159,12 @@ const LoopIterationInput = ({
         </div>
       )}
 
-      <div className="relative" onKeyDown={onInputKeyDown}>
+      <div
+        className="relative"
+        tabIndex={-1}
+        onKeyDown={onInputKeyDown}
+        aria-hidden="true"
+      >
         <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
           <DropdownMenuTrigger asChild>
             <div className="flex items-center cursor-pointer">
