@@ -5,6 +5,7 @@ import { fn } from '@storybook/test';
 import { fireEvent } from '@storybook/testing-library';
 import { AIChatMessages } from '../../components/ai-chat-messages/ai-chat-messages';
 import { selectLightOrDarkCanvas } from '../../test-utils/select-themed-canvas.util';
+import { Toaster } from '../../ui/toaster';
 import { sampleAIChatMessages } from './sample-messages';
 
 const meta: Meta<typeof AIChatMessages> = {
@@ -14,6 +15,14 @@ const meta: Meta<typeof AIChatMessages> = {
     onInject: action('Inject command'),
   },
   tags: ['autodocs'],
+  decorators: [
+    (Story) => (
+      <>
+        <Story />
+        <Toaster />
+      </>
+    ),
+  ],
 };
 
 export default meta;

@@ -6,6 +6,7 @@ import { fn } from '@storybook/test';
 import { AI_CHAT_CONTAINER_SIZES, AiChatContainer } from '../../components';
 import { AIChatMessages } from '../../components/ai-chat-messages/ai-chat-messages';
 import { Button } from '../../ui/button';
+import { Toaster } from '../../ui/toaster';
 import { sampleAIChatMessages } from './sample-messages';
 
 const meta = {
@@ -26,6 +27,14 @@ const meta = {
     },
   },
   tags: ['autodocs'],
+  decorators: [
+    (Story) => (
+      <>
+        <Story />
+        <Toaster />
+      </>
+    ),
+  ],
   render: (args) => {
     const [
       { containerSize, showAiChat, setShowAiChat, toggleContainerSizeState },

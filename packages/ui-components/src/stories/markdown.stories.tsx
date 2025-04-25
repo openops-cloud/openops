@@ -6,6 +6,7 @@ import { fireEvent } from '@storybook/testing-library';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Markdown, MarkdownCodeVariations } from '../components';
 import { selectLightOrDarkCanvas } from '../test-utils/select-themed-canvas.util';
+import { Toaster } from '../ui/toaster';
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const meta = {
     (Story) => (
       <QueryClientProvider client={queryClient}>
         <Story />
+        <Toaster />
       </QueryClientProvider>
     ),
   ],
