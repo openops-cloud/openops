@@ -12,6 +12,11 @@ type ConversationProps = {
   onConversationRetrieved: (conversation: OpenChatResponse) => void;
 } & Pick<UseChatHelpers, 'messages' | 'status'>;
 
+const ChatStatus = {
+  STREAMING: 'streaming',
+  SUBMITTED: 'submitted',
+};
+
 const Conversation = ({
   flowVersion,
   stepName,
@@ -63,7 +68,9 @@ const Conversation = ({
           </span>
         </div>
       ))}
-      {['streaming', 'submitted'].includes(status) && <LoadingSpinner />}
+      {[ChatStatus.STREAMING, ChatStatus.SUBMITTED].includes(status) && (
+        <LoadingSpinner />
+      )}
     </div>
   );
 };
