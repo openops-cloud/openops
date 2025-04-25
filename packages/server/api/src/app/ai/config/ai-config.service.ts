@@ -38,11 +38,6 @@ export const aiConfigService = {
         id: request.id,
         projectId,
       });
-    } else {
-      existing = await repo().findOneBy({
-        projectId,
-        provider: request.provider,
-      });
     }
 
     const aiConfig: Partial<AiConfig> = {
@@ -62,7 +57,7 @@ export const aiConfigService = {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await repo().upsert(aiConfig as any, ['projectId', 'provider']);
+    await repo().upsert(aiConfig as any, ['id']);
 
     const config = await repo().findOneByOrFail({
       projectId,

@@ -27,6 +27,7 @@ RUN ./tools/link-packages-to-root.sh
 
 # Copy Output files to appropriate directory from build stage
 COPY --link packages packages
+COPY --link ai-prompts ai-prompts
 
 LABEL service=openops
 

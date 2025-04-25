@@ -8,7 +8,13 @@ import {
   OpenChatResponse,
   PrincipalType,
 } from '@openops/shared';
-import { CoreMessage, pipeDataStreamToResponse, streamText } from 'ai';
+import {
+  CoreAssistantMessage,
+  CoreToolMessage,
+  pipeDataStreamToResponse,
+  streamText,
+  TextPart,
+} from 'ai';
 import { StatusCodes } from 'http-status-codes';
 import { encryptUtils } from '../../helper/encryption';
 import { aiConfigService } from '../config/ai-config.service';
@@ -87,15 +93,12 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
       execute: async (dataStreamWriter) => {
         const result = streamText({
           model: languageModel,
-          system: getSystemPrompt(chatContext),
+          system: await getSystemPrompt(chatContext),
           messages,
           ...aiConfig.modelSettings,
           async onFinish({ response }) {
             response.messages.forEach((r) => {
-              messages.push({
-                role: r.role,
-                content: r.content,
-              } as CoreMessage);
+              messages.push(getResponseObject(r));
             });
 
             await saveChatHistory(chatId, messages);
@@ -162,3 +165,37 @@ const DeleteChatOptions = {
     params: DeleteChatHistoryRequest,
   },
 };
+
+function getResponseObject(message: CoreAssistantMessage | CoreToolMessage): {
+  role: 'assistant';
+  content: string | Array<TextPart>;
+} {
+  if (message.role === 'tool') {
+    return {
+      role: 'assistant',
+      content: 'Messages received with the tool role are not supported.',
+    };
+  }
+
+  const content = message.content;
+  if (typeof content !== 'string' && Array.isArray(content)) {
+    for (const part of content) {
+      if (part.type !== 'text') {
+        return {
+          role: 'assistant',
+          content: `Invalid message type received. Type: ${part.type}`,
+        };
+      }
+    }
+
+    return {
+      role: 'assistant',
+      content: content as TextPart[],
+    };
+  }
+
+  return {
+    role: 'assistant',
+    content,
+  };
+}
