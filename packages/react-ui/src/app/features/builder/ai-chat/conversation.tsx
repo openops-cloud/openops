@@ -50,7 +50,7 @@ const Conversation = ({
   });
 
   const messagesToDisplay: MessageType[] =
-    messages.length > 0 ? messages : data?.messages || [];
+    messages.length > 0 ? messages : data?.messages ?? [];
 
   if (isPending) {
     return <LoadingSpinner />;
