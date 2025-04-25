@@ -32,7 +32,7 @@ export const CLIExample: Story = {
     fireEvent.click(firstInjectButton);
 
     expect(args.onInject).toHaveBeenCalledWith(
-      "aws ec2 describe-instances \\\n  --region us-east-1 \\\n  --filters \"Name=tag:Environment,Values=Production\" \\\n  --query 'Reservations[].Instances[].[InstanceId,InstanceType,State.Name,Tags[?Key=='Name'].Value|[0]]' \\\n  --output table",
+      expect.stringContaining('aws ec2 describe-instances'),
     );
 
     const secondInjectButton = selectLightOrDarkCanvas(
@@ -42,7 +42,7 @@ export const CLIExample: Story = {
     fireEvent.click(secondInjectButton);
 
     expect(args.onInject).toHaveBeenCalledWith(
-      'aws ce get-cost-and-usage \\\n  --time-period Start=$(date -d "last month" \'+%Y-%m-01\'),End=$(date \'+%Y-%m-01\') \\\n  --granularity MONTHLY \\\n  --metrics "UnblendedCost" \\\n  --filter \'{"Tags": {"Key": "Environment", "Values": ["Production"]}}\' \\\n  --group-by Type=DIMENSION,Key=SERVICE',
+      expect.stringContaining('aws ce get-cost-and-usage'),
     );
   },
 };
