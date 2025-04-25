@@ -1,4 +1,4 @@
-import { UseChatHelpers } from '@ai-sdk/react';
+import { Message, UseChatHelpers } from '@ai-sdk/react';
 import { BlockProperty } from '@openops/blocks-framework';
 import { LoadingSpinner } from '@openops/components/ui';
 import { flowHelper, FlowVersion, OpenChatResponse } from '@openops/shared';
@@ -40,7 +40,8 @@ const Conversation = ({
     enabled: !!stepDetails && !!stepDetails.settings.blockName,
   });
 
-  const messagesToDisplay = messages.length > 0 ? messages : data?.messages;
+  const messagesToDisplay =
+    messages.length > 0 ? messages : (data?.messages as Message[]);
 
   if (isPending) {
     return <LoadingSpinner />;
@@ -54,8 +55,8 @@ const Conversation = ({
       <span className="truncate text-sm italic">
         ChatId: &quot;{data?.chatId}&quot;
       </span>
-      {messagesToDisplay?.map((message, idx) => (
-        <div className="w-full flex flex-col" key={message.role + idx}>
+      {messagesToDisplay?.map((message) => (
+        <div className="w-full flex flex-col" key={message.id}>
           <span className="uppercase font-semibold">{message.role}:</span>
           <span className="whitespace-pre-line break-words">
             {JSON.stringify(message.content)}
