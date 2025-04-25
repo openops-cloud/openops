@@ -6,7 +6,8 @@ import {
   cn,
 } from '@openops/components/ui';
 import { FlowVersion, OpenChatResponse } from '@openops/shared';
-import { useEffect, useRef } from 'react';
+import { nanoid } from 'nanoid';
+import { useEffect, useRef, useState } from 'react';
 import { useBuilderStateContext } from '../builder-hooks';
 import { DataSelectorSizeState } from '../data-selector/data-selector-size-togglers';
 import { Conversation } from './conversation';
@@ -40,28 +41,29 @@ const AiChat = ({
   ]);
 
   const conversationRef = useRef<OpenChatResponse | null>(null);
+  const [chatSessionKey, setChatSessionKey] = useState<string>(nanoid());
 
-  const { messages, input, handleInputChange, handleSubmit, status, setData } =
-    useChat({
-      api: 'api/v1/ai/chat/conversation',
-      maxSteps: 5,
-      body: {
-        chatId: conversationRef.current?.chatId,
-      },
-      initialMessages: conversationRef.current?.messages as Message[],
-      experimental_prepareRequestBody: () => ({
-        chatId: conversationRef.current?.chatId,
-        message: input,
-      }),
-      headers: {
-        Authorization: `Bearer ${authenticationSession.getToken()}`,
-      },
-    });
+  const { messages, input, handleInputChange, handleSubmit, status } = useChat({
+    id: chatSessionKey,
+    api: 'api/v1/ai/chat/conversation',
+    maxSteps: 5,
+    body: {
+      chatId: conversationRef.current?.chatId,
+    },
+    initialMessages: conversationRef.current?.messages as Message[],
+    experimental_prepareRequestBody: () => ({
+      chatId: conversationRef.current?.chatId,
+      message: input,
+    }),
+    headers: {
+      Authorization: `Bearer ${authenticationSession.getToken()}`,
+    },
+  });
 
   useEffect(() => {
     conversationRef.current = null;
-    setData([]);
-  }, [selectedStep, setData]);
+    setChatSessionKey(nanoid());
+  }, [selectedStep]);
 
   return (
     <AiChatContainer
