@@ -32,12 +32,7 @@ const Message = ({
   if (!isUser) {
     return (
       <div className="!my-2 text-black dark:text-white">
-        <Markdown
-          markdown={message.content}
-          withBorder={false}
-          codeVariation={MarkdownCodeVariations.WithCopyAndInject}
-          handleInject={onInject}
-        />
+        <MessageContent content={message.content} onInject={onInject} />
       </div>
     );
   }
@@ -49,15 +44,25 @@ const Message = ({
         'bg-sky-50 dark:bg-slate-900 text-black dark:text-white',
       )}
     >
-      <Markdown
-        markdown={message.content}
-        withBorder={false}
-        codeVariation={MarkdownCodeVariations.WithCopyAndInject}
-        handleInject={onInject}
-      />
+      <MessageContent content={message.content} onInject={onInject} />
     </div>
   );
 };
+
+const MessageContent = ({
+  content,
+  onInject,
+}: {
+  content: string;
+  onInject: (code: string) => void;
+}) => (
+  <Markdown
+    markdown={content}
+    withBorder={false}
+    codeVariation={MarkdownCodeVariations.WithCopyAndInject}
+    handleInject={onInject}
+  />
+);
 
 AIChatMessages.displayName = 'AIChatMessages';
 export { AIChatMessages };
