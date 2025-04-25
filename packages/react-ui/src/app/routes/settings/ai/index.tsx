@@ -95,5 +95,5 @@ const AiSettingsPage = () => {
   );
 };
 
-AiSettingsPage.displayName = 'ProjectBlocksPage';
+AiSettingsPage.displayName = 'AiSettingsPage';
 export { AiSettingsPage };
