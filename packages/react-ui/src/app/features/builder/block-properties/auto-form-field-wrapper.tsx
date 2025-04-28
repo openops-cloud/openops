@@ -12,14 +12,16 @@ import {
 import { Action, FlagId, isNil, Trigger } from '@openops/shared';
 import { t } from 'i18next';
 import { Sparkles } from 'lucide-react';
-import { useContext, useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { ControllerRenderProps, useFormContext } from 'react-hook-form';
 
 import { TextInputWithMentions } from './text-input-with-mentions';
 import { CUSTOMIZED_INPUT_KEY, isDynamicViewToggled } from './utils';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
+import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
 import { ArrayFieldContext } from '@/app/features/builder/block-properties/dynamic-array/array-field-context';
+import { Link } from 'react-router-dom';
 import { useSafeBuilderStateContext } from '../builder-hooks';
 
 type inputNameLiteral = `settings.input.${string}`;
@@ -89,24 +91,39 @@ const FormLabelButton = ({
   const { data: isAIEnabled } = flagsHooks.useFlag(FlagId.SHOW_AI_SETTINGS);
   const readonly = useSafeBuilderStateContext((s) => s.readonly);
 
-  if (
+  const { hasActiveAiSettings, isLoading } =
+    aiSettingsHooks.useHasActiveAiSettings();
+
+  const shouldShowAIButton =
     property &&
     'supportsAI' in property &&
     property.supportsAI &&
     !readonly &&
-    isAIEnabled
-  ) {
-    return (
+    isAIEnabled;
+
+  if (shouldShowAIButton) {
+    return hasActiveAiSettings ? (
       <Button
         variant="link"
         className="h-5 pr-0 py-0 text-blueAccent-300 gap-[5px]"
         onClick={onGenerateWithAIClick}
+        loading={isLoading}
       >
         <Sparkles size={20} />
         {t('Generate with AI')}
       </Button>
+    ) : (
+      <Link
+        to="/settings/ai"
+        className="flex items-center h-5 pr-0 py-0 text-blueAccent-300 gap-[5px] hover:underline"
+      >
+        <Sparkles size={20} />
+        {t('Configure AI')}
+      </Link>
     );
-  } else if (allowDynamicValues) {
+  }
+
+  if (allowDynamicValues) {
     return (
       <DynamicToggle
         options={toggleOptions}
@@ -120,6 +137,7 @@ const FormLabelButton = ({
       />
     );
   }
+
   return null;
 };
 

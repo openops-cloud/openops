@@ -77,6 +77,7 @@
   "Dynamic": "Dynamic",
   "Static values stay the same, while dynamic values update based on data from other steps": "Static values stay the same, while dynamic values update based on data from other steps",
   "Generate with AI": "Generate with AI",
+  "Configure AI'": "Configure AI'",
   "Select an option": "Select an option",
   "Custom TypeScript Code": "Custom TypeScript Code",
   "Loop on Items": "Loop on Items",

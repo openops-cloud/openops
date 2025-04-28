@@ -16,4 +16,17 @@ export const aiSettingsHooks = {
       queryFn: () => aiSettingsApi.getAiSettings(),
     });
   },
+  useHasActiveAiSettings: () => {
+    const { data, isLoading, isError } = useQuery<AiConfig, Error>({
+      queryKey: ['ai-settings-active'],
+      queryFn: () => aiSettingsApi.getActiveAiSettings(),
+      staleTime: 1000,
+      retry: false,
+    });
+
+    return {
+      hasActiveAiSettings: !isError && !!data,
+      isLoading,
+    };
+  },
 };
