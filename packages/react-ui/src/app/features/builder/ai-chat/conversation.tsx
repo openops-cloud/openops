@@ -1,7 +1,12 @@
 import { UseChatHelpers } from '@ai-sdk/react';
 import { UIMessage } from '@ai-sdk/ui-utils';
 import { BlockProperty } from '@openops/blocks-framework';
-import { LoadingSpinner } from '@openops/components/ui';
+import {
+  AIChatMessage,
+  AIChatMessageRole,
+  AIChatMessages,
+  LoadingSpinner,
+} from '@openops/components/ui';
 import { flowHelper, FlowVersion, OpenChatResponse } from '@openops/shared';
 import { useQuery } from '@tanstack/react-query';
 import { aiChatApi } from './lib/chat-api';
@@ -56,25 +61,29 @@ const Conversation = ({
     return <LoadingSpinner />;
   }
 
+  const uiMessages: AIChatMessage[] = messagesToDisplay.map(
+    (message: MessageType, idx) => ({
+      id: message && 'id' in message ? message.id : String(idx),
+      role:
+        message.role.toLowerCase() === 'user'
+          ? AIChatMessageRole.user
+          : AIChatMessageRole.assistant,
+      content: Array.isArray(message.content)
+        ? message.content.map((c) => c.text).join()
+        : message.content,
+    }),
+  );
+
   return (
     <div className="flex flex-col gap-2">
-      <span className="text-sm italic">
-        Context Property name: &quot;{property.displayName}&quot;
-      </span>
-      <span className="truncate text-sm italic">
-        ChatId: &quot;{data?.chatId}&quot;
-      </span>
-      {messagesToDisplay.map((message: MessageType, idx) => (
-        <div
-          className="w-full flex flex-col"
-          key={message && 'id' in message ? message.id : String(idx)}
-        >
-          <span className="uppercase font-semibold">{message.role}:</span>
-          <span className="whitespace-pre-line break-words">
-            {JSON.stringify(message.content)}
-          </span>
-        </div>
-      ))}
+      <AIChatMessages
+        messages={uiMessages}
+        onInject={(code) => {
+          // tbd in next ticket
+          // eslint-disable-next-line no-console
+          console.log('inject', code);
+        }}
+      />
       {[ChatStatus.STREAMING, ChatStatus.SUBMITTED].includes(status) && (
         <LoadingSpinner />
       )}
