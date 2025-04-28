@@ -1,3 +1,4 @@
+import { ProvisionByoipCidrCommand } from '@aws-sdk/client-ec2';
 import {
   AiProviderEnum,
   GetProvidersResponse,
@@ -25,6 +26,7 @@ export interface AiProvider {
     apiKey: string;
     model: string;
     baseUrl?: string;
+    providerSettings?: Record<string, unknown>;
   }): LanguageModelV1;
 }
 
@@ -77,6 +79,7 @@ export const getAiProviderLanguageModel = async (aiConfig: {
     apiKey: aiConfig.apiKey,
     model: aiConfig.model,
     baseUrl: sanitizeBaseUrl(aiConfig.providerSettings),
+    ...aiConfig.providerSettings,
   });
 };
 
