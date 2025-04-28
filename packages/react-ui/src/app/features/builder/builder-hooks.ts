@@ -76,7 +76,10 @@ export type MidpanelState = {
   dataSelectorSize: DataSelectorSizeState;
   showAiChat: boolean;
   aiContainerSize: AiChatContainerSizeState;
-  aiChatProperty?: BlockProperty;
+  aiChatProperty?: BlockProperty & {
+    inputName: `settings.input.${string}`;
+  };
+  codeToInject?: string;
 };
 
 type MidpanelAction =
@@ -87,7 +90,12 @@ type MidpanelAction =
   | { type: 'AICHAT_CLOSE_CLICK' }
   | { type: 'AICHAT_TOGGLE_SIZE' }
   | { type: 'PANEL_CLICK_AWAY' }
-  | { type: 'GENERATE_WITH_AI_CLICK'; property?: BlockProperty };
+  | {
+      type: 'GENERATE_WITH_AI_CLICK';
+      property?: BlockProperty & { inputName: `settings.input.${string}` };
+    }
+  | { type: 'ADD_CODE_TO_INJECT'; code: string }
+  | { type: 'CLEAN_CODE_TO_INJECT' };
 
 export type BuilderState = {
   flow: Flow;
@@ -558,6 +566,18 @@ const applyMidpanelAction = (state: BuilderState, action: MidpanelAction) => {
         aiContainerSize: AI_CHAT_CONTAINER_SIZES.DOCKED,
         dataSelectorSize: DataSelectorSizeState.COLLAPSED,
         aiChatProperty: action.property,
+      };
+      break;
+    case 'ADD_CODE_TO_INJECT':
+      newMidpanelState = {
+        ...state.midpanelState,
+        codeToInject: action.code,
+      };
+      break;
+    case 'CLEAN_CODE_TO_INJECT':
+      newMidpanelState = {
+        ...state.midpanelState,
+        codeToInject: undefined,
       };
       break;
     default:
