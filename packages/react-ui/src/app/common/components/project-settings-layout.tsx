@@ -7,7 +7,7 @@ import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 
 const iconSize = 20;
 
-const sidebarNavItems = [
+const baseNavItems = [
   {
     title: t('General'),
     href: '/settings/general',
@@ -18,27 +18,37 @@ const sidebarNavItems = [
     href: '/settings/blocks',
     icon: <Puzzle size={iconSize} />,
   },
-  {
-    title: t('Appearance'),
-    href: '/settings/appearance',
-    icon: <SunMoon size={iconSize} />,
-  },
-  {
-    title: t('AI'),
-    href: '/settings/ai',
-    icon: <Sparkles size={iconSize} />,
-  },
 ];
+
+const appearanceNavItem = {
+  title: t('Appearance'),
+  href: '/settings/appearance',
+  icon: <SunMoon size={iconSize} />,
+};
+
+const aiNavItem = {
+  title: t('AI'),
+  href: '/settings/ai',
+  icon: <Sparkles size={iconSize} />,
+};
 
 interface SettingsLayoutProps {
   children: React.ReactNode;
 }
+
 export default function ProjectSettingsLayout({
   children,
 }: SettingsLayoutProps) {
-  const filteredNavItems = flagsHooks.useFlag(FlagId.DARK_THEME_ENABLED).data
-    ? sidebarNavItems
-    : sidebarNavItems.filter((item) => item.title !== t('Appearance'));
+  const showAppearanceSettings = flagsHooks.useFlag(
+    FlagId.DARK_THEME_ENABLED,
+  ).data;
+  const showAiSettings = flagsHooks.useFlag(FlagId.SHOW_AI_SETTINGS).data;
 
-  return <SidebarLayout items={filteredNavItems}>{children}</SidebarLayout>;
+  const sidebarNavItems = [
+    ...baseNavItems,
+    ...(showAppearanceSettings ? [appearanceNavItem] : []),
+    ...(showAiSettings ? [aiNavItem] : []),
+  ];
+
+  return <SidebarLayout items={sidebarNavItems}>{children}</SidebarLayout>;
 }
