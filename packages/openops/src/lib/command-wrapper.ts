@@ -29,7 +29,7 @@ export async function executeFile(
     env: envVariables,
   };
 
-  const maxBuffer = system.getNumber(AppSystemProp.EXECFILE_MAX_BUFFERSIZE_MB);
+  const maxBuffer = system.getNumber(AppSystemProp.EXEC_FILE_MAX_BUFFER_SIZE_MB);
   if (maxBuffer) {
     options.maxBuffer = maxBuffer * 1024 * 1024;
   }

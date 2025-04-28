@@ -172,7 +172,7 @@ describe('Execute File', () => {
     },
   );
 
-  it('should set maxBuffer when EXECFILE_MAX_BUFFERSIZE_MB is defined', async () => {
+  it('should set maxBuffer when EXEC_FILE_MAX_BUFFER_SIZE_MB is defined', async () => {
     mockGetNumber.mockReturnValue(5); // 5 MB
     mockMockExecFile('ok', '', 0);
 
@@ -188,7 +188,7 @@ describe('Execute File', () => {
     );
   });
 
-  it('should not set maxBuffer when EXECFILE_MAX_BUFFERSIZE_MB is undefined', async () => {
+  it('should not set maxBuffer when EXEC_FILE_MAX_BUFFER_SIZE_MB is undefined', async () => {
     mockGetNumber.mockReturnValue(undefined);
     mockMockExecFile('ok', '', 0);
 
