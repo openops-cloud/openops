@@ -52,6 +52,6 @@ export const seedTemplateTablesService = {
 
     await createKnownCostTypesByApplicationTable(token, databaseId);
 
-    logger.info('[Seeding opportunity template table] Done');
+    logger.info('[Seeding Known cost types by application table] Done');
   },
 };
