@@ -74,12 +74,14 @@ export const getAiProviderLanguageModel = async (aiConfig: {
   providerSettings?: Record<string, unknown> | null;
 }): Promise<LanguageModelV1> => {
   const aiProvider = getAiProvider(aiConfig.provider);
+  const { baseUrl: _ignored, ...otherProviderSettings } =
+    aiConfig.providerSettings ?? {};
 
   return aiProvider.createLanguageModel({
     apiKey: aiConfig.apiKey,
     model: aiConfig.model,
     baseUrl: sanitizeBaseUrl(aiConfig.providerSettings),
-    ...aiConfig.providerSettings,
+    ...otherProviderSettings,
   });
 };
 
