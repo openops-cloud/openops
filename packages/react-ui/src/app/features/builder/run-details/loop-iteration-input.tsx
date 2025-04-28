@@ -8,7 +8,7 @@ import {
   Input,
   ScrollArea,
 } from '@openops/components/ui';
-import { useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 
 import { ActionType } from '@openops/shared';
 
@@ -77,52 +77,67 @@ const LoopIterationInput = ({
     return Array.from({ length: totalIterations }, (_, i) => i + 1);
   }, [totalIterations]);
 
-  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value ?? '1';
-    const parsedValue = Math.max(
-      1,
-      Math.min(parseInt(value) ?? 1, totalIterations),
-    );
-    setLoopIndex(stepName, parsedValue - 1);
-  };
+  const onChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value ?? '1';
+      const parsedValue = Math.max(
+        1,
+        Math.min(parseInt(value) ?? 1, totalIterations),
+      );
+      setLoopIndex(stepName, parsedValue - 1);
+    },
+    [setLoopIndex, stepName, totalIterations],
+  );
 
-  const onBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    if (e.target.value === '' && inputRef.current) {
-      inputRef.current.value = '1';
-      setLoopIndex(stepName, 0);
-    }
-  };
+  const onBlur = useCallback(
+    (e: React.FocusEvent<HTMLInputElement>) => {
+      if (e.target.value === '' && inputRef.current) {
+        inputRef.current.value = '1';
+        setLoopIndex(stepName, 0);
+      }
+    },
+    [setLoopIndex, stepName],
+  );
 
-  const handleSelectIteration = (iteration: number) => {
-    if (inputRef.current) {
-      inputRef.current.value = String(iteration);
-    }
-    setLoopIndex(stepName, iteration - 1);
-    setIsDropdownOpen(false);
-  };
+  const handleSelectIteration = useCallback(
+    (iteration: number) => {
+      if (inputRef.current) {
+        inputRef.current.value = String(iteration);
+      }
+      setLoopIndex(stepName, iteration - 1);
+      setIsDropdownOpen(false);
+    },
+    [setLoopIndex, stepName],
+  );
 
-  const onInputClick = () => {
+  const onInputClick = useCallback(() => {
     if (!isStepSelected) {
       selectStepByName(stepName);
     }
     setIsDropdownOpen(true);
-  };
+  }, [isStepSelected, selectStepByName, stepName]);
 
-  const onInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'ArrowRight' && currentIndex < totalIterations - 1) {
-      setLoopIndex(stepName, currentIndex + 1);
-    }
-    if (e.key === 'ArrowLeft' && currentIndex > 0) {
-      setLoopIndex(stepName, currentIndex - 1);
-    }
-  };
+  const onInputKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'ArrowRight' && currentIndex < totalIterations - 1) {
+        setLoopIndex(stepName, currentIndex + 1);
+      }
+      if (e.key === 'ArrowLeft' && currentIndex > 0) {
+        setLoopIndex(stepName, currentIndex - 1);
+      }
+    },
+    [currentIndex, setLoopIndex, stepName, totalIterations],
+  );
 
-  const onArrowClick = (newIndex: number) => {
-    setLoopIndex(stepName, newIndex);
-    if (inputRef.current) {
-      inputRef.current.value = String(newIndex + 1);
-    }
-  };
+  const onArrowClick = useCallback(
+    (newIndex: number) => {
+      setLoopIndex(stepName, newIndex);
+      if (inputRef.current) {
+        inputRef.current.value = String(newIndex + 1);
+      }
+    },
+    [setLoopIndex, stepName],
+  );
 
   const inputWidth =
     (inputRef.current?.value.length ?? 1) +
