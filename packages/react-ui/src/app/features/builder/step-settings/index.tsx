@@ -140,14 +140,12 @@ const StepSettingsContainer = React.memo(() => {
 
   useEffect(() => {
     if (midpanelState.codeToInject && midpanelState.aiChatProperty?.inputName) {
-      setTimeout(() => {
-        form.setValue(
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          midpanelState.aiChatProperty!.inputName,
-          midpanelState.codeToInject,
-          { shouldValidate: true },
-        );
-      });
+      form.setValue(
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        midpanelState.aiChatProperty!.inputName,
+        midpanelState.codeToInject,
+        { shouldValidate: true },
+      );
 
       applyMidpanelAction({ type: 'CLEAN_CODE_TO_INJECT' });
       form.trigger();
