@@ -3,11 +3,12 @@ import { Message, useChat } from '@ai-sdk/react';
 import {
   AI_CHAT_CONTAINER_SIZES,
   AiChatContainer,
+  AiChatContainerSizeState,
   cn,
 } from '@openops/components/ui';
 import { FlowVersion, OpenChatResponse } from '@openops/shared';
 import { nanoid } from 'nanoid';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useBuilderStateContext } from '../builder-hooks';
 import { DataSelectorSizeState } from '../data-selector/data-selector-size-togglers';
 import { Conversation } from './conversation';
@@ -65,13 +66,35 @@ const AiChat = ({
     setChatSessionKey(nanoid());
   }, [selectedStep]);
 
+  const onToggleContainerSizeState = useCallback(
+    (size: AiChatContainerSizeState) => {
+      switch (size) {
+        case AI_CHAT_CONTAINER_SIZES.DOCKED:
+          dispatch({ type: 'AICHAT_DOCK_CLICK' });
+          return;
+        case AI_CHAT_CONTAINER_SIZES.EXPANDED:
+          dispatch({ type: 'AICHAT_EXPAND_CLICK' });
+          break;
+        case AI_CHAT_CONTAINER_SIZES.COLLAPSED:
+          dispatch({ type: 'AICHAT_MIMIZE_CLICK' });
+          break;
+      }
+    },
+    [dispatch],
+  );
+
+  const onCloseClick = useCallback(() => {
+    dispatch({ type: 'AICHAT_CLOSE_CLICK' });
+  }, [dispatch]);
+
   return (
     <AiChatContainer
       parentHeight={middlePanelSize.height}
+      parentWidth={middlePanelSize.width}
       showAiChat={showAiChat}
-      onCloseClick={() => dispatch({ type: 'AICHAT_CLOSE_CLICK' })}
+      onCloseClick={onCloseClick}
       containerSize={aiContainerSize}
-      toggleContainerSizeState={() => dispatch({ type: 'AICHAT_TOGGLE_SIZE' })}
+      toggleContainerSizeState={onToggleContainerSizeState}
       className={cn('right-0 static', {
         'children:transition-none':
           showDataSelector &&
