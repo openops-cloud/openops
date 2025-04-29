@@ -6,11 +6,7 @@ import {
 } from '@openops/shared';
 import { repoFactory } from '../../core/db/repo-factory';
 import { encryptUtils } from '../../helper/encryption';
-import {
-  AiApiKeyRedactionMessage,
-  AiConfigEntity,
-  AiConfigSchema,
-} from './ai-config.entity';
+import { AiApiKeyRedactionMessage, AiConfigEntity } from './ai-config.entity';
 
 const repo = repoFactory(AiConfigEntity);
 
