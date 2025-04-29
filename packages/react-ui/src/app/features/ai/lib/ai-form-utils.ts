@@ -15,16 +15,16 @@ export const AI_SETTINGS_FORM_SCHEMA = Type.Object({
   apiKey: Type.String({
     minLength: 1,
   }),
-  baseUrl: Type.String(),
-  providerSettings: Type.Optional(Type.Union([Type.String(), Type.Null()])),
-  modelSettings: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  baseURL: Type.String(),
+  providerSettings: Type.String(),
+  modelSettings: Type.String(),
 });
 
 export type AiSettingsFormSchema = Static<typeof AI_SETTINGS_FORM_SCHEMA>;
 
 export const AI_SETTINGS_SAVED_SUCCESSFULLY_TOAST = {
   title: t('Success'),
-  description: t('AI settings are deleted successfully'),
+  description: t('AI settings are saved successfully'),
   duration: DEFAULT_TOAST_DURATION,
 };
 

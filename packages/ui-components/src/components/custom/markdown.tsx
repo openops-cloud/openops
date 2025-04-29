@@ -85,7 +85,7 @@ const LanguageText = ({
     return (
       <textarea
         ref={textareaRef}
-        className="px-3 border  text-sm block w-full resize-none leading-tight bg-input rounded-lg border-none"
+        className="px-3 border text-sm block w-full resize-none leading-tight bg-input rounded-lg border-none"
         value={content}
         disabled
       />

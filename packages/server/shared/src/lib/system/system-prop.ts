@@ -97,6 +97,8 @@ export enum AppSystemProp {
   CANDU_CLIENT_TOKEN = 'CANDU_CLIENT_TOKEN',
 
   EXEC_FILE_MAX_BUFFER_SIZE_MB = 'EXEC_FILE_MAX_BUFFER_SIZE_MB',
+
+  SHOW_AI_SETTINGS = 'SHOW_AI_SETTINGS',
 }
 
 export enum SharedSystemProp {
