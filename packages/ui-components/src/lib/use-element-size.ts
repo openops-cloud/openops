@@ -6,6 +6,10 @@ export const useElementSize = (ref: RefObject<HTMLElement>) => {
     const handleResize = (entries: ResizeObserverEntry[]) => {
       if (entries[0]) {
         const { width, height } = entries[0].contentRect;
+        if (width === 0 && height === 0) {
+          return;
+        }
+
         setSize({ width, height });
       }
     };
