@@ -73,18 +73,11 @@ export const getAiProviderLanguageModel = async (aiConfig: {
 }): Promise<LanguageModelV1> => {
   const aiProvider = getAiProvider(aiConfig.provider);
   const sanitizedSettings = sanitizeProviderSettings(aiConfig.providerSettings);
-  const mappedProviderSettings: Record<string, unknown> = {
-    ...sanitizedSettings,
-    ...((sanitizedSettings['baseUrl'] && {
-      baseURL: sanitizedSettings['baseUrl'],
-    }) ??
-      {}),
-  };
-  delete mappedProviderSettings['baseUrl'];
+
   return aiProvider.createLanguageModel({
     apiKey: aiConfig.apiKey,
     model: aiConfig.model,
-    ...mappedProviderSettings,
+    ...sanitizedSettings,
   });
 };
 

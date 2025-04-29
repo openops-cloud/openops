@@ -168,7 +168,7 @@ describe('getAiProviderLanguageModel tests', () => {
       provider: AiProviderEnum.OPENAI,
       apiKey: 'test-api-key',
       model: 'gpt-4',
-      providerSettings: { baseUrl: 'https://api.example.com' },
+      providerSettings: { baseURL: 'https://api.example.com' },
     };
 
     const fakeModel = { id: 'mock-model', type: 'LanguageModelV1' };
@@ -200,7 +200,7 @@ describe('getAiProviderLanguageModel tests', () => {
     [
       {
         anotherValid: 'ok',
-        baseUrl: '',
+        baseURL: '',
         somethingElse: undefined,
       },
       {
@@ -252,7 +252,7 @@ describe('validateAiProviderConfig tests', () => {
       provider: AiProviderEnum.OPENAI,
       apiKey: 'test-api-key',
       model: 'gpt-4',
-      providerSettings: { baseUrl: 'https://api.example.com' },
+      providerSettings: { baseURL: 'https://api.example.com' },
     };
 
     const fakeModel = { id: 'mock-model', type: 'LanguageModelV1' };
