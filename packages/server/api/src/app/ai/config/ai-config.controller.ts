@@ -6,6 +6,7 @@ import { validateAiProviderConfig } from '@openops/common';
 import { AiConfig, PrincipalType, SaveAiConfigRequest } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
 import { entitiesMustBeOwnedByCurrentProject } from '../../authentication/authorization';
+import { encryptUtils } from '../../helper/encryption';
 import { aiConfigService } from './ai-config.service';
 
 export const aiConfigController: FastifyPluginAsyncTypebox = async (app) => {
@@ -15,7 +16,26 @@ export const aiConfigController: FastifyPluginAsyncTypebox = async (app) => {
     '/',
     SaveAiConfigOptions,
     async (request, reply): Promise<AiConfig> => {
-      const { valid, error } = await validateAiProviderConfig(request.body);
+      let existingApiKey = request.body.apiKey;
+      if (request.body.id) {
+        const exisiting = await aiConfigService.get(
+          {
+            projectId: request.principal.projectId,
+            id: request.body.id,
+          },
+          false,
+        );
+
+        existingApiKey = exisiting
+          ? encryptUtils.decryptString(JSON.parse(exisiting.apiKey))
+          : existingApiKey;
+      }
+
+      const { valid, error } = await validateAiProviderConfig({
+        ...request.body,
+        apiKey: existingApiKey,
+      });
+
       if (!valid) {
         return reply.status(StatusCodes.BAD_REQUEST).send(error);
       }
