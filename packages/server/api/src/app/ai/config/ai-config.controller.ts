@@ -18,13 +18,10 @@ export const aiConfigController: FastifyPluginAsyncTypebox = async (app) => {
     async (request, reply): Promise<AiConfig> => {
       let existingApiKey = request.body.apiKey;
       if (request.body.id) {
-        const existingConfig = await aiConfigService.get(
-          {
-            projectId: request.principal.projectId,
-            id: request.body.id,
-          },
-          false,
-        );
+        const existingConfig = await aiConfigService.getWithApiKey({
+          projectId: request.principal.projectId,
+          id: request.body.id,
+        });
 
         existingApiKey = existingConfig
           ? encryptUtils.decryptString(JSON.parse(existingConfig.apiKey))
