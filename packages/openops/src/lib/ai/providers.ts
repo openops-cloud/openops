@@ -77,7 +77,7 @@ export const getAiProviderLanguageModel = async (aiConfig: {
   return aiProvider.createLanguageModel({
     apiKey: aiConfig.apiKey,
     model: aiConfig.model,
-    ...sanitizedSettings,
+    providerSettings: sanitizedSettings,
   });
 };
 

@@ -10,11 +10,16 @@ function createLanguageModel(params: {
   if (!params.providerSettings?.['baseURL']) {
     throw new Error('baseURL is required for OpenAI-compatible providers');
   }
+
+  const { baseURL, ...restProviderSettings } = params.providerSettings as {
+    baseURL: string;
+  } & Record<string, unknown>;
+
   return createOpenAICompatible({
     name: 'open-ai-compatible-provider',
     apiKey: params.apiKey,
-    ...params.providerSettings,
-    baseURL: params.providerSettings['baseURL'] as string,
+    ...restProviderSettings,
+    baseURL,
   })(params.model);
 }
 
