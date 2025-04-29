@@ -60,32 +60,24 @@ const LanguageText = ({
     const textarea = textareaRef.current;
 
     if (textarea) {
-      const resizeObserver = new ResizeObserver(() => {
-        const lineCount = textarea.value.split('\n').length;
-        const isSingleLine = lineCount === 1;
+      const lineCount = textarea.value.split('\n').length;
+      const isSingleLine = lineCount === 1;
 
-        textarea.style.height = 'auto';
-        const newHeight = isSingleLine
-          ? textarea.scrollHeight
-          : textarea.scrollHeight + 16; // adding the extra padding
-        textarea.style.height = `${newHeight}px`;
+      textarea.style.height = 'auto';
+      const newHeight = isSingleLine
+        ? textarea.scrollHeight
+        : textarea.scrollHeight + 16; // adding the extra padding
+      textarea.style.height = `${newHeight}px`;
 
-        if (isSingleLine) {
-          textarea.style.lineHeight = `32px`;
-          textarea.style.paddingTop = '0';
-          textarea.style.paddingBottom = '0';
-        } else {
-          textarea.style.lineHeight = '';
-          textarea.style.paddingTop = '8px';
-          textarea.style.paddingBottom = '8px';
-        }
-      });
-
-      resizeObserver.observe(textarea);
-
-      return () => {
-        resizeObserver.disconnect();
-      };
+      if (isSingleLine) {
+        textarea.style.lineHeight = `32px`;
+        textarea.style.paddingTop = '0';
+        textarea.style.paddingBottom = '0';
+      } else {
+        textarea.style.lineHeight = '';
+        textarea.style.paddingTop = '8px';
+        textarea.style.paddingBottom = '8px';
+      }
     }
   }, [content]);
 
