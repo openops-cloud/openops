@@ -74,12 +74,16 @@ export const getAiProviderLanguageModel = async (aiConfig: {
   providerSettings?: Record<string, unknown> | null;
 }): Promise<LanguageModelV1> => {
   const aiProvider = getAiProvider(aiConfig.provider);
+  const sanitizedSettings = sanitizeProviderSettings(aiConfig.providerSettings);
 
   return aiProvider.createLanguageModel({
     apiKey: aiConfig.apiKey,
     model: aiConfig.model,
-    baseUrl: aiConfig.baseUrl,
-    ...aiConfig.providerSettings,
+    baseUrl:
+      aiConfig.baseUrl && aiConfig.baseUrl.trim() !== ''
+        ? aiConfig.baseUrl
+        : undefined,
+    ...sanitizedSettings,
   });
 };
 
@@ -132,3 +136,23 @@ const invalidConfigError = (
     error: { errorName, errorMessage },
   };
 };
+
+function sanitizeProviderSettings(
+  settings: Record<string, unknown> | null | undefined,
+): Record<string, unknown> {
+  if (!settings) return {};
+
+  const sanitized: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(settings)) {
+    if (
+      value !== null &&
+      value !== undefined &&
+      !(typeof value === 'string' && value.trim() === '')
+    ) {
+      sanitized[key] = value;
+    }
+  }
+
+  return sanitized;
+}
