@@ -8,6 +8,7 @@ export const AiConfig = Type.Object({
   provider: Type.Enum(AiProviderEnum),
   model: Type.String(),
   apiKey: Type.String(),
+  baseUrl: Type.Optional(Type.String()),
   providerSettings: Type.Optional(
     Type.Union([Type.Record(Type.String(), Type.Unknown()), Type.Null()]),
   ),
@@ -24,6 +25,7 @@ export const SaveAiConfigRequest = Type.Object({
   provider: Type.Enum(AiProviderEnum),
   model: Type.String(),
   apiKey: Type.String(),
+  baseUrl: Type.Optional(Type.String()),
   providerSettings: Type.Optional(
     Type.Union([Type.Record(Type.String(), Type.Unknown()), Type.Null()]),
   ),
