@@ -290,7 +290,7 @@ export const flagService = {
       },
       {
         id: FlagId.SHOW_AI_SETTINGS,
-        value: system.get<string>(AppSystemProp.SHOW_AI_SETTINGS),
+        value: system.getBoolean(AppSystemProp.SHOW_AI_SETTINGS),
         created,
         updated,
       },
