@@ -16,8 +16,8 @@ export const AI_SETTINGS_FORM_SCHEMA = Type.Object({
     minLength: 1,
   }),
   baseUrl: Type.String(),
-  providerSettings: Type.Optional(Type.Union([Type.String(), Type.Null()])),
-  modelSettings: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  providerSettings: Type.String(),
+  modelSettings: Type.String(),
 });
 
 export type AiSettingsFormSchema = Static<typeof AI_SETTINGS_FORM_SCHEMA>;

@@ -41,8 +41,8 @@ export const EMPTY_FORM_VALUE: AiSettingsFormSchema = {
   provider: '',
   apiKey: '',
   baseUrl: '',
-  modelSettings: '',
-  providerSettings: '',
+  modelSettings: '{}',
+  providerSettings: '{}',
   model: '',
 };
 
@@ -69,15 +69,19 @@ const AiSettingsForm = ({
       return;
     }
 
-    const formValue: AiSettingsFormSchema = {
-      ...(savedSettings as unknown as AiSettingsFormSchema),
+    const formValue = {
+      ...savedSettings,
+      baseUrl: (savedSettings.providerSettings?.baseUrl as string) ?? '',
       providerSettings: savedSettings.providerSettings
-        ? JSON.stringify(savedSettings.providerSettings)
-        : '',
+        ? JSON.stringify({
+            ...savedSettings.providerSettings,
+            baseUrl: undefined,
+          })
+        : '{}',
       modelSettings: savedSettings.modelSettings
         ? JSON.stringify(savedSettings.modelSettings)
-        : '',
-    };
+        : '{}',
+    } as AiSettingsFormSchema;
 
     setInitialFormValue(formValue);
     form.reset(formValue);
@@ -125,9 +129,13 @@ const AiSettingsForm = ({
   const onSaveClick = () => {
     const formValue = form.getValues();
 
+    const providerSettings = parseJsonOrNull(formValue.providerSettings);
+
     const parsedValue = {
       ...formValue,
-      providerSettings: parseJsonOrNull(formValue.providerSettings),
+      providerSettings: providerSettings
+        ? { ...providerSettings, baseUrl: formValue.baseUrl }
+        : { baseUrl: formValue.baseUrl },
       modelSettings: parseJsonOrNull(formValue.modelSettings),
     };
 
