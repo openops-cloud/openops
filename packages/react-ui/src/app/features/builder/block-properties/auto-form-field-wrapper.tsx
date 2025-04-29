@@ -89,7 +89,9 @@ const FormLabelButton = ({
   handleDynamicValueChange,
   onGenerateWithAIClick,
 }: FormLabelButtonProps) => {
-  const { data: isAIEnabled } = flagsHooks.useFlag(FlagId.SHOW_AI_SETTINGS);
+  const { data: isAIEnabled = false } = flagsHooks.useFlag(
+    FlagId.SHOW_AI_SETTINGS,
+  );
   const readonly = useSafeBuilderStateContext((s) => s?.readonly);
   const isAiChatVisible = useSafeBuilderStateContext(
     (s) => s?.midpanelState?.showAiChat,
