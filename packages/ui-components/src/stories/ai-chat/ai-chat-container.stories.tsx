@@ -26,6 +26,7 @@ const meta = {
         options: [
           AI_CHAT_CONTAINER_SIZES.COLLAPSED,
           AI_CHAT_CONTAINER_SIZES.DOCKED,
+          AI_CHAT_CONTAINER_SIZES.EXPANDED,
         ],
       },
     },
@@ -83,8 +84,15 @@ export const Docked: Story = {
     containerSize: AI_CHAT_CONTAINER_SIZES.DOCKED,
     showAiChat: true,
     toggleContainerSizeState: fn(),
-    onSubmitChat: fn(),
+    handleSubmit: fn(),
     onCloseClick: fn(),
+  },
+};
+
+export const Expanded: Story = {
+  args: {
+    ...Docked.args,
+    containerSize: AI_CHAT_CONTAINER_SIZES.EXPANDED,
   },
 };
 
@@ -92,12 +100,6 @@ export const Collapsed: Story = {
   args: {
     ...Docked.args,
     containerSize: AI_CHAT_CONTAINER_SIZES.COLLAPSED,
-  },
-};
-export const Expanded: Story = {
-  args: {
-    ...Docked.args,
-    containerSize: AI_CHAT_CONTAINER_SIZES.EXPANDED,
   },
 };
 
