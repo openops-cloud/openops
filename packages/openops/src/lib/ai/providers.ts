@@ -24,7 +24,6 @@ export interface AiProvider {
   createLanguageModel(params: {
     apiKey: string;
     model: string;
-    baseUrl?: string;
     providerSettings?: Record<string, unknown>;
   }): LanguageModelV1;
 }
@@ -70,7 +69,6 @@ export const getAiProviderLanguageModel = async (aiConfig: {
   provider: AiProviderEnum;
   apiKey: string;
   model: string;
-  baseUrl?: string;
   providerSettings?: Record<string, unknown> | null;
 }): Promise<LanguageModelV1> => {
   const aiProvider = getAiProvider(aiConfig.provider);
@@ -79,10 +77,6 @@ export const getAiProviderLanguageModel = async (aiConfig: {
   return aiProvider.createLanguageModel({
     apiKey: aiConfig.apiKey,
     model: aiConfig.model,
-    baseUrl:
-      aiConfig.baseUrl && aiConfig.baseUrl.trim() !== ''
-        ? aiConfig.baseUrl
-        : undefined,
     ...sanitizedSettings,
   });
 };
@@ -97,7 +91,6 @@ export const validateAiProviderConfig = async (
     apiKey: config.apiKey,
     model: config.model,
     provider: config.provider,
-    baseUrl: config.baseUrl,
     providerSettings: config.providerSettings,
   });
 
