@@ -7,6 +7,7 @@ import { AiConfig, PrincipalType, SaveAiConfigRequest } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
 import { entitiesMustBeOwnedByCurrentProject } from '../../authentication/authorization';
 import { encryptUtils } from '../../helper/encryption';
+import { AiApiKeyRedactionMessage } from './ai-config.entity';
 import { aiConfigService } from './ai-config.service';
 
 export const aiConfigController: FastifyPluginAsyncTypebox = async (app) => {
@@ -17,7 +18,7 @@ export const aiConfigController: FastifyPluginAsyncTypebox = async (app) => {
     SaveAiConfigOptions,
     async (request, reply): Promise<AiConfig> => {
       let existingApiKey = request.body.apiKey;
-      if (request.body.id) {
+      if (request.body.apiKey == AiApiKeyRedactionMessage && request.body.id) {
         const existingConfig = await aiConfigService.getWithApiKey({
           projectId: request.principal.projectId,
           id: request.body.id,
