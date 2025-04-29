@@ -3,7 +3,11 @@ import { action } from '@storybook/addon-actions';
 import { useArgs } from '@storybook/preview-api';
 import type { Meta, StoryObj } from '@storybook/react';
 import { fn } from '@storybook/test';
-import { AI_CHAT_CONTAINER_SIZES, AiChatContainer } from '../../components';
+import {
+  AI_CHAT_CONTAINER_SIZES,
+  AiChatContainer,
+  AiChatContainerSizeState,
+} from '../../components';
 import { AIChatMessages } from '../../components/ai-chat-messages/ai-chat-messages';
 import { Button } from '../../ui/button';
 import { Toaster } from '../../ui/toaster';
@@ -29,10 +33,10 @@ const meta = {
   tags: ['autodocs'],
   decorators: [
     (Story) => (
-      <>
+      <div className="h-[800px]">
         <Story />
         <Toaster />
-      </>
+      </div>
     ),
   ],
   render: (args) => {
@@ -41,13 +45,9 @@ const meta = {
       updateArgs,
     ] = useArgs();
 
-    const onToggleContainerSizeState = () => {
-      const newContainerSizeState =
-        containerSize === AI_CHAT_CONTAINER_SIZES.DOCKED
-          ? AI_CHAT_CONTAINER_SIZES.COLLAPSED
-          : AI_CHAT_CONTAINER_SIZES.DOCKED;
-      toggleContainerSizeState();
-      updateArgs({ containerSize: newContainerSizeState });
+    const onToggleContainerSizeState = (size: AiChatContainerSizeState) => {
+      toggleContainerSizeState(size);
+      updateArgs({ containerSize: size });
     };
 
     const onSetShowAiChat = (showAiChat: boolean) => {
@@ -78,7 +78,8 @@ type Story = StoryObj<typeof meta>;
 
 export const Docked: Story = {
   args: {
-    parentHeight: 500,
+    parentHeight: 800,
+    parentWidth: 800,
     containerSize: AI_CHAT_CONTAINER_SIZES.DOCKED,
     showAiChat: true,
     toggleContainerSizeState: fn(),
@@ -93,6 +94,12 @@ export const Collapsed: Story = {
     containerSize: AI_CHAT_CONTAINER_SIZES.COLLAPSED,
   },
 };
+export const Expanded: Story = {
+  args: {
+    ...Docked.args,
+    containerSize: AI_CHAT_CONTAINER_SIZES.EXPANDED,
+  },
+};
 
 export const Populated: Story = {
   args: {
@@ -104,13 +111,9 @@ export const Populated: Story = {
       updateArgs,
     ] = useArgs();
 
-    const onToggleContainerSizeState = () => {
-      const newContainerSizeState =
-        containerSize === AI_CHAT_CONTAINER_SIZES.DOCKED
-          ? AI_CHAT_CONTAINER_SIZES.COLLAPSED
-          : AI_CHAT_CONTAINER_SIZES.DOCKED;
-      toggleContainerSizeState();
-      updateArgs({ containerSize: newContainerSizeState });
+    const onToggleContainerSizeState = (size: AiChatContainerSizeState) => {
+      toggleContainerSizeState(size);
+      updateArgs({ containerSize: size });
     };
 
     const onSetShowAiChat = (showAiChat: boolean) => {
