@@ -53,13 +53,13 @@ export async function createKnownCostTypesByApplicationTable(
   });
 
   await addField(token, table.id, {
-    name: 'TotalCost',
+    name: 'Total Cost',
     type: 'number',
     number_decimal_places: 10,
   });
 
   await addField(token, table.id, {
-    name: 'TotalConsumedQuantity',
+    name: 'Total Consumed Quantity',
     type: 'number',
     number_decimal_places: 0,
   });
