@@ -232,10 +232,10 @@ describe('aiConfigService.get', () => {
     jest.clearAllMocks();
   });
 
-  test('should return config with redacted apiKey if shouldRedact is true', async () => {
+  test('should return get config with redacted apiKey', async () => {
     findOneByMock.mockResolvedValue({ ...config });
 
-    const result = await aiConfigService.get({ projectId, id: configId }, true);
+    const result = await aiConfigService.get({ projectId, id: configId });
 
     expect(findOneByMock).toHaveBeenCalledWith({
       id: configId,
@@ -248,13 +248,13 @@ describe('aiConfigService.get', () => {
     });
   });
 
-  test('should return config with original apiKey if shouldRedact is false', async () => {
+  test('should return getWithApiKey config with original apiKey', async () => {
     findOneByMock.mockResolvedValue({ ...config });
 
-    const result = await aiConfigService.get(
-      { projectId, id: configId },
-      false,
-    );
+    const result = await aiConfigService.getWithApiKey({
+      projectId,
+      id: configId,
+    });
 
     expect(findOneByMock).toHaveBeenCalledWith({
       id: configId,
@@ -267,7 +267,7 @@ describe('aiConfigService.get', () => {
   test('should return undefined if config is not found', async () => {
     findOneByMock.mockResolvedValue(undefined);
 
-    const result = await aiConfigService.get({ projectId, id: configId }, true);
+    const result = await aiConfigService.get({ projectId, id: configId });
 
     expect(result).toBeUndefined();
     expect(findOneByMock).toHaveBeenCalledWith({
@@ -297,10 +297,10 @@ describe('aiConfigService.getActiveConfig', () => {
     enabled: true,
   };
 
-  test('should return the enabled AI config with redacted API key if redacted=true', async () => {
+  test('should return the enabled AI config with redacted API in getActiveConfig', async () => {
     findOneByMock.mockResolvedValue(activeConfig);
 
-    const result = await aiConfigService.getActiveConfig(projectId, true);
+    const result = await aiConfigService.getActiveConfig(projectId);
 
     expect(findOneByMock).toHaveBeenCalledWith({
       projectId,
@@ -313,10 +313,10 @@ describe('aiConfigService.getActiveConfig', () => {
     });
   });
 
-  test('should return the enabled AI config with original API key if redacted=false', async () => {
+  test('should return the enabled AI config with original API key in getActiveConfigWithApiKey', async () => {
     findOneByMock.mockResolvedValue(activeConfig);
 
-    const result = await aiConfigService.getActiveConfig(projectId, false);
+    const result = await aiConfigService.getActiveConfigWithApiKey(projectId);
 
     expect(findOneByMock).toHaveBeenCalledWith({
       projectId,
