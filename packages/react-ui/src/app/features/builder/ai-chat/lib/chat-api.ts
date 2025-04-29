@@ -9,4 +9,7 @@ export const aiChatApi = {
       stepName,
     });
   },
+  delete(chatId: string) {
+    return api.delete<void>(`/v1/ai/chat/conversation/${chatId}`);
+  },
 };

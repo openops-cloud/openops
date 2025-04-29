@@ -24,6 +24,7 @@ import {
   TriggerType,
 } from '@openops/shared';
 import { flowRunUtils } from '../flow-runs/lib/flow-run-utils';
+import { aiChatApi } from './ai-chat/lib/chat-api';
 import { DataSelectorSizeState } from './data-selector/data-selector-size-togglers';
 
 const flowUpdatesQueue = new PromiseQueue();
@@ -615,6 +616,22 @@ const updateFlowVersion = (
   ) {
     set({ selectedStep: undefined });
     set({ rightSidebar: RightSideBarType.NONE });
+    deleteChatRequest(state.flowVersion, operation.request.name);
+  }
+
+  async function deleteChatRequest(flowVersion: FlowVersion, stepName: string) {
+    try {
+      const stepDetails = flowHelper.getStep(flowVersion, stepName);
+      const blockName = stepDetails?.settings?.blockName;
+      const chat = await aiChatApi.open(
+        newFlowVersion.flowId,
+        blockName,
+        stepName,
+      );
+      await aiChatApi.delete(chat.chatId);
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   const updateRequest = async () => {
