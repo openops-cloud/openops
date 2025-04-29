@@ -50,6 +50,8 @@ const StepSettingsContainer = React.memo(() => {
     saving,
     flowVersion,
     refreshBlockFormSettings,
+    midpanelState,
+    applyMidpanelAction,
   ] = useBuilderStateContext((state) => [
     state.readonly,
     state.exitStepSettings,
@@ -57,6 +59,8 @@ const StepSettingsContainer = React.memo(() => {
     state.saving,
     state.flowVersion,
     state.refreshBlockFormSettings,
+    state.midpanelState,
+    state.applyMidpanelAction,
   ]);
 
   const defaultValues = useMemo(() => {
@@ -133,6 +137,20 @@ const StepSettingsContainer = React.memo(() => {
     form.trigger();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshBlockFormSettings]);
+
+  useEffect(() => {
+    if (midpanelState.codeToInject && midpanelState.aiChatProperty?.inputName) {
+      form.setValue(
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        midpanelState.aiChatProperty!.inputName,
+        midpanelState.codeToInject,
+        { shouldValidate: true },
+      );
+
+      applyMidpanelAction({ type: 'CLEAN_CODE_TO_INJECT' });
+      form.trigger();
+    }
+  }, [form, midpanelState, applyMidpanelAction]);
 
   useUpdateEffect(() => {
     form.setValue('valid', form.formState.isValid);

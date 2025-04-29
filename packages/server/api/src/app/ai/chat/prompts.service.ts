@@ -9,11 +9,11 @@ export const getSystemPrompt = async (
   try {
     switch (context.blockName) {
       case '@openops/block-aws':
-        return await loadFile('aws.txt');
+        return await loadFile('aws-cli.txt');
       case '@openops/block-azure':
         return await loadFile('azure-cli.txt');
       case '@openops/block-google-cloud':
-        return '';
+        return await loadFile('gcp-cli.txt');
       default:
         return '';
     }

@@ -14,4 +14,7 @@ export const aiSettingsApi = {
   getAiSettings(): Promise<AiConfig[]> {
     return api.get<AiConfig[]>('/v1/ai/config/');
   },
+  getActiveAiSettings(): Promise<AiConfig> {
+    return api.get<AiConfig>('/v1/ai/config/active');
+  },
 };
