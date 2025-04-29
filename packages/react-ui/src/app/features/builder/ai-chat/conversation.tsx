@@ -84,9 +84,6 @@ const Conversation = ({
     }),
   );
 
-  // eslint-disable-next-line no-console
-  console.debug('uiMessages', uiMessages);
-
   return (
     <div className="flex flex-col gap-2">
       <AIChatMessages messages={uiMessages} onInject={onInject} />
