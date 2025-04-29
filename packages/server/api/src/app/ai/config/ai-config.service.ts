@@ -26,43 +26,31 @@ function redactApiKey(config: AiConfig): AiConfigRedacted {
 }
 
 export const aiConfigService = {
-  async upsert(params: {
+  async save(params: {
     projectId: string;
     request: SaveAiConfigRequest;
   }): Promise<AiConfigRedacted> {
     const { projectId, request } = params;
-    let existing: AiConfig | null = null;
 
-    if (request.id) {
-      existing = await repo().findOneBy({
-        id: request.id,
-        projectId,
-      });
-    }
+    const existing = request.id
+      ? await repo().findOneBy({ id: request.id, projectId })
+      : null;
+
+    const encryptedApiKey =
+      request.apiKey !== AiApiKeyRedactionMessage
+        ? JSON.stringify(encryptUtils.encryptString(request.apiKey))
+        : existing?.apiKey;
 
     const aiConfig: Partial<AiConfig> = {
       ...request,
+      id: request?.id ?? openOpsId(),
       projectId,
-      id: existing?.id ?? openOpsId(),
       created: existing?.created ?? new Date().toISOString(),
       updated: new Date().toISOString(),
+      apiKey: encryptedApiKey,
     };
 
-    if (request.apiKey !== AiApiKeyRedactionMessage) {
-      aiConfig.apiKey = JSON.stringify(
-        encryptUtils.encryptString(request.apiKey),
-      );
-    } else {
-      aiConfig.apiKey = existing?.apiKey;
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await repo().upsert(aiConfig as any, ['id']);
-
-    const config = await repo().findOneByOrFail({
-      projectId,
-      provider: request.provider,
-    });
+    const config = await repo().save(aiConfig);
 
     return redactApiKey(config);
   },
