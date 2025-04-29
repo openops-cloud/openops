@@ -80,7 +80,6 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
       apiKey,
       model: aiConfig.model,
       provider: aiConfig.provider,
-      baseUrl: aiConfig.baseUrl,
       providerSettings: aiConfig.providerSettings,
     });
 
