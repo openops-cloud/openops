@@ -187,6 +187,30 @@ describe('getAiProviderLanguageModel tests', () => {
     });
     expect(result).toEqual(fakeModel);
   });
+
+  test.each([[''], [' '], [undefined], [null]])(
+    'should sanitize providerSettings for unaccepted values',
+    async (baseUrl: string | undefined | null) => {
+      const aiConfig = {
+        provider: AiProviderEnum.OPENAI,
+        apiKey: 'test-api-key',
+        model: 'gpt-4',
+        providerSettings: { baseUrl },
+      };
+
+      const fakeModel = { id: 'mock-model', type: 'LanguageModelV1' };
+      openAIProviderMock.createLanguageModel.mockResolvedValue(fakeModel);
+
+      const result = await getAiProviderLanguageModel(aiConfig);
+
+      expect(openAIProviderMock.createLanguageModel).toHaveBeenCalledWith({
+        apiKey: aiConfig.apiKey,
+        model: aiConfig.model,
+        baseUrl: undefined,
+      });
+      expect(result).toEqual(fakeModel);
+    },
+  );
 });
 
 describe('validateAiProviderConfig tests', () => {

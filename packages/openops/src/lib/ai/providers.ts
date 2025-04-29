@@ -73,11 +73,12 @@ export const getAiProviderLanguageModel = async (aiConfig: {
   providerSettings?: Record<string, unknown> | null;
 }): Promise<LanguageModelV1> => {
   const aiProvider = getAiProvider(aiConfig.provider);
+  const sanitizeProviderSettings = aiConfig.providerSettings ?? {};
 
   return aiProvider.createLanguageModel({
     apiKey: aiConfig.apiKey,
     model: aiConfig.model,
-    ...aiConfig.providerSettings,
+    ...sanitizeProviderSettings,
   });
 };
 
@@ -128,4 +129,13 @@ const invalidConfigError = (
     valid: false,
     error: { errorName, errorMessage },
   };
+};
+
+const sanitizeProviderSettings = (
+  providerSettings?: Record<string, unknown> | null,
+): string | undefined => {
+  const rawBaseUrl = providerSettings?.['baseUrl'];
+  return typeof rawBaseUrl === 'string' && rawBaseUrl.trim() !== ''
+    ? rawBaseUrl
+    : undefined;
 };
