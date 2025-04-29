@@ -40,9 +40,9 @@ export const EMPTY_FORM_VALUE: AiSettingsFormSchema = {
   enabled: false,
   provider: '',
   apiKey: '',
-  baseUrl: '',
-  modelSettings: '',
-  providerSettings: '',
+  baseURL: '',
+  modelSettings: '{}',
+  providerSettings: '{}',
   model: '',
 };
 
@@ -69,15 +69,19 @@ const AiSettingsForm = ({
       return;
     }
 
-    const formValue: AiSettingsFormSchema = {
-      ...(savedSettings as unknown as AiSettingsFormSchema),
+    const formValue = {
+      ...savedSettings,
+      baseURL: (savedSettings.providerSettings?.baseURL as string) ?? '',
       providerSettings: savedSettings.providerSettings
-        ? JSON.stringify(savedSettings.providerSettings)
-        : '',
+        ? JSON.stringify({
+            ...savedSettings.providerSettings,
+            baseURL: undefined,
+          })
+        : '{}',
       modelSettings: savedSettings.modelSettings
         ? JSON.stringify(savedSettings.modelSettings)
-        : '',
-    };
+        : '{}',
+    } as AiSettingsFormSchema;
 
     setInitialFormValue(formValue);
     form.reset(formValue);
@@ -125,9 +129,13 @@ const AiSettingsForm = ({
   const onSaveClick = () => {
     const formValue = form.getValues();
 
+    const providerSettings = parseJsonOrNull(formValue.providerSettings);
+
     const parsedValue = {
       ...formValue,
-      providerSettings: parseJsonOrNull(formValue.providerSettings),
+      providerSettings: providerSettings
+        ? { ...providerSettings, baseURL: formValue.baseURL }
+        : { baseURL: formValue.baseURL },
       modelSettings: parseJsonOrNull(formValue.modelSettings),
     };
 
@@ -210,10 +218,10 @@ const AiSettingsForm = ({
         />
         <FormField
           control={form.control}
-          name="baseUrl"
+          name="baseURL"
           render={({ field }) => (
             <FormItem className="flex flex-col gap-2">
-              <Label htmlFor="baseUrl">{t('Base URL')}</Label>
+              <Label htmlFor="baseURL">{t('Base URL')}</Label>
               <Input onChange={field.onChange} value={field.value}></Input>
             </FormItem>
           )}

@@ -6,7 +6,7 @@ import {
   system,
   webhookSecretsUtils,
 } from '@openops/server-shared';
-import { Flag, FlagId, isNil } from '@openops/shared';
+import { Flag, FlagId } from '@openops/shared';
 import axios from 'axios';
 import { webhookUtils } from 'server-worker';
 import { repoFactory } from '../core/db/repo-factory';
@@ -290,7 +290,7 @@ export const flagService = {
       },
       {
         id: FlagId.SHOW_AI_SETTINGS,
-        value: false,
+        value: system.getBoolean(AppSystemProp.SHOW_AI_SETTINGS),
         created,
         updated,
       },

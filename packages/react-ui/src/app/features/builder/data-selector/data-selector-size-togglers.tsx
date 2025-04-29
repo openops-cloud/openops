@@ -23,7 +23,7 @@ export const DataSelectorSizeTogglers = ({
   const buttonClassName = (btnState: DataSelectorSizeState) =>
     cn('', {
       'text-outline': state === btnState,
-      'text-outline opacity-50': state !== btnState,
+      'text-outline opacity-50 hover:opacity-100': state !== btnState,
     });
 
   return (
@@ -46,7 +46,7 @@ export const DataSelectorSizeTogglers = ({
       </Button>
       <Button
         size="icon"
-        className={buttonClassName(DataSelectorSizeState.COLLAPSED)}
+        className="text-outline opacity-50 hover:opacity-100"
         onClick={() => handleClick(DataSelectorSizeState.COLLAPSED)}
         variant="basic"
       >

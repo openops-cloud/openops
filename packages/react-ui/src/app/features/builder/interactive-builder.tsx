@@ -62,7 +62,9 @@ const InteractiveBuilder = ({
   lefSideBarContainerWidth: number;
   flowVersion: FlowVersion;
 }) => {
-  const { data: isAIEnabled } = flagsHooks.useFlag(FlagId.SHOW_AI_SETTINGS);
+  const { data: isAIEnabled = false } = flagsHooks.useFlag(
+    FlagId.SHOW_AI_SETTINGS,
+  );
   const { onPaste } = usePaste();
 
   const onPasteOperation = (actionToPaste: Action): void => {

@@ -1,6 +1,7 @@
 import { BlockProperty } from '@openops/blocks-framework';
 import {
   Button,
+  cn,
   DYNAMIC_TOGGLE_VALUES,
   DynamicToggle,
   DynamicToggleOption,
@@ -88,8 +89,13 @@ const FormLabelButton = ({
   handleDynamicValueChange,
   onGenerateWithAIClick,
 }: FormLabelButtonProps) => {
-  const { data: isAIEnabled } = flagsHooks.useFlag(FlagId.SHOW_AI_SETTINGS);
-  const readonly = useSafeBuilderStateContext((s) => s.readonly);
+  const { data: isAIEnabled = false } = flagsHooks.useFlag(
+    FlagId.SHOW_AI_SETTINGS,
+  );
+  const readonly = useSafeBuilderStateContext((s) => s?.readonly);
+  const isAiChatVisible = useSafeBuilderStateContext(
+    (s) => s?.midpanelState?.showAiChat,
+  );
 
   const { hasActiveAiSettings, isLoading } =
     aiSettingsHooks.useHasActiveAiSettings();
@@ -105,7 +111,9 @@ const FormLabelButton = ({
     return hasActiveAiSettings ? (
       <Button
         variant="link"
-        className="h-5 pr-0 py-0 text-blueAccent-300 gap-[5px]"
+        className={cn('h-5 pr-0 py-0 gap-[5px]', {
+          'text-blueAccent-300': isAiChatVisible,
+        })}
         onClick={onGenerateWithAIClick}
         loading={isLoading}
       >
