@@ -9,6 +9,8 @@ import {
 } from '@openops/components/ui';
 import { flowHelper, FlowVersion, OpenChatResponse } from '@openops/shared';
 import { useQuery } from '@tanstack/react-query';
+import { useCallback } from 'react';
+import { useBuilderStateContext } from '../builder-hooks';
 import { aiChatApi } from './lib/chat-api';
 
 type ConversationProps = {
@@ -34,6 +36,7 @@ const Conversation = ({
   messages,
   status,
 }: ConversationProps) => {
+  const dispatch = useBuilderStateContext((state) => state.applyMidpanelAction);
   const stepDetails = flowHelper.getStep(flowVersion, stepName);
   const blockName = stepDetails?.settings?.blockName;
 
@@ -57,6 +60,13 @@ const Conversation = ({
   const messagesToDisplay: MessageType[] =
     messages.length > 0 ? messages : data?.messages ?? [];
 
+  const onInject = useCallback(
+    (code: string) => {
+      dispatch({ type: 'ADD_CODE_TO_INJECT', code });
+    },
+    [dispatch],
+  );
+
   if (isPending) {
     return <LoadingSpinner />;
   }
@@ -76,14 +86,7 @@ const Conversation = ({
 
   return (
     <div className="flex flex-col gap-2">
-      <AIChatMessages
-        messages={uiMessages}
-        onInject={(code) => {
-          // tbd in next ticket
-          // eslint-disable-next-line no-console
-          console.log('inject', code);
-        }}
-      />
+      <AIChatMessages messages={uiMessages} onInject={onInject} />
       {[ChatStatus.STREAMING, ChatStatus.SUBMITTED].includes(status) && (
         <LoadingSpinner />
       )}

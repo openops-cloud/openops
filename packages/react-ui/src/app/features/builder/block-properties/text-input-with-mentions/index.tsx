@@ -16,6 +16,7 @@ import { cn } from '@openops/components/ui';
 
 import { useBuilderStateContext } from '../../builder-hooks';
 
+import { useEffect } from 'react';
 import { textMentionUtils } from './text-input-utils';
 
 type TextInputWithMentionsProps = {
@@ -136,6 +137,27 @@ export const TextInputWithMentions = ({
     },
     [disabled],
   );
+
+  useEffect(() => {
+    if (editor && initialValue !== undefined) {
+      const currentEditorJson = editor.getJSON();
+      const currentEditorText =
+        textMentionUtils.convertTiptapJsonToText(currentEditorJson);
+      const newText = convertToText(initialValue);
+
+      if (currentEditorText !== newText) {
+        const newContent = {
+          type: 'doc',
+          content: textMentionUtils.convertTextToTipTapJsonContent(
+            newText,
+            steps,
+            stepsMetadata,
+          ),
+        };
+        editor.commands.setContent(newContent, false);
+      }
+    }
+  }, [editor, initialValue, steps, stepsMetadata]);
 
   return <EditorContent editor={editor} />;
 };
