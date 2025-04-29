@@ -20,7 +20,7 @@ export const aiConfigController: FastifyPluginAsyncTypebox = async (app) => {
         return reply.status(StatusCodes.BAD_REQUEST).send(error);
       }
 
-      const aiConfig = await aiConfigService.upsert({
+      const aiConfig = await aiConfigService.save({
         projectId: request.principal.projectId,
         request: request.body,
       });
