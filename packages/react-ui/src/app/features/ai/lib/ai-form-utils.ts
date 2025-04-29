@@ -24,7 +24,7 @@ export type AiSettingsFormSchema = Static<typeof AI_SETTINGS_FORM_SCHEMA>;
 
 export const AI_SETTINGS_SAVED_SUCCESSFULLY_TOAST = {
   title: t('Success'),
-  description: t('AI settings are deleted successfully'),
+  description: t('AI settings are saved successfully'),
   duration: DEFAULT_TOAST_DURATION,
 };
 

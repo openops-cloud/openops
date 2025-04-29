@@ -11,16 +11,18 @@ import { AI_CHAT_CONTAINER_SIZES, AiChatContainerSizeState } from './types';
 
 type AiChatContainerProps = {
   parentHeight: number;
+  parentWidth: number;
   showAiChat: boolean;
   onCloseClick: () => void;
   containerSize: AiChatContainerSizeState;
-  toggleContainerSizeState: () => void;
+  toggleContainerSizeState: (state: AiChatContainerSizeState) => void;
   className?: string;
   children?: ReactNode;
 } & Pick<UseChatHelpers, 'input' | 'handleInputChange' | 'handleSubmit'>;
 
 const AiChatContainer = ({
   parentHeight,
+  parentWidth,
   showAiChat,
   onCloseClick,
   containerSize,
@@ -38,6 +40,8 @@ const AiChatContainer = ({
     height = '0px';
   } else if (containerSize === AI_CHAT_CONTAINER_SIZES.DOCKED) {
     height = '450px';
+  } else if (containerSize === AI_CHAT_CONTAINER_SIZES.EXPANDED) {
+    height = `${parentHeight - 180}px`;
   } else {
     height = `${parentHeight - 100}px`;
   }
@@ -69,6 +73,7 @@ const AiChatContainer = ({
         {t('AI Chat')}
         <div className="flex-grow" />
         <AiChatSizeTogglers
+          size={containerSize}
           toggleContainerSizeState={toggleContainerSizeState}
           onCloseClick={onCloseClick}
         />
@@ -79,7 +84,10 @@ const AiChatContainer = ({
       <div
         style={{
           height,
-          width: '450px',
+          width:
+            containerSize !== AI_CHAT_CONTAINER_SIZES.EXPANDED
+              ? '450px'
+              : `${parentWidth - 40}px`,
         }}
         className="transition-all overflow-hidden"
       >
