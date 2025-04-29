@@ -51,44 +51,29 @@ const LanguageText = ({
   content: string;
   codeVariation?: CodeVariations;
 }) => {
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const divRef = useRef<HTMLDivElement>(null);
 
   const isInjectVariation =
     codeVariation === MarkdownCodeVariations.WithCopyAndInject;
 
   useEffect(() => {
-    const textarea = textareaRef.current;
-
-    if (textarea) {
-      const lineCount = textarea.value.split('\n').length;
-      const isSingleLine = lineCount === 1;
-
-      textarea.style.height = 'auto';
-      const newHeight = isSingleLine
-        ? textarea.scrollHeight
-        : textarea.scrollHeight + 16; // adding the extra padding
-      textarea.style.height = `${newHeight}px`;
-
-      if (isSingleLine) {
-        textarea.style.lineHeight = `32px`;
-        textarea.style.paddingTop = '0';
-        textarea.style.paddingBottom = '0';
-      } else {
-        textarea.style.lineHeight = '';
-        textarea.style.paddingTop = '8px';
-        textarea.style.paddingBottom = '8px';
-      }
+    const div = divRef.current;
+    if (div) {
+      div.style.height =
+        div.scrollHeight > 32 ? div.scrollHeight + 'px' : '32px';
     }
   }, [content]);
 
   if (isInjectVariation) {
     return (
-      <textarea
-        ref={textareaRef}
-        className="px-3 border text-sm block w-full resize-none leading-tight bg-input rounded-lg border-none"
-        value={content}
-        disabled
-      />
+      <div
+        ref={divRef}
+        className="p-4 text-sm block w-full leading-tight bg-input rounded-lg border-none overflow-y-hidden resize-none"
+        contentEditable={false}
+        suppressContentEditableWarning
+      >
+        {content}
+      </div>
     );
   }
 
@@ -101,7 +86,6 @@ const LanguageText = ({
     />
   );
 };
-
 const LanguageUrl = ({ content }: { content: string }) => {
   if (
     validator.isURL(content, {
