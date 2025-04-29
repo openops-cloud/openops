@@ -179,7 +179,7 @@ describe('getAiProviderLanguageModel tests', () => {
     expect(openAIProviderMock.createLanguageModel).toHaveBeenCalledWith({
       apiKey: aiConfig.apiKey,
       model: aiConfig.model,
-      baseUrl: 'https://api.example.com',
+      baseURL: 'https://api.example.com',
     });
     expect(result).toEqual(fakeModel);
   });
@@ -265,7 +265,7 @@ describe('validateAiProviderConfig tests', () => {
     expect(openAIProviderMock.createLanguageModel).toHaveBeenCalledWith({
       apiKey: aiConfig.apiKey,
       model: aiConfig.model,
-      baseUrl: 'https://api.example.com',
+      baseURL: 'https://api.example.com',
     });
   });
 
@@ -290,7 +290,7 @@ describe('validateAiProviderConfig tests', () => {
     expect(openAIProviderMock.createLanguageModel).toHaveBeenCalledWith({
       apiKey: aiConfig.apiKey,
       model: aiConfig.model,
-      baseUrl: undefined,
+      baseURL: undefined,
     });
   });
 
@@ -315,7 +315,7 @@ describe('validateAiProviderConfig tests', () => {
     expect(openAIProviderMock.createLanguageModel).toHaveBeenCalledWith({
       apiKey: aiConfig.apiKey,
       model: aiConfig.model,
-      baseUrl: undefined,
+      baseURL: undefined,
     });
   });
 });
