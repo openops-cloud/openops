@@ -35,7 +35,7 @@ const Message = ({
   return (
     <div
       className={cn(
-        'p-2 pb-4 px-4 rounded-lg',
+        'ml-20 p-2 pb-4 px-4 rounded-lg',
         'bg-sky-50 dark:bg-slate-900 text-black dark:text-white',
       )}
     >
