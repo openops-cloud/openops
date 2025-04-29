@@ -7,11 +7,11 @@ const deepSeekModels = ['deepseek-chat', 'deepseek-reasoner'];
 function createLanguageModel(params: {
   apiKey: string;
   model: string;
-  baseUrl?: string;
+  providerSettings?: Record<string, unknown>;
 }): LanguageModelV1 {
   return createDeepSeek({
     apiKey: params.apiKey,
-    baseURL: params.baseUrl,
+    ...params.providerSettings,
   })(params.model);
 }
 
