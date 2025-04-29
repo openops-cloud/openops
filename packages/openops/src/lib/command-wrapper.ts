@@ -1,6 +1,6 @@
-import { logger } from '@openops/server-shared';
+import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { ChildProcess } from 'child_process';
-import { execFile, spawn } from 'node:child_process';
+import { execFile, ExecFileOptions, spawn } from 'node:child_process';
 
 export interface CommandResult {
   stdOut: string;
@@ -25,8 +25,18 @@ export async function executeFile(
   args: string[],
   envVariables: any,
 ): Promise<CommandResult> {
-  const childProcess = execFile(file, args, { env: envVariables });
+  const options: ExecFileOptions = {
+    env: envVariables,
+  };
 
+  const maxBuffer = system.getNumber(
+    AppSystemProp.EXEC_FILE_MAX_BUFFER_SIZE_MB,
+  );
+  if (maxBuffer) {
+    options.maxBuffer = maxBuffer * 1024 * 1024;
+  }
+
+  const childProcess = execFile(file, args, options);
   return await getResult(childProcess, file);
 }
 
