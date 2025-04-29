@@ -15,7 +15,7 @@ export const AI_SETTINGS_FORM_SCHEMA = Type.Object({
   apiKey: Type.String({
     minLength: 1,
   }),
-  baseUrl: Type.String(),
+  baseURL: Type.String(),
   providerSettings: Type.String(),
   modelSettings: Type.String(),
 });

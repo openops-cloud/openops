@@ -40,7 +40,7 @@ export const EMPTY_FORM_VALUE: AiSettingsFormSchema = {
   enabled: false,
   provider: '',
   apiKey: '',
-  baseUrl: '',
+  baseURL: '',
   modelSettings: '{}',
   providerSettings: '{}',
   model: '',
@@ -71,11 +71,11 @@ const AiSettingsForm = ({
 
     const formValue = {
       ...savedSettings,
-      baseUrl: (savedSettings.providerSettings?.baseUrl as string) ?? '',
+      baseURL: (savedSettings.providerSettings?.baseURL as string) ?? '',
       providerSettings: savedSettings.providerSettings
         ? JSON.stringify({
             ...savedSettings.providerSettings,
-            baseUrl: undefined,
+            baseURL: undefined,
           })
         : '{}',
       modelSettings: savedSettings.modelSettings
@@ -134,8 +134,8 @@ const AiSettingsForm = ({
     const parsedValue = {
       ...formValue,
       providerSettings: providerSettings
-        ? { ...providerSettings, baseUrl: formValue.baseUrl }
-        : { baseUrl: formValue.baseUrl },
+        ? { ...providerSettings, baseURL: formValue.baseURL }
+        : { baseURL: formValue.baseURL },
       modelSettings: parseJsonOrNull(formValue.modelSettings),
     };
 
@@ -218,10 +218,10 @@ const AiSettingsForm = ({
         />
         <FormField
           control={form.control}
-          name="baseUrl"
+          name="baseURL"
           render={({ field }) => (
             <FormItem className="flex flex-col gap-2">
-              <Label htmlFor="baseUrl">{t('Base URL')}</Label>
+              <Label htmlFor="baseURL">{t('Base URL')}</Label>
               <Input onChange={field.onChange} value={field.value}></Input>
             </FormItem>
           )}
