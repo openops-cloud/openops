@@ -23,7 +23,7 @@ import equal from 'fast-deep-equal';
 import { t } from 'i18next';
 import { ChevronDown, ChevronRight, CircleCheck } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 
 type AiSettingsFormProps = {
   aiProviders?: {
@@ -88,7 +88,6 @@ const AiSettingsForm = ({
   }, [savedSettings, form]);
 
   const currentFormValue = form.watch();
-  const provider = useWatch({ control: form.control, name: 'provider' });
 
   const providerOptions = useMemo(
     () =>
@@ -100,9 +99,11 @@ const AiSettingsForm = ({
   );
 
   const modelOptions = useMemo(() => {
-    const selected = aiProviders?.find((p) => p.provider === provider);
+    const selected = aiProviders?.find(
+      (p) => p.provider === currentFormValue.provider,
+    );
     return selected?.models.map((m) => ({ label: m, value: m })) || [];
-  }, [provider, aiProviders]);
+  }, [currentFormValue.provider, aiProviders]);
 
   const isFormUnchanged = useMemo(() => {
     return equal(currentFormValue, initialFormValue);
@@ -175,6 +176,7 @@ const AiSettingsForm = ({
                   field.onChange(v);
                   resetModel();
                 }}
+                disabled={!currentFormValue.enabled}
                 value={field.value}
                 placeholder={t('Select an option')}
               ></SearchableSelect>
@@ -191,7 +193,9 @@ const AiSettingsForm = ({
               </Label>
               <AutocompleteInput
                 options={modelOptions}
-                disabled={!provider}
+                disabled={
+                  !currentFormValue.provider || !currentFormValue.enabled
+                }
                 onChange={field.onChange}
                 value={field.value}
                 className="w-full"
@@ -209,6 +213,7 @@ const AiSettingsForm = ({
               </Label>
               <Input
                 onChange={field.onChange}
+                disabled={!currentFormValue.enabled}
                 value={field.value}
                 type="password"
                 required={true}
@@ -223,7 +228,11 @@ const AiSettingsForm = ({
           render={({ field }) => (
             <FormItem className="flex flex-col gap-2">
               <Label htmlFor="baseURL">{t('Base URL')}</Label>
-              <Input onChange={field.onChange} value={field.value}></Input>
+              <Input
+                onChange={field.onChange}
+                value={field.value}
+                disabled={!currentFormValue.enabled}
+              ></Input>
             </FormItem>
           )}
         />
@@ -255,6 +264,7 @@ const AiSettingsForm = ({
                     <Textarea
                       value={field.value ?? ''}
                       onChange={field.onChange}
+                      disabled={!currentFormValue.enabled}
                     ></Textarea>
                   </FormItem>
                 )}
@@ -268,6 +278,7 @@ const AiSettingsForm = ({
                     <Textarea
                       value={field.value ?? ''}
                       onChange={field.onChange}
+                      disabled={!currentFormValue.enabled}
                     ></Textarea>
                   </FormItem>
                 )}
