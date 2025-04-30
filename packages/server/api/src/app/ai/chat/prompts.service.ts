@@ -8,15 +8,22 @@ export const getSystemPrompt = async (
 ): Promise<string> => {
   switch (context.blockName) {
     case '@openops/block-aws':
-      return loadPrompt('aws-cli.txt');
+      return loadWithBasePrompt('aws-cli.txt');
     case '@openops/block-azure':
-      return loadPrompt('azure-cli.txt');
+      return loadWithBasePrompt('azure-cli.txt');
     case '@openops/block-google-cloud':
-      return loadPrompt('gcp-cli.txt');
+      return loadWithBasePrompt('gcp-cli.txt');
     default:
       return '';
   }
 };
+
+async function loadWithBasePrompt(promptFile: string): Promise<string> {
+  const basePrompt = await loadPrompt('base-cli.txt');
+  const customPrompt = await loadPrompt(promptFile);
+
+  return `${basePrompt} \n ${customPrompt}`;
+}
 
 async function loadPrompt(filename: string): Promise<string> {
   const promptsLocation = system.get<string>(
