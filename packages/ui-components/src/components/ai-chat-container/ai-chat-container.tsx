@@ -73,7 +73,7 @@ const AiChatContainer = ({
         {t('AI Chat')}
         <div className="flex-grow" />
         <AiChatSizeTogglers
-          size={containerSize}
+          state={containerSize}
           toggleContainerSizeState={toggleContainerSizeState}
           onCloseClick={onCloseClick}
         />

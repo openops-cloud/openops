@@ -131,7 +131,23 @@ const DataSelector = ({
         className,
       )}
     >
-      <div className="text-lg items-center font-semibold px-5 py-2 flex gap-2">
+      <div
+        className="text-lg items-center font-semibold px-5 py-2 flex gap-2"
+        role="button"
+        onClick={() => {
+          if (
+            [
+              DataSelectorSizeState.DOCKED,
+              DataSelectorSizeState.EXPANDED,
+            ].includes(DataSelectorSize)
+          ) {
+            return;
+          }
+
+          // todo -> if ai chat is expanded, we should expand
+          setDataSelectorSize(DataSelectorSizeState.DOCKED);
+        }}
+      >
         {t('Data Selector')} <div className="flex-grow"></div>{' '}
         <DataSelectorSizeTogglers
           state={DataSelectorSize}
