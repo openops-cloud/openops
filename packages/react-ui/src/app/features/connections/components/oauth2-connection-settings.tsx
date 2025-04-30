@@ -242,7 +242,7 @@ const OAuth2ConnectionSettings = ({
                       {...field}
                       type="password"
                       placeholder={t('Client Secret')}
-                      autoComplete="off"
+                      autoComplete="new-password"
                     />
                   </FormControl>
                   <FormMessage />

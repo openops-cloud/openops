@@ -296,7 +296,7 @@ const selectFormComponentForProperty = ({
               type={
                 property.type === PropertyType.SECRET_TEXT ? 'password' : 'text'
               }
-              autoComplete="off"
+              autoComplete="new-password"
             ></Input>
           )}
         </AutoFormFieldWrapper>

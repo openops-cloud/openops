@@ -212,7 +212,7 @@ const AiSettingsForm = ({
                 value={field.value}
                 type="password"
                 required={true}
-                autoComplete="off"
+                autoComplete="new-password"
               ></Input>
             </FormItem>
           )}
