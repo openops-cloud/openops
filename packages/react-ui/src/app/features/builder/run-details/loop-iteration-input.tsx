@@ -141,7 +141,7 @@ const LoopIterationInput = ({
 
   const inputWidth =
     (inputRef.current?.value.length ?? 1) +
-    2 +
+    3 +
     String(totalIterations).length +
     'ch';
 
@@ -157,7 +157,7 @@ const LoopIterationInput = ({
           <Button
             variant="ghost"
             className="p-0"
-            disabled={currentIndex === 0}
+            disabled={currentIndex <= 0}
             onClick={() => onArrowClick(0)}
           >
             <ChevronsLeft size={16} />
@@ -166,7 +166,7 @@ const LoopIterationInput = ({
           <Button
             variant="ghost"
             className="p-0"
-            disabled={currentIndex === 0}
+            disabled={currentIndex <= 0}
             onClick={() => onArrowClick(currentIndex - 1)}
           >
             <ChevronLeft size={16} />
@@ -241,7 +241,7 @@ const LoopIterationInput = ({
           <Button
             variant="ghost"
             className="p-0"
-            disabled={currentIndex === totalIterations - 1}
+            disabled={currentIndex >= totalIterations - 1}
             onClick={() => onArrowClick(currentIndex + 1)}
           >
             <ChevronRight size={16} />
@@ -250,7 +250,7 @@ const LoopIterationInput = ({
           <Button
             variant="ghost"
             className="p-0"
-            disabled={currentIndex === totalIterations - 1}
+            disabled={currentIndex >= totalIterations - 1}
             onClick={() => onArrowClick(totalIterations - 1)}
           >
             <ChevronsRight size={16} />
