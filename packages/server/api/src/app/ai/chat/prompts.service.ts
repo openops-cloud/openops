@@ -19,9 +19,7 @@ export const getSystemPrompt = async (
 };
 
 async function loadPrompt(filename: string): Promise<string> {
-  const promptsLocation = system.get<string>(
-    AppSystemProp.AI_PROMPTS_LOCATION,
-  );
+  const promptsLocation = system.get<string>(AppSystemProp.AI_PROMPTS_LOCATION);
 
   if (promptsLocation) {
     return loadFromCloud(promptsLocation, filename);
@@ -45,14 +43,18 @@ async function loadFromCloud(
   const slash = promptsLocation.endsWith('/') ? '' : '/';
   const promptFile = `${promptsLocation}${slash}${filename}`;
 
-  const response = await fetch(promptFile);
-  if (!response.ok) {
-    logger.error('Failed to fetch prompt file.', {
-      statusText: response.statusText,
-      promptFile,
-    });
+  try {
+    const response = await fetch(promptFile);
+    if (!response.ok) {
+      logger.error('Failed to fetch prompt file.', {
+        statusText: response.statusText,
+        promptFile,
+      });
+      return '';
+    }
+    return await response.text();
+  } catch (error) {
+    logger.error('Failed to fetch prompt file.', error);
     return '';
   }
-
-  return response.text();
 }
