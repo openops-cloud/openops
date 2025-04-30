@@ -8,6 +8,8 @@ import type { ToastActionElement, ToastProps } from './toast';
 const TOAST_LIMIT = 1;
 const TOAST_REMOVE_DELAY = 1000000;
 
+export const DEFAULT_TOAST_DURATION = 3000;
+
 export const INTERNAL_ERROR_TOAST: ToasterToast = {
   id: 'internal-error',
   title: 'Error',

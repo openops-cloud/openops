@@ -14,10 +14,6 @@ type AiConfigRedacted = Omit<AiConfig, 'apiKey'> & {
   apiKey: typeof AiApiKeyRedactionMessage;
 };
 
-type AiConfigModel<T extends boolean> = T extends true
-  ? AiConfigRedacted
-  : AiConfig;
-
 function redactApiKey(config: AiConfig): AiConfigRedacted {
   return {
     ...config,
@@ -26,43 +22,31 @@ function redactApiKey(config: AiConfig): AiConfigRedacted {
 }
 
 export const aiConfigService = {
-  async upsert(params: {
+  async save(params: {
     projectId: string;
     request: SaveAiConfigRequest;
   }): Promise<AiConfigRedacted> {
     const { projectId, request } = params;
-    let existing: AiConfig | null = null;
 
-    if (request.id) {
-      existing = await repo().findOneBy({
-        id: request.id,
-        projectId,
-      });
-    }
+    const existing = request.id
+      ? await repo().findOneBy({ id: request.id, projectId })
+      : null;
+
+    const encryptedApiKey =
+      request.apiKey !== AiApiKeyRedactionMessage
+        ? JSON.stringify(encryptUtils.encryptString(request.apiKey))
+        : existing?.apiKey;
 
     const aiConfig: Partial<AiConfig> = {
       ...request,
+      id: request?.id ?? openOpsId(),
       projectId,
-      id: existing?.id ?? openOpsId(),
       created: existing?.created ?? new Date().toISOString(),
       updated: new Date().toISOString(),
+      apiKey: encryptedApiKey,
     };
 
-    if (request.apiKey !== AiApiKeyRedactionMessage) {
-      aiConfig.apiKey = JSON.stringify(
-        encryptUtils.encryptString(request.apiKey),
-      );
-    } else {
-      aiConfig.apiKey = existing?.apiKey;
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await repo().upsert(aiConfig as any, ['id']);
-
-    const config = await repo().findOneByOrFail({
-      projectId,
-      provider: request.provider,
-    });
+    const config = await repo().save(aiConfig);
 
     return redactApiKey(config);
   },
@@ -72,34 +56,35 @@ export const aiConfigService = {
     return configs.map(redactApiKey);
   },
 
-  async get<T extends boolean>(
-    params: { projectId: string; id: string },
-    redacted: T = true as T,
-  ): Promise<AiConfigModel<T> | undefined> {
-    const { projectId, id } = params;
-    const config = await repo().findOneBy({ id, projectId });
-
-    if (isNil(config)) {
-      return undefined;
-    }
-
-    return redacted ? redactApiKey(config) : (config as AiConfigModel<T>);
+  async get(params: {
+    projectId: string;
+    id: string;
+  }): Promise<AiConfigRedacted | undefined> {
+    const config = await getOneBy({
+      id: params.id,
+      projectId: params.projectId,
+    });
+    return config ? redactApiKey(config) : undefined;
   },
 
-  async getActiveConfig<T extends boolean>(
+  async getWithApiKey(params: {
+    projectId: string;
+    id: string;
+  }): Promise<AiConfig | undefined> {
+    return getOneBy({ id: params.id, projectId: params.projectId });
+  },
+
+  async getActiveConfig(
     projectId: string,
-    redacted: T = true as T,
-  ): Promise<AiConfigModel<T> | undefined> {
-    const config = await repo().findOneBy({
-      projectId,
-      enabled: true,
-    });
+  ): Promise<AiConfigRedacted | undefined> {
+    const config = await getOneBy({ projectId, enabled: true });
+    return config ? redactApiKey(config) : undefined;
+  },
 
-    if (isNil(config)) {
-      return undefined;
-    }
-
-    return redacted ? redactApiKey(config) : (config as AiConfigModel<T>);
+  async getActiveConfigWithApiKey(
+    projectId: string,
+  ): Promise<AiConfig | undefined> {
+    return getOneBy({ projectId, enabled: true });
   },
 
   async delete(params: { projectId: string; id: string }): Promise<void> {
@@ -113,3 +98,15 @@ export const aiConfigService = {
     await repo().delete({ id });
   },
 };
+
+async function getOneBy(
+  where: Partial<Pick<AiConfig, 'id' | 'projectId' | 'enabled'>>,
+): Promise<AiConfig | AiConfigRedacted | undefined> {
+  const config = await repo().findOneBy(where);
+
+  if (isNil(config)) {
+    return undefined;
+  }
+
+  return config;
+}

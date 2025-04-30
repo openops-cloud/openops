@@ -43,7 +43,7 @@ const ImportFlowDialog = ({ children }: { children: React.ReactNode }) => {
           type: FlowOperationType.IMPORT_FLOW,
           request: {
             displayName: importedWorkflow.name,
-            description: importedWorkflow.description,
+            description: importedWorkflow.template.description,
             trigger: importedWorkflow.template.trigger,
             connections,
           },

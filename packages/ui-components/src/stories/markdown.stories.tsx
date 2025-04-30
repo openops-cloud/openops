@@ -6,6 +6,7 @@ import { fireEvent } from '@storybook/testing-library';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Markdown, MarkdownCodeVariations } from '../components';
 import { selectLightOrDarkCanvas } from '../test-utils/select-themed-canvas.util';
+import { Toaster } from '../ui/toaster';
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const meta = {
     (Story) => (
       <QueryClientProvider client={queryClient}>
         <Story />
+        <Toaster />
       </QueryClientProvider>
     ),
   ],
@@ -195,8 +197,9 @@ aws ec2 describe-instances
   play: async ({ canvasElement, args }) => {
     const textarea =
       selectLightOrDarkCanvas(canvasElement).getByRole('textbox');
-    expect(textarea).toHaveValue('aws ec2 describe-instances');
-    expect(textarea).toBeDisabled();
+
+    expect(textarea).toHaveTextContent('aws ec2 describe-instances');
+    expect(textarea).toHaveAttribute('contenteditable', 'false');
     expect(textarea).toHaveClass('bg-input');
 
     expect(args.handleInject).not.toHaveBeenCalled();
@@ -227,10 +230,11 @@ aws s3 sync\n  --exclude "*"\n  --include "*.jpg"\n  <local-dir> s3://<bucket-na
   play: async ({ canvasElement }) => {
     const textarea =
       selectLightOrDarkCanvas(canvasElement).getByRole('textbox');
-    expect(textarea).toHaveValue(
-      'aws s3 sync\n  --exclude "*"\n  --include "*.jpg"\n  <local-dir> s3://<bucket-name>',
+
+    expect(textarea).toHaveTextContent(
+      'aws s3 sync --exclude "*" --include "*.jpg" <local-dir> s3://<bucket-name>',
     );
-    expect(textarea).toBeDisabled();
+    expect(textarea).toHaveAttribute('contenteditable', 'false');
     expect(textarea).toHaveClass('bg-input');
   },
 };

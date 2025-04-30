@@ -7,12 +7,12 @@ import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
-  useElementSize,
 } from '@openops/components/ui';
 import { ReactFlowProvider } from '@xyflow/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ImperativePanelHandle } from 'react-resizable-panels';
 import { useSearchParams } from 'react-router-dom';
+import { useMeasure } from 'react-use';
 
 import {
   LeftSideBarType,
@@ -92,7 +92,9 @@ const constructContainerKey = (
 
 const BuilderPage = () => {
   const [searchParams] = useSearchParams();
-  const { data: isAIEnabled } = flagsHooks.useFlag(FlagId.SHOW_AI_SETTINGS);
+  const { data: isAIEnabled = false } = flagsHooks.useFlag(
+    FlagId.SHOW_AI_SETTINGS,
+  );
 
   const [
     selectedStep,
@@ -151,10 +153,8 @@ const BuilderPage = () => {
       };
     },
   );
-  const middlePanelRef = useRef(null);
-  const middlePanelSize = useElementSize(middlePanelRef);
-  const leftSidePanelRef = useRef(null);
-  const leftSidePanelSize = useElementSize(leftSidePanelRef);
+  const [middlePanelRef, middlePanelSize] = useMeasure<HTMLDivElement>();
+  const [leftSidePanelRef, leftSidePanelSize] = useMeasure<HTMLDivElement>();
   const [isDraggingHandle, setIsDraggingHandle] = useState(false);
   const rightHandleRef = useAnimateSidebar(rightSidebar);
   const {

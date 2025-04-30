@@ -24,6 +24,7 @@ import {
   TriggerType,
 } from '@openops/shared';
 import { flowRunUtils } from '../flow-runs/lib/flow-run-utils';
+import { aiChatApi } from './ai-chat/lib/chat-api';
 import { DataSelectorSizeState } from './data-selector/data-selector-size-togglers';
 
 const flowUpdatesQueue = new PromiseQueue();
@@ -71,12 +72,15 @@ export enum RightSideBarType {
 
 type InsertMentionHandler = (propertyPath: string) => void;
 
-type MidpanelState = {
+export type MidpanelState = {
   showDataSelector: boolean;
   dataSelectorSize: DataSelectorSizeState;
   showAiChat: boolean;
   aiContainerSize: AiChatContainerSizeState;
-  aiChatProperty?: BlockProperty;
+  aiChatProperty?: BlockProperty & {
+    inputName: `settings.input.${string}`;
+  };
+  codeToInject?: string;
 };
 
 type MidpanelAction =
@@ -85,9 +89,16 @@ type MidpanelAction =
   | { type: 'DATASELECTOR_DOCK_CLICK' }
   | { type: 'DATASELECTOR_EXPAND_CLICK' }
   | { type: 'AICHAT_CLOSE_CLICK' }
-  | { type: 'AICHAT_TOGGLE_SIZE' }
+  | { type: 'AICHAT_MIMIZE_CLICK' }
+  | { type: 'AICHAT_DOCK_CLICK' }
+  | { type: 'AICHAT_EXPAND_CLICK' }
   | { type: 'PANEL_CLICK_AWAY' }
-  | { type: 'GENERATE_WITH_AI_CLICK'; property?: BlockProperty };
+  | {
+      type: 'GENERATE_WITH_AI_CLICK';
+      property?: BlockProperty & { inputName: `settings.input.${string}` };
+    }
+  | { type: 'ADD_CODE_TO_INJECT'; code: string }
+  | { type: 'CLEAN_CODE_TO_INJECT' };
 
 export type BuilderState = {
   flow: Flow;
@@ -533,17 +544,22 @@ const applyMidpanelAction = (state: BuilderState, action: MidpanelAction) => {
         dataSelectorSize: DataSelectorSizeState.DOCKED,
       };
       break;
-    case 'AICHAT_TOGGLE_SIZE':
+    case 'AICHAT_MIMIZE_CLICK':
       newMidpanelState = {
-        aiContainerSize:
-          state.midpanelState.aiContainerSize === AI_CHAT_CONTAINER_SIZES.DOCKED
-            ? AI_CHAT_CONTAINER_SIZES.COLLAPSED
-            : AI_CHAT_CONTAINER_SIZES.DOCKED,
-        dataSelectorSize:
-          state.midpanelState.dataSelectorSize ===
-          DataSelectorSizeState.COLLAPSED
-            ? DataSelectorSizeState.DOCKED
-            : DataSelectorSizeState.COLLAPSED,
+        aiContainerSize: AI_CHAT_CONTAINER_SIZES.COLLAPSED,
+        dataSelectorSize: state.midpanelState.dataSelectorSize,
+      };
+      break;
+    case 'AICHAT_DOCK_CLICK':
+      newMidpanelState = {
+        aiContainerSize: AI_CHAT_CONTAINER_SIZES.DOCKED,
+        dataSelectorSize: DataSelectorSizeState.COLLAPSED,
+      };
+      break;
+    case 'AICHAT_EXPAND_CLICK':
+      newMidpanelState = {
+        aiContainerSize: AI_CHAT_CONTAINER_SIZES.EXPANDED,
+        dataSelectorSize: DataSelectorSizeState.COLLAPSED,
       };
       break;
     case 'PANEL_CLICK_AWAY':
@@ -558,6 +574,18 @@ const applyMidpanelAction = (state: BuilderState, action: MidpanelAction) => {
         aiContainerSize: AI_CHAT_CONTAINER_SIZES.DOCKED,
         dataSelectorSize: DataSelectorSizeState.COLLAPSED,
         aiChatProperty: action.property,
+      };
+      break;
+    case 'ADD_CODE_TO_INJECT':
+      newMidpanelState = {
+        ...state.midpanelState,
+        codeToInject: action.code,
+      };
+      break;
+    case 'CLEAN_CODE_TO_INJECT':
+      newMidpanelState = {
+        ...state.midpanelState,
+        codeToInject: undefined,
       };
       break;
     default:
@@ -588,6 +616,22 @@ const updateFlowVersion = (
   ) {
     set({ selectedStep: undefined });
     set({ rightSidebar: RightSideBarType.NONE });
+    deleteChatRequest(state.flowVersion, operation.request.name);
+  }
+
+  async function deleteChatRequest(flowVersion: FlowVersion, stepName: string) {
+    try {
+      const stepDetails = flowHelper.getStep(flowVersion, stepName);
+      const blockName = stepDetails?.settings?.blockName;
+      const chat = await aiChatApi.open(
+        newFlowVersion.flowId,
+        blockName,
+        stepName,
+      );
+      await aiChatApi.delete(chat.chatId);
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   const updateRequest = async () => {
