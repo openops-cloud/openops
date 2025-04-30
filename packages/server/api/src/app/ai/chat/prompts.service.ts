@@ -1,32 +1,36 @@
-import { logger } from '@openops/server-shared';
-import { readFile } from 'fs/promises';
-import { join } from 'path';
+import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { ChatContext } from './ai-chat.service';
 
 export const getSystemPrompt = async (
   context: ChatContext,
 ): Promise<string> => {
-  try {
-    switch (context.blockName) {
-      case '@openops/block-aws':
-        return await loadFile('aws-cli.txt');
-      case '@openops/block-azure':
-        return await loadFile('azure-cli.txt');
-      case '@openops/block-google-cloud':
-        return await loadFile('gcp-cli.txt');
-      default:
-        return '';
-    }
-  } catch (error) {
-    logger.error('', error);
-    return '';
+  switch (context.blockName) {
+    case '@openops/block-aws':
+      return loadFile('aws-cli.txt');
+    case '@openops/block-azure':
+      return loadFile('azure-cli.txt');
+    case '@openops/block-google-cloud':
+      return loadFile('gcp-cli.txt');
+    default:
+      return '';
   }
 };
 
 async function loadFile(filename: string): Promise<string> {
-  const projectRoot = process.cwd();
+  const promptsLocation = system.getOrThrow<string>(
+    AppSystemProp.INTERNAL_PROMPTS_LOCATION,
+  );
+  const slash = promptsLocation.endsWith('/') ? '' : '/';
+  const promptFile = `${promptsLocation}${slash}${filename}`;
 
-  const filePath = join(projectRoot, 'ai-prompts', filename);
+  const response = await fetch(promptFile);
+  if (!response.ok) {
+    logger.error('Failed to fetch prompt file.', {
+      statusText: response.statusText,
+      promptFile,
+    });
+    return '';
+  }
 
-  return readFile(filePath, 'utf-8');
+  return response.text();
 }
