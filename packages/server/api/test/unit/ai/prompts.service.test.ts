@@ -15,7 +15,7 @@ jest.mock('@openops/server-shared', () => ({
     get: getMock,
   },
   AppSystemProp: {
-    INTERNAL_PROMPTS_LOCATION: 'INTERNAL_PROMPTS_LOCATION',
+    AI_PROMPTS_LOCATION: 'AI_PROMPTS_LOCATION',
   },
 }));
 

@@ -20,7 +20,7 @@ export const getSystemPrompt = async (
 
 async function loadPrompt(filename: string): Promise<string> {
   const promptsLocation = system.get<string>(
-    AppSystemProp.INTERNAL_PROMPTS_LOCATION,
+    AppSystemProp.AI_PROMPTS_LOCATION,
   );
 
   if (promptsLocation) {
