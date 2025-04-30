@@ -26,117 +26,70 @@ describe('getSystemPrompt', () => {
     jest.clearAllMocks();
   });
 
-  it('should load aws cli block prompt from cloud', async () => {
-    getMock.mockReturnValue('https://example.com/prompts/');
-    mockFetch.mockResolvedValueOnce(mockResponse('aws prompt content'));
-
-    const result = await getSystemPrompt({
-      blockName: '@openops/block-aws',
-      workflowId: 'workflowId',
-      stepName: 'stepName',
-    });
-
-    expect(result).toBe('aws prompt content');
-    expect(readFileMock).not.toHaveBeenCalled();
-    expect(fetch).toHaveBeenCalledWith(
-      'https://example.com/prompts/aws-cli.txt',
-    );
-  });
-
-  it.each([[''], [undefined]])(
-    'should load aws cli block prompt from local file',
-    async (location: string | undefined) => {
-      getMock.mockReturnValue(location);
-      readFileMock.mockResolvedValueOnce('aws prompt content');
+  it.each([
+    ['aws-cli.txt', '@openops/block-aws', 'aws prompt content'],
+    ['gcp-cli.txt', '@openops/block-google-cloud', 'gcp prompt content'],
+    ['azure-cli.txt', '@openops/block-azure', 'azure prompt content'],
+  ])(
+    'should load cli block prompt from cloud',
+    async (fileName: string, blockName: string, promptContent: string) => {
+      getMock.mockReturnValue('https://example.com/prompts/');
+      mockFetch.mockResolvedValueOnce(mockResponse(promptContent));
 
       const result = await getSystemPrompt({
-        blockName: '@openops/block-aws',
+        blockName,
         workflowId: 'workflowId',
         stepName: 'stepName',
       });
 
-      expect(readFileMock).toHaveBeenCalledWith(
-        expect.stringContaining('aws-cli.txt'),
-        'utf-8',
+      expect(result).toBe(promptContent);
+      expect(readFileMock).not.toHaveBeenCalled();
+      expect(fetch).toHaveBeenCalledWith(
+        `https://example.com/prompts/${fileName}`,
       );
-      expect(result).toBe('aws prompt content');
-      expect(fetch).not.toHaveBeenCalled();
     },
   );
 
-  it('should load azure cli block prompt from cloud', async () => {
-    getMock.mockReturnValue('https://example.com/prompts/');
-    mockFetch.mockResolvedValueOnce(mockResponse('azure prompt content'));
-
-    const result = await getSystemPrompt({
-      blockName: '@openops/block-azure',
-      workflowId: 'workflowId',
-      stepName: 'stepName',
-    });
-
-    expect(result).toBe('azure prompt content');
-    expect(readFileMock).not.toHaveBeenCalled();
-    expect(fetch).toHaveBeenCalledWith(
-      'https://example.com/prompts/azure-cli.txt',
-    );
-  });
-
-  it.each([[''], [undefined]])(
-    'should load azure cli block prompt from local file',
-    async (location: string | undefined) => {
+  it.each([
+    ['aws-cli.txt', '@openops/block-aws', 'aws prompt content', ''],
+    ['azure-cli.txt', '@openops/block-azure', 'azure prompt content', ''],
+    ['gcp-cli.txt', '@openops/block-google-cloud', 'gcp prompt content', ''],
+    ['aws-cli.txt', '@openops/block-aws', 'aws prompt content', undefined],
+    [
+      'azure-cli.txt',
+      '@openops/block-azure',
+      'azure prompt content',
+      undefined,
+    ],
+    [
+      'gcp-cli.txt',
+      '@openops/block-google-cloud',
+      'gcp prompt content',
+      undefined,
+    ],
+  ])(
+    'should load cli block prompt from local file',
+    async (
+      fileName: string,
+      blockName: string,
+      promptContent: string,
+      location: string | undefined,
+    ) => {
       getMock.mockReturnValue(location);
-      readFileMock.mockResolvedValueOnce('azure prompt content');
+      readFileMock.mockResolvedValueOnce(promptContent);
 
       const result = await getSystemPrompt({
-        blockName: '@openops/block-azure',
+        blockName,
         workflowId: 'workflowId',
         stepName: 'stepName',
       });
 
+      expect(result).toBe(promptContent);
+      expect(fetch).not.toHaveBeenCalled();
       expect(readFileMock).toHaveBeenCalledWith(
-        expect.stringContaining('azure-cli.txt'),
+        expect.stringContaining(fileName),
         'utf-8',
       );
-      expect(result).toBe('azure prompt content');
-      expect(fetch).not.toHaveBeenCalled();
-    },
-  );
-
-  it('should load gcp cli block prompt from cloud', async () => {
-    getMock.mockReturnValue('https://example.com/prompts/');
-    mockFetch.mockResolvedValueOnce(mockResponse('gcp prompt content'));
-
-    const result = await getSystemPrompt({
-      blockName: '@openops/block-google-cloud',
-      workflowId: 'workflowId',
-      stepName: 'stepName',
-    });
-
-    expect(result).toBe('gcp prompt content');
-    expect(readFileMock).not.toHaveBeenCalled();
-    expect(fetch).toHaveBeenCalledWith(
-      'https://example.com/prompts/gcp-cli.txt',
-    );
-  });
-
-  it.each([[''], [undefined]])(
-    'should load gcp cli block prompt from local file',
-    async (location: string | undefined) => {
-      getMock.mockReturnValue(location);
-      readFileMock.mockResolvedValueOnce('gcp prompt content');
-
-      const result = await getSystemPrompt({
-        blockName: '@openops/block-google-cloud',
-        workflowId: 'workflowId',
-        stepName: 'stepName',
-      });
-
-      expect(readFileMock).toHaveBeenCalledWith(
-        expect.stringContaining('gcp-cli.txt'),
-        'utf-8',
-      );
-      expect(result).toBe('gcp prompt content');
-      expect(fetch).not.toHaveBeenCalled();
     },
   );
 
