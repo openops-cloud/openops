@@ -1,4 +1,6 @@
 import { AppSystemProp, logger, system } from '@openops/server-shared';
+import { readFile } from 'fs/promises';
+import { join } from 'path';
 import { ChatContext } from './ai-chat.service';
 
 export const getSystemPrompt = async (
@@ -6,20 +8,40 @@ export const getSystemPrompt = async (
 ): Promise<string> => {
   switch (context.blockName) {
     case '@openops/block-aws':
-      return loadFile('aws-cli.txt');
+      return loadPrompt('aws-cli.txt');
     case '@openops/block-azure':
-      return loadFile('azure-cli.txt');
+      return loadPrompt('azure-cli.txt');
     case '@openops/block-google-cloud':
-      return loadFile('gcp-cli.txt');
+      return loadPrompt('gcp-cli.txt');
     default:
       return '';
   }
 };
 
-async function loadFile(filename: string): Promise<string> {
-  const promptsLocation = system.getOrThrow<string>(
+async function loadPrompt(filename: string): Promise<string> {
+  const promptsLocation = system.get<string>(
     AppSystemProp.INTERNAL_PROMPTS_LOCATION,
   );
+
+  if (promptsLocation) {
+    return loadFromCloud(promptsLocation, filename);
+  }
+
+  return loadFromFile(filename);
+}
+
+async function loadFromFile(filename: string): Promise<string> {
+  const projectRoot = process.cwd();
+
+  const filePath = join(projectRoot, 'ai-prompts', filename);
+
+  return readFile(filePath, 'utf-8');
+}
+
+async function loadFromCloud(
+  promptsLocation: string,
+  filename: string,
+): Promise<string> {
   const slash = promptsLocation.endsWith('/') ? '' : '/';
   const promptFile = `${promptsLocation}${slash}${filename}`;
 
