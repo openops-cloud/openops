@@ -1,4 +1,3 @@
-// todo - check if we can align this with DataSelectorSizeState to have only one type
 export const AI_CHAT_CONTAINER_SIZES = {
   DOCKED: 'docked',
   COLLAPSED: 'collapsed',
