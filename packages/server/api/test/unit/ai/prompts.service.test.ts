@@ -34,9 +34,7 @@ describe('getSystemPrompt', () => {
     'should load cli block prompt from cloud',
     async (fileName: string, blockName: string, promptContent: string) => {
       getMock.mockReturnValue('https://example.com/prompts/');
-      mockFetch
-        .mockResolvedValueOnce(mockResponse('base prompt content'))
-        .mockResolvedValueOnce(mockResponse(promptContent));
+      mockFetch.mockResolvedValueOnce(mockResponse(promptContent));
 
       const result = await getSystemPrompt({
         blockName,
@@ -44,14 +42,9 @@ describe('getSystemPrompt', () => {
         stepName: 'stepName',
       });
 
-      expect(result).toBe(`base prompt content \n ${promptContent}`);
+      expect(result).toBe(promptContent);
       expect(readFileMock).not.toHaveBeenCalled();
-      expect(fetch).toHaveBeenNthCalledWith(
-        1,
-        'https://example.com/prompts/base-cli.txt',
-      );
-      expect(fetch).toHaveBeenNthCalledWith(
-        2,
+      expect(fetch).toHaveBeenCalledWith(
         `https://example.com/prompts/${fileName}`,
       );
     },
@@ -83,9 +76,7 @@ describe('getSystemPrompt', () => {
       location: string | undefined,
     ) => {
       getMock.mockReturnValue(location);
-      readFileMock
-        .mockResolvedValueOnce('base prompt content')
-        .mockResolvedValueOnce(promptContent);
+      readFileMock.mockResolvedValueOnce(promptContent);
 
       const result = await getSystemPrompt({
         blockName,
@@ -93,15 +84,9 @@ describe('getSystemPrompt', () => {
         stepName: 'stepName',
       });
 
-      expect(result).toBe(`base prompt content \n ${promptContent}`);
+      expect(result).toBe(promptContent);
       expect(fetch).not.toHaveBeenCalled();
-      expect(readFileMock).toHaveBeenNthCalledWith(
-        1,
-        expect.stringContaining('base-cli.txt'),
-        'utf-8',
-      );
-      expect(readFileMock).toHaveBeenNthCalledWith(
-        2,
+      expect(readFileMock).toHaveBeenCalledWith(
         expect.stringContaining(fileName),
         'utf-8',
       );
@@ -121,10 +106,7 @@ describe('getSystemPrompt', () => {
 
   it('should handle failed fetch gracefully', async () => {
     getMock.mockReturnValue('https://example.com/prompts/');
-
-    mockFetch
-      .mockResolvedValueOnce(mockResponse('base prompt'))
-      .mockResolvedValueOnce({ ok: false, statusText: 'Not Found' });
+    mockFetch.mockResolvedValueOnce({ ok: false, statusText: 'Not Found' });
 
     const result = await getSystemPrompt({
       blockName: '@openops/block-aws',
@@ -132,8 +114,8 @@ describe('getSystemPrompt', () => {
       stepName: 'stepName',
     });
 
-    expect(result).toBe('base prompt \n ');
-    expect(fetch).toHaveBeenCalledTimes(2);
+    expect(result).toBe('');
+    expect(fetch).toHaveBeenCalled();
   });
 });
 
