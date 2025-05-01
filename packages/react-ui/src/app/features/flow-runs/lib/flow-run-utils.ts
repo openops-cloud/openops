@@ -223,17 +223,16 @@ function findStepParents(
     }
   }
   if (step.type === ActionType.SPLIT) {
-    const pathToAllBranches = step.branches
-      .map((branch) => {
-        return branch.nextAction
+    const pathFromBranches = step.branches
+      .map((branch) =>
+        branch.nextAction
           ? findStepParents(stepName, branch.nextAction)
-          : undefined;
-      })
-      .flat()
-      .filter(Boolean) as Action[];
+          : undefined,
+      )
+      .find((path) => path !== undefined);
 
-    if (pathToAllBranches?.length) {
-      return [step, ...pathToAllBranches.flat().filter(Boolean)];
+    if (pathFromBranches) {
+      return [step, ...pathFromBranches];
     }
   }
   if (step.type === ActionType.LOOP_ON_ITEMS) {
