@@ -99,6 +99,8 @@ export enum AppSystemProp {
   EXEC_FILE_MAX_BUFFER_SIZE_MB = 'EXEC_FILE_MAX_BUFFER_SIZE_MB',
 
   SHOW_AI_SETTINGS = 'SHOW_AI_SETTINGS',
+
+  AI_PROMPTS_LOCATION = 'AI_PROMPTS_LOCATION',
 }
 
 export enum SharedSystemProp {

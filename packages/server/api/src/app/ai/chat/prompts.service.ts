@@ -1,4 +1,4 @@
-import { logger } from '@openops/server-shared';
+import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 import { ChatContext } from './ai-chat.service';
@@ -6,27 +6,55 @@ import { ChatContext } from './ai-chat.service';
 export const getSystemPrompt = async (
   context: ChatContext,
 ): Promise<string> => {
-  try {
-    switch (context.blockName) {
-      case '@openops/block-aws':
-        return await loadFile('aws-cli.txt');
-      case '@openops/block-azure':
-        return await loadFile('azure-cli.txt');
-      case '@openops/block-google-cloud':
-        return await loadFile('gcp-cli.txt');
-      default:
-        return '';
-    }
-  } catch (error) {
-    logger.error('', error);
-    return '';
+  switch (context.blockName) {
+    case '@openops/block-aws':
+      return loadPrompt('aws-cli.txt');
+    case '@openops/block-azure':
+      return loadPrompt('azure-cli.txt');
+    case '@openops/block-google-cloud':
+      return loadPrompt('gcp-cli.txt');
+    default:
+      return '';
   }
 };
 
-async function loadFile(filename: string): Promise<string> {
+async function loadPrompt(filename: string): Promise<string> {
+  const promptsLocation = system.get<string>(AppSystemProp.AI_PROMPTS_LOCATION);
+
+  if (promptsLocation) {
+    return loadFromCloud(promptsLocation, filename);
+  }
+
+  return loadFromFile(filename);
+}
+
+async function loadFromFile(filename: string): Promise<string> {
   const projectRoot = process.cwd();
 
   const filePath = join(projectRoot, 'ai-prompts', filename);
 
   return readFile(filePath, 'utf-8');
+}
+
+async function loadFromCloud(
+  promptsLocation: string,
+  filename: string,
+): Promise<string> {
+  const slash = promptsLocation.endsWith('/') ? '' : '/';
+  const promptFile = `${promptsLocation}${slash}${filename}`;
+
+  try {
+    const response = await fetch(promptFile);
+    if (!response.ok) {
+      logger.error('Failed to fetch prompt file.', {
+        statusText: response.statusText,
+        promptFile,
+      });
+      return '';
+    }
+    return await response.text();
+  } catch (error) {
+    logger.error('Failed to fetch prompt file.', error);
+    return '';
+  }
 }
