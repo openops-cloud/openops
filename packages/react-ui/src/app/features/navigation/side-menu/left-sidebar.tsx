@@ -85,10 +85,7 @@ const LeftSidebarResizablePanel: React.FC<LeftSidebarResizablePanelProps> = ({
       collapsible={true}
       collapsedSize={LEFT_SIDEBAR_MIN_SIZE}
       ref={sidebarRef}
-      defaultSize={Math.max(
-        expandedPanelSizeRef.current || 0,
-        LEFT_SIDEBAR_MIN_SIZE,
-      )}
+      defaultSize={expandedPanelSizeRef.current ?? LEFT_SIDEBAR_MIN_SIZE}
       {...props}
     />
   );
