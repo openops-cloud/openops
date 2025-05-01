@@ -14,7 +14,9 @@ type AiChatContainerProps = {
   parentWidth: number;
   showAiChat: boolean;
   onCloseClick: () => void;
+  onToggle: () => void;
   containerSize: AiChatContainerSizeState;
+
   toggleContainerSizeState: (state: AiChatContainerSizeState) => void;
   className?: string;
   children?: ReactNode;
@@ -25,6 +27,7 @@ const AiChatContainer = ({
   parentWidth,
   showAiChat,
   onCloseClick,
+  onToggle,
   containerSize,
   toggleContainerSizeState,
   className,
@@ -68,7 +71,11 @@ const AiChatContainer = ({
         }
       }}
     >
-      <div className="text-md dark:text-primary items-center font-bold px-5 py-2 flex gap-2">
+      <div
+        className="text-md dark:text-primary items-center font-bold px-5 py-2 flex gap-2"
+        role="button"
+        onClick={onToggle}
+      >
         <Sparkles />
         {t('AI Chat')}
         <div className="flex-grow" />

@@ -3,9 +3,9 @@ import { t } from 'i18next';
 import { ExpandIcon, MinimizeIcon, MinusIcon } from 'lucide-react';
 
 export enum DataSelectorSizeState {
-  EXPANDED,
-  COLLAPSED,
-  DOCKED,
+  EXPANDED = 'expanded',
+  COLLAPSED = 'collapsed',
+  DOCKED = 'docked',
 }
 
 type DataSelectorSizeTogglersPorps = {

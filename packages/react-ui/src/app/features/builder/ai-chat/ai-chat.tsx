@@ -87,6 +87,25 @@ const AiChat = ({
     dispatch({ type: 'AICHAT_CLOSE_CLICK' });
   }, [dispatch]);
 
+  const onToggle = useCallback(() => {
+    if (
+      (
+        [
+          AI_CHAT_CONTAINER_SIZES.DOCKED,
+          AI_CHAT_CONTAINER_SIZES.EXPANDED,
+        ] as AiChatContainerSizeState[]
+      ).includes(aiContainerSize)
+    ) {
+      return;
+    }
+
+    if (dataSelectorSize === AI_CHAT_CONTAINER_SIZES.EXPANDED) {
+      onToggleContainerSizeState(AI_CHAT_CONTAINER_SIZES.EXPANDED);
+    } else {
+      onToggleContainerSizeState(AI_CHAT_CONTAINER_SIZES.DOCKED);
+    }
+  }, [aiContainerSize, dataSelectorSize, onToggleContainerSizeState]);
+
   return (
     <AiChatContainer
       parentHeight={middlePanelSize.height}
@@ -94,6 +113,7 @@ const AiChat = ({
       showAiChat={showAiChat}
       onCloseClick={onCloseClick}
       containerSize={aiContainerSize}
+      onToggle={onToggle}
       toggleContainerSizeState={onToggleContainerSizeState}
       className={cn('right-0 static', {
         'children:transition-none':
