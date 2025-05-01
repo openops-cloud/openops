@@ -1,7 +1,6 @@
 import { LEFT_SIDEBAR_MIN_SIZE } from '@/app/constants/sidebar';
 import { useDebounceCallback } from 'usehooks-ts';
-
-type PanelSizes = [number, number, number?];
+import { PanelSizes } from '../types/panel-sizes';
 
 export const useResizablePanelGroup = () => {
   const setPanelGroupSize = useDebounceCallback(

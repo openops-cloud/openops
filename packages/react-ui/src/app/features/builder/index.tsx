@@ -25,6 +25,7 @@ import { DynamicFormValidationProvider } from '@/app/features/builder/dynamic-fo
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { useResizablePanelGroup } from '@/app/common/hooks/use-resizable-panel-group';
 import { useSocket } from '@/app/common/providers/socket-provider';
+import { PanelSizes } from '@/app/common/types/panel-sizes';
 import { FLOW_CANVAS_Y_OFFESET } from '@/app/constants/flow-canvas';
 import { SEARCH_PARAMS } from '@/app/constants/search-params';
 import {
@@ -235,8 +236,7 @@ const BuilderPage = () => {
             direction="horizontal"
             className="absolute left-0 top-0"
             onLayout={(size) => {
-              // todo
-              setPanelGroupSize(RESIZABLE_PANEL_GROUP, size);
+              setPanelGroupSize(RESIZABLE_PANEL_GROUP, size as PanelSizes);
             }}
           >
             <LeftSidebarResizablePanel
