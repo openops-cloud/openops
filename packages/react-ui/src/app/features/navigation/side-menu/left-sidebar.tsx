@@ -14,7 +14,6 @@ import {
   ComponentProps,
   useCallback,
   useEffect,
-  useLayoutEffect,
   useRef,
   useState,
 } from 'react';
@@ -37,11 +36,11 @@ const LeftSidebarResizablePanel: React.FC<LeftSidebarResizablePanelProps> = ({
 }) => {
   const sidebarRef = useRef<ImperativePanelHandle | null>(null);
   const { getPanelGroupSize } = useResizablePanelGroup();
+
   const getExpandedPanelSizeFromLocalStorage = useCallback((): number => {
     const panelGroupSize = getPanelGroupSize(RESIZABLE_PANEL_GROUP);
-
     return panelGroupSize[0] || LEFT_SIDEBAR_MIN_SIZE;
-  }, []);
+  }, [getPanelGroupSize]);
 
   const expandedPanelSizeRef = useRef(getExpandedPanelSizeFromLocalStorage());
 
@@ -55,17 +54,21 @@ const LeftSidebarResizablePanel: React.FC<LeftSidebarResizablePanelProps> = ({
 
   const [hasMounted, setHasMounted] = useState(false);
 
-  useLayoutEffect(() => {
-    if (!sidebarRef) {
+  useEffect(() => {
+    if (!sidebarRef.current) {
       return;
     }
-    if (isMinimized) {
-      expandedPanelSizeRef.current = getExpandedPanelSizeFromLocalStorage();
-      if (hasMounted) {
-        sidebarRef.current?.collapse();
+    try {
+      if (isMinimized) {
+        expandedPanelSizeRef.current = getExpandedPanelSizeFromLocalStorage();
+        if (hasMounted) {
+          sidebarRef.current?.collapse();
+        }
+      } else {
+        sidebarRef.current?.expand(expandedPanelSizeRef.current);
       }
-    } else {
-      sidebarRef.current?.expand(expandedPanelSizeRef.current);
+    } catch (err) {
+      console.warn('Sidebar update skipped', err);
     }
   }, [getExpandedPanelSizeFromLocalStorage, hasMounted, isMinimized]);
 
@@ -82,7 +85,10 @@ const LeftSidebarResizablePanel: React.FC<LeftSidebarResizablePanelProps> = ({
       collapsible={true}
       collapsedSize={LEFT_SIDEBAR_MIN_SIZE}
       ref={sidebarRef}
-      defaultSize={expandedPanelSizeRef.current}
+      defaultSize={Math.max(
+        expandedPanelSizeRef.current || 0,
+        LEFT_SIDEBAR_MIN_SIZE,
+      )}
       {...props}
     />
   );

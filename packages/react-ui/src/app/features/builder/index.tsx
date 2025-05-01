@@ -66,18 +66,27 @@ const useAnimateSidebar = (
   sidebarValue: LeftSideBarType | RightSideBarType,
 ) => {
   const handleRef = useRef<ImperativePanelHandle>(null);
+
   const sidebarbarClosed = [
     LeftSideBarType.NONE,
     RightSideBarType.NONE,
   ].includes(sidebarValue);
+
   useEffect(() => {
-    const sidebarSize = handleRef.current?.getSize() ?? 0;
-    if (sidebarbarClosed) {
-      handleRef.current?.resize(0);
-    } else if (sidebarSize === 0) {
-      handleRef.current?.resize(25);
-    }
-  }, [handleRef, sidebarValue, sidebarbarClosed]);
+    requestAnimationFrame(() => {
+      try {
+        const size = handleRef.current?.getSize?.() ?? 0;
+        if (sidebarbarClosed) {
+          handleRef.current?.resize?.(0);
+        } else if (size === 0) {
+          handleRef.current?.resize?.(25);
+        }
+      } catch (err) {
+        console.warn('Sidebar update skipped', err);
+      }
+    });
+  }, [sidebarValue, sidebarbarClosed]);
+
   return handleRef;
 };
 
@@ -226,6 +235,7 @@ const BuilderPage = () => {
             direction="horizontal"
             className="absolute left-0 top-0"
             onLayout={(size) => {
+              // todo
               setPanelGroupSize(RESIZABLE_PANEL_GROUP, size);
             }}
           >
