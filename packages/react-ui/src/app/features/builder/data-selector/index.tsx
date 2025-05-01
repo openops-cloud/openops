@@ -156,7 +156,14 @@ const DataSelector = ({
       <div
         className="text-lg items-center font-semibold px-5 py-2 flex gap-2"
         role="button"
+        tabIndex={0}
         onClick={onToggle}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            onToggle();
+          }
+        }}
+        aria-label={t('Toggle Data Selector')}
       >
         {t('Data Selector')} <div className="flex-grow"></div>
         <DataSelectorSizeTogglers

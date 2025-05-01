@@ -74,7 +74,14 @@ const AiChatContainer = ({
       <div
         className="text-md dark:text-primary items-center font-bold px-5 py-2 flex gap-2"
         role="button"
+        tabIndex={0}
         onClick={onToggle}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            onToggle();
+          }
+        }}
+        aria-label={t('Toggle AI Chat')}
       >
         <Sparkles />
         {t('AI Chat')}
