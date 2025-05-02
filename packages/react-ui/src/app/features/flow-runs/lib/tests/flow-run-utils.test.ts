@@ -90,7 +90,7 @@ describe('flowRunUtils.extractStepOutput', () => {
     expect(result).toBeUndefined();
   });
 
-  it('extracts from BRANCH onSuccessAction path', () => {
+  it('returns undefined from BRANCH onSuccessAction path', () => {
     const trigger = {
       name: 'trigger',
       type: 'TRIGGER',
@@ -119,7 +119,7 @@ describe('flowRunUtils.extractStepOutput', () => {
     expect(result).toEqual(undefined);
   });
 
-  it('extracts from BRANCH onFailureAction path', () => {
+  it('returns undefined from BRANCH onFailureAction path', () => {
     const trigger = {
       name: 'trigger',
       type: 'TRIGGER',
@@ -148,7 +148,7 @@ describe('flowRunUtils.extractStepOutput', () => {
     expect(result).toEqual(undefined);
   });
 
-  it('extracts from SPLIT branch path', () => {
+  it('returns undefined from SPLIT branch path', () => {
     const trigger = {
       name: 'trigger',
       type: 'TRIGGER',
@@ -187,5 +187,112 @@ describe('flowRunUtils.extractStepOutput', () => {
       trigger as any,
     );
     expect(result).toEqual(undefined);
+  });
+  it('extracts output from BRANCH onSuccessAction path', () => {
+    const trigger = {
+      name: 'trigger',
+      type: 'TRIGGER',
+      nextAction: {
+        name: 'branch',
+        type: ActionType.BRANCH,
+        onSuccessAction: {
+          name: 'stepInSuccessPath',
+          type: ActionType.CODE,
+        },
+      },
+    };
+
+    const output = {
+      branch: {
+        output: {},
+      },
+      stepInSuccessPath: {
+        value: 'success-path-output',
+      },
+    };
+
+    const result = flowRunUtils.extractStepOutput(
+      'stepInSuccessPath',
+      {},
+      output as any,
+      trigger as any,
+    );
+    expect(result).toEqual({ value: 'success-path-output' });
+  });
+
+  it('extracts outputfrom BRANCH onFailureAction path', () => {
+    const trigger = {
+      name: 'trigger',
+      type: 'TRIGGER',
+      nextAction: {
+        name: 'branch',
+        type: ActionType.BRANCH,
+        onFailureAction: {
+          name: 'stepInFailurePath',
+          type: ActionType.CODE,
+        },
+      },
+    };
+
+    const output = {
+      branch: {
+        output: {},
+      },
+      stepInFailurePath: {
+        value: 'failure-path-output',
+      },
+    };
+
+    const result = flowRunUtils.extractStepOutput(
+      'stepInFailurePath',
+      {},
+      output as any,
+      trigger as any,
+    );
+    expect(result).toEqual({ value: 'failure-path-output' });
+  });
+
+  it('extracts output from SPLIT branch path', () => {
+    const trigger = {
+      name: 'trigger',
+      type: 'TRIGGER',
+      nextAction: {
+        name: 'split',
+        type: ActionType.SPLIT,
+        branches: [
+          {
+            name: 'branch1',
+            nextAction: {
+              name: 'stepInBranch1',
+              type: ActionType.CODE,
+            },
+          },
+          {
+            name: 'branch2',
+            nextAction: {
+              name: 'stepInBranch2',
+              type: ActionType.CODE,
+            },
+          },
+        ],
+      },
+    };
+
+    const output = {
+      split: {
+        output: {},
+      },
+      stepInBranch2: {
+        value: 'split-branch2-output',
+      },
+    };
+
+    const result = flowRunUtils.extractStepOutput(
+      'stepInBranch2',
+      {},
+      output as any,
+      trigger as any,
+    );
+    expect(result).toEqual({ value: 'split-branch2-output' });
   });
 });
