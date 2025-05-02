@@ -1,7 +1,7 @@
 ---
 name: "Feature Request"
 about: "Request a new capability from the OpenOps team"
-labels: ["feature-request"]
+labels: ["Feature request"]
 assignees: ""
 ---
 
