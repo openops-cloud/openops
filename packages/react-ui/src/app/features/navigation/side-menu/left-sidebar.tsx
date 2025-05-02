@@ -40,7 +40,8 @@ const LeftSidebarResizablePanel: React.FC<LeftSidebarResizablePanelProps> = ({
   const getExpandedPanelSizeFromLocalStorage = useCallback((): number => {
     const panelGroupSize = getPanelGroupSize(RESIZABLE_PANEL_GROUP);
     return panelGroupSize[0] || LEFT_SIDEBAR_MIN_SIZE;
-  }, [getPanelGroupSize]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const expandedPanelSizeRef = useRef(getExpandedPanelSizeFromLocalStorage());
 
