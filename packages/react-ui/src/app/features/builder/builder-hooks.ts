@@ -192,9 +192,10 @@ export const createBuilderStore = (initialState: BuilderInitialState) =>
           ),
         setActiveDraggingStep: (stepName: string | null) =>
           set(
-            {
+            (state) => ({
               activeDraggingStep: stepName,
-            },
+              selectedStep: stepName ?? state.selectedStep,
+            }),
             false,
             'setActiveDraggingStep',
           ),
@@ -597,6 +598,17 @@ const applyMidpanelAction = (state: BuilderState, action: MidpanelAction) => {
   };
 };
 
+async function deleteChatRequest(flowVersion: FlowVersion, stepName: string) {
+  try {
+    const stepDetails = flowHelper.getStep(flowVersion, stepName);
+    const blockName = stepDetails?.settings?.blockName;
+    const chat = await aiChatApi.open(flowVersion.flowId, blockName, stepName);
+    await aiChatApi.delete(chat.chatId);
+  } catch (err) {
+    console.error(err);
+  }
+}
+
 const updateFlowVersion = (
   state: BuilderState,
   operation: FlowOperationRequest,
@@ -619,19 +631,13 @@ const updateFlowVersion = (
     deleteChatRequest(state.flowVersion, operation.request.name);
   }
 
-  async function deleteChatRequest(flowVersion: FlowVersion, stepName: string) {
-    try {
-      const stepDetails = flowHelper.getStep(flowVersion, stepName);
-      const blockName = stepDetails?.settings?.blockName;
-      const chat = await aiChatApi.open(
-        newFlowVersion.flowId,
-        blockName,
-        stepName,
-      );
-      await aiChatApi.delete(chat.chatId);
-    } catch (err) {
-      console.error(err);
-    }
+  if (operation.type === FlowOperationType.DUPLICATE_ACTION) {
+    set({
+      selectedStep: flowHelper.getStep(
+        newFlowVersion,
+        operation.request.stepName,
+      )?.nextAction?.name,
+    });
   }
 
   const updateRequest = async () => {
