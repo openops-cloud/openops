@@ -15,8 +15,6 @@ import { useSearchParams } from 'react-router-dom';
 import { useMeasure } from 'react-use';
 
 import {
-  LeftSideBarType,
-  RightSideBarType,
   useBuilderStateContext,
   useSwitchToDraft,
 } from '@/app/features/builder/builder-hooks';
@@ -49,6 +47,7 @@ import { RunDetailsBar } from '../flow-runs/components/run-details-bar';
 import { FlowSideMenu } from '../navigation/side-menu/flow/flow-side-menu';
 import LeftSidebarResizablePanel from '../navigation/side-menu/left-sidebar';
 import { BuilderHeader } from './builder-header/builder-header';
+import { LeftSideBarType, RightSideBarType } from './builder-types';
 import { FlowBuilderCanvas } from './flow-canvas/flow-builder-canvas';
 import { FLOW_CANVAS_CONTAINER_ID } from './flow-version-undo-redo/constants';
 import { UndoRedo } from './flow-version-undo-redo/undo-redo';

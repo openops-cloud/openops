@@ -10,8 +10,9 @@ import { useCallback, useState } from 'react';
 
 import { Action, flowHelper, isNil, Trigger } from '@openops/shared';
 
-import { BuilderState, useBuilderStateContext } from '../builder-hooks';
+import { useBuilderStateContext } from '../builder-hooks';
 
+import { BuilderState } from '../builder-types';
 import { DataSelectorNode } from './data-selector-node';
 import {
   DataSelectorSizeState,

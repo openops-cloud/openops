@@ -12,10 +12,7 @@ import { ChevronLeft, Info } from 'lucide-react';
 import React, { useMemo } from 'react';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
-import {
-  LeftSideBarType,
-  useBuilderStateContext,
-} from '@/app/features/builder/builder-hooks';
+import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
 import {
   FlagId,
   FlowRun,
@@ -23,6 +20,7 @@ import {
   isNil,
   RunEnvironment,
 } from '@openops/shared';
+import { LeftSideBarType } from '../builder-types';
 
 import { flowRunUtils } from '../../flow-runs/lib/flow-run-utils';
 import { FlowStepDetailsCardItem } from './flow-step-details-card-item';

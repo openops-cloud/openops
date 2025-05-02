@@ -1,7 +1,7 @@
 import { ActionType, FlowOperationType, TriggerType } from '@openops/shared';
 import { waitFor } from '@testing-library/react';
 import { aiChatApi } from '../ai-chat/lib/chat-api';
-import { BuilderState, RightSideBarType } from '../builder-hooks';
+import { BuilderState, RightSideBarType } from '../builder-types';
 import { updateFlowVersion } from '../update-flow-version';
 
 jest.mock('@/app/features/flows/lib/flows-api');

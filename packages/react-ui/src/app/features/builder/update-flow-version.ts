@@ -7,7 +7,7 @@ import {
 } from '@openops/shared';
 import { flowsApi } from '../flows/lib/flows-api';
 import { aiChatApi } from './ai-chat/lib/chat-api';
-import { BuilderState, RightSideBarType } from './builder-hooks';
+import { BuilderState, RightSideBarType } from './builder-types';
 
 const flowUpdatesQueue = new PromiseQueue();
 

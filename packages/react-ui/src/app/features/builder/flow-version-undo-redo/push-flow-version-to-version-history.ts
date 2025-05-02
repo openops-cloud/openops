@@ -1,4 +1,4 @@
-import { BuilderState } from '@/app/features/builder/builder-hooks';
+import { BuilderState } from '@/app/features/builder/builder-types';
 
 export const pushFlowVersionToVersionHistory = (
   currentState: Pick<

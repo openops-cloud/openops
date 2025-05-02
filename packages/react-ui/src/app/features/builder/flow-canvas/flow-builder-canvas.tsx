@@ -10,7 +10,8 @@ import {
   ReturnLoopedgeButton,
   StepPlaceHolder,
 } from '@openops/components/ui';
-import { RightSideBarType, useBuilderStateContext } from '../builder-hooks';
+import { useBuilderStateContext } from '../builder-hooks';
+import { RightSideBarType } from '../builder-types';
 import { CanvasContextMenuWrapper } from './context-menu/context-menu-wrapper';
 import { EdgeWithButton } from './edges/edge-with-button';
 import { FlowDragLayer } from './flow-drag-layer';

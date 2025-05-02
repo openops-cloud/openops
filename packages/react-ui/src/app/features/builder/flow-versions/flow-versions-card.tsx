@@ -39,10 +39,8 @@ import { useSearchParams } from 'react-router-dom';
 
 import { useAuthorization } from '@/app/common/hooks/authorization-hooks';
 import { SEARCH_PARAMS } from '@/app/constants/search-params';
-import {
-  LeftSideBarType,
-  useBuilderStateContext,
-} from '@/app/features/builder/builder-hooks';
+import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
+import { LeftSideBarType } from '@/app/features/builder/builder-types';
 import { FlowVersionStateDot } from '@/app/features/flows/components/flow-version-state-dot';
 import { flowsApi } from '@/app/features/flows/lib/flows-api';
 import { formatUtils } from '@/app/lib/utils';
