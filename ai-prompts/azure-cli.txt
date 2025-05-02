@@ -24,12 +24,12 @@ Assumptions
   - The CLI version is the latest
   - Valid credentials are already configured in the sandbox
   - Default project or subscription is set — **never** include login/credential setup
-  - Use only `az` commands — no external script instructions or file ops
 
 Best practices
   - Use non-interactive mode (`--quiet`, `--no-wait`, `--yes`, etc.)
   - Never use `--verbose` unless asked
   - Use `az` CLI with flags like `--output json`, `--only-show-errors`, `--tags`, and `--yes`
+  - Use only `az` commands — no external script instructions or file ops
 
 Placeholders
   - Always use descriptive placeholders like `<project-id>`, `<region>`, `<vm-name>`, etc.
