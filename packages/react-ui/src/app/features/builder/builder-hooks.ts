@@ -192,9 +192,10 @@ export const createBuilderStore = (initialState: BuilderInitialState) =>
           ),
         setActiveDraggingStep: (stepName: string | null) =>
           set(
-            {
+            (state) => ({
               activeDraggingStep: stepName,
-            },
+              selectedStep: stepName ? stepName : state.selectedStep,
+            }),
             false,
             'setActiveDraggingStep',
           ),
