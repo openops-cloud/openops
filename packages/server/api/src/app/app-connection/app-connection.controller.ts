@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   FastifyPluginCallbackTypebox,
   Type,
@@ -8,14 +9,16 @@ import {
   OpenOpsId,
   Permission,
   PrincipalType,
+  RedactedAppConnection,
   SeekPage,
   SERVICE_KEY_SECURITY_OPENAPI,
   UpsertAppConnectionRequestBody,
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
+import { blockMetadataService } from '../blocks/block-metadata-service';
 import { sendConnectionDeletedEvent } from '../telemetry/event-models';
 import { appConnectionService } from './app-connection-service/app-connection-service';
-import { removeSensitiveData } from './app-connection-utils';
+import { redactSecrets, removeSensitiveData } from './app-connection-utils';
 
 export const appConnectionController: FastifyPluginCallbackTypebox = (
   app,
@@ -56,6 +59,30 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
         };
 
       return appConnectionsWithoutSensitiveData;
+    },
+  );
+  app.get(
+    '/:id',
+    GetAppConnectionRequest,
+    async (
+      request,
+    ): Promise<AppConnectionWithoutSensitiveData | RedactedAppConnection> => {
+      const connection = await appConnectionService.getOneOrThrow({
+        id: request.params.id,
+        projectId: request.principal.projectId,
+      });
+
+      const block = await blockMetadataService.get({
+        name: connection.blockName,
+        projectId: request.principal.projectId,
+        version: undefined,
+      });
+
+      if (!block) {
+        throw new Error(`Block metadata not found for ${connection.blockName}`);
+      }
+
+      return redactSecrets(block.auth, connection);
     },
   );
   app.delete(
@@ -128,6 +155,24 @@ const DeleteAppConnectionRequest = {
     tags: ['app-connections'],
     security: [SERVICE_KEY_SECURITY_OPENAPI],
     description: 'Delete an app connection',
+    params: Type.Object({
+      id: OpenOpsId,
+    }),
+    response: {
+      [StatusCodes.NO_CONTENT]: Type.Never(),
+    },
+  },
+};
+
+const GetAppConnectionRequest = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+    permission: Permission.READ_APP_CONNECTION,
+  },
+  schema: {
+    tags: ['app-connections'],
+    security: [SERVICE_KEY_SECURITY_OPENAPI],
+    description: 'Get an app connection',
     params: Type.Object({
       id: OpenOpsId,
     }),

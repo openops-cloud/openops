@@ -117,3 +117,7 @@ export const AppConnectionWithoutSensitiveData = Type.Object(
 export type AppConnectionWithoutSensitiveData = Static<
   typeof AppConnectionWithoutSensitiveData
 > & { __brand: 'AppConnectionWithoutSensitiveData' };
+
+export type RedactedAppConnection = Omit<AppConnection, 'value'> & {
+  value?: Record<string, unknown>;
+};
