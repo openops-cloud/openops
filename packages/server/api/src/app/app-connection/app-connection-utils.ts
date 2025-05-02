@@ -25,7 +25,7 @@ export function redactSecrets(
     return removeSensitiveData(connection);
   }
 
-  const redacted = { ...value };
+  const redacted = value;
 
   switch (auth.type) {
     case PropertyType.SECRET_TEXT: {
