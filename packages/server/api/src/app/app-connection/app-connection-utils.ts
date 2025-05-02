@@ -6,6 +6,8 @@ import {
   RedactedAppConnection,
 } from '@openops/shared';
 
+const REDACTED_MESSAGE = '**REDACTED**';
+
 export const removeSensitiveData = (
   appConnection: AppConnection,
 ): AppConnectionWithoutSensitiveData => {
@@ -26,7 +28,7 @@ export function redactSecrets(
 
   switch (auth.type) {
     case PropertyType.SECRET_TEXT: {
-      redacted.secret_text = '**REDACTED**';
+      redacted.secret_text = REDACTED_MESSAGE;
       return {
         ...connection,
         value: redacted as any,
@@ -34,7 +36,7 @@ export function redactSecrets(
     }
 
     case PropertyType.BASIC_AUTH: {
-      redacted.password = '**REDACTED**';
+      redacted.password = REDACTED_MESSAGE;
       return {
         ...connection,
         value: redacted as any,
@@ -48,7 +50,7 @@ export function redactSecrets(
           if (
             (prop as { type: PropertyType }).type === PropertyType.SECRET_TEXT
           ) {
-            props[key] = '**REDACTED**';
+            props[key] = REDACTED_MESSAGE;
           }
         }
         redacted.props = props;
@@ -66,7 +68,7 @@ export function redactSecrets(
           value: {
             type: PropertyType.OAUTH2,
             client_id: value.client_id,
-            client_secret: '**REDACTED**',
+            client_secret: REDACTED_MESSAGE,
             redirect_url: value.redirect_url,
           } as any,
         };
