@@ -10,11 +10,9 @@ import { create, StateCreator, useStore } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
 import { flowsApi } from '@/app/features/flows/lib/flows-api';
-import { PromiseQueue } from '@/app/lib/promise-queue';
 import { BlockProperty } from '@openops/blocks-framework';
 import {
   Flow,
-  flowHelper,
   FlowOperationRequest,
   FlowOperationType,
   FlowRun,
@@ -24,10 +22,8 @@ import {
   TriggerType,
 } from '@openops/shared';
 import { flowRunUtils } from '../flow-runs/lib/flow-run-utils';
-import { aiChatApi } from './ai-chat/lib/chat-api';
 import { DataSelectorSizeState } from './data-selector/data-selector-size-togglers';
-
-const flowUpdatesQueue = new PromiseQueue();
+import { updateFlowVersion } from './update-flow-version';
 
 export const BuilderStateContext = createContext<BuilderStore | null>(null);
 
@@ -595,74 +591,4 @@ const applyMidpanelAction = (state: BuilderState, action: MidpanelAction) => {
   return {
     midpanelState: { ...state.midpanelState, ...newMidpanelState },
   };
-};
-
-async function deleteChatRequest(flowVersion: FlowVersion, stepName: string) {
-  try {
-    const stepDetails = flowHelper.getStep(flowVersion, stepName);
-    const blockName = stepDetails?.settings?.blockName;
-    const chat = await aiChatApi.open(flowVersion.flowId, blockName, stepName);
-    await aiChatApi.delete(chat.chatId);
-  } catch (err) {
-    console.error(err);
-  }
-}
-
-const updateFlowVersion = (
-  state: BuilderState,
-  operation: FlowOperationRequest,
-  onError: () => void,
-  set: (
-    partial:
-      | BuilderState
-      | Partial<BuilderState>
-      | ((state: BuilderState) => BuilderState | Partial<BuilderState>),
-    replace?: boolean | undefined,
-  ) => void,
-) => {
-  const newFlowVersion = flowHelper.apply(state.flowVersion, operation);
-  if (
-    operation.type === FlowOperationType.DELETE_ACTION &&
-    operation.request.name === state.selectedStep
-  ) {
-    set({ selectedStep: undefined });
-    set({ rightSidebar: RightSideBarType.NONE });
-    deleteChatRequest(state.flowVersion, operation.request.name);
-  }
-
-  if (operation.type === FlowOperationType.DUPLICATE_ACTION) {
-    set({
-      selectedStep: flowHelper.getStep(
-        newFlowVersion,
-        operation.request.stepName,
-      )?.nextAction?.name,
-    });
-  }
-
-  const updateRequest = async () => {
-    set({ saving: true });
-    try {
-      const updatedFlowVersion = await flowsApi.update(
-        state.flow.id,
-        operation,
-      );
-      set((state) => {
-        return {
-          flowVersion: {
-            ...state.flowVersion,
-            id: updatedFlowVersion.version.id,
-            state: updatedFlowVersion.version.state,
-            updated: updatedFlowVersion.version.updated,
-          },
-          saving: flowUpdatesQueue.size() !== 0,
-        };
-      });
-    } catch (error) {
-      console.error(error);
-      flowUpdatesQueue.halt();
-      onError();
-    }
-  };
-  flowUpdatesQueue.add(updateRequest);
-  return { flowVersion: newFlowVersion };
 };
