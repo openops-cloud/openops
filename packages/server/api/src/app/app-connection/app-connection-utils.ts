@@ -2,6 +2,7 @@
 import { BlockAuthProperty, PropertyType } from '@openops/blocks-framework';
 import {
   AppConnection,
+  AppConnectionType,
   AppConnectionWithoutSensitiveData,
   RedactedAppConnection,
 } from '@openops/shared';
@@ -62,7 +63,12 @@ export function redactSecrets(
     }
 
     case PropertyType.OAUTH2: {
-      if ('client_secret' in connection.value) {
+      if (
+        value?.type === AppConnectionType.OAUTH2 &&
+        typeof value.client_secret === 'string' &&
+        typeof value.client_id === 'string' &&
+        typeof value.redirect_url === 'string'
+      ) {
         return {
           ...connection,
           value: {
