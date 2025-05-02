@@ -1,18 +1,11 @@
 ---
-name: "General Issue"
-about: "Describe your issue here"
-title: "[Issue]: "
-labels: ["needs-triage"]
+name: "Report a Bug"
+about: "Report a bug in the OpenOps platform"
+labels: ["Bug"]
 assignees: ""
 ---
 
-## Description
 Provide a clear and concise description of the issue.
-
-## Steps to Reproduce
-1. Step 1
-2. Step 2
-3. Step 3
 
 ## Expected Behavior
 Describe what you expected to happen.
@@ -20,15 +13,21 @@ Describe what you expected to happen.
 ## Actual Behavior
 Describe what actually happened.
 
+## Steps to Reproduce
+1. Step 1
+2. Step 2
+3. Step 3
+
 ## Screenshots or logs, if applicable
 Please add screenshots wherever applicable.
-Generate logs by running `curl https://openops.sh/share-logs | sh` and share the log file name.
+
+You can upload your logs to OpenOps support team by running `curl https://openops.sh/share-logs | sh` and sharing the log file name. Only OpenOps support team will be able to view the logs file.
 
 ## Your environment
-App version: 
+Release version: 
 Operating System: 
 Browser: 
-Additional relevant information: 
+Additional information: 
 
 ## Additional Context
 Add any other context or screenshots about the issue here.

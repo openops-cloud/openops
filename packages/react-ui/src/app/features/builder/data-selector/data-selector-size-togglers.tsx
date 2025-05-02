@@ -1,10 +1,11 @@
-import { Button, cn } from '@openops/components/ui';
-import { ExpandIcon, MinusIcon, PanelRightDashedIcon } from 'lucide-react';
+import { Button, TooltipWrapper } from '@openops/components/ui';
+import { t } from 'i18next';
+import { ExpandIcon, MinimizeIcon, MinusIcon } from 'lucide-react';
 
 export enum DataSelectorSizeState {
-  EXPANDED,
-  COLLAPSED,
-  DOCKED,
+  EXPANDED = 'expanded',
+  COLLAPSED = 'collapsed',
+  DOCKED = 'docked',
 }
 
 type DataSelectorSizeTogglersPorps = {
@@ -15,43 +16,47 @@ type DataSelectorSizeTogglersPorps = {
 export const DataSelectorSizeTogglers = ({
   state,
   setListSizeState: setDataSelectorSizeState,
-}: DataSelectorSizeTogglersPorps) => {
-  const handleClick = (newState: DataSelectorSizeState) => {
-    setDataSelectorSizeState(newState);
-  };
-
-  const buttonClassName = (btnState: DataSelectorSizeState) =>
-    cn('', {
-      'text-outline': state === btnState,
-      'text-outline opacity-50 hover:opacity-100': state !== btnState,
-    });
-
-  return (
-    <>
-      <Button
-        size="icon"
-        className={buttonClassName(DataSelectorSizeState.EXPANDED)}
-        onClick={() => handleClick(DataSelectorSizeState.EXPANDED)}
-        variant="basic"
-      >
-        <ExpandIcon></ExpandIcon>
-      </Button>
-      <Button
-        size="icon"
-        className={buttonClassName(DataSelectorSizeState.DOCKED)}
-        onClick={() => handleClick(DataSelectorSizeState.DOCKED)}
-        variant="basic"
-      >
-        <PanelRightDashedIcon></PanelRightDashedIcon>
-      </Button>
+}: DataSelectorSizeTogglersPorps) => (
+  <>
+    <TooltipWrapper
+      tooltipText={
+        state === DataSelectorSizeState.EXPANDED ? t('Dock') : t('Expand')
+      }
+    >
       <Button
         size="icon"
         className="text-outline opacity-50 hover:opacity-100"
-        onClick={() => handleClick(DataSelectorSizeState.COLLAPSED)}
+        onClick={(e) => {
+          e.stopPropagation();
+
+          if (state === DataSelectorSizeState.EXPANDED) {
+            setDataSelectorSizeState(DataSelectorSizeState.DOCKED);
+          } else {
+            setDataSelectorSizeState(DataSelectorSizeState.EXPANDED);
+          }
+        }}
+        variant="basic"
+      >
+        {state === DataSelectorSizeState.EXPANDED ? (
+          <MinimizeIcon />
+        ) : (
+          <ExpandIcon />
+        )}
+      </Button>
+    </TooltipWrapper>
+
+    <TooltipWrapper tooltipText={t('Minimize')}>
+      <Button
+        size="icon"
+        className="text-outline opacity-50 hover:opacity-100"
+        onClick={(e) => {
+          e.stopPropagation();
+          setDataSelectorSizeState(DataSelectorSizeState.COLLAPSED);
+        }}
         variant="basic"
       >
         <MinusIcon></MinusIcon>
       </Button>
-    </>
-  );
-};
+    </TooltipWrapper>
+  </>
+);

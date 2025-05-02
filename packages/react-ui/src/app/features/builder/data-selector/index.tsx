@@ -1,7 +1,12 @@
-import { cn, Input, ScrollArea } from '@openops/components/ui';
+import {
+  AI_CHAT_CONTAINER_SIZES,
+  cn,
+  Input,
+  ScrollArea,
+} from '@openops/components/ui';
 import { t } from 'i18next';
 import { SearchXIcon } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import { Action, flowHelper, isNil, Trigger } from '@openops/shared';
 
@@ -112,13 +117,30 @@ const DataSelector = ({
   parentHeight,
   parentWidth,
   showDataSelector,
-  dataSelectorSize: DataSelectorSize,
+  dataSelectorSize,
   setDataSelectorSize,
   className,
 }: DataSelectorProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const mentions = useBuilderStateContext(getAllStepsMentions);
+  const midpanelState = useBuilderStateContext((state) => state.midpanelState);
   const filteredMentions = filterBy(structuredClone(mentions), searchTerm);
+
+  const onToggle = useCallback(() => {
+    if (
+      [DataSelectorSizeState.DOCKED, DataSelectorSizeState.EXPANDED].includes(
+        dataSelectorSize,
+      )
+    ) {
+      return;
+    }
+
+    if (midpanelState.aiContainerSize === AI_CHAT_CONTAINER_SIZES.EXPANDED) {
+      setDataSelectorSize(DataSelectorSizeState.EXPANDED);
+    } else {
+      setDataSelectorSize(DataSelectorSizeState.DOCKED);
+    }
+  }, [dataSelectorSize, midpanelState.aiContainerSize, setDataSelectorSize]);
 
   return (
     <div
@@ -131,23 +153,34 @@ const DataSelector = ({
         className,
       )}
     >
-      <div className="text-lg items-center font-semibold px-5 py-2 flex gap-2">
-        {t('Data Selector')} <div className="flex-grow"></div>{' '}
+      <div
+        className="text-lg items-center font-semibold px-5 py-2 flex gap-2"
+        role="button"
+        tabIndex={0}
+        onClick={onToggle}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            onToggle();
+          }
+        }}
+        aria-label={t('Toggle Data Selector')}
+      >
+        {t('Data Selector')} <div className="flex-grow"></div>
         <DataSelectorSizeTogglers
-          state={DataSelectorSize}
+          state={dataSelectorSize}
           setListSizeState={setDataSelectorSize}
         ></DataSelectorSizeTogglers>
       </div>
       <div
         style={{
           height:
-            DataSelectorSize === DataSelectorSizeState.COLLAPSED
+            dataSelectorSize === DataSelectorSizeState.COLLAPSED
               ? '0px'
-              : DataSelectorSize === DataSelectorSizeState.DOCKED
+              : dataSelectorSize === DataSelectorSizeState.DOCKED
               ? '450px'
               : `${parentHeight - 180}px`,
           width:
-            DataSelectorSize !== DataSelectorSizeState.EXPANDED
+            dataSelectorSize !== DataSelectorSizeState.EXPANDED
               ? '450px'
               : `${parentWidth - 40}px`,
         }}

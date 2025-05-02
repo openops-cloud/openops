@@ -11,6 +11,7 @@ import {
 import { AIChatMessages } from '../../components/ai-chat-messages/ai-chat-messages';
 import { Button } from '../../ui/button';
 import { Toaster } from '../../ui/toaster';
+import { TooltipProvider } from '../../ui/tooltip';
 import { sampleAIChatMessages } from './sample-messages';
 
 const meta = {
@@ -34,10 +35,12 @@ const meta = {
   tags: ['autodocs'],
   decorators: [
     (Story) => (
-      <div className="h-[800px]">
-        <Story />
-        <Toaster />
-      </div>
+      <TooltipProvider>
+        <div className="h-[800px]">
+          <Story />
+          <Toaster />
+        </div>
+      </TooltipProvider>
     ),
   ],
   render: (args) => {
