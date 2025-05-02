@@ -1,7 +1,7 @@
 ---
 name: "Report a Bug"
 about: "Report a bug in the OpenOps platform"
-labels: ["bug"]
+labels: ["Bug"]
 assignees: ""
 ---
 
