@@ -1,6 +1,6 @@
 ---
 name: "Report a Bug"
-about: "Report a bug in the OpenOps platform or its documentation"
+about: "Report a bug in the OpenOps platform"
 labels: ["bug"]
 assignees: ""
 ---
