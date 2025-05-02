@@ -26,7 +26,6 @@ describe('updateFlowVersion', () => {
           nextAction: {
             name: 'step_1',
             type: ActionType.BLOCK,
-            settings: {},
             valid: false,
             displayName: 'step1',
             settings: {
