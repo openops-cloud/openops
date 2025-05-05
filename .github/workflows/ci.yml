@@ -206,6 +206,7 @@ jobs:
           context: .
           file: ./${{ matrix.target.file }}
           build-args: VERSION=${{ env.short_sha }}
+          platforms: linux/amd64,linux/arm64
           provenance: false
           push: true
           tags: |
