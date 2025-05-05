@@ -222,5 +222,6 @@ jobs:
           file: ./${{ matrix.target.file }}
           build-args: VERSION=${{ env.short_sha }}
           provenance: false
+          platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
