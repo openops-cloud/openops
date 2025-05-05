@@ -159,7 +159,7 @@ jobs:
     strategy:
         matrix:
             target:
-            - name: Editor
+            - name: App
               file: Dockerfile
               repository: openops-app
             - name: Engine
