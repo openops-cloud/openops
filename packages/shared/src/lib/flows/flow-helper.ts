@@ -470,7 +470,6 @@ function moveAction(
   }
   flowVersion = deleteAction(flowVersion, { name: request.name });
   flowVersion = addAction(flowVersion, {
-    // id: sourceStep.id,
     action: sourceStep as Action,
     parentStep: request.newParentStep,
     stepLocationRelativeToParent: request.stepLocationRelativeToNewParent,
@@ -1009,7 +1008,6 @@ function duplicateStepCascading(
     return step;
   });
   let finalFlow = addAction(flowVersion, {
-    // id: duplicatedStep.id,
     action: duplicatedStep as Action,
     parentStep,
     stepLocationRelativeToParent,
