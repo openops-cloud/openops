@@ -39,7 +39,6 @@ describe('Flow Step Test output', () => {
       .save([mockFlowVersion]);
 
     const savedData = await flowStepTestOutputService.save({
-      outputId: openOpsId(),
       stepId: openOpsId(),
       flowVersionId: mockFlowVersion.id,
       output: {
