@@ -110,13 +110,11 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
     },
   );
 
-  fastify.get(
-    '/:id/test-output',
-    GetFlowTestOutputRequestOptions,
-    (request) => ({
-      flowId: request.params.id,
-      stepIds: request.query.stepIds,
-    }),
+  fastify.get('/:id/test-output', GetFlowTestOutputRequestOptions, (request) =>
+    request.query.stepIds.reduce<Record<string, unknown>>((acc, stepId) => {
+      acc[stepId] = {};
+      return acc;
+    }, {}),
   );
 };
 
@@ -130,7 +128,7 @@ const GetFlowTestOutputRequestOptions = {
       id: OpenOpsId,
     }),
     querystring: Type.Object({
-      stepIds: Type.Optional(Type.Array(Type.String({}))),
+      stepIds: Type.Array(Type.String({})),
     }),
   },
 };
