@@ -176,6 +176,7 @@ async function waitForIterationsToFinishOrPause(
     isPaused: boolean;
   }[] = [];
   let noPausedIterations = true;
+  let executionFailed = false;
 
   const iterations = await promisePool(loopIterations, poolSize);
 
@@ -188,9 +189,7 @@ async function waitForIterationsToFinishOrPause(
     const { verdict, verdictResponse } = iterationContext;
 
     if (verdict === ExecutionVerdict.FAILED) {
-      return iterationContext.setCurrentPath(
-        iterationContext.currentPath.removeLast(),
-      );
+      executionFailed = true;
     }
 
     const isPaused =
@@ -214,6 +213,10 @@ async function waitForIterationsToFinishOrPause(
   );
 
   await saveIterationResults(store, actionName, iterationResults);
+  if (executionFailed) {
+    return executionState.setVerdict(ExecutionVerdict.FAILED);
+  }
+
   if (noPausedIterations) {
     return executionState;
   }
