@@ -44,6 +44,7 @@ import {
   FlagId,
   FlowOperationType,
   isNil,
+  openOpsId,
   supportUrl,
   Trigger,
   TriggerType,
@@ -128,6 +129,8 @@ const BlockSelector = ({
         break;
       }
       case FlowOperationType.ADD_ACTION: {
+        const newId = openOpsId();
+        stepData.id = newId;
         applyOperationAndPushToHistory(
           {
             type: FlowOperationType.ADD_ACTION,
@@ -149,6 +152,7 @@ const BlockSelector = ({
           {
             type: FlowOperationType.UPDATE_ACTION,
             request: {
+              id: (stepData as Action).id,
               type: (stepData as Action).type,
               displayName: stepData.displayName,
               name: operation.stepName,

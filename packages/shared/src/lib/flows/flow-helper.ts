@@ -7,6 +7,7 @@ import {
 } from '../app-connection/connections-utils';
 import { applyFunctionToValuesSync, isNil, isString } from '../common';
 import { ApplicationError, ErrorCode } from '../common/application-error';
+import { openOpsId } from '../common/id-generator';
 import {
   Action,
   ActionType,
@@ -469,6 +470,7 @@ function moveAction(
   }
   flowVersion = deleteAction(flowVersion, { name: request.name });
   flowVersion = addAction(flowVersion, {
+    // id: sourceStep.id,
     action: sourceStep as Action,
     parentStep: request.newParentStep,
     stepLocationRelativeToParent: request.stepLocationRelativeToNewParent,
@@ -637,6 +639,7 @@ function createAction(
   },
 ): Action {
   const baseProperties = {
+    id: request.id,
     displayName: request.displayName,
     name: request.name,
     valid: false,
@@ -706,6 +709,7 @@ function createTrigger(
   nextAction: Action | undefined,
 ): Trigger {
   const baseProperties = {
+    id: request.id,
     displayName: request.displayName,
     name,
     valid: false,
@@ -760,8 +764,14 @@ export function getImportOperations(
 ): FlowOperationRequest[] {
   const operations: FlowOperationRequest[] = [];
 
-  const createAddActionRequest = (action: Action): Action =>
-    prefillConnection(removeAnySubsequentAction(action), connections);
+  const createAddActionRequest = (action: Action): Action => {
+    const actionRequest = prefillConnection(
+      removeAnySubsequentAction(action),
+      connections,
+    );
+    actionRequest.id = actionRequest.id ?? openOpsId();
+    return actionRequest;
+  };
 
   while (step) {
     if (step.nextAction) {
@@ -812,7 +822,7 @@ export function getImportOperations(
               operations.push({
                 type: FlowOperationType.ADD_ACTION,
                 request: {
-                  parentStep: step!.name,
+                  parentStep: step?.name ?? '',
                   stepLocationRelativeToParent:
                     StepLocationRelativeToParent.INSIDE_SPLIT,
                   action: createAddActionRequest(branch.nextAction),
@@ -977,6 +987,7 @@ function duplicateStepCascading(
   });
 
   const duplicatedStep = transferStep(action, (step: Step) => {
+    step.id = openOpsId();
     step.displayName = `${step.displayName} Copy`;
     step.name = oldNameToNewName[step.name];
     clearStepTestData(step);
@@ -998,6 +1009,7 @@ function duplicateStepCascading(
     return step;
   });
   let finalFlow = addAction(flowVersion, {
+    // id: duplicatedStep.id,
     action: duplicatedStep as Action,
     parentStep,
     stepLocationRelativeToParent,
@@ -1019,7 +1031,7 @@ function replaceOldStepNameWithNewOne({
   newStepName: string;
 }): string {
   const regex = /{{(.*?)}}/g; // Regular expression to match strings inside {{ }}
-  return input.replace(regex, (match, content) => {
+  return input.replace(regex, (_, content) => {
     // Replace the content inside {{ }} using the provided function
     const replacedContent = content.replaceAll(
       new RegExp(`\\b${oldStepName}\\b`, 'g'),
