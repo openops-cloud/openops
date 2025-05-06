@@ -87,6 +87,6 @@ type SaveParams = {
   outputId?: OpenOpsId | undefined;
   // TODO: remove optional
   stepId?: OpenOpsId | undefined;
-  flowVersionId: OpenOpsId;
+  flowVersionId: FlowVersionId;
   output: unknown;
 };
