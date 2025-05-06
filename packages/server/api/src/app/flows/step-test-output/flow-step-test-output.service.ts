@@ -48,8 +48,7 @@ export const flowStepTestOutputService = {
 };
 
 type SaveParams = {
-  // TODO: remove optional
-  stepId?: OpenOpsId | undefined;
+  stepId: OpenOpsId;
   flowVersionId: FlowVersionId;
   output: unknown;
 };

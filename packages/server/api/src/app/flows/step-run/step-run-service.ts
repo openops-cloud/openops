@@ -5,7 +5,6 @@ import {
   flowHelper,
   FlowVersionId,
   isNil,
-  openOpsId,
   ProjectId,
   StepRunResponse,
   UserId,
