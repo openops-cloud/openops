@@ -139,6 +139,12 @@ export const flowController: FastifyPluginAsyncTypebox = async (app) => {
       cursorRequest: request.query.cursor ?? null,
     });
   });
+
+  app.get('/:id/test-output', GetFlowTestOutputRequestOptions, (request) => ({
+    flowId: request.params.id,
+    flowVersionId: request.query.flowVersionId,
+    stepIds: request.query.stepIds,
+  }));
 };
 
 async function createFromTemplate(
@@ -315,5 +321,21 @@ const DeleteFlowRequestOptions = {
     response: {
       [StatusCodes.NO_CONTENT]: Type.Never(),
     },
+  },
+};
+
+const GetFlowTestOutputRequestOptions = {
+  schema: {
+    tags: ['flows'],
+    description:
+      'Get flow test output by flowId and flowVersionId. Optionally, filter by stepIds',
+    security: [SERVICE_KEY_SECURITY_OPENAPI],
+    params: Type.Object({
+      id: OpenOpsId,
+    }),
+    querystring: Type.Object({
+      flowVersionId: Type.String({}),
+      stepIds: Type.Optional(Type.Array(Type.String({}))),
+    }),
   },
 };
