@@ -129,8 +129,7 @@ const BlockSelector = ({
         break;
       }
       case FlowOperationType.ADD_ACTION: {
-        const newId = openOpsId();
-        stepData.id = newId;
+        stepData.id = openOpsId();
         applyOperationAndPushToHistory(
           {
             type: FlowOperationType.ADD_ACTION,
