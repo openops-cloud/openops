@@ -587,6 +587,121 @@ describe('Flow Helper', () => {
       flowHelper.apply(resultFlow, addBlockRequest);
     }).toThrow(ApplicationError);
   });
+
+  it('should add id field when adding a new action', () => {
+    const addBlockRequest: FlowOperationRequest = {
+      type: FlowOperationType.ADD_ACTION,
+      request: {
+        parentStep: 'trigger',
+        action: createBlockAction('step_1', 'Get', {
+          input: {
+            key: '1',
+          },
+          packageType: PackageType.REGISTRY,
+          blockType: BlockType.OFFICIAL,
+          blockName: 'store',
+          blockVersion: '0.2.6',
+          actionName: 'get',
+          inputUiInfo: {
+            customizedInputs: {},
+          },
+        }),
+      },
+    };
+    const resultFlow = flowHelper.apply(
+      emptyScheduleFlowVersion,
+      addBlockRequest,
+    );
+    expect(resultFlow.trigger.nextAction).toHaveProperty('id', 'step_1');
+  });
+
+  it('should preserve id field when updating an action', () => {
+    const addBlockRequest: FlowOperationRequest = {
+      type: FlowOperationType.ADD_ACTION,
+      request: {
+        parentStep: 'trigger',
+        action: createBlockAction('step_1', 'Get', {
+          input: {
+            key: '1',
+          },
+          packageType: PackageType.REGISTRY,
+          blockType: BlockType.OFFICIAL,
+          blockName: 'store',
+          blockVersion: '0.2.6',
+          actionName: 'get',
+          inputUiInfo: {
+            customizedInputs: {},
+          },
+        }),
+      },
+    };
+    let resultFlow = flowHelper.apply(
+      emptyScheduleFlowVersion,
+      addBlockRequest,
+    );
+
+    const updateRequest: FlowOperationRequest = {
+      type: FlowOperationType.UPDATE_ACTION,
+      request: {
+        ...createBlockAction('step_1', 'Get Updated', {
+          input: {
+            key: '2',
+          },
+          packageType: PackageType.REGISTRY,
+          blockType: BlockType.OFFICIAL,
+          blockName: 'store',
+          blockVersion: '0.2.6',
+          actionName: 'get',
+          inputUiInfo: {
+            customizedInputs: {},
+          },
+        }),
+      },
+    };
+    resultFlow = flowHelper.apply(resultFlow, updateRequest);
+    expect(resultFlow.trigger.nextAction).toHaveProperty('id', 'step_1');
+  });
+
+  it('should add id field to child actions when adding them', () => {
+    const addBranchRequest: FlowOperationRequest = {
+      type: FlowOperationType.ADD_ACTION,
+      request: {
+        parentStep: 'trigger',
+        action: createBranchAction('step_1', {
+          conditions: [
+            [
+              {
+                operator: BranchOperator.TEXT_CONTAINS,
+                firstValue: '1',
+                secondValue: '1',
+                caseSensitive: true,
+              },
+            ],
+          ],
+          inputUiInfo: {},
+        }),
+      },
+    };
+    let resultFlow = flowHelper.apply(
+      emptyScheduleFlowVersion,
+      addBranchRequest,
+    );
+
+    const addCodeActionOnTrue: FlowOperationRequest = {
+      type: FlowOperationType.ADD_ACTION,
+      request: {
+        parentStep: 'step_1',
+        stepLocationRelativeToParent:
+          StepLocationRelativeToParent.INSIDE_TRUE_BRANCH,
+        action: createCodeAction('step_2'),
+      },
+    };
+    resultFlow = flowHelper.apply(resultFlow, addCodeActionOnTrue);
+    expect(resultFlow.trigger.nextAction.onSuccessAction).toHaveProperty(
+      'id',
+      'step_2',
+    );
+  });
 });
 
 it('Duplicate Flow With Branch', () => {
