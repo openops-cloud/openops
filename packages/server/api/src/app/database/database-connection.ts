@@ -23,6 +23,7 @@ import { FlowRunEntity } from '../flows/flow-run/flow-run-entity';
 import { FlowVersionEntity } from '../flows/flow-version/flow-version-entity';
 import { FlowEntity } from '../flows/flow/flow.entity';
 import { FolderEntity } from '../flows/folder/folder.entity';
+import { FlowStepTestOutputEntity } from '../flows/step-test-output/flow-step-test-output-entity';
 import { TriggerEventEntity } from '../flows/trigger-events/trigger-event.entity';
 import { OrganizationEntity } from '../organization/organization.entity';
 import { ProjectEntity } from '../project/project-entity';
@@ -33,7 +34,6 @@ import { WebhookSimulationEntity } from '../webhooks/webhook-simulation/webhook-
 import { WorkerMachineEntity } from '../workers/machine/machine-entity';
 import { createPostgresDataSource } from './postgres-connection';
 import { createSqlLiteDataSource } from './sqlite-connection';
-import { FlowStepTestOutputEntity } from '../flows/step-test-output/flow-step-test-output-entity';
 
 const databaseType = system.get(AppSystemProp.DB_TYPE);
 
