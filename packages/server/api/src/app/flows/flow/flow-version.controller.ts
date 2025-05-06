@@ -3,6 +3,7 @@ import {
   Type,
 } from '@fastify/type-provider-typebox';
 import {
+  FlowStepTestOutput,
   FlowVersionState,
   MinimalFlow,
   Permission,
@@ -128,7 +129,7 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
         }),
       },
     },
-    async (request): Promise<MinimalFlow[]> => {
+    async (request): Promise<FlowStepTestOutput[]> => {
       const { stepIds } = request.query;
       const { flowVersionId } = request.params;
 
