@@ -1,21 +1,24 @@
-import {
-  FlowVersionState,
-  openOpsId,
-} from '@openops/shared';
+import { FlowVersionState, openOpsId } from '@openops/shared';
+import { FastifyInstance } from 'fastify';
 import { databaseConnection } from '../../../../src/app/database/database-connection';
 import { flowStepTestOutputService } from '../../../../src/app/flows/step-test-output/flow-step-test-output.service';
+import { setupServer } from '../../../../src/app/server';
 import {
   createMockFlow,
   createMockFlowVersion,
   mockBasicSetup,
 } from '../../../helpers/mocks';
 
+let app: FastifyInstance | null = null;
+
 beforeAll(async () => {
   await databaseConnection().initialize();
+  app = await setupServer();
 });
 
 afterAll(async () => {
   await databaseConnection().destroy();
+  await app?.close();
 });
 
 describe('Flow Step Test output', () => {

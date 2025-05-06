@@ -1,7 +1,7 @@
 import { fileCompressor } from '@openops/server-shared';
 import {
   FileCompression,
-  FlowStepTestOutput,
+  FlowStepTestOutput, FlowVersionId,
   OpenOpsId,
   openOpsId,
 } from '@openops/shared';
@@ -41,6 +41,6 @@ type SaveParams = {
   outputId?: OpenOpsId | undefined;
   // TODO: remove optional
   stepId?: OpenOpsId | undefined;
-  flowVersionId: OpenOpsId;
+  flowVersionId: FlowVersionId;
   output: unknown;
 };
