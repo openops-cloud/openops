@@ -7,12 +7,10 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { t } from 'i18next';
 
-import {
-  LeftSideBarType,
-  useBuilderStateContext,
-} from '@/app/features/builder/builder-hooks';
+import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
 import { flowsApi } from '@/app/features/flows/lib/flows-api';
 import { FlowVersionMetadata, SeekPage } from '@openops/shared';
+import { LeftSideBarType } from '../builder-types';
 
 import { FlowVersionDetailsCard } from './flow-versions-card';
 

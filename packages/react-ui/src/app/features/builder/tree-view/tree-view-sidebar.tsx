@@ -3,7 +3,8 @@ import { useCallback, useMemo } from 'react';
 
 import { flowHelper } from '@openops/shared';
 
-import { LeftSideBarType, useBuilderStateContext } from '../builder-hooks';
+import { useBuilderStateContext } from '../builder-hooks';
+import { LeftSideBarType } from '../builder-types';
 import { useCenterWorkflowViewOntoStep } from '../hooks/center-workflow-view-onto-step';
 
 import { mapStepsToTreeView } from './utils';

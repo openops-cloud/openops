@@ -1,6 +1,5 @@
 import {
   AI_CHAT_CONTAINER_SIZES,
-  AiChatContainerSizeState,
   INTERNAL_ERROR_TOAST,
   toast,
 } from '@openops/components/ui';
@@ -10,11 +9,8 @@ import { create, StateCreator, useStore } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
 import { flowsApi } from '@/app/features/flows/lib/flows-api';
-import { PromiseQueue } from '@/app/lib/promise-queue';
-import { BlockProperty } from '@openops/blocks-framework';
 import {
   Flow,
-  flowHelper,
   FlowOperationRequest,
   FlowOperationType,
   FlowRun,
@@ -24,10 +20,17 @@ import {
   TriggerType,
 } from '@openops/shared';
 import { flowRunUtils } from '../flow-runs/lib/flow-run-utils';
-import { aiChatApi } from './ai-chat/lib/chat-api';
+import {
+  BuilderInitialState,
+  BuilderState,
+  InsertMentionHandler,
+  LeftSideBarType,
+  MidpanelAction,
+  MidpanelState,
+  RightSideBarType,
+} from './builder-types';
 import { DataSelectorSizeState } from './data-selector/data-selector-size-togglers';
-
-const flowUpdatesQueue = new PromiseQueue();
+import { updateFlowVersion } from './update-flow-version';
 
 export const BuilderStateContext = createContext<BuilderStore | null>(null);
 
@@ -55,103 +58,6 @@ export function useSafeBuilderStateContext<T>(
   if (store === noopStore) return undefined;
   return result;
 }
-
-export enum LeftSideBarType {
-  RUNS = 'runs',
-  VERSIONS = 'versions',
-  RUN_DETAILS = 'run-details',
-  MENU = 'menu',
-  TREE_VIEW = 'tree-view',
-  NONE = 'none',
-}
-
-export enum RightSideBarType {
-  NONE = 'none',
-  BLOCK_SETTINGS = 'block-settings',
-}
-
-type InsertMentionHandler = (propertyPath: string) => void;
-
-export type MidpanelState = {
-  showDataSelector: boolean;
-  dataSelectorSize: DataSelectorSizeState;
-  showAiChat: boolean;
-  aiContainerSize: AiChatContainerSizeState;
-  aiChatProperty?: BlockProperty & {
-    inputName: `settings.input.${string}`;
-  };
-  codeToInject?: string;
-};
-
-type MidpanelAction =
-  | { type: 'FOCUS_INPUT_WITH_MENTIONS' }
-  | { type: 'DATASELECTOR_MIMIZE_CLICK' }
-  | { type: 'DATASELECTOR_DOCK_CLICK' }
-  | { type: 'DATASELECTOR_EXPAND_CLICK' }
-  | { type: 'AICHAT_CLOSE_CLICK' }
-  | { type: 'AICHAT_MIMIZE_CLICK' }
-  | { type: 'AICHAT_DOCK_CLICK' }
-  | { type: 'AICHAT_EXPAND_CLICK' }
-  | { type: 'PANEL_CLICK_AWAY' }
-  | {
-      type: 'GENERATE_WITH_AI_CLICK';
-      property?: BlockProperty & { inputName: `settings.input.${string}` };
-    }
-  | { type: 'ADD_CODE_TO_INJECT'; code: string }
-  | { type: 'CLEAN_CODE_TO_INJECT' };
-
-export type BuilderState = {
-  flow: Flow;
-  flowVersion: FlowVersion;
-
-  readonly: boolean;
-  loopsIndexes: Record<string, number>;
-  run: FlowRun | null;
-  leftSidebar: LeftSideBarType;
-  rightSidebar: RightSideBarType;
-  selectedStep: string | null;
-  canExitRun: boolean;
-  activeDraggingStep: string | null;
-  saving: boolean;
-  refreshBlockFormSettings: boolean;
-  refreshSettings: () => void;
-  exitRun: () => void;
-  exitStepSettings: () => void;
-  renameFlowClientSide: (newName: string) => void;
-  moveToFolderClientSide: (folderId: string) => void;
-  setRun: (run: FlowRun, flowVersion: FlowVersion) => void;
-  setLeftSidebar: (leftSidebar: LeftSideBarType) => void;
-  setRightSidebar: (rightSidebar: RightSideBarType) => void;
-  applyOperation: (
-    operation: FlowOperationRequest,
-    onError: () => void,
-  ) => void;
-  removeStepSelection: () => void;
-  selectStepByName: (stepName: string, openRightSideBar?: boolean) => void;
-  startSaving: () => void;
-  setActiveDraggingStep: (stepName: string | null) => void;
-  setFlow: (flow: Flow) => void;
-  exitBlockSelector: () => void;
-  setVersion: (flowVersion: FlowVersion) => void;
-  setVersionUpdateTimestamp: (updateTimestamp: string) => void;
-  insertMention: InsertMentionHandler | null;
-  setReadOnly: (readOnly: boolean) => void;
-  setInsertMentionHandler: (handler: InsertMentionHandler | null) => void;
-  setLoopIndex: (stepName: string, index: number) => void;
-  canUndo: boolean;
-  setCanUndo: (canUndo: boolean) => void;
-  canRedo: boolean;
-  setCanRedo: (canUndo: boolean) => void;
-  dynamicPropertiesAuthReconnectCounter: number;
-  refreshDynamicPropertiesForAuth: () => void;
-  midpanelState: MidpanelState;
-  applyMidpanelAction: (midpanelAction: MidpanelAction) => void;
-};
-
-export type BuilderInitialState = Pick<
-  BuilderState,
-  'flow' | 'flowVersion' | 'readonly' | 'run' | 'canExitRun'
->;
 
 export type BuilderStore = ReturnType<typeof createBuilderStore>;
 export const createBuilderStore = (initialState: BuilderInitialState) =>
@@ -596,74 +502,4 @@ const applyMidpanelAction = (state: BuilderState, action: MidpanelAction) => {
   return {
     midpanelState: { ...state.midpanelState, ...newMidpanelState },
   };
-};
-
-async function deleteChatRequest(flowVersion: FlowVersion, stepName: string) {
-  try {
-    const stepDetails = flowHelper.getStep(flowVersion, stepName);
-    const blockName = stepDetails?.settings?.blockName;
-    const chat = await aiChatApi.open(flowVersion.flowId, blockName, stepName);
-    await aiChatApi.delete(chat.chatId);
-  } catch (err) {
-    console.error(err);
-  }
-}
-
-const updateFlowVersion = (
-  state: BuilderState,
-  operation: FlowOperationRequest,
-  onError: () => void,
-  set: (
-    partial:
-      | BuilderState
-      | Partial<BuilderState>
-      | ((state: BuilderState) => BuilderState | Partial<BuilderState>),
-    replace?: boolean | undefined,
-  ) => void,
-) => {
-  const newFlowVersion = flowHelper.apply(state.flowVersion, operation);
-  if (
-    operation.type === FlowOperationType.DELETE_ACTION &&
-    operation.request.name === state.selectedStep
-  ) {
-    set({ selectedStep: undefined });
-    set({ rightSidebar: RightSideBarType.NONE });
-    deleteChatRequest(state.flowVersion, operation.request.name);
-  }
-
-  if (operation.type === FlowOperationType.DUPLICATE_ACTION) {
-    set({
-      selectedStep: flowHelper.getStep(
-        newFlowVersion,
-        operation.request.stepName,
-      )?.nextAction?.name,
-    });
-  }
-
-  const updateRequest = async () => {
-    set({ saving: true });
-    try {
-      const updatedFlowVersion = await flowsApi.update(
-        state.flow.id,
-        operation,
-      );
-      set((state) => {
-        return {
-          flowVersion: {
-            ...state.flowVersion,
-            id: updatedFlowVersion.version.id,
-            state: updatedFlowVersion.version.state,
-            updated: updatedFlowVersion.version.updated,
-          },
-          saving: flowUpdatesQueue.size() !== 0,
-        };
-      });
-    } catch (error) {
-      console.error(error);
-      flowUpdatesQueue.halt();
-      onError();
-    }
-  };
-  flowUpdatesQueue.add(updateRequest);
-  return { flowVersion: newFlowVersion };
 };
