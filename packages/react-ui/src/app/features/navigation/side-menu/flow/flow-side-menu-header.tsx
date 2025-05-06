@@ -2,10 +2,8 @@ import { Button, SideMenuHeader, TooltipWrapper } from '@openops/components/ui';
 import { PanelRight } from 'lucide-react';
 
 import { AppLogo } from '@/app/common/components/app-logo';
-import {
-  LeftSideBarType,
-  useBuilderStateContext,
-} from '@/app/features/builder/builder-hooks';
+import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
+import { LeftSideBarType } from '@/app/features/builder/builder-types';
 import { useAppStore } from '@/app/store/app-store';
 import { t } from 'i18next';
 import { useCallback } from 'react';

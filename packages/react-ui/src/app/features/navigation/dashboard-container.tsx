@@ -11,6 +11,7 @@ import { DashboardSideMenu } from '@/app/features/navigation/side-menu/dashboard
 
 import { AllowOnlyLoggedInUserOnlyGuard } from '@/app/common/guards/allow-logged-in-user-only-guard';
 import { useResizablePanelGroup } from '@/app/common/hooks/use-resizable-panel-group';
+import { PanelSizes } from '@/app/common/types/panel-sizes';
 import { useAppStore } from '@/app/store/app-store';
 import {
   RESIZABLE_PANEL_GROUP,
@@ -51,7 +52,7 @@ export function DashboardContainer({
         direction="horizontal"
         id="dashboard"
         onLayout={(size) => {
-          setPanelGroupSize(RESIZABLE_PANEL_GROUP, size);
+          setPanelGroupSize(RESIZABLE_PANEL_GROUP, size as PanelSizes);
         }}
       >
         <LeftSidebarResizablePanel

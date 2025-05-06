@@ -222,6 +222,19 @@ function findStepParents(
       return [step, ...pathFromFalseBranch];
     }
   }
+  if (step.type === ActionType.SPLIT) {
+    const pathFromBranches = step.branches
+      .map((branch) =>
+        branch.nextAction
+          ? findStepParents(stepName, branch.nextAction)
+          : undefined,
+      )
+      .find((path) => path !== undefined);
+
+    if (pathFromBranches) {
+      return [step, ...pathFromBranches];
+    }
+  }
   if (step.type === ActionType.LOOP_ON_ITEMS) {
     const pathFromLoop = step.firstLoopAction
       ? findStepParents(stepName, step.firstLoopAction)

@@ -9,7 +9,8 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@openops/shared": ["../../packages/shared/src"]
+      "@openops/shared": ["../../packages/shared/src"],
+      "@openops/blocks-framework": ["../../packages/blocks/framework/src"]
     }
   },
   "exclude": [

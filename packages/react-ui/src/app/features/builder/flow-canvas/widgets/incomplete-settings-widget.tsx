@@ -2,8 +2,8 @@ import { Button } from '@openops/components/ui';
 import { t } from 'i18next';
 import React, { useMemo } from 'react';
 
-import { BuilderState } from '@/app/features/builder/builder-hooks';
 import { FlowVersion, flowHelper } from '@openops/shared';
+import { BuilderState } from '../../builder-types';
 
 type IncompleteSettingsButtonProps = {
   flowVersion: FlowVersion;

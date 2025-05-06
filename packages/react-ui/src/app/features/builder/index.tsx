@@ -15,8 +15,6 @@ import { useSearchParams } from 'react-router-dom';
 import { useMeasure } from 'react-use';
 
 import {
-  LeftSideBarType,
-  RightSideBarType,
   useBuilderStateContext,
   useSwitchToDraft,
 } from '@/app/features/builder/builder-hooks';
@@ -25,6 +23,7 @@ import { DynamicFormValidationProvider } from '@/app/features/builder/dynamic-fo
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { useResizablePanelGroup } from '@/app/common/hooks/use-resizable-panel-group';
 import { useSocket } from '@/app/common/providers/socket-provider';
+import { PanelSizes } from '@/app/common/types/panel-sizes';
 import { FLOW_CANVAS_Y_OFFESET } from '@/app/constants/flow-canvas';
 import { SEARCH_PARAMS } from '@/app/constants/search-params';
 import {
@@ -49,6 +48,7 @@ import { RunDetailsBar } from '../flow-runs/components/run-details-bar';
 import { FlowSideMenu } from '../navigation/side-menu/flow/flow-side-menu';
 import LeftSidebarResizablePanel from '../navigation/side-menu/left-sidebar';
 import { BuilderHeader } from './builder-header/builder-header';
+import { LeftSideBarType, RightSideBarType } from './builder-types';
 import { FlowBuilderCanvas } from './flow-canvas/flow-builder-canvas';
 import { FLOW_CANVAS_CONTAINER_ID } from './flow-version-undo-redo/constants';
 import { UndoRedo } from './flow-version-undo-redo/undo-redo';
@@ -66,18 +66,27 @@ const useAnimateSidebar = (
   sidebarValue: LeftSideBarType | RightSideBarType,
 ) => {
   const handleRef = useRef<ImperativePanelHandle>(null);
+
   const sidebarbarClosed = [
     LeftSideBarType.NONE,
     RightSideBarType.NONE,
   ].includes(sidebarValue);
+
   useEffect(() => {
-    const sidebarSize = handleRef.current?.getSize() ?? 0;
-    if (sidebarbarClosed) {
-      handleRef.current?.resize(0);
-    } else if (sidebarSize === 0) {
-      handleRef.current?.resize(25);
-    }
-  }, [handleRef, sidebarValue, sidebarbarClosed]);
+    requestAnimationFrame(() => {
+      try {
+        const size = handleRef.current?.getSize?.() ?? 0;
+        if (sidebarbarClosed) {
+          handleRef.current?.resize?.(0);
+        } else if (size === 0) {
+          handleRef.current?.resize?.(25);
+        }
+      } catch (err) {
+        console.warn('Sidebar update skipped', err);
+      }
+    });
+  }, [sidebarValue, sidebarbarClosed]);
+
   return handleRef;
 };
 
@@ -226,7 +235,7 @@ const BuilderPage = () => {
             direction="horizontal"
             className="absolute left-0 top-0"
             onLayout={(size) => {
-              setPanelGroupSize(RESIZABLE_PANEL_GROUP, size);
+              setPanelGroupSize(RESIZABLE_PANEL_GROUP, size as PanelSizes);
             }}
           >
             <LeftSidebarResizablePanel
@@ -256,13 +265,7 @@ const BuilderPage = () => {
               onDragging={setIsDraggingHandle}
             />
 
-            <ResizablePanel
-              order={2}
-              id={RESIZABLE_PANEL_IDS.MAIN}
-              className={cn('min-w-[775px]', {
-                'min-w-[830px]': leftSidebar === LeftSideBarType.NONE,
-              })}
-            >
+            <ResizablePanel order={2} id={RESIZABLE_PANEL_IDS.MAIN}>
               {readonly ? (
                 <ReadonlyCanvasProvider>
                   <div ref={middlePanelRef} className="relative h-full w-full">
