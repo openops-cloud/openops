@@ -12,8 +12,8 @@ export class AddFlowStepTestOutputTable1746454781866
           "id" character varying(21) NOT NULL,
           "created" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
           "updated" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
-          "step_id" character varying(21) NOT NULL,
-          "flow_version_id" character varying(21) NOT NULL,
+          "stepId" character varying(21) NOT NULL,
+          "flowVersionId" character varying(21) NOT NULL,
           "output" bytea NOT NULL,
           CONSTRAINT "PK_flow_step_test_output_id" PRIMARY KEY ("id")
         );
@@ -21,13 +21,13 @@ export class AddFlowStepTestOutputTable1746454781866
 
     await queryRunner.query(`
         ALTER TABLE "flow_step_test_output"
-        ADD CONSTRAINT "FK_flow_step_test_output_flow_version" FOREIGN KEY ("flow_version_id")
+        ADD CONSTRAINT "FK_flow_step_test_output_flow_version" FOREIGN KEY ("flowVersionId")
         REFERENCES "flow_version"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
       `);
 
     await queryRunner.query(`
       CREATE UNIQUE INDEX IF NOT EXISTS "UQ_flow_step_test_output_step_id_flow_version_id"
-      ON "flow_step_test_output" ("step_id", "flow_version_id");
+      ON "flow_step_test_output" ("stepId", "flowVersionId");
     `);
   }
 

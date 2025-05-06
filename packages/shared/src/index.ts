@@ -36,6 +36,7 @@ export * from './lib/flows/dto/list-flows-request';
 export * from './lib/flows/flow';
 export * from './lib/flows/flow-helper';
 export * from './lib/flows/flow-operations';
+export * from './lib/flows/flow-step-test-output';
 export * from './lib/flows/flow-version';
 export * from './lib/flows/folders/folder';
 export * from './lib/flows/folders/folder-requests';
