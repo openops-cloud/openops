@@ -1,5 +1,5 @@
 import { Static, Type } from '@sinclair/typebox';
-import { BaseModelSchema } from '../common/base-model';
+import { BaseModelSchema } from '../common';
 
 export const FlowStepTestOutput = Type.Object({
   ...BaseModelSchema,
