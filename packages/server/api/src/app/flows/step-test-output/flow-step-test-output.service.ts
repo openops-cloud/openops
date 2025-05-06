@@ -73,11 +73,6 @@ async function decompressOutput(
   };
 }
 
-type GetParams = {
-  id: FlowVersionId;
-  stepId: OpenOpsId;
-};
-
 type ListParams = {
   flowVersionId: FlowVersionId;
   stepIds: OpenOpsId[];
