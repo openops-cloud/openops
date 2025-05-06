@@ -119,11 +119,14 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
 };
 
 const GetFlowTestOutputRequestOptions = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
+    permission: Permission.READ_FLOW,
+  },
   schema: {
     tags: ['flow-version'],
     description:
       'Get flow test output by flowVersionId. Optionally, filter by stepIds',
-    security: [SERVICE_KEY_SECURITY_OPENAPI],
     params: Type.Object({
       id: OpenOpsId,
     }),
