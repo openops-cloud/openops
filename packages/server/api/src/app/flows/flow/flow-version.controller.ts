@@ -12,6 +12,7 @@ import {
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
 import { flowVersionService } from '../flow-version/flow-version.service';
+import { flowStepTestOutputService } from '../step-test-output/flow-step-test-output.service';
 import { flowService } from './flow.service';
 
 export const flowVersionController: FastifyPluginAsyncTypebox = async (
@@ -105,6 +106,35 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
       return flowVersionService.getLatestByConnection({
         connectionName,
         projectId: request.principal.projectId,
+      });
+    },
+  );
+
+  fastify.get(
+    '/:flowVersionId/test-output',
+    {
+      config: {
+        allowedPrincipals: [PrincipalType.USER],
+      },
+      schema: {
+        params: Type.Object({
+          flowVersionId: Type.String(),
+        }),
+        tags: ['flow-step-test-output'],
+        description: 'Gets the test output for a flow version',
+        security: [SERVICE_KEY_SECURITY_OPENAPI],
+        querystring: Type.Object({
+          stepIds: Type.Array(Type.String()),
+        }),
+      },
+    },
+    async (request): Promise<MinimalFlow[]> => {
+      const { stepIds } = request.query;
+      const { flowVersionId } = request.params;
+
+      return flowStepTestOutputService.list({
+        stepIds,
+        flowVersionId,
       });
     },
   );
