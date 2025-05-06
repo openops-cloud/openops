@@ -294,6 +294,12 @@ export const flagService = {
         created,
         updated,
       },
+      {
+        id: FlagId.USE_NEW_EXTERNAL_TESTDATA,
+        value: false,
+        created,
+        updated,
+      },
     );
 
     return flags;
