@@ -821,7 +821,7 @@ export function getImportOperations(
               operations.push({
                 type: FlowOperationType.ADD_ACTION,
                 request: {
-                  parentStep: step?.name ?? '',
+                  parentStep: step!.name,
                   stepLocationRelativeToParent:
                     StepLocationRelativeToParent.INSIDE_SPLIT,
                   action: createAddActionRequest(branch.nextAction),
