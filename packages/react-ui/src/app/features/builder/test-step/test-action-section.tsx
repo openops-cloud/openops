@@ -105,6 +105,8 @@ const TestActionSection = React.memo(
       },
     });
 
+    const isTesting = isPending || isLoadingTestOutput;
+
     const handleTest = () => {
       if (
         selectedStep.type === ActionType.BLOCK &&
@@ -132,8 +134,6 @@ const TestActionSection = React.memo(
         />
       );
     }
-
-    const isTesting = isPending || isLoadingTestOutput;
 
     if (!sampleDataExists) {
       return (
