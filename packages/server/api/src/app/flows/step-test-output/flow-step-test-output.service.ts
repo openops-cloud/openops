@@ -10,7 +10,7 @@ import { repoFactory } from '../../core/db/repo-factory';
 import { encryptUtils } from '../../helper/encryption';
 import { FlowStepTestOutputEntity } from './flow-step-test-output-entity';
 
-export const flowStepTestOutputRepo = repoFactory(FlowStepTestOutputEntity);
+const flowStepTestOutputRepo = repoFactory(FlowStepTestOutputEntity);
 
 export const flowStepTestOutputService = {
   async save({
