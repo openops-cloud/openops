@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Action,
   ActionType,
@@ -60,6 +61,7 @@ const flowVersionWithBranching: FlowVersion = {
         ],
       },
       nextAction: {
+        id: 'step_4',
         name: 'step_4',
         type: 'BLOCK',
         valid: true,
@@ -121,6 +123,7 @@ const flowVersionWithBranching: FlowVersion = {
 
 function createCodeAction(name: string): Action {
   return {
+    id: name,
     name,
     displayName: 'Code',
     type: ActionType.CODE,
@@ -134,6 +137,85 @@ function createCodeAction(name: string): Action {
     },
   };
 }
+
+function createBlockAction(
+  name: string,
+  displayName: string,
+  settings: {
+    input: Record<string, unknown>;
+    packageType: PackageType;
+    blockType: BlockType;
+    blockName: string;
+    blockVersion: string;
+    actionName: string;
+    inputUiInfo: {
+      customizedInputs?: Record<string, unknown>;
+    };
+    errorHandlingOptions?: {
+      retryOnFailure: {
+        value: boolean;
+      };
+      continueOnFailure: {
+        value: boolean;
+      };
+    };
+  },
+): Action {
+  return {
+    id: name,
+    name,
+    displayName,
+    type: ActionType.BLOCK,
+    valid: true,
+    settings,
+  };
+}
+
+function createBranchAction(
+  name: string,
+  settings: {
+    conditions: Array<
+      Array<{
+        operator: BranchOperator;
+        firstValue: string;
+        secondValue: string;
+        caseSensitive: boolean;
+      }>
+    >;
+    inputUiInfo: {
+      customizedInputs?: Record<string, unknown>;
+    };
+  },
+): Action {
+  return {
+    id: name,
+    name,
+    displayName: 'Branch',
+    type: ActionType.BRANCH,
+    valid: true,
+    settings,
+  };
+}
+
+function createLoopAction(
+  name: string,
+  settings: {
+    items: string;
+    inputUiInfo: {
+      customizedInputs?: Record<string, unknown>;
+    };
+  },
+): Action {
+  return {
+    id: name,
+    name,
+    displayName: 'Loop',
+    type: ActionType.LOOP_ON_ITEMS,
+    valid: true,
+    settings,
+  };
+}
+
 const emptyScheduleFlowVersion: FlowVersion = {
   id: 'pj0KQ7Aypoa9OQGHzmKDl',
   created: '2023-05-24T00:16:41.353Z',
@@ -206,6 +288,7 @@ describe('Flow Helper', () => {
         },
         displayName: 'Cron Expression',
         nextAction: {
+          id: 'step_4',
           name: 'step_4',
           type: 'BLOCK',
           valid: true,
@@ -278,6 +361,7 @@ describe('Flow Helper', () => {
         name: 'step_1',
         valid: true,
         nextAction: {
+          id: 'step_4',
           name: 'step_4',
           type: 'BLOCK',
           valid: true,
@@ -354,25 +438,19 @@ describe('Flow Helper', () => {
       type: FlowOperationType.ADD_ACTION,
       request: {
         parentStep: 'trigger',
-        action: {
-          name: 'step_1',
-          type: ActionType.BRANCH,
-          displayName: 'Branch',
-          valid: true,
-          settings: {
-            conditions: [
-              [
-                {
-                  operator: BranchOperator.TEXT_CONTAINS,
-                  firstValue: '1',
-                  secondValue: '1',
-                  caseSensitive: true,
-                },
-              ],
+        action: createBranchAction('step_1', {
+          conditions: [
+            [
+              {
+                operator: BranchOperator.TEXT_CONTAINS,
+                firstValue: '1',
+                secondValue: '1',
+                caseSensitive: true,
+              },
             ],
-            inputUiInfo: {},
-          },
-        },
+          ],
+          inputUiInfo: {},
+        }),
       },
     };
     const addCodeActionOnTrue: FlowOperationRequest = {
@@ -423,6 +501,7 @@ describe('Flow Helper', () => {
       },
       displayName: 'Cron Expression',
       nextAction: {
+        id: 'step_1',
         displayName: 'Branch',
         name: 'step_1',
         valid: true,
@@ -443,6 +522,7 @@ describe('Flow Helper', () => {
         onSuccessAction: {
           displayName: 'Code',
           name: 'step_2',
+          id: 'step_2',
           valid: true,
           type: 'CODE',
           settings: {
@@ -456,6 +536,7 @@ describe('Flow Helper', () => {
         onFailureAction: {
           displayName: 'Code',
           name: 'step_3',
+          id: 'step_3',
           valid: true,
           type: 'CODE',
           settings: {
@@ -469,6 +550,7 @@ describe('Flow Helper', () => {
         nextAction: {
           displayName: 'Code',
           name: 'step_4',
+          id: 'step_4',
           valid: true,
           type: 'CODE',
           settings: {
@@ -489,16 +571,10 @@ describe('Flow Helper', () => {
       type: FlowOperationType.ADD_ACTION,
       request: {
         parentStep: 'trigger',
-        action: {
-          name: 'step_1',
-          type: ActionType.LOOP_ON_ITEMS,
-          displayName: 'Loop',
-          valid: true,
-          settings: {
-            items: 'items',
-            inputUiInfo: {},
-          },
-        },
+        action: createLoopAction('step_1', {
+          items: 'items',
+          inputUiInfo: {},
+        }),
       },
     };
     const addCodeActionInside: FlowOperationRequest = {
@@ -539,6 +615,7 @@ describe('Flow Helper', () => {
       },
       displayName: 'Cron Expression',
       nextAction: {
+        id: 'step_1',
         displayName: 'Loop',
         name: 'step_1',
         valid: true,
@@ -549,6 +626,7 @@ describe('Flow Helper', () => {
         },
         firstLoopAction: {
           displayName: 'Code',
+          id: 'step_3',
           name: 'step_3',
           valid: true,
           type: 'CODE',
@@ -562,6 +640,7 @@ describe('Flow Helper', () => {
         },
         nextAction: {
           displayName: 'Code',
+          id: 'step_4',
           name: 'step_4',
           valid: true,
           type: 'CODE',
@@ -661,6 +740,78 @@ describe('Flow Helper', () => {
       ),
     );
   });
+
+  it('should handle paste actions request', () => {
+    const pasteActionsRequest: PasteActionsRequest = {
+      parentStep: 'trigger',
+      stepLocationRelativeToParent: StepLocationRelativeToParent.AFTER,
+      action: createBlockAction('step_1', 'Get', {
+        input: {
+          key: '1',
+        },
+        packageType: PackageType.REGISTRY,
+        blockType: BlockType.OFFICIAL,
+        blockName: 'store',
+        blockVersion: '~0.2.6',
+        actionName: 'get',
+        inputUiInfo: {
+          customizedInputs: {},
+        },
+      }),
+    };
+
+    const operation: FlowOperationRequest = {
+      type: FlowOperationType.PASTE_ACTIONS,
+      request: pasteActionsRequest,
+    };
+
+    const result = flowHelper.apply(emptyScheduleFlowVersion, operation);
+    const { id, ...actionWithoutId } = pasteActionsRequest.action;
+    const { id: resultId, ...resultWithoutId } = result.trigger.nextAction;
+    expect(resultWithoutId).toEqual(actionWithoutId);
+    expect(typeof resultId).toBe('string');
+  });
+
+  it('should handle update action with nested steps', () => {
+    const updateRequest: FlowOperationRequest = {
+      type: FlowOperationType.UPDATE_ACTION,
+      request: {
+        name: 'step_1',
+        type: ActionType.BRANCH,
+        displayName: 'Branch',
+        valid: true,
+        settings: {
+          conditions: [
+            [
+              {
+                operator: BranchOperator.TEXT_CONTAINS,
+                firstValue: '1',
+                secondValue: '1',
+                caseSensitive: true,
+              },
+            ],
+          ],
+          inputUiInfo: {},
+        },
+      },
+    };
+
+    const result = flowHelper.apply(flowVersionWithBranching, updateRequest);
+    expect(result.trigger.nextAction).toBeDefined();
+    expect(result.trigger.nextAction?.type).toBe(ActionType.BRANCH);
+  });
+
+  it('should handle delete action with nested steps', () => {
+    const operation: FlowOperationRequest = {
+      type: FlowOperationType.DELETE_ACTION,
+      request: {
+        name: 'step_2',
+      },
+    };
+
+    const result = flowHelper.apply(flowVersionWithBranching, operation);
+    expect(result.trigger.nextAction?.onSuccessAction).toBeUndefined();
+  });
 });
 
 it('Duplicate Flow With Branch', () => {
@@ -726,6 +877,7 @@ it('Duplicate Flow With Branch', () => {
         onFailureAction: {
           name: 'step_3',
           type: 'CODE',
+          id: 'step_3',
           valid: true,
           settings: {
             input: {},
@@ -771,6 +923,7 @@ it('Duplicate Flow With Branch', () => {
           type: ActionType.BRANCH,
           name: 'step_1',
           displayName: 'Branch',
+          id: 'IPvDstQewUpNmrQtADqJw',
           settings: {
             conditions: [
               [
@@ -796,6 +949,7 @@ it('Duplicate Flow With Branch', () => {
           type: ActionType.BLOCK,
           name: 'step_4',
           displayName: 'Get',
+          id: 'T7WQtMmqk5paJHq1HnE2m',
           settings: {
             input: {
               key: '1',
@@ -823,6 +977,7 @@ it('Duplicate Flow With Branch', () => {
           type: ActionType.CODE,
           name: 'step_3',
           displayName: 'Code',
+          id: 'step_3',
           settings: {
             input: {},
             sourceCode: {
@@ -864,7 +1019,26 @@ it('Duplicate Flow With Branch', () => {
     },
   ];
   const importOperations = flowHelper.getImportOperations(flowVersion.trigger);
-  expect(importOperations).toEqual(expectedImportOperations);
+
+  // Verify structure without specific IDs
+  expect(importOperations).toHaveLength(expectedImportOperations.length);
+  importOperations.forEach((operation, index) => {
+    const expectedOperation = expectedImportOperations[index];
+    expect(operation.type).toBe(expectedOperation.type);
+
+    const request = operation.request as { parentStep: string; action: Action };
+    const expectedRequest = expectedOperation.request as {
+      parentStep: string;
+      action: Action;
+    };
+
+    expect(request.parentStep).toBe(expectedRequest.parentStep);
+    const { id, ...actionWithoutId } = request.action;
+    const { id: expectedId, ...expectedActionWithoutId } =
+      expectedRequest.action;
+    expect(actionWithoutId).toEqual(expectedActionWithoutId);
+    expect(typeof id).toBe('string');
+  });
 });
 it('Duplicate Flow With Loops using Import', () => {
   const flowVersion: FlowVersion = {
@@ -904,6 +1078,7 @@ it('Duplicate Flow With Loops using Import', () => {
         nextAction: {
           name: 'step_3',
           type: 'CODE',
+          id: 'step_3',
           valid: true,
           settings: {
             input: {},
@@ -918,6 +1093,7 @@ it('Duplicate Flow With Loops using Import', () => {
         firstLoopAction: {
           name: 'step_2',
           type: 'CODE',
+          id: 'step_2',
           valid: true,
           settings: {
             input: {},
@@ -967,6 +1143,7 @@ it('Duplicate Flow With Loops using Import', () => {
             },
           },
           displayName: 'Code',
+          id: 'step_3',
         },
       },
     },
@@ -987,13 +1164,33 @@ it('Duplicate Flow With Loops using Import', () => {
             },
           },
           displayName: 'Code',
+          id: 'step_2',
         },
       },
     },
   ];
 
   const importOperations = flowHelper.getImportOperations(flowVersion.trigger);
-  expect(importOperations).toEqual(expectedResult);
+
+  // Verify structure without specific IDs
+  expect(importOperations).toHaveLength(expectedResult.length);
+  importOperations.forEach((operation, index) => {
+    const expectedOperation = expectedResult[index];
+    expect(operation.type).toBe(expectedOperation.type);
+
+    const request = operation.request as { parentStep: string; action: Action };
+    const expectedRequest = expectedOperation.request as {
+      parentStep: string;
+      action: Action;
+    };
+
+    expect(request.parentStep).toBe(expectedRequest.parentStep);
+    const { id, ...actionWithoutId } = request.action;
+    const { id: expectedId, ...expectedActionWithoutId } =
+      expectedRequest.action;
+    expect(actionWithoutId).toEqual(expectedActionWithoutId);
+    expect(typeof id).toBe('string');
+  });
 });
 
 it('Should remove connections', () => {
@@ -1151,25 +1348,19 @@ it('Should remove connections', () => {
 });
 
 describe('getImportOperations', () => {
-  const mockAction: Action = {
-    name: 'step_1',
-    type: ActionType.BLOCK,
-    valid: true,
-    settings: {
-      input: {
-        key: '1',
-      },
-      packageType: PackageType.REGISTRY,
-      blockType: BlockType.OFFICIAL,
-      blockName: 'store',
-      blockVersion: '0.2.6',
-      actionName: 'get',
-      inputUiInfo: {
-        customizedInputs: {},
-      },
+  const mockAction = createBlockAction('step_1', 'Get', {
+    input: {
+      key: '1',
     },
-    displayName: 'Get',
-  };
+    packageType: PackageType.REGISTRY,
+    blockType: BlockType.OFFICIAL,
+    blockName: 'store',
+    blockVersion: '0.2.6',
+    actionName: 'get',
+    inputUiInfo: {
+      customizedInputs: {},
+    },
+  });
 
   const mockTrigger: Trigger = {
     name: 'trigger',
@@ -1190,42 +1381,36 @@ describe('getImportOperations', () => {
     nextAction: mockAction,
   };
 
-  const mockSlackAction: Action = {
-    name: 'step_1',
-    type: ActionType.BLOCK,
-    valid: false,
-    settings: {
-      input: {
-        auth: "{{connections['initial-slack-connection']}}",
-        file: null,
-        text: {},
-        blocks: {},
-        threadTs: null,
-        username: null,
-        headerText: {},
-        conversationId: null,
-        authorizedUsers: null,
-        blockKitEnabled: false,
+  const mockSlackAction = createBlockAction('step_1', 'Send Message', {
+    input: {
+      auth: "{{connections['initial-slack-connection']}}",
+      file: null,
+      text: {},
+      blocks: {},
+      threadTs: null,
+      username: null,
+      headerText: {},
+      conversationId: null,
+      authorizedUsers: null,
+      blockKitEnabled: false,
+    },
+    blockName: '@openops/block-slack',
+    packageType: PackageType.REGISTRY,
+    actionName: 'send_slack_message',
+    blockType: BlockType.OFFICIAL,
+    inputUiInfo: {
+      customizedInputs: {},
+    },
+    blockVersion: '~0.5.2',
+    errorHandlingOptions: {
+      retryOnFailure: {
+        value: false,
       },
-      blockName: '@openops/block-slack',
-      packageType: PackageType.REGISTRY,
-      actionName: 'send_slack_message',
-      blockType: BlockType.OFFICIAL,
-      inputUiInfo: {
-        customizedInputs: {},
-      },
-      blockVersion: '~0.5.2',
-      errorHandlingOptions: {
-        retryOnFailure: {
-          value: false,
-        },
-        continueOnFailure: {
-          value: false,
-        },
+      continueOnFailure: {
+        value: false,
       },
     },
-    displayName: 'Send Message',
-  };
+  });
 
   const mockConnection = {
     id: 'T0N9yCE9dwpjcHvTH5hkQ',
@@ -1265,15 +1450,35 @@ describe('getImportOperations', () => {
   it('should return operations for trigger with one next action', () => {
     const result = flowHelper.getImportOperations(mockTrigger, []);
 
-    expect(result).toEqual([
-      {
-        type: 'ADD_ACTION',
-        request: {
-          parentStep: 'trigger',
-          action: mockAction,
+    expect(result).toHaveLength(1);
+    const operation = result[0];
+    expect(operation.type).toBe('ADD_ACTION');
+
+    const request = operation.request as { parentStep: string; action: Action };
+    expect(request.parentStep).toBe('trigger');
+
+    const { id, ...actionWithoutId } = request.action;
+    expect(actionWithoutId).toEqual({
+      displayName: 'Get',
+      name: 'step_1',
+      settings: {
+        actionName: 'get',
+        blockName: 'store',
+        blockType: 'OFFICIAL',
+        blockVersion: '0.2.6',
+        input: {
+          auth: undefined,
+          key: '1',
         },
+        inputUiInfo: {
+          customizedInputs: {},
+        },
+        packageType: 'REGISTRY',
       },
-    ]);
+      type: 'BLOCK',
+      valid: true,
+    });
+    expect(typeof id).toBe('string');
   });
 
   it('should return prefilled action with connection', () => {
@@ -1775,19 +1980,7 @@ describe('Split', () => {
   });
 
   describe('Add nodes inside a Split', () => {
-    const mockCodeAction: Action = {
-      type: ActionType.CODE,
-      settings: {
-        input: {},
-        sourceCode: {
-          code: 'test',
-          packageJson: '{}',
-        },
-      },
-      name: 'step_2',
-      valid: true,
-      displayName: 'Code',
-    };
+    const mockCodeAction = createCodeAction('step_2');
 
     it('StepLocationRelativeToParent.AFTER, should add a node in nextAction', () => {
       const operation: FlowOperationRequest = {
@@ -1867,6 +2060,7 @@ describe('Split', () => {
         {
           optionId: 'jFCJvPAjs8umZSeTDC5n1',
           nextAction: {
+            id: 'step_2',
             type: ActionType.CODE,
             settings: {
               input: {},
@@ -1934,6 +2128,7 @@ describe('Split', () => {
                   packageJson: '{}',
                 },
               },
+              id: 'step_2',
               name: 'step_2',
               valid: true,
               displayName: 'Code',
@@ -1983,19 +2178,8 @@ describe('Split', () => {
   });
 
   describe('Update nodes inside a Split', () => {
-    const mockCodeAction: Action = {
-      type: ActionType.CODE,
-      settings: {
-        input: {},
-        sourceCode: {
-          code: 'test',
-          packageJson: '{}',
-        },
-      },
-      name: 'step_2',
-      valid: true,
-      displayName: 'Code',
-    };
+    const mockCodeAction = createCodeAction('step_2');
+
     it('can update a node in nextAction', () => {
       const operation: FlowOperationRequest = {
         type: FlowOperationType.UPDATE_ACTION,
@@ -2026,6 +2210,7 @@ describe('Split', () => {
       expect(result.trigger.nextAction.displayName).toBe('Split');
       expect(result.trigger.nextAction.nextAction).toEqual(mockCodeAction);
     });
+
     it('can update a node in branch', () => {
       const operation: FlowOperationRequest = {
         type: FlowOperationType.UPDATE_ACTION,
@@ -2253,19 +2438,8 @@ describe('Split', () => {
   });
 
   describe('process operations', () => {
-    const mockCodeAction: Action = {
-      type: ActionType.CODE,
-      settings: {
-        input: {},
-        sourceCode: {
-          code: 'test',
-          packageJson: '{}',
-        },
-      },
-      name: 'step_2',
-      valid: true,
-      displayName: 'Code',
-    };
+    const mockCodeAction = createCodeAction('step_2');
+
     it('can correctly process import operations for split with branches', () => {
       const flowVersionWithSplitWithBranches = {
         ...flowVersionWithSplit,
@@ -2291,7 +2465,7 @@ describe('Split', () => {
                   conditions: [
                     [
                       {
-                        operator: BranchOperator.TEXT_EXACTLY_MATCHES,
+                        operator: 'TEXT_EXACTLY_MATCHES',
                         firstValue: '',
                         secondValue: '',
                         caseSensitive: false,
@@ -2305,7 +2479,7 @@ describe('Split', () => {
                   conditions: [
                     [
                       {
-                        operator: BranchOperator.TEXT_EXACTLY_MATCHES,
+                        operator: 'TEXT_EXACTLY_MATCHES',
                         firstValue: '',
                         secondValue: '',
                         caseSensitive: false,
@@ -2401,7 +2575,29 @@ describe('Split', () => {
       const operations = flowHelper.getImportOperations(
         flowVersionWithSplitWithBranches.trigger,
       );
-      expect(operations).toEqual(expectedOperations);
+
+      // Verify structure without specific IDs
+      expect(operations).toHaveLength(expectedOperations.length);
+      operations.forEach((operation, index) => {
+        const expectedOperation = expectedOperations[index];
+        expect(operation.type).toBe(expectedOperation.type);
+
+        const request = operation.request as {
+          parentStep: string;
+          action: Action;
+        };
+        const expectedRequest = expectedOperation.request as {
+          parentStep: string;
+          action: Action;
+        };
+
+        expect(request.parentStep).toBe(expectedRequest.parentStep);
+        const { id, ...actionWithoutId } = request.action;
+        const { id: expectedId, ...expectedActionWithoutId } =
+          expectedRequest.action;
+        expect(actionWithoutId).toEqual(expectedActionWithoutId);
+        expect(typeof id).toBe('string');
+      });
     });
 
     it('can process operations without stepLocationRelativeToParent', () => {
@@ -2667,52 +2863,12 @@ describe('bulkAddActions', () => {
   };
 
   const action = {
-    name: 'step_20',
-    type: 'CODE',
-    valid: true,
-    settings: {
-      input: {},
-      sourceCode: {
-        code: 'export const code = async (inputs) => {\n  return true;\n};',
-        packageJson: '{}',
-      },
-      inputUiInfo: {
-        customizedInputs: {},
-      },
-      errorHandlingOptions: {
-        retryOnFailure: {
-          value: false,
-        },
-        continueOnFailure: {
-          value: false,
-        },
-      },
-    },
+    ...createCodeAction('step_20'),
+    displayName: 'COPY 1',
     nextAction: {
-      name: 'step_30',
-      type: 'CODE',
-      valid: true,
-      settings: {
-        input: {},
-        sourceCode: {
-          code: 'export const code = async (inputs) => {\n  return true;\n};',
-          packageJson: '{}',
-        },
-        inputUiInfo: {
-          customizedInputs: {},
-        },
-        errorHandlingOptions: {
-          retryOnFailure: {
-            value: false,
-          },
-          continueOnFailure: {
-            value: false,
-          },
-        },
-      },
+      ...createCodeAction('step_30'),
       displayName: 'COPY 2',
     },
-    displayName: 'COPY 1',
   };
 
   const getPasteRequest = (
@@ -2808,6 +2964,113 @@ describe('bulkAddActions', () => {
   });
 });
 
+it('should add id field when adding a new action', () => {
+  const addBlockRequest: FlowOperationRequest = {
+    type: FlowOperationType.ADD_ACTION,
+    request: {
+      parentStep: 'trigger',
+      action: createBlockAction('step_1', 'Get', {
+        input: {
+          key: '1',
+        },
+        packageType: PackageType.REGISTRY,
+        blockType: BlockType.OFFICIAL,
+        blockName: 'store',
+        blockVersion: '0.2.6',
+        actionName: 'get',
+        inputUiInfo: {
+          customizedInputs: {},
+        },
+      }),
+    },
+  };
+  const resultFlow = flowHelper.apply(
+    emptyScheduleFlowVersion,
+    addBlockRequest,
+  );
+  expect(resultFlow.trigger.nextAction).toHaveProperty('id', 'step_1');
+});
+
+it('should preserve id field when updating an action', () => {
+  const addBlockRequest: FlowOperationRequest = {
+    type: FlowOperationType.ADD_ACTION,
+    request: {
+      parentStep: 'trigger',
+      action: createBlockAction('step_1', 'Get', {
+        input: {
+          key: '1',
+        },
+        packageType: PackageType.REGISTRY,
+        blockType: BlockType.OFFICIAL,
+        blockName: 'store',
+        blockVersion: '0.2.6',
+        actionName: 'get',
+        inputUiInfo: {
+          customizedInputs: {},
+        },
+      }),
+    },
+  };
+  let resultFlow = flowHelper.apply(emptyScheduleFlowVersion, addBlockRequest);
+
+  const updateRequest: FlowOperationRequest = {
+    type: FlowOperationType.UPDATE_ACTION,
+    request: createBlockAction('step_1', 'Get Updated', {
+      input: {
+        key: '2',
+      },
+      packageType: PackageType.REGISTRY,
+      blockType: BlockType.OFFICIAL,
+      blockName: 'store',
+      blockVersion: '0.2.6',
+      actionName: 'get',
+      inputUiInfo: {
+        customizedInputs: {},
+      },
+    }),
+  };
+  resultFlow = flowHelper.apply(resultFlow, updateRequest);
+  expect(resultFlow.trigger.nextAction).toHaveProperty('id', 'step_1');
+});
+
+it('should add id field to child actions when adding them', () => {
+  const addBranchRequest: FlowOperationRequest = {
+    type: FlowOperationType.ADD_ACTION,
+    request: {
+      parentStep: 'trigger',
+      action: createBranchAction('step_1', {
+        conditions: [
+          [
+            {
+              operator: BranchOperator.TEXT_CONTAINS,
+              firstValue: '1',
+              secondValue: '1',
+              caseSensitive: true,
+            },
+          ],
+        ],
+        inputUiInfo: {},
+      }),
+    },
+  };
+  let resultFlow = flowHelper.apply(emptyScheduleFlowVersion, addBranchRequest);
+
+  const addCodeActionOnTrue: FlowOperationRequest = {
+    type: FlowOperationType.ADD_ACTION,
+    request: {
+      parentStep: 'step_1',
+      stepLocationRelativeToParent:
+        StepLocationRelativeToParent.INSIDE_TRUE_BRANCH,
+      action: createCodeAction('step_2'),
+    },
+  };
+  resultFlow = flowHelper.apply(resultFlow, addCodeActionOnTrue);
+  expect(resultFlow.trigger.nextAction.onSuccessAction).toHaveProperty(
+    'id',
+    'step_2',
+  );
+});
+
 describe('getUsedConnections', () => {
   const actionWithBrokenConnections = {
     settings: {
@@ -2858,5 +3121,139 @@ describe('getUsedConnections', () => {
   it('returns an empty object if getAllSteps returns empty', () => {
     const result = flowHelper.getUsedConnections(actionWithBrokenConnections);
     expect(result).toEqual({});
+  });
+});
+
+describe('createTrigger', () => {
+  it('should create an EMPTY trigger', () => {
+    const name = 'trigger';
+    const request = {
+      type: TriggerType.EMPTY,
+      displayName: 'Empty Trigger',
+      settings: {},
+    };
+    const nextAction = undefined;
+
+    const result = flowHelper.createTrigger(name, request as any, nextAction);
+
+    expect(result).toEqual({
+      id: expect.any(String),
+      name: 'trigger',
+      type: TriggerType.EMPTY,
+      displayName: 'Empty Trigger',
+      settings: {},
+      valid: true,
+      nextAction: undefined,
+    });
+  });
+
+  it('should create a BLOCK trigger', () => {
+    const name = 'trigger';
+    const request = {
+      type: TriggerType.BLOCK,
+      displayName: 'Block Trigger',
+      settings: {
+        input: {
+          cronExpression: '25 10 * * 0,1,2,3,4',
+        },
+        packageType: PackageType.REGISTRY,
+        blockType: BlockType.OFFICIAL,
+        blockName: 'schedule',
+        blockVersion: '0.0.2',
+        inputUiInfo: {},
+        triggerName: 'cron_expression',
+      },
+    };
+    const nextAction = createCodeAction('step_1');
+
+    const result = flowHelper.createTrigger(name, request as any, nextAction);
+
+    expect(result).toEqual({
+      id: expect.any(String),
+      name: 'trigger',
+      type: TriggerType.BLOCK,
+      displayName: 'Block Trigger',
+      settings: {
+        input: {
+          cronExpression: '25 10 * * 0,1,2,3,4',
+        },
+        packageType: PackageType.REGISTRY,
+        blockType: BlockType.OFFICIAL,
+        blockName: 'schedule',
+        blockVersion: '0.0.2',
+        inputUiInfo: {},
+        triggerName: 'cron_expression',
+      },
+      valid: true,
+      nextAction,
+    });
+  });
+
+  it('should create trigger with custom id', () => {
+    const name = 'trigger';
+    const request = {
+      id: 'custom-id',
+      type: TriggerType.EMPTY,
+      displayName: 'Empty Trigger',
+      settings: {},
+    };
+    const nextAction = undefined;
+
+    const result = flowHelper.createTrigger(name, request as any, nextAction);
+
+    expect(result).toEqual({
+      id: 'custom-id',
+      name: 'trigger',
+      type: TriggerType.EMPTY,
+      displayName: 'Empty Trigger',
+      settings: {},
+      valid: true,
+      nextAction: undefined,
+    });
+  });
+
+  it('should create trigger with valid=false when specified', () => {
+    const name = 'trigger';
+    const request = {
+      type: TriggerType.EMPTY,
+      displayName: 'Empty Trigger',
+      settings: {},
+      valid: false,
+    };
+    const nextAction = undefined;
+
+    const result = flowHelper.createTrigger(name, request as any, nextAction);
+
+    expect(result).toEqual({
+      id: expect.any(String),
+      name: 'trigger',
+      type: TriggerType.EMPTY,
+      displayName: 'Empty Trigger',
+      settings: {},
+      valid: false,
+      nextAction: undefined,
+    });
+  });
+
+  it('should create trigger with nextAction', () => {
+    const name = 'trigger';
+    const request = {
+      type: TriggerType.EMPTY,
+      displayName: 'Empty Trigger',
+      settings: {},
+    };
+    const nextAction = createCodeAction('step_1');
+
+    const result = flowHelper.createTrigger(name, request as any, nextAction);
+
+    expect(result).toEqual({
+      id: expect.any(String),
+      name: 'trigger',
+      type: TriggerType.EMPTY,
+      displayName: 'Empty Trigger',
+      settings: {},
+      valid: true,
+      nextAction,
+    });
   });
 });

@@ -5,6 +5,7 @@ import {
 import {
   FlowVersionState,
   MinimalFlow,
+  OpenOpsId,
   Permission,
   PrincipalType,
   SERVICE_KEY_SECURITY_OPENAPI,
@@ -108,6 +109,31 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
       });
     },
   );
+
+  fastify.get('/:id/test-output', GetFlowTestOutputRequestOptions, (request) =>
+    request.query.stepIds.reduce<Record<string, unknown>>((acc, stepId) => {
+      acc[stepId] = {};
+      return acc;
+    }, {}),
+  );
+};
+
+const GetFlowTestOutputRequestOptions = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
+    permission: Permission.READ_FLOW,
+  },
+  schema: {
+    tags: ['flow-version'],
+    description:
+      'Get flow test output by flowVersionId. Optionally, filter by stepIds',
+    params: Type.Object({
+      id: OpenOpsId,
+    }),
+    querystring: Type.Object({
+      stepIds: Type.Array(Type.String({})),
+    }),
+  },
 };
 
 const GetLatestVersionsByConnectionRequestOptions = {

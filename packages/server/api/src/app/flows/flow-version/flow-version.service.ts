@@ -299,6 +299,7 @@ export const flowVersionService = {
       description: request.description,
       flowId,
       trigger: {
+        id: openOpsId(),
         type: TriggerType.EMPTY,
         name: 'trigger',
         settings: {},
@@ -455,6 +456,8 @@ async function prepareRequest(
   );
   switch (clonedRequest.type) {
     case FlowOperationType.ADD_ACTION:
+      clonedRequest.request.action.id =
+        clonedRequest.request.action.id ?? openOpsId();
       clonedRequest.request.action.valid = true;
       switch (clonedRequest.request.action.type) {
         case ActionType.LOOP_ON_ITEMS:
