@@ -19,7 +19,8 @@ export enum RiskLevel {
 }
 
 const commonActionProps = {
-  id: Type.Optional(Type.String()),
+  // todo - make this mandatory after migration
+  id: Type.Optional(Type.String({})),
   name: Type.String({}),
   valid: Type.Boolean({}),
   displayName: Type.String({}),

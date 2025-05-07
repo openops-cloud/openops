@@ -42,6 +42,7 @@ export function buildSimpleLoopAction({
     firstLoopAction?: Action
 }): LoopOnItemsAction {
     return {
+        id: name,
         name,
         displayName: 'Loop',
         type: ActionType.LOOP_ON_ITEMS,
@@ -54,10 +55,9 @@ export function buildSimpleLoopAction({
     }
 }
 
-
-
 export function buildActionWithOneCondition({ condition, onSuccessAction, onFailureAction }: { condition: BranchCondition, onSuccessAction?: Action, onFailureAction?: Action }): BranchAction {
     return {
+        id: 'branch',
         name: 'branch',
         displayName: 'Your Branch Name',
         type: ActionType.BRANCH,
@@ -73,9 +73,9 @@ export function buildActionWithOneCondition({ condition, onSuccessAction, onFail
     }
 }
 
-
 export function buildCodeAction({ name, input, nextAction, errorHandlingOptions }: { name: 'echo_step' | 'runtime' | 'echo_step_1', input: Record<string, unknown>, errorHandlingOptions?: ActionErrorHandlingOptions, nextAction?: Action }): CodeAction {
     return {
+        id: name,
         name,
         displayName: 'Your Action Name',
         type: ActionType.CODE,
@@ -94,6 +94,7 @@ export function buildCodeAction({ name, input, nextAction, errorHandlingOptions 
 
 export function buildBlockAction({ name, input, blockName, actionName, nextAction, errorHandlingOptions }: { errorHandlingOptions?: ActionErrorHandlingOptions, name: string, input: Record<string, unknown>, nextAction?: Action, blockName: string, actionName: string }): BlockAction {
     return {
+        id: name,
         name,
         displayName: 'Your Action Name',
         type: ActionType.BLOCK,
