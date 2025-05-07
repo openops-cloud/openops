@@ -151,6 +151,13 @@ export const flowsApi = {
   count() {
     return api.get<number>('/v1/flows/count');
   },
+  getStepTestOutput(flowVersionId: string, stepId: string) {
+    return api
+      .get<Record<string, unknown>>(
+        `/v1/flow-versions/${flowVersionId}/test-output?stepIds=${stepId}`,
+      )
+      .then((response) => response[stepId]);
+  },
 };
 
 function getInitialRun(
