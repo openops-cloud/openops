@@ -171,7 +171,7 @@ describe('Flow API', () => {
       expect(responseBody?.version?.flowId).toBe(responseBody?.id);
       expect(responseBody?.version?.displayName).toBe('test template');
       expect(responseBody?.version?.description).toBe('A test template');
-      expect(Object.keys(responseBody?.version?.trigger)).toHaveLength(5);
+      expect(Object.keys(responseBody?.version?.trigger)).toHaveLength(6);
       expect(responseBody?.version?.trigger.type).toBe('EMPTY');
       expect(responseBody?.version?.trigger.name).toBe('trigger');
       expect(responseBody?.version?.trigger.settings).toMatchObject({});
