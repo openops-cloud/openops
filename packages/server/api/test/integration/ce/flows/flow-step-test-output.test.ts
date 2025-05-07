@@ -22,69 +22,58 @@ afterAll(async () => {
 });
 
 describe('Flow Step Test output', () => {
-  it('Should save step test output', async () => {
+  const saveFlowAndVersion = async (
+    state: FlowVersionState = FlowVersionState.DRAFT,
+  ) => {
     const { mockProject } = await mockBasicSetup();
 
-    const mockFlow = createMockFlow({
-      projectId: mockProject.id,
-    });
+    const mockFlow = createMockFlow({ projectId: mockProject.id });
     await databaseConnection().getRepository('flow').save([mockFlow]);
 
     const mockFlowVersion = createMockFlowVersion({
       flowId: mockFlow.id,
-      state: FlowVersionState.DRAFT,
+      state,
     });
     await databaseConnection()
       .getRepository('flow_version')
       .save([mockFlowVersion]);
 
-    const savedData = await flowStepTestOutputService.save({
-      stepId: openOpsId(),
-      flowVersionId: mockFlowVersion.id,
-      output: {
-        test: 'test',
-      },
+    return { mockFlow, mockFlowVersion };
+  };
+
+  const saveTestOutput = async (
+    stepId: string,
+    versionId: string,
+    value: unknown,
+  ) =>
+    flowStepTestOutputService.save({
+      stepId,
+      flowVersionId: versionId,
+      output: value,
     });
 
-    const stepTestOutput = await databaseConnection()
-      .getRepository('flow_step_test_output')
-      .findOneByOrFail({
-        id: savedData.id,
-      });
+  it('Should save step test output', async () => {
+    const { mockFlowVersion } = await saveFlowAndVersion();
 
-    expect(Buffer.isBuffer(stepTestOutput.output)).toBe(true);
+    const savedData = await saveTestOutput(openOpsId(), mockFlowVersion.id, {
+      test: 'test',
+    });
+
+    const savedRaw = await databaseConnection()
+      .getRepository('flow_step_test_output')
+      .findOneByOrFail({ id: savedData.id });
+
+    expect(Buffer.isBuffer(savedRaw.output)).toBe(true);
   });
 
   it('Should list step test outputs for given step IDs', async () => {
-    const { mockProject } = await mockBasicSetup();
-
-    const mockFlow = createMockFlow({
-      projectId: mockProject.id,
-    });
-    await databaseConnection().getRepository('flow').save([mockFlow]);
-
-    const mockFlowVersion = createMockFlowVersion({
-      flowId: mockFlow.id,
-      state: FlowVersionState.DRAFT,
-    });
-    await databaseConnection()
-      .getRepository('flow_version')
-      .save([mockFlowVersion]);
+    const { mockFlowVersion } = await saveFlowAndVersion();
 
     const stepId1 = openOpsId();
     const stepId2 = openOpsId();
 
-    await flowStepTestOutputService.save({
-      stepId: stepId1,
-      flowVersionId: mockFlowVersion.id,
-      output: { value: 'one' },
-    });
-
-    await flowStepTestOutputService.save({
-      stepId: stepId2,
-      flowVersionId: mockFlowVersion.id,
-      output: { value: 'two' },
-    });
+    await saveTestOutput(stepId1, mockFlowVersion.id, { value: 'one' });
+    await saveTestOutput(stepId2, mockFlowVersion.id, { value: 'two' });
 
     const results = await flowStepTestOutputService.list({
       flowVersionId: mockFlowVersion.id,
@@ -97,53 +86,30 @@ describe('Flow Step Test output', () => {
   });
 
   it('Should copy all test outputs from one flow version to another', async () => {
-    const { mockProject } = await mockBasicSetup();
-
-    const mockFlow = createMockFlow({ projectId: mockProject.id });
-    await databaseConnection().getRepository('flow').save([mockFlow]);
-
-    const fromFlowVersion = createMockFlowVersion({
-      flowId: mockFlow.id,
-      state: FlowVersionState.LOCKED,
-    });
-    await databaseConnection()
-      .getRepository('flow_version')
-      .save([fromFlowVersion]);
-
-    const toFlowVersion = createMockFlowVersion({
-      flowId: mockFlow.id,
-      state: FlowVersionState.DRAFT,
-    });
-    await databaseConnection()
-      .getRepository('flow_version')
-      .save([toFlowVersion]);
+    const { mockFlowVersion: fromVersion } = await saveFlowAndVersion(
+      FlowVersionState.LOCKED,
+    );
+    const { mockFlowVersion: toVersion } = await saveFlowAndVersion(
+      FlowVersionState.DRAFT,
+    );
 
     const stepId1 = openOpsId();
     const stepId2 = openOpsId();
 
-    await flowStepTestOutputService.save({
-      stepId: stepId1,
-      flowVersionId: fromFlowVersion.id,
-      output: { value: 'from-1' },
-    });
-
-    await flowStepTestOutputService.save({
-      stepId: stepId2,
-      flowVersionId: fromFlowVersion.id,
-      output: { value: 'from-2' },
-    });
+    await saveTestOutput(stepId1, fromVersion.id, { value: 'from-1' });
+    await saveTestOutput(stepId2, fromVersion.id, { value: 'from-2' });
 
     await flowStepTestOutputService.copyFromVersion({
-      fromVersionId: fromFlowVersion.id,
-      toVersionId: toFlowVersion.id,
+      fromVersionId: fromVersion.id,
+      toVersionId: toVersion.id,
     });
 
-    const newSaved = await flowStepTestOutputService.list({
-      flowVersionId: toFlowVersion.id,
+    const copied = await flowStepTestOutputService.list({
+      flowVersionId: toVersion.id,
       stepIds: [stepId1, stepId2],
     });
 
-    expect(newSaved[0].output).toStrictEqual({ value: 'from-1' });
-    expect(newSaved[1].output).toStrictEqual({ value: 'from-2' });
+    expect(copied[0].output).toStrictEqual({ value: 'from-1' });
+    expect(copied[1].output).toStrictEqual({ value: 'from-2' });
   });
 });
