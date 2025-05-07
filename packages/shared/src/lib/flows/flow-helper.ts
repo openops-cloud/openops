@@ -708,7 +708,7 @@ function createTrigger(
   nextAction: Action | undefined,
 ): Trigger {
   const baseProperties = {
-    id: request.id,
+    id: request.id || openOpsId(),
     displayName: request.displayName,
     name,
     valid: false,
@@ -1211,4 +1211,5 @@ export const flowHelper = {
   truncateFlow,
   clearStepTestData,
   getUsedConnections,
+  createTrigger,
 };

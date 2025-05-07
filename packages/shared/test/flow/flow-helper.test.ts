@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Action,
   ActionType,
@@ -3120,5 +3121,139 @@ describe('getUsedConnections', () => {
   it('returns an empty object if getAllSteps returns empty', () => {
     const result = flowHelper.getUsedConnections(actionWithBrokenConnections);
     expect(result).toEqual({});
+  });
+});
+
+describe('createTrigger', () => {
+  it('should create an EMPTY trigger', () => {
+    const name = 'trigger';
+    const request = {
+      type: TriggerType.EMPTY,
+      displayName: 'Empty Trigger',
+      settings: {},
+    };
+    const nextAction = undefined;
+
+    const result = flowHelper.createTrigger(name, request as any, nextAction);
+
+    expect(result).toEqual({
+      id: expect.any(String),
+      name: 'trigger',
+      type: TriggerType.EMPTY,
+      displayName: 'Empty Trigger',
+      settings: {},
+      valid: true,
+      nextAction: undefined,
+    });
+  });
+
+  it('should create a BLOCK trigger', () => {
+    const name = 'trigger';
+    const request = {
+      type: TriggerType.BLOCK,
+      displayName: 'Block Trigger',
+      settings: {
+        input: {
+          cronExpression: '25 10 * * 0,1,2,3,4',
+        },
+        packageType: PackageType.REGISTRY,
+        blockType: BlockType.OFFICIAL,
+        blockName: 'schedule',
+        blockVersion: '0.0.2',
+        inputUiInfo: {},
+        triggerName: 'cron_expression',
+      },
+    };
+    const nextAction = createCodeAction('step_1');
+
+    const result = flowHelper.createTrigger(name, request as any, nextAction);
+
+    expect(result).toEqual({
+      id: expect.any(String),
+      name: 'trigger',
+      type: TriggerType.BLOCK,
+      displayName: 'Block Trigger',
+      settings: {
+        input: {
+          cronExpression: '25 10 * * 0,1,2,3,4',
+        },
+        packageType: PackageType.REGISTRY,
+        blockType: BlockType.OFFICIAL,
+        blockName: 'schedule',
+        blockVersion: '0.0.2',
+        inputUiInfo: {},
+        triggerName: 'cron_expression',
+      },
+      valid: true,
+      nextAction,
+    });
+  });
+
+  it('should create trigger with custom id', () => {
+    const name = 'trigger';
+    const request = {
+      id: 'custom-id',
+      type: TriggerType.EMPTY,
+      displayName: 'Empty Trigger',
+      settings: {},
+    };
+    const nextAction = undefined;
+
+    const result = flowHelper.createTrigger(name, request as any, nextAction);
+
+    expect(result).toEqual({
+      id: 'custom-id',
+      name: 'trigger',
+      type: TriggerType.EMPTY,
+      displayName: 'Empty Trigger',
+      settings: {},
+      valid: true,
+      nextAction: undefined,
+    });
+  });
+
+  it('should create trigger with valid=false when specified', () => {
+    const name = 'trigger';
+    const request = {
+      type: TriggerType.EMPTY,
+      displayName: 'Empty Trigger',
+      settings: {},
+      valid: false,
+    };
+    const nextAction = undefined;
+
+    const result = flowHelper.createTrigger(name, request as any, nextAction);
+
+    expect(result).toEqual({
+      id: expect.any(String),
+      name: 'trigger',
+      type: TriggerType.EMPTY,
+      displayName: 'Empty Trigger',
+      settings: {},
+      valid: false,
+      nextAction: undefined,
+    });
+  });
+
+  it('should create trigger with nextAction', () => {
+    const name = 'trigger';
+    const request = {
+      type: TriggerType.EMPTY,
+      displayName: 'Empty Trigger',
+      settings: {},
+    };
+    const nextAction = createCodeAction('step_1');
+
+    const result = flowHelper.createTrigger(name, request as any, nextAction);
+
+    expect(result).toEqual({
+      id: expect.any(String),
+      name: 'trigger',
+      type: TriggerType.EMPTY,
+      displayName: 'Empty Trigger',
+      settings: {},
+      valid: true,
+      nextAction,
+    });
   });
 });
