@@ -9,7 +9,6 @@ import {
   OpenOpsId,
   Permission,
   PrincipalType,
-  RedactedAppConnection,
   SeekPage,
   SERVICE_KEY_SECURITY_OPENAPI,
   UpsertAppConnectionRequestBody,
