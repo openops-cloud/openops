@@ -42,7 +42,7 @@ export const flowStepTestOutputService = {
 
     for (const stepId of params.stepIds) {
       const flowStepTestOutput = await flowStepTestOutputRepo().findOneBy({
-        id: params.flowVersionId,
+        flowVersionId: params.flowVersionId,
         stepId,
       });
 
