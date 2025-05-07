@@ -27,7 +27,7 @@ export const useStepTestOuput = (
     queryClient.invalidateQueries({
       queryKey: ['actionTestOutput', flowVersionId, stepId],
     });
-  }, [fallbackData]);
+  }, [fallbackData, flowVersionId, queryClient, stepId]);
 
   return useQuery({
     queryKey: ['actionTestOutput', flowVersionId, stepId],
