@@ -19,6 +19,7 @@ export enum RiskLevel {
 }
 
 const commonActionProps = {
+  id: Type.Optional(Type.String()),
   name: Type.String({}),
   valid: Type.Boolean({}),
   displayName: Type.String({}),

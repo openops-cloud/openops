@@ -6,6 +6,7 @@ import {
   FlowStepTestOutput,
   FlowVersionState,
   MinimalFlow,
+  OpenOpsId,
   Permission,
   PrincipalType,
   SERVICE_KEY_SECURITY_OPENAPI,
@@ -111,34 +112,30 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
     },
   );
 
-  fastify.get(
-    '/:flowVersionId/test-output',
-    {
-      config: {
-        allowedPrincipals: [PrincipalType.USER],
-      },
-      schema: {
-        params: Type.Object({
-          flowVersionId: Type.String(),
-        }),
-        tags: ['flow-step-test-output'],
-        description: 'Gets the test output for a flow version',
-        security: [SERVICE_KEY_SECURITY_OPENAPI],
-        querystring: Type.Object({
-          stepIds: Type.Array(Type.String()),
-        }),
-      },
-    },
-    async (request): Promise<FlowStepTestOutput[]> => {
-      const { stepIds } = request.query;
-      const { flowVersionId } = request.params;
-
-      return flowStepTestOutputService.list({
-        stepIds,
-        flowVersionId,
-      });
-    },
+  fastify.get('/:id/test-output', GetFlowTestOutputRequestOptions, (request) =>
+    request.query.stepIds.reduce<Record<string, unknown>>((acc, stepId) => {
+      acc[stepId] = {};
+      return acc;
+    }, {}),
   );
+};
+
+const GetFlowTestOutputRequestOptions = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
+    permission: Permission.READ_FLOW,
+  },
+  schema: {
+    tags: ['flow-version'],
+    description:
+      'Get flow test output by flowVersionId. Optionally, filter by stepIds',
+    params: Type.Object({
+      id: OpenOpsId,
+    }),
+    querystring: Type.Object({
+      stepIds: Type.Array(Type.String({})),
+    }),
+  },
 };
 
 const GetLatestVersionsByConnectionRequestOptions = {

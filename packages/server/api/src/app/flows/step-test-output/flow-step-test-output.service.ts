@@ -14,7 +14,6 @@ export const flowStepTestOutputRepo = repoFactory(FlowStepTestOutputEntity);
 
 export const flowStepTestOutputService = {
   async save({
-    outputId,
     stepId,
     flowVersionId,
     output,
@@ -27,8 +26,18 @@ export const flowStepTestOutputService = {
       compression: FileCompression.GZIP,
     });
 
+    const existing = await flowStepTestOutputRepo().findOneBy({
+      stepId,
+      flowVersionId,
+    });
+
+    let outputId = openOpsId();
+    if (existing) {
+      outputId = existing.id;
+    }
+
     const stepOutput = {
-      id: outputId ?? openOpsId(),
+      id: outputId,
       stepId,
       flowVersionId,
       output: compressedOutput,
@@ -79,7 +88,6 @@ type ListParams = {
 };
 
 type SaveParams = {
-  outputId?: OpenOpsId | undefined;
   // TODO: remove optional
   stepId?: OpenOpsId | undefined;
   flowVersionId: FlowVersionId;

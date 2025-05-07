@@ -39,7 +39,6 @@ describe('Flow Step Test output', () => {
       .save([mockFlowVersion]);
 
     const savedData = await flowStepTestOutputService.save({
-      outputId: openOpsId(),
       stepId: openOpsId(),
       flowVersionId: mockFlowVersion.id,
       output: {
@@ -76,14 +75,12 @@ describe('Flow Step Test output', () => {
     const stepId2 = openOpsId();
 
     await flowStepTestOutputService.save({
-      outputId: openOpsId(),
       stepId: stepId1,
       flowVersionId: mockFlowVersion.id,
       output: { value: 'one' },
     });
 
     await flowStepTestOutputService.save({
-      outputId: openOpsId(),
       stepId: stepId2,
       flowVersionId: mockFlowVersion.id,
       output: { value: 'two' },
