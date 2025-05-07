@@ -95,4 +95,55 @@ describe('Flow Step Test output', () => {
     expect(results[0].output).toStrictEqual({ value: 'one' });
     expect(results[1].output).toStrictEqual({ value: 'two' });
   });
+
+  it('Should copy all test outputs from one flow version to another', async () => {
+    const { mockProject } = await mockBasicSetup();
+
+    const mockFlow = createMockFlow({ projectId: mockProject.id });
+    await databaseConnection().getRepository('flow').save([mockFlow]);
+
+    const fromFlowVersion = createMockFlowVersion({
+      flowId: mockFlow.id,
+      state: FlowVersionState.LOCKED,
+    });
+    await databaseConnection()
+      .getRepository('flow_version')
+      .save([fromFlowVersion]);
+
+    const toFlowVersion = createMockFlowVersion({
+      flowId: mockFlow.id,
+      state: FlowVersionState.DRAFT,
+    });
+    await databaseConnection()
+      .getRepository('flow_version')
+      .save([toFlowVersion]);
+
+    const stepId1 = openOpsId();
+    const stepId2 = openOpsId();
+
+    await flowStepTestOutputService.save({
+      stepId: stepId1,
+      flowVersionId: fromFlowVersion.id,
+      output: { value: 'from-1' },
+    });
+
+    await flowStepTestOutputService.save({
+      stepId: stepId2,
+      flowVersionId: fromFlowVersion.id,
+      output: { value: 'from-2' },
+    });
+
+    await flowStepTestOutputService.copyFromVersion({
+      fromVersionId: fromFlowVersion.id,
+      toVersionId: toFlowVersion.id,
+    });
+
+    const newSaved = await flowStepTestOutputService.list({
+      flowVersionId: toFlowVersion.id,
+      stepIds: [stepId1, stepId2],
+    });
+
+    expect(newSaved[0].output).toStrictEqual({ value: 'from-1' });
+    expect(newSaved[1].output).toStrictEqual({ value: 'from-2' });
+  });
 });
