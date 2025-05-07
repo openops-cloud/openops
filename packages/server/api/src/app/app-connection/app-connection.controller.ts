@@ -61,30 +61,24 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
       return appConnectionsWithoutSensitiveData;
     },
   );
-  app.get(
-    '/:id',
-    GetAppConnectionRequest,
-    async (
-      request,
-    ): Promise<AppConnectionWithoutSensitiveData | RedactedAppConnection> => {
-      const connection = await appConnectionService.getOneOrThrow({
-        id: request.params.id,
-        projectId: request.principal.projectId,
-      });
+  app.get('/:id', GetAppConnectionRequest, async (request): Promise<any> => {
+    const connection = await appConnectionService.getOneOrThrow({
+      id: request.params.id,
+      projectId: request.principal.projectId,
+    });
 
-      const block = await blockMetadataService.get({
-        name: connection.blockName,
-        projectId: request.principal.projectId,
-        version: undefined,
-      });
+    const block = await blockMetadataService.get({
+      name: connection.blockName,
+      projectId: request.principal.projectId,
+      version: undefined,
+    });
 
-      if (!block) {
-        throw new Error(`Block metadata not found for ${connection.blockName}`);
-      }
+    if (!block) {
+      throw new Error(`Block metadata not found for ${connection.blockName}`);
+    }
 
-      return redactSecrets(block.auth, connection);
-    },
-  );
+    return redactSecrets(block.auth, connection);
+  });
   app.delete(
     '/:id',
     DeleteAppConnectionRequest,
@@ -166,18 +160,25 @@ const DeleteAppConnectionRequest = {
 
 const GetAppConnectionRequest = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+    allowedPrincipals: [PrincipalType.USER],
     permission: Permission.READ_APP_CONNECTION,
   },
   schema: {
     tags: ['app-connections'],
-    security: [SERVICE_KEY_SECURITY_OPENAPI],
     description: 'Get an app connection',
     params: Type.Object({
       id: OpenOpsId,
     }),
     response: {
-      [StatusCodes.NO_CONTENT]: Type.Never(),
+      [StatusCodes.OK]: Type.Intersect([
+        AppConnectionWithoutSensitiveData,
+        Type.Object(
+          {
+            value: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
+          },
+          { additionalProperties: true },
+        ),
+      ]),
     },
   },
 };

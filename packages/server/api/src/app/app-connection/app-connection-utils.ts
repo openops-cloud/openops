@@ -33,7 +33,7 @@ export function redactSecrets(
       return {
         ...connection,
         value: redacted as any,
-      };
+      } as RedactedAppConnection;
     }
 
     case PropertyType.BASIC_AUTH: {
@@ -41,7 +41,7 @@ export function redactSecrets(
       return {
         ...connection,
         value: redacted as any,
-      };
+      } as RedactedAppConnection;
     }
 
     case PropertyType.CUSTOM_AUTH: {
@@ -59,7 +59,7 @@ export function redactSecrets(
       return {
         ...connection,
         value: redacted as any,
-      };
+      } as RedactedAppConnection;
     }
 
     case PropertyType.OAUTH2: {
@@ -77,7 +77,7 @@ export function redactSecrets(
             client_secret: REDACTED_MESSAGE,
             redirect_url: value.redirect_url,
           } as any,
-        };
+        } as RedactedAppConnection;
       }
 
       return removeSensitiveData(connection);

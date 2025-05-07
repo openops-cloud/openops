@@ -118,6 +118,13 @@ export type AppConnectionWithoutSensitiveData = Static<
   typeof AppConnectionWithoutSensitiveData
 > & { __brand: 'AppConnectionWithoutSensitiveData' };
 
-export type RedactedAppConnection = Omit<AppConnection, 'value'> & {
-  value?: Record<string, unknown>;
+export const RedactedAppConnection = Type.Intersect([
+  AppConnectionWithoutSensitiveData,
+  Type.Object({
+    value: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
+  }),
+]);
+
+export type RedactedAppConnection = Static<typeof RedactedAppConnection> & {
+  __brand: 'RedactedAppConnection';
 };
