@@ -45,6 +45,46 @@ export const flowStepTestOutputService = {
 
     return flowStepTestOutputRepo().save(stepOutput);
   },
+
+  async list(params: ListParams): Promise<FlowStepTestOutput[]> {
+    const results: FlowStepTestOutput[] = [];
+
+    for (const stepId of params.stepIds) {
+      const flowStepTestOutput = await flowStepTestOutputRepo().findOneBy({
+        flowVersionId: params.flowVersionId,
+        stepId,
+      });
+
+      if (flowStepTestOutput) {
+        const result = await decompressOutput(flowStepTestOutput);
+        results.push(result);
+      }
+    }
+
+    return results;
+  },
+};
+
+async function decompressOutput(
+  record: FlowStepTestOutput,
+): Promise<FlowStepTestOutput> {
+  const decompressed = await fileCompressor.decompress({
+    data: record.output as Buffer,
+    compression: FileCompression.GZIP,
+  });
+
+  const parsedEncryptedOutput = JSON.parse(decompressed.toString());
+  const decryptedOutput = encryptUtils.decryptObject(parsedEncryptedOutput);
+
+  return {
+    ...record,
+    output: decryptedOutput,
+  };
+}
+
+type ListParams = {
+  flowVersionId: FlowVersionId;
+  stepIds: OpenOpsId[];
 };
 
 type SaveParams = {
