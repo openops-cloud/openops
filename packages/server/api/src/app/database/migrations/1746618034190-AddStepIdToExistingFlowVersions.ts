@@ -26,11 +26,11 @@ export class AddStepIdToExistingFlowVersions1746454781866
 
 async function updateRecords(
   queryRunner: QueryRunner,
-  records: { id: string; trigger?: any; template?: any }[],
+  records: { id: string; trigger: any }[],
   tableName: string,
 ): Promise<void> {
   for (const record of records) {
-    const jsonData = record.trigger ?? record.template;
+    const jsonData = record.trigger;
 
     const { updatedJson, extractedData } = await processJsonObject(jsonData);
 
@@ -38,8 +38,6 @@ async function updateRecords(
       `UPDATE "${tableName}" SET "trigger" = $1 WHERE "id" = $2`,
       [updatedJson, record.id],
     );
-
-    logger.info(`LENGTH ${extractedData.length}`);
 
     for (const data of extractedData) {
       const encryptOutput = encryptUtils.encryptObject(
@@ -89,7 +87,7 @@ async function updateJsonObject(
     return obj;
   }
 
-  if (obj.name && !obj.id) {
+  if (obj.name && obj.type && !obj.id) {
     obj.id = openOpsId();
   }
 
