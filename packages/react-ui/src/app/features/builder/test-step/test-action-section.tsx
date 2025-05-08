@@ -22,11 +22,13 @@ import { formatUtils } from '@/app/lib/utils';
 import {
   Action,
   ActionType,
+  FlagId,
   isNil,
   RiskLevel,
   StepRunResponse,
 } from '@openops/shared';
 
+import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { stepTestOutputHooks } from './step-test-output-hooks';
 import { TestSampleDataViewer } from './test-sample-data-viewer';
 import { TestButtonTooltip } from './test-step-tooltip';
@@ -62,10 +64,17 @@ const TestActionSection = React.memo(
       formValues.settings.inputUiInfo?.lastTestDate,
     );
 
-    const { data: currentSelectedData, isLoading: isLoadingTestOutput } =
-      stepTestOutputHooks.useStepTestOutputFormData(flowVersionId, form);
+    const {
+      data: currentSelectedData,
+      isLoading: isLoadingTestOutput,
+      refetch: refetchTestOutput,
+    } = stepTestOutputHooks.useStepTestOutputFormData(flowVersionId, form);
 
     const sampleDataExists = !isNil(lastTestDate) || !isNil(errorMessage);
+
+    const { data: useNewExternalTestData = false } = flagsHooks.useFlag(
+      FlagId.USE_NEW_EXTERNAL_TESTDATA,
+    );
 
     const socket = useSocket();
 
@@ -83,16 +92,19 @@ const TestActionSection = React.memo(
         if (stepResponse.success) {
           setErrorMessage(undefined);
 
-          form.setValue(
-            'settings.inputUiInfo.currentSelectedData',
-            formattedResponse,
-            { shouldValidate: true },
-          );
-          form.setValue(
-            'settings.inputUiInfo.lastTestDate',
-            dayjs().toISOString(),
-            { shouldValidate: true },
-          );
+          if (!useNewExternalTestData) {
+            form.setValue(
+              'settings.inputUiInfo.currentSelectedData',
+              formattedResponse,
+              { shouldValidate: true },
+            );
+            form.setValue(
+              'settings.inputUiInfo.lastTestDate',
+              dayjs().toISOString(),
+              { shouldValidate: true },
+            );
+          }
+          refetchTestOutput();
         } else {
           setErrorMessage(testStepUtils.formatErrorMessage(formattedResponse));
         }

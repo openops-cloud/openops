@@ -24,6 +24,7 @@ import { triggerEventsApi } from '@/app/features/flows/lib/trigger-events-api';
 import { formatUtils } from '@/app/lib/utils';
 import {
   CATCH_WEBHOOK,
+  FlagId,
   isNil,
   SeekPage,
   Trigger,
@@ -31,6 +32,7 @@ import {
   TriggerTestStrategy,
 } from '@openops/shared';
 
+import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { stepTestOutputHooks } from './step-test-output-hooks';
 import { TestSampleDataViewer } from './test-sample-data-viewer';
 import { TestButtonTooltip } from './test-step-tooltip';
@@ -87,8 +89,11 @@ const TestTriggerSection = React.memo(
       undefined,
     );
 
-    const { data: currentSelectedData, isLoading: isLoadingTestOutput } =
-      stepTestOutputHooks.useStepTestOutputFormData(flowVersionId, form);
+    const {
+      data: currentSelectedData,
+      isLoading: isLoadingTestOutput,
+      refetch: refetchTestOutput,
+    } = stepTestOutputHooks.useStepTestOutputFormData(flowVersionId, form);
 
     const [currentSelectedId, setCurrentSelectedId] = useState<
       string | undefined
@@ -178,18 +183,25 @@ const TestTriggerSection = React.memo(
 
     const isTesting = isPending || isLoadingTestOutput;
 
+    const { data: useNewExternalTestData = false } = flagsHooks.useFlag(
+      FlagId.USE_NEW_EXTERNAL_TESTDATA,
+    );
+
     function updateCurrentSelectedData(data: TriggerEvent) {
-      form.setValue(
-        'settings.inputUiInfo',
-        {
-          ...formValues.settings.inputUiInfo,
-          currentSelectedData: formatUtils.formatStepInputOrOutput(
-            data.payload,
-          ),
-          lastTestDate: dayjs().toISOString(),
-        },
-        { shouldValidate: true },
-      );
+      if (!useNewExternalTestData) {
+        form.setValue(
+          'settings.inputUiInfo',
+          {
+            ...formValues.settings.inputUiInfo,
+            currentSelectedData: formatUtils.formatStepInputOrOutput(
+              data.payload,
+            ),
+            lastTestDate: dayjs().toISOString(),
+          },
+          { shouldValidate: true },
+        );
+      }
+      refetchTestOutput();
       setLastTestDate(dayjs().toISOString());
     }
 
