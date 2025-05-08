@@ -1,6 +1,6 @@
 # .github/workflows/chromatic.yml
 
-name: "Chromatic"
+name: 'Chromatic'
 
 on: push
 
@@ -28,10 +28,8 @@ jobs:
         run: npm ci --prefer-offline
 
       - name: Run Chromatic
-        # ¯\_(ツ)_/¯ TODO: use chromaui/action@latest(or fixed > v11.16.5) version when SB comes with a final stable fix: https://github.com/chromaui/chromatic-cli/pull/1049.
-        # Also remove the build-storybook npm script and add buildCommand option to chromatic.config.json
         if: env.CHROMATIC_PROJECT_TOKEN
-        uses: chromaui/action@v11.28.2 
+        uses: chromaui/action@latest
         with:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           onlyChanged: true # 👈 Required option to enable TurboSnap
