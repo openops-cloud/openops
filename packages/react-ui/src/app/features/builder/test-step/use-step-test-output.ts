@@ -21,6 +21,7 @@ export const useStepTestOuput = (
     name: 'settings.inputUiInfo.lastTestDate',
     control: form.control as any,
   }) as unknown;
+
   const { id: stepId } = form.getValues();
 
   const queryClient = useQueryClient();
