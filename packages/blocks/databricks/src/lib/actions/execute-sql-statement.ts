@@ -19,11 +19,12 @@ export const executeSqlStatement = createAction({
   props: {
     workspaceDeploymentName: workspaceDeploymentName,
     warehouseId: warehouseId,
-    sqlText: Property.ShortText({
+    sqlText: Property.LongText({
       displayName: 'SQL query',
       required: true,
       description:
         'The SQL statement to execute. You can use named parameters like `:name` or numbered placeholders like `:1`, `:2`, etc.',
+      supportsAI: true,
     }),
     parameters: Property.Object({
       displayName: 'Parameters',

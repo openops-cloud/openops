@@ -13,6 +13,8 @@ export const getSystemPrompt = async (
       return loadPrompt('azure-cli.txt');
     case '@openops/block-google-cloud':
       return loadPrompt('gcp-cli.txt');
+    case '@openops/block-databricks':
+      return loadPrompt('databricks.txt');
     default:
       return '';
   }
