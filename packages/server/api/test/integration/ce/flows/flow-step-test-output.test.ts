@@ -98,4 +98,39 @@ describe('Flow Step Test output', () => {
       expect.arrayContaining([{ value: 'one' }, { value: 'two' }]),
     );
   });
+
+  it('Should return only available outputs and skip step IDs without saved output', async () => {
+    const { mockProject } = await mockBasicSetup();
+
+    const mockFlow = createMockFlow({
+      projectId: mockProject.id,
+    });
+    await databaseConnection().getRepository('flow').save([mockFlow]);
+
+    const mockFlowVersion = createMockFlowVersion({
+      flowId: mockFlow.id,
+      state: FlowVersionState.DRAFT,
+    });
+    await databaseConnection()
+      .getRepository('flow_version')
+      .save([mockFlowVersion]);
+
+    const existingStepId = openOpsId();
+    const missingStepId = openOpsId();
+
+    await flowStepTestOutputService.save({
+      stepId: existingStepId,
+      flowVersionId: mockFlowVersion.id,
+      output: { value: 'existing' },
+    });
+
+    const results = await flowStepTestOutputService.list({
+      flowVersionId: mockFlowVersion.id,
+      stepIds: [existingStepId, missingStepId],
+    });
+
+    expect(results).toHaveLength(1);
+    expect(results[0].stepId).toBe(existingStepId);
+    expect(results[0].output).toStrictEqual({ value: 'existing' });
+  });
 });
