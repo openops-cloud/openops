@@ -13,6 +13,7 @@ import {
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
 import { flowVersionService } from '../flow-version/flow-version.service';
+import { flowStepTestOutputService } from '../step-test-output/flow-step-test-output.service';
 import { flowService } from './flow.service';
 
 export const flowVersionController: FastifyPluginAsyncTypebox = async (
@@ -110,30 +111,47 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
     },
   );
 
-  fastify.get('/:id/test-output', GetFlowTestOutputRequestOptions, (request) =>
-    request.query.stepIds.reduce<Record<string, unknown>>((acc, stepId) => {
-      acc[stepId] = {};
-      return acc;
-    }, {}),
-  );
-};
+  fastify.get(
+    '/:flowVersionId/test-output',
+    {
+      config: {
+        allowedPrincipals: [PrincipalType.USER],
+      },
+      schema: {
+        params: Type.Object({
+          flowVersionId: Type.String(),
+        }),
+        tags: ['flow-step-test-output'],
+        description: 'Gets the test output for a flow version',
+        security: [SERVICE_KEY_SECURITY_OPENAPI],
+        querystring: Type.Object({
+          stepIds: Type.Array(Type.String()),
+        }),
+      },
+    },
+    async (
+      request,
+    ): Promise<
+      Record<OpenOpsId, { output: unknown; lastTestDate: string }>
+    > => {
+      const { stepIds } = request.query;
+      const { flowVersionId } = request.params;
 
-const GetFlowTestOutputRequestOptions = {
-  config: {
-    allowedPrincipals: [PrincipalType.USER],
-    permission: Permission.READ_FLOW,
-  },
-  schema: {
-    tags: ['flow-version'],
-    description:
-      'Get flow test output by flowVersionId. Optionally, filter by stepIds',
-    params: Type.Object({
-      id: OpenOpsId,
-    }),
-    querystring: Type.Object({
-      stepIds: Type.Array(Type.String({})),
-    }),
-  },
+      const flowStepTestOutputs = await flowStepTestOutputService.list({
+        stepIds,
+        flowVersionId,
+      });
+      return Object.fromEntries(
+        flowStepTestOutputs.map((flowStepTestOutput) => [
+          flowStepTestOutput.stepId as OpenOpsId,
+          {
+            output: flowStepTestOutput.output,
+            lastTestDate: flowStepTestOutput.updated,
+          },
+        ]),
+      );
+    },
+  );
 };
 
 const GetLatestVersionsByConnectionRequestOptions = {
