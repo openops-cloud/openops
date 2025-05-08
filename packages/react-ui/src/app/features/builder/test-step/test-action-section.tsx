@@ -30,6 +30,7 @@ import {
 import { TestSampleDataViewer } from './test-sample-data-viewer';
 import { TestButtonTooltip } from './test-step-tooltip';
 import { testStepUtils } from './test-step-utils';
+import { useStepTestOuput } from './use-step-test-output';
 
 type TestActionComponentProps = {
   isSaving: boolean;
@@ -60,16 +61,15 @@ const TestActionSection = React.memo(
     const [lastTestDate, setLastTestDate] = useState(
       formValues.settings.inputUiInfo?.lastTestDate,
     );
-    const { currentSelectedData } = formValues.settings.inputUiInfo ?? {};
+
+    const { data: currentSelectedData, isLoading: isLoadingTestOutput } =
+      useStepTestOuput(flowVersionId, form);
+
     const sampleDataExists = !isNil(lastTestDate) || !isNil(errorMessage);
 
     const socket = useSocket();
 
-    const { mutate, isPending: isTesting } = useMutation<
-      StepRunResponse,
-      Error,
-      void
-    >({
+    const { mutate, isPending } = useMutation<StepRunResponse, Error, void>({
       mutationFn: async () => {
         return flowsApi.testStep(socket, {
           flowVersionId,
@@ -104,6 +104,8 @@ const TestActionSection = React.memo(
         toast(INTERNAL_ERROR_TOAST);
       },
     });
+
+    const isTesting = isPending || isLoadingTestOutput;
 
     const handleTest = () => {
       if (
