@@ -7,10 +7,11 @@ import {
 import { customAuth } from '../common/custom-auth';
 
 const props = {
-  sqlText: Property.ShortText({
+  sqlText: Property.LongText({
     displayName: 'SQL query',
     description: 'Use :1, :2… or ? placeholders to use binding parameters.',
     required: true,
+    supportsAI: true,
   }),
   binds: Property.Array({
     displayName: 'Parameters',
