@@ -124,6 +124,35 @@ const getAllStepsMentions = (
   });
 };
 
+/**
+ * @deprecated currentSelectedData will be removed in the future
+ */
+const getAllStepsMentionsFromCurrentSelectedData: (
+  state: BuilderState,
+) => MentionTreeNode[] = (state) => {
+  const { selectedStep, flowVersion } = state;
+  if (!selectedStep || !flowVersion || !flowVersion.trigger) {
+    return [];
+  }
+  const pathToTargetStep = flowHelper.findPathToStep({
+    targetStepName: selectedStep,
+    trigger: flowVersion.trigger,
+  });
+
+  return pathToTargetStep.map((step) => {
+    const stepNeedsTesting = isNil(step.settings.inputUiInfo?.lastTestDate);
+    const displayName = `${step.dfsIndex + 1}. ${step.displayName}`;
+    if (stepNeedsTesting) {
+      return createTestNode(step, displayName);
+    }
+    return dataSelectorUtils.traverseStepOutputAndReturnMentionTree({
+      stepOutput: step.settings.inputUiInfo?.currentSelectedData,
+      propertyPath: step.name,
+      displayName: displayName,
+    });
+  });
+};
+
 type DataSelectorProps = {
   parentHeight: number;
   parentWidth: number;
@@ -147,6 +176,9 @@ const DataSelector = ({
   const [searchTerm, setSearchTerm] = useState('');
   const flowVersionId = useBuilderStateContext((state) => state.flowVersion.id);
   const pathToTargetStep = useBuilderStateContext(getPathToTargetStep);
+  const mentionsFromCurrentSelectedData = useBuilderStateContext(
+    getAllStepsMentionsFromCurrentSelectedData,
+  );
 
   const stepIds: string[] = pathToTargetStep.map((p) => p.id!);
 
@@ -161,13 +193,16 @@ const DataSelector = ({
         flowVersionId,
         stepIds,
       );
-
-      console.log('stepsTestOuput', stepTestOuput);
       return stepTestOuput;
     },
+    enabled: !!useNewExternalTestData,
   });
 
-  const mentions = getAllStepsMentions(pathToTargetStep, stepsTestOutput);
+  // Backwards compatibility: use old selector if flag is off
+  const mentions = useNewExternalTestData
+    ? getAllStepsMentions(pathToTargetStep, stepsTestOutput)
+    : mentionsFromCurrentSelectedData;
+
   const midpanelState = useBuilderStateContext((state) => state.midpanelState);
   const filteredMentions = filterBy(structuredClone(mentions), searchTerm);
 
