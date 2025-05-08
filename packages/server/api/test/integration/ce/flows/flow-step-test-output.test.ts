@@ -8,10 +8,13 @@ import {
   createMockFlowVersion,
   mockBasicSetup,
 } from '../../../helpers/mocks';
+import { encryptUtils } from '../../../../src/app/helper/encryption';
+import { QueueMode } from '@openops/server-shared';
 
 let app: FastifyInstance | null = null;
 
 beforeAll(async () => {
+  await encryptUtils.loadEncryptionKey(QueueMode.MEMORY);
   await databaseConnection().initialize();
   app = await setupServer();
 });
