@@ -19,7 +19,7 @@ services:
     environment:
       OPS_COMPONENT: app
       OPS_VERSION: ${OPS_VERSION:-latest}
-      OPS_OPENOPS_TABLES_VERSION: 0.1.10
+      OPS_OPENOPS_TABLES_VERSION: 0.1.11
       OPS_ANALYTICS_VERSION: 0.12.19
     depends_on:
       openops-tables:
@@ -46,7 +46,7 @@ services:
       - ${HOST_AZURE_CONFIG_DIR:-openops_azure_cli_data}:/tmp/azure
       - ${HOST_CLOUDSDK_CONFIG:-openops_gcloud_cli_data}:/tmp/gcloud
   openops-tables:
-    image: public.ecr.aws/openops/openops-tables:0.1.10
+    image: public.ecr.aws/openops/openops-tables:0.1.11
     platform: linux/amd64
     restart: unless-stopped
     environment:

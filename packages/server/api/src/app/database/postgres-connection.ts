@@ -16,6 +16,7 @@ import { ReplaceSelectOptionsIdsWithNames1741945618000 } from './migrations/1741
 import { CreateAiConfigTable1744641502000 } from './migrations/1744641502000-CreateAiConfigTable';
 import { AddProviderSettingsAndConstraintForAiConfig1745309649736 } from './migrations/1745309649736-AddProviderSettingsAndConstraintForAiConfig';
 import { AddFlowStepTestOutputTable1746454781866 } from './migrations/1746454781866-AddFlowStepTestOutputTable';
+import { AddStepIdToExistingFlowVersionsAndInsertOutputInTestOutputTable1746454781866 } from './migrations/1746618034190-AddStepIdToExistingFlowVersionsAndInsertOutputInTestOutputTable';
 
 const getSslConfig = (): boolean | TlsOptions => {
   const useSsl = system.get(AppSystemProp.POSTGRES_USE_SSL);
@@ -40,6 +41,7 @@ const getMigrations = (): (new () => MigrationInterface)[] => {
     CreateAiConfigTable1744641502000,
     AddProviderSettingsAndConstraintForAiConfig1745309649736,
     AddFlowStepTestOutputTable1746454781866,
+    AddStepIdToExistingFlowVersionsAndInsertOutputInTestOutputTable1746454781866,
   ];
 };
 
