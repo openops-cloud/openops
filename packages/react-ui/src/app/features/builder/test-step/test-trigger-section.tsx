@@ -65,10 +65,6 @@ const TestTriggerSection = React.memo(
     const formValues = form.getValues();
     const [isValid, setIsValid] = useState(false);
 
-    const [lastTestDate, setLastTestDate] = useState(
-      formValues.settings.inputUiInfo?.lastTestDate,
-    );
-
     const { blockModel, isLoading: isBlockLoading } = blocksHooks.useBlock({
       name: formValues.settings.blockName,
       version: formValues.settings.blockVersion,
@@ -87,7 +83,7 @@ const TestTriggerSection = React.memo(
       undefined,
     );
 
-    const { data: currentSelectedData, isLoading: isLoadingTestOutput } =
+    const { data: testOutputData, isLoading: isLoadingTestOutput } =
       useStepTestOuput(flowVersionId, form);
 
     const [currentSelectedId, setCurrentSelectedId] = useState<
@@ -190,7 +186,6 @@ const TestTriggerSection = React.memo(
         },
         { shouldValidate: true },
       );
-      setLastTestDate(dayjs().toISOString());
     }
 
     const { data: pollResults, refetch } = useQuery<SeekPage<TriggerEvent>>({
@@ -204,11 +199,11 @@ const TestTriggerSection = React.memo(
       staleTime: 0,
     });
 
+    const currentSelectedData = testOutputData?.output;
     const sampleDataSelected =
       !isNil(currentSelectedData) || !isNil(errorMessage);
-    const isTestedBefore = !isNil(
-      form.getValues().settings.inputUiInfo?.lastTestDate,
-    );
+
+    const isTestedBefore = !isNil(testOutputData?.lastTestDate);
 
     useEffect(() => {
       const selectedId = getSelectedId(
@@ -245,7 +240,7 @@ const TestTriggerSection = React.memo(
             isTesting={isTesting}
             currentSelectedData={currentSelectedData}
             errorMessage={errorMessage}
-            lastTestDate={lastTestDate}
+            lastTestDate={testOutputData?.lastTestDate}
             type={formValues.type}
           >
             {pollResults?.data && (

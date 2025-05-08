@@ -58,14 +58,11 @@ const TestActionSection = React.memo(
       setIsValid(form.formState.isValid);
     }, [form.formState.isValid]);
 
-    const [lastTestDate, setLastTestDate] = useState(
-      formValues.settings.inputUiInfo?.lastTestDate,
-    );
-
-    const { data: currentSelectedData, isLoading: isLoadingTestOutput } =
+    const { data: testOutputData, isLoading: isLoadingTestOutput } =
       useStepTestOuput(flowVersionId, form);
 
-    const sampleDataExists = !isNil(lastTestDate) || !isNil(errorMessage);
+    const sampleDataExists =
+      !isNil(testOutputData?.lastTestDate) || !isNil(errorMessage);
 
     const socket = useSocket();
 
@@ -96,8 +93,6 @@ const TestActionSection = React.memo(
         } else {
           setErrorMessage(testStepUtils.formatErrorMessage(formattedResponse));
         }
-
-        setLastTestDate(dayjs().toISOString());
       },
       onError: (error) => {
         console.error(error);
@@ -162,9 +157,9 @@ const TestActionSection = React.memo(
         isValid={isValid}
         isSaving={isSaving}
         isTesting={isTesting}
-        currentSelectedData={currentSelectedData}
+        currentSelectedData={testOutputData?.output}
         errorMessage={errorMessage}
-        lastTestDate={lastTestDate}
+        lastTestDate={testOutputData?.lastTestDate}
         type={formValues.type}
       />
     );

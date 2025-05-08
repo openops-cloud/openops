@@ -16,18 +16,29 @@ export const useStepTestOuput = (
     name: 'settings.inputUiInfo.currentSelectedData',
     control: form.control as any,
   }) as unknown;
+
+  const lastTestDate = useWatch({
+    name: 'settings.inputUiInfo.lastTestDate',
+    control: form.control as any,
+  }) as unknown;
   const { id: stepId } = form.getValues();
 
   const queryClient = useQueryClient();
 
-  const getFallbackData = () =>
-    form.watch('settings.inputUiInfo.currentSelectedData' as any);
+  const getFallbackData = () => ({
+    output: form.watch(
+      'settings.inputUiInfo.currentSelectedData' as any,
+    ) as unknown,
+    lastTestDate: form.watch(
+      'settings.inputUiInfo.lastTestDate' as any,
+    ) as unknown as string,
+  });
 
   useEffect(() => {
     queryClient.invalidateQueries({
       queryKey: ['actionTestOutput', flowVersionId, stepId],
     });
-  }, [fallbackData, flowVersionId, queryClient, stepId]);
+  }, [fallbackData, lastTestDate, flowVersionId, queryClient, stepId]);
 
   return useQuery({
     queryKey: ['actionTestOutput', flowVersionId, stepId],
