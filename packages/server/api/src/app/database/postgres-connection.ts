@@ -17,6 +17,7 @@ import { CreateAiConfigTable1744641502000 } from './migrations/1744641502000-Cre
 import { AddProviderSettingsAndConstraintForAiConfig1745309649736 } from './migrations/1745309649736-AddProviderSettingsAndConstraintForAiConfig';
 import { AddFlowStepTestOutputTable1746454781866 } from './migrations/1746454781866-AddFlowStepTestOutputTable';
 import { AddStepIdToExistingFlowVersions1746454781866 } from './migrations/1746618034190-AddStepIdToExistingFlowVersions';
+import { AddStepIdToExistingTemplates1746627735717 } from './migrations/1746627735717-AddStepIdToExistingTemplates';
 
 const getSslConfig = (): boolean | TlsOptions => {
   const useSsl = system.get(AppSystemProp.POSTGRES_USE_SSL);
@@ -42,6 +43,7 @@ const getMigrations = (): (new () => MigrationInterface)[] => {
     AddProviderSettingsAndConstraintForAiConfig1745309649736,
     AddFlowStepTestOutputTable1746454781866,
     AddStepIdToExistingFlowVersions1746454781866,
+    AddStepIdToExistingTemplates1746627735717,
   ];
 };
 
