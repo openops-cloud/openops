@@ -92,7 +92,10 @@ describe('Flow Step Test output', () => {
     });
 
     expect(results).toHaveLength(2);
-    expect(results[0].output).toStrictEqual({ value: 'one' });
-    expect(results[1].output).toStrictEqual({ value: 'two' });
+
+    const outputs = results.map((r) => r.output);
+    expect(outputs).toEqual(
+      expect.arrayContaining([{ value: 'one' }, { value: 'two' }]),
+    );
   });
 });

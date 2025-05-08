@@ -129,17 +129,26 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
         }),
       },
     },
-    async (request): Promise<Record<OpenOpsId, unknown>> => {
+    async (
+      request,
+    ): Promise<
+      Record<OpenOpsId, { output: unknown; lastTestDate: string }>
+    > => {
       const { stepIds } = request.query;
       const { flowVersionId } = request.params;
 
-      const outputs = await flowStepTestOutputService.list({
+      const flowStepTestOutputs = await flowStepTestOutputService.list({
         stepIds,
         flowVersionId,
       });
-
       return Object.fromEntries(
-        outputs.map(({ stepId, output }) => [stepId, output]),
+        flowStepTestOutputs.map((flowStepTestOutput) => [
+          flowStepTestOutput.stepId as OpenOpsId,
+          {
+            output: flowStepTestOutput.output as unknown,
+            lastTestDate: flowStepTestOutput.updated as string,
+          },
+        ]),
       );
     },
   );

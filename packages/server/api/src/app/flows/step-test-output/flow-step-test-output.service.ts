@@ -6,6 +6,7 @@ import {
   OpenOpsId,
   openOpsId,
 } from '@openops/shared';
+import { In } from 'typeorm';
 import { repoFactory } from '../../core/db/repo-factory';
 import { encryptUtils } from '../../helper/encryption';
 import { FlowStepTestOutputEntity } from './flow-step-test-output-entity';
@@ -47,19 +48,14 @@ export const flowStepTestOutputService = {
   },
 
   async list(params: ListParams): Promise<FlowStepTestOutput[]> {
-    const results: FlowStepTestOutput[] = [];
+    const flowStepTestOutputs = await flowStepTestOutputRepo().findBy({
+      flowVersionId: params.flowVersionId,
+      stepId: In(params.stepIds),
+    });
 
-    for (const stepId of params.stepIds) {
-      const flowStepTestOutput = await flowStepTestOutputRepo().findOneBy({
-        flowVersionId: params.flowVersionId,
-        stepId,
-      });
-
-      if (flowStepTestOutput) {
-        const result = await decompressOutput(flowStepTestOutput);
-        results.push(result);
-      }
-    }
+    const results: FlowStepTestOutput[] = await Promise.all(
+      flowStepTestOutputs.map(decompressOutput),
+    );
 
     return results;
   },
