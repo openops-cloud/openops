@@ -31,10 +31,10 @@ import {
   TriggerTestStrategy,
 } from '@openops/shared';
 
+import { stepTestOutputHooks } from './step-test-output-hooks';
 import { TestSampleDataViewer } from './test-sample-data-viewer';
 import { TestButtonTooltip } from './test-step-tooltip';
 import { testStepUtils } from './test-step-utils';
-import { useStepTestOuput } from './use-step-test-output';
 
 const waitFor2Seconds = () =>
   new Promise((resolve) => setTimeout(resolve, 2000));
@@ -88,7 +88,7 @@ const TestTriggerSection = React.memo(
     );
 
     const { data: currentSelectedData, isLoading: isLoadingTestOutput } =
-      useStepTestOuput(flowVersionId, form);
+      stepTestOutputHooks.useStepTestOutputFormData(flowVersionId, form);
 
     const [currentSelectedId, setCurrentSelectedId] = useState<
       string | undefined
