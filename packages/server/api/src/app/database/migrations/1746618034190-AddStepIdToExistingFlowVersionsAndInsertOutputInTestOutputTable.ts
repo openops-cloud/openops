@@ -4,11 +4,13 @@ import { FileCompression, openOpsId } from '@openops/shared';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 import { encryptUtils } from '../../helper/encryption';
 
-export class AddStepIdToExistingFlowVersions1746454781866
+export class AddStepIdToExistingFlowVersionsAndInsertOutputInTestOutputTable1746454781866
   implements MigrationInterface
 {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    logger.info('AddStepIdToExistingFlowVersions1746454781866: starting');
+    logger.info(
+      'AddStepIdToExistingFlowVersionsAndInsertOutputInTestOutputTable1746454781866: starting',
+    );
 
     const workflows = await queryRunner.query(
       'SELECT "id", "trigger" FROM "flow_version"',
@@ -16,7 +18,9 @@ export class AddStepIdToExistingFlowVersions1746454781866
 
     await updateRecords(queryRunner, workflows, 'flow_version');
 
-    logger.info('AddStepIdToExistingFlowVersions1746454781866: completed');
+    logger.info(
+      'AddStepIdToExistingFlowVersionsAndInsertOutputInTestOutputTable1746454781866: completed',
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
