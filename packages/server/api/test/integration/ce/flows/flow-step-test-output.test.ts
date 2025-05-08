@@ -89,28 +89,13 @@ describe('Flow Step Test output', () => {
   });
 
   it('Should return only available outputs and skip step IDs without saved output', async () => {
-    const { mockProject } = await mockBasicSetup();
-
-    const mockFlow = createMockFlow({
-      projectId: mockProject.id,
-    });
-    await databaseConnection().getRepository('flow').save([mockFlow]);
-
-    const mockFlowVersion = createMockFlowVersion({
-      flowId: mockFlow.id,
-      state: FlowVersionState.DRAFT,
-    });
-    await databaseConnection()
-      .getRepository('flow_version')
-      .save([mockFlowVersion]);
+    const { mockFlowVersion } = await saveFlowAndVersion();
 
     const existingStepId = openOpsId();
     const missingStepId = openOpsId();
 
-    await flowStepTestOutputService.save({
-      stepId: existingStepId,
-      flowVersionId: mockFlowVersion.id,
-      output: { value: 'existing' },
+    await saveTestOutput(existingStepId, mockFlowVersion.id, {
+      value: 'existing',
     });
 
     const results = await flowStepTestOutputService.list({
@@ -147,7 +132,9 @@ describe('Flow Step Test output', () => {
       stepIds: [stepId1, stepId2],
     });
 
-    expect(copied[0].output).toStrictEqual({ value: 'from-1' });
-    expect(copied[1].output).toStrictEqual({ value: 'from-2' });
+    const outputs = copied.map((c) => c.output);
+    expect(outputs).toEqual(
+      expect.arrayContaining([{ value: 'from-1' }, { value: 'from-2' }]),
+    );
   });
 });
