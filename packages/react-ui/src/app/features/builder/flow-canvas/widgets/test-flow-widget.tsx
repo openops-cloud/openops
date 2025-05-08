@@ -19,6 +19,7 @@ import {
 } from '@/app/features/flows/components/execute-risky-flow-dialog/execute-risky-flow-dialog';
 import { flowsApi } from '@/app/features/flows/lib/flows-api';
 import { FlowRun, FlowVersion, isNil, TriggerType } from '@openops/shared';
+import { stepTestOutputHooks } from '../../test-step/step-test-output-hooks';
 
 type TestFlowWidgetProps = {
   flowVersion: FlowVersion;
@@ -29,9 +30,14 @@ const TestFlowWidget = ({ flowVersion, setRun }: TestFlowWidgetProps) => {
   const socket = useSocket();
   const isMac = isMacUserAgent();
 
+  const { data: triggerStepOuput } = stepTestOutputHooks.useStepTestOutput(
+    flowVersion.id,
+    flowVersion.trigger.id,
+    flowVersion.trigger.settings.inputUiInfo?.currentSelectedData,
+  );
+
   const triggerHasSampleData =
-    flowVersion.trigger.type === TriggerType.BLOCK &&
-    !isNil(flowVersion.trigger.settings.inputUiInfo?.currentSelectedData);
+    flowVersion.trigger.type === TriggerType.BLOCK && !isNil(triggerStepOuput);
 
   const { mutate, isPending } = useMutation<void>({
     mutationFn: () =>
