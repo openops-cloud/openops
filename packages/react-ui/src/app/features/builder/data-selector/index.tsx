@@ -8,10 +8,20 @@ import { t } from 'i18next';
 import { SearchXIcon } from 'lucide-react';
 import { useCallback, useState } from 'react';
 
-import { Action, flowHelper, isNil, Trigger } from '@openops/shared';
+import {
+  Action,
+  FlagId,
+  flowHelper,
+  isNil,
+  StepWithIndex,
+  Trigger,
+} from '@openops/shared';
 
 import { useBuilderStateContext } from '../builder-hooks';
 
+import { flagsHooks } from '@/app/common/hooks/flags-hooks';
+import { useQuery } from '@tanstack/react-query';
+import { flowsApi } from '../../flows/lib/flows-api';
 import { BuilderState } from '../builder-types';
 import { DataSelectorNode } from './data-selector-node';
 import {
@@ -79,9 +89,47 @@ function filterBy(arr: MentionTreeNode[], query: string): MentionTreeNode[] {
     return acc; // Always return acc
   }, [] as MentionTreeNode[]);
 }
-const getAllStepsMentions: (state: BuilderState) => MentionTreeNode[] = (
-  state,
+
+const getPathToTargetStep = (state: BuilderState) => {
+  const { selectedStep, flowVersion } = state;
+  if (!selectedStep || !flowVersion || !flowVersion.trigger) {
+    return [];
+  }
+  const pathToTargetStep = flowHelper.findPathToStep({
+    targetStepName: selectedStep,
+    trigger: flowVersion.trigger,
+  });
+  return pathToTargetStep;
+};
+
+const getAllStepsMentions = (
+  pathToTargetStep: StepWithIndex[],
+  stepsTestOutput: Record<string, unknown> | undefined,
 ) => {
+  if (isNil(stepsTestOutput)) {
+    return [];
+  }
+
+  return pathToTargetStep.map((step) => {
+    const stepNeedsTesting = isNil(step.settings.inputUiInfo?.lastTestDate);
+    const displayName = `${step.dfsIndex + 1}. ${step.displayName}`;
+    if (stepNeedsTesting) {
+      return createTestNode(step, displayName);
+    }
+    return dataSelectorUtils.traverseStepOutputAndReturnMentionTree({
+      stepOutput: stepsTestOutput[step.id!],
+      propertyPath: step.name,
+      displayName: displayName,
+    });
+  });
+};
+
+/**
+ * @deprecated currentSelectedData will be removed in the future
+ */
+const getAllStepsMentionsFromCurrentSelectedData: (
+  state: BuilderState,
+) => MentionTreeNode[] = (state) => {
   const { selectedStep, flowVersion } = state;
   if (!selectedStep || !flowVersion || !flowVersion.trigger) {
     return [];
@@ -122,8 +170,39 @@ const DataSelector = ({
   setDataSelectorSize,
   className,
 }: DataSelectorProps) => {
+  const { data: useNewExternalTestData = false } = flagsHooks.useFlag(
+    FlagId.USE_NEW_EXTERNAL_TESTDATA,
+  );
   const [searchTerm, setSearchTerm] = useState('');
-  const mentions = useBuilderStateContext(getAllStepsMentions);
+  const flowVersionId = useBuilderStateContext((state) => state.flowVersion.id);
+  const pathToTargetStep = useBuilderStateContext(getPathToTargetStep);
+  const mentionsFromCurrentSelectedData = useBuilderStateContext(
+    getAllStepsMentionsFromCurrentSelectedData,
+  );
+
+  const stepIds: string[] = pathToTargetStep.map((p) => p.id!);
+
+  const { data: stepsTestOutput } = useQuery({
+    queryKey: [
+      'test-output',
+      flowVersionId,
+      pathToTargetStep.map((p) => p.name),
+    ],
+    queryFn: async () => {
+      const stepTestOuput = await flowsApi.getStepTestOutputBulk(
+        flowVersionId,
+        stepIds,
+      );
+      return stepTestOuput;
+    },
+    enabled: !!useNewExternalTestData,
+  });
+
+  // Backwards compatibility: use old selector if flag is off
+  const mentions = useNewExternalTestData
+    ? getAllStepsMentions(pathToTargetStep, stepsTestOutput)
+    : mentionsFromCurrentSelectedData;
+
   const midpanelState = useBuilderStateContext((state) => state.midpanelState);
   const filteredMentions = filterBy(structuredClone(mentions), searchTerm);
 

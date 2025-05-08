@@ -158,6 +158,11 @@ export const flowsApi = {
       )
       .then((response) => response[stepId]);
   },
+  getStepTestOutputBulk(flowVersionId: string, stepIds: string[]) {
+    return api.get<Record<string, unknown>>(
+      `/v1/flow-versions/${flowVersionId}/test-output?stepIds=${stepIds}`,
+    );
+  },
 };
 
 function getInitialRun(
