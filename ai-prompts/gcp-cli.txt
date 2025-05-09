@@ -36,6 +36,7 @@ Best practices
 
 Placeholders
   - Always use descriptive placeholders like `<project-id>`, `<region>`, `<vm-name>`, etc.
+  - If using placeholders, state: `Note: This command uses placeholders which are signaled with <>` 
   - Be consistent across multi-step tasks
 
 Multi-step workflows
