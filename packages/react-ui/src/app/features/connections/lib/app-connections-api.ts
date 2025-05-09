@@ -16,6 +16,9 @@ export const appConnectionsApi = {
       request,
     );
   },
+  get(id: string): Promise<AppConnection> {
+    return api.get<AppConnection>(`/v1/app-connections/${id}`);
+  },
   upsert(request: UpsertAppConnectionRequestBody): Promise<AppConnection> {
     return api.post<AppConnection>('/v1/app-connections', request);
   },
