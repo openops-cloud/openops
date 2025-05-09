@@ -101,9 +101,6 @@ const constructContainerKey = (
 
 const BuilderPage = () => {
   const [searchParams] = useSearchParams();
-  const { data: isAIEnabled = false } = flagsHooks.useFlag(
-    FlagId.SHOW_AI_SETTINGS,
-  );
 
   const [
     selectedStep,
@@ -274,7 +271,7 @@ const BuilderPage = () => {
                     <CanvasControls
                       topOffset={FLOW_CANVAS_Y_OFFESET}
                     ></CanvasControls>
-                    {!isAIEnabled && <AiWidget />}
+                    <AiWidget />
                     <div
                       className={cn('h-screen w-full flex-1 z-10', {
                         'bg-background': !isDraggingHandle,

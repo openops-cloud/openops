@@ -62,9 +62,6 @@ const InteractiveBuilder = ({
   lefSideBarContainerWidth: number;
   flowVersion: FlowVersion;
 }) => {
-  const { data: isAIEnabled = false } = flagsHooks.useFlag(
-    FlagId.SHOW_AI_SETTINGS,
-  );
   const { onPaste } = usePaste();
 
   const onPasteOperation = (actionToPaste: Action): void => {
@@ -155,7 +152,7 @@ const InteractiveBuilder = ({
       <div ref={middlePanelRef} className="relative h-full w-full">
         <BuilderHeader />
         <CanvasControls topOffset={FLOW_CANVAS_Y_OFFESET}></CanvasControls>
-        {!isAIEnabled && <AiWidget classname="left-[282px]" />}
+        <AiWidget classname="left-[282px]" />
         <div
           className="flex flex-col absolute bottom-0 right-0"
           ref={containerRef}
