@@ -1,4 +1,3 @@
-import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { FLOW_CANVAS_Y_OFFESET } from '@/app/constants/flow-canvas';
 import {
   AI_CHAT_CONTAINER_SIZES,
@@ -10,7 +9,6 @@ import {
 import {
   Action,
   ActionType,
-  FlagId,
   flowHelper,
   FlowVersion,
   isNil,

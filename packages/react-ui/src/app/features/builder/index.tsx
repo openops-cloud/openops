@@ -20,7 +20,6 @@ import {
 } from '@/app/features/builder/builder-hooks';
 import { DynamicFormValidationProvider } from '@/app/features/builder/dynamic-form-validation/dynamic-form-validation-context';
 
-import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { useResizablePanelGroup } from '@/app/common/hooks/use-resizable-panel-group';
 import { useSocket } from '@/app/common/providers/socket-provider';
 import { PanelSizes } from '@/app/common/types/panel-sizes';
@@ -29,7 +28,6 @@ import { SEARCH_PARAMS } from '@/app/constants/search-params';
 import {
   ActionType,
   BlockTrigger,
-  FlagId,
   flowHelper,
   isNil,
   TriggerType,
