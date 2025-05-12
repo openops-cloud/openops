@@ -34,8 +34,7 @@ const TestFlowWidget = ({ flowVersion, setRun }: TestFlowWidgetProps) => {
     flowVersion.id,
     flowVersion.trigger.id,
     {
-      currentSelectedData:
-        flowVersion.trigger.settings.inputUiInfo?.currentSelectedData,
+      output: flowVersion.trigger.settings.inputUiInfo?.currentSelectedData,
       lastTestDate: flowVersion.trigger.settings.inputUiInfo?.lastTestDate,
     },
   );
