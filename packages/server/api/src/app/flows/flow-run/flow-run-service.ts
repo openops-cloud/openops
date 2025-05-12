@@ -8,6 +8,7 @@ import {
   ExecutioOutputFile,
   FileCompression,
   FileType,
+  FlagId,
   FlowId,
   FlowRetryStrategy,
   FlowRun,
@@ -30,6 +31,7 @@ import { In, LessThan } from 'typeorm';
 import { repoFactory } from '../../core/db/repo-factory';
 import { APArrayContains } from '../../database/database-connection';
 import { fileService } from '../../file/file.service';
+import { flagService } from '../../flags/flag.service';
 import { flowVersionService } from '../../flows/flow-version/flow-version.service';
 import { buildPaginator } from '../../helper/pagination/build-paginator';
 import { paginationHelper } from '../../helper/pagination/pagination-utils';
@@ -37,6 +39,7 @@ import { Order } from '../../helper/pagination/paginator';
 import { webhookResponseWatcher } from '../../workers/helper/webhook-response-watcher';
 import { getJobPriority } from '../../workers/queue/queue-manager';
 import { flowService } from '../flow/flow.service';
+import { flowStepTestOutputService } from '../step-test-output/flow-step-test-output.service';
 import { FlowRunEntity } from './flow-run-entity';
 import { flowRunSideEffects } from './flow-run-side-effects';
 import { logSerializer } from './log-serializer';
@@ -349,13 +352,17 @@ export const flowRunService = {
   async test({ projectId, flowVersionId }: TestParams): Promise<FlowRun> {
     const flowVersion = await flowVersionService.getOneOrThrow(flowVersionId);
 
-    const payload =
-      flowVersion.trigger.settings.inputUiInfo.currentSelectedData;
+    // const payload =
+    //   flowVersion.trigger.settings.inputUiInfo.currentSelectedData;
+
+    if (await flagService.getOne(FlagId.USE_NEW_EXTERNAL_TESTDATA)) {
+      await flowStepTestOutputService.getAllStepOutputs(flowVersion.id);
+    }
 
     return this.start({
       projectId,
       flowVersionId,
-      payload,
+      payload: undefined,
       environment: RunEnvironment.TESTING,
       executionType: ExecutionType.BEGIN,
       synchronousHandlerId: webhookResponseWatcher.getServerId(),

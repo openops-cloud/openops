@@ -1,15 +1,17 @@
+import { encryptUtils, fileCompressor } from '@openops/server-shared';
 import {
   ActionType,
   BranchStepOutput,
+  FileCompression,
   flowHelper,
   FlowVersion,
   GenericStepOutput,
   LoopStepOutput,
+  OpenOpsId,
   SplitStepOutput,
   StepOutputStatus,
   TriggerType,
 } from '@openops/shared';
-import { variableService } from '../../variables/variable-service';
 import { FlowExecutorContext } from './flow-execution-context';
 
 export const testExecutionContext = {
@@ -19,12 +21,14 @@ export const testExecutionContext = {
     projectId,
     engineToken,
     apiUrl,
+    testOutputs,
   }: {
     flowVersion: FlowVersion;
     excludedStepName?: string;
     projectId: string;
     apiUrl: string;
     engineToken: string;
+    testOutputs?: Record<OpenOpsId, Buffer>;
   }): Promise<FlowExecutorContext> {
     const flowSteps = flowHelper.getAllSteps(flowVersion.trigger);
     let flowExecutionContext = FlowExecutorContext.empty();
@@ -38,6 +42,11 @@ export const testExecutionContext = {
         continue;
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let currentOutput: any;
+      if (step.id) {
+        currentOutput = await decompressOutput(testOutputs?.[step.id]);
+      }
       const stepType = step.type;
       switch (stepType) {
         case ActionType.BRANCH:
@@ -63,7 +72,7 @@ export const testExecutionContext = {
             LoopStepOutput.init({
               input: step.settings,
             }).setOutput({
-              item: inputUiInfo?.currentSelectedData?.item,
+              item: currentOutput?.item, //?? inputUiInfo?.currentSelectedData?.item,
               index: 1,
               iterations: [],
             }),
@@ -80,7 +89,7 @@ export const testExecutionContext = {
               input: step.settings,
               type: stepType,
               status: StepOutputStatus.SUCCEEDED,
-              output: inputUiInfo?.currentSelectedData,
+              output: currentOutput, //?? inputUiInfo?.currentSelectedData,
             }),
           );
           break;
@@ -89,3 +98,17 @@ export const testExecutionContext = {
     return flowExecutionContext;
   },
 };
+
+async function decompressOutput(output: unknown): Promise<unknown> {
+  if (!output) {
+    return undefined;
+  }
+
+  const decompressed = await fileCompressor.decompress({
+    data: output as Buffer,
+    compression: FileCompression.GZIP,
+  });
+
+  const parsedEncryptedOutput = JSON.parse(decompressed.toString());
+  return encryptUtils.decryptObject(parsedEncryptedOutput);
+}

@@ -82,6 +82,21 @@ export const flowStepTestOutputService = {
 
     return results;
   },
+
+  async getAllStepOutputs(
+    flowVersionId: FlowVersionId,
+  ): Promise<Record<OpenOpsId, Buffer>> {
+    const flowStepTestOutputs = await flowStepTestOutputRepo().findBy({
+      flowVersionId,
+    });
+
+    return Object.fromEntries(
+      flowStepTestOutputs.map((flowStepTestOutput) => [
+        flowStepTestOutput.stepId as OpenOpsId,
+        flowStepTestOutput.output as Buffer,
+      ]),
+    );
+  },
 };
 
 async function decompressOutput(
