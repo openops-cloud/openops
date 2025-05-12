@@ -15,6 +15,8 @@ export const getSystemPrompt = async (
       return loadPrompt('gcp-cli.txt');
     case '@openops/block-aws-athena':
       return loadPrompt('aws-athena.txt');
+    case '@openops/block-snowflake':
+      return loadPrompt('snowflake.txt');
     default:
       return '';
   }
