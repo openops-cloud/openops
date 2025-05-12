@@ -13,6 +13,7 @@ import { engineRunner } from 'server-worker';
 import { accessTokenManager } from '../../authentication/lib/access-token-manager';
 import { sendWorkflowTestBlockEvent } from '../../telemetry/event-models';
 import { flowVersionService } from '../flow-version/flow-version.service';
+import { flowStepTestOutputService } from '../step-test-output/flow-step-test-output.service';
 
 export const stepRunService = {
   async create({
@@ -46,6 +47,14 @@ export const stepRunService = {
       flowVersion,
       projectId,
     });
+
+    if (step.id) {
+      await flowStepTestOutputService.save({
+        stepId: step.id,
+        flowVersionId: flowVersion.id,
+        output: result.output,
+      });
+    }
 
     const endTime = performance.now();
     const duration = endTime - startTime;

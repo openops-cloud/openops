@@ -38,6 +38,7 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
         workflowId: request.body.workflowId,
         blockName: request.body.blockName,
         stepName: request.body.stepName,
+        actionName: request.body.actionName,
       };
 
       const chatId = generateChatId({

@@ -23,6 +23,7 @@ import { FlowRunEntity } from '../flows/flow-run/flow-run-entity';
 import { FlowVersionEntity } from '../flows/flow-version/flow-version-entity';
 import { FlowEntity } from '../flows/flow/flow.entity';
 import { FolderEntity } from '../flows/folder/folder.entity';
+import { FlowStepTestOutputEntity } from '../flows/step-test-output/flow-step-test-output-entity';
 import { TriggerEventEntity } from '../flows/trigger-events/trigger-event.entity';
 import { OrganizationEntity } from '../organization/organization.entity';
 import { ProjectEntity } from '../project/project-entity';
@@ -57,6 +58,7 @@ function getEntities(): EntitySchema<unknown>[] {
     FlowTemplateEntity,
     UserSettingsEntity,
     AiConfigEntity,
+    FlowStepTestOutputEntity,
   ];
 
   return entities;

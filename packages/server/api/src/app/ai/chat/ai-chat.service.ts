@@ -16,18 +16,21 @@ export type ChatContext = {
   workflowId: string;
   blockName: string;
   stepName: string;
+  actionName: string;
 };
 
 export const generateChatId = (params: {
   workflowId: string;
   blockName: string;
   stepName: string;
+  actionName: string;
   userId: string;
 }): string => {
   return hashUtils.hashObject({
     workflowId: params.workflowId,
     blockName: params.blockName,
     stepName: params.stepName,
+    actionName: params.actionName,
     userId: params.userId,
   });
 };

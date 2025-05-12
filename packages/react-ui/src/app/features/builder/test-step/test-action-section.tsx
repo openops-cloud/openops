@@ -22,14 +22,17 @@ import { formatUtils } from '@/app/lib/utils';
 import {
   Action,
   ActionType,
+  FlagId,
   isNil,
   RiskLevel,
   StepRunResponse,
 } from '@openops/shared';
 
+import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { TestSampleDataViewer } from './test-sample-data-viewer';
 import { TestButtonTooltip } from './test-step-tooltip';
 import { testStepUtils } from './test-step-utils';
+import { useStepTestOuput } from './use-step-test-output';
 
 type TestActionComponentProps = {
   isSaving: boolean;
@@ -57,19 +60,22 @@ const TestActionSection = React.memo(
       setIsValid(form.formState.isValid);
     }, [form.formState.isValid]);
 
-    const [lastTestDate, setLastTestDate] = useState(
-      formValues.settings.inputUiInfo?.lastTestDate,
+    const {
+      data: testOutputData,
+      isLoading: isLoadingTestOutput,
+      refetch: refetchTestOutput,
+    } = useStepTestOuput(flowVersionId, form);
+
+    const sampleDataExists =
+      !isNil(testOutputData?.lastTestDate) || !isNil(errorMessage);
+
+    const { data: useNewExternalTestData = false } = flagsHooks.useFlag(
+      FlagId.USE_NEW_EXTERNAL_TESTDATA,
     );
-    const { currentSelectedData } = formValues.settings.inputUiInfo ?? {};
-    const sampleDataExists = !isNil(lastTestDate) || !isNil(errorMessage);
 
     const socket = useSocket();
 
-    const { mutate, isPending: isTesting } = useMutation<
-      StepRunResponse,
-      Error,
-      void
-    >({
+    const { mutate, isPending } = useMutation<StepRunResponse, Error, void>({
       mutationFn: async () => {
         return flowsApi.testStep(socket, {
           flowVersionId,
@@ -83,27 +89,30 @@ const TestActionSection = React.memo(
         if (stepResponse.success) {
           setErrorMessage(undefined);
 
-          form.setValue(
-            'settings.inputUiInfo.currentSelectedData',
-            formattedResponse,
-            { shouldValidate: true },
-          );
-          form.setValue(
-            'settings.inputUiInfo.lastTestDate',
-            dayjs().toISOString(),
-            { shouldValidate: true },
-          );
+          if (!useNewExternalTestData) {
+            form.setValue(
+              'settings.inputUiInfo.currentSelectedData',
+              formattedResponse,
+              { shouldValidate: true },
+            );
+            form.setValue(
+              'settings.inputUiInfo.lastTestDate',
+              dayjs().toISOString(),
+              { shouldValidate: true },
+            );
+          }
+          refetchTestOutput();
         } else {
           setErrorMessage(testStepUtils.formatErrorMessage(formattedResponse));
         }
-
-        setLastTestDate(dayjs().toISOString());
       },
       onError: (error) => {
         console.error(error);
         toast(INTERNAL_ERROR_TOAST);
       },
     });
+
+    const isTesting = isPending || isLoadingTestOutput;
 
     const handleTest = () => {
       if (
@@ -160,9 +169,9 @@ const TestActionSection = React.memo(
         isValid={isValid}
         isSaving={isSaving}
         isTesting={isTesting}
-        currentSelectedData={currentSelectedData}
+        currentSelectedData={testOutputData?.output}
         errorMessage={errorMessage}
-        lastTestDate={lastTestDate}
+        lastTestDate={testOutputData?.lastTestDate}
         type={formValues.type}
       />
     );

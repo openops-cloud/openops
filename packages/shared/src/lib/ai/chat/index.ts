@@ -4,6 +4,7 @@ export const OpenChatRequest = Type.Object({
   workflowId: Type.String(),
   blockName: Type.String(),
   stepName: Type.String(),
+  actionName: Type.String(),
 });
 
 export type OpenChatRequest = Static<typeof OpenChatRequest>;
