@@ -33,10 +33,10 @@ import {
 } from '@openops/shared';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
+import { stepTestOutputHooks } from './step-test-output-hooks';
 import { TestSampleDataViewer } from './test-sample-data-viewer';
 import { TestButtonTooltip } from './test-step-tooltip';
 import { testStepUtils } from './test-step-utils';
-import { useStepTestOuput } from './use-step-test-output';
 
 const waitFor2Seconds = () =>
   new Promise((resolve) => setTimeout(resolve, 2000));
@@ -89,7 +89,7 @@ const TestTriggerSection = React.memo(
       data: testOutputData,
       isLoading: isLoadingTestOutput,
       refetch: refetchTestOutput,
-    } = useStepTestOuput(flowVersionId, form);
+    } = stepTestOutputHooks.useStepTestOutputFormData(flowVersionId, form);
 
     const [currentSelectedId, setCurrentSelectedId] = useState<
       string | undefined
