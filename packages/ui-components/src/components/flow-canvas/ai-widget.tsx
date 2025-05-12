@@ -1,10 +1,11 @@
 import { t } from 'i18next';
-import { Sparkles } from 'lucide-react';
+import { Bot } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '../../lib/cn';
 import { Button } from '../../ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '../../ui/popover';
+import { TooltipWrapper } from '../tooltip-wrapper';
 
 type Props = {
   classname?: string;
@@ -14,21 +15,24 @@ const AiWidget = ({ classname }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="ghost"
-          className={cn(
-            'w-[40px] h-[40px] absolute left-[242px] bottom-[10px] flex items-center justify-center z-50 bg-background shadow-editor rounded-xl',
-            classname,
-          )}
-          size="icon"
-          onClick={() => {
-            setIsOpen(true);
-          }}
-        >
-          <Sparkles className="w-6 h-6 dark:text-primary" />
-        </Button>
-      </PopoverTrigger>
+      <TooltipWrapper tooltipText={t('Build workflow with AI')}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="ghost"
+            className={cn(
+              'w-[40px] h-[40px] absolute left-[242px] bottom-[10px] flex items-center justify-center z-50 bg-background shadow-editor rounded-xl',
+              classname,
+            )}
+            size="icon"
+            onClick={() => {
+              setIsOpen(true);
+            }}
+          >
+            <Bot className="w-6 h-6 dark:text-primary" />
+          </Button>
+        </PopoverTrigger>
+      </TooltipWrapper>
+
       <PopoverContent
         side="top"
         align="start"
@@ -36,7 +40,7 @@ const AiWidget = ({ classname }: Props) => {
         className="w-fit p-0 border-none rounded-xl !shadow-editor"
       >
         <div className="h-[58px] px-4 py-[10px] rounded-t-xl flex items-center gap-3 bg-white dark:bg-black border-b">
-          <Sparkles className="w-5 h-5 dark:text-primary" />
+          <Bot className="w-6 h-6 dark:text-primary" />
           <h2 className="font-bold text-base">{t('AI Copilot')}</h2>
         </div>
         <div className="w-[323px] pl-[26px] py-4 text-sm bg-secondary/10">
