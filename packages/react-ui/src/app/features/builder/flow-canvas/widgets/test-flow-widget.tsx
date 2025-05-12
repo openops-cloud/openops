@@ -33,7 +33,11 @@ const TestFlowWidget = ({ flowVersion, setRun }: TestFlowWidgetProps) => {
   const { data: triggerStepOuput } = stepTestOutputHooks.useStepTestOutput(
     flowVersion.id,
     flowVersion.trigger.id,
-    flowVersion.trigger.settings.inputUiInfo?.currentSelectedData,
+    {
+      currentSelectedData:
+        flowVersion.trigger.settings.inputUiInfo?.currentSelectedData,
+      lastTestDate: flowVersion.trigger.settings.inputUiInfo?.lastTestDate,
+    },
   );
 
   const triggerHasSampleData =

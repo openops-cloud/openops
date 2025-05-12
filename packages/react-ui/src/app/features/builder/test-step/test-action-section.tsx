@@ -60,17 +60,14 @@ const TestActionSection = React.memo(
       setIsValid(form.formState.isValid);
     }, [form.formState.isValid]);
 
-    const [lastTestDate, setLastTestDate] = useState(
-      formValues.settings.inputUiInfo?.lastTestDate,
-    );
-
     const {
-      data: currentSelectedData,
+      data: testOutputData,
       isLoading: isLoadingTestOutput,
       refetch: refetchTestOutput,
     } = stepTestOutputHooks.useStepTestOutputFormData(flowVersionId, form);
 
-    const sampleDataExists = !isNil(lastTestDate) || !isNil(errorMessage);
+    const sampleDataExists =
+      !isNil(testOutputData?.lastTestDate) || !isNil(errorMessage);
 
     const { data: useNewExternalTestData = false } = flagsHooks.useFlag(
       FlagId.USE_NEW_EXTERNAL_TESTDATA,
@@ -108,8 +105,6 @@ const TestActionSection = React.memo(
         } else {
           setErrorMessage(testStepUtils.formatErrorMessage(formattedResponse));
         }
-
-        setLastTestDate(dayjs().toISOString());
       },
       onError: (error) => {
         console.error(error);
@@ -174,9 +169,9 @@ const TestActionSection = React.memo(
         isValid={isValid}
         isSaving={isSaving}
         isTesting={isTesting}
-        currentSelectedData={currentSelectedData}
+        currentSelectedData={testOutputData?.output}
         errorMessage={errorMessage}
-        lastTestDate={lastTestDate}
+        lastTestDate={testOutputData?.lastTestDate}
         type={formValues.type}
       />
     );

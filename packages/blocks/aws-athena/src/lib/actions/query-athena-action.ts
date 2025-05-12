@@ -16,6 +16,7 @@ export const runAthenaQueryAction = createAction({
     query: Property.LongText({
       displayName: 'Query',
       description: 'Query to run on the Athena database.',
+      supportsAI: true,
       required: true,
     }),
     database: Property.Dropdown<string>({

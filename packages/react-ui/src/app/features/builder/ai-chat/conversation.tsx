@@ -46,15 +46,20 @@ const Conversation = ({
       if (!stepDetails) {
         throw new Error('Step not found');
       }
+
       const data = await aiChatApi.open(
         flowVersion.flowId,
         blockName,
         stepName,
+        stepDetails.settings.actionName,
       );
       onConversationRetrieved(data);
       return data;
     },
-    enabled: !!stepDetails && !!stepDetails.settings.blockName,
+    enabled:
+      !!stepDetails &&
+      !!stepDetails.settings.blockName &&
+      !!stepDetails.settings.actionName,
   });
 
   const messagesToDisplay: MessageType[] =

@@ -27,12 +27,27 @@ describe('getSystemPrompt', () => {
   });
 
   it.each([
-    ['aws-cli.txt', '@openops/block-aws', 'aws prompt content'],
-    ['gcp-cli.txt', '@openops/block-google-cloud', 'gcp prompt content'],
-    ['azure-cli.txt', '@openops/block-azure', 'azure prompt content'],
+    ['aws-cli.txt', '@openops/block-aws', 'aws_cli', 'aws prompt content'],
+    [
+      'gcp-cli.txt',
+      '@openops/block-google-cloud',
+      'google_cloud_cli',
+      'gcp prompt content',
+    ],
+    [
+      'azure-cli.txt',
+      '@openops/block-azure',
+      'azure_cli',
+      'azure prompt content',
+    ],
   ])(
     'should load cli block prompt from cloud',
-    async (fileName: string, blockName: string, promptContent: string) => {
+    async (
+      fileName: string,
+      blockName: string,
+      actionName: string,
+      promptContent: string,
+    ) => {
       getMock.mockReturnValue('https://example.com/prompts/');
       mockFetch.mockResolvedValueOnce(mockResponse(promptContent));
 
@@ -40,6 +55,7 @@ describe('getSystemPrompt', () => {
         blockName,
         workflowId: 'workflowId',
         stepName: 'stepName',
+        actionName,
       });
 
       expect(result).toBe(promptContent);
@@ -51,19 +67,39 @@ describe('getSystemPrompt', () => {
   );
 
   it.each([
-    ['aws-cli.txt', '@openops/block-aws', 'aws prompt content', ''],
-    ['azure-cli.txt', '@openops/block-azure', 'azure prompt content', ''],
-    ['gcp-cli.txt', '@openops/block-google-cloud', 'gcp prompt content', ''],
-    ['aws-cli.txt', '@openops/block-aws', 'aws prompt content', undefined],
+    ['aws-cli.txt', '@openops/block-aws', 'aws_cli', 'aws prompt content', ''],
     [
       'azure-cli.txt',
       '@openops/block-azure',
+      'azure_cli',
+      'azure prompt content',
+      '',
+    ],
+    [
+      'gcp-cli.txt',
+      '@openops/block-google-cloud',
+      'google_cloud_cli',
+      'gcp prompt content',
+      '',
+    ],
+    [
+      'aws-cli.txt',
+      '@openops/block-aws',
+      'aws_cli',
+      'aws prompt content',
+      undefined,
+    ],
+    [
+      'azure-cli.txt',
+      '@openops/block-azure',
+      'azure_cli',
       'azure prompt content',
       undefined,
     ],
     [
       'gcp-cli.txt',
       '@openops/block-google-cloud',
+      'google_cloud_cli',
       'gcp prompt content',
       undefined,
     ],
@@ -72,6 +108,7 @@ describe('getSystemPrompt', () => {
     async (
       fileName: string,
       blockName: string,
+      actionName: string,
       promptContent: string,
       location: string | undefined,
     ) => {
@@ -82,6 +119,7 @@ describe('getSystemPrompt', () => {
         blockName,
         workflowId: 'workflowId',
         stepName: 'stepName',
+        actionName,
       });
 
       expect(result).toBe(promptContent);
@@ -98,6 +136,7 @@ describe('getSystemPrompt', () => {
       blockName: 'some-other-block',
       workflowId: 'workflowId',
       stepName: 'stepName',
+      actionName: 'some-other-action',
     });
 
     expect(result).toBe('');
@@ -112,6 +151,7 @@ describe('getSystemPrompt', () => {
       blockName: '@openops/block-aws',
       workflowId: 'workflowId',
       stepName: 'stepName',
+      actionName: 'aws-cli',
     });
 
     expect(result).toBe('');

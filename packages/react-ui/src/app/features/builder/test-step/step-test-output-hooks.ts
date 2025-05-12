@@ -4,7 +4,12 @@ import { useQuery } from '@tanstack/react-query';
 import { UseFormReturn } from 'react-hook-form';
 import { flowsApi } from '../../flows/lib/flows-api';
 
-type FallbackDataInput = (() => unknown) | unknown;
+type FallbackDataInput =
+  | (() => {
+      output: unknown;
+      lastTestDate: string;
+    })
+  | { output: unknown; lastTestDate: string };
 
 export const stepTestOutputHooks = {
   useStepTestOutput(
@@ -18,7 +23,12 @@ export const stepTestOutputHooks = {
 
     const resolveFallbackData = () =>
       typeof fallbackDataInput === 'function'
-        ? (fallbackDataInput as () => unknown)() ?? {}
+        ? (
+            fallbackDataInput as () => {
+              output: unknown;
+              lastTestDate: string;
+            }
+          )() ?? {}
         : fallbackDataInput ?? {};
 
     return useQuery({
@@ -47,8 +57,14 @@ export const stepTestOutputHooks = {
   ) {
     const { id: stepId } = form.getValues();
 
-    const getFallbackData = () =>
-      form.watch('settings.inputUiInfo.currentSelectedData' as any);
+    const getFallbackData = () => ({
+      output: form.watch(
+        'settings.inputUiInfo.currentSelectedData' as any,
+      ) as unknown,
+      lastTestDate: form.watch(
+        'settings.inputUiInfo.lastTestDate' as any,
+      ) as unknown as string,
+    });
 
     return stepTestOutputHooks.useStepTestOutput(
       flowVersionId,
