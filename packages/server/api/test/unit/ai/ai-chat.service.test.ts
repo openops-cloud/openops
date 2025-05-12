@@ -26,6 +26,7 @@ describe('generateChatId', () => {
       blockName: 'blockA',
       stepName: 'stepX',
       userId: 'user123',
+      actionName: 'actionA',
     };
 
     const expectedHash = 'fakeHash123';
