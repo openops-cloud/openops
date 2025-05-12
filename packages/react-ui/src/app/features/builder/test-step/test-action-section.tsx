@@ -22,11 +22,13 @@ import { formatUtils } from '@/app/lib/utils';
 import {
   Action,
   ActionType,
+  FlagId,
   isNil,
   RiskLevel,
   StepRunResponse,
 } from '@openops/shared';
 
+import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { TestSampleDataViewer } from './test-sample-data-viewer';
 import { TestButtonTooltip } from './test-step-tooltip';
 import { testStepUtils } from './test-step-utils';
@@ -58,14 +60,18 @@ const TestActionSection = React.memo(
       setIsValid(form.formState.isValid);
     }, [form.formState.isValid]);
 
-    const [lastTestDate, setLastTestDate] = useState(
-      formValues.settings.inputUiInfo?.lastTestDate,
+    const {
+      data: testOutputData,
+      isLoading: isLoadingTestOutput,
+      refetch: refetchTestOutput,
+    } = useStepTestOuput(flowVersionId, form);
+
+    const sampleDataExists =
+      !isNil(testOutputData?.lastTestDate) || !isNil(errorMessage);
+
+    const { data: useNewExternalTestData = false } = flagsHooks.useFlag(
+      FlagId.USE_NEW_EXTERNAL_TESTDATA,
     );
-
-    const { data: currentSelectedData, isLoading: isLoadingTestOutput } =
-      useStepTestOuput(flowVersionId, form);
-
-    const sampleDataExists = !isNil(lastTestDate) || !isNil(errorMessage);
 
     const socket = useSocket();
 
@@ -83,21 +89,22 @@ const TestActionSection = React.memo(
         if (stepResponse.success) {
           setErrorMessage(undefined);
 
-          form.setValue(
-            'settings.inputUiInfo.currentSelectedData',
-            formattedResponse,
-            { shouldValidate: true },
-          );
-          form.setValue(
-            'settings.inputUiInfo.lastTestDate',
-            dayjs().toISOString(),
-            { shouldValidate: true },
-          );
+          if (!useNewExternalTestData) {
+            form.setValue(
+              'settings.inputUiInfo.currentSelectedData',
+              formattedResponse,
+              { shouldValidate: true },
+            );
+            form.setValue(
+              'settings.inputUiInfo.lastTestDate',
+              dayjs().toISOString(),
+              { shouldValidate: true },
+            );
+          }
+          refetchTestOutput();
         } else {
           setErrorMessage(testStepUtils.formatErrorMessage(formattedResponse));
         }
-
-        setLastTestDate(dayjs().toISOString());
       },
       onError: (error) => {
         console.error(error);
@@ -162,9 +169,9 @@ const TestActionSection = React.memo(
         isValid={isValid}
         isSaving={isSaving}
         isTesting={isTesting}
-        currentSelectedData={currentSelectedData}
+        currentSelectedData={testOutputData?.output}
         errorMessage={errorMessage}
-        lastTestDate={lastTestDate}
+        lastTestDate={testOutputData?.lastTestDate}
         type={formValues.type}
       />
     );

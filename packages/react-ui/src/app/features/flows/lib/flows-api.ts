@@ -153,7 +153,7 @@ export const flowsApi = {
   },
   getStepTestOutput(flowVersionId: string, stepId: string) {
     return api
-      .get<Record<string, unknown>>(
+      .get<Record<string, { output: unknown; lastTestDate: string }>>(
         `/v1/flow-versions/${flowVersionId}/test-output?stepIds=${stepId}`,
       )
       .then((response) => response[stepId]);

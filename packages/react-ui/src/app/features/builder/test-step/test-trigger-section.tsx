@@ -24,6 +24,7 @@ import { triggerEventsApi } from '@/app/features/flows/lib/trigger-events-api';
 import { formatUtils } from '@/app/lib/utils';
 import {
   CATCH_WEBHOOK,
+  FlagId,
   isNil,
   SeekPage,
   Trigger,
@@ -31,6 +32,7 @@ import {
   TriggerTestStrategy,
 } from '@openops/shared';
 
+import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { TestSampleDataViewer } from './test-sample-data-viewer';
 import { TestButtonTooltip } from './test-step-tooltip';
 import { testStepUtils } from './test-step-utils';
@@ -65,10 +67,6 @@ const TestTriggerSection = React.memo(
     const formValues = form.getValues();
     const [isValid, setIsValid] = useState(false);
 
-    const [lastTestDate, setLastTestDate] = useState(
-      formValues.settings.inputUiInfo?.lastTestDate,
-    );
-
     const { blockModel, isLoading: isBlockLoading } = blocksHooks.useBlock({
       name: formValues.settings.blockName,
       version: formValues.settings.blockVersion,
@@ -87,8 +85,11 @@ const TestTriggerSection = React.memo(
       undefined,
     );
 
-    const { data: currentSelectedData, isLoading: isLoadingTestOutput } =
-      useStepTestOuput(flowVersionId, form);
+    const {
+      data: testOutputData,
+      isLoading: isLoadingTestOutput,
+      refetch: refetchTestOutput,
+    } = useStepTestOuput(flowVersionId, form);
 
     const [currentSelectedId, setCurrentSelectedId] = useState<
       string | undefined
@@ -178,19 +179,25 @@ const TestTriggerSection = React.memo(
 
     const isTesting = isPending || isLoadingTestOutput;
 
+    const { data: useNewExternalTestData = false } = flagsHooks.useFlag(
+      FlagId.USE_NEW_EXTERNAL_TESTDATA,
+    );
+
     function updateCurrentSelectedData(data: TriggerEvent) {
-      form.setValue(
-        'settings.inputUiInfo',
-        {
-          ...formValues.settings.inputUiInfo,
-          currentSelectedData: formatUtils.formatStepInputOrOutput(
-            data.payload,
-          ),
-          lastTestDate: dayjs().toISOString(),
-        },
-        { shouldValidate: true },
-      );
-      setLastTestDate(dayjs().toISOString());
+      if (!useNewExternalTestData) {
+        form.setValue(
+          'settings.inputUiInfo',
+          {
+            ...formValues.settings.inputUiInfo,
+            currentSelectedData: formatUtils.formatStepInputOrOutput(
+              data.payload,
+            ),
+            lastTestDate: dayjs().toISOString(),
+          },
+          { shouldValidate: true },
+        );
+      }
+      refetchTestOutput();
     }
 
     const { data: pollResults, refetch } = useQuery<SeekPage<TriggerEvent>>({
@@ -204,11 +211,11 @@ const TestTriggerSection = React.memo(
       staleTime: 0,
     });
 
+    const currentSelectedData = testOutputData?.output;
     const sampleDataSelected =
       !isNil(currentSelectedData) || !isNil(errorMessage);
-    const isTestedBefore = !isNil(
-      form.getValues().settings.inputUiInfo?.lastTestDate,
-    );
+
+    const isTestedBefore = !isNil(testOutputData?.lastTestDate);
 
     useEffect(() => {
       const selectedId = getSelectedId(
@@ -245,7 +252,7 @@ const TestTriggerSection = React.memo(
             isTesting={isTesting}
             currentSelectedData={currentSelectedData}
             errorMessage={errorMessage}
-            lastTestDate={lastTestDate}
+            lastTestDate={testOutputData?.lastTestDate}
             type={formValues.type}
           >
             {pollResults?.data && (
