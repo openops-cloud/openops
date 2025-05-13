@@ -2,6 +2,7 @@ import { FLOW_CANVAS_Y_OFFESET } from '@/app/constants/flow-canvas';
 import { AiBuilderButton } from '@/app/features/ai/ai-builder-button';
 import {
   AI_CHAT_CONTAINER_SIZES,
+  AiWidget,
   CanvasControls,
   cn,
   InteractiveContextProvider,
@@ -16,7 +17,6 @@ import {
 } from '@openops/shared';
 import React, { MutableRefObject, useCallback, useEffect, useRef } from 'react';
 import { useDebounceCallback } from 'usehooks-ts';
-import { AiAssistantChat } from '../ai/ai-assistant-chat';
 import { StepSettingsAiChat } from './ai-chat/step-settings-ai-chat';
 import { textMentionUtils } from './block-properties/text-input-with-mentions/text-input-utils';
 import { BuilderHeader } from './builder-header/builder-header';
@@ -150,13 +150,9 @@ const InteractiveBuilder = ({
     >
       <div ref={middlePanelRef} className="relative h-full w-full">
         <BuilderHeader />
-        <AiAssistantChat middlePanelSize={middlePanelSize} />
-        <CanvasControls
-          topOffset={FLOW_CANVAS_Y_OFFESET}
-          className={cn({
-            'left-[82px]': !lefSideBarContainerWidth,
-          })}
-        ></CanvasControls>
+        <CanvasControls topOffset={FLOW_CANVAS_Y_OFFESET}></CanvasControls>
+        <AiWidget classname="left-[282px]" />
+
         {!lefSideBarContainerWidth && <AiBuilderButton />}
         <div
           className="flex flex-col absolute bottom-0 right-0"
