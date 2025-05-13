@@ -169,7 +169,7 @@ describe('getSystemPrompt', () => {
       'gcp-big-query.txt',
       '@openops/block-google-cloud',
       'google_execute_sql_query',
-      'gcp bug query prompt content',
+      'gcp big query prompt content',
     ],
   ])(
     'should load action prompt from cloud',
