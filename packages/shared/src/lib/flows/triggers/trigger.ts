@@ -10,7 +10,7 @@ export enum TriggerType {
 }
 
 const commonProps = {
-  id: Type.Optional(Type.String()),
+  id: Type.String({}),
   name: Type.String({}),
   valid: Type.Boolean({}),
   displayName: Type.String({}),
