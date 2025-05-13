@@ -36,7 +36,7 @@ const AiAssistantChatContainer = ({
     <div
       ref={containerRef}
       className={cn(
-        'absolute bottom-[0px] mr-4 mb-5 z-50 overflow-x-hidden dark:text-primary bg-background shadow-editor rounded-md',
+        'absolute bottom-[0px] z-50 overflow-x-hidden dark:text-primary bg-background shadow-editor rounded-md',
         {
           hidden: !showAiChat,
         },
@@ -53,7 +53,7 @@ const AiAssistantChatContainer = ({
         }
       }}
     >
-      <div className="flex justify-between items-center px-5 py-2 gap-2 text-md dark:text-primary font-bold border-b border-gray-200">
+      <div className="flex justify-between items-center px-4 py-2 gap-2 text-md dark:text-primary font-bold border-b border-gray-200">
         <div className="flex items-center gap-2">
           <div className="size-8 flex justify-center items-center bg-background bg-gradient-to-b from-ring/40 to-primary-200/40 rounded-xl">
             <Bot size={20} />
