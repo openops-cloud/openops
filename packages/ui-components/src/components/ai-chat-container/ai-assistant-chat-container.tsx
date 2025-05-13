@@ -36,7 +36,7 @@ const AiAssistantChatContainer = ({
     <div
       ref={containerRef}
       className={cn(
-        'absolute bottom-[0px] mr-5 mb-5 z-50 border border-solid border-outline overflow-x-hidden dark:text-primary bg-background shadow-lg rounded-md',
+        'absolute bottom-[0px] mr-5 mb-5 z-50 overflow-x-hidden dark:text-primary bg-background shadow-editor rounded-md',
         {
           hidden: !showAiChat,
         },
@@ -53,7 +53,7 @@ const AiAssistantChatContainer = ({
         }
       }}
     >
-      <div className="flex justify-between items-center px-5 py-2 gap-2 text-md dark:text-primary font-bold">
+      <div className="flex justify-between items-center px-5 py-2 gap-2 text-md dark:text-primary font-bold border-b border-gray-200">
         <div className="flex items-center gap-2">
           <div className="size-8 flex justify-center items-center bg-background bg-gradient-to-b from-ring/40 to-primary-200/40 rounded-xl">
             <Bot size={20} />
@@ -74,8 +74,6 @@ const AiAssistantChatContainer = ({
           </Button>
         </TooltipWrapper>
       </div>
-
-      <div className="h-0 outline outline-1 outline-offset-[-0.50px] outline-gray-200" />
 
       <div
         style={{
