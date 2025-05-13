@@ -21,13 +21,10 @@ export function redactSecrets(
   connection: AppConnection,
 ): AppConnectionWithoutSensitiveData | RedactedAppConnection {
   const value: Record<string, any> | undefined = connection.value;
-  if (!auth || !value) {
-    return removeSensitiveData(connection);
-  }
 
   const redacted = value;
 
-  switch (auth.type) {
+  switch (auth?.type) {
     case PropertyType.SECRET_TEXT: {
       redacted.secret_text = REDACTED_MESSAGE;
       return {
