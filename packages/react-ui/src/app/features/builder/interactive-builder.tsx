@@ -1,5 +1,4 @@
 import { FLOW_CANVAS_Y_OFFESET } from '@/app/constants/flow-canvas';
-import { AiBuilderButton } from '@/app/features/ai/ai-builder-button';
 import {
   AI_CHAT_CONTAINER_SIZES,
   AiWidget,
@@ -152,8 +151,6 @@ const InteractiveBuilder = ({
         <BuilderHeader />
         <CanvasControls topOffset={FLOW_CANVAS_Y_OFFESET}></CanvasControls>
         <AiWidget classname="left-[282px]" />
-
-        {!lefSideBarContainerWidth && <AiBuilderButton />}
         <div
           className="flex flex-col absolute bottom-0 right-0"
           ref={containerRef}
