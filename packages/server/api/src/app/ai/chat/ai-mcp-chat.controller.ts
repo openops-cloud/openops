@@ -28,7 +28,7 @@ import {
   MCPChatContext,
   saveChatHistory,
 } from './ai-chat.service';
-import { getMcpSystemPrompt, getSystemPrompt } from './prompts.service';
+import { getMcpSystemPrompt } from './prompts.service';
 
 export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
   app.post(
