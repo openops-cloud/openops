@@ -36,7 +36,7 @@ const AiAssistantChatContainer = ({
     <div
       ref={containerRef}
       className={cn(
-        'absolute bottom-[0px] mr-5 mb-5 z-50 overflow-x-hidden dark:text-primary bg-background shadow-editor rounded-md',
+        'absolute bottom-[0px] mr-4 mb-5 z-50 overflow-x-hidden dark:text-primary bg-background shadow-editor rounded-md',
         {
           hidden: !showAiChat,
         },
