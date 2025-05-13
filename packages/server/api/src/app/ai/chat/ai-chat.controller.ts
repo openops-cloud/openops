@@ -99,9 +99,9 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
     });
 
     const tools = await getTools();
-
     pipeDataStreamToResponse(reply.raw, {
       execute: async (dataStreamWriter) => {
+        logger.debug('Send user message to LLM.');
         await streamMessages(
           dataStreamWriter,
           messages,
@@ -153,6 +153,7 @@ async function streamMessages(
     ...aiConfig.modelSettings,
     tools,
     toolChoice: 'auto',
+    maxRetries: 1,
     async onFinish({ response }) {
       response.messages.forEach((r) => {
         messages.push(getResponseObject(r));
@@ -163,6 +164,7 @@ async function streamMessages(
       if (
         response.messages[response.messages.length - 1].role !== 'assistant'
       ) {
+        logger.debug('Forwarding the message to LLM.');
         await streamMessages(
           dataStreamWriter,
           messages,
