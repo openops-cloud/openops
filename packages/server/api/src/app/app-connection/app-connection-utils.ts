@@ -87,29 +87,23 @@ export function redactSecrets(
 }
 
 export function restoreRedactedSecrets(
-  incomingConnection: AppConnection,
-  existingConnection: AppConnection | undefined,
+  incomingValue: Record<string, any>,
+  existingValue: Record<string, any>,
   auth: BlockAuthProperty | undefined,
-): AppConnection {
-  if (!auth || !existingConnection || !incomingConnection.value) {
-    return incomingConnection;
-  }
-  const incomingValue: Record<string, any> | undefined =
-    incomingConnection.value;
-  const existingValue: Record<string, any> | undefined =
-    existingConnection.value;
+) {
+  const restoredValue = incomingValue;
 
-  switch (auth.type) {
+  switch (auth?.type) {
     case PropertyType.SECRET_TEXT: {
       if (incomingValue.secret_text === REDACTED_MESSAGE) {
-        incomingValue.secret_text = existingValue.secret_text;
+        restoredValue.secret_text = existingValue.secret_text;
       }
       break;
     }
 
     case PropertyType.BASIC_AUTH: {
       if (incomingValue.password === REDACTED_MESSAGE) {
-        incomingValue.password = existingValue.password;
+        restoredValue.password = existingValue.password;
       }
       break;
     }
@@ -130,14 +124,14 @@ export function restoreRedactedSecrets(
           }
         }
 
-        incomingValue.props = restoredProps;
+        restoredValue.props = restoredProps;
       }
       break;
     }
 
     case PropertyType.OAUTH2: {
       if (incomingValue.client_secret === REDACTED_MESSAGE) {
-        incomingValue.client_secret = existingValue.client_secret;
+        restoredValue.client_secret = existingValue.client_secret;
       }
       break;
     }
@@ -146,5 +140,5 @@ export function restoreRedactedSecrets(
       break;
   }
 
-  return incomingConnection;
+  return restoredValue;
 }

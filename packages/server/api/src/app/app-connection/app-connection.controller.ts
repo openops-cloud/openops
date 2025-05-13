@@ -30,36 +30,10 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
   done,
 ) => {
   app.post('/', UpsertAppConnectionRequest, async (request, reply) => {
-    const existingConnection = await appConnectionService.getOne({
-      name: request.body.name,
-      projectId: request.principal.projectId,
-    });
-    let incomingConnection = request.body as AppConnection;
-
-    if (existingConnection) {
-      const block = await blockMetadataService.get({
-        name: incomingConnection.blockName,
-        projectId: request.principal.projectId,
-        version: undefined,
-      });
-
-      if (!block) {
-        throw new Error(
-          `Block metadata not found for ${incomingConnection.blockName}`,
-        );
-      }
-
-      incomingConnection = restoreRedactedSecrets(
-        incomingConnection,
-        existingConnection,
-        block.auth,
-      ) as AppConnection;
-    }
-
     const appConnection = await appConnectionService.upsert({
       userId: request.principal.id,
       projectId: request.principal.projectId,
-      request: incomingConnection as UpsertAppConnectionRequestBody,
+      request: request.body,
     });
 
     await reply

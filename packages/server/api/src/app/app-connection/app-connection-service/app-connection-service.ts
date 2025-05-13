@@ -41,7 +41,10 @@ import {
   sendConnectionCreatedEvent,
   sendConnectionUpdatedEvent,
 } from '../../telemetry/event-models';
-import { removeSensitiveData } from '../app-connection-utils';
+import {
+  removeSensitiveData,
+  restoreRedactedSecrets,
+} from '../app-connection-utils';
 import {
   AppConnectionEntity,
   AppConnectionSchema,
@@ -55,19 +58,43 @@ export const appConnectionService = {
   async upsert(params: UpsertParams): Promise<AppConnection> {
     const { projectId, request } = params;
 
+    const existingConnection = await repo().findOneBy({
+      name: request.name,
+      projectId,
+    });
+
+    let value = request.value;
+    if (existingConnection) {
+      const block = await blockMetadataService.get({
+        name: request.blockName,
+        projectId,
+        version: undefined,
+      });
+
+      if (!block) {
+        throw new Error(`Block metadata not found for ${request.blockName}`);
+      }
+
+      const decryptedExisting = decryptConnection(existingConnection);
+
+      const restoredConnectionValue = restoreRedactedSecrets(
+        value,
+        decryptedExisting.value,
+        block.auth,
+      );
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      value = restoredConnectionValue as any;
+    }
+
     const validatedConnectionValue = await validateConnectionValue({
-      connection: request,
+      connection: { ...request, value } as UpsertAppConnectionRequestBody,
       projectId,
     });
 
     const encryptedConnectionValue = encryptUtils.encryptObject({
       ...validatedConnectionValue,
-      ...request.value,
-    });
-
-    const existingConnection = await repo().findOneBy({
-      name: request.name,
-      projectId,
+      ...value,
     });
 
     const connection = {
