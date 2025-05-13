@@ -106,7 +106,6 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
           dataStreamWriter,
           languageModel,
           systemPrompt,
-          chatContext,
           aiConfig,
           messages,
           chatId,
@@ -176,7 +175,6 @@ async function streamMessages(
   dataStreamWriter: DataStreamWriter,
   languageModel: LanguageModel,
   systemPrompt: string,
-  chatContext: ChatContext,
   aiConfig: AiConfig,
   messages: CoreMessage[],
   chatId: string,
@@ -197,15 +195,13 @@ async function streamMessages(
 
       await saveChatHistory(chatId, messages);
 
-      if (
-        response.messages[response.messages.length - 1].role !== 'assistant'
-      ) {
+      const lastMessage = response.messages.at(-1);
+      if (lastMessage && lastMessage.role !== 'assistant') {
         logger.debug('Forwarding the message to LLM.');
         await streamMessages(
           dataStreamWriter,
           languageModel,
           systemPrompt,
-          chatContext,
           aiConfig,
           messages,
           chatId,
