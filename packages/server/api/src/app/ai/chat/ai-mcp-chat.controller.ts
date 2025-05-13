@@ -167,6 +167,10 @@ const DeleteChatOptions = {
   },
 };
 
+/**
+ * Stub function for fetching tools. This function currently returns an empty ToolSet.
+ * Future implementation should populate the ToolSet with the required tools.
+ */
 async function getTools(): Promise<ToolSet> {
   return {};
 }
