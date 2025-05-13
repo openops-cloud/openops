@@ -18,6 +18,6 @@ export const aiModule: FastifyPluginAsyncTypebox = async (app) => {
   });
 
   await app.register(aiMCPChatController, {
-    prefix: '/v1/ai/chat/mcp',
+    prefix: '/v1/ai/conversation',
   });
 };

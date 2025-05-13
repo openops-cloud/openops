@@ -57,7 +57,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
     },
   );
 
-  app.post('/conversation', NewMessageOptions, async (request, reply) => {
+  app.post('/', NewMessageOptions, async (request, reply) => {
     const chatId = request.body.chatId;
     const projectId = request.principal.projectId;
     const chatContext = await getChatContext(chatId);
@@ -114,23 +114,19 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
     });
   });
 
-  app.delete(
-    '/conversation/:chatId',
-    DeleteChatOptions,
-    async (request, reply) => {
-      const { chatId } = request.params;
+  app.delete('/:chatId', DeleteChatOptions, async (request, reply) => {
+    const { chatId } = request.params;
 
-      try {
-        await deleteChatHistory(chatId);
-        return await reply.code(StatusCodes.OK).send();
-      } catch (error) {
-        logger.error('Failed to delete chat history with error: ', error);
-        return reply.code(StatusCodes.INTERNAL_SERVER_ERROR).send({
-          message: 'Failed to delete chat history',
-        });
-      }
-    },
-  );
+    try {
+      await deleteChatHistory(chatId);
+      return await reply.code(StatusCodes.OK).send();
+    } catch (error) {
+      logger.error('Failed to delete chat history with error: ', error);
+      return reply.code(StatusCodes.INTERNAL_SERVER_ERROR).send({
+        message: 'Failed to delete chat history',
+      });
+    }
+  });
 };
 
 const OpenChatOptions = {
