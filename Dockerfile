@@ -11,6 +11,8 @@ RUN apk add --no-cache openssh-client python3 g++ git musl libcap-dev nginx gett
     yarn config set python /usr/bin/python3 && \
     npm install -g node-gyp npm@9.3.1 cross-env@7.0.3
 
+RUN npm install -g mint-mcp
+RUN npx -y mint-mcp add docs.openops.com
 
 # Set up backend
 WORKDIR /usr/src/app
