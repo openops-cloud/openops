@@ -140,5 +140,5 @@ const AiAssistantChatContainer = ({
   );
 };
 
-AiAssistantChatContainer.displayName = 'AiChatContainer';
+AiAssistantChatContainer.displayName = 'AiAssistantChatContainer';
 export { AiAssistantChatContainer };
