@@ -38,8 +38,9 @@ describe('executeSqlQueryAction', () => {
         required: true,
       },
       sqlText: {
-        type: 'SHORT_TEXT',
+        type: 'LONG_TEXT',
         required: true,
+        supportsAI: true,
       },
       params: {
         type: 'ARRAY',

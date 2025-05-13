@@ -9,7 +9,7 @@ import { ScrollArea } from '../../ui/scroll-area';
 import { AiChatSizeTogglers } from './ai-chat-size-togglers';
 import { AI_CHAT_CONTAINER_SIZES, AiChatContainerSizeState } from './types';
 
-type AiChatContainerProps = {
+type StepSettingsAiChatContainerProps = {
   parentHeight: number;
   parentWidth: number;
   showAiChat: boolean;
@@ -22,7 +22,7 @@ type AiChatContainerProps = {
   children?: ReactNode;
 } & Pick<UseChatHelpers, 'input' | 'handleInputChange' | 'handleSubmit'>;
 
-const AiChatContainer = ({
+const StepSettingsAiChatContainer = ({
   parentHeight,
   parentWidth,
   showAiChat,
@@ -35,7 +35,7 @@ const AiChatContainer = ({
   handleInputChange,
   handleSubmit,
   input,
-}: AiChatContainerProps) => {
+}: StepSettingsAiChatContainerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   let height: string;
@@ -146,5 +146,5 @@ const AiChatContainer = ({
   );
 };
 
-AiChatContainer.displayName = 'AiChatContainer';
-export { AiChatContainer };
+StepSettingsAiChatContainer.displayName = 'StepSettingsAiChatContainer';
+export { StepSettingsAiChatContainer };

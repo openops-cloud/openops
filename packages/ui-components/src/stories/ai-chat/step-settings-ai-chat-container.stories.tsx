@@ -5,8 +5,8 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { fn } from '@storybook/test';
 import {
   AI_CHAT_CONTAINER_SIZES,
-  AiChatContainer,
   AiChatContainerSizeState,
+  StepSettingsAiChatContainer,
 } from '../../components';
 import { AIChatMessages } from '../../components/ai-chat-messages/ai-chat-messages';
 import { Button } from '../../ui/button';
@@ -15,8 +15,8 @@ import { TooltipProvider } from '../../ui/tooltip';
 import { sampleAIChatMessages } from './sample-messages';
 
 const meta = {
-  title: 'Components/AiChatContainer',
-  component: AiChatContainer,
+  title: 'Components/StepSettingsAiChatContainer',
+  component: StepSettingsAiChatContainer,
   parameters: {
     layout: 'centered',
   },
@@ -64,17 +64,17 @@ const meta = {
         {!showAiChat && (
           <Button onClick={() => onSetShowAiChat(true)}>Show AI Chat</Button>
         )}
-        <AiChatContainer
+        <StepSettingsAiChatContainer
           {...args}
           containerSize={containerSize}
           toggleContainerSizeState={onToggleContainerSizeState}
           showAiChat={showAiChat}
           className="static"
-        ></AiChatContainer>
+        ></StepSettingsAiChatContainer>
       </>
     );
   },
-} satisfies Meta<typeof AiChatContainer>;
+} satisfies Meta<typeof StepSettingsAiChatContainer>;
 
 export default meta;
 
@@ -89,6 +89,9 @@ export const Docked: Story = {
     toggleContainerSizeState: fn(),
     handleSubmit: fn(),
     onCloseClick: fn(),
+    onToggle: fn(),
+    input: '',
+    handleInputChange: fn(),
   },
 };
 
@@ -131,7 +134,7 @@ export const Populated: Story = {
         {!showAiChat && (
           <Button onClick={() => onSetShowAiChat(true)}>Show AI Chat</Button>
         )}
-        <AiChatContainer
+        <StepSettingsAiChatContainer
           {...args}
           containerSize={containerSize}
           toggleContainerSizeState={onToggleContainerSizeState}
@@ -142,7 +145,7 @@ export const Populated: Story = {
             messages={sampleAIChatMessages}
             onInject={action('Inject command')}
           />
-        </AiChatContainer>
+        </StepSettingsAiChatContainer>
       </>
     );
   },
