@@ -28,6 +28,7 @@ import {
   Input,
   INTERNAL_ERROR_TOAST,
   Markdown,
+  MarkdownCodeVariations,
   Separator,
   toast,
 } from '@openops/components/ui';
@@ -188,7 +189,10 @@ const CreateEditConnectionDialogContent = ({
         </DialogTitle>
       </DialogHeader>
       <ScrollArea className="h-full">
-        <Markdown markdown={auth?.description}></Markdown>
+        <Markdown
+          markdown={auth?.description}
+          codeVariation={MarkdownCodeVariations.WithoutCopy}
+        ></Markdown>
         {auth?.description && <Separator className="my-4" />}
         <Form {...form}>
           <form

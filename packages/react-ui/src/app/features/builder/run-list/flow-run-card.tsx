@@ -12,15 +12,13 @@ import { t } from 'i18next';
 import { ChevronRightIcon } from 'lucide-react';
 import React from 'react';
 
-import {
-  LeftSideBarType,
-  useBuilderStateContext,
-} from '@/app/features/builder/builder-hooks';
+import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
 import { flowRunUtils } from '@/app/features/flow-runs/lib/flow-run-utils';
 import { flowRunsApi } from '@/app/features/flow-runs/lib/flow-runs-api';
 import { flowsApi } from '@/app/features/flows/lib/flows-api';
 import { formatUtils } from '@/app/lib/utils';
 import { FlowRun, isNil, PopulatedFlow } from '@openops/shared';
+import { LeftSideBarType } from '../builder-types';
 
 type FlowRunCardProps = {
   run: FlowRun;

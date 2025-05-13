@@ -64,9 +64,9 @@ describe('flow with looping', () => {
 
         const loopOut = result.steps.loop as LoopStepOutput
         expect(result.verdict).toBe(ExecutionVerdict.FAILED)
-        expect(loopOut.output?.iterations.length).toBe(1)
-        expect(loopOut.output?.index).toBe(1)
-        expect(loopOut.output?.item).toBe(4)
+        expect(loopOut.output?.iterations.length).toBe(3)
+        expect(loopOut.output?.index).toBe(3)
+        expect(loopOut.output?.item).toBe(6)
     })
 
 })

@@ -1,4 +1,3 @@
-import { LeftSideBarType } from '@/app/features/builder/builder-hooks';
 import {
   Button,
   cn,
@@ -13,6 +12,7 @@ import { t } from 'i18next';
 import { EllipsisVertical, History, Workflow } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { LeftSideBarType } from '../builder-types';
 
 const ICON_SIZE_SMALL = 16;
 const ICON_SIZE_LARGE = 24;

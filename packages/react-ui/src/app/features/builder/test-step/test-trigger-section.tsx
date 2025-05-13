@@ -17,20 +17,23 @@ import deepEqual from 'fast-deep-equal';
 import { t } from 'i18next';
 import { AlertCircle } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { useFormContext, useWatch } from 'react-hook-form';
+import { useFormContext } from 'react-hook-form';
 
 import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
 import { triggerEventsApi } from '@/app/features/flows/lib/trigger-events-api';
 import { formatUtils } from '@/app/lib/utils';
 import {
   CATCH_WEBHOOK,
+  FlagId,
+  isNil,
   SeekPage,
   Trigger,
   TriggerEvent,
   TriggerTestStrategy,
-  isNil,
 } from '@openops/shared';
 
+import { flagsHooks } from '@/app/common/hooks/flags-hooks';
+import { stepTestOutputHooks } from './step-test-output-hooks';
 import { TestSampleDataViewer } from './test-sample-data-viewer';
 import { TestButtonTooltip } from './test-step-tooltip';
 import { testStepUtils } from './test-step-utils';
@@ -64,10 +67,6 @@ const TestTriggerSection = React.memo(
     const formValues = form.getValues();
     const [isValid, setIsValid] = useState(false);
 
-    const [lastTestDate, setLastTestDate] = useState(
-      formValues.settings.inputUiInfo?.lastTestDate,
-    );
-
     const { blockModel, isLoading: isBlockLoading } = blocksHooks.useBlock({
       name: formValues.settings.blockName,
       version: formValues.settings.blockVersion,
@@ -86,8 +85,11 @@ const TestTriggerSection = React.memo(
       undefined,
     );
 
-    const [currentSelectedData, setCurrentSelectedData] =
-      useState<unknown>(undefined);
+    const {
+      data: testOutputData,
+      isLoading: isLoadingTestOutput,
+      refetch: refetchTestOutput,
+    } = stepTestOutputHooks.useStepTestOutputFormData(flowVersionId, form);
 
     const [currentSelectedId, setCurrentSelectedId] = useState<
       string | undefined
@@ -148,7 +150,7 @@ const TestTriggerSection = React.memo(
       },
     });
 
-    const { mutate: pollTrigger, isPending: isPollingTesting } = useMutation<
+    const { mutate: pollTrigger, isPending } = useMutation<
       SeekPage<TriggerEvent>,
       Error,
       void
@@ -175,19 +177,27 @@ const TestTriggerSection = React.memo(
       },
     });
 
+    const isTesting = isPending || isLoadingTestOutput;
+
+    const { data: useNewExternalTestData = false } = flagsHooks.useFlag(
+      FlagId.USE_NEW_EXTERNAL_TESTDATA,
+    );
+
     function updateCurrentSelectedData(data: TriggerEvent) {
-      form.setValue(
-        'settings.inputUiInfo',
-        {
-          ...formValues.settings.inputUiInfo,
-          currentSelectedData: formatUtils.formatStepInputOrOutput(
-            data.payload,
-          ),
-          lastTestDate: dayjs().toISOString(),
-        },
-        { shouldValidate: true },
-      );
-      setLastTestDate(dayjs().toISOString());
+      if (!useNewExternalTestData) {
+        form.setValue(
+          'settings.inputUiInfo',
+          {
+            ...formValues.settings.inputUiInfo,
+            currentSelectedData: formatUtils.formatStepInputOrOutput(
+              data.payload,
+            ),
+            lastTestDate: dayjs().toISOString(),
+          },
+          { shouldValidate: true },
+        );
+      }
+      refetchTestOutput();
     }
 
     const { data: pollResults, refetch } = useQuery<SeekPage<TriggerEvent>>({
@@ -201,16 +211,11 @@ const TestTriggerSection = React.memo(
       staleTime: 0,
     });
 
+    const currentSelectedData = testOutputData?.output;
     const sampleDataSelected =
       !isNil(currentSelectedData) || !isNil(errorMessage);
-    const isTestedBefore = !isNil(
-      form.getValues().settings.inputUiInfo?.lastTestDate,
-    );
 
-    const watchSelectedData = useWatch({
-      name: 'settings.inputUiInfo.currentSelectedData',
-      control: form.control,
-    });
+    const isTestedBefore = !isNil(testOutputData?.lastTestDate);
 
     useEffect(() => {
       const selectedId = getSelectedId(
@@ -222,8 +227,7 @@ const TestTriggerSection = React.memo(
 
     useEffect(() => {
       setErrorMessage(undefined);
-      setCurrentSelectedData(watchSelectedData);
-    }, [watchSelectedData]);
+    }, [currentSelectedData]);
 
     if (isBlockLoading) {
       return null;
@@ -245,10 +249,10 @@ const TestTriggerSection = React.memo(
             onRetest={isSimulation ? simulateTrigger : pollTrigger}
             isValid={isValid}
             isSaving={isSaving}
-            isTesting={isPollingTesting}
+            isTesting={isTesting}
             currentSelectedData={currentSelectedData}
             errorMessage={errorMessage}
-            lastTestDate={lastTestDate}
+            lastTestDate={testOutputData?.lastTestDate}
             type={formValues.type}
           >
             {pollResults?.data && (
@@ -365,7 +369,7 @@ const TestTriggerSection = React.memo(
                 onClick={() => pollTrigger()}
                 keyboardShortcut="G"
                 onKeyboardShortcut={pollTrigger}
-                loading={isPollingTesting}
+                loading={isTesting}
                 disabled={!isValid}
               >
                 <Dot animation={true} variant={'primary'}></Dot>

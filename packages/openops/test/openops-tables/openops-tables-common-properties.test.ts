@@ -116,7 +116,7 @@ describe('getTableFields', () => {
     ]);
     expect(authenticateDefaultUserInOpenOpsTablesMock).toHaveBeenCalledTimes(1);
     expect(getFieldsMock).toHaveBeenCalledTimes(1);
-    expect(getFieldsMock).toHaveBeenCalledWith(1, 'token'); // Adjust this line as needed.
+    expect(getFieldsMock).toHaveBeenCalledWith(1, 'token', false, undefined); // Adjust this line as needed.
   });
 
   test('should handle authentication failure', async () => {
@@ -144,7 +144,7 @@ describe('getTableFields', () => {
     expect(result).toMatchObject([]);
     expect(authenticateDefaultUserInOpenOpsTablesMock).toHaveBeenCalledTimes(1);
     expect(getFieldsMock).toHaveBeenCalledTimes(1);
-    expect(getFieldsMock).toHaveBeenCalledWith(1, 'token');
+    expect(getFieldsMock).toHaveBeenCalledWith(1, 'token', false, undefined);
   });
 
   test('should return our supported properties for the field', async () => {

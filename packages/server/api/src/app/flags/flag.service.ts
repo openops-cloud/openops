@@ -6,7 +6,7 @@ import {
   system,
   webhookSecretsUtils,
 } from '@openops/server-shared';
-import { Flag, FlagId, isNil } from '@openops/shared';
+import { Flag, FlagId } from '@openops/shared';
 import axios from 'axios';
 import { webhookUtils } from 'server-worker';
 import { repoFactory } from '../core/db/repo-factory';
@@ -93,20 +93,6 @@ export const flagService = {
       {
         id: FlagId.PROJECT_LIMITS_ENABLED,
         value: false,
-        created,
-        updated,
-      },
-      {
-        id: FlagId.CODE_COPILOT_ENABLED,
-        value: !isNil(system.get(AppSystemProp.OPENAI_API_KEY)),
-        created,
-        updated,
-      },
-      {
-        id: FlagId.HTTP_REQUEST_COPILOT_ENABLED,
-        value:
-          !isNil(system.get(AppSystemProp.OPENAI_API_KEY)) &&
-          !isNil(system.get(AppSystemProp.RAPID_API_KEY)),
         created,
         updated,
       },
@@ -299,6 +285,18 @@ export const flagService = {
       {
         id: FlagId.CANDU_CLIENT_TOKEN,
         value: system.get<string>(AppSystemProp.CANDU_CLIENT_TOKEN),
+        created,
+        updated,
+      },
+      {
+        id: FlagId.SHOW_AI_SETTINGS,
+        value: system.getBoolean(AppSystemProp.SHOW_AI_SETTINGS),
+        created,
+        updated,
+      },
+      {
+        id: FlagId.USE_NEW_EXTERNAL_TESTDATA,
+        value: false,
         created,
         updated,
       },

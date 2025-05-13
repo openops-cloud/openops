@@ -9,7 +9,7 @@ export const terraform = createBlock({
   minimumSupportedRelease: '0.20.0',
   logoUrl: 'https://static.openops.com/blocks/terraform.png',
   authors: ['OpenOps'],
-  categories: [BlockCategory.IaC],
+  categories: [BlockCategory.DEVOPS],
   actions: [modifyTemplate, deleteResourceFromTemplate],
   triggers: [],
 });

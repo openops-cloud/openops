@@ -137,8 +137,16 @@ const FlowStepDetailsCardItem = ({
             <div className="w-2"></div>
             <div className="flex gap-1 justify-end  items-center flex-grow">
               {isLoopStep && (
-                <div className="flex gap-1 justify-end  items-center flex-grow">
-                  <LoopIterationInput stepName={stepName} />
+                <div
+                  className={cn(
+                    'flex gap-1 justify-end  items-center flex-grow',
+                    { 'mr-4': !isStepSelected && !isChildSelected },
+                  )}
+                >
+                  <LoopIterationInput
+                    stepName={stepName}
+                    isStepSelected={isStepSelected || isChildSelected}
+                  />
                 </div>
               )}
               {(!isLoopStep ||

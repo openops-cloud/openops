@@ -1,13 +1,18 @@
-import { cn, Input, ScrollArea } from '@openops/components/ui';
+import {
+  AI_CHAT_CONTAINER_SIZES,
+  cn,
+  Input,
+  ScrollArea,
+} from '@openops/components/ui';
 import { t } from 'i18next';
 import { SearchXIcon } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 
-import { textMentionUtils } from '@/app/features/builder/block-properties/text-input-with-mentions/text-input-utils';
 import { Action, flowHelper, isNil, Trigger } from '@openops/shared';
 
-import { BuilderState, useBuilderStateContext } from '../builder-hooks';
+import { useBuilderStateContext } from '../builder-hooks';
 
+import { BuilderState } from '../builder-types';
 import { DataSelectorNode } from './data-selector-node';
 import {
   DataSelectorSizeState,
@@ -103,80 +108,80 @@ const getAllStepsMentions: (state: BuilderState) => MentionTreeNode[] = (
 type DataSelectorProps = {
   parentHeight: number;
   parentWidth: number;
+  showDataSelector: boolean;
+  dataSelectorSize: DataSelectorSizeState;
+  setDataSelectorSize: (dataSelectorSize: DataSelectorSizeState) => void;
+  className?: string;
 };
 
-const doesHaveInputThatUsesMentionClass = (
-  element: Element | null,
-): boolean => {
-  if (isNil(element)) {
-    return false;
-  }
-  if (element.classList.contains(textMentionUtils.inputThatUsesMentionClass)) {
-    return true;
-  }
-  const parent = element.parentElement;
-  if (parent) {
-    return doesHaveInputThatUsesMentionClass(parent);
-  }
-  return false;
-};
-
-const DataSelector = ({ parentHeight, parentWidth }: DataSelectorProps) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [DataSelectorSize, setDataSelectorSize] =
-    useState<DataSelectorSizeState>(DataSelectorSizeState.DOCKED);
+const DataSelector = ({
+  parentHeight,
+  parentWidth,
+  showDataSelector,
+  dataSelectorSize,
+  setDataSelectorSize,
+  className,
+}: DataSelectorProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const mentions = useBuilderStateContext(getAllStepsMentions);
+  const midpanelState = useBuilderStateContext((state) => state.midpanelState);
   const filteredMentions = filterBy(structuredClone(mentions), searchTerm);
-  const [showDataSelector, setShowDataSelector] = useState(false);
 
-  const checkFocus = useCallback(() => {
-    const isTextMentionInputFocused =
-      (!isNil(containerRef.current) &&
-        containerRef.current.contains(document.activeElement)) ||
-      doesHaveInputThatUsesMentionClass(document.activeElement);
+  const onToggle = useCallback(() => {
+    if (
+      [DataSelectorSizeState.DOCKED, DataSelectorSizeState.EXPANDED].includes(
+        dataSelectorSize,
+      )
+    ) {
+      return;
+    }
 
-    setShowDataSelector(isTextMentionInputFocused);
-  }, []);
-
-  useEffect(() => {
-    document.addEventListener('focusin', checkFocus);
-    document.addEventListener('focusout', checkFocus);
-
-    return () => {
-      document.removeEventListener('focusin', checkFocus);
-      document.removeEventListener('focusout', checkFocus);
-    };
-  }, [checkFocus]);
+    if (midpanelState.aiContainerSize === AI_CHAT_CONTAINER_SIZES.EXPANDED) {
+      setDataSelectorSize(DataSelectorSizeState.EXPANDED);
+    } else {
+      setDataSelectorSize(DataSelectorSizeState.DOCKED);
+    }
+  }, [dataSelectorSize, midpanelState.aiContainerSize, setDataSelectorSize]);
 
   return (
     <div
-      ref={containerRef}
       tabIndex={0}
       className={cn(
-        'absolute bottom-[0px]  mr-5 mb-5  right-[0px]  z-50 transition-all  border border-solid border-outline overflow-x-hidden bg-background shadow-lg rounded-md',
+        'mr-5 mb-5 z-50 transition-all border border-solid border-outline overflow-x-hidden bg-background shadow-lg rounded-md',
         {
-          'opacity-0 pointer-events-none': !showDataSelector,
+          hidden: !showDataSelector,
         },
+        className,
       )}
     >
-      <div className="text-lg items-center font-semibold px-5 py-2 flex gap-2">
-        {t('Data Selector')} <div className="flex-grow"></div>{' '}
+      <div
+        className="text-lg items-center font-semibold px-5 py-2 flex gap-2"
+        role="button"
+        tabIndex={0}
+        onClick={onToggle}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            onToggle();
+          }
+        }}
+        aria-label={t('Toggle Data Selector')}
+      >
+        {t('Data Selector')} <div className="flex-grow"></div>
         <DataSelectorSizeTogglers
-          state={DataSelectorSize}
+          state={dataSelectorSize}
           setListSizeState={setDataSelectorSize}
         ></DataSelectorSizeTogglers>
       </div>
       <div
         style={{
           height:
-            DataSelectorSize === DataSelectorSizeState.COLLAPSED
+            dataSelectorSize === DataSelectorSizeState.COLLAPSED
               ? '0px'
-              : DataSelectorSize === DataSelectorSizeState.DOCKED
+              : dataSelectorSize === DataSelectorSizeState.DOCKED
               ? '450px'
-              : `${parentHeight - 100}px`,
+              : `${parentHeight - 180}px`,
           width:
-            DataSelectorSize !== DataSelectorSizeState.EXPANDED
+            dataSelectorSize !== DataSelectorSizeState.EXPANDED
               ? '450px'
               : `${parentWidth - 40}px`,
         }}

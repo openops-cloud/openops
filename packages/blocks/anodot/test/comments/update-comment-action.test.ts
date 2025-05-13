@@ -84,7 +84,7 @@ describe('updateCommentAction', () => {
     });
 
     await expect(updateCommentAction.run(context)).rejects.toThrow(
-      "An error occurred while updating comment 'some comment id' of Anodot recommendation 'some recommendation id' (account id: some account id): Error: some error",
+      "An error occurred while updating comment 'some comment id' of Umbrella recommendation 'some recommendation id' (account id: some account id): Error: some error",
     );
   });
 

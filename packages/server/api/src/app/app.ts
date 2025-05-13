@@ -20,7 +20,6 @@ import {
   FlowImportTemplate,
   FlowRun,
   Folder,
-  isNil,
   Project,
   spreadIfDefined,
   UserInvitation,
@@ -31,15 +30,13 @@ import { FastifyInstance, FastifyRequest, HTTPMethods } from 'fastify';
 import fastifySocketIO from 'fastify-socket.io';
 import * as process from 'node:process';
 import { Socket } from 'socket.io';
+import { aiModule } from './ai/ai.module';
 import { appConnectionModule } from './app-connection/app-connection.module';
 import { appEventRoutingModule } from './app-event-routing/app-event-routing.module';
 import { authenticationModule } from './authentication/authentication.module';
-import { pricingModule } from './aws/pricing-module';
 import { blockModule } from './blocks/base-block-module';
 import { blockSyncService } from './blocks/block-sync-service';
 import { communityBlocksModule } from './blocks/community-block-module';
-import { copilotModule } from './copilot/copilot.module';
-import { requestWriterModule } from './copilot/request-writer/request-writer.module';
 import { rateLimitModule } from './core/security/rate-limit';
 import { securityHandlerChain } from './core/security/security-handler-chain';
 import { dashboardsModule } from './dashboards/dashboards-module';
@@ -51,8 +48,6 @@ import { flowModule } from './flows/flow.module';
 import { formModule } from './flows/flow/form/form.module';
 import { folderModule } from './flows/folder/folder.module';
 import { triggerEventModule } from './flows/trigger-events/trigger-event.module';
-import { encryptUtils } from './helper/encryption';
-import { jwtUtils } from './helper/jwt-utils';
 import { systemJobsSchedule } from './helper/system-jobs';
 import { organizationModule } from './organization/organization.module';
 import { projectModule } from './project/project-module';
@@ -194,17 +189,15 @@ export const setupApp = async (
   await app.register(appEventRoutingModule);
   await app.register(userModule);
   await app.register(authenticationModule);
-  await app.register(copilotModule);
-  await app.register(requestWriterModule);
   await app.register(organizationModule);
   await app.register(formModule);
   await blockSyncService.setup();
   await app.register(workerModule);
-  await app.register(pricingModule);
   await app.register(slackInteractionModule);
   await app.register(dashboardsModule);
   await app.register(userInfoModule);
   await app.register(userSettingsModule);
+  await app.register(aiModule);
 
   app.get(
     '/redirect',
@@ -228,8 +221,6 @@ export const setupApp = async (
       }
     },
   );
-
-  await validateEnvPropsOnStartup();
 
   await app.register(projectModule);
   await app.register(communityBlocksModule);
@@ -257,40 +248,6 @@ export const setupApp = async (
   } as FastifyCookieOptions);
 
   return app;
-};
-
-const validateEnvPropsOnStartup = async (): Promise<void> => {
-  const codeSandboxType = process.env.OPS_CODE_SANDBOX_TYPE;
-  if (!isNil(codeSandboxType)) {
-    throw new Error(
-      JSON.stringify({
-        message:
-          'OPS_CODE_SANDBOX_TYPE is deprecated, please use OPS_EXECUTION_MODE instead',
-      }),
-    );
-  }
-  const queueMode = system.getOrThrow<QueueMode>(AppSystemProp.QUEUE_MODE);
-  const encryptionKey = await encryptUtils.loadEncryptionKey(queueMode);
-  const isValidHexKey =
-    encryptionKey && /^[A-Fa-z0-9]{32}$/.test(encryptionKey);
-  if (!isValidHexKey) {
-    throw new Error(
-      JSON.stringify({
-        message:
-          'OPS_ENCRYPTION_KEY is either undefined or not a valid 32 hex string.',
-      }),
-    );
-  }
-
-  const jwtSecret = await jwtUtils.getJwtSecret();
-  if (isNil(jwtSecret)) {
-    throw new Error(
-      JSON.stringify({
-        message:
-          'OPS_JWT_SECRET is undefined, please define it in the environment variables',
-      }),
-    );
-  }
 };
 
 async function getAdapter() {

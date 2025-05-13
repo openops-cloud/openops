@@ -1,38 +1,10 @@
-import * as Sentry from '@sentry/node';
 import { logger } from './logger';
 import { system } from './system/system';
 import { SharedSystemProp } from './system/system-prop';
 
-const sentryDsn = system.get(SharedSystemProp.SENTRY_DSN);
-
-export const initializeSentry = () => {
-  if (sentryDsn) {
-    logger.info('Initializing Sentry');
-    Sentry.init({
-      dsn: sentryDsn,
-      beforeSend: (event) => {
-        if (event?.exception?.values?.[0].type === 'AxiosError') {
-          return null;
-        }
-        const value = event?.exception?.values?.[0]?.value;
-        if (
-          value &&
-          ['EXECUTION_TIMEOUT', 'ENTITY_NOT_FOUND'].includes(value)
-        ) {
-          return null;
-        }
-        return event;
-      },
-    });
-  }
-};
-
 export const exceptionHandler = {
   handle: (e: unknown): void => {
     logger.error('Caught an unknown exception', e);
-    if (sentryDsn) {
-      Sentry.captureException(e);
-    }
   },
 };
 

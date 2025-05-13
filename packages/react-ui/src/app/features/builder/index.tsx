@@ -7,16 +7,14 @@ import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
-  useElementSize,
 } from '@openops/components/ui';
 import { ReactFlowProvider } from '@xyflow/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ImperativePanelHandle } from 'react-resizable-panels';
 import { useSearchParams } from 'react-router-dom';
+import { useMeasure } from 'react-use';
 
 import {
-  LeftSideBarType,
-  RightSideBarType,
   useBuilderStateContext,
   useSwitchToDraft,
 } from '@/app/features/builder/builder-hooks';
@@ -24,6 +22,7 @@ import { DynamicFormValidationProvider } from '@/app/features/builder/dynamic-fo
 
 import { useResizablePanelGroup } from '@/app/common/hooks/use-resizable-panel-group';
 import { useSocket } from '@/app/common/providers/socket-provider';
+import { PanelSizes } from '@/app/common/types/panel-sizes';
 import { FLOW_CANVAS_Y_OFFESET } from '@/app/constants/flow-canvas';
 import { SEARCH_PARAMS } from '@/app/constants/search-params';
 import {
@@ -47,8 +46,7 @@ import { RunDetailsBar } from '../flow-runs/components/run-details-bar';
 import { FlowSideMenu } from '../navigation/side-menu/flow/flow-side-menu';
 import LeftSidebarResizablePanel from '../navigation/side-menu/left-sidebar';
 import { BuilderHeader } from './builder-header/builder-header';
-import { CopilotSidebar } from './copilot';
-import { DataSelector } from './data-selector';
+import { LeftSideBarType, RightSideBarType } from './builder-types';
 import { FlowBuilderCanvas } from './flow-canvas/flow-builder-canvas';
 import { FLOW_CANVAS_CONTAINER_ID } from './flow-version-undo-redo/constants';
 import { UndoRedo } from './flow-version-undo-redo/undo-redo';
@@ -66,18 +64,27 @@ const useAnimateSidebar = (
   sidebarValue: LeftSideBarType | RightSideBarType,
 ) => {
   const handleRef = useRef<ImperativePanelHandle>(null);
+
   const sidebarbarClosed = [
     LeftSideBarType.NONE,
     RightSideBarType.NONE,
   ].includes(sidebarValue);
+
   useEffect(() => {
-    const sidebarSize = handleRef.current?.getSize() ?? 0;
-    if (sidebarbarClosed) {
-      handleRef.current?.resize(0);
-    } else if (sidebarSize === 0) {
-      handleRef.current?.resize(25);
-    }
-  }, [handleRef, sidebarValue, sidebarbarClosed]);
+    requestAnimationFrame(() => {
+      try {
+        const size = handleRef.current?.getSize?.() ?? 0;
+        if (sidebarbarClosed) {
+          handleRef.current?.resize?.(0);
+        } else if (size === 0) {
+          handleRef.current?.resize?.(25);
+        }
+      } catch (err) {
+        console.warn('Sidebar update skipped', err);
+      }
+    });
+  }, [sidebarValue, sidebarbarClosed]);
+
   return handleRef;
 };
 
@@ -150,10 +157,8 @@ const BuilderPage = () => {
       };
     },
   );
-  const middlePanelRef = useRef(null);
-  const middlePanelSize = useElementSize(middlePanelRef);
-  const leftSidePanelRef = useRef(null);
-  const leftSidePanelSize = useElementSize(leftSidePanelRef);
+  const [middlePanelRef, middlePanelSize] = useMeasure<HTMLDivElement>();
+  const [leftSidePanelRef, leftSidePanelSize] = useMeasure<HTMLDivElement>();
   const [isDraggingHandle, setIsDraggingHandle] = useState(false);
   const rightHandleRef = useAnimateSidebar(rightSidebar);
   const {
@@ -179,10 +184,6 @@ const BuilderPage = () => {
       socket.removeAllListeners(WebsocketClientEvent.TEST_FLOW_RUN_PROGRESS);
       socket.removeAllListeners(WebsocketClientEvent.TEST_STEP_FINISHED);
       socket.removeAllListeners(WebsocketClientEvent.TEST_FLOW_RUN_STARTED);
-      socket.removeAllListeners(WebsocketClientEvent.GENERATE_CODE_FINISHED);
-      socket.removeAllListeners(
-        WebsocketClientEvent.GENERATE_HTTP_REQUEST_FINISHED,
-      );
     };
   }, [socket, refetchBlock]);
 
@@ -229,7 +230,7 @@ const BuilderPage = () => {
             direction="horizontal"
             className="absolute left-0 top-0"
             onLayout={(size) => {
-              setPanelGroupSize(RESIZABLE_PANEL_GROUP, size);
+              setPanelGroupSize(RESIZABLE_PANEL_GROUP, size as PanelSizes);
             }}
           >
             <LeftSidebarResizablePanel
@@ -249,9 +250,6 @@ const BuilderPage = () => {
                 {leftSidebar === LeftSideBarType.VERSIONS && (
                   <FlowVersionsList />
                 )}
-                {leftSidebar === LeftSideBarType.AI_COPILOT && (
-                  <CopilotSidebar />
-                )}
                 {leftSidebar === LeftSideBarType.MENU && <FlowSideMenu />}
                 {leftSidebar === LeftSideBarType.TREE_VIEW && <TreeView />}
               </div>
@@ -262,13 +260,7 @@ const BuilderPage = () => {
               onDragging={setIsDraggingHandle}
             />
 
-            <ResizablePanel
-              order={2}
-              id={RESIZABLE_PANEL_IDS.MAIN}
-              className={cn('min-w-[775px]', {
-                'min-w-[830px]': leftSidebar === LeftSideBarType.NONE,
-              })}
-            >
+            <ResizablePanel order={2} id={RESIZABLE_PANEL_IDS.MAIN}>
               {readonly ? (
                 <ReadonlyCanvasProvider>
                   <div ref={middlePanelRef} className="relative h-full w-full">
@@ -278,10 +270,6 @@ const BuilderPage = () => {
                       topOffset={FLOW_CANVAS_Y_OFFESET}
                     ></CanvasControls>
                     <AiWidget />
-                    <DataSelector
-                      parentHeight={middlePanelSize.height}
-                      parentWidth={middlePanelSize.width}
-                    ></DataSelector>
                     <div
                       className={cn('h-screen w-full flex-1 z-10', {
                         'bg-background': !isDraggingHandle,

@@ -4,12 +4,13 @@ import { Button } from '../../ui/button';
 import { useToast } from '../../ui/use-toast';
 
 import { t } from 'i18next';
-import { Copy } from 'lucide-react';
-import React from 'react';
+import { Copy, Plus } from 'lucide-react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import validator from 'validator';
 import { clipboardUtils } from '../../lib/clipboard-utils';
 import { COPY_PASTE_TOAST_DURATION } from '../../lib/constants';
+import { CodeVariations, MarkdownCodeVariations } from './types';
 
 function applyVariables(markdown: string, variables: Record<string, string>) {
   return markdown
@@ -24,6 +25,8 @@ type MarkdownProps = {
   variables?: Record<string, string>;
   className?: string;
   withBorder?: boolean;
+  codeVariation?: CodeVariations;
+  handleInject?: (codeContent: string) => void;
 };
 
 const Container = ({
@@ -41,7 +44,40 @@ const Container = ({
     children
   );
 
-const LanguageText = ({ content }: { content: string }) => {
+const LanguageText = ({
+  content,
+  codeVariation,
+}: {
+  content: string;
+  codeVariation?: CodeVariations;
+}) => {
+  const divRef = useRef<HTMLDivElement>(null);
+
+  const isInjectVariation =
+    codeVariation === MarkdownCodeVariations.WithCopyAndInject;
+
+  useEffect(() => {
+    const div = divRef.current;
+    if (div) {
+      div.style.height =
+        div.scrollHeight > 32 ? div.scrollHeight + 'px' : '32px';
+    }
+  }, [content]);
+
+  if (isInjectVariation) {
+    return (
+      <div
+        ref={divRef}
+        className="p-4 text-sm block w-full leading-tight bg-input rounded-lg border-none overflow-y-hidden resize-none"
+        contentEditable={false}
+        role="textbox"
+        suppressContentEditableWarning
+      >
+        {content}
+      </div>
+    );
+  }
+
   return (
     <input
       type="text"
@@ -51,7 +87,6 @@ const LanguageText = ({ content }: { content: string }) => {
     />
   );
 };
-
 const LanguageUrl = ({ content }: { content: string }) => {
   if (
     validator.isURL(content, {
@@ -81,7 +116,13 @@ const LanguageUrl = ({ content }: { content: string }) => {
   Renders a markdown component with support for variables and language text.
 */
 const Markdown = React.memo(
-  ({ markdown, variables, withBorder = true }: MarkdownProps) => {
+  ({
+    markdown,
+    variables,
+    withBorder = true,
+    codeVariation = MarkdownCodeVariations.WithCopy,
+    handleInject,
+  }: MarkdownProps) => {
     const { toast } = useToast();
 
     const showCopySuccessToast = () =>
@@ -111,6 +152,15 @@ const Markdown = React.memo(
       }
     };
 
+    const onInjectCode = useCallback(
+      (codeContent: string) => {
+        if (codeContent && handleInject && typeof handleInject === 'function') {
+          handleInject(codeContent);
+        }
+      },
+      [handleInject],
+    );
+
     if (!markdown) {
       return null;
     }
@@ -121,28 +171,60 @@ const Markdown = React.memo(
         <ReactMarkdown
           components={{
             code(props) {
-              const isLanguageText = props.className?.includes('language-text');
+              const isLanguageText = props.className?.includes('language');
               const isLanguageUrl = props.className?.includes('language-url');
+
+              if (!props.children) {
+                return null;
+              }
 
               if (!isLanguageText && !isLanguageUrl) {
                 return <code {...props} className="text-wrap" />;
               }
 
               const codeContent = String(props.children).trim();
+
               return (
                 <div className="relative py-2 w-full">
                   {isLanguageUrl ? (
                     <LanguageUrl content={codeContent} />
                   ) : (
-                    <LanguageText content={codeContent} />
+                    <LanguageText
+                      content={codeContent}
+                      codeVariation={codeVariation}
+                    />
                   )}
-                  <Button
-                    variant="ghost"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-background rounded p-2 inline-flex items-center justify-center"
-                    onClick={() => copyToClipboard(codeContent)}
-                  >
-                    <Copy className="w-4 h-4" />
-                  </Button>
+                  {codeVariation === MarkdownCodeVariations.WithCopy && (
+                    <Button
+                      variant="ghost"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-background rounded p-2 inline-flex items-center justify-center"
+                      onClick={() => copyToClipboard(codeContent)}
+                    >
+                      <Copy className="w-4 h-4" />
+                    </Button>
+                  )}
+                  {codeVariation ===
+                    MarkdownCodeVariations.WithCopyAndInject && (
+                    <div className="flex gap-2 items-center justify-end mt-1">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="rounded p-2 inline-flex items-center justify-center text-xs font-sans"
+                        onClick={() => onInjectCode(codeContent)}
+                      >
+                        <Plus className="w-4 h-4" />
+                        {t('Inject command')}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="rounded p-2 inline-flex items-center justify-center"
+                        onClick={() => copyToClipboard(codeContent)}
+                      >
+                        <Copy className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  )}
                 </div>
               );
             },

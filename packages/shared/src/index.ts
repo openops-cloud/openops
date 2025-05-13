@@ -1,3 +1,6 @@
+export * from './lib/ai/chat';
+export * from './lib/ai/config';
+export * from './lib/ai/providers';
 export * from './lib/analytics';
 export * from './lib/app-connection/app-connection';
 export * from './lib/app-connection/connections-utils';
@@ -15,7 +18,6 @@ export * from './lib/common/application-error';
 export * from './lib/common/base-model';
 export * from './lib/common/id-generator';
 export * from './lib/common/seek-page';
-export * from './lib/copilot';
 export * from './lib/engine';
 export * from './lib/file';
 export * from './lib/flag/flag';
@@ -34,6 +36,7 @@ export * from './lib/flows/dto/list-flows-request';
 export * from './lib/flows/flow';
 export * from './lib/flows/flow-helper';
 export * from './lib/flows/flow-operations';
+export * from './lib/flows/flow-step-test-output';
 export * from './lib/flows/flow-version';
 export * from './lib/flows/folders/folder';
 export * from './lib/flows/folders/folder-requests';
@@ -56,7 +59,6 @@ export * from './lib/user-settings';
 export * from './lib/webhook';
 export * from './lib/websocket';
 export * from './lib/workers';
-
 export * from './lib/workflow-stats';
 // Look at https://github.com/sinclairzx81/typebox/issues/350
 import { TypeSystemPolicy } from '@sinclair/typebox/system';

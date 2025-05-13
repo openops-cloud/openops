@@ -48,7 +48,7 @@ const BasicAuthConnectionSettings = React.memo(
             <FormItem className="flex flex-col">
               <FormLabel>{authProperty.password.displayName}</FormLabel>
               <FormControl>
-                <Input {...field} type="password" />
+                <Input {...field} type="password" autoComplete="new-password" />
               </FormControl>
               <FormDescription>
                 {authProperty.password.description}

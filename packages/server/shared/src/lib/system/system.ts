@@ -14,11 +14,6 @@ import {
   WorkerSystemProps,
 } from './system-prop';
 
-export enum CopilotInstanceTypes {
-  AZURE_OPENAI = 'AZURE_OPENAI',
-  OPENAI = 'OPENAI',
-}
-
 export enum BlocksSource {
   /**
    * @deprecated Use `DB`, as `CLOUD_AND_DB` is no longer supported.
@@ -56,8 +51,6 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [SharedSystemProp.CONTAINER_TYPE]: ContainerType.WORKER_AND_APP,
   [AppSystemProp.EXECUTION_DATA_RETENTION_DAYS]: '30',
   [AppSystemProp.BLOCKS_SYNC_MODE]: BlockSyncMode.NONE,
-  [AppSystemProp.COPILOT_INSTANCE_TYPE]: CopilotInstanceTypes.OPENAI,
-  [AppSystemProp.AZURE_OPENAI_API_VERSION]: '2023-06-01-preview',
   [AppSystemProp.TRIGGER_FAILURES_THRESHOLD]: '576',
   [SharedSystemProp.ENVIRONMENT]: 'prod',
   [WorkerSystemProps.FLOW_WORKER_CONCURRENCY]: '10',
@@ -67,8 +60,7 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [SharedSystemProp.LOG_PRETTY]: 'false',
   [SharedSystemProp.PACKAGE_ARCHIVE_PATH]: 'cache/archives',
   [SharedSystemProp.BLOCKS_SOURCE]: BlocksSource.FILE,
-  [AppSystemProp.QUEUE_MODE]:
-    process.env['NODE_ENV'] === 'test' ? QueueMode.MEMORY : QueueMode.REDIS,
+  [AppSystemProp.QUEUE_MODE]: QueueMode.REDIS,
   [SharedSystemProp.FLOW_TIMEOUT_SECONDS]: '600',
   [SharedSystemProp.TRIGGER_TIMEOUT_SECONDS]: '60',
   [AppSystemProp.TEMPLATES_SOURCE_URL]: '/api/v1/flow-templates',
@@ -91,6 +83,8 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [SharedSystemProp.INTERNAL_OAUTH_PROXY_URL]: 'https://oauth.openops.com',
   [AppSystemProp.CODE_BLOCK_MEMORY_LIMIT_IN_MB]: '128',
   [SharedSystemProp.INTERNAL_PARALLEL_LOOP_ITERATIONS_LIMIT]: '1',
+  [AppSystemProp.AI_PROMPTS_LOCATION]:
+    'https://raw.githubusercontent.com/openops-cloud/openops/main/ai-prompts',
 };
 
 export const system = {

@@ -10,10 +10,10 @@ import { FlowVersionState } from '@openops/shared';
 import { t } from 'i18next';
 import React from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { LeftSideBarType } from '../builder-types';
 
 import { SEARCH_PARAMS } from '@/app/constants/search-params';
 import {
-  LeftSideBarType,
   useBuilderStateContext,
   useSwitchToDraft,
 } from '@/app/features/builder/builder-hooks';

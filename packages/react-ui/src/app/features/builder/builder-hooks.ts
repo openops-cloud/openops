@@ -1,14 +1,16 @@
-import { INTERNAL_ERROR_TOAST, toast } from '@openops/components/ui';
+import {
+  AI_CHAT_CONTAINER_SIZES,
+  INTERNAL_ERROR_TOAST,
+  toast,
+} from '@openops/components/ui';
 import { useMutation } from '@tanstack/react-query';
 import { createContext, useContext } from 'react';
 import { create, StateCreator, useStore } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
 import { flowsApi } from '@/app/features/flows/lib/flows-api';
-import { PromiseQueue } from '@/app/lib/promise-queue';
 import {
   Flow,
-  flowHelper,
   FlowOperationRequest,
   FlowOperationType,
   FlowRun,
@@ -18,8 +20,17 @@ import {
   TriggerType,
 } from '@openops/shared';
 import { flowRunUtils } from '../flow-runs/lib/flow-run-utils';
-
-const flowUpdatesQueue = new PromiseQueue();
+import {
+  BuilderInitialState,
+  BuilderState,
+  InsertMentionHandler,
+  LeftSideBarType,
+  MidpanelAction,
+  MidpanelState,
+  RightSideBarType,
+} from './builder-types';
+import { DataSelectorSizeState } from './data-selector/data-selector-size-togglers';
+import { updateFlowVersion } from './update-flow-version';
 
 export const BuilderStateContext = createContext<BuilderStore | null>(null);
 
@@ -32,73 +43,21 @@ export function useBuilderStateContext<T>(
   return useStore(store, selector);
 }
 
-export enum LeftSideBarType {
-  RUNS = 'runs',
-  VERSIONS = 'versions',
-  RUN_DETAILS = 'run-details',
-  AI_COPILOT = 'chat',
-  MENU = 'menu',
-  TREE_VIEW = 'tree-view',
-  NONE = 'none',
-}
-
-export enum RightSideBarType {
-  NONE = 'none',
-  BLOCK_SETTINGS = 'block-settings',
-}
-
-type InsertMentionHandler = (propertyPath: string) => void;
-
-export type BuilderState = {
-  flow: Flow;
-  flowVersion: FlowVersion;
-
-  readonly: boolean;
-  loopsIndexes: Record<string, number>;
-  run: FlowRun | null;
-  leftSidebar: LeftSideBarType;
-  rightSidebar: RightSideBarType;
-  selectedStep: string | null;
-  canExitRun: boolean;
-  activeDraggingStep: string | null;
-  saving: boolean;
-  refreshBlockFormSettings: boolean;
-  refreshSettings: () => void;
-  exitRun: () => void;
-  exitStepSettings: () => void;
-  renameFlowClientSide: (newName: string) => void;
-  moveToFolderClientSide: (folderId: string) => void;
-  setRun: (run: FlowRun, flowVersion: FlowVersion) => void;
-  setLeftSidebar: (leftSidebar: LeftSideBarType) => void;
-  setRightSidebar: (rightSidebar: RightSideBarType) => void;
-  applyOperation: (
-    operation: FlowOperationRequest,
-    onError: () => void,
-  ) => void;
-  removeStepSelection: () => void;
-  selectStepByName: (stepName: string, openRightSideBar?: boolean) => void;
-  startSaving: () => void;
-  setActiveDraggingStep: (stepName: string | null) => void;
-  setFlow: (flow: Flow) => void;
-  exitBlockSelector: () => void;
-  setVersion: (flowVersion: FlowVersion) => void;
-  setVersionUpdateTimestamp: (updateTimestamp: string) => void;
-  insertMention: InsertMentionHandler | null;
-  setReadOnly: (readOnly: boolean) => void;
-  setInsertMentionHandler: (handler: InsertMentionHandler | null) => void;
-  setLoopIndex: (stepName: string, index: number) => void;
-  canUndo: boolean;
-  setCanUndo: (canUndo: boolean) => void;
-  canRedo: boolean;
-  setCanRedo: (canUndo: boolean) => void;
-  dynamicPropertiesAuthReconnectCounter: number;
-  refreshDynamicPropertiesForAuth: () => void;
+const noopStore = {
+  getState: () => ({}),
+  setState: () => {},
+  subscribe: () => () => {},
 };
 
-export type BuilderInitialState = Pick<
-  BuilderState,
-  'flow' | 'flowVersion' | 'readonly' | 'run' | 'canExitRun'
->;
+export function useSafeBuilderStateContext<T>(
+  selector: (state: BuilderState) => T,
+): T | undefined {
+  const store = useContext(BuilderStateContext) ?? noopStore;
+  const result = useStore(store, selector);
+
+  if (store === noopStore) return undefined;
+  return result;
+}
 
 export type BuilderStore = ReturnType<typeof createBuilderStore>;
 export const createBuilderStore = (initialState: BuilderInitialState) =>
@@ -139,9 +98,10 @@ export const createBuilderStore = (initialState: BuilderInitialState) =>
           ),
         setActiveDraggingStep: (stepName: string | null) =>
           set(
-            {
+            (state) => ({
               activeDraggingStep: stepName,
-            },
+              selectedStep: stepName ?? state.selectedStep,
+            }),
             false,
             'setActiveDraggingStep',
           ),
@@ -190,6 +150,11 @@ export const createBuilderStore = (initialState: BuilderInitialState) =>
                   ? RightSideBarType.BLOCK_SETTINGS
                   : RightSideBarType.NONE,
                 leftSidebar: getLeftSidebarOnSelectStep(state),
+                midpanelState: {
+                  ...state.midpanelState,
+                  showAiChat: false,
+                  aiChatProperty: undefined,
+                },
               };
             },
             false,
@@ -365,6 +330,19 @@ export const createBuilderStore = (initialState: BuilderInitialState) =>
             false,
             'refreshDynamicProperties',
           ),
+        midpanelState: {
+          showDataSelector: false,
+          dataSelectorSize: DataSelectorSizeState.DOCKED,
+          showAiChat: false,
+          aiChatProperty: undefined,
+          aiContainerSize: AI_CHAT_CONTAINER_SIZES.COLLAPSED,
+        },
+        applyMidpanelAction: (midpanelAction: MidpanelAction) =>
+          set(
+            (state) => applyMidpanelAction(state, midpanelAction),
+            false,
+            'applyMidpanelAction',
+          ),
       }),
       {
         enabled: process.env.NODE_ENV !== 'production',
@@ -433,51 +411,95 @@ export type UndoHistoryRelevantFlowOperationRequest = Extract<
   }
 >;
 
-const updateFlowVersion = (
-  state: BuilderState,
-  operation: FlowOperationRequest,
-  onError: () => void,
-  set: (
-    partial:
-      | BuilderState
-      | Partial<BuilderState>
-      | ((state: BuilderState) => BuilderState | Partial<BuilderState>),
-    replace?: boolean | undefined,
-  ) => void,
-) => {
-  const newFlowVersion = flowHelper.apply(state.flowVersion, operation);
-  if (
-    operation.type === FlowOperationType.DELETE_ACTION &&
-    operation.request.name === state.selectedStep
-  ) {
-    set({ selectedStep: undefined });
-    set({ rightSidebar: RightSideBarType.NONE });
-  }
+const applyMidpanelAction = (state: BuilderState, action: MidpanelAction) => {
+  let newMidpanelState: Partial<MidpanelState>;
+  const oldDataSelectorSize = state.midpanelState.dataSelectorSize;
+  const oldShowAiChat = state.midpanelState.showAiChat;
 
-  const updateRequest = async () => {
-    set({ saving: true });
-    try {
-      const updatedFlowVersion = await flowsApi.update(
-        state.flow.id,
-        operation,
-      );
-      set((state) => {
-        return {
-          flowVersion: {
-            ...state.flowVersion,
-            id: updatedFlowVersion.version.id,
-            state: updatedFlowVersion.version.state,
-            updated: updatedFlowVersion.version.updated,
-          },
-          saving: flowUpdatesQueue.size() !== 0,
-        };
-      });
-    } catch (error) {
-      console.error(error);
-      flowUpdatesQueue.halt();
-      onError();
-    }
+  switch (action.type) {
+    case 'FOCUS_INPUT_WITH_MENTIONS':
+      newMidpanelState = {
+        showDataSelector: true,
+        dataSelectorSize: oldShowAiChat
+          ? DataSelectorSizeState.DOCKED
+          : oldDataSelectorSize,
+        aiContainerSize: AI_CHAT_CONTAINER_SIZES.COLLAPSED,
+      };
+      break;
+    case 'DATASELECTOR_MIMIZE_CLICK':
+      newMidpanelState = {
+        dataSelectorSize: DataSelectorSizeState.COLLAPSED,
+        aiContainerSize: AI_CHAT_CONTAINER_SIZES.DOCKED,
+      };
+      break;
+    case 'DATASELECTOR_DOCK_CLICK':
+      newMidpanelState = {
+        dataSelectorSize: DataSelectorSizeState.DOCKED,
+        aiContainerSize: AI_CHAT_CONTAINER_SIZES.COLLAPSED,
+      };
+      break;
+    case 'DATASELECTOR_EXPAND_CLICK':
+      newMidpanelState = {
+        dataSelectorSize: DataSelectorSizeState.EXPANDED,
+        aiContainerSize: AI_CHAT_CONTAINER_SIZES.COLLAPSED,
+      };
+      break;
+    case 'AICHAT_CLOSE_CLICK':
+      newMidpanelState = {
+        showAiChat: false,
+        aiChatProperty: undefined,
+        dataSelectorSize: DataSelectorSizeState.DOCKED,
+      };
+      break;
+    case 'AICHAT_MIMIZE_CLICK':
+      newMidpanelState = {
+        aiContainerSize: AI_CHAT_CONTAINER_SIZES.COLLAPSED,
+        dataSelectorSize: state.midpanelState.dataSelectorSize,
+      };
+      break;
+    case 'AICHAT_DOCK_CLICK':
+      newMidpanelState = {
+        aiContainerSize: AI_CHAT_CONTAINER_SIZES.DOCKED,
+        dataSelectorSize: DataSelectorSizeState.COLLAPSED,
+      };
+      break;
+    case 'AICHAT_EXPAND_CLICK':
+      newMidpanelState = {
+        aiContainerSize: AI_CHAT_CONTAINER_SIZES.EXPANDED,
+        dataSelectorSize: DataSelectorSizeState.COLLAPSED,
+      };
+      break;
+    case 'PANEL_CLICK_AWAY':
+      newMidpanelState = {
+        showDataSelector: false,
+        aiContainerSize: AI_CHAT_CONTAINER_SIZES.DOCKED,
+      };
+      break;
+    case 'GENERATE_WITH_AI_CLICK':
+      newMidpanelState = {
+        showAiChat: true,
+        aiContainerSize: AI_CHAT_CONTAINER_SIZES.DOCKED,
+        dataSelectorSize: DataSelectorSizeState.COLLAPSED,
+        aiChatProperty: action.property,
+      };
+      break;
+    case 'ADD_CODE_TO_INJECT':
+      newMidpanelState = {
+        ...state.midpanelState,
+        codeToInject: action.code,
+      };
+      break;
+    case 'CLEAN_CODE_TO_INJECT':
+      newMidpanelState = {
+        ...state.midpanelState,
+        codeToInject: undefined,
+      };
+      break;
+    default:
+      newMidpanelState = state.midpanelState;
+      break;
+  }
+  return {
+    midpanelState: { ...state.midpanelState, ...newMidpanelState },
   };
-  flowUpdatesQueue.add(updateRequest);
-  return { flowVersion: newFlowVersion };
 };

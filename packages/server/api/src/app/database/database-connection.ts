@@ -12,6 +12,7 @@ import {
   ObjectLiteral,
   SelectQueryBuilder,
 } from 'typeorm';
+import { AiConfigEntity } from '../ai/config/ai-config.entity';
 import { AppConnectionEntity } from '../app-connection/app-connection.entity';
 import { AppEventRoutingEntity } from '../app-event-routing/app-event-routing.entity';
 import { BlockMetadataEntity } from '../blocks/block-metadata-entity';
@@ -22,6 +23,7 @@ import { FlowRunEntity } from '../flows/flow-run/flow-run-entity';
 import { FlowVersionEntity } from '../flows/flow-version/flow-version-entity';
 import { FlowEntity } from '../flows/flow/flow.entity';
 import { FolderEntity } from '../flows/folder/folder.entity';
+import { FlowStepTestOutputEntity } from '../flows/step-test-output/flow-step-test-output-entity';
 import { TriggerEventEntity } from '../flows/trigger-events/trigger-event.entity';
 import { OrganizationEntity } from '../organization/organization.entity';
 import { ProjectEntity } from '../project/project-entity';
@@ -55,6 +57,8 @@ function getEntities(): EntitySchema<unknown>[] {
     WorkerMachineEntity,
     FlowTemplateEntity,
     UserSettingsEntity,
+    AiConfigEntity,
+    FlowStepTestOutputEntity,
   ];
 
   return entities;

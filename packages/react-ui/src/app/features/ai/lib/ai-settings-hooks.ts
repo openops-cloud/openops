@@ -1,0 +1,32 @@
+import { aiSettingsApi } from '@/app/features/ai/lib/ai-settings-api';
+import { AiConfig, GetProvidersResponse } from '@openops/shared';
+import { useQuery } from '@tanstack/react-query';
+
+export const aiSettingsHooks = {
+  useAiSettingsProviders: () => {
+    return useQuery<GetProvidersResponse[], Error>({
+      queryKey: ['ai-settings-providers'],
+      queryFn: () => aiSettingsApi.getProviderOptions(),
+      staleTime: Infinity,
+    });
+  },
+  useAiSettings: () => {
+    return useQuery<AiConfig[], Error>({
+      queryKey: ['ai-settings'],
+      queryFn: () => aiSettingsApi.getAiSettings(),
+    });
+  },
+  useHasActiveAiSettings: () => {
+    const { data, isLoading, isError } = useQuery<AiConfig, Error>({
+      queryKey: ['ai-settings-active'],
+      queryFn: () => aiSettingsApi.getActiveAiSettings(),
+      staleTime: 1000,
+      retry: false,
+    });
+
+    return {
+      hasActiveAiSettings: !isError && !!data,
+      isLoading,
+    };
+  },
+};

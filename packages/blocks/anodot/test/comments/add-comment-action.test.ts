@@ -81,7 +81,7 @@ describe('addCommentAction', () => {
     });
 
     await expect(addCommentAction.run(context)).rejects.toThrow(
-      "An error occurred while adding a comment to Anodot recommendation 'some recommendation id' (account id: some account id): Error: some error",
+      "An error occurred while adding a comment to Umbrella recommendation 'some recommendation id' (account id: some account id): Error: some error",
     );
   });
 

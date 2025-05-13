@@ -46,6 +46,7 @@ describe('createTable', () => {
         'Content-Type': 'application/json',
         Authorization: `JWT ${token}`,
       }),
+      expect.any(Object),
     );
   });
 });

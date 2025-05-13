@@ -56,7 +56,7 @@ export const updateCommentAction = createAction({
 
       return result;
     } catch (error) {
-      const errorMsg = `An error occurred while updating comment '${commentId}' of Anodot recommendation '${recommendationId}' (account id: ${accountId}): ${error}`;
+      const errorMsg = `An error occurred while updating comment '${commentId}' of Umbrella recommendation '${recommendationId}' (account id: ${accountId}): ${error}`;
 
       logger.error(errorMsg);
 

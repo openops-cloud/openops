@@ -18,7 +18,6 @@ export * from './lib/aws/ec2/ec2-terminate-instances';
 export * from './lib/aws/get-account-alias-action';
 export * from './lib/aws/get-client';
 export * from './lib/aws/organizations-common';
-export * from './lib/aws/pricing-http-client';
 export * from './lib/aws/rds/rds-create-snapshot';
 export * from './lib/aws/rds/rds-delete-instance';
 export * from './lib/aws/rds/rds-delete-snapshot';
@@ -61,4 +60,7 @@ export * from './lib/cloud-cli-common';
 export * from './lib/dry-run-property';
 
 export * from './lib/google-cloud/auth';
+export * from './lib/google-cloud/bq-column-types';
 export * from './lib/promise-pool';
+
+export * from './lib/ai/providers';

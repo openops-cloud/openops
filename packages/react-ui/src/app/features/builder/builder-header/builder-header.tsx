@@ -1,9 +1,7 @@
 import { BuilderHeaderActionBar } from '@/app/features/builder/builder-header/builder-header-action-bar';
 import { SideMenuCollapsed } from '@/app/features/builder/builder-header/side-menu-collapsed';
-import {
-  LeftSideBarType,
-  useBuilderStateContext,
-} from '@/app/features/builder/builder-hooks';
+import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
+import { LeftSideBarType } from '../builder-types';
 
 import { ExpandSideMenu } from '@/app/features/builder/builder-header/expand-side-menu';
 import { WorkflowOverview } from '@/app/features/builder/builder-header/workflow-overview/workflow-overview';

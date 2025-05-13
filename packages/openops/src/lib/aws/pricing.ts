@@ -9,6 +9,7 @@ import {
   Pricing,
   Service,
 } from '@aws-sdk/client-pricing';
+import { cacheWrapper } from '@openops/server-shared';
 import { makeAwsRequest } from './aws-client-wrapper';
 import { getAwsClient } from './get-client';
 
@@ -62,7 +63,7 @@ export async function getAttributeValues(
   return attributeValues;
 }
 
-export async function getPriceList(
+export async function getPriceListFromAws(
   credentials: any,
   region: SupportedPricingRegion,
   serviceCode: string,
@@ -105,4 +106,30 @@ async function makeRequest(
   const response: unknown[] = await makeAwsRequest(pricingClient, command);
 
   return response;
+}
+
+export async function getPriceListWithCache(
+  credentials: any,
+  serviceCode: string,
+  filters: Filter[],
+  region: SupportedPricingRegion,
+): Promise<unknown> {
+  const cacheKey = createCacheKey(serviceCode, filters);
+
+  return await cacheWrapper.getOrAdd(cacheKey, getPriceListFromAws, [
+    credentials,
+    region,
+    serviceCode,
+    filters,
+  ]);
+}
+
+function createCacheKey(serviceCode: string, filters: Filter[]): string {
+  let cacheKey = `${serviceCode}`;
+
+  filters.forEach((filter) => {
+    cacheKey += `-${filter.Value}`;
+  });
+
+  return cacheKey;
 }

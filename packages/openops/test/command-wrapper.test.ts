@@ -1,5 +1,13 @@
 import { Readable } from 'stream';
 
+const mockGetNumber = jest.fn();
+jest.mock('@openops/server-shared', () => ({
+  ...jest.requireActual('@openops/server-shared'),
+  system: {
+    getNumber: mockGetNumber,
+  },
+}));
+
 const mockSpawn = jest.fn();
 const mockExecFile = jest.fn();
 jest.mock('node:child_process', () => {
@@ -163,6 +171,35 @@ describe('Execute File', () => {
       );
     },
   );
+
+  it('should set maxBuffer when EXEC_FILE_MAX_BUFFER_SIZE_MB is defined', async () => {
+    mockGetNumber.mockReturnValue(5); // 5 MB
+    mockMockExecFile('ok', '', 0);
+
+    await executeFile('command', ['--arg'], { VAR: 'value' });
+
+    expect(mockExecFile).toHaveBeenCalledWith(
+      'command',
+      ['--arg'],
+      expect.objectContaining({
+        env: { VAR: 'value' },
+        maxBuffer: 5 * 1024 * 1024,
+      }),
+    );
+  });
+
+  it('should not set maxBuffer when EXEC_FILE_MAX_BUFFER_SIZE_MB is undefined', async () => {
+    mockGetNumber.mockReturnValue(undefined);
+    mockMockExecFile('ok', '', 0);
+
+    await executeFile('command', ['--arg'], { VAR: 'value' });
+
+    expect(mockExecFile).toHaveBeenCalledWith(
+      'command',
+      ['--arg'],
+      expect.not.objectContaining({ maxBuffer: expect.any(Number) }),
+    );
+  });
 });
 
 function mockReadableStream(data: string) {
