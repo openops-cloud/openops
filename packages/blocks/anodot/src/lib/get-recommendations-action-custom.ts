@@ -26,7 +26,7 @@ import { RecommendationsRequestFilters } from './common/recommendations-request-
 export const getRecommendationsCustomAction = createAction({
   auth: anadotAuth,
   name: 'get_recommendations',
-  description: 'Get custom recommendations from Anodot',
+  description: 'Get custom Umbrella recommendations',
   displayName: 'Get Recommendations (custom settings)',
   props: {
     accounts: accountProperty(),
