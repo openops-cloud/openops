@@ -6,8 +6,12 @@ export const OpenChatRequest = Type.Object({
   stepName: Type.String(),
   actionName: Type.String(),
 });
-
 export type OpenChatRequest = Static<typeof OpenChatRequest>;
+
+export const OpenChatMCPRequest = Type.Object({
+  chatId: Type.Optional(Type.String()),
+});
+export type OpenChatMCPRequest = Static<typeof OpenChatMCPRequest>;
 
 export const OpenChatResponse = Type.Object({
   chatId: Type.String(),

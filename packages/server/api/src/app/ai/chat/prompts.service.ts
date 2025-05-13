@@ -3,6 +3,10 @@ import { readFile } from 'fs/promises';
 import { join } from 'path';
 import { ChatContext } from './ai-chat.service';
 
+export const getMcpSystemPrompt = async (): Promise<string> => {
+  return loadPrompt('mcp.txt');
+};
+
 export const getSystemPrompt = async (
   context: ChatContext,
 ): Promise<string> => {
