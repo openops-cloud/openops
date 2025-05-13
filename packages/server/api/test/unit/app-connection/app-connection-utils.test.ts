@@ -4,12 +4,8 @@ import {
   AppConnection,
   AppConnectionStatus,
   AppConnectionType,
-  RedactedAppConnection,
 } from '@openops/shared';
-import {
-  redactSecrets,
-  removeSensitiveData,
-} from '../../../src/app/app-connection/app-connection-utils';
+import { redactSecrets } from '../../../src/app/app-connection/app-connection-utils';
 
 describe('redactSecrets', () => {
   const baseConnection: Omit<AppConnection, 'value' | 'type'> = {
@@ -39,10 +35,8 @@ describe('redactSecrets', () => {
       required: true,
     };
 
-    const result = redactSecrets(auth, connection);
-    expect((result as RedactedAppConnection).value?.secret_text).toBe(
-      '**REDACTED**',
-    );
+    const result = redactSecrets(auth, connection.value);
+    expect(result?.secret_text).toBe('**REDACTED**');
   });
 
   test('should return BASIC_AUTH connection', () => {
@@ -64,11 +58,9 @@ describe('redactSecrets', () => {
       valueSchema: {} as any,
     } as any;
 
-    const result = redactSecrets(auth, connection);
-    expect((result as RedactedAppConnection).value?.password).toBe(
-      '**REDACTED**',
-    );
-    expect((result as RedactedAppConnection).value?.username).toBe('user');
+    const result = redactSecrets(auth, connection.value);
+    expect(result?.password).toBe('**REDACTED**');
+    expect(result?.username).toBe('user');
   });
 
   test('should return redacted CUSTOM_AUTH props', () => {
@@ -100,11 +92,8 @@ describe('redactSecrets', () => {
       required: false,
     };
 
-    const result = redactSecrets(auth, connection);
-    const props = (result as RedactedAppConnection).value?.props as Record<
-      string,
-      any
-    >;
+    const result = redactSecrets(auth, connection.value);
+    const props = result?.props as Record<string, any>;
 
     expect(props.clientSecret).toBe('**REDACTED**');
     expect(props.clientId).toBe('abc');
@@ -139,8 +128,9 @@ describe('redactSecrets', () => {
       required: true,
     };
 
-    const result = redactSecrets(auth, connection);
-    expect((result as RedactedAppConnection).value).toEqual({
+    const result = redactSecrets(auth, connection.value);
+
+    expect(result).toEqual({
       type: PropertyType.OAUTH2,
       client_id: 'abc',
       client_secret: '**REDACTED**',
@@ -159,8 +149,8 @@ describe('redactSecrets', () => {
       },
     };
 
-    const result = redactSecrets(undefined, connection);
-    expect(result).toEqual(removeSensitiveData(connection));
+    const result = redactSecrets(undefined, connection.value);
+    expect(result).toEqual(undefined);
   });
 
   test('should fall back to removeSensitiveData when value is missing', () => {
@@ -177,8 +167,8 @@ describe('redactSecrets', () => {
         valueSchema: {} as any,
         required: true,
       },
-      connection,
+      connection.value,
     );
-    expect(result).toEqual(removeSensitiveData(connection));
+    expect(result).toEqual(undefined);
   });
 });
