@@ -22,15 +22,12 @@ const getIvm = () => {
  */
 export const v8IsolateCodeSandbox: CodeSandbox = {
   async runCodeModule({ codeFile, inputs }) {
-    logger.debug('Getting IVM...')
     const ivm = getIvm();
-    logger.debug('Creating isolate object...')
     const isolate = new ivm.Isolate({
       memoryLimit: BLOCK_MEMORY_LIMIT_IN_MB,
     });
 
     try {
-      logger.debug('Creating isolate context...')
       const isolateContext = await initIsolateContext({
         isolate,
         codeContext: {
@@ -38,7 +35,6 @@ export const v8IsolateCodeSandbox: CodeSandbox = {
         },
       });
 
-      logger.debug('Reading code file...')
       const code = await fs.readFile(codeFile, 'utf8');
 
       logger.debug('Running code module in V8 Isolate sandbox', { code });
