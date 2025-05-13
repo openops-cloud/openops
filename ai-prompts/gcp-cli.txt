@@ -36,7 +36,7 @@ Best practices
 
 Placeholders
   - Always use descriptive placeholders like `PROJECT_ID`, `REGION`, `VM_NAME`, etc.
-  - If using placeholders, state: `Note: This command uses placeholders which are capitalized`
+  - If placeholders are used, provide a short explanation for each below the query. Do **not** add additional information.
   - Be consistent across multi-step tasks
 
 Multi-step workflows
