@@ -157,6 +157,45 @@ describe('getSystemPrompt', () => {
     expect(result).toBe('');
     expect(fetch).toHaveBeenCalled();
   });
+
+  it.each([
+    [
+      'gcp-cli.txt',
+      '@openops/block-google-cloud',
+      'google_cloud_cli',
+      'gcp cli prompt content',
+    ],
+    [
+      'gcp-big-query.txt',
+      '@openops/block-google-cloud',
+      'google_execute_sql_query',
+      'gcp big query prompt content',
+    ],
+  ])(
+    'should load action prompt from cloud',
+    async (
+      fileName: string,
+      blockName: string,
+      actionName: string,
+      promptContent: string,
+    ) => {
+      getMock.mockReturnValue('https://example.com/prompts/');
+      mockFetch.mockResolvedValueOnce(mockResponse(promptContent));
+
+      const result = await getSystemPrompt({
+        blockName,
+        workflowId: 'workflowId',
+        stepName: 'stepName',
+        actionName,
+      });
+
+      expect(result).toBe(promptContent);
+      expect(readFileMock).not.toHaveBeenCalled();
+      expect(fetch).toHaveBeenCalledWith(
+        `https://example.com/prompts/${fileName}`,
+      );
+    },
+  );
 });
 
 function mockResponse(body: string, ok = true, statusText = 'OK'): Response {

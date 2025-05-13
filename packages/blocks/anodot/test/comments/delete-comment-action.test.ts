@@ -81,7 +81,7 @@ describe('deleteCommentAction', () => {
     });
 
     await expect(deleteCommentAction.run(context)).rejects.toThrow(
-      "An error occurred while deleting comment 'some comment id' from Anodot recommendation 'some recommendation id' (account id: some account id): Error: some error",
+      "An error occurred while deleting comment 'some comment id' from Umbrella recommendation 'some recommendation id' (account id: some account id): Error: some error",
     );
   });
 

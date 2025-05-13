@@ -5,7 +5,7 @@ import { AnodotUserAccount, getAnodotUsers } from './common/users';
 export function accountProperty() {
   return Property.MultiSelectDropdown({
     displayName: 'Accounts',
-    description: 'A list of accounts available on Anodot.',
+    description: 'A list of available Umbrella accounts',
     refreshers: ['auth'],
     required: true,
     options: async ({ auth }: any) => {
@@ -38,7 +38,7 @@ async function getAccountDropdownState(
       return {
         disabled: true,
         options: [],
-        placeholder: 'Anodot user accounts is empty.',
+        placeholder: 'No user accounts found in Umbrella.',
       };
     }
 
@@ -59,7 +59,7 @@ async function getAccountDropdownState(
       disabled: true,
       options: [],
       placeholder:
-        'Could not fetch Anodot user accounts: ' + (error as Error).message,
+        'Could not fetch Umbrella user accounts: ' + (error as Error).message,
     } as DropdownState<unknown>;
   }
 }
