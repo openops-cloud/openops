@@ -1,63 +1,33 @@
 # Guidelines for Junie
 
-This document provides guidelines for contributing to the OpenOps project, focusing on pull requests and commit practices.
+This document provides concise guidelines for Junie when working with the OpenOps project.
+
+## Code Changes
+
+- **Automatic Git Workflow**: When asked to edit or write new code, Junie should automatically:
+  1. Create a branch (if not already on a feature branch)
+  2. Commit changes
+  3. Push to GitHub
+  4. Create a draft pull request (if not already exists)
 
 ## Pull Request Guidelines
 
-### Size and Scope
-
-- **Prefer small PRs**: Keep pull requests focused on a single feature, bug fix, or improvement.
-- **Small commits**: Break down your work into logical, small commits that each represent a complete change.
-- **One change per PR**: The PR should only contain changes related to the issue, with no unrelated modifications.
-
-### Naming and Formatting
-
-- **Use imperative mood** for PR titles and commit messages (e.g., "Add feature" not "Added feature" or "Adding feature").
-- **PR title requirements** (as defined in `.github/prlint.json`):
-  - Must start with a capital letter and a real word (e.g., "Add GO support")
-  - Must have at least three words
-  - Must use imperative mood (e.g., "Fix bug" not "Fixed bug" or "Fixing bug")
-
-### Creating Pull Requests
-
-1. **Use GitHub CLI to create a draft PR**:
-   ```bash
-   # Create a draft PR
-   gh pr create --draft --title "Add feature name" --body "Fixes #12345"
-   ```
-
-2. **Reference issues**:
-   - Reference a GitHub issue in the PR body (e.g., "Fixes #12345")
-   - Reference a Linear issue if one was mentioned (e.g., "Fixes OPS-1234")
-   - If no relevant issue exists, create a GitHub issue first:
-     ```bash
-     # Create a GitHub issue
-     gh issue create --title "Issue title" --body "Issue description"
-     ```
-
-3. **Follow the PR template**:
-   - Provide a clear description of the changes
-   - Complete the testing checklist
-   - Include visual changes if applicable
+- **Keep PRs small and focused** on a single feature or fix
+- **PR titles must**:
+  - Use imperative mood (e.g., "Add feature" not "Added feature")
+  - Start with a capital letter
+  - Have at least three words
+- **Always reference issues** in the PR body (e.g., "Fixes #12345" or "Fixes OPS-1234")
+- **Follow the PR template** with clear descriptions and testing information
 
 ## Commit Guidelines
 
-- **Use imperative mood** in commit messages (e.g., "Fix bug" not "Fixed bug")
-- **Keep commits small and focused** on a single change
-- **Write descriptive commit messages** that explain what the change does and why
-- **Follow this format** for commit messages:
-  ```
-  Short summary in imperative mood (under 50 chars)
+- **Use imperative mood** in commit messages
+- **Keep commits small** and focused on single changes
+- **Format commit messages** with a brief summary (under 50 chars) and optional detailed explanation
 
-  More detailed explanation if necessary. Wrap at around 72 
-  characters. Explain what and why, not how (the code shows that).
-
-  Fixes #issue_number
-  ```
-
-## Additional Resources
+## Resources
 
 - [CONTRIBUTING.md](../CONTRIBUTING.md): General contribution guidelines
-- [.github/pull_request_template.md](../.github/pull_request_template.md): PR template
-- [.github/prlint.json](../.github/prlint.json): PR linting rules
-- [docs.openops.com](https://docs.openops.com): Official OpenOps documentation
+- [PR template](../.github/pull_request_template.md) and [PR rules](../.github/prlint.json)
+- [OpenOps Documentation](https://docs.openops.com)
