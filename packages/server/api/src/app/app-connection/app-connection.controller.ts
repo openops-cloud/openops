@@ -4,6 +4,7 @@ import {
   Type,
 } from '@fastify/type-provider-typebox';
 import {
+  AppConnection,
   AppConnectionWithoutSensitiveData,
   ListAppConnectionsRequestQuery,
   OpenOpsId,
@@ -17,7 +18,11 @@ import { StatusCodes } from 'http-status-codes';
 import { blockMetadataService } from '../blocks/block-metadata-service';
 import { sendConnectionDeletedEvent } from '../telemetry/event-models';
 import { appConnectionService } from './app-connection-service/app-connection-service';
-import { redactSecrets, removeSensitiveData } from './app-connection-utils';
+import {
+  redactSecrets,
+  removeSensitiveData,
+  restoreRedactedSecrets,
+} from './app-connection-utils';
 
 export const appConnectionController: FastifyPluginCallbackTypebox = (
   app,
@@ -25,10 +30,36 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
   done,
 ) => {
   app.post('/', UpsertAppConnectionRequest, async (request, reply) => {
+    const existingConnection = await appConnectionService.getOne({
+      name: request.body.name,
+      projectId: request.principal.projectId,
+    });
+    let incomingConnection = request.body as AppConnection;
+
+    if (existingConnection) {
+      const block = await blockMetadataService.get({
+        name: incomingConnection.blockName,
+        projectId: request.principal.projectId,
+        version: undefined,
+      });
+
+      if (!block) {
+        throw new Error(
+          `Block metadata not found for ${incomingConnection.blockName}`,
+        );
+      }
+
+      incomingConnection = restoreRedactedSecrets(
+        incomingConnection,
+        existingConnection,
+        block.auth,
+      ) as AppConnection;
+    }
+
     const appConnection = await appConnectionService.upsert({
       userId: request.principal.id,
       projectId: request.principal.projectId,
-      request: request.body,
+      request: incomingConnection as UpsertAppConnectionRequestBody,
     });
 
     await reply
