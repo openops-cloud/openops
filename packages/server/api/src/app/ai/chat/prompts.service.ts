@@ -24,6 +24,8 @@ export const getSystemPrompt = async (
       return loadPrompt('aws-athena.txt');
     case '@openops/block-snowflake':
       return loadPrompt('snowflake.txt');
+    case '@openops/block-databricks':
+      return loadPrompt('databricks.txt');
     default:
       return '';
   }

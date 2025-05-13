@@ -3,7 +3,7 @@ import { Property } from '@openops/blocks-framework';
 export function getPredefinedRecommendationsDropdownProperty() {
   return Property.StaticDropdown({
     displayName: 'Recommendation',
-    description: 'The type of recommendations to fetch from Anodot',
+    description: 'The type of recommendations to fetch',
     options: {
       options: recommendationTypes.map((type: any) => ({
         label: type.label,

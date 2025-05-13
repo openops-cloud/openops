@@ -191,7 +191,7 @@ describe('updateUserStatusAction', () => {
     });
 
     await expect(updateUserStatusAction.run(context)).rejects.toThrow(
-      "An error occurred while setting user status 'label' on Anodot recommendation '1' (account id: undefined): Error: At least one of: label_add or label_delete fields must be filled.",
+      "An error occurred while setting user status 'label' on Umbrella recommendation '1' (account id: undefined): Error: At least one of: label_add or label_delete fields must be filled.",
     );
 
     expect(setUserStatusForRecommendationMock).not.toHaveBeenCalled();
