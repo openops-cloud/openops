@@ -162,7 +162,7 @@ const DeleteChatOptions = {
   },
   schema: {
     tags: ['ai', 'ai-chat-mcp'],
-    description: 'Deletes a chat history chat ID.',
+    description: 'Deletes chat history by chat ID.',
     params: DeleteChatHistoryRequest,
   },
 };
