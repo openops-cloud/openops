@@ -14,11 +14,25 @@ import { selectLightOrDarkCanvas } from '../../test-utils/select-themed-canvas.u
 import { Button } from '../../ui/button';
 import { TooltipProvider } from '../../ui/tooltip';
 
-const HeaderWrapper = ({ theme }: { theme?: string }) => {
-  const logoSrc =
-    theme === 'Dark'
-      ? 'https://static.openops.com/logos/logo.svg'
-      : 'https://static.openops.com/logos/logo.positive.svg';
+const HeaderWrapper = ({
+  theme,
+  isMinimized = false,
+}: {
+  theme?: string;
+  isMinimized?: boolean;
+}) => {
+  let logoSrc;
+  if (isMinimized) {
+    logoSrc =
+      theme === 'Dark'
+        ? 'https://static.openops.com/logos/logo.icon.svg'
+        : 'https://static.openops.com/logos/logo.icon.positive.svg';
+  } else {
+    logoSrc =
+      theme === 'Dark'
+        ? 'https://static.openops.com/logos/logo.svg'
+        : 'https://static.openops.com/logos/logo.positive.svg';
+  }
 
   return (
     <SideMenuHeader
@@ -119,7 +133,9 @@ const SidebarWrapper = ({
       <TooltipProvider>
         <div className="border-l border-t border-b w-full">
           <SideMenu
-            MenuHeader={() => <HeaderWrapper theme={theme} />}
+            MenuHeader={() => (
+              <HeaderWrapper theme={theme} isMinimized={isMinimized} />
+            )}
             MenuFooter={footer}
             className={cn('w-[300px]', className)}
           >
