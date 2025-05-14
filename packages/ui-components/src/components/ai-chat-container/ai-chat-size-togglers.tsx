@@ -34,7 +34,7 @@ const AiChatSizeTogglers = ({
           />
           <Button
             size="icon"
-            className="text-outline opacity-50 hover:opacity-100"
+            className="text-outline"
             onClick={(e) => {
               e.stopPropagation();
 
@@ -47,14 +47,13 @@ const AiChatSizeTogglers = ({
             variant="basic"
           >
             {state === AI_CHAT_CONTAINER_SIZES.EXPANDED ? (
-              <MinimizeIcon />
+              <MinimizeIcon className="text-black" size={16} />
             ) : (
-              <ExpandIcon />
+              <ExpandIcon className="text-black" size={16} />
             )}
           </Button>
         </>
       </TooltipWrapper>
-
       <TooltipWrapper tooltipText={t('Close')}>
         <Button
           size="icon"
@@ -63,9 +62,9 @@ const AiChatSizeTogglers = ({
             e.stopPropagation();
             onCloseClick();
           }}
-          className="text-outline opacity-50 hover:opacity-100"
+          className="text-outline"
         >
-          <XIcon />
+          <XIcon className="text-back" size={20} />
         </Button>
       </TooltipWrapper>
     </>

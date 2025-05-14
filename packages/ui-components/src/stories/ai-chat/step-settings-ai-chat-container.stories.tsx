@@ -95,6 +95,7 @@ export const Docked: Story = {
     onToggle: fn(),
     input: '',
     handleInputChange: fn(),
+    isEmpty: true,
   },
 };
 
@@ -115,6 +116,7 @@ export const Collapsed: Story = {
 export const Populated: Story = {
   args: {
     ...Docked.args,
+    isEmpty: false,
   },
   render: (args) => {
     const [
