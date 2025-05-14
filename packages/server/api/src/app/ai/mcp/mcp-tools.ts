@@ -48,11 +48,10 @@ export const getMCPTools = (): Record<string, Tool> => ({
         return result;
       } catch (error) {
         logger.error('Persistent docsMcpClient error:', error);
-        throw new Error(
-          `Persistent docsMcpClient failed: ${
-            error instanceof Error ? error.message : String(error)
-          }`,
-        );
+        return Promise.resolve({
+          error: true,
+          message: error instanceof Error ? error.message : String(error),
+        });
       }
     },
   }),
