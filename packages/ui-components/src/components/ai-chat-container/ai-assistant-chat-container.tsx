@@ -84,11 +84,11 @@ const AiAssistantChatContainer = ({
       >
         <div className="py-4 flex flex-col h-full">
           <ScrollArea className="h-full w-full">
-            <div className="h-full px-6">
-              {isEmpty && (
+            <div className="h-full w-full px-6 flex flex-col">
+              {isEmpty ? (
                 <div
                   className={
-                    'h-full flex flex-col items-center justify-center gap-4'
+                    'flex-1 flex flex-col items-center justify-center gap-4'
                   }
                 >
                   <span className="inline-block max-w-[220px] text-center dark:text-primary text-base font-bold leading-[25px]">
@@ -100,9 +100,9 @@ const AiAssistantChatContainer = ({
                     {t('How can I help you today?')}
                   </span>
                 </div>
+              ) : (
+                children
               )}
-
-              {children}
             </div>
           </ScrollArea>
           <div className="w-full px-4 relative">

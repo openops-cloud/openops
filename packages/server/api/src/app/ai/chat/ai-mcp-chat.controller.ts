@@ -174,7 +174,7 @@ const DeleteChatOptions = {
   },
 };
 
-export async function streamMessages(
+async function streamMessages(
   dataStreamWriter: DataStreamWriter,
   languageModel: LanguageModel,
   systemPrompt: string,
