@@ -8,11 +8,16 @@ import {
   OpenChatResponse,
   PrincipalType,
 } from '@openops/shared';
-import { pipeDataStreamToResponse } from 'ai';
+import {
+  CoreAssistantMessage,
+  CoreToolMessage,
+  pipeDataStreamToResponse,
+  streamText,
+  TextPart,
+} from 'ai';
 import { StatusCodes } from 'http-status-codes';
 import { encryptUtils } from '../../helper/encryption';
 import { aiConfigService } from '../config/ai-config.service';
-import { getMCPTools } from '../mcp/mcp-tools';
 import {
   ChatContext,
   createChatContext,
@@ -20,9 +25,9 @@ import {
   generateChatId,
   getChatContext,
   getChatHistory,
+  saveChatHistory,
 } from './ai-chat.service';
-import { streamMessages } from './ai-mcp-chat.controller';
-import { getMcpSystemPrompt } from './prompts.service';
+import { getSystemPrompt } from './prompts.service';
 
 export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
   app.post(
@@ -85,21 +90,23 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
       content: request.body.message,
     });
 
-    const systemPrompt = await getMcpSystemPrompt();
-    const tools = await getMCPTools();
-
     pipeDataStreamToResponse(reply.raw, {
       execute: async (dataStreamWriter) => {
-        logger.debug('Send user message to LLM.');
-        await streamMessages(
-          dataStreamWriter,
-          languageModel,
-          systemPrompt,
-          aiConfig,
+        const result = streamText({
+          model: languageModel,
+          system: await getSystemPrompt(chatContext),
           messages,
-          chatId,
-          tools,
-        );
+          ...aiConfig.modelSettings,
+          async onFinish({ response }) {
+            response.messages.forEach((r) => {
+              messages.push(getResponseObject(r));
+            });
+
+            await saveChatHistory(chatId, messages);
+          },
+        });
+
+        result.mergeIntoDataStream(dataStreamWriter);
       },
       onError: (error) => {
         return error instanceof Error ? error.message : String(error);
@@ -159,3 +166,37 @@ const DeleteChatOptions = {
     params: DeleteChatHistoryRequest,
   },
 };
+
+function getResponseObject(message: CoreAssistantMessage | CoreToolMessage): {
+  role: 'assistant';
+  content: string | Array<TextPart>;
+} {
+  if (message.role === 'tool') {
+    return {
+      role: 'assistant',
+      content: 'Messages received with the tool role are not supported.',
+    };
+  }
+
+  const content = message.content;
+  if (typeof content !== 'string' && Array.isArray(content)) {
+    for (const part of content) {
+      if (part.type !== 'text') {
+        return {
+          role: 'assistant',
+          content: `Invalid message type received. Type: ${part.type}`,
+        };
+      }
+    }
+
+    return {
+      role: 'assistant',
+      content: content as TextPart[],
+    };
+  }
+
+  return {
+    role: 'assistant',
+    content,
+  };
+}
