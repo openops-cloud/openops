@@ -1,22 +1,38 @@
+import { action } from '@storybook/addon-actions';
 import type { Meta, StoryObj } from '@storybook/react';
-import { Home, LucideBarChart2, Workflow, Wrench } from 'lucide-react';
-import { BrowserRouter } from 'react-router-dom';
-import { selectLightOrDarkCanvas } from '../../test-utils/select-themed-canvas.util';
-
 import { userEvent } from '@storybook/testing-library';
+import { Bot, Home, LucideBarChart2, Workflow, Wrench } from 'lucide-react';
+import { BrowserRouter } from 'react-router-dom';
 import {
   MenuFooter,
   SideMenu,
   SideMenuHeader,
   SideMenuNavigation,
 } from '../../components';
+import { cn } from '../../lib/cn';
+import { selectLightOrDarkCanvas } from '../../test-utils/select-themed-canvas.util';
+import { Button } from '../../ui/button';
 import { TooltipProvider } from '../../ui/tooltip';
 
-const HeaderWrapper = ({ theme }: { theme?: string }) => {
-  const logoSrc =
-    theme === 'Dark'
-      ? 'https://static.openops.com/logos/logo.svg'
-      : 'https://static.openops.com/logos/logo.positive.svg';
+const HeaderWrapper = ({
+  theme,
+  isMinimized = false,
+}: {
+  theme?: string;
+  isMinimized?: boolean;
+}) => {
+  let logoSrc;
+  if (isMinimized) {
+    logoSrc =
+      theme === 'Dark'
+        ? 'https://static.openops.com/logos/logo.icon.svg'
+        : 'https://static.openops.com/logos/logo.icon.positive.svg';
+  } else {
+    logoSrc =
+      theme === 'Dark'
+        ? 'https://static.openops.com/logos/logo.svg'
+        : 'https://static.openops.com/logos/logo.positive.svg';
+  }
 
   return (
     <SideMenuHeader
@@ -62,6 +78,33 @@ const FooterWrapperConnectedToCloud = () => (
   />
 );
 
+const AiFooter =
+  ({ isMinimized }: { isMinimized: boolean }) =>
+  // eslint-disable-next-line react/display-name
+  () =>
+    (
+      <MenuFooter
+        {...footerWrapperProps}
+        cloudConfig={{
+          ...footerWrapperProps.cloudConfig,
+          user: {
+            firstName: 'John',
+            lastName: 'Doe',
+            email: 'john.doe@acme.com',
+          },
+        }}
+        isMinimized={isMinimized}
+      >
+        <Button
+          variant="ai"
+          className={'size-9 p-0 gap-2'}
+          onClick={() => action('AI button clicked')}
+        >
+          <Bot className="w-6 h-6 dark:text-primary" />
+        </Button>
+      </MenuFooter>
+    );
+
 const FooterWrapperNotConnectedToCloud = () => (
   <MenuFooter {...footerWrapperProps} />
 );
@@ -70,29 +113,39 @@ const SidebarWrapper = ({
   isMinimized,
   theme,
   isFullCatalog,
+  isAiEnabled,
+  className,
 }: {
   isMinimized: boolean;
   theme?: string;
   isFullCatalog: boolean;
-}) => (
-  <BrowserRouter>
-    <TooltipProvider>
-      <div className="border-l border-t border-b w-full">
-        <SideMenu
-          MenuHeader={() => <HeaderWrapper theme={theme} />}
-          MenuFooter={
-            isFullCatalog
-              ? FooterWrapperConnectedToCloud
-              : FooterWrapperNotConnectedToCloud
-          }
-          className="w-[300px]"
-        >
-          <SideMenuNavigation links={MENU_LINKS} isMinimized={isMinimized} />
-        </SideMenu>
-      </div>
-    </TooltipProvider>
-  </BrowserRouter>
-);
+  isAiEnabled: boolean;
+  className?: string;
+}) => {
+  const footer = isAiEnabled
+    ? AiFooter({ isMinimized })
+    : isFullCatalog
+    ? FooterWrapperConnectedToCloud
+    : FooterWrapperNotConnectedToCloud;
+
+  return (
+    <BrowserRouter>
+      <TooltipProvider>
+        <div className="border-l border-t border-b w-full">
+          <SideMenu
+            MenuHeader={() => (
+              <HeaderWrapper theme={theme} isMinimized={isMinimized} />
+            )}
+            MenuFooter={footer}
+            className={cn('w-[300px]', className)}
+          >
+            <SideMenuNavigation links={MENU_LINKS} isMinimized={isMinimized} />
+          </SideMenu>
+        </div>
+      </TooltipProvider>
+    </BrowserRouter>
+  );
+};
 
 const MENU_LINKS = [
   {
@@ -156,5 +209,28 @@ export const WithConnectedCloudIndicator: Story = {
     const canvas = selectLightOrDarkCanvas(canvasElement);
     const avatarMenuTriggerEl = await canvas.findByTestId('user-avatar');
     await userEvent.click(avatarMenuTriggerEl);
+  },
+};
+
+/**
+ * Displays the AI button inside the footer .
+ */
+export const WithAiFeatureEnabled: Story = {
+  args: {
+    ...Default.args,
+    isFullCatalog: true,
+    isAiEnabled: true,
+  },
+};
+
+/**
+ * Displays the AI button inside the footer in minimized view.
+ */
+export const WithAiFeatureEnabledMinimized: Story = {
+  args: {
+    ...Default.args,
+    isMinimized: true,
+    isAiEnabled: true,
+    className: 'w-[69px]',
   },
 };
