@@ -36,8 +36,9 @@ const AiAssistantChat = ({
     handleInputChange,
     handleSubmit,
     status,
-    // chatId,
-    // createNewChat,
+    chatId,
+    createNewChat,
+    isOpenAiChatPending,
   } = useAiAssistantChat();
 
   const { width, height } = useMemo(() => {
@@ -78,8 +79,14 @@ const AiAssistantChat = ({
       handleSubmit={handleSubmit}
       input={input}
       isEmpty={!messages?.length}
+      onCreateNewChatClick={createNewChat}
+      isNewChatButtonEnabled={!!chatId}
     >
-      <AiAssistantConversation messages={messages} status={status} />
+      <AiAssistantConversation
+        messages={messages}
+        status={status}
+        isPending={isOpenAiChatPending}
+      />
     </AiAssistantChatContainer>
   );
 };

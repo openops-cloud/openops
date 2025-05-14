@@ -11,7 +11,7 @@ import { useMemo } from 'react';
 
 type AiAssistantConversationnProps = {
   isPending: boolean;
-  messages: MessageType;
+  messages: MessageType[];
 } & Pick<UseChatHelpers, 'status'>;
 
 const ChatStatus = {
