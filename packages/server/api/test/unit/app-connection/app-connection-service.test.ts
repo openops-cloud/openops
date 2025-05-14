@@ -8,6 +8,7 @@ jest.mock('../../../src/app/helper/encryption', () => ({
 const getMock = jest.fn();
 jest.mock('../../../src/app/blocks/block-metadata-service', () => ({
   blockMetadataService: {
+    ...jest.requireActual('../../../src/app/blocks/block-metadata-service'),
     get: getMock,
   },
 }));
