@@ -2,30 +2,17 @@ import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { getAiProviderLanguageModel } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import {
-  AiConfig,
   DeleteChatHistoryRequest,
   NewMessageRequest,
   OpenChatRequest,
   OpenChatResponse,
   PrincipalType,
 } from '@openops/shared';
-import {
-  CoreAssistantMessage,
-  CoreMessage,
-  CoreToolMessage,
-  DataStreamWriter,
-  experimental_createMCPClient,
-  LanguageModel,
-  pipeDataStreamToResponse,
-  streamText,
-  TextPart,
-  ToolCallPart,
-  ToolResultPart,
-  ToolSet,
-} from 'ai';
+import { pipeDataStreamToResponse } from 'ai';
 import { StatusCodes } from 'http-status-codes';
 import { encryptUtils } from '../../helper/encryption';
 import { aiConfigService } from '../config/ai-config.service';
+import { getMCPTools } from '../mcp/mcp-tools';
 import {
   ChatContext,
   createChatContext,
@@ -33,9 +20,9 @@ import {
   generateChatId,
   getChatContext,
   getChatHistory,
-  saveChatHistory,
 } from './ai-chat.service';
-import { getSystemPrompt } from './prompts.service';
+import { streamMessages } from './ai-mcp-chat.controller';
+import { getMcpSystemPrompt } from './prompts.service';
 
 export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
   app.post(
@@ -98,17 +85,19 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
       content: request.body.message,
     });
 
-    const tools = await getTools();
+    const systemPrompt = await getMcpSystemPrompt();
+    const tools = await getMCPTools();
+
     pipeDataStreamToResponse(reply.raw, {
       execute: async (dataStreamWriter) => {
         logger.debug('Send user message to LLM.');
         await streamMessages(
           dataStreamWriter,
+          languageModel,
+          systemPrompt,
+          aiConfig,
           messages,
           chatId,
-          languageModel,
-          chatContext,
-          aiConfig,
           tools,
         );
       },
@@ -136,50 +125,6 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
     },
   );
 };
-
-async function streamMessages(
-  dataStreamWriter: DataStreamWriter,
-  messages: CoreMessage[],
-  chatId: string,
-  languageModel: LanguageModel,
-  chatContext: ChatContext,
-  aiConfig: AiConfig,
-  tools: ToolSet,
-): Promise<void> {
-  const result = streamText({
-    model: languageModel,
-    system: await getSystemPrompt(chatContext),
-    messages,
-    ...aiConfig.modelSettings,
-    tools,
-    toolChoice: 'auto',
-    maxRetries: 1,
-    async onFinish({ response }) {
-      response.messages.forEach((r) => {
-        messages.push(getResponseObject(r));
-      });
-
-      await saveChatHistory(chatId, messages);
-
-      if (
-        response.messages[response.messages.length - 1].role !== 'assistant'
-      ) {
-        logger.debug('Forwarding the message to LLM.');
-        await streamMessages(
-          dataStreamWriter,
-          messages,
-          chatId,
-          languageModel,
-          chatContext,
-          aiConfig,
-          tools,
-        );
-      }
-    },
-  });
-
-  result.mergeIntoDataStream(dataStreamWriter);
-}
 
 const OpenChatOptions = {
   config: {
@@ -214,61 +159,3 @@ const DeleteChatOptions = {
     params: DeleteChatHistoryRequest,
   },
 };
-
-function getResponseObject(
-  message: CoreAssistantMessage | CoreToolMessage,
-): CoreToolMessage | CoreAssistantMessage {
-  if (message.role === 'tool') {
-    return {
-      role: message.role,
-      content: message.content as ToolResultPart[],
-    };
-  }
-
-  const content = message.content;
-  if (typeof content !== 'string' && Array.isArray(content)) {
-    let flag = false;
-    for (const part of content) {
-      if (part.type === 'tool-call') {
-        flag = true;
-        continue;
-      }
-
-      if (part.type !== 'text') {
-        return {
-          role: 'assistant',
-          content: `Invalid message type received. Type: ${part.type}`,
-        };
-      }
-    }
-
-    if (flag) {
-      return {
-        role: message.role,
-        content: content as ToolCallPart[],
-      };
-    }
-
-    return {
-      role: message.role,
-      content: content as TextPart[],
-    };
-  }
-
-  return {
-    role: 'assistant',
-    content,
-  };
-}
-
-async function getTools(): Promise<ToolSet> {
-  const supersetClient = await experimental_createMCPClient({
-    transport: {
-      type: 'sse',
-      url: 'http://localhost:8000/sse',
-      // url: 'http://localhost:3001/openops-tables/mcp/3S7D1gBhLZsBDnfLsuquYcYyqpZB5qxf/sse',
-    },
-  });
-
-  return supersetClient.tools();
-}

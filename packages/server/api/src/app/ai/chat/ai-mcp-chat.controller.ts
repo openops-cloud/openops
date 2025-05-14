@@ -36,6 +36,7 @@ import {
   saveChatHistory,
 } from './ai-chat.service';
 import { getMcpSystemPrompt } from './prompts.service';
+import { getMCPTools } from '../mcp/mcp-tools';
 
 const MAX_RECURSION_DEPTH = 5;
 
@@ -98,7 +99,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
     });
 
     const systemPrompt = await getMcpSystemPrompt();
-    const tools = await getTools();
+    const tools = await getMCPTools();
 
     pipeDataStreamToResponse(reply.raw, {
       execute: async (dataStreamWriter) => {
@@ -168,15 +169,7 @@ const DeleteChatOptions = {
   },
 };
 
-/**
- * Stub function for fetching tools. This function currently returns an empty ToolSet.
- * Future implementation should populate the ToolSet with the required tools.
- */
-async function getTools(): Promise<ToolSet> {
-  return {};
-}
-
-async function streamMessages(
+export async function streamMessages(
   dataStreamWriter: DataStreamWriter,
   languageModel: LanguageModel,
   systemPrompt: string,

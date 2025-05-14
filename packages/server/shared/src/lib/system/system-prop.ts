@@ -101,6 +101,8 @@ export enum AppSystemProp {
   SHOW_AI_SETTINGS = 'SHOW_AI_SETTINGS',
 
   AI_PROMPTS_LOCATION = 'AI_PROMPTS_LOCATION',
+
+  SUPERSET_MCP_SERVER_PATH = 'SUPERSET_MCP_SERVER_PATH',
 }
 
 export enum SharedSystemProp {
