@@ -42,7 +42,7 @@ const AiAssistantChat = ({
   } = useAiAssistantChat();
 
   const { width, height } = useMemo(() => {
-    const calculatedWidth = middlePanelSize.width * 0.3;
+    const calculatedWidth = middlePanelSize.width * 0.6;
     return {
       width: Math.max(
         CHAT_MIN_WIDTH,
