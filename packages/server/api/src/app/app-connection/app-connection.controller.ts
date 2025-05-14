@@ -76,8 +76,8 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
       id: request.params.id,
       projectId: request.principal.projectId,
     });
-    return connection;
-    /*const block = await blockMetadataService.get({
+
+    const block = await blockMetadataService.get({
       name: connection.blockName,
       projectId: request.principal.projectId,
       version: undefined,
@@ -93,7 +93,7 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
           ...connection,
           value: redactedValue,
         }
-      : removeSensitiveData(connection);*/
+      : removeSensitiveData(connection);
   });
   app.delete(
     '/:id',
