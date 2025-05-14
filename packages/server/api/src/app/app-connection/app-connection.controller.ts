@@ -38,7 +38,7 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
   });
 
   app.patch('/', PatchAppConnectionRequest, async (request, reply) => {
-    const appConnection = await appConnectionService.upsert({
+    const appConnection = await appConnectionService.patch({
       userId: request.principal.id,
       projectId: request.principal.projectId,
       request: request.body,
@@ -76,8 +76,8 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
       id: request.params.id,
       projectId: request.principal.projectId,
     });
-
-    const block = await blockMetadataService.get({
+    return connection;
+    /*const block = await blockMetadataService.get({
       name: connection.blockName,
       projectId: request.principal.projectId,
       version: undefined,
@@ -93,7 +93,7 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
           ...connection,
           value: redactedValue,
         }
-      : removeSensitiveData(connection);
+      : removeSensitiveData(connection);*/
   });
   app.delete(
     '/:id',

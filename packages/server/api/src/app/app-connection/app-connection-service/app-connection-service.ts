@@ -102,7 +102,7 @@ export const appConnectionService = {
     const { projectId, request } = params;
 
     const existingConnection = await repo().findOneByOrFail({
-      name: request.id,
+      id: request.id,
       projectId,
     });
 

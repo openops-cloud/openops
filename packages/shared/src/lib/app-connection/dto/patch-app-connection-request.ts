@@ -1,42 +1,146 @@
 import { Static, Type } from '@sinclair/typebox';
-import {
-  UpsertBasicAuthRequest,
-  UpsertCloudOAuth2Request,
-  UpsertCustomAuthRequest,
-  UpsertOAuth2Request,
-  UpsertPlatformOAuth2Request,
-  UpsertSecretTextRequest,
-} from './upsert-app-connection-request';
+import { AppConnectionType } from '../app-connection';
+import { OAuth2AuthorizationMethod } from '../oauth2-authorization-method';
 
-export const PatchSecretTextRequest = Type.Intersect([
-  Type.Object({ id: Type.String() }),
-  UpsertSecretTextRequest,
-]);
+const commonAuthProps = {
+  name: Type.String({}),
+  blockName: Type.String({}),
+  projectId: Type.String({}),
+};
 
-export const PatchOAuth2Request = Type.Intersect([
-  Type.Object({ id: Type.String() }),
-  UpsertOAuth2Request,
-]);
+enum OAuth2GrantType {
+  AUTHORIZATION_CODE = 'authorization_code',
+  CLIENT_CREDENTIALS = 'client_credentials',
+}
 
-export const PatchCloudOAuth2Request = Type.Intersect([
-  Type.Object({ id: Type.String() }),
-  UpsertCloudOAuth2Request,
-]);
+export const PatchCustomAuthRequest = Type.Object(
+  {
+    ...commonAuthProps,
+    id: Type.String(),
+    type: Type.Literal(AppConnectionType.CUSTOM_AUTH),
+    value: Type.Object({
+      type: Type.Literal(AppConnectionType.CUSTOM_AUTH),
+      props: Type.Record(Type.String(), Type.Unknown()),
+    }),
+  },
+  {
+    title: 'Custom Auth',
+    description: 'Custom Auth',
+  },
+);
 
-export const PatchPlatformOAuth2Request = Type.Intersect([
-  Type.Object({ id: Type.String() }),
-  UpsertPlatformOAuth2Request,
-]);
+const commonOAuth2ValueProps = {
+  client_id: Type.String({
+    minLength: 1,
+  }),
+  code: Type.String({
+    minLength: 1,
+  }),
+  code_challenge: Type.Optional(Type.String({})),
+  scope: Type.String(),
+  authorization_method: Type.Optional(Type.Enum(OAuth2AuthorizationMethod)),
+};
+export const PatchPlatformOAuth2Request = Type.Object(
+  {
+    ...commonAuthProps,
+    id: Type.String(),
+    type: Type.Literal(AppConnectionType.PLATFORM_OAUTH2),
+    value: Type.Object({
+      ...commonOAuth2ValueProps,
+      props: Type.Optional(Type.Record(Type.String(), Type.String())),
+      type: Type.Literal(AppConnectionType.PLATFORM_OAUTH2),
+      redirect_url: Type.String({
+        minLength: 1,
+      }),
+    }),
+  },
+  {
+    title: 'Platform OAuth2',
+    description: 'Platform OAuth2',
+  },
+);
 
-export const PatchBasicAuthRequest = Type.Intersect([
-  Type.Object({ id: Type.String() }),
-  UpsertBasicAuthRequest,
-]);
+export const PatchCloudOAuth2Request = Type.Object(
+  {
+    ...commonAuthProps,
+    id: Type.String(),
+    type: Type.Literal(AppConnectionType.CLOUD_OAUTH2),
+    value: Type.Object({
+      ...commonOAuth2ValueProps,
+      props: Type.Optional(Type.Record(Type.String(), Type.String())),
+      scope: Type.String(),
+      type: Type.Literal(AppConnectionType.CLOUD_OAUTH2),
+    }),
+  },
+  {
+    title: 'Cloud OAuth2',
+    description: 'Cloud OAuth2',
+  },
+);
 
-export const PatchCustomAuthRequest = Type.Intersect([
-  Type.Object({ id: Type.String() }),
-  UpsertCustomAuthRequest,
-]);
+export const PatchSecretTextRequest = Type.Object(
+  {
+    ...commonAuthProps,
+    id: Type.String(),
+    type: Type.Literal(AppConnectionType.SECRET_TEXT),
+    value: Type.Object({
+      type: Type.Literal(AppConnectionType.SECRET_TEXT),
+      secret_text: Type.String({
+        minLength: 1,
+      }),
+    }),
+  },
+  {
+    title: 'Secret Text',
+    description: 'Secret Text',
+  },
+);
+
+export const PatchOAuth2Request = Type.Object(
+  {
+    ...commonAuthProps,
+    id: Type.String(),
+    type: Type.Literal(AppConnectionType.OAUTH2),
+    value: Type.Object({
+      ...commonOAuth2ValueProps,
+      client_secret: Type.String({
+        minLength: 1,
+      }),
+      grant_type: Type.Optional(Type.Enum(OAuth2GrantType)),
+      props: Type.Optional(Type.Record(Type.String(), Type.Any())),
+      authorization_method: Type.Optional(Type.Enum(OAuth2AuthorizationMethod)),
+      redirect_url: Type.String({
+        minLength: 1,
+      }),
+      type: Type.Literal(AppConnectionType.OAUTH2),
+    }),
+  },
+  {
+    title: 'OAuth2',
+    description: 'OAuth2',
+  },
+);
+
+export const PatchBasicAuthRequest = Type.Object(
+  {
+    ...commonAuthProps,
+    id: Type.String(),
+    type: Type.Literal(AppConnectionType.BASIC_AUTH),
+    value: Type.Object({
+      username: Type.String({
+        minLength: 1,
+      }),
+      password: Type.String({
+        minLength: 1,
+      }),
+      type: Type.Literal(AppConnectionType.BASIC_AUTH),
+    }),
+  },
+  {
+    title: 'Basic Auth',
+    description: 'Basic Auth',
+  },
+);
 
 export const PatchAppConnectionRequestBody = Type.Union([
   PatchSecretTextRequest,
@@ -47,12 +151,12 @@ export const PatchAppConnectionRequestBody = Type.Union([
   PatchCustomAuthRequest,
 ]);
 
-export type PatchSecretTextRequest = Static<typeof PatchSecretTextRequest>;
-export type PatchOAuth2Request = Static<typeof PatchOAuth2Request>;
 export type PatchCloudOAuth2Request = Static<typeof PatchCloudOAuth2Request>;
 export type PatchPlatformOAuth2Request = Static<
   typeof PatchPlatformOAuth2Request
 >;
+export type PatchOAuth2Request = Static<typeof PatchOAuth2Request>;
+export type PatchSecretTextRequest = Static<typeof PatchSecretTextRequest>;
 export type PatchBasicAuthRequest = Static<typeof PatchBasicAuthRequest>;
 export type PatchCustomAuthRequest = Static<typeof PatchCustomAuthRequest>;
 export type PatchAppConnectionRequestBody = Static<
