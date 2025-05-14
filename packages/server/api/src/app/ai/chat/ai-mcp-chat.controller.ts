@@ -47,16 +47,12 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       const { id: userId } = request.principal;
 
       if (inputChatId) {
-        const existingChatId = generateChatIdForMCP({
-          chatId: inputChatId,
-          userId,
-        });
-        const existingContext = await getChatContext(existingChatId);
+        const existingContext = await getChatContext(inputChatId);
 
         if (existingContext) {
-          const messages = await getChatHistory(existingChatId);
+          const messages = await getChatHistory(inputChatId);
           return reply.code(200).send({
-            chatId: existingChatId,
+            chatId: inputChatId,
             messages,
           });
         }
