@@ -13,10 +13,19 @@ export async function getSupersetTools(): Promise<ToolSet> {
   const pythonPath = path.join(basePath, '.venv', 'bin', 'python');
   const serverPath = path.join(basePath, 'main.py');
 
+  const baseUrl =
+    system.get(AppSystemProp.ANALYTICS_PRIVATE_URL) + '/openops-analytics';
+  const password = system.getOrThrow(AppSystemProp.ANALYTICS_ADMIN_PASSWORD);
+
   const supersetClient = await experimental_createMCPClient({
     transport: new Experimental_StdioMCPTransport({
       command: pythonPath,
       args: [serverPath],
+      env: {
+        SUPERSET_BASE_URL: baseUrl,
+        SUPERSET_USERNAME: 'admin',
+        SUPERSET_PASSWORD: password,
+      },
     }),
   });
 
