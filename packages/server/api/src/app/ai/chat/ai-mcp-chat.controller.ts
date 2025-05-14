@@ -33,7 +33,6 @@ import {
   generateChatIdForMCP,
   getChatContext,
   getChatHistory,
-  MCPChatContext,
   saveChatHistory,
 } from './ai-chat.service';
 import { getMcpSystemPrompt } from './prompts.service';
@@ -45,20 +44,27 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
     '/open',
     OpenChatOptions,
     async (request, reply): Promise<OpenChatResponse> => {
-      const chatContext: MCPChatContext = {
-        chatId: request.body.chatId ?? openOpsId(),
-      };
+      const { chatId: inputChatId } = request.body;
+      const { id: userId } = request.principal;
 
-      const chatId = generateChatIdForMCP({
-        ...chatContext,
-        userId: request.principal.id,
-      });
+      if (inputChatId) {
+        const existingContext = await getChatContext(inputChatId);
 
-      const messages = await getChatHistory(chatId);
-
-      if (messages.length === 0) {
-        await createChatContext(chatId, chatContext);
+        if (existingContext) {
+          const messages = await getChatHistory(inputChatId);
+          return reply.code(200).send({
+            chatId: inputChatId,
+            messages,
+          });
+        }
       }
+
+      const newChatId = openOpsId();
+      const chatId = generateChatIdForMCP({ chatId: newChatId, userId });
+      const chatContext = { chatId: newChatId };
+
+      await createChatContext(chatId, chatContext);
+      const messages = await getChatHistory(chatId);
 
       return reply.code(200).send({
         chatId,
@@ -66,7 +72,6 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       });
     },
   );
-
   app.post('/', NewMessageOptions, async (request, reply) => {
     const chatId = request.body.chatId;
     const projectId = request.principal.projectId;
