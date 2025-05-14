@@ -1,3 +1,4 @@
+import { logger } from '@openops/server-shared';
 import { ToolSet } from 'ai';
 import { getDocsTools } from './docs-tools';
 import { getSupersetTools } from './superset-tools';
@@ -18,12 +19,12 @@ export const getMCPTools = async (): Promise<ToolSet> => {
 };
 
 async function safeGetTools(
-  loader: () => Promise<ToolSet>
+  loader: () => Promise<ToolSet>,
 ): Promise<Partial<ToolSet>> {
   try {
     return await loader();
   } catch (error) {
-    console.error('Error loading tools:', error);
+    logger.error('Error loading tools:', error);
     return {};
   }
 }
