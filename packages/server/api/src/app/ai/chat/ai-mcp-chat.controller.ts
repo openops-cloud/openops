@@ -26,8 +26,8 @@ import {
 import { StatusCodes } from 'http-status-codes';
 import { encryptUtils } from '../../helper/encryption';
 import { aiConfigService } from '../config/ai-config.service';
+import { getMCPTools } from '../mcp/mcp-tools';
 import {
-  ChatContext,
   createChatContext,
   deleteChatHistory,
   generateChatIdForMCP,
@@ -97,7 +97,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
     });
 
     const systemPrompt = await getMcpSystemPrompt();
-    const tools = await getTools();
+    const tools = getMCPTools();
 
     pipeDataStreamToResponse(reply.raw, {
       execute: async (dataStreamWriter) => {
@@ -166,14 +166,6 @@ const DeleteChatOptions = {
     params: DeleteChatHistoryRequest,
   },
 };
-
-/**
- * Stub function for fetching tools. This function currently returns an empty ToolSet.
- * Future implementation should populate the ToolSet with the required tools.
- */
-async function getTools(): Promise<ToolSet> {
-  return {};
-}
 
 async function streamMessages(
   dataStreamWriter: DataStreamWriter,
