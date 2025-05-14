@@ -72,5 +72,9 @@ ENV OPS_VERSION=$VERSION
 COPY tools/link-packages-to-root.sh tools/link-packages-to-root.sh
 RUN ./tools/link-packages-to-root.sh
 
+# This is required to make the isolated-vm package (code piece sandbox) work in arm64 docker images
+# https://github.com/laverdet/isolated-vm/issues/424
+ENV NODE_OPTIONS=--no-node-snapshot
+
 ENTRYPOINT [ "/bin/bash", "-c" ]
 CMD [ "cp -r /var/tmp-base/. /tmp/ && /lambda-entrypoint.sh main.handler; exit $?" ]

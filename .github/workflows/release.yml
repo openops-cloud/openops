@@ -63,13 +63,12 @@ jobs:
         run: |
           SOURCE_IMAGE=${{ steps.login-private-ecr.outputs.registry }}/openops/${{ matrix.target.repository }}:${SHA::8}
           echo "- 🚀 Source image: \`$SOURCE_IMAGE\`" >> $GITHUB_STEP_SUMMARY
-          PUBLIC_IMAGE=public.ecr.aws/openops/${{ matrix.target.repository }}
-          docker pull $SOURCE_IMAGE
-          docker tag $SOURCE_IMAGE $PUBLIC_IMAGE:$VERSION && docker push $_
-          echo "- ✅ Successfully tagged as \`$PUBLIC_IMAGE:$VERSION\`" >> $GITHUB_STEP_SUMMARY
+          PUBLIC_REPOSITORY=public.ecr.aws/openops/${{ matrix.target.repository }}
+          docker buildx imagetools create $SOURCE_IMAGE --tag $PUBLIC_REPOSITORY:$VERSION
+          echo "- ✅ Successfully tagged as \`$PUBLIC_REPOSITORY:$VERSION\`" >> $GITHUB_STEP_SUMMARY
           if ${{ inputs.latest }}; then
-            docker tag $SOURCE_IMAGE $PUBLIC_IMAGE:latest && docker push $_
-            echo "- ✅ Successfully tagged as \`$PUBLIC_IMAGE:latest\`" >> $GITHUB_STEP_SUMMARY
+            docker buildx imagetools create $SOURCE_IMAGE --tag $PUBLIC_REPOSITORY:latest
+            echo "- ✅ Successfully tagged as \`$PUBLIC_REPOSITORY:latest\`" >> $GITHUB_STEP_SUMMARY
           fi
   create-github-release:
     name: Create GitHub release
