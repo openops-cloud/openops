@@ -2,9 +2,9 @@ import { authenticationSession } from '@/app/lib/authentication-session';
 import { Message, useChat } from '@ai-sdk/react';
 import {
   AI_CHAT_CONTAINER_SIZES,
-  AiChatContainer,
   AiChatContainerSizeState,
   cn,
+  StepSettingsAiChatContainer,
 } from '@openops/components/ui';
 import { FlowVersion, OpenChatResponse } from '@openops/shared';
 import { nanoid } from 'nanoid';
@@ -13,7 +13,7 @@ import { useBuilderStateContext } from '../builder-hooks';
 import { DataSelectorSizeState } from '../data-selector/data-selector-size-togglers';
 import { Conversation } from './conversation';
 
-type AiChatProps = {
+type StepSettingsAiChatProps = {
   middlePanelSize: {
     width: number;
     height: number;
@@ -22,11 +22,11 @@ type AiChatProps = {
   flowVersion: FlowVersion;
 };
 
-const AiChat = ({
+const StepSettingsAiChat = ({
   middlePanelSize,
   selectedStep,
   flowVersion,
-}: AiChatProps) => {
+}: StepSettingsAiChatProps) => {
   const [
     {
       showDataSelector,
@@ -107,7 +107,7 @@ const AiChat = ({
   }, [aiContainerSize, dataSelectorSize, onToggleContainerSizeState]);
 
   return (
-    <AiChatContainer
+    <StepSettingsAiChatContainer
       parentHeight={middlePanelSize.height}
       parentWidth={middlePanelSize.width}
       showAiChat={showAiChat}
@@ -138,9 +138,9 @@ const AiChat = ({
           status={status}
         />
       )}
-    </AiChatContainer>
+    </StepSettingsAiChatContainer>
   );
 };
 
-AiChat.displayName = 'Chat';
-export { AiChat };
+StepSettingsAiChat.displayName = 'StepSettingsAiChat';
+export { StepSettingsAiChat };
