@@ -21,6 +21,7 @@ RUN <<-```
     git clone --depth 1 https://github.com/openops-cloud/superset-mcp .
     wget -qO- https://astral.sh/uv/install.sh | sh && source $HOME/.local/bin/env
     uv venv && uv pip install .
+```
 
 # Set up backend
 WORKDIR /usr/src/app
