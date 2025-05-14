@@ -104,7 +104,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
     });
 
     const systemPrompt = await getMcpSystemPrompt();
-    const tools = getMCPTools();
+    const tools = await getMCPTools();
 
     pipeDataStreamToResponse(reply.raw, {
       execute: async (dataStreamWriter) => {
