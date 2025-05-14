@@ -1,6 +1,10 @@
 import { action } from '@storybook/addon-actions';
 import type { Meta, StoryObj } from '@storybook/react';
-import { AiAssistantChatContainer, AIChatMessages } from '../../components';
+import {
+  AiAssistantChatContainer,
+  AIChatMessages,
+  MarkdownCodeVariations,
+} from '../../components';
 import { TooltipProvider } from '../../ui/tooltip';
 import { sampleAIChatMessages } from './sample-messages';
 
@@ -56,6 +60,24 @@ export const WithMessages: Story = {
         <AIChatMessages
           messages={sampleAIChatMessages}
           onInject={action('Inject command')}
+          codeVariation={MarkdownCodeVariations.WithCopyMultiline}
+        />
+      </AiAssistantChatContainer>
+    );
+  },
+};
+
+export const WithMessagesCopyAndInject: Story = {
+  args: {
+    isEmpty: false,
+  },
+  render: (args) => {
+    return (
+      <AiAssistantChatContainer {...args} showAiChat={true} className="static">
+        <AIChatMessages
+          messages={sampleAIChatMessages}
+          onInject={action('Inject command')}
+          codeVariation={MarkdownCodeVariations.WithCopyAndInject}
         />
       </AiAssistantChatContainer>
     );

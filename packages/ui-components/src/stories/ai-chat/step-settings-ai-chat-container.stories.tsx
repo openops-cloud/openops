@@ -6,6 +6,7 @@ import { fn } from '@storybook/test';
 import {
   AI_CHAT_CONTAINER_SIZES,
   AiChatContainerSizeState,
+  MarkdownCodeVariations,
   StepSettingsAiChatContainer,
 } from '../../components';
 import { AIChatMessages } from '../../components/ai-chat-messages/ai-chat-messages';
@@ -144,6 +145,7 @@ export const Populated: Story = {
           <AIChatMessages
             messages={sampleAIChatMessages}
             onInject={action('Inject command')}
+            codeVariation={MarkdownCodeVariations.WithCopyAndInject}
           />
         </StepSettingsAiChatContainer>
       </>
