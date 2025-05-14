@@ -34,10 +34,10 @@ export const getMCPTools = (): Record<string, Tool> => ({
         );
         return result;
       } catch (error) {
-        logger.error('Persistent docsMcpClient error:', error);
+        logger.error('docsMcpClient error:', error);
         return Promise.resolve({
-          error: true,
-          message: error instanceof Error ? error.message : String(error),
+          success: false,
+          error: error instanceof Error ? error.message : String(error),
         });
       }
     },

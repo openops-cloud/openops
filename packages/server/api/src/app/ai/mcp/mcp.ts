@@ -20,9 +20,10 @@ export async function callMcpTool(
     const tool = getMCPTool(toolName);
 
     if (!tool || typeof tool.execute !== 'function') {
-      throw new Error(
+      logger.error(
         `Tool "${toolName}" not found or does not have an execute method.`,
       );
+      return { success: false, error: new Error('Tool not found') };
     }
 
     const result = await withTimeout(
