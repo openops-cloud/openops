@@ -9,6 +9,7 @@ type AiChatSizeTogglersProps = {
   state: AiChatContainerSizeState;
   toggleContainerSizeState: (state: AiChatContainerSizeState) => void;
   onCloseClick: () => void;
+  enableNewChat: boolean;
   onNewChatClick: () => void;
 };
 
@@ -16,6 +17,7 @@ const AiChatSizeTogglers = ({
   state,
   toggleContainerSizeState,
   onCloseClick,
+  enableNewChat,
   onNewChatClick,
 }: AiChatSizeTogglersProps) => {
   const onClickHandler = useCallback(
@@ -38,6 +40,7 @@ const AiChatSizeTogglers = ({
             className="bg-gray-100 dark:bg-accent/10 bg-input rounded-xs mx-2"
             size="xs"
             onClick={onClickHandler}
+            disabled={!enableNewChat}
             type="button"
           >
             <div className="flex items-center">
