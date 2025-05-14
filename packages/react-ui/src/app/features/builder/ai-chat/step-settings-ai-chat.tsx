@@ -126,8 +126,7 @@ const StepSettingsAiChat = ({
         duration: 3000,
       });
       console.error(
-        'There was an error deleting existing chat and creating a new one:',
-        error,
+        `There was an error deleting existing chat and creating a new one: ${error}`,
       );
     } finally {
       setEnableNewChat(true);
