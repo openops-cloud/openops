@@ -89,6 +89,7 @@ export const Docked: Story = {
     toggleContainerSizeState: fn(),
     handleSubmit: fn(),
     onCloseClick: fn(),
+    onNewChatClick: fn(),
     onToggle: fn(),
     input: '',
     handleInputChange: fn(),
