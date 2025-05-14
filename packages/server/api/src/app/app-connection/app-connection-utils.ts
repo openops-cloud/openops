@@ -3,8 +3,8 @@ import { BlockAuthProperty, PropertyType } from '@openops/blocks-framework';
 import {
   AppConnection,
   AppConnectionType,
+  AppConnectionValue,
   AppConnectionWithoutSensitiveData,
-  RedactedAppConnection,
 } from '@openops/shared';
 
 const REDACTED_MESSAGE = '**REDACTED**';
@@ -18,32 +18,32 @@ export const removeSensitiveData = (
 
 export function redactSecrets(
   auth: BlockAuthProperty | undefined,
-  connection: AppConnection,
-): AppConnectionWithoutSensitiveData | RedactedAppConnection {
-  const value: Record<string, any> | undefined = connection.value;
+  value: AppConnectionValue,
+): Record<string, any> | undefined {
+  if (!value) {
+    return undefined;
+  }
 
-  const redacted = value;
+  const redacted: Record<string, any> | undefined = { ...value };
 
   switch (auth?.type) {
     case PropertyType.SECRET_TEXT: {
-      redacted.secret_text = REDACTED_MESSAGE;
       return {
-        ...connection,
-        value: redacted as any,
-      } as RedactedAppConnection;
+        ...redacted,
+        secret_text: REDACTED_MESSAGE,
+      };
     }
 
     case PropertyType.BASIC_AUTH: {
-      redacted.password = REDACTED_MESSAGE;
       return {
-        ...connection,
-        value: redacted as any,
-      } as RedactedAppConnection;
+        ...redacted,
+        password: REDACTED_MESSAGE,
+      };
     }
 
     case PropertyType.CUSTOM_AUTH: {
       if (redacted.props) {
-        const props = { ...redacted.props };
+        const props = redacted.props;
         for (const [key, prop] of Object.entries(auth.props)) {
           if (
             (prop as { type: PropertyType }).type === PropertyType.SECRET_TEXT
@@ -53,35 +53,28 @@ export function redactSecrets(
         }
         redacted.props = props;
       }
-      return {
-        ...connection,
-        value: redacted as any,
-      } as RedactedAppConnection;
+      return redacted;
     }
 
     case PropertyType.OAUTH2: {
       if (
-        value?.type === AppConnectionType.OAUTH2 &&
-        typeof value.client_secret === 'string' &&
-        typeof value.client_id === 'string' &&
-        typeof value.redirect_url === 'string'
+        typeof redacted.client_secret === 'string' &&
+        typeof redacted.client_id === 'string' &&
+        typeof redacted.redirect_url === 'string'
       ) {
         return {
-          ...connection,
-          value: {
-            type: PropertyType.OAUTH2,
-            client_id: value.client_id,
-            client_secret: REDACTED_MESSAGE,
-            redirect_url: value.redirect_url,
-          } as any,
-        } as RedactedAppConnection;
+          type: AppConnectionType.OAUTH2,
+          client_id: redacted.client_id,
+          client_secret: REDACTED_MESSAGE,
+          redirect_url: redacted.redirect_url,
+        };
       }
 
-      return removeSensitiveData(connection);
+      return undefined;
     }
 
     default: {
-      return removeSensitiveData(connection);
+      return undefined;
     }
   }
 }

@@ -80,8 +80,14 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
     if (!block) {
       throw new Error(`Block metadata not found for ${connection.blockName}`);
     }
+    const redactedValue = redactSecrets(block.auth, connection.value);
 
-    return redactSecrets(block.auth, connection);
+    return redactedValue
+      ? {
+          ...connection,
+          value: redactedValue,
+        }
+      : removeSensitiveData(connection);
   });
   app.delete(
     '/:id',
