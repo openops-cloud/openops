@@ -106,6 +106,35 @@ describe('Slack API', () => {
       });
     });
 
+    test.each([undefined, null, false])(
+      'should return 200 Ok if interactions are disabled',
+      async (interactionsEnabled) => {
+        verifySignatureMock.mockReturnValueOnce(true);
+
+        const payload = JSON.stringify({
+          actions: [
+            {
+              type: 'some type',
+            },
+          ],
+          message: {
+            metadata: {
+              event_payload: {
+                interactionsEnabled,
+              },
+            },
+          },
+        });
+
+        const response = await makeRequest(payload);
+
+        expect(response?.statusCode).toBe(StatusCodes.OK);
+        expect(response?.json()).toEqual({
+          text: 'Interactions are disabled',
+        });
+      },
+    );
+
     test('should return 200 Ok if message is disabled', async () => {
       verifySignatureMock.mockReturnValueOnce(true);
 
@@ -118,6 +147,7 @@ describe('Slack API', () => {
         message: {
           metadata: {
             event_payload: {
+              interactionsEnabled: true,
               messageDisabled: true,
             },
           },
@@ -143,7 +173,9 @@ describe('Slack API', () => {
         ],
         message: {
           metadata: {
-            event_payload: {},
+            event_payload: {
+              interactionsEnabled: true,
+            },
           },
         },
       });
@@ -172,6 +204,7 @@ describe('Slack API', () => {
         message: {
           metadata: {
             event_payload: {
+              interactionsEnabled: true,
               isTest: true,
               resumeUrl: 'http://some-resume-url.com?test=1',
             },
@@ -212,6 +245,7 @@ describe('Slack API', () => {
         message: {
           metadata: {
             event_payload: {
+              interactionsEnabled: true,
               isTest: false,
             },
           },
