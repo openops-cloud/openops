@@ -1,6 +1,6 @@
 import { ToolSet } from 'ai';
-import { getSupersetTools } from './superset-tools';
 import { getDocsTools } from './docs-tools';
+import { getSupersetTools } from './superset-tools';
 
 let toolSet: ToolSet | undefined;
 
