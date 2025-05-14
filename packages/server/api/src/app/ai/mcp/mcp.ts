@@ -1,3 +1,4 @@
+import { logger } from '@openops/server-shared';
 import { ToolExecutionOptions } from 'ai';
 import { getMCPTool } from './mcp-tools';
 
@@ -30,7 +31,7 @@ export async function callMcpTool(
     );
     return { success: true, result };
   } catch (error) {
-    // Optionally log error here
+    logger.error(error, `Error calling MCP tool ${toolName}`);
     return {
       success: false,
       error: error instanceof Error ? error : new Error(String(error)),

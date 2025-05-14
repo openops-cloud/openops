@@ -1,15 +1,8 @@
 import { logger } from '@openops/server-shared';
-import {
-  experimental_createMCPClient as createMCPClient,
-  Tool,
-  tool,
-} from 'ai';
-import { Experimental_StdioMCPTransport as StdioMCPTransport } from 'ai/mcp-stdio';
+import { Tool, tool } from 'ai';
 
 import { z } from 'zod';
-
-const DOCS_MCP_SERVER_PATH =
-  process.env.DOCS_MCP_SERVER_PATH || '/root/.mcp/docs.openops.com';
+import { getDocsMcpClient } from './docs';
 
 export const getMCPTool = (toolName: string): Tool => {
   const tool = getMCPTools()[toolName];
@@ -21,19 +14,13 @@ export const getMCPTool = (toolName: string): Tool => {
 
 export const getMCPTools = (): Record<string, Tool> => ({
   docsMcpClient: tool({
-    description:
-      'Search OpenOps documentation using the MCP tool (persistent long-running process)',
+    description: 'Search OpenOps documentation using the MCP tool',
     parameters: z.object({
       query: z.string().describe('The search query'),
     }),
     execute: async ({ query }) => {
       try {
-        const client = await createMCPClient({
-          transport: new StdioMCPTransport({
-            command: 'node',
-            args: [DOCS_MCP_SERVER_PATH],
-          }),
-        });
+        const client = await getDocsMcpClient();
         const tools = await client.tools();
 
         const searchTool = tools['search'];
