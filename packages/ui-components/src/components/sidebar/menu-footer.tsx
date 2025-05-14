@@ -60,8 +60,8 @@ const MenuFooter = ({
             to={settingsLink.to}
             label={settingsLink.label}
             Icon={settingsLink.icon}
-            iconClassName="size-6"
-            className="ml-0 h-9"
+            iconClassName="size-[21px]"
+            className="flex items-center justify-center ml-0 p-0 @[180px]:p-0 size-9 @[180px]:size-9 rounded-full @[180px]:rounded-full bg-accent dark:bg-accent hover:bg-input dark:hover:bg-accent/70"
             isMinimized={true}
           ></MenuNavigationItem>
         </div>
