@@ -222,6 +222,40 @@ describe('requestActionMessageAction', () => {
         StoreScope.FLOW_RUN,
       );
     });
+
+    test('should assign resumeUrl to actions when slack interactions are disabled', async () => {
+      slackSendMessageMock.mockImplementation(async (message) => message);
+
+      const mockContext = buildMockContext('Header Text', true);
+      mockContext.run.isTest = false;
+      mockContext.generateResumeUrl.mockImplementation(({ queryParams }) => {
+        return `https://example.com/resume?clicked=${queryParams.actionClicked}`;
+      });
+
+      const result = (await requestActionMessageAction.run(mockContext)) as any;
+
+      const actionBlock = result.blocks.find((b: any) => b.type === 'actions');
+      const action = actionBlock.elements[0];
+
+      expect(action.url).toContain('https://example.com/resume?clicked=');
+      expect(result.eventPayload.resumeUrl).toContain('executionCorrelationId');
+      expect(result.eventPayload.interactionsDisabled).toBe(true);
+    });
+
+    test('should assign static test url to actions in test mode', async () => {
+      slackSendMessageMock.mockImplementation(async (message) => message);
+
+      const mockContext = buildMockContext('Header Text', true);
+      mockContext.run.isTest = true;
+
+      const result = (await requestActionMessageAction.run(mockContext)) as any;
+      const actionBlock = result.blocks.find((b: any) => b.type === 'actions');
+      const action = actionBlock.elements[0];
+
+      expect(action.url).toBe(
+        'https://static.openops.com/test_slack_interactions.txt',
+      );
+    });
   });
 
   describe('RESUME execution', () => {
