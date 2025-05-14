@@ -4,14 +4,6 @@ import { Tool, tool } from 'ai';
 import { z } from 'zod';
 import { getDocsMcpClient } from './docs';
 
-export const getMCPTool = (toolName: string): Tool => {
-  const tool = getMCPTools()[toolName];
-  if (!tool) {
-    throw new Error(`Tool '${toolName}' not found.`);
-  }
-  return tool;
-};
-
 export const getMCPTools = (): Record<string, Tool> => ({
   docsMcpClient: tool({
     description: 'Search OpenOps documentation using the MCP tool',
