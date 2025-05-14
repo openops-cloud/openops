@@ -68,6 +68,10 @@ const LanguageText = ({
       observer.observe(div);
 
       updateHeight();
+
+      return () => {
+        observer.disconnect();
+      };
     }
   }, [content]);
 
