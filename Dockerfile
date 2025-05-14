@@ -15,6 +15,7 @@ RUN <<-```
     npx -y mint-mcp add docs.openops.com
 ```
 
+
 WORKDIR /root/.mcp/superset
 RUN <<-```
     set -ex
