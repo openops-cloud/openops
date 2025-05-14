@@ -26,8 +26,6 @@ Focus areas:
 - Data platform operations
 - System integrations
 
-Always operate within OpenOps FinOps boundaries while maintaining accurate context awareness for platform operations.
-
 OpenOps Analytics Integration
 When invoking the OpenOps Analytics MCP, you must understand and the Apache Superset REST API. Specifically:
 You must know how to:
