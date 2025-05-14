@@ -11,7 +11,7 @@ type AIChatMessagesProps = {
 const AIChatMessages = ({
   messages,
   onInject,
-  codeVariation = MarkdownCodeVariations.WithCopyAndInject,
+  codeVariation = MarkdownCodeVariations.WithCopyMultiline,
 }: AIChatMessagesProps) => (
   <div className="p-4 my-3 flex flex-col">
     {messages.map((message) => (

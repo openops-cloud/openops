@@ -6,6 +6,7 @@ import {
   AIChatMessageRole,
   AIChatMessages,
   LoadingSpinner,
+  MarkdownCodeVariations,
 } from '@openops/components/ui';
 import { flowHelper, FlowVersion, OpenChatResponse } from '@openops/shared';
 import { useQuery } from '@tanstack/react-query';
@@ -91,7 +92,11 @@ const Conversation = ({
 
   return (
     <div className="flex flex-col gap-2">
-      <AIChatMessages messages={uiMessages} onInject={onInject} />
+      <AIChatMessages
+        messages={uiMessages}
+        onInject={onInject}
+        codeVariation={MarkdownCodeVariations.WithCopyAndInject}
+      />
       {[ChatStatus.STREAMING, ChatStatus.SUBMITTED].includes(status) && (
         <LoadingSpinner />
       )}
