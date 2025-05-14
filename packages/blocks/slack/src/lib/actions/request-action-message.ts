@@ -105,7 +105,7 @@ const sendMessageAskingForAction = async (
   );
 
   const useSlackInteractions =
-    system.getBoolean(SharedSystemProp.USE_SLACK_INTERACTIONS) || false;
+    system.getBoolean(SharedSystemProp.USE_SLACK_INTERACTIONS) || true;
 
   if (!useSlackInteractions) {
     const baseUrl = await networkUtls.getPublicUrl();
