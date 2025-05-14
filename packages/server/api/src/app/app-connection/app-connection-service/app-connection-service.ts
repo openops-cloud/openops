@@ -20,6 +20,7 @@ import {
   isNil,
   OAuth2GrantType,
   openOpsId,
+  PatchAppConnectionRequestBody,
   ProjectId,
   SeekPage,
   UpsertAppConnectionRequestBody,
@@ -80,24 +81,28 @@ export const appConnectionService = {
       id: existingConnection?.id ?? openOpsId(),
       projectId,
     };
+
     await repo().upsert(connection, ['name', 'projectId']);
+
     const updatedConnection = await repo().findOneByOrFail({
       name: request.name,
       projectId,
     });
+
     if (existingConnection) {
       sendConnectionUpdatedEvent(params.userId, projectId, request.blockName);
     } else {
       sendConnectionCreatedEvent(params.userId, projectId, request.blockName);
     }
+
     return decryptConnection(updatedConnection);
   },
 
-  async update(params: UpsertParams): Promise<AppConnection> {
+  async patch(params: PatchParams): Promise<AppConnection> {
     const { projectId, request } = params;
 
     const existingConnection = await repo().findOneByOrFail({
-      name: request.name,
+      name: request.id,
       projectId,
     });
 
@@ -544,6 +549,12 @@ type UpsertParams = {
   userId: UserId;
   projectId: ProjectId;
   request: UpsertAppConnectionRequestBody;
+};
+
+type PatchParams = {
+  userId: UserId;
+  projectId: ProjectId;
+  request: PatchAppConnectionRequestBody;
 };
 
 type GetOneByName = {
