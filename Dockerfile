@@ -9,9 +9,8 @@ ENV NODE_ENV=production
 # Use a cache mount for apt to speed up the process
 RUN apk add --no-cache openssh-client python3 g++ git musl libcap-dev nginx gettext wget py3-setuptools make bash findutils && \
     yarn config set python /usr/bin/python3 && \
-    npm install -g node-gyp npm@9.3.1 cross-env@7.0.3 mint-mcp
-
-RUN npx -y mint-mcp add docs.openops.com
+    npm install -g node-gyp npm@9.3.1 cross-env@7.0.3 mint-mcp \
+    npx -y mint-mcp add docs.openops.com
 
 # Set up backend
 WORKDIR /usr/src/app
