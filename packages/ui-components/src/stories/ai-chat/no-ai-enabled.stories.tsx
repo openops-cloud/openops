@@ -2,6 +2,7 @@ import { action } from '@storybook/addon-actions';
 import type { Meta, StoryObj } from '@storybook/react';
 import { BrowserRouter } from 'react-router-dom';
 import { NoAiEnabledPopover } from '../../components';
+import { TooltipProvider } from '../../ui/tooltip';
 
 const meta = {
   title: 'Components/NoAiEnabledPopover',
@@ -13,9 +14,11 @@ const meta = {
     onCloseClick: action('onCloseClick'),
   },
   tags: ['autodocs'],
-  render: () => (
+  render: (args) => (
     <BrowserRouter>
-      <NoAiEnabledPopover />
+      <TooltipProvider>
+        <NoAiEnabledPopover {...args} />
+      </TooltipProvider>
     </BrowserRouter>
   ),
 } satisfies Meta<typeof NoAiEnabledPopover>;

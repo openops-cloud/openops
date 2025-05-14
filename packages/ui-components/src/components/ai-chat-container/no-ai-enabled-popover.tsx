@@ -22,12 +22,7 @@ const NoAiEnabledPopover = ({
           <h2 className="font-bold text-base">{t('AI Assistant')}</h2>
         </div>
         <TooltipWrapper tooltipText={t('Close')}>
-          <Button
-            size="icon"
-            variant="basic"
-            onClick={onCloseClick}
-            className="text-outline opacity-50 hover:opacity-100"
-          >
+          <Button size="icon" variant="basic" onClick={onCloseClick}>
             <XIcon size={20} />
           </Button>
         </TooltipWrapper>
