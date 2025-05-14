@@ -58,43 +58,19 @@ export const appConnectionService = {
   async upsert(params: UpsertParams): Promise<AppConnection> {
     const { projectId, request } = params;
 
-    const existingConnection = await repo().findOneBy({
-      name: request.name,
-      projectId,
-    });
-
-    let value = request.value;
-    if (existingConnection) {
-      const block = await blockMetadataService.get({
-        name: request.blockName,
-        projectId,
-        version: undefined,
-      });
-
-      if (!block) {
-        throw new Error(`Block metadata not found for ${request.blockName}`);
-      }
-
-      const decryptedExisting = decryptConnection(existingConnection);
-
-      const restoredConnectionValue = restoreRedactedSecrets(
-        value,
-        decryptedExisting.value,
-        block.auth,
-      );
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      value = restoredConnectionValue as any;
-    }
-
     const validatedConnectionValue = await validateConnectionValue({
-      connection: { ...request, value } as UpsertAppConnectionRequestBody,
+      connection: request,
       projectId,
     });
 
     const encryptedConnectionValue = encryptUtils.encryptObject({
       ...validatedConnectionValue,
-      ...value,
+      ...request.value,
+    });
+
+    const existingConnection = await repo().findOneBy({
+      name: request.name,
+      projectId,
     });
 
     const connection = {
@@ -104,19 +80,75 @@ export const appConnectionService = {
       id: existingConnection?.id ?? openOpsId(),
       projectId,
     };
-
     await repo().upsert(connection, ['name', 'projectId']);
+    const updatedConnection = await repo().findOneByOrFail({
+      name: request.name,
+      projectId,
+    });
+    if (existingConnection) {
+      sendConnectionUpdatedEvent(params.userId, projectId, request.blockName);
+    } else {
+      sendConnectionCreatedEvent(params.userId, projectId, request.blockName);
+    }
+    return decryptConnection(updatedConnection);
+  },
+
+  async update(params: UpsertParams): Promise<AppConnection> {
+    const { projectId, request } = params;
+
+    const existingConnection = await repo().findOneByOrFail({
+      name: request.name,
+      projectId,
+    });
+
+    const block = await blockMetadataService.get({
+      name: request.blockName,
+      projectId,
+      version: undefined,
+    });
+
+    if (!block) {
+      throw new Error(`Block metadata not found for ${request.blockName}`);
+    }
+
+    const decryptedExisting = decryptConnection(existingConnection);
+
+    const restoredConnectionValue = restoreRedactedSecrets(
+      request.value,
+      decryptedExisting.value,
+      block.auth,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ) as any;
+
+    const validatedConnectionValue = await validateConnectionValue({
+      connection: {
+        ...request,
+        value: restoredConnectionValue,
+      } as UpsertAppConnectionRequestBody,
+      projectId,
+    });
+
+    const encryptedConnectionValue = encryptUtils.encryptObject({
+      ...validatedConnectionValue,
+      ...restoredConnectionValue,
+    });
+
+    const connection = {
+      ...request,
+      status: AppConnectionStatus.ACTIVE,
+      value: encryptedConnectionValue,
+      id: existingConnection?.id,
+      projectId,
+    };
+
+    await repo().update(connection.id, connection);
 
     const updatedConnection = await repo().findOneByOrFail({
       name: request.name,
       projectId,
     });
 
-    if (existingConnection) {
-      sendConnectionUpdatedEvent(params.userId, projectId, request.blockName);
-    } else {
-      sendConnectionCreatedEvent(params.userId, projectId, request.blockName);
-    }
+    sendConnectionUpdatedEvent(params.userId, projectId, request.blockName);
 
     return decryptConnection(updatedConnection);
   },

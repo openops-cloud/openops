@@ -4,10 +4,10 @@ import {
   Type,
 } from '@fastify/type-provider-typebox';
 import {
-  AppConnection,
   AppConnectionWithoutSensitiveData,
   ListAppConnectionsRequestQuery,
   OpenOpsId,
+  PatchAppConnectionRequestBody,
   Permission,
   PrincipalType,
   SeekPage,
@@ -18,11 +18,7 @@ import { StatusCodes } from 'http-status-codes';
 import { blockMetadataService } from '../blocks/block-metadata-service';
 import { sendConnectionDeletedEvent } from '../telemetry/event-models';
 import { appConnectionService } from './app-connection-service/app-connection-service';
-import {
-  redactSecrets,
-  removeSensitiveData,
-  restoreRedactedSecrets,
-} from './app-connection-utils';
+import { redactSecrets, removeSensitiveData } from './app-connection-utils';
 
 export const appConnectionController: FastifyPluginCallbackTypebox = (
   app,
@@ -39,6 +35,16 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
     await reply
       .status(StatusCodes.CREATED)
       .send(removeSensitiveData(appConnection));
+  });
+
+  app.patch('/', PatchAppConnectionRequest, async (request, reply) => {
+    const appConnection = await appConnectionService.upsert({
+      userId: request.principal.id,
+      projectId: request.principal.projectId,
+      request: request.body,
+    });
+
+    await reply.status(StatusCodes.OK).send(removeSensitiveData(appConnection));
   });
 
   app.get(
@@ -130,6 +136,22 @@ const UpsertAppConnectionRequest = {
     body: UpsertAppConnectionRequestBody,
     Response: {
       [StatusCodes.CREATED]: AppConnectionWithoutSensitiveData,
+    },
+  },
+};
+
+const PatchAppConnectionRequest = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
+    permission: Permission.WRITE_APP_CONNECTION,
+  },
+  schema: {
+    tags: ['app-connections'],
+    security: [SERVICE_KEY_SECURITY_OPENAPI],
+    description: 'Update an app connection based on the connection ID',
+    body: PatchAppConnectionRequestBody,
+    Response: {
+      [StatusCodes.OK]: AppConnectionWithoutSensitiveData,
     },
   },
 };
