@@ -16,7 +16,6 @@ RUN <<-```
 ```
 
 WORKDIR /root/.mcp/superset
-WORKDIR /root/.mcp/superset
 RUN <<-```
     set -ex
     git clone --depth 1 https://github.com/openops-cloud/superset-mcp .
