@@ -29,8 +29,8 @@ export function removeActionBlocks(blocks: any): any[] {
 
 export function buildActionBlock(user: string, button: string) {
   const whoClickedText = !isEmpty(user)
-    ? `User @${user} clicked on '${button}'`
-    : `Clicked on '${button}'`;
+    ? `user @${user} clicked on '${button}'`
+    : `clicked on '${button}'`;
 
   const modifiedBlocks = [
     { type: 'divider' },
