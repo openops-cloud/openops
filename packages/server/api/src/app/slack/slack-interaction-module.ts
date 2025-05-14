@@ -90,10 +90,10 @@ const slackInteractionController: FastifyPluginCallbackTypebox = (
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-function-return-type
 async function evaluateUserInteraction(payload: any, reply: FastifyReply) {
-  const interactionsEnabled: boolean =
-    payload.message.metadata.event_payload.interactionsEnabled;
+  const interactionsDisabled: boolean =
+    payload.message.metadata.event_payload.interactionsDisabled;
 
-  if (!interactionsEnabled) {
+  if (interactionsDisabled) {
     logger.debug('Ignoring a Slack interaction: interactions are disabled');
     return reply.code(200).send({ text: 'Interactions are disabled' });
   }

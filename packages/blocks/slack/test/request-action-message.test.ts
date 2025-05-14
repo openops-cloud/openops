@@ -195,7 +195,7 @@ describe('requestActionMessageAction', () => {
         eventPayload: {
           domain: mockContextWithHeader.server.publicUrl,
           resumeUrl: undefined,
-          interactionsEnabled: true,
+          interactionsDisabled: false,
         },
       });
 
