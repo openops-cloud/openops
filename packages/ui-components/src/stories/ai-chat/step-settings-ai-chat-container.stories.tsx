@@ -90,6 +90,8 @@ export const Docked: Story = {
     toggleContainerSizeState: fn(),
     handleSubmit: fn(),
     onCloseClick: fn(),
+    enableNewChat: true,
+    onNewChatClick: fn(),
     onToggle: fn(),
     input: '',
     handleInputChange: fn(),
@@ -151,4 +153,12 @@ export const Populated: Story = {
       </>
     );
   },
+};
+
+export const NewChatDisabled: Story = {
+  args: {
+    ...Populated.args,
+    enableNewChat: false,
+  },
+  render: Populated.render,
 };

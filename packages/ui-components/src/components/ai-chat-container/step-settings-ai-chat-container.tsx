@@ -14,8 +14,10 @@ type StepSettingsAiChatContainerProps = {
   parentWidth: number;
   showAiChat: boolean;
   onCloseClick: () => void;
+  onNewChatClick: () => void;
   onToggle: () => void;
   containerSize: AiChatContainerSizeState;
+  enableNewChat: boolean;
 
   toggleContainerSizeState: (state: AiChatContainerSizeState) => void;
   className?: string;
@@ -27,6 +29,8 @@ const StepSettingsAiChatContainer = ({
   parentWidth,
   showAiChat,
   onCloseClick,
+  onNewChatClick,
+  enableNewChat,
   onToggle,
   containerSize,
   toggleContainerSizeState,
@@ -90,6 +94,8 @@ const StepSettingsAiChatContainer = ({
           state={containerSize}
           toggleContainerSizeState={toggleContainerSizeState}
           onCloseClick={onCloseClick}
+          onNewChatClick={onNewChatClick}
+          enableNewChat={enableNewChat}
         />
       </div>
 
