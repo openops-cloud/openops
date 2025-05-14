@@ -105,14 +105,14 @@ const sendMessageAskingForAction = async (
   );
 
   const useSlackInteractions =
-    system.getBoolean(SharedSystemProp.USE_SLACK_INTERACTIONS) || true;
+    system.getBoolean(SharedSystemProp.USE_SLACK_INTERACTIONS) || false;
 
   if (!useSlackInteractions) {
     const baseUrl = await networkUtls.getPublicUrl();
 
     actions.forEach((action: SlackActionDefinition) => {
       action.url = context.run.isTest
-        ? 'data:text/plain;charset=utf-8,Test succeeded. Slack interactions are disabled in test mode and are only available when running the entire workflow.'
+        ? 'https://static.openops.com/test_slack_interactions.txt'
         : context.generateResumeUrl(
             {
               queryParams: {
