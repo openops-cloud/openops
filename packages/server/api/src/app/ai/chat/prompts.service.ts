@@ -16,11 +16,16 @@ export const getSystemPrompt = async (
     case '@openops/block-azure':
       return loadPrompt('azure-cli.txt');
     case '@openops/block-google-cloud':
+      if (context.actionName === 'google_execute_sql_query') {
+        return loadPrompt('gcp-big-query.txt');
+      }
       return loadPrompt('gcp-cli.txt');
     case '@openops/block-aws-athena':
       return loadPrompt('aws-athena.txt');
     case '@openops/block-snowflake':
       return loadPrompt('snowflake.txt');
+    case '@openops/block-databricks':
+      return loadPrompt('databricks.txt');
     default:
       return '';
   }

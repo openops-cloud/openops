@@ -38,6 +38,8 @@ import {
 } from './ai-chat.service';
 import { getMcpSystemPrompt } from './prompts.service';
 
+const MAX_RECURSION_DEPTH = 5;
+
 export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
   app.post(
     '/open',
@@ -175,6 +177,7 @@ async function streamMessages(
   messages: CoreMessage[],
   chatId: string,
   tools: ToolSet,
+  recursionDepth = 0,
 ): Promise<void> {
   const result = streamText({
     model: languageModel,
@@ -193,6 +196,13 @@ async function streamMessages(
 
       const lastMessage = response.messages.at(-1);
       if (lastMessage && lastMessage.role !== 'assistant') {
+        if (recursionDepth >= MAX_RECURSION_DEPTH) {
+          logger.warn(
+            `Maximum recursion depth (${MAX_RECURSION_DEPTH}) reached. Terminating recursion.`,
+          );
+          return;
+        }
+
         logger.debug('Forwarding the message to LLM.');
         await streamMessages(
           dataStreamWriter,
@@ -202,6 +212,7 @@ async function streamMessages(
           messages,
           chatId,
           tools,
+          recursionDepth + 1,
         );
       }
     },
