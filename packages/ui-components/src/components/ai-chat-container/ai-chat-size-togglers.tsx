@@ -35,7 +35,7 @@ const AiChatSizeTogglers = ({
         <>
           <Button
             variant="basic"
-            className="bg-gray-100 dark:bg-accent rounded-xs mx-2"
+            className="bg-gray-100 dark:bg-accent/10 bg-input rounded-xs mx-2"
             size="xs"
             onClick={onClickHandler}
             type="button"
