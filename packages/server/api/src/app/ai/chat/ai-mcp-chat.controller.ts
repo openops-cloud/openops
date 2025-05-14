@@ -26,6 +26,7 @@ import {
 import { StatusCodes } from 'http-status-codes';
 import { encryptUtils } from '../../helper/encryption';
 import { aiConfigService } from '../config/ai-config.service';
+import { getMCPTools } from '../mcp/mcp-tools';
 import {
   createChatContext,
   deleteChatHistory,
@@ -36,7 +37,6 @@ import {
   saveChatHistory,
 } from './ai-chat.service';
 import { getMcpSystemPrompt } from './prompts.service';
-import { getMCPTools } from '../mcp/mcp-tools';
 
 const MAX_RECURSION_DEPTH = 5;
 
