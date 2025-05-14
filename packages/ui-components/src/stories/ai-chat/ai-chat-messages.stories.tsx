@@ -33,6 +33,7 @@ export const CLIExample: Story = {
   args: {
     onInject: fn(),
     messages: sampleAIChatMessages,
+    codeVariation: MarkdownCodeVariations.WithCopyAndInject,
   },
   play: async ({ canvasElement, args }) => {
     const firstInjectButton = selectLightOrDarkCanvas(
