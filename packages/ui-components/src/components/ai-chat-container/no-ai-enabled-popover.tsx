@@ -10,7 +10,7 @@ const NoAiEnabledPopover = ({
   onCloseClick,
 }: {
   className?: string;
-  onCloseClick?: () => void;
+  onCloseClick: () => void;
 }) => {
   return (
     <div className={cn('bg-background shadow-editor rounded-lg', className)}>
@@ -22,7 +22,7 @@ const NoAiEnabledPopover = ({
           <h2 className="font-bold text-base">{t('AI Assistant')}</h2>
         </div>
         <TooltipWrapper tooltipText={t('Close')}>
-          <Button size="icon" variant="basic" onClick={onCloseClick}>
+          <Button size="icon" variant="basic" onClick={onCloseClick} aria-label={t('Close')}>
             <XIcon size={20} />
           </Button>
         </TooltipWrapper>
