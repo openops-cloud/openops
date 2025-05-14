@@ -160,7 +160,7 @@ const UserAvatarMenu = ({ user, MenuContent }: UserAvatarMenuProps) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Avatar className="cursor-pointer h-8 w-8 " data-testid="user-avatar">
+        <Avatar className="cursor-pointer h-9 w-9 " data-testid="user-avatar">
           <AvatarFallback>
             <AvatarLetter email={user.email} disablePopup={true}></AvatarLetter>
           </AvatarFallback>
