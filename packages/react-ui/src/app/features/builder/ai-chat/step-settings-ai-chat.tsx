@@ -122,9 +122,13 @@ const StepSettingsAiChat = ({
       setMessages([]);
     } catch (error) {
       toast({
-        title: t('There was an error creating the chat, please try again'),
+        title: t('There was an error creating the new chat, please try again'),
         duration: 3000,
       });
+      console.error(
+        'There was an error deleting existing chat and creating a new one:',
+        error,
+      );
     } finally {
       setEnableNewChat(true);
     }
