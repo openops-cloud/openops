@@ -1,3 +1,4 @@
+import { action } from '@storybook/addon-actions';
 import type { Meta, StoryObj } from '@storybook/react';
 import { BrowserRouter } from 'react-router-dom';
 import { NoAiEnabledPopover } from '../../components';
@@ -7,6 +8,9 @@ const meta = {
   component: NoAiEnabledPopover,
   parameters: {
     layout: 'centered',
+  },
+  args: {
+    onCloseClick: action('onCloseClick'),
   },
   tags: ['autodocs'],
   render: () => (
