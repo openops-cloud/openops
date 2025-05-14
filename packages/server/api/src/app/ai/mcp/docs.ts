@@ -2,9 +2,10 @@ import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { experimental_createMCPClient as createMCPClient } from 'ai';
 import { Experimental_StdioMCPTransport as StdioMCPTransport } from 'ai/mcp-stdio';
 
-const DOCS_MCP_SERVER_PATH =
-  system.get<string>(AppSystemProp.DOCS_MCP_SERVER_PATH) ||
-  '/root/.mcp/docs.openops.com';
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+const DOCS_MCP_SERVER_PATH = system.get<string>(
+  AppSystemProp.DOCS_MCP_SERVER_PATH,
+)!;
 
 let cachedDocsMcpClient: Awaited<ReturnType<typeof createMCPClient>> | null =
   null;
