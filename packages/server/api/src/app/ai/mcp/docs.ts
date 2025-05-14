@@ -7,18 +7,13 @@ const DOCS_MCP_SERVER_PATH = system.get<string>(
   AppSystemProp.DOCS_MCP_SERVER_PATH,
 )!;
 
-let cachedDocsMcpClient: Awaited<ReturnType<typeof createMCPClient>> | null =
-  null;
-
 export async function getDocsMcpClient(): ReturnType<typeof createMCPClient> {
   logger.debug(DOCS_MCP_SERVER_PATH, 'DOCS_MCP_SERVER_PATH');
 
-  if (cachedDocsMcpClient) return cachedDocsMcpClient;
-  cachedDocsMcpClient = await createMCPClient({
+  return createMCPClient({
     transport: new StdioMCPTransport({
       command: 'node',
       args: [DOCS_MCP_SERVER_PATH],
     }),
   });
-  return cachedDocsMcpClient;
 }
