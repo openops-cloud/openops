@@ -1,7 +1,7 @@
 import { t } from 'i18next';
-import { ExpandIcon, MinimizeIcon, Plus, X as XIcon } from 'lucide-react';
-import { useCallback } from 'react';
+import { ExpandIcon, MinimizeIcon, X as XIcon } from 'lucide-react';
 import { Button } from '../../ui/button';
+import { NewAiChatButton } from '../new-ai-chat-button';
 import { TooltipWrapper } from '../tooltip-wrapper';
 import { AI_CHAT_CONTAINER_SIZES, AiChatContainerSizeState } from './types';
 
@@ -20,13 +20,6 @@ const AiChatSizeTogglers = ({
   enableNewChat,
   onNewChatClick,
 }: AiChatSizeTogglersProps) => {
-  const onClickHandler = useCallback(
-    (ev: React.MouseEvent<HTMLButtonElement>) => {
-      ev.stopPropagation();
-      onNewChatClick();
-    },
-    [onNewChatClick],
-  );
   return (
     <>
       <TooltipWrapper
@@ -35,19 +28,10 @@ const AiChatSizeTogglers = ({
         }
       >
         <>
-          <Button
-            variant="basic"
-            className="bg-gray-100 dark:bg-accent/10 bg-input rounded-xs mx-2"
-            size="xs"
-            onClick={onClickHandler}
-            disabled={!enableNewChat}
-            type="button"
-          >
-            <div className="flex items-center">
-              <Plus size={13} />
-              <span className="font-semibold text-xs ">{t('New chat')}</span>
-            </div>
-          </Button>
+          <NewAiChatButton
+            enableNewChat={enableNewChat}
+            onNewChatClick={onNewChatClick}
+          />
           <Button
             size="icon"
             className="text-outline opacity-50 hover:opacity-100"
