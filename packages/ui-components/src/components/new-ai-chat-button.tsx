@@ -20,7 +20,7 @@ export const NewAiChatButton = ({
   return (
     <Button
       variant="basic"
-      className="bg-gray-100 dark:bg-accent/10 bg-input rounded-xs mx-2"
+      className="bg-accent enabled:hover:bg-input dark:bg-accent/10 rounded-xs mx-2"
       size="xs"
       onClick={onClickHandler}
       disabled={!enableNewChat}
