@@ -214,7 +214,7 @@ describe('Slack API', () => {
       expect(sendEphemeralMessageMock).toHaveBeenCalledTimes(1);
       expect(sendEphemeralMessageMock).toHaveBeenCalledWith({
         ephemeralText:
-          'Slack interactions are only available when running the entire workflow.',
+          'Test succeeded. Slack interactions are disabled in test mode and are only available when running the entire workflow.',
         responseUrl:
           'https://hooks.slack.com/actions/XXXXXXXX/XXXXXXXXX/XXXXXXXXX',
         userId: 'some_user_id',
