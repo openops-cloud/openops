@@ -1,5 +1,10 @@
 import { createAction, StoreScope } from '@openops/blocks-framework';
-import { networkUtls, SharedSystemProp, system } from '@openops/server-shared';
+import {
+  logger,
+  networkUtls,
+  SharedSystemProp,
+  system,
+} from '@openops/server-shared';
 import {
   assertNotNullOrUndefined,
   ExecutionType,
@@ -37,6 +42,7 @@ export const requestActionMessageAction = createAction({
     timeoutInDays,
   },
   async run(context) {
+    console.log('LEYLA');
     if (context.executionType === ExecutionType.BEGIN) {
       const slackSendMessageResponse: MessageInfo =
         await sendMessageAskingForAction(context);
@@ -86,7 +92,7 @@ const sendMessageAskingForAction = async (
 ): Promise<MessageInfo> => {
   const { actions } = context.propsValue;
   assertNotNullOrUndefined(actions, 'actions');
-
+  console.log('LEYLA1');
   if (!actions.length) {
     throw new Error(`Must have at least one button action`);
   }
@@ -106,8 +112,9 @@ const sendMessageAskingForAction = async (
 
   const disableSlackInteractions =
     system.getBoolean(SharedSystemProp.DISABLE_SLACK_INTERACTIONS) || false;
-
+  console.log('LEYLA2' + disableSlackInteractions);
   if (disableSlackInteractions) {
+    console.log('LEYLA3');
     const baseUrl = await networkUtls.getPublicUrl();
 
     actions.forEach((action: SlackActionDefinition) => {

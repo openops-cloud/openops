@@ -233,7 +233,7 @@ describe('requestActionMessageAction', () => {
     });
 
     test('should assign resumeUrl to actions when slack interactions are disabled', async () => {
-      systemMock.getBoolean.mockReturnValue(true);
+      systemMock.getBoolean.mockReturnValueOnce(true);
       waitForInteractionMock.mockImplementation(async (messageObj: any) =>
         Promise.resolve({ ...messageObj }),
       );
@@ -267,7 +267,7 @@ describe('requestActionMessageAction', () => {
     });
 
     test('should assign static test url to actions in test mode', async () => {
-      systemMock.getBoolean.mockReturnValue(true);
+      systemMock.getBoolean.mockReturnValueOnce(true);
       waitForInteractionMock.mockImplementation(async (messageObj: any) =>
         Promise.resolve({ ...messageObj }),
       );
