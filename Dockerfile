@@ -12,7 +12,7 @@ RUN <<-```
     apk add --no-cache openssh-client python3 g++ git musl libcap-dev nginx gettext wget py3-setuptools make bash findutils
     yarn config set python /usr/bin/python3
     npm install -g node-gyp npm@9.3.1 cross-env@7.0.3 mint-mcp
-    npx -y mint-mcp add docs.openops.com
+    npx -y mint-mcp add docs.openops.com && test -e /root/.mcp/docs.openops.com
 ```
 
 WORKDIR /root/.mcp/superset
