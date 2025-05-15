@@ -79,7 +79,7 @@ const LanguageText = ({
     return (
       <div
         ref={divRef}
-        className="p-4 text-sm block w-full leading-tight bg-input rounded-lg border-none overflow-x-auto overflow-y-hidden resize-none whitespace-pre box-border"
+        className="p-4 text-sm block w-full leading-tight bg-input rounded-lg border-none overflow-y-hidden resize-none"
         contentEditable={false}
         role="textbox"
         suppressContentEditableWarning
