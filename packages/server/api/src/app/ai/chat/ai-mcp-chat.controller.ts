@@ -265,17 +265,18 @@ function removeToolMessages(messages: CoreMessage[]): CoreMessage[] {
       return false;
     }
 
-    return !(m.role === 'assistant' && isToolCall(m.content));
-  });
-}
+    if (m.role === 'assistant' && Array.isArray(m.content)) {
+      const newContent = m.content.filter((part) => part.type !== 'tool-call');
 
-function isToolCall(content: AssistantContent): content is ToolCallPart[] {
-  return (
-    Array.isArray(content) &&
-    content.every(
-      (part) => part && typeof part === 'object' && part.type === 'tool-call',
-    )
-  );
+      if (newContent.length === 0) {
+        return false;
+      }
+
+      m.content = newContent;
+    }
+
+    return true;
+  });
 }
 
 function getResponseObject(
