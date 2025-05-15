@@ -1,4 +1,4 @@
-import { logger } from '@openops/server-shared';
+import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { ToolSet } from 'ai';
 import { getDocsTools } from './docs-tools';
 import { getSupersetTools } from './superset-tools';
@@ -9,10 +9,14 @@ export const getMCPTools = async (): Promise<ToolSet> => {
   const docsTools = await safeGetTools('docs', getDocsTools);
   const tablesTools = await safeGetTools('tables', getTablesTools);
 
+  const loadTablesAndSupersetMcpTools = system.getBoolean(
+    AppSystemProp.LOAD_TABLES_AND_SUPERSET_MCP_TOOLS,
+  );
+
   const toolSet = {
-    ...supersetTools,
+    ...(loadTablesAndSupersetMcpTools && supersetTools),
     ...docsTools,
-    ...tablesTools,
+    ...(loadTablesAndSupersetMcpTools && tablesTools),
   } as ToolSet;
 
   return toolSet;
