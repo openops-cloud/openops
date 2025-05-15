@@ -20,8 +20,8 @@ export const getMCPTools = async (): Promise<ToolSet> => {
   }
 
   const toolSet = {
-    ...docsTools,
     ...supersetTools,
+    ...docsTools,
     ...tablesTools,
   } as ToolSet;
 
