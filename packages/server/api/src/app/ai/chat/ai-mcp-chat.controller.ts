@@ -199,7 +199,7 @@ async function streamMessages(
       logger.warn(message, error);
     },
     async onFinish({ response }) {
-      const filteredMessages = filterOldToolMessages(messages);
+      const filteredMessages = removeToolMessages(messages);
       response.messages.forEach((r) => {
         filteredMessages.push(getResponseObject(r));
       });
@@ -259,7 +259,7 @@ function generateMessageId(): string {
   return `msg-${base64url}`;
 }
 
-function filterOldToolMessages(messages: CoreMessage[]): CoreMessage[] {
+function removeToolMessages(messages: CoreMessage[]): CoreMessage[] {
   return messages.filter((m) => {
     if (m.role === 'tool') {
       return false;
