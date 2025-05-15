@@ -97,7 +97,7 @@ const AiAssistantChatContainer = ({
               {isEmpty ? (
                 <div
                   className={
-                    'flex-1 flex flex-col items-center justify-center gap-4'
+                    'flex-1 flex flex-col items-center justify-center gap-1'
                   }
                 >
                   <span className="inline-block max-w-[220px] text-center dark:text-primary text-base font-bold leading-[25px]">
