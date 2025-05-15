@@ -37,7 +37,7 @@ import {
 } from './ai-chat.service';
 import { getMcpSystemPrompt } from './prompts.service';
 
-const MAX_RECURSION_DEPTH = 5;
+const MAX_RECURSION_DEPTH = 10;
 
 export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
   app.post(
