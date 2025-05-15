@@ -6,15 +6,12 @@ import { toast } from '@openops/components/ui';
 import { OpenChatResponse } from '@openops/shared';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { t } from 'i18next';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { MessageType } from './types';
+import { useCallback, useRef } from 'react';
 
 const AI_ASSISTANT_LS_KEY = 'ai_assistant_chat_id';
 
 export const useAiAssistantChat = () => {
   const chatId = useRef(localStorage.getItem(AI_ASSISTANT_LS_KEY));
-
-  const [messagesToDisplay, setMessagesToDisplay] = useState<MessageType[]>([]);
 
   const { isPending: isOpenAiChatPending, data: openChatResponse } = useQuery({
     queryKey: [QueryKeys.openAiAssistantChat, chatId.current],
@@ -56,12 +53,6 @@ export const useAiAssistantChat = () => {
     }
   };
 
-  useEffect(() => {
-    setMessagesToDisplay(
-      messages.length > 0 ? messages : openChatResponse?.messages ?? [],
-    );
-  }, [messages, openChatResponse?.messages]);
-
   const queryClient = useQueryClient();
 
   const createNewChat = useCallback(async () => {
@@ -74,7 +65,7 @@ export const useAiAssistantChat = () => {
         await aiAssistantChatApi.delete(oldChatId);
 
         await queryClient.invalidateQueries({
-          queryKey: [QueryKeys.openAiAssistantChat],
+          queryKey: [QueryKeys.openAiAssistantChat, oldChatId],
         });
         setMessages([]);
       }
@@ -90,7 +81,7 @@ export const useAiAssistantChat = () => {
   }, [queryClient, setMessages]);
 
   return {
-    messages: messagesToDisplay,
+    messages,
     input,
     handleInputChange,
     handleSubmit,
