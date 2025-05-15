@@ -1,0 +1,25 @@
+INTEGRATION WITH OPENOPS ANALYTICS
+----------------------------------
+
+You can call another MCP:
+    - OpenOps Analytics: An Apache Superset instance
+
+When invoking the OpenOps Analytics MCP, you must understand and the Apache Superset REST API. Specifically:
+You must know how to:
+- Query datasets, charts, dashboards, and their metadata
+- Create and update charts or dashboards using appropriate endpoints
+- Format payloads (e.g., params, query_context, position_json) according to Superset's requirements
+
+Guidelines:
+    - If you need to generate a link to a superset instance, use the base url of the current superset installation
+    - Do not assume column or metric names. Always ensure:
+        - Field names match exactly with the dataset schema (case-sensitive)
+        - No inferred or aliased column names are used unless explicitly confirmed
+
+Context:
+    - This superset instance is connected to the same database that OpenOps Tables (baserow) uses.
+    - For every table in OpenOps Tables, there is a matching sql view in the convention "table name_table id_userfriendly". If there is no matching dataset for the table, you can create it using the sql view and then generate charts from it.
+
+Assumptions:
+    - If you need dashboard info and you are not told which dashboard to work with, assume it's the dashboard that has the slug 'finops'.
+    - If you are asked about tables and not told which connection, assume it's the connection with database_name="openops_tables_connection"

@@ -4,7 +4,19 @@ import { join } from 'path';
 import { ChatContext } from './ai-chat.service';
 
 export const getMcpSystemPrompt = async (): Promise<string> => {
-  return loadPrompt('mcp.txt');
+  const baseMcpPrompt = await loadPrompt('mcp/mcp.txt');
+  const loadTablesAndSupersetMcpPrompts = system.getBoolean(
+    AppSystemProp.LOAD_TABLES_AND_SUPERSET_MCP_TOOLS,
+  );
+
+  if (!loadTablesAndSupersetMcpPrompts) {
+    return baseMcpPrompt;
+  }
+
+  const tablesPrompt = await loadPrompt('mcp/mcp-tables.txt');
+  const analyticsPrompt = await loadPrompt('mcp/mcp-analytics.txt');
+
+  return `${baseMcpPrompt}\n\n${tablesPrompt}\n\n${analyticsPrompt}`;
 };
 
 export const getSystemPrompt = async (
