@@ -18,9 +18,8 @@ RUN <<-```
 WORKDIR /root/.mcp/superset
 RUN <<-```
     set -ex
-    SUPERSET_MCP_COMMIT_HASH=1c391f7d0a261ee51f7b1e6c413f1930418d17fe
-    git clone --depth 1 https://github.com/openops-cloud/superset-mcp .
-    git fetch origin \$SUPERSET_MCP_COMMIT_HASH && git checkout \$SUPERSET_MCP_COMMIT_HASH
+    git clone https://github.com/openops-cloud/superset-mcp .
+    git checkout 1c391f7d0a261ee51f7b1e6c413f1930418d17fe
     wget -qO- https://astral.sh/uv/install.sh | sh && source $HOME/.local/bin/env
     uv venv && uv pip install .
 ```
