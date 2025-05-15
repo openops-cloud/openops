@@ -1,11 +1,14 @@
-const systemMock = {
-  getBoolean: jest.fn(),
-};
-
-jest.mock('@openops/server-shared', () => ({
-  ...jest.requireActual('@openops/server-shared'),
-  system: systemMock,
-}));
+const getBooleanMock = jest.fn();
+jest.mock('@openops/server-shared', () => {
+  const actual = jest.requireActual('@openops/server-shared');
+  return {
+    ...actual,
+    system: {
+      ...actual.system,
+      getBoolean: getBooleanMock,
+    },
+  };
+});
 
 const slackSendMessageMock = jest.fn();
 
@@ -233,7 +236,7 @@ describe('requestActionMessageAction', () => {
     });
 
     test('should assign resumeUrl to actions when slack interactions are disabled', async () => {
-      systemMock.getBoolean.mockReturnValueOnce(true);
+      getBooleanMock.mockReturnValueOnce(true);
       waitForInteractionMock.mockImplementation(async (messageObj: any) =>
         Promise.resolve({ ...messageObj }),
       );
@@ -267,7 +270,7 @@ describe('requestActionMessageAction', () => {
     });
 
     test('should assign static test url to actions in test mode', async () => {
-      systemMock.getBoolean.mockReturnValueOnce(true);
+      getBooleanMock.mockReturnValueOnce(true);
       waitForInteractionMock.mockImplementation(async (messageObj: any) =>
         Promise.resolve({ ...messageObj }),
       );
