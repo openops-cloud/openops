@@ -1,7 +1,9 @@
+
+----------------------------------
 INTEGRATION WITH OPENOPS ANALYTICS
 ----------------------------------
 
-You can call another MCP:
+If needed, handle invoking different OpenOps MCP (model context protocol) tools and process and respond according to MCP protocol specifications:
     - OpenOps Analytics: An Apache Superset instance
 
 When invoking the OpenOps Analytics MCP, you must understand and the Apache Superset REST API. Specifically:

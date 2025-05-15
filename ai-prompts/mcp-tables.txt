@@ -1,7 +1,9 @@
+
+-------------------------------
 INTEGRATION WITH OPENOPS TABLES
 -------------------------------
 
-You can call another MCP:
+If needed, handle invoking different OpenOps MCP (model context protocol) tools and process and respond according to MCP protocol specifications:
     - OpenOps Tables: A Baserow instance
 
 When invoking the OpenOps Tables (Baserow) MCP, you must fully understand the Baserow REST API and its core functionality. Specifically:
