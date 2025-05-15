@@ -15,7 +15,6 @@ type AiAssistantChatContainerProps = {
   showAiChat: boolean;
   onCloseClick: () => void;
   onCreateNewChatClick: () => void;
-  isNewChatButtonEnabled: boolean;
   isEmpty: boolean;
   className?: string;
   children?: ReactNode;
@@ -27,7 +26,6 @@ const AiAssistantChatContainer = ({
   showAiChat,
   onCloseClick,
   onCreateNewChatClick,
-  isNewChatButtonEnabled,
   isEmpty = true,
   className,
   children,
@@ -67,7 +65,7 @@ const AiAssistantChatContainer = ({
         </div>
         <div className="flex items-center gap-4">
           <NewAiChatButton
-            enableNewChat={isNewChatButtonEnabled}
+            enableNewChat={!isEmpty}
             onNewChatClick={onCreateNewChatClick}
           />
           <TooltipWrapper tooltipText={t('Close')}>

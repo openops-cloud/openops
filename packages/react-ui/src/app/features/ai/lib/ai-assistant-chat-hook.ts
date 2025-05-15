@@ -6,20 +6,22 @@ import { toast } from '@openops/components/ui';
 import { OpenChatResponse } from '@openops/shared';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { t } from 'i18next';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { MessageType } from './types';
 
 const AI_ASSISTANT_LS_KEY = 'ai_assistant_chat_id';
 
 export const useAiAssistantChat = () => {
-  const [chatId, setChatId] = useState<string | null>(
-    localStorage.getItem(AI_ASSISTANT_LS_KEY),
-  );
+  const chatId = useRef(localStorage.getItem(AI_ASSISTANT_LS_KEY));
+
+  const [messagesToDisplay, setMessagesToDisplay] = useState<MessageType[]>([]);
 
   const { isPending: isOpenAiChatPending, data: openChatResponse } = useQuery({
-    queryKey: [QueryKeys.openAiAssistantChat],
+    queryKey: [QueryKeys.openAiAssistantChat, chatId.current],
     queryFn: async () => {
-      return await aiAssistantChatApi.open(chatId);
+      const conversation = await aiAssistantChatApi.open(chatId.current);
+      onConversationRetrieved(conversation);
+      return conversation;
     },
   });
 
@@ -50,24 +52,26 @@ export const useAiAssistantChat = () => {
   const onConversationRetrieved = (conversation: OpenChatResponse) => {
     if (conversation.chatId) {
       localStorage.setItem(AI_ASSISTANT_LS_KEY, conversation.chatId);
+      chatId.current = conversation.chatId;
     }
-    setChatId(conversation?.chatId ?? null);
   };
 
-  const messagesToDisplay: MessageType[] = useMemo(() => {
-    return messages.length > 0 ? messages : openChatResponse?.messages ?? [];
+  useEffect(() => {
+    setMessagesToDisplay(
+      messages.length > 0 ? messages : openChatResponse?.messages ?? [],
+    );
   }, [messages, openChatResponse?.messages]);
 
   const queryClient = useQueryClient();
 
   const createNewChat = useCallback(async () => {
-    const chatId = openChatResponse?.chatId;
+    const oldChatId = chatId.current;
 
-    setChatId(null);
+    chatId.current = null;
 
     try {
-      if (chatId) {
-        await aiAssistantChatApi.delete(chatId);
+      if (oldChatId) {
+        await aiAssistantChatApi.delete(oldChatId);
 
         await queryClient.invalidateQueries({
           queryKey: [QueryKeys.openAiAssistantChat],
@@ -83,7 +87,7 @@ export const useAiAssistantChat = () => {
         `There was an error deleting existing chat and creating a new one: ${error}`,
       );
     }
-  }, [openChatResponse?.chatId, queryClient, setMessages]);
+  }, [queryClient, setMessages]);
 
   return {
     messages: messagesToDisplay,
@@ -91,9 +95,7 @@ export const useAiAssistantChat = () => {
     handleInputChange,
     handleSubmit,
     status,
-    chatId,
     createNewChat,
-    onConversationRetrieved,
     isOpenAiChatPending,
   };
 };

@@ -36,7 +36,6 @@ const AiAssistantChat = ({
     handleInputChange,
     handleSubmit,
     status,
-    chatId,
     createNewChat,
     isOpenAiChatPending,
   } = useAiAssistantChat();
@@ -80,7 +79,6 @@ const AiAssistantChat = ({
       input={input}
       isEmpty={!messages?.length}
       onCreateNewChatClick={createNewChat}
-      isNewChatButtonEnabled={!!chatId}
     >
       <AiAssistantConversation
         messages={messages}
