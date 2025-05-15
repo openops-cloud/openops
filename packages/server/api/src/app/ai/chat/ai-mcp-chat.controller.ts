@@ -103,8 +103,14 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       content: request.body.message,
     });
 
-    const systemPrompt = await getMcpSystemPrompt();
     const tools = await getMCPTools();
+    const isAnalyticsLoaded = Object.keys(tools).includes('superset');
+    const isTablesLoaded = Object.keys(tools).includes('table');
+
+    const systemPrompt = await getMcpSystemPrompt({
+      isAnalyticsLoaded,
+      isTablesLoaded,
+    });
 
     pipeDataStreamToResponse(reply.raw, {
       execute: async (dataStreamWriter) => {
