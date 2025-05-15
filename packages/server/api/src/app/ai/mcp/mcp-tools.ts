@@ -10,21 +10,27 @@ export const getMCPTools = async (): Promise<ToolSet> => {
     return toolSet;
   }
 
+  const supersetTools = await safeGetTools('superset', getSupersetTools);
+  const docsTools = await safeGetTools('docs', getDocsTools);
+
   toolSet = {
-    ...(await safeGetTools(getSupersetTools)),
-    ...(await safeGetTools(getDocsTools)),
+    ...supersetTools,
+    ...docsTools,
   } as ToolSet;
 
   return toolSet;
 };
 
 async function safeGetTools(
+  name: string,
   loader: () => Promise<ToolSet>,
 ): Promise<Partial<ToolSet>> {
   try {
-    return await loader();
+    const tools = await loader();
+    logger.debug(`Loaded tools for ${name}:`, tools);
+    return tools;
   } catch (error) {
-    logger.error('Error loading tools:', error);
+    logger.error(`Error loading tools for ${name}:`, error);
     return {};
   }
 }
