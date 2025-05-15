@@ -3,7 +3,6 @@ import { ToolSet } from 'ai';
 import { getDocsTools } from './docs-tools';
 import { getSupersetTools } from './superset-tools';
 import { getTablesTools } from './tables-tools';
-// import { getDocsTools } from './docs-tools';
 
 let toolSet: ToolSet | undefined;
 
@@ -15,7 +14,6 @@ export const getMCPTools = async (): Promise<ToolSet> => {
   const supersetTools = await safeGetTools('superset', getSupersetTools);
   const docsTools = await safeGetTools('docs', getDocsTools);
   const tablesTools = await safeGetTools('docs', getTablesTools);
-
 
   toolSet = {
     ...supersetTools,
