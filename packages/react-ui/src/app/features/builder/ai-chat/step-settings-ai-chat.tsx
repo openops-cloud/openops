@@ -173,6 +173,7 @@ const StepSettingsAiChat = ({
       handleInputChange={handleInputChange}
       handleSubmit={handleSubmit}
       input={input}
+      isEmpty={!messages.length}
     >
       {selectedStep && showAiChat && aiChatProperty && (
         <Conversation

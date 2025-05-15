@@ -131,6 +131,7 @@ const StepSettingsAiChatContainer = ({
                     <br />
                     {t('OpenOps AI Chat!')}
                   </span>
+                  {children}
                 </div>
               ) : (
                 children
