@@ -11,6 +11,7 @@ import {
   PrincipalType,
 } from '@openops/shared';
 import {
+  AssistantContent,
   CoreAssistantMessage,
   CoreMessage,
   CoreToolMessage,
@@ -192,19 +193,25 @@ async function streamMessages(
     tools,
     toolChoice: 'auto',
     maxRetries: 1,
+    async onError({ error }) {
+      const message = error instanceof Error ? error.message : String(error);
+      appendMessageToStream(dataStreamWriter, message);
+      logger.warn(message, error);
+    },
     async onFinish({ response }) {
+      const filteredMessages = filterOldToolMessages(messages);
       response.messages.forEach((r) => {
-        messages.push(getResponseObject(r));
+        filteredMessages.push(getResponseObject(r));
       });
 
-      await saveChatHistory(chatId, messages);
+      await saveChatHistory(chatId, filteredMessages);
 
       const lastMessage = response.messages.at(-1);
       if (lastMessage && lastMessage.role !== 'assistant') {
         if (recursionDepth >= MAX_RECURSION_DEPTH) {
-          logger.warn(
-            `Maximum recursion depth (${MAX_RECURSION_DEPTH}) reached. Terminating recursion.`,
-          );
+          const message = `Maximum recursion depth (${MAX_RECURSION_DEPTH}) reached. Terminating recursion.`;
+          appendMessageToStream(dataStreamWriter, message);
+          logger.warn(message);
           return;
         }
 
@@ -214,7 +221,7 @@ async function streamMessages(
           languageModel,
           systemPrompt,
           aiConfig,
-          messages,
+          filteredMessages,
           chatId,
           tools,
           recursionDepth + 1,
@@ -224,6 +231,51 @@ async function streamMessages(
   });
 
   result.mergeIntoDataStream(dataStreamWriter);
+}
+
+function appendMessageToStream(
+  dataStreamWriter: DataStreamWriter,
+  message: string,
+): void {
+  dataStreamWriter.write(`f:{"messageId":"${generateMessageId()}"}\n`);
+
+  dataStreamWriter.write(`0:"${message}"\n`);
+
+  dataStreamWriter.write(
+    `e:{"finishReason":"stop","usage":{"promptTokens":null,"completionTokens":null},"isContinued":false}\n`,
+  );
+  dataStreamWriter.write(
+    `d:{"finishReason":"stop","usage":{"promptTokens":null,"completionTokens":null}}\n`,
+  );
+}
+
+function generateMessageId(): string {
+  const randomBytes = crypto.getRandomValues(new Uint8Array(18));
+  const base64url = Array.from(randomBytes)
+    .map((b) => b.toString(36).padStart(2, '0'))
+    .join('')
+    .slice(0, 24);
+
+  return `msg-${base64url}`;
+}
+
+function filterOldToolMessages(messages: CoreMessage[]): CoreMessage[] {
+  return messages.filter((m) => {
+    if (m.role === 'tool') {
+      return false;
+    }
+
+    return !(m.role === 'assistant' && isToolCall(m.content));
+  });
+}
+
+function isToolCall(content: AssistantContent): content is ToolCallPart[] {
+  return (
+    Array.isArray(content) &&
+    content.every(
+      (part) => part && typeof part === 'object' && part.type === 'tool-call',
+    )
+  );
 }
 
 function getResponseObject(
