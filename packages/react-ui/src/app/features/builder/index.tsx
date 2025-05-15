@@ -19,7 +19,6 @@ import {
 } from '@/app/features/builder/builder-hooks';
 import { DynamicFormValidationProvider } from '@/app/features/builder/dynamic-form-validation/dynamic-form-validation-context';
 
-import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { useResizablePanelGroup } from '@/app/common/hooks/use-resizable-panel-group';
 import { useSocket } from '@/app/common/providers/socket-provider';
 import { PanelSizes } from '@/app/common/types/panel-sizes';
@@ -211,10 +210,6 @@ const BuilderPage = () => {
     memorizedSelectedStep.type !== TriggerType.EMPTY &&
     !isBlockLoading;
 
-  const { data: showAiAssistantButton } = flagsHooks.useFlag<string>(
-    FlagId.SHOW_AI_SETTINGS,
-  );
-
   return (
     <div className="flex h-screen w-screen flex-col relative">
       {run && (
@@ -276,10 +271,9 @@ const BuilderPage = () => {
                       middlePanelSize={middlePanelSize}
                       className={'left-4 bottom-[70px]'}
                     />
-                    {leftSidebar === LeftSideBarType.NONE &&
-                      showAiAssistantButton && (
-                        <AiAssistantButton className="size-[42px] absolute left-4 bottom-[10px] z-50" />
-                      )}
+                    {leftSidebar === LeftSideBarType.NONE && (
+                      <AiAssistantButton className="size-[42px] absolute left-4 bottom-[10px] z-50" />
+                    )}
                     <CanvasControls
                       topOffset={FLOW_CANVAS_Y_OFFESET}
                       className={cn({

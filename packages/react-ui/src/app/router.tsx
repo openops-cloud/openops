@@ -65,10 +65,6 @@ const createRoutes = () => {
     FlagId.SHOW_DEMO_HOME_PAGE,
   );
 
-  const { data: isAiSettingsEnabled } = flagsHooks.useFlag<any>(
-    FlagId.SHOW_AI_SETTINGS,
-  );
-
   const routes = [
     {
       path: '/flows',
@@ -381,23 +377,21 @@ const createRoutes = () => {
     });
   }
 
-  if (isAiSettingsEnabled) {
-    routes.push({
-      path: '/settings/ai',
-      element: (
-        <DashboardContainer pageHeader={<PageHeader title={t('Settings')} />}>
-          <ProjectSettingsLayout>
-            <OpsErrorBoundary>
-              <PageTitle title="AI providers">
-                <AiSettingsPage />
-              </PageTitle>
-            </OpsErrorBoundary>
-          </ProjectSettingsLayout>
-        </DashboardContainer>
-      ),
-      errorElement: <RouteErrorBoundary />,
-    });
-  }
+  routes.push({
+    path: '/settings/ai',
+    element: (
+      <DashboardContainer pageHeader={<PageHeader title={t('Settings')} />}>
+        <ProjectSettingsLayout>
+          <OpsErrorBoundary>
+            <PageTitle title="AI providers">
+              <AiSettingsPage />
+            </PageTitle>
+          </OpsErrorBoundary>
+        </ProjectSettingsLayout>
+      </DashboardContainer>
+    ),
+    errorElement: <RouteErrorBoundary />,
+  });
 
   return routes;
 };

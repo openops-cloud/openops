@@ -1,4 +1,3 @@
-import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { FLOW_CANVAS_Y_OFFESET } from '@/app/constants/flow-canvas';
 import { AiAssistantButton } from '@/app/features/ai/ai-assistant-button';
 import { AiAssistantChat } from '@/app/features/ai/ai-assistant-chat';
@@ -12,7 +11,6 @@ import {
 import {
   Action,
   ActionType,
-  FlagId,
   flowHelper,
   FlowVersion,
   isNil,
@@ -148,10 +146,6 @@ const InteractiveBuilder = ({
     }
   };
 
-  const { data: showAiAssistantButton } = flagsHooks.useFlag<string>(
-    FlagId.SHOW_AI_SETTINGS,
-  );
-
   return (
     <InteractiveContextProvider
       selectedStep={selectedStep}
@@ -172,7 +166,7 @@ const InteractiveBuilder = ({
             'left-[74px]': !lefSideBarContainerWidth,
           })}
         ></CanvasControls>
-        {!lefSideBarContainerWidth && showAiAssistantButton && (
+        {!lefSideBarContainerWidth && (
           <AiAssistantButton className="size-[42px] absolute left-4 bottom-[10px] z-50" />
         )}
         <div
