@@ -28,7 +28,6 @@ import { AiAssistantButton } from '@/app/features/ai/ai-assistant-button';
 import {
   ActionType,
   BlockTrigger,
-  FlagId,
   flowHelper,
   isNil,
   TriggerType,
