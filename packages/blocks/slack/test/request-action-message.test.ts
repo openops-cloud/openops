@@ -7,6 +7,12 @@ jest.mock('@openops/server-shared', () => {
       ...actual.system,
       getBoolean: getBooleanMock,
     },
+    networkUtls: {
+      ...actual.networkUtls,
+      getPublicUrl: jest
+        .fn()
+        .mockResolvedValue('https://mocked-public-url.com'),
+    },
   };
 });
 
