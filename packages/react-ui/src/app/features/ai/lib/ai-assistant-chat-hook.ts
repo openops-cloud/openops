@@ -50,6 +50,7 @@ export const useAiAssistantChat = () => {
   const onConversationRetrieved = (conversation: OpenChatResponse) => {
     if (conversation.chatId) {
       localStorage.setItem(AI_ASSISTANT_LS_KEY, conversation.chatId);
+      setChatId(conversation.chatId);
     }
   };
 
