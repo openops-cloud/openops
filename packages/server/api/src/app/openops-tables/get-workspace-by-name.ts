@@ -11,7 +11,7 @@ export async function getWorkspaceByName(
   const allWorkspaces = await makeOpenOpsTablesRequest<Workspace[]>(
     'get',
     `api/workspaces/`,
-    'undefined',
+    undefined,
     createAxiosHeaders(token),
   );
   return allWorkspaces?.find((workspace) => workspace.name === name);
