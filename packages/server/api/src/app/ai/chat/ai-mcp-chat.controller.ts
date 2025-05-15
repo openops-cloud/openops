@@ -195,7 +195,7 @@ async function streamMessages(
     maxRetries: 1,
     async onError({ error }) {
       const message = error instanceof Error ? error.message : String(error);
-      appendMessageToStream(dataStreamWriter, message);
+      endStreamWithErrorMessage(dataStreamWriter, message);
       logger.warn(message, error);
     },
     async onFinish({ response }) {
@@ -210,7 +210,7 @@ async function streamMessages(
       if (lastMessage && lastMessage.role !== 'assistant') {
         if (recursionDepth >= MAX_RECURSION_DEPTH) {
           const message = `Maximum recursion depth (${MAX_RECURSION_DEPTH}) reached. Terminating recursion.`;
-          appendMessageToStream(dataStreamWriter, message);
+          endStreamWithErrorMessage(dataStreamWriter, message);
           logger.warn(message);
           return;
         }
@@ -233,7 +233,7 @@ async function streamMessages(
   result.mergeIntoDataStream(dataStreamWriter);
 }
 
-function appendMessageToStream(
+function endStreamWithErrorMessage(
   dataStreamWriter: DataStreamWriter,
   message: string,
 ): void {
