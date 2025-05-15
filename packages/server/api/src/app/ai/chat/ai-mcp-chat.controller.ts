@@ -11,7 +11,6 @@ import {
   PrincipalType,
 } from '@openops/shared';
 import {
-  AssistantContent,
   CoreAssistantMessage,
   CoreMessage,
   CoreToolMessage,
