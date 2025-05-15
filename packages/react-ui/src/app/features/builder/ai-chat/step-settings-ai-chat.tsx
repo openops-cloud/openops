@@ -14,8 +14,8 @@ import { nanoid } from 'nanoid';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useBuilderStateContext } from '../builder-hooks';
 import { DataSelectorSizeState } from '../data-selector/data-selector-size-togglers';
-import { Conversation } from './conversation';
 import { aiChatApi } from './lib/chat-api';
+import { StepSettingsAiConversation } from './step-settings-ai-conversation';
 
 type StepSettingsAiChatProps = {
   middlePanelSize: {
@@ -176,7 +176,7 @@ const StepSettingsAiChat = ({
       isEmpty={!messages.length}
     >
       {selectedStep && showAiChat && aiChatProperty && (
-        <Conversation
+        <StepSettingsAiConversation
           stepName={selectedStep}
           flowVersion={flowVersion}
           property={aiChatProperty}

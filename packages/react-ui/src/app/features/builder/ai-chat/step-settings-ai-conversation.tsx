@@ -29,7 +29,7 @@ const ChatStatus = {
   SUBMITTED: 'submitted',
 };
 
-const Conversation = ({
+const StepSettingsAiConversation = ({
   flowVersion,
   stepName,
   property,
@@ -104,5 +104,5 @@ const Conversation = ({
   );
 };
 
-Conversation.displayName = 'Conversation';
-export { Conversation };
+StepSettingsAiConversation.displayName = 'StepSettingsAiConversation';
+export { StepSettingsAiConversation };

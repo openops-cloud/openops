@@ -7,8 +7,10 @@ import {
   OPENOPS_CONNECT_TEMPLATES_LOGOUT_URL,
   OPENOPS_CONNECT_TEMPLATES_URL,
 } from '@/app/constants/cloud';
+import { AiAssistantButton } from '@/app/features/ai/ai-assistant-button';
 import { authenticationSession } from '@/app/lib/authentication-session';
 import { useAppStore } from '@/app/store/app-store';
+import { FlagId } from '@openops/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -34,6 +36,10 @@ const SideMenuFooter = () => {
   const useCloudTemplates = flagsHooks.useShouldFetchCloudTemplates();
   const branding = flagsHooks.useWebsiteBranding();
   const { createPollingInterval } = useUserInfoPolling();
+
+  const { data: showAiButton } = flagsHooks.useFlag<string>(
+    FlagId.SHOW_AI_SETTINGS,
+  );
 
   const cloudLogout = useCallback(() => {
     const popup = window.open(
@@ -101,7 +107,9 @@ const SideMenuFooter = () => {
         onCloudLogin,
         logoUrl: branding.logos.logoIconPositiveUrl,
       }}
-    />
+    >
+      {showAiButton && <AiAssistantButton />}
+    </MenuFooter>
   );
 };
 

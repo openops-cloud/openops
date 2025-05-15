@@ -24,6 +24,8 @@ const meta = {
     input: '',
     handleInputChange: action('handleInputChange'),
     handleSubmit: action('handleSubmit'),
+    isNewChatButtonEnabled: true,
+    onCreateNewChatClick: action('onNewChatClick'),
   },
   tags: ['autodocs'],
   decorators: [
