@@ -13,7 +13,7 @@ export const getMCPTools = async (): Promise<ToolSet> => {
 
   const supersetTools = await safeGetTools('superset', getSupersetTools);
   const docsTools = await safeGetTools('docs', getDocsTools);
-  const tablesTools = await safeGetTools('docs', getTablesTools);
+  const tablesTools = await safeGetTools('tables', getTablesTools);
 
   toolSet = {
     ...supersetTools,
