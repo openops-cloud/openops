@@ -50,8 +50,8 @@ export const useAiAssistantChat = () => {
   const onConversationRetrieved = (conversation: OpenChatResponse) => {
     if (conversation.chatId) {
       localStorage.setItem(AI_ASSISTANT_LS_KEY, conversation.chatId);
-      setChatId(conversation.chatId);
     }
+    setChatId(conversation?.chatId ?? null);
   };
 
   const messagesToDisplay: MessageType[] = useMemo(() => {
