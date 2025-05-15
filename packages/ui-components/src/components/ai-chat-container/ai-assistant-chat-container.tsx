@@ -63,7 +63,7 @@ const AiAssistantChatContainer = ({
           </div>
           {t('AI Assistant')}
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
           <NewAiChatButton
             enableNewChat={!isEmpty}
             onNewChatClick={onCreateNewChatClick}
@@ -76,9 +76,9 @@ const AiAssistantChatContainer = ({
                 e.stopPropagation();
                 onCloseClick();
               }}
-              className="text-outline opacity-50 hover:opacity-100"
+              className="text-outline"
             >
-              <XIcon />
+              <XIcon size={20} />
             </Button>
           </TooltipWrapper>
         </div>
