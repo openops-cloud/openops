@@ -47,9 +47,9 @@ const AiChatSizeTogglers = ({
             variant="basic"
           >
             {state === AI_CHAT_CONTAINER_SIZES.EXPANDED ? (
-              <MinimizeIcon className="text-black" size={16} />
+              <MinimizeIcon size={16} />
             ) : (
-              <ExpandIcon className="text-black" size={16} />
+              <ExpandIcon size={16} />
             )}
           </Button>
         </>
@@ -64,7 +64,7 @@ const AiChatSizeTogglers = ({
           }}
           className="text-outline"
         >
-          <XIcon className="text-back" size={20} />
+          <XIcon size={20} />
         </Button>
       </TooltipWrapper>
     </>
