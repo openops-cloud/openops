@@ -14,3 +14,4 @@ When invoking the OpenOps Tables (Baserow) MCP, you must fully understand the Ba
   - Names, field types, or constraints match Baserow's schema or configuration exactly.
   - Token-based authentication is used for all API interactions.
 - Format payloads appropriately for each endpoint, adhering to Baserow's API requirements (e.g., the types and structure of fields and rows).
+- Confirm with the user before doing any inserts, updates, or deletes. If prompted to perform those actions, only provide confirmation if the MCP was actually invoked successfully.
