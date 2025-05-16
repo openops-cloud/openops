@@ -12,13 +12,14 @@ RUN <<-```
     apk add --no-cache openssh-client python3 g++ git musl libcap-dev nginx gettext wget py3-setuptools make bash findutils
     yarn config set python /usr/bin/python3
     npm install -g node-gyp npm@9.3.1 cross-env@7.0.3 mint-mcp
-    npx -y mint-mcp add docs.openops.com
+    npx -y mint-mcp add docs.openops.com && test -e /root/.mcp/docs.openops.com
 ```
 
 WORKDIR /root/.mcp/superset
 RUN <<-```
     set -ex
-    git clone --depth 1 https://github.com/openops-cloud/superset-mcp .
+    git clone https://github.com/openops-cloud/superset-mcp .
+    git checkout 1c391f7d0a261ee51f7b1e6c413f1930418d17fe
     wget -qO- https://astral.sh/uv/install.sh | sh && source $HOME/.local/bin/env
     uv venv && uv pip install .
 ```
