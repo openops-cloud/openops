@@ -3,7 +3,7 @@ ARG VARIANT=18-bullseye
 FROM mcr.microsoft.com/vscode/devcontainers/javascript-node:0-${VARIANT}
 
 RUN <<-```
-    npm install -g @angular/cli nx cross-env@7.0.3 mint-mcp
+    npm install -g nx cross-env@7.0.3 mint-mcp
     npx -y mint-mcp add docs.openops.com
     apt-get update && apt-get install -y --no-install-recommends \
       git \
