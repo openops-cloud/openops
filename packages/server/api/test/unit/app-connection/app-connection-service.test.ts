@@ -1,3 +1,6 @@
+process.env.OPS_ENGINE_URL = 'http://mock-engine';
+process.env.ENVIRONMENT = 'testing';
+
 jest.mock('../../../src/app/helper/encryption', () => ({
   encryptUtils: {
     encryptObject: jest.fn((val) => `encrypted-${JSON.stringify(val)}`),
