@@ -209,6 +209,8 @@ const BuilderPage = () => {
     memorizedSelectedStep.type !== TriggerType.EMPTY &&
     !isBlockLoading;
 
+  const isSidebarOpen = rightSidebar === RightSideBarType.BLOCK_SETTINGS;
+
   return (
     <div className="flex h-screen w-screen flex-col relative">
       {run && (
@@ -268,6 +270,7 @@ const BuilderPage = () => {
                     <BuilderHeader />
                     <AiAssistantChat
                       middlePanelSize={middlePanelSize}
+                      isSidebarOpen={isSidebarOpen}
                       className={'left-4 bottom-[70px]'}
                     />
                     {leftSidebar === LeftSideBarType.NONE && (

@@ -3,11 +3,13 @@ import { useAiAssistantChat } from '@/app/features/ai/lib/ai-assistant-chat-hook
 import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
 import { useAppStore } from '@/app/store/app-store';
 import {
+  AI_CHAT_CONTAINER_SIZES,
   AiAssistantChatContainer,
+  AiChatContainerSizeState,
   cn,
   NoAiEnabledPopover,
 } from '@openops/components/ui';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 
 type AiAssistantChatProps = {
   middlePanelSize: {
@@ -15,20 +17,27 @@ type AiAssistantChatProps = {
     height: number;
   };
   className?: string;
+  isSidebarOpen?: boolean;
 };
 
 const PARENT_HEIGHT_GAP = 220;
 const CHAT_MIN_WIDTH = 360;
 const CHAT_MAX_WIDTH = 600;
+const CHAT_EXPANDED_WIDTH_OFFSET_BUILDER = 30;
+const CHAT_EXPANDED_WIDTH_OFFSET = 10;
 
 const AiAssistantChat = ({
   middlePanelSize,
+  isSidebarOpen = false,
   className,
 }: AiAssistantChatProps) => {
-  const { isAiChatOpened, setIsAiChatOpened } = useAppStore((s) => ({
-    isAiChatOpened: s.isAiChatOpened,
-    setIsAiChatOpened: s.setIsAiChatOpened,
-  }));
+  const { isAiChatOpened, setIsAiChatOpened, aiChatSize, setAiChatSize } =
+    useAppStore((s) => ({
+      isAiChatOpened: s.isAiChatOpened,
+      setIsAiChatOpened: s.setIsAiChatOpened,
+      aiChatSize: s.aiChatSize,
+      setAiChatSize: s.setAiChatSize,
+    }));
 
   const {
     messages,
@@ -42,17 +51,39 @@ const AiAssistantChat = ({
 
   const { width, height } = useMemo(() => {
     const calculatedWidth = middlePanelSize.width * 0.6;
+    const offset = isSidebarOpen
+      ? CHAT_EXPANDED_WIDTH_OFFSET_BUILDER
+      : CHAT_EXPANDED_WIDTH_OFFSET;
+    const calculatedExpandedWidth = middlePanelSize.width - offset;
+
     return {
       width: Math.max(
         CHAT_MIN_WIDTH,
-        Math.min(calculatedWidth, CHAT_MAX_WIDTH),
+        aiChatSize === AI_CHAT_CONTAINER_SIZES.EXPANDED
+          ? calculatedExpandedWidth
+          : Math.min(calculatedWidth, CHAT_MAX_WIDTH),
       ),
       height: middlePanelSize.height - PARENT_HEIGHT_GAP,
     };
-  }, [middlePanelSize]);
+  }, [
+    aiChatSize,
+    isSidebarOpen,
+    middlePanelSize.height,
+    middlePanelSize.width,
+  ]);
 
   const { hasActiveAiSettings, isLoading } =
     aiSettingsHooks.useHasActiveAiSettings();
+
+  const onToggleAiChatState = useCallback(() => {
+    let newSize: AiChatContainerSizeState;
+    if (aiChatSize === AI_CHAT_CONTAINER_SIZES.EXPANDED) {
+      newSize = AI_CHAT_CONTAINER_SIZES.DOCKED;
+    } else {
+      newSize = AI_CHAT_CONTAINER_SIZES.EXPANDED;
+    }
+    setAiChatSize(newSize);
+  }, [aiChatSize, setAiChatSize]);
 
   if (isLoading) {
     return null;
@@ -61,7 +92,13 @@ const AiAssistantChat = ({
   if (!hasActiveAiSettings && isAiChatOpened) {
     return (
       <NoAiEnabledPopover
-        className={cn('absolute left-4 bottom-[17px] z-50', className)}
+        className={cn(
+          'absolute left-4 bottom-[17px] z-50',
+          {
+            'top-0': aiChatSize === AI_CHAT_CONTAINER_SIZES.EXPANDED,
+          },
+          className,
+        )}
         onCloseClick={() => setIsAiChatOpened(false)}
       />
     );
@@ -73,12 +110,20 @@ const AiAssistantChat = ({
       width={width}
       showAiChat={isAiChatOpened}
       onCloseClick={() => setIsAiChatOpened(false)}
-      className={cn('left-4 bottom-[17px]', className)}
+      className={cn(
+        'left-4 bottom-[17px]',
+        {
+          'top-4': aiChatSize === AI_CHAT_CONTAINER_SIZES.EXPANDED,
+        },
+        className,
+      )}
       handleInputChange={handleInputChange}
       handleSubmit={handleSubmit}
       input={input}
       isEmpty={!messages?.length}
       onCreateNewChatClick={createNewChat}
+      toggleAiChatState={onToggleAiChatState}
+      aiChatSize={aiChatSize}
     >
       <AiAssistantConversation
         messages={messages}

@@ -22,6 +22,7 @@ import { StepSettingsAiChat } from './ai-chat/step-settings-ai-chat';
 import { textMentionUtils } from './block-properties/text-input-with-mentions/text-input-utils';
 import { BuilderHeader } from './builder-header/builder-header';
 import { useBuilderStateContext } from './builder-hooks';
+import { RightSideBarType } from './builder-types';
 import { DataSelector } from './data-selector';
 import { DataSelectorSizeState } from './data-selector/data-selector-size-togglers';
 import { FlowBuilderCanvas } from './flow-canvas/flow-builder-canvas';
@@ -94,8 +95,9 @@ const InteractiveBuilder = ({
     }
   };
 
-  const [state, dispatch] = useBuilderStateContext((state) => [
+  const [state, rightSidebar, dispatch] = useBuilderStateContext((state) => [
     state.midpanelState,
+    state.rightSidebar,
     state.applyMidpanelAction,
   ]);
 
@@ -146,6 +148,8 @@ const InteractiveBuilder = ({
     }
   };
 
+  const isSidebarOpen = rightSidebar === RightSideBarType.BLOCK_SETTINGS;
+
   return (
     <InteractiveContextProvider
       selectedStep={selectedStep}
@@ -158,6 +162,7 @@ const InteractiveBuilder = ({
         <BuilderHeader />
         <AiAssistantChat
           middlePanelSize={middlePanelSize}
+          isSidebarOpen={isSidebarOpen}
           className={'left-4 bottom-[70px]'}
         />
         <CanvasControls
