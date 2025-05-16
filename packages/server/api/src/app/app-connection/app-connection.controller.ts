@@ -3,7 +3,9 @@ import {
   FastifyPluginCallbackTypebox,
   Type,
 } from '@fastify/type-provider-typebox';
+import { logger } from '@openops/server-shared';
 import {
+  AppConnection,
   AppConnectionWithoutSensitiveData,
   ListAppConnectionsRequestQuery,
   OpenOpsId,
@@ -71,30 +73,36 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
       return appConnectionsWithoutSensitiveData;
     },
   );
-  app.get('/:id', GetAppConnectionRequest, async (request): Promise<any> => {
-    const connection = await appConnectionService.getOneOrThrow({
-      id: request.params.id,
-      projectId: request.principal.projectId,
-    });
+  app.get(
+    '/:id',
+    GetAppConnectionRequest,
+    async (request, reply): Promise<any> => {
+      const connection = await appConnectionService.getOneOrThrow({
+        id: request.params.id,
+        projectId: request.principal.projectId,
+      });
 
-    const block = await blockMetadataService.get({
-      name: connection.blockName,
-      projectId: request.principal.projectId,
-      version: undefined,
-    });
+      const block = await blockMetadataService.get({
+        name: connection.blockName,
+        projectId: request.principal.projectId,
+        version: undefined,
+      });
 
-    if (!block) {
-      throw new Error(`Block metadata not found for ${connection.blockName}`);
-    }
-    const redactedValue = redactSecrets(block.auth, connection.value);
+      if (!block) {
+        logger.error(`Block metadata not found for ${connection.blockName}`);
+        return reply.status(StatusCodes.BAD_REQUEST);
+      }
 
-    return redactedValue
-      ? {
-          ...connection,
-          value: redactedValue,
-        }
-      : removeSensitiveData(connection);
-  });
+      const redactedValue = redactSecrets(block.auth, connection.value);
+
+      return redactedValue
+        ? {
+            ...connection,
+            value: redactedValue,
+          }
+        : removeSensitiveData(connection);
+    },
+  );
   app.delete(
     '/:id',
     DeleteAppConnectionRequest,
