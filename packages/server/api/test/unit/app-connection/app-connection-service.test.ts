@@ -5,11 +5,11 @@ jest.mock('../../../src/app/helper/encryption', () => ({
   },
 }));
 
-const getMock = jest.fn();
+const getOrThrowMock = jest.fn();
 jest.mock('../../../src/app/blocks/block-metadata-service', () => ({
   blockMetadataService: {
     ...jest.requireActual('../../../src/app/blocks/block-metadata-service'),
-    get: getMock,
+    getOrThrow: getOrThrowMock,
   },
 }));
 
@@ -19,18 +19,21 @@ jest.mock('../../../src/app/app-connection/app-connection-utils', () => ({
 
 const updateMock = jest.fn();
 const findOneByOrFailMock = jest.fn();
-
+const findOneByMock = jest.fn();
 jest.mock('../../../src/app/core/db/repo-factory', () => ({
   ...jest.requireActual('../../../src/app/core/db/repo-factory'),
   repoFactory: () => () => ({
     update: updateMock,
     findOneByOrFail: findOneByOrFailMock,
+    findOneBy: findOneByMock,
   }),
 }));
 
 import {
   AppConnectionStatus,
   AppConnectionType,
+  ApplicationError,
+  ErrorCode,
   PatchAppConnectionRequestBody,
 } from '@openops/shared';
 import { appConnectionService } from '../../../src/app/app-connection/app-connection-service/app-connection-service';
@@ -71,7 +74,7 @@ describe('appConnectionService.update', () => {
     jest.clearAllMocks();
 
     findOneByOrFailMock.mockResolvedValue(existingConnection);
-    getMock.mockResolvedValue(blockMetadata);
+    getOrThrowMock.mockResolvedValue(blockMetadata);
     updateMock.mockResolvedValue(undefined);
   });
 
@@ -87,7 +90,7 @@ describe('appConnectionService.update', () => {
       projectId,
     });
 
-    expect(getMock).toHaveBeenCalledWith({
+    expect(getOrThrowMock).toHaveBeenCalledWith({
       name: blockName,
       projectId,
       version: undefined,
@@ -122,11 +125,19 @@ describe('appConnectionService.update', () => {
     });
   });
 
-  test('should throw if block metadata not found', async () => {
-    getMock.mockResolvedValue(null);
+  test('should throw if the connection was not found', async () => {
+    findOneByMock.mockResolvedValue(null);
 
-    await expect(
+    expect(() =>
       appConnectionService.patch({ projectId, request, userId }),
-    ).rejects.toThrow('Block metadata not found for test-block');
+    ).toThrow(
+      new ApplicationError({
+        code: ErrorCode.ENTITY_NOT_FOUND,
+        params: {
+          entityType: 'AppConnection',
+          entityId: request.id,
+        },
+      }),
+    );
   });
 });

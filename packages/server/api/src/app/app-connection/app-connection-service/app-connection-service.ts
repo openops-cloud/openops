@@ -101,21 +101,26 @@ export const appConnectionService = {
   async patch(params: PatchParams): Promise<AppConnection> {
     const { projectId, request } = params;
 
-    const existingConnection = await repo().findOneByOrFail({
+    const existingConnection = await repo().findOneBy({
       id: request.id,
       projectId,
     });
 
-    const block = await blockMetadataService.get({
+    if (isNil(existingConnection)) {
+      throw new ApplicationError({
+        code: ErrorCode.ENTITY_NOT_FOUND,
+        params: {
+          entityType: 'AppConnection',
+          entityId: request.id,
+        },
+      });
+    }
+
+    const block = await blockMetadataService.getOrThrow({
       name: request.blockName,
       projectId,
       version: undefined,
     });
-
-    if (!block) {
-      throw new Error(`Block metadata not found for ${request.blockName}`);
-    }
-
     const decryptedExisting = decryptConnection(existingConnection);
 
     const restoredConnectionValue = restoreRedactedSecrets(
@@ -138,24 +143,27 @@ export const appConnectionService = {
       ...restoredConnectionValue,
     });
 
-    const connection = {
+    await repo().update(existingConnection.id, {
       ...request,
       status: AppConnectionStatus.ACTIVE,
       value: encryptedConnectionValue,
       id: existingConnection?.id,
       projectId,
-    };
-
-    await repo().update(connection.id, connection);
-
-    const updatedConnection = await repo().findOneByOrFail({
-      name: request.name,
-      projectId,
     });
 
     sendConnectionUpdatedEvent(params.userId, projectId, request.blockName);
 
-    return decryptConnection(updatedConnection);
+    return {
+      ...existingConnection,
+      ...request,
+      id: existingConnection.id,
+      projectId,
+      status: AppConnectionStatus.ACTIVE,
+      value: {
+        ...validatedConnectionValue,
+        ...restoredConnectionValue,
+      },
+    };
   },
 
   async getOne({
