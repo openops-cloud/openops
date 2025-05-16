@@ -78,3 +78,60 @@ export function redactSecrets(
     }
   }
 }
+
+export function restoreRedactedSecrets(
+  incomingValue: Record<string, any>,
+  existingValue: Record<string, any>,
+  auth: BlockAuthProperty | undefined,
+): Record<string, any> {
+  const restoredValue = { ...incomingValue };
+
+  switch (auth?.type) {
+    case PropertyType.SECRET_TEXT: {
+      if (incomingValue.secret_text === REDACTED_MESSAGE) {
+        restoredValue.secret_text = existingValue.secret_text;
+      }
+      break;
+    }
+
+    case PropertyType.BASIC_AUTH: {
+      if (incomingValue.password === REDACTED_MESSAGE) {
+        restoredValue.password = existingValue.password;
+      }
+      break;
+    }
+
+    case PropertyType.CUSTOM_AUTH: {
+      if (incomingValue.props && existingValue.props) {
+        const restoredProps: Record<string, unknown> = {
+          ...incomingValue.props,
+        };
+
+        for (const [key, prop] of Object.entries(auth.props)) {
+          const isSecret =
+            (prop as { type: PropertyType }).type === PropertyType.SECRET_TEXT;
+          const isRedacted = restoredProps[key] === REDACTED_MESSAGE;
+
+          if (isSecret && isRedacted) {
+            restoredProps[key] = existingValue.props[key];
+          }
+        }
+
+        restoredValue.props = restoredProps;
+      }
+      break;
+    }
+
+    case PropertyType.OAUTH2: {
+      if (incomingValue.client_secret === REDACTED_MESSAGE) {
+        restoredValue.client_secret = existingValue.client_secret;
+      }
+      break;
+    }
+
+    default:
+      break;
+  }
+
+  return restoredValue;
+}

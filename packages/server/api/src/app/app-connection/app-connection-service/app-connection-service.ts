@@ -20,6 +20,7 @@ import {
   isNil,
   OAuth2GrantType,
   openOpsId,
+  PatchAppConnectionRequestBody,
   ProjectId,
   SeekPage,
   UpsertAppConnectionRequestBody,
@@ -41,7 +42,10 @@ import {
   sendConnectionCreatedEvent,
   sendConnectionUpdatedEvent,
 } from '../../telemetry/event-models';
-import { removeSensitiveData } from '../app-connection-utils';
+import {
+  removeSensitiveData,
+  restoreRedactedSecrets,
+} from '../app-connection-utils';
 import {
   AppConnectionEntity,
   AppConnectionSchema,
@@ -92,6 +96,74 @@ export const appConnectionService = {
     }
 
     return decryptConnection(updatedConnection);
+  },
+
+  async patch(params: PatchParams): Promise<AppConnection> {
+    const { projectId, request } = params;
+
+    const existingConnection = await repo().findOneBy({
+      id: request.id,
+      projectId,
+    });
+
+    if (isNil(existingConnection)) {
+      throw new ApplicationError({
+        code: ErrorCode.ENTITY_NOT_FOUND,
+        params: {
+          entityType: 'AppConnection',
+          entityId: request.id,
+        },
+      });
+    }
+
+    const block = await blockMetadataService.getOrThrow({
+      name: request.blockName,
+      projectId,
+      version: undefined,
+    });
+    const decryptedExisting = decryptConnection(existingConnection);
+
+    const restoredConnectionValue = restoreRedactedSecrets(
+      request.value,
+      decryptedExisting.value,
+      block.auth,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ) as any;
+
+    const validatedConnectionValue = await validateConnectionValue({
+      connection: {
+        ...request,
+        value: restoredConnectionValue,
+      } as UpsertAppConnectionRequestBody,
+      projectId,
+    });
+
+    const encryptedConnectionValue = encryptUtils.encryptObject({
+      ...validatedConnectionValue,
+      ...restoredConnectionValue,
+    });
+
+    await repo().update(existingConnection.id, {
+      ...request,
+      status: AppConnectionStatus.ACTIVE,
+      value: encryptedConnectionValue,
+      id: existingConnection?.id,
+      projectId,
+    });
+
+    sendConnectionUpdatedEvent(params.userId, projectId, request.blockName);
+
+    return {
+      ...existingConnection,
+      ...request,
+      id: existingConnection.id,
+      projectId,
+      status: AppConnectionStatus.ACTIVE,
+      value: {
+        ...validatedConnectionValue,
+        ...restoredConnectionValue,
+      },
+    };
   },
 
   async getOne({
@@ -485,6 +557,12 @@ type UpsertParams = {
   userId: UserId;
   projectId: ProjectId;
   request: UpsertAppConnectionRequestBody;
+};
+
+type PatchParams = {
+  userId: UserId;
+  projectId: ProjectId;
+  request: PatchAppConnectionRequestBody;
 };
 
 type GetOneByName = {
