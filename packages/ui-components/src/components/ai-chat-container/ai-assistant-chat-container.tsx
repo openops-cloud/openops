@@ -7,13 +7,13 @@ import { cn } from '../../lib/cn';
 import { Button } from '../../ui/button';
 import { ScrollArea } from '../../ui/scroll-area';
 import { AiChatSizeTogglers } from './ai-chat-size-togglers';
-import { AiChatContainerSizeState } from './types';
+import { AiAssistantChatSizeState } from './types';
 
 type AiAssistantChatContainerProps = {
   height: number;
   width: number;
   toggleAiChatState: () => void;
-  aiChatSize: AiChatContainerSizeState;
+  aiChatSize: AiAssistantChatSizeState;
   showAiChat: boolean;
   onCloseClick: () => void;
   onCreateNewChatClick: () => void;

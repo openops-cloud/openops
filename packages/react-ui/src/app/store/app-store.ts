@@ -1,6 +1,7 @@
 import {
   AI_CHAT_CONTAINER_SIZES,
-  AiChatContainerSizeState,
+  AiAssistantChatSizeState,
+  AiCliChatContainerSizeState,
 } from '@openops/components/ui';
 import { UserSettingsDefinition } from '@openops/shared';
 import { create } from 'zustand';
@@ -18,8 +19,8 @@ type AppState = {
   setUserSettings: (userSettings: UserSettingsDefinition) => void;
   isAiChatOpened: boolean;
   setIsAiChatOpened: (isAiChatOpened: boolean) => void;
-  aiChatSize: AiChatContainerSizeState;
-  setAiChatSize: (size: AiChatContainerSizeState) => void;
+  aiChatSize: AiAssistantChatSizeState;
+  setAiChatSize: (size: AiAssistantChatSizeState) => void;
 };
 
 const getInitialSidebarState = (): boolean => {
@@ -42,5 +43,6 @@ export const useAppStore = create<AppState>((set) => ({
   isAiChatOpened: false,
   setIsAiChatOpened: (isAiChatOpened: boolean) => set({ isAiChatOpened }),
   aiChatSize: AI_CHAT_CONTAINER_SIZES.DOCKED,
-  setAiChatSize: (size: AiChatContainerSizeState) => set({ aiChatSize: size }),
+  setAiChatSize: (size: AiCliChatContainerSizeState) =>
+    set({ aiChatSize: size }),
 }));

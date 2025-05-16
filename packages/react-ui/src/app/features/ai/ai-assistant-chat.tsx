@@ -5,7 +5,7 @@ import { useAppStore } from '@/app/store/app-store';
 import {
   AI_CHAT_CONTAINER_SIZES,
   AiAssistantChatContainer,
-  AiChatContainerSizeState,
+  AiCliChatContainerSizeState,
   cn,
   NoAiEnabledPopover,
 } from '@openops/components/ui';
@@ -76,7 +76,7 @@ const AiAssistantChat = ({
     aiSettingsHooks.useHasActiveAiSettings();
 
   const onToggleAiChatState = useCallback(() => {
-    let newSize: AiChatContainerSizeState;
+    let newSize: AiCliChatContainerSizeState;
     if (aiChatSize === AI_CHAT_CONTAINER_SIZES.EXPANDED) {
       newSize = AI_CHAT_CONTAINER_SIZES.DOCKED;
     } else {
