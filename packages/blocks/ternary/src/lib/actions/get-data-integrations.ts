@@ -3,10 +3,10 @@ import { createAction } from '@openops/blocks-framework';
 import { sendTernaryRequest } from '../common';
 import { ternaryCloudAuth } from '../common/auth';
 
-export const getBudgets = createAction({
-  name: 'get_budgets',
-  displayName: 'Get budgets',
-  description: 'Fetch budgets from Ternary.',
+export const getDataIntegrations = createAction({
+  name: 'get_data_integrations',
+  displayName: 'Get data integrations',
+  description: 'Fetch data integrations from Ternary.',
   auth: ternaryCloudAuth,
   props: {},
   run: async ({ auth }) => {
@@ -14,15 +14,14 @@ export const getBudgets = createAction({
       const response = await sendTernaryRequest({
         auth: auth,
         method: HttpMethod.GET,
-        url: 'budgets',
+        url: 'data-integrations',
         queryParams: {
           tenantID: auth.tenantId,
         },
       });
-      console.log(response);
-      return response.body as any[];
+      return response.body as object;
     } catch (e) {
-      console.error('Error getting budgets!');
+      console.error('Error getting data integrations!');
       console.error(e);
       return e;
     }

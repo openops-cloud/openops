@@ -1,0 +1,87 @@
+{
+  "providers": [
+    {
+      "label": "AWS",
+      "value": "AWS",
+      "categories": [
+        {
+          "label": "Amazon Elastic Compute Cloud (EC2)",
+          "value": "COMPUTE",
+          "serviceType": "EC2"
+        },
+        {
+          "label": "Amazon Elastic Block Store (EBS)",
+          "value": "COMPUTE",
+          "serviceType": "EBS"
+        },
+        {
+          "label": "Amazon Relational Database Service (RDS)",
+          "value": "DATABASE",
+          "serviceType": "RDS"
+        },
+        {
+          "label": "Amazon Simple Storage Service (S3)",
+          "value": "STORAGE",
+          "serviceType": "S3"
+        }
+      ]
+    },
+    {
+      "label": "Azure",
+      "value": "AZURE",
+      "categories": [
+        {
+          "label": "Azure Virutal Machines (VMs)",
+          "value": "COMPUTE",
+          "serviceType": "AZURE_VM"
+        },
+        {
+          "label": "Azure SQL",
+          "value": "DATABASE",
+          "serviceType": "AZURE_SQL"
+        },
+        {
+          "label": "Azure Kubernetes Service (AKS)",
+          "value": "KUBERNETES",
+          "serviceType": "AKS"
+        },
+        {
+          "label": "Azure Blob Storage",
+          "value": "STORAGE",
+          "serviceType": "AZURE_BLOB"
+        }
+      ]
+    },
+    {
+      "label": "GCP",
+      "value": "GCP",
+      "categories": [
+        {
+          "label": "Google Compute Engine",
+          "value": "COMPUTE",
+          "serviceType": "GCE"
+        },
+        {
+          "label": "Google Cloud Run",
+          "value": "COMPUTE",
+          "serviceType": "CLOUD_RUN"
+        },
+        {
+          "label": "Google Cloud SQL",
+          "value": "DATABASE",
+          "serviceType": "CLOUDSQL"
+        },
+        {
+          "label": "Google Kubernetes Engine (GKE)",
+          "value": "KUBERNETES",
+          "serviceType": "GKE"
+        },
+        {
+          "label": "Google Cloud Storage",
+          "value": "STORAGE",
+          "serviceType": "GCS"
+        }
+      ]
+    }
+  ]
+}
