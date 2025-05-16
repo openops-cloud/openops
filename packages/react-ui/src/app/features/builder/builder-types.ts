@@ -1,5 +1,5 @@
 import { BlockProperty } from '@openops/blocks-framework';
-import { AiChatContainerSizeState } from '@openops/components/ui';
+import { AiCliChatContainerSizeState } from '@openops/components/ui';
 import {
   Flow,
   FlowOperationRequest,
@@ -28,7 +28,7 @@ export type MidpanelState = {
   showDataSelector: boolean;
   dataSelectorSize: DataSelectorSizeState;
   showAiChat: boolean;
-  aiContainerSize: AiChatContainerSizeState;
+  aiContainerSize: AiCliChatContainerSizeState;
   aiChatProperty?: BlockProperty & {
     inputName: `settings.input.${string}`;
   };

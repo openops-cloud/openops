@@ -1,17 +1,19 @@
 import { UseChatHelpers } from '@ai-sdk/react';
 import { t } from 'i18next';
-import { Bot, Send as SendIcon, X as XIcon } from 'lucide-react';
+import { Bot, Send as SendIcon } from 'lucide-react';
 import { ReactNode, useRef } from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
-import { TooltipWrapper } from '../../components/tooltip-wrapper';
 import { cn } from '../../lib/cn';
 import { Button } from '../../ui/button';
 import { ScrollArea } from '../../ui/scroll-area';
-import { NewAiChatButton } from '../new-ai-chat-button';
+import { AiChatSizeTogglers } from './ai-chat-size-togglers';
+import { AiAssistantChatSizeState } from './types';
 
 type AiAssistantChatContainerProps = {
   height: number;
   width: number;
+  toggleAiChatState: () => void;
+  aiChatSize: AiAssistantChatSizeState;
   showAiChat: boolean;
   onCloseClick: () => void;
   onCreateNewChatClick: () => void;
@@ -23,6 +25,8 @@ type AiAssistantChatContainerProps = {
 const AiAssistantChatContainer = ({
   height,
   width,
+  toggleAiChatState,
+  aiChatSize,
   showAiChat,
   onCloseClick,
   onCreateNewChatClick,
@@ -64,23 +68,13 @@ const AiAssistantChatContainer = ({
           {t('AI Assistant')}
         </div>
         <div className="flex items-center gap-2">
-          <NewAiChatButton
+          <AiChatSizeTogglers
+            state={aiChatSize}
+            toggleContainerSizeState={toggleAiChatState}
+            onCloseClick={onCloseClick}
             enableNewChat={!isEmpty}
             onNewChatClick={onCreateNewChatClick}
           />
-          <TooltipWrapper tooltipText={t('Close')}>
-            <Button
-              size="icon"
-              variant="basic"
-              onClick={(e) => {
-                e.stopPropagation();
-                onCloseClick();
-              }}
-              className="text-outline"
-            >
-              <XIcon size={20} />
-            </Button>
-          </TooltipWrapper>
         </div>
       </div>
 

@@ -1,5 +1,6 @@
 import { action } from '@storybook/addon-actions';
 import type { Meta, StoryObj } from '@storybook/react';
+import { fn } from '@storybook/test';
 import {
   AiAssistantChatContainer,
   AIChatMessages,
@@ -24,7 +25,8 @@ const meta = {
     input: '',
     handleInputChange: action('handleInputChange'),
     handleSubmit: action('handleSubmit'),
-    isNewChatButtonEnabled: true,
+    aiChatSize: 'docked',
+    toggleAiChatState: fn(),
     onCreateNewChatClick: action('onNewChatClick'),
   },
   tags: ['autodocs'],

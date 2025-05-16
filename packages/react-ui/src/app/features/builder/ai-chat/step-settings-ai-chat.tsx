@@ -2,7 +2,7 @@ import { authenticationSession } from '@/app/lib/authentication-session';
 import { Message, useChat } from '@ai-sdk/react';
 import {
   AI_CHAT_CONTAINER_SIZES,
-  AiChatContainerSizeState,
+  AiCliChatContainerSizeState,
   cn,
   StepSettingsAiChatContainer,
   toast,
@@ -78,7 +78,7 @@ const StepSettingsAiChat = ({
   }, [selectedStep]);
 
   const onToggleContainerSizeState = useCallback(
-    (size: AiChatContainerSizeState) => {
+    (size: AiCliChatContainerSizeState) => {
       switch (size) {
         case AI_CHAT_CONTAINER_SIZES.DOCKED:
           dispatch({ type: 'AICHAT_DOCK_CLICK' });
@@ -139,7 +139,7 @@ const StepSettingsAiChat = ({
         [
           AI_CHAT_CONTAINER_SIZES.DOCKED,
           AI_CHAT_CONTAINER_SIZES.EXPANDED,
-        ] as AiChatContainerSizeState[]
+        ] as AiCliChatContainerSizeState[]
       ).includes(aiContainerSize)
     ) {
       return;

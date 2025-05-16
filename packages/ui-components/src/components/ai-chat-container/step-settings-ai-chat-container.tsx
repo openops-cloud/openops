@@ -7,7 +7,7 @@ import { cn } from '../../lib/cn';
 import { Button } from '../../ui/button';
 import { ScrollArea } from '../../ui/scroll-area';
 import { AiChatSizeTogglers } from './ai-chat-size-togglers';
-import { AI_CHAT_CONTAINER_SIZES, AiChatContainerSizeState } from './types';
+import { AI_CHAT_CONTAINER_SIZES, AiCliChatContainerSizeState } from './types';
 
 type StepSettingsAiChatContainerProps = {
   parentHeight: number;
@@ -16,11 +16,11 @@ type StepSettingsAiChatContainerProps = {
   onCloseClick: () => void;
   onNewChatClick: () => void;
   onToggle: () => void;
-  containerSize: AiChatContainerSizeState;
+  containerSize: AiCliChatContainerSizeState;
   enableNewChat: boolean;
   isEmpty: boolean;
 
-  toggleContainerSizeState: (state: AiChatContainerSizeState) => void;
+  toggleContainerSizeState: (state: AiCliChatContainerSizeState) => void;
   className?: string;
   children?: ReactNode;
 } & Pick<UseChatHelpers, 'input' | 'handleInputChange' | 'handleSubmit'>;
