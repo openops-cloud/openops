@@ -1,3 +1,14 @@
+jest.mock('@openops/server-shared', () => {
+  const actual = jest.requireActual('@openops/server-shared');
+  return {
+    ...actual,
+    system: {
+      ...actual.system,
+      getOrThrow: jest.fn().mockReturnValue('test-data'),
+    },
+  };
+});
+
 jest.mock('../../../src/app/helper/encryption', () => ({
   encryptUtils: {
     encryptObject: jest.fn((val) => `encrypted-${JSON.stringify(val)}`),
