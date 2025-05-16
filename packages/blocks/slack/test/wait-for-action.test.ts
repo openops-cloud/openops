@@ -109,7 +109,7 @@ describe('waitForAction', () => {
     );
   });
 
-  test('should update message when resume is triggered with a selected user action', async () => {
+  test('should update message when resume is triggered with a selected user action and username exists', async () => {
     slackUpdateMessageMock.mockResolvedValue('some updated message');
 
     const context = createContext({
@@ -149,11 +149,60 @@ describe('waitForAction', () => {
     const lastBlock = blocksArray[blocksArray.length - 1];
 
     expect(lastBlock.text.text).toBe(
-      `*:white_check_mark: Action received, user @some_user clicked on 'some action'*`,
+      `*:white_check_mark: Action received: user @some_user clicked on 'some action'*`,
     );
     expect(context.store.get).not.toHaveBeenCalled();
     expect(context.store.put).not.toHaveBeenCalled();
   });
+
+  test.each([null, undefined, ''])(
+    'should update message when resume is triggered with a selected user action and no username',
+    async (username) => {
+      slackUpdateMessageMock.mockResolvedValue('some updated message');
+
+      const context = createContext({
+        executionType: ExecutionType.RESUME,
+        currentExecutionPath: 'some step',
+        actions: ['some action'],
+        resumePayload: {
+          queryParams: {
+            userName: username,
+            actionClicked: 'some action',
+            path: 'step_1',
+          },
+        },
+      });
+
+      const result = (await waitForAction.run(context)) as any;
+
+      expect(result).toStrictEqual({
+        action: 'some action',
+        user: username,
+        isExpired: false,
+        message: 'some updated message',
+      });
+
+      expect(slackUpdateMessageMock).toHaveBeenCalledTimes(1);
+      expect(slackUpdateMessageMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          blocks: expect.arrayContaining([expect.anything()]),
+        }),
+      );
+
+      const lastCallArgs =
+        slackUpdateMessageMock.mock.calls[
+          slackUpdateMessageMock.mock.calls.length - 1
+        ][0];
+      const blocksArray = lastCallArgs.blocks;
+      const lastBlock = blocksArray[blocksArray.length - 1];
+
+      expect(lastBlock.text.text).toBe(
+        `*:white_check_mark: Action received: clicked on 'some action'*`,
+      );
+      expect(context.store.get).not.toHaveBeenCalled();
+      expect(context.store.put).not.toHaveBeenCalled();
+    },
+  );
 
   test('should pause flow again if resume is triggered for another step', async () => {
     const context = createContext({

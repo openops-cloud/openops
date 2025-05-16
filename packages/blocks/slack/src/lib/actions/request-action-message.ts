@@ -1,4 +1,5 @@
 import { createAction, StoreScope } from '@openops/blocks-framework';
+import { networkUtls, SharedSystemProp, system } from '@openops/server-shared';
 import {
   assertNotNullOrUndefined,
   ExecutionType,
@@ -66,10 +67,7 @@ export const requestActionMessageAction = createAction({
       );
     }
 
-    const actions = context.propsValue.actions as {
-      buttonText: string;
-      buttonStyle: string;
-    }[];
+    const actions = context.propsValue.actions as SlackActionDefinition[];
     const actionLabels = actions.map((action) => {
       return action.buttonText;
     });
@@ -106,6 +104,27 @@ const sendMessageAskingForAction = async (
     conversationId,
   );
 
+  const disableSlackInteractions =
+    system.getBoolean(SharedSystemProp.DISABLE_SLACK_INTERACTIONS) || false;
+
+  if (disableSlackInteractions) {
+    const baseUrl = await networkUtls.getPublicUrl();
+
+    actions.forEach((action: SlackActionDefinition) => {
+      action.url = context.run.isTest
+        ? 'https://static.openops.com/test_slack_interactions.txt'
+        : context.generateResumeUrl(
+            {
+              queryParams: {
+                executionCorrelationId: context.run.pauseId,
+                actionClicked: action.buttonText,
+              },
+            },
+            baseUrl,
+          );
+    });
+  }
+
   const blocks = createMessageBlocks(headerText, text, actions);
 
   return await slackSendMessage({
@@ -115,6 +134,7 @@ const sendMessageAskingForAction = async (
     conversationId: userOrChannelId,
     blocks: blocks,
     eventPayload: {
+      interactionsDisabled: disableSlackInteractions,
       domain: context.server.publicUrl,
       isTest: context.run.isTest,
       resumeUrl: context.generateResumeUrl({
@@ -131,6 +151,7 @@ interface SlackElement {
   text: SlackText;
   style?: string;
   confirm?: ConfirmationPrompt;
+  url?: string;
 }
 
 interface SlackText {
@@ -145,17 +166,21 @@ interface ConfirmationPrompt {
   confirm: SlackText;
 }
 
-function createButton(action: {
+interface SlackActionDefinition {
   buttonText: string;
   buttonStyle: string;
   confirmationPrompt: boolean;
   confirmationPromptText: string;
-}): SlackElement {
+  url?: string;
+}
+
+function createButton(action: SlackActionDefinition): SlackElement {
   const {
     buttonText,
     buttonStyle,
     confirmationPrompt,
     confirmationPromptText,
+    url,
   } = action;
 
   const button: SlackElement = {
@@ -164,6 +189,7 @@ function createButton(action: {
       type: 'plain_text',
       text: buttonText,
     },
+    url,
   };
 
   if (buttonStyle === 'danger' || buttonStyle === 'primary') {

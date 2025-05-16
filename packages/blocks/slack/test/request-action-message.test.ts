@@ -1,3 +1,21 @@
+const getBooleanMock = jest.fn();
+jest.mock('@openops/server-shared', () => {
+  const actual = jest.requireActual('@openops/server-shared');
+  return {
+    ...actual,
+    system: {
+      ...actual.system,
+      getBoolean: getBooleanMock,
+    },
+    networkUtls: {
+      ...actual.networkUtls,
+      getPublicUrl: jest
+        .fn()
+        .mockResolvedValue('https://mocked-public-url.com'),
+    },
+  };
+});
+
 const slackSendMessageMock = jest.fn();
 
 jest.mock('../src/lib/common/utils', () => ({
@@ -164,7 +182,7 @@ describe('requestActionMessageAction', () => {
 
   describe('BEGIN execution', () => {
     test('should send a message and return placeholder response values', async () => {
-      waitForInteractionMock.mockResolvedValue({
+      waitForInteractionMock.mockResolvedValueOnce({
         user: 'a user',
         action: 'an action',
         isExpired: undefined,
@@ -195,6 +213,7 @@ describe('requestActionMessageAction', () => {
         eventPayload: {
           domain: mockContextWithHeader.server.publicUrl,
           resumeUrl: undefined,
+          interactionsDisabled: false,
         },
       });
 
@@ -220,6 +239,63 @@ describe('requestActionMessageAction', () => {
         'some message',
         StoreScope.FLOW_RUN,
       );
+    });
+
+    test('should assign resumeUrl to actions when slack interactions are disabled', async () => {
+      getBooleanMock.mockReturnValueOnce(true);
+      waitForInteractionMock.mockImplementation(async (messageObj: any) =>
+        Promise.resolve({ ...messageObj }),
+      );
+      slackSendMessageMock.mockImplementation(async (message: any) =>
+        Promise.resolve(message),
+      );
+
+      const mockContext = buildMockContext('Header Text', true);
+      mockContext.run.isTest = false;
+      mockContext.generateResumeUrl.mockImplementation(
+        ({ queryParams }: any) => {
+          const query = new URLSearchParams(queryParams).toString();
+          return `https://example.com/resume?${query}`;
+        },
+      );
+
+      const result = (await requestActionMessageAction.run(mockContext)) as any;
+
+      const actionBlock = result.blocks.find((b: any) => b.type === 'actions');
+      expect(actionBlock).toBeDefined();
+      const action = actionBlock.elements[0];
+
+      expect(action.url).toBeDefined();
+      expect(action.url).toContain('https://example.com/resume?');
+      expect(action.url).toContain('actionClicked=Approve');
+
+      expect(result.eventPayload.resumeUrl).toContain(
+        'executionCorrelationId=',
+      );
+      expect(result.eventPayload.interactionsDisabled).toBe(true);
+    });
+
+    test('should assign static test url to actions in test mode', async () => {
+      getBooleanMock.mockReturnValueOnce(true);
+      waitForInteractionMock.mockImplementation(async (messageObj: any) =>
+        Promise.resolve({ ...messageObj }),
+      );
+      slackSendMessageMock.mockImplementation(async (message: any) =>
+        Promise.resolve(message),
+      );
+      const mockContext = buildMockContext('Header Text', true);
+      mockContext.run.isTest = true;
+
+      const result = (await requestActionMessageAction.run(mockContext)) as any;
+
+      const actionBlock = result.blocks.find((b: any) => b.type === 'actions');
+      expect(actionBlock).toBeDefined();
+      const action = actionBlock.elements[0];
+
+      expect(action.url).toBe(
+        'https://static.openops.com/test_slack_interactions.txt',
+      );
+      expect(result.eventPayload.interactionsDisabled).toBe(true);
     });
   });
 

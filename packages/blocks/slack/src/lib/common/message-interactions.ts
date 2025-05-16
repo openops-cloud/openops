@@ -1,3 +1,5 @@
+import { isEmpty } from '@openops/shared';
+
 export interface InteractionPayload {
   userName: string;
   actionClicked: string;
@@ -26,13 +28,17 @@ export function removeActionBlocks(blocks: any): any[] {
 }
 
 export function buildActionBlock(user: string, button: string) {
+  const whoClickedText = !isEmpty(user)
+    ? `user @${user} clicked on '${button}'`
+    : `clicked on '${button}'`;
+
   const modifiedBlocks = [
     { type: 'divider' },
     {
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: `*:white_check_mark: Action received, user @${user} clicked on '${button}'*`,
+        text: `*:white_check_mark: Action received: ${whoClickedText}*`,
       },
     },
   ];
