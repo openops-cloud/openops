@@ -1,6 +1,6 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { getAiProviderLanguageModel } from '@openops/common';
-import { logger } from '@openops/server-shared';
+import { AppSystemProp, logger, system } from '@openops/server-shared';
 import {
   AiConfig,
   DeleteChatHistoryRequest,
@@ -11,16 +11,12 @@ import {
   PrincipalType,
 } from '@openops/shared';
 import {
-  CoreAssistantMessage,
   CoreMessage,
-  CoreToolMessage,
   DataStreamWriter,
+  generateText,
   LanguageModel,
   pipeDataStreamToResponse,
   streamText,
-  TextPart,
-  ToolCallPart,
-  ToolResultPart,
   ToolSet,
 } from 'ai';
 import { StatusCodes } from 'http-status-codes';
@@ -28,16 +24,23 @@ import { encryptUtils } from '../../helper/encryption';
 import { aiConfigService } from '../config/ai-config.service';
 import { getMCPTools } from '../mcp/mcp-tools';
 import {
+  appendMessagesToChatHistory,
+  appendMessagesToSummarizedChatHistory,
   createChatContext,
   deleteChatHistory,
+  deleteSummarizedChatHistory,
   generateChatIdForMCP,
   getChatContext,
   getChatHistory,
-  saveChatHistory,
+  getSummarizedChatHistory,
 } from './ai-chat.service';
 import { getMcpSystemPrompt } from './prompts.service';
 
-const MAX_RECURSION_DEPTH = 10;
+let historyMaxTokens: number;
+let historyMaxMessages: number;
+const maxRecursionDepth = system.getNumberOrThrow(
+  AppSystemProp.MAX_LLM_CALLS_WITHOUT_INTERACTION,
+);
 
 export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
   app.post(
@@ -97,11 +100,13 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       providerSettings: aiConfig.providerSettings,
     });
 
-    const messages = await getChatHistory(chatId);
-    messages.push({
+    const newMessage: CoreMessage = {
       role: 'user',
       content: request.body.message,
-    });
+    };
+
+    await appendMessagesToChatHistory(chatId, [newMessage]);
+    await appendMessagesToSummarizedChatHistory(chatId, [newMessage]);
 
     const tools = await getMCPTools();
     const isAnalyticsLoaded = Object.keys(tools).includes('superset');
@@ -121,7 +126,6 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
           languageModel,
           systemPrompt,
           aiConfig,
-          messages,
           chatId,
           tools,
         );
@@ -137,6 +141,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
 
     try {
       await deleteChatHistory(chatId);
+      await deleteSummarizedChatHistory(chatId);
       return await reply.code(StatusCodes.OK).send();
     } catch (error) {
       logger.error('Failed to delete chat history with error: ', error);
@@ -186,36 +191,42 @@ async function streamMessages(
   languageModel: LanguageModel,
   systemPrompt: string,
   aiConfig: AiConfig,
-  messages: CoreMessage[],
   chatId: string,
   tools: ToolSet,
   recursionDepth = 0,
 ): Promise<void> {
+  const chatHistory = await getSummarizedChatHistory(chatId);
   const result = streamText({
     model: languageModel,
     system: systemPrompt,
-    messages,
+    messages: chatHistory,
     ...aiConfig.modelSettings,
     tools,
     toolChoice: 'auto',
-    maxRetries: 1,
+    maxRetries: 0,
     async onError({ error }) {
       const message = error instanceof Error ? error.message : String(error);
       endStreamWithErrorMessage(dataStreamWriter, message);
       logger.warn(message, error);
     },
-    async onFinish({ response }) {
-      const filteredMessages = removeToolMessages(messages);
-      response.messages.forEach((r) => {
-        filteredMessages.push(getResponseObject(r));
-      });
-
-      await saveChatHistory(chatId, filteredMessages);
+    async onFinish({ response, usage }) {
+      await appendMessagesToChatHistory(chatId, response.messages);
+      await appendMessagesToSummarizedChatHistory(
+        chatId,
+        response.messages,
+        (existingMessages) =>
+          summarizeMessages(
+            languageModel,
+            aiConfig,
+            existingMessages,
+            usage.totalTokens,
+          ),
+      );
 
       const lastMessage = response.messages.at(-1);
       if (lastMessage && lastMessage.role !== 'assistant') {
-        if (recursionDepth >= MAX_RECURSION_DEPTH) {
-          const message = `Maximum recursion depth (${MAX_RECURSION_DEPTH}) reached. Terminating recursion.`;
+        if (recursionDepth >= maxRecursionDepth) {
+          const message = `Maximum recursion depth (${maxRecursionDepth}) reached. Terminating recursion.`;
           endStreamWithErrorMessage(dataStreamWriter, message);
           logger.warn(message);
           return;
@@ -227,7 +238,6 @@ async function streamMessages(
           languageModel,
           systemPrompt,
           aiConfig,
-          filteredMessages,
           chatId,
           tools,
           recursionDepth + 1,
@@ -265,62 +275,88 @@ function generateMessageId(): string {
   return `msg-${base64url}`;
 }
 
-function removeToolMessages(messages: CoreMessage[]): CoreMessage[] {
-  return messages.filter((m) => {
-    if (m.role === 'tool') {
-      return false;
+async function summarizeMessages(
+  languageModel: LanguageModel,
+  aiConfig: AiConfig,
+  messages: CoreMessage[],
+  totalTokens: number,
+): Promise<CoreMessage[]> {
+  const maxTokens = getHistoryMaxTokens(aiConfig);
+  let debugMessage = `Token count ${totalTokens}, which exceeds the configured limit of ${maxTokens}. Summarizing messages.`;
+  if (isNaN(totalTokens)) {
+    const maxMessages = getHistoryMaxMessages();
+    debugMessage = `Message count is ${messages.length}, which exceeds the configured limit of ${maxMessages}. Summarizing messages.`;
+    logger.debug(
+      `The model is not providing token usage. Checking if the number of messages exceeds ${maxMessages}.`,
+    );
+    if (messages.length < maxMessages) {
+      return messages;
     }
+  } else if (totalTokens < maxTokens) {
+    return messages;
+  }
 
-    if (m.role === 'assistant' && Array.isArray(m.content)) {
-      const newContent = m.content.filter((part) => part.type !== 'tool-call');
+  logger.info(debugMessage);
 
-      if (newContent.length === 0) {
-        return false;
-      }
+  const { text } = await getSummaryMessage(
+    languageModel,
+    aiConfig,
+    messages,
+    maxTokens,
+  );
 
-      m.content = newContent;
-    }
+  return [
+    {
+      role: 'system',
+      content: `The following is a summary of the previous conversation: ${text}`,
+    },
+  ];
+}
 
-    return true;
+async function getSummaryMessage(
+  languageModel: LanguageModel,
+  aiConfig: AiConfig,
+  messages: CoreMessage[],
+  maxTokens: number,
+): Promise<{ text: string }> {
+  const systemPrompt =
+    'You are a helpful assistant tasked with summarizing conversations. Create concise summaries that preserve key context.';
+
+  return generateText({
+    model: languageModel,
+    system: systemPrompt,
+    messages,
+    ...aiConfig.modelSettings,
+    maxTokens,
   });
 }
 
-function getResponseObject(
-  message: CoreAssistantMessage | CoreToolMessage,
-): CoreToolMessage | CoreAssistantMessage {
-  const { role, content } = message;
-
-  if (role === 'tool') {
-    return {
-      role: message.role,
-      content: message.content as ToolResultPart[],
-    };
+function getHistoryMaxTokens(aiConfig: AiConfig): number {
+  if (historyMaxTokens) {
+    return historyMaxTokens;
   }
 
-  if (Array.isArray(content)) {
-    let hasToolCall = false;
-
-    for (const part of content) {
-      if (part.type === 'tool-call') {
-        hasToolCall = true;
-      } else if (part.type !== 'text') {
-        return {
-          role: 'assistant',
-          content: `Invalid message type received. Type: ${part.type}`,
-        };
-      }
-    }
-
-    return {
-      role,
-      content: hasToolCall
-        ? (content as ToolCallPart[])
-        : (content as TextPart[]),
-    };
+  const modelMax = aiConfig.modelSettings?.maxTokens;
+  if (typeof modelMax === 'number') {
+    historyMaxTokens = modelMax / 2;
+  } else {
+    const defaultMax = system.getNumberOrThrow(
+      AppSystemProp.MAX_TOKENS_IN_LLM_HISTORY,
+    );
+    historyMaxTokens = defaultMax / 2;
   }
 
-  return {
-    role: 'assistant',
-    content,
-  };
+  return historyMaxTokens;
+}
+
+function getHistoryMaxMessages(): number {
+  if (historyMaxMessages) {
+    return historyMaxMessages;
+  }
+
+  historyMaxMessages = system.getNumberOrThrow(
+    AppSystemProp.MAX_MESSAGES_IN_LLM_HISTORY,
+  );
+
+  return historyMaxMessages;
 }

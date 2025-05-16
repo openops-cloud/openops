@@ -1,4 +1,8 @@
-import { cacheWrapper, hashUtils } from '@openops/server-shared';
+import {
+  cacheWrapper,
+  distributedLock,
+  hashUtils,
+} from '@openops/server-shared';
 import { CoreMessage } from 'ai';
 
 // Chat expiration time is 24 hour
@@ -10,6 +14,10 @@ const chatContextKey = (chatId: string): string => {
 
 const chatHistoryKey = (chatId: string): string => {
   return `${chatId}:history`;
+};
+
+export const summarizedChatHistoryKey = (chatId: string): string => {
+  return `${chatId}:llm:history`;
 };
 
 export type MCPChatContext = {
@@ -87,6 +95,76 @@ export const saveChatHistory = async (
   );
 };
 
+export const appendMessagesToChatHistory = async (
+  chatId: string,
+  messages: CoreMessage[],
+): Promise<void> => {
+  const chatLock = await distributedLock.acquireLock({
+    key: `lock:${chatHistoryKey(chatId)}`,
+    timeout: 10000,
+  });
+
+  try {
+    const existingMessages = await getChatHistory(chatId);
+
+    existingMessages.push(...messages);
+
+    await saveChatHistory(chatId, existingMessages);
+  } finally {
+    await chatLock.release();
+  }
+};
+
 export const deleteChatHistory = async (chatId: string): Promise<void> => {
   await cacheWrapper.deleteKey(chatHistoryKey(chatId));
+};
+
+export const getSummarizedChatHistory = async (
+  chatId: string,
+): Promise<CoreMessage[]> => {
+  const messages = await cacheWrapper.getSerializedObject<CoreMessage[]>(
+    summarizedChatHistoryKey(chatId),
+  );
+
+  return messages ?? [];
+};
+
+export async function appendMessagesToSummarizedChatHistory(
+  chatId: string,
+  newMessages: CoreMessage[],
+  summarizeMessages?: (
+    existingMessages: CoreMessage[],
+  ) => Promise<CoreMessage[]>,
+): Promise<CoreMessage[]> {
+  const historyLock = await distributedLock.acquireLock({
+    key: `lock:${summarizedChatHistoryKey(chatId)}`,
+    timeout: 10000,
+  });
+
+  const messages: CoreMessage[] = [];
+  try {
+    let existingMessages = await getSummarizedChatHistory(chatId);
+
+    if (summarizeMessages) {
+      existingMessages = await summarizeMessages(existingMessages);
+    }
+
+    existingMessages.push(...newMessages);
+
+    await cacheWrapper.setSerializedObject(
+      summarizedChatHistoryKey(chatId),
+      existingMessages,
+      DEFAULT_EXPIRE_TIME,
+    );
+  } finally {
+    await historyLock.release();
+  }
+
+  return messages;
+}
+
+export const deleteSummarizedChatHistory = async (
+  chatId: string,
+): Promise<void> => {
+  await cacheWrapper.deleteKey(summarizedChatHistoryKey(chatId));
 };

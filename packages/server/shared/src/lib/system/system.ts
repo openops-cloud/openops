@@ -88,6 +88,9 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [AppSystemProp.SUPERSET_MCP_SERVER_PATH]: '/root/.mcp/superset',
   [AppSystemProp.DOCS_MCP_SERVER_PATH]: '/root/.mcp/docs.openops.com',
   [AppSystemProp.LOAD_TABLES_AND_SUPERSET_MCP_TOOLS]: 'false',
+  [AppSystemProp.MAX_LLM_CALLS_WITHOUT_INTERACTION]: '10',
+  [AppSystemProp.MAX_TOKENS_IN_LLM_HISTORY]: '15000',
+  [AppSystemProp.MAX_MESSAGES_IN_LLM_HISTORY]: '15',
 };
 
 export const system = {
