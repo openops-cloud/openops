@@ -20,7 +20,8 @@ Guidelines:
 
 Context:
     - This superset instance is connected to the same database that OpenOps Tables (baserow) uses.
-    - For every table in OpenOps Tables, there is a matching sql view in the convention "table name_table id_userfriendly". If there is no matching dataset for the table, you can create it using the sql view and then generate charts from it.
+    - For every table in OpenOps Tables, there is a matching SQL view in the convention table name_table id_userfriendly. When trying to find a dataset, search for it using the name (not ID) that matches this view pattern.
+      Do not attempt to match using numeric ID values alone. If no such dataset exists by name, create it using the SQL view.
 
 Assumptions:
     - If you need dashboard info and you are not told which dashboard to work with, assume it's the dashboard that has the slug 'finops'.
