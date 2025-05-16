@@ -1,6 +1,3 @@
-process.env.OPS_ENGINE_URL = 'http://mock-engine';
-process.env.ENVIRONMENT = 'testing';
-
 jest.mock('../../../src/app/helper/encryption', () => ({
   encryptUtils: {
     encryptObject: jest.fn((val) => `encrypted-${JSON.stringify(val)}`),
@@ -23,13 +20,11 @@ jest.mock('../../../src/app/app-connection/app-connection-utils', () => ({
 
 const updateMock = jest.fn();
 const findOneByOrFailMock = jest.fn();
-const findOneByMock = jest.fn();
 jest.mock('../../../src/app/core/db/repo-factory', () => ({
   ...jest.requireActual('../../../src/app/core/db/repo-factory'),
   repoFactory: () => () => ({
     update: updateMock,
     findOneByOrFail: findOneByOrFailMock,
-    findOneBy: findOneByMock,
   }),
 }));
 
@@ -130,8 +125,6 @@ describe('appConnectionService.update', () => {
   });
 
   test('should throw if the connection was not found', async () => {
-    findOneByMock.mockResolvedValue(null);
-
     expect(() =>
       appConnectionService.patch({ projectId, request, userId }),
     ).toThrow(
