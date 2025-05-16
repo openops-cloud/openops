@@ -84,7 +84,7 @@ export function restoreRedactedSecrets(
   existingValue: Record<string, any>,
   auth: BlockAuthProperty | undefined,
 ): Record<string, any> {
-  const restoredValue = incomingValue;
+  const restoredValue = { ...incomingValue };
 
   switch (auth?.type) {
     case PropertyType.SECRET_TEXT: {
