@@ -31,6 +31,11 @@ jest.mock('../../../src/app/helper/encryption', () => ({
   },
 }));
 
+jest.mock('../../../src/app/telemetry/event-models/ai', () => ({
+  sendAiConfigSavedEvent: jest.fn(),
+  sendAiConfigDeletedEvent: jest.fn(),
+}));
+
 import { AiProviderEnum, SaveAiConfigRequest } from '@openops/shared';
 import { AiApiKeyRedactionMessage } from '../../../src/app/ai/config/ai-config.entity';
 import { aiConfigService } from '../../../src/app/ai/config/ai-config.service';
@@ -62,6 +67,7 @@ describe('aiConfigService.save', () => {
     const result = await aiConfigService.save({
       projectId,
       request: baseRequest,
+      userId: 'user-id',
     });
 
     expect(findOneByMock).not.toHaveBeenCalled();
@@ -98,6 +104,7 @@ describe('aiConfigService.save', () => {
     const result = await aiConfigService.save({
       projectId,
       request: { id: existingId, ...baseRequest },
+      userId: 'user-id',
     });
 
     expect(findOneByMock).toHaveBeenCalledWith({ id: existingId, projectId });
@@ -141,6 +148,7 @@ describe('aiConfigService.save', () => {
     const result = await aiConfigService.save({
       projectId,
       request: redactedRequest,
+      userId: 'user-id',
     });
 
     expect(encryptStringMock).not.toHaveBeenCalled();
@@ -364,7 +372,7 @@ describe('aiConfigService.delete', () => {
     deleteMock.mockResolvedValue(undefined);
 
     await expect(
-      aiConfigService.delete({ projectId, id: configId }),
+      aiConfigService.delete({ projectId, id: configId, userId: 'user-id' }),
     ).resolves.not.toThrow();
 
     expect(findOneByMock).toHaveBeenCalledWith({ id: configId, projectId });
@@ -375,7 +383,7 @@ describe('aiConfigService.delete', () => {
     findOneByMock.mockResolvedValue(undefined);
 
     await expect(
-      aiConfigService.delete({ projectId, id: configId }),
+      aiConfigService.delete({ projectId, id: configId, userId: 'user-id' }),
     ).rejects.toThrow('Config not found or does not belong to this project');
 
     expect(findOneByMock).toHaveBeenCalledWith({ id: configId, projectId });

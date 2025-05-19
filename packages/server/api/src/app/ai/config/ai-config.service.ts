@@ -6,6 +6,10 @@ import {
 } from '@openops/shared';
 import { repoFactory } from '../../core/db/repo-factory';
 import { encryptUtils } from '../../helper/encryption';
+import {
+  sendAiConfigDeletedEvent,
+  sendAiConfigSavedEvent,
+} from '../../telemetry/event-models/ai';
 import { AiApiKeyRedactionMessage, AiConfigEntity } from './ai-config.entity';
 
 const repo = repoFactory(AiConfigEntity);
@@ -23,6 +27,7 @@ function redactApiKey(config: AiConfig): AiConfigRedacted {
 
 export const aiConfigService = {
   async save(params: {
+    userId: string;
     projectId: string;
     request: SaveAiConfigRequest;
   }): Promise<AiConfigRedacted> {
@@ -47,6 +52,14 @@ export const aiConfigService = {
     };
 
     const config = await repo().save(aiConfig);
+
+    sendAiConfigSavedEvent({
+      id: config.id,
+      userId: params.userId,
+      projectId: params.projectId,
+      provider: config.provider,
+      enabled: config.enabled ?? false,
+    });
 
     return redactApiKey(config);
   },
@@ -87,13 +100,23 @@ export const aiConfigService = {
     return getOneBy({ projectId, enabled: true });
   },
 
-  async delete(params: { projectId: string; id: string }): Promise<void> {
+  async delete(params: {
+    projectId: string;
+    id: string;
+    userId: string;
+  }): Promise<void> {
     const { projectId, id } = params;
 
     const config = await repo().findOneBy({ id, projectId });
     if (!config) {
       throw new Error('Config not found or does not belong to this project');
     }
+
+    sendAiConfigDeletedEvent({
+      userId: params.userId,
+      projectId: params.projectId,
+      id: params.id,
+    });
 
     await repo().delete({ id });
   },
