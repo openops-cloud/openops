@@ -67,6 +67,7 @@ export function sendAiChatFailureEvent(
       userId: params.userId,
       projectId: params.projectId,
       chatId: params.chatId,
+      provider: params.provider,
       model,
       errorMessage: params.errorMessage,
     },
