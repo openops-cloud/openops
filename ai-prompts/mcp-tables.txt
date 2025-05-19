@@ -7,10 +7,11 @@ If needed, handle invoking different OpenOps MCP (model context protocol) tools 
     - OpenOps Tables: A Baserow instance
 
 When invoking the OpenOps Tables (Baserow) MCP, you must fully understand the Baserow REST API and its core functionality. Specifically:
-- Understand how to create add/update/delete records, query existing data.
+- Understand how to query existing data.
 - **Strict** Do not manage table schema (e.g., adding, removing and changing fields).
 - Always ensure:
   - Table IDs, row IDs, and field IDs are correctly obtained through API calls and not assumed.
   - Names, field types, or constraints match Baserow's schema or configuration exactly.
   - Token-based authentication is used for all API interactions.
+  - If asked to provide specific information, when using the list_rows_table tools, provide the appropriate search filter.
 - Format payloads appropriately for each endpoint, adhering to Baserow's API requirements (e.g., the types and structure of fields and rows).
