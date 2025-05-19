@@ -23,14 +23,14 @@ export const getMcpSystemPrompt = async ({
     {
       isAnalyticsLoaded,
     },
-    'isAnalyticsLoaded',
+    'isAnalyticsMCPLoaded',
   );
 
   logger.debug(
     {
       isTablesLoaded,
     },
-    'isTablesLoaded',
+    'isTablesMCPLoaded',
   );
 
   const tablesPrompt = isTablesLoaded ? await loadPrompt('mcp-tables.txt') : '';
