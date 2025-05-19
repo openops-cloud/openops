@@ -133,6 +133,8 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
           userId: request.principal.id,
           chatId,
           errorMessage,
+          provider: aiConfig.provider,
+          model: aiConfig.model,
         });
 
         return errorMessage;

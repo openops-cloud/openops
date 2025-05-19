@@ -1,5 +1,5 @@
+import { AiProviderEnum } from '@openops/shared';
 import { telemetry } from '../telemetry';
-
 export type AiBase = {
   projectId: string;
   userId: string;
@@ -23,11 +23,8 @@ export enum AiEventName {
 
 export function sendAiConfigSavedEvent(
   params: AiConfigBase & {
-    model: string;
     provider: string;
     enabled: boolean;
-    providerSettings?: string;
-    modelSettings?: string;
   },
 ): void {
   telemetry.trackEvent({
@@ -36,11 +33,8 @@ export function sendAiConfigSavedEvent(
       userId: params.userId,
       projectId: params.projectId,
       id: params.id,
-      model: params.model,
       provider: params.provider,
       enabled: params.enabled.toString(),
-      providerSettings: params.providerSettings ?? '',
-      modelSettings: params.modelSettings ?? '',
     },
   });
 }
@@ -57,14 +51,24 @@ export function sendAiConfigDeletedEvent(params: AiConfigBase): void {
 }
 
 export function sendAiChatFailureEvent(
-  params: AiChatBase & { errorMessage: string },
+  params: AiChatBase & {
+    errorMessage: string;
+    model: string;
+    provider: string;
+  },
 ): void {
+  let model = params.model;
+  if (params.provider === AiProviderEnum.AZURE_OPENAI) {
+    model = 'custom';
+  }
+
   telemetry.trackEvent({
     name: AiEventName.AI_CHAT_FAILURE,
     labels: {
       userId: params.userId,
       projectId: params.projectId,
       chatId: params.chatId,
+      model,
       errorMessage: params.errorMessage,
     },
   });
