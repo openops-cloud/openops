@@ -41,6 +41,7 @@ import {
 } from './ai-chat.service';
 import { generateMessageId } from './ai-message-id-generator';
 import { getMcpSystemPrompt } from './prompts.service';
+import { selectRelevantTools } from './tools.service';
 const MAX_RECURSION_DEPTH = 10;
 
 export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
@@ -108,10 +109,16 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
     });
 
     const tools = await getMCPTools();
-    const isAnalyticsLoaded = Object.keys(tools).some((key) =>
+    const filteredTools = await selectRelevantTools({
+      messages,
+      tools,
+      languageModel,
+    });
+
+    const isAnalyticsLoaded = Object.keys(filteredTools ?? {}).some((key) =>
       key.includes('superset'),
     );
-    const isTablesLoaded = Object.keys(tools).some((key) =>
+    const isTablesLoaded = Object.keys(filteredTools ?? {}).some((key) =>
       key.includes('Table'),
     );
 
@@ -120,6 +127,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       isTablesLoaded,
     });
     logger.debug({ systemPrompt }, 'systemPrompt');
+    logger.debug({ filteredTools }, 'filteredTools');
 
     pipeDataStreamToResponse(reply.raw, {
       execute: async (dataStreamWriter) => {
@@ -131,7 +139,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
           aiConfig,
           messages,
           chatId,
-          tools,
+          filteredTools,
         );
       },
 
@@ -212,7 +220,7 @@ async function streamMessages(
   aiConfig: AiConfig,
   messages: CoreMessage[],
   chatId: string,
-  tools: ToolSet,
+  tools?: ToolSet,
   recursionDepth = 0,
 ): Promise<void> {
   const result = streamText({
