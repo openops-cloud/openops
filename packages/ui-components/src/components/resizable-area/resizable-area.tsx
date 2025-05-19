@@ -91,11 +91,16 @@ export function ResizableArea({
   return (
     <div
       ref={resizeRef}
-      className={cn('relative p-4 pr-0', className)}
+      className={cn(
+        'relative p-4 pr-0',
+        {
+          'absolute bottom-0': resizeFrom === 'top-right',
+        },
+        className,
+      )}
       style={{
         width: dimensions.width,
         height: dimensions.height,
-        ...(resizeFrom === 'top-right' && { position: 'absolute', bottom: 0 }),
         touchAction: 'none',
       }}
     >
