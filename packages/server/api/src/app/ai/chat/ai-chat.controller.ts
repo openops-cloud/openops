@@ -57,12 +57,6 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
         await createChatContext(chatId, chatContext);
       }
 
-      sendAiChatMessageOpenEvent({
-        projectId: request.principal.projectId,
-        chatId,
-        userId: request.principal.id,
-      });
-
       return reply.code(200).send({
         chatId,
         messages,
@@ -122,6 +116,7 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
           projectId,
           userId: request.principal.id,
           chatId,
+          provider: aiConfig.provider,
         });
       },
       onError: (error) => {
