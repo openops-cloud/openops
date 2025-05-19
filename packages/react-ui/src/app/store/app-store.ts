@@ -1,7 +1,6 @@
 import {
   AI_CHAT_CONTAINER_SIZES,
   AiAssistantChatSizeState,
-  AiCliChatContainerSizeState,
 } from '@openops/components/ui';
 import { UserSettingsDefinition } from '@openops/shared';
 import { create } from 'zustand';
@@ -43,6 +42,5 @@ export const useAppStore = create<AppState>((set) => ({
   isAiChatOpened: false,
   setIsAiChatOpened: (isAiChatOpened: boolean) => set({ isAiChatOpened }),
   aiChatSize: AI_CHAT_CONTAINER_SIZES.DOCKED,
-  setAiChatSize: (size: AiCliChatContainerSizeState) =>
-    set({ aiChatSize: size }),
+  setAiChatSize: (size: AiAssistantChatSizeState) => set({ aiChatSize: size }),
 }));
