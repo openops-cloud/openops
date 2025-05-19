@@ -104,12 +104,6 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
     });
 
     const tools = await getMCPTools();
-    logger.debug(
-      {
-        tools,
-      },
-      'All MCP tools',
-    );
     const isAnalyticsLoaded = Object.keys(tools).some((key) =>
       key.includes('superset'),
     );
