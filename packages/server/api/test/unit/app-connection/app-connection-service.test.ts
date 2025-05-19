@@ -5,6 +5,7 @@ jest.mock('@openops/server-shared', () => {
     system: {
       ...actual.system,
       getOrThrow: jest.fn().mockReturnValue('test-data'),
+      get: jest.fn().mockReturnValue('test-data'),
     },
   };
 });
