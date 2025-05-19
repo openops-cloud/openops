@@ -35,6 +35,7 @@ import {
   getChatHistory,
   saveChatHistory,
 } from './ai-chat.service';
+import { generateMessageId } from './ai-message-id-generator';
 import { getMcpSystemPrompt } from './prompts.service';
 
 const MAX_RECURSION_DEPTH = 10;
@@ -253,16 +254,6 @@ function endStreamWithErrorMessage(
   dataStreamWriter.write(
     `d:{"finishReason":"stop","usage":{"promptTokens":null,"completionTokens":null}}\n`,
   );
-}
-
-function generateMessageId(): string {
-  const randomBytes = crypto.getRandomValues(new Uint8Array(18));
-  const base64url = Array.from(randomBytes)
-    .map((b) => b.toString(36).padStart(2, '0'))
-    .join('')
-    .slice(0, 24);
-
-  return `msg-${base64url}`;
 }
 
 function removeToolMessages(messages: CoreMessage[]): CoreMessage[] {
