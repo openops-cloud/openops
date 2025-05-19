@@ -1,10 +1,5 @@
-import {
-  distributedLock,
-  exceptionHandler,
-  logger,
-  SharedSystemProp,
-  system,
-} from '@openops/server-shared';
+import { BlockMetadataModel } from '@openops/blocks-framework';
+import { distributedLock, exceptionHandler } from '@openops/server-shared';
 import {
   AppConnection,
   AppConnectionId,
@@ -14,25 +9,18 @@ import {
   AppConnectionWithoutSensitiveData,
   ApplicationError,
   Cursor,
-  EngineResponseStatus,
-  EnvironmentType,
   ErrorCode,
   isNil,
   OAuth2GrantType,
   openOpsId,
+  PatchAppConnectionRequestBody,
   ProjectId,
   SeekPage,
   UpsertAppConnectionRequestBody,
   UserId,
 } from '@openops/shared';
 import dayjs from 'dayjs';
-import { engineRunner } from 'server-worker';
 import { FindOperator, ILike, In } from 'typeorm';
-import { accessTokenManager } from '../../authentication/lib/access-token-manager';
-import {
-  blockMetadataService,
-  getBlockPackage,
-} from '../../blocks/block-metadata-service';
 import { repoFactory } from '../../core/db/repo-factory';
 import { encryptUtils } from '../../helper/encryption';
 import { buildPaginator } from '../../helper/pagination/build-paginator';
@@ -41,13 +29,17 @@ import {
   sendConnectionCreatedEvent,
   sendConnectionUpdatedEvent,
 } from '../../telemetry/event-models';
-import { removeSensitiveData } from '../app-connection-utils';
+import {
+  removeSensitiveData,
+  restoreRedactedSecrets,
+} from '../app-connection-utils';
 import {
   AppConnectionEntity,
   AppConnectionSchema,
 } from '../app-connection.entity';
 import { oauth2Handler } from './oauth2';
 import { oauth2Util } from './oauth2/oauth2-util';
+import { engineValidateAuth } from './validate-auth';
 
 const repo = repoFactory(AppConnectionEntity);
 
@@ -92,6 +84,69 @@ export const appConnectionService = {
     }
 
     return decryptConnection(updatedConnection);
+  },
+
+  async patch(params: PatchParams): Promise<AppConnection> {
+    const { projectId, request } = params;
+
+    const existingConnection = await repo().findOneBy({
+      id: request.id,
+      projectId,
+    });
+
+    if (isNil(existingConnection)) {
+      throw new ApplicationError({
+        code: ErrorCode.ENTITY_NOT_FOUND,
+        params: {
+          entityType: 'AppConnection',
+          entityId: request.id,
+        },
+      });
+    }
+
+    const decryptedExisting = decryptConnection(existingConnection);
+
+    const restoredConnectionValue = restoreRedactedSecrets(
+      request.value,
+      decryptedExisting.value,
+      params.block.auth,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ) as any;
+
+    const validatedConnectionValue = await validateConnectionValue({
+      connection: {
+        ...request,
+        value: restoredConnectionValue,
+      } as UpsertAppConnectionRequestBody,
+      projectId,
+    });
+
+    const encryptedConnectionValue = encryptUtils.encryptObject({
+      ...validatedConnectionValue,
+      ...restoredConnectionValue,
+    });
+
+    await repo().update(existingConnection.id, {
+      ...request,
+      status: AppConnectionStatus.ACTIVE,
+      value: encryptedConnectionValue,
+      id: existingConnection?.id,
+      projectId,
+    });
+
+    sendConnectionUpdatedEvent(params.userId, projectId, request.blockName);
+
+    return {
+      ...existingConnection,
+      ...request,
+      id: existingConnection.id,
+      projectId,
+      status: AppConnectionStatus.ACTIVE,
+      value: {
+        ...validatedConnectionValue,
+        ...restoredConnectionValue,
+      },
+    };
   },
 
   async getOne({
@@ -331,61 +386,6 @@ function decryptConnection(
   return connection;
 }
 
-const engineValidateAuth = async (
-  params: EngineValidateAuthParams,
-): Promise<void> => {
-  const environment = system.getOrThrow(SharedSystemProp.ENVIRONMENT);
-  if (environment === EnvironmentType.TESTING) {
-    return;
-  }
-  const { blockName, auth, projectId } = params;
-
-  const blockMetadata = await blockMetadataService.getOrThrow({
-    name: blockName,
-    projectId,
-    version: undefined,
-  });
-
-  const engineToken = await accessTokenManager.generateEngineToken({
-    projectId,
-  });
-  const engineResponse = await engineRunner.executeValidateAuth(engineToken, {
-    block: await getBlockPackage(projectId, {
-      blockName,
-      blockVersion: blockMetadata.version,
-      blockType: blockMetadata.blockType,
-      packageType: blockMetadata.packageType,
-    }),
-    auth,
-    projectId,
-  });
-
-  if (engineResponse.status !== EngineResponseStatus.OK) {
-    logger.error(
-      engineResponse,
-      '[AppConnectionService#engineValidateAuth] engineResponse',
-    );
-    throw new ApplicationError({
-      code: ErrorCode.ENGINE_OPERATION_FAILURE,
-      params: {
-        message: 'Failed to run engine validate auth',
-        context: engineResponse,
-      },
-    });
-  }
-
-  const validateAuthResult = engineResponse.result;
-
-  if (!validateAuthResult.valid) {
-    throw new ApplicationError({
-      code: ErrorCode.INVALID_APP_CONNECTION,
-      params: {
-        error: validateAuthResult.error,
-      },
-    });
-  }
-};
-
 /**
  * We should make sure this is accessed only once, as a race condition could occur where the token needs to be
  * refreshed and it gets accessed at the same time, which could result in the wrong request saving incorrect data.
@@ -487,6 +487,13 @@ type UpsertParams = {
   request: UpsertAppConnectionRequestBody;
 };
 
+type PatchParams = {
+  userId: UserId;
+  projectId: ProjectId;
+  request: PatchAppConnectionRequestBody;
+  block: BlockMetadataModel;
+};
+
 type GetOneByName = {
   projectId: ProjectId;
   name: string;
@@ -514,12 +521,6 @@ type ListParams = {
 
 type CountByProjectParams = {
   projectId: ProjectId;
-};
-
-type EngineValidateAuthParams = {
-  blockName: string;
-  projectId: ProjectId;
-  auth: AppConnectionValue;
 };
 
 type ValidateConnectionValueParams = {
