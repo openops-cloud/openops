@@ -11,30 +11,25 @@ import {
   ToolSet,
 } from 'ai';
 import { z } from 'zod';
+import { zodToJsonSchema } from 'zod-to-json-schema';
 import { openopsTables } from '../../openops-tables';
+import { jsonSchemaToZod } from './helpers/json-schema';
+
+// import { JSONSchema, jsonSchemaToZodObject } from './helpers/json-schema';
 
 type MCPTool = Tool & { execute: (...args: unknown[]) => Promise<unknown> };
 
 type MCPRegistry = {
   list: Record<string, MCPTool>;
-  create: Record<string, MCPTool>;
-  update: Record<string, MCPTool>;
+  create: Record<string, { zodRowSchema: z.ZodTypeAny; tool: MCPTool }>;
+  update: Record<string, { zodRowSchema: z.ZodTypeAny; tool: MCPTool }>;
   delete: Record<string, MCPTool>;
 };
 
 export async function getTablesTools(): Promise<ToolSet> {
   const { token } = await authenticateDefaultUserInOpenOpsTables();
-  logger.info(
-    {
-      token,
-    },
-    'Getting MCP endpoints from OpenOps tables',
-  );
   const mcpEndpoint = await openopsTables.getMcpEndpointList(token);
-
-  if (!mcpEndpoint) {
-    return {};
-  }
+  if (!mcpEndpoint) return {};
 
   const url =
     system.get(AppSystemProp.OPENOPS_TABLES_API_URL) +
@@ -74,199 +69,159 @@ export async function getTablesTools(): Promise<ToolSet> {
     const op = opMap[mcpOp];
     if (!op) continue;
 
-    if (op === 'create') {
-      // Try extracting schema metadata
-      // @ts-ignore
-      const jsonSchema = mcpTool.parameters?.jsonSchema;
-      const fields = jsonSchema?.properties?.row?.properties
-        ? Object.keys(jsonSchema.properties.row.properties)
-        : [];
-
-      // @ts-ignore
-      registry.create[tableId] = { tool: mcpTool, fields };
+    if (mcpOp === 'create_row') {
+      registry.create[tableId] = {
+        zodRowSchema: jsonSchemaToZod(
+          // @ts-expect-error - mcpTool type inference isn't accurate
+          mcpTool.parameters.jsonSchema.properties.row,
+        ),
+        // @ts-ignore
+        tool: mcpTool,
+      };
     } else {
-      // @ts-ignore
+      // @ts-expect-error - mcpTool type inference isn't accurate
       registry[op][tableId] = mcpTool;
     }
   }
-  logger.info(registry, 'Tables tools Registry');
 
   const toolSet: ToolSet = {};
 
   // List Tables Tool
   const listTablesTool = tools['list_tables'];
   if (listTablesTool) {
-    toolSet.listTables = tools['list_tables'];
+    toolSet.listTables = listTablesTool;
   }
 
   // List Rows Tool
   toolSet.listRowsTable = tool({
     description: 'List rows from a specific OpenOps table by table ID.',
     parameters: z.object({
-      tableId: z
-        .string()
-        .describe('The numeric table ID (e.g., "1", "2", "8")'),
+      tableId: z.string().describe('Table ID (e.g., "1", "2", "8")'),
       page: z
         .number()
         .default(1)
         .describe('Pagination page number (default: 1)'),
-      size: z
-        .number()
-        .default(100)
-        .describe('Number of rows per page (default: 100)'),
-      search: z
-        .string()
-        .optional()
-        .describe('Optional search term to filter results'),
+      size: z.number().default(100).describe('Number of rows per page'),
+      search: z.string().optional().describe('Optional search filter'),
     }),
     execute: async ({ tableId, ...rest }) => {
-      const tool = registry.list[tableId];
-      if (!tool)
-        throw new Error(
-          `No list_rows_table tool found for table ID: ${tableId}`,
-        );
-      return tool.execute(
+      const listTool = registry.list[tableId];
+      if (!listTool)
+        throw new Error(`No list_rows_table tool for table ${tableId}`);
+      return listTool.execute(
         { ...rest },
         { toolCallId: openOpsId(), messages: [] },
       );
     },
   });
 
-  // const createRowFields = Object.entries(registry.create).reduce(
-  //   (acc, [tableId, entry]) => {
-  //     // @ts-ignore
-  //     acc[tableId] = entry.fields?.slice(0, 5).join(', ') || '(no fields)';
-  //     return acc;
-  //   },
-  //   {} as Record<string, string>,
-  // );
+  logger.debug('Registry create contents:', Object.keys(registry.create));
 
-  toolSet.createRowTable = tool({
-    description: `Insert a new row into a table using its ID. Example:
-        "args": {
-        "row": {
-          "Estimated savings USD per month": "100.00",
-          "Resource Id": "i-0abc123xyz",
-          "Workflow": "Idle EC2 Workflow",
-          "Service": "EC2",
-          "Region": "us-east-1",
-          "Account": "123456789012",
-          "Owner": "jane.doe@company.com",
-          "Follow-up task": "Confirm resource ownership",
-          "Opportunity generator": "EC2 Idle Scanner",
-          "External Opportunity Id": "ext-op-12345",
-          "Opportunity details": "Instance has been idle for 14+ days",
-          "Snoozed until": "2024-01-01T00:00:00Z",
-          "Resolution notes": "Pending owner confirmation"
-        }
-    }`,
-    parameters: z.object({
-      tableId: z
-        .string()
-        .describe('The numeric table ID (e.g., "6", "2", "8").'),
-      row: z.record(z.any()).describe(
-        `Required. Object of fields to insert. ${Object.entries(registry.create)
-          .map(([tableId, entry]) =>
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            {
-              /* eslint-disable-next-line @typescript-eslint/ban-ts-comment*/
-              /* @ts-ignore*/
-              return `Table ${tableId}: ${entry.fields.join(', ')}`;
-            },
-          )
-          .join('\n')}`,
-      ),
-    }),
-    execute: async ({ tableId, row }) => {
-      const entry = registry.create[tableId];
-      if (!entry)
-        throw new Error(
-          `No create_row_table tool found for table ID: ${tableId}`,
-        );
+  // Create a general purpose tool if any tables exist
+  // Use specific table tools (createRowTable_X) for proper schema. See schema for available tables: ${JSON.stringify(
+  //       registry.create,
+  //     )}
 
-      // @ts-ignore
-      const { tool: createTool, fields: knownFields } = entry;
+  const createRowSchemas = Object.entries(registry.create)
+    .map(([tableId, entry]) => {
+      const schema = entry.zodRowSchema;
 
-      if (!row || typeof row !== 'object') {
-        throw new Error(
-          `Missing required 'row'. Must be a key-value object of column names. Known fields: ${knownFields.join(
-            ', ',
-          )}`,
-        );
+      if (!schema || schema._def.typeName !== 'ZodObject') {
+        logger.warn(`Invalid zodRowSchema for table ${tableId}`);
+        return null;
       }
 
-      // const invalidKeys = Object.keys(row).filter(
-      //   (k) => !knownFields.includes(k),
-      // );
-      // if (invalidKeys.length > 0) {
-      //   throw new Error(
-      //     `Invalid fields: ${invalidKeys.join(
-      //       ', ',
-      //     )}. Valid fields for table ${tableId}: ${knownFields.join(', ')}`,
-      //   );
-      // }
-
-      return createTool.execute(
-        { row },
-        { toolCallId: openOpsId(), messages: [] },
+      const jsonSchema = zodToJsonSchema(schema);
+      logger.info(
+        {
+          jsonSchema,
+        },
+        `jsonSchema for table ${tableId}`,
       );
-    },
-  });
+
+      return z
+        .object({
+          tableId: z.literal(tableId),
+          row: schema,
+        })
+        .describe(
+          `Create row in table ${tableId}`,
+        ) as z.ZodDiscriminatedUnionOption<'tableId'>;
+    })
+    .filter(Boolean); // remove nulls
+
+  if (createRowSchemas.length > 0) {
+    // @ts-ignore
+    const createRowSchema = z.discriminatedUnion('tableId', createRowSchemas);
+    const jsonSchema = zodToJsonSchema(createRowSchema);
+    logger.info(
+      {
+        jsonSchema,
+      },
+      `jsonSchema for all`,
+    );
+
+    toolSet.createRowTable = tool({
+      description:
+        'Create a row in a table by specifying the table and structured row data.',
+      parameters: createRowSchema,
+      execute: async ({ tableId, row }) => {
+        // @ts-ignore
+        const entry = registry.create[tableId];
+        if (!entry) throw new Error(`No tool found for table ${tableId}`);
+        return entry.tool.execute(
+          { row },
+          { toolCallId: openOpsId(), messages: [] },
+        );
+      },
+    });
+  } else {
+    logger.warn(
+      'No valid schemas found for createRowTable. Tool not registered.',
+    );
+  }
 
   // Update Row Tool
-  toolSet.updateRowTable = tool({
-    description: 'Update a row in a table. Provide the table ID and row ID.',
-    parameters: z.object({
-      tableId: z
-        .string()
-        .describe('The numeric table ID (e.g., "1", "2", "8")'),
-      rowId: z
-        .union([z.string(), z.number()])
-        .describe('ID of the row to update'),
-      fields: z
-        .record(z.any())
-        .describe('Field values to update. Must match the table schema.'),
-    }),
-    execute: async ({ tableId, rowId, fields }) => {
-      const tool = registry.update[tableId];
-      if (!tool)
-        throw new Error(
-          `No update_row_table tool found for table ID: ${tableId}`,
-        );
-      return tool.execute(
-        { id: rowId, row: fields },
-        { toolCallId: openOpsId(), messages: [] },
-      );
-    },
-  });
+  // toolSet.updateRowTable = tool({
+  //   description: `Update a row by table and row ID. Use specific table tools (updateRowTable_X) for proper schema. See schema for available tables: ${JSON.stringify(
+  //     registry.update,
+  //   )}`,
+  //   parameters: z.object({
+  //     tableId: z.string().describe('Table ID'),
+  //     rowId: z.union([z.string(), z.number()]).describe('Row ID'),
+  //     fields: z.record(z.any()).describe('Fields to update'),
+  //   }),
+  //   execute: async ({ tableId, rowId, fields }) => {
+  //     const updateTool = registry.update[tableId];
+  //     if (!updateTool)
+  //       throw new Error(`No update_row_table tool for table ${tableId}`);
+  //     return updateTool.execute(
+  //       { id: rowId, row: fields },
+  //       { toolCallId: openOpsId(), messages: [] },
+  //     );
+  //   },
+  // });
 
   // Delete Row Tool
   toolSet.deleteRowTable = tool({
-    description: 'Delete a row from a table using its table ID and row ID.',
+    description: 'Delete a row from a table.',
     parameters: z.object({
-      tableId: z
-        .string()
-        .describe('The numeric table ID (e.g., "1", "2", "8")'),
-      rowId: z
-        .union([z.string(), z.number()])
-        .describe('ID of the row to delete'),
+      tableId: z.string().describe('Table ID'),
+      rowId: z.union([z.string(), z.number()]).describe('Row ID'),
     }),
     execute: async ({ tableId, rowId }) => {
-      const tool = registry.delete[tableId];
-      if (!tool)
-        throw new Error(
-          `No delete_row_table tool found for table ID: ${tableId}`,
-        );
-      return tool.execute(
+      const deleteTool = registry.delete[tableId];
+      if (!deleteTool)
+        throw new Error(`No delete_row_table tool for table ${tableId}`);
+      return deleteTool.execute(
         { id: rowId },
         { toolCallId: openOpsId(), messages: [] },
       );
     },
   });
 
-  logger.info(toolSet, 'Wrapper tables toolSet');
-
+  logger.info(toolSet, 'Final registered toolset');
   return toolSet;
-  // return client.tools();
+
+  // return tools;
 }
