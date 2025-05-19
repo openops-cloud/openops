@@ -132,6 +132,8 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
           userId: request.principal.id,
           chatId,
           errorMessage: error instanceof Error ? error.message : String(error),
+          provider: aiConfig.provider,
+          model: aiConfig.model,
         });
         return error instanceof Error ? error.message : String(error);
       },
