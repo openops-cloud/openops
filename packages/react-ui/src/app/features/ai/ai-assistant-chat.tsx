@@ -18,7 +18,6 @@ type AiAssistantChatProps = {
   };
   className?: string;
   isSidebarOpen?: boolean;
-  customWidthOffset?: number;
 };
 
 const PARENT_HEIGHT_GAP = 220;
@@ -31,7 +30,6 @@ const AiAssistantChat = ({
   middlePanelSize,
   isSidebarOpen = false,
   className,
-  customWidthOffset,
 }: AiAssistantChatProps) => {
   const { isAiChatOpened, setIsAiChatOpened, aiChatSize, setAiChatSize } =
     useAppStore((s) => ({
@@ -56,8 +54,7 @@ const AiAssistantChat = ({
     const offset = isSidebarOpen
       ? CHAT_EXPANDED_WIDTH_OFFSET_BUILDER
       : CHAT_EXPANDED_WIDTH_OFFSET;
-    const calculatedExpandedWidth =
-      middlePanelSize.width - (customWidthOffset ?? offset);
+    const calculatedExpandedWidth = middlePanelSize.width - offset;
 
     return {
       width: Math.max(
@@ -70,7 +67,6 @@ const AiAssistantChat = ({
     };
   }, [
     aiChatSize,
-    customWidthOffset,
     isSidebarOpen,
     middlePanelSize.height,
     middlePanelSize.width,

@@ -34,7 +34,6 @@ type DashboardContainerProps = {
 
 const SIDEBAR_MIN_SIZE = 18;
 const SIDEBAR_MINIMIZED_WIDTH = 10;
-const CUSTOM_AI_CHAT_WIDTH_OFFSET = 10;
 
 export function DashboardContainer({
   children,
@@ -94,10 +93,7 @@ export function DashboardContainer({
           className="flex-1"
         >
           <div ref={middlePanelRef} className="relative h-full w-full">
-            <AiAssistantChat
-              middlePanelSize={middlePanelSize}
-              customWidthOffset={CUSTOM_AI_CHAT_WIDTH_OFFSET}
-            />
+            <AiAssistantChat middlePanelSize={middlePanelSize} />
             <DashboardContent
               pageHeader={pageHeader}
               useEntireInnerViewport={useEntireInnerViewport}
