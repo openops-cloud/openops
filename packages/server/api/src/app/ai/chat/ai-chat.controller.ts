@@ -19,7 +19,6 @@ import { StatusCodes } from 'http-status-codes';
 import { encryptUtils } from '../../helper/encryption';
 import {
   sendAiChatFailureEvent,
-  sendAiChatMessageOpenEvent,
   sendAiChatMessageSendEvent,
 } from '../../telemetry/event-models/ai';
 import { aiConfigService } from '../config/ai-config.service';
