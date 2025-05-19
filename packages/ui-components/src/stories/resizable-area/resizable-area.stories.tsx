@@ -4,15 +4,17 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { fn } from '@storybook/test';
 import { BoxSize, ResizableArea } from '../../components';
 
+const INITIAL_VALUES = {
+  width: 200,
+  height: 200,
+};
+
 const meta = {
   title: 'Components/ResizableBlock',
   component: ResizableArea,
   tags: ['autodocs'],
   args: {
-    dimensions: {
-      width: 200,
-      height: 200,
-    },
+    dimensions: INITIAL_VALUES,
     setDimensions: fn(),
     minWidth: 150,
     minHeight: 150,
@@ -42,10 +44,7 @@ const meta = {
   render: (args) => {
     const [, updateArgs] = useArgs();
 
-    const [dimensions, setDimensions] = useState<BoxSize>({
-      width: 400,
-      height: 400,
-    });
+    const [dimensions, setDimensions] = useState<BoxSize>(INITIAL_VALUES);
 
     const updateDimensionsState = useCallback(
       (newDimensions: BoxSize) => {
