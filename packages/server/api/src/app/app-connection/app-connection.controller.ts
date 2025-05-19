@@ -3,9 +3,7 @@ import {
   FastifyPluginCallbackTypebox,
   Type,
 } from '@fastify/type-provider-typebox';
-import { logger } from '@openops/server-shared';
 import {
-  AppConnection,
   AppConnectionWithoutSensitiveData,
   ListAppConnectionsRequestQuery,
   OpenOpsId,
