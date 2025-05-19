@@ -14,7 +14,7 @@ import {
 import { TooltipProvider } from '../../ui/tooltip';
 import { sampleAIChatMessages } from './sample-messages';
 
-export const useAiChatToggle = () => {
+const useAiChatToggle = () => {
   const [{ aiChatSize, toggleAiChatState }, updateArgs] = useArgs();
 
   const toggleAiChatStateSize = useCallback(() => {
