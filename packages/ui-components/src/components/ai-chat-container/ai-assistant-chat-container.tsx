@@ -11,10 +11,10 @@ import { AiChatSizeTogglers } from './ai-chat-size-togglers';
 import { AI_CHAT_CONTAINER_SIZES, AiAssistantChatSizeState } from './types';
 
 type AiAssistantChatContainerProps = {
-  initialSize: BoxSize;
+  dimensions: BoxSize;
+  setDimensions: (dimensions: BoxSize) => void;
   maxSize: BoxSize;
   toggleAiChatState: () => void;
-  onResize: (size: BoxSize) => void;
   aiChatSize: AiAssistantChatSizeState;
   showAiChat: boolean;
   onCloseClick: () => void;
@@ -28,10 +28,10 @@ export const CHAT_MIN_WIDTH = 360;
 export const PARENT_HEIGHT_GAP = 220;
 
 const AiAssistantChatContainer = ({
-  initialSize,
+  dimensions,
+  setDimensions,
   maxSize,
   toggleAiChatState,
-  onResize,
   aiChatSize,
   showAiChat,
   onCloseClick,
@@ -67,15 +67,14 @@ const AiAssistantChatContainer = ({
       }}
     >
       <ResizableArea
-        initialWidth={initialSize.width}
-        initialHeight={initialSize.height}
+        dimensions={dimensions}
+        setDimensions={setDimensions}
         minWidth={CHAT_MIN_WIDTH}
         minHeight={300}
         maxWidth={maxSize.width}
         maxHeight={maxSize.height}
         isDisabled={aiChatSize === AI_CHAT_CONTAINER_SIZES.EXPANDED}
         resizeFrom="top-right"
-        onResize={onResize}
         className="static pb-0"
       >
         <div className="h-full flex flex-col">

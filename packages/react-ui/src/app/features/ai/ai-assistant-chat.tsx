@@ -6,7 +6,6 @@ import {
   AI_CHAT_CONTAINER_SIZES,
   AiAssistantChatContainer,
   AiAssistantChatSizeState,
-  BoxSize,
   CHAT_MIN_WIDTH,
   cn,
   NoAiEnabledPopover,
@@ -55,20 +54,13 @@ const AiAssistantChat = ({
     isOpenAiChatPending,
   } = useAiAssistantChat();
 
-  const onContainerResize = useCallback(
-    (dimensions: BoxSize) => {
-      setAiChatDimensions(dimensions);
-    },
-    [setAiChatDimensions],
-  );
-
   const sizes = useMemo(() => {
     const calculatedWidth = middlePanelSize.width * 0.6;
     const calculatedExpandedWidth =
       middlePanelSize.width - CHAT_EXPANDED_WIDTH_OFFSET;
 
     return {
-      initial: aiChatDimensions ?? {
+      current: aiChatDimensions ?? {
         width: Math.max(
           CHAT_MIN_WIDTH,
           aiChatSize === AI_CHAT_CONTAINER_SIZES.EXPANDED
@@ -117,7 +109,8 @@ const AiAssistantChat = ({
 
   return (
     <AiAssistantChatContainer
-      initialSize={sizes.initial}
+      dimensions={sizes.current}
+      setDimensions={setAiChatDimensions}
       maxSize={sizes.max}
       showAiChat={isAiChatOpened}
       onCloseClick={() => setIsAiChatOpened(false)}
@@ -129,7 +122,6 @@ const AiAssistantChat = ({
       onCreateNewChatClick={createNewChat}
       toggleAiChatState={onToggleAiChatState}
       aiChatSize={aiChatSize}
-      onResize={onContainerResize}
     >
       <AiAssistantConversation
         messages={messages}
