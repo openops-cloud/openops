@@ -6,19 +6,15 @@ import TextareaAutosize from 'react-textarea-autosize';
 import { cn } from '../../lib/cn';
 import { Button } from '../../ui/button';
 import { ScrollArea } from '../../ui/scroll-area';
-import { ResizableArea } from '../resizable-area';
+import { BoxSize, ResizableArea } from '../resizable-area';
 import { AiChatSizeTogglers } from './ai-chat-size-togglers';
 import { AI_CHAT_CONTAINER_SIZES, AiAssistantChatSizeState } from './types';
-
-type BoxSize = {
-  width: number;
-  height: number;
-};
 
 type AiAssistantChatContainerProps = {
   initialSize: BoxSize;
   maxSize: BoxSize;
   toggleAiChatState: () => void;
+  onResize: (size: BoxSize) => void;
   aiChatSize: AiAssistantChatSizeState;
   showAiChat: boolean;
   onCloseClick: () => void;
@@ -35,6 +31,7 @@ const AiAssistantChatContainer = ({
   initialSize,
   maxSize,
   toggleAiChatState,
+  onResize,
   aiChatSize,
   showAiChat,
   onCloseClick,
@@ -78,6 +75,7 @@ const AiAssistantChatContainer = ({
         maxHeight={maxSize.height}
         isDisabled={aiChatSize === AI_CHAT_CONTAINER_SIZES.EXPANDED}
         resizeFrom="top-right"
+        onResize={onResize}
         className="static pb-0"
       >
         <div className="h-full flex flex-col">

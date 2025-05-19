@@ -6,6 +6,7 @@ import {
   AI_CHAT_CONTAINER_SIZES,
   AiAssistantChatContainer,
   AiAssistantChatSizeState,
+  BoxSize,
   CHAT_MIN_WIDTH,
   cn,
   NoAiEnabledPopover,
@@ -28,13 +29,21 @@ const AiAssistantChat = ({
   middlePanelSize,
   className,
 }: AiAssistantChatProps) => {
-  const { isAiChatOpened, setIsAiChatOpened, aiChatSize, setAiChatSize } =
-    useAppStore((s) => ({
-      isAiChatOpened: s.isAiChatOpened,
-      setIsAiChatOpened: s.setIsAiChatOpened,
-      aiChatSize: s.aiChatSize,
-      setAiChatSize: s.setAiChatSize,
-    }));
+  const {
+    isAiChatOpened,
+    setIsAiChatOpened,
+    aiChatSize,
+    setAiChatSize,
+    aiChatDimensions,
+    setAiChatDimensions,
+  } = useAppStore((s) => ({
+    isAiChatOpened: s.isAiChatOpened,
+    setIsAiChatOpened: s.setIsAiChatOpened,
+    aiChatSize: s.aiChatSize,
+    setAiChatSize: s.setAiChatSize,
+    aiChatDimensions: s.aiChatDimensions,
+    setAiChatDimensions: s.setAiChatDimensions,
+  }));
 
   const {
     messages,
@@ -46,13 +55,20 @@ const AiAssistantChat = ({
     isOpenAiChatPending,
   } = useAiAssistantChat();
 
+  const onContainerResize = useCallback(
+    (dimensions: BoxSize) => {
+      setAiChatDimensions(dimensions);
+    },
+    [setAiChatDimensions],
+  );
+
   const sizes = useMemo(() => {
     const calculatedWidth = middlePanelSize.width * 0.6;
     const calculatedExpandedWidth =
       middlePanelSize.width - CHAT_EXPANDED_WIDTH_OFFSET;
 
     return {
-      initial: {
+      initial: aiChatDimensions ?? {
         width: Math.max(
           CHAT_MIN_WIDTH,
           aiChatSize === AI_CHAT_CONTAINER_SIZES.EXPANDED
@@ -66,7 +82,12 @@ const AiAssistantChat = ({
         height: middlePanelSize.height - PARENT_HEIGHT_GAP,
       },
     };
-  }, [aiChatSize, middlePanelSize.height, middlePanelSize.width]);
+  }, [
+    aiChatDimensions,
+    aiChatSize,
+    middlePanelSize.height,
+    middlePanelSize.width,
+  ]);
 
   const { hasActiveAiSettings, isLoading } =
     aiSettingsHooks.useHasActiveAiSettings();
@@ -108,6 +129,7 @@ const AiAssistantChat = ({
       onCreateNewChatClick={createNewChat}
       toggleAiChatState={onToggleAiChatState}
       aiChatSize={aiChatSize}
+      onResize={onContainerResize}
     >
       <AiAssistantConversation
         messages={messages}

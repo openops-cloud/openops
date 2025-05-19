@@ -5,6 +5,11 @@ import { ScrollArea } from '../../ui/scroll-area';
 
 type ResizeHandlePosition = 'bottom-right' | 'top-right';
 
+export interface BoxSize {
+  width: number;
+  height: number;
+}
+
 interface ResizableAreaProps {
   initialWidth: number;
   initialHeight: number;
@@ -15,6 +20,7 @@ interface ResizableAreaProps {
   children: React.ReactNode;
   className?: string;
   resizeFrom?: ResizeHandlePosition;
+  onResize?: (size: BoxSize) => void;
   isDisabled?: boolean;
 }
 
@@ -28,9 +34,10 @@ export function ResizableArea({
   children,
   className,
   resizeFrom = 'bottom-right',
+  onResize,
   isDisabled,
 }: ResizableAreaProps) {
-  const [dimensions, setDimensions] = useState({
+  const [dimensions, setDimensions] = useState<BoxSize>({
     width: initialWidth,
     height: initialHeight,
   });
@@ -48,8 +55,12 @@ export function ResizableArea({
         ...prev,
         height: Math.min(prev.height, maxHeight),
       }));
+      onResize?.({
+        width: dimensions.width,
+        height: Math.min(dimensions.height, maxHeight),
+      });
     }
-  }, [dimensions.height, maxHeight, maxWidth]);
+  }, [dimensions.height, dimensions.width, maxHeight, maxWidth, onResize]);
 
   useEffect(() => {
     if (maxWidth < dimensions.width) {
@@ -57,8 +68,12 @@ export function ResizableArea({
         ...prev,
         width: Math.min(prev.width, maxWidth),
       }));
+      onResize?.({
+        height: dimensions.height,
+        width: Math.min(dimensions.width, maxWidth),
+      });
     }
-  }, [dimensions.height, dimensions.width, maxHeight, maxWidth]);
+  }, [dimensions.height, dimensions.width, maxHeight, maxWidth, onResize]);
 
   const resizeRef = useRef<HTMLDivElement>(null);
   const isResizingRef = useRef(false);
@@ -76,15 +91,17 @@ export function ResizableArea({
           ? startPosRef.current.height + dy
           : startPosRef.current.height - dy;
 
-      setDimensions({
+      const newDimension = {
         width: Math.min(
           Math.max(startPosRef.current.width + dx, minWidth),
           maxWidth,
         ),
         height: Math.min(Math.max(calculatedHeight, minHeight), maxHeight),
-      });
+      };
+      setDimensions(newDimension);
+      onResize?.(newDimension);
     },
-    [resizeFrom, minHeight, maxHeight, minWidth, maxWidth],
+    [resizeFrom, minWidth, maxWidth, minHeight, maxHeight, onResize],
   );
 
   const handleMouseUp = useCallback(() => {
