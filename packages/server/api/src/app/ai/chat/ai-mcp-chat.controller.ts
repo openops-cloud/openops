@@ -104,7 +104,12 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
     });
 
     const tools = await getMCPTools();
-    logger.debug(tools, 'tools');
+    logger.debug(
+      {
+        tools,
+      },
+      'All MCP tools',
+    );
     const isAnalyticsLoaded = Object.keys(tools).some((key) =>
       key.includes('superset'),
     );
@@ -130,8 +135,13 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
           tools,
         );
       },
+
       onError: (error) => {
-        return error instanceof Error ? error.message : String(error);
+        logger.error('Error in pipeDataStreamToResponse:', error);
+
+        return error instanceof Error
+          ? error.message
+          : String(error ?? 'Unknown error');
       },
     });
   });
