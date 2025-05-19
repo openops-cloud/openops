@@ -13,5 +13,5 @@ When invoking the OpenOps Tables (Baserow) MCP, you must fully understand the Ba
   - Table IDs, row IDs, and field IDs are correctly obtained through API calls and not assumed.
   - Names, field types, or constraints match Baserow's schema or configuration exactly.
   - Token-based authentication is used for all API interactions.
-  - If asked to provide specific information, when using the list_rows_table tools, provide the appropriete search filter.
+  - If asked to provide specific information, when using the list_rows_table tools, provide the appropriate search filter.
 - Format payloads appropriately for each endpoint, adhering to Baserow's API requirements (e.g., the types and structure of fields and rows).
