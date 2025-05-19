@@ -18,6 +18,7 @@ export function sendAiConfigSavedEvent(
   params: AiConfigBase & {
     model: string;
     provider: string;
+    enabled: boolean;
     providerSettings?: string;
     modelSettings?: string;
   },
@@ -30,6 +31,7 @@ export function sendAiConfigSavedEvent(
       id: params.id,
       model: params.model,
       provider: params.provider,
+      enabled: params.enabled.toString(),
       providerSettings: params.providerSettings ?? '',
       modelSettings: params.modelSettings ?? '',
     },

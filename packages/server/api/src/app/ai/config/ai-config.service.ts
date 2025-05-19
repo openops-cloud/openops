@@ -68,6 +68,7 @@ export const aiConfigService = {
         ...telemetryConfig,
         providerSettings: config.providerSettings,
         modelSettings: config.modelSettings,
+        enabled: config.enabled,
       };
     }
 
