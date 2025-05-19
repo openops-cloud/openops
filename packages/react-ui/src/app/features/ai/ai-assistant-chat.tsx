@@ -23,12 +23,10 @@ type AiAssistantChatProps = {
 const PARENT_HEIGHT_GAP = 220;
 const CHAT_MIN_WIDTH = 360;
 const CHAT_MAX_WIDTH = 600;
-const CHAT_EXPANDED_WIDTH_OFFSET_BUILDER = 30;
 const CHAT_EXPANDED_WIDTH_OFFSET = 32;
 
 const AiAssistantChat = ({
   middlePanelSize,
-  isSidebarOpen = false,
   className,
 }: AiAssistantChatProps) => {
   const { isAiChatOpened, setIsAiChatOpened, aiChatSize, setAiChatSize } =
@@ -51,10 +49,8 @@ const AiAssistantChat = ({
 
   const { width, height } = useMemo(() => {
     const calculatedWidth = middlePanelSize.width * 0.6;
-    const offset = isSidebarOpen
-      ? CHAT_EXPANDED_WIDTH_OFFSET_BUILDER
-      : CHAT_EXPANDED_WIDTH_OFFSET;
-    const calculatedExpandedWidth = middlePanelSize.width - offset;
+    const calculatedExpandedWidth =
+      middlePanelSize.width - CHAT_EXPANDED_WIDTH_OFFSET;
 
     return {
       width: Math.max(
@@ -65,12 +61,7 @@ const AiAssistantChat = ({
       ),
       height: middlePanelSize.height - PARENT_HEIGHT_GAP,
     };
-  }, [
-    aiChatSize,
-    isSidebarOpen,
-    middlePanelSize.height,
-    middlePanelSize.width,
-  ]);
+  }, [aiChatSize, middlePanelSize.height, middlePanelSize.width]);
 
   const { hasActiveAiSettings, isLoading } =
     aiSettingsHooks.useHasActiveAiSettings();
