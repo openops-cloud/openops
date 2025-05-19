@@ -1,3 +1,4 @@
+import { BlockMetadataModel } from '@openops/blocks-framework';
 import { distributedLock, exceptionHandler } from '@openops/server-shared';
 import {
   AppConnection,
@@ -20,7 +21,6 @@ import {
 } from '@openops/shared';
 import dayjs from 'dayjs';
 import { FindOperator, ILike, In } from 'typeorm';
-import { blockMetadataService } from '../../blocks/block-metadata-service';
 import { repoFactory } from '../../core/db/repo-factory';
 import { encryptUtils } from '../../helper/encryption';
 import { buildPaginator } from '../../helper/pagination/build-paginator';
@@ -104,17 +104,12 @@ export const appConnectionService = {
       });
     }
 
-    const block = await blockMetadataService.getOrThrow({
-      name: request.blockName,
-      projectId,
-      version: undefined,
-    });
     const decryptedExisting = decryptConnection(existingConnection);
 
     const restoredConnectionValue = restoreRedactedSecrets(
       request.value,
       decryptedExisting.value,
-      block.auth,
+      params.block.auth,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ) as any;
 
@@ -496,6 +491,7 @@ type PatchParams = {
   userId: UserId;
   projectId: ProjectId;
   request: PatchAppConnectionRequestBody;
+  block: BlockMetadataModel;
 };
 
 type GetOneByName = {

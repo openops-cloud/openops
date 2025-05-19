@@ -12,15 +12,6 @@ jest.mock(
   }),
 );
 
-const getOrThrowMock = jest.fn((input) => Promise.resolve(input));
-
-jest.mock('../../../src/app/blocks/block-metadata-service', () => ({
-  blockMetadataService: {
-    ...jest.requireActual('../../../src/app/blocks/block-metadata-service'),
-    getOrThrow: getOrThrowMock,
-  },
-}));
-
 jest.mock('../../../src/app/app-connection/app-connection-utils', () => ({
   restoreRedactedSecrets: jest.fn((val) => val),
 }));
@@ -35,11 +26,14 @@ jest.mock('../../../src/app/core/db/repo-factory', () => ({
   }),
 }));
 
+import { BlockMetadataModel } from '@openops/blocks-framework';
 import {
   AppConnectionStatus,
   AppConnectionType,
   ApplicationError,
+  BlockType,
   ErrorCode,
+  PackageType,
   PatchAppConnectionRequestBody,
 } from '@openops/shared';
 import { appConnectionService } from '../../../src/app/app-connection/app-connection-service/app-connection-service';
@@ -73,14 +67,23 @@ describe('appConnectionService.update', () => {
     status: AppConnectionStatus.ACTIVE,
   };
   const blockMetadata = {
-    auth: { secret_text: { type: 'string', label: 'Secret' } },
-  };
+    name: 'test-block',
+    displayName: 'Test Block',
+    description: 'desc',
+    logoUrl: 'url',
+    version: '1.0.0',
+    authors: ['leyla'],
+    actions: {},
+    triggers: {},
+    projectUsage: 0,
+    blockType: BlockType.CUSTOM,
+    packageType: PackageType.ARCHIVE,
+  } as BlockMetadataModel;
 
   beforeEach(() => {
     jest.clearAllMocks();
 
     findOneByMock.mockResolvedValue(existingConnection);
-    getOrThrowMock.mockResolvedValue(blockMetadata);
     updateMock.mockResolvedValue(undefined);
   });
 
@@ -89,17 +92,12 @@ describe('appConnectionService.update', () => {
       projectId,
       request,
       userId,
+      block: blockMetadata,
     });
 
     expect(findOneByMock).toHaveBeenCalledWith({
       id: request.id,
       projectId,
-    });
-
-    expect(getOrThrowMock).toHaveBeenCalledWith({
-      name: blockName,
-      projectId,
-      version: undefined,
     });
 
     expect(restoreRedactedSecrets).toHaveBeenCalledWith(
@@ -135,7 +133,12 @@ describe('appConnectionService.update', () => {
     findOneByMock.mockResolvedValue(null);
 
     await expect(
-      appConnectionService.patch({ projectId, request, userId }),
+      appConnectionService.patch({
+        projectId,
+        request,
+        userId,
+        block: blockMetadata,
+      }),
     ).rejects.toThrow(
       new ApplicationError({
         code: ErrorCode.ENTITY_NOT_FOUND,

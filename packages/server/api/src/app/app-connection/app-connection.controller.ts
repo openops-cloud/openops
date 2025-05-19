@@ -38,13 +38,29 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
   });
 
   app.patch('/', PatchAppConnectionRequest, async (request, reply) => {
+    const block = await blockMetadataService.getOrThrow({
+      name: request.body.blockName,
+      projectId: request.principal.projectId,
+      version: undefined,
+    });
+
     const appConnection = await appConnectionService.patch({
       userId: request.principal.id,
       projectId: request.principal.projectId,
       request: request.body,
+      block,
     });
 
-    await reply.status(StatusCodes.OK).send(removeSensitiveData(appConnection));
+    const redactedValue = redactSecrets(block.auth, appConnection.value);
+
+    const result = redactedValue
+      ? {
+          ...appConnection,
+          value: redactedValue,
+        }
+      : removeSensitiveData(appConnection);
+
+    await reply.status(StatusCodes.OK).send(result);
   });
 
   app.get(
