@@ -11,7 +11,6 @@ export type AiConfigBase = AiBase & {
 
 export type AiChatBase = AiBase & {
   chatId: string;
-  message: string;
 };
 
 export enum AiEventName {
@@ -65,7 +64,6 @@ export function sendAiChatFailureEvent(
       projectId: params.projectId,
       chatId: params.chatId,
       errorMessage: params.errorMessage,
-      message: params.message,
     },
   });
 }
