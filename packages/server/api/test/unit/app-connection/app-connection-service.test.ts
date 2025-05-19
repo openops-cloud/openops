@@ -30,12 +30,12 @@ jest.mock('../../../src/app/app-connection/app-connection-utils', () => ({
 }));
 
 const updateMock = jest.fn();
-const findOneByOrFailMock = jest.fn();
+const findOneByMock = jest.fn();
 jest.mock('../../../src/app/core/db/repo-factory', () => ({
   ...jest.requireActual('../../../src/app/core/db/repo-factory'),
   repoFactory: () => () => ({
     update: updateMock,
-    findOneByOrFail: findOneByOrFailMock,
+    findOneBy: findOneByMock,
   }),
 }));
 
@@ -83,7 +83,7 @@ describe('appConnectionService.update', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    findOneByOrFailMock.mockResolvedValue(existingConnection);
+    findOneBy.mockResolvedValue(existingConnection);
     getOrThrowMock.mockResolvedValue(blockMetadata);
     updateMock.mockResolvedValue(undefined);
   });
@@ -95,7 +95,7 @@ describe('appConnectionService.update', () => {
       userId,
     });
 
-    expect(findOneByOrFailMock).toHaveBeenCalledWith({
+    expect(findOneBy).toHaveBeenCalledWith({
       name: connectionName,
       projectId,
     });
