@@ -89,7 +89,6 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
       });
 
       if (!block) {
-        logger.error(`Block metadata not found for ${connection.blockName}`);
         return reply.status(StatusCodes.BAD_REQUEST);
       }
 

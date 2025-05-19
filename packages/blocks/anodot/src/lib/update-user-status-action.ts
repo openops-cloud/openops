@@ -107,7 +107,7 @@ export const updateUserStatusAction = createAction({
 
       return result;
     } catch (error) {
-      const errorMsg = `An error occurred while setting user status '${userStatus}' on Anodot recommendation '${recommendationId}' (account id: ${accountId}): ${error}`;
+      const errorMsg = `An error occurred while setting user status '${userStatus}' on Umbrella recommendation '${recommendationId}' (account id: ${accountId}): ${error}`;
 
       logger.error(errorMsg);
       throw new Error(errorMsg);

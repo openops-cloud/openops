@@ -9,10 +9,10 @@ import { getRecommendationsAction } from './lib/get-recommendations-action-prede
 import { updateUserStatusAction } from './lib/update-user-status-action';
 
 export const anodot = createBlock({
-  displayName: 'Anodot',
+  displayName: 'Umbrella',
   auth: anadotAuth,
   minimumSupportedRelease: '0.20.0',
-  logoUrl: 'https://static.openops.com/blocks/anodot.png',
+  logoUrl: 'https://static.openops.com/blocks/umbrella.png',
   categories: [BlockCategory.FINOPS],
   authors: ['OpenOps'],
   actions: [

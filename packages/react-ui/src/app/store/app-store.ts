@@ -13,6 +13,8 @@ type AppState = {
   setCloudUser: (user: UserInfo | null) => void;
   userSettings: UserSettingsDefinition;
   setUserSettings: (userSettings: UserSettingsDefinition) => void;
+  isAiChatOpened: boolean;
+  setIsAiChatOpened: (isAiChatOpened: boolean) => void;
 };
 
 const getInitialSidebarState = (): boolean => {
@@ -32,4 +34,6 @@ export const useAppStore = create<AppState>((set) => ({
   setCloudUser: (user) => set({ cloudUser: user }),
   userSettings: {},
   setUserSettings: (userSettings) => set({ userSettings: userSettings }),
+  isAiChatOpened: false,
+  setIsAiChatOpened: (isAiChatOpened: boolean) => set({ isAiChatOpened }),
 }));

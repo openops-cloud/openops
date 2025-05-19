@@ -289,8 +289,8 @@ export const flagService = {
         updated,
       },
       {
-        id: FlagId.SHOW_AI_SETTINGS,
-        value: system.getBoolean(AppSystemProp.SHOW_AI_SETTINGS),
+        id: FlagId.USE_NEW_EXTERNAL_TESTDATA,
+        value: false,
         created,
         updated,
       },

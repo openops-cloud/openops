@@ -12,29 +12,46 @@ const chatHistoryKey = (chatId: string): string => {
   return `${chatId}:history`;
 };
 
+export type MCPChatContext = {
+  chatId: string;
+};
+
 export type ChatContext = {
   workflowId: string;
   blockName: string;
   stepName: string;
+  actionName: string;
 };
 
 export const generateChatId = (params: {
   workflowId: string;
   blockName: string;
   stepName: string;
+  actionName: string;
   userId: string;
 }): string => {
   return hashUtils.hashObject({
     workflowId: params.workflowId,
     blockName: params.blockName,
     stepName: params.stepName,
+    actionName: params.actionName,
+    userId: params.userId,
+  });
+};
+
+export const generateChatIdForMCP = (params: {
+  chatId: string;
+  userId: string;
+}): string => {
+  return hashUtils.hashObject({
+    chatId: params.chatId,
     userId: params.userId,
   });
 };
 
 export const createChatContext = async (
   chatId: string,
-  context: ChatContext,
+  context: ChatContext | MCPChatContext,
 ): Promise<void> => {
   await cacheWrapper.setSerializedObject(
     chatContextKey(chatId),

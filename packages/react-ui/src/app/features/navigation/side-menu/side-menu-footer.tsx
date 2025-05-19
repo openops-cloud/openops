@@ -7,6 +7,7 @@ import {
   OPENOPS_CONNECT_TEMPLATES_LOGOUT_URL,
   OPENOPS_CONNECT_TEMPLATES_URL,
 } from '@/app/constants/cloud';
+import { AiAssistantButton } from '@/app/features/ai/ai-assistant-button';
 import { authenticationSession } from '@/app/lib/authentication-session';
 import { useAppStore } from '@/app/store/app-store';
 import { useQueryClient } from '@tanstack/react-query';
@@ -101,7 +102,9 @@ const SideMenuFooter = () => {
         onCloudLogin,
         logoUrl: branding.logos.logoIconPositiveUrl,
       }}
-    />
+    >
+      <AiAssistantButton />
+    </MenuFooter>
   );
 };
 

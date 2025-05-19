@@ -7,7 +7,7 @@ describe('getPredefinedRecommendationsDropdownProperty', () => {
     expect(result).toMatchObject({
       required: true,
       displayName: 'Recommendation',
-      description: 'The type of recommendations to fetch from Anodot',
+      description: 'The type of recommendations to fetch',
       type: 'STATIC_DROPDOWN',
       options: {
         options: [

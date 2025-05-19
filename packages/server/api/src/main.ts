@@ -1,13 +1,17 @@
 import {
+  AppSystemProp,
   initializeLock,
   logger,
+  QueueMode,
   sendLogs,
   setStopHandlers,
   system,
 } from '@openops/server-shared';
+import { isNil } from '@openops/shared';
 import { FastifyInstance } from 'fastify';
 import { appPostBoot } from './app/app';
 import { databaseConnection } from './app/database/database-connection';
+import { createOpenOpsTablesMcpEndpoint } from './app/database/seeds/create-open-ops-tables-mcp-endpoint';
 import { seedDevData } from './app/database/seeds/dev-seeds';
 import { seedFocusDataAggregationTemplateTable } from './app/database/seeds/openops-aggregated-costs-seed';
 import * as analytics from './app/database/seeds/openops-analytics-seed';
@@ -18,6 +22,8 @@ import { updateOpenopsTablesDatabase } from './app/database/seeds/openops-tables
 import { upsertAdminUser } from './app/database/seeds/seed-admin';
 import { seedEnvironmentId } from './app/database/seeds/seed-env-id';
 import { seedTemplateTables } from './app/database/seeds/seed-template-tables';
+import { encryptUtils } from './app/helper/encryption';
+import { jwtUtils } from './app/helper/jwt-utils';
 import { setupServer } from './app/server';
 import { telemetry } from './app/telemetry/telemetry';
 import { workerPostBoot } from './app/worker';
@@ -48,13 +54,52 @@ function setupTimeZone(): void {
   process.env.TZ = 'UTC';
 }
 
+async function validateEnvPropsOnStartup(): Promise<void> {
+  const codeSandboxType = process.env.OPS_CODE_SANDBOX_TYPE;
+  if (!isNil(codeSandboxType)) {
+    throw new Error(
+      JSON.stringify({
+        message:
+          'OPS_CODE_SANDBOX_TYPE is deprecated, please use OPS_EXECUTION_MODE instead',
+      }),
+    );
+  }
+
+  const queueMode = system.getOrThrow<QueueMode>(AppSystemProp.QUEUE_MODE);
+  const encryptionKey = await encryptUtils.loadEncryptionKey(queueMode);
+  const isValidHexKey =
+    encryptionKey && /^[A-Fa-z0-9]{32}$/.test(encryptionKey);
+  if (!isValidHexKey) {
+    throw new Error(
+      JSON.stringify({
+        message:
+          'OPS_ENCRYPTION_KEY is either undefined or not a valid 32 hex string.',
+      }),
+    );
+  }
+
+  const jwtSecret = await jwtUtils.getJwtSecret();
+  if (isNil(jwtSecret)) {
+    throw new Error(
+      JSON.stringify({
+        message:
+          'OPS_JWT_SECRET is undefined, please define it in the environment variables',
+      }),
+    );
+  }
+}
+
 const main = async (): Promise<void> => {
   setupTimeZone();
+
   if (system.isApp()) {
+    await validateEnvPropsOnStartup();
+
     await databaseConnection().initialize();
     await databaseConnection().runMigrations();
 
     await upsertAdminUser();
+    await createOpenOpsTablesMcpEndpoint();
     await updateOpenopsTablesDatabase();
     await deleteOldOpportunitiesTable();
     await seedDevData();

@@ -3,6 +3,7 @@ import { expect } from '@storybook/jest';
 import type { Meta, StoryObj } from '@storybook/react';
 import { fn } from '@storybook/test';
 import { fireEvent } from '@storybook/testing-library';
+import { MarkdownCodeVariations } from '../../components';
 import { AIChatMessages } from '../../components/ai-chat-messages/ai-chat-messages';
 import { selectLightOrDarkCanvas } from '../../test-utils/select-themed-canvas.util';
 import { Toaster } from '../../ui/toaster';
@@ -32,6 +33,7 @@ export const CLIExample: Story = {
   args: {
     onInject: fn(),
     messages: sampleAIChatMessages,
+    codeVariation: MarkdownCodeVariations.WithCopyAndInject,
   },
   play: async ({ canvasElement, args }) => {
     const firstInjectButton = selectLightOrDarkCanvas(
@@ -53,6 +55,14 @@ export const CLIExample: Story = {
     expect(args.onInject).toHaveBeenCalledWith(
       expect.stringContaining('aws ce get-cost-and-usage'),
     );
+  },
+};
+
+export const CLIExampleWithoutInject: Story = {
+  args: {
+    onInject: fn(),
+    messages: sampleAIChatMessages,
+    codeVariation: MarkdownCodeVariations.WithCopyMultiline,
   },
 };
 

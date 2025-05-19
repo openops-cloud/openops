@@ -29,11 +29,12 @@ export const executeSqlQueryAction = createAction({
       'gcloud auth login',
     ),
     project: projectCliDropdown,
-    sqlText: Property.ShortText({
+    sqlText: Property.LongText({
       displayName: 'SQL query',
       required: true,
       description:
         'The SQL statement to execute. You can use named parameters like `:name` or numbered placeholders like `:1`, `:2`, etc.',
+      supportsAI: true,
     }),
     params: Property.Array({
       displayName: 'Parameters',

@@ -3,6 +3,44 @@ import { readFile } from 'fs/promises';
 import { join } from 'path';
 import { ChatContext } from './ai-chat.service';
 
+export const getMcpSystemPrompt = async ({
+  isAnalyticsLoaded,
+  isTablesLoaded,
+}: {
+  isAnalyticsLoaded: boolean;
+  isTablesLoaded: boolean;
+}): Promise<string> => {
+  const baseMcpPrompt = await loadPrompt('mcp.txt');
+  const loadTablesAndSupersetMcpPrompts = system.getBoolean(
+    AppSystemProp.LOAD_TABLES_AND_SUPERSET_MCP_TOOLS,
+  );
+
+  if (!loadTablesAndSupersetMcpPrompts) {
+    return baseMcpPrompt;
+  }
+
+  logger.debug(
+    {
+      isAnalyticsLoaded,
+    },
+    'isAnalyticsMCPLoaded',
+  );
+
+  logger.debug(
+    {
+      isTablesLoaded,
+    },
+    'isTablesMCPLoaded',
+  );
+
+  const tablesPrompt = isTablesLoaded ? await loadPrompt('mcp-tables.txt') : '';
+  const analyticsPrompt = isAnalyticsLoaded
+    ? await loadPrompt('mcp-analytics.txt')
+    : '';
+
+  return `${baseMcpPrompt}\n\n${tablesPrompt}\n\n${analyticsPrompt}`;
+};
+
 export const getSystemPrompt = async (
   context: ChatContext,
 ): Promise<string> => {
@@ -12,7 +50,16 @@ export const getSystemPrompt = async (
     case '@openops/block-azure':
       return loadPrompt('azure-cli.txt');
     case '@openops/block-google-cloud':
+      if (context.actionName === 'google_execute_sql_query') {
+        return loadPrompt('gcp-big-query.txt');
+      }
       return loadPrompt('gcp-cli.txt');
+    case '@openops/block-aws-athena':
+      return loadPrompt('aws-athena.txt');
+    case '@openops/block-snowflake':
+      return loadPrompt('snowflake.txt');
+    case '@openops/block-databricks':
+      return loadPrompt('databricks.txt');
     default:
       return '';
   }

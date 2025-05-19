@@ -50,7 +50,7 @@ OpenOps integrates with a broad range of platforms, including cloud providers, d
 
 * AWS
 * Azure
-* Google Cloud (Coming soon\!)
+* Google Cloud
 
 ### **⚙️ System Requirements**
 

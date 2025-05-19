@@ -20,7 +20,6 @@ import {
   FlowImportTemplate,
   FlowRun,
   Folder,
-  isNil,
   Project,
   spreadIfDefined,
   UserInvitation,
@@ -49,8 +48,6 @@ import { flowModule } from './flows/flow.module';
 import { formModule } from './flows/flow/form/form.module';
 import { folderModule } from './flows/folder/folder.module';
 import { triggerEventModule } from './flows/trigger-events/trigger-event.module';
-import { encryptUtils } from './helper/encryption';
-import { jwtUtils } from './helper/jwt-utils';
 import { systemJobsSchedule } from './helper/system-jobs';
 import { organizationModule } from './organization/organization.module';
 import { projectModule } from './project/project-module';
@@ -225,8 +222,6 @@ export const setupApp = async (
     },
   );
 
-  await validateEnvPropsOnStartup();
-
   await app.register(projectModule);
   await app.register(communityBlocksModule);
 
@@ -253,40 +248,6 @@ export const setupApp = async (
   } as FastifyCookieOptions);
 
   return app;
-};
-
-const validateEnvPropsOnStartup = async (): Promise<void> => {
-  const codeSandboxType = process.env.OPS_CODE_SANDBOX_TYPE;
-  if (!isNil(codeSandboxType)) {
-    throw new Error(
-      JSON.stringify({
-        message:
-          'OPS_CODE_SANDBOX_TYPE is deprecated, please use OPS_EXECUTION_MODE instead',
-      }),
-    );
-  }
-  const queueMode = system.getOrThrow<QueueMode>(AppSystemProp.QUEUE_MODE);
-  const encryptionKey = await encryptUtils.loadEncryptionKey(queueMode);
-  const isValidHexKey =
-    encryptionKey && /^[A-Fa-z0-9]{32}$/.test(encryptionKey);
-  if (!isValidHexKey) {
-    throw new Error(
-      JSON.stringify({
-        message:
-          'OPS_ENCRYPTION_KEY is either undefined or not a valid 32 hex string.',
-      }),
-    );
-  }
-
-  const jwtSecret = await jwtUtils.getJwtSecret();
-  if (isNil(jwtSecret)) {
-    throw new Error(
-      JSON.stringify({
-        message:
-          'OPS_JWT_SECRET is undefined, please define it in the environment variables',
-      }),
-    );
-  }
 };
 
 async function getAdapter() {

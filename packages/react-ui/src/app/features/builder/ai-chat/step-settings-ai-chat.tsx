@@ -2,18 +2,22 @@ import { authenticationSession } from '@/app/lib/authentication-session';
 import { Message, useChat } from '@ai-sdk/react';
 import {
   AI_CHAT_CONTAINER_SIZES,
-  AiChatContainer,
   AiChatContainerSizeState,
   cn,
+  StepSettingsAiChatContainer,
+  toast,
 } from '@openops/components/ui';
-import { FlowVersion, OpenChatResponse } from '@openops/shared';
+import { flowHelper, FlowVersion, OpenChatResponse } from '@openops/shared';
+import { useQueryClient } from '@tanstack/react-query';
+import { t } from 'i18next';
 import { nanoid } from 'nanoid';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useBuilderStateContext } from '../builder-hooks';
 import { DataSelectorSizeState } from '../data-selector/data-selector-size-togglers';
-import { Conversation } from './conversation';
+import { aiChatApi } from './lib/chat-api';
+import { StepSettingsAiConversation } from './step-settings-ai-conversation';
 
-type AiChatProps = {
+type StepSettingsAiChatProps = {
   middlePanelSize: {
     width: number;
     height: number;
@@ -22,11 +26,11 @@ type AiChatProps = {
   flowVersion: FlowVersion;
 };
 
-const AiChat = ({
+const StepSettingsAiChat = ({
   middlePanelSize,
   selectedStep,
   flowVersion,
-}: AiChatProps) => {
+}: StepSettingsAiChatProps) => {
   const [
     {
       showDataSelector,
@@ -44,7 +48,14 @@ const AiChat = ({
   const conversationRef = useRef<OpenChatResponse | null>(null);
   const [chatSessionKey, setChatSessionKey] = useState<string>(nanoid());
 
-  const { messages, input, handleInputChange, handleSubmit, status } = useChat({
+  const {
+    messages,
+    input,
+    handleInputChange,
+    handleSubmit,
+    status,
+    setMessages,
+  } = useChat({
     id: chatSessionKey,
     api: 'api/v1/ai/chat/conversation',
     maxSteps: 5,
@@ -87,6 +98,41 @@ const AiChat = ({
     dispatch({ type: 'AICHAT_CLOSE_CLICK' });
   }, [dispatch]);
 
+  const queryClient = useQueryClient();
+
+  const [enableNewChat, setEnableNewChat] = useState(true);
+
+  const onNewChatClick = useCallback(async () => {
+    const chatId = conversationRef.current?.chatId;
+    if (!selectedStep || !chatId) {
+      return;
+    }
+
+    setEnableNewChat(false);
+
+    try {
+      await aiChatApi.delete(chatId);
+
+      const stepDetails = flowHelper.getStep(flowVersion, selectedStep);
+      const blockName = stepDetails?.settings?.blockName;
+
+      await queryClient.invalidateQueries({
+        queryKey: ['openChat', flowVersion.flowId, blockName, selectedStep],
+      });
+      setMessages([]);
+    } catch (error) {
+      toast({
+        title: t('There was an error creating the new chat, please try again'),
+        duration: 3000,
+      });
+      console.error(
+        `There was an error deleting existing chat and creating a new one: ${error}`,
+      );
+    } finally {
+      setEnableNewChat(true);
+    }
+  }, [flowVersion, queryClient, selectedStep, setMessages]);
+
   const onToggle = useCallback(() => {
     if (
       (
@@ -107,11 +153,13 @@ const AiChat = ({
   }, [aiContainerSize, dataSelectorSize, onToggleContainerSizeState]);
 
   return (
-    <AiChatContainer
+    <StepSettingsAiChatContainer
       parentHeight={middlePanelSize.height}
       parentWidth={middlePanelSize.width}
       showAiChat={showAiChat}
       onCloseClick={onCloseClick}
+      enableNewChat={enableNewChat}
+      onNewChatClick={onNewChatClick}
       containerSize={aiContainerSize}
       onToggle={onToggle}
       toggleContainerSizeState={onToggleContainerSizeState}
@@ -125,9 +173,10 @@ const AiChat = ({
       handleInputChange={handleInputChange}
       handleSubmit={handleSubmit}
       input={input}
+      isEmpty={!messages.length}
     >
       {selectedStep && showAiChat && aiChatProperty && (
-        <Conversation
+        <StepSettingsAiConversation
           stepName={selectedStep}
           flowVersion={flowVersion}
           property={aiChatProperty}
@@ -138,9 +187,9 @@ const AiChat = ({
           status={status}
         />
       )}
-    </AiChatContainer>
+    </StepSettingsAiChatContainer>
   );
 };
 
-AiChat.displayName = 'Chat';
-export { AiChat };
+StepSettingsAiChat.displayName = 'StepSettingsAiChat';
+export { StepSettingsAiChat };
