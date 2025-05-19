@@ -30,8 +30,6 @@ const WorkflowOverviewContent = ({
 
   const [dimensions, setDimensions] = useState<BoxSize>(INITIAL_SIZE);
 
-  console.warn('dimensions', dimensions);
-
   return (
     <div className="pt-6">
       <WorkflowOverviewHeader
