@@ -3,6 +3,8 @@ import ResizeIcon from '../../icons/resize-icon';
 import { cn } from '../../lib/cn';
 import { ScrollArea } from '../../ui/scroll-area';
 
+type ResizeHandlePosition = 'bottom-right' | 'top-right';
+
 interface ResizableAreaProps {
   initialWidth: number;
   initialHeight: number;
@@ -12,6 +14,7 @@ interface ResizableAreaProps {
   maxHeight: number;
   children: React.ReactNode;
   className?: string;
+  resizeFrom?: ResizeHandlePosition;
 }
 
 export function ResizableArea({
@@ -23,6 +26,7 @@ export function ResizableArea({
   maxHeight,
   children,
   className,
+  resizeFrom = 'bottom-right',
 }: ResizableAreaProps) {
   const [dimensions, setDimensions] = useState({
     width: initialWidth,
@@ -39,18 +43,20 @@ export function ResizableArea({
       const dx = e.clientX - startPosRef.current.x;
       const dy = e.clientY - startPosRef.current.y;
 
+      const calculatedHeight =
+        resizeFrom === 'bottom-right'
+          ? startPosRef.current.height + dy
+          : startPosRef.current.height - dy;
+
       setDimensions({
         width: Math.min(
           Math.max(startPosRef.current.width + dx, minWidth),
           maxWidth,
         ),
-        height: Math.min(
-          Math.max(startPosRef.current.height + dy, minHeight),
-          maxHeight,
-        ),
+        height: Math.min(Math.max(calculatedHeight, minHeight), maxHeight),
       });
     },
-    [minWidth, maxWidth, minHeight, maxHeight],
+    [resizeFrom, minHeight, maxHeight, minWidth, maxWidth],
   );
 
   const handleMouseUp = useCallback(() => {
@@ -89,13 +95,20 @@ export function ResizableArea({
       style={{
         width: dimensions.width,
         height: dimensions.height,
+        ...(resizeFrom === 'top-right' && { position: 'absolute', bottom: 0 }),
         touchAction: 'none',
       }}
     >
       <ScrollArea className="w-full h-full pr-3">{children}</ScrollArea>
 
       <ResizeIcon
-        className="absolute bottom-1 right-1 w-3 h-3 cursor-nwse-resize pointer-events-auto text-primary/40"
+        className={cn(
+          'absolute bottom-1 right-1 w-3 h-3 cursor-nwse-resize pointer-events-auto text-primary/40',
+          {
+            'top-1 right-1 cursor-nesw-resize rotate-[-90deg]':
+              resizeFrom === 'top-right',
+          },
+        )}
         onMouseDown={startResize}
       ></ResizeIcon>
     </div>

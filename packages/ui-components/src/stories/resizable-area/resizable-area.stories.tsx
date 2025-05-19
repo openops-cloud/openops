@@ -12,6 +12,7 @@ const meta = {
     minHeight: 150,
     maxWidth: 500,
     maxHeight: 500,
+    resizeFrom: 'bottom-right',
     children: (
       <p className="text-primary">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque
@@ -33,8 +34,8 @@ const meta = {
     },
   },
   render: (args) => (
-    <div className="w-[600px] h-[600px] p-[50px] border bg-background">
-      <ResizableArea {...args} className="border"></ResizableArea>
+    <div className="w-[600px] h-[600px] p-[50px] border bg-background relative">
+      <ResizableArea {...args} className="border mb-[50px]"></ResizableArea>
     </div>
   ),
   parameters: {
