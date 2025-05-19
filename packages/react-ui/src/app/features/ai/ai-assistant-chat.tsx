@@ -24,7 +24,7 @@ const PARENT_HEIGHT_GAP = 220;
 const CHAT_MIN_WIDTH = 360;
 const CHAT_MAX_WIDTH = 600;
 const CHAT_EXPANDED_WIDTH_OFFSET_BUILDER = 30;
-const CHAT_EXPANDED_WIDTH_OFFSET = 10;
+const CHAT_EXPANDED_WIDTH_OFFSET = 32;
 
 const AiAssistantChat = ({
   middlePanelSize,
