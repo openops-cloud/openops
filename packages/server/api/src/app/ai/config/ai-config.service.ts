@@ -1,6 +1,5 @@
 import {
   AiConfig,
-  AiProviderEnum,
   isNil,
   openOpsId,
   SaveAiConfigRequest,
