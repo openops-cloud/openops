@@ -95,7 +95,8 @@ const AiAssistantChat = ({
         className={cn(
           'absolute left-4 bottom-[17px] z-50',
           {
-            'top-0': aiChatSize === AI_CHAT_CONTAINER_SIZES.EXPANDED,
+            'top-0':
+              aiChatSize === AI_CHAT_CONTAINER_SIZES.EXPANDED && !isSidebarOpen,
           },
           className,
         )}
@@ -113,7 +114,8 @@ const AiAssistantChat = ({
       className={cn(
         'left-4 bottom-[17px]',
         {
-          'top-4': aiChatSize === AI_CHAT_CONTAINER_SIZES.EXPANDED,
+          'top-4':
+            aiChatSize === AI_CHAT_CONTAINER_SIZES.EXPANDED && !isSidebarOpen,
         },
         className,
       )}
