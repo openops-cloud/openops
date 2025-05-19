@@ -1,10 +1,4 @@
-import {
-  distributedLock,
-  exceptionHandler,
-  logger,
-  SharedSystemProp,
-  system,
-} from '@openops/server-shared';
+import { distributedLock, exceptionHandler } from '@openops/server-shared';
 import {
   AppConnection,
   AppConnectionId,
@@ -14,8 +8,6 @@ import {
   AppConnectionWithoutSensitiveData,
   ApplicationError,
   Cursor,
-  EngineResponseStatus,
-  EnvironmentType,
   ErrorCode,
   isNil,
   OAuth2GrantType,
@@ -27,13 +19,8 @@ import {
   UserId,
 } from '@openops/shared';
 import dayjs from 'dayjs';
-import { engineRunner } from 'server-worker';
 import { FindOperator, ILike, In } from 'typeorm';
-import { accessTokenManager } from '../../authentication/lib/access-token-manager';
-import {
-  blockMetadataService,
-  getBlockPackage,
-} from '../../blocks/block-metadata-service';
+import { blockMetadataService } from '../../blocks/block-metadata-service';
 import { repoFactory } from '../../core/db/repo-factory';
 import { encryptUtils } from '../../helper/encryption';
 import { buildPaginator } from '../../helper/pagination/build-paginator';
@@ -52,6 +39,7 @@ import {
 } from '../app-connection.entity';
 import { oauth2Handler } from './oauth2';
 import { oauth2Util } from './oauth2/oauth2-util';
+import { engineValidateAuth } from './validate-auth';
 
 const repo = repoFactory(AppConnectionEntity);
 
@@ -403,61 +391,6 @@ function decryptConnection(
   return connection;
 }
 
-const engineValidateAuth = async (
-  params: EngineValidateAuthParams,
-): Promise<void> => {
-  const environment = system.getOrThrow(SharedSystemProp.ENVIRONMENT);
-  if (environment === EnvironmentType.TESTING) {
-    return;
-  }
-  const { blockName, auth, projectId } = params;
-
-  const blockMetadata = await blockMetadataService.getOrThrow({
-    name: blockName,
-    projectId,
-    version: undefined,
-  });
-
-  const engineToken = await accessTokenManager.generateEngineToken({
-    projectId,
-  });
-  const engineResponse = await engineRunner.executeValidateAuth(engineToken, {
-    block: await getBlockPackage(projectId, {
-      blockName,
-      blockVersion: blockMetadata.version,
-      blockType: blockMetadata.blockType,
-      packageType: blockMetadata.packageType,
-    }),
-    auth,
-    projectId,
-  });
-
-  if (engineResponse.status !== EngineResponseStatus.OK) {
-    logger.error(
-      engineResponse,
-      '[AppConnectionService#engineValidateAuth] engineResponse',
-    );
-    throw new ApplicationError({
-      code: ErrorCode.ENGINE_OPERATION_FAILURE,
-      params: {
-        message: 'Failed to run engine validate auth',
-        context: engineResponse,
-      },
-    });
-  }
-
-  const validateAuthResult = engineResponse.result;
-
-  if (!validateAuthResult.valid) {
-    throw new ApplicationError({
-      code: ErrorCode.INVALID_APP_CONNECTION,
-      params: {
-        error: validateAuthResult.error,
-      },
-    });
-  }
-};
-
 /**
  * We should make sure this is accessed only once, as a race condition could occur where the token needs to be
  * refreshed and it gets accessed at the same time, which could result in the wrong request saving incorrect data.
@@ -592,12 +525,6 @@ type ListParams = {
 
 type CountByProjectParams = {
   projectId: ProjectId;
-};
-
-type EngineValidateAuthParams = {
-  blockName: string;
-  projectId: ProjectId;
-  auth: AppConnectionValue;
 };
 
 type ValidateConnectionValueParams = {

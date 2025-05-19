@@ -1,21 +1,16 @@
-jest.mock('@openops/server-shared', () => {
-  const actual = jest.requireActual('@openops/server-shared');
-  return {
-    ...actual,
-    system: {
-      ...actual.system,
-      getOrThrow: jest.fn().mockReturnValue('test-data'),
-      get: jest.fn().mockReturnValue('test-data'),
-    },
-  };
-});
-
 jest.mock('../../../src/app/helper/encryption', () => ({
   encryptUtils: {
     encryptObject: jest.fn((val) => `encrypted-${JSON.stringify(val)}`),
     decryptObject: jest.fn((val) => JSON.parse(val.replace('encrypted-', ''))),
   },
 }));
+
+jest.mock(
+  '../../../src/app/app-connection/app-connection-service/validate-auth',
+  () => ({
+    engineValidateAuth: jest.fn(),
+  }),
+);
 
 const getOrThrowMock = jest.fn((input) => Promise.resolve(input));
 
@@ -74,11 +69,11 @@ describe('appConnectionService.update', () => {
     name: connectionName,
     projectId,
     blockName,
-    value: 'encrypted-{"type":"SECRET_TEXT","secret":"old"}',
+    value: 'encrypted-{"type":"SECRET_TEXT","secret_text":"old"}',
     status: AppConnectionStatus.ACTIVE,
   };
   const blockMetadata = {
-    auth: { secret: { type: 'string', label: 'Secret' } },
+    auth: { secret_text: { type: 'string', label: 'Secret' } },
   };
 
   beforeEach(() => {
@@ -97,7 +92,7 @@ describe('appConnectionService.update', () => {
     });
 
     expect(findOneByMock).toHaveBeenCalledWith({
-      name: connectionName,
+      id: request.id,
       projectId,
     });
 
@@ -109,14 +104,14 @@ describe('appConnectionService.update', () => {
 
     expect(restoreRedactedSecrets).toHaveBeenCalledWith(
       request.value,
-      { type: 'SECRET_TEXT', secret: 'old' },
+      { type: 'SECRET_TEXT', secret_text: 'old' },
       blockMetadata.auth,
     );
 
     expect(encryptUtils.encryptObject).toHaveBeenCalledWith({
       ...request.value,
       type: 'SECRET_TEXT',
-      secret: 'abc',
+      secret_text: 'abc',
     });
 
     expect(updateMock).toHaveBeenCalledWith(existingConnection.id, {
@@ -124,7 +119,7 @@ describe('appConnectionService.update', () => {
       id: existingConnection.id,
       projectId,
       status: AppConnectionStatus.ACTIVE,
-      value: 'encrypted-{"type":"SECRET_TEXT","secret":"abc"}',
+      value: 'encrypted-{"type":"SECRET_TEXT","secret_text":"abc"}',
     });
 
     expect(result).toEqual({
@@ -132,14 +127,16 @@ describe('appConnectionService.update', () => {
       id: existingConnection.id,
       projectId,
       status: AppConnectionStatus.ACTIVE,
-      value: { type: 'SECRET_TEXT', secret: 'abc' },
+      value: { type: 'SECRET_TEXT', secret_text: 'abc' },
     });
   });
 
   test('should throw if the connection was not found', async () => {
-    expect(() =>
+    findOneByMock.mockResolvedValue(null);
+
+    await expect(
       appConnectionService.patch({ projectId, request, userId }),
-    ).toThrow(
+    ).rejects.toThrow(
       new ApplicationError({
         code: ErrorCode.ENTITY_NOT_FOUND,
         params: {
