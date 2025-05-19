@@ -14,6 +14,10 @@ type AiAssistantChatContainerProps = {
   height: number;
   width: number;
   showAiChat: boolean;
+  middlePanelSize: {
+    width: number;
+    height: number;
+  };
   onCloseClick: () => void;
   onCreateNewChatClick: () => void;
   isEmpty: boolean;
@@ -21,9 +25,13 @@ type AiAssistantChatContainerProps = {
   children?: ReactNode;
 } & Pick<UseChatHelpers, 'input' | 'handleInputChange' | 'handleSubmit'>;
 
+export const CHAT_MIN_WIDTH = 360;
+export const PARENT_HEIGHT_GAP = 220;
+
 const AiAssistantChatContainer = ({
   height,
   width,
+  middlePanelSize,
   showAiChat,
   onCloseClick,
   onCreateNewChatClick,
@@ -35,50 +43,9 @@ const AiAssistantChatContainer = ({
   input,
 }: AiAssistantChatContainerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [maxSize, setMaxSize] = useState({ width: width, height: height });
-  const [initialSize, setInitialSize] = useState({
-    width: width,
-    height: height,
-  });
 
-  const minHeight = Math.min(400, height);
-
-  console.warn('initialSize', initialSize);
-  console.warn('maxSize', maxSize);
-
-  useEffect(() => {
-    if (!showAiChat || !containerRef.current) return;
-
-    const parent = containerRef.current.parentElement;
-    if (!parent) return;
-
-    const updateSize = () => {
-      const bounds = parent.getBoundingClientRect();
-      // console.warn('bounds', bounds);
-      setMaxSize({
-        width: Math.floor(bounds.width) - 15,
-        height: Math.floor(bounds.height - 150),
-      });
-
-      setInitialSize((prev) => ({
-        width: Math.min(prev.width, Math.floor(bounds.width) - 15),
-        height: Math.min(prev.height, Math.floor(bounds.height - 150)),
-      }));
-    };
-
-    updateSize(); // Initial run
-
-    const resizeObserver = new ResizeObserver(() => {
-      // console.warn('observe!');
-      updateSize();
-    });
-
-    resizeObserver.observe(parent);
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, [showAiChat]);
+  const maxHeight = middlePanelSize.height - PARENT_HEIGHT_GAP;
+  const maxWidth = middlePanelSize.width - 100;
 
   return (
     <div
@@ -102,95 +69,96 @@ const AiAssistantChatContainer = ({
       }}
     >
       <ResizableArea
-        initialWidth={initialSize.width}
-        initialHeight={initialSize.height}
-        minWidth={width}
-        minHeight={minHeight}
-        maxWidth={maxSize.width}
-        maxHeight={maxSize.height}
+        initialWidth={width}
+        initialHeight={height}
+        minWidth={CHAT_MIN_WIDTH}
+        minHeight={300}
+        maxWidth={maxWidth}
+        maxHeight={maxHeight}
         resizeFrom="top-right"
-        className="static"
+        className="static pb-0"
       >
-        <div className="flex justify-between items-center px-4 py-2 gap-2 text-md dark:text-primary font-bold border-b border-gray-200">
-          <div className="flex items-center gap-2">
-            <div className="size-8 flex justify-center items-center bg-background bg-gradient-to-b from-ring/40 to-primary-200/40 rounded-xl">
-              <Bot size={20} />
-            </div>
-            {t('AI Assistant')}
-          </div>
-          <div className="flex items-center gap-2">
-            <NewAiChatButton
-              enableNewChat={!isEmpty}
-              onNewChatClick={onCreateNewChatClick}
-            />
-            <TooltipWrapper tooltipText={t('Close')}>
-              <Button
-                size="icon"
-                variant="basic"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onCloseClick();
-                }}
-                className="text-outline"
-              >
-                <XIcon size={20} />
-              </Button>
-            </TooltipWrapper>
-          </div>
-        </div>
-
-        <div className="overflow-hidden">
-          <div className="py-4 flex flex-col h-full">
-            <ScrollArea className="h-full w-full">
-              <div className="h-full w-full px-6 flex flex-col">
-                {isEmpty ? (
-                  <div
-                    className={
-                      'flex-1 flex flex-col items-center justify-center gap-1'
-                    }
-                  >
-                    <span className="inline-block max-w-[220px] text-center dark:text-primary text-base font-bold leading-[25px]">
-                      {t('Welcome to')}
-                      <br />
-                      {t('OpenOps AI Assistant!')}
-                    </span>
-                    <span className="text-[14px] font-normal">
-                      {t('How can I help you today?')}
-                    </span>
-                  </div>
-                ) : (
-                  children
-                )}
+        <div className="h-full flex flex-col">
+          <div className="flex justify-between items-center px-4 py-2 gap-2 text-md dark:text-primary font-bold border-b border-gray-200">
+            <div className="flex items-center gap-2">
+              <div className="size-8 flex justify-center items-center bg-background bg-gradient-to-b from-ring/40 to-primary-200/40 rounded-xl">
+                <Bot size={20} />
               </div>
-            </ScrollArea>
-            <div className="w-full px-4 relative">
-              <TextareaAutosize
-                className="w-full h-full min-h-12 resize-none rounded-lg border-gray-200 border-[1px] dark:text-primary-700 text-base font-normal leading-normal p-3 pr-12 outline-none dark:bg-accent"
-                minRows={1}
-                maxRows={4}
-                placeholder={t('Type your question here…')}
-                value={input}
-                onChange={handleInputChange}
-                onKeyDown={(ev) => {
-                  if (ev.key === 'Enter' && !ev.shiftKey) {
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                    handleSubmit();
-                  }
-                }}
+              {t('AI Assistant')}
+            </div>
+            <div className="flex items-center gap-2">
+              <NewAiChatButton
+                enableNewChat={!isEmpty}
+                onNewChatClick={onCreateNewChatClick}
               />
-
-              <Button
-                size="icon"
-                variant="transparent"
-                className="absolute right-7 bottom-2.5"
-                onClick={handleSubmit}
-              >
-                <SendIcon
-                  size={20}
-                  className="text-gray-400 hover:text-gray-600"
+              <TooltipWrapper tooltipText={t('Close')}>
+                <Button
+                  size="icon"
+                  variant="basic"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onCloseClick();
+                  }}
+                  className="text-outline"
+                >
+                  <XIcon size={20} />
+                </Button>
+              </TooltipWrapper>
+            </div>
+          </div>
+          <div className="overflow-hidden flex-1">
+            <div className="py-4 flex flex-col h-full">
+              <ScrollArea className="h-full w-full">
+                <div className="h-full w-full px-6 flex flex-col">
+                  {isEmpty ? (
+                    <div
+                      className={
+                        'flex-1 flex flex-col items-center justify-center gap-1'
+                      }
+                    >
+                      <span className="inline-block max-w-[220px] text-center dark:text-primary text-base font-bold leading-[25px]">
+                        {t('Welcome to')}
+                        <br />
+                        {t('OpenOps AI Assistant!')}
+                      </span>
+                      <span className="text-[14px] font-normal">
+                        {t('How can I help you today?')}
+                      </span>
+                    </div>
+                  ) : (
+                    children
+                  )}
+                </div>
+              </ScrollArea>
+              <div className="w-full px-4 relative">
+                <TextareaAutosize
+                  className="w-full h-full min-h-12 resize-none rounded-lg border-gray-200 border-[1px] dark:text-primary-700 text-base font-normal leading-normal p-3 pr-12 outline-none dark:bg-accent"
+                  minRows={1}
+                  maxRows={4}
+                  placeholder={t('Type your question here…')}
+                  value={input}
+                  onChange={handleInputChange}
+                  onKeyDown={(ev) => {
+                    if (ev.key === 'Enter' && !ev.shiftKey) {
+                      ev.preventDefault();
+                      ev.stopPropagation();
+                      handleSubmit();
+                    }
+                  }}
                 />
-              </Button>
+
+                <Button
+                  size="icon"
+                  variant="transparent"
+                  className="absolute right-7 bottom-2.5"
+                  onClick={handleSubmit}
+                >
+                  <SendIcon
+                    size={20}
+                    className="text-gray-400 hover:text-gray-600"
+                  />
+                </Button>
+              </div>
             </div>
           </div>
         </div>

@@ -4,8 +4,10 @@ import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
 import { useAppStore } from '@/app/store/app-store';
 import {
   AiAssistantChatContainer,
+  CHAT_MIN_WIDTH,
   cn,
   NoAiEnabledPopover,
+  PARENT_HEIGHT_GAP,
 } from '@openops/components/ui';
 import { useMemo } from 'react';
 
@@ -17,8 +19,6 @@ type AiAssistantChatProps = {
   className?: string;
 };
 
-const PARENT_HEIGHT_GAP = 220;
-const CHAT_MIN_WIDTH = 360;
 const CHAT_MAX_WIDTH = 600;
 
 const AiAssistantChat = ({
@@ -69,6 +69,7 @@ const AiAssistantChat = ({
 
   return (
     <AiAssistantChatContainer
+      middlePanelSize={middlePanelSize}
       height={height}
       width={width}
       showAiChat={isAiChatOpened}
