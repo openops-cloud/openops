@@ -83,7 +83,7 @@ describe('appConnectionService.update', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    findOneBy.mockResolvedValue(existingConnection);
+    findOneByMock.mockResolvedValue(existingConnection);
     getOrThrowMock.mockResolvedValue(blockMetadata);
     updateMock.mockResolvedValue(undefined);
   });
@@ -95,7 +95,7 @@ describe('appConnectionService.update', () => {
       userId,
     });
 
-    expect(findOneBy).toHaveBeenCalledWith({
+    expect(findOneByMock).toHaveBeenCalledWith({
       name: connectionName,
       projectId,
     });
