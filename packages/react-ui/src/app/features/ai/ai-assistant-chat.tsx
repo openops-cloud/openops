@@ -17,7 +17,6 @@ type AiAssistantChatProps = {
     height: number;
   };
   className?: string;
-  isSidebarOpen?: boolean;
 };
 
 const PARENT_HEIGHT_GAP = 220;
