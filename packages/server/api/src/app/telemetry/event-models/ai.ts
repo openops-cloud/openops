@@ -9,9 +9,15 @@ export type AiConfigBase = AiBase & {
   id: string;
 };
 
+export type AiChatBase = AiBase & {
+  chatId: string;
+  message: string;
+};
+
 export enum AiEventName {
   AI_CONFIG_SAVED = 'ai_config_saved',
   AI_CONFIG_DELETED = 'ai_config_deleted',
+  AI_CHAT_FAILURE = 'ai_chat_failure',
 }
 
 export function sendAiConfigSavedEvent(
@@ -45,6 +51,21 @@ export function sendAiConfigDeletedEvent(params: AiConfigBase): void {
       userId: params.userId,
       projectId: params.projectId,
       id: params.id,
+    },
+  });
+}
+
+export function sendAiChatFailureEvent(
+  params: AiChatBase & { errorMessage: string },
+): void {
+  telemetry.trackEvent({
+    name: AiEventName.AI_CHAT_FAILURE,
+    labels: {
+      userId: params.userId,
+      projectId: params.projectId,
+      chatId: params.chatId,
+      errorMessage: params.errorMessage,
+      message: params.message,
     },
   });
 }

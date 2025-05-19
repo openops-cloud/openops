@@ -17,6 +17,7 @@ import {
 } from 'ai';
 import { StatusCodes } from 'http-status-codes';
 import { encryptUtils } from '../../helper/encryption';
+import { sendAiChatFailureEvent } from '../../telemetry/event-models/ai';
 import { aiConfigService } from '../config/ai-config.service';
 import {
   ChatContext,
@@ -109,7 +110,18 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
         result.mergeIntoDataStream(dataStreamWriter);
       },
       onError: (error) => {
-        return error instanceof Error ? error.message : String(error);
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+
+        sendAiChatFailureEvent({
+          projectId,
+          userId: request.principal.id,
+          chatId,
+          message: request.body.message,
+          errorMessage,
+        });
+
+        return errorMessage;
       },
     });
   });

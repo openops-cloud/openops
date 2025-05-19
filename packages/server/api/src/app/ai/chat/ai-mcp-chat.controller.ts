@@ -25,6 +25,7 @@ import {
 } from 'ai';
 import { StatusCodes } from 'http-status-codes';
 import { encryptUtils } from '../../helper/encryption';
+import { sendAiChatFailureEvent } from '../../telemetry/event-models/ai';
 import { aiConfigService } from '../config/ai-config.service';
 import { getMCPTools } from '../mcp/mcp-tools';
 import {
@@ -36,7 +37,6 @@ import {
   saveChatHistory,
 } from './ai-chat.service';
 import { getMcpSystemPrompt } from './prompts.service';
-
 const MAX_RECURSION_DEPTH = 10;
 
 export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
@@ -127,6 +127,13 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         );
       },
       onError: (error) => {
+        sendAiChatFailureEvent({
+          projectId,
+          userId: request.principal.id,
+          chatId,
+          message: request.body.message,
+          errorMessage: error instanceof Error ? error.message : String(error),
+        });
         return error instanceof Error ? error.message : String(error);
       },
     });
