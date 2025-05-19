@@ -54,25 +54,13 @@ export const aiConfigService = {
 
     const config = await repo().save(aiConfig);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let telemetryConfig: any = {
+    sendAiConfigSavedEvent({
       id: config.id,
       userId: params.userId,
       projectId: params.projectId,
-      model: config.model,
       provider: config.provider,
-    };
-
-    if (config.provider != AiProviderEnum.AZURE_OPENAI) {
-      telemetryConfig = {
-        ...telemetryConfig,
-        providerSettings: config.providerSettings,
-        modelSettings: config.modelSettings,
-        enabled: config.enabled,
-      };
-    }
-
-    sendAiConfigSavedEvent(telemetryConfig);
+      enabled: config.enabled ?? false,
+    });
 
     return redactApiKey(config);
   },
