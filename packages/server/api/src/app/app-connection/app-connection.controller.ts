@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   FastifyPluginCallbackTypebox,
   Type,
 } from '@fastify/type-provider-typebox';
+import { logger } from '@openops/server-shared';
 import {
   AppConnectionWithoutSensitiveData,
   ListAppConnectionsRequestQuery,
@@ -13,9 +15,10 @@ import {
   UpsertAppConnectionRequestBody,
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
+import { blockMetadataService } from '../blocks/block-metadata-service';
 import { sendConnectionDeletedEvent } from '../telemetry/event-models';
 import { appConnectionService } from './app-connection-service/app-connection-service';
-import { removeSensitiveData } from './app-connection-utils';
+import { redactSecrets, removeSensitiveData } from './app-connection-utils';
 
 export const appConnectionController: FastifyPluginCallbackTypebox = (
   app,
@@ -56,6 +59,35 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
         };
 
       return appConnectionsWithoutSensitiveData;
+    },
+  );
+  app.get(
+    '/:id',
+    GetAppConnectionRequest,
+    async (request, reply): Promise<any> => {
+      const connection = await appConnectionService.getOneOrThrow({
+        id: request.params.id,
+        projectId: request.principal.projectId,
+      });
+
+      const block = await blockMetadataService.get({
+        name: connection.blockName,
+        projectId: request.principal.projectId,
+        version: undefined,
+      });
+
+      if (!block) {
+        return reply.status(StatusCodes.BAD_REQUEST);
+      }
+
+      const redactedValue = redactSecrets(block.auth, connection.value);
+
+      return redactedValue
+        ? {
+            ...connection,
+            value: redactedValue,
+          }
+        : removeSensitiveData(connection);
     },
   );
   app.delete(
@@ -133,6 +165,31 @@ const DeleteAppConnectionRequest = {
     }),
     response: {
       [StatusCodes.NO_CONTENT]: Type.Never(),
+    },
+  },
+};
+
+const GetAppConnectionRequest = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
+    permission: Permission.READ_APP_CONNECTION,
+  },
+  schema: {
+    tags: ['app-connections'],
+    description: 'Get an app connection',
+    params: Type.Object({
+      id: OpenOpsId,
+    }),
+    response: {
+      [StatusCodes.OK]: Type.Intersect([
+        AppConnectionWithoutSensitiveData,
+        Type.Object(
+          {
+            value: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
+          },
+          { additionalProperties: true },
+        ),
+      ]),
     },
   },
 };
