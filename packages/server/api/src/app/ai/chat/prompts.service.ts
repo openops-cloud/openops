@@ -10,35 +10,18 @@ export const getMcpSystemPrompt = async ({
   isAnalyticsLoaded: boolean;
   isTablesLoaded: boolean;
 }): Promise<string> => {
-  const baseMcpPrompt = await loadPrompt('mcp.txt');
-  const loadTablesAndSupersetMcpPrompts = system.getBoolean(
-    AppSystemProp.LOAD_TABLES_AND_SUPERSET_MCP_TOOLS,
-  );
+  const prompts = [loadPrompt('mcp.txt')];
 
-  if (!loadTablesAndSupersetMcpPrompts) {
-    return baseMcpPrompt;
+  if (isTablesLoaded) {
+    prompts.push(loadPrompt('mcp-tables.txt'));
   }
 
-  logger.debug(
-    {
-      isAnalyticsLoaded,
-    },
-    'isAnalyticsMCPLoaded',
-  );
+  if (isAnalyticsLoaded) {
+    prompts.push(loadPrompt('mcp-analytics.txt'));
+  }
 
-  logger.debug(
-    {
-      isTablesLoaded,
-    },
-    'isTablesMCPLoaded',
-  );
-
-  const tablesPrompt = isTablesLoaded ? await loadPrompt('mcp-tables.txt') : '';
-  const analyticsPrompt = isAnalyticsLoaded
-    ? await loadPrompt('mcp-analytics.txt')
-    : '';
-
-  return `${baseMcpPrompt}\n\n${tablesPrompt}\n\n${analyticsPrompt}`;
+  const allPrompts = await Promise.all(prompts);
+  return allPrompts.join('\n\n');
 };
 
 export const getSystemPrompt = async (
