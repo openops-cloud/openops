@@ -1,11 +1,13 @@
 import { OPENOPS_DEFAULT_DATABASE_NAME } from '@openops/common';
 import { openopsTables } from './index';
 
+export const OPENOPS_DEFAULT_WORKSPACE_NAME = 'OpenOps Workspace';
+
 export async function createDefaultWorkspaceAndDatabase(
   token: string,
 ): Promise<{ workspaceId: number; databaseId: number }> {
   const workspace = await openopsTables.createWorkspace(
-    'OpenOps Workspace',
+    OPENOPS_DEFAULT_WORKSPACE_NAME,
     token,
   );
 

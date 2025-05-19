@@ -11,6 +11,7 @@ import { isNil } from '@openops/shared';
 import { FastifyInstance } from 'fastify';
 import { appPostBoot } from './app/app';
 import { databaseConnection } from './app/database/database-connection';
+import { createOpenOpsTablesMcpEndpoint } from './app/database/seeds/create-open-ops-tables-mcp-endpoint';
 import { seedDevData } from './app/database/seeds/dev-seeds';
 import { seedFocusDataAggregationTemplateTable } from './app/database/seeds/openops-aggregated-costs-seed';
 import * as analytics from './app/database/seeds/openops-analytics-seed';
@@ -98,6 +99,7 @@ const main = async (): Promise<void> => {
     await databaseConnection().runMigrations();
 
     await upsertAdminUser();
+    await createOpenOpsTablesMcpEndpoint();
     await updateOpenopsTablesDatabase();
     await deleteOldOpportunitiesTable();
     await seedDevData();

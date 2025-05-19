@@ -5,13 +5,17 @@ import {
   AiChatContainerSizeState,
   cn,
   StepSettingsAiChatContainer,
+  toast,
 } from '@openops/components/ui';
-import { FlowVersion, OpenChatResponse } from '@openops/shared';
+import { flowHelper, FlowVersion, OpenChatResponse } from '@openops/shared';
+import { useQueryClient } from '@tanstack/react-query';
+import { t } from 'i18next';
 import { nanoid } from 'nanoid';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useBuilderStateContext } from '../builder-hooks';
 import { DataSelectorSizeState } from '../data-selector/data-selector-size-togglers';
-import { Conversation } from './conversation';
+import { aiChatApi } from './lib/chat-api';
+import { StepSettingsAiConversation } from './step-settings-ai-conversation';
 
 type StepSettingsAiChatProps = {
   middlePanelSize: {
@@ -44,7 +48,14 @@ const StepSettingsAiChat = ({
   const conversationRef = useRef<OpenChatResponse | null>(null);
   const [chatSessionKey, setChatSessionKey] = useState<string>(nanoid());
 
-  const { messages, input, handleInputChange, handleSubmit, status } = useChat({
+  const {
+    messages,
+    input,
+    handleInputChange,
+    handleSubmit,
+    status,
+    setMessages,
+  } = useChat({
     id: chatSessionKey,
     api: 'api/v1/ai/chat/conversation',
     maxSteps: 5,
@@ -87,6 +98,41 @@ const StepSettingsAiChat = ({
     dispatch({ type: 'AICHAT_CLOSE_CLICK' });
   }, [dispatch]);
 
+  const queryClient = useQueryClient();
+
+  const [enableNewChat, setEnableNewChat] = useState(true);
+
+  const onNewChatClick = useCallback(async () => {
+    const chatId = conversationRef.current?.chatId;
+    if (!selectedStep || !chatId) {
+      return;
+    }
+
+    setEnableNewChat(false);
+
+    try {
+      await aiChatApi.delete(chatId);
+
+      const stepDetails = flowHelper.getStep(flowVersion, selectedStep);
+      const blockName = stepDetails?.settings?.blockName;
+
+      await queryClient.invalidateQueries({
+        queryKey: ['openChat', flowVersion.flowId, blockName, selectedStep],
+      });
+      setMessages([]);
+    } catch (error) {
+      toast({
+        title: t('There was an error creating the new chat, please try again'),
+        duration: 3000,
+      });
+      console.error(
+        `There was an error deleting existing chat and creating a new one: ${error}`,
+      );
+    } finally {
+      setEnableNewChat(true);
+    }
+  }, [flowVersion, queryClient, selectedStep, setMessages]);
+
   const onToggle = useCallback(() => {
     if (
       (
@@ -112,6 +158,8 @@ const StepSettingsAiChat = ({
       parentWidth={middlePanelSize.width}
       showAiChat={showAiChat}
       onCloseClick={onCloseClick}
+      enableNewChat={enableNewChat}
+      onNewChatClick={onNewChatClick}
       containerSize={aiContainerSize}
       onToggle={onToggle}
       toggleContainerSizeState={onToggleContainerSizeState}
@@ -125,9 +173,10 @@ const StepSettingsAiChat = ({
       handleInputChange={handleInputChange}
       handleSubmit={handleSubmit}
       input={input}
+      isEmpty={!messages.length}
     >
       {selectedStep && showAiChat && aiChatProperty && (
-        <Conversation
+        <StepSettingsAiConversation
           stepName={selectedStep}
           flowVersion={flowVersion}
           property={aiChatProperty}

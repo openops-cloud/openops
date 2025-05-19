@@ -7,12 +7,14 @@ import { TooltipWrapper } from '../../components/tooltip-wrapper';
 import { cn } from '../../lib/cn';
 import { Button } from '../../ui/button';
 import { ScrollArea } from '../../ui/scroll-area';
+import { NewAiChatButton } from '../new-ai-chat-button';
 
 type AiAssistantChatContainerProps = {
   height: number;
   width: number;
   showAiChat: boolean;
   onCloseClick: () => void;
+  onCreateNewChatClick: () => void;
   isEmpty: boolean;
   className?: string;
   children?: ReactNode;
@@ -23,6 +25,7 @@ const AiAssistantChatContainer = ({
   width,
   showAiChat,
   onCloseClick,
+  onCreateNewChatClick,
   isEmpty = true,
   className,
   children,
@@ -60,19 +63,25 @@ const AiAssistantChatContainer = ({
           </div>
           {t('AI Assistant')}
         </div>
-        <TooltipWrapper tooltipText={t('Close')}>
-          <Button
-            size="icon"
-            variant="basic"
-            onClick={(e) => {
-              e.stopPropagation();
-              onCloseClick();
-            }}
-            className="text-outline opacity-50 hover:opacity-100"
-          >
-            <XIcon />
-          </Button>
-        </TooltipWrapper>
+        <div className="flex items-center gap-2">
+          <NewAiChatButton
+            enableNewChat={!isEmpty}
+            onNewChatClick={onCreateNewChatClick}
+          />
+          <TooltipWrapper tooltipText={t('Close')}>
+            <Button
+              size="icon"
+              variant="basic"
+              onClick={(e) => {
+                e.stopPropagation();
+                onCloseClick();
+              }}
+              className="text-outline"
+            >
+              <XIcon size={20} />
+            </Button>
+          </TooltipWrapper>
+        </div>
       </div>
 
       <div
@@ -84,11 +93,11 @@ const AiAssistantChatContainer = ({
       >
         <div className="py-4 flex flex-col h-full">
           <ScrollArea className="h-full w-full">
-            <div className="h-full px-6">
-              {isEmpty && (
+            <div className="h-full w-full px-6 flex flex-col">
+              {isEmpty ? (
                 <div
                   className={
-                    'h-full flex flex-col items-center justify-center gap-4'
+                    'flex-1 flex flex-col items-center justify-center gap-1'
                   }
                 >
                   <span className="inline-block max-w-[220px] text-center dark:text-primary text-base font-bold leading-[25px]">
@@ -100,9 +109,9 @@ const AiAssistantChatContainer = ({
                     {t('How can I help you today?')}
                   </span>
                 </div>
+              ) : (
+                children
               )}
-
-              {children}
             </div>
           </ScrollArea>
           <div className="w-full px-4 relative">

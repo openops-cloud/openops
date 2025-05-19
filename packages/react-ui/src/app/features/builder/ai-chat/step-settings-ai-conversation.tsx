@@ -6,6 +6,7 @@ import {
   AIChatMessageRole,
   AIChatMessages,
   LoadingSpinner,
+  MarkdownCodeVariations,
 } from '@openops/components/ui';
 import { flowHelper, FlowVersion, OpenChatResponse } from '@openops/shared';
 import { useQuery } from '@tanstack/react-query';
@@ -28,7 +29,7 @@ const ChatStatus = {
   SUBMITTED: 'submitted',
 };
 
-const Conversation = ({
+const StepSettingsAiConversation = ({
   flowVersion,
   stepName,
   property,
@@ -90,8 +91,12 @@ const Conversation = ({
   );
 
   return (
-    <div className="flex flex-col gap-2">
-      <AIChatMessages messages={uiMessages} onInject={onInject} />
+    <div className="flex flex-col gap-2 max-w-full">
+      <AIChatMessages
+        messages={uiMessages}
+        onInject={onInject}
+        codeVariation={MarkdownCodeVariations.WithCopyAndInject}
+      />
       {[ChatStatus.STREAMING, ChatStatus.SUBMITTED].includes(status) && (
         <LoadingSpinner />
       )}
@@ -99,5 +104,5 @@ const Conversation = ({
   );
 };
 
-Conversation.displayName = 'Conversation';
-export { Conversation };
+StepSettingsAiConversation.displayName = 'StepSettingsAiConversation';
+export { StepSettingsAiConversation };

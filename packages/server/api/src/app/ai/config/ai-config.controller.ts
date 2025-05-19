@@ -41,6 +41,7 @@ export const aiConfigController: FastifyPluginAsyncTypebox = async (app) => {
       const aiConfig = await aiConfigService.save({
         projectId: request.principal.projectId,
         request: request.body,
+        userId: request.principal.id,
       });
 
       return reply.status(StatusCodes.OK).send(aiConfig);
@@ -95,6 +96,7 @@ export const aiConfigController: FastifyPluginAsyncTypebox = async (app) => {
       await aiConfigService.delete({
         projectId: request.principal.projectId,
         id: request.params.id,
+        userId: request.principal.id,
       });
       return await reply.status(StatusCodes.OK).send();
     } catch (error) {

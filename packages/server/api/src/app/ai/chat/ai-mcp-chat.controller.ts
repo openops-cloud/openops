@@ -25,39 +25,47 @@ import {
 } from 'ai';
 import { StatusCodes } from 'http-status-codes';
 import { encryptUtils } from '../../helper/encryption';
+import { sendAiChatFailureEvent } from '../../telemetry/event-models/ai';
 import { aiConfigService } from '../config/ai-config.service';
+import { getMCPTools } from '../mcp/mcp-tools';
 import {
   createChatContext,
   deleteChatHistory,
   generateChatIdForMCP,
   getChatContext,
   getChatHistory,
-  MCPChatContext,
   saveChatHistory,
 } from './ai-chat.service';
+import { generateMessageId } from './ai-message-id-generator';
 import { getMcpSystemPrompt } from './prompts.service';
-
-const MAX_RECURSION_DEPTH = 5;
+const MAX_RECURSION_DEPTH = 10;
 
 export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
   app.post(
     '/open',
     OpenChatOptions,
     async (request, reply): Promise<OpenChatResponse> => {
-      const chatContext: MCPChatContext = {
-        chatId: request.body.chatId ?? openOpsId(),
-      };
+      const { chatId: inputChatId } = request.body;
+      const { id: userId } = request.principal;
 
-      const chatId = generateChatIdForMCP({
-        ...chatContext,
-        userId: request.principal.id,
-      });
+      if (inputChatId) {
+        const existingContext = await getChatContext(inputChatId);
 
-      const messages = await getChatHistory(chatId);
-
-      if (messages.length === 0) {
-        await createChatContext(chatId, chatContext);
+        if (existingContext) {
+          const messages = await getChatHistory(inputChatId);
+          return reply.code(200).send({
+            chatId: inputChatId,
+            messages,
+          });
+        }
       }
+
+      const newChatId = openOpsId();
+      const chatId = generateChatIdForMCP({ chatId: newChatId, userId });
+      const chatContext = { chatId: newChatId };
+
+      await createChatContext(chatId, chatContext);
+      const messages = await getChatHistory(chatId);
 
       return reply.code(200).send({
         chatId,
@@ -65,7 +73,6 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       });
     },
   );
-
   app.post('/', NewMessageOptions, async (request, reply) => {
     const chatId = request.body.chatId;
     const projectId = request.principal.projectId;
@@ -97,8 +104,15 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       content: request.body.message,
     });
 
-    const systemPrompt = await getMcpSystemPrompt();
-    const tools = await getTools();
+    const tools = await getMCPTools();
+    const isAnalyticsLoaded = Object.keys(tools).includes('superset');
+    const isTablesLoaded = Object.keys(tools).includes('table');
+
+    const systemPrompt = await getMcpSystemPrompt({
+      isAnalyticsLoaded,
+      isTablesLoaded,
+    });
+    logger.debug({ systemPrompt }, 'systemPrompt');
 
     pipeDataStreamToResponse(reply.raw, {
       execute: async (dataStreamWriter) => {
@@ -114,6 +128,14 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         );
       },
       onError: (error) => {
+        sendAiChatFailureEvent({
+          projectId,
+          userId: request.principal.id,
+          chatId,
+          errorMessage: error instanceof Error ? error.message : String(error),
+          provider: aiConfig.provider,
+          model: aiConfig.model,
+        });
         return error instanceof Error ? error.message : String(error);
       },
     });
@@ -168,14 +190,6 @@ const DeleteChatOptions = {
   },
 };
 
-/**
- * Stub function for fetching tools. This function currently returns an empty ToolSet.
- * Future implementation should populate the ToolSet with the required tools.
- */
-async function getTools(): Promise<ToolSet> {
-  return {};
-}
-
 async function streamMessages(
   dataStreamWriter: DataStreamWriter,
   languageModel: LanguageModel,
@@ -194,19 +208,25 @@ async function streamMessages(
     tools,
     toolChoice: 'auto',
     maxRetries: 1,
+    async onError({ error }) {
+      const message = error instanceof Error ? error.message : String(error);
+      endStreamWithErrorMessage(dataStreamWriter, message);
+      logger.warn(message, error);
+    },
     async onFinish({ response }) {
+      const filteredMessages = removeToolMessages(messages);
       response.messages.forEach((r) => {
-        messages.push(getResponseObject(r));
+        filteredMessages.push(getResponseObject(r));
       });
 
-      await saveChatHistory(chatId, messages);
+      await saveChatHistory(chatId, filteredMessages);
 
       const lastMessage = response.messages.at(-1);
       if (lastMessage && lastMessage.role !== 'assistant') {
         if (recursionDepth >= MAX_RECURSION_DEPTH) {
-          logger.warn(
-            `Maximum recursion depth (${MAX_RECURSION_DEPTH}) reached. Terminating recursion.`,
-          );
+          const message = `Maximum recursion depth (${MAX_RECURSION_DEPTH}) reached. Terminating recursion.`;
+          endStreamWithErrorMessage(dataStreamWriter, message);
+          logger.warn(message);
           return;
         }
 
@@ -216,7 +236,7 @@ async function streamMessages(
           languageModel,
           systemPrompt,
           aiConfig,
-          messages,
+          filteredMessages,
           chatId,
           tools,
           recursionDepth + 1,
@@ -226,6 +246,42 @@ async function streamMessages(
   });
 
   result.mergeIntoDataStream(dataStreamWriter);
+}
+
+function endStreamWithErrorMessage(
+  dataStreamWriter: DataStreamWriter,
+  message: string,
+): void {
+  dataStreamWriter.write(`f:{"messageId":"${generateMessageId()}"}\n`);
+
+  dataStreamWriter.write(`0:"${message}"\n`);
+
+  dataStreamWriter.write(
+    `e:{"finishReason":"stop","usage":{"promptTokens":null,"completionTokens":null},"isContinued":false}\n`,
+  );
+  dataStreamWriter.write(
+    `d:{"finishReason":"stop","usage":{"promptTokens":null,"completionTokens":null}}\n`,
+  );
+}
+
+function removeToolMessages(messages: CoreMessage[]): CoreMessage[] {
+  return messages.filter((m) => {
+    if (m.role === 'tool') {
+      return false;
+    }
+
+    if (m.role === 'assistant' && Array.isArray(m.content)) {
+      const newContent = m.content.filter((part) => part.type !== 'tool-call');
+
+      if (newContent.length === 0) {
+        return false;
+      }
+
+      m.content = newContent;
+    }
+
+    return true;
+  });
 }
 
 function getResponseObject(
