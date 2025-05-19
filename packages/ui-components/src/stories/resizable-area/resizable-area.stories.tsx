@@ -1,13 +1,19 @@
+/* eslint-disable react-hooks/rules-of-hooks */
+import { useArgs, useCallback, useState } from '@storybook/preview-api';
 import type { Meta, StoryObj } from '@storybook/react';
-import { ResizableArea } from '../../components';
+import { fn } from '@storybook/test';
+import { BoxSize, ResizableArea } from '../../components';
 
 const meta = {
   title: 'Components/ResizableBlock',
   component: ResizableArea,
   tags: ['autodocs'],
   args: {
-    initialWidth: 200,
-    initialHeight: 200,
+    dimensions: {
+      width: 200,
+      height: 200,
+    },
+    setDimensions: fn(),
     minWidth: 150,
     minHeight: 150,
     maxWidth: 500,
@@ -33,11 +39,35 @@ const meta = {
       },
     },
   },
-  render: (args) => (
-    <div className="w-[600px] h-[600px] p-[50px] border bg-background relative">
-      <ResizableArea {...args} className="border mb-[50px]"></ResizableArea>
-    </div>
-  ),
+  render: (args) => {
+    const [, updateArgs] = useArgs();
+
+    const [dimensions, setDimensions] = useState<BoxSize>({
+      width: 400,
+      height: 400,
+    });
+
+    const updateDimensionsState = useCallback(
+      (newDimensions: BoxSize) => {
+        setDimensions(newDimensions);
+        updateArgs({
+          dimensions: newDimensions,
+        });
+      },
+      [updateArgs],
+    );
+
+    return (
+      <div className="w-[600px] h-[600px] p-[50px] border bg-background relative">
+        <ResizableArea
+          {...args}
+          setDimensions={updateDimensionsState}
+          dimensions={dimensions}
+          className="border mb-[50px]"
+        ></ResizableArea>
+      </div>
+    );
+  },
   parameters: {
     layout: 'centered',
   },
