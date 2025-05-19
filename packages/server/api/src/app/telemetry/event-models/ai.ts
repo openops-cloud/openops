@@ -17,6 +17,8 @@ export enum AiEventName {
   AI_CONFIG_SAVED = 'ai_config_saved',
   AI_CONFIG_DELETED = 'ai_config_deleted',
   AI_CHAT_FAILURE = 'ai_chat_failure',
+  AI_CHAT_SEND_MESSAGE = 'ai_chat_send_message',
+  AI_CHAT_OPEN = 'ai_chat_open',
 }
 
 export function sendAiConfigSavedEvent(
@@ -64,6 +66,28 @@ export function sendAiChatFailureEvent(
       projectId: params.projectId,
       chatId: params.chatId,
       errorMessage: params.errorMessage,
+    },
+  });
+}
+
+export function sendAiChatMessageSendEvent(params: AiChatBase): void {
+  telemetry.trackEvent({
+    name: AiEventName.AI_CHAT_SEND_MESSAGE,
+    labels: {
+      userId: params.userId,
+      projectId: params.projectId,
+      chatId: params.chatId,
+    },
+  });
+}
+
+export function sendAiChatMessageOpenEvent(params: AiChatBase): void {
+  telemetry.trackEvent({
+    name: AiEventName.AI_CHAT_OPEN,
+    labels: {
+      userId: params.userId,
+      projectId: params.projectId,
+      chatId: params.chatId,
     },
   });
 }

@@ -17,7 +17,11 @@ import {
 } from 'ai';
 import { StatusCodes } from 'http-status-codes';
 import { encryptUtils } from '../../helper/encryption';
-import { sendAiChatFailureEvent } from '../../telemetry/event-models/ai';
+import {
+  sendAiChatFailureEvent,
+  sendAiChatMessageOpenEvent,
+  sendAiChatMessageSendEvent,
+} from '../../telemetry/event-models/ai';
 import { aiConfigService } from '../config/ai-config.service';
 import {
   ChatContext,
@@ -52,6 +56,12 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
       if (messages.length === 0) {
         await createChatContext(chatId, chatContext);
       }
+
+      sendAiChatMessageOpenEvent({
+        projectId: request.principal.projectId,
+        chatId,
+        userId: request.principal.id,
+      });
 
       return reply.code(200).send({
         chatId,
@@ -108,6 +118,11 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
         });
 
         result.mergeIntoDataStream(dataStreamWriter);
+        sendAiChatMessageSendEvent({
+          projectId,
+          userId: request.principal.id,
+          chatId,
+        });
       },
       onError: (error) => {
         const errorMessage =
