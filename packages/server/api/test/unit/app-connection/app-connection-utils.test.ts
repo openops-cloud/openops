@@ -5,7 +5,12 @@ import {
   AppConnectionStatus,
   AppConnectionType,
 } from '@openops/shared';
-import { redactSecrets } from '../../../src/app/app-connection/app-connection-utils';
+import {
+  redactSecrets,
+  restoreRedactedSecrets,
+} from '../../../src/app/app-connection/app-connection-utils';
+
+const REDACTED_MESSAGE = '**REDACTED**';
 
 describe('redactSecrets', () => {
   const baseConnection: Omit<AppConnection, 'value' | 'type'> = {
@@ -36,7 +41,7 @@ describe('redactSecrets', () => {
     };
 
     const result = redactSecrets(auth, connection.value);
-    expect(result?.secret_text).toBe('**REDACTED**');
+    expect(result?.secret_text).toBe(REDACTED_MESSAGE);
   });
 
   test('should return BASIC_AUTH connection', () => {
@@ -59,7 +64,7 @@ describe('redactSecrets', () => {
     } as any;
 
     const result = redactSecrets(auth, connection.value);
-    expect(result?.password).toBe('**REDACTED**');
+    expect(result?.password).toBe(REDACTED_MESSAGE);
     expect(result?.username).toBe('user');
   });
 
@@ -95,7 +100,7 @@ describe('redactSecrets', () => {
     const result = redactSecrets(auth, connection.value);
     const props = result?.props as Record<string, any>;
 
-    expect(props.clientSecret).toBe('**REDACTED**');
+    expect(props.clientSecret).toBe(REDACTED_MESSAGE);
     expect(props.clientId).toBe('abc');
   });
 
@@ -133,7 +138,7 @@ describe('redactSecrets', () => {
     expect(result).toEqual({
       type: PropertyType.OAUTH2,
       client_id: 'abc',
-      client_secret: '**REDACTED**',
+      client_secret: REDACTED_MESSAGE,
       redirect_url: 'https://redirect.com',
     });
   });
@@ -170,5 +175,127 @@ describe('redactSecrets', () => {
       connection.value,
     );
     expect(result).toEqual(undefined);
+  });
+});
+
+describe('restoreRedactedSecrets', () => {
+  test('should restore SECRET_TEXT when redacted', () => {
+    const incoming = { secret_text: REDACTED_MESSAGE };
+    const existing = { secret_text: 'original-secret' };
+    const auth: BlockAuthProperty = {
+      type: PropertyType.SECRET_TEXT,
+      displayName: 'Secret',
+      valueSchema: {} as any,
+      required: true,
+    };
+
+    const result = restoreRedactedSecrets(incoming, existing, auth);
+    expect(result.secret_text).toBe('original-secret');
+  });
+
+  test('should not restore SECRET_TEXT when not redacted', () => {
+    const incoming = { secret_text: 'new-secret' };
+    const existing = { secret_text: 'original-secret' };
+    const auth: BlockAuthProperty = {
+      type: PropertyType.SECRET_TEXT,
+      displayName: 'Secret',
+      valueSchema: {} as any,
+      required: true,
+    };
+
+    const result = restoreRedactedSecrets(incoming, existing, auth);
+    expect(result.secret_text).toBe('new-secret');
+  });
+
+  test('should restore BASIC_AUTH password when redacted', () => {
+    const incoming = { username: 'user', password: REDACTED_MESSAGE };
+    const existing = { username: 'user', password: 'original-password' };
+    const auth: BlockAuthProperty = {
+      type: PropertyType.BASIC_AUTH,
+      displayName: 'Basic Auth',
+      username: { displayName: 'User' },
+      password: { displayName: 'Pass' },
+      valueSchema: {} as any,
+      required: true,
+    } as any;
+
+    const result = restoreRedactedSecrets(incoming, existing, auth);
+    expect(result.password).toBe('original-password');
+  });
+
+  test('should restore CUSTOM_AUTH props if secret was redacted', () => {
+    const incoming = {
+      props: {
+        clientId: 'abc',
+        clientSecret: REDACTED_MESSAGE,
+      },
+    };
+    const existing = {
+      props: {
+        clientId: 'abc',
+        clientSecret: 'real-secret',
+      },
+    };
+    const auth: BlockAuthProperty = {
+      type: PropertyType.CUSTOM_AUTH,
+      displayName: 'Custom',
+      props: {
+        clientId: { type: PropertyType.SHORT_TEXT, displayName: 'Client ID' },
+        clientSecret: {
+          type: PropertyType.SECRET_TEXT,
+          displayName: 'Client Secret',
+        },
+      },
+      valueSchema: {} as any,
+      required: false,
+    };
+
+    const result = restoreRedactedSecrets(incoming, existing, auth);
+    expect(result.props.clientSecret).toBe('real-secret');
+    expect(result.props.clientId).toBe('abc');
+  });
+
+  test('should restore OAUTH2 client_secret if redacted', () => {
+    const incoming = {
+      client_id: 'abc',
+      client_secret: REDACTED_MESSAGE,
+      redirect_url: 'https://url',
+    };
+    const existing = {
+      client_id: 'abc',
+      client_secret: 'real-client-secret',
+      redirect_url: 'https://url',
+    };
+    const auth: BlockAuthProperty = {
+      type: PropertyType.OAUTH2,
+      displayName: 'OAuth2',
+      authUrl: '',
+      tokenUrl: '',
+      scope: [],
+      valueSchema: {} as any,
+      required: true,
+    };
+
+    const result = restoreRedactedSecrets(incoming, existing, auth);
+    expect(result.client_secret).toBe('real-client-secret');
+  });
+
+  test('should not modify values if auth type is unsupported', () => {
+    const incoming = { token: REDACTED_MESSAGE };
+    const existing = { token: 'real-token' };
+    const auth = {
+      type: 'UNSUPPORTED_TYPE' as PropertyType,
+    } as BlockAuthProperty;
+
+    const result = restoreRedactedSecrets(incoming, existing, auth);
+    expect(result).toEqual(incoming);
+  });
+
+  test('should not throw if auth is undefined', () => {
+    const incoming = { someKey: REDACTED_MESSAGE };
+    const existing = { someKey: 'value' };
+
+    const result = restoreRedactedSecrets(incoming, existing, undefined);
+    expect(result).toEqual(incoming);
   });
 });

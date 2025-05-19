@@ -1,23 +1,26 @@
 import { UseChatHelpers } from '@ai-sdk/react';
 import { t } from 'i18next';
-import { Bot, Send as SendIcon, X as XIcon } from 'lucide-react';
-import { ReactNode, useEffect, useRef, useState } from 'react';
+import { Bot, Send as SendIcon } from 'lucide-react';
+import { ReactNode, useRef } from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
-import { TooltipWrapper } from '../../components/tooltip-wrapper';
 import { cn } from '../../lib/cn';
 import { Button } from '../../ui/button';
 import { ScrollArea } from '../../ui/scroll-area';
-import { NewAiChatButton } from '../new-ai-chat-button';
 import { ResizableArea } from '../resizable-area';
+import { AiChatSizeTogglers } from './ai-chat-size-togglers';
+import { AI_CHAT_CONTAINER_SIZES, AiAssistantChatSizeState } from './types';
+
+type BoxSize = {
+  width: number;
+  height: number;
+};
 
 type AiAssistantChatContainerProps = {
-  height: number;
-  width: number;
+  initialSize: BoxSize;
+  maxSize: BoxSize;
+  toggleAiChatState: () => void;
+  aiChatSize: AiAssistantChatSizeState;
   showAiChat: boolean;
-  middlePanelSize: {
-    width: number;
-    height: number;
-  };
   onCloseClick: () => void;
   onCreateNewChatClick: () => void;
   isEmpty: boolean;
@@ -29,9 +32,10 @@ export const CHAT_MIN_WIDTH = 360;
 export const PARENT_HEIGHT_GAP = 220;
 
 const AiAssistantChatContainer = ({
-  height,
-  width,
-  middlePanelSize,
+  initialSize,
+  maxSize,
+  toggleAiChatState,
+  aiChatSize,
   showAiChat,
   onCloseClick,
   onCreateNewChatClick,
@@ -43,9 +47,6 @@ const AiAssistantChatContainer = ({
   input,
 }: AiAssistantChatContainerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
-
-  const maxHeight = middlePanelSize.height - PARENT_HEIGHT_GAP;
-  const maxWidth = middlePanelSize.width - 100;
 
   return (
     <div
@@ -69,12 +70,13 @@ const AiAssistantChatContainer = ({
       }}
     >
       <ResizableArea
-        initialWidth={width}
-        initialHeight={height}
+        initialWidth={initialSize.width}
+        initialHeight={initialSize.height}
         minWidth={CHAT_MIN_WIDTH}
         minHeight={300}
-        maxWidth={maxWidth}
-        maxHeight={maxHeight}
+        maxWidth={maxSize.width}
+        maxHeight={maxSize.height}
+        isDisabled={aiChatSize === AI_CHAT_CONTAINER_SIZES.EXPANDED}
         resizeFrom="top-right"
         className="static pb-0"
       >
@@ -87,23 +89,13 @@ const AiAssistantChatContainer = ({
               {t('AI Assistant')}
             </div>
             <div className="flex items-center gap-2">
-              <NewAiChatButton
+              <AiChatSizeTogglers
+                state={aiChatSize}
+                toggleContainerSizeState={toggleAiChatState}
+                onCloseClick={onCloseClick}
                 enableNewChat={!isEmpty}
                 onNewChatClick={onCreateNewChatClick}
               />
-              <TooltipWrapper tooltipText={t('Close')}>
-                <Button
-                  size="icon"
-                  variant="basic"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onCloseClick();
-                  }}
-                  className="text-outline"
-                >
-                  <XIcon size={20} />
-                </Button>
-              </TooltipWrapper>
             </div>
           </div>
           <div className="overflow-hidden flex-1">

@@ -3,11 +3,11 @@ import { ExpandIcon, MinimizeIcon, X as XIcon } from 'lucide-react';
 import { Button } from '../../ui/button';
 import { NewAiChatButton } from '../new-ai-chat-button';
 import { TooltipWrapper } from '../tooltip-wrapper';
-import { AI_CHAT_CONTAINER_SIZES, AiChatContainerSizeState } from './types';
+import { AI_CHAT_CONTAINER_SIZES, AiCliChatContainerSizeState } from './types';
 
 type AiChatSizeTogglersProps = {
-  state: AiChatContainerSizeState;
-  toggleContainerSizeState: (state: AiChatContainerSizeState) => void;
+  state: AiCliChatContainerSizeState;
+  toggleContainerSizeState: (state: AiCliChatContainerSizeState) => void;
   onCloseClick: () => void;
   enableNewChat: boolean;
   onNewChatClick: () => void;

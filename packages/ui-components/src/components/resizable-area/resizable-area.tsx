@@ -15,6 +15,7 @@ interface ResizableAreaProps {
   children: React.ReactNode;
   className?: string;
   resizeFrom?: ResizeHandlePosition;
+  isDisabled?: boolean;
 }
 
 export function ResizableArea({
@@ -27,11 +28,38 @@ export function ResizableArea({
   children,
   className,
   resizeFrom = 'bottom-right',
+  isDisabled,
 }: ResizableAreaProps) {
   const [dimensions, setDimensions] = useState({
     width: initialWidth,
     height: initialHeight,
   });
+
+  useEffect(() => {
+    setDimensions({
+      width: initialWidth,
+      height: initialHeight,
+    });
+  }, [initialWidth, initialHeight]);
+
+  useEffect(() => {
+    if (maxHeight < dimensions.height) {
+      setDimensions((prev) => ({
+        ...prev,
+        height: Math.min(prev.height, maxHeight),
+      }));
+    }
+  }, [dimensions.height, maxHeight, maxWidth]);
+
+  useEffect(() => {
+    if (maxWidth < dimensions.width) {
+      setDimensions((prev) => ({
+        ...prev,
+        width: Math.min(prev.width, maxWidth),
+      }));
+    }
+  }, [dimensions.height, dimensions.width, maxHeight, maxWidth]);
+
   const resizeRef = useRef<HTMLDivElement>(null);
   const isResizingRef = useRef(false);
   const startPosRef = useRef({ x: 0, y: 0, width: 0, height: 0 });
@@ -112,6 +140,7 @@ export function ResizableArea({
           {
             'top-1 right-1 cursor-nesw-resize rotate-[-90deg]':
               resizeFrom === 'top-right',
+            'opacity-50 pointer-events-none cursor-not-allowed': isDisabled,
           },
         )}
         onMouseDown={startResize}

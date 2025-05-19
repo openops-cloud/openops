@@ -3,11 +3,11 @@ import {
   FastifyPluginCallbackTypebox,
   Type,
 } from '@fastify/type-provider-typebox';
-import { logger } from '@openops/server-shared';
 import {
   AppConnectionWithoutSensitiveData,
   ListAppConnectionsRequestQuery,
   OpenOpsId,
+  PatchAppConnectionRequestBody,
   Permission,
   PrincipalType,
   SeekPage,
@@ -35,6 +35,32 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
     await reply
       .status(StatusCodes.CREATED)
       .send(removeSensitiveData(appConnection));
+  });
+
+  app.patch('/', PatchAppConnectionRequest, async (request, reply) => {
+    const block = await blockMetadataService.getOrThrow({
+      name: request.body.blockName,
+      projectId: request.principal.projectId,
+      version: undefined,
+    });
+
+    const appConnection = await appConnectionService.patch({
+      userId: request.principal.id,
+      projectId: request.principal.projectId,
+      request: request.body,
+      block,
+    });
+
+    const redactedValue = redactSecrets(block.auth, appConnection.value);
+
+    const result = redactedValue
+      ? {
+          ...appConnection,
+          value: redactedValue,
+        }
+      : removeSensitiveData(appConnection);
+
+    await reply.status(StatusCodes.OK).send(result);
   });
 
   app.get(
@@ -131,6 +157,22 @@ const UpsertAppConnectionRequest = {
     body: UpsertAppConnectionRequestBody,
     Response: {
       [StatusCodes.CREATED]: AppConnectionWithoutSensitiveData,
+    },
+  },
+};
+
+const PatchAppConnectionRequest = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
+    permission: Permission.WRITE_APP_CONNECTION,
+  },
+  schema: {
+    tags: ['app-connections'],
+    security: [SERVICE_KEY_SECURITY_OPENAPI],
+    description: 'Update an app connection based on the connection ID',
+    body: PatchAppConnectionRequestBody,
+    Response: {
+      [StatusCodes.OK]: AppConnectionWithoutSensitiveData,
     },
   },
 };

@@ -5,7 +5,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { fn } from '@storybook/test';
 import {
   AI_CHAT_CONTAINER_SIZES,
-  AiChatContainerSizeState,
+  AiCliChatContainerSizeState,
   MarkdownCodeVariations,
   StepSettingsAiChatContainer,
 } from '../../components';
@@ -50,7 +50,7 @@ const meta = {
       updateArgs,
     ] = useArgs();
 
-    const onToggleContainerSizeState = (size: AiChatContainerSizeState) => {
+    const onToggleContainerSizeState = (size: AiCliChatContainerSizeState) => {
       toggleContainerSizeState(size);
       updateArgs({ containerSize: size });
     };
@@ -124,7 +124,7 @@ export const Populated: Story = {
       updateArgs,
     ] = useArgs();
 
-    const onToggleContainerSizeState = (size: AiChatContainerSizeState) => {
+    const onToggleContainerSizeState = (size: AiCliChatContainerSizeState) => {
       toggleContainerSizeState(size);
       updateArgs({ containerSize: size });
     };

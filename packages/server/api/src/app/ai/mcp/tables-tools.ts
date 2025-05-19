@@ -9,10 +9,7 @@ import { openopsTables } from '../../openops-tables';
 export async function getTablesTools(): Promise<ToolSet> {
   const { token } = await authenticateDefaultUserInOpenOpsTables();
   const mcpEndpoint = await openopsTables.getMcpEndpointList(token);
-
-  if (!mcpEndpoint) {
-    return {};
-  }
+  if (!mcpEndpoint) return {};
 
   const url =
     system.get(AppSystemProp.OPENOPS_TABLES_API_URL) +
@@ -26,5 +23,14 @@ export async function getTablesTools(): Promise<ToolSet> {
     },
   });
 
-  return client.tools();
+  const tools = await client.tools();
+
+  const toolSet: ToolSet = {};
+  for (const [name, tool] of Object.entries(tools)) {
+    if (name.includes('list')) {
+      toolSet[name] = tool;
+    }
+  }
+
+  return toolSet;
 }
