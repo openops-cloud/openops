@@ -18,6 +18,7 @@ type AiAssistantChatProps = {
   };
   className?: string;
   isSidebarOpen?: boolean;
+  customWidthOffset?: number;
 };
 
 const PARENT_HEIGHT_GAP = 220;
@@ -30,6 +31,7 @@ const AiAssistantChat = ({
   middlePanelSize,
   isSidebarOpen = false,
   className,
+  customWidthOffset,
 }: AiAssistantChatProps) => {
   const { isAiChatOpened, setIsAiChatOpened, aiChatSize, setAiChatSize } =
     useAppStore((s) => ({
@@ -54,7 +56,8 @@ const AiAssistantChat = ({
     const offset = isSidebarOpen
       ? CHAT_EXPANDED_WIDTH_OFFSET_BUILDER
       : CHAT_EXPANDED_WIDTH_OFFSET;
-    const calculatedExpandedWidth = middlePanelSize.width - offset;
+    const calculatedExpandedWidth =
+      middlePanelSize.width - (customWidthOffset ?? offset);
 
     return {
       width: Math.max(
@@ -67,6 +70,7 @@ const AiAssistantChat = ({
     };
   }, [
     aiChatSize,
+    customWidthOffset,
     isSidebarOpen,
     middlePanelSize.height,
     middlePanelSize.width,
@@ -92,14 +96,7 @@ const AiAssistantChat = ({
   if (!hasActiveAiSettings && isAiChatOpened) {
     return (
       <NoAiEnabledPopover
-        className={cn(
-          'absolute left-4 bottom-[17px] z-50',
-          {
-            'top-0':
-              aiChatSize === AI_CHAT_CONTAINER_SIZES.EXPANDED && !isSidebarOpen,
-          },
-          className,
-        )}
+        className={cn('absolute left-4 bottom-[17px] z-50', className)}
         onCloseClick={() => setIsAiChatOpened(false)}
       />
     );
@@ -111,14 +108,7 @@ const AiAssistantChat = ({
       width={width}
       showAiChat={isAiChatOpened}
       onCloseClick={() => setIsAiChatOpened(false)}
-      className={cn(
-        'left-4 bottom-[17px]',
-        {
-          'top-4':
-            aiChatSize === AI_CHAT_CONTAINER_SIZES.EXPANDED && !isSidebarOpen,
-        },
-        className,
-      )}
+      className={cn('left-4 bottom-[17px]', className)}
       handleInputChange={handleInputChange}
       handleSubmit={handleSubmit}
       input={input}
