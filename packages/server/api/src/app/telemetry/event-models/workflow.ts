@@ -150,7 +150,8 @@ export function sendWorkflowTestFailureEvent(eventParams: {
   userId: string;
   projectId: string;
   flowVersionId: string;
-  errorMessage: string;
+  flowId: string;
+  flowRunId: string;
 }): void {
   telemetry.trackEvent({
     name: WorkflowEventName.WORKFLOW_TEST_FAILURE,
@@ -158,7 +159,8 @@ export function sendWorkflowTestFailureEvent(eventParams: {
       userId: eventParams.userId,
       flowVersionId: eventParams.flowVersionId,
       projectId: eventParams.projectId,
-      errorMessage: eventParams.errorMessage,
+      flowId: eventParams.flowId,
+      flowRunId: eventParams.flowRunId,
     },
   });
 }

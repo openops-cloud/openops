@@ -7,6 +7,7 @@ import {
   TestFlowRunRequestBody,
   WebsocketClientEvent,
   WebsocketServerEvent,
+  flowHelper,
 } from '@openops/shared';
 import { sendStepFailureEvent } from '../telemetry/event-models/step';
 import { sendWorkflowTestFailureEvent } from '../telemetry/event-models/workflow';
@@ -16,6 +17,7 @@ import {
 } from '../websockets/websockets.service';
 import { flowWorkerController } from '../workers/worker-controller';
 import { flowRunService } from './flow-run/flow-run-service';
+import { flowVersionService } from './flow-version/flow-version.service';
 import { flowVersionController } from './flow/flow-version.controller';
 import { flowController } from './flow/flow.controller';
 import { stepRunService } from './step-run/step-run-service';
@@ -29,10 +31,11 @@ export const flowModule: FastifyPluginAsyncTypebox = async (app) => {
   websocketService.addListener(WebsocketServerEvent.TEST_FLOW_RUN, (socket) => {
     return async (data: TestFlowRunRequestBody) => {
       let principal;
+      let flowRun;
       try {
         principal = await getPrincipalFromWebsocket(socket);
 
-        const flowRun = await flowRunService.test({
+        flowRun = await flowRunService.test({
           projectId: principal.projectId,
           flowVersionId: data.flowVersionId,
         });
@@ -52,7 +55,8 @@ export const flowModule: FastifyPluginAsyncTypebox = async (app) => {
           userId: principal?.id ?? '',
           projectId: principal?.projectId ?? '',
           flowVersionId: data.flowVersionId,
-          errorMessage: (err as Error).message,
+          flowId: flowRun?.flowId ?? '',
+          flowRunId: flowRun?.id ?? '',
         });
 
         logger.error('Something went wrong when handling the FLOW_RUN event.', {
@@ -87,11 +91,25 @@ export const flowModule: FastifyPluginAsyncTypebox = async (app) => {
         };
         socket.emit(WebsocketClientEvent.TEST_STEP_FINISHED, response);
       } catch (err) {
+        let step;
+        try {
+          const flowVersion = await flowVersionService.getOneOrThrow(
+            data.flowVersionId,
+          );
+          step = flowHelper.getStep(flowVersion, data.stepName);
+        } catch (err) {
+        logger.error('Something went wrong when getting the step.', {
+          message: (err as Error).message,
+        });
+
         sendStepFailureEvent({
           userId: principal?.id ?? '',
           projectId: principal?.projectId ?? '',
           stepName: data.stepName,
-          errorMessage: (err as Error).message,
+          stepType: step?.type ?? '',
+          blockName: step?.settings?.blockName || '',
+          actionName: step?.settings?.actionName || '',
+          flowVersionId: data.flowVersionId,
         });
 
         logger.error('Something went wrong when handling the STEP_RUN event.', {
