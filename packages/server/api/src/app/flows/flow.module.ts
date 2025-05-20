@@ -98,9 +98,10 @@ export const flowModule: FastifyPluginAsyncTypebox = async (app) => {
           );
           step = flowHelper.getStep(flowVersion, data.stepName);
         } catch (err) {
-        logger.error('Something went wrong when getting the step.', {
-          message: (err as Error).message,
-        });
+          logger.error('Something went wrong when getting the step.', {
+            message: (err as Error).message,
+          });
+        }
 
         sendStepFailureEvent({
           userId: principal?.id ?? '',
