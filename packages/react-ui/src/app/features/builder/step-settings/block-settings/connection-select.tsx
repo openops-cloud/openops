@@ -14,7 +14,6 @@ import {
   SelectValue,
 } from '@openops/components/ui';
 import {
-  AppConnectionWithoutSensitiveData,
   BlockAction,
   BlockTrigger,
   addConnectionBrackets,
@@ -42,8 +41,9 @@ type ConnectionSelectProps = {
 const ConnectionSelect = memo((params: ConnectionSelectProps) => {
   const [connectionDialogOpen, setConnectionDialogOpen] = useState(false);
   const [selectConnectionOpen, setSelectConnectionOpen] = useState(false);
-  const [reconnectConnection, setReconnectConnection] =
-    useState<AppConnectionWithoutSensitiveData | null>(null);
+  const [reconnectConnectionId, setReconnectConnectionId] = useState<
+    string | null
+  >(null);
   const form = useFormContext<BlockAction | BlockTrigger>();
   const {
     data: connectionsPage,
@@ -54,6 +54,10 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
     cursor: undefined,
     limit: 100,
     projectId: authenticationSession.getProjectId() ?? '',
+  });
+
+  const { data: reconnectConnection } = appConnectionsHooks.useConnection({
+    id: reconnectConnectionId,
   });
 
   const [refreshDynamicProperties] = useBuilderStateContext((state) => [
@@ -85,10 +89,11 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
               {connectionDialogOpen && (
                 <DynamicFormValidationProvider>
                   <CreateOrEditConnectionDialog
-                    reconnectConnection={reconnectConnection}
+                    editConnection={reconnectConnection ?? null}
+                    reconnect={true}
                     key={reconnectConnection?.name || 'newConnection'}
                     block={params.block}
-                    onConnectionCreated={async (connectionName) => {
+                    onConnectionSaved={async (connectionName) => {
                       await refetch();
                       field.onChange(addConnectionBrackets(connectionName));
                       refreshDynamicProperties();
@@ -119,14 +124,14 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
                       className="z-50 absolute right-8 top-2 "
                       onClick={(e) => {
                         e.stopPropagation();
-                        setReconnectConnection(
+                        setReconnectConnectionId(
                           connectionsPage?.data?.find(
                             (connection) =>
                               connection.name ===
                               removeConnectionBrackets(
                                 form.getValues().settings.input.auth ?? '',
                               ),
-                          ) ?? null,
+                          )?.id ?? null,
                         );
                         setSelectConnectionOpen(false);
                         setConnectionDialogOpen(true);
@@ -164,7 +169,7 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
                 <SelectContent>
                   <SelectAction
                     onClick={() => {
-                      setReconnectConnection(null);
+                      setReconnectConnectionId(null);
                       setSelectConnectionOpen(false);
                       setConnectionDialogOpen(true);
                     }}
