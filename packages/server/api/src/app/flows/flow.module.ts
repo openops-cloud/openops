@@ -108,8 +108,8 @@ export const flowModule: FastifyPluginAsyncTypebox = async (app) => {
           projectId: principal?.projectId ?? '',
           stepName: data.stepName,
           stepType: step?.type ?? '',
-          blockName: step?.settings?.blockName || '',
-          actionName: step?.settings?.actionName || '',
+          blockName: step?.settings?.blockName ?? '',
+          actionName: step?.settings?.actionName ?? '',
           flowVersionId: data.flowVersionId,
         });
 
