@@ -14,6 +14,7 @@ export const endFlowAction = createAction({
     },
   },
   async run(ctx) {
-    return ctx.run.stop({ response: {} }) ?? true;
+    ctx.run.stop({ response: {} })
+    return true;
   },
 });
