@@ -116,4 +116,4 @@ export const AppConnectionWithoutSensitiveData = Type.Object(
 );
 export type AppConnectionWithoutSensitiveData = Static<
   typeof AppConnectionWithoutSensitiveData
->;
+> & { __brand: 'AppConnectionWithoutSensitiveData' };
