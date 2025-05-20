@@ -86,10 +86,10 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
               inputName="settings.input.auth"
               allowDynamicValues={!params.isTrigger}
             >
-              {connectionDialogOpen && (
+              {connectionDialogOpen && reconnectConnection && (
                 <DynamicFormValidationProvider>
                   <CreateOrEditConnectionDialog
-                    editConnection={reconnectConnection ?? null}
+                    editConnection={reconnectConnection}
                     reconnect={true}
                     key={reconnectConnection?.name || 'newConnection'}
                     block={params.block}
