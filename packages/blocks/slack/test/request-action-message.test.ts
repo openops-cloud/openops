@@ -242,7 +242,7 @@ describe('requestActionMessageAction', () => {
     });
 
     test('should assign resumeUrl to actions when slack interactions are disabled', async () => {
-      getBooleanMock.mockReturnValueOnce(true);
+      getBooleanMock.mockReturnValueOnce(false);
       waitForInteractionMock.mockImplementation(async (messageObj: any) =>
         Promise.resolve({ ...messageObj }),
       );
@@ -275,8 +275,8 @@ describe('requestActionMessageAction', () => {
       expect(result.eventPayload.interactionsDisabled).toBe(true);
     });
 
-    test('should assign static test url to actions in test mode', async () => {
-      getBooleanMock.mockReturnValueOnce(true);
+    test('should assign static test url to actions in test mode when interactions are disabled', async () => {
+      getBooleanMock.mockReturnValueOnce(false);
       waitForInteractionMock.mockImplementation(async (messageObj: any) =>
         Promise.resolve({ ...messageObj }),
       );
@@ -297,6 +297,45 @@ describe('requestActionMessageAction', () => {
       );
       expect(result.eventPayload.interactionsDisabled).toBe(true);
     });
+
+    test.each([null, undefined, true])(
+      'should NOT assign resumeUrl to actions when SLACK_ENABLE_INTERACTIONS is %s',
+      async (slackEnableInteractions) => {
+        getBooleanMock.mockReturnValueOnce(slackEnableInteractions);
+        waitForInteractionMock.mockImplementation(async (messageObj: any) =>
+          Promise.resolve({ ...messageObj }),
+        );
+        slackSendMessageMock.mockImplementation(async (message: any) =>
+          Promise.resolve(message),
+        );
+
+        const mockContext = buildMockContext('Header Text', true);
+        mockContext.run.isTest = false;
+        mockContext.generateResumeUrl.mockImplementation(
+          ({ queryParams }: any) => {
+            const query = new URLSearchParams(queryParams).toString();
+            return `https://example.com/resume?${query}`;
+          },
+        );
+
+        const result = (await requestActionMessageAction.run(
+          mockContext,
+        )) as any;
+
+        const actionBlock = result.blocks.find(
+          (b: any) => b.type === 'actions',
+        );
+        expect(actionBlock).toBeDefined();
+        const action = actionBlock.elements[0];
+
+        expect(action.url).not.toBeDefined();
+
+        expect(result.eventPayload.resumeUrl).toContain(
+          'executionCorrelationId=',
+        );
+        expect(result.eventPayload.interactionsDisabled).toBe(false);
+      },
+    );
   });
 
   describe('RESUME execution', () => {

@@ -104,10 +104,10 @@ const sendMessageAskingForAction = async (
     conversationId,
   );
 
-  const disableSlackInteractions =
-    system.getBoolean(SharedSystemProp.DISABLE_SLACK_INTERACTIONS) || false;
+  const enableSlackInteractions =
+    system.getBoolean(SharedSystemProp.SLACK_ENABLE_INTERACTIONS) ?? true;
 
-  if (disableSlackInteractions) {
+  if (!enableSlackInteractions) {
     const baseUrl = await networkUtls.getPublicUrl();
 
     actions.forEach((action: SlackActionDefinition) => {
@@ -134,7 +134,7 @@ const sendMessageAskingForAction = async (
     conversationId: userOrChannelId,
     blocks: blocks,
     eventPayload: {
-      interactionsDisabled: disableSlackInteractions,
+      interactionsDisabled: !enableSlackInteractions,
       domain: context.server.publicUrl,
       isTest: context.run.isTest,
       resumeUrl: context.generateResumeUrl({
