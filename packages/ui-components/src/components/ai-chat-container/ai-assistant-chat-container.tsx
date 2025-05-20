@@ -24,7 +24,7 @@ type AiAssistantChatContainerProps = {
   children?: ReactNode;
 } & Pick<UseChatHelpers, 'input' | 'handleInputChange' | 'handleSubmit'>;
 
-export const CHAT_MIN_WIDTH = 360;
+export const CHAT_MIN_WIDTH = 375;
 export const PARENT_HEIGHT_GAP = 220;
 
 const AiAssistantChatContainer = ({
@@ -75,7 +75,8 @@ const AiAssistantChatContainer = ({
         maxHeight={maxSize.height}
         isDisabled={aiChatSize === AI_CHAT_CONTAINER_SIZES.EXPANDED}
         resizeFrom="top-right"
-        className="static pb-0"
+        className="static p-0"
+        scrollAreaClassName="pr-0"
       >
         <div className="h-full flex flex-col">
           <div className="flex justify-between items-center px-4 py-2 gap-2 text-md dark:text-primary font-bold border-b border-gray-200">

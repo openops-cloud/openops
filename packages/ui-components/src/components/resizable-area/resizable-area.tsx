@@ -17,6 +17,7 @@ interface ResizableAreaProps {
   maxHeight: number;
   children: React.ReactNode;
   className?: string;
+  scrollAreaClassName?: string;
   resizeFrom?: ResizeHandlePosition;
   isDisabled?: boolean;
   setDimensions: (dimensions: BoxSize) => void;
@@ -30,6 +31,7 @@ export function ResizableArea({
   maxHeight,
   children,
   className,
+  scrollAreaClassName,
   resizeFrom = 'bottom-right',
   isDisabled,
   dimensions,
@@ -126,7 +128,9 @@ export function ResizableArea({
         touchAction: 'none',
       }}
     >
-      <ScrollArea className="w-full h-full pr-3">{children}</ScrollArea>
+      <ScrollArea className={cn('w-full h-full pr-3', scrollAreaClassName)}>
+        {children}
+      </ScrollArea>
 
       <ResizeIcon
         className={cn(
