@@ -19,7 +19,6 @@ export const getBudgets = createAction({
           tenantID: auth.tenantId,
         },
       });
-      console.log(response);
       return response.body as any[];
     } catch (e) {
       console.error('Error getting budgets!');
