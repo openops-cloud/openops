@@ -10,7 +10,6 @@ import {
   UserId,
 } from '@openops/shared';
 import { engineRunner } from 'server-worker';
-import { InsertResult } from 'typeorm';
 import { accessTokenManager } from '../../authentication/lib/access-token-manager';
 import { sendWorkflowTestBlockEvent } from '../../telemetry/event-models';
 import { flowVersionService } from '../flow-version/flow-version.service';
