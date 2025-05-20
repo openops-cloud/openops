@@ -97,15 +97,7 @@ export const aiConfigService = {
   async getActiveConfigWithApiKey(
     projectId: string,
   ): Promise<AiConfig | undefined> {
-    const config = await getOneBy({ projectId, enabled: true });
-    if (!config) {
-      return;
-    }
-    config.modelSettings = {
-      ...(config.modelSettings ?? {}),
-      experimental_telemetry: { isEnabled: false },
-    };
-    return config;
+    return getOneBy({ projectId, enabled: true });
   },
 
   async delete(params: {
