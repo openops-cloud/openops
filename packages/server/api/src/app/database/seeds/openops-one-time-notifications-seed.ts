@@ -4,7 +4,7 @@ import { FlagEntity } from '../../flags/flag.entity';
 import { seedTemplateTablesService } from '../../openops-tables/template-tables/seed-tables-for-templates';
 import { databaseConnection } from '../database-connection';
 
-const ONE_TIME_NOTIFICATIONS = 'ONETIMENOTIFICATIONS';
+const ONE_TIME_NOTIFICATIONS = 'ONE_TIME_NOTIFICATIONS_SEEDED';
 
 const tableAlreadyCreated = async (): Promise<boolean> => {
   const flagRepo = databaseConnection().getRepository(FlagEntity);
