@@ -48,7 +48,7 @@ export const stepRunService = {
       projectId,
     });
 
-    if (step.id) {
+    if (step.id && result.output) {
       await flowStepTestOutputService.save({
         stepId: step.id,
         flowVersionId: flowVersion.id,
