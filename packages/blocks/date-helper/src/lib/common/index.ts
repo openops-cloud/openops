@@ -24,7 +24,7 @@ export enum timeFormat {
   format12 = 'DD/MM/YYYY',
   format13 = 'DD/MM/YY',
   format14 = 'X',
-  format15 = 'YYYY-MM-DDTHH:mm:ss.000Z',
+  format15 = 'YYYY-MM-DDTHH:mm:ss.SSSZ',
 }
 
 export enum timeFormatLabel {
