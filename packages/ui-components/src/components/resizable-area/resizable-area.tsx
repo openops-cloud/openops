@@ -134,11 +134,11 @@ export function ResizableArea({
 
       <ResizeIcon
         className={cn(
-          'absolute bottom-1 right-1 w-3 h-3 cursor-nwse-resize pointer-events-auto text-primary/40',
+          'absolute bottom-1 right-1 w-3 h-3 cursor-nwse-resize pointer-events-auto text-border-300',
           {
             'top-1 right-1 cursor-nesw-resize rotate-[-90deg]':
               resizeFrom === 'top-right',
-            'opacity-50 pointer-events-none cursor-not-allowed': isDisabled,
+            'opacity-25 pointer-events-none cursor-not-allowed': isDisabled,
           },
         )}
         onMouseDown={startResize}
