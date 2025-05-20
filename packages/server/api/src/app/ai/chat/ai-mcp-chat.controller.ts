@@ -126,8 +126,6 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       isAnalyticsLoaded,
       isTablesLoaded,
     });
-    logger.debug({ systemPrompt }, 'systemPrompt');
-    logger.debug({ filteredTools }, 'filteredTools');
 
     pipeDataStreamToResponse(reply.raw, {
       execute: async (dataStreamWriter) => {
