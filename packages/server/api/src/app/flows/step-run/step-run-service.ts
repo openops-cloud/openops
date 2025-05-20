@@ -52,7 +52,7 @@ export const stepRunService = {
       await flowStepTestOutputService.save({
         stepId: step.id,
         flowVersionId: flowVersion.id,
-        output: isNil(result.output) ? {} : result.output,
+        output: result.output,
       });
     }
 
