@@ -42,7 +42,7 @@ export function ResizableArea({
         height: maxHeight,
       });
     }
-  }, [dimensions.height, dimensions.width, maxHeight, maxWidth, setDimensions]);
+  }, [dimensions.height, dimensions.width, maxHeight, setDimensions]);
 
   useEffect(() => {
     if (maxWidth < dimensions.width && maxWidth > 0) {
@@ -51,7 +51,7 @@ export function ResizableArea({
         height: dimensions.height,
       });
     }
-  }, [dimensions.height, dimensions.width, maxHeight, maxWidth, setDimensions]);
+  }, [dimensions.height, dimensions.width, maxWidth, setDimensions]);
 
   const resizeRef = useRef<HTMLDivElement>(null);
   const isResizingRef = useRef(false);
