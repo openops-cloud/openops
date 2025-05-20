@@ -111,7 +111,7 @@ export async function makeOpenOpsTablesGet<T>(
   return responses;
 }
 
-async function makeOpenOpsTablesRequest<T>(
+export async function makeOpenOpsTablesRequest<T>(
   method: Method,
   route: string,
   body?: any,

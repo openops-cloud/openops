@@ -145,14 +145,14 @@ const updateEslintFile = async (blockName: string) => {
 };
 
 const updateJestConfigFile = async (blockName: string) => {
-  let jestConfig = await readJestConfig(`packages/blocks/${blockName}`);
-
-  jestConfig = jestConfig.replace(
-    /preset:\s'..\/..\/..\/jest.preset.js',/,
+  const jestConfigBuffer = await readJestConfig(`packages/blocks/${blockName}`);
+  const jestConfig = jestConfigBuffer.toString();
+  const updatedJestConfig = jestConfig.replace(
+    /preset:\s*['"].*jest\.preset\.js['"],?/,
     (match) => `${match}\n  setupFiles: ['../../../jest.env.js'],`,
   );
 
-  await writeJestConfig(`packages/blocks/${blockName}`, jestConfig);
+  await writeJestConfig(`packages/blocks/${blockName}`, updatedJestConfig);
 };
 
 const setupGeneratedLibrary = async (blockName: string) => {

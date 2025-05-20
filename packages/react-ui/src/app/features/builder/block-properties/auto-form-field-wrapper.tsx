@@ -10,7 +10,7 @@ import {
   FormLabel,
   ReadMoreDescription,
 } from '@openops/components/ui';
-import { Action, FlagId, isNil, Trigger } from '@openops/shared';
+import { Action, isNil, Trigger } from '@openops/shared';
 import { t } from 'i18next';
 import { Sparkles } from 'lucide-react';
 import { useCallback, useContext, useEffect } from 'react';
@@ -19,9 +19,9 @@ import { ControllerRenderProps, useFormContext } from 'react-hook-form';
 import { TextInputWithMentions } from './text-input-with-mentions';
 import { CUSTOMIZED_INPUT_KEY, isDynamicViewToggled } from './utils';
 
-import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
 import { ArrayFieldContext } from '@/app/features/builder/block-properties/dynamic-array/array-field-context';
+import { useAppStore } from '@/app/store/app-store';
 import { Link } from 'react-router-dom';
 import { useSafeBuilderStateContext } from '../builder-hooks';
 
@@ -89,9 +89,6 @@ const FormLabelButton = ({
   handleDynamicValueChange,
   onGenerateWithAIClick,
 }: FormLabelButtonProps) => {
-  const { data: isAIEnabled = false } = flagsHooks.useFlag(
-    FlagId.SHOW_AI_SETTINGS,
-  );
   const readonly = useSafeBuilderStateContext((s) => s?.readonly);
   const isAiChatVisible = useSafeBuilderStateContext(
     (s) => s?.midpanelState?.showAiChat,
@@ -101,11 +98,7 @@ const FormLabelButton = ({
     aiSettingsHooks.useHasActiveAiSettings();
 
   const shouldShowAIButton =
-    property &&
-    'supportsAI' in property &&
-    property.supportsAI &&
-    !readonly &&
-    isAIEnabled;
+    property && 'supportsAI' in property && property.supportsAI && !readonly;
 
   if (shouldShowAIButton) {
     return hasActiveAiSettings ? (
@@ -162,6 +155,10 @@ const AutoFormFieldWrapper = ({
 }: AutoFormFieldWrapperProps) => {
   const form = useFormContext<Action | Trigger>();
   const fieldState = form.getFieldState(inputName);
+
+  const { setIsAiChatOpened } = useAppStore((s) => ({
+    setIsAiChatOpened: s.setIsAiChatOpened,
+  }));
 
   const arrayFieldContext = useContext(ArrayFieldContext);
 
@@ -254,7 +251,8 @@ const AutoFormFieldWrapper = ({
         inputName,
       },
     });
-  }, [dispatch, property, inputName]);
+    setIsAiChatOpened(false);
+  }, [dispatch, property, inputName, setIsAiChatOpened]);
 
   return (
     <FormItem className="flex flex-col gap-1">
