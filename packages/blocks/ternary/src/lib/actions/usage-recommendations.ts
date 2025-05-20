@@ -136,7 +136,7 @@ export const updateUsageRecommendations = createAction({
       });
       return response.body as object;
     } catch (e) {
-      console.error('Error getting data integrations!');
+      console.error('Error updating usage recommendations.');
       console.error(e);
       return e;
     }
