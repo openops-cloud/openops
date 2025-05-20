@@ -39,16 +39,16 @@ export function ResizableArea({
     if (maxHeight < dimensions.height) {
       setDimensions({
         width: dimensions.width,
-        height: Math.min(dimensions.height, maxHeight),
+        height: maxHeight,
       });
     }
   }, [dimensions.height, dimensions.width, maxHeight, maxWidth, setDimensions]);
 
   useEffect(() => {
-    if (maxWidth < dimensions.width) {
+    if (maxWidth < dimensions.width && maxWidth > 0) {
       setDimensions({
+        width: maxWidth,
         height: dimensions.height,
-        width: Math.min(dimensions.width, maxWidth),
       });
     }
   }, [dimensions.height, dimensions.width, maxHeight, maxWidth, setDimensions]);
