@@ -113,6 +113,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       messages,
       tools,
       languageModel,
+      aiConfig,
     });
 
     const isAnalyticsLoaded = Object.keys(filteredTools ?? {}).some((key) =>

@@ -1,4 +1,5 @@
 import { logger } from '@openops/server-shared';
+import { AiConfig } from '@openops/shared';
 import { CoreMessage, generateObject, LanguageModel, ToolSet } from 'ai';
 import { z } from 'zod';
 
@@ -15,10 +16,12 @@ export async function selectRelevantTools({
   messages,
   tools,
   languageModel,
+  aiConfig,
 }: {
   messages: CoreMessage[];
   tools: ToolSet;
   languageModel: LanguageModel;
+  aiConfig: AiConfig;
 }): Promise<ToolSet | undefined> {
   const toolList = Object.entries(tools).map(([name, tool]) => ({
     name,
@@ -33,6 +36,7 @@ export async function selectRelevantTools({
       }),
       system: getSystemPrompt(toolList),
       messages,
+      ...aiConfig.modelSettings,
     });
 
     const selectedToolNames = toolSelectionResult.tool_names;
