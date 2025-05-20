@@ -100,15 +100,12 @@ const DeleteConnectionColumn = ({
           <DropdownMenuItem
             onSelect={(e) => {
               e.preventDefault();
-              e.stopPropagation();
               setIsOpenEditConnectionDialog(true);
             }}
           >
-            {!isOpenEditConnectionDialog && (
-              <span className="text-black text-sm font-medium">
-                {t('Edit')}
-              </span>
-            )}
+            <span className="text-black text-sm font-medium cursor-pointer w-full">
+              {t('Edit')}
+            </span>
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={(e) => {
@@ -126,13 +123,13 @@ const DeleteConnectionColumn = ({
               isPending={isPending}
               linkedFlows={linkedFlows}
             >
-              <span
-                role="button"
+              <button
                 onClick={() => mutate({ connectionName: row.name })}
-                className="text-black text-sm font-medium"
+                className="text-black text-sm font-medium bg-transparent border-none p-0 m-0 cursor-pointer appearance-none w-full text-left"
+                type="button"
               >
                 {t('Delete')}
-              </span>
+              </button>
             </DeleteConnectionDialog>
           </DropdownMenuItem>
         </DropdownMenuContent>
