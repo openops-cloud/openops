@@ -9,7 +9,10 @@ type EditConnectionDialogProps = {
   setOpen: (open: boolean) => void;
 };
 
-function EditConnectionDialog({ id, setOpen }: EditConnectionDialogProps) {
+function EditConnectionDialog({
+  id,
+  setOpen,
+}: Readonly<EditConnectionDialogProps>) {
   const { data: editConnection } = appConnectionsHooks.useConnection({
     id,
   });

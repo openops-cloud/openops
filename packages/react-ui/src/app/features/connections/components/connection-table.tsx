@@ -127,6 +127,7 @@ const DeleteConnectionColumn = ({
               linkedFlows={linkedFlows}
             >
               <span
+                role="button"
                 onClick={() => mutate({ connectionName: row.name })}
                 className="text-black text-sm font-medium"
               >

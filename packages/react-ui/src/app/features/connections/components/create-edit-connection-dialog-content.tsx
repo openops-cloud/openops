@@ -102,7 +102,7 @@ const CreateEditConnectionDialogContent = ({
       request: createDefaultValues(
         block,
         editConnection,
-        editConnection?.name || appConnectionUtils.findName(block.name),
+        editConnection?.name ?? appConnectionUtils.findName(block.name),
       ),
     },
     mode: 'onChange',
