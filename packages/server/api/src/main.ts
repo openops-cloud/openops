@@ -17,6 +17,7 @@ import { seedFocusDataAggregationTemplateTable } from './app/database/seeds/open
 import * as analytics from './app/database/seeds/openops-analytics-seed';
 import { deleteOldOpportunitiesTable } from './app/database/seeds/openops-delete-old-opportunities-table';
 import { seedKnownCostTypesByApplicationTable } from './app/database/seeds/openops-knonw-cost-types-by-application-seed';
+import { createOneTimeNotificationsTable } from './app/database/seeds/openops-one-time-notifications-seed';
 import { seedOpportunitesTemplateTable } from './app/database/seeds/openops-opportunities-table-seed';
 import { updateOpenopsTablesDatabase } from './app/database/seeds/openops-tables-rename-database';
 import { upsertAdminUser } from './app/database/seeds/seed-admin';
@@ -108,6 +109,7 @@ const main = async (): Promise<void> => {
     await seedOpportunitesTemplateTable();
     await seedFocusDataAggregationTemplateTable();
     await seedKnownCostTypesByApplicationTable();
+    await createOneTimeNotificationsTable();
     await analytics.seedAnalytics();
 
     initializeLock();

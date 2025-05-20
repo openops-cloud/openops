@@ -8,12 +8,13 @@ import { createAutoEc2InstancesShutdownTable } from './create-auto-ec2-instances
 import { createBusinessUnitsTable } from './create-business-units-table';
 import { createIdleEbsVolumesToDeleteTable } from './create-idle-ebs-volumes-to-delete-table';
 import { createKnownCostTypesByApplicationTable } from './create-known-cost-types-by-application-table';
+import { createOneTimeNotificationsTable } from './create-one-time-notifications-table';
 import { createOpportunitiesTable } from './create-opportunities-table';
 import { createResourceBuTagAssignmentTable } from './create-resource-bu-tag-assignment-table';
 import { createTagOwnerMappingTable } from './create-tag-owner-mapping-table';
 
 export const seedTemplateTablesService = {
-  async createBaseTemplateTables() {
+  async createBaseTemplateTables(): Promise<void> {
     const { token } = await authenticateDefaultUserInOpenOpsTables();
     const databaseId = await getDefaultDatabaseId(token);
 
@@ -30,7 +31,7 @@ export const seedTemplateTablesService = {
     logger.info('[Seeding template tables] Done');
   },
 
-  async createOpportunityTemplateTable() {
+  async createOpportunityTemplateTable(): Promise<void> {
     const { token } = await authenticateDefaultUserInOpenOpsTables();
     const databaseId = await getDefaultDatabaseId(token);
 
@@ -39,19 +40,28 @@ export const seedTemplateTablesService = {
     logger.info('[Seeding opportunity template table] Done');
   },
 
-  async createAggregatedCostsTable() {
+  async createAggregatedCostsTable(): Promise<void> {
     const { token } = await authenticateDefaultUserInOpenOpsTables();
     const databaseId = await getDefaultDatabaseId(token);
 
     await createAggregatedCostsTable(databaseId, token);
   },
 
-  async createKnownCostTypesByApplicationTable() {
+  async createKnownCostTypesByApplicationTable(): Promise<void> {
     const { token } = await authenticateDefaultUserInOpenOpsTables();
     const databaseId = await getDefaultDatabaseId(token);
 
     await createKnownCostTypesByApplicationTable(token, databaseId);
 
     logger.info('[Seeding Known cost types by application table] Done');
+  },
+
+  async createOneTimeNotificationsTable(): Promise<void> {
+    const { token } = await authenticateDefaultUserInOpenOpsTables();
+    const databaseId = await getDefaultDatabaseId(token);
+
+    await createOneTimeNotificationsTable(token, databaseId);
+
+    logger.info('[Seeding One-time notifications table] Done');
   },
 };
