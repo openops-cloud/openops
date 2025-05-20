@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { Navigate, useParams, useSearchParams } from 'react-router-dom';
 
+import { useDefaultSidebarState } from '@/app/common/hooks/use-default-sidebar-state';
 import { SEARCH_PARAMS } from '@/app/constants/search-params';
 import { BuilderPage } from '@/app/features/builder';
 import { BuilderStateProvider } from '@/app/features/builder/builder-state-provider';
@@ -13,6 +14,7 @@ import { AxiosError } from 'axios';
 const FlowBuilderPage = () => {
   const { flowId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
+  useDefaultSidebarState('expanded');
 
   useEffect(() => {
     const viewOnly = new URLSearchParams(window.location.search).get(
