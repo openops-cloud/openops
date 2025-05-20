@@ -21,6 +21,7 @@ export enum WorkflowEventName {
   WORKFLOW_EXPORTED = 'workflow_exported',
   WORKFLOW_TEST_BLOCK = 'workflow_test_block',
   CREATED_WORKFLOW_FROM_TEMPLATE = 'workflow_created_from_template',
+  WORKFLOW_TEST_FAILURE = 'workflow_test_failure',
 }
 
 export function sendWorkflowCreatedEvent(
@@ -141,6 +142,23 @@ export function sendWorkflowTestBlockEvent(eventParams: {
       blockName: eventParams.step.settings?.blockName || '',
       actionName: eventParams.step?.settings?.actionName || '',
       duration: eventParams.duration.toString(),
+    },
+  });
+}
+
+export function sendWorkflowTestFailureEvent(eventParams: {
+  userId: string;
+  projectId: string;
+  flowVersionId: string;
+  errorMessage: string;
+}): void {
+  telemetry.trackEvent({
+    name: WorkflowEventName.WORKFLOW_TEST_FAILURE,
+    labels: {
+      userId: eventParams.userId,
+      flowVersionId: eventParams.flowVersionId,
+      projectId: eventParams.projectId,
+      errorMessage: eventParams.errorMessage,
     },
   });
 }

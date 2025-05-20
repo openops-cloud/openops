@@ -8,6 +8,8 @@ import {
   WebsocketClientEvent,
   WebsocketServerEvent,
 } from '@openops/shared';
+import { sendStepFailureEvent } from '../telemetry/event-models/step';
+import { sendWorkflowTestFailureEvent } from '../telemetry/event-models/workflow';
 import {
   getPrincipalFromWebsocket,
   websocketService,
@@ -26,8 +28,9 @@ export const flowModule: FastifyPluginAsyncTypebox = async (app) => {
   await app.register(testTriggerController, { prefix: '/v1/test-trigger' });
   websocketService.addListener(WebsocketServerEvent.TEST_FLOW_RUN, (socket) => {
     return async (data: TestFlowRunRequestBody) => {
+      let principal;
       try {
-        const principal = await getPrincipalFromWebsocket(socket);
+        principal = await getPrincipalFromWebsocket(socket);
 
         const flowRun = await flowRunService.test({
           projectId: principal.projectId,
@@ -45,6 +48,13 @@ export const flowModule: FastifyPluginAsyncTypebox = async (app) => {
         );
         socket.emit(WebsocketClientEvent.TEST_FLOW_RUN_STARTED, flowRun);
       } catch (err) {
+        sendWorkflowTestFailureEvent({
+          userId: principal?.id ?? '',
+          projectId: principal?.projectId ?? '',
+          flowVersionId: data.flowVersionId,
+          errorMessage: (err as Error).message,
+        });
+
         logger.error('Something went wrong when handling the FLOW_RUN event.', {
           message: (err as Error).message,
         });
@@ -59,8 +69,9 @@ export const flowModule: FastifyPluginAsyncTypebox = async (app) => {
   });
   websocketService.addListener(WebsocketServerEvent.TEST_STEP_RUN, (socket) => {
     return async (data: CreateStepRunRequestBody) => {
+      let principal;
       try {
-        const principal = await getPrincipalFromWebsocket(socket);
+        principal = await getPrincipalFromWebsocket(socket);
 
         logger.debug({ data }, '[Socket#testStepRun]');
         const stepRun = await stepRunService.create({
@@ -76,6 +87,13 @@ export const flowModule: FastifyPluginAsyncTypebox = async (app) => {
         };
         socket.emit(WebsocketClientEvent.TEST_STEP_FINISHED, response);
       } catch (err) {
+        sendStepFailureEvent({
+          userId: principal?.id ?? '',
+          projectId: principal?.projectId ?? '',
+          stepName: data.stepName,
+          errorMessage: (err as Error).message,
+        });
+
         logger.error('Something went wrong when handling the STEP_RUN event.', {
           message: (err as Error).message,
         });
