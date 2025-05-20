@@ -38,7 +38,7 @@ export function ResizableArea({
   setDimensions,
 }: ResizableAreaProps) {
   useEffect(() => {
-    if (maxHeight < dimensions.height) {
+    if (maxHeight < dimensions.height && maxHeight > 0) {
       setDimensions({
         width: dimensions.width,
         height: maxHeight,
