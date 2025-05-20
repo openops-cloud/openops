@@ -82,12 +82,9 @@ jobs:
       RELEASE_DC_FILENAME: openops-dc-${{ needs.get-version.outputs.version }}.zip
     steps:
       - uses: actions/checkout@v4
-      - name: Copy files into deploy directory
-        run: |
-          cp THIRD_PARTY_LICENSES.txt LICENSE NOTICE deploy/docker-compose
-          cp -R ai-prompts deploy/docker-compose/
       - name: Update version in docker-compose
         run: |
+          cp THIRD_PARTY_LICENSES.txt LICENSE NOTICE deploy/docker-compose
           cd deploy/docker-compose
           sed -i "s/\${OPS_VERSION:-latest}/$VERSION/" docker-compose.yml
           zip -r $RELEASE_DC_FILENAME .
