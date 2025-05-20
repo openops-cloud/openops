@@ -87,7 +87,7 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
     'https://raw.githubusercontent.com/openops-cloud/openops/main/ai-prompts',
   [AppSystemProp.SUPERSET_MCP_SERVER_PATH]: '/root/.mcp/superset',
   [AppSystemProp.DOCS_MCP_SERVER_PATH]: '/root/.mcp/docs.openops.com',
-  [AppSystemProp.LOAD_TABLES_AND_SUPERSET_MCP_TOOLS]: 'false',
+  [AppSystemProp.LOAD_EXPERIMENTAL_MCP_TOOLS]: 'false',
 };
 
 export const system = {

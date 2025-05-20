@@ -6,17 +6,16 @@ import { getTablesTools } from './tables-tools';
 
 export const getMCPTools = async (): Promise<ToolSet> => {
   const docsTools = await safeGetTools('docs', getDocsTools);
+  const tablesTools = await safeGetTools('tables', getTablesTools);
 
-  const loadTablesAndSupersetMcpTools = system.getBoolean(
-    AppSystemProp.LOAD_TABLES_AND_SUPERSET_MCP_TOOLS,
+  const loadExperimentalTools = system.getBoolean(
+    AppSystemProp.LOAD_EXPERIMENTAL_MCP_TOOLS,
   );
 
   let supersetTools = {};
-  let tablesTools = {};
 
-  if (loadTablesAndSupersetMcpTools) {
+  if (loadExperimentalTools) {
     supersetTools = await safeGetTools('superset', getSupersetTools);
-    tablesTools = await safeGetTools('tables', getTablesTools);
   }
 
   const toolSet = {
