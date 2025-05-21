@@ -56,9 +56,10 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
     projectId: authenticationSession.getProjectId() ?? '',
   });
 
-  const { data: reconnectConnection } = appConnectionsHooks.useConnection({
-    id: reconnectConnectionId,
-  });
+  const { data: reconnectConnection, isFetching: isFetchingConnection } =
+    appConnectionsHooks.useConnection({
+      id: reconnectConnectionId,
+    });
 
   const [refreshDynamicProperties] = useBuilderStateContext((state) => [
     state.refreshDynamicPropertiesForAuth,
@@ -86,10 +87,10 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
               inputName="settings.input.auth"
               allowDynamicValues={!params.isTrigger}
             >
-              {connectionDialogOpen && reconnectConnection && (
+              {connectionDialogOpen && !isFetchingConnection && (
                 <DynamicFormValidationProvider>
                   <CreateOrEditConnectionDialog
-                    editConnection={reconnectConnection}
+                    editConnection={reconnectConnection ?? null}
                     reconnect={true}
                     key={reconnectConnection?.name || 'newConnection'}
                     block={params.block}
