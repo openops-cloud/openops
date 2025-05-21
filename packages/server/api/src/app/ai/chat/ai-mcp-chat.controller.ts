@@ -147,6 +147,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         });
 
         endStreamWithErrorMessage(reply.raw, message);
+        logger.warn(message, error);
         return message;
       },
     });
@@ -227,7 +228,7 @@ async function streamMessages(
     toolChoice: 'auto',
     maxRetries: 0,
     maxSteps: MAX_RECURSION_DEPTH,
-    async onStepFinish({ finishReason }) {
+    async onStepFinish({ finishReason }): Promise<void> {
       stepCount++;
       if (finishReason !== 'stop' && stepCount >= MAX_RECURSION_DEPTH) {
         const message = `Maximum recursion depth (${MAX_RECURSION_DEPTH}) reached. Terminating recursion.`;
@@ -235,7 +236,7 @@ async function streamMessages(
         logger.warn(message);
       }
     },
-    async onFinish({ response }) {
+    async onFinish({ response }): Promise<void> {
       const filteredMessages = removeToolMessages(messages);
       response.messages.forEach((r) => {
         filteredMessages.push(getResponseObject(r));
