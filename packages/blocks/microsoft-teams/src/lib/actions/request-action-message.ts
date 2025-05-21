@@ -86,7 +86,7 @@ export const requestActionMessageAction = createAction({
       const preparedActions: TeamsMessageButton[] = actions.map((action) => ({
         ...action,
         resumeUrl: context.run.isTest
-          ? 'http://static.openops.com/test_teams_actions.txt'
+          ? 'https://static.openops.com/test_teams_actions.txt'
           : context.generateResumeUrl(
               {
                 queryParams: {
