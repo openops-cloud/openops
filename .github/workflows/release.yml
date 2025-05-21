@@ -113,7 +113,9 @@ jobs:
         run: |
           aws s3 cp deploy/docker-compose/$RELEASE_DC_FILENAME s3://openops/releases/$VERSION/$RELEASE_DC_FILENAME
           echo "Also available at https://openops.s3.amazonaws.com/releases/$VERSION/$RELEASE_DC_FILENAME" >> $GITHUB_STEP_SUMMARY
-          echo "Can be installed using:" >> $GITHUB_STEP_SUMMARY
-          echo "```" >> $GITHUB_STEP_SUMMARY
-          echo "curl -fsSL openops.sh/install | OPENOPS_URL=https://openops.s3.amazonaws.com/releases/$VERSION/openops-dc-$VERSION.zip OPENOPS_VERSION=$VERSION sh" >> $GITHUB_STEP_SUMMARY
-          echo "```" >> $GITHUB_STEP_SUMMARY
+          cat <<EOF >> $GITHUB_STEP_SUMMARY
+          Can be installed using:
+          ```
+          curl -fsSL openops.sh/install | OPENOPS_URL=https://openops.s3.amazonaws.com/releases/$VERSION/openops-dc-$VERSION.zip OPENOPS_VERSION=$VERSION sh
+          ```
+          EOF
