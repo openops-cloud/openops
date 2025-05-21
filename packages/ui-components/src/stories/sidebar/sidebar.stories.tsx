@@ -101,15 +101,12 @@ const FooterWrapperConnectedToCloud = (
   />
 );
 
-const AiFooter = (isMinimized: boolean) => (
+const AiFooter = (isMinimized: boolean, cloudConfigOverride?: any) => (
   <MenuFooter
     {...footerWrapperProps}
     user={mockUser}
     isMinimized={isMinimized}
-    cloudConfig={{
-      ...footerWrapperProps.cloudConfig,
-      user: { email: mockUser.email },
-    }}
+    cloudConfig={cloudConfigOverride || footerWrapperProps.cloudConfig}
   >
     <Button
       variant="ai"
@@ -131,15 +128,17 @@ const SidebarWrapper = ({
   isFullCatalog,
   isAiEnabled,
   className,
+  cloudConfigOverride,
 }: {
   isMinimized: boolean;
   theme?: string;
   isFullCatalog: boolean;
   isAiEnabled: boolean;
   className?: string;
+  cloudConfigOverride?: any;
 }) => {
   const footer = isAiEnabled
-    ? AiFooter(isMinimized)
+    ? AiFooter(isMinimized, cloudConfigOverride)
     : isFullCatalog
     ? FooterWrapperConnectedToCloud
     : FooterWrapperNotConnectedToCloud;
@@ -152,7 +151,17 @@ const SidebarWrapper = ({
             MenuHeader={
               <HeaderWrapper theme={theme} isMinimized={isMinimized} />
             }
-            MenuFooter={footer}
+            MenuFooter={
+              cloudConfigOverride ? (
+                <MenuFooter
+                  {...footerWrapperProps}
+                  cloudConfig={cloudConfigOverride}
+                  user={mockUser}
+                />
+              ) : (
+                footer
+              )
+            }
             className={cn('w-[300px]', className)}
           >
             <SideMenuNavigation links={MENU_LINKS} isMinimized={isMinimized} />
@@ -212,6 +221,17 @@ export const WithNotConnectedCloudIndicator: Story = {
     isAiEnabled: false,
     isFullCatalog: false,
   },
+  render: (args, context) => (
+    <SidebarWrapper
+      {...args}
+      theme={context?.globals?.theme}
+      cloudConfigOverride={{
+        ...footerWrapperProps.cloudConfig,
+        user: undefined,
+      }}
+      key="not-connected-cloud"
+    />
+  ),
   play: async ({ canvasElement }) => {
     const canvas = selectLightOrDarkCanvas(canvasElement);
     const avatarMenuTriggerEl = await canvas.findByTestId('user-avatar');
