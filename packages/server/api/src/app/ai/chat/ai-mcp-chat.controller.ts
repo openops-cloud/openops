@@ -112,7 +112,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       key.includes('superset'),
     );
     const isTablesLoaded = Object.keys(tools).some((key) =>
-      key.includes('Table'),
+      key.includes('table'),
     );
 
     const systemPrompt = await getMcpSystemPrompt({
