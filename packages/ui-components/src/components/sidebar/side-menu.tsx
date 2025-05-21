@@ -4,8 +4,8 @@ import { cn } from '../../lib/cn';
 
 type SideMenuProps = {
   children: React.ReactNode;
-  MenuHeader: React.ComponentType;
-  MenuFooter: React.ComponentType;
+  MenuHeader: React.ReactNode;
+  MenuFooter: React.ReactNode;
   className?: string;
 };
 
@@ -19,10 +19,10 @@ const SideMenu = ({
     <div className={cn('border-r top-0 bg-background @container', className)}>
       <div className="flex flex-col h-screen justify-between">
         <div className="flex flex-col flex-1 overflow-hidden">
-          <MenuHeader />
+          {MenuHeader}
           {children}
         </div>
-        <MenuFooter />
+        {MenuFooter}
       </div>
     </div>
   );

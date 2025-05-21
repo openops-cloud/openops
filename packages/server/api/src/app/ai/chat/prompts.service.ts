@@ -3,8 +3,25 @@ import { readFile } from 'fs/promises';
 import { join } from 'path';
 import { ChatContext } from './ai-chat.service';
 
-export const getMcpSystemPrompt = async (): Promise<string> => {
-  return loadPrompt('mcp.txt');
+export const getMcpSystemPrompt = async ({
+  isAnalyticsLoaded,
+  isTablesLoaded,
+}: {
+  isAnalyticsLoaded: boolean;
+  isTablesLoaded: boolean;
+}): Promise<string> => {
+  const prompts = [loadPrompt('mcp.txt')];
+
+  if (isTablesLoaded) {
+    prompts.push(loadPrompt('mcp-tables.txt'));
+  }
+
+  if (isAnalyticsLoaded) {
+    prompts.push(loadPrompt('mcp-analytics.txt'));
+  }
+
+  const allPrompts = await Promise.all(prompts);
+  return allPrompts.join('\n\n');
 };
 
 export const getSystemPrompt = async (

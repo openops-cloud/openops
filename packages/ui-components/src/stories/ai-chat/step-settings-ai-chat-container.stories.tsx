@@ -5,7 +5,8 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { fn } from '@storybook/test';
 import {
   AI_CHAT_CONTAINER_SIZES,
-  AiChatContainerSizeState,
+  AiCliChatContainerSizeState,
+  MarkdownCodeVariations,
   StepSettingsAiChatContainer,
 } from '../../components';
 import { AIChatMessages } from '../../components/ai-chat-messages/ai-chat-messages';
@@ -49,7 +50,7 @@ const meta = {
       updateArgs,
     ] = useArgs();
 
-    const onToggleContainerSizeState = (size: AiChatContainerSizeState) => {
+    const onToggleContainerSizeState = (size: AiCliChatContainerSizeState) => {
       toggleContainerSizeState(size);
       updateArgs({ containerSize: size });
     };
@@ -89,9 +90,12 @@ export const Docked: Story = {
     toggleContainerSizeState: fn(),
     handleSubmit: fn(),
     onCloseClick: fn(),
+    enableNewChat: true,
+    onNewChatClick: fn(),
     onToggle: fn(),
     input: '',
     handleInputChange: fn(),
+    isEmpty: true,
   },
 };
 
@@ -112,6 +116,7 @@ export const Collapsed: Story = {
 export const Populated: Story = {
   args: {
     ...Docked.args,
+    isEmpty: false,
   },
   render: (args) => {
     const [
@@ -119,7 +124,7 @@ export const Populated: Story = {
       updateArgs,
     ] = useArgs();
 
-    const onToggleContainerSizeState = (size: AiChatContainerSizeState) => {
+    const onToggleContainerSizeState = (size: AiCliChatContainerSizeState) => {
       toggleContainerSizeState(size);
       updateArgs({ containerSize: size });
     };
@@ -144,9 +149,18 @@ export const Populated: Story = {
           <AIChatMessages
             messages={sampleAIChatMessages}
             onInject={action('Inject command')}
+            codeVariation={MarkdownCodeVariations.WithCopyAndInject}
           />
         </StepSettingsAiChatContainer>
       </>
     );
   },
+};
+
+export const NewChatDisabled: Story = {
+  args: {
+    ...Populated.args,
+    enableNewChat: false,
+  },
+  render: Populated.render,
 };

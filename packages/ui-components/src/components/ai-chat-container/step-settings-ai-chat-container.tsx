@@ -7,17 +7,20 @@ import { cn } from '../../lib/cn';
 import { Button } from '../../ui/button';
 import { ScrollArea } from '../../ui/scroll-area';
 import { AiChatSizeTogglers } from './ai-chat-size-togglers';
-import { AI_CHAT_CONTAINER_SIZES, AiChatContainerSizeState } from './types';
+import { AI_CHAT_CONTAINER_SIZES, AiCliChatContainerSizeState } from './types';
 
 type StepSettingsAiChatContainerProps = {
   parentHeight: number;
   parentWidth: number;
   showAiChat: boolean;
   onCloseClick: () => void;
+  onNewChatClick: () => void;
   onToggle: () => void;
-  containerSize: AiChatContainerSizeState;
+  containerSize: AiCliChatContainerSizeState;
+  enableNewChat: boolean;
+  isEmpty: boolean;
 
-  toggleContainerSizeState: (state: AiChatContainerSizeState) => void;
+  toggleContainerSizeState: (state: AiCliChatContainerSizeState) => void;
   className?: string;
   children?: ReactNode;
 } & Pick<UseChatHelpers, 'input' | 'handleInputChange' | 'handleSubmit'>;
@@ -27,6 +30,8 @@ const StepSettingsAiChatContainer = ({
   parentWidth,
   showAiChat,
   onCloseClick,
+  onNewChatClick,
+  enableNewChat,
   onToggle,
   containerSize,
   toggleContainerSizeState,
@@ -35,6 +40,7 @@ const StepSettingsAiChatContainer = ({
   handleInputChange,
   handleSubmit,
   input,
+  isEmpty = true,
 }: StepSettingsAiChatContainerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -90,6 +96,8 @@ const StepSettingsAiChatContainer = ({
           state={containerSize}
           toggleContainerSizeState={toggleContainerSizeState}
           onCloseClick={onCloseClick}
+          onNewChatClick={onNewChatClick}
+          enableNewChat={enableNewChat}
         />
       </div>
 
@@ -105,19 +113,35 @@ const StepSettingsAiChatContainer = ({
         }}
         className="transition-all overflow-hidden"
       >
-        <div className="py-8 flex flex-col h-full">
+        <div className="py-4 flex flex-col h-full">
           <ScrollArea className="transition-all h-full w-full">
-            <div className="flex-1 px-6">
-              <div className="justify-center dark:text-primary text-base font-bold leading-[25px]">
-                <span>{t('Welcome to OpenOps AI Chat!')}</span>
-              </div>
-              {children}
+            <div
+              className={cn('flex-1 px-6', {
+                'flex flex-col h-full': isEmpty,
+              })}
+            >
+              {isEmpty ? (
+                <div
+                  className={
+                    'flex-1 flex flex-col items-center justify-center gap-4'
+                  }
+                >
+                  <span className="inline-block max-w-[220px] text-center dark:text-primary text-base font-bold leading-[25px]">
+                    {t('Welcome to')}
+                    <br />
+                    {t('OpenOps AI Chat!')}
+                  </span>
+                  {children}
+                </div>
+              ) : (
+                children
+              )}
             </div>
           </ScrollArea>
           <div className="w-full rounded-tl rounded-tr px-4 relative">
             <TextareaAutosize
-              className="w-full h-full min-h-[69px] resize-none rounded-lg border-gray-200 border-[1px] dark:text-primary-700 text-base font-normal leading-normal p-4 pt-5 pr-14 outline-none dark:bg-accent"
-              minRows={2}
+              className="w-full h-full min-h-12 resize-none rounded-lg border-gray-200 border-[1px] dark:text-primary-700 text-base font-normal leading-normal p-3 pr-12 outline-none dark:bg-accent"
+              minRows={1}
               maxRows={4}
               placeholder="Ask a question about the command you need"
               value={input}
@@ -134,7 +158,7 @@ const StepSettingsAiChatContainer = ({
             <Button
               size="icon"
               variant="transparent"
-              className="absolute right-10 bottom-7"
+              className="absolute right-7 bottom-2.5"
               onClick={handleSubmit}
             >
               <SendIcon className="text-gray-400 hover:text-gray-600" />

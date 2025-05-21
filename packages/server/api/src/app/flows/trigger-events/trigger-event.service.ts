@@ -24,6 +24,7 @@ import { buildPaginator } from '../../helper/pagination/build-paginator';
 import { paginationHelper } from '../../helper/pagination/pagination-utils';
 import { Order } from '../../helper/pagination/paginator';
 import { flowService } from '../flow/flow.service';
+import { flowStepTestOutputService } from '../step-test-output/flow-step-test-output.service';
 import { TriggerEventEntity } from './trigger-event.entity';
 
 export const triggerEventRepo = repoFactory(TriggerEventEntity);
@@ -45,13 +46,23 @@ export const triggerEventService = {
 
     const sourceName = getSourceName(flow.version.trigger);
 
-    return triggerEventRepo().save({
+    const triggerEventToSave = {
       id: openOpsId(),
       projectId,
       flowId: flow.id,
       sourceName,
       payload: sanitizeObjectForPostgresql(payload),
-    });
+    };
+
+    if (flow.version.trigger.id) {
+      await flowStepTestOutputService.save({
+        stepId: flow.version.trigger.id,
+        flowVersionId: flow.version.id,
+        output: triggerEventToSave.payload,
+      });
+    }
+
+    return triggerEventRepo().save(triggerEventToSave);
   },
 
   async test({

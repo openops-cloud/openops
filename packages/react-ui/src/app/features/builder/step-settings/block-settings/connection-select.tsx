@@ -14,7 +14,6 @@ import {
   SelectValue,
 } from '@openops/components/ui';
 import {
-  AppConnectionWithoutSensitiveData,
   BlockAction,
   BlockTrigger,
   addConnectionBrackets,
@@ -22,7 +21,7 @@ import {
 } from '@openops/shared';
 import { t } from 'i18next';
 import { Plus } from 'lucide-react';
-import { memo, useState } from 'react';
+import { memo, useCallback, useState } from 'react';
 import { ControllerRenderProps, useFormContext } from 'react-hook-form';
 
 import { AutoFormFieldWrapper } from '@/app/features/builder/block-properties/auto-form-field-wrapper';
@@ -42,8 +41,9 @@ type ConnectionSelectProps = {
 const ConnectionSelect = memo((params: ConnectionSelectProps) => {
   const [connectionDialogOpen, setConnectionDialogOpen] = useState(false);
   const [selectConnectionOpen, setSelectConnectionOpen] = useState(false);
-  const [reconnectConnection, setReconnectConnection] =
-    useState<AppConnectionWithoutSensitiveData | null>(null);
+  const [reconnectConnectionId, setReconnectConnectionId] = useState<
+    string | null
+  >(null);
   const form = useFormContext<BlockAction | BlockTrigger>();
   const {
     data: connectionsPage,
@@ -56,9 +56,33 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
     projectId: authenticationSession.getProjectId() ?? '',
   });
 
+  const { data: reconnectConnection, isFetching: isFetchingConnection } =
+    appConnectionsHooks.useConnection({
+      id: reconnectConnectionId,
+    });
+
   const [refreshDynamicProperties] = useBuilderStateContext((state) => [
     state.refreshDynamicPropertiesForAuth,
   ]);
+
+  const handleReconnectClick = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation();
+      const connectionName = removeConnectionBrackets(
+        form.getValues().settings.input.auth ?? '',
+      );
+
+      const matchedConnectionId =
+        connectionsPage?.data?.find((c) => c.name === connectionName)?.id ??
+        null;
+
+      setReconnectConnectionId(matchedConnectionId);
+      setSelectConnectionOpen(false);
+      setConnectionDialogOpen(true);
+    },
+    [connectionsPage?.data, form],
+  );
+
   return (
     <FormField
       control={form.control}
@@ -82,13 +106,14 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
               inputName="settings.input.auth"
               allowDynamicValues={!params.isTrigger}
             >
-              {connectionDialogOpen && (
+              {connectionDialogOpen && !isFetchingConnection && (
                 <DynamicFormValidationProvider>
                   <CreateOrEditConnectionDialog
-                    reconnectConnection={reconnectConnection}
+                    connectionToEdit={reconnectConnection ?? null}
+                    reconnect={true}
                     key={reconnectConnection?.name || 'newConnection'}
                     block={params.block}
-                    onConnectionCreated={async (connectionName) => {
+                    onConnectionSaved={async (connectionName) => {
                       await refetch();
                       field.onChange(addConnectionBrackets(connectionName));
                       refreshDynamicProperties();
@@ -117,20 +142,7 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
                       variant="ghost"
                       size="xs"
                       className="z-50 absolute right-8 top-2 "
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setReconnectConnection(
-                          connectionsPage?.data?.find(
-                            (connection) =>
-                              connection.name ===
-                              removeConnectionBrackets(
-                                form.getValues().settings.input.auth ?? '',
-                              ),
-                          ) ?? null,
-                        );
-                        setSelectConnectionOpen(false);
-                        setConnectionDialogOpen(true);
-                      }}
+                      onClick={handleReconnectClick}
                     >
                       {t('Reconnect')}
                     </Button>
@@ -164,7 +176,7 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
                 <SelectContent>
                   <SelectAction
                     onClick={() => {
-                      setReconnectConnection(null);
+                      setReconnectConnectionId(null);
                       setSelectConnectionOpen(false);
                       setConnectionDialogOpen(true);
                     }}

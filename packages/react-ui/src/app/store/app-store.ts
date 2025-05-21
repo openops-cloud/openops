@@ -1,7 +1,11 @@
+import {
+  AI_CHAT_CONTAINER_SIZES,
+  AiAssistantChatSizeState,
+  BoxSize,
+} from '@openops/components/ui';
 import { UserSettingsDefinition } from '@openops/shared';
 import { create } from 'zustand';
 import { UserInfo } from '../features/cloud/lib/cloud-user-api';
-
 const SIDEBAR_MINIMIZED_KEY = 'dashboard-sidebar-minimized';
 
 type AppState = {
@@ -13,6 +17,12 @@ type AppState = {
   setCloudUser: (user: UserInfo | null) => void;
   userSettings: UserSettingsDefinition;
   setUserSettings: (userSettings: UserSettingsDefinition) => void;
+  isAiChatOpened: boolean;
+  setIsAiChatOpened: (isAiChatOpened: boolean) => void;
+  aiChatSize: AiAssistantChatSizeState;
+  setAiChatSize: (size: AiAssistantChatSizeState) => void;
+  aiChatDimensions: BoxSize | null;
+  setAiChatDimensions: (dimensions: BoxSize) => void;
 };
 
 const getInitialSidebarState = (): boolean => {
@@ -32,4 +42,12 @@ export const useAppStore = create<AppState>((set) => ({
   setCloudUser: (user) => set({ cloudUser: user }),
   userSettings: {},
   setUserSettings: (userSettings) => set({ userSettings: userSettings }),
+  isAiChatOpened: false,
+  setIsAiChatOpened: (isAiChatOpened: boolean) => set({ isAiChatOpened }),
+  aiChatSize: AI_CHAT_CONTAINER_SIZES.DOCKED,
+  setAiChatSize: (size: AiAssistantChatSizeState) =>
+    set({ aiChatSize: size, aiChatDimensions: null }),
+  aiChatDimensions: null,
+  setAiChatDimensions: (dimensions: BoxSize) =>
+    set({ aiChatDimensions: dimensions }),
 }));

@@ -115,7 +115,7 @@ const BranchSingleCondition = ({
                 value={field.value}
                 options={operationOptions}
                 placeholder={''}
-                onChange={(e) => field.onChange(e)}
+                onChange={field.onChange}
               />
               <FormMessage />
             </FormItem>
@@ -125,12 +125,17 @@ const BranchSingleCondition = ({
           <FormField
             name={`settings.conditions.${groupIndex}.${conditionIndex}.secondValue`}
             control={form.control}
+            defaultValue={
+              form.getValues(
+                `settings.conditions.${groupIndex}.${conditionIndex}.secondValue`,
+              ) ?? ''
+            }
             render={({ field }) => (
               <FormItem>
                 <TextInputWithMentions
                   placeholder={t('Second value')}
                   disabled={readonly}
-                  initialValue={field.value}
+                  initialValue={field.value ?? ''}
                   onChange={field.onChange}
                 ></TextInputWithMentions>
                 <FormMessage />

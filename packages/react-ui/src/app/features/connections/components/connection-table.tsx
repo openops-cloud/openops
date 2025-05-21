@@ -8,6 +8,10 @@ import {
   Button,
   DataTable,
   DataTableColumnHeader,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
   INTERNAL_ERROR_TOAST,
   PageHeader,
   PaginationParams,
@@ -24,8 +28,8 @@ import {
 } from '@openops/shared';
 import { ColumnDef } from '@tanstack/react-table';
 import { t } from 'i18next';
-import { CheckIcon, Trash } from 'lucide-react';
-import { Dispatch, SetStateAction, useState } from 'react';
+import { CheckIcon, EllipsisVertical } from 'lucide-react';
+import { Dispatch, SetStateAction, useCallback, useState } from 'react';
 
 import { appConnectionUtils } from '../lib/app-connections-utils';
 
@@ -33,6 +37,7 @@ import { flowsApi } from '@/app/features/flows/lib/flows-api';
 import { useMutation } from '@tanstack/react-query';
 import { useConnectionsContext } from './connections-context';
 import { DeleteConnectionDialog } from './delete-connection-dialog';
+import { EditConnectionDialog } from './edit-connection-dialog';
 import { NewConnectionTypeDialog } from './new-connection-type-dialog';
 
 type BlockIconWithBlockNameProps = {
@@ -79,27 +84,66 @@ const DeleteConnectionColumn = ({
     onError: () => toast(INTERNAL_ERROR_TOAST),
   });
 
+  const [isOpenEditConnectionDialog, setIsOpenEditConnectionDialog] =
+    useState(false);
+
+  const deleteConnectionMutation = useCallback(
+    () =>
+      appConnectionsApi.delete(row.id).then((data) => {
+        setRefresh((prev) => !prev);
+        return data;
+      }),
+    [row.id, setRefresh],
+  );
+
   return (
     <div className="flex items-end justify-end">
-      <DeleteConnectionDialog
-        connectionName={row.name}
-        mutationFn={() =>
-          appConnectionsApi.delete(row.id).then((data) => {
-            setRefresh((prev) => !prev);
-            return data;
-          })
-        }
-        isPending={isPending}
-        linkedFlows={linkedFlows}
-      >
-        <Button
-          variant="ghost"
-          className="size-8 p-0"
-          onClick={() => mutate({ connectionName: row.name })}
+      <DropdownMenu modal={false}>
+        <DropdownMenuTrigger
+          asChild
+          className="rounded-full p-2 hover:bg-muted cursor-pointer"
         >
-          <Trash className="size-4 stroke-destructive" />
-        </Button>
-      </DeleteConnectionDialog>
+          <EllipsisVertical className="h-10 w-10" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-[155px]">
+          <DropdownMenuItem
+            onSelect={(e) => {
+              e.preventDefault();
+              setIsOpenEditConnectionDialog(true);
+            }}
+          >
+            <span className="text-black text-sm font-medium cursor-pointer w-full">
+              {t('Edit')}
+            </span>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onSelect={(e) => {
+              e.preventDefault();
+            }}
+          >
+            <DeleteConnectionDialog
+              connectionName={row.name}
+              mutationFn={deleteConnectionMutation}
+              isPending={isPending}
+              linkedFlows={linkedFlows}
+            >
+              <button
+                onClick={() => mutate({ connectionName: row.name })}
+                className="text-black text-sm font-medium bg-transparent border-none p-0 m-0 cursor-pointer appearance-none w-full text-left"
+                type="button"
+              >
+                {t('Delete')}
+              </button>
+            </DeleteConnectionDialog>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      {isOpenEditConnectionDialog && (
+        <EditConnectionDialog
+          id={row.id}
+          setOpen={setIsOpenEditConnectionDialog}
+        />
+      )}
     </div>
   );
 };
