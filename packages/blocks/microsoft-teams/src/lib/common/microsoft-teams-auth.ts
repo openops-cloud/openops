@@ -3,7 +3,12 @@ import { getMicrosoftGraphClient } from './get-microsoft-graph-client';
 
 export const microsoftTeamsAuth = BlockAuth.OAuth2({
   required: true,
-  scope: ['User.Read', 'ChannelMessage.Send', 'ChatMessage.Send'],
+  scope: [
+    'User.Read',
+    'ChannelMessage.Send',
+    'ChatMessage.Send',
+    'User-Mail.ReadWrite.All',
+  ],
   authUrl: 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize',
   tokenUrl: 'https://login.microsoftonline.com/common/oauth2/v2.0/token',
   validate: async ({ auth }) => {

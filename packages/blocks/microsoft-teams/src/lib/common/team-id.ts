@@ -1,5 +1,5 @@
-import { Client, PageCollection } from '@microsoft/microsoft-graph-client';
-import { Channel, Team } from '@microsoft/microsoft-graph-types';
+import { PageCollection } from '@microsoft/microsoft-graph-client';
+import { Team } from '@microsoft/microsoft-graph-types';
 import {
   BlockPropValueSchema,
   DropdownOption,

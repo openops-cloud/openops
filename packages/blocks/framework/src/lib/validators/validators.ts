@@ -401,4 +401,19 @@ export class Validators {
       },
     };
   }
+
+  static maxArrayLength(
+    length: number,
+  ): TypedValidatorFn<ValidationInputType.ARRAY> {
+    return {
+      type: ValidationInputType.ARRAY,
+      fn: (_, processedValue) => {
+        return processedValue.length > length
+          ? formatErrorMessage(ErrorMessages.MAX_ARRAY_LENGTH, {
+              length,
+            })
+          : null;
+      },
+    };
+  }
 }
