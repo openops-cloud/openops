@@ -109,7 +109,7 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
               {connectionDialogOpen && !isFetchingConnection && (
                 <DynamicFormValidationProvider>
                   <CreateOrEditConnectionDialog
-                    editConnection={reconnectConnection ?? null}
+                    connectionToEdit={reconnectConnection ?? null}
                     reconnect={true}
                     key={reconnectConnection?.name || 'newConnection'}
                     block={params.block}

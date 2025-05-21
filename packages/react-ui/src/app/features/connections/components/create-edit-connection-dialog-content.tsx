@@ -65,7 +65,7 @@ class ConnectionNameAlreadyExists extends Error {
 export type CreateEditConnectionDialogContentProps = {
   block: BlockMetadataModelSummary | BlockMetadataModel;
   onConnectionSaved: (name: string) => void;
-  editConnection: AppConnection | null;
+  connectionToEdit: AppConnection | null;
   reconnect?: boolean;
   showBackButton?: boolean;
   setOpen: (open: boolean) => void;
@@ -74,7 +74,7 @@ export type CreateEditConnectionDialogContentProps = {
 const CreateEditConnectionDialogContent = ({
   block,
   onConnectionSaved,
-  editConnection,
+  connectionToEdit,
   reconnect = false,
   showBackButton = false,
   setOpen,
@@ -101,8 +101,8 @@ const CreateEditConnectionDialogContent = ({
     defaultValues: {
       request: createDefaultValues(
         block,
-        editConnection,
-        editConnection?.name ?? appConnectionUtils.findName(block.name),
+        connectionToEdit,
+        connectionToEdit?.name ?? appConnectionUtils.findName(block.name),
       ),
     },
     mode: 'onChange',
@@ -132,12 +132,12 @@ const CreateEditConnectionDialogContent = ({
 
         if (
           !isNil(existingConnection) &&
-          editConnection?.id !== existingConnection.id
+          connectionToEdit?.id !== existingConnection.id
         ) {
           throw new ConnectionNameAlreadyExists();
         }
       }
-      if (editConnection) {
+      if (connectionToEdit) {
         return appConnectionsApi.patch(formValues);
       } else {
         return appConnectionsApi.upsert(
@@ -151,7 +151,7 @@ const CreateEditConnectionDialogContent = ({
       onConnectionSaved(requestValues.name);
       setErrorMessage('');
 
-      if (editConnection) {
+      if (connectionToEdit) {
         const id: string = (requestValues as PatchAppConnectionRequestBody).id;
         queryClient.invalidateQueries({
           queryKey: ['app-connection', id],
@@ -200,19 +200,19 @@ const CreateEditConnectionDialogContent = ({
             ></ArrowLeft>
           )}
 
-          {editConnection &&
+          {connectionToEdit &&
             reconnect &&
             t('Reconnect {displayName} Connection', {
-              displayName: editConnection?.name,
+              displayName: connectionToEdit?.name,
             })}
 
-          {editConnection &&
+          {connectionToEdit &&
             !reconnect &&
             t('Edit {displayName} Connection', {
-              displayName: editConnection?.name,
+              displayName: connectionToEdit?.name,
             })}
 
-          {!editConnection &&
+          {!connectionToEdit &&
             t('Create {displayName} Connection', {
               displayName: block.displayName,
             })}
@@ -239,7 +239,7 @@ const CreateEditConnectionDialogContent = ({
                   <FormControl>
                     <Input
                       // TODO: OPS-XXX - When renaming a connection, it breaks all workflows that used it.
-                      disabled={!!editConnection}
+                      disabled={!!connectionToEdit}
                       {...field}
                       required
                       id="name"
@@ -270,7 +270,7 @@ const CreateEditConnectionDialogContent = ({
               <OAuth2ConnectionSettings
                 authProperty={block.auth as OAuth2Property<OAuth2Props>}
                 block={block}
-                reconnectConnection={editConnection}
+                reconnectConnection={connectionToEdit}
               />
             )}
 

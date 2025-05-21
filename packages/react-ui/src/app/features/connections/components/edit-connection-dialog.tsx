@@ -13,14 +13,14 @@ function EditConnectionDialog({
   id,
   setOpen,
 }: Readonly<EditConnectionDialogProps>) {
-  const { data: editConnection } = appConnectionsHooks.useConnection({
+  const { data: connectionToEdit } = appConnectionsHooks.useConnection({
     id,
   });
 
   const { blocks } = blocksHooks.useBlocks({});
 
   const block = blocks?.find(
-    (block) => block.name === editConnection?.blockName,
+    (block) => block.name === connectionToEdit?.blockName,
   );
 
   const { setRefresh } = useConnectionsContext();
@@ -37,7 +37,7 @@ function EditConnectionDialog({
         onConnectionSaved={() => {
           setRefresh((prev) => !prev);
         }}
-        editConnection={editConnection ?? null}
+        connectionToEdit={connectionToEdit ?? null}
         reconnect={false}
         setOpen={setOpen}
       />

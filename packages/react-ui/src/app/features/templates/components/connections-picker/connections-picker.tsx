@@ -166,7 +166,7 @@ const ConnectionsPicker = ({
               onConnectionCreated(connectionName, selectedBlockMetadata?.name);
             }}
             reconnect={false}
-            editConnection={null}
+            connectionToEdit={null}
             setOpen={() => {
               setSelectedBlockMetadata(null);
             }}
