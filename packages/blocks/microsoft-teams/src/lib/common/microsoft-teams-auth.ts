@@ -2,6 +2,7 @@ import { BlockAuth, BlockPropValueSchema } from '@openops/blocks-framework';
 import { getMicrosoftGraphClient } from './get-microsoft-graph-client';
 
 export const microsoftTeamsAuth = BlockAuth.OAuth2({
+  description: '⚠️ You can only use school or work accounts.',
   required: true,
   scope: ['User.Read', 'ChannelMessage.Send', 'ChatMessage.Send'],
   authUrl: 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize',
