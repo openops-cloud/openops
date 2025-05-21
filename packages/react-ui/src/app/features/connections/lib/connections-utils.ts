@@ -159,11 +159,11 @@ export const createDefaultValues = (
         type: AppConnectionType.CLOUD_OAUTH2,
         value: existingConnection
           ? ({
-              ...existingConnection.value,
               scope: block.auth?.scope.join(' '),
               client_id: '',
               props: {},
               code: '',
+              ...existingConnection.value,
             } as CloudOAuth2ConnectionValue & {
               code: string;
               props:
