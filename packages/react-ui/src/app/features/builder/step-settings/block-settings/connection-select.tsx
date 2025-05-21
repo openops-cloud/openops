@@ -21,7 +21,7 @@ import {
 } from '@openops/shared';
 import { t } from 'i18next';
 import { Plus } from 'lucide-react';
-import { memo, useState } from 'react';
+import { memo, useCallback, useState } from 'react';
 import { ControllerRenderProps, useFormContext } from 'react-hook-form';
 
 import { AutoFormFieldWrapper } from '@/app/features/builder/block-properties/auto-form-field-wrapper';
@@ -64,6 +64,25 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
   const [refreshDynamicProperties] = useBuilderStateContext((state) => [
     state.refreshDynamicPropertiesForAuth,
   ]);
+
+  const handleReconnectClick = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation();
+      const connectionName = removeConnectionBrackets(
+        form.getValues().settings.input.auth ?? '',
+      );
+
+      const matchedConnectionId =
+        connectionsPage?.data?.find((c) => c.name === connectionName)?.id ??
+        null;
+
+      setReconnectConnectionId(matchedConnectionId);
+      setSelectConnectionOpen(false);
+      setConnectionDialogOpen(true);
+    },
+    [connectionsPage?.data, form],
+  );
+
   return (
     <FormField
       control={form.control}
@@ -123,20 +142,7 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
                       variant="ghost"
                       size="xs"
                       className="z-50 absolute right-8 top-2 "
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setReconnectConnectionId(
-                          connectionsPage?.data?.find(
-                            (connection) =>
-                              connection.name ===
-                              removeConnectionBrackets(
-                                form.getValues().settings.input.auth ?? '',
-                              ),
-                          )?.id ?? null,
-                        );
-                        setSelectConnectionOpen(false);
-                        setConnectionDialogOpen(true);
-                      }}
+                      onClick={handleReconnectClick}
                     >
                       {t('Reconnect')}
                     </Button>
