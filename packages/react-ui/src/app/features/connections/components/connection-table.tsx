@@ -29,7 +29,7 @@ import {
 import { ColumnDef } from '@tanstack/react-table';
 import { t } from 'i18next';
 import { CheckIcon, EllipsisVertical } from 'lucide-react';
-import { Dispatch, SetStateAction, useState } from 'react';
+import { Dispatch, SetStateAction, useCallback, useState } from 'react';
 
 import { appConnectionUtils } from '../lib/app-connections-utils';
 
@@ -87,6 +87,15 @@ const DeleteConnectionColumn = ({
   const [isOpenEditConnectionDialog, setIsOpenEditConnectionDialog] =
     useState(false);
 
+  const deleteConnectionMutation = useCallback(
+    () =>
+      appConnectionsApi.delete(row.id).then((data) => {
+        setRefresh((prev) => !prev);
+        return data;
+      }),
+    [row.id, setRefresh],
+  );
+
   return (
     <div className="flex items-end justify-end">
       <DropdownMenu modal={false}>
@@ -114,12 +123,7 @@ const DeleteConnectionColumn = ({
           >
             <DeleteConnectionDialog
               connectionName={row.name}
-              mutationFn={() =>
-                appConnectionsApi.delete(row.id).then((data) => {
-                  setRefresh((prev) => !prev);
-                  return data;
-                })
-              }
+              mutationFn={deleteConnectionMutation}
               isPending={isPending}
               linkedFlows={linkedFlows}
             >
