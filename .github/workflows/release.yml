@@ -116,7 +116,7 @@ jobs:
           Also available at https://openops.s3.amazonaws.com/releases/$VERSION/$RELEASE_DC_FILENAME .
 
           Can be installed using:
-          ```
+          \`\`\`
           curl -fsSL openops.sh/install | OPENOPS_URL=https://openops.s3.amazonaws.com/releases/$VERSION/openops-dc-$VERSION.zip OPENOPS_VERSION=$VERSION sh
-          ```
+          \`\`\`
           EOF
