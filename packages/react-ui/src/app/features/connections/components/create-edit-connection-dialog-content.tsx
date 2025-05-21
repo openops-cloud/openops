@@ -33,14 +33,15 @@ import {
   toast,
 } from '@openops/components/ui';
 import {
-  AppConnectionWithoutSensitiveData,
+  AppConnection,
   ApplicationErrorParams,
   ErrorCode,
   isNil,
+  PatchAppConnectionRequestBody,
   UpsertAppConnectionRequestBody,
 } from '@openops/shared';
 import { ScrollArea } from '@radix-ui/react-scroll-area';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { t } from 'i18next';
 import { ArrowLeft } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -63,16 +64,18 @@ class ConnectionNameAlreadyExists extends Error {
 
 export type CreateEditConnectionDialogContentProps = {
   block: BlockMetadataModelSummary | BlockMetadataModel;
-  onConnectionCreated: (name: string) => void;
-  reconnectConnection: AppConnectionWithoutSensitiveData | null;
+  onConnectionSaved: (name: string) => void;
+  connectionToEdit: AppConnection | null;
+  reconnect?: boolean;
   showBackButton?: boolean;
   setOpen: (open: boolean) => void;
 };
 
 const CreateEditConnectionDialogContent = ({
   block,
-  onConnectionCreated,
-  reconnectConnection,
+  onConnectionSaved,
+  connectionToEdit,
+  reconnect = false,
   showBackButton = false,
   setOpen,
 }: CreateEditConnectionDialogContentProps) => {
@@ -93,14 +96,13 @@ const CreateEditConnectionDialogContent = ({
   }, [block, formSchemaRef]);
 
   const form = useForm<{
-    request: UpsertAppConnectionRequestBody;
+    request: UpsertAppConnectionRequestBody | PatchAppConnectionRequestBody;
   }>({
     defaultValues: {
       request: createDefaultValues(
         block,
-        reconnectConnection
-          ? reconnectConnection.name
-          : appConnectionUtils.findName(block.name),
+        connectionToEdit,
+        connectionToEdit?.name ?? appConnectionUtils.findName(block.name),
       ),
     },
     mode: 'onChange',
@@ -113,12 +115,13 @@ const CreateEditConnectionDialogContent = ({
   }, [formSchema]);
 
   const [errorMessage, setErrorMessage] = useState('');
+  const queryClient = useQueryClient();
 
   const { mutate, isPending } = useMutation({
     mutationFn: async () => {
       setErrorMessage('');
       const formValues = form.getValues().request;
-      if (!reconnectConnection) {
+      if (!reconnect) {
         const connections = await appConnectionsApi.list({
           projectId: authenticationSession.getProjectId()!,
           limit: 10000,
@@ -127,17 +130,33 @@ const CreateEditConnectionDialogContent = ({
           (connection) => connection.name === formValues.name,
         );
 
-        if (!isNil(existingConnection)) {
+        if (
+          !isNil(existingConnection) &&
+          connectionToEdit?.id !== existingConnection.id
+        ) {
           throw new ConnectionNameAlreadyExists();
         }
       }
-      return appConnectionsApi.upsert(formValues);
+      if (connectionToEdit) {
+        return appConnectionsApi.patch(formValues);
+      } else {
+        return appConnectionsApi.upsert(
+          formValues as UpsertAppConnectionRequestBody,
+        );
+      }
     },
     onSuccess: () => {
       setOpen(false);
-      const name = form.getValues().request.name;
-      onConnectionCreated(name);
+      const requestValues = form.getValues().request;
+      onConnectionSaved(requestValues.name);
       setErrorMessage('');
+
+      if (connectionToEdit) {
+        const id: string = (requestValues as PatchAppConnectionRequestBody).id;
+        queryClient.invalidateQueries({
+          queryKey: ['app-connection', id],
+        });
+      }
     },
     onError: (err) => {
       if (err instanceof ConnectionNameAlreadyExists) {
@@ -161,6 +180,7 @@ const CreateEditConnectionDialogContent = ({
           );
         }
       } else {
+        console.warn(err);
         toast(INTERNAL_ERROR_TOAST);
         console.error(err);
       }
@@ -179,13 +199,23 @@ const CreateEditConnectionDialogContent = ({
               className="w-6 h-6"
             ></ArrowLeft>
           )}
-          {reconnectConnection
-            ? t('Reconnect {displayName} Connection', {
-                displayName: reconnectConnection.name,
-              })
-            : t('Create {displayName} Connection', {
-                displayName: block.displayName,
-              })}
+
+          {connectionToEdit &&
+            reconnect &&
+            t('Reconnect {displayName} Connection', {
+              displayName: connectionToEdit?.name,
+            })}
+
+          {connectionToEdit &&
+            !reconnect &&
+            t('Edit {displayName} Connection', {
+              displayName: connectionToEdit?.name,
+            })}
+
+          {!connectionToEdit &&
+            t('Create {displayName} Connection', {
+              displayName: block.displayName,
+            })}
         </DialogTitle>
       </DialogHeader>
       <ScrollArea className="h-full">
@@ -208,7 +238,7 @@ const CreateEditConnectionDialogContent = ({
                   <FormLabel htmlFor="name">{t('Connection Name')}</FormLabel>
                   <FormControl>
                     <Input
-                      disabled={!isNil(reconnectConnection)}
+                      disabled={!!connectionToEdit}
                       {...field}
                       required
                       id="name"
@@ -239,7 +269,7 @@ const CreateEditConnectionDialogContent = ({
               <OAuth2ConnectionSettings
                 authProperty={block.auth as OAuth2Property<OAuth2Props>}
                 block={block}
-                reconnectConnection={reconnectConnection}
+                reconnectConnection={connectionToEdit}
               />
             )}
 

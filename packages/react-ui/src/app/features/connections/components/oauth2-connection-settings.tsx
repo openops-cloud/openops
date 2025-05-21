@@ -21,8 +21,8 @@ import {
   OAuth2Props,
 } from '@openops/blocks-framework';
 import {
+  AppConnection,
   AppConnectionType,
-  AppConnectionWithoutSensitiveData,
   FlagId,
   OAuth2GrantType,
   OpsEdition,
@@ -39,7 +39,7 @@ import { oauth2AppsHooks } from '../lib/oauth2-apps-hooks';
 type OAuth2ConnectionSettingsProps = {
   block: BlockMetadataModelSummary | BlockMetadataModel;
   authProperty: OAuth2Property<OAuth2Props>;
-  reconnectConnection: AppConnectionWithoutSensitiveData | null;
+  reconnectConnection: AppConnection | null;
 };
 function replaceVariables(
   authUrl: string,
