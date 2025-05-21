@@ -238,7 +238,6 @@ const CreateEditConnectionDialogContent = ({
                   <FormLabel htmlFor="name">{t('Connection Name')}</FormLabel>
                   <FormControl>
                     <Input
-                      // TODO: OPS-XXX - When renaming a connection, it breaks all workflows that used it.
                       disabled={!!connectionToEdit}
                       {...field}
                       required
