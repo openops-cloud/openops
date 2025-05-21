@@ -4,6 +4,7 @@ import {
   StoreScope,
   Validators,
 } from '@openops/blocks-framework';
+import { networkUtls } from '@openops/server-shared';
 import { ExecutionType } from '@openops/shared';
 import { ChannelOption, ChatOption } from '../common/chat-types';
 import { chatsAndChannels } from '../common/chats-and-channels';
@@ -80,14 +81,21 @@ export const requestActionMessageAction = createAction({
         actions: TeamsMessageAction[];
       };
     if (context.executionType === ExecutionType.BEGIN) {
+      const baseUrl = await networkUtls.getPublicUrl();
+
       const preparedActions: TeamsMessageButton[] = actions.map((action) => ({
         ...action,
-        resumeUrl: context.generateResumeUrl({
-          queryParams: {
-            executionCorrelationId: context.run.pauseId,
-            button: action.buttonText,
-          },
-        }),
+        resumeUrl: context.run.isTest
+          ? 'https://static.openops.com/test_teams_actions.txt'
+          : context.generateResumeUrl(
+              {
+                queryParams: {
+                  executionCorrelationId: context.run.pauseId,
+                  button: action.buttonText,
+                },
+              },
+              baseUrl,
+            ),
       }));
 
       const result = await sendChatOrChannelMessage({
