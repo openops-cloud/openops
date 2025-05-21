@@ -3,6 +3,8 @@ import { AiConfig } from '@openops/shared';
 import { CoreMessage, generateObject, LanguageModel, ToolSet } from 'ai';
 import { z } from 'zod';
 
+const MAX_SELECTED_TOOLS = 128;
+
 const getSystemPrompt = (
   toolList: Array<{ name: string; description: string }>,
 ): string => {
@@ -23,6 +25,10 @@ export async function selectRelevantTools({
   languageModel: LanguageModel;
   aiConfig: AiConfig;
 }): Promise<ToolSet | undefined> {
+  if (!tools || Object.keys(tools).length === 0) {
+    return undefined;
+  }
+
   const toolList = Object.entries(tools).map(([name, tool]) => ({
     name,
     description: tool.description || '',
@@ -39,7 +45,23 @@ export async function selectRelevantTools({
       ...aiConfig.modelSettings,
     });
 
-    const selectedToolNames = toolSelectionResult.tool_names;
+    let selectedToolNames = toolSelectionResult.tool_names;
+
+    if (selectedToolNames.length > MAX_SELECTED_TOOLS) {
+      selectedToolNames = selectedToolNames.slice(0, MAX_SELECTED_TOOLS);
+    }
+
+    const validToolNames = Object.keys(tools);
+    const invalidToolNames = selectedToolNames.filter(
+      (name) => !validToolNames.includes(name),
+    );
+
+    if (invalidToolNames.length > 0) {
+      selectedToolNames = selectedToolNames.filter((name) =>
+        validToolNames.includes(name),
+      );
+    }
+
     const filteredTools = Object.fromEntries(
       Object.entries(tools).filter(([name]) =>
         selectedToolNames.includes(name),
@@ -48,7 +70,7 @@ export async function selectRelevantTools({
 
     return filteredTools;
   } catch (error) {
-    logger.error(error, 'Error selecting tools:');
+    logger.error('Error selecting tools', error);
     return;
   }
 }
