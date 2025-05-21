@@ -1,3 +1,9 @@
+import {
+  OrganizationRole,
+  ProjectMemberRole,
+  UserStatus,
+} from '@openops/shared';
+
 import { action } from '@storybook/addon-actions';
 import type { Meta, StoryObj } from '@storybook/react';
 import { userEvent } from '@storybook/testing-library';
@@ -46,67 +52,77 @@ const HeaderWrapper = ({
   );
 };
 
+const mockUser = {
+  id: 'aaaaaaaaaaaaaaaaaaaaa',
+  created: new Date().toISOString(),
+  updated: new Date().toISOString(),
+  email: 'john.doe@acme.com',
+  firstName: 'John',
+  lastName: 'Doe',
+  trackEvents: false,
+  newsLetter: false,
+  verified: true,
+  organizationRole: OrganizationRole.ADMIN,
+  status: UserStatus.ACTIVE,
+  externalId: undefined,
+  organizationId: 'bbbbbbbbbbbbbbbbbbbbb',
+  token: '',
+  projectId: 'ccccccccccccccccccccc',
+  projectRole: ProjectMemberRole.ADMIN,
+  tablesRefreshToken: '',
+};
+
 const footerWrapperProps = {
   isMinimized: false,
   cloudConfig: {
     isCloudLoginEnabled: true,
+    onCloudLogin: () => {},
     logout: () => {},
     logoUrl: 'https://static.openops.com/logos/logo.icon.positive.svg',
+    user: { email: mockUser.email },
   },
   settingsLink: {
     to: '/settings',
     label: 'Settings',
     icon: Wrench,
   },
-  user: {
-    email: 'cezar@openops.com',
-  },
+  user: mockUser,
   onLogout: () => {},
 };
 
-const FooterWrapperConnectedToCloud = () => (
+const FooterWrapperConnectedToCloud = (
   <MenuFooter
     {...footerWrapperProps}
+    user={mockUser}
     cloudConfig={{
       ...footerWrapperProps.cloudConfig,
-      user: {
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'john.doe@acme.com',
-      },
+      user: { email: mockUser.email },
     }}
   />
 );
 
-const AiFooter =
-  ({ isMinimized }: { isMinimized: boolean }) =>
-  // eslint-disable-next-line react/display-name
-  () =>
-    (
-      <MenuFooter
-        {...footerWrapperProps}
-        cloudConfig={{
-          ...footerWrapperProps.cloudConfig,
-          user: {
-            firstName: 'John',
-            lastName: 'Doe',
-            email: 'john.doe@acme.com',
-          },
-        }}
-        isMinimized={isMinimized}
-      >
-        <Button
-          variant="ai"
-          className={'size-9 p-0 gap-2'}
-          onClick={() => action('AI button clicked')}
-        >
-          <Bot className="w-6 h-6 dark:text-primary" />
-        </Button>
-      </MenuFooter>
-    );
+const AiFooter = (isMinimized: boolean) => (
+  <MenuFooter
+    {...footerWrapperProps}
+    user={mockUser}
+    isMinimized={isMinimized}
+    cloudConfig={{
+      ...footerWrapperProps.cloudConfig,
+      user: { email: mockUser.email },
+    }}
+  >
+    <Button
+      variant="ai"
+      className={'size-9 p-0 gap-2'}
+      onClick={() => action('AI button clicked')}
+    >
+      <Bot className="w-6 h-6 dark:text-primary" />
+    </Button>
+  </MenuFooter>
+);
 
-const FooterWrapperNotConnectedToCloud = () => (
-  <MenuFooter {...footerWrapperProps} />
+const FooterWrapperNotConnectedToCloud = (
+  <MenuFooter {...footerWrapperProps} user={mockUser} />
 );
 
 const SidebarWrapper = ({
@@ -123,7 +139,7 @@ const SidebarWrapper = ({
   className?: string;
 }) => {
   const footer = isAiEnabled
-    ? AiFooter({ isMinimized })
+    ? AiFooter(isMinimized)
     : isFullCatalog
     ? FooterWrapperConnectedToCloud
     : FooterWrapperNotConnectedToCloud;
@@ -133,9 +149,9 @@ const SidebarWrapper = ({
       <TooltipProvider>
         <div className="border-l border-t border-b w-full">
           <SideMenu
-            MenuHeader={() => (
+            MenuHeader={
               <HeaderWrapper theme={theme} isMinimized={isMinimized} />
-            )}
+            }
             MenuFooter={footer}
             className={cn('w-[300px]', className)}
           >
@@ -179,6 +195,7 @@ export const Default: Story = {
   args: {
     isMinimized: false,
     isFullCatalog: false,
+    isAiEnabled: false,
   },
   render: (args, context) => (
     <SidebarWrapper {...args} theme={context?.globals?.theme} />
@@ -190,6 +207,11 @@ export const Default: Story = {
  */
 export const WithNotConnectedCloudIndicator: Story = {
   ...Default,
+  args: {
+    ...Default.args,
+    isAiEnabled: false,
+    isFullCatalog: false,
+  },
   play: async ({ canvasElement }) => {
     const canvas = selectLightOrDarkCanvas(canvasElement);
     const avatarMenuTriggerEl = await canvas.findByTestId('user-avatar');
@@ -204,6 +226,7 @@ export const WithConnectedCloudIndicator: Story = {
   args: {
     ...Default.args,
     isFullCatalog: true,
+    isAiEnabled: false,
   },
   play: async ({ canvasElement }) => {
     const canvas = selectLightOrDarkCanvas(canvasElement);
@@ -230,6 +253,7 @@ export const WithAiFeatureEnabledMinimized: Story = {
   args: {
     ...Default.args,
     isMinimized: true,
+    isFullCatalog: true,
     isAiEnabled: true,
     className: 'w-[69px]',
   },
