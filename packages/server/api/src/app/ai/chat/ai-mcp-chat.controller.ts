@@ -226,7 +226,7 @@ async function streamMessages(
     ...aiConfig.modelSettings,
     tools,
     toolChoice: 'auto',
-    maxRetries: 0,
+    maxRetries: 1,
     maxSteps: MAX_RECURSION_DEPTH,
     async onStepFinish({ finishReason }): Promise<void> {
       stepCount++;
