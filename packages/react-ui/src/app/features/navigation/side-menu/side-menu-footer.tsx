@@ -22,7 +22,11 @@ const settingsLink: MenuLink = {
   icon: Wrench,
 };
 
-const SideMenuFooter = () => {
+type Props = {
+  isMinimized: boolean;
+};
+
+const SideMenuFooter = ({ isMinimized }: Props) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -31,7 +35,6 @@ const SideMenuFooter = () => {
     setCloudUser: s.setCloudUser,
   }));
   const user = authenticationSession.getCurrentUser();
-  const isSidebarMinimized = useAppStore((state) => state.isSidebarMinimized);
   const useCloudTemplates = flagsHooks.useShouldFetchCloudTemplates();
   const branding = flagsHooks.useWebsiteBranding();
   const { createPollingInterval } = useUserInfoPolling();
@@ -91,7 +94,7 @@ const SideMenuFooter = () => {
       settingsLink={settingsLink}
       user={user}
       onLogout={onLogout}
-      isMinimized={isSidebarMinimized}
+      isMinimized={isMinimized}
       cloudConfig={{
         user: cloudUser
           ? {

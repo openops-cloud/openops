@@ -25,7 +25,8 @@ type AiAssistantChatContainerProps = {
 } & Pick<UseChatHelpers, 'input' | 'handleInputChange' | 'handleSubmit'>;
 
 export const CHAT_MIN_WIDTH = 375;
-export const PARENT_HEIGHT_GAP = 220;
+export const PARENT_INITIAL_HEIGHT_GAP = 220;
+export const PARENT_MAX_HEIGHT_GAP = 95;
 
 const AiAssistantChatContainer = ({
   dimensions,

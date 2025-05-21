@@ -16,6 +16,18 @@ export const appConnectionsHooks = {
       staleTime: 0,
     });
   },
+  useConnection: (request: { id: string | null }) => {
+    return useQuery({
+      queryKey: ['app-connection', request.id],
+      queryFn: () => {
+        if (request.id === null) {
+          return null;
+        }
+        return appConnectionsApi.get(request.id);
+      },
+      staleTime: 0,
+    });
+  },
   useGroupedConnections: (request: ListAppConnectionsRequestQuery) => {
     return useQuery({
       queryKey: ['app-connections', request?.blockNames],

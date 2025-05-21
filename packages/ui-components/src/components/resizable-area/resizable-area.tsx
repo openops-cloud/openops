@@ -59,6 +59,13 @@ export function ResizableArea({
   const isResizingRef = useRef(false);
   const startPosRef = useRef({ x: 0, y: 0, width: 0, height: 0 });
 
+  const toggleIframePointerEvents = (enabled: boolean) => {
+    const iframes = document.querySelectorAll('iframe');
+    iframes.forEach((iframe) => {
+      iframe.style.pointerEvents = enabled ? 'initial' : 'none';
+    });
+  };
+
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
       if (!isResizingRef.current) return;
@@ -87,6 +94,7 @@ export function ResizableArea({
     isResizingRef.current = false;
     document.removeEventListener('mousemove', handleMouseMove);
     document.removeEventListener('mouseup', handleMouseUp);
+    toggleIframePointerEvents(true);
   }, [handleMouseMove]);
 
   const startResize = (e: React.MouseEvent) => {
@@ -100,6 +108,7 @@ export function ResizableArea({
         height: rect.height,
       };
       isResizingRef.current = true;
+      toggleIframePointerEvents(false);
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
     }
@@ -109,6 +118,7 @@ export function ResizableArea({
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
+      toggleIframePointerEvents(true);
     };
   }, [handleMouseMove, handleMouseUp]);
 
@@ -142,7 +152,9 @@ export function ResizableArea({
           },
         )}
         onMouseDown={startResize}
-      ></ResizeIcon>
+      />
     </div>
   );
 }
+
+ResizableArea.displayName = 'ResizableArea';

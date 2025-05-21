@@ -9,7 +9,8 @@ import {
   CHAT_MIN_WIDTH,
   cn,
   NoAiEnabledPopover,
-  PARENT_HEIGHT_GAP,
+  PARENT_INITIAL_HEIGHT_GAP,
+  PARENT_MAX_HEIGHT_GAP,
 } from '@openops/components/ui';
 import { useCallback, useMemo } from 'react';
 
@@ -59,6 +60,12 @@ const AiAssistantChat = ({
     const calculatedExpandedWidth =
       middlePanelSize.width - CHAT_EXPANDED_WIDTH_OFFSET;
 
+    const calculatedHeight =
+      middlePanelSize.height -
+      (aiChatSize === AI_CHAT_CONTAINER_SIZES.EXPANDED
+        ? PARENT_MAX_HEIGHT_GAP
+        : PARENT_INITIAL_HEIGHT_GAP);
+
     return {
       current: aiChatDimensions ?? {
         width: Math.max(
@@ -67,11 +74,11 @@ const AiAssistantChat = ({
             ? calculatedExpandedWidth
             : Math.min(calculatedWidth, CHAT_MAX_WIDTH),
         ),
-        height: middlePanelSize.height - PARENT_HEIGHT_GAP,
+        height: calculatedHeight,
       },
       max: {
         width: middlePanelSize.width - CHAT_EXPANDED_WIDTH_OFFSET,
-        height: middlePanelSize.height - PARENT_HEIGHT_GAP,
+        height: middlePanelSize.height - PARENT_MAX_HEIGHT_GAP,
       },
     };
   }, [
