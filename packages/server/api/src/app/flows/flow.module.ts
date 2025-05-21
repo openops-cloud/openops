@@ -10,7 +10,10 @@ import {
   flowHelper,
 } from '@openops/shared';
 import { sendStepFailureEvent } from '../telemetry/event-models/step';
-import { sendWorkflowTestFailureEvent } from '../telemetry/event-models/workflow';
+import {
+  sendWorkflowTestFailureEvent,
+  sendWorkflowTestRunTriggeredEvent,
+} from '../telemetry/event-models/workflow';
 import {
   getPrincipalFromWebsocket,
   websocketService,
@@ -38,6 +41,14 @@ export const flowModule: FastifyPluginAsyncTypebox = async (app) => {
         flowRun = await flowRunService.test({
           projectId: principal.projectId,
           flowVersionId: data.flowVersionId,
+        });
+
+        sendWorkflowTestRunTriggeredEvent({
+          projectId: principal.id,
+          userId: principal.projectId,
+          flowVersionId: data.flowVersionId,
+          flowId: flowRun.flowId,
+          flowRunId: flowRun.id,
         });
 
         logger.debug(
