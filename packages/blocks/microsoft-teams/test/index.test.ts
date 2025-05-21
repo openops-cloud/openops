@@ -6,13 +6,16 @@ describe('block declaration tests', () => {
   });
 
   test('should return correct actions', () => {
-    expect(Object.keys(microsoftTeams.actions()).length).toBe(3);
+    expect(Object.keys(microsoftTeams.actions()).length).toBe(4);
     expect(microsoftTeams.actions()).toMatchObject({
       microsoft_teams_send_channel_message: {
         name: 'microsoft_teams_send_channel_message',
       },
       microsoft_teams_send_chat_message: {
         name: 'microsoft_teams_send_chat_message',
+      },
+      microsoft_teams_request_action_message: {
+        name: 'microsoft_teams_request_action_message',
       },
       custom_api_call: {
         name: 'custom_api_call',
