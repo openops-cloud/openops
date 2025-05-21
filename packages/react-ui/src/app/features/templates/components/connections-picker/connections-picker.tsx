@@ -162,10 +162,11 @@ const ConnectionsPicker = ({
         <DynamicFormValidationProvider>
           <CreateEditConnectionDialogContent
             block={selectedBlockMetadata}
-            onConnectionCreated={(connectionName) => {
+            onConnectionSaved={(connectionName) => {
               onConnectionCreated(connectionName, selectedBlockMetadata?.name);
             }}
-            reconnectConnection={null}
+            reconnect={false}
+            connectionToEdit={null}
             setOpen={() => {
               setSelectedBlockMetadata(null);
             }}

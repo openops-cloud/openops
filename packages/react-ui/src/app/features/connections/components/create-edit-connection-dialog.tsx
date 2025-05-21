@@ -14,8 +14,9 @@ const CreateOrEditConnectionDialog = React.memo(
     block,
     open,
     setOpen,
-    onConnectionCreated,
-    reconnectConnection,
+    onConnectionSaved,
+    reconnect,
+    connectionToEdit,
   }: ConnectionDialogProps) => {
     return (
       <Dialog
@@ -30,8 +31,9 @@ const CreateOrEditConnectionDialog = React.memo(
           <CreateEditConnectionDialogContent
             block={block}
             setOpen={setOpen}
-            onConnectionCreated={onConnectionCreated}
-            reconnectConnection={reconnectConnection}
+            onConnectionSaved={onConnectionSaved}
+            connectionToEdit={connectionToEdit}
+            reconnect={reconnect}
           />
         </DialogContent>
       </Dialog>

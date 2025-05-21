@@ -8,7 +8,13 @@ import {
   ResizablePanelGroup,
 } from '@openops/components/ui';
 import { ReactFlowProvider } from '@xyflow/react';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { ImperativePanelHandle } from 'react-resizable-panels';
 import { useSearchParams } from 'react-router-dom';
 import { useMeasure } from 'react-use';
@@ -60,6 +66,8 @@ import { StepSettingsProvider } from './step-settings/step-settings-context';
 import { TreeView } from './tree-view';
 
 const minWidthOfSidebar = 'min-w-[max(20vw,400px)]';
+
+const MIDDLE_PANEL_TOP_OFFSET = 60;
 
 const useAnimateSidebar = (
   sidebarValue: LeftSideBarType | RightSideBarType,
@@ -158,7 +166,7 @@ const BuilderPage = () => {
       };
     },
   );
-  const [middlePanelRef, middlePanelSize] = useMeasure<HTMLDivElement>();
+  const [middlePanelRef, rawMiddlePanelSize] = useMeasure<HTMLDivElement>();
   const [leftSidePanelRef, leftSidePanelSize] = useMeasure<HTMLDivElement>();
   const [isDraggingHandle, setIsDraggingHandle] = useState(false);
   const rightHandleRef = useAnimateSidebar(rightSidebar);
@@ -208,6 +216,13 @@ const BuilderPage = () => {
     !!memorizedSelectedStep &&
     memorizedSelectedStep.type !== TriggerType.EMPTY &&
     !isBlockLoading;
+
+  const middlePanelSize = useMemo(() => {
+    return {
+      width: rawMiddlePanelSize.width,
+      height: rawMiddlePanelSize.height - MIDDLE_PANEL_TOP_OFFSET,
+    };
+  }, [rawMiddlePanelSize.height, rawMiddlePanelSize.width]);
 
   return (
     <div className="flex h-screen w-screen flex-col relative">
