@@ -2,10 +2,6 @@ import { createBlock } from '@openops/blocks-framework';
 import { BlockCategory } from '@openops/shared';
 import { getBudgets } from './lib/actions/get-budgets';
 import { getDataIntegrations } from './lib/actions/get-data-integrations';
-import {
-  getUsageRecommendations,
-  updateUsageRecommendations,
-} from './lib/actions/usage-recommendations';
 import { ternaryCloudAuth } from './lib/common/auth';
 
 export const ternary = createBlock({
@@ -21,8 +17,8 @@ export const ternary = createBlock({
     getBudgets,
     // forecasting
     // cost allocation?
-    getUsageRecommendations,
-    updateUsageRecommendations,
+    //getUsageRecommendations,
+    //updateUsageRecommendations,
   ],
   triggers: [],
 });
