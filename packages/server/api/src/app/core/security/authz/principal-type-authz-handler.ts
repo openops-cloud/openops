@@ -3,10 +3,7 @@ import { FastifyRequest } from 'fastify';
 import { BaseSecurityHandler } from '../security-handler';
 
 export class PrincipalTypeAuthzHandler extends BaseSecurityHandler {
-  private static readonly IGNORED_ROUTES = [
-    '/favicon.ico',
-    '/redirect',
-  ];
+  private static readonly IGNORED_ROUTES = ['/favicon.ico', '/redirect'];
 
   private static readonly DEFAULT_ALLOWED_PRINCIPAL_TYPES = [
     PrincipalType.USER,
