@@ -12,7 +12,9 @@ import {
   Action,
   FlagId,
   flowHelper,
+  isEmpty,
   isNil,
+  StepOutputWithData,
   StepWithIndex,
   Trigger,
 } from '@openops/shared';
@@ -105,24 +107,27 @@ const getPathToTargetStep = (state: BuilderState) => {
 
 const getAllStepsMentions = (
   pathToTargetStep: StepWithIndex[],
-  // todo consolidate type
-  stepsTestOutput:
-    | Record<string, { output: unknown; lastTestDate: string }>
-    | undefined,
+  stepsTestOutput: Record<string, StepOutputWithData> | undefined,
 ) => {
-  if (isNil(stepsTestOutput)) {
+  if (!stepsTestOutput || isEmpty(stepsTestOutput)) {
     return [];
   }
 
   return pathToTargetStep.map((step) => {
-    const stepNeedsTesting = isNil(stepsTestOutput[step.id!]?.lastTestDate);
     const displayName = `${step.dfsIndex + 1}. ${step.displayName}`;
+
+    if (!step.id) {
+      console.warn('Step ID is missing');
+      return createTestNode(step, displayName);
+    }
+
+    const stepNeedsTesting = isNil(stepsTestOutput[step.id].lastTestDate);
 
     if (stepNeedsTesting) {
       return createTestNode(step, displayName);
     }
     return dataSelectorUtils.traverseStepOutputAndReturnMentionTree({
-      stepOutput: stepsTestOutput[step.id!].output,
+      stepOutput: stepsTestOutput[step.id].output,
       propertyPath: step.name,
       displayName: displayName,
     });
@@ -181,21 +186,20 @@ const DataSelector = ({
   );
   const [searchTerm, setSearchTerm] = useState('');
   const flowVersionId = useBuilderStateContext((state) => state.flowVersion.id);
+  const isDataSelectorVisible = useBuilderStateContext(
+    (state) => state.midpanelState.showDataSelector,
+  );
+
   const pathToTargetStep = useBuilderStateContext(getPathToTargetStep);
   const mentionsFromCurrentSelectedData = useBuilderStateContext(
     getAllStepsMentionsFromCurrentSelectedData,
   );
 
   const stepIds: string[] = pathToTargetStep.map((p) => p.id!);
-  console.log('stepIds', stepIds);
 
-  // todo need to check how to avoid overfetching && fetch only when data selector is opened
-  const { data: stepsTestOutput } = useQuery({
-    queryKey: [
-      QueryKeys.dataSelectorStepTestOutput,
-      flowVersionId,
-      pathToTargetStep.map((p) => p.name),
-    ],
+  // todo need to check how to avoid overfetching && handle loading state
+  const { data: stepsTestOutput, isLoading } = useQuery({
+    queryKey: [QueryKeys.dataSelectorStepTestOutput, flowVersionId, stepIds],
     queryFn: async () => {
       const stepTestOuput = await flowsApi.getStepTestOutputBulk(
         flowVersionId,
@@ -203,7 +207,8 @@ const DataSelector = ({
       );
       return stepTestOuput;
     },
-    enabled: !!useNewExternalTestData,
+    enabled:
+      !!useNewExternalTestData && isDataSelectorVisible && stepIds.length > 0,
   });
 
   const mentions = useNewExternalTestData
