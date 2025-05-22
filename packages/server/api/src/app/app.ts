@@ -3,6 +3,7 @@ import cookie from '@fastify/cookie';
 import cors from '@fastify/cors';
 import { fastifyRequestContext } from '@fastify/request-context';
 import swagger from '@fastify/swagger';
+import swaggerUi from '@fastify/swagger-ui';
 import { BlockMetadata } from '@openops/blocks-framework';
 import {
   AppSystemProp,
@@ -101,6 +102,16 @@ export const setupApp = async (
         url: 'https://www.openops.com/docs',
         description: 'Find more info here',
       },
+    },
+  });
+
+  await app.register(swaggerUi, {
+    routePrefix: '/v1/openapi',
+    staticCSP: true,
+    transformSpecificationClone: true,
+    uiConfig: {
+      docExpansion: 'list',
+      deepLinking: true,
     },
   });
 

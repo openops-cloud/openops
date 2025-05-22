@@ -5,7 +5,6 @@ import { BaseSecurityHandler } from '../security-handler';
 export class PrincipalTypeAuthzHandler extends BaseSecurityHandler {
   private static readonly IGNORED_ROUTES = [
     '/favicon.ico',
-    '/v1/docs',
     '/redirect',
   ];
 
@@ -18,6 +17,7 @@ export class PrincipalTypeAuthzHandler extends BaseSecurityHandler {
   protected canHandle(request: FastifyRequest): Promise<boolean> {
     const requestMatches =
       !PrincipalTypeAuthzHandler.IGNORED_ROUTES.includes(request.routerPath) &&
+      !request.routerPath.startsWith('/v1/openapi') &&
       !request.routerPath.startsWith('/ui');
 
     return Promise.resolve(requestMatches);
