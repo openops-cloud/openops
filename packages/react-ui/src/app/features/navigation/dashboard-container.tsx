@@ -13,6 +13,7 @@ import { AllowOnlyLoggedInUserOnlyGuard } from '@/app/common/guards/allow-logged
 import { useResizablePanelGroup } from '@/app/common/hooks/use-resizable-panel-group';
 import { PanelSizes } from '@/app/common/types/panel-sizes';
 import { useAppStore } from '@/app/store/app-store';
+import { useMeasure } from 'react-use';
 import {
   RESIZABLE_PANEL_GROUP,
   RESIZABLE_PANEL_IDS,
@@ -22,6 +23,7 @@ import {
   LEFT_SIDEBAR_MIN_EFFECTIVE_WIDTH,
   LEFT_SIDEBAR_MIN_SIZE,
 } from '../../constants/sidebar';
+import { AiAssistantChat } from '../ai/ai-assistant-chat';
 import LeftSidebarResizablePanel from './side-menu/left-sidebar';
 
 type DashboardContainerProps = {
@@ -43,6 +45,7 @@ export function DashboardContainer({
   const { isMinimized } = useAppStore((state) => ({
     isMinimized: state.isSidebarMinimized,
   }));
+  const [middlePanelRef, middlePanelSize] = useMeasure<HTMLDivElement>();
 
   const { setPanelGroupSize } = useResizablePanelGroup();
 
@@ -89,12 +92,15 @@ export function DashboardContainer({
           order={2}
           className="flex-1"
         >
-          <DashboardContent
-            pageHeader={pageHeader}
-            useEntireInnerViewport={useEntireInnerViewport}
-          >
-            {children}
-          </DashboardContent>
+          <div ref={middlePanelRef} className="relative h-full w-full">
+            <AiAssistantChat middlePanelSize={middlePanelSize} />
+            <DashboardContent
+              pageHeader={pageHeader}
+              useEntireInnerViewport={useEntireInnerViewport}
+            >
+              {children}
+            </DashboardContent>
+          </div>
         </ResizablePanel>
       </ResizablePanelGroup>
     </AllowOnlyLoggedInUserOnlyGuard>

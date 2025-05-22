@@ -50,7 +50,7 @@ export const deleteCommentAction = createAction({
 
       return result;
     } catch (error) {
-      const errorMsg = `An error occurred while deleting comment '${commentId}' from Anodot recommendation '${recommendationId}' (account id: ${accountId}): ${error}`;
+      const errorMsg = `An error occurred while deleting comment '${commentId}' from Umbrella recommendation '${recommendationId}' (account id: ${accountId}): ${error}`;
 
       logger.error(errorMsg);
 

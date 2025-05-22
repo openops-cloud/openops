@@ -96,6 +96,15 @@ export const Gradient: Story = {
 };
 
 /**
+ * The `ai` button variant features a striking gradient background,
+ */
+export const AI: Story = {
+  args: {
+    variant: 'ai',
+  },
+};
+
+/**
  * Add the `disabled` prop to a button to prevent interactions and add a
  * loading indicator, such as a spinner, to signify an in-progress action.
  */

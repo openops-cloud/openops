@@ -1,7 +1,9 @@
 import { FLOW_CANVAS_Y_OFFESET } from '@/app/constants/flow-canvas';
+import { AiAssistantButton } from '@/app/features/ai/ai-assistant-button';
+import { AiAssistantChat } from '@/app/features/ai/ai-assistant-chat';
+import { useAppStore } from '@/app/store/app-store';
 import {
   AI_CHAT_CONTAINER_SIZES,
-  AiWidget,
   CanvasControls,
   cn,
   InteractiveContextProvider,
@@ -14,9 +16,9 @@ import {
   isNil,
   StepLocationRelativeToParent,
 } from '@openops/shared';
-import { MutableRefObject, useCallback, useEffect, useRef } from 'react';
+import React, { MutableRefObject, useCallback, useEffect, useRef } from 'react';
 import { useDebounceCallback } from 'usehooks-ts';
-import { AiChat } from './ai-chat/ai-chat';
+import { StepSettingsAiChat } from './ai-chat/step-settings-ai-chat';
 import { textMentionUtils } from './block-properties/text-input-with-mentions/text-input-utils';
 import { BuilderHeader } from './builder-header/builder-header';
 import { useBuilderStateContext } from './builder-hooks';
@@ -97,6 +99,10 @@ const InteractiveBuilder = ({
     state.applyMidpanelAction,
   ]);
 
+  const { setIsAiChatOpened } = useAppStore((s) => ({
+    setIsAiChatOpened: s.setIsAiChatOpened,
+  }));
+
   const checkFocus = useCallback(() => {
     const isTextMentionInputFocused = doesHaveInputThatUsesMentionClass(
       document.activeElement,
@@ -104,6 +110,7 @@ const InteractiveBuilder = ({
 
     if (isTextMentionInputFocused) {
       dispatch({ type: 'FOCUS_INPUT_WITH_MENTIONS' });
+      setIsAiChatOpened(false);
       return;
     }
 
@@ -114,7 +121,7 @@ const InteractiveBuilder = ({
     if (isClickAway) {
       dispatch({ type: 'PANEL_CLICK_AWAY' });
     }
-  }, [dispatch]);
+  }, [dispatch, setIsAiChatOpened]);
 
   const debouncedCheckFocus = useDebounceCallback(checkFocus, 100);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -149,13 +156,24 @@ const InteractiveBuilder = ({
     >
       <div ref={middlePanelRef} className="relative h-full w-full">
         <BuilderHeader />
-        <CanvasControls topOffset={FLOW_CANVAS_Y_OFFESET}></CanvasControls>
-        <AiWidget classname="left-[282px]" />
+        <AiAssistantChat
+          middlePanelSize={middlePanelSize}
+          className={'left-4 bottom-[70px]'}
+        />
+        <CanvasControls
+          topOffset={FLOW_CANVAS_Y_OFFESET}
+          className={cn({
+            'left-[74px]': !lefSideBarContainerWidth,
+          })}
+        ></CanvasControls>
+        {!lefSideBarContainerWidth && (
+          <AiAssistantButton className="size-[42px] absolute left-4 bottom-[10px] z-50" />
+        )}
         <div
           className="flex flex-col absolute bottom-0 right-0"
           ref={containerRef}
         >
-          <AiChat
+          <StepSettingsAiChat
             middlePanelSize={middlePanelSize}
             selectedStep={selectedStep}
             flowVersion={flowVersion}

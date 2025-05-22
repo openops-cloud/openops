@@ -1,4 +1,3 @@
-import { Client } from '@microsoft/microsoft-graph-client';
 import { createAction, Property } from '@openops/blocks-framework';
 import { channelId } from '../common/channel-id';
 import { getMicrosoftGraphClient } from '../common/get-microsoft-graph-client';

@@ -1,3 +1,4 @@
+import { QueryKeys } from '@/app/constants/query-keys';
 import { AiSettingsForm } from '@/app/features/ai/ai-settings-form';
 import {
   AI_SETTINGS_DELETED_SUCCESSFULLY_TOAST,
@@ -12,7 +13,7 @@ import {
   toast,
   TooltipWrapper,
 } from '@openops/components/ui';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { t } from 'i18next';
 import { Trash } from 'lucide-react';
@@ -24,6 +25,8 @@ const AiSettingsPage = () => {
   const { data: aiSettings, refetch: refetchAiSettings } =
     aiSettingsHooks.useAiSettings();
 
+  const queryClient = useQueryClient();
+
   const { mutate: onSave, isPending: isSaving } = useMutation({
     mutationFn: async (aiSettings: AiSettingsFormSchema) => {
       return aiSettingsApi.saveAiSettings({
@@ -31,9 +34,12 @@ const AiSettingsPage = () => {
         projectId: authenticationSession.getProjectId()!,
       });
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       refetchAiSettings();
       toast(AI_SETTINGS_SAVED_SUCCESSFULLY_TOAST);
+      await queryClient.invalidateQueries({
+        queryKey: [QueryKeys.activeAiSettings],
+      });
     },
     onError: (error: AxiosError) => {
       const message =
