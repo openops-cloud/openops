@@ -40,13 +40,6 @@ export const cleanLogEvent = (logEvent: any) => {
       continue;
     }
 
-    if (value instanceof Error) {
-      eventData[`${key}Message`] = truncate(value.message);
-      eventData[`${key}Name`] = value.name;
-      eventData[`${key}Stack`] = truncate(value.stack ?? '', 2000);
-      continue;
-    }
-
     if (typeof value === 'object') {
       try {
         eventData[key] = truncate(JSON.stringify(value));
