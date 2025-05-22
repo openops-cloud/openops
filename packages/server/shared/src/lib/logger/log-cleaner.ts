@@ -40,6 +40,13 @@ export const cleanLogEvent = (logEvent: any) => {
       continue;
     }
 
+    if (value instanceof Error) {
+      eventData[`${key}Message`] = truncate(value.message);
+      eventData[`${key}Name`] = value.name;
+      eventData[`${key}Stack`] = truncate(value.stack ?? '', 2000);
+      continue;
+    }
+
     if (typeof value === 'object') {
       try {
         eventData[key] = truncate(JSON.stringify(value));
@@ -50,7 +57,6 @@ export const cleanLogEvent = (logEvent: any) => {
     }
 
     if (typeof value === 'number') {
-      // Max 2 decimal points
       eventData[key] = Math.round(value * 100) / 100;
       continue;
     }
@@ -58,6 +64,7 @@ export const cleanLogEvent = (logEvent: any) => {
     eventData[key] = truncate(value);
   }
 
+  // Legacy compatibility: flatten if the *entire* event is an Error
   if (logEvent.event instanceof Error) {
     eventData.stack = truncate(logEvent.event.stack, 2000);
     eventData.name = logEvent.event.name;
@@ -67,6 +74,7 @@ export const cleanLogEvent = (logEvent: any) => {
       eventData.message = truncate(logEvent.event.message);
     }
   }
+
   logEvent.event = eventData;
   return logEvent;
 };
