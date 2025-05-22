@@ -306,6 +306,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
         mockReply as unknown as FastifyReply,
       );
 
+      expect(pipeDataStreamToResponse).toHaveBeenCalled();
       expect(streamText).toHaveBeenCalledWith(
         expect.objectContaining({
           tools: filteredTools,
