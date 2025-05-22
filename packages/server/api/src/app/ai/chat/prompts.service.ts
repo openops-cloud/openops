@@ -77,7 +77,10 @@ async function loadFromCloud(
     const response = await fetch(promptFile);
     if (!response.ok) {
       logger.error('Failed to fetch prompt file.', {
-        message: { statusText: response.statusText, promptFile },
+        message: JSON.stringify({
+          statusText: response.statusText,
+          promptFile,
+        }),
       });
       return '';
     }
