@@ -268,9 +268,28 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
       },
     );
 
-    it.each([undefined, {}, null])(
-      'should handle when selectRelevantTools returns %p',
-      async (selectedTools) => {
+    it.each([
+      {
+        selectedTools: undefined,
+        expected: { isAnalyticsLoaded: false, isTablesLoaded: false },
+      },
+      {
+        selectedTools: {},
+        expected: { isAnalyticsLoaded: false, isTablesLoaded: false },
+      },
+      {
+        selectedTools: null,
+        expected: { isAnalyticsLoaded: false, isTablesLoaded: false },
+      },
+      {
+        selectedTools: {
+          tool1: { description: 'Tool 1', parameters: {} },
+        },
+        expected: { isAnalyticsLoaded: false, isTablesLoaded: false },
+      },
+    ])(
+      'should pass filtered tools to streamText via pipeDataStreamToResponse with $selectedTools',
+      async ({ selectedTools, expected }) => {
         (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);
         (selectRelevantTools as jest.Mock).mockResolvedValue(selectedTools);
 
@@ -280,10 +299,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           mockReply as unknown as FastifyReply,
         );
 
-        expect(getMcpSystemPrompt).toHaveBeenCalledWith({
-          isAnalyticsLoaded: false,
-          isTablesLoaded: false,
-        });
+        expect(getMcpSystemPrompt).toHaveBeenCalledWith(expected);
         expect(pipeDataStreamToResponse).toHaveBeenCalled();
         expect(streamText).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -292,26 +308,5 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
         );
       },
     );
-
-    it('should pass filtered tools to streamText via pipeDataStreamToResponse', async () => {
-      (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);
-      const filteredTools = {
-        tool1: { description: 'Tool 1', parameters: {} },
-      };
-      (selectRelevantTools as jest.Mock).mockResolvedValue(filteredTools);
-
-      const postHandler = handlers['/'];
-      await postHandler(
-        mockRequest as FastifyRequest,
-        mockReply as unknown as FastifyReply,
-      );
-
-      expect(pipeDataStreamToResponse).toHaveBeenCalled();
-      expect(streamText).toHaveBeenCalledWith(
-        expect.objectContaining({
-          tools: filteredTools,
-        }),
-      );
-    });
   });
 });

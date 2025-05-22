@@ -47,10 +47,6 @@ export async function selectRelevantTools({
 
     let selectedToolNames = toolSelectionResult.tool_names;
 
-    if (selectedToolNames.length > MAX_SELECTED_TOOLS) {
-      selectedToolNames = selectedToolNames.slice(0, MAX_SELECTED_TOOLS);
-    }
-
     const validToolNames = Object.keys(tools);
     const invalidToolNames = selectedToolNames.filter(
       (name) => !validToolNames.includes(name),
@@ -62,13 +58,11 @@ export async function selectRelevantTools({
       );
     }
 
-    const filteredTools = Object.fromEntries(
-      Object.entries(tools).filter(([name]) =>
-        selectedToolNames.includes(name),
-      ),
+    return Object.fromEntries(
+      Object.entries(tools)
+        .filter(([name]) => selectedToolNames.includes(name))
+        .slice(0, MAX_SELECTED_TOOLS),
     );
-
-    return filteredTools;
   } catch (error) {
     logger.error('Error selecting tools', error);
     return;
