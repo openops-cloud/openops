@@ -89,12 +89,17 @@ const SingleCondition = ({
           <FormField
             name={`${groupName}.${conditionIndex}.${0}.secondValue`}
             control={form.control}
+            defaultValue={
+              form.getValues(
+                `${groupName}.${conditionIndex}.${0}.secondValue`,
+              ) ?? ''
+            }
             render={({ field }) => (
               <FormItem>
                 <TextInputWithMentions
                   placeholder={t('Second value')}
                   disabled={readonly}
-                  initialValue={field.value}
+                  initialValue={field.value ?? ''}
                   onChange={field.onChange}
                 ></TextInputWithMentions>
                 <FormMessage />

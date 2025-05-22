@@ -7,9 +7,14 @@ import {
   PropertyType,
 } from '@openops/blocks-framework';
 import {
+  AppConnection,
   AppConnectionType,
   assertNotNullOrUndefined,
+  BasicAuthConnectionValue,
+  CloudOAuth2ConnectionValue,
+  CustomAuthConnectionValue,
   isNil,
+  SecretTextConnectionValue,
   UpsertAppConnectionRequestBody,
   UpsertBasicAuthRequest,
   UpsertCloudOAuth2Request,
@@ -96,58 +101,84 @@ export const buildConnectionSchema = (
 
 export const createDefaultValues = (
   block: BlockMetadataModelSummary | BlockMetadataModel,
+  existingConnection: AppConnection | null,
   suggestedConnectionName: string,
-): Partial<UpsertAppConnectionRequestBody> => {
+): Partial<UpsertAppConnectionRequestBody> & { id?: string } => {
   const projectId = authenticationSession.getProjectId();
   assertNotNullOrUndefined(projectId, 'projectId');
   switch (block.auth?.type) {
     case PropertyType.SECRET_TEXT:
       return {
+        id: existingConnection?.id,
         name: suggestedConnectionName,
         blockName: block.name,
         projectId,
         type: AppConnectionType.SECRET_TEXT,
-        value: {
-          type: AppConnectionType.SECRET_TEXT,
-          secret_text: '',
-        },
+        value: existingConnection
+          ? (existingConnection.value as SecretTextConnectionValue)
+          : {
+              type: AppConnectionType.SECRET_TEXT,
+              secret_text: '',
+            },
       };
     case PropertyType.BASIC_AUTH:
       return {
+        id: existingConnection?.id,
         name: suggestedConnectionName,
         blockName: block.name,
         projectId,
         type: AppConnectionType.BASIC_AUTH,
-        value: {
-          type: AppConnectionType.BASIC_AUTH,
-          username: '',
-          password: '',
-        },
+        value: existingConnection
+          ? (existingConnection.value as BasicAuthConnectionValue)
+          : {
+              type: AppConnectionType.BASIC_AUTH,
+              username: '',
+              password: '',
+            },
       };
     case PropertyType.CUSTOM_AUTH:
       return {
+        id: existingConnection?.id,
         name: suggestedConnectionName,
         blockName: block.name,
         projectId,
         type: AppConnectionType.CUSTOM_AUTH,
-        value: {
-          type: AppConnectionType.CUSTOM_AUTH,
-          props: formUtils.getDefaultValueForStep(block.auth.props, {}),
-        },
+        value: existingConnection
+          ? (existingConnection.value as CustomAuthConnectionValue)
+          : {
+              type: AppConnectionType.CUSTOM_AUTH,
+              props: formUtils.getDefaultValueForStep(block.auth.props, {}),
+            },
       };
     case PropertyType.OAUTH2:
       return {
+        id: existingConnection?.id,
         name: suggestedConnectionName,
         blockName: block.name,
         projectId,
         type: AppConnectionType.CLOUD_OAUTH2,
-        value: {
-          type: AppConnectionType.CLOUD_OAUTH2,
-          scope: block.auth?.scope.join(' '),
-          client_id: '',
-          props: {},
-          code: '',
-        },
+        value: existingConnection
+          ? ({
+              scope: block.auth?.scope.join(' '),
+              client_id: '',
+              props: {},
+              code: '',
+              ...existingConnection.value,
+            } as CloudOAuth2ConnectionValue & {
+              code: string;
+              props:
+                | {
+                    [x: string]: string;
+                  }
+                | undefined;
+            })
+          : {
+              type: AppConnectionType.CLOUD_OAUTH2,
+              scope: block.auth?.scope.join(' '),
+              client_id: '',
+              props: {},
+              code: '',
+            },
       };
     default:
       throw new Error(`Unsupported property type: ${block.auth}`);

@@ -1,5 +1,10 @@
 import { WorkflowOverviewHeader } from '@/app/features/builder/builder-header/workflow-overview/workflow-overview-header';
-import { Markdown, ResizableArea, Textarea } from '@openops/components/ui';
+import {
+  BoxSize,
+  Markdown,
+  ResizableArea,
+  Textarea,
+} from '@openops/components/ui';
 import { t } from 'i18next';
 import { useState } from 'react';
 
@@ -7,6 +12,11 @@ type WorkflowOverviewContentProps = {
   overview?: string;
   isWorkflowReadonly: boolean;
   onOverviewChange: (overview: string) => void;
+};
+
+const INITIAL_SIZE = {
+  width: 400,
+  height: 450,
 };
 
 const WorkflowOverviewContent = ({
@@ -18,6 +28,8 @@ const WorkflowOverviewContent = ({
     !overview && !isWorkflowReadonly,
   );
 
+  const [dimensions, setDimensions] = useState<BoxSize>(INITIAL_SIZE);
+
   return (
     <div className="pt-6">
       <WorkflowOverviewHeader
@@ -28,8 +40,8 @@ const WorkflowOverviewContent = ({
         isWorkflowReadonly={isWorkflowReadonly}
       ></WorkflowOverviewHeader>
       <ResizableArea
-        initialWidth={400}
-        initialHeight={450}
+        dimensions={dimensions}
+        setDimensions={setDimensions}
         minWidth={385}
         minHeight={300}
         maxWidth={700}

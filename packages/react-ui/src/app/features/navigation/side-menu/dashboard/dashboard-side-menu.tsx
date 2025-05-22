@@ -56,7 +56,10 @@ export function DashboardSideMenu() {
     !isValidISODate(userSettings?.telemetryInteractionTimestamp || '');
 
   return (
-    <SideMenu MenuHeader={DashboardSideMenuHeader} MenuFooter={SideMenuFooter}>
+    <SideMenu
+      MenuHeader={<DashboardSideMenuHeader />}
+      MenuFooter={<SideMenuFooter isMinimized={isSidebarMinimized} />}
+    >
       <SideMenuNavigation links={MENU_LINKS} isMinimized={isSidebarMinimized} />
       <div className="flex flex-col justify-between h-full overflow-hidden">
         {isWorkflowsPage && !isSidebarMinimized && (

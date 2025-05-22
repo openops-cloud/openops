@@ -41,9 +41,8 @@ import {
 } from './ai-chat.service';
 import { generateMessageId } from './ai-message-id-generator';
 import { getMcpSystemPrompt } from './prompts.service';
-import { selectRelevantTools } from './tools.service';
-const MAX_RECURSION_DEPTH = 10;
 
+const MAX_RECURSION_DEPTH = 10;
 export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
   app.post(
     '/open',
@@ -119,8 +118,8 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
     const isAnalyticsLoaded = Object.keys(filteredTools ?? {}).some((key) =>
       key.includes('superset'),
     );
-    const isTablesLoaded = Object.keys(filteredTools ?? {}).some((key) =>
-      key.includes('Table'),
+    const isTablesLoaded = Object.keys(tools).some((key) =>
+      key.includes('table'),
     );
 
     const systemPrompt = await getMcpSystemPrompt({
@@ -143,15 +142,19 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       },
 
       onError: (error) => {
+        const message = error instanceof Error ? error.message : String(error);
         sendAiChatFailureEvent({
           projectId,
           userId: request.principal.id,
           chatId,
-          errorMessage: error instanceof Error ? error.message : String(error),
+          errorMessage: message,
           provider: aiConfig.provider,
           model: aiConfig.model,
         });
-        return error instanceof Error ? error.message : String(error);
+
+        endStreamWithErrorMessage(reply.raw, message);
+        logger.warn(message, error);
+        return message;
       },
     });
 
@@ -220,8 +223,8 @@ async function streamMessages(
   messages: CoreMessage[],
   chatId: string,
   tools?: ToolSet,
-  recursionDepth = 0,
 ): Promise<void> {
+  let stepCount = 0;
   const result = streamText({
     model: languageModel,
     system: systemPrompt,
@@ -230,40 +233,22 @@ async function streamMessages(
     tools,
     toolChoice: 'auto',
     maxRetries: 1,
-    async onError({ error }) {
-      const message = error instanceof Error ? error.message : String(error);
-      endStreamWithErrorMessage(dataStreamWriter, message);
-      logger.warn(message, error);
+    maxSteps: MAX_RECURSION_DEPTH,
+    async onStepFinish({ finishReason }): Promise<void> {
+      stepCount++;
+      if (finishReason !== 'stop' && stepCount >= MAX_RECURSION_DEPTH) {
+        const message = `Maximum recursion depth (${MAX_RECURSION_DEPTH}) reached. Terminating recursion.`;
+        endStreamWithErrorMessage(dataStreamWriter, message);
+        logger.warn(message);
+      }
     },
-    async onFinish({ response }) {
+    async onFinish({ response }): Promise<void> {
       const filteredMessages = removeToolMessages(messages);
       response.messages.forEach((r) => {
         filteredMessages.push(getResponseObject(r));
       });
 
       await saveChatHistory(chatId, filteredMessages);
-
-      const lastMessage = response.messages.at(-1);
-      if (lastMessage && lastMessage.role !== 'assistant') {
-        if (recursionDepth >= MAX_RECURSION_DEPTH) {
-          const message = `Maximum recursion depth (${MAX_RECURSION_DEPTH}) reached. Terminating recursion.`;
-          endStreamWithErrorMessage(dataStreamWriter, message);
-          logger.warn(message);
-          return;
-        }
-
-        logger.debug('Forwarding the message to LLM.');
-        await streamMessages(
-          dataStreamWriter,
-          languageModel,
-          systemPrompt,
-          aiConfig,
-          filteredMessages,
-          chatId,
-          tools,
-          recursionDepth + 1,
-        );
-      }
     },
   });
 
@@ -271,7 +256,7 @@ async function streamMessages(
 }
 
 function endStreamWithErrorMessage(
-  dataStreamWriter: DataStreamWriter,
+  dataStreamWriter: NodeJS.WritableStream | DataStreamWriter,
   message: string,
 ): void {
   dataStreamWriter.write(`f:{"messageId":"${generateMessageId()}"}\n`);
