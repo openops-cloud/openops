@@ -42,6 +42,7 @@ ENV LD_LIBRARY_PATH=""
 ENV AZURE_CONFIG_DIR="/tmp/azure"
 RUN <<-```
     set -ex
+    # Azure CLI installation from Microsoft repository supports both amd64 and arm64 architectures
     rpm --import https://packages.microsoft.com/keys/microsoft.asc
     curl -sSL https://packages.microsoft.com/config/rhel/8/prod.repo -o /etc/yum.repos.d/azure-cli.repo
     dnf install -y azure-cli && mkdir /tmp/azure
