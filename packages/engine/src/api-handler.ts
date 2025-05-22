@@ -24,10 +24,15 @@ const engineController: FastifyPluginAsyncTypebox = async (fastify) => {
       },
     },
     async (request, reply) => {
+      const requestIdHeader = request.headers?.['requestid'];
+      const requestId = Array.isArray(requestIdHeader)
+        ? requestIdHeader[0]
+        : requestIdHeader;
+
       await runWithLogContext(
         {
           deadlineTimestamp: request.body.deadlineTimestamp.toString(),
-          requestId: request.headers?.['requestid'] ?? request.id,
+          requestId: requestId ?? request.id,
           operationType: request.body.operationType,
         },
         () => handleRequest(request, reply),

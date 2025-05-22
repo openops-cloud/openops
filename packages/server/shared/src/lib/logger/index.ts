@@ -102,6 +102,6 @@ function enrichEvent(event: object): object {
 }
 
 export const logzioLogger = initLogzioLogger();
-export const logger = initLogger();
+export const logger: Logger = initLogger();
 export * from './send-logs';
 export { truncate };

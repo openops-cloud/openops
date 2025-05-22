@@ -3,10 +3,7 @@ import { FastifyRequest } from 'fastify';
 import { BaseSecurityHandler } from '../security-handler';
 
 export class PrincipalTypeAuthzHandler extends BaseSecurityHandler {
-  private static readonly IGNORED_ROUTES = [
-    '/favicon.ico',
-    '/redirect',
-  ];
+  private static readonly IGNORED_ROUTES = ['/favicon.ico', '/redirect'];
 
   private static readonly DEFAULT_ALLOWED_PRINCIPAL_TYPES = [
     PrincipalType.USER,
@@ -15,17 +12,20 @@ export class PrincipalTypeAuthzHandler extends BaseSecurityHandler {
   ];
 
   protected canHandle(request: FastifyRequest): Promise<boolean> {
+    const path = request.routeOptions?.url ?? '';
+
     const requestMatches =
-      !PrincipalTypeAuthzHandler.IGNORED_ROUTES.includes(request.routerPath) &&
-      !request.routerPath.startsWith('/v1/openapi') &&
-      !request.routerPath.startsWith('/ui');
+      !PrincipalTypeAuthzHandler.IGNORED_ROUTES.includes(path) &&
+      !path.startsWith('/v1/openapi') &&
+      !path.startsWith('/ui');
 
     return Promise.resolve(requestMatches);
   }
 
   protected doHandle(request: FastifyRequest): Promise<void> {
     const principalType = request.principal.type;
-    const configuredPrincipals = request.routeConfig.allowedPrincipals;
+    const configuredPrincipals =
+      request.routeOptions?.config?.allowedPrincipals;
     const defaultPrincipals =
       PrincipalTypeAuthzHandler.DEFAULT_ALLOWED_PRINCIPAL_TYPES;
     const allowedPrincipals = configuredPrincipals ?? defaultPrincipals;

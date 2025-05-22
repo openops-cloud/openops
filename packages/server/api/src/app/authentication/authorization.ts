@@ -36,7 +36,11 @@ export const entitiesMustBeOwnedByCurrentProject: preSerializationHookHandler<
   Payload | null
 > = (request, _response, payload, done) => {
   logger.trace(
-    { payload, principal: request.principal, route: request.routeConfig },
+    {
+      payload,
+      principal: request.principal,
+      route: request.routeOptions?.config,
+    },
     'entitiesMustBeOwnedByCurrentProject',
   );
 

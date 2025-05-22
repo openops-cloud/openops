@@ -6,7 +6,8 @@ const ROUTE_PREFIX = '/v1/appsumo';
 
 export class AppSumoAuthnHandler extends BaseSecurityHandler {
   protected canHandle(request: FastifyRequest): Promise<boolean> {
-    const routeMatches = request.routerPath.startsWith(ROUTE_PREFIX);
+    const routePattern = request.routeOptions?.url ?? '';
+    const routeMatches = routePattern.startsWith(ROUTE_PREFIX);
     return Promise.resolve(routeMatches);
   }
 
