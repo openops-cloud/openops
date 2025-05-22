@@ -20,8 +20,8 @@ RUN <<-```
     set -ex
     git clone https://github.com/openops-cloud/superset-mcp .
     git checkout 1c391f7d0a261ee51f7b1e6c413f1930418d17fe
-    wget -qO- https://astral.sh/uv/install.sh | sh && source $HOME/.local/bin/env
-    uv venv && uv pip install .
+    wget -qO- https://astral.sh/uv/install.sh | sh
+    python3 -m venv .venv && python3 -m venv pip install .
 ```
 
 # Set up backend
