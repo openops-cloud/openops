@@ -1,5 +1,6 @@
 import { AxiosRequestConfig } from 'axios';
 import { nanoid } from 'nanoid';
+import qs from 'qs';
 import { Socket } from 'socket.io-client';
 
 import { api } from '@/app/lib/api';
@@ -159,8 +160,9 @@ export const flowsApi = {
       .then((response) => response[stepId]);
   },
   getStepTestOutputBulk(flowVersionId: string, stepIds: string[]) {
+    const params = qs.stringify({ stepIds }, { arrayFormat: 'repeat' });
     return api.get<Record<string, unknown>>(
-      `/v1/flow-versions/${flowVersionId}/test-output?stepIds=${stepIds}`,
+      `/v1/flow-versions/${flowVersionId}/test-output?${params}`,
     );
   },
 };
