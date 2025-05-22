@@ -169,6 +169,27 @@ Language URL, valid URL 👇
   },
 };
 
+/**
+ * Emphasizes the use of code blocks with variables.
+ * Various code language and code value combinations are shown.
+ */
+export const CodeMultilineWithCopyBlocks: Story = {
+  args: {
+    codeVariation: 'with-copy-multiline',
+    markdown: `
+### Describe EC2 Instances
+\`\`\`text
+aws ec2 describe-instances
+--dry-run
+`,
+    variables: {
+      nonUrl: 'This code is a non an URL and is NOT clickable',
+      url: 'https://some.clickable.url',
+      json: '{"key": "value"}',
+    },
+  },
+};
+
 export const CodeWithoutCopy: Story = {
   args: {
     codeVariation: 'without-copy',

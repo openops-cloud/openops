@@ -46,25 +46,36 @@ const Container = ({
 
 const LanguageText = ({
   content,
-  codeVariation,
+  multilineVariation = false,
 }: {
   content: string;
-  codeVariation?: CodeVariations;
+  multilineVariation?: boolean;
 }) => {
   const divRef = useRef<HTMLDivElement>(null);
-
-  const isInjectVariation =
-    codeVariation === MarkdownCodeVariations.WithCopyAndInject;
 
   useEffect(() => {
     const div = divRef.current;
     if (div) {
-      div.style.height =
-        div.scrollHeight > 32 ? div.scrollHeight + 'px' : '32px';
+      const updateHeight = () => {
+        requestAnimationFrame(() => {
+          div.style.height = 'auto';
+          div.style.height =
+            div.scrollHeight > 32 ? div.scrollHeight + 'px' : '32px';
+        });
+      };
+
+      const observer = new ResizeObserver(updateHeight);
+      observer.observe(div);
+
+      updateHeight();
+
+      return () => {
+        observer.disconnect();
+      };
     }
   }, [content]);
 
-  if (isInjectVariation) {
+  if (multilineVariation) {
     return (
       <div
         ref={divRef}
@@ -151,6 +162,9 @@ const Markdown = React.memo(
         });
       }
     };
+    const multilineVariation =
+      codeVariation === MarkdownCodeVariations.WithCopyAndInject ||
+      codeVariation === MarkdownCodeVariations.WithCopyMultiline;
 
     const onInjectCode = useCallback(
       (codeContent: string) => {
@@ -191,7 +205,7 @@ const Markdown = React.memo(
                   ) : (
                     <LanguageText
                       content={codeContent}
-                      codeVariation={codeVariation}
+                      multilineVariation={multilineVariation}
                     />
                   )}
                   {codeVariation === MarkdownCodeVariations.WithCopy && (
@@ -203,18 +217,21 @@ const Markdown = React.memo(
                       <Copy className="w-4 h-4" />
                     </Button>
                   )}
-                  {codeVariation ===
-                    MarkdownCodeVariations.WithCopyAndInject && (
+                  {multilineVariation && (
                     <div className="flex gap-2 items-center justify-end mt-1">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="rounded p-2 inline-flex items-center justify-center text-xs font-sans"
-                        onClick={() => onInjectCode(codeContent)}
-                      >
-                        <Plus className="w-4 h-4" />
-                        {t('Inject command')}
-                      </Button>
+                      {codeVariation ===
+                        MarkdownCodeVariations.WithCopyAndInject && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="rounded p-2 inline-flex items-center justify-center text-xs font-sans"
+                          onClick={() => onInjectCode(codeContent)}
+                        >
+                          <Plus className="w-4 h-4" />
+                          {t('Inject command')}
+                        </Button>
+                      )}
+
                       <Button
                         size="sm"
                         variant="ghost"

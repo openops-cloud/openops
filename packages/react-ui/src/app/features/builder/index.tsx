@@ -1,5 +1,4 @@
 import {
-  AiWidget,
   BuilderTreeViewProvider,
   CanvasControls,
   cn,
@@ -9,7 +8,13 @@ import {
   ResizablePanelGroup,
 } from '@openops/components/ui';
 import { ReactFlowProvider } from '@xyflow/react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { ImperativePanelHandle } from 'react-resizable-panels';
 import { useSearchParams } from 'react-router-dom';
 import { useMeasure } from 'react-use';
@@ -25,6 +30,7 @@ import { useSocket } from '@/app/common/providers/socket-provider';
 import { PanelSizes } from '@/app/common/types/panel-sizes';
 import { FLOW_CANVAS_Y_OFFESET } from '@/app/constants/flow-canvas';
 import { SEARCH_PARAMS } from '@/app/constants/search-params';
+import { AiAssistantButton } from '@/app/features/ai/ai-assistant-button';
 import {
   ActionType,
   BlockTrigger,
@@ -41,6 +47,7 @@ import {
   LEFT_SIDEBAR_MIN_EFFECTIVE_WIDTH,
   LEFT_SIDEBAR_MIN_SIZE,
 } from '../../constants/sidebar';
+import { AiAssistantChat } from '../ai/ai-assistant-chat';
 import { blocksHooks } from '../blocks/lib/blocks-hook';
 import { RunDetailsBar } from '../flow-runs/components/run-details-bar';
 import { FlowSideMenu } from '../navigation/side-menu/flow/flow-side-menu';
@@ -59,6 +66,8 @@ import { StepSettingsProvider } from './step-settings/step-settings-context';
 import { TreeView } from './tree-view';
 
 const minWidthOfSidebar = 'min-w-[max(20vw,400px)]';
+
+const MIDDLE_PANEL_TOP_OFFSET = 60;
 
 const useAnimateSidebar = (
   sidebarValue: LeftSideBarType | RightSideBarType,
@@ -157,7 +166,7 @@ const BuilderPage = () => {
       };
     },
   );
-  const [middlePanelRef, middlePanelSize] = useMeasure<HTMLDivElement>();
+  const [middlePanelRef, rawMiddlePanelSize] = useMeasure<HTMLDivElement>();
   const [leftSidePanelRef, leftSidePanelSize] = useMeasure<HTMLDivElement>();
   const [isDraggingHandle, setIsDraggingHandle] = useState(false);
   const rightHandleRef = useAnimateSidebar(rightSidebar);
@@ -207,6 +216,13 @@ const BuilderPage = () => {
     !!memorizedSelectedStep &&
     memorizedSelectedStep.type !== TriggerType.EMPTY &&
     !isBlockLoading;
+
+  const middlePanelSize = useMemo(() => {
+    return {
+      width: rawMiddlePanelSize.width,
+      height: rawMiddlePanelSize.height - MIDDLE_PANEL_TOP_OFFSET,
+    };
+  }, [rawMiddlePanelSize.height, rawMiddlePanelSize.width]);
 
   return (
     <div className="flex h-screen w-screen flex-col relative">
@@ -265,11 +281,19 @@ const BuilderPage = () => {
                 <ReadonlyCanvasProvider>
                   <div ref={middlePanelRef} className="relative h-full w-full">
                     <BuilderHeader />
-
+                    <AiAssistantChat
+                      middlePanelSize={middlePanelSize}
+                      className={'left-4 bottom-[70px]'}
+                    />
+                    {leftSidebar === LeftSideBarType.NONE && (
+                      <AiAssistantButton className="size-[42px] absolute left-4 bottom-[10px] z-50" />
+                    )}
                     <CanvasControls
                       topOffset={FLOW_CANVAS_Y_OFFESET}
+                      className={cn({
+                        'left-[74px]': leftSidebar === LeftSideBarType.NONE,
+                      })}
                     ></CanvasControls>
-                    <AiWidget />
                     <div
                       className={cn('h-screen w-full flex-1 z-10', {
                         'bg-background': !isDraggingHandle,

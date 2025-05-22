@@ -29,10 +29,10 @@ import {
 } from '@openops/shared';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
+import { stepTestOutputHooks } from './step-test-output-hooks';
 import { TestSampleDataViewer } from './test-sample-data-viewer';
 import { TestButtonTooltip } from './test-step-tooltip';
 import { testStepUtils } from './test-step-utils';
-import { useStepTestOuput } from './use-step-test-output';
 
 type TestActionComponentProps = {
   isSaving: boolean;
@@ -64,7 +64,7 @@ const TestActionSection = React.memo(
       data: testOutputData,
       isLoading: isLoadingTestOutput,
       refetch: refetchTestOutput,
-    } = useStepTestOuput(flowVersionId, form);
+    } = stepTestOutputHooks.useStepTestOutputFormData(flowVersionId, form);
 
     const sampleDataExists =
       !isNil(testOutputData?.lastTestDate) || !isNil(errorMessage);
