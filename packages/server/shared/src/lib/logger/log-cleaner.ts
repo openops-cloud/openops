@@ -57,6 +57,7 @@ export const cleanLogEvent = (logEvent: any) => {
     }
 
     if (typeof value === 'number') {
+      // Max 2 decimal points
       eventData[key] = Math.round(value * 100) / 100;
       continue;
     }
@@ -64,7 +65,6 @@ export const cleanLogEvent = (logEvent: any) => {
     eventData[key] = truncate(value);
   }
 
-  // Legacy compatibility: flatten if the *entire* event is an Error
   if (logEvent.event instanceof Error) {
     eventData.stack = truncate(logEvent.event.stack, 2000);
     eventData.name = logEvent.event.name;
@@ -74,7 +74,6 @@ export const cleanLogEvent = (logEvent: any) => {
       eventData.message = truncate(logEvent.event.message);
     }
   }
-
   logEvent.event = eventData;
   return logEvent;
 };
