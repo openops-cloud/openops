@@ -30,6 +30,7 @@ const buttonVariants = cva(
         transparentOnDark: 'text-white',
         greenRounded:
           'bg-background bg-gradient-to-t from-greenAccent to-greenAccent-200 !py-[7px] !px-[13.5px] !rounded-lg text-primary font-bold text-[16px]  hover:underline disabled:from-greenAccent/60 disabled:to-greenAccent-200/40 disabled:opacity-100 disabled:text-primary/50',
+        ai: 'focus-visible:ring-0 dark:text-white bg-background bg-gradient-to-r from-ring/35 to-primary-200/35 rounded-xl transition-all hover:from-ring/45 hover:to-primary-200/45',
       },
       size: {
         default: 'h-10 px-4 py-2',

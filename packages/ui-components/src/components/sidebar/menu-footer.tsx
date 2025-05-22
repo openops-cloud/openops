@@ -1,4 +1,6 @@
 import { AuthenticationResponse } from '@openops/shared';
+import { ReactNode } from 'react';
+import { cn } from '../../lib/cn';
 import {
   OpenOpsCloudConfig,
   UserAvatarDropdownMenuContent,
@@ -13,6 +15,7 @@ export type MenuFooterProps = {
   onLogout: () => void;
   isMinimized: boolean;
   cloudConfig: OpenOpsCloudConfig;
+  children?: ReactNode;
 };
 
 const MenuFooter = ({
@@ -21,34 +24,52 @@ const MenuFooter = ({
   onLogout,
   isMinimized,
   cloudConfig,
-}: MenuFooterProps) => (
-  <div className="w-full flex justify-between items-center px-6 pt-[18px] pb-6 border-t flex-col gap-1 h-[146px] @[180px]:py-4 @[180px]:flex-row @[180px]:h-[64px]">
-    <MenuNavigationItem
-      to={settingsLink.to}
-      label={settingsLink.label}
-      Icon={settingsLink.icon}
-      iconClassName="@[180px]:size-6"
-      className="@[180px]:gap-2"
-      isMinimized={isMinimized}
-    ></MenuNavigationItem>
-    <UserAvatarMenu
-      user={
-        user
-          ? {
-              email: user.email ?? '',
+  children,
+}: MenuFooterProps) => {
+  return (
+    <>
+      {isMinimized && (
+        <div className="w-full flex justify-center items-center mb-4">
+          {children}
+        </div>
+      )}
+      <div className="w-full flex justify-between items-center p-4 border-t flex-col gap-1  @[180px]:py-4 @[180px]:flex-row @[180px]:h-[64px]">
+        <div
+          className={cn('flex items-center gap-2', {
+            'flex-col-reverse': isMinimized,
+          })}
+        >
+          <UserAvatarMenu
+            user={
+              user
+                ? {
+                    email: user.email ?? '',
+                  }
+                : undefined
             }
-          : undefined
-      }
-      MenuContent={
-        <UserAvatarDropdownMenuContent
-          cloudConfig={cloudConfig}
-          onLogout={onLogout}
-          user={user}
-        />
-      }
-    />
-  </div>
-);
+            MenuContent={
+              <UserAvatarDropdownMenuContent
+                cloudConfig={cloudConfig}
+                onLogout={onLogout}
+                user={user}
+              />
+            }
+          />
+
+          <MenuNavigationItem
+            to={settingsLink.to}
+            label={settingsLink.label}
+            Icon={settingsLink.icon}
+            iconClassName="size-[21px]"
+            className="flex items-center justify-center ml-0 p-0 @[180px]:p-0 size-9 @[180px]:size-9 rounded-full @[180px]:rounded-full bg-accent dark:bg-accent hover:bg-input dark:hover:bg-accent/70"
+            isMinimized={true}
+          ></MenuNavigationItem>
+        </div>
+        {!isMinimized && children}
+      </div>
+    </>
+  );
+};
 
 MenuFooter.displayName = 'MenuFooter';
 export { MenuFooter };

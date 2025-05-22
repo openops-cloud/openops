@@ -25,7 +25,7 @@ export const DataSelectorSizeTogglers = ({
     >
       <Button
         size="icon"
-        className="text-outline opacity-50 hover:opacity-100"
+        className="text-outline"
         onClick={(e) => {
           e.stopPropagation();
 
@@ -38,9 +38,9 @@ export const DataSelectorSizeTogglers = ({
         variant="basic"
       >
         {state === DataSelectorSizeState.EXPANDED ? (
-          <MinimizeIcon />
+          <MinimizeIcon size={16} />
         ) : (
-          <ExpandIcon />
+          <ExpandIcon size={16} />
         )}
       </Button>
     </TooltipWrapper>
@@ -48,14 +48,14 @@ export const DataSelectorSizeTogglers = ({
     <TooltipWrapper tooltipText={t('Minimize')}>
       <Button
         size="icon"
-        className="text-outline opacity-50 hover:opacity-100"
+        className="text-outline"
         onClick={(e) => {
           e.stopPropagation();
           setDataSelectorSizeState(DataSelectorSizeState.COLLAPSED);
         }}
         variant="basic"
       >
-        <MinusIcon></MinusIcon>
+        <MinusIcon size={20}></MinusIcon>
       </Button>
     </TooltipWrapper>
   </>

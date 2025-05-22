@@ -24,6 +24,7 @@ export enum timeFormat {
   format12 = 'DD/MM/YYYY',
   format13 = 'DD/MM/YY',
   format14 = 'X',
+  format15 = 'YYYY-MM-DDTHH:mm:ss.SSSZ',
 }
 
 export enum timeFormatLabel {
@@ -32,7 +33,7 @@ export enum timeFormatLabel {
   format02 = 'MMMM DD YYYY HH:mm:ss (September 17 2023 11:23:58)',
   format03 = 'MMMM DD YYYY (September 17 2023)',
   format04 = 'MMM DD YYYY (Sep 17 2023)',
-  format05 = 'YYYY-MM-DDTHH:mm:ss (2023-09-17T11:23:58) ',
+  format05 = 'YYYY-MM-DDTHH:mm:ss (2023-09-17T11:23:58)',
   format06 = 'YYYY-MM-DD HH:mm:ss (2023-09-17 11:23:58)',
   format07 = 'YYYY-MM-DD (2023-09-17)',
   format08 = 'MM-DD-YYYY (09-17-2023)',
@@ -42,6 +43,7 @@ export enum timeFormatLabel {
   format12 = 'DD/MM/YYYY (17/09/2023)',
   format13 = 'DD/MM/YY (17/09/23)',
   format14 = 'X (1694949838)',
+  format15 = 'YYYY-MM-DDTHH:mm:ss.SSSZ (2023-09-17T11:23:58.000Z)',
 }
 
 export enum timeParts {
@@ -74,6 +76,7 @@ export const optionalTimeFormats = [
   { label: timeFormatLabel.format07, value: timeFormat.format07 },
   { label: timeFormatLabel.format06, value: timeFormat.format06 },
   { label: timeFormatLabel.format05, value: timeFormat.format05 },
+  { label: timeFormatLabel.format15, value: timeFormat.format15 },
   { label: timeFormatLabel.format00, value: timeFormat.format00 },
   { label: timeFormatLabel.format01, value: timeFormat.format01 },
   { label: timeFormatLabel.format02, value: timeFormat.format02 },

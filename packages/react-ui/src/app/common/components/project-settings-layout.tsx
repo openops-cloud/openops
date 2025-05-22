@@ -42,12 +42,11 @@ export default function ProjectSettingsLayout({
   const showAppearanceSettings = flagsHooks.useFlag(
     FlagId.DARK_THEME_ENABLED,
   ).data;
-  const showAiSettings = flagsHooks.useFlag(FlagId.SHOW_AI_SETTINGS).data;
 
   const sidebarNavItems = [
     ...baseNavItems,
     ...(showAppearanceSettings ? [appearanceNavItem] : []),
-    ...(showAiSettings ? [aiNavItem] : []),
+    ...[aiNavItem],
   ];
 
   return <SidebarLayout items={sidebarNavItems}>{children}</SidebarLayout>;

@@ -39,6 +39,7 @@ import {
   flowVersionRepo,
   flowVersionService,
 } from '../flow-version/flow-version.service';
+import { flowStepTestOutputService } from '../step-test-output/flow-step-test-output.service';
 import { flowSideEffects } from './flow-service-side-effects';
 import { FlowEntity } from './flow.entity';
 import { flowRepo } from './flow.repo';
@@ -561,6 +562,11 @@ async function update({
             type: FlowOperationType.IMPORT_FLOW,
             request: lastVersionWithArtifacts,
           },
+        });
+
+        await flowStepTestOutputService.copyFromVersion({
+          fromVersionId: lastVersionWithArtifacts.id,
+          toVersionId: lastVersion.id,
         });
       }
 

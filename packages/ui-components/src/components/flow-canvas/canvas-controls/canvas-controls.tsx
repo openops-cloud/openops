@@ -6,12 +6,19 @@ import { Button } from '../../../ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../../../ui/tooltip';
 
 import { CenterFlowIcon } from '../../../icons';
+import { cn } from '../../../lib/cn';
 import { VerticalDivider } from '../../../ui/vertical-divider';
 import { useCanvasContext } from '../canvas-context';
 import { InitialZoom } from '../constants';
 import { PanningModeToggleControl } from './panning-mode-toggle-control';
 
-const CanvasControls = ({ topOffset }: { topOffset?: number }) => {
+const CanvasControls = ({
+  topOffset,
+  className,
+}: {
+  topOffset?: number;
+  className?: string;
+}) => {
   const reactFlow = useReactFlow();
   const { readonly } = useCanvasContext();
 
@@ -46,7 +53,12 @@ const CanvasControls = ({ topOffset }: { topOffset?: number }) => {
   }, [reactFlow, topOffset]);
 
   return (
-    <div className="bg-background absolute left-[10px] bottom-[10px] z-50 rounded-xl flex flex-row items-center gap-1 shadow-editor py-0.5 px-2">
+    <div
+      className={cn(
+        'bg-background absolute left-4 bottom-[10px] z-50 rounded-xl flex flex-row items-center gap-1 shadow-editor py-0.5 px-2',
+        className,
+      )}
+    >
       {!readonly && <PanningModeToggleControl />}
 
       <VerticalDivider height={24} />

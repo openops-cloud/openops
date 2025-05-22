@@ -19,7 +19,7 @@ import { RecommendationsRequestFilters } from './common/recommendations-request-
 export const getRecommendationsAction = createAction({
   auth: anadotAuth,
   name: 'get_recommendations_predefined',
-  description: 'Get recommendations from Anodot',
+  description: 'Get Umbrella recommendations',
   displayName: 'Get Recommendations',
   props: {
     accounts: accountProperty(),
