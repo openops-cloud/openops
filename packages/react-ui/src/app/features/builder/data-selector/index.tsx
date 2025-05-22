@@ -2,6 +2,7 @@ import {
   AI_CHAT_CONTAINER_SIZES,
   cn,
   Input,
+  LoadingSpinner,
   ScrollArea,
 } from '@openops/components/ui';
 import { t } from 'i18next';
@@ -197,7 +198,7 @@ const DataSelector = ({
 
   const stepIds: string[] = pathToTargetStep.map((p) => p.id!);
 
-  // todo need to check how to avoid overfetching && handle loading state
+  // todo need to check how to avoid overfetching as we invalidate this on every test step
   const { data: stepsTestOutput, isLoading } = useQuery({
     queryKey: [QueryKeys.dataSelectorStepTestOutput, flowVersionId, stepIds],
     queryFn: async () => {
@@ -285,6 +286,12 @@ const DataSelector = ({
             onChange={(e) => setSearchTerm(e.target.value)}
           ></Input>
         </div>
+
+        {isLoading && (
+          <div className="w-full h-full flex items-center justify-center">
+            <LoadingSpinner></LoadingSpinner>
+          </div>
+        )}
 
         <ScrollArea className="transition-all h-[calc(100%-56px)] w-full ">
           {filteredMentions &&
