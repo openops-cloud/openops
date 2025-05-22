@@ -141,6 +141,7 @@ export type BaseActionContext<
       queryParams: Record<string, string>;
     },
     baseUrl?: string,
+    staticFileUrl?: string,
   ) => string;
   currentExecutionPath: string;
 };

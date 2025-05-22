@@ -88,6 +88,8 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [AppSystemProp.SUPERSET_MCP_SERVER_PATH]: '/root/.mcp/superset',
   [AppSystemProp.DOCS_MCP_SERVER_PATH]: '/root/.mcp/docs.openops.com',
   [AppSystemProp.LOAD_EXPERIMENTAL_MCP_TOOLS]: 'false',
+  [AppSystemProp.RESUME_EXECUTION_REDIRECT_URL]:
+    'https://static.openops.com/html/resume_execution.html',
 };
 
 export const system = {

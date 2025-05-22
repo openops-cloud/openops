@@ -1,5 +1,10 @@
 import { createAction, StoreScope } from '@openops/blocks-framework';
-import { networkUtls, SharedSystemProp, system } from '@openops/server-shared';
+import {
+  AppSystemProp,
+  networkUtls,
+  SharedSystemProp,
+  system,
+} from '@openops/server-shared';
 import {
   assertNotNullOrUndefined,
   ExecutionType,
@@ -109,6 +114,9 @@ const sendMessageAskingForAction = async (
 
   if (!enableSlackInteractions) {
     const baseUrl = await networkUtls.getPublicUrl();
+    const redirectUrl = system.getOrThrow(
+      AppSystemProp.RESUME_EXECUTION_REDIRECT_URL,
+    );
 
     actions.forEach((action: SlackActionDefinition) => {
       action.url = context.run.isTest
@@ -121,6 +129,7 @@ const sendMessageAskingForAction = async (
               },
             },
             baseUrl,
+            redirectUrl,
           );
     });
   }
