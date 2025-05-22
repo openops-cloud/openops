@@ -20,6 +20,7 @@ import {
 import { useBuilderStateContext } from '../builder-hooks';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
+import { QueryKeys } from '@/app/constants/query-keys';
 import { useQuery } from '@tanstack/react-query';
 import { flowsApi } from '../../flows/lib/flows-api';
 import { BuilderState } from '../builder-types';
@@ -69,7 +70,7 @@ function filterBy(arr: MentionTreeNode[], query: string): MentionTreeNode[] {
       const filteredChildren = filterBy(item.children, query);
       if (filteredChildren.length) {
         acc.push({ ...item, children: filteredChildren });
-        return acc; // return acc as we have handled this item
+        return acc;
       }
     }
 
@@ -86,7 +87,7 @@ function filterBy(arr: MentionTreeNode[], query: string): MentionTreeNode[] {
       acc.push({ ...item, children: undefined });
     }
 
-    return acc; // Always return acc
+    return acc;
   }, [] as MentionTreeNode[]);
 }
 
@@ -104,20 +105,24 @@ const getPathToTargetStep = (state: BuilderState) => {
 
 const getAllStepsMentions = (
   pathToTargetStep: StepWithIndex[],
-  stepsTestOutput: Record<string, unknown> | undefined,
+  // todo consolidate type
+  stepsTestOutput:
+    | Record<string, { output: unknown; lastTestDate: string }>
+    | undefined,
 ) => {
   if (isNil(stepsTestOutput)) {
     return [];
   }
 
   return pathToTargetStep.map((step) => {
-    const stepNeedsTesting = isNil(step.settings.inputUiInfo?.lastTestDate);
+    const stepNeedsTesting = isNil(stepsTestOutput[step.id!]?.lastTestDate);
     const displayName = `${step.dfsIndex + 1}. ${step.displayName}`;
+
     if (stepNeedsTesting) {
       return createTestNode(step, displayName);
     }
     return dataSelectorUtils.traverseStepOutputAndReturnMentionTree({
-      stepOutput: stepsTestOutput[step.id!],
+      stepOutput: stepsTestOutput[step.id!].output,
       propertyPath: step.name,
       displayName: displayName,
     });
@@ -170,6 +175,7 @@ const DataSelector = ({
   setDataSelectorSize,
   className,
 }: DataSelectorProps) => {
+  // todo
   const { data: useNewExternalTestData = false } = flagsHooks.useFlag(
     FlagId.USE_NEW_EXTERNAL_TESTDATA,
   );
@@ -181,10 +187,12 @@ const DataSelector = ({
   );
 
   const stepIds: string[] = pathToTargetStep.map((p) => p.id!);
+  console.log('stepIds', stepIds);
 
+  // todo need to check how to avoid overfetching && fetch only when data selector is opened
   const { data: stepsTestOutput } = useQuery({
     queryKey: [
-      'test-output',
+      QueryKeys.dataSelectorStepTestOutput,
       flowVersionId,
       pathToTargetStep.map((p) => p.name),
     ],
@@ -198,7 +206,6 @@ const DataSelector = ({
     enabled: !!useNewExternalTestData,
   });
 
-  // Backwards compatibility: use old selector if flag is off
   const mentions = useNewExternalTestData
     ? getAllStepsMentions(pathToTargetStep, stepsTestOutput)
     : mentionsFromCurrentSelectedData;

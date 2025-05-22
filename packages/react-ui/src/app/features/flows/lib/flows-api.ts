@@ -161,7 +161,8 @@ export const flowsApi = {
   },
   getStepTestOutputBulk(flowVersionId: string, stepIds: string[]) {
     const params = qs.stringify({ stepIds }, { arrayFormat: 'repeat' });
-    return api.get<Record<string, unknown>>(
+    // todo type
+    return api.get<Record<string, { output: unknown; lastTestDate: string }>>(
       `/v1/flow-versions/${flowVersionId}/test-output?${params}`,
     );
   },
