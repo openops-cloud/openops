@@ -99,7 +99,7 @@ jest.mock('ai', () => {
 
   return {
     pipeDataStreamToResponse: jest.fn((_, options) => {
-      if (options && options.execute) {
+      if (options?.execute) {
         const mockWriter: MockDataStreamWriter = {
           write: jest.fn(),
           end: jest.fn(),
