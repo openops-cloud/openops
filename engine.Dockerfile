@@ -1,7 +1,7 @@
 FROM public.ecr.aws/lambda/nodejs:20
 
 # Architecture will be set automatically by Docker buildx
-ARG TARGETARCH=amd64
+ARG TARGETARCH
 
 ENV NODE_VERSION=20.18.0
 ENV NODE_ENV=production
