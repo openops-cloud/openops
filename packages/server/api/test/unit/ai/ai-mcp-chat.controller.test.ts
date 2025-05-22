@@ -174,13 +174,6 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
     const mockAllTools = {
       tool1: { description: 'Tool 1', parameters: {} },
       tool2: { description: 'Tool 2', parameters: {} },
-      mcp_analytics_superset: { description: 'Analytics tool', parameters: {} },
-      mcp_table_tool: { description: 'Table tool', parameters: {} },
-    };
-
-    const mockNoSpecialTools = {
-      tool1: { description: 'Tool 1', parameters: {} },
-      tool2: { description: 'Tool 2', parameters: {} },
     };
 
     beforeEach(async () => {
@@ -223,91 +216,82 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
       });
     });
 
-    it('should correctly detect presence of analytics and table tools and set isAnalyticsLoaded and isTablesLoaded flags', async () => {
-      (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);
-      (selectRelevantTools as jest.Mock).mockResolvedValue({
-        tool1: { description: 'Tool 1', parameters: {} },
-        mcp_analytics_superset: {
-          description: 'Analytics tool',
-          parameters: {},
+    it.each([
+      {
+        selectedTools: {
+          tool1: { description: 'Tool 1', parameters: {} },
+          mcp_analytics_superset: {
+            description: 'Analytics tool',
+            parameters: {},
+          },
+          mcp_table_tool: { description: 'Table tool', parameters: {} },
         },
-        mcp_table_tool: { description: 'Table tool', parameters: {} },
-      });
+        expected: { isAnalyticsLoaded: true, isTablesLoaded: true },
+      },
+      {
+        selectedTools: {
+          tool1: { description: 'Tool 1', parameters: {} },
+          tool2: { description: 'Tool 2', parameters: {} },
+        },
+        expected: { isAnalyticsLoaded: false, isTablesLoaded: false },
+      },
+      {
+        selectedTools: {
+          tool1: { description: 'Tool 1', parameters: {} },
+          mcp_analytics_superset: {
+            description: 'Analytics tool',
+            parameters: {},
+          },
+        },
+        expected: { isAnalyticsLoaded: true, isTablesLoaded: false },
+      },
+      {
+        selectedTools: {
+          tool1: { description: 'Tool 1', parameters: {} },
+          mcp_table_tool: { description: 'Table tool', parameters: {} },
+        },
+        expected: { isAnalyticsLoaded: false, isTablesLoaded: true },
+      },
+    ])(
+      'should handle analytics/tables flags when tools are $expected.isAnalyticsLoaded/$expected.isTablesLoaded',
+      async ({ selectedTools, expected }) => {
+        (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);
+        (selectRelevantTools as jest.Mock).mockResolvedValue(selectedTools);
 
-      const postHandler = handlers['/'];
-      await postHandler(
-        mockRequest as FastifyRequest,
-        mockReply as unknown as FastifyReply,
-      );
+        const postHandler = handlers['/'];
+        await postHandler(
+          mockRequest as FastifyRequest,
+          mockReply as unknown as FastifyReply,
+        );
 
-      expect(getMcpSystemPrompt).toHaveBeenCalledWith({
-        isAnalyticsLoaded: true,
-        isTablesLoaded: true,
-      });
-    });
+        expect(getMcpSystemPrompt).toHaveBeenCalledWith(expected);
+      },
+    );
 
-    it('should correctly detect absence of analytics and table tools and set isAnalyticsLoaded and isTablesLoaded flags', async () => {
-      (getMCPTools as jest.Mock).mockResolvedValue(mockNoSpecialTools);
-      (selectRelevantTools as jest.Mock).mockResolvedValue({
-        tool1: { description: 'Tool 1', parameters: {} },
-        tool2: { description: 'Tool 2', parameters: {} },
-      });
+    it.each([undefined, {}, null])(
+      'should handle when selectRelevantTools returns %p',
+      async (selectedTools) => {
+        (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);
+        (selectRelevantTools as jest.Mock).mockResolvedValue(selectedTools);
 
-      const postHandler = handlers['/'];
-      await postHandler(
-        mockRequest as FastifyRequest,
-        mockReply as unknown as FastifyReply,
-      );
+        const postHandler = handlers['/'];
+        await postHandler(
+          mockRequest as FastifyRequest,
+          mockReply as unknown as FastifyReply,
+        );
 
-      expect(getMcpSystemPrompt).toHaveBeenCalledWith({
-        isAnalyticsLoaded: false,
-        isTablesLoaded: false,
-      });
-    });
-
-    it('should handle when selectRelevantTools returns undefined', async () => {
-      (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);
-      (selectRelevantTools as jest.Mock).mockResolvedValue(undefined);
-
-      const postHandler = handlers['/'];
-      await postHandler(
-        mockRequest as FastifyRequest,
-        mockReply as unknown as FastifyReply,
-      );
-
-      expect(getMcpSystemPrompt).toHaveBeenCalledWith({
-        isAnalyticsLoaded: false,
-        isTablesLoaded: true,
-      });
-      expect(pipeDataStreamToResponse).toHaveBeenCalled();
-      expect(streamText).toHaveBeenCalledWith(
-        expect.objectContaining({
-          tools: undefined,
-        }),
-      );
-    });
-
-    it('should handle when selectRelevantTools returns empty object', async () => {
-      (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);
-      (selectRelevantTools as jest.Mock).mockResolvedValue({});
-
-      const postHandler = handlers['/'];
-      await postHandler(
-        mockRequest as FastifyRequest,
-        mockReply as unknown as FastifyReply,
-      );
-
-      expect(getMcpSystemPrompt).toHaveBeenCalledWith({
-        isAnalyticsLoaded: false,
-        isTablesLoaded: true,
-      });
-      expect(pipeDataStreamToResponse).toHaveBeenCalled();
-      expect(streamText).toHaveBeenCalledWith(
-        expect.objectContaining({
-          tools: {},
-        }),
-      );
-    });
+        expect(getMcpSystemPrompt).toHaveBeenCalledWith({
+          isAnalyticsLoaded: false,
+          isTablesLoaded: false,
+        });
+        expect(pipeDataStreamToResponse).toHaveBeenCalled();
+        expect(streamText).toHaveBeenCalledWith(
+          expect.objectContaining({
+            tools: selectedTools,
+          }),
+        );
+      },
+    );
 
     it('should pass filtered tools to streamText via pipeDataStreamToResponse', async () => {
       (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);

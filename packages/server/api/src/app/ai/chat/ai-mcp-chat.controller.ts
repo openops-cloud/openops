@@ -119,7 +119,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
     const isAnalyticsLoaded = Object.keys(filteredTools ?? {}).some((key) =>
       key.includes('superset'),
     );
-    const isTablesLoaded = Object.keys(tools).some((key) =>
+    const isTablesLoaded = Object.keys(filteredTools ?? {}).some((key) =>
       key.includes('table'),
     );
 
