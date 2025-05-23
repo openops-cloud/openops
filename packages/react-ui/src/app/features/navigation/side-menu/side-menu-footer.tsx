@@ -1,3 +1,4 @@
+import { QueryKeys } from '@/app/constants/query-keys';
 import { MenuFooter, MenuLink } from '@openops/components/ui';
 import { t } from 'i18next';
 import { Wrench } from 'lucide-react';
@@ -52,7 +53,7 @@ const SideMenuFooter = ({ isMinimized }: Props) => {
       );
     }
     queryClient.invalidateQueries({
-      queryKey: ['cloud-user-info'],
+      queryKey: [QueryKeys.cloudUserInfo],
     });
     setCloudUser(null);
   }, [queryClient, setCloudUser]);
