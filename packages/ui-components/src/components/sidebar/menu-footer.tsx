@@ -1,6 +1,5 @@
 import { AuthenticationResponse } from '@openops/shared';
 import { t } from 'i18next';
-import { platform } from 'os';
 import { ReactNode } from 'react';
 import { cn } from '../../lib/cn';
 import {
