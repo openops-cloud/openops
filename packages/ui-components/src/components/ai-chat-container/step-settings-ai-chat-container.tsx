@@ -1,7 +1,7 @@
 import { UseChatHelpers } from '@ai-sdk/react';
 import { t } from 'i18next';
 import { Send as SendIcon, Sparkles } from 'lucide-react';
-import { ReactNode, useRef } from 'react';
+import { ReactNode, useEffect, useRef } from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
 import { cn } from '../../lib/cn';
 import { Button } from '../../ui/button';
@@ -19,7 +19,7 @@ type StepSettingsAiChatContainerProps = {
   containerSize: AiCliChatContainerSizeState;
   enableNewChat: boolean;
   isEmpty: boolean;
-
+  stepName: string;
   toggleContainerSizeState: (state: AiCliChatContainerSizeState) => void;
   className?: string;
   children?: ReactNode;
@@ -40,9 +40,29 @@ const StepSettingsAiChatContainer = ({
   handleInputChange,
   handleSubmit,
   input,
+  stepName,
   isEmpty = true,
 }: StepSettingsAiChatContainerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const scrollViewportRef = useRef<HTMLDivElement>(null);
+  const hasScrolledOnce = useRef<boolean>(false);
+
+  useEffect(() => {
+    hasScrolledOnce.current = false;
+  }, [stepName]);
+
+  useEffect(() => {
+    if (
+      scrollViewportRef.current &&
+      !isEmpty &&
+      showAiChat &&
+      !hasScrolledOnce.current
+    ) {
+      scrollViewportRef.current.scrollTop =
+        scrollViewportRef.current.scrollHeight;
+      hasScrolledOnce.current = true;
+    }
+  }, [isEmpty, showAiChat, stepName]);
 
   let height: string;
   if (containerSize === AI_CHAT_CONTAINER_SIZES.COLLAPSED) {
@@ -114,7 +134,10 @@ const StepSettingsAiChatContainer = ({
         className="transition-all overflow-hidden"
       >
         <div className="py-4 flex flex-col h-full">
-          <ScrollArea className="transition-all h-full w-full">
+          <ScrollArea
+            className="transition-all h-full w-full"
+            viewPortRef={scrollViewportRef}
+          >
             <div
               className={cn('flex-1 px-6', {
                 'flex flex-col h-full': isEmpty,
