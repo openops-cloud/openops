@@ -224,8 +224,10 @@ jobs:
         run: |
           DIGEST=$(docker buildx imagetools inspect $SHA_TAG --raw | \
             jq -r  '.manifests[] | select(.platform.architecture == "amd64") | .digest')
-          docker manifest create $SHA_TAG-amd64 $SHA_TAG@$DIGEST
-          docker manifest push $SHA_TAG-amd64
+          echo "Got digest for $SHA_TAG: $DIGEST"
+          echo "Pushing single-arch manifest for ${SHA_TAG}@${DIGEST}"
+          docker manifest create ${SHA_TAG}-amd64 ${SHA_TAG}@${DIGEST}
+          docker manifest push ${SHA_TAG}-amd64
       - name: Build image
         if: ${{ !vars.ECR_REGION }}
         uses: docker/build-push-action@v6
