@@ -49,16 +49,18 @@ const AiAssistantChatContainer = ({
   const hasScrolledOnce = useRef<boolean>(false);
 
   useEffect(() => {
-    if (
-      scrollViewportRef.current &&
-      !isEmpty &&
-      showAiChat &&
-      !hasScrolledOnce.current
-    ) {
-      scrollViewportRef.current.scrollTop =
-        scrollViewportRef.current.scrollHeight;
-      hasScrolledOnce.current = true;
-    }
+    setTimeout(() => {
+      if (
+        !!scrollViewportRef.current &&
+        !isEmpty &&
+        showAiChat &&
+        !hasScrolledOnce.current
+      ) {
+        scrollViewportRef.current.scrollTop =
+          scrollViewportRef.current.scrollHeight;
+        hasScrolledOnce.current = true;
+      }
+    });
   }, [isEmpty, showAiChat]);
 
   return (
