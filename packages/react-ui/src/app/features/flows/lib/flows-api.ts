@@ -21,6 +21,7 @@ import {
   MinimalFlow,
   PopulatedFlow,
   SeekPage,
+  StepOutputWithData,
   StepRunResponse,
   TestFlowRunRequestBody,
   UpdateFlowVersionRequest,
@@ -154,15 +155,14 @@ export const flowsApi = {
   },
   getStepTestOutput(flowVersionId: string, stepId: string) {
     return api
-      .get<Record<string, { output: unknown; lastTestDate: string }>>(
+      .get<Record<string, StepOutputWithData>>(
         `/v1/flow-versions/${flowVersionId}/test-output?stepIds=${stepId}`,
       )
       .then((response) => response[stepId]);
   },
   getStepTestOutputBulk(flowVersionId: string, stepIds: string[]) {
     const params = qs.stringify({ stepIds }, { arrayFormat: 'repeat' });
-    // todo type
-    return api.get<Record<string, { output: unknown; lastTestDate: string }>>(
+    return api.get<Record<string, StepOutputWithData>>(
       `/v1/flow-versions/${flowVersionId}/test-output?${params}`,
     );
   },

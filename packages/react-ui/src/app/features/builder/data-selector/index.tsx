@@ -64,7 +64,7 @@ function filterBy(arr: MentionTreeNode[], query: string): MentionTreeNode[] {
 
 const getPathToTargetStep = (state: BuilderState) => {
   const { selectedStep, flowVersion } = state;
-  if (!selectedStep || !flowVersion || !flowVersion.trigger) {
+  if (!selectedStep || !flowVersion?.trigger) {
     return [];
   }
   const pathToTargetStep = flowHelper.findPathToStep({
@@ -81,7 +81,7 @@ const getAllStepsMentionsFromCurrentSelectedData: (
   state: BuilderState,
 ) => MentionTreeNode[] = (state) => {
   const { selectedStep, flowVersion } = state;
-  if (!selectedStep || !flowVersion || !flowVersion.trigger) {
+  if (!selectedStep || !flowVersion?.trigger) {
     return [];
   }
   const pathToTargetStep = flowHelper.findPathToStep({
@@ -120,7 +120,6 @@ const DataSelector = ({
   setDataSelectorSize,
   className,
 }: DataSelectorProps) => {
-  // todo
   const { data: useNewExternalTestData = false } = flagsHooks.useFlag(
     FlagId.USE_NEW_EXTERNAL_TESTDATA,
   );

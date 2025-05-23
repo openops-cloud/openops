@@ -44,7 +44,7 @@ describe('dataSelectorUtils', () => {
       (_desc, stepsTestOutput) => {
         const result = dataSelectorUtils.getAllStepsMentions(
           [mockStep()],
-          stepsTestOutput as any,
+          stepsTestOutput,
         );
         expect(result).toEqual([]);
       },
