@@ -51,10 +51,10 @@ export const getSystemPrompt = async (
 async function loadPrompt(filename: string): Promise<string> {
   const promptsLocation = system.get<string>(AppSystemProp.AI_PROMPTS_LOCATION);
 
-  // if (promptsLocation) {
-  //   const prompt = await loadFromCloud(promptsLocation, filename);
-  //   return prompt || loadFromFile(filename);
-  // }
+  if (promptsLocation) {
+    const prompt = await loadFromCloud(promptsLocation, filename);
+    return prompt || loadFromFile(filename);
+  }
 
   return loadFromFile(filename);
 }
