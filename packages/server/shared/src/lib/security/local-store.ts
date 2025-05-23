@@ -1,6 +1,6 @@
-import { AppSystemProp, system } from '@openops/server-shared';
 import fs from 'fs';
 import path from 'path';
+import { AppSystemProp, system } from '../system';
 
 export const localFileStore = {
   async save(key: string, value: string): Promise<void> {

@@ -1,3 +1,5 @@
+const decryptStringMock = jest.fn().mockReturnValue('test-encrypt');
+
 import { getAiProviderLanguageModel } from '@openops/common';
 import { AiProviderEnum, PrincipalType } from '@openops/shared';
 import { LanguageModel, pipeDataStreamToResponse, streamText } from 'ai';
@@ -16,7 +18,6 @@ import { getMcpSystemPrompt } from '../../../src/app/ai/chat/prompts.service';
 import { selectRelevantTools } from '../../../src/app/ai/chat/tools.service';
 import { aiConfigService } from '../../../src/app/ai/config/ai-config.service';
 import { getMCPTools } from '../../../src/app/ai/mcp/mcp-tools';
-import { encryptUtils } from '../../../src/app/helper/encryption';
 
 jest.mock('@openops/server-shared', () => ({
   logger: {
@@ -49,16 +50,13 @@ jest.mock('@openops/server-shared', () => ({
     POSTGRES: 'POSTGRES',
     SQLITE3: 'SQLITE3',
   },
+  encryptUtils: {
+    decryptString: decryptStringMock,
+  },
 }));
 
 jest.mock('@openops/common', () => ({
   getAiProviderLanguageModel: jest.fn(),
-}));
-
-jest.mock('../../../src/app/helper/encryption', () => ({
-  encryptUtils: {
-    decryptString: jest.fn(),
-  },
 }));
 
 jest.mock('../../../src/app/ai/config/ai-config.service', () => ({
@@ -186,9 +184,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
       (
         aiConfigService.getActiveConfigWithApiKey as jest.Mock
       ).mockResolvedValue(mockAiConfig);
-      (encryptUtils.decryptString as jest.Mock).mockReturnValue(
-        'decrypted-api-key',
-      );
+      decryptStringMock.mockReturnValue('decrypted-api-key');
       (getAiProviderLanguageModel as jest.Mock).mockResolvedValue(
         mockLanguageModel,
       );

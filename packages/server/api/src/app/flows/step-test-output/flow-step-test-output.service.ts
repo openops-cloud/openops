@@ -1,4 +1,4 @@
-import { fileCompressor } from '@openops/server-shared';
+import { encryptUtils, fileCompressor } from '@openops/server-shared';
 import {
   FileCompression,
   FlowStepTestOutput,
@@ -8,7 +8,6 @@ import {
 } from '@openops/shared';
 import { In } from 'typeorm';
 import { repoFactory } from '../../core/db/repo-factory';
-import { encryptUtils } from '../../helper/encryption';
 import { FlowStepTestOutputEntity } from './flow-step-test-output-entity';
 
 const flowStepTestOutputRepo = repoFactory(FlowStepTestOutputEntity);

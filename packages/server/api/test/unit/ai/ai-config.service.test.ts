@@ -23,9 +23,22 @@ jest.mock('../../../src/app/core/db/repo-factory', () => ({
 }));
 
 const encryptStringMock = jest.fn().mockReturnValue('test-encrypt');
-
-jest.mock('../../../src/app/helper/encryption', () => ({
-  ...jest.requireActual('../../../src/app/helper/encryption'),
+jest.mock('@openops/server-shared', () => ({
+  system: {
+    getNumber: jest.fn(),
+    getBoolean: jest.fn(),
+    getOrThrow: jest.fn(),
+    get: jest.fn(),
+  },
+  AppSystemProp: {
+    DB_TYPE: 'DB_TYPE',
+  },
+  SharedSystemProp: {
+    ENABLE_HOST_SESSION: 'ENABLE_HOST_SESSION',
+  },
+  DatabaseType: {
+    SQLITE3: 'SQLITE3',
+  },
   encryptUtils: {
     encryptString: encryptStringMock,
   },

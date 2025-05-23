@@ -1,9 +1,8 @@
+import { assertNotNullOrUndefined, isNil } from '@openops/shared';
 import * as crypto from 'crypto';
 import { randomBytes } from 'node:crypto';
 import { promisify } from 'util';
-
-import { AppSystemProp, QueueMode, system } from '@openops/server-shared';
-import { assertNotNullOrUndefined, isNil } from '@openops/shared';
+import { AppSystemProp, QueueMode, system } from '../system';
 import { localFileStore } from './local-store';
 
 let secret: string | null;
@@ -58,7 +57,8 @@ function encryptObject(object: unknown): EncryptedObject {
 
 function decryptObject<T>(encryptedObject: EncryptedObject): T {
   const iv = Buffer.from(encryptedObject.iv, 'hex');
-  const key = Buffer.from(secret!, 'binary');
+  assertNotNullOrUndefined(secret, 'secret');
+  const key = Buffer.from(secret, 'binary');
   const decipher = crypto.createDecipheriv(algorithm, key, iv);
   let decrypted = decipher.update(encryptedObject.data, 'hex', 'utf8');
   decrypted += decipher.final('utf8');
@@ -66,7 +66,8 @@ function decryptObject<T>(encryptedObject: EncryptedObject): T {
 }
 function decryptString(encryptedObject: EncryptedObject): string {
   const iv = Buffer.from(encryptedObject.iv, 'hex');
-  const key = Buffer.from(secret!, 'binary');
+  assertNotNullOrUndefined(secret, 'secret');
+  const key = Buffer.from(secret, 'binary');
   const decipher = crypto.createDecipheriv(algorithm, key, iv);
   let decrypted = decipher.update(encryptedObject.data, 'hex', 'utf8');
   decrypted += decipher.final('utf8');

@@ -3,10 +3,10 @@ import {
   Type,
 } from '@fastify/type-provider-typebox';
 import { validateAiProviderConfig } from '@openops/common';
+import { encryptUtils } from '@openops/server-shared';
 import { AiConfig, PrincipalType, SaveAiConfigRequest } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
 import { entitiesMustBeOwnedByCurrentProject } from '../../authentication/authorization';
-import { encryptUtils } from '../../helper/encryption';
 import { AiApiKeyRedactionMessage } from './ai-config.entity';
 import { aiConfigService } from './ai-config.service';
 

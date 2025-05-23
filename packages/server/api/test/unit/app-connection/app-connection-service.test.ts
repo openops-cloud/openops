@@ -1,4 +1,5 @@
-jest.mock('../../../src/app/helper/encryption', () => ({
+jest.mock('@openops/server-shared', () => ({
+  ...jest.requireActual('@openops/server-shared'),
   encryptUtils: {
     encryptObject: jest.fn((val) => `encrypted-${JSON.stringify(val)}`),
     decryptObject: jest.fn((val) => JSON.parse(val.replace('encrypted-', ''))),
@@ -27,6 +28,7 @@ jest.mock('../../../src/app/core/db/repo-factory', () => ({
 }));
 
 import { BlockMetadataModel } from '@openops/blocks-framework';
+import { encryptUtils } from '@openops/server-shared';
 import {
   AppConnectionStatus,
   AppConnectionType,
@@ -38,7 +40,6 @@ import {
 } from '@openops/shared';
 import { appConnectionService } from '../../../src/app/app-connection/app-connection-service/app-connection-service';
 import { restoreRedactedSecrets } from '../../../src/app/app-connection/app-connection-utils';
-import { encryptUtils } from '../../../src/app/helper/encryption';
 
 describe('appConnectionService.update', () => {
   const projectId = 'project-123';

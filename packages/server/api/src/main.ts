@@ -1,8 +1,7 @@
 import {
-  AppSystemProp,
+  encryptionKeyInitializer,
   initializeLock,
   logger,
-  QueueMode,
   sendLogs,
   setStopHandlers,
   system,
@@ -22,7 +21,6 @@ import { updateOpenopsTablesDatabase } from './app/database/seeds/openops-tables
 import { upsertAdminUser } from './app/database/seeds/seed-admin';
 import { seedEnvironmentId } from './app/database/seeds/seed-env-id';
 import { seedTemplateTables } from './app/database/seeds/seed-template-tables';
-import { encryptUtils } from './app/helper/encryption';
 import { jwtUtils } from './app/helper/jwt-utils';
 import { setupServer } from './app/server';
 import { telemetry } from './app/telemetry/telemetry';
@@ -65,18 +63,7 @@ async function validateEnvPropsOnStartup(): Promise<void> {
     );
   }
 
-  const queueMode = system.getOrThrow<QueueMode>(AppSystemProp.QUEUE_MODE);
-  const encryptionKey = await encryptUtils.loadEncryptionKey(queueMode);
-  const isValidHexKey =
-    encryptionKey && /^[A-Fa-z0-9]{32}$/.test(encryptionKey);
-  if (!isValidHexKey) {
-    throw new Error(
-      JSON.stringify({
-        message:
-          'OPS_ENCRYPTION_KEY is either undefined or not a valid 32 hex string.',
-      }),
-    );
-  }
+  await encryptionKeyInitializer();
 
   const jwtSecret = await jwtUtils.getJwtSecret();
   if (isNil(jwtSecret)) {
