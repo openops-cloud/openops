@@ -8,7 +8,6 @@ export const QueryKeys = {
   openAiAssistantChat: 'open-assistant-chat',
   aiSettings: 'ai-settings',
   aiSettingsProviders: 'ai-settings-providers',
-  dataSelectorStepTestOutput: 'data-selector-test-output',
 
   // Platform
   organization: 'organization',
@@ -44,6 +43,7 @@ export const QueryKeys = {
 
   // Builder
   stepTestOutput: 'step-test-output',
+  dataSelectorStepTestOutput: 'data-selector-test-output',
   triggerEvents: 'triggerEvents',
   openChat: 'openChat',
 
