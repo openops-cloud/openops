@@ -1,3 +1,4 @@
+import { QueryKeys } from '@/app/constants/query-keys';
 import { authenticationSession } from '@/app/lib/authentication-session';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
@@ -8,10 +9,13 @@ export const useRefetchFolderTree = () => {
   return useCallback(() => {
     return Promise.all([
       queryClient.invalidateQueries({
-        queryKey: ['folders/flows', authenticationSession.getProjectId()],
+        queryKey: [
+          QueryKeys.foldersFlows,
+          authenticationSession.getProjectId(),
+        ],
       }),
       queryClient.invalidateQueries({
-        queryKey: ['folders/flows/search'],
+        queryKey: [QueryKeys.foldersFlowsSearch],
       }),
     ]);
   }, [queryClient]);

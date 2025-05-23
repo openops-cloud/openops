@@ -8,6 +8,7 @@ import { NavigateFunction } from 'react-router-dom';
 import { flowsApi } from './flows-api';
 
 import { userSettingsHooks } from '@/app/common/hooks/user-settings-hooks';
+import { QueryKeys } from '@/app/constants/query-keys';
 import { SEARCH_PARAMS } from '@/app/constants/search-params';
 import { authenticationSession } from '@/app/lib/authentication-session';
 
@@ -34,7 +35,7 @@ async function fetchFlows(name: string, limit: number, signal: AbortSignal) {
 export const flowsHooks = {
   useFlows: (request: Omit<ListFlowsRequest, 'projectId'>) => {
     return useQuery({
-      queryKey: ['flows', authenticationSession.getProjectId()],
+      queryKey: [QueryKeys.flows, authenticationSession.getProjectId()],
       queryFn: async () => {
         return await flowsApi.list({
           ...request,
@@ -48,7 +49,7 @@ export const flowsHooks = {
     const [searchTerm, setSearchTerm] = useState('');
 
     const { data: reults, isLoading } = useQuery({
-      queryKey: ['folders/flows/search', searchTerm, paginationLimit],
+      queryKey: [QueryKeys.foldersFlowsSearch, searchTerm, paginationLimit],
       queryFn: async ({ signal }) => {
         if (!searchTerm) return { data: [] };
         return fetchFlows(searchTerm.trim(), paginationLimit, signal);
