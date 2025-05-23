@@ -217,6 +217,15 @@ jobs:
             type=registry,ref=${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}-cache
             type=registry,ref=${{ env.REPOSITORY_URI }}:main-cache
           cache-to: mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}-cache
+      - name: Push single-arch manifest
+        if: vars.ECR_REGION
+        env:
+          SHA_TAG=${{ env.REPOSITORY_URI }}:${{ env.SHORT_SHA }}
+        run: |
+          DIGEST=$(docker buildx imagetools inspect $SHA_TAG | \
+            jq -r  '.manifests[] | select(.platform.architecture == "amd64") | .digest')
+          docker manifest create $SHA_TAG-amd64 $SHA_TAG@$DIGEST
+          docker manifest push $SHA_TAG-amd64
       - name: Build image
         if: ${{ !vars.ECR_REGION }}
         uses: docker/build-push-action@v6
