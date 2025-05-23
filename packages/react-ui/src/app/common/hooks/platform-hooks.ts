@@ -1,5 +1,17 @@
 import { platformApi } from '@/app/lib/platforms-api';
-import { usePrefetchQuery, useSuspenseQuery } from '@tanstack/react-query';
+import {
+  QueryClient,
+  usePrefetchQuery,
+  useQuery,
+  useSuspenseQuery,
+} from '@tanstack/react-query';
+import { compare, validate } from 'compare-versions';
+
+const fetchPlatformMetadataOptions = {
+  queryKey: ['platform-metadata'],
+  queryFn: platformApi.getPlatformMetadata,
+  staleTime: Infinity,
+};
 
 export const platformHooks = {
   prefetchPlatform: () => {
@@ -22,5 +34,34 @@ export const platformHooks = {
         await query.refetch();
       },
     };
+  },
+  prefetchPlatformMetadata: (queryClient: QueryClient) => {
+    queryClient.prefetchQuery(fetchPlatformMetadataOptions);
+  },
+  usePlatformVersion: () => {
+    return useQuery({
+      ...fetchPlatformMetadataOptions,
+      select: (data) => data.version,
+    });
+  },
+  useHasNewerAvailableVersion: () => {
+    const { data: latestReleaseData } = useQuery({
+      queryKey: ['latest-release'],
+      queryFn: platformApi.getLatestRelease,
+      staleTime: Infinity,
+    });
+
+    const { data: platformVersionData } = platformHooks.usePlatformVersion();
+
+    if (
+      !latestReleaseData?.name ||
+      !validate(latestReleaseData.name) ||
+      !platformVersionData ||
+      !validate(platformVersionData)
+    ) {
+      return false;
+    }
+
+    return compare(latestReleaseData.name, platformVersionData, '>');
   },
 };

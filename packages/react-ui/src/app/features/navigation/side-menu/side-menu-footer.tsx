@@ -3,6 +3,7 @@ import { t } from 'i18next';
 import { Wrench } from 'lucide-react';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
+import { platformHooks } from '@/app/common/hooks/platform-hooks';
 import {
   OPENOPS_CONNECT_TEMPLATES_LOGOUT_URL,
   OPENOPS_CONNECT_TEMPLATES_URL,
@@ -89,6 +90,9 @@ const SideMenuFooter = ({ isMinimized }: Props) => {
     });
   }, [navigate]);
 
+  const hasNewerAvailableVersion = platformHooks.useHasNewerAvailableVersion();
+  const { data: currentVersion } = platformHooks.usePlatformVersion();
+
   return (
     <MenuFooter
       settingsLink={settingsLink}
@@ -105,6 +109,8 @@ const SideMenuFooter = ({ isMinimized }: Props) => {
         onCloudLogin,
         logoUrl: branding.logos.logoIconPositiveUrl,
       }}
+      currentVersion={currentVersion}
+      hasNewerAvailableVersion={hasNewerAvailableVersion}
     >
       <AiAssistantButton />
     </MenuFooter>

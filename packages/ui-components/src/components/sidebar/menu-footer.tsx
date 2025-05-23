@@ -1,4 +1,6 @@
 import { AuthenticationResponse } from '@openops/shared';
+import { t } from 'i18next';
+import { platform } from 'os';
 import { ReactNode } from 'react';
 import { cn } from '../../lib/cn';
 import {
@@ -15,6 +17,8 @@ export type MenuFooterProps = {
   onLogout: () => void;
   isMinimized: boolean;
   cloudConfig: OpenOpsCloudConfig;
+  hasNewerAvailableVersion?: boolean;
+  currentVersion?: string;
   children?: ReactNode;
 };
 
@@ -24,8 +28,18 @@ const MenuFooter = ({
   onLogout,
   isMinimized,
   cloudConfig,
+  hasNewerAvailableVersion,
+  currentVersion,
   children,
 }: MenuFooterProps) => {
+  const newerVersionNotification = hasNewerAvailableVersion
+    ? t(
+        'Current version: {currentVersion}. Newer version is available, go to settings to update',
+        {
+          currentVersion,
+        },
+      )
+    : undefined;
   return (
     <>
       {isMinimized && (
@@ -55,11 +69,11 @@ const MenuFooter = ({
               />
             }
           />
-
           <MenuNavigationItem
             to={settingsLink.to}
             label={settingsLink.label}
             Icon={settingsLink.icon}
+            notificationLabel={newerVersionNotification}
             iconClassName="size-[21px]"
             className="flex items-center justify-center ml-0 p-0 @[180px]:p-0 size-9 @[180px]:size-9 rounded-full @[180px]:rounded-full bg-accent dark:bg-accent hover:bg-input dark:hover:bg-accent/70"
             isMinimized={true}
