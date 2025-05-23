@@ -3,7 +3,7 @@ import { Flag, FlagId } from '@openops/shared';
 import axios from 'axios';
 import { repoFactory } from '../core/db/repo-factory';
 import { FlagEntity } from './flag.entity';
-import { getInMemoryFlags } from './in-memory-flags';
+import { inMemoryFlagsService } from './in-memory-flags.service';
 
 const flagRepo = repoFactory(FlagEntity);
 
@@ -24,7 +24,7 @@ export const flagService = {
   async getAll(): Promise<Flag[]> {
     const flags = await flagRepo().find({});
 
-    const inMemoryFlags = await getInMemoryFlags();
+    const inMemoryFlags = await inMemoryFlagsService.getAll();
 
     flags.push(...inMemoryFlags);
 

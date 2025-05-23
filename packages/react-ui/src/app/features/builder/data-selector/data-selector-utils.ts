@@ -1,4 +1,12 @@
 import { formatUtils } from '@/app/lib/utils';
+import {
+  Action,
+  isEmpty,
+  isNil,
+  StepOutputWithData,
+  StepWithIndex,
+  Trigger,
+} from '@openops/shared';
 
 export type MentionTreeNode = {
   key: string;
@@ -131,6 +139,59 @@ function handleObjectStepOutput(
   };
 }
 
+const getAllStepsMentions = (
+  pathToTargetStep: StepWithIndex[],
+  stepsTestOutput: Record<string, StepOutputWithData> | undefined,
+) => {
+  if (!stepsTestOutput || isEmpty(stepsTestOutput)) {
+    return [];
+  }
+
+  return pathToTargetStep.map((step) => {
+    const displayName = `${step.dfsIndex + 1}. ${step.displayName}`;
+
+    if (!step.id || !stepsTestOutput[step.id]) {
+      return createTestNode(step, displayName);
+    }
+
+    const stepNeedsTesting = isNil(stepsTestOutput[step.id].lastTestDate);
+
+    if (stepNeedsTesting) {
+      return createTestNode(step, displayName);
+    }
+    return dataSelectorUtils.traverseStepOutputAndReturnMentionTree({
+      stepOutput: stepsTestOutput[step.id].output,
+      propertyPath: step.name,
+      displayName: displayName,
+    });
+  });
+};
+
+const createTestNode = (
+  step: Action | Trigger,
+  displayName: string,
+): MentionTreeNode => {
+  return {
+    key: step.name,
+    data: {
+      displayName,
+      propertyPath: step.name,
+    },
+    children: [
+      {
+        data: {
+          displayName: displayName,
+          propertyPath: step.name,
+          isTestStepNode: true,
+        },
+        key: `test_${step.name}`,
+      },
+    ],
+  };
+};
+
 export const dataSelectorUtils = {
   traverseStepOutputAndReturnMentionTree,
+  getAllStepsMentions,
+  createTestNode,
 };

@@ -9,6 +9,7 @@ import {
   Permission,
   PrincipalType,
   SERVICE_KEY_SECURITY_OPENAPI,
+  StepOutputWithData,
   UpdateFlowVersionRequest,
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
@@ -129,11 +130,7 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
         }),
       },
     },
-    async (
-      request,
-    ): Promise<
-      Record<OpenOpsId, { output: unknown; lastTestDate: string }>
-    > => {
+    async (request): Promise<Record<OpenOpsId, StepOutputWithData>> => {
       const { stepIds } = request.query;
       const { flowVersionId } = request.params;
 

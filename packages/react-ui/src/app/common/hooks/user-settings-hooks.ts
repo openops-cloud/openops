@@ -1,3 +1,4 @@
+import { QueryKeys } from '@/app/constants/query-keys';
 import { authenticationSession } from '@/app/lib/authentication-session';
 import { userSettingsApi } from '@/app/lib/user-settings-api';
 import { useAppStore } from '@/app/store/app-store';
@@ -18,7 +19,7 @@ export const userSettingsHooks = {
 
     const { data, isLoading, error, refetch } = useQuery({
       queryKey: [
-        'user-settings',
+        QueryKeys.userSettings,
         authenticationSession.getProjectId(),
         authenticationSession.getCurrentUser()?.id,
         authenticationSession.getOrganizationId(),

@@ -1,5 +1,6 @@
 import { AxiosRequestConfig } from 'axios';
 import { nanoid } from 'nanoid';
+import qs from 'qs';
 import { Socket } from 'socket.io-client';
 
 import { api } from '@/app/lib/api';
@@ -20,6 +21,7 @@ import {
   MinimalFlow,
   PopulatedFlow,
   SeekPage,
+  StepOutputWithData,
   StepRunResponse,
   TestFlowRunRequestBody,
   UpdateFlowVersionRequest,
@@ -153,10 +155,16 @@ export const flowsApi = {
   },
   getStepTestOutput(flowVersionId: string, stepId: string) {
     return api
-      .get<Record<string, { output: unknown; lastTestDate: string }>>(
+      .get<Record<string, StepOutputWithData>>(
         `/v1/flow-versions/${flowVersionId}/test-output?stepIds=${stepId}`,
       )
       .then((response) => response[stepId]);
+  },
+  getStepTestOutputBulk(flowVersionId: string, stepIds: string[]) {
+    const params = qs.stringify({ stepIds }, { arrayFormat: 'repeat' });
+    return api.get<Record<string, StepOutputWithData>>(
+      `/v1/flow-versions/${flowVersionId}/test-output?${params}`,
+    );
   },
 };
 
