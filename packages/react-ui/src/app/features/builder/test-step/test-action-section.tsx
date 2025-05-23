@@ -4,7 +4,7 @@ import {
   INTERNAL_ERROR_TOAST,
   useToast,
 } from '@openops/components/ui';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import { t } from 'i18next';
 import React, { useEffect, useState } from 'react';
@@ -29,6 +29,7 @@ import {
 } from '@openops/shared';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
+import { QueryKeys } from '@/app/constants/query-keys';
 import { stepTestOutputHooks } from './step-test-output-hooks';
 import { TestSampleDataViewer } from './test-sample-data-viewer';
 import { TestButtonTooltip } from './test-step-tooltip';
@@ -47,6 +48,7 @@ const TestActionSection = React.memo(
     );
     const form = useFormContext<Action>();
     const formValues = form.getValues();
+    const queryClient = useQueryClient();
 
     const [isValid, setIsValid] = useState(false);
 
@@ -77,10 +79,14 @@ const TestActionSection = React.memo(
 
     const { mutate, isPending } = useMutation<StepRunResponse, Error, void>({
       mutationFn: async () => {
-        return flowsApi.testStep(socket, {
+        const response = await flowsApi.testStep(socket, {
           flowVersionId,
           stepName: formValues.name,
         });
+        queryClient.invalidateQueries({
+          queryKey: [QueryKeys.dataSelectorStepTestOutput],
+        });
+        return response;
       },
       onSuccess: (stepResponse) => {
         const formattedResponse = formatUtils.formatStepInputOrOutput(

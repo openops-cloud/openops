@@ -414,18 +414,30 @@ export type UndoHistoryRelevantFlowOperationRequest = Extract<
 const applyMidpanelAction = (state: BuilderState, action: MidpanelAction) => {
   let newMidpanelState: Partial<MidpanelState>;
   const oldDataSelectorSize = state.midpanelState.dataSelectorSize;
+  const oldShowDataSelector = state.midpanelState.showDataSelector;
   const oldShowAiChat = state.midpanelState.showAiChat;
+  const oldAiChatSize = state.midpanelState.aiContainerSize;
 
   switch (action.type) {
-    case 'FOCUS_INPUT_WITH_MENTIONS':
+    case 'FOCUS_INPUT_WITH_MENTIONS': {
+      let newDataSelectorSize;
+      if (
+        oldShowAiChat &&
+        oldAiChatSize !== AI_CHAT_CONTAINER_SIZES.COLLAPSED
+      ) {
+        newDataSelectorSize = DataSelectorSizeState.COLLAPSED;
+      } else if (oldShowDataSelector) {
+        newDataSelectorSize = oldDataSelectorSize;
+      } else {
+        newDataSelectorSize = DataSelectorSizeState.DOCKED;
+      }
+
       newMidpanelState = {
         showDataSelector: true,
-        dataSelectorSize: oldShowAiChat
-          ? DataSelectorSizeState.DOCKED
-          : oldDataSelectorSize,
-        aiContainerSize: AI_CHAT_CONTAINER_SIZES.COLLAPSED,
+        dataSelectorSize: newDataSelectorSize,
       };
       break;
+    }
     case 'DATASELECTOR_MIMIZE_CLICK':
       newMidpanelState = {
         dataSelectorSize: DataSelectorSizeState.COLLAPSED,
