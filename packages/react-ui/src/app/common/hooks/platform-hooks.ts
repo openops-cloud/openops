@@ -1,6 +1,27 @@
 import { QueryKeys } from '@/app/constants/query-keys';
 import { platformApi } from '@/app/lib/platforms-api';
-import { usePrefetchQuery, useSuspenseQuery } from '@tanstack/react-query';
+import {
+  QueryClient,
+  usePrefetchQuery,
+  useQuery,
+  useSuspenseQuery,
+} from '@tanstack/react-query';
+import { compare, validate } from 'compare-versions';
+
+const fetchNewerVersionOptions = {
+  queryKey: [QueryKeys.platformMetadata, QueryKeys.latestRelease],
+  queryFn: async () => {
+    const [platformMetadata, latestRelease] = await Promise.all([
+      platformApi.getPlatformMetadata(),
+      platformApi.getLatestRelease().catch(() => null),
+    ]);
+    return {
+      currentVersion: platformMetadata.version,
+      latestVersion: latestRelease?.name ?? null,
+    };
+  },
+  staleTime: Infinity,
+};
 
 export const platformHooks = {
   prefetchPlatform: () => {
@@ -22,6 +43,33 @@ export const platformHooks = {
       refetch: async () => {
         await query.refetch();
       },
+    };
+  },
+  prefetchNewerVersionInfo: (queryClient: QueryClient) => {
+    queryClient.prefetchQuery(fetchNewerVersionOptions);
+  },
+  useNewerAvailableVersion: () => {
+    const queryResult = useQuery(fetchNewerVersionOptions);
+
+    const { data } = queryResult;
+
+    if (
+      !data?.currentVersion ||
+      !validate(data.currentVersion) ||
+      !data.latestVersion ||
+      !validate(data.latestVersion)
+    ) {
+      return { queryResult, hasNewerVersionAvailable: false };
+    }
+
+    const hasNewerVersionAvailable = compare(
+      data.latestVersion,
+      data.currentVersion,
+      '>',
+    );
+    return {
+      queryResult,
+      hasNewerVersionAvailable,
     };
   },
 };

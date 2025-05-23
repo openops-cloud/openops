@@ -5,4 +5,5 @@ export type MenuLink = {
   label: string;
   icon: React.ComponentType<LucideProps>;
   isComingSoon?: boolean;
+  notificationLabel?: string;
 };

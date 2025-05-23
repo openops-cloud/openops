@@ -11,6 +11,7 @@ import { userSettingsHooks } from '@/app/common/hooks/user-settings-hooks';
 import { SocketProvider } from '@/app/common/providers/socket-provider';
 import { authenticationSession } from '@/app/lib/authentication-session';
 import { navigationUtil } from '@/app/lib/navigation-util';
+import { useQueryClient } from '@tanstack/react-query';
 import { userHooks } from '../hooks/user-hooks';
 
 function isJwtExpired(token: string): boolean {
@@ -36,6 +37,7 @@ export const AllowOnlyLoggedInUserOnlyGuard = ({
 }: AllowOnlyLoggedInUserOnlyGuardProps) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   if (!authenticationSession.isLoggedIn()) {
     navigationUtil.save(location.pathname + location.search);
@@ -54,6 +56,8 @@ export const AllowOnlyLoggedInUserOnlyGuard = ({
 
   projectHooks.prefetchProject();
   platformHooks.prefetchPlatform();
+  platformHooks.prefetchNewerVersionInfo(queryClient);
+
   flagsHooks.useFlags();
   userSettingsHooks.useUserSettings();
   userHooks.useUserMeta();
