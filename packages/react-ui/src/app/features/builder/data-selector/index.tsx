@@ -117,8 +117,7 @@ const getAllStepsMentions = (
   return pathToTargetStep.map((step) => {
     const displayName = `${step.dfsIndex + 1}. ${step.displayName}`;
 
-    if (!step.id) {
-      console.warn('Step ID is missing');
+    if (!step.id || !stepsTestOutput[step.id]) {
       return createTestNode(step, displayName);
     }
 
