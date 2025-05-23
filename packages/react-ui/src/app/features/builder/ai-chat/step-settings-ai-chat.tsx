@@ -1,21 +1,14 @@
-import { QueryKeys } from '@/app/constants/query-keys';
-import { authenticationSession } from '@/app/lib/authentication-session';
-import { Message, useChat } from '@ai-sdk/react';
 import {
   AI_CHAT_CONTAINER_SIZES,
   AiCliChatContainerSizeState,
   cn,
   StepSettingsAiChatContainer,
-  toast,
 } from '@openops/components/ui';
-import { flowHelper, FlowVersion, OpenChatResponse } from '@openops/shared';
-import { useQueryClient } from '@tanstack/react-query';
-import { t } from 'i18next';
-import { nanoid } from 'nanoid';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { FlowVersion } from '@openops/shared';
+import { useCallback } from 'react';
 import { useBuilderStateContext } from '../builder-hooks';
 import { DataSelectorSizeState } from '../data-selector/data-selector-size-togglers';
-import { aiChatApi } from './lib/chat-api';
+import { useStepSettingsAiChat } from './lib/step-settings-ai-chat-hook';
 import { StepSettingsAiConversation } from './step-settings-ai-conversation';
 
 type StepSettingsAiChatProps = {
@@ -23,7 +16,7 @@ type StepSettingsAiChatProps = {
     width: number;
     height: number;
   };
-  selectedStep: string | null;
+  selectedStep: string;
   flowVersion: FlowVersion;
 };
 
@@ -33,21 +26,12 @@ const StepSettingsAiChat = ({
   flowVersion,
 }: StepSettingsAiChatProps) => {
   const [
-    {
-      showDataSelector,
-      dataSelectorSize,
-      aiContainerSize,
-      showAiChat,
-      aiChatProperty,
-    },
+    { showDataSelector, dataSelectorSize, aiContainerSize, showAiChat },
     dispatch,
   ] = useBuilderStateContext((state) => [
     state.midpanelState,
     state.applyMidpanelAction,
   ]);
-
-  const conversationRef = useRef<OpenChatResponse | null>(null);
-  const [chatSessionKey, setChatSessionKey] = useState<string>(nanoid());
 
   const {
     messages,
@@ -55,28 +39,11 @@ const StepSettingsAiChat = ({
     handleInputChange,
     handleSubmit,
     status,
-    setMessages,
-  } = useChat({
-    id: chatSessionKey,
-    api: 'api/v1/ai/chat/conversation',
-    maxSteps: 5,
-    body: {
-      chatId: conversationRef.current?.chatId,
-    },
-    initialMessages: conversationRef.current?.messages as Message[],
-    experimental_prepareRequestBody: () => ({
-      chatId: conversationRef.current?.chatId,
-      message: input,
-    }),
-    headers: {
-      Authorization: `Bearer ${authenticationSession.getToken()}`,
-    },
-  });
-
-  useEffect(() => {
-    conversationRef.current = null;
-    setChatSessionKey(nanoid());
-  }, [selectedStep]);
+    onNewChatClick,
+    enableNewChat,
+    isOpenAiChatPending,
+    isEmpty,
+  } = useStepSettingsAiChat(flowVersion, selectedStep);
 
   const onToggleContainerSizeState = useCallback(
     (size: AiCliChatContainerSizeState) => {
@@ -98,46 +65,6 @@ const StepSettingsAiChat = ({
   const onCloseClick = useCallback(() => {
     dispatch({ type: 'AICHAT_CLOSE_CLICK' });
   }, [dispatch]);
-
-  const queryClient = useQueryClient();
-
-  const [enableNewChat, setEnableNewChat] = useState(true);
-
-  const onNewChatClick = useCallback(async () => {
-    const chatId = conversationRef.current?.chatId;
-    if (!selectedStep || !chatId) {
-      return;
-    }
-
-    setEnableNewChat(false);
-
-    try {
-      await aiChatApi.delete(chatId);
-
-      const stepDetails = flowHelper.getStep(flowVersion, selectedStep);
-      const blockName = stepDetails?.settings?.blockName;
-
-      await queryClient.invalidateQueries({
-        queryKey: [
-          QueryKeys.openChat,
-          flowVersion.flowId,
-          blockName,
-          selectedStep,
-        ],
-      });
-      setMessages([]);
-    } catch (error) {
-      toast({
-        title: t('There was an error creating the new chat, please try again'),
-        duration: 3000,
-      });
-      console.error(
-        `There was an error deleting existing chat and creating a new one: ${error}`,
-      );
-    } finally {
-      setEnableNewChat(true);
-    }
-  }, [flowVersion, queryClient, selectedStep, setMessages]);
 
   const onToggle = useCallback(() => {
     if (
@@ -179,20 +106,14 @@ const StepSettingsAiChat = ({
       handleInputChange={handleInputChange}
       handleSubmit={handleSubmit}
       input={input}
-      isEmpty={!messages.length}
+      isEmpty={isEmpty}
+      stepName={selectedStep}
     >
-      {selectedStep && showAiChat && aiChatProperty && (
-        <StepSettingsAiConversation
-          stepName={selectedStep}
-          flowVersion={flowVersion}
-          property={aiChatProperty}
-          onConversationRetrieved={(conversation) =>
-            (conversationRef.current = conversation)
-          }
-          messages={messages}
-          status={status}
-        />
-      )}
+      <StepSettingsAiConversation
+        messages={messages}
+        status={status}
+        isPending={isOpenAiChatPending}
+      />
     </StepSettingsAiChatContainer>
   );
 };
