@@ -221,13 +221,12 @@ jobs:
         if: vars.ECR_REGION
         env:
           SHA_TAG: ${{ env.REPOSITORY_URI }}:${{ env.SHORT_SHA }}
+          BRANCH_TAG: ${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}
         run: |
-          DIGEST=$(docker buildx imagetools inspect $SHA_TAG --raw | \
-            jq -r  '.manifests[] | select(.platform.architecture == "amd64") | .digest')
-          echo "Got digest for $SHA_TAG: $DIGEST"
-          echo "Pushing single-arch manifest for ${SHA_TAG}@${DIGEST}"
-          docker manifest create ${SHA_TAG}-amd64 ${SHA_TAG}@${DIGEST}
-          docker manifest push ${SHA_TAG}-amd64
+          docker pull $SHA_TAG
+          docker tag $SHA_TAG ${SHA_TAG}-amd64 ${BRANCH_TAG}-amd64
+          docker push ${SHA_TAG}-amd64
+          docker push ${BRANCH_TAG}-amd64
       - name: Build image
         if: ${{ !vars.ECR_REGION }}
         uses: docker/build-push-action@v6
