@@ -6,14 +6,14 @@ import { useQuery } from '@tanstack/react-query';
 export const aiSettingsHooks = {
   useAiSettingsProviders: () => {
     return useQuery<GetProvidersResponse[], Error>({
-      queryKey: ['ai-settings-providers'],
+      queryKey: [QueryKeys.aiSettingsProviders],
       queryFn: () => aiSettingsApi.getProviderOptions(),
       staleTime: Infinity,
     });
   },
   useAiSettings: () => {
     return useQuery<AiConfig[], Error>({
-      queryKey: ['ai-settings'],
+      queryKey: [QueryKeys.aiSettings],
       queryFn: () => aiSettingsApi.getAiSettings(),
     });
   },

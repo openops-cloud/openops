@@ -9,3 +9,8 @@ export const FlowStepTestOutput = Type.Object({
 });
 
 export type FlowStepTestOutput = Static<typeof FlowStepTestOutput>;
+
+export type StepOutputWithData = {
+  output: unknown;
+  lastTestDate: string;
+};

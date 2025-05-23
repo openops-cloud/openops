@@ -1,3 +1,4 @@
+import { QueryKeys } from '@/app/constants/query-keys';
 import {
   DashboardOverview,
   FlowRun,
@@ -17,7 +18,7 @@ export const useDashboardData = () => {
     SeekPage<FlowRun>,
     Error
   >({
-    queryKey: ['home-runs'],
+    queryKey: [QueryKeys.homeRuns],
     queryFn: fetchRuns,
   });
 
@@ -26,13 +27,13 @@ export const useDashboardData = () => {
     isLoading: isLoadingFlows,
     refetch: refetchFlows,
   } = useQuery<SeekPage<PopulatedFlow>, Error>({
-    queryKey: ['home-flows-recent'],
+    queryKey: [QueryKeys.homeFlowsRecent],
     queryFn: () => fetchFlows(10),
   });
 
   const { data: existingFlowsResponse, isLoading: isLoadingExistingFlows } =
     useQuery<SeekPage<PopulatedFlow>, Error>({
-      queryKey: ['home-flows', flowsResponse],
+      queryKey: [QueryKeys.homeFlows, flowsResponse],
       enabled: !!flowsResponse,
       queryFn: () => fetchFlows(1),
     });
@@ -52,7 +53,7 @@ export const useAnalyticsOverview = () => {
     DashboardOverview,
     Error
   >({
-    queryKey: ['home-analytics-overview'],
+    queryKey: [QueryKeys.homeAnalyticsOverview],
     queryFn: homeApi.getAnalyticsOverview,
   });
 
@@ -67,7 +68,7 @@ export const useWorkflowsOverview = (
     WorkflowStats,
     Error
   >({
-    queryKey: ['home-workflows-overview'],
+    queryKey: [QueryKeys.homeWorkflowsOverview],
     queryFn: () =>
       homeApi.getWorkflowsdOverview({ createdAfter, createdBefore }),
   });

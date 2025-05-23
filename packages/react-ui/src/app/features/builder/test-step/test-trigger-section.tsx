@@ -19,6 +19,7 @@ import { AlertCircle } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 
+import { QueryKeys } from '@/app/constants/query-keys';
 import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
 import { triggerEventsApi } from '@/app/features/flows/lib/trigger-events-api';
 import { formatUtils } from '@/app/lib/utils';
@@ -201,7 +202,7 @@ const TestTriggerSection = React.memo(
     }
 
     const { data: pollResults, refetch } = useQuery<SeekPage<TriggerEvent>>({
-      queryKey: ['triggerEvents', flowVersionId],
+      queryKey: [QueryKeys.triggerEvents, flowVersionId],
       queryFn: () =>
         triggerEventsApi.list({
           flowId: flowId,

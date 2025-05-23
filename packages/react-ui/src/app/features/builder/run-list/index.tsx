@@ -1,3 +1,4 @@
+import { QueryKeys } from '@/app/constants/query-keys';
 import {
   CardList,
   CardListEmpty,
@@ -33,7 +34,7 @@ const FlowRecentRunsList = React.memo(
       isLoading,
       isError,
     } = useQuery<SeekPage<FlowRun>, Error>({
-      queryKey: ['flow-runs', flow.id],
+      queryKey: [QueryKeys.flowRuns, flow.id],
       queryFn: () =>
         flowRunsApi.list({
           flowId: [flow.id],
