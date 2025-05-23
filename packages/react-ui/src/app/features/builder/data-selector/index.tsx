@@ -140,12 +140,9 @@ const DataSelector = ({
   const stepIds: string[] = pathToTargetStep.map((p) => p.id!);
   console.log('stepIds', stepIds);
 
-  // --- Caching logic for optimized fetching ---
   const [_, forceRerender] = useState(0); // for cache updates
-  // On first load, fetch all. After that, only fetch stale steps.
   const [initialLoad, setInitialLoad] = useState(true);
 
-  // Helper to fetch and cache step data
   const fetchAndCacheStepData = async (ids: string[]) => {
     if (!ids.length) return {};
     const stepTestOutput = await flowsApi.getStepTestOutputBulk(
@@ -161,7 +158,6 @@ const DataSelector = ({
     return stepTestOutput;
   };
 
-  // Main data fetching logic
   const { isLoading } = useQuery({
     queryKey: [QueryKeys.dataSelectorStepTestOutput, flowVersionId, ...stepIds],
     queryFn: async () => {
@@ -170,7 +166,7 @@ const DataSelector = ({
         setInitialLoad(false);
         return fetchAndCacheStepData(stepIds);
       } else {
-        // Only fetch for stale steps
+        // todo -> Only fetch for stale steps or steps that don't have data in the cache !!
         const staleIds = stepIds.filter((id) =>
           stepTestOutputCache.isStale(id),
         );
