@@ -37,32 +37,54 @@ export const platformHooks = {
     };
   },
   prefetchPlatformMetadata: (queryClient: QueryClient) => {
-    queryClient.prefetchQuery(fetchPlatformMetadataOptions);
-  },
-  usePlatformVersion: () => {
-    return useQuery({
-      ...fetchPlatformMetadataOptions,
-      select: (data) => data.version,
+    queryClient.prefetchQuery({
+      queryKey: [QueryKeys.platformMetadata],
+      queryFn: platformApi.getPlatformMetadata,
+      staleTime: Infinity,
     });
   },
-  useHasNewerAvailableVersion: () => {
-    const { data: latestReleaseData } = useQuery({
-      queryKey: [QueryKeys.latestRelease],
-      queryFn: platformApi.getLatestRelease,
+  prefetchLatestRelease: (queryClient: QueryClient) => {
+    queryClient.prefetchQuery({
+      queryKey: [QueryKeys.platformMetadata],
+      queryFn: platformApi.getPlatformMetadata,
+      staleTime: Infinity,
+    });
+  },
+  useNewerAvailableVersion: () => {
+    const queryResult = useQuery({
+      queryKey: [QueryKeys.platformMetadata, QueryKeys.latestRelease],
+      queryFn: async () => {
+        const [platformMetadata, latestRelease] = await Promise.all([
+          platformApi.getPlatformMetadata(),
+          platformApi.getLatestRelease().catch(() => null),
+        ]);
+        return {
+          currentVersion: platformMetadata.version,
+          latestVersion: latestRelease?.name ?? null,
+        };
+      },
       staleTime: Infinity,
     });
 
-    const { data: platformVersionData } = platformHooks.usePlatformVersion();
+    const { data } = queryResult;
 
     if (
-      !latestReleaseData?.name ||
-      !validate(latestReleaseData.name) ||
-      !platformVersionData ||
-      !validate(platformVersionData)
+      !data?.currentVersion ||
+      !validate(data.currentVersion) ||
+      !data.latestVersion ||
+      !validate(data.latestVersion)
     ) {
-      return false;
+      return { queryResult, hasNewerVersionAvailable: false };
     }
 
-    return compare(latestReleaseData.name, platformVersionData, '>');
+    const hasNewerVersionAvailable = compare(
+      data.latestVersion,
+      data.currentVersion,
+      '>',
+    );
+    return {
+      queryResult,
+      hasNewerVersionAvailable,
+    };
   },
 };

@@ -96,13 +96,15 @@ const SideMenuFooter = ({ isMinimized }: Props) => {
     });
   }, [navigate]);
 
-  const hasNewerAvailableVersion = platformHooks.useHasNewerAvailableVersion();
-  const { data: currentVersion } = platformHooks.usePlatformVersion();
+  const {
+    queryResult: { data },
+    hasNewerVersionAvailable,
+  } = platformHooks.useNewerAvailableVersion();
 
   return (
     <MenuFooter
       settingsLink={
-        hasNewerAvailableVersion ? newerVersionSettingsLink : settingsLink
+        hasNewerVersionAvailable ? newerVersionSettingsLink : settingsLink
       }
       user={user}
       onLogout={onLogout}
@@ -117,8 +119,8 @@ const SideMenuFooter = ({ isMinimized }: Props) => {
         onCloudLogin,
         logoUrl: branding.logos.logoIconPositiveUrl,
       }}
-      currentVersion={currentVersion}
-      hasNewerAvailableVersion={hasNewerAvailableVersion}
+      currentVersion={data?.currentVersion}
+      hasNewerVersionAvailable={hasNewerVersionAvailable}
     >
       <AiAssistantButton />
     </MenuFooter>

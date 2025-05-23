@@ -13,12 +13,9 @@ import { Link } from 'react-router-dom';
 
 const AboutSettingsPage = () => {
   const {
-    data: version,
-    error,
-    isLoading,
-  } = platformHooks.usePlatformVersion();
-
-  const hasNewerAvailableVersion = platformHooks.useHasNewerAvailableVersion();
+    queryResult: { data, isLoading, error },
+    hasNewerVersionAvailable,
+  } = platformHooks.useNewerAvailableVersion();
 
   return (
     <Card className="w-full">
@@ -34,7 +31,9 @@ const AboutSettingsPage = () => {
             </span>
             {isLoading && <LoadingSpinner className="w-4 h-4" />}
             {error && <span>{t('Error loading version')}</span>}
-            {version && <span className="text-base font-bold">{version}</span>}
+            {data && (
+              <span className="text-base font-bold">{data.currentVersion}</span>
+            )}
           </div>
 
           <Link
@@ -43,7 +42,7 @@ const AboutSettingsPage = () => {
             rel="noopener noreferrer"
             className="self-end"
           >
-            <Button disabled={!hasNewerAvailableVersion}>
+            <Button disabled={!hasNewerVersionAvailable}>
               {t('Learn how to update')}
             </Button>
           </Link>

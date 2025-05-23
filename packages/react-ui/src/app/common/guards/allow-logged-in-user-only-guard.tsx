@@ -57,6 +57,8 @@ export const AllowOnlyLoggedInUserOnlyGuard = ({
   projectHooks.prefetchProject();
   platformHooks.prefetchPlatform();
   platformHooks.prefetchPlatformMetadata(queryClient);
+  platformHooks.prefetchLatestRelease(queryClient);
+
   flagsHooks.useFlags();
   userSettingsHooks.useUserSettings();
   userHooks.useUserMeta();

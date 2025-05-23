@@ -16,7 +16,7 @@ export type MenuFooterProps = {
   onLogout: () => void;
   isMinimized: boolean;
   cloudConfig: OpenOpsCloudConfig;
-  hasNewerAvailableVersion: boolean;
+  hasNewerVersionAvailable: boolean;
   currentVersion?: string;
   children?: ReactNode;
 };
@@ -27,11 +27,11 @@ const MenuFooter = ({
   onLogout,
   isMinimized,
   cloudConfig,
-  hasNewerAvailableVersion,
+  hasNewerVersionAvailable,
   currentVersion,
   children,
 }: MenuFooterProps) => {
-  const newerVersionNotification = hasNewerAvailableVersion
+  const newerVersionNotification = hasNewerVersionAvailable
     ? t(
         'Current version: {currentVersion}. Newer version is available, go to settings to update',
         {
@@ -74,7 +74,7 @@ const MenuFooter = ({
             Icon={settingsLink.icon}
             iconClassName="size-[21px]"
             className="flex items-center justify-center ml-0 p-0 @[180px]:p-0 size-9 @[180px]:size-9 rounded-full @[180px]:rounded-full bg-accent dark:bg-accent hover:bg-input dark:hover:bg-accent/70"
-            hasNotification={hasNewerAvailableVersion}
+            hasNotification={hasNewerVersionAvailable}
           ></MenuFooterNavigationItem>
         </div>
         {!isMinimized && children}

@@ -93,7 +93,7 @@ const footerWrapperProps = {
 const FooterWrapperConnectedToCloud = (
   <MenuFooter
     {...footerWrapperProps}
-    hasNewerAvailableVersion={false}
+    hasNewerVersionAvailable={false}
     user={mockUser}
     cloudConfig={{
       ...footerWrapperProps.cloudConfig,
@@ -105,7 +105,7 @@ const FooterWrapperConnectedToCloud = (
 const AiFooter = (isMinimized: boolean, cloudConfigOverride?: any) => (
   <MenuFooter
     {...footerWrapperProps}
-    hasNewerAvailableVersion={false}
+    hasNewerVersionAvailable={false}
     user={mockUser}
     isMinimized={isMinimized}
     cloudConfig={cloudConfigOverride || footerWrapperProps.cloudConfig}
@@ -124,7 +124,7 @@ const FooterWrapperNotConnectedToCloud = (
   <MenuFooter
     {...footerWrapperProps}
     user={mockUser}
-    hasNewerAvailableVersion={false}
+    hasNewerVersionAvailable={false}
   />
 );
 
@@ -135,7 +135,7 @@ const SidebarWrapper = ({
   isAiEnabled,
   className,
   cloudConfigOverride,
-  hasNewerAvailableVersion = false,
+  hasNewerVersionAvailable = false,
   currentVersion,
 }: {
   isMinimized: boolean;
@@ -144,7 +144,7 @@ const SidebarWrapper = ({
   isAiEnabled: boolean;
   className?: string;
   cloudConfigOverride?: any;
-  hasNewerAvailableVersion?: boolean;
+  hasNewerVersionAvailable?: boolean;
   currentVersion?: string;
 }) => {
   const footer = isAiEnabled
@@ -159,16 +159,16 @@ const SidebarWrapper = ({
       <MenuFooter
         {...footerWrapperProps}
         cloudConfig={cloudConfigOverride}
-        hasNewerAvailableVersion={false}
+        hasNewerVersionAvailable={false}
         user={mockUser}
       />
     );
-  } else if (hasNewerAvailableVersion) {
+  } else if (hasNewerVersionAvailable) {
     MenuFooterWrapped = (
       <MenuFooter
         {...footerWrapperProps}
         user={mockUser}
-        hasNewerAvailableVersion={true}
+        hasNewerVersionAvailable={true}
         currentVersion={currentVersion}
       />
     );
@@ -228,7 +228,7 @@ export const Default: Story = {
     isMinimized: false,
     isFullCatalog: false,
     isAiEnabled: false,
-    hasNewerAvailableVersion: false,
+    hasNewerVersionAvailable: false,
     currentVersion: '0.2.8',
   },
   render: (args, context) => (
@@ -240,7 +240,7 @@ export const NewerVersionAvailable: Story = {
   ...Default,
   args: {
     ...Default.args,
-    hasNewerAvailableVersion: true,
+    hasNewerVersionAvailable: true,
     currentVersion: '0.2.8',
   },
 };
