@@ -184,9 +184,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
       (
         aiConfigService.getActiveConfigWithApiKey as jest.Mock
       ).mockResolvedValue(mockAiConfig);
-      decryptStringMock.mockReturnValue(
-        'decrypted-api-key',
-      );
+      decryptStringMock.mockReturnValue('decrypted-api-key');
       (getAiProviderLanguageModel as jest.Mock).mockResolvedValue(
         mockLanguageModel,
       );
