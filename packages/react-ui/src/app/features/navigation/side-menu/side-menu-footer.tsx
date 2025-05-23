@@ -3,6 +3,7 @@ import { t } from 'i18next';
 import { Wrench } from 'lucide-react';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
+import { QueryKeys } from '@/app/constants/query-keys';
 import {
   OPENOPS_CONNECT_TEMPLATES_LOGOUT_URL,
   OPENOPS_CONNECT_TEMPLATES_URL,
@@ -52,7 +53,7 @@ const SideMenuFooter = ({ isMinimized }: Props) => {
       );
     }
     queryClient.invalidateQueries({
-      queryKey: ['cloud-user-info'],
+      queryKey: [QueryKeys.cloudUserInfo],
     });
     setCloudUser(null);
   }, [queryClient, setCloudUser]);

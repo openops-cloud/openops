@@ -12,6 +12,7 @@ import { flowHelper, FlowVersion, OpenChatResponse } from '@openops/shared';
 import { useQuery } from '@tanstack/react-query';
 import { useCallback } from 'react';
 import { useBuilderStateContext } from '../builder-hooks';
+import { QueryKeys } from '@/app/constants/query-keys';
 import { aiChatApi } from './lib/chat-api';
 
 type ConversationProps = {
@@ -42,7 +43,7 @@ const StepSettingsAiConversation = ({
   const blockName = stepDetails?.settings?.blockName;
 
   const { isPending, data } = useQuery({
-    queryKey: ['openChat', flowVersion.flowId, blockName, stepName],
+    queryKey: [QueryKeys.openChat, flowVersion.flowId, blockName, stepName],
     queryFn: async () => {
       if (!stepDetails) {
         throw new Error('Step not found');
