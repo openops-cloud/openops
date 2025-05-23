@@ -16,7 +16,7 @@ export function accountProperty() {
 
 export function accountSingleSelectProperty() {
   return Property.Dropdown({
-    displayName: 'Accounts',
+    displayName: 'Account',
     description: 'A list of available Umbrella accounts',
     refreshers: ['auth'],
     required: true,

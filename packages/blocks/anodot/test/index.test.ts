@@ -25,7 +25,7 @@ describe('block declaration tests', () => {
   });
 
   test('should return block with correct number of actions', () => {
-    expect(Object.keys(anodot.actions()).length).toBe(7);
+    expect(Object.keys(anodot.actions()).length).toBe(8);
     expect(anodot.actions()).toMatchObject({
       get_recommendations_predefined: {
         name: 'get_recommendations_predefined',
@@ -53,6 +53,10 @@ describe('block declaration tests', () => {
       },
       custom_anodot_api_action: {
         name: 'custom_anodot_api_action',
+        requireAuth: true,
+      },
+      anodot_get_user_accounts: {
+        name: 'anodot_get_user_accounts',
         requireAuth: true,
       },
     });
