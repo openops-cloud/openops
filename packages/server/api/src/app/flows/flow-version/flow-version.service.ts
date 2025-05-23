@@ -29,6 +29,7 @@ import {
   Trigger,
   TriggerType,
   UserId,
+  validateTriggerImport,
 } from '@openops/shared';
 import { TSchema, Type } from '@sinclair/typebox';
 import { TypeCompiler } from '@sinclair/typebox/compiler';
@@ -107,6 +108,21 @@ export const flowVersionService = {
       }
 
       case FlowOperationType.IMPORT_FLOW: {
+        const workflowImport = userOperation.request.trigger as Trigger;
+
+        const validationResult = validateTriggerImport(workflowImport);
+
+        if (!validationResult.success) {
+          throw new ApplicationError({
+            code: ErrorCode.VALIDATION,
+            params: {
+              message: `Invalid workflow structure: ${validationResult.errors?.join(
+                ', ',
+              )}`,
+            },
+          });
+        }
+
         operations = handleImportFlowOperation(
           flowVersion,
           userOperation.request,

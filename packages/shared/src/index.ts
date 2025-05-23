@@ -46,6 +46,7 @@ export * from './lib/flows/step-run';
 export * from './lib/flows/trigger-events/trigger-event';
 export * from './lib/flows/trigger-events/trigger-events-dto';
 export * from './lib/flows/triggers/trigger';
+export * from './lib/flows/workflow-import-schema';
 export * from './lib/forms';
 export * from './lib/invitations';
 export * from './lib/license-keys';

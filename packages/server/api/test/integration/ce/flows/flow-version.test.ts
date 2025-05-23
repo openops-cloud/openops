@@ -1,8 +1,11 @@
 import {
+  FlowOperationType,
   FlowVersionState,
+  ImportFlowRequest,
   openOpsId,
   PrincipalType,
   Trigger,
+  validateTriggerImport,
 } from '@openops/shared';
 import { FastifyInstance } from 'fastify';
 import { StatusCodes } from 'http-status-codes';
@@ -16,6 +19,16 @@ import {
   mockBasicSetup,
 } from '../../../helpers/mocks';
 
+jest.mock('@openops/shared', () => {
+  const original = jest.requireActual('@openops/shared');
+  return {
+    ...original,
+    validateTriggerImport: jest.fn(),
+  };
+});
+
+const mockValidateTriggerImport = validateTriggerImport as jest.Mock;
+
 let app: FastifyInstance | null = null;
 
 beforeAll(async () => {
@@ -26,6 +39,14 @@ beforeAll(async () => {
 afterAll(async () => {
   await databaseConnection().destroy();
   await app?.close();
+});
+
+beforeEach(() => {
+  mockValidateTriggerImport.mockReturnValue({ success: true });
+});
+
+afterEach(() => {
+  jest.clearAllMocks();
 });
 
 describe('Flow Version API', () => {
@@ -56,8 +77,7 @@ describe('Flow Version API', () => {
         method: 'POST',
         url: `/v1/flow-versions/${mockFlowVersion.id}/trigger`,
         headers: {
-          authorization: `Bearer ${mockToken}`,
-        },
+          authorization: `******        },
         body: {
           flowId: mockFlow.id,
           valid: true,
@@ -94,8 +114,7 @@ describe('Flow Version API', () => {
         method: 'POST',
         url: `/v1/flow-versions/${mockFlowVersion.id}/trigger`,
         headers: {
-          authorization: `Bearer ${mockToken}`,
-        },
+          authorization: `******        },
         body: {
           flowId: openOpsId(),
           valid: true,
@@ -136,8 +155,7 @@ describe('Flow Version API', () => {
         method: 'POST',
         url: `/v1/flow-versions/${mockFlowVersion.id}/trigger`,
         headers: {
-          authorization: `Bearer ${mockToken}`,
-        },
+          authorization: `******        },
         body: {
           flowId: mockFlow.id,
           valid: true,
@@ -151,6 +169,103 @@ describe('Flow Version API', () => {
       expect(responseBody?.message).toBe(
         'The flow and version are not associated with the project',
       );
+    });
+  });
+
+  describe('Flow version operations', () => {
+    it('Should validate trigger import when importing a flow', async () => {
+      const { mockOwner, mockProject } = await mockBasicSetup();
+
+      const mockFlow = createMockFlow({
+        projectId: mockProject.id,
+      });
+      await databaseConnection().getRepository('flow').save([mockFlow]);
+
+      const mockFlowVersion = createMockFlowVersion({
+        flowId: mockFlow.id,
+        state: FlowVersionState.DRAFT,
+      });
+      await databaseConnection()
+        .getRepository('flow_version')
+        .save([mockFlowVersion]);
+
+      const mockToken = await generateMockToken({
+        id: mockOwner.id,
+        projectId: mockProject.id,
+        type: PrincipalType.USER,
+      });
+
+      const mockTrigger = createMockTrigger();
+      const response = await app?.inject({
+        method: 'POST',
+        url: `/v1/flow-versions/${mockFlowVersion.id}/operations`,
+        headers: {
+          authorization: `******        },
+        body: {
+          type: FlowOperationType.IMPORT_FLOW,
+          request: {
+            displayName: 'Imported Workflow',
+            description: 'An imported workflow',
+            trigger: mockTrigger,
+          } as ImportFlowRequest,
+        },
+      });
+
+      expect(response?.statusCode).toBe(StatusCodes.OK);
+      expect(mockValidateTriggerImport).toHaveBeenCalledWith(mockTrigger);
+    });
+
+    it('Should return validation error when trigger import is invalid', async () => {
+      mockValidateTriggerImport.mockReturnValue({
+        success: false,
+        errors: ['Invalid structure', 'Missing required fields'],
+      });
+
+      const { mockOwner, mockProject } = await mockBasicSetup();
+
+      const mockFlow = createMockFlow({
+        projectId: mockProject.id,
+      });
+      await databaseConnection().getRepository('flow').save([mockFlow]);
+
+      const mockFlowVersion = createMockFlowVersion({
+        flowId: mockFlow.id,
+        state: FlowVersionState.DRAFT,
+      });
+      await databaseConnection()
+        .getRepository('flow_version')
+        .save([mockFlowVersion]);
+
+      const mockToken = await generateMockToken({
+        id: mockOwner.id,
+        projectId: mockProject.id,
+        type: PrincipalType.USER,
+      });
+
+      const invalidTrigger = {
+        type: 'EMPTY',
+      } as Trigger;
+
+      const response = await app?.inject({
+        method: 'POST',
+        url: `/v1/flow-versions/${mockFlowVersion.id}/operations`,
+        headers: {
+          authorization: `******        },
+        body: {
+          type: FlowOperationType.IMPORT_FLOW,
+          request: {
+            displayName: 'Invalid Workflow',
+            description: 'A workflow with invalid structure',
+            trigger: invalidTrigger,
+          } as ImportFlowRequest,
+        },
+      });
+
+      expect(response?.statusCode).toBe(StatusCodes.BAD_REQUEST);
+      const responseBody = JSON.parse(response?.body || '{}');
+      expect(responseBody.message).toContain('Invalid workflow structure');
+      expect(responseBody.message).toContain('Invalid structure, Missing required fields');
+      expect(mockValidateTriggerImport).toHaveBeenCalledWith(invalidTrigger);
     });
   });
 
@@ -203,8 +318,7 @@ describe('Flow Version API', () => {
         method: 'GET',
         url: `/v1/flow-versions?connectionName=testConnection`,
         headers: {
-          authorization: `Bearer ${mockToken}`,
-        },
+          authorization: `******        },
       });
 
       expect(response?.statusCode).toBe(StatusCodes.OK);
@@ -232,8 +346,7 @@ describe('Flow Version API', () => {
         method: 'GET',
         url: `/v1/flow-versions?connectionName=nonExistentConnection`,
         headers: {
-          authorization: `Bearer ${mockToken}`,
-        },
+          authorization: `******        },
       });
 
       expect(response?.statusCode).toBe(StatusCodes.OK);
@@ -290,8 +403,7 @@ describe('Flow Version API', () => {
         method: 'GET',
         url: `/v1/flow-versions?connectionName=testConnection`,
         headers: {
-          authorization: `Bearer ${mockToken}`,
-        },
+          authorization: `******        },
       });
 
       expect(response?.statusCode).toBe(StatusCodes.OK);
