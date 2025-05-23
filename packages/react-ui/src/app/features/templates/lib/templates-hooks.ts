@@ -2,6 +2,7 @@ import { BlockCategory, FlagId, FlowTemplateMetadata } from '@openops/shared';
 import { useQuery } from '@tanstack/react-query';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
+import { QueryKeys } from '@/app/constants/query-keys';
 import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
 import {
   GetTemplatesParams,
@@ -53,7 +54,7 @@ export const templatesHooks = {
 
     return useQuery<FlowTemplateMetadata[], Error>({
       queryKey: [
-        'flow-templates',
+        QueryKeys.flowTemplates,
         search,
         ...services,
         ...domains,

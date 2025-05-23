@@ -1,4 +1,5 @@
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
+import { QueryKeys } from '@/app/constants/query-keys';
 import { Action, FlagId, isEmpty, isNil, Trigger } from '@openops/shared';
 import { useQuery } from '@tanstack/react-query';
 import { UseFormReturn } from 'react-hook-form';
@@ -32,7 +33,7 @@ export const stepTestOutputHooks = {
         : fallbackDataInput ?? {};
 
     return useQuery({
-      queryKey: ['stepTestOutput', flowVersionId, stepId],
+      queryKey: [QueryKeys.stepTestOutput, flowVersionId, stepId],
       queryFn: async () => {
         if (!stepId || !useNewExternalTestData) {
           return resolveFallbackData();
