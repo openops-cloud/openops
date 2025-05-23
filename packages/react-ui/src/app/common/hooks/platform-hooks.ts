@@ -8,9 +8,18 @@ import {
 } from '@tanstack/react-query';
 import { compare, validate } from 'compare-versions';
 
-const fetchPlatformMetadataOptions = {
-  queryKey: [QueryKeys.platformMetadata],
-  queryFn: platformApi.getPlatformMetadata,
+const fetchNewerVersionOptions = {
+  queryKey: [QueryKeys.platformMetadata, QueryKeys.latestRelease],
+  queryFn: async () => {
+    const [platformMetadata, latestRelease] = await Promise.all([
+      platformApi.getPlatformMetadata(),
+      platformApi.getLatestRelease().catch(() => null),
+    ]);
+    return {
+      currentVersion: platformMetadata.version,
+      latestVersion: latestRelease?.name ?? null,
+    };
+  },
   staleTime: Infinity,
 };
 
@@ -36,35 +45,11 @@ export const platformHooks = {
       },
     };
   },
-  prefetchPlatformMetadata: (queryClient: QueryClient) => {
-    queryClient.prefetchQuery({
-      queryKey: [QueryKeys.platformMetadata],
-      queryFn: platformApi.getPlatformMetadata,
-      staleTime: Infinity,
-    });
-  },
-  prefetchLatestRelease: (queryClient: QueryClient) => {
-    queryClient.prefetchQuery({
-      queryKey: [QueryKeys.platformMetadata],
-      queryFn: platformApi.getPlatformMetadata,
-      staleTime: Infinity,
-    });
+  prefetchNewerVersionInfo: (queryClient: QueryClient) => {
+    queryClient.prefetchQuery(fetchNewerVersionOptions);
   },
   useNewerAvailableVersion: () => {
-    const queryResult = useQuery({
-      queryKey: [QueryKeys.platformMetadata, QueryKeys.latestRelease],
-      queryFn: async () => {
-        const [platformMetadata, latestRelease] = await Promise.all([
-          platformApi.getPlatformMetadata(),
-          platformApi.getLatestRelease().catch(() => null),
-        ]);
-        return {
-          currentVersion: platformMetadata.version,
-          latestVersion: latestRelease?.name ?? null,
-        };
-      },
-      staleTime: Infinity,
-    });
+    const queryResult = useQuery(fetchNewerVersionOptions);
 
     const { data } = queryResult;
 
