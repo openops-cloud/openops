@@ -166,12 +166,14 @@ const DataSelector = ({
         setInitialLoad(false);
         return fetchAndCacheStepData(stepIds);
       } else {
-        // todo -> Only fetch for stale steps or steps that don't have data in the cache !!
-        const staleIds = stepIds.filter((id) =>
-          stepTestOutputCache.isStale(id),
+        // Only fetch for stale steps or steps that don't have data in the cache
+        const idsToFetch = stepIds.filter(
+          (id) =>
+            stepTestOutputCache.isStale(id) ||
+            stepTestOutputCache.getStepData(id) === undefined,
         );
-        if (staleIds.length) {
-          return fetchAndCacheStepData(staleIds);
+        if (idsToFetch.length) {
+          return fetchAndCacheStepData(idsToFetch);
         }
         return {};
       }
@@ -180,12 +182,10 @@ const DataSelector = ({
       !!useNewExternalTestData && isDataSelectorVisible && stepIds.length > 0,
   });
 
-  // Compose mentions from cache if flag is on
   const mentions = useMemo(() => {
     if (!useNewExternalTestData) {
       return mentionsFromCurrentSelectedData;
     }
-    // Compose mentions from cache
     const stepTestOutput: Record<string, any> = {};
     stepIds.forEach((id) => {
       const cached = stepTestOutputCache.getStepData(id);
@@ -205,7 +205,6 @@ const DataSelector = ({
     initialLoad,
   ]);
 
-  // Expanded state handlers
   const getExpanded = (nodeKey: string) =>
     stepTestOutputCache.getExpanded(nodeKey);
   const setExpanded = (nodeKey: string, expanded: boolean) => {
@@ -215,7 +214,6 @@ const DataSelector = ({
 
   // Auto-expand/collapse nodes on search term change
   useEffect(() => {
-    // Only run if searchTerm changes
     if (searchTerm) {
       // Expand all nodes at depth 0 and 1
       const expandNodes = (nodes: MentionTreeNode[], depth: number) => {
