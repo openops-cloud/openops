@@ -1,6 +1,6 @@
+import { QueryKeys } from '@/app/constants/query-keys';
 import { platformApi } from '@/app/lib/platforms-api';
 import { usePrefetchQuery, useSuspenseQuery } from '@tanstack/react-query';
-import { QueryKeys } from '@/app/constants/query-keys';
 
 export const platformHooks = {
   prefetchPlatform: () => {

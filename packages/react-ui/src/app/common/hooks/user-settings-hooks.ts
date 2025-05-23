@@ -1,5 +1,5 @@
-import { authenticationSession } from '@/app/lib/authentication-session';
 import { QueryKeys } from '@/app/constants/query-keys';
+import { authenticationSession } from '@/app/lib/authentication-session';
 import { userSettingsApi } from '@/app/lib/user-settings-api';
 import { useAppStore } from '@/app/store/app-store';
 import { isNil, UserSettingsDefinition } from '@openops/shared';

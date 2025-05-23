@@ -1,5 +1,5 @@
-import { authenticationSession } from '@/app/lib/authentication-session';
 import { QueryKeys } from '@/app/constants/query-keys';
+import { authenticationSession } from '@/app/lib/authentication-session';
 import { Message, useChat } from '@ai-sdk/react';
 import {
   AI_CHAT_CONTAINER_SIZES,
@@ -118,7 +118,12 @@ const StepSettingsAiChat = ({
       const blockName = stepDetails?.settings?.blockName;
 
       await queryClient.invalidateQueries({
-        queryKey: [QueryKeys.openChat, flowVersion.flowId, blockName, selectedStep],
+        queryKey: [
+          QueryKeys.openChat,
+          flowVersion.flowId,
+          blockName,
+          selectedStep,
+        ],
       });
       setMessages([]);
     } catch (error) {
