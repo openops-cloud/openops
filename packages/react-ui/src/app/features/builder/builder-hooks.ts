@@ -420,14 +420,22 @@ const applyMidpanelAction = (state: BuilderState, action: MidpanelAction) => {
 
   switch (action.type) {
     case 'FOCUS_INPUT_WITH_MENTIONS':
+      // eslint-disable-next-line no-case-declarations
+      let newDataSelectorSize;
+      if (
+        oldShowAiChat &&
+        oldAiChatSize !== AI_CHAT_CONTAINER_SIZES.COLLAPSED
+      ) {
+        newDataSelectorSize = DataSelectorSizeState.COLLAPSED;
+      } else if (oldShowDataSelector) {
+        newDataSelectorSize = oldDataSelectorSize;
+      } else {
+        newDataSelectorSize = DataSelectorSizeState.DOCKED;
+      }
+
       newMidpanelState = {
         showDataSelector: true,
-        dataSelectorSize:
-          oldShowAiChat && oldAiChatSize !== AI_CHAT_CONTAINER_SIZES.COLLAPSED
-            ? DataSelectorSizeState.COLLAPSED
-            : oldShowDataSelector
-            ? oldDataSelectorSize
-            : DataSelectorSizeState.DOCKED,
+        dataSelectorSize: newDataSelectorSize,
       };
       break;
     case 'DATASELECTOR_MIMIZE_CLICK':
