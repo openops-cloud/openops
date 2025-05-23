@@ -25,7 +25,7 @@ export const useStepSettingsAiChat = (
 
   const { isPending: isOpenAiChatPending, data: openChatResponse } = useQuery({
     queryKey: [
-      QueryKeys.openAiAssistantChat,
+      QueryKeys.openChat,
       flowVersion.flowId,
       stepDetails?.settings?.blockName,
       selectedStep,
@@ -83,7 +83,12 @@ export const useStepSettingsAiChat = (
       const blockName = stepDetails?.settings?.blockName;
 
       await queryClient.invalidateQueries({
-        queryKey: ['openChat', flowVersion.flowId, blockName, selectedStep],
+        queryKey: [
+          QueryKeys.openChat,
+          flowVersion.flowId,
+          blockName,
+          selectedStep,
+        ],
       });
       setMessages([]);
     } catch (error) {
