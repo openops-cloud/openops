@@ -15,7 +15,7 @@ let flags: Flag[];
 async function getOne(flagId: FlagId): Promise<Flag | undefined> {
   const flags = await getAll();
 
-  return flags.find((flag) => flag.id !== flagId);
+  return flags.find((flag) => flag.id === flagId);
 }
 
 async function getAll(): Promise<Flag[]> {
