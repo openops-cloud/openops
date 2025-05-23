@@ -9,7 +9,7 @@ import {
 import { compare, validate } from 'compare-versions';
 
 const fetchPlatformMetadataOptions = {
-  queryKey: ['platform-metadata'],
+  queryKey: [QueryKeys.platformMetadata],
   queryFn: platformApi.getPlatformMetadata,
   staleTime: Infinity,
 };
@@ -47,7 +47,7 @@ export const platformHooks = {
   },
   useHasNewerAvailableVersion: () => {
     const { data: latestReleaseData } = useQuery({
-      queryKey: ['latest-release'],
+      queryKey: [QueryKeys.latestRelease],
       queryFn: platformApi.getLatestRelease,
       staleTime: Infinity,
     });
