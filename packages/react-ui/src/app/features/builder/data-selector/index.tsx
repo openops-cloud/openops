@@ -9,16 +9,7 @@ import { t } from 'i18next';
 import { SearchXIcon } from 'lucide-react';
 import { useCallback, useState } from 'react';
 
-import {
-  Action,
-  FlagId,
-  flowHelper,
-  isEmpty,
-  isNil,
-  StepOutputWithData,
-  StepWithIndex,
-  Trigger,
-} from '@openops/shared';
+import { FlagId, flowHelper, isNil } from '@openops/shared';
 
 import { useBuilderStateContext } from '../builder-hooks';
 
@@ -33,29 +24,6 @@ import {
   DataSelectorSizeTogglers,
 } from './data-selector-size-togglers';
 import { dataSelectorUtils, MentionTreeNode } from './data-selector-utils';
-
-const createTestNode = (
-  step: Action | Trigger,
-  displayName: string,
-): MentionTreeNode => {
-  return {
-    key: step.name,
-    data: {
-      displayName,
-      propertyPath: step.name,
-    },
-    children: [
-      {
-        data: {
-          displayName: displayName,
-          propertyPath: step.name,
-          isTestStepNode: true,
-        },
-        key: `test_${step.name}`,
-      },
-    ],
-  };
-};
 
 function filterBy(arr: MentionTreeNode[], query: string): MentionTreeNode[] {
   if (!query) {
@@ -106,34 +74,6 @@ const getPathToTargetStep = (state: BuilderState) => {
   return pathToTargetStep;
 };
 
-const getAllStepsMentions = (
-  pathToTargetStep: StepWithIndex[],
-  stepsTestOutput: Record<string, StepOutputWithData> | undefined,
-) => {
-  if (!stepsTestOutput || isEmpty(stepsTestOutput)) {
-    return [];
-  }
-
-  return pathToTargetStep.map((step) => {
-    const displayName = `${step.dfsIndex + 1}. ${step.displayName}`;
-
-    if (!step.id || !stepsTestOutput[step.id]) {
-      return createTestNode(step, displayName);
-    }
-
-    const stepNeedsTesting = isNil(stepsTestOutput[step.id].lastTestDate);
-
-    if (stepNeedsTesting) {
-      return createTestNode(step, displayName);
-    }
-    return dataSelectorUtils.traverseStepOutputAndReturnMentionTree({
-      stepOutput: stepsTestOutput[step.id].output,
-      propertyPath: step.name,
-      displayName: displayName,
-    });
-  });
-};
-
 /**
  * @deprecated currentSelectedData will be removed in the future
  */
@@ -153,7 +93,7 @@ const getAllStepsMentionsFromCurrentSelectedData: (
     const stepNeedsTesting = isNil(step.settings.inputUiInfo?.lastTestDate);
     const displayName = `${step.dfsIndex + 1}. ${step.displayName}`;
     if (stepNeedsTesting) {
-      return createTestNode(step, displayName);
+      return dataSelectorUtils.createTestNode(step, displayName);
     }
     return dataSelectorUtils.traverseStepOutputAndReturnMentionTree({
       stepOutput: step.settings.inputUiInfo?.currentSelectedData,
@@ -197,9 +137,8 @@ const DataSelector = ({
 
   const stepIds: string[] = pathToTargetStep.map((p) => p.id!);
 
-  // todo need to check how to avoid overfetching as we invalidate this on every test step
   const { data: stepsTestOutput, isLoading } = useQuery({
-    queryKey: [QueryKeys.dataSelectorStepTestOutput, flowVersionId, stepIds],
+    queryKey: [QueryKeys.dataSelectorStepTestOutput, flowVersionId, ...stepIds],
     queryFn: async () => {
       const stepTestOuput = await flowsApi.getStepTestOutputBulk(
         flowVersionId,
@@ -212,7 +151,7 @@ const DataSelector = ({
   });
 
   const mentions = useNewExternalTestData
-    ? getAllStepsMentions(pathToTargetStep, stepsTestOutput)
+    ? dataSelectorUtils.getAllStepsMentions(pathToTargetStep, stepsTestOutput)
     : mentionsFromCurrentSelectedData;
 
   const midpanelState = useBuilderStateContext((state) => state.midpanelState);
