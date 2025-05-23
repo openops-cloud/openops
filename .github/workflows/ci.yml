@@ -222,7 +222,7 @@ jobs:
         env:
           SHA_TAG: ${{ env.REPOSITORY_URI }}:${{ env.SHORT_SHA }}
         run: |
-          DIGEST=$(docker buildx imagetools inspect $SHA_TAG | \
+          DIGEST=$(docker buildx imagetools inspect $SHA_TAG --raw | \
             jq -r  '.manifests[] | select(.platform.architecture == "amd64") | .digest')
           docker manifest create $SHA_TAG-amd64 $SHA_TAG@$DIGEST
           docker manifest push $SHA_TAG-amd64
