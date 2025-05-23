@@ -419,8 +419,7 @@ const applyMidpanelAction = (state: BuilderState, action: MidpanelAction) => {
   const oldAiChatSize = state.midpanelState.aiContainerSize;
 
   switch (action.type) {
-    case 'FOCUS_INPUT_WITH_MENTIONS':
-      // eslint-disable-next-line no-case-declarations
+    case 'FOCUS_INPUT_WITH_MENTIONS': {
       let newDataSelectorSize;
       if (
         oldShowAiChat &&
@@ -438,6 +437,7 @@ const applyMidpanelAction = (state: BuilderState, action: MidpanelAction) => {
         dataSelectorSize: newDataSelectorSize,
       };
       break;
+    }
     case 'DATASELECTOR_MIMIZE_CLICK':
       newMidpanelState = {
         dataSelectorSize: DataSelectorSizeState.COLLAPSED,
