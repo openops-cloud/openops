@@ -1,4 +1,4 @@
-import { fileCompressor } from '@openops/server-shared';
+import { encryptUtils, fileCompressor } from '@openops/server-shared';
 import {
   FileCompression,
   FlowStepTestOutput,
@@ -8,7 +8,6 @@ import {
 } from '@openops/shared';
 import { In } from 'typeorm';
 import { repoFactory } from '../../core/db/repo-factory';
-import { encryptUtils } from '../../helper/encryption';
 import { FlowStepTestOutputEntity } from './flow-step-test-output-entity';
 
 const flowStepTestOutputRepo = repoFactory(FlowStepTestOutputEntity);
@@ -85,7 +84,7 @@ export const flowStepTestOutputService = {
 
   async getAllStepOutputs(
     flowVersionId: FlowVersionId,
-  ): Promise<Record<OpenOpsId, Buffer>> {
+  ): Promise<Record<OpenOpsId, string>> {
     const flowStepTestOutputs = await flowStepTestOutputRepo().findBy({
       flowVersionId,
     });
@@ -93,7 +92,7 @@ export const flowStepTestOutputService = {
     return Object.fromEntries(
       flowStepTestOutputs.map((flowStepTestOutput) => [
         flowStepTestOutput.stepId as OpenOpsId,
-        flowStepTestOutput.output as Buffer,
+        (flowStepTestOutput.output as Buffer).toString('base64'),
       ]),
     );
   },

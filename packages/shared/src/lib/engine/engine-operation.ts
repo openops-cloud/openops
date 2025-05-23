@@ -55,7 +55,7 @@ export type ExecuteExtractBlockMetadata = BlockPackage;
 export type ExecuteStepOperation = BaseEngineOperation & {
   stepName: string;
   flowVersion: FlowVersion;
-  testOutputs?: Record<OpenOpsId, Buffer>;
+  testOutputs?: Record<OpenOpsId, string>;
 };
 
 export type ExecutePropsOptions = BaseEngineOperation & {
@@ -65,7 +65,7 @@ export type ExecutePropsOptions = BaseEngineOperation & {
   flowVersion: FlowVersion;
   input: Record<string, unknown>;
   searchValue?: string;
-  testOutputs?: Record<OpenOpsId, Buffer>;
+  testOutputs?: Record<OpenOpsId, string>;
 };
 
 type BaseExecuteFlowOperation<T extends ExecutionType> = BaseEngineOperation & {

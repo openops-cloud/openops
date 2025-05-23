@@ -5,12 +5,12 @@ import {
   SaveAiConfigRequest,
 } from '@openops/shared';
 import { repoFactory } from '../../core/db/repo-factory';
-import { encryptUtils } from '../../helper/encryption';
 import {
   sendAiConfigDeletedEvent,
   sendAiConfigSavedEvent,
 } from '../../telemetry/event-models/ai';
 import { AiApiKeyRedactionMessage, AiConfigEntity } from './ai-config.entity';
+import { encryptUtils } from '@openops/server-shared';
 
 const repo = repoFactory(AiConfigEntity);
 

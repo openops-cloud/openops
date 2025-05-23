@@ -1,9 +1,8 @@
+import { assertNotNullOrUndefined, isNil } from '@openops/shared';
 import * as crypto from 'crypto';
 import { randomBytes } from 'node:crypto';
 import { promisify } from 'util';
-
-import { AppSystemProp, QueueMode, system } from '@openops/server-shared';
-import { assertNotNullOrUndefined, isNil } from '@openops/shared';
+import { AppSystemProp, QueueMode, system } from '../system';
 import { localFileStore } from './local-store';
 
 let secret: string | null;

@@ -5,7 +5,7 @@ import {
   JSONB_COLUMN_TYPE,
   OpenOpsIdSchema,
 } from '../database/database-common';
-import { EncryptedObject } from '../helper/encryption';
+import { EncryptedObject } from '@openops/server-shared';
 
 export type AppConnectionSchema = Omit<AppConnection, 'value'> & {
   project: Project;

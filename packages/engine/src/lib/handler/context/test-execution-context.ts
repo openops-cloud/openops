@@ -28,7 +28,7 @@ export const testExecutionContext = {
     projectId: string;
     apiUrl: string;
     engineToken: string;
-    testOutputs?: Record<OpenOpsId, Buffer>;
+    testOutputs?: Record<OpenOpsId, string>;
   }): Promise<FlowExecutorContext> {
     const flowSteps = flowHelper.getAllSteps(flowVersion.trigger);
     let flowExecutionContext = FlowExecutorContext.empty();
@@ -44,9 +44,12 @@ export const testExecutionContext = {
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let currentOutput: any;
-      if (step.id) {
+      if (testOutputs && step.id) {
         currentOutput = await decompressOutput(testOutputs?.[step.id]);
+      } else {
+        currentOutput = inputUiInfo?.currentSelectedData;
       }
+
       const stepType = step.type;
       switch (stepType) {
         case ActionType.BRANCH:
@@ -72,7 +75,7 @@ export const testExecutionContext = {
             LoopStepOutput.init({
               input: step.settings,
             }).setOutput({
-              item: currentOutput?.item, //?? inputUiInfo?.currentSelectedData?.item,
+              item: currentOutput?.item,
               index: 1,
               iterations: [],
             }),
@@ -89,7 +92,7 @@ export const testExecutionContext = {
               input: step.settings,
               type: stepType,
               status: StepOutputStatus.SUCCEEDED,
-              output: currentOutput, //?? inputUiInfo?.currentSelectedData,
+              output: currentOutput,
             }),
           );
           break;
@@ -99,13 +102,13 @@ export const testExecutionContext = {
   },
 };
 
-async function decompressOutput(output: unknown): Promise<unknown> {
+async function decompressOutput(output: string): Promise<unknown> {
   if (!output) {
     return undefined;
   }
 
   const decompressed = await fileCompressor.decompress({
-    data: output as Buffer,
+    data: Buffer.from(output, 'base64'),
     compression: FileCompression.GZIP,
   });
 

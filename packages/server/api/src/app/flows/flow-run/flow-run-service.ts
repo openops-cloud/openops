@@ -31,7 +31,7 @@ import { In, LessThan } from 'typeorm';
 import { repoFactory } from '../../core/db/repo-factory';
 import { APArrayContains } from '../../database/database-connection';
 import { fileService } from '../../file/file.service';
-import { flagService } from '../../flags/flag.service';
+import { getInMemoryFlag } from '../../flags/in-memory-flags';
 import { flowVersionService } from '../../flows/flow-version/flow-version.service';
 import { buildPaginator } from '../../helper/pagination/build-paginator';
 import { paginationHelper } from '../../helper/pagination/pagination-utils';
@@ -352,17 +352,18 @@ export const flowRunService = {
   async test({ projectId, flowVersionId }: TestParams): Promise<FlowRun> {
     const flowVersion = await flowVersionService.getOneOrThrow(flowVersionId);
 
-    // const payload =
-    //   flowVersion.trigger.settings.inputUiInfo.currentSelectedData;
-
-    if (await flagService.getOne(FlagId.USE_NEW_EXTERNAL_TESTDATA)) {
-      await flowStepTestOutputService.getAllStepOutputs(flowVersion.id);
+    let payload = flowVersion.trigger.settings.inputUiInfo.currentSelectedData;
+    if (await getInMemoryFlag(FlagId.USE_NEW_EXTERNAL_TESTDATA)) {
+      payload = await flowStepTestOutputService.list({
+        flowVersionId: flowVersion.id,
+        stepIds: [flowVersion.trigger.id!],
+      });
     }
 
     return this.start({
       projectId,
       flowVersionId,
-      payload: undefined,
+      payload,
       environment: RunEnvironment.TESTING,
       executionType: ExecutionType.BEGIN,
       synchronousHandlerId: webhookResponseWatcher.getServerId(),

@@ -4,16 +4,15 @@ import {
   ErrorCode,
   FlagId,
   flowHelper,
-  FlowStepTestOutput,
   FlowVersionId,
-  isNil,
+  isNil, OpenOpsId,
   ProjectId,
   StepRunResponse,
   UserId,
 } from '@openops/shared';
 import { engineRunner } from 'server-worker';
 import { accessTokenManager } from '../../authentication/lib/access-token-manager';
-import { flagService } from '../../flags/flag.service';
+import { getInMemoryFlag } from '../../flags/in-memory-flags';
 import { sendWorkflowTestBlockEvent } from '../../telemetry/event-models';
 import { flowVersionService } from '../flow-version/flow-version.service';
 import { flowStepTestOutputService } from '../step-test-output/flow-step-test-output.service';
@@ -42,12 +41,12 @@ export const stepRunService = {
       });
     }
 
-    let testOutputs = undefined;
-    // if (await flagService.getOne(FlagId.USE_NEW_EXTERNAL_TESTDATA)) {
+    let testOutputs: Record<OpenOpsId, string> | undefined = undefined;
+    if (await getInMemoryFlag(FlagId.USE_NEW_EXTERNAL_TESTDATA)) {
       testOutputs = await flowStepTestOutputService.getAllStepOutputs(
         flowVersion.id,
       );
-    // }
+    }
 
     const engineToken = await accessTokenManager.generateEngineToken({
       projectId,
