@@ -7,7 +7,7 @@ import {
 } from '@openops/components/ui';
 import { t } from 'i18next';
 import { SearchXIcon } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { FlagId, flowHelper, isNil } from '@openops/shared';
 
@@ -149,12 +149,26 @@ const DataSelector = ({
       !!useNewExternalTestData && isDataSelectorVisible && stepIds.length > 0,
   });
 
-  const mentions = useNewExternalTestData
-    ? dataSelectorUtils.getAllStepsMentions(pathToTargetStep, stepsTestOutput)
-    : mentionsFromCurrentSelectedData;
+  const mentions = useMemo(() => {
+    if (!useNewExternalTestData) {
+      return mentionsFromCurrentSelectedData;
+    }
+    return dataSelectorUtils.getAllStepsMentions(
+      pathToTargetStep,
+      stepsTestOutput,
+    );
+  }, [
+    useNewExternalTestData,
+    mentionsFromCurrentSelectedData,
+    pathToTargetStep,
+    stepsTestOutput,
+  ]);
 
   const midpanelState = useBuilderStateContext((state) => state.midpanelState);
-  const filteredMentions = filterBy(structuredClone(mentions), searchTerm);
+  const filteredMentions = useMemo(
+    () => filterBy(structuredClone(mentions), searchTerm),
+    [mentions, searchTerm],
+  );
 
   const onToggle = useCallback(() => {
     if (
