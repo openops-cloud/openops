@@ -4,7 +4,7 @@ import {
   INTERNAL_ERROR_TOAST,
   useToast,
 } from '@openops/components/ui';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import { t } from 'i18next';
 import React, { useEffect, useState } from 'react';
