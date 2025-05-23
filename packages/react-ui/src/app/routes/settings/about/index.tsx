@@ -18,8 +18,7 @@ const AboutSettingsPage = () => {
     isLoading,
   } = platformHooks.usePlatformVersion();
 
-  const useHasNewerAvailableVersion =
-    platformHooks.useHasNewerAvailableVersion();
+  const hasNewerAvailableVersion = platformHooks.useHasNewerAvailableVersion();
 
   return (
     <Card className="w-full">
@@ -44,7 +43,7 @@ const AboutSettingsPage = () => {
             rel="noopener noreferrer"
             className="self-end"
           >
-            <Button disabled={!useHasNewerAvailableVersion}>
+            <Button disabled={!hasNewerAvailableVersion}>
               {t('Learn how to update')}
             </Button>
           </Link>
