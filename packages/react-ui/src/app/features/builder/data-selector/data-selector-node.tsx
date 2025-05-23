@@ -1,6 +1,6 @@
 import { Collapsible, CollapsibleTrigger } from '@openops/components/ui';
 import { CollapsibleContent } from '@radix-ui/react-collapsible';
-import React, { useEffect, useState } from 'react';
+import { memo } from 'react';
 
 import { DataSelectorNodeContent } from './data-selector-node-content';
 import { MentionTreeNode } from './data-selector-utils';
@@ -10,20 +10,18 @@ type DataSelectoNodeProps = {
   node: MentionTreeNode;
   depth: number;
   searchTerm: string;
+  expanded: boolean;
+  setExpanded: (expanded: boolean) => void;
 };
 
-const DataSelectorNode = React.memo(
-  ({ node, depth, searchTerm }: DataSelectoNodeProps) => {
-    const [expanded, setExpanded] = useState(false);
-
-    useEffect(() => {
-      if (searchTerm && depth <= 1) {
-        setExpanded(true);
-      } else if (!searchTerm) {
-        setExpanded(false);
-      }
-    }, [searchTerm, depth]);
-
+const DataSelectorNode = memo(
+  ({
+    node,
+    depth,
+    searchTerm,
+    expanded,
+    setExpanded,
+  }: DataSelectoNodeProps) => {
     if (node.data.isTestStepNode) {
       return (
         <TestStepSection stepName={node.data.propertyPath}></TestStepSection>
@@ -47,12 +45,14 @@ const DataSelectorNode = React.memo(
           <CollapsibleContent className="w-full">
             {node.children && node.children.length > 0 && (
               <div className="flex flex-col ">
-                {node.children.map((node) => (
+                {node.children.map((childNode) => (
                   <DataSelectorNode
                     depth={depth + 1}
-                    node={node}
-                    key={node.key}
+                    node={childNode}
+                    key={childNode.key}
                     searchTerm={searchTerm}
+                    expanded={expanded}
+                    setExpanded={setExpanded}
                   ></DataSelectorNode>
                 ))}
               </div>
@@ -63,5 +63,6 @@ const DataSelectorNode = React.memo(
     );
   },
 );
+
 DataSelectorNode.displayName = 'DataSelectorNode';
 export { DataSelectorNode };

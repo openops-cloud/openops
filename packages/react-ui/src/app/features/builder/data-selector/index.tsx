@@ -7,7 +7,7 @@ import {
 } from '@openops/components/ui';
 import { t } from 'i18next';
 import { SearchXIcon } from 'lucide-react';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { FlagId, flowHelper, isNil } from '@openops/shared';
 
@@ -18,6 +18,7 @@ import { QueryKeys } from '@/app/constants/query-keys';
 import { useQuery } from '@tanstack/react-query';
 import { flowsApi } from '../../flows/lib/flows-api';
 import { BuilderState } from '../builder-types';
+import { stepTestOutputCache } from './data-selector-cache';
 import { DataSelectorNode } from './data-selector-node';
 import {
   DataSelectorSizeState,
@@ -129,40 +130,124 @@ const DataSelector = ({
     (state) => state.midpanelState.showDataSelector,
   );
 
+  console.log('StepTestOutputCache', stepTestOutputCache);
+
   const pathToTargetStep = useBuilderStateContext(getPathToTargetStep);
   const mentionsFromCurrentSelectedData = useBuilderStateContext(
     getAllStepsMentionsFromCurrentSelectedData,
   );
 
   const stepIds: string[] = pathToTargetStep.map((p) => p.id!);
+  console.log('stepIds', stepIds);
 
-  const { data: stepsTestOutput, isLoading } = useQuery({
+  // --- Caching logic for optimized fetching ---
+  const [_, forceRerender] = useState(0); // for cache updates
+  // On first load, fetch all. After that, only fetch stale steps.
+  const [initialLoad, setInitialLoad] = useState(true);
+
+  // Helper to fetch and cache step data
+  const fetchAndCacheStepData = async (ids: string[]) => {
+    if (!ids.length) return {};
+    const stepTestOutput = await flowsApi.getStepTestOutputBulk(
+      flowVersionId,
+      ids,
+    );
+    ids.forEach((id) => {
+      if (stepTestOutput[id]) {
+        stepTestOutputCache.setStepData(id, stepTestOutput[id]);
+      }
+    });
+    forceRerender((v) => v + 1); // update UI
+    return stepTestOutput;
+  };
+
+  // Main data fetching logic
+  const { isLoading } = useQuery({
     queryKey: [QueryKeys.dataSelectorStepTestOutput, flowVersionId, ...stepIds],
     queryFn: async () => {
-      const stepTestOuput = await flowsApi.getStepTestOutputBulk(
-        flowVersionId,
-        stepIds,
-      );
-      return stepTestOuput;
+      if (!useNewExternalTestData) return {};
+      if (initialLoad) {
+        setInitialLoad(false);
+        return fetchAndCacheStepData(stepIds);
+      } else {
+        // Only fetch for stale steps
+        const staleIds = stepIds.filter((id) =>
+          stepTestOutputCache.isStale(id),
+        );
+        if (staleIds.length) {
+          return fetchAndCacheStepData(staleIds);
+        }
+        return {};
+      }
     },
     enabled:
       !!useNewExternalTestData && isDataSelectorVisible && stepIds.length > 0,
   });
 
+  // Compose mentions from cache if flag is on
   const mentions = useMemo(() => {
     if (!useNewExternalTestData) {
       return mentionsFromCurrentSelectedData;
     }
+    // Compose mentions from cache
+    const stepTestOutput: Record<string, any> = {};
+    stepIds.forEach((id) => {
+      const cached = stepTestOutputCache.getStepData(id);
+      if (cached) stepTestOutput[id] = cached;
+    });
     return dataSelectorUtils.getAllStepsMentions(
       pathToTargetStep,
-      stepsTestOutput,
+      stepTestOutput,
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     useNewExternalTestData,
     mentionsFromCurrentSelectedData,
     pathToTargetStep,
-    stepsTestOutput,
+    stepIds,
+    _,
+    initialLoad,
   ]);
+
+  // Expanded state handlers
+  const getExpanded = (nodeKey: string) =>
+    stepTestOutputCache.getExpanded(nodeKey);
+  const setExpanded = (nodeKey: string, expanded: boolean) => {
+    stepTestOutputCache.setExpanded(nodeKey, expanded);
+    forceRerender((v) => v + 1);
+  };
+
+  // Auto-expand/collapse nodes on search term change
+  useEffect(() => {
+    // Only run if searchTerm changes
+    if (searchTerm) {
+      // Expand all nodes at depth 0 and 1
+      const expandNodes = (nodes: MentionTreeNode[], depth: number) => {
+        nodes.forEach((node) => {
+          if (depth <= 1) {
+            stepTestOutputCache.setExpanded(node.key, true);
+          }
+          if (node.children) {
+            expandNodes(node.children, depth + 1);
+          }
+        });
+      };
+      expandNodes(mentions, 0);
+    } else {
+      // Collapse all nodes
+      const collapseNodes = (nodes: MentionTreeNode[]) => {
+        nodes.forEach((node) => {
+          stepTestOutputCache.setExpanded(node.key, false);
+          if (node.children) {
+            collapseNodes(node.children);
+          }
+        });
+      };
+      collapseNodes(mentions);
+    }
+    forceRerender((v) => v + 1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchTerm]);
 
   const midpanelState = useBuilderStateContext((state) => state.midpanelState);
   const filteredMentions = useMemo(
@@ -185,6 +270,13 @@ const DataSelector = ({
       setDataSelectorSize(DataSelectorSizeState.DOCKED);
     }
   }, [dataSelectorSize, midpanelState.aiContainerSize, setDataSelectorSize]);
+
+  // Clear cache on unmount or when flowVersionId changes
+  useEffect(() => {
+    return () => {
+      stepTestOutputCache.clearAll();
+    };
+  }, [flowVersionId]);
 
   return (
     <div
@@ -252,6 +344,8 @@ const DataSelector = ({
                 key={node.key}
                 node={node}
                 searchTerm={searchTerm}
+                expanded={getExpanded(node.key)}
+                setExpanded={(expanded) => setExpanded(node.key, expanded)}
               ></DataSelectorNode>
             ))}
           {filteredMentions.length === 0 && (
