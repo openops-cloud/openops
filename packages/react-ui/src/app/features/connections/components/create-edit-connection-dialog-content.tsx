@@ -1,4 +1,5 @@
 import { useDynamicFormValidationContext } from '@/app/features/builder/dynamic-form-validation/dynamic-form-validation-context';
+import { QueryKeys } from '@/app/constants/query-keys';
 import { appConnectionsApi } from '@/app/features/connections/lib/app-connections-api';
 import { appConnectionUtils } from '@/app/features/connections/lib/app-connections-utils';
 import { api } from '@/app/lib/api';
@@ -154,7 +155,7 @@ const CreateEditConnectionDialogContent = ({
       if (connectionToEdit) {
         const id: string = (requestValues as PatchAppConnectionRequestBody).id;
         queryClient.invalidateQueries({
-          queryKey: ['app-connection', id],
+          queryKey: [QueryKeys.appConnection, id],
         });
       }
     },

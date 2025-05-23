@@ -1,6 +1,7 @@
 export const QueryKeys = {
   // User related
   userMetadata: 'user/meta',
+  userSettings: 'user-settings',
   
   // AI settings
   activeAiSettings: 'active-ai-settings',
@@ -28,6 +29,7 @@ export const QueryKeys = {
   flow: 'flow',
   flowVersions: 'flow-versions',
   flowRuns: 'flow-runs',
+  flowTemplates: 'flow-templates',
   
   // Runs
   run: 'run',
