@@ -11,6 +11,7 @@ import { t } from 'i18next';
 import React from 'react';
 
 import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
+import { QueryKeys } from '@/app/constants/query-keys';
 import { flowRunsApi } from '@/app/features/flow-runs/lib/flow-runs-api';
 import { FlowRun, SeekPage } from '@openops/shared';
 import { LeftSideBarType } from '../builder-types';
@@ -33,7 +34,7 @@ const FlowRecentRunsList = React.memo(
       isLoading,
       isError,
     } = useQuery<SeekPage<FlowRun>, Error>({
-      queryKey: ['flow-runs', flow.id],
+      queryKey: [QueryKeys.flowRuns, flow.id],
       queryFn: () =>
         flowRunsApi.list({
           flowId: [flow.id],
