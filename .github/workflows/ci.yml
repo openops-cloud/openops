@@ -220,7 +220,7 @@ jobs:
       - name: Push single-arch manifest
         if: vars.ECR_REGION
         env:
-          SHA_TAG=${{ env.REPOSITORY_URI }}:${{ env.SHORT_SHA }}
+          SHA_TAG: ${{ env.REPOSITORY_URI }}:${{ env.SHORT_SHA }}
         run: |
           DIGEST=$(docker buildx imagetools inspect $SHA_TAG | \
             jq -r  '.manifests[] | select(.platform.architecture == "amd64") | .digest')
