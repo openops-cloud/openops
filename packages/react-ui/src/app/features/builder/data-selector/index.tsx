@@ -2,16 +2,21 @@ import {
   AI_CHAT_CONTAINER_SIZES,
   cn,
   Input,
+  LoadingSpinner,
   ScrollArea,
 } from '@openops/components/ui';
 import { t } from 'i18next';
 import { SearchXIcon } from 'lucide-react';
 import { useCallback, useState } from 'react';
 
-import { Action, flowHelper, isNil, Trigger } from '@openops/shared';
+import { FlagId, flowHelper, isNil } from '@openops/shared';
 
 import { useBuilderStateContext } from '../builder-hooks';
 
+import { flagsHooks } from '@/app/common/hooks/flags-hooks';
+import { QueryKeys } from '@/app/constants/query-keys';
+import { useQuery } from '@tanstack/react-query';
+import { flowsApi } from '../../flows/lib/flows-api';
 import { BuilderState } from '../builder-types';
 import { DataSelectorNode } from './data-selector-node';
 import {
@@ -19,29 +24,6 @@ import {
   DataSelectorSizeTogglers,
 } from './data-selector-size-togglers';
 import { dataSelectorUtils, MentionTreeNode } from './data-selector-utils';
-
-const createTestNode = (
-  step: Action | Trigger,
-  displayName: string,
-): MentionTreeNode => {
-  return {
-    key: step.name,
-    data: {
-      displayName,
-      propertyPath: step.name,
-    },
-    children: [
-      {
-        data: {
-          displayName: displayName,
-          propertyPath: step.name,
-          isTestStepNode: true,
-        },
-        key: `test_${step.name}`,
-      },
-    ],
-  };
-};
 
 function filterBy(arr: MentionTreeNode[], query: string): MentionTreeNode[] {
   if (!query) {
@@ -59,7 +41,7 @@ function filterBy(arr: MentionTreeNode[], query: string): MentionTreeNode[] {
       const filteredChildren = filterBy(item.children, query);
       if (filteredChildren.length) {
         acc.push({ ...item, children: filteredChildren });
-        return acc; // return acc as we have handled this item
+        return acc;
       }
     }
 
@@ -76,14 +58,30 @@ function filterBy(arr: MentionTreeNode[], query: string): MentionTreeNode[] {
       acc.push({ ...item, children: undefined });
     }
 
-    return acc; // Always return acc
+    return acc;
   }, [] as MentionTreeNode[]);
 }
-const getAllStepsMentions: (state: BuilderState) => MentionTreeNode[] = (
-  state,
-) => {
+
+const getPathToTargetStep = (state: BuilderState) => {
   const { selectedStep, flowVersion } = state;
-  if (!selectedStep || !flowVersion || !flowVersion.trigger) {
+  if (!selectedStep || !flowVersion?.trigger) {
+    return [];
+  }
+  const pathToTargetStep = flowHelper.findPathToStep({
+    targetStepName: selectedStep,
+    trigger: flowVersion.trigger,
+  });
+  return pathToTargetStep;
+};
+
+/**
+ * @deprecated currentSelectedData will be removed in the future
+ */
+const getAllStepsMentionsFromCurrentSelectedData: (
+  state: BuilderState,
+) => MentionTreeNode[] = (state) => {
+  const { selectedStep, flowVersion } = state;
+  if (!selectedStep || !flowVersion?.trigger) {
     return [];
   }
   const pathToTargetStep = flowHelper.findPathToStep({
@@ -95,7 +93,7 @@ const getAllStepsMentions: (state: BuilderState) => MentionTreeNode[] = (
     const stepNeedsTesting = isNil(step.settings.inputUiInfo?.lastTestDate);
     const displayName = `${step.dfsIndex + 1}. ${step.displayName}`;
     if (stepNeedsTesting) {
-      return createTestNode(step, displayName);
+      return dataSelectorUtils.createTestNode(step, displayName);
     }
     return dataSelectorUtils.traverseStepOutputAndReturnMentionTree({
       stepOutput: step.settings.inputUiInfo?.currentSelectedData,
@@ -122,8 +120,39 @@ const DataSelector = ({
   setDataSelectorSize,
   className,
 }: DataSelectorProps) => {
+  const { data: useNewExternalTestData = false } = flagsHooks.useFlag(
+    FlagId.USE_NEW_EXTERNAL_TESTDATA,
+  );
   const [searchTerm, setSearchTerm] = useState('');
-  const mentions = useBuilderStateContext(getAllStepsMentions);
+  const flowVersionId = useBuilderStateContext((state) => state.flowVersion.id);
+  const isDataSelectorVisible = useBuilderStateContext(
+    (state) => state.midpanelState.showDataSelector,
+  );
+
+  const pathToTargetStep = useBuilderStateContext(getPathToTargetStep);
+  const mentionsFromCurrentSelectedData = useBuilderStateContext(
+    getAllStepsMentionsFromCurrentSelectedData,
+  );
+
+  const stepIds: string[] = pathToTargetStep.map((p) => p.id!);
+
+  const { data: stepsTestOutput, isLoading } = useQuery({
+    queryKey: [QueryKeys.dataSelectorStepTestOutput, flowVersionId, ...stepIds],
+    queryFn: async () => {
+      const stepTestOuput = await flowsApi.getStepTestOutputBulk(
+        flowVersionId,
+        stepIds,
+      );
+      return stepTestOuput;
+    },
+    enabled:
+      !!useNewExternalTestData && isDataSelectorVisible && stepIds.length > 0,
+  });
+
+  const mentions = useNewExternalTestData
+    ? dataSelectorUtils.getAllStepsMentions(pathToTargetStep, stepsTestOutput)
+    : mentionsFromCurrentSelectedData;
+
   const midpanelState = useBuilderStateContext((state) => state.midpanelState);
   const filteredMentions = filterBy(structuredClone(mentions), searchTerm);
 
@@ -194,6 +223,12 @@ const DataSelector = ({
             onChange={(e) => setSearchTerm(e.target.value)}
           ></Input>
         </div>
+
+        {isLoading && (
+          <div className="w-full h-full flex items-center justify-center">
+            <LoadingSpinner></LoadingSpinner>
+          </div>
+        )}
 
         <ScrollArea className="transition-all h-[calc(100%-56px)] w-full ">
           {filteredMentions &&
