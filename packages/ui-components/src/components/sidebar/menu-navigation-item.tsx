@@ -1,14 +1,9 @@
 import { t } from 'i18next';
-import { Circle, LucideProps } from 'lucide-react';
+import { LucideProps } from 'lucide-react';
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '../../lib/cn';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '../../ui/tooltip';
+
 import { TooltipWrapper } from '../tooltip-wrapper';
 
 type MenuNavigationItemProps = {
@@ -16,8 +11,6 @@ type MenuNavigationItemProps = {
   label: string;
   isMinimized: boolean;
   Icon: React.ComponentType<LucideProps>;
-  notificationLabel?: string;
-  notificationIconClassName?: string;
   className?: string;
   iconClassName?: string;
   isComingSoon?: boolean;
@@ -28,8 +21,6 @@ const MenuNavigationItem = ({
   label,
   isMinimized,
   Icon,
-  notificationLabel,
-  notificationIconClassName,
   className,
   iconClassName,
   isComingSoon,
@@ -47,34 +38,18 @@ const MenuNavigationItem = ({
           className,
         )}
       >
-        <div className="relative">
-          <Icon
-            className={cn(
-              'size-[18px] transition-colors',
-              {
-                'text-primary': isActive,
-                'text-primary-400 dark:text-gray-100': !isActive,
-              },
-              iconClassName,
-            )}
-            strokeWidth={isActive ? 2.7 : 2.3}
-          />
-          {notificationLabel && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Circle
-                    className={cn(
-                      'absolute top-[-7px] right-[-6px] w-2 h-2 stroke-red-500 fill-red-500',
-                      notificationIconClassName,
-                    )}
-                  />
-                </TooltipTrigger>
-                <TooltipContent>{notificationLabel}</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+        <Icon
+          className={cn(
+            'size-[18px] transition-colors',
+            {
+              'text-primary': isActive,
+              'text-primary-400 dark:text-gray-100': !isActive,
+            },
+            iconClassName,
           )}
-        </div>
+          strokeWidth={isActive ? 2.7 : 2.3}
+        />
+
         {!isMinimized && (
           <>
             <span

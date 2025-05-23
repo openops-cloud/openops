@@ -93,6 +93,7 @@ const footerWrapperProps = {
 const FooterWrapperConnectedToCloud = (
   <MenuFooter
     {...footerWrapperProps}
+    hasNewerAvailableVersion={false}
     user={mockUser}
     cloudConfig={{
       ...footerWrapperProps.cloudConfig,
@@ -104,6 +105,7 @@ const FooterWrapperConnectedToCloud = (
 const AiFooter = (isMinimized: boolean, cloudConfigOverride?: any) => (
   <MenuFooter
     {...footerWrapperProps}
+    hasNewerAvailableVersion={false}
     user={mockUser}
     isMinimized={isMinimized}
     cloudConfig={cloudConfigOverride || footerWrapperProps.cloudConfig}
@@ -119,7 +121,11 @@ const AiFooter = (isMinimized: boolean, cloudConfigOverride?: any) => (
 );
 
 const FooterWrapperNotConnectedToCloud = (
-  <MenuFooter {...footerWrapperProps} user={mockUser} />
+  <MenuFooter
+    {...footerWrapperProps}
+    user={mockUser}
+    hasNewerAvailableVersion={false}
+  />
 );
 
 const SidebarWrapper = ({
@@ -129,6 +135,8 @@ const SidebarWrapper = ({
   isAiEnabled,
   className,
   cloudConfigOverride,
+  hasNewerAvailableVersion = false,
+  currentVersion,
 }: {
   isMinimized: boolean;
   theme?: string;
@@ -136,12 +144,37 @@ const SidebarWrapper = ({
   isAiEnabled: boolean;
   className?: string;
   cloudConfigOverride?: any;
+  hasNewerAvailableVersion?: boolean;
+  currentVersion?: string;
 }) => {
   const footer = isAiEnabled
     ? AiFooter(isMinimized, cloudConfigOverride)
     : isFullCatalog
     ? FooterWrapperConnectedToCloud
     : FooterWrapperNotConnectedToCloud;
+
+  let MenuFooterWrapped: React.ReactNode;
+  if (cloudConfigOverride) {
+    MenuFooterWrapped = (
+      <MenuFooter
+        {...footerWrapperProps}
+        cloudConfig={cloudConfigOverride}
+        hasNewerAvailableVersion={false}
+        user={mockUser}
+      />
+    );
+  } else if (hasNewerAvailableVersion) {
+    MenuFooterWrapped = (
+      <MenuFooter
+        {...footerWrapperProps}
+        user={mockUser}
+        hasNewerAvailableVersion={true}
+        currentVersion={currentVersion}
+      />
+    );
+  } else {
+    MenuFooterWrapped = footer;
+  }
 
   return (
     <BrowserRouter>
@@ -151,17 +184,7 @@ const SidebarWrapper = ({
             MenuHeader={
               <HeaderWrapper theme={theme} isMinimized={isMinimized} />
             }
-            MenuFooter={
-              cloudConfigOverride ? (
-                <MenuFooter
-                  {...footerWrapperProps}
-                  cloudConfig={cloudConfigOverride}
-                  user={mockUser}
-                />
-              ) : (
-                footer
-              )
-            }
+            MenuFooter={MenuFooterWrapped}
             className={cn('w-[300px]', className)}
           >
             <SideMenuNavigation links={MENU_LINKS} isMinimized={isMinimized} />
@@ -205,10 +228,21 @@ export const Default: Story = {
     isMinimized: false,
     isFullCatalog: false,
     isAiEnabled: false,
+    hasNewerAvailableVersion: false,
+    currentVersion: '0.2.8',
   },
   render: (args, context) => (
     <SidebarWrapper {...args} theme={context?.globals?.theme} />
   ),
+};
+
+export const NewerVersionAvailable: Story = {
+  ...Default,
+  args: {
+    ...Default.args,
+    hasNewerAvailableVersion: true,
+    currentVersion: '0.2.8',
+  },
 };
 
 /**
