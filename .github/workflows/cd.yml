@@ -11,7 +11,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    if: github.event.workflow_run.conclusion == 'success' && github.repository_owner == 'openops-cloud'
+    if: github.event.workflow_run.conclusion == 'success' && github.repository == 'openops-cloud/openops'
     steps:
       - name: Get token from Github App
         id: app_token
