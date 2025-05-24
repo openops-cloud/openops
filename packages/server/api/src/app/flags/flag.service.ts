@@ -290,7 +290,7 @@ export const flagService = {
       },
       {
         id: FlagId.USE_NEW_EXTERNAL_TESTDATA,
-        value: false,
+        value: true,
         created,
         updated,
       },
