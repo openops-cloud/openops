@@ -101,7 +101,7 @@ describe('useSelectorData', () => {
     stepTestOutputCache.setStepData('a', stepAData);
     stepTestOutputCache.setStepData('b', stepBData);
 
-    let initialLoad = false;
+    const initialLoad = false;
     const { result } = setupHook({ stepIds, flowVersionId, initialLoad });
     await waitFor(() => !result.current.isLoading);
 
@@ -119,7 +119,7 @@ describe('useSelectorData', () => {
     const flowVersionId = 'fv3';
     (flowsApi.getStepTestOutputBulk as jest.Mock).mockClear();
 
-    let initialLoad = true;
+    const initialLoad = true;
     const { result } = setupHook({
       stepIds,
       flowVersionId,
@@ -136,7 +136,7 @@ describe('useSelectorData', () => {
     const flowVersionId = 'fv4';
     (flowsApi.getStepTestOutputBulk as jest.Mock).mockClear();
 
-    let initialLoad = true;
+    const initialLoad = true;
     const { result } = setupHook({ stepIds, flowVersionId, initialLoad });
     await waitFor(() => !result.current.isLoading);
     expect(flowsApi.getStepTestOutputBulk).not.toHaveBeenCalled();
@@ -149,7 +149,7 @@ describe('useSelectorData', () => {
     const testData = { a: { foo: 1 }, b: { bar: 2 }, c: { baz: 3 } };
     (flowsApi.getStepTestOutputBulk as jest.Mock).mockResolvedValue(testData);
 
-    let initialLoad = true;
+    const initialLoad = true;
     const { result } = setupHook({ stepIds, flowVersionId, initialLoad });
     await waitFor(() => !result.current.isLoading);
     expect(forceRerender).toHaveBeenCalledTimes(1);
@@ -162,7 +162,7 @@ describe('useSelectorData', () => {
       new Error('Network error'),
     );
 
-    let initialLoad = true;
+    const initialLoad = true;
     const { result } = setupHook({ stepIds, flowVersionId, initialLoad });
     await waitFor(() => !result.current.isLoading);
     expect(forceRerender).not.toHaveBeenCalled();
@@ -173,7 +173,7 @@ describe('useSelectorData', () => {
     const flowVersionId = 'fv9';
     (flowsApi.getStepTestOutputBulk as jest.Mock).mockClear();
 
-    let initialLoad = true;
+    const initialLoad = true;
     const { result } = setupHook({
       stepIds,
       flowVersionId,
