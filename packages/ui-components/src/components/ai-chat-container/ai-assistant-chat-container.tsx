@@ -1,7 +1,7 @@
 import { UseChatHelpers } from '@ai-sdk/react';
 import { t } from 'i18next';
 import { Bot, Send as SendIcon } from 'lucide-react';
-import { ReactNode, useEffect, useRef } from 'react';
+import { ReactNode, useLayoutEffect, useRef } from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
 import { cn } from '../../lib/cn';
 import { Button } from '../../ui/button';
@@ -48,20 +48,22 @@ const AiAssistantChatContainer = ({
   const scrollViewportRef = useRef<HTMLDivElement>(null);
   const hasScrolledOnce = useRef<boolean>(false);
 
-  useEffect(() => {
-    setTimeout(() => {
+  useLayoutEffect(() => {
+    requestAnimationFrame(() => {
       if (
         scrollViewportRef.current &&
         !isEmpty &&
         showAiChat &&
-        !hasScrolledOnce.current
+        !hasScrolledOnce.current &&
+        !!children
       ) {
         scrollViewportRef.current.scrollTop =
           scrollViewportRef.current.scrollHeight;
+
         hasScrolledOnce.current = true;
       }
     });
-  }, [isEmpty, showAiChat]);
+  }, [isEmpty, showAiChat, children]);
 
   return (
     <div
