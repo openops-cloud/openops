@@ -92,7 +92,10 @@ const TestActionSection = React.memo(
           setErrorMessage(undefined);
 
           if (useNewExternalTestData) {
-            stepTestOutputCache.setStepData(formValues.id!, formattedResponse);
+            stepTestOutputCache.setStepData(formValues.id!, {
+              output: formattedResponse,
+              lastTestDate: dayjs().toISOString(),
+            });
           } else {
             form.setValue(
               'settings.inputUiInfo.currentSelectedData',

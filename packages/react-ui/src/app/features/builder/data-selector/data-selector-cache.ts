@@ -1,11 +1,13 @@
 // Utility for caching step test output and expanded state in the Data Selector
 // This is a simple in-memory cache, can be replaced with context or other state management if needed
 
+import { StepOutputWithData } from '@openops/shared';
+
 /**
  * StepTestOutputCache manages test output and expanded state for steps in the Data Selector.
  */
 export class StepTestOutputCache {
-  private stepData: Record<string, any> = {};
+  private stepData: Record<string, StepOutputWithData> = {};
   private expandedNodes: Record<string, boolean> = {};
 
   /**
@@ -18,7 +20,7 @@ export class StepTestOutputCache {
   /**
    * Set test output for a step.
    */
-  setStepData(stepId: string, data: any) {
+  setStepData(stepId: string, data: StepOutputWithData) {
     this.stepData[stepId] = data;
   }
 

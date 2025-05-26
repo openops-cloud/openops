@@ -7,12 +7,21 @@ describe('StepTestOutputCache', () => {
   });
 
   it('should set and get step data', () => {
-    cache.setStepData('step1', { foo: 'bar' });
-    expect(cache.getStepData('step1')).toEqual({ foo: 'bar' });
+    cache.setStepData('step1', {
+      output: { foo: 'bar' },
+      lastTestDate: '2024-01-01T00:00:00Z',
+    });
+    expect(cache.getStepData('step1')).toEqual({
+      output: { foo: 'bar' },
+      lastTestDate: '2024-01-01T00:00:00Z',
+    });
   });
 
   it('should clear step data and expanded state', () => {
-    cache.setStepData('step1', { foo: 'bar' });
+    cache.setStepData('step1', {
+      output: { foo: 'bar' },
+      lastTestDate: '2024-01-01T00:00:00Z',
+    });
     cache.setExpanded('step1', true);
     cache.clearStep('step1');
     expect(cache.getStepData('step1')).toBeUndefined();
@@ -37,7 +46,10 @@ describe('StepTestOutputCache', () => {
   });
 
   it('should clear all cache and expanded state', () => {
-    cache.setStepData('step1', { foo: 'bar' });
+    cache.setStepData('step1', {
+      output: { foo: 'bar' },
+      lastTestDate: '2024-01-01T00:00:00Z',
+    });
     cache.setExpanded('node1', true);
     cache.clearAll();
     expect(cache.getStepData('step1')).toBeUndefined();

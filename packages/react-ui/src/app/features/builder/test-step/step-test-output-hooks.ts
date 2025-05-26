@@ -49,7 +49,7 @@ export const stepTestOutputHooks = {
           return resolveFallbackData();
         }
 
-        stepTestOutputCache.setStepData(stepId, stepTestOutput.output);
+        stepTestOutputCache.setStepData(stepId, stepTestOutput);
 
         return stepTestOutput;
       },

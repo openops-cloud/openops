@@ -9,7 +9,7 @@ import { t } from 'i18next';
 import { SearchXIcon } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { FlagId, flowHelper, isNil } from '@openops/shared';
+import { FlagId, flowHelper, isNil, StepOutputWithData } from '@openops/shared';
 
 import { useBuilderStateContext } from '../builder-hooks';
 
@@ -136,7 +136,7 @@ const DataSelector = ({
   );
 
   const stepIds: string[] = pathToTargetStep.map((p) => p.id!);
-  console.log('stepIds', stepIds);
+  // console.log('stepIds', stepIds);
 
   const [forceRender, forceRerender] = useState(0); // for cache updates
   const [initialLoad, setInitialLoad] = useState(true);
@@ -155,7 +155,7 @@ const DataSelector = ({
     if (!useNewExternalTestData) {
       return mentionsFromCurrentSelectedData;
     }
-    const stepTestOutput: Record<string, any> = {};
+    const stepTestOutput: Record<string, StepOutputWithData> = {};
     stepIds.forEach((id) => {
       const cached = stepTestOutputCache.getStepData(id);
       if (cached) stepTestOutput[id] = cached;

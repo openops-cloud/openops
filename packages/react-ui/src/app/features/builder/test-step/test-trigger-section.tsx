@@ -186,10 +186,10 @@ const TestTriggerSection = React.memo(
 
     function updateCurrentSelectedData(data: TriggerEvent) {
       if (useNewExternalTestData) {
-        stepTestOutputCache.setStepData(
-          formValues.id!,
-          formatUtils.formatStepInputOrOutput(data.payload),
-        );
+        stepTestOutputCache.setStepData(formValues.id!, {
+          output: formatUtils.formatStepInputOrOutput(data.payload),
+          lastTestDate: dayjs().toISOString(),
+        });
       } else {
         form.setValue(
           'settings.inputUiInfo',

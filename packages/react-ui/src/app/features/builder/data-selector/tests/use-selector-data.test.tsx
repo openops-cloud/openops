@@ -59,7 +59,10 @@ describe('useSelectorData', () => {
   it('fetches and caches data for all stepIds on initial load', async () => {
     const stepIds = ['a', 'b'];
     const flowVersionId = 'fv1';
-    const testData = { a: { foo: 1 }, b: { bar: 2 } };
+    const testData = {
+      a: { output: { foo: 1 }, lastTestDate: '2024-01-01T00:00:00Z' },
+      b: { output: { bar: 2 }, lastTestDate: '2024-01-01T00:00:00Z' },
+    };
     (flowsApi.getStepTestOutputBulk as jest.Mock).mockResolvedValue(testData);
 
     let initialLoad = true;
@@ -85,8 +88,18 @@ describe('useSelectorData', () => {
     const flowVersionId = 'fv2';
     const testData = { c: { baz: 3 } };
     (flowsApi.getStepTestOutputBulk as jest.Mock).mockResolvedValue(testData);
-    stepTestOutputCache.setStepData('a', { cached: true });
-    stepTestOutputCache.setStepData('b', { cached: true });
+
+    const stepAData = {
+      output: { foo: 1 },
+      lastTestDate: '2024-01-01T00:00:00Z',
+    };
+    const stepBData = {
+      output: { bar: 2 },
+      lastTestDate: '2024-01-01T00:00:00Z',
+    };
+
+    stepTestOutputCache.setStepData('a', stepAData);
+    stepTestOutputCache.setStepData('b', stepBData);
 
     let initialLoad = false;
     const { result } = setupHook({ stepIds, flowVersionId, initialLoad });
@@ -95,8 +108,8 @@ describe('useSelectorData', () => {
     expect(flowsApi.getStepTestOutputBulk).toHaveBeenCalledWith(flowVersionId, [
       'c',
     ]);
-    expect(stepTestOutputCache.getStepData('a')).toEqual({ cached: true });
-    expect(stepTestOutputCache.getStepData('b')).toEqual({ cached: true });
+    expect(stepTestOutputCache.getStepData('a')).toEqual(stepAData);
+    expect(stepTestOutputCache.getStepData('b')).toEqual(stepBData);
     expect(stepTestOutputCache.getStepData('c')).toEqual(testData.c);
     expect(forceRerender).toHaveBeenCalledTimes(1);
   });
