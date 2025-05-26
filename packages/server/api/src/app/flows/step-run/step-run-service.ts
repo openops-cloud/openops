@@ -13,7 +13,7 @@ import {
 } from '@openops/shared';
 import { engineRunner } from 'server-worker';
 import { accessTokenManager } from '../../authentication/lib/access-token-manager';
-import { inMemoryFlagsService } from '../../flags/in-memory-flags.service';
+import { devFlagsService } from '../../flags/dev-flags.service';
 import { sendWorkflowTestBlockEvent } from '../../telemetry/event-models';
 import { flowVersionService } from '../flow-version/flow-version.service';
 import { flowStepTestOutputService } from '../step-test-output/flow-step-test-output.service';
@@ -43,7 +43,7 @@ export const stepRunService = {
     }
 
     let testOutputs: Record<OpenOpsId, string> | undefined = undefined;
-    if (await inMemoryFlagsService.getOne(FlagId.USE_NEW_EXTERNAL_TESTDATA)) {
+    if (await devFlagsService.getOne(FlagId.USE_NEW_EXTERNAL_TESTDATA)) {
       testOutputs = await flowStepTestOutputService.getAllStepOutputs(
         flowVersion.id,
       );

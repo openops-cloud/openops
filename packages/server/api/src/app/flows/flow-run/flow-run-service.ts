@@ -31,7 +31,7 @@ import { In, LessThan } from 'typeorm';
 import { repoFactory } from '../../core/db/repo-factory';
 import { APArrayContains } from '../../database/database-connection';
 import { fileService } from '../../file/file.service';
-import { inMemoryFlagsService } from '../../flags/in-memory-flags.service';
+import { devFlagsService } from '../../flags/dev-flags.service';
 import { buildPaginator } from '../../helper/pagination/build-paginator';
 import { paginationHelper } from '../../helper/pagination/pagination-utils';
 import { Order } from '../../helper/pagination/paginator';
@@ -353,7 +353,7 @@ export const flowRunService = {
     const flowVersion = await flowVersionService.getOneOrThrow(flowVersionId);
 
     let payload = flowVersion.trigger.settings.inputUiInfo.currentSelectedData;
-    if (await inMemoryFlagsService.getOne(FlagId.USE_NEW_EXTERNAL_TESTDATA)) {
+    if (await devFlagsService.getOne(FlagId.USE_NEW_EXTERNAL_TESTDATA)) {
       payload = await flowStepTestOutputService.list({
         flowVersionId: flowVersion.id,
         stepIds: [flowVersion.trigger.id!],

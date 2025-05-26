@@ -24,8 +24,8 @@ import {
 } from '@openops/shared';
 import { engineRunner } from 'server-worker';
 import { accessTokenManager } from '../authentication/lib/access-token-manager';
+import { devFlagsService } from '../flags/dev-flags.service';
 import { flagService } from '../flags/flag.service';
-import { inMemoryFlagsService } from '../flags/in-memory-flags.service';
 import { flowService } from '../flows/flow/flow.service';
 import { flowStepTestOutputService } from '../flows/step-test-output/flow-step-test-output.service';
 import {
@@ -156,7 +156,7 @@ const baseBlocksController: FastifyPluginAsyncTypebox = async (app) => {
     });
 
     let testOutputs: Record<OpenOpsId, string> | undefined = undefined;
-    if (await inMemoryFlagsService.getOne(FlagId.USE_NEW_EXTERNAL_TESTDATA)) {
+    if (await devFlagsService.getOne(FlagId.USE_NEW_EXTERNAL_TESTDATA)) {
       testOutputs = await flowStepTestOutputService.getAllStepOutputs(
         request.flowVersionId,
       );
