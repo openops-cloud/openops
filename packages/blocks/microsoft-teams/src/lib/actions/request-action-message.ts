@@ -4,10 +4,7 @@ import {
   StoreScope,
   Validators,
 } from '@openops/blocks-framework';
-import {
-  generateResumeExecutionUiUrl,
-  networkUtls,
-} from '@openops/server-shared';
+import { networkUtls } from '@openops/server-shared';
 import { ExecutionType } from '@openops/shared';
 import { ChannelOption, ChatOption } from '../common/chat-types';
 import { chatsAndChannels } from '../common/chats-and-channels';
@@ -86,19 +83,23 @@ export const requestActionMessageAction = createAction({
     if (context.executionType === ExecutionType.BEGIN) {
       const baseUrl = await networkUtls.getPublicUrl();
 
-      const preparedActions: TeamsMessageButton[] = actions.map((action) => ({
-        ...action,
-        resumeUrl: context.run.isTest
-          ? 'https://static.openops.com/test_teams_actions.txt'
-          : generateResumeExecutionUiUrl(
-              context,
-              {
-                executionCorrelationId: context.run.pauseId,
-                button: action.buttonText,
-              },
-              baseUrl,
-            ),
-      }));
+      const preparedActions: TeamsMessageButton[] = actions.map((action) => {
+        const resumeUrl = context.generateResumeUrl(
+          {
+            queryParams: {
+              executionCorrelationId: context.run.pauseId,
+              button: action.buttonText,
+            },
+          },
+          baseUrl,
+        );
+        return {
+          ...action,
+          resumeUrl: `https://static.openops.com/html/resume_execution.html?isTest=${
+            context.run.isTest
+          }&redirectUrl=${encodeURIComponent(resumeUrl)}`,
+        };
+      });
 
       const result = await sendChatOrChannelMessage({
         accessToken: context.auth.access_token,
