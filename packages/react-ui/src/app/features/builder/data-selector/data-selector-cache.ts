@@ -1,6 +1,3 @@
-// Utility for caching step test output and expanded state in the Data Selector
-// This is a simple in-memory cache, can be replaced with context or other state management if needed
-
 import { StepOutputWithData } from '@openops/shared';
 
 /**
@@ -52,7 +49,7 @@ export class StepTestOutputCache {
   }
 
   /**
-   * Reset all expanded state (e.g., when a step is re-tested).
+   * Reset all expanded state
    */
   resetExpandedForStep(stepId: string) {
     Object.keys(this.expandedNodes).forEach((key) => {
