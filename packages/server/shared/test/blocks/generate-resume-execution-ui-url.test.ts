@@ -1,3 +1,8 @@
+import {
+  ActionContext,
+  OAuth2Property,
+  OAuth2Props,
+} from '@openops/blocks-framework';
 import { generateResumeExecutionUiUrl } from '../../src/lib/blocks/generate-resume-execution-ui-url';
 
 describe('generateResumeExecutionUiUrl', () => {
@@ -11,14 +16,14 @@ describe('generateResumeExecutionUiUrl', () => {
     },
     generateResumeUrl: jest
       .fn()
-      .mockImplementation(({ queryParams, baseUrl }) => {
-        return new URL(
-          `https://${baseUrl || 'example.com'}/resume?executionCorrelationId=${
-            queryParams.executionCorrelationId
-          }&button=${queryParams.button}`,
-        );
+      .mockImplementation(({ queryParams }, baseUrl) => {
+        return `https://${
+          baseUrl || 'example.com'
+        }/resume?executionCorrelationId=${
+          queryParams.executionCorrelationId
+        }&button=${queryParams.button}`;
       }),
-  };
+  } as unknown as ActionContext<OAuth2Property<OAuth2Props>>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -27,16 +32,16 @@ describe('generateResumeExecutionUiUrl', () => {
   it('should generate correct URL with default baseUrl', () => {
     const result = generateResumeExecutionUiUrl(mockAction, mockContext);
 
-    // Verify generateResumeUrl was called with correct parameters
-    expect(mockContext.generateResumeUrl).toHaveBeenCalledWith({
-      queryParams: {
-        executionCorrelationId: 'test-pause-id',
-        button: 'Approve',
+    expect(mockContext.generateResumeUrl).toHaveBeenCalledWith(
+      {
+        queryParams: {
+          executionCorrelationId: 'test-pause-id',
+          button: 'Approve',
+        },
       },
-      baseUrl: undefined,
-    });
+      undefined,
+    );
 
-    // Verify the final URL structure
     expect(result).toContain(
       'https://static.openops.com/html/resume_execution.html',
     );
@@ -53,18 +58,18 @@ describe('generateResumeExecutionUiUrl', () => {
       baseUrl,
     );
 
-    // Verify generateResumeUrl was called with correct parameters
-    expect(mockContext.generateResumeUrl).toHaveBeenCalledWith({
-      queryParams: {
-        executionCorrelationId: 'test-pause-id',
-        button: 'Approve',
+    expect(mockContext.generateResumeUrl).toHaveBeenCalledWith(
+      {
+        queryParams: {
+          executionCorrelationId: 'test-pause-id',
+          button: 'Approve',
+        },
       },
       baseUrl,
-    });
+    );
 
-    // Verify the final URL structure contains the custom domain
-    expect(result).toContain(
-      'redirectUrl=https%3A%2F%2Fcustom-domain.com%2Fresume',
+    expect(result).toEqual(
+      'https://static.openops.com/html/resume_execution.html?redirectUrl=https%3A%2F%2Fcustom-domain.com%2Fresume%3FexecutionCorrelationId%3Dtest-pause-id%26button%3DApprove',
     );
   });
 
@@ -75,14 +80,15 @@ describe('generateResumeExecutionUiUrl', () => {
 
     const result = generateResumeExecutionUiUrl(customAction, mockContext);
 
-    // Verify the button text is included in the URL
-    expect(mockContext.generateResumeUrl).toHaveBeenCalledWith({
-      queryParams: {
-        executionCorrelationId: 'test-pause-id',
-        button: 'Reject',
+    expect(mockContext.generateResumeUrl).toHaveBeenCalledWith(
+      {
+        queryParams: {
+          executionCorrelationId: 'test-pause-id',
+          button: 'Reject',
+        },
       },
-      baseUrl: undefined,
-    });
+      undefined,
+    );
 
     expect(result).toContain('button%3DReject');
   });
@@ -97,23 +103,22 @@ describe('generateResumeExecutionUiUrl', () => {
       mockContext,
     );
 
-    // Verify special characters are properly encoded
-    expect(mockContext.generateResumeUrl).toHaveBeenCalledWith({
-      queryParams: {
-        executionCorrelationId: 'test-pause-id',
-        button: 'Special & Chars?',
+    expect(mockContext.generateResumeUrl).toHaveBeenCalledWith(
+      {
+        queryParams: {
+          executionCorrelationId: 'test-pause-id',
+          button: 'Special & Chars?',
+        },
       },
-      baseUrl: undefined,
-    });
+      undefined,
+    );
 
-    // The URL encoding should be handled by the URL and URLSearchParams objects
     expect(result).toContain('redirectUrl=');
   });
 
   it('should return a valid URL string', () => {
     const result = generateResumeExecutionUiUrl(mockAction, mockContext);
 
-    // Verify the result is a valid URL
     expect(() => new URL(result)).not.toThrow();
   });
 });
