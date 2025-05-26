@@ -50,6 +50,7 @@ export * from './lib/forms';
 export * from './lib/invitations';
 export * from './lib/license-keys';
 export * from './lib/organization';
+export * from './lib/platform-metadata';
 export * from './lib/project';
 export * from './lib/store-entry/dto/store-entry-request';
 export * from './lib/store-entry/store-entry';
