@@ -51,7 +51,7 @@ const AiAssistantChatContainer = ({
   useEffect(() => {
     setTimeout(() => {
       if (
-        !!scrollViewportRef.current &&
+        scrollViewportRef.current &&
         !isEmpty &&
         showAiChat &&
         !hasScrolledOnce.current
