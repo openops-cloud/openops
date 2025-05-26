@@ -1,6 +1,5 @@
-import { encryptUtils, fileCompressor } from '@openops/server-shared';
+import { stepOutputTransformer } from '@openops/server-shared';
 import {
-  FileCompression,
   FlowStepTestOutput,
   FlowVersionId,
   OpenOpsId,
@@ -18,13 +17,9 @@ export const flowStepTestOutputService = {
     flowVersionId,
     output,
   }: SaveParams): Promise<FlowStepTestOutput> {
-    const encryptOutput = encryptUtils.encryptObject(output);
-    const binaryOutput = Buffer.from(JSON.stringify(encryptOutput));
-
-    const compressedOutput = await fileCompressor.compress({
-      data: binaryOutput,
-      compression: FileCompression.GZIP,
-    });
+    const compressedOutput = await stepOutputTransformer.encryptAndCompress(
+      output,
+    );
 
     const existing = await flowStepTestOutputRepo().findOneBy({
       stepId,
@@ -75,24 +70,16 @@ export const flowStepTestOutputService = {
       stepId: In(params.stepIds),
     });
 
-    const results: FlowStepTestOutput[] = await Promise.all(
-      flowStepTestOutputs.map(decompressOutput),
-    );
-
-    return results;
+    return Promise.all(flowStepTestOutputs.map(decompressOutput));
   },
 };
 
 async function decompressOutput(
   record: FlowStepTestOutput,
 ): Promise<FlowStepTestOutput> {
-  const decompressed = await fileCompressor.decompress({
-    data: record.output as Buffer,
-    compression: FileCompression.GZIP,
-  });
-
-  const parsedEncryptedOutput = JSON.parse(decompressed.toString());
-  const decryptedOutput = encryptUtils.decryptObject(parsedEncryptedOutput);
+  const decryptedOutput = await stepOutputTransformer.decompressAndDecrypt(
+    record.output as Buffer,
+  );
 
   return {
     ...record,
