@@ -14,9 +14,6 @@ import { FlagId, flowHelper, isNil } from '@openops/shared';
 import { useBuilderStateContext } from '../builder-hooks';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
-import { QueryKeys } from '@/app/constants/query-keys';
-import { useQuery } from '@tanstack/react-query';
-import { flowsApi } from '../../flows/lib/flows-api';
 import { BuilderState } from '../builder-types';
 import { stepTestOutputCache } from './data-selector-cache';
 import { DataSelectorNode } from './data-selector-node';
@@ -25,6 +22,7 @@ import {
   DataSelectorSizeTogglers,
 } from './data-selector-size-togglers';
 import { dataSelectorUtils, MentionTreeNode } from './data-selector-utils';
+import { useSelectorData } from './use-selector-data';
 
 function filterBy(arr: MentionTreeNode[], query: string): MentionTreeNode[] {
   if (!query) {
@@ -143,42 +141,14 @@ const DataSelector = ({
   const [forceRender, forceRerender] = useState(0); // for cache updates
   const [initialLoad, setInitialLoad] = useState(true);
 
-  const fetchAndCacheStepData = async (ids: string[]) => {
-    if (!ids.length) return {};
-    const stepTestOutput = await flowsApi.getStepTestOutputBulk(
-      flowVersionId,
-      ids,
-    );
-    ids.forEach((id) => {
-      if (stepTestOutput[id]) {
-        stepTestOutputCache.setStepData(id, stepTestOutput[id]);
-      }
-    });
-    forceRerender((v) => v + 1);
-    return stepTestOutput;
-  };
-
-  const { isLoading } = useQuery({
-    queryKey: [QueryKeys.dataSelectorStepTestOutput, flowVersionId, ...stepIds],
-    queryFn: async () => {
-      if (!useNewExternalTestData) return {};
-      if (initialLoad) {
-        setInitialLoad(false);
-        return fetchAndCacheStepData(stepIds);
-      } else {
-        // Only fetch for steps that don't have data in the cache
-        const idsToFetch = stepIds.filter(
-          (id) => stepTestOutputCache.getStepData(id) === undefined,
-        );
-        if (idsToFetch.length) {
-          return fetchAndCacheStepData(idsToFetch);
-        }
-        return {};
-      }
-    },
-    enabled:
-      !!useNewExternalTestData && isDataSelectorVisible && stepIds.length > 0,
-    staleTime: 0,
+  const { isLoading } = useSelectorData({
+    stepIds,
+    flowVersionId,
+    useNewExternalTestData: !!useNewExternalTestData,
+    isDataSelectorVisible,
+    initialLoad,
+    setInitialLoad,
+    forceRerender,
   });
 
   const mentions = useMemo(() => {
