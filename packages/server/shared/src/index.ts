@@ -1,6 +1,5 @@
 export * from './lib/blocks-builder';
 export * from './lib/blocks/file-blocks-utils';
-export * from './lib/blocks/step-output-transformer';
 export * from './lib/cache-handler';
 export * from './lib/cache/cache-wrapper';
 export * from './lib/cache/redis-connection';
@@ -23,6 +22,7 @@ export * from './lib/promise-handler';
 export * from './lib/security/encryption';
 export * from './lib/security/encryption-key-initializer';
 export * from './lib/security/local-store';
+export * from './lib/security/object-transformer';
 export * from './lib/semaphore';
 export * from './lib/stop-handlers';
 export * from './lib/system';

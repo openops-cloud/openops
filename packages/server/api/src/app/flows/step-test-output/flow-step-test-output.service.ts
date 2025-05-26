@@ -1,4 +1,7 @@
-import { stepOutputTransformer } from '@openops/server-shared';
+import {
+  decompressAndDecrypt,
+  encryptAndCompress,
+} from '@openops/server-shared';
 import {
   FlowStepTestOutput,
   FlowVersionId,
@@ -17,9 +20,7 @@ export const flowStepTestOutputService = {
     flowVersionId,
     output,
   }: SaveParams): Promise<FlowStepTestOutput> {
-    const compressedOutput = await stepOutputTransformer.encryptAndCompress(
-      output,
-    );
+    const compressedOutput = await encryptAndCompress(output);
 
     const existing = await flowStepTestOutputRepo().findOneBy({
       stepId,
@@ -77,9 +78,7 @@ export const flowStepTestOutputService = {
 async function decompressOutput(
   record: FlowStepTestOutput,
 ): Promise<FlowStepTestOutput> {
-  const decryptedOutput = await stepOutputTransformer.decompressAndDecrypt(
-    record.output as Buffer,
-  );
+  const decryptedOutput = await decompressAndDecrypt(record.output as Buffer);
 
   return {
     ...record,

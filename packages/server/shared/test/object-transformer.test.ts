@@ -17,7 +17,10 @@ jest.mock('../src/lib/security/encryption', () => ({
 }));
 
 import { FileCompression } from '@openops/shared';
-import { stepOutputTransformer } from '../src/lib/blocks/step-output-transformer';
+import {
+  decompressAndDecrypt,
+  encryptAndCompress,
+} from '../src/lib/security/object-transformer';
 
 describe('stepOutputTransformer', () => {
   beforeEach(() => {
@@ -32,7 +35,7 @@ describe('stepOutputTransformer', () => {
     encryptObjectMock.mockReturnValue(encryptedOutput);
     compressMock.mockResolvedValue(compressedOutput);
 
-    const result = await stepOutputTransformer.encryptAndCompress(testOutput);
+    const result = await encryptAndCompress(testOutput);
 
     expect(encryptObjectMock).toHaveBeenCalledWith(testOutput);
     expect(compressMock).toHaveBeenCalledWith({
@@ -52,9 +55,7 @@ describe('stepOutputTransformer', () => {
     decompressMock.mockResolvedValue(decompressedOutput);
     decryptObjectMock.mockReturnValue(decryptedOutput);
 
-    const result = await stepOutputTransformer.decompressAndDecrypt(
-      compressedOutput,
-    );
+    const result = await decompressAndDecrypt(compressedOutput);
 
     expect(decompressMock).toHaveBeenCalledWith({
       data: compressedOutput,
@@ -77,12 +78,8 @@ describe('stepOutputTransformer', () => {
     decompressMock.mockResolvedValue(decompressedEmpty);
     decryptObjectMock.mockReturnValue(emptyObject);
 
-    const compressed = await stepOutputTransformer.encryptAndCompress(
-      emptyObject,
-    );
-    const decompressed = await stepOutputTransformer.decompressAndDecrypt(
-      compressed,
-    );
+    const compressed = await encryptAndCompress(emptyObject);
+    const decompressed = await decompressAndDecrypt(compressed);
 
     expect(compressed).toBe(compressedEmpty);
     expect(decompressed).toBe(emptyObject);
@@ -99,12 +96,8 @@ describe('stepOutputTransformer', () => {
     decompressMock.mockResolvedValue(decompressedNull);
     decryptObjectMock.mockReturnValue(nullValue);
 
-    const compressed = await stepOutputTransformer.encryptAndCompress(
-      nullValue,
-    );
-    const decompressed = await stepOutputTransformer.decompressAndDecrypt(
-      compressed,
-    );
+    const compressed = await encryptAndCompress(nullValue);
+    const decompressed = await decompressAndDecrypt(compressed);
 
     expect(compressed).toBe(compressedNull);
     expect(decompressed).toBe(nullValue);
