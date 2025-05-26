@@ -19,6 +19,7 @@ export * from './lib/memory-lock';
 export * from './lib/network-utils';
 export * from './lib/package-manager';
 export * from './lib/promise-handler';
+export * from './lib/security/encrypt-compress';
 export * from './lib/security/encryption';
 export * from './lib/security/encryption-key-initializer';
 export * from './lib/security/local-store';
