@@ -1,3 +1,4 @@
+import { stepOutputTransformer } from '@openops/server-shared';
 import {
   ActionType,
   ApplicationError,
@@ -44,9 +45,11 @@ export const stepRunService = {
 
     let testOutputs: Record<OpenOpsId, string> | undefined = undefined;
     if (await devFlagsService.getOne(FlagId.USE_NEW_EXTERNAL_TESTDATA)) {
-      testOutputs = await flowStepTestOutputService.getAllStepOutputs(
+      const outputs = await flowStepTestOutputService.listEncrypted(
         flowVersion.id,
       );
+
+      testOutputs = stepOutputTransformer.encodeTestOutputs(outputs);
     }
 
     const engineToken = await accessTokenManager.generateEngineToken({

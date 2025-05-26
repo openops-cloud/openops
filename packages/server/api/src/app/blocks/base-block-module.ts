@@ -7,6 +7,7 @@ import {
   BlockMetadataModel,
   BlockMetadataModelSummary,
 } from '@openops/blocks-framework';
+import { stepOutputTransformer } from '@openops/server-shared';
 import {
   ALL_PRINCIPAL_TYPES,
   BlockCategory,
@@ -157,9 +158,11 @@ const baseBlocksController: FastifyPluginAsyncTypebox = async (app) => {
 
     let testOutputs: Record<OpenOpsId, string> | undefined = undefined;
     if (await devFlagsService.getOne(FlagId.USE_NEW_EXTERNAL_TESTDATA)) {
-      testOutputs = await flowStepTestOutputService.getAllStepOutputs(
+      const outputs = await flowStepTestOutputService.listEncrypted(
         request.flowVersionId,
       );
+
+      testOutputs = stepOutputTransformer.encodeTestOutputs(outputs);
     }
 
     const { result } = await engineRunner.executeProp(engineToken, {

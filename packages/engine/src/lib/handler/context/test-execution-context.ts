@@ -32,6 +32,11 @@ export const testExecutionContext = {
     const flowSteps = flowHelper.getAllSteps(flowVersion.trigger);
     let flowExecutionContext = FlowExecutorContext.empty();
 
+    let decodedTestOutputs: Record<OpenOpsId, Buffer> = {};
+    if (testOutputs) {
+      decodedTestOutputs = stepOutputTransformer.decodeTestOutputs(testOutputs);
+    }
+
     for (const step of flowSteps) {
       const {
         name,
@@ -43,11 +48,10 @@ export const testExecutionContext = {
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let currentOutput: any;
-      if (testOutputs && step.id && testOutputs?.[step.id]) {
-        currentOutput =
-          await stepOutputTransformer.decompressAndDecryptEncodedString(
-            testOutputs?.[step.id],
-          );
+      if (decodedTestOutputs && step.id && testOutputs?.[step.id]) {
+        currentOutput = await stepOutputTransformer.decompressAndDecrypt(
+          decodedTestOutputs?.[step.id],
+        );
       } else {
         currentOutput = inputUiInfo?.currentSelectedData;
       }

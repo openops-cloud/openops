@@ -1,7 +1,4 @@
-import {
-  stepOutputStringEncoding,
-  stepOutputTransformer,
-} from '@openops/server-shared';
+import { stepOutputTransformer } from '@openops/server-shared';
 import {
   FlowStepTestOutput,
   FlowVersionId,
@@ -67,7 +64,7 @@ export const flowStepTestOutputService = {
     );
   },
 
-  async list(params: ListParams): Promise<FlowStepTestOutput[]> {
+  async listDecrypted(params: ListParams): Promise<FlowStepTestOutput[]> {
     const flowStepTestOutputs = await flowStepTestOutputRepo().findBy({
       flowVersionId: params.flowVersionId,
       stepId: In(params.stepIds),
@@ -76,21 +73,12 @@ export const flowStepTestOutputService = {
     return Promise.all(flowStepTestOutputs.map(decompressOutput));
   },
 
-  async getAllStepOutputs(
+  async listEncrypted(
     flowVersionId: FlowVersionId,
-  ): Promise<Record<OpenOpsId, string>> {
-    const flowStepTestOutputs = await flowStepTestOutputRepo().findBy({
+  ): Promise<FlowStepTestOutput[]> {
+    return flowStepTestOutputRepo().findBy({
       flowVersionId,
     });
-
-    return Object.fromEntries(
-      flowStepTestOutputs.map((flowStepTestOutput) => [
-        flowStepTestOutput.stepId as OpenOpsId,
-        (flowStepTestOutput.output as Buffer).toString(
-          stepOutputStringEncoding,
-        ),
-      ]),
-    );
   },
 };
 
