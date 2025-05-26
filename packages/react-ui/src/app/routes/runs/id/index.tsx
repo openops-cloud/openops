@@ -2,6 +2,7 @@ import { LoadingSpinner } from '@openops/components/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 
+import { QueryKeys } from '@/app/constants/query-keys';
 import { BuilderPage } from '@/app/features/builder';
 import { BuilderStateProvider } from '@/app/features/builder/builder-state-provider';
 import { flowRunsApi } from '@/app/features/flow-runs/lib/flow-runs-api';
@@ -18,7 +19,7 @@ const FlowRunPage = () => {
     },
     Error
   >({
-    queryKey: ['run', runId],
+    queryKey: [QueryKeys.run, runId],
     queryFn: async () => {
       const flowRun = await flowRunsApi.getPopulated(runId!);
       const flow = await flowsApi.get(flowRun.flowId, {

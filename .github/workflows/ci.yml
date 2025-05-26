@@ -217,6 +217,15 @@ jobs:
             type=registry,ref=${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}-cache
             type=registry,ref=${{ env.REPOSITORY_URI }}:main-cache
           cache-to: mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}-cache
+      - name: Push single-arch manifest for the engine
+        if: vars.ECR_REGION && matrix.target.name == 'Engine'
+        env:
+          SHA_TAG: ${{ env.REPOSITORY_URI }}:${{ env.SHORT_SHA }}
+          BRANCH_TAG: ${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}
+        run: |
+          docker pull $SHA_TAG
+          docker tag $SHA_TAG ${SHA_TAG}-amd64 && docker push ${SHA_TAG}-amd64
+          docker tag $SHA_TAG ${BRANCH_TAG}-amd64 && docker push ${BRANCH_TAG}-amd64
       - name: Build image
         if: ${{ !vars.ECR_REGION }}
         uses: docker/build-push-action@v6

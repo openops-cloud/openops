@@ -1,5 +1,6 @@
 import { usePrefetchQuery, useSuspenseQuery } from '@tanstack/react-query';
 
+import { QueryKeys } from '@/app/constants/query-keys';
 import { flagsApi, FlagsMap } from '@/app/lib/flags-api';
 import { FlagId } from '@openops/shared';
 
@@ -31,14 +32,14 @@ export const flagsHooks = {
   prefetchFlags: () => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     usePrefetchQuery<FlagsMap, Error>({
-      queryKey: ['flags'],
+      queryKey: [QueryKeys.flags],
       queryFn: flagsApi.getAll,
       staleTime: Infinity,
     });
   },
   useFlags: () => {
     return useSuspenseQuery<FlagsMap, Error>({
-      queryKey: ['flags'],
+      queryKey: [QueryKeys.flags],
       queryFn: flagsApi.getAll,
       staleTime: Infinity,
     });
@@ -49,7 +50,7 @@ export const flagsHooks = {
   },
   useFlag: <T>(flagId: FlagId) => {
     const data = useSuspenseQuery<FlagsMap, Error>({
-      queryKey: ['flags'],
+      queryKey: [QueryKeys.flags],
       queryFn: flagsApi.getAll,
       staleTime: Infinity,
     }).data?.[flagId] as T | null;
