@@ -24,7 +24,7 @@ const AiAssistantButton = ({ className }: { className?: string }) => {
   }, [applyMidpanelAction, isAiChatOpened, setIsAiChatOpened]);
 
   return (
-    <TooltipWrapper tooltipText={t('AI Assistant')}>
+    <TooltipWrapper tooltipText={t('AI Assistant')} tooltipPlacement="right">
       <Button
         variant="ai"
         className={cn('size-9 p-0 gap-2', className, {

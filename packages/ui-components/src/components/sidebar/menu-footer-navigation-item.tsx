@@ -28,10 +28,7 @@ const MenuFooterNavigationItem = ({
   const isActive = location.pathname.startsWith(to);
 
   return (
-    <TooltipWrapper
-      tooltipText={label}
-      tooltipPlacement={hasNotification ? 'top' : 'right'}
-    >
+    <TooltipWrapper tooltipText={label} tooltipPlacement="right">
       <Link
         to={to}
         className={cn(
