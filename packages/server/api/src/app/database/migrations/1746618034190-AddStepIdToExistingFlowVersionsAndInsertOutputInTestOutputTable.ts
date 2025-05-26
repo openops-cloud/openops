@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { fileCompressor, logger } from '@openops/server-shared';
+import { encryptUtils, fileCompressor, logger } from '@openops/server-shared';
 import { FileCompression, openOpsId } from '@openops/shared';
 import { MigrationInterface, QueryRunner } from 'typeorm';
-import { encryptUtils } from '../../helper/encryption';
 
 export class AddStepIdToExistingFlowVersionsAndInsertOutputInTestOutputTable1746454781866
   implements MigrationInterface

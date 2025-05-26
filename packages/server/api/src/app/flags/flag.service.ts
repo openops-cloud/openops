@@ -10,6 +10,7 @@ import { Flag, FlagId } from '@openops/shared';
 import axios from 'axios';
 import { webhookUtils } from 'server-worker';
 import { repoFactory } from '../core/db/repo-factory';
+import { devFlagsService } from './dev-flags.service';
 import { FlagEntity } from './flag.entity';
 import { defaultTheme } from './theme';
 
@@ -35,6 +36,10 @@ export const flagService = {
     const created = now;
     const updated = now;
     const latestVersion = await this.getLatestRelease();
+
+    const devFlags = await devFlagsService.getAll();
+
+    flags.push(...devFlags);
     flags.push(
       {
         id: FlagId.ENVIRONMENT,
@@ -285,12 +290,6 @@ export const flagService = {
       {
         id: FlagId.CANDU_CLIENT_TOKEN,
         value: system.get<string>(AppSystemProp.CANDU_CLIENT_TOKEN),
-        created,
-        updated,
-      },
-      {
-        id: FlagId.USE_NEW_EXTERNAL_TESTDATA,
-        value: false,
         created,
         updated,
       },

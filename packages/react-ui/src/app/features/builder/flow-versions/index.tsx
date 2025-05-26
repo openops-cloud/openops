@@ -7,6 +7,7 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { t } from 'i18next';
 
+import { QueryKeys } from '@/app/constants/query-keys';
 import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
 import { flowsApi } from '@/app/features/flows/lib/flows-api';
 import { FlowVersionMetadata, SeekPage } from '@openops/shared';
@@ -24,7 +25,7 @@ const FlowVersionsList = () => {
     isLoading,
     isError,
   } = useQuery<SeekPage<FlowVersionMetadata>, Error>({
-    queryKey: ['flow-versions', flow.id],
+    queryKey: [QueryKeys.flowVersions, flow.id],
     queryFn: () =>
       flowsApi.listVersions(flow.id, {
         limit: 100,

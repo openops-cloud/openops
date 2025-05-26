@@ -13,14 +13,13 @@ services:
         condition: service_healthy
   openops-app:
     image: public.ecr.aws/openops/openops-app:${OPS_VERSION:-latest}
-    platform: linux/amd64
     restart: unless-stopped
     env_file: .env
     environment:
       OPS_COMPONENT: app
       OPS_VERSION: ${OPS_VERSION:-latest}
       OPS_OPENOPS_TABLES_VERSION: 0.2.1
-      OPS_ANALYTICS_VERSION: 0.12.19
+      OPS_ANALYTICS_VERSION: 0.14.0
     depends_on:
       openops-tables:
         condition: service_healthy
@@ -32,7 +31,6 @@ services:
         condition: service_healthy
   openops-engine:
     image: public.ecr.aws/openops/openops-engine:${OPS_VERSION:-latest}
-    platform: linux/amd64
     restart: unless-stopped
     env_file: .env
     command: ["cp -r /var/tmp-base/. /tmp/ && node main.js; exit $?"]
@@ -47,7 +45,6 @@ services:
       - ${HOST_CLOUDSDK_CONFIG:-openops_gcloud_cli_data}:/tmp/gcloud
   openops-tables:
     image: public.ecr.aws/openops/openops-tables:0.2.1
-    platform: linux/amd64
     restart: unless-stopped
     environment:
       BASEROW_PUBLIC_URL: ${OPS_OPENOPS_TABLES_PUBLIC_URL}
@@ -86,9 +83,8 @@ services:
       postgres:
         condition: service_healthy
   openops-analytics:
-    image: public.ecr.aws/openops/openops-analytics:0.12.19
+    image: public.ecr.aws/openops/openops-analytics:0.14.0
     restart: unless-stopped
-    platform: linux/amd64 # Needed for M1 Macs until we have cross-platform CI builds(linux/adm64 and linux/arm64 images)
     environment:
       ADMIN_PASSWORD: ${OPS_ANALYTICS_ADMIN_PASSWORD}
       POWERUSER_PASSWORD: ${ANALYTICS_POWERUSER_PASSWORD}

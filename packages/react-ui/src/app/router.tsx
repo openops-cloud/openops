@@ -41,6 +41,7 @@ import { HomeDemoPage, HomeDemoPageHeader } from './routes/home-demo';
 import { OpenOpsAnalyticsPage } from './routes/openops-analytics';
 import { OpenOpsTablesPage } from './routes/openops-tables';
 import { FlowRunPage } from './routes/runs/id';
+import { AboutSettingsPage } from './routes/settings/about';
 import AppearancePage from './routes/settings/appearance';
 import GeneralPage from './routes/settings/general';
 import { SignInPage } from './routes/sign-in';
@@ -385,6 +386,22 @@ const createRoutes = () => {
           <OpsErrorBoundary>
             <PageTitle title="AI providers">
               <AiSettingsPage />
+            </PageTitle>
+          </OpsErrorBoundary>
+        </ProjectSettingsLayout>
+      </DashboardContainer>
+    ),
+    errorElement: <RouteErrorBoundary />,
+  });
+
+  routes.push({
+    path: '/settings/about',
+    element: (
+      <DashboardContainer pageHeader={<PageHeader title={t('Settings')} />}>
+        <ProjectSettingsLayout>
+          <OpsErrorBoundary>
+            <PageTitle title="About">
+              <AboutSettingsPage />
             </PageTitle>
           </OpsErrorBoundary>
         </ProjectSettingsLayout>

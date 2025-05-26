@@ -1,4 +1,5 @@
 import { AuthenticationResponse } from '@openops/shared';
+import { t } from 'i18next';
 import { ReactNode } from 'react';
 import { cn } from '../../lib/cn';
 import {
@@ -6,7 +7,7 @@ import {
   UserAvatarDropdownMenuContent,
   UserAvatarMenu,
 } from '../../ui/user-avatar-menu';
-import { MenuNavigationItem } from './menu-navigation-item';
+import { MenuFooterNavigationItem } from './menu-footer-navigation-item';
 import { MenuLink } from './types';
 
 export type MenuFooterProps = {
@@ -15,6 +16,8 @@ export type MenuFooterProps = {
   onLogout: () => void;
   isMinimized: boolean;
   cloudConfig: OpenOpsCloudConfig;
+  hasNewerVersionAvailable: boolean;
+  currentVersion?: string;
   children?: ReactNode;
 };
 
@@ -24,8 +27,18 @@ const MenuFooter = ({
   onLogout,
   isMinimized,
   cloudConfig,
+  hasNewerVersionAvailable,
+  currentVersion,
   children,
 }: MenuFooterProps) => {
+  const newerVersionNotification = hasNewerVersionAvailable
+    ? t(
+        'Current version: {currentVersion}. Newer version is available, go to settings to update',
+        {
+          currentVersion,
+        },
+      )
+    : undefined;
   return (
     <>
       {isMinimized && (
@@ -55,15 +68,14 @@ const MenuFooter = ({
               />
             }
           />
-
-          <MenuNavigationItem
+          <MenuFooterNavigationItem
             to={settingsLink.to}
-            label={settingsLink.label}
+            label={newerVersionNotification ?? settingsLink.label}
             Icon={settingsLink.icon}
             iconClassName="size-[21px]"
             className="flex items-center justify-center ml-0 p-0 @[180px]:p-0 size-9 @[180px]:size-9 rounded-full @[180px]:rounded-full bg-accent dark:bg-accent hover:bg-input dark:hover:bg-accent/70"
-            isMinimized={true}
-          ></MenuNavigationItem>
+            hasNotification={hasNewerVersionAvailable}
+          ></MenuFooterNavigationItem>
         </div>
         {!isMinimized && children}
       </div>
