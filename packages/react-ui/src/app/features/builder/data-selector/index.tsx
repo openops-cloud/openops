@@ -231,7 +231,7 @@ const DataSelector = ({
     }
   }, [dataSelectorSize, midpanelState.aiContainerSize, setDataSelectorSize]);
 
-  // Clear cache on unmount or when flowVersionId changes or when the component is unmounted
+  // Clear cache on unmount or when flowVersionId changes
   useEffect(() => {
     return () => {
       stepTestOutputCache.clearAll();
