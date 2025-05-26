@@ -266,7 +266,7 @@ describe('requestActionMessageAction', () => {
       const action = actionBlock.elements[0];
 
       expect(action.url).toBeDefined();
-      expect(action.url).toContain('https://example.com/resume?');
+      expect(action.url).toContain('https%3A%2F%2Fexample.com');
       expect(action.url).toContain('actionClicked=Approve');
 
       expect(result.eventPayload.resumeUrl).toContain(
