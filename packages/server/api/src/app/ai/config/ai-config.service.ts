@@ -11,7 +11,6 @@ import {
   sendAiConfigSavedEvent,
 } from '../../telemetry/event-models/ai';
 import { AiApiKeyRedactionMessage, AiConfigEntity } from './ai-config.entity';
-import { encryptUtils } from '@openops/server-shared';
 
 const repo = repoFactory(AiConfigEntity);
 

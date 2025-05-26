@@ -11,19 +11,23 @@ import {
   ALL_PRINCIPAL_TYPES,
   BlockCategory,
   BlockOptionRequest,
+  FlagId,
   GetBlockRequestParams,
   GetBlockRequestQuery,
   GetBlockRequestWithScopeParams,
   ListBlocksRequestQuery,
   ListVersionRequestQuery,
   ListVersionsResponse,
+  OpenOpsId,
   OpsEdition,
   PrincipalType,
 } from '@openops/shared';
 import { engineRunner } from 'server-worker';
 import { accessTokenManager } from '../authentication/lib/access-token-manager';
 import { flagService } from '../flags/flag.service';
+import { inMemoryFlagsService } from '../flags/in-memory-flags.service';
 import { flowService } from '../flows/flow/flow.service';
+import { flowStepTestOutputService } from '../flows/step-test-output/flow-step-test-output.service';
 import {
   blockMetadataService,
   getBlockPackage,
@@ -150,6 +154,14 @@ const baseBlocksController: FastifyPluginAsyncTypebox = async (app) => {
     const engineToken = await accessTokenManager.generateEngineToken({
       projectId,
     });
+
+    let testOutputs: Record<OpenOpsId, string> | undefined = undefined;
+    if (await inMemoryFlagsService.getOne(FlagId.USE_NEW_EXTERNAL_TESTDATA)) {
+      testOutputs = await flowStepTestOutputService.getAllStepOutputs(
+        request.flowVersionId,
+      );
+    }
+
     const { result } = await engineRunner.executeProp(engineToken, {
       block: await getBlockPackage(projectId, request),
       flowVersion: flow.version,
@@ -158,6 +170,7 @@ const baseBlocksController: FastifyPluginAsyncTypebox = async (app) => {
       input: request.input,
       projectId,
       searchValue: request.searchValue,
+      testOutputs,
     });
 
     return result;

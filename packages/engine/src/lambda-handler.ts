@@ -1,4 +1,9 @@
-import { logger, runWithLogContext, sendLogs } from '@openops/server-shared';
+import {
+  encryptionKeyInitializer,
+  logger,
+  runWithLogContext,
+  sendLogs,
+} from '@openops/server-shared';
 import { EngineResponseStatus } from '@openops/shared';
 import { APIGatewayEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
 import { nanoid } from 'nanoid';
@@ -20,6 +25,8 @@ export async function lambdaHandler(
   }
 
   const data = await parseJson<EngineRequest>(event.body);
+
+  await encryptionKeyInitializer();
 
   return runWithLogContext<APIGatewayProxyResult | undefined>(
     {

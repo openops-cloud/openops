@@ -1,8 +1,7 @@
-import { encryptUtils, fileCompressor } from '@openops/server-shared';
+import { stepOutputTransformer } from '@openops/server-shared';
 import {
   ActionType,
   BranchStepOutput,
-  FileCompression,
   flowHelper,
   FlowVersion,
   GenericStepOutput,
@@ -44,8 +43,11 @@ export const testExecutionContext = {
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let currentOutput: any;
-      if (testOutputs && step.id) {
-        currentOutput = await decompressOutput(testOutputs?.[step.id]);
+      if (testOutputs && step.id && testOutputs?.[step.id]) {
+        currentOutput =
+          await stepOutputTransformer.decompressAndDecryptEncodedString(
+            testOutputs?.[step.id],
+          );
       } else {
         currentOutput = inputUiInfo?.currentSelectedData;
       }
@@ -101,17 +103,3 @@ export const testExecutionContext = {
     return flowExecutionContext;
   },
 };
-
-async function decompressOutput(output: string): Promise<unknown> {
-  if (!output) {
-    return undefined;
-  }
-
-  const decompressed = await fileCompressor.decompress({
-    data: Buffer.from(output, 'base64'),
-    compression: FileCompression.GZIP,
-  });
-
-  const parsedEncryptedOutput = JSON.parse(decompressed.toString());
-  return encryptUtils.decryptObject(parsedEncryptedOutput);
-}
