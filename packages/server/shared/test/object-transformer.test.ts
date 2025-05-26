@@ -20,7 +20,7 @@ import { FileCompression } from '@openops/shared';
 import {
   decompressAndDecrypt,
   encryptAndCompress,
-} from '../src/lib/security/object-transformer';
+} from '../src/lib/security/encrypt-compress';
 
 describe('Object Transformer', () => {
   beforeEach(() => {
