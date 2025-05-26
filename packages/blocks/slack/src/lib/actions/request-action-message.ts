@@ -1,16 +1,12 @@
 import { createAction, StoreScope } from '@openops/blocks-framework';
-import {
-  AppSystemProp,
-  networkUtls,
-  SharedSystemProp,
-  system,
-} from '@openops/server-shared';
+import { networkUtls, SharedSystemProp, system } from '@openops/server-shared';
 import {
   assertNotNullOrUndefined,
   ExecutionType,
   isEmpty,
 } from '@openops/shared';
 import { slackAuth } from '../common/authentication';
+import { generateSlackRedirectUrl } from '../common/generate-slack-redirect-url';
 import { getSlackIdFromPropertyInput } from '../common/get-slack-users';
 import { MessageInfo } from '../common/message-result';
 import {
@@ -114,23 +110,9 @@ const sendMessageAskingForAction = async (
 
   if (!enableSlackInteractions) {
     const baseUrl = await networkUtls.getPublicUrl();
-    const redirectUrl = system.getOrThrow(
-      AppSystemProp.RESUME_EXECUTION_REDIRECT_URL,
-    );
 
     actions.forEach((action: SlackActionDefinition) => {
-      action.url = context.run.isTest
-        ? 'https://static.openops.com/test_slack_interactions.txt'
-        : context.generateResumeUrl(
-            {
-              queryParams: {
-                executionCorrelationId: context.run.pauseId,
-                actionClicked: action.buttonText,
-              },
-            },
-            baseUrl,
-            redirectUrl,
-          );
+      action.url = generateSlackRedirectUrl(action, context, baseUrl);
     });
   }
 

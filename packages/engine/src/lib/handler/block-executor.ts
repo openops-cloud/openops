@@ -172,7 +172,7 @@ const executeAction: ActionHandler<BlockAction> = async ({
       project: {
         id: constants.projectId,
       },
-      generateResumeUrl: (params, baseUrl, resumeExecutionRedirectUrl) => {
+      generateResumeUrl: (params, baseUrl) => {
         const url = new URL(
           `${baseUrl ?? constants.internalApiUrl}v1/flow-runs/${
             constants.flowRunId
@@ -182,13 +182,6 @@ const executeAction: ActionHandler<BlockAction> = async ({
           ...params.queryParams,
           path: currentExecutionPath,
         }).toString();
-        if (resumeExecutionRedirectUrl) {
-          const uiUrl = new URL(resumeExecutionRedirectUrl);
-          uiUrl.search = new URLSearchParams({
-            redirectUrl: url.toString(),
-          }).toString();
-          return uiUrl.toString();
-        }
         return url.toString();
       },
     };

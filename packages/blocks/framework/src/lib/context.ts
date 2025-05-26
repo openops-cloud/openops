@@ -136,21 +136,11 @@ export type BaseActionContext<
     pause: PauseHook;
     isTest: boolean;
   };
-  /**
-   * Generates a URL that can be used to resume execution of a flow.
-   * @param params - Parameters for generating the resume URL
-   * @param params.queryParams - Query parameters to include in the resume URL
-   * @param baseUrl - Optional base URL to use instead of the default
-   * @param resumeExecutionRedirectUrl - Optional URL to redirect to after resuming execution.
-   *                                     If not provided, the system default will be used.
-   * @returns The generated resume URL
-   */
   generateResumeUrl: (
     params: {
       queryParams: Record<string, string>;
     },
     baseUrl?: string,
-    resumeExecutionRedirectUrl?: string,
   ) => string;
   currentExecutionPath: string;
 };
