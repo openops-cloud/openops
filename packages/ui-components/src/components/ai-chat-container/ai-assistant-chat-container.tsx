@@ -4,6 +4,7 @@ import { Bot, Send as SendIcon } from 'lucide-react';
 import { ReactNode, useEffect, useRef } from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
 import { cn } from '../../lib/cn';
+import { AiChatScrollDelay } from '../../lib/constants';
 import { Button } from '../../ui/button';
 import { ScrollArea } from '../../ui/scroll-area';
 import { BoxSize, ResizableArea } from '../resizable-area';
@@ -64,7 +65,7 @@ const AiAssistantChatContainer = ({
 
         hasScrolledOnce.current = true;
       }
-    }, 300);
+    }, AiChatScrollDelay);
   }, [isEmpty, showAiChat, children]);
 
   return (
