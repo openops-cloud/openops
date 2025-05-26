@@ -278,6 +278,7 @@ const Markdown = React.memo(
             li: ({ node, ...props }) => <li {...props} />,
             a: ({ node, ...props }) => (
               <a
+                target="_blank"
                 className="font-medium text-primary underline underline-offset-4"
                 {...props}
               />
