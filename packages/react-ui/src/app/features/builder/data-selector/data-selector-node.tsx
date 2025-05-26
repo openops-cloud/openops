@@ -10,8 +10,8 @@ type DataSelectoNodeProps = {
   node: MentionTreeNode;
   depth: number;
   searchTerm: string;
-  expanded: boolean;
-  setExpanded: (expanded: boolean) => void;
+  getExpanded: (nodeKey: string) => boolean;
+  setExpanded: (nodeKey: string, expanded: boolean) => void;
 };
 
 const DataSelectorNode = memo(
@@ -19,7 +19,7 @@ const DataSelectorNode = memo(
     node,
     depth,
     searchTerm,
-    expanded,
+    getExpanded,
     setExpanded,
   }: DataSelectoNodeProps) => {
     if (node.data.isTestStepNode) {
@@ -27,18 +27,21 @@ const DataSelectorNode = memo(
         <TestStepSection stepName={node.data.propertyPath}></TestStepSection>
       );
     }
+    const expanded = getExpanded(node.key);
+    const handleSetExpanded = (expanded: boolean) =>
+      setExpanded(node.key, expanded);
     return (
       <Collapsible
         className="w-full"
         open={expanded}
-        onOpenChange={setExpanded}
+        onOpenChange={handleSetExpanded}
       >
         <>
           <CollapsibleTrigger asChild={true} className="w-full relative">
             <DataSelectorNodeContent
               node={node}
               expanded={expanded}
-              setExpanded={setExpanded}
+              setExpanded={handleSetExpanded}
               depth={depth}
             ></DataSelectorNodeContent>
           </CollapsibleTrigger>
@@ -51,7 +54,7 @@ const DataSelectorNode = memo(
                     node={childNode}
                     key={childNode.key}
                     searchTerm={searchTerm}
-                    expanded={expanded}
+                    getExpanded={getExpanded}
                     setExpanded={setExpanded}
                   ></DataSelectorNode>
                 ))}

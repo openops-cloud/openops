@@ -308,8 +308,8 @@ const DataSelector = ({
                 key={node.key}
                 node={node}
                 searchTerm={searchTerm}
-                expanded={getExpanded(node.key)}
-                setExpanded={(expanded) => setExpanded(node.key, expanded)}
+                getExpanded={getExpanded}
+                setExpanded={setExpanded}
               ></DataSelectorNode>
             ))}
           {filteredMentions.length === 0 && (
