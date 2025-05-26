@@ -279,6 +279,7 @@ const Markdown = React.memo(
             a: ({ node, ...props }) => (
               <a
                 target="_blank"
+                rel="noopener noreferrer"
                 className="font-medium text-primary underline underline-offset-4"
                 {...props}
               />
