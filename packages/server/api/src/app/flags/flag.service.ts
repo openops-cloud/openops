@@ -283,7 +283,7 @@ export const flagService = {
       },
       {
         id: FlagId.THIRD_PARTY_AUTH_PROVIDER_REDIRECT_URL,
-        value: await flagService.getBackendRedirectUrl(),
+        value: await this.getBackendRedirectUrl(),
         created,
         updated,
       },
