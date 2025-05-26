@@ -140,7 +140,7 @@ const DataSelector = ({
   const stepIds: string[] = pathToTargetStep.map((p) => p.id!);
   console.log('stepIds', stepIds);
 
-  const [_, forceRerender] = useState(0); // for cache updates
+  const [forceRender, forceRerender] = useState(0); // for cache updates
   const [initialLoad, setInitialLoad] = useState(true);
 
   const fetchAndCacheStepData = async (ids: string[]) => {
@@ -154,7 +154,7 @@ const DataSelector = ({
         stepTestOutputCache.setStepData(id, stepTestOutput[id]);
       }
     });
-    forceRerender((v) => v + 1); // update UI
+    forceRerender((v) => v + 1);
     return stepTestOutput;
   };
 
@@ -166,11 +166,9 @@ const DataSelector = ({
         setInitialLoad(false);
         return fetchAndCacheStepData(stepIds);
       } else {
-        // Only fetch for stale steps or steps that don't have data in the cache
+        // Only fetch for steps that don't have data in the cache
         const idsToFetch = stepIds.filter(
-          (id) =>
-            stepTestOutputCache.isStale(id) ||
-            stepTestOutputCache.getStepData(id) === undefined,
+          (id) => stepTestOutputCache.getStepData(id) === undefined,
         );
         if (idsToFetch.length) {
           return fetchAndCacheStepData(idsToFetch);
@@ -180,6 +178,7 @@ const DataSelector = ({
     },
     enabled:
       !!useNewExternalTestData && isDataSelectorVisible && stepIds.length > 0,
+    staleTime: 0,
   });
 
   const mentions = useMemo(() => {
@@ -201,7 +200,7 @@ const DataSelector = ({
     mentionsFromCurrentSelectedData,
     pathToTargetStep,
     stepIds,
-    _,
+    forceRender,
     initialLoad,
   ]);
 
@@ -266,6 +265,7 @@ const DataSelector = ({
   }, [dataSelectorSize, midpanelState.aiContainerSize, setDataSelectorSize]);
 
   // Clear cache on unmount or when flowVersionId changes
+  // todo - maybe move to top level, so we still have data when navigating between view-only / edit mode
   useEffect(() => {
     return () => {
       stepTestOutputCache.clearAll();

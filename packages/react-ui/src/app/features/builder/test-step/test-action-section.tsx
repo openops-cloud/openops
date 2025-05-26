@@ -120,7 +120,6 @@ const TestActionSection = React.memo(
 
     const handleTest = () => {
       if (useNewExternalTestData) {
-        stepTestOutputCache.markStale(formValues.id!);
         stepTestOutputCache.resetExpandedForStep(formValues.id!);
       }
       if (
@@ -138,7 +137,6 @@ const TestActionSection = React.memo(
     const confirmRiskyStep = () => {
       setRiskyStepConfirmationMessage(null);
       if (useNewExternalTestData) {
-        stepTestOutputCache.markStale(formValues.id!);
         stepTestOutputCache.resetExpandedForStep(formValues.id!);
       }
       mutate();

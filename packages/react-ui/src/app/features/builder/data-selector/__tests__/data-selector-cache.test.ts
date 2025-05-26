@@ -11,13 +11,6 @@ describe('StepTestOutputCache', () => {
     expect(cache.getStepData('step1')).toEqual({ foo: 'bar' });
   });
 
-  it('should mark and check stale steps', () => {
-    cache.markStale('step1');
-    expect(cache.isStale('step1')).toBe(true);
-    cache.setStepData('step1', { foo: 'bar' });
-    expect(cache.isStale('step1')).toBe(false);
-  });
-
   it('should clear step data and expanded state', () => {
     cache.setStepData('step1', { foo: 'bar' });
     cache.setExpanded('step1', true);
@@ -46,10 +39,8 @@ describe('StepTestOutputCache', () => {
   it('should clear all cache and expanded state', () => {
     cache.setStepData('step1', { foo: 'bar' });
     cache.setExpanded('node1', true);
-    cache.markStale('step1');
     cache.clearAll();
     expect(cache.getStepData('step1')).toBeUndefined();
     expect(cache.getExpanded('node1')).toBe(false);
-    expect(cache.isStale('step1')).toBe(false);
   });
 });

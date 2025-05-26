@@ -7,7 +7,6 @@
 export class StepTestOutputCache {
   private stepData: Record<string, any> = {};
   private expandedNodes: Record<string, boolean> = {};
-  private staleSteps: Set<string> = new Set();
 
   /**
    * Get cached test output for a step.
@@ -21,21 +20,6 @@ export class StepTestOutputCache {
    */
   setStepData(stepId: string, data: any) {
     this.stepData[stepId] = data;
-    this.staleSteps.delete(stepId);
-  }
-
-  /**
-   * Mark a step as stale (needs refetch).
-   */
-  markStale(stepId: string) {
-    this.staleSteps.add(stepId);
-  }
-
-  /**
-   * Check if a step is stale.
-   */
-  isStale(stepId: string) {
-    return this.staleSteps.has(stepId);
   }
 
   /**
@@ -43,7 +27,6 @@ export class StepTestOutputCache {
    */
   clearStep(stepId: string) {
     delete this.stepData[stepId];
-    this.staleSteps.delete(stepId);
     // Remove expanded nodes for this step and its children
     Object.keys(this.expandedNodes).forEach((key) => {
       if (key.startsWith(stepId)) {
@@ -83,7 +66,6 @@ export class StepTestOutputCache {
   clearAll() {
     this.stepData = {};
     this.expandedNodes = {};
-    this.staleSteps.clear();
   }
 }
 
