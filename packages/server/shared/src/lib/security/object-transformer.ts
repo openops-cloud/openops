@@ -7,11 +7,11 @@ import { encryptUtils } from './encryption';
  * @param obj object to encrypt and compress
  */
 export async function encryptAndCompress(obj: unknown): Promise<Buffer> {
-  const encryptOutput = encryptUtils.encryptObject(obj);
-  const binaryOutput = Buffer.from(JSON.stringify(encryptOutput));
+  const encryptObject = encryptUtils.encryptObject(obj);
+  const binaryObject = Buffer.from(JSON.stringify(encryptObject));
 
   return fileCompressor.compress({
-    data: binaryOutput,
+    data: binaryObject,
     compression: FileCompression.GZIP,
   });
 }
@@ -26,6 +26,6 @@ export async function decompressAndDecrypt(buffer: Buffer): Promise<unknown> {
     compression: FileCompression.GZIP,
   });
 
-  const parsedEncryptedOutput = JSON.parse(decompressed.toString());
-  return encryptUtils.decryptObject(parsedEncryptedOutput);
+  const parsedEncryptedObject = JSON.parse(decompressed.toString());
+  return encryptUtils.decryptObject(parsedEncryptedObject);
 }

@@ -22,49 +22,49 @@ import {
   encryptAndCompress,
 } from '../src/lib/security/object-transformer';
 
-describe('stepOutputTransformer', () => {
+describe('Object Transformer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should encrypt and compress the output', async () => {
-    const testOutput = { test: 'data' };
-    const encryptedOutput = { iv: 'test-iv', data: 'encrypted-data' };
-    const compressedOutput = Buffer.from('compressed-data');
+  it('should encrypt and compress the object', async () => {
+    const testObject = { test: 'data' };
+    const encryptedObject = { iv: 'test-iv', data: 'encrypted-data' };
+    const compressedObject = Buffer.from('compressed-data');
 
-    encryptObjectMock.mockReturnValue(encryptedOutput);
-    compressMock.mockResolvedValue(compressedOutput);
+    encryptObjectMock.mockReturnValue(encryptedObject);
+    compressMock.mockResolvedValue(compressedObject);
 
-    const result = await encryptAndCompress(testOutput);
+    const result = await encryptAndCompress(testObject);
 
-    expect(encryptObjectMock).toHaveBeenCalledWith(testOutput);
+    expect(encryptObjectMock).toHaveBeenCalledWith(testObject);
     expect(compressMock).toHaveBeenCalledWith({
-      data: Buffer.from(JSON.stringify(encryptedOutput)),
+      data: Buffer.from(JSON.stringify(encryptedObject)),
       compression: FileCompression.GZIP,
     });
-    expect(result).toBe(compressedOutput);
+    expect(result).toBe(compressedObject);
   });
 
-  it('should decompress and decrypt the output', async () => {
-    const compressedOutput = Buffer.from('compressed-data');
-    const decompressedOutput = Buffer.from(
+  it('should decompress and decrypt the object', async () => {
+    const compressedObject = Buffer.from('compressed-data');
+    const decompressedObject = Buffer.from(
       JSON.stringify({ iv: 'test-iv', data: 'encrypted-data' }),
     );
-    const decryptedOutput = { test: 'data' };
+    const decryptedObject = { test: 'data' };
 
-    decompressMock.mockResolvedValue(decompressedOutput);
-    decryptObjectMock.mockReturnValue(decryptedOutput);
+    decompressMock.mockResolvedValue(decompressedObject);
+    decryptObjectMock.mockReturnValue(decryptedObject);
 
-    const result = await decompressAndDecrypt(compressedOutput);
+    const result = await decompressAndDecrypt(compressedObject);
 
     expect(decompressMock).toHaveBeenCalledWith({
-      data: compressedOutput,
+      data: compressedObject,
       compression: FileCompression.GZIP,
     });
     expect(decryptObjectMock).toHaveBeenCalledWith(
-      JSON.parse(decompressedOutput.toString()),
+      JSON.parse(decompressedObject.toString()),
     );
-    expect(result).toBe(decryptedOutput);
+    expect(result).toBe(decryptedObject);
   });
 
   it('should handle empty objects', async () => {
