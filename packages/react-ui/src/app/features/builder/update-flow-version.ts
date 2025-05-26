@@ -26,7 +26,15 @@ export const updateFlowVersion = (
 ) => {
   const newFlowVersion = flowHelper.apply(state.flowVersion, operation);
   if (operation.type === FlowOperationType.DELETE_ACTION) {
-    stepTestOutputCache.clearStep(operation.request.name);
+    const stepToClear = flowHelper.getStep(
+      state.flowVersion,
+      operation.request.name,
+    );
+
+    if (stepToClear) {
+      stepTestOutputCache.clearStep(stepToClear.id!);
+    }
+
     if (operation.request.name === state.selectedStep) {
       set({ selectedStep: undefined });
       set({ rightSidebar: RightSideBarType.NONE });
