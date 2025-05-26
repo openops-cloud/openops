@@ -32,7 +32,16 @@ const AboutSettingsPage = () => {
             {isLoading && <LoadingSpinner className="w-4 h-4" />}
             {error && <span>{t('Error loading version')}</span>}
             {data && (
-              <span className="text-base font-bold">{data.currentVersion}</span>
+              <div className="flex items-center gap-2">
+                <span className="text-base font-bold">
+                  {data.currentVersion}
+                </span>
+                {hasNewerVersionAvailable && (
+                  <div className="text-primary-800 text-sm leading-tight bg-muted rounded-xs px-2 py-[3px]">
+                    {t('Newer version is available')}
+                  </div>
+                )}
+              </div>
             )}
           </div>
 
