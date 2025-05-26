@@ -1,7 +1,8 @@
-import { stepOutputTransformer } from '@openops/server-shared';
+import { decompressAndDecrypt } from '@openops/server-shared';
 import {
   ActionType,
   BranchStepOutput,
+  decodeTestOutputs,
   flowHelper,
   FlowVersion,
   GenericStepOutput,
@@ -34,7 +35,7 @@ export const testExecutionContext = {
 
     let decodedTestOutputs: Record<OpenOpsId, Buffer> = {};
     if (testOutputs) {
-      decodedTestOutputs = stepOutputTransformer.decodeTestOutputs(testOutputs);
+      decodedTestOutputs = decodeTestOutputs(testOutputs);
     }
 
     for (const step of flowSteps) {
@@ -49,7 +50,7 @@ export const testExecutionContext = {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let currentOutput: any;
       if (decodedTestOutputs && step.id && testOutputs?.[step.id]) {
-        currentOutput = await stepOutputTransformer.decompressAndDecrypt(
+        currentOutput = await decompressAndDecrypt(
           decodedTestOutputs?.[step.id],
         );
       } else {

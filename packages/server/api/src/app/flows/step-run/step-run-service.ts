@@ -1,7 +1,6 @@
-import { stepOutputTransformer } from '@openops/server-shared';
 import {
   ActionType,
-  ApplicationError,
+  ApplicationError, encodeTestOutputs,
   ErrorCode,
   FlagId,
   flowHelper,
@@ -49,7 +48,7 @@ export const stepRunService = {
         flowVersion.id,
       );
 
-      testOutputs = stepOutputTransformer.encodeTestOutputs(outputs);
+      testOutputs = encodeTestOutputs(outputs);
     }
 
     const engineToken = await accessTokenManager.generateEngineToken({
