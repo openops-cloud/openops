@@ -18,11 +18,42 @@ const Wrapper = (props: { children: React.ReactNode }) => (
   </QueryClientProvider>
 );
 
+let setInitialLoad: jest.Mock;
+let forceRerender: jest.Mock;
+
+function setupHook(options = {}) {
+  const defaultOptions = {
+    stepIds: ['a'],
+    flowVersionId: 'fv1',
+    useNewExternalTestData: true,
+    isDataSelectorVisible: true,
+    initialLoad: true,
+    setInitialLoad,
+    forceRerender,
+  };
+  const merged = { ...defaultOptions, ...options };
+  return renderHook(
+    () =>
+      useSelectorData({
+        stepIds: merged.stepIds,
+        flowVersionId: merged.flowVersionId,
+        useNewExternalTestData: merged.useNewExternalTestData,
+        isDataSelectorVisible: merged.isDataSelectorVisible,
+        initialLoad: merged.initialLoad,
+        setInitialLoad: merged.setInitialLoad,
+        forceRerender: merged.forceRerender,
+      }),
+    { wrapper: Wrapper },
+  );
+}
+
 describe('useSelectorData', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     queryClient.clear();
     stepTestOutputCache.clearAll();
+    setInitialLoad = jest.fn();
+    forceRerender = jest.fn();
   });
 
   it('fetches and caches data for all stepIds on initial load', async () => {
@@ -32,25 +63,11 @@ describe('useSelectorData', () => {
     (flowsApi.getStepTestOutputBulk as jest.Mock).mockResolvedValue(testData);
 
     let initialLoad = true;
-    const setInitialLoad = jest.fn((v) => {
+    setInitialLoad.mockImplementation((v) => {
       initialLoad = v;
     });
-    const forceRerender = jest.fn();
 
-    const { result } = renderHook(
-      () =>
-        useSelectorData({
-          stepIds,
-          flowVersionId,
-          useNewExternalTestData: true,
-          isDataSelectorVisible: true,
-          initialLoad,
-          setInitialLoad,
-          forceRerender,
-        }),
-      { wrapper: Wrapper },
-    );
-
+    const { result } = setupHook({ stepIds, flowVersionId, initialLoad });
     await waitFor(() => !result.current.isLoading);
 
     expect(flowsApi.getStepTestOutputBulk).toHaveBeenCalledWith(
@@ -63,34 +80,16 @@ describe('useSelectorData', () => {
     expect(forceRerender).toHaveBeenCalledTimes(1);
   });
 
-  it('only fetches for stepIds not in cache on subsequent loads', async () => {
+  it('fetches only for stepIds not in cache on subsequent loads', async () => {
     const stepIds = ['a', 'b', 'c'];
     const flowVersionId = 'fv2';
     const testData = { c: { baz: 3 } };
     (flowsApi.getStepTestOutputBulk as jest.Mock).mockResolvedValue(testData);
-
-    // Pre-populate cache for a and b
     stepTestOutputCache.setStepData('a', { cached: true });
     stepTestOutputCache.setStepData('b', { cached: true });
 
     let initialLoad = false;
-    const setInitialLoad = jest.fn();
-    const forceRerender = jest.fn();
-
-    const { result } = renderHook(
-      () =>
-        useSelectorData({
-          stepIds,
-          flowVersionId,
-          useNewExternalTestData: true,
-          isDataSelectorVisible: true,
-          initialLoad,
-          setInitialLoad,
-          forceRerender,
-        }),
-      { wrapper: Wrapper },
-    );
-
+    const { result } = setupHook({ stepIds, flowVersionId, initialLoad });
     await waitFor(() => !result.current.isLoading);
 
     expect(flowsApi.getStepTestOutputBulk).toHaveBeenCalledWith(flowVersionId, [
@@ -108,23 +107,66 @@ describe('useSelectorData', () => {
     (flowsApi.getStepTestOutputBulk as jest.Mock).mockClear();
 
     let initialLoad = true;
-    const setInitialLoad = jest.fn();
-    const forceRerender = jest.fn();
+    const { result } = setupHook({
+      stepIds,
+      flowVersionId,
+      useNewExternalTestData: false,
+      initialLoad,
+    });
+    await waitFor(() => !result.current.isLoading);
+    expect(flowsApi.getStepTestOutputBulk).not.toHaveBeenCalled();
+    expect(forceRerender).not.toHaveBeenCalled();
+  });
 
-    const { result } = renderHook(
-      () =>
-        useSelectorData({
-          stepIds,
-          flowVersionId,
-          useNewExternalTestData: false,
-          isDataSelectorVisible: true,
-          initialLoad,
-          setInitialLoad,
-          forceRerender,
-        }),
-      { wrapper: Wrapper },
+  it('does not fetch if stepIds is empty', async () => {
+    const stepIds: string[] = [];
+    const flowVersionId = 'fv4';
+    (flowsApi.getStepTestOutputBulk as jest.Mock).mockClear();
+
+    let initialLoad = true;
+    const { result } = setupHook({ stepIds, flowVersionId, initialLoad });
+    await waitFor(() => !result.current.isLoading);
+    expect(flowsApi.getStepTestOutputBulk).not.toHaveBeenCalled();
+    expect(forceRerender).not.toHaveBeenCalled();
+  });
+
+  it('calls forceRerender only once per fetch even for multiple stepIds', async () => {
+    const stepIds = ['a', 'b', 'c'];
+    const flowVersionId = 'fv5';
+    const testData = { a: { foo: 1 }, b: { bar: 2 }, c: { baz: 3 } };
+    (flowsApi.getStepTestOutputBulk as jest.Mock).mockResolvedValue(testData);
+
+    let initialLoad = true;
+    const { result } = setupHook({ stepIds, flowVersionId, initialLoad });
+    await waitFor(() => !result.current.isLoading);
+    expect(forceRerender).toHaveBeenCalledTimes(1);
+  });
+
+  it('handles fetch errors gracefully', async () => {
+    const stepIds = ['a'];
+    const flowVersionId = 'fv6';
+    (flowsApi.getStepTestOutputBulk as jest.Mock).mockRejectedValue(
+      new Error('Network error'),
     );
 
+    let initialLoad = true;
+    const { result } = setupHook({ stepIds, flowVersionId, initialLoad });
+    await waitFor(() => !result.current.isLoading);
+    expect(forceRerender).not.toHaveBeenCalled();
+  });
+
+  it('does not fetch if isDataSelectorVisible is false', async () => {
+    const stepIds = ['a'];
+    const flowVersionId = 'fv9';
+    (flowsApi.getStepTestOutputBulk as jest.Mock).mockClear();
+
+    let initialLoad = true;
+    const { result } = setupHook({
+      stepIds,
+      flowVersionId,
+      isDataSelectorVisible: false,
+      initialLoad,
+    });
     await waitFor(() => !result.current.isLoading);
     expect(flowsApi.getStepTestOutputBulk).not.toHaveBeenCalled();
     expect(forceRerender).not.toHaveBeenCalled();

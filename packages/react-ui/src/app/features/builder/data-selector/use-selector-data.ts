@@ -35,7 +35,7 @@ export function useSelectorData({
     return stepTestOutput;
   };
 
-  const { isLoading, refetch } = useQuery({
+  const { isLoading } = useQuery({
     queryKey: [QueryKeys.dataSelectorStepTestOutput, flowVersionId, ...stepIds],
     queryFn: async () => {
       if (!useNewExternalTestData) return {};
@@ -58,5 +58,5 @@ export function useSelectorData({
     staleTime: 0,
   });
 
-  return { isLoading, refetch };
+  return { isLoading };
 }
