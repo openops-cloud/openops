@@ -4,7 +4,10 @@ import {
   StoreScope,
   Validators,
 } from '@openops/blocks-framework';
-import { networkUtls } from '@openops/server-shared';
+import {
+  generateResumeExecutionUiUrl,
+  networkUtls,
+} from '@openops/server-shared';
 import { ExecutionType } from '@openops/shared';
 import { ChannelOption, ChatOption } from '../common/chat-types';
 import { chatsAndChannels } from '../common/chats-and-channels';
@@ -12,7 +15,6 @@ import {
   TeamsMessageAction,
   TeamsMessageButton,
 } from '../common/generate-message-with-buttons';
-import { generateMSTeamsRedirectURl } from '../common/generate-ms-teams-redirect-url';
 import { microsoftTeamsAuth } from '../common/microsoft-teams-auth';
 import { onActionReceived } from '../common/on-action-received';
 import { sendChatOrChannelMessage } from '../common/send-chat-or-channel-message';
@@ -86,7 +88,9 @@ export const requestActionMessageAction = createAction({
 
       const preparedActions: TeamsMessageButton[] = actions.map((action) => ({
         ...action,
-        resumeUrl: generateMSTeamsRedirectURl(action, context, baseUrl),
+        resumeUrl: context.run.isTest
+          ? 'https://static.openops.com/test_teams_actions.txt'
+          : generateResumeExecutionUiUrl(action, context, baseUrl),
       }));
 
       const result = await sendChatOrChannelMessage({
