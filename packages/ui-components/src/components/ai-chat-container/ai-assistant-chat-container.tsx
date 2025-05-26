@@ -57,8 +57,10 @@ const AiAssistantChatContainer = ({
         !hasScrolledOnce.current &&
         !!children
       ) {
-        scrollViewportRef.current.scrollTop =
-          scrollViewportRef.current.scrollHeight;
+        scrollViewportRef.current.scrollTo({
+          top: scrollViewportRef.current.scrollHeight,
+          behavior: 'smooth',
+        });
 
         hasScrolledOnce.current = true;
       }

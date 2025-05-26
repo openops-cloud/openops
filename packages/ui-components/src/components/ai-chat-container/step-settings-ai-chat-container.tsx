@@ -52,16 +52,21 @@ const StepSettingsAiChatContainer = ({
   }, [stepName]);
 
   useEffect(() => {
-    if (
-      scrollViewportRef.current &&
-      !isEmpty &&
-      showAiChat &&
-      !hasScrolledOnce.current
-    ) {
-      scrollViewportRef.current.scrollTop =
-        scrollViewportRef.current.scrollHeight;
-      hasScrolledOnce.current = true;
-    }
+    setTimeout(() => {
+      if (
+        scrollViewportRef.current &&
+        !isEmpty &&
+        showAiChat &&
+        !hasScrolledOnce.current
+      ) {
+        scrollViewportRef.current.scrollTo({
+          top: scrollViewportRef.current.scrollHeight,
+          behavior: 'smooth',
+        });
+
+        hasScrolledOnce.current = true;
+      }
+    }, 300);
   }, [isEmpty, showAiChat, stepName]);
 
   let height: string;
