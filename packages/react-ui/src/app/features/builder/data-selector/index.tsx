@@ -128,17 +128,14 @@ const DataSelector = ({
     (state) => state.midpanelState.showDataSelector,
   );
 
-  console.log('StepTestOutputCache', stepTestOutputCache);
-
   const pathToTargetStep = useBuilderStateContext(getPathToTargetStep);
   const mentionsFromCurrentSelectedData = useBuilderStateContext(
     getAllStepsMentionsFromCurrentSelectedData,
   );
 
   const stepIds: string[] = pathToTargetStep.map((p) => p.id!);
-  // console.log('stepIds', stepIds);
 
-  const [forceRender, forceRerender] = useState(0); // for cache updates
+  const [forceRender, setForceRerender] = useState(0); // for cache updates
   const [initialLoad, setInitialLoad] = useState(true);
 
   const { isLoading } = useSelectorData({
@@ -148,7 +145,7 @@ const DataSelector = ({
     isDataSelectorVisible,
     initialLoad,
     setInitialLoad,
-    forceRerender,
+    forceRerender: setForceRerender,
   });
 
   const mentions = useMemo(() => {
@@ -178,7 +175,7 @@ const DataSelector = ({
     stepTestOutputCache.getExpanded(nodeKey);
   const setExpanded = (nodeKey: string, expanded: boolean) => {
     stepTestOutputCache.setExpanded(nodeKey, expanded);
-    forceRerender((v) => v + 1);
+    setForceRerender((v) => v + 1);
   };
 
   // Auto-expand/collapse nodes on search term change
@@ -208,7 +205,7 @@ const DataSelector = ({
       };
       collapseNodes(mentions);
     }
-    forceRerender((v) => v + 1);
+    setForceRerender((v) => v + 1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchTerm]);
 
@@ -234,8 +231,7 @@ const DataSelector = ({
     }
   }, [dataSelectorSize, midpanelState.aiContainerSize, setDataSelectorSize]);
 
-  // Clear cache on unmount or when flowVersionId changes
-  // todo - maybe move to top level, so we still have data when navigating between view-only / edit mode
+  // Clear cache on unmount or when flowVersionId changes or when the component is unmounted
   useEffect(() => {
     return () => {
       stepTestOutputCache.clearAll();
