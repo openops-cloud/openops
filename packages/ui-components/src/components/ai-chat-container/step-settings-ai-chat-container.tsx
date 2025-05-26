@@ -4,7 +4,7 @@ import { Send as SendIcon, Sparkles } from 'lucide-react';
 import { ReactNode, useEffect, useRef } from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
 import { cn } from '../../lib/cn';
-import { AiChatScrollDelay } from '../../lib/constants';
+import { AI_CHAT_SCROLL_DELAY } from '../../lib/constants';
 import { Button } from '../../ui/button';
 import { ScrollArea } from '../../ui/scroll-area';
 import { AiChatSizeTogglers } from './ai-chat-size-togglers';
@@ -67,7 +67,7 @@ const StepSettingsAiChatContainer = ({
 
         hasScrolledOnce.current = true;
       }
-    }, AiChatScrollDelay);
+    }, AI_CHAT_SCROLL_DELAY);
   }, [isEmpty, showAiChat, stepName]);
 
   let height: string;
