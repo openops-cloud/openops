@@ -1,6 +1,7 @@
 import {
   ActionType,
-  ApplicationError, encodeTestOutputs,
+  ApplicationError,
+  encodeTestOutputs,
   ErrorCode,
   FlagId,
   flowHelper,
