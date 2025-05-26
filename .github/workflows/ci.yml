@@ -155,17 +155,17 @@ jobs:
         with:
           path: dist
           key: dist-${{ github.sha }}
-  build-images:
+  build-images-amd64:
     strategy:
-        matrix:
-            target:
-            - name: App
-              file: Dockerfile
-              repository: openops-app
-            - name: Engine
-              file: engine.Dockerfile
-              repository: openops-engine
-    name: Build ${{ matrix.target.name }} Image
+      matrix:
+        target:
+        - name: App
+          file: Dockerfile
+          repository: openops-app
+        - name: Engine
+          file: engine.Dockerfile
+          repository: openops-engine
+    name: Build ${{ matrix.target.name }} Image (amd64)
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -206,26 +206,25 @@ jobs:
           context: .
           file: ./${{ matrix.target.file }}
           build-args: VERSION=${{ env.SHORT_SHA }}
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           provenance: false
           push: true
           tags: |
-            ${{ env.REPOSITORY_URI }}:${{ env.SHORT_SHA }}
-            ${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}-${{ env.SHORT_SHA }}
-            ${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}
+            ${{ env.REPOSITORY_URI }}:${{ env.SHORT_SHA }}-amd64
+            ${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}-${{ env.SHORT_SHA }}-amd64
+            ${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}-amd64
           cache-from: |
-            type=registry,ref=${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}-cache
-            type=registry,ref=${{ env.REPOSITORY_URI }}:main-cache
-          cache-to: mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}-cache
-      - name: Push single-arch manifest for the engine
+            type=registry,ref=${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}-amd64-cache
+            type=registry,ref=${{ env.REPOSITORY_URI }}:main-amd64-cache
+          cache-to: mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}-amd64-cache
+      - name: Push lambda-compatible tags for engine
         if: vars.ECR_REGION && matrix.target.name == 'Engine'
         env:
-          SHA_TAG: ${{ env.REPOSITORY_URI }}:${{ env.SHORT_SHA }}
-          BRANCH_TAG: ${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}
+          SHA_TAG: ${{ env.REPOSITORY_URI }}:${{ env.SHORT_SHA }}-amd64
+          BRANCH_TAG: ${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}-amd64
         run: |
-          docker pull $SHA_TAG
-          docker tag $SHA_TAG ${SHA_TAG}-amd64 && docker push ${SHA_TAG}-amd64
-          docker tag $SHA_TAG ${BRANCH_TAG}-amd64 && docker push ${BRANCH_TAG}-amd64
+          docker tag $SHA_TAG ${SHA_TAG}-lambda && docker push ${SHA_TAG}-lambda
+          docker tag $BRANCH_TAG ${BRANCH_TAG}-lambda && docker push ${BRANCH_TAG}-lambda
       - name: Build image
         if: ${{ !vars.ECR_REGION }}
         uses: docker/build-push-action@v6
@@ -234,6 +233,131 @@ jobs:
           file: ./${{ matrix.target.file }}
           build-args: VERSION=${{ env.SHORT_SHA }}
           provenance: false
-          platforms: linux/amd64,linux/arm64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+          cache-from: type=gha,scope=${{ matrix.target.name }}-amd64
+          cache-to: type=gha,mode=max,scope=${{ matrix.target.name }}-amd64
+
+  build-images-arm64:
+    strategy:
+      matrix:
+        target:
+        - name: App
+          file: Dockerfile
+          repository: openops-app
+        - name: Engine
+          file: engine.Dockerfile
+          repository: openops-engine
+    name: Build ${{ matrix.target.name }} Image (arm64)
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore build cache
+        uses: actions/cache/restore@v4
+        with:
+          path: dist
+          key: dist-${{ github.sha }}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Configure AWS credentials
+        if: vars.ECR_REGION
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.ECR_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.ECR_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.ECR_REGION }}
+      - name: Login to Amazon ECR
+        id: login-ecr
+        if: vars.ECR_REGION
+        uses: aws-actions/amazon-ecr-login@v2
+      - name: Format image tag parts
+        env:
+          BRANCH: ${{ github.ref_name }}
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          echo SANITIZED_BRANCH=${BRANCH//[\/.:_]/-} >> "$GITHUB_ENV"
+          echo REPOSITORY_URI=${REGISTRY}/openops/${{ matrix.target.repository }} >> "$GITHUB_ENV"
+          echo SHORT_SHA=${SHA::8} >> "$GITHUB_ENV"
+      - name: Build image
+        if: vars.ECR_REGION
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./${{ matrix.target.file }}
+          build-args: VERSION=${{ env.SHORT_SHA }}
+          platforms: linux/arm64
+          provenance: false
+          push: true
+          tags: |
+            ${{ env.REPOSITORY_URI }}:${{ env.SHORT_SHA }}-arm64
+            ${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}-${{ env.SHORT_SHA }}-arm64
+            ${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}-arm64
+          cache-from: |
+            type=registry,ref=${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}-arm64-cache
+            type=registry,ref=${{ env.REPOSITORY_URI }}:main-arm64-cache
+          cache-to: mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}-arm64-cache
+      - name: Build image
+        if: ${{ !vars.ECR_REGION }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./${{ matrix.target.file }}
+          build-args: VERSION=${{ env.SHORT_SHA }}
+          provenance: false
+          platforms: linux/arm64
+          cache-from: type=gha,scope=${{ matrix.target.name }}-arm64
+          cache-to: type=gha,mode=max,scope=${{ matrix.target.name }}-arm64
+  create-multiarch-manifest:
+    strategy:
+      matrix:
+        target:
+        - name: App
+          repository: openops-app
+        - name: Engine
+          repository: openops-engine
+    name: Create Multi-arch Manifest for ${{ matrix.target.name }}
+    needs: [build-images-amd64, build-images-arm64]
+    runs-on: ubuntu-latest
+    if: vars.ECR_REGION
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.ECR_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.ECR_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.ECR_REGION }}
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+      - name: Format image tag parts
+        env:
+          BRANCH: ${{ github.ref_name }}
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          echo SANITIZED_BRANCH=${BRANCH//[\/.:_]/-} >> "$GITHUB_ENV"
+          echo REPOSITORY_URI=${REGISTRY}/openops/${{ matrix.target.repository }} >> "$GITHUB_ENV"
+          echo SHORT_SHA=${SHA::8} >> "$GITHUB_ENV"
+      - name: Create and push multi-arch manifest
+        run: |
+          # Create and push SHA manifest
+          docker manifest create ${{ env.REPOSITORY_URI }}:${{ env.SHORT_SHA }} \
+            ${{ env.REPOSITORY_URI }}:${{ env.SHORT_SHA }}-amd64 \
+            ${{ env.REPOSITORY_URI }}:${{ env.SHORT_SHA }}-arm64
+          docker manifest push ${{ env.REPOSITORY_URI }}:${{ env.SHORT_SHA }}
+          
+          # Create and push branch-SHA manifest
+          docker manifest create ${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}-${{ env.SHORT_SHA }} \
+            ${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}-${{ env.SHORT_SHA }}-amd64 \
+            ${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}-${{ env.SHORT_SHA }}-arm64
+          docker manifest push ${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}-${{ env.SHORT_SHA }}
+          
+          # Create and push branch manifest
+          docker manifest create ${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }} \
+            ${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}-amd64 \
+            ${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}-arm64
+          docker manifest push ${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}
