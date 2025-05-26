@@ -118,7 +118,14 @@ const sendMessageAskingForAction = async (
     actions.forEach((action: SlackActionDefinition) => {
       action.url = context.run.isTest
         ? 'https://static.openops.com/test_slack_interactions.txt'
-        : generateResumeExecutionUiUrl(action, context, baseUrl);
+        : generateResumeExecutionUiUrl(
+            context,
+            {
+              executionCorrelationId: context.run.pauseId,
+              actionClicked: action.buttonText,
+            },
+            baseUrl,
+          );
     });
   }
 

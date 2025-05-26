@@ -90,7 +90,14 @@ export const requestActionMessageAction = createAction({
         ...action,
         resumeUrl: context.run.isTest
           ? 'https://static.openops.com/test_teams_actions.txt'
-          : generateResumeExecutionUiUrl(action, context, baseUrl),
+          : generateResumeExecutionUiUrl(
+              context,
+              {
+                executionCorrelationId: context.run.pauseId,
+                button: action.buttonText,
+              },
+              baseUrl,
+            ),
       }));
 
       const result = await sendChatOrChannelMessage({

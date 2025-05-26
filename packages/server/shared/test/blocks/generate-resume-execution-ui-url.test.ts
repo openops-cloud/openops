@@ -6,8 +6,9 @@ import {
 import { generateResumeExecutionUiUrl } from '../../src/lib/blocks/generate-resume-execution-ui-url';
 
 describe('generateResumeExecutionUiUrl', () => {
-  const mockAction = {
-    buttonText: 'Approve',
+  const mockQuery = {
+    executionCorrelationId: 'test-pause-id',
+    button: 'Approve',
   };
 
   const mockContext = {
@@ -30,7 +31,7 @@ describe('generateResumeExecutionUiUrl', () => {
   });
 
   it('should generate correct URL with default baseUrl', () => {
-    const result = generateResumeExecutionUiUrl(mockAction, mockContext);
+    const result = generateResumeExecutionUiUrl(mockContext, mockQuery);
 
     expect(mockContext.generateResumeUrl).toHaveBeenCalledWith(
       {
@@ -53,8 +54,8 @@ describe('generateResumeExecutionUiUrl', () => {
   it('should use provided baseUrl when specified', () => {
     const baseUrl = 'custom-domain.com';
     const result = generateResumeExecutionUiUrl(
-      mockAction,
       mockContext,
+      mockQuery,
       baseUrl,
     );
 
@@ -74,11 +75,12 @@ describe('generateResumeExecutionUiUrl', () => {
   });
 
   it('should handle different button text correctly', () => {
-    const customAction = {
-      buttonText: 'Reject',
+    const customQuery = {
+      executionCorrelationId: 'test-pause-id',
+      button: 'Reject',
     };
 
-    const result = generateResumeExecutionUiUrl(customAction, mockContext);
+    const result = generateResumeExecutionUiUrl(mockContext, customQuery);
 
     expect(mockContext.generateResumeUrl).toHaveBeenCalledWith(
       {
@@ -94,13 +96,14 @@ describe('generateResumeExecutionUiUrl', () => {
   });
 
   it('should correctly encode the URL parameters', () => {
-    const actionWithSpecialChars = {
-      buttonText: 'Special & Chars?',
+    const queryWithSpecialChars = {
+      executionCorrelationId: 'test-pause-id',
+      button: 'Special & Chars?',
     };
 
     const result = generateResumeExecutionUiUrl(
-      actionWithSpecialChars,
       mockContext,
+      queryWithSpecialChars,
     );
 
     expect(mockContext.generateResumeUrl).toHaveBeenCalledWith(
@@ -117,7 +120,7 @@ describe('generateResumeExecutionUiUrl', () => {
   });
 
   it('should return a valid URL string', () => {
-    const result = generateResumeExecutionUiUrl(mockAction, mockContext);
+    const result = generateResumeExecutionUiUrl(mockContext, mockQuery);
 
     expect(() => new URL(result)).not.toThrow();
   });

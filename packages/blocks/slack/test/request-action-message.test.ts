@@ -267,11 +267,9 @@ describe('requestActionMessageAction', () => {
 
       expect(action.url).toBeDefined();
       expect(action.url).toContain('https%3A%2F%2Fexample.com');
-      expect(action.url).toContain('actionClicked=Approve');
+      expect(action.url).toContain('actionClicked%3DApprove');
 
-      expect(result.eventPayload.resumeUrl).toContain(
-        'executionCorrelationId=',
-      );
+      expect(result.eventPayload.resumeUrl).toContain('executionCorrelationId');
       expect(result.eventPayload.interactionsDisabled).toBe(true);
     });
 
