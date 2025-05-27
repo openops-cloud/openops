@@ -172,6 +172,23 @@ const DataSelector = ({
     initialLoad,
   ]);
 
+  // OBSOLETE: This effect is now considered obsolete and only used until flag is removed
+  useEffect(() => {
+    if (!useNewExternalTestData && mentionsFromCurrentSelectedData) {
+      const traverseAndCache = (nodes: MentionTreeNode[]) => {
+        nodes.forEach((node) => {
+          if (stepTestOutputCache.getExpanded(node.key) === undefined) {
+            stepTestOutputCache.setExpanded(node.key, false);
+          }
+          if (node.children) {
+            traverseAndCache(node.children);
+          }
+        });
+      };
+      traverseAndCache(mentionsFromCurrentSelectedData);
+    }
+  }, [useNewExternalTestData, mentionsFromCurrentSelectedData]);
+
   const getExpanded = (nodeKey: string) =>
     stepTestOutputCache.getExpanded(nodeKey);
   const setExpanded = (nodeKey: string, expanded: boolean) => {
