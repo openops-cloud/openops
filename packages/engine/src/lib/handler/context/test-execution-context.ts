@@ -2,7 +2,7 @@ import { decompressAndDecrypt } from '@openops/server-shared';
 import {
   ActionType,
   BranchStepOutput,
-  decodeTestOutputs,
+  decodeStepOutput,
   flowHelper,
   FlowVersion,
   GenericStepOutput,
@@ -21,22 +21,17 @@ export const testExecutionContext = {
     projectId,
     engineToken,
     apiUrl,
-    testOutputs,
+    stepTestOutputs,
   }: {
     flowVersion: FlowVersion;
     excludedStepName?: string;
     projectId: string;
     apiUrl: string;
     engineToken: string;
-    testOutputs?: Record<OpenOpsId, string>;
+    stepTestOutputs?: Record<OpenOpsId, string>;
   }): Promise<FlowExecutorContext> {
     const flowSteps = flowHelper.getAllSteps(flowVersion.trigger);
     let flowExecutionContext = FlowExecutorContext.empty();
-
-    let decodedTestOutputs: Record<OpenOpsId, Buffer> = {};
-    if (testOutputs) {
-      decodedTestOutputs = decodeTestOutputs(testOutputs);
-    }
 
     for (const step of flowSteps) {
       const {
@@ -49,10 +44,9 @@ export const testExecutionContext = {
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let currentOutput: any;
-      if (decodedTestOutputs && step.id && testOutputs?.[step.id]) {
-        currentOutput = await decompressAndDecrypt(
-          decodedTestOutputs?.[step.id],
-        );
+      if (stepTestOutputs && step.id && stepTestOutputs?.[step.id]) {
+        const decodedTestOutput = decodeStepOutput(stepTestOutputs?.[step.id]);
+        currentOutput = await decompressAndDecrypt(decodedTestOutput);
       } else {
         currentOutput = inputUiInfo?.currentSelectedData;
       }

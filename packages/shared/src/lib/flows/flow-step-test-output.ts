@@ -16,25 +16,17 @@ export type StepOutputWithData = {
   lastTestDate: string;
 };
 
-export function encodeTestOutputs(
-  testOutputs: FlowStepTestOutput[],
+export function encodeStepOutputs(
+  stepTestOutputs: FlowStepTestOutput[],
 ): Record<OpenOpsId, string> {
   return Object.fromEntries(
-    testOutputs.map((testOutput) => [
+    stepTestOutputs.map((testOutput) => [
       testOutput.stepId as OpenOpsId,
       (testOutput.output as Buffer).toString('base64'),
     ]),
   );
 }
 
-export function decodeTestOutputs(
-  testOutputs: Record<OpenOpsId, string>,
-): Record<OpenOpsId, Buffer> {
-  const decoded: Record<OpenOpsId, Buffer> = {};
-
-  for (const [key, base64Value] of Object.entries(testOutputs)) {
-    decoded[key as OpenOpsId] = Buffer.from(base64Value, 'base64');
-  }
-
-  return decoded;
+export function decodeStepOutput(output: string): Buffer {
+  return Buffer.from(output, 'base64');
 }

@@ -11,7 +11,7 @@ import {
   ALL_PRINCIPAL_TYPES,
   BlockCategory,
   BlockOptionRequest,
-  encodeTestOutputs,
+  encodeStepOutputs,
   FlagId,
   flowHelper,
   GetBlockRequestParams,
@@ -157,7 +157,7 @@ const baseBlocksController: FastifyPluginAsyncTypebox = async (app) => {
       projectId,
     });
 
-    let testOutputs: Record<OpenOpsId, string> | undefined = undefined;
+    let stepTestOutputs: Record<OpenOpsId, string> | undefined = undefined;
     const featureFlag = await devFlagsService.getOne(
       FlagId.USE_NEW_EXTERNAL_TESTDATA,
     );
@@ -172,7 +172,7 @@ const baseBlocksController: FastifyPluginAsyncTypebox = async (app) => {
         stepIds,
       });
 
-      testOutputs = encodeTestOutputs(outputs);
+      stepTestOutputs = encodeStepOutputs(outputs);
     }
 
     const { result } = await engineRunner.executeProp(engineToken, {
@@ -183,7 +183,7 @@ const baseBlocksController: FastifyPluginAsyncTypebox = async (app) => {
       input: request.input,
       projectId,
       searchValue: request.searchValue,
-      testOutputs,
+      stepTestOutputs,
     });
 
     return result;

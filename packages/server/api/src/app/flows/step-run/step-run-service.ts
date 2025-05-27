@@ -1,7 +1,7 @@
 import {
   ActionType,
   ApplicationError,
-  encodeTestOutputs,
+  encodeStepOutputs,
   ErrorCode,
   FlagId,
   flowHelper,
@@ -47,7 +47,7 @@ export const stepRunService = {
       });
     }
 
-    let testOutputs: Record<OpenOpsId, string> | undefined = undefined;
+    let stepTestOutputs: Record<OpenOpsId, string> | undefined = undefined;
     const featureFlag = await devFlagsService.getOne(
       FlagId.USE_NEW_EXTERNAL_TESTDATA,
     );
@@ -57,7 +57,7 @@ export const stepRunService = {
         stepIds,
       });
 
-      testOutputs = encodeTestOutputs(outputs);
+      stepTestOutputs = encodeStepOutputs(outputs);
     }
 
     const engineToken = await accessTokenManager.generateEngineToken({
@@ -68,7 +68,7 @@ export const stepRunService = {
       stepName,
       flowVersion,
       projectId,
-      testOutputs,
+      stepTestOutputs,
     });
 
     if (step.id) {
