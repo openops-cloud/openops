@@ -19,13 +19,4 @@ export const projectApi = {
   getAll: async () => {
     return api.get<Project>(`/v1/users/projects`);
   },
-  update: async (projectId: string, request: any) => {
-    return api.post<Project>(`/v1/projects/${projectId}`, request);
-  },
-  create: async (request: any) => {
-    return api.post<Project>('/v1/projects', request);
-  },
-  delete: async (projectId: string) => {
-    return api.delete<void>(`/v1/projects/${projectId}`);
-  },
 };
