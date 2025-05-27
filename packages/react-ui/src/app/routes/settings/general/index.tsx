@@ -11,8 +11,6 @@ import {
 } from '@openops/components/ui';
 
 import { platformHooks } from '@/app/common/hooks/platform-hooks';
-import { ManageGeneralSettings } from '@/app/features/settings/components/manage-general-settings';
-import { VersionInformation } from '@/app/features/settings/components/version-information';
 import { t } from 'i18next';
 import { Link } from 'react-router-dom';
 

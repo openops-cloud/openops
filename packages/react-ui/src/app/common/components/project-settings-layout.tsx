@@ -1,6 +1,6 @@
 import { FlagId } from '@openops/shared';
 import { t } from 'i18next';
-import { Info, Settings, Sparkles, SunMoon } from 'lucide-react';
+import { Settings, Sparkles, SunMoon } from 'lucide-react';
 
 import SidebarLayout from '@/app/common/components/sidebar-layout';
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
