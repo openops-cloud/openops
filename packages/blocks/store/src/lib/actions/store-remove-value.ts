@@ -1,9 +1,4 @@
-import {
-  createAction,
-  Property,
-  StoreScope,
-  Validators,
-} from '@openops/blocks-framework';
+import { createAction, Property, Validators } from '@openops/blocks-framework';
 import { common, getScopeAndKey } from './common';
 
 export const storageRemoveValue = createAction({
@@ -29,6 +24,7 @@ export const storageRemoveValue = createAction({
   async run(context) {
     const { key, scope } = getScopeAndKey({
       runId: context.run.id,
+      isTest: context.run.isTest,
       key: context.propsValue['key'],
       scope: context.propsValue.store_scope,
     });
