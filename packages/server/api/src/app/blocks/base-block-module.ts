@@ -13,6 +13,7 @@ import {
   BlockOptionRequest,
   encodeTestOutputs,
   FlagId,
+  flowHelper,
   GetBlockRequestParams,
   GetBlockRequestQuery,
   GetBlockRequestWithScopeParams,
@@ -157,10 +158,19 @@ const baseBlocksController: FastifyPluginAsyncTypebox = async (app) => {
     });
 
     let testOutputs: Record<OpenOpsId, string> | undefined = undefined;
-    if (await devFlagsService.getOne(FlagId.USE_NEW_EXTERNAL_TESTDATA)) {
-      const outputs = await flowStepTestOutputService.listEncrypted(
-        request.flowVersionId,
-      );
+    const featureFlag = await devFlagsService.getOne(
+      FlagId.USE_NEW_EXTERNAL_TESTDATA,
+    );
+    if (featureFlag && featureFlag.value) {
+      const stepIds = flowHelper
+        .getAllSteps(flow.version.trigger)
+        .filter((step) => step.id !== undefined)
+        .map((step) => step.id as string);
+
+      const outputs = await flowStepTestOutputService.listEncrypted({
+        flowVersionId: request.flowVersionId,
+        stepIds,
+      });
 
       testOutputs = encodeTestOutputs(outputs);
     }

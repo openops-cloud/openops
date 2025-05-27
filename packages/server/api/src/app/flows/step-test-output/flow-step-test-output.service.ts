@@ -74,11 +74,10 @@ export const flowStepTestOutputService = {
     return Promise.all(flowStepTestOutputs.map(decompressOutput));
   },
 
-  async listEncrypted(
-    flowVersionId: FlowVersionId,
-  ): Promise<FlowStepTestOutput[]> {
+  async listEncrypted(params: ListParams): Promise<FlowStepTestOutput[]> {
     return flowStepTestOutputRepo().findBy({
-      flowVersionId,
+      flowVersionId: params.flowVersionId,
+      stepId: In(params.stepIds),
     });
   },
 };

@@ -30,6 +30,10 @@ export const stepRunService = {
 
     const flowVersion = await flowVersionService.getOneOrThrow(flowVersionId);
     const step = flowHelper.getStep(flowVersion, stepName);
+    const stepIds = flowHelper
+      .getAllSteps(flowVersion.trigger)
+      .filter((step) => step.id !== undefined)
+      .map((step) => step.id as string);
 
     if (
       isNil(step) ||
@@ -44,10 +48,14 @@ export const stepRunService = {
     }
 
     let testOutputs: Record<OpenOpsId, string> | undefined = undefined;
-    if (await devFlagsService.getOne(FlagId.USE_NEW_EXTERNAL_TESTDATA)) {
-      const outputs = await flowStepTestOutputService.listEncrypted(
-        flowVersion.id,
-      );
+    const featureFlag = await devFlagsService.getOne(
+      FlagId.USE_NEW_EXTERNAL_TESTDATA,
+    );
+    if (featureFlag && featureFlag.value) {
+      const outputs = await flowStepTestOutputService.listEncrypted({
+        flowVersionId: flowVersion.id,
+        stepIds,
+      });
 
       testOutputs = encodeTestOutputs(outputs);
     }

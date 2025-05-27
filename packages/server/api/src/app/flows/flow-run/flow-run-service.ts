@@ -353,7 +353,10 @@ export const flowRunService = {
     const flowVersion = await flowVersionService.getOneOrThrow(flowVersionId);
 
     let payload = flowVersion.trigger.settings.inputUiInfo.currentSelectedData;
-    if (await devFlagsService.getOne(FlagId.USE_NEW_EXTERNAL_TESTDATA)) {
+    const featureFlag = await devFlagsService.getOne(
+      FlagId.USE_NEW_EXTERNAL_TESTDATA,
+    );
+    if (featureFlag && featureFlag.value) {
       payload = await flowStepTestOutputService.listDecrypted({
         flowVersionId: flowVersion.id,
         stepIds: [flowVersion.trigger.id!],
