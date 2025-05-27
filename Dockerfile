@@ -29,7 +29,10 @@ RUN <<-```
     set -ex
     git clone https://github.com/openops-cloud/openops-mcp .
     wget -qO- https://astral.sh/uv/install.sh | sh
-    python3 -m venv .venv && python3 -m venv pip install .
+    python3 -m venv .venv
+    source .venv/bin/activate
+    pip install -r requirements.txt
+    pip install .
 ```
 
 # Set up backend
