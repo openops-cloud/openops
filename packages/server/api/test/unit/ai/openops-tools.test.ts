@@ -1,10 +1,5 @@
 import '@fastify/swagger';
-import {
-  AppSystemProp,
-  logger,
-  networkUtls,
-  system,
-} from '@openops/server-shared';
+import { logger, networkUtls, system } from '@openops/server-shared';
 import { experimental_createMCPClient } from 'ai';
 import { FastifyInstance } from 'fastify';
 import { getOpenOpsTools } from '../../../src/app/ai/mcp/openops-tools';

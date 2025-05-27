@@ -9,7 +9,7 @@ import { Experimental_StdioMCPTransport } from 'ai/mcp-stdio';
 import { FastifyInstance } from 'fastify';
 import path from 'path';
 
-let openopsClient: any = null;
+let openopsClient = null;
 
 export async function getOpenOpsTools(
   app: FastifyInstance,
