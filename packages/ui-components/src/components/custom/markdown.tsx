@@ -283,7 +283,9 @@ const Markdown = React.memo(
             ol: ({ node, ...props }) => (
               <ol className="my-6 ml-6 list-decimal [&>li]:mt-2" {...props} />
             ),
-            li: ({ node, ...props }) => <li {...props} />,
+            li: ({ node, ...props }) => (
+              <li className={cn(textClassName)} {...props} />
+            ),
             a: ({ node, ...props }) => (
               <a
                 target="_blank"
