@@ -22,6 +22,7 @@ import {
   DataSelectorSizeTogglers,
 } from './data-selector-size-togglers';
 import { dataSelectorUtils, MentionTreeNode } from './data-selector-utils';
+import { expandOrCollapseNodesOnSearch } from './expand-or-collapse-on-search';
 import { useSelectorData } from './use-selector-data';
 
 function filterBy(arr: MentionTreeNode[], query: string): MentionTreeNode[] {
@@ -178,34 +179,8 @@ const DataSelector = ({
     setForceRerender((v) => v + 1);
   };
 
-  // Auto-expand/collapse nodes on search term change
   useEffect(() => {
-    if (searchTerm) {
-      // Expand all nodes at depth 0 and 1
-      const expandNodes = (nodes: MentionTreeNode[], depth: number) => {
-        nodes.forEach((node) => {
-          if (depth <= 1) {
-            stepTestOutputCache.setExpanded(node.key, true);
-          }
-          if (node.children) {
-            expandNodes(node.children, depth + 1);
-          }
-        });
-      };
-      expandNodes(mentions, 0);
-    } else {
-      // Collapse all nodes
-      const collapseNodes = (nodes: MentionTreeNode[]) => {
-        nodes.forEach((node) => {
-          stepTestOutputCache.setExpanded(node.key, false);
-          if (node.children) {
-            collapseNodes(node.children);
-          }
-        });
-      };
-      collapseNodes(mentions);
-    }
-    setForceRerender((v) => v + 1);
+    expandOrCollapseNodesOnSearch(mentions, searchTerm, setForceRerender);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchTerm]);
 
