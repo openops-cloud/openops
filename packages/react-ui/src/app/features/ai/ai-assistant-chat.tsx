@@ -56,7 +56,7 @@ const AiAssistantChat = ({
   } = useAiAssistantChat();
 
   const sizes = useMemo(() => {
-    const calculatedWidth = middlePanelSize.width * 0.6;
+    const calculatedWidth = middlePanelSize.width * 0.3;
     const calculatedExpandedWidth =
       middlePanelSize.width - CHAT_EXPANDED_WIDTH_OFFSET;
 

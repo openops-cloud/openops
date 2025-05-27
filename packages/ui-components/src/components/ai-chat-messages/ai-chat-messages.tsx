@@ -78,6 +78,8 @@ const MessageContent = ({
     withBorder={false}
     codeVariation={codeVariation}
     handleInject={onInject}
+    textClassName={'text-sm'}
+    linkClassName={'text-sm'}
   />
 );
 
