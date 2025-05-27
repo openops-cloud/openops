@@ -1,9 +1,7 @@
-import swagger from '@fastify/swagger';
 import {
   AppSystemProp,
   logger,
   networkUtls,
-  SharedSystemProp,
   system,
 } from '@openops/server-shared';
 import { experimental_createMCPClient, ToolSet } from 'ai';
