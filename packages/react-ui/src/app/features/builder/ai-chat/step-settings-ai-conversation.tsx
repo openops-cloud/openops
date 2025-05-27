@@ -1,6 +1,5 @@
 import { UseChatHelpers } from '@ai-sdk/react';
 import { UIMessage } from '@ai-sdk/ui-utils';
-import { BlockProperty } from '@openops/blocks-framework';
 import {
   AIChatMessage,
   AIChatMessageRole,
@@ -8,17 +7,12 @@ import {
   LoadingSpinner,
   MarkdownCodeVariations,
 } from '@openops/components/ui';
-import { flowHelper, FlowVersion, OpenChatResponse } from '@openops/shared';
-import { useQuery } from '@tanstack/react-query';
-import { useCallback } from 'react';
+import { OpenChatResponse } from '@openops/shared';
+import { useCallback, useMemo } from 'react';
 import { useBuilderStateContext } from '../builder-hooks';
-import { aiChatApi } from './lib/chat-api';
 
 type ConversationProps = {
-  stepName: string;
-  flowVersion: FlowVersion;
-  property: BlockProperty;
-  onConversationRetrieved: (conversation: OpenChatResponse) => void;
+  isPending: boolean;
 } & Pick<UseChatHelpers, 'messages' | 'status'>;
 
 type ServerMessage = NonNullable<OpenChatResponse['messages']>[number];
@@ -30,41 +24,11 @@ const ChatStatus = {
 };
 
 const StepSettingsAiConversation = ({
-  flowVersion,
-  stepName,
-  property,
-  onConversationRetrieved,
   messages,
   status,
+  isPending,
 }: ConversationProps) => {
   const dispatch = useBuilderStateContext((state) => state.applyMidpanelAction);
-  const stepDetails = flowHelper.getStep(flowVersion, stepName);
-  const blockName = stepDetails?.settings?.blockName;
-
-  const { isPending, data } = useQuery({
-    queryKey: ['openChat', flowVersion.flowId, blockName, stepName],
-    queryFn: async () => {
-      if (!stepDetails) {
-        throw new Error('Step not found');
-      }
-
-      const data = await aiChatApi.open(
-        flowVersion.flowId,
-        blockName,
-        stepName,
-        stepDetails.settings.actionName,
-      );
-      onConversationRetrieved(data);
-      return data;
-    },
-    enabled:
-      !!stepDetails &&
-      !!stepDetails.settings.blockName &&
-      !!stepDetails.settings.actionName,
-  });
-
-  const messagesToDisplay: MessageType[] =
-    messages.length > 0 ? messages : data?.messages ?? [];
 
   const onInject = useCallback(
     (code: string) => {
@@ -73,12 +37,8 @@ const StepSettingsAiConversation = ({
     [dispatch],
   );
 
-  if (isPending) {
-    return <LoadingSpinner />;
-  }
-
-  const uiMessages: AIChatMessage[] = messagesToDisplay.map(
-    (message: MessageType, idx) => ({
+  const uiMessages: AIChatMessage[] = useMemo(() => {
+    return messages.map((message: MessageType, idx) => ({
       id: message && 'id' in message ? message.id : String(idx),
       role:
         message.role.toLowerCase() === 'user'
@@ -87,8 +47,12 @@ const StepSettingsAiConversation = ({
       content: Array.isArray(message.content)
         ? message.content.map((c) => c.text).join()
         : message.content,
-    }),
-  );
+    }));
+  }, [messages]);
+
+  if (isPending) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <div className="flex flex-col gap-2 max-w-full">

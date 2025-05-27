@@ -21386,6 +21386,7 @@ The following npm packages may be included in this product:
 
  - @fastify/fast-json-stringify-compiler@4.3.0
  - @fastify/swagger-ui@1.10.2
+ - @fastify/swagger-ui@2.1.0
 
 These packages each contain the following license:
 

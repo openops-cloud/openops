@@ -3,6 +3,7 @@ import { LucideProps } from 'lucide-react';
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '../../lib/cn';
+
 import { TooltipWrapper } from '../tooltip-wrapper';
 
 type MenuNavigationItemProps = {

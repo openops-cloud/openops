@@ -1,10 +1,11 @@
-import { Client, PageCollection } from '@microsoft/microsoft-graph-client';
+import { PageCollection } from '@microsoft/microsoft-graph-client';
 import { Chat, ConversationMember } from '@microsoft/microsoft-graph-types';
 import {
   BlockPropValueSchema,
   DropdownOption,
   Property,
 } from '@openops/blocks-framework';
+import { PRIVATE_CHAT_KIND } from './get-all-chat-options';
 import { getMicrosoftGraphClient } from './get-microsoft-graph-client';
 import { microsoftTeamsAuth } from './microsoft-teams-auth';
 import { parseMsPaginatedData } from './parse-ms-paginated-data';
@@ -42,13 +43,6 @@ export const chatId = Property.Dropdown({
   },
 });
 
-const CHAT_TYPE = {
-  oneOnOne: '1 : 1',
-  group: 'Group',
-  meeting: 'Meeting',
-  unknownFutureValue: 'Unknown',
-};
-
 async function populateChatOptions(
   options: DropdownOption<string>[],
   elem: Chat,
@@ -61,7 +55,9 @@ async function populateChatOptions(
       .join(',');
 
   options.push({
-    label: `(${CHAT_TYPE[elem.chatType!]} Chat) ${chatName || '(no title)'}`,
+    label: `(${PRIVATE_CHAT_KIND[elem.chatType!]} Chat) ${
+      chatName ?? '(no title)'
+    }`,
     value: elem.id!,
   });
 }

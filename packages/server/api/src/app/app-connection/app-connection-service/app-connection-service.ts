@@ -1,5 +1,9 @@
 import { BlockMetadataModel } from '@openops/blocks-framework';
-import { distributedLock, exceptionHandler } from '@openops/server-shared';
+import {
+  distributedLock,
+  encryptUtils,
+  exceptionHandler,
+} from '@openops/server-shared';
 import {
   AppConnection,
   AppConnectionId,
@@ -22,7 +26,6 @@ import {
 import dayjs from 'dayjs';
 import { FindOperator, ILike, In } from 'typeorm';
 import { repoFactory } from '../../core/db/repo-factory';
-import { encryptUtils } from '../../helper/encryption';
 import { buildPaginator } from '../../helper/pagination/build-paginator';
 import { paginationHelper } from '../../helper/pagination/pagination-utils';
 import {

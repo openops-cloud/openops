@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
+import { QueryKeys } from '@/app/constants/query-keys';
 import {
   AppConnectionWithoutSensitiveData,
   ListAppConnectionsRequestQuery,
@@ -9,7 +10,7 @@ import { appConnectionsApi } from './app-connections-api';
 export const appConnectionsHooks = {
   useConnections: (request: ListAppConnectionsRequestQuery) => {
     return useQuery({
-      queryKey: ['app-connections', request?.blockNames],
+      queryKey: [QueryKeys.appConnections, request?.blockNames],
       queryFn: () => {
         return appConnectionsApi.list(request);
       },
@@ -18,7 +19,7 @@ export const appConnectionsHooks = {
   },
   useConnection: (request: { id: string | null }) => {
     return useQuery({
-      queryKey: ['app-connection', request.id],
+      queryKey: [QueryKeys.appConnection, request.id],
       queryFn: () => {
         if (request.id === null) {
           return null;
@@ -30,7 +31,7 @@ export const appConnectionsHooks = {
   },
   useGroupedConnections: (request: ListAppConnectionsRequestQuery) => {
     return useQuery({
-      queryKey: ['app-connections', request?.blockNames],
+      queryKey: [QueryKeys.appConnections, request?.blockNames],
       queryFn: () => appConnectionsApi.list(request),
       staleTime: 0,
       select: (connectionsPage) =>

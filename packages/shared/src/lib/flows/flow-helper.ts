@@ -1074,7 +1074,7 @@ function findAvailableStepName(
   return findUnusedName(steps, stepPrefix);
 }
 
-type StepWithIndex = Step & { dfsIndex: number };
+export type StepWithIndex = Step & { dfsIndex: number };
 
 function findPathToStep({
   targetStepName,

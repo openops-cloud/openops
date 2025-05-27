@@ -1,6 +1,6 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { getAiProviderLanguageModel } from '@openops/common';
-import { logger } from '@openops/server-shared';
+import { encryptUtils, logger } from '@openops/server-shared';
 import {
   DeleteChatHistoryRequest,
   NewMessageRequest,
@@ -16,7 +16,6 @@ import {
   TextPart,
 } from 'ai';
 import { StatusCodes } from 'http-status-codes';
-import { encryptUtils } from '../../helper/encryption';
 import {
   sendAiChatFailureEvent,
   sendAiChatMessageSendEvent,
