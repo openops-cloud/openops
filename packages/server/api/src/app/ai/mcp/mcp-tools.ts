@@ -6,11 +6,14 @@ import { getOpenOpsTools } from './openops-tools';
 import { getSupersetTools } from './superset-tools';
 import { getTablesTools } from './tables-tools';
 
-export const getMCPTools = async (app: FastifyInstance): Promise<ToolSet> => {
+export const getMCPTools = async (
+  app: FastifyInstance,
+  authToken: string,
+): Promise<ToolSet> => {
   const docsTools = await safeGetTools('docs', getDocsTools);
-  //const tablesTools = await safeGetTools('tables', getTablesTools);
+  const tablesTools = await safeGetTools('tables', getTablesTools);
   const openopsTools = await safeGetTools('openops', () =>
-    getOpenOpsTools(app),
+    getOpenOpsTools(app, authToken),
   );
 
   const loadExperimentalTools = system.getBoolean(
@@ -24,9 +27,9 @@ export const getMCPTools = async (app: FastifyInstance): Promise<ToolSet> => {
   }
 
   const toolSet = {
-    //...supersetTools,
+    ...supersetTools,
     ...docsTools,
-    //...tablesTools,
+    ...tablesTools,
     ...openopsTools,
   } as ToolSet;
 

@@ -90,8 +90,7 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
     '/Users/leylabuechel/Documents/openops-mcp',
   [AppSystemProp.DOCS_MCP_SERVER_PATH]: '/root/.mcp/docs.openops.com',
   [AppSystemProp.LOAD_EXPERIMENTAL_MCP_TOOLS]: 'false',
-  [AppSystemProp.OPENOPS_MCP_SERVER_PATH]:
-    '/Users/leylabuechel/Documents/openops-mcp',
+  [AppSystemProp.OPENOPS_MCP_SERVER_PATH]: '/root/.mcp/openops',
 };
 
 export const system = {

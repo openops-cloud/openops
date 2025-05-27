@@ -24,6 +24,14 @@ RUN <<-```
     python3 -m venv .venv && python3 -m venv pip install .
 ```
 
+WORKDIR /root/.mcp/openops
+RUN <<-```
+    set -ex
+    git clone https://github.com/openops-cloud/openops-mcp .
+    wget -qO- https://astral.sh/uv/install.sh | sh
+    python3 -m venv .venv && python3 -m venv pip install .
+```
+
 # Set up backend
 WORKDIR /usr/src/app
 

@@ -69,6 +69,7 @@ export const setupApp = async (
   await app.register(swagger, {
     hideUntagged: true,
     openapi: {
+      openapi: '3.1.0',
       servers: [
         {
           url: 'https://app.openops.com/api',
