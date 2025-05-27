@@ -17,7 +17,6 @@ export const microsoftTeamsAuth = BlockAuth.OAuth2({
       const authValue = auth as BlockPropValueSchema<typeof microsoftTeamsAuth>;
       const client = getMicrosoftGraphClient(authValue.access_token);
 
-      console.log('TESTING AUTH', authValue);
       await client.api('/me').get();
       return { valid: true };
     } catch (error) {
