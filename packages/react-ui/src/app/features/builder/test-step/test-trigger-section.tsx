@@ -34,6 +34,7 @@ import {
 } from '@openops/shared';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
+import { stepTestOutputCache } from '../data-selector/data-selector-cache';
 import { stepTestOutputHooks } from './step-test-output-hooks';
 import { TestSampleDataViewer } from './test-sample-data-viewer';
 import { TestButtonTooltip } from './test-step-tooltip';
@@ -185,7 +186,12 @@ const TestTriggerSection = React.memo(
     );
 
     function updateCurrentSelectedData(data: TriggerEvent) {
-      if (!useNewExternalTestData) {
+      if (useNewExternalTestData) {
+        stepTestOutputCache.setStepData(formValues.id!, {
+          output: formatUtils.formatStepInputOrOutput(data.payload),
+          lastTestDate: dayjs().toISOString(),
+        });
+      } else {
         form.setValue(
           'settings.inputUiInfo',
           {

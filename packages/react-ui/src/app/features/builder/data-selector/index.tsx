@@ -7,23 +7,23 @@ import {
 } from '@openops/components/ui';
 import { t } from 'i18next';
 import { SearchXIcon } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { FlagId, flowHelper, isNil } from '@openops/shared';
+import { FlagId, flowHelper, isNil, StepOutputWithData } from '@openops/shared';
 
 import { useBuilderStateContext } from '../builder-hooks';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
-import { QueryKeys } from '@/app/constants/query-keys';
-import { useQuery } from '@tanstack/react-query';
-import { flowsApi } from '../../flows/lib/flows-api';
 import { BuilderState } from '../builder-types';
+import { stepTestOutputCache } from './data-selector-cache';
 import { DataSelectorNode } from './data-selector-node';
 import {
   DataSelectorSizeState,
   DataSelectorSizeTogglers,
 } from './data-selector-size-togglers';
 import { dataSelectorUtils, MentionTreeNode } from './data-selector-utils';
+import { expandOrCollapseNodesOnSearch } from './expand-or-collapse-on-search';
+import { useSelectorData } from './use-selector-data';
 
 function filterBy(arr: MentionTreeNode[], query: string): MentionTreeNode[] {
   if (!query) {
@@ -136,25 +136,76 @@ const DataSelector = ({
 
   const stepIds: string[] = pathToTargetStep.map((p) => p.id!);
 
-  const { data: stepsTestOutput, isLoading } = useQuery({
-    queryKey: [QueryKeys.dataSelectorStepTestOutput, flowVersionId, ...stepIds],
-    queryFn: async () => {
-      const stepTestOuput = await flowsApi.getStepTestOutputBulk(
-        flowVersionId,
-        stepIds,
-      );
-      return stepTestOuput;
-    },
-    enabled:
-      !!useNewExternalTestData && isDataSelectorVisible && stepIds.length > 0,
+  const [forceRender, setForceRerender] = useState(0); // for cache updates
+  const [initialLoad, setInitialLoad] = useState(true);
+
+  const { isLoading } = useSelectorData({
+    stepIds,
+    flowVersionId,
+    useNewExternalTestData: !!useNewExternalTestData,
+    isDataSelectorVisible,
+    initialLoad,
+    setInitialLoad,
+    forceRerender: setForceRerender,
   });
 
-  const mentions = useNewExternalTestData
-    ? dataSelectorUtils.getAllStepsMentions(pathToTargetStep, stepsTestOutput)
-    : mentionsFromCurrentSelectedData;
+  const mentions = useMemo(() => {
+    if (!useNewExternalTestData) {
+      return mentionsFromCurrentSelectedData;
+    }
+    const stepTestOutput: Record<string, StepOutputWithData> = {};
+    stepIds.forEach((id) => {
+      const cached = stepTestOutputCache.getStepData(id);
+      if (cached) stepTestOutput[id] = cached;
+    });
+    return dataSelectorUtils.getAllStepsMentions(
+      pathToTargetStep,
+      stepTestOutput,
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    useNewExternalTestData,
+    mentionsFromCurrentSelectedData,
+    pathToTargetStep,
+    stepIds,
+    forceRender,
+    initialLoad,
+  ]);
+
+  // OBSOLETE: This effect is now considered obsolete and only used until flag is removed
+  useEffect(() => {
+    if (!useNewExternalTestData && mentionsFromCurrentSelectedData) {
+      const traverseAndCache = (nodes: MentionTreeNode[]) => {
+        nodes.forEach((node) => {
+          if (stepTestOutputCache.getExpanded(node.key) === undefined) {
+            stepTestOutputCache.setExpanded(node.key, false);
+          }
+          if (node.children) {
+            traverseAndCache(node.children);
+          }
+        });
+      };
+      traverseAndCache(mentionsFromCurrentSelectedData);
+    }
+  }, [useNewExternalTestData, mentionsFromCurrentSelectedData]);
+
+  const getExpanded = (nodeKey: string) =>
+    stepTestOutputCache.getExpanded(nodeKey);
+  const setExpanded = (nodeKey: string, expanded: boolean) => {
+    stepTestOutputCache.setExpanded(nodeKey, expanded);
+    setForceRerender((v) => v + 1);
+  };
+
+  useEffect(() => {
+    expandOrCollapseNodesOnSearch(mentions, searchTerm, setForceRerender);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchTerm]);
 
   const midpanelState = useBuilderStateContext((state) => state.midpanelState);
-  const filteredMentions = filterBy(structuredClone(mentions), searchTerm);
+  const filteredMentions = useMemo(
+    () => filterBy(structuredClone(mentions), searchTerm),
+    [mentions, searchTerm],
+  );
 
   const onToggle = useCallback(() => {
     if (
@@ -171,6 +222,13 @@ const DataSelector = ({
       setDataSelectorSize(DataSelectorSizeState.DOCKED);
     }
   }, [dataSelectorSize, midpanelState.aiContainerSize, setDataSelectorSize]);
+
+  // Clear cache on unmount or when flowVersionId changes
+  useEffect(() => {
+    return () => {
+      stepTestOutputCache.clearAll();
+    };
+  }, [flowVersionId]);
 
   return (
     <div
@@ -238,6 +296,8 @@ const DataSelector = ({
                 key={node.key}
                 node={node}
                 searchTerm={searchTerm}
+                getExpanded={getExpanded}
+                setExpanded={setExpanded}
               ></DataSelectorNode>
             ))}
           {filteredMentions.length === 0 && (
