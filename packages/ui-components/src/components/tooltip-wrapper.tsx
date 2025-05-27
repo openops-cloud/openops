@@ -1,7 +1,7 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 
 type Props = {
-  tooltipText: string;
+  tooltipText: string | null | undefined;
   tooltipPlacement?: 'top' | 'bottom' | 'left' | 'right';
   delayDuration?: number;
   children: React.ReactNode;

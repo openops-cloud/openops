@@ -7,6 +7,8 @@ import {
   CardHeader,
   CardTitle,
   LoadingSpinner,
+  TooltipProvider,
+  TooltipWrapper,
 } from '@openops/components/ui';
 import { t } from 'i18next';
 import { Link } from 'react-router-dom';
@@ -45,16 +47,26 @@ const AboutSettingsPage = () => {
             )}
           </div>
 
-          <Link
-            to="https://docs.openops.com/getting-started/updating-openops"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="self-end"
-          >
-            <Button disabled={!hasNewerVersionAvailable}>
-              {t('Learn how to update')}
-            </Button>
-          </Link>
+          <TooltipProvider>
+            <TooltipWrapper
+              tooltipText={
+                !hasNewerVersionAvailable
+                  ? t('You are on the latest version')
+                  : null
+              }
+            >
+              <Link
+                to="https://docs.openops.com/getting-started/updating-openops"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="self-end"
+              >
+                <Button disabled={!hasNewerVersionAvailable}>
+                  {t('Learn how to update')}
+                </Button>
+              </Link>
+            </TooltipWrapper>
+          </TooltipProvider>
         </div>
       </CardContent>
     </Card>

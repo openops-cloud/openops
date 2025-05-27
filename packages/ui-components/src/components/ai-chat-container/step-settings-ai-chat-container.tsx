@@ -1,9 +1,10 @@
 import { UseChatHelpers } from '@ai-sdk/react';
 import { t } from 'i18next';
 import { Send as SendIcon, Sparkles } from 'lucide-react';
-import { ReactNode, useRef } from 'react';
+import { ReactNode, useEffect, useRef } from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
 import { cn } from '../../lib/cn';
+import { AI_CHAT_SCROLL_DELAY } from '../../lib/constants';
 import { Button } from '../../ui/button';
 import { ScrollArea } from '../../ui/scroll-area';
 import { AiChatSizeTogglers } from './ai-chat-size-togglers';
@@ -19,7 +20,7 @@ type StepSettingsAiChatContainerProps = {
   containerSize: AiCliChatContainerSizeState;
   enableNewChat: boolean;
   isEmpty: boolean;
-
+  stepName: string;
   toggleContainerSizeState: (state: AiCliChatContainerSizeState) => void;
   className?: string;
   children?: ReactNode;
@@ -40,9 +41,34 @@ const StepSettingsAiChatContainer = ({
   handleInputChange,
   handleSubmit,
   input,
+  stepName,
   isEmpty = true,
 }: StepSettingsAiChatContainerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const scrollViewportRef = useRef<HTMLDivElement>(null);
+  const hasScrolledOnce = useRef<boolean>(false);
+
+  useEffect(() => {
+    hasScrolledOnce.current = false;
+  }, [stepName]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      if (
+        scrollViewportRef.current &&
+        !isEmpty &&
+        showAiChat &&
+        !hasScrolledOnce.current
+      ) {
+        scrollViewportRef.current.scrollTo({
+          top: scrollViewportRef.current.scrollHeight,
+          behavior: 'smooth',
+        });
+
+        hasScrolledOnce.current = true;
+      }
+    }, AI_CHAT_SCROLL_DELAY);
+  }, [isEmpty, showAiChat, stepName]);
 
   let height: string;
   if (containerSize === AI_CHAT_CONTAINER_SIZES.COLLAPSED) {
@@ -114,7 +140,10 @@ const StepSettingsAiChatContainer = ({
         className="transition-all overflow-hidden"
       >
         <div className="py-4 flex flex-col h-full">
-          <ScrollArea className="transition-all h-full w-full">
+          <ScrollArea
+            className="transition-all h-full w-full"
+            viewPortRef={scrollViewportRef}
+          >
             <div
               className={cn('flex-1 px-6', {
                 'flex flex-col h-full': isEmpty,
