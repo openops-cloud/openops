@@ -83,20 +83,23 @@ export const requestActionMessageAction = createAction({
     if (context.executionType === ExecutionType.BEGIN) {
       const baseUrl = await networkUtls.getPublicUrl();
 
-      const preparedActions: TeamsMessageButton[] = actions.map((action) => ({
-        ...action,
-        resumeUrl: context.run.isTest
-          ? 'https://static.openops.com/test_teams_actions.txt'
-          : context.generateResumeUrl(
-              {
-                queryParams: {
-                  executionCorrelationId: context.run.pauseId,
-                  button: action.buttonText,
-                },
-              },
-              baseUrl,
-            ),
-      }));
+      const preparedActions: TeamsMessageButton[] = actions.map((action) => {
+        const resumeUrl = context.generateResumeUrl(
+          {
+            queryParams: {
+              executionCorrelationId: context.run.pauseId,
+              button: action.buttonText,
+            },
+          },
+          baseUrl,
+        );
+        return {
+          ...action,
+          resumeUrl: `https://static.openops.com/html/resume_execution.html?isTest=${
+            context.run.isTest
+          }&redirectUrl=${encodeURIComponent(resumeUrl)}`,
+        };
+      });
 
       const result = await sendChatOrChannelMessage({
         accessToken: context.auth.access_token,
