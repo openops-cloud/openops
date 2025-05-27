@@ -40,7 +40,7 @@ export async function getOpenOpsTools(
           OPENAPI_SCHEMA: JSON.stringify(openApiSchema),
           AUTH_TOKEN: authToken,
           API_BASE_URL: apiBaseUrl,
-          MCP_SERVER_PATH: basePath,
+          OPENOPS_MCP_SERVER_PATH: basePath,
         },
       }),
     });
