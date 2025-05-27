@@ -1,8 +1,4 @@
-import {
-  createAction,
-  Property,
-  Validators,
-} from '@openops/blocks-framework';
+import { createAction, Property, Validators } from '@openops/blocks-framework';
 import { common, getScopeAndKey } from './common';
 
 export const storageRemoveValue = createAction({
