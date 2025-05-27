@@ -85,9 +85,13 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [SharedSystemProp.INTERNAL_PARALLEL_LOOP_ITERATIONS_LIMIT]: '1',
   [AppSystemProp.AI_PROMPTS_LOCATION]:
     'https://raw.githubusercontent.com/openops-cloud/openops/main/ai-prompts',
-  [AppSystemProp.SUPERSET_MCP_SERVER_PATH]: '/root/.mcp/superset',
+  [AppSystemProp.MCP_SERVER_PATH]: '/Users/leylabuechel/Documents/openops-mcp',
+  [AppSystemProp.SUPERSET_MCP_SERVER_PATH]:
+    '/Users/leylabuechel/Documents/openops-mcp',
   [AppSystemProp.DOCS_MCP_SERVER_PATH]: '/root/.mcp/docs.openops.com',
   [AppSystemProp.LOAD_EXPERIMENTAL_MCP_TOOLS]: 'false',
+  [AppSystemProp.OPENOPS_MCP_SERVER_PATH]:
+    '/Users/leylabuechel/Documents/openops-mcp',
 };
 
 export const system = {

@@ -11,7 +11,7 @@ const getSystemPrompt = (
   const toolsMessage = toolList
     .map((t) => `- ${t.name}: ${t.description}`)
     .join('\n');
-  return `Given the following conversation history and the list of available tools, select the tools that are most relevant to answer the user's request. Return an array of tool names.\n\nTools:\n${toolsMessage}.`;
+  return `Given the following conversation history and the list of available tools, select ALL tools that could be relevant to answer the user's request, even if they might be used indirectly. Return an array of tool names.\n\nTools:\n${toolsMessage}.`;
 };
 
 export async function selectRelevantTools({
@@ -34,6 +34,12 @@ export async function selectRelevantTools({
     description: tool.description || '',
   }));
 
+  // Log available tools for debugging
+  logger.info('Available tools:', {
+    toolNames: Object.keys(tools),
+    toolDescriptions: toolList.map((t) => `${t.name}: ${t.description}`),
+  });
+
   try {
     const { object: toolSelectionResult } = await generateObject({
       model: languageModel,
@@ -47,24 +53,38 @@ export async function selectRelevantTools({
 
     let selectedToolNames = toolSelectionResult.tool_names;
 
+    // Log selected tools for debugging
+    logger.info('Selected tools:', {
+      selectedToolNames,
+      allAvailableTools: Object.keys(tools),
+    });
+
     const validToolNames = Object.keys(tools);
     const invalidToolNames = selectedToolNames.filter(
       (name) => !validToolNames.includes(name),
     );
 
     if (invalidToolNames.length > 0) {
+      logger.warn('Invalid tool names selected:', { invalidToolNames });
       selectedToolNames = selectedToolNames.filter((name) =>
         validToolNames.includes(name),
       );
     }
 
-    return Object.fromEntries(
+    const filteredTools = Object.fromEntries(
       Object.entries(tools)
         .filter(([name]) => selectedToolNames.includes(name))
         .slice(0, MAX_SELECTED_TOOLS),
     );
+
+    // Log final filtered tools
+    logger.info('Final filtered tools:', {
+      filteredToolNames: Object.keys(filteredTools),
+    });
+
+    return filteredTools;
   } catch (error) {
     logger.error('Error selecting tools', error);
-    return;
+    return tools; // Return all tools on error instead of undefined
   }
 }
