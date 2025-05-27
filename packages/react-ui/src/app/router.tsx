@@ -394,22 +394,6 @@ const createRoutes = () => {
     errorElement: <RouteErrorBoundary />,
   });
 
-  routes.push({
-    path: '/settings/about',
-    element: (
-      <DashboardContainer pageHeader={<PageHeader title={t('Settings')} />}>
-        <ProjectSettingsLayout>
-          <OpsErrorBoundary>
-            <PageTitle title="About">
-              <AboutSettingsPage />
-            </PageTitle>
-          </OpsErrorBoundary>
-        </ProjectSettingsLayout>
-      </DashboardContainer>
-    ),
-    errorElement: <RouteErrorBoundary />,
-  });
-
   return routes;
 };
 
