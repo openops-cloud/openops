@@ -266,16 +266,14 @@ describe('requestActionMessageAction', () => {
       const action = actionBlock.elements[0];
 
       expect(action.url).toBeDefined();
-      expect(action.url).toContain('https://example.com/resume?');
-      expect(action.url).toContain('actionClicked=Approve');
+      expect(action.url).toContain('https%3A%2F%2Fexample.com');
+      expect(action.url).toContain('actionClicked%3DApprove');
 
-      expect(result.eventPayload.resumeUrl).toContain(
-        'executionCorrelationId=',
-      );
+      expect(result.eventPayload.resumeUrl).toContain('executionCorrelationId');
       expect(result.eventPayload.interactionsDisabled).toBe(true);
     });
 
-    test('should assign static test url to actions in test mode when interactions are disabled', async () => {
+    test('should set isTest flag in static test url to actions in test mode when interactions are disabled', async () => {
       getBooleanMock.mockReturnValueOnce(false);
       waitForInteractionMock.mockImplementation(async (messageObj: any) =>
         Promise.resolve({ ...messageObj }),
@@ -293,7 +291,7 @@ describe('requestActionMessageAction', () => {
       const action = actionBlock.elements[0];
 
       expect(action.url).toBe(
-        'https://static.openops.com/test_slack_interactions.txt',
+        'https://static.openops.com/html/resume_execution.html?isTest=true&redirectUrl=undefined',
       );
       expect(result.eventPayload.interactionsDisabled).toBe(true);
     });
