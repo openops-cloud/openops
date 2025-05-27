@@ -52,7 +52,7 @@ const AboutSettingsPage = () => {
               tooltipText={
                 !hasNewerVersionAvailable
                   ? t('You are on the latest version')
-                  : ''
+                  : null
               }
             >
               <Link
