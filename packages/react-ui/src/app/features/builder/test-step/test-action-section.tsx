@@ -4,7 +4,7 @@ import {
   INTERNAL_ERROR_TOAST,
   useToast,
 } from '@openops/components/ui';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import { t } from 'i18next';
 import React, { useEffect, useState } from 'react';
@@ -29,7 +29,7 @@ import {
 } from '@openops/shared';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
-import { QueryKeys } from '@/app/constants/query-keys';
+import { stepTestOutputCache } from '../data-selector/data-selector-cache';
 import { stepTestOutputHooks } from './step-test-output-hooks';
 import { TestSampleDataViewer } from './test-sample-data-viewer';
 import { TestButtonTooltip } from './test-step-tooltip';
@@ -48,7 +48,6 @@ const TestActionSection = React.memo(
     );
     const form = useFormContext<Action>();
     const formValues = form.getValues();
-    const queryClient = useQueryClient();
 
     const [isValid, setIsValid] = useState(false);
 
@@ -83,9 +82,6 @@ const TestActionSection = React.memo(
           flowVersionId,
           stepName: formValues.name,
         });
-        queryClient.invalidateQueries({
-          queryKey: [QueryKeys.dataSelectorStepTestOutput],
-        });
         return response;
       },
       onSuccess: (stepResponse) => {
@@ -95,7 +91,12 @@ const TestActionSection = React.memo(
         if (stepResponse.success) {
           setErrorMessage(undefined);
 
-          if (!useNewExternalTestData) {
+          if (useNewExternalTestData) {
+            stepTestOutputCache.setStepData(formValues.id!, {
+              output: formattedResponse,
+              lastTestDate: dayjs().toISOString(),
+            });
+          } else {
             form.setValue(
               'settings.inputUiInfo.currentSelectedData',
               formattedResponse,
@@ -121,6 +122,9 @@ const TestActionSection = React.memo(
     const isTesting = isPending || isLoadingTestOutput;
 
     const handleTest = () => {
+      if (useNewExternalTestData) {
+        stepTestOutputCache.resetExpandedForStep(formValues.id!);
+      }
       if (
         selectedStep.type === ActionType.BLOCK &&
         selectedStepTemplateModel?.riskLevel === RiskLevel.HIGH
@@ -135,6 +139,9 @@ const TestActionSection = React.memo(
 
     const confirmRiskyStep = () => {
       setRiskyStepConfirmationMessage(null);
+      if (useNewExternalTestData) {
+        stepTestOutputCache.resetExpandedForStep(formValues.id!);
+      }
       mutate();
     };
 

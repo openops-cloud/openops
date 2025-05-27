@@ -1,7 +1,21 @@
-import { ActionType, FlowOperationType, TriggerType } from '@openops/shared';
+import { AI_CHAT_CONTAINER_SIZES } from '@openops/components/ui';
+import {
+  ActionType,
+  FlowOperationRequest,
+  FlowOperationType,
+  FlowStatus,
+  FlowVersionState,
+  TriggerType,
+} from '@openops/shared';
 import { waitFor } from '@testing-library/react';
 import { aiChatApi } from '../ai-chat/lib/chat-api';
-import { BuilderState, RightSideBarType } from '../builder-types';
+import {
+  BuilderState,
+  LeftSideBarType,
+  RightSideBarType,
+} from '../builder-types';
+import { stepTestOutputCache } from '../data-selector/data-selector-cache';
+import { DataSelectorSizeState } from '../data-selector/data-selector-size-togglers';
 import { updateFlowVersion } from '../update-flow-version';
 
 jest.mock('@/app/features/flows/lib/flows-api');
@@ -14,9 +28,23 @@ describe('updateFlowVersion', () => {
 
   beforeEach(() => {
     mockState = {
-      flow: { id: 'flow1' },
+      flow: {
+        id: 'flow1',
+        created: '2023-01-01T00:00:00.000Z',
+        updated: '2023-01-01T00:00:00.000Z',
+        projectId: 'project1',
+        folderId: null,
+        status: FlowStatus.ENABLED,
+        schedule: null,
+        publishedVersionId: null,
+      },
       flowVersion: {
         id: 'version1',
+        created: '2023-01-01T00:00:00.000Z',
+        updated: '2023-01-01T00:00:00.000Z',
+        flowId: 'flow1',
+        displayName: 'Test Flow Version',
+        description: '',
         trigger: {
           name: 'trigger1',
           type: TriggerType.EMPTY,
@@ -24,6 +52,7 @@ describe('updateFlowVersion', () => {
           valid: false,
           displayName: 'Select Trigger',
           nextAction: {
+            id: 'step_1',
             name: 'step_1',
             type: ActionType.BLOCK,
             valid: false,
@@ -33,9 +62,56 @@ describe('updateFlowVersion', () => {
             },
           },
         },
+        updatedBy: null,
+        valid: false,
+        state: FlowVersionState.DRAFT,
       },
       selectedStep: 'step_1',
       rightSidebar: RightSideBarType.BLOCK_SETTINGS,
+      readonly: false,
+      loopsIndexes: {},
+      run: null,
+      leftSidebar: LeftSideBarType.NONE,
+      canExitRun: false,
+      activeDraggingStep: null,
+      saving: false,
+      refreshBlockFormSettings: false,
+      refreshSettings: jest.fn(),
+      exitRun: jest.fn(),
+      exitStepSettings: jest.fn(),
+      renameFlowClientSide: jest.fn(),
+      moveToFolderClientSide: jest.fn(),
+      setRun: jest.fn(),
+      setLeftSidebar: jest.fn(),
+      setRightSidebar: jest.fn(),
+      applyOperation: jest.fn(),
+      removeStepSelection: jest.fn(),
+      selectStepByName: jest.fn(),
+      startSaving: jest.fn(),
+      setActiveDraggingStep: jest.fn(),
+      setFlow: jest.fn(),
+      exitBlockSelector: jest.fn(),
+      setVersion: jest.fn(),
+      setVersionUpdateTimestamp: jest.fn(),
+      insertMention: null,
+      setReadOnly: jest.fn(),
+      setInsertMentionHandler: jest.fn(),
+      setLoopIndex: jest.fn(),
+      canUndo: false,
+      setCanUndo: jest.fn(),
+      canRedo: false,
+      setCanRedo: jest.fn(),
+      dynamicPropertiesAuthReconnectCounter: 0,
+      refreshDynamicPropertiesForAuth: jest.fn(),
+      midpanelState: {
+        showDataSelector: false,
+        dataSelectorSize: DataSelectorSizeState.DOCKED,
+        showAiChat: false,
+        aiContainerSize: AI_CHAT_CONTAINER_SIZES.COLLAPSED,
+        aiChatProperty: undefined,
+        codeToInject: undefined,
+      },
+      applyMidpanelAction: jest.fn(),
     };
 
     mockSet = jest.fn();
@@ -52,7 +128,7 @@ describe('updateFlowVersion', () => {
         settings: { blockVersion: '1.0.0' },
         displayName: 'Google Cloud CLI',
       },
-    };
+    } as FlowOperationRequest;
 
     const result = updateFlowVersion(
       mockState,
@@ -67,6 +143,13 @@ describe('updateFlowVersion', () => {
     expect(result).toEqual({
       flowVersion: {
         id: 'version1',
+        created: '2023-01-01T00:00:00.000Z',
+        updated: '2023-01-01T00:00:00.000Z',
+        flowId: 'flow1',
+        displayName: 'Test Flow Version',
+        description: '',
+        state: FlowVersionState.DRAFT,
+        updatedBy: null,
         trigger: {
           name: 'trigger1',
           type: 'EMPTY',
@@ -90,7 +173,7 @@ describe('updateFlowVersion', () => {
     const operation = {
       type: FlowOperationType.DELETE_ACTION,
       request: { name: 'step_1' },
-    };
+    } as FlowOperationRequest;
 
     (aiChatApi.open as jest.Mock).mockResolvedValue({ chatId: 'chat1' });
     (aiChatApi.delete as jest.Mock).mockResolvedValue({});
@@ -114,7 +197,7 @@ describe('updateFlowVersion', () => {
     const operation = {
       type: FlowOperationType.DUPLICATE_ACTION,
       request: { stepName: 'step_1' },
-    };
+    } as FlowOperationRequest;
 
     updateFlowVersion(mockState, operation, mockOnError, mockSet);
 
@@ -122,5 +205,20 @@ describe('updateFlowVersion', () => {
     await waitFor(() =>
       expect(mockSet).toHaveBeenCalledWith({ selectedStep: 'step_2' }),
     );
+  });
+
+  it('should call stepTestOutputCache.clearStep when deleting a step', async () => {
+    const operation = {
+      type: FlowOperationType.DELETE_ACTION,
+      request: { name: 'step_1' },
+    } as FlowOperationRequest;
+    const clearStepSpy = jest.spyOn(stepTestOutputCache, 'clearStep');
+    (aiChatApi.open as jest.Mock).mockResolvedValue({ chatId: 'chat1' });
+    (aiChatApi.delete as jest.Mock).mockResolvedValue({});
+
+    updateFlowVersion(mockState, operation, mockOnError, mockSet);
+
+    expect(clearStepSpy).toHaveBeenCalledWith('step_1');
+    clearStepSpy.mockRestore();
   });
 });
