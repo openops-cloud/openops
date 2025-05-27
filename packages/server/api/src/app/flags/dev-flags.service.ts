@@ -20,7 +20,7 @@ async function getAll(): Promise<Flag[]> {
   flags = [
     {
       id: FlagId.USE_NEW_EXTERNAL_TESTDATA,
-      value: true,
+      value: false,
       created,
       updated,
     },
