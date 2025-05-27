@@ -69,13 +69,15 @@ describe('OpenOps Tools', () => {
 
     expect(experimental_createMCPClient).toHaveBeenCalledWith({
       transport: expect.objectContaining({
-        command: expect.stringContaining('python'),
-        args: expect.arrayContaining([expect.stringContaining('main.py')]),
-        env: {
-          OPENAPI_SCHEMA: JSON.stringify({ openapi: '3.1' }),
-          AUTH_TOKEN: mockAuthToken,
-          API_BASE_URL: mockApiBaseUrl,
-          OPENOPS_MCP_SERVER_PATH: mockBasePath,
+        serverParams: {
+          command: `${mockBasePath}/.venv/bin/python`,
+          args: [`${mockBasePath}/main.py`],
+          env: {
+            OPENAPI_SCHEMA: JSON.stringify({ openapi: '3.1' }),
+            AUTH_TOKEN: mockAuthToken,
+            API_BASE_URL: mockApiBaseUrl,
+            OPENOPS_MCP_SERVER_PATH: mockBasePath,
+          },
         },
       }),
     });
