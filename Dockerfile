@@ -30,8 +30,9 @@ RUN <<-```
     git clone https://github.com/openops-cloud/openops-mcp .
     wget -qO- https://astral.sh/uv/install.sh | sh
     python3 -m venv .venv
-    source .venv/bin/activate
-    pip install -r requirements.txt
+    . .venv/bin/activate && \
+    pip install --upgrade pip && \
+    pip install -r requirements.txt && \
     pip install .
 ```
 
