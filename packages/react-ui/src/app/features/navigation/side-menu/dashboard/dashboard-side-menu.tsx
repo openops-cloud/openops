@@ -11,6 +11,7 @@ import { userSettingsHooks } from '@/app/common/hooks/user-settings-hooks';
 import { MENU_LINKS } from '@/app/constants/menu-links';
 import { QueryKeys } from '@/app/constants/query-keys';
 import { FolderFilterList } from '@/app/features/folders/component/folder-filter-list';
+import { useAnalyticsLinks } from '@/app/features/navigation/lib/analytics-links-hook';
 import { DashboardSideMenuHeader } from '@/app/features/navigation/side-menu/dashboard/dashboard-side-menu-header';
 import { SideMenuFooter } from '@/app/features/navigation/side-menu/side-menu-footer';
 import { usersApi } from '@/app/lib/users-api';
@@ -23,6 +24,7 @@ export function DashboardSideMenu() {
   const location = useLocation();
   const queryClient = useQueryClient();
   const isWorkflowsPage = location.pathname.includes('flows');
+  const isAnalyticsPage = location.pathname.includes('analytics');
   const isSidebarMinimized = useAppStore((state) => state.isSidebarMinimized);
 
   const userSettings = useAppStore((state) => state.userSettings);
@@ -55,6 +57,8 @@ export function DashboardSideMenu() {
     userSettings !== undefined &&
     !isValidISODate(userSettings?.telemetryInteractionTimestamp || '');
 
+  const analyticsMenuLinks = useAnalyticsLinks();
+
   return (
     <SideMenu
       MenuHeader={<DashboardSideMenuHeader />}
@@ -66,6 +70,12 @@ export function DashboardSideMenu() {
           <ScrollArea className="border-t">
             <FolderFilterList />
           </ScrollArea>
+        )}
+        {isAnalyticsPage && (
+          <SideMenuNavigation
+            links={analyticsMenuLinks}
+            isMinimized={isSidebarMinimized}
+          />
         )}
         {showBanner && (
           <div
