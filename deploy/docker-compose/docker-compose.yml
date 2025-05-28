@@ -19,7 +19,7 @@ services:
       OPS_COMPONENT: app
       OPS_VERSION: ${OPS_VERSION:-latest}
       OPS_OPENOPS_TABLES_VERSION: 0.2.2
-      OPS_ANALYTICS_VERSION: 0.14.0
+      OPS_ANALYTICS_VERSION: 0.14.1
     depends_on:
       openops-tables:
         condition: service_healthy
@@ -83,7 +83,7 @@ services:
       postgres:
         condition: service_healthy
   openops-analytics:
-    image: public.ecr.aws/openops/openops-analytics:0.14.0
+    image: public.ecr.aws/openops/openops-analytics:0.14.1
     restart: unless-stopped
     environment:
       ADMIN_PASSWORD: ${OPS_ANALYTICS_ADMIN_PASSWORD}
