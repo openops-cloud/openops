@@ -1,5 +1,4 @@
 import { Static, Type } from '@sinclair/typebox';
-import { Cursor } from '../../common/seek-page';
 
 export const CreateFolderRequest = Type.Object({
   displayName: Type.String(),
@@ -21,17 +20,6 @@ export const DeleteFolderRequest = Type.Object({
 });
 
 export type DeleteFlowRequest = Static<typeof DeleteFolderRequest>;
-
-export const ListFolderRequest = Type.Object({
-  limit: Type.Optional(Type.Number({})),
-  cursor: Type.Optional(Type.String({})),
-  projectId: Type.String(),
-});
-
-export type ListFolderRequest = Omit<
-  Static<typeof ListFolderRequest>,
-  'cursor'
-> & { cursor: Cursor | undefined };
 
 export const ListFolderFlowsRequest = Type.Object({
   excludeUncategorizedFolder: Type.Optional(Type.Boolean()),
