@@ -24,7 +24,6 @@ RUN <<-```
     python3 -m venv .venv && python3 -m venv pip install .
 ```
 
-
 WORKDIR /root/.mcp/openops-mcp
 RUN <<-```
     set -ex
@@ -32,7 +31,6 @@ RUN <<-```
     wget -qO- https://astral.sh/uv/install.sh | sh && source $HOME/.local/bin/env
     uv venv && . .venv/bin/activate && uv pip install -r requirements.txt
 ```
-
 
 # Set up backend
 WORKDIR /usr/src/app
