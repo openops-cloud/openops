@@ -2,6 +2,7 @@ import {
   AppSystemProp,
   logger,
   networkUtls,
+  SharedSystemProp,
   system,
 } from '@openops/server-shared';
 import { experimental_createMCPClient, ToolSet } from 'ai';
@@ -17,6 +18,7 @@ export async function getOpenOpsTools(
 ): Promise<ToolSet> {
   const basePath = system.get<string>(AppSystemProp.OPENOPS_MCP_SERVER_PATH);
   const apiBaseUrl = await networkUtls.getPublicUrl();
+  const logzioToken = system.get<string>(SharedSystemProp.LOGZIO_TOKEN) ?? '';
 
   if (!basePath) {
     logger.warn('OPENOPS_MCP_SERVER_PATH not set');
@@ -39,6 +41,7 @@ export async function getOpenOpsTools(
           AUTH_TOKEN: authToken,
           API_BASE_URL: apiBaseUrl,
           OPENOPS_MCP_SERVER_PATH: basePath,
+          LOGZIO_TOKEN: logzioToken,
         },
       }),
     });
