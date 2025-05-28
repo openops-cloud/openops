@@ -1,7 +1,6 @@
 import { useAuthorization } from '@/app/common/hooks/authorization-hooks';
 import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
 import { appConnectionsApi } from '@/app/features/connections/lib/app-connections-api';
-import { authenticationSession } from '@/app/lib/authentication-session';
 import { formatUtils } from '@/app/lib/utils';
 import {
   BlockIcon,
@@ -252,8 +251,6 @@ const fetchData = async (
   pagination: PaginationParams,
 ) => {
   return appConnectionsApi.list({
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    projectId: authenticationSession.getProjectId()!,
     cursor: pagination.cursor,
     limit: pagination.limit ?? 10,
     status: params.status,
