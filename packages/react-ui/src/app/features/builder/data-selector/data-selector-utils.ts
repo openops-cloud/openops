@@ -192,15 +192,6 @@ const createTestNode = (
   };
 };
 
-export const dataSelectorUtils = {
-  traverseStepOutputAndReturnMentionTree,
-  getAllStepsMentions,
-  createTestNode,
-  filterBy,
-  getPathToTargetStep,
-  getAllStepsMentionsFromCurrentSelectedData,
-};
-
 /**
  * Filters MentionTreeNode arrays by a query string, including recursive logic
  */
@@ -284,4 +275,13 @@ const getAllStepsMentionsFromCurrentSelectedData: (
       displayName: displayName,
     });
   });
+};
+
+export const dataSelectorUtils = {
+  traverseStepOutputAndReturnMentionTree,
+  getAllStepsMentions,
+  createTestNode,
+  filterBy,
+  getPathToTargetStep,
+  getAllStepsMentionsFromCurrentSelectedData,
 };

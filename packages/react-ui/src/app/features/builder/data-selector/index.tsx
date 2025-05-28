@@ -9,12 +9,11 @@ import { t } from 'i18next';
 import { SearchXIcon } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { FlagId, isNil, StepOutputWithData } from '@openops/shared';
+import { FlagId, StepOutputWithData } from '@openops/shared';
 
 import { useBuilderStateContext } from '../builder-hooks';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
-import { BuilderState } from '../builder-types';
 import { stepTestOutputCache } from './data-selector-cache';
 import { DataSelectorNode } from './data-selector-node';
 import {
@@ -51,7 +50,9 @@ const DataSelector = ({
     (state) => state.midpanelState.showDataSelector,
   );
 
-  const pathToTargetStep = useBuilderStateContext(dataSelectorUtils.getPathToTargetStep);
+  const pathToTargetStep = useBuilderStateContext(
+    dataSelectorUtils.getPathToTargetStep,
+  );
   const mentionsFromCurrentSelectedData = useBuilderStateContext(
     dataSelectorUtils.getAllStepsMentionsFromCurrentSelectedData,
   );

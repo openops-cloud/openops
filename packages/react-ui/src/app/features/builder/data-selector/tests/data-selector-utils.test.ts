@@ -201,11 +201,19 @@ describe('dataSelectorUtils', () => {
       const nodes: dataSelectorUtils.MentionTreeNode[] = [
         {
           key: 'node1',
-          data: { propertyPath: 'path1', displayName: 'Node 1', value: 'value1' },
+          data: { 
+            propertyPath: 'path1', 
+            displayName: 'Node 1', 
+            value: 'value1',
+          },
         },
         {
           key: 'node2',
-          data: { propertyPath: 'path2', displayName: 'Node 2', value: 'value2' },
+          data: { 
+            propertyPath: 'path2', 
+            displayName: 'Node 2', 
+            value: 'value2'
+          },
         },
       ];
       
@@ -217,11 +225,19 @@ describe('dataSelectorUtils', () => {
       const nodes: dataSelectorUtils.MentionTreeNode[] = [
         {
           key: 'node1',
-          data: { propertyPath: 'path1', displayName: 'Node 1', value: 'value1' },
+          data: { 
+            propertyPath: 'path1', 
+            displayName: 'Node 1', 
+            value: 'value1',
+          },
         },
         {
           key: 'node2',
-          data: { propertyPath: 'path2', displayName: 'Different Name', value: 'value2' },
+          data: { 
+            propertyPath: 'path2', 
+            displayName: 'Different Name', 
+            value: 'value2'
+          },
         },
       ];
       
@@ -234,11 +250,19 @@ describe('dataSelectorUtils', () => {
       const nodes: dataSelectorUtils.MentionTreeNode[] = [
         {
           key: 'node1',
-          data: { propertyPath: 'path1', displayName: 'Node 1', value: 'some value' },
+          data: { 
+            propertyPath: 'path1', 
+            displayName: 'Node 1', 
+            value: 'some value',
+          },
         },
         {
           key: 'node2',
-          data: { propertyPath: 'path2', displayName: 'Node 2', value: 'other content' },
+          data: { 
+            propertyPath: 'path2', 
+            displayName: 'Node 2', 
+            value: 'other content',
+          },
         },
       ];
       
@@ -251,21 +275,37 @@ describe('dataSelectorUtils', () => {
       const nodes: dataSelectorUtils.MentionTreeNode[] = [
         {
           key: 'parent1',
-          data: { propertyPath: 'parent', displayName: 'Parent', value: 'parent value' },
+          data: { 
+            propertyPath: 'parent', 
+            displayName: 'Parent', 
+            value: 'parent value',
+          },
           children: [
             {
               key: 'child1',
-              data: { propertyPath: 'child', displayName: 'Child', value: 'match this' },
+              data: { 
+                propertyPath: 'child', 
+                displayName: 'Child', 
+                value: 'match this',
+              },
             },
           ],
         },
         {
           key: 'parent2',
-          data: { propertyPath: 'parent2', displayName: 'Parent 2', value: 'parent value 2' },
+          data: { 
+            propertyPath: 'parent2', 
+            displayName: 'Parent 2', 
+            value: 'parent value 2',
+          },
           children: [
             {
               key: 'child2',
-              data: { propertyPath: 'child2', displayName: 'Child 2', value: 'no match' },
+              data: { 
+                propertyPath: 'child2', 
+                displayName: 'Child 2', 
+                value: 'no match',
+              },
             },
           ],
         },
@@ -282,7 +322,11 @@ describe('dataSelectorUtils', () => {
       const nodes: dataSelectorUtils.MentionTreeNode[] = [
         {
           key: 'node1',
-          data: { propertyPath: 'path1', displayName: 'Node 1', value: 'value1' },
+          data: { 
+            propertyPath: 'path1', 
+            displayName: 'Node 1', 
+            value: 'value1',
+          },
           children: [
             {
               key: 'test_node1',
@@ -290,7 +334,7 @@ describe('dataSelectorUtils', () => {
                 propertyPath: 'path1', 
                 displayName: 'Node 1', 
                 isTestStepNode: true,
-                value: 'match this'
+                value: 'match this',
               },
             },
           ],
