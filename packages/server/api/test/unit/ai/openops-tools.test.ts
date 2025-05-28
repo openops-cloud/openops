@@ -1,64 +1,67 @@
-const serverSharedMock = {
-  ...jest.requireActual('@openops/server-shared'),
-  logger: {
-    warn: jest.fn(),
-    error: jest.fn(),
-  },
-  networkUtls: {
-    getInternalApiUrl: jest.fn(),
-  },
+const mockBasePath = '/mock/base/path';
+const mockApiBaseUrl = 'http://test-api-url';
+const mockTools = {
+  tool1: { description: 'Test tool 1', parameters: {} },
+  tool2: { description: 'Test tool 2', parameters: {} },
 };
-jest.mock('@openops/server-shared', () => serverSharedMock);
 
 const createMcpClientMock = jest.fn();
 jest.mock('ai', () => ({
   experimental_createMCPClient: createMcpClientMock,
 }));
 
+const systemMock = {
+  get: jest.fn(),
+  getOrThrow: jest.fn(),
+};
+
+const loggerMock = {
+  warn: jest.fn(),
+  error: jest.fn(),
+};
+
+const networkUtlsMock = {
+  getInternalApiUrl: jest.fn(),
+};
+
+jest.mock('@openops/server-shared', () => ({
+  ...jest.requireActual('@openops/server-shared'),
+  system: systemMock,
+  logger: loggerMock,
+  networkUtls: networkUtlsMock,
+  AppSystemProp: {
+    OPENOPS_MCP_SERVER_PATH: 'OPENOPS_MCP_SERVER_PATH',
+  },
+  SharedSystemProp: {
+    LOGZIO_TOKEN: 'LOGZIO_TOKEN',
+    ENVIRONMENT_NAME: 'ENVIRONMENT_NAME',
+  },
+}));
+
+import '@fastify/swagger';
 import { FastifyInstance } from 'fastify';
 import { getOpenOpsTools } from '../../../src/app/ai/mcp/openops-tools';
 
-describe('OpenOps Tools', () => {
-  const originalEnv = process.env;
-
+describe('getOpenOpsTools', () => {
   const mockApp = {
     swagger: jest.fn().mockReturnValue({ openapi: '3.1' }),
   } as unknown as FastifyInstance;
 
-  const mockTools = {
-    tool1: { description: 'Test tool 1', parameters: {} },
-    tool2: { description: 'Test tool 2', parameters: {} },
-  };
-
-  const mockApiBaseUrl = 'http://test-api-url';
-  const mockBasePath = '/mock/base/path';
-
-  beforeAll(() => {
-    process.env.OPS_LOGZIO_TOKEN = 'test-logzio-token';
-    process.env.OPS_ENVIRONMENT_NAME = 'test-environment';
-    process.env.OPS_OPENOPS_MCP_SERVER_PATH = mockBasePath;
-  });
-
   beforeEach(() => {
     jest.clearAllMocks();
-    serverSharedMock.networkUtls.getInternalApiUrl.mockReturnValue(
-      mockApiBaseUrl,
-    );
-  });
 
-  afterAll(() => {
-    process.env = originalEnv;
-  });
+    systemMock.getOrThrow.mockImplementation((key) => {
+      if (key === 'OPENOPS_MCP_SERVER_PATH') return mockBasePath;
+      throw new Error(`${key} not set`);
+    });
 
-  it('should return empty object when OPENOPS_MCP_SERVER_PATH is not set', async () => {
-    process.env.OPS_OPENOPS_MCP_SERVER_PATH = undefined;
+    systemMock.get.mockImplementation((key) => {
+      if (key === 'LOGZIO_TOKEN') return 'test-logzio-token';
+      if (key === 'ENVIRONMENT_NAME') return 'test-environment';
+      return undefined;
+    });
 
-    const result = await getOpenOpsTools(mockApp, 'test-auth-token');
-
-    expect(result).toEqual({});
-    expect(serverSharedMock.logger.warn).toHaveBeenCalledWith(
-      'OPENOPS_MCP_SERVER_PATH not set',
-    );
+    networkUtlsMock.getInternalApiUrl.mockReturnValue(mockApiBaseUrl);
   });
 
   it('should create MCP client and return tools when successful', async () => {
@@ -69,6 +72,7 @@ describe('OpenOps Tools', () => {
 
     const result = await getOpenOpsTools(mockApp, 'test-auth-token');
 
+    expect(result).toEqual(mockTools);
     expect(createMcpClientMock).toHaveBeenCalledWith({
       transport: expect.objectContaining({
         serverParams: {
@@ -85,17 +89,16 @@ describe('OpenOps Tools', () => {
         },
       }),
     });
-    expect(result).toEqual(mockTools);
   });
 
-  it('should return empty object when MCP client creation fails', async () => {
+  it('should return empty object and log error if MCP client creation fails', async () => {
     const mockError = new Error('Test error');
     createMcpClientMock.mockRejectedValue(mockError);
 
     const result = await getOpenOpsTools(mockApp, 'mock-auth-token');
 
     expect(result).toEqual({});
-    expect(serverSharedMock.logger.error).toHaveBeenCalledWith(
+    expect(loggerMock.error).toHaveBeenCalledWith(
       'Failed to create OpenOps MCP client:',
       mockError,
     );

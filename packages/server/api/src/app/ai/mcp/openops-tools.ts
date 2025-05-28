@@ -10,20 +10,13 @@ import { Experimental_StdioMCPTransport } from 'ai/mcp-stdio';
 import { FastifyInstance } from 'fastify';
 import path from 'path';
 
-let openopsClient = null;
-
 export async function getOpenOpsTools(
   app: FastifyInstance,
   authToken: string,
 ): Promise<ToolSet> {
-  const basePath = system.get<string>(AppSystemProp.OPENOPS_MCP_SERVER_PATH);
-  const apiBaseUrl = networkUtls.getInternalApiUrl();
-  const logzioToken = system.get<string>(SharedSystemProp.LOGZIO_TOKEN);
-
-  if (!basePath) {
-    logger.warn('OPENOPS_MCP_SERVER_PATH not set');
-    return {};
-  }
+  const basePath = system.getOrThrow<string>(
+    AppSystemProp.OPENOPS_MCP_SERVER_PATH,
+  );
 
   const pythonPath = path.join(basePath, '.venv', 'bin', 'python');
   const serverPath = path.join(basePath, 'main.py');
@@ -31,16 +24,16 @@ export async function getOpenOpsTools(
   const openApiSchema = app.swagger();
 
   try {
-    openopsClient = await experimental_createMCPClient({
+    const openopsClient = await experimental_createMCPClient({
       transport: new Experimental_StdioMCPTransport({
         command: pythonPath,
         args: [serverPath],
         env: {
           OPENAPI_SCHEMA: JSON.stringify(openApiSchema),
           AUTH_TOKEN: authToken,
-          API_BASE_URL: apiBaseUrl,
+          API_BASE_URL: networkUtls.getInternalApiUrl(),
           OPENOPS_MCP_SERVER_PATH: basePath,
-          LOGZIO_TOKEN: logzioToken ?? '',
+          LOGZIO_TOKEN: system.get<string>(SharedSystemProp.LOGZIO_TOKEN) ?? '',
           ENVIRONMENT:
             system.get<string>(SharedSystemProp.ENVIRONMENT_NAME) ?? '',
         },
