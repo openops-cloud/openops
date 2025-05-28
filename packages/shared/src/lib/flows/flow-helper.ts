@@ -268,8 +268,15 @@ function transferFlow<T extends Step>(
   ) as Trigger;
   return clonedFlow;
 }
+
 function getAllSteps(trigger: Trigger | Action): (Action | Trigger)[] {
   return traverseInternal(trigger);
+}
+
+function getAllStepIds(trigger: Trigger | Action): string[] {
+  return getAllSteps(trigger)
+    .filter((step) => step.id !== undefined)
+    .map((step) => step.id as string);
 }
 
 function getAllStepsAtFirstLevel(step: Step): Step[] {
@@ -1195,6 +1202,7 @@ export const flowHelper = {
   isAction,
   isTrigger,
   getAllSteps,
+  getAllStepIds,
   isPartOfInnerFlow,
   getUsedBlocks,
   getImportOperations,

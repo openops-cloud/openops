@@ -30,10 +30,7 @@ export const stepRunService = {
 
     const flowVersion = await flowVersionService.getOneOrThrow(flowVersionId);
     const step = flowHelper.getStep(flowVersion, stepName);
-    const stepIds = flowHelper
-      .getAllSteps(flowVersion.trigger)
-      .filter((step) => step.id !== undefined)
-      .map((step) => step.id as string);
+    const stepIds = flowHelper.getAllStepIds(flowVersion.trigger);
 
     if (
       isNil(step) ||
@@ -51,7 +48,7 @@ export const stepRunService = {
     const featureFlag = await devFlagsService.getOne(
       FlagId.USE_NEW_EXTERNAL_TESTDATA,
     );
-    if (featureFlag && featureFlag.value) {
+    if (featureFlag?.value) {
       const outputs = await flowStepTestOutputService.listEncrypted({
         flowVersionId: flowVersion.id,
         stepIds,

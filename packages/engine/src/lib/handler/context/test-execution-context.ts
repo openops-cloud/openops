@@ -42,14 +42,11 @@ export const testExecutionContext = {
         continue;
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let currentOutput: any;
-      if (stepTestOutputs && step.id && stepTestOutputs?.[step.id]) {
-        const decodedTestOutput = decodeStepOutput(stepTestOutputs?.[step.id]);
-        currentOutput = await decompressAndDecrypt(decodedTestOutput);
-      } else {
-        currentOutput = inputUiInfo?.currentSelectedData;
-      }
+      const currentOutput = await getStepOutput(
+        step.id,
+        inputUiInfo,
+        stepTestOutputs,
+      );
 
       const stepType = step.type;
       switch (stepType) {
@@ -102,3 +99,17 @@ export const testExecutionContext = {
     return flowExecutionContext;
   },
 };
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+async function getStepOutput(
+  stepId?: string,
+  inputUiInfo?: any,
+  stepTestOutputs?: Record<OpenOpsId, string>,
+): Promise<any> {
+  if (stepId && stepTestOutputs?.[stepId]) {
+    const decodedTestOutput = decodeStepOutput(stepTestOutputs?.[stepId]);
+    return decompressAndDecrypt(decodedTestOutput);
+  }
+
+  return inputUiInfo?.currentSelectedData;
+}

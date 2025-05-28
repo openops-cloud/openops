@@ -161,12 +161,8 @@ const baseBlocksController: FastifyPluginAsyncTypebox = async (app) => {
     const featureFlag = await devFlagsService.getOne(
       FlagId.USE_NEW_EXTERNAL_TESTDATA,
     );
-    if (featureFlag && featureFlag.value) {
-      const stepIds = flowHelper
-        .getAllSteps(flow.version.trigger)
-        .filter((step) => step.id !== undefined)
-        .map((step) => step.id as string);
-
+    if (featureFlag?.value) {
+      const stepIds = flowHelper.getAllStepIds(flow.version.trigger);
       const outputs = await flowStepTestOutputService.listEncrypted({
         flowVersionId: request.flowVersionId,
         stepIds,

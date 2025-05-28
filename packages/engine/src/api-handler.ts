@@ -1,7 +1,6 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import {
   blocksBuilder,
-  encryptionKeyInitializer,
   logger,
   runWithLogContext,
   setStopHandlers,
@@ -68,7 +67,6 @@ export const start = async (): Promise<void> => {
     setStopHandlers(app);
 
     await blocksBuilder();
-    await encryptionKeyInitializer();
     await app.register(engineController);
 
     await app.listen({
