@@ -2,7 +2,6 @@ import { Static, Type } from '@sinclair/typebox';
 
 export const CreateFolderRequest = Type.Object({
   displayName: Type.String(),
-  projectId: Type.String(),
   parentFolderId: Type.Optional(Type.String()),
 });
 
