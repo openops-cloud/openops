@@ -12,18 +12,19 @@ export const getMCPTools = async (
 ): Promise<ToolSet> => {
   const docsTools = await safeGetTools('docs', getDocsTools);
   const tablesTools = await safeGetTools('tables', getTablesTools);
-  const openopsTools = await safeGetTools('openops', () =>
-    getOpenOpsTools(app, authToken),
-  );
 
   const loadExperimentalTools = system.getBoolean(
     AppSystemProp.LOAD_EXPERIMENTAL_MCP_TOOLS,
   );
 
   let supersetTools = {};
+  let openopsTools = {};
 
   if (loadExperimentalTools) {
     supersetTools = await safeGetTools('superset', getSupersetTools);
+    openopsTools = await safeGetTools('openops', () =>
+      getOpenOpsTools(app, authToken),
+    );
   }
 
   const toolSet = {

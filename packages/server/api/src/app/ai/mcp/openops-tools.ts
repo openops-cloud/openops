@@ -29,7 +29,6 @@ export async function getOpenOpsTools(
   const serverPath = path.join(basePath, 'main.py');
 
   const openApiSchema = app.swagger();
-  logger.info('Initializing OpenOps MCP client with schema');
 
   try {
     openopsClient = await experimental_createMCPClient({
