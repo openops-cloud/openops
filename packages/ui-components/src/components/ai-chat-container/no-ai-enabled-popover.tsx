@@ -38,11 +38,7 @@ const NoAiEnabledPopover = ({
         </span>
         <p>
           {t('Please go to ')}
-          <Link
-            to="/settings/ai"
-            target="_blank"
-            className="font-bold text-primary-200"
-          >
+          <Link to="/settings/ai" className="font-bold text-primary-200">
             {t('Settings')}
           </Link>
           {t(' to complete the setup.')}
