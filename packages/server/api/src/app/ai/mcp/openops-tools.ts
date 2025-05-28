@@ -17,7 +17,7 @@ export async function getOpenOpsTools(
   authToken: string,
 ): Promise<ToolSet> {
   const basePath = system.get<string>(AppSystemProp.OPENOPS_MCP_SERVER_PATH);
-  const apiBaseUrl = await networkUtls.getPublicUrl();
+  const apiBaseUrl = networkUtls.getInternalApiUrl();
   const logzioToken = system.get<string>(SharedSystemProp.LOGZIO_TOKEN);
 
   if (!basePath) {
