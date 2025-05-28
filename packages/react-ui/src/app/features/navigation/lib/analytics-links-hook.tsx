@@ -10,12 +10,16 @@ export const useAnalyticsLinks = () => {
   );
 
   return [
-    {
-      to: `${analyticsPublicUrl}/openops-analytics/`,
-      target: '_blank',
-      label: t('Admin Panel'),
-      icon: Table2WithGearIcon,
-    },
+    ...(analyticsPublicUrl
+      ? [
+          {
+            to: `${analyticsPublicUrl}/openops-analytics/`,
+            target: '_blank',
+            label: t('Admin Panel'),
+            icon: Table2WithGearIcon,
+          },
+        ]
+      : []),
     {
       to: 'https://docs.openops.com/reporting-analytics/data-visualization',
       target: '_blank',
