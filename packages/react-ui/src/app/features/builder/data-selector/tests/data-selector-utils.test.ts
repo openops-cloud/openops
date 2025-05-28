@@ -7,6 +7,39 @@ jest.mock('@/app/lib/utils', () => ({
   },
 }));
 
+// Mock flowHelper
+jest.mock('@openops/shared', () => {
+  const originalModule = jest.requireActual('@openops/shared');
+  return {
+    ...originalModule,
+    flowHelper: {
+      ...originalModule.flowHelper,
+      findPathToStep: jest.fn(({ targetStepName }) => {
+        // Mock implementation to return a simple path
+        if (targetStepName === 'emptyStep') {
+          return [];
+        }
+        return [
+          {
+            id: 'step1',
+            name: 'step1',
+            displayName: 'Step 1',
+            dfsIndex: 0,
+            settings: {},
+          },
+          {
+            id: 'step2',
+            name: 'step2',
+            displayName: 'Step 2',
+            dfsIndex: 1,
+            settings: {},
+          },
+        ];
+      }),
+    },
+  };
+});
+
 describe('dataSelectorUtils', () => {
   describe('getAllStepsMentions', () => {
     const baseStep = {
@@ -160,6 +193,231 @@ describe('dataSelectorUtils', () => {
       expect(node.children?.[0].data.displayName).toBe(displayName);
       expect(node.children?.[0].data.propertyPath).toBe('triggerStep');
       expect(node.children?.[0].key).toBe('test_triggerStep');
+    });
+  });
+
+  describe('filterBy', () => {
+    it('returns the original array when query is empty', () => {
+      const nodes: dataSelectorUtils.MentionTreeNode[] = [
+        {
+          key: 'node1',
+          data: { propertyPath: 'path1', displayName: 'Node 1', value: 'value1' },
+        },
+        {
+          key: 'node2',
+          data: { propertyPath: 'path2', displayName: 'Node 2', value: 'value2' },
+        },
+      ];
+      
+      const result = dataSelectorUtils.filterBy(nodes, '');
+      expect(result).toEqual(nodes);
+    });
+
+    it('filters nodes by displayName', () => {
+      const nodes: dataSelectorUtils.MentionTreeNode[] = [
+        {
+          key: 'node1',
+          data: { propertyPath: 'path1', displayName: 'Node 1', value: 'value1' },
+        },
+        {
+          key: 'node2',
+          data: { propertyPath: 'path2', displayName: 'Different Name', value: 'value2' },
+        },
+      ];
+      
+      const result = dataSelectorUtils.filterBy(nodes, 'node');
+      expect(result).toHaveLength(1);
+      expect(result[0].key).toBe('node1');
+    });
+
+    it('filters nodes by value', () => {
+      const nodes: dataSelectorUtils.MentionTreeNode[] = [
+        {
+          key: 'node1',
+          data: { propertyPath: 'path1', displayName: 'Node 1', value: 'some value' },
+        },
+        {
+          key: 'node2',
+          data: { propertyPath: 'path2', displayName: 'Node 2', value: 'other content' },
+        },
+      ];
+      
+      const result = dataSelectorUtils.filterBy(nodes, 'other');
+      expect(result).toHaveLength(1);
+      expect(result[0].key).toBe('node2');
+    });
+
+    it('recursively filters children', () => {
+      const nodes: dataSelectorUtils.MentionTreeNode[] = [
+        {
+          key: 'parent1',
+          data: { propertyPath: 'parent', displayName: 'Parent', value: 'parent value' },
+          children: [
+            {
+              key: 'child1',
+              data: { propertyPath: 'child', displayName: 'Child', value: 'match this' },
+            },
+          ],
+        },
+        {
+          key: 'parent2',
+          data: { propertyPath: 'parent2', displayName: 'Parent 2', value: 'parent value 2' },
+          children: [
+            {
+              key: 'child2',
+              data: { propertyPath: 'child2', displayName: 'Child 2', value: 'no match' },
+            },
+          ],
+        },
+      ];
+      
+      const result = dataSelectorUtils.filterBy(nodes, 'match');
+      expect(result).toHaveLength(1);
+      expect(result[0].key).toBe('parent1');
+      expect(result[0].children).toHaveLength(1);
+      expect(result[0].children?.[0].key).toBe('child1');
+    });
+
+    it('skips test nodes', () => {
+      const nodes: dataSelectorUtils.MentionTreeNode[] = [
+        {
+          key: 'node1',
+          data: { propertyPath: 'path1', displayName: 'Node 1', value: 'value1' },
+          children: [
+            {
+              key: 'test_node1',
+              data: { 
+                propertyPath: 'path1', 
+                displayName: 'Node 1', 
+                isTestStepNode: true,
+                value: 'match this'
+              },
+            },
+          ],
+        },
+      ];
+      
+      const result = dataSelectorUtils.filterBy(nodes, 'match');
+      expect(result).toHaveLength(0);
+    });
+  });
+
+  describe('getPathToTargetStep', () => {
+    it('returns empty array when selectedStep is not provided', () => {
+      const state = {
+        selectedStep: '',
+        flowVersion: { trigger: { type: 'BLOCK' } },
+      };
+      
+      const result = dataSelectorUtils.getPathToTargetStep(state);
+      expect(result).toEqual([]);
+    });
+
+    it('returns empty array when flowVersion.trigger is not provided', () => {
+      const state = {
+        selectedStep: 'step1',
+        flowVersion: {},
+      };
+      
+      const result = dataSelectorUtils.getPathToTargetStep(state);
+      expect(result).toEqual([]);
+    });
+
+    it('returns path from flowHelper.findPathToStep', () => {
+      const state = {
+        selectedStep: 'step3',
+        flowVersion: {
+          trigger: { type: 'BLOCK', name: 'trigger' },
+        },
+      };
+      
+      const result = dataSelectorUtils.getPathToTargetStep(state);
+      expect(result).toHaveLength(2);
+      expect(result[0].name).toBe('step1');
+      expect(result[1].name).toBe('step2');
+    });
+
+    it('handles empty path case', () => {
+      const state = {
+        selectedStep: 'emptyStep',
+        flowVersion: {
+          trigger: { type: 'BLOCK', name: 'trigger' },
+        },
+      };
+      
+      const result = dataSelectorUtils.getPathToTargetStep(state);
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('getAllStepsMentionsFromCurrentSelectedData', () => {
+    it('returns empty array when selectedStep is not provided', () => {
+      const state = {
+        selectedStep: '',
+        flowVersion: { trigger: { type: 'BLOCK' } },
+      };
+      
+      const result = dataSelectorUtils.getAllStepsMentionsFromCurrentSelectedData(state);
+      expect(result).toEqual([]);
+    });
+
+    it('returns empty array when flowVersion.trigger is not provided', () => {
+      const state = {
+        selectedStep: 'step1',
+        flowVersion: {},
+      };
+      
+      const result = dataSelectorUtils.getAllStepsMentionsFromCurrentSelectedData(state);
+      expect(result).toEqual([]);
+    });
+
+    it('creates test nodes for steps needing testing', () => {
+      const state = {
+        selectedStep: 'step3',
+        flowVersion: {
+          trigger: { type: 'BLOCK', name: 'trigger' },
+        },
+      };
+      
+      const result = dataSelectorUtils.getAllStepsMentionsFromCurrentSelectedData(state);
+      expect(result).toHaveLength(2);
+      expect(result[0].children?.[0].data.isTestStepNode).toBe(true);
+      expect(result[1].children?.[0].data.isTestStepNode).toBe(true);
+    });
+
+    it('traverses step output for steps with lastTestDate', () => {
+      // Mock a step with inputUiInfo.lastTestDate
+      jest.mock('@openops/shared', () => {
+        const originalModule = jest.requireActual('@openops/shared');
+        return {
+          ...originalModule,
+          flowHelper: {
+            ...originalModule.flowHelper,
+            findPathToStep: jest.fn(() => [{
+              id: 'step1',
+              name: 'step1',
+              displayName: 'Step With Data',
+              dfsIndex: 0,
+              settings: {
+                inputUiInfo: {
+                  lastTestDate: '2024-01-01',
+                  currentSelectedData: { foo: 'bar' },
+                },
+              },
+            }]),
+          },
+        };
+      });
+
+      const state = {
+        selectedStep: 'stepWithData',
+        flowVersion: {
+          trigger: { type: 'BLOCK', name: 'trigger' },
+        },
+      };
+      
+      const result = dataSelectorUtils.getAllStepsMentionsFromCurrentSelectedData(state);
+      expect(result).toHaveLength(2); // Mock returns two steps regardless of input
     });
   });
 });
