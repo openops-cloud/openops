@@ -19,14 +19,13 @@ export const errorHandler = async (
       params: error.error.params,
     });
   } else {
-    const requestSummary = (({
+    const requestSummary = (({ method, url, body, params, query }) => ({
       method,
       url,
-      headers,
       body,
       params,
       query,
-    }) => ({ method, url, headers, body, params, query }))(_request);
+    }))(_request);
 
     logger.error('Error handler caught an exception.', {
       message: error.message,
