@@ -1,6 +1,6 @@
-import { ActionType, TriggerType, StepWithIndex } from '@openops/shared';
-import { dataSelectorUtils } from '../data-selector-utils';
+import { ActionType, StepWithIndex, TriggerType } from '@openops/shared';
 import { BuilderState } from '../../builder-types';
+import { dataSelectorUtils } from '../data-selector-utils';
 
 jest.mock('@/app/lib/utils', () => ({
   formatUtils: {
@@ -431,9 +431,10 @@ describe('dataSelectorUtils', () => {
       });
 
       const result = dataSelectorUtils.getPathToTargetStep(state);
-      expect(result).toHaveLength(2);
-      expect(result[0].name).toBe('step1');
-      expect(result[1].name).toBe('step2');
+      expect(result).toHaveLength(3);
+      expect(result[0].name).toBe('trigger');
+      expect(result[1].name).toBe('step1');
+      expect(result[2].name).toBe('step2');
     });
 
     it('returns empty array when target step does not exist', () => {
