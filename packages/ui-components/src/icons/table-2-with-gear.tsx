@@ -8,8 +8,8 @@ const Table2WithGearIcon = ({
 }: LucideProps) => {
   return (
     <svg
-      width="18"
-      height="18"
+      width={size}
+      height={size}
       viewBox="0 0 18 18"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -47,7 +47,7 @@ const Table2WithGearIcon = ({
         fillRule="evenodd"
         clipRule="evenodd"
         d="M13.5 12C12.6716 12 12 12.6716 12 13.5C12 14.3284 12.6716 15 13.5 15C14.3284 15 15 14.3284 15 13.5C15 12.6716 14.3284 12 13.5 12ZM10.5 13.5C10.5 11.8431 11.8431 10.5 13.5 10.5C15.1569 10.5 16.5 11.8431 16.5 13.5C16.5 15.1569 15.1569 16.5 13.5 16.5C11.8431 16.5 10.5 15.1569 10.5 13.5Z"
-        fill="#0F0831"
+        fill="currentColor"
       />
       <path
         fillRule="evenodd"
