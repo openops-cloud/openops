@@ -201,22 +201,22 @@ describe('dataSelectorUtils', () => {
       const nodes: dataSelectorUtils.MentionTreeNode[] = [
         {
           key: 'node1',
-          data: { 
-            propertyPath: 'path1', 
-            displayName: 'Node 1', 
+          data: {
+            propertyPath: 'path1',
+            displayName: 'Node 1',
             value: 'value1',
           },
         },
         {
           key: 'node2',
-          data: { 
-            propertyPath: 'path2', 
-            displayName: 'Node 2', 
-            value: 'value2'
+          data: {
+            propertyPath: 'path2',
+            displayName: 'Node 2',
+            value: 'value2',
           },
         },
       ];
-      
+
       const result = dataSelectorUtils.filterBy(nodes, '');
       expect(result).toEqual(nodes);
     });
@@ -225,22 +225,22 @@ describe('dataSelectorUtils', () => {
       const nodes: dataSelectorUtils.MentionTreeNode[] = [
         {
           key: 'node1',
-          data: { 
-            propertyPath: 'path1', 
-            displayName: 'Node 1', 
+          data: {
+            propertyPath: 'path1',
+            displayName: 'Node 1',
             value: 'value1',
           },
         },
         {
           key: 'node2',
-          data: { 
-            propertyPath: 'path2', 
-            displayName: 'Different Name', 
-            value: 'value2'
+          data: {
+            propertyPath: 'path2',
+            displayName: 'Different Name',
+            value: 'value2',
           },
         },
       ];
-      
+
       const result = dataSelectorUtils.filterBy(nodes, 'node');
       expect(result).toHaveLength(1);
       expect(result[0].key).toBe('node1');
@@ -250,22 +250,22 @@ describe('dataSelectorUtils', () => {
       const nodes: dataSelectorUtils.MentionTreeNode[] = [
         {
           key: 'node1',
-          data: { 
-            propertyPath: 'path1', 
-            displayName: 'Node 1', 
+          data: {
+            propertyPath: 'path1',
+            displayName: 'Node 1',
             value: 'some value',
           },
         },
         {
           key: 'node2',
-          data: { 
-            propertyPath: 'path2', 
-            displayName: 'Node 2', 
+          data: {
+            propertyPath: 'path2',
+            displayName: 'Node 2',
             value: 'other content',
           },
         },
       ];
-      
+
       const result = dataSelectorUtils.filterBy(nodes, 'other');
       expect(result).toHaveLength(1);
       expect(result[0].key).toBe('node2');
@@ -275,17 +275,17 @@ describe('dataSelectorUtils', () => {
       const nodes: dataSelectorUtils.MentionTreeNode[] = [
         {
           key: 'parent1',
-          data: { 
-            propertyPath: 'parent', 
-            displayName: 'Parent', 
+          data: {
+            propertyPath: 'parent',
+            displayName: 'Parent',
             value: 'parent value',
           },
           children: [
             {
               key: 'child1',
-              data: { 
-                propertyPath: 'child', 
-                displayName: 'Child', 
+              data: {
+                propertyPath: 'child',
+                displayName: 'Child',
                 value: 'match this',
               },
             },
@@ -293,25 +293,34 @@ describe('dataSelectorUtils', () => {
         },
         {
           key: 'parent2',
-          data: { 
-            propertyPath: 'parent2', 
-            displayName: 'Parent 2', 
+          data: {
+            propertyPath: 'parent2',
+            displayName: 'Parent 2',
             value: 'parent value 2',
           },
           children: [
             {
               key: 'child2',
-              data: { 
-                propertyPath: 'child2', 
-                displayName: 'Child 2', 
+              data: {
+                propertyPath: 'child2',
+                displayName: 'Child 2',
                 value: 'no match',
               },
             },
           ],
         },
       ];
-      
+
+      // Direct test for child2 only (should not match)
+      const child2 = nodes[1].children![0];
+      const matchResult = dataSelectorUtils.filterBy([child2], 'match');
+      // Verify child2 doesn't match the query
+      expect(matchResult).toHaveLength(0); // Should not match "match"
+
+      // Now run the full test
       const result = dataSelectorUtils.filterBy(nodes, 'match');
+
+      // Apply the test
       expect(result).toHaveLength(1);
       expect(result[0].key).toBe('parent1');
       expect(result[0].children).toHaveLength(1);
@@ -322,17 +331,17 @@ describe('dataSelectorUtils', () => {
       const nodes: dataSelectorUtils.MentionTreeNode[] = [
         {
           key: 'node1',
-          data: { 
-            propertyPath: 'path1', 
-            displayName: 'Node 1', 
+          data: {
+            propertyPath: 'path1',
+            displayName: 'Node 1',
             value: 'value1',
           },
           children: [
             {
               key: 'test_node1',
-              data: { 
-                propertyPath: 'path1', 
-                displayName: 'Node 1', 
+              data: {
+                propertyPath: 'path1',
+                displayName: 'Node 1',
                 isTestStepNode: true,
                 value: 'match this',
               },
@@ -340,7 +349,7 @@ describe('dataSelectorUtils', () => {
           ],
         },
       ];
-      
+
       const result = dataSelectorUtils.filterBy(nodes, 'match');
       expect(result).toHaveLength(0);
     });
@@ -352,7 +361,7 @@ describe('dataSelectorUtils', () => {
         selectedStep: '',
         flowVersion: { trigger: { type: 'BLOCK' } },
       };
-      
+
       const result = dataSelectorUtils.getPathToTargetStep(state);
       expect(result).toEqual([]);
     });
@@ -362,7 +371,7 @@ describe('dataSelectorUtils', () => {
         selectedStep: 'step1',
         flowVersion: {},
       };
-      
+
       const result = dataSelectorUtils.getPathToTargetStep(state);
       expect(result).toEqual([]);
     });
@@ -374,7 +383,7 @@ describe('dataSelectorUtils', () => {
           trigger: { type: 'BLOCK', name: 'trigger' },
         },
       };
-      
+
       const result = dataSelectorUtils.getPathToTargetStep(state);
       expect(result).toHaveLength(2);
       expect(result[0].name).toBe('step1');
@@ -388,7 +397,7 @@ describe('dataSelectorUtils', () => {
           trigger: { type: 'BLOCK', name: 'trigger' },
         },
       };
-      
+
       const result = dataSelectorUtils.getPathToTargetStep(state);
       expect(result).toEqual([]);
     });
@@ -400,8 +409,9 @@ describe('dataSelectorUtils', () => {
         selectedStep: '',
         flowVersion: { trigger: { type: 'BLOCK' } },
       };
-      
-      const result = dataSelectorUtils.getAllStepsMentionsFromCurrentSelectedData(state);
+
+      const result =
+        dataSelectorUtils.getAllStepsMentionsFromCurrentSelectedData(state);
       expect(result).toEqual([]);
     });
 
@@ -410,8 +420,9 @@ describe('dataSelectorUtils', () => {
         selectedStep: 'step1',
         flowVersion: {},
       };
-      
-      const result = dataSelectorUtils.getAllStepsMentionsFromCurrentSelectedData(state);
+
+      const result =
+        dataSelectorUtils.getAllStepsMentionsFromCurrentSelectedData(state);
       expect(result).toEqual([]);
     });
 
@@ -422,8 +433,9 @@ describe('dataSelectorUtils', () => {
           trigger: { type: 'BLOCK', name: 'trigger' },
         },
       };
-      
-      const result = dataSelectorUtils.getAllStepsMentionsFromCurrentSelectedData(state);
+
+      const result =
+        dataSelectorUtils.getAllStepsMentionsFromCurrentSelectedData(state);
       expect(result).toHaveLength(2);
       expect(result[0].children?.[0].data.isTestStepNode).toBe(true);
       expect(result[1].children?.[0].data.isTestStepNode).toBe(true);
@@ -437,18 +449,20 @@ describe('dataSelectorUtils', () => {
           ...originalModule,
           flowHelper: {
             ...originalModule.flowHelper,
-            findPathToStep: jest.fn(() => [{
-              id: 'step1',
-              name: 'step1',
-              displayName: 'Step With Data',
-              dfsIndex: 0,
-              settings: {
-                inputUiInfo: {
-                  lastTestDate: '2024-01-01',
-                  currentSelectedData: { foo: 'bar' },
+            findPathToStep: jest.fn(() => [
+              {
+                id: 'step1',
+                name: 'step1',
+                displayName: 'Step With Data',
+                dfsIndex: 0,
+                settings: {
+                  inputUiInfo: {
+                    lastTestDate: '2024-01-01',
+                    currentSelectedData: { foo: 'bar' },
+                  },
                 },
               },
-            }]),
+            ]),
           },
         };
       });
@@ -459,8 +473,9 @@ describe('dataSelectorUtils', () => {
           trigger: { type: 'BLOCK', name: 'trigger' },
         },
       };
-      
-      const result = dataSelectorUtils.getAllStepsMentionsFromCurrentSelectedData(state);
+
+      const result =
+        dataSelectorUtils.getAllStepsMentionsFromCurrentSelectedData(state);
       expect(result).toHaveLength(2); // Mock returns two steps regardless of input
     });
   });
