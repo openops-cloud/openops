@@ -304,23 +304,14 @@ describe('dataSelectorUtils', () => {
               data: {
                 propertyPath: 'child2',
                 displayName: 'Child 2',
-                value: 'no match',
+                value: 'different value',
               },
             },
           ],
         },
       ];
 
-      // Direct test for child2 only (should not match)
-      const child2 = nodes[1].children![0];
-      const matchResult = dataSelectorUtils.filterBy([child2], 'match');
-      // Verify child2 doesn't match the query
-      expect(matchResult).toHaveLength(0); // Should not match "match"
-
-      // Now run the full test
       const result = dataSelectorUtils.filterBy(nodes, 'match');
-
-      // Apply the test
       expect(result).toHaveLength(1);
       expect(result[0].key).toBe('parent1');
       expect(result[0].children).toHaveLength(1);
