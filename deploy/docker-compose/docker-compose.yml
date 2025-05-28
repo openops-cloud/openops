@@ -20,6 +20,11 @@ services:
       OPS_VERSION: ${OPS_VERSION:-latest}
       OPS_OPENOPS_TABLES_VERSION: 0.2.2
       OPS_ANALYTICS_VERSION: 0.14.0
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     depends_on:
       openops-tables:
         condition: service_healthy
