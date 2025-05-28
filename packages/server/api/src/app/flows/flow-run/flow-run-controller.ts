@@ -30,12 +30,10 @@ export const flowRunController: FastifyPluginCallbackTypebox = (
   done,
 ): void => {
   app.get('/', ListRequest, async (request) => {
-    // TODO project Id will be required after May 2024, this no longer needs to be optional
     const projectId =
-      request.query.projectId ??
-      (request.principal.type === PrincipalType.SERVICE
+      request.principal.type === PrincipalType.SERVICE
         ? undefined
-        : request.principal.projectId);
+        : request.principal.projectId;
     assertNotNullOrUndefined(projectId, 'projectId');
     return flowRunService.list({
       projectId,
