@@ -19,7 +19,20 @@ export const errorHandler = async (
       params: error.error.params,
     });
   } else {
-    logger.error('Error handler caught an exception.' + error.stack);
+    const requestSummary = (({
+      method,
+      url,
+      headers,
+      body,
+      params,
+      query,
+    }) => ({ method, url, headers, body, params, query }))(_request);
+
+    logger.error('Error handler caught an exception.', {
+      message: error.message,
+      stack: error.stack,
+      request: requestSummary,
+    });
 
     await reply
       .status(error.statusCode ?? StatusCodes.INTERNAL_SERVER_ERROR)
