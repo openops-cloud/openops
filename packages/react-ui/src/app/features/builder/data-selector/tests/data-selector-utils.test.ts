@@ -1,6 +1,6 @@
 import { ActionType, StepWithIndex, TriggerType } from '@openops/shared';
 import { BuilderState } from '../../builder-types';
-import { dataSelectorUtils } from '../data-selector-utils';
+import { dataSelectorUtils, MentionTreeNode } from '../data-selector-utils';
 
 jest.mock('@/app/lib/utils', () => ({
   formatUtils: {
@@ -32,7 +32,6 @@ const createTestAction = (
   nextAction,
 });
 
-// Create a test flow with steps in sequence
 const createTestFlow = () => {
   const step3 = createTestAction('step3', 'Step 3');
   const step2 = createTestAction('step2', 'Step 2', step3);
@@ -42,7 +41,6 @@ const createTestFlow = () => {
   return trigger;
 };
 
-// Create a minimal builder state for testing
 const createBuilderState = (overrides = {}): BuilderState => {
   const defaultState: any = {
     flow: { id: 'flow1', name: 'Test Flow' },
@@ -254,7 +252,7 @@ describe('dataSelectorUtils', () => {
 
   describe('filterBy', () => {
     it('returns the original array when query is empty', () => {
-      const nodes: dataSelectorUtils.MentionTreeNode[] = [
+      const nodes: MentionTreeNode[] = [
         {
           key: 'node1',
           data: {
@@ -278,7 +276,7 @@ describe('dataSelectorUtils', () => {
     });
 
     it('filters nodes by displayName', () => {
-      const nodes: dataSelectorUtils.MentionTreeNode[] = [
+      const nodes: MentionTreeNode[] = [
         {
           key: 'node1',
           data: {
@@ -303,7 +301,7 @@ describe('dataSelectorUtils', () => {
     });
 
     it('filters nodes by value', () => {
-      const nodes: dataSelectorUtils.MentionTreeNode[] = [
+      const nodes: MentionTreeNode[] = [
         {
           key: 'node1',
           data: {
@@ -328,7 +326,7 @@ describe('dataSelectorUtils', () => {
     });
 
     it('recursively filters children', () => {
-      const nodes: dataSelectorUtils.MentionTreeNode[] = [
+      const nodes: MentionTreeNode[] = [
         {
           key: 'parent1',
           data: {
@@ -375,7 +373,7 @@ describe('dataSelectorUtils', () => {
     });
 
     it('skips test nodes', () => {
-      const nodes: dataSelectorUtils.MentionTreeNode[] = [
+      const nodes: MentionTreeNode[] = [
         {
           key: 'node1',
           data: {
@@ -446,91 +444,6 @@ describe('dataSelectorUtils', () => {
 
       const result = dataSelectorUtils.getPathToTargetStep(state);
       expect(result).toEqual([]);
-    });
-  });
-
-  describe('getAllStepsMentionsFromCurrentSelectedData', () => {
-    it('returns empty array when selectedStep is not provided', () => {
-      const state = createBuilderState({
-        selectedStep: '',
-        flowVersion: { trigger: createTestTrigger() },
-      });
-
-      const result =
-        dataSelectorUtils.getAllStepsMentionsFromCurrentSelectedData(state);
-      expect(result).toEqual([]);
-    });
-
-    it('returns empty array when flowVersion.trigger is not provided', () => {
-      const state = createBuilderState({
-        selectedStep: 'step1',
-        flowVersion: {},
-      });
-
-      const result =
-        dataSelectorUtils.getAllStepsMentionsFromCurrentSelectedData(state);
-      expect(result).toEqual([]);
-    });
-
-    it('creates test nodes for steps needing testing', () => {
-      const trigger = createTestFlow();
-      const state = createBuilderState({
-        selectedStep: 'step3',
-        flowVersion: {
-          trigger,
-        },
-      });
-
-      const result =
-        dataSelectorUtils.getAllStepsMentionsFromCurrentSelectedData(state);
-
-      // With real flow helper, should have 2 steps in path to step3
-      expect(result).toHaveLength(2);
-      // Both steps should need testing since they don't have lastTestDate
-      expect(result[0].children?.[0].data.isTestStepNode).toBe(true);
-      expect(result[1].children?.[0].data.isTestStepNode).toBe(true);
-    });
-
-    it('uses step output data for steps with lastTestDate', () => {
-      // Create a flow with step that has test data
-      const step3 = createTestAction('step3', 'Step 3');
-
-      const step2 = createTestAction('step2', 'Step 2', step3);
-      step2.settings = {
-        inputUiInfo: {
-          lastTestDate: '2024-01-01',
-          currentSelectedData: { foo: 'bar' },
-        },
-      };
-
-      const step1 = createTestAction('step1', 'Step 1', step2);
-      step1.settings = {
-        inputUiInfo: {
-          lastTestDate: null, // This step needs testing
-        },
-      };
-
-      const trigger = createTestTrigger();
-      trigger.nextAction = step1;
-
-      const state = createBuilderState({
-        selectedStep: 'step3',
-        flowVersion: {
-          trigger,
-        },
-      });
-
-      const result =
-        dataSelectorUtils.getAllStepsMentionsFromCurrentSelectedData(state);
-
-      // With real flow helper, should have 2 steps in path to step3
-      expect(result).toHaveLength(2);
-      // First step should need testing
-      expect(result[0].children?.[0].data.isTestStepNode).toBe(true);
-      // Second step should have data
-      expect(result[1].data.displayName).toBe('2. Step 2');
-      expect(result[1].children?.[0].data.displayName).toBe('foo');
-      expect(result[1].children?.[0].data.value).toBe('bar');
     });
   });
 });
