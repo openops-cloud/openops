@@ -10,7 +10,7 @@ export const getMcpSystemPrompt = async ({
   isAnalyticsLoaded: boolean;
   isTablesLoaded: boolean;
 }): Promise<string> => {
-  const prompts = [loadPrompt('mcp.txt'), loadFromFile('openops-mcp.txt')];
+  const prompts = [loadPrompt('mcp.txt')];
 
   if (isTablesLoaded) {
     prompts.push(loadPrompt('mcp-tables.txt'));
