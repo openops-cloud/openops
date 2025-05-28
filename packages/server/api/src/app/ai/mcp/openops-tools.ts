@@ -42,6 +42,8 @@ export async function getOpenOpsTools(
           API_BASE_URL: apiBaseUrl,
           OPENOPS_MCP_SERVER_PATH: basePath,
           LOGZIO_TOKEN: logzioToken ?? '',
+          ENVIRONMENT:
+            system.get<string>(SharedSystemProp.ENVIRONMENT_NAME) ?? '',
         },
       }),
     });
