@@ -1,5 +1,9 @@
-import { ActionType, StepWithIndex, TriggerType } from '@openops/shared';
+import { 
+  ActionType, 
+  TriggerType 
+} from '@openops/shared';
 import { dataSelectorUtils } from '../data-selector-utils';
+import { BuilderState } from '../../builder-types';
 
 jest.mock('@/app/lib/utils', () => ({
   formatUtils: {
@@ -7,38 +11,89 @@ jest.mock('@/app/lib/utils', () => ({
   },
 }));
 
-// Mock flowHelper
-jest.mock('@openops/shared', () => {
-  const originalModule = jest.requireActual('@openops/shared');
-  return {
-    ...originalModule,
-    flowHelper: {
-      ...originalModule.flowHelper,
-      findPathToStep: jest.fn(({ targetStepName }) => {
-        // Mock implementation to return a simple path
-        if (targetStepName === 'emptyStep') {
-          return [];
-        }
-        return [
-          {
-            id: 'step1',
-            name: 'step1',
-            displayName: 'Step 1',
-            dfsIndex: 0,
-            settings: {},
-          },
-          {
-            id: 'step2',
-            name: 'step2',
-            displayName: 'Step 2',
-            dfsIndex: 1,
-            settings: {},
-          },
-        ];
-      }),
-    },
-  };
+// Helper functions to create test flow structures
+const createTestTrigger = (name = 'trigger'): any => ({
+  name,
+  displayName: 'Test Trigger',
+  type: TriggerType.BLOCK,
+  settings: {},
+  valid: true,
+  nextAction: null,
 });
+
+const createTestAction = (name: string, displayName: string, nextAction = null): any => ({
+  id: name,
+  name,
+  displayName,
+  type: ActionType.BLOCK,
+  settings: {},
+  valid: true,
+  nextAction,
+});
+
+// Create a test flow with steps in sequence
+const createTestFlow = () => {
+  const step3 = createTestAction('step3', 'Step 3');
+  const step2 = createTestAction('step2', 'Step 2', step3);
+  const step1 = createTestAction('step1', 'Step 1', step2);
+  const trigger = createTestTrigger();
+  trigger.nextAction = step1;
+  return trigger;
+};
+
+// Create a minimal builder state for testing
+const createBuilderState = (overrides = {}): BuilderState => {
+  const defaultState: any = {
+    flow: { id: 'flow1', name: 'Test Flow' },
+    flowVersion: { id: 'version1' },
+    readonly: false,
+    loopsIndexes: {},
+    run: null,
+    leftSidebar: 'none',
+    rightSidebar: 'none',
+    selectedStep: null,
+    canExitRun: false,
+    activeDraggingStep: null,
+    saving: false,
+    refreshBlockFormSettings: false,
+    refreshSettings: jest.fn(),
+    exitRun: jest.fn(),
+    exitStepSettings: jest.fn(),
+    renameFlowClientSide: jest.fn(),
+    moveToFolderClientSide: jest.fn(),
+    setRun: jest.fn(),
+    setLeftSidebar: jest.fn(),
+    setRightSidebar: jest.fn(),
+    applyOperation: jest.fn(),
+    removeStepSelection: jest.fn(),
+    selectStepByName: jest.fn(),
+    startSaving: jest.fn(),
+    setActiveDraggingStep: jest.fn(),
+    setFlow: jest.fn(),
+    exitBlockSelector: jest.fn(),
+    setVersion: jest.fn(),
+    setVersionUpdateTimestamp: jest.fn(),
+    insertMention: null,
+    setReadOnly: jest.fn(),
+    setInsertMentionHandler: jest.fn(),
+    setLoopIndex: jest.fn(),
+    canUndo: false,
+    setCanUndo: jest.fn(),
+    canRedo: false,
+    setCanRedo: jest.fn(),
+    dynamicPropertiesAuthReconnectCounter: 0,
+    refreshDynamicPropertiesForAuth: jest.fn(),
+    midpanelState: {
+      showDataSelector: false,
+      dataSelectorSize: 'docked',
+      showAiChat: false,
+      aiContainerSize: 'docked',
+    },
+    applyMidpanelAction: jest.fn(),
+  };
+  
+  return { ...defaultState, ...overrides };
+};
 
 describe('dataSelectorUtils', () => {
   describe('getAllStepsMentions', () => {
@@ -348,32 +403,31 @@ describe('dataSelectorUtils', () => {
 
   describe('getPathToTargetStep', () => {
     it('returns empty array when selectedStep is not provided', () => {
-      const state = {
+      const state = createBuilderState({
         selectedStep: '',
-        flowVersion: { trigger: { type: 'BLOCK' } },
-      };
+        flowVersion: { trigger: createTestTrigger() },
+      });
 
       const result = dataSelectorUtils.getPathToTargetStep(state);
       expect(result).toEqual([]);
     });
 
     it('returns empty array when flowVersion.trigger is not provided', () => {
-      const state = {
+      const state = createBuilderState({
         selectedStep: 'step1',
         flowVersion: {},
-      };
+      });
 
       const result = dataSelectorUtils.getPathToTargetStep(state);
       expect(result).toEqual([]);
     });
 
-    it('returns path from flowHelper.findPathToStep', () => {
-      const state = {
+    it('returns path to the target step', () => {
+      const trigger = createTestFlow();
+      const state = createBuilderState({
         selectedStep: 'step3',
-        flowVersion: {
-          trigger: { type: 'BLOCK', name: 'trigger' },
-        },
-      };
+        flowVersion: { trigger },
+      });
 
       const result = dataSelectorUtils.getPathToTargetStep(state);
       expect(result).toHaveLength(2);
@@ -381,13 +435,12 @@ describe('dataSelectorUtils', () => {
       expect(result[1].name).toBe('step2');
     });
 
-    it('handles empty path case', () => {
-      const state = {
-        selectedStep: 'emptyStep',
-        flowVersion: {
-          trigger: { type: 'BLOCK', name: 'trigger' },
-        },
-      };
+    it('returns empty array when target step does not exist', () => {
+      const trigger = createTestFlow();
+      const state = createBuilderState({
+        selectedStep: 'nonExistentStep',
+        flowVersion: { trigger },
+      });
 
       const result = dataSelectorUtils.getPathToTargetStep(state);
       expect(result).toEqual([]);
@@ -396,10 +449,10 @@ describe('dataSelectorUtils', () => {
 
   describe('getAllStepsMentionsFromCurrentSelectedData', () => {
     it('returns empty array when selectedStep is not provided', () => {
-      const state = {
+      const state = createBuilderState({
         selectedStep: '',
-        flowVersion: { trigger: { type: 'BLOCK' } },
-      };
+        flowVersion: { trigger: createTestTrigger() },
+      });
 
       const result =
         dataSelectorUtils.getAllStepsMentionsFromCurrentSelectedData(state);
@@ -407,10 +460,10 @@ describe('dataSelectorUtils', () => {
     });
 
     it('returns empty array when flowVersion.trigger is not provided', () => {
-      const state = {
+      const state = createBuilderState({
         selectedStep: 'step1',
         flowVersion: {},
-      };
+      });
 
       const result =
         dataSelectorUtils.getAllStepsMentionsFromCurrentSelectedData(state);
@@ -418,56 +471,64 @@ describe('dataSelectorUtils', () => {
     });
 
     it('creates test nodes for steps needing testing', () => {
-      const state = {
+      const trigger = createTestFlow();
+      const state = createBuilderState({
         selectedStep: 'step3',
         flowVersion: {
-          trigger: { type: 'BLOCK', name: 'trigger' },
+          trigger,
         },
-      };
+      });
 
       const result =
         dataSelectorUtils.getAllStepsMentionsFromCurrentSelectedData(state);
+      
+      // With real flow helper, should have 2 steps in path to step3
       expect(result).toHaveLength(2);
+      // Both steps should need testing since they don't have lastTestDate
       expect(result[0].children?.[0].data.isTestStepNode).toBe(true);
       expect(result[1].children?.[0].data.isTestStepNode).toBe(true);
     });
 
-    it('traverses step output for steps with lastTestDate', () => {
-      // Mock a step with inputUiInfo.lastTestDate
-      jest.mock('@openops/shared', () => {
-        const originalModule = jest.requireActual('@openops/shared');
-        return {
-          ...originalModule,
-          flowHelper: {
-            ...originalModule.flowHelper,
-            findPathToStep: jest.fn(() => [
-              {
-                id: 'step1',
-                name: 'step1',
-                displayName: 'Step With Data',
-                dfsIndex: 0,
-                settings: {
-                  inputUiInfo: {
-                    lastTestDate: '2024-01-01',
-                    currentSelectedData: { foo: 'bar' },
-                  },
-                },
-              },
-            ]),
-          },
-        };
-      });
-
-      const state = {
-        selectedStep: 'stepWithData',
-        flowVersion: {
-          trigger: { type: 'BLOCK', name: 'trigger' },
-        },
+    it('uses step output data for steps with lastTestDate', () => {
+      // Create a flow with step that has test data
+      const step3 = createTestAction('step3', 'Step 3');
+      
+      const step2 = createTestAction('step2', 'Step 2', step3);
+      step2.settings = {
+        inputUiInfo: {
+          lastTestDate: '2024-01-01',
+          currentSelectedData: { foo: 'bar' },
+        }
       };
+      
+      const step1 = createTestAction('step1', 'Step 1', step2);
+      step1.settings = {
+        inputUiInfo: {
+          lastTestDate: null, // This step needs testing
+        }
+      };
+      
+      const trigger = createTestTrigger();
+      trigger.nextAction = step1;
+
+      const state = createBuilderState({
+        selectedStep: 'step3',
+        flowVersion: {
+          trigger,
+        },
+      });
 
       const result =
         dataSelectorUtils.getAllStepsMentionsFromCurrentSelectedData(state);
-      expect(result).toHaveLength(2); // Mock returns two steps regardless of input
+      
+      // With real flow helper, should have 2 steps in path to step3
+      expect(result).toHaveLength(2);
+      // First step should need testing
+      expect(result[0].children?.[0].data.isTestStepNode).toBe(true);
+      // Second step should have data
+      expect(result[1].data.displayName).toBe('2. Step 2');
+      expect(result[1].children?.[0].data.displayName).toBe('foo');
+      expect(result[1].children?.[0].data.value).toBe('bar');
     });
   });
 });
