@@ -24,11 +24,6 @@ const settingsLink: MenuLink = {
   icon: Wrench,
 };
 
-const newerVersionSettingsLink: MenuLink = {
-  ...settingsLink,
-  to: '/settings/about',
-};
-
 type Props = {
   isMinimized: boolean;
 };
@@ -103,9 +98,7 @@ const SideMenuFooter = ({ isMinimized }: Props) => {
 
   return (
     <MenuFooter
-      settingsLink={
-        hasNewerVersionAvailable ? newerVersionSettingsLink : settingsLink
-      }
+      settingsLink={settingsLink}
       user={user}
       onLogout={onLogout}
       isMinimized={isMinimized}
