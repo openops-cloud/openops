@@ -247,6 +247,7 @@ async function streamMessages(
       }
     },
     async onFinish({ response }): Promise<void> {
+      logger.debug('LLM response received, saving chat history.', { response });
       const filteredMessages = removeToolMessages(messages);
       response.messages.forEach((r) => {
         filteredMessages.push(getResponseObject(r));
