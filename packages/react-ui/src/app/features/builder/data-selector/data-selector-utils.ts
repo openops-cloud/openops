@@ -161,7 +161,7 @@ const getAllStepsMentions = (
     if (stepNeedsTesting) {
       return createTestNode(step, displayName);
     }
-    return dataSelectorUtils.traverseStepOutputAndReturnMentionTree({
+    return traverseStepOutputAndReturnMentionTree({
       stepOutput: stepsTestOutput[step.id].output,
       propertyPath: step.name,
       displayName: displayName,
@@ -267,9 +267,9 @@ const getAllStepsMentionsFromCurrentSelectedData: (
     const stepNeedsTesting = isNil(step.settings.inputUiInfo?.lastTestDate);
     const displayName = `${step.dfsIndex + 1}. ${step.displayName}`;
     if (stepNeedsTesting) {
-      return dataSelectorUtils.createTestNode(step, displayName);
+      return createTestNode(step, displayName);
     }
-    return dataSelectorUtils.traverseStepOutputAndReturnMentionTree({
+    return traverseStepOutputAndReturnMentionTree({
       stepOutput: step.settings.inputUiInfo?.currentSelectedData,
       propertyPath: step.name,
       displayName: displayName,

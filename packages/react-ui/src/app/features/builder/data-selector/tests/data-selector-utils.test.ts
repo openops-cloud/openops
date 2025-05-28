@@ -1,7 +1,4 @@
-import { 
-  ActionType, 
-  TriggerType 
-} from '@openops/shared';
+import { ActionType, TriggerType, StepWithIndex } from '@openops/shared';
 import { dataSelectorUtils } from '../data-selector-utils';
 import { BuilderState } from '../../builder-types';
 
@@ -21,7 +18,11 @@ const createTestTrigger = (name = 'trigger'): any => ({
   nextAction: null,
 });
 
-const createTestAction = (name: string, displayName: string, nextAction = null): any => ({
+const createTestAction = (
+  name: string,
+  displayName: string,
+  nextAction = null,
+): any => ({
   id: name,
   name,
   displayName,
@@ -91,7 +92,7 @@ const createBuilderState = (overrides = {}): BuilderState => {
     },
     applyMidpanelAction: jest.fn(),
   };
-  
+
   return { ...defaultState, ...overrides };
 };
 
@@ -481,7 +482,7 @@ describe('dataSelectorUtils', () => {
 
       const result =
         dataSelectorUtils.getAllStepsMentionsFromCurrentSelectedData(state);
-      
+
       // With real flow helper, should have 2 steps in path to step3
       expect(result).toHaveLength(2);
       // Both steps should need testing since they don't have lastTestDate
@@ -492,22 +493,22 @@ describe('dataSelectorUtils', () => {
     it('uses step output data for steps with lastTestDate', () => {
       // Create a flow with step that has test data
       const step3 = createTestAction('step3', 'Step 3');
-      
+
       const step2 = createTestAction('step2', 'Step 2', step3);
       step2.settings = {
         inputUiInfo: {
           lastTestDate: '2024-01-01',
           currentSelectedData: { foo: 'bar' },
-        }
+        },
       };
-      
+
       const step1 = createTestAction('step1', 'Step 1', step2);
       step1.settings = {
         inputUiInfo: {
           lastTestDate: null, // This step needs testing
-        }
+        },
       };
-      
+
       const trigger = createTestTrigger();
       trigger.nextAction = step1;
 
@@ -520,7 +521,7 @@ describe('dataSelectorUtils', () => {
 
       const result =
         dataSelectorUtils.getAllStepsMentionsFromCurrentSelectedData(state);
-      
+
       // With real flow helper, should have 2 steps in path to step3
       expect(result).toHaveLength(2);
       // First step should need testing
