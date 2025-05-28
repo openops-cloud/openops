@@ -143,9 +143,11 @@ describe('getSystemPrompt', () => {
     expect(fetch).not.toHaveBeenCalled();
   });
 
-  it('should handle failed fetch gracefully', async () => {
+  it('should fallback to read from local file', async () => {
+    const promptContent = 'aws prompt content';
     getMock.mockReturnValue('https://example.com/prompts/');
     mockFetch.mockResolvedValueOnce({ ok: false, statusText: 'Not Found' });
+    readFileMock.mockResolvedValueOnce(promptContent);
 
     const result = await getSystemPrompt({
       blockName: '@openops/block-aws',
@@ -154,8 +156,9 @@ describe('getSystemPrompt', () => {
       actionName: 'aws-cli',
     });
 
-    expect(result).toBe('');
-    expect(fetch).toHaveBeenCalled();
+    expect(result).toBe(promptContent);
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(readFileMock).toHaveBeenCalledTimes(1);
   });
 
   it.each([

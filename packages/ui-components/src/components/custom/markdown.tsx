@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import validator from 'validator';
 import { clipboardUtils } from '../../lib/clipboard-utils';
+import { cn } from '../../lib/cn';
 import { COPY_PASTE_TOAST_DURATION } from '../../lib/constants';
 import { CodeVariations, MarkdownCodeVariations } from './types';
 
@@ -25,6 +26,8 @@ type MarkdownProps = {
   variables?: Record<string, string>;
   className?: string;
   withBorder?: boolean;
+  textClassName?: string;
+  linkClassName?: string;
   codeVariation?: CodeVariations;
   handleInject?: (codeContent: string) => void;
 };
@@ -132,6 +135,8 @@ const Markdown = React.memo(
     variables,
     withBorder = true,
     codeVariation = MarkdownCodeVariations.WithCopy,
+    textClassName,
+    linkClassName,
     handleInject,
   }: MarkdownProps) => {
     const { toast } = useToast();
@@ -265,7 +270,10 @@ const Markdown = React.memo(
             ),
             p: ({ node, ...props }) => (
               <p
-                className="leading-7 mt-2 [&:not(:first-child)]:my-2"
+                className={cn(
+                  'leading-7 mt-2 [&:not(:first-child)]:my-2',
+                  textClassName,
+                )}
                 {...props}
               />
             ),
@@ -275,12 +283,17 @@ const Markdown = React.memo(
             ol: ({ node, ...props }) => (
               <ol className="my-6 ml-6 list-decimal [&>li]:mt-2" {...props} />
             ),
-            li: ({ node, ...props }) => <li {...props} />,
+            li: ({ node, ...props }) => (
+              <li className={cn(textClassName)} {...props} />
+            ),
             a: ({ node, ...props }) => (
               <a
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-medium text-primary underline underline-offset-4"
+                className={cn(
+                  'font-medium text-primary underline underline-offset-4',
+                  linkClassName,
+                )}
                 {...props}
               />
             ),

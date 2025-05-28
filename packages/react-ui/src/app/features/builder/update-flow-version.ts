@@ -8,6 +8,7 @@ import {
 import { flowsApi } from '../flows/lib/flows-api';
 import { aiChatApi } from './ai-chat/lib/chat-api';
 import { BuilderState, RightSideBarType } from './builder-types';
+import { stepTestOutputCache } from './data-selector/data-selector-cache';
 
 const flowUpdatesQueue = new PromiseQueue();
 
@@ -24,13 +25,21 @@ export const updateFlowVersion = (
   ) => void,
 ) => {
   const newFlowVersion = flowHelper.apply(state.flowVersion, operation);
-  if (
-    operation.type === FlowOperationType.DELETE_ACTION &&
-    operation.request.name === state.selectedStep
-  ) {
-    set({ selectedStep: undefined });
-    set({ rightSidebar: RightSideBarType.NONE });
-    deleteChatRequest(state.flowVersion, operation.request.name);
+  if (operation.type === FlowOperationType.DELETE_ACTION) {
+    const stepToClear = flowHelper.getStep(
+      state.flowVersion,
+      operation.request.name,
+    );
+
+    if (stepToClear) {
+      stepTestOutputCache.clearStep(stepToClear.id!);
+    }
+
+    if (operation.request.name === state.selectedStep) {
+      set({ selectedStep: undefined });
+      set({ rightSidebar: RightSideBarType.NONE });
+      deleteChatRequest(state.flowVersion, operation.request.name);
+    }
   }
 
   if (operation.type === FlowOperationType.DUPLICATE_ACTION) {

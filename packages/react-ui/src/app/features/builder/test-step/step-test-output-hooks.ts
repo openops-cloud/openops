@@ -4,6 +4,7 @@ import { Action, FlagId, isEmpty, isNil, Trigger } from '@openops/shared';
 import { useQuery } from '@tanstack/react-query';
 import { UseFormReturn } from 'react-hook-form';
 import { flowsApi } from '../../flows/lib/flows-api';
+import { stepTestOutputCache } from '../data-selector/data-selector-cache';
 
 type FallbackDataInput =
   | (() => {
@@ -47,6 +48,8 @@ export const stepTestOutputHooks = {
         if (isNil(stepTestOutput) || isEmpty(stepTestOutput)) {
           return resolveFallbackData();
         }
+
+        stepTestOutputCache.setStepData(stepId, stepTestOutput);
 
         return stepTestOutput;
       },
