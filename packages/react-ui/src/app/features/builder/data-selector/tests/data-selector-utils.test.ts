@@ -8,7 +8,6 @@ jest.mock('@/app/lib/utils', () => ({
   },
 }));
 
-// Helper functions to create test flow structures
 const createTestTrigger = (name = 'trigger'): any => ({
   name,
   displayName: 'Test Trigger',
@@ -45,50 +44,6 @@ const createBuilderState = (overrides = {}): BuilderState => {
   const defaultState: any = {
     flow: { id: 'flow1', name: 'Test Flow' },
     flowVersion: { id: 'version1' },
-    readonly: false,
-    loopsIndexes: {},
-    run: null,
-    leftSidebar: 'none',
-    rightSidebar: 'none',
-    selectedStep: null,
-    canExitRun: false,
-    activeDraggingStep: null,
-    saving: false,
-    refreshBlockFormSettings: false,
-    refreshSettings: jest.fn(),
-    exitRun: jest.fn(),
-    exitStepSettings: jest.fn(),
-    renameFlowClientSide: jest.fn(),
-    moveToFolderClientSide: jest.fn(),
-    setRun: jest.fn(),
-    setLeftSidebar: jest.fn(),
-    setRightSidebar: jest.fn(),
-    applyOperation: jest.fn(),
-    removeStepSelection: jest.fn(),
-    selectStepByName: jest.fn(),
-    startSaving: jest.fn(),
-    setActiveDraggingStep: jest.fn(),
-    setFlow: jest.fn(),
-    exitBlockSelector: jest.fn(),
-    setVersion: jest.fn(),
-    setVersionUpdateTimestamp: jest.fn(),
-    insertMention: null,
-    setReadOnly: jest.fn(),
-    setInsertMentionHandler: jest.fn(),
-    setLoopIndex: jest.fn(),
-    canUndo: false,
-    setCanUndo: jest.fn(),
-    canRedo: false,
-    setCanRedo: jest.fn(),
-    dynamicPropertiesAuthReconnectCounter: 0,
-    refreshDynamicPropertiesForAuth: jest.fn(),
-    midpanelState: {
-      showDataSelector: false,
-      dataSelectorSize: 'docked',
-      showAiChat: false,
-      aiContainerSize: 'docked',
-    },
-    applyMidpanelAction: jest.fn(),
   };
 
   return { ...defaultState, ...overrides };
@@ -275,54 +230,56 @@ describe('dataSelectorUtils', () => {
       expect(result).toEqual(nodes);
     });
 
-    it('filters nodes by displayName', () => {
-      const nodes: MentionTreeNode[] = [
-        {
-          key: 'node1',
-          data: {
-            propertyPath: 'path1',
-            displayName: 'Node 1',
-            value: 'value1',
+    it.each([
+      {
+        desc: 'filters nodes by displayName',
+        nodes: [
+          {
+            key: 'node1',
+            data: {
+              propertyPath: 'path1',
+              displayName: 'Node 1',
+              value: 'value1',
+            },
           },
-        },
-        {
-          key: 'node2',
-          data: {
-            propertyPath: 'path2',
-            displayName: 'Different Name',
-            value: 'value2',
+          {
+            key: 'node2',
+            data: {
+              propertyPath: 'path2',
+              displayName: 'Different Name',
+              value: 'value2',
+            },
           },
-        },
-      ];
-
-      const result = dataSelectorUtils.filterBy(nodes, 'node');
-      expect(result).toHaveLength(1);
-      expect(result[0].key).toBe('node1');
-    });
-
-    it('filters nodes by value', () => {
-      const nodes: MentionTreeNode[] = [
-        {
-          key: 'node1',
-          data: {
-            propertyPath: 'path1',
-            displayName: 'Node 1',
-            value: 'some value',
+        ],
+        query: 'node',
+        expectedKeys: ['node1'],
+      },
+      {
+        desc: 'filters nodes by value',
+        nodes: [
+          {
+            key: 'node1',
+            data: {
+              propertyPath: 'path1',
+              displayName: 'Node 1',
+              value: 'some value',
+            },
           },
-        },
-        {
-          key: 'node2',
-          data: {
-            propertyPath: 'path2',
-            displayName: 'Node 2',
-            value: 'other content',
+          {
+            key: 'node2',
+            data: {
+              propertyPath: 'path2',
+              displayName: 'Node 2',
+              value: 'other content',
+            },
           },
-        },
-      ];
-
-      const result = dataSelectorUtils.filterBy(nodes, 'other');
-      expect(result).toHaveLength(1);
-      expect(result[0].key).toBe('node2');
+        ],
+        query: 'other',
+        expectedKeys: ['node2'],
+      },
+    ])('$desc', ({ nodes, query, expectedKeys }) => {
+      const result = dataSelectorUtils.filterBy(nodes, query);
+      expect(result.map((n: MentionTreeNode) => n.key)).toEqual(expectedKeys);
     });
 
     it('recursively filters children', () => {
@@ -401,22 +358,22 @@ describe('dataSelectorUtils', () => {
   });
 
   describe('getPathToTargetStep', () => {
-    it('returns empty array when selectedStep is not provided', () => {
-      const state = createBuilderState({
-        selectedStep: '',
-        flowVersion: { trigger: createTestTrigger() },
-      });
-
-      const result = dataSelectorUtils.getPathToTargetStep(state);
-      expect(result).toEqual([]);
-    });
-
-    it('returns empty array when flowVersion.trigger is not provided', () => {
-      const state = createBuilderState({
-        selectedStep: 'step1',
-        flowVersion: {},
-      });
-
+    it.each([
+      {
+        desc: 'returns empty array when selectedStep is not provided',
+        state: createBuilderState({
+          selectedStep: '',
+          flowVersion: { trigger: createTestTrigger() },
+        }),
+      },
+      {
+        desc: 'returns empty array when flowVersion.trigger is not provided',
+        state: createBuilderState({
+          selectedStep: 'step1',
+          flowVersion: {},
+        }),
+      },
+    ])('$desc', ({ state }) => {
       const result = dataSelectorUtils.getPathToTargetStep(state);
       expect(result).toEqual([]);
     });
