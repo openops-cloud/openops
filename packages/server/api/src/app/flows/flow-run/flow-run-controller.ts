@@ -30,10 +30,7 @@ export const flowRunController: FastifyPluginCallbackTypebox = (
   done,
 ): void => {
   app.get('/', ListRequest, async (request) => {
-    const projectId =
-      request.principal.type === PrincipalType.SERVICE
-        ? undefined
-        : request.principal.projectId;
+    const projectId = request.principal.projectId;
     assertNotNullOrUndefined(projectId, 'projectId');
     return flowRunService.list({
       projectId,
