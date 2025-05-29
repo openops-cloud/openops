@@ -26,6 +26,7 @@ const meta = {
     ],
     selectedDomains: ['Allocation'],
     selectedServices: [],
+    selectedCategories: [],
     onDomainFilterClick: fn(),
     onServiceFilterClick: fn(),
     clearFilters: fn(),
@@ -63,5 +64,11 @@ export const Default: Story = {
     const allTemplatesFilter = canvas.getByText('All Templates');
     await userEvent.click(allTemplatesFilter);
     expect(clearFilters).toHaveBeenCalled();
+  },
+};
+
+export const WithSelectedCategory: Story = {
+  args: {
+    selectedCategories: ['AWS'],
   },
 };

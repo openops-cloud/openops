@@ -77,6 +77,7 @@ type FlowTemplateFilterSidebarProps = {
   categories: Category[];
   selectedDomains: string[];
   selectedServices: string[];
+  selectedCategories?: string[];
   onDomainFilterClick: (domain: string) => void;
   onServiceFilterClick: (service: string) => void;
   clearFilters: () => void;
@@ -87,6 +88,7 @@ const FlowTemplateFilterSidebar = ({
   categories,
   selectedDomains,
   selectedServices,
+  selectedCategories = [],
   onDomainFilterClick,
   onServiceFilterClick,
   clearFilters,
@@ -118,7 +120,14 @@ const FlowTemplateFilterSidebar = ({
         <div className="flex flex-col w-full">
           {categories.map((category) => (
             <Collapsible key={category.name}>
-              <CollapsibleTrigger className="flex items-center cursor-pointer px-3 py-2 hover:bg-muted rounded w-full">
+              <CollapsibleTrigger
+                className={cn(
+                  'flex items-center cursor-pointer px-3 py-2 hover:bg-muted rounded w-full',
+                  {
+                    'bg-muted': selectedCategories.includes(category.name),
+                  },
+                )}
+              >
                 <ChevronRight
                   className="size-4 flex-shrink-0 mr-2 transition-transform data-[state=open]:rotate-90"
                   aria-hidden="true"
