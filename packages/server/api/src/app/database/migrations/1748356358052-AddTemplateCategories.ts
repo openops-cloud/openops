@@ -6,7 +6,7 @@ export class AddTemplateCategories1748356358052 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
             ALTER TABLE "flow_template"
-            ADD "categories" jsonb DEFAULT '[]'
+            ADD "categories" jsonb DEFAULT '[]' NOT NULL
         `);
   }
 
