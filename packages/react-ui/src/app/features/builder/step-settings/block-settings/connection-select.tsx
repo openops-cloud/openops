@@ -29,7 +29,6 @@ import { DynamicFormValidationProvider } from '@/app/features/builder/dynamic-fo
 
 import { CreateOrEditConnectionDialog } from '@/app/features/connections/components/create-edit-connection-dialog';
 import { appConnectionsHooks } from '@/app/features/connections/lib/app-connections-hooks';
-import { authenticationSession } from '@/app/lib/authentication-session';
 import { useBuilderStateContext } from '../../builder-hooks';
 
 type ConnectionSelectProps = {
@@ -53,7 +52,6 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
     blockNames: [params.block.name],
     cursor: undefined,
     limit: 100,
-    projectId: authenticationSession.getProjectId() ?? '',
   });
 
   const { data: reconnectConnection, isFetching: isFetchingConnection } =

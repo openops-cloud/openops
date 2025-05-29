@@ -170,8 +170,11 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
     const mockLanguageModel = {} as LanguageModel;
 
     const mockAllTools = {
-      tool1: { description: 'Tool 1', parameters: {} },
-      tool2: { description: 'Tool 2', parameters: {} },
+      client: [],
+      tools: {
+        tool1: { description: 'Tool 1', parameters: {} },
+        tool2: { description: 'Tool 2', parameters: {} },
+      },
     };
 
     beforeEach(async () => {
@@ -206,7 +209,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
 
       expect(selectRelevantTools).toHaveBeenCalledWith({
         messages: [...mockMessages, { role: 'user', content: 'test message' }],
-        tools: mockAllTools,
+        tools: mockAllTools.tools,
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
       });

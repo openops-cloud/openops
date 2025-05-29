@@ -5,11 +5,17 @@ import {
 import { AppSystemProp, system } from '@openops/server-shared';
 import { experimental_createMCPClient as createMCPClient, ToolSet } from 'ai';
 import { openopsTables } from '../../openops-tables';
+import { MCPTool } from './mcp-tools';
 
-export async function getTablesTools(): Promise<ToolSet> {
+export async function getTablesTools(): Promise<MCPTool> {
   const { token } = await authenticateDefaultUserInOpenOpsTables();
   const mcpEndpoint = await openopsTables.getMcpEndpointList(token);
-  if (!mcpEndpoint) return {};
+  if (!mcpEndpoint) {
+    return {
+      client: undefined,
+      toolSet: {},
+    };
+  }
 
   const url =
     system.get(AppSystemProp.OPENOPS_TABLES_API_URL) +
@@ -32,5 +38,8 @@ export async function getTablesTools(): Promise<ToolSet> {
     }
   }
 
-  return toolSet;
+  return {
+    client,
+    toolSet,
+  };
 }

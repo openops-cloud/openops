@@ -3,7 +3,6 @@ import {
   CreateFolderRequest,
   DeleteFolderRequest,
   ListFolderFlowsRequest,
-  ListFolderRequest,
   Permission,
   PrincipalType,
   SERVICE_KEY_SECURITY_OPENAPI,
@@ -105,19 +104,6 @@ const GetFolderParams = {
     }),
     description: 'Get a folder by id',
     security: [SERVICE_KEY_SECURITY_OPENAPI],
-  },
-};
-
-const ListFoldersParams = {
-  config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
-    permission: Permission.READ_FLOW,
-  },
-  schema: {
-    tags: ['folders'],
-    description: 'List folders',
-    security: [SERVICE_KEY_SECURITY_OPENAPI],
-    querystring: ListFolderRequest,
   },
 };
 

@@ -3,7 +3,6 @@ import { useDynamicFormValidationContext } from '@/app/features/builder/dynamic-
 import { appConnectionsApi } from '@/app/features/connections/lib/app-connections-api';
 import { appConnectionUtils } from '@/app/features/connections/lib/app-connections-utils';
 import { api } from '@/app/lib/api';
-import { authenticationSession } from '@/app/lib/authentication-session';
 import { typeboxResolver } from '@hookform/resolvers/typebox';
 import {
   BasicAuthProperty,
@@ -124,7 +123,6 @@ const CreateEditConnectionDialogContent = ({
       const formValues = form.getValues().request;
       if (!reconnect) {
         const connections = await appConnectionsApi.list({
-          projectId: authenticationSession.getProjectId()!,
           limit: 10000,
         });
         const existingConnection = connections.data.find(

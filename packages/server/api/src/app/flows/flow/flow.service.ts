@@ -71,7 +71,6 @@ export const flowService = {
       userId,
       projectId,
       request: {
-        projectId,
         displayName,
       },
     });

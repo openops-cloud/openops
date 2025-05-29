@@ -28,7 +28,6 @@ import { userSettingsHooks } from '@/app/common/hooks/user-settings-hooks';
 import { SEARCH_PARAMS } from '@/app/constants/search-params';
 import { ImportFlowDialog } from '@/app/features/flows/components/import-flow-dialog/import-flow-dialog';
 import { useRefetchFolderTree } from '@/app/features/folders/hooks/refetch-folder-tree';
-import { authenticationSession } from '@/app/lib/authentication-session';
 import { flowsApi } from '../lib/flows-api';
 import { flowsUtils } from '../lib/flows-utils';
 import { MoveFlowDialog } from './move-flow-dialog';
@@ -65,7 +64,6 @@ const FlowActionMenu: React.FC<FlowActionMenuProps> = ({
     mutationFn: async () => {
       const createdFlow = await flowsApi.create({
         displayName: flowVersion.displayName,
-        projectId: authenticationSession.getProjectId()!,
       });
       const updatedFlow = await flowsApi.update(createdFlow.id, {
         type: FlowOperationType.IMPORT_FLOW,
