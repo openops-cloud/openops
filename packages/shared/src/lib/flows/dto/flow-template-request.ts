@@ -32,6 +32,7 @@ export const FlowTemplateMetadata = Type.Object({
   isGettingStarted: Type.Optional(Type.Boolean()),
   projectId: Type.String(),
   organizationId: Type.String(),
+  categories: Type.Array(Type.String()),
 });
 
 export type FlowTemplateMetadata = Static<typeof FlowTemplateMetadata>;
