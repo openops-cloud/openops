@@ -10,7 +10,7 @@ export type FlowTemplateSchema = FlowTemplateDto & {
   organization: Organization;
   minSupportedVersion?: string;
   maxSupportedVersion?: string;
-  categories?: string[];
+  categories: string[];
 };
 
 export const FlowTemplateEntity = new EntitySchema<FlowTemplateSchema>({
