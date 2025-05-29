@@ -10,7 +10,6 @@ import { flowsApi } from './flows-api';
 import { userSettingsHooks } from '@/app/common/hooks/user-settings-hooks';
 import { QueryKeys } from '@/app/constants/query-keys';
 import { SEARCH_PARAMS } from '@/app/constants/search-params';
-import { authenticationSession } from '@/app/lib/authentication-session';
 
 export type FlowsSearchState = {
   searchTerm: string;
@@ -34,7 +33,7 @@ async function fetchFlows(name: string, limit: number, signal: AbortSignal) {
 export const flowsHooks = {
   useFlows: (request: ListFlowsRequest) => {
     return useQuery({
-      queryKey: [QueryKeys.flows, authenticationSession.getProjectId()],
+      queryKey: [QueryKeys.flows],
       queryFn: async () => {
         return await flowsApi.list(request);
       },
