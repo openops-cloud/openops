@@ -36,16 +36,16 @@ export const stepTestOutputHooks = {
     return useQuery({
       queryKey: [QueryKeys.stepTestOutput, flowVersionId, stepId],
       queryFn: async () => {
-        if (!useNewExternalTestData) {
+        if (!stepId || !useNewExternalTestData) {
           return resolveFallbackData();
         }
 
         const stepTestOutput = await flowsApi.getStepTestOutput(
           flowVersionId,
-          stepId!,
+          stepId,
         );
 
-        stepTestOutputCache.setStepData(stepId!, stepTestOutput);
+        stepTestOutputCache.setStepData(stepId, stepTestOutput);
 
         return stepTestOutput;
       },
