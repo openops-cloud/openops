@@ -14,7 +14,16 @@ const meta = {
   tags: ['autodocs'],
   args: {
     domains: storyMocks.domains,
-    services: storyMocks.services,
+    categories: [
+      {
+        name: 'AWS',
+        services: storyMocks.services.slice(0, 4),
+      },
+      {
+        name: 'Azure',
+        services: storyMocks.services.slice(4),
+      },
+    ],
     selectedDomains: ['Allocation'],
     selectedServices: [],
     onDomainFilterClick: fn(),
