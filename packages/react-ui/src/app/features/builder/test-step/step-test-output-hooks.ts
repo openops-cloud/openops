@@ -1,6 +1,6 @@
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { QueryKeys } from '@/app/constants/query-keys';
-import { Action, FlagId, isEmpty, isNil, Trigger } from '@openops/shared';
+import { Action, FlagId, Trigger } from '@openops/shared';
 import { useQuery } from '@tanstack/react-query';
 import { UseFormReturn } from 'react-hook-form';
 import { flowsApi } from '../../flows/lib/flows-api';
@@ -36,25 +36,22 @@ export const stepTestOutputHooks = {
     return useQuery({
       queryKey: [QueryKeys.stepTestOutput, flowVersionId, stepId],
       queryFn: async () => {
-        if (!stepId || !useNewExternalTestData) {
+        if (!useNewExternalTestData) {
           return resolveFallbackData();
         }
 
         const stepTestOutput = await flowsApi.getStepTestOutput(
           flowVersionId,
-          stepId,
+          stepId!,
         );
 
-        if (isNil(stepTestOutput) || isEmpty(stepTestOutput)) {
-          return resolveFallbackData();
-        }
-
-        stepTestOutputCache.setStepData(stepId, stepTestOutput);
+        stepTestOutputCache.setStepData(stepId!, stepTestOutput);
 
         return stepTestOutput;
       },
     });
   },
+
   useStepTestOutputFormData(
     flowVersionId: string,
     form: UseFormReturn<Action> | UseFormReturn<Trigger>,
