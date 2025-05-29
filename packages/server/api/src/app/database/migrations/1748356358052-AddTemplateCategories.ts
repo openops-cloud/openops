@@ -11,8 +11,6 @@ export class AddTemplateCategories1748356358052 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`
-            ALTER TABLE "flow_template" DROP COLUMN "categories"
-        `);
+    throw new Error('Rollback not implemented');
   }
 }
