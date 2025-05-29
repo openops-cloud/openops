@@ -69,7 +69,7 @@ export const FlowTemplateEntity = new EntitySchema<FlowTemplateSchema>({
     },
     categories: {
       type: JSONB_COLUMN_TYPE,
-      nullable: true,
+      nullable: false,
     },
   },
   indices: [
