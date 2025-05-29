@@ -33,7 +33,7 @@ async function fetchFlows(name: string, limit: number, signal: AbortSignal) {
 export const flowsHooks = {
   useFlows: (request: ListFlowsRequest) => {
     return useQuery({
-      queryKey: [QueryKeys.flows],
+      queryKey: [QueryKeys.flows, JSON.stringify(request)],
       queryFn: async () => {
         return await flowsApi.list(request);
       },
