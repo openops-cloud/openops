@@ -14,7 +14,7 @@ export const CloudLoggedInBrief = ({ appLogo }: { appLogo: ReactNode }) => (
       <br />
       {t('you can close this window anytime.')}
     </h1>
-    <Alert className="mt-8 text-sm flex-col" variant="default">
+    <Alert className="mt-8 text-sm flex-col max-w-[560px]" variant="default">
       <AlertDescription>
         <b>{t('Note: ')}</b>
         {t(
