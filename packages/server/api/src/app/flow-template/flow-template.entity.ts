@@ -10,6 +10,7 @@ export type FlowTemplateSchema = FlowTemplateDto & {
   organization: Organization;
   minSupportedVersion?: string;
   maxSupportedVersion?: string;
+  categories: string[];
 };
 
 export const FlowTemplateEntity = new EntitySchema<FlowTemplateSchema>({
@@ -65,6 +66,10 @@ export const FlowTemplateEntity = new EntitySchema<FlowTemplateSchema>({
     maxSupportedVersion: {
       type: String,
       nullable: true,
+    },
+    categories: {
+      type: JSONB_COLUMN_TYPE,
+      nullable: false,
     },
   },
   indices: [

@@ -9,12 +9,11 @@ import { t } from 'i18next';
 import { SearchXIcon } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { FlagId, flowHelper, isNil, StepOutputWithData } from '@openops/shared';
+import { FlagId, StepOutputWithData } from '@openops/shared';
 
 import { useBuilderStateContext } from '../builder-hooks';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
-import { BuilderState } from '../builder-types';
 import { stepTestOutputCache } from './data-selector-cache';
 import { DataSelectorNode } from './data-selector-node';
 import {
@@ -24,84 +23,6 @@ import {
 import { dataSelectorUtils, MentionTreeNode } from './data-selector-utils';
 import { expandOrCollapseNodesOnSearch } from './expand-or-collapse-on-search';
 import { useSelectorData } from './use-selector-data';
-
-function filterBy(arr: MentionTreeNode[], query: string): MentionTreeNode[] {
-  if (!query) {
-    return arr;
-  }
-
-  return arr.reduce((acc, item) => {
-    const isTestNode =
-      !isNil(item.children) && item?.children?.[0]?.data?.isTestStepNode;
-    if (isTestNode) {
-      return acc;
-    }
-
-    if (item.children?.length) {
-      const filteredChildren = filterBy(item.children, query);
-      if (filteredChildren.length) {
-        acc.push({ ...item, children: filteredChildren });
-        return acc;
-      }
-    }
-
-    const normalizedValue = item?.data?.value;
-    const value = isNil(normalizedValue)
-      ? ''
-      : JSON.stringify(normalizedValue).toLowerCase();
-    const displayName = item?.data?.displayName?.toLowerCase();
-
-    if (
-      displayName?.includes(query.toLowerCase()) ||
-      value.includes(query.toLowerCase())
-    ) {
-      acc.push({ ...item, children: undefined });
-    }
-
-    return acc;
-  }, [] as MentionTreeNode[]);
-}
-
-const getPathToTargetStep = (state: BuilderState) => {
-  const { selectedStep, flowVersion } = state;
-  if (!selectedStep || !flowVersion?.trigger) {
-    return [];
-  }
-  const pathToTargetStep = flowHelper.findPathToStep({
-    targetStepName: selectedStep,
-    trigger: flowVersion.trigger,
-  });
-  return pathToTargetStep;
-};
-
-/**
- * @deprecated currentSelectedData will be removed in the future
- */
-const getAllStepsMentionsFromCurrentSelectedData: (
-  state: BuilderState,
-) => MentionTreeNode[] = (state) => {
-  const { selectedStep, flowVersion } = state;
-  if (!selectedStep || !flowVersion?.trigger) {
-    return [];
-  }
-  const pathToTargetStep = flowHelper.findPathToStep({
-    targetStepName: selectedStep,
-    trigger: flowVersion.trigger,
-  });
-
-  return pathToTargetStep.map((step) => {
-    const stepNeedsTesting = isNil(step.settings.inputUiInfo?.lastTestDate);
-    const displayName = `${step.dfsIndex + 1}. ${step.displayName}`;
-    if (stepNeedsTesting) {
-      return dataSelectorUtils.createTestNode(step, displayName);
-    }
-    return dataSelectorUtils.traverseStepOutputAndReturnMentionTree({
-      stepOutput: step.settings.inputUiInfo?.currentSelectedData,
-      propertyPath: step.name,
-      displayName: displayName,
-    });
-  });
-};
 
 type DataSelectorProps = {
   parentHeight: number;
@@ -129,9 +50,11 @@ const DataSelector = ({
     (state) => state.midpanelState.showDataSelector,
   );
 
-  const pathToTargetStep = useBuilderStateContext(getPathToTargetStep);
+  const pathToTargetStep = useBuilderStateContext(
+    dataSelectorUtils.getPathToTargetStep,
+  );
   const mentionsFromCurrentSelectedData = useBuilderStateContext(
-    getAllStepsMentionsFromCurrentSelectedData,
+    dataSelectorUtils.getAllStepsMentionsFromCurrentSelectedData,
   );
 
   const stepIds: string[] = pathToTargetStep.map((p) => p.id!);
@@ -203,7 +126,7 @@ const DataSelector = ({
 
   const midpanelState = useBuilderStateContext((state) => state.midpanelState);
   const filteredMentions = useMemo(
-    () => filterBy(structuredClone(mentions), searchTerm),
+    () => dataSelectorUtils.filterBy(structuredClone(mentions), searchTerm),
     [mentions, searchTerm],
   );
 
