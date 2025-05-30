@@ -1,6 +1,5 @@
 import { t } from 'i18next';
 import { ChevronRight } from 'lucide-react';
-import React from 'react';
 import { cn } from '../../lib/cn';
 import {
   Collapsible,
@@ -10,6 +9,7 @@ import {
 import { ScrollArea } from '../../ui/scroll-area';
 import { TooltipProvider } from '../../ui/tooltip';
 import { OverflowTooltip } from '../overflow-tooltip';
+import { TemplateSidebarCategory } from './types';
 
 type FlowTemplateFilterItemProps = {
   value: string;
@@ -67,14 +67,9 @@ const FlowTemplateFilterHeader = ({
 
 FlowTemplateFilterHeader.displayName = 'FlowTemplateFilterHeader';
 
-type Category = {
-  name: string;
-  services: string[];
-};
-
 type FlowTemplateFilterSidebarProps = {
   domains: string[];
-  categories: Category[];
+  categories: TemplateSidebarCategory[];
   selectedDomains: string[];
   selectedServices: string[];
   selectedCategories?: string[];
@@ -118,7 +113,7 @@ const FlowTemplateFilterSidebar = ({
       <FlowTemplateFilterHeader title={t('Cloud providers')} />
       <ScrollArea className="max-h-[50%] w-full">
         <div className="flex flex-col w-full">
-          {categories.map((category) => (
+          {categories?.map((category) => (
             <Collapsible key={category.name}>
               <CollapsibleTrigger
                 className={cn(

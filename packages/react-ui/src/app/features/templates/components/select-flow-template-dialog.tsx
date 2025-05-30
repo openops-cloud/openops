@@ -95,7 +95,7 @@ const FlowTemplateFilterSidebarWrapper = ({
 }: FlowTemplateFilterSidebarProps) => {
   const useCloudTemplates = flagsHooks.useShouldFetchCloudTemplates();
 
-  const { domains, services, isLoading, status, isError } =
+  const { domains, categories, isLoading, status, isError } =
     templatesHooks.useTemplateFilters({
       enabled: true,
       useCloudTemplates,
@@ -129,7 +129,7 @@ const FlowTemplateFilterSidebarWrapper = ({
   return (
     <FlowTemplateFilterSidebar
       domains={domains}
-      services={services}
+      categories={categories}
       selectedDomains={selectedDomains}
       selectedServices={selectedServices}
       onDomainFilterClick={onDomainFilterClick}

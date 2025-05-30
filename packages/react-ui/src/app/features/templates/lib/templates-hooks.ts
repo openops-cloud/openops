@@ -9,7 +9,10 @@ import {
   templatesApi,
 } from '@/app/features/templates/lib/templates-api';
 import { BlockMetadataModelSummary } from '@openops/blocks-framework';
-import { FlowTemplateMetadataWithIntegrations } from '@openops/components/ui';
+import {
+  FlowTemplateMetadataWithIntegrations,
+  TemplateSidebarCategory,
+} from '@openops/components/ui';
 import { AxiosError } from 'axios';
 import { useMemo } from 'react';
 import { cloudTemplatesApi } from './cloud-templates-api';
@@ -93,7 +96,7 @@ export const templatesHooks = {
     gettingStartedTemplateFilter,
   }: TemplateBaseParams): {
     domains: string[];
-    services: string[];
+    categories: TemplateSidebarCategory[];
     isLoading: boolean;
     status: 'error' | 'success' | 'pending';
     isError: boolean;
@@ -108,7 +111,7 @@ export const templatesHooks = {
       useCloudTemplates,
       gettingStartedTemplateFilter,
     });
-    const [uniqueDomains, uniqueServices] = useMemo(() => {
+    const [uniqueDomains, uniqueCategories] = useMemo(() => {
       const uniqueDomainsSet = new Set<string>();
       const uniqueServicesSet = new Set<string>();
 
@@ -117,15 +120,31 @@ export const templatesHooks = {
         item.services.forEach((service) => uniqueServicesSet.add(service));
       });
 
-      return [
-        Array.from(uniqueDomainsSet).sort(),
-        Array.from(uniqueServicesSet).sort(),
-      ];
+      const uniqueCategories: TemplateSidebarCategory[] = [];
+      templates?.forEach((item) => {
+        item.categories?.forEach((category) => {
+          const existingCategory = uniqueCategories.find(
+            (c) => c.name === category,
+          );
+          if (existingCategory) {
+            existingCategory.services.push(
+              ...Array.from(new Set(item.services)).sort(),
+            );
+          } else {
+            uniqueCategories.push({
+              name: category,
+              services: Array.from(new Set(item.services)).sort(),
+            });
+          }
+        });
+      });
+
+      return [Array.from(uniqueDomainsSet).sort(), uniqueCategories];
     }, [templates]);
 
     return {
       domains: uniqueDomains,
-      services: uniqueServices,
+      categories: uniqueCategories,
       isLoading,
       status,
       isError,
