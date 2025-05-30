@@ -23,11 +23,18 @@ export const getRecordsAction = createAction({
       displayName: 'Filter type',
       required: false,
       options: {
-        options: Object.entries(FilterType).map(([key, value]) => ({
-          label: value,
-          value: key,
-        })),
+        options: [
+          {
+            label: 'Match all filters',
+            value: FilterType.AND,
+          },
+          {
+            label: 'Match any filter',
+            value: FilterType.OR,
+          },
+        ],
       },
+      defaultValue: FilterType.AND,
     }),
     filters: Property.DynamicProperties({
       displayName: '',
