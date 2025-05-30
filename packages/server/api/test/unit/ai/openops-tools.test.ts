@@ -72,7 +72,10 @@ describe('getOpenOpsTools', () => {
 
     const result = await getOpenOpsTools(mockApp, 'test-auth-token');
 
-    expect(result).toEqual(mockTools);
+    expect(result).toEqual({
+      client: mockClient,
+      toolSet: mockTools,
+    });
     expect(createMcpClientMock).toHaveBeenCalledWith({
       transport: expect.objectContaining({
         serverParams: {
@@ -97,7 +100,10 @@ describe('getOpenOpsTools', () => {
 
     const result = await getOpenOpsTools(mockApp, 'mock-auth-token');
 
-    expect(result).toEqual({});
+    expect(result).toEqual({
+      client: undefined,
+      toolSet: {},
+    });
     expect(loggerMock.error).toHaveBeenCalledWith(
       'Failed to create OpenOps MCP client:',
       mockError,

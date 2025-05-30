@@ -9,11 +9,12 @@ import { experimental_createMCPClient, ToolSet } from 'ai';
 import { Experimental_StdioMCPTransport } from 'ai/mcp-stdio';
 import { FastifyInstance } from 'fastify';
 import path from 'path';
+import { MCPTool } from './mcp-tools';
 
 export async function getOpenOpsTools(
   app: FastifyInstance,
   authToken: string,
-): Promise<ToolSet> {
+): Promise<MCPTool> {
   const basePath = system.getOrThrow<string>(
     AppSystemProp.OPENOPS_MCP_SERVER_PATH,
   );
@@ -42,9 +43,15 @@ export async function getOpenOpsTools(
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    return await openopsClient.tools();
+    return {
+      client: openopsClient,
+      toolSet: await openopsClient.tools(),
+    };
   } catch (error) {
     logger.error('Failed to create OpenOps MCP client:', error);
-    return {};
+    return {
+      client: undefined,
+      toolSet: {},
+    };
   }
 }
