@@ -41,11 +41,8 @@ export const useStepSettingsAiChat = (
         stepDetails.settings.actionName,
       );
     },
-    enabled: Boolean(
-      stepDetails?.settings?.blockName &&
-        stepDetails?.settings?.actionName &&
-        selectedStep,
-    ),
+    enabled:
+      !!stepDetails?.settings?.blockName && !!stepDetails?.settings?.actionName,
   });
 
   const {
