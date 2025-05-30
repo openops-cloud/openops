@@ -953,12 +953,16 @@ function isPartOfInnerFlow({
 }
 
 function duplicateStep(
+  newStepId: string,
   stepName: string,
   flowVersionWithArtifacts: FlowVersion,
 ): FlowVersion {
-  const clonedStep = JSON.parse(
-    JSON.stringify(flowHelper.getStep(flowVersionWithArtifacts, stepName)),
-  );
+  const clonedStep = {
+    ...JSON.parse(
+      JSON.stringify(flowHelper.getStep(flowVersionWithArtifacts, stepName)),
+    ),
+    id: newStepId,
+  };
 
   clonedStep.nextAction = undefined;
   if (!clonedStep) {
@@ -993,7 +997,8 @@ function duplicateStepCascading(
   });
 
   const duplicatedStep = transferStep(action, (step: Step) => {
-    step.id = openOpsId();
+    // we already assigned the root step in the duplicateStep function
+    step.id = step.id === action.id ? action.id : openOpsId();
     step.displayName = `${step.displayName} Copy`;
     step.name = oldNameToNewName[step.name];
     clearStepTestData(step);
@@ -1178,6 +1183,7 @@ export const flowHelper = {
         break;
       case FlowOperationType.DUPLICATE_ACTION: {
         clonedVersion = duplicateStep(
+          operation.request.stepId,
           operation.request.stepName,
           clonedVersion,
         );

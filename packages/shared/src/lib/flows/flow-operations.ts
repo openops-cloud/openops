@@ -85,6 +85,7 @@ export type UpdateActionRequest = Static<typeof UpdateActionRequest>;
 
 export const DuplicateStepRequest = Type.Object({
   stepName: Type.String(),
+  stepId: Type.String(),
 });
 
 export type DuplicateStepRequest = Static<typeof DuplicateStepRequest>;
