@@ -1,19 +1,30 @@
 const hashObjectMock = jest.fn();
 const getSerializedObjectMock = jest.fn();
+const setSerializedObjectMock = jest.fn();
 const deleteKeyMock = jest.fn();
+const acquireLockMock = jest.fn();
+const releaseMock = jest.fn();
+
 jest.mock('@openops/server-shared', () => ({
   hashUtils: {
     hashObject: hashObjectMock,
   },
   cacheWrapper: {
     getSerializedObject: getSerializedObjectMock,
+    setSerializedObject: setSerializedObjectMock,
     deleteKey: deleteKeyMock,
+  },
+  distributedLock: {
+    acquireLock: acquireLockMock,
   },
 }));
 
 import { CoreMessage } from 'ai';
 import {
+  appendMessagesToChatHistory,
+  appendMessagesToChatHistoryContext,
   deleteChatHistory,
+  deleteChatHistoryContext,
   generateChatId,
   getChatContext,
   getChatHistory,
@@ -90,6 +101,139 @@ describe('getChatContext', () => {
     const result = await getChatContext(chatId);
 
     expect(result).toEqual(null);
+  });
+});
+
+describe('appendMessagesToChatHistory', () => {
+  const chatId = 'chat-append-test';
+  const existingMessages: CoreMessage[] = [{ role: 'user', content: 'Hello' }];
+  const newMessages: CoreMessage[] = [
+    { role: 'assistant', content: 'Hi there!' },
+  ];
+  const mockLock = { release: releaseMock };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    acquireLockMock.mockResolvedValue(mockLock);
+    getSerializedObjectMock.mockResolvedValue(existingMessages);
+    setSerializedObjectMock.mockResolvedValue(undefined);
+    releaseMock.mockResolvedValue(undefined);
+  });
+
+  it('should append messages to existing history and save', async () => {
+    expect(existingMessages.length).toBe(1);
+
+    await appendMessagesToChatHistory(chatId, newMessages);
+
+    expect(acquireLockMock).toHaveBeenCalledWith({
+      key: `lock:${chatId}:history`,
+      timeout: 30000,
+    });
+    expect(getSerializedObjectMock).toHaveBeenCalledWith(`${chatId}:history`);
+    expect(existingMessages.length).toBe(2);
+    expect(setSerializedObjectMock).toHaveBeenCalledWith(
+      `${chatId}:history`,
+      [...existingMessages],
+      86400,
+    );
+    expect(releaseMock).toHaveBeenCalled();
+  });
+
+  it('should release lock even if an error occurs', async () => {
+    getSerializedObjectMock.mockRejectedValue(new Error('Test error'));
+
+    await expect(
+      appendMessagesToChatHistory(chatId, newMessages),
+    ).rejects.toThrow('Test error');
+
+    expect(releaseMock).toHaveBeenCalled();
+  });
+});
+
+describe('appendMessagesToChatHistoryContext', () => {
+  const chatId = 'chat-context-append-test';
+  const existingMessages: CoreMessage[] = [{ role: 'user', content: 'Hello' }];
+  const newMessages: CoreMessage[] = [
+    { role: 'assistant', content: 'Hi there!' },
+  ];
+  const mockLock = { release: releaseMock };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    acquireLockMock.mockResolvedValue(mockLock);
+    getSerializedObjectMock.mockResolvedValue(existingMessages);
+    setSerializedObjectMock.mockResolvedValue(undefined);
+    releaseMock.mockResolvedValue(undefined);
+  });
+
+  it('should append messages to existing history context and save', async () => {
+    const result = await appendMessagesToChatHistoryContext(
+      chatId,
+      newMessages,
+    );
+
+    expect(acquireLockMock).toHaveBeenCalledWith({
+      key: `lock:${chatId}:context:history`,
+      timeout: 30000,
+    });
+    expect(getSerializedObjectMock).toHaveBeenCalledWith(
+      `${chatId}:context:history`,
+    );
+    expect(setSerializedObjectMock).toHaveBeenCalledWith(
+      `${chatId}:context:history`,
+      [...existingMessages],
+      86400,
+    );
+    expect(releaseMock).toHaveBeenCalled();
+    expect(result).toEqual([...existingMessages]);
+  });
+
+  it('should call summarizeMessages if provided', async () => {
+    const summarizedMessages: CoreMessage[] = [
+      { role: 'system', content: 'Summarized content' },
+    ];
+    const summarizeMessagesMock = jest
+      .fn()
+      .mockResolvedValue(summarizedMessages);
+
+    const result = await appendMessagesToChatHistoryContext(
+      chatId,
+      newMessages,
+      summarizeMessagesMock,
+    );
+
+    expect(summarizeMessagesMock).toHaveBeenCalledWith(existingMessages);
+    expect(setSerializedObjectMock).toHaveBeenCalledWith(
+      `${chatId}:context:history`,
+      [...summarizedMessages],
+      86400,
+    );
+    expect(result).toEqual([...summarizedMessages]);
+  });
+
+  it('should release lock even if an error occurs', async () => {
+    getSerializedObjectMock.mockRejectedValue(new Error('Test error'));
+
+    await expect(
+      appendMessagesToChatHistoryContext(chatId, newMessages),
+    ).rejects.toThrow('Test error');
+
+    expect(releaseMock).toHaveBeenCalled();
+  });
+});
+
+describe('deleteChatHistoryContext', () => {
+  const chatId = 'chat-context-delete-test';
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should call deleteKey for history context', async () => {
+    await deleteChatHistoryContext(chatId);
+
+    expect(deleteKeyMock).toHaveBeenCalledTimes(1);
+    expect(deleteKeyMock).toHaveBeenCalledWith(`${chatId}:context:history`);
   });
 });
 
