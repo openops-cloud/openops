@@ -28,6 +28,7 @@ export const flowTemplateController: FastifyPluginAsyncTypebox = async (
           domains: Type.Optional(Type.Array(Type.String())),
           blocks: Type.Optional(Type.Array(Type.String())),
           version: Type.Optional(Type.String()),
+          categories: Type.Optional(Type.Array(Type.String())),
         }),
       },
     },
@@ -41,6 +42,7 @@ export const flowTemplateController: FastifyPluginAsyncTypebox = async (
         projectId: request.principal.projectId,
         organizationId: request.principal.organization.id,
         version: request.query.version,
+        categories: request.query.categories,
       });
     },
   );
@@ -83,6 +85,11 @@ export const flowTemplateController: FastifyPluginAsyncTypebox = async (
             isGettingStarted: { type: 'boolean' },
             minVersion: { type: 'string' },
             maxVersion: { type: 'string' },
+            categories: {
+              type: 'array',
+              items: { type: 'string' },
+              nullable: false,
+            },
           },
         },
       },
@@ -98,6 +105,7 @@ export const flowTemplateController: FastifyPluginAsyncTypebox = async (
           isGettingStarted: boolean;
           minVersion: string;
           maxVersion: string;
+          categories: string[];
         };
       }>,
       reply,
@@ -114,6 +122,7 @@ export const flowTemplateController: FastifyPluginAsyncTypebox = async (
           organizationId: request.principal.organization.id,
           minVersion: request.body.minVersion,
           maxVersion: request.body.maxVersion,
+          categories: request.body.categories,
         });
 
         await reply.status(200).send({ result });
