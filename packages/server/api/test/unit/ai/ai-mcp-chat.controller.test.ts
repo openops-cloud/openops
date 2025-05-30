@@ -9,10 +9,7 @@ import {
   FastifyReply,
   FastifyRequest,
 } from 'fastify';
-import {
-  getChatContext,
-  getChatHistory,
-} from '../../../src/app/ai/chat/ai-chat.service';
+import { getChatContext } from '../../../src/app/ai/chat/ai-chat.service';
 import { aiMCPChatController } from '../../../src/app/ai/chat/ai-mcp-chat.controller';
 import { getMcpSystemPrompt } from '../../../src/app/ai/chat/prompts.service';
 import { selectRelevantTools } from '../../../src/app/ai/chat/tools.service';
@@ -38,9 +35,13 @@ jest.mock('@openops/server-shared', () => ({
       }
       return 'mock-value';
     }),
+    getNumberOrThrow: jest.fn(() => {
+      return 1;
+    }),
   },
   AppSystemProp: {
     DB_TYPE: 'DB_TYPE',
+    MAX_LLM_CALLS_WITHOUT_INTERACTION: 'MAX_LLM_CALLS_WITHOUT_INTERACTION',
   },
   SharedSystemProp: {
     ENVIRONMENT: 'ENVIRONMENT',
@@ -69,10 +70,16 @@ jest.mock('../../../src/app/ai/mcp/mcp-tools', () => ({
   getMCPTools: jest.fn(),
 }));
 
+const mockMessages = [{ role: 'user', content: 'previous message' }];
 jest.mock('../../../src/app/ai/chat/ai-chat.service', () => ({
   getChatContext: jest.fn(),
   getChatHistory: jest.fn(),
-  saveChatHistory: jest.fn(),
+  appendMessagesToChatHistory: jest.fn(),
+  appendMessagesToChatHistoryContext: jest
+    .fn()
+    .mockImplementation(async (chatId, newMessages, summarizeCallback) => {
+      return [...mockMessages, ...newMessages];
+    }),
   generateChatIdForMCP: jest.fn(),
   createChatContext: jest.fn(),
 }));
@@ -154,7 +161,6 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
 
   describe('POST / (new message endpoint)', () => {
     const mockChatContext = { chatId: 'test-chat-id' };
-    const mockMessages = [{ role: 'user', content: 'previous message' }];
     const mockAiConfig = {
       projectId: 'test-project-id',
       provider: AiProviderEnum.ANTHROPIC,
@@ -183,7 +189,6 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
       handlers = {};
 
       (getChatContext as jest.Mock).mockResolvedValue(mockChatContext);
-      (getChatHistory as jest.Mock).mockResolvedValue([...mockMessages]);
       (
         aiConfigService.getActiveConfigWithApiKey as jest.Mock
       ).mockResolvedValue(mockAiConfig);
@@ -212,6 +217,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
         tools: mockAllTools.tools,
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
+        chatId: 'test-chat-id',
       });
     });
 
