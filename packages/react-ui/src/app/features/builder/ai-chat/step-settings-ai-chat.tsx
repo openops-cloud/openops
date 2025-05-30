@@ -6,6 +6,7 @@ import {
 } from '@openops/components/ui';
 import { FlowVersion } from '@openops/shared';
 import { useCallback } from 'react';
+import { useAiModelSelector } from '../../ai/lib/ai-model-selector-hook';
 import { useBuilderStateContext } from '../builder-hooks';
 import { DataSelectorSizeState } from '../data-selector/data-selector-size-togglers';
 import { useStepSettingsAiChat } from './lib/step-settings-ai-chat-hook';
@@ -44,6 +45,13 @@ const StepSettingsAiChat = ({
     isOpenAiChatPending,
     isEmpty,
   } = useStepSettingsAiChat(flowVersion, selectedStep);
+
+  const {
+    selectedModel,
+    availableModels,
+    onModelSelected,
+    isLoading: isModelSelectorLoading,
+  } = useAiModelSelector();
 
   const onToggleContainerSizeState = useCallback(
     (size: AiCliChatContainerSizeState) => {
@@ -108,6 +116,10 @@ const StepSettingsAiChat = ({
       input={input}
       isEmpty={isEmpty}
       stepName={selectedStep}
+      availableModels={availableModels}
+      selectedModel={selectedModel}
+      onModelSelected={onModelSelected}
+      isModelSelectorLoading={isModelSelectorLoading}
     >
       <StepSettingsAiConversation
         messages={messages}

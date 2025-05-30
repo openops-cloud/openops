@@ -96,6 +96,10 @@ export const Docked: Story = {
     input: '',
     handleInputChange: fn(),
     isEmpty: true,
+    availableModels: ['gpt-3.5-turbo', 'gpt-4', 'claude-2'],
+    selectedModel: 'gpt-4',
+    onModelSelected: fn(),
+    isModelSelectorLoading: false,
   },
 };
 
