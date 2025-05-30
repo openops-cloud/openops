@@ -108,6 +108,7 @@ export const engineRunner: EngineRunner = {
       publicUrl: await networkUtls.getPublicUrl(),
       internalApiUrl: networkUtls.getInternalApiUrl(),
       engineToken,
+      stepTestOutputs: operation.stepTestOutputs,
     };
 
     return callEngineLambda(EngineOperationType.EXECUTE_STEP, input);

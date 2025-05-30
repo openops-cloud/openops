@@ -67,7 +67,6 @@ export const start = async (): Promise<void> => {
     setStopHandlers(app);
 
     await blocksBuilder();
-
     await app.register(engineController);
 
     await app.listen({

@@ -1,15 +1,17 @@
+import { decompressAndDecrypt } from '@openops/server-shared';
 import {
   ActionType,
   BranchStepOutput,
+  decodeStepOutput,
   flowHelper,
   FlowVersion,
   GenericStepOutput,
   LoopStepOutput,
+  OpenOpsId,
   SplitStepOutput,
   StepOutputStatus,
   TriggerType,
 } from '@openops/shared';
-import { variableService } from '../../variables/variable-service';
 import { FlowExecutorContext } from './flow-execution-context';
 
 export const testExecutionContext = {
@@ -19,12 +21,14 @@ export const testExecutionContext = {
     projectId,
     engineToken,
     apiUrl,
+    stepTestOutputs,
   }: {
     flowVersion: FlowVersion;
     excludedStepName?: string;
     projectId: string;
     apiUrl: string;
     engineToken: string;
+    stepTestOutputs?: Record<OpenOpsId, string>;
   }): Promise<FlowExecutorContext> {
     const flowSteps = flowHelper.getAllSteps(flowVersion.trigger);
     let flowExecutionContext = FlowExecutorContext.empty();
@@ -37,6 +41,12 @@ export const testExecutionContext = {
       if (name === excludedStepName) {
         continue;
       }
+
+      const currentOutput = await getStepOutput(
+        step.id,
+        inputUiInfo,
+        stepTestOutputs,
+      );
 
       const stepType = step.type;
       switch (stepType) {
@@ -63,7 +73,7 @@ export const testExecutionContext = {
             LoopStepOutput.init({
               input: step.settings,
             }).setOutput({
-              item: inputUiInfo?.currentSelectedData?.item,
+              item: currentOutput?.item,
               index: 1,
               iterations: [],
             }),
@@ -80,7 +90,7 @@ export const testExecutionContext = {
               input: step.settings,
               type: stepType,
               status: StepOutputStatus.SUCCEEDED,
-              output: inputUiInfo?.currentSelectedData,
+              output: currentOutput,
             }),
           );
           break;
@@ -89,3 +99,17 @@ export const testExecutionContext = {
     return flowExecutionContext;
   },
 };
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+async function getStepOutput(
+  stepId?: string,
+  inputUiInfo?: any,
+  stepTestOutputs?: Record<OpenOpsId, string>,
+): Promise<any> {
+  if (stepId && stepTestOutputs?.[stepId]) {
+    const decodedTestOutput = decodeStepOutput(stepTestOutputs?.[stepId]);
+    return decompressAndDecrypt(decodedTestOutput);
+  }
+
+  return inputUiInfo?.currentSelectedData;
+}

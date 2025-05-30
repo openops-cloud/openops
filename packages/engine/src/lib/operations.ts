@@ -87,6 +87,7 @@ async function executeStep(
       excludedStepName: step.name,
       projectId: input.projectId,
       engineToken: input.engineToken,
+      stepTestOutputs: input.stepTestOutputs,
     }),
     constants: EngineConstants.fromExecuteStepInput(input),
   });
@@ -196,6 +197,7 @@ export async function execute(
             flowVersion: input.flowVersion,
             projectId: input.projectId,
             engineToken: input.engineToken,
+            stepTestOutputs: input.stepTestOutputs,
           }),
           searchValue: input.searchValue,
           constants: EngineConstants.fromExecutePropertyInput(input),

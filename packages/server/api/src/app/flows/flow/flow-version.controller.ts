@@ -134,10 +134,12 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
       const { stepIds } = request.query;
       const { flowVersionId } = request.params;
 
-      const flowStepTestOutputs = await flowStepTestOutputService.list({
-        stepIds,
-        flowVersionId,
-      });
+      const flowStepTestOutputs = await flowStepTestOutputService.listDecrypted(
+        {
+          stepIds,
+          flowVersionId,
+        },
+      );
       return Object.fromEntries(
         flowStepTestOutputs.map((flowStepTestOutput) => [
           flowStepTestOutput.stepId as OpenOpsId,
