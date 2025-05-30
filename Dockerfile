@@ -11,7 +11,7 @@ RUN <<-```
     set -ex
     apk add --no-cache openssh-client python3 g++ git musl libcap-dev nginx gettext wget py3-setuptools make bash findutils
     yarn config set python /usr/bin/python3
-    npm install -g node-gyp npm@9.3.1 cross-env@7.0.3 mint-mcp
+    npm install -g node-gyp npm@9.3.1 cross-env@7.0.3 pnpm@10.0.0 mint-mcp
     npx -y mint-mcp add docs.openops.com && test -e /root/.mcp/docs.openops.com
 ```
 
@@ -27,11 +27,11 @@ RUN <<-```
 # Set up backend
 WORKDIR /usr/src/app
 
-# Even though we build the project outside of the container, we prefer to run npm ci here instead of including
+# Even though we build the project outside of the container, we prefer to run pnpm install here instead of including
 # the node_modules directory in the build context. Including it in the build context means that we will always
 # waste time on copying these 2.2GB even if no packages were changed.
-COPY --link package.json package-lock.json .npmrc ./
-RUN npm ci --no-audit --no-fund
+COPY --link package.json pnpm-lock.yaml .npmrc ./
+RUN pnpm install --no-frozen-lockfile --no-fund
 COPY --link dist dist
 
 COPY tools/link-packages-to-root.sh tools/link-packages-to-root.sh
