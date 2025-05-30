@@ -1,12 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { CloudLoggedInBrief } from '../../components/cloud-connection/cloud-logged-in-brief';
 import { cn } from '../../lib/cn';
+
 const meta = {
   title: 'ui/CloudConnection/CloudLoggedInBrief',
   component: CloudLoggedInBrief,
   parameters: {
     layout: 'centered',
   },
+
   decorators: [
     (Story) => (
       <div
@@ -34,8 +36,8 @@ export const Default: Story = {
       <div className={cn('h-[60px]')}>
         <img
           className="h-full"
-          src="https://static.openops.com/logos/logo.positive.svg"
           alt="logo"
+          src="https://static.openops.com/logos/logo.positive.svg"
         />
       </div>
     ),
