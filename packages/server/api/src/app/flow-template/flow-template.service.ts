@@ -39,7 +39,7 @@ type createFlowTemplateParams = {
   isGettingStarted?: boolean;
   minVersion?: string;
   maxVersion?: string;
-  categories?: string[];
+  categories: string[];
 };
 
 export const flowTemplateService = {
@@ -183,7 +183,7 @@ export const flowTemplateService = {
       isGettingStarted: requestOptions.isGettingStarted,
       minSupportedVersion: requestOptions.minVersion,
       maxSupportedVersion: requestOptions.maxVersion,
-      categories: requestOptions.categories ?? [],
+      categories: requestOptions.categories,
     });
   },
 };

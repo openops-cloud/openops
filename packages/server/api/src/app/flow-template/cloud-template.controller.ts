@@ -96,6 +96,7 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
         organizationId: request.principal.organization.id,
         cloudTemplates: true,
         version: request.query.version,
+        categories: request.query.categories,
       });
     },
   );
