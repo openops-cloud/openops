@@ -1,4 +1,8 @@
-import { logger, networkUtls } from '@openops/server-shared';
+import {
+  encryptionKeyInitializer,
+  logger,
+  networkUtls,
+} from '@openops/server-shared';
 import { EngineOperationType, EngineResponse } from '@openops/shared';
 import { execute } from './lib/operations';
 
@@ -8,6 +12,8 @@ export async function executeEngine(
   operationType: EngineOperationType,
 ): Promise<EngineResponse<unknown>> {
   const startTime = performance.now();
+
+  await encryptionKeyInitializer();
 
   // TODO: Remove this from the server side
   engineInput.publicUrl = await networkUtls.getPublicUrl();
