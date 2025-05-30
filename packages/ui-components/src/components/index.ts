@@ -5,6 +5,7 @@ export * from './builder-sidebar/sidebar-header';
 export * from './builder-tree-view';
 export * from './builder-tree-view/types';
 export * from './builder-undo-redo/UndoRedo';
+export * from './cloud-connection/cloud-logged-in-brief';
 export * from './confirmation-dialog/confirmation-dialog';
 export * from './custom';
 export * from './dashboard-overview';
