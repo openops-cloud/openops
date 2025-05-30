@@ -8,6 +8,7 @@ export const QueryKeys = {
   openAiAssistantChat: 'open-assistant-chat',
   aiSettings: 'ai-settings',
   aiSettingsProviders: 'ai-settings-providers',
+  aiProviderModels: 'ai-provider-models',
 
   // Platform
   organization: 'organization',
