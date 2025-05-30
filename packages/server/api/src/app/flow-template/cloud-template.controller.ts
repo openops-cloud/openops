@@ -64,6 +64,7 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
           domains: Type.Optional(Type.Array(Type.String())),
           blocks: Type.Optional(Type.Array(Type.String())),
           version: Type.Optional(Type.String()),
+          categories: Type.Optional(Type.Array(Type.String())),
         }),
       },
     },

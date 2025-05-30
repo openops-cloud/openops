@@ -1,4 +1,5 @@
-import { createBlock } from '@openops/blocks-framework';
+import { createCustomApiCallAction } from '@openops/blocks-common';
+import { createBlock, OAuth2PropertyValue } from '@openops/blocks-framework';
 import { BlockCategory } from '@openops/shared';
 import { createPullRequestAction } from './lib/actions/create-pull-request-action';
 import { getFileAction } from './lib/actions/get-file-action';
@@ -11,7 +12,18 @@ export const github = createBlock({
   minimumSupportedRelease: '0.20.0',
   logoUrl: 'https://static.openops.com/blocks/github.png',
   authors: [],
-  actions: [getFileAction, createPullRequestAction, runWorkflowAction],
+  actions: [
+    getFileAction,
+    createPullRequestAction,
+    runWorkflowAction,
+    createCustomApiCallAction({
+      baseUrl: () => 'https://api.github.com',
+      auth: auth,
+      authMapping: async (auth) => ({
+        Authorization: `Bearer ${(auth as OAuth2PropertyValue).access_token}`,
+      }),
+    }),
+  ],
   categories: [BlockCategory.DEVOPS],
   triggers: [],
 });
