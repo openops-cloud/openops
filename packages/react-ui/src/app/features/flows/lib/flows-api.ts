@@ -158,7 +158,7 @@ export const flowsApi = {
       .get<Record<string, StepOutputWithData>>(
         `/v1/flow-versions/${flowVersionId}/test-output?stepIds=${stepId}`,
       )
-      .then((response) => response[stepId] || {});
+      .then((response) => response[stepId] ?? {});
   },
   getStepTestOutputBulk(flowVersionId: string, stepIds: string[]) {
     const params = qs.stringify({ stepIds }, { arrayFormat: 'repeat' });
