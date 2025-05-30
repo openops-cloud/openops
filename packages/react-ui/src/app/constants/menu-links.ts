@@ -32,6 +32,5 @@ export const MENU_LINKS: MenuLink[] = [
     to: '/analytics',
     label: t('Analytics'),
     icon: LucideBarChart2,
-    isComingSoon: true,
   },
 ];

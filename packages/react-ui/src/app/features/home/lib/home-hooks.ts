@@ -10,7 +10,6 @@ import { useQuery } from '@tanstack/react-query';
 
 import { flowRunsApi } from '@/app/features/flow-runs/lib/flow-runs-api';
 import { flowsApi } from '@/app/features/flows/lib/flows-api';
-import { authenticationSession } from '@/app/lib/authentication-session';
 import { homeApi } from './home-api';
 
 export const useDashboardData = () => {
@@ -78,7 +77,6 @@ export const useWorkflowsOverview = (
 
 const fetchRuns = async () => {
   return flowRunsApi.list({
-    projectId: authenticationSession.getProjectId()!,
     limit: 10,
   });
 };
@@ -88,7 +86,6 @@ const fetchFlows = async (
   showPublihedFlowsWithDrafts?: boolean,
 ) => {
   return flowsApi.list({
-    projectId: authenticationSession.getProjectId()!,
     limit: limit,
     cursor: undefined,
   });

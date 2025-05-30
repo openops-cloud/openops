@@ -10,7 +10,6 @@ import { flowsApi } from './flows-api';
 import { userSettingsHooks } from '@/app/common/hooks/user-settings-hooks';
 import { QueryKeys } from '@/app/constants/query-keys';
 import { SEARCH_PARAMS } from '@/app/constants/search-params';
-import { authenticationSession } from '@/app/lib/authentication-session';
 
 export type FlowsSearchState = {
   searchTerm: string;
@@ -21,7 +20,6 @@ export type FlowsSearchState = {
 async function fetchFlows(name: string, limit: number, signal: AbortSignal) {
   return flowsApi.list(
     {
-      projectId: authenticationSession.getProjectId()!,
       limit: limit,
       name: name,
       cursor: undefined,
@@ -33,14 +31,11 @@ async function fetchFlows(name: string, limit: number, signal: AbortSignal) {
 }
 
 export const flowsHooks = {
-  useFlows: (request: Omit<ListFlowsRequest, 'projectId'>) => {
+  useFlows: (request: ListFlowsRequest) => {
     return useQuery({
-      queryKey: [QueryKeys.flows, authenticationSession.getProjectId()],
+      queryKey: [QueryKeys.flows, JSON.stringify(request)],
       queryFn: async () => {
-        return await flowsApi.list({
-          ...request,
-          projectId: authenticationSession.getProjectId()!,
-        });
+        return await flowsApi.list(request);
       },
       staleTime: 5 * 1000,
     });
@@ -81,7 +76,6 @@ export const flowsHooks = {
     >({
       mutationFn: async (folderId: string | undefined) => {
         const flow = await flowsApi.create({
-          projectId: authenticationSession.getProjectId()!,
           displayName: t('Untitled'),
           folderId: folderId,
         });

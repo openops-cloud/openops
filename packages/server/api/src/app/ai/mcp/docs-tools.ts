@@ -1,16 +1,16 @@
 import { AppSystemProp, logger, system } from '@openops/server-shared';
-import {
-  experimental_createMCPClient as createMCPClient,
-  tool,
-  ToolSet,
-} from 'ai';
+import { experimental_createMCPClient as createMCPClient, tool } from 'ai';
 import { Experimental_StdioMCPTransport as StdioMCPTransport } from 'ai/mcp-stdio';
 import { z } from 'zod';
+import { MCPTool } from './mcp-tools';
 
-export async function getDocsTools(): Promise<ToolSet> {
+export async function getDocsTools(): Promise<MCPTool> {
   const mcpServerPath = system.get<string>(AppSystemProp.DOCS_MCP_SERVER_PATH);
   if (!mcpServerPath) {
-    return Promise.resolve({});
+    return {
+      client: undefined,
+      toolSet: {},
+    };
   }
 
   logger.debug('Creating MCP client for docs', {
@@ -58,5 +58,8 @@ export async function getDocsTools(): Promise<ToolSet> {
     }),
   };
 
-  return toolSet;
+  return {
+    client,
+    toolSet,
+  };
 }
