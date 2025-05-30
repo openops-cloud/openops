@@ -82,11 +82,11 @@ export function createCustomApiCallAction({
         displayName: 'Headers',
         description:
           'Authorization headers are injected automatically from your connection.',
-        required: true,
+        required: false,
       }),
       queryParams: Property.Object({
         displayName: 'Query Parameters',
-        required: true,
+        required: false,
       }),
       body: Property.Json({
         displayName: 'Body',
