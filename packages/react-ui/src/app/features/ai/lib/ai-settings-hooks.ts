@@ -41,13 +41,10 @@ export const aiSettingsHooks = {
       retry: false,
     });
   },
-  useProviderModels: (providerName: string | null) => {
+  useProviderModels: (providerName: string) => {
     return useQuery<GetProvidersResponse, Error>({
       queryKey: [QueryKeys.aiProviderModels, providerName],
-      queryFn: () =>
-        providerName
-          ? aiSettingsApi.getProviderModels(providerName)
-          : Promise.reject('No provider selected'),
+      queryFn: () => aiSettingsApi.getProviderModels(providerName),
       enabled: !!providerName,
       staleTime: Infinity,
     });

@@ -43,11 +43,17 @@ const AiModelSelector = ({
     [onModelSelected, selectedModel],
   );
 
+  const onOpenChange = useCallback(() => {
+    if (hasOptions && !isModelSelectorLoading) {
+      setOpen((open) => !open);
+    }
+  }, [hasOptions, isModelSelectorLoading]);
+
   return (
     <div className={cn('relative', className)}>
       <Popover
         open={open && hasOptions && !isModelSelectorLoading}
-        onOpenChange={setOpen}
+        onOpenChange={onOpenChange}
       >
         <PopoverTrigger asChild disabled={!hasOptions}>
           <div
@@ -55,11 +61,6 @@ const AiModelSelector = ({
               'inline-flex items-center gap-1 cursor-pointer',
               !hasOptions && 'cursor-default',
             )}
-            onClick={() => {
-              if (hasOptions && !isModelSelectorLoading) {
-                setOpen(!open);
-              }
-            }}
           >
             <Badge
               variant="secondary"
