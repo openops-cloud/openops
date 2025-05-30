@@ -6,7 +6,7 @@ import {
 } from '@openops/components/ui';
 import { FlowVersion } from '@openops/shared';
 import { useCallback } from 'react';
-import { useAiModelSelector } from '@/app/features/ai/lib/ai-model-selector-hook';
+import { useAiModelSelector } from '../../ai/lib/ai-model-selector-hook';
 import { useBuilderStateContext } from '../builder-hooks';
 import { DataSelectorSizeState } from '../data-selector/data-selector-size-togglers';
 import { useStepSettingsAiChat } from './lib/step-settings-ai-chat-hook';

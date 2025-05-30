@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { aiSettingsHooks } from './ai-settings-hooks';
 
 export const useAiModelSelector = () => {
