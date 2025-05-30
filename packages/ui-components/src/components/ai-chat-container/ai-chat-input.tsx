@@ -31,7 +31,7 @@ export const AiChatInput = ({
           viewPortClassName={'max-h-[103px]'}
         >
           <TextareaAutosize
-            className="w-full h-full min-h-6  resize-none dark:text-primary-700 text-base font-normal leading-normal outline-none dark:bg-accent"
+            className="w-full h-full min-h-6 resize-none dark:text-primary-700 text-base font-normal leading-normal outline-none dark:bg-transparent"
             placeholder={placeholder}
             value={input}
             onChange={handleInputChange}
