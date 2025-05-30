@@ -13,11 +13,13 @@ import {
 } from '../../ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '../../ui/popover';
 import { ScrollArea } from '../../ui/scroll-area';
+import { LoadingSpinner } from '../../ui/spinner';
 
 type AiModelSelectorProps = {
   selectedModel: string;
   availableModels: string[];
   onModelSelected: (modelName: string) => void;
+  isModelSelectorLoading: boolean;
   className?: string;
 };
 
@@ -25,22 +27,28 @@ const AiModelSelector = ({
   selectedModel,
   availableModels,
   onModelSelected,
+  isModelSelectorLoading,
   className,
 }: AiModelSelectorProps) => {
   const [open, setOpen] = useState(false);
   const hasOptions = availableModels.length > 1;
 
   const handleSelect = useCallback(
-    (value: string) => {
-      onModelSelected(value);
-      setOpen(false);
+    (model: string) => {
+      if (selectedModel !== model) {
+        onModelSelected(model);
+        setOpen(false);
+      }
     },
-    [onModelSelected],
+    [onModelSelected, selectedModel],
   );
 
   return (
     <div className={cn('relative', className)}>
-      <Popover open={open && hasOptions} onOpenChange={setOpen}>
+      <Popover
+        open={open && hasOptions && !isModelSelectorLoading}
+        onOpenChange={setOpen}
+      >
         <PopoverTrigger asChild disabled={!hasOptions}>
           <div
             className={cn(
@@ -48,7 +56,7 @@ const AiModelSelector = ({
               !hasOptions && 'cursor-default',
             )}
             onClick={() => {
-              if (hasOptions) {
+              if (hasOptions && !isModelSelectorLoading) {
                 setOpen(!open);
               }
             }}
@@ -61,6 +69,7 @@ const AiModelSelector = ({
               {hasOptions && (
                 <ChevronDown className="h-3 w-3 shrink-0 opacity-50" />
               )}
+              {isModelSelectorLoading && <LoadingSpinner size={16} />}
             </Badge>
           </div>
         </PopoverTrigger>
@@ -82,8 +91,9 @@ const AiModelSelector = ({
                         onSelect={() => handleSelect(model)}
                       >
                         <Check
+                          size={16}
                           className={cn(
-                            'mr-2 h-4 w-4',
+                            'mr-2',
                             selectedModel === model
                               ? 'opacity-100'
                               : 'opacity-0',
