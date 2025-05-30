@@ -1,5 +1,6 @@
 import { useQueries, useQuery } from '@tanstack/react-query';
 
+import { QueryKeys } from '@/app/constants/query-keys';
 import {
   ActionBase,
   BlockMetadataModel,
@@ -56,7 +57,7 @@ type UseMetadataProps = {
 export const blocksHooks = {
   useBlock: ({ name, version, enabled = true }: UseBlockProps) => {
     const query = useQuery<BlockMetadataModel, Error>({
-      queryKey: ['block', name, version],
+      queryKey: [QueryKeys.block, name, version],
       queryFn: () => blocksApi.get({ name, version }),
       staleTime: Infinity,
       enabled,
@@ -71,7 +72,7 @@ export const blocksHooks = {
   useMultipleBlocks: ({ names }: UseMultipleBlocksProps) => {
     return useQueries({
       queries: names.map((name) => ({
-        queryKey: ['block', name, undefined],
+        queryKey: [QueryKeys.block, name, undefined],
         queryFn: () => blocksApi.get({ name, version: undefined }),
         staleTime: Infinity,
       })),
@@ -81,7 +82,7 @@ export const blocksHooks = {
     const blockName = step?.settings?.blockName;
     const blockVersion = step?.settings?.blockVersion;
     const query = useQuery<StepMetadata, Error>({
-      queryKey: ['block', step?.type, blockName, blockVersion],
+      queryKey: [QueryKeys.block, step?.type, blockName, blockVersion],
       queryFn: () => blocksApi.getMetadata(step!),
       staleTime: Infinity,
       enabled: enabled && !isNil(step),
@@ -154,7 +155,7 @@ export const blocksHooks = {
   },
   useBlocks: ({ searchQuery }: UseBlocksProps) => {
     const query = useQuery<BlockMetadataModelSummary[], Error>({
-      queryKey: ['blocks', searchQuery],
+      queryKey: [QueryKeys.blocks, searchQuery],
       queryFn: () => blocksApi.list({ searchQuery }),
       staleTime: searchQuery ? 0 : Infinity,
     });
@@ -165,7 +166,7 @@ export const blocksHooks = {
   },
   useAllStepsMetadata: ({ searchQuery, type, enabled }: UseMetadataProps) => {
     const query = useQuery<StepMetadataWithSuggestions[], Error>({
-      queryKey: ['blocks-metadata', searchQuery, type],
+      queryKey: [QueryKeys.blocksMetadata, searchQuery, type],
       queryFn: async () => {
         const blocks = await blocksApi.list({
           searchQuery,
@@ -217,7 +218,7 @@ function stepMetadataQueryBuilder(step: Step) {
   const blockName = isBlockStep ? step.settings.blockName : undefined;
   const blockVersion = isBlockStep ? step.settings.blockVersion : undefined;
   return {
-    queryKey: ['block', step.type, blockName, blockVersion],
+    queryKey: [QueryKeys.block, step.type, blockName, blockVersion],
     queryFn: () => blocksApi.getMetadata(step),
     staleTime: Infinity,
   };

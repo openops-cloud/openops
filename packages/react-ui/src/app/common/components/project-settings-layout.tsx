@@ -1,6 +1,6 @@
 import { FlagId } from '@openops/shared';
 import { t } from 'i18next';
-import { Puzzle, Settings, Sparkles, SunMoon } from 'lucide-react';
+import { Settings, Sparkles, SunMoon } from 'lucide-react';
 
 import SidebarLayout from '@/app/common/components/sidebar-layout';
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
@@ -12,11 +12,6 @@ const baseNavItems = [
     title: t('General'),
     href: '/settings/general',
     icon: <Settings size={iconSize} />,
-  },
-  {
-    title: t('Blocks'),
-    href: '/settings/blocks',
-    icon: <Puzzle size={iconSize} />,
   },
 ];
 
@@ -46,7 +41,7 @@ export default function ProjectSettingsLayout({
   const sidebarNavItems = [
     ...baseNavItems,
     ...(showAppearanceSettings ? [appearanceNavItem] : []),
-    ...[aiNavItem],
+    aiNavItem,
   ];
 
   return <SidebarLayout items={sidebarNavItems}>{children}</SidebarLayout>;

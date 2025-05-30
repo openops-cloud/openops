@@ -1,9 +1,10 @@
 import { UseChatHelpers } from '@ai-sdk/react';
 import { t } from 'i18next';
 import { Bot, Send as SendIcon } from 'lucide-react';
-import { ReactNode, useRef } from 'react';
+import { ReactNode, useEffect, useRef } from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
 import { cn } from '../../lib/cn';
+import { AI_CHAT_SCROLL_DELAY } from '../../lib/constants';
 import { Button } from '../../ui/button';
 import { ScrollArea } from '../../ui/scroll-area';
 import { BoxSize, ResizableArea } from '../resizable-area';
@@ -45,6 +46,27 @@ const AiAssistantChatContainer = ({
   input,
 }: AiAssistantChatContainerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const scrollViewportRef = useRef<HTMLDivElement>(null);
+  const hasScrolledOnce = useRef<boolean>(false);
+
+  useEffect(() => {
+    setTimeout(() => {
+      if (
+        scrollViewportRef.current &&
+        !isEmpty &&
+        showAiChat &&
+        !hasScrolledOnce.current &&
+        !!children
+      ) {
+        scrollViewportRef.current.scrollTo({
+          top: scrollViewportRef.current.scrollHeight,
+          behavior: 'smooth',
+        });
+
+        hasScrolledOnce.current = true;
+      }
+    }, AI_CHAT_SCROLL_DELAY);
+  }, [isEmpty, showAiChat, children]);
 
   return (
     <div
@@ -99,7 +121,10 @@ const AiAssistantChatContainer = ({
           </div>
           <div className="overflow-hidden flex-1">
             <div className="py-4 flex flex-col h-full">
-              <ScrollArea className="h-full w-full">
+              <ScrollArea
+                className="h-full w-full"
+                viewPortRef={scrollViewportRef}
+              >
                 <div className="h-full w-full px-6 flex flex-col">
                   {isEmpty ? (
                     <div

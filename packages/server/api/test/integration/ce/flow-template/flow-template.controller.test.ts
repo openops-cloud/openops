@@ -72,6 +72,7 @@ describe('Flow templates API', () => {
       blocks: ['test-block'],
       updated: new Date().toISOString(),
       created: new Date().toISOString(),
+      categories: ['test-category'],
     };
     await databaseConnection()
       .getRepository('flow_template')

@@ -1,7 +1,7 @@
 services:
   tables:
     container_name: tables
-    image: public.ecr.aws/openops/openops-tables:0.2.1
+    image: public.ecr.aws/openops/openops-tables:0.2.2
     environment:
       BASEROW_PUBLIC_URL: ${OPS_OPENOPS_TABLES_PUBLIC_URL}
       BASEROW_PRIVATE_URL: http://localhost:3001
@@ -72,7 +72,7 @@ services:
       - 'redis_data:/data'
   analytics:
     container_name: analytics
-    image: public.ecr.aws/openops/openops-analytics:0.14.0
+    image: public.ecr.aws/openops/openops-analytics:0.14.1
     ports: ['8088:8088']
     environment:
       DATABASE_DIALECT: 'postgresql'

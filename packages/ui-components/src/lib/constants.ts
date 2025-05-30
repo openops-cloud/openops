@@ -35,3 +35,5 @@ export const PRIMITIVE_STEP_METADATA = {
 };
 
 export const COPY_PASTE_TOAST_DURATION = 2000;
+
+export const AI_CHAT_SCROLL_DELAY = 200;

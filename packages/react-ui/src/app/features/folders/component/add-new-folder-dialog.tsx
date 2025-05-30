@@ -23,7 +23,6 @@ import { useEffect, useState } from 'react';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
 
 import { api } from '@/app/lib/api';
-import { authenticationSession } from '@/app/lib/authentication-session';
 import { FolderDto } from '@openops/shared';
 
 import { useRefetchFolderTree } from '@/app/features/folders/hooks/refetch-folder-tree';
@@ -57,7 +56,6 @@ const AddNewFolderDialog = ({ updateSearchParams }: Props) => {
     mutationFn: async (data) => {
       return await foldersApi.create({
         displayName: data.displayName,
-        projectId: authenticationSession.getProjectId()!,
       });
     },
     onSuccess: (folder) => {

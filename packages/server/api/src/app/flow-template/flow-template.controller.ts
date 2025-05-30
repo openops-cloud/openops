@@ -27,6 +27,7 @@ export const flowTemplateController: FastifyPluginAsyncTypebox = async (
           services: Type.Optional(Type.Array(Type.String())),
           domains: Type.Optional(Type.Array(Type.String())),
           blocks: Type.Optional(Type.Array(Type.String())),
+          version: Type.Optional(Type.String()),
         }),
       },
     },
@@ -39,6 +40,7 @@ export const flowTemplateController: FastifyPluginAsyncTypebox = async (
         blocks: request.query.blocks,
         projectId: request.principal.projectId,
         organizationId: request.principal.organization.id,
+        version: request.query.version,
       });
     },
   );

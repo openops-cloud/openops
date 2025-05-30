@@ -1,4 +1,3 @@
-import { typeboxResolver } from '@hookform/resolvers/typebox';
 import {
   Button,
   Card,
@@ -6,116 +5,70 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  Form,
-  FormField,
-  FormItem,
-  FormMessage,
-  Input,
-  INTERNAL_ERROR_TOAST,
-  Label,
-  useToast,
+  LoadingSpinner,
+  TooltipProvider,
+  TooltipWrapper,
 } from '@openops/components/ui';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { t } from 'i18next';
-import { useForm } from 'react-hook-form';
 
-import { useAuthorization } from '@/app/common/hooks/authorization-hooks';
-import { projectHooks } from '@/app/common/hooks/project-hooks';
-import { authenticationSession } from '@/app/lib/authentication-session';
-import { projectApi } from '@/app/lib/project-api';
-import { Project, ProjectMemberRole } from '@openops/shared';
+import { platformHooks } from '@/app/common/hooks/platform-hooks';
+import { t } from 'i18next';
+import { Link } from 'react-router-dom';
 
 export default function GeneralPage() {
-  const queryClient = useQueryClient();
-  const { project, updateProject } = projectHooks.useCurrentProject();
-  const { role } = useAuthorization();
-  const { toast } = useToast();
-
-  const form = useForm({
-    defaultValues: {
-      displayName: project?.displayName,
-    },
-    disabled: role !== ProjectMemberRole.ADMIN,
-    resolver: typeboxResolver(Project),
-  });
-
-  const mutation = useMutation<
-    Project,
-    Error,
-    {
-      displayName: string;
-    }
-  >({
-    mutationFn: (request) => {
-      updateProject(queryClient, request);
-      return projectApi.update(authenticationSession.getProjectId()!, request);
-    },
-    onSuccess: () => {
-      toast({
-        title: t('Success'),
-        description: t('Your changes have been saved.'),
-        duration: 3000,
-      });
-    },
-    onError: (error) => {
-      toast(INTERNAL_ERROR_TOAST);
-      console.error(error);
-    },
-  });
+  const {
+    queryResult: { data, isLoading, error },
+    hasNewerVersionAvailable,
+  } = platformHooks.useNewerAvailableVersion();
 
   return (
     <Card className="w-full">
       <CardHeader className="pb-3">
         <CardTitle>{t('General')}</CardTitle>
-        <CardDescription>
-          {t('Manage general settings for your project.')}
-        </CardDescription>
-        {role !== ProjectMemberRole.ADMIN && (
-          <p>
-            <span className="text-destructive">*</span>{' '}
-            {t('Only project admins can change this setting.')}
-          </p>
-        )}
+        <CardDescription>{t('Information about this version')}</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-1 mt-4">
-        <Form {...form}>
-          <form className="grid space-y-4" onSubmit={(e) => e.preventDefault()}>
-            <FormField
-              name="displayName"
-              render={({ field }) => (
-                <FormItem className="grid space-y-2">
-                  <Label htmlFor="displayName">{t('Project Name')}</Label>
-                  <Input
-                    {...field}
-                    required
-                    id="displayName"
-                    placeholder={t('Project Name')}
-                    className="rounded-sm"
-                  />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {form?.formState?.errors?.root?.serverError && (
-              <FormMessage>
-                {form.formState.errors.root.serverError.message}
-              </FormMessage>
+        <div className="flex justify-between items-center">
+          <div className="flex flex-col gap-2">
+            <span className="text-primary-300 text-base font-medium">
+              {t('Running version')}
+            </span>
+            {isLoading && <LoadingSpinner className="w-4 h-4" />}
+            {error && <span>{t('Error loading version')}</span>}
+            {data && (
+              <div className="flex items-center gap-2">
+                <span className="text-base font-bold">
+                  {data.currentVersion}
+                </span>
+                {hasNewerVersionAvailable && (
+                  <div className="text-primary-800 text-sm leading-tight bg-muted rounded-xs px-2 py-[3px]">
+                    {t('Newer version is available')}
+                  </div>
+                )}
+              </div>
             )}
-          </form>
-        </Form>
-        {role === ProjectMemberRole.ADMIN && (
-          <div className="flex gap-2 justify-end mt-4">
-            <Button
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                mutation.mutate(form.getValues());
-              }}
-            >
-              {t('Save')}
-            </Button>
           </div>
-        )}
+
+          <TooltipProvider>
+            <TooltipWrapper
+              tooltipText={
+                !hasNewerVersionAvailable
+                  ? t('You are on the latest version')
+                  : null
+              }
+            >
+              <Link
+                to="https://docs.openops.com/getting-started/updating-openops"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="self-end"
+              >
+                <Button disabled={!hasNewerVersionAvailable}>
+                  {t('Learn how to update')}
+                </Button>
+              </Link>
+            </TooltipWrapper>
+          </TooltipProvider>
+        </div>
       </CardContent>
     </Card>
   );

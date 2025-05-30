@@ -1,3 +1,4 @@
+import { QueryKeys } from '@/app/constants/query-keys';
 import {
   DashboardOverview,
   FlowRun,
@@ -9,7 +10,6 @@ import { useQuery } from '@tanstack/react-query';
 
 import { flowRunsApi } from '@/app/features/flow-runs/lib/flow-runs-api';
 import { flowsApi } from '@/app/features/flows/lib/flows-api';
-import { authenticationSession } from '@/app/lib/authentication-session';
 import { homeApi } from './home-api';
 
 export const useDashboardData = () => {
@@ -17,7 +17,7 @@ export const useDashboardData = () => {
     SeekPage<FlowRun>,
     Error
   >({
-    queryKey: ['home-runs'],
+    queryKey: [QueryKeys.homeRuns],
     queryFn: fetchRuns,
   });
 
@@ -26,13 +26,13 @@ export const useDashboardData = () => {
     isLoading: isLoadingFlows,
     refetch: refetchFlows,
   } = useQuery<SeekPage<PopulatedFlow>, Error>({
-    queryKey: ['home-flows-recent'],
+    queryKey: [QueryKeys.homeFlowsRecent],
     queryFn: () => fetchFlows(10),
   });
 
   const { data: existingFlowsResponse, isLoading: isLoadingExistingFlows } =
     useQuery<SeekPage<PopulatedFlow>, Error>({
-      queryKey: ['home-flows', flowsResponse],
+      queryKey: [QueryKeys.homeFlows, flowsResponse],
       enabled: !!flowsResponse,
       queryFn: () => fetchFlows(1),
     });
@@ -52,7 +52,7 @@ export const useAnalyticsOverview = () => {
     DashboardOverview,
     Error
   >({
-    queryKey: ['home-analytics-overview'],
+    queryKey: [QueryKeys.homeAnalyticsOverview],
     queryFn: homeApi.getAnalyticsOverview,
   });
 
@@ -67,7 +67,7 @@ export const useWorkflowsOverview = (
     WorkflowStats,
     Error
   >({
-    queryKey: ['home-workflows-overview'],
+    queryKey: [QueryKeys.homeWorkflowsOverview],
     queryFn: () =>
       homeApi.getWorkflowsdOverview({ createdAfter, createdBefore }),
   });
@@ -77,7 +77,6 @@ export const useWorkflowsOverview = (
 
 const fetchRuns = async () => {
   return flowRunsApi.list({
-    projectId: authenticationSession.getProjectId()!,
     limit: 10,
   });
 };
@@ -87,7 +86,6 @@ const fetchFlows = async (
   showPublihedFlowsWithDrafts?: boolean,
 ) => {
   return flowsApi.list({
-    projectId: authenticationSession.getProjectId()!,
     limit: limit,
     cursor: undefined,
   });

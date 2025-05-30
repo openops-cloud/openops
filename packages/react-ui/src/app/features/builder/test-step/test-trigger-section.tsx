@@ -19,6 +19,7 @@ import { AlertCircle } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 
+import { QueryKeys } from '@/app/constants/query-keys';
 import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
 import { triggerEventsApi } from '@/app/features/flows/lib/trigger-events-api';
 import { formatUtils } from '@/app/lib/utils';
@@ -33,6 +34,7 @@ import {
 } from '@openops/shared';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
+import { stepTestOutputCache } from '../data-selector/data-selector-cache';
 import { stepTestOutputHooks } from './step-test-output-hooks';
 import { TestSampleDataViewer } from './test-sample-data-viewer';
 import { TestButtonTooltip } from './test-step-tooltip';
@@ -184,7 +186,12 @@ const TestTriggerSection = React.memo(
     );
 
     function updateCurrentSelectedData(data: TriggerEvent) {
-      if (!useNewExternalTestData) {
+      if (useNewExternalTestData) {
+        stepTestOutputCache.setStepData(formValues.id!, {
+          output: formatUtils.formatStepInputOrOutput(data.payload),
+          lastTestDate: dayjs().toISOString(),
+        });
+      } else {
         form.setValue(
           'settings.inputUiInfo',
           {
@@ -201,7 +208,7 @@ const TestTriggerSection = React.memo(
     }
 
     const { data: pollResults, refetch } = useQuery<SeekPage<TriggerEvent>>({
-      queryKey: ['triggerEvents', flowVersionId],
+      queryKey: [QueryKeys.triggerEvents, flowVersionId],
       queryFn: () =>
         triggerEventsApi.list({
           flowId: flowId,

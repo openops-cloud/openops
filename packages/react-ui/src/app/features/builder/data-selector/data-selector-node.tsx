@@ -1,6 +1,6 @@
 import { Collapsible, CollapsibleTrigger } from '@openops/components/ui';
 import { CollapsibleContent } from '@radix-ui/react-collapsible';
-import { useEffect, useState } from 'react';
+import { memo } from 'react';
 
 import { DataSelectorNodeContent } from './data-selector-node-content';
 import { MentionTreeNode } from './data-selector-utils';
@@ -10,56 +10,62 @@ type DataSelectoNodeProps = {
   node: MentionTreeNode;
   depth: number;
   searchTerm: string;
+  getExpanded: (nodeKey: string) => boolean;
+  setExpanded: (nodeKey: string, expanded: boolean) => void;
 };
 
-const DataSelectorNode = ({
-  node,
-  depth,
-  searchTerm,
-}: DataSelectoNodeProps) => {
-  const [expanded, setExpanded] = useState(false);
-
-  useEffect(() => {
-    if (searchTerm && depth <= 1) {
-      setExpanded(true);
-    } else if (!searchTerm) {
-      setExpanded(false);
+const DataSelectorNode = memo(
+  ({
+    node,
+    depth,
+    searchTerm,
+    getExpanded,
+    setExpanded,
+  }: DataSelectoNodeProps) => {
+    if (node.data.isTestStepNode) {
+      return (
+        <TestStepSection stepName={node.data.propertyPath}></TestStepSection>
+      );
     }
-  }, [searchTerm, depth]);
-
-  if (node.data.isTestStepNode) {
+    const expanded = getExpanded(node.key);
+    const handleSetExpanded = (expanded: boolean) =>
+      setExpanded(node.key, expanded);
     return (
-      <TestStepSection stepName={node.data.propertyPath}></TestStepSection>
+      <Collapsible
+        className="w-full"
+        open={expanded}
+        onOpenChange={handleSetExpanded}
+      >
+        <>
+          <CollapsibleTrigger asChild={true} className="w-full relative">
+            <DataSelectorNodeContent
+              node={node}
+              expanded={expanded}
+              setExpanded={handleSetExpanded}
+              depth={depth}
+            ></DataSelectorNodeContent>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="w-full">
+            {node.children && node.children.length > 0 && (
+              <div className="flex flex-col ">
+                {node.children.map((childNode) => (
+                  <DataSelectorNode
+                    depth={depth + 1}
+                    node={childNode}
+                    key={childNode.key}
+                    searchTerm={searchTerm}
+                    getExpanded={getExpanded}
+                    setExpanded={setExpanded}
+                  ></DataSelectorNode>
+                ))}
+              </div>
+            )}
+          </CollapsibleContent>
+        </>
+      </Collapsible>
     );
-  }
-  return (
-    <Collapsible className="w-full" open={expanded} onOpenChange={setExpanded}>
-      <>
-        <CollapsibleTrigger asChild={true} className="w-full relative">
-          <DataSelectorNodeContent
-            node={node}
-            expanded={expanded}
-            setExpanded={setExpanded}
-            depth={depth}
-          ></DataSelectorNodeContent>
-        </CollapsibleTrigger>
-        <CollapsibleContent className="w-full">
-          {node.children && node.children.length > 0 && (
-            <div className="flex flex-col ">
-              {node.children.map((node) => (
-                <DataSelectorNode
-                  depth={depth + 1}
-                  node={node}
-                  key={node.key}
-                  searchTerm={searchTerm}
-                ></DataSelectorNode>
-              ))}
-            </div>
-          )}
-        </CollapsibleContent>
-      </>
-    </Collapsible>
-  );
-};
+  },
+);
+
 DataSelectorNode.displayName = 'DataSelectorNode';
 export { DataSelectorNode };

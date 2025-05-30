@@ -21,7 +21,6 @@ import { userSettingsHooks } from '@/app/common/hooks/user-settings-hooks';
 import { SEARCH_PARAMS } from '@/app/constants/search-params';
 import { ImportFlowDialogContent } from '@/app/features/flows/components/import-flow-dialog/import-flow-dialog-content';
 import { templatesHooks } from '@/app/features/templates/lib/templates-hooks';
-import { authenticationSession } from '@/app/lib/authentication-session';
 
 const ImportFlowDialog = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
@@ -37,7 +36,6 @@ const ImportFlowDialog = ({ children }: { children: React.ReactNode }) => {
       if (importedWorkflow) {
         const newFlow = await flowsApi.create({
           displayName: importedWorkflow.name,
-          projectId: authenticationSession.getProjectId()!,
         });
         return await flowsApi.update(newFlow.id, {
           type: FlowOperationType.IMPORT_FLOW,

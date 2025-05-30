@@ -29,6 +29,7 @@ export const storageRemoveFromList = createAction({
   async run(context) {
     const { key, scope } = getScopeAndKey({
       runId: context.run.id,
+      isTest: context.run.isTest,
       key: context.propsValue['key'],
       scope: context.propsValue.store_scope,
     });
