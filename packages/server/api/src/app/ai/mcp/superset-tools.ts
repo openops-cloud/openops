@@ -1,13 +1,17 @@
 import { AppSystemProp, system } from '@openops/server-shared';
-import { experimental_createMCPClient, ToolSet } from 'ai';
+import { experimental_createMCPClient } from 'ai';
 import { Experimental_StdioMCPTransport } from 'ai/mcp-stdio';
 import path from 'path';
+import { MCPTool } from './mcp-tools';
 
-export async function getSupersetTools(): Promise<ToolSet> {
+export async function getSupersetTools(): Promise<MCPTool> {
   const basePath = system.get<string>(AppSystemProp.SUPERSET_MCP_SERVER_PATH);
 
   if (!basePath) {
-    return {};
+    return {
+      client: undefined,
+      toolSet: {},
+    };
   }
 
   const pythonPath = path.join(basePath, '.venv', 'bin', 'python');
@@ -29,5 +33,8 @@ export async function getSupersetTools(): Promise<ToolSet> {
     }),
   });
 
-  return supersetClient.tools();
+  return {
+    client: supersetClient,
+    toolSet: await supersetClient.tools(),
+  };
 }

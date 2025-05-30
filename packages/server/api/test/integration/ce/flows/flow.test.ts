@@ -918,6 +918,7 @@ async function createMockFlowTemplate(
     updated: new Date().toISOString(),
     created: new Date().toISOString(),
     isSample: false,
+    categories: [],
   };
 
   return mockTemplate;

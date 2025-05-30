@@ -14,6 +14,7 @@ import {
   Action,
   ActionType,
   FlowOperationType,
+  openOpsId,
   StepLocationRelativeToParent,
 } from '@openops/shared';
 
@@ -83,6 +84,7 @@ const CanvasContextMenu = memo(
           type: FlowOperationType.DUPLICATE_ACTION,
           request: {
             stepName: data.step.name,
+            stepId: openOpsId(),
           },
         },
         () => toast(UNSAVED_CHANGES_TOAST),

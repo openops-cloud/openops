@@ -107,7 +107,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       content: request.body.message,
     });
 
-    const tools = await getMCPTools();
+    const { mcpClients, tools } = await getMCPTools();
     const filteredTools = await selectRelevantTools({
       messages,
       tools,
@@ -137,6 +137,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
           aiConfig,
           messages,
           chatId,
+          mcpClients,
           filteredTools,
         );
       },
@@ -153,6 +154,9 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         });
 
         endStreamWithErrorMessage(reply.raw, message);
+        closeMCPClients(mcpClients).catch((e) =>
+          logger.warn('Failed to close mcp client.', e),
+        );
         logger.warn(message, error);
         return message;
       },
@@ -222,6 +226,7 @@ async function streamMessages(
   aiConfig: AiConfig,
   messages: CoreMessage[],
   chatId: string,
+  mcpClients: unknown[],
   tools?: ToolSet,
 ): Promise<void> {
   let stepCount = 0;
@@ -249,6 +254,7 @@ async function streamMessages(
       });
 
       await saveChatHistory(chatId, filteredMessages);
+      await closeMCPClients(mcpClients);
     },
   });
 
@@ -329,4 +335,11 @@ function getResponseObject(
     role: 'assistant',
     content,
   };
+}
+
+async function closeMCPClients(mcpClients: unknown[]): Promise<void> {
+  for (const mcpClient of mcpClients) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (mcpClient as any)?.close();
+  }
 }

@@ -3,7 +3,6 @@ import { Theme, useTheme } from '@/app/common/providers/theme-provider';
 import { DynamicFormValidationProvider } from '@/app/features/builder/dynamic-form-validation/dynamic-form-validation-context';
 import { CreateEditConnectionDialogContent } from '@/app/features/connections/components/create-edit-connection-dialog-content';
 import { appConnectionsHooks } from '@/app/features/connections/lib/app-connections-hooks';
-import { authenticationSession } from '@/app/lib/authentication-session';
 import { BlockMetadataModelSummary } from '@openops/blocks-framework';
 import {
   BlockIcon,
@@ -70,7 +69,6 @@ const ConnectionsPicker = ({
     isLoading,
     refetch,
   } = appConnectionsHooks.useGroupedConnections({
-    projectId: authenticationSession.getProjectId() ?? '',
     blockNames: integrations.map((integration) => integration.name),
     limit: 10000,
   });

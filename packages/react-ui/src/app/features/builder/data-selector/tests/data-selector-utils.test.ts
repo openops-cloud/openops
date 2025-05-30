@@ -1,11 +1,53 @@
 import { ActionType, StepWithIndex, TriggerType } from '@openops/shared';
-import { dataSelectorUtils } from '../data-selector-utils';
+import { BuilderState } from '../../builder-types';
+import { dataSelectorUtils, MentionTreeNode } from '../data-selector-utils';
 
 jest.mock('@/app/lib/utils', () => ({
   formatUtils: {
     formatStepInputOrOutput: (v: unknown) => v,
   },
 }));
+
+const createTestTrigger = (name = 'trigger'): any => ({
+  name,
+  displayName: 'Test Trigger',
+  type: TriggerType.BLOCK,
+  settings: {},
+  valid: true,
+  nextAction: null,
+});
+
+const createTestAction = (
+  name: string,
+  displayName: string,
+  nextAction = null,
+): any => ({
+  id: name,
+  name,
+  displayName,
+  type: ActionType.BLOCK,
+  settings: {},
+  valid: true,
+  nextAction,
+});
+
+const createTestFlow = () => {
+  const step3 = createTestAction('step3', 'Step 3');
+  const step2 = createTestAction('step2', 'Step 2', step3);
+  const step1 = createTestAction('step1', 'Step 1', step2);
+  const trigger = createTestTrigger();
+  trigger.nextAction = step1;
+  return trigger;
+};
+
+const createBuilderState = (overrides = {}): BuilderState => {
+  const defaultState: any = {
+    flow: { id: 'flow1', name: 'Test Flow' },
+    flowVersion: { id: 'version1' },
+  };
+
+  return { ...defaultState, ...overrides };
+};
 
 describe('dataSelectorUtils', () => {
   describe('getAllStepsMentions', () => {
@@ -160,6 +202,205 @@ describe('dataSelectorUtils', () => {
       expect(node.children?.[0].data.displayName).toBe(displayName);
       expect(node.children?.[0].data.propertyPath).toBe('triggerStep');
       expect(node.children?.[0].key).toBe('test_triggerStep');
+    });
+  });
+
+  describe('filterBy', () => {
+    it('returns the original array when query is empty', () => {
+      const nodes: MentionTreeNode[] = [
+        {
+          key: 'node1',
+          data: {
+            propertyPath: 'path1',
+            displayName: 'Node 1',
+            value: 'value1',
+          },
+        },
+        {
+          key: 'node2',
+          data: {
+            propertyPath: 'path2',
+            displayName: 'Node 2',
+            value: 'value2',
+          },
+        },
+      ];
+
+      const result = dataSelectorUtils.filterBy(nodes, '');
+      expect(result).toEqual(nodes);
+    });
+
+    it.each([
+      {
+        desc: 'filters nodes by displayName',
+        nodes: [
+          {
+            key: 'node1',
+            data: {
+              propertyPath: 'path1',
+              displayName: 'Node 1',
+              value: 'value1',
+            },
+          },
+          {
+            key: 'node2',
+            data: {
+              propertyPath: 'path2',
+              displayName: 'Different Name',
+              value: 'value2',
+            },
+          },
+        ],
+        query: 'node',
+        expectedKeys: ['node1'],
+      },
+      {
+        desc: 'filters nodes by value',
+        nodes: [
+          {
+            key: 'node1',
+            data: {
+              propertyPath: 'path1',
+              displayName: 'Node 1',
+              value: 'some value',
+            },
+          },
+          {
+            key: 'node2',
+            data: {
+              propertyPath: 'path2',
+              displayName: 'Node 2',
+              value: 'other content',
+            },
+          },
+        ],
+        query: 'other',
+        expectedKeys: ['node2'],
+      },
+    ])('$desc', ({ nodes, query, expectedKeys }) => {
+      const result = dataSelectorUtils.filterBy(nodes, query);
+      expect(result.map((n: MentionTreeNode) => n.key)).toEqual(expectedKeys);
+    });
+
+    it('recursively filters children', () => {
+      const nodes: MentionTreeNode[] = [
+        {
+          key: 'parent1',
+          data: {
+            propertyPath: 'parent',
+            displayName: 'Parent',
+            value: 'parent value',
+          },
+          children: [
+            {
+              key: 'child1',
+              data: {
+                propertyPath: 'child',
+                displayName: 'Child',
+                value: 'match this',
+              },
+            },
+          ],
+        },
+        {
+          key: 'parent2',
+          data: {
+            propertyPath: 'parent2',
+            displayName: 'Parent 2',
+            value: 'parent value 2',
+          },
+          children: [
+            {
+              key: 'child2',
+              data: {
+                propertyPath: 'child2',
+                displayName: 'Child 2',
+                value: 'different value',
+              },
+            },
+          ],
+        },
+      ];
+
+      const result = dataSelectorUtils.filterBy(nodes, 'match');
+      expect(result).toHaveLength(1);
+      expect(result[0].key).toBe('parent1');
+      expect(result[0].children).toHaveLength(1);
+      expect(result[0].children?.[0].key).toBe('child1');
+    });
+
+    it('skips test nodes', () => {
+      const nodes: MentionTreeNode[] = [
+        {
+          key: 'node1',
+          data: {
+            propertyPath: 'path1',
+            displayName: 'Node 1',
+            value: 'value1',
+          },
+          children: [
+            {
+              key: 'test_node1',
+              data: {
+                propertyPath: 'path1',
+                displayName: 'Node 1',
+                isTestStepNode: true,
+                value: 'match this',
+              },
+            },
+          ],
+        },
+      ];
+
+      const result = dataSelectorUtils.filterBy(nodes, 'match');
+      expect(result).toHaveLength(0);
+    });
+  });
+
+  describe('getPathToTargetStep', () => {
+    it.each([
+      {
+        desc: 'returns empty array when selectedStep is not provided',
+        state: createBuilderState({
+          selectedStep: '',
+          flowVersion: { trigger: createTestTrigger() },
+        }),
+      },
+      {
+        desc: 'returns empty array when flowVersion.trigger is not provided',
+        state: createBuilderState({
+          selectedStep: 'step1',
+          flowVersion: {},
+        }),
+      },
+    ])('$desc', ({ state }) => {
+      const result = dataSelectorUtils.getPathToTargetStep(state);
+      expect(result).toEqual([]);
+    });
+
+    it('returns path to the target step', () => {
+      const trigger = createTestFlow();
+      const state = createBuilderState({
+        selectedStep: 'step3',
+        flowVersion: { trigger },
+      });
+
+      const result = dataSelectorUtils.getPathToTargetStep(state);
+      expect(result).toHaveLength(3);
+      expect(result[0].name).toBe('trigger');
+      expect(result[1].name).toBe('step1');
+      expect(result[2].name).toBe('step2');
+    });
+
+    it('returns empty array when target step does not exist', () => {
+      const trigger = createTestFlow();
+      const state = createBuilderState({
+        selectedStep: 'nonExistentStep',
+        flowVersion: { trigger },
+      });
+
+      const result = dataSelectorUtils.getPathToTargetStep(state);
+      expect(result).toEqual([]);
     });
   });
 });

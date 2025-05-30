@@ -7,7 +7,6 @@ import {
 } from '@/app/features/ai/lib/ai-form-utils';
 import { aiSettingsApi } from '@/app/features/ai/lib/ai-settings-api';
 import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
-import { authenticationSession } from '@/app/lib/authentication-session';
 import {
   INTERNAL_ERROR_TOAST,
   toast,
@@ -29,10 +28,7 @@ const AiSettingsPage = () => {
 
   const { mutate: onSave, isPending: isSaving } = useMutation({
     mutationFn: async (aiSettings: AiSettingsFormSchema) => {
-      return aiSettingsApi.saveAiSettings({
-        ...aiSettings,
-        projectId: authenticationSession.getProjectId()!,
-      });
+      return aiSettingsApi.saveAiSettings(aiSettings);
     },
     onSuccess: async () => {
       refetchAiSettings();

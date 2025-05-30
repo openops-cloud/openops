@@ -20,7 +20,6 @@ import {
   ALL_SELECTED,
   foldersHooks,
 } from '@/app/features/folders/lib/folders-hooks';
-import { authenticationSession } from '@/app/lib/authentication-session';
 import { formatUtils } from '@/app/lib/utils';
 import { FlowStatus, FlowVersionState } from '@openops/shared';
 
@@ -100,7 +99,6 @@ const FlowsPage = () => {
       pagination: PaginationParams,
     ) => {
       return flowsApi.list({
-        projectId: authenticationSession.getProjectId()!,
         cursor: pagination.cursor,
         limit: pagination.limit ?? 10,
         status: params.status,

@@ -26,7 +26,6 @@ import { Folder } from '@openops/shared';
 
 import { foldersApi } from '../lib/folders-api';
 
-import { authenticationSession } from '@/app/lib/authentication-session';
 import { FormMessages } from './form-error-messages';
 import { FOLDER_EXISTS_MSG, FolderFormSchema } from './form-schema';
 
@@ -57,7 +56,6 @@ const CreateSubfolderDialog = ({
   >({
     mutationFn: async (data) =>
       await foldersApi.create({
-        projectId: authenticationSession.getProjectId()!,
         displayName: data.displayName,
         parentFolderId: folderId,
       }),
