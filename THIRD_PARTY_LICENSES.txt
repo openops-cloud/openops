@@ -4994,6 +4994,7 @@ Apache License
 The following npm packages may be included in this product:
 
  - @swc/core@1.5.7
+ - @swc/helpers@0.5.11
  - @swc/types@0.1.7
 
 These packages each contain the following license:
@@ -10192,11 +10193,12 @@ Apache-2.0
 
 -----------
 
-The following npm package may be included in this product:
+The following npm packages may be included in this product:
 
+ - @swc/core-darwin-arm64@1.5.7
  - @swc/core-darwin-arm64@1.7.42
 
-This package contains the following license:
+These packages each contain the following license:
 
 Apache-2.0 AND MIT
 
