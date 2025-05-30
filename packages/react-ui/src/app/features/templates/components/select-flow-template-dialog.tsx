@@ -85,6 +85,8 @@ type FlowTemplateFilterSidebarProps = {
   selectedServices: string[];
   setSelectedDomains: (domains: string[]) => void;
   setSelectedServices: (services: string[]) => void;
+  selectedCategories: string[];
+  setSelectedCategories: (categories: string[]) => void;
 };
 
 const FlowTemplateFilterSidebarWrapper = ({
@@ -92,6 +94,8 @@ const FlowTemplateFilterSidebarWrapper = ({
   selectedServices,
   setSelectedDomains,
   setSelectedServices,
+  selectedCategories,
+  setSelectedCategories,
 }: FlowTemplateFilterSidebarProps) => {
   const useCloudTemplates = flagsHooks.useShouldFetchCloudTemplates();
 
@@ -119,11 +123,27 @@ const FlowTemplateFilterSidebarWrapper = ({
   const onServiceFilterClick = (service: string) => {
     setSelectedServices(selectedServices.includes(service) ? [] : [service]);
     setSelectedDomains([]);
+    setSelectedCategories([]);
+  };
+
+  const onCategoryFilterClick = (category: string) => {
+    if (category === '') {
+      setSelectedCategories([]);
+      setSelectedServices([]);
+      return;
+    }
+
+    setSelectedCategories(
+      selectedCategories.includes(category) ? [] : [category],
+    );
+    setSelectedDomains([]);
+    setSelectedServices([]);
   };
 
   const clearFilters = () => {
     setSelectedDomains([]);
     setSelectedServices([]);
+    setSelectedCategories([]);
   };
 
   return (
@@ -134,7 +154,9 @@ const FlowTemplateFilterSidebarWrapper = ({
       selectedServices={selectedServices}
       onDomainFilterClick={onDomainFilterClick}
       onServiceFilterClick={onServiceFilterClick}
+      onCategoryFilterClick={onCategoryFilterClick}
       clearFilters={clearFilters}
+      selectedCategories={selectedCategories}
     />
   );
 };
@@ -176,6 +198,8 @@ type SelectFlowTemplateDialogContentProps = {
   expandPreview: () => void;
   closeExpanded: () => void;
   onSearchInputChange: (search: string) => void;
+  selectedCategories: string[];
+  setSelectedCategories: (categories: string[]) => void;
 } & FlowTemplateFilterSidebarProps;
 
 const SelectFlowTemplateDialogContent = ({
@@ -186,6 +210,8 @@ const SelectFlowTemplateDialogContent = ({
   selectedServices,
   setSelectedDomains,
   setSelectedServices,
+  selectedCategories,
+  setSelectedCategories,
   searchInitialValue,
   selectedTemplateMetadata,
   isTemplatePreselected,
@@ -245,6 +271,8 @@ const SelectFlowTemplateDialogContent = ({
               selectedServices={selectedServices}
               setSelectedDomains={setSelectedDomains}
               setSelectedServices={setSelectedServices}
+              selectedCategories={selectedCategories}
+              setSelectedCategories={setSelectedCategories}
             />
           </div>
           <VerticalDivider className="h-full" />
@@ -292,6 +320,7 @@ const SelectFlowTemplateDialog = ({
 }) => {
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [selectedDomains, setSelectedDomains] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [searchText, setSearchText] = useState('');
   const { updateHomePageOperationalViewFlag } =
     userSettingsHooks.useHomePageOperationalView();
@@ -313,6 +342,7 @@ const SelectFlowTemplateDialog = ({
   useEffect(() => {
     setSelectedDomains([]);
     setSelectedServices([]);
+    setSelectedCategories([]);
     resetTemplateDialog();
   }, [isOpen, resetTemplateDialog, searchText]);
 
@@ -328,6 +358,7 @@ const SelectFlowTemplateDialog = ({
       search: searchText,
       domains: selectedDomains,
       services: selectedServices,
+      categories: selectedCategories,
       useCloudTemplates,
       gettingStartedTemplateFilter: 'exclude',
     });
@@ -471,6 +502,8 @@ const SelectFlowTemplateDialog = ({
               handleTemplateSelect={handleTemplateSelect}
               searchInitialValue={searchText}
               onSearchInputChange={setSearchText}
+              selectedCategories={selectedCategories}
+              setSelectedCategories={setSelectedCategories}
             />
           </div>
         )}

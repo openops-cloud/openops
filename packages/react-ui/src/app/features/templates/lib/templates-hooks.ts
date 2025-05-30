@@ -44,6 +44,7 @@ export const templatesHooks = {
     useCloudTemplates = false,
     enabled = true,
     search = '',
+    categories = [],
     services = [],
     domains = [],
     blocks = [],
@@ -59,6 +60,7 @@ export const templatesHooks = {
       queryKey: [
         QueryKeys.flowTemplates,
         search,
+        ...categories,
         ...services,
         ...domains,
         ...blocks,
@@ -74,6 +76,7 @@ export const templatesHooks = {
         return (
           await templatesApiToUse.list({
             search,
+            categories,
             services,
             domains,
             blocks,
@@ -176,6 +179,7 @@ export const templatesHooks = {
     enabled = true,
     useCloudTemplates = false,
     search = '',
+    categories = [],
     services = [],
     domains = [],
     blocks = [],
@@ -192,6 +196,7 @@ export const templatesHooks = {
       useCloudTemplates,
       enabled,
       search,
+      categories,
       services,
       domains,
       blocks,

@@ -72,9 +72,10 @@ type FlowTemplateFilterSidebarProps = {
   categories: TemplateSidebarCategory[];
   selectedDomains: string[];
   selectedServices: string[];
-  selectedCategories?: string[];
+  selectedCategories: string[];
   onDomainFilterClick: (domain: string) => void;
   onServiceFilterClick: (service: string) => void;
+  onCategoryFilterClick: (category: string) => void;
   clearFilters: () => void;
 };
 
@@ -83,9 +84,10 @@ const FlowTemplateFilterSidebar = ({
   categories,
   selectedDomains,
   selectedServices,
-  selectedCategories = [],
+  selectedCategories,
   onDomainFilterClick,
   onServiceFilterClick,
+  onCategoryFilterClick,
   clearFilters,
 }: FlowTemplateFilterSidebarProps) => {
   return (
@@ -114,7 +116,12 @@ const FlowTemplateFilterSidebar = ({
       <ScrollArea className="max-h-[50%] w-full">
         <div className="flex flex-col w-full">
           {categories?.map((category) => (
-            <Collapsible key={category.name}>
+            <Collapsible
+              key={category.name}
+              onOpenChange={(open) => {
+                onCategoryFilterClick(open ? category.name : '');
+              }}
+            >
               <CollapsibleTrigger
                 className={cn(
                   'flex items-center cursor-pointer px-3 py-2 hover:bg-muted rounded w-full',
