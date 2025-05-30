@@ -990,7 +990,8 @@ function duplicateStepCascading(
   });
 
   const duplicatedStep = transferStep(action, (step: Step) => {
-    step.id = action.id;
+    // we already assigned the root step in the duplicateStep function
+    step.id = step.id === action.id ? action.id : openOpsId();
     step.displayName = `${step.displayName} Copy`;
     step.name = oldNameToNewName[step.name];
     clearStepTestData(step);
