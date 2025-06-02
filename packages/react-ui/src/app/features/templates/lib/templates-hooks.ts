@@ -141,6 +141,7 @@ export const templatesHooks = {
           }
         });
       });
+      uniqueCategories.sort((a, b) => a.name.localeCompare(b.name));
 
       return [Array.from(uniqueDomainsSet).sort(), uniqueCategories];
     }, [templates]);
