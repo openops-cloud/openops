@@ -157,32 +157,33 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
     '/:flowVersionId/test-output',
     SaveTestOutputRequestOptions,
     async (request, reply) => {
-      try {
-        const { flowVersionId } = request.params;
-        const { stepId, output } = request.body;
+      const { flowVersionId } = request.params;
+      const { stepId, output } = request.body;
 
-        const savedOutput = await flowStepTestOutputService.save({
-          stepId,
-          flowVersionId,
-          output,
-        });
-
-        await reply.status(StatusCodes.OK).send({
-          success: true,
-          message: 'Test output saved successfully',
-          data: {
-            output,
-            id: savedOutput.id,
-            stepId: savedOutput.stepId,
-            flowVersionId: savedOutput.flowVersionId,
-          },
-        });
-      } catch (error) {
-        await reply.status(StatusCodes.INTERNAL_SERVER_ERROR).send({
+      const flowVersion = await flowVersionService.getOne(flowVersionId);
+      if (!flowVersion) {
+        await reply.status(StatusCodes.NOT_FOUND).send({
           success: false,
-          message: (error as Error).message,
+          message: 'The defined flow version was not found',
         });
       }
+
+      const savedOutput = await flowStepTestOutputService.save({
+        stepId,
+        flowVersionId,
+        output,
+      });
+
+      await reply.status(StatusCodes.OK).send({
+        success: true,
+        message: 'Test output saved successfully',
+        data: {
+          output,
+          id: savedOutput.id,
+          stepId: savedOutput.stepId,
+          flowVersionId: savedOutput.flowVersionId,
+        },
+      });
     },
   );
 };
@@ -232,7 +233,7 @@ const SaveTestOutputRequestOptions = {
           flowVersionId: T.String(),
         }),
       }),
-      [StatusCodes.INTERNAL_SERVER_ERROR]: T.Object({
+      [StatusCodes.NOT_FOUND]: T.Object({
         success: T.Boolean(),
         message: T.String(),
       }),

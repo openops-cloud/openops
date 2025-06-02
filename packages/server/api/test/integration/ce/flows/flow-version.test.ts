@@ -15,11 +15,13 @@ import {
   createMockTrigger,
   mockBasicSetup,
 } from '../../../helpers/mocks';
+import { encryptionKeyInitializer } from '@openops/server-shared';
 
 let app: FastifyInstance | null = null;
 
 beforeAll(async () => {
   await databaseConnection().initialize();
+  await encryptionKeyInitializer();
   app = await setupServer();
 });
 
@@ -360,7 +362,12 @@ describe('Flow Version API', () => {
         },
       });
 
-      expect(response?.statusCode).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
+      expect(response?.statusCode).toBe(StatusCodes.NOT_FOUND);
+      const responseBody = response?.json();
+      expect(responseBody).toMatchObject({
+        success: false,
+        message: 'The defined flow version was not found',
+      });
     });
   });
 });
