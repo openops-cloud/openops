@@ -17,18 +17,21 @@ RUN <<-```
 
 RUN wget -qO- https://astral.sh/uv/install.sh | sh && source $HOME/.local/bin/env
 
+WORKDIR /root/.mcp/superset
 RUN <<-```
     set -ex
-    mkdir -p /root/.mcp/superset /root/.mcp/openops-mcp
-    cd /root/.mcp/superset && git clone https://github.com/openops-cloud/superset-mcp . && git checkout 1c391f7d0a261ee51f7b1e6c413f1930418d17fe
-    cd /root/.mcp/openops-mcp && git clone --depth 1 https://github.com/openops-cloud/openops-mcp . && git checkout dad1afe41efa2c6882525421829198e443cada05
+    git clone https://github.com/openops-cloud/superset-mcp .
+    git checkout 1c391f7d0a261ee51f7b1e6c413f1930418d17fe
+    python3 -m venv .venv && python3 -m venv pip install .
 ```
 
-WORKDIR /root/.mcp/superset
-RUN python3 -m venv .venv && python3 -m venv pip install .
-
 WORKDIR /root/.mcp/openops-mcp
-RUN uv venv && . .venv/bin/activate && uv pip install -r requirements.txt
+RUN <<-```
+    set -ex
+    git clone --depth 1 https://github.com/openops-cloud/openops-mcp .
+    git checkout dad1afe41efa2c6882525421829198e443cada05
+    uv venv && . .venv/bin/activate && uv pip install -r requirements.txt
+```
 
 # Set up backend
 WORKDIR /usr/src/app
