@@ -202,6 +202,7 @@ describe('flowTemplateService', () => {
         services: ['service1'],
         domains: ['domain1'],
         blocks: ['block1'],
+        categories: ['category1', 'category2'],
         organizationId: 'organization-id',
         projectId: 'project-id',
       };
@@ -253,6 +254,7 @@ describe('flowTemplateService', () => {
         services: ['service1'],
         domains: ['domain1'],
         blocks: ['block1'],
+        categories: ['category1', 'category2'],
         organizationId: 'organization-id',
         projectId: 'project-id',
       };
