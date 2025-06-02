@@ -74,6 +74,24 @@ describe('getUniqueCategoriesFromTemplates', () => {
       ],
       desc: 'deduplicates services and sorts them',
     },
+    {
+      input: [makeTemplate({ categories: [''], services: ['EC2'] })],
+      expected: [{ name: '', services: ['EC2'] }],
+      desc: 'handles a template with an empty category',
+    },
+    {
+      input: [makeTemplate({ categories: ['AWS'], services: [] })],
+      expected: [{ name: 'AWS', services: [] }],
+      desc: 'handles a category with empty services',
+    },
+    {
+      input: [makeTemplate({ categories: ['AWS', ''], services: [] })],
+      expected: [
+        { name: '', services: [] },
+        { name: 'AWS', services: [] },
+      ],
+      desc: 'handles multiple categories including an empty one, all with empty services',
+    },
   ])('$desc', ({ input, expected }) => {
     expect(getUniqueCategoriesFromTemplates(input)).toEqual(expected);
   });
