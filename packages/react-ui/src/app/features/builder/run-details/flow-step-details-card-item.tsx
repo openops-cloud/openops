@@ -125,7 +125,6 @@ const FlowStepDetailsCardItem = ({
               minWidth: `${depth * 25}px`,
               display: depth === 0 ? 'none' : 'flex',
             }}
-            ref={divRef}
           ></div>
           <div className="flex items-center w-full gap-3">
             {children.length > 0 && (
