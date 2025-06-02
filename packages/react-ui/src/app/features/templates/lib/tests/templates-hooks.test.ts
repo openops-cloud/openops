@@ -76,7 +76,7 @@ describe('getUniqueCategoriesFromTemplates', () => {
     },
     {
       input: [makeTemplate({ categories: [''], services: ['EC2'] })],
-      expected: [{ name: '', services: ['EC2'] }],
+      expected: [],
       desc: 'handles a template with an empty category',
     },
     {
@@ -86,10 +86,7 @@ describe('getUniqueCategoriesFromTemplates', () => {
     },
     {
       input: [makeTemplate({ categories: ['AWS', ''], services: [] })],
-      expected: [
-        { name: '', services: [] },
-        { name: 'AWS', services: [] },
-      ],
+      expected: [{ name: 'AWS', services: [] }],
       desc: 'handles multiple categories including an empty one, all with empty services',
     },
   ])('$desc', ({ input, expected }) => {

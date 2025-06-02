@@ -2,6 +2,7 @@ import { BlockCategory, FlagId, FlowTemplateMetadata } from '@openops/shared';
 import { useQuery } from '@tanstack/react-query';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
+import { DEFAULT_LOCALE } from '@/app/constants/locale';
 import { QueryKeys } from '@/app/constants/query-keys';
 import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
 import {
@@ -39,13 +40,17 @@ type UseTemplatesParams = GetTemplatesParams & TemplateBaseParams;
 
 const TEMPLATES_FAILURE_RETRY_LIMIT = 3;
 
+const sortFunction = (a: string, b: string) => {
+  return a.localeCompare(b, DEFAULT_LOCALE);
+};
+
 export function getUniqueCategoriesFromTemplates(
   templates?: FlowTemplateMetadata[],
 ): TemplateSidebarCategory[] {
   const categoryMap = new Map<string, Set<string>>();
   templates?.forEach((item) => {
     item.categories?.forEach((category) => {
-      if (!categoryMap.has(category)) {
+      if (category && !categoryMap.has(category)) {
         categoryMap.set(category, new Set());
       }
       item.services.forEach((service) => {
@@ -56,9 +61,9 @@ export function getUniqueCategoriesFromTemplates(
   return Array.from(categoryMap.entries())
     .map(([name, services]) => ({
       name,
-      services: Array.from(services).sort(),
+      services: Array.from(services).sort(sortFunction),
     }))
-    .sort((a, b) => a.name.localeCompare(b.name));
+    .sort((a, b) => sortFunction(a.name, b.name));
 }
 
 export const templatesHooks = {
