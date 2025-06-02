@@ -173,7 +173,7 @@ export const amazonAuth = BlockAuth.CustomAuth({
     }),
     defaultRegion: Property.ShortText({
       displayName: 'Default Region',
-      required: true,
+      required: false,
     }),
     endpoint: Property.ShortText({
       displayName: 'Custom Endpoint (optional)',
