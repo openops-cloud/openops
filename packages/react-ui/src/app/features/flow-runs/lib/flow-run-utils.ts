@@ -160,7 +160,7 @@ function findLoopsState(
 ) {
   const loops = flowHelper
     .getAllSteps(flowVersion.trigger)
-    .filter((s) => s.type === ActionType.LOOP_ON_ITEMS) as LoopOnItemsAction[];
+    .filter((s) => s.type === ActionType.LOOP_ON_ITEMS);
   const failedStepInfo = run.steps ? findFailedStep(run) : null;
 
   const res = loops.reduce(
