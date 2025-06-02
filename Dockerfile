@@ -18,7 +18,8 @@ RUN <<-```
 WORKDIR /root/.mcp
 RUN <<-```
     set -ex
-    wget -qO- https://astral.sh/uv/install.sh | sh && source $HOME/.local/bin/env
+    wget -qO- https://astral.sh/uv/install.sh | sh
+    export PATH="$HOME/.local/bin:$PATH"
 
     # Superset mcp
     git clone https://github.com/openops-cloud/superset-mcp superset
