@@ -108,6 +108,7 @@ const FlowStepDetailsCardItem = ({
     <Collapsible open={isOpen} className="w-full">
       <CollapsibleTrigger asChild={true}>
         <CardListItem
+          ref={divRef}
           onClick={() => {
             if (!isStepSelected) {
               selectStepByName(stepName);
