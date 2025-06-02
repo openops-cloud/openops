@@ -8,7 +8,7 @@ export type CloudLoggedInBriefProps = {
 };
 
 export const CloudLoggedInBrief = ({ appLogo }: CloudLoggedInBriefProps) => (
-  <div className="flex flex-col items-center h-[100vh] p-5 gap-4 bg-background">
+  <div className="flex flex-col items-center h-screen p-5 gap-4 bg-background">
     {appLogo}
     <div className="w-[42px] h-[42px] mt-[100px] bg-gray-300 rounded-full flex items-center justify-center">
       <User />
