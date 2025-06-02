@@ -242,7 +242,7 @@ describe('flowTemplateService', () => {
         template: flowVersion.trigger,
         projectId: requestOptions.projectId,
         organizationId: requestOptions.organizationId,
-        categories: [],
+        categories: requestOptions.categories,
       });
       expect(result).toEqual(insertResult);
     });
