@@ -16,7 +16,6 @@ const EXCLUDED_PATHS = [
   '/v1/authentication',
   '/v1/organizations',
   '/v1/users',
-  '/v1/meta',
 ];
 
 const EXCLUDED_OPERATIONS = ['delete'];
