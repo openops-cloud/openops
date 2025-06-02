@@ -39,6 +39,28 @@ type UseTemplatesParams = GetTemplatesParams & TemplateBaseParams;
 
 const TEMPLATES_FAILURE_RETRY_LIMIT = 3;
 
+export function getUniqueCategoriesFromTemplates(
+  templates?: FlowTemplateMetadata[],
+): TemplateSidebarCategory[] {
+  const categoryMap = new Map<string, Set<string>>();
+  templates?.forEach((item) => {
+    item.categories?.forEach((category) => {
+      if (!categoryMap.has(category)) {
+        categoryMap.set(category, new Set());
+      }
+      item.services.forEach((service) => {
+        categoryMap.get(category)?.add(service);
+      });
+    });
+  });
+  return Array.from(categoryMap.entries())
+    .map(([name, services]) => ({
+      name,
+      services: Array.from(services).sort(),
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
 export const templatesHooks = {
   useTemplates: ({
     useCloudTemplates = false,
@@ -123,25 +145,7 @@ export const templatesHooks = {
         item.services.forEach((service) => uniqueServicesSet.add(service));
       });
 
-      const uniqueCategories: TemplateSidebarCategory[] = [];
-      templates?.forEach((item) => {
-        item.categories?.forEach((category) => {
-          const existingCategory = uniqueCategories.find(
-            (c) => c.name === category,
-          );
-          if (existingCategory) {
-            existingCategory.services.push(
-              ...Array.from(new Set(item.services)).sort(),
-            );
-          } else {
-            uniqueCategories.push({
-              name: category,
-              services: Array.from(new Set(item.services)).sort(),
-            });
-          }
-        });
-      });
-      uniqueCategories.sort((a, b) => a.name.localeCompare(b.name));
+      const uniqueCategories = getUniqueCategoriesFromTemplates(templates);
 
       return [Array.from(uniqueDomainsSet).sort(), uniqueCategories];
     }, [templates]);
