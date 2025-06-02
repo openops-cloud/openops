@@ -296,3 +296,117 @@ describe('flowRunUtils.extractStepOutput', () => {
     expect(result).toEqual({ value: 'split-branch2-output' });
   });
 });
+describe('flowRunUtils.findFailedStep', () => {
+  it('returns the name of the failed step at the top level', () => {
+    const run = {
+      steps: {
+        step1: { status: 'SUCCEEDED' },
+        step2: { status: 'FAILED' },
+        step3: { status: 'SUCCEEDED' },
+      },
+    } as any;
+    expect(flowRunUtils.findFailedStep(run)).toBe('step2');
+  });
+
+  it('returns the name of the failed step inside a loop', () => {
+    const run = {
+      steps: {
+        loop1: {
+          type: ActionType.LOOP_ON_ITEMS,
+          output: {
+            iterations: [
+              {
+                child: { status: 'SUCCEEDED' },
+              },
+              {
+                child: { status: 'FAILED' },
+              },
+            ],
+          },
+        },
+      },
+    } as any;
+    expect(flowRunUtils.findFailedStep(run)).toBe('child');
+  });
+
+  it('returns null if there are no failed steps', () => {
+    const run = {
+      steps: {
+        step1: { status: 'SUCCEEDED' },
+        step2: { status: 'SUCCEEDED' },
+      },
+    } as any;
+    expect(flowRunUtils.findFailedStep(run)).toBeNull();
+  });
+});
+
+describe('flowRunUtils.findLoopsState', () => {
+  const trigger = {
+    name: 'trigger',
+    type: 'TRIGGER',
+    nextAction: {
+      name: 'loop1',
+      type: ActionType.LOOP_ON_ITEMS,
+      firstLoopAction: {
+        name: 'step1',
+        type: ActionType.CODE,
+      },
+    },
+  };
+
+  const flowVersion = { trigger } as any;
+
+  it('returns currentLoopsState if no failed step', () => {
+    const run = { steps: {} } as any;
+    const currentLoopsState = { loop1: 2 };
+    const result = flowRunUtils.findLoopsState(
+      flowVersion,
+      run,
+      currentLoopsState,
+    );
+    expect(result).toEqual({ loop1: 2 });
+  });
+
+  it('sets loop index to MAX_SAFE_INTEGER if failed step is child of loop', () => {
+    const run = {
+      steps: {
+        step1: { status: 'FAILED' },
+      },
+    } as any;
+    const currentLoopsState = { loop1: 1 };
+    const result = flowRunUtils.findLoopsState(
+      flowVersion,
+      run,
+      currentLoopsState,
+    );
+    expect(result.loop1).toBe(Number.MAX_SAFE_INTEGER);
+  });
+
+  it('keeps currentLoopsState for unrelated loops', () => {
+    const trigger = {
+      name: 'trigger',
+      type: 'TRIGGER',
+      nextAction: {
+        name: 'loop1',
+        type: ActionType.LOOP_ON_ITEMS,
+        firstLoopAction: {
+          name: 'step1',
+          type: ActionType.CODE,
+        },
+      },
+    };
+    const flowVersion = { trigger } as any;
+    const run = {
+      steps: {
+        unrelatedStep: { status: 'FAILED' },
+      },
+    } as any;
+    const currentLoopsState = { loop1: 3 };
+    const result = flowRunUtils.findLoopsState(
+      flowVersion,
+      run,
+      currentLoopsState,
+    );
+    expect(result.loop1).toBe(3);
+  });
+});
