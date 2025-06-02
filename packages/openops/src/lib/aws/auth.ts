@@ -165,11 +165,11 @@ export const amazonAuth = BlockAuth.CustomAuth({
   props: {
     accessKeyId: BlockAuth.SecretText({
       displayName: 'Access Key ID',
-      required: true,
+      required: false,
     }),
     secretAccessKey: BlockAuth.SecretText({
       displayName: 'Secret Access Key',
-      required: true,
+      required: false,
     }),
     defaultRegion: Property.ShortText({
       displayName: 'Default Region',
