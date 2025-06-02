@@ -447,7 +447,7 @@
   "You are now logged in,": "You are now logged in,",
   "you can close this window anytime.": "you can close this window anytime.",
   "Note: ": "Note: ",
-  "Exploring template catalog might not work if you're not running Openops over a secure HTTPS connection.": "Exploring template catalog might not work if you're not running Openops over a secure HTTPS connection.",
+  "Exploring template catalog might not work if you're not running Openops over a secure HTTPS connection or if you configured your browser to block 3rd party cookies (some browsers like Safari block 3rd party cookies by default).": "Exploring template catalog might not work if you're not running Openops over a secure HTTPS connection or if you configured your browser to block 3rd party cookies (some browsers like Safari block 3rd party cookies by default).",
   "Inject command": "Inject command",
   "Open opportunities": "Open opportunities",
   "Check opportunities": "Check opportunities",
