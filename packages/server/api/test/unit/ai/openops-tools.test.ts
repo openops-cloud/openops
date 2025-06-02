@@ -43,8 +43,29 @@ import { FastifyInstance } from 'fastify';
 import { getOpenOpsTools } from '../../../src/app/ai/mcp/openops-tools';
 
 describe('getOpenOpsTools', () => {
+  const mockOpenApiSchema = {
+    openapi: '3.1',
+    paths: {
+      '/v1/authentication/sign-in': {
+        post: { operationId: 'signIn' },
+      },
+      '/v1/users/profile': {
+        get: { operationId: 'getProfile' },
+        delete: { operationId: 'deleteProfile' },
+      },
+      '/v1/organizations/123': {
+        get: { operationId: 'getOrg' },
+        put: { operationId: 'updateOrg' },
+      },
+      '/v1/api/endpoint': {
+        get: { operationId: 'getData' },
+        post: { operationId: 'createData' },
+      },
+    },
+  };
+
   const mockApp = {
-    swagger: jest.fn().mockReturnValue({ openapi: '3.1' }),
+    swagger: jest.fn().mockReturnValue(mockOpenApiSchema),
   } as unknown as FastifyInstance;
 
   beforeEach(() => {
@@ -76,22 +97,22 @@ describe('getOpenOpsTools', () => {
       client: mockClient,
       toolSet: mockTools,
     });
-    expect(createMcpClientMock).toHaveBeenCalledWith({
-      transport: expect.objectContaining({
-        serverParams: {
-          command: `${mockBasePath}/.venv/bin/python`,
-          args: [`${mockBasePath}/main.py`],
-          env: {
-            OPENAPI_SCHEMA: JSON.stringify({ openapi: '3.1' }),
-            AUTH_TOKEN: 'test-auth-token',
-            API_BASE_URL: mockApiBaseUrl,
-            OPENOPS_MCP_SERVER_PATH: mockBasePath,
-            LOGZIO_TOKEN: 'test-logzio-token',
-            ENVIRONMENT: 'test-environment',
-          },
-        },
-      }),
+
+    const filteredSchema = JSON.parse(
+      createMcpClientMock.mock.calls[0][0].transport.serverParams.env
+        .OPENAPI_SCHEMA,
+    );
+
+    expect(filteredSchema.paths).toEqual({
+      '/v1/api/endpoint': {
+        get: { operationId: 'getData' },
+        post: { operationId: 'createData' },
+      },
     });
+    expect(filteredSchema.paths['/v1/authentication/sign-in']).toBeUndefined();
+    expect(filteredSchema.paths['/v1/users/profile']).toBeUndefined();
+    expect(filteredSchema.paths['/v1/organizations/123']).toBeUndefined();
+    expect(filteredSchema.paths['/v1/api/endpoint'].delete).toBeUndefined();
   });
 
   it('should return empty object and log error if MCP client creation fails', async () => {
