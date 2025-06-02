@@ -152,7 +152,10 @@ export const templatesHooks = {
 
       const uniqueCategories = getUniqueCategoriesFromTemplates(templates);
 
-      return [Array.from(uniqueDomainsSet).sort(), uniqueCategories];
+      return [
+        Array.from(uniqueDomainsSet).sort(sortFunction),
+        uniqueCategories,
+      ];
     }, [templates]);
 
     return {
