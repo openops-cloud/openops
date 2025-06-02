@@ -1,3 +1,4 @@
+import { encryptionKeyInitializer } from '@openops/server-shared';
 import {
   FlowVersionState,
   openOpsId,
@@ -15,7 +16,6 @@ import {
   createMockTrigger,
   mockBasicSetup,
 } from '../../../helpers/mocks';
-import { encryptionKeyInitializer } from '@openops/server-shared';
 
 let app: FastifyInstance | null = null;
 
