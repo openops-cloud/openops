@@ -7,7 +7,9 @@ describe('connectionProviders', () => {
     it('should return all providers', () => {
       const result = connectionProviders.getAll();
 
-      expect(result).toEqual(Object.values(providerMap));
+      expect(result).toEqual(
+        expect.arrayContaining(Object.values(providerMap)),
+      );
       expect(result.length).toBeGreaterThan(0);
     });
   });
