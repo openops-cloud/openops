@@ -3,7 +3,7 @@ import { AwsCredentials } from './auth';
 export function getAwsClient<T>(
   ClientConstructor: new (config: {
     region: string;
-    credentials: AwsCredentials;
+    credentials: AwsCredentials | undefined;
     endpoint?: string;
   }) => T,
   credentials: AwsCredentials,
@@ -11,11 +11,13 @@ export function getAwsClient<T>(
 ): T {
   return new ClientConstructor({
     region,
-    credentials: {
-      accessKeyId: credentials.accessKeyId,
-      secretAccessKey: credentials.secretAccessKey,
-      sessionToken: credentials.sessionToken,
-    },
+    credentials: credentials.accessKeyId
+      ? {
+          accessKeyId: credentials.accessKeyId,
+          secretAccessKey: credentials.secretAccessKey,
+          sessionToken: credentials.sessionToken,
+        }
+      : undefined,
     endpoint: credentials.endpoint ? credentials.endpoint : undefined,
   });
 }
