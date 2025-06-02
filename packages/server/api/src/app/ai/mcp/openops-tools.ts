@@ -41,8 +41,6 @@ export async function getOpenOpsTools(
       }),
     });
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
     return {
       client: openopsClient,
       toolSet: await openopsClient.tools(),
