@@ -22,7 +22,7 @@ export const CloudLoggedInBrief = ({ appLogo }: CloudLoggedInBriefProps) => (
       <AlertDescription>
         <b>{t('Note: ')}</b>
         {t(
-          "Exploring template catalog might not work if you're not running Openops over a secure HTTPS connection.",
+          "Exploring template catalog might not work if you're not running Openops over a secure HTTPS connection or if you configured your browser to block 3rd party cookies (some browsers like Safari block 3rd party cookies by default).",
         )}
       </AlertDescription>
     </Alert>
