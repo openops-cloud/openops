@@ -17,6 +17,10 @@ export const flagController: FastifyPluginAsyncTypebox = async (app) => {
         allowedPrincipals: ALL_PRINCIPAL_TYPES,
       },
       logLevel: 'silent',
+      schema: {
+        description:
+          'Retrieve all system configuration flags and their values. This endpoint returns a map of flag IDs to their current values, including environment settings, feature flags, and system configurations.',
+      },
     },
     async (request: FastifyRequest) => {
       const flags = await flagService.getAll();
@@ -35,6 +39,10 @@ export const flagController: FastifyPluginAsyncTypebox = async (app) => {
     {
       config: {
         allowedPrincipals: [PrincipalType.ENGINE],
+      },
+      schema: {
+        description:
+          'Retrieve the current environment ID. This endpoint is specifically for the engine to identify which environment it is running in.',
       },
     },
     async (_request, reply) => {

@@ -217,7 +217,7 @@ const SyncWebhookRequest = {
   schema: {
     ...WEBHOOK_PARAMS.schema,
     description:
-      'Synchronize a webhook for a specific flow. This endpoint processes incoming webhook requests and triggers the associated flow execution in synchronous mode.',
+      'Process webhook requests synchronously for a specific flow. This endpoint handles incoming webhook requests and executes the associated flow immediately, waiting for the execution to complete before responding. Useful for scenarios requiring immediate feedback or when the webhook caller needs the flow execution result.',
   },
 };
 
@@ -226,7 +226,7 @@ const WebhookRequest = {
   schema: {
     ...WEBHOOK_PARAMS.schema,
     description:
-      'Handle webhook requests for a specific flow. This endpoint processes incoming webhook requests and triggers the associated flow execution.',
+      'Process webhook requests asynchronously for a specific flow. This endpoint handles incoming webhook requests and queues the associated flow for execution, responding immediately without waiting for the flow to complete. Ideal for high-volume webhook scenarios where immediate acknowledgment is sufficient.',
   },
 };
 
@@ -235,7 +235,7 @@ const TestWebhookRequest = {
   schema: {
     ...WEBHOOK_PARAMS.schema,
     description:
-      'Test a webhook for a specific flow. This endpoint allows you to send test webhook requests to verify the flow configuration and execution.',
+      'Test webhook functionality for a specific flow. This endpoint allows sending test webhook requests to verify flow configuration, trigger conditions, and execution behavior without affecting production data. Useful for development and debugging purposes.',
   },
 };
 
@@ -244,6 +244,6 @@ const WEBHOOK_QUERY_PARAMS = {
   schema: {
     querystring: WebhookUrlParams,
     description:
-      'Handle webhook requests for a specific flow using query parameters. This endpoint processes incoming webhook requests and triggers the associated flow execution. It supports both synchronous and asynchronous processing modes.',
+      'Process webhook requests using query parameters. This endpoint provides an alternative way to trigger flows via webhooks, allowing the flow ID to be specified in the query string instead of the URL path. Supports both synchronous and asynchronous processing modes.',
   },
 };

@@ -153,7 +153,8 @@ const UpsertAppConnectionRequest = {
   schema: {
     tags: ['app-connections'],
     security: [SERVICE_KEY_SECURITY_OPENAPI],
-    description: 'Upsert an app connection based on the app name',
+    description:
+      'Create or update an app connection based on the app name. This endpoint handles both new connection creation and updates to existing connections, supporting various authentication types including OAuth2, Basic Auth, and Custom Auth.',
     body: UpsertAppConnectionRequestBody,
     Response: {
       [StatusCodes.CREATED]: AppConnectionWithoutSensitiveData,
@@ -169,7 +170,8 @@ const PatchAppConnectionRequest = {
   schema: {
     tags: ['app-connections'],
     security: [SERVICE_KEY_SECURITY_OPENAPI],
-    description: 'Update an app connection based on the connection ID',
+    description:
+      "Update an existing app connection based on the connection ID. This endpoint allows modification of connection settings, authentication details, and other configuration parameters while maintaining the connection's identity.",
     body: PatchAppConnectionRequestBody,
     Response: {
       [StatusCodes.OK]: AppConnectionWithoutSensitiveData,
@@ -186,7 +188,8 @@ const ListAppConnectionsRequest = {
     tags: ['app-connections'],
     security: [SERVICE_KEY_SECURITY_OPENAPI],
     querystring: ListAppConnectionsRequestQuery,
-    description: 'List app connections',
+    description:
+      'List all app connections in the project with filtering and pagination options. This endpoint supports filtering by name, block type, and status, and includes pagination controls for large result sets.',
     response: {
       [StatusCodes.OK]: SeekPage(AppConnectionWithoutSensitiveData),
     },
@@ -202,7 +205,7 @@ const DeleteAppConnectionRequest = {
     tags: ['app-connections'],
     security: [SERVICE_KEY_SECURITY_OPENAPI],
     description:
-      'Delete an app connection by its ID. This endpoint removes a specific app connection from the project and triggers a connection deleted event for tracking purposes.',
+      'Delete an app connection by its ID. This endpoint removes a specific app connection from the project, cleans up associated resources, and triggers a connection deleted event for tracking purposes. Use with caution as this action cannot be undone.',
     params: Type.Object({
       id: OpenOpsId,
     }),
@@ -220,7 +223,7 @@ const GetAppConnectionRequest = {
   schema: {
     tags: ['app-connections'],
     description:
-      'Get an app connection by its ID. This endpoint retrieves detailed information about a specific app connection, including its configuration and settings. Sensitive data is automatically redacted in the response.',
+      'Get an app connection by its ID. This endpoint retrieves detailed information about a specific app connection, including its configuration, settings, and current status. Sensitive data such as authentication tokens and secrets is automatically redacted in the response for security.',
     params: Type.Object({
       id: OpenOpsId,
     }),
