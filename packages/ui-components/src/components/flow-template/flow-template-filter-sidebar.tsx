@@ -131,7 +131,7 @@ const FlowTemplateFilterSidebar = ({
                 )}
               >
                 <ChevronRight
-                  className="size-4 flex-shrink-0 mr-2 transition-transform data-[state=open]:rotate-90"
+                  className="size-4 flex-shrink-0 mr-2 transition-transform data-[state=open]:rotate-90 dark:text-primary"
                   aria-hidden="true"
                 />
                 <span className="font-normal text-slate-600 dark:text-primary text-base">
