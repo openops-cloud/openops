@@ -6,7 +6,6 @@ import { stepTestOutputCache } from './data-selector-cache';
 export function useSelectorData({
   stepIds,
   flowVersionId,
-  useNewExternalTestData,
   isDataSelectorVisible,
   initialLoad,
   setInitialLoad,
@@ -14,7 +13,6 @@ export function useSelectorData({
 }: {
   stepIds: string[];
   flowVersionId: string;
-  useNewExternalTestData: boolean;
   isDataSelectorVisible: boolean;
   initialLoad: boolean;
   setInitialLoad: (v: boolean) => void;
@@ -52,8 +50,7 @@ export function useSelectorData({
         return {};
       }
     },
-    enabled:
-      !!useNewExternalTestData && isDataSelectorVisible && stepIds.length > 0,
+    enabled: isDataSelectorVisible && stepIds.length > 0,
     staleTime: 0,
   });
 

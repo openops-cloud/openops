@@ -9,18 +9,17 @@ import { t } from 'i18next';
 import { SearchXIcon } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { FlagId, StepOutputWithData } from '@openops/shared';
+import { StepOutputWithData } from '@openops/shared';
 
 import { useBuilderStateContext } from '../builder-hooks';
 
-import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { stepTestOutputCache } from './data-selector-cache';
 import { DataSelectorNode } from './data-selector-node';
 import {
   DataSelectorSizeState,
   DataSelectorSizeTogglers,
 } from './data-selector-size-togglers';
-import { dataSelectorUtils, MentionTreeNode } from './data-selector-utils';
+import { dataSelectorUtils } from './data-selector-utils';
 import { expandOrCollapseNodesOnSearch } from './expand-or-collapse-on-search';
 import { useSelectorData } from './use-selector-data';
 
@@ -41,9 +40,6 @@ const DataSelector = ({
   setDataSelectorSize,
   className,
 }: DataSelectorProps) => {
-  const { data: useNewExternalTestData = false } = flagsHooks.useFlag(
-    FlagId.USE_NEW_EXTERNAL_TESTDATA,
-  );
   const [searchTerm, setSearchTerm] = useState('');
   const flowVersionId = useBuilderStateContext((state) => state.flowVersion.id);
   const isDataSelectorVisible = useBuilderStateContext(
@@ -52,9 +48,6 @@ const DataSelector = ({
 
   const pathToTargetStep = useBuilderStateContext(
     dataSelectorUtils.getPathToTargetStep,
-  );
-  const mentionsFromCurrentSelectedData = useBuilderStateContext(
-    dataSelectorUtils.getAllStepsMentionsFromCurrentSelectedData,
   );
 
   const stepIds: string[] = pathToTargetStep.map((p) => p.id);
@@ -65,7 +58,6 @@ const DataSelector = ({
   const { isLoading } = useSelectorData({
     stepIds,
     flowVersionId,
-    useNewExternalTestData: !!useNewExternalTestData,
     isDataSelectorVisible,
     initialLoad,
     setInitialLoad,
@@ -73,9 +65,6 @@ const DataSelector = ({
   });
 
   const mentions = useMemo(() => {
-    if (!useNewExternalTestData) {
-      return mentionsFromCurrentSelectedData;
-    }
     const stepTestOutput: Record<string, StepOutputWithData> = {};
     stepIds.forEach((id) => {
       const cached = stepTestOutputCache.getStepData(id);
@@ -86,31 +75,7 @@ const DataSelector = ({
       stepTestOutput,
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    useNewExternalTestData,
-    mentionsFromCurrentSelectedData,
-    pathToTargetStep,
-    stepIds,
-    forceRender,
-    initialLoad,
-  ]);
-
-  // OBSOLETE: This effect is now considered obsolete and only used until flag is removed
-  useEffect(() => {
-    if (!useNewExternalTestData && mentionsFromCurrentSelectedData) {
-      const traverseAndCache = (nodes: MentionTreeNode[]) => {
-        nodes.forEach((node) => {
-          if (stepTestOutputCache.getExpanded(node.key) === undefined) {
-            stepTestOutputCache.setExpanded(node.key, false);
-          }
-          if (node.children) {
-            traverseAndCache(node.children);
-          }
-        });
-      };
-      traverseAndCache(mentionsFromCurrentSelectedData);
-    }
-  }, [useNewExternalTestData, mentionsFromCurrentSelectedData]);
+  }, [pathToTargetStep, stepIds, forceRender, initialLoad]);
 
   const getExpanded = (nodeKey: string) =>
     stepTestOutputCache.getExpanded(nodeKey);
