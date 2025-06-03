@@ -470,4 +470,29 @@ describe('flowRunUtils.findLoopsState', () => {
     );
     expect(result).toEqual({ loop1: 0, loop2: 1 });
   });
+
+  it('returns currentLoopsState if the failed step is the parent loop itself', () => {
+    const run = {
+      steps: {
+        loop1: {
+          type: ActionType.LOOP_ON_ITEMS,
+          status: 'FAILED',
+          output: {
+            iterations: [
+              { step1: { status: 'SUCCEEDED' } },
+              { step1: { status: 'SUCCEEDED' } },
+            ],
+          },
+        },
+      },
+    } as any;
+    const currentLoopsState = { loop1: 1 };
+    const result = flowRunUtils.findLoopsState(
+      flowVersion,
+      run,
+      currentLoopsState,
+    );
+    // Since the failed step is the parent loop, should just return the current state
+    expect(result).toEqual({ loop: 1 });
+  });
 });

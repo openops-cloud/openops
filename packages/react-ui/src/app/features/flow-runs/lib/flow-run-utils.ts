@@ -15,7 +15,6 @@ import {
   FlowRun,
   FlowRunStatus,
   FlowVersion,
-  LoopOnItemsAction,
   LoopStepOutput,
   LoopStepResult,
   StepOutput,
@@ -163,31 +162,28 @@ function findLoopsState(
     .filter((s) => s.type === ActionType.LOOP_ON_ITEMS);
   const failedStepInfo = run.steps ? findFailedStep(run) : null;
 
-  const res = loops.reduce(
-    (res: Record<string, number>, step: LoopOnItemsAction) => {
-      const loopName = step.name;
-      if (failedStepInfo) {
-        const isFailedStepChildOfLoop = flowHelper.isChildOf(
-          step,
-          failedStepInfo.stepName,
-        );
-        if (
-          isFailedStepChildOfLoop &&
-          failedStepInfo.loopIndexes[loopName] !== undefined
-        ) {
-          return {
-            ...res,
-            [loopName]: failedStepInfo.loopIndexes[loopName],
-          };
-        }
+  const res = loops.reduce((res: Record<string, number>, step) => {
+    const loopName = step.name;
+    if (failedStepInfo) {
+      const isFailedStepParent = flowHelper.isChildOf(
+        step,
+        failedStepInfo.stepName,
+      );
+      if (
+        isFailedStepParent &&
+        failedStepInfo.loopIndexes[loopName] !== undefined
+      ) {
+        return {
+          ...res,
+          [loopName]: failedStepInfo.loopIndexes[loopName],
+        };
       }
-      return {
-        ...res,
-        [loopName]: currentLoopsState[loopName] ?? 0,
-      };
-    },
-    currentLoopsState,
-  );
+    }
+    return {
+      ...res,
+      [loopName]: currentLoopsState[loopName] ?? 0,
+    };
+  }, currentLoopsState);
 
   return res;
 }
