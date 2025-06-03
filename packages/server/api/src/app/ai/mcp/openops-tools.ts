@@ -121,6 +121,41 @@ export async function getOpenOpsTools(
         );
       });
       logger.info('[OPENOPS TOOLS] Python version:', { pythonVersion });
+
+      // Test Python environment and imports
+      const testCommand = `${pythonPath} -c "import sys; import json; import httpx; import fastmcp; print('Python environment OK')"`;
+      try {
+        const testResult = await new Promise<string>((resolve, reject) => {
+          exec(
+            testCommand,
+            (error: Error | null, stdout: string, stderr: string) => {
+              if (error) {
+                logger.error(
+                  '[OPENOPS TOOLS] Python environment test failed:',
+                  {
+                    error: error.message,
+                    stderr,
+                  },
+                );
+                reject(error);
+              } else {
+                resolve(stdout.trim());
+              }
+            },
+          );
+        });
+        logger.info('[OPENOPS TOOLS] Python environment test:', {
+          result: testResult,
+        });
+      } catch (error) {
+        logger.error(
+          '[OPENOPS TOOLS] Python environment verification failed:',
+          {
+            error: error instanceof Error ? error.message : String(error),
+          },
+        );
+        throw new Error('Python environment verification failed');
+      }
     } catch (error) {
       logger.error('[OPENOPS TOOLS] Error checking Python version:', error);
     }
@@ -153,14 +188,20 @@ export async function getOpenOpsTools(
           LOGZIO_TOKEN: logzioToken ?? '',
           ENVIRONMENT:
             system.get<string>(SharedSystemProp.ENVIRONMENT_NAME) ?? '',
-          PYTHONUNBUFFERED: '1', // Ensure Python output is not buffered
-          PYTHONIOENCODING: 'utf-8', // Ensure proper encoding
+          PYTHONUNBUFFERED: '1',
+          PYTHONIOENCODING: 'utf-8',
+          PYTHONPATH: basePath,
+        },
+        stderr: (data) => {
+          logger.error('[OPENOPS TOOLS] Python stderr:', {
+            output: data.toString(),
+          });
         },
       }),
     });
 
-    // Wait longer for Python process to initialize
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    // Wait longer for Python process to initialize and log any startup issues
+    await new Promise((resolve) => setTimeout(resolve, 5000));
 
     // Verify the client is still connected
     try {
