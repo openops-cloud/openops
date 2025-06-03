@@ -24,6 +24,17 @@ const networkUtlsMock = {
   getInternalApiUrl: jest.fn(),
 };
 
+const fsMock = {
+  writeFile: jest.fn(),
+};
+
+const osMock = {
+  tmpdir: jest.fn().mockReturnValue('/tmp'),
+};
+
+jest.mock('fs/promises', () => fsMock);
+jest.mock('os', () => osMock);
+
 jest.mock('@openops/server-shared', () => ({
   ...jest.requireActual('@openops/server-shared'),
   system: systemMock,
@@ -76,22 +87,45 @@ describe('getOpenOpsTools', () => {
       client: mockClient,
       toolSet: mockTools,
     });
+
+    expect(fsMock.writeFile).toHaveBeenCalledWith(
+      '/tmp/openapi-schema.json',
+      JSON.stringify({ openapi: '3.1' }),
+      'utf-8',
+    );
+
     expect(createMcpClientMock).toHaveBeenCalledWith({
       transport: expect.objectContaining({
-        serverParams: {
-          command: `${mockBasePath}/.venv/bin/python`,
-          args: [`${mockBasePath}/main.py`],
-          env: {
-            OPENAPI_SCHEMA: JSON.stringify({ openapi: '3.1' }),
-            AUTH_TOKEN: 'test-auth-token',
-            API_BASE_URL: mockApiBaseUrl,
-            OPENOPS_MCP_SERVER_PATH: mockBasePath,
-            LOGZIO_TOKEN: 'test-logzio-token',
-            ENVIRONMENT: 'test-environment',
-          },
+        command: `${mockBasePath}/.venv/bin/python`,
+        args: [`${mockBasePath}/main.py`],
+        env: {
+          OPENAPI_SCHEMA_PATH: '/tmp/openapi-schema.json',
+          AUTH_TOKEN: 'test-auth-token',
+          API_BASE_URL: mockApiBaseUrl,
+          OPENOPS_MCP_SERVER_PATH: mockBasePath,
+          LOGZIO_TOKEN: 'test-logzio-token',
+          ENVIRONMENT: 'test-environment',
         },
       }),
     });
+  });
+
+  it('should only write schema file once for multiple calls', async () => {
+    const mockClient = {
+      tools: jest.fn().mockResolvedValue(mockTools),
+    };
+    createMcpClientMock.mockResolvedValue(mockClient);
+
+    await getOpenOpsTools(mockApp, 'test-auth-token');
+    await getOpenOpsTools(mockApp, 'test-auth-token');
+    await getOpenOpsTools(mockApp, 'test-auth-token');
+
+    expect(fsMock.writeFile).toHaveBeenCalledTimes(1);
+    expect(fsMock.writeFile).toHaveBeenCalledWith(
+      '/tmp/openapi-schema.json',
+      JSON.stringify({ openapi: '3.1' }),
+      'utf-8',
+    );
   });
 
   it('should return empty object and log error if MCP client creation fails', async () => {

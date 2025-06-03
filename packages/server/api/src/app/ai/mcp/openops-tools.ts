@@ -8,8 +8,25 @@ import {
 import { experimental_createMCPClient } from 'ai';
 import { Experimental_StdioMCPTransport } from 'ai/mcp-stdio';
 import { FastifyInstance } from 'fastify';
+import fs from 'fs/promises';
+import os from 'os';
 import path from 'path';
 import { MCPTool } from './mcp-tools';
+
+let cachedSchemaPath: string | undefined;
+
+async function getOpenApiSchemaPath(app: FastifyInstance): Promise<string> {
+  if (!cachedSchemaPath) {
+    const openApiSchema = app.swagger();
+    cachedSchemaPath = path.join(os.tmpdir(), 'openapi-schema.json');
+    await fs.writeFile(
+      cachedSchemaPath,
+      JSON.stringify(openApiSchema),
+      'utf-8',
+    );
+  }
+  return cachedSchemaPath;
+}
 
 export async function getOpenOpsTools(
   app: FastifyInstance,
@@ -18,11 +35,10 @@ export async function getOpenOpsTools(
   const basePath = system.getOrThrow<string>(
     AppSystemProp.OPENOPS_MCP_SERVER_PATH,
   );
-
   const pythonPath = path.join(basePath, '.venv', 'bin', 'python');
   const serverPath = path.join(basePath, 'main.py');
 
-  const openApiSchema = app.swagger();
+  const tempSchemaPath = await getOpenApiSchemaPath(app);
 
   try {
     const openopsClient = await experimental_createMCPClient({
@@ -30,7 +46,7 @@ export async function getOpenOpsTools(
         command: pythonPath,
         args: [serverPath],
         env: {
-          OPENAPI_SCHEMA: JSON.stringify(openApiSchema),
+          OPENAPI_SCHEMA_PATH: tempSchemaPath,
           AUTH_TOKEN: authToken,
           API_BASE_URL: networkUtls.getInternalApiUrl(),
           OPENOPS_MCP_SERVER_PATH: basePath,
