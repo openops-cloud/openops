@@ -16,7 +16,7 @@ import { MCPTool } from './mcp-tools';
 let cachedSchemaPath: string | undefined;
 
 async function getOpenApiSchemaPath(app: FastifyInstance): Promise<string> {
-  logger.info('Retrieving OpenAPI schema path');
+  logger.info('[OPENOPS TOOLS]Retrieving OpenAPI schema path');
   if (!cachedSchemaPath) {
     const openApiSchema = app.swagger();
     cachedSchemaPath = path.join(os.tmpdir(), 'openapi-schema.json');
@@ -25,11 +25,14 @@ async function getOpenApiSchemaPath(app: FastifyInstance): Promise<string> {
       JSON.stringify(openApiSchema),
       'utf-8',
     );
-    logger.info('Writing OpenAPI schema to:', {
+    logger.info('[OPENOPS TOOLS]First time writing OpenAPI schema to:', {
       cachedSchemaPath,
       schema: JSON.stringify(openApiSchema),
     });
   }
+  logger.info('[OPENOPS TOOLS] Returning cached OpenAPI schema path:', {
+    cachedSchemaPath,
+  });
   return cachedSchemaPath;
 }
 
@@ -37,7 +40,7 @@ export async function getOpenOpsTools(
   app: FastifyInstance,
   authToken: string,
 ): Promise<MCPTool> {
-  logger.info('Creating OpenOps MCP client');
+  logger.info('[OPENOPS TOOLS] Creating OpenOps MCP client');
   const basePath = system.getOrThrow<string>(
     AppSystemProp.OPENOPS_MCP_SERVER_PATH,
   );
@@ -48,7 +51,9 @@ export async function getOpenOpsTools(
   const serverPath = path.join(basePath, 'main.py');
 
   const tempSchemaPath = await getOpenApiSchemaPath(app);
-
+  logger.info('[OPENOPS TOOLS] Temp schema path:', {
+    tempSchemaPath,
+  });
   try {
     logger.info('Initializing OpenOps MCP client with Python path:', {
       pythonPath,
@@ -70,13 +75,13 @@ export async function getOpenOpsTools(
     });
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    logger.info('Finished Initializing');
+    logger.info('[OPENOPS TOOLS]Finished Initializing');
     return {
       client: openopsClient,
       toolSet: await openopsClient.tools(),
     };
   } catch (error) {
-    logger.error('Failed to create OpenOps MCP client:', {
+    logger.error('[OPENOPS TOOLS] Failed to create OpenOps MCP client:', {
       error: error instanceof Error ? error.message : String(error),
       apiBaseUrl,
     });
