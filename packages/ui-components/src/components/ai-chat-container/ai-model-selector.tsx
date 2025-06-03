@@ -67,10 +67,10 @@ const AiModelSelector = ({
               className="flex items-center gap-1 rounded-xs"
             >
               {selectedModel}
-              {hasOptions && (
+              {isModelSelectorLoading && <LoadingSpinner size={12} />}
+              {hasOptions && !isModelSelectorLoading && (
                 <ChevronDown className="h-3 w-3 shrink-0 opacity-50" />
               )}
-              {isModelSelectorLoading && <LoadingSpinner size={16} />}
             </Badge>
           </div>
         </PopoverTrigger>
