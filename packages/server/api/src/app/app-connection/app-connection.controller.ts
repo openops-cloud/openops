@@ -201,7 +201,8 @@ const DeleteAppConnectionRequest = {
   schema: {
     tags: ['app-connections'],
     security: [SERVICE_KEY_SECURITY_OPENAPI],
-    description: 'Delete an app connection',
+    description:
+      'Delete an app connection by its ID. This endpoint removes a specific app connection from the project and triggers a connection deleted event for tracking purposes.',
     params: Type.Object({
       id: OpenOpsId,
     }),
@@ -218,7 +219,8 @@ const GetAppConnectionRequest = {
   },
   schema: {
     tags: ['app-connections'],
-    description: 'Get an app connection',
+    description:
+      'Get an app connection by its ID. This endpoint retrieves detailed information about a specific app connection, including its configuration and settings. Sensitive data is automatically redacted in the response.',
     params: Type.Object({
       id: OpenOpsId,
     }),

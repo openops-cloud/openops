@@ -19,6 +19,7 @@ const ListAiProvidersRequest = {
   },
   schema: {
     tags: ['ai-providers'],
-    description: 'Get ai providers with their models',
+    description:
+      'List all available AI providers and their models. This endpoint retrieves information about all supported AI service providers and the models they offer, enabling integration with various AI services.',
   },
 };

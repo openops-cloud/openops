@@ -51,6 +51,8 @@ const CreateWebhookSimulationRequest = {
     body: Type.Object({
       flowId: Type.String(),
     }),
+    description:
+      'Create a webhook simulation for testing purposes. This endpoint allows you to simulate webhook requests for a specific flow, enabling testing of webhook-triggered flows without actual external requests.',
   },
 };
 
@@ -62,7 +64,16 @@ const GetWebhookSimulationRequest = {
     querystring: Type.Object({
       flowId: Type.String(),
     }),
+    description:
+      'Get the current webhook simulation status for a specific flow. This endpoint retrieves information about an active webhook simulation, including its configuration and status.',
   },
 };
 
-const DeleteWebhookSimulationRequest = GetWebhookSimulationRequest;
+const DeleteWebhookSimulationRequest = {
+  ...GetWebhookSimulationRequest,
+  schema: {
+    ...GetWebhookSimulationRequest.schema,
+    description:
+      'Delete an active webhook simulation for a specific flow. This endpoint terminates any ongoing webhook simulation and cleans up associated resources.',
+  },
+};

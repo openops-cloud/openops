@@ -1,4 +1,7 @@
-import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
+import {
+  FastifyPluginAsyncTypebox,
+  Type,
+} from '@fastify/type-provider-typebox';
 import {
   JobType,
   LATEST_JOB_DATA_SCHEMA_VERSION,
@@ -27,7 +30,7 @@ import { getJobPriority } from '../workers/queue/queue-manager';
 export const webhookController: FastifyPluginAsyncTypebox = async (app) => {
   app.all(
     '/:flowId/sync',
-    WEBHOOK_PARAMS,
+    SyncWebhookRequest,
     async (request: FastifyRequest<{ Params: WebhookUrlParams }>, reply) => {
       const response = await handleWebhook({
         request,
@@ -44,7 +47,7 @@ export const webhookController: FastifyPluginAsyncTypebox = async (app) => {
 
   app.all(
     '/:flowId',
-    WEBHOOK_PARAMS,
+    WebhookRequest,
     async (request: FastifyRequest<{ Params: WebhookUrlParams }>, reply) => {
       const response = await handleWebhook({
         request,
@@ -72,7 +75,7 @@ export const webhookController: FastifyPluginAsyncTypebox = async (app) => {
       .send(response.body);
   });
 
-  app.all('/:flowId/test', WEBHOOK_PARAMS, async (request, reply) => {
+  app.all('/:flowId/test', TestWebhookRequest, async (request, reply) => {
     const response = await handleWebhook({
       request,
       flowId: request.params.flowId,
@@ -209,12 +212,38 @@ const WEBHOOK_PARAMS = {
   },
 };
 
-const WEBHOOK_QUERY_PARAMS = {
-  config: {
-    allowedPrincipals: ALL_PRINCIPAL_TYPES,
-    skipAuth: true,
+const SyncWebhookRequest = {
+  ...WEBHOOK_PARAMS,
+  schema: {
+    ...WEBHOOK_PARAMS.schema,
+    description:
+      'Synchronize a webhook for a specific flow. This endpoint processes incoming webhook requests and triggers the associated flow execution in synchronous mode.',
   },
+};
+
+const WebhookRequest = {
+  ...WEBHOOK_PARAMS,
+  schema: {
+    ...WEBHOOK_PARAMS.schema,
+    description:
+      'Handle webhook requests for a specific flow. This endpoint processes incoming webhook requests and triggers the associated flow execution.',
+  },
+};
+
+const TestWebhookRequest = {
+  ...WEBHOOK_PARAMS,
+  schema: {
+    ...WEBHOOK_PARAMS.schema,
+    description:
+      'Test a webhook for a specific flow. This endpoint allows you to send test webhook requests to verify the flow configuration and execution.',
+  },
+};
+
+const WEBHOOK_QUERY_PARAMS = {
+  ...WEBHOOK_PARAMS,
   schema: {
     querystring: WebhookUrlParams,
+    description:
+      'Handle webhook requests for a specific flow using query parameters. This endpoint processes incoming webhook requests and triggers the associated flow execution. It supports both synchronous and asynchronous processing modes.',
   },
 };

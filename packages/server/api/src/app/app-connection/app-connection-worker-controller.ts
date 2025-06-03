@@ -49,5 +49,7 @@ const GetAppConnectionRequest = {
     params: Type.Object({
       connectionName: Type.String(),
     }),
+    description:
+      'Get an app connection by its name. This endpoint is specifically for worker processes to retrieve app connection details by name, with proper error handling for non-existent connections.',
   },
 };
