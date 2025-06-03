@@ -1,11 +1,14 @@
-import { connectionProviders } from '../../src/lib/connection-providers';
-import { ConnectionProvider } from '../../src/lib/connection-providers/providers';
-import { providerMap } from '../../src/lib/connection-providers/providers-map';
+import {
+  ConnectionProvider,
+  getAllConnectionProviders,
+  getConnectionProvider,
+} from '../../../src/lib/app-connection/connection-providers/providers';
+import { providerMap } from '../../../src/lib/app-connection/connection-providers/providers-map';
 
 describe('connectionProviders', () => {
   describe('getAll', () => {
     it('should return all providers', () => {
-      const result = connectionProviders.getAll();
+      const result = getAllConnectionProviders();
 
       expect(result).toEqual(
         expect.arrayContaining(Object.values(providerMap)),
@@ -16,7 +19,7 @@ describe('connectionProviders', () => {
 
   describe('getOne', () => {
     it('should return a specific provider by id', () => {
-      const provider = connectionProviders.getOne(ConnectionProvider.AWS);
+      const provider = getConnectionProvider(ConnectionProvider.AWS);
 
       expect(provider).toEqual(providerMap[ConnectionProvider.AWS]);
       expect(provider.id).toBe(ConnectionProvider.AWS);
@@ -26,7 +29,7 @@ describe('connectionProviders', () => {
 
     it('should return a specific provider for each ConnectionProvider enum value', () => {
       Object.values(ConnectionProvider).forEach((providerId) => {
-        const provider = connectionProviders.getOne(providerId);
+        const provider = getConnectionProvider(providerId);
 
         expect(provider).toBeDefined();
         expect(provider.id).toBe(providerId);

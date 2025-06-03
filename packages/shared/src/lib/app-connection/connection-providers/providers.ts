@@ -1,8 +1,10 @@
-export interface Provider {
+import { providerMap } from './providers-map';
+
+export type Provider = {
   id: ConnectionProvider;
   displayName: string;
   logoUrl: string;
-}
+};
 
 export enum ConnectionProvider {
   AWS = 'AWS',
@@ -19,4 +21,12 @@ export enum ConnectionProvider {
   SNOWFLAKE = 'SNOWFLAKE',
   TERNARY = 'TERNARY',
   UMBRELLA = 'UMBRELLA',
+}
+
+export function getAllConnectionProviders(): Provider[] {
+  return Object.values(providerMap);
+}
+
+export function getConnectionProvider(id: ConnectionProvider): Provider {
+  return providerMap[id];
 }
