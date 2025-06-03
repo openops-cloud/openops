@@ -3301,6 +3301,7 @@ describe('duplicateStep', () => {
     valid: true,
     state: FlowVersionState.DRAFT,
     trigger: {
+      id: 'trigger',
       name: 'trigger',
       type: TriggerType.EMPTY,
       valid: true,
