@@ -33,7 +33,7 @@ export const BlockAuth = {
       ...request,
       valueSchema: undefined,
       type: PropertyType.SECRET_TEXT,
-      required: true,
+      required: request.required ?? true,
     } as unknown as R extends true
       ? SecretTextProperty<true>
       : SecretTextProperty<false>;
