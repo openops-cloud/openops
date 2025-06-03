@@ -92,7 +92,7 @@ const TestActionSection = React.memo(
           setErrorMessage(undefined);
 
           if (useNewExternalTestData) {
-            stepTestOutputCache.setStepData(formValues.id!, {
+            stepTestOutputCache.setStepData(formValues.id, {
               output: formattedResponse,
               lastTestDate: dayjs().toISOString(),
             });
@@ -123,7 +123,7 @@ const TestActionSection = React.memo(
 
     const handleTest = () => {
       if (useNewExternalTestData) {
-        stepTestOutputCache.resetExpandedForStep(formValues.id!);
+        stepTestOutputCache.resetExpandedForStep(formValues.id);
       }
       if (
         selectedStep.type === ActionType.BLOCK &&
@@ -140,7 +140,7 @@ const TestActionSection = React.memo(
     const confirmRiskyStep = () => {
       setRiskyStepConfirmationMessage(null);
       if (useNewExternalTestData) {
-        stepTestOutputCache.resetExpandedForStep(formValues.id!);
+        stepTestOutputCache.resetExpandedForStep(formValues.id);
       }
       mutate();
     };

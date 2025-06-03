@@ -1,14 +1,14 @@
 import { UseChatHelpers } from '@ai-sdk/react';
 import { t } from 'i18next';
-import { Bot, Send as SendIcon } from 'lucide-react';
+import { Bot } from 'lucide-react';
 import { ReactNode, useEffect, useRef } from 'react';
-import TextareaAutosize from 'react-textarea-autosize';
 import { cn } from '../../lib/cn';
 import { AI_CHAT_SCROLL_DELAY } from '../../lib/constants';
-import { Button } from '../../ui/button';
 import { ScrollArea } from '../../ui/scroll-area';
 import { BoxSize, ResizableArea } from '../resizable-area';
+import { AiChatInput } from './ai-chat-input';
 import { AiChatSizeTogglers } from './ai-chat-size-togglers';
+import { AiModelSelectorProps } from './ai-model-selector';
 import { AI_CHAT_CONTAINER_SIZES, AiAssistantChatSizeState } from './types';
 
 type AiAssistantChatContainerProps = {
@@ -23,7 +23,8 @@ type AiAssistantChatContainerProps = {
   isEmpty: boolean;
   className?: string;
   children?: ReactNode;
-} & Pick<UseChatHelpers, 'input' | 'handleInputChange' | 'handleSubmit'>;
+} & Pick<UseChatHelpers, 'input' | 'handleInputChange' | 'handleSubmit'> &
+  AiModelSelectorProps;
 
 export const CHAT_MIN_WIDTH = 375;
 export const PARENT_INITIAL_HEIGHT_GAP = 220;
@@ -44,6 +45,10 @@ const AiAssistantChatContainer = ({
   handleInputChange,
   handleSubmit,
   input,
+  availableModels,
+  selectedModel,
+  onModelSelected,
+  isModelSelectorLoading,
 }: AiAssistantChatContainerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollViewportRef = useRef<HTMLDivElement>(null);
@@ -146,35 +151,16 @@ const AiAssistantChatContainer = ({
                   )}
                 </div>
               </ScrollArea>
-              <div className="w-full px-4 relative">
-                <TextareaAutosize
-                  className="w-full h-full min-h-12 resize-none rounded-lg border-gray-200 border-[1px] dark:text-primary-700 text-base font-normal leading-normal p-3 pr-12 outline-none dark:bg-accent"
-                  minRows={1}
-                  maxRows={4}
-                  placeholder={t('Type your question here…')}
-                  value={input}
-                  onChange={handleInputChange}
-                  onKeyDown={(ev) => {
-                    if (ev.key === 'Enter' && !ev.shiftKey) {
-                      ev.preventDefault();
-                      ev.stopPropagation();
-                      handleSubmit();
-                    }
-                  }}
-                />
-
-                <Button
-                  size="icon"
-                  variant="transparent"
-                  className="absolute right-7 bottom-2.5"
-                  onClick={handleSubmit}
-                >
-                  <SendIcon
-                    size={20}
-                    className="text-gray-400 hover:text-gray-600"
-                  />
-                </Button>
-              </div>
+              <AiChatInput
+                input={input}
+                handleInputChange={handleInputChange}
+                handleSubmit={handleSubmit}
+                availableModels={availableModels}
+                selectedModel={selectedModel}
+                onModelSelected={onModelSelected}
+                isModelSelectorLoading={isModelSelectorLoading}
+                placeholder={t('Type your question here…')}
+              />
             </div>
           </div>
         </div>
