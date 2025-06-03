@@ -17,23 +17,42 @@ import { MCPTool } from './mcp-tools';
 let cachedSchemaPath: string | undefined;
 
 async function getOpenApiSchemaPath(app: FastifyInstance): Promise<string> {
-  logger.info('[OPENOPS TOOLS]Retrieving OpenAPI schema path');
+  logger.info('[OPENOPS TOOLS] Retrieving OpenAPI schema path');
   if (!cachedSchemaPath) {
     const openApiSchema = app.swagger();
-    cachedSchemaPath = path.join(os.tmpdir(), 'openapi-schema.json');
-    await fs.writeFile(
-      cachedSchemaPath,
-      JSON.stringify(openApiSchema),
-      'utf-8',
-    );
-    logger.info('[OPENOPS TOOLS]First time writing OpenAPI schema to:', {
-      cachedSchemaPath,
-      schema: JSON.stringify(openApiSchema),
-    });
+    const tempPath = path.join(os.tmpdir(), 'openapi-schema.json');
+    try {
+      await fs.writeFile(tempPath, JSON.stringify(openApiSchema), 'utf-8');
+      await fs.access(tempPath);
+      cachedSchemaPath = tempPath;
+      logger.info('[OPENOPS TOOLS] Successfully wrote OpenAPI schema to:', {
+        cachedSchemaPath,
+      });
+    } catch (error) {
+      logger.error('[OPENOPS TOOLS] Failed to write OpenAPI schema:', {
+        error: error instanceof Error ? error.message : String(error),
+        tempPath,
+      });
+      throw new Error('Failed to write OpenAPI schema file');
+    }
+  } else {
+    try {
+      await fs.access(cachedSchemaPath);
+      logger.info('[OPENOPS TOOLS] Using existing OpenAPI schema at:', {
+        cachedSchemaPath,
+      });
+    } catch (error) {
+      logger.warn(
+        '[OPENOPS TOOLS] Cached schema file not found, regenerating:',
+        {
+          cachedSchemaPath,
+          error: error instanceof Error ? error.message : String(error),
+        },
+      );
+      cachedSchemaPath = undefined;
+      return getOpenApiSchemaPath(app);
+    }
   }
-  logger.info('[OPENOPS TOOLS] Returning cached OpenAPI schema path:', {
-    cachedSchemaPath,
-  });
   return cachedSchemaPath;
 }
 
