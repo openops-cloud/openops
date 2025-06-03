@@ -25,7 +25,7 @@ async function getOpenApiSchemaPath(app: FastifyInstance): Promise<string> {
       JSON.stringify(openApiSchema),
       'utf-8',
     );
-    logger.info('Writing OpenAPI schema to:', cachedSchemaPath);
+    logger.info('Writing OpenAPI schema to:', { cachedSchemaPath });
   }
   return cachedSchemaPath;
 }
@@ -44,10 +44,9 @@ export async function getOpenOpsTools(
   const tempSchemaPath = await getOpenApiSchemaPath(app);
 
   try {
-    logger.info(
-      'Initializing OpenOps MCP client with Python path:',
+    logger.info('Initializing OpenOps MCP client with Python path:', {
       pythonPath,
-    );
+    });
     const openopsClient = await experimental_createMCPClient({
       transport: new Experimental_StdioMCPTransport({
         command: pythonPath,
@@ -69,7 +68,7 @@ export async function getOpenOpsTools(
       toolSet: await openopsClient.tools(),
     };
   } catch (error) {
-    logger.error('Failed to create OpenOps MCP client:', error);
+    logger.error('Failed to create OpenOps MCP client:', { error });
     return {
       client: undefined,
       toolSet: {},
