@@ -3,11 +3,11 @@ import {
   FastifyPluginCallbackTypebox,
   Type,
 } from '@fastify/type-provider-typebox';
+import { system } from '@openops/server-shared';
 import {
   AppConnectionWithoutSensitiveData,
   ListAppConnectionsRequestQuery,
   OpenOpsId,
-  OpsEdition,
   PatchAppConnectionRequestBody,
   Permission,
   PrincipalType,
@@ -150,7 +150,7 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
         projectId: request.principal.projectId,
         release: await flagService.getCurrentRelease(),
         includeHidden: false,
-        edition: OpsEdition.COMMUNITY,
+        edition: system.getEdition(),
       });
 
       const authMetadata: Record<string, any> = {};
