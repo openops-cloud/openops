@@ -6,6 +6,8 @@ import {
 import { system } from '@openops/server-shared';
 import {
   AppConnectionWithoutSensitiveData,
+  ConnectionProvider,
+  getConnectionProvider,
   ListAppConnectionsRequestQuery,
   OpenOpsId,
   PatchAppConnectionRequestBody,
@@ -153,15 +155,28 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
         edition: system.getEdition(),
       });
 
-      const authMetadata: Record<string, any> = {};
+      const providerMetadata: Record<string, any> = {};
 
       for (const block of blocks) {
         if (block.auth) {
-          authMetadata[block.name] = block.auth;
+          const provider = block.auth.provider;
+          if (!providerMetadata[provider]) {
+            const providerInfo = getConnectionProvider(
+              provider as ConnectionProvider,
+            );
+            providerMetadata[provider] = {
+              id: providerInfo.id,
+              displayName: providerInfo.displayName,
+              logoUrl: providerInfo.logoUrl,
+              supportedBlocks: [],
+              props: block.auth.props || {},
+            };
+          }
+          providerMetadata[provider].supportedBlocks.push(block.name);
         }
       }
 
-      return authMetadata;
+      return providerMetadata;
     },
   );
 
