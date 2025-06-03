@@ -192,11 +192,6 @@ export async function getOpenOpsTools(
           PYTHONIOENCODING: 'utf-8',
           PYTHONPATH: basePath,
         },
-        stderr: (data) => {
-          logger.error('[OPENOPS TOOLS] Python stderr:', {
-            output: data.toString(),
-          });
-        },
       }),
     });
 
