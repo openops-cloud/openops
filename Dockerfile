@@ -15,26 +15,23 @@ RUN <<-```
     npx -y mint-mcp add docs.openops.com && test -e /root/.mcp/docs.openops.com
 ```
 
-WORKDIR /root/.mcp
-RUN <<-EOF
+WORKDIR /root/.mcp/superset
+RUN <<-```
     set -ex
-    wget -qO- https://astral.sh/uv/install.sh | sh
-    export PATH="$HOME/.local/bin:$PATH"
-
-    # Superset MCP
-    git clone --depth 1 https://github.com/openops-cloud/superset-mcp superset
-    cd superset
+    git clone https://github.com/openops-cloud/superset-mcp .
     git checkout 1c391f7d0a261ee51f7b1e6c413f1930418d17fe
-    uv venv && uv pip install .
-    cd ..
+    wget -qO- https://astral.sh/uv/install.sh | sh
+    python3 -m venv .venv && python3 -m venv pip install .
+```
 
-    # Openops MCP
-    git clone --depth 1 https://github.com/openops-cloud/openops-mcp openops
-    cd openops
+WORKDIR /root/.mcp/openops-mcp
+RUN <<-```
+    set -ex
+    git clone --depth 1 https://github.com/openops-cloud/openops-mcp .
     git checkout dad1afe41efa2c6882525421829198e443cada05
-    uv venv && uv pip install -r requirements.txt
-    cd ..
-EOF
+    wget -qO- https://astral.sh/uv/install.sh | sh && source $HOME/.local/bin/env
+    uv venv && . .venv/bin/activate && uv pip install -r requirements.txt
+```
 
 # Set up backend
 WORKDIR /usr/src/app
