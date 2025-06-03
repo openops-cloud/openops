@@ -5,6 +5,9 @@ export const aiSettingsApi = {
   getProviderOptions(): Promise<GetProvidersResponse[]> {
     return api.get<GetProvidersResponse[]>('/v1/ai/providers');
   },
+  getProviderModels(providerName: string): Promise<GetProvidersResponse> {
+    return api.get<GetProvidersResponse>(`/v1/ai/providers/${providerName}`);
+  },
   saveAiSettings(payload: any): Promise<GetProvidersResponse> {
     return api.post<GetProvidersResponse>('/v1/ai/config', payload);
   },

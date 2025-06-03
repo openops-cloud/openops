@@ -28,7 +28,7 @@ You can generate your API token from:
       required: true,
       validators: [Validators.email],
     }),
-    apiToken: BlockAuth.SecretText({
+    apiToken: Property.SecretText({
       displayName: 'API Token',
       description: 'Your Jira API Token',
       required: true,

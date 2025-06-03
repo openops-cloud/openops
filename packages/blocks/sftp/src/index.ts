@@ -22,7 +22,7 @@ export const sftpAuth = BlockAuth.CustomAuth({
       description: 'The username of the SFTP server',
       required: true,
     }),
-    password: BlockAuth.SecretText({
+    password: Property.SecretText({
       displayName: 'Password',
       description: 'The password of the SFTP server',
       required: true,
