@@ -9,15 +9,18 @@ export function getAwsClient<T>(
   credentials: AwsCredentials,
   region: string,
 ): T {
-  return new ClientConstructor({
-    region,
-    credentials: credentials.accessKeyId
-      ? {
-          accessKeyId: credentials.accessKeyId,
-          secretAccessKey: credentials.secretAccessKey,
-          sessionToken: credentials.sessionToken,
-        }
-      : undefined,
-    endpoint: credentials.endpoint ? credentials.endpoint : undefined,
-  });
+  const config: any = { region };
+  if (credentials.accessKeyId) {
+    config.credentials = {
+      accessKeyId: credentials.accessKeyId,
+      secretAccessKey: credentials.secretAccessKey,
+      sessionToken: credentials.sessionToken,
+    };
+  }
+  if (credentials.endpoint) {
+    config.endpoint = credentials.endpoint;
+  }
+
+
+  return new ClientConstructor(config);
 }
