@@ -96,6 +96,10 @@ const meta = {
     aiChatSize: 'docked',
     toggleAiChatState: fn(),
     onCreateNewChatClick: action('onNewChatClick'),
+    availableModels: ['gpt-3.5-turbo', 'gpt-4', 'claude-2'],
+    selectedModel: 'gpt-4',
+    onModelSelected: action('onModelSelected'),
+    isModelSelectorLoading: false,
   },
 
   tags: ['autodocs'],
