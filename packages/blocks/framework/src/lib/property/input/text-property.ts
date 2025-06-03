@@ -25,3 +25,16 @@ export const LongTextProperty = Type.Composite([
 export type LongTextProperty<R extends boolean> = BasePropertySchema &
   SupportsAISchema &
   TPropertyValue<string, PropertyType.LONG_TEXT, ValidationInputType.STRING, R>;
+
+export const SecretTextProperty = Type.Composite([
+  BasePropertySchema,
+  TPropertyValue(Type.String(), PropertyType.SECRET_TEXT),
+]);
+
+export type SecretTextProperty<R extends boolean> = BasePropertySchema &
+  TPropertyValue<
+    string,
+    PropertyType.SECRET_TEXT,
+    ValidationInputType.STRING,
+    R
+  >;

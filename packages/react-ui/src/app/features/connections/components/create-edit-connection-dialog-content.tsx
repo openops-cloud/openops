@@ -12,7 +12,7 @@ import {
   OAuth2Property,
   OAuth2Props,
   PropertyType,
-  SecretTextProperty,
+  SecretAuthProperty,
 } from '@openops/blocks-framework';
 import {
   Button,
@@ -251,7 +251,7 @@ const CreateEditConnectionDialogContent = ({
             ></FormField>
             {auth?.type === PropertyType.SECRET_TEXT && (
               <SecretTextConnectionSettings
-                authProperty={block.auth as SecretTextProperty<boolean>}
+                authProperty={block.auth as SecretAuthProperty<boolean>}
               />
             )}
             {auth?.type === PropertyType.BASIC_AUTH && (

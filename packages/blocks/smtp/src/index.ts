@@ -16,7 +16,7 @@ export const smtpAuth = BlockAuth.CustomAuth({
       displayName: 'Email',
       required: true,
     }),
-    password: BlockAuth.SecretText({
+    password: Property.SecretText({
       displayName: 'Password',
       required: true,
     }),

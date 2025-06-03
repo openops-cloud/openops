@@ -35,7 +35,7 @@ export const azureAuth = BlockAuth.CustomAuth({
       required: true,
       description: 'The Azure Application (client) ID.',
     }),
-    clientSecret: BlockAuth.SecretText({
+    clientSecret: Property.SecretText({
       displayName: 'Client Secret',
       required: true,
       description: 'The secret associated with the Azure Application.',
