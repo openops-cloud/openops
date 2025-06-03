@@ -296,3 +296,203 @@ describe('flowRunUtils.extractStepOutput', () => {
     expect(result).toEqual({ value: 'split-branch2-output' });
   });
 });
+describe('flowRunUtils.findFailedStep', () => {
+  it('returns the failed step info at the top level', () => {
+    const run = {
+      steps: {
+        step1: { status: 'SUCCEEDED' },
+        step2: { status: 'FAILED' },
+        step3: { status: 'SUCCEEDED' },
+      },
+    } as any;
+    const result = flowRunUtils.findFailedStep(run);
+    expect(result).toEqual({ stepName: 'step2', loopIndexes: {} });
+  });
+
+  it('returns the failed step info inside a loop', () => {
+    const run = {
+      steps: {
+        loop1: {
+          type: ActionType.LOOP_ON_ITEMS,
+          output: {
+            iterations: [
+              {
+                child: { status: 'SUCCEEDED' },
+              },
+              {
+                child: { status: 'FAILED' },
+              },
+            ],
+          },
+        },
+      },
+    } as any;
+    const result = flowRunUtils.findFailedStep(run);
+    expect(result).toEqual({ stepName: 'child', loopIndexes: { loop1: 1 } });
+  });
+
+  it('returns the failed step info inside nested loops', () => {
+    const run = {
+      steps: {
+        loop1: {
+          type: ActionType.LOOP_ON_ITEMS,
+          output: {
+            iterations: [
+              {
+                loop2: {
+                  type: ActionType.LOOP_ON_ITEMS,
+                  output: {
+                    iterations: [
+                      { child: { status: 'SUCCEEDED' } },
+                      { child: { status: 'FAILED' } },
+                    ],
+                  },
+                },
+              },
+            ],
+          },
+        },
+      },
+    } as any;
+    const result = flowRunUtils.findFailedStep(run);
+    expect(result).toEqual({
+      stepName: 'child',
+      loopIndexes: { loop1: 0, loop2: 1 },
+    });
+  });
+
+  it('returns null if there are no failed steps', () => {
+    const run = {
+      steps: {
+        step1: { status: 'SUCCEEDED' },
+        step2: { status: 'SUCCEEDED' },
+      },
+    } as any;
+    expect(flowRunUtils.findFailedStep(run)).toBeNull();
+  });
+});
+
+describe('flowRunUtils.findLoopsState', () => {
+  const trigger = {
+    name: 'trigger',
+    type: 'TRIGGER',
+    nextAction: {
+      name: 'loop1',
+      type: ActionType.LOOP_ON_ITEMS,
+      firstLoopAction: {
+        name: 'step1',
+        type: ActionType.CODE,
+      },
+    },
+  };
+
+  const flowVersion = { trigger } as any;
+
+  it('returns currentLoopsState if no failed step', () => {
+    const run = { steps: {} } as any;
+    const currentLoopsState = { loop1: 2 };
+    const result = flowRunUtils.findLoopsState(
+      flowVersion,
+      run,
+      currentLoopsState,
+    );
+    expect(result).toEqual({ loop1: 2 });
+  });
+
+  it('returns failed loop indexes if failed step is child of loop', () => {
+    const run = {
+      steps: {
+        loop1: {
+          type: ActionType.LOOP_ON_ITEMS,
+          output: {
+            iterations: [
+              { step1: { status: 'SUCCEEDED' } },
+              { step1: { status: 'FAILED' } },
+            ],
+          },
+        },
+      },
+    } as any;
+    const currentLoopsState = { loop1: 1 };
+    const result = flowRunUtils.findLoopsState(
+      flowVersion,
+      run,
+      currentLoopsState,
+    );
+    expect(result).toEqual({ loop1: 1 });
+  });
+
+  it('returns failed loop indexes for nested loops', () => {
+    const trigger = {
+      name: 'trigger',
+      type: 'TRIGGER',
+      nextAction: {
+        name: 'loop1',
+        type: ActionType.LOOP_ON_ITEMS,
+        firstLoopAction: {
+          name: 'loop2',
+          type: ActionType.LOOP_ON_ITEMS,
+          firstLoopAction: {
+            name: 'step1',
+            type: ActionType.CODE,
+          },
+        },
+      },
+    };
+    const flowVersion = { trigger } as any;
+    const run = {
+      steps: {
+        loop1: {
+          type: ActionType.LOOP_ON_ITEMS,
+          output: {
+            iterations: [
+              {
+                loop2: {
+                  type: ActionType.LOOP_ON_ITEMS,
+                  output: {
+                    iterations: [
+                      { step1: { status: 'SUCCEEDED' } },
+                      { step1: { status: 'FAILED' } },
+                    ],
+                  },
+                },
+              },
+            ],
+          },
+        },
+      },
+    } as any;
+    const currentLoopsState = { loop1: 0, loop2: 1 };
+    const result = flowRunUtils.findLoopsState(
+      flowVersion,
+      run,
+      currentLoopsState,
+    );
+    expect(result).toEqual({ loop1: 0, loop2: 1 });
+  });
+
+  it('returns currentLoopsState if the failed step is the parent loop itself', () => {
+    const run = {
+      steps: {
+        loop1: {
+          type: ActionType.LOOP_ON_ITEMS,
+          status: 'FAILED',
+          output: {
+            iterations: [
+              { step1: { status: 'SUCCEEDED' } },
+              { step1: { status: 'SUCCEEDED' } },
+            ],
+          },
+        },
+      },
+    } as any;
+    const currentLoopsState = { loop1: 1 };
+    const result = flowRunUtils.findLoopsState(
+      flowVersion,
+      run,
+      currentLoopsState,
+    );
+    // Since the failed step is the parent loop, should just return the current state
+    expect(result).toEqual({ loop1: 1 });
+  });
+});
