@@ -24,7 +24,7 @@ export const AiChatInput = ({
   placeholder,
 }: AiChatInputProps) => {
   return (
-    <div className={cn(`w-full px-4 `, className)}>
+    <div className={cn('w-full px-4', className)}>
       <div className="relative pt-1 pb-8 border-gray-200 border-[1px] rounded-lg overflow-hidden">
         <ScrollArea
           className="h-full p-3 pr-12"
