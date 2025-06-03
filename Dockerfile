@@ -28,9 +28,9 @@ WORKDIR /root/.mcp/openops-mcp
 RUN <<-```
     set -ex
     git clone https://github.com/openops-cloud/openops-mcp .
-    git checkout 38fef2c0450b5fe728c8fa61b0e7c629350fcd2c
+    git checkout 4191aabafc54c5fec5e982e911bc8631ee261722
     wget -qO- https://astral.sh/uv/install.sh | sh && source $HOME/.local/bin/env
-    python3 -m venv .venv && .venv/bin/pip install .
+    uv venv && . .venv/bin/activate && uv pip install -r requirements.txt
 ```
 
 # Set up backend
