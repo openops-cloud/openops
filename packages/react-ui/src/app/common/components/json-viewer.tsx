@@ -173,42 +173,40 @@ const JsonViewer = React.memo(({ json, title }: JsonViewerProps) => {
         </div>
       </div>
 
-      {
+      {isNil(json) ? (
+        <pre className="text-sm whitespace-pre-wrap overflow-x-auto p-2">
+          {json === null ? 'null' : 'undefined'}
+        </pre>
+      ) : (
         <>
-          {isNil(json) ? (
+          {typeof json !== 'string' && typeof json !== 'object' && (
             <pre className="text-sm whitespace-pre-wrap overflow-x-auto p-2">
-              {json === null ? 'null' : 'undefined'}
+              {JSON.stringify(json)}
             </pre>
-          ) : (
-            <>
-              {typeof json !== 'string' && typeof json !== 'object' && (
-                <pre className="text-sm whitespace-pre-wrap overflow-x-auto p-2">
-                  {JSON.stringify(json)}
-                </pre>
-              )}
-              {typeof json === 'string' && (
-                <pre className="text-sm whitespace-pre-wrap overflow-x-auto p-2">
-                  {json}
-                </pre>
-              )}
-              {typeof json === 'object' && (
-                <ReactJson
-                  style={{
-                    overflowX: 'auto',
-                  }}
-                  theme={viewerTheme}
-                  enableClipboard={false}
-                  groupArraysAfterLength={20}
-                  displayDataTypes={false}
-                  name={false}
-                  quotesOnKeys={false}
-                  src={json}
-                />
-              )}
-            </>
+          )}
+          {typeof json === 'string' && (
+            <pre className="text-sm whitespace-pre-wrap overflow-x-auto p-2">
+              {json}
+            </pre>
+          )}
+          {typeof json === 'object' && (
+            <ReactJson
+              style={{
+                overflowX: 'auto',
+              }}
+              theme={viewerTheme}
+              enableClipboard={false}
+              groupArraysAfterLength={20}
+              displayDataTypes={false}
+              name={false}
+              quotesOnKeys={false}
+              src={json}
+              collapsed={1}
+              collapseStringsAfterLength={50}
+            />
           )}
         </>
-      }
+      )}
     </div>
   );
 });
