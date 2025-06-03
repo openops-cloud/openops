@@ -7,6 +7,7 @@ import {
 } from '@openops/server-shared';
 import { experimental_createMCPClient } from 'ai';
 import { Experimental_StdioMCPTransport } from 'ai/mcp-stdio';
+import { exec } from 'child_process';
 import { FastifyInstance } from 'fastify';
 import fs from 'fs/promises';
 import os from 'os';
@@ -55,9 +56,56 @@ export async function getOpenOpsTools(
     tempSchemaPath,
   });
   try {
-    logger.info('Initializing OpenOps MCP client with Python path:', {
-      pythonPath,
-    });
+    logger.info(
+      '[OPENOPS TOOLS] Initializing OpenOps MCP client with Python path:',
+      {
+        pythonPath,
+        basePath,
+        venvExists: await fs
+          .access(pythonPath)
+          .then(() => true)
+          .catch(() => false),
+        serverExists: await fs
+          .access(serverPath)
+          .then(() => true)
+          .catch(() => false),
+      },
+    );
+
+    // Log environment variables (excluding sensitive ones)
+    const envVars = {
+      OPENAPI_SCHEMA_PATH: tempSchemaPath,
+      API_BASE_URL: apiBaseUrl,
+      OPENOPS_MCP_SERVER_PATH: basePath,
+      ENVIRONMENT: system.get<string>(SharedSystemProp.ENVIRONMENT_NAME) ?? '',
+      LOGZIO_TOKEN_EXISTS: !!logzioToken,
+      AUTH_TOKEN_EXISTS: !!authToken,
+    };
+    logger.info('[OPENOPS TOOLS] Environment variables:', envVars);
+
+    // Check Python version and virtual environment
+    try {
+      const pythonVersion = await new Promise<string>((resolve) => {
+        exec(
+          `${pythonPath} --version`,
+          (error: Error | null, stdout: string) => {
+            if (error) {
+              logger.error(
+                '[OPENOPS TOOLS] Failed to get Python version:',
+                error,
+              );
+              resolve('unknown');
+            } else {
+              resolve(stdout.trim());
+            }
+          },
+        );
+      });
+      logger.info('[OPENOPS TOOLS] Python version:', { pythonVersion });
+    } catch (error) {
+      logger.error('[OPENOPS TOOLS] Error checking Python version:', error);
+    }
+
     const openopsClient = await experimental_createMCPClient({
       transport: new Experimental_StdioMCPTransport({
         command: pythonPath,
@@ -75,7 +123,7 @@ export async function getOpenOpsTools(
     });
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    logger.info('[OPENOPS TOOLS]Finished Initializing');
+    logger.info('[OPENOPS TOOLS] Finished Initializing');
     return {
       client: openopsClient,
       toolSet: await openopsClient.tools(),
@@ -84,6 +132,8 @@ export async function getOpenOpsTools(
     logger.error('[OPENOPS TOOLS] Failed to create OpenOps MCP client:', {
       error: error instanceof Error ? error.message : String(error),
       apiBaseUrl,
+      errorStack: error instanceof Error ? error.stack : undefined,
+      errorName: error instanceof Error ? error.name : undefined,
     });
     return {
       client: undefined,
