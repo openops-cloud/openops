@@ -3,28 +3,13 @@ import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { ORGIN_PROJECT_ID_KEY, ORGIN_USER_ID_KEY } from '@/app/constants/cloud';
 import { cloudUserApi } from '@/app/features/cloud/lib/cloud-user-api';
 import { getProjectIdSearchParam } from '@/app/features/cloud/lib/utils';
-import { t } from 'i18next';
+import { CloudLoggedInBrief } from '@openops/components/ui';
 import Cookies from 'js-cookie';
-import { User } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEffectOnce } from 'react-use';
 import { additionalFronteggParams, initializeFrontegg } from './frontegg-setup';
 import { getExpirationDate } from './jwt-utils';
-
-const CloudLoggedInBrief = () => (
-  <div className="flex flex-col items-center h-[100vh] p-5 gap-4">
-    <AppLogo className="h-12" />
-    <div className="w-[42px] h-[42px] mt-[100px] bg-gray-300 rounded-full flex items-center justify-center">
-      <User />
-    </div>
-    <h1 className="text-base text-center">
-      {t('You are now logged in,')}
-      <br />
-      {t('you can close this window anytime.')}
-    </h1>
-  </div>
-);
 
 const CloudConnectionPage = () => {
   const navigate = useNavigate();
@@ -122,7 +107,7 @@ const CloudConnectionPage = () => {
   }, [flags, flags.data, isLoading, navigate]);
 
   if (isAuthenticated) {
-    return <CloudLoggedInBrief />;
+    return <CloudLoggedInBrief appLogo={<AppLogo className="h-12" />} />;
   }
 
   return null;
