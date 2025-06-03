@@ -17,10 +17,10 @@ export function getAwsClient<T>(
       sessionToken: credentials.sessionToken,
     };
   }
+
   if (credentials.endpoint) {
     config.endpoint = credentials.endpoint;
   }
-
 
   return new ClientConstructor(config);
 }

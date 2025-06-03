@@ -5,38 +5,17 @@ import {
   STSClient,
 } from '@aws-sdk/client-sts';
 import { v4 as uuidv4 } from 'uuid';
-
-function getSTSClient(
-  accessKeyId: string,
-  secretAccessKey: string,
-  defaultRegion: string,
-  sessionToken?: string,
-  endpoint?: string,
-): STSClient {
-  const auth = {
-    region: defaultRegion,
-    credentials: {
-      accessKeyId: accessKeyId,
-      secretAccessKey: secretAccessKey,
-      sessionToken: sessionToken,
-    },
-    endpoint: endpoint,
-  };
-
-  return new STSClient(auth);
-}
+import { getAwsClient } from './get-client';
 
 export async function getAccountId(
   credentials: any,
   defaultRegion: string,
 ): Promise<string> {
-  const client = getSTSClient(
-    credentials.accessKeyId,
-    credentials.secretAccessKey,
+  const client = getAwsClient(
+    STSClient,
+    credentials,
     defaultRegion,
-    credentials.sessionToken,
-    credentials.endpoint,
-  );
+  ) as STSClient;
   const command = new GetCallerIdentityCommand({});
   const response = await client.send(command);
 
@@ -50,7 +29,11 @@ export async function assumeRole(
   roleArn: string,
   externalId?: string,
 ): Promise<Credentials | undefined> {
-  const client = getSTSClient(accessKeyId, secretAccessKey, defaultRegion);
+  const client = getAwsClient(
+    STSClient,
+    { accessKeyId, secretAccessKey },
+    defaultRegion,
+  ) as STSClient;
   const command = new AssumeRoleCommand({
     RoleArn: roleArn,
     ExternalId: externalId || undefined,
