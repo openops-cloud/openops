@@ -41,10 +41,15 @@ export const aiSettingsHooks = {
       retry: false,
     });
   },
-  useProviderModels: (providerName: string) => {
-    return useQuery<GetProvidersResponse, Error>({
+  useProviderModels: (providerName: string | null | undefined) => {
+    return useQuery<GetProvidersResponse | null, Error>({
       queryKey: [QueryKeys.aiProviderModels, providerName],
-      queryFn: () => aiSettingsApi.getProviderModels(providerName),
+      queryFn: () => {
+        if (!providerName) {
+          return null;
+        }
+        return aiSettingsApi.getProviderModels(providerName);
+      },
       enabled: !!providerName,
       staleTime: Infinity,
     });

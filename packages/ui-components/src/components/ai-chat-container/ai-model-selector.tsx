@@ -16,7 +16,7 @@ import { ScrollArea } from '../../ui/scroll-area';
 import { LoadingSpinner } from '../../ui/spinner';
 
 type AiModelSelectorProps = {
-  selectedModel: string;
+  selectedModel?: string;
   availableModels: string[];
   onModelSelected: (modelName: string) => void;
   isModelSelectorLoading: boolean;

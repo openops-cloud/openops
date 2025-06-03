@@ -69,6 +69,9 @@ export const Loading: Story = {
   args: {
     isModelSelectorLoading: true,
   },
+  parameters: {
+    chromatic: { disable: true },
+  },
 };
 
 /**

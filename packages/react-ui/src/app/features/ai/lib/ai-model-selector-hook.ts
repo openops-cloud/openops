@@ -5,7 +5,7 @@ export const useAiModelSelector = () => {
     aiSettingsHooks.useActiveAiSettings();
 
   const { data: provider, isLoading: isLoadingProviderModels } =
-    aiSettingsHooks.useProviderModels(activeConfig?.provider ?? '');
+    aiSettingsHooks.useProviderModels(activeConfig?.provider ?? null);
 
   const { mutate: updateAiSetting, isPending: isSaving } =
     aiSettingsHooks.useSaveAiSettings();
@@ -20,7 +20,7 @@ export const useAiModelSelector = () => {
   };
 
   return {
-    selectedModel: activeConfig?.model ?? '',
+    selectedModel: activeConfig?.model,
     availableModels: provider?.models ?? [],
     isLoading: isLoadingActiveConfig || isLoadingProviderModels || isSaving,
     onModelSelected,
