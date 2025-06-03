@@ -7,15 +7,19 @@ import { TPropertyValue } from '../input/common';
 import { StaticDropdownProperty } from '../input/dropdown/static-dropdown';
 import { NumberProperty } from '../input/number-property';
 import { PropertyType } from '../input/property-type';
-import { LongTextProperty, ShortTextProperty } from '../input/text-property';
+import {
+  LongTextProperty,
+  SecretTextProperty,
+  ShortTextProperty,
+} from '../input/text-property';
 import { BaseBlockAuthSchema } from './common';
-import { SecretTextProperty } from './secret-text-property';
 
 const CustomAuthProps = Type.Record(
   Type.String(),
   Type.Union([
     ShortTextProperty,
     LongTextProperty,
+    SecretTextProperty,
     NumberProperty,
     CheckboxProperty,
     StaticDropdownProperty,

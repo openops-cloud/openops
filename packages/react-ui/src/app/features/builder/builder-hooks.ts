@@ -222,7 +222,7 @@ export const createBuilderStore = (initialState: BuilderInitialState) =>
                 leftSidebar: LeftSideBarType.RUN_DETAILS,
                 rightSidebar: RightSideBarType.BLOCK_SETTINGS,
                 selectedStep: run.steps
-                  ? flowRunUtils.findFailedStep(run) ??
+                  ? flowRunUtils.findFailedStep(run)?.stepName ??
                     state.selectedStep ??
                     'trigger'
                   : 'trigger',

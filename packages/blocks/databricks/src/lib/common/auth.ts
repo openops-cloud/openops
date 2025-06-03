@@ -32,7 +32,7 @@ export const databricksAuth = BlockAuth.CustomAuth({
       displayName: 'Client ID',
       required: true,
     }),
-    clientSecret: BlockAuth.SecretText({
+    clientSecret: Property.SecretText({
       displayName: 'Client Secret',
       required: true,
     }),

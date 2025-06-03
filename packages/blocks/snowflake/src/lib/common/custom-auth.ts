@@ -28,7 +28,7 @@ export const customAuth = BlockAuth.CustomAuth({
       required: true,
       description: 'The login name for your Snowflake user.',
     }),
-    password: BlockAuth.SecretText({
+    password: Property.SecretText({
       displayName: 'Password',
       description: 'Password for the user.',
       required: true,

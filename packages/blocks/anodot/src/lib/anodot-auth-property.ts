@@ -25,7 +25,7 @@ export const anadotAuth = BlockAuth.CustomAuth({
       displayName: 'Username',
       description: 'The username to use to connect to Umbrella',
     }),
-    password: BlockAuth.SecretText({
+    password: Property.SecretText({
       required: true,
       displayName: 'Password',
       description: 'The password to use to connect to Umbrella',
