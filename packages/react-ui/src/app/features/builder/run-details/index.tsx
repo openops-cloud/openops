@@ -88,12 +88,10 @@ const FlowRunDetails = React.memo(() => {
 
   const message = getMessage(run, rententionDays);
 
-  let failedStepInfo = null;
-  if (run) {
-    failedStepInfo = flowRunUtils.findFailedStep(run);
-  }
-
   useEffectOnce(() => {
+    if (!run?.steps) return;
+    const failedStepInfo = flowRunUtils.findFailedStep(run);
+
     if (failedStepInfo && selectedStep !== failedStepInfo.stepName) {
       selectStepByName(failedStepInfo.stepName);
       document
