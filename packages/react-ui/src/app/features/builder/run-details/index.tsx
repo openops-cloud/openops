@@ -22,10 +22,11 @@ import {
 } from '@openops/shared';
 import { LeftSideBarType } from '../builder-types';
 
+import { useEffectOnce } from 'react-use';
 import { flowRunUtils } from '../../flow-runs/lib/flow-run-utils';
+import { RUN_DETAILS_STEP_CARD_ID_PREFIX } from './constants';
 import { FlowStepDetailsCardItem } from './flow-step-details-card-item';
 import { FlowStepInputOutput } from './flow-step-input-output';
-
 function getMessage(run: FlowRun | null, retentionDays: number | null) {
   if (
     !run ||
@@ -52,19 +53,27 @@ const FlowRunDetails = React.memo(() => {
     FlagId.EXECUTION_DATA_RETENTION_DAYS,
   );
 
-  const [setLeftSidebar, run, steps, loopsIndexes, flowVersion, selectedStep] =
-    useBuilderStateContext((state) => {
-      const steps =
-        state.run && state.run.steps ? Object.keys(state.run.steps) : [];
-      return [
-        state.setLeftSidebar,
-        state.run,
-        steps,
-        state.loopsIndexes,
-        state.flowVersion,
-        state.selectedStep,
-      ];
-    });
+  const [
+    setLeftSidebar,
+    run,
+    steps,
+    loopsIndexes,
+    flowVersion,
+    selectedStep,
+    selectStepByName,
+  ] = useBuilderStateContext((state) => {
+    const steps =
+      state.run && state.run.steps ? Object.keys(state.run.steps) : [];
+    return [
+      state.setLeftSidebar,
+      state.run,
+      steps,
+      state.loopsIndexes,
+      state.flowVersion,
+      state.selectedStep,
+      state.selectStepByName,
+    ];
+  });
 
   const selectedStepOutput = useMemo(() => {
     return run && selectedStep && run.steps
@@ -78,6 +87,22 @@ const FlowRunDetails = React.memo(() => {
   }, [run, selectedStep, loopsIndexes, flowVersion.trigger]);
 
   const message = getMessage(run, rententionDays);
+
+  let failedStepInfo = null;
+  if (run) {
+    failedStepInfo = flowRunUtils.findFailedStep(run);
+  }
+
+  useEffectOnce(() => {
+    if (failedStepInfo && selectedStep !== failedStepInfo.stepName) {
+      selectStepByName(failedStepInfo.stepName);
+      document
+        .querySelector(
+          `#${RUN_DETAILS_STEP_CARD_ID_PREFIX}-${failedStepInfo.stepName}`,
+        )
+        ?.scrollIntoView({ behavior: 'smooth' });
+    }
+  });
 
   if (!isNil(message))
     return (
