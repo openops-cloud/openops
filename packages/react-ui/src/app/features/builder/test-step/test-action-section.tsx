@@ -29,6 +29,7 @@ import {
 } from '@openops/shared';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
+import { stepTestOutputCache } from '../data-selector/data-selector-cache';
 import { stepTestOutputHooks } from './step-test-output-hooks';
 import { TestSampleDataViewer } from './test-sample-data-viewer';
 import { TestButtonTooltip } from './test-step-tooltip';
@@ -77,10 +78,11 @@ const TestActionSection = React.memo(
 
     const { mutate, isPending } = useMutation<StepRunResponse, Error, void>({
       mutationFn: async () => {
-        return flowsApi.testStep(socket, {
+        const response = await flowsApi.testStep(socket, {
           flowVersionId,
           stepName: formValues.name,
         });
+        return response;
       },
       onSuccess: (stepResponse) => {
         const formattedResponse = formatUtils.formatStepInputOrOutput(
@@ -89,7 +91,12 @@ const TestActionSection = React.memo(
         if (stepResponse.success) {
           setErrorMessage(undefined);
 
-          if (!useNewExternalTestData) {
+          if (useNewExternalTestData) {
+            stepTestOutputCache.setStepData(formValues.id!, {
+              output: formattedResponse,
+              lastTestDate: dayjs().toISOString(),
+            });
+          } else {
             form.setValue(
               'settings.inputUiInfo.currentSelectedData',
               formattedResponse,
@@ -115,6 +122,9 @@ const TestActionSection = React.memo(
     const isTesting = isPending || isLoadingTestOutput;
 
     const handleTest = () => {
+      if (useNewExternalTestData) {
+        stepTestOutputCache.resetExpandedForStep(formValues.id!);
+      }
       if (
         selectedStep.type === ActionType.BLOCK &&
         selectedStepTemplateModel?.riskLevel === RiskLevel.HIGH
@@ -129,6 +139,9 @@ const TestActionSection = React.memo(
 
     const confirmRiskyStep = () => {
       setRiskyStepConfirmationMessage(null);
+      if (useNewExternalTestData) {
+        stepTestOutputCache.resetExpandedForStep(formValues.id!);
+      }
       mutate();
     };
 

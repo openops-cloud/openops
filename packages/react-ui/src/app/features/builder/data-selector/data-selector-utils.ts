@@ -1,4 +1,14 @@
 import { formatUtils } from '@/app/lib/utils';
+import {
+  Action,
+  flowHelper,
+  isEmpty,
+  isNil,
+  StepOutputWithData,
+  StepWithIndex,
+  Trigger,
+} from '@openops/shared';
+import { BuilderState } from '../builder-types';
 
 export type MentionTreeNode = {
   key: string;
@@ -131,6 +141,147 @@ function handleObjectStepOutput(
   };
 }
 
+const getAllStepsMentions = (
+  pathToTargetStep: StepWithIndex[],
+  stepsTestOutput: Record<string, StepOutputWithData> | undefined,
+) => {
+  if (!stepsTestOutput || isEmpty(stepsTestOutput)) {
+    return [];
+  }
+
+  return pathToTargetStep.map((step) => {
+    const displayName = `${step.dfsIndex + 1}. ${step.displayName}`;
+
+    if (!step.id || !stepsTestOutput[step.id]) {
+      return createTestNode(step, displayName);
+    }
+
+    const stepNeedsTesting = isNil(stepsTestOutput[step.id].lastTestDate);
+
+    if (stepNeedsTesting) {
+      return createTestNode(step, displayName);
+    }
+    return traverseStepOutputAndReturnMentionTree({
+      stepOutput: stepsTestOutput[step.id].output,
+      propertyPath: step.name,
+      displayName: displayName,
+    });
+  });
+};
+
+const createTestNode = (
+  step: Action | Trigger,
+  displayName: string,
+): MentionTreeNode => {
+  return {
+    key: step.name,
+    data: {
+      displayName,
+      propertyPath: step.name,
+    },
+    children: [
+      {
+        data: {
+          displayName: displayName,
+          propertyPath: step.name,
+          isTestStepNode: true,
+        },
+        key: `test_${step.name}`,
+      },
+    ],
+  };
+};
+
+/**
+ * Filters MentionTreeNode arrays by a query string, including recursive logic
+ */
+function filterBy(arr: MentionTreeNode[], query: string): MentionTreeNode[] {
+  if (!query) {
+    return arr;
+  }
+
+  return arr.reduce((acc, item) => {
+    const isTestNode =
+      !isNil(item.children) && item?.children?.[0]?.data?.isTestStepNode;
+    if (isTestNode) {
+      return acc;
+    }
+
+    if (item.children?.length) {
+      const filteredChildren = filterBy(item.children, query);
+      if (filteredChildren.length) {
+        acc.push({ ...item, children: filteredChildren });
+        return acc;
+      }
+    }
+
+    const normalizedValue = item?.data?.value;
+    const value = isNil(normalizedValue)
+      ? ''
+      : JSON.stringify(normalizedValue).toLowerCase();
+    const displayName = item?.data?.displayName?.toLowerCase();
+
+    if (
+      displayName?.includes(query.toLowerCase()) ||
+      value.includes(query.toLowerCase())
+    ) {
+      acc.push({ ...item, children: undefined });
+    }
+
+    return acc;
+  }, [] as MentionTreeNode[]);
+}
+
+/**
+ * Selector that computes the path to the target step using flowHelper.findPathToStep
+ */
+const getPathToTargetStep = (state: BuilderState) => {
+  const { selectedStep, flowVersion } = state;
+  if (!selectedStep || !flowVersion?.trigger) {
+    return [];
+  }
+  const pathToTargetStep = flowHelper.findPathToStep({
+    targetStepName: selectedStep,
+    trigger: flowVersion.trigger,
+  });
+  return pathToTargetStep;
+};
+
+/**
+ * @deprecated currentSelectedData will be removed in the future
+ * Selector for mapping each step in the path to a MentionTreeNode
+ */
+const getAllStepsMentionsFromCurrentSelectedData: (
+  state: BuilderState,
+) => MentionTreeNode[] = (state) => {
+  const { selectedStep, flowVersion } = state;
+  if (!selectedStep || !flowVersion?.trigger) {
+    return [];
+  }
+  const pathToTargetStep = flowHelper.findPathToStep({
+    targetStepName: selectedStep,
+    trigger: flowVersion.trigger,
+  });
+
+  return pathToTargetStep.map((step) => {
+    const stepNeedsTesting = isNil(step.settings.inputUiInfo?.lastTestDate);
+    const displayName = `${step.dfsIndex + 1}. ${step.displayName}`;
+    if (stepNeedsTesting) {
+      return createTestNode(step, displayName);
+    }
+    return traverseStepOutputAndReturnMentionTree({
+      stepOutput: step.settings.inputUiInfo?.currentSelectedData,
+      propertyPath: step.name,
+      displayName: displayName,
+    });
+  });
+};
+
 export const dataSelectorUtils = {
   traverseStepOutputAndReturnMentionTree,
+  getAllStepsMentions,
+  createTestNode,
+  filterBy,
+  getPathToTargetStep,
+  getAllStepsMentionsFromCurrentSelectedData,
 };

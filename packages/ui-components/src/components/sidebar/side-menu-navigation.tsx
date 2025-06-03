@@ -14,6 +14,7 @@ const SideMenuNavigation = ({
     {links.map((link, index) => (
       <MenuNavigationItem
         to={link.to}
+        target={link.target}
         label={link.label}
         Icon={link.icon}
         key={index}

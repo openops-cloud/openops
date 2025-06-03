@@ -1,4 +1,5 @@
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
+import { QueryKeys } from '@/app/constants/query-keys';
 import { useAppStore } from '@/app/store/app-store';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
@@ -12,7 +13,7 @@ export const useCloudProfile = () => {
 
   const useCloudTemplates = flagsHooks.useShouldFetchCloudTemplates();
   const { data, refetch, isSuccess } = useQuery({
-    queryKey: ['cloud-user-info'],
+    queryKey: [QueryKeys.cloudUserInfo],
     queryFn: () => {
       return cloudUserApi.getUserInfo();
     },

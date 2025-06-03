@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { useDefaultSidebarState } from '@/app/common/hooks/use-default-sidebar-state';
+import { QueryKeys } from '@/app/constants/query-keys';
 import { useCandu } from '@/app/features/extensions/candu/use-candu';
 import { authenticationApi } from '@/app/lib/authentication-api';
 import { FlagId } from '@openops/shared';
@@ -37,7 +38,7 @@ const OpenOpsAnalyticsPage = () => {
   );
 
   const { data: dashboardEmbedId, isSuccess } = useQuery({
-    queryKey: ['analytics-embed-id'],
+    queryKey: [QueryKeys.analyticsEmbedId],
     queryFn: authenticationApi.fetchAnalyticsEmbedId,
     staleTime: Infinity,
   });

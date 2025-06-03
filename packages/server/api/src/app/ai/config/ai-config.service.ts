@@ -1,3 +1,4 @@
+import { encryptUtils } from '@openops/server-shared';
 import {
   AiConfig,
   isNil,
@@ -5,7 +6,6 @@ import {
   SaveAiConfigRequest,
 } from '@openops/shared';
 import { repoFactory } from '../../core/db/repo-factory';
-import { encryptUtils } from '../../helper/encryption';
 import {
   sendAiConfigDeletedEvent,
   sendAiConfigSavedEvent,

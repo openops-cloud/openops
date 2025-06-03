@@ -9,7 +9,6 @@ export const ListFlowsRequest = Type.Object({
   cursor: Type.Optional(Type.String({})),
   status: Type.Optional(Type.Array(Type.Enum(FlowStatus))),
   versionState: Type.Optional(Type.Array(Type.Enum(FlowVersionState))),
-  projectId: Type.String({}),
   name: Type.Optional(Type.String({})),
 });
 

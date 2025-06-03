@@ -268,8 +268,15 @@ function transferFlow<T extends Step>(
   ) as Trigger;
   return clonedFlow;
 }
+
 function getAllSteps(trigger: Trigger | Action): (Action | Trigger)[] {
   return traverseInternal(trigger);
+}
+
+function getAllStepIds(trigger: Trigger | Action): string[] {
+  return getAllSteps(trigger)
+    .filter((step) => step.id !== undefined)
+    .map((step) => step.id as string);
 }
 
 function getAllStepsAtFirstLevel(step: Step): Step[] {
@@ -946,12 +953,16 @@ function isPartOfInnerFlow({
 }
 
 function duplicateStep(
+  newStepId: string,
   stepName: string,
   flowVersionWithArtifacts: FlowVersion,
 ): FlowVersion {
-  const clonedStep = JSON.parse(
-    JSON.stringify(flowHelper.getStep(flowVersionWithArtifacts, stepName)),
-  );
+  const clonedStep = {
+    ...JSON.parse(
+      JSON.stringify(flowHelper.getStep(flowVersionWithArtifacts, stepName)),
+    ),
+    id: newStepId,
+  };
 
   clonedStep.nextAction = undefined;
   if (!clonedStep) {
@@ -986,7 +997,8 @@ function duplicateStepCascading(
   });
 
   const duplicatedStep = transferStep(action, (step: Step) => {
-    step.id = openOpsId();
+    // we already assigned the root step in the duplicateStep function
+    step.id = step.id === action.id ? action.id : openOpsId();
     step.displayName = `${step.displayName} Copy`;
     step.name = oldNameToNewName[step.name];
     clearStepTestData(step);
@@ -1074,7 +1086,7 @@ function findAvailableStepName(
   return findUnusedName(steps, stepPrefix);
 }
 
-type StepWithIndex = Step & { dfsIndex: number };
+export type StepWithIndex = Step & { dfsIndex: number };
 
 function findPathToStep({
   targetStepName,
@@ -1171,6 +1183,7 @@ export const flowHelper = {
         break;
       case FlowOperationType.DUPLICATE_ACTION: {
         clonedVersion = duplicateStep(
+          operation.request.stepId,
           operation.request.stepName,
           clonedVersion,
         );
@@ -1195,6 +1208,7 @@ export const flowHelper = {
   isAction,
   isTrigger,
   getAllSteps,
+  getAllStepIds,
   isPartOfInnerFlow,
   getUsedBlocks,
   getImportOperations,

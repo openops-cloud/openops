@@ -72,6 +72,7 @@ export const createMockTemplate = (
     id: template?.id ?? openOpsId(),
     created: template?.created ?? faker.date.recent().toISOString(),
     updated: template?.updated ?? faker.date.recent().toISOString(),
+    categories: template?.categories ?? [],
   };
 };
 

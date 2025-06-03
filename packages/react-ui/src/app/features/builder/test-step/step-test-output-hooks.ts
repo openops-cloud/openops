@@ -1,8 +1,10 @@
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
-import { Action, FlagId, isEmpty, isNil, Trigger } from '@openops/shared';
+import { QueryKeys } from '@/app/constants/query-keys';
+import { Action, FlagId, Trigger } from '@openops/shared';
 import { useQuery } from '@tanstack/react-query';
 import { UseFormReturn } from 'react-hook-form';
 import { flowsApi } from '../../flows/lib/flows-api';
+import { stepTestOutputCache } from '../data-selector/data-selector-cache';
 
 type FallbackDataInput =
   | (() => {
@@ -32,7 +34,7 @@ export const stepTestOutputHooks = {
         : fallbackDataInput ?? {};
 
     return useQuery({
-      queryKey: ['stepTestOutput', flowVersionId, stepId],
+      queryKey: [QueryKeys.stepTestOutput, flowVersionId, stepId],
       queryFn: async () => {
         if (!stepId || !useNewExternalTestData) {
           return resolveFallbackData();
@@ -43,14 +45,13 @@ export const stepTestOutputHooks = {
           stepId,
         );
 
-        if (isNil(stepTestOutput) || isEmpty(stepTestOutput)) {
-          return resolveFallbackData();
-        }
+        stepTestOutputCache.setStepData(stepId, stepTestOutput);
 
         return stepTestOutput;
       },
     });
   },
+
   useStepTestOutputFormData(
     flowVersionId: string,
     form: UseFormReturn<Action> | UseFormReturn<Trigger>,

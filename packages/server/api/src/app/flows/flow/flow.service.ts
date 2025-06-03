@@ -71,7 +71,6 @@ export const flowService = {
       userId,
       projectId,
       request: {
-        projectId,
         displayName,
       },
     });
@@ -442,6 +441,7 @@ export const flowService = {
       domains: [],
       created: Date.now().toString(),
       updated: Date.now().toString(),
+      categories: [],
     };
   },
 

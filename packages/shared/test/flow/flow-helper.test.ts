@@ -3289,3 +3289,170 @@ describe('createTrigger', () => {
     });
   });
 });
+
+describe('duplicateStep', () => {
+  const baseFlowVersion: FlowVersion = {
+    id: 'pj0KQ7Aypoa9OQGHzmKDl',
+    created: '2023-05-24T00:16:41.353Z',
+    updated: '2023-05-24T00:16:41.353Z',
+    flowId: 'lod6JEdKyPlvrnErdnrGa',
+    displayName: 'Test Flow',
+    updatedBy: '',
+    valid: true,
+    state: FlowVersionState.DRAFT,
+    trigger: {
+      name: 'trigger',
+      type: TriggerType.EMPTY,
+      valid: true,
+      settings: {},
+      displayName: 'Trigger',
+      nextAction: {
+        id: 'original-id',
+        name: 'step_1',
+        type: ActionType.CODE,
+        valid: true,
+        settings: {
+          input: {},
+          sourceCode: {
+            code: 'test',
+            packageJson: '{}',
+          },
+        },
+        displayName: 'Original Step',
+      },
+    },
+  };
+
+  it('should duplicate step with provided id', () => {
+    const operation: FlowOperationRequest = {
+      type: FlowOperationType.DUPLICATE_ACTION,
+      request: {
+        stepName: 'step_1',
+        stepId: 'new-custom-id',
+      },
+    };
+
+    const result = flowHelper.apply(baseFlowVersion, operation);
+    const duplicatedStep = result.trigger.nextAction.nextAction;
+
+    expect(duplicatedStep).toBeDefined();
+    expect(duplicatedStep.id).toBe('new-custom-id');
+    expect(duplicatedStep.name).toBe('step_2');
+    expect(duplicatedStep.displayName).toBe('Original Step Copy');
+  });
+
+  it('should preserve id through cascading operations', () => {
+    const flowWithNestedSteps: FlowVersion = {
+      ...baseFlowVersion,
+      trigger: {
+        ...baseFlowVersion.trigger,
+        nextAction: {
+          id: 'branch-id',
+          name: 'step_1',
+          type: ActionType.BRANCH,
+          valid: true,
+          settings: {
+            conditions: [[]],
+            inputUiInfo: {},
+          },
+          displayName: 'Branch',
+          onSuccessAction: {
+            id: 'success-id',
+            name: 'step_2',
+            type: ActionType.CODE,
+            valid: true,
+            settings: {
+              input: {},
+              sourceCode: {
+                code: 'test',
+                packageJson: '{}',
+              },
+            },
+            displayName: 'Success Action',
+          },
+          onFailureAction: {
+            id: 'failure-id',
+            name: 'step_3',
+            type: ActionType.CODE,
+            valid: true,
+            settings: {
+              input: {},
+              sourceCode: {
+                code: 'test',
+                packageJson: '{}',
+              },
+            },
+            displayName: 'Failure Action',
+          },
+        },
+      },
+    };
+
+    const operation: FlowOperationRequest = {
+      type: FlowOperationType.DUPLICATE_ACTION,
+      request: {
+        stepName: 'step_1',
+        stepId: 'new-branch-id',
+      },
+    };
+
+    const result = flowHelper.apply(flowWithNestedSteps, operation);
+    const duplicatedBranch = result.trigger.nextAction.nextAction;
+
+    expect(duplicatedBranch).toBeDefined();
+    expect(duplicatedBranch.id).toBe('new-branch-id');
+    expect(duplicatedBranch.name).toBe('step_4');
+    expect(duplicatedBranch.displayName).toBe('Branch Copy');
+
+    expect(duplicatedBranch.onSuccessAction).toBeDefined();
+    expect(duplicatedBranch.onFailureAction).toBeDefined();
+
+    // we have a new id for the child steps
+    expect(duplicatedBranch.onSuccessAction.id).not.toBe('success-id');
+    expect(duplicatedBranch.onSuccessAction.id).toEqual(expect.any(String));
+
+    // we have a new id for the child steps
+    expect(duplicatedBranch.onFailureAction.id).not.toBe('failure-id');
+    expect(duplicatedBranch.onFailureAction.id).toEqual(expect.any(String));
+  });
+
+  it('should handle step references in input settings', () => {
+    const flowWithReference: FlowVersion = {
+      ...baseFlowVersion,
+      trigger: {
+        ...baseFlowVersion.trigger,
+        nextAction: {
+          id: 'original-id',
+          name: 'step_1',
+          type: ActionType.CODE,
+          valid: true,
+          settings: {
+            input: {
+              reference: '{{step_1.output}}',
+            },
+            sourceCode: {
+              code: 'test',
+              packageJson: '{}',
+            },
+          },
+          displayName: 'Original Step',
+        },
+      },
+    };
+
+    const operation: FlowOperationRequest = {
+      type: FlowOperationType.DUPLICATE_ACTION,
+      request: {
+        stepName: 'step_1',
+        stepId: 'new-id',
+      },
+    };
+
+    const result = flowHelper.apply(flowWithReference, operation);
+    const duplicatedStep = result.trigger.nextAction.nextAction;
+
+    expect(duplicatedStep).toBeDefined();
+    expect(duplicatedStep.id).toBe('new-id');
+    expect(duplicatedStep.settings.input.reference).toBe('{{step_2.output}}');
+  });
+});

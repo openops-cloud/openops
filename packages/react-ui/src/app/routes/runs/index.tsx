@@ -9,7 +9,6 @@ import { useRunsTableColumns } from '@/app/features/flow-runs/hooks/useRunsTable
 import { flowRunUtils } from '@/app/features/flow-runs/lib/flow-run-utils';
 import { flowRunsApi } from '@/app/features/flow-runs/lib/flow-runs-api';
 import { flowsHooks } from '@/app/features/flows/lib/flows-hooks';
-import { authenticationSession } from '@/app/lib/authentication-session';
 import { formatUtils } from '@/app/lib/utils';
 
 const fetchData = async (
@@ -23,7 +22,6 @@ const fetchData = async (
   const status = params.status;
   return flowRunsApi.list({
     status,
-    projectId: authenticationSession.getProjectId()!,
     flowId: params.flowId,
     cursor: pagination.cursor,
     limit: pagination.limit ?? 10,

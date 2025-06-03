@@ -1,9 +1,8 @@
-import { QueueMode } from '@openops/server-shared';
+import { encryptUtils, QueueMode } from '@openops/server-shared';
 import { FlowVersionState, openOpsId } from '@openops/shared';
 import { FastifyInstance } from 'fastify';
 import { databaseConnection } from '../../../../src/app/database/database-connection';
 import { flowStepTestOutputService } from '../../../../src/app/flows/step-test-output/flow-step-test-output.service';
-import { encryptUtils } from '../../../../src/app/helper/encryption';
 import { setupServer } from '../../../../src/app/server';
 import {
   createMockFlow,
@@ -78,7 +77,7 @@ describe('Flow Step Test output', () => {
     await saveTestOutput(stepId1, mockFlowVersion.id, { value: 'one' });
     await saveTestOutput(stepId2, mockFlowVersion.id, { value: 'two' });
 
-    const results = await flowStepTestOutputService.list({
+    const results = await flowStepTestOutputService.listDecrypted({
       flowVersionId: mockFlowVersion.id,
       stepIds: [stepId1, stepId2],
     });
@@ -101,7 +100,7 @@ describe('Flow Step Test output', () => {
       value: 'existing',
     });
 
-    const results = await flowStepTestOutputService.list({
+    const results = await flowStepTestOutputService.listDecrypted({
       flowVersionId: mockFlowVersion.id,
       stepIds: [existingStepId, missingStepId],
     });
@@ -130,7 +129,7 @@ describe('Flow Step Test output', () => {
       toVersionId: toVersion.id,
     });
 
-    const copied = await flowStepTestOutputService.list({
+    const copied = await flowStepTestOutputService.listDecrypted({
       flowVersionId: toVersion.id,
       stepIds: [stepId1, stepId2],
     });
@@ -172,7 +171,7 @@ describe('Flow Step Test output', () => {
       output: { value: 'two' },
     });
 
-    const results = await flowStepTestOutputService.list({
+    const results = await flowStepTestOutputService.listDecrypted({
       flowVersionId: mockFlowVersion.id,
       stepIds: [stepId1, stepId2],
     });
@@ -210,7 +209,7 @@ describe('Flow Step Test output', () => {
       output: { value: 'existing' },
     });
 
-    const results = await flowStepTestOutputService.list({
+    const results = await flowStepTestOutputService.listDecrypted({
       flowVersionId: mockFlowVersion.id,
       stepIds: [existingStepId, missingStepId],
     });

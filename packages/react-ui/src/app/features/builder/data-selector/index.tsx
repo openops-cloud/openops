@@ -2,108 +2,27 @@ import {
   AI_CHAT_CONTAINER_SIZES,
   cn,
   Input,
+  LoadingSpinner,
   ScrollArea,
 } from '@openops/components/ui';
 import { t } from 'i18next';
 import { SearchXIcon } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { Action, flowHelper, isNil, Trigger } from '@openops/shared';
+import { FlagId, StepOutputWithData } from '@openops/shared';
 
 import { useBuilderStateContext } from '../builder-hooks';
 
-import { BuilderState } from '../builder-types';
+import { flagsHooks } from '@/app/common/hooks/flags-hooks';
+import { stepTestOutputCache } from './data-selector-cache';
 import { DataSelectorNode } from './data-selector-node';
 import {
   DataSelectorSizeState,
   DataSelectorSizeTogglers,
 } from './data-selector-size-togglers';
 import { dataSelectorUtils, MentionTreeNode } from './data-selector-utils';
-
-const createTestNode = (
-  step: Action | Trigger,
-  displayName: string,
-): MentionTreeNode => {
-  return {
-    key: step.name,
-    data: {
-      displayName,
-      propertyPath: step.name,
-    },
-    children: [
-      {
-        data: {
-          displayName: displayName,
-          propertyPath: step.name,
-          isTestStepNode: true,
-        },
-        key: `test_${step.name}`,
-      },
-    ],
-  };
-};
-
-function filterBy(arr: MentionTreeNode[], query: string): MentionTreeNode[] {
-  if (!query) {
-    return arr;
-  }
-
-  return arr.reduce((acc, item) => {
-    const isTestNode =
-      !isNil(item.children) && item?.children?.[0]?.data?.isTestStepNode;
-    if (isTestNode) {
-      return acc;
-    }
-
-    if (item.children?.length) {
-      const filteredChildren = filterBy(item.children, query);
-      if (filteredChildren.length) {
-        acc.push({ ...item, children: filteredChildren });
-        return acc; // return acc as we have handled this item
-      }
-    }
-
-    const normalizedValue = item?.data?.value;
-    const value = isNil(normalizedValue)
-      ? ''
-      : JSON.stringify(normalizedValue).toLowerCase();
-    const displayName = item?.data?.displayName?.toLowerCase();
-
-    if (
-      displayName?.includes(query.toLowerCase()) ||
-      value.includes(query.toLowerCase())
-    ) {
-      acc.push({ ...item, children: undefined });
-    }
-
-    return acc; // Always return acc
-  }, [] as MentionTreeNode[]);
-}
-const getAllStepsMentions: (state: BuilderState) => MentionTreeNode[] = (
-  state,
-) => {
-  const { selectedStep, flowVersion } = state;
-  if (!selectedStep || !flowVersion || !flowVersion.trigger) {
-    return [];
-  }
-  const pathToTargetStep = flowHelper.findPathToStep({
-    targetStepName: selectedStep,
-    trigger: flowVersion.trigger,
-  });
-
-  return pathToTargetStep.map((step) => {
-    const stepNeedsTesting = isNil(step.settings.inputUiInfo?.lastTestDate);
-    const displayName = `${step.dfsIndex + 1}. ${step.displayName}`;
-    if (stepNeedsTesting) {
-      return createTestNode(step, displayName);
-    }
-    return dataSelectorUtils.traverseStepOutputAndReturnMentionTree({
-      stepOutput: step.settings.inputUiInfo?.currentSelectedData,
-      propertyPath: step.name,
-      displayName: displayName,
-    });
-  });
-};
+import { expandOrCollapseNodesOnSearch } from './expand-or-collapse-on-search';
+import { useSelectorData } from './use-selector-data';
 
 type DataSelectorProps = {
   parentHeight: number;
@@ -122,10 +41,94 @@ const DataSelector = ({
   setDataSelectorSize,
   className,
 }: DataSelectorProps) => {
+  const { data: useNewExternalTestData = false } = flagsHooks.useFlag(
+    FlagId.USE_NEW_EXTERNAL_TESTDATA,
+  );
   const [searchTerm, setSearchTerm] = useState('');
-  const mentions = useBuilderStateContext(getAllStepsMentions);
+  const flowVersionId = useBuilderStateContext((state) => state.flowVersion.id);
+  const isDataSelectorVisible = useBuilderStateContext(
+    (state) => state.midpanelState.showDataSelector,
+  );
+
+  const pathToTargetStep = useBuilderStateContext(
+    dataSelectorUtils.getPathToTargetStep,
+  );
+  const mentionsFromCurrentSelectedData = useBuilderStateContext(
+    dataSelectorUtils.getAllStepsMentionsFromCurrentSelectedData,
+  );
+
+  const stepIds: string[] = pathToTargetStep.map((p) => p.id!);
+
+  const [forceRender, setForceRerender] = useState(0); // for cache updates
+  const [initialLoad, setInitialLoad] = useState(true);
+
+  const { isLoading } = useSelectorData({
+    stepIds,
+    flowVersionId,
+    useNewExternalTestData: !!useNewExternalTestData,
+    isDataSelectorVisible,
+    initialLoad,
+    setInitialLoad,
+    forceRerender: setForceRerender,
+  });
+
+  const mentions = useMemo(() => {
+    if (!useNewExternalTestData) {
+      return mentionsFromCurrentSelectedData;
+    }
+    const stepTestOutput: Record<string, StepOutputWithData> = {};
+    stepIds.forEach((id) => {
+      const cached = stepTestOutputCache.getStepData(id);
+      if (cached) stepTestOutput[id] = cached;
+    });
+    return dataSelectorUtils.getAllStepsMentions(
+      pathToTargetStep,
+      stepTestOutput,
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    useNewExternalTestData,
+    mentionsFromCurrentSelectedData,
+    pathToTargetStep,
+    stepIds,
+    forceRender,
+    initialLoad,
+  ]);
+
+  // OBSOLETE: This effect is now considered obsolete and only used until flag is removed
+  useEffect(() => {
+    if (!useNewExternalTestData && mentionsFromCurrentSelectedData) {
+      const traverseAndCache = (nodes: MentionTreeNode[]) => {
+        nodes.forEach((node) => {
+          if (stepTestOutputCache.getExpanded(node.key) === undefined) {
+            stepTestOutputCache.setExpanded(node.key, false);
+          }
+          if (node.children) {
+            traverseAndCache(node.children);
+          }
+        });
+      };
+      traverseAndCache(mentionsFromCurrentSelectedData);
+    }
+  }, [useNewExternalTestData, mentionsFromCurrentSelectedData]);
+
+  const getExpanded = (nodeKey: string) =>
+    stepTestOutputCache.getExpanded(nodeKey);
+  const setExpanded = (nodeKey: string, expanded: boolean) => {
+    stepTestOutputCache.setExpanded(nodeKey, expanded);
+    setForceRerender((v) => v + 1);
+  };
+
+  useEffect(() => {
+    expandOrCollapseNodesOnSearch(mentions, searchTerm, setForceRerender);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchTerm]);
+
   const midpanelState = useBuilderStateContext((state) => state.midpanelState);
-  const filteredMentions = filterBy(structuredClone(mentions), searchTerm);
+  const filteredMentions = useMemo(
+    () => dataSelectorUtils.filterBy(structuredClone(mentions), searchTerm),
+    [mentions, searchTerm],
+  );
 
   const onToggle = useCallback(() => {
     if (
@@ -142,6 +145,13 @@ const DataSelector = ({
       setDataSelectorSize(DataSelectorSizeState.DOCKED);
     }
   }, [dataSelectorSize, midpanelState.aiContainerSize, setDataSelectorSize]);
+
+  // Clear cache on unmount or when flowVersionId changes
+  useEffect(() => {
+    return () => {
+      stepTestOutputCache.clearAll();
+    };
+  }, [flowVersionId]);
 
   return (
     <div
@@ -195,6 +205,12 @@ const DataSelector = ({
           ></Input>
         </div>
 
+        {isLoading && (
+          <div className="w-full h-full flex items-center justify-center">
+            <LoadingSpinner></LoadingSpinner>
+          </div>
+        )}
+
         <ScrollArea className="transition-all h-[calc(100%-56px)] w-full ">
           {filteredMentions &&
             filteredMentions.map((node) => (
@@ -203,6 +219,8 @@ const DataSelector = ({
                 key={node.key}
                 node={node}
                 searchTerm={searchTerm}
+                getExpanded={getExpanded}
+                setExpanded={setExpanded}
               ></DataSelectorNode>
             ))}
           {filteredMentions.length === 0 && (

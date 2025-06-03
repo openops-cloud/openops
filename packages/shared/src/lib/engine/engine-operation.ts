@@ -1,6 +1,7 @@
 import { Static, Type } from '@sinclair/typebox';
 import { AppConnectionValue } from '../app-connection/app-connection';
 import { BlockPackage } from '../blocks';
+import { OpenOpsId } from '../common/id-generator';
 import {
   ExecutionState,
   ExecutionType,
@@ -54,6 +55,7 @@ export type ExecuteExtractBlockMetadata = BlockPackage;
 export type ExecuteStepOperation = BaseEngineOperation & {
   stepName: string;
   flowVersion: FlowVersion;
+  stepTestOutputs?: Record<OpenOpsId, string>;
 };
 
 export type ExecutePropsOptions = BaseEngineOperation & {
@@ -63,6 +65,7 @@ export type ExecutePropsOptions = BaseEngineOperation & {
   flowVersion: FlowVersion;
   input: Record<string, unknown>;
   searchValue?: string;
+  stepTestOutputs?: Record<OpenOpsId, string>;
 };
 
 type BaseExecuteFlowOperation<T extends ExecutionType> = BaseEngineOperation & {

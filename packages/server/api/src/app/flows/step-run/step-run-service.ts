@@ -1,16 +1,20 @@
 import {
   ActionType,
   ApplicationError,
+  encodeStepOutputs,
   ErrorCode,
+  FlagId,
   flowHelper,
   FlowVersionId,
   isNil,
+  OpenOpsId,
   ProjectId,
   StepRunResponse,
   UserId,
 } from '@openops/shared';
 import { engineRunner } from 'server-worker';
 import { accessTokenManager } from '../../authentication/lib/access-token-manager';
+import { devFlagsService } from '../../flags/dev-flags.service';
 import { sendWorkflowTestBlockEvent } from '../../telemetry/event-models';
 import { flowVersionService } from '../flow-version/flow-version.service';
 import { flowStepTestOutputService } from '../step-test-output/flow-step-test-output.service';
@@ -26,6 +30,7 @@ export const stepRunService = {
 
     const flowVersion = await flowVersionService.getOneOrThrow(flowVersionId);
     const step = flowHelper.getStep(flowVersion, stepName);
+    const stepIds = flowHelper.getAllStepIds(flowVersion.trigger);
 
     if (
       isNil(step) ||
@@ -38,6 +43,20 @@ export const stepRunService = {
         },
       });
     }
+
+    let stepTestOutputs: Record<OpenOpsId, string> | undefined = undefined;
+    const featureFlag = await devFlagsService.getOne(
+      FlagId.USE_NEW_EXTERNAL_TESTDATA,
+    );
+    if (featureFlag?.value) {
+      const outputs = await flowStepTestOutputService.listEncrypted({
+        flowVersionId: flowVersion.id,
+        stepIds,
+      });
+
+      stepTestOutputs = encodeStepOutputs(outputs);
+    }
+
     const engineToken = await accessTokenManager.generateEngineToken({
       projectId,
     });
@@ -46,6 +65,7 @@ export const stepRunService = {
       stepName,
       flowVersion,
       projectId,
+      stepTestOutputs,
     });
 
     if (step.id) {

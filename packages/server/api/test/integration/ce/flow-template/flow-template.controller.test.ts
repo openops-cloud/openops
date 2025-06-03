@@ -73,6 +73,7 @@ describe('Flow templates API', () => {
       blocks: ['test-block'],
       updated: new Date().toISOString(),
       created: new Date().toISOString(),
+      categories: ['AWS', 'GCP'],
     };
     await databaseConnection()
       .getRepository('flow_template')
@@ -93,6 +94,7 @@ describe('Flow templates API', () => {
       expect(templates).toHaveLength(1);
       expect(templates[0].domains).toStrictEqual(['FinOps']);
       expect(templates[0].template).toBeUndefined();
+      expect(templates[0].categories).toStrictEqual(['AWS', 'GCP']);
     });
   });
 
@@ -104,6 +106,7 @@ describe('Flow templates API', () => {
 
       expect(templates.domains).toStrictEqual(['FinOps']);
       expect(templates.template).not.toBeUndefined();
+      expect(templates.categories).toStrictEqual(['AWS', 'GCP']);
     });
   });
 });
