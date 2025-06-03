@@ -7,7 +7,7 @@ import {
   CollapsibleTrigger,
 } from '@openops/components/ui';
 import { ChevronRight } from 'lucide-react';
-import React, { useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 
 import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
 import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
@@ -22,7 +22,6 @@ import {
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { StepStatusIcon } from '@/app/features/flow-runs/components/step-status-icon';
-import { useEffectOnce } from 'react-use';
 import { LoopIterationInput } from './loop-iteration-input';
 
 type FlowStepDetailsCardProps = {
@@ -98,11 +97,19 @@ const FlowStepDetailsCardItem = ({
   const isLoopStep = stepOutput && stepOutput.type === ActionType.LOOP_ON_ITEMS;
   const divRef = useRef<HTMLDivElement>(null);
 
-  useEffectOnce(() => {
-    if (stepOutput?.status === StepOutputStatus.FAILED) {
+  const isFailedStep = stepOutput?.status === StepOutputStatus.FAILED;
+
+  useEffect(() => {
+    if (isFailedStep && !isStepSelected) {
+      selectStepByName(stepName);
+    }
+  }, [isFailedStep, isStepSelected, selectStepByName, stepName]);
+
+  useEffect(() => {
+    if (isFailedStep) {
       divRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
-  });
+  }, [isFailedStep]);
 
   return (
     <Collapsible open={isOpen} className="w-full">
