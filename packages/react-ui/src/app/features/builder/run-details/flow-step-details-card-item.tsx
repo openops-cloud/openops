@@ -99,9 +99,15 @@ const FlowStepDetailsCardItem = ({
   const divRef = useRef<HTMLDivElement>(null);
 
   useEffectOnce(() => {
-    if (stepOutput?.status === StepOutputStatus.FAILED) {
-      divRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (stepOutput?.status !== StepOutputStatus.FAILED) {
+      return;
     }
+
+    if (!isStepSelected) {
+      selectStepByName(stepName);
+    }
+
+    divRef.current?.scrollIntoView({ behavior: 'smooth' });
   });
 
   return (
