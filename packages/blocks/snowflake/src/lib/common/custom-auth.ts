@@ -1,5 +1,6 @@
 import { HttpError } from '@openops/blocks-common';
 import { BlockAuth, Property, Validators } from '@openops/blocks-framework';
+import { ConnectionProvider, getConnectionProvider } from '@openops/shared';
 import { configureConnection } from './configure-connection';
 import { connect } from './utils';
 
@@ -16,6 +17,7 @@ If you're experiencing delays, double-check that your **Account Identifier** is 
 `;
 
 export const customAuth = BlockAuth.CustomAuth({
+  provider: getConnectionProvider(ConnectionProvider.SNOWFLAKE),
   description: markdown,
   props: {
     account: Property.ShortText({

@@ -1,8 +1,10 @@
 import { HttpError, HttpMethod } from '@openops/blocks-common';
 import { BlockAuth, Property, Validators } from '@openops/blocks-framework';
+import { ConnectionProvider, getConnectionProvider } from '@openops/shared';
 import { sendTernaryRequest } from './index';
 
 export const ternaryCloudAuth = BlockAuth.CustomAuth({
+  provider: getConnectionProvider(ConnectionProvider.TERNARY),
   description: `
 Ternary API documentation:
 https://docs.ternary.app/reference/using-the-api`,

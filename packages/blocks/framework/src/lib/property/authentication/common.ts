@@ -1,3 +1,4 @@
+import { ConnectionProvider, Provider } from '@openops/shared';
 import { Type } from '@sinclair/typebox';
 
 export const BaseBlockAuthSchema = Type.Object({
