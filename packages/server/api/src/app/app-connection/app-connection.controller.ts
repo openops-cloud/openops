@@ -7,6 +7,7 @@ import {
   AppConnectionWithoutSensitiveData,
   ListAppConnectionsRequestQuery,
   OpenOpsId,
+  OpsEdition,
   PatchAppConnectionRequestBody,
   Permission,
   PrincipalType,
@@ -16,6 +17,7 @@ import {
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
 import { blockMetadataService } from '../blocks/block-metadata-service';
+import { flagService } from '../flags/flag.service';
 import { sendConnectionDeletedEvent } from '../telemetry/event-models';
 import { appConnectionService } from './app-connection-service/app-connection-service';
 import { redactSecrets, removeSensitiveData } from './app-connection-utils';
@@ -140,6 +142,29 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
     },
   );
 
+  app.get(
+    '/metadata',
+    GetConnectionMetadataRequest,
+    async (request): Promise<Record<string, any>> => {
+      const blocks = await blockMetadataService.list({
+        projectId: request.principal.projectId,
+        release: await flagService.getCurrentRelease(),
+        includeHidden: false,
+        edition: OpsEdition.COMMUNITY,
+      });
+
+      const authMetadata: Record<string, any> = {};
+
+      for (const block of blocks) {
+        if (block.auth) {
+          authMetadata[block.name] = block.auth;
+        }
+      }
+
+      return authMetadata;
+    },
+  );
+
   done();
 };
 
@@ -232,6 +257,21 @@ const GetAppConnectionRequest = {
           { additionalProperties: true },
         ),
       ]),
+    },
+  },
+};
+
+const GetConnectionMetadataRequest = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
+    permission: Permission.READ_APP_CONNECTION,
+  },
+  schema: {
+    tags: ['app-connections'],
+    security: [SERVICE_KEY_SECURITY_OPENAPI],
+    description: 'Get authentication metadata for all available connections',
+    response: {
+      [StatusCodes.OK]: Type.Record(Type.String(), Type.Unknown()),
     },
   },
 };
