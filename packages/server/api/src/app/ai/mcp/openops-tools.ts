@@ -25,7 +25,10 @@ async function getOpenApiSchemaPath(app: FastifyInstance): Promise<string> {
       JSON.stringify(openApiSchema),
       'utf-8',
     );
-    logger.info('Writing OpenAPI schema to:', { cachedSchemaPath });
+    logger.info('Writing OpenAPI schema to:', {
+      cachedSchemaPath,
+      schema: JSON.stringify(openApiSchema),
+    });
   }
   return cachedSchemaPath;
 }
@@ -38,6 +41,9 @@ export async function getOpenOpsTools(
   const basePath = system.getOrThrow<string>(
     AppSystemProp.OPENOPS_MCP_SERVER_PATH,
   );
+  const apiBaseUrl = networkUtls.getInternalApiUrl();
+  const logzioToken = system.get<string>(SharedSystemProp.LOGZIO_TOKEN);
+
   const pythonPath = path.join(basePath, '.venv', 'bin', 'python');
   const serverPath = path.join(basePath, 'main.py');
 
@@ -54,9 +60,9 @@ export async function getOpenOpsTools(
         env: {
           OPENAPI_SCHEMA_PATH: tempSchemaPath,
           AUTH_TOKEN: authToken,
-          API_BASE_URL: networkUtls.getInternalApiUrl(),
+          API_BASE_URL: apiBaseUrl,
           OPENOPS_MCP_SERVER_PATH: basePath,
-          LOGZIO_TOKEN: system.get<string>(SharedSystemProp.LOGZIO_TOKEN) ?? '',
+          LOGZIO_TOKEN: logzioToken ?? '',
           ENVIRONMENT:
             system.get<string>(SharedSystemProp.ENVIRONMENT_NAME) ?? '',
         },
@@ -72,6 +78,7 @@ export async function getOpenOpsTools(
   } catch (error) {
     logger.error('Failed to create OpenOps MCP client:', {
       error: error instanceof Error ? error.message : String(error),
+      apiBaseUrl,
     });
     return {
       client: undefined,
