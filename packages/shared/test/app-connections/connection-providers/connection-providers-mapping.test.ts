@@ -1,9 +1,9 @@
+import { ConnectionProvider } from '../../../src/lib/app-connection/connection-providers';
 import {
-  ConnectionProvider,
   getAllConnectionProviders,
   getConnectionProvider,
-} from '../../../src/lib/app-connection/connection-providers/providers';
-import { providerMap } from '../../../src/lib/app-connection/connection-providers/providers-map';
+  providerMap,
+} from '../../../src/lib/app-connection/connection-providers-mapping';
 
 describe('connectionProviders', () => {
   describe('getAll', () => {

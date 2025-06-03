@@ -1,4 +1,4 @@
-import { ConnectionProvider, Provider } from './providers';
+import { ConnectionProvider, Provider } from './connection-providers';
 
 const baseUrl = 'https://static.openops.com';
 
@@ -74,3 +74,11 @@ export const providerMap: Record<ConnectionProvider, Provider> = {
     logoUrl: `${baseUrl}/blocks/umbrella.png`,
   },
 };
+
+export function getAllConnectionProviders(): Provider[] {
+  return Object.values(providerMap);
+}
+
+export function getConnectionProvider(id: ConnectionProvider): Provider {
+  return providerMap[id];
+}
