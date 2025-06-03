@@ -9,6 +9,7 @@ import {
 import { ScrollArea } from '../../ui/scroll-area';
 import { TooltipProvider } from '../../ui/tooltip';
 import { OverflowTooltip } from '../overflow-tooltip';
+import { replaceServicePrefix } from './template-utils';
 import { TemplateSidebarCategory } from './types';
 
 type FlowTemplateFilterItemProps = {
@@ -144,7 +145,7 @@ const FlowTemplateFilterSidebar = ({
                     <FlowTemplateFilterItem
                       key={service}
                       value={service}
-                      displayName={service}
+                      displayName={replaceServicePrefix(service)}
                       onClick={onServiceFilterClick}
                       isActive={selectedServices.includes(service)}
                     />

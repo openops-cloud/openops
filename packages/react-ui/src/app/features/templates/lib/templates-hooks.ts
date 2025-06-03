@@ -44,13 +44,6 @@ const sortFunction = (a: string, b: string) => {
   return a.localeCompare(b, DEFAULT_LOCALE);
 };
 
-// replace services like "AWS EC2" or "GCP .." or "Azure .." with just "EC2"
-export const replaceServicePrefix = (service?: string) => {
-  if (!service) return '';
-  const match = service.match(/^(AWS|GCP|Azure)\s+([^\s].*)$/);
-  return match ? match[2] : service;
-};
-
 export function getUniqueCategoriesFromTemplates(
   templates?: FlowTemplateMetadata[],
 ): TemplateSidebarCategory[] {
@@ -61,7 +54,7 @@ export function getUniqueCategoriesFromTemplates(
         categoryMap.set(category, new Set());
       }
       item.services.forEach((service) => {
-        categoryMap.get(category)?.add(replaceServicePrefix(service));
+        categoryMap.get(category)?.add(service);
       });
     });
   });
