@@ -1,7 +1,4 @@
-import {
-  FastifyPluginAsyncTypebox,
-  Type,
-} from '@fastify/type-provider-typebox';
+import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import {
   JobType,
   LATEST_JOB_DATA_SCHEMA_VERSION,
