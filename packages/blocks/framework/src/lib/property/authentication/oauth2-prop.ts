@@ -1,13 +1,13 @@
 import { OAuth2GrantType } from '@openops/shared';
 import { Type } from '@sinclair/typebox';
 import { StaticPropsValue } from '..';
-import { ValidationInputType } from '../../validators/types';
+import { ValidationInputType } from '../../validators';
 import { TPropertyValue } from '../input/common';
 import { StaticDropdownProperty } from '../input/dropdown/static-dropdown';
 import { PropertyType } from '../input/property-type';
+import { SecretTextProperty } from '../input/secret-text-property';
 import { ShortTextProperty } from '../input/text-property';
 import { BaseBlockAuthSchema } from './common';
-import { SecretTextProperty } from './secret-text-property';
 
 export enum OAuth2AuthorizationMethod {
   HEADER = 'HEADER',

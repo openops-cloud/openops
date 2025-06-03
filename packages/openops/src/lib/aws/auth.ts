@@ -1,7 +1,11 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
-import { BlockAuth, Property } from '@openops/blocks-framework';
+import {
+  BlockAuth,
+  Property,
+} from '@openops/blocks-framework';
 import { parseArn } from './arn-handler';
 import { assumeRole } from './sts-common';
+import { ConnectionProvider, connectionProviders } from '@openops/shared';
 
 export interface AwsCredentials {
   accessKeyId: string;
@@ -162,12 +166,13 @@ export function getAwsAccountsSingleSelectDropdown() {
 }
 
 export const amazonAuth = BlockAuth.CustomAuth({
+  provider: connectionProviders.getOne(ConnectionProvider.AWS),
   props: {
-    accessKeyId: BlockAuth.SecretText({
+    accessKeyId: Property.SecretText({
       displayName: 'Access Key ID',
       required: true,
     }),
-    secretAccessKey: BlockAuth.SecretText({
+    secretAccessKey: Property.SecretText({
       displayName: 'Secret Access Key',
       required: true,
     }),

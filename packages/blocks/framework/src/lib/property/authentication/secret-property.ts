@@ -4,7 +4,7 @@ import { TPropertyValue } from '../input/common';
 import { PropertyType } from '../input/property-type';
 import { BaseBlockAuthSchema } from './common';
 
-export const SecretTextProperty = Type.Composite([
+export const SecretProperty = Type.Composite([
   BaseBlockAuthSchema,
   TPropertyValue(
     Type.Object({
@@ -14,11 +14,10 @@ export const SecretTextProperty = Type.Composite([
   ),
 ]);
 
-export type SecretTextProperty<R extends boolean> =
-  BaseBlockAuthSchema<string> &
-    TPropertyValue<
-      string,
-      PropertyType.SECRET_TEXT,
-      ValidationInputType.STRING,
-      R
-    >;
+export type SecretProperty<R extends boolean> = BaseBlockAuthSchema<string> &
+  TPropertyValue<
+    string,
+    PropertyType.SECRET_TEXT,
+    ValidationInputType.STRING,
+    R
+  >;

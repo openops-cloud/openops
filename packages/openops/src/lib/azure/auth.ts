@@ -1,7 +1,11 @@
-import { BlockAuth, Property } from '@openops/blocks-framework';
+import {
+  BlockAuth,
+  Property,
+} from '@openops/blocks-framework';
 import { SharedSystemProp, system } from '@openops/server-shared';
 import { AxiosHeaders } from 'axios';
 import { makeHttpRequest } from '../axios-wrapper';
+import { ConnectionProvider, connectionProviders } from '@openops/shared';
 
 export type AzureCredentials = {
   access_token: string;
@@ -29,13 +33,14 @@ const enableHostSession =
   system.getBoolean(SharedSystemProp.ENABLE_HOST_SESSION) ?? false;
 
 export const azureAuth = BlockAuth.CustomAuth({
+  provider: connectionProviders.getOne(ConnectionProvider.AZURE),
   props: {
     clientId: Property.ShortText({
       displayName: 'Application (client) ID',
       required: true,
       description: 'The Azure Application (client) ID.',
     }),
-    clientSecret: BlockAuth.SecretText({
+    clientSecret: Property.SecretText({
       displayName: 'Client Secret',
       required: true,
       description: 'The secret associated with the Azure Application.',

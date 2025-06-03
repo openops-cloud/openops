@@ -1,7 +1,12 @@
 import { HttpError } from '@openops/blocks-common';
-import { BlockAuth, Property, Validators } from '@openops/blocks-framework';
+import {
+  BlockAuth,
+  Property,
+  Validators,
+} from '@openops/blocks-framework';
 import { configureConnection } from './configure-connection';
 import { connect } from './utils';
+import { ConnectionProvider, connectionProviders } from '@openops/shared';
 
 const markdown = `
 1.  Go to the [Snowflake Login Page](https://app.snowflake.com/) and log in to your account.
@@ -16,6 +21,7 @@ If you're experiencing delays, double-check that your **Account Identifier** is 
 `;
 
 export const customAuth = BlockAuth.CustomAuth({
+  provider: connectionProviders.getOne(ConnectionProvider.SNOWFLAKE),
   description: markdown,
   props: {
     account: Property.ShortText({
@@ -28,7 +34,7 @@ export const customAuth = BlockAuth.CustomAuth({
       required: true,
       description: 'The login name for your Snowflake user.',
     }),
-    password: BlockAuth.SecretText({
+    password: Property.SecretText({
       displayName: 'Password',
       description: 'Password for the user.',
       required: true,

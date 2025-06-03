@@ -1,11 +1,16 @@
 import { BlockAuth, Property, createBlock } from '@openops/blocks-framework';
-import { BlockCategory } from '@openops/shared';
+import {
+  BlockCategory,
+  ConnectionProvider,
+  connectionProviders,
+} from '@openops/shared';
 import { sendEmail } from './lib/actions/send-email';
 import { smtpCommon } from './lib/common';
 
 const SMTPPorts = [25, 465, 587, 2525];
 
 export const smtpAuth = BlockAuth.CustomAuth({
+  provider: connectionProviders.getOne(ConnectionProvider.SMTP),
   required: true,
   props: {
     host: Property.ShortText({
@@ -16,7 +21,7 @@ export const smtpAuth = BlockAuth.CustomAuth({
       displayName: 'Email',
       required: true,
     }),
-    password: BlockAuth.SecretText({
+    password: Property.SecretText({
       displayName: 'Password',
       required: true,
     }),

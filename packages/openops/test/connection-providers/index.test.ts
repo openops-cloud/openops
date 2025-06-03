@@ -1,6 +1,6 @@
-import { connectionProviders } from '../../src/lib/connection-providers';
-import { ConnectionProvider } from '../../src/lib/connection-providers/providers';
-import { providerMap } from '../../src/lib/connection-providers/providers-map';
+import { connectionProviders } from '../../../shared/src/lib/app-connection/connection-providers';
+import { ConnectionProvider } from '../../../shared/src/lib/app-connection/connection-providers/providers';
+import { providerMap } from '../../../shared/src/lib/app-connection/connection-providers/providers-map';
 
 describe('connectionProviders', () => {
   describe('getAll', () => {

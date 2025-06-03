@@ -1,10 +1,14 @@
-import { BlockAuth } from '@openops/blocks-framework';
+import {
+  BlockAuth,
+  Property,
+} from '@openops/blocks-framework';
 import { SharedSystemProp, system } from '@openops/server-shared';
 import fs from 'fs/promises';
 import os from 'os';
 import path from 'path';
 import { runCliCommand } from '../cli-command-wrapper';
 import { useTempFile } from '../use-temp-file';
+import { ConnectionProvider, connectionProviders } from '@openops/shared';
 
 const enableHostSession =
   system.getBoolean(SharedSystemProp.ENABLE_HOST_SESSION) ?? false;
@@ -21,9 +25,10 @@ const markdown = `
 You can also visit [OpenOps documentation](https://docs.openops.com/introduction/overview) for more information.`;
 
 export const googleCloudAuth = BlockAuth.CustomAuth({
+  provider: connectionProviders.getOne(ConnectionProvider.GCLOUD),
   description: markdown,
   props: {
-    keyFileContent: BlockAuth.SecretText({
+    keyFileContent: Property.SecretText({
       displayName: 'Key file content',
       description: 'Provide the content of the service-account key file.',
       required: true,

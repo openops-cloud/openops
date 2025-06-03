@@ -3,20 +3,20 @@ import { PropertyType } from '../input/property-type';
 import { BasicAuthProperty } from './basic-auth-prop';
 import { CustomAuthProperty, CustomAuthProps } from './custom-auth-prop';
 import { OAuth2Property, OAuth2Props } from './oauth2-prop';
-import { SecretTextProperty } from './secret-text-property';
+import { SecretProperty } from './secret-property';
 
 export const BlockAuthProperty = Type.Union([
   BasicAuthProperty,
   CustomAuthProperty,
   OAuth2Property,
-  SecretTextProperty,
+  SecretProperty,
 ]);
 
 export type BlockAuthProperty =
   | BasicAuthProperty
   | CustomAuthProperty<any, boolean>
   | OAuth2Property<any>
-  | SecretTextProperty<boolean>;
+  | SecretProperty<boolean>;
 
 type AuthProperties<T> = Omit<Properties<T>, 'displayName'>;
 
@@ -26,17 +26,17 @@ type Properties<T> = Omit<
 >;
 
 export const BlockAuth = {
-  SecretText<R extends boolean>(
-    request: Properties<SecretTextProperty<R>>,
-  ): R extends true ? SecretTextProperty<true> : SecretTextProperty<false> {
+  Secret<R extends boolean>(
+    request: Properties<SecretProperty<R>>,
+  ): R extends true ? SecretProperty<true> : SecretProperty<false> {
     return {
       ...request,
       valueSchema: undefined,
       type: PropertyType.SECRET_TEXT,
       required: true,
     } as unknown as R extends true
-      ? SecretTextProperty<true>
-      : SecretTextProperty<false>;
+      ? SecretProperty<true>
+      : SecretProperty<false>;
   },
   OAuth2<T extends OAuth2Props>(
     request: AuthProperties<OAuth2Property<T>>,

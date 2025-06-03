@@ -16,7 +16,6 @@ export {
   OAuth2PropertyValue,
   OAuth2Props,
 } from './authentication/oauth2-prop';
-export { SecretTextProperty } from './authentication/secret-text-property';
 export { Property } from './input';
 export { ArrayProperty, ArraySubProps } from './input/array-property';
 export { CheckboxProperty } from './input/checkbox-property';

@@ -18,6 +18,7 @@ import { MarkDownProperty } from './markdown-property';
 import { NumberProperty } from './number-property';
 import { ObjectProperty } from './object-property';
 import { PropertyType } from './property-type';
+import { SecretTextProperty } from './secret-text-property';
 import { LongTextProperty, ShortTextProperty } from './text-property';
 
 export const InputProperty = Type.Union([
@@ -39,6 +40,7 @@ export const InputProperty = Type.Union([
 ]);
 
 export type InputProperty =
+  | SecretTextProperty<boolean>
   | ShortTextProperty<boolean>
   | LongTextProperty<boolean>
   | MarkDownProperty
@@ -61,6 +63,18 @@ type Properties<T> = Omit<
 >;
 
 export const Property = {
+  SecretText<R extends boolean>(
+    request: Properties<SecretTextProperty<R>>,
+  ): R extends true ? SecretTextProperty<true> : SecretTextProperty<false> {
+    return {
+      ...request,
+      valueSchema: undefined,
+      type: PropertyType.SECRET_TEXT,
+      defaultValidators: [Validators.string],
+    } as unknown as R extends true
+      ? SecretTextProperty<true>
+      : SecretTextProperty<false>;
+  },
   ShortText<R extends boolean>(
     request: Properties<ShortTextProperty<R>>,
   ): R extends true ? ShortTextProperty<true> : ShortTextProperty<false> {

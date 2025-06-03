@@ -9,6 +9,8 @@ function getOne(id: ConnectionProvider): Provider {
   return providerMap[id];
 }
 
+export * from './providers';
+
 export const connectionProviders = {
   getAll,
   getOne,
