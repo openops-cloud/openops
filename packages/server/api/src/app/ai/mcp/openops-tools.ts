@@ -125,6 +125,22 @@ export async function getOpenOpsTools(
       logger.error('[OPENOPS TOOLS] Error checking Python version:', error);
     }
 
+    // Verify schema file exists and is readable
+    try {
+      const stats = await fs.stat(tempSchemaPath);
+      logger.info('[OPENOPS TOOLS] Schema file stats:', {
+        size: stats.size,
+        permissions: stats.mode,
+        lastModified: stats.mtime,
+      });
+    } catch (error) {
+      logger.error('[OPENOPS TOOLS] Schema file verification failed:', {
+        error: error instanceof Error ? error.message : String(error),
+        path: tempSchemaPath,
+      });
+      throw new Error('Schema file verification failed');
+    }
+
     const openopsClient = await experimental_createMCPClient({
       transport: new Experimental_StdioMCPTransport({
         command: pythonPath,
@@ -137,16 +153,32 @@ export async function getOpenOpsTools(
           LOGZIO_TOKEN: logzioToken ?? '',
           ENVIRONMENT:
             system.get<string>(SharedSystemProp.ENVIRONMENT_NAME) ?? '',
+          PYTHONUNBUFFERED: '1', // Ensure Python output is not buffered
+          PYTHONIOENCODING: 'utf-8', // Ensure proper encoding
         },
       }),
     });
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    logger.info('[OPENOPS TOOLS] Finished Initializing');
-    return {
-      client: openopsClient,
-      toolSet: await openopsClient.tools(),
-    };
+    // Wait longer for Python process to initialize
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    // Verify the client is still connected
+    try {
+      const toolSet = await openopsClient.tools();
+      logger.info('[OPENOPS TOOLS] Successfully retrieved tools:', {
+        toolCount: Object.keys(toolSet).length,
+      });
+      return {
+        client: openopsClient,
+        toolSet,
+      };
+    } catch (error) {
+      logger.error('[OPENOPS TOOLS] Failed to get tools from client:', {
+        error: error instanceof Error ? error.message : String(error),
+        errorStack: error instanceof Error ? error.stack : undefined,
+      });
+      throw error;
+    }
   } catch (error) {
     logger.error('[OPENOPS TOOLS] Failed to create OpenOps MCP client:', {
       error: error instanceof Error ? error.message : String(error),
