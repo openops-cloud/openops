@@ -63,12 +63,16 @@ export async function getOpenOpsTools(
       }),
     });
 
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    logger.info('Finished Initializing');
     return {
       client: openopsClient,
       toolSet: await openopsClient.tools(),
     };
   } catch (error) {
-    logger.error('Failed to create OpenOps MCP client:', { error });
+    logger.error('Failed to create OpenOps MCP client:', {
+      error: error instanceof Error ? error.message : String(error),
+    });
     return {
       client: undefined,
       toolSet: {},
