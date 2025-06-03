@@ -12,11 +12,7 @@ import { OpenAPI } from 'openapi-types';
 import path from 'path';
 import { MCPTool } from './mcp-tools';
 
-const EXCLUDED_PATHS = [
-  '/v1/authentication',
-  '/v1/organizations',
-  '/v1/users',
-];
+const EXCLUDED_PATHS = ['/v1/authentication', '/v1/organizations', '/v1/users'];
 
 const EXCLUDED_OPERATIONS = ['delete'];
 
@@ -65,6 +61,18 @@ function filterOpenApiSchema(schema: OpenAPI.Document): OpenAPI.Document {
   return filteredSchema;
 }
 
+// Global cache for OpenAPI schema
+let cachedOpenApiSchema: string | undefined;
+
+function getOpenApiSchema(app: FastifyInstance): string {
+  if (!cachedOpenApiSchema) {
+    const openApiSchema = app.swagger() as OpenAPI.Document;
+    const filteredSchema = filterOpenApiSchema(openApiSchema);
+    cachedOpenApiSchema = JSON.stringify(filteredSchema);
+  }
+  return cachedOpenApiSchema;
+}
+
 export async function getOpenOpsTools(
   app: FastifyInstance,
   authToken: string,
@@ -76,16 +84,13 @@ export async function getOpenOpsTools(
   const pythonPath = path.join(basePath, '.venv', 'bin', 'python');
   const serverPath = path.join(basePath, 'main.py');
 
-  const openApiSchema = app.swagger() as OpenAPI.Document;
-  const filteredSchema = filterOpenApiSchema(openApiSchema);
-
   try {
     const openopsClient = await experimental_createMCPClient({
       transport: new Experimental_StdioMCPTransport({
         command: pythonPath,
         args: [serverPath],
         env: {
-          OPENAPI_SCHEMA: JSON.stringify(filteredSchema),
+          OPENAPI_SCHEMA: getOpenApiSchema(app),
           AUTH_TOKEN: authToken,
           API_BASE_URL: networkUtls.getInternalApiUrl(),
           OPENOPS_MCP_SERVER_PATH: basePath,
