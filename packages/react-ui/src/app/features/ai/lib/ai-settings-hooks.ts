@@ -1,7 +1,10 @@
 import { QueryKeys } from '@/app/constants/query-keys';
 import { aiSettingsApi } from '@/app/features/ai/lib/ai-settings-api';
+import { toast } from '@openops/components/ui';
 import { AiConfig, GetProvidersResponse } from '@openops/shared';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
+import { t } from 'i18next';
 
 export const aiSettingsHooks = {
   useAiSettingsProviders: () => {
@@ -29,5 +32,51 @@ export const aiSettingsHooks = {
       hasActiveAiSettings: !isError && !!data && !!data?.enabled,
       isLoading,
     };
+  },
+  useActiveAiSettings: () => {
+    return useQuery<AiConfig, Error>({
+      queryKey: [QueryKeys.activeAiSettings],
+      queryFn: () => aiSettingsApi.getActiveAiSettings(),
+      staleTime: 1000,
+      retry: false,
+    });
+  },
+  useProviderModels: (providerName: string | null | undefined) => {
+    return useQuery<GetProvidersResponse | null, Error>({
+      queryKey: [QueryKeys.aiProviderModels, providerName],
+      queryFn: () => {
+        if (!providerName) {
+          return null;
+        }
+        return aiSettingsApi.getProviderModels(providerName);
+      },
+      enabled: !!providerName,
+      staleTime: Infinity,
+    });
+  },
+  useSaveAiSettings: () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+      mutationFn: (payload: any) => aiSettingsApi.saveAiSettings(payload),
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: [QueryKeys.activeAiSettings],
+        });
+        queryClient.invalidateQueries({ queryKey: [QueryKeys.aiSettings] });
+      },
+      onError: (error: AxiosError) => {
+        const message =
+          error.status === 400
+            ? (error.response?.data as { errorMessage: string })?.errorMessage
+            : error.message;
+        toast({
+          title: t('Error'),
+          variant: 'destructive',
+          description: message,
+          duration: 3000,
+        });
+      },
+    });
   },
 };

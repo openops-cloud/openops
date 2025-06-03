@@ -163,11 +163,11 @@ export function getAwsAccountsSingleSelectDropdown() {
 
 export const amazonAuth = BlockAuth.CustomAuth({
   props: {
-    accessKeyId: BlockAuth.SecretText({
+    accessKeyId: Property.SecretText({
       displayName: 'Access Key ID',
       required: true,
     }),
-    secretAccessKey: BlockAuth.SecretText({
+    secretAccessKey: Property.SecretText({
       displayName: 'Secret Access Key',
       required: true,
     }),

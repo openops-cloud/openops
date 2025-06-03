@@ -8,7 +8,7 @@ Ternary API documentation:
 https://docs.ternary.app/reference/using-the-api`,
   required: true,
   props: {
-    apiKey: BlockAuth.SecretText({
+    apiKey: Property.SecretText({
       displayName: 'API key',
       defaultValue: '',
       required: true,

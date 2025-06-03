@@ -69,6 +69,7 @@ describe('flow execution', () => {
       updatedBy: mockUser.id,
       state: FlowVersionState.LOCKED,
       trigger: {
+        id: 'everyHourTrigger',
         type: TriggerType.BLOCK,
         settings: {
           blockName: '@openops/block-schedule',
