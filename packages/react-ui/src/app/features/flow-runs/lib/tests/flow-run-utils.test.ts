@@ -493,6 +493,6 @@ describe('flowRunUtils.findLoopsState', () => {
       currentLoopsState,
     );
     // Since the failed step is the parent loop, should just return the current state
-    expect(result).toEqual({ loop: 1 });
+    expect(result).toEqual({ loop1: 1 });
   });
 });
