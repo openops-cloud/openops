@@ -24,13 +24,11 @@ RUN <<-```
     python3 -m venv .venv && python3 -m venv pip install .
 ```
 
-
-
 WORKDIR /root/.mcp/openops-mcp
 RUN <<-```
     set -ex
     git clone https://github.com/openops-cloud/openops-mcp .
-    git checkout lb/test
+    git checkout 4191aabafc54c5fec5e982e911bc8631ee261722
     wget -qO- https://astral.sh/uv/install.sh | sh && source $HOME/.local/bin/env
     uv venv && . .venv/bin/activate && uv pip install -r requirements.txt
 ```
