@@ -64,7 +64,6 @@ export async function getOpenOpsTools(
   } catch (error) {
     logger.error('[OPENOPS TOOLS] Failed to create OpenOps MCP client:', {
       error: error instanceof Error ? error.message : String(error),
-      apiBaseUrl,
       errorStack: error instanceof Error ? error.stack : undefined,
       errorName: error instanceof Error ? error.name : undefined,
     });
