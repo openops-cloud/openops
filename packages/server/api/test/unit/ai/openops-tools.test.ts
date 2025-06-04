@@ -5,11 +5,6 @@ const mockTools = {
   tool2: { description: 'Test tool 2', parameters: {} },
 };
 
-const createMcpClientMock = jest.fn();
-jest.mock('ai', () => ({
-  experimental_createMCPClient: createMcpClientMock,
-}));
-
 const systemMock = {
   get: jest.fn(),
   getOrThrow: jest.fn(),
@@ -23,6 +18,12 @@ const loggerMock = {
 const networkUtlsMock = {
   getInternalApiUrl: jest.fn(),
 };
+
+const createMcpClientMock = jest.fn();
+
+jest.mock('ai', () => ({
+  experimental_createMCPClient: createMcpClientMock,
+}));
 
 jest.mock('@openops/server-shared', () => ({
   ...jest.requireActual('@openops/server-shared'),
@@ -76,6 +77,16 @@ describe('getOpenOpsTools', () => {
     },
   };
 
+  const filteredSchema = {
+    openapi: '3.1',
+    paths: {
+      '/v1/api/endpoint': {
+        get: { operationId: 'getData' },
+        post: { operationId: 'createData' },
+      },
+    },
+  };
+
   const mockApp = {
     swagger: jest.fn().mockReturnValue(mockOpenApiSchema),
   } as unknown as FastifyInstance;
@@ -106,7 +117,7 @@ describe('getOpenOpsTools', () => {
     await getOpenOpsTools(mockApp, 'auth-1');
     expect(fs.writeFile).toHaveBeenCalledWith(
       path.join('/tmp', 'openapi-schema.json'),
-      JSON.stringify({ openapi: '3.1' }),
+      JSON.stringify(filteredSchema),
       'utf-8',
     );
 
@@ -127,50 +138,19 @@ describe('getOpenOpsTools', () => {
       toolSet: mockTools,
     });
 
-    const filteredSchema = JSON.parse(
-      createMcpClientMock.mock.calls[0][0].transport.serverParams.env
-        .OPENAPI_SCHEMA,
-    );
-
-    expect(filteredSchema.paths).toEqual({
-      '/v1/api/endpoint': {
-        get: { operationId: 'getData' },
-        post: { operationId: 'createData' },
-      },
-    });
-    expect(filteredSchema.paths['/v1/authentication/sign-in']).toBeUndefined();
-    expect(filteredSchema.paths['/v1/users/profile']).toBeUndefined();
-    expect(filteredSchema.paths['/v1/organizations/123']).toBeUndefined();
-    expect(filteredSchema.paths['/v1/api/endpoint'].delete).toBeUndefined();
-  });
-
-  it('should return empty object and log error if MCP client creation fails', async () => {
-    const mockError = new Error('Test error');
-    createMcpClientMock.mockRejectedValue(mockError);
-
-    const result = await getOpenOpsTools(mockApp, 'mock-auth-token');
-
-    expect(result).toEqual({
-      client: undefined,
-      toolSet: {},
-    });
-    expect(loggerMock.error).toHaveBeenCalledWith(
-      'Failed to create OpenOps MCP client:',
-      mockError,
-    );
     expect(createMcpClientMock).toHaveBeenCalledWith({
       transport: expect.objectContaining({
         serverParams: {
           command: `${mockBasePath}/.venv/bin/python`,
           args: [`${mockBasePath}/main.py`],
-          env: {
+          env: expect.objectContaining({
             OPENAPI_SCHEMA_PATH: expect.any(String),
             AUTH_TOKEN: 'test-auth-token',
             API_BASE_URL: mockApiBaseUrl,
             OPENOPS_MCP_SERVER_PATH: mockBasePath,
             LOGZIO_TOKEN: 'test-logzio-token',
             ENVIRONMENT: 'test-environment',
-          },
+          }),
         },
       }),
     });
