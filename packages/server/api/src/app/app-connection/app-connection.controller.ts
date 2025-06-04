@@ -165,7 +165,7 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
               displayName: provider.displayName,
               logoUrl: provider.logoUrl,
               supportedBlocks: [],
-              props: block.auth.props ?? {},
+              props: block.auth ?? {},
             };
           }
           providerMetadata[provider.id].supportedBlocks.push(block.name);
