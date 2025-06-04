@@ -7,17 +7,22 @@ import {
 import { experimental_createMCPClient } from 'ai';
 import { Experimental_StdioMCPTransport } from 'ai/mcp-stdio';
 import { FastifyInstance } from 'fastify';
+import fs from 'fs/promises';
 import { OpenAPI } from 'openapi-types';
+import os from 'os';
 import path from 'path';
 import { MCPTool } from './mcp-tools';
 
-import fs from 'fs/promises';
-import os from 'os';
-const EXCLUDED_PATHS = [
-  '/v1/authentication',
-  '/v1/organizations',
-  '/v1/users',
-  '/v1/ai',
+const INCLUDED_PATHS = [
+  '/v1/folders',
+  '/v1/flow-versions',
+  '/v1/flows',
+  '/v1/files',
+  '/v1/flow-templates',
+  '/v1/test-trigger',
+  '/v1/blocks',
+  '/v1/flow-runs',
+  '/v1/app-connections',
 ];
 
 const EXCLUDED_OPERATIONS = ['delete'];
@@ -42,7 +47,7 @@ function filterOpenApiSchema(schema: OpenAPI.Document): OpenAPI.Document {
 
     for (const [path, pathItem] of Object.entries(filteredSchema.paths)) {
       if (
-        EXCLUDED_PATHS.some((excludedPath) => path.startsWith(excludedPath))
+        !INCLUDED_PATHS.some((includedPath) => path.startsWith(includedPath))
       ) {
         continue;
       }
