@@ -1,8 +1,7 @@
 import { UseChatHelpers } from '@ai-sdk/react';
 import { t } from 'i18next';
-import { throttle } from 'lodash-es';
 import { Bot } from 'lucide-react';
-import { ReactNode, useCallback, useEffect, useRef } from 'react';
+import { ReactNode, useEffect, useRef } from 'react';
 import { useIntersection } from 'react-use';
 import { cn } from '../../lib/cn';
 import { AI_CHAT_SCROLL_DELAY } from '../../lib/constants';
@@ -85,7 +84,8 @@ const AiAssistantChatContainer = ({
       const lastUserIndex = messages.map((m) => m.role).lastIndexOf('user');
       if (
         lastUserIndex !== -1 &&
-        lastUserMessageId.current !== messages[lastUserIndex].id
+        lastUserMessageId.current !== messages[lastUserIndex].id &&
+        !userHasScrolled.current
       ) {
         lastUserMessageId.current = messages[lastUserIndex].id;
         lastUserMessageRef.current?.scrollIntoView({
@@ -101,7 +101,8 @@ const AiAssistantChatContainer = ({
     if (
       status === 'streaming' &&
       isLastUserMessageVisible?.isIntersecting &&
-      streamingEndRef.current
+      streamingEndRef.current &&
+      !userHasScrolled.current
     ) {
       streamingEndRef.current.scrollIntoView({
         behavior: 'smooth',
@@ -114,12 +115,14 @@ const AiAssistantChatContainer = ({
   useEffect(() => {
     const scrollEl = scrollViewportRef.current;
     if (!scrollEl) return;
-    const handleScroll = () => {
+    const giveUserControl = () => {
       userHasScrolled.current = true;
     };
-    scrollEl.addEventListener('scroll', handleScroll);
+    scrollEl.addEventListener('scroll', giveUserControl);
+    window.addEventListener('scroll', giveUserControl, { passive: true });
     return () => {
-      scrollEl.removeEventListener('scroll', handleScroll);
+      scrollEl.removeEventListener('scroll', giveUserControl);
+      window.removeEventListener('scroll', giveUserControl);
     };
   }, [scrollViewportRef]);
 
