@@ -10,6 +10,7 @@ import {
 export type AppConnectionSchema = Omit<AppConnection, 'value'> & {
   project: Project;
   value: EncryptedObject;
+  provider?: string;
 };
 
 export const AppConnectionEntity = new EntitySchema<AppConnectionSchema>({
@@ -32,6 +33,10 @@ export const AppConnectionEntity = new EntitySchema<AppConnectionSchema>({
     projectId: OpenOpsIdSchema,
     value: {
       type: JSONB_COLUMN_TYPE,
+    },
+    provider: {
+      type: String,
+      nullable: true,
     },
   },
   indices: [

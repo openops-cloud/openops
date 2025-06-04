@@ -1,11 +1,13 @@
 import { Static, Type } from '@sinclair/typebox';
 import { AppConnectionType } from '../app-connection';
+import { Provider } from '../connection-providers';
 import { OAuth2AuthorizationMethod } from '../oauth2-authorization-method';
 
 const commonAuthProps = {
   name: Type.String({}),
   blockName: Type.String({}),
   projectId: Type.String({}),
+  provider: Type.Optional(Type.Enum(Provider)),
 };
 
 export enum OAuth2GrantType {
