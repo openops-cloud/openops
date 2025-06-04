@@ -26,7 +26,7 @@ const baseTemplate: FlowTemplateMetadataWithIntegrations = {
   name: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam pulvinar id purus nec tempor. ',
   description:
     'Services: ["Compute", "Network", "Storage", "Databases", "Security", "Development & Integration", "Analytics & Big Data", "Application Hosting"]\nDomains: ["Allocation", "Anomaly management", "Workload optimization", "Rate optimization", "FinOps education & enablement"]',
-  type: 'ORGANIZATION',
+  categories: ['AWS'],
   tags: [''],
   services: [
     'Compute',
@@ -233,6 +233,16 @@ const baseTemplate: FlowTemplateMetadataWithIntegrations = {
 };
 
 export const mocks = {
+  categories: [
+    {
+      name: 'AWS',
+      services,
+    },
+    {
+      name: 'Azure',
+      services,
+    },
+  ],
   services,
   domains,
   baseTemplate,

@@ -1,8 +1,16 @@
 import { t } from 'i18next';
+import { ChevronRight } from 'lucide-react';
 import { cn } from '../../lib/cn';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '../../ui/collapsible';
 import { ScrollArea } from '../../ui/scroll-area';
 import { TooltipProvider } from '../../ui/tooltip';
 import { OverflowTooltip } from '../overflow-tooltip';
+import { replaceServicePrefix } from './template-utils';
+import { TemplateSidebarCategory } from './types';
 
 type FlowTemplateFilterItemProps = {
   value: string;
@@ -39,9 +47,20 @@ const FlowTemplateFilterItem = ({
 
 FlowTemplateFilterItem.displayName = 'FlowTemplateFilterItem';
 
-const FlowTemplateFilterHeader = ({ title }: { title: string }) => (
+const FlowTemplateFilterHeader = ({
+  title,
+  className,
+}: {
+  title: string;
+  className?: string;
+}) => (
   <div className="h-16 px-3 py-3 justify-start items-end gap-2.5 inline-flex overflow-hidden">
-    <span className="text-slate-600 dark:text-primary text-base font-bold leading-snug truncate">
+    <span
+      className={cn(
+        'text-slate-600 dark:text-primary text-base font-bold leading-snug truncate',
+        className,
+      )}
+    >
       {title}
     </span>
   </div>
@@ -51,21 +70,25 @@ FlowTemplateFilterHeader.displayName = 'FlowTemplateFilterHeader';
 
 type FlowTemplateFilterSidebarProps = {
   domains: string[];
-  services: string[];
+  categories: TemplateSidebarCategory[];
   selectedDomains: string[];
   selectedServices: string[];
+  selectedCategories: string[];
   onDomainFilterClick: (domain: string) => void;
   onServiceFilterClick: (service: string) => void;
+  onCategoryFilterClick: (category: string) => void;
   clearFilters: () => void;
 };
 
 const FlowTemplateFilterSidebar = ({
   domains,
-  services,
+  categories,
   selectedDomains,
   selectedServices,
+  selectedCategories,
   onDomainFilterClick,
   onServiceFilterClick,
+  onCategoryFilterClick,
   clearFilters,
 }: FlowTemplateFilterSidebarProps) => {
   return (
@@ -90,17 +113,46 @@ const FlowTemplateFilterSidebar = ({
           ))}
         </div>
       </ScrollArea>
-      <FlowTemplateFilterHeader title={t('Services')} />
-      <ScrollArea className="max-h-[40%] w-full">
+      <FlowTemplateFilterHeader title={t('Cloud providers')} />
+      <ScrollArea className="max-h-[50%] w-full">
         <div className="flex flex-col w-full">
-          {services.map((service) => (
-            <FlowTemplateFilterItem
-              key={service}
-              value={service}
-              displayName={service}
-              onClick={onServiceFilterClick}
-              isActive={selectedServices.includes(service)}
-            />
+          {categories?.map((category) => (
+            <Collapsible
+              key={category.name}
+              onOpenChange={(open) => {
+                onCategoryFilterClick(open ? category.name : '');
+              }}
+            >
+              <CollapsibleTrigger
+                className={cn(
+                  'flex items-center cursor-pointer px-3 py-2 hover:bg-muted rounded w-full',
+                  {
+                    'bg-muted': selectedCategories.includes(category.name),
+                  },
+                )}
+              >
+                <ChevronRight
+                  className="size-4 flex-shrink-0 mr-2 transition-transform data-[state=open]:rotate-90 dark:text-primary"
+                  aria-hidden="true"
+                />
+                <span className="font-normal text-slate-600 dark:text-primary text-base">
+                  {category.name}
+                </span>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="data-[state=open]:animate-slideDown overflow-hidden data-[state=closed]:animate-slideUp">
+                <div className="pl-4">
+                  {category.services.map((service) => (
+                    <FlowTemplateFilterItem
+                      key={service}
+                      value={service}
+                      displayName={replaceServicePrefix(service)}
+                      onClick={onServiceFilterClick}
+                      isActive={selectedServices.includes(service)}
+                    />
+                  ))}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
           ))}
         </div>
       </ScrollArea>

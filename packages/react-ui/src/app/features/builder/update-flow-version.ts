@@ -32,7 +32,7 @@ export const updateFlowVersion = (
     );
 
     if (stepToClear) {
-      stepTestOutputCache.clearStep(stepToClear.id);
+      stepTestOutputCache.clearStep(stepToClear.id!);
     }
 
     if (operation.request.name === state.selectedStep) {

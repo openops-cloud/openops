@@ -85,7 +85,7 @@ const TestActionSection = React.memo(
         if (stepResponse.success) {
           setErrorMessage(undefined);
 
-          stepTestOutputCache.setStepData(formValues.id, {
+          stepTestOutputCache.setStepData(formValues.id!, {
             output: formattedResponse,
             lastTestDate: dayjs().toISOString(),
           });
@@ -104,7 +104,7 @@ const TestActionSection = React.memo(
     const isTesting = isPending || isLoadingTestOutput;
 
     const handleTest = () => {
-      stepTestOutputCache.resetExpandedForStep(formValues.id);
+      stepTestOutputCache.resetExpandedForStep(formValues.id!);
       if (
         selectedStep.type === ActionType.BLOCK &&
         selectedStepTemplateModel?.riskLevel === RiskLevel.HIGH
@@ -119,7 +119,7 @@ const TestActionSection = React.memo(
 
     const confirmRiskyStep = () => {
       setRiskyStepConfirmationMessage(null);
-      stepTestOutputCache.resetExpandedForStep(formValues.id);
+      stepTestOutputCache.resetExpandedForStep(formValues.id!);
       mutate();
     };
 

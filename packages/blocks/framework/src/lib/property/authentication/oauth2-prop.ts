@@ -5,9 +5,8 @@ import { ValidationInputType } from '../../validators/types';
 import { TPropertyValue } from '../input/common';
 import { StaticDropdownProperty } from '../input/dropdown/static-dropdown';
 import { PropertyType } from '../input/property-type';
-import { ShortTextProperty } from '../input/text-property';
+import { SecretTextProperty, ShortTextProperty } from '../input/text-property';
 import { BaseBlockAuthSchema } from './common';
-import { SecretTextProperty } from './secret-text-property';
 
 export enum OAuth2AuthorizationMethod {
   HEADER = 'HEADER',
