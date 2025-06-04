@@ -135,7 +135,9 @@ describe('getOpenOpsTools', () => {
     });
     expect(loggerMock.error).toHaveBeenCalledWith(
       'Failed to create OpenOps MCP client:',
-      mockError,
+      {
+        error: 'Test error',
+      },
     );
   });
 });
