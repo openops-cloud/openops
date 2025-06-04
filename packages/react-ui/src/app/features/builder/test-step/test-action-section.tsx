@@ -160,10 +160,9 @@ const TestActionSection = React.memo(
         isValid={isValid}
         isSaving={isSaving}
         isTesting={isTesting}
-        currentSelectedData={testOutputData?.output}
+        data={testOutputData?.output}
         errorMessage={errorMessage}
         lastTestDate={testOutputData?.lastTestDate}
-        type={formValues.type}
       />
     );
   },
