@@ -70,9 +70,19 @@ describe('getOpenOpsTools', () => {
         get: { operationId: 'getOrg' },
         put: { operationId: 'updateOrg' },
       },
-      '/v1/api/endpoint': {
-        get: { operationId: 'getData' },
-        post: { operationId: 'createData' },
+      '/v1/flows/abc': {
+        get: { operationId: 'getFlow' },
+        delete: { operationId: 'deleteFlow' },
+      },
+      '/v1/blocks/xyz': {
+        post: { operationId: 'createBlock' },
+        delete: { operationId: 'deleteBlock' },
+      },
+      '/v1/files/123': {
+        get: { operationId: 'getFile' },
+      },
+      '/v1/other/endpoint': {
+        get: { operationId: 'getOther' },
       },
     },
   };
@@ -80,9 +90,14 @@ describe('getOpenOpsTools', () => {
   const filteredSchema = {
     openapi: '3.1',
     paths: {
-      '/v1/api/endpoint': {
-        get: { operationId: 'getData' },
-        post: { operationId: 'createData' },
+      '/v1/flows/abc': {
+        get: { operationId: 'getFlow' },
+      },
+      '/v1/blocks/xyz': {
+        post: { operationId: 'createBlock' },
+      },
+      '/v1/files/123': {
+        get: { operationId: 'getFile' },
       },
     },
   };
