@@ -36,7 +36,6 @@ export const AppConnectionEntity = new EntitySchema<AppConnectionSchema>({
     },
     provider: {
       type: String,
-      nullable: true,
     },
   },
   indices: [
