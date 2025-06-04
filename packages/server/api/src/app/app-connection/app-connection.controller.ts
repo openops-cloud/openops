@@ -23,7 +23,10 @@ import { flagService } from '../flags/flag.service';
 import { sendConnectionDeletedEvent } from '../telemetry/event-models';
 import { appConnectionService } from './app-connection-service/app-connection-service';
 import { redactSecrets, removeSensitiveData } from './app-connection-utils';
-import { resolveProvidersForBlocks } from './connection-providers-resolver';
+import {
+  getProviderMetadataForAllBlocks,
+  resolveProvidersForBlocks,
+} from './connection-providers-resolver';
 
 export const appConnectionController: FastifyPluginCallbackTypebox = (
   app,
@@ -163,32 +166,7 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
     '/metadata',
     GetConnectionMetadataRequest,
     async (request): Promise<Record<string, any>> => {
-      const blocks = await blockMetadataService.list({
-        projectId: request.principal.projectId,
-        release: await flagService.getCurrentRelease(),
-        includeHidden: false,
-        edition: system.getEdition(),
-      });
-
-      const providerMetadata: Record<string, any> = {};
-
-      for (const block of blocks) {
-        if (block.auth) {
-          const provider = block.auth.provider;
-          if (!providerMetadata[provider.id]) {
-            providerMetadata[provider.id] = {
-              id: provider.id,
-              displayName: provider.displayName,
-              logoUrl: provider.logoUrl,
-              supportedBlocks: [],
-              props: block.auth ?? {},
-            };
-          }
-          providerMetadata[provider.id].supportedBlocks.push(block.name);
-        }
-      }
-
-      return providerMetadata;
+      return getProviderMetadataForAllBlocks(request.principal.projectId);
     },
   );
 

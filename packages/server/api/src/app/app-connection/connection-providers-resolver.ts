@@ -35,3 +35,42 @@ export async function resolveProvidersForBlocks(
 
   return [...new Set(providers)];
 }
+
+type ProviderMetadata = {
+  id: Provider;
+  displayName: string;
+  logoUrl: string;
+  supportedBlocks: string[];
+  props: unknown;
+};
+
+export async function getProviderMetadataForAllBlocks(
+  projectId: string,
+): Promise<Partial<Record<Provider, ProviderMetadata>>> {
+  const blocks = await blockMetadataService.list({
+    projectId,
+    release: await flagService.getCurrentRelease(),
+    includeHidden: false,
+    edition: system.getEdition(),
+  });
+
+  const providerMetadata: Partial<Record<Provider, ProviderMetadata>> = {};
+
+  for (const block of blocks) {
+    if (block.auth) {
+      const provider = block.auth.provider;
+      if (!providerMetadata[provider.id]) {
+        providerMetadata[provider.id] = {
+          id: provider.id,
+          displayName: provider.displayName,
+          logoUrl: provider.logoUrl,
+          supportedBlocks: [],
+          props: block.auth ?? {},
+        };
+      }
+      providerMetadata[provider.id]?.supportedBlocks.push(block.name);
+    }
+  }
+
+  return providerMetadata;
+}
