@@ -4,7 +4,7 @@ import {
   AppConnection,
   AppConnectionStatus,
   AppConnectionType,
-  ConnectionProvider,
+  Provider,
 } from '@openops/shared';
 import {
   redactSecrets,
@@ -36,7 +36,7 @@ describe('redactSecrets', () => {
 
     const auth: BlockAuthProperty = {
       provider: {
-        id: ConnectionProvider.AWS,
+        id: Provider.AWS,
         displayName: 'AWS',
         logoUrl: 'logo',
       },
@@ -90,7 +90,7 @@ describe('redactSecrets', () => {
 
     const auth: BlockAuthProperty = {
       provider: {
-        id: ConnectionProvider.AWS,
+        id: Provider.AWS,
         displayName: 'AWS',
         logoUrl: 'logo',
       },
@@ -136,7 +136,7 @@ describe('redactSecrets', () => {
 
     const auth: BlockAuthProperty = {
       provider: {
-        id: ConnectionProvider.AWS,
+        id: Provider.AWS,
         displayName: 'AWS',
         logoUrl: 'logo',
       },
@@ -184,7 +184,7 @@ describe('redactSecrets', () => {
     const result = redactSecrets(
       {
         provider: {
-          id: ConnectionProvider.AWS,
+          id: Provider.AWS,
           displayName: 'AWS',
           logoUrl: 'logo',
         },
@@ -205,7 +205,7 @@ describe('restoreRedactedSecrets', () => {
     const existing = { secret_text: 'original-secret' };
     const auth: BlockAuthProperty = {
       provider: {
-        id: ConnectionProvider.AWS,
+        id: Provider.AWS,
         displayName: 'AWS',
         logoUrl: 'logo',
       },
@@ -224,7 +224,7 @@ describe('restoreRedactedSecrets', () => {
     const existing = { secret_text: 'original-secret' };
     const auth: BlockAuthProperty = {
       provider: {
-        id: ConnectionProvider.AWS,
+        id: Provider.AWS,
         displayName: 'AWS',
         logoUrl: 'logo',
       },
@@ -269,7 +269,7 @@ describe('restoreRedactedSecrets', () => {
     };
     const auth: BlockAuthProperty = {
       provider: {
-        id: ConnectionProvider.AWS,
+        id: Provider.AWS,
         displayName: 'AWS',
         logoUrl: 'logo',
       },
@@ -304,7 +304,7 @@ describe('restoreRedactedSecrets', () => {
     };
     const auth: BlockAuthProperty = {
       provider: {
-        id: ConnectionProvider.AWS,
+        id: Provider.AWS,
         displayName: 'AWS',
         logoUrl: 'logo',
       },

@@ -1,4 +1,4 @@
-import { ConnectionProvider } from '../../../src/lib/app-connection/connection-providers';
+import { Provider } from '../../../src/lib/app-connection/connection-providers';
 import {
   getAllConnectionProviders,
   getConnectionProvider,
@@ -19,16 +19,16 @@ describe('connectionProviders', () => {
 
   describe('getOne', () => {
     it('should return a specific provider by id', () => {
-      const provider = getConnectionProvider(ConnectionProvider.AWS);
+      const provider = getConnectionProvider(Provider.AWS);
 
-      expect(provider).toEqual(providerMap[ConnectionProvider.AWS]);
-      expect(provider.id).toBe(ConnectionProvider.AWS);
+      expect(provider).toEqual(providerMap[Provider.AWS]);
+      expect(provider.id).toBe(Provider.AWS);
       expect(provider.displayName).toBe('AWS');
       expect(provider.logoUrl).toContain('aws.png');
     });
 
     it('should return a specific provider for each ConnectionProvider enum value', () => {
-      Object.values(ConnectionProvider).forEach((providerId) => {
+      Object.values(Provider).forEach((providerId) => {
         const provider = getConnectionProvider(providerId);
 
         expect(provider).toBeDefined();

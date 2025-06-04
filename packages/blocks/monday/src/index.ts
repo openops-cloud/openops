@@ -1,7 +1,7 @@
 import { BlockAuth, createBlock } from '@openops/blocks-framework';
 import {
   BlockCategory,
-  ConnectionProvider,
+  Provider,
   getConnectionProvider,
 } from '@openops/shared';
 import { createColumnAction } from './lib/actions/create-column';
@@ -22,7 +22,7 @@ const markdown = `
 6.Copy your personal token`;
 
 export const mondayAuth = BlockAuth.SecretAuth({
-  provider: getConnectionProvider(ConnectionProvider.MONDAY),
+  provider: getConnectionProvider(Provider.MONDAY),
   displayName: 'API v2 Token',
   description: markdown,
   required: true,

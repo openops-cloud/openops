@@ -1,8 +1,8 @@
 import { BlockAuth } from '@openops/blocks-framework';
-import { ConnectionProvider, getConnectionProvider } from '@openops/shared';
+import { Provider, getConnectionProvider } from '@openops/shared';
 
 export const auth = BlockAuth.OAuth2({
-  provider: getConnectionProvider(ConnectionProvider.GITHUB),
+  provider: getConnectionProvider(Provider.GITHUB),
   required: true,
   authUrl: 'https://github.com/login/oauth/authorize',
   tokenUrl: 'https://github.com/login/oauth/access_token',

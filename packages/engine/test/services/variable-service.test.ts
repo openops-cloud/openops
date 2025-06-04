@@ -3,7 +3,7 @@ import { VariableService } from '../../src/lib/variables/variable-service';
 import { BlockAuth, Property, Validators, WorkflowFile } from '@openops/blocks-framework';
 import {
   ActionType,
-  ConnectionProvider,
+  Provider,
   GenericStepOutput,
   getConnectionProvider,
   StepOutputStatus,
@@ -302,7 +302,7 @@ describe('Variable Service', () => {
             }),
         }
         const { processedInput, errors } = await variableService.applyProcessorsAndValidators(input, props, BlockAuth.CustomAuth({
-            provider: getConnectionProvider(ConnectionProvider.SMTP),
+            provider: getConnectionProvider(Provider.SMTP),
             required: true,
             props: {
                 age: Property.Number({
@@ -360,7 +360,7 @@ describe('Variable Service', () => {
             }),
         }
         const { processedInput, errors } = await variableService.applyProcessorsAndValidators(input, props, BlockAuth.CustomAuth({
-            provider: getConnectionProvider(ConnectionProvider.SMTP),
+            provider: getConnectionProvider(Provider.SMTP),
             required: true,
             props: {
                 age: Property.Number({
@@ -533,7 +533,7 @@ describe('Variable Service', () => {
             }),
         }
         const { errors } = await variableService.applyProcessorsAndValidators(input, props, BlockAuth.CustomAuth({
-            provider: getConnectionProvider(ConnectionProvider.SMTP),
+            provider: getConnectionProvider(Provider.SMTP),
             required: true,
             props: {
                 email: Property.LongText({

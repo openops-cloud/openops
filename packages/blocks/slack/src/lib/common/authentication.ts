@@ -1,8 +1,8 @@
 import { BlockAuth } from '@openops/blocks-framework';
-import { ConnectionProvider, getConnectionProvider } from '@openops/shared';
+import { Provider, getConnectionProvider } from '@openops/shared';
 
 export const slackAuth = BlockAuth.OAuth2({
-  provider: getConnectionProvider(ConnectionProvider.SLACK),
+  provider: getConnectionProvider(Provider.SLACK),
   description: '',
   authUrl: 'https://slack.com/oauth/v2/authorize',
   tokenUrl: 'https://slack.com/api/oauth.v2.access',

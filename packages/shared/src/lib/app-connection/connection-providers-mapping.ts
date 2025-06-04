@@ -1,84 +1,84 @@
-import { ConnectionProvider, Provider } from './connection-providers';
+import { Provider, ConnectionProvider } from './connection-providers';
 
 const baseUrl = 'https://static.openops.com';
 
-export const providerMap: Record<ConnectionProvider, Provider> = {
-  [ConnectionProvider.AWS]: {
-    id: ConnectionProvider.AWS,
+export const providerMap: Record<Provider, ConnectionProvider> = {
+  [Provider.AWS]: {
+    id: Provider.AWS,
     displayName: 'AWS',
     logoUrl: `${baseUrl}/blocks/aws.png`,
   },
-  [ConnectionProvider.AZURE]: {
-    id: ConnectionProvider.AZURE,
+  [Provider.AZURE]: {
+    id: Provider.AZURE,
     displayName: 'Azure',
     logoUrl: `${baseUrl}/blocks/azure.svg`,
   },
-  [ConnectionProvider.DATABRICKS]: {
-    id: ConnectionProvider.DATABRICKS,
+  [Provider.DATABRICKS]: {
+    id: Provider.DATABRICKS,
     displayName: 'Databricks',
     logoUrl: `${baseUrl}/blocks/databricks.png`,
   },
-  [ConnectionProvider.GITHUB]: {
-    id: ConnectionProvider.GITHUB,
+  [Provider.GITHUB]: {
+    id: Provider.GITHUB,
     displayName: 'Github',
     logoUrl: `${baseUrl}/blocks/github.png`,
   },
-  [ConnectionProvider.GCLOUD]: {
-    id: ConnectionProvider.GCLOUD,
+  [Provider.GCLOUD]: {
+    id: Provider.GCLOUD,
     displayName: 'Google Cloud (GCP)',
     logoUrl: `${baseUrl}/blocks/google-cloud.svg`,
   },
-  [ConnectionProvider.JIRA]: {
-    id: ConnectionProvider.JIRA,
+  [Provider.JIRA]: {
+    id: Provider.JIRA,
     displayName: 'Jira Cloud',
     logoUrl: `${baseUrl}/blocks/jira.png`,
   },
-  [ConnectionProvider.MICROSOFT_TEAMS]: {
-    id: ConnectionProvider.MICROSOFT_TEAMS,
+  [Provider.MICROSOFT_TEAMS]: {
+    id: Provider.MICROSOFT_TEAMS,
     displayName: 'Microsoft Teams',
     logoUrl: `${baseUrl}/blocks/microsoft-teams.png`,
   },
-  [ConnectionProvider.MONDAY]: {
-    id: ConnectionProvider.MONDAY,
+  [Provider.MONDAY]: {
+    id: Provider.MONDAY,
     displayName: 'monday.com',
     logoUrl: `${baseUrl}/blocks/monday.png`,
   },
-  [ConnectionProvider.SLACK]: {
-    id: ConnectionProvider.SLACK,
+  [Provider.SLACK]: {
+    id: Provider.SLACK,
     displayName: 'Slack',
     logoUrl: `${baseUrl}/blocks/slack.png`,
   },
-  [ConnectionProvider.SFTP]: {
-    id: ConnectionProvider.SFTP,
+  [Provider.SFTP]: {
+    id: Provider.SFTP,
     displayName: 'SFTP',
     logoUrl: `${baseUrl}/blocks/sftp.svg`,
   },
-  [ConnectionProvider.SMTP]: {
-    id: ConnectionProvider.SMTP,
+  [Provider.SMTP]: {
+    id: Provider.SMTP,
     displayName: 'SMTP',
     logoUrl: `${baseUrl}/blocks/smtp.png`,
   },
-  [ConnectionProvider.SNOWFLAKE]: {
-    id: ConnectionProvider.SNOWFLAKE,
+  [Provider.SNOWFLAKE]: {
+    id: Provider.SNOWFLAKE,
     displayName: 'Snowflake',
     logoUrl: `${baseUrl}/blocks/snowflake-logo.svg`,
   },
-  [ConnectionProvider.TERNARY]: {
-    id: ConnectionProvider.TERNARY,
+  [Provider.TERNARY]: {
+    id: Provider.TERNARY,
     displayName: 'Ternary',
     logoUrl: `${baseUrl}/blocks/ternary.png`,
   },
-  [ConnectionProvider.UMBRELLA]: {
-    id: ConnectionProvider.UMBRELLA,
+  [Provider.UMBRELLA]: {
+    id: Provider.UMBRELLA,
     displayName: 'Umbrella',
     logoUrl: `${baseUrl}/blocks/umbrella.png`,
   },
 };
 
-export function getAllConnectionProviders(): Provider[] {
+export function getAllConnectionProviders(): ConnectionProvider[] {
   return Object.values(providerMap);
 }
 
-export function getConnectionProvider(id: ConnectionProvider): Provider {
+export function getConnectionProvider(id: Provider): ConnectionProvider {
   return providerMap[id];
 }

@@ -1,6 +1,6 @@
 import { Type } from '@sinclair/typebox';
 
-export enum ConnectionProvider {
+export enum Provider {
   AWS = 'AWS',
   AZURE = 'AZURE',
   DATABRICKS = 'DATABRICKS',
@@ -17,14 +17,14 @@ export enum ConnectionProvider {
   UMBRELLA = 'UMBRELLA',
 }
 
-export const Provider = Type.Object({
+export const ConnectionProviderSchema = Type.Object({
   logoUrl: Type.String(),
   displayName: Type.String(),
-  id: Type.Enum(ConnectionProvider),
+  id: Type.Enum(Provider),
 });
 
-export type Provider = {
-  id: ConnectionProvider;
+export type ConnectionProvider = {
+  id: Provider;
   displayName: string;
   logoUrl: string;
 };

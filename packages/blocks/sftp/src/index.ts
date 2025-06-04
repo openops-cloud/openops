@@ -1,12 +1,12 @@
 import { BlockAuth, Property, createBlock } from '@openops/blocks-framework';
-import { ConnectionProvider, getConnectionProvider } from '@openops/shared';
+import { Provider, getConnectionProvider } from '@openops/shared';
 import Client from 'ssh2-sftp-client';
 import { createFile } from './lib/actions/create-file';
 import { readFileContent } from './lib/actions/read-file';
 import { newOrModifiedFile } from './lib/triggers/new-modified-file';
 
 export const sftpAuth = BlockAuth.CustomAuth({
-  provider: getConnectionProvider(ConnectionProvider.SFTP),
+  provider: getConnectionProvider(Provider.SFTP),
   description: 'Enter the authentication details',
   props: {
     host: Property.ShortText({
