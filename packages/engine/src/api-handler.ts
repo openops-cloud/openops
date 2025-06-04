@@ -21,6 +21,8 @@ const engineController: FastifyPluginAsyncTypebox = async (fastify) => {
     {
       schema: {
         body: EngineRequest,
+        description:
+          'Execute an engine operation. This endpoint processes engine requests with proper logging context, handling various operation types and managing request deadlines.',
       },
     },
     async (request, reply) => {

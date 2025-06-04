@@ -204,7 +204,8 @@ const CreateFlowRequestOptions = {
   },
   schema: {
     tags: ['flows'],
-    description: 'Create a flow',
+    description:
+      'Create a new flow either from scratch or from a template. When creating from a template, provide the template details and connection IDs. When creating from scratch, provide the basic flow configuration.',
     security: [SERVICE_KEY_SECURITY_OPENAPI],
     body: Type.Union([CreateEmptyFlowRequest, CreateFlowFromTemplateRequest]),
     response: {
@@ -219,7 +220,8 @@ const UpdateFlowRequestOptions = {
   },
   schema: {
     tags: ['flows'],
-    description: 'Apply an operation to a flow',
+    description:
+      'Apply an operation to modify an existing flow. This endpoint allows updating flow properties, status, and configuration. The operation will be rejected if the flow is currently being edited by another user.',
     security: [SERVICE_KEY_SECURITY_OPENAPI],
     body: FlowOperationRequest,
     params: Type.Object({
@@ -239,7 +241,8 @@ const ListFlowsRequestOptions = {
   },
   schema: {
     tags: ['flows'],
-    description: 'List flows',
+    description:
+      'Retrieve a paginated list of flows for the current project. Supports filtering by folder, status, name, and version state. Results are returned in a seek-based pagination format.',
     security: [SERVICE_KEY_SECURITY_OPENAPI],
     querystring: ListFlowsRequest,
     response: {
@@ -257,7 +260,8 @@ const CountFlowsRequestOptions = {
 const GetFlowVersionRequestOptions = {
   schema: {
     tags: ['flows'],
-    description: 'Get a flow version by id',
+    description:
+      'Retrieve a paginated list of version history for a specific flow. Each version includes metadata about changes, timestamps, and the user who made the modifications.',
     security: [SERVICE_KEY_SECURITY_OPENAPI],
     params: Type.Object({
       id: OpenOpsId,
@@ -289,7 +293,8 @@ const GetFlowRequestOptions = {
   schema: {
     tags: ['flows'],
     security: [SERVICE_KEY_SECURITY_OPENAPI],
-    description: 'Get a flow by id',
+    description:
+      'Retrieve detailed information about a specific flow including its current version, configuration, and associated metadata. Optionally specify a version ID to get historical flow data.',
     params: Type.Object({
       id: OpenOpsId,
     }),
@@ -308,7 +313,8 @@ const DeleteFlowRequestOptions = {
   schema: {
     tags: ['flows'],
     security: [SERVICE_KEY_SECURITY_OPENAPI],
-    description: 'Delete a flow',
+    description:
+      'Permanently delete a flow and all its associated versions. This operation cannot be undone and will remove all flow data including configurations, versions, and execution history.',
     params: Type.Object({
       id: OpenOpsId,
     }),
