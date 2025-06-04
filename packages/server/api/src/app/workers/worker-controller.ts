@@ -38,6 +38,8 @@ export const flowWorkerController: FastifyPluginAsyncTypebox = async (app) => {
       },
       logLevel: 'silent',
       schema: {
+        description:
+          'Poll for pending flow jobs in a specific queue. This endpoint allows workers to check for new jobs in webhook, one-time, or repeatable job queues.',
         querystring: PollJobRequest,
       },
     },
@@ -61,6 +63,8 @@ export const flowWorkerController: FastifyPluginAsyncTypebox = async (app) => {
         allowedPrincipals: [PrincipalType.WORKER],
       },
       schema: {
+        description:
+          'Delete a webhook simulation for a specific flow. This endpoint removes the webhook simulation data associated with a flow and project.',
         body: DeleteWebhookSimulationRequest,
       },
     },
@@ -77,6 +81,8 @@ export const flowWorkerController: FastifyPluginAsyncTypebox = async (app) => {
         allowedPrincipals: [PrincipalType.WORKER],
       },
       schema: {
+        description:
+          'Send a webhook update for a flow execution. This endpoint allows workers to send status updates, including response status, body, and headers, for a specific flow execution.',
         body: SendWebhookUpdateRequest,
       },
     },
@@ -98,6 +104,8 @@ export const flowWorkerController: FastifyPluginAsyncTypebox = async (app) => {
         allowedPrincipals: [PrincipalType.WORKER],
       },
       schema: {
+        description:
+          "Save trigger event payloads for a flow. This endpoint stores the payloads from trigger events in the project's event store for future reference and analysis.",
         body: SavePayloadRequest,
       },
     },
@@ -124,6 +132,8 @@ export const flowWorkerController: FastifyPluginAsyncTypebox = async (app) => {
         allowedPrincipals: [PrincipalType.WORKER],
       },
       schema: {
+        description:
+          'Submit payloads to start new flow runs. This endpoint creates new flow executions for each unique payload, handling deduplication and setting up the appropriate execution environment.',
         body: SubmitPayloadsRequest,
       },
     },
@@ -164,6 +174,8 @@ export const flowWorkerController: FastifyPluginAsyncTypebox = async (app) => {
         allowedPrincipals: [PrincipalType.WORKER],
       },
       schema: {
+        description:
+          'Resume a paused flow run. This endpoint restarts a previously paused flow execution, allowing it to continue from where it left off with the provided resume payload.',
         body: ResumeRunRequest,
       },
     },

@@ -70,7 +70,8 @@ const CreateFolderParams = {
   },
   schema: {
     tags: ['folders'],
-    description: 'Create a new folder',
+    description:
+      'Create a new folder in the project. This endpoint allows you to organize flows by creating a hierarchical folder structure. You can specify an optional parent folder to create nested folders.',
     security: [SERVICE_KEY_SECURITY_OPENAPI],
     body: CreateFolderRequest,
   },
@@ -83,7 +84,8 @@ const UpdateFolderParams = {
   },
   schema: {
     tags: ['folders'],
-    description: 'Update an existing folder',
+    description:
+      "Update an existing folder's properties. This endpoint allows you to modify the folder name and change its parent folder, effectively reorganizing the folder structure.",
     security: [SERVICE_KEY_SECURITY_OPENAPI],
     params: Type.Object({
       id: Type.String(),
@@ -102,7 +104,8 @@ const GetFolderParams = {
     params: Type.Object({
       id: Type.String(),
     }),
-    description: 'Get a folder by id',
+    description:
+      "Retrieve detailed information about a specific folder. This endpoint returns the folder's metadata, including its name, creation date, and associated flows.",
     security: [SERVICE_KEY_SECURITY_OPENAPI],
   },
 };
@@ -114,7 +117,8 @@ const ListFoldersFlowsParams = {
   },
   schema: {
     tags: ['folders'],
-    description: 'List folders and flows',
+    description:
+      'List all folders and their associated flows in the project. This endpoint returns a hierarchical view of the folder structure, including the uncategorized folder unless explicitly excluded.',
     security: [SERVICE_KEY_SECURITY_OPENAPI],
     querystring: ListFolderFlowsRequest,
   },
@@ -128,7 +132,8 @@ const DeleteFolderParams = {
   schema: {
     params: DeleteFolderRequest,
     tags: ['folders'],
-    description: 'Delete a folder',
+    description:
+      'Delete a folder and its contents. This endpoint removes the specified folder and all its subfolders, moving any contained flows to the uncategorized folder.',
     security: [SERVICE_KEY_SECURITY_OPENAPI],
   },
 };

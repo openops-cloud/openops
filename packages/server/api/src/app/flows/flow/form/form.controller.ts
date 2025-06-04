@@ -23,7 +23,8 @@ const GetFormRequest = {
     allowedPrincipals: ALL_PRINCIPAL_TYPES,
   },
   schema: {
-    description: 'Get a form by flow id',
+    description:
+      'Retrieve form configuration for a specific flow. This endpoint returns the form structure, including input fields, validation rules, and submission settings. The form can be retrieved from either the published version or draft version of the flow based on the useDraft parameter.',
     params: Type.Object({
       flowId: OpenOpsId,
     }),
