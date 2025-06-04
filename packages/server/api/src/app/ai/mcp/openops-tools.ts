@@ -13,7 +13,12 @@ import { MCPTool } from './mcp-tools';
 
 import fs from 'fs/promises';
 import os from 'os';
-const EXCLUDED_PATHS = ['/v1/authentication', '/v1/organizations', '/v1/users'];
+const EXCLUDED_PATHS = [
+  '/v1/authentication',
+  '/v1/organizations',
+  '/v1/users',
+  '/v1/ai',
+];
 
 const EXCLUDED_OPERATIONS = ['delete'];
 
