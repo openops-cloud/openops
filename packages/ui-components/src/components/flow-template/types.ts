@@ -12,3 +12,8 @@ export const FlowTemplateMetadataWithIntegrations = Type.Composite([
 export type FlowTemplateMetadataWithIntegrations = Static<
   typeof FlowTemplateMetadataWithIntegrations
 >;
+
+export type TemplateSidebarCategory = {
+  name: string;
+  services: string[];
+};

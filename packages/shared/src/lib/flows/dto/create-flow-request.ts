@@ -4,7 +4,6 @@ import { Trigger } from '../triggers/trigger';
 export const CreateEmptyFlowRequest = Type.Object({
   displayName: Type.String({}),
   folderId: Type.Optional(Type.String({})),
-  projectId: Type.String({}),
 });
 
 export type CreateEmptyFlowRequest = Static<typeof CreateEmptyFlowRequest>;

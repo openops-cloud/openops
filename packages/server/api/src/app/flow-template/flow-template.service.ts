@@ -24,6 +24,7 @@ export type flowTemplateQueryParams = {
   cloudTemplates?: boolean;
   isSample?: boolean;
   version?: string;
+  categories?: string[];
 };
 
 type createFlowTemplateParams = {
@@ -38,6 +39,7 @@ type createFlowTemplateParams = {
   isGettingStarted?: boolean;
   minVersion?: string;
   maxVersion?: string;
+  categories: string[];
 };
 
 export const flowTemplateService = {
@@ -65,6 +67,7 @@ export const flowTemplateService = {
         'flow_template.isGettingStarted',
         'flow_template.minSupportedVersion',
         'flow_template.maxSupportedVersion',
+        'flow_template.categories',
       ]);
     if (queryParams.search) {
       queryBuilder = queryBuilder.andWhere(
@@ -112,6 +115,12 @@ export const flowTemplateService = {
       queryBuilder = queryBuilder.andWhere(
         '("isSample" = true OR "isGettingStarted" = true)',
       );
+    }
+
+    if (queryParams.categories) {
+      queryBuilder = queryBuilder.andWhere('categories @> :categories', {
+        categories: JSON.stringify(queryParams.categories),
+      });
     }
 
     if (!queryParams.cloudTemplates) {
@@ -174,6 +183,7 @@ export const flowTemplateService = {
       isGettingStarted: requestOptions.isGettingStarted,
       minSupportedVersion: requestOptions.minVersion,
       maxSupportedVersion: requestOptions.maxVersion,
+      categories: requestOptions.categories,
     });
   },
 };

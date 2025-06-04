@@ -202,6 +202,7 @@ describe('flowTemplateService', () => {
         services: ['service1'],
         domains: ['domain1'],
         blocks: ['block1'],
+        categories: ['category1', 'category2'],
         organizationId: 'organization-id',
         projectId: 'project-id',
       };
@@ -241,6 +242,7 @@ describe('flowTemplateService', () => {
         template: flowVersion.trigger,
         projectId: requestOptions.projectId,
         organizationId: requestOptions.organizationId,
+        categories: requestOptions.categories,
       });
       expect(result).toEqual(insertResult);
     });
@@ -252,6 +254,7 @@ describe('flowTemplateService', () => {
         services: ['service1'],
         domains: ['domain1'],
         blocks: ['block1'],
+        categories: ['category1', 'category2'],
         organizationId: 'organization-id',
         projectId: 'project-id',
       };

@@ -65,13 +65,20 @@ export const flowStepTestOutputService = {
     );
   },
 
-  async list(params: ListParams): Promise<FlowStepTestOutput[]> {
+  async listDecrypted(params: ListParams): Promise<FlowStepTestOutput[]> {
     const flowStepTestOutputs = await flowStepTestOutputRepo().findBy({
       flowVersionId: params.flowVersionId,
       stepId: In(params.stepIds),
     });
 
     return Promise.all(flowStepTestOutputs.map(decompressOutput));
+  },
+
+  async listEncrypted(params: ListParams): Promise<FlowStepTestOutput[]> {
+    return flowStepTestOutputRepo().findBy({
+      flowVersionId: params.flowVersionId,
+      stepId: In(params.stepIds),
+    });
   },
 };
 

@@ -4,6 +4,7 @@ import {
   AppConnection,
   AppConnectionStatus,
   AppConnectionType,
+  Provider,
 } from '@openops/shared';
 import {
   redactSecrets,
@@ -34,6 +35,11 @@ describe('redactSecrets', () => {
     };
 
     const auth: BlockAuthProperty = {
+      provider: {
+        id: Provider.AWS,
+        displayName: 'AWS',
+        logoUrl: 'logo',
+      },
       type: PropertyType.SECRET_TEXT,
       displayName: 'Secret',
       valueSchema: 'some schema',
@@ -83,6 +89,11 @@ describe('redactSecrets', () => {
     };
 
     const auth: BlockAuthProperty = {
+      provider: {
+        id: Provider.AWS,
+        displayName: 'AWS',
+        logoUrl: 'logo',
+      },
       type: PropertyType.CUSTOM_AUTH,
       displayName: 'Custom Auth',
       props: {
@@ -124,6 +135,11 @@ describe('redactSecrets', () => {
     };
 
     const auth: BlockAuthProperty = {
+      provider: {
+        id: Provider.AWS,
+        displayName: 'AWS',
+        logoUrl: 'logo',
+      },
       type: PropertyType.OAUTH2,
       displayName: 'OAuth2',
       authUrl: '',
@@ -167,6 +183,11 @@ describe('redactSecrets', () => {
 
     const result = redactSecrets(
       {
+        provider: {
+          id: Provider.AWS,
+          displayName: 'AWS',
+          logoUrl: 'logo',
+        },
         type: PropertyType.SECRET_TEXT,
         displayName: 'x',
         valueSchema: {} as any,
@@ -183,6 +204,11 @@ describe('restoreRedactedSecrets', () => {
     const incoming = { secret_text: REDACTED_MESSAGE };
     const existing = { secret_text: 'original-secret' };
     const auth: BlockAuthProperty = {
+      provider: {
+        id: Provider.AWS,
+        displayName: 'AWS',
+        logoUrl: 'logo',
+      },
       type: PropertyType.SECRET_TEXT,
       displayName: 'Secret',
       valueSchema: {} as any,
@@ -197,6 +223,11 @@ describe('restoreRedactedSecrets', () => {
     const incoming = { secret_text: 'new-secret' };
     const existing = { secret_text: 'original-secret' };
     const auth: BlockAuthProperty = {
+      provider: {
+        id: Provider.AWS,
+        displayName: 'AWS',
+        logoUrl: 'logo',
+      },
       type: PropertyType.SECRET_TEXT,
       displayName: 'Secret',
       valueSchema: {} as any,
@@ -237,6 +268,11 @@ describe('restoreRedactedSecrets', () => {
       },
     };
     const auth: BlockAuthProperty = {
+      provider: {
+        id: Provider.AWS,
+        displayName: 'AWS',
+        logoUrl: 'logo',
+      },
       type: PropertyType.CUSTOM_AUTH,
       displayName: 'Custom',
       props: {
@@ -267,6 +303,11 @@ describe('restoreRedactedSecrets', () => {
       redirect_url: 'https://url',
     };
     const auth: BlockAuthProperty = {
+      provider: {
+        id: Provider.AWS,
+        displayName: 'AWS',
+        logoUrl: 'logo',
+      },
       type: PropertyType.OAUTH2,
       displayName: 'OAuth2',
       authUrl: '',

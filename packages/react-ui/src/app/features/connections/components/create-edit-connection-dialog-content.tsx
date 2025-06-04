@@ -3,7 +3,6 @@ import { useDynamicFormValidationContext } from '@/app/features/builder/dynamic-
 import { appConnectionsApi } from '@/app/features/connections/lib/app-connections-api';
 import { appConnectionUtils } from '@/app/features/connections/lib/app-connections-utils';
 import { api } from '@/app/lib/api';
-import { authenticationSession } from '@/app/lib/authentication-session';
 import { typeboxResolver } from '@hookform/resolvers/typebox';
 import {
   BasicAuthProperty,
@@ -13,7 +12,7 @@ import {
   OAuth2Property,
   OAuth2Props,
   PropertyType,
-  SecretTextProperty,
+  SecretAuthProperty,
 } from '@openops/blocks-framework';
 import {
   Button,
@@ -124,7 +123,6 @@ const CreateEditConnectionDialogContent = ({
       const formValues = form.getValues().request;
       if (!reconnect) {
         const connections = await appConnectionsApi.list({
-          projectId: authenticationSession.getProjectId()!,
           limit: 10000,
         });
         const existingConnection = connections.data.find(
@@ -253,7 +251,7 @@ const CreateEditConnectionDialogContent = ({
             ></FormField>
             {auth?.type === PropertyType.SECRET_TEXT && (
               <SecretTextConnectionSettings
-                authProperty={block.auth as SecretTextProperty<boolean>}
+                authProperty={block.auth as SecretAuthProperty<boolean>}
               />
             )}
             {auth?.type === PropertyType.BASIC_AUTH && (
