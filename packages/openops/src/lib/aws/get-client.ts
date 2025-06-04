@@ -1,3 +1,4 @@
+import { SharedSystemProp, system } from '@openops/server-shared';
 import { AwsCredentials } from './auth';
 
 export function getAwsClient<T>(
@@ -16,6 +17,10 @@ export function getAwsClient<T>(
       secretAccessKey: credentials.secretAccessKey,
       sessionToken: credentials.sessionToken,
     };
+  } else if (!system.getBoolean(SharedSystemProp.AWS_ENABLE_IMPLICIT_ROLE)) {
+    throw new Error(
+      'AWS credentials are required, please provide accessKeyId and secretAccessKey',
+    );
   }
 
   if (credentials.endpoint) {
