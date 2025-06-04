@@ -1,4 +1,4 @@
-import { Provider, ConnectionProvider } from './connection-providers';
+import { ConnectionProvider, Provider } from './connection-providers';
 
 const baseUrl = 'https://static.openops.com';
 
