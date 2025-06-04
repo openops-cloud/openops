@@ -1,7 +1,14 @@
-import { FlowExecutorContext } from '../../src/lib/handler/context/flow-execution-context'
-import { VariableService } from '../../src/lib/variables/variable-service'
-import { WorkflowFile, BlockAuth, Property, Validators } from '@openops/blocks-framework'
-import { ActionType, GenericStepOutput, StepOutputStatus, TriggerType } from '@openops/shared'
+import { FlowExecutorContext } from '../../src/lib/handler/context/flow-execution-context';
+import { VariableService } from '../../src/lib/variables/variable-service';
+import { BlockAuth, Property, Validators, WorkflowFile } from '@openops/blocks-framework';
+import {
+  ActionType,
+  Provider,
+  GenericStepOutput,
+  getConnectionProvider,
+  StepOutputStatus,
+  TriggerType,
+} from '@openops/shared';
 
 const variableService = new VariableService({
     projectId: 'PROJECT_ID',
@@ -295,6 +302,7 @@ describe('Variable Service', () => {
             }),
         }
         const { processedInput, errors } = await variableService.applyProcessorsAndValidators(input, props, BlockAuth.CustomAuth({
+            provider: getConnectionProvider(Provider.SMTP),
             required: true,
             props: {
                 age: Property.Number({
@@ -352,6 +360,7 @@ describe('Variable Service', () => {
             }),
         }
         const { processedInput, errors } = await variableService.applyProcessorsAndValidators(input, props, BlockAuth.CustomAuth({
+            provider: getConnectionProvider(Provider.SMTP),
             required: true,
             props: {
                 age: Property.Number({
@@ -524,6 +533,7 @@ describe('Variable Service', () => {
             }),
         }
         const { errors } = await variableService.applyProcessorsAndValidators(input, props, BlockAuth.CustomAuth({
+            provider: getConnectionProvider(Provider.SMTP),
             required: true,
             props: {
                 email: Property.LongText({

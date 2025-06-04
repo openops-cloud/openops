@@ -905,7 +905,6 @@ async function createMockFlowTemplate(
     organizationId: params.organizationId ?? openOpsId(),
     services: ['ECS', 'EC2'],
     template: params.template || {
-      id: 'test-template',
       type: TriggerType.EMPTY,
       name: 'trigger',
       settings: {},
