@@ -54,17 +54,23 @@ export const storeEntryController: FastifyPluginAsyncTypebox = async (
 const CreateRequest = {
   schema: {
     body: PutStoreEntryRequest,
+    description:
+      "Create or update a key-value store entry. This endpoint allows you to store and manage data in the project's key-value store, with automatic size validation to prevent oversized entries.",
   },
 };
 
 const GetRequest = {
   schema: {
     querystring: GetStoreEntryRequest,
+    description:
+      "Retrieve a value from the key-value store. This endpoint fetches the value associated with a specific key in the project's store, returning a 404 error if the key is not found.",
   },
 };
 
 const DeleteStoreRequest = {
   schema: {
     querystring: DeleteStoreEntryRequest,
+    description:
+      "Delete a key-value store entry. This endpoint removes a specific key-value pair from the project's store. Note that this operation is restricted to engine principals only.",
   },
 };

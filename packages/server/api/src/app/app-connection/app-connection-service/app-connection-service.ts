@@ -19,6 +19,7 @@ import {
   openOpsId,
   PatchAppConnectionRequestBody,
   ProjectId,
+  Provider,
   SeekPage,
   UpsertAppConnectionRequestBody,
   UserId,
@@ -213,6 +214,7 @@ export const appConnectionService = {
     status,
     limit,
     connectionsIds,
+    providers,
   }: ListParams): Promise<SeekPage<AppConnection>> {
     const decodedCursor = paginationHelper.decodeCursor(cursorRequest);
 
@@ -238,9 +240,11 @@ export const appConnectionService = {
     if (!isNil(status)) {
       querySelector.status = In(status);
     }
-
     if (!isNil(connectionsIds)) {
       querySelector.id = In(connectionsIds);
+    }
+    if (!isNil(providers) && providers.length > 0) {
+      querySelector.provider = In(providers);
     }
 
     const queryBuilder = repo()
@@ -280,6 +284,7 @@ export const appConnectionService = {
         cursorRequest: null,
         name: undefined,
         status: [AppConnectionStatus.ACTIVE],
+        providers: undefined,
       })
     ).data.map(removeSensitiveData);
   },
@@ -521,6 +526,7 @@ type ListParams = {
   name: string | undefined;
   status: AppConnectionStatus[] | undefined;
   limit: number;
+  providers: Provider[] | undefined;
 };
 
 type CountByProjectParams = {

@@ -20,7 +20,8 @@ export const flowTemplateController: FastifyPluginAsyncTypebox = async (
       },
       schema: {
         tags: ['flow-templates'],
-        description: 'List flow templates',
+        description:
+          'List available flow templates with filtering options. This endpoint allows searching and filtering templates by tags, services, domains, blocks, and version compatibility. Useful for finding templates that match specific requirements or use cases.',
         querystring: Type.Object({
           search: Type.Optional(Type.String()),
           tags: Type.Optional(Type.Array(Type.String())),
@@ -55,7 +56,8 @@ export const flowTemplateController: FastifyPluginAsyncTypebox = async (
       },
       schema: {
         tags: ['flow-templates'],
-        description: 'Get a flow template by id',
+        description:
+          'Get detailed information about a specific flow template by its ID. This endpoint returns the complete template configuration including its trigger, blocks, and metadata.',
         params: Type.Object({
           id: OpenOpsId,
         }),
@@ -76,6 +78,8 @@ export const flowTemplateController: FastifyPluginAsyncTypebox = async (
         body: {
           type: 'object',
           required: ['flowId'],
+          description:
+            'Create a new flow template from an existing flow. This endpoint allows converting a flow into a reusable template with specified metadata, tags, and version compatibility constraints.',
           properties: {
             flowId: { type: 'string' },
             tags: { type: 'array' },
