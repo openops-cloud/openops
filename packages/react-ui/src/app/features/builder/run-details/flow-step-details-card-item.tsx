@@ -1,10 +1,10 @@
 import {
   Button,
   CardListItem,
+  cn,
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-  cn,
 } from '@openops/components/ui';
 import { ChevronRight } from 'lucide-react';
 import React, { useMemo } from 'react';
@@ -17,6 +17,7 @@ import { ActionType, FlagId, flowHelper } from '@openops/shared';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { StepStatusIcon } from '@/app/features/flow-runs/components/step-status-icon';
+import { RUN_DETAILS_STEP_CARD_ID_PREFIX } from './constants';
 import { LoopIterationInput } from './loop-iteration-input';
 
 type FlowStepDetailsCardProps = {
@@ -95,6 +96,7 @@ const FlowStepDetailsCardItem = ({
     <Collapsible open={isOpen} className="w-full">
       <CollapsibleTrigger asChild={true}>
         <CardListItem
+          id={`${RUN_DETAILS_STEP_CARD_ID_PREFIX}-${stepName}`}
           onClick={() => {
             if (!isStepSelected) {
               selectStepByName(stepName);
@@ -113,7 +115,7 @@ const FlowStepDetailsCardItem = ({
               display: depth === 0 ? 'none' : 'flex',
             }}
           ></div>
-          <div className="flex items-center  w-full gap-3">
+          <div className="flex items-center w-full gap-3">
             {children.length > 0 && (
               <Button
                 variant="ghost"
@@ -135,11 +137,11 @@ const FlowStepDetailsCardItem = ({
               step?.displayName
             }`}</div>
             <div className="w-2"></div>
-            <div className="flex gap-1 justify-end  items-center flex-grow">
+            <div className="flex gap-1 justify-end items-center flex-grow">
               {isLoopStep && (
                 <div
                   className={cn(
-                    'flex gap-1 justify-end  items-center flex-grow',
+                    'flex gap-1 justify-end items-center flex-grow',
                     { 'mr-4': !isStepSelected && !isChildSelected },
                   )}
                 >
