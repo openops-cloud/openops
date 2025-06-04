@@ -41,7 +41,6 @@ jest.mock('@openops/server-shared', () => ({
 import '@fastify/swagger';
 import { FastifyInstance } from 'fastify';
 import fs from 'fs/promises';
-import os from 'os';
 import path from 'path';
 import { getOpenOpsTools } from '../../../src/app/ai/mcp/openops-tools';
 
@@ -121,23 +120,5 @@ describe('getOpenOpsTools', () => {
         },
       }),
     });
-  });
-
-  it('should return empty object and log error if MCP client creation fails', async () => {
-    const mockError = new Error('Test error');
-    createMcpClientMock.mockRejectedValue(mockError);
-
-    const result = await getOpenOpsTools(mockApp, 'mock-auth-token');
-
-    expect(result).toEqual({
-      client: undefined,
-      toolSet: {},
-    });
-    expect(loggerMock.error).toHaveBeenCalledWith(
-      'Failed to create OpenOps MCP client:',
-      {
-        error: 'Test error',
-      },
-    );
   });
 });

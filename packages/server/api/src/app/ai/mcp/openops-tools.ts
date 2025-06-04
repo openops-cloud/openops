@@ -40,34 +40,24 @@ export async function getOpenOpsTools(
 
   const tempSchemaPath = await getOpenApiSchemaPath(app);
 
-  try {
-    const openopsClient = await experimental_createMCPClient({
-      transport: new Experimental_StdioMCPTransport({
-        command: pythonPath,
-        args: [serverPath],
-        env: {
-          OPENAPI_SCHEMA_PATH: tempSchemaPath,
-          AUTH_TOKEN: authToken,
-          API_BASE_URL: networkUtls.getInternalApiUrl(),
-          OPENOPS_MCP_SERVER_PATH: basePath,
-          LOGZIO_TOKEN: system.get<string>(SharedSystemProp.LOGZIO_TOKEN) ?? '',
-          ENVIRONMENT:
-            system.get<string>(SharedSystemProp.ENVIRONMENT_NAME) ?? '',
-        },
-      }),
-    });
+  const openopsClient = await experimental_createMCPClient({
+    transport: new Experimental_StdioMCPTransport({
+      command: pythonPath,
+      args: [serverPath],
+      env: {
+        OPENAPI_SCHEMA_PATH: tempSchemaPath,
+        AUTH_TOKEN: authToken,
+        API_BASE_URL: networkUtls.getInternalApiUrl(),
+        OPENOPS_MCP_SERVER_PATH: basePath,
+        LOGZIO_TOKEN: system.get<string>(SharedSystemProp.LOGZIO_TOKEN) ?? '',
+        ENVIRONMENT:
+          system.get<string>(SharedSystemProp.ENVIRONMENT_NAME) ?? '',
+      },
+    }),
+  });
 
-    return {
-      client: openopsClient,
-      toolSet: await openopsClient.tools(),
-    };
-  } catch (error) {
-    logger.error('Failed to create OpenOps MCP client:', {
-      error: error instanceof Error ? error.message : String(error),
-    });
-    return {
-      client: undefined,
-      toolSet: {},
-    };
-  }
+  return {
+    client: openopsClient,
+    toolSet: await openopsClient.tools(),
+  };
 }
