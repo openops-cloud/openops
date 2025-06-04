@@ -3,7 +3,6 @@ import {
   FastifyPluginCallbackTypebox,
   Type,
 } from '@fastify/type-provider-typebox';
-import { system } from '@openops/server-shared';
 import {
   AppConnectionWithoutSensitiveData,
   FlagId,
@@ -19,7 +18,6 @@ import {
 import { StatusCodes } from 'http-status-codes';
 import { blockMetadataService } from '../blocks/block-metadata-service';
 import { devFlagsService } from '../flags/dev-flags.service';
-import { flagService } from '../flags/flag.service';
 import { sendConnectionDeletedEvent } from '../telemetry/event-models';
 import { appConnectionService } from './app-connection-service/app-connection-service';
 import { redactSecrets, removeSensitiveData } from './app-connection-utils';
