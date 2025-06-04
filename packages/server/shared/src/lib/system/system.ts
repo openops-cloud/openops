@@ -5,8 +5,8 @@ import {
   isNil,
   OpsEdition,
 } from '@openops/shared';
-import os from 'os';
 import crypto from 'crypto';
+import os from 'os';
 import path from 'path';
 import {
   AppSystemProp,
@@ -181,8 +181,12 @@ export const system = {
     const props = Object.keys(SharedSystemProp)
       .map((key) => `${key}=${system.get(key as SystemProp)}`)
       .join(';');
-    return crypto.createHash('sha256').update(props).digest('base64url').slice(0, 12);
-  }
+    return crypto
+      .createHash('sha256')
+      .update(props)
+      .digest('base64url')
+      .slice(0, 12);
+  },
 };
 
 const getEnvVar = (prop: SystemProp): string | undefined => {

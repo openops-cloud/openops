@@ -3,9 +3,9 @@ import {
   TagResourcesCommand,
   TagResourcesCommandOutput,
 } from '@aws-sdk/client-resource-groups-tagging-api';
-import { groupARNsByRegion } from '../regions';
-import { getAwsClient } from '../get-client';
 import { AwsCredentials } from '../auth';
+import { getAwsClient } from '../get-client';
+import { groupARNsByRegion } from '../regions';
 
 export type TaggingResult = {
   succeeded: string[];
@@ -26,7 +26,11 @@ export async function addTagsToResources(
     const command = getTagResourcesCommand(arnsList, tags);
 
     try {
-      const client = getAwsClient(ResourceGroupsTaggingAPIClient, credentials, region);
+      const client = getAwsClient(
+        ResourceGroupsTaggingAPIClient,
+        credentials,
+        region,
+      );
 
       const response: TagResourcesCommandOutput = await client.send(command);
 

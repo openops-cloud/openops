@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 import { BlockAuth, Property } from '@openops/blocks-framework';
+import { logger, SharedSystemProp, system } from '@openops/server-shared';
 import { parseArn } from './arn-handler';
 import { assumeRole } from './sts-common';
-import { SharedSystemProp, system, logger } from '@openops/server-shared';
 
-const isImplicitRoleEnabled = system.getBoolean(SharedSystemProp.AWS_ENABLE_IMPLICIT_ROLE)
+const isImplicitRoleEnabled = system.getBoolean(
+  SharedSystemProp.AWS_ENABLE_IMPLICIT_ROLE,
+);
 
 export interface AwsCredentials {
   accessKeyId: string;
@@ -172,7 +174,11 @@ export const amazonAuth = BlockAuth.CustomAuth({
       defaultValue: 'us-east-1',
     }),
     accessKeyId: Property.SecretText({
-      displayName: 'Access Key ID' + (isImplicitRoleEnabled ? ' (leave blank to use the role assigned to the hosting environment)' : ''),
+      displayName:
+        'Access Key ID' +
+        (isImplicitRoleEnabled
+          ? ' (leave blank to use the role assigned to the hosting environment)'
+          : ''),
       required: !isImplicitRoleEnabled,
     }),
     secretAccessKey: Property.SecretText({
@@ -218,7 +224,7 @@ export const amazonAuth = BlockAuth.CustomAuth({
     }
 
     return { valid: true };
-  }
+  },
 });
 
 export function getRoleForAccount(
