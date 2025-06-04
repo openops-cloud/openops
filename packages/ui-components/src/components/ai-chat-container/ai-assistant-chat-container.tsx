@@ -2,6 +2,7 @@ import { UseChatHelpers } from '@ai-sdk/react';
 import { t } from 'i18next';
 import { Bot } from 'lucide-react';
 import { ReactNode, useEffect, useRef } from 'react';
+import { useIntersection } from 'react-use';
 import { cn } from '../../lib/cn';
 import { AI_CHAT_SCROLL_DELAY } from '../../lib/constants';
 import { ScrollArea } from '../../ui/scroll-area';
@@ -24,6 +25,8 @@ type AiAssistantChatContainerProps = {
   className?: string;
   children?: ReactNode;
   messages?: { id: string }[];
+  status?: string;
+  lastUserMessageRef: React.RefObject<HTMLDivElement>;
 } & Pick<UseChatHelpers, 'input' | 'handleInputChange' | 'handleSubmit'> &
   AiModelSelectorProps;
 
@@ -51,38 +54,74 @@ const AiAssistantChatContainer = ({
   selectedModel,
   onModelSelected,
   isModelSelectorLoading,
+  status,
+  lastUserMessageRef,
 }: AiAssistantChatContainerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollViewportRef = useRef<HTMLDivElement>(null);
-  const hasScrolledOnce = useRef<boolean>(false);
+  const hasAutoScrolled = useRef<boolean>(false);
   const lastMessageId = useRef<string | null>(
     messages.length ? messages[messages.length - 1].id : null,
   );
+
+  const isLastUserMessageVisible = useIntersection(lastUserMessageRef, {
+    root: null,
+    rootMargin: '0px',
+    threshold: 1,
+  });
 
   useEffect(() => {
     const currentLastId = messages.length
       ? messages[messages.length - 1].id
       : null;
-    if (currentLastId !== lastMessageId.current) {
-      hasScrolledOnce.current = false;
+    if (currentLastId !== lastMessageId.current || showAiChat) {
+      hasAutoScrolled.current = false;
       lastMessageId.current = currentLastId;
     }
-    setTimeout(() => {
-      if (
-        scrollViewportRef.current &&
-        !isEmpty &&
-        showAiChat &&
-        !hasScrolledOnce.current &&
-        !!children
-      ) {
-        scrollViewportRef.current.scrollTo({
-          top: scrollViewportRef.current.scrollHeight,
-          behavior: 'smooth',
-        });
-        hasScrolledOnce.current = true;
-      }
-    }, AI_CHAT_SCROLL_DELAY);
-  }, [messages, isEmpty, showAiChat, children]);
+  }, [messages, showAiChat]);
+
+  useEffect(() => {
+    if (!hasAutoScrolled.current && !isEmpty && showAiChat && !!children) {
+      setTimeout(() => {
+        if (scrollViewportRef.current) {
+          scrollViewportRef.current.scrollTo({
+            top: scrollViewportRef.current.scrollHeight,
+            behavior: 'smooth',
+          });
+          hasAutoScrolled.current = true;
+        }
+      }, AI_CHAT_SCROLL_DELAY);
+      return;
+    }
+
+    console.log('isLastUserMessageVisible', isLastUserMessageVisible);
+
+    if (
+      status === 'streaming' &&
+      !isEmpty &&
+      showAiChat &&
+      !!children &&
+      scrollViewportRef.current &&
+      (!isLastUserMessageVisible?.intersectionRatio ||
+        isLastUserMessageVisible.intersectionRatio > 0.9)
+    ) {
+      setTimeout(() => {
+        if (scrollViewportRef.current) {
+          scrollViewportRef.current.scrollTo({
+            top: scrollViewportRef.current.scrollHeight,
+            behavior: 'smooth',
+          });
+        }
+      }, AI_CHAT_SCROLL_DELAY);
+    }
+  }, [
+    isEmpty,
+    showAiChat,
+    children,
+    messages,
+    isLastUserMessageVisible,
+    status,
+  ]);
 
   return (
     <div

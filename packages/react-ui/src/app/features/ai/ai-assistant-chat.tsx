@@ -13,7 +13,7 @@ import {
   PARENT_INITIAL_HEIGHT_GAP,
   PARENT_MAX_HEIGHT_GAP,
 } from '@openops/components/ui';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 
 type AiAssistantChatProps = {
   middlePanelSize: {
@@ -31,6 +31,7 @@ const AiAssistantChat = ({
   middlePanelSize,
   className,
 }: AiAssistantChatProps) => {
+  const lastUserMessageRef = useRef<HTMLDivElement>(null);
   const {
     isAiChatOpened,
     setIsAiChatOpened,
@@ -143,11 +144,15 @@ const AiAssistantChat = ({
       isModelSelectorLoading={isModelSelectorLoading}
       onModelSelected={onModelSelected}
       messages={messages.map((m) => ({ id: m.id }))}
+      status={status}
+      lastUserMessageRef={lastUserMessageRef}
     >
       <AiAssistantConversation
         messages={messages}
         status={status}
         isPending={isOpenAiChatPending}
+        parentHeight={sizes.current.height}
+        lastUserMessageRef={lastUserMessageRef}
       />
     </AiAssistantChatContainer>
   );
