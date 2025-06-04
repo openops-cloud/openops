@@ -20,15 +20,13 @@ export const getMCPTools = async (
 }> => {
   const docsTools = await safeGetTools('docs', getDocsTools);
   const tablesTools = await safeGetTools('tables', getTablesTools);
+  const openopsTools = await safeGetTools('openops', () =>
+    getOpenOpsTools(app, authToken),
+  );
 
   const loadExperimentalTools = system.getBoolean(
     AppSystemProp.LOAD_EXPERIMENTAL_MCP_TOOLS,
   );
-
-  let openopsTools: Partial<MCPTool> = {
-    client: undefined,
-    toolSet: {},
-  };
 
   let supersetTools: Partial<MCPTool> = {
     client: undefined,
@@ -37,9 +35,6 @@ export const getMCPTools = async (
 
   if (loadExperimentalTools) {
     supersetTools = await safeGetTools('superset', getSupersetTools);
-    openopsTools = await safeGetTools('openops', () =>
-      getOpenOpsTools(app, authToken),
-    );
   }
 
   const toolSet = {
