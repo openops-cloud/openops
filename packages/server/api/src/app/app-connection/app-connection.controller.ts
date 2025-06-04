@@ -6,7 +6,7 @@ import {
 import { system } from '@openops/server-shared';
 import {
   AppConnectionWithoutSensitiveData,
-  ConnectionProvider,
+  Provider,
   getConnectionProvider,
   ListAppConnectionsRequestQuery,
   OpenOpsId,
@@ -162,17 +162,17 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
           const provider = block.auth.provider;
           if (!providerMetadata[provider.id]) {
             const providerInfo = getConnectionProvider(
-              provider as ConnectionProvider,
+              provider as Provider,
             );
-            providerMetadata[provider] = {
+            providerMetadata[provider.id] = {
               id: providerInfo.id,
               displayName: providerInfo.displayName,
               logoUrl: providerInfo.logoUrl,
               supportedBlocks: [],
-              props: block.auth.props || {},
+              props: block.auth.props ?? {},
             };
           }
-          providerMetadata[provider].supportedBlocks.push(block.name);
+          providerMetadata[provider.id].supportedBlocks.push(block.name);
         }
       }
 
