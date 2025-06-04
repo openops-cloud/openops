@@ -146,11 +146,6 @@ export const WithMessages: Story = {
   },
   parameters: {
     chromatic: { delay: 1000 },
-    docs: {
-      story: {
-        inline: false,
-      },
-    },
   },
   render: (args) => {
     const {
