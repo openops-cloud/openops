@@ -24,7 +24,6 @@ jest.mock('../../../src/app/blocks/block-metadata-service', () => ({
 }));
 
 import { logger } from '@openops/server-shared';
-import { Provider } from '@openops/shared';
 import { resolveProvidersForBlocks } from '../../../src/app/app-connection/connection-providers-resolver';
 
 describe('resolveProvidersForBlocks', () => {
@@ -43,25 +42,19 @@ describe('resolveProvidersForBlocks', () => {
       {
         name: 'block1',
         auth: {
-          provider: {
-            id: Provider.AWS,
-          },
+          authProviderKey: 'AWS',
         },
       },
       {
         name: 'block2',
         auth: {
-          provider: {
-            id: Provider.GITHUB,
-          },
+          authProviderKey: 'Github',
         },
       },
       {
         name: 'block3',
         auth: {
-          provider: {
-            id: Provider.AWS,
-          },
+          authProviderKey: 'AWS',
         },
       },
     ];
@@ -82,7 +75,7 @@ describe('resolveProvidersForBlocks', () => {
       edition,
     });
 
-    expect(result).toEqual([Provider.AWS, Provider.GITHUB]);
+    expect(result).toEqual(['AWS', 'Github']);
     expect(result.length).toBe(2);
   });
 
@@ -91,9 +84,7 @@ describe('resolveProvidersForBlocks', () => {
       {
         name: 'block1',
         auth: {
-          provider: {
-            id: Provider.AWS,
-          },
+          authProviderKey: 'AWS',
         },
       },
     ];
@@ -109,7 +100,7 @@ describe('resolveProvidersForBlocks', () => {
       'Block not found. Block name: non-existent-block',
     );
 
-    expect(result).toEqual([Provider.AWS]);
+    expect(result).toEqual(['AWS']);
     expect(result.length).toBe(1);
   });
 
@@ -118,17 +109,13 @@ describe('resolveProvidersForBlocks', () => {
       {
         name: 'block1',
         auth: {
-          provider: {
-            id: Provider.AWS,
-          },
+          authProviderKey: 'AWS',
         },
       },
       {
         name: 'block2',
         auth: {
-          provider: {
-            id: Provider.AWS,
-          },
+          authProviderKey: 'AWS',
         },
       },
     ];
@@ -140,7 +127,7 @@ describe('resolveProvidersForBlocks', () => {
       projectId,
     );
 
-    expect(result).toEqual([Provider.AWS]);
+    expect(result).toEqual(['AWS']);
     expect(result.length).toBe(1);
   });
 
@@ -149,9 +136,7 @@ describe('resolveProvidersForBlocks', () => {
       {
         name: 'block1',
         auth: {
-          provider: {
-            id: Provider.AWS,
-          },
+          authProviderKey: 'AWS',
         },
       },
       {
@@ -171,7 +156,7 @@ describe('resolveProvidersForBlocks', () => {
       projectId,
     );
 
-    expect(result).toEqual([Provider.AWS]);
+    expect(result).toEqual(['AWS']);
     expect(result.length).toBe(1);
   });
 
@@ -180,9 +165,7 @@ describe('resolveProvidersForBlocks', () => {
       {
         name: 'block1',
         auth: {
-          provider: {
-            id: Provider.AWS,
-          },
+          authProviderKey: 'AWS',
         },
       },
     ];
