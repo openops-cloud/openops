@@ -123,7 +123,8 @@ const getAiConfigRequest = {
   },
   schema: {
     tags: ['ai-config'],
-    description: 'Returns all AI configs for the current project.',
+    description:
+      'List all AI configurations or get the active configuration. This endpoint allows you to retrieve either all AI configurations for the project or specifically the currently active configuration.',
   },
 };
 
@@ -133,7 +134,8 @@ const aiConfigIdRequest = {
   },
   schema: {
     tags: ['ai-config'],
-    description: 'Returns a single AI config by ID.',
+    description:
+      'Get or delete an AI configuration by its ID. This endpoint allows you to retrieve or remove a specific AI configuration from the project.',
     params: Type.Object({
       id: Type.String(),
     }),

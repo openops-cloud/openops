@@ -18,6 +18,8 @@ export const testTriggerController: FastifyPluginAsyncTypebox = async (app) => {
 
 const TestTriggerRequest = {
   schema: {
+    description:
+      'Test a flow trigger with specified parameters. This endpoint allows users to validate and test flow triggers before deploying them to production, helping ensure proper configuration and behavior.',
     body: TestTriggerRequestBody,
   },
   config: {

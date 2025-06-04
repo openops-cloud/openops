@@ -25,5 +25,7 @@ const GetFileRequest = {
     params: Type.Object({
       fileId: Type.String(),
     }),
+    description:
+      'Retrieve a file by its ID. This endpoint allows you to download a specific file, returning its contents as a zip file. The file must be associated with the current project.',
   },
 };
