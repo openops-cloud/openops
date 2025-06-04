@@ -1,7 +1,8 @@
 import { UseChatHelpers } from '@ai-sdk/react';
 import { t } from 'i18next';
+import { throttle } from 'lodash-es';
 import { Bot } from 'lucide-react';
-import { ReactNode, useEffect, useRef } from 'react';
+import { ReactNode, useCallback, useEffect, useRef } from 'react';
 import { useIntersection } from 'react-use';
 import { cn } from '../../lib/cn';
 import { AI_CHAT_SCROLL_DELAY } from '../../lib/constants';
@@ -24,7 +25,7 @@ type AiAssistantChatContainerProps = {
   isEmpty: boolean;
   className?: string;
   children?: ReactNode;
-  messages?: { id: string }[];
+  messages?: { id: string; role: string }[];
   status?: string;
   lastUserMessageRef: React.RefObject<HTMLDivElement>;
 } & Pick<UseChatHelpers, 'input' | 'handleInputChange' | 'handleSubmit'> &
@@ -33,6 +34,11 @@ type AiAssistantChatContainerProps = {
 export const CHAT_MIN_WIDTH = 375;
 export const PARENT_INITIAL_HEIGHT_GAP = 220;
 export const PARENT_MAX_HEIGHT_GAP = 95;
+
+const getLastUserMessageId = (messages: { id: string; role: string }[]) => {
+  const lastUserIndex = messages.map((m) => m.role).lastIndexOf('user');
+  return lastUserIndex !== -1 ? messages[lastUserIndex].id : null;
+};
 
 const AiAssistantChatContainer = ({
   dimensions,
@@ -60,50 +66,77 @@ const AiAssistantChatContainer = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollViewportRef = useRef<HTMLDivElement>(null);
   const hasAutoScrolled = useRef<boolean>(false);
-  const lastMessageId = useRef<string | null>(
-    messages.length ? messages[messages.length - 1].id : null,
+  const userHasScrolled = useRef<boolean>(false);
+  const lastUserMessageId = useRef<string | null>(
+    getLastUserMessageId(messages),
   );
 
+  const streamingEndRef = useRef<HTMLDivElement>(null);
+
   const isLastUserMessageVisible = useIntersection(lastUserMessageRef, {
-    root: null,
+    root: scrollViewportRef?.current,
     rootMargin: '0px',
     threshold: 1,
   });
 
+  // scroll to the last user message, when getting a new user message
   useEffect(() => {
-    const currentLastId = messages.length
-      ? messages[messages.length - 1].id
-      : null;
-    if (currentLastId !== lastMessageId.current || showAiChat) {
-      hasAutoScrolled.current = false;
-      lastMessageId.current = currentLastId;
+    if (messages.length) {
+      const lastUserIndex = messages.map((m) => m.role).lastIndexOf('user');
+      if (
+        lastUserIndex !== -1 &&
+        lastUserMessageId.current !== messages[lastUserIndex].id
+      ) {
+        lastUserMessageId.current = messages[lastUserIndex].id;
+        lastUserMessageRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'end',
+        });
+      }
     }
-  }, [messages, showAiChat]);
+  }, [lastUserMessageRef, messages]);
 
+  // auto-scroll to the AI when streaming
   useEffect(() => {
-    if (!hasAutoScrolled.current && !isEmpty && showAiChat && !!children) {
-      setTimeout(() => {
-        if (scrollViewportRef.current) {
-          scrollViewportRef.current.scrollTo({
-            top: scrollViewportRef.current.scrollHeight,
-            behavior: 'smooth',
-          });
-          hasAutoScrolled.current = true;
-        }
-      }, AI_CHAT_SCROLL_DELAY);
-      return;
-    }
-
-    console.log('isLastUserMessageVisible', isLastUserMessageVisible);
-
     if (
       status === 'streaming' &&
+      isLastUserMessageVisible?.isIntersecting &&
+      streamingEndRef.current
+    ) {
+      streamingEndRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'end',
+      });
+    }
+  }, [status, isLastUserMessageVisible, messages]);
+
+  // track user scroll interaction
+  useEffect(() => {
+    const scrollEl = scrollViewportRef.current;
+    if (!scrollEl) return;
+    const handleScroll = () => {
+      userHasScrolled.current = true;
+    };
+    scrollEl.addEventListener('scroll', handleScroll);
+    return () => {
+      scrollEl.removeEventListener('scroll', handleScroll);
+    };
+  }, [scrollViewportRef]);
+
+  // when messages length changes, reset userHasScrolled and hasAutoScrolled
+  useEffect(() => {
+    userHasScrolled.current = false;
+    hasAutoScrolled.current = false;
+  }, [messages.length]);
+
+  // initial scroll to the bottom when the chat is opened
+  useEffect(() => {
+    if (
+      !hasAutoScrolled.current &&
       !isEmpty &&
       showAiChat &&
       !!children &&
-      scrollViewportRef.current &&
-      (!isLastUserMessageVisible?.intersectionRatio ||
-        isLastUserMessageVisible.intersectionRatio > 0.9)
+      !userHasScrolled.current
     ) {
       setTimeout(() => {
         if (scrollViewportRef.current) {
@@ -112,16 +145,11 @@ const AiAssistantChatContainer = ({
             behavior: 'smooth',
           });
         }
+        hasAutoScrolled.current = true;
       }, AI_CHAT_SCROLL_DELAY);
+      return;
     }
-  }, [
-    isEmpty,
-    showAiChat,
-    children,
-    messages,
-    isLastUserMessageVisible,
-    status,
-  ]);
+  }, [isEmpty, showAiChat, children, isLastUserMessageVisible]);
 
   return (
     <div
@@ -197,7 +225,10 @@ const AiAssistantChatContainer = ({
                       </span>
                     </div>
                   ) : (
-                    children
+                    <>
+                      {children}
+                      <div ref={streamingEndRef} className="h-1" />
+                    </>
                   )}
                 </div>
               </ScrollArea>

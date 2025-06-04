@@ -143,7 +143,7 @@ const AiAssistantChat = ({
       selectedModel={selectedModel}
       isModelSelectorLoading={isModelSelectorLoading}
       onModelSelected={onModelSelected}
-      messages={messages.map((m) => ({ id: m.id }))}
+      messages={messages.map((m) => ({ id: m.id, role: m.role }))}
       status={status}
       lastUserMessageRef={lastUserMessageRef}
     >
