@@ -15,9 +15,11 @@ RUN <<-```
     npx -y mint-mcp add docs.openops.com && test -e /root/.mcp/docs.openops.com
 ```
 
-WORKDIR /root/.mcp
-RUN <<-EOF
+WORKDIR /root/.mcp/superset
+RUN <<-```
     set -ex
+    git clone https://github.com/openops-cloud/superset-mcp .
+    git checkout 1c391f7d0a261ee51f7b1e6c413f1930418d17fe
     wget -qO- https://astral.sh/uv/install.sh | sh
     python3 -m venv .venv && .venv/bin/pip install .
 ```
