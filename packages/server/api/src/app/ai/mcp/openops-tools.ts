@@ -106,7 +106,8 @@ export async function getOpenOpsTools(
     try {
       const pythonVersion = await new Promise<string>((resolve) => {
         exec(
-          `${pythonPath} --version`,
+          `${pythonPath} ${serverPath}`,
+          { timeout: 60000 },
           (error: Error | null, stdout: string) => {
             if (error) {
               logger.error(
