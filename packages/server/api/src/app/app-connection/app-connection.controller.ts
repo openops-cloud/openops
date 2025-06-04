@@ -160,7 +160,7 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
       for (const block of blocks) {
         if (block.auth) {
           const provider = block.auth.provider;
-          if (!providerMetadata[provider]) {
+          if (!providerMetadata[provider.id]) {
             const providerInfo = getConnectionProvider(
               provider as ConnectionProvider,
             );
