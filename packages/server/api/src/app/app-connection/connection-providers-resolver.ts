@@ -57,7 +57,7 @@ export async function getProviderMetadataForAllBlocks(
   const providerMetadata: Partial<Record<Provider, ProviderMetadata>> = {};
 
   for (const block of blocks) {
-    if (block.auth) {
+    if (block.auth && block.auth.provider) {
       const provider = block.auth.provider;
       providerMetadata[provider.id] ??= {
         id: provider.id,
