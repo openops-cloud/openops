@@ -161,9 +161,9 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
           const provider = block.auth.provider;
           if (!providerMetadata[provider.id]) {
             providerMetadata[provider.id] = {
-              id: providerInfo.id,
-              displayName: providerInfo.displayName,
-              logoUrl: providerInfo.logoUrl,
+              id: provider.id,
+              displayName: provider.displayName,
+              logoUrl: provider.logoUrl,
               supportedBlocks: [],
               props: block.auth.props ?? {},
             };
