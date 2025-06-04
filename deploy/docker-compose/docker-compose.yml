@@ -18,7 +18,7 @@ services:
     environment:
       OPS_COMPONENT: app
       OPS_VERSION: ${OPS_VERSION:-latest}
-      OPS_OPENOPS_TABLES_VERSION: 0.2.2
+      OPS_OPENOPS_TABLES_VERSION: 0.2.3
       OPS_ANALYTICS_VERSION: 0.14.1
     depends_on:
       openops-tables:
