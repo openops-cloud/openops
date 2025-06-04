@@ -10,7 +10,6 @@ import {
 export type AppConnectionSchema = Omit<AppConnection, 'value'> & {
   project: Project;
   value: EncryptedObject;
-  provider?: string;
 };
 
 export const AppConnectionEntity = new EntitySchema<AppConnectionSchema>({
