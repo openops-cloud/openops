@@ -92,13 +92,13 @@ export async function getOpenOpsTools(
     );
 
     // Log environment variables (excluding sensitive ones)
-    const envVars = {
+    const envVars: Record<string, string> = {
       OPENAPI_SCHEMA_PATH: tempSchemaPath,
       API_BASE_URL: apiBaseUrl,
       OPENOPS_MCP_SERVER_PATH: basePath,
       ENVIRONMENT: system.get<string>(SharedSystemProp.ENVIRONMENT_NAME) ?? '',
-      LOGZIO_TOKEN_EXISTS: !!logzioToken,
-      AUTH_TOKEN_EXISTS: !!authToken,
+      LOGZIO_TOKEN_EXISTS: `${!!logzioToken}`,
+      AUTH_TOKEN_EXISTS: `${!!authToken}`,
     };
     logger.info('[OPENOPS TOOLS] Environment variables:', envVars);
 
@@ -107,13 +107,13 @@ export async function getOpenOpsTools(
       const pythonVersion = await new Promise<string>((resolve) => {
         exec(
           `${pythonPath} ${serverPath}`,
-          { timeout: 60000 },
+          { timeout: 60000, env: envVars },
           (error: Error | null, stdout: string) => {
             if (error) {
-              logger.error(
-                '[OPENOPS TOOLS] Failed to get Python version:',
+              logger.error('[OPENOPS TOOLS] Failed to get Python version:', {
+                json: JSON.stringify(error),
                 error,
-              );
+              });
               resolve('unknown');
             } else {
               resolve(stdout.trim());
