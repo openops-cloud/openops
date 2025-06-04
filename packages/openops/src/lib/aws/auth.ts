@@ -2,6 +2,9 @@
 import { BlockAuth, Property } from '@openops/blocks-framework';
 import { parseArn } from './arn-handler';
 import { assumeRole } from './sts-common';
+import { SharedSystemProp, system, logger } from '@openops/server-shared';
+
+const isImplicitRoleEnabled = system.getBoolean(SharedSystemProp.AWS_ENABLE_IMPLICIT_ROLE)
 
 export interface AwsCredentials {
   accessKeyId: string;
@@ -163,17 +166,18 @@ export function getAwsAccountsSingleSelectDropdown() {
 
 export const amazonAuth = BlockAuth.CustomAuth({
   props: {
-    accessKeyId: Property.SecretText({
-      displayName: 'Access Key ID',
-      required: false,
-    }),
-    secretAccessKey: Property.SecretText({
-      displayName: 'Secret Access Key',
-      required: false,
-    }),
     defaultRegion: Property.ShortText({
       displayName: 'Default Region',
       required: true,
+      defaultValue: 'us-east-1',
+    }),
+    accessKeyId: Property.SecretText({
+      displayName: 'Access Key ID' + (isImplicitRoleEnabled ? ' (leave blank to use the role assigned to the hosting environment)' : ''),
+      required: !isImplicitRoleEnabled,
+    }),
+    secretAccessKey: Property.SecretText({
+      displayName: 'Secret Access Key',
+      required: !isImplicitRoleEnabled,
     }),
     endpoint: Property.ShortText({
       displayName: 'Custom Endpoint (optional)',
@@ -199,18 +203,23 @@ export const amazonAuth = BlockAuth.CustomAuth({
     }),
   },
   required: true,
-});
+  validate: async ({ auth }) => {
+    logger.debug('Validating Amazon Auth', auth);
+    if (!auth.defaultRegion) {
+      return { valid: false, error: 'Default region is required' };
+    }
 
-export function isAwsAuth(obj: any): obj is AwsAuth {
-  return (
-    obj !== null &&
-    typeof obj === 'object' &&
-    Object.prototype.hasOwnProperty.call(obj, 'accessKeyId') &&
-    typeof obj.accessKeyId === 'string' &&
-    Object.prototype.hasOwnProperty.call(obj, 'secretAccessKey') &&
-    typeof obj.secretAccessKey === 'string'
-  );
-}
+    if (!auth.accessKeyId && !isImplicitRoleEnabled) {
+      return { valid: false, error: 'Access Key ID is required' };
+    }
+
+    if (!auth.secretAccessKey && !isImplicitRoleEnabled) {
+      return { valid: false, error: 'Secret Access Key is required' };
+    }
+
+    return { valid: true };
+  }
+});
 
 export function getRoleForAccount(
   auth: any,

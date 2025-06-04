@@ -130,7 +130,7 @@ async function loadBlockFromFolder(
     const indexPath = join(folderPath, 'src', 'index.js') + suffix;
     const stats = await fs.stat(packageJsonDir); // Get file stats
 
-    const cacheKey = `${blockName}-${blockVersion}-${stats.mtime.getTime()}`;
+    const cacheKey = `${blockName}-${blockVersion}-${stats.mtime.getTime()}-${system.calculateConfigurationHash()}`;
     let blockMetadata = await cacheWrapper.getSerializedObject<BlockMetadata>(
       cacheKey,
     );
