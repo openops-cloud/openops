@@ -71,7 +71,7 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
     ListAppConnectionsRequest,
     async (request): Promise<SeekPage<AppConnectionWithoutSensitiveData>> => {
       const { name, status, cursor, limit } = request.query;
-      let { blockNames, providers } = request.query;
+      let { blockNames, authProviders } = request.query;
 
       const featureFlag = await devFlagsService.getOne(
         FlagId.USE_CONNECTIONS_PROVIDER,
@@ -83,8 +83,8 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
         );
 
         blockNames = [];
-        providers = providers ?? [];
-        providers.push(...blockProviders);
+        authProviders = authProviders ?? [];
+        authProviders.push(...blockProviders);
       }
 
       const appConnections = await appConnectionService.list({
@@ -95,7 +95,7 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
         projectId: request.principal.projectId,
         cursorRequest: cursor ?? null,
         limit: limit ?? DEFAULT_PAGE_SIZE,
-        providers,
+        authProviders,
       });
 
       return {

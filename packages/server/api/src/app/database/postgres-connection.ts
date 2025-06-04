@@ -19,6 +19,9 @@ import { AddFlowStepTestOutputTable1746454781866 } from './migrations/1746454781
 import { AddStepIdToExistingFlowVersionsAndInsertOutputInTestOutputTable1746454781866 } from './migrations/1746618034190-AddStepIdToExistingFlowVersionsAndInsertOutputInTestOutputTable';
 import { AddTemplateCategories1748356358052 } from './migrations/1748356358052-AddTemplateCategories';
 import { AddProviderToAppConnectionTable1748356358053 } from './migrations/1748356358053-AddProviderToAppConnectionTable';
+import {
+  AddAuthProviderKeyToAppConnectionTable1749066895522
+} from './migrations/1749066895522-AddAuthProviderKeyToAppConnectionTable';
 
 const getSslConfig = (): boolean | TlsOptions => {
   const useSsl = system.get(AppSystemProp.POSTGRES_USE_SSL);
@@ -46,6 +49,7 @@ const getMigrations = (): (new () => MigrationInterface)[] => {
     AddStepIdToExistingFlowVersionsAndInsertOutputInTestOutputTable1746454781866,
     AddTemplateCategories1748356358052,
     AddProviderToAppConnectionTable1748356358053,
+    AddAuthProviderKeyToAppConnectionTable1749066895522,
   ];
 };
 

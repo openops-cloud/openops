@@ -6,11 +6,12 @@ import {
   StaticPropsValue,
   Validators,
 } from '@openops/blocks-framework';
-import { Provider, getConnectionProvider } from '@openops/shared';
 import { getUsers, sendJiraRequest } from './lib/common';
 
 export const jiraCloudAuth = BlockAuth.CustomAuth({
-  provider: getConnectionProvider(Provider.JIRA),
+  authProviderKey: 'Jira',
+  authProviderDisplayName: 'Jira Cloud',
+  authProviderLogoUrl: `https://static.openops.com/blocks/jira.png`,
   description: `
 You can generate your API token from:
 ***https://id.atlassian.com/manage-profile/security/api-tokens***
