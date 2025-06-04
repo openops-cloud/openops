@@ -3,6 +3,7 @@ import { FlowTemplateDto, FlowTemplateMetadata } from '@openops/shared';
 
 export type GetTemplatesParams = {
   search?: string;
+  categories?: string[];
   services?: string[];
   domains?: string[];
   blocks?: string[];

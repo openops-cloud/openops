@@ -1,4 +1,5 @@
 import { BlockAuth, Property } from '@openops/blocks-framework';
+import { Provider, getConnectionProvider } from '@openops/shared';
 import { getDatabricksToken } from './get-databricks-token';
 
 const description = `
@@ -21,6 +22,7 @@ const failedValidationResponse = {
 };
 
 export const databricksAuth = BlockAuth.CustomAuth({
+  provider: getConnectionProvider(Provider.DATABRICKS),
   required: true,
   description,
   props: {
@@ -32,7 +34,7 @@ export const databricksAuth = BlockAuth.CustomAuth({
       displayName: 'Client ID',
       required: true,
     }),
-    clientSecret: BlockAuth.SecretText({
+    clientSecret: Property.SecretText({
       displayName: 'Client Secret',
       required: true,
     }),

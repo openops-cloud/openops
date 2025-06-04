@@ -1,6 +1,5 @@
 import {
   AppSystemProp,
-  logger,
   networkUtls,
   SharedSystemProp,
   system,
@@ -12,6 +11,8 @@ import { OpenAPI } from 'openapi-types';
 import path from 'path';
 import { MCPTool } from './mcp-tools';
 
+import fs from 'fs/promises';
+import os from 'os';
 const EXCLUDED_PATHS = ['/v1/authentication', '/v1/organizations', '/v1/users'];
 
 const EXCLUDED_OPERATIONS = ['delete'];
@@ -61,16 +62,20 @@ function filterOpenApiSchema(schema: OpenAPI.Document): OpenAPI.Document {
   return filteredSchema;
 }
 
-// Global cache for OpenAPI schema
-let cachedOpenApiSchema: string | undefined;
+let cachedSchemaPath: string | undefined;
 
-function getOpenApiSchema(app: FastifyInstance): string {
-  if (!cachedOpenApiSchema) {
-    const openApiSchema = app.swagger() as OpenAPI.Document;
+async function getOpenApiSchemaPath(app: FastifyInstance): Promise<string> {
+  if (!cachedSchemaPath) {
+    const openApiSchema = app.swagger();
     const filteredSchema = filterOpenApiSchema(openApiSchema);
-    cachedOpenApiSchema = JSON.stringify(filteredSchema);
+    cachedSchemaPath = path.join(os.tmpdir(), 'openapi-schema.json');
+    await fs.writeFile(
+      cachedSchemaPath,
+      JSON.stringify(filteredSchema),
+      'utf-8',
+    );
   }
-  return cachedOpenApiSchema;
+  return cachedSchemaPath;
 }
 
 export async function getOpenOpsTools(
@@ -84,32 +89,26 @@ export async function getOpenOpsTools(
   const pythonPath = path.join(basePath, '.venv', 'bin', 'python');
   const serverPath = path.join(basePath, 'main.py');
 
-  try {
-    const openopsClient = await experimental_createMCPClient({
-      transport: new Experimental_StdioMCPTransport({
-        command: pythonPath,
-        args: [serverPath],
-        env: {
-          OPENAPI_SCHEMA: getOpenApiSchema(app),
-          AUTH_TOKEN: authToken,
-          API_BASE_URL: networkUtls.getInternalApiUrl(),
-          OPENOPS_MCP_SERVER_PATH: basePath,
-          LOGZIO_TOKEN: system.get<string>(SharedSystemProp.LOGZIO_TOKEN) ?? '',
-          ENVIRONMENT:
-            system.get<string>(SharedSystemProp.ENVIRONMENT_NAME) ?? '',
-        },
-      }),
-    });
+  const tempSchemaPath = await getOpenApiSchemaPath(app);
 
-    return {
-      client: openopsClient,
-      toolSet: await openopsClient.tools(),
-    };
-  } catch (error) {
-    logger.error('Failed to create OpenOps MCP client:', error);
-    return {
-      client: undefined,
-      toolSet: {},
-    };
-  }
+  const openopsClient = await experimental_createMCPClient({
+    transport: new Experimental_StdioMCPTransport({
+      command: pythonPath,
+      args: [serverPath],
+      env: {
+        OPENAPI_SCHEMA_PATH: tempSchemaPath,
+        AUTH_TOKEN: authToken,
+        API_BASE_URL: networkUtls.getInternalApiUrl(),
+        OPENOPS_MCP_SERVER_PATH: basePath,
+        LOGZIO_TOKEN: system.get<string>(SharedSystemProp.LOGZIO_TOKEN) ?? '',
+        ENVIRONMENT:
+          system.get<string>(SharedSystemProp.ENVIRONMENT_NAME) ?? '',
+      },
+    }),
+  });
+
+  return {
+    client: openopsClient,
+    toolSet: await openopsClient.tools(),
+  };
 }

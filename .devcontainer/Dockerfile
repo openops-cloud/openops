@@ -19,7 +19,6 @@ RUN <<-```
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
-ENV PATH="/root/.local/bin:$PATH"
 
 RUN <<-```
   # Install yq
@@ -53,27 +52,22 @@ RUN <<-```
 ENV PATH="/opt/google-cloud-sdk/bin:$PATH"
 
 SHELL ["/bin/bash", "-c"]
-WORKDIR /root/.mcp
-RUN <<-EOF
+WORKDIR /root/.mcp/superset
+RUN <<-```
     set -ex
-    wget -qO- https://astral.sh/uv/install.sh | sh
-    export PATH="$HOME/.local/bin:$PATH"
-
-    # Superset MCP
-    git clone --depth 1 https://github.com/openops-cloud/superset-mcp superset
-    cd superset
-    git checkout 1c391f7d0a261ee51f7b1e6c413f1930418d17fe
+    git clone https://github.com/openops-cloud/superset-mcp .
+    wget -qO- https://astral.sh/uv/install.sh | sh && source $HOME/.local/bin/env
     uv venv && uv pip install .
-    cd ..
+```
 
-    # Openops MCP
-    git clone --depth 1 https://github.com/openops-cloud/openops-mcp openops
-    cd openops
-    git checkout dad1afe41efa2c6882525421829198e443cada05
-    uv venv && uv pip install -r requirements.txt
-    cd ..
-EOF
+WORKDIR /root/.mcp/openops-mcp
+RUN <<-```
+    set -ex
+    git clone https://github.com/openops-cloud/openops-mcp .
+    git checkout 6708ea66b72d84db2505b1782731060dd8e02350
+    wget -qO- https://astral.sh/uv/install.sh | sh && source $HOME/.local/bin/env
+    uv venv && . .venv/bin/activate && uv pip install -r requirements.txt
+```
 
 WORKDIR /workspaces
-
 

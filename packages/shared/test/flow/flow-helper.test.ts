@@ -3424,3 +3424,82 @@ describe('duplicateStep', () => {
     expect(duplicatedStep.settings.input.reference).toBe('{{step_2.output}}');
   });
 });
+
+describe('flowHelper.isChildOf', () => {
+  it('returns true if child is inside LOOP_ON_ITEMS', () => {
+    const loopAction: any = {
+      name: 'loop1',
+      type: ActionType.LOOP_ON_ITEMS,
+      firstLoopAction: {
+        name: 'child1',
+        type: ActionType.CODE,
+      },
+    };
+    expect(flowHelper.isChildOf(loopAction, 'child1')).toBe(true);
+    expect(flowHelper.isChildOf(loopAction, 'notAChild')).toBe(false);
+  });
+
+  it('returns true if child is inside BRANCH', () => {
+    const branchAction: any = {
+      name: 'branch1',
+      type: ActionType.BRANCH,
+      onSuccessAction: {
+        name: 'successChild',
+        type: ActionType.CODE,
+      },
+      onFailureAction: {
+        name: 'failureChild',
+        type: ActionType.CODE,
+      },
+    };
+    expect(flowHelper.isChildOf(branchAction, 'successChild')).toBe(true);
+    expect(flowHelper.isChildOf(branchAction, 'failureChild')).toBe(true);
+    expect(flowHelper.isChildOf(branchAction, 'notAChild')).toBe(false);
+  });
+
+  it('returns true if child is inside SPLIT', () => {
+    const splitAction: any = {
+      name: 'split1',
+      type: ActionType.SPLIT,
+      branches: [
+        {
+          optionId: 'branchA',
+          nextAction: {
+            name: 'branchAChild',
+            type: ActionType.CODE,
+          },
+        },
+      ],
+    };
+    expect(flowHelper.isChildOf(splitAction, 'branchAChild')).toBe(true);
+    expect(flowHelper.isChildOf(splitAction, 'notAChild')).toBe(false);
+  });
+
+  it('returns true if child is deeply nested: SPLIT > BRANCH > LOOP_ON_ITEMS > CODE', () => {
+    const splitAction: any = {
+      name: 'split1',
+      type: ActionType.SPLIT,
+      branches: [
+        {
+          optionId: 'branchA',
+          nextAction: {
+            name: 'branch1',
+            type: ActionType.BRANCH,
+            onSuccessAction: {
+              name: 'loop1',
+              type: ActionType.LOOP_ON_ITEMS,
+              firstLoopAction: {
+                name: 'deepChild',
+                type: ActionType.CODE,
+              },
+            },
+          },
+        },
+      ],
+    };
+    expect(flowHelper.isChildOf(splitAction, 'deepChild')).toBe(true);
+    expect(flowHelper.isChildOf(splitAction, 'loop1')).toBe(true);
+    expect(flowHelper.isChildOf(splitAction, 'branch1')).toBe(true);
+    expect(flowHelper.isChildOf(splitAction, 'notAChild')).toBe(false);
+  });
+});

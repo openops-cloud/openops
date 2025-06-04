@@ -1,5 +1,6 @@
-import { BlockAuth } from '@openops/blocks-framework';
+import { BlockAuth, Property } from '@openops/blocks-framework';
 import { SharedSystemProp, system } from '@openops/server-shared';
+import { Provider, getConnectionProvider } from '@openops/shared';
 import fs from 'fs/promises';
 import os from 'os';
 import path from 'path';
@@ -21,9 +22,10 @@ const markdown = `
 You can also visit [OpenOps documentation](https://docs.openops.com/introduction/overview) for more information.`;
 
 export const googleCloudAuth = BlockAuth.CustomAuth({
+  provider: getConnectionProvider(Provider.GCLOUD),
   description: markdown,
   props: {
-    keyFileContent: BlockAuth.SecretText({
+    keyFileContent: Property.SecretText({
       displayName: 'Key file content',
       description: 'Provide the content of the service-account key file.',
       required: true,
