@@ -23,6 +23,7 @@ type AiAssistantChatContainerProps = {
   isEmpty: boolean;
   className?: string;
   children?: ReactNode;
+  messages?: { id: string }[];
 } & Pick<UseChatHelpers, 'input' | 'handleInputChange' | 'handleSubmit'> &
   AiModelSelectorProps;
 
@@ -42,6 +43,7 @@ const AiAssistantChatContainer = ({
   isEmpty = true,
   className,
   children,
+  messages = [],
   handleInputChange,
   handleSubmit,
   input,
@@ -53,8 +55,18 @@ const AiAssistantChatContainer = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollViewportRef = useRef<HTMLDivElement>(null);
   const hasScrolledOnce = useRef<boolean>(false);
+  const lastMessageId = useRef<string | null>(
+    messages.length ? messages[messages.length - 1].id : null,
+  );
 
   useEffect(() => {
+    const currentLastId = messages.length
+      ? messages[messages.length - 1].id
+      : null;
+    if (currentLastId !== lastMessageId.current) {
+      hasScrolledOnce.current = false;
+      lastMessageId.current = currentLastId;
+    }
     setTimeout(() => {
       if (
         scrollViewportRef.current &&
@@ -67,11 +79,10 @@ const AiAssistantChatContainer = ({
           top: scrollViewportRef.current.scrollHeight,
           behavior: 'smooth',
         });
-
         hasScrolledOnce.current = true;
       }
     }, AI_CHAT_SCROLL_DELAY);
-  }, [isEmpty, showAiChat, children]);
+  }, [messages, isEmpty, showAiChat, children]);
 
   return (
     <div

@@ -142,6 +142,7 @@ const AiAssistantChat = ({
       selectedModel={selectedModel}
       isModelSelectorLoading={isModelSelectorLoading}
       onModelSelected={onModelSelected}
+      messages={messages.map((m) => ({ id: m.id }))}
     >
       <AiAssistantConversation
         messages={messages}
