@@ -1,8 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  FastifyPluginCallbackTypebox,
-  Type,
-} from '@fastify/type-provider-typebox';
+import { FastifyPluginCallbackTypebox, Type } from '@fastify/type-provider-typebox';
 import {
   AppConnectionWithoutSensitiveData,
   ListAppConnectionsRequestQuery,
@@ -67,7 +64,7 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
     '/',
     ListAppConnectionsRequest,
     async (request): Promise<SeekPage<AppConnectionWithoutSensitiveData>> => {
-      const { name, blockNames, status, cursor, limit } = request.query;
+      const { name, blockNames, status, cursor, limit, providers } = request.query;
 
       const appConnections = await appConnectionService.list({
         blockNames,
@@ -76,15 +73,13 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
         projectId: request.principal.projectId,
         cursorRequest: cursor ?? null,
         limit: limit ?? DEFAULT_PAGE_SIZE,
+        providers,
       });
 
-      const appConnectionsWithoutSensitiveData: SeekPage<AppConnectionWithoutSensitiveData> =
-        {
-          ...appConnections,
-          data: appConnections.data.map(removeSensitiveData),
-        };
-
-      return appConnectionsWithoutSensitiveData;
+      return {
+        ...appConnections,
+        data: appConnections.data.map(removeSensitiveData),
+      };
     },
   );
   app.get(
