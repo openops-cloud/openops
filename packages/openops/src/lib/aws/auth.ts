@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 import { BlockAuth, Property } from '@openops/blocks-framework';
 import { logger, SharedSystemProp, system } from '@openops/server-shared';
-import { Provider, getConnectionProvider } from '@openops/shared';
+import { getConnectionProvider, Provider } from '@openops/shared';
 import { parseArn } from './arn-handler';
 import { assumeRole } from './sts-common';
 
