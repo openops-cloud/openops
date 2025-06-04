@@ -53,6 +53,8 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
         allowedPrincipals: [PrincipalType.ENGINE],
       },
       schema: {
+        description:
+          'Retrieve detailed information about a specific flow run. This endpoint returns the complete execution state, including step outputs, duration, and any errors encountered during the run.',
         params: GetRunForWorkerRequest,
       },
     },
@@ -72,6 +74,8 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
         allowedPrincipals: [PrincipalType.ENGINE],
       },
       schema: {
+        description:
+          'Update the status of a job in the queue. This endpoint allows the engine to mark jobs as completed or failed, with optional status messages for tracking job execution progress.',
         body: UpdateJobRequest,
       },
     },
@@ -389,6 +393,8 @@ const UpdateFailureCount = {
     allowedPrincipals: [PrincipalType.ENGINE],
   },
   schema: {
+    description:
+      'Update the failure count for a flow. This endpoint tracks the success or failure of flow executions, helping to monitor flow reliability and performance over time.',
     body: UpdateFailureCountRequest,
   },
 };
@@ -398,6 +404,8 @@ const GetLockedVersionRequest = {
     allowedPrincipals: [PrincipalType.ENGINE],
   },
   schema: {
+    description:
+      'Retrieve a specific version of a flow for execution. This endpoint fetches the exact flow version specified by flowId and versionId, ensuring the engine has the correct flow configuration for execution.',
     querystring: GetFlowVersionForWorkerRequest,
     response: {
       [StatusCodes.OK]: PopulatedFlow,
@@ -410,6 +418,8 @@ const RemoveFlowRequest = {
     allowedPrincipals: [PrincipalType.ENGINE],
   },
   schema: {
+    description:
+      'Remove a stale job from the queue. This endpoint allows the engine to clean up jobs that are no longer needed, helping to maintain queue health and prevent resource leaks.',
     body: RemoveStableJobEngineRequest,
   },
 };

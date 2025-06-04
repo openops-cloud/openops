@@ -59,6 +59,8 @@ const GenerateWorkerTokenParams = {
     allowedPrincipals: [PrincipalType.SUPER_USER],
   },
   schema: {
+    description:
+      'Generate a new worker machine token for an organization. This endpoint creates a secure authentication token that allows a worker machine to connect to the system and process jobs.',
     body: Type.Object({
       organizationId: Type.String(),
     }),
@@ -70,6 +72,8 @@ const HeartbeatParams = {
     allowedPrincipals: [PrincipalType.WORKER],
   },
   schema: {
+    description:
+      "Send a heartbeat signal from a worker machine. This endpoint updates the machine's status and resource usage metrics, helping to monitor worker health and availability.",
     body: WorkerMachineHealthcheckRequest,
   },
 };
@@ -77,5 +81,9 @@ const HeartbeatParams = {
 const ListWorkersParams = {
   config: {
     allowedPrincipals: [PrincipalType.USER],
+  },
+  schema: {
+    description:
+      'List all registered worker machines. This endpoint returns information about all worker machines in the system, including their status, resource usage, and connection details.',
   },
 };

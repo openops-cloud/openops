@@ -56,7 +56,8 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
       },
       schema: {
         tags: ['flow-templates'],
-        description: 'List flow templates',
+        description:
+          'Retrieve a paginated list of cloud-based flow templates. This endpoint supports filtering by search terms, tags, services, domains, blocks, and categories. For authenticated users, it returns all available templates, while unauthenticated users only see sample templates. Results can be filtered by version to ensure compatibility.',
         querystring: Type.Object({
           search: Type.Optional(Type.String()),
           tags: Type.Optional(Type.Array(Type.String())),
@@ -110,7 +111,8 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
       },
       schema: {
         tags: ['flow-templates'],
-        description: 'Get a flow template by id',
+        description:
+          'Retrieve detailed information about a specific cloud flow template by its ID. This endpoint returns the complete template configuration including its structure, blocks, and metadata. For unauthenticated users, only sample templates are accessible. Authenticated users can access all templates in their organization.',
         params: Type.Object({
           id: OpenOpsId,
         }),
