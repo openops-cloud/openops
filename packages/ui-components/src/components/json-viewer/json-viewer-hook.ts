@@ -84,7 +84,7 @@ export const useJsonViewer = ({
       try {
         const jsonData = JSON.parse(json);
         onChange(jsonData);
-      } catch (e) {
+      } catch {
         toast(UNSAVED_CHANGES_TOAST);
       }
     }

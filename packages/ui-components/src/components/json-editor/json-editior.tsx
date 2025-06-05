@@ -28,7 +28,7 @@ const tryParseJson = (value: unknown): unknown => {
   }
   try {
     return JSON.parse(value);
-  } catch (e) {
+  } catch {
     return value;
   }
 };
