@@ -1,3 +1,4 @@
+import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { QueryKeys } from '@/app/constants/query-keys';
 import { useDynamicFormValidationContext } from '@/app/features/builder/dynamic-form-validation/dynamic-form-validation-context';
 import { appConnectionsApi } from '@/app/features/connections/lib/app-connections-api';
@@ -36,6 +37,7 @@ import {
   AppConnection,
   ApplicationErrorParams,
   ErrorCode,
+  FlagId,
   isNil,
   PatchAppConnectionRequestBody,
   UpsertAppConnectionRequestBody,
@@ -46,6 +48,7 @@ import { t } from 'i18next';
 import { ArrowLeft } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { appConnectionsHooks } from '../lib/app-connections-hooks';
 import {
   buildConnectionSchema,
   createDefaultValues,
@@ -79,7 +82,17 @@ const CreateEditConnectionDialogContent = ({
   showBackButton = false,
   setOpen,
 }: CreateEditConnectionDialogContentProps) => {
-  const { auth } = block;
+  const { data: connectionsMetadata } =
+    appConnectionsHooks.useConnectionsMetadata();
+  const providerKey = block.auth?.authProviderKey;
+  const { data: useConnectionsProvider } = flagsHooks.useFlag<boolean>(
+    FlagId.USE_CONNECTIONS_PROVIDER,
+  );
+
+  const auth = useConnectionsProvider
+    ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      connectionsMetadata?.[providerKey!]
+    : block.auth;
 
   const { formSchema, setFormSchema, formSchemaRef } =
     useDynamicFormValidationContext();

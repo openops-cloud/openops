@@ -46,4 +46,11 @@ export const appConnectionsHooks = {
         }, {}),
     });
   },
+  useConnectionsMetadata: () => {
+    return useQuery({
+      queryKey: [QueryKeys.appConnections, 'metadata'],
+      queryFn: () => appConnectionsApi.getMetadata(),
+      staleTime: Infinity,
+    });
+  },
 };
