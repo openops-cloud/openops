@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { Controller, useForm } from 'react-hook-form';
 
-import { JsonEditor } from '../../components/json-editor/json-editior';
+import { JsonEditor } from '../../components/json-editor/json-editor';
 
 /**
  * A JSON editor component that provides syntax highlighting, validation, and editing capabilities for JSON data.
