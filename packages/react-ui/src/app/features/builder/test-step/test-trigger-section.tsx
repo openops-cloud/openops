@@ -25,7 +25,6 @@ import { triggerEventsApi } from '@/app/features/flows/lib/trigger-events-api';
 import { formatUtils } from '@/app/lib/utils';
 import {
   CATCH_WEBHOOK,
-  FlagId,
   isNil,
   SeekPage,
   Trigger,
@@ -33,7 +32,6 @@ import {
   TriggerTestStrategy,
 } from '@openops/shared';
 
-import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { stepTestOutputCache } from '../data-selector/data-selector-cache';
 import { stepTestOutputHooks } from './step-test-output-hooks';
 import { TestSampleDataViewer } from './test-sample-data-viewer';
@@ -48,15 +46,12 @@ type TestTriggerSectionProps = {
   flowId: string;
 };
 
-function getSelectedId(
-  currentSelectedData: unknown,
-  pollResults: TriggerEvent[],
-) {
-  if (currentSelectedData === undefined) {
+function getSelectedId(testOutput: unknown, pollResults: TriggerEvent[]) {
+  if (testOutput === undefined) {
     return undefined;
   }
   for (let i = 0; i < pollResults.length; i++) {
-    if (deepEqual(currentSelectedData, pollResults[i].payload)) {
+    if (deepEqual(testOutput, pollResults[i].payload)) {
       return pollResults[i].id;
     }
   }
@@ -102,7 +97,7 @@ const TestTriggerSection = React.memo(
           return triggerEventsApi.saveTriggerMockdata(flowId, mockData);
         },
         onSuccess: async (result) => {
-          updateCurrentSelectedData(result);
+          updateSelectedData(result);
           refetch();
         },
       });
@@ -136,7 +131,7 @@ const TestTriggerSection = React.memo(
       },
       onSuccess: async (results) => {
         if (results.length > 0) {
-          updateCurrentSelectedData(results[0]);
+          updateSelectedData(results[0]);
           refetch();
           await triggerEventsApi.deleteWebhookSimulation(flowId);
         }
@@ -165,7 +160,7 @@ const TestTriggerSection = React.memo(
       },
       onSuccess: (results) => {
         if (results.data.length > 0) {
-          updateCurrentSelectedData(results.data[0]);
+          updateSelectedData(results.data[0]);
           refetch();
         }
       },
@@ -181,29 +176,12 @@ const TestTriggerSection = React.memo(
 
     const isTesting = isPending || isLoadingTestOutput;
 
-    const { data: useNewExternalTestData = false } = flagsHooks.useFlag(
-      FlagId.USE_NEW_EXTERNAL_TESTDATA,
-    );
+    function updateSelectedData(data: TriggerEvent) {
+      stepTestOutputCache.setStepData(formValues.id!, {
+        output: formatUtils.formatStepInputOrOutput(data.payload),
+        lastTestDate: dayjs().toISOString(),
+      });
 
-    function updateCurrentSelectedData(data: TriggerEvent) {
-      if (useNewExternalTestData) {
-        stepTestOutputCache.setStepData(formValues.id!, {
-          output: formatUtils.formatStepInputOrOutput(data.payload),
-          lastTestDate: dayjs().toISOString(),
-        });
-      } else {
-        form.setValue(
-          'settings.inputUiInfo',
-          {
-            ...formValues.settings.inputUiInfo,
-            currentSelectedData: formatUtils.formatStepInputOrOutput(
-              data.payload,
-            ),
-            lastTestDate: dayjs().toISOString(),
-          },
-          { shouldValidate: true },
-        );
-      }
       refetchTestOutput();
     }
 
@@ -218,23 +196,23 @@ const TestTriggerSection = React.memo(
       staleTime: 0,
     });
 
-    const currentSelectedData = testOutputData?.output;
+    const currentTestOutput = testOutputData?.output;
     const sampleDataSelected =
-      !isNil(currentSelectedData) || !isNil(errorMessage);
+      !isNil(currentTestOutput) || !isNil(errorMessage);
 
     const isTestedBefore = !isNil(testOutputData?.lastTestDate);
 
     useEffect(() => {
       const selectedId = getSelectedId(
-        currentSelectedData,
+        currentTestOutput,
         pollResults?.data ?? [],
       );
       setCurrentSelectedId(selectedId);
-    }, [currentSelectedData, pollResults]);
+    }, [currentTestOutput, pollResults]);
 
     useEffect(() => {
       setErrorMessage(undefined);
-    }, [currentSelectedData]);
+    }, [currentTestOutput]);
 
     if (isBlockLoading) {
       return null;
@@ -257,10 +235,9 @@ const TestTriggerSection = React.memo(
             isValid={isValid}
             isSaving={isSaving}
             isTesting={isTesting}
-            currentSelectedData={currentSelectedData}
+            data={currentTestOutput}
             errorMessage={errorMessage}
             lastTestDate={testOutputData?.lastTestDate}
-            type={formValues.type}
           >
             {pollResults?.data && (
               <div className="mb-3">
@@ -271,7 +248,7 @@ const TestTriggerSection = React.memo(
                       (triggerEvent) => triggerEvent.id === value,
                     );
                     if (triggerEvent) {
-                      updateCurrentSelectedData(triggerEvent);
+                      updateSelectedData(triggerEvent);
                     }
                   }}
                 >
