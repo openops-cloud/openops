@@ -10,15 +10,20 @@ import {
   Input,
   ScrollArea,
 } from '@openops/components/ui';
-import { isNil } from '@openops/shared';
+import { FlagId } from '@openops/shared';
 import { DialogTrigger } from '@radix-ui/react-dialog';
 import { t } from 'i18next';
 import React, { useEffect, useState } from 'react';
 
 import { CreateOrEditConnectionDialog } from './create-edit-connection-dialog';
 
+import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
 import { DynamicFormValidationProvider } from '@/app/features/builder/dynamic-form-validation/dynamic-form-validation-context';
+import {
+  aggregateBlocksByProvider,
+  filterBlocks,
+} from '../lib/connections-utils';
 
 type NewConnectionTypeDialogProps = {
   onConnectionCreated: () => void;
@@ -32,15 +37,17 @@ const NewConnectionTypeDialog = React.memo(
     const [selectedBlock, setSelectedBlock] = useState<
       BlockMetadataModelSummary | undefined
     >(undefined);
+
+    const { data: useConnectionsProvider } = flagsHooks.useFlag<boolean>(
+      FlagId.USE_CONNECTIONS_PROVIDER,
+    );
+
     const { blocks, isLoading } = blocksHooks.useBlocks({});
     const [searchTerm, setSearchTerm] = useState('');
 
-    const filteredBlocks = blocks?.filter((block) => {
-      return (
-        !isNil(block.auth) &&
-        block.displayName.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    });
+    const filteredBlocks = useConnectionsProvider
+      ? filterBlocks(aggregateBlocksByProvider(blocks ?? []), searchTerm)
+      : filterBlocks(blocks ?? [], searchTerm);
 
     const clickBlock = (name: string) => {
       setDialogTypesOpen(false);
