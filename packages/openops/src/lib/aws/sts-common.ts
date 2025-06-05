@@ -11,11 +11,7 @@ export async function getAccountId(
   credentials: any,
   defaultRegion: string,
 ): Promise<string> {
-  const client = getAwsClient(
-    STSClient,
-    credentials,
-    defaultRegion,
-  ) as STSClient;
+  const client = getAwsClient(STSClient, credentials, defaultRegion);
   const command = new GetCallerIdentityCommand({});
   const response = await client.send(command);
 
@@ -33,7 +29,7 @@ export async function assumeRole(
     STSClient,
     { accessKeyId, secretAccessKey },
     defaultRegion,
-  ) as STSClient;
+  );
   const command = new AssumeRoleCommand({
     RoleArn: roleArn,
     ExternalId: externalId || undefined,
