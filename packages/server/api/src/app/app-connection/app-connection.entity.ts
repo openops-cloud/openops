@@ -33,6 +33,9 @@ export const AppConnectionEntity = new EntitySchema<AppConnectionSchema>({
     value: {
       type: JSONB_COLUMN_TYPE,
     },
+    authProviderKey: {
+      type: String,
+    },
   },
   indices: [
     {

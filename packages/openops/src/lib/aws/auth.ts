@@ -168,7 +168,9 @@ export function getAwsAccountsSingleSelectDropdown() {
 }
 
 export const amazonAuth = BlockAuth.CustomAuth({
-  provider: getConnectionProvider(Provider.AWS),
+  authProviderKey: 'AWS',
+  authProviderDisplayName: 'AWS',
+  authProviderLogoUrl: `https://static.openops.com/blocks/aws.png`,
   props: {
     defaultRegion: Property.ShortText({
       displayName: 'Default Region',

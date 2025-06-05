@@ -5,6 +5,7 @@ import {
 } from '@fastify/type-provider-typebox';
 import {
   AppConnectionWithoutSensitiveData,
+  FlagId,
   ListAppConnectionsRequestQuery,
   OpenOpsId,
   PatchAppConnectionRequestBody,
@@ -16,9 +17,14 @@ import {
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
 import { blockMetadataService } from '../blocks/block-metadata-service';
+import { devFlagsService } from '../flags/dev-flags.service';
 import { sendConnectionDeletedEvent } from '../telemetry/event-models';
 import { appConnectionService } from './app-connection-service/app-connection-service';
 import { redactSecrets, removeSensitiveData } from './app-connection-utils';
+import {
+  getProviderMetadataForAllBlocks,
+  resolveProvidersForBlocks,
+} from './connection-providers-resolver';
 
 export const appConnectionController: FastifyPluginCallbackTypebox = (
   app,
@@ -67,24 +73,38 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
     '/',
     ListAppConnectionsRequest,
     async (request): Promise<SeekPage<AppConnectionWithoutSensitiveData>> => {
-      const { name, blockNames, status, cursor, limit } = request.query;
+      const { name, status, cursor, limit } = request.query;
+      let { blockNames, authProviders } = request.query;
+
+      const featureFlag = await devFlagsService.getOne(
+        FlagId.USE_CONNECTIONS_PROVIDER,
+      );
+      if (blockNames && featureFlag?.value) {
+        const blockProviders = await resolveProvidersForBlocks(
+          blockNames,
+          request.principal.projectId,
+        );
+
+        blockNames = [];
+        authProviders = authProviders ?? [];
+        authProviders.push(...blockProviders);
+      }
 
       const appConnections = await appConnectionService.list({
+        // TODO: remove blockNames from this request
         blockNames,
         name,
         status,
         projectId: request.principal.projectId,
         cursorRequest: cursor ?? null,
         limit: limit ?? DEFAULT_PAGE_SIZE,
+        authProviders,
       });
 
-      const appConnectionsWithoutSensitiveData: SeekPage<AppConnectionWithoutSensitiveData> =
-        {
-          ...appConnections,
-          data: appConnections.data.map(removeSensitiveData),
-        };
-
-      return appConnectionsWithoutSensitiveData;
+      return {
+        ...appConnections,
+        data: appConnections.data.map(removeSensitiveData),
+      };
     },
   );
   app.get(
@@ -137,6 +157,14 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
       );
 
       await reply.status(StatusCodes.NO_CONTENT).send();
+    },
+  );
+
+  app.get(
+    '/metadata',
+    GetConnectionMetadataRequest,
+    async (request): Promise<Record<string, any>> => {
+      return getProviderMetadataForAllBlocks(request.principal.projectId);
     },
   );
 
@@ -237,6 +265,21 @@ const GetAppConnectionRequest = {
           { additionalProperties: true },
         ),
       ]),
+    },
+  },
+};
+
+const GetConnectionMetadataRequest = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
+    permission: Permission.READ_APP_CONNECTION,
+  },
+  schema: {
+    tags: ['app-connections'],
+    security: [SERVICE_KEY_SECURITY_OPENAPI],
+    description: 'Get authentication metadata for all available connections',
+    response: {
+      [StatusCodes.OK]: Type.Record(Type.String(), Type.Unknown()),
     },
   },
 };

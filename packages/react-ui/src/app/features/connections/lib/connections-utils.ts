@@ -112,6 +112,7 @@ export const createDefaultValues = (
         id: existingConnection?.id,
         name: suggestedConnectionName,
         blockName: block.name,
+        authProviderKey: block.auth?.authProviderKey,
         projectId,
         type: AppConnectionType.SECRET_TEXT,
         value: existingConnection
@@ -126,6 +127,7 @@ export const createDefaultValues = (
         id: existingConnection?.id,
         name: suggestedConnectionName,
         blockName: block.name,
+        authProviderKey: block.auth?.authProviderKey,
         projectId,
         type: AppConnectionType.BASIC_AUTH,
         value: existingConnection
@@ -141,6 +143,7 @@ export const createDefaultValues = (
         id: existingConnection?.id,
         name: suggestedConnectionName,
         blockName: block.name,
+        authProviderKey: block.auth?.authProviderKey,
         projectId,
         type: AppConnectionType.CUSTOM_AUTH,
         value: existingConnection
@@ -155,6 +158,7 @@ export const createDefaultValues = (
         id: existingConnection?.id,
         name: suggestedConnectionName,
         blockName: block.name,
+        authProviderKey: block.auth?.authProviderKey,
         projectId,
         type: AppConnectionType.CLOUD_OAUTH2,
         value: existingConnection

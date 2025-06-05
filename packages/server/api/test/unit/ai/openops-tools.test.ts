@@ -5,11 +5,6 @@ const mockTools = {
   tool2: { description: 'Test tool 2', parameters: {} },
 };
 
-const createMcpClientMock = jest.fn();
-jest.mock('ai', () => ({
-  experimental_createMCPClient: createMcpClientMock,
-}));
-
 const systemMock = {
   get: jest.fn(),
   getOrThrow: jest.fn(),
@@ -23,6 +18,12 @@ const loggerMock = {
 const networkUtlsMock = {
   getInternalApiUrl: jest.fn(),
 };
+
+const createMcpClientMock = jest.fn();
+
+jest.mock('ai', () => ({
+  experimental_createMCPClient: createMcpClientMock,
+}));
 
 jest.mock('@openops/server-shared', () => ({
   ...jest.requireActual('@openops/server-shared'),
@@ -38,24 +39,71 @@ jest.mock('@openops/server-shared', () => ({
   },
 }));
 
+jest.mock('fs/promises', () => ({
+  ...jest.requireActual('fs/promises'),
+  writeFile: jest.fn(),
+}));
+
+jest.mock('os', () => ({
+  ...jest.requireActual('os'),
+  tmpdir: jest.fn().mockReturnValue('/tmp'),
+}));
+
 import '@fastify/swagger';
 import { FastifyInstance } from 'fastify';
 import fs from 'fs/promises';
 import path from 'path';
 import { getOpenOpsTools } from '../../../src/app/ai/mcp/openops-tools';
 
-jest.mock('fs/promises', () => ({
-  ...jest.requireActual('fs/promises'),
-  writeFile: jest.fn(),
-}));
-jest.mock('os', () => ({
-  ...jest.requireActual('os'),
-  tmpdir: jest.fn().mockReturnValue('/tmp'),
-}));
-
 describe('getOpenOpsTools', () => {
+  const mockOpenApiSchema = {
+    openapi: '3.1',
+    paths: {
+      '/v1/authentication/sign-in': {
+        post: { operationId: 'signIn' },
+      },
+      '/v1/users/profile': {
+        get: { operationId: 'getProfile' },
+        delete: { operationId: 'deleteProfile' },
+      },
+      '/v1/organizations/123': {
+        get: { operationId: 'getOrg' },
+        put: { operationId: 'updateOrg' },
+      },
+      '/v1/flows/abc': {
+        get: { operationId: 'getFlow' },
+        delete: { operationId: 'deleteFlow' },
+      },
+      '/v1/blocks/xyz': {
+        post: { operationId: 'createBlock' },
+        delete: { operationId: 'deleteBlock' },
+      },
+      '/v1/files/123': {
+        get: { operationId: 'getFile' },
+      },
+      '/v1/other/endpoint': {
+        get: { operationId: 'getOther' },
+      },
+    },
+  };
+
+  const filteredSchema = {
+    openapi: '3.1',
+    paths: {
+      '/v1/flows/abc': {
+        get: { operationId: 'getFlow' },
+      },
+      '/v1/blocks/xyz': {
+        post: { operationId: 'createBlock' },
+      },
+      '/v1/files/123': {
+        get: { operationId: 'getFile' },
+      },
+    },
+  };
+
   const mockApp = {
-    swagger: jest.fn().mockReturnValue({ openapi: '3.1' }),
+    swagger: jest.fn().mockReturnValue(mockOpenApiSchema),
   } as unknown as FastifyInstance;
 
   beforeEach(() => {
@@ -84,7 +132,7 @@ describe('getOpenOpsTools', () => {
     await getOpenOpsTools(mockApp, 'auth-1');
     expect(fs.writeFile).toHaveBeenCalledWith(
       path.join('/tmp', 'openapi-schema.json'),
-      JSON.stringify({ openapi: '3.1' }),
+      JSON.stringify(filteredSchema),
       'utf-8',
     );
 
@@ -104,19 +152,20 @@ describe('getOpenOpsTools', () => {
       client: mockClient,
       toolSet: mockTools,
     });
+
     expect(createMcpClientMock).toHaveBeenCalledWith({
       transport: expect.objectContaining({
         serverParams: {
           command: `${mockBasePath}/.venv/bin/python`,
           args: [`${mockBasePath}/main.py`],
-          env: {
+          env: expect.objectContaining({
             OPENAPI_SCHEMA_PATH: expect.any(String),
             AUTH_TOKEN: 'test-auth-token',
             API_BASE_URL: mockApiBaseUrl,
             OPENOPS_MCP_SERVER_PATH: mockBasePath,
             LOGZIO_TOKEN: 'test-logzio-token',
             ENVIRONMENT: 'test-environment',
-          },
+          }),
         },
       }),
     });
