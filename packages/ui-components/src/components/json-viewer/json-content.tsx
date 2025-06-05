@@ -9,7 +9,7 @@ import {
   FormItem,
   FormMessage,
 } from '../../ui/form';
-import { JsonEditor } from '../json-editor/json-editior';
+import { JsonEditor } from '../json-editor/json-editor';
 
 type JsonFormValues = {
   jsonContent: string;
