@@ -104,7 +104,6 @@ describe('groupedConnectionsSelector', () => {
     const connections: AppConnectionWithoutSensitiveData[] = [
       createConnection({
         id: '1',
-
         name: 'aws',
         blockName: '@openops/block-aws',
       }),
