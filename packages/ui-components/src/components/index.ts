@@ -40,6 +40,8 @@ export * from './flows/new-flow-button';
 export * from './folder-breadcrumbs/folder-breadcrumbs';
 export * from './folder-tree';
 export * from './help-us-improve';
+export * from './json-editor/json-editior';
+export * from './json-viewer/json-viewer';
 export * from './knowledge-base-card/knowledge-base-card';
 export * from './no-workflows-placeholder/no-workflows-placeholder';
 export * from './overflow-tooltip';
