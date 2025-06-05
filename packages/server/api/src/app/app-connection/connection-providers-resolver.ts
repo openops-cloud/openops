@@ -1,3 +1,4 @@
+import { BlockAuthProperty } from '@openops/blocks-framework';
 import { logger, system } from '@openops/server-shared';
 import { blockMetadataService } from '../blocks/block-metadata-service';
 import { flagService } from '../flags/flag.service';
@@ -33,4 +34,37 @@ export async function resolveProvidersForBlocks(
   }
 
   return [...new Set(authProviders)];
+}
+
+type ProviderMetadata = BlockAuthProperty & {
+  supportedBlocks: string[];
+};
+
+export async function getProviderMetadataForAllBlocks(
+  projectId: string,
+): Promise<Partial<Record<string, ProviderMetadata>>> {
+  const blocks = await blockMetadataService.list({
+    projectId,
+    release: await flagService.getCurrentRelease(),
+    includeHidden: false,
+    edition: system.getEdition(),
+  });
+
+  const providerMetadata: Partial<Record<string, ProviderMetadata>> = {};
+
+  for (const block of blocks) {
+    if (block.auth && Object.keys(block.auth).length > 0) {
+      const authProvider = block.auth;
+      providerMetadata[authProvider.authProviderKey] ??= {
+        ...authProvider,
+        supportedBlocks: [],
+      };
+
+      providerMetadata[authProvider.authProviderKey]?.supportedBlocks.push(
+        block.name,
+      );
+    }
+  }
+
+  return providerMetadata;
 }

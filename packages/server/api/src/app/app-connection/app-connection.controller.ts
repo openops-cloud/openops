@@ -21,7 +21,10 @@ import { devFlagsService } from '../flags/dev-flags.service';
 import { sendConnectionDeletedEvent } from '../telemetry/event-models';
 import { appConnectionService } from './app-connection-service/app-connection-service';
 import { redactSecrets, removeSensitiveData } from './app-connection-utils';
-import { resolveProvidersForBlocks } from './connection-providers-resolver';
+import {
+  getProviderMetadataForAllBlocks,
+  resolveProvidersForBlocks,
+} from './connection-providers-resolver';
 
 export const appConnectionController: FastifyPluginCallbackTypebox = (
   app,
@@ -157,6 +160,14 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
     },
   );
 
+  app.get(
+    '/metadata',
+    GetConnectionMetadataRequest,
+    async (request): Promise<Record<string, any>> => {
+      return getProviderMetadataForAllBlocks(request.principal.projectId);
+    },
+  );
+
   done();
 };
 
@@ -254,6 +265,21 @@ const GetAppConnectionRequest = {
           { additionalProperties: true },
         ),
       ]),
+    },
+  },
+};
+
+const GetConnectionMetadataRequest = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
+    permission: Permission.READ_APP_CONNECTION,
+  },
+  schema: {
+    tags: ['app-connections'],
+    security: [SERVICE_KEY_SECURITY_OPENAPI],
+    description: 'Get authentication metadata for all available connections',
+    response: {
+      [StatusCodes.OK]: Type.Record(Type.String(), Type.Unknown()),
     },
   },
 };
