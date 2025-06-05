@@ -11,6 +11,7 @@ import {
   Trigger,
 } from '@openops/shared';
 import { useQuery } from '@tanstack/react-query';
+import { useCallback } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { flowsApi } from '../../flows/lib/flows-api';
 import { stepTestOutputCache } from '../data-selector/data-selector-cache';
@@ -89,34 +90,37 @@ export const stepTestOutputHooks = {
       state.applyOperation,
     ]);
 
-    return (sampleData: unknown) => {
-      const isTrigger = flowHelper.isTrigger(selectedStep.type);
-      const updatedStep = {
-        ...selectedStep,
-        settings: {
-          ...selectedStep.settings,
-          inputUiInfo: {
-            ...selectedStep.settings.inputUiInfo,
-            sampleData: sampleData,
+    return useCallback(
+      (sampleData: unknown) => {
+        const isTrigger = flowHelper.isTrigger(selectedStep.type);
+        const updatedStep = {
+          ...selectedStep,
+          settings: {
+            ...selectedStep.settings,
+            inputUiInfo: {
+              ...selectedStep.settings.inputUiInfo,
+              sampleData: sampleData,
+            },
           },
-        },
-      };
+        };
 
-      const createOperation = () => {
-        if (isTrigger) {
-          return {
-            type: FlowOperationType.UPDATE_TRIGGER as const,
-            request: updatedStep as Trigger,
-          };
-        } else {
-          return {
-            type: FlowOperationType.UPDATE_ACTION as const,
-            request: updatedStep as Action,
-          };
-        }
-      };
+        const createOperation = () => {
+          if (isTrigger) {
+            return {
+              type: FlowOperationType.UPDATE_TRIGGER as const,
+              request: updatedStep as Trigger,
+            };
+          } else {
+            return {
+              type: FlowOperationType.UPDATE_ACTION as const,
+              request: updatedStep as Action,
+            };
+          }
+        };
 
-      applyOperation(createOperation(), () => toast(UNSAVED_CHANGES_TOAST));
-    };
+        applyOperation(createOperation(), () => toast(UNSAVED_CHANGES_TOAST));
+      },
+      [applyOperation, selectedStep],
+    );
   },
 };
