@@ -277,6 +277,60 @@ const getAllStepsMentionsFromCurrentSelectedData: (
   });
 };
 
+const isPlainObject = (value: unknown): value is Record<string, unknown> => {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    !Array.isArray(value) &&
+    !(value instanceof Map) &&
+    !(value instanceof Date)
+  );
+};
+
+const isAtomicValue = (value: unknown): boolean => {
+  return (
+    value === null ||
+    value === undefined ||
+    typeof value !== 'object' ||
+    Array.isArray(value) ||
+    value instanceof Map ||
+    value instanceof Date
+  );
+};
+
+/**
+ * Merges sample data with test output, with sample data having priority.
+ * If both are objects, sample data properties will override test output properties.
+ * If test output is not an object, sample data will be used if it exists.
+ * Handles nested objects by recursively merging them.
+ * Arrays, Maps, and Dates are treated as atomic values - sample data takes precedence.
+ * Primitives are treated as atomic values - sample data takes precedence.
+ */
+const mergeSampleDataWithTestOutput = (
+  sampleData: unknown,
+  testOutput: unknown,
+): unknown => {
+  if (isAtomicValue(sampleData) || isAtomicValue(testOutput)) {
+    return sampleData ?? testOutput;
+  }
+
+  if (isPlainObject(sampleData) && isPlainObject(testOutput)) {
+    const result = { ...testOutput };
+
+    Object.entries(sampleData).forEach(([key, value]) => {
+      if (isPlainObject(value) && isPlainObject(testOutput[key])) {
+        result[key] = mergeSampleDataWithTestOutput(value, testOutput[key]);
+      } else {
+        result[key] = value;
+      }
+    });
+
+    return result;
+  }
+
+  return sampleData ?? testOutput;
+};
+
 export const dataSelectorUtils = {
   traverseStepOutputAndReturnMentionTree,
   getAllStepsMentions,
@@ -284,4 +338,5 @@ export const dataSelectorUtils = {
   filterBy,
   getPathToTargetStep,
   getAllStepsMentionsFromCurrentSelectedData,
+  mergeSampleDataWithTestOutput,
 };

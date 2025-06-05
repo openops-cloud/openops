@@ -403,4 +403,219 @@ describe('dataSelectorUtils', () => {
       expect(result).toEqual([]);
     });
   });
+
+  describe('mergeSampleDataWithTestOutput', () => {
+    it('should use sample data when test output is not an object', () => {
+      const sampleData = { foo: 'bar' };
+      const testOutput = 'not an object';
+      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
+        sampleData,
+        testOutput,
+      );
+      expect(result).toEqual(sampleData);
+    });
+
+    it('should use sample data when test output is null', () => {
+      const sampleData = { foo: 'bar' };
+      const testOutput = null;
+      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
+        sampleData,
+        testOutput,
+      );
+      expect(result).toEqual(sampleData);
+    });
+
+    it('should merge objects with sample data having priority', () => {
+      const sampleData = { foo: 'bar', baz: 'qux' };
+      const testOutput = { foo: 'old', extra: 'value' };
+      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
+        sampleData,
+        testOutput,
+      );
+      expect(result).toEqual({
+        foo: 'bar',
+        baz: 'qux',
+        extra: 'value',
+      });
+    });
+
+    it('should return test output when no sample data exists', () => {
+      const sampleData = undefined;
+      const testOutput = { foo: 'bar' };
+      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
+        sampleData,
+        testOutput,
+      );
+      expect(result).toEqual(testOutput);
+    });
+
+    it('should handle null sample data', () => {
+      const sampleData = null;
+      const testOutput = { foo: 'bar' };
+      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
+        sampleData,
+        testOutput,
+      );
+      expect(result).toEqual(testOutput);
+    });
+
+    it('should merge nested objects', () => {
+      const sampleData = {
+        foo: {
+          bar: 'new value',
+          extra: 'sample',
+        },
+      };
+      const testOutput = {
+        foo: {
+          bar: 'old value',
+          baz: 'test',
+        },
+      };
+      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
+        sampleData,
+        testOutput,
+      );
+      expect(result).toEqual({
+        foo: {
+          bar: 'new value',
+          extra: 'sample',
+          baz: 'test',
+        },
+      });
+    });
+
+    it('should return sampleData when both are primitives', () => {
+      const sampleData = 'override';
+      const testOutput = 'original';
+      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
+        sampleData,
+        testOutput,
+      );
+      expect(result).toEqual(sampleData);
+    });
+
+    it('should handle numeric primitives', () => {
+      const sampleData = 42;
+      const testOutput = 100;
+      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
+        sampleData,
+        testOutput,
+      );
+      expect(result).toEqual(sampleData);
+    });
+
+    it('should handle boolean primitives', () => {
+      const sampleData = true;
+      const testOutput = false;
+      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
+        sampleData,
+        testOutput,
+      );
+      expect(result).toEqual(sampleData);
+    });
+
+    it('should handle arrays as atomic values', () => {
+      const sampleData = [1, 2, 3];
+      const testOutput = [4, 5, 6];
+      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
+        sampleData,
+        testOutput,
+      );
+      expect(result).toEqual(sampleData);
+    });
+
+    it('should handle array vs object', () => {
+      const sampleData = [1, 2, 3];
+      const testOutput = { foo: 'bar' };
+      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
+        sampleData,
+        testOutput,
+      );
+      expect(result).toEqual(sampleData);
+    });
+
+    it('should handle object vs array', () => {
+      const sampleData = { foo: 'bar' };
+      const testOutput = [1, 2, 3];
+      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
+        sampleData,
+        testOutput,
+      );
+      expect(result).toEqual(sampleData);
+    });
+
+    it('should handle Maps as atomic values', () => {
+      const sampleData = new Map([['key1', 'value1']]);
+      const testOutput = new Map([['key2', 'value2']]);
+      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
+        sampleData,
+        testOutput,
+      );
+      expect(result).toEqual(sampleData);
+    });
+
+    it('should handle Dates as atomic values', () => {
+      const sampleData = new Date('2024-01-01');
+      const testOutput = new Date('2024-02-01');
+      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
+        sampleData,
+        testOutput,
+      );
+      expect(result).toEqual(sampleData);
+    });
+
+    it('should handle Map vs object', () => {
+      const sampleData = new Map([['key1', 'value1']]);
+      const testOutput = { foo: 'bar' };
+      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
+        sampleData,
+        testOutput,
+      );
+      expect(result).toEqual(sampleData);
+    });
+
+    it('should handle Date vs object', () => {
+      const sampleData = new Date('2024-01-01');
+      const testOutput = { foo: 'bar' };
+      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
+        sampleData,
+        testOutput,
+      );
+      expect(result).toEqual(sampleData);
+    });
+
+    it('should handle nested objects with Maps and Dates', () => {
+      const sampleData = {
+        map: new Map([['key1', 'value1']]),
+        date: new Date('2024-01-01'),
+        nested: {
+          map: new Map([['key2', 'value2']]),
+          date: new Date('2024-02-01'),
+        },
+      };
+      const testOutput = {
+        map: new Map([['key3', 'value3']]),
+        date: new Date('2024-03-01'),
+        nested: {
+          map: new Map([['key4', 'value4']]),
+          date: new Date('2024-04-01'),
+          extra: 'value',
+        },
+      };
+      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
+        sampleData,
+        testOutput,
+      );
+      expect(result).toEqual({
+        map: sampleData.map,
+        date: sampleData.date,
+        nested: {
+          map: sampleData.nested.map,
+          date: sampleData.nested.date,
+          extra: 'value',
+        },
+      });
+    });
+  });
 });

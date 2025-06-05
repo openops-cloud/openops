@@ -45,10 +45,13 @@ const DataSelector = ({
     FlagId.USE_NEW_EXTERNAL_TESTDATA,
   );
   const [searchTerm, setSearchTerm] = useState('');
-  const flowVersionId = useBuilderStateContext((state) => state.flowVersion.id);
-  const isDataSelectorVisible = useBuilderStateContext(
-    (state) => state.midpanelState.showDataSelector,
-  );
+  const { flowVersionId, flowVersion, isDataSelectorVisible, midpanelState } =
+    useBuilderStateContext((state) => ({
+      flowVersionId: state.flowVersion.id,
+      flowVersion: state.flowVersion,
+      isDataSelectorVisible: state.midpanelState.showDataSelector,
+      midpanelState: state.midpanelState,
+    }));
 
   const pathToTargetStep = useBuilderStateContext(
     dataSelectorUtils.getPathToTargetStep,
@@ -79,7 +82,18 @@ const DataSelector = ({
     const stepTestOutput: Record<string, StepOutputWithData> = {};
     stepIds.forEach((id) => {
       const cached = stepTestOutputCache.getStepData(id);
-      if (cached) stepTestOutput[id] = cached;
+      const step = pathToTargetStep.find((s) => s.id === id);
+      const sampleData = step?.settings.inputUiInfo?.sampleData;
+
+      if (cached) {
+        stepTestOutput[id] = {
+          ...cached,
+          output: dataSelectorUtils.mergeSampleDataWithTestOutput(
+            sampleData,
+            cached.output,
+          ),
+        };
+      }
     });
     return dataSelectorUtils.getAllStepsMentions(
       pathToTargetStep,
@@ -93,6 +107,7 @@ const DataSelector = ({
     stepIds,
     forceRender,
     initialLoad,
+    flowVersion.trigger.settings.inputUiInfo?.sampleData,
   ]);
 
   // OBSOLETE: This effect is now considered obsolete and only used until flag is removed
@@ -124,7 +139,6 @@ const DataSelector = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchTerm]);
 
-  const midpanelState = useBuilderStateContext((state) => state.midpanelState);
   const filteredMentions = useMemo(
     () => dataSelectorUtils.filterBy(structuredClone(mentions), searchTerm),
     [mentions, searchTerm],
