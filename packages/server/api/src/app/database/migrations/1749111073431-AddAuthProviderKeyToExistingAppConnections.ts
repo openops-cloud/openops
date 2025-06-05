@@ -31,6 +31,11 @@ export class AddAuthProviderKeyToExistingAppConnections1749111073431
         [authProviderKey, record.id],
       );
     }
+
+    await queryRunner.query(`
+      ALTER TABLE "app_connection"
+      ALTER COLUMN "authProviderKey" SET NOT NULL
+    `);
   }
 
   public async down(_: QueryRunner): Promise<void> {
