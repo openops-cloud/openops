@@ -7,7 +7,7 @@ export class AddAuthProviderKeyToExistingAppConnections1749111073431
   name = 'AddAuthProviderKeyToExistingAppConnections1749111073431';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    const providers = await getProviderMetadataForAllBlocks();
+    const providers = await getProvidersMapping();
 
     const records = await queryRunner.query(`
       SELECT "id", "blockName" FROM "app_connection"
@@ -38,18 +38,13 @@ export class AddAuthProviderKeyToExistingAppConnections1749111073431
   }
 }
 
-export async function getProviderMetadataForAllBlocks(): Promise<
-  Record<string, string>
-> {
+async function getProvidersMapping(): Promise<Record<string, string>> {
   const blocks = await fileBlocksUtils.findAllBlocks();
-
   const blockMetadata: Record<string, string> = {};
-
   for (const block of blocks) {
     if (block.auth?.authProviderKey) {
       blockMetadata[block.name] = block.auth?.authProviderKey;
     }
   }
-
   return blockMetadata;
 }
