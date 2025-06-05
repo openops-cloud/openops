@@ -52,6 +52,7 @@ describe('selectRelevantTools', () => {
         tools: emptyTools,
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
+        chatId: 'test-chat-id',
       });
 
       expect(result).toBeUndefined();
@@ -80,6 +81,7 @@ describe('selectRelevantTools', () => {
         tools: mockTools,
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
+        chatId: 'test-chat-id',
       });
 
       expect(result).toEqual(mockTools);
@@ -111,6 +113,7 @@ describe('selectRelevantTools', () => {
         tools: mockTools,
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
+        chatId: 'test-chat-id',
       });
 
       expect(result).toEqual({});
@@ -140,6 +143,7 @@ describe('selectRelevantTools', () => {
         tools: mockTools,
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
+        chatId: 'test-chat-id',
       });
 
       expect(result).toEqual({
@@ -173,6 +177,7 @@ describe('selectRelevantTools', () => {
         tools: mockTools,
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
+        chatId: 'test-chat-id',
       });
 
       expect(result).toEqual({});
@@ -205,6 +210,7 @@ describe('selectRelevantTools', () => {
         tools: mockTools,
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
+        chatId: 'test-chat-id',
       });
 
       expect(result).toEqual({
@@ -239,6 +245,7 @@ describe('selectRelevantTools', () => {
         tools: mockTools,
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
+        chatId: 'test-chat-id',
       });
 
       expect(result).toBeUndefined();
@@ -270,6 +277,7 @@ describe('selectRelevantTools', () => {
         tools: mockTools,
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
+        chatId: 'test-chat-id',
       });
 
       expect(Object.keys(result || {}).length).toBe(128);
@@ -303,6 +311,7 @@ describe('selectRelevantTools', () => {
         tools: mockTools,
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
+        chatId: 'test-chat-id',
       });
 
       expect(result).toEqual(mockTools);
@@ -342,6 +351,7 @@ describe('selectRelevantTools', () => {
         tools: mockTools,
         languageModel: mockLanguageModel,
         aiConfig: aiConfigWithSettings,
+        chatId: 'test-chat-id',
       });
 
       expect(generateObject).toHaveBeenCalledWith(

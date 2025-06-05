@@ -2,6 +2,10 @@ import { logger } from '@openops/server-shared';
 import { AiConfig } from '@openops/shared';
 import { CoreMessage, generateObject, LanguageModel, ToolSet } from 'ai';
 import { z } from 'zod';
+import {
+  shouldTryToSummarize,
+  summarizeChatHistoryContext,
+} from './ai-message-history-summarizer';
 
 const MAX_SELECTED_TOOLS = 128;
 
@@ -15,15 +19,19 @@ const getSystemPrompt = (
 };
 
 export async function selectRelevantTools({
-  messages,
+  chatId,
   tools,
-  languageModel,
+  messages,
   aiConfig,
+  languageModel,
+  attemptIndex = 0,
 }: {
-  messages: CoreMessage[];
+  chatId: string;
   tools: ToolSet;
-  languageModel: LanguageModel;
   aiConfig: AiConfig;
+  messages: CoreMessage[];
+  languageModel: LanguageModel;
+  attemptIndex?: number;
 }): Promise<ToolSet | undefined> {
   if (!tools || Object.keys(tools).length === 0) {
     return undefined;
@@ -64,7 +72,28 @@ export async function selectRelevantTools({
         .slice(0, MAX_SELECTED_TOOLS),
     );
   } catch (error) {
-    logger.error('Error selecting tools', error);
-    return;
+    const errorMessage = error instanceof Error ? error.message : String(error);
+
+    attemptIndex = attemptIndex + 1;
+    if (!shouldTryToSummarize(errorMessage, attemptIndex)) {
+      logger.error('Error selecting tools', error);
+      return;
+    }
+
+    const newHistory = await summarizeChatHistoryContext(
+      languageModel,
+      aiConfig,
+      chatId,
+    );
+
+    logger.debug('Retry the call to selectRelevantTools');
+    return selectRelevantTools({
+      chatId,
+      messages: newHistory,
+      languageModel,
+      aiConfig,
+      tools,
+      attemptIndex,
+    });
   }
 }
