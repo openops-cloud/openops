@@ -5,7 +5,6 @@ import { stepTestOutputHooks } from '../test-step/step-test-output-hooks';
 import { useBuilderStateContext } from '../builder-hooks';
 import { useStepSettingsContext } from '../step-settings/step-settings-context';
 
-// Mock dependencies
 jest.mock('../step-settings/step-settings-context', () => ({
   useStepSettingsContext: jest.fn(),
 }));
@@ -28,7 +27,6 @@ const mockUseBuilderStateContext =
 const mockFlowHelper = flowHelper as jest.Mocked<typeof flowHelper>;
 const mockApplyOperation = jest.fn();
 
-// Minimal test data
 const mockStep = {
   id: 'step-123',
   name: 'test-step',
@@ -124,7 +122,6 @@ describe('stepTestOutputHooks.useSaveSelectedStepSampleData', () => {
       result.current(testSampleData);
     });
 
-    // Verify the request object contains the updated step with new sampleData
     const applyOperationCall = mockApplyOperation.mock.calls[0];
     const operationRequest = applyOperationCall[0];
 
