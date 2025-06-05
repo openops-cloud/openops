@@ -1,7 +1,6 @@
 import { Static, Type } from '@sinclair/typebox';
 import { BaseModel, BaseModelSchema } from '../common/base-model';
 import { OpenOpsId } from '../common/id-generator';
-import { Provider } from './connection-providers';
 import { OAuth2GrantType } from './dto/upsert-app-connection-request';
 import { OAuth2AuthorizationMethod } from './oauth2-authorization-method';
 
@@ -90,7 +89,7 @@ export type AppConnection<Type extends AppConnectionType = AppConnectionType> =
     projectId: string;
     status: AppConnectionStatus;
     value: AppConnectionValue<Type>;
-    provider?: Provider;
+    authProviderKey?: string;
   };
 
 export type OAuth2AppConnection = AppConnection<AppConnectionType.OAUTH2>;
@@ -111,7 +110,7 @@ export const AppConnectionWithoutSensitiveData = Type.Object(
     blockName: Type.String(),
     projectId: OpenOpsId,
     status: Type.Enum(AppConnectionStatus),
-    provider: Type.Optional(Type.Union([Type.Enum(Provider), Type.Null()])),
+    authProviderKey: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   },
   {
     description: 'App connection is a connection to an external app.',

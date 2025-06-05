@@ -1,12 +1,12 @@
+import { BlockAuthProperty } from '@openops/blocks-framework';
 import { logger, system } from '@openops/server-shared';
-import { Provider } from '@openops/shared';
 import { blockMetadataService } from '../blocks/block-metadata-service';
 import { flagService } from '../flags/flag.service';
 
 export async function resolveProvidersForBlocks(
   blockNames: string[],
   projectId: string,
-): Promise<Provider[]> {
+): Promise<string[]> {
   const release = await flagService.getCurrentRelease();
   const edition = system.getEdition();
 
@@ -17,7 +17,7 @@ export async function resolveProvidersForBlocks(
     edition,
   });
 
-  const providers: Provider[] = [];
+  const authProviders: string[] = [];
   const blockMap = new Map(blocks.map((b) => [b.name, b]));
 
   for (const blockName of blockNames) {
@@ -27,26 +27,22 @@ export async function resolveProvidersForBlocks(
       continue;
     }
 
-    const providerId = block.auth?.provider?.id;
-    if (providerId) {
-      providers.push(providerId);
+    const authProviderKey = block.auth?.authProviderKey;
+    if (authProviderKey) {
+      authProviders.push(authProviderKey);
     }
   }
 
-  return [...new Set(providers)];
+  return [...new Set(authProviders)];
 }
 
-type ProviderMetadata = {
-  id: Provider;
-  displayName: string;
-  logoUrl: string;
+type ProviderMetadata = BlockAuthProperty & {
   supportedBlocks: string[];
-  props: unknown;
 };
 
 export async function getProviderMetadataForAllBlocks(
   projectId: string,
-): Promise<Partial<Record<Provider, ProviderMetadata>>> {
+): Promise<Partial<Record<string, ProviderMetadata>>> {
   const blocks = await blockMetadataService.list({
     projectId,
     release: await flagService.getCurrentRelease(),
@@ -54,19 +50,19 @@ export async function getProviderMetadataForAllBlocks(
     edition: system.getEdition(),
   });
 
-  const providerMetadata: Partial<Record<Provider, ProviderMetadata>> = {};
+  const providerMetadata: Partial<Record<string, ProviderMetadata>> = {};
 
   for (const block of blocks) {
-    if (block.auth && block.auth.provider) {
-      const provider = block.auth.provider;
-      providerMetadata[provider.id] ??= {
-        id: provider.id,
-        displayName: provider.displayName,
-        logoUrl: provider.logoUrl,
+    if (block.auth && Object.keys(block.auth).length > 0) {
+      const authProvider = block.auth;
+      providerMetadata[authProvider.authProviderKey] ??= {
+        ...authProvider,
         supportedBlocks: [],
-        props: block.auth ?? {},
       };
-      providerMetadata[provider.id]?.supportedBlocks.push(block.name);
+
+      providerMetadata[authProvider.authProviderKey]?.supportedBlocks.push(
+        block.name,
+      );
     }
   }
 

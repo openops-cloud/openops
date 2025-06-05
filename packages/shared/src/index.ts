@@ -3,8 +3,6 @@ export * from './lib/ai/config';
 export * from './lib/ai/providers';
 export * from './lib/analytics';
 export * from './lib/app-connection/app-connection';
-export * from './lib/app-connection/connection-providers';
-export * from './lib/app-connection/connection-providers-mapping';
 export * from './lib/app-connection/connections-utils';
 export * from './lib/app-connection/dto/patch-app-connection-request';
 export * from './lib/app-connection/dto/read-app-connection-request';
