@@ -28,4 +28,4 @@ else {
   execSync('rm -rf node_modules');
 }
 
-execSync('npm ci');
+execSync('pnpm install');

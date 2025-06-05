@@ -58,5 +58,5 @@ try {
   );
 }
 
-// Execute "npm publish" to publish
-execSync(`npm publish --access public --tag ${tag}`);
+// Execute "pnpm publish" to publish
+execSync(`pnpm publish --access public --tag ${tag}`);

@@ -197,5 +197,5 @@ type LinkParams = {
 };
 
 function getCommandExecutor(command: Command): string {
-  return command === 'tsc' ? 'npx' : 'npm';
+  return command === 'tsc' ? 'npx' : 'pnpm';
 }

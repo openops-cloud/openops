@@ -71,6 +71,22 @@ For detailed documentation, visit our [documentation portal](https://docs.openop
 * [OpenOps Tables](https://docs.openops.com/reporting-analytics/tables)
 * [OpenOps Analytics](https://docs.openops.com/reporting-analytics/data-visualization)
 
+## **🛠️ Development Environment**
+
+### **Package Manager**
+
+OpenOps uses [pnpm](https://pnpm.io/) as its package manager. If you're contributing to the project, please make sure you have pnpm installed globally:
+
+```bash
+npm install -g pnpm
+```
+
+When cloning the repository, use pnpm to install dependencies:
+
+```bash
+pnpm install
+```
+
 ## **🤝 Contributing**
 
 We welcome contributions to OpenOps\! See our [contributing guide](./CONTRIBUTING.md) for details.

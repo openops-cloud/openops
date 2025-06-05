@@ -81,13 +81,13 @@ RUN <<-```
     npm config --global set cache /tmp/.npm/_cache
     npm config --global set logs-dir /tmp/.npm/_logs
     cd codes && npm init -y && npm i @tsconfig/node20@20.1.4 @types/node@20.14.8 typescript@5.6.3
-    npm install -g node-gyp npm@9.3.1 cross-env@7.0.3
+    npm install -g node-gyp npm@9.3.1 cross-env@7.0.3 pnpm@10.0.0
 ```
 
 ENV PATH=/tmp/npm-global:$PATH
 
-COPY --link package.json package-lock.json .npmrc ./
-RUN npm ci --no-audit --no-fund
+COPY --link package.json pnpm-lock.yaml .npmrc ./
+RUN pnpm install --no-frozen-lockfile --no-fund
 COPY --link dist/packages/engine .
 COPY --link dist dist
 
