@@ -180,6 +180,7 @@ export const system = {
   },
   calculateConfigurationHash(): string {
     const props = Object.keys(SharedSystemProp)
+      .sort()
       .map((key) => `${key}=${system.get(key as SystemProp)}`)
       .join(';');
     return crypto

@@ -213,7 +213,6 @@ export const amazonAuth = BlockAuth.CustomAuth({
   },
   required: true,
   validate: async ({ auth }) => {
-    logger.debug('Validating Amazon Auth', auth);
     if (!auth.defaultRegion) {
       return { valid: false, error: 'Default region is required' };
     }
