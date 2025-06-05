@@ -13,6 +13,7 @@ import {
 } from '@openops/components/ui';
 import {
   AppConnectionWithoutSensitiveData,
+  FlagId,
   flowHelper,
   isNil,
   Trigger,
@@ -43,6 +44,10 @@ const ConnectionsPicker = ({
   close,
   onUseTemplate,
 }: ConnectionsPickerProps) => {
+  const { data: useConnectionsProvider } = flagsHooks.useFlag<boolean>(
+    FlagId.USE_CONNECTIONS_PROVIDER,
+  );
+
   const [selectedBlockMetadata, setSelectedBlockMetadata] =
     useState<BlockMetadataModelSummary | null>(null);
   const [selectedConnections, setSelectedConnections] = useState<{
@@ -68,10 +73,13 @@ const ConnectionsPicker = ({
     data: groupedConnections,
     isLoading,
     refetch,
-  } = appConnectionsHooks.useGroupedConnections({
-    blockNames: integrations.map((integration) => integration.name),
-    limit: 10000,
-  });
+  } = appConnectionsHooks.useGroupedConnections(
+    {
+      blockNames: integrations.map((integration) => integration.name),
+      limit: 10000,
+    },
+    useConnectionsProvider ?? false,
+  );
 
   useEffect(() => {
     if (
