@@ -107,7 +107,6 @@ const DataSelector = ({
     stepIds,
     forceRender,
     initialLoad,
-    flowVersion.trigger.settings.inputUiInfo?.sampleData,
   ]);
 
   // OBSOLETE: This effect is now considered obsolete and only used until flag is removed
