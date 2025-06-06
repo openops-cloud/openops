@@ -32,6 +32,7 @@ const AiAssistantChat = ({
   className,
 }: AiAssistantChatProps) => {
   const lastUserMessageRef = useRef<HTMLDivElement>(null);
+  const lastAssistantMessageRef = useRef<HTMLDivElement>(null);
   const {
     isAiChatOpened,
     setIsAiChatOpened,
@@ -146,6 +147,7 @@ const AiAssistantChat = ({
       messages={messages.map((m) => ({ id: m.id, role: m.role }))}
       status={status}
       lastUserMessageRef={lastUserMessageRef}
+      lastAssistantMessageRef={lastAssistantMessageRef}
     >
       <AiAssistantConversation
         messages={messages}
@@ -153,6 +155,7 @@ const AiAssistantChat = ({
         isPending={isOpenAiChatPending}
         parentHeight={sizes.current.height}
         lastUserMessageRef={lastUserMessageRef}
+        lastAssistantMessageRef={lastAssistantMessageRef}
       />
     </AiAssistantChatContainer>
   );

@@ -8,6 +8,37 @@ type AIChatMessagesProps = {
   onInject?: (code: string) => void;
   codeVariation?: MarkdownCodeVariations;
   lastUserMessageRef?: React.RefObject<HTMLDivElement>;
+  lastAssistantMessageRef?: React.RefObject<HTMLDivElement>;
+};
+
+const getMessageRef = (
+  message: AIChatMessage,
+  messageIndex: number,
+  messages: AIChatMessage[],
+  lastUserMessageRef?: React.RefObject<HTMLDivElement>,
+  lastAssistantMessageRef?: React.RefObject<HTMLDivElement>,
+) => {
+  if (!lastUserMessageRef || !lastAssistantMessageRef) {
+    return undefined;
+  }
+
+  const lastUserMessageIndex = messages.map((m) => m.role).lastIndexOf('user');
+  const lastAssistantMessageIndex = messages
+    .map((m) => m.role)
+    .lastIndexOf('assistant');
+
+  if (message.role === 'user' && messageIndex === lastUserMessageIndex) {
+    return lastUserMessageRef;
+  }
+
+  if (
+    message.role === 'assistant' &&
+    messageIndex === lastAssistantMessageIndex
+  ) {
+    return lastAssistantMessageRef;
+  }
+
+  return undefined;
 };
 
 const AIChatMessages = forwardRef<HTMLDivElement, AIChatMessagesProps>(
@@ -17,24 +48,25 @@ const AIChatMessages = forwardRef<HTMLDivElement, AIChatMessagesProps>(
       onInject,
       codeVariation = MarkdownCodeVariations.WithCopyMultiline,
       lastUserMessageRef,
+      lastAssistantMessageRef,
     },
     ref,
   ) => {
-    const lastUserIdx = messages.map((m) => m.role).lastIndexOf('user');
-    // console.log('lastUserIdx', lastUserIdx);
     return (
       <div className="p-4 my-3 flex flex-col" ref={ref}>
-        {messages.map((message, idx) => (
+        {messages.map((message, index) => (
           <Message
             key={message.id}
             message={message}
             onInject={onInject}
             codeVariation={codeVariation}
-            ref={
-              message.role === 'user' && idx === lastUserIdx
-                ? lastUserMessageRef
-                : undefined
-            }
+            ref={getMessageRef(
+              message,
+              index,
+              messages,
+              lastUserMessageRef,
+              lastAssistantMessageRef,
+            )}
           />
         ))}
       </div>

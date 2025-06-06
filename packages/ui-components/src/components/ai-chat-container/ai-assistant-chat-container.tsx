@@ -26,6 +26,7 @@ type AiAssistantChatContainerProps = {
   messages?: { id: string; role: string }[];
   status?: string;
   lastUserMessageRef: React.RefObject<HTMLDivElement>;
+  lastAssistantMessageRef: React.RefObject<HTMLDivElement>;
 } & Pick<UseChatHelpers, 'input' | 'handleInputChange' | 'handleSubmit'> &
   AiModelSelectorProps;
 
@@ -36,6 +37,20 @@ export const PARENT_MAX_HEIGHT_GAP = 95;
 const getLastUserMessageId = (messages: { id: string; role: string }[]) => {
   const lastUserIndex = messages.map((m) => m.role).lastIndexOf('user');
   return lastUserIndex !== -1 ? messages[lastUserIndex].id : null;
+};
+
+const getBufferAreaHeight = (
+  height: number,
+  currentBufferAreaHeight: number,
+  lastUserMsgHeight: number,
+  lastAssistantMsgHeight: number,
+  status?: string,
+) => {
+  if (['streaming', 'submitted'].includes(status ?? '')) {
+    return Math.floor(Math.max(0, height - lastUserMsgHeight - 240));
+  }
+
+  return currentBufferAreaHeight - lastAssistantMsgHeight;
 };
 
 const AiAssistantChatContainer = ({
@@ -60,6 +75,7 @@ const AiAssistantChatContainer = ({
   isModelSelectorLoading,
   status,
   lastUserMessageRef,
+  lastAssistantMessageRef,
 }: AiAssistantChatContainerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollViewportRef = useRef<HTMLDivElement>(null);
@@ -75,7 +91,7 @@ const AiAssistantChatContainer = ({
       const lastUserIndex = messages.map((m) => m.role).lastIndexOf('user');
       if (
         lastUserIndex !== -1 &&
-        lastUserMessageId.current !== messages[lastUserIndex].id
+        lastUserMessageId?.current !== messages[lastUserIndex].id
       ) {
         lastUserMessageId.current = messages[lastUserIndex].id;
         streamingEndRef.current?.scrollIntoView({
@@ -104,10 +120,17 @@ const AiAssistantChatContainer = ({
 
   const height = dimensions.height ?? 0;
   const lastMsgHeight = lastUserMessageRef.current?.offsetHeight ?? 0;
-  const bufferAreaHeight =
-    status === 'streaming' || status === 'submitted'
-      ? Math.floor(Math.max(0, height - lastMsgHeight - 240))
-      : 20;
+  const currentBufferAreaHeight = streamingEndRef.current?.offsetHeight ?? 0;
+  const lastAssistantMsgHeight =
+    lastAssistantMessageRef?.current?.offsetHeight ?? 0;
+
+  const bufferAreaHeight = getBufferAreaHeight(
+    height,
+    currentBufferAreaHeight,
+    lastMsgHeight,
+    lastAssistantMsgHeight,
+    status,
+  );
 
   return (
     <div

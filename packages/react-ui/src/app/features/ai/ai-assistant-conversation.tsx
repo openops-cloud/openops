@@ -14,6 +14,7 @@ type AiAssistantConversationnProps = {
   messages: MessageType[];
   parentHeight: number;
   lastUserMessageRef: React.RefObject<HTMLDivElement>;
+  lastAssistantMessageRef: React.RefObject<HTMLDivElement>;
 } & Pick<UseChatHelpers, 'status'>;
 
 const ChatStatus = {
@@ -26,6 +27,7 @@ const AiAssistantConversation = ({
   status,
   isPending,
   lastUserMessageRef,
+  lastAssistantMessageRef,
 }: AiAssistantConversationnProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -52,6 +54,7 @@ const AiAssistantConversation = ({
         messages={uiMessages}
         codeVariation={MarkdownCodeVariations.WithCopyMultiline}
         lastUserMessageRef={lastUserMessageRef}
+        lastAssistantMessageRef={lastAssistantMessageRef}
       />
       {[ChatStatus.STREAMING, ChatStatus.SUBMITTED].includes(status) && (
         <LoadingSpinner />
