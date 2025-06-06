@@ -173,7 +173,10 @@ const createTestNode = (
   step: Action | Trigger,
   displayName: string,
 ): MentionTreeNode => {
-  const hasSampleData = !!step.settings.inputUiInfo?.sampleData;
+  const sampleData = step.settings?.inputUiInfo?.sampleData;
+  const hasSampleData =
+    !isNil(sampleData) &&
+    (typeof sampleData !== 'object' || Object.keys(sampleData).length > 0);
   if (hasSampleData) {
     return traverseStepOutputAndReturnMentionTree({
       stepOutput: step.settings.inputUiInfo.sampleData,

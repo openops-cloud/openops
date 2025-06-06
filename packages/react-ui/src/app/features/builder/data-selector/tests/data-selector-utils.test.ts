@@ -203,6 +203,118 @@ describe('dataSelectorUtils', () => {
       expect(node.children?.[0].data.propertyPath).toBe('triggerStep');
       expect(node.children?.[0].key).toBe('test_triggerStep');
     });
+
+    it('uses traverseStepOutputAndReturnMentionTree when step has sample data', () => {
+      const step = {
+        name: 'actionStep',
+        displayName: 'Action Step',
+        settings: {
+          inputUiInfo: {
+            sampleData: { foo: 'bar' },
+          },
+        },
+      };
+      const displayName = '1. Action Step';
+      const node = dataSelectorUtils.createTestNode(step as any, displayName);
+
+      expect(node.children?.[0]?.data.isTestStepNode).toBeUndefined();
+
+      expect(node.key).toBe('actionStep');
+      expect(node.data.displayName).toBe(displayName);
+      expect(node.data.propertyPath).toBe('actionStep');
+      expect(node.children).toHaveLength(1);
+      expect(node.children?.[0].key).toBe("actionStep['foo']");
+      expect(node.children?.[0].data.propertyPath).toBe("actionStep['foo']");
+      expect(node.children?.[0].data.value).toBe('bar');
+    });
+
+    it('creates test node when step has empty sample data object', () => {
+      const step = {
+        name: 'actionStep',
+        displayName: 'Action Step',
+        settings: {
+          inputUiInfo: {
+            sampleData: {},
+          },
+        },
+      };
+      const displayName = '1. Action Step';
+      const node = dataSelectorUtils.createTestNode(step as any, displayName);
+
+      expect(node.key).toBe('actionStep');
+      expect(node.data.displayName).toBe(displayName);
+      expect(node.data.propertyPath).toBe('actionStep');
+      expect(node.children).toHaveLength(1);
+      expect(node.children?.[0].data.isTestStepNode).toBe(true);
+      expect(node.children?.[0].data.displayName).toBe(displayName);
+      expect(node.children?.[0].data.propertyPath).toBe('actionStep');
+      expect(node.children?.[0].key).toBe('test_actionStep');
+    });
+
+    it('creates test node when step has null sample data', () => {
+      const step = {
+        name: 'actionStep',
+        displayName: 'Action Step',
+        settings: {
+          inputUiInfo: {
+            sampleData: null,
+          },
+        },
+      };
+      const displayName = '1. Action Step';
+      const node = dataSelectorUtils.createTestNode(step as any, displayName);
+
+      expect(node.key).toBe('actionStep');
+      expect(node.data.displayName).toBe(displayName);
+      expect(node.data.propertyPath).toBe('actionStep');
+      expect(node.children).toHaveLength(1);
+      expect(node.children?.[0].data.isTestStepNode).toBe(true);
+      expect(node.children?.[0].data.displayName).toBe(displayName);
+      expect(node.children?.[0].data.propertyPath).toBe('actionStep');
+      expect(node.children?.[0].key).toBe('test_actionStep');
+    });
+
+    it('creates test node when step has undefined sample data', () => {
+      const step = {
+        name: 'actionStep',
+        displayName: 'Action Step',
+        settings: {
+          inputUiInfo: {
+            sampleData: undefined,
+          },
+        },
+      };
+      const displayName = '1. Action Step';
+      const node = dataSelectorUtils.createTestNode(step as any, displayName);
+
+      expect(node.key).toBe('actionStep');
+      expect(node.data.displayName).toBe(displayName);
+      expect(node.data.propertyPath).toBe('actionStep');
+      expect(node.children).toHaveLength(1);
+      expect(node.children?.[0].data.isTestStepNode).toBe(true);
+      expect(node.children?.[0].data.displayName).toBe(displayName);
+      expect(node.children?.[0].data.propertyPath).toBe('actionStep');
+      expect(node.children?.[0].key).toBe('test_actionStep');
+    });
+
+    it('creates test node when step has no inputUiInfo', () => {
+      const step = {
+        name: 'actionStep',
+        displayName: 'Action Step',
+        settings: {},
+      };
+      const displayName = '1. Action Step';
+      const node = dataSelectorUtils.createTestNode(step as any, displayName);
+
+      expect(node.key).toBe('actionStep');
+      expect(node.data.displayName).toBe(displayName);
+      expect(node.data.propertyPath).toBe('actionStep');
+      expect(node.children).toHaveLength(1);
+      expect(node.children?.[0].data.isTestStepNode).toBe(true);
+      expect(node.children?.[0].data.displayName).toBe(displayName);
+      expect(node.children?.[0].data.propertyPath).toBe('actionStep');
+      expect(node.children?.[0].key).toBe('test_actionStep');
+    });
   });
 
   describe('filterBy', () => {
