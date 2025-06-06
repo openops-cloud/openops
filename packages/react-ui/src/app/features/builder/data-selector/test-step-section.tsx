@@ -13,10 +13,8 @@ export const TestStepSection = ({ stepName }: { stepName: string }) => {
     <div className="flex flex-col gap-3 select-none text-center px-12 py-10 flex-grow items-center justify-center ">
       <div>
         {isTrigger
-          ? t(
-              'This trigger needs to have data loaded from your account, to use as sample data.',
-            )
-          : t('This step needs to be tested in order to view its data.')}
+          ? t('This trigger needs to have data loaded.')
+          : t('This step needs to have data loaded.')}
       </div>
       <div>
         <Button
