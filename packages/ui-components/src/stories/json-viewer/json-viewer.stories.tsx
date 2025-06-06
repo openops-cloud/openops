@@ -108,3 +108,13 @@ export const EmptyJson: Story = {
     title: 'Empty JSON',
   },
 };
+
+/**
+ * The JSON viewer displaying a file URL with a download button.
+ */
+export const FileButton: Story = {
+  args: {
+    json: 'file://path/to/example.json',
+    title: 'File Download Example',
+  },
+};
