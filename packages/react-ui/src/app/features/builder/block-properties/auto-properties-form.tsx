@@ -9,6 +9,7 @@ import {
   FormControl,
   FormField,
   Input,
+  JsonEditor,
   Markdown,
   Switch,
 } from '@openops/components/ui';
@@ -17,9 +18,9 @@ import { t } from 'i18next';
 import React from 'react';
 import { ControllerRenderProps, useFormContext } from 'react-hook-form';
 
-import { JsonEditor } from '@/app/common/components/json-editior';
 import { SearchableSelect } from '@/app/common/components/searchable-select';
 
+import { useTheme } from '@/app/common/providers/theme-provider';
 import { AlertError } from './alert-error';
 import { ArrayBlockProperty } from './array-property';
 import { AutoFormFieldWrapper } from './auto-form-field-wrapper';
@@ -50,6 +51,7 @@ const AutoPropertiesFormComponent = React.memo(
     useMentionTextInput,
   }: AutoFormProps) => {
     const form = useFormContext();
+    const { theme } = useTheme();
 
     return (
       <div className="flex flex-col gap-4 w-full">
@@ -70,6 +72,7 @@ const AutoPropertiesFormComponent = React.memo(
                   markdownVariables: markdownVariables ?? {},
                   useMentionTextInput: useMentionTextInput,
                   disabled: disabled ?? false,
+                  theme,
                 })
               }
             />
@@ -89,6 +92,7 @@ type selectFormComponentForPropertyParams = {
   markdownVariables: Record<string, string>;
   useMentionTextInput: boolean;
   disabled: boolean;
+  theme?: string;
 };
 
 const selectFormComponentForProperty = ({
@@ -100,6 +104,7 @@ const selectFormComponentForProperty = ({
   markdownVariables,
   useMentionTextInput,
   disabled,
+  theme,
 }: selectFormComponentForPropertyParams) => {
   switch (property.type) {
     case PropertyType.ARRAY:
@@ -209,7 +214,11 @@ const selectFormComponentForProperty = ({
               disabled={disabled}
             ></BuilderJsonEditorWrapper>
           ) : (
-            <JsonEditor field={field} readonly={disabled}></JsonEditor>
+            <JsonEditor
+              field={field}
+              readonly={disabled}
+              theme={theme}
+            ></JsonEditor>
           )}
         </AutoFormFieldWrapper>
       );

@@ -144,6 +144,9 @@ export const WithMessages: Story = {
   args: {
     isEmpty: false,
   },
+  parameters: {
+    chromatic: { delay: 1000 },
+  },
   render: (args) => {
     const {
       aiChatSize,
@@ -174,6 +177,9 @@ export const WithMessages: Story = {
 export const WithMessagesCopyAndInject: Story = {
   args: {
     isEmpty: false,
+  },
+  parameters: {
+    chromatic: { delay: 500 },
   },
   render: (args) => {
     const {

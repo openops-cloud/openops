@@ -99,12 +99,6 @@ export const validationUtils = {
   },
 };
 
-export const isStepFileUrl = (json: unknown): json is string => {
-  return (
-    Boolean(json) && typeof json === 'string' && json.startsWith('file://')
-  );
-};
-
 export const isValidISODate = (dateString: string) => {
   const parsedDate = parseISO(dateString);
   return isValid(parsedDate);

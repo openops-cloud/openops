@@ -199,13 +199,18 @@ const ListBlocksRequest = {
   },
   schema: {
     querystring: ListBlocksRequestQuery,
+    description:
+      'List all available blocks with filtering and sorting options. This endpoint retrieves a paginated list of blocks that can be used in flows, including both official and custom blocks. Supports filtering by release version, tags, categories, and block type.',
   },
 };
+
 const GetBlockParamsRequest = {
   config: {
     allowedPrincipals: ALL_PRINCIPAL_TYPES,
   },
   schema: {
+    description:
+      'Retrieve detailed information about a specific block by its name. This endpoint returns the complete block metadata including its configuration, actions, triggers, and properties. Optionally specify a version to get historical block data or check compatibility.',
     params: GetBlockRequestParams,
     querystring: GetBlockRequestQuery,
   },
@@ -216,6 +221,8 @@ const GetBlockParamsWithScopeRequest = {
     allowedPrincipals: ALL_PRINCIPAL_TYPES,
   },
   schema: {
+    description:
+      'Retrieve detailed information about a scoped block (e.g., custom blocks). This endpoint returns the complete block metadata for blocks that belong to a specific scope or namespace. Useful for accessing custom blocks or blocks from specific organizations.',
     params: GetBlockRequestWithScopeParams,
     querystring: GetBlockRequestQuery,
   },
@@ -226,17 +233,24 @@ const ListCategoriesRequest = {
     allowedPrincipals: ALL_PRINCIPAL_TYPES,
   },
   schema: {
+    description:
+      'Retrieve all available block categories with filtering options. This endpoint returns a list of predefined categories that can be used to organize and filter blocks in the system. Supports filtering by release version, edition, and block type.',
     querystring: ListBlocksRequestQuery,
   },
 };
 
 const OptionsBlockRequest = {
   schema: {
+    description:
+      'Execute a block option or property to retrieve dynamic configuration options. This endpoint is used to fetch dynamic values, validate inputs, or get suggestions based on the current block configuration and flow context. Essential for building dynamic block configurations.',
     body: BlockOptionRequest,
   },
 };
+
 const DeleteBlockRequest = {
   schema: {
+    description:
+      'Delete a custom block from the system. This endpoint permanently removes a block and its associated metadata. This operation cannot be undone and will affect any flows using this block. Use with caution as it may impact existing flows.',
     params: Type.Object({
       id: Type.String(),
     }),
@@ -248,6 +262,8 @@ const ListVersionsRequest = {
     allowedPrincipals: ALL_PRINCIPAL_TYPES,
   },
   schema: {
+    description:
+      'Retrieve version history for blocks. This endpoint returns a list of available versions for a specific block, including release information and compatibility details. Useful for tracking block evolution, managing updates, and ensuring compatibility with your flows.',
     querystring: ListVersionRequestQuery,
   },
 };
@@ -255,5 +271,9 @@ const ListVersionsRequest = {
 const SyncBlocksRequest = {
   config: {
     allowedPrincipals: [PrincipalType.USER],
+  },
+  schema: {
+    description:
+      'Synchronize blocks with the registry. This endpoint updates the local block registry with the latest versions and configurations from the remote registry. Ensures your system has access to the most recent block updates and security patches.',
   },
 };
