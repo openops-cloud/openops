@@ -1,8 +1,8 @@
 import { BlockIcon, Button } from '@openops/components/ui';
 import { t } from 'i18next';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, CircleAlert } from 'lucide-react';
 
-import { flowHelper } from '@openops/shared';
+import { flowHelper, isNil } from '@openops/shared';
 
 import { useRipple } from '../../../common/providers/theme-provider';
 import { blocksHooks } from '../../blocks/lib/blocks-hook';
@@ -60,6 +60,11 @@ const DataSelectorNodeContent = ({
     );
   const showNodeValue = !node.children && !!node.data.value;
 
+  const sampleData = step?.settings?.inputUiInfo?.sampleData;
+  const hasSampleData =
+    !isNil(sampleData) &&
+    (typeof sampleData !== 'object' || Object.keys(sampleData).length > 0);
+
   return (
     <div
       tabIndex={0}
@@ -75,7 +80,7 @@ const DataSelectorNodeContent = ({
       }}
       className="w-full max-w-full select-none focus:outline-none hover:bg-accent focus:bg-accent focus:bg-opacity-75 hover:bg-opacity-75 cursor-pointer group"
     >
-      <div className="flex-grow  max-w-full flex items-center gap-2 min-h-[48px] pr-3 select-none">
+      <div className="flex-grow max-w-full flex items-center gap-2 min-h-[48px] pr-3 select-none">
         <div
           style={{
             minWidth: `${depth * 25 + (depth === 0 ? 0 : 25) + 18}px`,
@@ -93,8 +98,10 @@ const DataSelectorNodeContent = ({
             ></BlockIcon>
           </div>
         )}
-        <div className=" truncate">{node.data.displayName}</div>
-
+        <div className="truncate">{node.data.displayName}</div>
+        {hasSampleData && (
+          <CircleAlert className="min-w-4 w-4 h-4 text-warning-200" />
+        )}
         {showNodeValue && (
           <>
             <div className="flex-shrink-0">:</div>
@@ -107,7 +114,7 @@ const DataSelectorNodeContent = ({
         <div className="ml-auto flex flex-shrink-0 gap-2 items-center">
           {showInsertButton && (
             <Button
-              className="z-50 hover:opacity-100 opacity-0 p-0  w-0 group-hover:w-full group-hover:p-1  group-hover:opacity-100 focus:opacity-100"
+              className="z-50 hover:opacity-100 opacity-0 p-0 w-0 group-hover:w-full group-hover:p-1 group-hover:opacity-100 focus:opacity-100"
               variant="basic"
               size="sm"
               onClick={(e) => {
