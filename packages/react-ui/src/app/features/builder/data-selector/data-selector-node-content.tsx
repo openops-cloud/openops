@@ -8,7 +8,7 @@ import { useRipple } from '../../../common/providers/theme-provider';
 import { blocksHooks } from '../../blocks/lib/blocks-hook';
 import { useBuilderStateContext } from '../builder-hooks';
 
-import { MentionTreeNode } from './data-selector-utils';
+import { dataSelectorUtils, MentionTreeNode } from './data-selector-utils';
 
 const ToggleIcon = ({ expanded }: { expanded: boolean }) => {
   const toggleIconSize = 15;
@@ -60,10 +60,7 @@ const DataSelectorNodeContent = ({
     );
   const showNodeValue = !node.children && !!node.data.value;
 
-  const sampleData = step?.settings?.inputUiInfo?.sampleData;
-  const hasSampleData =
-    !isNil(sampleData) &&
-    (typeof sampleData !== 'object' || Object.keys(sampleData).length > 0);
+  const stepHasSampleData = dataSelectorUtils.hasStepSampleData(step);
 
   return (
     <div
@@ -99,7 +96,7 @@ const DataSelectorNodeContent = ({
           </div>
         )}
         <div className="truncate">{node.data.displayName}</div>
-        {hasSampleData && (
+        {stepHasSampleData && (
           <TooltipWrapper
             tooltipText={t('Step contains sample data')}
             tooltipPlacement="bottom"

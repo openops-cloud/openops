@@ -169,15 +169,19 @@ const getAllStepsMentions = (
   });
 };
 
+const hasStepSampleData = (step: Action | Trigger | undefined) => {
+  const sampleData = step?.settings?.inputUiInfo?.sampleData;
+  return (
+    !isNil(sampleData) &&
+    (typeof sampleData !== 'object' || Object.keys(sampleData).length > 0)
+  );
+};
+
 const createTestNode = (
   step: Action | Trigger,
   displayName: string,
 ): MentionTreeNode => {
-  const sampleData = step.settings?.inputUiInfo?.sampleData;
-  const hasSampleData =
-    !isNil(sampleData) &&
-    (typeof sampleData !== 'object' || Object.keys(sampleData).length > 0);
-  if (hasSampleData) {
+  if (hasStepSampleData(step)) {
     return traverseStepOutputAndReturnMentionTree({
       stepOutput: step.settings.inputUiInfo.sampleData,
       propertyPath: step.name,
@@ -387,4 +391,5 @@ export const dataSelectorUtils = {
   getPathToTargetStep,
   getAllStepsMentionsFromCurrentSelectedData,
   mergeSampleDataWithTestOutput,
+  hasStepSampleData,
 };
