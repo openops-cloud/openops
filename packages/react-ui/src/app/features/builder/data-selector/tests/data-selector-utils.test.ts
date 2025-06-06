@@ -651,5 +651,211 @@ describe('dataSelectorUtils', () => {
       });
       expect(result.usedSampleData).toBe(false);
     });
+
+    it('merges deeply nested objects (5 levels deep)', () => {
+      const sampleData = {
+        level1: {
+          level2: {
+            level3: {
+              level4: {
+                level5: {
+                  value: 'sample',
+                  extra: 'sample-extra',
+                },
+              },
+            },
+          },
+        },
+      };
+      const testOutput = {
+        level1: {
+          level2: {
+            level3: {
+              level4: {
+                level5: {
+                  value: 'test',
+                  testExtra: 'test-value',
+                },
+              },
+            },
+          },
+        },
+      };
+      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
+        sampleData,
+        testOutput,
+      );
+      expect(result.data).toEqual({
+        level1: {
+          level2: {
+            level3: {
+              level4: {
+                level5: {
+                  value: 'sample',
+                  extra: 'sample-extra',
+                  testExtra: 'test-value',
+                },
+              },
+            },
+          },
+        },
+      });
+      expect(result.usedSampleData).toBe(true);
+    });
+
+    it('preserves test output keys not present in sample data', () => {
+      const sampleData = {
+        foo: {
+          bar: 'sample',
+        },
+      };
+      const testOutput = {
+        foo: {
+          bar: 'test',
+          extra: 'test-value',
+        },
+        rootExtra: 'root-value',
+      };
+      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
+        sampleData,
+        testOutput,
+      );
+      expect(result.data).toEqual({
+        foo: {
+          bar: 'sample',
+          extra: 'test-value',
+        },
+        rootExtra: 'root-value',
+      });
+      expect(result.usedSampleData).toBe(true);
+    });
+
+    it('uses test output for empty objects in sample data', () => {
+      const sampleData = {
+        empty: {},
+        nested: {
+          empty: {},
+        },
+      };
+      const testOutput = {
+        empty: { value: 'test' },
+        nested: {
+          empty: { value: 'test' },
+        },
+      };
+      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
+        sampleData,
+        testOutput,
+      );
+      expect(result.data).toEqual({
+        empty: { value: 'test' },
+        nested: {
+          empty: { value: 'test' },
+        },
+      });
+      expect(result.usedSampleData).toBe(false);
+    });
+
+    it('uses test output for empty arrays in sample data', () => {
+      const sampleData = {
+        empty: [],
+        nested: {
+          empty: [],
+        },
+      };
+      const testOutput = {
+        empty: [1, 2, 3],
+        nested: {
+          empty: [4, 5, 6],
+        },
+      };
+      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
+        sampleData,
+        testOutput,
+      );
+      expect(result.data).toEqual({
+        empty: [1, 2, 3],
+        nested: {
+          empty: [4, 5, 6],
+        },
+      });
+      expect(result.usedSampleData).toBe(false);
+    });
+
+    it('uses test output when sample data has undefined values in nested structure', () => {
+      const sampleData = {
+        level1: {
+          level2: {
+            value: undefined,
+            nested: {
+              value: undefined,
+            },
+          },
+        },
+      };
+      const testOutput = {
+        level1: {
+          level2: {
+            value: 'test-value',
+            nested: {
+              value: 'nested-test-value',
+            },
+          },
+        },
+      };
+      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
+        sampleData,
+        testOutput,
+      );
+      expect(result.data).toEqual({
+        level1: {
+          level2: {
+            value: 'test-value',
+            nested: {
+              value: 'nested-test-value',
+            },
+          },
+        },
+      });
+      expect(result.usedSampleData).toBe(false);
+    });
+
+    it('handles mixed undefined and defined values in nested structure', () => {
+      const sampleData = {
+        level1: {
+          defined: 'sample-value',
+          undefined: undefined,
+          nested: {
+            defined: 'nested-sample',
+            undefined: undefined,
+          },
+        },
+      };
+      const testOutput = {
+        level1: {
+          defined: 'test-value',
+          undefined: 'test-undefined',
+          nested: {
+            defined: 'nested-test',
+            undefined: 'nested-test-undefined',
+          },
+        },
+      };
+      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
+        sampleData,
+        testOutput,
+      );
+      expect(result.data).toEqual({
+        level1: {
+          defined: 'sample-value',
+          undefined: 'test-undefined',
+          nested: {
+            defined: 'nested-sample',
+            undefined: 'nested-test-undefined',
+          },
+        },
+      });
+      expect(result.usedSampleData).toBe(true);
+    });
   });
 });

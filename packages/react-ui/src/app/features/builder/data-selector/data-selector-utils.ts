@@ -298,6 +298,10 @@ const isAtomicValue = (value: unknown): boolean => {
   );
 };
 
+const isEmptyArray = (value: unknown): boolean => {
+  return Array.isArray(value) && value.length === 0;
+};
+
 type MergedOutput = {
   data: unknown;
   usedSampleData: boolean;
@@ -309,6 +313,7 @@ type MergedOutput = {
  * If test output is not an object, sample data will be used if it exists.
  * Handles nested objects by recursively merging them.
  * Arrays, Maps, and Dates are treated as atomic values - sample data takes precedence.
+ * Empty arrays in sample data are replaced with test output arrays.
  * Primitives are treated as atomic values - sample data takes precedence.
  * Returns an object containing the merged data and a flag indicating whether sample data was used.
  */
@@ -316,6 +321,14 @@ const mergeSampleDataWithTestOutput = (
   sampleData: unknown,
   testOutput: unknown,
 ): MergedOutput => {
+  // Handle empty arrays in sample data
+  if (isEmptyArray(sampleData) && Array.isArray(testOutput)) {
+    return {
+      data: testOutput,
+      usedSampleData: false,
+    };
+  }
+
   if (isAtomicValue(sampleData) || isAtomicValue(testOutput)) {
     return {
       data: sampleData ?? testOutput,
@@ -332,6 +345,9 @@ const mergeSampleDataWithTestOutput = (
         const merged = mergeSampleDataWithTestOutput(value, testOutput[key]);
         result[key] = merged.data;
         usedSampleData = usedSampleData || merged.usedSampleData;
+      } else if (isEmptyArray(value) && Array.isArray(testOutput[key])) {
+        result[key] = testOutput[key];
+        usedSampleData = false;
       } else if (value !== undefined) {
         result[key] = value;
         usedSampleData = true;
