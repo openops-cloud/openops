@@ -46,11 +46,17 @@ const getBufferAreaHeight = (
   lastAssistantMsgHeight: number,
   status?: string,
 ) => {
+  if (status === 'ready') {
+    return currentBufferAreaHeight;
+  }
+
   if (['streaming', 'submitted'].includes(status ?? '')) {
     return Math.floor(Math.max(0, height - lastUserMsgHeight - 240));
   }
 
-  return currentBufferAreaHeight - lastAssistantMsgHeight;
+  return Math.floor(
+    Math.max(32, currentBufferAreaHeight - lastAssistantMsgHeight),
+  );
 };
 
 const AiAssistantChatContainer = ({
@@ -109,7 +115,7 @@ const AiAssistantChatContainer = ({
         if (scrollViewportRef.current) {
           scrollViewportRef.current.scrollTo({
             top: scrollViewportRef.current.scrollHeight,
-            behavior: 'smooth',
+            behavior: 'instant',
           });
           hasAutoScrolled.current = true;
         }

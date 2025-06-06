@@ -11,36 +11,6 @@ type AIChatMessagesProps = {
   lastAssistantMessageRef?: React.RefObject<HTMLDivElement>;
 };
 
-const getMessageRef = (
-  message: AIChatMessage,
-  messageIndex: number,
-  messages: AIChatMessage[],
-  lastUserMessageRef?: React.RefObject<HTMLDivElement>,
-  lastAssistantMessageRef?: React.RefObject<HTMLDivElement>,
-) => {
-  if (!lastUserMessageRef || !lastAssistantMessageRef) {
-    return undefined;
-  }
-
-  const lastUserMessageIndex = messages.map((m) => m.role).lastIndexOf('user');
-  const lastAssistantMessageIndex = messages
-    .map((m) => m.role)
-    .lastIndexOf('assistant');
-
-  if (message.role === 'user' && messageIndex === lastUserMessageIndex) {
-    return lastUserMessageRef;
-  }
-
-  if (
-    message.role === 'assistant' &&
-    messageIndex === lastAssistantMessageIndex
-  ) {
-    return lastAssistantMessageRef;
-  }
-
-  return undefined;
-};
-
 const AIChatMessages = forwardRef<HTMLDivElement, AIChatMessagesProps>(
   (
     {
@@ -52,6 +22,35 @@ const AIChatMessages = forwardRef<HTMLDivElement, AIChatMessagesProps>(
     },
     ref,
   ) => {
+    const lastUserMessageIndex = messages
+      .map((m) => m.role)
+      .lastIndexOf(AIChatMessageRole.user);
+    const lastAssistantMessageIndex = messages
+      .map((m) => m.role)
+      .lastIndexOf(AIChatMessageRole.assistant);
+
+    const getMessageRef = (messageIndex: number, messageRole: string) => {
+      if (!lastUserMessageRef || !lastAssistantMessageRef) {
+        return undefined;
+      }
+
+      if (
+        messageRole === AIChatMessageRole.user &&
+        messageIndex === lastUserMessageIndex
+      ) {
+        return lastUserMessageRef;
+      }
+
+      if (
+        messageRole === AIChatMessageRole.assistant &&
+        messageIndex === lastAssistantMessageIndex
+      ) {
+        return lastAssistantMessageRef;
+      }
+
+      return undefined;
+    };
+
     return (
       <div className="p-4 my-3 flex flex-col" ref={ref}>
         {messages.map((message, index) => (
@@ -60,13 +59,7 @@ const AIChatMessages = forwardRef<HTMLDivElement, AIChatMessagesProps>(
             message={message}
             onInject={onInject}
             codeVariation={codeVariation}
-            ref={getMessageRef(
-              message,
-              index,
-              messages,
-              lastUserMessageRef,
-              lastAssistantMessageRef,
-            )}
+            ref={getMessageRef(index, message.role)}
           />
         ))}
       </div>
@@ -86,7 +79,7 @@ const Message = forwardRef<
 
   if (!isUser) {
     return (
-      <div className="!my-2 text-black dark:text-white">
+      <div className="!my-2 text-black dark:text-white" ref={ref}>
         <MessageContent
           content={message.content}
           onInject={onInject}
