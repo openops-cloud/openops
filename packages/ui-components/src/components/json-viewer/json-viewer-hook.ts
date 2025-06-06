@@ -10,7 +10,9 @@ const removeDoubleQuotes = (str: string): string =>
 
 const isStepFileUrl = (json: unknown): json is string => {
   return (
-    Boolean(json) && typeof json === 'string' && json.startsWith('file://')
+    Boolean(json) &&
+    typeof json === 'string' &&
+    (json.startsWith('file://') || json.startsWith('"file://'))
   );
 };
 

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { FileButton } from './file-button';
 import { HeaderButtons } from './header-buttons';
@@ -26,12 +26,6 @@ const JsonViewer = React.memo(
       },
       mode: 'onChange',
     });
-
-    useEffect(() => {
-      form.reset({
-        jsonContent: json,
-      });
-    }, [json, form]);
 
     const {
       handleCopy,

@@ -118,3 +118,44 @@ export const FileButton: Story = {
     title: 'File Download Example',
   },
 };
+
+/**
+ * The JSON viewer with file URLs embedded within the JSON object.
+ * This demonstrates the functionality of the useLayoutEffect hook that
+ * transforms file URLs within JSON objects into FileButton components.
+ */
+export const EmbeddedFileUrls: Story = {
+  args: {
+    json: {
+      name: 'Document Collection',
+      files: {
+        document1: 'file://path/to/document1.pdf',
+        document2: 'file://path/to/document2.docx',
+      },
+      nestedFiles: {
+        folder1: {
+          file1: 'file://path/to/nested/file1.txt',
+        },
+      },
+      fileArray: [
+        'file://path/to/array/file1.json',
+        'file://path/to/array/file2.json',
+      ],
+    },
+    title: 'Embedded File URLs Example',
+  },
+};
+
+/**
+ * The JSON viewer displaying a file write result object.
+ * This demonstrates how the JsonViewer displays the result of a file write operation,
+ * similar to what is returned by context.files.write() in blocks.
+ */
+export const FileWriteResult: Story = {
+  args: {
+    json: {
+      file: 'file://path/to/example.txt',
+    },
+    title: 'File Write Result Example',
+  },
+};
