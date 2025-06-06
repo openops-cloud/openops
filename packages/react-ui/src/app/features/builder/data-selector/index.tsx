@@ -45,10 +45,9 @@ const DataSelector = ({
     FlagId.USE_NEW_EXTERNAL_TESTDATA,
   );
   const [searchTerm, setSearchTerm] = useState('');
-  const { flowVersionId, flowVersion, isDataSelectorVisible, midpanelState } =
+  const { flowVersionId, isDataSelectorVisible, midpanelState } =
     useBuilderStateContext((state) => ({
       flowVersionId: state.flowVersion.id,
-      flowVersion: state.flowVersion,
       isDataSelectorVisible: state.midpanelState.showDataSelector,
       midpanelState: state.midpanelState,
     }));
