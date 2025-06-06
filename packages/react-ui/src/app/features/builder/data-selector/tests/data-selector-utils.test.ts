@@ -412,7 +412,8 @@ describe('dataSelectorUtils', () => {
         sampleData,
         testOutput,
       );
-      expect(result).toEqual(sampleData);
+      expect(result.data).toEqual(sampleData);
+      expect(result.usedSampleData).toBe(true);
     });
 
     it('returns sample data when test output is null', () => {
@@ -422,7 +423,8 @@ describe('dataSelectorUtils', () => {
         sampleData,
         testOutput,
       );
-      expect(result).toEqual(sampleData);
+      expect(result.data).toEqual(sampleData);
+      expect(result.usedSampleData).toBe(true);
     });
 
     it('prioritizes sample data properties over test output properties', () => {
@@ -432,11 +434,12 @@ describe('dataSelectorUtils', () => {
         sampleData,
         testOutput,
       );
-      expect(result).toEqual({
+      expect(result.data).toEqual({
         foo: 'bar',
         baz: 'qux',
         extra: 'value',
       });
+      expect(result.usedSampleData).toBe(true);
     });
 
     it('returns test output when sample data is undefined', () => {
@@ -446,7 +449,8 @@ describe('dataSelectorUtils', () => {
         sampleData,
         testOutput,
       );
-      expect(result).toEqual(testOutput);
+      expect(result.data).toEqual(testOutput);
+      expect(result.usedSampleData).toBe(false);
     });
 
     it('returns test output when sample data is null', () => {
@@ -456,7 +460,8 @@ describe('dataSelectorUtils', () => {
         sampleData,
         testOutput,
       );
-      expect(result).toEqual(testOutput);
+      expect(result.data).toEqual(testOutput);
+      expect(result.usedSampleData).toBe(false);
     });
 
     it('preserves sample data in nested object structures', () => {
@@ -476,13 +481,14 @@ describe('dataSelectorUtils', () => {
         sampleData,
         testOutput,
       );
-      expect(result).toEqual({
+      expect(result.data).toEqual({
         foo: {
           bar: 'new value',
           extra: 'sample',
           baz: 'test',
         },
       });
+      expect(result.usedSampleData).toBe(true);
     });
 
     it('returns sample data when both inputs are primitive values', () => {
@@ -492,7 +498,8 @@ describe('dataSelectorUtils', () => {
         sampleData,
         testOutput,
       );
-      expect(result).toEqual(sampleData);
+      expect(result.data).toEqual(sampleData);
+      expect(result.usedSampleData).toBe(true);
     });
 
     it('returns sample data when sample is number and test output is string', () => {
@@ -502,7 +509,8 @@ describe('dataSelectorUtils', () => {
         sampleData,
         testOutput,
       );
-      expect(result).toEqual(sampleData);
+      expect(result.data).toEqual(sampleData);
+      expect(result.usedSampleData).toBe(true);
     });
 
     it('returns sample data when sample is boolean and test output is number', () => {
@@ -512,7 +520,8 @@ describe('dataSelectorUtils', () => {
         sampleData,
         testOutput,
       );
-      expect(result).toEqual(sampleData);
+      expect(result.data).toEqual(sampleData);
+      expect(result.usedSampleData).toBe(true);
     });
 
     it('returns sample data when sample is array and test output is primitive', () => {
@@ -522,7 +531,8 @@ describe('dataSelectorUtils', () => {
         sampleData,
         testOutput,
       );
-      expect(result).toEqual(sampleData);
+      expect(result.data).toEqual(sampleData);
+      expect(result.usedSampleData).toBe(true);
     });
 
     it('returns sample data when sample is object and test output is array', () => {
@@ -532,7 +542,8 @@ describe('dataSelectorUtils', () => {
         sampleData,
         testOutput,
       );
-      expect(result).toEqual(sampleData);
+      expect(result.data).toEqual(sampleData);
+      expect(result.usedSampleData).toBe(true);
     });
 
     it('returns sample data when sample is Map and test output is array', () => {
@@ -542,7 +553,8 @@ describe('dataSelectorUtils', () => {
         sampleData,
         testOutput,
       );
-      expect(result).toEqual(sampleData);
+      expect(result.data).toEqual(sampleData);
+      expect(result.usedSampleData).toBe(true);
     });
 
     it('returns sample data when sample is Date and test output is string', () => {
@@ -552,7 +564,8 @@ describe('dataSelectorUtils', () => {
         sampleData,
         testOutput,
       );
-      expect(result).toEqual(sampleData);
+      expect(result.data).toEqual(sampleData);
+      expect(result.usedSampleData).toBe(true);
     });
 
     it('returns sample data when sample is Map and test output is object', () => {
@@ -562,7 +575,8 @@ describe('dataSelectorUtils', () => {
         sampleData,
         testOutput,
       );
-      expect(result).toEqual(sampleData);
+      expect(result.data).toEqual(sampleData);
+      expect(result.usedSampleData).toBe(true);
     });
 
     it('returns sample data when sample is Date and test output is object', () => {
@@ -572,7 +586,8 @@ describe('dataSelectorUtils', () => {
         sampleData,
         testOutput,
       );
-      expect(result).toEqual(sampleData);
+      expect(result.data).toEqual(sampleData);
+      expect(result.usedSampleData).toBe(true);
     });
 
     it('preserves sample data in nested structures with mixed types', () => {
@@ -597,7 +612,7 @@ describe('dataSelectorUtils', () => {
         sampleData,
         testOutput,
       );
-      expect(result).toEqual({
+      expect(result.data).toEqual({
         map: sampleData.map,
         date: sampleData.date,
         nested: {
@@ -606,6 +621,35 @@ describe('dataSelectorUtils', () => {
           extra: 'value',
         },
       });
+      expect(result.usedSampleData).toBe(true);
+    });
+
+    it('uses test output values when sample data values are undefined', () => {
+      const sampleData = {
+        foo: undefined,
+        nested: {
+          baz: undefined,
+        },
+      };
+      const testOutput = {
+        foo: 'old',
+        nested: {
+          baz: 'old',
+          extra: 'value',
+        },
+      };
+      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
+        sampleData,
+        testOutput,
+      );
+      expect(result.data).toEqual({
+        foo: 'old',
+        nested: {
+          baz: 'old',
+          extra: 'value',
+        },
+      });
+      expect(result.usedSampleData).toBe(false);
     });
   });
 });

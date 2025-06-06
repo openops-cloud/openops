@@ -298,6 +298,11 @@ const isAtomicValue = (value: unknown): boolean => {
   );
 };
 
+type MergedOutput = {
+  data: unknown;
+  usedSampleData: boolean;
+};
+
 /**
  * Merges sample data with test output, with sample data having priority.
  * If both are objects, sample data properties will override test output properties.
@@ -305,30 +310,44 @@ const isAtomicValue = (value: unknown): boolean => {
  * Handles nested objects by recursively merging them.
  * Arrays, Maps, and Dates are treated as atomic values - sample data takes precedence.
  * Primitives are treated as atomic values - sample data takes precedence.
+ * Returns an object containing the merged data and a flag indicating whether sample data was used.
  */
 const mergeSampleDataWithTestOutput = (
   sampleData: unknown,
   testOutput: unknown,
-): unknown => {
+): MergedOutput => {
   if (isAtomicValue(sampleData) || isAtomicValue(testOutput)) {
-    return sampleData ?? testOutput;
+    return {
+      data: sampleData ?? testOutput,
+      usedSampleData: sampleData !== undefined && sampleData !== null,
+    };
   }
 
   if (isPlainObject(sampleData) && isPlainObject(testOutput)) {
     const result = { ...testOutput };
+    let usedSampleData = false;
 
     Object.entries(sampleData).forEach(([key, value]) => {
       if (isPlainObject(value) && isPlainObject(testOutput[key])) {
-        result[key] = mergeSampleDataWithTestOutput(value, testOutput[key]);
-      } else {
+        const merged = mergeSampleDataWithTestOutput(value, testOutput[key]);
+        result[key] = merged.data;
+        usedSampleData = usedSampleData || merged.usedSampleData;
+      } else if (value !== undefined) {
         result[key] = value;
+        usedSampleData = true;
       }
     });
 
-    return result;
+    return {
+      data: result,
+      usedSampleData,
+    };
   }
 
-  return sampleData ?? testOutput;
+  return {
+    data: sampleData ?? testOutput,
+    usedSampleData: sampleData !== undefined && sampleData !== null,
+  };
 };
 
 export const dataSelectorUtils = {

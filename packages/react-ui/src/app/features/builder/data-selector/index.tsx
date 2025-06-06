@@ -91,7 +91,7 @@ const DataSelector = ({
           output: dataSelectorUtils.mergeSampleDataWithTestOutput(
             sampleData,
             cached.output,
-          ),
+          ).data,
         };
       }
     });
