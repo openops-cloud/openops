@@ -88,14 +88,14 @@ export const flowStepTestOutputService = {
 async function decompressOutput(
   record: FlowStepTestOutput,
 ): Promise<FlowStepTestOutput> {
-  const x = record.output as Buffer;
-  if (x.length === 0) {
+  const outputBuffer = record.output as Buffer;
+  if (outputBuffer.length === 0) {
     return {
       ...record,
       output: undefined,
     };
   }
-  const decryptedOutput = await decompressAndDecrypt(record.output as Buffer);
+  const decryptedOutput = await decompressAndDecrypt(outputBuffer);
 
   return {
     ...record,
