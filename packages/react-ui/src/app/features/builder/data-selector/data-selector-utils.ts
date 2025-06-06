@@ -173,6 +173,15 @@ const createTestNode = (
   step: Action | Trigger,
   displayName: string,
 ): MentionTreeNode => {
+  const hasSampleData = !!step.settings.inputUiInfo?.sampleData;
+  if (hasSampleData) {
+    return traverseStepOutputAndReturnMentionTree({
+      stepOutput: step.settings.inputUiInfo.sampleData,
+      propertyPath: step.name,
+      displayName: displayName,
+    });
+  }
+
   return {
     key: step.name,
     data: {
@@ -201,9 +210,10 @@ function filterBy(arr: MentionTreeNode[], query: string): MentionTreeNode[] {
   }
 
   return arr.reduce((acc, item) => {
-    const isTestNode =
+    const isTestNodeOrHasNoSampleData =
       !isNil(item.children) && item?.children?.[0]?.data?.isTestStepNode;
-    if (isTestNode) {
+
+    if (isTestNodeOrHasNoSampleData) {
       return acc;
     }
 
