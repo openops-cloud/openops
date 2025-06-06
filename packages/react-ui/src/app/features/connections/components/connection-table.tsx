@@ -22,8 +22,8 @@ import {
 import {
   AppConnection,
   AppConnectionStatus,
+  FlagId,
   MinimalFlow,
-  Permission,
 } from '@openops/shared';
 import { ColumnDef } from '@tanstack/react-table';
 import { t } from 'i18next';
@@ -32,6 +32,7 @@ import { Dispatch, SetStateAction, useCallback, useState } from 'react';
 
 import { appConnectionUtils } from '../lib/app-connections-utils';
 
+import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { flowsApi } from '@/app/features/flows/lib/flows-api';
 import { useMutation } from '@tanstack/react-query';
 import { useConnectionsContext } from './connections-context';
@@ -43,17 +44,29 @@ type BlockIconWithBlockNameProps = {
   blockName: string;
 };
 const BlockIconWithBlockName = ({ blockName }: BlockIconWithBlockNameProps) => {
+  const { data: useConnectionsProvider } = flagsHooks.useFlag<boolean>(
+    FlagId.USE_CONNECTIONS_PROVIDER,
+  );
+
   const { blockModel } = blocksHooks.useBlock({
     name: blockName,
   });
+
+  const diplayName = useConnectionsProvider
+    ? blockModel?.auth?.authProviderDisplayName
+    : blockModel?.displayName;
+
+  const logoUrl = useConnectionsProvider
+    ? blockModel?.auth?.authProviderLogoUrl
+    : blockModel?.logoUrl;
 
   return (
     <BlockIcon
       circle={true}
       size={'md'}
       border={true}
-      displayName={blockModel?.displayName}
-      logoUrl={blockModel?.logoUrl}
+      displayName={diplayName}
+      logoUrl={logoUrl}
       showTooltip={true}
     />
   );
@@ -259,9 +272,7 @@ const fetchData = async (
 
 const ConnectionsHeader = () => {
   const { checkAccess } = useAuthorization();
-  const userHasPermissionToWriteAppConnection = checkAccess(
-    Permission.WRITE_APP_CONNECTION,
-  );
+  const userHasPermissionToWriteAppConnection = checkAccess();
 
   const { setRefresh } = useConnectionsContext();
 
