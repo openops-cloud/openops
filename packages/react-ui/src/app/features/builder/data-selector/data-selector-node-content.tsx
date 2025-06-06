@@ -1,4 +1,4 @@
-import { BlockIcon, Button } from '@openops/components/ui';
+import { BlockIcon, Button, TooltipWrapper } from '@openops/components/ui';
 import { t } from 'i18next';
 import { ChevronDown, ChevronUp, CircleAlert } from 'lucide-react';
 
@@ -100,7 +100,12 @@ const DataSelectorNodeContent = ({
         )}
         <div className="truncate">{node.data.displayName}</div>
         {hasSampleData && (
-          <CircleAlert className="min-w-4 w-4 h-4 text-warning-200" />
+          <TooltipWrapper
+            tooltipText={t('Step contains sample data')}
+            tooltipPlacement="bottom"
+          >
+            <CircleAlert className="min-w-4 w-4 h-4 text-warning-200" />
+          </TooltipWrapper>
         )}
         {showNodeValue && (
           <>
