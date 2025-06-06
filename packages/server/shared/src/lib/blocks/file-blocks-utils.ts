@@ -130,6 +130,7 @@ async function loadBlockFromFolder(
     const indexPath = join(folderPath, 'src', 'index.js') + suffix;
     const stats = await fs.stat(packageJsonDir); // Get file stats
 
+    // We add the configuration hash to ensure that env var changes take effect (e.g. AWS_ENABLE_IMPLICIT_ROLE)
     const cacheKey = `${blockName}-${blockVersion}-${stats.mtime.getTime()}-${system.calculateConfigurationHash()}`;
     let blockMetadata = await cacheWrapper.getSerializedObject<BlockMetadata>(
       cacheKey,
