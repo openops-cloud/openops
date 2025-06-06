@@ -1,9 +1,7 @@
 import { UseChatHelpers } from '@ai-sdk/react';
 import { t } from 'i18next';
-import throttle from 'lodash-es/throttle';
 import { Bot } from 'lucide-react';
-import { ReactNode, useCallback, useEffect, useRef } from 'react';
-import { useIntersection } from 'react-use';
+import { ReactNode, useEffect, useRef } from 'react';
 import { cn } from '../../lib/cn';
 import { AI_CHAT_SCROLL_DELAY } from '../../lib/constants';
 import { ScrollArea } from '../../ui/scroll-area';
@@ -66,18 +64,10 @@ const AiAssistantChatContainer = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollViewportRef = useRef<HTMLDivElement>(null);
   const hasAutoScrolled = useRef<boolean>(false);
-  const userHasScrolled = useRef<boolean>(false);
+  const streamingEndRef = useRef<HTMLDivElement>(null);
   const lastUserMessageId = useRef<string | null>(
     getLastUserMessageId(messages),
   );
-
-  const streamingEndRef = useRef<HTMLDivElement>(null);
-
-  const isLastUserMessageVisible = useIntersection(lastUserMessageRef, {
-    root: scrollViewportRef?.current,
-    rootMargin: '0px',
-    threshold: 1,
-  });
 
   // scroll to the last user message, when getting a new user message
   useEffect(() => {
@@ -85,87 +75,39 @@ const AiAssistantChatContainer = ({
       const lastUserIndex = messages.map((m) => m.role).lastIndexOf('user');
       if (
         lastUserIndex !== -1 &&
-        lastUserMessageId.current !== messages[lastUserIndex].id &&
-        !userHasScrolled.current
+        lastUserMessageId.current !== messages[lastUserIndex].id
       ) {
         lastUserMessageId.current = messages[lastUserIndex].id;
-        lastUserMessageRef.current?.scrollIntoView({
+        streamingEndRef.current?.scrollIntoView({
           behavior: 'smooth',
-          block: 'end',
+          block: 'start',
         });
       }
     }
   }, [lastUserMessageRef, messages]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const streamScroll = useCallback(
-    throttle((ref: React.RefObject<HTMLDivElement>) => {
-      if (!ref.current) {
-        return;
-      }
-
-      ref.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'end',
-      });
-    }, AI_CHAT_SCROLL_DELAY),
-    [],
-  );
-
-  // auto-scroll to the AI when streaming
-  useEffect(() => {
-    if (
-      status === 'streaming' &&
-      isLastUserMessageVisible?.isIntersecting &&
-      streamingEndRef.current &&
-      !userHasScrolled.current
-    ) {
-      streamScroll(streamingEndRef);
-    }
-  }, [status, isLastUserMessageVisible, streamScroll, messages]);
-
-  // track user scroll interaction
-  // useEffect(() => {
-  //   const scrollEl = scrollViewportRef.current;
-  //   if (!scrollEl) return;
-  //   const giveUserControl = () => {
-  //     userHasScrolled.current = true;
-  //   };
-  //   scrollEl.addEventListener('scroll', giveUserControl);
-  //   window.addEventListener('scroll', giveUserControl, { passive: true });
-  //   return () => {
-  //     scrollEl.removeEventListener('scroll', giveUserControl);
-  //     window.removeEventListener('scroll', giveUserControl);
-  //   };
-  // }, [scrollViewportRef]);
-
-  // when messages length changes, reset userHasScrolled and hasAutoScrolled
-  // useEffect(() => {
-  //   userHasScrolled.current = false;
-  //   hasAutoScrolled.current = false;
-  // }, [messages.length]);
-
   // initial scroll to the bottom when the chat is opened
   useEffect(() => {
-    if (
-      !hasAutoScrolled.current &&
-      !isEmpty &&
-      showAiChat &&
-      !!children &&
-      !userHasScrolled.current
-    ) {
+    if (!isEmpty && showAiChat && !!children && !hasAutoScrolled.current) {
       setTimeout(() => {
         if (scrollViewportRef.current) {
           scrollViewportRef.current.scrollTo({
             top: scrollViewportRef.current.scrollHeight,
             behavior: 'smooth',
           });
+          hasAutoScrolled.current = true;
         }
-        hasAutoScrolled.current = true;
       }, AI_CHAT_SCROLL_DELAY);
       return;
     }
-  }, [isEmpty, showAiChat, children, isLastUserMessageVisible]);
+  }, [isEmpty, showAiChat, children]);
+
+  const height = dimensions.height ?? 0;
+  const lastMsgHeight = lastUserMessageRef.current?.offsetHeight ?? 0;
+  const bufferAreaHeight =
+    status === 'streaming' || status === 'submitted'
+      ? Math.floor(Math.max(0, height - lastMsgHeight - 240))
+      : 20;
 
   return (
     <div
@@ -221,10 +163,10 @@ const AiAssistantChatContainer = ({
           <div className="overflow-hidden flex-1">
             <div className="py-4 flex flex-col h-full">
               <ScrollArea
-                className="h-full w-full"
+                className="flex-1 w-full"
                 viewPortRef={scrollViewportRef}
               >
-                <div className="h-full w-full px-6 flex flex-col">
+                <div className="w-full px-6 flex flex-col">
                   {isEmpty ? (
                     <div
                       className={
@@ -241,10 +183,16 @@ const AiAssistantChatContainer = ({
                       </span>
                     </div>
                   ) : (
-                    <>
+                    <div className="flex flex-col">
                       {children}
-                      <div ref={streamingEndRef} className="h-1" />
-                    </>
+                      <div
+                        ref={streamingEndRef}
+                        id="streaming-end"
+                        style={{
+                          height: bufferAreaHeight,
+                        }}
+                      />
+                    </div>
                   )}
                 </div>
               </ScrollArea>
