@@ -1,7 +1,8 @@
 import { UseChatHelpers } from '@ai-sdk/react';
 import { t } from 'i18next';
+import throttle from 'lodash-es/throttle';
 import { Bot } from 'lucide-react';
-import { ReactNode, useEffect, useRef } from 'react';
+import { ReactNode, useCallback, useEffect, useRef } from 'react';
 import { useIntersection } from 'react-use';
 import { cn } from '../../lib/cn';
 import { AI_CHAT_SCROLL_DELAY } from '../../lib/constants';
@@ -96,6 +97,21 @@ const AiAssistantChatContainer = ({
     }
   }, [lastUserMessageRef, messages]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const streamScroll = useCallback(
+    throttle((ref: React.RefObject<HTMLDivElement>) => {
+      if (!ref.current) {
+        return;
+      }
+
+      ref.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'end',
+      });
+    }, AI_CHAT_SCROLL_DELAY),
+    [],
+  );
+
   // auto-scroll to the AI when streaming
   useEffect(() => {
     if (
@@ -104,33 +120,30 @@ const AiAssistantChatContainer = ({
       streamingEndRef.current &&
       !userHasScrolled.current
     ) {
-      streamingEndRef.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'end',
-      });
+      streamScroll(streamingEndRef);
     }
-  }, [status, isLastUserMessageVisible, messages]);
+  }, [status, isLastUserMessageVisible, streamScroll, messages]);
 
   // track user scroll interaction
-  useEffect(() => {
-    const scrollEl = scrollViewportRef.current;
-    if (!scrollEl) return;
-    const giveUserControl = () => {
-      userHasScrolled.current = true;
-    };
-    scrollEl.addEventListener('scroll', giveUserControl);
-    window.addEventListener('scroll', giveUserControl, { passive: true });
-    return () => {
-      scrollEl.removeEventListener('scroll', giveUserControl);
-      window.removeEventListener('scroll', giveUserControl);
-    };
-  }, [scrollViewportRef]);
+  // useEffect(() => {
+  //   const scrollEl = scrollViewportRef.current;
+  //   if (!scrollEl) return;
+  //   const giveUserControl = () => {
+  //     userHasScrolled.current = true;
+  //   };
+  //   scrollEl.addEventListener('scroll', giveUserControl);
+  //   window.addEventListener('scroll', giveUserControl, { passive: true });
+  //   return () => {
+  //     scrollEl.removeEventListener('scroll', giveUserControl);
+  //     window.removeEventListener('scroll', giveUserControl);
+  //   };
+  // }, [scrollViewportRef]);
 
   // when messages length changes, reset userHasScrolled and hasAutoScrolled
-  useEffect(() => {
-    userHasScrolled.current = false;
-    hasAutoScrolled.current = false;
-  }, [messages.length]);
+  // useEffect(() => {
+  //   userHasScrolled.current = false;
+  //   hasAutoScrolled.current = false;
+  // }, [messages.length]);
 
   // initial scroll to the bottom when the chat is opened
   useEffect(() => {
