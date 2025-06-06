@@ -7,7 +7,7 @@ export async function runCommand(
   credentials: any,
 ): Promise<string> {
   if (
-    credentials.accessKeyId === undefined &&
+    !credentials.accessKeyId &&
     !system.getBoolean(SharedSystemProp.AWS_ENABLE_IMPLICIT_ROLE)
   ) {
     throw new Error(
