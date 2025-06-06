@@ -2,7 +2,7 @@ import { BlockIcon, Button, TooltipWrapper } from '@openops/components/ui';
 import { t } from 'i18next';
 import { ChevronDown, ChevronUp, CircleAlert } from 'lucide-react';
 
-import { flowHelper, isNil } from '@openops/shared';
+import { flowHelper } from '@openops/shared';
 
 import { useRipple } from '../../../common/providers/theme-provider';
 import { blocksHooks } from '../../blocks/lib/blocks-hook';
@@ -101,7 +101,11 @@ const DataSelectorNodeContent = ({
             tooltipText={t('Step contains sample data')}
             tooltipPlacement="bottom"
           >
-            <CircleAlert className="min-w-4 w-4 h-4 text-warning-200" />
+            <CircleAlert
+              className="min-w-4 w-4 h-4 text-warning-200"
+              role="img"
+              aria-label={t('Step contains sample data')}
+            />
           </TooltipWrapper>
         )}
         {showNodeValue && (
