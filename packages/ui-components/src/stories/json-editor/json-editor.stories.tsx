@@ -54,16 +54,6 @@ export const Default: Story = {
 };
 
 /**
- * The JSON editor with a custom class name for additional styling.
- */
-export const WithCustomClass: Story = {
-  args: {
-    readonly: false,
-    className: 'custom-editor-class',
-  } as any,
-};
-
-/**
  * The JSON editor with a focus handler that logs when the editor receives focus.
  */
 export const WithFocusHandler: Story = {
