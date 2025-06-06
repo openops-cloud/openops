@@ -14,7 +14,7 @@ type JsonViewerProps = {
   theme?: string;
 };
 
-type JsonFormValues = {
+export type JsonFormValues = {
   jsonContent: string;
 };
 
@@ -31,11 +31,19 @@ const JsonViewer = React.memo(
       handleCopy,
       handleDownload,
       handleDownloadFile,
+      handleDelete,
       isFileUrl,
       isEditMode,
       setIsEditMode,
       apply,
-    } = useJsonViewer({ json, title, readonly, renderFileButton, onChange });
+    } = useJsonViewer({
+      json,
+      title,
+      readonly,
+      renderFileButton,
+      onChange,
+      form,
+    });
 
     if (isFileUrl) {
       return (
@@ -55,9 +63,8 @@ const JsonViewer = React.memo(
             handleCopy={handleCopy}
             handleDownload={handleDownload}
             handleEdit={() => setIsEditMode(true)}
-            handleDelete={() => {
-              onChange && onChange(undefined);
-            }}
+            handleDelete={handleDelete}
+            showDeleteButton={!!json}
             apply={() => {
               apply(form.getValues('jsonContent'));
             }}

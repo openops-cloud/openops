@@ -1,9 +1,11 @@
 import { t } from 'i18next';
 import { useLayoutEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
+import { UseFormReturn } from 'react-hook-form';
 import { clipboardUtils } from '../../lib/clipboard-utils';
 import { COPY_PASTE_TOAST_DURATION } from '../../lib/constants';
-import { toast, UNSAVED_CHANGES_TOAST } from '../../ui/use-toast';
+import { toast } from '../../ui/use-toast';
+import { JsonFormValues } from './json-viewer';
 
 const removeDoubleQuotes = (str: string): string =>
   str.startsWith('"') && str.endsWith('"') ? str.slice(1, -1) : str;
@@ -26,6 +28,7 @@ type UseJsonViewerProps = {
     isProductionFile: boolean;
     handleDownloadFile: (fileUrl: string, ext?: string) => void;
   }) => React.ReactNode;
+  form: UseFormReturn<JsonFormValues, any, undefined>;
 };
 
 export const useJsonViewer = ({
@@ -34,6 +37,7 @@ export const useJsonViewer = ({
   readonly = true,
   onChange,
   renderFileButton,
+  form,
 }: UseJsonViewerProps) => {
   const [isEditMode, setIsEditMode] = useState(!json && !readonly);
 
@@ -81,14 +85,17 @@ export const useJsonViewer = ({
     URL.revokeObjectURL(fileUrl);
   };
 
+  const handleDelete = () => {
+    setIsEditMode(true);
+    form.reset({ jsonContent: '' });
+    if (onChange) {
+      onChange(undefined);
+    }
+  };
+
   const apply = (json: string) => {
     if (onChange) {
-      try {
-        const jsonData = JSON.parse(json);
-        onChange(jsonData);
-      } catch {
-        toast(UNSAVED_CHANGES_TOAST);
-      }
+      onChange(json);
     }
     setIsEditMode(false);
   };
@@ -134,6 +141,7 @@ export const useJsonViewer = ({
     handleCopy,
     handleDownload,
     handleDownloadFile,
+    handleDelete,
     isFileUrl,
     isEditMode,
     setIsEditMode,
