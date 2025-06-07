@@ -24,109 +24,155 @@ import {
   stopInstance,
 } from '../../../src/lib/aws/ec2/ec2-instance-state-manager';
 
-describe('stopInstance', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
+describe('ec2-instance-state-manager', () => {
+  const OLD_ENV = process.env;
+  beforeAll(() => {
+    jest.resetModules();
+    process.env = { ...OLD_ENV }; // Make a copy
+    process.env['OPS_AWS_ENABLE_IMPLICIT_ROLE'] = 'true';
   });
 
-  test('should stop instance', async () => {
-    mockEc2.stopInstances.mockResolvedValue('mockResult');
+  afterAll(() => {
+    process.env = OLD_ENV; // Restore old environment
+  });
 
-    const result = await stopInstance(
-      'some creds',
-      'instance-id',
-      'region',
-      false,
-      undefined,
-    );
-
-    expect(result).toBe('mockResult');
-    expect(mockEc2.stopInstances).toHaveBeenCalledTimes(1);
-    expect(mockEc2.stopInstances).toHaveBeenCalledWith({
-      InstanceIds: ['instance-id'],
-      DryRun: false,
+  describe('stopInstance', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
     });
-  });
 
-  test.each([true, false])(
-    'should run with dry run',
-    async (dryRun: boolean) => {
+    test('should stop instance', async () => {
       mockEc2.stopInstances.mockResolvedValue('mockResult');
 
-      await stopInstance(
+      const result = await stopInstance(
         'some creds',
         'instance-id',
         'region',
-        dryRun,
+        false,
         undefined,
       );
 
+      expect(result).toBe('mockResult');
       expect(mockEc2.stopInstances).toHaveBeenCalledTimes(1);
       expect(mockEc2.stopInstances).toHaveBeenCalledWith({
         InstanceIds: ['instance-id'],
-        DryRun: dryRun,
+        DryRun: false,
       });
-    },
-  );
-
-  test('should catch and throw if something throws', async () => {
-    mockEc2.stopInstances.mockRejectedValue(new Error('some error'));
-
-    await expect(
-      stopInstance('some creds', 'instance-id', 'region', false, undefined),
-    ).rejects.toThrow('some error');
-
-    expect(waitForMock.waitForConditionWithTimeout).not.toBeCalled();
-  });
-
-  test('should wait for instance state change if wait for is set', async () => {
-    mockEc2.stopInstances.mockResolvedValue('mockResult');
-    mockEc2.describeInstanceStatus.mockResolvedValue({
-      InstanceStatuses: [
-        { InstanceState: { Name: EC2.InstanceStateName.stopped } },
-      ],
     });
 
-    await stopInstance('some creds', 'instance-id', 'region', false, 10);
+    test.each([true, false])(
+      'should run with dry run',
+      async (dryRun: boolean) => {
+        mockEc2.stopInstances.mockResolvedValue('mockResult');
 
-    expect(waitForMock.waitForConditionWithTimeout).toHaveBeenCalledTimes(1);
-    expect(waitForMock.waitForConditionWithTimeout).toBeCalledWith(
-      expect.any(Function),
-      300,
-      10,
-      `Instance state change to ${EC2.InstanceStateName.stopped}`,
-    );
-  });
-});
+        await stopInstance(
+          'some creds',
+          'instance-id',
+          'region',
+          dryRun,
+          undefined,
+        );
 
-describe('startInstance', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  test('should start instance', async () => {
-    mockEc2.startInstances.mockResolvedValue('mockResult');
-
-    const result = await startInstance(
-      'some creds',
-      'instance-id',
-      'region',
-      false,
-      undefined,
+        expect(mockEc2.stopInstances).toHaveBeenCalledTimes(1);
+        expect(mockEc2.stopInstances).toHaveBeenCalledWith({
+          InstanceIds: ['instance-id'],
+          DryRun: dryRun,
+        });
+      },
     );
 
-    expect(result).toBe('mockResult');
-    expect(mockEc2.startInstances).toHaveBeenCalledTimes(1);
-    expect(mockEc2.startInstances).toHaveBeenCalledWith({
-      InstanceIds: ['instance-id'],
-      DryRun: false,
+    test('should catch and throw if something throws', async () => {
+      mockEc2.stopInstances.mockRejectedValue(new Error('some error'));
+
+      await expect(
+        stopInstance('some creds', 'instance-id', 'region', false, undefined),
+      ).rejects.toThrow('some error');
+
+      expect(waitForMock.waitForConditionWithTimeout).not.toBeCalled();
     });
-    expect(waitForMock.waitForConditionWithTimeout).not.toHaveBeenCalled();
+
+    test('should wait for instance state change if wait for is set', async () => {
+      mockEc2.stopInstances.mockResolvedValue('mockResult');
+      mockEc2.describeInstanceStatus.mockResolvedValue({
+        InstanceStatuses: [
+          { InstanceState: { Name: EC2.InstanceStateName.stopped } },
+        ],
+      });
+
+      await stopInstance('some creds', 'instance-id', 'region', false, 10);
+
+      expect(waitForMock.waitForConditionWithTimeout).toHaveBeenCalledTimes(1);
+      expect(waitForMock.waitForConditionWithTimeout).toBeCalledWith(
+        expect.any(Function),
+        300,
+        10,
+        `Instance state change to ${EC2.InstanceStateName.stopped}`,
+      );
+    });
   });
 
-  test.each([true, false])(
-    'should run with dry run',
-    async (dryRun: boolean) => {
+  describe('startInstance', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    test('should start instance', async () => {
+      mockEc2.startInstances.mockResolvedValue('mockResult');
+
+      const result = await startInstance(
+        'some creds',
+        'instance-id',
+        'region',
+        false,
+        undefined,
+      );
+
+      expect(result).toBe('mockResult');
+      expect(mockEc2.startInstances).toHaveBeenCalledTimes(1);
+      expect(mockEc2.startInstances).toHaveBeenCalledWith({
+        InstanceIds: ['instance-id'],
+        DryRun: false,
+      });
+      expect(waitForMock.waitForConditionWithTimeout).not.toHaveBeenCalled();
+    });
+
+    test.each([true, false])(
+      'should run with dry run',
+      async (dryRun: boolean) => {
+        mockEc2.startInstances.mockResolvedValue('mockResult');
+        mockEc2.describeInstanceStatus.mockResolvedValue({
+          InstanceStatuses: [
+            { InstanceState: { Name: EC2.InstanceStateName.running } },
+          ],
+        });
+
+        await startInstance(
+          'some creds',
+          'instance-id',
+          'region',
+          dryRun,
+          undefined,
+        );
+
+        expect(mockEc2.startInstances).toHaveBeenCalledTimes(1);
+        expect(mockEc2.startInstances).toHaveBeenCalledWith({
+          InstanceIds: ['instance-id'],
+          DryRun: dryRun,
+        });
+      },
+    );
+
+    test('should catch and throw if something throws', async () => {
+      mockEc2.startInstances.mockRejectedValue(new Error('some error'));
+
+      await expect(
+        startInstance('some creds', 'instance-id', 'region', false, undefined),
+      ).rejects.toThrow('some error');
+
+      expect(waitForMock.waitForConditionWithTimeout).not.toBeCalled();
+    });
+
+    test('should wait for instance state change if wait for is set', async () => {
       mockEc2.startInstances.mockResolvedValue('mockResult');
       mockEc2.describeInstanceStatus.mockResolvedValue({
         InstanceStatuses: [
@@ -134,99 +180,69 @@ describe('startInstance', () => {
         ],
       });
 
-      await startInstance(
-        'some creds',
-        'instance-id',
-        'region',
-        dryRun,
-        undefined,
+      await startInstance('some creds', 'instance-id', 'region', false, 10);
+
+      expect(waitForMock.waitForConditionWithTimeout).toHaveBeenCalledTimes(1);
+      expect(waitForMock.waitForConditionWithTimeout).toBeCalledWith(
+        expect.any(Function),
+        300,
+        10,
+        `Instance state change to ${EC2.InstanceStateName.running}`,
       );
-
-      expect(mockEc2.startInstances).toHaveBeenCalledTimes(1);
-      expect(mockEc2.startInstances).toHaveBeenCalledWith({
-        InstanceIds: ['instance-id'],
-        DryRun: dryRun,
-      });
-    },
-  );
-
-  test('should catch and throw if something throws', async () => {
-    mockEc2.startInstances.mockRejectedValue(new Error('some error'));
-
-    await expect(
-      startInstance('some creds', 'instance-id', 'region', false, undefined),
-    ).rejects.toThrow('some error');
-
-    expect(waitForMock.waitForConditionWithTimeout).not.toBeCalled();
+    });
   });
 
-  test('should wait for instance state change if wait for is set', async () => {
-    mockEc2.startInstances.mockResolvedValue('mockResult');
-    mockEc2.describeInstanceStatus.mockResolvedValue({
-      InstanceStatuses: [
-        { InstanceState: { Name: EC2.InstanceStateName.running } },
-      ],
+  describe('getInstanceState', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
     });
 
-    await startInstance('some creds', 'instance-id', 'region', false, 10);
+    test.each([
+      [EC2.InstanceStateName.running],
+      [EC2.InstanceStateName.stopped],
+    ])(
+      'should get instance state',
+      async (instanceState: EC2.InstanceStateName) => {
+        mockEc2.describeInstanceStatus.mockResolvedValue({
+          InstanceStatuses: [{ InstanceState: { Name: instanceState } }],
+        });
 
-    expect(waitForMock.waitForConditionWithTimeout).toHaveBeenCalledTimes(1);
-    expect(waitForMock.waitForConditionWithTimeout).toBeCalledWith(
-      expect.any(Function),
-      300,
-      10,
-      `Instance state change to ${EC2.InstanceStateName.running}`,
+        const result = await getInstanceState(mockEc2, 'instance-id', false);
+        expect(mockEc2.describeInstanceStatus).toHaveBeenCalledTimes(1);
+        expect(mockEc2.describeInstanceStatus).toHaveBeenCalledWith({
+          InstanceIds: ['instance-id'],
+          IncludeAllInstances: true,
+          DryRun: false,
+        });
+        expect(result?.Name).toBe(instanceState);
+      },
     );
-  });
-});
 
-describe('getInstanceState', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
+    test.each([true, false])(
+      'should run with dry run',
+      async (dryRun: boolean) => {
+        mockEc2.describeInstanceStatus.mockResolvedValue({
+          InstanceStatuses: [
+            { InstanceState: { Name: EC2.InstanceStateName.stopped } },
+          ],
+        });
 
-  test.each([[EC2.InstanceStateName.running], [EC2.InstanceStateName.stopped]])(
-    'should get instance state',
-    async (instanceState: EC2.InstanceStateName) => {
-      mockEc2.describeInstanceStatus.mockResolvedValue({
-        InstanceStatuses: [{ InstanceState: { Name: instanceState } }],
-      });
+        await getInstanceState(mockEc2, 'instance-id', dryRun);
+        expect(mockEc2.describeInstanceStatus).toHaveBeenCalledTimes(1);
+        expect(mockEc2.describeInstanceStatus).toHaveBeenCalledWith({
+          InstanceIds: ['instance-id'],
+          IncludeAllInstances: true,
+          DryRun: dryRun,
+        });
+      },
+    );
 
-      const result = await getInstanceState(mockEc2, 'instance-id', false);
-      expect(mockEc2.describeInstanceStatus).toHaveBeenCalledTimes(1);
-      expect(mockEc2.describeInstanceStatus).toHaveBeenCalledWith({
-        InstanceIds: ['instance-id'],
-        IncludeAllInstances: true,
-        DryRun: false,
-      });
-      expect(result?.Name).toBe(instanceState);
-    },
-  );
+    test('should throw if something throws', async () => {
+      mockEc2.describeInstanceStatus.mockRejectedValue(new Error('some error'));
 
-  test.each([true, false])(
-    'should run with dry run',
-    async (dryRun: boolean) => {
-      mockEc2.describeInstanceStatus.mockResolvedValue({
-        InstanceStatuses: [
-          { InstanceState: { Name: EC2.InstanceStateName.stopped } },
-        ],
-      });
-
-      await getInstanceState(mockEc2, 'instance-id', dryRun);
-      expect(mockEc2.describeInstanceStatus).toHaveBeenCalledTimes(1);
-      expect(mockEc2.describeInstanceStatus).toHaveBeenCalledWith({
-        InstanceIds: ['instance-id'],
-        IncludeAllInstances: true,
-        DryRun: dryRun,
-      });
-    },
-  );
-
-  test('should throw if something throws', async () => {
-    mockEc2.describeInstanceStatus.mockRejectedValue(new Error('some error'));
-
-    await expect(
-      getInstanceState(mockEc2, 'instance-id', false),
-    ).rejects.toThrow('some error');
+      await expect(
+        getInstanceState(mockEc2, 'instance-id', false),
+      ).rejects.toThrow('some error');
+    });
   });
 });
