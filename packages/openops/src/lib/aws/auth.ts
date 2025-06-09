@@ -172,8 +172,11 @@ export const amazonAuth = BlockAuth.CustomAuth({
   authProviderLogoUrl: `https://static.openops.com/blocks/aws.png`,
   description: `
    For production usage, it is recommended to use the AWS role assigned to the hosting environment, by leaving
-  the "Access Key Id" and "Secret Access Key" fields empty. ${isImplicitRoleEnabled ? '' :
-    '**To enable this capability, set the environment variable "OPS_AWS_ENABLE_IMPLICIT_ROLE" to "true".** '}
+  the "Access Key Id" and "Secret Access Key" fields empty. ${
+    isImplicitRoleEnabled
+      ? ''
+      : '**To enable this capability, set the environment variable "OPS_AWS_ENABLE_IMPLICIT_ROLE" to "true".** '
+  }
    See [AWS documentation](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/attach-iam-role.html) for more information.
 
   For local and testing purposes, you can use the classic access key and secret access key authentication.
