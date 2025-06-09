@@ -21,6 +21,9 @@ const failedValidationResponse = {
 };
 
 export const databricksAuth = BlockAuth.CustomAuth({
+  authProviderKey: 'Databricks',
+  authProviderDisplayName: 'Databricks',
+  authProviderLogoUrl: `https://static.openops.com/blocks/databricks.png`,
   required: true,
   description,
   props: {

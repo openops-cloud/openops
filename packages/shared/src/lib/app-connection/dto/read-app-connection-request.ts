@@ -7,6 +7,7 @@ export const ListAppConnectionsRequestQuery = Type.Object({
   name: Type.Optional(Type.String({})),
   status: Type.Optional(Type.Array(Type.Enum(AppConnectionStatus))),
   limit: Type.Optional(Type.Number({})),
+  authProviders: Type.Optional(Type.Array(Type.String({}))),
 });
 export type ListAppConnectionsRequestQuery = Static<
   typeof ListAppConnectionsRequestQuery

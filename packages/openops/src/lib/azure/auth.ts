@@ -29,6 +29,9 @@ const enableHostSession =
   system.getBoolean(SharedSystemProp.ENABLE_HOST_SESSION) ?? false;
 
 export const azureAuth = BlockAuth.CustomAuth({
+  authProviderKey: 'Azure',
+  authProviderDisplayName: 'Azure',
+  authProviderLogoUrl: `https://static.openops.com/blocks/azure.svg`,
   props: {
     clientId: Property.ShortText({
       displayName: 'Application (client) ID',

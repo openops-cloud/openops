@@ -40,6 +40,7 @@ export const InputProperty = Type.Union([
   JsonProperty,
   DateTimeProperty,
   FileProperty,
+  SecretTextProperty,
 ]);
 
 export type InputProperty =
@@ -57,7 +58,8 @@ export type InputProperty =
   | StaticMultiSelectDropdownProperty<unknown, boolean>
   | DynamicProperties<boolean>
   | DateTimeProperty<boolean>
-  | FileProperty<boolean>;
+  | FileProperty<boolean>
+  | SecretTextProperty<boolean>;
 
 type Properties<T> = Omit<
   T,

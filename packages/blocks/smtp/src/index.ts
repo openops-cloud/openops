@@ -6,6 +6,9 @@ import { smtpCommon } from './lib/common';
 const SMTPPorts = [25, 465, 587, 2525];
 
 export const smtpAuth = BlockAuth.CustomAuth({
+  authProviderKey: 'SMTP',
+  authProviderDisplayName: 'SMTP',
+  authProviderLogoUrl: `https://static.openops.com/blocks/smtp.png`,
   required: true,
   props: {
     host: Property.ShortText({

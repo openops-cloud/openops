@@ -169,10 +169,26 @@ const getAllStepsMentions = (
   });
 };
 
+const hasStepSampleData = (step: Action | Trigger | undefined) => {
+  const sampleData = step?.settings?.inputUiInfo?.sampleData;
+  return (
+    !isNil(sampleData) &&
+    (typeof sampleData !== 'object' || Object.keys(sampleData).length > 0)
+  );
+};
+
 const createTestNode = (
   step: Action | Trigger,
   displayName: string,
 ): MentionTreeNode => {
+  if (hasStepSampleData(step)) {
+    return traverseStepOutputAndReturnMentionTree({
+      stepOutput: step.settings.inputUiInfo.sampleData,
+      propertyPath: step.name,
+      displayName: displayName,
+    });
+  }
+
   return {
     key: step.name,
     data: {
@@ -201,9 +217,10 @@ function filterBy(arr: MentionTreeNode[], query: string): MentionTreeNode[] {
   }
 
   return arr.reduce((acc, item) => {
-    const isTestNode =
+    const isTestNodeOrHasNoSampleData =
       !isNil(item.children) && item?.children?.[0]?.data?.isTestStepNode;
-    if (isTestNode) {
+
+    if (isTestNodeOrHasNoSampleData) {
       return acc;
     }
 
@@ -277,6 +294,95 @@ const getAllStepsMentionsFromCurrentSelectedData: (
   });
 };
 
+const isPlainObject = (value: unknown): value is Record<string, unknown> => {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    !Array.isArray(value) &&
+    !(value instanceof Map) &&
+    !(value instanceof Date)
+  );
+};
+
+const isAtomicValue = (value: unknown): boolean => {
+  return (
+    value === null ||
+    value === undefined ||
+    typeof value !== 'object' ||
+    Array.isArray(value) ||
+    value instanceof Map ||
+    value instanceof Date
+  );
+};
+
+const isEmptyArray = (value: unknown): boolean => {
+  return Array.isArray(value) && value.length === 0;
+};
+
+type MergedOutput = {
+  data: unknown;
+  usedSampleData: boolean;
+};
+
+/**
+ * Merges sample data with test output, with sample data having priority.
+ * If both are objects, sample data properties will override test output properties.
+ * If test output is not an object, sample data will be used if it exists.
+ * Handles nested objects by recursively merging them.
+ * Arrays, Maps, and Dates are treated as atomic values - sample data takes precedence.
+ * Empty arrays in sample data are replaced with test output arrays.
+ * Primitives are treated as atomic values - sample data takes precedence.
+ * Returns an object containing the merged data and a flag indicating whether sample data was used.
+ */
+const mergeSampleDataWithTestOutput = (
+  sampleData: unknown,
+  testOutput: unknown,
+): MergedOutput => {
+  // Handle empty arrays in sample data
+  if (isEmptyArray(sampleData) && Array.isArray(testOutput)) {
+    return {
+      data: testOutput,
+      usedSampleData: false,
+    };
+  }
+
+  if (isAtomicValue(sampleData) || isAtomicValue(testOutput)) {
+    return {
+      data: sampleData ?? testOutput,
+      usedSampleData: sampleData !== undefined && sampleData !== null,
+    };
+  }
+
+  if (isPlainObject(sampleData) && isPlainObject(testOutput)) {
+    const result = { ...testOutput };
+    let usedSampleData = false;
+
+    Object.entries(sampleData).forEach(([key, value]) => {
+      if (isPlainObject(value) && isPlainObject(testOutput[key])) {
+        const merged = mergeSampleDataWithTestOutput(value, testOutput[key]);
+        result[key] = merged.data;
+        usedSampleData = usedSampleData || merged.usedSampleData;
+      } else if (isEmptyArray(value) && Array.isArray(testOutput[key])) {
+        result[key] = testOutput[key];
+        usedSampleData = false;
+      } else if (value !== undefined) {
+        result[key] = value;
+        usedSampleData = true;
+      }
+    });
+
+    return {
+      data: result,
+      usedSampleData,
+    };
+  }
+
+  return {
+    data: sampleData ?? testOutput,
+    usedSampleData: sampleData !== undefined && sampleData !== null,
+  };
+};
+
 export const dataSelectorUtils = {
   traverseStepOutputAndReturnMentionTree,
   getAllStepsMentions,
@@ -284,4 +390,6 @@ export const dataSelectorUtils = {
   filterBy,
   getPathToTargetStep,
   getAllStepsMentionsFromCurrentSelectedData,
+  mergeSampleDataWithTestOutput,
+  hasStepSampleData,
 };

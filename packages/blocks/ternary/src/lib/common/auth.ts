@@ -3,6 +3,9 @@ import { BlockAuth, Property, Validators } from '@openops/blocks-framework';
 import { sendTernaryRequest } from './index';
 
 export const ternaryCloudAuth = BlockAuth.CustomAuth({
+  authProviderKey: 'Ternary',
+  authProviderDisplayName: 'Ternary',
+  authProviderLogoUrl: `https://static.openops.com/blocks/ternary.png`,
   description: `
 Ternary API documentation:
 https://docs.ternary.app/reference/using-the-api`,

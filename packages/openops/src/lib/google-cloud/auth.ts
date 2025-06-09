@@ -21,6 +21,9 @@ const markdown = `
 You can also visit [OpenOps documentation](https://docs.openops.com/introduction/overview) for more information.`;
 
 export const googleCloudAuth = BlockAuth.CustomAuth({
+  authProviderKey: 'GCloud',
+  authProviderDisplayName: 'Google Cloud (GCP)',
+  authProviderLogoUrl: `https://static.openops.com/blocks/google-cloud.svg`,
   description: markdown,
   props: {
     keyFileContent: Property.SecretText({

@@ -162,6 +162,9 @@ export function getAwsAccountsSingleSelectDropdown() {
 }
 
 export const amazonAuth = BlockAuth.CustomAuth({
+  authProviderKey: 'AWS',
+  authProviderDisplayName: 'AWS',
+  authProviderLogoUrl: `https://static.openops.com/blocks/aws.png`,
   props: {
     accessKeyId: Property.SecretText({
       displayName: 'Access Key ID',

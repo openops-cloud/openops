@@ -20,7 +20,10 @@ export const flowStepTestOutputService = {
     flowVersionId,
     output,
   }: SaveParams): Promise<FlowStepTestOutput> {
-    const compressedOutput = await encryptAndCompress(output);
+    let compressedOutput = Buffer.alloc(0);
+    if (output !== undefined) {
+      compressedOutput = await encryptAndCompress(output);
+    }
 
     const existing = await flowStepTestOutputRepo().findOneBy({
       stepId,
@@ -85,7 +88,14 @@ export const flowStepTestOutputService = {
 async function decompressOutput(
   record: FlowStepTestOutput,
 ): Promise<FlowStepTestOutput> {
-  const decryptedOutput = await decompressAndDecrypt(record.output as Buffer);
+  const outputBuffer = record.output as Buffer;
+  if (outputBuffer.length === 0) {
+    return {
+      ...record,
+      output: undefined,
+    };
+  }
+  const decryptedOutput = await decompressAndDecrypt(outputBuffer);
 
   return {
     ...record,

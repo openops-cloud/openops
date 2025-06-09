@@ -10,15 +10,20 @@ import {
   Input,
   ScrollArea,
 } from '@openops/components/ui';
-import { isNil } from '@openops/shared';
+import { FlagId } from '@openops/shared';
 import { DialogTrigger } from '@radix-ui/react-dialog';
 import { t } from 'i18next';
 import React, { useEffect, useState } from 'react';
 
 import { CreateOrEditConnectionDialog } from './create-edit-connection-dialog';
 
+import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
 import { DynamicFormValidationProvider } from '@/app/features/builder/dynamic-form-validation/dynamic-form-validation-context';
+import {
+  aggregateBlocksByProvider,
+  filterBlocks,
+} from '../lib/connections-utils';
 
 type NewConnectionTypeDialogProps = {
   onConnectionCreated: () => void;
@@ -32,15 +37,17 @@ const NewConnectionTypeDialog = React.memo(
     const [selectedBlock, setSelectedBlock] = useState<
       BlockMetadataModelSummary | undefined
     >(undefined);
+
+    const { data: useConnectionsProvider } = flagsHooks.useFlag<boolean>(
+      FlagId.USE_CONNECTIONS_PROVIDER,
+    );
+
     const { blocks, isLoading } = blocksHooks.useBlocks({});
     const [searchTerm, setSearchTerm] = useState('');
 
-    const filteredBlocks = blocks?.filter((block) => {
-      return (
-        !isNil(block.auth) &&
-        block.displayName.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    });
+    const filteredBlocks = useConnectionsProvider
+      ? filterBlocks(aggregateBlocksByProvider(blocks ?? []), searchTerm)
+      : filterBlocks(blocks ?? [], searchTerm);
 
     const clickBlock = (name: string) => {
       setDialogTypesOpen(false);
@@ -90,7 +97,7 @@ const NewConnectionTypeDialog = React.memo(
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <ScrollArea className="flex-grow overflow-y-auto ">
+            <ScrollArea className="flex-grow overflow-y-auto">
               <div className="grid grid-cols-4 gap-4">
                 {(isLoading ||
                   (filteredBlocks && filteredBlocks.length === 0)) && (
@@ -98,20 +105,30 @@ const NewConnectionTypeDialog = React.memo(
                 )}
                 {!isLoading &&
                   filteredBlocks &&
-                  filteredBlocks.map((block, index) => (
-                    <div
-                      key={index}
-                      onClick={() => clickBlock(block.name)}
-                      className="border p-2 h-[150px] w-[150px] flex flex-col items-center justify-center hover:bg-accent hover:text-accent-foreground cursor-pointer rounded-lg"
-                    >
-                      <div className="h-10 flex items-center justify-center">
-                        <img className="w-10" src={block.logoUrl}></img>
+                  filteredBlocks.map((block, index) => {
+                    const logoUrl =
+                      useConnectionsProvider && block.auth
+                        ? block.auth.authProviderLogoUrl
+                        : block.logoUrl;
+                    return (
+                      <div
+                        key={index}
+                        onClick={() => clickBlock(block.name)}
+                        className="border p-2 h-[150px] w-[150px] flex flex-col items-center justify-center hover:bg-accent hover:text-accent-foreground cursor-pointer rounded-lg"
+                      >
+                        <div className="h-10 flex items-center justify-center">
+                          <img
+                            className="w-10"
+                            alt={block.auth?.authProviderDisplayName ?? ''}
+                            src={logoUrl}
+                          ></img>
+                        </div>
+                        <div className="mt-2 text-center text-md">
+                          {block.displayName}
+                        </div>
                       </div>
-                      <div className="mt-2 text-center text-md">
-                        {block.displayName}
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
               </div>
             </ScrollArea>
             <DialogFooter>

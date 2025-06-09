@@ -1,6 +1,8 @@
 import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { ToolSet } from 'ai';
+import { FastifyInstance } from 'fastify';
 import { getDocsTools } from './docs-tools';
+import { getOpenOpsTools } from './openops-tools';
 import { getSupersetTools } from './superset-tools';
 import { getTablesTools } from './tables-tools';
 
@@ -9,12 +11,18 @@ export type MCPTool = {
   toolSet: ToolSet;
 };
 
-export const getMCPTools = async (): Promise<{
+export const getMCPTools = async (
+  app: FastifyInstance,
+  authToken: string,
+): Promise<{
   mcpClients: unknown[];
   tools: ToolSet;
 }> => {
   const docsTools = await safeGetTools('docs', getDocsTools);
   const tablesTools = await safeGetTools('tables', getTablesTools);
+  const openopsTools = await safeGetTools('openops', () =>
+    getOpenOpsTools(app, authToken),
+  );
 
   const loadExperimentalTools = system.getBoolean(
     AppSystemProp.LOAD_EXPERIMENTAL_MCP_TOOLS,
@@ -33,6 +41,7 @@ export const getMCPTools = async (): Promise<{
     ...supersetTools.toolSet,
     ...docsTools.toolSet,
     ...tablesTools.toolSet,
+    ...openopsTools.toolSet,
   } as ToolSet;
 
   return {
