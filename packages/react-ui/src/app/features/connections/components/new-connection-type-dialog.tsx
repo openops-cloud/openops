@@ -97,7 +97,7 @@ const NewConnectionTypeDialog = React.memo(
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <ScrollArea className="flex-grow overflow-y-auto ">
+            <ScrollArea className="flex-grow overflow-y-auto">
               <div className="grid grid-cols-4 gap-4">
                 {(isLoading ||
                   (filteredBlocks && filteredBlocks.length === 0)) && (
@@ -105,20 +105,30 @@ const NewConnectionTypeDialog = React.memo(
                 )}
                 {!isLoading &&
                   filteredBlocks &&
-                  filteredBlocks.map((block, index) => (
-                    <div
-                      key={index}
-                      onClick={() => clickBlock(block.name)}
-                      className="border p-2 h-[150px] w-[150px] flex flex-col items-center justify-center hover:bg-accent hover:text-accent-foreground cursor-pointer rounded-lg"
-                    >
-                      <div className="h-10 flex items-center justify-center">
-                        <img className="w-10" src={block.logoUrl}></img>
+                  filteredBlocks.map((block, index) => {
+                    const logoUrl =
+                      useConnectionsProvider && block.auth
+                        ? block.auth.authProviderLogoUrl
+                        : block.logoUrl;
+                    return (
+                      <div
+                        key={index}
+                        onClick={() => clickBlock(block.name)}
+                        className="border p-2 h-[150px] w-[150px] flex flex-col items-center justify-center hover:bg-accent hover:text-accent-foreground cursor-pointer rounded-lg"
+                      >
+                        <div className="h-10 flex items-center justify-center">
+                          <img
+                            className="w-10"
+                            alt={block.auth?.authProviderDisplayName ?? ''}
+                            src={logoUrl}
+                          ></img>
+                        </div>
+                        <div className="mt-2 text-center text-md">
+                          {block.displayName}
+                        </div>
                       </div>
-                      <div className="mt-2 text-center text-md">
-                        {block.displayName}
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
               </div>
             </ScrollArea>
             <DialogFooter>
