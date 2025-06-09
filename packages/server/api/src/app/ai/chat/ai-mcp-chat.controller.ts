@@ -236,13 +236,20 @@ async function streamMessages(
   tools?: ToolSet,
 ): Promise<void> {
   let stepCount = 0;
+
+  let toolChoice: 'auto' | 'none' | 'required' = 'auto';
+  if (!tools || Object.keys(tools).length === 0) {
+    toolChoice = 'none';
+    systemPrompt += `\n\nMCP tools are not available in this chat. Do not claim access or simulate responses from them under any circumstance.`;
+  }
+
   const result = streamText({
     model: languageModel,
     system: systemPrompt,
     messages,
     ...aiConfig.modelSettings,
     tools,
-    toolChoice: 'auto',
+    toolChoice,
     maxRetries: 1,
     maxSteps: MAX_RECURSION_DEPTH,
     async onStepFinish({ finishReason }): Promise<void> {
