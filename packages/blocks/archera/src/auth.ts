@@ -1,7 +1,10 @@
 import { BlockAuth, Property } from '@openops/blocks-framework';
+
 export const archeraAuth = BlockAuth.CustomAuth({
-  description: `todo
-    `,
+  authProviderKey: 'Archera',
+  authProviderDisplayName: 'Archera',
+  authProviderLogoUrl: `https://static.openops.com/blocks/archera.jpeg`,
+  description: '',
   required: true,
   props: {
     apiToken: Property.SecretText({
