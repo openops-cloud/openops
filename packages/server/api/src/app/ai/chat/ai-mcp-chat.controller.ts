@@ -20,6 +20,7 @@ import {
   streamText,
   TextPart,
   ToolCallPart,
+  ToolChoice,
   ToolResultPart,
   ToolSet,
 } from 'ai';
@@ -237,7 +238,7 @@ async function streamMessages(
 ): Promise<void> {
   let stepCount = 0;
 
-  let toolChoice: 'auto' | 'none' | 'required' = 'auto';
+  let toolChoice: ToolChoice<Record<string, never>> = 'auto';
   if (!tools || Object.keys(tools).length === 0) {
     toolChoice = 'none';
     systemPrompt += `\n\nMCP tools are not available in this chat. Do not claim access or simulate responses from them under any circumstance.`;
