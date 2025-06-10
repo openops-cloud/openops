@@ -28,7 +28,7 @@ export const HeaderButtons = ({
     <div className="flex items-center gap-2">
       {isEditMode && apply ? (
         <Button variant={'ghost'} size={'sm'} onClick={apply}>
-          <Check className="w-4 h-4" />
+          <Check className="w-4 h-4 mr-[3px]" />
           {t('Apply')}
         </Button>
       ) : (
