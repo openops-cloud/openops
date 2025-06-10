@@ -47,7 +47,7 @@ const getBufferAreaHeight = (
   status?: string,
 ) => {
   if (status === 'ready') {
-    return currentBufferAreaHeight;
+    return Math.floor(Math.max(32, height - lastAssistantMsgHeight - 280));
   }
 
   if (['streaming', 'submitted'].includes(status ?? '')) {
