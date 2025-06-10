@@ -22,7 +22,6 @@ export const archera = createBlock({
     getCommitmentPlanAction,
     applyCommitmentPlanAction,
     getCommitmentsInventoryAction,
-    getCommitmentPlanAction,
     getMetricsAction,
     createCustomApiCallAction({
       baseUrl: (auth: any) => `https://api.archera.ai/v1/org/${auth.orgId}`,
