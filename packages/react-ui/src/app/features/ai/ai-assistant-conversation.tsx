@@ -12,7 +12,6 @@ import { useMemo, useRef } from 'react';
 type AiAssistantConversationnProps = {
   isPending: boolean;
   messages: MessageType[];
-  parentHeight: number;
   lastUserMessageRef: React.RefObject<HTMLDivElement>;
   lastAssistantMessageRef: React.RefObject<HTMLDivElement>;
 } & Pick<UseChatHelpers, 'status'>;

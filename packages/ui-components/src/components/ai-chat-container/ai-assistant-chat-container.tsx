@@ -90,8 +90,9 @@ const AiAssistantChatContainer = ({
 
   // scroll to the bottom of the chat when the chat is opened
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
     if (!isEmpty && showAiChat && !!children && !hasAutoScrolled.current) {
-      setTimeout(() => {
+      timeoutId = setTimeout(() => {
         if (scrollViewportRef.current) {
           scrollViewportRef.current.scrollTo({
             top: scrollViewportRef.current.scrollHeight,
@@ -100,8 +101,10 @@ const AiAssistantChatContainer = ({
           hasAutoScrolled.current = true;
         }
       }, AI_CHAT_SCROLL_DELAY);
-      return;
     }
+    return () => {
+      clearTimeout(timeoutId);
+    };
   }, [isEmpty, showAiChat, children]);
 
   const height = dimensions.height ?? 0;

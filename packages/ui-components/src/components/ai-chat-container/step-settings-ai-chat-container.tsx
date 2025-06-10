@@ -81,7 +81,7 @@ const StepSettingsAiChatContainer = ({
       ) {
         lastUserMessageId.current = messages[lastUserIndex].id;
         streamingEndRef.current?.scrollIntoView({
-          behavior: 'instant',
+          behavior: 'smooth',
           block: 'start',
         });
       }
@@ -90,7 +90,7 @@ const StepSettingsAiChatContainer = ({
 
   // scroll to the bottom of the chat when the chat is opened
   useEffect(() => {
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       if (
         scrollViewportRef.current &&
         !isEmpty &&
@@ -99,28 +99,26 @@ const StepSettingsAiChatContainer = ({
       ) {
         scrollViewportRef.current.scrollTo({
           top: scrollViewportRef.current.scrollHeight,
-          behavior: 'smooth',
+          behavior: 'instant',
         });
 
         hasScrolledOnce.current = true;
       }
     }, AI_CHAT_SCROLL_DELAY);
+    return () => {
+      clearTimeout(timeoutId);
+    };
   }, [isEmpty, showAiChat, stepName]);
 
-  let height: string;
-  let numericHeight = 0;
+  let height: number;
   if (containerSize === AI_CHAT_CONTAINER_SIZES.COLLAPSED) {
-    height = '0px';
-    numericHeight = 0;
+    height = 0;
   } else if (containerSize === AI_CHAT_CONTAINER_SIZES.DOCKED) {
-    height = '450px';
-    numericHeight = 450;
+    height = 450;
   } else if (containerSize === AI_CHAT_CONTAINER_SIZES.EXPANDED) {
-    height = `${parentHeight - 180}px`;
-    numericHeight = parentHeight - 180;
+    height = parentHeight - 180;
   } else {
-    height = `${parentHeight - 100}px`;
-    numericHeight = parentHeight - 100;
+    height = parentHeight - 100;
   }
 
   const lastMsgHeight = lastUserMessageRef.current?.offsetHeight ?? 0;
@@ -129,7 +127,7 @@ const StepSettingsAiChatContainer = ({
     lastAssistantMessageRef.current?.offsetHeight ?? 0;
 
   const bufferAreaHeight = getBufferAreaHeight(
-    numericHeight,
+    height,
     currentBufferAreaHeight,
     lastMsgHeight,
     lastAssistantMsgHeight,
@@ -190,7 +188,7 @@ const StepSettingsAiChatContainer = ({
 
       <div
         style={{
-          height,
+          height: `${height}px`,
           width:
             containerSize !== AI_CHAT_CONTAINER_SIZES.EXPANDED
               ? '450px'
