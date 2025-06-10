@@ -2,15 +2,15 @@ import { httpClient, HttpMethod } from '@openops/blocks-common';
 import { createAction, Property } from '@openops/blocks-framework';
 import { archeraAuth } from '../../auth';
 
-export const getRecommendedPlan = createAction({
+export const getDefaultCommitmentPlansAction = createAction({
   auth: archeraAuth,
-  name: 'archera_get_recommended_plan',
-  description: 'Get recommended Archera commitment plan for a given provider',
-  displayName: 'Get Recommended Plan',
+  name: 'archera_get_default_commitment_plans',
+  description: 'Retrieve the default Archera commitment plans for a given provider',
+  displayName: 'Get Default Commitment Plans',
   props: {
     provider: Property.StaticDropdown({
       displayName: 'Provider',
-      description: 'The cloud provider to fetch recommendations for.',
+      description: 'The cloud provider to fetch default commitment plans for.',
       required: true,
       options: {
         options: [
@@ -23,7 +23,7 @@ export const getRecommendedPlan = createAction({
   async run(context) {
     const response = await httpClient.sendRequest({
       method: HttpMethod.GET,
-      url: `https://api.archera.ai/v1/org/${context.auth.orgId}/commitment-plans/recommended`,
+      url: `https://api.archera.ai/v1/org/${context.auth.orgId}/commitment-plans/default`,
       headers: {
         'x-api-key': context.auth.apiToken,
       },
