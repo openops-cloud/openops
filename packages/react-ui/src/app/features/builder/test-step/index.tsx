@@ -59,15 +59,11 @@ const TestStepContainer = React.memo(
                   avoidCollisions
                   hideWhenDetached
                   side="bottom"
-                  className="font-medium text-left text-black"
+                  className="font-medium text-left text-black max-w-[418px] text-wrap"
                 >
                   {t(
-                    'Sample data is for building and testing only - scheduled runs\n and test workflow are using the real step output.',
-                  )
-                    .split('\n')
-                    .map((line, index) => (
-                      <div key={index}>{line}</div>
-                    ))}
+                    'Sample data is for building and testing only - scheduled runs and test workflow are using the real step output.',
+                  )}
                 </TooltipContent>
               </Tooltip>
             </TabsTrigger>
