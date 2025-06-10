@@ -5,6 +5,7 @@ import { ReactNode, useEffect, useRef } from 'react';
 import { cn } from '../../lib/cn';
 import { AI_CHAT_SCROLL_DELAY } from '../../lib/constants';
 import { ScrollArea } from '../../ui/scroll-area';
+import { AIChatMessageRole } from '../ai-chat-messages';
 import { BoxSize, ResizableArea } from '../resizable-area';
 import { AiChatInput } from './ai-chat-input';
 import { AiChatSizeTogglers } from './ai-chat-size-togglers';
@@ -66,6 +67,19 @@ const AiAssistantChatContainer = ({
   const lastUserMessageId = useRef<string | null>(
     getLastUserMessageId(messages),
   );
+  const lastUserMessageIndex = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (showAiChat) {
+      if (lastUserMessageIndex.current === null && messages.length) {
+        lastUserMessageIndex.current = messages
+          .map((m) => m.role)
+          .lastIndexOf(AIChatMessageRole.user);
+      }
+    } else {
+      lastUserMessageIndex.current = null;
+    }
+  }, [showAiChat, messages]);
 
   // scroll to the last user message, when getting a new user message
   useEffect(() => {
@@ -73,8 +87,10 @@ const AiAssistantChatContainer = ({
     if (!scrollArea || scrollArea.scrollHeight <= scrollArea.clientHeight) {
       return;
     }
-    if (messages.length) {
-      const lastUserIndex = messages.map((m) => m.role).lastIndexOf('user');
+    if (messages.length && showAiChat) {
+      const lastUserIndex = messages
+        .map((m) => m.role)
+        .lastIndexOf(AIChatMessageRole.user);
       if (
         lastUserIndex !== -1 &&
         lastUserMessageId?.current !== messages[lastUserIndex].id
@@ -86,12 +102,12 @@ const AiAssistantChatContainer = ({
         });
       }
     }
-  }, [messages]);
+  }, [messages, showAiChat]);
 
   // scroll to the bottom of the chat when the chat is opened
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
-    if (!isEmpty && showAiChat && !!children && !hasAutoScrolled.current) {
+    if (!isEmpty && showAiChat && messages.length && !hasAutoScrolled.current) {
       timeoutId = setTimeout(() => {
         if (scrollViewportRef.current) {
           scrollViewportRef.current.scrollTo({
@@ -105,7 +121,7 @@ const AiAssistantChatContainer = ({
     return () => {
       clearTimeout(timeoutId);
     };
-  }, [isEmpty, showAiChat, children]);
+  }, [isEmpty, showAiChat, messages.length]);
 
   const height = dimensions.height ?? 0;
   const lastMsgHeight = lastUserMessageRef.current?.offsetHeight ?? 0;
@@ -113,13 +129,19 @@ const AiAssistantChatContainer = ({
   const lastAssistantMsgHeight =
     lastAssistantMessageRef?.current?.offsetHeight ?? 0;
 
-  const bufferAreaHeight = getBufferAreaHeight(
-    height,
-    currentBufferAreaHeight,
-    lastMsgHeight,
-    lastAssistantMsgHeight,
-    status,
-  );
+  const hasNewMessage =
+    lastUserMessageIndex.current !== null &&
+    lastUserMessageIndex.current !== messages.length - 2;
+
+  const bufferAreaHeight = hasNewMessage
+    ? getBufferAreaHeight(
+        height,
+        currentBufferAreaHeight,
+        lastMsgHeight,
+        lastAssistantMsgHeight,
+        status,
+      )
+    : 0;
 
   return (
     <div

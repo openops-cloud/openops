@@ -122,7 +122,10 @@ const StepSettingsAiChat = ({
       selectedModel={selectedModel}
       onModelSelected={onModelSelected}
       isModelSelectorLoading={isModelSelectorLoading}
-      messages={messages.map((m) => ({ id: m.id, role: m.role }))}
+      messages={messages.map((m, idx) => ({
+        id: m.id ?? String(idx),
+        role: m.role,
+      }))}
       status={status}
       lastUserMessageRef={lastUserMessageRef}
       lastAssistantMessageRef={lastAssistantMessageRef}

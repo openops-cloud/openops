@@ -5,6 +5,7 @@ import { ReactNode, useEffect, useRef } from 'react';
 import { cn } from '../../lib/cn';
 import { AI_CHAT_SCROLL_DELAY } from '../../lib/constants';
 import { ScrollArea } from '../../ui/scroll-area';
+import { AIChatMessageRole } from '../ai-chat-messages';
 import { AiChatInput } from './ai-chat-input';
 import { AiChatSizeTogglers } from './ai-chat-size-togglers';
 import { AiModelSelectorProps } from './ai-model-selector';
@@ -64,17 +65,35 @@ const StepSettingsAiChatContainer = ({
   const lastUserMessageId = useRef<string | null>(
     getLastUserMessageId(messages),
   );
-
+  const lastUserMessageIndex = useRef<number | null>(null);
   const streamingEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     hasScrolledOnce.current = false;
   }, [stepName]);
 
+  useEffect(() => {
+    if (showAiChat) {
+      if (lastUserMessageIndex.current === null && messages.length) {
+        lastUserMessageIndex.current = messages
+          .map((m) => m.role)
+          .lastIndexOf(AIChatMessageRole.user);
+      }
+    } else {
+      lastUserMessageIndex.current = null;
+    }
+  }, [showAiChat, messages]);
+
   // scroll to the last user message, when getting a new user message
   useEffect(() => {
-    if (messages.length) {
-      const lastUserIndex = messages.map((m) => m.role).lastIndexOf('user');
+    const scrollArea = scrollViewportRef.current;
+    if (!scrollArea || scrollArea.scrollHeight <= scrollArea.clientHeight) {
+      return;
+    }
+    if (messages.length && showAiChat) {
+      const lastUserIndex = messages
+        .map((m) => m.role)
+        .lastIndexOf(AIChatMessageRole.user);
       if (
         lastUserIndex !== -1 &&
         lastUserMessageId?.current !== messages[lastUserIndex].id
@@ -86,7 +105,7 @@ const StepSettingsAiChatContainer = ({
         });
       }
     }
-  }, [messages]);
+  }, [messages, showAiChat]);
 
   // scroll to the bottom of the chat when the chat is opened
   useEffect(() => {
@@ -126,17 +145,23 @@ const StepSettingsAiChatContainer = ({
   const lastAssistantMsgHeight =
     lastAssistantMessageRef.current?.offsetHeight ?? 0;
 
-  const bufferAreaHeight = getBufferAreaHeight(
-    height,
-    currentBufferAreaHeight,
-    lastMsgHeight,
-    lastAssistantMsgHeight,
-    status,
-    {
-      readyGap: 220,
-      streamingGap: 180,
-    },
-  );
+  const hasNewMessage =
+    lastUserMessageIndex.current !== null &&
+    lastUserMessageIndex.current !== messages.length - 2;
+
+  const bufferAreaHeight = hasNewMessage
+    ? getBufferAreaHeight(
+        height,
+        currentBufferAreaHeight,
+        lastMsgHeight,
+        lastAssistantMsgHeight,
+        status,
+        {
+          readyGap: 220,
+          streamingGap: 180,
+        },
+      )
+    : 0;
 
   return (
     <div
