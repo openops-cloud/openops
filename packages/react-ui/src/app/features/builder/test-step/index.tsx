@@ -53,7 +53,10 @@ const TestStepContainer = React.memo(
               {t('Sample output data')}
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Info className="w-4 h-4 text-black" />
+                  <Info
+                    className="w-4 h-4 text-black"
+                    aria-label={t('Sample output info')}
+                  />
                 </TooltipTrigger>
                 <TooltipContent
                   avoidCollisions
