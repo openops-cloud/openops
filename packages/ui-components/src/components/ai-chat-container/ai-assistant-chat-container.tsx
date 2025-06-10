@@ -9,6 +9,7 @@ import { BoxSize, ResizableArea } from '../resizable-area';
 import { AiChatInput } from './ai-chat-input';
 import { AiChatSizeTogglers } from './ai-chat-size-togglers';
 import { AiModelSelectorProps } from './ai-model-selector';
+import { getBufferAreaHeight, getLastUserMessageId } from './ai-scroll-helpers';
 import { AI_CHAT_CONTAINER_SIZES, AiAssistantChatSizeState } from './types';
 
 type AiAssistantChatContainerProps = {
@@ -33,31 +34,6 @@ type AiAssistantChatContainerProps = {
 export const CHAT_MIN_WIDTH = 375;
 export const PARENT_INITIAL_HEIGHT_GAP = 220;
 export const PARENT_MAX_HEIGHT_GAP = 95;
-
-const getLastUserMessageId = (messages: { id: string; role: string }[]) => {
-  const lastUserIndex = messages.map((m) => m.role).lastIndexOf('user');
-  return lastUserIndex !== -1 ? messages[lastUserIndex].id : null;
-};
-
-const getBufferAreaHeight = (
-  height: number,
-  currentBufferAreaHeight: number,
-  lastUserMsgHeight: number,
-  lastAssistantMsgHeight: number,
-  status?: string,
-) => {
-  if (status === 'ready') {
-    return Math.floor(Math.max(32, height - lastAssistantMsgHeight - 280));
-  }
-
-  if (['streaming', 'submitted'].includes(status ?? '')) {
-    return Math.floor(Math.max(0, height - lastUserMsgHeight - 240));
-  }
-
-  return Math.floor(
-    Math.max(32, currentBufferAreaHeight - lastAssistantMsgHeight),
-  );
-};
 
 const AiAssistantChatContainer = ({
   dimensions,
@@ -108,7 +84,7 @@ const AiAssistantChatContainer = ({
     }
   }, [lastUserMessageRef, messages]);
 
-  // initial scroll to the bottom when the chat is opened
+  // scroll to the bottom of the chat when the chat is opened
   useEffect(() => {
     if (!isEmpty && showAiChat && !!children && !hasAutoScrolled.current) {
       setTimeout(() => {
