@@ -14,6 +14,18 @@ export function accountProperty() {
   });
 }
 
+export function accountSingleSelectProperty() {
+  return Property.Dropdown({
+    displayName: 'Accounts',
+    description: 'A list of available Umbrella accounts',
+    refreshers: ['auth'],
+    required: true,
+    options: async ({ auth }: any) => {
+      return getAccountDropdownState(auth);
+    },
+  });
+}
+
 async function getAccountDropdownState(
   auth: any,
 ): Promise<DropdownState<unknown>> {
@@ -57,9 +69,9 @@ async function getAccountDropdownState(
   } catch (error) {
     return {
       disabled: true,
+      error: (error as Error).message,
       options: [],
-      placeholder:
-        'Could not fetch Umbrella user accounts: ' + (error as Error).message,
+      placeholder: 'Could not fetch Umbrella user accounts',
     } as DropdownState<unknown>;
   }
 }
