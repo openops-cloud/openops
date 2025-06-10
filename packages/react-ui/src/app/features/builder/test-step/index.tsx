@@ -6,9 +6,13 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
 } from '@openops/components/ui';
 import { ActionType, TriggerType } from '@openops/shared';
 import { t } from 'i18next';
+import { Info } from 'lucide-react';
 import React from 'react';
 import { TestActionSection } from './test-action-section';
 import { TestTriggerSection } from './test-trigger-section';
@@ -44,9 +48,28 @@ const TestStepContainer = React.memo(
             </TabsTrigger>
             <TabsTrigger
               value={TabListEnum.SAMPLE_STEP_OUTPUT}
-              className="font-bold text-primary-300 text-base pr-0 pl-2 dark:text-white rounded-none  border-b-2 data-[state=active]:bg-background data-[state=active]:text-primary-300 data-[state=active]:dark:text-white data-[state=active]:shadow-none data-[state=active]:border-blueAccent-300"
+              className="font-bold text-primary-300 text-base pr-0 pl-2 dark:text-white rounded-none border-b-2 data-[state=active]:bg-background data-[state=active]:text-primary-300 data-[state=active]:dark:text-white data-[state=active]:shadow-none data-[state=active]:border-blueAccent-300 gap-1"
             >
               {t('Sample output data')}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="w-4 h-4 text-black" />
+                </TooltipTrigger>
+                <TooltipContent
+                  avoidCollisions
+                  hideWhenDetached
+                  side="bottom"
+                  className="font-medium text-left text-black"
+                >
+                  {t(
+                    'Sample data is for building and testing only - scheduled runs\n and test workflow are using the real step output.',
+                  )
+                    .split('\n')
+                    .map((line, index) => (
+                      <div key={index}>{line}</div>
+                    ))}
+                </TooltipContent>
+              </Tooltip>
             </TabsTrigger>
           </TabsList>
           <TabsContent value={TabListEnum.STEP_OUTPUT}>
