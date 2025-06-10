@@ -20,7 +20,7 @@ export const applyCommitmentPlanAction = createAction({
         url: `https://api.archera.ai/v1/org/${context.auth.orgId}/commitment-plans/${context.propsValue.planId}/apply`,
         headers: {
             'x-api-key': context.auth.apiToken,
-          },
+        },
       });
   
       return response.body;

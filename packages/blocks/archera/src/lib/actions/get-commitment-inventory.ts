@@ -104,7 +104,7 @@ export const getCommitmentsInventoryAction = createAction({
         url: `https://api.archera.ai/v1/org/${context.auth.orgId}/commitments`,
         headers: {
             'x-api-key': context.auth.apiToken,
-          },
+        },
         queryParams,
       });
   
