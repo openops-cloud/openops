@@ -96,6 +96,10 @@ const meta = {
     aiChatSize: 'docked',
     toggleAiChatState: fn(),
     onCreateNewChatClick: action('onNewChatClick'),
+    availableModels: ['gpt-3.5-turbo', 'gpt-4', 'claude-2'],
+    selectedModel: 'gpt-4',
+    onModelSelected: action('onModelSelected'),
+    isModelSelectorLoading: false,
   },
 
   tags: ['autodocs'],
@@ -140,6 +144,9 @@ export const WithMessages: Story = {
   args: {
     isEmpty: false,
   },
+  parameters: {
+    chromatic: { delay: 1000 },
+  },
   render: (args) => {
     const {
       aiChatSize,
@@ -170,6 +177,9 @@ export const WithMessages: Story = {
 export const WithMessagesCopyAndInject: Story = {
   args: {
     isEmpty: false,
+  },
+  parameters: {
+    chromatic: { delay: 500 },
   },
   render: (args) => {
     const {

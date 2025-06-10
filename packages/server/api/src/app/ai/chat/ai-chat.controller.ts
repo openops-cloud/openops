@@ -161,7 +161,7 @@ const OpenChatOptions = {
   schema: {
     tags: ['ai', 'ai-chat'],
     description:
-      'Opens a chat session, either starting fresh or resuming prior messages if the conversation has history.',
+      'Initialize a new chat session or resume an existing one. This endpoint creates a unique chat ID and context for the conversation, storing the workflow, block, step, and action information for future reference.',
     body: OpenChatRequest,
   },
 };
@@ -172,7 +172,8 @@ const NewMessageOptions = {
   },
   schema: {
     tags: ['ai', 'ai-chat'],
-    description: 'Sends a message to the chat session',
+    description:
+      'Send a message to the AI chat session and receive a streaming response. This endpoint processes the user message, generates an AI response using the configured language model, and maintains the conversation history.',
     body: NewMessageRequest,
   },
 };
@@ -183,7 +184,8 @@ const DeleteChatOptions = {
   },
   schema: {
     tags: ['ai', 'ai-chat'],
-    description: 'Deletes a chat history chat ID.',
+    description:
+      'Delete a chat session and its associated history. This endpoint removes all messages and context data for the specified chat ID, effectively ending the conversation.',
     params: DeleteChatHistoryRequest,
   },
 };

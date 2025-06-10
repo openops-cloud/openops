@@ -1,3 +1,11 @@
+const mockSystem = { getBoolean: jest.fn().mockReturnValue(false) };
+jest.mock('@openops/server-shared', () => ({
+  system: mockSystem,
+  SharedSystemProp: {
+    AWS_ENABLE_IMPLICIT_ROLE: 'AWS_ENABLE_IMPLICIT_ROLE',
+  },
+}));
+
 import { getAwsClient } from '../../src/lib/aws/get-client';
 
 class MockServiceClient {
@@ -53,4 +61,34 @@ describe('getClient', () => {
       });
     },
   );
+
+  test('should throw an error if credentials are not provided', () => {
+    const credentials = {
+      accessKeyId: '',
+      secretAccessKey: '',
+    };
+    expect(() => {
+      getAwsClient(MockServiceClient, credentials, region);
+    }).toThrow(
+      'AWS credentials are required, please provide accessKeyId and secretAccessKey',
+    );
+  });
+
+  test('should not throw an error if credentials are not required', () => {
+    mockSystem.getBoolean.mockReturnValue(true);
+    const credentials = {
+      accessKeyId: '',
+      secretAccessKey: '',
+    };
+    try {
+      const client = getAwsClient(MockServiceClient, credentials, region);
+      expect(client).toBeInstanceOf(MockServiceClient);
+      expect(client.config).toEqual({
+        region,
+        endpoint: undefined,
+      });
+    } finally {
+      mockSystem.getBoolean.mockReturnValue(false);
+    }
+  });
 });

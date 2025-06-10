@@ -17,7 +17,10 @@ const markdown = `
 5.Select **API** tab.\n
 6.Copy your personal token`;
 
-export const mondayAuth = BlockAuth.SecretText({
+export const mondayAuth = BlockAuth.SecretAuth({
+  authProviderKey: 'Monday',
+  authProviderDisplayName: 'monday.com',
+  authProviderLogoUrl: `https://static.openops.com/blocks/monday.png`,
   displayName: 'API v2 Token',
   description: markdown,
   required: true,

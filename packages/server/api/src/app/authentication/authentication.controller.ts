@@ -38,6 +38,8 @@ const AnalyticsGuestTokenRequestOptions = {
     allowedPrincipals: ALL_PRINCIPAL_TYPES,
   },
   schema: {
+    description:
+      'Retrieve a guest token for accessing analytics dashboards. This endpoint requires a valid dashboard embed UUID to generate a temporary access token for embedded dashboard views.',
     querystring: GetBlockRequestParams,
   },
 };
@@ -143,6 +145,8 @@ const SignUpRequestOptions = {
     rateLimit: rateLimitOptions,
   },
   schema: {
+    description:
+      'Register a new user in the system. This endpoint is restricted to admin users only and requires email and password credentials. In community edition, users are automatically verified upon registration.',
     body: SignUpRequest,
   },
 };
@@ -153,6 +157,8 @@ const SignInRequestOptions = {
     rateLimit: rateLimitOptions,
   },
   schema: {
+    description:
+      'Authenticate a user and generate access tokens. This endpoint validates email and password credentials, resolves the organization context, and returns JWT tokens for subsequent API access. Rate limited to prevent brute force attacks.',
     body: SignInRequest,
   },
 };

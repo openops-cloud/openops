@@ -20,6 +20,7 @@ import {
   streamText,
   TextPart,
   ToolCallPart,
+  ToolChoice,
   ToolResultPart,
   ToolSet,
 } from 'ai';
@@ -107,7 +108,11 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       content: request.body.message,
     });
 
-    const { mcpClients, tools } = await getMCPTools();
+    const { mcpClients, tools } = await getMCPTools(
+      app,
+      request.headers.authorization?.replace('Bearer ', '') ?? '',
+    );
+
     const filteredTools = await selectRelevantTools({
       messages,
       tools,
@@ -192,7 +197,7 @@ const OpenChatOptions = {
   schema: {
     tags: ['ai', 'ai-chat-mcp'],
     description:
-      'Opens a chat session, either starting fresh or resuming prior messages if the conversation has history.',
+      'Initialize a new MCP chat session or resume an existing one. This endpoint creates a unique chat ID and context for the conversation, supporting integration with MCP tools and services.',
     body: OpenChatMCPRequest,
   },
 };
@@ -203,7 +208,8 @@ const NewMessageOptions = {
   },
   schema: {
     tags: ['ai', 'ai-chat-mcp'],
-    description: 'Sends a message to the chat session',
+    description:
+      'Send a message to the MCP chat session and receive a streaming response. This endpoint processes the user message, generates an AI response using the configured language model, and maintains the conversation history while integrating with MCP tools.',
     body: NewMessageRequest,
   },
 };
@@ -214,7 +220,8 @@ const DeleteChatOptions = {
   },
   schema: {
     tags: ['ai', 'ai-chat-mcp'],
-    description: 'Deletes chat history by chat ID.',
+    description:
+      'Delete an MCP chat session and its associated history. This endpoint removes all messages, context data, and MCP tool states for the specified chat ID, effectively ending the conversation.',
     params: DeleteChatHistoryRequest,
   },
 };
@@ -230,13 +237,20 @@ async function streamMessages(
   tools?: ToolSet,
 ): Promise<void> {
   let stepCount = 0;
+
+  let toolChoice: ToolChoice<Record<string, never>> = 'auto';
+  if (!tools || Object.keys(tools).length === 0) {
+    toolChoice = 'none';
+    systemPrompt += `\n\nMCP tools are not available in this chat. Do not claim access or simulate responses from them under any circumstance.`;
+  }
+
   const result = streamText({
     model: languageModel,
     system: systemPrompt,
     messages,
     ...aiConfig.modelSettings,
     tools,
-    toolChoice: 'auto',
+    toolChoice,
     maxRetries: 1,
     maxSteps: MAX_RECURSION_DEPTH,
     async onStepFinish({ finishReason }): Promise<void> {

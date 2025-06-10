@@ -18,7 +18,11 @@ import { MarkDownProperty } from './markdown-property';
 import { NumberProperty } from './number-property';
 import { ObjectProperty } from './object-property';
 import { PropertyType } from './property-type';
-import { LongTextProperty, ShortTextProperty } from './text-property';
+import {
+  LongTextProperty,
+  SecretTextProperty,
+  ShortTextProperty,
+} from './text-property';
 
 export const InputProperty = Type.Union([
   ShortTextProperty,
@@ -36,6 +40,7 @@ export const InputProperty = Type.Union([
   JsonProperty,
   DateTimeProperty,
   FileProperty,
+  SecretTextProperty,
 ]);
 
 export type InputProperty =
@@ -53,7 +58,8 @@ export type InputProperty =
   | StaticMultiSelectDropdownProperty<unknown, boolean>
   | DynamicProperties<boolean>
   | DateTimeProperty<boolean>
-  | FileProperty<boolean>;
+  | FileProperty<boolean>
+  | SecretTextProperty<boolean>;
 
 type Properties<T> = Omit<
   T,
@@ -228,5 +234,17 @@ export const Property = {
       valueSchema: undefined,
       type: PropertyType.FILE,
     } as unknown as R extends true ? FileProperty<true> : FileProperty<false>;
+  },
+  SecretText<R extends boolean>(
+    request: Properties<SecretTextProperty<R>>,
+  ): R extends true ? SecretTextProperty<true> : SecretTextProperty<false> {
+    return {
+      ...request,
+      valueSchema: undefined,
+      type: PropertyType.SECRET_TEXT,
+      defaultValidators: [Validators.string],
+    } as unknown as R extends true
+      ? SecretTextProperty<true>
+      : SecretTextProperty<false>;
   },
 };

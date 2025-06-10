@@ -16,7 +16,7 @@ export {
   OAuth2PropertyValue,
   OAuth2Props,
 } from './authentication/oauth2-prop';
-export { SecretTextProperty } from './authentication/secret-text-property';
+export { SecretAuthProperty } from './authentication/secret-auth-property';
 export { Property } from './input';
 export { ArrayProperty, ArraySubProps } from './input/array-property';
 export { CheckboxProperty } from './input/checkbox-property';
@@ -41,7 +41,11 @@ export { JsonProperty } from './input/json-property';
 export { NumberProperty } from './input/number-property';
 export { ObjectProperty } from './input/object-property';
 export { PropertyType } from './input/property-type';
-export { LongTextProperty, ShortTextProperty } from './input/text-property';
+export {
+  LongTextProperty,
+  SecretTextProperty,
+  ShortTextProperty,
+} from './input/text-property';
 export const BlockProperty = Type.Union([InputProperty, BlockAuthProperty]);
 export type BlockProperty = InputProperty | BlockAuthProperty;
 

@@ -3,7 +3,11 @@ import Client from 'ssh2-sftp-client';
 import { createFile } from './lib/actions/create-file';
 import { readFileContent } from './lib/actions/read-file';
 import { newOrModifiedFile } from './lib/triggers/new-modified-file';
+
 export const sftpAuth = BlockAuth.CustomAuth({
+  authProviderKey: 'SFTP',
+  authProviderDisplayName: 'SFTP',
+  authProviderLogoUrl: `https://static.openops.com/blocks/sftp.svg`,
   description: 'Enter the authentication details',
   props: {
     host: Property.ShortText({
@@ -22,7 +26,7 @@ export const sftpAuth = BlockAuth.CustomAuth({
       description: 'The username of the SFTP server',
       required: true,
     }),
-    password: BlockAuth.SecretText({
+    password: Property.SecretText({
       displayName: 'Password',
       description: 'The password of the SFTP server',
       required: true,

@@ -71,6 +71,7 @@ export const appConnectionService = {
       value: encryptedConnectionValue,
       id: existingConnection?.id ?? openOpsId(),
       projectId,
+      authProviderKey: request.authProviderKey,
     };
 
     await repo().upsert(connection, ['name', 'projectId']);
@@ -212,6 +213,7 @@ export const appConnectionService = {
     status,
     limit,
     connectionsIds,
+    authProviders,
   }: ListParams): Promise<SeekPage<AppConnection>> {
     const decodedCursor = paginationHelper.decodeCursor(cursorRequest);
 
@@ -237,9 +239,11 @@ export const appConnectionService = {
     if (!isNil(status)) {
       querySelector.status = In(status);
     }
-
     if (!isNil(connectionsIds)) {
       querySelector.id = In(connectionsIds);
+    }
+    if (!isNil(authProviders) && authProviders.length > 0) {
+      querySelector.authProviderKey = In(authProviders);
     }
 
     const queryBuilder = repo()
@@ -279,6 +283,7 @@ export const appConnectionService = {
         cursorRequest: null,
         name: undefined,
         status: [AppConnectionStatus.ACTIVE],
+        authProviders: undefined,
       })
     ).data.map(removeSensitiveData);
   },
@@ -520,6 +525,7 @@ type ListParams = {
   name: string | undefined;
   status: AppConnectionStatus[] | undefined;
   limit: number;
+  authProviders: string[] | undefined;
 };
 
 type CountByProjectParams = {

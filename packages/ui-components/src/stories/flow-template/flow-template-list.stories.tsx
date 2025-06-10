@@ -1,17 +1,18 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { expect } from '@storybook/jest';
+import type { Meta, StoryObj } from '@storybook/react';
+import { fn, screen, userEvent, waitFor } from '@storybook/test';
+import { useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import {
   FlowTemplateFilterSidebar,
   FlowTemplateList,
   FlowTemplateMetadataWithIntegrations,
-} from '@/components';
-import { Dialog, DialogContent } from '@/ui/dialog';
-import { VerticalDivider } from '@/ui/vertical-divider';
-import { expect } from '@storybook/jest';
-import type { Meta, StoryObj } from '@storybook/react';
-import { fn, screen, userEvent, waitFor } from '@storybook/test';
-import { v4 as uuidv4 } from 'uuid';
+} from '../../components';
 import { cn } from '../../lib/cn';
+import { Dialog, DialogContent } from '../../ui/dialog';
 import { TooltipProvider } from '../../ui/tooltip';
+import { VerticalDivider } from '../../ui/vertical-divider';
 import { mocks as storyMocks } from './mocks';
 
 /**
@@ -27,39 +28,47 @@ const meta = {
       disable: true,
     },
   },
-  render: (args) => (
-    <TooltipProvider>
-      <Dialog open={true} onOpenChange={() => {}}>
-        <DialogContent
-          className={cn(
-            'flex flex-col p-0 transition-none h-[90vh] max-w-[1380px]',
-            {
-              'max-w-[1137px]': !args.isFullCatalog,
-            },
-          )}
-        >
-          <div className="flex bg-background h-full rounded-2xl">
-            {args.isFullCatalog && (
-              <>
-                <div className="w-[255px]">
-                  <FlowTemplateFilterSidebar
-                    services={storyMocks.services}
-                    domains={storyMocks.domains}
-                    selectedDomains={[]}
-                    selectedServices={[]}
-                    setSelectedDomains={args.setSelectedDomains}
-                    setSelectedServices={args.setSelectedServices}
-                  />
-                </div>
-                <VerticalDivider className="h-full" />
-              </>
+  render: (args) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const [selectedCategories, setSelectedCategories] = useState<string[]>([
+      'Azure',
+    ]);
+    return (
+      <TooltipProvider>
+        <Dialog open={true} onOpenChange={() => {}}>
+          <DialogContent
+            className={cn(
+              'flex flex-col p-0 transition-none h-[90vh] max-w-[1380px]',
+              {
+                'max-w-[1137px]': !args.isFullCatalog,
+              },
             )}
-            <FlowTemplateList {...args} />
-          </div>
-        </DialogContent>
-      </Dialog>
-    </TooltipProvider>
-  ),
+          >
+            <div className="flex bg-background h-full rounded-2xl">
+              {args.isFullCatalog && (
+                <>
+                  <div className="w-[255px]">
+                    <FlowTemplateFilterSidebar
+                      categories={storyMocks.categories}
+                      domains={storyMocks.domains}
+                      selectedDomains={[]}
+                      selectedServices={[]}
+                      selectedCategories={selectedCategories}
+                      setSelectedDomains={args.setSelectedDomains}
+                      setSelectedServices={args.setSelectedServices}
+                      onCategoryFilterClick={setSelectedCategories}
+                    />
+                  </div>
+                  <VerticalDivider className="h-full" />
+                </>
+              )}
+              <FlowTemplateList {...args} />
+            </div>
+          </DialogContent>
+        </Dialog>
+      </TooltipProvider>
+    );
+  },
 } satisfies Meta<typeof FlowTemplateList>;
 
 export default meta;
@@ -90,8 +99,12 @@ ConnectedToCloud.args = {
   onSearchInputChange: fn(),
   isFullCatalog: true,
   ownerLogoUrl: 'https://static.openops.com/logos/logo.icon.positive.svg',
+  selectedDomains: [],
+  selectedCategories: [],
+  selectedServices: [],
   setSelectedDomains: fn(),
   setSelectedServices: fn(),
+  setSelectedCategories: fn(),
   onExploreMoreClick: fn(),
 };
 

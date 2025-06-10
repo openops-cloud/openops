@@ -1,5 +1,6 @@
 import { AiAssistantConversation } from '@/app/features/ai/ai-assistant-conversation';
 import { useAiAssistantChat } from '@/app/features/ai/lib/ai-assistant-chat-hook';
+import { useAiModelSelector } from '@/app/features/ai/lib/ai-model-selector-hook';
 import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
 import { useAppStore } from '@/app/store/app-store';
 import {
@@ -55,6 +56,13 @@ const AiAssistantChat = ({
     createNewChat,
     isOpenAiChatPending,
   } = useAiAssistantChat();
+
+  const {
+    selectedModel,
+    availableModels,
+    onModelSelected,
+    isLoading: isModelSelectorLoading,
+  } = useAiModelSelector();
 
   const sizes = useMemo(() => {
     const calculatedWidth = middlePanelSize.width * CHAT_WIDTH_FACTOR;
@@ -130,6 +138,10 @@ const AiAssistantChat = ({
       onCreateNewChatClick={createNewChat}
       toggleAiChatState={onToggleAiChatState}
       aiChatSize={aiChatSize}
+      availableModels={availableModels}
+      selectedModel={selectedModel}
+      isModelSelectorLoading={isModelSelectorLoading}
+      onModelSelected={onModelSelected}
     >
       <AiAssistantConversation
         messages={messages}

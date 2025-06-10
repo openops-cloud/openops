@@ -9,11 +9,11 @@ import { Static, Type } from '@sinclair/typebox';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 
-import { SecretTextProperty } from '@openops/blocks-framework';
+import { SecretAuthProperty } from '@openops/blocks-framework';
 import { UpsertSecretTextRequest } from '@openops/shared';
 
 type SecretTextConnectionSettingsProps = {
-  authProperty: SecretTextProperty<boolean>;
+  authProperty: SecretAuthProperty<boolean>;
 };
 
 const SecretTextConnectionSettings = React.memo(
