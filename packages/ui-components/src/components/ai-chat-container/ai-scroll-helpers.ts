@@ -1,6 +1,7 @@
-export const BUFFER_MIN_HEIGHT = 32;
-export const BUFFER_READY_GAP = 280;
-export const BUFFER_STREAMING_GAP = 240;
+const BUFFER_MIN_HEIGHT = 32;
+const BUFFER_READY_GAP = 280;
+const BUFFER_STREAMING_GAP = 240;
+const DEFAULT_USER_MSG_HEIGHT = 62;
 
 export function getLastUserMessageId(
   messages: { id: string; role: string }[],
@@ -32,11 +33,13 @@ export function getBufferAreaHeight(
   }
 
   if (['streaming', 'submitted'].includes(status ?? '')) {
+    const userMsgHeight =
+      lastUserMsgHeight > 0 ? lastUserMsgHeight : DEFAULT_USER_MSG_HEIGHT;
     return Math.floor(
       Math.max(
         0,
         containerHeight -
-          lastUserMsgHeight -
+          userMsgHeight -
           (options?.streamingGap ?? BUFFER_STREAMING_GAP),
       ),
     );

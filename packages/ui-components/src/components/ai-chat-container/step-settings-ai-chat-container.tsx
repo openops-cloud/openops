@@ -81,7 +81,7 @@ const StepSettingsAiChatContainer = ({
       ) {
         lastUserMessageId.current = messages[lastUserIndex].id;
         streamingEndRef.current?.scrollIntoView({
-          behavior: 'smooth',
+          behavior: 'instant',
           block: 'start',
         });
       }

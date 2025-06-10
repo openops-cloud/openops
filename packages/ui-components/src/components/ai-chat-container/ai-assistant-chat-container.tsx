@@ -69,6 +69,10 @@ const AiAssistantChatContainer = ({
 
   // scroll to the last user message, when getting a new user message
   useEffect(() => {
+    const scrollArea = scrollViewportRef.current;
+    if (!scrollArea || scrollArea.scrollHeight <= scrollArea.clientHeight) {
+      return;
+    }
     if (messages.length) {
       const lastUserIndex = messages.map((m) => m.role).lastIndexOf('user');
       if (

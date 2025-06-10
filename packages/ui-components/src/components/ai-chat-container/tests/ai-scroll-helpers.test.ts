@@ -1,5 +1,4 @@
 import {
-  BUFFER_MIN_HEIGHT,
   getBufferAreaHeight,
   getLastUserMessageId,
 } from '../ai-scroll-helpers';
@@ -59,7 +58,7 @@ describe('getBufferAreaHeight', () => {
   });
 
   it('handles negative and zero heights', () => {
-    expect(getBufferAreaHeight(0, 0, 0, 0, 'ready')).toBe(BUFFER_MIN_HEIGHT);
+    expect(getBufferAreaHeight(0, 0, 0, 0, 'ready')).toBe(32);
     expect(getBufferAreaHeight(-100, -100, -100, -100, 'streaming')).toBe(0);
   });
 });
