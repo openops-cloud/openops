@@ -3,26 +3,7 @@ import {
   DescribeAccountCommand,
   OrganizationsClient,
 } from '@aws-sdk/client-organizations';
-
-function getOrganizationsClient(
-  accessKeyId: string,
-  secretAccessKey: string,
-  defaultRegion: string,
-  sessionToken?: string,
-  endpoint?: string,
-): OrganizationsClient {
-  const auth = {
-    region: defaultRegion,
-    credentials: {
-      accessKeyId: accessKeyId,
-      secretAccessKey: secretAccessKey,
-      sessionToken: sessionToken,
-    },
-    endpoint: endpoint,
-  };
-
-  return new OrganizationsClient(auth);
-}
+import { getAwsClient } from './get-client';
 
 export async function getAccountName(
   credentials: any,
@@ -46,13 +27,7 @@ export async function getAccountInformation(
   defaultRegion: string,
   accountId: string,
 ): Promise<Account | undefined> {
-  const client = getOrganizationsClient(
-    credentials.accessKeyId,
-    credentials.secretAccessKey,
-    defaultRegion,
-    credentials.sessionToken,
-    credentials.endpoint,
-  );
+  const client = getAwsClient(OrganizationsClient, credentials, defaultRegion);
   const command = new DescribeAccountCommand({ AccountId: accountId });
 
   const response = await client.send(command);

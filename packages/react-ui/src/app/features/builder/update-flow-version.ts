@@ -83,11 +83,17 @@ async function deleteChatRequest(flowVersion: FlowVersion, stepName: string) {
   try {
     const stepDetails = flowHelper.getStep(flowVersion, stepName);
     const blockName = stepDetails?.settings?.blockName;
+    const actionName = stepDetails?.settings?.actionName;
+
+    if (!blockName || !actionName) {
+      return;
+    }
+
     const chat = await aiChatApi.open(
       flowVersion.flowId,
       blockName,
       stepName,
-      stepDetails?.settings.actionName,
+      actionName,
     );
     await aiChatApi.delete(chat.chatId);
   } catch (err) {

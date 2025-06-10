@@ -1,12 +1,12 @@
-import { Button } from '@openops/components/ui';
+import { Button, JsonViewer } from '@openops/components/ui';
 import { t } from 'i18next';
 import React, { useMemo } from 'react';
 
-import { JsonViewer } from '@/app/common/components/json-viewer';
 import { StepStatusIcon } from '@/app/features/flow-runs/components/step-status-icon';
 import { formatUtils } from '@/app/lib/utils';
 import { ActionType, StepOutputStatus, TriggerType } from '@openops/shared';
 
+import { useTheme } from '@/app/common/providers/theme-provider';
 import { TestButtonTooltip } from './test-step-tooltip';
 
 type TestSampleDataViewerProps = {
@@ -37,6 +37,9 @@ const TestSampleDataViewer = React.memo(
       () => formatUtils.formatStepInputOrOutput(currentSelectedData),
       [currentSelectedData],
     );
+
+    const { theme } = useTheme();
+
     return (
       <>
         {!isTesting && children}
@@ -85,6 +88,7 @@ const TestSampleDataViewer = React.memo(
           <JsonViewer
             json={errorMessage ?? formattedData}
             title={t('Output')}
+            theme={theme}
           ></JsonViewer>
         </div>
       </>

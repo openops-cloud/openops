@@ -380,7 +380,7 @@ const TestTriggerSection = React.memo(
                 disabled={!isValid}
               >
                 <Dot animation={true} variant={'primary'}></Dot>
-                {t('Load Sample Data')}
+                {t('Load Data')}
               </Button>
             </TestButtonTooltip>
           </div>
