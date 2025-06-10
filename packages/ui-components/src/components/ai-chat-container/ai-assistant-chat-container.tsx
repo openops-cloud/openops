@@ -86,7 +86,7 @@ const AiAssistantChatContainer = ({
         });
       }
     }
-  }, [lastUserMessageRef, messages]);
+  }, [messages]);
 
   // scroll to the bottom of the chat when the chat is opened
   useEffect(() => {
