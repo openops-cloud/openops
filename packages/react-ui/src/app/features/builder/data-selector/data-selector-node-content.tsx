@@ -1,6 +1,6 @@
 import { BlockIcon, Button, TooltipWrapper } from '@openops/components/ui';
 import { t } from 'i18next';
-import { ChevronDown, ChevronUp, CircleAlert } from 'lucide-react';
+import { ChevronDown, ChevronUp, Info } from 'lucide-react';
 
 import { flowHelper } from '@openops/shared';
 
@@ -101,8 +101,8 @@ const DataSelectorNodeContent = ({
             tooltipText={t('Step contains sample data')}
             tooltipPlacement="bottom"
           >
-            <CircleAlert
-              className="min-w-4 w-4 h-4 text-warning-200"
+            <Info
+              className="min-w-4 w-4 h-4 text-blueAccent"
               role="img"
               aria-label={t('Step contains sample data')}
             />

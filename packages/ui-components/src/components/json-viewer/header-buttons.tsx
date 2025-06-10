@@ -6,6 +6,7 @@ import { Button } from '../../ui/button';
 type HeaderButtonsProps = {
   isEditMode: boolean;
   readonly: boolean;
+  showDeleteButton: boolean;
   handleCopy: () => void;
   handleDownload: () => void;
   handleEdit: () => void;
@@ -16,6 +17,7 @@ type HeaderButtonsProps = {
 export const HeaderButtons = ({
   isEditMode,
   readonly,
+  showDeleteButton,
   handleCopy,
   handleDownload,
   handleEdit,
@@ -26,16 +28,19 @@ export const HeaderButtons = ({
     <div className="flex items-center gap-2">
       {isEditMode && apply ? (
         <Button variant={'ghost'} size={'sm'} onClick={apply}>
-          <Check className="w-4 h-4" />
+          <Check className="w-4 h-4 mr-[3px]" />
           {t('Apply')}
         </Button>
       ) : (
         <>
           {!readonly && (
             <>
-              <Button variant={'ghost'} size={'sm'} onClick={handleDelete}>
-                <Trash className="w-4 h-4" />
-              </Button>
+              {showDeleteButton && (
+                <Button variant={'ghost'} size={'sm'} onClick={handleDelete}>
+                  <Trash className="w-4 h-4" />
+                </Button>
+              )}
+
               <Button variant={'ghost'} size={'sm'} onClick={handleEdit}>
                 <Pencil className="w-4 h-4" />
               </Button>
