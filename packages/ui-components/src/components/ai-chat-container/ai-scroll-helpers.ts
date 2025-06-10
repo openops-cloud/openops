@@ -15,19 +15,30 @@ export function getBufferAreaHeight(
   lastUserMsgHeight: number,
   lastAssistantMsgHeight: number,
   status?: string,
+  options?: {
+    readyGap?: number;
+    streamingGap?: number;
+  },
 ): number {
   if (status === 'ready') {
     return Math.floor(
       Math.max(
         BUFFER_MIN_HEIGHT,
-        containerHeight - lastAssistantMsgHeight - BUFFER_READY_GAP,
+        containerHeight -
+          lastAssistantMsgHeight -
+          (options?.readyGap ?? BUFFER_READY_GAP),
       ),
     );
   }
 
   if (['streaming', 'submitted'].includes(status ?? '')) {
     return Math.floor(
-      Math.max(0, containerHeight - lastUserMsgHeight - BUFFER_STREAMING_GAP),
+      Math.max(
+        0,
+        containerHeight -
+          lastUserMsgHeight -
+          (options?.streamingGap ?? BUFFER_STREAMING_GAP),
+      ),
     );
   }
 

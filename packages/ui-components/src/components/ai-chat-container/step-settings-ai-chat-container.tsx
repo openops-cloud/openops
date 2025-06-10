@@ -134,6 +134,10 @@ const StepSettingsAiChatContainer = ({
     lastMsgHeight,
     lastAssistantMsgHeight,
     status,
+    {
+      readyGap: 220,
+      streamingGap: 180,
+    },
   );
 
   return (
