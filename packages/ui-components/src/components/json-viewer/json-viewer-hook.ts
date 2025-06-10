@@ -87,7 +87,7 @@ export const useJsonViewer = ({
 
   const handleDelete = () => {
     setIsEditMode(true);
-    form.reset({ jsonContent: '' });
+    form.reset({ jsonContent: undefined });
     if (onChange) {
       onChange(undefined);
     }
