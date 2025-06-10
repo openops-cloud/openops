@@ -5,7 +5,8 @@ import { archeraAuth } from '../../auth';
 export const getDefaultCommitmentPlansAction = createAction({
   auth: archeraAuth,
   name: 'archera_get_default_commitment_plans',
-  description: 'Retrieve the default Archera commitment plans for a given provider',
+  description:
+    'Retrieve the default Archera commitment plans for a given provider',
   displayName: 'Get Default Commitment Plans',
   props: {
     provider: Property.StaticDropdown({
