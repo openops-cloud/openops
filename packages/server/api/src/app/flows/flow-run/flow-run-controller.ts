@@ -109,7 +109,7 @@ const ListRequest = {
   schema: {
     tags: ['flow-runs'],
     description:
-      'List flow runs with advanced filtering and pagination capabilities. This endpoint retrieves a paginated list of flow executions, supporting filtering by flow ID, tags, status, and date range. Results include execution metadata, duration, status, and associated tags. Useful for monitoring and analyzing flow execution history.',
+      'List flow runs with advanced filtering and pagination capabilities. This endpoint retrieves a paginated list of workflow executions, supporting filtering by workflow ID, tags, status, and date range. Results include execution metadata, duration, status, and associated tags. Useful for monitoring and analyzing workflow execution history.',
     security: [SERVICE_KEY_SECURITY_OPENAPI],
     querystring: ListFlowRunsRequestQuery,
     response: {
@@ -142,7 +142,7 @@ const ResumeFlowRunRequest = {
   },
   schema: {
     description:
-      'Handle requests for a specific flow run execution. This endpoint manages the lifecycle of flow run requests, including creating, updating, and retrieving request data. Supports various HTTP methods (GET, PUT, POST, PATCH, DELETE) for different request operations. Essential for handling webhook callbacks and resuming paused flows.',
+      'Handle requests for a specific flow run execution. This endpoint manages the lifecycle of flow run requests, including creating, updating, and retrieving request data. It supports various HTTP methods (GET, PUT, POST, PATCH, DELETE) for different request operations.',
     params: Type.Object({
       id: OpenOpsId,
       executionCorrelationId: Type.String(),
@@ -156,7 +156,7 @@ const RetryFlowRequest = {
   },
   schema: {
     description:
-      'Retry a failed flow run with optional modifications. This endpoint allows restarting a failed flow execution, potentially with different parameters or configuration. Useful for handling transient failures or testing different scenarios.',
+      'Retry a failed workflow run from either the failed step or the beginning. This endpoint allows users to re-execute a workflow run that has encountered errors, with options to specify the retry strategy (e.g., from the last failed step or from the start). Useful for recovering from transient errors or fixing issues in workflow logic.',
     params: Type.Object({
       id: OpenOpsId,
     }),

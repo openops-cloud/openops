@@ -199,7 +199,7 @@ const PatchAppConnectionRequest = {
     tags: ['app-connections'],
     security: [SERVICE_KEY_SECURITY_OPENAPI],
     description:
-      "Update an existing app connection's configuration. This endpoint is specifically for modifying existing connections and requires the connection to already exist. All changes are validated and encrypted before storage. The connection's identity, name and type cannot be changed. Returns the updated connection with sensitive data redacted.",
+      "Update an existing app connection's configuration. This endpoint is used for modifying an existing connection and requires the connection to already exist. All changes are validated and encrypted before storage. The connection's name and type cannot be changed. Returns the updated connection with sensitive data redacted.",
     body: PatchAppConnectionRequestBody,
     Response: {
       [StatusCodes.OK]: AppConnectionWithoutSensitiveData,

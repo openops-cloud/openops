@@ -200,7 +200,7 @@ const ListBlocksRequest = {
   schema: {
     querystring: ListBlocksRequestQuery,
     description:
-      'List all available blocks with advanced filtering and sorting capabilities. This endpoint retrieves a comprehensive list of blocks that can be used in flows, including both official and custom blocks. Supports filtering by release version, tags, categories, block type, and search queries. Results can be sorted by name, update date, creation date, or popularity.',
+      'List all available blocks with advanced filtering and sorting capabilities. This endpoint retrieves a comprehensive list of blocks that can be used in workflows, including both official and custom blocks. Supports filtering by package version, tags, categories, block type, and search queries. Results can be sorted by name, update date, creation date, or popularity.',
   },
 };
 
@@ -210,7 +210,7 @@ const GetBlockParamsRequest = {
   },
   schema: {
     description:
-      'Retrieve detailed information about a specific block by its name. This endpoint returns the complete block metadata including its configuration, actions, triggers, properties, and authentication requirements. Optionally specify a version to get historical block data or check compatibility. The response includes all necessary information for integrating the block into flows.',
+      'Retrieve detailed information about a specific block by its name. This endpoint returns the complete block metadata including its configuration, actions, triggers, properties, and authentication requirements. Optionally specify a package version to get historical block data or check compatibility. The response includes all necessary information for integrating the block into flows.',
     params: GetBlockRequestParams,
     querystring: GetBlockRequestQuery,
   },
