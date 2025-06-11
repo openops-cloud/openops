@@ -198,7 +198,7 @@ const GetLatestVersionsByConnectionRequestOptions = {
   },
   schema: {
     description:
-      'Retrieves all flows that contain a specific connection. This endpoint returns the latest version of each flow that uses the specified connection, including minimal flow information such as ID, name, and version details. Useful for tracking which flows depend on a particular connection.',
+      'Retrieves all workflow that contain a specific connection. This endpoint returns the latest version of each workflow that uses the specified connection, including minimal workflow information such as ID, name, and version details. Useful for tracking which workflow depend on a particular connection.',
     tags: ['flow-version'],
     security: [SERVICE_KEY_SECURITY_OPENAPI],
     querystring: Type.Object({
