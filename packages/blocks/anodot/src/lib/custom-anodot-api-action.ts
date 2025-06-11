@@ -16,8 +16,8 @@ export const customAnodotApiAction = createCustomApiCallAction({
   additionalProps: {
     selectedAccount: accountSingleSelectProperty(),
   },
-  authMapping: async (auth: any) => {
-    const { authUrl, username, password } = auth;
+  authMapping: async (context: any) => {
+    const { authUrl, username, password } = context.auth;
     const anodotTokens = await authenticateUserWithAnodot(
       authUrl,
       username,
@@ -27,8 +27,8 @@ export const customAnodotApiAction = createCustomApiCallAction({
       anodotTokens.Authorization,
       buildUserAccountApiKey(
         anodotTokens.apikey,
-        (auth.selectedAccount as any).accountKey,
-        (auth.selectedAccount as any).divisionId,
+        (context.propsValue.selectedAccount as any).accountKey,
+        (context.propsValue.selectedAccount as any).divisionId,
       ),
     );
   },

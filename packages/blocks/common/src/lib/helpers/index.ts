@@ -37,7 +37,10 @@ export function createCustomApiCallAction({
 }: {
   auth?: BlockAuthProperty;
   baseUrl: (auth?: unknown) => string;
-  authMapping?: (auth: unknown) => Promise<HttpHeaders>;
+  authMapping?: (context: {
+    auth: unknown;
+    propsValue: unknown;
+  }) => Promise<HttpHeaders>;
   description?: string | null;
   displayName?: string | null;
   name?: string | null;
@@ -113,7 +116,7 @@ export function createCustomApiCallAction({
 
       let headersValue = headers as HttpHeaders;
       if (authMapping) {
-        const headers = await authMapping(context.auth);
+        const headers = await authMapping(context);
         if (headers) {
           headersValue = {
             ...headersValue,
