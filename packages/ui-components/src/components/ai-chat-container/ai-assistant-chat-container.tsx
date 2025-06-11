@@ -174,10 +174,10 @@ const AiAssistantChatContainer = ({
           <div className="overflow-hidden flex-1">
             <div className="py-4 flex flex-col h-full">
               <ScrollArea
-                className="flex-1 w-full"
+                className="h-full w-full flex-1"
                 viewPortRef={scrollViewportRef}
               >
-                <div className="w-full px-6 flex flex-col">
+                <div className="h-full w-full px-6 flex flex-col flex-1">
                   {isEmpty ? (
                     <div
                       className={
