@@ -1,4 +1,5 @@
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
+import { ApplicationError, ErrorCode } from '@openops/shared';
 import { LanguageModelV1 } from 'ai';
 import { AiProvider } from '../providers';
 
@@ -8,7 +9,12 @@ function createLanguageModel(params: {
   providerSettings?: Record<string, unknown>;
 }): LanguageModelV1 {
   if (!params.providerSettings?.['baseURL']) {
-    throw new Error('baseURL is required for OpenAI-compatible providers');
+    throw new ApplicationError({
+      code: ErrorCode.OPENAI_COMPATIBLE_PROVIDER_BASE_URL_REQUIRED,
+      params: {
+        message: 'baseURL is required for OpenAI-compatible providers',
+      },
+    });
   }
 
   const { baseURL, ...restProviderSettings } = params.providerSettings as {

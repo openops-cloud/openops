@@ -29,21 +29,13 @@ export const aiConfigController: FastifyPluginAsyncTypebox = async (app) => {
           : existingApiKey;
       }
 
-      try {
-        const { valid, error } = await validateAiProviderConfig({
-          ...request.body,
-          apiKey: existingApiKey,
-        });
+      const { valid, error } = await validateAiProviderConfig({
+        ...request.body,
+        apiKey: existingApiKey,
+      });
 
-        if (!valid) {
-          return await reply.status(StatusCodes.BAD_REQUEST).send(error);
-        }
-      } catch (err) {
-        return reply.status(StatusCodes.BAD_REQUEST).send({
-          errorName: err instanceof Error ? err.name : 'UnknownError',
-          errorMessage:
-            err instanceof Error ? err.message : 'Unknown error occurred',
-        });
+      if (!valid) {
+        return reply.status(StatusCodes.BAD_REQUEST).send(error);
       }
 
       const aiConfig = await aiConfigService.save({

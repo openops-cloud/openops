@@ -62,7 +62,8 @@ export type ApplicationErrorParams =
   | ActivationKeyNotAlreadyActivated
   | EmailAlreadyHasActivationKey
   | FolderAlreadyExists
-  | TemplateNotFound;
+  | TemplateNotFound
+  | OpenAICompatibleProviderBaseURLRequired;
 
 export type BaseErrorParams<T, V> = {
   code: T;
@@ -399,6 +400,13 @@ export type TemplateNotFound = BaseErrorParams<
   }
 >;
 
+export type OpenAICompatibleProviderBaseURLRequired = BaseErrorParams<
+  ErrorCode.OPENAI_COMPATIBLE_PROVIDER_BASE_URL_REQUIRED,
+  {
+    message: string;
+  }
+>;
+
 export enum ErrorCode {
   AUTHENTICATION = 'AUTHENTICATION',
   AUTHORIZATION = 'AUTHORIZATION',
@@ -450,4 +458,5 @@ export enum ErrorCode {
   EMAIL_ALREADY_HAS_ACTIVATION_KEY = 'EMAIL_ALREADY_HAS_ACTIVATION_KEY',
   FOLDER_ALREADY_EXISTS = 'FOLDER_ALREADY_EXISTS',
   TEMPLATE_NOT_FOUND = 'TEMPLATE_NOT_FOUND',
+  OPENAI_COMPATIBLE_PROVIDER_BASE_URL_REQUIRED = 'OPENAI_COMPATIBLE_PROVIDER_BASE_URL_REQUIRED',
 }
