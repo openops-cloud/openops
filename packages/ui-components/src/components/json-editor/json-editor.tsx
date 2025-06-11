@@ -39,10 +39,18 @@ type JsonEditorProps = {
   onFocus?: (ref: RefObject<ReactCodeMirrorRef>) => void;
   className?: string;
   theme?: string;
+  placeholder?: string;
 };
 
 const JsonEditor = React.memo(
-  ({ field, readonly, onFocus, className, theme }: JsonEditorProps) => {
+  ({
+    field,
+    readonly,
+    onFocus,
+    className,
+    theme,
+    placeholder,
+  }: JsonEditorProps) => {
     const [value, setValue] = useState(convertToString(field.value));
     const editorTheme = theme === 'dark' ? githubDark : githubLight;
     const extensions = [
@@ -53,10 +61,11 @@ const JsonEditor = React.memo(
     ];
     const ref = useRef<ReactCodeMirrorRef>(null);
     return (
-      <div className="flex flex-col gap-2 border rounded py-2 px-2">
+      <div className="flex flex-col gap-2 border border-t-0 rounded py-2 px-2">
         <CodeMirror
           ref={ref}
           value={value}
+          placeholder={placeholder}
           className={cn('border-none', className)}
           height="250px"
           width="100%"

@@ -1,4 +1,5 @@
 import { isNil } from '@openops/shared';
+import { t } from 'i18next';
 import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import ReactJson from 'react-json-view';
@@ -43,6 +44,7 @@ export const JsonContent = ({
                 <FormControl>
                   <JsonEditor
                     {...field}
+                    placeholder={t('Paste sample data here')}
                     field={field as any}
                     readonly={false}
                     theme={theme}
@@ -58,7 +60,7 @@ export const JsonContent = ({
   }
 
   return (
-    <>
+    <div className="pt-[11px] pl-3">
       {isNil(json) ? (
         <pre className="text-sm whitespace-pre-wrap overflow-x-auto p-2">
           {json === null ? 'null' : 'undefined'}
@@ -93,6 +95,6 @@ export const JsonContent = ({
           )}
         </>
       )}
-    </>
+    </div>
   );
 };
