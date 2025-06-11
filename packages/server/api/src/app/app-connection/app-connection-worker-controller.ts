@@ -50,6 +50,6 @@ const GetAppConnectionRequest = {
       connectionName: Type.String(),
     }),
     description:
-      'Get an app connection by its name. This endpoint is specifically designed for worker processes to retrieve app connection details by name. It includes proper error handling for non-existent connections and returns the complete connection configuration with all necessary credentials for worker operations. This endpoint is restricted to worker processes only.',
+      'Get an app connection by its name. This endpoint is specifically for worker processes to retrieve app connection details by name, with proper error handling for non-existent connections.',
   },
 };

@@ -199,7 +199,7 @@ const PatchAppConnectionRequest = {
     tags: ['app-connections'],
     security: [SERVICE_KEY_SECURITY_OPENAPI],
     description:
-      "Update an existing app connection's configuration. This endpoint is specifically for modifying existing connections and requires the connection to already exist. All changes are validated and encrypted before storage. The connection's identity and type cannot be changed. Returns the updated connection with sensitive data redacted.",
+      "Update an existing app connection's configuration. This endpoint is specifically for modifying existing connections and requires the connection to already exist. All changes are validated and encrypted before storage. The connection's identity, name and type cannot be changed. Returns the updated connection with sensitive data redacted.",
     body: PatchAppConnectionRequestBody,
     Response: {
       [StatusCodes.OK]: AppConnectionWithoutSensitiveData,
@@ -233,7 +233,7 @@ const DeleteAppConnectionRequest = {
     tags: ['app-connections'],
     security: [SERVICE_KEY_SECURITY_OPENAPI],
     description:
-      'Delete an app connection by its ID. This endpoint permanently removes a specific app connection from the project, cleans up associated resources, and triggers a connection deleted event for tracking purposes. All associated data and credentials are securely removed. This action cannot be undone.',
+      'Delete an app connection by its ID. This endpoint removes a specific app connection from the project, cleans up associated resources, and triggers a connection deleted event for tracking purposes. Use with caution as this action cannot be undone.',
     params: Type.Object({
       id: OpenOpsId,
     }),
