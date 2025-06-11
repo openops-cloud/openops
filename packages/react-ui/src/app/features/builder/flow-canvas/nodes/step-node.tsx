@@ -173,6 +173,7 @@ const WorkflowStepNode = React.memo(
                   ? FlowOperationType.UPDATE_TRIGGER
                   : blockSelectorOperation,
                 stepName: data.step!.name!,
+                id: data.step!.id!,
               }}
               open={openBlockSelector || (!readonly && isEmptyTriggerSelected)}
               onOpenChange={(open) => {
