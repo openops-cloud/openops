@@ -29,58 +29,24 @@ const INCLUDED_PATHS: Record<string, string[]> = {
   '/v1/app-connections/metadata': ['get'],
 };
 
-type OpenApiPathItem = {
-  [method: string]: {
-    tags?: string[];
-    summary?: string;
-    description?: string;
-    operationId?: string;
-    parameters?: unknown[];
-    requestBody?: unknown;
-    responses?: Record<string, unknown>;
-  };
-};
-
 async function filterOpenApiSchema(
   schema: OpenAPI.Document,
 ): Promise<OpenAPI.Document> {
-  const filteredSchema = { ...schema };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const filteredPaths: Record<string, any> = {};
 
-  if (!filteredSchema.paths) {
-    return filteredSchema;
-  }
+  for (const [path, pathItem] of Object.entries(schema.paths ?? {})) {
+    if (!INCLUDED_PATHS[path]) continue;
 
-  const filteredPaths: Record<string, OpenApiPathItem> = {};
-
-  for (const [path, pathItem] of Object.entries(filteredSchema.paths)) {
-    const allowedMethods = INCLUDED_PATHS[path];
-    if (!allowedMethods) continue;
-
-    const filteredPathItem = filterPathItemMethods(
-      pathItem as Record<string, OpenApiPathItem[string]>,
-      allowedMethods,
-    );
-
-    if (Object.keys(filteredPathItem).length > 0) {
-      filteredPaths[path] = filteredPathItem;
+    filteredPaths[path] = {};
+    for (const [method, op] of Object.entries(pathItem)) {
+      if (INCLUDED_PATHS[path].includes(method.toLowerCase())) {
+        filteredPaths[path][method] = op;
+      }
     }
   }
 
-  filteredSchema.paths = filteredPaths;
-  return filteredSchema;
-}
-
-function filterPathItemMethods(
-  pathItem: Record<string, OpenApiPathItem[string]>,
-  allowedMethods: string[],
-): OpenApiPathItem {
-  const filtered: OpenApiPathItem = {};
-  for (const [method, operation] of Object.entries(pathItem)) {
-    if (allowedMethods.includes(method.toLowerCase())) {
-      filtered[method] = operation;
-    }
-  }
-  return filtered;
+  return { ...schema, paths: filteredPaths };
 }
 
 let cachedSchemaPath: string | undefined;
