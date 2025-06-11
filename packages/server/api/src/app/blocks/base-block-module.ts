@@ -252,7 +252,6 @@ const DeleteBlockRequest = {
     description:
       'Delete a custom block from the system. This endpoint permanently removes a block and its associated metadata. This operation cannot be undone and will affect any flows using this block. Use with caution as it may impact existing flows.',
     params: Type.Object({
-      
       id: Type.String(),
     }),
   },
