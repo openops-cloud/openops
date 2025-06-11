@@ -60,7 +60,7 @@ export const JsonContent = ({
   }
 
   return (
-    <div className="pt-[11px] pl-3">
+    <div className="pt-[11px] pl-3 border-t border-solid">
       {isNil(json) ? (
         <pre className="text-sm whitespace-pre-wrap overflow-x-auto p-2">
           {json === null ? 'null' : 'undefined'}
