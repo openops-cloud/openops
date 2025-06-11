@@ -109,7 +109,7 @@ const ListRequest = {
   schema: {
     tags: ['flow-runs'],
     description:
-      'List flow runs with filtering and pagination options. This endpoint retrieves a paginated list of flow executions, supporting filtering by flow ID, tags, status, and date range. Results are returned in a seek-based pagination format.',
+      'List flow runs with advanced filtering and pagination capabilities. This endpoint retrieves a paginated list of flow executions, supporting filtering by flow ID, tags, status, and date range. Results include execution metadata, duration, status, and associated tags. Useful for monitoring and analyzing flow execution history.',
     security: [SERVICE_KEY_SECURITY_OPENAPI],
     querystring: ListFlowRunsRequestQuery,
     response: {
@@ -125,7 +125,7 @@ const GetRequest = {
   schema: {
     tags: ['flow-runs'],
     description:
-      'Get detailed information about a specific flow run. This endpoint returns the complete execution data including status, duration, steps, and any associated metadata. Useful for monitoring and debugging flow executions.',
+      'Get detailed information about a specific flow run. This endpoint returns the complete execution data including status, duration, steps, error messages, and any associated metadata. Includes step-by-step execution details and their outputs. Essential for debugging and monitoring individual flow executions.',
     security: [SERVICE_KEY_SECURITY_OPENAPI],
     params: Type.Object({
       id: OpenOpsId,
@@ -142,7 +142,7 @@ const ResumeFlowRunRequest = {
   },
   schema: {
     description:
-      'Handle requests for a specific flow run execution. This endpoint manages the lifecycle of flow run requests, including creating, updating, and retrieving request data. It supports various HTTP methods (GET, PUT, POST, PATCH, DELETE) for different request operations.',
+      'Handle requests for a specific flow run execution. This endpoint manages the lifecycle of flow run requests, including creating, updating, and retrieving request data. Supports various HTTP methods (GET, PUT, POST, PATCH, DELETE) for different request operations. Essential for handling webhook callbacks and resuming paused flows.',
     params: Type.Object({
       id: OpenOpsId,
       executionCorrelationId: Type.String(),
