@@ -112,5 +112,6 @@ async function updateJsonObject(
       obj[key] = await updateJsonObject(obj[key], extractedData);
     }
   }
+
   return obj;
 }
