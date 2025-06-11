@@ -9,6 +9,7 @@ import {
   deepMergeAndCast,
   flowHelper,
   FlowVersion,
+  openOpsId,
   Trigger,
   TriggerType,
 } from '@openops/shared';
@@ -67,6 +68,7 @@ const getDefaultStep = ({
     },
   };
   const common = {
+    id: openOpsId(),
     name: stepName,
     valid:
       block.type === ActionType.CODE || block.type === ActionType.LOOP_ON_ITEMS,
