@@ -46,31 +46,41 @@ async function filterOpenApiSchema(
 ): Promise<OpenAPI.Document> {
   const filteredSchema = { ...schema };
 
-  if (filteredSchema.paths) {
-    const filteredPaths: Record<string, OpenApiPathItem> = {};
-
-    for (const [path, pathItem] of Object.entries(filteredSchema.paths)) {
-      const allowedMethods = INCLUDED_PATHS[path];
-      if (!allowedMethods) continue;
-
-      const filteredPathItem: OpenApiPathItem = {};
-      for (const [method, operation] of Object.entries(
-        pathItem as Record<string, OpenApiPathItem[string]>,
-      )) {
-        if (allowedMethods.includes(method.toLowerCase())) {
-          filteredPathItem[method] = operation;
-        }
-      }
-
-      if (Object.keys(filteredPathItem).length > 0) {
-        filteredPaths[path] = filteredPathItem;
-      }
-    }
-
-    filteredSchema.paths = filteredPaths;
+  if (!filteredSchema.paths) {
+    return filteredSchema;
   }
 
+  const filteredPaths: Record<string, OpenApiPathItem> = {};
+
+  for (const [path, pathItem] of Object.entries(filteredSchema.paths)) {
+    const allowedMethods = INCLUDED_PATHS[path];
+    if (!allowedMethods) continue;
+
+    const filteredPathItem = filterPathItemMethods(
+      pathItem as Record<string, OpenApiPathItem[string]>,
+      allowedMethods,
+    );
+
+    if (Object.keys(filteredPathItem).length > 0) {
+      filteredPaths[path] = filteredPathItem;
+    }
+  }
+
+  filteredSchema.paths = filteredPaths;
   return filteredSchema;
+}
+
+function filterPathItemMethods(
+  pathItem: Record<string, OpenApiPathItem[string]>,
+  allowedMethods: string[],
+): OpenApiPathItem {
+  const filtered: OpenApiPathItem = {};
+  for (const [method, operation] of Object.entries(pathItem)) {
+    if (allowedMethods.includes(method.toLowerCase())) {
+      filtered[method] = operation;
+    }
+  }
+  return filtered;
 }
 
 let cachedSchemaPath: string | undefined;
