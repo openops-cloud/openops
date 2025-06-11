@@ -38,11 +38,11 @@ export const aiConfigController: FastifyPluginAsyncTypebox = async (app) => {
         if (!valid) {
           return await reply.status(StatusCodes.BAD_REQUEST).send(error);
         }
-      } catch (error) {
+      } catch (err) {
         return reply.status(StatusCodes.BAD_REQUEST).send({
-          errorName: error instanceof Error ? error.name : 'UnknownError',
+          errorName: err instanceof Error ? err.name : 'UnknownError',
           errorMessage:
-            error instanceof Error ? error.message : 'Unknown error occurred',
+            err instanceof Error ? err.message : 'Unknown error occurred',
         });
       }
 
