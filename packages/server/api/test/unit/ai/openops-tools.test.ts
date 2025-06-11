@@ -59,27 +59,46 @@ describe('getOpenOpsTools', () => {
   const mockOpenApiSchema = {
     openapi: '3.1',
     paths: {
-      '/v1/authentication/sign-in': {
-        post: { operationId: 'signIn' },
-      },
-      '/v1/users/profile': {
-        get: { operationId: 'getProfile' },
-        delete: { operationId: 'deleteProfile' },
-      },
-      '/v1/organizations/123': {
-        get: { operationId: 'getOrg' },
-        put: { operationId: 'updateOrg' },
-      },
-      '/v1/flows/abc': {
-        get: { operationId: 'getFlow' },
-        delete: { operationId: 'deleteFlow' },
-      },
-      '/v1/blocks/xyz': {
-        post: { operationId: 'createBlock' },
-        delete: { operationId: 'deleteBlock' },
-      },
-      '/v1/files/123': {
+      '/v1/files/{fileId}': {
         get: { operationId: 'getFile' },
+      },
+      '/v1/flow-versions/': {
+        get: { operationId: 'getFlowVersions' },
+      },
+      '/v1/flows/{id}': {
+        get: { operationId: 'getFlow' },
+      },
+      '/v1/blocks/categories': {
+        get: { operationId: 'getBlockCategories' },
+      },
+      '/v1/blocks/': {
+        get: { operationId: 'getBlocks' },
+      },
+      '/v1/blocks/{scope}/{name}': {
+        get: { operationId: 'getBlockScopeName' },
+      },
+      '/v1/blocks/{name}': {
+        get: { operationId: 'getBlockName' },
+      },
+      '/v1/flow-runs/': {
+        get: { operationId: 'getFlowRuns' },
+      },
+      '/v1/flow-runs/{id}': {
+        get: { operationId: 'getFlowRun' },
+      },
+      '/v1/flow-runs/{id}/retry': {
+        post: { operationId: 'retryFlowRun' },
+      },
+      '/v1/app-connections/': {
+        get: { operationId: 'getAppConnections' },
+        post: { operationId: 'createAppConnection' },
+        patch: { operationId: 'patchAppConnection' },
+      },
+      '/v1/app-connections/{id}': {
+        get: { operationId: 'getAppConnectionById' },
+      },
+      '/v1/app-connections/metadata': {
+        get: { operationId: 'getAppConnectionsMetadata' },
       },
       '/v1/other/endpoint': {
         get: { operationId: 'getOther' },
@@ -90,14 +109,46 @@ describe('getOpenOpsTools', () => {
   const filteredSchema = {
     openapi: '3.1',
     paths: {
-      '/v1/flows/abc': {
+      '/v1/files/{fileId}': {
+        get: { operationId: 'getFile' },
+      },
+      '/v1/flow-versions/': {
+        get: { operationId: 'getFlowVersions' },
+      },
+      '/v1/flows/{id}': {
         get: { operationId: 'getFlow' },
       },
-      '/v1/blocks/xyz': {
-        post: { operationId: 'createBlock' },
+      '/v1/blocks/categories': {
+        get: { operationId: 'getBlockCategories' },
       },
-      '/v1/files/123': {
-        get: { operationId: 'getFile' },
+      '/v1/blocks/': {
+        get: { operationId: 'getBlocks' },
+      },
+      '/v1/blocks/{scope}/{name}': {
+        get: { operationId: 'getBlockScopeName' },
+      },
+      '/v1/blocks/{name}': {
+        get: { operationId: 'getBlockName' },
+      },
+      '/v1/flow-runs/': {
+        get: { operationId: 'getFlowRuns' },
+      },
+      '/v1/flow-runs/{id}': {
+        get: { operationId: 'getFlowRun' },
+      },
+      '/v1/flow-runs/{id}/retry': {
+        post: { operationId: 'retryFlowRun' },
+      },
+      '/v1/app-connections/': {
+        get: { operationId: 'getAppConnections' },
+        post: { operationId: 'createAppConnection' },
+        patch: { operationId: 'patchAppConnection' },
+      },
+      '/v1/app-connections/{id}': {
+        get: { operationId: 'getAppConnectionById' },
+      },
+      '/v1/app-connections/metadata': {
+        get: { operationId: 'getAppConnectionsMetadata' },
       },
     },
   };
@@ -123,7 +174,7 @@ describe('getOpenOpsTools', () => {
     networkUtlsMock.getInternalApiUrl.mockReturnValue(mockApiBaseUrl);
   });
 
-  it('should write the OpenAPI schema to a file once and reuse it later', async () => {
+  it('should write the filtered OpenAPI schema to a file once and reuse it later', async () => {
     const mockClient = {
       tools: jest.fn().mockResolvedValue(mockTools),
     };

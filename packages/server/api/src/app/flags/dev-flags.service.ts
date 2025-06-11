@@ -30,6 +30,12 @@ async function getAll(): Promise<Flag[]> {
       created,
       updated,
     },
+    {
+      id: FlagId.SHOW_SAMPLE_DATA,
+      value: false,
+      created,
+      updated,
+    },
   ];
 
   return flags;
