@@ -34,7 +34,6 @@ import {
   blockMetadataService,
   getBlockPackage,
 } from './block-metadata-service';
-import { blockSyncService } from './block-sync-service';
 
 export const blockModule: FastifyPluginAsyncTypebox = async (app) => {
   await app.register(baseBlocksController, { prefix: '/v1/blocks' });
