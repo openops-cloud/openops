@@ -18,7 +18,7 @@ import { useBuilderStateContext } from '../builder-hooks';
 import { useApplyOperationAndPushToHistory } from '../flow-version-undo-redo/hooks/apply-operation-and-push-to-history';
 import { useCenterWorkflowViewOntoStep } from './center-workflow-view-onto-step';
 
-const assignNewIdsToActions = (action: Action): Action => {
+export const assignNewIdsToActions = (action: Action): Action => {
   const newAction = { ...action };
   newAction.id = openOpsId();
 
