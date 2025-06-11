@@ -19,8 +19,10 @@ export const github = createBlock({
     createCustomApiCallAction({
       baseUrl: () => 'https://api.github.com',
       auth: auth,
-      authMapping: async (auth) => ({
-        Authorization: `Bearer ${(auth as OAuth2PropertyValue).access_token}`,
+      authMapping: async (context: any) => ({
+        Authorization: `Bearer ${
+          (context.auth as OAuth2PropertyValue).access_token
+        }`,
       }),
     }),
   ],
