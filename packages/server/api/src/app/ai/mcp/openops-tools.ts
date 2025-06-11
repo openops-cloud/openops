@@ -13,19 +13,21 @@ import os from 'os';
 import path from 'path';
 import { MCPTool } from './mcp-tools';
 
-const INCLUDED_PATHS = [
-  '/v1/folders',
-  '/v1/flow-versions',
-  '/v1/flows',
-  '/v1/files',
-  '/v1/flow-templates',
-  '/v1/test-trigger',
-  '/v1/blocks',
-  '/v1/flow-runs',
-  '/v1/app-connections',
-];
-
-const EXCLUDED_OPERATIONS = ['delete'];
+const INCLUDED_PATHS: Record<string, string[]> = {
+  '/v1/files/{fileId}': ['get'],
+  '/v1/flow-versions/': ['get'],
+  '/v1/flows/{id}': ['get'],
+  '/v1/blocks/categories': ['get'],
+  '/v1/blocks/': ['get'],
+  '/v1/blocks/{scope}/{name}': ['get'],
+  '/v1/blocks/{name}': ['get'],
+  '/v1/flow-runs/': ['get'],
+  '/v1/flow-runs/{id}': ['get'],
+  '/v1/flow-runs/{id}/retry': ['post'],
+  '/v1/app-connections/': ['get', 'post', 'patch'],
+  '/v1/app-connections/{id}': ['get'],
+  '/v1/app-connections/metadata': ['get'],
+};
 
 type OpenApiPathItem = {
   [method: string]: {
@@ -39,24 +41,23 @@ type OpenApiPathItem = {
   };
 };
 
-function filterOpenApiSchema(schema: OpenAPI.Document): OpenAPI.Document {
+async function filterOpenApiSchema(
+  schema: OpenAPI.Document,
+): Promise<OpenAPI.Document> {
   const filteredSchema = { ...schema };
 
   if (filteredSchema.paths) {
     const filteredPaths: Record<string, OpenApiPathItem> = {};
 
     for (const [path, pathItem] of Object.entries(filteredSchema.paths)) {
-      if (
-        !INCLUDED_PATHS.some((includedPath) => path.startsWith(includedPath))
-      ) {
-        continue;
-      }
+      const allowedMethods = INCLUDED_PATHS[path];
+      if (!allowedMethods) continue;
 
       const filteredPathItem: OpenApiPathItem = {};
       for (const [method, operation] of Object.entries(
         pathItem as Record<string, OpenApiPathItem[string]>,
       )) {
-        if (!EXCLUDED_OPERATIONS.includes(method.toLowerCase())) {
+        if (allowedMethods.includes(method.toLowerCase())) {
           filteredPathItem[method] = operation;
         }
       }
@@ -77,7 +78,7 @@ let cachedSchemaPath: string | undefined;
 async function getOpenApiSchemaPath(app: FastifyInstance): Promise<string> {
   if (!cachedSchemaPath) {
     const openApiSchema = app.swagger();
-    const filteredSchema = filterOpenApiSchema(openApiSchema);
+    const filteredSchema = await filterOpenApiSchema(openApiSchema);
     cachedSchemaPath = path.join(os.tmpdir(), 'openapi-schema.json');
     await fs.writeFile(
       cachedSchemaPath,
