@@ -210,7 +210,7 @@ const GetBlockParamsRequest = {
   },
   schema: {
     description:
-      'Retrieve detailed information about a specific block by its name. This endpoint returns the complete block metadata including its configuration, actions, triggers, properties, and authentication requirements. Optionally specify a package version to get historical block data or check compatibility. The response includes all necessary information for integrating the block into flows.',
+      'Retrieve detailed information about a specific block by its name. This endpoint returns the complete block metadata including its configuration, actions, triggers, properties, and authentication requirements. Optionally specify a package version to get historical block data or check compatibility. The response includes all necessary information for integrating the block into workflows.',
     params: GetBlockRequestParams,
     querystring: GetBlockRequestQuery,
   },
@@ -252,6 +252,7 @@ const DeleteBlockRequest = {
     description:
       'Delete a custom block from the system. This endpoint permanently removes a block and its associated metadata. This operation cannot be undone and will affect any flows using this block. Use with caution as it may impact existing flows.',
     params: Type.Object({
+      
       id: Type.String(),
     }),
   },
