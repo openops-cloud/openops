@@ -11,6 +11,10 @@ import { AiChatSizeTogglers } from './ai-chat-size-togglers';
 import { AiModelSelectorProps } from './ai-model-selector';
 import { getBufferAreaHeight, getLastUserMessageId } from './ai-scroll-helpers';
 import { AI_CHAT_CONTAINER_SIZES, AiCliChatContainerSizeState } from './types';
+import {
+  useScrollToBottomOnOpen,
+  useScrollToLastUserMessage,
+} from './use-ai-chat-scroll';
 
 type StepSettingsAiChatContainerProps = {
   parentHeight: number;
@@ -128,6 +132,22 @@ const StepSettingsAiChatContainer = ({
       clearTimeout(timeoutId);
     };
   }, [isEmpty, showAiChat, stepName]);
+
+  useScrollToLastUserMessage({
+    messages,
+    showAiChat,
+    scrollViewportRef,
+    lastUserMessageId,
+    streamingEndRef,
+  });
+
+  useScrollToBottomOnOpen({
+    isEmpty,
+    showAiChat,
+    messages,
+    hasAutoScrolled: hasScrolledOnce,
+    scrollViewportRef,
+  });
 
   let height: number;
   if (containerSize === AI_CHAT_CONTAINER_SIZES.COLLAPSED) {

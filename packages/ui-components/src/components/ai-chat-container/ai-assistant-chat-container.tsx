@@ -3,7 +3,6 @@ import { t } from 'i18next';
 import { Bot } from 'lucide-react';
 import { ReactNode, useEffect, useRef } from 'react';
 import { cn } from '../../lib/cn';
-import { AI_CHAT_SCROLL_DELAY } from '../../lib/constants';
 import { ScrollArea } from '../../ui/scroll-area';
 import { AIChatMessageRole } from '../ai-chat-messages';
 import { BoxSize, ResizableArea } from '../resizable-area';
@@ -12,6 +11,10 @@ import { AiChatSizeTogglers } from './ai-chat-size-togglers';
 import { AiModelSelectorProps } from './ai-model-selector';
 import { getBufferAreaHeight, getLastUserMessageId } from './ai-scroll-helpers';
 import { AI_CHAT_CONTAINER_SIZES, AiAssistantChatSizeState } from './types';
+import {
+  useScrollToBottomOnOpen,
+  useScrollToLastUserMessage,
+} from './use-ai-chat-scroll';
 
 type AiAssistantChatContainerProps = {
   dimensions: BoxSize;
@@ -81,47 +84,21 @@ const AiAssistantChatContainer = ({
     }
   }, [showAiChat, messages]);
 
-  // scroll to the last user message, when getting a new user message
-  useEffect(() => {
-    const scrollArea = scrollViewportRef.current;
-    if (!scrollArea || scrollArea.scrollHeight <= scrollArea.clientHeight) {
-      return;
-    }
-    if (messages.length && showAiChat) {
-      const lastUserIndex = messages
-        .map((m) => m.role)
-        .lastIndexOf(AIChatMessageRole.user);
-      if (
-        lastUserIndex !== -1 &&
-        lastUserMessageId?.current !== messages[lastUserIndex].id
-      ) {
-        lastUserMessageId.current = messages[lastUserIndex].id;
-        streamingEndRef.current?.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start',
-        });
-      }
-    }
-  }, [messages, showAiChat]);
+  useScrollToLastUserMessage({
+    messages,
+    showAiChat,
+    scrollViewportRef,
+    lastUserMessageId,
+    streamingEndRef,
+  });
 
-  // scroll to the bottom of the chat when the chat is opened
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-    if (!isEmpty && showAiChat && messages.length && !hasAutoScrolled.current) {
-      timeoutId = setTimeout(() => {
-        if (scrollViewportRef.current) {
-          scrollViewportRef.current.scrollTo({
-            top: scrollViewportRef.current.scrollHeight,
-            behavior: 'instant',
-          });
-          hasAutoScrolled.current = true;
-        }
-      }, AI_CHAT_SCROLL_DELAY);
-    }
-    return () => {
-      clearTimeout(timeoutId);
-    };
-  }, [isEmpty, showAiChat, messages.length]);
+  useScrollToBottomOnOpen({
+    isEmpty,
+    showAiChat,
+    messages,
+    hasAutoScrolled,
+    scrollViewportRef,
+  });
 
   const height = dimensions.height ?? 0;
   const lastMsgHeight = lastUserMessageRef.current?.offsetHeight ?? 0;
