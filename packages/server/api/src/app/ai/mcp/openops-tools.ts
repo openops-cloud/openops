@@ -13,63 +13,40 @@ import os from 'os';
 import path from 'path';
 import { MCPTool } from './mcp-tools';
 
-const INCLUDED_PATHS = [
-  '/v1/folders',
-  '/v1/flow-versions',
-  '/v1/flows',
-  '/v1/files',
-  '/v1/flow-templates',
-  '/v1/test-trigger',
-  '/v1/blocks',
-  '/v1/flow-runs',
-  '/v1/app-connections',
-];
-
-const EXCLUDED_OPERATIONS = ['delete'];
-
-type OpenApiPathItem = {
-  [method: string]: {
-    tags?: string[];
-    summary?: string;
-    description?: string;
-    operationId?: string;
-    parameters?: unknown[];
-    requestBody?: unknown;
-    responses?: Record<string, unknown>;
-  };
+const INCLUDED_PATHS: Record<string, string[]> = {
+  '/v1/files/{fileId}': ['get'],
+  '/v1/flow-versions/': ['get'],
+  '/v1/flows/{id}': ['get'],
+  '/v1/blocks/categories': ['get'],
+  '/v1/blocks/': ['get'],
+  '/v1/blocks/{scope}/{name}': ['get'],
+  '/v1/blocks/{name}': ['get'],
+  '/v1/flow-runs/': ['get'],
+  '/v1/flow-runs/{id}': ['get'],
+  '/v1/flow-runs/{id}/retry': ['post'],
+  '/v1/app-connections/': ['get', 'post', 'patch'],
+  '/v1/app-connections/{id}': ['get'],
+  '/v1/app-connections/metadata': ['get'],
 };
 
-function filterOpenApiSchema(schema: OpenAPI.Document): OpenAPI.Document {
-  const filteredSchema = { ...schema };
+async function filterOpenApiSchema(
+  schema: OpenAPI.Document,
+): Promise<OpenAPI.Document> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const filteredPaths: Record<string, any> = {};
 
-  if (filteredSchema.paths) {
-    const filteredPaths: Record<string, OpenApiPathItem> = {};
+  for (const [path, pathItem] of Object.entries(schema.paths ?? {})) {
+    if (!INCLUDED_PATHS[path]) continue;
 
-    for (const [path, pathItem] of Object.entries(filteredSchema.paths)) {
-      if (
-        !INCLUDED_PATHS.some((includedPath) => path.startsWith(includedPath))
-      ) {
-        continue;
-      }
-
-      const filteredPathItem: OpenApiPathItem = {};
-      for (const [method, operation] of Object.entries(
-        pathItem as Record<string, OpenApiPathItem[string]>,
-      )) {
-        if (!EXCLUDED_OPERATIONS.includes(method.toLowerCase())) {
-          filteredPathItem[method] = operation;
-        }
-      }
-
-      if (Object.keys(filteredPathItem).length > 0) {
-        filteredPaths[path] = filteredPathItem;
+    filteredPaths[path] = {};
+    for (const [method, op] of Object.entries(pathItem)) {
+      if (INCLUDED_PATHS[path].includes(method.toLowerCase())) {
+        filteredPaths[path][method] = op;
       }
     }
-
-    filteredSchema.paths = filteredPaths;
   }
 
-  return filteredSchema;
+  return { ...schema, paths: filteredPaths };
 }
 
 let cachedSchemaPath: string | undefined;
@@ -77,7 +54,7 @@ let cachedSchemaPath: string | undefined;
 async function getOpenApiSchemaPath(app: FastifyInstance): Promise<string> {
   if (!cachedSchemaPath) {
     const openApiSchema = app.swagger();
-    const filteredSchema = filterOpenApiSchema(openApiSchema);
+    const filteredSchema = await filterOpenApiSchema(openApiSchema);
     cachedSchemaPath = path.join(os.tmpdir(), 'openapi-schema.json');
     await fs.writeFile(
       cachedSchemaPath,

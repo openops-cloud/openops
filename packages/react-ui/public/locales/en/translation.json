@@ -230,6 +230,7 @@
   "Sample output data": "Sample output data",
   "Sample output info": "Sample output info",
   "Sample data is for building and testing only - scheduled runs and test workflow are using the real step output.": "Sample data is for building and testing only - scheduled runs and test workflow are using the real step output.",
+  "Generate Sample Data": "Generate Sample Data",
   "Test Step": "Test Step",
   "Warning. Executing this step may modify resources in your environment.": "Warning. Executing this step may modify resources in your environment.",
   "Please review the details before proceeding.": "Please review the details before proceeding.",
