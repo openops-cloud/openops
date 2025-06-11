@@ -114,7 +114,6 @@ const BlockSelector = ({
       block,
       actionOrTriggerName: item.name,
       displayName: item.displayName,
-      id: operation.id!,
     });
 
     switch (operation.type) {

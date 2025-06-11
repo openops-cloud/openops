@@ -47,13 +47,11 @@ const getStepName = (block: StepMetadata, flowVersion: FlowVersion) => {
 };
 
 const getDefaultStep = ({
-  id,
   stepName,
   block,
   actionOrTriggerName,
   displayName,
 }: {
-  id: string;
   stepName: string;
   block: StepMetadata;
   displayName: string;
@@ -70,7 +68,7 @@ const getDefaultStep = ({
     },
   };
   const common = {
-    id: id ?? openOpsId(),
+    id: openOpsId(),
     name: stepName,
     valid:
       block.type === ActionType.CODE || block.type === ActionType.LOOP_ON_ITEMS,

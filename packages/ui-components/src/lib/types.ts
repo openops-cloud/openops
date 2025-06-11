@@ -55,13 +55,11 @@ export type BlockSelectorOperation =
         stepLocationRelativeToParent: StepLocationRelativeToParent;
         branchNodeId?: string;
       };
-      id?: string;
     }
-  | { type: FlowOperationType.UPDATE_TRIGGER; id: string }
+  | { type: FlowOperationType.UPDATE_TRIGGER }
   | {
       type: FlowOperationType.UPDATE_ACTION;
       stepName: string;
-      id: string;
     };
 
 export type HandleSelectCallback = (
