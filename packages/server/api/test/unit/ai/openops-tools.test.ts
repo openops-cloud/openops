@@ -148,7 +148,6 @@ describe('getOpenOpsTools', () => {
       },
       '/v1/app-connections/': {
         get: { operationId: 'getAppConnections' },
-        post: { operationId: 'createAppConnection' },
         patch: { operationId: 'patchAppConnection' },
       },
       '/v1/app-connections/{id}': {
