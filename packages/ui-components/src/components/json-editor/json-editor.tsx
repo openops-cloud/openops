@@ -38,6 +38,7 @@ type JsonEditorProps = {
   readonly: boolean;
   onFocus?: (ref: RefObject<ReactCodeMirrorRef>) => void;
   className?: string;
+  containerClassName?: string;
   theme?: string;
   placeholder?: string;
 };
@@ -48,6 +49,7 @@ const JsonEditor = React.memo(
     readonly,
     onFocus,
     className,
+    containerClassName,
     theme,
     placeholder,
   }: JsonEditorProps) => {
@@ -61,7 +63,12 @@ const JsonEditor = React.memo(
     ];
     const ref = useRef<ReactCodeMirrorRef>(null);
     return (
-      <div className="flex flex-col gap-2 border rounded py-2 px-2">
+      <div
+        className={cn(
+          'flex flex-col gap-2 border rounded py-2 px-2',
+          containerClassName,
+        )}
+      >
         <CodeMirror
           ref={ref}
           value={value}

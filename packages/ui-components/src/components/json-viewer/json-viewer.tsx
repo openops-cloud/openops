@@ -12,6 +12,7 @@ type JsonViewerProps = {
   readonly?: boolean;
   onChange?: (json: any) => void;
   theme?: string;
+  editorClassName?: string;
 };
 
 export type JsonFormValues = {
@@ -19,7 +20,14 @@ export type JsonFormValues = {
 };
 
 const JsonViewer = React.memo(
-  ({ json, title, readonly = true, onChange, theme }: JsonViewerProps) => {
+  ({
+    json,
+    title,
+    readonly = true,
+    onChange,
+    theme,
+    editorClassName,
+  }: JsonViewerProps) => {
     const form = useForm<JsonFormValues>({
       defaultValues: {
         jsonContent: json,
@@ -70,12 +78,12 @@ const JsonViewer = React.memo(
             }}
           />
         </div>
-
         <JsonContent
           isEditMode={isEditMode}
           json={json}
           form={form}
           theme={theme}
+          editorClassName={editorClassName}
         />
       </div>
     );

@@ -22,6 +22,7 @@ type JsonContentProps = {
   form: UseFormReturn<JsonFormValues>;
   theme?: string;
   validateJson?: (value: string) => { valid: boolean; message?: string };
+  editorClassName?: string;
 };
 
 export const JsonContent = ({
@@ -29,6 +30,7 @@ export const JsonContent = ({
   json,
   form,
   theme,
+  editorClassName,
 }: JsonContentProps) => {
   const viewerTheme = theme === 'dark' ? 'pop' : 'rjv-default';
 
@@ -48,6 +50,7 @@ export const JsonContent = ({
                     field={field as any}
                     readonly={false}
                     theme={theme}
+                    containerClassName={editorClassName}
                   />
                 </FormControl>
                 <FormMessage className="ml-4 pb-1" />
