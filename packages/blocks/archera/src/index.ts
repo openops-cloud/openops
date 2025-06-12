@@ -26,8 +26,8 @@ export const archera = createBlock({
     createCustomApiCallAction({
       baseUrl: (auth: any) => `https://api.archera.ai/v1/org/${auth.orgId}`,
       auth: archeraAuth,
-      authMapping: async (auth) => ({
-        'x-api-key': (auth as any).apiToken,
+      authMapping: async (context) => ({
+        'x-api-key': (context.auth as any).apiToken,
       }),
     }),
   ],
