@@ -1,39 +1,64 @@
-# App Connection Patching Guide
+# App Connection Guide
 
-When a user wants to update an app connection, follow these steps:
+## Important Rules
+- Never remove or overwrite existing roles or other fields unless explicitly requested
+- Never ask for redacted or secret fields unless the user wants to change them
+- For PATCH operations: Always use the full, current connection object as the base
+- For POST operations: Only require the minimum information needed for a new connection
+- **Never ask for fields that are already specified in the metadata** (like `type` or `authProvider`)
 
----
+## Operation Types
+- **POST**: For creating new connections
+- **PATCH**: For updating existing connections (requires existing connection ID)
 
-## 1. Find the Existing Connection
-- Use the **list endpoint** to find the connection by name or ID. Do this without feedback from the user.
-- Once you have the id from the prevous step, use the **get endpoint** with the connection ID to fetch the **full, current connection object**.
+## Step-by-Step Process
 
-## 2.
-- Use the ** get metadata ** endpoint to verify which fields are required,
-  and if there are some fields that are neither provided by the user nor are in the current connection which are REQUIRED, request them from the user
-## 2. Prepare the Patch Request
-- **Start with a copy of the entire existing connection object that was fetched from the get endpoint**
-- Only modify the specific fields the user wants to change.
-- if the user requested to change a field that does not exist on the connection, find the most equivalent one and ask the user for confirmation.
-- if the user requested to change something but is missing info on other REQUIRED fields, request the user to provide the other fields.
-- **For arrays:**
-  - If the user wants to add a new item, **append** it to the existing array (do not overwrite the array).
-  - If the user wants to remove or update an item, do so as specified.
-- **Do not remove or overwrite any existing fields or array items unless the user requests it.**
-- All other fields as they currently exist, unless the user wants to change them.
+### 1. Verify Required Fields
+- Call the **get metadata** endpoint to fetch required fields for the connection type
+- Use metadata to populate system-provided fields (e.g., authProvider, type)
+- **Do not ask the user for fields that are specified in the metadata**
+- If any required fields are missing (not provided by user or not existing in the metadata), request them from the user
 
-## 3. Send the Patch Request
-- Use the **patch endpoint** with the prepared request.
-- The backend will handle validation, encryption, and redacted secrets.
+### 2. For PATCH Operations Only: Find Existing Connection
+- Use the **list endpoint** to find the connection by name or ID
+- Use the **get endpoint** with the connection ID to fetch the complete current connection object
 
-## 4. Confirm the Update
-- Return the updated connection details to the user, confirming only the requested changes were made.
+### 3. For PATCH Operations Only: Prepare Update
+- Start with a complete copy of the existing connection object
+- Only modify fields explicitly requested by the user
+- If user requests changes to non-existent fields, find equivalent fields and ask for confirmation
+- For array modifications:
+  - To add: Append new items to existing array
+  - To remove/update: Modify specific items as requested
+- Preserve all other existing fields and array items
 
----
+### 4. Send Request
+- Use **POST endpoint** for new connections
+- Use **PATCH endpoint** for updates
+- Backend will handle validation, encryption, and secret redaction
 
-### Important
-- **Never remove or overwrite existing roles or other fields unless the user asks.**
-- **Never ask the user for redacted or secret fields unless they want to change them.**
-- **Always use the full, current connection object as the base for your patch.**
+### 5. Confirm Changes
+- Return the updated/created connection details
+- Only show fields that were modified or created
 
----
+## Example Scenarios
+
+### Creating New Connection
+1. Get metadata for connection type
+2. Collect required fields from user
+3. Send POST request
+4. Confirm creation
+
+### Updating Connection
+1. Get metadata for connection type
+2. Find existing connection
+3. Get current connection details
+4. Apply requested changes
+5. Send PATCH request
+6. Confirm updates
+
+## Common Mistakes to Avoid
+- Asking for fields that are already specified in the metadata (like `type` or `authProvider`)
+- Not using the metadata-provided values for system fields
+- Asking for optional fields unless specifically needed
+- Modifying fields that weren't requested by the user
