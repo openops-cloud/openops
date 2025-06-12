@@ -89,7 +89,7 @@ export type AppConnection<Type extends AppConnectionType = AppConnectionType> =
     projectId: string;
     status: AppConnectionStatus;
     value: AppConnectionValue<Type>;
-    authProviderKey?: string;
+    authProviderKey: string;
   };
 
 export type OAuth2AppConnection = AppConnection<AppConnectionType.OAUTH2>;
@@ -110,7 +110,7 @@ export const AppConnectionWithoutSensitiveData = Type.Object(
     blockName: Type.String(),
     projectId: OpenOpsId,
     status: Type.Enum(AppConnectionStatus),
-    authProviderKey: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+    authProviderKey: Type.String(),
   },
   {
     description: 'App connection is a connection to an external app.',

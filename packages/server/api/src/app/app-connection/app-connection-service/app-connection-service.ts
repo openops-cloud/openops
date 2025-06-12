@@ -1,4 +1,4 @@
-import { BlockMetadataModel } from '@openops/blocks-framework';
+import { BlockAuthProperty } from '@openops/blocks-framework';
 import {
   distributedLock,
   encryptUtils,
@@ -82,9 +82,17 @@ export const appConnectionService = {
     });
 
     if (existingConnection) {
-      sendConnectionUpdatedEvent(params.userId, projectId, request.blockName);
+      sendConnectionUpdatedEvent(
+        params.userId,
+        projectId,
+        request.authProviderKey,
+      );
     } else {
-      sendConnectionCreatedEvent(params.userId, projectId, request.blockName);
+      sendConnectionCreatedEvent(
+        params.userId,
+        projectId,
+        request.authProviderKey,
+      );
     }
 
     return decryptConnection(updatedConnection);
@@ -113,7 +121,7 @@ export const appConnectionService = {
     const restoredConnectionValue = restoreRedactedSecrets(
       request.value,
       decryptedExisting.value,
-      params.block.auth,
+      params.authProperty,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ) as any;
 
@@ -494,7 +502,7 @@ type PatchParams = {
   userId: UserId;
   projectId: ProjectId;
   request: PatchAppConnectionRequestBody;
-  block: BlockMetadataModel;
+  authProperty: BlockAuthProperty | undefined;
 };
 
 type GetOneByName = {
