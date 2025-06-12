@@ -34,7 +34,6 @@ import {
   blockMetadataService,
   getBlockPackage,
 } from './block-metadata-service';
-import { blockSyncService } from './block-sync-service';
 
 export const blockModule: FastifyPluginAsyncTypebox = async (app) => {
   await app.register(baseBlocksController, { prefix: '/v1/blocks' });
@@ -140,10 +139,6 @@ const baseBlocksController: FastifyPluginAsyncTypebox = async (app) => {
       });
     },
   );
-
-  app.post('/sync', SyncBlocksRequest, async (): Promise<void> => {
-    await blockSyncService.sync();
-  });
 
   app.post('/options', OptionsBlockRequest, async (req) => {
     const request = req.body;
@@ -265,15 +260,5 @@ const ListVersionsRequest = {
     description:
       'Retrieve version history for blocks. This endpoint returns a list of available versions for a specific block, including release information and compatibility details. Useful for tracking block evolution, managing updates, and ensuring compatibility with your flows.',
     querystring: ListVersionRequestQuery,
-  },
-};
-
-const SyncBlocksRequest = {
-  config: {
-    allowedPrincipals: [PrincipalType.USER],
-  },
-  schema: {
-    description:
-      'Synchronize blocks with the registry. This endpoint updates the local block registry with the latest versions and configurations from the remote registry. Ensures your system has access to the most recent block updates and security patches.',
   },
 };
