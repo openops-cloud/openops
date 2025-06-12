@@ -6,7 +6,7 @@ const commonAuthProps = {
   name: Type.String({}),
   blockName: Type.String({}),
   projectId: Type.String({}),
-  authProviderKey: Type.Optional(Type.String({})),
+  authProviderKey: Type.String({}),
 };
 
 export enum OAuth2GrantType {

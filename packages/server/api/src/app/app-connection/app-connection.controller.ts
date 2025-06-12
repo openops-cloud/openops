@@ -153,7 +153,7 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
       sendConnectionDeletedEvent(
         request.principal.id,
         connection.projectId,
-        connection.blockName,
+        connection.authProviderKey,
       );
 
       await reply.status(StatusCodes.NO_CONTENT).send();
