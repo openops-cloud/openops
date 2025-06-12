@@ -516,458 +516,67 @@ describe('dataSelectorUtils', () => {
     });
   });
 
-  describe('mergeSampleDataWithTestOutput', () => {
-    it('returns sample data when test output is not an object', () => {
-      const sampleData = { foo: 'bar' };
-      const testOutput = 'not an object';
-      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
-        sampleData,
-        testOutput,
-      );
-      expect(result.data).toEqual(sampleData);
-      expect(result.usedSampleData).toBe(true);
+  describe('hasStepSampleData', () => {
+    it('returns false when step is undefined', () => {
+      const result = dataSelectorUtils.hasStepSampleData(undefined);
+      expect(result).toBe(false);
     });
 
-    it('returns sample data when test output is null', () => {
-      const sampleData = { foo: 'bar' };
-      const testOutput = null;
-      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
-        sampleData,
-        testOutput,
-      );
-      expect(result.data).toEqual(sampleData);
-      expect(result.usedSampleData).toBe(true);
+    it('returns false when step has no settings', () => {
+      const step = { name: 'test' };
+      const result = dataSelectorUtils.hasStepSampleData(step as any);
+      expect(result).toBe(false);
     });
 
-    it('prioritizes sample data properties over test output properties', () => {
-      const sampleData = { foo: 'bar', baz: 'qux' };
-      const testOutput = { foo: 'old', extra: 'value' };
-      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
-        sampleData,
-        testOutput,
-      );
-      expect(result.data).toEqual({
-        foo: 'bar',
-        baz: 'qux',
-        extra: 'value',
-      });
-      expect(result.usedSampleData).toBe(true);
+    it('returns false when step has no inputUiInfo', () => {
+      const step = { name: 'test', settings: {} };
+      const result = dataSelectorUtils.hasStepSampleData(step as any);
+      expect(result).toBe(false);
     });
 
-    it('returns test output when sample data is undefined', () => {
-      const sampleData = undefined;
-      const testOutput = { foo: 'bar' };
-      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
-        sampleData,
-        testOutput,
-      );
-      expect(result.data).toEqual(testOutput);
-      expect(result.usedSampleData).toBe(false);
-    });
-
-    it('returns test output when sample data is null', () => {
-      const sampleData = null;
-      const testOutput = { foo: 'bar' };
-      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
-        sampleData,
-        testOutput,
-      );
-      expect(result.data).toEqual(testOutput);
-      expect(result.usedSampleData).toBe(false);
-    });
-
-    it('preserves sample data in nested object structures', () => {
-      const sampleData = {
-        foo: {
-          bar: 'new value',
-          extra: 'sample',
-        },
+    it('returns false when sampleData is undefined', () => {
+      const step = {
+        name: 'test',
+        settings: { inputUiInfo: {} },
       };
-      const testOutput = {
-        foo: {
-          bar: 'old value',
-          baz: 'test',
-        },
-      };
-      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
-        sampleData,
-        testOutput,
-      );
-      expect(result.data).toEqual({
-        foo: {
-          bar: 'new value',
-          extra: 'sample',
-          baz: 'test',
-        },
-      });
-      expect(result.usedSampleData).toBe(true);
+      const result = dataSelectorUtils.hasStepSampleData(step as any);
+      expect(result).toBe(false);
     });
 
-    it('returns sample data when both inputs are primitive values', () => {
-      const sampleData = 'override';
-      const testOutput = 'original';
-      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
-        sampleData,
-        testOutput,
-      );
-      expect(result.data).toEqual(sampleData);
-      expect(result.usedSampleData).toBe(true);
+    it('returns false when sampleData is null', () => {
+      const step = {
+        name: 'test',
+        settings: { inputUiInfo: { sampleData: null } },
+      };
+      const result = dataSelectorUtils.hasStepSampleData(step as any);
+      expect(result).toBe(false);
     });
 
-    it('returns sample data when sample is number and test output is string', () => {
-      const sampleData = 42;
-      const testOutput = '100';
-      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
-        sampleData,
-        testOutput,
-      );
-      expect(result.data).toEqual(sampleData);
-      expect(result.usedSampleData).toBe(true);
+    it('returns false when sampleData is an empty object', () => {
+      const step = {
+        name: 'test',
+        settings: { inputUiInfo: { sampleData: {} } },
+      };
+      const result = dataSelectorUtils.hasStepSampleData(step as any);
+      expect(result).toBe(false);
     });
 
-    it('returns sample data when sample is boolean and test output is number', () => {
-      const sampleData = true;
-      const testOutput = 1;
-      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
-        sampleData,
-        testOutput,
-      );
-      expect(result.data).toEqual(sampleData);
-      expect(result.usedSampleData).toBe(true);
+    it('returns true when sampleData is a non-empty object', () => {
+      const step = {
+        name: 'test',
+        settings: { inputUiInfo: { sampleData: { foo: 'bar' } } },
+      };
+      const result = dataSelectorUtils.hasStepSampleData(step as any);
+      expect(result).toBe(true);
     });
 
-    it('returns sample data when sample is array and test output is primitive', () => {
-      const sampleData = [1, 2, 3];
-      const testOutput = 'not an array';
-      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
-        sampleData,
-        testOutput,
-      );
-      expect(result.data).toEqual(sampleData);
-      expect(result.usedSampleData).toBe(true);
-    });
-
-    it('returns sample data when sample is object and test output is array', () => {
-      const sampleData = { foo: 'bar' };
-      const testOutput = [1, 2, 3];
-      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
-        sampleData,
-        testOutput,
-      );
-      expect(result.data).toEqual(sampleData);
-      expect(result.usedSampleData).toBe(true);
-    });
-
-    it('returns sample data when sample is Map and test output is array', () => {
-      const sampleData = new Map([['key1', 'value1']]);
-      const testOutput = ['value1', 'value2'];
-      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
-        sampleData,
-        testOutput,
-      );
-      expect(result.data).toEqual(sampleData);
-      expect(result.usedSampleData).toBe(true);
-    });
-
-    it('returns sample data when sample is Date and test output is string', () => {
-      const sampleData = new Date('2024-01-01');
-      const testOutput = '2024-01-01';
-      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
-        sampleData,
-        testOutput,
-      );
-      expect(result.data).toEqual(sampleData);
-      expect(result.usedSampleData).toBe(true);
-    });
-
-    it('returns sample data when sample is Map and test output is object', () => {
-      const sampleData = new Map([['key1', 'value1']]);
-      const testOutput = { key1: 'value1' };
-      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
-        sampleData,
-        testOutput,
-      );
-      expect(result.data).toEqual(sampleData);
-      expect(result.usedSampleData).toBe(true);
-    });
-
-    it('returns sample data when sample is Date and test output is object', () => {
-      const sampleData = new Date('2024-01-01');
-      const testOutput = { timestamp: 1704067200000 };
-      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
-        sampleData,
-        testOutput,
-      );
-      expect(result.data).toEqual(sampleData);
-      expect(result.usedSampleData).toBe(true);
-    });
-
-    it('preserves sample data in nested structures with mixed types', () => {
-      const sampleData = {
-        map: new Map([['key1', 'value1']]),
-        date: new Date('2024-01-01'),
-        nested: {
-          array: [1, 2, 3],
-          primitive: 'value',
-        },
+    it('returns true when sampleData is a non-object value', () => {
+      const step = {
+        name: 'test',
+        settings: { inputUiInfo: { sampleData: 'test value' } },
       };
-      const testOutput = {
-        map: { key1: 'value1' },
-        date: '2024-01-01',
-        nested: {
-          array: 'not an array',
-          primitive: 42,
-          extra: 'value',
-        },
-      };
-      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
-        sampleData,
-        testOutput,
-      );
-      expect(result.data).toEqual({
-        map: sampleData.map,
-        date: sampleData.date,
-        nested: {
-          array: sampleData.nested.array,
-          primitive: sampleData.nested.primitive,
-          extra: 'value',
-        },
-      });
-      expect(result.usedSampleData).toBe(true);
-    });
-
-    it('uses test output values when sample data values are undefined', () => {
-      const sampleData = {
-        foo: undefined,
-        nested: {
-          baz: undefined,
-        },
-      };
-      const testOutput = {
-        foo: 'old',
-        nested: {
-          baz: 'old',
-          extra: 'value',
-        },
-      };
-      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
-        sampleData,
-        testOutput,
-      );
-      expect(result.data).toEqual({
-        foo: 'old',
-        nested: {
-          baz: 'old',
-          extra: 'value',
-        },
-      });
-      expect(result.usedSampleData).toBe(false);
-    });
-
-    it('merges deeply nested objects (5 levels deep)', () => {
-      const sampleData = {
-        level1: {
-          level2: {
-            level3: {
-              level4: {
-                level5: {
-                  value: 'sample',
-                  extra: 'sample-extra',
-                },
-              },
-            },
-          },
-        },
-      };
-      const testOutput = {
-        level1: {
-          level2: {
-            level3: {
-              level4: {
-                level5: {
-                  value: 'test',
-                  testExtra: 'test-value',
-                },
-              },
-            },
-          },
-        },
-      };
-      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
-        sampleData,
-        testOutput,
-      );
-      expect(result.data).toEqual({
-        level1: {
-          level2: {
-            level3: {
-              level4: {
-                level5: {
-                  value: 'sample',
-                  extra: 'sample-extra',
-                  testExtra: 'test-value',
-                },
-              },
-            },
-          },
-        },
-      });
-      expect(result.usedSampleData).toBe(true);
-    });
-
-    it('preserves test output keys not present in sample data', () => {
-      const sampleData = {
-        foo: {
-          bar: 'sample',
-        },
-      };
-      const testOutput = {
-        foo: {
-          bar: 'test',
-          extra: 'test-value',
-        },
-        rootExtra: 'root-value',
-      };
-      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
-        sampleData,
-        testOutput,
-      );
-      expect(result.data).toEqual({
-        foo: {
-          bar: 'sample',
-          extra: 'test-value',
-        },
-        rootExtra: 'root-value',
-      });
-      expect(result.usedSampleData).toBe(true);
-    });
-
-    it('uses test output for empty objects in sample data', () => {
-      const sampleData = {
-        empty: {},
-        nested: {
-          empty: {},
-        },
-      };
-      const testOutput = {
-        empty: { value: 'test' },
-        nested: {
-          empty: { value: 'test' },
-        },
-      };
-      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
-        sampleData,
-        testOutput,
-      );
-      expect(result.data).toEqual({
-        empty: { value: 'test' },
-        nested: {
-          empty: { value: 'test' },
-        },
-      });
-      expect(result.usedSampleData).toBe(false);
-    });
-
-    it('uses test output for empty arrays in sample data', () => {
-      const sampleData = {
-        empty: [],
-        nested: {
-          empty: [],
-        },
-      };
-      const testOutput = {
-        empty: [1, 2, 3],
-        nested: {
-          empty: [4, 5, 6],
-        },
-      };
-      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
-        sampleData,
-        testOutput,
-      );
-      expect(result.data).toEqual({
-        empty: [1, 2, 3],
-        nested: {
-          empty: [4, 5, 6],
-        },
-      });
-      expect(result.usedSampleData).toBe(false);
-    });
-
-    it('uses test output when sample data has undefined values in nested structure', () => {
-      const sampleData = {
-        level1: {
-          level2: {
-            value: undefined,
-            nested: {
-              value: undefined,
-            },
-          },
-        },
-      };
-      const testOutput = {
-        level1: {
-          level2: {
-            value: 'test-value',
-            nested: {
-              value: 'nested-test-value',
-            },
-          },
-        },
-      };
-      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
-        sampleData,
-        testOutput,
-      );
-      expect(result.data).toEqual({
-        level1: {
-          level2: {
-            value: 'test-value',
-            nested: {
-              value: 'nested-test-value',
-            },
-          },
-        },
-      });
-      expect(result.usedSampleData).toBe(false);
-    });
-
-    it('handles mixed undefined and defined values in nested structure', () => {
-      const sampleData = {
-        level1: {
-          defined: 'sample-value',
-          undefined: undefined,
-          nested: {
-            defined: 'nested-sample',
-            undefined: undefined,
-          },
-        },
-      };
-      const testOutput = {
-        level1: {
-          defined: 'test-value',
-          undefined: 'test-undefined',
-          nested: {
-            defined: 'nested-test',
-            undefined: 'nested-test-undefined',
-          },
-        },
-      };
-      const result = dataSelectorUtils.mergeSampleDataWithTestOutput(
-        sampleData,
-        testOutput,
-      );
-      expect(result.data).toEqual({
-        level1: {
-          defined: 'sample-value',
-          undefined: 'test-undefined',
-          nested: {
-            defined: 'nested-sample',
-            undefined: 'nested-test-undefined',
-          },
-        },
-      });
-      expect(result.usedSampleData).toBe(true);
+      const result = dataSelectorUtils.hasStepSampleData(step as any);
+      expect(result).toBe(true);
     });
   });
 });

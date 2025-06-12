@@ -33,14 +33,18 @@ export function createCustomApiCallAction({
   description,
   displayName,
   name,
+  additionalProps,
 }: {
   auth?: BlockAuthProperty;
   baseUrl: (auth?: unknown) => string;
-  authMapping?: (auth: unknown) => Promise<HttpHeaders>;
-  //   add description as a parameter that can be null
+  authMapping?: (context: {
+    auth: unknown;
+    propsValue: unknown;
+  }) => Promise<HttpHeaders>;
   description?: string | null;
   displayName?: string | null;
   name?: string | null;
+  additionalProps?: Record<string, any>;
 }) {
   return createAction({
     name: name ? name : 'custom_api_call',
@@ -51,6 +55,7 @@ export function createCustomApiCallAction({
     auth: auth ? auth : undefined,
     requireAuth: auth ? true : false,
     props: {
+      ...(additionalProps || {}),
       url: Property.DynamicProperties({
         displayName: '',
         required: true,
@@ -111,7 +116,7 @@ export function createCustomApiCallAction({
 
       let headersValue = headers as HttpHeaders;
       if (authMapping) {
-        const headers = await authMapping(context.auth);
+        const headers = await authMapping(context);
         if (headers) {
           headersValue = {
             ...headersValue,

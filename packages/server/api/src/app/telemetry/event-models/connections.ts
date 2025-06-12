@@ -1,7 +1,7 @@
 import { telemetry } from '../telemetry';
 
 export type ConnectionBase = {
-  blockName: string;
+  authProviderKey: string;
   projectId: string;
 };
 

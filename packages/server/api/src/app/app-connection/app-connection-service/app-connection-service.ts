@@ -146,7 +146,11 @@ export const appConnectionService = {
       projectId,
     });
 
-    sendConnectionUpdatedEvent(params.userId, projectId, request.blockName);
+    sendConnectionUpdatedEvent(
+      params.userId,
+      projectId,
+      request.authProviderKey,
+    );
 
     return {
       ...existingConnection,
