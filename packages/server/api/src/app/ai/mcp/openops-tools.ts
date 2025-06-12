@@ -102,8 +102,7 @@ export async function getOpenOpsTools(
       toolProvider: 'openops',
     };
   }
-  const toolsFilePath = '/workspaces/openops/openops-tools.json';
-  await fs.writeFile(toolsFilePath, JSON.stringify(tools, null, 2), 'utf-8');
+
   return {
     client: openopsClient,
     toolSet,
