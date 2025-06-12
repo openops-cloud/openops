@@ -21,7 +21,7 @@ export const anadotAuth = BlockAuth.CustomAuth({
       description: 'The URL to use to request Umbrella API',
       required: true,
       validators: [Validators.url],
-      defaultValue: 'https://api.umbrellacost.io/api/v1',
+      defaultValue: 'https://api.umbrellacost.io/api',
     }),
     username: Property.ShortText({
       required: true,

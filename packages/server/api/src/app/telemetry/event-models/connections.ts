@@ -1,7 +1,7 @@
 import { telemetry } from '../telemetry';
 
 export type ConnectionBase = {
-  blockName: string;
+  authProviderKey: string;
   projectId: string;
 };
 
@@ -14,14 +14,14 @@ export enum ConnectionEventName {
 export function sendConnectionCreatedEvent(
   userId: string,
   projectId: string,
-  blockName: string,
+  authProviderKey: string,
 ): void {
   telemetry.trackEvent({
     name: ConnectionEventName.CONNECTION_CREATED,
     labels: {
       userId,
-      blockName,
       projectId,
+      authProviderKey,
     },
   });
 }
@@ -29,14 +29,14 @@ export function sendConnectionCreatedEvent(
 export function sendConnectionUpdatedEvent(
   userId: string,
   projectId: string,
-  blockName: string,
+  authProviderKey: string,
 ): void {
   telemetry.trackEvent({
     name: ConnectionEventName.CONNECTION_UPDATED,
     labels: {
       userId,
-      blockName,
       projectId,
+      authProviderKey,
     },
   });
 }
@@ -44,14 +44,14 @@ export function sendConnectionUpdatedEvent(
 export function sendConnectionDeletedEvent(
   userId: string,
   projectId: string,
-  blockName: string,
+  authProviderKey: string,
 ): void {
   telemetry.trackEvent({
     name: ConnectionEventName.CONNECTION_DELETED,
     labels: {
       userId,
-      blockName,
       projectId,
+      authProviderKey,
     },
   });
 }
