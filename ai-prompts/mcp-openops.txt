@@ -3,7 +3,8 @@
 ## Important Rules
 - Never remove or overwrite existing roles or other fields unless explicitly requested
 - Never ask for redacted or secret fields unless the user wants to change them
-- For PATCH operations: Always use the full, current connection object as the base
+- Always use the full, current connection object as the base
+- NEVER allow renaming of a connection
 - **Never ask for fields that are already specified in the metadata** (like `type` or `authProvider`)
 
 ## Operation Types
