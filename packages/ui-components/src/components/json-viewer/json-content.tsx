@@ -1,4 +1,5 @@
 import { isNil } from '@openops/shared';
+import { t } from 'i18next';
 import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import ReactJson from 'react-json-view';
@@ -21,6 +22,7 @@ type JsonContentProps = {
   form: UseFormReturn<JsonFormValues>;
   theme?: string;
   validateJson?: (value: string) => { valid: boolean; message?: string };
+  editorClassName?: string;
 };
 
 export const JsonContent = ({
@@ -28,6 +30,7 @@ export const JsonContent = ({
   json,
   form,
   theme,
+  editorClassName,
 }: JsonContentProps) => {
   const viewerTheme = theme === 'dark' ? 'pop' : 'rjv-default';
 
@@ -43,9 +46,11 @@ export const JsonContent = ({
                 <FormControl>
                   <JsonEditor
                     {...field}
+                    placeholder={t('Paste sample data here')}
                     field={field as any}
                     readonly={false}
                     theme={theme}
+                    containerClassName={editorClassName}
                   />
                 </FormControl>
                 <FormMessage className="ml-4 pb-1" />
@@ -58,7 +63,7 @@ export const JsonContent = ({
   }
 
   return (
-    <>
+    <div className="pt-[11px] pl-3 border-t border-solid">
       {isNil(json) ? (
         <pre className="text-sm whitespace-pre-wrap overflow-x-auto p-2">
           {json === null ? 'null' : 'undefined'}
@@ -93,6 +98,6 @@ export const JsonContent = ({
           )}
         </>
       )}
-    </>
+    </div>
   );
 };
