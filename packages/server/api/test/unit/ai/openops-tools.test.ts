@@ -4,12 +4,12 @@ const mockTools = {
   tool1: {
     description: 'Test tool 1',
     parameters: {},
-    toolProvider: 'openops-mcp',
+    toolProvider: 'openops',
   },
   tool2: {
     description: 'Test tool 2',
     parameters: {},
-    toolProvider: 'openops-mcp',
+    toolProvider: 'openops',
   },
 };
 

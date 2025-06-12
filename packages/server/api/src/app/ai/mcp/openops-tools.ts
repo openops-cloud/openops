@@ -99,7 +99,7 @@ export async function getOpenOpsTools(
   for (const [key, tool] of Object.entries(tools)) {
     toolSet[key] = {
       ...tool,
-      toolProvider: 'openops-mcp',
+      toolProvider: 'openops',
     };
   }
 

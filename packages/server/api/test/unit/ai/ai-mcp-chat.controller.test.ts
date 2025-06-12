@@ -237,7 +237,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           openops_mcp_tool: {
             description: 'Table tool',
             parameters: {},
-            toolProvider: 'openops-mcp',
+            toolProvider: 'openops',
           },
         },
         expected: {
@@ -252,7 +252,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           openops_mcp_tool: {
             description: 'Table tool',
             parameters: {},
-            toolProvider: 'openops-mcp',
+            toolProvider: 'openops',
           },
         },
         expected: {

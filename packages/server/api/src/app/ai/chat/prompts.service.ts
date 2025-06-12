@@ -23,7 +23,7 @@ export const getMcpSystemPrompt = async ({
   }
 
   if (isOpenOpsMCPEnabled) {
-    prompts.push(loadPrompt('openops-mcp.txt'));
+    prompts.push(loadPrompt('mcp-openops.txt'));
   }
 
   const allPrompts = await Promise.all(prompts);
