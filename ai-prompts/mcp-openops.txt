@@ -5,7 +5,8 @@
 - Never ask for redacted or secret fields unless the user wants to change them
 - For PATCH operations: Always use the full, current connection object as the base
 - For POST operations: Only require the minimum information needed for a new connection
-- **Never ask for fields that are already specified in the metadata** (like `type` or `authProvider`)
+- **Never ask for fields that are already specified in the metadata** (like `type` or `authProvider`),
+  for block information like blockName, use the default block or the first one in the list in supportedBlocks of the metadata.
 
 ## Operation Types
 - **POST**: For creating new connections
