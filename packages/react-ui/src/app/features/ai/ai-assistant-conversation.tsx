@@ -7,11 +7,13 @@ import {
   LoadingSpinner,
   MarkdownCodeVariations,
 } from '@openops/components/ui';
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 
 type AiAssistantConversationnProps = {
   isPending: boolean;
   messages: MessageType[];
+  lastUserMessageRef: React.RefObject<HTMLDivElement>;
+  lastAssistantMessageRef: React.RefObject<HTMLDivElement>;
 } & Pick<UseChatHelpers, 'status'>;
 
 const ChatStatus = {
@@ -23,7 +25,11 @@ const AiAssistantConversation = ({
   messages,
   status,
   isPending,
+  lastUserMessageRef,
+  lastAssistantMessageRef,
 }: AiAssistantConversationnProps) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
   const uiMessages: AIChatMessage[] = useMemo(() => {
     return messages.map((message: MessageType, idx) => ({
       id: message && 'id' in message ? message.id : String(idx),
@@ -42,10 +48,12 @@ const AiAssistantConversation = ({
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2" ref={containerRef}>
       <AIChatMessages
         messages={uiMessages}
         codeVariation={MarkdownCodeVariations.WithCopyMultiline}
+        lastUserMessageRef={lastUserMessageRef}
+        lastAssistantMessageRef={lastAssistantMessageRef}
       />
       {[ChatStatus.STREAMING, ChatStatus.SUBMITTED].includes(status) && (
         <LoadingSpinner />

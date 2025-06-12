@@ -3,13 +3,18 @@ import { t } from 'i18next';
 import { Bot } from 'lucide-react';
 import { ReactNode, useEffect, useRef } from 'react';
 import { cn } from '../../lib/cn';
-import { AI_CHAT_SCROLL_DELAY } from '../../lib/constants';
 import { ScrollArea } from '../../ui/scroll-area';
+import { AIChatMessageRole } from '../ai-chat-messages';
 import { BoxSize, ResizableArea } from '../resizable-area';
 import { AiChatInput } from './ai-chat-input';
 import { AiChatSizeTogglers } from './ai-chat-size-togglers';
 import { AiModelSelectorProps } from './ai-model-selector';
+import { getBufferAreaHeight, getLastUserMessageId } from './ai-scroll-helpers';
 import { AI_CHAT_CONTAINER_SIZES, AiAssistantChatSizeState } from './types';
+import {
+  useScrollToBottomOnOpen,
+  useScrollToLastUserMessage,
+} from './use-ai-chat-scroll';
 
 type AiAssistantChatContainerProps = {
   dimensions: BoxSize;
@@ -23,6 +28,10 @@ type AiAssistantChatContainerProps = {
   isEmpty: boolean;
   className?: string;
   children?: ReactNode;
+  messages?: { id: string; role: string }[];
+  status?: string;
+  lastUserMessageRef: React.RefObject<HTMLDivElement>;
+  lastAssistantMessageRef: React.RefObject<HTMLDivElement>;
 } & Pick<UseChatHelpers, 'input' | 'handleInputChange' | 'handleSubmit'> &
   AiModelSelectorProps;
 
@@ -42,6 +51,7 @@ const AiAssistantChatContainer = ({
   isEmpty = true,
   className,
   children,
+  messages = [],
   handleInputChange,
   handleSubmit,
   input,
@@ -49,29 +59,66 @@ const AiAssistantChatContainer = ({
   selectedModel,
   onModelSelected,
   isModelSelectorLoading,
+  status,
+  lastUserMessageRef,
+  lastAssistantMessageRef,
 }: AiAssistantChatContainerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollViewportRef = useRef<HTMLDivElement>(null);
-  const hasScrolledOnce = useRef<boolean>(false);
+  const hasAutoScrolled = useRef<boolean>(false);
+  const streamingEndRef = useRef<HTMLDivElement>(null);
+  const lastUserMessageId = useRef<string | null>(
+    getLastUserMessageId(messages),
+  );
+  const lastUserMessageIndex = useRef<number | null>(null);
 
   useEffect(() => {
-    setTimeout(() => {
-      if (
-        scrollViewportRef.current &&
-        !isEmpty &&
-        showAiChat &&
-        !hasScrolledOnce.current &&
-        !!children
-      ) {
-        scrollViewportRef.current.scrollTo({
-          top: scrollViewportRef.current.scrollHeight,
-          behavior: 'smooth',
-        });
-
-        hasScrolledOnce.current = true;
+    if (showAiChat) {
+      if (lastUserMessageIndex.current === null && messages.length) {
+        lastUserMessageIndex.current = messages
+          .map((m) => m.role)
+          .lastIndexOf(AIChatMessageRole.user);
       }
-    }, AI_CHAT_SCROLL_DELAY);
-  }, [isEmpty, showAiChat, children]);
+    } else {
+      lastUserMessageIndex.current = null;
+    }
+  }, [showAiChat, messages]);
+
+  useScrollToLastUserMessage({
+    messages,
+    showAiChat,
+    scrollViewportRef,
+    lastUserMessageId,
+    streamingEndRef,
+  });
+
+  useScrollToBottomOnOpen({
+    isEmpty,
+    showAiChat,
+    messages,
+    hasAutoScrolled,
+    scrollViewportRef,
+  });
+
+  const height = dimensions.height ?? 0;
+  const lastMsgHeight = lastUserMessageRef.current?.offsetHeight ?? 0;
+  const currentBufferAreaHeight = streamingEndRef.current?.offsetHeight ?? 0;
+  const lastAssistantMsgHeight =
+    lastAssistantMessageRef?.current?.offsetHeight ?? 0;
+
+  const hasNewMessage =
+    lastUserMessageIndex.current !== null &&
+    lastUserMessageIndex.current !== messages.length - 2;
+
+  const bufferAreaHeight = hasNewMessage
+    ? getBufferAreaHeight(
+        height,
+        currentBufferAreaHeight,
+        lastMsgHeight,
+        lastAssistantMsgHeight,
+        status,
+      )
+    : 0;
 
   return (
     <div
@@ -127,10 +174,10 @@ const AiAssistantChatContainer = ({
           <div className="overflow-hidden flex-1">
             <div className="py-4 flex flex-col h-full">
               <ScrollArea
-                className="h-full w-full"
+                className="h-full w-full flex-1"
                 viewPortRef={scrollViewportRef}
               >
-                <div className="h-full w-full px-6 flex flex-col">
+                <div className="h-full w-full px-6 flex flex-col flex-1">
                   {isEmpty ? (
                     <div
                       className={
@@ -147,7 +194,16 @@ const AiAssistantChatContainer = ({
                       </span>
                     </div>
                   ) : (
-                    children
+                    <div className="flex flex-col">
+                      {children}
+                      <div
+                        ref={streamingEndRef}
+                        id="streaming-end"
+                        style={{
+                          height: bufferAreaHeight,
+                        }}
+                      />
+                    </div>
                   )}
                 </div>
               </ScrollArea>

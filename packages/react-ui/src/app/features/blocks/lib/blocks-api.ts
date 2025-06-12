@@ -87,9 +87,6 @@ export const blocksApi = {
       }
     }
   },
-  syncFromCloud() {
-    return api.post<void>(`/v1/blocks/sync`, {});
-  },
   install(params: AddBlockRequestBody) {
     const formData = new FormData();
     formData.set('packageType', params.packageType);

@@ -182,7 +182,7 @@ const UpsertAppConnectionRequest = {
     tags: ['app-connections'],
     security: [SERVICE_KEY_SECURITY_OPENAPI],
     description:
-      'Create or update an app connection based on the app name. This endpoint handles both new connection creation and updates to existing connections, supporting various authentication types including OAuth2, Basic Auth, and Custom Auth.',
+      'Create a new app connection. This endpoint is used for initial connection setup and supports various authentication types including OAuth2, Basic Auth, and Custom Auth. The connection is automatically encrypted and stored securely. Returns the created connection with sensitive data redacted.',
     body: UpsertAppConnectionRequestBody,
     Response: {
       [StatusCodes.CREATED]: AppConnectionWithoutSensitiveData,
@@ -199,7 +199,7 @@ const PatchAppConnectionRequest = {
     tags: ['app-connections'],
     security: [SERVICE_KEY_SECURITY_OPENAPI],
     description:
-      "Update an existing app connection based on the connection ID. This endpoint allows modification of connection settings, authentication details, and other configuration parameters while maintaining the connection's identity.",
+      "Update an existing app connection's configuration. This endpoint is used for modifying an existing connection and requires the connection to already exist. All changes are validated and encrypted before storage. The connection's name and type cannot be changed. Returns the updated connection with sensitive data redacted.",
     body: PatchAppConnectionRequestBody,
     Response: {
       [StatusCodes.OK]: AppConnectionWithoutSensitiveData,
@@ -217,7 +217,7 @@ const ListAppConnectionsRequest = {
     security: [SERVICE_KEY_SECURITY_OPENAPI],
     querystring: ListAppConnectionsRequestQuery,
     description:
-      'List all app connections in the project with filtering and pagination options. This endpoint supports filtering by name, block type, and status, and includes pagination controls for large result sets.',
+      'List all app connections in the project with advanced filtering and pagination capabilities. Supports filtering by name, block type, status, and authentication provider. Results are paginated and include metadata about each connection. All sensitive data is automatically redacted in the response.',
     response: {
       [StatusCodes.OK]: SeekPage(AppConnectionWithoutSensitiveData),
     },
@@ -251,7 +251,7 @@ const GetAppConnectionRequest = {
   schema: {
     tags: ['app-connections'],
     description:
-      'Get an app connection by its ID. This endpoint retrieves detailed information about a specific app connection, including its configuration, settings, and current status. Sensitive data such as authentication tokens and secrets is automatically redacted in the response for security.',
+      'Get detailed information about a specific app connection by its ID. This endpoint retrieves the complete connection configuration, settings, and current status. All sensitive data such as authentication tokens, secrets, and credentials is automatically redacted in the response for security. Returns a 404 error if the connection is not found.',
     params: Type.Object({
       id: OpenOpsId,
     }),
@@ -277,7 +277,8 @@ const GetConnectionMetadataRequest = {
   schema: {
     tags: ['app-connections'],
     security: [SERVICE_KEY_SECURITY_OPENAPI],
-    description: 'Get authentication metadata for all available connections',
+    description:
+      'Retrieve comprehensive metadata about all available connection types and their authentication requirements. This endpoint provides detailed information about supported authentication methods, required fields, and configuration options for each connection type. Useful for building connection configuration interfaces.',
     response: {
       [StatusCodes.OK]: Type.Record(Type.String(), Type.Unknown()),
     },

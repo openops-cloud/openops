@@ -5,6 +5,7 @@ import { useArgs, useCallback, useState } from '@storybook/preview-api';
 import type { Meta, StoryObj } from '@storybook/react';
 import { fn } from '@storybook/test';
 
+import { useRef } from 'react';
 import {
   AI_CHAT_CONTAINER_SIZES,
   AiAssistantChatContainer,
@@ -113,6 +114,8 @@ const meta = {
     ),
   ],
   render: (args) => {
+    const lastUserMessageRef = useRef<HTMLDivElement>(null);
+    const lastAssistantMessageRef = useRef<HTMLDivElement>(null);
     const {
       aiChatSize,
       toggleAiChatStateSize,
@@ -129,6 +132,8 @@ const meta = {
         setDimensions={updateDimensionsState}
         showAiChat={true}
         className="relative w-full"
+        lastUserMessageRef={lastUserMessageRef}
+        lastAssistantMessageRef={lastAssistantMessageRef}
       ></AiAssistantChatContainer>
     );
   },
@@ -154,6 +159,8 @@ export const WithMessages: Story = {
       dimensions,
       updateDimensionsState,
     } = useAiChatToggleAndDimensions();
+    const lastUserMessageRef = useRef<HTMLDivElement>(null);
+    const lastAssistantMessageRef = useRef<HTMLDivElement>(null);
     return (
       <AiAssistantChatContainer
         {...args}
@@ -163,11 +170,16 @@ export const WithMessages: Story = {
         setDimensions={updateDimensionsState}
         showAiChat={true}
         className="relative w-full"
+        lastUserMessageRef={lastUserMessageRef}
+        lastAssistantMessageRef={lastAssistantMessageRef}
+        messages={sampleAIChatMessages}
       >
         <AIChatMessages
           messages={sampleAIChatMessages}
           onInject={action('Inject command')}
           codeVariation={MarkdownCodeVariations.WithCopyMultiline}
+          lastUserMessageRef={lastUserMessageRef}
+          lastAssistantMessageRef={lastAssistantMessageRef}
         />
       </AiAssistantChatContainer>
     );
@@ -189,6 +201,9 @@ export const WithMessagesCopyAndInject: Story = {
       updateDimensionsState,
     } = useAiChatToggleAndDimensions();
 
+    const lastUserMessageRef = useRef<HTMLDivElement>(null);
+    const lastAssistantMessageRef = useRef<HTMLDivElement>(null);
+
     return (
       <AiAssistantChatContainer
         {...args}
@@ -198,11 +213,16 @@ export const WithMessagesCopyAndInject: Story = {
         setDimensions={updateDimensionsState}
         showAiChat={true}
         className="relative w-full"
+        lastUserMessageRef={lastUserMessageRef}
+        lastAssistantMessageRef={lastAssistantMessageRef}
+        messages={sampleAIChatMessages}
       >
         <AIChatMessages
           messages={sampleAIChatMessages}
           onInject={action('Inject command')}
           codeVariation={MarkdownCodeVariations.WithCopyAndInject}
+          lastUserMessageRef={lastUserMessageRef}
+          lastAssistantMessageRef={lastAssistantMessageRef}
         />
       </AiAssistantChatContainer>
     );

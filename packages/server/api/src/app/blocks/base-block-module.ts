@@ -34,7 +34,6 @@ import {
   blockMetadataService,
   getBlockPackage,
 } from './block-metadata-service';
-import { blockSyncService } from './block-sync-service';
 
 export const blockModule: FastifyPluginAsyncTypebox = async (app) => {
   await app.register(baseBlocksController, { prefix: '/v1/blocks' });
@@ -141,10 +140,6 @@ const baseBlocksController: FastifyPluginAsyncTypebox = async (app) => {
     },
   );
 
-  app.post('/sync', SyncBlocksRequest, async (): Promise<void> => {
-    await blockSyncService.sync();
-  });
-
   app.post('/options', OptionsBlockRequest, async (req) => {
     const request = req.body;
     const { projectId } = req.principal;
@@ -200,7 +195,7 @@ const ListBlocksRequest = {
   schema: {
     querystring: ListBlocksRequestQuery,
     description:
-      'List all available blocks with filtering and sorting options. This endpoint retrieves a paginated list of blocks that can be used in flows, including both official and custom blocks. Supports filtering by release version, tags, categories, and block type.',
+      'List all available blocks with advanced filtering and sorting capabilities. This endpoint retrieves a comprehensive list of blocks that can be used in workflows, including both official and custom blocks. Supports filtering by package version, tags, categories, block type, and search queries. Results can be sorted by name, update date, creation date, or popularity.',
   },
 };
 
@@ -210,7 +205,7 @@ const GetBlockParamsRequest = {
   },
   schema: {
     description:
-      'Retrieve detailed information about a specific block by its name. This endpoint returns the complete block metadata including its configuration, actions, triggers, and properties. Optionally specify a version to get historical block data or check compatibility.',
+      'Retrieve detailed information about a specific block by its name. This endpoint returns the complete block metadata including its configuration, actions, triggers, properties, and authentication requirements. Optionally specify a package version to get historical block data or check compatibility. The response includes all necessary information for integrating the block into workflows.',
     params: GetBlockRequestParams,
     querystring: GetBlockRequestQuery,
   },
@@ -222,7 +217,7 @@ const GetBlockParamsWithScopeRequest = {
   },
   schema: {
     description:
-      'Retrieve detailed information about a scoped block (e.g., custom blocks). This endpoint returns the complete block metadata for blocks that belong to a specific scope or namespace. Useful for accessing custom blocks or blocks from specific organizations.',
+      'Retrieve detailed information about a scoped block (e.g., custom blocks or organization-specific blocks). This endpoint returns the complete block metadata for blocks that belong to a specific scope or namespace. Includes all configuration details, actions, triggers, and authentication requirements. Useful for accessing custom blocks or blocks from specific organizations.',
     params: GetBlockRequestWithScopeParams,
     querystring: GetBlockRequestQuery,
   },
@@ -234,7 +229,7 @@ const ListCategoriesRequest = {
   },
   schema: {
     description:
-      'Retrieve all available block categories with filtering options. This endpoint returns a list of predefined categories that can be used to organize and filter blocks in the system. Supports filtering by release version, edition, and block type.',
+      'Retrieve all available block categories with their metadata. This endpoint returns a comprehensive list of predefined categories (e.g., FINOPS, CLOUD, WORKFLOW, COLLABORATION) that can be used to organize and filter blocks in the system. Each category includes its display name, description, and associated metadata. Useful for building category-based navigation and filtering interfaces.',
     querystring: ListBlocksRequestQuery,
   },
 };
@@ -265,15 +260,5 @@ const ListVersionsRequest = {
     description:
       'Retrieve version history for blocks. This endpoint returns a list of available versions for a specific block, including release information and compatibility details. Useful for tracking block evolution, managing updates, and ensuring compatibility with your flows.',
     querystring: ListVersionRequestQuery,
-  },
-};
-
-const SyncBlocksRequest = {
-  config: {
-    allowedPrincipals: [PrincipalType.USER],
-  },
-  schema: {
-    description:
-      'Synchronize blocks with the registry. This endpoint updates the local block registry with the latest versions and configurations from the remote registry. Ensures your system has access to the most recent block updates and security patches.',
   },
 };
