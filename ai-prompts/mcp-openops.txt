@@ -1,3 +1,7 @@
+# Workflows Guide
+
+When you are asked for information about a specific workflow, if you have the name but not the id, fetch workflows by name to get the ID. If you find more than one matching workflow with the same name, ask the user which workflow they mean, and provide additional information like creation date, folder name, etc.
+
 # App Connection Guide
 
 ## Important Rules
