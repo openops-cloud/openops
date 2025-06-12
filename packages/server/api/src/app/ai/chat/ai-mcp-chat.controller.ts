@@ -144,7 +144,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
           {
             ...filteredTools,
             ...(isOpenOpsMCPEnabled
-              ? collectToolsByProvider(filteredTools, 'openops')
+              ? collectToolsByProvider(tools, 'openops')
               : {}),
           },
         );

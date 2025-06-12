@@ -377,11 +377,59 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
         expect(pipeDataStreamToResponse).toHaveBeenCalled();
         expect(streamText).toHaveBeenCalledWith(
           expect.objectContaining({
-            tools: selectedTools,
+            tools: selectedTools ?? {},
             system: expected.expectedSystemPrompt,
           }),
         );
       },
+    );
+  });
+
+  it('should include all openops tools from the full tool set when a relevant openops tool is present in selectedTools', async () => {
+    const openopsTools = {
+      openops_tool1: {
+        description: 'OpenOps Tool 1',
+        parameters: {},
+        toolProvider: 'openops',
+      },
+      openops_tool2: {
+        description: 'OpenOps Tool 2',
+        parameters: {},
+        toolProvider: 'openops',
+      },
+      unrelated_tool: {
+        description: 'Other Tool',
+        parameters: {},
+        toolProvider: 'tables',
+      },
+    };
+    (getMCPTools as jest.Mock).mockResolvedValue({
+      client: [],
+      tools: openopsTools,
+    });
+
+    const selectedTools = {
+      openops_tool1: {
+        description: 'OpenOps Tool 1',
+        parameters: {},
+        toolProvider: 'openops',
+      },
+    };
+    (selectRelevantTools as jest.Mock).mockResolvedValue(selectedTools);
+
+    const postHandler = handlers['/'];
+    await postHandler(
+      mockRequest as FastifyRequest,
+      mockReply as unknown as FastifyReply,
+    );
+
+    expect(streamText).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tools: {
+          openops_tool1: openopsTools.openops_tool1,
+          openops_tool2: openopsTools.openops_tool2,
+        },
+      }),
     );
   });
 });
