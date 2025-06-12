@@ -4,12 +4,9 @@
 - Never remove or overwrite existing roles or other fields unless explicitly requested
 - Never ask for redacted or secret fields unless the user wants to change them
 - For PATCH operations: Always use the full, current connection object as the base
-- For POST operations: Only require the minimum information needed for a new connection
-- **Never ask for fields that are already specified in the metadata** (like `type` or `authProvider`),
-  for block information like blockName, use the default block or the first one in the list in supportedBlocks of the metadata.
+- **Never ask for fields that are already specified in the metadata** (like `type` or `authProvider`)
 
 ## Operation Types
-- **POST**: For creating new connections
 - **PATCH**: For updating existing connections (requires existing connection ID)
 
 ## Step-by-Step Process
@@ -34,21 +31,14 @@
 - Preserve all other existing fields and array items
 
 ### 4. Send Request
-- Use **POST endpoint** for new connections
 - Use **PATCH endpoint** for updates
 - Backend will handle validation, encryption, and secret redaction
 
 ### 5. Confirm Changes
-- Return the updated/created connection details
-- Only show fields that were modified or created
+- Return the updated connection details
+- Only show fields that were modified
 
 ## Example Scenarios
-
-### Creating New Connection
-1. Get metadata for connection type
-2. Collect required fields from user
-3. Send POST request
-4. Confirm creation
 
 ### Updating Connection
 1. Get metadata for connection type

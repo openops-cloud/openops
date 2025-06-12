@@ -24,7 +24,7 @@ const INCLUDED_PATHS: Record<string, string[]> = {
   '/v1/flow-runs/': ['get'],
   '/v1/flow-runs/{id}': ['get'],
   '/v1/flow-runs/{id}/retry': ['post'],
-  '/v1/app-connections/': ['get', 'post', 'patch'],
+  '/v1/app-connections/': ['get', 'patch'],
   '/v1/app-connections/{id}': ['get'],
   '/v1/app-connections/metadata': ['get'],
 };
@@ -102,7 +102,8 @@ export async function getOpenOpsTools(
       toolProvider: 'openops',
     };
   }
-
+  const toolsFilePath = '/workspaces/openops/openops-tools.json';
+  await fs.writeFile(toolsFilePath, JSON.stringify(tools, null, 2), 'utf-8');
   return {
     client: openopsClient,
     toolSet,
