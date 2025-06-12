@@ -5,7 +5,7 @@ import {
   StepSettingsAiChatContainer,
 } from '@openops/components/ui';
 import { FlowVersion } from '@openops/shared';
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { useAiModelSelector } from '../../ai/lib/ai-model-selector-hook';
 import { useBuilderStateContext } from '../builder-hooks';
 import { DataSelectorSizeState } from '../data-selector/data-selector-size-togglers';
@@ -26,6 +26,8 @@ const StepSettingsAiChat = ({
   selectedStep,
   flowVersion,
 }: StepSettingsAiChatProps) => {
+  const lastUserMessageRef = useRef<HTMLDivElement>(null);
+  const lastAssistantMessageRef = useRef<HTMLDivElement>(null);
   const [
     { showDataSelector, dataSelectorSize, aiContainerSize, showAiChat },
     dispatch,
@@ -120,11 +122,20 @@ const StepSettingsAiChat = ({
       selectedModel={selectedModel}
       onModelSelected={onModelSelected}
       isModelSelectorLoading={isModelSelectorLoading}
+      messages={messages.map((m, idx) => ({
+        id: m.id ?? String(idx),
+        role: m.role,
+      }))}
+      status={status}
+      lastUserMessageRef={lastUserMessageRef}
+      lastAssistantMessageRef={lastAssistantMessageRef}
     >
       <StepSettingsAiConversation
         messages={messages}
         status={status}
         isPending={isOpenAiChatPending}
+        lastUserMessageRef={lastUserMessageRef}
+        lastAssistantMessageRef={lastAssistantMessageRef}
       />
     </StepSettingsAiChatContainer>
   );

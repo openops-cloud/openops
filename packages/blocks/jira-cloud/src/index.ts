@@ -36,6 +36,20 @@ export const jiraCloud = createBlock({
     updateIssueCommentAction,
     listIssueCommentsAction,
     deleteIssueCommentAction,
+    createCustomApiCallAction({
+      baseUrl: (auth) => {
+        return `${(auth as JiraAuth).instanceUrl}/rest/api/3`;
+      },
+      auth: jiraCloudAuth,
+      authMapping: async (context) => {
+        const jiraAuth = context.auth as JiraAuth;
+        const credentials = `${jiraAuth.email}:${jiraAuth.apiToken}`;
+        const encoded = Buffer.from(credentials).toString('base64');
+        return {
+          Authorization: `Basic ${encoded}`,
+        };
+      },
+    }),
   ],
   triggers: [newIssue, updatedIssue],
 });

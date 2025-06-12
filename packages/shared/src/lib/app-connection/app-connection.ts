@@ -89,7 +89,7 @@ export type AppConnection<Type extends AppConnectionType = AppConnectionType> =
     projectId: string;
     status: AppConnectionStatus;
     value: AppConnectionValue<Type>;
-    authProviderKey?: string;
+    authProviderKey: string;
   };
 
 export type OAuth2AppConnection = AppConnection<AppConnectionType.OAUTH2>;

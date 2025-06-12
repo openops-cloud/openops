@@ -25,9 +25,9 @@ export const HeaderButtons = ({
   apply,
 }: HeaderButtonsProps) => {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-0.5">
       {isEditMode && apply ? (
-        <Button variant={'ghost'} size={'sm'} onClick={apply}>
+        <Button variant={'ghost'} className="p-2 h-8" onClick={apply}>
           <Check className="w-4 h-4 mr-[3px]" />
           {t('Apply')}
         </Button>
@@ -36,20 +36,32 @@ export const HeaderButtons = ({
           {!readonly && (
             <>
               {showDeleteButton && (
-                <Button variant={'ghost'} size={'sm'} onClick={handleDelete}>
+                <Button
+                  variant={'ghost'}
+                  className="p-2 h-8"
+                  onClick={handleDelete}
+                >
                   <Trash className="w-4 h-4" />
                 </Button>
               )}
 
-              <Button variant={'ghost'} size={'sm'} onClick={handleEdit}>
+              <Button
+                variant={'ghost'}
+                className="p-2 h-8"
+                onClick={handleEdit}
+              >
                 <Pencil className="w-4 h-4" />
               </Button>
             </>
           )}
-          <Button variant={'ghost'} size={'sm'} onClick={handleDownload}>
+          <Button
+            variant={'ghost'}
+            className="p-2 h-8"
+            onClick={handleDownload}
+          >
             <Download className="w-4 h-4" />
           </Button>
-          <Button variant={'ghost'} size={'sm'} onClick={handleCopy}>
+          <Button variant={'ghost'} className="p-2 h-8" onClick={handleCopy}>
             <Copy className="w-4 h-4" />
           </Button>
         </>
