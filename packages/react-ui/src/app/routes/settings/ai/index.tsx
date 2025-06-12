@@ -12,6 +12,7 @@ import {
   toast,
   TooltipWrapper,
 } from '@openops/components/ui';
+import { ApplicationErrorParams, ErrorCode } from '@openops/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { t } from 'i18next';
@@ -38,10 +39,18 @@ const AiSettingsPage = () => {
       });
     },
     onError: (error: AxiosError) => {
-      const message =
-        error.status === 400
-          ? (error.response?.data as { errorMessage: string })?.errorMessage
-          : error.message;
+      let message = '';
+      const apError = error.response?.data as ApplicationErrorParams;
+      if (
+        apError.code === ErrorCode.OPENAI_COMPATIBLE_PROVIDER_BASE_URL_REQUIRED
+      ) {
+        message = t('Base URL is required for OpenAI-compatible providers');
+      } else {
+        message =
+          error.status === 400
+            ? (error.response?.data as { errorMessage: string })?.errorMessage
+            : error.message;
+      }
       toast({
         title: t('Error'),
         variant: 'destructive',
