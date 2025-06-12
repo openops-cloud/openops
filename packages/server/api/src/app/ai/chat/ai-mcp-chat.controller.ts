@@ -120,20 +120,10 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       aiConfig,
     });
 
-    const isAnalyticsLoaded = Object.keys(filteredTools ?? {}).some((key) =>
-      key.includes('superset'),
-    );
-    const isTablesLoaded = Object.keys(filteredTools ?? {}).some((key) =>
-      key.includes('table'),
-    );
-    const isOpenOpsMCPEnabled = Object.keys(filteredTools ?? {}).some((key) =>
-      key.includes('openops-mcp'),
-    );
-
     const systemPrompt = await getMcpSystemPrompt({
-      isAnalyticsLoaded,
-      isTablesLoaded,
-      isOpenOpsMCPEnabled,
+      isAnalyticsLoaded: hasToolProvider(filteredTools, 'tables'),
+      isTablesLoaded: hasToolProvider(filteredTools, 'superset'),
+      isOpenOpsMCPEnabled: hasToolProvider(filteredTools, 'openops-mcp'),
     });
 
     pipeDataStreamToResponse(reply.raw, {
@@ -360,4 +350,13 @@ async function closeMCPClients(mcpClients: unknown[]): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await (mcpClient as any)?.close();
   }
+}
+
+export function hasToolProvider(
+  tools: ToolSet | undefined,
+  provider: string,
+): boolean {
+  return Object.values(tools ?? {}).some(
+    (tool) => (tool as { toolProvider?: string }).toolProvider === provider,
+  );
 }
