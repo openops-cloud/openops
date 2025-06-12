@@ -227,8 +227,13 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           mcp_analytics_superset: {
             description: 'Analytics tool',
             parameters: {},
+            toolProvider: 'superset',
           },
-          mcp_table_tool: { description: 'Table tool', parameters: {} },
+          mcp_table_tool: {
+            description: 'Table tool',
+            parameters: {},
+            toolProvider: 'tables',
+          },
           openops_mcp_tool: {
             description: 'Table tool',
             parameters: {},
@@ -273,6 +278,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           mcp_analytics_superset: {
             description: 'Analytics tool',
             parameters: {},
+            toolProvider: 'superset',
           },
         },
         expected: {
@@ -284,7 +290,11 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
       {
         selectedTools: {
           tool1: { description: 'Tool 1', parameters: {} },
-          mcp_table_tool: { description: 'Table tool', parameters: {} },
+          mcp_table_tool: {
+            description: 'Table tool',
+            parameters: {},
+            toolProvider: 'tables',
+          },
         },
         expected: {
           isAnalyticsLoaded: false,
@@ -293,7 +303,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
         },
       },
     ])(
-      'should handle analytics/tables flags when tools are $expected.isAnalyticsLoaded/$expected.isTablesLoaded',
+      'should handle analytics/tables/openops flags when tools are $expected.isAnalyticsLoaded/$expected.isTablesLoaded/$expected.isOpenOpsMCPEnabled',
       async ({ selectedTools, expected }) => {
         (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);
         (selectRelevantTools as jest.Mock).mockResolvedValue(selectedTools);
