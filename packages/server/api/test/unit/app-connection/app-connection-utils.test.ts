@@ -21,6 +21,7 @@ describe('redactSecrets', () => {
     blockName: 'block-test',
     projectId: 'project-1',
     status: AppConnectionStatus.ACTIVE,
+    authProviderKey: 'auth-provider-1',
   };
 
   test('should return redacted SECRET_TEXT connection', () => {

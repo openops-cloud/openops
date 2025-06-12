@@ -20,8 +20,10 @@ export const microsoftTeams = createBlock({
     createCustomApiCallAction({
       auth: microsoftTeamsAuth,
       baseUrl: () => 'https://graph.microsoft.com/v1.0/',
-      authMapping: async (auth) => ({
-        Authorization: `Bearer ${(auth as OAuth2PropertyValue).access_token}`,
+      authMapping: async (context: any) => ({
+        Authorization: `Bearer ${
+          (context.auth as OAuth2PropertyValue).access_token
+        }`,
       }),
     }),
   ],

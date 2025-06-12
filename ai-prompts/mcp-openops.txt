@@ -1,0 +1,39 @@
+# App Connection Patching Guide
+
+When a user wants to update an app connection, follow these steps:
+
+---
+
+## 1. Find the Existing Connection
+- Use the **list endpoint** to find the connection by name or ID. Do this without feedback from the user.
+- Once you have the id from the prevous step, use the **get endpoint** with the connection ID to fetch the **full, current connection object**.
+
+## 2.
+- Use the ** get metadata ** endpoint to verify which fields are required,
+  and if there are some fields that are neither provided by the user nor are in the current connection which are REQUIRED, request them from the user
+## 2. Prepare the Patch Request
+- **Start with a copy of the entire existing connection object that was fetched from the get endpoint**
+- Only modify the specific fields the user wants to change.
+- if the user requested to change a field that does not exist on the connection, find the most equivalent one and ask the user for confirmation.
+- if the user requested to change something but is missing info on other REQUIRED fields, request the user to provide the other fields.
+- **For arrays:**
+  - If the user wants to add a new item, **append** it to the existing array (do not overwrite the array).
+  - If the user wants to remove or update an item, do so as specified.
+- **Do not remove or overwrite any existing fields or array items unless the user requests it.**
+- All other fields as they currently exist, unless the user wants to change them.
+
+## 3. Send the Patch Request
+- Use the **patch endpoint** with the prepared request.
+- The backend will handle validation, encryption, and redacted secrets.
+
+## 4. Confirm the Update
+- Return the updated connection details to the user, confirming only the requested changes were made.
+
+---
+
+### Important
+- **Never remove or overwrite existing roles or other fields unless the user asks.**
+- **Never ask the user for redacted or secret fields unless they want to change them.**
+- **Always use the full, current connection object as the base for your patch.**
+
+---

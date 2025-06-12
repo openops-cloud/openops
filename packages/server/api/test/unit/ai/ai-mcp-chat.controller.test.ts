@@ -227,17 +227,50 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           mcp_analytics_superset: {
             description: 'Analytics tool',
             parameters: {},
+            toolProvider: 'superset',
           },
-          mcp_table_tool: { description: 'Table tool', parameters: {} },
+          mcp_table_tool: {
+            description: 'Table tool',
+            parameters: {},
+            toolProvider: 'tables',
+          },
+          openops_mcp_tool: {
+            description: 'Table tool',
+            parameters: {},
+            toolProvider: 'openops',
+          },
         },
-        expected: { isAnalyticsLoaded: true, isTablesLoaded: true },
+        expected: {
+          isAnalyticsLoaded: true,
+          isTablesLoaded: true,
+          isOpenOpsMCPEnabled: true,
+        },
+      },
+      {
+        selectedTools: {
+          tool1: { description: 'Tool 1', parameters: {} },
+          openops_mcp_tool: {
+            description: 'Table tool',
+            parameters: {},
+            toolProvider: 'openops',
+          },
+        },
+        expected: {
+          isAnalyticsLoaded: false,
+          isTablesLoaded: false,
+          isOpenOpsMCPEnabled: true,
+        },
       },
       {
         selectedTools: {
           tool1: { description: 'Tool 1', parameters: {} },
           tool2: { description: 'Tool 2', parameters: {} },
         },
-        expected: { isAnalyticsLoaded: false, isTablesLoaded: false },
+        expected: {
+          isAnalyticsLoaded: false,
+          isTablesLoaded: false,
+          isOpenOpsMCPEnabled: false,
+        },
       },
       {
         selectedTools: {
@@ -245,19 +278,32 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           mcp_analytics_superset: {
             description: 'Analytics tool',
             parameters: {},
+            toolProvider: 'superset',
           },
         },
-        expected: { isAnalyticsLoaded: true, isTablesLoaded: false },
+        expected: {
+          isAnalyticsLoaded: true,
+          isTablesLoaded: false,
+          isOpenOpsMCPEnabled: false,
+        },
       },
       {
         selectedTools: {
           tool1: { description: 'Tool 1', parameters: {} },
-          mcp_table_tool: { description: 'Table tool', parameters: {} },
+          mcp_table_tool: {
+            description: 'Table tool',
+            parameters: {},
+            toolProvider: 'tables',
+          },
         },
-        expected: { isAnalyticsLoaded: false, isTablesLoaded: true },
+        expected: {
+          isAnalyticsLoaded: false,
+          isTablesLoaded: true,
+          isOpenOpsMCPEnabled: false,
+        },
       },
     ])(
-      'should handle analytics/tables flags when tools are $expected.isAnalyticsLoaded/$expected.isTablesLoaded',
+      'should handle analytics/tables/openops flags when tools are $expected.isAnalyticsLoaded/$expected.isTablesLoaded/$expected.isOpenOpsMCPEnabled',
       async ({ selectedTools, expected }) => {
         (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);
         (selectRelevantTools as jest.Mock).mockResolvedValue(selectedTools);
@@ -278,6 +324,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
         expected: {
           isAnalyticsLoaded: false,
           isTablesLoaded: false,
+          isOpenOpsMCPEnabled: false,
           expectedSystemPrompt: emptyToolsSystemPrompt,
         },
       },
@@ -286,6 +333,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
         expected: {
           isAnalyticsLoaded: false,
           isTablesLoaded: false,
+          isOpenOpsMCPEnabled: false,
           expectedSystemPrompt: emptyToolsSystemPrompt,
         },
       },
@@ -294,6 +342,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
         expected: {
           isAnalyticsLoaded: false,
           isTablesLoaded: false,
+          isOpenOpsMCPEnabled: false,
           expectedSystemPrompt: emptyToolsSystemPrompt,
         },
       },
@@ -304,6 +353,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
         expected: {
           isAnalyticsLoaded: false,
           isTablesLoaded: false,
+          isOpenOpsMCPEnabled: false,
           expectedSystemPrompt: systemPrompt,
         },
       },
@@ -322,6 +372,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
         expect(getMcpSystemPrompt).toHaveBeenCalledWith({
           isAnalyticsLoaded: expected.isAnalyticsLoaded,
           isTablesLoaded: expected.isTablesLoaded,
+          isOpenOpsMCPEnabled: expected.isOpenOpsMCPEnabled,
         });
         expect(pipeDataStreamToResponse).toHaveBeenCalled();
         expect(streamText).toHaveBeenCalledWith(

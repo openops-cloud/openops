@@ -93,9 +93,18 @@ export async function getOpenOpsTools(
       },
     }),
   });
+  const tools = await openopsClient.tools();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const toolSet: Record<string, any> = {};
+  for (const [key, tool] of Object.entries(tools)) {
+    toolSet[key] = {
+      ...tool,
+      toolProvider: 'openops',
+    };
+  }
 
   return {
     client: openopsClient,
-    toolSet: await openopsClient.tools(),
+    toolSet,
   };
 }

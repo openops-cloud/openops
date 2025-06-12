@@ -1,8 +1,16 @@
 const mockBasePath = '/mock/base/path';
 const mockApiBaseUrl = 'http://test-api-url';
 const mockTools = {
-  tool1: { description: 'Test tool 1', parameters: {} },
-  tool2: { description: 'Test tool 2', parameters: {} },
+  tool1: {
+    description: 'Test tool 1',
+    parameters: {},
+    toolProvider: 'openops',
+  },
+  tool2: {
+    description: 'Test tool 2',
+    parameters: {},
+    toolProvider: 'openops',
+  },
 };
 
 const systemMock = {
