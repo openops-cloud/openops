@@ -515,4 +515,68 @@ describe('dataSelectorUtils', () => {
       expect(result).toEqual([]);
     });
   });
+
+  describe('hasStepSampleData', () => {
+    it('returns false when step is undefined', () => {
+      const result = dataSelectorUtils.hasStepSampleData(undefined);
+      expect(result).toBe(false);
+    });
+
+    it('returns false when step has no settings', () => {
+      const step = { name: 'test' };
+      const result = dataSelectorUtils.hasStepSampleData(step as any);
+      expect(result).toBe(false);
+    });
+
+    it('returns false when step has no inputUiInfo', () => {
+      const step = { name: 'test', settings: {} };
+      const result = dataSelectorUtils.hasStepSampleData(step as any);
+      expect(result).toBe(false);
+    });
+
+    it('returns false when sampleData is undefined', () => {
+      const step = {
+        name: 'test',
+        settings: { inputUiInfo: {} },
+      };
+      const result = dataSelectorUtils.hasStepSampleData(step as any);
+      expect(result).toBe(false);
+    });
+
+    it('returns false when sampleData is null', () => {
+      const step = {
+        name: 'test',
+        settings: { inputUiInfo: { sampleData: null } },
+      };
+      const result = dataSelectorUtils.hasStepSampleData(step as any);
+      expect(result).toBe(false);
+    });
+
+    it('returns false when sampleData is an empty object', () => {
+      const step = {
+        name: 'test',
+        settings: { inputUiInfo: { sampleData: {} } },
+      };
+      const result = dataSelectorUtils.hasStepSampleData(step as any);
+      expect(result).toBe(false);
+    });
+
+    it('returns true when sampleData is a non-empty object', () => {
+      const step = {
+        name: 'test',
+        settings: { inputUiInfo: { sampleData: { foo: 'bar' } } },
+      };
+      const result = dataSelectorUtils.hasStepSampleData(step as any);
+      expect(result).toBe(true);
+    });
+
+    it('returns true when sampleData is a non-object value', () => {
+      const step = {
+        name: 'test',
+        settings: { inputUiInfo: { sampleData: 'test value' } },
+      };
+      const result = dataSelectorUtils.hasStepSampleData(step as any);
+      expect(result).toBe(true);
+    });
+  });
 });
