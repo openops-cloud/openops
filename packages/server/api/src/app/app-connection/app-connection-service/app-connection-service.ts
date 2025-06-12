@@ -82,9 +82,17 @@ export const appConnectionService = {
     });
 
     if (existingConnection) {
-      sendConnectionUpdatedEvent(params.userId, projectId, request.blockName);
+      sendConnectionUpdatedEvent(
+        params.userId,
+        projectId,
+        request.authProviderKey,
+      );
     } else {
-      sendConnectionCreatedEvent(params.userId, projectId, request.blockName);
+      sendConnectionCreatedEvent(
+        params.userId,
+        projectId,
+        request.authProviderKey,
+      );
     }
 
     return decryptConnection(updatedConnection);
@@ -138,7 +146,11 @@ export const appConnectionService = {
       projectId,
     });
 
-    sendConnectionUpdatedEvent(params.userId, projectId, request.blockName);
+    sendConnectionUpdatedEvent(
+      params.userId,
+      projectId,
+      request.authProviderKey,
+    );
 
     return {
       ...existingConnection,
