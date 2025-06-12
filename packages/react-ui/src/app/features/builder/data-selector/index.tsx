@@ -87,10 +87,9 @@ const DataSelector = ({
       if (cached) {
         stepTestOutput[id] = {
           ...cached,
-          output: dataSelectorUtils.mergeSampleDataWithTestOutput(
-            sampleData,
-            cached.output,
-          ).data,
+          output: dataSelectorUtils.hasStepSampleData(step)
+            ? sampleData
+            : cached.output,
         };
       }
     });
