@@ -69,7 +69,11 @@ const ConnectionsPicker = ({
     isLoading,
     refetch,
   } = appConnectionsHooks.useGroupedConnections({
-    blockNames: integrations.map((integration) => integration.name),
+    authProviders: integrations.flatMap((integration) =>
+      integration.auth?.authProviderKey
+        ? [integration.auth.authProviderKey]
+        : [],
+    ),
     limit: 10000,
   });
 
