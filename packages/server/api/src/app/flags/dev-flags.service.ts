@@ -32,7 +32,7 @@ async function getAll(): Promise<Flag[]> {
     },
     {
       id: FlagId.SHOW_SAMPLE_DATA,
-      value: true,
+      value: false,
       created,
       updated,
     },
