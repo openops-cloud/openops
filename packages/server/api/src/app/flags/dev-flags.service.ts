@@ -25,12 +25,6 @@ async function getAll(): Promise<Flag[]> {
       updated,
     },
     {
-      id: FlagId.USE_CONNECTIONS_PROVIDER,
-      value: true,
-      created,
-      updated,
-    },
-    {
       id: FlagId.SHOW_SAMPLE_DATA,
       value: false,
       created,
