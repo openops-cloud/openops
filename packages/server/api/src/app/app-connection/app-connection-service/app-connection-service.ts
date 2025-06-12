@@ -207,7 +207,6 @@ export const appConnectionService = {
 
   async list({
     projectId,
-    blockNames,
     cursorRequest,
     name,
     status,
@@ -230,9 +229,6 @@ export const appConnectionService = {
     const querySelector: Record<string, string | FindOperator<string>> = {
       projectId,
     };
-    if (!isNil(blockNames) && blockNames.length > 0) {
-      querySelector.blockName = In(blockNames);
-    }
     if (!isNil(name)) {
       querySelector.name = ILike(`%${name}%`);
     }
@@ -279,7 +275,6 @@ export const appConnectionService = {
         limit: 1000,
         projectId,
         connectionsIds,
-        blockNames: undefined,
         cursorRequest: null,
         name: undefined,
         status: [AppConnectionStatus.ACTIVE],
@@ -519,7 +514,6 @@ type DeleteParams = {
 
 type ListParams = {
   projectId: ProjectId;
-  blockNames: string[] | undefined;
   connectionsIds?: string[];
   cursorRequest: Cursor | null;
   name: string | undefined;
