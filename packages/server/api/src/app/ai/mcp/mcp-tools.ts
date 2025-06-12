@@ -45,7 +45,12 @@ export const getMCPTools = async (
   } as ToolSet;
 
   return {
-    mcpClients: [supersetTools.client, docsTools.client, tablesTools.client],
+    mcpClients: [
+      supersetTools.client,
+      docsTools.client,
+      tablesTools.client,
+      openopsTools.client,
+    ],
     tools: toolSet,
   };
 };

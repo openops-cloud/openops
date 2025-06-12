@@ -6,9 +6,11 @@ import { ChatContext } from './ai-chat.service';
 export const getMcpSystemPrompt = async ({
   isAnalyticsLoaded,
   isTablesLoaded,
+  isOpenOpsMCPEnabled,
 }: {
   isAnalyticsLoaded: boolean;
   isTablesLoaded: boolean;
+  isOpenOpsMCPEnabled: boolean;
 }): Promise<string> => {
   const prompts = [loadPrompt('mcp.txt')];
 
@@ -18,6 +20,10 @@ export const getMcpSystemPrompt = async ({
 
   if (isAnalyticsLoaded) {
     prompts.push(loadPrompt('mcp-analytics.txt'));
+  }
+
+  if (isOpenOpsMCPEnabled) {
+    prompts.push(loadFromFile('openops-mcp.txt'));
   }
 
   const allPrompts = await Promise.all(prompts);

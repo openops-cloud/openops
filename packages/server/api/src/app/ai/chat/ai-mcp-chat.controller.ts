@@ -126,10 +126,14 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
     const isTablesLoaded = Object.keys(filteredTools ?? {}).some((key) =>
       key.includes('table'),
     );
+    const isOpenOpsMCPEnabled = Object.keys(filteredTools ?? {}).some((key) =>
+      key.includes('openops-mcp'),
+    );
 
     const systemPrompt = await getMcpSystemPrompt({
       isAnalyticsLoaded,
       isTablesLoaded,
+      isOpenOpsMCPEnabled,
     });
 
     pipeDataStreamToResponse(reply.raw, {
