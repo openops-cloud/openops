@@ -441,6 +441,7 @@ function handleImportFlowOperation(
   operations.push(
     ...flowHelper.getImportOperations(
       operation.trigger,
+      operation.blockToProviderMap,
       operation.connections as AppConnectionWithoutSensitiveData[],
     ),
   );

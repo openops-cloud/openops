@@ -51,6 +51,7 @@ export const ImportFlowRequest = Type.Object({
   displayName: Type.String({}),
   description: Type.Optional(Type.String({})),
   trigger: Trigger,
+  blockToProviderMap: Type.Optional(Type.Object({})),
   connections: Type.Optional(Type.Array(AppConnectionWithoutSensitiveData)),
 });
 

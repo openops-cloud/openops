@@ -32,6 +32,7 @@ import {
 import { FlowVersion, FlowVersionState } from './flow-version';
 import { DEFAULT_SAMPLE_DATA_SETTINGS } from './sample-data';
 import { Trigger, TriggerType } from './triggers/trigger';
+
 type Step = Action | Trigger;
 
 type GetStepFromSubFlow = {
@@ -748,23 +749,32 @@ function createTrigger(
 
 const prefillConnection = (
   action: Action,
+  blockToProviderMap?: Record<string, string>,
   connections?: AppConnectionWithoutSensitiveData[],
 ): Action => {
-  if (
-    Array.isArray(connections) &&
-    'input' in action.settings &&
-    'auth' in action.settings.input
-  ) {
-    const authProviderKey = action.settings.input['auth'].authProviderKey;
-    const connection = connections.find(
-      (c) => c.authProviderKey === authProviderKey,
-    );
+  if (!Array.isArray(connections)) {
+    return action;
+  }
 
-    if (connection && 'input' in action.settings) {
-      action.settings.input['auth'] = addConnectionBrackets(connection.name);
-    } else {
-      action.settings.input['auth'] = undefined;
-    }
+  let authProviderKey: string | undefined;
+  if (
+    'input' in action.settings &&
+    'auth' in action.settings.input &&
+    'authProviderKey' in action.settings.input
+  ) {
+    authProviderKey = action.settings.input['auth'].authProviderKey;
+  } else if ('blockName' in action.settings && blockToProviderMap) {
+    authProviderKey = blockToProviderMap[action.settings.blockName];
+  }
+
+  const connection = connections.find(
+    (c) => c.authProviderKey === authProviderKey,
+  );
+
+  if (connection && 'input' in action.settings) {
+    action.settings.input['auth'] = addConnectionBrackets(connection.name);
+  } else if ('input' in action.settings) {
+    action.settings.input['auth'] = undefined;
   }
 
   return action;
@@ -772,6 +782,7 @@ const prefillConnection = (
 
 export function getImportOperations(
   step: Action | Trigger | undefined,
+  blockToProviderMap?: Record<string, string>,
   connections?: AppConnectionWithoutSensitiveData[],
 ): FlowOperationRequest[] {
   const operations: FlowOperationRequest[] = [];
@@ -779,6 +790,7 @@ export function getImportOperations(
   const createAddActionRequest = (action: Action): Action => {
     const actionRequest = prefillConnection(
       removeAnySubsequentAction(action),
+      blockToProviderMap,
       connections,
     );
     actionRequest.id = actionRequest.id ?? openOpsId();
@@ -808,7 +820,11 @@ export function getImportOperations(
             },
           });
           operations.push(
-            ...getImportOperations(step.onFailureAction, connections),
+            ...getImportOperations(
+              step.onFailureAction,
+              blockToProviderMap,
+              connections,
+            ),
           );
         }
         if (step.onSuccessAction) {
@@ -822,7 +838,11 @@ export function getImportOperations(
             },
           });
           operations.push(
-            ...getImportOperations(step.onSuccessAction, connections),
+            ...getImportOperations(
+              step.onSuccessAction,
+              blockToProviderMap,
+              connections,
+            ),
           );
         }
         break;
@@ -842,7 +862,11 @@ export function getImportOperations(
                 },
               });
               operations.push(
-                ...getImportOperations(branch.nextAction, connections),
+                ...getImportOperations(
+                  branch.nextAction,
+                  blockToProviderMap,
+                  connections,
+                ),
               );
             }
           });
@@ -861,7 +885,11 @@ export function getImportOperations(
             },
           });
           operations.push(
-            ...getImportOperations(step.firstLoopAction, connections),
+            ...getImportOperations(
+              step.firstLoopAction,
+              blockToProviderMap,
+              connections,
+            ),
           );
         }
         break;
