@@ -22,6 +22,7 @@ import { AddProviderToAppConnectionTable1748356358053 } from './migrations/17483
 import { AddAuthProviderKeyToAppConnectionTable1749066895522 } from './migrations/1749066895522-AddAuthProviderKeyToAppConnectionTable';
 import { AddAuthProviderKeyToExistingAppConnections1749111073431 } from './migrations/1749111073431-AddAuthProviderKeyToExistingAppConnections';
 import { AddStepIdToExistingFlowVersions1749644220381 } from './migrations/1749644220381-AddStepIdToExistingFlowVersions';
+import { SetBlockNameAsNullableInConnectionsTable1749809813762 } from './migrations/1749809813762-SetBlockNameAsNullableInConnectionsTable';
 
 const getSslConfig = (): boolean | TlsOptions => {
   const useSsl = system.get(AppSystemProp.POSTGRES_USE_SSL);
@@ -52,6 +53,7 @@ const getMigrations = (): (new () => MigrationInterface)[] => {
     AddAuthProviderKeyToAppConnectionTable1749066895522,
     AddAuthProviderKeyToExistingAppConnections1749111073431,
     AddStepIdToExistingFlowVersions1749644220381,
+    SetBlockNameAsNullableInConnectionsTable1749809813762,
   ];
 };
 

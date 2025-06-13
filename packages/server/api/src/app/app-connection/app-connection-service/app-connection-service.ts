@@ -309,12 +309,12 @@ const validateConnectionValue = async (
     case AppConnectionType.PLATFORM_OAUTH2: {
       const tokenUrl = await oauth2Util.getOAuth2TokenUrl({
         projectId,
-        blockName: connection.blockName,
+        authProviderKey: connection.authProviderKey,
         props: connection.value.props,
       });
       return oauth2Handler[connection.value.type].claim({
         projectId,
-        blockName: connection.blockName,
+        authProviderKey: connection.authProviderKey,
         request: {
           grantType: OAuth2GrantType.AUTHORIZATION_CODE,
           code: connection.value.code,
@@ -330,12 +330,12 @@ const validateConnectionValue = async (
     case AppConnectionType.CLOUD_OAUTH2: {
       const tokenUrl = await oauth2Util.getOAuth2TokenUrl({
         projectId,
-        blockName: connection.blockName,
+        authProviderKey: connection.authProviderKey,
         props: connection.value.props,
       });
       const auth = await oauth2Handler[connection.value.type].claim({
         projectId,
-        blockName: connection.blockName,
+        authProviderKey: connection.authProviderKey,
         request: {
           tokenUrl,
           grantType: OAuth2GrantType.AUTHORIZATION_CODE,
@@ -347,7 +347,7 @@ const validateConnectionValue = async (
         },
       });
       await engineValidateAuth({
-        blockName: connection.blockName,
+        authProviderKey: connection.authProviderKey,
         projectId,
         auth,
       });
@@ -356,12 +356,12 @@ const validateConnectionValue = async (
     case AppConnectionType.OAUTH2: {
       const tokenUrl = await oauth2Util.getOAuth2TokenUrl({
         projectId,
-        blockName: connection.blockName,
+        authProviderKey: connection.authProviderKey,
         props: connection.value.props,
       });
       return oauth2Handler[connection.value.type].claim({
         projectId,
-        blockName: connection.blockName,
+        authProviderKey: connection.authProviderKey,
         request: {
           tokenUrl,
           code: connection.value.code,
@@ -379,7 +379,7 @@ const validateConnectionValue = async (
     case AppConnectionType.BASIC_AUTH:
     case AppConnectionType.SECRET_TEXT:
       await engineValidateAuth({
-        blockName: connection.blockName,
+        authProviderKey: connection.authProviderKey,
         projectId,
         auth: connection.value,
       });
@@ -471,21 +471,21 @@ async function refresh(connection: AppConnection): Promise<AppConnection> {
   switch (connection.value.type) {
     case AppConnectionType.PLATFORM_OAUTH2:
       connection.value = await oauth2Handler[connection.value.type].refresh({
-        blockName: connection.blockName,
+        authProviderKey: connection.authProviderKey,
         projectId: connection.projectId,
         connectionValue: connection.value,
       });
       break;
     case AppConnectionType.CLOUD_OAUTH2:
       connection.value = await oauth2Handler[connection.value.type].refresh({
-        blockName: connection.blockName,
+        authProviderKey: connection.authProviderKey,
         projectId: connection.projectId,
         connectionValue: connection.value,
       });
       break;
     case AppConnectionType.OAUTH2:
       connection.value = await oauth2Handler[connection.value.type].refresh({
-        blockName: connection.blockName,
+        authProviderKey: connection.authProviderKey,
         projectId: connection.projectId,
         connectionValue: connection.value,
       });

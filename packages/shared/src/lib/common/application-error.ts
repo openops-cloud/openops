@@ -83,7 +83,7 @@ export type InvalidClaimParams = BaseErrorParams<
 >;
 export type InvalidCloudClaimParams = BaseErrorParams<
   ErrorCode.INVALID_CLOUD_CLAIM,
-  { blockName: string }
+  { authProviderKey: string }
 >;
 
 export type InvalidBearerTokenParams = BaseErrorParams<

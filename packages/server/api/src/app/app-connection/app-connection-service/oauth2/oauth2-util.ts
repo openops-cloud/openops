@@ -10,7 +10,7 @@ import {
   OAuth2GrantType,
 } from '@openops/shared';
 import { isAxiosError } from 'axios';
-import { blockMetadataService } from '../../../blocks/block-metadata-service';
+import { getAuthProviderMetadata } from '../../connection-providers-resolver';
 
 export const oauth2Util = {
   formatOAuth2Response,
@@ -61,19 +61,15 @@ function isExpired(connection: BaseOAuth2ConnectionValue): boolean {
 
 async function getOAuth2TokenUrl({
   projectId,
-  blockName,
+  authProviderKey,
   props,
 }: {
   projectId: string;
-  blockName: string;
+  authProviderKey: string;
   props?: Record<string, string>;
 }): Promise<string> {
-  const blockMetadata = await blockMetadataService.getOrThrow({
-    name: blockName,
-    projectId,
-    version: undefined,
-  });
-  const auth = blockMetadata.auth;
+  const auth = await getAuthProviderMetadata(authProviderKey, projectId);
+
   assertNotNullOrUndefined(auth, 'auth');
   switch (auth.type) {
     case PropertyType.OAUTH2:
