@@ -5,7 +5,6 @@ import {
   useToast,
 } from '@openops/components/ui';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import dayjs from 'dayjs';
 import { t } from 'i18next';
 import React, { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
@@ -24,12 +23,13 @@ import {
   ActionType,
   isNil,
   RiskLevel,
-  StepOutputWithData,
   StepRunResponse,
 } from '@openops/shared';
 
-import { QueryKeys } from '@/app/constants/query-keys';
-import { stepTestOutputCache } from '../data-selector/data-selector-cache';
+import {
+  setStepOutputCache,
+  stepTestOutputCache,
+} from '../data-selector/data-selector-cache';
 import { stepTestOutputHooks } from './step-test-output-hooks';
 import { TestSampleDataViewer } from './test-sample-data-viewer';
 import { TestButtonTooltip } from './test-step-tooltip';
@@ -62,11 +62,8 @@ const TestActionSection = React.memo(
       setIsValid(form.formState.isValid);
     }, [form.formState.isValid]);
 
-    const {
-      data: testOutputData,
-      isLoading: isLoadingTestOutput,
-      // refetch: refetchTestOutput,
-    } = stepTestOutputHooks.useStepTestOutputFormData(flowVersionId, form);
+    const { data: testOutputData, isLoading: isLoadingTestOutput } =
+      stepTestOutputHooks.useStepTestOutputFormData(flowVersionId, form);
 
     const sampleDataExists =
       !isNil(testOutputData?.lastTestDate) || !isNil(errorMessage);
@@ -87,17 +84,13 @@ const TestActionSection = React.memo(
         );
         if (stepResponse.success) {
           setErrorMessage(undefined);
-
-          const stepTestOutput: StepOutputWithData = {
-            output: formattedResponse,
-            lastTestDate: dayjs().toISOString(),
-          };
-
-          stepTestOutputCache.setStepData(formValues.id!, stepTestOutput);
-          queryClient.setQueryData(
-            [QueryKeys.stepTestOutput, flowVersionId, formValues.id!],
-            stepTestOutput,
-          );
+          setStepOutputCache({
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            stepId: formValues.id!,
+            flowVersionId,
+            output: stepResponse.output,
+            queryClient,
+          });
         } else {
           setErrorMessage(testStepUtils.formatErrorMessage(formattedResponse));
         }
@@ -111,6 +104,7 @@ const TestActionSection = React.memo(
     const isTesting = isPending || isLoadingTestOutput;
 
     const handleTest = () => {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       stepTestOutputCache.resetExpandedForStep(formValues.id!);
       if (
         selectedStep.type === ActionType.BLOCK &&
@@ -126,6 +120,7 @@ const TestActionSection = React.memo(
 
     const confirmRiskyStep = () => {
       setRiskyStepConfirmationMessage(null);
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       stepTestOutputCache.resetExpandedForStep(formValues.id!);
       mutate();
     };

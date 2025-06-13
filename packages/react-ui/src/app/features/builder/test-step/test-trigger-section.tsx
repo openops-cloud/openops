@@ -27,13 +27,15 @@ import {
   CATCH_WEBHOOK,
   isNil,
   SeekPage,
-  StepOutputWithData,
   Trigger,
   TriggerEvent,
   TriggerTestStrategy,
 } from '@openops/shared';
 
-import { stepTestOutputCache } from '../data-selector/data-selector-cache';
+import {
+  setStepOutputCache,
+  stepTestOutputCache,
+} from '../data-selector/data-selector-cache';
 import { stepTestOutputHooks } from './step-test-output-hooks';
 import { TestSampleDataViewer } from './test-sample-data-viewer';
 import { TestButtonTooltip } from './test-step-tooltip';
@@ -97,14 +99,6 @@ const TestTriggerSection = React.memo(
         },
         onSuccess: async (result) => {
           updateSelectedData(result);
-          const stepTestOutput: StepOutputWithData = {
-            output: formatUtils.formatStepInputOrOutput(result.payload),
-            lastTestDate: dayjs().toISOString(),
-          };
-          queryClient.setQueryData(
-            [QueryKeys.stepTestOutput, flowVersionId, formValues.id!],
-            stepTestOutput,
-          );
         },
       });
     const {
@@ -139,14 +133,7 @@ const TestTriggerSection = React.memo(
           const lastResult = results[results.length - 1];
           updateSelectedData(lastResult);
 
-          const stepTestOutput: StepOutputWithData = {
-            output: formatUtils.formatStepInputOrOutput(lastResult.payload),
-            lastTestDate: dayjs().toISOString(),
-          };
-          queryClient.setQueryData(
-            [QueryKeys.stepTestOutput, flowVersionId, formValues.id!],
-            stepTestOutput,
-          );
+          // setStepOutputCache handles output and cache
 
           await triggerEventsApi.deleteWebhookSimulation(flowId);
         }
@@ -192,17 +179,18 @@ const TestTriggerSection = React.memo(
     const isTesting = isPending || isLoadingTestOutput;
 
     function updateSelectedData(data: TriggerEvent) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       stepTestOutputCache.setStepData(formValues.id!, {
         output: formatUtils.formatStepInputOrOutput(data.payload),
         lastTestDate: dayjs().toISOString(),
       });
-      queryClient.setQueryData(
-        [QueryKeys.stepTestOutput, flowVersionId, formValues.id!],
-        {
-          output: formatUtils.formatStepInputOrOutput(data.payload),
-          lastTestDate: dayjs().toISOString(),
-        },
-      );
+      setStepOutputCache({
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        stepId: formValues.id!,
+        flowVersionId,
+        output: data.payload,
+        queryClient,
+      });
     }
 
     const { data: pollResults, refetch } = useQuery<SeekPage<TriggerEvent>>({
