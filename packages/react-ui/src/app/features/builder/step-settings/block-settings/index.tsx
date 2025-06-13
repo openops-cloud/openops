@@ -35,7 +35,9 @@ const BlockSettings = React.memo((props: BlockSettingsProps) => {
     version: props.step.settings.blockVersion,
   });
 
+  const providerKey = blockModel?.auth?.authProviderKey;
   const actionName = (props.step.settings as BlockActionSettings).actionName;
+
   const selectedAction = actionName
     ? blockModel?.actions[actionName]
     : undefined;
@@ -78,6 +80,8 @@ const BlockSettings = React.memo((props: BlockSettingsProps) => {
                 isTrigger={!isNil(selectedTrigger)}
                 block={blockModel}
                 disabled={props.readonly}
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                providerKey={providerKey!}
               ></ConnectionSelect>
             )}
           {selectedAction && (

@@ -1,0 +1,60 @@
+# Workflows Guide
+
+When you are asked for information about a specific workflow, if you have the name but not the id, fetch workflows by name to get the ID. If you find more than one matching workflow with the same name, ask the user which workflow they mean, and provide additional information like creation date, folder name, etc.
+
+# App Connection Guide
+
+## Important Rules
+- Never remove or overwrite existing roles or other fields unless explicitly requested
+- Never ask for redacted or secret fields unless the user wants to change them
+- Always use the full, current connection object as the base
+- NEVER allow renaming of a connection
+- **Never ask for fields that are already specified in the metadata** (like `type` or `authProvider`)
+
+## Operation Types
+- **PATCH**: For updating existing connections (requires existing connection ID)
+
+## Step-by-Step Process
+
+### 1. Verify Required Fields
+- Call the **get metadata** endpoint to fetch required fields for the connection type
+- Use metadata to populate system-provided fields (e.g., authProvider, type)
+- **Do not ask the user for fields that are specified in the metadata**
+- If any required fields are missing (not provided by user or not existing in the metadata), request them from the user
+
+### 2. For PATCH Operations Only: Find Existing Connection
+- Use the **list endpoint** to find the connection by name or ID
+- Use the **get endpoint** with the connection ID to fetch the complete current connection object
+
+### 3. For PATCH Operations Only: Prepare Update
+- Start with a complete copy of the existing connection object
+- Only modify fields explicitly requested by the user
+- If user requests changes to non-existent fields, find equivalent fields and ask for confirmation
+- For array modifications:
+  - To add: Append new items to existing array
+  - To remove/update: Modify specific items as requested
+- Preserve all other existing fields and array items
+
+### 4. Send Request
+- Use **PATCH endpoint** for updates
+- Backend will handle validation, encryption, and secret redaction
+
+### 5. Confirm Changes
+- Return the updated connection details
+- Only show fields that were modified
+
+## Example Scenarios
+
+### Updating Connection
+1. Get metadata for connection type
+2. Find existing connection
+3. Get current connection details
+4. Apply requested changes
+5. Send PATCH request
+6. Confirm updates
+
+## Common Mistakes to Avoid
+- Asking for fields that are already specified in the metadata (like `type` or `authProvider`)
+- Not using the metadata-provided values for system fields
+- Asking for optional fields unless specifically needed
+- Modifying fields that weren't requested by the user

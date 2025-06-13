@@ -1,10 +1,10 @@
-import { ScrollArea } from '@openops/components/ui';
+import { JsonViewer, ScrollArea } from '@openops/components/ui';
 import { t } from 'i18next';
 import { Timer } from 'lucide-react';
 import React from 'react';
 
-import { JsonViewer } from '@/app/common/components/json-viewer';
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
+import { useTheme } from '@/app/common/providers/theme-provider';
 import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
 import { StepStatusIcon } from '@/app/features/flow-runs/components/step-status-icon';
 import { formatUtils } from '@/app/lib/utils';
@@ -27,6 +27,8 @@ const FlowStepInputOutput = React.memo(
     const selectedStep = selectedStepName
       ? flowHelper.getStep(flowVersion, selectedStepName)
       : undefined;
+
+    const { theme } = useTheme();
     return (
       <ScrollArea className="h-full p-4 ">
         {stepDetails && (
@@ -53,9 +55,13 @@ const FlowStepInputOutput = React.memo(
                 </>
               )}
             </div>
-            <JsonViewer title={t('Input')} json={stepDetails.input} />
+            <JsonViewer
+              title={t('Input')}
+              json={stepDetails.input}
+              theme={theme}
+            />
             <div className="mt-4"></div>
-            <JsonViewer title={t('Output')} json={stepOutput} />
+            <JsonViewer title={t('Output')} json={stepOutput} theme={theme} />
           </div>
         )}
       </ScrollArea>

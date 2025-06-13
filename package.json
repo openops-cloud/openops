@@ -3,7 +3,7 @@
   "version": "0.100.0",
   "rcVersion": "0.100.0",
   "scripts": {
-    "prepare": "cp -uv .env.template .env || :",
+    "prepare": "[ ! -e .env ] && cp -v .env.template .env || :",
     "serve:frontend": "nx serve react-ui",
     "build:frontend": "nx build react-ui",
     "serve:backend": "nx run server-api:serve:development",

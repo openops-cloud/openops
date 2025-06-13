@@ -1,5 +1,4 @@
 import { json } from '@codemirror/lang-json';
-import { cn } from '@openops/components/ui';
 import { githubDark, githubLight } from '@uiw/codemirror-theme-github';
 import CodeMirror, {
   EditorState,
@@ -8,8 +7,7 @@ import CodeMirror, {
 } from '@uiw/react-codemirror';
 import React, { RefObject, useRef, useState } from 'react';
 import { ControllerRenderProps } from 'react-hook-form';
-
-import { useTheme } from '@/app/common/providers/theme-provider';
+import { cn } from '../../lib/cn';
 
 const styleTheme = EditorView.baseTheme({
   '&.cm-editor.cm-focused': {
@@ -30,7 +28,7 @@ const tryParseJson = (value: unknown): unknown => {
   }
   try {
     return JSON.parse(value);
-  } catch (e) {
+  } catch {
     return value;
   }
 };
@@ -40,13 +38,23 @@ type JsonEditorProps = {
   readonly: boolean;
   onFocus?: (ref: RefObject<ReactCodeMirrorRef>) => void;
   className?: string;
+  containerClassName?: string;
+  theme?: string;
+  placeholder?: string;
 };
 
 const JsonEditor = React.memo(
-  ({ field, readonly, onFocus, className }: JsonEditorProps) => {
+  ({
+    field,
+    readonly,
+    onFocus,
+    className,
+    containerClassName,
+    theme,
+    placeholder,
+  }: JsonEditorProps) => {
     const [value, setValue] = useState(convertToString(field.value));
-    const { theme } = useTheme();
-    const ediitorTheme = theme === 'dark' ? githubDark : githubLight;
+    const editorTheme = theme === 'dark' ? githubDark : githubLight;
     const extensions = [
       styleTheme,
       EditorState.readOnly.of(readonly),
@@ -55,10 +63,16 @@ const JsonEditor = React.memo(
     ];
     const ref = useRef<ReactCodeMirrorRef>(null);
     return (
-      <div className="flex flex-col gap-2 border rounded py-2 px-2">
+      <div
+        className={cn(
+          'flex flex-col gap-2 border rounded py-2 px-2',
+          containerClassName,
+        )}
+      >
         <CodeMirror
           ref={ref}
           value={value}
+          placeholder={placeholder}
           className={cn('border-none', className)}
           height="250px"
           width="100%"
@@ -75,7 +89,7 @@ const JsonEditor = React.memo(
             setValue(value);
             field.onChange(tryParseJson(value));
           }}
-          theme={ediitorTheme}
+          theme={editorTheme}
           readOnly={readonly}
           onFocus={() => onFocus?.(ref)}
           extensions={extensions}

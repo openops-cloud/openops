@@ -1,5 +1,7 @@
 import {
   AiProviderEnum,
+  ApplicationError,
+  ApplicationErrorParams,
   GetProvidersResponse,
   SaveAiConfigRequest,
 } from '@openops/shared';
@@ -88,16 +90,16 @@ export const validateAiProviderConfig = async (
   config: SaveAiConfigRequest,
 ): Promise<{
   valid: boolean;
-  error?: { errorMessage: string; errorName: string };
+  error?: { errorMessage: string; errorName: string } | ApplicationErrorParams;
 }> => {
-  const languageModel = await getAiProviderLanguageModel({
-    apiKey: config.apiKey,
-    model: config.model,
-    provider: config.provider,
-    providerSettings: config.providerSettings,
-  });
-
   try {
+    const languageModel = await getAiProviderLanguageModel({
+      apiKey: config.apiKey,
+      model: config.model,
+      provider: config.provider,
+      providerSettings: config.providerSettings,
+    });
+
     await generateText({
       model: languageModel,
       prompt: '',
@@ -109,6 +111,13 @@ export const validateAiProviderConfig = async (
         error.name,
         error.message.replace(config.apiKey, '**REDACTED**'),
       );
+    }
+
+    if (error instanceof ApplicationError) {
+      return {
+        valid: false,
+        error: error.error,
+      };
     }
 
     return invalidConfigError(

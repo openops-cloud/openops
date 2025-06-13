@@ -34,7 +34,6 @@ import {
   blockMetadataService,
   getBlockPackage,
 } from './block-metadata-service';
-import { blockSyncService } from './block-sync-service';
 
 export const blockModule: FastifyPluginAsyncTypebox = async (app) => {
   await app.register(baseBlocksController, { prefix: '/v1/blocks' });
@@ -141,10 +140,6 @@ const baseBlocksController: FastifyPluginAsyncTypebox = async (app) => {
     },
   );
 
-  app.post('/sync', SyncBlocksRequest, async (): Promise<void> => {
-    await blockSyncService.sync();
-  });
-
   app.post('/options', OptionsBlockRequest, async (req) => {
     const request = req.body;
     const { projectId } = req.principal;
@@ -199,13 +194,18 @@ const ListBlocksRequest = {
   },
   schema: {
     querystring: ListBlocksRequestQuery,
+    description:
+      'List all available blocks with advanced filtering and sorting capabilities. This endpoint retrieves a comprehensive list of blocks that can be used in workflows, including both official and custom blocks. Supports filtering by package version, tags, categories, block type, and search queries. Results can be sorted by name, update date, creation date, or popularity.',
   },
 };
+
 const GetBlockParamsRequest = {
   config: {
     allowedPrincipals: ALL_PRINCIPAL_TYPES,
   },
   schema: {
+    description:
+      'Retrieve detailed information about a specific block by its name. This endpoint returns the complete block metadata including its configuration, actions, triggers, properties, and authentication requirements. Optionally specify a package version to get historical block data or check compatibility. The response includes all necessary information for integrating the block into workflows.',
     params: GetBlockRequestParams,
     querystring: GetBlockRequestQuery,
   },
@@ -216,6 +216,8 @@ const GetBlockParamsWithScopeRequest = {
     allowedPrincipals: ALL_PRINCIPAL_TYPES,
   },
   schema: {
+    description:
+      'Retrieve detailed information about a scoped block (e.g., custom blocks or organization-specific blocks). This endpoint returns the complete block metadata for blocks that belong to a specific scope or namespace. Includes all configuration details, actions, triggers, and authentication requirements. Useful for accessing custom blocks or blocks from specific organizations.',
     params: GetBlockRequestWithScopeParams,
     querystring: GetBlockRequestQuery,
   },
@@ -226,17 +228,24 @@ const ListCategoriesRequest = {
     allowedPrincipals: ALL_PRINCIPAL_TYPES,
   },
   schema: {
+    description:
+      'Retrieve all available block categories with their metadata. This endpoint returns a comprehensive list of predefined categories (e.g., FINOPS, CLOUD, WORKFLOW, COLLABORATION) that can be used to organize and filter blocks in the system. Each category includes its display name, description, and associated metadata. Useful for building category-based navigation and filtering interfaces.',
     querystring: ListBlocksRequestQuery,
   },
 };
 
 const OptionsBlockRequest = {
   schema: {
+    description:
+      'Execute a block option or property to retrieve dynamic configuration options. This endpoint is used to fetch dynamic values, validate inputs, or get suggestions based on the current block configuration and flow context. Essential for building dynamic block configurations.',
     body: BlockOptionRequest,
   },
 };
+
 const DeleteBlockRequest = {
   schema: {
+    description:
+      'Delete a custom block from the system. This endpoint permanently removes a block and its associated metadata. This operation cannot be undone and will affect any flows using this block. Use with caution as it may impact existing flows.',
     params: Type.Object({
       id: Type.String(),
     }),
@@ -248,12 +257,8 @@ const ListVersionsRequest = {
     allowedPrincipals: ALL_PRINCIPAL_TYPES,
   },
   schema: {
+    description:
+      'Retrieve version history for blocks. This endpoint returns a list of available versions for a specific block, including release information and compatibility details. Useful for tracking block evolution, managing updates, and ensuring compatibility with your flows.',
     querystring: ListVersionRequestQuery,
-  },
-};
-
-const SyncBlocksRequest = {
-  config: {
-    allowedPrincipals: [PrincipalType.USER],
   },
 };

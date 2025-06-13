@@ -1,9 +1,5 @@
 import { BlockAuth, createBlock } from '@openops/blocks-framework';
-import {
-  BlockCategory,
-  Provider,
-  getConnectionProvider,
-} from '@openops/shared';
+import { BlockCategory } from '@openops/shared';
 import { createColumnAction } from './lib/actions/create-column';
 import { createGroupAction } from './lib/actions/create-group';
 import { createItemAction } from './lib/actions/create-item';
@@ -22,7 +18,9 @@ const markdown = `
 6.Copy your personal token`;
 
 export const mondayAuth = BlockAuth.SecretAuth({
-  provider: getConnectionProvider(Provider.MONDAY),
+  authProviderKey: 'Monday',
+  authProviderDisplayName: 'monday.com',
+  authProviderLogoUrl: `https://static.openops.com/blocks/monday.png`,
   displayName: 'API v2 Token',
   description: markdown,
   required: true,

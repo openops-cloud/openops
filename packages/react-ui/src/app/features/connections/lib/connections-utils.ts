@@ -1,5 +1,4 @@
 import { formUtils } from '@/app/features/builder/block-properties/form-utils';
-import { authenticationSession } from '@/app/lib/authentication-session';
 import {
   BlockMetadataModel,
   BlockMetadataModelSummary,
@@ -9,7 +8,6 @@ import {
 import {
   AppConnection,
   AppConnectionType,
-  assertNotNullOrUndefined,
   BasicAuthConnectionValue,
   CloudOAuth2ConnectionValue,
   CustomAuthConnectionValue,
@@ -104,15 +102,13 @@ export const createDefaultValues = (
   existingConnection: AppConnection | null,
   suggestedConnectionName: string,
 ): Partial<UpsertAppConnectionRequestBody> & { id?: string } => {
-  const projectId = authenticationSession.getProjectId();
-  assertNotNullOrUndefined(projectId, 'projectId');
   switch (block.auth?.type) {
     case PropertyType.SECRET_TEXT:
       return {
         id: existingConnection?.id,
         name: suggestedConnectionName,
         blockName: block.name,
-        projectId,
+        authProviderKey: block.auth?.authProviderKey,
         type: AppConnectionType.SECRET_TEXT,
         value: existingConnection
           ? (existingConnection.value as SecretTextConnectionValue)
@@ -126,7 +122,7 @@ export const createDefaultValues = (
         id: existingConnection?.id,
         name: suggestedConnectionName,
         blockName: block.name,
-        projectId,
+        authProviderKey: block.auth?.authProviderKey,
         type: AppConnectionType.BASIC_AUTH,
         value: existingConnection
           ? (existingConnection.value as BasicAuthConnectionValue)
@@ -141,7 +137,7 @@ export const createDefaultValues = (
         id: existingConnection?.id,
         name: suggestedConnectionName,
         blockName: block.name,
-        projectId,
+        authProviderKey: block.auth?.authProviderKey,
         type: AppConnectionType.CUSTOM_AUTH,
         value: existingConnection
           ? (existingConnection.value as CustomAuthConnectionValue)
@@ -155,7 +151,7 @@ export const createDefaultValues = (
         id: existingConnection?.id,
         name: suggestedConnectionName,
         blockName: block.name,
-        projectId,
+        authProviderKey: block.auth?.authProviderKey,
         type: AppConnectionType.CLOUD_OAUTH2,
         value: existingConnection
           ? ({
@@ -183,4 +179,30 @@ export const createDefaultValues = (
     default:
       throw new Error(`Unsupported property type: ${block.auth}`);
   }
+};
+
+export const filterBlocks = (
+  blocks: BlockMetadataModelSummary[],
+  searchTerm: string,
+) => {
+  return blocks.filter((block) => {
+    return (
+      !isNil(block.auth) &&
+      block.displayName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  });
+};
+
+export const aggregateBlocksByProvider = (
+  blocks: BlockMetadataModelSummary[],
+) => {
+  return Object.values(
+    blocks?.reduce((acc, block) => {
+      const key = block.auth?.authProviderKey ?? '';
+      if (!acc[key]) {
+        acc[key] = block;
+      }
+      return acc;
+    }, {} as Record<string, BlockMetadataModelSummary>) ?? {},
+  );
 };

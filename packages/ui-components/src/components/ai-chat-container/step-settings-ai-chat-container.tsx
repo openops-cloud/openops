@@ -5,10 +5,16 @@ import { ReactNode, useEffect, useRef } from 'react';
 import { cn } from '../../lib/cn';
 import { AI_CHAT_SCROLL_DELAY } from '../../lib/constants';
 import { ScrollArea } from '../../ui/scroll-area';
+import { AIChatMessageRole } from '../ai-chat-messages';
 import { AiChatInput } from './ai-chat-input';
 import { AiChatSizeTogglers } from './ai-chat-size-togglers';
 import { AiModelSelectorProps } from './ai-model-selector';
+import { getBufferAreaHeight, getLastUserMessageId } from './ai-scroll-helpers';
 import { AI_CHAT_CONTAINER_SIZES, AiCliChatContainerSizeState } from './types';
+import {
+  useScrollToBottomOnOpen,
+  useScrollToLastUserMessage,
+} from './use-ai-chat-scroll';
 
 type StepSettingsAiChatContainerProps = {
   parentHeight: number;
@@ -24,6 +30,10 @@ type StepSettingsAiChatContainerProps = {
   toggleContainerSizeState: (state: AiCliChatContainerSizeState) => void;
   className?: string;
   children?: ReactNode;
+  messages?: { id: string; role: string }[];
+  status?: string;
+  lastUserMessageRef: React.RefObject<HTMLDivElement>;
+  lastAssistantMessageRef: React.RefObject<HTMLDivElement>;
 } & Pick<UseChatHelpers, 'input' | 'handleInputChange' | 'handleSubmit'> &
   AiModelSelectorProps;
 
@@ -48,17 +58,62 @@ const StepSettingsAiChatContainer = ({
   selectedModel,
   onModelSelected,
   isModelSelectorLoading,
+  messages = [],
+  status,
+  lastUserMessageRef,
+  lastAssistantMessageRef,
 }: StepSettingsAiChatContainerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollViewportRef = useRef<HTMLDivElement>(null);
   const hasScrolledOnce = useRef<boolean>(false);
+  const lastUserMessageId = useRef<string | null>(
+    getLastUserMessageId(messages),
+  );
+  const lastUserMessageIndex = useRef<number | null>(null);
+  const streamingEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     hasScrolledOnce.current = false;
   }, [stepName]);
 
   useEffect(() => {
-    setTimeout(() => {
+    if (showAiChat) {
+      if (lastUserMessageIndex.current === null && messages.length) {
+        lastUserMessageIndex.current = messages
+          .map((m) => m.role)
+          .lastIndexOf(AIChatMessageRole.user);
+      }
+    } else {
+      lastUserMessageIndex.current = null;
+    }
+  }, [showAiChat, messages]);
+
+  // scroll to the last user message, when getting a new user message
+  useEffect(() => {
+    const scrollArea = scrollViewportRef.current;
+    if (!scrollArea || scrollArea.scrollHeight <= scrollArea.clientHeight) {
+      return;
+    }
+    if (messages.length && showAiChat) {
+      const lastUserIndex = messages
+        .map((m) => m.role)
+        .lastIndexOf(AIChatMessageRole.user);
+      if (
+        lastUserIndex !== -1 &&
+        lastUserMessageId?.current !== messages[lastUserIndex].id
+      ) {
+        lastUserMessageId.current = messages[lastUserIndex].id;
+        streamingEndRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+      }
+    }
+  }, [messages, showAiChat]);
+
+  // scroll to the bottom of the chat when the chat is opened
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
       if (
         scrollViewportRef.current &&
         !isEmpty &&
@@ -67,24 +122,66 @@ const StepSettingsAiChatContainer = ({
       ) {
         scrollViewportRef.current.scrollTo({
           top: scrollViewportRef.current.scrollHeight,
-          behavior: 'smooth',
+          behavior: 'instant',
         });
 
         hasScrolledOnce.current = true;
       }
     }, AI_CHAT_SCROLL_DELAY);
+    return () => {
+      clearTimeout(timeoutId);
+    };
   }, [isEmpty, showAiChat, stepName]);
 
-  let height: string;
+  useScrollToLastUserMessage({
+    messages,
+    showAiChat,
+    scrollViewportRef,
+    lastUserMessageId,
+    streamingEndRef,
+  });
+
+  useScrollToBottomOnOpen({
+    isEmpty,
+    showAiChat,
+    messages,
+    hasAutoScrolled: hasScrolledOnce,
+    scrollViewportRef,
+  });
+
+  let height: number;
   if (containerSize === AI_CHAT_CONTAINER_SIZES.COLLAPSED) {
-    height = '0px';
+    height = 0;
   } else if (containerSize === AI_CHAT_CONTAINER_SIZES.DOCKED) {
-    height = '450px';
+    height = 450;
   } else if (containerSize === AI_CHAT_CONTAINER_SIZES.EXPANDED) {
-    height = `${parentHeight - 180}px`;
+    height = parentHeight - 180;
   } else {
-    height = `${parentHeight - 100}px`;
+    height = parentHeight - 100;
   }
+
+  const lastMsgHeight = lastUserMessageRef.current?.offsetHeight ?? 0;
+  const currentBufferAreaHeight = streamingEndRef.current?.offsetHeight ?? 0;
+  const lastAssistantMsgHeight =
+    lastAssistantMessageRef.current?.offsetHeight ?? 0;
+
+  const hasNewMessage =
+    lastUserMessageIndex.current !== null &&
+    lastUserMessageIndex.current !== messages.length - 2;
+
+  const bufferAreaHeight = hasNewMessage
+    ? getBufferAreaHeight(
+        height,
+        currentBufferAreaHeight,
+        lastMsgHeight,
+        lastAssistantMsgHeight,
+        status,
+        {
+          readyGap: 220,
+          streamingGap: 180,
+        },
+      )
+    : 0;
 
   return (
     <div
@@ -136,7 +233,7 @@ const StepSettingsAiChatContainer = ({
 
       <div
         style={{
-          height,
+          height: `${height}px`,
           width:
             containerSize !== AI_CHAT_CONTAINER_SIZES.EXPANDED
               ? '450px'
@@ -168,7 +265,14 @@ const StepSettingsAiChatContainer = ({
                   {children}
                 </div>
               ) : (
-                children
+                <div className="flex flex-col">
+                  {children}
+                  <div
+                    ref={streamingEndRef}
+                    id="streaming-end"
+                    style={{ height: bufferAreaHeight }}
+                  />
+                </div>
               )}
             </div>
           </ScrollArea>

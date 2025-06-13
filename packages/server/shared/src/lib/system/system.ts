@@ -5,6 +5,7 @@ import {
   isNil,
   OpsEdition,
 } from '@openops/shared';
+import crypto from 'crypto';
 import os from 'os';
 import path from 'path';
 import {
@@ -88,6 +89,8 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [AppSystemProp.SUPERSET_MCP_SERVER_PATH]: '/root/.mcp/superset',
   [AppSystemProp.DOCS_MCP_SERVER_PATH]: '/root/.mcp/docs.openops.com',
   [AppSystemProp.LOAD_EXPERIMENTAL_MCP_TOOLS]: 'false',
+  [SharedSystemProp.AWS_ENABLE_IMPLICIT_ROLE]: 'false',
+  [AppSystemProp.OPENOPS_MCP_SERVER_PATH]: '/root/.mcp/openops-mcp',
 };
 
 export const system = {
@@ -174,6 +177,17 @@ export const system = {
     return [ContainerType.APP, ContainerType.WORKER_AND_APP].includes(
       this.getOrThrow<ContainerType>(SharedSystemProp.CONTAINER_TYPE),
     );
+  },
+  calculateConfigurationHash(): string {
+    const props = Object.keys(SharedSystemProp)
+      .sort()
+      .map((key) => `${key}=${system.get(key as SystemProp)}`)
+      .join(';');
+    return crypto
+      .createHash('sha256')
+      .update(props)
+      .digest('base64url')
+      .slice(0, 12);
   },
 };
 

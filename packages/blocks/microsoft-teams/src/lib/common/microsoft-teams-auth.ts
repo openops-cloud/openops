@@ -1,9 +1,10 @@
 import { BlockAuth, BlockPropValueSchema } from '@openops/blocks-framework';
-import { Provider, getConnectionProvider } from '@openops/shared';
 import { getMicrosoftGraphClient } from './get-microsoft-graph-client';
 
 export const microsoftTeamsAuth = BlockAuth.OAuth2({
-  provider: getConnectionProvider(Provider.MICROSOFT_TEAMS),
+  authProviderKey: 'Microsoft_Teams',
+  authProviderDisplayName: 'Microsoft Teams',
+  authProviderLogoUrl: `https://static.openops.com/blocks/microsoft-teams.png`,
   description: '⚠️ You can only use school or work accounts.',
   required: true,
   scope: [

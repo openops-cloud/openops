@@ -41,10 +41,12 @@ const DataSelector = ({
   className,
 }: DataSelectorProps) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const flowVersionId = useBuilderStateContext((state) => state.flowVersion.id);
-  const isDataSelectorVisible = useBuilderStateContext(
-    (state) => state.midpanelState.showDataSelector,
-  );
+  const { flowVersionId, isDataSelectorVisible, midpanelState } =
+    useBuilderStateContext((state) => ({
+      flowVersionId: state.flowVersion.id,
+      isDataSelectorVisible: state.midpanelState.showDataSelector,
+      midpanelState: state.midpanelState,
+    }));
 
   const pathToTargetStep = useBuilderStateContext(
     dataSelectorUtils.getPathToTargetStep,
@@ -68,7 +70,17 @@ const DataSelector = ({
     const stepTestOutput: Record<string, StepOutputWithData> = {};
     stepIds.forEach((id) => {
       const cached = stepTestOutputCache.getStepData(id);
-      if (cached) stepTestOutput[id] = cached;
+      const step = pathToTargetStep.find((s) => s.id === id);
+      const sampleData = step?.settings.inputUiInfo?.sampleData;
+
+      if (cached) {
+        stepTestOutput[id] = {
+          ...cached,
+          output: dataSelectorUtils.hasStepSampleData(step)
+            ? sampleData
+            : cached.output,
+        };
+      }
     });
     return dataSelectorUtils.getAllStepsMentions(
       pathToTargetStep,
@@ -89,7 +101,6 @@ const DataSelector = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchTerm]);
 
-  const midpanelState = useBuilderStateContext((state) => state.midpanelState);
   const filteredMentions = useMemo(
     () => dataSelectorUtils.filterBy(structuredClone(mentions), searchTerm),
     [mentions, searchTerm],

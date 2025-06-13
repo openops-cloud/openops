@@ -46,6 +46,8 @@ const UpdateOrganizationRequest = {
     response: {
       [StatusCodes.OK]: Organization,
     },
+    description:
+      "Update an organization's details. This endpoint allows you to modify the properties of an existing organization, such as its name, settings, and other configuration options.",
   },
 };
 
@@ -57,7 +59,8 @@ const GetOrganizationRequest = {
   schema: {
     tags: ['organizations'],
     security: [SERVICE_KEY_SECURITY_OPENAPI],
-    description: 'Get a organization by id',
+    description:
+      'Get an organization by its ID. This endpoint retrieves detailed information about a specific organization, including its configuration, settings, and associated metadata.',
     params: Type.Object({
       id: OpenOpsId,
     }),

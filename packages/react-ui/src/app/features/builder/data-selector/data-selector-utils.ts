@@ -169,10 +169,26 @@ const getAllStepsMentions = (
   });
 };
 
+const hasStepSampleData = (step: Action | Trigger | undefined) => {
+  const sampleData = step?.settings?.inputUiInfo?.sampleData;
+  return (
+    !isNil(sampleData) &&
+    (typeof sampleData !== 'object' || Object.keys(sampleData).length > 0)
+  );
+};
+
 const createTestNode = (
   step: Action | Trigger,
   displayName: string,
 ): MentionTreeNode => {
+  if (hasStepSampleData(step)) {
+    return traverseStepOutputAndReturnMentionTree({
+      stepOutput: step.settings.inputUiInfo.sampleData,
+      propertyPath: step.name,
+      displayName: displayName,
+    });
+  }
+
   return {
     key: step.name,
     data: {
@@ -201,9 +217,10 @@ function filterBy(arr: MentionTreeNode[], query: string): MentionTreeNode[] {
   }
 
   return arr.reduce((acc, item) => {
-    const isTestNode =
+    const isTestNodeOrHasNoSampleData =
       !isNil(item.children) && item?.children?.[0]?.data?.isTestStepNode;
-    if (isTestNode) {
+
+    if (isTestNodeOrHasNoSampleData) {
       return acc;
     }
 
@@ -253,4 +270,5 @@ export const dataSelectorUtils = {
   createTestNode,
   filterBy,
   getPathToTargetStep,
+  hasStepSampleData,
 };
