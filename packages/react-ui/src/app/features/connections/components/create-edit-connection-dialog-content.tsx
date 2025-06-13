@@ -62,7 +62,7 @@ class ConnectionNameAlreadyExists extends Error {
 }
 
 export type CreateEditConnectionDialogContentProps = {
-  onConnectionSaved: (name: string) => void;
+  onConnectionSaved: (name: string, authProviderKey: string) => void;
   connectionToEdit: AppConnection | null;
   authProviderKey: string;
   reconnect?: boolean;
@@ -152,7 +152,7 @@ const CreateEditConnectionDialogContent = ({
     onSuccess: () => {
       setOpen(false);
       const requestValues = form.getValues().request;
-      onConnectionSaved(requestValues.name);
+      onConnectionSaved(requestValues.name, requestValues.authProviderKey);
       setErrorMessage('');
 
       if (connectionToEdit) {

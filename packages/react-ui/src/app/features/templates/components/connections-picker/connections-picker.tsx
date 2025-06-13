@@ -146,14 +146,15 @@ const ConnectionsPicker = ({
 
   const onConnectionCreated = async (
     connectionName: string,
+    authProviderKey: string,
     blockName: string,
   ) => {
     setSelectedBlockMetadata(null);
     const updatedGroupedConnections = await refetch();
 
-    const newConnection = updatedGroupedConnections?.data?.[blockName]?.find(
-      (connection) => connection.name === connectionName,
-    );
+    const newConnection = updatedGroupedConnections?.data?.[
+      authProviderKey
+    ]?.find((connection) => connection.name === connectionName);
 
     if (newConnection) {
       onConnectionChange(blockName, newConnection);
@@ -170,8 +171,12 @@ const ConnectionsPicker = ({
         <DynamicFormValidationProvider>
           <CreateEditConnectionDialogContent
             authProviderKey={selectedBlockMetadata?.auth?.authProviderKey ?? ''}
-            onConnectionSaved={(connectionName) => {
-              onConnectionCreated(connectionName, selectedBlockMetadata?.name);
+            onConnectionSaved={(connectionName, authProviderKey) => {
+              onConnectionCreated(
+                connectionName,
+                authProviderKey,
+                selectedBlockMetadata?.name,
+              );
             }}
             reconnect={false}
             connectionToEdit={null}
