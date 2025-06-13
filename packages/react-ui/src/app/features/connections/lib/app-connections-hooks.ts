@@ -11,7 +11,7 @@ import { appConnectionsApi } from './app-connections-api';
 export const appConnectionsHooks = {
   useConnections: (request: ListAppConnectionsRequestQuery) => {
     return useQuery({
-      queryKey: [QueryKeys.appConnections, request?.blockNames],
+      queryKey: [QueryKeys.appConnections, request?.authProviders],
       queryFn: () => {
         return appConnectionsApi.list(request);
       },
@@ -35,7 +35,7 @@ export const appConnectionsHooks = {
     useConnectionsProvider: boolean,
   ) => {
     return useQuery({
-      queryKey: [QueryKeys.appConnections, request?.blockNames],
+      queryKey: [QueryKeys.appConnections, request?.authProviders],
       queryFn: () => appConnectionsApi.list(request),
       staleTime: 0,
       select: useConnectionsProvider
