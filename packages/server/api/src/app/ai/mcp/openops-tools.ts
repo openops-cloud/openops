@@ -17,6 +17,7 @@ const INCLUDED_PATHS: Record<string, string[]> = {
   '/v1/files/{fileId}': ['get'],
   '/v1/flow-versions/': ['get'],
   '/v1/flows/': ['get'],
+  '/v1/flows/count': ['get'],
   '/v1/flows/{id}': ['get'],
   '/v1/blocks/categories': ['get'],
   '/v1/blocks/': ['get'],
@@ -30,9 +31,7 @@ const INCLUDED_PATHS: Record<string, string[]> = {
   '/v1/app-connections/metadata': ['get'],
 };
 
-async function filterOpenApiSchema(
-  schema: OpenAPI.Document,
-): Promise<OpenAPI.Document> {
+function filterOpenApiSchema(schema: OpenAPI.Document): OpenAPI.Document {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const filteredPaths: Record<string, any> = {};
 
@@ -55,7 +54,7 @@ let cachedSchemaPath: string | undefined;
 async function getOpenApiSchemaPath(app: FastifyInstance): Promise<string> {
   if (!cachedSchemaPath) {
     const openApiSchema = app.swagger();
-    const filteredSchema = await filterOpenApiSchema(openApiSchema);
+    const filteredSchema = filterOpenApiSchema(openApiSchema);
     cachedSchemaPath = path.join(os.tmpdir(), 'openapi-schema.json');
     await fs.writeFile(
       cachedSchemaPath,

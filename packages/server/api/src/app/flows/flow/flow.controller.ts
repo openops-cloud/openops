@@ -242,7 +242,7 @@ const ListFlowsRequestOptions = {
   schema: {
     tags: ['flows'],
     description:
-      'Retrieve a paginated list of flows for the current project. Supports filtering by folder, status, name, and version state. Results are returned in a seek-based pagination format.',
+      'Retrieve a paginated list of workflows for the current project. Supports filtering by folder, status, name, and version state. Results are returned in a seek-based pagination format.',
     security: [SERVICE_KEY_SECURITY_OPENAPI],
     querystring: ListFlowsRequest,
     response: {
@@ -253,6 +253,8 @@ const ListFlowsRequestOptions = {
 
 const CountFlowsRequestOptions = {
   schema: {
+    description:
+      'Retrieve a list of a workflows for the current project. Supports filtering by folder.',
     querystring: CountFlowsRequest,
   },
 };
