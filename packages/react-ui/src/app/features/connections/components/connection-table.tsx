@@ -22,7 +22,6 @@ import {
 import {
   AppConnection,
   AppConnectionStatus,
-  FlagId,
   MinimalFlow,
 } from '@openops/shared';
 import { ColumnDef } from '@tanstack/react-table';
@@ -32,7 +31,6 @@ import { Dispatch, SetStateAction, useCallback, useState } from 'react';
 
 import { appConnectionUtils } from '../lib/app-connections-utils';
 
-import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { flowsApi } from '@/app/features/flows/lib/flows-api';
 import { useMutation } from '@tanstack/react-query';
 import { useConnectionsContext } from './connections-context';
@@ -44,28 +42,19 @@ type BlockIconWithBlockNameProps = {
   blockName: string;
 };
 const BlockIconWithBlockName = ({ blockName }: BlockIconWithBlockNameProps) => {
-  const { data: useConnectionsProvider } = flagsHooks.useFlag<boolean>(
-    FlagId.USE_CONNECTIONS_PROVIDER,
-  );
-
   const { blockModel } = blocksHooks.useBlock({
     name: blockName,
   });
 
-  const diplayName = useConnectionsProvider
-    ? blockModel?.auth?.authProviderDisplayName
-    : blockModel?.displayName;
-
-  const logoUrl = useConnectionsProvider
-    ? blockModel?.auth?.authProviderLogoUrl
-    : blockModel?.logoUrl;
+  const displayName = blockModel?.auth?.authProviderDisplayName;
+  const logoUrl = blockModel?.auth?.authProviderLogoUrl;
 
   return (
     <BlockIcon
       circle={true}
       size={'md'}
       border={true}
-      displayName={diplayName}
+      displayName={displayName}
       logoUrl={logoUrl}
       showTooltip={true}
     />

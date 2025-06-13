@@ -30,17 +30,12 @@ export const appConnectionsHooks = {
       staleTime: 0,
     });
   },
-  useGroupedConnections: (
-    request: ListAppConnectionsRequestQuery,
-    useConnectionsProvider: boolean,
-  ) => {
+  useGroupedConnections: (request: ListAppConnectionsRequestQuery) => {
     return useQuery({
       queryKey: [QueryKeys.appConnections, request?.authProviders],
       queryFn: () => appConnectionsApi.list(request),
       staleTime: 0,
-      select: useConnectionsProvider
-        ? groupedConnectionsSelector
-        : legacyGroupedConnectionsSelector,
+      select: groupedConnectionsSelector,
     });
   },
   useConnectionsMetadata: () => {
@@ -50,23 +45,6 @@ export const appConnectionsHooks = {
       staleTime: Infinity,
     });
   },
-};
-
-/**
- * @deprecated
- */
-const legacyGroupedConnectionsSelector = (
-  connectionsPage: SeekPage<AppConnectionWithoutSensitiveData>,
-): Record<string, AppConnectionWithoutSensitiveData[]> => {
-  return connectionsPage.data.reduce<
-    Record<string, AppConnectionWithoutSensitiveData[]>
-  >((acc, connection) => {
-    if (!acc[connection.blockName]) {
-      acc[connection.blockName] = [];
-    }
-    acc[connection.blockName].push(connection);
-    return acc;
-  }, {});
 };
 
 export const groupedConnectionsSelector = (
