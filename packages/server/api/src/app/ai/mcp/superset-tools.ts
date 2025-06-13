@@ -33,8 +33,18 @@ export async function getSupersetTools(): Promise<MCPTool> {
     }),
   });
 
+  const tools = await supersetClient.tools();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const toolSet: Record<string, any> = {};
+  for (const [key, tool] of Object.entries(tools)) {
+    toolSet[key] = {
+      ...tool,
+      toolProvider: 'superset',
+    };
+  }
+
   return {
     client: supersetClient,
-    toolSet: await supersetClient.tools(),
+    toolSet,
   };
 }
