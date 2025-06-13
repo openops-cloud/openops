@@ -9,6 +9,7 @@ import { platformHooks } from '@/app/common/hooks/platform-hooks';
 import { projectHooks } from '@/app/common/hooks/project-hooks';
 import { userSettingsHooks } from '@/app/common/hooks/user-settings-hooks';
 import { SocketProvider } from '@/app/common/providers/socket-provider';
+// eslint-disable-next-line import/no-restricted-paths
 import { appConnectionsHooks } from '@/app/features/connections/lib/app-connections-hooks';
 import { authenticationSession } from '@/app/lib/authentication-session';
 import { navigationUtil } from '@/app/lib/navigation-util';

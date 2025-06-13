@@ -14,12 +14,7 @@ import { useFormContext } from 'react-hook-form';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { oauth2Utils } from '@/app/lib/oauth2-utils';
-import {
-  BlockMetadataModel,
-  BlockMetadataModelSummary,
-  OAuth2Property,
-  OAuth2Props,
-} from '@openops/blocks-framework';
+import { OAuth2Property, OAuth2Props } from '@openops/blocks-framework';
 import {
   AppConnection,
   AppConnectionType,
