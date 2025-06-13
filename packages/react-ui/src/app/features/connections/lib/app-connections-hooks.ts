@@ -11,7 +11,7 @@ import { appConnectionsApi } from './app-connections-api';
 export const appConnectionsHooks = {
   useConnections: (request: ListAppConnectionsRequestQuery) => {
     return useQuery({
-      queryKey: [QueryKeys.appConnections, request?.blockNames],
+      queryKey: [QueryKeys.appConnections, request?.authProviders],
       queryFn: () => {
         return appConnectionsApi.list(request);
       },
@@ -32,7 +32,7 @@ export const appConnectionsHooks = {
   },
   useGroupedConnections: (request: ListAppConnectionsRequestQuery) => {
     return useQuery({
-      queryKey: [QueryKeys.appConnections, request?.blockNames],
+      queryKey: [QueryKeys.appConnections, request?.authProviders],
       queryFn: () => appConnectionsApi.list(request),
       staleTime: 0,
       select: groupedConnectionsSelector,
@@ -50,7 +50,7 @@ export const appConnectionsHooks = {
 export const groupedConnectionsSelector = (
   connectionsPage: SeekPage<AppConnectionWithoutSensitiveData>,
 ): Record<string, AppConnectionWithoutSensitiveData[]> => {
-  const connectionsByProvider = connectionsPage.data.reduce<
+  return connectionsPage.data.reduce<
     Record<string, AppConnectionWithoutSensitiveData[]>
   >((acc, connection) => {
     if (connection.authProviderKey && !acc[connection.authProviderKey]) {
@@ -60,24 +60,4 @@ export const groupedConnectionsSelector = (
     acc[connection.authProviderKey!].push(connection);
     return acc;
   }, {});
-
-  const connectionsByBlock = connectionsPage.data.reduce<
-    Record<string, AppConnectionWithoutSensitiveData[]>
-  >((acc, connection) => {
-    if (!acc[connection.blockName]) {
-      acc[connection.blockName] = [];
-    }
-
-    if (acc[connection.blockName].length > 0) {
-      return acc;
-    }
-
-    acc[connection.blockName].push(
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      ...(connectionsByProvider[connection.authProviderKey!] ?? []),
-    );
-    return acc;
-  }, {});
-
-  return connectionsByBlock;
 };
