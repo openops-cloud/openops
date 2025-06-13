@@ -17,6 +17,7 @@ const INCLUDED_PATHS: Record<string, string[]> = {
   '/v1/files/{fileId}': ['get'],
   '/v1/flow-versions/': ['get'],
   '/v1/flows/': ['get'],
+  '/v1/flows/count': ['get'],
   '/v1/flows/{id}': ['get'],
   '/v1/blocks/categories': ['get'],
   '/v1/blocks/': ['get'],
