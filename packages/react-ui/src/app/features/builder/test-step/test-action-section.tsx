@@ -4,7 +4,7 @@ import {
   INTERNAL_ERROR_TOAST,
   useToast,
 } from '@openops/components/ui';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import { t } from 'i18next';
 import React, { useEffect, useState } from 'react';
@@ -24,9 +24,11 @@ import {
   ActionType,
   isNil,
   RiskLevel,
+  StepOutputWithData,
   StepRunResponse,
 } from '@openops/shared';
 
+import { QueryKeys } from '@/app/constants/query-keys';
 import { stepTestOutputCache } from '../data-selector/data-selector-cache';
 import { stepTestOutputHooks } from './step-test-output-hooks';
 import { TestSampleDataViewer } from './test-sample-data-viewer';
@@ -46,6 +48,7 @@ const TestActionSection = React.memo(
     );
     const form = useFormContext<Action>();
     const formValues = form.getValues();
+    const queryClient = useQueryClient();
 
     const [isValid, setIsValid] = useState(false);
 
@@ -62,7 +65,7 @@ const TestActionSection = React.memo(
     const {
       data: testOutputData,
       isLoading: isLoadingTestOutput,
-      refetch: refetchTestOutput,
+      // refetch: refetchTestOutput,
     } = stepTestOutputHooks.useStepTestOutputFormData(flowVersionId, form);
 
     const sampleDataExists =
@@ -85,12 +88,16 @@ const TestActionSection = React.memo(
         if (stepResponse.success) {
           setErrorMessage(undefined);
 
-          stepTestOutputCache.setStepData(formValues.id!, {
+          const stepTestOutput: StepOutputWithData = {
             output: formattedResponse,
             lastTestDate: dayjs().toISOString(),
-          });
+          };
 
-          refetchTestOutput();
+          stepTestOutputCache.setStepData(formValues.id!, stepTestOutput);
+          queryClient.setQueryData(
+            [QueryKeys.stepTestOutput, flowVersionId, formValues.id!],
+            stepTestOutput,
+          );
         } else {
           setErrorMessage(testStepUtils.formatErrorMessage(formattedResponse));
         }
