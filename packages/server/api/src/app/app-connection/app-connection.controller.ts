@@ -5,7 +5,6 @@ import {
 } from '@fastify/type-provider-typebox';
 import {
   AppConnectionWithoutSensitiveData,
-  FlagId,
   ListAppConnectionsRequestQuery,
   OpenOpsId,
   PatchAppConnectionRequestBody,
@@ -17,7 +16,6 @@ import {
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
 import { blockMetadataService } from '../blocks/block-metadata-service';
-import { devFlagsService } from '../flags/dev-flags.service';
 import { sendConnectionDeletedEvent } from '../telemetry/event-models';
 import { appConnectionService } from './app-connection-service/app-connection-service';
 import { redactSecrets, removeSensitiveData } from './app-connection-utils';
@@ -73,26 +71,20 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
     '/',
     ListAppConnectionsRequest,
     async (request): Promise<SeekPage<AppConnectionWithoutSensitiveData>> => {
-      const { name, status, cursor, limit } = request.query;
-      let { blockNames, authProviders } = request.query;
+      const { name, status, cursor, limit, blockNames } = request.query;
+      let { authProviders } = request.query;
 
-      const featureFlag = await devFlagsService.getOne(
-        FlagId.USE_CONNECTIONS_PROVIDER,
-      );
-      if (blockNames && featureFlag?.value) {
+      if (blockNames) {
         const blockProviders = await resolveProvidersForBlocks(
           blockNames,
           request.principal.projectId,
         );
 
-        blockNames = [];
         authProviders = authProviders ?? [];
         authProviders.push(...blockProviders);
       }
 
       const appConnections = await appConnectionService.list({
-        // TODO: remove blockNames from this request
-        blockNames,
         name,
         status,
         projectId: request.principal.projectId,
