@@ -750,7 +750,6 @@ const prefillConnection = (
   action: Action,
   connections?: AppConnectionWithoutSensitiveData[],
 ): Action => {
-  // TODO: FIX THIS
   if (
     Array.isArray(connections) &&
     'input' in action.settings &&

@@ -252,9 +252,7 @@ export async function execute(
           projectId: input.projectId,
         });
 
-        const output = await blockHelper.executeValidateAuth({
-          params: input,
-        });
+        const output = await blockHelper.executeValidateAuth(input);
 
         return {
           status: EngineResponseStatus.OK,
