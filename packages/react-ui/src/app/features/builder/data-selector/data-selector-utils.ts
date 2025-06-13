@@ -264,42 +264,11 @@ const getPathToTargetStep = (state: BuilderState) => {
   return pathToTargetStep;
 };
 
-/**
- * @deprecated currentSelectedData will be removed in the future
- * Selector for mapping each step in the path to a MentionTreeNode
- */
-const getAllStepsMentionsFromCurrentSelectedData: (
-  state: BuilderState,
-) => MentionTreeNode[] = (state) => {
-  const { selectedStep, flowVersion } = state;
-  if (!selectedStep || !flowVersion?.trigger) {
-    return [];
-  }
-  const pathToTargetStep = flowHelper.findPathToStep({
-    targetStepName: selectedStep,
-    trigger: flowVersion.trigger,
-  });
-
-  return pathToTargetStep.map((step) => {
-    const stepNeedsTesting = isNil(step.settings.inputUiInfo?.lastTestDate);
-    const displayName = `${step.dfsIndex + 1}. ${step.displayName}`;
-    if (stepNeedsTesting) {
-      return createTestNode(step, displayName);
-    }
-    return traverseStepOutputAndReturnMentionTree({
-      stepOutput: step.settings.inputUiInfo?.currentSelectedData,
-      propertyPath: step.name,
-      displayName: displayName,
-    });
-  });
-};
-
 export const dataSelectorUtils = {
   traverseStepOutputAndReturnMentionTree,
   getAllStepsMentions,
   createTestNode,
   filterBy,
   getPathToTargetStep,
-  getAllStepsMentionsFromCurrentSelectedData,
   hasStepSampleData,
 };
