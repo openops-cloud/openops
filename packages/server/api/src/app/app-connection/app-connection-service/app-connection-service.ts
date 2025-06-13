@@ -471,21 +471,21 @@ async function refresh(connection: AppConnection): Promise<AppConnection> {
   switch (connection.value.type) {
     case AppConnectionType.PLATFORM_OAUTH2:
       connection.value = await oauth2Handler[connection.value.type].refresh({
-        blockName: connection.blockName,
+        authProviderKey: connection.authProviderKey,
         projectId: connection.projectId,
         connectionValue: connection.value,
       });
       break;
     case AppConnectionType.CLOUD_OAUTH2:
       connection.value = await oauth2Handler[connection.value.type].refresh({
-        blockName: connection.blockName,
+        authProviderKey: connection.authProviderKey,
         projectId: connection.projectId,
         connectionValue: connection.value,
       });
       break;
     case AppConnectionType.OAUTH2:
       connection.value = await oauth2Handler[connection.value.type].refresh({
-        blockName: connection.blockName,
+        authProviderKey: connection.authProviderKey,
         projectId: connection.projectId,
         connectionValue: connection.value,
       });

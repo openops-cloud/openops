@@ -71,18 +71,8 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
     '/',
     ListAppConnectionsRequest,
     async (request): Promise<SeekPage<AppConnectionWithoutSensitiveData>> => {
-      const { name, status, cursor, limit, blockNames } = request.query;
+      const { name, status, cursor, limit } = request.query;
       let { authProviders } = request.query;
-
-      if (blockNames) {
-        const blockProviders = await resolveProvidersForBlocks(
-          blockNames,
-          request.principal.projectId,
-        );
-
-        authProviders = authProviders ?? [];
-        authProviders.push(...blockProviders);
-      }
 
       const appConnections = await appConnectionService.list({
         name,
