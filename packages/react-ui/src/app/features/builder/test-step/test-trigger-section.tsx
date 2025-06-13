@@ -133,8 +133,6 @@ const TestTriggerSection = React.memo(
           const lastResult = results[results.length - 1];
           updateSelectedData(lastResult);
 
-          // setStepOutputCache handles output and cache
-
           await triggerEventsApi.deleteWebhookSimulation(flowId);
         }
       },
