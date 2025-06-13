@@ -1,4 +1,8 @@
+import { QueryKeys } from '@/app/constants/query-keys';
+import { formatUtils } from '@/app/lib/utils';
 import { StepOutputWithData } from '@openops/shared';
+import { QueryClient } from '@tanstack/react-query';
+import dayjs from 'dayjs';
 
 /**
  * StepTestOutputCache manages test output and expanded state for steps in the Data Selector.
@@ -69,3 +73,28 @@ export class StepTestOutputCache {
 }
 
 export const stepTestOutputCache = new StepTestOutputCache();
+
+/**
+ * Utility to set step test output in both the cache and react-query client.
+ */
+export function setStepOutputCache({
+  stepId,
+  flowVersionId,
+  output,
+  queryClient,
+}: {
+  stepId: string;
+  flowVersionId: string;
+  output: unknown;
+  queryClient: QueryClient;
+}) {
+  const stepTestOutput: StepOutputWithData = {
+    output: formatUtils.formatStepInputOrOutput(output),
+    lastTestDate: dayjs().toISOString(),
+  };
+  stepTestOutputCache.setStepData(stepId, stepTestOutput);
+  queryClient.setQueryData(
+    [QueryKeys.stepTestOutput, flowVersionId, stepId],
+    stepTestOutput,
+  );
+}
