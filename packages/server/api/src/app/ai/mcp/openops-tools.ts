@@ -31,9 +31,7 @@ const INCLUDED_PATHS: Record<string, string[]> = {
   '/v1/app-connections/metadata': ['get'],
 };
 
-function filterOpenApiSchema(
-  schema: OpenAPI.Document,
-): Promise<OpenAPI.Document> {
+function filterOpenApiSchema(schema: OpenAPI.Document): OpenAPI.Document {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const filteredPaths: Record<string, any> = {};
 
