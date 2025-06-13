@@ -10,7 +10,7 @@ export type OAuth2Service<CONNECTION_VALUE extends BaseOAuth2ConnectionValue> =
   };
 
 export type RefreshOAuth2Request<T extends BaseOAuth2ConnectionValue> = {
-  blockName: string;
+  authProviderKey: string;
   projectId: string;
   connectionValue: T;
 };
@@ -29,6 +29,6 @@ export type OAuth2RequestBody = {
 
 export type ClaimOAuth2Request = {
   projectId: string;
-  blockName: string;
+  authProviderKey: string;
   request: OAuth2RequestBody;
 };

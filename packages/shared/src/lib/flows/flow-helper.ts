@@ -750,9 +750,16 @@ const prefillConnection = (
   action: Action,
   connections?: AppConnectionWithoutSensitiveData[],
 ): Action => {
-  if (Array.isArray(connections) && 'blockName' in action.settings) {
-    const blockName = action.settings.blockName;
-    const connection = connections.find((c) => c.blockName === blockName);
+  // TODO: FIX THIS
+  if (
+    Array.isArray(connections) &&
+    'input' in action.settings &&
+    'auth' in action.settings.input
+  ) {
+    const authProviderKey = action.settings.input['auth'].authProviderKey;
+    const connection = connections.find(
+      (c) => c.authProviderKey === authProviderKey,
+    );
 
     if (connection && 'input' in action.settings) {
       action.settings.input['auth'] = addConnectionBrackets(connection.name);

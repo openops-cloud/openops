@@ -19,12 +19,12 @@ export const cloudOAuth2Service: OAuth2Service<CloudOAuth2ConnectionValue> = {
 };
 
 async function refresh({
-  blockName,
+  authProviderKey,
   connectionValue,
 }: RefreshOAuth2Request<CloudOAuth2ConnectionValue>): Promise<CloudOAuth2ConnectionValue> {
   const requestBody = {
     refreshToken: connectionValue.refresh_token,
-    blockName,
+    authProviderKey,
     clientId: connectionValue.client_id,
     edition: system.getEdition(),
     authorizationMethod: connectionValue.authorization_method,
@@ -50,7 +50,7 @@ async function refresh({
 
 async function claim({
   request,
-  blockName,
+  authProviderKey,
 }: ClaimOAuth2Request): Promise<CloudOAuth2ConnectionValue> {
   try {
     const cloudRequest: ClaimWithCloudRequest = {
@@ -59,7 +59,7 @@ async function claim({
       authorizationMethod: request.authorizationMethod,
       clientId: request.clientId,
       tokenUrl: request.tokenUrl,
-      blockName,
+      authProviderKey,
       edition: system.getEdition(),
     };
 
@@ -86,14 +86,14 @@ async function claim({
     throw new ApplicationError({
       code: ErrorCode.INVALID_CLOUD_CLAIM,
       params: {
-        blockName,
+        authProviderKey,
       },
     });
   }
 }
 
 type ClaimWithCloudRequest = {
-  blockName: string;
+  authProviderKey: string;
   code: string;
   codeVerifier: string | undefined;
   authorizationMethod: OAuth2AuthorizationMethod | undefined;
