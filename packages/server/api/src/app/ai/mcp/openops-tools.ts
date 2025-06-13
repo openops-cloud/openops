@@ -7,7 +7,7 @@ import {
 import { experimental_createMCPClient } from 'ai';
 import { Experimental_StdioMCPTransport } from 'ai/mcp-stdio';
 import { FastifyInstance } from 'fastify';
-import fs from 'fs/promises';
+import * as fs from 'fs';
 import { OpenAPI } from 'openapi-types';
 import os from 'os';
 import path from 'path';
@@ -58,11 +58,7 @@ async function getOpenApiSchemaPath(app: FastifyInstance): Promise<string> {
     const openApiSchema = app.swagger();
     const filteredSchema = await filterOpenApiSchema(openApiSchema);
     cachedSchemaPath = path.join(os.tmpdir(), 'openapi-schema.json');
-    await fs.writeFile(
-      cachedSchemaPath,
-      JSON.stringify(filteredSchema),
-      'utf-8',
-    );
+    fs.writeFileSync(cachedSchemaPath, JSON.stringify(filteredSchema), 'utf-8');
   }
   return cachedSchemaPath;
 }
@@ -104,6 +100,12 @@ export async function getOpenOpsTools(
       toolProvider: 'openops',
     };
   }
+
+  // Write tools to JSON file
+  fs.writeFileSync(
+    '/Users/leylabuechel/Documents/openops/leylas-tools.json',
+    JSON.stringify(toolSet, null, 2),
+  );
 
   return {
     client: openopsClient,
