@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@openops/components/ui';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import deepEqual from 'fast-deep-equal';
 import { t } from 'i18next';
@@ -32,7 +32,10 @@ import {
   TriggerTestStrategy,
 } from '@openops/shared';
 
-import { stepTestOutputCache } from '../data-selector/data-selector-cache';
+import {
+  setStepOutputCache,
+  stepTestOutputCache,
+} from '../data-selector/data-selector-cache';
 import { stepTestOutputHooks } from './step-test-output-hooks';
 import { TestSampleDataViewer } from './test-sample-data-viewer';
 import { TestButtonTooltip } from './test-step-tooltip';
@@ -68,6 +71,7 @@ const TestTriggerSection = React.memo(
       name: formValues.settings.blockName,
       version: formValues.settings.blockVersion,
     });
+    const queryClient = useQueryClient();
 
     const isSimulation =
       blockModel?.triggers?.[formValues.settings.triggerName]?.testStrategy ===
@@ -82,11 +86,8 @@ const TestTriggerSection = React.memo(
       undefined,
     );
 
-    const {
-      data: testOutputData,
-      isLoading: isLoadingTestOutput,
-      refetch: refetchTestOutput,
-    } = stepTestOutputHooks.useStepTestOutputFormData(flowVersionId, form);
+    const { data: testOutputData, isLoading: isLoadingTestOutput } =
+      stepTestOutputHooks.useStepTestOutputFormData(flowVersionId, form);
 
     const [currentSelectedId, setCurrentSelectedId] = useState<
       string | undefined
@@ -98,7 +99,6 @@ const TestTriggerSection = React.memo(
         },
         onSuccess: async (result) => {
           updateSelectedData(result);
-          refetch();
         },
       });
     const {
@@ -112,7 +112,6 @@ const TestTriggerSection = React.memo(
           await triggerEventsApi.list({ flowId, cursor: undefined, limit: 5 })
         ).data.map((triggerEvent) => triggerEvent.id);
         await triggerEventsApi.startWebhookSimulation(flowId);
-        // TODO REFACTOR: replace this with a websocket
         let attempt = 0;
         while (attempt < 1000) {
           const newData = await triggerEventsApi.list({
@@ -131,8 +130,9 @@ const TestTriggerSection = React.memo(
       },
       onSuccess: async (results) => {
         if (results.length > 0) {
-          updateSelectedData(results[0]);
-          refetch();
+          const lastResult = results[results.length - 1];
+          updateSelectedData(lastResult);
+
           await triggerEventsApi.deleteWebhookSimulation(flowId);
         }
       },
@@ -177,12 +177,18 @@ const TestTriggerSection = React.memo(
     const isTesting = isPending || isLoadingTestOutput;
 
     function updateSelectedData(data: TriggerEvent) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       stepTestOutputCache.setStepData(formValues.id!, {
         output: formatUtils.formatStepInputOrOutput(data.payload),
         lastTestDate: dayjs().toISOString(),
       });
-
-      refetchTestOutput();
+      setStepOutputCache({
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        stepId: formValues.id!,
+        flowVersionId,
+        output: data.payload,
+        queryClient,
+      });
     }
 
     const { data: pollResults, refetch } = useQuery<SeekPage<TriggerEvent>>({
@@ -197,7 +203,7 @@ const TestTriggerSection = React.memo(
     });
 
     const currentTestOutput = testOutputData?.output;
-    const sampleDataSelected =
+    const outputDataSelected =
       !isNil(currentTestOutput) || !isNil(errorMessage);
 
     const isTestedBefore = !isNil(testOutputData?.lastTestDate);
@@ -229,7 +235,7 @@ const TestTriggerSection = React.memo(
 
     return (
       <div>
-        {sampleDataSelected && !isSimulating && !isSavingMockdata && (
+        {outputDataSelected && !isSimulating && !isSavingMockdata && (
           <TestSampleDataViewer
             onRetest={isSimulation ? simulateTrigger : pollTrigger}
             isValid={isValid}
@@ -249,6 +255,7 @@ const TestTriggerSection = React.memo(
                     );
                     if (triggerEvent) {
                       updateSelectedData(triggerEvent);
+                      setCurrentSelectedId(value);
                     }
                   }}
                 >
@@ -311,7 +318,7 @@ const TestTriggerSection = React.memo(
           </div>
         )}
         {!isTestedBefore &&
-          !sampleDataSelected &&
+          !outputDataSelected &&
           isSimulation &&
           !isSimulating && (
             <div className="flex justify-center flex-col gap-2 items-center">
@@ -344,7 +351,7 @@ const TestTriggerSection = React.memo(
               )}
             </div>
           )}
-        {!isTestedBefore && !sampleDataSelected && !isSimulation && (
+        {!isTestedBefore && !outputDataSelected && !isSimulation && (
           <div className="flex justify-center">
             <TestButtonTooltip disabled={!isValid}>
               <Button
