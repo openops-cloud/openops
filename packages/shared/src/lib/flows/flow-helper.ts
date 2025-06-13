@@ -1,6 +1,5 @@
 import { TypeCompiler } from '@sinclair/typebox/compiler';
 import semver from 'semver';
-import { AppConnectionWithoutSensitiveData } from '../app-connection/app-connection';
 import {
   addConnectionBrackets,
   removeConnectionBrackets,
@@ -20,6 +19,7 @@ import {
 } from './actions/action';
 import {
   AddActionRequest,
+  AppConnectionsWithSupportedBlocks,
   DeleteActionRequest,
   FlowOperationRequest,
   FlowOperationType,
@@ -749,26 +749,30 @@ function createTrigger(
 
 const prefillConnection = (
   action: Action,
-  blockToProviderMap?: Record<string, string>,
-  connections?: AppConnectionWithoutSensitiveData[],
+  connections?: AppConnectionsWithSupportedBlocks,
 ): Action => {
   if (!Array.isArray(connections)) {
     return action;
   }
 
   let authProviderKey: string | undefined;
+  let blockName: string | undefined;
+  if ('blockName' in action.settings) {
+    blockName = action.settings.blockName;
+  }
+
   if (
     'input' in action.settings &&
     'auth' in action.settings.input &&
     'authProviderKey' in action.settings.input
   ) {
     authProviderKey = action.settings.input['auth'].authProviderKey;
-  } else if ('blockName' in action.settings && blockToProviderMap) {
-    authProviderKey = blockToProviderMap[action.settings.blockName];
   }
 
   const connection = connections.find(
-    (c) => c.authProviderKey === authProviderKey,
+    (c) =>
+      c.authProviderKey === authProviderKey ||
+      (blockName && c.supportedBlocks.includes(blockName)),
   );
 
   if (connection && 'input' in action.settings) {
@@ -782,15 +786,13 @@ const prefillConnection = (
 
 export function getImportOperations(
   step: Action | Trigger | undefined,
-  blockToProviderMap?: Record<string, string>,
-  connections?: AppConnectionWithoutSensitiveData[],
+  connections?: AppConnectionsWithSupportedBlocks,
 ): FlowOperationRequest[] {
   const operations: FlowOperationRequest[] = [];
 
   const createAddActionRequest = (action: Action): Action => {
     const actionRequest = prefillConnection(
       removeAnySubsequentAction(action),
-      blockToProviderMap,
       connections,
     );
     actionRequest.id = actionRequest.id ?? openOpsId();
@@ -820,11 +822,7 @@ export function getImportOperations(
             },
           });
           operations.push(
-            ...getImportOperations(
-              step.onFailureAction,
-              blockToProviderMap,
-              connections,
-            ),
+            ...getImportOperations(step.onFailureAction, connections),
           );
         }
         if (step.onSuccessAction) {
@@ -838,11 +836,7 @@ export function getImportOperations(
             },
           });
           operations.push(
-            ...getImportOperations(
-              step.onSuccessAction,
-              blockToProviderMap,
-              connections,
-            ),
+            ...getImportOperations(step.onSuccessAction, connections),
           );
         }
         break;
@@ -862,11 +856,7 @@ export function getImportOperations(
                 },
               });
               operations.push(
-                ...getImportOperations(
-                  branch.nextAction,
-                  blockToProviderMap,
-                  connections,
-                ),
+                ...getImportOperations(branch.nextAction, connections),
               );
             }
           });
@@ -885,11 +875,7 @@ export function getImportOperations(
             },
           });
           operations.push(
-            ...getImportOperations(
-              step.firstLoopAction,
-              blockToProviderMap,
-              connections,
-            ),
+            ...getImportOperations(step.firstLoopAction, connections),
           );
         }
         break;

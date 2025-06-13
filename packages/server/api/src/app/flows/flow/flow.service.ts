@@ -1,5 +1,6 @@
 import { AppSystemProp, distributedLock, system } from '@openops/server-shared';
 import {
+  AppConnectionsWithSupportedBlocks,
   ApplicationError,
   CreateEmptyFlowRequest,
   Cursor,
@@ -76,19 +77,10 @@ export const flowService = {
       },
     });
 
-    const connectionsList = connectionIds.length
-      ? await appConnectionService.listActiveConnectionsByIds(
-          projectId,
-          connectionIds,
-        )
-      : [];
-
-    const blockNames = flowHelper
-      .getAllSteps(trigger)
-      .map((b) => b.settings.blockName);
-    const blockToProviderMap = await resolveProvidersForBlocks(
-      blockNames,
+    const connectionsList = await getConnections(
       projectId,
+      trigger,
+      connectionIds,
     );
 
     const updatedFlow = await update({
@@ -101,7 +93,6 @@ export const flowService = {
           displayName,
           description,
           trigger,
-          blockToProviderMap,
           connections: connectionsList,
         },
       },
@@ -632,6 +623,36 @@ const assertFlowIsNotNull: <T extends Flow>(
       params: {},
     });
   }
+};
+
+const getConnections = async (
+  projectId: string,
+  trigger: Trigger,
+  connectionIds: string[],
+): Promise<AppConnectionsWithSupportedBlocks> => {
+  if (!connectionIds.length) {
+    return [];
+  }
+
+  const connectionsList = await appConnectionService.listActiveConnectionsByIds(
+    projectId,
+    connectionIds,
+  );
+
+  const blockNames = flowHelper
+    .getAllSteps(trigger)
+    .map((b) => b.settings.blockName);
+  const blockToProviderMap = await resolveProvidersForBlocks(
+    blockNames,
+    projectId,
+  );
+
+  return connectionsList.map((connection) => {
+    return {
+      ...connection,
+      supportedBlocks: blockToProviderMap[connection.authProviderKey],
+    };
+  });
 };
 
 type CreateParams = {

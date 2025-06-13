@@ -6,7 +6,7 @@ import { flagService } from '../flags/flag.service';
 export async function resolveProvidersForBlocks(
   blockNames: string[],
   projectId: string,
-): Promise<Record<string, string>> {
+): Promise<Record<string, string[]>> {
   const release = await flagService.getCurrentRelease();
   const edition = system.getEdition();
 
@@ -17,7 +17,7 @@ export async function resolveProvidersForBlocks(
     edition,
   });
 
-  const blockToProvider: Record<string, string> = {};
+  const blockToProvider: Record<string, string[]> = {};
   const blockMap = new Map(blocks.map((b) => [b.name, b]));
 
   for (const blockName of blockNames) {
@@ -28,8 +28,14 @@ export async function resolveProvidersForBlocks(
     }
 
     const authProviderKey = block.auth?.authProviderKey;
-    if (authProviderKey) {
-      blockToProvider[blockName] = authProviderKey;
+    if (!authProviderKey) {
+      continue;
+    }
+
+    if (blockToProvider[authProviderKey]) {
+      blockToProvider[authProviderKey].push(blockName);
+    } else {
+      blockToProvider[authProviderKey] = [blockName];
     }
   }
 

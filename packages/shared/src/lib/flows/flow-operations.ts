@@ -47,12 +47,22 @@ export const LockFlowRequest = Type.Object({});
 
 export type LockFlowRequest = Static<typeof LockFlowRequest>;
 
+export const AppConnectionsWithSupportedBlocks = Type.Array(
+  Type.Intersect([
+    AppConnectionWithoutSensitiveData,
+    Type.Object({ supportedBlocks: Type.Array(Type.String()) }),
+  ]),
+);
+
+export type AppConnectionsWithSupportedBlocks = Static<
+  typeof AppConnectionsWithSupportedBlocks
+>;
+
 export const ImportFlowRequest = Type.Object({
   displayName: Type.String({}),
   description: Type.Optional(Type.String({})),
   trigger: Trigger,
-  blockToProviderMap: Type.Optional(Type.Object({})),
-  connections: Type.Optional(Type.Array(AppConnectionWithoutSensitiveData)),
+  connections: Type.Optional(AppConnectionsWithSupportedBlocks),
 });
 
 export type ImportFlowRequest = Static<typeof ImportFlowRequest>;
