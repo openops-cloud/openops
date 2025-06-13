@@ -4,7 +4,6 @@ import { useStepSettingsContext } from '@/app/features/builder/step-settings/ste
 import { toast, UNSAVED_CHANGES_TOAST } from '@openops/components/ui';
 import {
   Action,
-  FlagId,
   flowHelper,
   FlowOperationType,
   Trigger,
@@ -38,7 +37,8 @@ export const stepTestOutputHooks = {
   ) {
     const { id: stepId } = form.getValues();
 
-    return stepTestOutputHooks.useStepTestOutput(flowVersionId, stepId);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return stepTestOutputHooks.useStepTestOutput(flowVersionId, stepId!);
   },
   useSaveSelectedStepSampleData() {
     const { selectedStep } = useStepSettingsContext();
