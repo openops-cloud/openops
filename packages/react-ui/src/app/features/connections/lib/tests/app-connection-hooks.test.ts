@@ -64,7 +64,7 @@ describe('groupedConnectionsSelector', () => {
         createConnection({ id: 'aws-1', name: 'aws-1' }),
         createConnection({ id: 'aws-2', name: 'aws-2' }),
       ],
-      '@openops/block-aws',
+      'AWS',
       2,
     ],
     [
@@ -85,19 +85,19 @@ describe('groupedConnectionsSelector', () => {
           authProviderKey: 'Slack',
         }),
       ],
-      '@openops/block-slack',
+      'Slack',
       2,
     ],
-  ])('%s', (_desc, connections, blockName, expectedLength) => {
+  ])('%s', (_desc, connections, authProviderKey, expectedLength) => {
     const page: SeekPage<AppConnectionWithoutSensitiveData> = {
       data: connections,
       next: null,
       previous: null,
     };
     const result = groupedConnectionsSelector(page);
-    expect(Object.keys(result)).toEqual([blockName]);
-    expect(result[blockName]).toHaveLength(expectedLength);
-    expect(result[blockName]).toEqual(connections);
+    expect(Object.keys(result)).toEqual([authProviderKey]);
+    expect(result[authProviderKey]).toHaveLength(expectedLength);
+    expect(result[authProviderKey]).toEqual(connections);
   });
 
   it('groups connections by authProviderKey and blockName', () => {
@@ -142,21 +142,14 @@ describe('groupedConnectionsSelector', () => {
     };
     const result = groupedConnectionsSelector(page);
     expect(result).toEqual({
-      '@openops/block-aws': [
+      AWS: [
         connections[0],
         connections[1],
         connections[2],
         connections[3],
         connections[4],
       ],
-      '@openops/block-aws-athena': [
-        connections[0],
-        connections[1],
-        connections[2],
-        connections[3],
-        connections[4],
-      ],
-      '@openops/block-slack': [connections[5]],
+      Slack: [connections[5]],
     });
   });
 });
