@@ -66,7 +66,7 @@ describe('resolveProvidersForBlocks', () => {
     listBlocksMock.mockResolvedValue(blocks);
 
     const result = await resolveProvidersForBlocks(
-      ['block1', 'block2'],
+      ['block1', 'block2', 'block3'],
       projectId,
     );
 
@@ -79,8 +79,10 @@ describe('resolveProvidersForBlocks', () => {
       edition,
     });
 
-    expect(result).toEqual(['AWS', 'Github']);
-    expect(result.length).toBe(2);
+    expect(result).toEqual({
+      AWS: ['block1', 'block3'],
+      Github: ['block2'],
+    });
   });
 
   test('should handle non-existent blocks', async () => {
@@ -104,8 +106,9 @@ describe('resolveProvidersForBlocks', () => {
       'Block not found. Block name: non-existent-block',
     );
 
-    expect(result).toEqual(['AWS']);
-    expect(result.length).toBe(1);
+    expect(result).toEqual({
+      AWS: ['block1'],
+    });
   });
 
   test('should deduplicate providers', async () => {
@@ -131,8 +134,9 @@ describe('resolveProvidersForBlocks', () => {
       projectId,
     );
 
-    expect(result).toEqual(['AWS']);
-    expect(result.length).toBe(1);
+    expect(result).toEqual({
+      AWS: ['block1', 'block2'],
+    });
   });
 
   test('should handle blocks without providers', async () => {
@@ -160,8 +164,9 @@ describe('resolveProvidersForBlocks', () => {
       projectId,
     );
 
-    expect(result).toEqual(['AWS']);
-    expect(result.length).toBe(1);
+    expect(result).toEqual({
+      AWS: ['block1'],
+    });
   });
 
   test('should return empty array for empty block list', async () => {
@@ -178,8 +183,7 @@ describe('resolveProvidersForBlocks', () => {
 
     const result = await resolveProvidersForBlocks([], projectId);
 
-    expect(result).toEqual([]);
-    expect(result.length).toBe(0);
+    expect(result).toEqual({});
   });
 });
 
