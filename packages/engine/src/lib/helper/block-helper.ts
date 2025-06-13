@@ -143,11 +143,9 @@ export const blockHelper = {
     }
   },
 
-  async executeValidateAuth({
-    params,
-  }: {
-    params: ExecuteValidateAuthOperation;
-  }): Promise<ExecuteValidateAuthResponse> {
+  async executeValidateAuth(
+    params: ExecuteValidateAuthOperation,
+  ): Promise<ExecuteValidateAuthResponse> {
     const authProperty = params.authProperty as BlockAuthProperty | undefined;
 
     if (authProperty?.validate === undefined) {
