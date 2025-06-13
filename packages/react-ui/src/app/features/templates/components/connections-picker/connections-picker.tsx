@@ -92,7 +92,12 @@ const ConnectionsPicker = ({
         AppConnectionWithoutSensitiveData | null
       > = {};
       integrations.forEach((integration) => {
-        const options = groupedConnections[integration.name] ?? [];
+        let options: AppConnectionWithoutSensitiveData[] = [];
+        const authProviderKey = integration.auth?.authProviderKey;
+        if (authProviderKey) {
+          options = groupedConnections[authProviderKey] ?? [];
+        }
+
         const usedConnection = usedConnectionNames[integration.name]
           ? options.find((connection) => {
               return connection.name === usedConnectionNames[integration.name];
@@ -114,9 +119,10 @@ const ConnectionsPicker = ({
     return integrations.map((integration, index) => ({
       selectedConnection: selectedConnections[integration.name] ?? null,
       integration,
-      connectionOptions: groupedConnections
-        ? groupedConnections[integration.name]
-        : [],
+      connectionOptions:
+        groupedConnections && integration.auth?.authProviderKey
+          ? groupedConnections[integration.auth?.authProviderKey]
+          : [],
       id: String(index),
     }));
   }, [groupedConnections, integrations, selectedConnections]);
