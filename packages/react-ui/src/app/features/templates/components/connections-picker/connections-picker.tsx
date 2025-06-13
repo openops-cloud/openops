@@ -169,7 +169,7 @@ const ConnectionsPicker = ({
       {selectedBlockMetadata ? (
         <DynamicFormValidationProvider>
           <CreateEditConnectionDialogContent
-            block={selectedBlockMetadata}
+            authProviderKey={selectedBlockMetadata?.auth?.authProviderKey ?? ''}
             onConnectionSaved={(connectionName) => {
               onConnectionCreated(connectionName, selectedBlockMetadata?.name);
             }}

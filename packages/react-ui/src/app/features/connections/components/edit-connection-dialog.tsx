@@ -1,4 +1,3 @@
-import { blocksHooks } from '../../blocks/lib/blocks-hook';
 import { DynamicFormValidationProvider } from '../../builder/dynamic-form-validation/dynamic-form-validation-context';
 import { appConnectionsHooks } from '../lib/app-connections-hooks';
 import { useConnectionsContext } from './connections-context';
@@ -17,15 +16,9 @@ function EditConnectionDialog({
     id,
   });
 
-  const { blocks } = blocksHooks.useBlocks({});
-
-  const block = blocks?.find(
-    (block) => block.name === connectionToEdit?.blockName,
-  );
-
   const { setRefresh } = useConnectionsContext();
 
-  if (!block) {
+  if (!connectionToEdit) {
     return;
   }
 
@@ -33,7 +26,7 @@ function EditConnectionDialog({
     <DynamicFormValidationProvider>
       <CreateOrEditConnectionDialog
         open={true}
-        block={block}
+        authProviderKey={connectionToEdit.authProviderKey}
         onConnectionSaved={() => {
           setRefresh((prev) => !prev);
         }}
