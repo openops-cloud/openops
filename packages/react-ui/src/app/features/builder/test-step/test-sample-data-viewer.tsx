@@ -4,7 +4,7 @@ import React, { useMemo } from 'react';
 
 import { StepStatusIcon } from '@/app/features/flow-runs/components/step-status-icon';
 import { formatUtils } from '@/app/lib/utils';
-import { ActionType, StepOutputStatus, TriggerType } from '@openops/shared';
+import { StepOutputStatus } from '@openops/shared';
 
 import { useTheme } from '@/app/common/providers/theme-provider';
 import { TestButtonTooltip } from './test-step-tooltip';
@@ -14,10 +14,9 @@ type TestSampleDataViewerProps = {
   isValid: boolean;
   isSaving: boolean;
   isTesting: boolean;
-  currentSelectedData: unknown;
+  data: unknown;
   errorMessage: string | undefined;
   lastTestDate: string | undefined;
-  type: ActionType | TriggerType;
   children?: React.ReactNode;
 };
 
@@ -27,15 +26,14 @@ const TestSampleDataViewer = React.memo(
     isValid,
     isSaving,
     isTesting,
-    currentSelectedData,
+    data,
     errorMessage,
     lastTestDate,
-    type,
     children,
   }: TestSampleDataViewerProps) => {
     const formattedData = useMemo(
-      () => formatUtils.formatStepInputOrOutput(currentSelectedData),
-      [currentSelectedData],
+      () => formatUtils.formatStepInputOrOutput(data),
+      [data],
     );
 
     const { theme } = useTheme();

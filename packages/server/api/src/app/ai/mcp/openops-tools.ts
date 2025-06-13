@@ -16,6 +16,7 @@ import { MCPTool } from './mcp-tools';
 const INCLUDED_PATHS: Record<string, string[]> = {
   '/v1/files/{fileId}': ['get'],
   '/v1/flow-versions/': ['get'],
+  '/v1/flows/': ['get'],
   '/v1/flows/{id}': ['get'],
   '/v1/blocks/categories': ['get'],
   '/v1/blocks/': ['get'],
@@ -24,7 +25,7 @@ const INCLUDED_PATHS: Record<string, string[]> = {
   '/v1/flow-runs/': ['get'],
   '/v1/flow-runs/{id}': ['get'],
   '/v1/flow-runs/{id}/retry': ['post'],
-  '/v1/app-connections/': ['get', 'post', 'patch'],
+  '/v1/app-connections/': ['get', 'patch'],
   '/v1/app-connections/{id}': ['get'],
   '/v1/app-connections/metadata': ['get'],
 };
@@ -93,9 +94,18 @@ export async function getOpenOpsTools(
       },
     }),
   });
+  const tools = await openopsClient.tools();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const toolSet: Record<string, any> = {};
+  for (const [key, tool] of Object.entries(tools)) {
+    toolSet[key] = {
+      ...tool,
+      toolProvider: 'openops',
+    };
+  }
 
   return {
     client: openopsClient,
-    toolSet: await openopsClient.tools(),
+    toolSet,
   };
 }

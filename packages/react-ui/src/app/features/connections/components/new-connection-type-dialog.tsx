@@ -10,14 +10,12 @@ import {
   Input,
   ScrollArea,
 } from '@openops/components/ui';
-import { FlagId } from '@openops/shared';
 import { DialogTrigger } from '@radix-ui/react-dialog';
 import { t } from 'i18next';
 import React, { useEffect, useState } from 'react';
 
 import { CreateOrEditConnectionDialog } from './create-edit-connection-dialog';
 
-import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
 import { DynamicFormValidationProvider } from '@/app/features/builder/dynamic-form-validation/dynamic-form-validation-context';
 import {
@@ -38,16 +36,13 @@ const NewConnectionTypeDialog = React.memo(
       BlockMetadataModelSummary | undefined
     >(undefined);
 
-    const { data: useConnectionsProvider } = flagsHooks.useFlag<boolean>(
-      FlagId.USE_CONNECTIONS_PROVIDER,
-    );
-
     const { blocks, isLoading } = blocksHooks.useBlocks({});
     const [searchTerm, setSearchTerm] = useState('');
 
-    const filteredBlocks = useConnectionsProvider
-      ? filterBlocks(aggregateBlocksByProvider(blocks ?? []), searchTerm)
-      : filterBlocks(blocks ?? [], searchTerm);
+    const filteredBlocks = filterBlocks(
+      aggregateBlocksByProvider(blocks ?? []),
+      searchTerm,
+    );
 
     const clickBlock = (name: string) => {
       setDialogTypesOpen(false);
@@ -106,10 +101,6 @@ const NewConnectionTypeDialog = React.memo(
                 {!isLoading &&
                   filteredBlocks &&
                   filteredBlocks.map((block, index) => {
-                    const logoUrl =
-                      useConnectionsProvider && block.auth
-                        ? block.auth.authProviderLogoUrl
-                        : block.logoUrl;
                     return (
                       <div
                         key={index}
@@ -120,7 +111,7 @@ const NewConnectionTypeDialog = React.memo(
                           <img
                             className="w-10"
                             alt={block.auth?.authProviderDisplayName ?? ''}
-                            src={logoUrl}
+                            src={block.auth?.authProviderLogoUrl ?? ''}
                           ></img>
                         </div>
                         <div className="mt-2 text-center text-md">

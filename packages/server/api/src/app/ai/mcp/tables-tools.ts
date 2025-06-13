@@ -34,7 +34,10 @@ export async function getTablesTools(): Promise<MCPTool> {
   const toolSet: ToolSet = {};
   for (const [name, tool] of Object.entries(tools)) {
     if (name.includes('list')) {
-      toolSet[name] = tool;
+      toolSet[name] = {
+        ...tool,
+        toolProvider: 'tables',
+      } as typeof tool & { toolProvider: string };
     }
   }
 

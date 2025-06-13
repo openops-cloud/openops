@@ -1,8 +1,16 @@
 const mockBasePath = '/mock/base/path';
 const mockApiBaseUrl = 'http://test-api-url';
 const mockTools = {
-  tool1: { description: 'Test tool 1', parameters: {} },
-  tool2: { description: 'Test tool 2', parameters: {} },
+  tool1: {
+    description: 'Test tool 1',
+    parameters: {},
+    toolProvider: 'openops',
+  },
+  tool2: {
+    description: 'Test tool 2',
+    parameters: {},
+    toolProvider: 'openops',
+  },
 };
 
 const systemMock = {
@@ -65,6 +73,9 @@ describe('getOpenOpsTools', () => {
       '/v1/flow-versions/': {
         get: { operationId: 'getFlowVersions' },
       },
+      '/v1/flows/': {
+        get: { operationId: 'getFlows' },
+      },
       '/v1/flows/{id}': {
         get: { operationId: 'getFlow' },
       },
@@ -91,7 +102,6 @@ describe('getOpenOpsTools', () => {
       },
       '/v1/app-connections/': {
         get: { operationId: 'getAppConnections' },
-        post: { operationId: 'createAppConnection' },
         patch: { operationId: 'patchAppConnection' },
       },
       '/v1/app-connections/{id}': {
@@ -115,6 +125,9 @@ describe('getOpenOpsTools', () => {
       '/v1/flow-versions/': {
         get: { operationId: 'getFlowVersions' },
       },
+      '/v1/flows/': {
+        get: { operationId: 'getFlows' },
+      },
       '/v1/flows/{id}': {
         get: { operationId: 'getFlow' },
       },
@@ -141,7 +154,6 @@ describe('getOpenOpsTools', () => {
       },
       '/v1/app-connections/': {
         get: { operationId: 'getAppConnections' },
-        post: { operationId: 'createAppConnection' },
         patch: { operationId: 'patchAppConnection' },
       },
       '/v1/app-connections/{id}': {

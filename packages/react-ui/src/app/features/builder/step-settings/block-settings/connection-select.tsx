@@ -16,7 +16,6 @@ import {
 import {
   BlockAction,
   BlockTrigger,
-  FlagId,
   addConnectionBrackets,
   removeConnectionBrackets,
 } from '@openops/shared';
@@ -28,7 +27,6 @@ import { ControllerRenderProps, useFormContext } from 'react-hook-form';
 import { AutoFormFieldWrapper } from '@/app/features/builder/block-properties/auto-form-field-wrapper';
 import { DynamicFormValidationProvider } from '@/app/features/builder/dynamic-form-validation/dynamic-form-validation-context';
 
-import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { CreateOrEditConnectionDialog } from '@/app/features/connections/components/create-edit-connection-dialog';
 import { appConnectionsHooks } from '@/app/features/connections/lib/app-connections-hooks';
 import { useBuilderStateContext } from '../../builder-hooks';
@@ -47,18 +45,13 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
     string | null
   >(null);
 
-  const { data: useConnectionsProvider } = flagsHooks.useFlag<boolean>(
-    FlagId.USE_CONNECTIONS_PROVIDER,
-  );
-
   const form = useFormContext<BlockAction | BlockTrigger>();
   const {
     data: connectionsPage,
     isLoading,
     refetch,
   } = appConnectionsHooks.useConnections({
-    blockNames: useConnectionsProvider ? undefined : [params.block.name],
-    authProviders: useConnectionsProvider ? [params.providerKey] : undefined,
+    authProviders: [params.providerKey],
     cursor: undefined,
     limit: 100,
   });
