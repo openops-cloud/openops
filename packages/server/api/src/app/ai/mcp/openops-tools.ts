@@ -31,7 +31,7 @@ const INCLUDED_PATHS: Record<string, string[]> = {
   '/v1/app-connections/metadata': ['get'],
 };
 
-async function filterOpenApiSchema(
+function filterOpenApiSchema(
   schema: OpenAPI.Document,
 ): Promise<OpenAPI.Document> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -56,7 +56,7 @@ let cachedSchemaPath: string | undefined;
 async function getOpenApiSchemaPath(app: FastifyInstance): Promise<string> {
   if (!cachedSchemaPath) {
     const openApiSchema = app.swagger();
-    const filteredSchema = await filterOpenApiSchema(openApiSchema);
+    const filteredSchema = filterOpenApiSchema(openApiSchema);
     cachedSchemaPath = path.join(os.tmpdir(), 'openapi-schema.json');
     await fs.writeFile(
       cachedSchemaPath,
