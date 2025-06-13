@@ -68,3 +68,21 @@ export async function getProviderMetadataForAllBlocks(
 
   return providerMetadata;
 }
+
+export async function getAuthProviderMetadata(
+  authProviderKey: string,
+  projectId: string,
+): Promise<BlockAuthProperty | undefined> {
+  const release = await flagService.getCurrentRelease();
+  const edition = system.getEdition();
+
+  const blocks = await blockMetadataService.list({
+    includeHidden: false,
+    projectId,
+    release,
+    edition,
+  });
+
+  return blocks.find((block) => block.auth?.authProviderKey === authProviderKey)
+    ?.auth;
+}

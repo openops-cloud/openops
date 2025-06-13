@@ -93,7 +93,7 @@ describe('appConnectionService.update', () => {
       projectId,
       request,
       userId,
-      block: blockMetadata,
+      authProperty: blockMetadata.auth,
     });
 
     expect(findOneByMock).toHaveBeenCalledWith({
@@ -138,7 +138,7 @@ describe('appConnectionService.update', () => {
         projectId,
         request,
         userId,
-        block: blockMetadata,
+        authProperty: blockMetadata.auth,
       }),
     ).rejects.toThrow(
       new ApplicationError({

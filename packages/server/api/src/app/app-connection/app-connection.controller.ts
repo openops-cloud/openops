@@ -15,13 +15,12 @@ import {
   UpsertAppConnectionRequestBody,
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
-import { blockMetadataService } from '../blocks/block-metadata-service';
 import { sendConnectionDeletedEvent } from '../telemetry/event-models';
 import { appConnectionService } from './app-connection-service/app-connection-service';
 import { redactSecrets, removeSensitiveData } from './app-connection-utils';
 import {
+  getAuthProviderMetadata,
   getProviderMetadataForAllBlocks,
-  resolveProvidersForBlocks,
 } from './connection-providers-resolver';
 
 export const appConnectionController: FastifyPluginCallbackTypebox = (
@@ -42,20 +41,19 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
   });
 
   app.patch('/', PatchAppConnectionRequest, async (request, reply) => {
-    const block = await blockMetadataService.getOrThrow({
-      name: request.body.blockName,
-      projectId: request.principal.projectId,
-      version: undefined,
-    });
+    const authProperty = await getAuthProviderMetadata(
+      request.body.authProviderKey,
+      request.principal.projectId,
+    );
 
     const appConnection = await appConnectionService.patch({
       userId: request.principal.id,
       projectId: request.principal.projectId,
       request: request.body,
-      block,
+      authProperty,
     });
 
-    const redactedValue = redactSecrets(block.auth, appConnection.value);
+    const redactedValue = redactSecrets(authProperty, appConnection.value);
 
     const result = redactedValue
       ? {
@@ -71,8 +69,7 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
     '/',
     ListAppConnectionsRequest,
     async (request): Promise<SeekPage<AppConnectionWithoutSensitiveData>> => {
-      const { name, status, cursor, limit } = request.query;
-      let { authProviders } = request.query;
+      const { name, status, cursor, limit, authProviders } = request.query;
 
       const appConnections = await appConnectionService.list({
         name,
@@ -93,22 +90,22 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
     '/:id',
     GetAppConnectionRequest,
     async (request, reply): Promise<any> => {
+      const projectId = request.principal.projectId;
       const connection = await appConnectionService.getOneOrThrow({
         id: request.params.id,
-        projectId: request.principal.projectId,
+        projectId,
       });
 
-      const block = await blockMetadataService.get({
-        name: connection.blockName,
-        projectId: request.principal.projectId,
-        version: undefined,
-      });
+      const authProperty = await getAuthProviderMetadata(
+        connection.authProviderKey,
+        projectId,
+      );
 
-      if (!block) {
+      if (!authProperty) {
         return reply.status(StatusCodes.BAD_REQUEST);
       }
 
-      const redactedValue = redactSecrets(block.auth, connection.value);
+      const redactedValue = redactSecrets(authProperty, connection.value);
 
       return redactedValue
         ? {

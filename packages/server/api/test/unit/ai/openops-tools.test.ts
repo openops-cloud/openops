@@ -76,6 +76,9 @@ describe('getOpenOpsTools', () => {
       '/v1/flows/': {
         get: { operationId: 'getFlows' },
       },
+      '/v1/flows/count': {
+        get: { operationId: 'getFlowsCount' },
+      },
       '/v1/flows/{id}': {
         get: { operationId: 'getFlow' },
       },
@@ -127,6 +130,9 @@ describe('getOpenOpsTools', () => {
       },
       '/v1/flows/': {
         get: { operationId: 'getFlows' },
+      },
+      '/v1/flows/count': {
+        get: { operationId: 'getFlowsCount' },
       },
       '/v1/flows/{id}': {
         get: { operationId: 'getFlow' },

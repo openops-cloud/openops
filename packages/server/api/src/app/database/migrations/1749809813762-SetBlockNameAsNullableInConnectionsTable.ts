@@ -11,7 +11,7 @@ export class SetBlockNameAsNullableInConnectionsTable1749809813762
 
     await queryRunner.query(`
       ALTER TABLE "app_connection"
-      ALTER COLUMN "blockName" SET NULL
+      ALTER COLUMN "blockName" DROP NOT NULL;
     `);
 
     logger.info(

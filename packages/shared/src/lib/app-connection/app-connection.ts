@@ -108,7 +108,7 @@ export const AppConnectionWithoutSensitiveData = Type.Object(
     type: Type.Enum(AppConnectionType),
     projectId: OpenOpsId,
     status: Type.Enum(AppConnectionStatus),
-    authProviderKey: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+    authProviderKey: Type.String(),
   },
   {
     description: 'App connection is a connection to an external app.',

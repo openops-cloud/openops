@@ -46,7 +46,7 @@ export type BaseEngineOperation = {
 };
 
 export type ExecuteValidateAuthOperation = BaseEngineOperation & {
-  block: BlockPackage;
+  authProperty: unknown;
   auth: AppConnectionValue;
 };
 

@@ -1,5 +1,6 @@
 import {
   ArrayProperty,
+  BlockAuthProperty,
   BlockMetadata,
   BlockPropertyMap,
   DropdownProperty,
@@ -144,28 +145,21 @@ export const blockHelper = {
 
   async executeValidateAuth({
     params,
-    blocksSource,
   }: {
     params: ExecuteValidateAuthOperation;
-    blocksSource: string;
   }): Promise<ExecuteValidateAuthResponse> {
-    const { block: blockPackage } = params;
+    const authProperty = params.authProperty as BlockAuthProperty | undefined;
 
-    const block = await blockLoader.loadBlockOrThrow({
-      blockName: blockPackage.blockName,
-      blockVersion: blockPackage.blockVersion,
-      blocksSource,
-    });
-    if (block.auth?.validate === undefined) {
+    if (authProperty?.validate === undefined) {
       return {
         valid: true,
       };
     }
 
-    switch (block.auth.type) {
+    switch (authProperty.type) {
       case PropertyType.BASIC_AUTH: {
         const con = params.auth as BasicAuthConnectionValue;
-        return block.auth.validate({
+        return authProperty.validate({
           auth: {
             username: con.username,
             password: con.password,
@@ -174,13 +168,13 @@ export const blockHelper = {
       }
       case PropertyType.SECRET_TEXT: {
         const con = params.auth as SecretTextConnectionValue;
-        return block.auth.validate({
+        return authProperty.validate({
           auth: con.secret_text,
         });
       }
       case PropertyType.OAUTH2: {
         const auth = params.auth as OAuth2PropertyValue;
-        return block.auth.validate({
+        return authProperty.validate({
           auth,
         });
       }
@@ -192,7 +186,7 @@ export const blockHelper = {
             await validateHost(con.props[prop] as string);
           }
         }
-        return block.auth.validate({
+        return authProperty.validate({
           auth: con.props,
         });
       }
