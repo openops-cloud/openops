@@ -1,6 +1,6 @@
 import { formUtils } from '@/app/features/builder/block-properties/form-utils';
 import {
-  BlockMetadataModel,
+  BlockAuthProperty,
   BlockMetadataModelSummary,
   CustomAuthProperty,
   PropertyType,
@@ -24,10 +24,7 @@ import {
 import { Type } from '@sinclair/typebox';
 import { t } from 'i18next';
 
-export const buildConnectionSchema = (
-  block: BlockMetadataModelSummary | BlockMetadataModel,
-) => {
-  const auth = block.auth;
+export const buildConnectionSchema = (auth: BlockAuthProperty | undefined) => {
   if (isNil(auth)) {
     return Type.Object({
       request: Type.Composite([
@@ -98,17 +95,16 @@ export const buildConnectionSchema = (
 };
 
 export const createDefaultValues = (
-  block: BlockMetadataModelSummary | BlockMetadataModel,
+  auth: BlockAuthProperty | undefined,
   existingConnection: AppConnection | null,
   suggestedConnectionName: string,
 ): Partial<UpsertAppConnectionRequestBody> & { id?: string } => {
-  switch (block.auth?.type) {
+  switch (auth?.type) {
     case PropertyType.SECRET_TEXT:
       return {
         id: existingConnection?.id,
         name: suggestedConnectionName,
-        blockName: block.name,
-        authProviderKey: block.auth?.authProviderKey,
+        authProviderKey: auth?.authProviderKey,
         type: AppConnectionType.SECRET_TEXT,
         value: existingConnection
           ? (existingConnection.value as SecretTextConnectionValue)
@@ -121,8 +117,7 @@ export const createDefaultValues = (
       return {
         id: existingConnection?.id,
         name: suggestedConnectionName,
-        blockName: block.name,
-        authProviderKey: block.auth?.authProviderKey,
+        authProviderKey: auth?.authProviderKey,
         type: AppConnectionType.BASIC_AUTH,
         value: existingConnection
           ? (existingConnection.value as BasicAuthConnectionValue)
@@ -136,26 +131,24 @@ export const createDefaultValues = (
       return {
         id: existingConnection?.id,
         name: suggestedConnectionName,
-        blockName: block.name,
-        authProviderKey: block.auth?.authProviderKey,
+        authProviderKey: auth?.authProviderKey,
         type: AppConnectionType.CUSTOM_AUTH,
         value: existingConnection
           ? (existingConnection.value as CustomAuthConnectionValue)
           : {
               type: AppConnectionType.CUSTOM_AUTH,
-              props: formUtils.getDefaultValueForStep(block.auth.props, {}),
+              props: formUtils.getDefaultValueForStep(auth?.props, {}),
             },
       };
     case PropertyType.OAUTH2:
       return {
         id: existingConnection?.id,
         name: suggestedConnectionName,
-        blockName: block.name,
-        authProviderKey: block.auth?.authProviderKey,
+        authProviderKey: auth?.authProviderKey,
         type: AppConnectionType.CLOUD_OAUTH2,
         value: existingConnection
           ? ({
-              scope: block.auth?.scope.join(' '),
+              scope: auth?.scope.join(' '),
               client_id: '',
               props: {},
               code: '',
@@ -170,14 +163,14 @@ export const createDefaultValues = (
             })
           : {
               type: AppConnectionType.CLOUD_OAUTH2,
-              scope: block.auth?.scope.join(' '),
+              scope: auth?.scope.join(' '),
               client_id: '',
               props: {},
               code: '',
             },
       };
     default:
-      throw new Error(`Unsupported property type: ${block.auth}`);
+      throw new Error(`Unsupported property type: ${(auth as any)?.type}`);
   }
 };
 

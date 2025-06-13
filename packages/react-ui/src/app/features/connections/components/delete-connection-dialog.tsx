@@ -32,8 +32,8 @@ const DeleteConnectionDialogContent = ({
         })}
       </span>
       <ul className="ml-7 list-disc break-words">
-        {linkedFlows.slice(0, 5).map((minimalFlow, i) => (
-          <li key={i}>{minimalFlow.displayName}</li>
+        {linkedFlows.slice(0, 5).map((minimalFlow) => (
+          <li key={minimalFlow.id}>{minimalFlow.displayName}</li>
         ))}
       </ul>
       {linkedFlows.length > 5 && (

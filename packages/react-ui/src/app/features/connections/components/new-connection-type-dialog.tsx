@@ -69,7 +69,7 @@ const NewConnectionTypeDialog = React.memo(
           <DynamicFormValidationProvider>
             <CreateOrEditConnectionDialog
               connectionToEdit={null}
-              block={selectedBlock}
+              authProviderKey={selectedBlock?.auth?.authProviderKey ?? ''}
               open={connectionDialogOpen}
               onConnectionSaved={onConnectionCreated}
               setOpen={handleDialogOpen}
