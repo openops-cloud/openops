@@ -21,7 +21,6 @@ import { redactSecrets, removeSensitiveData } from './app-connection-utils';
 import {
   getAuthProviderMetadata,
   getProviderMetadataForAllBlocks,
-  resolveProvidersForBlocks,
 } from './connection-providers-resolver';
 
 export const appConnectionController: FastifyPluginCallbackTypebox = (
@@ -70,18 +69,7 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
     '/',
     ListAppConnectionsRequest,
     async (request): Promise<SeekPage<AppConnectionWithoutSensitiveData>> => {
-      const { name, status, cursor, limit, blockNames } = request.query;
-      let { authProviders } = request.query;
-
-      if (blockNames) {
-        const blockProviders = await resolveProvidersForBlocks(
-          blockNames,
-          request.principal.projectId,
-        );
-
-        authProviders = authProviders ?? [];
-        authProviders.push(...blockProviders);
-      }
+      const { name, status, cursor, limit, authProviders } = request.query;
 
       const appConnections = await appConnectionService.list({
         name,
