@@ -1,11 +1,6 @@
-import { logger } from '@openops/server-shared';
 import { AiConfig } from '@openops/shared';
 import { CoreMessage, generateObject, LanguageModel, ToolSet } from 'ai';
 import { z } from 'zod';
-import {
-  shouldTryToSummarize,
-  summarizeChatHistoryContext,
-} from './ai-message-history-summarizer';
 
 const MAX_SELECTED_TOOLS = 128;
 
@@ -19,19 +14,15 @@ const getSystemPrompt = (
 };
 
 export async function selectRelevantTools({
-  chatId,
   tools,
   messages,
   aiConfig,
   languageModel,
-  attemptIndex = 0,
 }: {
-  chatId: string;
   tools: ToolSet;
   aiConfig: AiConfig;
   messages: CoreMessage[];
   languageModel: LanguageModel;
-  attemptIndex?: number;
 }): Promise<ToolSet | undefined> {
   if (!tools || Object.keys(tools).length === 0) {
     return undefined;
@@ -42,58 +33,32 @@ export async function selectRelevantTools({
     description: tool.description || '',
   }));
 
-  try {
-    const { object: toolSelectionResult } = await generateObject({
-      model: languageModel,
-      schema: z.object({
-        tool_names: z.array(z.string()),
-      }),
-      system: getSystemPrompt(toolList),
-      messages,
-      ...aiConfig.modelSettings,
-    });
+  const { object: toolSelectionResult } = await generateObject({
+    model: languageModel,
+    schema: z.object({
+      tool_names: z.array(z.string()),
+    }),
+    system: getSystemPrompt(toolList),
+    messages,
+    ...aiConfig.modelSettings,
+  });
 
-    let selectedToolNames = toolSelectionResult.tool_names;
+  let selectedToolNames = toolSelectionResult.tool_names;
 
-    const validToolNames = Object.keys(tools);
-    const invalidToolNames = selectedToolNames.filter(
-      (name) => !validToolNames.includes(name),
+  const validToolNames = Object.keys(tools);
+  const invalidToolNames = selectedToolNames.filter(
+    (name) => !validToolNames.includes(name),
+  );
+
+  if (invalidToolNames.length > 0) {
+    selectedToolNames = selectedToolNames.filter((name) =>
+      validToolNames.includes(name),
     );
-
-    if (invalidToolNames.length > 0) {
-      selectedToolNames = selectedToolNames.filter((name) =>
-        validToolNames.includes(name),
-      );
-    }
-
-    return Object.fromEntries(
-      Object.entries(tools)
-        .filter(([name]) => selectedToolNames.includes(name))
-        .slice(0, MAX_SELECTED_TOOLS),
-    );
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-
-    attemptIndex = attemptIndex + 1;
-    if (!shouldTryToSummarize(errorMessage, attemptIndex)) {
-      logger.error('Error selecting tools', error);
-      return;
-    }
-
-    const newHistory = await summarizeChatHistoryContext(
-      languageModel,
-      aiConfig,
-      chatId,
-    );
-
-    logger.debug('Retry the call to selectRelevantTools');
-    return selectRelevantTools({
-      chatId,
-      messages: newHistory,
-      languageModel,
-      aiConfig,
-      tools,
-      attemptIndex,
-    });
   }
+
+  return Object.fromEntries(
+    Object.entries(tools)
+      .filter(([name]) => selectedToolNames.includes(name))
+      .slice(0, MAX_SELECTED_TOOLS),
+  );
 }

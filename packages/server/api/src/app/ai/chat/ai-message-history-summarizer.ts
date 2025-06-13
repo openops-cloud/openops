@@ -1,7 +1,6 @@
 import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { AiConfig } from '@openops/shared';
 import { APICallError, CoreMessage, generateText, LanguageModel } from 'ai';
-import { appendMessagesToChatHistoryContext } from './ai-chat.service';
 
 function getHistoryMaxTokens(aiConfig: AiConfig): number {
   const modelMax = aiConfig.modelSettings?.maxTokens;
@@ -12,28 +11,7 @@ function getHistoryMaxTokens(aiConfig: AiConfig): number {
   return system.getNumberOrThrow(AppSystemProp.MAX_TOKENS_FOR_HISTORY_SUMMARY);
 }
 
-export function shouldTryToSummarize(
-  message: string,
-  attemptIndex: number,
-): boolean {
-  return message.includes('tokens') && attemptIndex < 2;
-}
-
-export async function summarizeChatHistoryContext(
-  languageModel: LanguageModel,
-  aiConfig: AiConfig,
-  chatId: string,
-): Promise<CoreMessage[]> {
-  return appendMessagesToChatHistoryContext(
-    chatId,
-    [],
-    async (existingMessages) => {
-      return summarizeChatHistory(existingMessages, languageModel, aiConfig);
-    },
-  );
-}
-
-async function summarizeChatHistory(
+export async function summarizeChatHistory(
   existingMessages: CoreMessage[],
   languageModel: LanguageModel,
   aiConfig: AiConfig,
@@ -74,7 +52,7 @@ async function generateSummary(
   languageModel: LanguageModel,
   messages: CoreMessage[],
   aiConfig: AiConfig,
-): Promise<CoreMessage[]> {
+): Promise<CoreMessage> {
   try {
     return await requestToGenerateSummary(languageModel, messages, aiConfig);
   } catch (error) {
@@ -90,7 +68,7 @@ async function retryWithTruncatedInteractions(
   languageModel: LanguageModel,
   messages: CoreMessage[],
   aiConfig: AiConfig,
-): Promise<CoreMessage[]> {
+): Promise<CoreMessage> {
   const maxInteractions = system.getNumberOrThrow(
     AppSystemProp.MAX_USER_INTERACTIONS_FOR_SUMMARY,
   );
@@ -107,7 +85,7 @@ async function requestToGenerateSummary(
   languageModel: LanguageModel,
   messages: CoreMessage[],
   aiConfig: AiConfig,
-): Promise<CoreMessage[]> {
+): Promise<CoreMessage> {
   const systemPrompt =
     'You are an expert at creating extremely concise conversation summaries. ' +
     'Focus only on the most important information, decisions, and context. ' +
@@ -122,12 +100,10 @@ async function requestToGenerateSummary(
     maxTokens: getHistoryMaxTokens(aiConfig),
   });
 
-  return [
-    {
-      role: 'system',
-      content: `The following is a summary of the previous conversation: ${text}`,
-    },
-  ];
+  return {
+    role: 'system',
+    content: `The following is a summary of the previous conversation: ${text}`,
+  } as CoreMessage;
 }
 
 function truncateByTheNumberOfUserInteractions(

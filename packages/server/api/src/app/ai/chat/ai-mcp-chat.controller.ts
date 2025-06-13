@@ -11,12 +11,8 @@ import {
 } from '@openops/shared';
 import { CoreMessage } from 'ai';
 import { StatusCodes } from 'http-status-codes';
-import { sendAiChatMessageSendEvent } from '../../telemetry/event-models';
 import { aiConfigService } from '../config/ai-config.service';
-import { getMCPTools } from '../mcp/mcp-tools';
 import {
-  appendMessagesToChatHistory,
-  appendMessagesToChatHistoryContext,
   createChatContext,
   deleteChatHistory,
   deleteChatHistoryContext,
@@ -25,8 +21,6 @@ import {
   getChatHistory,
 } from './ai-chat.service';
 import { streamAIResponse } from './ai-stream-handler';
-import { getMcpSystemPrompt } from './prompts.service';
-import { selectRelevantTools } from './tools.service';
 
 export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
   app.post(
@@ -92,58 +86,34 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       content: request.body.message,
     };
 
-    await appendMessagesToChatHistory(chatId, [newMessage]);
-    const chatHistory = await appendMessagesToChatHistoryContext(chatId, [
-      newMessage,
-    ]);
-
-    const { mcpClients, tools } = await getMCPTools(
+    const { mcpClients, allTools } = await getMCPTools(
       app,
       request.headers.authorization?.replace('Bearer ', '') ?? '',
     );
 
-    const filteredTools = await selectRelevantTools({
-      messages: chatHistory,
-      languageModel,
-      aiConfig,
-      tools,
-      chatId,
-    });
-
-    const isAnalyticsLoaded = Object.keys(filteredTools ?? {}).some((key) =>
-      key.includes('superset'),
-    );
-    const isTablesLoaded = Object.keys(filteredTools ?? {}).some((key) =>
-      key.includes('table'),
-    );
-
-    const systemPrompt = await getMcpSystemPrompt({
-      isAnalyticsLoaded,
-      isTablesLoaded,
-    });
-
-    streamAIResponse({
+    await streamAIResponse({
       userId,
       chatId,
       projectId,
       aiConfig,
-      mcpClients,
-      systemPrompt,
       languageModel,
-      attemptIndex: 0,
-      handledError: false,
-      tools: filteredTools,
-      messages: chatHistory,
+      newMessage,
       serverResponse: reply.raw,
+      allTools,
     });
 
-    sendAiChatMessageSendEvent({
-      projectId,
-      userId: request.principal.id,
-      chatId,
-      provider: aiConfig.provider,
-    });
+    await closeMCPClients(mcpClients);
   });
+
+  async function closeMCPClients(mcpClients: unknown[]): Promise<void> {
+    for (const mcpClient of mcpClients) {
+      try {
+        await (mcpClient as unknown)?.close();
+      } catch (e) {
+        logger.warn('Failed to close mcp client.', e);
+      }
+    }
+  }
 
   app.delete('/:chatId', DeleteChatOptions, async (request, reply) => {
     const { chatId } = request.params;
