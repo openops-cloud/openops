@@ -441,7 +441,7 @@ function handleImportFlowOperation(
   operations.push(
     ...flowHelper.getImportOperations(
       operation.trigger,
-      operation.connections as AppConnectionsWithSupportedBlocks,
+      operation.connections as AppConnectionsWithSupportedBlocks[],
     ),
   );
   return operations;

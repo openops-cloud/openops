@@ -629,7 +629,7 @@ const getConnections = async (
   projectId: string,
   trigger: Trigger,
   connectionIds: string[],
-): Promise<AppConnectionsWithSupportedBlocks> => {
+): Promise<AppConnectionsWithSupportedBlocks[]> => {
   if (!connectionIds.length) {
     return [];
   }
