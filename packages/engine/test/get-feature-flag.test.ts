@@ -13,6 +13,7 @@ jest.mock('@openops/server-shared', () => ({
   },
 }));
 
+const originalFetch = global.fetch;
 global.fetch = fetchMock;
 
 import { getFeatureFlag } from '../src/get-feature-flag';
@@ -24,6 +25,10 @@ describe('getFeatureFlag', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     getInternalApiUrlMock.mockReturnValue(mockApiUrl);
+  });
+
+  afterAll(() => {
+    global.fetch = originalFetch;
   });
 
   describe('cache hit scenario', () => {
