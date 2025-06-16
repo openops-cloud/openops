@@ -260,6 +260,7 @@ const OAuth2ConnectionSettings = ({
             <div className="rounded-full border border-solid p-1 flex items-center justify-center">
               <img
                 src={authProperty.authProviderLogoUrl}
+                alt={authProperty.displayName}
                 className="w-5 h-5"
               ></img>
             </div>

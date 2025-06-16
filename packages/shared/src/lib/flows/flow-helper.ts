@@ -772,7 +772,7 @@ const prefillConnection = (
   const connection = connections.find(
     (c) =>
       c.authProviderKey === authProviderKey ||
-      (blockName && c.supportedBlocks && c.supportedBlocks.includes(blockName)),
+      (blockName && c.supportedBlocks?.includes(blockName)),
   );
 
   if (connection && 'input' in action.settings) {
