@@ -77,7 +77,7 @@ jobs:
           fi
       - name: Commit changes for dependabot
         if: failure() && startsWith(github.head_ref, 'dependabot/')
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v6
         with:
           commit_message: Update THIRD_PARTY_LICENSES.txt
   test:
