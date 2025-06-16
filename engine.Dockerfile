@@ -10,7 +10,7 @@ RUN <<-```
     set -ex
     dnf install tar gzip shadow-utils util-linux findutils python3 make gcc gcc-c++ zlib-devel brotli-devel openssl-devel -y
     dnf -y clean all && rm -rf /var/cache
-    
+
     # Install YQ with architecture-specific binary
     if [ "$TARGETARCH" = "arm64" ]; then
         curl -L https://github.com/mikefarah/yq/releases/latest/download/yq_linux_arm64 -o /usr/bin/yq
@@ -18,13 +18,13 @@ RUN <<-```
         curl -L https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o /usr/bin/yq
     fi
     chmod +x /usr/bin/yq
-    
+
     # Install hcledit (note: arm64 version might not be available, defaulting to amd64)
     curl -L https://github.com/minamijoyo/hcledit/releases/download/v0.2.15/hcledit_0.2.15_linux_amd64.tar.gz -o /tmp/hcledit_0.2.15_linux_amd64.tar.gz
     tar -C /usr/bin -xf /tmp/hcledit_0.2.15_linux_amd64.tar.gz
     chmod +x /usr/bin/hcledit
     rm /tmp/hcledit_0.2.15_linux_amd64.tar.gz
-    
+
     # Install AWS CLI with architecture-specific package
     if [ "$TARGETARCH" = "arm64" ]; then
         curl -L https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip -o awscliv2.zip
@@ -40,23 +40,21 @@ RUN <<-```
 
 ENV LD_LIBRARY_PATH=""
 ENV AZURE_CONFIG_DIR="/tmp/azure"
+ENV AZURE_CLI_VERSION=2.60.0
 RUN <<-```
     set -ex
-    # Azure CLI installation from Microsoft repository supports both amd64 and arm64 architectures
-    rpm --import https://packages.microsoft.com/keys/microsoft.asc
-    curl -sSL https://packages.microsoft.com/config/rhel/8/prod.repo -o /etc/yum.repos.d/azure-cli.repo
-    dnf install -y azure-cli && mkdir /tmp/azure
-    dnf -y clean all && rm -rf /var/cache
+    mkdir /tmp/azure && cd /tmp
+    curl -sL https://aka.ms/InstallAzureCli | bash -s -- --version $AZURE_CLI_VERSION
 ```
 
 ENV CLOUDSDK_CONFIG="/tmp/gcloud"
 RUN <<-```
     set -ex
     dnf install -y gnupg unzip libstdc++ binutils python3
-    
+
     # Install Google Cloud CLI with architecture-specific package
     if [ "$TARGETARCH" = "arm64" ]; then
-        # For ARM64 architecture
+        # For ARM64 architecture       
         curl -sSL https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-516.0.0-linux-arm.tar.gz -o /tmp/gcloud.tar.gz
     else
         # For AMD64 architecture
