@@ -33,7 +33,7 @@ type ConnectionsPickerProps = {
   integrations: BlockMetadataModelSummary[];
   isUseTemplateLoading: boolean;
   close: () => void;
-  onUseTemplate: (connections: AppConnectionsWithSupportedBlocks) => void;
+  onUseTemplate: (connections: AppConnectionsWithSupportedBlocks[]) => void;
 };
 
 const ConnectionsPicker = ({
@@ -163,7 +163,7 @@ const ConnectionsPicker = ({
   };
 
   const onUseTemplateClick = () => {
-    const connectionsWithSupportedBlocks: AppConnectionsWithSupportedBlocks =
+    const connectionsWithSupportedBlocks: AppConnectionsWithSupportedBlocks[] =
       Object.entries(selectedConnections)
         .filter(([, connection]) => !!connection)
         .map(([blockName, connection]) => ({

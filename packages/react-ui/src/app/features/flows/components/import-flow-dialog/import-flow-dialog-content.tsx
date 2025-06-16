@@ -17,7 +17,7 @@ type ImportFlowDialogContentProps = {
   templateTrigger: Trigger | undefined;
   resetDialog: () => void;
   isUseTemplateLoading: boolean;
-  onUseTemplate: (connections: AppConnectionsWithSupportedBlocks) => void;
+  onUseTemplate: (connections: AppConnectionsWithSupportedBlocks[]) => void;
   handleFileParsing: (file: File | null) => void;
   isImportLoading: boolean;
 };

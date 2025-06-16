@@ -386,7 +386,7 @@ const SelectFlowTemplateDialog = ({
   });
 
   const { mutate: useTemplate, isPending: isUseTemplatePending } = useMutation({
-    mutationFn: async (connections: AppConnectionsWithSupportedBlocks) => {
+    mutationFn: async (connections: AppConnectionsWithSupportedBlocks[]) => {
       if (!selectedTemplate) {
         return Promise.reject();
       }
