@@ -41,22 +41,8 @@ RUN <<-```
 ENV LD_LIBRARY_PATH=""
 ENV AZURE_CONFIG_DIR="/tmp/azure"
 
-RUN <<-```
-    set -ex
-    # Import Microsofts GPG key
-    rpm --import https://packages.microsoft.com/keys/microsoft.asc
-
-    # Download and install the specific version of Azure CLI
-    curl -sL https://aka.ms/InstallAzureCLIDeb | bash -s -- --version 2.74.0
-
-    # Create the Azure configuration directory
+RUN pip3 install azure-cli==2.74.0 && \
     mkdir -p /tmp/azure
-
-    # Clean up to reduce image size
-    dnf clean all
-    rm -rf /var/cache
-```
-
 
 ENV CLOUDSDK_CONFIG="/tmp/gcloud"
 RUN <<-```
