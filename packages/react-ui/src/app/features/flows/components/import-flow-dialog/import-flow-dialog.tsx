@@ -7,7 +7,7 @@ import {
   toast,
 } from '@openops/components/ui';
 import {
-  AppConnectionWithoutSensitiveData,
+  AppConnectionsWithSupportedBlocks,
   FlowImportTemplate,
   FlowOperationType,
 } from '@openops/shared';
@@ -32,7 +32,7 @@ const ImportFlowDialog = ({ children }: { children: React.ReactNode }) => {
     templatesHooks.useSetTemplateIntegrations(importedWorkflow);
 
   const { mutate: createFlow, isPending: isUseTemplateLoading } = useMutation({
-    mutationFn: async (connections: AppConnectionWithoutSensitiveData[]) => {
+    mutationFn: async (connections: AppConnectionsWithSupportedBlocks) => {
       if (importedWorkflow) {
         const newFlow = await flowsApi.create({
           displayName: importedWorkflow.name,

@@ -30,7 +30,7 @@ import {
   VerticalDivider,
 } from '@openops/components/ui';
 import {
-  AppConnectionWithoutSensitiveData,
+  AppConnectionsWithSupportedBlocks,
   FlowTemplateDto,
 } from '@openops/shared';
 import { useMutation } from '@tanstack/react-query';
@@ -386,7 +386,7 @@ const SelectFlowTemplateDialog = ({
   });
 
   const { mutate: useTemplate, isPending: isUseTemplatePending } = useMutation({
-    mutationFn: async (connections: AppConnectionWithoutSensitiveData[]) => {
+    mutationFn: async (connections: AppConnectionsWithSupportedBlocks) => {
       if (!selectedTemplate) {
         return Promise.reject();
       }

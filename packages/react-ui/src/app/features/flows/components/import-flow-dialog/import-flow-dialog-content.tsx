@@ -8,7 +8,7 @@ import {
   FlowTemplateMetadataWithIntegrations,
   Input,
 } from '@openops/components/ui';
-import { AppConnectionWithoutSensitiveData, Trigger } from '@openops/shared';
+import { AppConnectionsWithSupportedBlocks, Trigger } from '@openops/shared';
 import { t } from 'i18next';
 import React, { useMemo, useRef, useState } from 'react';
 
@@ -17,7 +17,7 @@ type ImportFlowDialogContentProps = {
   templateTrigger: Trigger | undefined;
   resetDialog: () => void;
   isUseTemplateLoading: boolean;
-  onUseTemplate: (connections: AppConnectionWithoutSensitiveData[]) => void;
+  onUseTemplate: (connections: AppConnectionsWithSupportedBlocks) => void;
   handleFileParsing: (file: File | null) => void;
   isImportLoading: boolean;
 };
