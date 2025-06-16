@@ -49,7 +49,7 @@ export type LockFlowRequest = Static<typeof LockFlowRequest>;
 
 export const AppConnectionsWithSupportedBlocks = Type.Object({
   ...AppConnectionWithoutSensitiveData.properties,
-  supportedBlocks: Type.Optional(Type.Array(Type.String())),
+  supportedBlocks: Type.Array(Type.String()),
 });
 
 export type AppConnectionsWithSupportedBlocks = Static<
