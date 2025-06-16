@@ -43,21 +43,18 @@ ENV AZURE_CONFIG_DIR="/tmp/azure"
 
 RUN <<-```
     set -ex
-    # Import Microsoft's GPG key
+    # Import Microsofts GPG key
     rpm --import https://packages.microsoft.com/keys/microsoft.asc
 
-    # Download the specific Azure CLI RPM package for version 2.74.0
-    curl -sSL -o azure-cli-2.74.0-1.el8.noarch.rpm https://packages.microsoft.com/yumrepos/azure-cli/azure-cli-2.74.0-1.el8.noarch.rpm
-
-    # Install the downloaded RPM package
-    dnf install -y ./azure-cli-2.74.0-1.el8.noarch.rpm
+    # Download and install the specific version of Azure CLI
+    curl -sL https://aka.ms/InstallAzureCLIDeb | bash -s -- --version 2.74.0
 
     # Create the Azure configuration directory
     mkdir -p /tmp/azure
 
     # Clean up to reduce image size
     dnf clean all
-    rm -rf /var/cache /azure-cli-2.74.0-1.el8.noarch.rpm
+    rm -rf /var/cache
 ```
 
 
