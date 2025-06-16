@@ -40,7 +40,7 @@ RUN <<-```
 
 ENV LD_LIBRARY_PATH=""
 ENV AZURE_CONFIG_DIR="/tmp/azure"
-ENV AZURE_CLI_VERSION=2.60.0
+ENV AZURE_CLI_VERSION=2.74.0
 RUN <<-```
     set -ex
     mkdir /tmp/azure && cd /tmp
