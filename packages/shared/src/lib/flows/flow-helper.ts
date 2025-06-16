@@ -749,7 +749,7 @@ function createTrigger(
 
 const prefillConnection = (
   action: Action,
-  connections?: AppConnectionsWithSupportedBlocks,
+  connections?: AppConnectionsWithSupportedBlocks[],
 ): Action => {
   if (!Array.isArray(connections)) {
     return action;
@@ -772,7 +772,7 @@ const prefillConnection = (
   const connection = connections.find(
     (c) =>
       c.authProviderKey === authProviderKey ||
-      (blockName && c.supportedBlocks.includes(blockName)),
+      (blockName && c.supportedBlocks && c.supportedBlocks.includes(blockName)),
   );
 
   if (connection && 'input' in action.settings) {
@@ -786,7 +786,7 @@ const prefillConnection = (
 
 export function getImportOperations(
   step: Action | Trigger | undefined,
-  connections?: AppConnectionsWithSupportedBlocks,
+  connections?: AppConnectionsWithSupportedBlocks[],
 ): FlowOperationRequest[] {
   const operations: FlowOperationRequest[] = [];
 
