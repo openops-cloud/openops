@@ -38,25 +38,28 @@ RUN <<-```
     rm -rf aws
 ```
 
+ENV LD_LIBRARY_PATH=""
 ENV AZURE_CONFIG_DIR="/tmp/azure"
-ENV AZURE_CLI_VERSION=2.74.0
-ENV AZURE_CONFIG_DIR="/tmp/azure"
-ENV AZURE_CLI_VERSION=2.74.0
+
 RUN <<-```
     set -ex
-    mkdir -p /tmp/azure /opt/azcli && cd /opt/azcli
+    # Import Microsoft's GPG key
+    rpm --import https://packages.microsoft.com/keys/microsoft.asc
 
-    if [ "$TARGETARCH" = "arm64" ]; then
-        curl -L https://azcliprod.blob.core.windows.net/releases/$AZURE_CLI_VERSION/azure-cli-$AZURE_CLI_VERSION-linux-aarch64.tar.gz -o azcli.tar.gz
-    else
-        curl -L https://azcliprod.blob.core.windows.net/releases/$AZURE_CLI_VERSION/azure-cli-$AZURE_CLI_VERSION-linux-x86_64.tar.gz -o azcli.tar.gz
-    fi
+    # Download the specific Azure CLI RPM package for version 2.74.0
+    curl -sSL -o azure-cli-2.74.0-1.el8.noarch.rpm https://packages.microsoft.com/yumrepos/azure-cli/azure-cli-2.74.0-1.el8.noarch.rpm
 
-    tar -xf azcli.tar.gz
-    ./install.sh
-    az version
-    rm -rf /opt/azcli
+    # Install the downloaded RPM package
+    dnf install -y ./azure-cli-2.74.0-1.el8.noarch.rpm
+
+    # Create the Azure configuration directory
+    mkdir -p /tmp/azure
+
+    # Clean up to reduce image size
+    dnf clean all
+    rm -rf /var/cache /azure-cli-2.74.0-1.el8.noarch.rpm
 ```
+
 
 ENV CLOUDSDK_CONFIG="/tmp/gcloud"
 RUN <<-```
