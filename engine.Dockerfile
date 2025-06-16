@@ -40,6 +40,8 @@ RUN <<-```
 
 ENV AZURE_CONFIG_DIR="/tmp/azure"
 ENV AZURE_CLI_VERSION=2.74.0
+ENV AZURE_CONFIG_DIR="/tmp/azure"
+ENV AZURE_CLI_VERSION=2.74.0
 RUN <<-```
     set -ex
     mkdir -p /tmp/azure /opt/azcli && cd /opt/azcli
@@ -50,7 +52,7 @@ RUN <<-```
         curl -L https://azcliprod.blob.core.windows.net/releases/$AZURE_CLI_VERSION/azure-cli-$AZURE_CLI_VERSION-linux-x86_64.tar.gz -o azcli.tar.gz
     fi
 
-    tar -xzf azcli.tar.gz
+    tar -xf azcli.tar.gz
     ./install.sh
     az version
     rm -rf /opt/azcli
