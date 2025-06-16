@@ -14,12 +14,7 @@ import { useFormContext } from 'react-hook-form';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { oauth2Utils } from '@/app/lib/oauth2-utils';
-import {
-  BlockMetadataModel,
-  BlockMetadataModelSummary,
-  OAuth2Property,
-  OAuth2Props,
-} from '@openops/blocks-framework';
+import { OAuth2Property, OAuth2Props } from '@openops/blocks-framework';
 import {
   AppConnection,
   AppConnectionType,
@@ -37,7 +32,6 @@ import { formUtils } from '../../builder/block-properties/form-utils';
 import { oauth2AppsHooks } from '../lib/oauth2-apps-hooks';
 
 type OAuth2ConnectionSettingsProps = {
-  block: BlockMetadataModelSummary | BlockMetadataModel;
   authProperty: OAuth2Property<OAuth2Props>;
   reconnectConnection: AppConnection | null;
 };
@@ -63,7 +57,6 @@ function replaceVariables(
 
 const OAuth2ConnectionSettings = ({
   authProperty,
-  block,
   reconnectConnection,
 }: OAuth2ConnectionSettingsProps) => {
   const [readyToConnect, setReadyToConnect] = useState(false);
@@ -106,11 +99,13 @@ const OAuth2ConnectionSettings = ({
   }>();
 
   const hasCode = form.getValues().request.value.code;
-  const predefinedClientId = blockToClientIdMap?.[block.name]?.clientId;
+  const predefinedClientId =
+    blockToClientIdMap?.[authProperty.authProviderKey]?.clientId;
   useEffect(() => {
     if (isNil(currentOAuth2Type) && !isNil(blockToClientIdMap)) {
       setOAuth2Type(
-        blockToClientIdMap?.[block.name]?.type ?? AppConnectionType.OAUTH2,
+        blockToClientIdMap?.[authProperty.authProviderKey]?.type ??
+          AppConnectionType.OAUTH2,
       );
       return;
     }
@@ -263,9 +258,15 @@ const OAuth2ConnectionSettings = ({
         {authProperty.grantType !== OAuth2GrantType.CLIENT_CREDENTIALS && (
           <div className="border border-solid p-2 rounded-lg gap-2 flex text-center items-center justify-center h-full">
             <div className="rounded-full border border-solid p-1 flex items-center justify-center">
-              <img src={block.logoUrl} className="w-5 h-5"></img>
+              <img
+                src={authProperty.authProviderLogoUrl}
+                alt={authProperty.displayName}
+                className="w-5 h-5"
+              ></img>
             </div>
-            <div className="text-sm">{block.displayName}</div>
+            <div className="text-sm">
+              {authProperty.authProviderDisplayName}
+            </div>
             <div className="flex-grow"></div>
             {!hasCode && (
               <Button
