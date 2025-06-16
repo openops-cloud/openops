@@ -38,13 +38,22 @@ RUN <<-```
     rm -rf aws
 ```
 
-ENV LD_LIBRARY_PATH=""
 ENV AZURE_CONFIG_DIR="/tmp/azure"
 ENV AZURE_CLI_VERSION=2.74.0
 RUN <<-```
     set -ex
-    mkdir /tmp/azure && cd /tmp
-    curl -sL https://aka.ms/InstallAzureCli | bash -s -- --version $AZURE_CLI_VERSION
+    mkdir -p /tmp/azure /opt/azcli && cd /opt/azcli
+
+    if [ "$TARGETARCH" = "arm64" ]; then
+        curl -L https://azcliprod.blob.core.windows.net/releases/$AZURE_CLI_VERSION/azure-cli-$AZURE_CLI_VERSION-linux-aarch64.tar.gz -o azcli.tar.gz
+    else
+        curl -L https://azcliprod.blob.core.windows.net/releases/$AZURE_CLI_VERSION/azure-cli-$AZURE_CLI_VERSION-linux-x86_64.tar.gz -o azcli.tar.gz
+    fi
+
+    tar -xzf azcli.tar.gz
+    ./install.sh
+    az version
+    rm -rf /opt/azcli
 ```
 
 ENV CLOUDSDK_CONFIG="/tmp/gcloud"
@@ -54,7 +63,7 @@ RUN <<-```
 
     # Install Google Cloud CLI with architecture-specific package
     if [ "$TARGETARCH" = "arm64" ]; then
-        # For ARM64 architecture       
+        # For ARM64 architecture
         curl -sSL https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-516.0.0-linux-arm.tar.gz -o /tmp/gcloud.tar.gz
     else
         # For AMD64 architecture
