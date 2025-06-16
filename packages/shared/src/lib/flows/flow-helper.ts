@@ -1,6 +1,5 @@
 import { TypeCompiler } from '@sinclair/typebox/compiler';
 import semver from 'semver';
-import { AppConnectionWithoutSensitiveData } from '../app-connection/app-connection';
 import {
   addConnectionBrackets,
   removeConnectionBrackets,
@@ -20,6 +19,7 @@ import {
 } from './actions/action';
 import {
   AddActionRequest,
+  AppConnectionsWithSupportedBlocks,
   DeleteActionRequest,
   FlowOperationRequest,
   FlowOperationType,
@@ -32,6 +32,7 @@ import {
 import { FlowVersion, FlowVersionState } from './flow-version';
 import { DEFAULT_SAMPLE_DATA_SETTINGS } from './sample-data';
 import { Trigger, TriggerType } from './triggers/trigger';
+
 type Step = Action | Trigger;
 
 type GetStepFromSubFlow = {
@@ -748,23 +749,36 @@ function createTrigger(
 
 const prefillConnection = (
   action: Action,
-  connections?: AppConnectionWithoutSensitiveData[],
+  connections?: AppConnectionsWithSupportedBlocks[],
 ): Action => {
-  if (
-    Array.isArray(connections) &&
-    'input' in action.settings &&
-    'auth' in action.settings.input
-  ) {
-    const authProviderKey = action.settings.input['auth'].authProviderKey;
-    const connection = connections.find(
-      (c) => c.authProviderKey === authProviderKey,
-    );
+  if (!Array.isArray(connections)) {
+    return action;
+  }
 
-    if (connection && 'input' in action.settings) {
-      action.settings.input['auth'] = addConnectionBrackets(connection.name);
-    } else {
-      action.settings.input['auth'] = undefined;
-    }
+  let authProviderKey: string | undefined;
+  let blockName: string | undefined;
+  if ('blockName' in action.settings) {
+    blockName = action.settings.blockName;
+  }
+
+  if (
+    'input' in action.settings &&
+    'auth' in action.settings.input &&
+    'authProviderKey' in action.settings.input
+  ) {
+    authProviderKey = action.settings.input['auth'].authProviderKey;
+  }
+
+  const connection = connections.find(
+    (c) =>
+      c.authProviderKey === authProviderKey ||
+      (blockName && c.supportedBlocks && c.supportedBlocks.includes(blockName)),
+  );
+
+  if (connection && 'input' in action.settings) {
+    action.settings.input['auth'] = addConnectionBrackets(connection.name);
+  } else if ('input' in action.settings) {
+    action.settings.input['auth'] = undefined;
   }
 
   return action;
@@ -772,7 +786,7 @@ const prefillConnection = (
 
 export function getImportOperations(
   step: Action | Trigger | undefined,
-  connections?: AppConnectionWithoutSensitiveData[],
+  connections?: AppConnectionsWithSupportedBlocks[],
 ): FlowOperationRequest[] {
   const operations: FlowOperationRequest[] = [];
 

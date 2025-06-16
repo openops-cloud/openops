@@ -12,6 +12,7 @@ import {
   OverflowTooltip,
 } from '@openops/components/ui';
 import {
+  AppConnectionsWithSupportedBlocks,
   AppConnectionWithoutSensitiveData,
   flowHelper,
   isNil,
@@ -32,7 +33,7 @@ type ConnectionsPickerProps = {
   integrations: BlockMetadataModelSummary[];
   isUseTemplateLoading: boolean;
   close: () => void;
-  onUseTemplate: (connections: AppConnectionWithoutSensitiveData[]) => void;
+  onUseTemplate: (connections: AppConnectionsWithSupportedBlocks[]) => void;
 };
 
 const ConnectionsPicker = ({
@@ -162,7 +163,15 @@ const ConnectionsPicker = ({
   };
 
   const onUseTemplateClick = () => {
-    onUseTemplate(Object.values(selectedConnections).filter((c) => !!c));
+    const connectionsWithSupportedBlocks: AppConnectionsWithSupportedBlocks[] =
+      Object.entries(selectedConnections)
+        .filter(([, connection]) => !!connection)
+        .map(([blockName, connection]) => ({
+          ...connection!,
+          supportedBlocks: [blockName],
+        }));
+
+    onUseTemplate(connectionsWithSupportedBlocks);
   };
 
   return (
