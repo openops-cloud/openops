@@ -3,8 +3,8 @@ import {
   Action,
   ActionType,
   AppConnectionStatus,
+  AppConnectionsWithSupportedBlocks,
   AppConnectionType,
-  AppConnectionWithoutSensitiveData,
   ApplicationError,
   BlockAction,
   BlockType,
@@ -1423,7 +1423,8 @@ describe('getImportOperations', () => {
     projectId: 'RBzywn95MW70WsnpKFQRU',
     status: AppConnectionStatus.ACTIVE,
     authProviderKey: 'Slack',
-  } as AppConnectionWithoutSensitiveData;
+    supportedBlocks: ['@openops/block-slack'],
+  } as AppConnectionsWithSupportedBlocks;
 
   type OperationsResponse = Array<{
     type: 'ADD_ACTION';
@@ -1630,7 +1631,12 @@ describe('getImportOperations', () => {
         ...mockTrigger,
         nextAction: actionWithoutAuth,
       },
-      [mockConnection],
+      [
+        {
+          ...mockConnection,
+          supportedBlocks: [],
+        },
+      ],
     ) as OperationsResponse;
 
     expect(result[0].request.action.settings.input['auth']).toBe(undefined);
