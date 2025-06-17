@@ -85,7 +85,6 @@ export type AppConnection<Type extends AppConnectionType = AppConnectionType> =
   BaseModel<AppConnectionId> & {
     name: string;
     type: Type;
-    blockName: string;
     projectId: string;
     status: AppConnectionStatus;
     value: AppConnectionValue<Type>;
@@ -107,7 +106,6 @@ export const AppConnectionWithoutSensitiveData = Type.Object(
     ...BaseModelSchema,
     name: Type.String(),
     type: Type.Enum(AppConnectionType),
-    blockName: Type.String(),
     projectId: OpenOpsId,
     status: Type.Enum(AppConnectionStatus),
     authProviderKey: Type.String(),

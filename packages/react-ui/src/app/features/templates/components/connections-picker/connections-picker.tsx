@@ -12,6 +12,7 @@ import {
   OverflowTooltip,
 } from '@openops/components/ui';
 import {
+  AppConnectionsWithSupportedBlocks,
   AppConnectionWithoutSensitiveData,
   flowHelper,
   isNil,
@@ -32,7 +33,7 @@ type ConnectionsPickerProps = {
   integrations: BlockMetadataModelSummary[];
   isUseTemplateLoading: boolean;
   close: () => void;
-  onUseTemplate: (connections: AppConnectionWithoutSensitiveData[]) => void;
+  onUseTemplate: (connections: AppConnectionsWithSupportedBlocks[]) => void;
 };
 
 const ConnectionsPicker = ({
@@ -146,14 +147,15 @@ const ConnectionsPicker = ({
 
   const onConnectionCreated = async (
     connectionName: string,
+    authProviderKey: string,
     blockName: string,
   ) => {
     setSelectedBlockMetadata(null);
     const updatedGroupedConnections = await refetch();
 
-    const newConnection = updatedGroupedConnections?.data?.[blockName]?.find(
-      (connection) => connection.name === connectionName,
-    );
+    const newConnection = updatedGroupedConnections?.data?.[
+      authProviderKey
+    ]?.find((connection) => connection.name === connectionName);
 
     if (newConnection) {
       onConnectionChange(blockName, newConnection);
@@ -161,7 +163,15 @@ const ConnectionsPicker = ({
   };
 
   const onUseTemplateClick = () => {
-    onUseTemplate(Object.values(selectedConnections).filter((c) => !!c));
+    const connectionsWithSupportedBlocks: AppConnectionsWithSupportedBlocks[] =
+      Object.entries(selectedConnections)
+        .filter(([, connection]) => !!connection)
+        .map(([blockName, connection]) => ({
+          ...connection!,
+          supportedBlocks: [blockName],
+        }));
+
+    onUseTemplate(connectionsWithSupportedBlocks);
   };
 
   return (
@@ -169,9 +179,13 @@ const ConnectionsPicker = ({
       {selectedBlockMetadata ? (
         <DynamicFormValidationProvider>
           <CreateEditConnectionDialogContent
-            block={selectedBlockMetadata}
-            onConnectionSaved={(connectionName) => {
-              onConnectionCreated(connectionName, selectedBlockMetadata?.name);
+            authProviderKey={selectedBlockMetadata?.auth?.authProviderKey ?? ''}
+            onConnectionSaved={(connectionName, authProviderKey) => {
+              onConnectionCreated(
+                connectionName,
+                authProviderKey,
+                selectedBlockMetadata?.name,
+              );
             }}
             reconnect={false}
             connectionToEdit={null}
