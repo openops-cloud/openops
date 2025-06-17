@@ -19,7 +19,7 @@ import { PRIMITIVE_STEP_METADATA } from '../../lib/constants';
 import { WorkflowNode, flowCanvasUtils } from '../../lib/flow-canvas-utils';
 import { StepMetadata } from '../../lib/types';
 import { TooltipProvider } from '../../ui/tooltip';
-import template from './flow-template';
+import template, { withSampleData } from './flow-templates-data';
 
 const getPrimitiveStepMetadata = (
   step: Action | Trigger,
@@ -64,17 +64,17 @@ const nodeTypes = {
   loopPlaceholder: LoopStepPlaceHolder,
 };
 
-const FlowCanvasStory = (args: FlowCanvasProps) => {
+const FlowCanvasStory = (args: FlowCanvasProps & { template: Trigger }) => {
   const [graph, graphHeight] = useMemo(() => {
-    const graph = flowCanvasUtils.traverseFlow(template);
+    const graph = flowCanvasUtils.traverseFlow(args.template);
     const graphHeight = getNodesBounds(graph.nodes);
 
     return [graph, graphHeight];
-  }, []);
+  }, [args.template]);
 
   return (
     <div className="w-full h-[100vh] relative">
-      <TemplateCanvasProvider template={template}>
+      <TemplateCanvasProvider template={args.template}>
         <ReadonlyCanvasProvider>
           <TooltipProvider>
             <FlowCanvas {...args} graph={graph}>
@@ -125,4 +125,17 @@ type Story = StoryObj<typeof meta>;
 /**
  * Shows only primitive steps (with static step data)
  */
-export const Default: Story = {};
+export const Default: Story = {
+  args: {
+    template: template,
+  },
+};
+
+/**
+ * Shows a flow canvas with sample data
+ */
+export const WithSampleData: Story = {
+  args: {
+    template: withSampleData(template),
+  },
+};

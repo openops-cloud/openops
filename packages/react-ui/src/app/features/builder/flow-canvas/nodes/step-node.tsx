@@ -7,6 +7,7 @@ import {
   LoadingSpinner,
   OPS_NODE_SIZE,
   OverflowTooltip,
+  SampleDataLabel,
   STEP_CONTEXT_MENU_ATTRIBUTE,
   Tooltip,
   TooltipContent,
@@ -134,7 +135,7 @@ const WorkflowStepNode = React.memo(
             width: `${OPS_NODE_SIZE.stepNode.width}px`,
           }}
           className={cn(
-            'transition-all border-box rounded-sm border border-solid  border-border-300 relative hover:border-primary-200 group pointer-events-auto z-20',
+            'transition-all border-box rounded-sm border border-solid  border-border-300 relative hover:border-primary-200 group pointer-events-auto z-10',
             {
               'shadow-step-container': !isDragging,
               'border-primary-200': isSelected,
@@ -276,19 +277,7 @@ const WorkflowStepNode = React.memo(
           </div>
         </div>
 
-        {hasSampleData && (
-          <div
-            className={cn(
-              'absolute z-10 bottom-[-20px] left-1/2 -translate-x-1/2',
-              'w-[118px] h-[24px] flex items-center justify-center',
-              'font-satoshi font-medium text-xs text-blueAccent-500',
-              'border border-solid border-blueAccent-500 rounded-[4px]',
-              'bg-background-800',
-            )}
-          >
-            {t('Sample output data')}
-          </div>
-        )}
+        {hasSampleData && <SampleDataLabel />}
       </>
     );
   },
