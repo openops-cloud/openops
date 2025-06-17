@@ -35,7 +35,7 @@ export const graphqlAction = createAction({
   },
   async run(context) {
     const { query, variables } = context.propsValue;
-    const apiKey = context.auth as string;
+    const apiKey = context.auth;
     const accessToken = await getAccessToken(apiKey);
 
     const response = await fetch('https://chapi.cloudhealthtech.com/graphql', {
@@ -44,7 +44,7 @@ export const graphqlAction = createAction({
         Authorization: `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ query, variables: variables || {} }),
+      body: JSON.stringify({ query, variables: variables ?? {} }),
     });
 
     if (!response.ok)
