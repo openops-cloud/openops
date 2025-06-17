@@ -90,7 +90,6 @@ describe('getCostTools', () => {
     id: 'test-connection-id',
     name: 'test-aws-connection',
     type: AppConnectionType.CUSTOM_AUTH,
-    blockName: 'aws',
     projectId: mockProjectId,
     status: AppConnectionStatus.ACTIVE,
     value: {
