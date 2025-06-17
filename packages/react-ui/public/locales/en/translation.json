@@ -37,6 +37,8 @@
   "Success": "Success",
   "AI settings are saved successfully": "AI settings are saved successfully",
   "AI settings are deleted successfully": "AI settings are deleted successfully",
+  "MCP settings are saved successfully": "MCP settings are saved successfully",
+  "MCP settings are deleted successfully": "MCP settings are deleted successfully",
   "Error": "Error",
   "MCP": "MCP",
   "External tools:": "External tools:",

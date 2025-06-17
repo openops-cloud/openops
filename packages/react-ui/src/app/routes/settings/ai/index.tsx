@@ -4,6 +4,8 @@ import {
   AI_SETTINGS_DELETED_SUCCESSFULLY_TOAST,
   AI_SETTINGS_SAVED_SUCCESSFULLY_TOAST,
   AiSettingsFormSchema,
+  MCP_SETTINGS_DELETED_SUCCESSFULLY_TOAST,
+  MCP_SETTINGS_SAVED_SUCCESSFULLY_TOAST,
 } from '@/app/features/ai/lib/ai-form-utils';
 import { aiSettingsApi } from '@/app/features/ai/lib/ai-settings-api';
 import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
@@ -69,7 +71,7 @@ const AiSettingsPage = () => {
     mcpSettingsHooks.useSaveMcpSettings({
       onSuccess: () => {
         refetchMcpSettings();
-        toast(AI_SETTINGS_SAVED_SUCCESSFULLY_TOAST);
+        toast(MCP_SETTINGS_SAVED_SUCCESSFULLY_TOAST);
       },
       onError: () => {
         toast(INTERNAL_ERROR_TOAST);
@@ -80,7 +82,7 @@ const AiSettingsPage = () => {
     {
       onSuccess: () => {
         refetchMcpSettings();
-        toast(AI_SETTINGS_DELETED_SUCCESSFULLY_TOAST);
+        toast(MCP_SETTINGS_DELETED_SUCCESSFULLY_TOAST);
       },
       onError: () => {
         toast(INTERNAL_ERROR_TOAST);
