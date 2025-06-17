@@ -8,6 +8,12 @@ import {
 } from '@openops/shared';
 import { appConnectionsApi } from './app-connections-api';
 
+/**
+ * Maximum number of connections to fetch when we want to get all connections.
+ * This value is high enough to ensure we get all connections in practice.
+ */
+export const FETCH_ALL_CONNECTIONS_LIMIT = 100;
+
 export const appConnectionsHooks = {
   useConnections: (request: ListAppConnectionsRequestQuery) => {
     return useQuery({

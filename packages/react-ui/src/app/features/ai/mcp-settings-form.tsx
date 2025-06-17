@@ -12,7 +12,10 @@ import equal from 'fast-deep-equal';
 import { t } from 'i18next';
 import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { appConnectionsHooks } from '../connections/lib/app-connections-hooks';
+import {
+  appConnectionsHooks,
+  FETCH_ALL_CONNECTIONS_LIMIT,
+} from '../connections/lib/app-connections-hooks';
 import {
   mcpFormSchemaResolver,
   McpSettingsFormSchema,
@@ -39,7 +42,7 @@ const McpSettingsForm = ({
   const { data: awsConnections, isLoading: isAwsConnectionsLoading } =
     appConnectionsHooks.useConnections({
       authProviders: ['AWS'],
-      limit: 100,
+      limit: FETCH_ALL_CONNECTIONS_LIMIT,
     });
 
   const form = useForm<McpSettingsFormSchema>({
