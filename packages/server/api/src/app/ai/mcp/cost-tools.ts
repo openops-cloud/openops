@@ -86,7 +86,7 @@ async function initializeMcpClient(
         AWS_ACCESS_KEY_ID: credentials.accessKeyId,
         AWS_SECRET_ACCESS_KEY: credentials.secretAccessKey,
         AWS_REGION: credentials.region,
-        COST_EXPLORER_MCP_SERVER_PATH: config.basePath,
+        AWS_COST_PATH: config.basePath,
         AWS_SDK_LOAD_CONFIG: '1',
       },
     }),
@@ -119,17 +119,14 @@ export async function getCostTools(
     };
   }
 
-  const costExplorerBasePath = system.getOrThrow<string>(
-    AppSystemProp.COST_EXPLORER_MCP_SERVER_PATH,
-  );
-  const costAnalysisBasePath = system.getOrThrow<string>(
-    AppSystemProp.COST_ANALYSIS_MCP_SERVER_PATH,
+  const awsCostBasePath = system.getOrThrow<string>(
+    AppSystemProp.AWS_COST_PATH,
   );
 
   const [costExplorer, costAnalysis] = await Promise.all([
     initializeMcpClient(
       {
-        basePath: costExplorerBasePath,
+        basePath: awsCostBasePath,
         serverDir:
           'src/cost-explorer-mcp-server/awslabs/cost_explorer_mcp_server',
         toolProvider: 'cost-explorer',
@@ -138,7 +135,7 @@ export async function getCostTools(
     ),
     initializeMcpClient(
       {
-        basePath: costAnalysisBasePath,
+        basePath: awsCostBasePath,
         serverDir:
           'src/cost-analysis-mcp-server/awslabs/cost_analysis_mcp_server',
         toolProvider: 'cost-analysis',
