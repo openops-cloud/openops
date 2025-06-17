@@ -19,7 +19,7 @@ import { PRIMITIVE_STEP_METADATA } from '../../lib/constants';
 import { WorkflowNode, flowCanvasUtils } from '../../lib/flow-canvas-utils';
 import { StepMetadata } from '../../lib/types';
 import { TooltipProvider } from '../../ui/tooltip';
-import template, { withSampleData } from './flow-templates-data';
+import template from './flow-templates-data';
 
 const getPrimitiveStepMetadata = (
   step: Action | Trigger,
@@ -127,15 +127,6 @@ type Story = StoryObj<typeof meta>;
  */
 export const Default: Story = {
   args: {
-    template: template,
-  },
-};
-
-/**
- * Shows a flow canvas with sample data
- */
-export const WithSampleData: Story = {
-  args: {
-    template: withSampleData(template),
+    template,
   },
 };

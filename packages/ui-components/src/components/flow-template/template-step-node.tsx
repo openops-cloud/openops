@@ -35,7 +35,7 @@ const TemplateStepNode = React.memo(
           width: `${OPS_NODE_SIZE.stepNode.width}px`,
         }}
         className={
-          'transition-all border-box rounded-sm border border-solid border-border-300 relative hover:border-primary-200 group z-10'
+          'transition-all border-box rounded-sm border border-solid border-border-300 relative hover:border-primary-200 group'
         }
       >
         <div className="h-full w-full rounded-sm overflow-hidden bg-background pl-4 pr-2 py-[10px] flex flex-col justify-between">

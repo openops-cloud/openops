@@ -1,11 +1,4 @@
-import {
-  ActionType,
-  flowHelper,
-  FlowVersion,
-  FlowVersionState,
-  Trigger,
-  TriggerType,
-} from '@openops/shared';
+import { ActionType, Trigger, TriggerType } from '@openops/shared';
 
 const template: Trigger = {
   name: 'trigger',
@@ -125,30 +118,3 @@ const template: Trigger = {
 };
 
 export default template;
-
-export const withSampleData = (template: Trigger): Trigger => {
-  return flowHelper.transferFlow(
-    {
-      ...template,
-      valid: true,
-      id: '1',
-      flowId: '1',
-      trigger: template,
-      state: FlowVersionState.DRAFT,
-      created: new Date().toISOString(),
-      updated: new Date().toISOString(),
-    } as FlowVersion,
-    (step) => {
-      step.settings = {
-        ...step.settings,
-        inputUiInfo: {
-          ...step.settings.inputUiInfo,
-          sampleData: {
-            message: 'Sample data',
-          },
-        },
-      };
-      return step;
-    },
-  ).trigger;
-};
