@@ -26,9 +26,6 @@ export const AppConnectionEntity = new EntitySchema<AppConnectionSchema>({
       type: String,
       default: AppConnectionStatus.ACTIVE,
     },
-    blockName: {
-      type: String,
-    },
     projectId: OpenOpsIdSchema,
     value: {
       type: JSONB_COLUMN_TYPE,

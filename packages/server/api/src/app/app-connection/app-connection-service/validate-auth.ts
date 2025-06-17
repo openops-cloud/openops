@@ -9,10 +9,7 @@ import {
 } from '@openops/shared';
 import { engineRunner } from 'server-worker';
 import { accessTokenManager } from '../../authentication/lib/access-token-manager';
-import {
-  blockMetadataService,
-  getBlockPackage,
-} from '../../blocks/block-metadata-service';
+import { getAuthProviderMetadata } from '../connection-providers-resolver';
 
 export const engineValidateAuth = async (
   params: EngineValidateAuthParams,
@@ -21,26 +18,20 @@ export const engineValidateAuth = async (
   if (environment === EnvironmentType.TESTING) {
     return;
   }
-  const { blockName, auth, projectId } = params;
-
-  const blockMetadata = await blockMetadataService.getOrThrow({
-    name: blockName,
-    projectId,
-    version: undefined,
-  });
+  const { authProviderKey, auth, projectId } = params;
 
   const engineToken = await accessTokenManager.generateEngineToken({
     projectId,
   });
+
+  const authProperty = await getAuthProviderMetadata(
+    authProviderKey,
+    projectId,
+  );
   const engineResponse = await engineRunner.executeValidateAuth(engineToken, {
-    block: await getBlockPackage(projectId, {
-      blockName,
-      blockVersion: blockMetadata.version,
-      blockType: blockMetadata.blockType,
-      packageType: blockMetadata.packageType,
-    }),
     auth,
     projectId,
+    authProperty,
   });
 
   if (engineResponse.status !== EngineResponseStatus.OK) {
@@ -70,7 +61,7 @@ export const engineValidateAuth = async (
 };
 
 type EngineValidateAuthParams = {
-  blockName: string;
+  authProviderKey: string;
   projectId: ProjectId;
   auth: AppConnectionValue;
 };
