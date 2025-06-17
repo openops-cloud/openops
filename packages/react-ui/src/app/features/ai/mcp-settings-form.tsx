@@ -8,9 +8,8 @@ import {
   Label,
 } from '@openops/components/ui';
 import { McpConfig } from '@openops/shared';
-import equal from 'fast-deep-equal';
 import { t } from 'i18next';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import {
   appConnectionsHooks,
@@ -50,23 +49,19 @@ const McpSettingsForm = ({
     defaultValues: EMPTY_MCP_FORM_VALUE,
     mode: 'onChange',
   });
-  const [initialFormValue, setInitialFormValue] =
-    useState<McpSettingsFormSchema>(EMPTY_MCP_FORM_VALUE);
 
   useEffect(() => {
     if (!savedSettings) {
-      setInitialFormValue(EMPTY_MCP_FORM_VALUE);
       form.reset(EMPTY_MCP_FORM_VALUE);
       return;
     }
 
     const formValue = savedSettings ?? EMPTY_MCP_FORM_VALUE;
 
-    setInitialFormValue(formValue);
     form.reset(formValue);
   }, [savedSettings, form]);
 
-  const currentFormValue = form.watch();
+  const awsCost = form.watch('awsCost');
 
   const connectionOptions = useMemo(() => {
     return (
@@ -76,10 +71,6 @@ const McpSettingsForm = ({
       })) ?? []
     );
   }, [awsConnections]);
-
-  const isFormUnchanged = useMemo(() => {
-    return equal(currentFormValue, initialFormValue);
-  }, [currentFormValue, initialFormValue]);
 
   const resetForm = () => {
     form.reset();
@@ -128,7 +119,7 @@ const McpSettingsForm = ({
                   className="text-base font-normal"
                 >
                   {t('Connection')}
-                  {currentFormValue.awsCost?.enabled && (
+                  {awsCost?.enabled && (
                     <span className="text-destructive">*</span>
                   )}
                 </Label>
@@ -136,7 +127,7 @@ const McpSettingsForm = ({
                   loading={isAwsConnectionsLoading}
                   options={connectionOptions}
                   onChange={field.onChange}
-                  disabled={!currentFormValue.awsCost?.enabled}
+                  disabled={!awsCost?.enabled}
                   value={field.value}
                   placeholder={t('Select a connection')}
                   className="w-full"
@@ -152,14 +143,14 @@ const McpSettingsForm = ({
               variant="outline"
               type="button"
               onClick={resetForm}
-              disabled={isSaving || isFormUnchanged}
+              disabled={isSaving || !form.formState.isDirty}
             >
               {t('Cancel')}
             </Button>
             <Button
               className="w-[95px]"
               type="button"
-              disabled={!form.formState.isValid || isFormUnchanged}
+              disabled={!form.formState.isValid || !form.formState.isDirty}
               onClick={onSaveClick}
               loading={isSaving}
             >
