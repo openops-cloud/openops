@@ -76,7 +76,7 @@ describe('mcpConfigService', () => {
       expect(result).toEqual(mockMcpConfig);
       expect(sendMcpConfigSavedEvent).toHaveBeenCalledWith({
         id: mockMcpConfig.id,
-        userId: '',
+        userId,
         projectId,
         awsCost: mockMcpConfig.awsCost,
         created: expect.any(String),
@@ -115,7 +115,7 @@ describe('mcpConfigService', () => {
       });
       expect(sendMcpConfigSavedEvent).toHaveBeenCalledWith({
         id: existingId,
-        userId: '',
+        userId,
         projectId,
         awsCost: mockMcpConfig.awsCost,
         created: '2025-04-22T12:00:00Z',
@@ -155,7 +155,7 @@ describe('mcpConfigService', () => {
         userId,
       });
 
-      expect(deleteMock).toHaveBeenCalledWith({ projectId });
+      expect(deleteMock).toHaveBeenCalledWith({ projectId, id: configId });
       expect(sendMcpConfigDeletedEvent).toHaveBeenCalledWith({
         id: configId,
         userId,
