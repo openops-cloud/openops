@@ -19,7 +19,7 @@ export const mcpConfigService = {
     projectId: string;
     request: SaveMcpConfigRequest;
   }): Promise<McpConfig> {
-    const { projectId, request } = params;
+    const { projectId, request, userId } = params;
 
     const existing = request.id
       ? await repo().findOneBy({ id: request.id, projectId })
@@ -36,9 +36,9 @@ export const mcpConfigService = {
     const config = await repo().save(aiConfig);
 
     sendMcpConfigSavedEvent({
+      userId,
+      projectId,
       id: config.id,
-      userId: '',
-      projectId: params.projectId,
       awsCost: config.awsCost,
       created: aiConfig.created ?? '',
       updated: aiConfig.updated ?? '',
