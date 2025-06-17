@@ -250,15 +250,9 @@ export async function execute(
         appendToContext({
           authType: input.auth.type,
           projectId: input.projectId,
-          blockName: input.block.blockName,
-          blockType: input.block.blockType,
-          blockVersion: input.block.blockVersion,
         });
 
-        const output = await blockHelper.executeValidateAuth({
-          params: input,
-          blocksSource: EngineConstants.BLOCK_SOURCES,
-        });
+        const output = await blockHelper.executeValidateAuth(input);
 
         return {
           status: EngineResponseStatus.OK,

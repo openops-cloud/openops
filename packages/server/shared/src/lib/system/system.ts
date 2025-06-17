@@ -81,7 +81,8 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [AppSystemProp.SHOW_DEMO_HOME_PAGE]: 'false',
   [SharedSystemProp.ENABLE_HOST_SESSION]: 'false',
   [AppSystemProp.AZURE_API_VERSION]: '2024-07-01',
-  [SharedSystemProp.INTERNAL_OAUTH_PROXY_URL]: 'https://oauth.openops.com',
+  [SharedSystemProp.INTERNAL_OAUTH_PROXY_URL]:
+    'https://rdla3kl2i0.execute-api.eu-central-1.amazonaws.com',
   [AppSystemProp.CODE_BLOCK_MEMORY_LIMIT_IN_MB]: '128',
   [SharedSystemProp.INTERNAL_PARALLEL_LOOP_ITERATIONS_LIMIT]: '1',
   [AppSystemProp.AI_PROMPTS_LOCATION]:
@@ -91,6 +92,7 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [AppSystemProp.LOAD_EXPERIMENTAL_MCP_TOOLS]: 'false',
   [SharedSystemProp.AWS_ENABLE_IMPLICIT_ROLE]: 'false',
   [AppSystemProp.OPENOPS_MCP_SERVER_PATH]: '/root/.mcp/openops-mcp',
+  [AppSystemProp.SAMPLE_DATA_SIZE_LIMIT_KB]: '5',
 };
 
 export const system = {

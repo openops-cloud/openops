@@ -293,6 +293,12 @@ export const flagService = {
         created,
         updated,
       },
+      {
+        id: FlagId.SAMPLE_DATA_SIZE_LIMIT_KB,
+        value: system.getNumber(AppSystemProp.SAMPLE_DATA_SIZE_LIMIT_KB),
+        created,
+        updated,
+      },
     );
 
     return flags;

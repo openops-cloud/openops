@@ -3,8 +3,8 @@ import {
   Action,
   ActionType,
   AppConnectionStatus,
+  AppConnectionsWithSupportedBlocks,
   AppConnectionType,
-  AppConnectionWithoutSensitiveData,
   ApplicationError,
   BlockAction,
   BlockType,
@@ -1383,7 +1383,9 @@ describe('getImportOperations', () => {
 
   const mockSlackAction = createBlockAction('step_1', 'Send Message', {
     input: {
-      auth: "{{connections['initial-slack-connection']}}",
+      auth: {
+        authProviderKey: 'Slack',
+      },
       file: null,
       text: {},
       blocks: {},
@@ -1418,10 +1420,11 @@ describe('getImportOperations', () => {
     updated: '2025-02-03T14:43:12.324Z',
     name: 'prefilled-slack-connection',
     type: AppConnectionType.CLOUD_OAUTH2,
-    blockName: '@openops/block-slack',
     projectId: 'RBzywn95MW70WsnpKFQRU',
     status: AppConnectionStatus.ACTIVE,
-  } as AppConnectionWithoutSensitiveData;
+    authProviderKey: 'Slack',
+    supportedBlocks: ['@openops/block-slack'],
+  } as AppConnectionsWithSupportedBlocks;
 
   type OperationsResponse = Array<{
     type: 'ADD_ACTION';
@@ -1532,7 +1535,9 @@ describe('getImportOperations', () => {
                 valid: false,
                 settings: {
                   input: {
-                    auth: "{{connections['slack']}}",
+                    auth: {
+                      authProviderKey: 'Slack',
+                    },
                     file: null,
                     text: {
                       text: null,
@@ -1610,37 +1615,42 @@ describe('getImportOperations', () => {
     );
   });
 
-  it('should unset connection when block name does not match and connections are provided', () => {
-    const actionWithoutBlockName = {
+  it('should unset connection when auth provider does not match and connections are provided', () => {
+    const actionWithoutAuth = {
       ...mockSlackAction,
-      settings: { ...mockSlackAction.settings, blockName: 'something-else' },
+      settings: {
+        ...mockSlackAction.settings,
+        input: {
+          authProviderKey: 'test',
+        },
+      },
     };
 
     const result = flowHelper.getImportOperations(
       {
         ...mockTrigger,
-        nextAction: actionWithoutBlockName,
+        nextAction: actionWithoutAuth,
       },
-      [mockConnection],
+      [
+        {
+          ...mockConnection,
+          supportedBlocks: [],
+        },
+      ],
     ) as OperationsResponse;
 
     expect(result[0].request.action.settings.input['auth']).toBe(undefined);
   });
 
   it('should not change connection when connections are not provided', () => {
-    const actionWithoutBlockName = {
-      ...mockSlackAction,
-      settings: { ...mockSlackAction.settings, blockName: 'something-else' },
-    };
-
     const result = flowHelper.getImportOperations({
       ...mockTrigger,
-      nextAction: actionWithoutBlockName,
+      nextAction: mockSlackAction,
     }) as OperationsResponse;
 
-    expect(result[0].request.action.settings.input['auth']).toBe(
-      "{{connections['initial-slack-connection']}}",
-    );
+    expect(result[0].request.action.settings.input['auth']).toStrictEqual({
+      authProviderKey: 'Slack',
+    });
   });
 
   it('when having handle multiple connections for same block, the first is used', () => {

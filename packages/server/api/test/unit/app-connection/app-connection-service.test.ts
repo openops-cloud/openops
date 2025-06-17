@@ -1,3 +1,9 @@
+jest.mock('../../../src/app/flags/flag.service', () => ({
+  flagService: {
+    getCurrentRelease: jest.fn(),
+  },
+}));
+
 jest.mock('@openops/server-shared', () => ({
   ...jest.requireActual('@openops/server-shared'),
   encryptUtils: {
@@ -45,14 +51,12 @@ describe('appConnectionService.update', () => {
   const projectId = 'project-123';
   const userId = 'user-123';
   const connectionName = 'test-conn';
-  const blockName = 'test-block';
 
   const request: PatchAppConnectionRequestBody = {
     id: 'conn-id-123',
     type: AppConnectionType.SECRET_TEXT,
     projectId,
     name: connectionName,
-    blockName,
     value: {
       type: AppConnectionType.SECRET_TEXT,
       secret_text: 'abc',
@@ -63,7 +67,6 @@ describe('appConnectionService.update', () => {
     id: 'conn-id-123',
     name: connectionName,
     projectId,
-    blockName,
     value: 'encrypted-{"type":"SECRET_TEXT","secret_text":"old"}',
     status: AppConnectionStatus.ACTIVE,
   };
