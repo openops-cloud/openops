@@ -124,7 +124,8 @@ const WorkflowStepNode = React.memo(
       ? FlowOperationType.UPDATE_ACTION
       : FlowOperationType.UPDATE_TRIGGER;
 
-    const hasSampleData = !!data.step?.settings.inputUiInfo?.sampleData;
+    const hasSampleData =
+      !!data.step?.settings.inputUiInfo?.sampleData && !readonly;
 
     return (
       <>
