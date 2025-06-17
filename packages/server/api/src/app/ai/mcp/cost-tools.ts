@@ -67,12 +67,7 @@ async function initializeMcpClient(
   credentials: AwsCredentials,
 ): Promise<MCPTool> {
   const pythonPath = path.join(config.basePath, '.venv', 'bin', 'python');
-  const serverPath = path.join(
-    config.basePath,
-    'awslabs',
-    config.serverDir,
-    'server.py',
-  );
+  const serverPath = path.join(config.basePath, config.serverDir, 'server.py');
 
   logger.debug(
     `Initializing ${config.toolProvider} MCP client with AWS credentials`,
@@ -135,7 +130,8 @@ export async function getCostTools(
     initializeMcpClient(
       {
         basePath: costExplorerBasePath,
-        serverDir: 'cost_explorer_mcp_server',
+        serverDir:
+          'src/cost-explorer-mcp-server/awslabs/cost_explorer_mcp_server',
         toolProvider: 'cost-explorer',
       },
       credentials,
@@ -143,7 +139,8 @@ export async function getCostTools(
     initializeMcpClient(
       {
         basePath: costAnalysisBasePath,
-        serverDir: 'cost_analysis_mcp_server',
+        serverDir:
+          'src/cost-analysis-mcp-server/awslabs/cost_analysis_mcp_server',
         toolProvider: 'cost-analysis',
       },
       credentials,
