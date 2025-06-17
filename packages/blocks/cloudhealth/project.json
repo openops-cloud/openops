@@ -15,17 +15,13 @@
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/blocks/cloudhealth",
         "tsConfig": "packages/blocks/cloudhealth/tsconfig.lib.json",
         "packageJson": "packages/blocks/cloudhealth/package.json",
         "main": "packages/blocks/cloudhealth/src/index.ts",
-        "assets": [
-          "packages/blocks/cloudhealth/*.md"
-        ],
+        "assets": ["packages/blocks/cloudhealth/*.md"],
         "buildableProjectDepsInPackageJsonType": "dependencies",
         "updateBuildableProjectDepsInPackageJson": true
       }
@@ -37,18 +33,14 @@
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": [
-        "{workspaceRoot}/coverage/{projectRoot}"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
         "jestConfig": "packages/blocks/cloudhealth/jest.config.ts"
       }
     },
     "lint": {
       "executor": "@nx/eslint:lint",
-      "outputs": [
-        "{options.outputFile}"
-      ]
+      "outputs": ["{options.outputFile}"]
     }
   }
 }
