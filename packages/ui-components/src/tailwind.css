@@ -108,8 +108,9 @@
     --primary: 0 0% 100%;
     --primary-100: 204 38% 75%;
     --primary-200: 239 65% 61%;
-    --primary-300: 250 75% 12%;
+    --primary-300: 265 79% 71%;
     --primary-foreground: 210 20% 98%;
+    --primary-800: 265 66% 80%;
 
     --green-accent: 133 68% 64%;
     --green-accent-100: 77 88% 90%;
@@ -147,6 +148,8 @@
     --chart-5: 340 75% 55%;
 
     --sidebar-shadow-color: 255, 255, 255, 0.05;
+
+    --background-800: 224 71.4% 4.1%;
   }
 }
 
