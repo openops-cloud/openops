@@ -39,6 +39,7 @@ const McpSettingsForm = ({
   const { data: awsConnections, isLoading: isAwsConnectionsLoading } =
     appConnectionsHooks.useConnections({
       authProviders: ['AWS'],
+      limit: 100,
     });
 
   const form = useForm<McpSettingsFormSchema>({
