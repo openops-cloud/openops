@@ -9,6 +9,11 @@ export class RemoveBlockNameFromConnectionsTable1750161024797
 
     await queryRunner.query(`
       ALTER TABLE "app_connection"
+      DROP COLUMN IF EXISTS "pieceName";
+    `);
+
+    await queryRunner.query(`
+      ALTER TABLE "app_connection"
       DROP COLUMN IF EXISTS "blockName";
     `);
 
