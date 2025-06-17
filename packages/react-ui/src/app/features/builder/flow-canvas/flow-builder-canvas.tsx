@@ -16,6 +16,7 @@ import { CanvasContextMenuWrapper } from './context-menu/context-menu-wrapper';
 import { EdgeWithButton } from './edges/edge-with-button';
 import { FlowDragLayer } from './flow-drag-layer';
 import { BigButton } from './nodes/big-button';
+import { BranchLabelNode } from './nodes/branch-label-node';
 import { WorkflowStepNode } from './nodes/step-node';
 import { AboveFlowWidgets } from './widgets';
 
@@ -28,6 +29,7 @@ const nodeTypes = {
   placeholder: StepPlaceHolder,
   bigButton: BigButton,
   loopPlaceholder: LoopStepPlaceHolder,
+  branchLabel: BranchLabelNode,
 };
 const FlowBuilderCanvas = React.memo(
   ({ lefSideBarContainerWidth = 0 }: { lefSideBarContainerWidth?: number }) => {

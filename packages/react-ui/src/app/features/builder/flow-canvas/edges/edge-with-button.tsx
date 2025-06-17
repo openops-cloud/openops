@@ -83,24 +83,7 @@ const EdgeWithButton = React.memo((props: EdgePath) => {
         style={{ strokeWidth: `${LINE_WIDTH}px` }}
         className="cursor-default !stroke-greyBlue"
       />
-      {isInsideBranch && (
-        <BranchLabel
-          branchName={
-            props.data.stepLocationRelativeToParent ===
-            StepLocationRelativeToParent.INSIDE_TRUE_BRANCH
-              ? t('True')
-              : t('False')
-          }
-          isDefaultBranch={false}
-          buttonPosition={buttonPosition}
-        />
-      )}
-      {isInsideSplit && (
-        <BranchLabel
-          {...getSplitEdgeData(props.source, props.target, nodes)}
-          buttonPosition={buttonPosition}
-        />
-      )}
+
       {props.data?.addButton && !readonly && (
         <BlockSelector
           operation={{
@@ -144,6 +127,24 @@ const EdgeWithButton = React.memo((props: EdgePath) => {
           </foreignObject>
         </BlockSelector>
       )}
+      {/* {isInsideBranch && (
+        <BranchLabel
+          branchName={
+            props.data.stepLocationRelativeToParent ===
+            StepLocationRelativeToParent.INSIDE_TRUE_BRANCH
+              ? t('True')
+              : t('False')
+          }
+          isDefaultBranch={false}
+          buttonPosition={buttonPosition}
+        />
+      )}
+      {isInsideSplit && (
+        <BranchLabel
+          {...getSplitEdgeData(props.source, props.target, nodes)}
+          buttonPosition={buttonPosition}
+        />
+      )} */}
     </>
   );
 });

@@ -27,6 +27,7 @@ export enum WorkflowNodeType {
   BIG_BUTTON = 'bigButton',
   STEP_NODE = 'stepNode',
   SMALL_BUTTON = 'smallButton',
+  BRANCH_LABEL = 'branchLabel',
 }
 
 export const OPS_NODE_SIZE: Record<
@@ -52,6 +53,10 @@ export const OPS_NODE_SIZE: Record<
   [WorkflowNodeType.SMALL_BUTTON]: {
     height: SMALL_BUTTON_SIZE,
     width: SMALL_BUTTON_SIZE,
+  },
+  [WorkflowNodeType.BRANCH_LABEL]: {
+    height: 40,
+    width: NODE_WIDTH,
   },
 };
 
@@ -276,7 +281,71 @@ function buildChildrenGraph(
       graph.edges[graph.edges.length - 1].data.addButton = false;
     }
 
-    deltaLeftX += cbx.width + HORIZONTAL_SPACE_BETWEEN_NODES;
+    // Inject branchLabel node for split/branch edges
+    if (
+      locations[idx] === StepLocationRelativeToParent.INSIDE_SPLIT ||
+      locations[idx] === StepLocationRelativeToParent.INSIDE_TRUE_BRANCH ||
+      locations[idx] === StepLocationRelativeToParent.INSIDE_FALSE_BRANCH
+    ) {
+      // Use the same logic as buttonPosition in getEdgePath
+      const LABEL_WIDTH = 128;
+      const LABEL_HEIGHT = 40;
+      const parentNode = graph.nodes[0];
+      const childNode = childGraphAfterOffset.nodes[0];
+      const sourceX =
+        parentNode.position.x + OPS_NODE_SIZE[parentNode.type].width / 2;
+      const sourceY =
+        parentNode.position.y + OPS_NODE_SIZE[parentNode.type].height;
+      const targetX =
+        childNode.position.x + OPS_NODE_SIZE[childNode.type].width / 2;
+      const targetY = childNode.position.y;
+      const targetType = childNode.type;
+      const targetYWithPlaceHolder =
+        targetY +
+        (flowCanvasUtils.isPlaceHolder(targetType)
+          ? OPS_NODE_SIZE[targetType].height + 10
+          : 0);
+      let labelX, labelY;
+      if (sourceX === targetX) {
+        labelX = (targetX + sourceX) / 2 - LABEL_WIDTH / 2;
+        labelY = (targetYWithPlaceHolder + sourceY) / 2 - LABEL_HEIGHT / 2;
+      } else {
+        const isInsideBranch =
+          locations[idx] === StepLocationRelativeToParent.INSIDE_TRUE_BRANCH ||
+          locations[idx] === StepLocationRelativeToParent.INSIDE_FALSE_BRANCH;
+        const isInsideSplit =
+          locations[idx] === StepLocationRelativeToParent.INSIDE_SPLIT;
+        const lengthMultiplier = isInsideSplit || isInsideBranch ? 1.7 : 1;
+        const FIRST_LINE_LENGTH = 55 * lengthMultiplier;
+        labelX = targetX - LABEL_WIDTH / 2;
+        labelY =
+          targetYWithPlaceHolder -
+          FIRST_LINE_LENGTH / 2 -
+          10 -
+          LABEL_HEIGHT / 2;
+      }
+      graph.nodes.push({
+        id: `${parentNode.id}-branch-label-${idx}`,
+        position: { x: labelX, y: labelY },
+        type: WorkflowNodeType.BRANCH_LABEL,
+        data: {
+          label:
+            locations[idx] === StepLocationRelativeToParent.INSIDE_TRUE_BRANCH
+              ? 'True'
+              : locations[idx] ===
+                StepLocationRelativeToParent.INSIDE_FALSE_BRANCH
+              ? 'False'
+              : `Branch ${idx + 1}`,
+        },
+        selectable: false,
+        draggable: false,
+      });
+    }
+
+    const isInsideSplit =
+      locations[idx] === StepLocationRelativeToParent.INSIDE_SPLIT;
+    deltaLeftX +=
+      cbx.width + HORIZONTAL_SPACE_BETWEEN_NODES + (isInsideSplit ? 30 : 0);
   });
   graph = mergeGraph(graph, commonPartGraph);
   return graph;
@@ -515,7 +584,7 @@ export const getLengthMultiplier = ({
   isInsideBranch: boolean;
   isInsideSplit: boolean;
   isInsideLoop: boolean;
-}) => (isInsideSplit || isInsideBranch || isInsideLoop ? 1.7 : 1);
+}) => (isInsideLoop ? 1.7 : isInsideSplit || isInsideBranch ? 1.5 : 1);
 
 type Step = Action | Trigger;
 
@@ -535,6 +604,7 @@ export type WorkflowNode = {
     parentStep?: string;
     stepLocationRelativeToParent?: StepLocationRelativeToParent;
     branchNodeId?: string;
+    label?: string;
   };
   selectable?: boolean;
   selected?: boolean;
