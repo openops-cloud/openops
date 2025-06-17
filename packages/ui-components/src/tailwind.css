@@ -51,6 +51,7 @@
     --blue-accent-200: 251, 22%, 29%;
     --blue-accent-300: 209, 85%, 57%;
     --blue-accent-400: 206, 94%, 81%;
+    --blue-accent-500: 209 85% 57%; /* Primary Blue accent from Figma */
 
     --grey-blue-50: 240 100% 98%;
     --grey-blue: 213 28% 67%;
@@ -79,6 +80,8 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+
+    --background-800: 209 85% 98%; /* BG-800 from Figma */
   }
 
   .dark {

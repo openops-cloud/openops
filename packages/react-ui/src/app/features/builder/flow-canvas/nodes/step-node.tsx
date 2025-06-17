@@ -281,9 +281,9 @@ const WorkflowStepNode = React.memo(
             className={cn(
               'absolute z-10 bottom-[-20px] left-1/2 -translate-x-1/2',
               'w-[118px] h-[24px] flex items-center justify-center',
-              'font-satoshi font-medium text-xs text-[#4F94E8]',
-              'border border-solid border-[#4F94E8] rounded-[4px]',
-              'bg-[#EFF7FE]',
+              'font-satoshi font-medium text-xs text-blueAccent-500',
+              'border border-solid border-blueAccent-500 rounded-[4px]',
+              'bg-background-800',
             )}
           >
             {t('Sample output data')}
