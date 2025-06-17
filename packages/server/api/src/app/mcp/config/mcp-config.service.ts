@@ -59,7 +59,7 @@ export const mcpConfigService = {
     id: string;
     userId: string;
   }): Promise<void> {
-    await repo().delete({ projectId });
+    await repo().delete({ projectId, id });
     sendMcpConfigDeletedEvent({
       id,
       userId,
