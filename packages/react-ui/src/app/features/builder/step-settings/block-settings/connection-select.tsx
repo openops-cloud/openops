@@ -112,7 +112,7 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
                     connectionToEdit={reconnectConnection ?? null}
                     reconnect={true}
                     key={reconnectConnection?.name || 'newConnection'}
-                    block={params.block}
+                    authProviderKey={params.providerKey}
                     onConnectionSaved={async (connectionName) => {
                       await refetch();
                       field.onChange(addConnectionBrackets(connectionName));

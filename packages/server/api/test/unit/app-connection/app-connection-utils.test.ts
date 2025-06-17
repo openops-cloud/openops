@@ -18,7 +18,6 @@ describe('redactSecrets', () => {
     created: '2025-05-02T00:00:00Z',
     updated: '2025-05-02T00:00:00Z',
     name: 'Test',
-    blockName: 'block-test',
     projectId: 'project-1',
     status: AppConnectionStatus.ACTIVE,
     authProviderKey: 'auth-provider-1',

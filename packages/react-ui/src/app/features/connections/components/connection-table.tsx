@@ -1,5 +1,4 @@
 import { useAuthorization } from '@/app/common/hooks/authorization-hooks';
-import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
 import { appConnectionsApi } from '@/app/features/connections/lib/app-connections-api';
 import { formatUtils } from '@/app/lib/utils';
 import {
@@ -33,21 +32,24 @@ import { appConnectionUtils } from '../lib/app-connections-utils';
 
 import { flowsApi } from '@/app/features/flows/lib/flows-api';
 import { useMutation } from '@tanstack/react-query';
+import { appConnectionsHooks } from '../lib/app-connections-hooks';
 import { useConnectionsContext } from './connections-context';
 import { DeleteConnectionDialog } from './delete-connection-dialog';
 import { EditConnectionDialog } from './edit-connection-dialog';
 import { NewConnectionTypeDialog } from './new-connection-type-dialog';
 
 type BlockIconWithBlockNameProps = {
-  blockName: string;
+  authProviderKey: string;
 };
-const BlockIconWithBlockName = ({ blockName }: BlockIconWithBlockNameProps) => {
-  const { blockModel } = blocksHooks.useBlock({
-    name: blockName,
-  });
+const BlockIconWithBlockName = ({
+  authProviderKey,
+}: BlockIconWithBlockNameProps) => {
+  const { data: connectionsMetadata } =
+    appConnectionsHooks.useConnectionsMetadata();
+  const connectionModel = connectionsMetadata?.[authProviderKey];
 
-  const displayName = blockModel?.auth?.authProviderDisplayName;
-  const logoUrl = blockModel?.auth?.authProviderLogoUrl;
+  const displayName = connectionModel?.authProviderDisplayName;
+  const logoUrl = connectionModel?.authProviderLogoUrl;
 
   return (
     <BlockIcon
@@ -61,7 +63,7 @@ const BlockIconWithBlockName = ({ blockName }: BlockIconWithBlockNameProps) => {
   );
 };
 
-const DeleteConnectionColumn = ({
+const MenuConnectionColumn = ({
   row,
   setRefresh,
 }: {
@@ -85,8 +87,7 @@ const DeleteConnectionColumn = ({
     onError: () => toast(INTERNAL_ERROR_TOAST),
   });
 
-  const [isOpenEditConnectionDialog, setIsOpenEditConnectionDialog] =
-    useState(false);
+  const [isEditConnectionDialog, setIsEditConnectionDialog] = useState(false);
 
   const deleteConnectionMutation = useCallback(
     () =>
@@ -108,9 +109,10 @@ const DeleteConnectionColumn = ({
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-[155px]">
           <DropdownMenuItem
+            key="edit"
             onSelect={(e) => {
               e.preventDefault();
-              setIsOpenEditConnectionDialog(true);
+              setIsEditConnectionDialog(true);
             }}
           >
             <span className="text-black text-sm font-medium cursor-pointer w-full">
@@ -118,6 +120,7 @@ const DeleteConnectionColumn = ({
             </span>
           </DropdownMenuItem>
           <DropdownMenuItem
+            key="delete"
             onSelect={(e) => {
               e.preventDefault();
             }}
@@ -139,11 +142,8 @@ const DeleteConnectionColumn = ({
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      {isOpenEditConnectionDialog && (
-        <EditConnectionDialog
-          id={row.id}
-          setOpen={setIsOpenEditConnectionDialog}
-        />
+      {isEditConnectionDialog && (
+        <EditConnectionDialog id={row.id} setOpen={setIsEditConnectionDialog} />
       )}
     </div>
   );
@@ -153,14 +153,16 @@ const columns: (
 ) => ColumnDef<RowDataWithActions<AppConnection>>[] = (setRefresh) => {
   return [
     {
-      accessorKey: 'blockName',
+      accessorKey: 'authProviderKey',
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={t('App')} />
       ),
       cell: ({ row }) => {
         return (
           <div className="text-left">
-            <BlockIconWithBlockName blockName={row.original.blockName} />
+            <BlockIconWithBlockName
+              authProviderKey={row.original.authProviderKey}
+            />
           </div>
         );
       },
@@ -227,7 +229,7 @@ const columns: (
       ),
       cell: ({ row }) => {
         return (
-          <DeleteConnectionColumn row={row.original} setRefresh={setRefresh} />
+          <MenuConnectionColumn row={row.original} setRefresh={setRefresh} />
         );
       },
     },
