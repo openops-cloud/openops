@@ -35,6 +35,7 @@ type SearchableSelectProps<T> = {
   showDeselect?: boolean;
   onRefresh?: () => void;
   showRefresh?: boolean;
+  className?: string;
 };
 
 export const SearchableSelect = <T extends React.Key>({
@@ -47,6 +48,7 @@ export const SearchableSelect = <T extends React.Key>({
   showDeselect,
   onRefresh,
   showRefresh,
+  className,
 }: SearchableSelectProps<T>) => {
   const triggerRef = useRef<HTMLButtonElement>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -126,7 +128,7 @@ export const SearchableSelect = <T extends React.Key>({
           e.stopPropagation();
         }}
       >
-        <div className="relative">
+        <div className={cn('relative', className)}>
           <Button
             ref={triggerRef}
             variant="outline"

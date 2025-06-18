@@ -34,6 +34,18 @@ export const AI_SETTINGS_DELETED_SUCCESSFULLY_TOAST = {
   duration: DEFAULT_TOAST_DURATION,
 };
 
+export const MCP_SETTINGS_SAVED_SUCCESSFULLY_TOAST = {
+  title: t('Success'),
+  description: t('MCP settings are saved successfully'),
+  duration: DEFAULT_TOAST_DURATION,
+};
+
+export const MCP_SETTINGS_DELETED_SUCCESSFULLY_TOAST = {
+  title: t('Success'),
+  description: t('MCP settings are deleted successfully'),
+  duration: DEFAULT_TOAST_DURATION,
+};
+
 export const isValidJsonField = (input: string): boolean => {
   try {
     JSON.parse(input);
