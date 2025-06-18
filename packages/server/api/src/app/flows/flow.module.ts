@@ -24,6 +24,7 @@ import { flowVersionService } from './flow-version/flow-version.service';
 import { flowVersionController } from './flow/flow-version.controller';
 import { flowController } from './flow/flow.controller';
 import { stepRunService } from './step-run/step-run-service';
+import { testStepController } from './test-step/test-step.controller';
 import { testTriggerController } from './test-trigger/test-trigger-controller';
 
 export const flowModule: FastifyPluginAsyncTypebox = async (app) => {
@@ -31,6 +32,7 @@ export const flowModule: FastifyPluginAsyncTypebox = async (app) => {
   await app.register(flowVersionController, { prefix: '/v1/flow-versions' });
   await app.register(flowController, { prefix: '/v1/flows' });
   await app.register(testTriggerController, { prefix: '/v1/test-trigger' });
+  await app.register(testStepController, { prefix: '/v1/test-step' });
   websocketService.addListener(WebsocketServerEvent.TEST_FLOW_RUN, (socket) => {
     return async (data: TestFlowRunRequestBody) => {
       let principal;
