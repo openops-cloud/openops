@@ -25,6 +25,7 @@ jest.mock('../../../src/app/telemetry/event-models', () => ({
   sendMcpConfigDeletedEvent: jest.fn(),
 }));
 
+import { SaveMcpConfigRequest } from '@openops/shared';
 import { mcpConfigService } from '../../../src/app/mcp/config/mcp-config.service';
 import {
   sendMcpConfigDeletedEvent,
@@ -58,7 +59,7 @@ describe('mcpConfigService', () => {
         enabled: true,
         connectionName: 'test-aws-connection',
       },
-    };
+    } as unknown as SaveMcpConfigRequest;
 
     test('should create a new MCP config when one does not exist', async () => {
       findOneByMock.mockResolvedValue(null);

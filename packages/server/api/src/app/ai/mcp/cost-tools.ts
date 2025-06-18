@@ -21,11 +21,7 @@ async function getAwsCredentials(
     (c) => (c.name = 'aws-cost'),
   );
 
-  if (
-    isEmpty(awsCostMcpConfig) ||
-    !awsCostMcpConfig?.config ||
-    !awsCostMcpConfig.config['enabled']
-  ) {
+  if (isEmpty(awsCostMcpConfig) || !awsCostMcpConfig?.config['enabled']) {
     logger.debug(
       'AWS Cost is not enabled in MCP config, skipping AWS cost tools',
     );
