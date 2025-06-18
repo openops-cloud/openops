@@ -19,7 +19,7 @@ jest.mock('@openops/server-shared', () => ({
     getOrThrow: jest.fn(),
   },
   AppSystemProp: {
-    AWS_COST_PATH: 'AWS_COST_PATH',
+    AWS_MCP_COST_PATH: 'AWS_MCP_COST_PATH',
   },
 }));
 
@@ -32,7 +32,7 @@ const mockTransport = {
     AWS_ACCESS_KEY_ID: '',
     AWS_SECRET_ACCESS_KEY: '',
     AWS_REGION: '',
-    AWS_COST_PATH: '',
+    AWS_MCP_COST_PATH: '',
     AWS_SDK_LOAD_CONFIG: '1',
   },
 };
@@ -113,12 +113,12 @@ describe('getCostTools', () => {
       AWS_ACCESS_KEY_ID: '',
       AWS_SECRET_ACCESS_KEY: '',
       AWS_REGION: '',
-      AWS_COST_PATH: '',
+      AWS_MCP_COST_PATH: '',
       AWS_SDK_LOAD_CONFIG: '1',
     };
 
     (system.getOrThrow as jest.Mock).mockImplementation((key: string) => {
-      if (key === AppSystemProp.AWS_COST_PATH) return mockBasePath;
+      if (key === AppSystemProp.AWS_MCP_COST_PATH) return mockBasePath;
 
       throw new Error(`${key} not set`);
     });
@@ -216,7 +216,7 @@ describe('getCostTools', () => {
       AWS_ACCESS_KEY_ID: mockAwsCredentials.accessKeyId,
       AWS_SECRET_ACCESS_KEY: mockAwsCredentials.secretAccessKey,
       AWS_REGION: mockAwsCredentials.region,
-      AWS_COST_PATH: mockBasePath,
+      AWS_MCP_COST_PATH: mockBasePath,
       AWS_SDK_LOAD_CONFIG: '1',
     };
 
@@ -254,7 +254,7 @@ describe('getCostTools', () => {
       AWS_ACCESS_KEY_ID: mockAwsCredentials.accessKeyId,
       AWS_SECRET_ACCESS_KEY: mockAwsCredentials.secretAccessKey,
       AWS_REGION: mockAwsCredentials.region,
-      AWS_COST_PATH: mockBasePath,
+      AWS_MCP_COST_PATH: mockBasePath,
       AWS_SDK_LOAD_CONFIG: '1',
     });
   });

@@ -95,7 +95,7 @@ async function initializeMcpClient(
         AWS_ACCESS_KEY_ID: credentials.accessKeyId,
         AWS_SECRET_ACCESS_KEY: credentials.secretAccessKey,
         AWS_REGION: credentials.region,
-        AWS_COST_PATH: config.basePath,
+        AWS_MCP_COST_PATH: config.basePath,
         AWS_SDK_LOAD_CONFIG: '1',
       },
     }),
@@ -129,7 +129,7 @@ export async function getCostTools(
   }
 
   const awsCostBasePath = system.getOrThrow<string>(
-    AppSystemProp.AWS_COST_PATH,
+    AppSystemProp.AWS_MCP_COST_PATH,
   );
 
   const [costExplorer, costAnalysis] = await Promise.all([
