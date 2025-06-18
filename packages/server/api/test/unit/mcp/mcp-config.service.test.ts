@@ -25,7 +25,10 @@ jest.mock('../../../src/app/telemetry/event-models', () => ({
   sendMcpConfigDeletedEvent: jest.fn(),
 }));
 
-import { SaveMcpConfigRequest } from '@openops/shared';
+import {
+  AWS_COST_MCP_CONFIG_NAME,
+  SaveMcpConfigRequest,
+} from '@openops/shared';
 import { mcpConfigService } from '../../../src/app/mcp/config/mcp-config.service';
 import {
   sendMcpConfigDeletedEvent,
@@ -39,7 +42,7 @@ describe('mcpConfigService', () => {
   const mockMcpConfig = {
     id: 'mocked-id',
     projectId,
-    name: 'aws-cost',
+    name: AWS_COST_MCP_CONFIG_NAME,
     config: {
       enabled: true,
       connectionName: 'test-aws-connection',
@@ -54,7 +57,7 @@ describe('mcpConfigService', () => {
 
   describe('save', () => {
     const baseRequest = {
-      name: 'aws-cost',
+      name: AWS_COST_MCP_CONFIG_NAME,
       config: {
         enabled: true,
         connectionName: 'test-aws-connection',
@@ -84,7 +87,7 @@ describe('mcpConfigService', () => {
         id: mockMcpConfig.id,
         userId,
         projectId,
-        name: 'aws-cost',
+        name: AWS_COST_MCP_CONFIG_NAME,
         config: mockMcpConfig.config,
         created: expect.any(String),
         updated: expect.any(String),
@@ -124,7 +127,7 @@ describe('mcpConfigService', () => {
         id: existingId,
         userId,
         projectId,
-        name: 'aws-cost',
+        name: AWS_COST_MCP_CONFIG_NAME,
         config: mockMcpConfig.config,
         created: '2025-04-22T12:00:00Z',
         updated: expect.any(String),
@@ -177,7 +180,7 @@ describe('mcpConfigService', () => {
       {
         id: 'mocked-id-1',
         projectId,
-        name: 'aws-cost',
+        name: AWS_COST_MCP_CONFIG_NAME,
         config: {
           enabled: true,
           connectionName: 'test-aws-connection',
