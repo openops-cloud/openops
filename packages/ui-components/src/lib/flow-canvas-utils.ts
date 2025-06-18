@@ -624,7 +624,7 @@ export const getLengthMultiplier = ({
   isInsideLoop: boolean;
 }) => {
   if (isInsideLoop) {
-    return 1.7;
+    return 1.85;
   }
   if (isInsideSplit || isInsideBranch) {
     return 1.5;
