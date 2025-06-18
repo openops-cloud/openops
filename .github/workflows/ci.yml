@@ -195,7 +195,7 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
       - name: Format image tag parts
         env:
-          BRANCH: ${{ github.ref_name }}
+          BRANCH: ${{ github.head_ref || github.ref_name }}
           SHA: ${{ github.event.pull_request.head.sha || github.sha }}
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
@@ -251,7 +251,7 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
       - name: Format image tag components
         env:
-          BRANCH: ${{ github.ref_name }}
+          BRANCH: ${{ github.head_ref || github.ref_name }}
         run: |
           echo SANITIZED_BRANCH=${BRANCH//[\/]/-} >> "$GITHUB_ENV"
           echo BASE_REPOSITORY_URI=${{ steps.login-ecr.outputs.registry }}/${{ matrix.repository }} >> "$GITHUB_ENV"
