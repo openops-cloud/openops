@@ -92,7 +92,7 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [AppSystemProp.LOAD_EXPERIMENTAL_MCP_TOOLS]: 'false',
   [SharedSystemProp.AWS_ENABLE_IMPLICIT_ROLE]: 'false',
   [AppSystemProp.OPENOPS_MCP_SERVER_PATH]: '/root/.mcp/openops-mcp',
-  [AppSystemProp.AWS_COST_PATH]: '/root/.mcp/aws-cost',
+  [AppSystemProp.AWS_MCP_COST_PATH]: '/root/.mcp/aws-cost',
   [AppSystemProp.SAMPLE_DATA_SIZE_LIMIT_KB]: '5',
 };
 
