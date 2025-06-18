@@ -1,10 +1,11 @@
-import { cn } from '@openops/components/ui';
+import {
+  BRANCH_LABEL_HEIGHT,
+  BRANCH_LABEL_WIDTH,
+  cn,
+} from '@openops/components/ui';
 import React from 'react';
 
-const LABEL_WIDTH = 116;
-const LABEL_HEIGHT = 20;
-const LABEL_PADDING = 6;
-
+// todo move to ui-components
 export function BranchLabelNode({
   data,
 }: {
@@ -15,8 +16,8 @@ export function BranchLabelNode({
 }) {
   const { label, isDefaultBranch } = data;
   const style: React.CSSProperties = {
-    width: LABEL_WIDTH + LABEL_PADDING * 2,
-    height: LABEL_HEIGHT + LABEL_PADDING * 2,
+    width: BRANCH_LABEL_WIDTH,
+    height: BRANCH_LABEL_HEIGHT,
     gap: isDefaultBranch ? 6 : 0,
   };
 
