@@ -252,10 +252,11 @@ jobs:
       - name: Format image tag components
         env:
           BRANCH: ${{ github.head_ref || github.ref_name }}
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           echo SANITIZED_BRANCH=${BRANCH//[\/]/-} >> "$GITHUB_ENV"
           echo BASE_REPOSITORY_URI=${{ steps.login-ecr.outputs.registry }}/openops/${{ matrix.repository }} >> "$GITHUB_ENV"
-          echo SHORT_SHA=${GITHUB_SHA::8} >> "$GITHUB_ENV"
+          echo SHORT_SHA=${SHA::8} >> "$GITHUB_ENV"
       - name: Create and push manifests
         run: |
           # Create and push SHA manifest
