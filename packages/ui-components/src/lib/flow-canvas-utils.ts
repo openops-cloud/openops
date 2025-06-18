@@ -340,6 +340,10 @@ function buildChildrenGraph(
                     o.id ===
                     childGraphAfterOffset?.nodes[0]?.data?.branchNodeId,
                 )?.name,
+          isDefaultBranch:
+            locations[idx] === StepLocationRelativeToParent.INSIDE_SPLIT &&
+            graph.nodes[0].data.step?.settings.defaultBranch ===
+              childGraphAfterOffset?.nodes[0]?.data?.branchNodeId,
         },
         selectable: false,
         draggable: false,
@@ -613,6 +617,7 @@ export type WorkflowNode = {
     stepLocationRelativeToParent?: StepLocationRelativeToParent;
     branchNodeId?: string;
     label?: string;
+    isDefaultBranch?: boolean;
   };
   selectable?: boolean;
   selected?: boolean;

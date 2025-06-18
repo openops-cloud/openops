@@ -36,6 +36,7 @@ import {
 import { useMutation } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { BranchLabelNode } from '../../builder/flow-canvas/nodes/branch-label-node';
 import { popupFeatures } from '../../cloud/lib/popup';
 import { useCloudProfile } from '../../cloud/lib/use-cloud-profile';
 import { useUserInfoPolling } from '../../cloud/lib/use-user-info-polling';
@@ -78,6 +79,7 @@ const nodeTypes = {
   placeholder: StepPlaceHolder,
   bigButton: StepPlaceHolder,
   loopPlaceholder: LoopStepPlaceHolder,
+  branchLabel: BranchLabelNode,
 };
 
 type FlowTemplateFilterSidebarProps = {
