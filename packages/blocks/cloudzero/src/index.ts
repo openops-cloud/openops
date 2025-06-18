@@ -4,7 +4,7 @@ import { BlockCategory } from '@openops/shared';
 import { cloudzeroAuth } from './lib/auth';
 
 export const cloudzero = createBlock({
-  displayName: 'Cloudzero',
+  displayName: 'CloudZero',
   auth: cloudzeroAuth,
   minimumSupportedRelease: '0.20.0',
   logoUrl: 'https://static.openops.com/blocks/cloudzero.png',
