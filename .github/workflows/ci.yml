@@ -30,7 +30,7 @@ jobs:
     needs: install
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@5a3ec84eff668545956fd18022155c47e93e2684
+      - uses: actions/checkout@v4
       - name: Restore node_modules cache
         id: node-modules-cache
         uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684
