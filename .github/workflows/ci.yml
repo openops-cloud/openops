@@ -169,7 +169,7 @@ jobs:
               file: engine.Dockerfile
               repository: openops-engine
             platform: [amd64, arm64]
-    name: Build ${{ matrix.target.name }} Image for ${{ matrix.arch.name }}
+    name: Build ${{ matrix.target.name }} Image for ${{ matrix.platform }}
     needs: build
     runs-on: ${{ matrix.platform == 'amd64' && 'ubuntu-latest' || 'ubuntu-arm64' }}
     steps:
