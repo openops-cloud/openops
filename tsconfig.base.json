@@ -278,6 +278,12 @@
       "@openops/block-stable-diffusion-webui": [
         "packages/blocks/stable-diffusion-webui/src/index.ts"
       ],
+      "@openops/mongodb": [
+        "packages/blocks/mongodb/src/index.ts"
+      ],
+      "@openops/graphql": [
+        "packages/blocks/graphql/src/index.ts"
+      ],
       "@openops/block-store": ["packages/blocks/store/src/index.ts"],
       "@openops/block-straico": ["packages/blocks/straico/src/index.ts"],
       "@openops/block-stripe": ["packages/blocks/stripe/src/index.ts"],

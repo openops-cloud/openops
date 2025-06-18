@@ -1,0 +1,37 @@
+{
+  "name": "blocks-google-drive",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/blocks/community/google-drive/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "options": {
+        "outputPath": "dist/packages/blocks/community/google-drive",
+        "tsConfig": "packages/blocks/community/google-drive/tsconfig.lib.json",
+        "packageJson": "packages/blocks/community/google-drive/package.json",
+        "main": "packages/blocks/community/google-drive/src/index.ts",
+        "assets": [
+          "packages/blocks/community/google-drive/*.md",
+          {
+            "input": "packages/blocks/community/google-drive/src/i18n",
+            "output": "./src/i18n",
+            "glob": "**/!(i18n.json)"
+          }
+        ],
+        "buildableProjectDepsInPackageJsonType": "dependencies",
+        "updateBuildableProjectDepsInPackageJson": true
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": [
+        "{options.outputFile}"
+      ]
+    }
+  },
+  "tags": []
+}

@@ -1,0 +1,89 @@
+import { createCustomApiCallAction } from '@openops/blocks-common';
+import {
+  OAuth2PropertyValue,
+  blockAuth,
+  createblock,
+} from '@openops/blocks-framework';
+import { blockCategory } from '@openops/shared';
+import { clearSheetAction } from './lib/actions/clear-sheet';
+import { deleteRowAction } from './lib/actions/delete-row.action';
+import { findRowByNumAction } from './lib/actions/find-row-by-num';
+import { findRowsAction } from './lib/actions/find-rows';
+import { getRowsAction } from './lib/actions/get-rows';
+import { insertRowAction } from './lib/actions/insert-row.action';
+import { updateRowAction } from './lib/actions/update-row';
+import { googleSheetsCommon } from './lib/common/common';
+import { newRowAddedTrigger } from './lib/triggers/new-row-added-webhook';
+import { newOrUpdatedRowTrigger } from './lib/triggers/new-or-updated-row.trigger';
+import { insertMultipleRowsAction } from './lib/actions/insert-multiple-rows.action';
+import { createWorksheetAction } from './lib/actions/create-worksheet';
+import { createSpreadsheetAction } from './lib/actions/create-spreadsheet';
+import { findSpreadsheets } from './lib/actions/find-spreadsheets';
+import { newSpreadsheetTrigger } from './lib/triggers/new-spreadsheet';
+import { newWorksheetTrigger } from './lib/triggers/new-worksheet';
+import { findWorksheetAction } from './lib/actions/find-worksheet';
+import { copyWorksheetAction } from './lib/actions/copy-worksheet';
+import { updateMultipleRowsAction } from './lib/actions/update-multiple-rows';
+import { createColumnAction } from './lib/actions/create-column';
+
+export const googleSheetsAuth = blockAuth.OAuth2({
+  description: '',
+
+  authUrl: 'https://accounts.google.com/o/oauth2/auth',
+  tokenUrl: 'https://oauth2.googleapis.com/token',
+  required: true,
+  scope: [
+    'https://www.googleapis.com/auth/spreadsheets',
+    'https://www.googleapis.com/auth/drive.readonly',
+    'https://www.googleapis.com/auth/drive',
+  ],
+});
+
+export const googleSheets = createblock({
+  minimumSupportedRelease: '0.36.1',
+  logoUrl: 'https://cdn.openops.com/blocks/google-sheets.png',
+  categories: [blockCategory.PRODUCTIVITY],
+  authors: [
+    'ShayPunter',
+    'Ozak93',
+    'Abdallah-Alwarawreh',
+    'Salem-Alaa',
+    'kishanprmr',
+    'MoShizzle',
+    'AbdulTheActiveblockr',
+    'khaledmashaly',
+    'abuaboud',
+  ],
+  actions: [
+    insertRowAction,
+    insertMultipleRowsAction,
+    deleteRowAction,
+    updateRowAction,
+    findRowsAction,
+    createSpreadsheetAction,
+    createWorksheetAction,
+    clearSheetAction,
+    findRowByNumAction,
+    getRowsAction,
+    findSpreadsheets,
+    findWorksheetAction,
+    copyWorksheetAction,
+    updateMultipleRowsAction,
+    createColumnAction,
+    createCustomApiCallAction({
+      auth: googleSheetsAuth,
+      baseUrl: () => {
+        return googleSheetsCommon.baseUrl;
+      },
+      authMapping: async (auth) => {
+        return {
+          Authorization: `Bearer ${(auth as OAuth2PropertyValue).access_token}`,
+        };
+      },
+    }),
+  ],
+  displayName: 'Google Sheets',
+  description: 'Create, edit, and collaborate on spreadsheets online',
+  triggers: [newRowAddedTrigger, newOrUpdatedRowTrigger,newSpreadsheetTrigger,newWorksheetTrigger],
+  auth: googleSheetsAuth,
+});

@@ -1,0 +1,69 @@
+{
+  "name": "blocks-linear",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/blocks/community/linear/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "options": {
+        "outputPath": "dist/packages/blocks/community/linear",
+        "tsConfig": "packages/blocks/community/linear/tsconfig.lib.json",
+        "packageJson": "packages/blocks/community/linear/package.json",
+        "main": "packages/blocks/community/linear/src/index.ts",
+        "assets": [
+          "packages/blocks/community/linear/*.md",
+          {
+            "input": "packages/blocks/community/linear/src/i18n",
+            "output": "./src/i18n",
+            "glob": "**/!(i18n.json)"
+          }
+        ],
+        "buildableProjectDepsInPackageJsonType": "dependencies",
+        "updateBuildableProjectDepsInPackageJson": true
+      },
+      "dependsOn": ["prebuild", "^build"]
+    },
+    "prebuild": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "packages/blocks/community/linear",
+        "command": "npm ci"
+      }
+    },
+    "build-with-deps": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "nx run blocks-linear:prebuild",
+          "nx run blocks-linear:build",
+          "nx run blocks-linear:postbuild"
+        ],
+        "parallel": false
+      }
+    },
+    "postbuild": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "dist/packages/blocks/community/linear",
+        "command": "npm install"
+      }
+    },
+    "publish": {
+      "command": "node tools/scripts/publish.mjs blocks-linear {args.ver} {args.tag}",
+      "dependsOn": [
+        "build"
+      ]
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": [
+        "{options.outputFile}"
+      ]
+    }
+  },
+  "tags": []
+}
