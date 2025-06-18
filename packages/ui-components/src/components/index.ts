@@ -21,6 +21,7 @@ export * from './flow-canvas/edges/return-loop-edge';
 export * from './flow-canvas/edges/utils';
 export * from './flow-canvas/flow-canvas';
 export * from './flow-canvas/loop-step-placeholder';
+export * from './flow-canvas/nodes/branch-label-node';
 export * from './flow-canvas/nodes/step-holder-placeholder';
 export * from './flow-canvas/sample-data-label';
 export * from './flow-canvas/types';

@@ -1,9 +1,9 @@
+import React from 'react';
+import { cn } from '../../../lib/cn';
 import {
   BRANCH_LABEL_HEIGHT,
   BRANCH_LABEL_WIDTH,
-  cn,
-} from '@openops/components/ui';
-import React from 'react';
+} from '../../../lib/flow-canvas-utils';
 
 // todo move to ui-components
 export function BranchLabelNode({

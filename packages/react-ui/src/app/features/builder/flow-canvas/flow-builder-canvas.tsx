@@ -4,6 +4,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { FLOW_CANVAS_Y_OFFESET } from '@/app/constants/flow-canvas';
 import {
   BelowFlowWidget,
+  BranchLabelNode,
   FlowCanvas,
   flowCanvasUtils,
   LoopStepPlaceHolder,
@@ -16,7 +17,6 @@ import { CanvasContextMenuWrapper } from './context-menu/context-menu-wrapper';
 import { EdgeWithButton } from './edges/edge-with-button';
 import { FlowDragLayer } from './flow-drag-layer';
 import { BigButton } from './nodes/big-button';
-import { BranchLabelNode } from './nodes/branch-label-node';
 import { WorkflowStepNode } from './nodes/step-node';
 import { AboveFlowWidgets } from './widgets';
 
