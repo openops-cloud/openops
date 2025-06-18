@@ -10,6 +10,7 @@ import {
   FlowCanvasProps,
 } from '../../components/flow-canvas/flow-canvas';
 import { LoopStepPlaceHolder } from '../../components/flow-canvas/loop-step-placeholder';
+import { BranchLabelNode } from '../../components/flow-canvas/nodes/branch-label-node';
 import { StepPlaceHolder } from '../../components/flow-canvas/nodes/step-holder-placeholder';
 import { BelowFlowWidget } from '../../components/flow-canvas/widgets/below-flow-widget';
 import { TemplateCanvasProvider } from '../../components/flow-template/template-canvas-context';
@@ -62,6 +63,7 @@ const nodeTypes = {
   placeholder: StepPlaceHolder,
   bigButton: StepPlaceHolder,
   loopPlaceholder: LoopStepPlaceHolder,
+  branchLabel: BranchLabelNode,
 };
 
 const FlowCanvasStory = (args: FlowCanvasProps & { template: Trigger }) => {
