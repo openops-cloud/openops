@@ -34,3 +34,23 @@ export const SaveAiConfigRequest = Type.Object({
 });
 
 export type SaveAiConfigRequest = Static<typeof SaveAiConfigRequest>;
+
+const mcpServerConfig = Type.Record(Type.String(), Type.Unknown());
+
+export const McpConfig = Type.Object({
+  ...BaseModelSchema,
+  projectId: Type.String(),
+  name: Type.String(),
+  config: mcpServerConfig,
+});
+
+export type McpConfig = Static<typeof McpConfig>;
+export const AWS_COST_MCP_CONFIG_NAME = 'aws-cost';
+
+export const SaveMcpConfigRequest = Type.Object({
+  id: Type.Optional(Type.String()),
+  name: Type.String(),
+  config: mcpServerConfig,
+});
+
+export type SaveMcpConfigRequest = Static<typeof SaveMcpConfigRequest>;
