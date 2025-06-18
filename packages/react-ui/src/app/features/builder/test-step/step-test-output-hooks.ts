@@ -44,10 +44,6 @@ export const stepTestOutputHooks = {
     return stepTestOutputHooks.useStepTestOutput(flowVersionId, stepId!);
   },
   useSaveSelectedStepSampleData(form: UseFormReturn<Action | Trigger>) {
-    const { selectedStep } = useStepSettingsContext();
-    const [applyOperation] = useBuilderStateContext((state) => [
-      state.applyOperation,
-    ]);
     const { data: sampleDataSizeLimit } = flagsHooks.useFlag<number>(
       FlagId.SAMPLE_DATA_SIZE_LIMIT_KB,
     );
@@ -65,39 +61,12 @@ export const stepTestOutputHooks = {
           });
           return;
         }
-        const isTrigger = flowHelper.isTrigger(selectedStep.type);
-        const updatedStep = {
-          ...selectedStep,
-          settings: {
-            ...selectedStep.settings,
-            inputUiInfo: {
-              ...selectedStep.settings.inputUiInfo,
-              sampleData: sampleData,
-            },
-          },
-        };
-
-        const createOperation = () => {
-          if (isTrigger) {
-            return {
-              type: FlowOperationType.UPDATE_TRIGGER as const,
-              request: updatedStep as Trigger,
-            };
-          } else {
-            return {
-              type: FlowOperationType.UPDATE_ACTION as const,
-              request: updatedStep as Action,
-            };
-          }
-        };
-
-        applyOperation(createOperation(), () => toast(UNSAVED_CHANGES_TOAST));
 
         form.setValue('settings.inputUiInfo.sampleData', sampleData, {
           shouldValidate: true,
         });
       },
-      [applyOperation, selectedStep, sampleDataSizeLimit, form],
+      [sampleDataSizeLimit, form],
     );
   },
 };
