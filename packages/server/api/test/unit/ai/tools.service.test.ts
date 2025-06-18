@@ -1,4 +1,3 @@
-import { logger } from '@openops/server-shared';
 import { AiConfig, AiProviderEnum } from '@openops/shared';
 import {
   CoreMessage,
@@ -7,7 +6,7 @@ import {
   LanguageModel,
   ToolSet,
 } from 'ai';
-import { selectRelevantTools } from '../../../src/app/ai/chat/tools.service';
+import { FastifyInstance } from 'fastify';
 
 jest.mock('@openops/server-shared', () => ({
   logger: {
@@ -20,7 +19,18 @@ jest.mock('ai', () => ({
   generateObject: jest.fn(),
 }));
 
-describe('selectRelevantTools', () => {
+const getMCPToolsMock = jest.fn();
+jest.mock('../../../src/app/ai/mcp/mcp-tools', () => ({
+  getMCPTools: getMCPToolsMock,
+}));
+
+const getMcpSystemPromptMock = jest.fn();
+jest.mock('../../../src/app/ai/chat/prompts.service', () => ({
+  getMcpSystemPrompt: getMcpSystemPromptMock,
+}));
+
+import { getMCPToolsContext } from '../../../src/app/ai/chat/tools.service';
+describe('getMCPToolsContext', () => {
   const mockLanguageModel = {} as LanguageModel;
   const mockAiConfig = {
     projectId: 'test-project',
@@ -39,22 +49,37 @@ describe('selectRelevantTools', () => {
     { role: 'user', content: 'Test message' } as CoreUserMessage,
   ];
 
+  const mockApp = {
+    swagger: jest.fn(),
+  } as unknown as FastifyInstance;
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   describe('Input validation', () => {
-    it('should return undefined when no tools are provided', async () => {
-      const emptyTools: ToolSet = {};
-
-      const result = await selectRelevantTools({
-        messages: mockMessages,
-        tools: emptyTools,
-        languageModel: mockLanguageModel,
-        aiConfig: mockAiConfig,
+    it('should return empty objects with no tools available message', async () => {
+      getMcpSystemPromptMock.mockResolvedValue('');
+      getMCPToolsMock.mockResolvedValue({
+        mcpClients: [],
+        tools: {},
       });
 
-      expect(result).toBeUndefined();
+      const result = await getMCPToolsContext(
+        mockApp,
+        'projectId',
+        'authToken',
+        mockAiConfig,
+        mockMessages,
+        mockLanguageModel,
+      );
+
+      expect(result).toStrictEqual({
+        mcpClients: [],
+        filteredTools: {},
+        systemPrompt:
+          '\n\nMCP tools are not available in this chat. Do not claim access or simulate responses from them under any circumstance.',
+      });
       expect(generateObject).not.toHaveBeenCalled();
     });
 
@@ -69,20 +94,27 @@ describe('selectRelevantTools', () => {
         },
       };
 
+      getMCPToolsMock.mockResolvedValue({
+        mcpClients: [],
+        tools: mockTools,
+      });
+
       (generateObject as jest.Mock).mockResolvedValue({
         object: {
           tool_names: ['tool1', 'tool2'],
         },
       });
 
-      const result = await selectRelevantTools({
-        messages: mockMessages,
-        tools: mockTools,
-        languageModel: mockLanguageModel,
-        aiConfig: mockAiConfig,
-      });
+      const result = await getMCPToolsContext(
+        mockApp,
+        'projectId',
+        'authToken',
+        mockAiConfig,
+        mockMessages,
+        mockLanguageModel,
+      );
 
-      expect(result).toEqual(mockTools);
+      expect(result.filteredTools).toEqual(mockTools);
       expect(generateObject).toHaveBeenCalled();
     });
   });
@@ -100,20 +132,27 @@ describe('selectRelevantTools', () => {
         },
       };
 
+      getMCPToolsMock.mockResolvedValue({
+        mcpClients: [],
+        tools: mockTools,
+      });
+
       (generateObject as jest.Mock).mockResolvedValue({
         object: {
           tool_names: [],
         },
       });
 
-      const result = await selectRelevantTools({
-        messages: mockMessages,
-        tools: mockTools,
-        languageModel: mockLanguageModel,
-        aiConfig: mockAiConfig,
-      });
+      const result = await getMCPToolsContext(
+        mockApp,
+        'projectId',
+        'authToken',
+        mockAiConfig,
+        mockMessages,
+        mockLanguageModel,
+      );
 
-      expect(result).toEqual({});
+      expect(result.filteredTools).toEqual({});
       expect(generateObject).toHaveBeenCalled();
     });
 
@@ -129,20 +168,27 @@ describe('selectRelevantTools', () => {
         },
       };
 
+      getMCPToolsMock.mockResolvedValue({
+        mcpClients: [],
+        tools: mockTools,
+      });
+
       (generateObject as jest.Mock).mockResolvedValue({
         object: {
           tool_names: ['tool1', 'nonexistent_tool'],
         },
       });
 
-      const result = await selectRelevantTools({
-        messages: mockMessages,
-        tools: mockTools,
-        languageModel: mockLanguageModel,
-        aiConfig: mockAiConfig,
-      });
+      const result = await getMCPToolsContext(
+        mockApp,
+        'projectId',
+        'authToken',
+        mockAiConfig,
+        mockMessages,
+        mockLanguageModel,
+      );
 
-      expect(result).toEqual({
+      expect(result.filteredTools).toEqual({
         tool1: {
           description: 'Tool 1 description',
           parameters: {},
@@ -162,20 +208,27 @@ describe('selectRelevantTools', () => {
         },
       };
 
+      getMCPToolsMock.mockResolvedValue({
+        mcpClients: [],
+        tools: mockTools,
+      });
+
       (generateObject as jest.Mock).mockResolvedValue({
         object: {
           tool_names: ['invalid1', 'invalid2'],
         },
       });
 
-      const result = await selectRelevantTools({
-        messages: mockMessages,
-        tools: mockTools,
-        languageModel: mockLanguageModel,
-        aiConfig: mockAiConfig,
-      });
+      const result = await getMCPToolsContext(
+        mockApp,
+        'projectId',
+        'authToken',
+        mockAiConfig,
+        mockMessages,
+        mockLanguageModel,
+      );
 
-      expect(result).toEqual({});
+      expect(result.filteredTools).toEqual({});
     });
 
     it('should properly handle a mix of valid and invalid tool names', async () => {
@@ -194,20 +247,27 @@ describe('selectRelevantTools', () => {
         },
       };
 
+      getMCPToolsMock.mockResolvedValue({
+        mcpClients: [],
+        tools: mockTools,
+      });
+
       (generateObject as jest.Mock).mockResolvedValue({
         object: {
           tool_names: ['tool1', 'invalid_tool', 'tool3'],
         },
       });
 
-      const result = await selectRelevantTools({
-        messages: mockMessages,
-        tools: mockTools,
-        languageModel: mockLanguageModel,
-        aiConfig: mockAiConfig,
-      });
+      const result = await getMCPToolsContext(
+        mockApp,
+        'projectId',
+        'authToken',
+        mockAiConfig,
+        mockMessages,
+        mockLanguageModel,
+      );
 
-      expect(result).toEqual({
+      expect(result.filteredTools).toEqual({
         tool1: {
           description: 'Tool 1 description',
           parameters: {},
@@ -217,35 +277,6 @@ describe('selectRelevantTools', () => {
           parameters: {},
         },
       });
-    });
-
-    it('should return undefined when LLM throws an error', async () => {
-      const mockTools: ToolSet = {
-        tool1: {
-          description: 'Tool 1 description',
-          parameters: {},
-        },
-        tool2: {
-          description: 'Tool 2 description',
-          parameters: {},
-        },
-      };
-
-      const mockError = new Error('LLM error');
-      (generateObject as jest.Mock).mockRejectedValue(mockError);
-
-      const result = await selectRelevantTools({
-        messages: mockMessages,
-        tools: mockTools,
-        languageModel: mockLanguageModel,
-        aiConfig: mockAiConfig,
-      });
-
-      expect(result).toBeUndefined();
-      expect(logger.error).toHaveBeenCalledWith(
-        'Error selecting tools',
-        mockError,
-      );
     });
   });
 
@@ -259,20 +290,27 @@ describe('selectRelevantTools', () => {
         };
       }
 
+      getMCPToolsMock.mockResolvedValue({
+        mcpClients: [],
+        tools: mockTools,
+      });
+
       (generateObject as jest.Mock).mockResolvedValue({
         object: {
           tool_names: Object.keys(mockTools),
         },
       });
 
-      const result = await selectRelevantTools({
-        messages: mockMessages,
-        tools: mockTools,
-        languageModel: mockLanguageModel,
-        aiConfig: mockAiConfig,
-      });
+      const result = await getMCPToolsContext(
+        mockApp,
+        'projectId',
+        'authToken',
+        mockAiConfig,
+        mockMessages,
+        mockLanguageModel,
+      );
 
-      expect(Object.keys(result || {}).length).toBe(128);
+      expect(Object.keys(result.filteredTools || {}).length).toBe(128);
     });
   });
 
@@ -284,6 +322,11 @@ describe('selectRelevantTools', () => {
           parameters: {},
         },
       };
+
+      getMCPToolsMock.mockResolvedValue({
+        mcpClients: [],
+        tools: mockTools,
+      });
 
       const complexMessages: CoreMessage[] = [
         { role: 'system', content: 'System message' },
@@ -298,14 +341,16 @@ describe('selectRelevantTools', () => {
         },
       });
 
-      const result = await selectRelevantTools({
-        messages: complexMessages,
-        tools: mockTools,
-        languageModel: mockLanguageModel,
-        aiConfig: mockAiConfig,
-      });
+      const result = await getMCPToolsContext(
+        mockApp,
+        'projectId',
+        'authToken',
+        mockAiConfig,
+        complexMessages,
+        mockLanguageModel,
+      );
 
-      expect(result).toEqual(mockTools);
+      expect(result.filteredTools).toEqual(mockTools);
       expect(generateObject).toHaveBeenCalledWith(
         expect.objectContaining({
           messages: complexMessages,
@@ -316,12 +361,15 @@ describe('selectRelevantTools', () => {
 
   describe('Configuration', () => {
     it('should pass correct model settings from aiConfig to generateObject', async () => {
-      const mockTools: ToolSet = {
-        tool1: {
-          description: 'Tool 1 description',
-          parameters: {},
+      getMCPToolsMock.mockResolvedValue({
+        mcpClients: [],
+        tools: {
+          tool1: {
+            description: 'Tool 1 description',
+            parameters: {},
+          },
         },
-      };
+      });
 
       const aiConfigWithSettings = {
         ...mockAiConfig,
@@ -337,12 +385,14 @@ describe('selectRelevantTools', () => {
         },
       });
 
-      await selectRelevantTools({
-        messages: mockMessages,
-        tools: mockTools,
-        languageModel: mockLanguageModel,
-        aiConfig: aiConfigWithSettings,
-      });
+      await getMCPToolsContext(
+        mockApp,
+        'projectId',
+        'authToken',
+        aiConfigWithSettings,
+        mockMessages,
+        mockLanguageModel,
+      );
 
       expect(generateObject).toHaveBeenCalledWith(
         expect.objectContaining({
