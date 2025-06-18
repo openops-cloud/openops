@@ -8,6 +8,7 @@ ENV NODE_ENV=production
 
 RUN <<-```
     set -ex
+    echo "trigger"
     dnf install tar gzip shadow-utils util-linux findutils python3 make gcc gcc-c++ zlib-devel brotli-devel openssl-devel -y
     dnf -y clean all && rm -rf /var/cache
 
