@@ -1,6 +1,5 @@
 import { DragMoveEvent, useDndMonitor, useDroppable } from '@dnd-kit/core';
 import {
-  BranchLabel,
   cn,
   DRAGGED_STEP_TAG,
   EdgePath,
@@ -8,16 +7,10 @@ import {
   getEdgePath,
   getLengthMultiplier,
   getPositionRelativeToParent,
-  getSplitEdgeData,
   LINE_WIDTH,
 } from '@openops/components/ui';
-import {
-  FlowOperationType,
-  isNil,
-  StepLocationRelativeToParent,
-} from '@openops/shared';
+import { FlowOperationType, isNil } from '@openops/shared';
 import { BaseEdge, useNodes } from '@xyflow/react';
-import { t } from 'i18next';
 import React, { useState } from 'react';
 
 import { useBuilderStateContext } from '../../builder-hooks';
@@ -127,24 +120,6 @@ const EdgeWithButton = React.memo((props: EdgePath) => {
           </foreignObject>
         </BlockSelector>
       )}
-      {/* {isInsideBranch && (
-        <BranchLabel
-          branchName={
-            props.data.stepLocationRelativeToParent ===
-            StepLocationRelativeToParent.INSIDE_TRUE_BRANCH
-              ? t('True')
-              : t('False')
-          }
-          isDefaultBranch={false}
-          buttonPosition={buttonPosition}
-        />
-      )}
-      {isInsideSplit && (
-        <BranchLabel
-          {...getSplitEdgeData(props.source, props.target, nodes)}
-          buttonPosition={buttonPosition}
-        />
-      )} */}
     </>
   );
 });

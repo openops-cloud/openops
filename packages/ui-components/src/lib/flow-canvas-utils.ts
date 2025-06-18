@@ -519,6 +519,12 @@ export function getEdgePath({
 }) {
   const ARROW_DOWN = 'm6 -6 l-6 6 m-6 -6 l6 6';
 
+  const isInsideConditionOrSplit = [
+    StepLocationRelativeToParent.INSIDE_SPLIT,
+    StepLocationRelativeToParent.INSIDE_TRUE_BRANCH,
+    StepLocationRelativeToParent.INSIDE_FALSE_BRANCH,
+  ].includes(data.stepLocationRelativeToParent);
+
   const targetYWithPlaceHolder =
     targetY +
     (flowCanvasUtils.isPlaceHolder(data.targetType)
@@ -545,10 +551,11 @@ export function getEdgePath({
   const ARC_LENGTH = 15;
   const SIGN = sourceX > targetX ? -1 : 1;
 
+  const yOffset = isInsideConditionOrSplit ? 20 : 10;
   return {
     buttonPosition: {
       x: targetX - BUTTON_SIZE.width / 2,
-      y: targetYWithPlaceHolder - FIRST_LINE_LENGTH / 2 - 10,
+      y: targetYWithPlaceHolder - FIRST_LINE_LENGTH / 2 - yOffset,
     },
     edgePath: `M${sourceX} ${sourceY}
     v${
