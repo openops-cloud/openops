@@ -7,7 +7,7 @@ import {
   FormItem,
   Label,
 } from '@openops/components/ui';
-import { McpConfig } from '@openops/shared';
+import { isEmpty, McpConfig } from '@openops/shared';
 import { t } from 'i18next';
 import { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
@@ -21,7 +21,7 @@ import {
 } from './lib/mcp-form-utils';
 
 type McpSettingsFormProps = {
-  savedSettings?: McpConfig;
+  savedSettings?: McpSettingsFormSchema;
   onSave: (settings: McpSettingsFormSchema) => void;
   isSaving: boolean;
 };
@@ -51,7 +51,7 @@ const McpSettingsForm = ({
   });
 
   useEffect(() => {
-    if (!savedSettings) {
+    if (isEmpty(savedSettings)) {
       form.reset(EMPTY_MCP_FORM_VALUE);
       return;
     }
@@ -104,7 +104,7 @@ const McpSettingsForm = ({
                   className="text-base mt-0 whitespace-nowrap font-normal"
                   style={{ marginTop: '0rem' }}
                 >
-                  {t('AWS Cost')}{' '}
+                  {t('AWS Cost')}
                 </Label>
               </FormItem>
             )}

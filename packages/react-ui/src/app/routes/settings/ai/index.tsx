@@ -133,14 +133,14 @@ const AiSettingsPage = () => {
             isSaving={isSavingMcpSettings}
             savedSettings={mcpSettings}
           />
-          {mcpSettings?.awsCost && (
+          {mcpSettings?.id && (
             <TooltipWrapper tooltipText={t('Delete')}>
               <Trash
                 size={24}
                 role="button"
                 className="text-destructive"
                 aria-label="Delete"
-                onClick={() => onDeleteMcpSettings(mcpSettings.id)}
+                onClick={() => onDeleteMcpSettings(mcpSettings.id!)}
               />
             </TooltipWrapper>
           )}
