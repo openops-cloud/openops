@@ -1,15 +1,7 @@
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { QueryKeys } from '@/app/constants/query-keys';
-import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
-import { useStepSettingsContext } from '@/app/features/builder/step-settings/step-settings-context';
-import { toast, UNSAVED_CHANGES_TOAST } from '@openops/components/ui';
-import {
-  Action,
-  FlagId,
-  flowHelper,
-  FlowOperationType,
-  Trigger,
-} from '@openops/shared';
+import { toast } from '@openops/components/ui';
+import { Action, FlagId, Trigger } from '@openops/shared';
 import { useQuery } from '@tanstack/react-query';
 import { t } from 'i18next';
 import { useCallback } from 'react';
