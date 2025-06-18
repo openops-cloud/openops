@@ -47,11 +47,20 @@ export const graphqlAction = createAction({
       body: JSON.stringify({ query, variables: variables ?? {} }),
     });
 
-    if (!response.ok)
-      throw new Error(`GraphQL request failed: ${response.statusText}`);
+    if (!response.ok) {
+      const errorMessages = `GraphQL request failed: ${response.statusText}`;
+      logger.error(errorMessages);
+      throw new Error(errorMessages);
+    }
+
     const result = await response.json();
-    if (result.errors)
-      throw new Error(`GraphQL Error: ${result.errors[0].message}`);
+
+    if (result.errors) {
+      const errorMessages = `GraphQL Error: ${result.errors[0].message}`;
+      logger.error(errorMessages);
+      throw new Error(errorMessages);
+    }
+
     return result.data;
   },
 });
