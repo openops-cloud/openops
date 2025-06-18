@@ -335,17 +335,18 @@ function buildChildrenGraph(
               : locations[idx] ===
                 StepLocationRelativeToParent.INSIDE_FALSE_BRANCH
               ? 'False'
-              : `Branch ${idx + 1}`,
+              : graph.nodes[0].data.step?.settings?.options?.find(
+                  (o: { id: string }) =>
+                    o.id ===
+                    childGraphAfterOffset?.nodes[0]?.data?.branchNodeId,
+                )?.name,
         },
         selectable: false,
         draggable: false,
       });
     }
 
-    const isInsideSplit =
-      locations[idx] === StepLocationRelativeToParent.INSIDE_SPLIT;
-    deltaLeftX +=
-      cbx.width + HORIZONTAL_SPACE_BETWEEN_NODES + (isInsideSplit ? 30 : 0);
+    deltaLeftX += cbx.width + HORIZONTAL_SPACE_BETWEEN_NODES;
   });
   graph = mergeGraph(graph, commonPartGraph);
   return graph;
