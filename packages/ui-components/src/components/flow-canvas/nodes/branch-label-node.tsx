@@ -5,14 +5,14 @@ import {
   BRANCH_LABEL_WIDTH,
 } from '../../../lib/flow-canvas-utils';
 
-export function BranchLabelNode({
-  data,
-}: {
+type BranchLabelNodeProps = {
   data: {
     label: string;
     isDefaultBranch: boolean;
   };
-}) {
+};
+
+export function BranchLabelNode({ data }: BranchLabelNodeProps) {
   const { label, isDefaultBranch } = data;
   const style: React.CSSProperties = {
     width: BRANCH_LABEL_WIDTH,
