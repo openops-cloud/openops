@@ -31,8 +31,8 @@ export const mcpConfigController: FastifyPluginAsyncTypebox = async (app) => {
   app.get(
     '/',
     getMcpConfigRequest,
-    async (request, reply): Promise<McpConfig> => {
-      const config = await mcpConfigService.get(request.principal.projectId);
+    async (request, reply): Promise<McpConfig[]> => {
+      const config = await mcpConfigService.list(request.principal.projectId);
       return reply.status(StatusCodes.OK).send(config);
     },
   );

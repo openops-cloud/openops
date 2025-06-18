@@ -40,17 +40,21 @@ export const SaveAiConfigRequest = Type.Object({
 
 export type SaveAiConfigRequest = Static<typeof SaveAiConfigRequest>;
 
+const mcpServerConfig = Type.Record(Type.String(), Type.Unknown());
+
 export const McpConfig = Type.Object({
   ...BaseModelSchema,
   projectId: Type.String(),
-  awsCost: Type.Optional(awsCostSettings),
+  name: Type.String(),
+  config: Type.Optional(mcpServerConfig),
 });
 
 export type McpConfig = Static<typeof McpConfig>;
 
 export const SaveMcpConfigRequest = Type.Object({
   id: Type.Optional(Type.String()),
-  awsCost: Type.Optional(awsCostSettings),
+  name: Type.String(),
+  config: Type.Optional(mcpServerConfig),
 });
 
 export type SaveMcpConfigRequest = Static<typeof SaveMcpConfigRequest>;

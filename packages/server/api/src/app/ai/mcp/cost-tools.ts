@@ -1,6 +1,6 @@
 import { AwsAuth } from '@openops/common';
 import { AppSystemProp, logger, system } from '@openops/server-shared';
-import { AppConnectionType, CustomAuthConnectionValue } from '@openops/shared';
+import { CustomAuthConnectionValue, isEmpty } from '@openops/shared';
 import { experimental_createMCPClient } from 'ai';
 import { Experimental_StdioMCPTransport } from 'ai/mcp-stdio';
 import path from 'path';
@@ -17,24 +17,37 @@ type AwsCredentials = {
 async function getAwsCredentials(
   projectId: string,
 ): Promise<AwsCredentials | null> {
-  const mcpConfig = await mcpConfigService.get(projectId);
-  if (!mcpConfig?.awsCost?.enabled) {
-    logger.debug('AWS Cost is not enabled in MCP config, skipping AWS tools');
+  const awsCostMcpConfig = (await mcpConfigService.list(projectId)).find(
+    (c) => (c.name = 'aws-cost'),
+  );
+
+  if (
+    isEmpty(awsCostMcpConfig) ||
+    !awsCostMcpConfig?.config ||
+    !awsCostMcpConfig.config['enabled']
+  ) {
+    logger.debug(
+      'AWS Cost is not enabled in MCP config, skipping AWS cost tools',
+    );
+    return null;
+  }
+
+  const config = awsCostMcpConfig.config as Record<string, unknown>;
+
+  if (isEmpty(config['connectionName'])) {
+    logger.debug(
+      'connectionName is missing in the AWS Cost MCP config, skipping AWS cost tool',
+    );
     return null;
   }
 
   const connection = await appConnectionService.getOne({
     projectId,
-    name: mcpConfig.awsCost.connectionName,
+    name: config['connectionName'] as string,
   });
 
   if (!connection) {
-    logger.debug('AWS connection not found, skipping AWS tools');
-    return null;
-  }
-
-  if (connection.type !== AppConnectionType.CUSTOM_AUTH) {
-    logger.debug('Connection is not a custom auth type, skipping AWS tools');
+    logger.debug('AWS connection not found, skipping AWS cost tools');
     return null;
   }
 

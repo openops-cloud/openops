@@ -11,7 +11,8 @@ export class CreateMcpConfigTable1749644220382 implements MigrationInterface {
           "created" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
           "updated" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
           "projectId" character varying(21) NOT NULL,
-          "awsCost" jsonb DEFAULT '{"enabled": false, "connectionName": ""}',
+          "name" character varying(50) NOT NULL,
+          "config" jsonb DEFAULT '{}',
           CONSTRAINT "PK_mcp_config_id" PRIMARY KEY ("id")
         );
       `);
@@ -23,15 +24,11 @@ export class CreateMcpConfigTable1749644220382 implements MigrationInterface {
       `);
 
     await queryRunner.query(`
-        CREATE UNIQUE INDEX IF NOT EXISTS "UQ_mcp_config_projectId" ON "mcp_config" ("projectId");
+        CREATE INDEX IF NOT EXISTS "IDX_mcp_config_project_name" ON "mcp_config" ("projectId", "name");
       `);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    logger.info('CreateMcpConfigTable1749644220382: down starting');
-
-    await queryRunner.query(`DROP TABLE IF EXISTS "mcp_config";`);
-
-    logger.info('CreateMcpConfigTable1749644220382: down finished');
+    throw new Error('Not implemented');
   }
 }
