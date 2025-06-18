@@ -5,7 +5,6 @@ import {
   BRANCH_LABEL_WIDTH,
 } from '../../../lib/flow-canvas-utils';
 
-// todo move to ui-components
 export function BranchLabelNode({
   data,
 }: {
