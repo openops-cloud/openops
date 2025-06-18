@@ -7,7 +7,7 @@ import {
   FormItem,
   Label,
 } from '@openops/components/ui';
-import { isEmpty, McpConfig } from '@openops/shared';
+import { isEmpty } from '@openops/shared';
 import { t } from 'i18next';
 import { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
