@@ -1,5 +1,9 @@
 import { typeboxResolver } from '@hookform/resolvers/typebox';
-import { McpConfig, SaveMcpConfigRequest } from '@openops/shared';
+import {
+  AWS_COST_MCP_CONFIG_NAME,
+  McpConfig,
+  SaveMcpConfigRequest,
+} from '@openops/shared';
 import { Static, Type } from '@sinclair/typebox';
 import { Resolver } from 'react-hook-form';
 
@@ -32,8 +36,6 @@ export const mcpFormSchemaResolver: Resolver<McpSettingsFormSchema> = async (
   return typeboxValidation;
 };
 
-const AWS_COST_MCP_NAME = 'aws-cost';
-
 export const mapMcpConfigsToFormSchema = (
   mcpConfigs: McpConfig[],
 ): McpSettingsFormSchema => {
@@ -41,7 +43,7 @@ export const mapMcpConfigsToFormSchema = (
 
   mcpConfigs.forEach((config) => {
     switch (config.name) {
-      case AWS_COST_MCP_NAME:
+      case AWS_COST_MCP_CONFIG_NAME:
         formSchema.awsCost = {
           enabled: config.config.enabled as boolean,
           connectionName: config.config.connectionName as string,
@@ -61,7 +63,7 @@ export const mapFormSchemaToMcpConfigs = (
 
   if (formSchema.awsCost) {
     configs.push({
-      name: AWS_COST_MCP_NAME,
+      name: AWS_COST_MCP_CONFIG_NAME,
       config: {
         enabled: formSchema.awsCost.enabled,
         connectionName: formSchema.awsCost.connectionName,
