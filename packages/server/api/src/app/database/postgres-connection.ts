@@ -24,6 +24,7 @@ import { AddAuthProviderKeyToExistingAppConnections1749111073431 } from './migra
 import { AddStepIdToExistingFlowVersions1749644220381 } from './migrations/1749644220381-AddStepIdToExistingFlowVersions';
 import { CreateMcpConfigTable1749644220382 } from './migrations/1749644220382-CreateMcpConfigTable';
 import { SetBlockNameAsNullableInConnectionsTable1749809813762 } from './migrations/1749809813762-SetBlockNameAsNullableInConnectionsTable';
+import { RemoveBlockNameFromConnectionsTable1750161024797 } from './migrations/1750161024797-RemoveBlockNameFromConnectionsTable';
 
 const getSslConfig = (): boolean | TlsOptions => {
   const useSsl = system.get(AppSystemProp.POSTGRES_USE_SSL);
@@ -56,6 +57,7 @@ const getMigrations = (): (new () => MigrationInterface)[] => {
     AddStepIdToExistingFlowVersions1749644220381,
     CreateMcpConfigTable1749644220382,
     SetBlockNameAsNullableInConnectionsTable1749809813762,
+    RemoveBlockNameFromConnectionsTable1750161024797,
   ];
 };
 
