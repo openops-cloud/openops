@@ -23,6 +23,8 @@ export const NODE_WIDTH = 260;
 export const DRAGGED_STEP_TAG = 'dragged-step';
 export const BRANCH_LABEL_WIDTH = 118;
 export const BRANCH_LABEL_HEIGHT = 30;
+const BUTTON_VERTICAL_OFFSET = 10;
+const BUTTON_VERTICAL_OFFSET_INSIDE_CONDITION_OR_SPLIT = 20;
 
 export enum WorkflowNodeType {
   LOOP_PLACEHOLDER = 'loopPlaceholder',
@@ -577,7 +579,9 @@ export function getEdgePath({
   const ARC_LENGTH = 15;
   const SIGN = sourceX > targetX ? -1 : 1;
 
-  const buttonVerticalOffset = isInsideConditionOrSplit ? 20 : 10;
+  const buttonVerticalOffset = isInsideConditionOrSplit
+    ? BUTTON_VERTICAL_OFFSET_INSIDE_CONDITION_OR_SPLIT
+    : BUTTON_VERTICAL_OFFSET;
   return {
     buttonPosition: {
       x: targetX - BUTTON_SIZE.width / 2,
