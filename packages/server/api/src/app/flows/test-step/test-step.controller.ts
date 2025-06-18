@@ -1,5 +1,5 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { Action } from '@openops/shared';
+import { flowHelper } from '@openops/shared';
 import { Type } from '@sinclair/typebox';
 import { StatusCodes } from 'http-status-codes';
 import { flowVersionService } from '../flow-version/flow-version.service';
@@ -15,7 +15,11 @@ export const testStepController: FastifyPluginAsyncTypebox = async (app) => {
       versionId: undefined,
     });
 
-    const step = flowVersion.trigger.nextAction as Action | undefined;
+    const step = flowHelper
+      .getAllSteps(flowVersion.trigger)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .find((step: any) => step.id === stepId);
+
     if (!step || step.id !== stepId) {
       await reply.status(StatusCodes.NOT_FOUND).send({
         success: false,
