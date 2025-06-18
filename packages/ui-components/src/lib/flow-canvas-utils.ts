@@ -618,7 +618,15 @@ export const getLengthMultiplier = ({
   isInsideBranch: boolean;
   isInsideSplit: boolean;
   isInsideLoop: boolean;
-}) => (isInsideLoop ? 1.7 : isInsideSplit || isInsideBranch ? 1.5 : 1);
+}) => {
+  if (isInsideLoop) {
+    return 1.7;
+  }
+  if (isInsideSplit || isInsideBranch) {
+    return 1.5;
+  }
+  return 1;
+};
 
 type Step = Action | Trigger;
 

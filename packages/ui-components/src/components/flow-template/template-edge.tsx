@@ -23,14 +23,12 @@ const TemplateEdge = React.memo((props: EdgePath) => {
   });
 
   return (
-    <>
-      <BaseEdge
-        interactionWidth={0}
-        path={edgePath}
-        style={{ strokeWidth: `${LINE_WIDTH}px` }}
-        className="cursor-default !stroke-greyBlue"
-      />
-    </>
+    <BaseEdge
+      interactionWidth={0}
+      path={edgePath}
+      style={{ strokeWidth: `${LINE_WIDTH}px` }}
+      className="cursor-default !stroke-greyBlue"
+    />
   );
 });
 
