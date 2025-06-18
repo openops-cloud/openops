@@ -53,6 +53,10 @@ WORKDIR /usr/src/app
 # waste time on copying these 2.2GB even if no packages were changed.
 COPY --link package.json package-lock.json .npmrc ./
 RUN npm ci --no-audit --no-fund
+
+# Fix for high UID/GID values in npm packages causing Docker pull issues
+RUN find $(pwd) -name node_modules -type d -exec sh -c 'find {} -type d -exec chmod 755 {} \; && find {} -type f -exec chmod 644 {} \; && chown -R root:root {}' \;
+
 COPY --link dist dist
 
 COPY tools/link-packages-to-root.sh tools/link-packages-to-root.sh
