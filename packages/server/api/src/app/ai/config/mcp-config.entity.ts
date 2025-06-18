@@ -15,10 +15,15 @@ export const McpConfigEntity = new EntitySchema<McpConfigSchema>({
   columns: {
     ...BaseColumnSchemaPart,
     projectId: OpenOpsIdSchema,
-    awsCost: {
+    name: {
+      type: 'varchar',
+      length: 50,
+      nullable: false,
+    },
+    config: {
       type: JSONB_COLUMN_TYPE,
       nullable: true,
-      default: '{"enabled": false, "connectionName": ""}',
+      default: '{}',
     },
   },
   relations: {
@@ -35,9 +40,8 @@ export const McpConfigEntity = new EntitySchema<McpConfigSchema>({
   },
   indices: [
     {
-      name: 'idx_mcp_config_project_id',
-      columns: ['projectId'],
-      unique: true,
+      name: 'idx_mcp_config_project_name',
+      columns: ['projectId', 'name'],
     },
   ],
 });

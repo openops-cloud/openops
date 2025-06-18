@@ -39,7 +39,8 @@ export const mcpConfigService = {
       userId,
       projectId,
       id: config.id,
-      awsCost: config.awsCost,
+      config: config.config,
+      name: config.name,
       created: aiConfig.created ?? '',
       updated: aiConfig.updated ?? '',
     });
@@ -47,9 +48,20 @@ export const mcpConfigService = {
     return config;
   },
 
-  async get(projectId: string): Promise<McpConfig | undefined> {
-    return getOneBy({ projectId });
+  async get(params: {
+    projectId: string;
+    id: string;
+  }): Promise<McpConfig | undefined> {
+    return getOneBy({
+      id: params.id,
+      projectId: params.projectId,
+    });
   },
+
+  async list(projectId: string): Promise<McpConfig[]> {
+    return repo().findBy({ projectId });
+  },
+
   async delete({
     projectId,
     id,

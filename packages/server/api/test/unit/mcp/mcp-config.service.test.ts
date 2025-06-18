@@ -8,6 +8,7 @@ jest.mock('@openops/shared', () => ({
 const findOneByMock = jest.fn();
 const saveMock = jest.fn();
 const deleteMock = jest.fn();
+const findByMock = jest.fn();
 
 jest.mock('../../../src/app/core/db/repo-factory', () => ({
   ...jest.requireActual('../../../src/app/core/db/repo-factory'),
@@ -15,6 +16,7 @@ jest.mock('../../../src/app/core/db/repo-factory', () => ({
     findOneBy: findOneByMock,
     save: saveMock,
     delete: deleteMock,
+    findBy: findByMock,
   }),
 }));
 
@@ -31,11 +33,13 @@ import {
 
 describe('mcpConfigService', () => {
   const projectId = 'test-project';
+  const id = 'test-id';
   const userId = 'test-user';
   const mockMcpConfig = {
     id: 'mocked-id',
     projectId,
-    awsCost: {
+    name: 'aws-cost',
+    config: {
       enabled: true,
       connectionName: 'test-aws-connection',
     },
@@ -49,7 +53,8 @@ describe('mcpConfigService', () => {
 
   describe('save', () => {
     const baseRequest = {
-      awsCost: {
+      name: 'aws-cost',
+      config: {
         enabled: true,
         connectionName: 'test-aws-connection',
       },
@@ -78,7 +83,8 @@ describe('mcpConfigService', () => {
         id: mockMcpConfig.id,
         userId,
         projectId,
-        awsCost: mockMcpConfig.awsCost,
+        name: 'aws-cost',
+        config: mockMcpConfig.config,
         created: expect.any(String),
         updated: expect.any(String),
       });
@@ -117,7 +123,8 @@ describe('mcpConfigService', () => {
         id: existingId,
         userId,
         projectId,
-        awsCost: mockMcpConfig.awsCost,
+        name: 'aws-cost',
+        config: mockMcpConfig.config,
         created: '2025-04-22T12:00:00Z',
         updated: expect.any(String),
       });
@@ -128,18 +135,18 @@ describe('mcpConfigService', () => {
     test('should return MCP config when it exists', async () => {
       findOneByMock.mockResolvedValue(mockMcpConfig);
 
-      const result = await mcpConfigService.get(projectId);
+      const result = await mcpConfigService.get({ id, projectId });
 
-      expect(findOneByMock).toHaveBeenCalledWith({ projectId });
+      expect(findOneByMock).toHaveBeenCalledWith({ id, projectId });
       expect(result).toEqual(mockMcpConfig);
     });
 
     test('should return undefined when MCP config does not exist', async () => {
       findOneByMock.mockResolvedValue(null);
 
-      const result = await mcpConfigService.get(projectId);
+      const result = await mcpConfigService.get({ id, projectId });
 
-      expect(findOneByMock).toHaveBeenCalledWith({ projectId });
+      expect(findOneByMock).toHaveBeenCalledWith({ id, projectId });
       expect(result).toBeUndefined();
     });
   });
@@ -161,6 +168,55 @@ describe('mcpConfigService', () => {
         userId,
         projectId,
       });
+    });
+  });
+
+  describe('list', () => {
+    const mockMcpConfigs = [
+      {
+        id: 'mocked-id-1',
+        projectId,
+        name: 'aws-cost',
+        config: {
+          enabled: true,
+          connectionName: 'test-aws-connection',
+        },
+        created: '2025-04-22T12:00:00Z',
+        updated: '2025-04-22T12:00:00Z',
+      },
+      {
+        id: 'mocked-id-2',
+        projectId,
+        name: 'openops-tools',
+        config: {
+          enabled: false,
+          settings: {},
+        },
+        created: '2025-04-22T12:00:00Z',
+        updated: '2025-04-22T12:00:00Z',
+      },
+    ];
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    test('should return all MCP configs for a project', async () => {
+      findByMock.mockResolvedValue(mockMcpConfigs);
+
+      const result = await mcpConfigService.list(projectId);
+
+      expect(findByMock).toHaveBeenCalledWith({ projectId });
+      expect(result).toEqual(mockMcpConfigs);
+    });
+
+    test('should return empty array when no MCP configs exist', async () => {
+      findByMock.mockResolvedValue([]);
+
+      const result = await mcpConfigService.list(projectId);
+
+      expect(findByMock).toHaveBeenCalledWith({ projectId });
+      expect(result).toEqual([]);
     });
   });
 });

@@ -96,8 +96,8 @@ export function sendMcpConfigSavedEvent(
   telemetry.trackEvent({
     name: AiEventName.MCP_CONFIG_SAVED,
     labels: {
-      awsCostEnabled: params.awsCost?.enabled.toString() ?? 'false',
-      awsCostConnectionName: params.awsCost?.connectionName ?? 'none',
+      name: params.name,
+      config: JSON.stringify(params.config),
       projectId: params.projectId,
       id: params.id,
       userId: params.userId,

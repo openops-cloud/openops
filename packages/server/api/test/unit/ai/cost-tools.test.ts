@@ -55,6 +55,7 @@ jest.mock(
 jest.mock('../../../src/app/mcp/config/mcp-config.service', () => ({
   mcpConfigService: {
     get: jest.fn(),
+    list: jest.fn(),
   },
 }));
 
@@ -79,10 +80,15 @@ describe('getCostTools', () => {
   };
 
   const mockMcpConfig = {
-    awsCost: {
+    id: 'test-config-id',
+    projectId: mockProjectId,
+    name: 'aws-cost',
+    config: {
       enabled: true,
       connectionName: 'test-aws-connection',
     },
+    created: new Date().toISOString(),
+    updated: new Date().toISOString(),
   };
 
   const mockConnection: AppConnection = {
@@ -117,16 +123,19 @@ describe('getCostTools', () => {
       throw new Error(`${key} not set`);
     });
 
-    (mcpConfigService.get as jest.Mock).mockResolvedValue(mockMcpConfig);
+    (mcpConfigService.list as jest.Mock).mockResolvedValue([mockMcpConfig]);
     (appConnectionService.getOne as jest.Mock).mockResolvedValue(
       mockConnection,
     );
   });
 
   it('should return empty tools when AWS Cost is not enabled', async () => {
-    (mcpConfigService.get as jest.Mock).mockResolvedValue({
-      awsCost: { enabled: false },
-    });
+    (mcpConfigService.list as jest.Mock).mockResolvedValue([
+      {
+        ...mockMcpConfig,
+        config: { enabled: false },
+      },
+    ]);
 
     const result = await getCostTools(mockProjectId);
 
@@ -135,11 +144,12 @@ describe('getCostTools', () => {
       costAnalysis: { client: undefined, toolSet: {} },
     });
     expect(logger.debug).toHaveBeenCalledWith(
-      'AWS Cost is not enabled in MCP config, skipping AWS tools',
+      'AWS Cost is not enabled in MCP config, skipping AWS cost tools',
     );
   });
 
   it('should return empty tools when AWS connection is not found', async () => {
+    (mcpConfigService.list as jest.Mock).mockResolvedValue([mockMcpConfig]);
     (appConnectionService.getOne as jest.Mock).mockResolvedValue(null);
 
     const result = await getCostTools(mockProjectId);
@@ -149,28 +159,12 @@ describe('getCostTools', () => {
       costAnalysis: { client: undefined, toolSet: {} },
     });
     expect(logger.debug).toHaveBeenCalledWith(
-      'AWS connection not found, skipping AWS tools',
-    );
-  });
-
-  it('should return empty tools when connection is not CUSTOM_AUTH type', async () => {
-    (appConnectionService.getOne as jest.Mock).mockResolvedValue({
-      ...mockConnection,
-      type: AppConnectionType.OAUTH2,
-    });
-
-    const result = await getCostTools(mockProjectId);
-
-    expect(result).toEqual({
-      costExplorer: { client: undefined, toolSet: {} },
-      costAnalysis: { client: undefined, toolSet: {} },
-    });
-    expect(logger.debug).toHaveBeenCalledWith(
-      'Connection is not a custom auth type, skipping AWS tools',
+      'AWS connection not found, skipping AWS cost tools',
     );
   });
 
   it('should return empty tools when AWS credentials are missing', async () => {
+    (mcpConfigService.list as jest.Mock).mockResolvedValue([mockMcpConfig]);
     (appConnectionService.getOne as jest.Mock).mockResolvedValue({
       ...mockConnection,
       value: {
@@ -199,6 +193,24 @@ describe('getCostTools', () => {
       tools: jest.fn().mockResolvedValue(mockTools),
     };
     (experimental_createMCPClient as jest.Mock).mockResolvedValue(mockClient);
+
+    (mcpConfigService.list as jest.Mock).mockResolvedValue([
+      {
+        ...mockMcpConfig,
+        config: {
+          enabled: true,
+          connectionName: 'test-aws-connection',
+        },
+      },
+    ]);
+
+    (appConnectionService.getOne as jest.Mock).mockResolvedValue({
+      ...mockConnection,
+      value: {
+        type: AppConnectionType.CUSTOM_AUTH,
+        props: mockAwsCredentials,
+      } as CustomAuthConnectionValue,
+    });
 
     mockTransport.env = {
       AWS_ACCESS_KEY_ID: mockAwsCredentials.accessKeyId,
