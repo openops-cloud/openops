@@ -37,6 +37,7 @@ jobs:
         with:
           path: node_modules
           key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
+          fail-on-cache-miss: true
       - name: Restore NX cache
         uses: actions/cache@v4
         with:
@@ -105,6 +106,7 @@ jobs:
         with:
           path: node_modules
           key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
+          fail-on-cache-miss: true
       - name: Restore NX cache
         uses: actions/cache@v4
         with:
@@ -137,6 +139,7 @@ jobs:
         with:
           path: node_modules
           key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
+          fail-on-cache-miss: true
       - name: Restore NX cache
         uses: actions/cache@v4
         with:
@@ -175,6 +178,7 @@ jobs:
         with:
           path: dist
           key: dist-${{ github.sha }}
+          fail-on-cache-miss: true
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
