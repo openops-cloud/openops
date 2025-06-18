@@ -54,7 +54,10 @@ module.exports = {
         },
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
-        background: 'hsl(var(--background))',
+        background: {
+          DEFAULT: 'hsl(var(--background))',
+          800: 'hsl(var(--background-800))',
+        },
         editorBackground: 'hsl(var(--editor-background))',
         foreground: 'hsl(var(--foreground))',
         primary: {
@@ -81,6 +84,7 @@ module.exports = {
           200: 'hsl(var(--blue-accent-200))',
           300: 'hsl(var(--blue-accent-300))',
           400: 'hsl(var(--blue-accent-400))',
+          500: 'hsl(var(--blue-accent-500))',
         },
         greyBlue: {
           DEFAULT: 'hsl(var(--grey-blue))',

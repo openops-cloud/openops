@@ -1236,6 +1236,7 @@ export const flowHelper = {
   getStepFromSubFlow,
   isChildOf,
   transferFlowAsync,
+  transferFlow,
   getAllChildSteps,
   getAllStepsAtFirstLevel,
   duplicateStep,

@@ -19,8 +19,12 @@ const TemplateStepNode = React.memo(
 
     const { stepIndex, displayName } = useMemo(() => {
       const steps = flowHelper.getAllSteps(template);
+
       const index = steps.findIndex((step) => step.name === stepName);
-      return { stepIndex: index + 1, displayName: steps[index].displayName };
+      return {
+        stepIndex: index + 1,
+        displayName: steps[index].displayName,
+      };
     }, [stepName, template]);
 
     return (
