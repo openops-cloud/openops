@@ -46,7 +46,7 @@ export const McpConfig = Type.Object({
   ...BaseModelSchema,
   projectId: Type.String(),
   name: Type.String(),
-  config: Type.Optional(mcpServerConfig),
+  config: mcpServerConfig,
 });
 
 export type McpConfig = Static<typeof McpConfig>;
@@ -54,7 +54,7 @@ export type McpConfig = Static<typeof McpConfig>;
 export const SaveMcpConfigRequest = Type.Object({
   id: Type.Optional(Type.String()),
   name: Type.String(),
-  config: Type.Optional(mcpServerConfig),
+  config: mcpServerConfig,
 });
 
 export type SaveMcpConfigRequest = Static<typeof SaveMcpConfigRequest>;
