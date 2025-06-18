@@ -1,6 +1,10 @@
 import { AwsAuth } from '@openops/common';
 import { AppSystemProp, logger, system } from '@openops/server-shared';
-import { CustomAuthConnectionValue, isEmpty } from '@openops/shared';
+import {
+  AWS_COST_MCP_CONFIG_NAME,
+  CustomAuthConnectionValue,
+  isEmpty,
+} from '@openops/shared';
 import { experimental_createMCPClient } from 'ai';
 import { Experimental_StdioMCPTransport } from 'ai/mcp-stdio';
 import path from 'path';
@@ -18,7 +22,7 @@ async function getAwsCredentials(
   projectId: string,
 ): Promise<AwsCredentials | null> {
   const awsCostMcpConfig = (await mcpConfigService.list(projectId)).find(
-    (c) => (c.name = 'aws-cost'),
+    (c) => (c.name = AWS_COST_MCP_CONFIG_NAME),
   );
 
   if (isEmpty(awsCostMcpConfig) || !awsCostMcpConfig?.config['enabled']) {

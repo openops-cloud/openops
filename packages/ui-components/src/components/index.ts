@@ -23,6 +23,7 @@ export * from './flow-canvas/edges/utils';
 export * from './flow-canvas/flow-canvas';
 export * from './flow-canvas/loop-step-placeholder';
 export * from './flow-canvas/nodes/step-holder-placeholder';
+export * from './flow-canvas/sample-data-label';
 export * from './flow-canvas/types';
 export * from './flow-canvas/widgets/below-flow-widget';
 export * from './flow-template/explore-templates-carousel/explore-templates-carousel';

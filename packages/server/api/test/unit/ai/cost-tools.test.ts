@@ -3,6 +3,7 @@ import {
   AppConnection,
   AppConnectionStatus,
   AppConnectionType,
+  AWS_COST_MCP_CONFIG_NAME,
   CustomAuthConnectionValue,
 } from '@openops/shared';
 import { experimental_createMCPClient } from 'ai';
@@ -82,7 +83,7 @@ describe('getCostTools', () => {
   const mockMcpConfig = {
     id: 'test-config-id',
     projectId: mockProjectId,
-    name: 'aws-cost',
+    name: AWS_COST_MCP_CONFIG_NAME,
     config: {
       enabled: true,
       connectionName: 'test-aws-connection',

@@ -10,7 +10,7 @@ type BranchLabelProps = {
 const LABEL_WIDTH = 116;
 const LABEL_HEIGHT = 28;
 const LABEL_X_OFFSET = 50;
-const LABEL_Y_OFFSET = 28;
+const LABEL_Y_OFFSET = 18;
 
 export const BranchLabel = ({
   branchName,

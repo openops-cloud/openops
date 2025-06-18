@@ -2,11 +2,6 @@ import { Static, Type } from '@sinclair/typebox';
 import { BaseModelSchema } from '../../common/base-model';
 import { AiProviderEnum } from '../providers/index';
 
-const awsCostSettings = Type.Object({
-  enabled: Type.Boolean(),
-  connectionName: Type.String(),
-});
-
 export const AiConfig = Type.Object({
   ...BaseModelSchema,
   projectId: Type.String(),
@@ -50,6 +45,7 @@ export const McpConfig = Type.Object({
 });
 
 export type McpConfig = Static<typeof McpConfig>;
+export const AWS_COST_MCP_CONFIG_NAME = 'aws-cost';
 
 export const SaveMcpConfigRequest = Type.Object({
   id: Type.Optional(Type.String()),
