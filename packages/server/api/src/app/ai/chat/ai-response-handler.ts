@@ -11,6 +11,10 @@ import {
   appendMessagesToChatHistoryContext,
   saveChatHistoryContext,
 } from './ai-chat.service';
+import {
+  shouldTryToSummarize,
+  summarizeChatHistory,
+} from './ai-history-summarizer';
 import { generateMessageId } from './ai-message-id-generator';
 import { streamAIResponse } from './ai-stream-handler';
 import { getMCPToolsContext, MCPToolsContext } from './tools.service';
@@ -134,7 +138,28 @@ async function streamAiResponseWithRetry(
       chatHistory: chatContext.chatHistory,
     });
   } catch (error) {
-    unrecoverableError(params, error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+
+    if (!shouldTryToSummarize(errorMessage)) {
+      unrecoverableError(params, error);
+      return newMessages;
+    }
+
+    chatContext.chatHistory = await summarizeChatHistory(
+      chatContext.chatHistory,
+      params.languageModel,
+      params.aiConfig,
+    );
+
+    try {
+      await streamAIResponse({
+        ...params,
+        newMessages,
+        chatHistory: chatContext.chatHistory,
+      });
+    } catch (error) {
+      unrecoverableError(params, error);
+    }
   }
 
   return newMessages;
@@ -177,7 +202,29 @@ async function getMCPToolsContextWithRetry(
       languageModel,
     );
   } catch (error) {
-    logger.error('Error selecting tools', error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    if (shouldTryToSummarize(errorMessage)) {
+      chatCurrentContext.chatHistory = await summarizeChatHistory(
+        chatCurrentContext.chatHistory,
+        languageModel,
+        aiConfig,
+      );
+
+      try {
+        return await getMCPToolsContext(
+          app,
+          projectId,
+          authToken,
+          aiConfig,
+          chatCurrentContext.chatHistory,
+          languageModel,
+        );
+      } catch (error) {
+        logger.debug('Error selecting tools', error);
+      }
+    } else {
+      logger.error('Error selecting tools', error);
+    }
   }
 
   return {

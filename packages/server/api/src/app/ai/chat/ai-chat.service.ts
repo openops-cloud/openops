@@ -5,7 +5,7 @@ import {
 } from '@openops/server-shared';
 import { CoreMessage } from 'ai';
 
-// Chat expiration time is 24 hour
+// Chat expiration time is 24 hours
 const DEFAULT_EXPIRE_TIME = 86400;
 const LOCK_EXPIRE_TIME = 30000;
 
