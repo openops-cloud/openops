@@ -43,7 +43,7 @@ export const stepTestOutputHooks = {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return stepTestOutputHooks.useStepTestOutput(flowVersionId, stepId!);
   },
-  useSaveSelectedStepSampleData() {
+  useSaveSelectedStepSampleData(form: UseFormReturn<Action | Trigger>) {
     const { selectedStep } = useStepSettingsContext();
     const [applyOperation] = useBuilderStateContext((state) => [
       state.applyOperation,
@@ -92,8 +92,12 @@ export const stepTestOutputHooks = {
         };
 
         applyOperation(createOperation(), () => toast(UNSAVED_CHANGES_TOAST));
+
+        form.setValue('settings.inputUiInfo.sampleData', sampleData, {
+          shouldValidate: true,
+        });
       },
-      [applyOperation, selectedStep, sampleDataSizeLimit],
+      [applyOperation, selectedStep, sampleDataSizeLimit, form],
     );
   },
 };
