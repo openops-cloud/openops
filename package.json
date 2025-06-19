@@ -25,7 +25,7 @@
     "storybook": "nx run ui-components:storybook",
     "build-storybook": "nx run ui-components:build-storybook --",
     "chromatic": "npx chromatic --",
-    "build:blocks": "nx run-many -t build -p blocks-*",
+    "build:blocks": "npx nx run-many -t build -p blocks-*",
     "build:blocks:changed": "npx ts-node -e \"const { blocksBuilder } = require('@openops/server-shared'); blocksBuilder().catch(console.error);\"",
     "link:blocks": "./tools/link-packages-to-root.sh",
     "link:blocks:engine": "./tools/link-blocks-for-engine.sh",
