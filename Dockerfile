@@ -55,6 +55,8 @@ COPY --link package.json package-lock.json .npmrc ./
 RUN npm ci --no-audit --no-fund
 COPY --link dist dist
 
+# Link blocks for dynamic imports (needed for engine runtime)
+# Webpack bundling handles static dependencies, but dynamic imports still need npm linking
 COPY tools/link-packages-to-root.sh tools/link-packages-to-root.sh
 RUN ./tools/link-packages-to-root.sh
 

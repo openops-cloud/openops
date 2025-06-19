@@ -24,7 +24,14 @@
     "i18n:extract": "i18next --config packages/react-ui/i18next-parser.config.js && jq 'to_entries | map({(.key): .key}) | add' packages/react-ui/public/locales/en/translation.json > packages/react-ui/public/locales/en/translation.tmp.json && mv packages/react-ui/public/locales/en/translation.tmp.json packages/react-ui/public/locales/en/translation.json",
     "storybook": "nx run ui-components:storybook",
     "build-storybook": "nx run ui-components:build-storybook --",
-    "chromatic": "npx chromatic --"
+    "chromatic": "npx chromatic --",
+    "build:blocks": "nx run-many -t build -p blocks-*",
+    "build:blocks:changed": "npx ts-node -e \"const { blocksBuilder } = require('@openops/server-shared'); blocksBuilder().catch(console.error);\"",
+    "link:blocks": "./tools/link-packages-to-root.sh",
+    "link:blocks:engine": "./tools/link-blocks-for-engine.sh",
+    "link:framework": "./tools/link-framework.sh",
+    "link:block": "./tools/link-packages-to-root.sh",
+    "dev:fast": "npm run build:blocks:changed && npm run link:blocks:engine && npm run link:framework && npm run dev"
   },
   "private": true,
   "dependencies": {
