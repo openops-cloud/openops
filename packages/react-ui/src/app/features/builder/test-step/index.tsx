@@ -11,10 +11,17 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@openops/components/ui';
-import { ActionType, FlagId, TriggerType } from '@openops/shared';
+import {
+  Action,
+  ActionType,
+  FlagId,
+  Trigger,
+  TriggerType,
+} from '@openops/shared';
 import { t } from 'i18next';
 import { Info } from 'lucide-react';
 import React from 'react';
+import { useFormContext } from 'react-hook-form';
 import { TestActionSection } from './test-action-section';
 import { TestTriggerSection } from './test-trigger-section';
 
@@ -32,8 +39,9 @@ enum TabListEnum {
 
 const TestStepContainer = React.memo(
   ({ flowVersionId, isSaving, type, flowId }: TestStepContainerProps) => {
+    const form = useFormContext<Action | Trigger>();
     const useSaveSelectedStepSampleData =
-      stepTestOutputHooks.useSaveSelectedStepSampleData();
+      stepTestOutputHooks.useSaveSelectedStepSampleData(form);
 
     const { data: showSampleData } = flagsHooks.useFlag<boolean>(
       FlagId.SHOW_SAMPLE_DATA,
