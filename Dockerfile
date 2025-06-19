@@ -53,6 +53,12 @@ WORKDIR /usr/src/app
 # waste time on copying these 2.2GB even if no packages were changed.
 COPY --link package.json package-lock.json .npmrc ./
 RUN npm ci --no-audit --no-fund
+
+# Build blocks for production (needed for block metadata API)
+COPY --link packages packages
+COPY --link nx.json tsconfig.base.json ./
+RUN npm run build:blocks
+
 COPY --link dist dist
 
 # Link blocks for dynamic imports (needed for engine runtime)
@@ -61,7 +67,6 @@ COPY tools/link-packages-to-root.sh tools/link-packages-to-root.sh
 RUN ./tools/link-packages-to-root.sh
 
 # Copy Output files to appropriate directory from build stage
-COPY --link packages packages
 COPY --link ai-prompts ai-prompts
 
 LABEL service=openops
