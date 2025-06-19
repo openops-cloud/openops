@@ -54,17 +54,29 @@ WORKDIR /usr/src/app
 COPY --link package.json package-lock.json .npmrc ./
 RUN npm ci --no-audit --no-fund
 
-# Build blocks for production (needed for block metadata API)
-COPY --link packages packages
-COPY --link nx.json tsconfig.base.json ./
-RUN npm run build:blocks
-
+# Copy pre-built dist directory (blocks should already be built)
 COPY --link dist dist
+
+# Verify blocks are available
+RUN if [ -d "dist/packages/blocks" ] && [ "$(ls -A dist/packages/blocks 2>/dev/null)" ]; then \
+      echo "✓ Blocks found in dist directory"; \
+      ls -la dist/packages/blocks/ | head -10; \
+    else \
+      echo "✗ No blocks found in dist directory - they need to be built before Docker build"; \
+      exit 1; \
+    fi
 
 # Link blocks for dynamic imports (needed for engine runtime)
 # Webpack bundling handles static dependencies, but dynamic imports still need npm linking
 COPY tools/link-packages-to-root.sh tools/link-packages-to-root.sh
 RUN ./tools/link-packages-to-root.sh
+
+# Link framework and core packages (server-shared, blocks-framework, shared)
+COPY tools/link-framework.sh tools/link-framework.sh
+RUN ./tools/link-framework.sh
+
+# Copy packages directory (needed for runtime references but not for linking)
+COPY --link packages packages
 
 # Copy Output files to appropriate directory from build stage
 COPY --link ai-prompts ai-prompts
