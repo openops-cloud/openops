@@ -1,4 +1,4 @@
-import { FlowOperationType, flowHelper } from '@openops/shared';
+import { flowHelper } from '@openops/shared';
 import { act, renderHook } from '@testing-library/react';
 import { flagsHooks } from '../../../common/hooks/flags-hooks';
 import { useBuilderStateContext } from '../builder-hooks';
@@ -54,6 +54,11 @@ const mockStep = {
   valid: true,
 };
 
+const mockSetValue = jest.fn();
+const mockForm = {
+  setValue: mockSetValue,
+} as any;
+
 describe('stepTestOutputHooks.useSaveSelectedStepSampleData', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -71,7 +76,7 @@ describe('stepTestOutputHooks.useSaveSelectedStepSampleData', () => {
     mockFlowHelper.isTrigger.mockReturnValue(false);
 
     const { result } = renderHook(() =>
-      stepTestOutputHooks.useSaveSelectedStepSampleData(),
+      stepTestOutputHooks.useSaveSelectedStepSampleData(mockForm),
     );
 
     expect(typeof result.current).toBe('function');
@@ -82,23 +87,17 @@ describe('stepTestOutputHooks.useSaveSelectedStepSampleData', () => {
     mockFlowHelper.isTrigger.mockReturnValue(false);
 
     const { result } = renderHook(() =>
-      stepTestOutputHooks.useSaveSelectedStepSampleData(),
+      stepTestOutputHooks.useSaveSelectedStepSampleData(mockForm),
     );
 
     act(() => {
       result.current(testSampleData);
     });
 
-    expect(mockFlowHelper.isTrigger).toHaveBeenCalledWith(mockStep.type);
-    expect(mockApplyOperation).toHaveBeenCalledWith(
-      {
-        type: FlowOperationType.UPDATE_ACTION,
-        request: expect.objectContaining({
-          id: 'step-123',
-          name: 'test-step',
-        }),
-      },
-      expect.any(Function),
+    expect(mockSetValue).toHaveBeenCalledWith(
+      'settings.inputUiInfo.sampleData',
+      testSampleData,
+      { shouldValidate: true },
     );
   });
 
@@ -107,23 +106,17 @@ describe('stepTestOutputHooks.useSaveSelectedStepSampleData', () => {
     mockFlowHelper.isTrigger.mockReturnValue(true);
 
     const { result } = renderHook(() =>
-      stepTestOutputHooks.useSaveSelectedStepSampleData(),
+      stepTestOutputHooks.useSaveSelectedStepSampleData(mockForm),
     );
 
     act(() => {
       result.current(testSampleData);
     });
 
-    expect(mockFlowHelper.isTrigger).toHaveBeenCalledWith(mockStep.type);
-    expect(mockApplyOperation).toHaveBeenCalledWith(
-      {
-        type: FlowOperationType.UPDATE_TRIGGER,
-        request: expect.objectContaining({
-          id: 'step-123',
-          name: 'test-step',
-        }),
-      },
-      expect.any(Function),
+    expect(mockSetValue).toHaveBeenCalledWith(
+      'settings.inputUiInfo.sampleData',
+      testSampleData,
+      { shouldValidate: true },
     );
   });
 
@@ -132,18 +125,17 @@ describe('stepTestOutputHooks.useSaveSelectedStepSampleData', () => {
     mockFlowHelper.isTrigger.mockReturnValue(false);
 
     const { result } = renderHook(() =>
-      stepTestOutputHooks.useSaveSelectedStepSampleData(),
+      stepTestOutputHooks.useSaveSelectedStepSampleData(mockForm),
     );
 
     act(() => {
       result.current(testSampleData);
     });
 
-    const applyOperationCall = mockApplyOperation.mock.calls[0];
-    const operationRequest = applyOperationCall[0];
-
-    expect(operationRequest.request.settings.inputUiInfo.sampleData).toEqual(
+    expect(mockSetValue).toHaveBeenCalledWith(
+      'settings.inputUiInfo.sampleData',
       testSampleData,
+      { shouldValidate: true },
     );
   });
 
@@ -151,28 +143,28 @@ describe('stepTestOutputHooks.useSaveSelectedStepSampleData', () => {
     mockFlowHelper.isTrigger.mockReturnValue(false);
 
     const { result } = renderHook(() =>
-      stepTestOutputHooks.useSaveSelectedStepSampleData(),
+      stepTestOutputHooks.useSaveSelectedStepSampleData(mockForm),
     );
 
     act(() => {
       result.current(null);
     });
 
-    const applyOperationCall = mockApplyOperation.mock.calls[0];
-    const operationRequest = applyOperationCall[0];
-
-    expect(operationRequest.request.settings.inputUiInfo.sampleData).toBeNull();
+    expect(mockSetValue).toHaveBeenCalledWith(
+      'settings.inputUiInfo.sampleData',
+      null,
+      { shouldValidate: true },
+    );
 
     act(() => {
       result.current(undefined);
     });
 
-    const secondCall = mockApplyOperation.mock.calls[1];
-    const secondRequest = secondCall[0];
-
-    expect(
-      secondRequest.request.settings.inputUiInfo.sampleData,
-    ).toBeUndefined();
+    expect(mockSetValue).toHaveBeenCalledWith(
+      'settings.inputUiInfo.sampleData',
+      undefined,
+      { shouldValidate: true },
+    );
   });
 });
 
