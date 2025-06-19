@@ -1,5 +1,4 @@
 export * from './lib/blocks-builder';
-export { buildSpecificBlocks } from './lib/blocks-builder';
 export * from './lib/blocks/file-blocks-utils';
 export * from './lib/cache-handler';
 export * from './lib/cache/cache-wrapper';
