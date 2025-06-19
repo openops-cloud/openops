@@ -75,6 +75,10 @@ RUN ./tools/link-packages-to-root.sh
 COPY tools/link-framework.sh tools/link-framework.sh
 RUN ./tools/link-framework.sh
 
+# Link blocks for engine dynamic imports (creates direct symlinks in node_modules)
+COPY tools/link-blocks-for-engine.sh tools/link-blocks-for-engine.sh
+RUN ./tools/link-blocks-for-engine.sh
+
 # Copy packages directory (needed for runtime references but not for linking)
 COPY --link packages packages
 
