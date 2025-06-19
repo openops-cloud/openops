@@ -60,8 +60,8 @@ export const OPS_NODE_SIZE: Record<
     width: SMALL_BUTTON_SIZE,
   },
   [WorkflowNodeType.BRANCH_LABEL]: {
-    height: 40,
-    width: NODE_WIDTH,
+    height: BRANCH_LABEL_HEIGHT,
+    width: BRANCH_LABEL_WIDTH,
   },
 };
 

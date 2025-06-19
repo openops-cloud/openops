@@ -278,7 +278,7 @@ const WorkflowStepNode = React.memo(
           </div>
         </div>
 
-        {hasSampleData && <SampleDataLabel />}
+        {hasSampleData && !isDragging && <SampleDataLabel />}
       </>
     );
   },
