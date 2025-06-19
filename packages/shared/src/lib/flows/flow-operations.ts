@@ -9,7 +9,7 @@ import {
   SplitActionSchema,
 } from './actions/action';
 import { FlowStatus } from './flow';
-import { BlockTrigger, EmptyTrigger, Trigger } from './triggers/trigger';
+import { Trigger, TriggerWithOptionalId } from './triggers/trigger';
 
 export enum FlowOperationType {
   LOCK_AND_PUBLISH = 'LOCK_AND_PUBLISH',
@@ -59,7 +59,7 @@ export type AppConnectionsWithSupportedBlocks = Static<
 export const ImportFlowRequest = Type.Object({
   displayName: Type.String({}),
   description: Type.Optional(Type.String({})),
-  trigger: Trigger,
+  trigger: Type.Omit(Trigger, ['id']),
   connections: Type.Optional(Type.Array(AppConnectionsWithSupportedBlocks)),
 });
 
@@ -119,7 +119,7 @@ export const AddActionRequest = Type.Object({
 });
 export type AddActionRequest = Static<typeof AddActionRequest>;
 
-export const UpdateTriggerRequest = Type.Union([EmptyTrigger, BlockTrigger]);
+export const UpdateTriggerRequest = TriggerWithOptionalId;
 export type UpdateTriggerRequest = Static<typeof UpdateTriggerRequest>;
 
 export const UpdateFlowStatusRequest = Type.Object({
