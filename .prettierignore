@@ -4,7 +4,6 @@
 /coverage
 
 /.nx/
-/packages/engine/webpack.config.js
 /packages/engine/test/
 /packages/ui-components/storybook-static/
 /cache/
