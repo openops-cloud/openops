@@ -1,5 +1,5 @@
 import { createCustomApiCallAction } from '@openops/blocks-common';
-import { createBlock } from '@openops/blocks-framework';
+import { createBlock, Property } from '@openops/blocks-framework';
 import { BlockCategory } from '@openops/shared';
 import { cloudhealthAuth } from './lib/auth';
 import { graphqlAction } from './lib/graphql-action';
@@ -15,6 +15,12 @@ export const cloudhealth = createBlock({
     createCustomApiCallAction({
       baseUrl: () => 'https://chapi.cloudhealthtech.com/v1',
       auth: cloudhealthAuth,
+      additionalProps: {
+        documentation: Property.MarkDown({
+          value:
+            'For more information, visit the [CloudHealth API documentation](https://apidocs.cloudhealthtech.com/).',
+        }),
+      },
       authMapping: async (context) => ({
         Authorization: `Bearer ${context.auth as string}`,
         'Content-Type': 'application/json',
