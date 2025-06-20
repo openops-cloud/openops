@@ -209,7 +209,7 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .find((step: any) => step.id === stepId);
 
-      if (!step || step.id !== stepId) {
+      if (!step) {
         await reply.status(StatusCodes.NOT_FOUND).send({
           success: false,
           output: 'Step not found',
