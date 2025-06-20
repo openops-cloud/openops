@@ -43,7 +43,6 @@ type GetStepFromSubFlow = {
   stepName: string;
 };
 
-// todo
 const actionSchemaValidator = TypeCompiler.Compile(SingleActionSchema);
 const triggerSchemaValidation = TypeCompiler.Compile(TriggerWithOptionalId);
 
