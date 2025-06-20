@@ -26,12 +26,9 @@
     "build-storybook": "nx run ui-components:build-storybook --",
     "chromatic": "npx chromatic --",
     "build:blocks": "npx nx run-many -t build -p blocks-*",
-    "build:blocks:changed": "npx ts-node -e \"const { blocksBuilder } = require('@openops/server-shared'); blocksBuilder().catch(console.error);\"",
     "link:blocks": "./tools/link-packages-to-root.sh",
     "link:blocks:engine": "./tools/link-blocks-for-engine.sh",
-    "link:framework": "./tools/link-framework.sh",
-    "link:block": "./tools/link-packages-to-root.sh",
-    "dev:fast": "npm run build:blocks:changed && npm run link:blocks:engine && npm run link:framework && cross-env-shell FORCE_COLOR=true concurrently -n \"GUI,API,ENG\" -c \"bgBlue.bold,bgGreen.bold,bgRed.bold,bgYellow.bold\" \"npm:serve:frontend\" \"npm:serve:backend\" \"npm:serve:engine\""
+    "link:framework": "./tools/link-framework.sh"
   },
   "private": true,
   "dependencies": {
