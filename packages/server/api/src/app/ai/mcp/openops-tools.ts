@@ -16,6 +16,7 @@ import { MCPTool } from './mcp-tools';
 const INCLUDED_PATHS: Record<string, string[]> = {
   '/v1/files/{fileId}': ['get'],
   '/v1/flow-versions/': ['get'],
+  '/v1/flow-versions/{workflowId}/{stepId}': ['post'],
   '/v1/flows/': ['get'],
   '/v1/flows/count': ['get'],
   '/v1/flows/{id}': ['get'],
@@ -29,8 +30,6 @@ const INCLUDED_PATHS: Record<string, string[]> = {
   '/v1/app-connections/': ['get', 'patch'],
   '/v1/app-connections/{id}': ['get'],
   '/v1/app-connections/metadata': ['get'],
-  '/v1/test-step/{workflowId}/{stepId}': ['post'],
-  '/v1/test-trigger': ['post'],
 };
 
 function filterOpenApiSchema(schema: OpenAPI.Document): OpenAPI.Document {
