@@ -54,7 +54,7 @@ WORKDIR /usr/src/app
 COPY --link package.json package-lock.json .npmrc ./
 RUN npm ci --no-audit --no-fund
 
-# Copy pre-built dist directory (blocks should already be built)
+# Copy pre-built dist directory
 COPY --link dist dist
 
 # Verify blocks are available
@@ -66,8 +66,7 @@ RUN if [ -d "dist/packages/blocks" ] && [ "$(ls -A dist/packages/blocks 2>/dev/n
       exit 1; \
     fi
 
-# Link blocks for dynamic imports (needed for engine runtime)
-# Webpack bundling handles static dependencies, but dynamic imports still need npm linking
+# Link packages using original production approach (same as main branch)
 COPY tools/link-packages-to-root.sh tools/link-packages-to-root.sh
 RUN ./tools/link-packages-to-root.sh
 

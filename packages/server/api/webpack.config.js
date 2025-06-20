@@ -1,54 +1,57 @@
 const { composePlugins, withNx } = require('@nx/webpack');
 const IgnoreDynamicRequire = require('webpack-ignore-dynamic-require');
 const path = require('path');
-const fs = require('fs');
-
-// Helper to get all block directories
-function getBlockDirectories() {
-  const blocksPath = path.resolve(__dirname, '../../blocks');
-  const blockDirs = [];
-
-  function findBlockDirs(dir) {
-    try {
-      const entries = fs.readdirSync(dir, { withFileTypes: true });
-
-      for (const entry of entries) {
-        if (
-          entry.isDirectory() &&
-          !['node_modules', 'dist', 'framework', 'common'].includes(entry.name)
-        ) {
-          const fullPath = path.join(dir, entry.name);
-          const packageJsonPath = path.join(fullPath, 'package.json');
-
-          try {
-            const packageJson = JSON.parse(
-              fs.readFileSync(packageJsonPath, 'utf-8'),
-            );
-            if (packageJson.name?.startsWith('@openops/block-')) {
-              blockDirs.push(fullPath);
-            } else {
-              findBlockDirs(fullPath);
-            }
-          } catch {
-            findBlockDirs(fullPath);
-          }
-        }
-      }
-    } catch (e) {
-      // Ignore errors
-    }
-  }
-
-  findBlockDirs(blocksPath);
-  return blockDirs;
-}
 
 module.exports = composePlugins(withNx(), (config) => {
   config.plugins.push(new IgnoreDynamicRequire());
 
-  // Only add smart block watching in development
-  if (process.env.NODE_ENV !== 'production') {
-    // Enhanced webpack plugin for smarter block watching
+  // Only add smart block watching in development environment (not production builds)
+  if (process.env.NODE_ENV !== 'production' && !process.env.DOCKER_ENV) {
+    const fs = require('fs');
+
+    // Helper to get all block directories
+    function getBlockDirectories() {
+      const blocksPath = path.resolve(__dirname, '../../blocks');
+      const blockDirs = [];
+
+      function findBlockDirs(dir) {
+        try {
+          const entries = fs.readdirSync(dir, { withFileTypes: true });
+
+          for (const entry of entries) {
+            if (
+              entry.isDirectory() &&
+              !['node_modules', 'dist', 'framework', 'common'].includes(
+                entry.name,
+              )
+            ) {
+              const fullPath = path.join(dir, entry.name);
+              const packageJsonPath = path.join(fullPath, 'package.json');
+
+              try {
+                const packageJson = JSON.parse(
+                  fs.readFileSync(packageJsonPath, 'utf-8'),
+                );
+                if (packageJson.name?.startsWith('@openops/block-')) {
+                  blockDirs.push(fullPath);
+                } else {
+                  findBlockDirs(fullPath);
+                }
+              } catch {
+                findBlockDirs(fullPath);
+              }
+            }
+          }
+        } catch (e) {
+          // Ignore errors
+        }
+      }
+
+      findBlockDirs(blocksPath);
+      return blockDirs;
+    }
+
+    // Enhanced webpack plugin for smarter block watching (development only)
     config.plugins.push({
       apply: (compiler) => {
         let isInitialBuild = true;
@@ -107,6 +110,17 @@ module.exports = composePlugins(withNx(), (config) => {
             callback();
           },
         );
+      },
+    });
+  } else {
+    // Production mode: Use original simple approach (same as main branch)
+    config.plugins.push({
+      apply: (compiler) => {
+        compiler.hooks.afterCompile.tap('WatchBlocksFolder', (compilation) => {
+          compilation.contextDependencies.add(
+            path.resolve(__dirname, '../../blocks'),
+          );
+        });
       },
     });
   }

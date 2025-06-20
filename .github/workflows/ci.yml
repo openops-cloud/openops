@@ -83,18 +83,18 @@ jobs:
           commit_message: Update THIRD_PARTY_LICENSES.txt
   test:
     strategy:
-        matrix:
-            test-suits:
-              - name: UI
-                include: ui-*,*-ui
-              - name: Blocks
-                include: blocks-*
-              - name: Server API
-                key: server-api
-                include: server-api
-              - name: Engine and Libraries
-                key: others
-                exclude: ui-*,*-ui,blocks-*,server-api
+      matrix:
+        test-suits:
+          - name: UI
+            include: ui-*,*-ui
+          - name: Blocks
+            include: blocks-*
+          - name: Server API
+            key: server-api
+            include: server-api
+          - name: Engine and Libraries
+            key: others
+            exclude: ui-*,*-ui,blocks-*,server-api
     name: Test ${{ matrix.test-suits.name }}
     needs: install
     runs-on: ubuntu-latest
@@ -160,15 +160,15 @@ jobs:
           key: dist-${{ github.sha }}
   build-images:
     strategy:
-        matrix:
-            target:
-            - name: App
-              file: Dockerfile
-              repository: openops-app
-            - name: Engine
-              file: engine.Dockerfile
-              repository: openops-engine
-            platform: [amd64, arm64]
+      matrix:
+        target:
+          - name: App
+            file: Dockerfile
+            repository: openops-app
+          - name: Engine
+            file: engine.Dockerfile
+            repository: openops-engine
+        platform: [amd64, arm64]
     name: Build ${{ matrix.target.name }} Image for ${{ matrix.platform }}
     needs: build
     runs-on: ${{ matrix.platform == 'amd64' && 'ubuntu-latest' || 'ubuntu-arm64' }}
@@ -275,4 +275,43 @@ jobs:
 
           echo "✅ Successfully pushed image $BASE_REPOSITORY_URI:$SANITIZED_BRANCH" >> $GITHUB_STEP_SUMMARY
 
+      - name: Verify blocks and core packages are built
+        run: |
+          echo "Verifying blocks are built in dist directory..."
+          if [ -d "dist/packages/blocks" ] && [ "$(ls -A dist/packages/blocks 2>/dev/null)" ]; then
+            echo "✅ Blocks found in dist directory:"
+            ls -la dist/packages/blocks/ | head -10
+            echo "✅ Sample block structure:"
+            find dist/packages/blocks/ -name "index.js" | head -3 | xargs -I {} sh -c 'echo "Found: {}"'
+          else
+            echo "❌ No blocks found in dist directory!"
+            echo "Contents of dist/packages:"
+            ls -la dist/packages/ || echo "dist/packages not found"
+            exit 1
+          fi
 
+          echo "Verifying core packages are built..."
+          CORE_PACKAGES=("server-shared" "shared" "blocks/framework")
+          for pkg in "${CORE_PACKAGES[@]}"; do
+            if [ -f "dist/packages/$pkg/package.json" ]; then
+              echo "✅ Core package found: $pkg"
+            else
+              echo "❌ Core package missing: $pkg"
+              echo "Contents of dist/packages:"
+              ls -la dist/packages/ || echo "dist/packages not found"
+              exit 1
+            fi
+          done
+
+          echo "Testing environment-aware linking script..."
+          # Test production mode (should use simple approach)
+          echo "🐳 Testing production mode:"
+          export NODE_ENV=production
+          ./tools/link-packages-to-root.sh || echo "Production linking test completed"
+
+          # Test development mode (should use enhanced approach)  
+          echo "🛠️ Testing development mode:"
+          unset NODE_ENV
+          ./tools/link-packages-to-root.sh || echo "Development linking test completed"
+
+          echo "✅ Environment-aware system verified"

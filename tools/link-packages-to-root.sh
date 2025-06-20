@@ -1,5 +1,21 @@
 #!/usr/bin/env bash
 
+# Check if we're in production (Docker) environment
+IS_PRODUCTION=false
+if [ -f /.dockerenv ] || grep -q -i docker /proc/1/cgroup 2>/dev/null || [ -n "${DOCKER_ENV:-}" ]; then
+    IS_PRODUCTION=true
+fi
+
+# PRODUCTION MODE: Use original simple approach (same as main branch)
+if [ "$IS_PRODUCTION" = true ]; then
+    echo "🐳 Production mode: Using original linking approach"
+    find dist -name package.json -not -path '*/node_modules/*' -not -path '*/ui/*' -printf '%h\n' | xargs npm link --no-audit --no-fund
+    exit 0
+fi
+
+# DEVELOPMENT MODE: Use enhanced approach with better error handling
+echo "🛠️  Development mode: Using enhanced linking approach"
+
 # Enhanced package linking script with selective linking support
 # Usage: ./link-packages-to-root.sh [specific-block-names...]
 # If no arguments provided, links all packages
@@ -22,13 +38,6 @@ done
 LINKED_COUNT=0
 FAILED_COUNT=0
 
-# Check if we're in a Docker environment (improved detection)
-IS_DOCKER=false
-if [ -f /.dockerenv ] || grep -q -i docker /proc/1/cgroup 2>/dev/null || [ -n "${DOCKER_ENV:-}" ]; then
-    IS_DOCKER=true
-    echo "Running in Docker environment"
-fi
-
 # Check if npm is available
 if ! command -v npm &> /dev/null; then
     echo "Error: npm is not available"
@@ -49,16 +58,6 @@ link_package() {
         echo "✗ No package.json found: $pkg_path"
         ((FAILED_COUNT++))
         return 1
-    fi
-    
-    # Skip certain packages in Docker that might cause issues
-    if [ "$IS_DOCKER" = true ]; then
-        case "$pkg_name" in
-            "react-ui"|"ui-components")
-                echo "⚠ Skipping UI package in Docker: $pkg_name"
-                return 0
-                ;;
-        esac
     fi
     
     if cd "$pkg_path" 2>/dev/null; then
@@ -83,18 +82,6 @@ if [ ! -d "dist" ]; then
     exit 0
 fi
 
-# Always show debug output to see what's happening
-echo "=== DEBUG: Directory structure ==="
-echo "Contents of dist directory:"
-ls -la dist/ || echo "Failed to list dist/"
-echo "Contents of dist/packages:"
-ls -la dist/packages/ || echo "Failed to list dist/packages/"
-if [ -d "dist/packages/blocks" ]; then
-    echo "Contents of dist/packages/blocks:"
-    ls -la dist/packages/blocks/ | head -10 || echo "Failed to list dist/packages/blocks/"
-fi
-echo "=== END DEBUG ==="
-
 # Use find with better error handling and check if any packages exist
 PACKAGE_COUNT=0
 PACKAGES_FOUND=()
@@ -103,10 +90,7 @@ while IFS= read -r -d '' pkg_json; do
     PACKAGES_FOUND+=("$pkg_json")
 done < <(find dist -name package.json -type f -not -path '*/node_modules/*' -not -path '*/ui/*' -print0 2>/dev/null || true)
 
-echo "=== DEBUG: Found $PACKAGE_COUNT packages ==="
-echo "All package.json files found:"
-printf '%s\n' "${PACKAGES_FOUND[@]}"
-echo "=== END DEBUG ==="
+echo "Found $PACKAGE_COUNT packages to link"
 
 if [ ${#SPECIFIC_BLOCKS[@]} -eq 0 ]; then
     # Link all packages (original behavior)
@@ -119,7 +103,7 @@ if [ ${#SPECIFIC_BLOCKS[@]} -eq 0 ]; then
     
     for pkg_json in "${PACKAGES_FOUND[@]}"; do
         pkg_dir=$(dirname "$pkg_json")
-        echo "Processing package: $pkg_json -> $pkg_dir"
+        echo "Processing package: $(basename "$pkg_dir")"
         
         # Add error handling for individual package processing
         if ! link_package "$pkg_dir"; then
@@ -150,7 +134,6 @@ fi
 echo
 echo "Linking completed: $LINKED_COUNT successful, $FAILED_COUNT failed"
 
-# In Docker builds, be more tolerant of failures - only exit 1 if no packages were linked at all
 if [ $LINKED_COUNT -eq 0 ] && [ $FAILED_COUNT -gt 0 ]; then
     echo "Error: No packages were successfully linked"
     exit 1

@@ -1,4 +1,5 @@
 import {
+  existsSync,
   readFileSync as readFileSyncSync,
   writeFileSync as writeFileSyncSync,
 } from 'node:fs';
@@ -136,6 +137,43 @@ export async function blocksBuilder(changedFiles?: string[]): Promise<void> {
   if (!isFileBlocks || !isDevEnv) {
     return;
   }
+
+  // Check if we're in production environment (Docker) - use simple approach
+  const isProduction =
+    process.env['NODE_ENV'] === 'production' ||
+    process.env['DOCKER_ENV'] ||
+    existsSync('/.dockerenv');
+
+  if (isProduction) {
+    logger.info(
+      'Production environment detected - using simple build approach',
+    );
+    let lock: Lock | undefined;
+    try {
+      lock = await acquireRedisLock(`build-blocks`, 60000);
+      const startTime = performance.now();
+      await execAsync('nx run-many -t build -p blocks-*');
+      const buildDuration = Math.floor(performance.now() - startTime);
+      logger.info(
+        `Finished building all blocks in ${buildDuration}ms (production mode)`,
+      );
+
+      // Simple linking in production
+      await execAsync(join(cwd(), 'tools/link-packages-to-root.sh'));
+      const linkDuration = Math.floor(
+        performance.now() - startTime - buildDuration,
+      );
+      logger.info(`Linked blocks in ${linkDuration}ms. All blocks are ready.`);
+    } finally {
+      await lock?.release();
+    }
+    return;
+  }
+
+  // DEVELOPMENT MODE: Use smart incremental building
+  logger.info(
+    'Development environment detected - using smart incremental building',
+  );
 
   let lock: Lock | undefined;
   try {

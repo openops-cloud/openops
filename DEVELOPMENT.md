@@ -1,10 +1,28 @@
 # OpenOps Development Guide
 
-## Improved Hot Reload & Build System
+## Environment-Aware Build System
 
-This document explains the enhanced development workflow with dramatically improved build times and hot reload performance.
+This document explains the environment-aware development workflow that provides dramatically improved build times for local development while maintaining production stability.
 
-## Key Improvements
+## Environment Separation Strategy
+
+### 🐳 **Production (Docker)**
+
+- **Behavior**: Exactly like main branch (original approach)
+- **Linking**: Simple global npm links (`find dist | xargs npm link`)
+- **Webpack**: Original block watching approach
+- **Builds**: Full builds of all blocks
+- **Reliability**: ✅ Proven stable production behavior
+
+### 🛠️ **Development (Local)**
+
+- **Behavior**: Enhanced with performance improvements
+- **Linking**: Smart symlinks + incremental linking
+- **Webpack**: Intelligent block watching + build coordination
+- **Builds**: ⚡ Only changed blocks (8x faster)
+- **Performance**: ⚡ Dramatically improved hot reload
+
+## Key Development Improvements
 
 ### ⚡ Incremental Block Building
 
@@ -41,7 +59,7 @@ npm run dev
 ### Manual Block Operations
 
 ```bash
-# Build only changed blocks
+# Build only changed blocks (development only)
 npm run build:blocks:changed
 
 # Build all blocks (full rebuild)
@@ -50,13 +68,13 @@ npm run build:blocks
 # Link all blocks for global access
 npm run link:blocks
 
-# Link blocks for engine module resolution
+# Link blocks for engine module resolution (development only)
 npm run link:blocks:engine
 
-# Link framework and shared packages for API server
+# Link framework and shared packages for API server (development only)
 npm run link:framework
 
-# Link specific blocks
+# Link specific blocks (development only)
 ./tools/link-packages-to-root.sh block-name1 block-name2
 ```
 
@@ -70,51 +88,82 @@ npm run link:framework
 
 4. **Clean State**: Delete `dist/` folder and run `npm run build:blocks` for full rebuild
 
-## How It Works
+## How Environment Detection Works
 
-### Intelligent Change Detection
+The system automatically detects the environment and adjusts behavior:
 
-The system tracks modification times of block source files and only rebuilds what has changed:
+### Detection Logic
 
+```javascript
+// Production detection
+const isProduction =
+  process.env.NODE_ENV === 'production' ||
+  process.env.DOCKER_ENV ||
+  fs.existsSync('/.dockerenv');
 ```
-Block file change → Smart webpack detects specific block →
-API server builds only that block → Both servers restart
+
+### Component Behaviors
+
+#### **link-packages-to-root.sh**
+
+```bash
+# Production: Original one-liner
+find dist -name package.json | xargs npm link
+
+# Development: Enhanced with error handling + selective linking
 ```
 
-### Build Cache
+#### **webpack configs**
 
-- Tracks last modification time of each block
-- Compares with cached build times
-- Skips unchanged blocks automatically
+```javascript
+// Production: Original block watching
+compilation.contextDependencies.add(path.resolve(__dirname, '../blocks'));
 
-### Coordinated Webpack Builds
+// Development: Smart individual block watching + build coordination
+```
 
-- **API Server**: Handles block building and linking
-- **Engine Server**: Only watches for changes, lets API server build
+#### **blocks-builder.ts**
+
+```javascript
+// Production: Simple full builds
+await execAsync('nx run-many -t build -p blocks-*');
+
+// Development: Incremental builds based on modification times
+```
 
 ## Performance Comparison
 
-| Operation           | Before       | After        | Improvement      |
+| Operation           | Production   | Development  | Improvement      |
 | ------------------- | ------------ | ------------ | ---------------- |
 | Single block change | 60-120s      | 5-15s        | **8x faster**    |
 | Server restart      | Both rebuild | One rebuilds | **2x less work** |
 | Package linking     | All blocks   | Changed only | **10x faster**   |
+| First build         | ~2 minutes   | ~2 minutes   | Same             |
+| Hot reload          | 60-120s      | 5-15s        | **8x faster**    |
 
 ## Troubleshooting
 
-### Blocks Not Updating
+### Production Issues
+
+- ✅ **Always stable**: Uses original main branch approach
+- ✅ **No complex scripts**: Simple npm linking only
+- ✅ **Predictable**: Same behavior as before improvements
+
+### Development Issues
+
+#### Blocks Not Updating
 
 1. Check if block was actually built: `ls dist/packages/blocks/[block-name]`
 2. Verify linking: `npm ls -g | grep @openops/blocks-[block-name]`
 3. Clear cache: `rm -rf dist/` and rebuild
 
-### Build Errors
+#### Build Errors
 
 - Individual block build errors won't crash the entire system
 - Check webpack console for specific block issues
 - Use `npm run build:blocks [block-name]` to test specific blocks
 
-### Runtime Module Loading Issues
+#### Runtime Module Loading Issues
 
 If you see "Cannot find module '@openops/block-xxx'" errors:
 
@@ -125,65 +174,30 @@ If you see "Cannot find module '@openops/block-xxx'" errors:
    ./tools/link-blocks-for-engine.sh
    ```
 
-If you see "Cannot find module '@openops/blocks-framework'" errors:
+#### Switch to Production Mode Locally
 
-1. **Check framework link**: `ls -la node_modules/@openops/blocks-framework`
-2. **Rebuild and relink framework**: `npm run link:framework`
-3. **Manual fix**: Run the framework linking script:
-   ```bash
-   ./tools/link-framework.sh
-   ```
+If development mode causes issues, you can force production behavior:
 
-**How it works**:
-
-- **Engine blocks**: Use symlinks in `node_modules` for dynamic imports
-- **Framework**: Uses separate symlinks for API server direct imports
-- **Dependencies**: Framework script also links `@openops/shared` dependency
-- **No circular references**: All linking strategies avoid the ELOOP errors
+```bash
+export NODE_ENV=production
+npm run dev
+```
 
 ### Slow Performance Still?
 
 1. Ensure you're using the new system: Look for "Building X changed blocks" messages
 2. Check if you have many blocks with changes: `git status packages/blocks/`
-3. Consider using `pnpm` for even faster package operations (see PNPM Migration section)
+3. Consider using `pnpm` for even faster package operations
 
-## PNPM Migration (Optional)
+## Files Modified for Environment Separation
 
-The system now supports better package management. To migrate to pnpm:
-
-```bash
-# Install pnpm
-npm install -g pnpm
-
-# Remove npm files
-rm package-lock.json
-
-# Install with pnpm
-pnpm install
-
-# Update development scripts (modify package.json to use pnpm instead of npm)
-```
-
-**Benefits of pnpm**:
-
-- Faster installs and linking
-- Better disk space usage
-- More reliable symlink handling
-
-**Considerations**:
-
-- Test thoroughly with `loadBlockOrThrow` dynamic imports
-- Ensure all CI/CD systems support pnpm
-- Team needs to switch to pnpm commands
-
-## Next Steps
-
-The current improvements should dramatically speed up development. If you're still experiencing issues:
-
-1. **Report specific performance bottlenecks** with timing details
-2. **Consider pnpm migration** for additional speed gains
-3. **Optimize individual block builds** by reviewing dependencies
+1. **`Dockerfile`**: Uses original simple production approach
+2. **`tools/link-packages-to-root.sh`**: Environment-aware linking
+3. **`packages/server/api/webpack.config.js`**: Conditional smart watching
+4. **`packages/engine/webpack.config.js`**: Conditional smart watching
+5. **`packages/server/shared/src/lib/blocks-builder.ts`**: Environment-aware building
 
 ---
 
-_Performance improvements: ~8x faster hot reload, ~2x less duplicate work, ~10x faster linking_
+_🐳 Production: Stable and reliable (same as main branch)_  
+_🛠️ Development: 8x faster hot reload with intelligent incremental builds_
