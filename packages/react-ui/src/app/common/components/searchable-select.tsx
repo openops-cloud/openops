@@ -37,6 +37,7 @@ type SearchableSelectProps<T> = {
   showRefresh?: boolean;
   className?: string;
   dropdownActionItem?: React.ReactNode;
+  dropdownActionItemOnSelect?: () => void;
 };
 
 export const SearchableSelect = <T extends React.Key>({
@@ -51,6 +52,7 @@ export const SearchableSelect = <T extends React.Key>({
   showRefresh,
   className,
   dropdownActionItem,
+  dropdownActionItemOnSelect,
 }: SearchableSelectProps<T>) => {
   const triggerRef = useRef<HTMLButtonElement>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -210,6 +212,7 @@ export const SearchableSelect = <T extends React.Key>({
                 <CommandItem
                   onSelect={() => {
                     setOpen(false);
+                    dropdownActionItemOnSelect?.();
                   }}
                 >
                   {dropdownActionItem}

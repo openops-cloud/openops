@@ -154,14 +154,14 @@ const McpSettingsForm = ({
                   placeholder={t('Select a connection')}
                   className="w-full"
                   dropdownActionItem={
-                    <span
-                      className="flex items-center gap-1 w-full"
-                      onClick={() => setConnectionDialogOpen(true)}
-                    >
+                    <span className="flex items-center gap-1 w-full">
                       <Plus size={16} />
                       {t('Create Connection')}
                     </span>
                   }
+                  dropdownActionItemOnSelect={() => {
+                    setConnectionDialogOpen(true);
+                  }}
                 ></SearchableSelect>
               </FormItem>
             )}
