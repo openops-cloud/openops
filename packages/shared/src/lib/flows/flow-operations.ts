@@ -119,9 +119,6 @@ export const AddActionRequest = Type.Object({
 });
 export type AddActionRequest = Static<typeof AddActionRequest>;
 
-export const UpdateTriggerRequest = TriggerWithOptionalId;
-export type UpdateTriggerRequest = Static<typeof UpdateTriggerRequest>;
-
 export const UpdateFlowStatusRequest = Type.Object({
   status: Type.Enum(FlowStatus),
 });
@@ -241,7 +238,7 @@ export const FlowOperationRequest = Type.Union([
   Type.Object(
     {
       type: Type.Literal(FlowOperationType.UPDATE_TRIGGER),
-      request: UpdateTriggerRequest,
+      request: TriggerWithOptionalId,
     },
     {
       title: 'Update Trigger',

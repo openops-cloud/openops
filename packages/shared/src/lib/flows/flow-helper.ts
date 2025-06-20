@@ -27,7 +27,6 @@ import {
   PasteActionsRequest,
   StepLocationRelativeToParent,
   UpdateActionRequest,
-  UpdateTriggerRequest,
 } from './flow-operations';
 import { FlowVersion, FlowVersionState } from './flow-version';
 import { DEFAULT_SAMPLE_DATA_SETTINGS } from './sample-data';
@@ -719,7 +718,7 @@ function isChildOf(
 
 function createTrigger(
   name: string,
-  request: UpdateTriggerRequest,
+  request: TriggerWithOptionalId,
   nextAction: Action | undefined,
 ): Trigger {
   const baseProperties = {
