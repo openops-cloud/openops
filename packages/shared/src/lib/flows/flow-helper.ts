@@ -27,11 +27,14 @@ import {
   PasteActionsRequest,
   StepLocationRelativeToParent,
   UpdateActionRequest,
-  UpdateTriggerRequest,
 } from './flow-operations';
 import { FlowVersion, FlowVersionState } from './flow-version';
 import { DEFAULT_SAMPLE_DATA_SETTINGS } from './sample-data';
-import { Trigger, TriggerType } from './triggers/trigger';
+import {
+  Trigger,
+  TriggerType,
+  TriggerWithOptionalId,
+} from './triggers/trigger';
 
 type Step = Action | Trigger;
 
@@ -41,7 +44,7 @@ type GetStepFromSubFlow = {
 };
 
 const actionSchemaValidator = TypeCompiler.Compile(SingleActionSchema);
-const triggerSchemaValidation = TypeCompiler.Compile(Trigger);
+const triggerSchemaValidation = TypeCompiler.Compile(TriggerWithOptionalId);
 
 function isValid(flowVersion: FlowVersion): boolean {
   let valid = true;
@@ -125,9 +128,9 @@ function getUsedBlocks(trigger: Trigger): string[] {
 }
 
 function traverseInternal(
-  step: Trigger | Action | undefined,
-): (Action | Trigger)[] {
-  const steps: (Action | Trigger)[] = [];
+  step: TriggerWithOptionalId | Action | undefined,
+): (Action | TriggerWithOptionalId)[] {
+  const steps: (Action | TriggerWithOptionalId)[] = [];
   while (step !== undefined && step !== null) {
     steps.push(step);
     if (step.type === ActionType.BRANCH) {
@@ -270,7 +273,9 @@ function transferFlow<T extends Step>(
   return clonedFlow;
 }
 
-function getAllSteps(trigger: Trigger | Action): (Action | Trigger)[] {
+function getAllSteps(
+  trigger: TriggerWithOptionalId | Action,
+): (Action | TriggerWithOptionalId)[] {
   return traverseInternal(trigger);
 }
 
@@ -321,7 +326,7 @@ function getAllChildSteps(
 function getStep(
   flowVersion: FlowVersion,
   stepName: string,
-): Action | Trigger | undefined {
+): Action | TriggerWithOptionalId | undefined {
   return getAllSteps(flowVersion.trigger).find(
     (step) => step.name === stepName,
   );
@@ -348,7 +353,7 @@ const getStepFromSubFlow = ({
 }: GetStepFromSubFlow): Step | undefined => {
   const subFlowSteps = getAllSteps(subFlowStartStep);
 
-  return subFlowSteps.find((step) => step.name === stepName);
+  return subFlowSteps.find((step) => step.name === stepName) as Step;
 };
 function updateAction(
   flowVersion: FlowVersion,
@@ -712,11 +717,11 @@ function isChildOf(
 
 function createTrigger(
   name: string,
-  request: UpdateTriggerRequest,
+  request: TriggerWithOptionalId,
   nextAction: Action | undefined,
 ): Trigger {
   const baseProperties = {
-    id: request.id || openOpsId(),
+    id: request.id ?? openOpsId(),
     displayName: request.displayName,
     name,
     valid: false,
@@ -785,7 +790,7 @@ const prefillConnection = (
 };
 
 export function getImportOperations(
-  step: Action | Trigger | undefined,
+  step: Action | TriggerWithOptionalId | undefined,
   connections?: AppConnectionsWithSupportedBlocks[],
 ): FlowOperationRequest[] {
   const operations: FlowOperationRequest[] = [];
@@ -1124,7 +1129,7 @@ function findPathToStep({
       const steps = getAllSteps(step);
       return steps.some((s) => s.name === targetStepName);
     })
-    .filter((step) => step.name !== targetStepName);
+    .filter((step) => step.name !== targetStepName) as StepWithIndex[];
 }
 
 const removeConnection = (step: Step): Step => {

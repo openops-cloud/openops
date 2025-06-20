@@ -32,8 +32,7 @@ export const stepTestOutputHooks = {
   ) {
     const { id: stepId } = form.getValues();
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return stepTestOutputHooks.useStepTestOutput(flowVersionId, stepId!);
+    return stepTestOutputHooks.useStepTestOutput(flowVersionId, stepId);
   },
   useSaveSelectedStepSampleData(form: UseFormReturn<Action | Trigger>) {
     const { data: sampleDataSizeLimit } = flagsHooks.useFlag<number>(

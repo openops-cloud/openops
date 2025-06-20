@@ -20,7 +20,7 @@ import {
   PopulatedFlow,
   ProjectId,
   SeekPage,
-  Trigger,
+  TriggerWithOptionalId,
   UNCATEGORIZED_FOLDER_ID,
   UserId,
 } from '@openops/shared';
@@ -627,7 +627,7 @@ const assertFlowIsNotNull: <T extends Flow>(
 
 const getConnections = async (
   projectId: string,
-  trigger: Trigger,
+  trigger: TriggerWithOptionalId,
   connectionIds: string[],
 ): Promise<AppConnectionsWithSupportedBlocks[]> => {
   if (!connectionIds.length) {
@@ -641,7 +641,8 @@ const getConnections = async (
 
   const blockNames = flowHelper
     .getAllSteps(trigger)
-    .map((b) => b.settings.blockName);
+    .map((b) => b.settings?.blockName)
+    .filter(Boolean);
   const blockToProviderMap = await resolveProvidersForBlocks(
     blockNames,
     projectId,
@@ -667,7 +668,7 @@ type CreateFromTemplateParams = {
   userId: UserId;
   displayName: string;
   description: string | undefined;
-  trigger: Trigger;
+  trigger: TriggerWithOptionalId;
   connectionIds: string[];
   isSample: boolean;
 };

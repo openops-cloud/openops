@@ -23,7 +23,7 @@ import {
   PrincipalType,
   SeekPage,
   SERVICE_KEY_SECURITY_OPENAPI,
-  Trigger,
+  TriggerWithOptionalId,
 } from '@openops/shared';
 import dayjs from 'dayjs';
 import { StatusCodes } from 'http-status-codes';
@@ -149,7 +149,7 @@ async function createFromTemplate(
     isSample: boolean;
     displayName: string;
     description?: string;
-    trigger: Trigger;
+    trigger: TriggerWithOptionalId;
   },
   connectionIds: string[],
 ) {

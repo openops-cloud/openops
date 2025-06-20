@@ -1,8 +1,8 @@
 import { Static, Type } from '@sinclair/typebox';
 import { BaseModelSchema } from '../../common';
-import { FlowVersion } from '../flow-version';
+import { NoIdFlowVersion } from '../flow-version';
 import { Trigger } from '../triggers/trigger';
-export const FlowVersionTemplate = Type.Omit(FlowVersion, [
+export const FlowVersionTemplate = Type.Omit(NoIdFlowVersion, [
   'id',
   'created',
   'updated',
