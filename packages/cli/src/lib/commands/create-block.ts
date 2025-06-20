@@ -57,7 +57,6 @@ const nxGenerateNodeLibrary = async (
     `--directory=packages/blocks/${blockName}`,
     `--name=blocks-${blockName}`,
     `--importPath=${packageName}`,
-    '--publishable',
     '--buildable',
     '--projectNameAndRootFormat=as-provided',
     '--strict',
