@@ -132,7 +132,7 @@ async function getDirectoryLastModified(dir: string): Promise<number> {
   return maxTime;
 }
 
-export async function blocksBuilder(changedFiles?: string[]): Promise<void> {
+export async function blocksBuilder(): Promise<void> {
   // Only run this script if the blocks source is file and the environment is dev
   if (!isFileBlocks || !isDevEnv) {
     return;
@@ -158,7 +158,6 @@ export async function blocksBuilder(changedFiles?: string[]): Promise<void> {
         `Finished building all blocks in ${buildDuration}ms (production mode)`,
       );
 
-      // Simple linking in production
       await execAsync(join(cwd(), 'tools/link-packages-to-root.sh'));
       const linkDuration = Math.floor(
         performance.now() - startTime - buildDuration,
@@ -170,7 +169,6 @@ export async function blocksBuilder(changedFiles?: string[]): Promise<void> {
     return;
   }
 
-  // DEVELOPMENT MODE: Use smart incremental building
   logger.info(
     'Development environment detected - using smart incremental building',
   );
