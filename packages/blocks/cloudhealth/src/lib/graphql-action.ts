@@ -1,4 +1,5 @@
 import { createAction, Property } from '@openops/blocks-framework';
+import { logger } from '@openops/server-shared';
 import { cloudhealthAuth } from './auth';
 
 const documentation = `
