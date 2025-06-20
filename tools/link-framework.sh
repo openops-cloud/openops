@@ -11,28 +11,24 @@ FRAMEWORK_PATH="dist/packages/blocks/framework"
 SHARED_PATH="dist/packages/shared"
 SERVER_SHARED_PATH="dist/packages/server/shared"
 
-# Check if framework is built
 if [ ! -f "$FRAMEWORK_PATH/package.json" ]; then
     echo "❌ Framework not found at $FRAMEWORK_PATH"
     echo "Run: npx nx build blocks-framework"
     exit 1
 fi
 
-# Check if framework has built files
 if [ ! -f "$FRAMEWORK_PATH/src/index.js" ]; then
     echo "❌ Framework not built properly - missing index.js"
     echo "Run: npx nx build blocks-framework"
     exit 1
 fi
 
-# Check if shared package is built
 if [ ! -f "$SHARED_PATH/package.json" ]; then
     echo "❌ Shared package not found at $SHARED_PATH"
     echo "Run: npx nx build shared"
     exit 1
 fi
 
-# Check if server-shared package is built
 if [ ! -f "$SERVER_SHARED_PATH/package.json" ]; then
     echo "❌ Server-shared package not found at $SERVER_SHARED_PATH"
     echo "Run: npx nx build server-shared"
@@ -67,7 +63,6 @@ else
     exit 1
 fi
 
-# Link framework package
 echo "🔗 Linking framework package..."
 abs_framework_path=$(realpath "$FRAMEWORK_PATH")
 if ln -sf "$abs_framework_path" "node_modules/@openops/blocks-framework" 2>/dev/null; then
@@ -77,7 +72,6 @@ else
     exit 1
 fi
 
-# Verify the links work
 if [ -d "node_modules/@openops/blocks-framework" ] && [ -f "node_modules/@openops/blocks-framework/src/index.js" ] && [ -d "node_modules/@openops/shared" ] && [ -d "node_modules/@openops/server-shared" ]; then
     echo "✓ Verification: All packages are accessible"
     echo "🎉 Framework and all dependencies successfully linked!"

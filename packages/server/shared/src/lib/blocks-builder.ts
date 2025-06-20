@@ -1,12 +1,11 @@
 import {
-  existsSync,
   readFileSync as readFileSyncSync,
   writeFileSync as writeFileSyncSync,
 } from 'node:fs';
 import { readdir, readFile, stat } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { cwd } from 'node:process';
-import { join, relative } from 'path';
+import { join } from 'path';
 import { acquireRedisLock } from './cache/redis-lock';
 import { execAsync } from './exec-async';
 import { logger } from './logger';
@@ -41,8 +40,8 @@ function saveBuildCache(cache: Map<string, number>): void {
   try {
     const obj = Object.fromEntries(cache);
     writeFileSyncSync(cacheFile, JSON.stringify(obj, null, 2));
-  } catch {
-    // Ignore save errors
+  } catch (error) {
+    logger.warn('Error saving build cache', { error });
   }
 }
 
@@ -123,8 +122,8 @@ async function getDirectoryLastModified(dir: string): Promise<number> {
           await checkDir(fullPath);
         }
       }
-    } catch {
-      // Ignore errors
+    } catch (error) {
+      logger.warn('Error checking directory last modified', { error });
     }
   }
 
@@ -138,37 +137,6 @@ export async function blocksBuilder(): Promise<void> {
     return;
   }
 
-  // Check if we're in production environment (Docker) - use simple approach
-  const isProduction =
-    process.env['NODE_ENV'] === 'production' ||
-    process.env['DOCKER_ENV'] ||
-    existsSync('/.dockerenv');
-
-  if (isProduction) {
-    logger.info(
-      'Production environment detected - using simple build approach',
-    );
-    let lock: Lock | undefined;
-    try {
-      lock = await acquireRedisLock(`build-blocks`, 60000);
-      const startTime = performance.now();
-      await execAsync('nx run-many -t build -p blocks-*');
-      const buildDuration = Math.floor(performance.now() - startTime);
-      logger.info(
-        `Finished building all blocks in ${buildDuration}ms (production mode)`,
-      );
-
-      await execAsync(join(cwd(), 'tools/link-packages-to-root.sh'));
-      const linkDuration = Math.floor(
-        performance.now() - startTime - buildDuration,
-      );
-      logger.info(`Linked blocks in ${linkDuration}ms. All blocks are ready.`);
-    } finally {
-      await lock?.release();
-    }
-    return;
-  }
-
   logger.info(
     'Development environment detected - using smart incremental building',
   );
@@ -178,7 +146,6 @@ export async function blocksBuilder(): Promise<void> {
     lock = await acquireRedisLock(`build-blocks`, 60000);
     const startTime = performance.now();
 
-    // Get all blocks and check which ones need rebuilding
     const blocks = await getBlocksWithChanges();
     const blocksToRebuild = blocks.filter((b) => b.needsRebuild);
 
@@ -195,7 +162,6 @@ export async function blocksBuilder(): Promise<void> {
       `Building ${blocksToRebuild.length} changed blocks out of ${blocks.length} total blocks`,
     );
 
-    // Build only the changed blocks
     const blockNames = blocksToRebuild.map((b) =>
       b.name.replace('@openops/block-', 'blocks-'),
     );
@@ -206,9 +172,7 @@ export async function blocksBuilder(): Promise<void> {
       `Finished building ${blocksToRebuild.length} blocks in ${buildDuration}ms. Linking blocks...`,
     );
 
-    // Link only the changed blocks for better performance
     for (const block of blocksToRebuild) {
-      // Extract block folder name from path (e.g., "sftp" from "packages/blocks/sftp")
       const blockFolderName = block.path.split('/').pop();
       if (!blockFolderName) {
         logger.warn(`Could not extract folder name from path: ${block.path}`);
@@ -224,7 +188,6 @@ export async function blocksBuilder(): Promise<void> {
       );
 
       try {
-        // Check if the dist directory exists before trying to link
         await stat(distPath);
 
         await execAsync(`cd "${distPath}" && npm link --no-audit --no-fund`);
@@ -249,7 +212,6 @@ export async function blocksBuilder(): Promise<void> {
       `Linked ${blocksToRebuild.length} blocks in ${linkDuration}ms. Blocks are ready.`,
     );
 
-    // Save the updated cache
     saveBuildCache(blockBuildCache);
   } finally {
     await lock?.release();
