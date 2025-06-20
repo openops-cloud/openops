@@ -80,15 +80,18 @@ export const graphqlAction = createAction({
     const result = await response.json();
 
     if (result.errors) {
-      throw new Error(
-        `GraphQL Error: ${result.errors
-          .map((error: any) => error.message)
-          .join(' | ')}`,
-      );
+      const errorMessages = `GraphQL Error: ${result.errors
+        .map((error: any) => error.message)
+        .join(' | ')}`;
+
+      logger.error(errorMessages);
+      throw new Error(errorMessages);
     }
 
     if (!response.ok) {
-      throw new Error(`GraphQL request failed: ${response.statusText}`);
+      const errorMessages = `GraphQL request failed: ${response.statusText}`;
+      logger.error(errorMessages);
+      throw new Error(errorMessages);
     }
 
     return result.data;
