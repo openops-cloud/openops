@@ -16,7 +16,7 @@ import { MCPTool } from './mcp-tools';
 const INCLUDED_PATHS: Record<string, string[]> = {
   '/v1/files/{fileId}': ['get'],
   '/v1/flow-versions/': ['get'],
-  '/v1/flow-versions/{workflowId}/{stepId}': ['post'],
+  '/v1/flow-versions/{flowVersionId}/{stepId}/test': ['post'],
   '/v1/flows/': ['get'],
   '/v1/flows/count': ['get'],
   '/v1/flows/{id}': ['get'],

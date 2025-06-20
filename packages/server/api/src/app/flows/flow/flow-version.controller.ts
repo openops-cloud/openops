@@ -196,13 +196,10 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
     '/:flowVersionId/:stepId/test',
     TestStepRequest,
     async (request, reply) => {
-      const { workflowId, stepId } = request.params;
+      const { flowVersionId, stepId } = request.params;
       const projectId = request.principal.projectId;
 
-      const flowVersion = await flowVersionService.getFlowVersionOrThrow({
-        flowId: workflowId,
-        versionId: undefined,
-      });
+      const flowVersion = await flowVersionService.getOneOrThrow(flowVersionId);
 
       const step = flowHelper
         .getAllSteps(flowVersion.trigger)
@@ -301,7 +298,7 @@ const TestStepRequest = {
     description:
       'Test a flow step with specified parameters. With this endpoint its possible to validate steps.',
     params: Type.Object({
-      workflowId: Type.String(),
+      flowVersionId: Type.String(),
       stepId: Type.String(),
     }),
     response: {
