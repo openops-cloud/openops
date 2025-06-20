@@ -3,21 +3,6 @@
 # Script to create local symlinks for blocks so the engine can resolve them
 # This is separate from global npm linking to avoid circular reference issues
 
-# Check if we're in a Docker environment
-IS_DOCKER=false
-echo "Checking if running in Docker..."
-echo "  /.dockerenv exists: $([ -f /.dockerenv ] && echo "yes" || echo "no")"
-echo "  /proc/1/cgroup contains docker: $(grep -q -i docker /proc/1/cgroup 2>/dev/null && echo "yes" || echo "no")"
-echo "  DOCKER_ENV set: $([ -n "${DOCKER_ENV:-}" ] && echo "yes" || echo "no")"
-
-if [ -f /.dockerenv ] || grep -q -i docker /proc/1/cgroup 2>/dev/null || [ -n "${DOCKER_ENV:-}" ]; then
-    IS_DOCKER=true
-    echo "✅ Running in Docker environment - using tolerant mode"
-else
-    IS_DOCKER=false
-    echo "❌ Not in Docker environment - using strict mode"
-    set -e
-fi
 
 LINKED_COUNT=0
 FAILED_COUNT=0
@@ -93,19 +78,12 @@ done
 echo
 echo "Local symlinking completed: $LINKED_COUNT successful, $FAILED_COUNT failed"
 
-# In Docker builds, be more tolerant of failures - only exit 1 if no blocks were linked at all
 if [ $LINKED_COUNT -eq 0 ] && [ $FAILED_COUNT -gt 0 ]; then
     echo "❌ Error: No blocks were successfully linked"
     exit 1
 elif [ $FAILED_COUNT -gt 0 ]; then
-    if [ "$IS_DOCKER" = true ]; then
-        echo "⚠️  Warning: Some blocks failed to link in Docker, but continuing..."
-        echo "✅ $LINKED_COUNT blocks are accessible to the engine"
-        exit 0
-    else
-        echo "⚠️  Some blocks failed to link"
-        exit 1
-    fi
+    echo "⚠️  Some blocks failed to link"
+    exit 1
 else
     echo "✅ All blocks are now accessible to the engine!"
     exit 0

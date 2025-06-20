@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 
-# Check if we're in production (Docker) environment
-IS_PRODUCTION=false
-if [ -f /.dockerenv ] || grep -q -i docker /proc/1/cgroup 2>/dev/null || [ -n "${DOCKER_ENV:-}" ]; then
-    IS_PRODUCTION=true
+# Check if we're in Docker environment - if so, use original main branch approach
+if [ -f /.dockerenv ] || grep -q -i docker /proc/1/cgroup 2>/dev/null; then
+    echo "🐳 Docker environment: Using original main branch approach"
+    find dist -name package.json -not -path '*/node_modules/*' -not -path '*/ui/*' -printf '%h\n' | xargs npm link --no-audit --no-fund
+    exit 0
 fi
 
-# PRODUCTION MODE: Use original simple approach (same as main branch)
-if [ "$IS_PRODUCTION" = true ]; then
-    echo "🐳 Production mode: Using original linking approach"
+# Check if we're in production mode (non-Docker) - also use simple approach
+if [ "${NODE_ENV}" = "production" ] || [ -n "${DOCKER_ENV:-}" ]; then
+    echo "🏭 Production mode: Using original linking approach"
     find dist -name package.json -not -path '*/node_modules/*' -not -path '*/ui/*' -printf '%h\n' | xargs npm link --no-audit --no-fund
     exit 0
 fi
