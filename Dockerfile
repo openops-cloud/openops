@@ -53,18 +53,13 @@ WORKDIR /usr/src/app
 # waste time on copying these 2.2GB even if no packages were changed.
 COPY --link package.json package-lock.json .npmrc ./
 RUN npm ci --no-audit --no-fund
-
-# Copy pre-built dist directory
 COPY --link dist dist
 
-# Copy packages directory
-COPY --link packages packages
-
-# Link packages (original main branch approach)
 COPY tools/link-packages-to-root.sh tools/link-packages-to-root.sh
 RUN ./tools/link-packages-to-root.sh
 
 # Copy Output files to appropriate directory from build stage
+COPY --link packages packages
 COPY --link ai-prompts ai-prompts
 
 LABEL service=openops
