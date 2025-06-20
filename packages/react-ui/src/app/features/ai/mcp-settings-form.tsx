@@ -124,7 +124,9 @@ const McpSettingsForm = ({
                 authProviderKey={AWS_AUTH_PROVIDER_KEY}
                 onConnectionSaved={async (connectionName) => {
                   await refetchAwsConnections();
-                  form.setValue('awsCost.connectionName', connectionName);
+                  form.setValue('awsCost.connectionName', connectionName, {
+                    shouldValidate: true,
+                  });
                 }}
                 open={connectionDialogOpen}
                 setOpen={setConnectionDialogOpen}
