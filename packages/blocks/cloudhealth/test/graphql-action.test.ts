@@ -51,7 +51,7 @@ describe('GraphQL Action', () => {
     expect(global.fetch).toHaveBeenCalledTimes(2);
   });
 
-  it('should handle GraphQL errors', async () => {
+  it('should handle GraphQL errors with HTTP 200', async () => {
     const mockError = {
       errors: [{ message: 'Invalid query' }],
     };
@@ -78,10 +78,97 @@ describe('GraphQL Action', () => {
     );
   });
 
-  it('should handle invalid API key', async () => {
+  it('should handle HTTP errors with GraphQL errors (prioritize GraphQL errors)', async () => {
+    const mockError = {
+      errors: [
+        { message: 'Cannot query field "nonExistentField" on type "Query".' },
+      ],
+    };
+
+    (global.fetch as jest.Mock)
+      .mockImplementationOnce(() =>
+        Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              data: { loginAPI: { accessToken: mockAccessToken } },
+            }),
+        }),
+      )
+      .mockImplementationOnce(() =>
+        Promise.resolve({
+          ok: false,
+          statusText: 'Bad Request',
+          json: () => Promise.resolve(mockError),
+        }),
+      );
+
+    await expect(graphqlAction.run(mockContext)).rejects.toThrow(
+      'GraphQL Error: Cannot query field "nonExistentField" on type "Query".',
+    );
+  });
+
+  it('should handle HTTP errors without GraphQL errors', async () => {
+    (global.fetch as jest.Mock)
+      .mockImplementationOnce(() =>
+        Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              data: { loginAPI: { accessToken: mockAccessToken } },
+            }),
+        }),
+      )
+      .mockImplementationOnce(() =>
+        Promise.resolve({
+          ok: false,
+          statusText: 'Unauthorized',
+          json: () => Promise.resolve({}),
+        }),
+      );
+
+    await expect(graphqlAction.run(mockContext)).rejects.toThrow(
+      'GraphQL request failed: Unauthorized',
+    );
+  });
+
+  it('should handle multiple GraphQL errors with pipe separator', async () => {
+    const mockError = {
+      errors: [
+        { message: 'Cannot query field "nonExistentField" on type "Query".' },
+        {
+          message:
+            'Cannot query field "accounts" on type "Query". Did you mean "awsAccounts"?',
+        },
+      ],
+    };
+
+    (global.fetch as jest.Mock)
+      .mockImplementationOnce(() =>
+        Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              data: { loginAPI: { accessToken: mockAccessToken } },
+            }),
+        }),
+      )
+      .mockImplementationOnce(() =>
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(mockError),
+        }),
+      );
+
+    await expect(graphqlAction.run(mockContext)).rejects.toThrow(
+      'GraphQL Error: Cannot query field "nonExistentField" on type "Query". | Cannot query field "accounts" on type "Query". Did you mean "awsAccounts"?',
+    );
+  });
+
+  it('should handle invalid API key during login', async () => {
     (global.fetch as jest.Mock).mockImplementationOnce(() =>
       Promise.resolve({
-        ok: false,
+        ok: true,
         json: () =>
           Promise.resolve({ errors: [{ message: 'Invalid API key' }] }),
       }),

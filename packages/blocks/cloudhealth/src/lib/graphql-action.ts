@@ -1,6 +1,32 @@
 import { createAction, Property } from '@openops/blocks-framework';
 import { cloudhealthAuth } from './auth';
 
+const documentation = `
+  # GraphQL Query Documentation
+
+  This action allows you to execute GraphQL queries against the CloudHealth API.
+
+  ## Usage
+  1. Write your GraphQL query in the **Query** field
+  2. Optionally provide variables in JSON format
+
+  Example Query:
+    Query:
+      query GetAccountsByStatus($status: String!) {
+        accounts(status: $status) {
+          id
+          name
+          status
+          created_at
+        }
+      }
+
+    Variables:
+      { "status": "active" }
+
+    For more information, visit the [CloudHealth GraphQL API documentation](https://help.cloudhealthtech.com/graphql-api/).
+`;
+
 async function getAccessToken(apiKey: string) {
   const response = await fetch('https://chapi.cloudhealthtech.com/graphql', {
     method: 'POST',
@@ -22,6 +48,9 @@ export const graphqlAction = createAction({
   description: 'Execute a GraphQL query against the CloudHealth API',
   auth: cloudhealthAuth,
   props: {
+    documentation: Property.MarkDown({
+      value: documentation,
+    }),
     query: Property.LongText({
       displayName: 'GraphQL Query',
       description: 'The GraphQL query to execute',
@@ -47,11 +76,20 @@ export const graphqlAction = createAction({
       body: JSON.stringify({ query, variables: variables ?? {} }),
     });
 
-    if (!response.ok)
-      throw new Error(`GraphQL request failed: ${response.statusText}`);
     const result = await response.json();
-    if (result.errors)
-      throw new Error(`GraphQL Error: ${result.errors[0].message}`);
+
+    if (result.errors) {
+      throw new Error(
+        `GraphQL Error: ${result.errors
+          .map((error: any) => error.message)
+          .join(' | ')}`,
+      );
+    }
+
+    if (!response.ok) {
+      throw new Error(`GraphQL request failed: ${response.statusText}`);
+    }
+
     return result.data;
   },
 });
