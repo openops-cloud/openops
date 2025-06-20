@@ -3,29 +3,32 @@ import { logger } from '@openops/server-shared';
 import { cloudhealthAuth } from './auth';
 
 const documentation = `
-  # GraphQL Query Documentation
+  ### GraphQL Query Documentation
 
   This action allows you to execute GraphQL queries against the CloudHealth API.
 
-  ## Usage
-  1. Write your GraphQL query in the **Query** field
+  **Usage**
+  1. Write your GraphQL query in the Query field
   2. Optionally provide variables in JSON format
 
-  Example Query:
-    Query:
-      query GetAccountsByStatus($status: String!) {
-        accounts(status: $status) {
-          id
-          name
-          status
-          created_at
-        }
-      }
+  **Example Query:**
+  \`\`\`graphql
+  query GetAccountsByStatus($status: String!) {
+    accounts(status: $status) {
+      id
+      name
+      status
+      created_at
+    }
+  }
+  \`\`\`
 
-    Variables:
-      { "status": "active" }
+  **Variables:**
+  \`\`\`json
+  { "status": "active" }
+  \`\`\`
 
-    For more information, visit the [CloudHealth GraphQL API documentation](https://help.cloudhealthtech.com/graphql-api/).
+  For more information, visit the [CloudHealth GraphQL API documentation](https://help.cloudhealthtech.com/graphql-api/).
 `;
 
 async function getAccessToken(apiKey: string) {
