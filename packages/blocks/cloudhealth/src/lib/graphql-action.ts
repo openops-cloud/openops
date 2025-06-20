@@ -81,20 +81,24 @@ export const graphqlAction = createAction({
     });
 
     const result = await response.json();
+    const errorMessages = [];
 
     if (result.errors) {
-      const errorMessages = `GraphQL Error: ${result.errors
-        .map((error: any) => error.message)
-        .join(' | ')}`;
-
-      logger.error(errorMessages);
-      throw new Error(errorMessages);
+      errorMessages.push(
+        `GraphQL Error: ${result.errors
+          .map((error: any) => error.message)
+          .join(' | ')}`,
+      );
     }
 
     if (!response.ok) {
-      const errorMessages = `GraphQL request failed: ${response.statusText}`;
-      logger.error(errorMessages);
-      throw new Error(errorMessages);
+      errorMessages.push(`GraphQL request failed: ${response.statusText}`);
+    }
+
+    if (errorMessages.length > 0) {
+      const combinedError = errorMessages.join(' | ');
+      logger.error(combinedError);
+      throw new Error(combinedError);
     }
 
     return result.data;

@@ -104,7 +104,7 @@ describe('GraphQL Action', () => {
       );
 
     await expect(graphqlAction.run(mockContext)).rejects.toThrow(
-      'GraphQL Error: Cannot query field "nonExistentField" on type "Query".',
+      'GraphQL Error: Cannot query field "nonExistentField" on type "Query". | GraphQL request failed: Bad Request',
     );
   });
 
