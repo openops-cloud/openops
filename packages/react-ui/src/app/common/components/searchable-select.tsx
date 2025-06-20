@@ -36,6 +36,8 @@ type SearchableSelectProps<T> = {
   onRefresh?: () => void;
   showRefresh?: boolean;
   className?: string;
+  customDropdownAction?: React.ReactNode;
+  onCustomDropdownActionSelect?: () => void;
 };
 
 export const SearchableSelect = <T extends React.Key>({
@@ -49,6 +51,8 @@ export const SearchableSelect = <T extends React.Key>({
   onRefresh,
   showRefresh,
   className,
+  customDropdownAction,
+  onCustomDropdownActionSelect,
 }: SearchableSelectProps<T>) => {
   const triggerRef = useRef<HTMLButtonElement>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -205,6 +209,16 @@ export const SearchableSelect = <T extends React.Key>({
                 className="h-full"
                 viewPortClassName={'max-h-[200px]'}
               >
+                {customDropdownAction && (
+                  <CommandItem
+                    onSelect={() => {
+                      setOpen(false);
+                      onCustomDropdownActionSelect?.();
+                    }}
+                  >
+                    {customDropdownAction}
+                  </CommandItem>
+                )}
                 {filterOptionsIndices &&
                   filterOptionsIndices.map((filterIndex) => {
                     const option = options[filterIndex];
