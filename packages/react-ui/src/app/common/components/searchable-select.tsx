@@ -209,14 +209,16 @@ export const SearchableSelect = <T extends React.Key>({
                 className="h-full"
                 viewPortClassName={'max-h-[200px]'}
               >
-                <CommandItem
-                  onSelect={() => {
-                    setOpen(false);
-                    onCustomDropdownActionSelect?.();
-                  }}
-                >
-                  {customDropdownAction}
-                </CommandItem>
+                {customDropdownAction && (
+                  <CommandItem
+                    onSelect={() => {
+                      setOpen(false);
+                      onCustomDropdownActionSelect?.();
+                    }}
+                  >
+                    {customDropdownAction}
+                  </CommandItem>
+                )}
                 {filterOptionsIndices &&
                   filterOptionsIndices.map((filterIndex) => {
                     const option = options[filterIndex];
