@@ -9,8 +9,11 @@ import {
 } from '@openops/components/ui';
 import { isEmpty } from '@openops/shared';
 import { t } from 'i18next';
-import { useEffect, useMemo } from 'react';
+import { Plus } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { DynamicFormValidationProvider } from '../builder/dynamic-form-validation/dynamic-form-validation-context';
+import { CreateOrEditConnectionDialog } from '../connections/components/create-edit-connection-dialog';
 import {
   appConnectionsHooks,
   FETCH_ALL_CONNECTIONS_LIMIT,
@@ -33,16 +36,23 @@ export const EMPTY_MCP_FORM_VALUE: McpSettingsFormSchema = {
   },
 };
 
+const AWS_AUTH_PROVIDER_KEY = 'AWS';
+
 const McpSettingsForm = ({
   savedSettings,
   onSave,
   isSaving,
 }: McpSettingsFormProps) => {
-  const { data: awsConnections, isLoading: isAwsConnectionsLoading } =
-    appConnectionsHooks.useConnections({
-      authProviders: ['AWS'],
-      limit: FETCH_ALL_CONNECTIONS_LIMIT,
-    });
+  const {
+    data: awsConnections,
+    isLoading: isAwsConnectionsLoading,
+    refetch: refetchAwsConnections,
+  } = appConnectionsHooks.useConnections({
+    authProviders: [AWS_AUTH_PROVIDER_KEY],
+    limit: FETCH_ALL_CONNECTIONS_LIMIT,
+  });
+
+  const [connectionDialogOpen, setConnectionDialogOpen] = useState(false);
 
   const form = useForm<McpSettingsFormSchema>({
     resolver: mcpFormSchemaResolver,
@@ -84,9 +94,6 @@ const McpSettingsForm = ({
     <Form {...form}>
       <form className="flex-1 flex flex-col gap-4 max-w-[720px]">
         <span className="text-base bold font-bold">{t('MCP')}</span>
-        <span className="text-base bold font-bold mt-2">
-          {t('External tools:')}
-        </span>
         <div className="flex gap-8 items-center">
           <FormField
             control={form.control}
@@ -109,6 +116,23 @@ const McpSettingsForm = ({
               </FormItem>
             )}
           />
+          {connectionDialogOpen && (
+            <DynamicFormValidationProvider>
+              <CreateOrEditConnectionDialog
+                connectionToEdit={null}
+                reconnect={true}
+                authProviderKey={AWS_AUTH_PROVIDER_KEY}
+                onConnectionSaved={async (connectionName) => {
+                  await refetchAwsConnections();
+                  form.setValue('awsCost.connectionName', connectionName, {
+                    shouldValidate: true,
+                  });
+                }}
+                open={connectionDialogOpen}
+                setOpen={setConnectionDialogOpen}
+              ></CreateOrEditConnectionDialog>
+            </DynamicFormValidationProvider>
+          )}
           <FormField
             control={form.control}
             name="awsCost.connectionName"
@@ -131,6 +155,15 @@ const McpSettingsForm = ({
                   value={field.value}
                   placeholder={t('Select a connection')}
                   className="w-full"
+                  customDropdownAction={
+                    <span className="flex items-center gap-1 w-full">
+                      <Plus size={16} />
+                      {t('Create Connection')}
+                    </span>
+                  }
+                  onCustomDropdownActionSelect={() => {
+                    setConnectionDialogOpen(true);
+                  }}
                 ></SearchableSelect>
               </FormItem>
             )}
