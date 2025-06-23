@@ -1,8 +1,10 @@
 import chalk from 'chalk';
 import { Command } from 'commander';
-import { readdir, unlink, writeFile } from 'fs/promises';
+import { readdir, stat, unlink, writeFile } from 'fs/promises';
 import inquirer from 'inquirer';
 import assert from 'node:assert';
+import { rm } from 'node:fs/promises';
+import nodePath from 'node:path';
 import { findBlockSourceDirectory } from '../utils/block-utils';
 import { exec } from '../utils/exec';
 import {
@@ -72,12 +74,21 @@ const removeUnusedFiles = async (blockName: string) => {
   const path = `packages/blocks/${blockName}/src/lib/`;
   const files = await readdir(path);
   for (const file of files) {
-    await unlink(path + file);
+    const fullPath = nodePath.join(path, file);
+    const stats = await stat(fullPath);
+
+    if (stats.isDirectory()) {
+      await rm(fullPath, { recursive: true, force: true });
+    } else {
+      await unlink(fullPath);
+    }
   }
 };
+
 function capitalizeFirstLetter(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }
+
 const generateIndexTsFile = async (blockName: string) => {
   const blockNameCamelCase = blockName
     .split('-')
@@ -105,6 +116,7 @@ const generateIndexTsFile = async (blockName: string) => {
 
   await writeFile(`packages/blocks/${blockName}/src/index.ts`, indexTemplate);
 };
+
 const updateProjectJsonConfig = async (blockName: string) => {
   const projectJson = await readProjectJson(`packages/blocks/${blockName}`);
 
@@ -134,6 +146,7 @@ const updateProjectJsonConfig = async (blockName: string) => {
 
   await writeProjectJson(`packages/blocks/${blockName}`, projectJson);
 };
+
 const updateEslintFile = async (blockName: string) => {
   const eslintFile = await readPackageEslint(`packages/blocks/${blockName}`);
   eslintFile.overrides.splice(
