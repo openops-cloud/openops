@@ -69,7 +69,7 @@ async function getBlocksWithChanges(): Promise<BlockBuildInfo[]> {
           if (packageJson.name?.startsWith('@openops/block-')) {
             // Get the most recent modification time in the block
             const lastModified = await getDirectoryLastModified(fullPath);
-            const cached = blockBuildCache.get(packageJson.name) || 0;
+            const cached = blockBuildCache.get(packageJson.name) ?? 0;
             const needsRebuild = lastModified > cached;
 
             // Debug logging for first few blocks
