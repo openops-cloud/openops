@@ -14,9 +14,9 @@ import {
 } from '@openops/shared';
 import { Type as T } from '@sinclair/typebox';
 import { StatusCodes } from 'http-status-codes';
+import { validateFlowVersionBelongsToProject } from '../common/flow-version-validation';
 import { flowVersionService } from '../flow-version/flow-version.service';
 import { flowStepTestOutputService } from '../step-test-output/flow-step-test-output.service';
-import { flowService } from './flow.service';
 
 export const flowVersionController: FastifyPluginAsyncTypebox = async (
   fastify,
@@ -53,16 +53,17 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
               'It is not possible to update the flowId of a flow version',
           });
         }
-        const flow = await flowService.getOne({
-          id: flowVersion.flowId,
-          projectId: request.principal.projectId,
-        });
-        if (flow === null || flow === undefined) {
-          await reply.status(StatusCodes.BAD_REQUEST).send({
-            success: false,
-            message: 'The flow and version are not associated with the project',
-          });
+
+        const isValid = await validateFlowVersionBelongsToProject(
+          flowVersion,
+          request.principal.projectId,
+          reply,
+        );
+
+        if (!isValid) {
+          return;
         }
+
         if (flowVersion.state === FlowVersionState.LOCKED) {
           await reply.status(StatusCodes.BAD_REQUEST).send({
             success: false,
