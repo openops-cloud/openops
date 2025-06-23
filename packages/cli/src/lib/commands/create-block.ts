@@ -72,11 +72,11 @@ const removeUnusedFiles = async (blockName: string) => {
   const path = `packages/blocks/${blockName}/src/lib/`;
   const files = await readdir(path);
   for (const file of files) {
-    const fullPath = path + file;
+    const fullPath = path.join(path, file);
     const stats = await stat(fullPath);
 
     if (stats.isDirectory()) {
-      await rmdir(fullPath, { recursive: true });
+      await rm(fullPath, { recursive: true, force: true });
     } else {
       await unlink(fullPath);
     }
