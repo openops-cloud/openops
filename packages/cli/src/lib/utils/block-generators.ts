@@ -71,10 +71,12 @@ export const updateProjectJsonConfig = async (blockName: string) => {
 
 export const updateEslintFile = async (blockName: string) => {
   const eslintFile = await readPackageEslint(`packages/blocks/${blockName}`);
-  eslintFile.overrides.splice(
-    eslintFile.overrides.findIndex((rule: any) => rule.files[0] == '*.json'),
-    1,
+  const ruleIndex = eslintFile.overrides.findIndex(
+    (rule: any) => rule.files[0] == '*.json',
   );
+  if (ruleIndex !== -1) {
+    eslintFile.overrides.splice(ruleIndex, 1);
+  }
   await writePackageEslint(`packages/blocks/${blockName}`, eslintFile);
 };
 
