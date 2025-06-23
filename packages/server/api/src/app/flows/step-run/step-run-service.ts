@@ -1,4 +1,5 @@
 import {
+  Action,
   ActionType,
   ApplicationError,
   encodeStepOutputs,
@@ -10,6 +11,7 @@ import {
   OpenOpsId,
   ProjectId,
   StepRunResponse,
+  Trigger,
   UserId,
 } from '@openops/shared';
 import { engineRunner } from 'server-worker';
@@ -85,7 +87,7 @@ export const stepRunService = {
       projectId,
       duration,
       userId,
-      step,
+      step: step as Action | Trigger,
     });
 
     return {

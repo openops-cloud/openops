@@ -52,7 +52,7 @@ const DataSelector = ({
     dataSelectorUtils.getPathToTargetStep,
   );
 
-  const stepIds: string[] = pathToTargetStep.map((p) => p.id!);
+  const stepIds: string[] = pathToTargetStep.map((p) => p.id);
 
   const [forceRender, setForceRerender] = useState(0); // for cache updates
   const [initialLoad, setInitialLoad] = useState(true);
