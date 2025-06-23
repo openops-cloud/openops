@@ -65,7 +65,7 @@ export const testController: FastifyPluginAsyncTypebox = async (fastify) => {
 const TestStepRequest = {
   schema: {
     description:
-      'Test a flow step with specified parameters. With this endpoint its possible to validate steps.',
+      'Test a workflow step with specified parameters. With this endpoint its possible to validate steps.',
     body: Type.Object({
       flowVersionId: Type.String(),
       stepId: Type.String(),
