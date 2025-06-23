@@ -16,6 +16,7 @@ import { formatUtils } from '@/app/lib/utils';
 import { ActionType, FlagId, flowHelper } from '@openops/shared';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
+import { useCenterWorkflowViewOntoStep } from '@/app/features/builder/hooks/center-workflow-view-onto-step';
 import { StepStatusIcon } from '@/app/features/flow-runs/components/step-status-icon';
 import { RUN_DETAILS_STEP_CARD_ID_PREFIX } from './constants';
 import { LoopIterationInput } from './loop-iteration-input';
@@ -58,6 +59,18 @@ const FlowStepDetailsCardItem = ({
     ];
   });
 
+  const centerWorkflowViewOntoStep = useCenterWorkflowViewOntoStep();
+
+  const onStepClick = () => {
+    if (!isStepSelected) {
+      selectStepByName(stepName);
+      centerWorkflowViewOntoStep(stepName);
+      setIsOpen(true);
+    } else {
+      setIsOpen(!isOpen);
+    }
+  };
+
   const isChildSelected = useMemo(() => {
     return step?.type === ActionType.LOOP_ON_ITEMS && selectedStep
       ? flowHelper.isChildOf(step, selectedStep)
@@ -97,14 +110,7 @@ const FlowStepDetailsCardItem = ({
       <CollapsibleTrigger asChild={true}>
         <CardListItem
           id={`${RUN_DETAILS_STEP_CARD_ID_PREFIX}-${stepName}`}
-          onClick={() => {
-            if (!isStepSelected) {
-              selectStepByName(stepName);
-              setIsOpen(true);
-            } else {
-              setIsOpen(!isOpen);
-            }
-          }}
+          onClick={onStepClick}
           className={cn('cursor-pointer select-none px-4 py-3 h-14', {
             'bg-accent text-accent-foreground': isStepSelected,
           })}
