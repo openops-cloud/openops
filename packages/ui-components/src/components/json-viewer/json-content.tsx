@@ -1,8 +1,9 @@
+import { json as jsonLang } from '@codemirror/lang-json';
 import { isNil } from '@openops/shared';
+import { githubDark, githubLight } from '@uiw/codemirror-theme-github';
+import CodeMirror from '@uiw/react-codemirror';
 import { t } from 'i18next';
-import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
-import ReactJson from 'react-json-view';
 import {
   Form,
   FormControl,
@@ -32,7 +33,7 @@ export const JsonContent = ({
   theme,
   editorClassName,
 }: JsonContentProps) => {
-  const viewerTheme = theme === 'dark' ? 'pop' : 'rjv-default';
+  const codeEditiorTheme = theme === 'dark' ? githubDark : githubLight;
 
   if (isEditMode) {
     return (
@@ -75,26 +76,26 @@ export const JsonContent = ({
               {JSON.stringify(json)}
             </pre>
           )}
-          {typeof json === 'string' && (
-            <pre className="text-sm whitespace-pre-wrap overflow-x-auto p-2">
-              {json}
-            </pre>
-          )}
-          {typeof json === 'object' && (
-            <ReactJson
-              style={{
-                overflowX: 'auto',
-              }}
-              theme={viewerTheme}
-              enableClipboard={false}
-              groupArraysAfterLength={20}
-              displayDataTypes={false}
-              name={false}
-              quotesOnKeys={false}
-              src={json}
-              collapsed={1}
-              collapseStringsAfterLength={50}
-            />
+          {(typeof json === 'object' || typeof json === 'string') && (
+            <div className="overflow-auto">
+              <CodeMirror
+                editable={false}
+                readOnly={true}
+                value={json}
+                className="border-none"
+                height="250px"
+                width="100%"
+                maxWidth="100%"
+                basicSetup={{
+                  foldGutter: true,
+                  highlightActiveLineGutter: true,
+                  lineNumbers: true,
+                }}
+                lang="json"
+                theme={codeEditiorTheme}
+                extensions={[jsonLang()]}
+              />
+            </div>
           )}
         </>
       )}

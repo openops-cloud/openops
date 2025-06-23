@@ -312,16 +312,14 @@ const StepSettingsContainer = React.memo(() => {
             <>
               <ResizableHandle withHandle={true} />
               <ResizablePanel defaultSize={45}>
-                <ScrollArea className="h-[calc(100%-35px)] p-4 pb-10 ">
-                  {modifiedStep.type && (
-                    <TestStepContainer
-                      type={modifiedStep.type}
-                      flowId={flowVersion.flowId}
-                      flowVersionId={flowVersion.id}
-                      isSaving={saving}
-                    ></TestStepContainer>
-                  )}
-                </ScrollArea>
+                {modifiedStep.type && (
+                  <TestStepContainer
+                    type={modifiedStep.type}
+                    flowId={flowVersion.flowId}
+                    flowVersionId={flowVersion.id}
+                    isSaving={saving}
+                  ></TestStepContainer>
+                )}
               </ResizablePanel>
             </>
           )}
