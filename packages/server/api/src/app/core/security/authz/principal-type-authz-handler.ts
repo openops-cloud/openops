@@ -1,4 +1,9 @@
-import { ApplicationError, assertNotNullOrUndefined, ErrorCode, PrincipalType } from '@openops/shared';
+import {
+  ApplicationError,
+  assertNotNullOrUndefined,
+  ErrorCode,
+  PrincipalType,
+} from '@openops/shared';
 import { FastifyRequest } from 'fastify';
 import { BaseSecurityHandler } from '../security-handler';
 
