@@ -12,17 +12,14 @@ export type MCPTool = {
   toolSet: ToolSet;
 };
 
-export type MCPToolsResult = {
-  mcpClients: unknown[];
-  tools: ToolSet;
-  isAwsCostMcpAvailable: boolean;
-};
-
 export const getMCPTools = async (
   app: FastifyInstance,
   authToken: string,
   projectId: string,
-): Promise<MCPToolsResult> => {
+): Promise<{
+  mcpClients: unknown[];
+  tools: ToolSet;
+}> => {
   const docsTools = await safeGetTools('docs', getDocsTools);
   const tablesTools = await safeGetTools('tables', getTablesTools);
   const openopsTools = await safeGetTools('openops', () =>
@@ -38,10 +35,6 @@ export const getMCPTools = async (
     client: costAnalysis.client,
     toolSet: costAnalysis.toolSet,
   };
-
-  const isAwsCostMcpAvailable =
-    Object.keys(costExplorerTools.toolSet).length > 0 ||
-    Object.keys(costAnalysisTools.toolSet).length > 0;
 
   const loadExperimentalTools = system.getBoolean(
     AppSystemProp.LOAD_EXPERIMENTAL_MCP_TOOLS,
@@ -75,7 +68,6 @@ export const getMCPTools = async (
       costAnalysisTools.client,
     ],
     tools: toolSet,
-    isAwsCostMcpAvailable,
   };
 };
 

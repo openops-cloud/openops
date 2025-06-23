@@ -108,7 +108,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       content: request.body.message,
     });
 
-    const { mcpClients, tools, isAwsCostMcpAvailable } = await getMCPTools(
+    const { mcpClients, tools } = await getMCPTools(
       app,
       request.headers.authorization?.replace('Bearer ', '') ?? '',
       projectId,
@@ -120,6 +120,10 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       languageModel,
       aiConfig,
     });
+
+    const isAwsCostMcpAvailable =
+      hasToolProvider(filteredTools, 'costAnalysisTools') ||
+      hasToolProvider(filteredTools, 'costExplorerTools');
 
     const isAnalyticsLoaded = hasToolProvider(filteredTools, 'superset');
     const isTablesLoaded = hasToolProvider(filteredTools, 'tables');
