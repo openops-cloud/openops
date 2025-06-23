@@ -209,18 +209,15 @@ export async function blocksBuilder(): Promise<void> {
       `Building ${depsToRebuild.length} changed dependencies out of ${allDeps.length} total dependencies`,
     );
 
-    // Build openops-common first (since blocks might depend on it)
     if (openopsToRebuild.length > 0) {
       logger.info('Building openops-common...');
       await execAsync('nx run openops-common:build');
 
-      // Update cache for openops-common
       for (const dep of openopsToRebuild) {
         depBuildCache.set(dep.name, dep.lastModified);
       }
     }
 
-    // Build blocks
     if (blocksToRebuild.length > 0) {
       logger.info(`Building ${blocksToRebuild.length} blocks...`);
       const blockNames = blocksToRebuild.map((b) =>
@@ -234,7 +231,6 @@ export async function blocksBuilder(): Promise<void> {
       `Finished building ${depsToRebuild.length} dependencies in ${buildDuration}ms. Linking blocks...`,
     );
 
-    // Link blocks (openops-common doesn't need linking as it's already linked)
     for (const block of blocksToRebuild) {
       const blockFolderName = block.path.split('/').pop();
       if (!blockFolderName) {

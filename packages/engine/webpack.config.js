@@ -39,7 +39,7 @@ module.exports = composePlugins(withNx(), (config) => {
           }
         } else if (filename && filename.includes('/packages/openops/')) {
           console.log(
-            `[Engine Server] Detected change in openops package: ${filename} - will rebuild on restart`,
+            `[Engine Server] Detected change in openops package: ${filename}`,
           );
         }
       });
