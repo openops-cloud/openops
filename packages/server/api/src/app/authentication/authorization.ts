@@ -39,7 +39,7 @@ export const entitiesMustBeOwnedByCurrentProject: preSerializationHookHandler<
     {
       payload,
       principal: request.principal,
-      route: request.routeOptions?.config,
+      route: request.routeOptions.config,
     },
     'entitiesMustBeOwnedByCurrentProject',
   );

@@ -1,4 +1,4 @@
-import { ApplicationError, ErrorCode, PrincipalType } from '@openops/shared';
+import { ApplicationError, assertNotNullOrUndefined, ErrorCode, PrincipalType } from '@openops/shared';
 import { FastifyRequest } from 'fastify';
 import { BaseSecurityHandler } from '../security-handler';
 
@@ -12,7 +12,8 @@ export class PrincipalTypeAuthzHandler extends BaseSecurityHandler {
   ];
 
   protected canHandle(request: FastifyRequest): Promise<boolean> {
-    const routerPath = request.routeOptions?.url ?? '';
+    const routerPath = request.routeOptions.url;
+    assertNotNullOrUndefined(routerPath, 'routerPath is undefined');
 
     const requestMatches =
       !PrincipalTypeAuthzHandler.IGNORED_ROUTES.includes(routerPath) &&

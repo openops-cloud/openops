@@ -34,21 +34,6 @@ jest.mock('axios', () => {
   };
 });
 
-const loggerMock = jest.fn();
-
-jest.mock('@openops/server-shared', () => ({
-  ...jest.requireActual('@openops/server-shared'),
-  logger: {
-    info: loggerMock,
-    debug: loggerMock,
-    error: loggerMock,
-    fatal: loggerMock,
-    warn: loggerMock,
-    trace: loggerMock,
-    child: loggerMock,
-  },
-}));
-
 const sendEphemeralMessageMock = jest.fn();
 jest.mock('../../../../src/app/slack/ephemeral-message', () => ({
   sendEphemeralMessage: sendEphemeralMessageMock,
