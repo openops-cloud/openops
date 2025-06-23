@@ -16,6 +16,9 @@ module.exports = composePlugins(withNx(), (config) => {
         blockDirs.forEach((dir) => {
           compilation.contextDependencies.add(dir);
         });
+
+        const openopsDir = path.resolve(__dirname, '../../openops');
+        compilation.contextDependencies.add(openopsDir);
       });
 
       compiler.hooks.invalid.tap(
@@ -38,6 +41,10 @@ module.exports = composePlugins(withNx(), (config) => {
                 `[API Server] Detected change in block: ${pathParts[2]}`,
               );
             }
+          } else if (filename && filename.includes('/packages/openops/')) {
+            console.log(
+              `[API Server] Detected change in openops package: ${filename} - will rebuild on restart`,
+            );
           }
         },
       );

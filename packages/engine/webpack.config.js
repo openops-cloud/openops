@@ -15,6 +15,9 @@ module.exports = composePlugins(withNx(), (config) => {
         blockDirs.forEach((dir) => {
           compilation.contextDependencies.add(dir);
         });
+
+        const openopsDir = path.resolve(__dirname, '../openops');
+        compilation.contextDependencies.add(openopsDir);
       });
 
       compiler.hooks.invalid.tap('SmartBlockWatcher', (filename) => {
@@ -34,6 +37,10 @@ module.exports = composePlugins(withNx(), (config) => {
               `[Engine Server] Detected change in block: ${pathParts[2]} - waiting for API server to handle build`,
             );
           }
+        } else if (filename && filename.includes('/packages/openops/')) {
+          console.log(
+            `[Engine Server] Detected change in openops package: ${filename} - will rebuild on restart`,
+          );
         }
       });
 

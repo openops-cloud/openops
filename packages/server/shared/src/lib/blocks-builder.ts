@@ -18,15 +18,16 @@ const isDevEnv = system.getOrThrow(SharedSystemProp.ENVIRONMENT) === 'dev';
 
 const LOG_FIRST_BLOCKS = 3;
 
-type BlockBuildInfo = {
+type DependencyBuildInfo = {
   name: string;
   path: string;
   lastModified: number;
   needsRebuild: boolean;
+  type: 'block' | 'openops-common';
 };
 
-// Cache for tracking block modification times (persistent across runs)
-const cacheFile = join(tmpdir(), 'openops-block-cache.json');
+// Cache for tracking dependency modification times (persistent across runs)
+const cacheFile = join(tmpdir(), 'openops-deps-cache.json');
 
 function loadBuildCache(): Map<string, number> {
   try {
@@ -47,11 +48,42 @@ function saveBuildCache(cache: Map<string, number>): void {
   }
 }
 
-const blockBuildCache = loadBuildCache();
+const depBuildCache = loadBuildCache();
 
-async function getBlocksWithChanges(): Promise<BlockBuildInfo[]> {
+async function getOpenOpsCommonInfo(): Promise<DependencyBuildInfo | null> {
+  const openopsPath = join(cwd(), 'packages', 'openops');
+  const packageJsonPath = join(openopsPath, 'package.json');
+
+  try {
+    const packageJson = JSON.parse(await readFile(packageJsonPath, 'utf-8'));
+
+    if (packageJson.name === '@openops/common') {
+      const lastModified = await getDirectoryLastModified(openopsPath);
+      const cached = depBuildCache.get(packageJson.name) ?? 0;
+      const needsRebuild = lastModified > cached;
+
+      logger.debug(
+        `OpenOps Common: lastModified=${lastModified}, cached=${cached}, needsRebuild=${needsRebuild}`,
+      );
+
+      return {
+        name: packageJson.name,
+        path: openopsPath,
+        lastModified,
+        needsRebuild,
+        type: 'openops-common',
+      };
+    }
+  } catch (error) {
+    logger.warn('Error checking openops-common package', { error });
+  }
+
+  return null;
+}
+
+async function getBlocksWithChanges(): Promise<DependencyBuildInfo[]> {
   const blocksPath = join(cwd(), 'packages', 'blocks');
-  const blocks: BlockBuildInfo[] = [];
+  const blocks: DependencyBuildInfo[] = [];
 
   async function findBlocks(dir: string): Promise<void> {
     const entries = await readdir(dir, { withFileTypes: true });
@@ -70,7 +102,7 @@ async function getBlocksWithChanges(): Promise<BlockBuildInfo[]> {
           );
           if (packageJson.name?.startsWith('@openops/block-')) {
             const lastModified = await getDirectoryLastModified(fullPath);
-            const cached = blockBuildCache.get(packageJson.name) ?? 0;
+            const cached = depBuildCache.get(packageJson.name) ?? 0;
             const needsRebuild = lastModified > cached;
 
             if (blocks.length < LOG_FIRST_BLOCKS) {
@@ -84,6 +116,7 @@ async function getBlocksWithChanges(): Promise<BlockBuildInfo[]> {
               path: fullPath,
               lastModified,
               needsRebuild,
+              type: 'block',
             });
           } else {
             // Recurse into subdirectories
@@ -143,35 +176,65 @@ export async function blocksBuilder(): Promise<void> {
 
   let lock: Lock | undefined;
   try {
-    lock = await acquireRedisLock(`build-blocks`, 60000);
+    lock = await acquireRedisLock(`build-deps`, 60000);
     const startTime = performance.now();
 
-    const blocks = await getBlocksWithChanges();
-    const blocksToRebuild = blocks.filter((b) => b.needsRebuild);
+    // Get all dependencies that might need rebuilding
+    const [blocks, openopsCommon] = await Promise.all([
+      getBlocksWithChanges(),
+      getOpenOpsCommonInfo(),
+    ]);
 
-    logger.info(
-      `Found ${blocks.length} total blocks, ${blocksToRebuild.length} need rebuilding`,
+    const allDeps: DependencyBuildInfo[] = [...blocks];
+    if (openopsCommon) {
+      allDeps.push(openopsCommon);
+    }
+
+    const depsToRebuild = allDeps.filter((d) => d.needsRebuild);
+    const blocksToRebuild = depsToRebuild.filter((d) => d.type === 'block');
+    const openopsToRebuild = depsToRebuild.filter(
+      (d) => d.type === 'openops-common',
     );
 
-    if (blocksToRebuild.length === 0) {
-      logger.info('All blocks are up to date, skipping build');
+    logger.info(
+      `Found ${allDeps.length} total dependencies, ${depsToRebuild.length} need rebuilding`,
+    );
+
+    if (depsToRebuild.length === 0) {
+      logger.info('All dependencies are up to date, skipping build');
       return;
     }
 
     logger.info(
-      `Building ${blocksToRebuild.length} changed blocks out of ${blocks.length} total blocks`,
+      `Building ${depsToRebuild.length} changed dependencies out of ${allDeps.length} total dependencies`,
     );
 
-    const blockNames = blocksToRebuild.map((b) =>
-      b.name.replace('@openops/block-', 'blocks-'),
-    );
-    await execAsync(`nx run-many -t build -p ${blockNames.join(',')}`);
+    // Build openops-common first (since blocks might depend on it)
+    if (openopsToRebuild.length > 0) {
+      logger.info('Building openops-common...');
+      await execAsync('nx run openops-common:build');
+
+      // Update cache for openops-common
+      for (const dep of openopsToRebuild) {
+        depBuildCache.set(dep.name, dep.lastModified);
+      }
+    }
+
+    // Build blocks
+    if (blocksToRebuild.length > 0) {
+      logger.info(`Building ${blocksToRebuild.length} blocks...`);
+      const blockNames = blocksToRebuild.map((b) =>
+        b.name.replace('@openops/block-', 'blocks-'),
+      );
+      await execAsync(`nx run-many -t build -p ${blockNames.join(',')}`);
+    }
 
     const buildDuration = Math.floor(performance.now() - startTime);
     logger.info(
-      `Finished building ${blocksToRebuild.length} blocks in ${buildDuration}ms. Linking blocks...`,
+      `Finished building ${depsToRebuild.length} dependencies in ${buildDuration}ms. Linking blocks...`,
     );
 
+    // Link blocks (openops-common doesn't need linking as it's already linked)
     for (const block of blocksToRebuild) {
       const blockFolderName = block.path.split('/').pop();
       if (!blockFolderName) {
@@ -191,7 +254,7 @@ export async function blocksBuilder(): Promise<void> {
         await stat(distPath);
 
         await execAsync(`cd "${distPath}" && npm link --no-audit --no-fund`);
-        blockBuildCache.set(block.name, block.lastModified);
+        depBuildCache.set(block.name, block.lastModified);
         logger.debug(`Successfully linked block ${block.name}`);
       } catch (error) {
         const err = error as { code?: string };
@@ -209,10 +272,10 @@ export async function blocksBuilder(): Promise<void> {
       performance.now() - startTime - buildDuration,
     );
     logger.info(
-      `Linked ${blocksToRebuild.length} blocks in ${linkDuration}ms. Blocks are ready.`,
+      `Linked ${blocksToRebuild.length} blocks in ${linkDuration}ms. Dependencies are ready.`,
     );
 
-    saveBuildCache(blockBuildCache);
+    saveBuildCache(depBuildCache);
   } finally {
     await lock?.release();
   }
