@@ -12,17 +12,20 @@ export class PrincipalTypeAuthzHandler extends BaseSecurityHandler {
   ];
 
   protected canHandle(request: FastifyRequest): Promise<boolean> {
+    const routerPath = request.routeOptions?.url ?? '';
+
     const requestMatches =
-      !PrincipalTypeAuthzHandler.IGNORED_ROUTES.includes(request.routerPath) &&
-      !request.routerPath.startsWith('/v1/openapi') &&
-      !request.routerPath.startsWith('/ui');
+      !PrincipalTypeAuthzHandler.IGNORED_ROUTES.includes(routerPath) &&
+      !routerPath.startsWith('/v1/openapi') &&
+      !routerPath.startsWith('/ui');
 
     return Promise.resolve(requestMatches);
   }
 
   protected doHandle(request: FastifyRequest): Promise<void> {
     const principalType = request.principal.type;
-    const configuredPrincipals = request.routeConfig.allowedPrincipals;
+    const configuredPrincipals =
+      request.routeOptions?.config?.allowedPrincipals;
     const defaultPrincipals =
       PrincipalTypeAuthzHandler.DEFAULT_ALLOWED_PRINCIPAL_TYPES;
     const allowedPrincipals = configuredPrincipals ?? defaultPrincipals;
