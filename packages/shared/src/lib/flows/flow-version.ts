@@ -22,17 +22,6 @@ export const FlowVersion = Type.Object({
   state: Type.Enum(FlowVersionState),
 });
 
-export const NoIdFlowVersion = Type.Object({
-  ...BaseModelSchema,
-  flowId: Type.String(),
-  displayName: Type.String(),
-  description: Type.Optional(Type.String()),
-  trigger: Type.Omit(Trigger, ['id']),
-  updatedBy: Nullable(Type.String()),
-  valid: Type.Boolean(),
-  state: Type.Enum(FlowVersionState),
-});
-
 export type FlowVersion = Static<typeof FlowVersion>;
 
 export const FlowVersionMetadata = Type.Object({
