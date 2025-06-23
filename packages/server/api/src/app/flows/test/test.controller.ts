@@ -1,10 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   FastifyPluginAsyncTypebox,
   Type,
 } from '@fastify/type-provider-typebox';
-import { flowHelper } from '@openops/shared';
+import { flowHelper, FlowVersion } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
 import { flowVersionService } from '../flow-version/flow-version.service';
+import { flowService } from '../flow/flow.service';
 import { stepRunService } from '../step-run/step-run-service';
 
 export const testController: FastifyPluginAsyncTypebox = async (fastify) => {
@@ -16,6 +18,16 @@ export const testController: FastifyPluginAsyncTypebox = async (fastify) => {
       const projectId = request.principal.projectId;
 
       const flowVersion = await flowVersionService.getOneOrThrow(flowVersionId);
+
+      const isValid = await validateFlowBelongToProject(
+        flowVersion,
+        projectId,
+        reply,
+      );
+
+      if (!isValid) {
+        return;
+      }
 
       const step = flowHelper
         .getAllSteps(flowVersion.trigger)
@@ -53,6 +65,27 @@ export const testController: FastifyPluginAsyncTypebox = async (fastify) => {
     },
   );
 };
+
+async function validateFlowBelongToProject(
+  flowVersion: FlowVersion,
+  projectId: string,
+  reply: any,
+): Promise<boolean> {
+  const flow = await flowService.getOne({
+    id: flowVersion.flowId,
+    projectId,
+  });
+  if (flow === null || flow === undefined) {
+    await reply.status(StatusCodes.BAD_REQUEST).send({
+      success: false,
+      message: 'The flow and version are not associated with the project',
+    });
+
+    return false;
+  }
+
+  return true;
+}
 
 const TestStepRequest = {
   schema: {
