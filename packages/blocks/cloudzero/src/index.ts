@@ -1,5 +1,5 @@
 import { createCustomApiCallAction } from '@openops/blocks-common';
-import { createBlock } from '@openops/blocks-framework';
+import { createBlock, Property } from '@openops/blocks-framework';
 import { BlockCategory } from '@openops/shared';
 import { cloudzeroAuth } from './lib/auth';
 
@@ -17,6 +17,12 @@ export const cloudzero = createBlock({
       authMapping: async (context) => ({
         Authorization: context.auth as string,
       }),
+      additionalProps: {
+        documentation: Property.MarkDown({
+          value:
+            'For more information, visit the [CloudZero API documentation](https://docs.cloudzero.com/reference/introduction).',
+        }),
+      },
     }),
   ],
   triggers: [],

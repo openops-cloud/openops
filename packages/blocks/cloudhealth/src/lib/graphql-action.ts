@@ -13,20 +13,21 @@ const documentation = `
 
   **Example Query:**
   \`\`\`graphql
-  query GetAccountsByStatus($status: String!) {
-    accounts(status: $status) {
-      id
-      name
-      status
-      created_at
+  query Budget($cloud: CloudType) { 
+    budgets(cloud: $cloud) { 
+      id 
+      name 
+      cloud 
     }
   }
   \`\`\`
 
   **Variables:**
   \`\`\`json
-  { "status": "active" }
+  { "cloud": "AWS" }
   \`\`\`
+
+  **Note:** Make sure your query parameters match the variables you provide. The query above filters budgets by cloud provider.
 
   For more information, visit the [CloudHealth GraphQL API documentation](https://help.cloudhealthtech.com/graphql-api/).
 `;

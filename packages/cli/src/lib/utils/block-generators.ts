@@ -1,5 +1,7 @@
 import chalk from 'chalk';
-import { readdir, unlink, writeFile } from 'fs/promises';
+import { readdir, unlink } from 'fs/promises';
+import { rm, stat } from 'node:fs/promises';
+import nodePath from 'node:path';
 import { exec } from '../utils/exec';
 import {
   readJestConfig,
@@ -34,7 +36,14 @@ export const removeUnusedFiles = async (blockName: string) => {
   const path = `packages/blocks/${blockName}/src/lib/`;
   const files = await readdir(path);
   for (const file of files) {
-    await unlink(path + file);
+    const fullPath = nodePath.join(path, file);
+    const stats = await stat(fullPath);
+
+    if (stats.isDirectory()) {
+      await rm(fullPath, { recursive: true, force: true });
+    } else {
+      await unlink(fullPath);
+    }
   }
 };
 
