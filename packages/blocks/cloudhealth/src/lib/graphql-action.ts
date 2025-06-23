@@ -13,8 +13,8 @@ const documentation = `
 
   **Example Query:**
   \`\`\`graphql
-  query Budget { 
-    budgets { 
+  query Budget($cloud: CloudType) { 
+    budgets(cloud: $cloud) { 
       id 
       name 
       cloud 
@@ -24,8 +24,10 @@ const documentation = `
 
   **Variables:**
   \`\`\`json
-  { "cloud": "aws" }
+  { "cloud": "AWS" }
   \`\`\`
+
+  **Note:** Make sure your query parameters match the variables you provide. The query above filters budgets by cloud provider.
 
   For more information, visit the [CloudHealth GraphQL API documentation](https://help.cloudhealthtech.com/graphql-api/).
 `;
