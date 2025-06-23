@@ -78,6 +78,15 @@ export const testController: FastifyPluginAsyncTypebox = async (fastify) => {
           flowVersionId,
         );
 
+        const isValid = await validateFlowBelongToProject(
+          flowVersion,
+          projectId,
+          reply,
+        );
+
+        if (!isValid) {
+          return;
+        }
         const flowRun = await flowRunService.test({
           projectId,
           flowVersionId: flowVersion.id,
