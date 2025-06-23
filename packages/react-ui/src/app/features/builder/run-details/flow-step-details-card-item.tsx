@@ -7,7 +7,7 @@ import {
   CollapsibleTrigger,
 } from '@openops/components/ui';
 import { ChevronRight } from 'lucide-react';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
 import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
@@ -61,16 +61,6 @@ const FlowStepDetailsCardItem = ({
 
   const centerWorkflowViewOntoStep = useCenterWorkflowViewOntoStep();
 
-  const onStepClick = () => {
-    if (!isStepSelected) {
-      selectStepByName(stepName);
-      centerWorkflowViewOntoStep(stepName);
-      setIsOpen(true);
-    } else {
-      setIsOpen(!isOpen);
-    }
-  };
-
   const isChildSelected = useMemo(() => {
     return step?.type === ActionType.LOOP_ON_ITEMS && selectedStep
       ? flowHelper.isChildOf(step, selectedStep)
@@ -104,6 +94,23 @@ const FlowStepDetailsCardItem = ({
   const [isOpen, setIsOpen] = React.useState(true);
 
   const isLoopStep = stepOutput && stepOutput.type === ActionType.LOOP_ON_ITEMS;
+
+  const onStepClick = useCallback(() => {
+    if (!isStepSelected) {
+      selectStepByName(stepName);
+      centerWorkflowViewOntoStep(stepName);
+      setIsOpen(true);
+    } else {
+      setIsOpen(!isOpen);
+    }
+  }, [
+    isStepSelected,
+    stepName,
+    isOpen,
+    selectStepByName,
+    centerWorkflowViewOntoStep,
+    setIsOpen,
+  ]);
 
   return (
     <Collapsible open={isOpen} className="w-full">
