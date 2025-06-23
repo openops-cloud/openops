@@ -175,11 +175,12 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
     const mockLanguageModel = {} as LanguageModel;
 
     const mockAllTools = {
-      client: [],
+      mcpClients: [],
       tools: {
         tool1: { description: 'Tool 1', parameters: {} },
         tool2: { description: 'Tool 2', parameters: {} },
       },
+      isAwsCostMcpAvailable: true,
     };
 
     beforeEach(async () => {
@@ -244,6 +245,8 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           isAnalyticsLoaded: true,
           isTablesLoaded: true,
           isOpenOpsMCPEnabled: true,
+          isAwsCostMcpAvailable: true,
+          userMessage: 'test message',
         },
       },
       {
@@ -259,6 +262,8 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           isAnalyticsLoaded: false,
           isTablesLoaded: false,
           isOpenOpsMCPEnabled: true,
+          isAwsCostMcpAvailable: true,
+          userMessage: 'test message',
         },
       },
       {
@@ -270,6 +275,8 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           isAnalyticsLoaded: false,
           isTablesLoaded: false,
           isOpenOpsMCPEnabled: false,
+          isAwsCostMcpAvailable: true,
+          userMessage: 'test message',
         },
       },
       {
@@ -285,6 +292,8 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           isAnalyticsLoaded: true,
           isTablesLoaded: false,
           isOpenOpsMCPEnabled: false,
+          isAwsCostMcpAvailable: true,
+          userMessage: 'test message',
         },
       },
       {
@@ -300,6 +309,8 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           isAnalyticsLoaded: false,
           isTablesLoaded: true,
           isOpenOpsMCPEnabled: false,
+          isAwsCostMcpAvailable: true,
+          userMessage: 'test message',
         },
       },
     ])(
@@ -325,6 +336,8 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           isAnalyticsLoaded: false,
           isTablesLoaded: false,
           isOpenOpsMCPEnabled: false,
+          isAwsCostMcpAvailable: true,
+          userMessage: 'test message',
           expectedSystemPrompt: emptyToolsSystemPrompt,
         },
       },
@@ -334,6 +347,8 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           isAnalyticsLoaded: false,
           isTablesLoaded: false,
           isOpenOpsMCPEnabled: false,
+          isAwsCostMcpAvailable: true,
+          userMessage: 'test message',
           expectedSystemPrompt: emptyToolsSystemPrompt,
         },
       },
@@ -343,6 +358,8 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           isAnalyticsLoaded: false,
           isTablesLoaded: false,
           isOpenOpsMCPEnabled: false,
+          isAwsCostMcpAvailable: true,
+          userMessage: 'test message',
           expectedSystemPrompt: emptyToolsSystemPrompt,
         },
       },
@@ -354,6 +371,8 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           isAnalyticsLoaded: false,
           isTablesLoaded: false,
           isOpenOpsMCPEnabled: false,
+          isAwsCostMcpAvailable: true,
+          userMessage: 'test message',
           expectedSystemPrompt: systemPrompt,
         },
       },
@@ -373,6 +392,8 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           isAnalyticsLoaded: expected.isAnalyticsLoaded,
           isTablesLoaded: expected.isTablesLoaded,
           isOpenOpsMCPEnabled: expected.isOpenOpsMCPEnabled,
+          isAwsCostMcpAvailable: expected.isAwsCostMcpAvailable,
+          userMessage: expected.userMessage,
         });
         expect(pipeDataStreamToResponse).toHaveBeenCalled();
         expect(streamText).toHaveBeenCalledWith(
@@ -404,8 +425,9 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
       },
     };
     (getMCPTools as jest.Mock).mockResolvedValue({
-      client: [],
+      mcpClients: [],
       tools: openopsTools,
+      isAwsCostMcpAvailable: true,
     });
 
     const selectedTools = {
@@ -431,5 +453,87 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
         },
       }),
     );
+  });
+
+  it('should include AWS cost MCP configuration hint when user asks about AWS cost but MCP is not available', async () => {
+    const mockRequestWithCostQuery = {
+      ...mockRequest,
+      body: {
+        ...mockRequest.body,
+        message: 'Show me AWS cost analysis for this month',
+      },
+    };
+
+    const mockToolsWithoutCost = {
+      mcpClients: [],
+      tools: {
+        tool1: { description: 'Tool 1', parameters: {} },
+      },
+      isAwsCostMcpAvailable: false,
+    };
+
+    (getMCPTools as jest.Mock).mockResolvedValue(mockToolsWithoutCost);
+    (selectRelevantTools as jest.Mock).mockResolvedValue({
+      tool1: { description: 'Tool 1', parameters: {} },
+    });
+
+    const postHandler = handlers['/'];
+    await postHandler(
+      mockRequestWithCostQuery as FastifyRequest,
+      mockReply as unknown as FastifyReply,
+    );
+
+    expect(getMcpSystemPrompt).toHaveBeenCalledWith({
+      isAnalyticsLoaded: false,
+      isTablesLoaded: false,
+      isOpenOpsMCPEnabled: false,
+      isAwsCostMcpAvailable: false,
+      userMessage: 'Show me AWS cost analysis for this month',
+    });
+  });
+
+  it('should not include AWS cost MCP configuration hint when MCP is available', async () => {
+    const mockRequestWithCostQuery = {
+      ...mockRequest,
+      body: {
+        ...mockRequest.body,
+        message: 'Show me AWS cost analysis for this month',
+      },
+    };
+
+    const mockToolsWithCost = {
+      mcpClients: [],
+      tools: {
+        aws_cost_tool: {
+          description: 'AWS Cost Tool',
+          parameters: {},
+          toolProvider: 'cost-explorer',
+        },
+      },
+      isAwsCostMcpAvailable: true,
+    };
+
+    (getMCPTools as jest.Mock).mockResolvedValue(mockToolsWithCost);
+    (selectRelevantTools as jest.Mock).mockResolvedValue({
+      aws_cost_tool: {
+        description: 'AWS Cost Tool',
+        parameters: {},
+        toolProvider: 'cost-explorer',
+      },
+    });
+
+    const postHandler = handlers['/'];
+    await postHandler(
+      mockRequestWithCostQuery as FastifyRequest,
+      mockReply as unknown as FastifyReply,
+    );
+
+    expect(getMcpSystemPrompt).toHaveBeenCalledWith({
+      isAnalyticsLoaded: false,
+      isTablesLoaded: false,
+      isOpenOpsMCPEnabled: false,
+      isAwsCostMcpAvailable: true,
+      userMessage: 'Show me AWS cost analysis for this month',
+    });
   });
 });

@@ -108,7 +108,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       content: request.body.message,
     });
 
-    const { mcpClients, tools } = await getMCPTools(
+    const { mcpClients, tools, isAwsCostMcpAvailable } = await getMCPTools(
       app,
       request.headers.authorization?.replace('Bearer ', '') ?? '',
       projectId,
@@ -129,6 +129,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       isAnalyticsLoaded,
       isTablesLoaded,
       isOpenOpsMCPEnabled,
+      isAwsCostMcpAvailable,
     });
 
     pipeDataStreamToResponse(reply.raw, {
