@@ -10,7 +10,6 @@ module.exports = composePlugins(withNx(), (config) => {
     apply: (compiler) => {
       let isInitialBuild = true;
 
-      // Watch individual block directories instead of the entire blocks folder
       compiler.hooks.afterCompile.tap('SmartBlockWatcher', (compilation) => {
         const blockDirs = getBlockDirectories(__dirname, '../blocks');
         blockDirs.forEach((dir) => {
@@ -18,7 +17,6 @@ module.exports = composePlugins(withNx(), (config) => {
         });
       });
 
-      // Engine server just watches for changes but doesn't build (API server handles it)
       compiler.hooks.invalid.tap('SmartBlockWatcher', (filename) => {
         if (filename && filename.includes('/packages/blocks/')) {
           const relativePath = path.relative(
@@ -39,7 +37,6 @@ module.exports = composePlugins(withNx(), (config) => {
         }
       });
 
-      // Engine server doesn't need to build blocks since API server handles it
       compiler.hooks.beforeCompile.tapAsync(
         'SmartBlockWatcher',
         (params, callback) => {

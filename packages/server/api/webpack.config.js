@@ -6,13 +6,11 @@ const { getBlockDirectories } = require('../../../tools/webpack-utils');
 module.exports = composePlugins(withNx(), (config) => {
   config.plugins.push(new IgnoreDynamicRequire());
 
-  // Enhanced webpack plugin for smarter block watching (development only)
   config.plugins.push({
     apply: (compiler) => {
       let isInitialBuild = true;
       const changedBlocks = new Set();
 
-      // Watch individual block directories instead of the entire blocks folder
       compiler.hooks.afterCompile.tap('SmartBlockWatcher', (compilation) => {
         const blockDirs = getBlockDirectories(__dirname, '../../blocks');
         blockDirs.forEach((dir) => {
@@ -20,7 +18,6 @@ module.exports = composePlugins(withNx(), (config) => {
         });
       });
 
-      // Handle file changes more intelligently
       compiler.hooks.invalid.tap(
         'SmartBlockWatcher',
         (filename, changeTime) => {
@@ -45,7 +42,6 @@ module.exports = composePlugins(withNx(), (config) => {
         },
       );
 
-      // Simple build coordination - just log changes, let external tools handle builds
       compiler.hooks.beforeCompile.tapAsync(
         'SmartBlockWatcher',
         (params, callback) => {

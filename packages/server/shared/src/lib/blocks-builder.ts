@@ -16,6 +16,8 @@ const isFileBlocks =
   system.getOrThrow(SharedSystemProp.BLOCKS_SOURCE) === 'FILE';
 const isDevEnv = system.getOrThrow(SharedSystemProp.ENVIRONMENT) === 'dev';
 
+const LOG_FIRST_BLOCKS = 3;
+
 type BlockBuildInfo = {
   name: string;
   path: string;
@@ -67,13 +69,11 @@ async function getBlocksWithChanges(): Promise<BlockBuildInfo[]> {
             await readFile(packageJsonPath, 'utf-8'),
           );
           if (packageJson.name?.startsWith('@openops/block-')) {
-            // Get the most recent modification time in the block
             const lastModified = await getDirectoryLastModified(fullPath);
             const cached = blockBuildCache.get(packageJson.name) ?? 0;
             const needsRebuild = lastModified > cached;
 
-            // Debug logging for first few blocks
-            if (blocks.length < 3) {
+            if (blocks.length < LOG_FIRST_BLOCKS) {
               logger.debug(
                 `Block ${packageJson.name}: lastModified=${lastModified}, cached=${cached}, needsRebuild=${needsRebuild}`,
               );
