@@ -1,46 +1,7 @@
 const { composePlugins, withNx } = require('@nx/webpack');
 const IgnoreDynamicRequire = require('webpack-ignore-dynamic-require');
 const path = require('path');
-const fs = require('fs');
-
-function getBlockDirectories() {
-  const blocksPath = path.resolve(__dirname, '../blocks');
-  const blockDirs = [];
-
-  function findBlockDirs(dir) {
-    try {
-      const entries = fs.readdirSync(dir, { withFileTypes: true });
-
-      for (const entry of entries) {
-        if (
-          entry.isDirectory() &&
-          !['node_modules', 'dist', 'framework', 'common'].includes(entry.name)
-        ) {
-          const fullPath = path.join(dir, entry.name);
-          const packageJsonPath = path.join(fullPath, 'package.json');
-
-          try {
-            const packageJson = JSON.parse(
-              fs.readFileSync(packageJsonPath, 'utf-8'),
-            );
-            if (packageJson.name?.startsWith('@openops/block-')) {
-              blockDirs.push(fullPath);
-            } else {
-              findBlockDirs(fullPath);
-            }
-          } catch {
-            findBlockDirs(fullPath);
-          }
-        }
-      }
-    } catch (e) {
-      // Ignore errors
-    }
-  }
-
-  findBlockDirs(blocksPath);
-  return blockDirs;
-}
+const { getBlockDirectories } = require('../../tools/webpack-utils');
 
 module.exports = composePlugins(withNx(), (config) => {
   config.plugins.push(new IgnoreDynamicRequire());
@@ -51,7 +12,7 @@ module.exports = composePlugins(withNx(), (config) => {
 
       // Watch individual block directories instead of the entire blocks folder
       compiler.hooks.afterCompile.tap('SmartBlockWatcher', (compilation) => {
-        const blockDirs = getBlockDirectories();
+        const blockDirs = getBlockDirectories(__dirname, '../blocks');
         blockDirs.forEach((dir) => {
           compilation.contextDependencies.add(dir);
         });
