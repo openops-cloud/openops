@@ -21,6 +21,9 @@ module.exports = composePlugins(withNx(), (config) => {
 
         const sharedDir = path.resolve(__dirname, '../shared');
         compilation.contextDependencies.add(sharedDir);
+
+        const serverSharedDir = path.resolve(__dirname, '../server/shared');
+        compilation.contextDependencies.add(serverSharedDir);
       });
 
       compiler.hooks.invalid.tap('SmartBlockWatcher', (filename) => {
@@ -47,6 +50,10 @@ module.exports = composePlugins(withNx(), (config) => {
         } else if (filename && filename.includes('/packages/shared/')) {
           console.log(
             `[Engine Server] Detected change in shared package: ${filename}`,
+          );
+        } else if (filename && filename.includes('/packages/server/shared/')) {
+          console.log(
+            `[Engine Server] Detected change in server-shared package: ${filename}`,
           );
         }
       });

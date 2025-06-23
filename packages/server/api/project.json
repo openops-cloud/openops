@@ -3,7 +3,12 @@
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/server/api/src",
   "projectType": "application",
-  "implicitDependencies": ["engine", "openops-common", "shared"],
+  "implicitDependencies": [
+    "engine",
+    "openops-common",
+    "shared",
+    "server-shared"
+  ],
   "targets": {
     "build": {
       "executor": "@nx/webpack:webpack",

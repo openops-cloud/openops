@@ -22,6 +22,9 @@ module.exports = composePlugins(withNx(), (config) => {
 
         const sharedDir = path.resolve(__dirname, '../../shared');
         compilation.contextDependencies.add(sharedDir);
+
+        const serverSharedDir = path.resolve(__dirname, '../shared');
+        compilation.contextDependencies.add(serverSharedDir);
       });
 
       compiler.hooks.invalid.tap(
@@ -51,6 +54,13 @@ module.exports = composePlugins(withNx(), (config) => {
           } else if (filename && filename.includes('/packages/shared/')) {
             console.log(
               `[API Server] Detected change in shared package: ${filename}`,
+            );
+          } else if (
+            filename &&
+            filename.includes('/packages/server/shared/')
+          ) {
+            console.log(
+              `[API Server] Detected change in server-shared package: ${filename}`,
             );
           }
         },

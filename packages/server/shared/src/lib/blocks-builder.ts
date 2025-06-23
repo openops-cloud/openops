@@ -23,7 +23,7 @@ type DependencyBuildInfo = {
   path: string;
   lastModified: number;
   needsRebuild: boolean;
-  type: 'block' | 'openops-common' | 'shared';
+  type: 'block' | 'openops-common' | 'shared' | 'server-shared';
 };
 
 // Cache for tracking dependency modification times (persistent across runs)
@@ -76,6 +76,37 @@ async function getSharedInfo(): Promise<DependencyBuildInfo | null> {
     }
   } catch (error) {
     logger.warn('Error checking shared package', { error });
+  }
+
+  return null;
+}
+
+async function getServerSharedInfo(): Promise<DependencyBuildInfo | null> {
+  const serverSharedPath = join(cwd(), 'packages', 'server', 'shared');
+  const packageJsonPath = join(serverSharedPath, 'package.json');
+
+  try {
+    const packageJson = JSON.parse(await readFile(packageJsonPath, 'utf-8'));
+
+    if (packageJson.name === 'server-shared') {
+      const lastModified = await getDirectoryLastModified(serverSharedPath);
+      const cached = depBuildCache.get(packageJson.name) ?? 0;
+      const needsRebuild = lastModified > cached;
+
+      logger.debug(
+        `Server Shared: lastModified=${lastModified}, cached=${cached}, needsRebuild=${needsRebuild}`,
+      );
+
+      return {
+        name: packageJson.name,
+        path: serverSharedPath,
+        lastModified,
+        needsRebuild,
+        type: 'server-shared',
+      };
+    }
+  } catch (error) {
+    logger.warn('Error checking server-shared package', { error });
   }
 
   return null;
@@ -211,10 +242,11 @@ export async function blocksBuilder(): Promise<void> {
     const startTime = performance.now();
 
     // Get all dependencies that might need rebuilding
-    const [blocks, openopsCommon, shared] = await Promise.all([
+    const [blocks, openopsCommon, shared, serverShared] = await Promise.all([
       getBlocksWithChanges(),
       getOpenOpsCommonInfo(),
       getSharedInfo(),
+      getServerSharedInfo(),
     ]);
 
     const allDeps: DependencyBuildInfo[] = [...blocks];
@@ -224,6 +256,9 @@ export async function blocksBuilder(): Promise<void> {
     if (shared) {
       allDeps.push(shared);
     }
+    if (serverShared) {
+      allDeps.push(serverShared);
+    }
 
     const depsToRebuild = allDeps.filter((d) => d.needsRebuild);
     const blocksToRebuild = depsToRebuild.filter((d) => d.type === 'block');
@@ -231,6 +266,9 @@ export async function blocksBuilder(): Promise<void> {
       (d) => d.type === 'openops-common',
     );
     const sharedToRebuild = depsToRebuild.filter((d) => d.type === 'shared');
+    const serverSharedToRebuild = depsToRebuild.filter(
+      (d) => d.type === 'server-shared',
+    );
 
     logger.info(
       `Found ${allDeps.length} total dependencies, ${depsToRebuild.length} need rebuilding`,
@@ -256,7 +294,18 @@ export async function blocksBuilder(): Promise<void> {
       }
     }
 
-    // Build openops-common second (depends on shared, blocks depend on it)
+    // Build server-shared second (depends on shared)
+    if (serverSharedToRebuild.length > 0) {
+      logger.info('Building server-shared...');
+      await execAsync('nx run server-shared:build');
+
+      // Update cache for server-shared
+      for (const dep of serverSharedToRebuild) {
+        depBuildCache.set(dep.name, dep.lastModified);
+      }
+    }
+
+    // Build openops-common third (depends on shared and server-shared, blocks depend on it)
     if (openopsToRebuild.length > 0) {
       logger.info('Building openops-common...');
       await execAsync('nx run openops-common:build');

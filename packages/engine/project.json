@@ -74,5 +74,5 @@
     }
   },
   "tags": [],
-  "implicitDependencies": ["openops-common", "shared"]
+  "implicitDependencies": ["openops-common", "shared", "server-shared"]
 }
