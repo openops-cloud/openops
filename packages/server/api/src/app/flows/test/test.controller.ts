@@ -5,14 +5,13 @@ import {
 } from '@fastify/type-provider-typebox';
 import {
   flowHelper,
-  FlowVersion,
   PrincipalType,
   TestTriggerRequestBody,
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
+import { validateFlowVersionBelongsToProject } from '../common/flow-version-validation';
 import { flowRunService } from '../flow-run/flow-run-service';
 import { flowVersionService } from '../flow-version/flow-version.service';
-import { flowService } from '../flow/flow.service';
 import { stepRunService } from '../step-run/step-run-service';
 import { testTriggerService } from '../test-trigger/test-trigger-service';
 
@@ -23,7 +22,7 @@ export const testController: FastifyPluginAsyncTypebox = async (fastify) => {
 
     const flowVersion = await flowVersionService.getOneOrThrow(flowVersionId);
 
-    const isValid = await validateFlowBelongToProject(
+    const isValid = await validateFlowVersionBelongsToProject(
       flowVersion,
       projectId,
       reply,
@@ -74,7 +73,7 @@ export const testController: FastifyPluginAsyncTypebox = async (fastify) => {
     try {
       const flowVersion = await flowVersionService.getOneOrThrow(flowVersionId);
 
-      const isValid = await validateFlowBelongToProject(
+      const isValid = await validateFlowVersionBelongsToProject(
         flowVersion,
         projectId,
         reply,
@@ -118,31 +117,10 @@ export const testController: FastifyPluginAsyncTypebox = async (fastify) => {
   });
 };
 
-async function validateFlowBelongToProject(
-  flowVersion: FlowVersion,
-  projectId: string,
-  reply: any,
-): Promise<boolean> {
-  const flow = await flowService.getOne({
-    id: flowVersion.flowId,
-    projectId,
-  });
-  if (flow === null || flow === undefined) {
-    await reply.status(StatusCodes.BAD_REQUEST).send({
-      success: false,
-      message: 'The flow and version are not associated with the project',
-    });
-
-    return false;
-  }
-
-  return true;
-}
-
 const TestStepRequest = {
   schema: {
     description:
-      'Test a flow step with specified parameters. With this endpoint its possible to validate steps.',
+      'Test a workflow step with specified parameters. With this endpoint its possible to validate steps.',
     body: Type.Object({
       flowVersionId: Type.String(),
       stepId: Type.String(),
