@@ -3,12 +3,18 @@ import {
   FastifyPluginAsyncTypebox,
   Type,
 } from '@fastify/type-provider-typebox';
-import { flowHelper, FlowVersion } from '@openops/shared';
+import {
+  flowHelper,
+  FlowVersion,
+  PrincipalType,
+  TestTriggerRequestBody,
+} from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
 import { flowRunService } from '../flow-run/flow-run-service';
 import { flowVersionService } from '../flow-version/flow-version.service';
 import { flowService } from '../flow/flow.service';
 import { stepRunService } from '../step-run/step-run-service';
+import { testTriggerService } from '../test-trigger/test-trigger-service';
 
 export const testController: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.post(
@@ -87,6 +93,7 @@ export const testController: FastifyPluginAsyncTypebox = async (fastify) => {
         if (!isValid) {
           return;
         }
+
         const flowRun = await flowRunService.test({
           projectId,
           flowVersionId: flowVersion.id,
@@ -109,6 +116,18 @@ export const testController: FastifyPluginAsyncTypebox = async (fastify) => {
       }
     },
   );
+
+  fastify.post('/trigger', TestTriggerRequest, async (request) => {
+    const { projectId } = request.principal;
+    const { flowId, flowVersionId, testStrategy } = request.body;
+
+    return testTriggerService.test({
+      flowId,
+      flowVersionId,
+      projectId,
+      testStrategy,
+    });
+  });
 };
 
 async function validateFlowBelongToProject(
@@ -180,5 +199,16 @@ const TestWorkflowRequest = {
         message: Type.String(),
       }),
     },
+  },
+};
+
+const TestTriggerRequest = {
+  schema: {
+    description:
+      'Test a flow trigger with specified parameters. This endpoint allows users to validate and test flow triggers before deploying them to production, helping ensure proper configuration and behavior.',
+    body: TestTriggerRequestBody,
+  },
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
   },
 };
