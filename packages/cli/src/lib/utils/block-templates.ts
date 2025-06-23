@@ -17,18 +17,6 @@ async function formatBlockFolder(blockName: string): Promise<void> {
   }
 }
 
-async function writeAndFormat(
-  filePath: string,
-  content: string,
-  blockName: string,
-  shouldFormat = true,
-): Promise<void> {
-  await writeFile(filePath, content);
-  if (shouldFormat) {
-    await formatBlockFolder(blockName);
-  }
-}
-
 export const generateIndexTsFile = async (
   blockName: string,
   authType: string,
@@ -66,11 +54,7 @@ export const generateIndexTsFile = async (
     });
     `;
 
-  await writeAndFormat(
-    `packages/blocks/${blockName}/src/index.ts`,
-    indexTemplate,
-    blockName,
-  );
+  await writeFile(`packages/blocks/${blockName}/src/index.ts`, indexTemplate);
 };
 
 export const generateAuthFile = async (blockName: string, authType: string) => {
@@ -171,11 +155,7 @@ export const ${blockNameCamelCase}Auth = BlockAuth.OAuth2({
   const { mkdir } = await import('fs/promises');
   await mkdir(`packages/blocks/${blockName}/src/lib`, { recursive: true });
 
-  await writeAndFormat(
-    `packages/blocks/${blockName}/src/lib/auth.ts`,
-    authTemplate,
-    blockName,
-  );
+  await writeFile(`packages/blocks/${blockName}/src/lib/auth.ts`, authTemplate);
 };
 
 export const generateOpinionatedStructure = async (
@@ -237,11 +217,9 @@ export const sampleAction = createAction({
 });
 `;
 
-  await writeAndFormat(
+  await writeFile(
     `packages/blocks/${blockName}/src/lib/actions/sample-action.ts`,
     actionTemplate,
-    blockName,
-    false,
   );
 
   // Generate common service
@@ -320,11 +298,9 @@ export class ${capitalizeFirstLetter(blockName)}Service {
 }
 `;
 
-  await writeAndFormat(
+  await writeFile(
     `packages/blocks/${blockName}/src/lib/common/${blockName}-service.ts`,
     serviceTemplate,
-    blockName,
-    false,
   );
 
   // Generate action test
@@ -379,11 +355,9 @@ describe('sampleAction', () => {
 });
 `;
 
-  await writeAndFormat(
+  await writeFile(
     `packages/blocks/${blockName}/test/actions/sample-action.test.ts`,
     actionTestTemplate,
-    blockName,
-    false,
   );
 
   // Generate service test
@@ -485,11 +459,9 @@ describe('${capitalizeFirstLetter(blockName)}Service', () => {
 });
 `;
 
-  await writeAndFormat(
+  await writeFile(
     `packages/blocks/${blockName}/test/common/${blockName}-service.test.ts`,
     serviceTestTemplate,
-    blockName,
-    false,
   );
 
   // Update index.ts to include the sample action
@@ -514,11 +486,9 @@ export const ${blockNameCamelCase} = createBlock({
 });
 `;
 
-  await writeAndFormat(
+  await writeFile(
     `packages/blocks/${blockName}/src/index.ts`,
     updatedIndexTemplate,
-    blockName,
-    false,
   );
 
   await formatBlockFolder(blockName);
