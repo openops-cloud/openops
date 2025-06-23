@@ -1,8 +1,10 @@
 import chalk from 'chalk';
 import { Command } from 'commander';
-import { readdir, rmdir, stat, unlink, writeFile } from 'fs/promises';
+import { readdir, stat, unlink, writeFile } from 'fs/promises';
 import inquirer from 'inquirer';
 import assert from 'node:assert';
+import { rm } from 'node:fs/promises';
+import nodePath from 'node:path';
 import { findBlockSourceDirectory } from '../utils/block-utils';
 import { exec } from '../utils/exec';
 import {
@@ -72,7 +74,7 @@ const removeUnusedFiles = async (blockName: string) => {
   const path = `packages/blocks/${blockName}/src/lib/`;
   const files = await readdir(path);
   for (const file of files) {
-    const fullPath = path.join(path, file);
+    const fullPath = nodePath.join(path, file);
     const stats = await stat(fullPath);
 
     if (stats.isDirectory()) {
