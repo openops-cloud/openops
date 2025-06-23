@@ -212,6 +212,7 @@ export const sampleAction = createAction({
   const serviceTemplate = `import { ${
     authType !== 'none' ? `OAuth2PropertyValue, ` : ''
   }Property } from '@openops/blocks-framework';
+import axios, { AxiosRequestConfig } from 'axios';
 
 export interface ${capitalizeFirstLetter(blockName)}ServiceConfig {
   ${authType !== 'none' ? `auth: OAuth2PropertyValue;` : ''}
@@ -225,13 +226,11 @@ export class ${capitalizeFirstLetter(blockName)}Service {
     this.config = config;
   }
 
-  async makeRequest(endpoint: string, options: any = {}) {
-    // Add your HTTP client logic here
-    // Example using fetch or axios
+  async makeRequest(endpoint: string, options: AxiosRequestConfig = {}) {
     const url = \`\${this.config.baseUrl || 'https://api.${blockName}.com'}\${endpoint}\`;
     
     // Add authentication headers based on auth type
-    const headers = {
+    const headers: Record<string, any> = {
       'Content-Type': 'application/json',
       ...options.headers,
     };
@@ -259,18 +258,16 @@ export class ${capitalizeFirstLetter(blockName)}Service {
         : ''
     }
 
-    // Make the request
-    const response = await fetch(url, {
+    // Make the request using axios
+    const response = await axios({
+      url,
       method: options.method || 'GET',
       headers,
-      body: options.body ? JSON.stringify(options.body) : undefined,
+      data: options.data,
+      ...options,
     });
 
-    if (!response.ok) {
-      throw new Error(\`HTTP \${response.status}: \${response.statusText}\`);
-    }
-
-    return response.json();
+    return response.data;
   }
 
   // Add your service methods here
@@ -281,7 +278,7 @@ export class ${capitalizeFirstLetter(blockName)}Service {
   async createData(data: any) {
     return this.makeRequest('/data', {
       method: 'POST',
-      body: data,
+      data,
     });
   }
 }
@@ -353,9 +350,14 @@ describe('sampleAction', () => {
   const serviceTestTemplate = `import { ${
     authType !== 'none' ? `OAuth2PropertyValue, ` : ''
   }Property } from '@openops/blocks-framework';
+import axios from 'axios';
 import { ${capitalizeFirstLetter(
     blockName,
   )}Service } from '../../src/lib/common/${blockName}-service';
+
+// Mock axios
+jest.mock('axios');
+const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 describe('${capitalizeFirstLetter(blockName)}Service', () => {
   let service: ${capitalizeFirstLetter(blockName)}Service;
@@ -383,27 +385,30 @@ describe('${capitalizeFirstLetter(blockName)}Service', () => {
   });
 
   it('should make requests with correct configuration', async () => {
-    // Mock fetch or your HTTP client
-    global.fetch = jest.fn().mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve({ data: 'test' }),
+    // Mock axios response
+    (mockedAxios as any).mockResolvedValue({
+      data: { data: 'test' },
+      status: 200,
+      statusText: 'OK',
+      headers: {},
+      config: {} as any,
     });
 
     await service.getData();
 
-    expect(fetch).toHaveBeenCalledWith(
-      'https://api.test.com/data',
+    expect(mockedAxios).toHaveBeenCalledWith(
       expect.objectContaining({
+        url: 'https://api.test.com/data',
         method: 'GET',
         headers: expect.objectContaining({
           'Content-Type': 'application/json',
           ${
             authType !== 'none'
-              ? `'Authorization': 'Bearer mock-access-token',`
+              ? `Authorization: 'Bearer mock-access-token',`
               : ''
           }
         }),
-      })
+      }),
     );
   });
 
@@ -415,21 +420,24 @@ describe('${capitalizeFirstLetter(blockName)}Service', () => {
       baseUrl: 'https://api.test.com',
     });
 
-    global.fetch = jest.fn().mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve({ data: 'test' }),
+    (mockedAxios as any).mockResolvedValue({
+      data: { data: 'test' },
+      status: 200,
+      statusText: 'OK',
+      headers: {},
+      config: {} as any,
     });
 
     await serviceWithoutAuth.getData();
 
-    expect(fetch).toHaveBeenCalledWith(
-      'https://api.test.com/data',
+    expect(mockedAxios).toHaveBeenCalledWith(
       expect.objectContaining({
+        url: 'https://api.test.com/data',
         method: 'GET',
         headers: expect.objectContaining({
           'Content-Type': 'application/json',
         }),
-      })
+      }),
     );
   });`
       : ''
