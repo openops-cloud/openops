@@ -62,7 +62,7 @@ export const testController: FastifyPluginAsyncTypebox = async (fastify) => {
   });
 
   fastify.post('/flowVersion', TestWorkflowRequest, async (request, reply) => {
-    const { flowVersionId } = request.params;
+    const { flowVersionId } = request.body;
     const projectId = request.principal.projectId;
 
     try {
@@ -149,8 +149,8 @@ const TestStepRequest = {
 const TestWorkflowRequest = {
   schema: {
     description:
-      'Test a complete workflow by executing it with the current flow version. This endpoint starts a test run of the entire workflow.',
-    params: Type.Object({
+      'Test a complete workflow by executing it with the current workflow version. This endpoint starts a test run of the entire workflow.',
+    body: Type.Object({
       flowVersionId: Type.String(),
     }),
     response: {
