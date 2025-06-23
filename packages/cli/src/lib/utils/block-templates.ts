@@ -1,7 +1,32 @@
+import { exec } from 'child_process';
 import { writeFile } from 'fs/promises';
+import { promisify } from 'util';
+
+const execAsync = promisify(exec);
 
 export function capitalizeFirstLetter(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
+
+async function formatBlockFolder(blockName: string): Promise<void> {
+  try {
+    const blockPath = `packages/blocks/${blockName}`;
+    await execAsync(`npx prettier --write "${blockPath}/**/*.{ts,js,json}"`);
+  } catch (error) {
+    console.warn(`⚠️ Failed to format ${blockName} block:`, error);
+  }
+}
+
+async function writeAndFormat(
+  filePath: string,
+  content: string,
+  blockName: string,
+  shouldFormat = true,
+): Promise<void> {
+  await writeFile(filePath, content);
+  if (shouldFormat) {
+    await formatBlockFolder(blockName);
+  }
 }
 
 export const generateIndexTsFile = async (
@@ -41,7 +66,11 @@ export const generateIndexTsFile = async (
     });
     `;
 
-  await writeFile(`packages/blocks/${blockName}/src/index.ts`, indexTemplate);
+  await writeAndFormat(
+    `packages/blocks/${blockName}/src/index.ts`,
+    indexTemplate,
+    blockName,
+  );
 };
 
 export const generateAuthFile = async (blockName: string, authType: string) => {
@@ -141,7 +170,12 @@ export const ${blockNameCamelCase}Auth = BlockAuth.OAuth2({
   // Create lib directory if it doesn't exist
   const { mkdir } = await import('fs/promises');
   await mkdir(`packages/blocks/${blockName}/src/lib`, { recursive: true });
-  await writeFile(`packages/blocks/${blockName}/src/lib/auth.ts`, authTemplate);
+
+  await writeAndFormat(
+    `packages/blocks/${blockName}/src/lib/auth.ts`,
+    authTemplate,
+    blockName,
+  );
 };
 
 export const generateOpinionatedStructure = async (
@@ -203,9 +237,11 @@ export const sampleAction = createAction({
 });
 `;
 
-  await writeFile(
+  await writeAndFormat(
     `packages/blocks/${blockName}/src/lib/actions/sample-action.ts`,
     actionTemplate,
+    blockName,
+    false,
   );
 
   // Generate common service
@@ -284,9 +320,11 @@ export class ${capitalizeFirstLetter(blockName)}Service {
 }
 `;
 
-  await writeFile(
+  await writeAndFormat(
     `packages/blocks/${blockName}/src/lib/common/${blockName}-service.ts`,
     serviceTemplate,
+    blockName,
+    false,
   );
 
   // Generate action test
@@ -341,9 +379,11 @@ describe('sampleAction', () => {
 });
 `;
 
-  await writeFile(
+  await writeAndFormat(
     `packages/blocks/${blockName}/test/actions/sample-action.test.ts`,
     actionTestTemplate,
+    blockName,
+    false,
   );
 
   // Generate service test
@@ -445,9 +485,11 @@ describe('${capitalizeFirstLetter(blockName)}Service', () => {
 });
 `;
 
-  await writeFile(
+  await writeAndFormat(
     `packages/blocks/${blockName}/test/common/${blockName}-service.test.ts`,
     serviceTestTemplate,
+    blockName,
+    false,
   );
 
   // Update index.ts to include the sample action
@@ -472,8 +514,12 @@ export const ${blockNameCamelCase} = createBlock({
 });
 `;
 
-  await writeFile(
+  await writeAndFormat(
     `packages/blocks/${blockName}/src/index.ts`,
     updatedIndexTemplate,
+    blockName,
+    false,
   );
+
+  await formatBlockFolder(blockName);
 };
