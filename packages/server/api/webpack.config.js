@@ -19,6 +19,9 @@ module.exports = composePlugins(withNx(), (config) => {
 
         const openopsDir = path.resolve(__dirname, '../../openops');
         compilation.contextDependencies.add(openopsDir);
+
+        const sharedDir = path.resolve(__dirname, '../../shared');
+        compilation.contextDependencies.add(sharedDir);
       });
 
       compiler.hooks.invalid.tap(
@@ -44,6 +47,10 @@ module.exports = composePlugins(withNx(), (config) => {
           } else if (filename && filename.includes('/packages/openops/')) {
             console.log(
               `[API Server] Detected change in openops package: ${filename}`,
+            );
+          } else if (filename && filename.includes('/packages/shared/')) {
+            console.log(
+              `[API Server] Detected change in shared package: ${filename}`,
             );
           }
         },

@@ -3,25 +3,19 @@
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/server/api/src",
   "projectType": "application",
-  "implicitDependencies": [
-    "engine"
-  ],
+  "implicitDependencies": ["engine", "openops-common", "shared"],
   "targets": {
     "build": {
       "executor": "@nx/webpack:webpack",
       "defaultConfiguration": "production",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "target": "node",
         "compiler": "tsc",
         "outputPath": "dist/packages/server/api",
         "main": "packages/server/api/src/main.ts",
         "tsConfig": "packages/server/api/tsconfig.app.json",
-        "assets": [
-          "packages/server/api/src/assets"
-        ],
+        "assets": ["packages/server/api/src/assets"],
         "webpackConfig": "packages/server/api/webpack.config.js",
         "generatePackageJson": false,
         "babelUpwardRootMode": true,
@@ -59,55 +53,39 @@
     },
     "lint": {
       "executor": "@nx/eslint:lint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "packages/server/api/**/*.ts"
-        ]
+        "lintFilePatterns": ["packages/server/api/**/*.ts"]
       }
     },
     "test-unit": {
       "executor": "@nx/jest:jest",
-      "outputs": [
-        "{workspaceRoot}/coverage/{projectRoot}"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
         "jestConfig": "packages/server/api/jest.config.ts",
         "passWithNoTests": false,
         "bail": true,
-        "testPathPattern": [
-          "packages/server/api/test/unit"
-        ]
+        "testPathPattern": ["packages/server/api/test/unit"]
       }
     },
     "test-ce": {
       "executor": "@nx/jest:jest",
-      "outputs": [
-        "{workspaceRoot}/coverage/{projectRoot}"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
         "jestConfig": "packages/server/api/jest.config.ts",
         "passWithNoTests": false,
         "bail": true,
-        "testPathPattern": [
-          "packages/server/api/test/integration/ce"
-        ]
+        "testPathPattern": ["packages/server/api/test/integration/ce"]
       }
     },
     "test-cloud": {
       "executor": "@nx/jest:jest",
-      "outputs": [
-        "{workspaceRoot}/coverage/{projectRoot}"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
         "jestConfig": "packages/server/api/jest.config.ts",
         "passWithNoTests": false,
         "bail": true,
-        "testPathPattern": [
-          "packages/server/api/test/integration/cloud"
-        ]
+        "testPathPattern": ["packages/server/api/test/integration/cloud"]
       }
     },
     "test": {
@@ -118,7 +96,7 @@
           "./tools/link-packages-to-root.sh",
           "nx test-unit server-api --output-style stream-without-prefixes",
           "export $(cat packages/server/api/.env.tests | xargs) && OPS_EDITION=cloud nx test-cloud server-api --output-style stream-without-prefixes",
-          "export $(cat packages/server/api/.env.tests | xargs) && OPS_EDITION=ce nx test-ce server-api --output-style stream-without-prefixes",
+          "export $(cat packages/server/api/.env.tests | xargs) && OPS_EDITION=ce nx test-ce server-api --output-style stream-without-prefixes"
         ],
         "parallel": false
       }
