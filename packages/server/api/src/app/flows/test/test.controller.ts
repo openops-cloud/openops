@@ -11,13 +11,61 @@ import { flowService } from '../flow/flow.service';
 import { stepRunService } from '../step-run/step-run-service';
 
 export const testController: FastifyPluginAsyncTypebox = async (fastify) => {
-  fastify.post(
-    '/:flowVersionId/:stepId',
-    TestStepRequest,
-    async (request, reply) => {
-      const { flowVersionId, stepId } = request.params;
-      const projectId = request.principal.projectId;
+  fastify.post('/step', TestStepRequest, async (request, reply) => {
+    const { flowVersionId, stepId } = request.body;
+    const projectId = request.principal.projectId;
 
+    const flowVersion = await flowVersionService.getOneOrThrow(flowVersionId);
+
+    const isValid = await validateFlowBelongToProject(
+      flowVersion,
+      projectId,
+      reply,
+    );
+
+    if (!isValid) {
+      return;
+    }
+
+    const step = flowHelper
+      .getAllSteps(flowVersion.trigger)
+      .find((step) => step.id === stepId);
+
+    if (!step) {
+      await reply.status(StatusCodes.NOT_FOUND).send({
+        success: false,
+        output: 'Step not found',
+      });
+      return;
+    }
+
+    try {
+      const result = await stepRunService.create({
+        userId: request.principal.id,
+        projectId,
+        flowVersionId: flowVersion.id,
+        stepName: step.name,
+      });
+      await reply.send({
+        success: result.success,
+        output: result.output ?? {},
+      });
+    } catch (error) {
+      await reply.status(StatusCodes.BAD_REQUEST).send({
+        success: false,
+        output:
+          error instanceof Error
+            ? error.message
+            : 'An error occurred while testing the step',
+      });
+    }
+  });
+
+  fastify.post('/flowVersion', TestWorkflowRequest, async (request, reply) => {
+    const { flowVersionId } = request.params;
+    const projectId = request.principal.projectId;
+
+    try {
       const flowVersion = await flowVersionService.getOneOrThrow(flowVersionId);
 
       const isValid = await validateFlowBelongToProject(
@@ -29,86 +77,27 @@ export const testController: FastifyPluginAsyncTypebox = async (fastify) => {
       if (!isValid) {
         return;
       }
+      const flowRun = await flowRunService.test({
+        projectId,
+        flowVersionId: flowVersion.id,
+      });
 
-      const step = flowHelper
-        .getAllSteps(flowVersion.trigger)
-        .find((step) => step.id === stepId);
-
-      if (!step) {
-        await reply.status(StatusCodes.NOT_FOUND).send({
-          success: false,
-          output: 'Step not found',
-        });
-        return;
-      }
-
-      try {
-        const result = await stepRunService.create({
-          userId: request.principal.id,
-          projectId,
-          flowVersionId: flowVersion.id,
-          stepName: step.name,
-        });
-
-        await reply.send({
-          success: result.success,
-          output: result.output ?? {},
-        });
-      } catch (error) {
-        await reply.status(StatusCodes.BAD_REQUEST).send({
-          success: false,
-          output:
-            error instanceof Error
-              ? error.message
-              : 'An error occurred while testing the step',
-        });
-      }
-    },
-  );
-
-  fastify.post(
-    '/:flowVersionId',
-    TestWorkflowRequest,
-    async (request, reply) => {
-      const { flowVersionId } = request.params;
-      const projectId = request.principal.projectId;
-
-      try {
-        const flowVersion = await flowVersionService.getOneOrThrow(
-          flowVersionId,
-        );
-
-        const isValid = await validateFlowBelongToProject(
-          flowVersion,
-          projectId,
-          reply,
-        );
-
-        if (!isValid) {
-          return;
-        }
-        const flowRun = await flowRunService.test({
-          projectId,
-          flowVersionId: flowVersion.id,
-        });
-
-        await reply.send({
-          success: true,
-          flowRunId: flowRun.id,
-          status: flowRun.status,
-          message: 'Workflow test started successfully',
-        });
-      } catch (error) {
-        await reply.status(StatusCodes.BAD_REQUEST).send({
-          success: false,
-          message:
-            error instanceof Error
-              ? error.message
-              : 'An error occurred while testing the workflow',
-        });
-      }
-    },
-  );
+      await reply.send({
+        success: true,
+        flowRunId: flowRun.id,
+        status: flowRun.status,
+        message: 'Workflow test started successfully',
+      });
+    } catch (error) {
+      await reply.status(StatusCodes.BAD_REQUEST).send({
+        success: false,
+        message:
+          error instanceof Error
+            ? error.message
+            : 'An error occurred while testing the workflow',
+      });
+    }
+  });
 };
 
 async function validateFlowBelongToProject(
@@ -136,7 +125,7 @@ const TestStepRequest = {
   schema: {
     description:
       'Test a flow step with specified parameters. With this endpoint its possible to validate steps.',
-    params: Type.Object({
+    body: Type.Object({
       flowVersionId: Type.String(),
       stepId: Type.String(),
     }),
