@@ -9,13 +9,6 @@ import {
   ValidBranchCondition,
 } from '@openops/shared';
 
-const emptyCondition: ValidBranchCondition = {
-  firstValue: '',
-  secondValue: '',
-  operator: BranchOperator.TEXT_CONTAINS,
-  caseSensitive: false,
-};
-
 const createEmptyCondition = (): ValidBranchCondition => {
   return {
     firstValue: '',
@@ -24,6 +17,8 @@ const createEmptyCondition = (): ValidBranchCondition => {
     caseSensitive: false,
   };
 };
+
+const emptyCondition = createEmptyCondition();
 
 type BranchSettingsProps = {
   readonly: boolean;
