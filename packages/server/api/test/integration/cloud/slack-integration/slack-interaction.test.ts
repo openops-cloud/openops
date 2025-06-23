@@ -42,6 +42,10 @@ jest.mock('@openops/server-shared', () => ({
     info: loggerMock,
     debug: loggerMock,
     error: loggerMock,
+    fatal: loggerMock,
+    warn: loggerMock,
+    trace: loggerMock,
+    child: loggerMock,
   },
 }));
 
