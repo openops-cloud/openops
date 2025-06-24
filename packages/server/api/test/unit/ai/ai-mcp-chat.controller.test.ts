@@ -180,7 +180,6 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
         tool1: { description: 'Tool 1', parameters: {} },
         tool2: { description: 'Tool 2', parameters: {} },
       },
-      isAwsCostMcpAvailable: false,
     };
 
     beforeEach(async () => {
@@ -417,7 +416,6 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
     (getMCPTools as jest.Mock).mockResolvedValue({
       mcpClients: [],
       tools: openopsTools,
-      isAwsCostMcpAvailable: false,
     });
 
     const selectedTools = {
@@ -451,7 +449,6 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
       tools: {
         tool1: { description: 'Tool 1', parameters: {} },
       },
-      isAwsCostMcpAvailable: false,
     };
 
     (getMCPTools as jest.Mock).mockResolvedValue(mockToolsWithoutCost);
