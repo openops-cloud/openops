@@ -129,7 +129,7 @@ const TestStepRequest = {
 const TestWorkflowRequest = {
   schema: {
     description:
-      'Test a complete workflow by executing it with the current workflow version. This endpoint starts a test run of the entire workflow.',
+      'Start a test for a workflow using a defined workflow version. This endpoint starts a test run of the entire workflow.',
     body: Type.Object({
       flowVersionId: Type.String(),
     }),
