@@ -30,7 +30,7 @@ const INCLUDED_PATHS: Record<string, string[]> = {
   '/v1/app-connections/{id}': ['get'],
   '/v1/app-connections/metadata': ['get'],
   '/v1/test/step': ['post'],
-  '/v1/test/flowVersion': ['post'],
+  '/v1/test/flow': ['post'],
   '/v1/test/trigger': ['post'],
 };
 

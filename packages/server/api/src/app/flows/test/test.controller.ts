@@ -67,7 +67,7 @@ export const testController: FastifyPluginAsyncTypebox = async (fastify) => {
     }
   });
 
-  fastify.post('/flowVersion', TestWorkflowRequest, async (request, reply) => {
+  fastify.post('/flow', TestWorkflowRequest, async (request, reply) => {
     const { flowVersionId } = request.body;
     const projectId = request.principal.projectId;
 
@@ -100,7 +100,7 @@ export const testController: FastifyPluginAsyncTypebox = async (fastify) => {
         message:
           error instanceof Error
             ? error.message
-            : 'An error occurred while testing the workflow',
+            : 'An error occurred while starting the workflow execution.',
       });
     }
   });
@@ -146,7 +146,7 @@ const TestStepRequest = {
 const TestWorkflowRequest = {
   schema: {
     description:
-      'Test a complete workflow by executing it with the current workflow version. This endpoint starts a test run of the entire workflow.',
+      'Start a test for a workflow using a defined workflow version. This endpoint starts a test run of the entire workflow.',
     body: Type.Object({
       flowVersionId: Type.String(),
     }),

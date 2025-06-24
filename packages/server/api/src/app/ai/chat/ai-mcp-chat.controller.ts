@@ -121,6 +121,10 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       aiConfig,
     });
 
+    const isAwsCostMcpAvailable =
+      hasToolProvider(filteredTools, 'cost-analysis') ||
+      hasToolProvider(filteredTools, 'cost-explorer');
+
     const isAnalyticsLoaded = hasToolProvider(filteredTools, 'superset');
     const isTablesLoaded = hasToolProvider(filteredTools, 'tables');
     const isOpenOpsMCPEnabled = hasToolProvider(filteredTools, 'openops');
@@ -129,6 +133,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       isAnalyticsLoaded,
       isTablesLoaded,
       isOpenOpsMCPEnabled,
+      isAwsCostMcpAvailable,
     });
 
     pipeDataStreamToResponse(reply.raw, {
