@@ -164,316 +164,110 @@ export const generateOpinionatedStructure = async (
   await mkdir(`packages/blocks/${blockName}/src/lib/actions`, {
     recursive: true,
   });
-  await mkdir(`packages/blocks/${blockName}/src/lib/common`, {
-    recursive: true,
-  });
-  await mkdir(`packages/blocks/${blockName}/test/actions`, { recursive: true });
-  await mkdir(`packages/blocks/${blockName}/test/common`, { recursive: true });
 
-  const actionTemplate = `
-import { createAction, Property } from '@openops/blocks-framework';
-${
-  authType !== 'none'
-    ? `import { ${blockNameCamelCase}Auth } from '../auth';`
-    : ''
-}
+  let indexTemplate = '';
 
-export const sampleAction = createAction({
-  name: 'sample_action',
-  displayName: 'Sample Action',
-  description: 'A sample action for ${capitalizeFirstLetter(blockName)}',
-  ${authType !== 'none' ? `auth: ${blockNameCamelCase}Auth,` : ''}
-  props: {
-    input: Property.ShortText({
-      displayName: 'Input',
-      description: 'Sample input field',
-      required: true,
-    }),
-  },
-  async run(context) {
-    const { input } = context.propsValue;
-    
-    // Add your action logic here
-    return {
-      success: true,
-      message: \`Processed: \${input}\`,
-    };
-  },
-});
-`;
-
-  await writeFile(
-    `packages/blocks/${blockName}/src/lib/actions/sample-action.ts`,
-    actionTemplate,
-  );
-
-  const serviceTemplate = `
-import { ${
-    authType !== 'none' ? 'OAuth2PropertyValue' : ''
-  } } from '@openops/blocks-framework';
-import axios, { AxiosRequestConfig } from 'axios';
-
-export interface ${capitalizeFirstLetter(blockName)}ServiceConfig {
-  ${authType !== 'none' ? `auth: OAuth2PropertyValue;` : ''}
-  baseUrl?: string;
-}
-
-export class ${capitalizeFirstLetter(blockName)}Service {
-  private config: ${capitalizeFirstLetter(blockName)}ServiceConfig;
-
-  constructor(config: ${capitalizeFirstLetter(blockName)}ServiceConfig) {
-    this.config = config;
-  }
-
-  async makeRequest(endpoint: string, options: AxiosRequestConfig = {}) {
-    const url = \`\${this.config.baseUrl || 'https://api.${blockName}.com'}\${endpoint}\`;
-    
-    // Add authentication headers based on auth type
-    const headers: Record<string, any> = {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    };
-
-    // Add auth headers based on type
-    ${
-      authType === 'secret'
-        ? `if (this.config.auth?.access_token) {
-      headers['Authorization'] = \`Bearer \${this.config.auth.access_token}\`;
-    }`
-        : ''
-    }
-    ${
-      authType === 'oauth2'
-        ? `if (this.config.auth?.access_token) {
-      headers['Authorization'] = \`Bearer \${this.config.auth.access_token}\`;
-    }`
-        : ''
-    }
-    ${
-      authType === 'custom'
-        ? `if (this.config.auth?.access_token) {
-      headers['Authorization'] = \`Bearer \${this.config.auth.access_token}\`;
-    }`
-        : ''
-    }
-
-    // Make the request using axios
-    const response = await axios({
-      url,
-      method: options.method || 'GET',
-      headers,
-      data: options.data,
-      ...options,
-    });
-
-    return response.data;
-  }
-
-  // Add your service methods here
-  async getData() {
-    return this.makeRequest('/data');
-  }
-
-  async createData(data: any) {
-    return this.makeRequest('/data', {
-      method: 'POST',
-      data,
-    });
-  }
-}
-`;
-
-  await writeFile(
-    `packages/blocks/${blockName}/src/lib/common/${blockName}-service.ts`,
-    serviceTemplate,
-  );
-
-  const actionTestTemplate = `
-import { sampleAction } from '../../src/lib/actions/sample-action';
-
-describe('sampleAction', () => {
-  it('should process input correctly', async () => {
-    const mockContext = {
-      propsValue: {
-        input: 'test input',
-      },
-      ${
-        authType !== 'none'
-          ? `auth: {
-        access_token: 'mock-access-token',
-        data: {},
-      },`
-          : ''
-      }
-    };
-
-    const result = await sampleAction.run(mockContext as any);
-
-    expect(result).toEqual({
-      success: true,
-      message: 'Processed: test input',
-    });
-  });
-
-  it('should handle empty input', async () => {
-    const mockContext = {
-      propsValue: {
-        input: '',
-      },
-      ${
-        authType !== 'none'
-          ? `auth: {
-        access_token: 'mock-access-token',
-        data: {},
-      },`
-          : ''
-      }
-    };
-
-    const result = await sampleAction.run(mockContext as any);
-
-    expect(result).toEqual({
-      success: true,
-      message: 'Processed: ',
-    });
-  });
-});
-`;
-
-  await writeFile(
-    `packages/blocks/${blockName}/test/actions/sample-action.test.ts`,
-    actionTestTemplate,
-  );
-
-  const serviceTestTemplate = `
-import { ${
-    authType !== 'none' ? `OAuth2PropertyValue ` : ''
-  } } from '@openops/blocks-framework';
-import axios from 'axios';
-import { ${capitalizeFirstLetter(
-    blockName,
-  )}Service } from '../../src/lib/common/${blockName}-service';
-
-// Mock axios
-jest.mock('axios');
-const mockedAxios = axios as jest.Mocked<typeof axios>;
-
-describe('${capitalizeFirstLetter(blockName)}Service', () => {
-  let service: ${capitalizeFirstLetter(blockName)}Service;
-
-  beforeEach(() => {
-    ${
-      authType !== 'none'
-        ? `const mockAuth: OAuth2PropertyValue = {
-      access_token: 'mock-access-token',
-      data: {},
-    };
-
-    service = new ${capitalizeFirstLetter(blockName)}Service({
-      auth: mockAuth,
-      baseUrl: 'https://api.test.com',
-    });`
-        : `service = new ${capitalizeFirstLetter(blockName)}Service({
-      baseUrl: 'https://api.test.com',
-    });`
-    }
-  });
-
-  it('should be instantiated correctly', () => {
-    expect(service).toBeInstanceOf(${capitalizeFirstLetter(blockName)}Service);
-  });
-
-  it('should make requests with correct configuration', async () => {
-    // Mock axios response
-    (mockedAxios as any).mockResolvedValue({
-      data: { data: 'test' },
-      status: 200,
-      statusText: 'OK',
-      headers: {},
-      config: {} as any,
-    });
-
-    await service.getData();
-
-    expect(mockedAxios).toHaveBeenCalledWith(
-      expect.objectContaining({
-        url: 'https://api.test.com/data',
-        method: 'GET',
-        headers: expect.objectContaining({
-          'Content-Type': 'application/json',
-          ${
-            authType !== 'none'
-              ? `Authorization: 'Bearer mock-access-token',`
-              : ''
-          }
-        }),
-      }),
-    );
-  });
-
-  ${
-    authType !== 'none'
-      ? `it('should handle requests without auth token', async () => {
-    const serviceWithoutAuth = new ${capitalizeFirstLetter(blockName)}Service({
-      auth: { data: {} } as OAuth2PropertyValue,
-      baseUrl: 'https://api.test.com',
-    });
-
-    (mockedAxios as any).mockResolvedValue({
-      data: { data: 'test' },
-      status: 200,
-      statusText: 'OK',
-      headers: {},
-      config: {} as any,
-    });
-
-    await serviceWithoutAuth.getData();
-
-    expect(mockedAxios).toHaveBeenCalledWith(
-      expect.objectContaining({
-        url: 'https://api.test.com/data',
-        method: 'GET',
-        headers: expect.objectContaining({
-          'Content-Type': 'application/json',
-        }),
-      }),
-    );
-  });`
-      : ''
-  }
-});
-`;
-
-  await writeFile(
-    `packages/blocks/${blockName}/test/common/${blockName}-service.test.ts`,
-    serviceTestTemplate,
-  );
-
-  const updatedIndexTemplate = `
-import { createBlock } from "@openops/blocks-framework";
-${
-  authType !== 'none'
-    ? `import { ${blockNameCamelCase}Auth } from './lib/auth';`
-    : ''
-}
-import { sampleAction } from './lib/actions/sample-action';
+  if (authType !== 'none') {
+    indexTemplate = `
+import { createCustomApiCallAction } from '@openops/blocks-common';
+import { createBlock, Property } from '@openops/blocks-framework';
+import { BlockCategory } from '@openops/shared';
+import { ${blockNameCamelCase}Auth } from './lib/auth';
 
 export const ${blockNameCamelCase} = createBlock({
   displayName: "${capitalizeFirstLetter(blockName)}",
-  auth: ${
-    authType !== 'none' ? `${blockNameCamelCase}Auth` : 'BlockAuth.None()'
-  },
+  auth: ${blockNameCamelCase}Auth,
   minimumSupportedRelease: '0.20.0',
   logoUrl: "https://static.openops.com/blocks/${blockName}.png",
   authors: [],
-  actions: [sampleAction],
+  categories: [BlockCategory.FINOPS],
+  actions: [
+    createCustomApiCallAction({
+      baseUrl: () => 'https://api.${blockName}.com',
+      auth: ${blockNameCamelCase}Auth,
+      additionalProps: {
+        documentation: Property.MarkDown({
+          value: 'For more information, visit the [${capitalizeFirstLetter(
+            blockName,
+          )} API documentation](https://docs.${blockName}.com/reference/introduction).',
+        }),
+      },
+    }),
+  ],
   triggers: [],
 });
 `;
+  } else {
+    indexTemplate = `
+import { BlockAuth, createBlock } from "@openops/blocks-framework";
+
+export const ${blockNameCamelCase} = createBlock({
+  displayName: "${capitalizeFirstLetter(blockName)}",
+  auth: BlockAuth.None(),
+  minimumSupportedRelease: '0.20.0',
+  logoUrl: "https://static.openops.com/blocks/${blockName}.png",
+  authors: [],
+  actions: [],
+  triggers: [],
+});
+`;
+  }
+
+  await writeFile(`packages/blocks/${blockName}/src/index.ts`, indexTemplate);
+
+  let testTemplate = '';
+
+  if (authType !== 'none') {
+    const authTypeMap = {
+      secret: 'SECRET_TEXT',
+      oauth2: 'OAUTH2',
+      custom: 'CUSTOM_AUTH',
+    };
+
+    testTemplate = `
+import { ${blockNameCamelCase} } from '../src/index';
+
+describe('block declaration tests', () => {
+  test('should return block with correct authentication', () => {
+    expect(${blockNameCamelCase}.auth).toMatchObject({
+      type: '${authTypeMap[authType as keyof typeof authTypeMap]}',
+      required: true,
+      authProviderKey: '${blockName}',
+      authProviderDisplayName: '${capitalizeFirstLetter(blockName)}',
+      authProviderLogoUrl: 'https://static.openops.com/blocks/${blockName}.png',
+    });
+  });
+
+  test('should return block with correct number of actions', () => {
+    expect(Object.keys(${blockNameCamelCase}.actions()).length).toBe(1);
+    expect(${blockNameCamelCase}.actions()).toMatchObject({
+      custom_api_call: {
+        name: 'custom_api_call',
+        requireAuth: true,
+      },
+    });
+  });
+});
+`;
+  } else {
+    testTemplate = `
+import { ${blockNameCamelCase} } from '../src/index';
+
+describe('block declaration tests', () => {
+  test('should return block with correct authentication', () => {
+    expect(${blockNameCamelCase}.auth).toBeUndefined();
+  });
+
+  test('should return block with correct number of actions', () => {
+    expect(Object.keys(${blockNameCamelCase}.actions()).length).toBe(0);
+  });
+});
+`;
+  }
 
   await writeFile(
-    `packages/blocks/${blockName}/src/index.ts`,
-    updatedIndexTemplate,
+    `packages/blocks/${blockName}/test/index.test.ts`,
+    testTemplate,
   );
 
   await formatBlockFolder(blockName);

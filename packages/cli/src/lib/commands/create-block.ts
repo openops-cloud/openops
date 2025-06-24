@@ -55,7 +55,7 @@ export const createBlock = async (
   if (createOpinionatedStructure) {
     console.log(
       chalk.blue(
-        `📁 Opinionated folder structure created with sample actions, tests, and service layer`,
+        `📁 Opinionated folder structure created with sample actions and custom API call action`,
       ),
     );
   }
