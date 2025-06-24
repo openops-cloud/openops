@@ -1,15 +1,7 @@
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { QueryKeys } from '@/app/constants/query-keys';
-import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
-import { useStepSettingsContext } from '@/app/features/builder/step-settings/step-settings-context';
-import { toast, UNSAVED_CHANGES_TOAST } from '@openops/components/ui';
-import {
-  Action,
-  FlagId,
-  flowHelper,
-  FlowOperationType,
-  Trigger,
-} from '@openops/shared';
+import { toast } from '@openops/components/ui';
+import { Action, FlagId, Trigger } from '@openops/shared';
 import { useQuery } from '@tanstack/react-query';
 import { t } from 'i18next';
 import { useCallback } from 'react';
@@ -43,11 +35,7 @@ export const stepTestOutputHooks = {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return stepTestOutputHooks.useStepTestOutput(flowVersionId, stepId!);
   },
-  useSaveSelectedStepSampleData() {
-    const { selectedStep } = useStepSettingsContext();
-    const [applyOperation] = useBuilderStateContext((state) => [
-      state.applyOperation,
-    ]);
+  useSaveSelectedStepSampleData(form: UseFormReturn<Action | Trigger>) {
     const { data: sampleDataSizeLimit } = flagsHooks.useFlag<number>(
       FlagId.SAMPLE_DATA_SIZE_LIMIT_KB,
     );
@@ -65,35 +53,12 @@ export const stepTestOutputHooks = {
           });
           return;
         }
-        const isTrigger = flowHelper.isTrigger(selectedStep.type);
-        const updatedStep = {
-          ...selectedStep,
-          settings: {
-            ...selectedStep.settings,
-            inputUiInfo: {
-              ...selectedStep.settings.inputUiInfo,
-              sampleData: sampleData,
-            },
-          },
-        };
 
-        const createOperation = () => {
-          if (isTrigger) {
-            return {
-              type: FlowOperationType.UPDATE_TRIGGER as const,
-              request: updatedStep as Trigger,
-            };
-          } else {
-            return {
-              type: FlowOperationType.UPDATE_ACTION as const,
-              request: updatedStep as Action,
-            };
-          }
-        };
-
-        applyOperation(createOperation(), () => toast(UNSAVED_CHANGES_TOAST));
+        form.setValue('settings.inputUiInfo.sampleData', sampleData, {
+          shouldValidate: true,
+        });
       },
-      [applyOperation, selectedStep, sampleDataSizeLimit],
+      [sampleDataSizeLimit, form],
     );
   },
 };

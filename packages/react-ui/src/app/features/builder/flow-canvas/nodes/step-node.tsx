@@ -7,6 +7,7 @@ import {
   LoadingSpinner,
   OPS_NODE_SIZE,
   OverflowTooltip,
+  SampleDataLabel,
   STEP_CONTEXT_MENU_ATTRIBUTE,
   Tooltip,
   TooltipContent,
@@ -123,151 +124,162 @@ const WorkflowStepNode = React.memo(
       ? FlowOperationType.UPDATE_ACTION
       : FlowOperationType.UPDATE_TRIGGER;
 
+    const hasSampleData =
+      !!data.step?.settings.inputUiInfo?.sampleData && !readonly;
+
     return (
-      <div
-        id={data.step!.name}
-        style={{
-          height: `${OPS_NODE_SIZE.stepNode.height}px`,
-          width: `${OPS_NODE_SIZE.stepNode.width}px`,
-        }}
-        className={cn(
-          'transition-all border-box rounded-sm border border-solid  border-border-300 relative hover:border-primary-200 group pointer-events-auto',
-          {
-            'shadow-step-container': !isDragging,
-            'border-primary-200': isSelected,
-            'bg-background': !isDragging,
-            'border-none': isDragging,
-            'shadow-none': isDragging,
-          },
-        )}
-        onClick={(e) => handleStepClick(e)}
-        key={data.step?.name}
-        ref={setNodeRef}
-        {...attributes}
-        {...listeners}
-        {...{ [`data-${STEP_CONTEXT_MENU_ATTRIBUTE}`]: data.step!.name }}
-      >
+      <>
         <div
-          className="absolute text-accent-foreground text-sm opacity-0 transition-all duration-300 group-hover:opacity-100 "
+          id={data.step!.name}
           style={{
-            top: `${OPS_NODE_SIZE.stepNode.height / 2 - 12}px`,
-            right: `-${OPS_NODE_SIZE.stepNode.width / 5}px`,
+            height: `${OPS_NODE_SIZE.stepNode.height}px`,
+            width: `${OPS_NODE_SIZE.stepNode.width}px`,
           }}
-        >
-          {data.step?.name}
-        </div>
-        <div
           className={cn(
-            'absolute left-0 top-0 pointer-events-none  rounded-sm w-full h-full',
+            'transition-all border-box rounded-sm border border-solid  border-border-300 relative hover:border-primary-200 group pointer-events-auto z-10',
             {
-              'border-t-[3px] border-primary-200 border-solid':
-                isSelected && !isDragging,
+              'shadow-step-container': !isDragging,
+              'border-primary-200': isSelected,
+              'bg-background': !isDragging,
+              'border-none': isDragging,
+              'shadow-none': isDragging,
             },
           )}
-        ></div>
-        <div className="h-full w-full overflow-hidden">
-          {!isDragging && (
-            <BlockSelector
-              operation={{
-                type: isEmptyTriggerSelected
-                  ? FlowOperationType.UPDATE_TRIGGER
-                  : blockSelectorOperation,
-                stepName: data.step!.name!,
-              }}
-              open={openBlockSelector || (!readonly && isEmptyTriggerSelected)}
-              onOpenChange={(open) => {
-                setOpenBlockSelector(open);
-                if (open) {
-                  setOpenStepActionsMenu(false);
-                } else if (data.step?.type === TriggerType.EMPTY) {
-                  exitStepSettings();
+          onClick={(e) => handleStepClick(e)}
+          key={data.step?.name}
+          ref={setNodeRef}
+          {...attributes}
+          {...listeners}
+          {...{ [`data-${STEP_CONTEXT_MENU_ATTRIBUTE}`]: data.step!.name }}
+        >
+          <div
+            className="absolute text-accent-foreground text-sm opacity-0 transition-all duration-300 group-hover:opacity-100 "
+            style={{
+              top: `${OPS_NODE_SIZE.stepNode.height / 2 - 12}px`,
+              right: `-${OPS_NODE_SIZE.stepNode.width / 5}px`,
+            }}
+          >
+            {data.step?.name}
+          </div>
+          <div
+            className={cn(
+              'absolute left-0 top-0 pointer-events-none rounded-sm w-full h-full',
+              {
+                'border-t-[3px] border-primary-200 border-solid':
+                  isSelected && !isDragging,
+              },
+            )}
+          ></div>
+
+          <div className="h-full w-full overflow-hidden">
+            {!isDragging && (
+              <BlockSelector
+                operation={{
+                  type: isEmptyTriggerSelected
+                    ? FlowOperationType.UPDATE_TRIGGER
+                    : blockSelectorOperation,
+                  stepName: data.step!.name!,
+                }}
+                open={
+                  openBlockSelector || (!readonly && isEmptyTriggerSelected)
                 }
-              }}
-              asChild={true}
-            >
-              <div
-                className="h-full w-full pl-4 pr-2 py-[10px] flex flex-col justify-between"
-                onClick={(e) => {
-                  if (!openBlockSelector) {
-                    handleStepClick(e);
+                onOpenChange={(open) => {
+                  setOpenBlockSelector(open);
+                  if (open) {
+                    setOpenStepActionsMenu(false);
+                  } else if (data.step?.type === TriggerType.EMPTY) {
+                    exitStepSettings();
                   }
                 }}
+                asChild={true}
               >
-                <div className="flex items-center justify-between w-full">
-                  <div className="flex flex-1 items-center gap-[6px]">
-                    <BlockIcon
-                      logoUrl={stepMetadata?.logoUrl}
-                      displayName={stepMetadata?.displayName}
-                      showTooltip={false}
-                      size={'sm'}
-                    ></BlockIcon>
-                    <div className="text-xs truncate text-muted-foreground text-ellipsis overflow-hidden whitespace-nowrap w-full">
-                      {stepMetadata?.displayName}
+                <div
+                  className="h-full w-full pl-4 pr-2 py-[10px] flex flex-col justify-between"
+                  onClick={(e) => {
+                    if (!openBlockSelector) {
+                      handleStepClick(e);
+                    }
+                  }}
+                >
+                  <div className="flex items-center justify-between w-full">
+                    <div className="flex flex-1 items-center gap-[6px]">
+                      <BlockIcon
+                        logoUrl={stepMetadata?.logoUrl}
+                        displayName={stepMetadata?.displayName}
+                        showTooltip={false}
+                        size={'sm'}
+                      ></BlockIcon>
+                      <div className="text-xs truncate text-muted-foreground text-ellipsis overflow-hidden whitespace-nowrap w-full">
+                        {stepMetadata?.displayName}
+                      </div>
+                    </div>
+
+                    {!readonly && (
+                      <CanvasContextMenu
+                        data={data}
+                        isAction={isAction}
+                        openStepActionsMenu={openStepActionsMenu}
+                        setOpenStepActionsMenu={setOpenStepActionsMenu}
+                        setOpenBlockSelector={setOpenBlockSelector}
+                      />
+                    )}
+                  </div>
+
+                  <div className="flex justify-between gap-[6px] w-full items-center">
+                    <OverflowTooltip
+                      text={`${stepIndex}. ${data.step?.displayName}`}
+                    />
+
+                    <div className="w-4 ml-1 flex items-center justify-center ">
+                      {statusInfo &&
+                        React.createElement(statusInfo.Icon, {
+                          className: cn('w-4 h-4', {
+                            'text-success-300':
+                              statusInfo.variant === 'success',
+                            'text-destructive-300':
+                              statusInfo.variant === 'error',
+                          }),
+                        })}
+                      {showRunningIcon && (
+                        <LoadingSpinner className="w-4 h-4 text-primary"></LoadingSpinner>
+                      )}
+                      {!data.step?.valid && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="mr-2">
+                              <InvalidStepIcon
+                                size={16}
+                                viewBox="0 0 16 16"
+                                className="stroke-0 animate-fade"
+                              ></InvalidStepIcon>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom">
+                            {t('Incomplete settings')}
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
                     </div>
                   </div>
-
-                  {!readonly && (
-                    <CanvasContextMenu
-                      data={data}
-                      isAction={isAction}
-                      openStepActionsMenu={openStepActionsMenu}
-                      setOpenStepActionsMenu={setOpenStepActionsMenu}
-                      setOpenBlockSelector={setOpenBlockSelector}
-                    />
-                  )}
                 </div>
+              </BlockSelector>
+            )}
 
-                <div className="flex justify-between gap-[6px] w-full items-center">
-                  <OverflowTooltip
-                    text={`${stepIndex}. ${data.step?.displayName}`}
-                  />
-
-                  <div className="w-4 ml-1 flex items-center justify-center ">
-                    {statusInfo &&
-                      React.createElement(statusInfo.Icon, {
-                        className: cn('w-4 h-4', {
-                          'text-success-300': statusInfo.variant === 'success',
-                          'text-destructive-300':
-                            statusInfo.variant === 'error',
-                        }),
-                      })}
-                    {showRunningIcon && (
-                      <LoadingSpinner className="w-4 h-4 text-primary"></LoadingSpinner>
-                    )}
-                    {!data.step?.valid && (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div className="mr-2">
-                            <InvalidStepIcon
-                              size={16}
-                              viewBox="0 0 16 16"
-                              className="stroke-0 animate-fade"
-                            ></InvalidStepIcon>
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent side="bottom">
-                          {t('Incomplete settings')}
-                        </TooltipContent>
-                      </Tooltip>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </BlockSelector>
-          )}
-
-          <Handle
-            type="source"
-            style={{ opacity: 0 }}
-            position={Position.Bottom}
-          />
-          <Handle
-            type="target"
-            position={Position.Top}
-            style={{ opacity: 0 }}
-          />
+            <Handle
+              type="source"
+              style={{ opacity: 0 }}
+              position={Position.Bottom}
+            />
+            <Handle
+              type="target"
+              position={Position.Top}
+              style={{ opacity: 0 }}
+            />
+          </div>
         </div>
-      </div>
+
+        {hasSampleData && !isDragging && <SampleDataLabel />}
+      </>
     );
   },
 );

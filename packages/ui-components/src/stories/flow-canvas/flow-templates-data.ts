@@ -22,16 +22,7 @@ const template: Trigger = {
       type: ActionType.BRANCH,
       valid: false,
       settings: {
-        conditions: [
-          [
-            {
-              operator: 'TEXT_CONTAINS',
-              firstValue: '',
-              secondValue: '',
-              caseSensitive: false,
-            },
-          ],
-        ],
+        conditions: [],
         inputUiInfo: {
           customizedInputs: {},
         },
@@ -80,30 +71,12 @@ const template: Trigger = {
             {
               id: 'KGTmb8CEYs8sixovYNybM',
               name: 'Branch 2',
-              conditions: [
-                [
-                  {
-                    operator: 'TEXT_EXACTLY_MATCHES',
-                    firstValue: '',
-                    secondValue: '',
-                    caseSensitive: false,
-                  },
-                ],
-              ],
+              conditions: [],
             },
             {
               id: '_-lhBWxfUpVo3vTjUEPPb',
               name: 'Branch 3',
-              conditions: [
-                [
-                  {
-                    operator: 'TEXT_EXACTLY_MATCHES',
-                    firstValue: '',
-                    secondValue: '',
-                    caseSensitive: false,
-                  },
-                ],
-              ],
+              conditions: [],
             },
           ],
           inputUiInfo: {

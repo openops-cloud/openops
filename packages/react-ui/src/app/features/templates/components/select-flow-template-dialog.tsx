@@ -13,6 +13,7 @@ import { OPENOPS_CONNECT_TEMPLATES_URL } from '@/app/constants/cloud';
 import { authenticationSession } from '@/app/lib/authentication-session';
 import { BlockMetadataModelSummary } from '@openops/blocks-framework';
 import {
+  BranchLabelNode,
   cn,
   Dialog,
   DialogContent,
@@ -78,6 +79,7 @@ const nodeTypes = {
   placeholder: StepPlaceHolder,
   bigButton: StepPlaceHolder,
   loopPlaceholder: LoopStepPlaceHolder,
+  branchLabel: BranchLabelNode,
 };
 
 type FlowTemplateFilterSidebarProps = {
