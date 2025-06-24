@@ -1,6 +1,7 @@
 import { isNil } from '@openops/shared';
 import { t } from 'i18next';
 import { UseFormReturn } from 'react-hook-form';
+import { tryParseJson } from '../../lib/json-utils';
 import {
   Form,
   FormControl,
@@ -8,7 +9,7 @@ import {
   FormItem,
   FormMessage,
 } from '../../ui/form';
-import { JsonEditor } from '../json-editor';
+import { CodeMirrorEditor } from '../json-editor';
 
 type JsonFormValues = {
   jsonContent: string;
@@ -44,13 +45,15 @@ export const JsonContent = ({
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <JsonEditor
-                    {...field}
+                  <CodeMirrorEditor
+                    value={field.value}
                     placeholder={t('Paste sample data here')}
-                    field={field as any}
                     readonly={false}
                     theme={theme}
                     containerClassName={editorClassName}
+                    onChange={(value) => {
+                      field.onChange(tryParseJson(value));
+                    }}
                   />
                 </FormControl>
                 <FormMessage className="ml-4 pb-1" />
@@ -83,8 +86,8 @@ export const JsonContent = ({
           {(typeof json === 'object' ||
             (typeof json === 'string' && !isEmptyString(json))) && (
             <div className="overflow-auto">
-              <JsonEditor
-                field={{ value: json }}
+              <CodeMirrorEditor
+                value={json}
                 readonly={true}
                 theme={theme}
                 containerClassName={editorClassName}
