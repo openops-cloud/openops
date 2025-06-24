@@ -11,7 +11,7 @@ RUN <<-```
       locales-all \
       libcap-dev \
       wget \
-      unzip \
+      unzip
     rm -rf /var/lib/apt/lists/*
 ```
 
