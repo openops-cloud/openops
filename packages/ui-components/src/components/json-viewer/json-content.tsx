@@ -1,7 +1,4 @@
-import { json as jsonLang } from '@codemirror/lang-json';
 import { isNil } from '@openops/shared';
-import { githubDark, githubLight } from '@uiw/codemirror-theme-github';
-import CodeMirror, { EditorView } from '@uiw/react-codemirror';
 import { t } from 'i18next';
 import { UseFormReturn } from 'react-hook-form';
 import {
@@ -11,7 +8,7 @@ import {
   FormItem,
   FormMessage,
 } from '../../ui/form';
-import { JsonEditor } from '../json-editor/json-editor';
+import { JsonEditor } from '../json-editor';
 
 type JsonFormValues = {
   jsonContent: string;
@@ -26,17 +23,8 @@ type JsonContentProps = {
   editorClassName?: string;
 };
 
-const styleTheme = EditorView.baseTheme({
-  '&.cm-editor.cm-focused': {
-    outline: 'none',
-  },
-});
-
-const convertToString = (value: unknown): string => {
-  if (typeof value === 'string') {
-    return value;
-  }
-  return JSON.stringify(value, null, 2);
+const isEmptyString = (value: any): boolean => {
+  return typeof value === 'string' && value.trim() === '';
 };
 
 export const JsonContent = ({
@@ -46,8 +34,6 @@ export const JsonContent = ({
   theme,
   editorClassName,
 }: JsonContentProps) => {
-  const codeEditiorTheme = theme === 'dark' ? githubDark : githubLight;
-
   if (isEditMode) {
     return (
       <Form {...form}>
@@ -76,10 +62,8 @@ export const JsonContent = ({
     );
   }
 
-  const extensions = [styleTheme, jsonLang()];
-
   return (
-    <div className="pt-[11px] pl-3 border-t border-solid">
+    <div className="">
       {isNil(json) ? (
         <pre className="text-sm whitespace-pre-wrap overflow-x-auto p-2">
           {json === null ? 'null' : 'undefined'}
@@ -91,24 +75,19 @@ export const JsonContent = ({
               {JSON.stringify(json)}
             </pre>
           )}
-          {(typeof json === 'object' || typeof json === 'string') && (
+          {isEmptyString(json) && (
+            <pre className="text-sm whitespace-pre-wrap overflow-x-auto p-2">
+              {json}
+            </pre>
+          )}
+          {(typeof json === 'object' ||
+            (typeof json === 'string' && !isEmptyString(json))) && (
             <div className="overflow-auto">
-              <CodeMirror
-                editable={false}
-                readOnly={true}
-                value={convertToString(json)}
-                className="border-none"
-                height="250px"
-                width="100%"
-                maxWidth="100%"
-                basicSetup={{
-                  foldGutter: true,
-                  highlightActiveLineGutter: true,
-                  lineNumbers: true,
-                }}
-                lang="json"
-                theme={codeEditiorTheme}
-                extensions={extensions}
+              <JsonEditor
+                field={{ value: json }}
+                readonly={true}
+                theme={theme}
+                containerClassName={editorClassName}
               />
             </div>
           )}
