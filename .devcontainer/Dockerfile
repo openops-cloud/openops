@@ -79,10 +79,10 @@ RUN <<-```
     wget -qO- https://astral.sh/uv/install.sh | sh && source $HOME/.local/bin/env
     python3 -m venv .venv
     . .venv/bin/activate
+    pip install mcp
     pip install ./src/cost-explorer-mcp-server
     pip install ./src/cost-analysis-mcp-server
 ```
-
 
 WORKDIR /workspaces
 
