@@ -1,7 +1,20 @@
+import { exec } from 'child_process';
 import { writeFile } from 'fs/promises';
+import { promisify } from 'util';
+
+const execAsync = promisify(exec);
 
 export function capitalizeFirstLetter(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
+
+async function formatBlockFolder(blockName: string): Promise<void> {
+  try {
+    const blockPath = `packages/blocks/${blockName}`;
+    await execAsync(`npx prettier --write "${blockPath}/**/*.{ts,js,json}"`);
+  } catch (error) {
+    console.warn(`⚠️ Failed to format ${blockName} block:`, error);
+  }
 }
 
 export const generateIndexTsFile = async (
@@ -127,6 +140,7 @@ export const ${blockNameCamelCase}Auth = BlockAuth.OAuth2({
 
   const { mkdir } = await import('fs/promises');
   await mkdir(`packages/blocks/${blockName}/src/lib`, { recursive: true });
+
   await writeFile(`packages/blocks/${blockName}/src/lib/auth.ts`, authTemplate);
 };
 
@@ -461,4 +475,6 @@ export const ${blockNameCamelCase} = createBlock({
     `packages/blocks/${blockName}/src/index.ts`,
     updatedIndexTemplate,
   );
+
+  await formatBlockFolder(blockName);
 };
