@@ -206,8 +206,8 @@ export const sampleAction = createAction({
   );
 
   const serviceTemplate = `import { ${
-    authType !== 'none' ? `OAuth2PropertyValue, ` : ''
-  }Property } from '@openops/blocks-framework';
+    authType !== 'none' ? 'OAuth2PropertyValue' : ''
+  } } from '@openops/blocks-framework';
 import axios, { AxiosRequestConfig } from 'axios';
 
 export interface ${capitalizeFirstLetter(blockName)}ServiceConfig {
@@ -444,7 +444,7 @@ describe('${capitalizeFirstLetter(blockName)}Service', () => {
     serviceTestTemplate,
   );
 
-  const updatedIndexTemplate = `import { createBlock, BlockAuth } from "@openops/blocks-framework";
+  const updatedIndexTemplate = `import { createBlock } from "@openops/blocks-framework";
 ${
   authType !== 'none'
     ? `import { ${blockNameCamelCase}Auth } from './lib/auth';`
