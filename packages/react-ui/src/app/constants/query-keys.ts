@@ -7,6 +7,7 @@ export const QueryKeys = {
   activeAiSettings: 'active-ai-settings',
   openAiAssistantChat: 'open-assistant-chat',
   aiSettings: 'ai-settings',
+  mcpSettings: 'mcp-settings',
   aiSettingsProviders: 'ai-settings-providers',
   aiProviderModels: 'ai-provider-models',
 

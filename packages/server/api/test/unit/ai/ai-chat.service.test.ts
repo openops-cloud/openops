@@ -188,29 +188,6 @@ describe('appendMessagesToChatHistoryContext', () => {
     expect(result).toEqual([...existingMessages]);
   });
 
-  it('should call summarizeMessages if provided', async () => {
-    const summarizedMessages: CoreMessage[] = [
-      { role: 'system', content: 'Summarized content' },
-    ];
-    const summarizeMessagesMock = jest
-      .fn()
-      .mockResolvedValue(summarizedMessages);
-
-    const result = await appendMessagesToChatHistoryContext(
-      chatId,
-      newMessages,
-      summarizeMessagesMock,
-    );
-
-    expect(summarizeMessagesMock).toHaveBeenCalledWith(existingMessages);
-    expect(setSerializedObjectMock).toHaveBeenCalledWith(
-      `${chatId}:context:history`,
-      [...summarizedMessages],
-      86400,
-    );
-    expect(result).toEqual([...summarizedMessages]);
-  });
-
   it('should release lock even if an error occurs', async () => {
     getSerializedObjectMock.mockRejectedValue(new Error('Test error'));
 

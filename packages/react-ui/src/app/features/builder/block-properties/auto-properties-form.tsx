@@ -11,6 +11,7 @@ import {
   Input,
   JsonEditor,
   Markdown,
+  MarkdownCodeVariations,
   Switch,
 } from '@openops/components/ui';
 import { isNil } from '@openops/shared';
@@ -169,6 +170,7 @@ const selectFormComponentForProperty = ({
         <Markdown
           markdown={property.description}
           variables={markdownVariables}
+          codeVariation={MarkdownCodeVariations.WithCopyMultiline}
         />
       );
     case PropertyType.STATIC_DROPDOWN:

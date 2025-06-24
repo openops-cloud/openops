@@ -51,6 +51,7 @@ export const testController: FastifyPluginAsyncTypebox = async (fastify) => {
         flowVersionId: flowVersion.id,
         stepName: step.name,
       });
+
       await reply.send({
         success: result.success,
         output: result.output ?? {},

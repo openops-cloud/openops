@@ -106,10 +106,17 @@ async function getStepOutput(
   inputUiInfo?: any,
   stepTestOutputs?: Record<OpenOpsId, string>,
 ): Promise<any> {
+  const shouldUseSampleData =
+    inputUiInfo?.sampleData != null && inputUiInfo?.sampleData !== '';
+
+  if (shouldUseSampleData) {
+    return inputUiInfo?.sampleData;
+  }
+
   if (stepId && stepTestOutputs?.[stepId]) {
     const decodedTestOutput = decodeStepOutput(stepTestOutputs?.[stepId]);
     return decompressAndDecrypt(decodedTestOutput);
   }
 
-  return inputUiInfo?.currentSelectedData;
+  return undefined;
 }

@@ -14,9 +14,9 @@ import {
   SelectValue,
 } from '@openops/components/ui';
 import {
+  addConnectionBrackets,
   BlockAction,
   BlockTrigger,
-  addConnectionBrackets,
   removeConnectionBrackets,
 } from '@openops/shared';
 import { t } from 'i18next';
@@ -28,7 +28,10 @@ import { AutoFormFieldWrapper } from '@/app/features/builder/block-properties/au
 import { DynamicFormValidationProvider } from '@/app/features/builder/dynamic-form-validation/dynamic-form-validation-context';
 
 import { CreateOrEditConnectionDialog } from '@/app/features/connections/components/create-edit-connection-dialog';
-import { appConnectionsHooks } from '@/app/features/connections/lib/app-connections-hooks';
+import {
+  appConnectionsHooks,
+  FETCH_ALL_CONNECTIONS_LIMIT,
+} from '@/app/features/connections/lib/app-connections-hooks';
 import { useBuilderStateContext } from '../../builder-hooks';
 
 type ConnectionSelectProps = {
@@ -53,7 +56,7 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
   } = appConnectionsHooks.useConnections({
     authProviders: [params.providerKey],
     cursor: undefined,
-    limit: 100,
+    limit: FETCH_ALL_CONNECTIONS_LIMIT,
   });
 
   const { data: reconnectConnection, isFetching: isFetchingConnection } =

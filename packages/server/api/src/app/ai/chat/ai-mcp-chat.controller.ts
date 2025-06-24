@@ -111,6 +111,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
     const { mcpClients, tools } = await getMCPTools(
       app,
       request.headers.authorization?.replace('Bearer ', '') ?? '',
+      projectId,
     );
 
     const filteredTools = await selectRelevantTools({

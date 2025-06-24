@@ -1,4 +1,4 @@
-import { AiProviderEnum } from '@openops/shared';
+import { AiProviderEnum, McpConfig } from '@openops/shared';
 import { telemetry } from '../telemetry';
 export type AiBase = {
   projectId: string;
@@ -18,6 +18,8 @@ export enum AiEventName {
   AI_CONFIG_DELETED = 'ai_config_deleted',
   AI_CHAT_FAILURE = 'ai_chat_failure',
   AI_CHAT_SEND_MESSAGE = 'ai_chat_send_message',
+  MCP_CONFIG_SAVED = 'mcp_config_saved',
+  MCP_CONFIG_DELETED = 'mcp_config_deleted',
 }
 
 export function sendAiConfigSavedEvent(
@@ -84,6 +86,34 @@ export function sendAiChatMessageSendEvent(
       projectId: params.projectId,
       chatId: params.chatId,
       provider: params.provider,
+    },
+  });
+}
+
+export function sendMcpConfigSavedEvent(
+  params: McpConfig & { userId: string },
+): void {
+  telemetry.trackEvent({
+    name: AiEventName.MCP_CONFIG_SAVED,
+    labels: {
+      name: params.name,
+      config: JSON.stringify(params.config),
+      projectId: params.projectId,
+      id: params.id,
+      userId: params.userId,
+    },
+  });
+}
+
+export function sendMcpConfigDeletedEvent(
+  params: Pick<McpConfig, 'id' | 'projectId'> & { userId: string },
+): void {
+  telemetry.trackEvent({
+    name: AiEventName.MCP_CONFIG_DELETED,
+    labels: {
+      userId: params.userId,
+      projectId: params.projectId,
+      id: params.id,
     },
   });
 }
