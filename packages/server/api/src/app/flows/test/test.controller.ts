@@ -95,7 +95,7 @@ export const testController: FastifyPluginAsyncTypebox = async (fastify) => {
         message:
           error instanceof Error
             ? error.message
-            : 'An error occurred while testing the workflow',
+            : 'An error occurred while starting the workflow execution.',
       });
     }
   });
