@@ -42,8 +42,6 @@ export const createBlock = async (
   authType: string,
   createOpinionatedStructure: boolean,
 ) => {
-  await validateBlockName(blockName);
-  await validatePackageName(packageName);
   await checkIfBlockExists(blockName);
   await nxGenerateNodeLibrary(blockName, packageName);
   await setupGeneratedLibrary(blockName, authType, createOpinionatedStructure);
@@ -71,13 +69,7 @@ export const createBlockCommand = new Command('create')
         type: 'input',
         name: 'blockName',
         message: 'Enter the block name:',
-        validate: (input: string) => {
-          const blockNamePattern = /^[A-Za-z0-9-]+$/;
-          if (!blockNamePattern.test(input)) {
-            return 'Block names can only contain lowercase letters, numbers, and hyphens.';
-          }
-          return true;
-        },
+        validate: validateBlockName,
       },
       {
         type: 'input',
@@ -85,13 +77,7 @@ export const createBlockCommand = new Command('create')
         message: 'Enter the package name:',
         default: (answers: any) => `@openops/block-${answers.blockName}`,
         when: (answers: any) => answers.blockName !== undefined,
-        validate: (input: string) => {
-          const packageNamePattern = /^(?:@[a-zA-Z0-9-]+\/)?[a-zA-Z0-9-]+$/;
-          if (!packageNamePattern.test(input)) {
-            return 'Package names can only contain lowercase letters, numbers, and hyphens.';
-          }
-          return true;
-        },
+        validate: validatePackageName,
       },
       {
         type: 'list',

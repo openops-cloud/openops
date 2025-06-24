@@ -1,29 +1,21 @@
 import chalk from 'chalk';
 
-export const validateBlockName = async (blockName: string) => {
+export const validateBlockName = (blockName: string) => {
   console.log(chalk.yellow('Validating block name....'));
   const blockNamePattern = /^[A-Za-z0-9-]+$/;
   if (!blockNamePattern.test(blockName)) {
-    console.log(
-      chalk.red(
-        `🚨 Invalid block name: ${blockName}. Block names can only contain lowercase letters, numbers, and hyphens.`,
-      ),
-    );
-    process.exit(1);
+    return `🚨 Invalid block name: ${blockName}. Block names can only contain lowercase letters, numbers, and hyphens.`;
   }
+  return true;
 };
 
-export const validatePackageName = async (packageName: string) => {
+export const validatePackageName = (packageName: string) => {
   console.log(chalk.yellow('Validating package name....'));
   const packageNamePattern = /^(?:@[a-zA-Z0-9-]+\/)?[a-zA-Z0-9-]+$/;
   if (!packageNamePattern.test(packageName)) {
-    console.log(
-      chalk.red(
-        `🚨 Invalid package name: ${packageName}. Package names can only contain lowercase letters, numbers, and hyphens.`,
-      ),
-    );
-    process.exit(1);
+    return `🚨 Invalid package name: ${packageName}. Package names can only contain lowercase letters, numbers, and hyphens.`;
   }
+  return true;
 };
 
 export const checkIfBlockExists = async (blockName: string) => {
