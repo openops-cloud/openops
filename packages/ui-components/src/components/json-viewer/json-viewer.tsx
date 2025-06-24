@@ -65,11 +65,7 @@ const JsonViewer = React.memo(
       <div className="rounded-lg border border-solid">
         <div className="px-4 py-3 flex items-center gap-2 h-[61px]">
           <div className="flex-grow justify-center items-center">
-            {children ? (
-              children
-            ) : (
-              <span className="text-base font-medium">{title}</span>
-            )}
+            {children ?? <span className="text-base font-medium">{title}</span>}
           </div>
           <HeaderButtons
             isEditMode={isEditMode}

@@ -27,7 +27,6 @@ const VIEW_INPUT_OPTIONS = {
 type ViewToggleButtonsProps = {
   viewType: JsonViewType;
   onViewTypeChange: (value: JsonViewType) => void;
-  className?: string;
 };
 
 const ViewToggleButton = ({
@@ -62,7 +61,7 @@ export const ViewToggleButtons = ({
 }: ViewToggleButtonsProps) => {
   const handleValueChange = (value: JsonViewType) => {
     if (value) {
-      onViewTypeChange(value as JsonViewType);
+      onViewTypeChange(value);
     }
   };
 
