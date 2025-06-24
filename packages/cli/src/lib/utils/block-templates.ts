@@ -46,7 +46,7 @@ export const generateIndexTsFile = async (
 
 export const generateAuthFile = async (blockName: string, authType: string) => {
   if (authType === 'none') {
-    return; // No auth file needed for none
+    return;
   }
 
   const blockNameCamelCase = blockName
@@ -138,7 +138,6 @@ export const ${blockNameCamelCase}Auth = BlockAuth.OAuth2({
       break;
   }
 
-  // Create lib directory if it doesn't exist
   const { mkdir } = await import('fs/promises');
   await mkdir(`packages/blocks/${blockName}/src/lib`, { recursive: true });
   await writeFile(`packages/blocks/${blockName}/src/lib/auth.ts`, authTemplate);
@@ -161,7 +160,6 @@ export const generateOpinionatedStructure = async (
 
   const { mkdir } = await import('fs/promises');
 
-  // Create directory structure
   await mkdir(`packages/blocks/${blockName}/src/lib/actions`, {
     recursive: true,
   });
@@ -171,7 +169,6 @@ export const generateOpinionatedStructure = async (
   await mkdir(`packages/blocks/${blockName}/test/actions`, { recursive: true });
   await mkdir(`packages/blocks/${blockName}/test/common`, { recursive: true });
 
-  // Generate sample action
   const actionTemplate = `import { createAction, Property } from '@openops/blocks-framework';
 ${
   authType !== 'none'
@@ -208,7 +205,6 @@ export const sampleAction = createAction({
     actionTemplate,
   );
 
-  // Generate common service
   const serviceTemplate = `import { ${
     authType !== 'none' ? `OAuth2PropertyValue, ` : ''
   }Property } from '@openops/blocks-framework';
@@ -289,7 +285,6 @@ export class ${capitalizeFirstLetter(blockName)}Service {
     serviceTemplate,
   );
 
-  // Generate action test
   const actionTestTemplate = `import { sampleAction } from '../../src/lib/actions/sample-action';
 
 describe('sampleAction', () => {
@@ -346,7 +341,6 @@ describe('sampleAction', () => {
     actionTestTemplate,
   );
 
-  // Generate service test
   const serviceTestTemplate = `import { ${
     authType !== 'none' ? `OAuth2PropertyValue, ` : ''
   }Property } from '@openops/blocks-framework';
@@ -450,7 +444,6 @@ describe('${capitalizeFirstLetter(blockName)}Service', () => {
     serviceTestTemplate,
   );
 
-  // Update index.ts to include the sample action
   const updatedIndexTemplate = `import { createBlock, BlockAuth } from "@openops/blocks-framework";
 ${
   authType !== 'none'
