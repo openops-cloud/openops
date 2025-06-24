@@ -51,4 +51,5 @@ export * from './page-primitives';
 export * from './resizable-area';
 export * from './search-input/search-input';
 export * from './sidebar';
+export * from './test-step-data-viewer/test-step-data-viewer';
 export * from './tooltip-wrapper';

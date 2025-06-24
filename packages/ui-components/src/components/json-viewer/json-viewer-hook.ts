@@ -20,7 +20,7 @@ const isStepFileUrl = (json: unknown): json is string => {
 
 type UseJsonViewerProps = {
   json: any;
-  title: string;
+  title?: string;
   readonly?: boolean;
   onChange?: (json: any) => void;
   renderFileButton: (props: {

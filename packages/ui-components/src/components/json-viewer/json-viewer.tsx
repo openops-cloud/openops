@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import { FileButton } from './file-button';
 import { HeaderButtons } from './header-buttons';
@@ -8,11 +8,12 @@ import { renderFileButton } from './render-file-button';
 
 type JsonViewerProps = {
   json: any;
-  title: string;
+  title?: string;
   readonly?: boolean;
   onChange?: (json: any) => void;
   theme?: string;
   editorClassName?: string;
+  children?: ReactNode;
 };
 
 export type JsonFormValues = {
@@ -27,6 +28,7 @@ const JsonViewer = React.memo(
     onChange,
     theme,
     editorClassName,
+    children,
   }: JsonViewerProps) => {
     const form = useForm<JsonFormValues>({
       defaultValues: {
@@ -63,7 +65,11 @@ const JsonViewer = React.memo(
       <div className="rounded-lg border border-solid">
         <div className="px-4 py-3 flex items-center gap-2 h-[61px]">
           <div className="flex-grow justify-center items-center">
-            <span className="text-base font-medium">{title}</span>
+            {children ? (
+              children
+            ) : (
+              <span className="text-base font-medium">{title}</span>
+            )}
           </div>
           <HeaderButtons
             isEditMode={isEditMode}
