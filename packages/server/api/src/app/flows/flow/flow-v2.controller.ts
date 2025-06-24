@@ -11,7 +11,6 @@ import {
   PopulatedFlow,
   PrincipalType,
   SERVICE_KEY_SECURITY_OPENAPI,
-  flowHelper,
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
 import { entitiesMustBeOwnedByCurrentProject } from '../../authentication/authorization';
@@ -33,34 +32,6 @@ export const flowV2Controller: FastifyPluginAsyncTypebox = async (app) => {
       const flowId = request.params.id;
       const projectId = request.principal.projectId;
 
-      // Get current flow to debug step names
-      const currentFlow = await flowService.getOnePopulatedOrThrow({
-        id: flowId,
-        projectId,
-      });
-
-      const allSteps = flowHelper.getAllSteps(currentFlow.version.trigger);
-      const stepNames = allSteps.map((step) => ({
-        name: step.name,
-        id: step.id,
-        type: step.type,
-        displayName: step.displayName,
-      }));
-
-      logger.info('Available steps in workflow', {
-        flowId,
-        stepNames,
-        requestedParentStep: request.body.parentStep,
-      });
-
-      logger.info('Calling flowService.update', {
-        flowId,
-        userId,
-        projectId,
-        operationType: FlowOperationType.ADD_ACTION,
-        parentStep: request.body.parentStep,
-      });
-
       const updatedFlow = await flowService.update({
         id: flowId,
         userId,
@@ -71,19 +42,9 @@ export const flowV2Controller: FastifyPluginAsyncTypebox = async (app) => {
         },
       });
 
-      logger.info('Flow service update completed successfully', {
-        flowId,
-        updatedFlowId: updatedFlow.id,
-        hasNextAction: !!updatedFlow.version?.trigger?.nextAction,
-        nextActionName: updatedFlow.version?.trigger?.nextAction?.name,
-      });
-
       return updatedFlow;
     } catch (error) {
       logger.error('Error in V2 Add Step endpoint', {
-        flowId: request.params.id,
-        userId: request.principal.id,
-        projectId: request.principal.projectId,
         error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
       });

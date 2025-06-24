@@ -97,10 +97,6 @@ export async function getOpenOpsTools(
   });
   const tools = await openopsClient.tools();
 
-  // Save tools to JSON file for debugging
-  const toolsDebugPath = path.join(process.cwd(), 'mcp-tools-debug.json');
-  await fs.writeFile(toolsDebugPath, JSON.stringify(tools, null, 2), 'utf-8');
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const toolSet: Record<string, any> = {};
   for (const [key, tool] of Object.entries(tools)) {
