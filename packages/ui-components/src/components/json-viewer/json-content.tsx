@@ -1,7 +1,7 @@
 import { json as jsonLang } from '@codemirror/lang-json';
 import { isNil } from '@openops/shared';
 import { githubDark, githubLight } from '@uiw/codemirror-theme-github';
-import CodeMirror from '@uiw/react-codemirror';
+import CodeMirror, { EditorView } from '@uiw/react-codemirror';
 import { t } from 'i18next';
 import { UseFormReturn } from 'react-hook-form';
 import {
@@ -24,6 +24,19 @@ type JsonContentProps = {
   theme?: string;
   validateJson?: (value: string) => { valid: boolean; message?: string };
   editorClassName?: string;
+};
+
+const styleTheme = EditorView.baseTheme({
+  '&.cm-editor.cm-focused': {
+    outline: 'none',
+  },
+});
+
+const convertToString = (value: unknown): string => {
+  if (typeof value === 'string') {
+    return value;
+  }
+  return JSON.stringify(value, null, 2);
 };
 
 export const JsonContent = ({
@@ -63,6 +76,8 @@ export const JsonContent = ({
     );
   }
 
+  const extensions = [styleTheme, jsonLang()];
+
   return (
     <div className="pt-[11px] pl-3 border-t border-solid">
       {isNil(json) ? (
@@ -81,7 +96,7 @@ export const JsonContent = ({
               <CodeMirror
                 editable={false}
                 readOnly={true}
-                value={json}
+                value={convertToString(json)}
                 className="border-none"
                 height="250px"
                 width="100%"
@@ -93,7 +108,7 @@ export const JsonContent = ({
                 }}
                 lang="json"
                 theme={codeEditiorTheme}
-                extensions={[jsonLang()]}
+                extensions={extensions}
               />
             </div>
           )}
