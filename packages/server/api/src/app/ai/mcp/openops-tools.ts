@@ -22,6 +22,7 @@ const INCLUDED_PATHS: Record<string, string[]> = {
   '/v2/flows/{id}/steps': ['post'],
   '/v1/blocks/categories': ['get'],
   '/v1/blocks/': ['get'],
+  '/v1/blocks/options': ['post'],
   '/v1/blocks/{scope}/{name}': ['get'],
   '/v1/blocks/{name}': ['get'],
   '/v1/flow-runs/': ['get'],
