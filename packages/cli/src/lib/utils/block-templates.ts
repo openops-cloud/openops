@@ -28,18 +28,18 @@ export const generateIndexTsFile = async (
   }
 
   const indexTemplate = `
-    import { createBlock, BlockAuth } from "@openops/blocks-framework";
-    ${authImport}
-    export const ${blockNameCamelCase} = createBlock({
-      displayName: "${capitalizeFirstLetter(blockName)}",
-      auth: ${authConfig},
-      minimumSupportedRelease: '0.20.0',
-      logoUrl: "https://static.openops.com/blocks/${blockName}.png",
-      authors: [],
-      actions: [],
-      triggers: [],
-    });
-    `;
+  import { createBlock, BlockAuth } from "@openops/blocks-framework";
+  ${authImport}
+  export const ${blockNameCamelCase} = createBlock({
+    displayName: "${capitalizeFirstLetter(blockName)}",
+    auth: ${authConfig},
+    minimumSupportedRelease: '0.20.0',
+    logoUrl: "https://static.openops.com/blocks/${blockName}.png",
+    authors: [],
+    actions: [],
+    triggers: [],
+  });
+  `;
 
   await writeFile(`packages/blocks/${blockName}/src/index.ts`, indexTemplate);
 };
@@ -64,7 +64,8 @@ export const generateAuthFile = async (blockName: string, authType: string) => {
 
   switch (authType) {
     case 'secret':
-      authTemplate = `import { BlockAuth } from '@openops/blocks-framework';
+      authTemplate = `
+import { BlockAuth } from '@openops/blocks-framework';
 
 export const ${blockNameCamelCase}Auth = BlockAuth.SecretAuth({
   displayName: 'API Key',
@@ -78,7 +79,8 @@ export const ${blockNameCamelCase}Auth = BlockAuth.SecretAuth({
       break;
 
     case 'custom':
-      authTemplate = `import { BlockAuth, Property } from '@openops/blocks-framework';
+      authTemplate = `
+import { BlockAuth, Property } from '@openops/blocks-framework';
 
 export const ${blockNameCamelCase}Auth = BlockAuth.CustomAuth({
   authProviderKey: '${blockName}',
@@ -106,7 +108,8 @@ export const ${blockNameCamelCase}Auth = BlockAuth.CustomAuth({
       break;
 
     case 'oauth2':
-      authTemplate = `import { BlockAuth } from '@openops/blocks-framework';
+      authTemplate = `
+import { BlockAuth } from '@openops/blocks-framework';
 
 export const ${blockNameCamelCase}Auth = BlockAuth.OAuth2({
   authProviderKey: '${blockName}',
@@ -190,7 +193,8 @@ export const sampleAction = createAction({
     actionTemplate,
   );
 
-  const serviceTemplate = `import { ${
+  const serviceTemplate = `
+import { ${
     authType !== 'none' ? 'OAuth2PropertyValue' : ''
   } } from '@openops/blocks-framework';
 import axios, { AxiosRequestConfig } from 'axios';
@@ -431,7 +435,8 @@ describe('${capitalizeFirstLetter(blockName)}Service', () => {
     serviceTestTemplate,
   );
 
-  const updatedIndexTemplate = `import { createBlock } from "@openops/blocks-framework";
+  const updatedIndexTemplate = `
+import { createBlock } from "@openops/blocks-framework";
 ${
   authType !== 'none'
     ? `import { ${blockNameCamelCase}Auth } from './lib/auth';`
