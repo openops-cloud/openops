@@ -66,29 +66,13 @@ export const generateAuthFile = async (blockName: string, authType: string) => {
     case 'secret':
       authTemplate = `import { BlockAuth } from '@openops/blocks-framework';
 
-const markdown = \`
-To get your ${capitalizeFirstLetter(blockName)} API key:
-
-1. Log into your ${capitalizeFirstLetter(blockName)} account
-2. Navigate to Settings > API Keys
-3. Select "Create New API Key"
-4. Enter a name and description for your key
-5. Copy the API key displayed (it will not be shown again)
-
-> ⚠️ WARNING: The API key will not be shown again after creation.
-
-For more information, visit the [${capitalizeFirstLetter(
-        blockName,
-      )} API documentation](https://docs.${blockName}.com/api).
-\`;
-
 export const ${blockNameCamelCase}Auth = BlockAuth.SecretAuth({
   displayName: 'API Key',
   required: true,
   authProviderKey: '${blockName}',
   authProviderDisplayName: '${capitalizeFirstLetter(blockName)}',
   authProviderLogoUrl: 'https://static.openops.com/blocks/${blockName}.png',
-  description: markdown,
+  description: '',
 });
 `;
       break;
@@ -169,7 +153,8 @@ export const generateOpinionatedStructure = async (
   await mkdir(`packages/blocks/${blockName}/test/actions`, { recursive: true });
   await mkdir(`packages/blocks/${blockName}/test/common`, { recursive: true });
 
-  const actionTemplate = `import { createAction, Property } from '@openops/blocks-framework';
+  const actionTemplate = `
+import { createAction, Property } from '@openops/blocks-framework';
 ${
   authType !== 'none'
     ? `import { ${blockNameCamelCase}Auth } from '../auth';`
@@ -285,7 +270,8 @@ export class ${capitalizeFirstLetter(blockName)}Service {
     serviceTemplate,
   );
 
-  const actionTestTemplate = `import { sampleAction } from '../../src/lib/actions/sample-action';
+  const actionTestTemplate = `
+import { sampleAction } from '../../src/lib/actions/sample-action';
 
 describe('sampleAction', () => {
   it('should process input correctly', async () => {
@@ -341,9 +327,10 @@ describe('sampleAction', () => {
     actionTestTemplate,
   );
 
-  const serviceTestTemplate = `import { ${
-    authType !== 'none' ? `OAuth2PropertyValue, ` : ''
-  }Property } from '@openops/blocks-framework';
+  const serviceTestTemplate = `
+import { ${
+    authType !== 'none' ? `OAuth2PropertyValue ` : ''
+  } } from '@openops/blocks-framework';
 import axios from 'axios';
 import { ${capitalizeFirstLetter(
     blockName,
