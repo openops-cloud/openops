@@ -62,7 +62,7 @@ export const testController: FastifyPluginAsyncTypebox = async (fastify) => {
     }
   });
 
-  fastify.post('/flowVersion', TestWorkflowRequest, async (request, reply) => {
+  fastify.post('/flow', TestWorkflowRequest, async (request, reply) => {
     const { flowVersionId } = request.body;
     const projectId = request.principal.projectId;
 
