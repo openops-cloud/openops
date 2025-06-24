@@ -148,7 +148,7 @@ describe('Flow Version API', () => {
         },
       });
 
-      expect(response?.statusCode).toBe(StatusCodes.BAD_REQUEST);
+      expect(response?.statusCode).toBe(StatusCodes.FORBIDDEN);
       const responseBody = JSON.parse(response?.body || '{}');
       expect(responseBody?.message).toBe(
         'The flow and version are not associated with the project',

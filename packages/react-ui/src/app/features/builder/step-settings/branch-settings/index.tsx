@@ -9,12 +9,16 @@ import {
   ValidBranchCondition,
 } from '@openops/shared';
 
-const emptyCondition: ValidBranchCondition = {
-  firstValue: '',
-  secondValue: '',
-  operator: BranchOperator.TEXT_CONTAINS,
-  caseSensitive: false,
+const createEmptyCondition = (): ValidBranchCondition => {
+  return {
+    firstValue: '',
+    secondValue: '',
+    operator: BranchOperator.TEXT_CONTAINS,
+    caseSensitive: false,
+  };
 };
+
+const emptyCondition = createEmptyCondition();
 
 type BranchSettingsProps = {
   readonly: boolean;
@@ -45,12 +49,15 @@ const BranchSettings = React.memo(({ readonly }: BranchSettingsProps) => {
 
   const handleAnd = (groupIndex: number) => {
     const conditions = form.getValues().settings.conditions;
-    conditions[groupIndex] = [...conditions[groupIndex], emptyCondition];
+    conditions[groupIndex] = [
+      ...conditions[groupIndex],
+      createEmptyCondition(),
+    ];
     update(groupIndex, conditions[groupIndex]);
   };
 
   const handleOr = () => {
-    append([[emptyCondition]]);
+    append([[createEmptyCondition()]]);
   };
 
   return (
