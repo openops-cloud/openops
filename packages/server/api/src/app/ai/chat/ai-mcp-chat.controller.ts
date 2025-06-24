@@ -122,8 +122,8 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
     });
 
     const isAwsCostMcpAvailable =
-      hasToolProvider(filteredTools, 'costAnalysisTools') ||
-      hasToolProvider(filteredTools, 'costExplorerTools');
+      hasToolProvider(filteredTools, 'cost-analysis') ||
+      hasToolProvider(filteredTools, 'cost-explorer');
 
     const isAnalyticsLoaded = hasToolProvider(filteredTools, 'superset');
     const isTablesLoaded = hasToolProvider(filteredTools, 'tables');
