@@ -88,7 +88,7 @@ async function getServerSharedInfo(): Promise<DependencyBuildInfo | null> {
   try {
     const packageJson = JSON.parse(await readFile(packageJsonPath, 'utf-8'));
 
-    if (packageJson.name === 'server-shared') {
+    if (packageJson.name === '@openops/server-shared') {
       const lastModified = await getDirectoryLastModified(serverSharedPath);
       const cached = depBuildCache.get(packageJson.name) ?? 0;
       const needsRebuild = lastModified > cached;
