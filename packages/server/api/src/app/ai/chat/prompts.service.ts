@@ -28,7 +28,7 @@ export const getMcpSystemPrompt = async ({
     prompts.push(loadPrompt('mcp-openops.txt'));
   }
 
-  if (isAwsCostMcpAvailable === false) {
+  if (!isAwsCostMcpAvailable) {
     prompts.push(loadPrompt('mcp-aws-cost-unavailable.txt'));
   }
 
