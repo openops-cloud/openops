@@ -12,7 +12,8 @@ RUN <<-```
       libcap-dev \
       wget \
       unzip \
-      python3-venv
+      python3-venv \
+      python3-setuptools
     rm -rf /var/lib/apt/lists/*
 ```
 
