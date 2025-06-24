@@ -11,7 +11,8 @@ RUN <<-```
       locales-all \
       libcap-dev \
       wget \
-      unzip
+      unzip \
+      python3-venv
     rm -rf /var/lib/apt/lists/*
 ```
 
