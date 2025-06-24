@@ -1,9 +1,4 @@
-import {
-  AppSystemProp,
-  distributedLock,
-  logger,
-  system,
-} from '@openops/server-shared';
+import { AppSystemProp, distributedLock, system } from '@openops/server-shared';
 import {
   AppConnectionsWithSupportedBlocks,
   ApplicationError,
@@ -266,14 +261,6 @@ export const flowService = {
   },
 
   async update(params: UpdateParams): Promise<PopulatedFlow> {
-    logger.info('Flow service update called', {
-      flowId: params.id,
-      userId: params.userId,
-      projectId: params.projectId,
-      operationType: params.operation.type,
-      operationRequest: params.operation.request,
-    });
-
     const result = await update(params);
 
     sendWorkflowUpdatedEvent({
@@ -282,13 +269,6 @@ export const flowService = {
       projectId: result.projectId,
       operation: params.operation,
       flowVersionId: result.version.id,
-    });
-
-    logger.info('Flow service update completed', {
-      flowId: result.id,
-      resultId: result.id,
-      hasNextAction: !!result.version?.trigger?.nextAction,
-      nextActionName: result.version?.trigger?.nextAction?.name,
     });
 
     return result;
@@ -532,14 +512,6 @@ async function update({
   operation,
   lock = true,
 }: UpdateParams): Promise<PopulatedFlow> {
-  logger.info('Flow service update called', {
-    flowId: id,
-    userId,
-    projectId,
-    operationType: operation.type,
-    operationRequest: operation.request,
-  });
-
   const flowLock = lock
     ? await distributedLock.acquireLock({
         key: id,
@@ -549,42 +521,28 @@ async function update({
 
   try {
     if (operation.type === FlowOperationType.LOCK_AND_PUBLISH) {
-      logger.info('Processing LOCK_AND_PUBLISH operation');
       await flowService.updatedPublishedVersionId({
         id,
         userId,
         projectId,
       });
     } else if (operation.type === FlowOperationType.CHANGE_STATUS) {
-      logger.info('Processing CHANGE_STATUS operation');
       await flowService.updateStatus({
         id,
         projectId,
         newStatus: operation.request.status,
       });
     } else if (operation.type === FlowOperationType.CHANGE_FOLDER) {
-      logger.info('Processing CHANGE_FOLDER operation');
       await flowRepo().update(id, {
         folderId: operation.request.folderId,
       });
     } else {
-      logger.info('Processing flow operation', {
-        operationType: operation.type,
-      });
-
       let lastVersion = await flowVersionService.getFlowVersionOrThrow({
         flowId: id,
         versionId: undefined,
       });
 
-      logger.info('Retrieved flow version', {
-        flowId: id,
-        versionId: lastVersion.id,
-        versionState: lastVersion.state,
-      });
-
       if (lastVersion.state === FlowVersionState.LOCKED) {
-        logger.info('Flow version is locked, creating new version');
         const lastVersionWithArtifacts =
           await flowVersionService.getFlowVersionOrThrow({
             flowId: id,
@@ -613,46 +571,20 @@ async function update({
         });
       }
 
-      logger.info('Applying operation to flow version', {
-        flowId: id,
-        versionId: lastVersion.id,
-        operationType: operation.type,
-      });
-
       await flowVersionService.applyOperation({
         userId,
         projectId,
         flowVersion: lastVersion,
         userOperation: operation,
       });
-
-      logger.info('Operation applied successfully');
     }
-  } catch (error) {
-    logger.error('Error in flow service update', {
-      flowId: id,
-      userId,
-      projectId,
-      operationType: operation.type,
-      error: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-    });
-    throw error;
   } finally {
     await flowLock?.release();
   }
 
-  logger.info('Retrieving updated flow');
   const result = await flowService.getOnePopulatedOrThrow({
     id,
     projectId,
-  });
-
-  logger.info('Flow service update completed', {
-    flowId: id,
-    resultId: result.id,
-    hasNextAction: !!result.version?.trigger?.nextAction,
-    nextActionName: result.version?.trigger?.nextAction?.name,
   });
 
   return result;

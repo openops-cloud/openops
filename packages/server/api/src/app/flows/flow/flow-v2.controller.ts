@@ -20,13 +20,6 @@ export const flowV2Controller: FastifyPluginAsyncTypebox = async (app) => {
   app.addHook('preSerialization', entitiesMustBeOwnedByCurrentProject);
 
   app.post('/:id/steps', AddStepRequestOptions, async (request) => {
-    logger.info('V2 Add Step endpoint called', {
-      flowId: request.params.id,
-      userId: request.principal.id,
-      projectId: request.principal.projectId,
-      requestBody: request.body,
-    });
-
     try {
       const userId = request.principal.id;
       const flowId = request.params.id;
