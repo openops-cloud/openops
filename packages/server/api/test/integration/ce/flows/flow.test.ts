@@ -843,10 +843,6 @@ describe('Flow API', () => {
         },
       });
 
-      // expect(response?.statusCode).toBe(StatusCodes.BAD_REQUEST);
-      // const responseBody = response?.json();
-      // expect(responseBody?.code).toBe(undefined);
-
       expect(response?.statusCode).toBe(StatusCodes.NOT_FOUND);
       const responseBody = response?.json();
       expect(responseBody?.code).toBe('ENTITY_NOT_FOUND');
