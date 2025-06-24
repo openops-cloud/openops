@@ -1,10 +1,10 @@
 import { t } from 'i18next';
-import { TooltipWrapper } from '../../components';
 import {
   DataStatePropInterceptor,
   ToggleGroup,
   ToggleGroupItem,
 } from '../../ui/toggle-group';
+import { TooltipWrapper } from '../tooltip-wrapper';
 
 export enum JsonViewType {
   Input = 'Input',
