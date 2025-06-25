@@ -68,18 +68,18 @@ export const JsonContent = ({
   return (
     <div>
       {isNil(json) ? (
-        <pre className="text-sm whitespace-pre-wrap overflow-x-auto p-2">
+        <pre className="text-sm whitespace-pre-wrap overflow-x-auto p-2 border-t">
           {json === null ? 'null' : 'undefined'}
         </pre>
       ) : (
         <>
           {typeof json !== 'string' && typeof json !== 'object' && (
-            <pre className="text-sm whitespace-pre-wrap overflow-x-auto p-2">
+            <pre className="text-sm whitespace-pre-wrap overflow-x-auto p-2 border-t">
               {JSON.stringify(json)}
             </pre>
           )}
           {isEmptyString(json) && (
-            <pre className="text-sm whitespace-pre-wrap overflow-x-auto p-2">
+            <pre className="text-sm whitespace-pre-wrap overflow-x-auto p-2 border-t">
               {json}
             </pre>
           )}
