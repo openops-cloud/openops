@@ -13,6 +13,8 @@ type JsonViewerProps = {
   onChange?: (json: any) => void;
   theme?: string;
   editorClassName?: string;
+  isEditModeEnabled?: boolean;
+  onEditModeChange?: (isEditModeEnabled: boolean) => void;
   children?: ReactNode;
 };
 
@@ -28,6 +30,8 @@ const JsonViewer = React.memo(
     onChange,
     theme,
     editorClassName,
+    isEditModeEnabled,
+    onEditModeChange,
     children,
   }: JsonViewerProps) => {
     const form = useForm<JsonFormValues>({
@@ -53,6 +57,8 @@ const JsonViewer = React.memo(
       renderFileButton,
       onChange,
       form,
+      isEditModeEnabled,
+      onEditModeChange,
     });
 
     if (isFileUrl) {

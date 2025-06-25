@@ -24,11 +24,6 @@ const VIEW_INPUT_OPTIONS = {
   },
 };
 
-type ViewToggleButtonsProps = {
-  viewType: JsonViewType;
-  onViewTypeChange: (value: JsonViewType) => void;
-};
-
 const ViewToggleButton = ({
   tooltipText,
   value,
@@ -55,8 +50,15 @@ const ViewToggleButton = ({
   );
 };
 
+type ViewToggleButtonsProps = {
+  viewType: JsonViewType;
+  disabled: boolean;
+  onViewTypeChange: (value: JsonViewType) => void;
+};
+
 export const ViewToggleButtons = ({
   viewType,
+  disabled,
   onViewTypeChange,
 }: ViewToggleButtonsProps) => {
   const handleValueChange = (value: JsonViewType) => {
@@ -70,6 +72,7 @@ export const ViewToggleButtons = ({
       type="single"
       value={viewType}
       onValueChange={handleValueChange}
+      disabled={disabled}
       className={
         'inline-flex bg-background border rounded-[4px] p-[1px] gap-[2px]'
       }

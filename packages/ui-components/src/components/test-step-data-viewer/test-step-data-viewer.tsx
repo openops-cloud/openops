@@ -23,28 +23,30 @@ const TestStepDataViewer = ({
     JsonViewType.Output,
   );
 
+  const [isEditModeEnabled, setIsEditModeEnabled] = useState<boolean>(false);
+
   const selectedJson = useMemo(() => {
     return selectedViewType === JsonViewType.Input ? inputJson : outputJson;
   }, [selectedViewType, inputJson, outputJson]);
 
   return (
-    <div className="bg-background">
-      <JsonViewer
-        json={selectedJson}
-        title={selectedViewType}
-        readonly={readonly}
-        onChange={onChange}
-        theme={theme}
-        editorClassName={editorClassName}
-      >
-        {inputJson ? (
-          <ViewToggleButtons
-            viewType={selectedViewType}
-            onViewTypeChange={setSelectedViewType}
-          />
-        ) : null}
-      </JsonViewer>
-    </div>
+    <JsonViewer
+      json={selectedJson}
+      title={selectedViewType}
+      readonly={readonly}
+      onChange={onChange}
+      theme={theme}
+      editorClassName={editorClassName}
+      onEditModeChange={setIsEditModeEnabled}
+    >
+      {inputJson ? (
+        <ViewToggleButtons
+          disabled={isEditModeEnabled}
+          viewType={selectedViewType}
+          onViewTypeChange={setSelectedViewType}
+        />
+      ) : null}
+    </JsonViewer>
   );
 };
 
