@@ -15,6 +15,6 @@ If the user instead asks about **AWS cost anomalies**, **unexpected charges**, o
 
 In such cases, guide the user to:
 • Use the AWS Console to review anomaly monitors and reports
-• Or use the AWS CLI (e.g., `aws ce list-anomaly-monitors`, `list-anomalies`) to fetch anomaly data
+• Or consult the AWS documentation for anomaly detection tools.
 
 Never infer anomaly data unless it is explicitly given by the user.
