@@ -1,5 +1,6 @@
 import { isNil } from '@openops/shared';
 import { t } from 'i18next';
+import { useMemo } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { tryParseJson } from '../../lib/json-utils';
 import {
@@ -24,10 +25,6 @@ type JsonContentProps = {
   editorClassName?: string;
 };
 
-const isEmptyString = (value: any): boolean => {
-  return typeof value === 'string' && value.trim() === '';
-};
-
 export const JsonContent = ({
   isEditMode,
   json,
@@ -35,6 +32,10 @@ export const JsonContent = ({
   theme,
   editorClassName,
 }: JsonContentProps) => {
+  const isEmptyString = useMemo(() => {
+    return typeof json === 'string' && json.trim() === '';
+  }, [json]);
+
   if (isEditMode) {
     return (
       <Form {...form}>
@@ -78,13 +79,13 @@ export const JsonContent = ({
               {JSON.stringify(json)}
             </pre>
           )}
-          {isEmptyString(json) && (
+          {isEmptyString && (
             <pre className="text-sm whitespace-pre-wrap overflow-x-auto p-2 border-t">
               {json}
             </pre>
           )}
           {(typeof json === 'object' ||
-            (typeof json === 'string' && !isEmptyString(json))) && (
+            (typeof json === 'string' && !isEmptyString)) && (
             <div className="overflow-auto">
               <CodeMirrorEditor
                 value={json}
