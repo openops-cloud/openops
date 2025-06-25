@@ -18,7 +18,30 @@ const convertToString = (value: unknown): string => {
   if (typeof value === 'string') {
     return value;
   }
-  return JSON.stringify(value, null, 2);
+  try {
+    return JSON.stringify(value, null, 2);
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      error.message.includes('circular structure')
+    ) {
+      const seen = new WeakSet();
+      return JSON.stringify(
+        value,
+        (key, val) => {
+          if (typeof val === 'object' && val !== null) {
+            if (seen.has(val)) {
+              return '';
+            }
+            seen.add(val);
+          }
+          return val;
+        },
+        2,
+      );
+    }
+    return String(value);
+  }
 };
 
 type CodeMirrorEditorProps = {
