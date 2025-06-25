@@ -30,7 +30,7 @@ const ViewToggleButton = ({
   label,
 }: {
   tooltipText: string;
-  value: string;
+  value: JsonViewType;
   label: string;
 }) => {
   return (
