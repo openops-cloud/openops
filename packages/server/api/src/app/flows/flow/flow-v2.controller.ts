@@ -105,7 +105,7 @@ const UpdateStepRequestOptions = {
   schema: {
     tags: ['flows-v2'],
     description:
-      'Update an existing step in a workflow. This endpoint allows you to update the properties of an existing step in the workflow.
+      'Update an existing step in a workflow. This endpoint allows you to update the properties of an existing step in the workflow.'
     security: [SERVICE_KEY_SECURITY_OPENAPI],
     params: Type.Object({
       id: OpenOpsId,
