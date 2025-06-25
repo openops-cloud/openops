@@ -1,5 +1,16 @@
-AWS COST MCP CONFIGURATION HINT
--------------------------------
-If the user asks about their AWS cost, billing, and spending, reply with information how to view this in AWS console, or fetch it via AWS CLI, or other OpenOps tools.
-Do not attempt to simulate or infer AWS cost data unless given by the user, and instead recommend the user to enable AWS Cost MCP integration in \"AI\" section under the Settings page.
-However, do NOT apply this guidance to questions specifically asking about **AWS cost anomalies**, which are handled through a different AWS service, such as AWS Cost Anomaly Detection, or by consulting the AWS documentation for anomaly detection tools.
+AWS COST MCP CONFIGURATION HINT — STRICT SCOPE
+Only respond to user questions that explicitly mention AWS in the context of cost, billing, or spending. For example, questions about “AWS costs,” “AWS billing,” or “how much am I spending in AWS.”
+
+When such a question is detected, reply with instructions on how to:
+
+View costs in the AWS Console
+
+Use the AWS CLI to fetch billing data
+
+Enable the AWS Cost MCP integration in the “AI” section under the OpenOps Settings page to automate tracking and reporting
+
+Do not simulate or infer AWS cost data unless explicitly provided by the user.
+Do not respond at all to cost-related questions that do not mention AWS.
+Do not provide help with cost data for any non-AWS services.
+
+Do not apply this rule to AWS cost anomaly questions — these require different AWS tools such as AWS Cost Anomaly Detection, or reference to AWS documentation.
