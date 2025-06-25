@@ -10,7 +10,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@openops/components/ui';
-import { ActionType, TriggerType } from '@openops/shared';
+import { Action, ActionType, Trigger, TriggerType } from '@openops/shared';
 import { t } from 'i18next';
 import { Info } from 'lucide-react';
 import React from 'react';
@@ -90,7 +90,6 @@ const TestStepContainer = React.memo(
               onChange={useSaveSelectedStepSampleData}
               json={selectedStep?.settings?.inputUiInfo?.sampleData ?? ''}
               readonly={false}
-              editorClassName=""
             />
           </TabsContent>
         </Tabs>
