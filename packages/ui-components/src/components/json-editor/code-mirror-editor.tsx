@@ -86,11 +86,12 @@ const CodeMirrorEditor = React.memo(
           width="100%"
           maxWidth="100%"
           basicSetup={{
-            foldGutter: false,
+            foldGutter: readonly,
             lineNumbers: true,
             searchKeymap: false,
             lintKeymap: true,
             autocompletion: true,
+            highlightActiveLine: !readonly,
           }}
           lang="json"
           onChange={onChange}
