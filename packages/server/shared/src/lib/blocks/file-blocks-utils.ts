@@ -131,10 +131,7 @@ async function loadBlockFromFolder(
     const stats = await fs.stat(packageJsonDir); // Get file stats
 
     // We add the configuration hash to ensure that env var changes take effect (e.g. AWS_ENABLE_IMPLICIT_ROLE)
-    // In dev mode, add current timestamp to ensure cache is always fresh
-    const cacheKey = `${blockName}-${blockVersion}-${stats.mtime.getTime()}-${system.calculateConfigurationHash()}${
-      isDevEnv ? '-' + Date.now() : ''
-    }`;
+    const cacheKey = `${blockName}-${blockVersion}-${stats.mtime.getTime()}-${system.calculateConfigurationHash()}`;
     let blockMetadata = await cacheWrapper.getSerializedObject<BlockMetadata>(
       cacheKey,
     );
@@ -173,7 +170,6 @@ async function loadBlockFromFolder(
     await cacheWrapper.setSerializedObject<BlockMetadata>(
       cacheKey,
       blockMetadata,
-      isDevEnv ? 30 : undefined, // 30 seconds TTL in dev mode, 1 hour in production
     );
 
     return blockMetadata;
