@@ -65,15 +65,6 @@ export const Default: Story = {
 };
 
 /**
- * The JSON editor with a focus handler that logs when the editor receives focus.
- */
-export const WithFocusHandler: Story = {
-  args: {
-    readonly: false,
-  } as any,
-};
-
-/**
  * The JSON editor with complex nested JSON data.
  */
 export const ComplexJson: Story = {
