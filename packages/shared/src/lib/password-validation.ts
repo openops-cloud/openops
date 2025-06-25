@@ -1,4 +1,5 @@
 import { t } from 'i18next';
+import { ApplicationError, ErrorCode } from './common/application-error';
 
 const MIN_LENGTH = 8;
 const MAX_LENGTH = 64;
@@ -60,6 +61,18 @@ const passwordValidation = {
     NUMBER_REGEX.test(value) || validationMessages.number,
 };
 
-const emailRegex =
-  /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-export { emailRegex, passwordRules, passwordValidation };
+const assertValidPassword = (password: string): void => {
+  const isPasswordValid =
+    password.length >= MIN_LENGTH && password.length <= MAX_LENGTH;
+
+  if (!isPasswordValid) {
+    throw new ApplicationError({
+      code: ErrorCode.INVALID_USER_PASSWORD,
+      params: {
+        message: `The provided password is not valid. ${password}`,
+      },
+    });
+  }
+};
+
+export { assertValidPassword, passwordRules, passwordValidation };
