@@ -55,8 +55,8 @@ COPY --link package.json package-lock.json .npmrc ./
 RUN npm ci --no-audit --no-fund
 COPY --link dist dist
 
-COPY tools/link-blocks-and-framework.sh tools/link-blocks-and-framework.sh
-RUN ./tools/link-blocks-and-framework.sh
+COPY tools/link-packages-to-root.sh tools/link-packages-to-root.sh
+RUN ./tools/link-packages-to-root.sh
 
 # Copy Output files to appropriate directory from build stage
 COPY --link packages packages

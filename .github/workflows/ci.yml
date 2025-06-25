@@ -83,18 +83,18 @@ jobs:
           commit_message: Update THIRD_PARTY_LICENSES.txt
   test:
     strategy:
-      matrix:
-        test-suits:
-          - name: UI
-            include: ui-*,*-ui
-          - name: Blocks
-            include: blocks-*
-          - name: Server API
-            key: server-api
-            include: server-api
-          - name: Engine and Libraries
-            key: others
-            exclude: ui-*,*-ui,blocks-*,server-api
+        matrix:
+            test-suits:
+              - name: UI
+                include: ui-*,*-ui
+              - name: Blocks
+                include: blocks-*
+              - name: Server API
+                key: server-api
+                include: server-api
+              - name: Engine and Libraries
+                key: others
+                exclude: ui-*,*-ui,blocks-*,server-api
     name: Test ${{ matrix.test-suits.name }}
     needs: install
     runs-on: ubuntu-latest
@@ -122,7 +122,7 @@ jobs:
           timeout_minutes: 10
           max_attempts: 3
           retry_on: error
-          command: npx nx run-many --target test --projects "${{ matrix.test-suits.include }}" --exclude "${{ matrix.test-suits.exclude }}"
+          command: npx nx run-many --target test --projects "${{ matrix.test-suits.include }}" --exclude "${{ matrix.test-suits.exclude }}" --quiet
         env:
           NX_REJECT_UNKNOWN_LOCAL_CACHE: 0
       - name: Truncate NX cache
@@ -160,15 +160,15 @@ jobs:
           key: dist-${{ github.sha }}
   build-images:
     strategy:
-      matrix:
-        target:
-          - name: App
-            file: Dockerfile
-            repository: openops-app
-          - name: Engine
-            file: engine.Dockerfile
-            repository: openops-engine
-        platform: [amd64, arm64]
+        matrix:
+            target:
+            - name: App
+              file: Dockerfile
+              repository: openops-app
+            - name: Engine
+              file: engine.Dockerfile
+              repository: openops-engine
+            platform: [amd64, arm64]
     name: Build ${{ matrix.target.name }} Image for ${{ matrix.platform }}
     needs: build
     runs-on: ${{ matrix.platform == 'amd64' && 'ubuntu-latest' || 'ubuntu-arm64' }}
@@ -274,3 +274,5 @@ jobs:
           docker manifest push $BASE_REPOSITORY_URI:$SANITIZED_BRANCH
 
           echo "✅ Successfully pushed image $BASE_REPOSITORY_URI:$SANITIZED_BRANCH" >> $GITHUB_STEP_SUMMARY
+
+
