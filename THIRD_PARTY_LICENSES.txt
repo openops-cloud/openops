@@ -868,7 +868,7 @@ This product also include the following software:
  Licensed under the MIT license:
    http://www.opensource.org/licenses/mit-license.php
 
- The word "QR Code" is registered trademark of
+ The word "QR Code" is registered trademark of 
  DENSO WAVE INCORPORATED
    http://www.denso-wave.com/qrcode/faqpatent-e.html
 
@@ -1345,34 +1345,6 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
------------
-
-The following npm package may be included in this product:
-
- - asap@2.0.6
-
-This package contains the following license:
-
-Copyright 2009–2014 Contributors. All rights reserved.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to
-deal in the Software without restriction, including without limitation the
-rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
-sell copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
-IN THE SOFTWARE.
 
 -----------
 
@@ -5958,19 +5930,19 @@ This package contains the following license:
 
 Copyright (c) 2014 Guillermo Rauch <guillermo@learnboost.com>
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software
-and associated documentation files (the 'Software'), to deal in the Software without restriction,
-including without limitation the rights to use, copy, modify, merge, publish, distribute,
-sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
+and associated documentation files (the 'Software'), to deal in the Software without restriction, 
+including without limitation the rights to use, copy, modify, merge, publish, distribute, 
+sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is 
 furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all copies or
+The above copyright notice and this permission notice shall be included in all copies or 
 substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING 
+BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND 
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, 
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 -----------
@@ -6144,19 +6116,19 @@ This package contains the following license:
 
 Copyright (c) 2014 TJ Holowaychuk <tj@vision-media.ca>
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software
-and associated documentation files (the 'Software'), to deal in the Software without restriction,
-including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
+and associated documentation files (the 'Software'), to deal in the Software without restriction, 
+including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, 
 and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so,
 subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all copies or substantial
+The above copyright notice and this permission notice shall be included in all copies or substantial 
 portions of the Software.
 
-THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
-LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT 
+LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 -----------
@@ -7302,19 +7274,19 @@ By: Rich Harris
 Repository: git+https://github.com/jridgewell/sourcemap-codec.git
 
 > The MIT License
->
+> 
 > Copyright (c) 2015 Rich Harris
->
+> 
 > Permission is hereby granted, free of charge, to any person obtaining a copy
 > of this software and associated documentation files (the "Software"), to deal
 > in the Software without restriction, including without limitation the rights
 > to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 > copies of the Software, and to permit persons to whom the Software is
 > furnished to do so, subject to the following conditions:
->
+> 
 > The above copyright notice and this permission notice shall be included in
 > all copies or substantial portions of the Software.
->
+> 
 > THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 > IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 > FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -7331,19 +7303,19 @@ By: Rich Harris
 Repository: rollup/plugins
 
 > The MIT License (MIT)
->
+> 
 > Copyright (c) 2019 RollupJS Plugin Contributors (https://github.com/rollup/plugins/graphs/contributors)
->
+> 
 > Permission is hereby granted, free of charge, to any person obtaining a copy
 > of this software and associated documentation files (the "Software"), to deal
 > in the Software without restriction, including without limitation the rights
 > to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 > copies of the Software, and to permit persons to whom the Software is
 > furnished to do so, subject to the following conditions:
->
+> 
 > The above copyright notice and this permission notice shall be included in
 > all copies or substantial portions of the Software.
->
+> 
 > THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 > IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 > FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -7360,13 +7332,13 @@ By: Elan Shanker
 Repository: https://github.com/micromatch/anymatch
 
 > The ISC License
->
+> 
 > Copyright (c) 2019 Elan Shanker, Paul Miller (https://paulmillr.com)
->
+> 
 > Permission to use, copy, modify, and/or distribute this software for any
 > purpose with or without fee is hereby granted, provided that the above
 > copyright notice and this permission notice appear in all copies.
->
+> 
 > THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
 > WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
 > MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -7383,14 +7355,14 @@ By: Sindre Sorhus
 Repository: sindresorhus/binary-extensions
 
 > MIT License
->
+> 
 > Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com)
 > Copyright (c) Paul Miller (https://paulmillr.com)
->
+> 
 > Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
->
+> 
 > The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
->
+> 
 > THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---------------------------------------
@@ -7401,19 +7373,19 @@ By: Jon Schlinkert, Brian Woodward, Elan Shanker, Eugene Sharygin, hemanth.hm
 Repository: micromatch/braces
 
 > The MIT License (MIT)
->
+> 
 > Copyright (c) 2014-present, Jon Schlinkert.
->
+> 
 > Permission is hereby granted, free of charge, to any person obtaining a copy
 > of this software and associated documentation files (the "Software"), to deal
 > in the Software without restriction, including without limitation the rights
 > to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 > copies of the Software, and to permit persons to whom the Software is
 > furnished to do so, subject to the following conditions:
->
+> 
 > The above copyright notice and this permission notice shall be included in
 > all copies or substantial portions of the Software.
->
+> 
 > THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 > IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 > FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -7430,13 +7402,13 @@ By: Sindre Sorhus
 Repository: sindresorhus/builtin-modules
 
 > MIT License
->
+> 
 > Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com)
->
+> 
 > Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
->
+> 
 > The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
->
+> 
 > THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---------------------------------------
@@ -7447,19 +7419,19 @@ By: Paul Miller, Elan Shanker
 Repository: git+https://github.com/paulmillr/chokidar.git
 
 > The MIT License (MIT)
->
+> 
 > Copyright (c) 2012-2019 Paul Miller (https://paulmillr.com), Elan Shanker
->
+> 
 > Permission is hereby granted, free of charge, to any person obtaining a copy
 > of this software and associated documentation files (the “Software”), to deal
 > in the Software without restriction, including without limitation the rights
 > to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 > copies of the Software, and to permit persons to whom the Software is
 > furnished to do so, subject to the following conditions:
->
+> 
 > The above copyright notice and this permission notice shall be included in
 > all copies or substantial portions of the Software.
->
+> 
 > THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 > IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 > FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -7476,11 +7448,11 @@ By: Jorge Bucaran
 Repository: jorgebucaran/colorette
 
 > Copyright © Jorge Bucaran <<https://jorgebucaran.com>>
->
+> 
 > Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the 'Software'), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
->
+> 
 > The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
->
+> 
 > THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---------------------------------------
@@ -7491,13 +7463,13 @@ By: Sindre Sorhus
 Repository: sindresorhus/date-time
 
 > MIT License
->
+> 
 > Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com)
->
+> 
 > Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
->
+> 
 > The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
->
+> 
 > THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---------------------------------------
@@ -7508,19 +7480,19 @@ By: Jon Schlinkert, Edo Rivai, Paul Miller, Rouven Weßling
 Repository: jonschlinkert/fill-range
 
 > The MIT License (MIT)
->
+> 
 > Copyright (c) 2014-present, Jon Schlinkert.
->
+> 
 > Permission is hereby granted, free of charge, to any person obtaining a copy
 > of this software and associated documentation files (the "Software"), to deal
 > in the Software without restriction, including without limitation the rights
 > to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 > copies of the Software, and to permit persons to whom the Software is
 > furnished to do so, subject to the following conditions:
->
+> 
 > The above copyright notice and this permission notice shall be included in
 > all copies or substantial portions of the Software.
->
+> 
 > THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 > IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 > FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -7537,13 +7509,13 @@ By: Luke Edwards
 Repository: lukeed/flru
 
 > MIT License
->
+> 
 > Copyright (c) Luke Edwards <luke.edwards05@gmail.com> (lukeed.com)
->
+> 
 > Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
->
+> 
 > The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
->
+> 
 > THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---------------------------------------
@@ -7554,13 +7526,13 @@ By: Gulp Team, Elan Shanker, Blaine Bublitz
 Repository: gulpjs/glob-parent
 
 > The ISC License
->
+> 
 > Copyright (c) 2015, 2019 Elan Shanker
->
+> 
 > Permission to use, copy, modify, and/or distribute this software for any
 > purpose with or without fee is hereby granted, provided that the above
 > copyright notice and this permission notice appear in all copies.
->
+> 
 > THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
 > WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
 > MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -7577,13 +7549,13 @@ By: Sindre Sorhus
 Repository: sindresorhus/is-binary-path
 
 > MIT License
->
+> 
 > Copyright (c) 2019 Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com), Paul Miller (https://paulmillr.com)
->
+> 
 > Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
->
+> 
 > The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
->
+> 
 > THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---------------------------------------
@@ -7594,19 +7566,19 @@ By: Jon Schlinkert
 Repository: jonschlinkert/is-extglob
 
 > The MIT License (MIT)
->
+> 
 > Copyright (c) 2014-2016, Jon Schlinkert
->
+> 
 > Permission is hereby granted, free of charge, to any person obtaining a copy
 > of this software and associated documentation files (the "Software"), to deal
 > in the Software without restriction, including without limitation the rights
 > to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 > copies of the Software, and to permit persons to whom the Software is
 > furnished to do so, subject to the following conditions:
->
+> 
 > The above copyright notice and this permission notice shall be included in
 > all copies or substantial portions of the Software.
->
+> 
 > THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 > IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 > FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -7623,19 +7595,19 @@ By: Jon Schlinkert, Brian Woodward, Daniel Perez
 Repository: micromatch/is-glob
 
 > The MIT License (MIT)
->
+> 
 > Copyright (c) 2014-2017, Jon Schlinkert.
->
+> 
 > Permission is hereby granted, free of charge, to any person obtaining a copy
 > of this software and associated documentation files (the "Software"), to deal
 > in the Software without restriction, including without limitation the rights
 > to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 > copies of the Software, and to permit persons to whom the Software is
 > furnished to do so, subject to the following conditions:
->
+> 
 > The above copyright notice and this permission notice shall be included in
 > all copies or substantial portions of the Software.
->
+> 
 > THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 > IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 > FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -7652,19 +7624,19 @@ By: Jon Schlinkert, Olsten Larck, Rouven Weßling
 Repository: jonschlinkert/is-number
 
 > The MIT License (MIT)
->
+> 
 > Copyright (c) 2014-present, Jon Schlinkert.
->
+> 
 > Permission is hereby granted, free of charge, to any person obtaining a copy
 > of this software and associated documentation files (the "Software"), to deal
 > in the Software without restriction, including without limitation the rights
 > to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 > copies of the Software, and to permit persons to whom the Software is
 > furnished to do so, subject to the following conditions:
->
+> 
 > The above copyright notice and this permission notice shall be included in
 > all copies or substantial portions of the Software.
->
+> 
 > THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 > IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 > FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -7695,11 +7667,11 @@ By: Rich Harris
 Repository: https://github.com/rich-harris/magic-string
 
 > Copyright 2018 Rich Harris
->
+> 
 > Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
->
+> 
 > The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
->
+> 
 > THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---------------------------------------
@@ -7710,19 +7682,19 @@ By: Jon Schlinkert, Blaine Bublitz
 Repository: jonschlinkert/normalize-path
 
 > The MIT License (MIT)
->
+> 
 > Copyright (c) 2014-2018, Jon Schlinkert.
->
+> 
 > Permission is hereby granted, free of charge, to any person obtaining a copy
 > of this software and associated documentation files (the "Software"), to deal
 > in the Software without restriction, including without limitation the rights
 > to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 > copies of the Software, and to permit persons to whom the Software is
 > furnished to do so, subject to the following conditions:
->
+> 
 > The above copyright notice and this permission notice shall be included in
 > all copies or substantial portions of the Software.
->
+> 
 > THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 > IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 > FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -7739,13 +7711,13 @@ By: Sindre Sorhus
 Repository: sindresorhus/parse-ms
 
 > MIT License
->
+> 
 > Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com)
->
+> 
 > Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
->
+> 
 > The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
->
+> 
 > THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---------------------------------------
@@ -7756,19 +7728,19 @@ By: Jon Schlinkert
 Repository: micromatch/picomatch
 
 > The MIT License (MIT)
->
+> 
 > Copyright (c) 2017-present, Jon Schlinkert.
->
+> 
 > Permission is hereby granted, free of charge, to any person obtaining a copy
 > of this software and associated documentation files (the "Software"), to deal
 > in the Software without restriction, including without limitation the rights
 > to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 > copies of the Software, and to permit persons to whom the Software is
 > furnished to do so, subject to the following conditions:
->
+> 
 > The above copyright notice and this permission notice shall be included in
 > all copies or substantial portions of the Software.
->
+> 
 > THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 > IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 > FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -7785,13 +7757,13 @@ By: Sindre Sorhus
 Repository: sindresorhus/pretty-bytes
 
 > MIT License
->
+> 
 > Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com)
->
+> 
 > Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
->
+> 
 > The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
->
+> 
 > THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---------------------------------------
@@ -7802,13 +7774,13 @@ By: Sindre Sorhus
 Repository: sindresorhus/pretty-ms
 
 > MIT License
->
+> 
 > Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com)
->
+> 
 > Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
->
+> 
 > The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
->
+> 
 > THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---------------------------------------
@@ -7819,19 +7791,19 @@ By: Thorsten Lorenz, Paul Miller
 Repository: git://github.com/paulmillr/readdirp.git
 
 > MIT License
->
+> 
 > Copyright (c) 2012-2019 Thorsten Lorenz, Paul Miller (https://paulmillr.com)
->
+> 
 > Permission is hereby granted, free of charge, to any person obtaining a copy
 > of this software and associated documentation files (the "Software"), to deal
 > in the Software without restriction, including without limitation the rights
 > to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 > copies of the Software, and to permit persons to whom the Software is
 > furnished to do so, subject to the following conditions:
->
+> 
 > The above copyright notice and this permission notice shall be included in all
 > copies or substantial portions of the Software.
->
+> 
 > THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 > IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 > FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -7848,14 +7820,14 @@ By: Ben Coe
 Repository: https://github.com/tapjs/signal-exit.git
 
 > The ISC License
->
+> 
 > Copyright (c) 2015-2023 Benjamin Coe, Isaac Z. Schlueter, and Contributors
->
+> 
 > Permission to use, copy, modify, and/or distribute this software
 > for any purpose with or without fee is hereby granted, provided
 > that the above copyright notice and this permission notice
 > appear in all copies.
->
+> 
 > THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
 > WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES
 > OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE
@@ -7872,13 +7844,13 @@ By: Sindre Sorhus
 Repository: sindresorhus/time-zone
 
 > MIT License
->
+> 
 > Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com)
->
+> 
 > Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
->
+> 
 > The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
->
+> 
 > THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---------------------------------------
@@ -7889,19 +7861,19 @@ By: Jon Schlinkert, Rouven Weßling
 Repository: micromatch/to-regex-range
 
 > The MIT License (MIT)
->
+> 
 > Copyright (c) 2015-present, Jon Schlinkert.
->
+> 
 > Permission is hereby granted, free of charge, to any person obtaining a copy
 > of this software and associated documentation files (the "Software"), to deal
 > in the Software without restriction, including without limitation the rights
 > to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 > copies of the Software, and to permit persons to whom the Software is
 > furnished to do so, subject to the following conditions:
->
+> 
 > The above copyright notice and this permission notice shall be included in
 > all copies or substantial portions of the Software.
->
+> 
 > THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 > IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 > FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -7918,12 +7890,12 @@ By: Ben Coe
 Repository: https://github.com/yargs/yargs-parser.git
 
 > Copyright (c) 2016, Contributors
->
+> 
 > Permission to use, copy, modify, and/or distribute this software
 > for any purpose with or without fee is hereby granted, provided
 > that the above copyright notice and this permission notice
 > appear in all copies.
->
+> 
 > THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
 > WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES
 > OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE
@@ -8019,7 +7991,7 @@ The following npm package may be included in this product:
 
 This package contains the following license:
 
-#Copyright (c) 2014 Calvin Metcalf
+#Copyright (c) 2014 Calvin Metcalf 
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
@@ -8493,7 +8465,7 @@ Apache License
 
 Version 2.0, January 2004
 
-http://www.apache.org/licenses/
+http://www.apache.org/licenses/ 
 
 TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
 
@@ -10066,7 +10038,7 @@ Apache License
 
 Version 2.0, January 2004
 
-http://www.apache.org/licenses/
+http://www.apache.org/licenses/ 
 
 TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
 
@@ -11374,18 +11346,18 @@ These packages each contain the following license:
 
 Copyright (c) 2013 Brian J. Brennan
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to use,
-copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the
-Software, and to permit persons to whom the Software is furnished to do so,
+Permission is hereby granted, free of charge, to any person obtaining a copy 
+of this software and associated documentation files (the "Software"), to deal in 
+the Software without restriction, including without limitation the rights to use, 
+copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the 
+Software, and to permit persons to whom the Software is furnished to do so, 
 subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all
+The above copyright notice and this permission notice shall be included in all 
 copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
-INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
 PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
 FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
@@ -12277,25 +12249,25 @@ This package contains the following license:
 
 Copyright (c) 2016 'Dominic Tarr'
 
-Permission is hereby granted, free of charge,
-to any person obtaining a copy of this software and
-associated documentation files (the "Software"), to
-deal in the Software without restriction, including
-without limitation the rights to use, copy, modify,
-merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom
-the Software is furnished to do so,
+Permission is hereby granted, free of charge, 
+to any person obtaining a copy of this software and 
+associated documentation files (the "Software"), to 
+deal in the Software without restriction, including 
+without limitation the rights to use, copy, modify, 
+merge, publish, distribute, sublicense, and/or sell 
+copies of the Software, and to permit persons to whom 
+the Software is furnished to do so, 
 subject to the following conditions:
 
-The above copyright notice and this permission notice
+The above copyright notice and this permission notice 
 shall be included in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES 
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 -----------
@@ -12872,7 +12844,7 @@ The following npm package may be included in this product:
 This package contains the following license:
 
 Copyright (c) 2019 The Fastify Team
-Copyright (c) 2019, Sideway Inc, and project contributors
+Copyright (c) 2019, Sideway Inc, and project contributors  
 All rights reserved.
 
 The complete list of contributors can be found at:
@@ -14195,10 +14167,10 @@ deal in the Software without restriction, including without limitation the
 rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
 sell copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
-
+ 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
-
+ 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -14577,18 +14549,18 @@ This package contains the following license:
 
 Copyright 2019 "David Mark Clements <david.mark.clements@gmail.com>"
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
+documentation files (the "Software"), to deal in the Software without restriction, including without limitation 
+the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and 
 to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all copies or substantial portions
+The above copyright notice and this permission notice shall be included in all copies or substantial portions 
 of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
-TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
-THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED 
+TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
+THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
 IN THE SOFTWARE.
 
 -----------
@@ -15849,7 +15821,7 @@ the directories in which they reside and in the code itself. No external
 contributions are allowed under licenses which are fundamentally incompatible
 with the AFL-2.1 OR and BSD-3-Clause licenses that Dojo is distributed under.
 
-The text of the AFL-2.1 and BSD-3-Clause licenses is reproduced below.
+The text of the AFL-2.1 and BSD-3-Clause licenses is reproduced below. 
 
 -------------------------------------------------------------------------------
 BSD 3-Clause "New" License:
@@ -17207,9 +17179,9 @@ This software is covered under the following copyright:
  * The above copyright notice and this permission notice shall be
  * included in all copies or substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED "AS-IS" AND WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY
- * WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+ * THE SOFTWARE IS PROVIDED "AS-IS" AND WITHOUT WARRANTY OF ANY KIND, 
+ * EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY 
+ * WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  
  *
  * IN NO EVENT SHALL TOM WU BE LIABLE FOR ANY SPECIAL, INCIDENTAL,
  * INDIRECT OR CONSEQUENTIAL DAMAGES OF ANY KIND, OR ANY DAMAGES WHATSOEVER
@@ -23774,25 +23746,25 @@ The MIT License
 
 Copyright (c) 2011 Dominic Tarr
 
-Permission is hereby granted, free of charge,
-to any person obtaining a copy of this software and
-associated documentation files (the "Software"), to
-deal in the Software without restriction, including
-without limitation the rights to use, copy, modify,
-merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom
-the Software is furnished to do so,
+Permission is hereby granted, free of charge, 
+to any person obtaining a copy of this software and 
+associated documentation files (the "Software"), to 
+deal in the Software without restriction, including 
+without limitation the rights to use, copy, modify, 
+merge, publish, distribute, sublicense, and/or sell 
+copies of the Software, and to permit persons to whom 
+the Software is furnished to do so, 
 subject to the following conditions:
 
-The above copyright notice and this permission notice
+The above copyright notice and this permission notice 
 shall be included in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES 
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 -----------
@@ -23807,25 +23779,25 @@ The MIT License
 
 Copyright (c) 2012 Tim Caswell
 
-Permission is hereby granted, free of charge,
-to any person obtaining a copy of this software and
-associated documentation files (the "Software"), to
-deal in the Software without restriction, including
-without limitation the rights to use, copy, modify,
-merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom
-the Software is furnished to do so,
+Permission is hereby granted, free of charge, 
+to any person obtaining a copy of this software and 
+associated documentation files (the "Software"), to 
+deal in the Software without restriction, including 
+without limitation the rights to use, copy, modify, 
+merge, publish, distribute, sublicense, and/or sell 
+copies of the Software, and to permit persons to whom 
+the Software is furnished to do so, 
 subject to the following conditions:
 
-The above copyright notice and this permission notice
+The above copyright notice and this permission notice 
 shall be included in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES 
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 -----------
@@ -23840,18 +23812,18 @@ The MIT License
 
 Copyright (c) 2013 Brian J. Brennan
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to use,
-copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the
-Software, and to permit persons to whom the Software is furnished to do so,
+Permission is hereby granted, free of charge, to any person obtaining a copy 
+of this software and associated documentation files (the "Software"), to deal in 
+the Software without restriction, including without limitation the rights to use, 
+copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the 
+Software, and to permit persons to whom the Software is furnished to do so, 
 subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all
+The above copyright notice and this permission notice shall be included in all 
 copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
-INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
 PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
 FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
@@ -23869,25 +23841,25 @@ The MIT License
 
 Copyright (c) 2013 James Halliday (mail@substack.net)
 
-Permission is hereby granted, free of charge,
-to any person obtaining a copy of this software and
-associated documentation files (the "Software"), to
-deal in the Software without restriction, including
-without limitation the rights to use, copy, modify,
-merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom
-the Software is furnished to do so,
+Permission is hereby granted, free of charge, 
+to any person obtaining a copy of this software and 
+associated documentation files (the "Software"), to 
+deal in the Software without restriction, including 
+without limitation the rights to use, copy, modify, 
+merge, publish, distribute, sublicense, and/or sell 
+copies of the Software, and to permit persons to whom 
+the Software is furnished to do so, 
 subject to the following conditions:
 
-The above copyright notice and this permission notice
+The above copyright notice and this permission notice 
 shall be included in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES 
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 -----------
@@ -23902,25 +23874,25 @@ The MIT License
 
 Copyright (c) 2013 Max Ogden
 
-Permission is hereby granted, free of charge,
-to any person obtaining a copy of this software and
-associated documentation files (the "Software"), to
-deal in the Software without restriction, including
-without limitation the rights to use, copy, modify,
-merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom
-the Software is furnished to do so,
+Permission is hereby granted, free of charge, 
+to any person obtaining a copy of this software and 
+associated documentation files (the "Software"), to 
+deal in the Software without restriction, including 
+without limitation the rights to use, copy, modify, 
+merge, publish, distribute, sublicense, and/or sell 
+copies of the Software, and to permit persons to whom 
+the Software is furnished to do so, 
 subject to the following conditions:
 
-The above copyright notice and this permission notice
+The above copyright notice and this permission notice 
 shall be included in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
-ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES 
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 -----------
@@ -29140,19 +29112,19 @@ The following npm packages may be included in this product:
 These packages each contain the following license:
 
 The MIT License (MIT)
-
+ 
 Copyright (c) 2015 Auth0, Inc. <support@auth0.com> (http://auth0.com)
-
+ 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
-
+ 
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
-
+ 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -30227,7 +30199,7 @@ This package contains the following license:
 
 TypeBox
 
-Json Schema Type Builder with Static Type Resolution for TypeScript
+Json Schema Type Builder with Static Type Resolution for TypeScript 
 
 The MIT License (MIT)
 
@@ -30259,7 +30231,7 @@ The following npm package may be included in this product:
 
 This package contains the following license:
 
-TypeBox: JSON Schema Type Builder with Static Type Resolution for TypeScript
+TypeBox: JSON Schema Type Builder with Static Type Resolution for TypeScript 
 
 The MIT License (MIT)
 
