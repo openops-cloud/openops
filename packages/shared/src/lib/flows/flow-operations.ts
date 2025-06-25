@@ -9,7 +9,7 @@ import {
   SplitActionSchema,
 } from './actions/action';
 import { FlowStatus } from './flow';
-import { Trigger, TriggerWithOptionalId } from './triggers/trigger';
+import { Trigger, TriggerWithOptionalId, UpdateTriggerRequest } from './triggers/trigger';
 
 export enum FlowOperationType {
   LOCK_AND_PUBLISH = 'LOCK_AND_PUBLISH',
@@ -238,7 +238,7 @@ export const FlowOperationRequest = Type.Union([
   Type.Object(
     {
       type: Type.Literal(FlowOperationType.UPDATE_TRIGGER),
-      request: TriggerWithOptionalId,
+      request: UpdateTriggerRequest,
     },
     {
       title: 'Update Trigger',
