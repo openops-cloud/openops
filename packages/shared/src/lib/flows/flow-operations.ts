@@ -9,7 +9,7 @@ import {
   SplitActionSchema,
 } from './actions/action';
 import { FlowStatus } from './flow';
-import { Trigger, TriggerWithOptionalId, UpdateTriggerRequest } from './triggers/trigger';
+import { Trigger, UpdateTriggerRequest } from './triggers/trigger';
 
 export enum FlowOperationType {
   LOCK_AND_PUBLISH = 'LOCK_AND_PUBLISH',
