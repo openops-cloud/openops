@@ -90,7 +90,7 @@ const TestStepContainer = React.memo(
               onChange={useSaveSelectedStepSampleData}
               json={selectedStep?.settings?.inputUiInfo?.sampleData ?? ''}
               readonly={false}
-              editorClassName="rounded-t-none border-l-0"
+              editorClassName=""
             />
           </TabsContent>
         </Tabs>

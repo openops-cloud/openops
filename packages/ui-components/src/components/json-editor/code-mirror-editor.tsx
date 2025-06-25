@@ -76,14 +76,12 @@ const CodeMirrorEditor = React.memo(
     const ref = useRef<ReactCodeMirrorRef>(null);
 
     return (
-      <div
-        className={cn('flex flex-col gap-2 border rounded', containerClassName)}
-      >
+      <div className={cn('flex flex-col gap-2 p-1', containerClassName)}>
         <CodeMirror
           ref={ref}
           value={convertToString(value)}
           placeholder={placeholder}
-          className={cn('border-none', className)}
+          className={cn('border-t', className)}
           height="250px"
           width="100%"
           maxWidth="100%"
