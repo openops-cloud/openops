@@ -27,7 +27,7 @@
     "chromatic": "npx chromatic --",
     "build:blocks": "npx nx run-many -t build -p blocks-*",
     "build:server-worker": "npx nx run server-worker:build",
-    "link:blocks-and-framework": "./tools/link-blocks-and-framework.sh"
+    "link:blocks-and-framework": "./tools/link-packages.sh"
   },
   "private": true,
   "dependencies": {
