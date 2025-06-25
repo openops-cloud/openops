@@ -174,8 +174,9 @@ export const setupApp = async (
   app.addHook('onRequest', async (request, reply) => {
     const route = app.hasRoute({
       method: request.method as HTTPMethods,
-      url: request.url,
+      url: request.routeOptions.url!,
     });
+
     if (!route) {
       return reply.code(404).send({
         statusCode: 404,

@@ -244,7 +244,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           isAnalyticsLoaded: true,
           isTablesLoaded: true,
           isOpenOpsMCPEnabled: true,
-          isAwsCostMcpAvailable: false,
+          isAwsCostMcpDisabled: true,
         },
       },
       {
@@ -260,7 +260,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           isAnalyticsLoaded: false,
           isTablesLoaded: false,
           isOpenOpsMCPEnabled: true,
-          isAwsCostMcpAvailable: false,
+          isAwsCostMcpDisabled: true,
         },
       },
       {
@@ -272,7 +272,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           isAnalyticsLoaded: false,
           isTablesLoaded: false,
           isOpenOpsMCPEnabled: false,
-          isAwsCostMcpAvailable: false,
+          isAwsCostMcpDisabled: true,
         },
       },
       {
@@ -288,7 +288,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           isAnalyticsLoaded: true,
           isTablesLoaded: false,
           isOpenOpsMCPEnabled: false,
-          isAwsCostMcpAvailable: false,
+          isAwsCostMcpDisabled: true,
         },
       },
       {
@@ -304,7 +304,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           isAnalyticsLoaded: false,
           isTablesLoaded: true,
           isOpenOpsMCPEnabled: false,
-          isAwsCostMcpAvailable: false,
+          isAwsCostMcpDisabled: true,
         },
       },
     ])(
@@ -330,7 +330,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           isAnalyticsLoaded: false,
           isTablesLoaded: false,
           isOpenOpsMCPEnabled: false,
-          isAwsCostMcpAvailable: false,
+          isAwsCostMcpDisabled: true,
           expectedSystemPrompt: emptyToolsSystemPrompt,
         },
       },
@@ -340,7 +340,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           isAnalyticsLoaded: false,
           isTablesLoaded: false,
           isOpenOpsMCPEnabled: false,
-          isAwsCostMcpAvailable: false,
+          isAwsCostMcpDisabled: true,
           expectedSystemPrompt: emptyToolsSystemPrompt,
         },
       },
@@ -350,7 +350,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           isAnalyticsLoaded: false,
           isTablesLoaded: false,
           isOpenOpsMCPEnabled: false,
-          isAwsCostMcpAvailable: false,
+          isAwsCostMcpDisabled: true,
           expectedSystemPrompt: emptyToolsSystemPrompt,
         },
       },
@@ -362,7 +362,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           isAnalyticsLoaded: false,
           isTablesLoaded: false,
           isOpenOpsMCPEnabled: false,
-          isAwsCostMcpAvailable: false,
+          isAwsCostMcpDisabled: true,
           expectedSystemPrompt: systemPrompt,
         },
       },
@@ -382,7 +382,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           isAnalyticsLoaded: expected.isAnalyticsLoaded,
           isTablesLoaded: expected.isTablesLoaded,
           isOpenOpsMCPEnabled: expected.isOpenOpsMCPEnabled,
-          isAwsCostMcpAvailable: expected.isAwsCostMcpAvailable,
+          isAwsCostMcpDisabled: expected.isAwsCostMcpDisabled,
         });
         expect(pipeDataStreamToResponse).toHaveBeenCalled();
         expect(streamText).toHaveBeenCalledWith(
@@ -466,7 +466,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
       isAnalyticsLoaded: false,
       isTablesLoaded: false,
       isOpenOpsMCPEnabled: false,
-      isAwsCostMcpAvailable: false,
+      isAwsCostMcpDisabled: true,
     });
   });
 });
