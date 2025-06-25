@@ -40,7 +40,7 @@ const ViewToggleButton = ({
           value={value}
           size="xs"
           className={
-            'w-[66px] h-6 px-2 py-1 text-sm font-normal transition-colors data-[state=on]:bg-gray-200 dark:data-[state=on]:bg-gray-800 data-[state=on]:shadow-sm border-0 dark:data-[state=off]:text-gray-400 data-[state=off]:hover:bg-gray-200 dark:data-[state=off]:hover:bg-gray-800 rounded-[4px]'
+            'w-[66px] h-6 px-2 py-1 text-sm font-normal transition-colors data-[state=on]:bg-gray-200 dark:data-[state=on]:bg-gray-800 border-0 dark:data-[state=off]:text-gray-400 data-[state=off]:hover:bg-gray-200 dark:data-[state=off]:hover:bg-gray-800 rounded-[4px]'
           }
         >
           {label}
