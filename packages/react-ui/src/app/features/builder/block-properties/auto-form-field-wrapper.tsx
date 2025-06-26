@@ -4,7 +4,6 @@ import {
   cn,
   DynamicToggle,
   DynamicToggleOption,
-  DynamicToggleValue,
   FormItem,
   FormLabel,
   ReadMoreDescription,
@@ -56,12 +55,12 @@ const getInitialFieldValue = (
   return fieldValue ?? defaultValue ?? null;
 };
 
-const DYNAMIC_TOGGLE_VALUES: Record<string, DynamicToggleValue> = {
+const DYNAMIC_TOGGLE_VALUES = {
   STATIC: 'Static',
   DYNAMIC: 'Dynamic',
 };
 
-const toggleOptions: DynamicToggleOption[] = [
+const TOGGLE_OPTIONS: DynamicToggleOption[] = [
   {
     value: DYNAMIC_TOGGLE_VALUES.STATIC,
     label: t('Static'),
@@ -81,7 +80,7 @@ type FormLabelButtonProps = {
   allowDynamicValues: boolean;
   disabled: boolean;
   dynamicViewToggled: boolean;
-  handleDynamicValueChange: (value: DynamicToggleValue) => void;
+  handleDynamicValueChange: (value: string) => void;
   onGenerateWithAIClick: () => void;
 };
 
@@ -131,7 +130,7 @@ const FormLabelButton = ({
   if (allowDynamicValues) {
     return (
       <DynamicToggle
-        options={toggleOptions}
+        options={TOGGLE_OPTIONS}
         onChange={handleDynamicValueChange}
         defaultValue={
           dynamicViewToggled
@@ -199,7 +198,7 @@ const AutoFormFieldWrapper = ({
   }, [propertyName, inputName, arrayFieldContext]);
 
   // array fields use the dynamicViewToggled property to specify if a property is toggled
-  function handleChange(value: DynamicToggleValue) {
+  function handleChange(value: string) {
     const isInDynamicView = value === DYNAMIC_TOGGLE_VALUES.DYNAMIC;
     if (arrayFieldContext) {
       form.setValue(

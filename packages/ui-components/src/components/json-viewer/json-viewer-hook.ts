@@ -51,7 +51,7 @@ export const useJsonViewer = ({
     if (isEditModeEnabled !== undefined) {
       setIsEditMode(!!isEditModeEnabled);
     }
-  }, [isEditMode, isEditModeEnabled]);
+  }, [isEditModeEnabled]);
 
   const editModeChange = useCallback(
     (editMode: boolean) => {
