@@ -145,7 +145,7 @@ export async function loadBlockMetadataFromFolder(
 
     // We add the configuration hash to ensure that env var changes take effect (e.g. AWS_ENABLE_IMPLICIT_ROLE)
     const cacheKey =
-      providedCacheKey ||
+      providedCacheKey ??
       `${blockName}-${blockVersion}-${stats.mtime.getTime()}-${system.calculateConfigurationHash()}`;
 
     if (!bypassCache) {
