@@ -27,35 +27,14 @@ module.exports = composePlugins(withNx(), (config) => {
       });
 
       compiler.hooks.invalid.tap('SmartBlockWatcher', (filename) => {
-        if (filename && filename.includes('/packages/blocks/')) {
-          const relativePath = path.relative(
-            path.resolve(__dirname, '..'),
-            filename,
-          );
-          const pathParts = relativePath.split('/');
+        const relativePath = path.relative(
+          path.resolve(__dirname, '..'),
+          filename,
+        );
 
-          if (
-            pathParts[0] === 'packages' &&
-            pathParts[1] === 'blocks' &&
-            pathParts[2]
-          ) {
-            console.log(
-              `[Engine Server] Detected change in block: ${pathParts[2]} - waiting for API server to handle build`,
-            );
-          }
-        } else if (filename && filename.includes('/packages/openops/')) {
-          console.log(
-            `[Engine Server] Detected change in openops package: ${filename}`,
-          );
-        } else if (filename && filename.includes('/packages/shared/')) {
-          console.log(
-            `[Engine Server] Detected change in shared package: ${filename}`,
-          );
-        } else if (filename && filename.includes('/packages/server/shared/')) {
-          console.log(
-            `[Engine Server] Detected change in server-shared package: ${filename}`,
-          );
-        }
+        console.log(
+          chalk.yellow(`[Engine Server] Detected change in: ${relativePath}`),
+        );
       });
 
       compiler.hooks.beforeCompile.tapAsync(
