@@ -9,7 +9,6 @@ module.exports = composePlugins(withNx(), (config) => {
 
   config.plugins.push({
     apply: (compiler) => {
-      let isInitialBuild = true;
       const changedBlocks = new Set();
 
       compiler.hooks.afterCompile.tap('SmartBlockWatcher', (compilation) => {
@@ -41,10 +40,6 @@ module.exports = composePlugins(withNx(), (config) => {
       compiler.hooks.beforeCompile.tapAsync(
         'SmartBlockWatcher',
         (params, callback) => {
-          if (isInitialBuild) {
-            isInitialBuild = false;
-          }
-
           if (changedBlocks.size > 0) {
             console.log(
               `[API Server] Changes detected in blocks: ${Array.from(

@@ -9,8 +9,6 @@ module.exports = composePlugins(withNx(), (config) => {
 
   config.plugins.push({
     apply: (compiler) => {
-      let isInitialBuild = true;
-
       compiler.hooks.afterCompile.tap('SmartBlockWatcher', (compilation) => {
         const blockDirs = getBlockDirectories(__dirname, '../blocks');
         blockDirs.forEach((dir) => {
@@ -41,9 +39,6 @@ module.exports = composePlugins(withNx(), (config) => {
       compiler.hooks.beforeCompile.tapAsync(
         'SmartBlockWatcher',
         (params, callback) => {
-          if (isInitialBuild) {
-            isInitialBuild = false;
-          }
           callback();
         },
       );
