@@ -5,8 +5,7 @@ import CodeMirror, {
   EditorView,
   ReactCodeMirrorRef,
 } from '@uiw/react-codemirror';
-import React, { RefObject, useRef, useState } from 'react';
-import { ControllerRenderProps } from 'react-hook-form';
+import React, { RefObject, useRef } from 'react';
 import { cn } from '../../lib/cn';
 
 const styleTheme = EditorView.baseTheme({
@@ -19,41 +18,54 @@ const convertToString = (value: unknown): string => {
   if (typeof value === 'string') {
     return value;
   }
-  return JSON.stringify(value, null, 2);
-};
-
-const tryParseJson = (value: unknown): unknown => {
-  if (typeof value !== 'string') {
-    return value;
-  }
   try {
-    return JSON.parse(value);
-  } catch {
-    return value;
+    return JSON.stringify(value, null, 2);
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      error.message.includes('circular structure')
+    ) {
+      const seen = new WeakSet();
+      return JSON.stringify(
+        value,
+        (key, val) => {
+          if (typeof val === 'object' && val !== null) {
+            if (seen.has(val)) {
+              return '';
+            }
+            seen.add(val);
+          }
+          return val;
+        },
+        2,
+      );
+    }
+    return String(value);
   }
 };
 
-type JsonEditorProps = {
-  field: ControllerRenderProps<Record<string, any>, string>;
-  readonly: boolean;
+type CodeMirrorEditorProps = {
+  value: unknown;
+  readonly?: boolean;
   onFocus?: (ref: RefObject<ReactCodeMirrorRef>) => void;
+  onChange?: (value: string) => void;
   className?: string;
   containerClassName?: string;
   theme?: string;
   placeholder?: string;
 };
 
-const JsonEditor = React.memo(
+const CodeMirrorEditor = React.memo(
   ({
-    field,
-    readonly,
+    value,
+    readonly = false,
     onFocus,
+    onChange,
     className,
     containerClassName,
     theme,
     placeholder,
-  }: JsonEditorProps) => {
-    const [value, setValue] = useState(convertToString(field.value));
+  }: CodeMirrorEditorProps) => {
     const editorTheme = theme === 'dark' ? githubDark : githubLight;
     const extensions = [
       styleTheme,
@@ -62,33 +74,27 @@ const JsonEditor = React.memo(
       json(),
     ];
     const ref = useRef<ReactCodeMirrorRef>(null);
+
     return (
-      <div
-        className={cn(
-          'flex flex-col gap-2 border rounded py-2 px-2',
-          containerClassName,
-        )}
-      >
+      <div className={cn('flex flex-col gap-2 p-1', containerClassName)}>
         <CodeMirror
           ref={ref}
-          value={value}
+          value={convertToString(value)}
           placeholder={placeholder}
-          className={cn('border-none', className)}
+          className={cn('border-t', className)}
           height="250px"
           width="100%"
           maxWidth="100%"
           basicSetup={{
-            foldGutter: false,
+            foldGutter: readonly,
             lineNumbers: true,
             searchKeymap: false,
             lintKeymap: true,
             autocompletion: true,
+            highlightActiveLine: !readonly,
           }}
           lang="json"
-          onChange={(value) => {
-            setValue(value);
-            field.onChange(tryParseJson(value));
-          }}
+          onChange={onChange}
           theme={editorTheme}
           readOnly={readonly}
           onFocus={() => onFocus?.(ref)}
@@ -99,5 +105,5 @@ const JsonEditor = React.memo(
   },
 );
 
-JsonEditor.displayName = 'JsonEditor';
-export { JsonEditor };
+CodeMirrorEditor.displayName = 'CodeMirrorEditor';
+export { CodeMirrorEditor };
