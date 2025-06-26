@@ -31,7 +31,6 @@ const INCLUDED_PATHS: Record<string, string[]> = {
   '/v1/app-connections/': ['get', 'patch'],
   '/v1/app-connections/{id}': ['get'],
   '/v1/app-connections/metadata': ['get'],
-  '/v1/test/step': ['post'],
 };
 
 function filterOpenApiSchema(schema: OpenAPI.Document): OpenAPI.Document {

@@ -14,7 +14,7 @@ export const CreateFlowFromTemplateRequest = Type.Object({
     isSample: Type.Boolean({}),
     displayName: Type.String({}),
     description: Type.Optional(Type.String({})),
-    trigger: Trigger,
+    trigger: Type.Omit(Trigger, ['id']),
   }),
   connectionIds: Type.Array(Type.String({})),
 });

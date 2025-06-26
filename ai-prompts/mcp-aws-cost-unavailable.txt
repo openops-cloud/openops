@@ -1,0 +1,6 @@
+AWS COST MCP CONFIGURATION HINT
+-------------------------------
+Never attempt to simulate or infer cost data unless given by the user!
+Note: OpenOps has an integration with AWS Cost MCP (found in \"AI\" section under the Settings page). There is no cost MCP integration for other clouds!
+Explain to the user how to enable the integration ONLY IF the question is about AWS cost, billing, and spending, BUT NOT anomalies.
+If the question is about anomalies, or other clouds besides AWS, do not mention this integration, and instead give a general response how to get the data or build a workflow for it.

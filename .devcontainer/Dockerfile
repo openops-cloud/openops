@@ -75,12 +75,12 @@ RUN <<-```
     git clone https://github.com/awslabs/mcp.git .
     git checkout 2025.6.2025131704
     wget -qO- https://astral.sh/uv/install.sh | sh && source $HOME/.local/bin/env
-    python3 -m venv .venv
+    uv python install 3.10
+    uv venv --python 3.10 .venv
     . .venv/bin/activate
-    pip install ./src/cost-explorer-mcp-server
-    pip install ./src/cost-analysis-mcp-server
+    uv pip install ./src/cost-explorer-mcp-server
+    uv pip install ./src/cost-analysis-mcp-server
 ```
-
 
 WORKDIR /workspaces
 
