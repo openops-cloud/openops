@@ -42,155 +42,103 @@ async function getDirectoryLastModified(dir: string): Promise<number> {
   return maxTime;
 }
 
-export async function getSharedInfo(): Promise<DependencyBuildInfo | null> {
-  const sharedPath = join(cwd(), 'packages', 'shared');
-  const packageJsonPath = join(sharedPath, 'package.json');
+// TODO: Parse project.json and check if targets.build.executor === 'nx:noop'
+const BLOCKS_TO_IGNORE = ['@openops/block-sftp'];
+
+async function getPackageInfo(
+  packagePath: string,
+  packageType: 'block' | 'openops-common' | 'shared' | 'server-shared',
+  logPrefix?: string,
+): Promise<DependencyBuildInfo | null> {
+  const packageJsonPath = join(packagePath, 'package.json');
 
   try {
     const packageJson = JSON.parse(await readFile(packageJsonPath, 'utf-8'));
 
-    if (packageJson.name === '@openops/shared') {
-      const lastModified = await getDirectoryLastModified(sharedPath);
-      const cached = depBuildCache.get(packageJson.name) ?? 0;
-      const needsRebuild = lastModified > cached;
-
-      logger.debug(
-        `Shared: lastModified=${lastModified}, cached=${cached}, needsRebuild=${needsRebuild}`,
-      );
-
-      return {
-        name: packageJson.name,
-        path: sharedPath,
-        lastModified,
-        needsRebuild,
-        type: 'shared',
-      };
+    if (
+      packageType === 'block' &&
+      BLOCKS_TO_IGNORE.includes(packageJson.name)
+    ) {
+      return null;
     }
+
+    const lastModified = await getDirectoryLastModified(packagePath);
+    const cached = depBuildCache.get(packageJson.name) ?? 0;
+    const needsRebuild = lastModified > cached;
+
+    const displayName =
+      logPrefix || packageType.charAt(0).toUpperCase() + packageType.slice(1);
+    logger.debug(
+      `${displayName} ${packageJson.name}: lastModified=${lastModified}, cached=${cached}, needsRebuild=${needsRebuild}`,
+    );
+
+    return {
+      name: packageJson.name,
+      path: packagePath,
+      lastModified,
+      needsRebuild,
+      type: packageType,
+    };
   } catch (error) {
-    logger.warn('Error checking shared package', { error });
+    logger.warn(`Error checking package at ${packageJsonPath}`, { error });
   }
 
   return null;
+}
+
+export async function getSharedInfo(): Promise<DependencyBuildInfo | null> {
+  const sharedPath = join(cwd(), 'packages', 'shared');
+  return getPackageInfo(sharedPath, 'shared', 'Shared');
 }
 
 export async function getServerSharedInfo(): Promise<DependencyBuildInfo | null> {
   const serverSharedPath = join(cwd(), 'packages', 'server', 'shared');
-  const packageJsonPath = join(serverSharedPath, 'package.json');
-
-  try {
-    const packageJson = JSON.parse(await readFile(packageJsonPath, 'utf-8'));
-
-    if (packageJson.name === '@openops/server-shared') {
-      const lastModified = await getDirectoryLastModified(serverSharedPath);
-      const cached = depBuildCache.get(packageJson.name) ?? 0;
-      const needsRebuild = lastModified > cached;
-
-      logger.debug(
-        `Server Shared: lastModified=${lastModified}, cached=${cached}, needsRebuild=${needsRebuild}`,
-      );
-
-      return {
-        name: packageJson.name,
-        path: serverSharedPath,
-        lastModified,
-        needsRebuild,
-        type: 'server-shared',
-      };
-    }
-  } catch (error) {
-    logger.warn('Error checking server-shared package', { error });
-  }
-
-  return null;
+  return getPackageInfo(serverSharedPath, 'server-shared', 'Server Shared');
 }
 
 export async function getOpenOpsCommonInfo(): Promise<DependencyBuildInfo | null> {
   const openopsPath = join(cwd(), 'packages', 'openops');
-  const packageJsonPath = join(openopsPath, 'package.json');
-
-  try {
-    const packageJson = JSON.parse(await readFile(packageJsonPath, 'utf-8'));
-
-    if (packageJson.name === '@openops/common') {
-      const lastModified = await getDirectoryLastModified(openopsPath);
-      const cached = depBuildCache.get(packageJson.name) ?? 0;
-      const needsRebuild = lastModified > cached;
-
-      logger.debug(
-        `OpenOps Common: lastModified=${lastModified}, cached=${cached}, needsRebuild=${needsRebuild}`,
-      );
-
-      return {
-        name: packageJson.name,
-        path: openopsPath,
-        lastModified,
-        needsRebuild,
-        type: 'openops-common',
-      };
-    }
-  } catch (error) {
-    logger.warn('Error checking openops-common package', { error });
-  }
-
-  return null;
+  return getPackageInfo(openopsPath, 'openops-common', 'OpenOps Common');
 }
-
-// TODO: Parse project.json and check if targets.build.executor === 'nx:noop'
-const BLOCKS_TO_IGNORE = ['@openops/block-sftp'];
 
 export async function getBlocksWithChanges(): Promise<DependencyBuildInfo[]> {
   const blocksPath = join(cwd(), 'packages', 'blocks');
   const blocks: DependencyBuildInfo[] = [];
 
-  async function findBlocks(dir: string): Promise<void> {
-    const entries = await readdir(dir, { withFileTypes: true });
+  const entries = await readdir(blocksPath, { withFileTypes: true });
 
-    for (const entry of entries) {
-      if (
-        entry.isDirectory() &&
-        !['node_modules', 'dist', 'framework', 'common'].includes(entry.name)
-      ) {
-        const fullPath = join(dir, entry.name);
-        const packageJsonPath = join(fullPath, 'package.json');
+  for (const entry of entries) {
+    if (
+      entry.isDirectory() &&
+      !['node_modules', 'dist', 'framework', 'common'].includes(entry.name)
+    ) {
+      const fullPath = join(blocksPath, entry.name);
+      const packageJsonPath = join(fullPath, 'package.json');
 
-        try {
-          const packageJson = JSON.parse(
-            await readFile(packageJsonPath, 'utf-8'),
-          );
-          if (packageJson.name?.startsWith('@openops/block-')) {
-            if (BLOCKS_TO_IGNORE.includes(packageJson.name)) {
-              continue;
-            }
-
-            const lastModified = await getDirectoryLastModified(fullPath);
-            const cached = depBuildCache.get(packageJson.name) ?? 0;
-            const needsRebuild = lastModified > cached;
-
+      try {
+        const packageJson = JSON.parse(
+          await readFile(packageJsonPath, 'utf-8'),
+        );
+        if (packageJson.name?.startsWith('@openops/block-')) {
+          const blockInfo = await getPackageInfo(fullPath, 'block');
+          if (blockInfo) {
             if (blocks.length < LOG_FIRST_BLOCKS) {
               logger.debug(
-                `Block ${packageJson.name}: lastModified=${lastModified}, cached=${cached}, needsRebuild=${needsRebuild}`,
+                `Block ${packageJson.name}: lastModified=${
+                  blockInfo.lastModified
+                }, cached=${
+                  depBuildCache.get(packageJson.name) ?? 0
+                }, needsRebuild=${blockInfo.needsRebuild}`,
               );
             }
-
-            blocks.push({
-              name: packageJson.name,
-              path: fullPath,
-              lastModified,
-              needsRebuild,
-              type: 'block',
-            });
-          } else {
-            // Recurse into subdirectories
-            await findBlocks(fullPath);
+            blocks.push(blockInfo);
           }
-        } catch {
-          // No package.json or not a block, recurse
-          await findBlocks(fullPath);
         }
+      } catch (err) {
+        logger.warn(`Error checking package at ${packageJsonPath}`, { err });
       }
     }
   }
 
-  await findBlocks(blocksPath);
   return blocks;
 }
