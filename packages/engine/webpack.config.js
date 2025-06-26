@@ -2,6 +2,7 @@ const { composePlugins, withNx } = require('@nx/webpack');
 const IgnoreDynamicRequire = require('webpack-ignore-dynamic-require');
 const path = require('path');
 const { getBlockDirectories } = require('../../tools/webpack-utils');
+const chalk = require('chalk');
 
 module.exports = composePlugins(withNx(), (config) => {
   config.plugins.push(new IgnoreDynamicRequire());
