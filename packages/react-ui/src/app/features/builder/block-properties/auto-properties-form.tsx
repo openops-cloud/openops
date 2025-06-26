@@ -6,13 +6,14 @@ import {
   PropertyType,
 } from '@openops/blocks-framework';
 import {
+  CodeMirrorEditor,
   FormControl,
   FormField,
   Input,
-  JsonEditor,
   Markdown,
   MarkdownCodeVariations,
   Switch,
+  tryParseJson,
 } from '@openops/components/ui';
 import { isNil } from '@openops/shared';
 import { t } from 'i18next';
@@ -216,11 +217,14 @@ const selectFormComponentForProperty = ({
               disabled={disabled}
             ></BuilderJsonEditorWrapper>
           ) : (
-            <JsonEditor
-              field={field}
+            <CodeMirrorEditor
+              value={field.value}
               readonly={disabled}
               theme={theme}
-            ></JsonEditor>
+              onChange={(value) => {
+                field.onChange(tryParseJson(value));
+              }}
+            ></CodeMirrorEditor>
           )}
         </AutoFormFieldWrapper>
       );
