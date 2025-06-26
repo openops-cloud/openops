@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require('fs');
+const chalk = require('chalk');
 
 /**
  * Get all block directories that contain valid @openops/block-* packages
@@ -38,7 +39,7 @@ function getBlockDirectories(baseDir, relativePath) {
         }
       }
     } catch (e) {
-      // Ignore errors
+      console.log(chalk.red(`Error reading block directory: ${relativePath}`));
     }
   }
 
