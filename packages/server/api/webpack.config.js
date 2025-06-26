@@ -33,6 +33,7 @@ module.exports = composePlugins(withNx(), (config) => {
           filename,
         );
 
+        const pathParts = relativePath.split('/');
         if (
           pathParts[0] === 'packages' &&
           pathParts[1] === 'blocks' &&
