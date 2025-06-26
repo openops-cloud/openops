@@ -66,6 +66,7 @@ export const stepRunService = {
         stepId: step.id,
         flowVersionId: flowVersion.id,
         output: result.output,
+        input: result.input,
       });
     }
 

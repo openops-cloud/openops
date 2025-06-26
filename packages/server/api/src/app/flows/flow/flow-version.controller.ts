@@ -149,6 +149,7 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
         flowStepTestOutputs.map((flowStepTestOutput) => [
           flowStepTestOutput.stepId as OpenOpsId,
           {
+            input: flowStepTestOutput.input,
             output: flowStepTestOutput.output,
             lastTestDate: flowStepTestOutput.updated,
           },
@@ -163,7 +164,7 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
     async (request, reply) => {
       const { flowVersionId } = request.params;
       const { stepId, output } = request.body;
-
+  
       const flowVersion = await flowVersionService.getOne(flowVersionId);
       if (!flowVersion) {
         await reply.status(StatusCodes.NOT_FOUND).send({
@@ -171,13 +172,13 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
           message: 'The defined flow version was not found',
         });
       }
-
+  
       const savedOutput = await flowStepTestOutputService.save({
         stepId,
         flowVersionId,
         output,
       });
-
+  
       await reply.status(StatusCodes.OK).send({
         success: true,
         message: 'Test output saved successfully',

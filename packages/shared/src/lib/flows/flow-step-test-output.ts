@@ -6,12 +6,14 @@ export const FlowStepTestOutput = Type.Object({
   ...BaseModelSchema,
   stepId: Type.String(),
   flowVersionId: Type.String(),
+  input: Type.Unknown(),
   output: Type.Unknown(),
 });
 
 export type FlowStepTestOutput = Static<typeof FlowStepTestOutput>;
 
 export type StepOutputWithData = {
+  input: unknown;
   output: unknown;
   lastTestDate: string;
 };

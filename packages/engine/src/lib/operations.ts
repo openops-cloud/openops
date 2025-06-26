@@ -92,9 +92,11 @@ async function executeStep(
     constants: EngineConstants.fromExecuteStepInput(input),
   });
 
+  const stepResult = output.steps[step.name];
   return {
     success: output.verdict !== ExecutionVerdict.FAILED,
-    output: cleanSampleData(output.steps[step.name]),
+    output: cleanSampleData(stepResult),
+    input: stepResult.input,
   };
 }
 

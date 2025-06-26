@@ -64,6 +64,7 @@ const triggerEventController: FastifyPluginAsyncTypebox = async (fastify) => {
         projectId: request.principal.projectId,
         flowId: request.query.flowId,
         payload: request.body,
+        input: '',
       });
     },
   );
