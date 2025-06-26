@@ -205,7 +205,6 @@ export const InteractiveContextProvider = ({
 
     const stepToBeCopied = cloneDeep(stepDetails);
     stepToBeCopied.nextAction = undefined;
-    flowHelper.clearStepTestData(stepToBeCopied);
 
     handleCopy(stepToBeCopied as Action, 1);
   }, [flowVersion, handleCopy, selectedStep]);
@@ -364,7 +363,6 @@ export const InteractiveContextProvider = ({
     const selectedStepNames: string[] = [];
 
     flowHelper.getAllSteps(selectedFlowAction).forEach((step) => {
-      flowHelper.clearStepTestData(step);
       selectedStepNames.push(step.name);
     });
 
@@ -387,9 +385,6 @@ export const InteractiveContextProvider = ({
       const actionToBeCopied = cloneDeep(action);
       actionToBeCopied.nextAction = undefined;
       const allNestedSteps = flowHelper.getAllSteps(actionToBeCopied);
-      allNestedSteps.forEach((step) => {
-        flowHelper.clearStepTestData(step);
-      });
       handleCopy(actionToBeCopied, allNestedSteps.length);
     },
     [handleCopy],
