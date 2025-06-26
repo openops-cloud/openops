@@ -58,18 +58,23 @@ export const Default: Story = {
   play: async ({ canvasElement }) => {
     const canvas = selectLightOrDarkCanvas(canvasElement);
     // Verify that Output is selected by default
-    expect(canvas.getByText('Output')).toHaveAttribute('data-state', 'on');
+    await waitFor(() => {
+      const outputToggle = canvas.getByRole('radio', { name: 'Output' });
+      expect(outputToggle).toBeChecked();
+    });
 
     // Switch to Input view
-    await userEvent.click(canvas.getByText('Input'));
+    await userEvent.click(canvas.getByRole('radio', { name: 'Input' }));
     await waitFor(() => {
-      expect(canvas.getByText('Input')).toHaveAttribute('data-state', 'on');
+      const inputToggle = canvas.getByRole('radio', { name: 'Input' });
+      expect(inputToggle).toBeChecked();
     });
 
     // Switch back to Output view
-    await userEvent.click(canvas.getByText('Output'));
+    await userEvent.click(canvas.getByRole('radio', { name: 'Output' }));
     await waitFor(() => {
-      expect(canvas.getByText('Output')).toHaveAttribute('data-state', 'on');
+      const outputToggle = canvas.getByRole('radio', { name: 'Output' });
+      expect(outputToggle).toBeChecked();
     });
   },
 };
