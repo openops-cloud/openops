@@ -1,7 +1,7 @@
 import { t } from 'i18next';
 import { useMemo, useState } from 'react';
-import { DynamicToggle } from '../dynamic-toggle/dynamic-toggle';
 import { JsonViewer } from '../json-viewer/json-viewer';
+import { ToggleSwitch } from '../toggle-switch/toggle-switch';
 
 type TestStepDataViewerProps = {
   inputJson?: any;
@@ -59,7 +59,7 @@ const TestStepDataViewer = ({
       onEditModeChange={setIsEditModeEnabled}
     >
       {inputJson ? (
-        <DynamicToggle
+        <ToggleSwitch
           disabled={isEditModeEnabled}
           defaultValue={selectedViewType}
           onChange={setSelectedViewType}

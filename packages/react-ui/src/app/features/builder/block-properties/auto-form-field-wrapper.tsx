@@ -2,11 +2,11 @@ import { BlockProperty } from '@openops/blocks-framework';
 import {
   Button,
   cn,
-  DynamicToggle,
-  DynamicToggleOption,
   FormItem,
   FormLabel,
   ReadMoreDescription,
+  ToggleSwitch,
+  ToggleSwitchOption,
 } from '@openops/components/ui';
 import { Action, isNil, Trigger } from '@openops/shared';
 import { t } from 'i18next';
@@ -60,7 +60,7 @@ const DYNAMIC_TOGGLE_VALUES = {
   DYNAMIC: 'Dynamic',
 };
 
-const TOGGLE_OPTIONS: DynamicToggleOption[] = [
+const TOGGLE_OPTIONS: ToggleSwitchOption[] = [
   {
     value: DYNAMIC_TOGGLE_VALUES.STATIC,
     label: t('Static'),
@@ -129,7 +129,7 @@ const FormLabelButton = ({
 
   if (allowDynamicValues) {
     return (
-      <DynamicToggle
+      <ToggleSwitch
         options={TOGGLE_OPTIONS}
         onChange={handleDynamicValueChange}
         defaultValue={

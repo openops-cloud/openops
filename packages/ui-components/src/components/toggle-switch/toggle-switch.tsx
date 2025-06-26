@@ -3,21 +3,21 @@ import { cn } from '../../lib/cn';
 import { ToggleGroup, ToggleGroupItem } from '../../ui/toggle-group';
 import { TooltipWrapper } from '../tooltip-wrapper';
 
-export type DynamicToggleOption = {
+export type ToggleSwitchOption = {
   value: string;
   label: string;
   tooltipText?: string;
 };
 
 type Props = {
-  options: DynamicToggleOption[];
+  options: ToggleSwitchOption[];
   defaultValue?: string;
   onChange?: (value: string) => void;
   disabled?: boolean;
   className?: string;
 };
 
-const DynamicToggle = ({
+const ToggleSwitch = ({
   options,
   defaultValue,
   onChange,
@@ -72,6 +72,6 @@ const DynamicToggle = ({
   );
 };
 
-DynamicToggle.displayName = 'DynamicToggle';
+ToggleSwitch.displayName = 'DynamicToggle';
 
-export { DynamicToggle };
+export { ToggleSwitch };
