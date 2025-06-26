@@ -7,6 +7,7 @@ export type DependencyBuildInfo = {
 };
 
 export type BuildResult = {
+  blocks: DependencyBuildInfo[];
   allDeps: DependencyBuildInfo[];
   depsToRebuild: DependencyBuildInfo[];
   blocksToRebuild: DependencyBuildInfo[];

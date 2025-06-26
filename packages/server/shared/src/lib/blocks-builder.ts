@@ -1,3 +1,5 @@
+import { cwd } from 'node:process';
+import { join } from 'path';
 import {
   buildDependencies,
   linkBlocks,
@@ -10,7 +12,8 @@ import {
   getSharedInfo,
   setDependencyCache,
 } from './blocks-builder/dependency-analyzer';
-import { BuildResult } from './blocks-builder/types';
+import { BuildResult, DependencyBuildInfo } from './blocks-builder/types';
+import { loadBlockMetadataFromFolder } from './blocks/file-blocks-utils';
 import { acquireRedisLock } from './cache/redis-lock';
 import { logger } from './logger';
 import { Lock } from './memory-lock';
@@ -21,6 +24,41 @@ const isFileBlocks =
 const isDevEnv = system.getOrThrow(SharedSystemProp.ENVIRONMENT) === 'dev';
 
 const depBuildCache = loadBuildCache();
+
+async function updateBlockMetadataCache(
+  depsToRebuild: DependencyBuildInfo[],
+): Promise<void> {
+  for (const dep of depsToRebuild) {
+    if (dep.type !== 'block') {
+      continue;
+    }
+
+    try {
+      const distPath = join(
+        cwd(),
+        'dist',
+        'packages',
+        'blocks',
+        dep.name.replace('@openops/block-', ''),
+      );
+
+      const blockMetadata = await loadBlockMetadataFromFolder(distPath, {
+        bypassCache: true,
+      });
+
+      if (blockMetadata) {
+        logger.debug(`Updated block metadata cache for ${blockMetadata.name}`);
+      } else {
+        logger.warn(`Failed to load block metadata for ${dep.name}`);
+      }
+    } catch (error) {
+      logger.warn(
+        `Failed to update block metadata cache for ${dep.name}:`,
+        error,
+      );
+    }
+  }
+}
 
 async function analyzeDependencies(): Promise<BuildResult> {
   // Set the dependency cache for the analyzer functions
@@ -56,6 +94,7 @@ async function analyzeDependencies(): Promise<BuildResult> {
   );
 
   return {
+    blocks,
     allDeps,
     depsToRebuild,
     blocksToRebuild,
@@ -99,7 +138,7 @@ export async function blocksBuilder(): Promise<void> {
 
     const buildDuration = Math.floor(performance.now() - startTime);
     logger.info(
-      `Finished building ${buildResult.depsToRebuild.length} dependencies in ${buildDuration}ms. Linking blocks...`,
+      `Finished building ${buildResult.depsToRebuild.length} dependencies in ${buildDuration}ms. Updating block metadata cache...`,
     );
 
     await linkBlocks(buildResult.blocksToRebuild, depBuildCache);
@@ -110,6 +149,9 @@ export async function blocksBuilder(): Promise<void> {
     logger.info(
       `Linked ${buildResult.blocksToRebuild.length} blocks in ${linkDuration}ms. Dependencies are ready.`,
     );
+
+    // For any change in openops-common, only openops-common needs to be rebuild but the metadata cache still needs to be updated for all blocks
+    await updateBlockMetadataCache(buildResult.blocks);
 
     saveBuildCache(depBuildCache);
   } finally {

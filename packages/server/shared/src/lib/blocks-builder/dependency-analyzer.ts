@@ -135,6 +135,9 @@ export async function getOpenOpsCommonInfo(): Promise<DependencyBuildInfo | null
   return null;
 }
 
+// TODO: Parse project.json and check if targets.build.executor === 'nx:noop'
+const BLOCKS_TO_IGNORE = ['@openops/block-sftp'];
+
 export async function getBlocksWithChanges(): Promise<DependencyBuildInfo[]> {
   const blocksPath = join(cwd(), 'packages', 'blocks');
   const blocks: DependencyBuildInfo[] = [];
@@ -155,6 +158,10 @@ export async function getBlocksWithChanges(): Promise<DependencyBuildInfo[]> {
             await readFile(packageJsonPath, 'utf-8'),
           );
           if (packageJson.name?.startsWith('@openops/block-')) {
+            if (BLOCKS_TO_IGNORE.includes(packageJson.name)) {
+              continue;
+            }
+
             const lastModified = await getDirectoryLastModified(fullPath);
             const cached = depBuildCache.get(packageJson.name) ?? 0;
             const needsRebuild = lastModified > cached;
