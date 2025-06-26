@@ -67,7 +67,7 @@ async function getPackageInfo(
     const needsRebuild = lastModified > cached;
 
     const displayName =
-      logPrefix || packageType.charAt(0).toUpperCase() + packageType.slice(1);
+      logPrefix ?? packageType.charAt(0).toUpperCase() + packageType.slice(1);
     logger.debug(
       `${displayName} ${packageJson.name}: lastModified=${lastModified}, cached=${cached}, needsRebuild=${needsRebuild}`,
     );
