@@ -108,36 +108,35 @@ export async function getBlocksWithChanges(): Promise<DependencyBuildInfo[]> {
   const entries = await readdir(blocksPath, { withFileTypes: true });
 
   for (const entry of entries) {
-    if (entry.isDirectory() && !['framework', 'common'].includes(entry.name)) {
-      const fullPath = join(blocksPath, entry.name);
-      const packageJsonPath = join(fullPath, 'package.json');
+    if (!entry.isDirectory() || ['framework', 'common'].includes(entry.name)) {
+      continue;
+    }
+    const fullPath = join(blocksPath, entry.name);
+    const packageJsonPath = join(fullPath, 'package.json');
 
-      try {
-        const packageJson = JSON.parse(
-          await readFile(packageJsonPath, 'utf-8'),
-        );
-        if (!packageJson.name?.startsWith('@openops/block-')) {
-          continue;
-        }
-
-        const blockInfo = await getPackageInfo(fullPath, 'block');
-        if (!blockInfo) {
-          continue;
-        }
-
-        if (blocks.length < LOG_FIRST_BLOCKS) {
-          logger.debug(
-            `Block ${packageJson.name}: lastModified=${
-              blockInfo.lastModified
-            }, cached=${
-              depBuildCache.get(packageJson.name) ?? 0
-            }, needsRebuild=${blockInfo.needsRebuild}`,
-          );
-        }
-        blocks.push(blockInfo);
-      } catch (err) {
-        logger.warn(`Error checking package at ${packageJsonPath}`, { err });
+    try {
+      const packageJson = JSON.parse(await readFile(packageJsonPath, 'utf-8'));
+      if (!packageJson.name?.startsWith('@openops/block-')) {
+        continue;
       }
+
+      const blockInfo = await getPackageInfo(fullPath, 'block');
+      if (!blockInfo) {
+        continue;
+      }
+
+      if (blocks.length < LOG_FIRST_BLOCKS) {
+        logger.debug(
+          `Block ${packageJson.name}: lastModified=${
+            blockInfo.lastModified
+          }, cached=${depBuildCache.get(packageJson.name) ?? 0}, needsRebuild=${
+            blockInfo.needsRebuild
+          }`,
+        );
+      }
+      blocks.push(blockInfo);
+    } catch (err) {
+      logger.warn(`Error checking package at ${packageJsonPath}`, { err });
     }
   }
 
