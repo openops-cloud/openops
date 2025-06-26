@@ -1,6 +1,7 @@
+import { t } from 'i18next';
 import { useMemo, useState } from 'react';
+import { DynamicToggle } from '../dynamic-toggle/dynamic-toggle';
 import { JsonViewer } from '../json-viewer/json-viewer';
-import { JsonViewType, ViewToggleButtons } from './view-toggle-buttons';
 
 type TestStepDataViewerProps = {
   inputJson?: any;
@@ -11,6 +12,24 @@ type TestStepDataViewerProps = {
   editorClassName?: string;
 };
 
+const JsonViewType = {
+  Input: 'Input',
+  Output: 'Output',
+};
+
+const VIEW_INPUT_OPTIONS = [
+  {
+    value: JsonViewType.Input,
+    label: t('Input'),
+    tooltipText: t('View input data'),
+  },
+  {
+    value: JsonViewType.Output,
+    label: t('Output'),
+    tooltipText: t('View output data'),
+  },
+];
+
 const TestStepDataViewer = ({
   inputJson,
   outputJson,
@@ -19,7 +38,7 @@ const TestStepDataViewer = ({
   theme,
   editorClassName,
 }: TestStepDataViewerProps) => {
-  const [selectedViewType, setSelectedViewType] = useState<JsonViewType>(
+  const [selectedViewType, setSelectedViewType] = useState<string>(
     JsonViewType.Output,
   );
 
@@ -40,10 +59,11 @@ const TestStepDataViewer = ({
       onEditModeChange={setIsEditModeEnabled}
     >
       {inputJson ? (
-        <ViewToggleButtons
+        <DynamicToggle
           disabled={isEditModeEnabled}
-          viewType={selectedViewType}
-          onViewTypeChange={setSelectedViewType}
+          defaultValue={selectedViewType}
+          onChange={setSelectedViewType}
+          options={VIEW_INPUT_OPTIONS}
         />
       ) : null}
     </JsonViewer>

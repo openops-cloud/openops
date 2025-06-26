@@ -2,7 +2,6 @@ import { BlockProperty } from '@openops/blocks-framework';
 import {
   Button,
   cn,
-  DYNAMIC_TOGGLE_VALUES,
   DynamicToggle,
   DynamicToggleOption,
   DynamicToggleValue,
@@ -57,14 +56,19 @@ const getInitialFieldValue = (
   return fieldValue ?? defaultValue ?? null;
 };
 
+const DYNAMIC_TOGGLE_VALUES: Record<string, DynamicToggleValue> = {
+  STATIC: 'Static',
+  DYNAMIC: 'Dynamic',
+};
+
 const toggleOptions: DynamicToggleOption[] = [
   {
-    value: 'Static',
+    value: DYNAMIC_TOGGLE_VALUES.STATIC,
     label: t('Static'),
     tooltipText: t('Use a static pre-defined value'),
   },
   {
-    value: 'Dynamic',
+    value: DYNAMIC_TOGGLE_VALUES.DYNAMIC,
     label: t('Dynamic'),
     tooltipText: t(
       'Static values stay the same, while dynamic values update based on data from other steps',
