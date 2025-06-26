@@ -60,6 +60,7 @@ describe('Flow templates API', () => {
       organizationId,
       services: ['ECS', 'EC2'],
       template: {
+        id: 'trigger',
         type: TriggerType.EMPTY,
         name: 'trigger',
         settings: {},
