@@ -105,9 +105,7 @@ export function buildBlockAction({ name, input, blockName, actionName, nextActio
             blockVersion: '1.0.0', // Not required since it's running in development mode
             blockType: BlockType.OFFICIAL,
             actionName,
-            inputUiInfo: {
-                currentSelectedData: {},
-            },
+            inputUiInfo: {},
             errorHandlingOptions,
         },
         nextAction,

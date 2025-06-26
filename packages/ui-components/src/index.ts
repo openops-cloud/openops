@@ -71,6 +71,7 @@ export * from './lib/color-util';
 export * from './lib/compose-refs';
 export * from './lib/constants';
 export * from './lib/flow-canvas-utils';
+export * from './lib/json-utils';
 export * from './lib/types';
 export * from './lib/use-element-size';
 export * from './lib/use-forwarded-ref';
