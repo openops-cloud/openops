@@ -32,6 +32,15 @@ module.exports = composePlugins(withNx(), (config) => {
           path.resolve(__dirname, '../..'),
           filename,
         );
+
+        if (
+          pathParts[0] === 'packages' &&
+          pathParts[1] === 'blocks' &&
+          pathParts[2]
+        ) {
+          changedBlocks.add(pathParts[2]);
+        }
+
         console.log(
           chalk.yellow(`[API Server] Detected change in: ${relativePath}`),
         );
