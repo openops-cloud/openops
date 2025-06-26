@@ -108,10 +108,7 @@ export async function getBlocksWithChanges(): Promise<DependencyBuildInfo[]> {
   const entries = await readdir(blocksPath, { withFileTypes: true });
 
   for (const entry of entries) {
-    if (
-      entry.isDirectory() &&
-      !['node_modules', 'dist', 'framework', 'common'].includes(entry.name)
-    ) {
+    if (entry.isDirectory() && !['framework', 'common'].includes(entry.name)) {
       const fullPath = join(blocksPath, entry.name);
       const packageJsonPath = join(fullPath, 'package.json');
 
