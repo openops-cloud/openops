@@ -119,21 +119,25 @@ export async function getBlocksWithChanges(): Promise<DependencyBuildInfo[]> {
         const packageJson = JSON.parse(
           await readFile(packageJsonPath, 'utf-8'),
         );
-        if (packageJson.name?.startsWith('@openops/block-')) {
-          const blockInfo = await getPackageInfo(fullPath, 'block');
-          if (blockInfo) {
-            if (blocks.length < LOG_FIRST_BLOCKS) {
-              logger.debug(
-                `Block ${packageJson.name}: lastModified=${
-                  blockInfo.lastModified
-                }, cached=${
-                  depBuildCache.get(packageJson.name) ?? 0
-                }, needsRebuild=${blockInfo.needsRebuild}`,
-              );
-            }
-            blocks.push(blockInfo);
-          }
+        if (!packageJson.name?.startsWith('@openops/block-')) {
+          continue;
         }
+
+        const blockInfo = await getPackageInfo(fullPath, 'block');
+        if (!blockInfo) {
+          continue;
+        }
+
+        if (blocks.length < LOG_FIRST_BLOCKS) {
+          logger.debug(
+            `Block ${packageJson.name}: lastModified=${
+              blockInfo.lastModified
+            }, cached=${
+              depBuildCache.get(packageJson.name) ?? 0
+            }, needsRebuild=${blockInfo.needsRebuild}`,
+          );
+        }
+        blocks.push(blockInfo);
       } catch (err) {
         logger.warn(`Error checking package at ${packageJsonPath}`, { err });
       }
