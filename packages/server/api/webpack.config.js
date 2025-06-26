@@ -33,7 +33,7 @@ module.exports = composePlugins(withNx(), (config) => {
           filename,
         );
         console.log(
-          chalk.yellow(`[Engine Server] Detected change in: ${relativePath}`),
+          chalk.yellow(`[API Server] Detected change in: ${relativePath}`),
         );
       });
 
