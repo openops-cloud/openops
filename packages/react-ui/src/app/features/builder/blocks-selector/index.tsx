@@ -252,7 +252,11 @@ const BlockSelector = ({
   });
 
   useEffect(() => {
-    if (initialSelectedBlock && open) {
+    if (
+      initialSelectedBlock &&
+      open &&
+      initialSelectedBlock.type !== TriggerType.EMPTY
+    ) {
       setSelectedMetadata(initialSelectedBlock);
       mutate(initialSelectedBlock);
     }
