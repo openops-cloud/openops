@@ -9,7 +9,7 @@ export class AddInputToTestOutputTable1750933522145
 
     await queryRunner.query(`
       ALTER TABLE "flow_step_test_output"
-      ADD COLUMN IF NOT EXISTS "input" bytea NOT NULL DEFAULT E'';
+      ADD COLUMN IF NOT EXISTS "input" bytea NOT NULL DEFAULT ''::bytea;
     `);
 
     logger.info('AddInputToTestOutputTable1750933522145: completed');
