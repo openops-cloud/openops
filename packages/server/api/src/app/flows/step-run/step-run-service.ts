@@ -84,6 +84,7 @@ export const stepRunService = {
 
     return {
       success: result.success,
+      input: result.input,
       output: result.output,
     };
   },
