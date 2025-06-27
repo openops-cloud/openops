@@ -24,7 +24,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { HttpError } from '@/app/lib/api';
 import { authenticationApi } from '@/app/lib/authentication-api';
-import { passwordValidation } from '../lib/password-validation-utils';
+import { passwordValidation } from '@openops/shared';
 import { PasswordValidator } from './password-validator';
 
 const ChangePasswordForm = () => {
