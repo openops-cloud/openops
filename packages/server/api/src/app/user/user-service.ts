@@ -1,6 +1,8 @@
 import { cacheWrapper } from '@openops/server-shared';
 import {
   ApplicationError,
+  assertValidEmail,
+  assertValidPassword,
   ErrorCode,
   isNil,
   openOpsId,
@@ -181,6 +183,8 @@ export const userService = {
     id,
     newPassword,
   }: UpdatePasswordParams): Promise<void> {
+    assertValidPassword(newPassword);
+
     const hashedPassword = await passwordHasher.hash(newPassword);
 
     await userRepo().update(id, {
@@ -190,6 +194,8 @@ export const userService = {
   },
 
   async updateEmail({ id, newEmail }: UpdateEmailParams): Promise<void> {
+    assertValidEmail(newEmail);
+
     await userRepo().update(id, {
       updated: dayjs().toISOString(),
       email: newEmail,
