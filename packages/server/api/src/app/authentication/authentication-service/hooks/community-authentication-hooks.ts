@@ -2,7 +2,10 @@ import { authenticateDefaultUserInOpenOpsTables } from '@openops/common';
 import { AppSystemProp, system } from '@openops/server-shared';
 import {
   ApplicationError,
+  assertValidEmail,
+  assertValidPassword,
   ErrorCode,
+  isEmpty,
   isNil,
   PrincipalType,
   Project,
@@ -20,8 +23,19 @@ export const communityAuthenticationServiceHooks: AuthenticationServiceHooks = {
   async preSignIn() {
     // Empty
   },
-  async preSignUp() {
-    // Empty
+  async preSignUp({ email, password, name }) {
+    assertValidEmail(email);
+    assertValidPassword(password);
+
+    if (isEmpty(name)) {
+      throw new ApplicationError({
+        code: ErrorCode.INVALID_NAME_FOR_USER,
+        params: {
+          name,
+          message: 'First name and last name were not provided correctly.',
+        },
+      });
+    }
   },
   async postSignUp({ user, tablesRefreshToken }) {
     let organization = await organizationService.getOldestOrganization();

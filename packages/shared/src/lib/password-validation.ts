@@ -1,4 +1,5 @@
 import { t } from 'i18next';
+import { ApplicationError, ErrorCode } from './common/application-error';
 
 const MIN_LENGTH = 8;
 const MAX_LENGTH = 64;
@@ -6,6 +7,15 @@ const SPECIAL_CHARACTER_REGEX = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/;
 const LOWERCASE_REGEX = /[a-z]/;
 const UPPERCASE_REGEX = /[A-Z]/;
 const NUMBER_REGEX = /[0-9]/;
+
+const ALLOWED_CHARACTERS = [
+  SPECIAL_CHARACTER_REGEX.source,
+  LOWERCASE_REGEX.source,
+  UPPERCASE_REGEX.source,
+  NUMBER_REGEX.source,
+]
+  .map((source) => source.replace(/[[\]]/g, ''))
+  .join('');
 
 type ValidationRule = {
   label: string;
@@ -60,6 +70,30 @@ const passwordValidation = {
     NUMBER_REGEX.test(value) || validationMessages.number,
 };
 
-const emailRegex =
-  /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-export { emailRegex, passwordRules, passwordValidation };
+const assertValidPassword = (password: string): void => {
+  const isLengthValid =
+    password.length >= MIN_LENGTH && password.length <= MAX_LENGTH;
+
+  if (!isLengthValid) {
+    throw new ApplicationError({
+      code: ErrorCode.INVALID_USER_PASSWORD,
+      params: {
+        message: `Password must be between ${MIN_LENGTH} and ${MAX_LENGTH} characters.`,
+      },
+    });
+  }
+
+  const INVALID_CHAR_REGEX = new RegExp(`[^${ALLOWED_CHARACTERS}]`);
+  const hasInvalidChars = INVALID_CHAR_REGEX.test(password);
+  if (hasInvalidChars) {
+    throw new ApplicationError({
+      code: ErrorCode.INVALID_USER_PASSWORD,
+      params: {
+        message:
+          'Password contains invalid characters. Only alphanumeric and common special characters are allowed.',
+      },
+    });
+  }
+};
+
+export { assertValidPassword, passwordRules, passwordValidation };

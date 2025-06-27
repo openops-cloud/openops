@@ -17,15 +17,15 @@ import { useRef, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 
-import { HttpError, api } from '@/app/lib/api';
+import { api, HttpError } from '@/app/lib/api';
 import { authenticationApi } from '@/app/lib/authentication-api';
 import { authenticationSession } from '@/app/lib/authentication-session';
-import { AuthenticationResponse, SignUpRequest } from '@openops/shared';
-
 import {
+  AuthenticationResponse,
   emailRegex,
   passwordValidation,
-} from '../lib/password-validation-utils';
+  SignUpRequest,
+} from '@openops/shared';
 
 import { PasswordValidator } from './password-validator';
 
