@@ -216,6 +216,7 @@ const AiAssistantChatContainer = ({
                 onModelSelected={onModelSelected}
                 isModelSelectorLoading={isModelSelectorLoading}
                 placeholder={t('Type your question here…')}
+                status={status}
               />
             </div>
           </div>

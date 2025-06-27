@@ -285,6 +285,7 @@ const StepSettingsAiChatContainer = ({
             onModelSelected={onModelSelected}
             isModelSelectorLoading={isModelSelectorLoading}
             placeholder={t('Ask a question about the command you need')}
+            status={status}
           />
         </div>
       </div>
