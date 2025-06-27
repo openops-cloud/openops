@@ -100,7 +100,7 @@ async function decompressOutput(
   if (inputBuffer.length !== 0) {
     decryptedInput = await decompressAndDecrypt(inputBuffer);
   }
-  
+
   const outputBuffer = record.output as Buffer;
   let decryptedOutput = undefined;
   if (outputBuffer.length !== 0) {

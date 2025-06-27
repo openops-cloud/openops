@@ -46,20 +46,27 @@ describe('Flow Step Test output', () => {
   const saveTestOutput = async (
     stepId: string,
     versionId: string,
-    value: unknown,
+    input: unknown,
+    output: unknown,
   ) =>
     flowStepTestOutputService.save({
       stepId,
       flowVersionId: versionId,
-      output: value,
+      output,
+      input,
     });
 
   it('Should save step test output', async () => {
     const { mockFlowVersion } = await saveFlowAndVersion();
 
-    const savedData = await saveTestOutput(openOpsId(), mockFlowVersion.id, {
-      test: 'test',
-    });
+    const savedData = await saveTestOutput(
+      openOpsId(),
+      mockFlowVersion.id,
+      'input',
+      {
+        test: 'test',
+      },
+    );
 
     const savedRaw = await databaseConnection()
       .getRepository('flow_step_test_output')
@@ -74,8 +81,18 @@ describe('Flow Step Test output', () => {
     const stepId1 = openOpsId();
     const stepId2 = openOpsId();
 
-    await saveTestOutput(stepId1, mockFlowVersion.id, { value: 'one' });
-    await saveTestOutput(stepId2, mockFlowVersion.id, { value: 'two' });
+    await saveTestOutput(
+      stepId1,
+      mockFlowVersion.id,
+      { input: 'one' },
+      { value: 'one' },
+    );
+    await saveTestOutput(
+      stepId2,
+      mockFlowVersion.id,
+      { input: 'one' },
+      { value: 'two' },
+    );
 
     const results = await flowStepTestOutputService.listDecrypted({
       flowVersionId: mockFlowVersion.id,
@@ -83,6 +100,11 @@ describe('Flow Step Test output', () => {
     });
 
     expect(results).toHaveLength(2);
+
+    const inputs = results.map((r) => r.input);
+    expect(inputs).toEqual(
+      expect.arrayContaining([{ input: 'one' }, { input: 'two' }]),
+    );
 
     const outputs = results.map((r) => r.output);
     expect(outputs).toEqual(
@@ -96,9 +118,16 @@ describe('Flow Step Test output', () => {
     const existingStepId = openOpsId();
     const missingStepId = openOpsId();
 
-    await saveTestOutput(existingStepId, mockFlowVersion.id, {
-      value: 'existing',
-    });
+    await saveTestOutput(
+      existingStepId,
+      mockFlowVersion.id,
+      {
+        input: 'existing',
+      },
+      {
+        value: 'existing',
+      },
+    );
 
     const results = await flowStepTestOutputService.listDecrypted({
       flowVersionId: mockFlowVersion.id,
@@ -107,6 +136,7 @@ describe('Flow Step Test output', () => {
 
     expect(results).toHaveLength(1);
     expect(results[0].stepId).toBe(existingStepId);
+    expect(results[0].input).toStrictEqual({ input: 'existing' });
     expect(results[0].output).toStrictEqual({ value: 'existing' });
   });
 
@@ -121,8 +151,18 @@ describe('Flow Step Test output', () => {
     const stepId1 = openOpsId();
     const stepId2 = openOpsId();
 
-    await saveTestOutput(stepId1, fromVersion.id, { value: 'from-1' });
-    await saveTestOutput(stepId2, fromVersion.id, { value: 'from-2' });
+    await saveTestOutput(
+      stepId1,
+      fromVersion.id,
+      { input: 'from-1' },
+      { value: 'from-1' },
+    );
+    await saveTestOutput(
+      stepId2,
+      fromVersion.id,
+      { input: 'from-2' },
+      { value: 'from-2' },
+    );
 
     await flowStepTestOutputService.copyFromVersion({
       fromVersionId: fromVersion.id,
@@ -133,6 +173,11 @@ describe('Flow Step Test output', () => {
       flowVersionId: toVersion.id,
       stepIds: [stepId1, stepId2],
     });
+
+    const inputs = copied.map((c) => c.input);
+    expect(inputs).toEqual(
+      expect.arrayContaining([{ input: 'from-1' }, { input: 'from-2' }]),
+    );
 
     const outputs = copied.map((c) => c.output);
     expect(outputs).toEqual(
@@ -162,12 +207,14 @@ describe('Flow Step Test output', () => {
     await flowStepTestOutputService.save({
       stepId: stepId1,
       flowVersionId: mockFlowVersion.id,
+      input: { input: 'one' },
       output: { value: 'one' },
     });
 
     await flowStepTestOutputService.save({
       stepId: stepId2,
       flowVersionId: mockFlowVersion.id,
+      input: { input: 'two' },
       output: { value: 'two' },
     });
 
@@ -177,6 +224,11 @@ describe('Flow Step Test output', () => {
     });
 
     expect(results).toHaveLength(2);
+
+    const inputs = results.map((r) => r.input);
+    expect(inputs).toEqual(
+      expect.arrayContaining([{ input: 'one' }, { input: 'two' }]),
+    );
 
     const outputs = results.map((r) => r.output);
     expect(outputs).toEqual(
@@ -206,6 +258,7 @@ describe('Flow Step Test output', () => {
     await flowStepTestOutputService.save({
       stepId: existingStepId,
       flowVersionId: mockFlowVersion.id,
+      input: { input: 'existing' },
       output: { value: 'existing' },
     });
 
@@ -216,6 +269,7 @@ describe('Flow Step Test output', () => {
 
     expect(results).toHaveLength(1);
     expect(results[0].stepId).toBe(existingStepId);
+    expect(results[0].input).toStrictEqual({ input: 'existing' });
     expect(results[0].output).toStrictEqual({ value: 'existing' });
   });
 });
