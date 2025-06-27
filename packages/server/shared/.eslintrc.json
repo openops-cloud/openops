@@ -8,7 +8,14 @@
     },
     {
       "files": ["*.ts", "*.tsx"],
-      "rules": {}
+      "rules": {},
+      "parserOptions": {
+        "project": [
+          "packages/server/shared/tsconfig.lib.json",
+          "packages/server/api/tsconfig.app.json",
+          "packages/server/api/tsconfig.spec.json"
+        ]
+      }
     },
     {
       "files": ["*.js", "*.jsx"],

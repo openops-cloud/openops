@@ -3,12 +3,12 @@ import { action } from '@storybook/addon-actions';
 import { expect } from '@storybook/jest';
 import { Meta, StoryObj } from '@storybook/react';
 import { userEvent, waitFor } from '@storybook/testing-library';
-import { DynamicToggle } from '../../components/dynamic-toggle/dynamic-toggle';
+import { ToggleSwitch } from '../../components/toggle-switch/toggle-switch';
 import { selectLightOrDarkCanvas } from '../../test-utils/select-themed-canvas.util';
 
-const meta: Meta<typeof DynamicToggle> = {
-  title: 'Components/DynamicToggle',
-  component: DynamicToggle,
+const meta: Meta<typeof ToggleSwitch> = {
+  title: 'Components/ToggleSwitch',
+  component: ToggleSwitch,
   tags: ['autodocs'],
   decorators: [
     (Story) => (
@@ -26,7 +26,7 @@ const meta: Meta<typeof DynamicToggle> = {
   },
 };
 
-type Story = StoryObj<typeof DynamicToggle>;
+type Story = StoryObj<typeof ToggleSwitch>;
 
 const options = [
   {
