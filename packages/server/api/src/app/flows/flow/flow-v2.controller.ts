@@ -70,7 +70,6 @@ export const flowV2Controller: FastifyPluginAsyncTypebox = async (app) => {
       return updatedFlow;
     } catch (error) {
       logger.error('Error in V2 Update Step endpoint', {
-      logger.error('Error updating workflow step.', {
         body: request.body,
         flowId: request.params.id,
         stepName: request.params.stepName,
