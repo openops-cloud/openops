@@ -1,5 +1,5 @@
 import { t } from 'i18next';
-import { useLayoutEffect, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { UseFormReturn } from 'react-hook-form';
 import { clipboardUtils } from '../../lib/clipboard-utils';
@@ -20,7 +20,7 @@ const isStepFileUrl = (json: unknown): json is string => {
 
 type UseJsonViewerProps = {
   json: any;
-  title: string;
+  title?: string;
   readonly?: boolean;
   onChange?: (json: any) => void;
   renderFileButton: (props: {
@@ -29,6 +29,8 @@ type UseJsonViewerProps = {
     handleDownloadFile: (fileUrl: string, ext?: string) => void;
   }) => React.ReactNode;
   form: UseFormReturn<JsonFormValues, any, undefined>;
+  isEditModeEnabled?: boolean;
+  onEditModeChange?: (isEditModeEnabled: boolean) => void;
 };
 
 export const useJsonViewer = ({
@@ -38,8 +40,26 @@ export const useJsonViewer = ({
   onChange,
   renderFileButton,
   form,
+  isEditModeEnabled,
+  onEditModeChange,
 }: UseJsonViewerProps) => {
-  const [isEditMode, setIsEditMode] = useState(!json && !readonly);
+  const [isEditMode, setIsEditMode] = useState(
+    isEditModeEnabled ?? (!json && !readonly),
+  );
+
+  useEffect(() => {
+    if (isEditModeEnabled !== undefined) {
+      setIsEditMode(!!isEditModeEnabled);
+    }
+  }, [isEditModeEnabled]);
+
+  const editModeChange = useCallback(
+    (editMode: boolean) => {
+      onEditModeChange && onEditModeChange(editMode);
+      setIsEditMode(editMode);
+    },
+    [onEditModeChange],
+  );
 
   const showCopySuccessToast = () =>
     toast({
@@ -86,7 +106,7 @@ export const useJsonViewer = ({
   };
 
   const handleDelete = () => {
-    setIsEditMode(true);
+    editModeChange(true);
     form.reset({ jsonContent: undefined });
     if (onChange) {
       onChange(undefined);
@@ -97,7 +117,7 @@ export const useJsonViewer = ({
     if (onChange) {
       onChange(json);
     }
-    setIsEditMode(false);
+    editModeChange(false);
   };
 
   useLayoutEffect(() => {
@@ -144,7 +164,7 @@ export const useJsonViewer = ({
     handleDelete,
     isFileUrl,
     isEditMode,
-    setIsEditMode,
+    setIsEditMode: editModeChange,
     readonly,
     apply,
   };

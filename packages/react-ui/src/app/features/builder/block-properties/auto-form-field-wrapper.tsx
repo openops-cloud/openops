@@ -2,13 +2,11 @@ import { BlockProperty } from '@openops/blocks-framework';
 import {
   Button,
   cn,
-  DYNAMIC_TOGGLE_VALUES,
-  DynamicToggle,
-  DynamicToggleOption,
-  DynamicToggleValue,
   FormItem,
   FormLabel,
   ReadMoreDescription,
+  ToggleSwitch,
+  ToggleSwitchOption,
 } from '@openops/components/ui';
 import { Action, isNil, Trigger } from '@openops/shared';
 import { t } from 'i18next';
@@ -57,14 +55,19 @@ const getInitialFieldValue = (
   return fieldValue ?? defaultValue ?? null;
 };
 
-const toggleOptions: DynamicToggleOption[] = [
+const DYNAMIC_TOGGLE_VALUES = {
+  STATIC: 'Static',
+  DYNAMIC: 'Dynamic',
+};
+
+const TOGGLE_OPTIONS: ToggleSwitchOption[] = [
   {
-    value: 'Static',
+    value: DYNAMIC_TOGGLE_VALUES.STATIC,
     label: t('Static'),
     tooltipText: t('Use a static pre-defined value'),
   },
   {
-    value: 'Dynamic',
+    value: DYNAMIC_TOGGLE_VALUES.DYNAMIC,
     label: t('Dynamic'),
     tooltipText: t(
       'Static values stay the same, while dynamic values update based on data from other steps',
@@ -77,7 +80,7 @@ type FormLabelButtonProps = {
   allowDynamicValues: boolean;
   disabled: boolean;
   dynamicViewToggled: boolean;
-  handleDynamicValueChange: (value: DynamicToggleValue) => void;
+  handleDynamicValueChange: (value: string) => void;
   onGenerateWithAIClick: () => void;
 };
 
@@ -126,8 +129,8 @@ const FormLabelButton = ({
 
   if (allowDynamicValues) {
     return (
-      <DynamicToggle
-        options={toggleOptions}
+      <ToggleSwitch
+        options={TOGGLE_OPTIONS}
         onChange={handleDynamicValueChange}
         defaultValue={
           dynamicViewToggled
@@ -195,7 +198,7 @@ const AutoFormFieldWrapper = ({
   }, [propertyName, inputName, arrayFieldContext]);
 
   // array fields use the dynamicViewToggled property to specify if a property is toggled
-  function handleChange(value: DynamicToggleValue) {
+  function handleChange(value: string) {
     const isInDynamicView = value === DYNAMIC_TOGGLE_VALUES.DYNAMIC;
     if (arrayFieldContext) {
       form.setValue(

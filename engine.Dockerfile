@@ -89,8 +89,8 @@ COPY --link dist dist
 ARG VERSION=unknown
 ENV OPS_VERSION=$VERSION
 
-COPY tools/link-packages-to-root.sh tools/link-packages-to-root.sh
-RUN ./tools/link-packages-to-root.sh
+COPY tools/link-packages.sh tools/link-packages.sh
+RUN ./tools/link-packages.sh
 
 # This is required to make the isolated-vm package (code piece sandbox) work in arm64 docker images
 # https://github.com/laverdet/isolated-vm/issues/424
