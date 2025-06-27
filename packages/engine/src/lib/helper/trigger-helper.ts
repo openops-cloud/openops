@@ -116,6 +116,7 @@ export const triggerHelper = {
         id: params.projectId,
       },
     };
+
     switch (params.hookType) {
       case TriggerHookType.ON_DISABLE:
         await trigger.onDisable(context);
@@ -160,6 +161,7 @@ export const triggerHelper = {
         try {
           return {
             success: true,
+            input: resolvedInput,
             output: await trigger.test({
               ...context,
               files: createFilesService({
@@ -178,6 +180,7 @@ export const triggerHelper = {
             success: false,
             message: JSON.stringify(e),
             output: [],
+            input: resolvedInput,
           };
         }
       case TriggerHookType.RUN: {
@@ -206,6 +209,7 @@ export const triggerHelper = {
                 success: false,
                 message: 'Webhook is not verified',
                 output: [],
+                input: resolvedInput,
               };
             }
           } catch (e) {
@@ -214,6 +218,7 @@ export const triggerHelper = {
               success: false,
               message: 'Error while verifying webhook',
               output: [],
+              input: resolvedInput,
             };
           }
         }
@@ -235,6 +240,7 @@ export const triggerHelper = {
         return {
           success: true,
           output: items,
+          input: resolvedInput,
         };
       }
     }

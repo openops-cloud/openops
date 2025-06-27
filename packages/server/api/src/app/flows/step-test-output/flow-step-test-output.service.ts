@@ -18,11 +18,16 @@ export const flowStepTestOutputService = {
   async save({
     stepId,
     flowVersionId,
+    input,
     output,
   }: SaveParams): Promise<FlowStepTestOutput> {
+    let compressedInput = Buffer.alloc(0);
     let compressedOutput = Buffer.alloc(0);
     if (output !== undefined) {
       compressedOutput = await encryptAndCompress(output);
+    }
+    if (input !== undefined) {
+      compressedInput = await encryptAndCompress(input);
     }
 
     const existing = await flowStepTestOutputRepo().findOneBy({
@@ -39,6 +44,7 @@ export const flowStepTestOutputService = {
       id: outputId,
       stepId,
       flowVersionId,
+      input: compressedInput,
       output: compressedOutput,
     };
 
@@ -61,6 +67,7 @@ export const flowStepTestOutputService = {
         flowStepTestOutputRepo().save({
           stepId: previous.stepId,
           flowVersionId: toVersionId,
+          input: previous.input,
           output: previous.output,
           id: openOpsId(),
         }),
@@ -88,17 +95,21 @@ export const flowStepTestOutputService = {
 async function decompressOutput(
   record: FlowStepTestOutput,
 ): Promise<FlowStepTestOutput> {
-  const outputBuffer = record.output as Buffer;
-  if (outputBuffer.length === 0) {
-    return {
-      ...record,
-      output: undefined,
-    };
+  const inputBuffer = record.input as Buffer;
+  let decryptedInput = undefined;
+  if (inputBuffer.length !== 0) {
+    decryptedInput = await decompressAndDecrypt(inputBuffer);
   }
-  const decryptedOutput = await decompressAndDecrypt(outputBuffer);
+
+  const outputBuffer = record.output as Buffer;
+  let decryptedOutput = undefined;
+  if (outputBuffer.length !== 0) {
+    decryptedOutput = await decompressAndDecrypt(outputBuffer);
+  }
 
   return {
     ...record,
+    input: decryptedInput,
     output: decryptedOutput,
   };
 }
@@ -111,5 +122,6 @@ type ListParams = {
 type SaveParams = {
   stepId: OpenOpsId;
   flowVersionId: FlowVersionId;
+  input: unknown;
   output: unknown;
 };

@@ -7,9 +7,17 @@ export enum Provider {
 
 export type AuthenticationServiceHooks = {
   preSignIn(p: PreParams): Promise<void>;
-  preSignUp(p: PreParams): Promise<void>;
+  preSignUp(p: PreSignUpParams): Promise<void>;
   postSignUp(p: PostParams): Promise<PostResult>;
   postSignIn(p: PostParams): Promise<PostResult>;
+};
+
+type PreSignUpParams = {
+  name: string;
+  email: string;
+  password: string;
+  organizationId: string | null;
+  provider: Provider;
 };
 
 type PreParams = {

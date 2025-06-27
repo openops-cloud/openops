@@ -21,15 +21,20 @@ import { Provider } from './hooks/authentication-service-hooks';
 
 export const authenticationService = {
   async signUp(params: SignUpParams): Promise<AuthenticationResponse> {
-    await hooks.get().preSignUp(params);
-    const user = await createUser(params);
+    const name = `${params.firstName} ${params.lastName}`.trim();
+    await hooks.get().preSignUp({
+      ...params,
+      name,
+    });
 
     const { token, refresh_token } = await openopsTables.createUser({
-      name: `${params.firstName} ${params.lastName}`,
+      name,
       email: params.email,
       password: params.password,
       authenticate: true,
     });
+
+    const user = await createUser(params);
 
     return this.signUpResponse({
       user,
