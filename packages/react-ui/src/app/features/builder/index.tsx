@@ -9,6 +9,7 @@ import {
 } from '@openops/components/ui';
 import { ReactFlowProvider } from '@xyflow/react';
 import React, {
+  MutableRefObject,
   useCallback,
   useEffect,
   useMemo,
@@ -32,13 +33,16 @@ import { FLOW_CANVAS_Y_OFFESET } from '@/app/constants/flow-canvas';
 import { SEARCH_PARAMS } from '@/app/constants/search-params';
 import { AiAssistantButton } from '@/app/features/ai/ai-assistant-button';
 import {
+  Action,
   ActionType,
   BlockTrigger,
   flowHelper,
   isNil,
+  Trigger,
   TriggerType,
   WebsocketClientEvent,
 } from '@openops/shared';
+import { useMutation } from '@tanstack/react-query';
 import {
   RESIZABLE_PANEL_GROUP,
   RESIZABLE_PANEL_IDS,
@@ -50,6 +54,7 @@ import {
 import { AiAssistantChat } from '../ai/ai-assistant-chat';
 import { blocksHooks } from '../blocks/lib/blocks-hook';
 import { RunDetailsBar } from '../flow-runs/components/run-details-bar';
+import { flowRunsApi } from '../flow-runs/lib/flow-runs-api';
 import { FlowSideMenu } from '../navigation/side-menu/flow/flow-side-menu';
 import LeftSidebarResizablePanel from '../navigation/side-menu/left-sidebar';
 import { BuilderHeader } from './builder-header/builder-header';
@@ -120,6 +125,7 @@ const BuilderPage = () => {
     setReadOnly,
     exitStepSettings,
     flowVersion,
+    setRun,
   ] = useBuilderStateContext((state) => [
     state.selectedStep,
     state.leftSidebar,
@@ -131,6 +137,7 @@ const BuilderPage = () => {
     state.setReadOnly,
     state.exitStepSettings,
     state.flowVersion,
+    state.setRun,
   ]);
 
   const clearSelectedStep = useCallback(() => {
@@ -184,17 +191,43 @@ const BuilderPage = () => {
 
   const socket = useSocket();
 
+  const { mutate: fetchAndUpdateRun } = useMutation({
+    mutationFn: flowRunsApi.getPopulated,
+  });
+
   useEffect(() => {
     socket.on(WebsocketClientEvent.REFRESH_BLOCK, () => {
       refetchBlock();
     });
+
+    socket.on(WebsocketClientEvent.FLOW_RUN_PROGRESS, (runId: string) => {
+      if (run && run?.id === runId) {
+        fetchAndUpdateRun(runId, {
+          onSuccess: (updatedRun) => {
+            setRun(updatedRun, flowVersion);
+          },
+        });
+      }
+    });
+    socket.on(WebsocketClientEvent.TEST_FLOW_RUN_PROGRESS, (runId: string) => {
+      if (run && run?.id === runId) {
+        fetchAndUpdateRun(runId, {
+          onSuccess: (updatedRun) => {
+            setRun(updatedRun, flowVersion);
+          },
+        });
+      }
+    });
+
     return () => {
       socket.removeAllListeners(WebsocketClientEvent.REFRESH_BLOCK);
       socket.removeAllListeners(WebsocketClientEvent.TEST_FLOW_RUN_PROGRESS);
+      socket.removeAllListeners(WebsocketClientEvent.FLOW_RUN_PROGRESS);
       socket.removeAllListeners(WebsocketClientEvent.TEST_STEP_FINISHED);
       socket.removeAllListeners(WebsocketClientEvent.TEST_FLOW_RUN_STARTED);
     };
-  }, [socket, refetchBlock]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [socket.id, run?.id]);
 
   useEffect(() => {
     const viewOnlyParam = searchParams.get(SEARCH_PARAMS.viewOnly) === 'true';
@@ -235,6 +268,7 @@ const BuilderPage = () => {
             socket.removeAllListeners(
               WebsocketClientEvent.TEST_FLOW_RUN_PROGRESS,
             );
+            socket.removeAllListeners(WebsocketClientEvent.FLOW_RUN_PROGRESS);
             switchToDraft();
           }}
         />
@@ -308,7 +342,9 @@ const BuilderPage = () => {
                 <InteractiveBuilder
                   selectedStep={selectedStep}
                   clearSelectedStep={clearSelectedStep}
-                  middlePanelRef={middlePanelRef}
+                  middlePanelRef={
+                    middlePanelRef as unknown as MutableRefObject<null>
+                  }
                   middlePanelSize={middlePanelSize}
                   flowVersion={flowVersion}
                   lefSideBarContainerWidth={leftSidePanelSize?.width || 0}
@@ -338,7 +374,7 @@ const BuilderPage = () => {
                 {isRightSidebarVisible && (
                   <StepSettingsProvider
                     blockModel={blockModel}
-                    selectedStep={memorizedSelectedStep}
+                    selectedStep={memorizedSelectedStep as Action | Trigger}
                     key={containerKey}
                   >
                     <DynamicFormValidationProvider>

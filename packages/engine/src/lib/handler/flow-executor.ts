@@ -1,5 +1,5 @@
-import { logger, runWithTemporaryContext } from '@openops/server-shared';
-import { Action, ActionType, isNil, ProgressUpdateType } from '@openops/shared';
+import { runWithTemporaryContext } from '@openops/server-shared';
+import { Action, ActionType, isNil } from '@openops/shared';
 import { performance } from 'node:perf_hooks';
 import { progressService } from '../services/progress.service';
 import { throwIfExecutionTimeExceeded } from '../timeout-validator';
@@ -51,6 +51,15 @@ export const flowExecutor = {
 
       const stepStartTime = performance.now();
 
+      progressService
+        .sendUpdate({
+          engineConstants: constants,
+          flowExecutorContext: flowExecutionContext,
+        })
+        .catch((error) => {
+          console.error('Error sending update:', error);
+        });
+
       const logContext = {
         actionType: currentAction.type,
       };
@@ -75,21 +84,6 @@ export const flowExecutor = {
 
       if (flowExecutionContext.verdict !== ExecutionVerdict.RUNNING) {
         break;
-      }
-
-      const isNotNested = flowExecutionContext.currentPath.path.length === 0;
-      const sendContinuousProgress =
-        isNotNested &&
-        constants.progressUpdateType === ProgressUpdateType.TEST_FLOW;
-      if (sendContinuousProgress) {
-        progressService
-          .sendUpdate({
-            engineConstants: constants,
-            flowExecutorContext: flowExecutionContext,
-          })
-          .catch((error) => {
-            logger.error('Error sending progress update', error);
-          });
       }
 
       currentAction = currentAction.nextAction;

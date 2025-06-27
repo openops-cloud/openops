@@ -109,14 +109,26 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
   });
 
   app.post('/update-run', UpdateStepProgress, async (request) => {
-    const { executionCorrelationId, runId, workerHandlerId, runDetails } =
-      request.body;
+    const {
+      executionCorrelationId,
+      runId,
+      workerHandlerId,
+      runDetails,
+      executionStateContentLength,
+    } = request.body;
     const progressUpdateType =
       request.body.progressUpdateType ?? ProgressUpdateType.NONE;
+
+    const nonSupportedStatuses = [
+      FlowRunStatus.RUNNING,
+      FlowRunStatus.SUCCEEDED,
+      FlowRunStatus.PAUSED,
+      FlowRunStatus.STOPPED,
+    ];
     if (
-      progressUpdateType === ProgressUpdateType.WEBHOOK_RESPONSE &&
-      workerHandlerId &&
-      executionCorrelationId
+      !nonSupportedStatuses.includes(runDetails.status) &&
+      !isNil(workerHandlerId) &&
+      !isNil(executionCorrelationId)
     ) {
       await webhookResponseWatcher.publish(
         executionCorrelationId,
@@ -125,7 +137,7 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
       );
     }
 
-    const populatedRun = await flowRunService.updateStatus({
+    const runWithoutSteps = await flowRunService.updateStatus({
       flowRunId: runId,
       status: getTerminalStatus(runDetails.status),
       tasks: runDetails.tasks,
@@ -135,8 +147,21 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
       tags: runDetails.tags ?? [],
     });
 
-    if (populatedRun.status === FlowRunStatus.RUNNING) {
-      return;
+    const updateLogs =
+      !isNil(executionStateContentLength) && executionStateContentLength > 0;
+    if (!updateLogs) {
+      // Only emit progress events when NOT updating logs (during step execution)
+      if (progressUpdateType === ProgressUpdateType.TEST_FLOW) {
+        console.log('emit TEST_FLOW_RUN_PROGRESS');
+        app.io
+          .to(request.principal.projectId)
+          .emit(WebsocketClientEvent.TEST_FLOW_RUN_PROGRESS, runId);
+      } else {
+        // For production runs and other contexts, emit FLOW_RUN_PROGRESS
+        app.io
+          .to(request.principal.projectId)
+          .emit(WebsocketClientEvent.FLOW_RUN_PROGRESS, runId);
+      }
     }
 
     if (runDetails.status === FlowRunStatus.PAUSED) {
@@ -152,12 +177,9 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
         },
       });
     }
-    app.io
-      .to(populatedRun.projectId)
-      .emit(WebsocketClientEvent.TEST_FLOW_RUN_PROGRESS, populatedRun);
 
     await markJobAsCompleted(
-      populatedRun.status,
+      runWithoutSteps.status,
       executionCorrelationId,
       request.principal as unknown as EnginePrincipal,
       runDetails.error,

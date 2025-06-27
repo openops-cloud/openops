@@ -9,6 +9,7 @@ export const UpdateRunProgressRequest = Type.Object({
   runId: Type.String(),
   progressUpdateType: Type.Optional(Type.Enum(ProgressUpdateType)),
   workerHandlerId: Nullable(Type.String()),
+  executionStateContentLength: Type.Optional(Type.Number()),
 });
 
 export type UpdateRunProgressRequest = Static<typeof UpdateRunProgressRequest>;
