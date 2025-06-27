@@ -21,7 +21,7 @@ import {
 import { useMutation } from '@tanstack/react-query';
 import { t } from 'i18next';
 import { MoveLeft, SearchX } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useDebounce } from 'use-debounce';
 
@@ -56,6 +56,7 @@ type BlockSelectorProps = {
   asChild?: boolean;
   onOpenChange: (open: boolean) => void;
   operation: BlockSelectorOperation;
+  initialSelectedBlock?: StepMetadata;
 };
 
 const BlockSelector = ({
@@ -64,6 +65,7 @@ const BlockSelector = ({
   asChild = true,
   onOpenChange,
   operation,
+  initialSelectedBlock,
 }: BlockSelectorProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery] = useDebounce(searchQuery, 300);
@@ -76,7 +78,7 @@ const BlockSelector = ({
   const [actionsOrTriggers, setSelectedSubItems] = useState<
     ItemListMetadata[] | undefined
   >(undefined);
-
+  const selectedItemRef = useRef<HTMLDivElement | null>(null);
   const [selectedTag, setSelectedTag] = useState<TagKey>(ALL_KEY);
   const [selectStepByName, flowVersion] = useBuilderStateContext((state) => [
     state.selectStepByName,
@@ -235,6 +237,12 @@ const BlockSelector = ({
       }
     },
     onSuccess: (items) => {
+      if (selectedBlockMetadata && open && selectedItemRef.current) {
+        selectedItemRef.current?.scrollIntoView({
+          behavior: 'auto',
+          block: 'nearest',
+        });
+      }
       setSelectedSubItems(items);
     },
     onError: (e) => {
@@ -242,6 +250,17 @@ const BlockSelector = ({
       toast(INTERNAL_ERROR_TOAST);
     },
   });
+
+  useEffect(() => {
+    if (
+      initialSelectedBlock &&
+      open &&
+      initialSelectedBlock.type !== TriggerType.EMPTY
+    ) {
+      setSelectedMetadata(initialSelectedBlock);
+      mutate(initialSelectedBlock);
+    }
+  }, [initialSelectedBlock, mutate, open]);
 
   const blocksMetadata = useMemo(
     () =>
@@ -348,6 +367,12 @@ const BlockSelector = ({
                         e.preventDefault();
                       }
                     }}
+                    ref={
+                      blockMetadata.displayName ===
+                      selectedBlockMetadata?.displayName
+                        ? selectedItemRef
+                        : null
+                    }
                   >
                     <div className="flex gap-2 items-center">
                       <BlockIcon

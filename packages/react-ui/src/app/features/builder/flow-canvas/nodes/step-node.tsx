@@ -191,6 +191,7 @@ const WorkflowStepNode = React.memo(
                     exitStepSettings();
                   }
                 }}
+                initialSelectedBlock={stepMetadata}
                 asChild={true}
               >
                 <div
