@@ -11,7 +11,6 @@ import {
   FlowImportTemplate,
   FlowOperationRequest,
   FlowRun,
-  FlowRunStatus,
   FlowVersion,
   FlowVersionMetadata,
   GetFlowQueryParamsRequest,
@@ -66,39 +65,10 @@ export const flowsApi = {
     socket: Socket,
     request: TestFlowRunRequestBody,
     onUpdate: (response: FlowRun) => void,
-  ) {
+  ): Promise<void> {
     socket.emit(WebsocketServerEvent.TEST_FLOW_RUN, request);
-    const run = await getInitialRun(socket, request.flowVersionId);
-
-    onUpdate(run);
-    return new Promise<void>((resolve, reject) => {
-      const handleProgress = (response: FlowRun) => {
-        if (run.id !== response.id) {
-          return;
-        }
-        onUpdate(response);
-        if (
-          response.status !== FlowRunStatus.RUNNING &&
-          response.status !== FlowRunStatus.PAUSED
-        ) {
-          socket.off(
-            WebsocketClientEvent.TEST_FLOW_RUN_PROGRESS,
-            handleProgress,
-          );
-          socket.off('error', handleError);
-          resolve();
-        }
-      };
-
-      const handleError = (error: any) => {
-        socket.off(WebsocketClientEvent.TEST_FLOW_RUN_PROGRESS, handleProgress);
-        socket.off('error', handleError);
-        reject(error);
-      };
-
-      socket.on(WebsocketClientEvent.TEST_FLOW_RUN_PROGRESS, handleProgress);
-      socket.on('error', handleError);
-    });
+    const initialRun = await getInitialRun(socket, request.flowVersionId);
+    onUpdate(initialRun);
   },
   testStep(
     socket: Socket,
@@ -172,7 +142,7 @@ function getInitialRun(
   socket: Socket,
   flowVersionId: string,
 ): Promise<FlowRun> {
-  return new Promise<FlowRun>((resolve, reject) => {
+  return new Promise<FlowRun>((resolve) => {
     const onRunStarted = (run: FlowRun) => {
       if (run.flowVersionId !== flowVersionId) {
         return;
@@ -181,13 +151,6 @@ function getInitialRun(
       resolve(run);
     };
 
-    const handleError = (error: any) => {
-      socket.off(WebsocketClientEvent.TEST_STEP_FINISHED, onRunStarted);
-      socket.off('error', handleError);
-      reject(error);
-    };
-
     socket.on(WebsocketClientEvent.TEST_FLOW_RUN_STARTED, onRunStarted);
-    socket.on('error', handleError);
   });
 }
