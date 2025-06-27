@@ -1,0 +1,68 @@
+import {
+  FastifyPluginAsyncTypebox,
+  Type,
+} from '@fastify/type-provider-typebox';
+import { logger } from '@openops/server-shared';
+import {
+  AddActionRequest,
+  FlowOperationType,
+  OpenOpsId,
+  Permission,
+  PopulatedFlow,
+  PrincipalType,
+  SERVICE_KEY_SECURITY_OPENAPI,
+} from '@openops/shared';
+import { StatusCodes } from 'http-status-codes';
+import { entitiesMustBeOwnedByCurrentProject } from '../../authentication/authorization';
+import { flowService } from './flow.service';
+
+export const flowV2Controller: FastifyPluginAsyncTypebox = async (app) => {
+  app.addHook('preSerialization', entitiesMustBeOwnedByCurrentProject);
+
+  app.post('/:id/steps', AddStepRequestOptions, async (request) => {
+    try {
+      const userId = request.principal.id;
+      const flowId = request.params.id;
+      const projectId = request.principal.projectId;
+
+      const updatedFlow = await flowService.update({
+        id: flowId,
+        userId,
+        projectId,
+        operation: {
+          type: FlowOperationType.ADD_ACTION,
+          request: request.body,
+        },
+      });
+
+      return updatedFlow;
+    } catch (error) {
+      logger.error('Error adding step to workflow.', {
+        body: request.body,
+        flowId: request.params.id,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw error;
+    }
+  });
+};
+
+const AddStepRequestOptions = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+    permission: Permission.UPDATE_FLOW_STATUS,
+  },
+  schema: {
+    tags: ['flows-v2'],
+    description:
+      'Add a new step to a workflow. This endpoint allows you to add actions, triggers, or other step types to an existing workflow. The step will be added at the specified location relative to the parent step. Note: The parentStep parameter should be the name of the step (e.g., "step_1", "step_3", "trigger"), not the step ID.',
+    security: [SERVICE_KEY_SECURITY_OPENAPI],
+    params: Type.Object({
+      id: OpenOpsId,
+    }),
+    body: AddActionRequest,
+    response: {
+      [StatusCodes.OK]: PopulatedFlow,
+    },
+  },
+};
