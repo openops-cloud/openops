@@ -12,7 +12,7 @@ import {
   openopsTablesDropdownProperty,
   updateRow,
 } from '@openops/common';
-import { cacheWrapper } from '@openops/server-shared';
+import { cacheWrapper, logger } from '@openops/server-shared';
 import { convertToStringWithValidation, isEmpty } from '@openops/shared';
 
 export const updateRecordAction = createAction({
@@ -138,6 +138,11 @@ export const updateRecordAction = createAction({
     const primaryKeyField = getPrimaryKeyFieldFromFields(tableFields);
     const primaryKeyValue = getPrimaryKey(rowPrimaryKey['rowPrimaryKey']);
 
+    logger.info(
+      `[${context.run.id}] Starting tables service calls for table: ${tableName}`,
+    );
+    const startTime = Date.now();
+
     const rowToUpdate = primaryKeyValue
       ? await getRowByPrimaryKeyValue(
           token,
@@ -150,19 +155,35 @@ export const updateRecordAction = createAction({
 
     if (!rowToUpdate) {
       fieldsToUpdate[primaryKeyField.name] = primaryKeyValue;
-      return await addRow({
+      const result = await addRow({
         tableId: tableId,
         token: token,
         fields: fieldsToUpdate,
       });
+
+      const endTime = Date.now();
+      const duration = endTime - startTime;
+      logger.info(
+        `[${context.run.id}] Finished tables service calls for table: ${tableName}. Duration: ${duration}ms`,
+      );
+
+      return result;
     }
 
-    return await updateRow({
+    const result = await updateRow({
       tableId: tableId,
       token: token,
       rowId: rowToUpdate.id,
       fields: fieldsToUpdate,
     });
+
+    const endTime = Date.now();
+    const duration = endTime - startTime;
+    logger.info(
+      `[${context.run.id}] Finished tables service calls for table: ${tableName}. Duration: ${duration}ms`,
+    );
+
+    return result;
   },
 });
 
