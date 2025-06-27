@@ -17,8 +17,6 @@ const updateLock = new Mutex();
 export const progressService = {
   sendUpdate: async (params: UpdateStepProgressParams): Promise<void> => {
     throwIfExecutionTimeExceeded();
-    console.log('sendUpdate from engine');
-
     return updateLock.runExclusive(async () => {
       if (lastScheduledUpdateId) {
         clearTimeout(lastScheduledUpdateId);
