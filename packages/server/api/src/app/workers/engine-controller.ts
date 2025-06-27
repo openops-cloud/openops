@@ -150,14 +150,11 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
     const updateLogs =
       !isNil(executionStateContentLength) && executionStateContentLength > 0;
     if (!updateLogs) {
-      // Only emit progress events when NOT updating logs (during step execution)
       if (progressUpdateType === ProgressUpdateType.TEST_FLOW) {
-        console.log('emit TEST_FLOW_RUN_PROGRESS');
         app.io
           .to(request.principal.projectId)
           .emit(WebsocketClientEvent.TEST_FLOW_RUN_PROGRESS, runId);
       } else {
-        // For production runs and other contexts, emit FLOW_RUN_PROGRESS
         app.io
           .to(request.principal.projectId)
           .emit(WebsocketClientEvent.FLOW_RUN_PROGRESS, runId);

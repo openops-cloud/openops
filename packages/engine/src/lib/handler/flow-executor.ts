@@ -1,4 +1,4 @@
-import { runWithTemporaryContext } from '@openops/server-shared';
+import { logger, runWithTemporaryContext } from '@openops/server-shared';
 import { Action, ActionType, isNil } from '@openops/shared';
 import { performance } from 'node:perf_hooks';
 import { progressService } from '../services/progress.service';
@@ -57,7 +57,7 @@ export const flowExecutor = {
           flowExecutorContext: flowExecutionContext,
         })
         .catch((error) => {
-          console.error('Error sending update:', error);
+          logger.error('Error sending progress update', error);
         });
 
       const logContext = {
