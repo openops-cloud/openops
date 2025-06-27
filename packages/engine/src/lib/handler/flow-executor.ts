@@ -51,15 +51,6 @@ export const flowExecutor = {
 
       const stepStartTime = performance.now();
 
-      progressService
-        .sendUpdate({
-          engineConstants: constants,
-          flowExecutorContext: flowExecutionContext,
-        })
-        .catch((error) => {
-          logger.error('Error sending progress update', error);
-        });
-
       const logContext = {
         actionType: currentAction.type,
       };
@@ -85,6 +76,15 @@ export const flowExecutor = {
       if (flowExecutionContext.verdict !== ExecutionVerdict.RUNNING) {
         break;
       }
+
+      progressService
+        .sendUpdate({
+          engineConstants: constants,
+          flowExecutorContext: flowExecutionContext,
+        })
+        .catch((error) => {
+          logger.error('Error sending progress update', error);
+        });
 
       currentAction = currentAction.nextAction;
     }
