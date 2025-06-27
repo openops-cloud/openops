@@ -137,7 +137,7 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
       );
     }
 
-    const runWithoutSteps = await flowRunService.updateStatus({
+    const populatedRun = await flowRunService.updateStatus({
       flowRunId: runId,
       status: getTerminalStatus(runDetails.status),
       tasks: runDetails.tasks,
@@ -161,11 +161,14 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
       }
     }
 
-    if (runDetails.status === FlowRunStatus.PAUSED) {
+    if (
+      runDetails.status === FlowRunStatus.PAUSED &&
+      !isNil(runDetails.pauseMetadata)
+    ) {
       await flowRunService.pause({
         flowRunId: runId,
         pauseMetadata: {
-          ...runDetails.pauseMetadata!,
+          ...runDetails.pauseMetadata,
           progressUpdateType,
           handlerId: workerHandlerId ?? undefined,
           executionCorrelationId:
@@ -176,7 +179,7 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
     }
 
     await markJobAsCompleted(
-      runWithoutSteps.status,
+      populatedRun.status,
       executionCorrelationId,
       request.principal as unknown as EnginePrincipal,
       runDetails.error,
