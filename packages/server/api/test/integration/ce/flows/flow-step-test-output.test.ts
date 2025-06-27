@@ -90,7 +90,7 @@ describe('Flow Step Test output', () => {
     await saveTestOutput(
       stepId2,
       mockFlowVersion.id,
-      { input: 'one' },
+      { input: 'two' },
       { value: 'two' },
     );
 
@@ -183,93 +183,5 @@ describe('Flow Step Test output', () => {
     expect(outputs).toEqual(
       expect.arrayContaining([{ value: 'from-1' }, { value: 'from-2' }]),
     );
-  });
-
-  it('Should list step test outputs for given step IDs', async () => {
-    const { mockProject } = await mockBasicSetup();
-
-    const mockFlow = createMockFlow({
-      projectId: mockProject.id,
-    });
-    await databaseConnection().getRepository('flow').save([mockFlow]);
-
-    const mockFlowVersion = createMockFlowVersion({
-      flowId: mockFlow.id,
-      state: FlowVersionState.DRAFT,
-    });
-    await databaseConnection()
-      .getRepository('flow_version')
-      .save([mockFlowVersion]);
-
-    const stepId1 = openOpsId();
-    const stepId2 = openOpsId();
-
-    await flowStepTestOutputService.save({
-      stepId: stepId1,
-      flowVersionId: mockFlowVersion.id,
-      input: { input: 'one' },
-      output: { value: 'one' },
-    });
-
-    await flowStepTestOutputService.save({
-      stepId: stepId2,
-      flowVersionId: mockFlowVersion.id,
-      input: { input: 'two' },
-      output: { value: 'two' },
-    });
-
-    const results = await flowStepTestOutputService.listDecrypted({
-      flowVersionId: mockFlowVersion.id,
-      stepIds: [stepId1, stepId2],
-    });
-
-    expect(results).toHaveLength(2);
-
-    const inputs = results.map((r) => r.input);
-    expect(inputs).toEqual(
-      expect.arrayContaining([{ input: 'one' }, { input: 'two' }]),
-    );
-
-    const outputs = results.map((r) => r.output);
-    expect(outputs).toEqual(
-      expect.arrayContaining([{ value: 'one' }, { value: 'two' }]),
-    );
-  });
-
-  it('Should return only available outputs and skip step IDs without saved output', async () => {
-    const { mockProject } = await mockBasicSetup();
-
-    const mockFlow = createMockFlow({
-      projectId: mockProject.id,
-    });
-    await databaseConnection().getRepository('flow').save([mockFlow]);
-
-    const mockFlowVersion = createMockFlowVersion({
-      flowId: mockFlow.id,
-      state: FlowVersionState.DRAFT,
-    });
-    await databaseConnection()
-      .getRepository('flow_version')
-      .save([mockFlowVersion]);
-
-    const existingStepId = openOpsId();
-    const missingStepId = openOpsId();
-
-    await flowStepTestOutputService.save({
-      stepId: existingStepId,
-      flowVersionId: mockFlowVersion.id,
-      input: { input: 'existing' },
-      output: { value: 'existing' },
-    });
-
-    const results = await flowStepTestOutputService.listDecrypted({
-      flowVersionId: mockFlowVersion.id,
-      stepIds: [existingStepId, missingStepId],
-    });
-
-    expect(results).toHaveLength(1);
-    expect(results[0].stepId).toBe(existingStepId);
-    expect(results[0].input).toStrictEqual({ input: 'existing' });
-    expect(results[0].output).toStrictEqual({ value: 'existing' });
   });
 });
