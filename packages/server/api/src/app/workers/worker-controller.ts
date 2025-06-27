@@ -117,6 +117,7 @@ export const flowWorkerController: FastifyPluginAsyncTypebox = async (app) => {
             flowId,
             payload,
             projectId,
+            input: {},
           }),
         ),
       );

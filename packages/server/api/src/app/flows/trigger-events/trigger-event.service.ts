@@ -34,10 +34,12 @@ export const triggerEventService = {
     projectId,
     flowId,
     payload,
+    input,
   }: {
     projectId: ProjectId;
     flowId: FlowId;
     payload: unknown;
+    input: unknown;
   }): Promise<TriggerEvent> {
     const flow = await flowService.getOnePopulatedOrThrow({
       id: flowId,
@@ -59,6 +61,7 @@ export const triggerEventService = {
         stepId: flow.version.trigger.id,
         flowVersionId: flow.version.id,
         output: triggerEventToSave.payload,
+        input,
       });
     }
 
@@ -110,6 +113,7 @@ export const triggerEventService = {
             projectId,
             flowId: flow.id,
             payload: output,
+            input: testResult.input,
           });
         }
 
