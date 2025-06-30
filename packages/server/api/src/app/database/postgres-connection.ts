@@ -26,7 +26,7 @@ import { CreateMcpConfigTable1749644220382 } from './migrations/1749644220382-Cr
 import { SetBlockNameAsNullableInConnectionsTable1749809813762 } from './migrations/1749809813762-SetBlockNameAsNullableInConnectionsTable';
 import { RemoveBlockNameFromConnectionsTable1750161024797 } from './migrations/1750161024797-RemoveBlockNameFromConnectionsTable';
 import { AddInputToTestOutputTable1750933522145 } from './migrations/1750933522145-AddInputToTestOutputTable';
-import { AddInputToTriggerEventTable1750933522145 } from './migrations/1751281438388-AddInputToTriggerEventTable';
+import { AddInputToTriggerEventTable1751282188913 } from './migrations/1751282188913-AddInputToTriggerEventTable';
 
 const getSslConfig = (): boolean | TlsOptions => {
   const useSsl = system.get(AppSystemProp.POSTGRES_USE_SSL);
@@ -61,7 +61,7 @@ const getMigrations = (): (new () => MigrationInterface)[] => {
     SetBlockNameAsNullableInConnectionsTable1749809813762,
     RemoveBlockNameFromConnectionsTable1750161024797,
     AddInputToTestOutputTable1750933522145,
-    AddInputToTriggerEventTable1750933522145,
+    AddInputToTriggerEventTable1751282188913,
   ];
 };
 
