@@ -9,18 +9,15 @@ interface UseRunProgressParams {
   run: FlowRun | null;
   setRun: (run: FlowRun, flowVersion: FlowVersion) => void;
   flowVersion: FlowVersion | null;
-  refetchBlock?: () => void;
 }
 
 export const useRunProgress = ({
   run,
   setRun,
   flowVersion,
-  refetchBlock,
 }: UseRunProgressParams) => {
   const socket = useSocket();
   const abortControllerRef = useRef<AbortController | null>(null);
-  const isMountedRef = useRef(true);
 
   const { mutate: fetchAndUpdateRun } = useMutation({
     mutationFn: async (runId: string) => {
@@ -34,11 +31,6 @@ export const useRunProgress = ({
         const result = await flowRunsApi.getPopulated(runId, {
           signal: abortControllerRef.current.signal,
         });
-
-        // Check if component is still mounted before returning result
-        if (!isMountedRef.current) {
-          return null;
-        }
 
         return result;
       } catch (error) {
@@ -66,13 +58,6 @@ export const useRunProgress = ({
   );
 
   useEffect(() => {
-    // todo - extract refetch block to a separate hook
-    if (refetchBlock) {
-      socket.on(WebsocketClientEvent.REFRESH_BLOCK, () => {
-        refetchBlock();
-      });
-    }
-
     socket.on(WebsocketClientEvent.TEST_FLOW_RUN_PROGRESS, handleRunProgress);
 
     return () => {
@@ -81,10 +66,9 @@ export const useRunProgress = ({
         abortControllerRef.current = null;
       }
 
-      socket.removeAllListeners(WebsocketClientEvent.REFRESH_BLOCK);
       socket.removeAllListeners(WebsocketClientEvent.TEST_FLOW_RUN_PROGRESS);
       socket.removeAllListeners(WebsocketClientEvent.TEST_STEP_FINISHED);
       socket.removeAllListeners(WebsocketClientEvent.TEST_FLOW_RUN_STARTED);
     };
-  }, [socket.id, run?.id, handleRunProgress, refetchBlock, socket]);
+  }, [socket.id, run?.id, handleRunProgress, socket]);
 };

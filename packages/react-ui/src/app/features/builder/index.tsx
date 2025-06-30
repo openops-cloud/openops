@@ -25,6 +25,7 @@ import {
   useSwitchToDraft,
 } from '@/app/features/builder/builder-hooks';
 import { DynamicFormValidationProvider } from '@/app/features/builder/dynamic-form-validation/dynamic-form-validation-context';
+import { useRefreshBlock } from '@/app/features/builder/hooks/use-refresh-block';
 import { useRunProgress } from '@/app/features/builder/hooks/use-run-progress';
 
 import { useResizablePanelGroup } from '@/app/common/hooks/use-resizable-panel-group';
@@ -195,6 +196,9 @@ const BuilderPage = () => {
     run,
     setRun,
     flowVersion,
+  });
+
+  useRefreshBlock({
     refetchBlock,
   });
 
