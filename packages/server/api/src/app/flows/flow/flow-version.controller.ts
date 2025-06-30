@@ -156,6 +156,68 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
       );
     },
   );
+
+  fastify.post(
+    '/:flowVersionId/test-output',
+    {
+      config: {
+        allowedPrincipals: [PrincipalType.USER],
+      },
+      schema: {
+        description: 'Inject test/sample output for a step in a flow version',
+        params: Type.Object({
+          flowVersionId: Type.String(),
+        }),
+        body: Type.Object({
+          stepId: Type.String(),
+          input: Type.Any(),
+          output: Type.Any(),
+        }),
+        response: {
+          [StatusCodes.OK]: Type.Object({
+            success: Type.Boolean(),
+            id: Type.String(),
+          }),
+          [StatusCodes.BAD_REQUEST]: Type.Object({
+            success: Type.Boolean(),
+            message: Type.String(),
+          }),
+        },
+      },
+    },
+    async (request, reply) => {
+      const { flowVersionId } = request.params;
+      const { stepId, input, output } = request.body;
+      try {
+        const flowVersion = await flowVersionService.getOneOrThrow(
+          flowVersionId,
+        );
+        const isValid = await validateFlowVersionBelongsToProject(
+          flowVersion,
+          request.principal.projectId,
+          reply,
+        );
+        if (!isValid) {
+          return;
+        }
+        const saved = await flowStepTestOutputService.save({
+          stepId,
+          flowVersionId,
+          input,
+          output,
+        });
+        await reply.status(StatusCodes.OK).send({
+          success: true,
+          id: saved.id,
+        });
+      } catch (error) {
+        await reply.status(StatusCodes.BAD_REQUEST).send({
+          success: false,
+          message: (error as Error).message,
+        });
+      }
+    },
+  );
 };
 
 const GetLatestVersionsByConnectionRequestOptions = {
