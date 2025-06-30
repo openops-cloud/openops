@@ -25,6 +25,7 @@ import {
   useSwitchToDraft,
 } from '@/app/features/builder/builder-hooks';
 import { DynamicFormValidationProvider } from '@/app/features/builder/dynamic-form-validation/dynamic-form-validation-context';
+import { useRunProgress } from '@/app/features/builder/hooks/use-run-progress';
 
 import { useResizablePanelGroup } from '@/app/common/hooks/use-resizable-panel-group';
 import { useSocket } from '@/app/common/providers/socket-provider';
@@ -42,7 +43,7 @@ import {
   TriggerType,
   WebsocketClientEvent,
 } from '@openops/shared';
-import { useMutation } from '@tanstack/react-query';
+
 import {
   RESIZABLE_PANEL_GROUP,
   RESIZABLE_PANEL_IDS,
@@ -54,7 +55,6 @@ import {
 import { AiAssistantChat } from '../ai/ai-assistant-chat';
 import { blocksHooks } from '../blocks/lib/blocks-hook';
 import { RunDetailsBar } from '../flow-runs/components/run-details-bar';
-import { flowRunsApi } from '../flow-runs/lib/flow-runs-api';
 import { FlowSideMenu } from '../navigation/side-menu/flow/flow-side-menu';
 import LeftSidebarResizablePanel from '../navigation/side-menu/left-sidebar';
 import { BuilderHeader } from './builder-header/builder-header';
@@ -191,43 +191,12 @@ const BuilderPage = () => {
 
   const socket = useSocket();
 
-  const { mutate: fetchAndUpdateRun } = useMutation({
-    mutationFn: flowRunsApi.getPopulated,
+  useRunProgress({
+    run,
+    setRun,
+    flowVersion,
+    refetchBlock,
   });
-
-  useEffect(() => {
-    socket.on(WebsocketClientEvent.REFRESH_BLOCK, () => {
-      refetchBlock();
-    });
-
-    socket.on(WebsocketClientEvent.FLOW_RUN_PROGRESS, (runId: string) => {
-      if (run && run?.id === runId) {
-        fetchAndUpdateRun(runId, {
-          onSuccess: (updatedRun) => {
-            setRun(updatedRun, flowVersion);
-          },
-        });
-      }
-    });
-    socket.on(WebsocketClientEvent.TEST_FLOW_RUN_PROGRESS, (runId: string) => {
-      if (run && run?.id === runId) {
-        fetchAndUpdateRun(runId, {
-          onSuccess: (updatedRun) => {
-            setRun(updatedRun, flowVersion);
-          },
-        });
-      }
-    });
-
-    return () => {
-      socket.removeAllListeners(WebsocketClientEvent.REFRESH_BLOCK);
-      socket.removeAllListeners(WebsocketClientEvent.TEST_FLOW_RUN_PROGRESS);
-      socket.removeAllListeners(WebsocketClientEvent.FLOW_RUN_PROGRESS);
-      socket.removeAllListeners(WebsocketClientEvent.TEST_STEP_FINISHED);
-      socket.removeAllListeners(WebsocketClientEvent.TEST_FLOW_RUN_STARTED);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [socket.id, run?.id]);
 
   useEffect(() => {
     const viewOnlyParam = searchParams.get(SEARCH_PARAMS.viewOnly) === 'true';
