@@ -119,16 +119,10 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
     const progressUpdateType =
       request.body.progressUpdateType ?? ProgressUpdateType.NONE;
 
-    const nonSupportedStatuses = [
-      FlowRunStatus.RUNNING,
-      FlowRunStatus.SUCCEEDED,
-      FlowRunStatus.PAUSED,
-      FlowRunStatus.STOPPED,
-    ];
     if (
-      !nonSupportedStatuses.includes(runDetails.status) &&
-      !isNil(workerHandlerId) &&
-      !isNil(executionCorrelationId)
+      progressUpdateType === ProgressUpdateType.WEBHOOK_RESPONSE &&
+      workerHandlerId &&
+      executionCorrelationId
     ) {
       await webhookResponseWatcher.publish(
         executionCorrelationId,

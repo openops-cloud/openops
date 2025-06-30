@@ -394,37 +394,6 @@ describe('Engine Controller - update-run endpoint', () => {
       });
     });
 
-    it('should publish webhook response for non-supported statuses', async () => {
-      const request = {
-        ...baseRequest,
-        body: {
-          ...baseRequest.body,
-          runDetails: {
-            ...baseRequest.body.runDetails,
-            status: FlowRunStatus.FAILED,
-          },
-        },
-      };
-
-      const updateRunHandler = handlers['/update-run'];
-      await updateRunHandler(
-        request as unknown as FastifyRequest,
-        mockReply as unknown as FastifyReply,
-      );
-
-      expect(webhookResponseWatcher.publish).toHaveBeenCalledWith(
-        'test-correlation-id',
-        'test-handler-id',
-        {
-          status: StatusCodes.INTERNAL_SERVER_ERROR,
-          body: {
-            message: 'The flow has failed and there is no response returned',
-          },
-          headers: {},
-        },
-      );
-    });
-
     describe('should not publish webhook response', () => {
       it.each([
         {
@@ -635,6 +604,14 @@ describe('Engine Controller - update-run endpoint', () => {
             ...baseRequest,
             body: {
               ...baseRequest.body,
+              progressUpdateType: ![
+                'RUNNING',
+                'SUCCEEDED',
+                'PAUSED',
+                'STOPPED',
+              ].includes(status)
+                ? ProgressUpdateType.WEBHOOK_RESPONSE
+                : ProgressUpdateType.NONE,
               runDetails: {
                 ...baseRequest.body.runDetails,
                 status,
