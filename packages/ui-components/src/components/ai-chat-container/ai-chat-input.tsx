@@ -6,15 +6,17 @@ import { Button } from '../../ui/button';
 import { ScrollArea } from '../../ui/scroll-area';
 import { AiModelSelector, AiModelSelectorProps } from './ai-model-selector';
 
-export const ChatStatus = {
-  STREAMING: 'streaming',
-  SUBMITTED: 'submitted',
-};
+export enum ChatStatus {
+  STREAMING = 'streaming',
+  SUBMITTED = 'submitted',
+  READY = 'ready',
+  ERROR = 'error',
+}
 
 export type AiChatInputProps = {
   className?: string;
   placeholder?: string;
-  status?: string;
+  status?: ChatStatus;
 } & Pick<UseChatHelpers, 'input' | 'handleInputChange' | 'handleSubmit'> &
   AiModelSelectorProps;
 

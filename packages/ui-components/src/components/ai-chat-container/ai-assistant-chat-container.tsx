@@ -6,7 +6,7 @@ import { cn } from '../../lib/cn';
 import { ScrollArea } from '../../ui/scroll-area';
 import { AIChatMessageRole } from '../ai-chat-messages';
 import { BoxSize, ResizableArea } from '../resizable-area';
-import { AiChatInput } from './ai-chat-input';
+import { AiChatInput, ChatStatus } from './ai-chat-input';
 import { AiChatSizeTogglers } from './ai-chat-size-togglers';
 import { AiModelSelectorProps } from './ai-model-selector';
 import { getBufferAreaHeight, getLastUserMessageId } from './ai-scroll-helpers';
@@ -29,7 +29,7 @@ type AiAssistantChatContainerProps = {
   className?: string;
   children?: ReactNode;
   messages?: { id: string; role: string }[];
-  status?: string;
+  status?: ChatStatus;
   lastUserMessageRef: React.RefObject<HTMLDivElement>;
   lastAssistantMessageRef: React.RefObject<HTMLDivElement>;
 } & Pick<UseChatHelpers, 'input' | 'handleInputChange' | 'handleSubmit'> &
