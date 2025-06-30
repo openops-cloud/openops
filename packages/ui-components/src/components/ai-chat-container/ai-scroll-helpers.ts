@@ -1,3 +1,5 @@
+import { ChatStatus } from './ai-chat-input';
+
 const BUFFER_MIN_HEIGHT = 32;
 const BUFFER_READY_GAP = 280;
 const BUFFER_STREAMING_GAP = 240;
@@ -15,13 +17,13 @@ export function getBufferAreaHeight(
   currentBufferAreaHeight: number,
   lastUserMsgHeight: number,
   lastAssistantMsgHeight: number,
-  status?: string,
+  status?: ChatStatus,
   options?: {
     readyGap?: number;
     streamingGap?: number;
   },
 ): number {
-  if (status === 'ready') {
+  if (status === ChatStatus.READY) {
     return Math.floor(
       Math.max(
         BUFFER_MIN_HEIGHT,
@@ -32,7 +34,9 @@ export function getBufferAreaHeight(
     );
   }
 
-  if (['streaming', 'submitted'].includes(status ?? '')) {
+  if (
+    [ChatStatus.STREAMING, ChatStatus.SUBMITTED].includes(status as ChatStatus)
+  ) {
     const userMsgHeight =
       lastUserMsgHeight > 0 ? lastUserMsgHeight : DEFAULT_USER_MSG_HEIGHT;
     return Math.floor(

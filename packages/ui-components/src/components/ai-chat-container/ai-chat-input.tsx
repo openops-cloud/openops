@@ -6,9 +6,17 @@ import { Button } from '../../ui/button';
 import { ScrollArea } from '../../ui/scroll-area';
 import { AiModelSelector, AiModelSelectorProps } from './ai-model-selector';
 
+export enum ChatStatus {
+  STREAMING = 'streaming',
+  SUBMITTED = 'submitted',
+  READY = 'ready',
+  ERROR = 'error',
+}
+
 export type AiChatInputProps = {
   className?: string;
   placeholder?: string;
+  status?: ChatStatus;
 } & Pick<UseChatHelpers, 'input' | 'handleInputChange' | 'handleSubmit'> &
   AiModelSelectorProps;
 
@@ -22,6 +30,7 @@ export const AiChatInput = ({
   isModelSelectorLoading,
   className,
   placeholder,
+  status,
 }: AiChatInputProps) => {
   return (
     <div className={cn('w-full px-4', className)}>
@@ -50,6 +59,10 @@ export const AiChatInput = ({
           variant="transparent"
           className="absolute right-3 top-3"
           onClick={handleSubmit}
+          disabled={
+            !!status &&
+            [ChatStatus.STREAMING, ChatStatus.SUBMITTED].includes(status)
+          }
         >
           <SendIcon size={20} className="text-gray-400 hover:text-gray-600" />
         </Button>

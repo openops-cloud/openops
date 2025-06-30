@@ -6,7 +6,7 @@ import { cn } from '../../lib/cn';
 import { AI_CHAT_SCROLL_DELAY } from '../../lib/constants';
 import { ScrollArea } from '../../ui/scroll-area';
 import { AIChatMessageRole } from '../ai-chat-messages';
-import { AiChatInput } from './ai-chat-input';
+import { AiChatInput, ChatStatus } from './ai-chat-input';
 import { AiChatSizeTogglers } from './ai-chat-size-togglers';
 import { AiModelSelectorProps } from './ai-model-selector';
 import { getBufferAreaHeight, getLastUserMessageId } from './ai-scroll-helpers';
@@ -31,7 +31,7 @@ type StepSettingsAiChatContainerProps = {
   className?: string;
   children?: ReactNode;
   messages?: { id: string; role: string }[];
-  status?: string;
+  status?: ChatStatus;
   lastUserMessageRef: React.RefObject<HTMLDivElement>;
   lastAssistantMessageRef: React.RefObject<HTMLDivElement>;
 } & Pick<UseChatHelpers, 'input' | 'handleInputChange' | 'handleSubmit'> &
@@ -285,6 +285,7 @@ const StepSettingsAiChatContainer = ({
             onModelSelected={onModelSelected}
             isModelSelectorLoading={isModelSelectorLoading}
             placeholder={t('Ask a question about the command you need')}
+            status={status}
           />
         </div>
       </div>
