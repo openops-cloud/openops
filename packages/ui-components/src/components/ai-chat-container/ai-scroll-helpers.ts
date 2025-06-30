@@ -34,7 +34,9 @@ export function getBufferAreaHeight(
     );
   }
 
-  if ([ChatStatus.STREAMING, ChatStatus.SUBMITTED].includes(status as ChatStatus)) {
+  if (
+    [ChatStatus.STREAMING, ChatStatus.SUBMITTED].includes(status as ChatStatus)
+  ) {
     const userMsgHeight =
       lastUserMsgHeight > 0 ? lastUserMsgHeight : DEFAULT_USER_MSG_HEIGHT;
     return Math.floor(
