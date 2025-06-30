@@ -81,6 +81,7 @@ export const flowExecutor = {
         .sendUpdate({
           engineConstants: constants,
           flowExecutorContext: flowExecutionContext,
+          updateImmediate: true,
         })
         .catch((error) => {
           logger.error('Error sending progress update', error);

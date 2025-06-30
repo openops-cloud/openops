@@ -31,6 +31,7 @@ export const progressService = {
         return;
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
       lastScheduledUpdateId = setTimeout(async () => {
         await sendUpdateRunRequest(params);
       }, DEBOUNCE_THRESHOLD);
@@ -42,7 +43,7 @@ const sendUpdateRunRequest = async (
   params: UpdateStepProgressParams,
 ): Promise<void> => {
   await lock.runExclusive(async () => {
-    logger.info('Sending update run request');
+    logger.info('Sending run update run request');
     lastActionExecutionTime = Date.now();
     const { flowExecutorContext, engineConstants } = params;
     const url = new URL(
@@ -60,7 +61,7 @@ const sendUpdateRunRequest = async (
     }
 
     const request: UpdateRunProgressRequest = {
-      executionCorrelationId: engineConstants.executionCorrelationId!,
+      executionCorrelationId: engineConstants.executionCorrelationId,
       runId: engineConstants.flowRunId,
       workerHandlerId: engineConstants.serverHandlerId ?? null,
       runDetails: await flowExecutorContext.toResponse(),
