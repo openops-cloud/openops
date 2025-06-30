@@ -88,6 +88,7 @@ const TestActionSection = React.memo(
             stepId: formValues.id,
             flowVersionId,
             output: stepResponse.output,
+            input: stepResponse.input,
             queryClient,
           });
         } else {
@@ -160,7 +161,8 @@ const TestActionSection = React.memo(
         isValid={isValid}
         isSaving={isSaving}
         isTesting={isTesting}
-        data={testOutputData?.output}
+        outputData={testOutputData?.output}
+        inputData={testOutputData?.input}
         errorMessage={errorMessage}
         lastTestDate={testOutputData?.lastTestDate}
       />

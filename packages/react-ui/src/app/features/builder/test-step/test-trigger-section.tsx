@@ -185,6 +185,7 @@ const TestTriggerSection = React.memo(
         stepId: formValues.id,
         flowVersionId,
         output: data.payload,
+        input: data.input,
         queryClient,
       });
     }
@@ -201,6 +202,8 @@ const TestTriggerSection = React.memo(
     });
 
     const currentTestOutput = testOutputData?.output;
+    const currentTestInput = testOutputData?.input;
+
     const outputDataSelected =
       !isNil(currentTestOutput) || !isNil(errorMessage);
 
@@ -239,7 +242,8 @@ const TestTriggerSection = React.memo(
             isValid={isValid}
             isSaving={isSaving}
             isTesting={isTesting}
-            data={currentTestOutput}
+            outputData={currentTestOutput}
+            inputData={currentTestInput}
             errorMessage={errorMessage}
             lastTestDate={testOutputData?.lastTestDate}
           >
