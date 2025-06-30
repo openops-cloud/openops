@@ -109,13 +109,8 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
   });
 
   app.post('/update-run', UpdateStepProgress, async (request) => {
-    const {
-      executionCorrelationId,
-      runId,
-      workerHandlerId,
-      runDetails,
-      executionStateContentLength,
-    } = request.body;
+    const { executionCorrelationId, runId, workerHandlerId, runDetails } =
+      request.body;
     const progressUpdateType =
       request.body.progressUpdateType ?? ProgressUpdateType.NONE;
 
@@ -141,14 +136,6 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
       tags: runDetails.tags ?? [],
     });
 
-    const updateLogs =
-      !isNil(executionStateContentLength) && executionStateContentLength > 0;
-    if (!updateLogs && progressUpdateType === ProgressUpdateType.TEST_FLOW) {
-      app.io
-        .to(request.principal.projectId)
-        .emit(WebsocketClientEvent.TEST_FLOW_RUN_PROGRESS, runId);
-    }
-
     if (
       runDetails.status === FlowRunStatus.PAUSED &&
       !isNil(runDetails.pauseMetadata)
@@ -165,6 +152,10 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
         },
       });
     }
+
+    app.io
+      .to(request.principal.projectId)
+      .emit(WebsocketClientEvent.FLOW_RUN_PROGRESS, runId);
 
     await markJobAsCompleted(
       populatedRun.status,

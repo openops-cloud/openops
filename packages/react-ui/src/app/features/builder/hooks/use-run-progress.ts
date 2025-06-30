@@ -58,7 +58,7 @@ export const useRunProgress = ({
   );
 
   useEffect(() => {
-    socket.on(WebsocketClientEvent.TEST_FLOW_RUN_PROGRESS, handleRunProgress);
+    socket.on(WebsocketClientEvent.FLOW_RUN_PROGRESS, handleRunProgress);
 
     return () => {
       if (abortControllerRef.current) {
@@ -66,7 +66,7 @@ export const useRunProgress = ({
         abortControllerRef.current = null;
       }
 
-      socket.removeAllListeners(WebsocketClientEvent.TEST_FLOW_RUN_PROGRESS);
+      socket.removeAllListeners(WebsocketClientEvent.FLOW_RUN_PROGRESS);
       socket.removeAllListeners(WebsocketClientEvent.TEST_STEP_FINISHED);
       socket.removeAllListeners(WebsocketClientEvent.TEST_FLOW_RUN_STARTED);
     };

@@ -111,7 +111,6 @@ describe('Engine Controller - update-run endpoint', () => {
           duration: 1000,
           steps: { step1: { result: 'success' } },
         },
-        executionStateContentLength: 0,
       },
       principal: mockEnginePrincipal,
     };
@@ -265,7 +264,7 @@ describe('Engine Controller - update-run endpoint', () => {
       );
     });
 
-    it('should emit TEST_FLOW_RUN_PROGRESS for test flows', async () => {
+    it('should emit FLOW_RUN_PROGRESS for test flows', async () => {
       const request = {
         ...baseRequest,
         body: {
@@ -282,56 +281,9 @@ describe('Engine Controller - update-run endpoint', () => {
 
       expect(mockIo.to).toHaveBeenCalledWith('test-project-id');
       expect(mockIo.emit).toHaveBeenCalledWith(
-        WebsocketClientEvent.TEST_FLOW_RUN_PROGRESS,
+        WebsocketClientEvent.FLOW_RUN_PROGRESS,
         'test-run-id',
       );
-    });
-
-    describe('should not emit progress', () => {
-      it.each([
-        {
-          name: 'when executionStateContentLength > 0',
-          requestOverrides: {
-            executionStateContentLength: 1000,
-            progressUpdateType: ProgressUpdateType.TEST_FLOW,
-          },
-        },
-        {
-          name: 'when progressUpdateType is missing',
-          requestOverrides: {
-            executionStateContentLength: 0,
-            // progressUpdateType is missing - defaults to NONE, no emission expected
-          },
-        },
-        {
-          name: 'when executionStateContentLength is null',
-          requestOverrides: {
-            executionStateContentLength: null,
-          },
-        },
-        {
-          name: 'when executionStateContentLength is undefined',
-          requestOverrides: {
-            // executionStateContentLength is undefined - defaults to no emission
-          },
-        },
-      ])('$name', async ({ requestOverrides }) => {
-        const request = {
-          ...baseRequest,
-          body: {
-            ...baseRequest.body,
-            ...requestOverrides,
-          },
-        };
-
-        const updateRunHandler = handlers['/update-run'];
-        await updateRunHandler(
-          request as unknown as FastifyRequest,
-          mockReply as unknown as FastifyReply,
-        );
-
-        expect(mockIo.emit).not.toHaveBeenCalled();
-      });
     });
 
     describe('PAUSED status handling', () => {
@@ -395,10 +347,11 @@ describe('Engine Controller - update-run endpoint', () => {
     });
 
     describe('should not publish webhook response', () => {
-      it.each([
-        {
-          name: 'for supported statuses (RUNNING)',
-          requestOverrides: {
+      it('should not publish for RUNNING status', async () => {
+        const request = {
+          ...baseRequest,
+          body: {
+            ...baseRequest.body,
             runDetails: {
               status: FlowRunStatus.RUNNING,
               tasks: [],
@@ -406,10 +359,22 @@ describe('Engine Controller - update-run endpoint', () => {
               steps: { step1: { result: 'success' } },
             },
           },
-        },
-        {
-          name: 'when workerHandlerId is null',
-          requestOverrides: {
+        };
+
+        const updateRunHandler = handlers['/update-run'];
+        await updateRunHandler(
+          request as unknown as FastifyRequest,
+          mockReply as unknown as FastifyReply,
+        );
+
+        expect(webhookResponseWatcher.publish).not.toHaveBeenCalled();
+      });
+
+      it('should not publish when workerHandlerId is null', async () => {
+        const request = {
+          ...baseRequest,
+          body: {
+            ...baseRequest.body,
             workerHandlerId: null,
             runDetails: {
               status: FlowRunStatus.FAILED,
@@ -418,10 +383,22 @@ describe('Engine Controller - update-run endpoint', () => {
               steps: { step1: { result: 'success' } },
             },
           },
-        },
-        {
-          name: 'when executionCorrelationId is null',
-          requestOverrides: {
+        };
+
+        const updateRunHandler = handlers['/update-run'];
+        await updateRunHandler(
+          request as unknown as FastifyRequest,
+          mockReply as unknown as FastifyReply,
+        );
+
+        expect(webhookResponseWatcher.publish).not.toHaveBeenCalled();
+      });
+
+      it('should not publish when executionCorrelationId is null', async () => {
+        const request = {
+          ...baseRequest,
+          body: {
+            ...baseRequest.body,
             executionCorrelationId: null,
             runDetails: {
               status: FlowRunStatus.FAILED,
@@ -429,14 +406,6 @@ describe('Engine Controller - update-run endpoint', () => {
               duration: 1000,
               steps: { step1: { result: 'success' } },
             },
-          },
-        },
-      ])('$name', async ({ requestOverrides }) => {
-        const request = {
-          ...baseRequest,
-          body: {
-            ...baseRequest.body,
-            ...requestOverrides,
           },
         };
 
