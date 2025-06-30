@@ -73,7 +73,6 @@ export const useRunProgress = ({
       });
     }
 
-    socket.on(WebsocketClientEvent.FLOW_RUN_PROGRESS, handleRunProgress);
     socket.on(WebsocketClientEvent.TEST_FLOW_RUN_PROGRESS, handleRunProgress);
 
     return () => {
@@ -84,7 +83,6 @@ export const useRunProgress = ({
 
       socket.removeAllListeners(WebsocketClientEvent.REFRESH_BLOCK);
       socket.removeAllListeners(WebsocketClientEvent.TEST_FLOW_RUN_PROGRESS);
-      socket.removeAllListeners(WebsocketClientEvent.FLOW_RUN_PROGRESS);
       socket.removeAllListeners(WebsocketClientEvent.TEST_STEP_FINISHED);
       socket.removeAllListeners(WebsocketClientEvent.TEST_FLOW_RUN_STARTED);
     };

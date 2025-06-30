@@ -237,7 +237,6 @@ const BuilderPage = () => {
             socket.removeAllListeners(
               WebsocketClientEvent.TEST_FLOW_RUN_PROGRESS,
             );
-            socket.removeAllListeners(WebsocketClientEvent.FLOW_RUN_PROGRESS);
             switchToDraft();
           }}
         />
