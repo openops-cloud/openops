@@ -116,38 +116,54 @@ async function loadBlocksFromFolder(
 async function loadBlockFromFolder(
   folderPath: string,
 ): Promise<BlockMetadata | null> {
+  return loadBlockMetadataFromFolder(folderPath, {
+    bypassCache: false,
+  });
+}
+
+export async function loadBlockMetadataFromFolder(
+  folderPath: string,
+  options: {
+    bypassCache?: boolean;
+    cacheKey?: string;
+  } = {},
+): Promise<BlockMetadata | null> {
+  const { bypassCache = false, cacheKey: providedCacheKey } = options;
   let lock = undefined;
 
   try {
     // Parse name and version from package.json
-    const packageJsonDir = join(folderPath, 'package.json');
-    const packageJson = JSON.parse(await readFile(packageJsonDir, 'utf-8'));
+    const packageJsonPath = join(folderPath, 'package.json');
+    const packageJson = JSON.parse(await readFile(packageJsonPath, 'utf-8'));
     const { name: blockName, version: blockVersion } = packageJson;
 
     // A combination of a random suffix and clearing the "require" cache is
     // needed for reloading blocks in dev mode
     const suffix = isDevEnv ? '?version=' + new Date().getTime() : '';
     const indexPath = join(folderPath, 'src', 'index.js') + suffix;
-    const stats = await fs.stat(packageJsonDir); // Get file stats
+    const stats = await fs.stat(packageJsonPath); // Get file stats
 
     // We add the configuration hash to ensure that env var changes take effect (e.g. AWS_ENABLE_IMPLICIT_ROLE)
-    const cacheKey = `${blockName}-${blockVersion}-${stats.mtime.getTime()}-${system.calculateConfigurationHash()}`;
-    let blockMetadata = await cacheWrapper.getSerializedObject<BlockMetadata>(
-      cacheKey,
-    );
+    const cacheKey =
+      providedCacheKey ??
+      `${blockName}-${blockVersion}-${stats.mtime.getTime()}-${system.calculateConfigurationHash()}`;
 
-    if (blockMetadata) {
-      return blockMetadata;
-    }
+    if (!bypassCache) {
+      let blockMetadata = await cacheWrapper.getSerializedObject<BlockMetadata>(
+        cacheKey,
+      );
+      if (blockMetadata) {
+        return blockMetadata;
+      }
 
-    lock = await memoryLock.acquire(`${cacheKey}`);
+      lock = await memoryLock.acquire(`${cacheKey}`);
 
-    blockMetadata = await cacheWrapper.getSerializedObject<BlockMetadata>(
-      cacheKey,
-    );
-
-    if (blockMetadata) {
-      return blockMetadata;
+      blockMetadata = await cacheWrapper.getSerializedObject<BlockMetadata>(
+        cacheKey,
+      );
+      if (blockMetadata) {
+        return blockMetadata;
+      }
     }
 
     logger.debug(`No file-metadata found in cache. Loading ${cacheKey}`);
@@ -159,7 +175,7 @@ async function loadBlockFromFolder(
       blockVersion,
     });
 
-    blockMetadata = {
+    const blockMetadata: BlockMetadata = {
       ...block.metadata(),
       name: blockName,
       version: blockVersion,

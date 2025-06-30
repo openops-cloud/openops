@@ -17,14 +17,7 @@ async function getAll(): Promise<Flag[]> {
   const created = now;
   const updated = now;
 
-  flags = [
-    {
-      id: FlagId.USE_NEW_EXTERNAL_TESTDATA,
-      value: true,
-      created,
-      updated,
-    },
-  ];
+  flags = [];
 
   return flags;
 }

@@ -4,6 +4,7 @@ import {
   AIChatMessage,
   AIChatMessageRole,
   AIChatMessages,
+  ChatStatus,
   LoadingSpinner,
   MarkdownCodeVariations,
 } from '@openops/components/ui';
@@ -19,11 +20,6 @@ type ConversationProps = {
 
 type ServerMessage = NonNullable<OpenChatResponse['messages']>[number];
 type MessageType = ServerMessage | UIMessage;
-
-const ChatStatus = {
-  STREAMING: 'streaming',
-  SUBMITTED: 'submitted',
-};
 
 const StepSettingsAiConversation = ({
   messages,

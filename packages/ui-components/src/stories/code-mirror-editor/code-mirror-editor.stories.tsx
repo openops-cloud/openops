@@ -1,14 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { Controller, useForm } from 'react-hook-form';
 
-import { JsonEditor } from '../../components/json-editor/json-editor';
+import { CodeMirrorEditor } from '../../components/json-editor';
+import { tryParseJson } from '../../lib/json-utils';
 
 /**
  * A JSON editor component that provides syntax highlighting, validation, and editing capabilities for JSON data.
  */
 const meta = {
-  title: 'components/JsonEditor',
-  component: JsonEditor,
+  title: 'components/CodeMirrorEditor',
+  component: CodeMirrorEditor,
   tags: ['autodocs'],
   parameters: {
     layout: 'centered',
@@ -31,14 +32,24 @@ const meta = {
             <Controller
               control={form.control}
               name="jsonContent"
-              render={({ field }) => <Story args={{ field } as any} />}
+              render={({ field }) => (
+                <Story
+                  args={
+                    {
+                      value: field.value,
+                      onChange: (value: string) =>
+                        field.onChange(tryParseJson(value)),
+                    } as any
+                  }
+                />
+              )}
             />
           </form>
         </div>
       );
     },
   ],
-} satisfies Meta<typeof JsonEditor>;
+} satisfies Meta<typeof CodeMirrorEditor>;
 
 export default meta;
 
@@ -48,15 +59,6 @@ type Story = StoryObj<typeof meta>;
  * The default view of the JSON editor, allowing users to edit JSON content with syntax highlighting.
  */
 export const Default: Story = {
-  args: {
-    readonly: false,
-  } as any,
-};
-
-/**
- * The JSON editor with a focus handler that logs when the editor receives focus.
- */
-export const WithFocusHandler: Story = {
   args: {
     readonly: false,
   } as any,
@@ -115,7 +117,16 @@ export const ComplexJson: Story = {
               control={form.control}
               name="jsonContent"
               render={({ field }) => (
-                <Story args={{ field, readonly: false } as any} />
+                <Story
+                  args={
+                    {
+                      value: field.value,
+                      onChange: (value: string) =>
+                        field.onChange(tryParseJson(value)),
+                      readonly: false,
+                    } as any
+                  }
+                />
               )}
             />
           </form>

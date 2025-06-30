@@ -1,6 +1,5 @@
-# [Choice] Node.js version (use -bullseye variants on local arm64/Apple Silicon): 18, 16, 14, 18-bullseye, 16-bullseye, 14-bullseye, 18-buster, 16-buster, 14-buster
-ARG VARIANT=18-bullseye
-FROM mcr.microsoft.com/vscode/devcontainers/javascript-node:0-${VARIANT}
+ARG VARIANT=1.1.12-20-bullseye
+FROM mcr.microsoft.com/vscode/devcontainers/javascript-node:${VARIANT}
 
 RUN <<-```
     npm install -g nx cross-env@7.0.3 mint-mcp
@@ -75,12 +74,12 @@ RUN <<-```
     git clone https://github.com/awslabs/mcp.git .
     git checkout 2025.6.2025131704
     wget -qO- https://astral.sh/uv/install.sh | sh && source $HOME/.local/bin/env
-    python3 -m venv .venv
+    uv python install 3.10
+    uv venv --python 3.10 .venv
     . .venv/bin/activate
-    pip install ./src/cost-explorer-mcp-server
-    pip install ./src/cost-analysis-mcp-server
+    uv pip install ./src/cost-explorer-mcp-server
+    uv pip install ./src/cost-analysis-mcp-server
 ```
-
 
 WORKDIR /workspaces
 

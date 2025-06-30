@@ -12,11 +12,10 @@ import {
   StepOutputWithData,
   UpdateFlowVersionRequest,
 } from '@openops/shared';
-import { Type as T } from '@sinclair/typebox';
 import { StatusCodes } from 'http-status-codes';
+import { validateFlowVersionBelongsToProject } from '../common/flow-version-validation';
 import { flowVersionService } from '../flow-version/flow-version.service';
 import { flowStepTestOutputService } from '../step-test-output/flow-step-test-output.service';
-import { flowService } from './flow.service';
 
 export const flowVersionController: FastifyPluginAsyncTypebox = async (
   fastify,
@@ -53,16 +52,17 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
               'It is not possible to update the flowId of a flow version',
           });
         }
-        const flow = await flowService.getOne({
-          id: flowVersion.flowId,
-          projectId: request.principal.projectId,
-        });
-        if (flow === null || flow === undefined) {
-          await reply.status(StatusCodes.BAD_REQUEST).send({
-            success: false,
-            message: 'The flow and version are not associated with the project',
-          });
+
+        const isValid = await validateFlowVersionBelongsToProject(
+          flowVersion,
+          request.principal.projectId,
+          reply,
+        );
+
+        if (!isValid) {
+          return;
         }
+
         if (flowVersion.state === FlowVersionState.LOCKED) {
           await reply.status(StatusCodes.BAD_REQUEST).send({
             success: false,
@@ -148,45 +148,12 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
         flowStepTestOutputs.map((flowStepTestOutput) => [
           flowStepTestOutput.stepId as OpenOpsId,
           {
+            input: flowStepTestOutput.input,
             output: flowStepTestOutput.output,
             lastTestDate: flowStepTestOutput.updated,
           },
         ]),
       );
-    },
-  );
-
-  fastify.post(
-    '/:flowVersionId/test-output',
-    SaveTestOutputRequestOptions,
-    async (request, reply) => {
-      const { flowVersionId } = request.params;
-      const { stepId, output } = request.body;
-
-      const flowVersion = await flowVersionService.getOne(flowVersionId);
-      if (!flowVersion) {
-        await reply.status(StatusCodes.NOT_FOUND).send({
-          success: false,
-          message: 'The defined flow version was not found',
-        });
-      }
-
-      const savedOutput = await flowStepTestOutputService.save({
-        stepId,
-        flowVersionId,
-        output,
-      });
-
-      await reply.status(StatusCodes.OK).send({
-        success: true,
-        message: 'Test output saved successfully',
-        data: {
-          output,
-          id: savedOutput.id,
-          stepId: savedOutput.stepId,
-          flowVersionId: savedOutput.flowVersionId,
-        },
-      });
     },
   );
 };
@@ -206,41 +173,6 @@ const GetLatestVersionsByConnectionRequestOptions = {
     }),
     response: {
       [StatusCodes.OK]: Type.Array(MinimalFlow),
-    },
-  },
-};
-
-const SaveTestOutputRequestOptions = {
-  config: {
-    allowedPrincipals: [PrincipalType.USER],
-  },
-  schema: {
-    params: Type.Object({
-      flowVersionId: Type.String(),
-    }),
-    tags: ['flow-step-test-output'],
-    description:
-      'Saves a user-defined test output for a specific step for the defined flow version.',
-    security: [SERVICE_KEY_SECURITY_OPENAPI],
-    body: T.Object({
-      stepId: T.String(),
-      output: T.Unknown(),
-    }),
-    response: {
-      [StatusCodes.OK]: T.Object({
-        success: T.Boolean(),
-        message: T.String(),
-        data: T.Object({
-          id: T.String(),
-          stepId: T.String(),
-          output: T.Unknown(),
-          flowVersionId: T.String(),
-        }),
-      }),
-      [StatusCodes.NOT_FOUND]: T.Object({
-        success: T.Boolean(),
-        message: T.String(),
-      }),
     },
   },
 };

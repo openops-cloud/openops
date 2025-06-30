@@ -1,6 +1,6 @@
 import { Check, X } from 'lucide-react';
 
-import { passwordRules } from '../lib/password-validation-utils';
+import { passwordRules } from '@openops/shared';
 
 const PasswordValidator = ({ password }: { password: string }) => {
   return (

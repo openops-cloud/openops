@@ -12,7 +12,6 @@ import {
   BlockCategory,
   BlockOptionRequest,
   encodeStepOutputs,
-  FlagId,
   flowHelper,
   GetBlockRequestParams,
   GetBlockRequestQuery,
@@ -20,13 +19,11 @@ import {
   ListBlocksRequestQuery,
   ListVersionRequestQuery,
   ListVersionsResponse,
-  OpenOpsId,
   OpsEdition,
   PrincipalType,
 } from '@openops/shared';
 import { engineRunner } from 'server-worker';
 import { accessTokenManager } from '../authentication/lib/access-token-manager';
-import { devFlagsService } from '../flags/dev-flags.service';
 import { flagService } from '../flags/flag.service';
 import { flowService } from '../flows/flow/flow.service';
 import { flowStepTestOutputService } from '../flows/step-test-output/flow-step-test-output.service';
@@ -152,19 +149,13 @@ const baseBlocksController: FastifyPluginAsyncTypebox = async (app) => {
       projectId,
     });
 
-    let stepTestOutputs: Record<OpenOpsId, string> | undefined = undefined;
-    const featureFlag = await devFlagsService.getOne(
-      FlagId.USE_NEW_EXTERNAL_TESTDATA,
-    );
-    if (featureFlag?.value) {
-      const stepIds = flowHelper.getAllStepIds(flow.version.trigger);
-      const outputs = await flowStepTestOutputService.listEncrypted({
-        flowVersionId: request.flowVersionId,
-        stepIds,
-      });
+    const stepIds = flowHelper.getAllStepIds(flow.version.trigger);
+    const outputs = await flowStepTestOutputService.listEncrypted({
+      flowVersionId: request.flowVersionId,
+      stepIds,
+    });
 
-      stepTestOutputs = encodeStepOutputs(outputs);
-    }
+    const stepTestOutputs = encodeStepOutputs(outputs);
 
     const { result } = await engineRunner.executeProp(engineToken, {
       block: await getBlockPackage(projectId, request),
