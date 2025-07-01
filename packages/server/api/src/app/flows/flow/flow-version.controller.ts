@@ -164,7 +164,8 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
         allowedPrincipals: [PrincipalType.USER],
       },
       schema: {
-        description: 'Inject test/sample output and input for a step in a flow version',
+        description:
+          'Inject test/sample output and input for a step in a flow version',
         params: Type.Object({
           flowVersionId: Type.String(),
         }),
