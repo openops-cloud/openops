@@ -54,6 +54,7 @@ export const triggerEventService = {
       flowId: flow.id,
       sourceName,
       payload: sanitizeObjectForPostgresql(payload),
+      input: sanitizeObjectForPostgresql(input),
     };
 
     if (flow.version.trigger.id) {
