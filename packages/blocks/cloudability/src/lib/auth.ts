@@ -15,7 +15,7 @@ export const cloudabilityAuth = BlockAuth.SecretAuth({
   displayName: 'API Key',
   required: true,
   authProviderKey: 'cloudability',
-  authProviderDisplayName: 'Cloudability',
+  authProviderDisplayName: 'CloudAbility',
   authProviderLogoUrl: 'https://static.openops.com/blocks/cloudability.png',
   description: markdown,
 });
