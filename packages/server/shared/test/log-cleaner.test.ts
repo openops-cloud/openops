@@ -1,6 +1,5 @@
 import { cleanLogEvent, maxFieldLength } from '../src/lib/logger/log-cleaner';
 
-// It's over 9000
 export const excessiveFieldLength = maxFieldLength + 9000;
 
 describe('log-cleaner', () => {
@@ -70,22 +69,6 @@ describe('log-cleaner', () => {
     });
   });
 
-  it('should map error object', () => {
-    const logEvent = {
-      event: new Error('test error'),
-    };
-
-    const result = cleanLogEvent(logEvent);
-
-    expect(result).toEqual({
-      event: {
-        stack: expect.stringMatching(/^Error: test error\s+at Object/),
-        name: 'Error',
-      },
-      message: 'test error',
-    });
-  });
-
   it('should ignore null or undefined values', () => {
     const logEvent = {
       event: {
@@ -149,6 +132,101 @@ describe('log-cleaner', () => {
           "    --> starting at object with constructor 'Object'\n" +
           "    --- property 'circular' closes the circle",
       },
+    });
+  });
+
+  describe('error objects', () => {
+    it('should map error object', () => {
+      const logEvent = {
+        event: new Error('test error'),
+      };
+
+      const result = cleanLogEvent(logEvent);
+
+      expect(result).toEqual({
+        event: {
+          stack: expect.stringMatching(/^Error: test error\s+at Object/),
+          name: 'Error',
+        },
+        message: 'test error',
+      });
+    });
+
+    it('should handle error object when logEvent.message already exists', () => {
+      const logEvent = {
+        message: 'existing message',
+        event: new Error('test error'),
+      };
+
+      const result = cleanLogEvent(logEvent);
+
+      expect(result).toEqual({
+        message: 'existing message',
+        event: {
+          stack: expect.stringMatching(/^Error: test error\s+at Object/),
+          name: 'Error',
+          message: 'test error',
+        },
+      });
+    });
+
+    it('should truncate long error stack traces', () => {
+      const longError = new Error('test error');
+      // Create a very long stack trace
+      longError.stack = 'Error: test error\n' + 'at test'.repeat(1000);
+
+      const logEvent = {
+        event: longError,
+      };
+
+      const result = cleanLogEvent(logEvent);
+
+      expect(result.event.stack).toHaveLength(2000);
+      expect(result.event.stack).toMatch(/\.\.\.$/);
+      expect(result.event.name).toBe('Error');
+      expect(result.message).toBe('test error');
+    });
+
+    it('should handle custom error types', () => {
+      class CustomError extends Error {
+        constructor(message: string) {
+          super(message);
+          this.name = 'CustomError';
+        }
+      }
+
+      const logEvent = {
+        event: new CustomError('custom error message'),
+      };
+
+      const result = cleanLogEvent(logEvent);
+
+      expect(result).toEqual({
+        event: {
+          stack: expect.stringMatching(
+            /^CustomError: custom error message\s+at Object/,
+          ),
+          name: 'CustomError',
+        },
+        message: 'custom error message',
+      });
+    });
+
+    it('should handle error with empty message', () => {
+      const error = new Error();
+      const logEvent = {
+        event: error,
+      };
+
+      const result = cleanLogEvent(logEvent);
+
+      expect(result).toEqual({
+        event: {
+          stack: expect.stringMatching(/^Error\s+at Object/),
+          name: 'Error',
+        },
+        message: '',
+      });
     });
   });
 });
