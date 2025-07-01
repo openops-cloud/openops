@@ -74,9 +74,9 @@ services:
           'CMD-SHELL',
           '/baserow/backend/docker/docker-entrypoint.sh backend-healthcheck',
         ]
-      interval: 15s
-      timeout: 5s
-      retries: 8
+      interval: 20s
+      timeout: 8s
+      retries: 10
     depends_on:
       redis:
         condition: service_healthy
@@ -101,7 +101,7 @@ services:
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:8088/health']
       interval: 20s
-      timeout: 10s
+      timeout: 8s
       retries: 10
     depends_on:
       postgres:
