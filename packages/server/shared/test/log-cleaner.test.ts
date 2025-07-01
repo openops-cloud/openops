@@ -1,5 +1,5 @@
 import { cleanLogEvent, maxFieldLength } from '../src/lib/logger/log-cleaner';
-
+// It's over 9000
 export const excessiveFieldLength = maxFieldLength + 9000;
 
 describe('log-cleaner', () => {
