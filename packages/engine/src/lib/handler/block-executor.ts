@@ -166,7 +166,11 @@ const executeAction: ActionHandler<BlockAction> = async ({
         name: constants.flowName,
         pauseId: executionState.pauseId,
         stop: createStopHook(hookResponse),
-        pause: createPauseHook(hookResponse, executionState.pauseId),
+        pause: createPauseHook(
+          hookResponse,
+          currentExecutionPath,
+          executionState.pauseId,
+        ),
         isTest: constants.testSingleStepMode,
       },
       project: {
@@ -281,6 +285,7 @@ function createStopHook(hookResponse: HookResponse): StopHook {
 
 function createPauseHook(
   hookResponse: HookResponse,
+  currentExecutionPath: string,
   pauseId: string,
 ): PauseHook {
   return (req) => {
@@ -293,10 +298,16 @@ function createPauseHook(
       ).executionCorrelationId;
     }
 
+    let path = currentExecutionPath;
+    if ('path' in req.pauseMetadata) {
+      path = (req.pauseMetadata as { path: string }).path;
+    }
+
     hookResponse.pauseResponse = {
       pauseMetadata: {
         ...req.pauseMetadata,
         executionCorrelationId,
+        path,
       },
     };
   };

@@ -14,6 +14,7 @@ import {
   isNil,
   PopulatedFlow,
   ProgressUpdateType,
+  RunEnvironment,
   TriggerPayload,
 } from '@openops/shared';
 import { engineApiService, workerApiService } from '../api/server-api.service';
@@ -36,6 +37,7 @@ async function executeRepeatingJob({
     versionId: flowVersionId,
     type: GetFlowVersionForWorkerRequestType.EXACT,
   });
+
   const flowVersion = populatedFlow?.version ?? null;
   const isStale = await isStaleFlowVersion(populatedFlow, jobType);
   if (isStale) {
@@ -52,7 +54,12 @@ async function executeRepeatingJob({
     });
     return;
   }
-  if (populatedFlow?.status === FlowStatus.DISABLED) {
+
+  if (
+    data.jobType === RepeatableJobType.EXECUTE_TRIGGER &&
+    data.environment === RunEnvironment.PRODUCTION &&
+    populatedFlow?.status === FlowStatus.DISABLED
+  ) {
     logger.info(
       {
         message: '[FlowQueueConsumer#executeRepeatingJob]',
@@ -63,6 +70,7 @@ async function executeRepeatingJob({
     );
     return;
   }
+
   assertNotNullOrUndefined(flowVersion, 'flowVersion');
   switch (data.jobType) {
     case RepeatableJobType.EXECUTE_TRIGGER:

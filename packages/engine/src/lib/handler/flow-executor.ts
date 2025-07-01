@@ -73,23 +73,30 @@ export const flowExecutor = {
         duration: stepEndTime - stepStartTime,
       });
 
-      if (flowExecutionContext.verdict !== ExecutionVerdict.RUNNING) {
+      if (
+        flowExecutionContext.verdict !== ExecutionVerdict.RUNNING &&
+        flowExecutionContext.verdict !== ExecutionVerdict.PAUSED
+      ) {
         break;
       }
 
-      const isNotNested = flowExecutionContext.currentPath.path.length === 0;
-      const sendContinuousProgress =
-        isNotNested &&
-        constants.progressUpdateType === ProgressUpdateType.TEST_FLOW;
-      if (sendContinuousProgress) {
-        progressService
-          .sendUpdate({
-            engineConstants: constants,
-            flowExecutorContext: flowExecutionContext,
-          })
-          .catch((error) => {
-            logger.error('Error sending progress update', error);
-          });
+      // const isNotNested = flowExecutionContext.currentPath.path.length === 0;
+      // const sendContinuousProgress =
+      //   isNotNested &&
+      //   constants.progressUpdateType === ProgressUpdateType.TEST_FLOW;
+      // if (sendContinuousProgress) {
+      progressService
+        .sendUpdate({
+          engineConstants: constants,
+          flowExecutorContext: flowExecutionContext,
+        })
+        .catch((error) => {
+          logger.error('Error sending progress update', error);
+        });
+      // }
+
+      if (flowExecutionContext.verdict === ExecutionVerdict.PAUSED) {
+        break;
       }
 
       currentAction = currentAction.nextAction;

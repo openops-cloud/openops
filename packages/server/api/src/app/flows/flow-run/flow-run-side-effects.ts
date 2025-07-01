@@ -120,6 +120,9 @@ export const flowRunSideEffects = {
           environment: flowRun.environment,
           jobType: RepeatableJobType.DELAYED_FLOW,
           flowVersionId: flowRun.flowVersionId,
+          resumePayload: {
+            ...flowRun.pauseMetadata,
+          },
         },
         delay: calculateDelayForPausedRun(pauseMetadata.resumeDateTime),
       });
