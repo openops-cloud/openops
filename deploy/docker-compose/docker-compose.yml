@@ -98,6 +98,11 @@ services:
       DATABASE_HOST_ALT: ${OPS_OPENOPS_TABLES_DB_HOST}
       SUPERSET_SECRET_KEY: ${OPS_ENCRYPTION_KEY}
       SUPERSET_FEATURE_ALLOW_ADHOC_SUBQUERY: '${ANALYTICS_ALLOW_ADHOC_SUBQUERY}'
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8088/health']
+      interval: 20s
+      timeout: 10s
+      retries: 10
     depends_on:
       postgres:
         condition: service_healthy
