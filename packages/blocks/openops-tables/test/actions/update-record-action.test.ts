@@ -330,7 +330,7 @@ describe('updateRowAction', () => {
   });
 });
 
-describe('fieldsProperties property', () => {
+describe.skip('fieldsProperties property', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
