@@ -3,7 +3,7 @@ import { cloudability } from '../src/index';
 describe('block declaration tests', () => {
   test('should return block with correct authentication', () => {
     expect(cloudability.auth).toMatchObject({
-      type: 'SECRET_TEXT',
+      type: 'CUSTOM_AUTH',
       required: true,
       authProviderKey: 'cloudability',
       authProviderDisplayName: 'Cloudability',
