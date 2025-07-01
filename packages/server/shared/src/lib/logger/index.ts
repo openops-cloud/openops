@@ -65,7 +65,7 @@ function initLogger(): Logger {
           const logEvent = cleanLogEvent({
             message,
             level: levelString,
-            event: eventData,
+            ...(eventData ? { event: eventData } : {}),
           });
 
           if (logzioLogger) {
