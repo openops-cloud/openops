@@ -101,7 +101,7 @@ const TestActionSection = React.memo(
       },
     });
 
-    const isTesting = isPending || isLoadingStepData;
+    const isTesting = isPending ?? isLoadingStepData;
 
     const handleTest = () => {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

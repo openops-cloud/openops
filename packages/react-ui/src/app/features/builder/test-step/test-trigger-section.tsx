@@ -174,7 +174,7 @@ const TestTriggerSection = React.memo(
       },
     });
 
-    const isTesting = isPending || isLoadingStepData;
+    const isTesting = isPending ?? isLoadingStepData;
 
     function updateSelectedData(data: TriggerEvent) {
       stepTestOutputCache.setStepData(formValues.id, {
