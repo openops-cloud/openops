@@ -13,13 +13,7 @@ import React, { useMemo } from 'react';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
-import {
-  FlagId,
-  FlowRun,
-  FlowRunStatus,
-  isNil,
-  RunEnvironment,
-} from '@openops/shared';
+import { FlagId, isNil, RunEnvironment } from '@openops/shared';
 import { LeftSideBarType } from '../builder-types';
 
 import { useEffectOnce } from 'react-use';
@@ -27,25 +21,7 @@ import { flowRunUtils } from '../../flow-runs/lib/flow-run-utils';
 import { RUN_DETAILS_STEP_CARD_ID_PREFIX } from './constants';
 import { FlowStepDetailsCardItem } from './flow-step-details-card-item';
 import { FlowStepInputOutput } from './flow-step-input-output';
-
-function getMessage(run: FlowRun | null, retentionDays: number | null) {
-  if (
-    !run ||
-    run.status === FlowRunStatus.RUNNING ||
-    run.status === FlowRunStatus.SCHEDULED
-  )
-    return null;
-  if (run.status === FlowRunStatus.INTERNAL_ERROR) {
-    return t('There are no logs captured for this run.');
-  }
-  if (isNil(run.logsFileId)) {
-    return t(
-      'Logs are kept for {days} days after execution and then deleted.',
-      { days: retentionDays },
-    );
-  }
-  return null;
-}
+import { getRunMessage } from './run-details-helpers';
 
 const FlowRunDetails = React.memo(() => {
   const { data: rententionDays } = flagsHooks.useFlag<number>(
@@ -85,7 +61,7 @@ const FlowRunDetails = React.memo(() => {
       : null;
   }, [run, selectedStep, loopsIndexes, flowVersion.trigger]);
 
-  const message = getMessage(run, rententionDays);
+  const message = getRunMessage(run, rententionDays);
 
   useEffectOnce(() => {
     if (!run?.steps) return;
