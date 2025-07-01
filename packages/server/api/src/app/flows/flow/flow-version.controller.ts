@@ -3,6 +3,8 @@ import {
   Type,
 } from '@fastify/type-provider-typebox';
 import {
+  ApplicationError,
+  ErrorCode,
   FlowVersionState,
   MinimalFlow,
   OpenOpsId,
@@ -183,6 +185,10 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
             success: Type.Boolean(),
             message: Type.String(),
           }),
+          [StatusCodes.NOT_FOUND]: Type.Object({
+            success: Type.Boolean(),
+            message: Type.String(),
+          }),
         },
       },
     },
@@ -212,10 +218,20 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
           id: saved.id,
         });
       } catch (error) {
-        await reply.status(StatusCodes.BAD_REQUEST).send({
-          success: false,
-          message: (error as Error).message,
-        });
+        if (
+          error instanceof ApplicationError &&
+          error.error.code === ErrorCode.ENTITY_NOT_FOUND
+        ) {
+          await reply.status(StatusCodes.NOT_FOUND).send({
+            success: false,
+            message: 'The defined flow version was not found',
+          });
+        } else {
+          await reply.status(StatusCodes.BAD_REQUEST).send({
+            success: false,
+            message: (error as Error).message,
+          });
+        }
       }
     },
   );
