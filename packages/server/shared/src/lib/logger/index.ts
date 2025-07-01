@@ -53,11 +53,24 @@ function initLogger(): Logger {
           const levelString = pino.levels.labels[level] ?? 'info';
           const message =
             inputArgs && inputArgs.find((arg) => typeof arg === 'string');
-          const logEvent = cleanLogEvent({
-            message,
-            level: levelString,
-            ...(!isEmpty(eventData) && { event: enrichEvent(eventData ?? {}) }),
-          });
+
+          let logEvent;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          if ((eventData as any) instanceof Error) {
+            logEvent = cleanLogEvent({
+              message,
+              level: levelString,
+              event: eventData,
+            });
+          } else {
+            logEvent = cleanLogEvent({
+              message,
+              level: levelString,
+              ...(!isEmpty(eventData) && {
+                event: enrichEvent(eventData ?? {}),
+              }),
+            });
+          }
 
           if (logzioLogger) {
             logzioLogger.log(logEvent);
