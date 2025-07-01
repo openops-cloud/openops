@@ -27,6 +27,7 @@ import { flowRunUtils } from '../../flow-runs/lib/flow-run-utils';
 import { RUN_DETAILS_STEP_CARD_ID_PREFIX } from './constants';
 import { FlowStepDetailsCardItem } from './flow-step-details-card-item';
 import { FlowStepInputOutput } from './flow-step-input-output';
+
 function getMessage(run: FlowRun | null, retentionDays: number | null) {
   if (
     !run ||
@@ -34,9 +35,7 @@ function getMessage(run: FlowRun | null, retentionDays: number | null) {
     run.status === FlowRunStatus.SCHEDULED
   )
     return null;
-  if (
-    [FlowRunStatus.INTERNAL_ERROR, FlowRunStatus.TIMEOUT].includes(run.status)
-  ) {
+  if (run.status === FlowRunStatus.INTERNAL_ERROR) {
     return t('There are no logs captured for this run.');
   }
   if (isNil(run.logsFileId)) {
