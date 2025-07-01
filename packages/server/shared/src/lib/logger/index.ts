@@ -7,6 +7,10 @@ import { getContext } from './async-context';
 import { initLogzioLogger } from './init-logzio';
 import { cleanLogEvent, truncate } from './log-cleaner';
 
+function isError(obj: unknown): obj is Error {
+  return obj instanceof Error;
+}
+
 function initLogger(): Logger {
   try {
     const level = system.get<Level>(SharedSystemProp.LOG_LEVEL) ?? 'info';
@@ -44,7 +48,7 @@ function initLogger(): Logger {
           ) {
             inputArgs = [inputArgs[1], inputArgs[0], ...inputArgs.slice(2)];
           }
-          const eventData =
+          let eventData: object | undefined =
             typeof inputArgs[0] === 'object' ? inputArgs[0] : undefined;
           if ((eventData && eventData['req']) || level < numericLevel) {
             return null;
@@ -54,23 +58,15 @@ function initLogger(): Logger {
           const message =
             inputArgs && inputArgs.find((arg) => typeof arg === 'string');
 
-          let logEvent;
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          if ((eventData as any) instanceof Error) {
-            logEvent = cleanLogEvent({
-              message,
-              level: levelString,
-              event: eventData,
-            });
-          } else {
-            logEvent = cleanLogEvent({
-              message,
-              level: levelString,
-              ...(!isEmpty(eventData) && {
-                event: enrichEvent(eventData ?? {}),
-              }),
-            });
+          if (isError(eventData) || !isEmpty(eventData)) {
+            eventData = enrichEvent(eventData ?? {});
           }
+
+          const logEvent = cleanLogEvent({
+            message,
+            level: levelString,
+            event: eventData,
+          });
 
           if (logzioLogger) {
             logzioLogger.log(logEvent);
@@ -107,8 +103,18 @@ function enrichEvent(event: object): object {
     clientIp: requestContext.get('clientIp' as never) ?? undefined,
   };
 
+  const baseEvent =
+    event instanceof Error
+      ? {
+          ...event,
+          message: event.message,
+          name: event.name,
+          stack: event.stack,
+        }
+      : event;
+
   return {
-    ...event,
+    ...baseEvent,
     ...enrichedContext,
     ...getContext(),
   };
