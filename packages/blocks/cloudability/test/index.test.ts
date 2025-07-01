@@ -6,7 +6,7 @@ describe('block declaration tests', () => {
       type: 'SECRET_TEXT',
       required: true,
       authProviderKey: 'cloudability',
-      authProviderDisplayName: 'Cloudability',
+      authProviderDisplayName: 'CloudAbility',
       authProviderLogoUrl: 'https://static.openops.com/blocks/cloudability.png',
     });
   });
