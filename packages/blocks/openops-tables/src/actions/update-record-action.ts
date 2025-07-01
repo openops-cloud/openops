@@ -1,19 +1,16 @@
 import { BlockAuth, createAction, Property } from '@openops/blocks-framework';
 import {
-  addRow,
   authenticateDefaultUserInOpenOpsTables,
   getFields,
   getPrimaryKeyFieldFromFields,
   getPropertyFromField,
-  getRowByPrimaryKeyValue,
   getTableFields,
   getTableIdByTableName,
   OpenOpsField,
   openopsTablesDropdownProperty,
-  updateRow,
+  upsertRow,
 } from '@openops/common';
 import { cacheWrapper } from '@openops/server-shared';
-import { convertToStringWithValidation, isEmpty } from '@openops/shared';
 
 export const updateRecordAction = createAction({
   auth: BlockAuth.None(),
@@ -111,7 +108,7 @@ export const updateRecordAction = createAction({
     }),
   },
   async run(context) {
-    const { rowPrimaryKey, fieldsProperties } = context.propsValue;
+    const { fieldsProperties } = context.propsValue;
     const tableName = context.propsValue.tableName as unknown as string;
 
     const tableCacheKey = `${context.run.id}-table-${tableName}`;
@@ -135,49 +132,13 @@ export const updateRecordAction = createAction({
       fieldsProperties,
     );
 
-    const primaryKeyField = getPrimaryKeyFieldFromFields(tableFields);
-    const primaryKeyValue = getPrimaryKey(rowPrimaryKey['rowPrimaryKey']);
-
-    const rowToUpdate = primaryKeyValue
-      ? await getRowByPrimaryKeyValue(
-          token,
-          tableId,
-          primaryKeyValue,
-          primaryKeyField.name,
-          primaryKeyField.type,
-        )
-      : undefined;
-
-    if (!rowToUpdate) {
-      fieldsToUpdate[primaryKeyField.name] = primaryKeyValue;
-      return await addRow({
-        tableId: tableId,
-        token: token,
-        fields: fieldsToUpdate,
-      });
-    }
-
-    return await updateRow({
+    return await upsertRow({
       tableId: tableId,
       token: token,
-      rowId: rowToUpdate.id,
       fields: fieldsToUpdate,
     });
   },
 });
-
-function getPrimaryKey(rowPrimaryKey: any): string | undefined {
-  if (rowPrimaryKey === null || rowPrimaryKey === undefined) {
-    return undefined;
-  }
-
-  const primaryKeyValue = convertToStringWithValidation(
-    rowPrimaryKey,
-    'The primary key should be a string',
-  );
-
-  return isEmpty(primaryKeyValue) ? undefined : primaryKeyValue;
-}
 
 function mapFieldsToObject(
   tableName: string,

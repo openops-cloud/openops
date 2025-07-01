@@ -32,6 +32,10 @@ export interface AddRowParams extends RowParams {
   fields: { [key: string]: any };
 }
 
+export interface UpsertRowParams extends RowParams {
+  fields: { [key: string]: any };
+}
+
 export interface UpdateRowParams extends RowParams {
   fields: { [key: string]: any };
   rowId: number;
@@ -113,6 +117,17 @@ export async function updateRow(updateRowParams: UpdateRowParams) {
     return await makeOpenOpsTablesPatch(
       `api/database/rows/table/${updateRowParams.tableId}/${updateRowParams.rowId}/?user_field_names=true`,
       updateRowParams.fields,
+      authenticationHeader,
+    );
+  });
+}
+
+export async function upsertRow(upsertRowParams: UpsertRowParams) {
+  return executeWithConcurrencyLimit(async () => {
+    const authenticationHeader = createAxiosHeaders(upsertRowParams.token);
+    return await makeOpenOpsTablesPost(
+      `api/database/rows/table/${upsertRowParams.tableId}/upsert/?user_field_names=true`,
+      upsertRowParams.fields,
       authenticationHeader,
     );
   });
