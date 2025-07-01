@@ -1,9 +1,4 @@
 ---
-description: 
-globs: 
-alwaysApply: true
----
----
 description: Coding guidelines
 globs: 
 alwaysApply: true
