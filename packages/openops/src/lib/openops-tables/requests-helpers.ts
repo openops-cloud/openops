@@ -76,6 +76,22 @@ export async function makeOpenOpsTablesPatch<T>(
   );
 }
 
+export async function makeOpenOpsTablesPut<T>(
+  route: string,
+  body: any,
+  headers?: AxiosHeaders,
+  retryConfigs?: IAxiosRetryConfig,
+): Promise<T> {
+  return makeOpenOpsTablesRequest<T>(
+    'PUT',
+    route,
+    body,
+    headers,
+    undefined,
+    retryConfigs,
+  );
+}
+
 export async function makeOpenOpsTablesGet<T>(
   route: string,
   headers?: AxiosHeaders,

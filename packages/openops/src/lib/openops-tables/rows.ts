@@ -11,6 +11,7 @@ import {
   makeOpenOpsTablesGet,
   makeOpenOpsTablesPatch,
   makeOpenOpsTablesPost,
+  makeOpenOpsTablesPut,
 } from '../openops-tables/requests-helpers';
 
 export interface OpenOpsRow {
@@ -125,7 +126,7 @@ export async function updateRow(updateRowParams: UpdateRowParams) {
 export async function upsertRow(upsertRowParams: UpsertRowParams) {
   return executeWithConcurrencyLimit(async () => {
     const authenticationHeader = createAxiosHeaders(upsertRowParams.token);
-    return await makeOpenOpsTablesPost(
+    return await makeOpenOpsTablesPut(
       `api/database/rows/table/${upsertRowParams.tableId}/upsert/?user_field_names=true`,
       upsertRowParams.fields,
       authenticationHeader,
