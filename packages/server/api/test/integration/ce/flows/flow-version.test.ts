@@ -302,72 +302,72 @@ describe('Flow Version API', () => {
       expect(responseBody).toHaveLength(0);
     });
   });
+});
 
-  describe('POST to update test-output', () => {
-    it('Should save the test-output', async () => {
-      const { mockOwner, mockProject } = await mockBasicSetup();
+describe('POST to update test-output', () => {
+  it('Should save the test-output', async () => {
+    const { mockOwner, mockProject } = await mockBasicSetup();
 
-      const mockFlow = createMockFlow({
-        projectId: mockProject.id,
-      });
-      await databaseConnection().getRepository('flow').save([mockFlow]);
+    const mockFlow = createMockFlow({
+      projectId: mockProject.id,
+    });
+    await databaseConnection().getRepository('flow').save([mockFlow]);
 
-      const mockFlowVersion = createMockFlowVersion({
-        flowId: mockFlow.id,
-        state: FlowVersionState.DRAFT,
-      });
-      await databaseConnection()
-        .getRepository('flow_version')
-        .save([mockFlowVersion]);
+    const mockFlowVersion = createMockFlowVersion({
+      flowId: mockFlow.id,
+      state: FlowVersionState.DRAFT,
+    });
+    await databaseConnection()
+      .getRepository('flow_version')
+      .save([mockFlowVersion]);
 
-      const mockToken = await generateMockToken({
-        id: mockOwner.id,
-        projectId: mockProject.id,
-        type: PrincipalType.USER,
-      });
-
-      const response = await app?.inject({
-        method: 'POST',
-        url: `/v1/flow-versions/${mockFlowVersion.id}/test-output`,
-        headers: {
-          authorization: `Bearer ${mockToken}`,
-        },
-        body: {
-          stepId: openOpsId(),
-          output: 'expected test output',
-        },
-      });
-
-      expect(response?.statusCode).toBe(StatusCodes.OK);
+    const mockToken = await generateMockToken({
+      id: mockOwner.id,
+      projectId: mockProject.id,
+      type: PrincipalType.USER,
     });
 
-    it('Should receive an error when trying to save the test-output', async () => {
-      const { mockOwner, mockProject } = await mockBasicSetup();
+    const response = await app?.inject({
+      method: 'POST',
+      url: `/v1/flow-versions/${mockFlowVersion.id}/test-output`,
+      headers: {
+        authorization: `Bearer ${mockToken}`,
+      },
+      body: {
+        stepId: openOpsId(),
+        output: 'expected test output',
+      },
+    });
 
-      const mockToken = await generateMockToken({
-        id: mockOwner.id,
-        projectId: mockProject.id,
-        type: PrincipalType.USER,
-      });
+    expect(response?.statusCode).toBe(StatusCodes.OK);
+  });
 
-      const response = await app?.inject({
-        method: 'POST',
-        url: `/v1/flow-versions/${openOpsId()}/test-output`,
-        headers: {
-          authorization: `Bearer ${mockToken}`,
-        },
-        body: {
-          stepId: openOpsId(),
-          output: 'expected test output',
-        },
-      });
+  it('Should receive an error when trying to save the test-output', async () => {
+    const { mockOwner, mockProject } = await mockBasicSetup();
 
-      expect(response?.statusCode).toBe(StatusCodes.NOT_FOUND);
-      const responseBody = response?.json();
-      expect(responseBody).toMatchObject({
-        success: false,
-        message: 'The defined flow version was not found',
-      });
+    const mockToken = await generateMockToken({
+      id: mockOwner.id,
+      projectId: mockProject.id,
+      type: PrincipalType.USER,
+    });
+
+    const response = await app?.inject({
+      method: 'POST',
+      url: `/v1/flow-versions/${openOpsId()}/test-output`,
+      headers: {
+        authorization: `Bearer ${mockToken}`,
+      },
+      body: {
+        stepId: openOpsId(),
+        output: 'expected test output',
+      },
+    });
+
+    expect(response?.statusCode).toBe(StatusCodes.NOT_FOUND);
+    const responseBody = response?.json();
+    expect(responseBody).toMatchObject({
+      success: false,
+      message: 'The defined flow version was not found',
     });
   });
 });
