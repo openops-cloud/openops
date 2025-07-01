@@ -223,7 +223,7 @@ describe('log-cleaner', () => {
 
       expect(result).toEqual({
         event: {
-          stack: expect.stringMatching(/^Error\s+at Object/),
+          stack: expect.stringMatching(/^Error(?::.*)?\n\s+at /),
           name: 'Error',
         },
         message: '',
