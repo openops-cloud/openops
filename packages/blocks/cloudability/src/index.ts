@@ -27,7 +27,7 @@ For more information, visit the [Cloudability API documentation](https://www.ibm
 `;
 
 export const cloudability = createBlock({
-  displayName: 'CloudAbility',
+  displayName: 'Cloudability',
   auth: cloudabilityAuth,
   minimumSupportedRelease: '0.20.0',
   logoUrl: 'https://static.openops.com/blocks/cloudability.png',
