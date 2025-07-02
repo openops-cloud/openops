@@ -99,7 +99,7 @@ export const ResumeRunRequest = DelayedJobData;
 export type ResumeRunRequest = Static<typeof ResumeRunRequest>;
 
 export const flowTimeoutSandbox =
-  system.getNumber(SharedSystemProp.FLOW_TIMEOUT_SECONDS) ?? 600;
+  system.getNumber(SharedSystemProp.FLOW_TIMEOUT_SECONDS) ?? 60;
 export const triggerTimeoutSandbox =
   system.getNumber(SharedSystemProp.TRIGGER_TIMEOUT_SECONDS) ?? 60;
 
