@@ -1,15 +1,10 @@
 /* eslint-disable no-console */
 import { requestContext } from '@fastify/request-context';
-import { isEmpty } from '@openops/shared';
 import pino, { Level, Logger, TransportSingleOptions } from 'pino';
 import { SharedSystemProp, system } from '../system';
 import { getContext } from './async-context';
 import { initLogzioLogger } from './init-logzio';
 import { cleanLogEvent, truncate } from './log-cleaner';
-
-function isError(obj: unknown): obj is Error {
-  return obj instanceof Error;
-}
 
 function initLogger(): Logger {
   try {
@@ -48,7 +43,7 @@ function initLogger(): Logger {
           ) {
             inputArgs = [inputArgs[1], inputArgs[0], ...inputArgs.slice(2)];
           }
-          let eventData: object | undefined =
+          const eventData =
             typeof inputArgs[0] === 'object' ? inputArgs[0] : undefined;
           if ((eventData && eventData['req']) || level < numericLevel) {
             return null;
@@ -58,14 +53,10 @@ function initLogger(): Logger {
           const message =
             inputArgs && inputArgs.find((arg) => typeof arg === 'string');
 
-          if (isError(eventData) || !isEmpty(eventData)) {
-            eventData = enrichEvent(eventData ?? {});
-          }
-
           const logEvent = cleanLogEvent({
             message,
             level: levelString,
-            ...(eventData ? { event: eventData } : {}),
+            event: enrichEvent(eventData ?? {}),
           });
 
           if (logzioLogger) {
@@ -104,7 +95,7 @@ function enrichEvent(event: object): object {
     ...getContext(),
   };
 
-  if (isError(event)) {
+  if (event instanceof Error) {
     Object.assign(event, enrichedContext);
     return event;
   }
