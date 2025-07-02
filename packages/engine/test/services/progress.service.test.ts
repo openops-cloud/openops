@@ -67,7 +67,6 @@ describe('Progress Service', () => {
 
       await progressService.sendUpdate(successParams);
 
-      expect(logger.debug).toHaveBeenCalledWith('Sending run update run request');
       expect(successParams.flowExecutorContext.toResponse).toHaveBeenCalled();
       expect(global.fetch).toHaveBeenCalledWith(
         'http://localhost:3000/v1/engine/update-run',

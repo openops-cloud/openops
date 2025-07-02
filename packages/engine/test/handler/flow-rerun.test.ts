@@ -2,6 +2,12 @@ import { ExecutionVerdict, FlowExecutorContext } from '../../src/lib/handler/con
 import { flowExecutor } from '../../src/lib/handler/flow-executor'
 import { buildBlockAction, generateMockEngineConstants } from './test-helper'
 
+jest.mock('../../src/lib/services/progress.service', () => ({
+    progressService: {
+        sendUpdate: jest.fn().mockImplementation(() => Promise.resolve()),
+    },
+}))
+
 const failedHttpAction = buildBlockAction({
     name: 'send_http',
     blockName: '@openops/block-http',

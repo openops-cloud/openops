@@ -73,10 +73,6 @@ export const flowExecutor = {
         duration: stepEndTime - stepStartTime,
       });
 
-      if (flowExecutionContext.verdict !== ExecutionVerdict.RUNNING) {
-        break;
-      }
-
       progressService
         .sendUpdate({
           engineConstants: constants,
@@ -85,6 +81,10 @@ export const flowExecutor = {
         .catch((error) => {
           logger.error('Error sending progress update', error);
         });
+
+      if (flowExecutionContext.verdict !== ExecutionVerdict.RUNNING) {
+        break;
+      }
 
       currentAction = currentAction.nextAction;
     }
