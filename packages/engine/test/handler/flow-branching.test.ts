@@ -4,7 +4,7 @@ import { buildActionWithOneCondition, generateMockEngineConstants } from './test
 import { BranchCondition, BranchOperator } from '@openops/shared'
 
 function executeBranchActionWithOneCondition(condition: BranchCondition): Promise<FlowExecutorContext> {
-    return flowExecutor.execute({
+    return flowExecutor.executeFromAction({
         action: buildActionWithOneCondition({
             condition,
         }),

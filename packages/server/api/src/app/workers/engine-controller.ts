@@ -155,13 +155,6 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
     app.io
       .to(populatedRun.projectId)
       .emit(WebsocketClientEvent.TEST_FLOW_RUN_PROGRESS, populatedRun);
-
-    await markJobAsCompleted(
-      populatedRun.status,
-      executionCorrelationId,
-      request.principal as unknown as EnginePrincipal,
-      runDetails.error,
-    );
   });
 
   app.get('/flows', GetLockedVersionRequest, async (request) => {

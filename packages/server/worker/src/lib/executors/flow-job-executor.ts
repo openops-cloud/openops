@@ -2,8 +2,10 @@ import {
   distributedLock,
   exceptionHandler,
   flowTimeoutSandbox,
+  JobStatus,
   logger,
   OneTimeJobData,
+  QueueName,
 } from '@openops/server-shared';
 import {
   ApplicationError,
@@ -112,15 +114,19 @@ async function executeFlow(
       if (isTimeoutError) {
         await handleTimeoutError(jobData, engineToken);
       } else {
-        await handleInternalError(
-          jobData,
+        const error = new ApplicationError({
+          code: ErrorCode.ENGINE_OPERATION_FAILURE,
+          params: {
+            message: result.error?.message ?? 'internal error',
+          },
+        });
+
+        await handleInternalError(jobData, engineToken, error);
+
+        await updateJobStatus(
           engineToken,
-          new ApplicationError({
-            code: ErrorCode.ENGINE_OPERATION_FAILURE,
-            params: {
-              message: result.error?.message ?? 'internal error',
-            },
-          }),
+          JobStatus.FAILED,
+          `Internal error reported by engine: ${JSON.stringify(error)}`,
         );
       }
     }
@@ -134,6 +140,7 @@ async function executeFlow(
       await handleInternalError(jobData, engineToken, e as Error);
     }
   } finally {
+    await updateJobStatus(engineToken);
     await flowRunLock.release();
   }
 }
@@ -194,6 +201,18 @@ async function handleInternalError(
     runId: jobData.runId,
   });
   exceptionHandler.handle(e);
+}
+
+async function updateJobStatus(
+  engineToken: string,
+  status: JobStatus = JobStatus.COMPLETED,
+  message = 'Flow succeeded',
+): Promise<void> {
+  await engineApiService(engineToken).updateJobStatus({
+    status,
+    message,
+    queueName: QueueName.ONE_TIME,
+  });
 }
 
 export const flowJobExecutor = {
