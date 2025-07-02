@@ -83,9 +83,8 @@ jobs:
     env:
       VERSION: ${{ needs.get-version.outputs.version }}
       RELEASE_DC_FILENAME: openops-dc-${{ needs.get-version.outputs.version }}.zip
-      DOWNLOAD_URL: https://files.openops.com/releases/${{ env.VERSION }}/${{ env.RELEASE_DC_FILENAME}}
     outputs:
-      download_url: ${{ env.DOWNLOAD_URL }}
+      download_url: ${{ steps.upload-release.outputs.download_url }}
     steps:
       - uses: actions/checkout@v4.2.2
       - name: Update version in docker-compose
@@ -116,6 +115,9 @@ jobs:
           aws-secret-access-key: ${{ secrets.RELEASE_S3_SECRET_ACCESS_KEY }}
           aws-region: us-east-2
       - name: Upload release to S3
+        id: upload-release
+        env:
+          DOWNLOAD_URL: https://files.openops.com/releases/${{ env.VERSION }}/${{ env.RELEASE_DC_FILENAME}}
         run: |
           aws s3 cp deploy/docker-compose/$RELEASE_DC_FILENAME s3://openops/releases/$VERSION/$RELEASE_DC_FILENAME
           cat <<EOF >> $GITHUB_STEP_SUMMARY
@@ -126,6 +128,7 @@ jobs:
           curl -fsS https://openops.sh/install | OPENOPS_URL=$DOWNLOAD_URL OPENOPS_VERSION=$VERSION sh
           \`\`\`
           EOF
+          echo "download_url=$DOWNLOAD_URL" >> $GITHUB_OUTPUT
   trigger-deployment:
     name: Trigger a deployment
     needs: [get-version, create-github-release]
