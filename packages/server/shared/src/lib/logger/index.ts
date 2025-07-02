@@ -104,7 +104,7 @@ function enrichEvent(event: object): object {
     ...getContext(),
   };
 
-  if (event instanceof Error) {
+  if (isError(event)) {
     Object.assign(event, enrichedContext);
     return event;
   }
