@@ -389,7 +389,7 @@ describe('redactSecrets', () => {
     expect(props.nonSecret).toBe('keep-this');
   });
 
-  test('should return original value when OAUTH2 client_secret is null', () => {
+  test('should return undefined value when OAUTH2 client_secret is null', () => {
     const connection: AppConnection = {
       ...baseConnection,
       type: AppConnectionType.OAUTH2,
