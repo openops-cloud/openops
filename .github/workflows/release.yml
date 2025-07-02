@@ -11,6 +11,10 @@ on:
         type: boolean
         description: Create latest tag
         default: true
+      deploy_to_test:
+        type: boolean
+        description: Deploy the release to the test environment
+        default: true
 
 jobs:
   get-version:
@@ -122,11 +126,11 @@ jobs:
           curl -fsS https://openops.sh/install | OPENOPS_URL=$DOWNLOAD_URL OPENOPS_VERSION=$VERSION sh
           \`\`\`
           EOF
-  deploy:
+  trigger-deployment:
     name: Trigger deployment to test environment
     needs: [get-version, create-github-release]
     runs-on: ubuntu-latest
-    if: github.repository == 'openops-cloud/openops'
+    if: github.repository == 'openops-cloud/openops' && inputs.deploy_to_test == 'true'
     steps:
       - name: Get token from Github App
         id: app_token
