@@ -130,7 +130,7 @@ jobs:
     name: Trigger deployment to test environment
     needs: [get-version, create-github-release]
     runs-on: ubuntu-latest
-    if: github.repository == 'openops-cloud/openops' && inputs.deploy_to_test == 'true'
+    if: ${{ github.repository == 'openops-cloud/openops' && inputs.deploy_to_test == 'true' }}
     steps:
       - name: Get token from Github App
         id: app_token
