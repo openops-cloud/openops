@@ -83,6 +83,9 @@ jobs:
     env:
       VERSION: ${{ needs.get-version.outputs.version }}
       RELEASE_DC_FILENAME: openops-dc-${{ needs.get-version.outputs.version }}.zip
+      DOWNLOAD_URL: https://files.openops.com/releases/${{ env.VERSION }}/${{ env.RELEASE_DC_FILENAME}}
+    outputs:
+      download_url: ${{ env.DOWNLOAD_URL }}
     steps:
       - uses: actions/checkout@v4.2.2
       - name: Update version in docker-compose
@@ -113,10 +116,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.RELEASE_S3_SECRET_ACCESS_KEY }}
           aws-region: us-east-2
       - name: Upload release to S3
-        env:
-          DOWNLOAD_URL: https://files.openops.com/releases/${{ env.VERSION }}/${{ env.RELEASE_DC_FILENAME}}
         run: |
-          echo "release_url=$DOWNLOAD_URL" >> $GITHUB_OUTPUT
           aws s3 cp deploy/docker-compose/$RELEASE_DC_FILENAME s3://openops/releases/$VERSION/$RELEASE_DC_FILENAME
           cat <<EOF >> $GITHUB_STEP_SUMMARY
           Also available at $DOWNLOAD_URL .
@@ -127,7 +127,7 @@ jobs:
           \`\`\`
           EOF
   trigger-deployment:
-    name: Trigger deployment to test environment
+    name: Trigger a deployment
     needs: [get-version, create-github-release]
     runs-on: ubuntu-latest
     if: github.repository == 'openops-cloud/openops' && inputs.deploy_to_test
@@ -143,7 +143,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.app_token.outputs.token }}
           VERSION: ${{ needs.get-version.outputs.version }}
-          RELEASE_URL: ${{ needs.create-github-release.outputs.release_url }}
+          RELEASE_URL: ${{ needs.create-github-release.outputs.download_url }}
         run: |
           gh workflow run "Deploy Docker Compose Release" -R openops-cloud/devops -f release_version=${VERSION} -f release_url=${RELEASE_URL} -r deploy-release-action
 
