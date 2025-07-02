@@ -141,5 +141,5 @@ jobs:
           VERSION: ${{ needs.get-version.outputs.version }}
           RELEASE_URL: ${{ needs.create-github-release.outputs.release_url }}
         run: |
-          gh workflow run deploy-docker-compose-release -R openops-cloud/devops -f release_version=${VERSION} -f release_url=${RELEASE_URL} -r main
+          gh workflow run deploy-docker-compose-release -R openops-cloud/devops -f release_version=${VERSION} -f release_url=${RELEASE_URL} -r deploy-release-action
 
