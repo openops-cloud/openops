@@ -3,6 +3,7 @@ import { logger } from '@openops/server-shared';
 import { throwIfExecutionTimeExceeded } from '../../src/lib/timeout-validator';
 
 jest.mock('@openops/server-shared', () => ({
+  ...jest.requireActual('@openops/server-shared'),
   logger: {
     debug: jest.fn(),
     error: jest.fn(),
@@ -186,6 +187,88 @@ describe('Progress Service', () => {
       await progressService.sendUpdate(params2);
 
       expect(global.fetch).toHaveBeenCalledTimes(2);
+    });
+
+    it('should deduplicate requests with different durations but same content', async () => {
+      const baseParams = {
+        ...mockParams,
+        engineConstants: {
+          ...mockParams.engineConstants,
+          executionCorrelationId: 'test-correlation-id-duration',
+        },
+      };
+
+      const params1 = {
+        ...baseParams,
+        flowExecutorContext: {
+          toResponse: jest.fn().mockResolvedValue({
+            steps: {},
+            status: 'RUNNING',
+            duration: 1000,
+            tasks: 1,
+          }),
+        },
+      };
+
+      const params2 = {
+        ...baseParams,
+        flowExecutorContext: {
+          toResponse: jest.fn().mockResolvedValue({
+            steps: {},
+            status: 'RUNNING',
+            duration: 2500, // different duration
+            tasks: 1,
+          }),
+        },
+      };
+
+      await progressService.sendUpdate(params1);
+      await progressService.sendUpdate(params2);
+
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+      expect(params1.flowExecutorContext.toResponse).toHaveBeenCalledTimes(1);
+      expect(params2.flowExecutorContext.toResponse).toHaveBeenCalledTimes(1);
+    });
+
+    it('should send separate requests when non-duration fields change', async () => {
+      const baseParams = {
+        ...mockParams,
+        engineConstants: {
+          ...mockParams.engineConstants,
+          executionCorrelationId: 'test-correlation-id-non-duration',
+        },
+      };
+
+      const params1 = {
+        ...baseParams,
+        flowExecutorContext: {
+          toResponse: jest.fn().mockResolvedValue({
+            steps: {},
+            status: 'RUNNING',
+            duration: 1000,
+            tasks: 1,
+          }),
+        },
+      };
+
+      const params2 = {
+        ...baseParams,
+        flowExecutorContext: {
+          toResponse: jest.fn().mockResolvedValue({
+            steps: {},
+            status: 'COMPLETED',
+            duration: 1000,
+            tasks: 1,
+          }),
+        },
+      };
+
+      await progressService.sendUpdate(params1);
+      await progressService.sendUpdate(params2);
+
+      expect(global.fetch).toHaveBeenCalledTimes(2);
+      expect(params1.flowExecutorContext.toResponse).toHaveBeenCalledTimes(1);
+      expect(params2.flowExecutorContext.toResponse).toHaveBeenCalledTimes(1);
     });
 
     it('should use mutex for thread safety', async () => {

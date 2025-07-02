@@ -1,7 +1,6 @@
-import { logger } from '@openops/server-shared';
+import { hashUtils, logger } from '@openops/server-shared';
 import { UpdateRunProgressRequest } from '@openops/shared';
 import { Mutex } from 'async-mutex';
-import crypto from 'crypto';
 import { EngineConstants } from '../handler/context/engine-constants';
 import { FlowExecutorContext } from '../handler/context/flow-execution-context';
 import { throwIfExecutionTimeExceeded } from '../timeout-validator';
@@ -45,14 +44,15 @@ const sendUpdateRunRequest = async (
   };
 
   // Request deduplication using hash comparison
-  const requestHash = crypto
-    .createHash('sha256')
-    .update(JSON.stringify(request))
-    .digest('hex');
+  const requestHash = hashUtils.hashObject(request, (key, value) => {
+    if (key === 'duration') return undefined;
+    return value;
+  });
 
   if (requestHash === lastRequestHash) {
     return;
   }
+
   lastRequestHash = requestHash;
 
   await fetch(url.toString(), {
