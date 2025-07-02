@@ -31,9 +31,9 @@ services:
           'CMD-SHELL',
           '/baserow/backend/docker/docker-entrypoint.sh backend-healthcheck',
         ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      interval: 20s
+      timeout: 8s
+      retries: 10
     shm_size: '512mb'
     depends_on:
       redis:
@@ -87,6 +87,11 @@ services:
       SUPERSET_FEATURE_ALLOW_ADHOC_SUBQUERY: '${ANALYTICS_ALLOW_ADHOC_SUBQUERY}'
       ADMIN_PASSWORD: ${OPS_ANALYTICS_ADMIN_PASSWORD}
       POWERUSER_PASSWORD: ${ANALYTICS_POWERUSER_PASSWORD}
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8088/health']
+      interval: 20s
+      timeout: 8s
+      retries: 10
     depends_on:
       postgres:
         condition: service_healthy

@@ -1,4 +1,4 @@
-import { JsonViewer, ScrollArea } from '@openops/components/ui';
+import { ScrollArea, TestStepDataViewer } from '@openops/components/ui';
 import { t } from 'i18next';
 import { Timer } from 'lucide-react';
 import React from 'react';
@@ -55,13 +55,11 @@ const FlowStepInputOutput = React.memo(
                 </>
               )}
             </div>
-            <JsonViewer
-              title={t('Input')}
-              json={stepDetails.input}
+            <TestStepDataViewer
+              inputJson={stepDetails.input}
+              outputJson={stepOutput}
               theme={theme}
             />
-            <div className="mt-4"></div>
-            <JsonViewer title={t('Output')} json={stepOutput} theme={theme} />
           </div>
         )}
       </ScrollArea>

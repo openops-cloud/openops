@@ -1,11 +1,11 @@
 import { useStepSettingsContext } from '@/app/features/builder/step-settings/step-settings-context';
 import { stepTestOutputHooks } from '@/app/features/builder/test-step/step-test-output-hooks';
 import {
-  JsonViewer,
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
+  TestStepDataViewer,
   Tooltip,
   TooltipContent,
   TooltipTrigger,
@@ -85,10 +85,9 @@ const TestStepContainer = React.memo(
             )}
           </TabsContent>
           <TabsContent value={TabListEnum.SAMPLE_STEP_OUTPUT}>
-            <JsonViewer
-              title={t('Output')}
+            <TestStepDataViewer
+              outputJson={selectedStep?.settings?.inputUiInfo?.sampleData ?? ''}
               onChange={useSaveSelectedStepSampleData}
-              json={selectedStep?.settings?.inputUiInfo?.sampleData ?? ''}
               readonly={false}
             />
           </TabsContent>

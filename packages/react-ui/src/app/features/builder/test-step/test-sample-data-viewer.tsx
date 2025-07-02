@@ -1,4 +1,4 @@
-import { Button, JsonViewer } from '@openops/components/ui';
+import { Button, TestStepDataViewer } from '@openops/components/ui';
 import { t } from 'i18next';
 import React, { useMemo } from 'react';
 
@@ -14,7 +14,8 @@ type TestSampleDataViewerProps = {
   isValid: boolean;
   isSaving: boolean;
   isTesting: boolean;
-  data: unknown;
+  inputData: unknown;
+  outputData: unknown;
   errorMessage: string | undefined;
   lastTestDate: string | undefined;
   children?: React.ReactNode;
@@ -26,14 +27,20 @@ const TestSampleDataViewer = React.memo(
     isValid,
     isSaving,
     isTesting,
-    data,
+    inputData,
+    outputData,
     errorMessage,
     lastTestDate,
     children,
   }: TestSampleDataViewerProps) => {
-    const formattedData = useMemo(
-      () => formatUtils.formatStepInputOrOutput(data),
-      [data],
+    const formattedInputData = useMemo(
+      () => formatUtils.formatStepInputOrOutput(inputData),
+      [inputData],
+    );
+
+    const formattedOutputData = useMemo(
+      () => formatUtils.formatStepInputOrOutput(outputData),
+      [outputData],
     );
 
     const { theme } = useTheme();
@@ -83,11 +90,11 @@ const TestSampleDataViewer = React.memo(
               </Button>
             </TestButtonTooltip>
           </div>
-          <JsonViewer
-            json={errorMessage ?? formattedData}
-            title={t('Output')}
+          <TestStepDataViewer
+            outputJson={errorMessage ?? formattedOutputData}
+            inputJson={formattedInputData}
             theme={theme}
-          ></JsonViewer>
+          />
         </div>
       </>
     );
