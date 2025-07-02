@@ -10,7 +10,7 @@ import {
 
 const REDACTED_MESSAGE = '**REDACTED**';
 
-const redactIfTruthy = (value: any): any => {
+const redactIfNotNilOrEmpty = (value: any): any => {
   return !isNil(value) && value !== '' ? REDACTED_MESSAGE : value;
 };
 
@@ -19,7 +19,7 @@ const redactProperty = (
   key: string,
 ): Record<string, any> => ({
   ...obj,
-  [key]: redactIfTruthy(obj[key]),
+  [key]: redactIfNotNilOrEmpty(obj[key]),
 });
 
 export const removeSensitiveData = (
@@ -55,7 +55,7 @@ export function redactSecrets(
           if (
             (prop as { type: PropertyType }).type === PropertyType.SECRET_TEXT
           ) {
-            props[key] = redactIfTruthy(props[key]);
+            props[key] = redactIfNotNilOrEmpty(props[key]);
           }
         }
         redacted.props = props;
