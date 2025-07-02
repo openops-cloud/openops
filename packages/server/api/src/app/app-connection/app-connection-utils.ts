@@ -5,9 +5,22 @@ import {
   AppConnectionType,
   AppConnectionValue,
   AppConnectionWithoutSensitiveData,
+  isNil,
 } from '@openops/shared';
 
 const REDACTED_MESSAGE = '**REDACTED**';
+
+const redactIfTruthy = (value: any): any => {
+  return !isNil(value) && value !== '' ? REDACTED_MESSAGE : value;
+};
+
+const redactProperty = (
+  obj: Record<string, any>,
+  key: string,
+): Record<string, any> => ({
+  ...obj,
+  [key]: redactIfTruthy(obj[key]),
+});
 
 export const removeSensitiveData = (
   appConnection: AppConnection,
@@ -28,17 +41,11 @@ export function redactSecrets(
 
   switch (auth?.type) {
     case PropertyType.SECRET_TEXT: {
-      return {
-        ...redacted,
-        secret_text: REDACTED_MESSAGE,
-      };
+      return redactProperty(redacted, 'secret_text');
     }
 
     case PropertyType.BASIC_AUTH: {
-      return {
-        ...redacted,
-        password: REDACTED_MESSAGE,
-      };
+      return redactProperty(redacted, 'password');
     }
 
     case PropertyType.CUSTOM_AUTH: {
@@ -48,7 +55,7 @@ export function redactSecrets(
           if (
             (prop as { type: PropertyType }).type === PropertyType.SECRET_TEXT
           ) {
-            props[key] = REDACTED_MESSAGE;
+            props[key] = redactIfTruthy(props[key]);
           }
         }
         redacted.props = props;
@@ -62,12 +69,15 @@ export function redactSecrets(
         typeof redacted.client_id === 'string' &&
         typeof redacted.redirect_url === 'string'
       ) {
-        return {
-          type: AppConnectionType.OAUTH2,
-          client_id: redacted.client_id,
-          client_secret: REDACTED_MESSAGE,
-          redirect_url: redacted.redirect_url,
-        };
+        return redactProperty(
+          {
+            type: AppConnectionType.OAUTH2,
+            client_id: redacted.client_id,
+            client_secret: redacted.client_secret,
+            redirect_url: redacted.redirect_url,
+          },
+          'client_secret',
+        );
       }
 
       return undefined;
