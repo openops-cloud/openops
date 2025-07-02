@@ -86,8 +86,7 @@ const pauseFlowWithLoopAndBranch = buildSimpleLoopAction({
 })
 
 describe('flow with pause', () => {
-
-    it('should pause and resume succesfully with loops and branch', async () => {
+    it('should pause and resume successfully with loops and branch', async () => {
         const pauseResult = await flowExecutor.execute({
             action: pauseFlowWithLoopAndBranch,
             executionState: FlowExecutorContext.empty().setPauseId('executionCorrelationId'),
@@ -145,6 +144,7 @@ describe('flow with pause', () => {
         expect(resumeResult1.verdictResponse).toEqual({
             'pauseMetadata': {
                 executionCorrelationId: 'executionCorrelationId',
+                path: "approval-1",
                 response: {},
             },
             'reason': 'PAUSED',
@@ -164,9 +164,7 @@ describe('flow with pause', () => {
             }),
         })
         expect(resumeResult2.verdict).toBe(ExecutionVerdict.RUNNING)
-
     })
-
 
     it('should pause and resume successfully', async () => {
         const pauseResult = await flowExecutor.execute({
@@ -178,6 +176,7 @@ describe('flow with pause', () => {
         expect(pauseResult.verdictResponse).toEqual({
             'pauseMetadata': {
                 executionCorrelationId: 'executionCorrelationId',
+                path: "approval",
                 response: {},
             },
             'reason': 'PAUSED',
