@@ -286,6 +286,51 @@ describe('Engine Controller - update-run endpoint', () => {
       );
     });
 
+    it('should return early and not mark job as completed when populatedRun status is RUNNING', async () => {
+      const request = {
+        ...baseRequest,
+        body: {
+          ...baseRequest.body,
+          runDetails: {
+            ...baseRequest.body.runDetails,
+            status: FlowRunStatus.SUCCEEDED,
+          },
+        },
+      };
+
+      (flowRunService.updateStatus as jest.Mock).mockResolvedValue({
+        ...mockPopulatedRun,
+        status: FlowRunStatus.RUNNING,
+      });
+
+      const updateRunHandler = handlers['/update-run'];
+      await updateRunHandler(
+        request as unknown as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(flowRunService.updateStatus).toHaveBeenCalledWith({
+        flowRunId: 'test-run-id',
+        status: FlowRunStatus.SUCCEEDED,
+        tasks: [],
+        duration: 1000,
+        executionState: {
+          steps: { step1: { result: 'success' } },
+        },
+        projectId: 'test-project-id',
+        tags: [],
+      });
+
+      expect(mockIo.to).toHaveBeenCalledWith('test-project-id');
+      expect(mockIo.emit).toHaveBeenCalledWith(
+        WebsocketClientEvent.FLOW_RUN_PROGRESS,
+        'test-run-id',
+      );
+
+      // Should NOT call flowConsumer.update (markJobAsCompleted)
+      expect(flowConsumer.update).not.toHaveBeenCalled();
+    });
+
     describe('PAUSED status handling', () => {
       it('should handle PAUSED status with pause metadata', async () => {
         const pauseMetadata = {
@@ -342,7 +387,14 @@ describe('Engine Controller - update-run endpoint', () => {
           mockReply as unknown as FastifyReply,
         );
 
-        expect(flowRunService.pause).not.toHaveBeenCalled();
+        expect(flowRunService.pause).toHaveBeenCalledWith({
+          flowRunId: 'test-run-id',
+          pauseMetadata: {
+            progressUpdateType: ProgressUpdateType.NONE,
+            handlerId: 'test-handler-id',
+            executionCorrelationId: 'test-correlation-id',
+          },
+        });
       });
     });
 

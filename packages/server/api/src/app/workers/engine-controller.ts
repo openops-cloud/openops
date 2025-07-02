@@ -136,14 +136,11 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
       tags: runDetails.tags ?? [],
     });
 
-    if (
-      runDetails.status === FlowRunStatus.PAUSED &&
-      !isNil(runDetails.pauseMetadata)
-    ) {
+    if (runDetails.status === FlowRunStatus.PAUSED) {
       await flowRunService.pause({
         flowRunId: runId,
         pauseMetadata: {
-          ...runDetails.pauseMetadata,
+          ...(runDetails.pauseMetadata ?? {}),
           progressUpdateType,
           handlerId: workerHandlerId ?? undefined,
           executionCorrelationId:
@@ -156,6 +153,10 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
     app.io
       .to(request.principal.projectId)
       .emit(WebsocketClientEvent.FLOW_RUN_PROGRESS, runId);
+
+    if (populatedRun.status === FlowRunStatus.RUNNING) {
+      return;
+    }
 
     await markJobAsCompleted(
       populatedRun.status,
