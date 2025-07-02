@@ -59,13 +59,15 @@ export const cleanLogEvent = (logEvent: any) => {
   }
 
   if (logEvent.event instanceof Error) {
-    eventData.stack = truncate(logEvent.event.stack, 2000);
-    eventData.name = logEvent.event.name;
+    const { stack, message, name, ...rest } = logEvent.event;
+    eventData.stack = truncate(stack, 2000);
+    eventData.name = name;
     if (!logEvent.message) {
-      logEvent.message = truncate(logEvent.event.message);
+      logEvent.message = truncate(message);
     } else {
-      eventData.message = truncate(logEvent.event.message);
+      eventData.message = truncate(message);
     }
+    Object.assign(eventData, rest);
   }
   logEvent.event = eventData;
   return logEvent;

@@ -101,22 +101,17 @@ function enrichEvent(event: object): object {
     requestMethod: requestContext.get('requestMethod' as never) ?? undefined,
     requestPath: requestContext.get('requestPath' as never) ?? undefined,
     clientIp: requestContext.get('clientIp' as never) ?? undefined,
+    ...getContext(),
   };
 
-  const baseEvent =
-    event instanceof Error
-      ? {
-          ...event,
-          message: event.message,
-          name: event.name,
-          stack: event.stack,
-        }
-      : event;
+  if (event instanceof Error) {
+    Object.assign(event, enrichedContext);
+    return event;
+  }
 
   return {
-    ...baseEvent,
+    ...event,
     ...enrichedContext,
-    ...getContext(),
   };
 }
 

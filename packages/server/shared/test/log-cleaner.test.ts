@@ -138,8 +138,12 @@ describe('log-cleaner', () => {
 
   describe('error objects', () => {
     it('should map error object', () => {
+      const error = new Error('test error');
+      Object.assign(error, {
+        testContext: 'testContext',
+      });
       const logEvent = {
-        event: new Error('test error'),
+        event: error,
       };
 
       const result = cleanLogEvent(logEvent);
@@ -148,6 +152,7 @@ describe('log-cleaner', () => {
         event: {
           stack: expect.stringMatching(/^Error: test error\s+at Object/),
           name: 'Error',
+          testContext: 'testContext',
         },
         message: 'test error',
       });
