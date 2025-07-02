@@ -44,14 +44,17 @@ const executeFlow = async (
     executionState: context,
     constants,
   });
+
   const newContext =
     output.verdict === ExecutionVerdict.RUNNING
       ? output.setVerdict(ExecutionVerdict.SUCCEEDED, output.verdictResponse)
       : output;
+
   await progressService.sendUpdate({
     engineConstants: constants,
     flowExecutorContext: newContext,
   });
+
   const response = await newContext.toResponse();
   return {
     status: EngineResponseStatus.OK,

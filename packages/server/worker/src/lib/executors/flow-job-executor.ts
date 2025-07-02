@@ -2,8 +2,10 @@ import {
   distributedLock,
   exceptionHandler,
   flowTimeoutSandbox,
+  JobStatus,
   logger,
   OneTimeJobData,
+  QueueName,
 } from '@openops/server-shared';
 import {
   ApplicationError,
@@ -79,6 +81,8 @@ async function executeFlow(
     timeout: (flowTimeoutSandbox + 3) * 1000, // Engine timeout plus 3 more seconds
   });
 
+  let jobStatus: JobStatus | undefined;
+  let message: string | undefined;
   try {
     if (jobData.executionType === ExecutionType.BEGIN) {
       await setFirstRunningState(jobData, engineToken);
@@ -112,16 +116,17 @@ async function executeFlow(
       if (isTimeoutError) {
         await handleTimeoutError(jobData, engineToken);
       } else {
-        await handleInternalError(
-          jobData,
-          engineToken,
-          new ApplicationError({
-            code: ErrorCode.ENGINE_OPERATION_FAILURE,
-            params: {
-              message: result.error?.message ?? 'internal error',
-            },
-          }),
-        );
+        const error = new ApplicationError({
+          code: ErrorCode.ENGINE_OPERATION_FAILURE,
+          params: {
+            message: result.error?.message ?? 'internal error',
+          },
+        });
+
+        await handleInternalError(jobData, engineToken, error);
+
+        jobStatus = JobStatus.FAILED;
+        message = `Internal error reported by engine: ${JSON.stringify(error)}`;
       }
     }
   } catch (e) {
@@ -132,8 +137,11 @@ async function executeFlow(
       await handleTimeoutError(jobData, engineToken);
     } else {
       await handleInternalError(jobData, engineToken, e as Error);
+      jobStatus = JobStatus.FAILED;
+      message = `Internal error reported by engine: ${JSON.stringify(e)}`;
     }
   } finally {
+    await updateJobStatus(engineToken, jobStatus, message);
     await flowRunLock.release();
   }
 }
@@ -194,6 +202,18 @@ async function handleInternalError(
     runId: jobData.runId,
   });
   exceptionHandler.handle(e);
+}
+
+async function updateJobStatus(
+  engineToken: string,
+  status: JobStatus = JobStatus.COMPLETED,
+  message = 'Flow succeeded',
+): Promise<void> {
+  await engineApiService(engineToken).updateJobStatus({
+    status,
+    message,
+    queueName: QueueName.ONE_TIME,
+  });
 }
 
 export const flowJobExecutor = {
