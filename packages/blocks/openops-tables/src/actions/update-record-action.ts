@@ -11,6 +11,7 @@ import {
   upsertRow,
 } from '@openops/common';
 import { cacheWrapper } from '@openops/server-shared';
+import { convertToStringWithValidation } from '@openops/shared';
 
 export const updateRecordAction = createAction({
   auth: BlockAuth.None(),
@@ -108,7 +109,7 @@ export const updateRecordAction = createAction({
     }),
   },
   async run(context) {
-    const { fieldsProperties } = context.propsValue;
+    const { rowPrimaryKey, fieldsProperties } = context.propsValue;
     const tableName = context.propsValue.tableName as unknown as string;
 
     const tableCacheKey = `${context.run.id}-table-${tableName}`;
@@ -131,6 +132,7 @@ export const updateRecordAction = createAction({
       tableFields,
       fieldsProperties,
     );
+    validatePrimaryKey(rowPrimaryKey['rowPrimaryKey']);
 
     return await upsertRow({
       tableId: tableId,
@@ -164,4 +166,15 @@ function mapFieldsToObject(
   }
 
   return fieldsToUpdate;
+}
+
+function validatePrimaryKey(rowPrimaryKey: any): void {
+  if (rowPrimaryKey === null || rowPrimaryKey === undefined) {
+    return;
+  }
+
+  convertToStringWithValidation(
+    rowPrimaryKey,
+    'The primary key should be a string',
+  );
 }
