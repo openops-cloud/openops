@@ -125,7 +125,7 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
       );
     }
 
-    await flowRunService.updateStatus({
+    const populatedRun = await flowRunService.updateStatus({
       flowRunId: runId,
       status: getTerminalStatus(runDetails.status),
       tasks: runDetails.tasks,

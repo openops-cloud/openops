@@ -141,8 +141,9 @@ async function executeFlow(
     } else {
       await handleInternalError(jobData, engineToken, e as Error);
       jobStatus = JobStatus.FAILED;
-      jobFinalMessage = `Internal error reported by engine. Error message: ${(e as Error).message}`;
-
+      jobFinalMessage = `Internal error reported by engine. Error message: ${
+        (e as Error).message
+      }`;
     }
   } finally {
     await updateJobStatus(engineToken, jobStatus, jobFinalMessage);
