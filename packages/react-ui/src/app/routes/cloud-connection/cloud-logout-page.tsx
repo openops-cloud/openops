@@ -29,13 +29,13 @@ const CloudLogoutPage = () => {
     Cookies.remove('cloud-refresh-token');
 
     app.ready(() => {
-      app.logout();
-
-      if (window.opener) {
-        setTimeout(() => {
-          window.close();
-        }, 300);
-      }
+      app.logout(() => {
+        if (window.opener) {
+          setTimeout(() => {
+            window.close();
+          }, 300);
+        }
+      });
     });
   }, [flags, isLoading, navigate]);
 
