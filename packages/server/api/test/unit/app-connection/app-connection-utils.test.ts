@@ -23,6 +23,12 @@ describe('redactSecrets', () => {
     authProviderKey: 'auth-provider-1',
   };
 
+  const falsyValues = [
+    { value: null, description: 'null' },
+    { value: undefined, description: 'undefined' },
+    { value: '', description: 'empty string' },
+  ];
+
   test('should return redacted SECRET_TEXT connection', () => {
     const connection: AppConnection = {
       ...baseConnection,
@@ -189,205 +195,102 @@ describe('redactSecrets', () => {
     expect(result).toEqual(undefined);
   });
 
-  test('should return original value when SECRET_TEXT is null', () => {
-    const connection: AppConnection = {
-      ...baseConnection,
-      type: AppConnectionType.SECRET_TEXT,
-      value: {
+  test.each(falsyValues)(
+    'should return original value when SECRET_TEXT is $description',
+    ({ value }) => {
+      const connection: AppConnection = {
+        ...baseConnection,
         type: AppConnectionType.SECRET_TEXT,
-        secret_text: null as any,
-      },
-    };
+        value: {
+          type: AppConnectionType.SECRET_TEXT,
+          secret_text: value as any,
+        },
+      };
 
-    const auth: BlockAuthProperty = {
-      authProviderKey: 'AWS',
-      authProviderDisplayName: 'AWS',
-      authProviderLogoUrl: `https://static.openops.com/blocks/aws.png`,
-      type: PropertyType.SECRET_TEXT,
-      displayName: 'Secret',
-      valueSchema: 'some schema',
-      required: true,
-    };
+      const auth: BlockAuthProperty = {
+        authProviderKey: 'AWS',
+        authProviderDisplayName: 'AWS',
+        authProviderLogoUrl: `https://static.openops.com/blocks/aws.png`,
+        type: PropertyType.SECRET_TEXT,
+        displayName: 'Secret',
+        valueSchema: 'some schema',
+        required: true,
+      };
 
-    const result = redactSecrets(auth, connection.value);
-    expect(result?.secret_text).toBe(null);
-  });
+      const result = redactSecrets(auth, connection.value);
+      expect(result?.secret_text).toBe(value);
+    },
+  );
 
-  test('should return original value when SECRET_TEXT is undefined', () => {
-    const connection: AppConnection = {
-      ...baseConnection,
-      type: AppConnectionType.SECRET_TEXT,
-      value: {
-        type: AppConnectionType.SECRET_TEXT,
-        secret_text: undefined as any,
-      },
-    };
-
-    const auth: BlockAuthProperty = {
-      authProviderKey: 'AWS',
-      authProviderDisplayName: 'AWS',
-      authProviderLogoUrl: `https://static.openops.com/blocks/aws.png`,
-      type: PropertyType.SECRET_TEXT,
-      displayName: 'Secret',
-      valueSchema: 'some schema',
-      required: true,
-    };
-
-    const result = redactSecrets(auth, connection.value);
-    expect(result?.secret_text).toBe(undefined);
-  });
-
-  test('should return original value when SECRET_TEXT is empty string', () => {
-    const connection: AppConnection = {
-      ...baseConnection,
-      type: AppConnectionType.SECRET_TEXT,
-      value: {
-        type: AppConnectionType.SECRET_TEXT,
-        secret_text: '',
-      },
-    };
-
-    const auth: BlockAuthProperty = {
-      authProviderKey: 'AWS',
-      authProviderDisplayName: 'AWS',
-      authProviderLogoUrl: `https://static.openops.com/blocks/aws.png`,
-      type: PropertyType.SECRET_TEXT,
-      displayName: 'Secret',
-      valueSchema: 'some schema',
-      required: true,
-    };
-
-    const result = redactSecrets(auth, connection.value);
-    expect(result?.secret_text).toBe('');
-  });
-
-  test('should return original value when BASIC_AUTH password is null', () => {
-    const connection: AppConnection = {
-      ...baseConnection,
-      type: AppConnectionType.BASIC_AUTH,
-      value: {
+  test.each(falsyValues)(
+    'should return original value when BASIC_AUTH password is $description',
+    ({ value }) => {
+      const connection: AppConnection = {
+        ...baseConnection,
         type: AppConnectionType.BASIC_AUTH,
-        username: 'user',
-        password: null as any,
-      },
-    };
+        value: {
+          type: AppConnectionType.BASIC_AUTH,
+          username: 'user',
+          password: value as any,
+        },
+      };
 
-    const auth = {
-      type: PropertyType.BASIC_AUTH,
-      displayName: 'Basic Auth',
-      username: { displayName: 'Username' },
-      password: { displayName: 'Password' },
-      valueSchema: {} as any,
-    } as any;
+      const auth = {
+        type: PropertyType.BASIC_AUTH,
+        displayName: 'Basic Auth',
+        username: { displayName: 'Username' },
+        password: { displayName: 'Password' },
+        valueSchema: {} as any,
+      } as any;
 
-    const result = redactSecrets(auth, connection.value);
-    expect(result?.password).toBe(null);
-    expect(result?.username).toBe('user');
-  });
+      const result = redactSecrets(auth, connection.value);
+      expect(result?.password).toBe(value);
+      expect(result?.username).toBe('user');
+    },
+  );
 
-  test('should return original value when BASIC_AUTH password is empty string', () => {
-    const connection: AppConnection = {
-      ...baseConnection,
-      type: AppConnectionType.BASIC_AUTH,
-      value: {
-        type: AppConnectionType.BASIC_AUTH,
-        username: 'user',
-        password: '',
-      },
-    };
-
-    const auth = {
-      type: PropertyType.BASIC_AUTH,
-      displayName: 'Basic Auth',
-      username: { displayName: 'Username' },
-      password: { displayName: 'Password' },
-      valueSchema: {} as any,
-    } as any;
-
-    const result = redactSecrets(auth, connection.value);
-    expect(result?.password).toBe('');
-    expect(result?.username).toBe('user');
-  });
-
-  test('should return original value when CUSTOM_AUTH secret prop is null', () => {
-    const connection: AppConnection = {
-      ...baseConnection,
-      type: AppConnectionType.CUSTOM_AUTH,
-      value: {
+  test.each(falsyValues)(
+    'should return original value when CUSTOM_AUTH secret prop is $description',
+    ({ value }) => {
+      const connection: AppConnection = {
+        ...baseConnection,
         type: AppConnectionType.CUSTOM_AUTH,
+        value: {
+          type: AppConnectionType.CUSTOM_AUTH,
+          props: {
+            clientId: 'abc',
+            clientSecret: value as any,
+            nonSecret: 'keep-this',
+          },
+        },
+      };
+
+      const auth: BlockAuthProperty = {
+        authProviderKey: 'AWS',
+        authProviderDisplayName: 'AWS',
+        authProviderLogoUrl: `https://static.openops.com/blocks/aws.png`,
+        type: PropertyType.CUSTOM_AUTH,
+        displayName: 'Custom Auth',
         props: {
-          clientId: 'abc',
-          clientSecret: null as any,
-          nonSecret: 'keep-this',
+          clientId: { type: PropertyType.SHORT_TEXT, displayName: 'Client ID' },
+          clientSecret: {
+            type: PropertyType.SECRET_TEXT,
+            displayName: 'Client Secret',
+          },
+          nonSecret: { type: PropertyType.SHORT_TEXT, displayName: 'Other' },
         },
-      },
-    };
+        valueSchema: {} as any,
+        required: false,
+      };
 
-    const auth: BlockAuthProperty = {
-      authProviderKey: 'AWS',
-      authProviderDisplayName: 'AWS',
-      authProviderLogoUrl: `https://static.openops.com/blocks/aws.png`,
-      type: PropertyType.CUSTOM_AUTH,
-      displayName: 'Custom Auth',
-      props: {
-        clientId: { type: PropertyType.SHORT_TEXT, displayName: 'Client ID' },
-        clientSecret: {
-          type: PropertyType.SECRET_TEXT,
-          displayName: 'Client Secret',
-        },
-        nonSecret: { type: PropertyType.SHORT_TEXT, displayName: 'Other' },
-      },
-      valueSchema: {} as any,
-      required: false,
-    };
+      const result = redactSecrets(auth, connection.value);
+      const props = result?.props as Record<string, any>;
 
-    const result = redactSecrets(auth, connection.value);
-    const props = result?.props as Record<string, any>;
-
-    expect(props.clientSecret).toBe(null);
-    expect(props.clientId).toBe('abc');
-    expect(props.nonSecret).toBe('keep-this');
-  });
-
-  test('should return original value when CUSTOM_AUTH secret prop is empty string', () => {
-    const connection: AppConnection = {
-      ...baseConnection,
-      type: AppConnectionType.CUSTOM_AUTH,
-      value: {
-        type: AppConnectionType.CUSTOM_AUTH,
-        props: {
-          clientId: 'abc',
-          clientSecret: '',
-          nonSecret: 'keep-this',
-        },
-      },
-    };
-
-    const auth: BlockAuthProperty = {
-      authProviderKey: 'AWS',
-      authProviderDisplayName: 'AWS',
-      authProviderLogoUrl: `https://static.openops.com/blocks/aws.png`,
-      type: PropertyType.CUSTOM_AUTH,
-      displayName: 'Custom Auth',
-      props: {
-        clientId: { type: PropertyType.SHORT_TEXT, displayName: 'Client ID' },
-        clientSecret: {
-          type: PropertyType.SECRET_TEXT,
-          displayName: 'Client Secret',
-        },
-        nonSecret: { type: PropertyType.SHORT_TEXT, displayName: 'Other' },
-      },
-      valueSchema: {} as any,
-      required: false,
-    };
-
-    const result = redactSecrets(auth, connection.value);
-    const props = result?.props as Record<string, any>;
-
-    expect(props.clientSecret).toBe('');
-    expect(props.clientId).toBe('abc');
-    expect(props.nonSecret).toBe('keep-this');
-  });
+      expect(props.clientSecret).toBe(value);
+      expect(props.clientId).toBe('abc');
+      expect(props.nonSecret).toBe('keep-this');
+    },
+  );
 
   test('should return undefined value when OAUTH2 client_secret is null', () => {
     const connection: AppConnection = {
