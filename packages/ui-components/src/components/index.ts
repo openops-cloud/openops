@@ -39,6 +39,7 @@ export * from './flow-template/types';
 export * from './flows/new-flow-button';
 export * from './folder-breadcrumbs/folder-breadcrumbs';
 export * from './folder-tree';
+export * from './generate-with-ai/generate-with-ai';
 export * from './help-us-improve';
 export * from './json-editor';
 export * from './json-viewer/json-viewer';
