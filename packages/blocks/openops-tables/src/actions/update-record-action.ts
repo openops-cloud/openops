@@ -11,7 +11,7 @@ import {
   upsertRow,
 } from '@openops/common';
 import { cacheWrapper } from '@openops/server-shared';
-import { convertToStringWithValidation } from '@openops/shared';
+import { convertToStringWithValidation, isEmpty } from '@openops/shared';
 
 export const updateRecordAction = createAction({
   auth: BlockAuth.None(),
@@ -132,7 +132,10 @@ export const updateRecordAction = createAction({
       tableFields,
       fieldsProperties,
     );
-    validatePrimaryKey(rowPrimaryKey['rowPrimaryKey']);
+
+    const primaryKeyField = getPrimaryKeyFieldFromFields(tableFields);
+    const primaryKeyValue = getPrimaryKey(rowPrimaryKey['rowPrimaryKey']);
+    fieldsToUpdate[primaryKeyField.name] = primaryKeyValue;
 
     return await upsertRow({
       tableId: tableId,
@@ -141,6 +144,19 @@ export const updateRecordAction = createAction({
     });
   },
 });
+
+function getPrimaryKey(rowPrimaryKey: any): string | undefined {
+  if (rowPrimaryKey === null || rowPrimaryKey === undefined) {
+    return undefined;
+  }
+
+  const primaryKeyValue = convertToStringWithValidation(
+    rowPrimaryKey,
+    'The primary key should be a string',
+  );
+
+  return isEmpty(primaryKeyValue) ? undefined : primaryKeyValue;
+}
 
 function mapFieldsToObject(
   tableName: string,
@@ -166,15 +182,4 @@ function mapFieldsToObject(
   }
 
   return fieldsToUpdate;
-}
-
-function validatePrimaryKey(rowPrimaryKey: any): void {
-  if (rowPrimaryKey === null || rowPrimaryKey === undefined) {
-    return;
-  }
-
-  convertToStringWithValidation(
-    rowPrimaryKey,
-    'The primary key should be a string',
-  );
 }

@@ -149,7 +149,10 @@ describe('updateRowAction', () => {
     expect(openopsCommonMock.upsertRow).toHaveBeenCalledWith({
       tableId: 1,
       token: 'some databaseToken',
-      fields: { field1: 'new value' },
+      fields: {
+        'primary key field': 'some primary key value',
+        field1: 'new value',
+      },
     });
     expect(result).toBe('mock result');
   });
@@ -179,6 +182,12 @@ describe('updateRowAction', () => {
     );
 
     expect(openopsCommonMock.upsertRow).not.toHaveBeenCalled();
+    expect(
+      openopsCommonMock.getPrimaryKeyFieldFromFields,
+    ).not.toHaveBeenCalled();
+    expect(
+      openopsCommonMock.getPrimaryKeyFieldFromFields,
+    ).not.toHaveBeenCalled();
   });
 
   test.each([[[]], [{}]])(
