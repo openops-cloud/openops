@@ -204,41 +204,6 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
   });
 };
 
-async function markJobAsCompleted(
-  status: FlowRunStatus,
-  executionCorrelationId: string,
-  enginePrincipal: EnginePrincipal,
-  error: unknown,
-): Promise<void> {
-  switch (status) {
-    case FlowRunStatus.FAILED:
-    case FlowRunStatus.TIMEOUT:
-    case FlowRunStatus.PAUSED:
-    case FlowRunStatus.STOPPED:
-    case FlowRunStatus.SUCCEEDED:
-      await flowConsumer.update({
-        executionCorrelationId,
-        queueName: QueueName.ONE_TIME,
-        status: JobStatus.COMPLETED,
-        token: enginePrincipal.queueToken!,
-        message: 'Flow succeeded',
-      });
-      break;
-    case FlowRunStatus.SCHEDULED:
-    case FlowRunStatus.IGNORED:
-    case FlowRunStatus.RUNNING:
-      break;
-    case FlowRunStatus.INTERNAL_ERROR:
-      await flowConsumer.update({
-        executionCorrelationId,
-        queueName: QueueName.ONE_TIME,
-        status: JobStatus.FAILED,
-        token: enginePrincipal.queueToken!,
-        message: `Internal error reported by engine: ${JSON.stringify(error)}`,
-      });
-  }
-}
-
 async function getFlow(
   projectId: string,
   request: GetFlowVersionForWorkerRequest,
