@@ -26,7 +26,9 @@ type MarkdownProps = {
   variables?: Record<string, string>;
   className?: string;
   withBorder?: boolean;
+  containerClassName?: string;
   textClassName?: string;
+  listClassName?: string;
   linkClassName?: string;
   codeVariation?: CodeVariations;
   handleInject?: (codeContent: string) => void;
@@ -35,12 +37,14 @@ type MarkdownProps = {
 const Container = ({
   withBorder,
   children,
+  className,
 }: {
   withBorder: boolean;
+  className?: string;
   children: React.ReactNode;
 }) =>
   withBorder ? (
-    <Alert className="rounded">
+    <Alert className={cn('rounded', className)}>
       <AlertDescription className="w-full">{children}</AlertDescription>
     </Alert>
   ) : (
@@ -135,6 +139,8 @@ const Markdown = React.memo(
     variables,
     withBorder = true,
     codeVariation = MarkdownCodeVariations.WithCopy,
+    containerClassName,
+    listClassName,
     textClassName,
     linkClassName,
     handleInject,
@@ -186,7 +192,7 @@ const Markdown = React.memo(
 
     const markdownProcessed = applyVariables(markdown, variables ?? {});
     return (
-      <Container withBorder={withBorder}>
+      <Container withBorder={withBorder} className={containerClassName}>
         <ReactMarkdown
           components={{
             code(props) {
@@ -278,10 +284,18 @@ const Markdown = React.memo(
               />
             ),
             ul: ({ node, ...props }) => (
-              <ul className="my-2 ml-6 list-disc [&>li]:mt-2" {...props} />
+              <ul
+                className={cn('my-2 ml-6 list-disc [&>li]:mt-2', listClassName)}
+                {...props}
+              />
             ),
             ol: ({ node, ...props }) => (
-              <ol className="my-6 ml-6 list-decimal [&>li]:mt-2" {...props} />
+              <ol
+                className={
+                  (cn('my-6 ml-6 list-decimal [&>li]:mt-2'), listClassName)
+                }
+                {...props}
+              />
             ),
             li: ({ node, ...props }) => (
               <li className={cn(textClassName)} {...props} />
