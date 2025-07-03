@@ -81,6 +81,8 @@ async function executeFlow(
     timeout: (flowTimeoutSandbox + 3) * 1000, // Engine timeout plus 3 more seconds
   });
 
+  let jobStatus: JobStatus | undefined;
+  let jobFinalMessage: string | undefined;
   try {
     if (jobData.executionType === ExecutionType.BEGIN) {
       await setFirstRunningState(jobData, engineToken);
@@ -114,20 +116,20 @@ async function executeFlow(
       if (isTimeoutError) {
         await handleTimeoutError(jobData, engineToken);
       } else {
-        const error = new ApplicationError({
-          code: ErrorCode.ENGINE_OPERATION_FAILURE,
-          params: {
-            message: result.error?.message ?? 'internal error',
-          },
-        });
-
-        await handleInternalError(jobData, engineToken, error);
-
-        await updateJobStatus(
+        const errorMessage = result.error?.message ?? 'internal error';
+        await handleInternalError(
+          jobData,
           engineToken,
-          JobStatus.FAILED,
-          `Internal error reported by engine: ${JSON.stringify(error)}`,
+          new ApplicationError({
+            code: ErrorCode.ENGINE_OPERATION_FAILURE,
+            params: {
+              message: errorMessage,
+            },
+          }),
         );
+
+        jobStatus = JobStatus.FAILED;
+        jobFinalMessage = `Internal error reported by engine. Error message: ${errorMessage}`;
       }
     }
   } catch (e) {
@@ -140,7 +142,7 @@ async function executeFlow(
       await handleInternalError(jobData, engineToken, e as Error);
     }
   } finally {
-    await updateJobStatus(engineToken);
+    await updateJobStatus(engineToken, jobStatus, jobFinalMessage);
     await flowRunLock.release();
   }
 }
