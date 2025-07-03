@@ -13,7 +13,6 @@ import {
 } from 'fastify';
 import { StatusCodes } from 'http-status-codes';
 import { flowRunService } from '../../../src/app/flows/flow-run/flow-run-service';
-import { flowConsumer } from '../../../src/app/workers/consumer';
 import { flowEngineWorker } from '../../../src/app/workers/engine-controller';
 import { webhookResponseWatcher } from '../../../src/app/workers/helper/webhook-response-watcher';
 
@@ -21,12 +20,6 @@ jest.mock('../../../src/app/flows/flow-run/flow-run-service', () => ({
   flowRunService: {
     updateStatus: jest.fn(),
     pause: jest.fn(),
-  },
-}));
-
-jest.mock('../../../src/app/workers/consumer', () => ({
-  flowConsumer: {
-    update: jest.fn(),
   },
 }));
 
@@ -93,7 +86,6 @@ describe('Engine Controller - update-run endpoint', () => {
       mockPopulatedRun,
     );
     (flowRunService.pause as jest.Mock).mockResolvedValue({});
-    (flowConsumer.update as jest.Mock).mockResolvedValue({});
     (webhookResponseWatcher.publish as jest.Mock).mockResolvedValue({});
 
     await flowEngineWorker(mockApp, {} as FastifyPluginOptions);
@@ -134,14 +126,6 @@ describe('Engine Controller - update-run endpoint', () => {
         },
         projectId: 'test-project-id',
         tags: [],
-      });
-
-      expect(flowConsumer.update).toHaveBeenCalledWith({
-        executionCorrelationId: 'test-correlation-id',
-        queueName: QueueName.ONE_TIME,
-        status: JobStatus.COMPLETED,
-        token: 'test-queue-token',
-        message: 'Flow succeeded',
       });
     });
 
@@ -194,12 +178,16 @@ describe('Engine Controller - update-run endpoint', () => {
         mockReply as unknown as FastifyReply,
       );
 
-      expect(flowConsumer.update).toHaveBeenCalledWith({
-        executionCorrelationId: 'test-correlation-id',
-        queueName: QueueName.ONE_TIME,
-        status: JobStatus.COMPLETED,
-        token: 'test-queue-token',
-        message: 'Flow succeeded',
+      expect(flowRunService.updateStatus).toHaveBeenCalledWith({
+        flowRunId: 'test-run-id',
+        status: FlowRunStatus.FAILED,
+        tasks: [],
+        duration: 1000,
+        executionState: {
+          steps: { step1: { result: 'success' } },
+        },
+        projectId: 'test-project-id',
+        tags: [],
       });
     });
 
@@ -228,14 +216,14 @@ describe('Engine Controller - update-run endpoint', () => {
         mockReply as unknown as FastifyReply,
       );
 
-      expect(flowConsumer.update).toHaveBeenCalledWith({
-        executionCorrelationId: 'test-correlation-id',
-        queueName: QueueName.ONE_TIME,
-        status: JobStatus.FAILED,
-        token: 'test-queue-token',
-        message: `Internal error reported by engine: ${JSON.stringify(
-          testError,
-        )}`,
+      expect(flowRunService.updateStatus).toHaveBeenCalledWith({
+        flowRunId: 'test-run-id',
+        status: FlowRunStatus.INTERNAL_ERROR,
+        tasks: [],
+        duration: 1000,
+        executionState: null,
+        projectId: 'test-project-id',
+        tags: [],
       });
     });
 
@@ -284,51 +272,6 @@ describe('Engine Controller - update-run endpoint', () => {
         WebsocketClientEvent.FLOW_RUN_PROGRESS,
         'test-run-id',
       );
-    });
-
-    it('should return early and not mark job as completed when populatedRun status is RUNNING', async () => {
-      const request = {
-        ...baseRequest,
-        body: {
-          ...baseRequest.body,
-          runDetails: {
-            ...baseRequest.body.runDetails,
-            status: FlowRunStatus.SUCCEEDED,
-          },
-        },
-      };
-
-      (flowRunService.updateStatus as jest.Mock).mockResolvedValue({
-        ...mockPopulatedRun,
-        status: FlowRunStatus.RUNNING,
-      });
-
-      const updateRunHandler = handlers['/update-run'];
-      await updateRunHandler(
-        request as unknown as FastifyRequest,
-        mockReply as unknown as FastifyReply,
-      );
-
-      expect(flowRunService.updateStatus).toHaveBeenCalledWith({
-        flowRunId: 'test-run-id',
-        status: FlowRunStatus.SUCCEEDED,
-        tasks: [],
-        duration: 1000,
-        executionState: {
-          steps: { step1: { result: 'success' } },
-        },
-        projectId: 'test-project-id',
-        tags: [],
-      });
-
-      expect(mockIo.to).toHaveBeenCalledWith('test-project-id');
-      expect(mockIo.emit).toHaveBeenCalledWith(
-        WebsocketClientEvent.FLOW_RUN_PROGRESS,
-        'test-run-id',
-      );
-
-      // Should NOT call flowConsumer.update (markJobAsCompleted)
-      expect(flowConsumer.update).not.toHaveBeenCalled();
     });
 
     describe('PAUSED status handling', () => {
@@ -475,70 +418,55 @@ describe('Engine Controller - update-run endpoint', () => {
       const statusTestCases = [
         {
           status: FlowRunStatus.SCHEDULED,
-          shouldCallConsumerUpdate: false,
-          expectedJobStatus: null,
         },
         {
           status: FlowRunStatus.IGNORED,
-          shouldCallConsumerUpdate: false,
-          expectedJobStatus: null,
         },
         {
           status: FlowRunStatus.RUNNING,
-          shouldCallConsumerUpdate: false,
-          expectedJobStatus: null,
-        },
-        {
-          status: FlowRunStatus.TIMEOUT,
-          shouldCallConsumerUpdate: true,
-          expectedJobStatus: JobStatus.COMPLETED,
         },
         {
           status: FlowRunStatus.PAUSED,
-          shouldCallConsumerUpdate: true,
-          expectedJobStatus: JobStatus.COMPLETED,
         },
       ];
 
-      statusTestCases.forEach(
-        ({ status, shouldCallConsumerUpdate, expectedJobStatus }) => {
-          it(`should handle ${status} status correctly`, async () => {
-            const request = {
-              ...baseRequest,
-              body: {
-                ...baseRequest.body,
-                runDetails: {
-                  ...baseRequest.body.runDetails,
-                  status,
-                },
+      statusTestCases.forEach(({ status }) => {
+        it(`should handle ${status} status correctly`, async () => {
+          const request = {
+            ...baseRequest,
+            body: {
+              ...baseRequest.body,
+              runDetails: {
+                ...baseRequest.body.runDetails,
+                status,
               },
-            };
+            },
+          };
 
-            (flowRunService.updateStatus as jest.Mock).mockResolvedValue({
-              ...mockPopulatedRun,
-              status,
-            });
-
-            const updateRunHandler = handlers['/update-run'];
-            await updateRunHandler(
-              request as unknown as FastifyRequest,
-              mockReply as unknown as FastifyReply,
-            );
-
-            if (shouldCallConsumerUpdate) {
-              expect(flowConsumer.update).toHaveBeenCalledWith({
-                executionCorrelationId: 'test-correlation-id',
-                queueName: QueueName.ONE_TIME,
-                status: expectedJobStatus,
-                token: 'test-queue-token',
-                message: 'Flow succeeded',
-              });
-            } else {
-              expect(flowConsumer.update).not.toHaveBeenCalled();
-            }
+          (flowRunService.updateStatus as jest.Mock).mockResolvedValue({
+            ...mockPopulatedRun,
+            status,
           });
-        },
-      );
+
+          const updateRunHandler = handlers['/update-run'];
+          await updateRunHandler(
+            request as unknown as FastifyRequest,
+            mockReply as unknown as FastifyReply,
+          );
+
+          expect(flowRunService.updateStatus).toHaveBeenCalledWith({
+            flowRunId: 'test-run-id',
+            status,
+            tasks: [],
+            duration: 1000,
+            executionState: {
+              steps: { step1: { result: 'success' } },
+            },
+            projectId: 'test-project-id',
+            tags: [],
+          });
+        });
+      });
     });
 
     describe('getFlowResponse test cases', () => {
@@ -769,14 +697,14 @@ describe('Engine Controller - update-run endpoint', () => {
           mockReply as unknown as FastifyReply,
         );
 
-        expect(flowConsumer.update).toHaveBeenCalledWith({
-          executionCorrelationId: 'test-correlation-id',
-          queueName: QueueName.ONE_TIME,
-          status: JobStatus.FAILED,
-          token: 'test-queue-token',
-          message: `Internal error reported by engine: ${JSON.stringify(
-            complexError,
-          )}`,
+        expect(flowRunService.updateStatus).toHaveBeenCalledWith({
+          flowRunId: 'test-run-id',
+          status: FlowRunStatus.INTERNAL_ERROR,
+          tasks: [],
+          duration: 1000,
+          executionState: null,
+          projectId: 'test-project-id',
+          tags: [],
         });
       });
     });
