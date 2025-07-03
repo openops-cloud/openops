@@ -30,11 +30,12 @@ const CloudLogoutPage = () => {
 
     app.ready(() => {
       app.logout(() => {
-        if (window.opener) {
-          setTimeout(() => {
-            window.close();
-          }, 300);
+        if (!window.opener) {
+          return;
         }
+        setTimeout(() => {
+          window.close();
+        }, 300);
       });
     });
   }, [flags, isLoading, navigate]);
