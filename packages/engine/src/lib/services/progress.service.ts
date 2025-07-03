@@ -1,7 +1,6 @@
 import { hashUtils, logger } from '@openops/server-shared';
 import { UpdateRunProgressRequest } from '@openops/shared';
 import { Mutex } from 'async-mutex';
-import crypto from 'crypto';
 import { EngineConstants } from '../handler/context/engine-constants';
 import { FlowExecutorContext } from '../handler/context/flow-execution-context';
 import { throwIfExecutionTimeExceeded } from '../timeout-validator';
@@ -52,6 +51,7 @@ const sendUpdateRunRequest = async (
   if (requestHash === lastRequestHash) {
     return;
   }
+
   lastRequestHash = requestHash;
 
   await fetch(url.toString(), {
