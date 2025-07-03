@@ -298,10 +298,7 @@ function createPauseHook(
       ).executionCorrelationId;
     }
 
-    let path = currentExecutionPath;
-    if ('path' in req.pauseMetadata) {
-      path = (req.pauseMetadata as { path: string }).path;
-    }
+    const path = req.pauseMetadata?.path ?? currentExecutionPath;
 
     hookResponse.pauseResponse = {
       pauseMetadata: {

@@ -2,6 +2,12 @@ import { ExecutionVerdict, FlowExecutorContext } from '../../src/lib/handler/con
 import { flowExecutor } from '../../src/lib/handler/flow-executor'
 import { buildBlockAction, generateMockEngineConstants } from './test-helper'
 
+jest.mock('../../src/lib/services/progress.service', () => ({
+    progressService: {
+        sendUpdate: jest.fn().mockImplementation(() => Promise.resolve()),
+    },
+}))
+
 const failedHttpAction = buildBlockAction({
     name: 'send_http',
     blockName: '@openops/block-http',
@@ -34,10 +40,10 @@ const successHttpAction =  buildBlockAction({
 describe('flow retry', () => {
     const context = FlowExecutorContext.empty()
     it('should retry entire flow', async () => {
-        const failedResult = await flowExecutor.execute({
+        const failedResult = await flowExecutor.executeFromAction({
             action: failedHttpAction, executionState: context, constants: generateMockEngineConstants(),
         })
-        const retryEntireFlow = await flowExecutor.execute({
+        const retryEntireFlow = await flowExecutor.executeFromAction({
             action: successHttpAction, executionState: context, constants: generateMockEngineConstants(),
         })
         expect(failedResult.verdict).toBe(ExecutionVerdict.FAILED)
@@ -45,11 +51,11 @@ describe('flow retry', () => {
     })
 
     it('should retry flow from failed step', async () => {
-        const failedResult = await flowExecutor.execute({
+        const failedResult = await flowExecutor.executeFromAction({
             action: failedHttpAction, executionState: context, constants: generateMockEngineConstants(),
         })
 
-        const retryFromFailed = await flowExecutor.execute({
+        const retryFromFailed = await flowExecutor.executeFromAction({
             action: successHttpAction, executionState: context, constants: generateMockEngineConstants({}),
         })
         expect(failedResult.verdict).toBe(ExecutionVerdict.FAILED)

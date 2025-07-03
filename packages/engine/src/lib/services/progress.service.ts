@@ -21,7 +21,6 @@ export const progressService = {
 const sendUpdateRunRequest = async (
   params: UpdateStepProgressParams,
 ): Promise<void> => {
-  logger.debug('Sending run update run request');
   const { flowExecutorContext, engineConstants } = params;
   const url = new URL(`${engineConstants.internalApiUrl}v1/engine/update-run`);
 
@@ -43,6 +42,7 @@ const sendUpdateRunRequest = async (
     progressUpdateType: engineConstants.progressUpdateType,
   };
 
+  // Request deduplication using hash comparison
   const requestHash = hashUtils.hashObject(request, (key, value) => {
     if (key === 'duration') return undefined;
     return value;
@@ -51,6 +51,7 @@ const sendUpdateRunRequest = async (
   if (requestHash === lastRequestHash) {
     return;
   }
+
   lastRequestHash = requestHash;
 
   await fetch(url.toString(), {

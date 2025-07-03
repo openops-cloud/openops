@@ -59,8 +59,17 @@ export const TriggerWithOptionalId = Type.Intersect([
 ]);
 
 export const UpdateTriggerRequest = Type.Union([
-  Type.Omit(EmptyTrigger, ['id']),
-  Type.Omit(BlockTrigger, ['id']),
+  Type.Composite([
+    Type.Omit(BlockTrigger, ['id']),
+    Type.Object({
+      id: Type.Optional(Type.String()),
+    }),
+  ]),
+  Type.Composite([
+    Type.Omit(EmptyTrigger, ['id']),
+    Type.Object({
+      id: Type.Optional(Type.String()),
+    }),
+  ]),
 ]);
-
 export type UpdateTriggerRequest = Static<typeof UpdateTriggerRequest>;
