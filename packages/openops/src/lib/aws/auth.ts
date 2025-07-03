@@ -171,15 +171,22 @@ export const amazonAuth = BlockAuth.CustomAuth({
   authProviderDisplayName: 'AWS',
   authProviderLogoUrl: `https://static.openops.com/blocks/aws.png`,
   description: `
-   For production usage, it is recommended to use the AWS role assigned to the hosting environment, by leaving
-  the "Access Key Id" and "Secret Access Key" fields empty. ${
-    isImplicitRoleEnabled
-      ? ''
-      : '**To enable this capability, set the environment variable "OPS_AWS_ENABLE_IMPLICIT_ROLE" to "true".** '
-  }
-   See [AWS documentation](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/attach-iam-role.html) for more information.
+ **🧪 Sandbox or evaluation environment**
+ <br>You may use access key credentials by manually providing both the Access Key ID and Secret Access Key.
 
-  For local and testing purposes, you can use the classic access key and secret access key authentication.
+
+ **🔐 Production environment**<br>
+Use the AWS IAM role assigned to the hosting environment:
+- Leave "Access Key ID" and "Secret Access Key" empty.
+- Set the environment variable: **OPS_AWS_ENABLE_IMPLICIT_ROLE=true**. Refer to [AWS docs](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/attach-iam-role.html) for details.
+
+
+ **🏆 Enterprise capabilities (Paid Offering, Ideal for enterprise-scale environments)**<br>
+For large or complex setups, enhanced features are available, including:
+- Automatic account discovery
+- Integration with secret management systems for credential handling
+<br>
+ [Explore our commercial offering](https://www.openops.com/pricing/)
   `,
   props: {
     defaultRegion: Property.ShortText({
