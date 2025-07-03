@@ -29,7 +29,7 @@ describe('flow with looping', () => {
                 'index': '{{loop.index}}',
             },
         })
-        const result = await flowExecutor.execute({
+        const result = await flowExecutor.executeFromAction({
             action: buildSimpleLoopAction({
                 name: 'loop',
                 loopItems: '{{ [4,5,6] }}',
@@ -61,7 +61,7 @@ describe('flow with looping', () => {
                 }),
             }),
         })
-        const result = await flowExecutor.execute({
+        const result = await flowExecutor.executeFromAction({
             action: generateArray,
             executionState: FlowExecutorContext.empty(),
             constants: generateMockEngineConstants(),

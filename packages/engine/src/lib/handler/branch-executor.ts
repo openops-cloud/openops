@@ -46,14 +46,14 @@ export const branchExecutor: BaseExecutor<BranchAction> = {
       );
 
       if (!evaluatedCondition && action.onFailureAction) {
-        branchExecutionContext = await flowExecutor.execute({
+        branchExecutionContext = await flowExecutor.executeFromAction({
           action: action.onFailureAction,
           executionState: branchExecutionContext,
           constants,
         });
       }
       if (evaluatedCondition && action.onSuccessAction) {
-        branchExecutionContext = await flowExecutor.execute({
+        branchExecutionContext = await flowExecutor.executeFromAction({
           action: action.onSuccessAction,
           executionState: branchExecutionContext,
           constants,

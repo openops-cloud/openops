@@ -36,7 +36,7 @@ function buildSimpleBranchingWithOneCondition(condition: BranchCondition): Branc
 describe('flow with branching', () => {
 
     it('should execute on success branch', async () => {
-        const result = await flowExecutor.execute({
+        const result = await flowExecutor.executeFromAction({
             action: buildSimpleBranchingWithOneCondition({
                 operator: BranchOperator.TEXT_EXACTLY_MATCHES,
                 firstValue: 'test',
@@ -56,7 +56,7 @@ describe('flow with branching', () => {
     })
 
     it('should execute on failure branch', async () => {
-        const result = await flowExecutor.execute({
+        const result = await flowExecutor.executeFromAction({
             action: buildSimpleBranchingWithOneCondition({
                 operator: BranchOperator.TEXT_EXACTLY_MATCHES,
                 firstValue: 'test',

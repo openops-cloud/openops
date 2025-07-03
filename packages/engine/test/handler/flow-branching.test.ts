@@ -10,7 +10,7 @@ jest.mock('../../src/lib/services/progress.service', () => ({
 }))
 
 function executeBranchActionWithOneCondition(condition: BranchCondition): Promise<FlowExecutorContext> {
-    return flowExecutor.execute({
+    return flowExecutor.executeFromAction({
         action: buildActionWithOneCondition({
             condition,
         }),
