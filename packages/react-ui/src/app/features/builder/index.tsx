@@ -9,6 +9,7 @@ import {
 } from '@openops/components/ui';
 import { ReactFlowProvider } from '@xyflow/react';
 import React, {
+  MutableRefObject,
   useCallback,
   useEffect,
   useMemo,
@@ -24,6 +25,8 @@ import {
   useSwitchToDraft,
 } from '@/app/features/builder/builder-hooks';
 import { DynamicFormValidationProvider } from '@/app/features/builder/dynamic-form-validation/dynamic-form-validation-context';
+import { useRefreshBlock } from '@/app/features/builder/hooks/use-refresh-block';
+import { useRunProgress } from '@/app/features/builder/hooks/use-run-progress';
 
 import { useResizablePanelGroup } from '@/app/common/hooks/use-resizable-panel-group';
 import { useSocket } from '@/app/common/providers/socket-provider';
@@ -32,13 +35,16 @@ import { FLOW_CANVAS_Y_OFFESET } from '@/app/constants/flow-canvas';
 import { SEARCH_PARAMS } from '@/app/constants/search-params';
 import { AiAssistantButton } from '@/app/features/ai/ai-assistant-button';
 import {
+  Action,
   ActionType,
   BlockTrigger,
   flowHelper,
   isNil,
+  Trigger,
   TriggerType,
   WebsocketClientEvent,
 } from '@openops/shared';
+
 import {
   RESIZABLE_PANEL_GROUP,
   RESIZABLE_PANEL_IDS,
@@ -120,6 +126,7 @@ const BuilderPage = () => {
     setReadOnly,
     exitStepSettings,
     flowVersion,
+    setRun,
   ] = useBuilderStateContext((state) => [
     state.selectedStep,
     state.leftSidebar,
@@ -131,6 +138,7 @@ const BuilderPage = () => {
     state.setReadOnly,
     state.exitStepSettings,
     state.flowVersion,
+    state.setRun,
   ]);
 
   const clearSelectedStep = useCallback(() => {
@@ -184,17 +192,15 @@ const BuilderPage = () => {
 
   const socket = useSocket();
 
-  useEffect(() => {
-    socket.on(WebsocketClientEvent.REFRESH_BLOCK, () => {
-      refetchBlock();
-    });
-    return () => {
-      socket.removeAllListeners(WebsocketClientEvent.REFRESH_BLOCK);
-      socket.removeAllListeners(WebsocketClientEvent.TEST_FLOW_RUN_PROGRESS);
-      socket.removeAllListeners(WebsocketClientEvent.TEST_STEP_FINISHED);
-      socket.removeAllListeners(WebsocketClientEvent.TEST_FLOW_RUN_STARTED);
-    };
-  }, [socket, refetchBlock]);
+  useRunProgress({
+    run,
+    setRun,
+    flowVersion,
+  });
+
+  useRefreshBlock({
+    refetchBlock,
+  });
 
   useEffect(() => {
     const viewOnlyParam = searchParams.get(SEARCH_PARAMS.viewOnly) === 'true';
@@ -232,9 +238,7 @@ const BuilderPage = () => {
           run={run}
           isLoading={isSwitchingToDraftPending}
           exitRun={() => {
-            socket.removeAllListeners(
-              WebsocketClientEvent.TEST_FLOW_RUN_PROGRESS,
-            );
+            socket.removeAllListeners(WebsocketClientEvent.FLOW_RUN_PROGRESS);
             switchToDraft();
           }}
         />
@@ -308,7 +312,9 @@ const BuilderPage = () => {
                 <InteractiveBuilder
                   selectedStep={selectedStep}
                   clearSelectedStep={clearSelectedStep}
-                  middlePanelRef={middlePanelRef}
+                  middlePanelRef={
+                    middlePanelRef as unknown as MutableRefObject<null>
+                  }
                   middlePanelSize={middlePanelSize}
                   flowVersion={flowVersion}
                   lefSideBarContainerWidth={leftSidePanelSize?.width || 0}
@@ -338,7 +344,7 @@ const BuilderPage = () => {
                 {isRightSidebarVisible && (
                   <StepSettingsProvider
                     blockModel={blockModel}
-                    selectedStep={memorizedSelectedStep}
+                    selectedStep={memorizedSelectedStep as Action | Trigger}
                     key={containerKey}
                   >
                     <DynamicFormValidationProvider>
