@@ -55,11 +55,7 @@ async function executeRepeatingJob({
     return;
   }
 
-  if (
-    data.jobType === RepeatableJobType.EXECUTE_TRIGGER &&
-    data.environment === RunEnvironment.PRODUCTION &&
-    populatedFlow?.status === FlowStatus.DISABLED
-  ) {
+  if (shouldSkipDisabledFlow(data, populatedFlow)) {
     logger.info(
       {
         message: '[FlowQueueConsumer#executeRepeatingJob]',
@@ -146,6 +142,17 @@ const consumeDelayedJob = async (
 ): Promise<void> => {
   logger.info(`[FlowQueueConsumer#consumeDelayedJob] flowRunId=${data.runId}`);
   await workerApiService(workerToken).resumeRun(data);
+};
+
+const shouldSkipDisabledFlow = (
+  data: ScheduledJobData,
+  populatedFlow: PopulatedFlow | null,
+): boolean => {
+  return (
+    data.jobType === RepeatableJobType.EXECUTE_TRIGGER &&
+    data.environment === RunEnvironment.PRODUCTION &&
+    populatedFlow?.status === FlowStatus.DISABLED
+  );
 };
 
 type Params = {
