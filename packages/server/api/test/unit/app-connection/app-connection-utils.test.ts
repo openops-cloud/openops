@@ -292,70 +292,51 @@ describe('redactSecrets', () => {
     },
   );
 
-  test('should return undefined value when OAUTH2 client_secret is null', () => {
-    const connection: AppConnection = {
-      ...baseConnection,
-      type: AppConnectionType.OAUTH2,
-      value: {
+  test.each([
+    { value: null, description: 'null', expectUndefined: true },
+    { value: undefined, description: 'undefined', expectUndefined: true },
+    { value: '', description: 'empty string', expectUndefined: false },
+  ])(
+    'should handle OAUTH2 client_secret when $description',
+    ({ value, expectUndefined }) => {
+      const connection: AppConnection = {
+        ...baseConnection,
         type: AppConnectionType.OAUTH2,
-        client_id: 'abc',
-        client_secret: null as any,
-        redirect_url: 'https://redirect.com',
-      } as any,
-    };
+        value: {
+          type: AppConnectionType.OAUTH2,
+          client_id: 'abc',
+          client_secret: value as any,
+          redirect_url: 'https://redirect.com',
+        } as any,
+      };
 
-    const auth: BlockAuthProperty = {
-      authProviderKey: 'AWS',
-      authProviderDisplayName: 'AWS',
-      authProviderLogoUrl: `https://static.openops.com/blocks/aws.png`,
-      type: PropertyType.OAUTH2,
-      displayName: 'OAuth2',
-      authUrl: '',
-      tokenUrl: '',
-      scope: [],
-      valueSchema: {} as any,
-      required: true,
-    };
+      const auth: BlockAuthProperty = {
+        authProviderKey: 'AWS',
+        authProviderDisplayName: 'AWS',
+        authProviderLogoUrl: `https://static.openops.com/blocks/aws.png`,
+        type: PropertyType.OAUTH2,
+        displayName: 'OAuth2',
+        authUrl: '',
+        tokenUrl: '',
+        scope: [],
+        valueSchema: {} as any,
+        required: true,
+      };
 
-    const result = redactSecrets(auth, connection.value);
+      const result = redactSecrets(auth, connection.value);
 
-    expect(result).toBeUndefined();
-  });
-
-  test('should return original value when OAUTH2 client_secret is empty string', () => {
-    const connection: AppConnection = {
-      ...baseConnection,
-      type: AppConnectionType.OAUTH2,
-      value: {
-        type: AppConnectionType.OAUTH2,
-        client_id: 'abc',
-        client_secret: '',
-        redirect_url: 'https://redirect.com',
-      } as any,
-    };
-
-    const auth: BlockAuthProperty = {
-      authProviderKey: 'AWS',
-      authProviderDisplayName: 'AWS',
-      authProviderLogoUrl: `https://static.openops.com/blocks/aws.png`,
-      type: PropertyType.OAUTH2,
-      displayName: 'OAuth2',
-      authUrl: '',
-      tokenUrl: '',
-      scope: [],
-      valueSchema: {} as any,
-      required: true,
-    };
-
-    const result = redactSecrets(auth, connection.value);
-
-    expect(result).toEqual({
-      type: PropertyType.OAUTH2,
-      client_id: 'abc',
-      client_secret: '',
-      redirect_url: 'https://redirect.com',
-    });
-  });
+      if (expectUndefined) {
+        expect(result).toBeUndefined();
+      } else {
+        expect(result).toEqual({
+          type: PropertyType.OAUTH2,
+          client_id: 'abc',
+          client_secret: value,
+          redirect_url: 'https://redirect.com',
+        });
+      }
+    },
+  );
 });
 
 describe('restoreRedactedSecrets', () => {
