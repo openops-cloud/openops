@@ -10,7 +10,7 @@ import {
   openopsTablesDropdownProperty,
   upsertRow,
 } from '@openops/common';
-import { cacheWrapper, logger } from '@openops/server-shared';
+import { cacheWrapper } from '@openops/server-shared';
 
 export const updateRecordAction = createAction({
   auth: BlockAuth.None(),
@@ -132,21 +132,11 @@ export const updateRecordAction = createAction({
       fieldsProperties,
     );
 
-    logger.info(`Starting tables service upsert call for table: ${tableName}`);
-    const startTime = Date.now();
-
-    const result = await upsertRow({
+    return await upsertRow({
       tableId: tableId,
       token: token,
       fields: fieldsToUpdate,
     });
-
-    const endTime = Date.now();
-    const duration = endTime - startTime;
-    logger.info(
-      `Finished tables service upsert call for table: ${tableName}. Duration: ${duration}ms`,
-    );
-    return result;
   },
 });
 
