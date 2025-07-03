@@ -99,7 +99,7 @@ export const splitExecutor: BaseExecutor<SplitAction> = {
     }
 
     try {
-      return await flowExecutor.execute({
+      return await flowExecutor.executeFromAction({
         action: nextAction,
         executionState: executionContext,
         constants,
