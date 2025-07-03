@@ -17,7 +17,14 @@ async function getAll(): Promise<Flag[]> {
   const created = now;
   const updated = now;
 
-  flags = [];
+  flags = [
+    {
+      id: FlagId.CODE_WITH_AI,
+      value: false,
+      created,
+      updated,
+    },
+  ];
 
   return flags;
 }
