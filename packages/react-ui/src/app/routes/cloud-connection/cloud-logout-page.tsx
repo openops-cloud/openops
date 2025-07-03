@@ -1,14 +1,15 @@
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
+import { FronteggApp } from '@frontegg/js';
 import Cookies from 'js-cookie';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { initializeFrontegg } from './frontegg-setup';
 
-const handleAppReady = (app: any) => {
+const handleAppReady = (app: FronteggApp) => {
   app.ready(() => handleLogout(app));
 };
 
-const handleLogout = (app: any) => {
+const handleLogout = (app: FronteggApp) => {
   app.logout(handleWindowClose);
 };
 
