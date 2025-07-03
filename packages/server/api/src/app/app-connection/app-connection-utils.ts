@@ -69,15 +69,12 @@ export function redactSecrets(
         typeof redacted.client_id === 'string' &&
         typeof redacted.redirect_url === 'string'
       ) {
-        return redactProperty(
-          {
-            type: AppConnectionType.OAUTH2,
-            client_id: redacted.client_id,
-            client_secret: redacted.client_secret,
-            redirect_url: redacted.redirect_url,
-          },
-          'client_secret',
-        );
+        return {
+          type: AppConnectionType.OAUTH2,
+          client_id: redacted.client_id,
+          client_secret: redactIfNotNilOrEmpty(redacted.client_secret),
+          redirect_url: redacted.redirect_url,
+        };
       }
 
       return undefined;
