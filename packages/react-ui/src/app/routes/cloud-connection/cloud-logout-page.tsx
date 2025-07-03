@@ -4,12 +4,12 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { initializeFrontegg } from './frontegg-setup';
 
-const handleLogout = (app: any) => {
-  app.logout(handleWindowClose);
-};
-
 const handleAppReady = (app: any) => {
   app.ready(() => handleLogout(app));
+};
+
+const handleLogout = (app: any) => {
+  app.logout(handleWindowClose);
 };
 
 const handleWindowClose = () => {
