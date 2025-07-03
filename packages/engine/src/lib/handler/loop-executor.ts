@@ -156,7 +156,7 @@ function triggerLoopIterations(
 
     const executionContextCopy = cloneDeep(newExecutionContext);
     loopIterations[i] = () =>
-      flowExecutor.execute({
+      flowExecutor.executeFromAction({
         executionState: executionContextCopy,
         action: firstLoopAction,
         constants,
@@ -278,7 +278,7 @@ async function resumePausedIteration(
   loopStepResult.index = Number(previousIterationResult.index);
   loopStepResult.item = previousIterationResult.item;
 
-  newExecutionContext = await flowExecutor.execute({
+  newExecutionContext = await flowExecutor.executeFromAction({
     executionState: newExecutionContext,
     action: firstLoopAction,
     constants,

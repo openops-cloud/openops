@@ -39,6 +39,13 @@ jest.mock('../../src/lib/services/storage.service', () => ({
     })),
 }))
 
+jest.mock('../../src/lib/services/progress.service', () => ({
+    progressService: {
+        sendUpdate: jest.fn().mockImplementation(() => Promise.resolve()),
+    },
+}))
+
+
 const simplePauseFlow = buildBlockAction({
     name: 'approval',
     blockName: '@openops/block-approval',
@@ -87,8 +94,8 @@ const pauseFlowWithLoopAndBranch = buildSimpleLoopAction({
 
 describe('flow with pause', () => {
 
-    it('should pause and resume succesfully with loops and branch', async () => {
-        const pauseResult = await flowExecutor.execute({
+    it('should pause and resume successfully with loops and branch', async () => {
+        const pauseResult = await flowExecutor.executeFromAction({
             action: pauseFlowWithLoopAndBranch,
             executionState: FlowExecutorContext.empty().setPauseId('executionCorrelationId'),
             constants: generateMockEngineConstants(),
@@ -102,7 +109,7 @@ describe('flow with pause', () => {
         })
         expect(Object.keys(pauseResult.steps)).toEqual(['loop'])
 
-        const resumeResult = await flowExecutor.execute({
+        const resumeResult = await flowExecutor.executeFromAction({
             action: pauseFlowWithLoopAndBranch,
             executionState: pauseResult.setVerdict(ExecutionVerdict.RUNNING, undefined).setCurrentPath(StepExecutionPath.empty()),
             constants: generateMockEngineConstants({
@@ -123,12 +130,12 @@ describe('flow with pause', () => {
     })
 
     it('should pause and resume with two different steps in same flow successfully', async () => {
-        const pauseResult1 = await flowExecutor.execute({
+        const pauseResult1 = await flowExecutor.executeFromAction({
             action: flawWithTwoPause,
             executionState: FlowExecutorContext.empty().setPauseId('executionCorrelationId'),
             constants: generateMockEngineConstants(),
         })
-        const resumeResult1 = await flowExecutor.execute({
+        const resumeResult1 = await flowExecutor.executeFromAction({
             action: flawWithTwoPause,
             executionState: pauseResult1,
             constants: generateMockEngineConstants({
@@ -145,11 +152,12 @@ describe('flow with pause', () => {
         expect(resumeResult1.verdictResponse).toEqual({
             'pauseMetadata': {
                 executionCorrelationId: 'executionCorrelationId',
+                path: "approval-1",
                 response: {},
             },
             'reason': 'PAUSED',
         })
-        const resumeResult2 = await flowExecutor.execute({
+        const resumeResult2 = await flowExecutor.executeFromAction({
             action: flawWithTwoPause,
             executionState: resumeResult1.setVerdict(ExecutionVerdict.RUNNING, undefined),
             constants: generateMockEngineConstants({
@@ -164,12 +172,10 @@ describe('flow with pause', () => {
             }),
         })
         expect(resumeResult2.verdict).toBe(ExecutionVerdict.RUNNING)
-
     })
 
-
     it('should pause and resume successfully', async () => {
-        const pauseResult = await flowExecutor.execute({
+        const pauseResult = await flowExecutor.executeFromAction({
             action: simplePauseFlow,
             executionState: FlowExecutorContext.empty().setPauseId('executionCorrelationId'),
             constants: generateMockEngineConstants(),
@@ -178,12 +184,13 @@ describe('flow with pause', () => {
         expect(pauseResult.verdictResponse).toEqual({
             'pauseMetadata': {
                 executionCorrelationId: 'executionCorrelationId',
+                path: "approval",
                 response: {},
             },
             'reason': 'PAUSED',
         })
 
-        const resumeResult = await flowExecutor.execute({
+        const resumeResult = await flowExecutor.executeFromAction({
             action: simplePauseFlow,
             executionState: pauseResult,
             constants: generateMockEngineConstants({

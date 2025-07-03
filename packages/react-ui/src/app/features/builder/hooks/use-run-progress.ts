@@ -5,11 +5,11 @@ import { useSocket } from '@/app/common/providers/socket-provider';
 import { flowRunsApi } from '@/app/features/flow-runs/lib/flow-runs-api';
 import { FlowRun, FlowVersion, WebsocketClientEvent } from '@openops/shared';
 
-interface UseRunProgressParams {
+type UseRunProgressParams = {
   run: FlowRun | null;
   setRun: (run: FlowRun, flowVersion: FlowVersion) => void;
   flowVersion: FlowVersion | null;
-}
+};
 
 export const useRunProgress = ({
   run,

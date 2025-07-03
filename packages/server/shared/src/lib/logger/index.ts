@@ -1,6 +1,5 @@
 /* eslint-disable no-console */
 import { requestContext } from '@fastify/request-context';
-import { isEmpty } from '@openops/shared';
 import pino, { Level, Logger, TransportSingleOptions } from 'pino';
 import { SharedSystemProp, system } from '../system';
 import { getContext } from './async-context';
@@ -53,10 +52,11 @@ function initLogger(): Logger {
           const levelString = pino.levels.labels[level] ?? 'info';
           const message =
             inputArgs && inputArgs.find((arg) => typeof arg === 'string');
+
           const logEvent = cleanLogEvent({
             message,
             level: levelString,
-            ...(!isEmpty(eventData) && { event: enrichEvent(eventData ?? {}) }),
+            event: enrichEvent(eventData ?? {}),
           });
 
           if (logzioLogger) {
@@ -92,12 +92,17 @@ function enrichEvent(event: object): object {
     requestMethod: requestContext.get('requestMethod' as never) ?? undefined,
     requestPath: requestContext.get('requestPath' as never) ?? undefined,
     clientIp: requestContext.get('clientIp' as never) ?? undefined,
+    ...getContext(),
   };
+
+  if (event instanceof Error) {
+    Object.assign(event, enrichedContext);
+    return event;
+  }
 
   return {
     ...event,
     ...enrichedContext,
-    ...getContext(),
   };
 }
 

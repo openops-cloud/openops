@@ -1,4 +1,4 @@
-import { logger } from '@openops/server-shared';
+import { hashUtils, logger } from '@openops/server-shared';
 import { UpdateRunProgressRequest } from '@openops/shared';
 import { Mutex } from 'async-mutex';
 import crypto from 'crypto';
@@ -22,7 +22,6 @@ export const progressService = {
 const sendUpdateRunRequest = async (
   params: UpdateStepProgressParams,
 ): Promise<void> => {
-  logger.debug('Sending run update run request');
   const { flowExecutorContext, engineConstants } = params;
   const url = new URL(`${engineConstants.internalApiUrl}v1/engine/update-run`);
 
@@ -45,10 +44,10 @@ const sendUpdateRunRequest = async (
   };
 
   // Request deduplication using hash comparison
-  const requestHash = crypto
-    .createHash('sha256')
-    .update(JSON.stringify(request))
-    .digest('hex');
+  const requestHash = hashUtils.hashObject(request, (key, value) => {
+    if (key === 'duration') return undefined;
+    return value;
+  });
 
   if (requestHash === lastRequestHash) {
     return;

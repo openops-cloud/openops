@@ -15,6 +15,11 @@ jest.mock('../../src/lib/services/storage.service', () => ({
   })),
 }))
 
+jest.mock('../../src/lib/services/progress.service', () => ({
+    progressService: {
+        sendUpdate: jest.fn().mockImplementation(() => Promise.resolve()),
+    },
+}))
 describe('flow with looping', () => {
 
     it('should execute iterations', async () => {
@@ -24,7 +29,7 @@ describe('flow with looping', () => {
                 'index': '{{loop.index}}',
             },
         })
-        const result = await flowExecutor.execute({
+        const result = await flowExecutor.executeFromAction({
             action: buildSimpleLoopAction({
                 name: 'loop',
                 loopItems: '{{ [4,5,6] }}',
@@ -56,7 +61,7 @@ describe('flow with looping', () => {
                 }),
             }),
         })
-        const result = await flowExecutor.execute({
+        const result = await flowExecutor.executeFromAction({
             action: generateArray,
             executionState: FlowExecutorContext.empty(),
             constants: generateMockEngineConstants(),
