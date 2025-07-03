@@ -4,6 +4,23 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { initializeFrontegg } from './frontegg-setup';
 
+const handleLogout = (app: any) => {
+  app.logout(handleWindowClose);
+};
+
+const handleAppReady = (app: any) => {
+  app.ready(() => handleLogout(app));
+};
+
+const handleWindowClose = () => {
+  if (!window.opener) {
+    return;
+  }
+  setTimeout(() => {
+    window.close();
+  }, 300);
+};
+
 const CloudLogoutPage = () => {
   const navigate = useNavigate();
   const { data: flags, isLoading } = flagsHooks.useFlags();
@@ -28,16 +45,7 @@ const CloudLogoutPage = () => {
     Cookies.remove('cloud-token');
     Cookies.remove('cloud-refresh-token');
 
-    app.ready(() => {
-      app.logout(() => {
-        if (!window.opener) {
-          return;
-        }
-        setTimeout(() => {
-          window.close();
-        }, 300);
-      });
-    });
+    handleAppReady(app);
   }, [flags, isLoading, navigate]);
 
   return null;
