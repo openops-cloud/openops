@@ -33,7 +33,7 @@ const getInitialSidebarState = (): boolean => {
   return stored ? JSON.parse(stored) : false;
 };
 
-export const useAppStore = create<AppState>((set, get) => ({
+export const useAppStore = create<AppState>((set) => ({
   isSidebarMinimized: getInitialSidebarState(),
   setIsSidebarMinimized: (isMinimized) => {
     localStorage.setItem(SIDEBAR_MINIMIZED_KEY, JSON.stringify(isMinimized));
