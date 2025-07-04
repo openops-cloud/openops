@@ -23,6 +23,9 @@ type AppState = {
   setAiChatSize: (size: AiAssistantChatSizeState) => void;
   aiChatDimensions: BoxSize | null;
   setAiChatDimensions: (dimensions: BoxSize) => void;
+  aiChatInput: string;
+  setAiChatInput: (input: string) => void;
+  clearAiChatInput: () => void;
 };
 
 const getInitialSidebarState = (): boolean => {
@@ -30,7 +33,7 @@ const getInitialSidebarState = (): boolean => {
   return stored ? JSON.parse(stored) : false;
 };
 
-export const useAppStore = create<AppState>((set) => ({
+export const useAppStore = create<AppState>((set, get) => ({
   isSidebarMinimized: getInitialSidebarState(),
   setIsSidebarMinimized: (isMinimized) => {
     localStorage.setItem(SIDEBAR_MINIMIZED_KEY, JSON.stringify(isMinimized));
@@ -50,4 +53,11 @@ export const useAppStore = create<AppState>((set) => ({
   aiChatDimensions: null,
   setAiChatDimensions: (dimensions: BoxSize) =>
     set({ aiChatDimensions: dimensions }),
+  aiChatInput: '',
+  setAiChatInput: (input) => {
+    set({ aiChatInput: input });
+  },
+  clearAiChatInput: () => {
+    set({ aiChatInput: '' });
+  },
 }));
