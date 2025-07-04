@@ -64,7 +64,11 @@ export const useAiAssistantChat = () => {
   }, [aiInput, aiChatInput, setAiChatInput]);
 
   const handleInputChangeWithStore = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    (
+      e:
+        | React.ChangeEvent<HTMLTextAreaElement>
+        | React.ChangeEvent<HTMLInputElement>,
+    ) => {
       handleInputChange(e);
       setAiChatInput(e.target.value);
     },
