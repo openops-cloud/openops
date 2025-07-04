@@ -7,6 +7,12 @@ jest.mock('../../src/lib/code-block/prepare-code-block.ts', () => ({
     prepareCodeBlock: jest.fn(),
 }))
 
+jest.mock('../../src/lib/services/progress.service', () => ({
+    progressService: {
+        sendUpdate: jest.fn().mockImplementation(() => Promise.resolve()),
+    },
+}))
+
 function buildSimpleBranchingWithOneCondition(condition: BranchCondition): BranchAction {
     return {
         ...buildActionWithOneCondition({

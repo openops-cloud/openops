@@ -4,7 +4,8 @@ import { t } from 'i18next';
 import React from 'react';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
-import { FlagId, FlowRun, FlowRunStatus } from '@openops/shared';
+import { getStatusText } from '@/app/features/builder/run-details/run-details-helpers';
+import { FlagId, FlowRun } from '@openops/shared';
 
 import { flowRunUtils } from '../lib/flow-run-utils';
 
@@ -14,26 +15,6 @@ type RunDetailsBarProps = {
   exitRun: () => void;
   isLoading: boolean;
 };
-
-function getStatusText(status: FlowRunStatus, timeout: number) {
-  switch (status) {
-    case FlowRunStatus.STOPPED:
-    case FlowRunStatus.SUCCEEDED:
-      return t('Run Succeeded');
-    case FlowRunStatus.FAILED:
-      return t('Run Failed');
-    case FlowRunStatus.PAUSED:
-      return t('Workflow Run is paused');
-    case FlowRunStatus.RUNNING:
-      return t('Running');
-    case FlowRunStatus.TIMEOUT:
-      return t('Run exceeded {timeout} seconds, try to optimize your steps.', {
-        timeout,
-      });
-    case FlowRunStatus.INTERNAL_ERROR:
-      return t('Run failed for an unknown reason, contact support.');
-  }
-}
 
 const RunDetailsBar = React.memo(
   ({ run, canExitRun, exitRun, isLoading }: RunDetailsBarProps) => {

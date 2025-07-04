@@ -39,6 +39,13 @@ jest.mock('../../src/lib/services/storage.service', () => ({
     })),
 }))
 
+jest.mock('../../src/lib/services/progress.service', () => ({
+    progressService: {
+        sendUpdate: jest.fn().mockImplementation(() => Promise.resolve()),
+    },
+}))
+
+
 const simplePauseFlow = buildBlockAction({
     name: 'approval',
     blockName: '@openops/block-approval',
