@@ -27,7 +27,7 @@ describe('flow with response', () => {
                 'hello': 'world',
             },
         }
-        const result = await flowExecutor.execute({
+        const result = await flowExecutor.executeFromAction({
             action: buildBlockAction({
                 name: 'http',
                 blockName: '@openops/block-http',

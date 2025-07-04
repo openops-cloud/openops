@@ -19,6 +19,7 @@ export const PauseMetadata = Type.Object({
   progressUpdateType: Type.Optional(Type.Enum(ProgressUpdateType)),
   executionCorrelationId: Type.Optional(Type.String()),
   response: Type.Optional(Type.Unknown()),
+  path: Type.Optional(Type.String()),
 });
 
 export type PauseMetadata = Static<typeof PauseMetadata>;
