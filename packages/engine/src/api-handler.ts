@@ -11,12 +11,16 @@ import { StatusCodes } from 'http-status-codes';
 import { executeEngine } from './engine-executor';
 import { EngineRequest } from './main';
 
-const LAMBDA_FASTIFY_BODY_LIMIT = 6 * 1024 * 1024; // 6MB same as engine api-handler & nginx.conf
+const isLambdaEnvironment = (): boolean => {
+  return process.env.AWS_LAMBDA_FUNCTION_NAME !== undefined;
+};
 
+const LAMBDA_FASTIFY_BODY_LIMIT = 6 * 1024 * 1024; // 6MB
+const DEFAULT_FASTIFY_BODY_LIMIT = 10 * 1024 * 1024; // 10MB
 const app = fastify({
-  bodyLimit: process.env.AWS_LAMBDA_FUNCTION_NAME
+  bodyLimit: isLambdaEnvironment()
     ? LAMBDA_FASTIFY_BODY_LIMIT
-    : undefined,
+    : DEFAULT_FASTIFY_BODY_LIMIT,
 });
 
 const engineController: FastifyPluginAsyncTypebox = async (fastify) => {
