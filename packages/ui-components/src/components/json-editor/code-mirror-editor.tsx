@@ -7,7 +7,6 @@ import CodeMirror, {
 } from '@uiw/react-codemirror';
 import React, { RefObject, useRef } from 'react';
 import { cn } from '../../lib/cn';
-import { ScrollArea } from '../../ui/scroll-area';
 
 const styleTheme = EditorView.baseTheme({
   '&.cm-editor.cm-focused': {
