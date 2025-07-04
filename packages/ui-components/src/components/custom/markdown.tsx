@@ -291,9 +291,10 @@ const Markdown = React.memo(
             ),
             ol: ({ node, ...props }) => (
               <ol
-                className={
-                  (cn('my-6 ml-6 list-decimal [&>li]:mt-2'), listClassName)
-                }
+                className={cn(
+                  'my-6 ml-6 list-decimal [&>li]:mt-2',
+                  listClassName,
+                )}
                 {...props}
               />
             ),
