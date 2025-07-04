@@ -1,10 +1,6 @@
 #!/bin/sh
 
-if [ -n "$OPS_FASTIFY_BODY_LIMIT_MB" ]; then
-  export NGINX_BODY_LIMIT="${OPS_FASTIFY_BODY_LIMIT_MB}m"
-else
-  export NGINX_BODY_LIMIT="10m"  # Default fallback
-fi
+export NGINX_BODY_LIMIT="${OPS_BODY_LIMIT_MB:-10}m"
 
 # Generate nginx config from template
 envsubst < /etc/nginx/nginx.template.conf > /etc/nginx/nginx.conf

@@ -4,17 +4,17 @@ import { AppSystemProp, system } from './system';
 const ONE_MB_IN_BYTES = 1024 * 1024;
 export const getFastifyBodyLimitOrThrow = (): number => {
   const bodyLimitInMb = Number.parseInt(
-    system.getOrThrow<string>(AppSystemProp.FASTIFY_BODY_LIMIT_MB),
+    system.getOrThrow<string>(AppSystemProp.BODY_LIMIT_MB),
   );
   if (Number.isNaN(bodyLimitInMb)) {
     throw new ApplicationError(
       {
         code: ErrorCode.SYSTEM_PROP_INVALID,
         params: {
-          prop: AppSystemProp.FASTIFY_BODY_LIMIT_MB,
+          prop: AppSystemProp.BODY_LIMIT_MB,
         },
       },
-      `System property OPS_${AppSystemProp.FASTIFY_BODY_LIMIT_MB} is not a valid number`,
+      `System property OPS_${AppSystemProp.BODY_LIMIT_MB} is not a valid integer`,
     );
   }
   return ONE_MB_IN_BYTES * bodyLimitInMb;
