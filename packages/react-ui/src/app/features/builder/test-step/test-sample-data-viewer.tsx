@@ -48,7 +48,7 @@ const TestSampleDataViewer = React.memo(
     return (
       <>
         {!isTesting && children}
-        <div className="flex-grow flex flex-col w-full text-start gap-4">
+        <div className="h-full flex flex-col w-full text-start gap-4">
           <div className="flex justify-center items-center">
             <div className="flex flex-col flex-grow gap-1">
               <div className="text-md flex gap-1 justyf-center items-center">

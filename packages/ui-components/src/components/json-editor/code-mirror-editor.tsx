@@ -7,6 +7,7 @@ import CodeMirror, {
 } from '@uiw/react-codemirror';
 import React, { RefObject, useRef } from 'react';
 import { cn } from '../../lib/cn';
+import { ScrollArea } from '../../ui/scroll-area';
 
 const styleTheme = EditorView.baseTheme({
   '&.cm-editor.cm-focused': {
@@ -76,13 +77,13 @@ const CodeMirrorEditor = React.memo(
     const ref = useRef<ReactCodeMirrorRef>(null);
 
     return (
-      <div className={cn('flex flex-col gap-2 p-1', containerClassName)}>
+      <div className={cn('h-full flex flex-col gap-2', containerClassName)}>
         <CodeMirror
           ref={ref}
           value={convertToString(value)}
           placeholder={placeholder}
           className={cn('border-t', className)}
-          height="250px"
+          height="100%"
           width="100%"
           maxWidth="100%"
           basicSetup={{
