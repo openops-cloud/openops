@@ -3,7 +3,6 @@ import { useAiAssistantChat } from '@/app/features/ai/lib/ai-assistant-chat-hook
 import { useAiModelSelector } from '@/app/features/ai/lib/ai-model-selector-hook';
 import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
 import { useSafeBuilderStateContext } from '@/app/features/builder/builder-hooks';
-import { flowsHooks } from '@/app/features/flows/lib/flows-hooks';
 import { useAppStore } from '@/app/store/app-store';
 import {
   AI_CHAT_CONTAINER_SIZES,
@@ -93,39 +92,6 @@ const AiAssistantChat = ({
       return Array.from(existingOptionsMap.values());
     });
   }, [flowVersion]);
-
-  const { data: workflows } = flowsHooks.useFlows({
-    limit: 999,
-    cursor: undefined,
-  });
-
-  useEffect(() => {
-    if (workflows) {
-      setAvailableScopeOptions((options) => {
-        const newOptions = workflows.data.map((workflow) => {
-          return {
-            id: workflow.id,
-            displayName: workflow.version.displayName,
-            type: AiScopeType.WORKFLOW,
-          };
-        });
-
-        // Create a map of existing options by ID for quick lookup
-        const existingOptionsMap = new Map(
-          options.map((option) => [option.id, option]),
-        );
-
-        // Only add new options that don't already exist in the state
-        newOptions.forEach((option) => {
-          if (!existingOptionsMap.has(option.id)) {
-            existingOptionsMap.set(option.id, option);
-          }
-        });
-
-        return Array.from(existingOptionsMap.values());
-      });
-    }
-  }, [workflows]);
 
   const {
     messages,

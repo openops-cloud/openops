@@ -3,11 +3,11 @@ import { Badge } from '../../ui/badge';
 
 export enum AiScopeType {
   STEP = 'STEP',
-  WORKFLOW = 'WORKFLOW',
 }
 
 export type AiScopeItem = {
   displayName: string;
+  logoUrl: string;
   id: string;
   type: AiScopeType;
 };
@@ -21,10 +21,10 @@ const AiScopeItem = ({
 }) => {
   return (
     <Badge
-      variant="secondary"
-      className="w-fit flex items-center gap-1 rounded-xs font-normal"
+      variant="outline"
+      className="w-fit flex items-center gap-1 rounded-xs font-normal truncate"
     >
-      {`${item.type} ${item.displayName}`}
+      {item.displayName}
       <X
         className="h-3 w-3 opacity-50"
         role="button"

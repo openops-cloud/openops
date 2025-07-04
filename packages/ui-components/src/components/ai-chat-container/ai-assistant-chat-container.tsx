@@ -36,7 +36,6 @@ type AiAssistantChatContainerProps = {
   lastAssistantMessageRef: React.RefObject<HTMLDivElement>;
   availableScopeOptions?: ScopeOption[];
   onScopeSelected?: (scope: ScopeOption) => void;
-  isScopeSelectorLoading?: boolean;
 } & Pick<UseChatHelpers, 'input' | 'handleInputChange' | 'handleSubmit'> &
   AiModelSelectorProps &
   AiScopeProps;
@@ -72,7 +71,6 @@ const AiAssistantChatContainer = ({
   onAiScopeItemRemove,
   availableScopeOptions = [],
   onScopeSelected,
-  isScopeSelectorLoading,
 }: AiAssistantChatContainerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollViewportRef = useRef<HTMLDivElement>(null);
@@ -232,7 +230,6 @@ const AiAssistantChatContainer = ({
                 onAiScopeItemRemove={onAiScopeItemRemove}
                 availableScopeOptions={availableScopeOptions}
                 onScopeSelected={onScopeSelected}
-                isScopeSelectorLoading={isScopeSelectorLoading}
               />
             </div>
           </div>

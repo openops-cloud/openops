@@ -22,7 +22,6 @@ export type AiChatInputProps = {
   status?: ChatStatus;
   availableScopeOptions?: ScopeOption[];
   onScopeSelected?: (scope: ScopeOption) => void;
-  isScopeSelectorLoading?: boolean;
 } & Pick<UseChatHelpers, 'input' | 'handleInputChange' | 'handleSubmit'> &
   AiModelSelectorProps &
   AiScopeProps;
@@ -42,7 +41,6 @@ export const AiChatInput = ({
   onAiScopeItemRemove,
   availableScopeOptions = [],
   onScopeSelected,
-  isScopeSelectorLoading = false,
 }: AiChatInputProps) => {
   return (
     <div className={cn('w-full px-4', className)}>
@@ -93,7 +91,6 @@ export const AiChatInput = ({
           <AiScopeSelector
             availableScopeOptions={availableScopeOptions}
             onScopeSelected={onScopeSelected}
-            isScopeSelectorLoading={isScopeSelectorLoading}
             className={className}
           />
           <AiModelSelector
@@ -103,20 +100,6 @@ export const AiChatInput = ({
             isModelSelectorLoading={isModelSelectorLoading}
           />
         </div>
-
-        {/*<Select>*/}
-        {/*  <SelectTrigger>*/}
-        {/*    <Plus />*/}
-        {/*  </SelectTrigger>*/}
-        {/*  <SelectContent>*/}
-        {/*    {contextOptions &&*/}
-        {/*      contextOptions.map((context) => (*/}
-        {/*        <SelectItem key={context.id} value={context.id}>*/}
-        {/*          {context?.displayName}*/}
-        {/*        </SelectItem>*/}
-        {/*      ))}*/}
-        {/*  </SelectContent>*/}
-        {/*</Select>*/}
       </div>
     </div>
   );
