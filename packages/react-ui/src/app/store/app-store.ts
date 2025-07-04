@@ -23,6 +23,9 @@ type AppState = {
   setAiChatSize: (size: AiAssistantChatSizeState) => void;
   aiChatDimensions: BoxSize | null;
   setAiChatDimensions: (dimensions: BoxSize) => void;
+  aiChatInput: string;
+  setAiChatInput: (input: string) => void;
+  clearAiChatInput: () => void;
 };
 
 const getInitialSidebarState = (): boolean => {
@@ -50,4 +53,11 @@ export const useAppStore = create<AppState>((set) => ({
   aiChatDimensions: null,
   setAiChatDimensions: (dimensions: BoxSize) =>
     set({ aiChatDimensions: dimensions }),
+  aiChatInput: '',
+  setAiChatInput: (input) => {
+    set({ aiChatInput: input });
+  },
+  clearAiChatInput: () => {
+    set({ aiChatInput: '' });
+  },
 }));
