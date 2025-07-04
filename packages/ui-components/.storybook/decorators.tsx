@@ -1,4 +1,5 @@
 import isChromatic from 'chromatic/isChromatic';
+import { MemoryRouter } from 'react-router-dom';
 import '../src/styles/global.css';
 import '../src/tailwind.css';
 import { ThemeSwitcherValue } from './preview';
@@ -27,5 +28,18 @@ export const ThemeSwitcherDecorator = ({
       {lightContainer}
       {darkContainer}
     </div>
+  );
+};
+
+/**
+ * Decorator that applies theme-aware styling by inheriting from parent theme class
+ */
+export const ThemeAwareDecorator = (Story: any, context: any) => {
+  return (
+    <MemoryRouter>
+      <div className="p-32 dark:bg-gray-900 rounded-lg">
+        <Story />
+      </div>
+    </MemoryRouter>
   );
 };

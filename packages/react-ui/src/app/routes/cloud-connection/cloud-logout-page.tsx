@@ -1,8 +1,26 @@
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
+import { FronteggApp } from '@frontegg/js';
 import Cookies from 'js-cookie';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { initializeFrontegg } from './frontegg-setup';
+
+const handleAppReady = (app: FronteggApp) => {
+  app.ready(() => handleLogout(app));
+};
+
+const handleLogout = (app: FronteggApp) => {
+  app.logout(handleWindowClose);
+};
+
+const handleWindowClose = () => {
+  if (!window.opener) {
+    return;
+  }
+  setTimeout(() => {
+    window.close();
+  }, 300);
+};
 
 const CloudLogoutPage = () => {
   const navigate = useNavigate();
@@ -28,15 +46,7 @@ const CloudLogoutPage = () => {
     Cookies.remove('cloud-token');
     Cookies.remove('cloud-refresh-token');
 
-    app.ready(() => {
-      app.logout();
-
-      if (window.opener) {
-        setTimeout(() => {
-          window.close();
-        }, 300);
-      }
-    });
+    handleAppReady(app);
   }, [flags, isLoading, navigate]);
 
   return null;

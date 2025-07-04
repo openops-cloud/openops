@@ -222,6 +222,7 @@ export const createMockFlowVersion = (
   flowVersion?: Partial<FlowVersion>,
 ): FlowVersion => {
   const emptyTrigger = {
+    id: 'trigger',
     type: TriggerType.EMPTY,
     name: 'trigger',
     settings: {},
@@ -245,6 +246,7 @@ export const createMockFlowVersion = (
 
 export const createMockTrigger = (): Trigger => {
   return {
+    id: 'trigger',
     type: TriggerType.EMPTY,
     name: 'trigger',
     settings: {},
@@ -267,9 +269,7 @@ export const createMockTrigger = (): Trigger => {
             packageJson: {},
           },
           inputUiInfo: {
-            lastTestDate: '2024-11-28T10:12:12.799Z',
             customizedInputs: {},
-            currentSelectedData: [],
           },
           errorHandlingOptions: {
             retryOnFailure: {

@@ -3,6 +3,8 @@ import {
   Type,
 } from '@fastify/type-provider-typebox';
 import {
+  ApplicationError,
+  ErrorCode,
   FlowVersionState,
   MinimalFlow,
   OpenOpsId,
@@ -12,11 +14,10 @@ import {
   StepOutputWithData,
   UpdateFlowVersionRequest,
 } from '@openops/shared';
-import { Type as T } from '@sinclair/typebox';
 import { StatusCodes } from 'http-status-codes';
+import { validateFlowVersionBelongsToProject } from '../common/flow-version-validation';
 import { flowVersionService } from '../flow-version/flow-version.service';
 import { flowStepTestOutputService } from '../step-test-output/flow-step-test-output.service';
-import { flowService } from './flow.service';
 
 export const flowVersionController: FastifyPluginAsyncTypebox = async (
   fastify,
@@ -53,16 +54,17 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
               'It is not possible to update the flowId of a flow version',
           });
         }
-        const flow = await flowService.getOne({
-          id: flowVersion.flowId,
-          projectId: request.principal.projectId,
-        });
-        if (flow === null || flow === undefined) {
-          await reply.status(StatusCodes.BAD_REQUEST).send({
-            success: false,
-            message: 'The flow and version are not associated with the project',
-          });
+
+        const isValid = await validateFlowVersionBelongsToProject(
+          flowVersion,
+          request.principal.projectId,
+          reply,
+        );
+
+        if (!isValid) {
+          return;
         }
+
         if (flowVersion.state === FlowVersionState.LOCKED) {
           await reply.status(StatusCodes.BAD_REQUEST).send({
             success: false,
@@ -148,6 +150,7 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
         flowStepTestOutputs.map((flowStepTestOutput) => [
           flowStepTestOutput.stepId as OpenOpsId,
           {
+            input: flowStepTestOutput.input,
             output: flowStepTestOutput.output,
             lastTestDate: flowStepTestOutput.updated,
           },
@@ -158,35 +161,78 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
 
   fastify.post(
     '/:flowVersionId/test-output',
-    SaveTestOutputRequestOptions,
+    {
+      config: {
+        allowedPrincipals: [PrincipalType.USER],
+      },
+      schema: {
+        description:
+          'Inject test/sample output and input for a step in a flow version',
+        params: Type.Object({
+          flowVersionId: Type.String(),
+        }),
+        body: Type.Object({
+          stepId: Type.String(),
+          input: Type.Any(),
+          output: Type.Any(),
+        }),
+        response: {
+          [StatusCodes.OK]: Type.Object({
+            success: Type.Boolean(),
+            id: Type.String(),
+          }),
+          [StatusCodes.BAD_REQUEST]: Type.Object({
+            success: Type.Boolean(),
+            message: Type.String(),
+          }),
+          [StatusCodes.NOT_FOUND]: Type.Object({
+            success: Type.Boolean(),
+            message: Type.String(),
+          }),
+        },
+      },
+    },
     async (request, reply) => {
       const { flowVersionId } = request.params;
-      const { stepId, output } = request.body;
-
-      const flowVersion = await flowVersionService.getOne(flowVersionId);
-      if (!flowVersion) {
-        await reply.status(StatusCodes.NOT_FOUND).send({
-          success: false,
-          message: 'The defined flow version was not found',
-        });
-      }
-
-      const savedOutput = await flowStepTestOutputService.save({
-        stepId,
-        flowVersionId,
-        output,
-      });
-
-      await reply.status(StatusCodes.OK).send({
-        success: true,
-        message: 'Test output saved successfully',
-        data: {
+      const { stepId, input, output } = request.body;
+      try {
+        const flowVersion = await flowVersionService.getOneOrThrow(
+          flowVersionId,
+        );
+        const isValid = await validateFlowVersionBelongsToProject(
+          flowVersion,
+          request.principal.projectId,
+          reply,
+        );
+        if (!isValid) {
+          return;
+        }
+        const saved = await flowStepTestOutputService.save({
+          stepId,
+          flowVersionId,
+          input,
           output,
-          id: savedOutput.id,
-          stepId: savedOutput.stepId,
-          flowVersionId: savedOutput.flowVersionId,
-        },
-      });
+        });
+        await reply.status(StatusCodes.OK).send({
+          success: true,
+          id: saved.id,
+        });
+      } catch (error) {
+        if (
+          error instanceof ApplicationError &&
+          error.error.code === ErrorCode.ENTITY_NOT_FOUND
+        ) {
+          await reply.status(StatusCodes.NOT_FOUND).send({
+            success: false,
+            message: 'The defined flow version was not found',
+          });
+        } else {
+          await reply.status(StatusCodes.BAD_REQUEST).send({
+            success: false,
+            message: (error as Error).message,
+          });
+        }
+      }
     },
   );
 };
@@ -206,41 +252,6 @@ const GetLatestVersionsByConnectionRequestOptions = {
     }),
     response: {
       [StatusCodes.OK]: Type.Array(MinimalFlow),
-    },
-  },
-};
-
-const SaveTestOutputRequestOptions = {
-  config: {
-    allowedPrincipals: [PrincipalType.USER],
-  },
-  schema: {
-    params: Type.Object({
-      flowVersionId: Type.String(),
-    }),
-    tags: ['flow-step-test-output'],
-    description:
-      'Saves a user-defined test output for a specific step for the defined flow version.',
-    security: [SERVICE_KEY_SECURITY_OPENAPI],
-    body: T.Object({
-      stepId: T.String(),
-      output: T.Unknown(),
-    }),
-    response: {
-      [StatusCodes.OK]: T.Object({
-        success: T.Boolean(),
-        message: T.String(),
-        data: T.Object({
-          id: T.String(),
-          stepId: T.String(),
-          output: T.Unknown(),
-          flowVersionId: T.String(),
-        }),
-      }),
-      [StatusCodes.NOT_FOUND]: T.Object({
-        success: T.Boolean(),
-        message: T.String(),
-      }),
     },
   },
 };

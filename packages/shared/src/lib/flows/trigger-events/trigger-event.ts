@@ -7,4 +7,5 @@ export type TriggerEvent = {
   flowId: string;
   sourceName: string;
   payload: unknown;
+  input: unknown;
 } & BaseModel<TriggerEventId>;

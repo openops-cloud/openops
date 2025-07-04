@@ -19,8 +19,10 @@ const INCLUDED_PATHS: Record<string, string[]> = {
   '/v1/flows/': ['get'],
   '/v1/flows/count': ['get'],
   '/v1/flows/{id}': ['get'],
+  '/v2/flows/{id}/steps': ['post'],
   '/v1/blocks/categories': ['get'],
   '/v1/blocks/': ['get'],
+  '/v1/blocks/options': ['post'],
   '/v1/blocks/{scope}/{name}': ['get'],
   '/v1/blocks/{name}': ['get'],
   '/v1/flow-runs/': ['get'],
@@ -94,6 +96,7 @@ export async function getOpenOpsTools(
     }),
   });
   const tools = await openopsClient.tools();
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const toolSet: Record<string, any> = {};
   for (const [key, tool] of Object.entries(tools)) {

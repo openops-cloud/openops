@@ -86,7 +86,7 @@ const TestTriggerSection = React.memo(
       undefined,
     );
 
-    const { data: testOutputData, isLoading: isLoadingTestOutput } =
+    const { data: stepData, isLoading: isLoadingStepData } =
       stepTestOutputHooks.useStepTestOutputFormData(flowVersionId, form);
 
     const [currentSelectedId, setCurrentSelectedId] = useState<
@@ -174,19 +174,18 @@ const TestTriggerSection = React.memo(
       },
     });
 
-    const isTesting = isPending || isLoadingTestOutput;
+    const isTesting = isPending ?? isLoadingStepData;
 
     function updateSelectedData(data: TriggerEvent) {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      stepTestOutputCache.setStepData(formValues.id!, {
+      stepTestOutputCache.setStepData(formValues.id, {
         output: formatUtils.formatStepInputOrOutput(data.payload),
         lastTestDate: dayjs().toISOString(),
       });
       setStepOutputCache({
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        stepId: formValues.id!,
+        stepId: formValues.id,
         flowVersionId,
         output: data.payload,
+        input: data.input,
         queryClient,
       });
     }
@@ -202,11 +201,13 @@ const TestTriggerSection = React.memo(
       staleTime: 0,
     });
 
-    const currentTestOutput = testOutputData?.output;
+    const currentTestOutput = stepData?.output;
+    const currentTestInput = stepData?.input;
+
     const outputDataSelected =
       !isNil(currentTestOutput) || !isNil(errorMessage);
 
-    const isTestedBefore = !isNil(testOutputData?.lastTestDate);
+    const isTestedBefore = !isNil(stepData?.lastTestDate);
 
     useEffect(() => {
       const selectedId = getSelectedId(
@@ -241,9 +242,10 @@ const TestTriggerSection = React.memo(
             isValid={isValid}
             isSaving={isSaving}
             isTesting={isTesting}
-            data={currentTestOutput}
+            outputData={currentTestOutput}
+            inputData={currentTestInput}
             errorMessage={errorMessage}
-            lastTestDate={testOutputData?.lastTestDate}
+            lastTestDate={stepData?.lastTestDate}
           >
             {pollResults?.data && (
               <div className="mb-3">

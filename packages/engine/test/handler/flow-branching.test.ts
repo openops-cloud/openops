@@ -3,8 +3,14 @@ import { flowExecutor } from '../../src/lib/handler/flow-executor'
 import { buildActionWithOneCondition, generateMockEngineConstants } from './test-helper'
 import { BranchCondition, BranchOperator } from '@openops/shared'
 
+jest.mock('../../src/lib/services/progress.service', () => ({
+    progressService: {
+        sendUpdate: jest.fn().mockImplementation(() => Promise.resolve()),
+    },
+}))
+
 function executeBranchActionWithOneCondition(condition: BranchCondition): Promise<FlowExecutorContext> {
-    return flowExecutor.execute({
+    return flowExecutor.executeFromAction({
         action: buildActionWithOneCondition({
             condition,
         }),

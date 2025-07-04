@@ -1,15 +1,10 @@
 import { logger } from './logger';
-import { system } from './system/system';
-import { SharedSystemProp } from './system/system-prop';
 
 export const exceptionHandler = {
   handle: (e: unknown): void => {
     logger.error('Caught an unknown exception', e);
   },
 };
-
-const ENRICH_ERROR_CONTEXT =
-  system.getBoolean(SharedSystemProp.ENRICH_ERROR_CONTEXT) ?? false;
 
 export const enrichErrorContext = ({
   error,

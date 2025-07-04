@@ -62,11 +62,11 @@ const TestActionSection = React.memo(
       setIsValid(form.formState.isValid);
     }, [form.formState.isValid]);
 
-    const { data: testOutputData, isLoading: isLoadingTestOutput } =
+    const { data: stepData, isLoading: isLoadingStepData } =
       stepTestOutputHooks.useStepTestOutputFormData(flowVersionId, form);
 
     const sampleDataExists =
-      !isNil(testOutputData?.lastTestDate) || !isNil(errorMessage);
+      !isNil(stepData?.lastTestDate) || !isNil(errorMessage);
 
     const socket = useSocket();
 
@@ -85,10 +85,10 @@ const TestActionSection = React.memo(
         if (stepResponse.success) {
           setErrorMessage(undefined);
           setStepOutputCache({
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            stepId: formValues.id!,
+            stepId: formValues.id,
             flowVersionId,
             output: stepResponse.output,
+            input: stepResponse.input,
             queryClient,
           });
         } else {
@@ -101,11 +101,11 @@ const TestActionSection = React.memo(
       },
     });
 
-    const isTesting = isPending || isLoadingTestOutput;
+    const isTesting = isPending ?? isLoadingStepData;
 
     const handleTest = () => {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      stepTestOutputCache.resetExpandedForStep(formValues.id!);
+      stepTestOutputCache.resetExpandedForStep(formValues.id);
       if (
         selectedStep.type === ActionType.BLOCK &&
         selectedStepTemplateModel?.riskLevel === RiskLevel.HIGH
@@ -120,8 +120,7 @@ const TestActionSection = React.memo(
 
     const confirmRiskyStep = () => {
       setRiskyStepConfirmationMessage(null);
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      stepTestOutputCache.resetExpandedForStep(formValues.id!);
+      stepTestOutputCache.resetExpandedForStep(formValues.id);
       mutate();
     };
 
@@ -162,9 +161,10 @@ const TestActionSection = React.memo(
         isValid={isValid}
         isSaving={isSaving}
         isTesting={isTesting}
-        data={testOutputData?.output}
+        outputData={stepData?.output}
+        inputData={stepData?.input}
         errorMessage={errorMessage}
-        lastTestDate={testOutputData?.lastTestDate}
+        lastTestDate={stepData?.lastTestDate}
       />
     );
   },

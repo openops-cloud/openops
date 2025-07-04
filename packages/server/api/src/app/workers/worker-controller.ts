@@ -117,6 +117,7 @@ export const flowWorkerController: FastifyPluginAsyncTypebox = async (app) => {
             flowId,
             payload,
             projectId,
+            input: {},
           }),
         ),
       );
@@ -182,7 +183,9 @@ export const flowWorkerController: FastifyPluginAsyncTypebox = async (app) => {
     async (request) => {
       const data = request.body;
       await flowRunService.start({
-        payload: null,
+        payload: {
+          queryParams: data.resumePayload,
+        },
         flowRunId: data.runId,
         synchronousHandlerId: data.synchronousHandlerId ?? undefined,
         projectId: data.projectId,

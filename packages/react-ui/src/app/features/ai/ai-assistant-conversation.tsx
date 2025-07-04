@@ -4,6 +4,7 @@ import {
   AIChatMessage,
   AIChatMessageRole,
   AIChatMessages,
+  ChatStatus,
   LoadingSpinner,
   MarkdownCodeVariations,
 } from '@openops/components/ui';
@@ -15,11 +16,6 @@ type AiAssistantConversationnProps = {
   lastUserMessageRef: React.RefObject<HTMLDivElement>;
   lastAssistantMessageRef: React.RefObject<HTMLDivElement>;
 } & Pick<UseChatHelpers, 'status'>;
-
-const ChatStatus = {
-  STREAMING: 'streaming',
-  SUBMITTED: 'submitted',
-};
 
 const AiAssistantConversation = ({
   messages,

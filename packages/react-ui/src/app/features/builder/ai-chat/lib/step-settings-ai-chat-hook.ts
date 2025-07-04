@@ -52,6 +52,7 @@ export const useStepSettingsAiChat = (
     handleSubmit,
     status,
     setMessages,
+    stop: stopChat,
   } = useChat({
     id: chatSessionKey,
     api: 'api/v1/ai/chat/conversation',
@@ -78,6 +79,7 @@ export const useStepSettingsAiChat = (
     setEnableNewChat(false);
 
     try {
+      stopChat();
       await aiChatApi.delete(chatId);
 
       const stepDetails = flowHelper.getStep(flowVersion, selectedStep);

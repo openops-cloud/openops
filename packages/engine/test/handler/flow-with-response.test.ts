@@ -3,6 +3,12 @@ import { flowExecutor } from '../../src/lib/handler/flow-executor'
 import { buildBlockAction, generateMockEngineConstants } from './test-helper'
 import { FlowRunStatus } from '@openops/shared'
 
+jest.mock('../../src/lib/services/progress.service', () => ({
+    progressService: {
+        sendUpdate: jest.fn().mockImplementation(() => Promise.resolve()),
+    },
+}))
+
 describe('flow with response', () => {
 
     it('should execute return response successfully', async () => {
@@ -27,7 +33,7 @@ describe('flow with response', () => {
                 'hello': 'world',
             },
         }
-        const result = await flowExecutor.execute({
+        const result = await flowExecutor.executeFromAction({
             action: buildBlockAction({
                 name: 'http',
                 blockName: '@openops/block-http',

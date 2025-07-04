@@ -1,16 +1,16 @@
 import { useStepSettingsContext } from '@/app/features/builder/step-settings/step-settings-context';
 import { stepTestOutputHooks } from '@/app/features/builder/test-step/step-test-output-hooks';
 import {
-  JsonViewer,
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
+  TestStepDataViewer,
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@openops/components/ui';
-import { ActionType, TriggerType } from '@openops/shared';
+import { Action, ActionType, Trigger, TriggerType } from '@openops/shared';
 import { t } from 'i18next';
 import { Info } from 'lucide-react';
 import React from 'react';
@@ -85,12 +85,10 @@ const TestStepContainer = React.memo(
             )}
           </TabsContent>
           <TabsContent value={TabListEnum.SAMPLE_STEP_OUTPUT}>
-            <JsonViewer
-              title={t('Output')}
+            <TestStepDataViewer
+              outputJson={selectedStep?.settings?.inputUiInfo?.sampleData ?? ''}
               onChange={useSaveSelectedStepSampleData}
-              json={selectedStep?.settings?.inputUiInfo?.sampleData ?? ''}
               readonly={false}
-              editorClassName="rounded-t-none border-l-0"
             />
           </TabsContent>
         </Tabs>

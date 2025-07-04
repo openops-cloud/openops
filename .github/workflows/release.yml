@@ -11,6 +11,10 @@ on:
         type: boolean
         description: Create latest tag
         default: true
+      deploy_to_test:
+        type: boolean
+        description: Deploy the release to the test environment
+        default: true
 
 jobs:
   get-version:
@@ -22,7 +26,7 @@ jobs:
     - name: Get next version
       if: inputs.version == ''
       id: semver
-      uses: flatherskevin/semver-action@v1
+      uses: flatherskevin/semver-action@fc3c4e67353e3c45b8164521ddd17c9e38d6d4d8
       with:
         incrementLevel: patch
         source: tags
@@ -41,18 +45,18 @@ jobs:
       VERSION: ${{ needs.get-version.outputs.version }}
     steps:
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v3.11.1
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v4.2.1
         with:
           aws-access-key-id: ${{ secrets.ECR_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.ECR_SECRET_ACCESS_KEY }}
           aws-region: ${{ vars.ECR_REGION }}
       - name: Login to private ECR
         id: login-private-ecr
-        uses: aws-actions/amazon-ecr-login@v2
+        uses: aws-actions/amazon-ecr-login@v2.0.1
       - name: Login to public ECR
-        uses: aws-actions/amazon-ecr-login@v2
+        uses: aws-actions/amazon-ecr-login@v2.0.1
         env:
           AWS_REGION: ${{ vars.ECR_PUBLIC_REGION }}
         with:
@@ -79,8 +83,10 @@ jobs:
     env:
       VERSION: ${{ needs.get-version.outputs.version }}
       RELEASE_DC_FILENAME: openops-dc-${{ needs.get-version.outputs.version }}.zip
+    outputs:
+      download_url: ${{ steps.upload-release.outputs.download_url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.2.2
       - name: Update version in docker-compose
         run: |
           cp THIRD_PARTY_LICENSES.txt LICENSE NOTICE deploy/docker-compose
@@ -103,19 +109,44 @@ jobs:
           echo "The release was created as a draft." >> $GITHUB_STEP_SUMMARY
           echo "Please [review and publish it](${RELEASE_URL/\/tags\//\/edit\/})." >> $GITHUB_STEP_SUMMARY
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v4.2.1
         with:
           aws-access-key-id: ${{ secrets.RELEASE_S3_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.RELEASE_S3_SECRET_ACCESS_KEY }}
           aws-region: us-east-2
       - name: Upload release to S3
+        id: upload-release
+        env:
+          DOWNLOAD_URL: https://files.openops.com/releases/${{ env.VERSION }}/${{ env.RELEASE_DC_FILENAME}}
         run: |
           aws s3 cp deploy/docker-compose/$RELEASE_DC_FILENAME s3://openops/releases/$VERSION/$RELEASE_DC_FILENAME
           cat <<EOF >> $GITHUB_STEP_SUMMARY
-          Also available at https://openops.s3.amazonaws.com/releases/$VERSION/$RELEASE_DC_FILENAME .
+          Also available at $DOWNLOAD_URL .
 
           Can be installed using:
           \`\`\`
-          curl -fsS https://openops.sh/install | OPENOPS_URL=https://files.openops.com/releases/$VERSION/openops-dc-$VERSION.zip OPENOPS_VERSION=$VERSION sh
+          curl -fsS https://openops.sh/install | OPENOPS_URL=$DOWNLOAD_URL OPENOPS_VERSION=$VERSION sh
           \`\`\`
           EOF
+          echo "download_url=$DOWNLOAD_URL" >> $GITHUB_OUTPUT
+  trigger-deployment:
+    name: Trigger a deployment
+    needs: [get-version, create-github-release]
+    runs-on: ubuntu-latest
+    if: github.repository == 'openops-cloud/openops' && inputs.deploy_to_test
+    steps:
+      - name: Get token from Github App
+        id: app_token
+        uses: actions/create-github-app-token@v2.0.6
+        with:
+          app-id: ${{ vars.DEVOPS_GITHUB_APP_ID }}
+          private-key: ${{ secrets.DEVOPS_GITHUB_APP_PEM }}
+          owner: ${{ github.repository_owner }}
+      - name: Trigger deployment
+        env:
+          GITHUB_TOKEN: ${{ steps.app_token.outputs.token }}
+          VERSION: ${{ needs.get-version.outputs.version }}
+          RELEASE_URL: ${{ needs.create-github-release.outputs.download_url }}
+        run: |
+          gh workflow run "Deploy Docker Compose Release" -R openops-cloud/devops -f release_version=${VERSION} -f release_url=${RELEASE_URL} -r main
+
