@@ -1,7 +1,7 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import {
   blocksBuilder,
-  getFastifyBodyLimit,
+  getFastifyBodyLimitOrThrow,
   logger,
   runWithLogContext,
   setStopHandlers,
@@ -12,7 +12,7 @@ import { StatusCodes } from 'http-status-codes';
 import { executeEngine } from './engine-executor';
 import { EngineRequest } from './main';
 
-const app = fastify({ bodyLimit: getFastifyBodyLimit() });
+const app = fastify({ bodyLimit: getFastifyBodyLimitOrThrow() });
 
 const engineController: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.post(
