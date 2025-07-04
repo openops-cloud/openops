@@ -32,6 +32,7 @@ import { TestStepContainer } from '../test-step';
 import { BlockSettings } from './block-settings';
 import { BranchSettings } from './branch-settings';
 import { CodeSettings } from './code-settings';
+import { useApplyCodeToInject } from './hooks/use-apply-code-to-inject';
 import { LoopsSettings } from './loops-settings';
 import { SplitSettings } from './split-settings';
 import { useStepSettingsContext } from './step-settings-context';
@@ -138,19 +139,11 @@ const StepSettingsContainer = React.memo(() => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshBlockFormSettings]);
 
-  useEffect(() => {
-    if (midpanelState.codeToInject && midpanelState.aiChatProperty?.inputName) {
-      form.setValue(
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        midpanelState.aiChatProperty!.inputName,
-        midpanelState.codeToInject,
-        { shouldValidate: true },
-      );
-
-      applyMidpanelAction({ type: 'CLEAN_CODE_TO_INJECT' });
-      form.trigger();
-    }
-  }, [form, midpanelState, applyMidpanelAction]);
+  useApplyCodeToInject({
+    form,
+    midpanelState,
+    applyMidpanelAction,
+  });
 
   useUpdateEffect(() => {
     form.setValue('valid', form.formState.isValid);

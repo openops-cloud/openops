@@ -55,6 +55,13 @@ export const getSystemPrompt = async (
       return loadPrompt('snowflake.txt');
     case '@openops/block-databricks':
       return loadPrompt('databricks.txt');
+    // wip until the final ticket is implemented
+    case '@openops/code':
+      return `Generate code with this interface, based on what the user wants to transform. Inputs are passed as an object. The code should be executable in isolated-vm (Secure & isolated JS environments for nodejs)
+      export const code = async (inputs) => {  
+      // do transformation logic here
+      return ...; };
+      `;
     default:
       return '';
   }
