@@ -1,6 +1,6 @@
 import formBody from '@fastify/formbody';
 import fastifyMultipart from '@fastify/multipart';
-import { logger, system } from '@openops/server-shared';
+import { getFastifyBodyLimit, logger, system } from '@openops/server-shared';
 import { openOpsId } from '@openops/shared';
 import fastify, { FastifyBaseLogger, FastifyInstance } from 'fastify';
 import fastifyFavicon from 'fastify-favicon';
@@ -28,7 +28,7 @@ async function setupBaseApp(): Promise<FastifyInstance> {
   const app = fastify({
     loggerInstance: logger as FastifyBaseLogger,
     pluginTimeout: 30000,
-    bodyLimit: 6 * 1024 * 1024, // 6MB same as engine api-handler & nginx.conf
+    bodyLimit: getFastifyBodyLimit(),
     genReqId: () => {
       return `req_${openOpsId()}`;
     },

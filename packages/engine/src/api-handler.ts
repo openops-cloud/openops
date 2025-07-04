@@ -1,6 +1,7 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import {
   blocksBuilder,
+  getFastifyBodyLimit,
   logger,
   runWithLogContext,
   setStopHandlers,
@@ -11,17 +12,7 @@ import { StatusCodes } from 'http-status-codes';
 import { executeEngine } from './engine-executor';
 import { EngineRequest } from './main';
 
-const isLambdaEnvironment = (): boolean => {
-  return process.env.AWS_LAMBDA_FUNCTION_NAME !== undefined;
-};
-
-const LAMBDA_FASTIFY_BODY_LIMIT = 6 * 1024 * 1024; // 6MB
-const DEFAULT_FASTIFY_BODY_LIMIT = 10 * 1024 * 1024; // 10MB
-const app = fastify({
-  bodyLimit: isLambdaEnvironment()
-    ? LAMBDA_FASTIFY_BODY_LIMIT
-    : DEFAULT_FASTIFY_BODY_LIMIT,
-});
+const app = fastify({ bodyLimit: getFastifyBodyLimit() });
 
 const engineController: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.post(

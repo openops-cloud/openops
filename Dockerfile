@@ -65,7 +65,7 @@ COPY --link ai-prompts ai-prompts
 LABEL service=openops
 
 # Copy Nginx configuration template and static files
-COPY nginx.standard.conf /etc/nginx/nginx.conf
+COPY nginx.template.conf /etc/nginx/nginx.conf
 COPY dist/packages/react-ui/ /usr/share/nginx/html/
 
 ARG VERSION=unknown

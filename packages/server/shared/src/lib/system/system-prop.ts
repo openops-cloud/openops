@@ -107,6 +107,7 @@ export enum AppSystemProp {
 
   AWS_MCP_COST_PATH = 'AWS_MCP_COST_PATH',
   SAMPLE_DATA_SIZE_LIMIT_KB = 'SAMPLE_DATA_SIZE_LIMIT_KB',
+  FASTIFY_BODY_LIMIT_MB = 'FASTIFY_BODY_LIMIT_MB',
 }
 
 export enum SharedSystemProp {
