@@ -10,6 +10,7 @@ import { t } from 'i18next';
 import { useCallback, useEffect, useRef } from 'react';
 
 const AI_ASSISTANT_LS_KEY = 'ai_assistant_chat_id';
+const AI_ASSISTANT_SESSION_ID = 'ai_assistant_session_id';
 
 export const useAiAssistantChat = () => {
   const chatId = useRef(localStorage.getItem(AI_ASSISTANT_LS_KEY));
@@ -39,7 +40,7 @@ export const useAiAssistantChat = () => {
     setMessages,
     stop: stopChat,
   } = useChat({
-    id: 'ai-assistant-session',
+    id: AI_ASSISTANT_SESSION_ID,
     api: '/api/v1/ai/conversation',
     maxSteps: 5,
     body: {
