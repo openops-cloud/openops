@@ -311,7 +311,7 @@ const StepSettingsContainer = React.memo(() => {
             {!readonly && (
               <>
                 <ResizableHandle withHandle={true} />
-                <ResizablePanel defaultSize={45}>
+                <ResizablePanel defaultSize={45} className="min-h-[60px]">
                   {modifiedStep.type && (
                     <TestStepContainer
                       type={modifiedStep.type}

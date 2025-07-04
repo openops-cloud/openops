@@ -71,6 +71,7 @@ const CodeMirrorEditor = React.memo(
       styleTheme,
       EditorState.readOnly.of(readonly),
       EditorView.editable.of(!readonly),
+      EditorView.lineWrapping,
       json(),
     ];
     const ref = useRef<ReactCodeMirrorRef>(null);
@@ -93,6 +94,7 @@ const CodeMirrorEditor = React.memo(
             autocompletion: true,
             highlightActiveLine: !readonly,
           }}
+          indentWithTab={false}
           lang="json"
           onChange={onChange}
           theme={editorTheme}
