@@ -2,18 +2,24 @@ import { AiAssistantConversation } from '@/app/features/ai/ai-assistant-conversa
 import { useAiAssistantChat } from '@/app/features/ai/lib/ai-assistant-chat-hook';
 import { useAiModelSelector } from '@/app/features/ai/lib/ai-model-selector-hook';
 import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
+import { useSafeBuilderStateContext } from '@/app/features/builder/builder-hooks';
+import { flowsHooks } from '@/app/features/flows/lib/flows-hooks';
 import { useAppStore } from '@/app/store/app-store';
 import {
   AI_CHAT_CONTAINER_SIZES,
   AiAssistantChatContainer,
   AiAssistantChatSizeState,
+  AiScopeItem,
+  AiScopeType,
   CHAT_MIN_WIDTH,
   cn,
   NoAiEnabledPopover,
   PARENT_INITIAL_HEIGHT_GAP,
   PARENT_MAX_HEIGHT_GAP,
+  ScopeOption,
 } from '@openops/components/ui';
-import { useCallback, useMemo, useRef } from 'react';
+import { flowHelper } from '@openops/shared';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 type AiAssistantChatProps = {
   middlePanelSize: {
@@ -48,6 +54,78 @@ const AiAssistantChat = ({
     aiChatDimensions: s.aiChatDimensions,
     setAiChatDimensions: s.setAiChatDimensions,
   }));
+
+  const [aiScopeItems, setAiScopeItems] = useState<AiScopeItem[]>([]);
+  const [availableScopeOptions, setAvailableScopeOptions] = useState<
+    ScopeOption[]
+  >([]);
+
+  const flowVersion = useSafeBuilderStateContext((s) => s?.flowVersion);
+
+  useEffect(() => {
+    const options = flowVersion?.trigger
+      ? flowHelper.getAllSteps(flowVersion.trigger)
+      : [];
+
+    setAvailableScopeOptions((state) => {
+      const newOptions = options
+        .filter((option) => Boolean(option.id))
+        .map((option) => {
+          return {
+            id: option.id,
+            displayName: option.displayName,
+            type: AiScopeType.STEP,
+          } as ScopeOption;
+        });
+
+      // Create a map of existing options by ID for quick lookup
+      const existingOptionsMap = new Map(
+        state.map((option) => [option.id, option]),
+      );
+
+      // Only add new options that don't already exist in the state
+      newOptions.forEach((option) => {
+        if (!existingOptionsMap.has(option.id)) {
+          existingOptionsMap.set(option.id, option);
+        }
+      });
+
+      return Array.from(existingOptionsMap.values());
+    });
+  }, [flowVersion]);
+
+  const { data: workflows } = flowsHooks.useFlows({
+    limit: 999,
+    cursor: undefined,
+  });
+
+  useEffect(() => {
+    if (workflows) {
+      setAvailableScopeOptions((options) => {
+        const newOptions = workflows.data.map((workflow) => {
+          return {
+            id: workflow.id,
+            displayName: workflow.version.displayName,
+            type: AiScopeType.WORKFLOW,
+          };
+        });
+
+        // Create a map of existing options by ID for quick lookup
+        const existingOptionsMap = new Map(
+          options.map((option) => [option.id, option]),
+        );
+
+        // Only add new options that don't already exist in the state
+        newOptions.forEach((option) => {
+          if (!existingOptionsMap.has(option.id)) {
+            existingOptionsMap.set(option.id, option);
+          }
+        });
+
+        return Array.from(existingOptionsMap.values());
+      });
+    }
+  }, [workflows]);
 
   const {
     messages,
@@ -112,6 +190,29 @@ const AiAssistantChat = ({
     setAiChatSize(newSize);
   }, [aiChatSize, setAiChatSize]);
 
+  const handleScopeSelected = useCallback((scope: ScopeOption) => {
+    // Check if the scope is already in the aiScopeItems
+    setAiScopeItems((prevItems) => {
+      const isAlreadyAdded = prevItems.some((item) => item.id === scope.id);
+      if (!isAlreadyAdded) {
+        return [...prevItems, scope as AiScopeItem];
+      }
+      return prevItems;
+    });
+  }, []);
+
+  const handleScopeRemoved = useCallback((id: string) => {
+    setAiScopeItems((prevItems) => prevItems.filter((item) => item.id !== id));
+  }, []);
+
+  // Filter out already selected items from available options
+  const filteredAvailableScopeOptions = useMemo(() => {
+    const selectedIds = new Set(aiScopeItems.map((item) => item.id));
+    return availableScopeOptions.filter(
+      (option) => !selectedIds.has(option.id),
+    );
+  }, [availableScopeOptions, aiScopeItems]);
+
   if (isLoading) {
     return null;
   }
@@ -151,6 +252,10 @@ const AiAssistantChat = ({
       status={status}
       lastUserMessageRef={lastUserMessageRef}
       lastAssistantMessageRef={lastAssistantMessageRef}
+      aiScopeItems={aiScopeItems}
+      onAiScopeItemRemove={handleScopeRemoved}
+      availableScopeOptions={filteredAvailableScopeOptions}
+      onScopeSelected={handleScopeSelected}
     >
       <AiAssistantConversation
         messages={messages}
