@@ -177,7 +177,7 @@ export const amazonAuth = BlockAuth.CustomAuth({
 
  **🔐 Production environment**<br>
 Use the AWS IAM role assigned to the hosting environment:
-- Set the environment variable in your installation: **OPS_AWS_ENABLE_IMPLICIT_ROLE=true**. Refer to [AWS docs](https://docs.openops.com/cloud-access/access-levels-permissions#connecting-using-an-iam-role-attached-to-your-ec2-instance) for details.
+- Set the environment variable in your installation: **OPS_AWS_ENABLE_IMPLICIT_ROLE=true**. Refer to [OpenOps docs](https://docs.openops.com/cloud-access/access-levels-permissions#connecting-using-an-iam-role-attached-to-your-ec2-instance) for details.
 - Leave "Access Key ID" and "Secret Access Key" empty.
 
 
