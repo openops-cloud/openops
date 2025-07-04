@@ -1,6 +1,6 @@
 #!/bin/sh
 
-export NGINX_BODY_LIMIT="${OPS_BODY_LIMIT_MB:-10}m"
+export NGINX_CLIENT_MAX_BODY_SIZE="${OPS_BODY_REQUEST_LIMIT:-10}m"
 
 # Generate nginx config from template
 envsubst < /etc/nginx/nginx.template.conf > /etc/nginx/nginx.conf

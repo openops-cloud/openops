@@ -93,7 +93,7 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [AppSystemProp.OPENOPS_MCP_SERVER_PATH]: '/root/.mcp/openops-mcp',
   [AppSystemProp.AWS_MCP_COST_PATH]: '/root/.mcp/aws-cost',
   [AppSystemProp.SAMPLE_DATA_SIZE_LIMIT_KB]: '100',
-  [AppSystemProp.BODY_LIMIT_MB]: '10',
+  [AppSystemProp.BODY_REQUEST_LIMIT]: '10',
 };
 
 export const system = {
