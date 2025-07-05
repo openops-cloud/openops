@@ -7,6 +7,7 @@ export * from './lib/crypto';
 export * from './lib/distributed-lock';
 export * from './lib/exception-handler';
 export * from './lib/exec-async';
+export * from './lib/fastify';
 export * from './lib/file-compressor';
 export * from './lib/file-system';
 export * from './lib/hash';

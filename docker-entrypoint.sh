@@ -1,5 +1,10 @@
 #!/bin/sh
 
+export NGINX_CLIENT_MAX_BODY_SIZE="${OPS_REQUEST_BODY_LIMIT:-10}m"
+
+# Generate nginx config from template
+envsubst '${NGINX_CLIENT_MAX_BODY_SIZE}' < /etc/nginx/nginx.template.conf > /etc/nginx/nginx.conf
+
 # Start Nginx server
 nginx -g "daemon off;" &
 
