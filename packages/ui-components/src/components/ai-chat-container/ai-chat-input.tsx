@@ -62,7 +62,7 @@ export const AiChatInput = ({
         )}
       <div className="relative overflow-hidden">
         <ScrollArea
-          className="h-full pr-12 py-3"
+          className="h-full pr-12 py-2"
           viewPortClassName={'max-h-[103px]'}
         >
           <TextareaAutosize
@@ -83,7 +83,7 @@ export const AiChatInput = ({
         <Button
           size="icon"
           variant="transparent"
-          className="absolute right-3 top-4 !p-0 size-5"
+          className="absolute right-3 top-3 !p-0 size-5"
           onClick={handleSubmit}
           disabled={
             !!status &&
