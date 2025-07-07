@@ -215,7 +215,7 @@ const getAbortController = (
 
 export const cancelActiveStream = async (chatId: string): Promise<void> => {
   const streamData = await getActiveStream(chatId);
-  if (streamData && streamData.abortControllerId) {
+  if (streamData?.abortControllerId) {
     const abortController = getAbortController(streamData.abortControllerId);
     if (abortController) {
       logger.debug('Aborting stream controller found in this instance', {
