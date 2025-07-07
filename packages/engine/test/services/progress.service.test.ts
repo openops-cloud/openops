@@ -15,9 +15,12 @@ jest.mock('../../src/lib/timeout-validator', () => ({
   throwIfExecutionTimeExceeded: jest.fn(),
 }));
 
-const mockThrowIfExecutionTimeExceeded = throwIfExecutionTimeExceeded as jest.MockedFunction<typeof throwIfExecutionTimeExceeded>;
+jest.mock('@openops/common', () => ({
+  makeHttpRequest: jest.fn(),
+}));
 
-global.fetch = jest.fn();
+const mockThrowIfExecutionTimeExceeded = throwIfExecutionTimeExceeded as jest.MockedFunction<typeof throwIfExecutionTimeExceeded>;
+const mockMakeHttpRequest = require('@openops/common').makeHttpRequest as jest.MockedFunction<any>;
 
 describe('Progress Service', () => {
   const mockParams = {
@@ -45,10 +48,7 @@ describe('Progress Service', () => {
     // Reset the timeout mock to not throw by default
     mockThrowIfExecutionTimeExceeded.mockReset();
     
-    (global.fetch as jest.Mock).mockResolvedValue({
-      ok: true,
-      status: 200,
-    });
+    mockMakeHttpRequest.mockResolvedValue({});
   });
 
   afterEach(() => {
@@ -68,14 +68,19 @@ describe('Progress Service', () => {
       await progressService.sendUpdate(successParams);
 
       expect(successParams.flowExecutorContext.toResponse).toHaveBeenCalled();
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(mockMakeHttpRequest).toHaveBeenCalledWith(
+        'POST',
         'http://localhost:3000/v1/engine/update-run',
+        expect.any(Object), // AxiosHeaders
         expect.objectContaining({
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: 'Bearer test-token',
-          },
+          executionCorrelationId: 'test-correlation-id-success',
+          runId: 'test-run-id',
+          workerHandlerId: 'test-handler-id',
+          progressUpdateType: 'WEBHOOK_RESPONSE',
+        }),
+        expect.objectContaining({
+          retries: 3,
+          retryDelay: expect.any(Function),
         })
       );
     });
@@ -109,11 +114,12 @@ describe('Progress Service', () => {
 
       await progressService.sendUpdate(uniqueParams);
 
-      expect(global.fetch).toHaveBeenCalledTimes(1);
-      const fetchCall = (global.fetch as jest.Mock).mock.calls[0];
-      const [url, options] = fetchCall;
-      const requestBody = JSON.parse(options.body);
+      expect(mockMakeHttpRequest).toHaveBeenCalledTimes(1);
+      const call = mockMakeHttpRequest.mock.calls[0];
+      const [method, url, headers, requestBody, retryConfig] = call;
 
+      expect(method).toBe('POST');
+      expect(url).toBe('http://localhost:3000/v1/engine/update-run');
       expect(requestBody).toEqual(
         expect.objectContaining({
           executionCorrelationId: 'test-correlation-id-payload',
@@ -142,10 +148,9 @@ describe('Progress Service', () => {
 
       await progressService.sendUpdate(paramsWithoutHandlerId);
 
-      expect(global.fetch).toHaveBeenCalledTimes(1);
-      const fetchCall = (global.fetch as jest.Mock).mock.calls[0];
-      const [url, options] = fetchCall;
-      const requestBody = JSON.parse(options.body);
+      expect(mockMakeHttpRequest).toHaveBeenCalledTimes(1);
+      const call = mockMakeHttpRequest.mock.calls[0];
+      const [method, url, headers, requestBody] = call;
       
       expect(requestBody.workerHandlerId).toBe(null);
     });
@@ -162,7 +167,7 @@ describe('Progress Service', () => {
       await progressService.sendUpdate(duplicateParams);
       await progressService.sendUpdate(duplicateParams);
 
-      expect(global.fetch).toHaveBeenCalledTimes(1);
+      expect(mockMakeHttpRequest).toHaveBeenCalledTimes(1);
     });
 
     it('should send different requests when content changes', async () => {
@@ -185,7 +190,7 @@ describe('Progress Service', () => {
       await progressService.sendUpdate(params1);
       await progressService.sendUpdate(params2);
 
-      expect(global.fetch).toHaveBeenCalledTimes(2);
+      expect(mockMakeHttpRequest).toHaveBeenCalledTimes(2);
     });
 
     it('should deduplicate requests with different durations but same content', async () => {
@@ -224,7 +229,7 @@ describe('Progress Service', () => {
       await progressService.sendUpdate(params1);
       await progressService.sendUpdate(params2);
 
-      expect(global.fetch).toHaveBeenCalledTimes(1);
+      expect(mockMakeHttpRequest).toHaveBeenCalledTimes(1);
       expect(params1.flowExecutorContext.toResponse).toHaveBeenCalledTimes(1);
       expect(params2.flowExecutorContext.toResponse).toHaveBeenCalledTimes(1);
     });
@@ -265,7 +270,7 @@ describe('Progress Service', () => {
       await progressService.sendUpdate(params1);
       await progressService.sendUpdate(params2);
 
-      expect(global.fetch).toHaveBeenCalledTimes(2);
+      expect(mockMakeHttpRequest).toHaveBeenCalledTimes(2);
       expect(params1.flowExecutorContext.toResponse).toHaveBeenCalledTimes(1);
       expect(params2.flowExecutorContext.toResponse).toHaveBeenCalledTimes(1);
     });
@@ -289,10 +294,10 @@ describe('Progress Service', () => {
       await Promise.all(promises);
 
       // Due to mutex locking and request deduplication, should only make one request
-      expect(global.fetch).toHaveBeenCalledTimes(1);
+      expect(mockMakeHttpRequest).toHaveBeenCalledTimes(1);
     });
 
-    it('should handle fetch errors gracefully', async () => {
+    it('should handle HTTP errors gracefully', async () => {
       const errorParams = {
         ...mockParams,
         engineConstants: {
@@ -301,7 +306,7 @@ describe('Progress Service', () => {
         },
       };
 
-      (global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'));
+      mockMakeHttpRequest.mockRejectedValue(new Error('Network error'));
 
       await expect(progressService.sendUpdate(errorParams)).rejects.toThrow('Network error');
     });
@@ -318,12 +323,14 @@ describe('Progress Service', () => {
 
       await progressService.sendUpdate(paramsWithDifferentUrl);
 
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(mockMakeHttpRequest).toHaveBeenCalledWith(
+        'POST',
         'https://api.example.com/v1/engine/update-run',
+        expect.any(Object),
+        expect.any(Object),
         expect.any(Object)
       );
     });
-
 
     it('should throw error when execution time is exceeded', async () => {
       const timeoutParams = {
@@ -341,7 +348,7 @@ describe('Progress Service', () => {
 
       await expect(progressService.sendUpdate(timeoutParams)).rejects.toThrow('Execution time exceeded');
       expect(mockThrowIfExecutionTimeExceeded).toHaveBeenCalledTimes(1);
-      expect(global.fetch).not.toHaveBeenCalled();
+      expect(mockMakeHttpRequest).not.toHaveBeenCalled();
       expect(timeoutParams.flowExecutorContext.toResponse).not.toHaveBeenCalled();
     });
   });

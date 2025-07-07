@@ -1,6 +1,8 @@
+import { makeHttpRequest } from '@openops/common';
 import { hashUtils, logger } from '@openops/server-shared';
 import { UpdateRunProgressRequest } from '@openops/shared';
 import { Mutex } from 'async-mutex';
+import { AxiosHeaders } from 'axios';
 import { EngineConstants } from '../handler/context/engine-constants';
 import { FlowExecutorContext } from '../handler/context/flow-execution-context';
 import { throwIfExecutionTimeExceeded } from '../timeout-validator';
@@ -54,14 +56,21 @@ const sendUpdateRunRequest = async (
 
   lastRequestHash = requestHash;
 
-  await fetch(url.toString(), {
-    method: 'POST',
-    headers: {
+  await makeHttpRequest(
+    'POST',
+    url.toString(),
+    new AxiosHeaders({
       'Content-Type': 'application/json',
       Authorization: `Bearer ${engineConstants.engineToken}`,
+    }),
+    request,
+    {
+      retries: 3,
+      retryDelay: (retryCount: number) => {
+        return (retryCount + 1) * 1000; // 1s, 2s, 3s
+      },
     },
-    body: JSON.stringify(request),
-  });
+  );
 };
 
 type UpdateStepProgressParams = {
