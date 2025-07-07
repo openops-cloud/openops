@@ -20,7 +20,7 @@ export const linearCreateIssue = createAction({
       required: false,
     }),
     state_id: props.status_id(),
-    labels: props.labels(),
+    labels: props.labels(true),
     assignee_id: props.assignee_id(),
     priority_id: props.priority_id(),
     template_id: props.template_id(),
@@ -36,7 +36,7 @@ export const linearCreateIssue = createAction({
       labelIds: propsValue.labels,
       templateId: propsValue.template_id,
     };
-    const client = makeClient(auth as string);
+    const client = makeClient(auth);
     const result = await client.createIssue(issue);
     if (result.success) {
       const createdIssue = await result.issue;

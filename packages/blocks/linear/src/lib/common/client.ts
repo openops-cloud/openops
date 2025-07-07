@@ -1,7 +1,7 @@
 import { LinearClient, LinearDocument } from '@linear/sdk';
 
 export class LinearClientWrapper {
-  private client: LinearClient;
+  private readonly client: LinearClient;
   constructor(apiKey: string) {
     this.client = new LinearClient({ apiKey: apiKey });
   }

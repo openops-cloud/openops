@@ -14,16 +14,16 @@ export const linearUpdateIssue = createAction({
     issue_id: props.issue_id(),
     title: Property.ShortText({
       displayName: 'Title',
-      required: false,
+      required: true,
     }),
     description: Property.LongText({
       displayName: 'Description',
       required: false,
     }),
-    state_id: props.status_id(),
-    labels: props.labels(),
+    state_id: props.status_id(true),
+    labels: props.labels(true),
     assignee_id: props.assignee_id(),
-    priority_id: props.priority_id(),
+    priority_id: props.priority_id(true),
   },
   async run({ auth, propsValue }) {
     const issueId = propsValue.issue_id!;
@@ -35,7 +35,7 @@ export const linearUpdateIssue = createAction({
       priority: propsValue.priority_id,
       labelIds: propsValue.labels,
     };
-    const client = makeClient(auth as string);
+    const client = makeClient(auth);
     const result = await client.updateIssue(issueId, issue);
     if (result.success) {
       const updatedIssue = await result.issue;
