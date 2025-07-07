@@ -1,9 +1,11 @@
 import { t } from 'i18next';
-import { useLayoutEffect, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
+import { UseFormReturn } from 'react-hook-form';
 import { clipboardUtils } from '../../lib/clipboard-utils';
 import { COPY_PASTE_TOAST_DURATION } from '../../lib/constants';
-import { toast, UNSAVED_CHANGES_TOAST } from '../../ui/use-toast';
+import { toast } from '../../ui/use-toast';
+import { JsonFormValues } from './json-viewer';
 
 const removeDoubleQuotes = (str: string): string =>
   str.startsWith('"') && str.endsWith('"') ? str.slice(1, -1) : str;
@@ -18,7 +20,7 @@ const isStepFileUrl = (json: unknown): json is string => {
 
 type UseJsonViewerProps = {
   json: any;
-  title: string;
+  title?: string;
   readonly?: boolean;
   onChange?: (json: any) => void;
   renderFileButton: (props: {
@@ -26,6 +28,9 @@ type UseJsonViewerProps = {
     isProductionFile: boolean;
     handleDownloadFile: (fileUrl: string, ext?: string) => void;
   }) => React.ReactNode;
+  form: UseFormReturn<JsonFormValues, any, undefined>;
+  isEditModeEnabled?: boolean;
+  onEditModeChange?: (isEditModeEnabled: boolean) => void;
 };
 
 export const useJsonViewer = ({
@@ -34,8 +39,27 @@ export const useJsonViewer = ({
   readonly = true,
   onChange,
   renderFileButton,
+  form,
+  isEditModeEnabled,
+  onEditModeChange,
 }: UseJsonViewerProps) => {
-  const [isEditMode, setIsEditMode] = useState(!json && !readonly);
+  const [isEditMode, setIsEditMode] = useState(
+    isEditModeEnabled ?? (!json && !readonly),
+  );
+
+  useEffect(() => {
+    if (isEditModeEnabled !== undefined) {
+      setIsEditMode(!!isEditModeEnabled);
+    }
+  }, [isEditModeEnabled]);
+
+  const editModeChange = useCallback(
+    (editMode: boolean) => {
+      onEditModeChange && onEditModeChange(editMode);
+      setIsEditMode(editMode);
+    },
+    [onEditModeChange],
+  );
 
   const showCopySuccessToast = () =>
     toast({
@@ -81,16 +105,19 @@ export const useJsonViewer = ({
     URL.revokeObjectURL(fileUrl);
   };
 
+  const handleDelete = () => {
+    editModeChange(true);
+    form.reset({ jsonContent: undefined });
+    if (onChange) {
+      onChange(undefined);
+    }
+  };
+
   const apply = (json: string) => {
     if (onChange) {
-      try {
-        const jsonData = JSON.parse(json);
-        onChange(jsonData);
-      } catch {
-        toast(UNSAVED_CHANGES_TOAST);
-      }
+      onChange(json);
     }
-    setIsEditMode(false);
+    editModeChange(false);
   };
 
   useLayoutEffect(() => {
@@ -134,9 +161,10 @@ export const useJsonViewer = ({
     handleCopy,
     handleDownload,
     handleDownloadFile,
+    handleDelete,
     isFileUrl,
     isEditMode,
-    setIsEditMode,
+    setIsEditMode: editModeChange,
     readonly,
     apply,
   };

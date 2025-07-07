@@ -15,7 +15,6 @@ function createConnection(
     updated: '2025-06-01T00:00:00.000Z',
     name: 'default',
     type: AppConnectionType.CUSTOM_AUTH,
-    blockName: '@openops/block-aws',
     projectId: 'HUvbevoLCGQX5hOHeRthU',
     status: AppConnectionStatus.ACTIVE,
     authProviderKey: 'AWS',
@@ -35,8 +34,7 @@ describe('groupedConnectionsSelector', () => {
         id: 'missing-slack',
         name: 'slack-missing-provider',
         type: AppConnectionType.CLOUD_OAUTH2,
-        blockName: '@openops/block-slack',
-        authProviderKey: null,
+        authProviderKey: undefined,
       }),
     ];
     const page: SeekPage<AppConnectionWithoutSensitiveData> = {
@@ -64,7 +62,7 @@ describe('groupedConnectionsSelector', () => {
         createConnection({ id: 'aws-1', name: 'aws-1' }),
         createConnection({ id: 'aws-2', name: 'aws-2' }),
       ],
-      '@openops/block-aws',
+      'AWS',
       2,
     ],
     [
@@ -74,30 +72,28 @@ describe('groupedConnectionsSelector', () => {
           id: 'slack-1',
           name: 'slack-1',
           type: AppConnectionType.CLOUD_OAUTH2,
-          blockName: '@openops/block-slack',
           authProviderKey: 'Slack',
         }),
         createConnection({
           id: 'slack-2',
           name: 'slack-2',
           type: AppConnectionType.CLOUD_OAUTH2,
-          blockName: '@openops/block-slack',
           authProviderKey: 'Slack',
         }),
       ],
-      '@openops/block-slack',
+      'Slack',
       2,
     ],
-  ])('%s', (_desc, connections, blockName, expectedLength) => {
+  ])('%s', (_desc, connections, authProviderKey, expectedLength) => {
     const page: SeekPage<AppConnectionWithoutSensitiveData> = {
       data: connections,
       next: null,
       previous: null,
     };
     const result = groupedConnectionsSelector(page);
-    expect(Object.keys(result)).toEqual([blockName]);
-    expect(result[blockName]).toHaveLength(expectedLength);
-    expect(result[blockName]).toEqual(connections);
+    expect(Object.keys(result)).toEqual([authProviderKey]);
+    expect(result[authProviderKey]).toHaveLength(expectedLength);
+    expect(result[authProviderKey]).toEqual(connections);
   });
 
   it('groups connections by authProviderKey and blockName', () => {
@@ -105,33 +101,27 @@ describe('groupedConnectionsSelector', () => {
       createConnection({
         id: '1',
         name: 'aws',
-        blockName: '@openops/block-aws',
       }),
       createConnection({
         id: '2',
         name: 'aws-provider',
-        blockName: '@openops/block-aws',
       }),
       createConnection({
         id: '3',
         name: 'aws-athena-provider',
-        blockName: '@openops/block-aws-athena',
       }),
       createConnection({
         id: 'wGS7AXBwbDTr6BO7askqW',
         name: 'aws-test',
-        blockName: '@openops/block-aws',
       }),
       createConnection({
         id: '4',
         name: 'aws-test1',
-        blockName: '@openops/block-aws',
       }),
       createConnection({
         id: '5',
         name: 'slack',
         type: AppConnectionType.CLOUD_OAUTH2,
-        blockName: '@openops/block-slack',
         authProviderKey: 'Slack',
       }),
     ];
@@ -142,21 +132,14 @@ describe('groupedConnectionsSelector', () => {
     };
     const result = groupedConnectionsSelector(page);
     expect(result).toEqual({
-      '@openops/block-aws': [
+      AWS: [
         connections[0],
         connections[1],
         connections[2],
         connections[3],
         connections[4],
       ],
-      '@openops/block-aws-athena': [
-        connections[0],
-        connections[1],
-        connections[2],
-        connections[3],
-        connections[4],
-      ],
-      '@openops/block-slack': [connections[5]],
+      Slack: [connections[5]],
     });
   });
 });

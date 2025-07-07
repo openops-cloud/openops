@@ -8,7 +8,6 @@ import {
   ExecutioOutputFile,
   FileCompression,
   FileType,
-  FlagId,
   FlowId,
   FlowRetryStrategy,
   FlowRun,
@@ -31,7 +30,6 @@ import { In, LessThan } from 'typeorm';
 import { repoFactory } from '../../core/db/repo-factory';
 import { APArrayContains } from '../../database/database-connection';
 import { fileService } from '../../file/file.service';
-import { devFlagsService } from '../../flags/dev-flags.service';
 import { buildPaginator } from '../../helper/pagination/build-paginator';
 import { paginationHelper } from '../../helper/pagination/pagination-utils';
 import { Order } from '../../helper/pagination/paginator';
@@ -352,16 +350,10 @@ export const flowRunService = {
   async test({ projectId, flowVersionId }: TestParams): Promise<FlowRun> {
     const flowVersion = await flowVersionService.getOneOrThrow(flowVersionId);
 
-    let payload = flowVersion.trigger.settings.inputUiInfo.currentSelectedData;
-    const featureFlag = await devFlagsService.getOne(
-      FlagId.USE_NEW_EXTERNAL_TESTDATA,
-    );
-    if (featureFlag?.value) {
-      payload = await flowStepTestOutputService.listDecrypted({
-        flowVersionId: flowVersion.id,
-        stepIds: [flowVersion.trigger.id!],
-      });
-    }
+    const payload = await flowStepTestOutputService.listDecrypted({
+      flowVersionId: flowVersion.id,
+      stepIds: [flowVersion.trigger.id],
+    });
 
     return this.start({
       projectId,

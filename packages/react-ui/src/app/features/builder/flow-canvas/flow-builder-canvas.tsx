@@ -4,6 +4,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { FLOW_CANVAS_Y_OFFESET } from '@/app/constants/flow-canvas';
 import {
   BelowFlowWidget,
+  BranchLabelNode,
   FlowCanvas,
   flowCanvasUtils,
   LoopStepPlaceHolder,
@@ -28,6 +29,7 @@ const nodeTypes = {
   placeholder: StepPlaceHolder,
   bigButton: BigButton,
   loopPlaceholder: LoopStepPlaceHolder,
+  branchLabel: BranchLabelNode,
 };
 const FlowBuilderCanvas = React.memo(
   ({ lefSideBarContainerWidth = 0 }: { lefSideBarContainerWidth?: number }) => {

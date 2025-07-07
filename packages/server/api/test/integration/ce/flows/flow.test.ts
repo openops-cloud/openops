@@ -813,7 +813,7 @@ describe('Flow API', () => {
       });
     });
 
-    it('Returns 400 for non-existent flow', async () => {
+    it('Returns 404 for non-existent flow', async () => {
       const mockUser = createMockUser();
       await databaseConnection().getRepository('user').save([mockUser]);
 
@@ -833,7 +833,7 @@ describe('Flow API', () => {
         projectId: mockProject.id,
       });
 
-      const nonExistentFlowId = 'non-existent-id';
+      const nonExistentFlowId = openOpsId();
 
       const response = await app?.inject({
         method: 'GET',
@@ -843,10 +843,9 @@ describe('Flow API', () => {
         },
       });
 
-      expect(response?.statusCode).toBe(StatusCodes.BAD_REQUEST);
+      expect(response?.statusCode).toBe(StatusCodes.NOT_FOUND);
       const responseBody = response?.json();
-
-      expect(responseBody?.code).toBe(undefined);
+      expect(responseBody?.code).toBe('ENTITY_NOT_FOUND');
     });
 
     it('Returns 404 for non-existent version id', async () => {
@@ -905,6 +904,7 @@ async function createMockFlowTemplate(
     organizationId: params.organizationId ?? openOpsId(),
     services: ['ECS', 'EC2'],
     template: params.template || {
+      id: 'trigger',
       type: TriggerType.EMPTY,
       name: 'trigger',
       settings: {},

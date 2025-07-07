@@ -297,8 +297,19 @@ describe('validateAiProviderConfig tests', () => {
     const result = await validateAiProviderConfig(aiConfig);
 
     expect(result.valid).toBeFalsy();
-    expect(result.error?.errorName).toBe('Error name');
-    expect(result.error?.errorMessage).toBe('Mocked error');
+    expect(result.error).toBeDefined();
+    if (result.error && 'errorName' in result.error) {
+      expect(result.error.errorName).toBe('Error name');
+      expect(result.error.errorMessage).toBe('Mocked error');
+    } else if (
+      result.error &&
+      'code' in result.error &&
+      result.error.params &&
+      'message' in result.error.params
+    ) {
+      expect(result.error.code).toBe('Error name');
+      expect(result.error.params.message).toBe('Mocked error');
+    }
     expect(openAIProviderMock.createLanguageModel).toHaveBeenCalledWith({
       apiKey: aiConfig.apiKey,
       model: aiConfig.model,
@@ -324,8 +335,19 @@ describe('validateAiProviderConfig tests', () => {
     const result = await validateAiProviderConfig(aiConfig);
 
     expect(result.valid).toBeFalsy();
-    expect(result.error?.errorName).toBe('Error name');
-    expect(result.error?.errorMessage).toBe('Mocked error **REDACTED**');
+    expect(result.error).toBeDefined();
+    if (result.error && 'errorName' in result.error) {
+      expect(result.error.errorName).toBe('Error name');
+      expect(result.error.errorMessage).toBe('Mocked error **REDACTED**');
+    } else if (
+      result.error &&
+      'code' in result.error &&
+      result.error.params &&
+      'message' in result.error.params
+    ) {
+      expect(result.error.code).toBe('Error name');
+      expect(result.error.params.message).toBe('Mocked error **REDACTED**');
+    }
     expect(openAIProviderMock.createLanguageModel).toHaveBeenCalledWith({
       apiKey: aiConfig.apiKey,
       model: aiConfig.model,

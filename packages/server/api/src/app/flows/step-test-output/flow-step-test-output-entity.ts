@@ -17,6 +17,10 @@ export const FlowStepTestOutputEntity =
       ...BaseColumnSchemaPart,
       stepId: OpenOpsIdSchema,
       flowVersionId: OpenOpsIdSchema,
+      input: {
+        type: BLOB_COLUMN_TYPE,
+        nullable: false,
+      },
       output: {
         type: BLOB_COLUMN_TYPE,
         nullable: false,

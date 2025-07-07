@@ -4,6 +4,7 @@ import {
   AIChatMessage,
   AIChatMessageRole,
   AIChatMessages,
+  ChatStatus,
   LoadingSpinner,
   MarkdownCodeVariations,
 } from '@openops/components/ui';
@@ -13,20 +14,19 @@ import { useBuilderStateContext } from '../builder-hooks';
 
 type ConversationProps = {
   isPending: boolean;
+  lastUserMessageRef: React.RefObject<HTMLDivElement>;
+  lastAssistantMessageRef: React.RefObject<HTMLDivElement>;
 } & Pick<UseChatHelpers, 'messages' | 'status'>;
 
 type ServerMessage = NonNullable<OpenChatResponse['messages']>[number];
 type MessageType = ServerMessage | UIMessage;
 
-const ChatStatus = {
-  STREAMING: 'streaming',
-  SUBMITTED: 'submitted',
-};
-
 const StepSettingsAiConversation = ({
   messages,
   status,
   isPending,
+  lastUserMessageRef,
+  lastAssistantMessageRef,
 }: ConversationProps) => {
   const dispatch = useBuilderStateContext((state) => state.applyMidpanelAction);
 
@@ -60,6 +60,8 @@ const StepSettingsAiConversation = ({
         messages={uiMessages}
         onInject={onInject}
         codeVariation={MarkdownCodeVariations.WithCopyAndInject}
+        lastUserMessageRef={lastUserMessageRef}
+        lastAssistantMessageRef={lastAssistantMessageRef}
       />
       {[ChatStatus.STREAMING, ChatStatus.SUBMITTED].includes(status) && (
         <LoadingSpinner />

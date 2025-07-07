@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@openops/components/ui';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import deepEqual from 'fast-deep-equal';
 import { t } from 'i18next';
@@ -25,7 +25,6 @@ import { triggerEventsApi } from '@/app/features/flows/lib/trigger-events-api';
 import { formatUtils } from '@/app/lib/utils';
 import {
   CATCH_WEBHOOK,
-  FlagId,
   isNil,
   SeekPage,
   Trigger,
@@ -33,8 +32,10 @@ import {
   TriggerTestStrategy,
 } from '@openops/shared';
 
-import { flagsHooks } from '@/app/common/hooks/flags-hooks';
-import { stepTestOutputCache } from '../data-selector/data-selector-cache';
+import {
+  setStepOutputCache,
+  stepTestOutputCache,
+} from '../data-selector/data-selector-cache';
 import { stepTestOutputHooks } from './step-test-output-hooks';
 import { TestSampleDataViewer } from './test-sample-data-viewer';
 import { TestButtonTooltip } from './test-step-tooltip';
@@ -48,15 +49,12 @@ type TestTriggerSectionProps = {
   flowId: string;
 };
 
-function getSelectedId(
-  currentSelectedData: unknown,
-  pollResults: TriggerEvent[],
-) {
-  if (currentSelectedData === undefined) {
+function getSelectedId(testOutput: unknown, pollResults: TriggerEvent[]) {
+  if (testOutput === undefined) {
     return undefined;
   }
   for (let i = 0; i < pollResults.length; i++) {
-    if (deepEqual(currentSelectedData, pollResults[i].payload)) {
+    if (deepEqual(testOutput, pollResults[i].payload)) {
       return pollResults[i].id;
     }
   }
@@ -73,6 +71,7 @@ const TestTriggerSection = React.memo(
       name: formValues.settings.blockName,
       version: formValues.settings.blockVersion,
     });
+    const queryClient = useQueryClient();
 
     const isSimulation =
       blockModel?.triggers?.[formValues.settings.triggerName]?.testStrategy ===
@@ -87,11 +86,8 @@ const TestTriggerSection = React.memo(
       undefined,
     );
 
-    const {
-      data: testOutputData,
-      isLoading: isLoadingTestOutput,
-      refetch: refetchTestOutput,
-    } = stepTestOutputHooks.useStepTestOutputFormData(flowVersionId, form);
+    const { data: stepData, isLoading: isLoadingStepData } =
+      stepTestOutputHooks.useStepTestOutputFormData(flowVersionId, form);
 
     const [currentSelectedId, setCurrentSelectedId] = useState<
       string | undefined
@@ -102,8 +98,7 @@ const TestTriggerSection = React.memo(
           return triggerEventsApi.saveTriggerMockdata(flowId, mockData);
         },
         onSuccess: async (result) => {
-          updateCurrentSelectedData(result);
-          refetch();
+          updateSelectedData(result);
         },
       });
     const {
@@ -117,7 +112,6 @@ const TestTriggerSection = React.memo(
           await triggerEventsApi.list({ flowId, cursor: undefined, limit: 5 })
         ).data.map((triggerEvent) => triggerEvent.id);
         await triggerEventsApi.startWebhookSimulation(flowId);
-        // TODO REFACTOR: replace this with a websocket
         let attempt = 0;
         while (attempt < 1000) {
           const newData = await triggerEventsApi.list({
@@ -136,8 +130,9 @@ const TestTriggerSection = React.memo(
       },
       onSuccess: async (results) => {
         if (results.length > 0) {
-          updateCurrentSelectedData(results[0]);
-          refetch();
+          const lastResult = results[results.length - 1];
+          updateSelectedData(lastResult);
+
           await triggerEventsApi.deleteWebhookSimulation(flowId);
         }
       },
@@ -165,7 +160,7 @@ const TestTriggerSection = React.memo(
       },
       onSuccess: (results) => {
         if (results.data.length > 0) {
-          updateCurrentSelectedData(results.data[0]);
+          updateSelectedData(results.data[0]);
           refetch();
         }
       },
@@ -179,32 +174,20 @@ const TestTriggerSection = React.memo(
       },
     });
 
-    const isTesting = isPending || isLoadingTestOutput;
+    const isTesting = isPending ?? isLoadingStepData;
 
-    const { data: useNewExternalTestData = false } = flagsHooks.useFlag(
-      FlagId.USE_NEW_EXTERNAL_TESTDATA,
-    );
-
-    function updateCurrentSelectedData(data: TriggerEvent) {
-      if (useNewExternalTestData) {
-        stepTestOutputCache.setStepData(formValues.id!, {
-          output: formatUtils.formatStepInputOrOutput(data.payload),
-          lastTestDate: dayjs().toISOString(),
-        });
-      } else {
-        form.setValue(
-          'settings.inputUiInfo',
-          {
-            ...formValues.settings.inputUiInfo,
-            currentSelectedData: formatUtils.formatStepInputOrOutput(
-              data.payload,
-            ),
-            lastTestDate: dayjs().toISOString(),
-          },
-          { shouldValidate: true },
-        );
-      }
-      refetchTestOutput();
+    function updateSelectedData(data: TriggerEvent) {
+      stepTestOutputCache.setStepData(formValues.id, {
+        output: formatUtils.formatStepInputOrOutput(data.payload),
+        lastTestDate: dayjs().toISOString(),
+      });
+      setStepOutputCache({
+        stepId: formValues.id,
+        flowVersionId,
+        output: data.payload,
+        input: data.input,
+        queryClient,
+      });
     }
 
     const { data: pollResults, refetch } = useQuery<SeekPage<TriggerEvent>>({
@@ -218,23 +201,25 @@ const TestTriggerSection = React.memo(
       staleTime: 0,
     });
 
-    const currentSelectedData = testOutputData?.output;
-    const sampleDataSelected =
-      !isNil(currentSelectedData) || !isNil(errorMessage);
+    const currentTestOutput = stepData?.output;
+    const currentTestInput = stepData?.input;
 
-    const isTestedBefore = !isNil(testOutputData?.lastTestDate);
+    const outputDataSelected =
+      !isNil(currentTestOutput) || !isNil(errorMessage);
+
+    const isTestedBefore = !isNil(stepData?.lastTestDate);
 
     useEffect(() => {
       const selectedId = getSelectedId(
-        currentSelectedData,
+        currentTestOutput,
         pollResults?.data ?? [],
       );
       setCurrentSelectedId(selectedId);
-    }, [currentSelectedData, pollResults]);
+    }, [currentTestOutput, pollResults]);
 
     useEffect(() => {
       setErrorMessage(undefined);
-    }, [currentSelectedData]);
+    }, [currentTestOutput]);
 
     if (isBlockLoading) {
       return null;
@@ -250,19 +235,10 @@ const TestTriggerSection = React.memo(
           });
 
     return (
-      <div>
-        {sampleDataSelected && !isSimulating && !isSavingMockdata && (
-          <TestSampleDataViewer
-            onRetest={isSimulation ? simulateTrigger : pollTrigger}
-            isValid={isValid}
-            isSaving={isSaving}
-            isTesting={isTesting}
-            currentSelectedData={currentSelectedData}
-            errorMessage={errorMessage}
-            lastTestDate={testOutputData?.lastTestDate}
-            type={formValues.type}
-          >
-            {pollResults?.data && (
+      <div className="flex flex-col h-full">
+        {outputDataSelected && !isSimulating && !isSavingMockdata && (
+          <>
+            {pollResults?.data && !isTesting && (
               <div className="mb-3">
                 <Select
                   value={currentSelectedId}
@@ -271,7 +247,8 @@ const TestTriggerSection = React.memo(
                       (triggerEvent) => triggerEvent.id === value,
                     );
                     if (triggerEvent) {
-                      updateCurrentSelectedData(triggerEvent);
+                      updateSelectedData(triggerEvent);
+                      setCurrentSelectedId(value);
                     }
                   }}
                 >
@@ -304,7 +281,19 @@ const TestTriggerSection = React.memo(
                 </span>
               </div>
             )}
-          </TestSampleDataViewer>
+            <div className="flex-1 overflow-hidden">
+              <TestSampleDataViewer
+                onRetest={isSimulation ? simulateTrigger : pollTrigger}
+                isValid={isValid}
+                isSaving={isSaving}
+                isTesting={isTesting}
+                outputData={currentTestOutput}
+                inputData={currentTestInput}
+                errorMessage={errorMessage}
+                lastTestDate={stepData?.lastTestDate}
+              />
+            </div>
+          </>
         )}
 
         {isSimulation && isSimulating && (
@@ -334,7 +323,7 @@ const TestTriggerSection = React.memo(
           </div>
         )}
         {!isTestedBefore &&
-          !sampleDataSelected &&
+          !outputDataSelected &&
           isSimulation &&
           !isSimulating && (
             <div className="flex justify-center flex-col gap-2 items-center">
@@ -367,7 +356,7 @@ const TestTriggerSection = React.memo(
               )}
             </div>
           )}
-        {!isTestedBefore && !sampleDataSelected && !isSimulation && (
+        {!isTestedBefore && !outputDataSelected && !isSimulation && (
           <div className="flex justify-center">
             <TestButtonTooltip disabled={!isValid}>
               <Button
@@ -380,7 +369,7 @@ const TestTriggerSection = React.memo(
                 disabled={!isValid}
               >
                 <Dot animation={true} variant={'primary'}></Dot>
-                {t('Load Sample Data')}
+                {t('Load Data')}
               </Button>
             </TestButtonTooltip>
           </div>

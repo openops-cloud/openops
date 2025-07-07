@@ -28,9 +28,21 @@ WORKDIR /root/.mcp/openops-mcp
 RUN <<-```
     set -ex
     git clone https://github.com/openops-cloud/openops-mcp .
-    git checkout 6708ea66b72d84db2505b1782731060dd8e02350
+    git checkout 7f964bd4fcfd46fbb7ab4b96abd15e4d3d77758d
     wget -qO- https://astral.sh/uv/install.sh | sh && source $HOME/.local/bin/env
     uv venv && . .venv/bin/activate && uv pip install -r requirements.txt
+```
+
+WORKDIR /root/.mcp/aws-cost
+RUN <<-```
+    set -ex
+    git clone https://github.com/awslabs/mcp.git .
+    git checkout 2025.6.2025131704
+    wget -qO- https://astral.sh/uv/install.sh | sh && source $HOME/.local/bin/env
+    python3 -m venv .venv
+    . .venv/bin/activate
+    pip install ./src/cost-explorer-mcp-server
+    pip install ./src/cost-analysis-mcp-server
 ```
 
 # Set up backend
@@ -43,8 +55,8 @@ COPY --link package.json package-lock.json .npmrc ./
 RUN npm ci --no-audit --no-fund
 COPY --link dist dist
 
-COPY tools/link-packages-to-root.sh tools/link-packages-to-root.sh
-RUN ./tools/link-packages-to-root.sh
+COPY tools/link-packages.sh tools/link-packages.sh
+RUN ./tools/link-packages.sh
 
 # Copy Output files to appropriate directory from build stage
 COPY --link packages packages
@@ -53,7 +65,7 @@ COPY --link ai-prompts ai-prompts
 LABEL service=openops
 
 # Copy Nginx configuration template and static files
-COPY nginx.standard.conf /etc/nginx/nginx.conf
+COPY nginx.template.conf /etc/nginx/nginx.template.conf
 COPY dist/packages/react-ui/ /usr/share/nginx/html/
 
 ARG VERSION=unknown

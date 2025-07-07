@@ -24,6 +24,10 @@ export const TriggerEventEntity = new EntitySchema<TriggerEventSchema>({
       type: JSONB_COLUMN_TYPE,
       nullable: true,
     },
+    input: {
+      type: JSONB_COLUMN_TYPE,
+      nullable: true,
+    },
   },
   indices: [
     {

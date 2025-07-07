@@ -1,14 +1,11 @@
-import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { QueryKeys } from '@/app/constants/query-keys';
 import { useDynamicFormValidationContext } from '@/app/features/builder/dynamic-form-validation/dynamic-form-validation-context';
 import { appConnectionsApi } from '@/app/features/connections/lib/app-connections-api';
-import { appConnectionUtils } from '@/app/features/connections/lib/app-connections-utils';
 import { api } from '@/app/lib/api';
 import { typeboxResolver } from '@hookform/resolvers/typebox';
 import {
   BasicAuthProperty,
-  BlockMetadataModel,
-  BlockMetadataModelSummary,
+  BlockAuthProperty,
   CustomAuthProperty,
   OAuth2Property,
   OAuth2Props,
@@ -37,7 +34,6 @@ import {
   AppConnection,
   ApplicationErrorParams,
   ErrorCode,
-  FlagId,
   isNil,
   PatchAppConnectionRequestBody,
   UpsertAppConnectionRequestBody,
@@ -66,56 +62,52 @@ class ConnectionNameAlreadyExists extends Error {
 }
 
 export type CreateEditConnectionDialogContentProps = {
-  block: BlockMetadataModelSummary | BlockMetadataModel;
-  onConnectionSaved: (name: string) => void;
+  onConnectionSaved: (name: string, authProviderKey: string) => void;
   connectionToEdit: AppConnection | null;
+  authProviderKey: string;
   reconnect?: boolean;
   showBackButton?: boolean;
   setOpen: (open: boolean) => void;
 };
 
 const CreateEditConnectionDialogContent = ({
-  block,
   onConnectionSaved,
   connectionToEdit,
+  authProviderKey,
   reconnect = false,
   showBackButton = false,
   setOpen,
 }: CreateEditConnectionDialogContentProps) => {
   const { data: connectionsMetadata } =
     appConnectionsHooks.useConnectionsMetadata();
-  const providerKey = block.auth?.authProviderKey;
-  const { data: useConnectionsProvider } = flagsHooks.useFlag<boolean>(
-    FlagId.USE_CONNECTIONS_PROVIDER,
-  );
 
-  const auth = useConnectionsProvider
-    ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      connectionsMetadata?.[providerKey!]
-    : block.auth;
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const auth = connectionsMetadata?.[authProviderKey] as BlockAuthProperty;
 
   const { formSchema, setFormSchema, formSchemaRef } =
     useDynamicFormValidationContext();
 
   useEffect(() => {
-    if (!formSchemaRef.current && block) {
-      const schema = buildConnectionSchema(block);
+    if (!formSchemaRef.current && auth) {
+      const schema = buildConnectionSchema(auth);
 
       if (schema) {
         formSchemaRef.current = true;
         setFormSchema(schema);
       }
     }
-  }, [block, formSchemaRef]);
+  }, [auth, formSchemaRef]);
 
   const form = useForm<{
     request: UpsertAppConnectionRequestBody | PatchAppConnectionRequestBody;
   }>({
     defaultValues: {
       request: createDefaultValues(
-        block,
+        auth,
         connectionToEdit,
-        connectionToEdit?.name ?? appConnectionUtils.findName(block.name),
+        connectionToEdit?.name ??
+          connectionToEdit?.authProviderKey ??
+          authProviderKey,
       ),
     },
     mode: 'onChange',
@@ -160,7 +152,7 @@ const CreateEditConnectionDialogContent = ({
     onSuccess: () => {
       setOpen(false);
       const requestValues = form.getValues().request;
-      onConnectionSaved(requestValues.name);
+      onConnectionSaved(requestValues.name, requestValues.authProviderKey);
       setErrorMessage('');
 
       if (connectionToEdit) {
@@ -226,14 +218,17 @@ const CreateEditConnectionDialogContent = ({
 
           {!connectionToEdit &&
             t('Create {displayName} Connection', {
-              displayName: block.displayName,
+              displayName: authProviderKey,
             })}
         </DialogTitle>
       </DialogHeader>
       <ScrollArea className="h-full">
         <Markdown
+          containerClassName="bg-secondary"
           markdown={auth?.description}
           codeVariation={MarkdownCodeVariations.WithoutCopy}
+          textClassName="!my-0"
+          listClassName="!my-0"
         ></Markdown>
         {auth?.description && <Separator className="my-4" />}
         <Form {...form}>
@@ -264,23 +259,22 @@ const CreateEditConnectionDialogContent = ({
             ></FormField>
             {auth?.type === PropertyType.SECRET_TEXT && (
               <SecretTextConnectionSettings
-                authProperty={block.auth as SecretAuthProperty<boolean>}
+                authProperty={auth as SecretAuthProperty<boolean>}
               />
             )}
             {auth?.type === PropertyType.BASIC_AUTH && (
               <BasicAuthConnectionSettings
-                authProperty={block.auth as BasicAuthProperty}
+                authProperty={auth as BasicAuthProperty}
               />
             )}
             {auth?.type === PropertyType.CUSTOM_AUTH && (
               <CustomAuthConnectionSettings
-                authProperty={block.auth as CustomAuthProperty<any>}
+                authProperty={auth as CustomAuthProperty<any>}
               />
             )}
             {auth?.type === PropertyType.OAUTH2 && (
               <OAuth2ConnectionSettings
-                authProperty={block.auth as OAuth2Property<OAuth2Props>}
-                block={block}
+                authProperty={auth as OAuth2Property<OAuth2Props>}
                 reconnectConnection={connectionToEdit}
               />
             )}

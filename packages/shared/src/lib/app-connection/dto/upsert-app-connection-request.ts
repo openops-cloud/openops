@@ -4,9 +4,7 @@ import { OAuth2AuthorizationMethod } from '../oauth2-authorization-method';
 
 const commonAuthProps = {
   name: Type.String({}),
-  blockName: Type.String({}),
-  projectId: Type.String({}),
-  authProviderKey: Type.Optional(Type.String({})),
+  authProviderKey: Type.String({}),
 };
 
 export enum OAuth2GrantType {

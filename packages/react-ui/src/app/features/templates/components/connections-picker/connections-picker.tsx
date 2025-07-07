@@ -12,8 +12,8 @@ import {
   OverflowTooltip,
 } from '@openops/components/ui';
 import {
+  AppConnectionsWithSupportedBlocks,
   AppConnectionWithoutSensitiveData,
-  FlagId,
   flowHelper,
   isNil,
   Trigger,
@@ -33,7 +33,7 @@ type ConnectionsPickerProps = {
   integrations: BlockMetadataModelSummary[];
   isUseTemplateLoading: boolean;
   close: () => void;
-  onUseTemplate: (connections: AppConnectionWithoutSensitiveData[]) => void;
+  onUseTemplate: (connections: AppConnectionsWithSupportedBlocks[]) => void;
 };
 
 const ConnectionsPicker = ({
@@ -44,10 +44,6 @@ const ConnectionsPicker = ({
   close,
   onUseTemplate,
 }: ConnectionsPickerProps) => {
-  const { data: useConnectionsProvider } = flagsHooks.useFlag<boolean>(
-    FlagId.USE_CONNECTIONS_PROVIDER,
-  );
-
   const [selectedBlockMetadata, setSelectedBlockMetadata] =
     useState<BlockMetadataModelSummary | null>(null);
   const [selectedConnections, setSelectedConnections] = useState<{
@@ -73,13 +69,14 @@ const ConnectionsPicker = ({
     data: groupedConnections,
     isLoading,
     refetch,
-  } = appConnectionsHooks.useGroupedConnections(
-    {
-      blockNames: integrations.map((integration) => integration.name),
-      limit: 10000,
-    },
-    useConnectionsProvider ?? false,
-  );
+  } = appConnectionsHooks.useGroupedConnections({
+    authProviders: integrations.flatMap((integration) =>
+      integration.auth?.authProviderKey
+        ? [integration.auth.authProviderKey]
+        : [],
+    ),
+    limit: 10000,
+  });
 
   useEffect(() => {
     if (
@@ -96,7 +93,12 @@ const ConnectionsPicker = ({
         AppConnectionWithoutSensitiveData | null
       > = {};
       integrations.forEach((integration) => {
-        const options = groupedConnections[integration.name] ?? [];
+        let options: AppConnectionWithoutSensitiveData[] = [];
+        const authProviderKey = integration.auth?.authProviderKey;
+        if (authProviderKey) {
+          options = groupedConnections[authProviderKey] ?? [];
+        }
+
         const usedConnection = usedConnectionNames[integration.name]
           ? options.find((connection) => {
               return connection.name === usedConnectionNames[integration.name];
@@ -118,9 +120,10 @@ const ConnectionsPicker = ({
     return integrations.map((integration, index) => ({
       selectedConnection: selectedConnections[integration.name] ?? null,
       integration,
-      connectionOptions: groupedConnections
-        ? groupedConnections[integration.name]
-        : [],
+      connectionOptions:
+        groupedConnections && integration.auth?.authProviderKey
+          ? groupedConnections[integration.auth?.authProviderKey]
+          : [],
       id: String(index),
     }));
   }, [groupedConnections, integrations, selectedConnections]);
@@ -144,14 +147,15 @@ const ConnectionsPicker = ({
 
   const onConnectionCreated = async (
     connectionName: string,
+    authProviderKey: string,
     blockName: string,
   ) => {
     setSelectedBlockMetadata(null);
     const updatedGroupedConnections = await refetch();
 
-    const newConnection = updatedGroupedConnections?.data?.[blockName]?.find(
-      (connection) => connection.name === connectionName,
-    );
+    const newConnection = updatedGroupedConnections?.data?.[
+      authProviderKey
+    ]?.find((connection) => connection.name === connectionName);
 
     if (newConnection) {
       onConnectionChange(blockName, newConnection);
@@ -159,7 +163,15 @@ const ConnectionsPicker = ({
   };
 
   const onUseTemplateClick = () => {
-    onUseTemplate(Object.values(selectedConnections).filter((c) => !!c));
+    const connectionsWithSupportedBlocks: AppConnectionsWithSupportedBlocks[] =
+      Object.entries(selectedConnections)
+        .filter(([, connection]) => !!connection)
+        .map(([blockName, connection]) => ({
+          ...connection!,
+          supportedBlocks: [blockName],
+        }));
+
+    onUseTemplate(connectionsWithSupportedBlocks);
   };
 
   return (
@@ -167,9 +179,13 @@ const ConnectionsPicker = ({
       {selectedBlockMetadata ? (
         <DynamicFormValidationProvider>
           <CreateEditConnectionDialogContent
-            block={selectedBlockMetadata}
-            onConnectionSaved={(connectionName) => {
-              onConnectionCreated(connectionName, selectedBlockMetadata?.name);
+            authProviderKey={selectedBlockMetadata?.auth?.authProviderKey ?? ''}
+            onConnectionSaved={(connectionName, authProviderKey) => {
+              onConnectionCreated(
+                connectionName,
+                authProviderKey,
+                selectedBlockMetadata?.name,
+              );
             }}
             reconnect={false}
             connectionToEdit={null}

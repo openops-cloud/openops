@@ -3,8 +3,8 @@ import {
   Action,
   ActionType,
   AppConnectionStatus,
+  AppConnectionsWithSupportedBlocks,
   AppConnectionType,
-  AppConnectionWithoutSensitiveData,
   ApplicationError,
   BlockAction,
   BlockType,
@@ -30,6 +30,7 @@ const flowVersionWithBranching: FlowVersion = {
   updatedBy: '',
   displayName: 'Standup Reminder',
   trigger: {
+    id: 'trigger_id',
     name: 'trigger',
     type: TriggerType.BLOCK,
     valid: true,
@@ -224,6 +225,7 @@ const emptyScheduleFlowVersion: FlowVersion = {
   displayName: 'Standup Reminder',
   updatedBy: '',
   trigger: {
+    id: 'trigger',
     name: 'trigger',
     type: TriggerType.BLOCK,
     valid: true,
@@ -272,6 +274,7 @@ describe('Flow Helper', () => {
       flowId: 'lod6JEdKyPlvrnErdnrGa',
       displayName: 'Standup Reminder',
       trigger: {
+        id: 'trigger_id',
         name: 'trigger',
         type: TriggerType.BLOCK,
         valid: true,
@@ -318,6 +321,7 @@ describe('Flow Helper', () => {
     const updateRequest: FlowOperationRequest = {
       type: FlowOperationType.UPDATE_ACTION,
       request: {
+        id: 'step_1',
         name: 'step_1',
         type: ActionType.BRANCH,
         displayName: 'Branch',
@@ -342,6 +346,7 @@ describe('Flow Helper', () => {
       updateRequest,
     );
     const expectedFlowTrigger: Trigger = {
+      id: 'trigger_id',
       name: 'trigger',
       type: TriggerType.BLOCK,
       valid: true,
@@ -357,6 +362,7 @@ describe('Flow Helper', () => {
         triggerName: 'cron_expression',
       },
       nextAction: {
+        id: 'step_1',
         displayName: 'Branch',
         name: 'step_1',
         valid: true,
@@ -485,6 +491,7 @@ describe('Flow Helper', () => {
     resultFlow = flowHelper.apply(resultFlow, addCodeActionOnFalse);
     resultFlow = flowHelper.apply(resultFlow, addCodeActionOnAfter);
     const expectedTrigger: Trigger = {
+      id: 'trigger',
       name: 'trigger',
       type: TriggerType.BLOCK,
       valid: true,
@@ -599,6 +606,7 @@ describe('Flow Helper', () => {
     resultFlow = flowHelper.apply(resultFlow, addCodeActionOnAfter);
 
     const expectedTrigger: Trigger = {
+      id: 'trigger',
       name: 'trigger',
       type: TriggerType.BLOCK,
       valid: true,
@@ -666,6 +674,7 @@ describe('Flow Helper', () => {
       flowId: 'lod6JEdKyPlvrnErdnrGa',
       displayName: 'Standup Reminder',
       trigger: {
+        id: 'trigger',
         name: 'trigger',
         type: TriggerType.BLOCK,
         valid: true,
@@ -709,6 +718,7 @@ describe('Flow Helper', () => {
       request: {
         parentStep: 'trigger',
         action: {
+          id: 'step_1',
           name: 'step_1',
           type: ActionType.BLOCK,
           displayName: 'Get',
@@ -776,6 +786,7 @@ describe('Flow Helper', () => {
     const updateRequest: FlowOperationRequest = {
       type: FlowOperationType.UPDATE_ACTION,
       request: {
+        id: 'step_1',
         name: 'step_1',
         type: ActionType.BRANCH,
         displayName: 'Branch',
@@ -823,6 +834,7 @@ it('Duplicate Flow With Branch', () => {
     updatedBy: '',
     displayName: 'Standup Reminder',
     trigger: {
+      id: 'trigger',
       name: 'trigger',
       type: TriggerType.BLOCK,
       valid: true,
@@ -996,8 +1008,9 @@ it('Duplicate Flow With Branch', () => {
         stepLocationRelativeToParent:
           StepLocationRelativeToParent.INSIDE_TRUE_BRANCH,
         action: {
-          type: ActionType.BLOCK,
+          id: 'step_2',
           name: 'step_2',
+          type: ActionType.BLOCK,
           displayName: 'Send Message Webhook',
           settings: {
             input: {
@@ -1049,6 +1062,7 @@ it('Duplicate Flow With Loops using Import', () => {
     updatedBy: '',
     displayName: 'Flow 1',
     trigger: {
+      id: 'trigger',
       name: 'trigger',
       type: TriggerType.BLOCK,
       valid: true,
@@ -1116,6 +1130,7 @@ it('Duplicate Flow With Loops using Import', () => {
       request: {
         parentStep: 'trigger',
         action: {
+          id: 'step_1',
           name: 'step_1',
           type: ActionType.LOOP_ON_ITEMS,
           valid: false,
@@ -1132,6 +1147,7 @@ it('Duplicate Flow With Loops using Import', () => {
       request: {
         parentStep: 'step_1',
         action: {
+          id: 'step_3',
           name: 'step_3',
           type: ActionType.CODE,
           valid: true,
@@ -1143,7 +1159,6 @@ it('Duplicate Flow With Loops using Import', () => {
             },
           },
           displayName: 'Code',
-          id: 'step_3',
         },
       },
     },
@@ -1153,6 +1168,7 @@ it('Duplicate Flow With Loops using Import', () => {
         parentStep: 'step_1',
         stepLocationRelativeToParent: StepLocationRelativeToParent.INSIDE_LOOP,
         action: {
+          id: 'step_2',
           name: 'step_2',
           type: ActionType.CODE,
           valid: true,
@@ -1164,7 +1180,6 @@ it('Duplicate Flow With Loops using Import', () => {
             },
           },
           displayName: 'Code',
-          id: 'step_2',
         },
       },
     },
@@ -1202,6 +1217,7 @@ it('Should remove connections', () => {
     description: '',
     displayName: 'Untitled',
     trigger: {
+      id: 'trigger',
       name: 'trigger',
       type: 'TRIGGER',
       valid: true,
@@ -1363,6 +1379,7 @@ describe('getImportOperations', () => {
   });
 
   const mockTrigger: Trigger = {
+    id: 'trigger',
     name: 'trigger',
     type: TriggerType.BLOCK,
     valid: true,
@@ -1383,7 +1400,9 @@ describe('getImportOperations', () => {
 
   const mockSlackAction = createBlockAction('step_1', 'Send Message', {
     input: {
-      auth: "{{connections['initial-slack-connection']}}",
+      auth: {
+        authProviderKey: 'Slack',
+      },
       file: null,
       text: {},
       blocks: {},
@@ -1418,10 +1437,11 @@ describe('getImportOperations', () => {
     updated: '2025-02-03T14:43:12.324Z',
     name: 'prefilled-slack-connection',
     type: AppConnectionType.CLOUD_OAUTH2,
-    blockName: '@openops/block-slack',
     projectId: 'RBzywn95MW70WsnpKFQRU',
     status: AppConnectionStatus.ACTIVE,
-  } as AppConnectionWithoutSensitiveData;
+    authProviderKey: 'Slack',
+    supportedBlocks: ['@openops/block-slack'],
+  } as AppConnectionsWithSupportedBlocks;
 
   type OperationsResponse = Array<{
     type: 'ADD_ACTION';
@@ -1532,7 +1552,9 @@ describe('getImportOperations', () => {
                 valid: false,
                 settings: {
                   input: {
-                    auth: "{{connections['slack']}}",
+                    auth: {
+                      authProviderKey: 'Slack',
+                    },
                     file: null,
                     text: {
                       text: null,
@@ -1610,37 +1632,42 @@ describe('getImportOperations', () => {
     );
   });
 
-  it('should unset connection when block name does not match and connections are provided', () => {
-    const actionWithoutBlockName = {
+  it('should unset connection when auth provider does not match and connections are provided', () => {
+    const actionWithoutAuth = {
       ...mockSlackAction,
-      settings: { ...mockSlackAction.settings, blockName: 'something-else' },
+      settings: {
+        ...mockSlackAction.settings,
+        input: {
+          authProviderKey: 'test',
+        },
+      },
     };
 
     const result = flowHelper.getImportOperations(
       {
         ...mockTrigger,
-        nextAction: actionWithoutBlockName,
+        nextAction: actionWithoutAuth,
       },
-      [mockConnection],
+      [
+        {
+          ...mockConnection,
+          supportedBlocks: [],
+        },
+      ],
     ) as OperationsResponse;
 
     expect(result[0].request.action.settings.input['auth']).toBe(undefined);
   });
 
   it('should not change connection when connections are not provided', () => {
-    const actionWithoutBlockName = {
-      ...mockSlackAction,
-      settings: { ...mockSlackAction.settings, blockName: 'something-else' },
-    };
-
     const result = flowHelper.getImportOperations({
       ...mockTrigger,
-      nextAction: actionWithoutBlockName,
+      nextAction: mockSlackAction,
     }) as OperationsResponse;
 
-    expect(result[0].request.action.settings.input['auth']).toBe(
-      "{{connections['initial-slack-connection']}}",
-    );
+    expect(result[0].request.action.settings.input['auth']).toStrictEqual({
+      authProviderKey: 'Slack',
+    });
   });
 
   it('when having handle multiple connections for same block, the first is used', () => {
@@ -1673,6 +1700,7 @@ describe('Split', () => {
     updatedBy: '',
     displayName: 'Flow 1',
     trigger: {
+      id: 'trigger',
       name: 'trigger',
       type: TriggerType.EMPTY,
       valid: false,
@@ -1743,6 +1771,7 @@ describe('Split', () => {
       updatedBy: '',
       displayName: 'Flow 1',
       trigger: {
+        id: 'trigger',
         name: 'trigger',
         type: TriggerType.EMPTY,
         valid: false,
@@ -1759,6 +1788,7 @@ describe('Split', () => {
     const operation: FlowOperationRequest = {
       type: FlowOperationType.UPDATE_ACTION,
       request: {
+        id: flowVersionWithSplit.trigger.nextAction.id,
         name: flowVersionWithSplit.trigger.nextAction.name,
         type: ActionType.SPLIT,
         displayName: 'Split',
@@ -1797,6 +1827,7 @@ describe('Split', () => {
       updatedBy: '',
       displayName: 'Flow 1',
       trigger: {
+        id: 'trigger',
         name: 'trigger',
         type: TriggerType.EMPTY,
         valid: false,
@@ -1805,7 +1836,7 @@ describe('Split', () => {
         nextAction: {
           displayName: 'Split',
           name: 'step_1',
-          valid: true,
+          valid: false,
           type: 'SPLIT',
           settings: {
             options: [
@@ -1853,6 +1884,7 @@ describe('Split', () => {
         parentStep: 'trigger',
         stepLocationRelativeToParent: StepLocationRelativeToParent.AFTER,
         action: {
+          id: 'step_1',
           type: ActionType.SPLIT,
           branches: [
             {
@@ -1913,6 +1945,7 @@ describe('Split', () => {
       displayName: 'Standup Reminder',
       updatedBy: '',
       trigger: {
+        id: 'trigger',
         name: 'trigger',
         type: TriggerType.BLOCK,
         valid: true,
@@ -1929,6 +1962,7 @@ describe('Split', () => {
         },
         displayName: 'Cron Expression',
         nextAction: {
+          id: 'step_1',
           displayName: 'Split',
           name: 'step_1',
           valid: false,
@@ -2077,6 +2111,7 @@ describe('Split', () => {
       ]);
 
       const mockCodeAction2: Action = {
+        id: 'step_30',
         type: ActionType.CODE,
         settings: {
           input: {},
@@ -2108,6 +2143,7 @@ describe('Split', () => {
         {
           optionId: 'jFCJvPAjs8umZSeTDC5n1',
           nextAction: {
+            id: 'step_30',
             type: ActionType.CODE,
             settings: {
               input: {},
@@ -2295,6 +2331,7 @@ describe('Split', () => {
       const secondOperation: FlowOperationRequest = {
         type: FlowOperationType.UPDATE_ACTION,
         request: {
+          id: flowVersionWithSplit.trigger.nextAction.id,
           name: flowVersionWithSplit.trigger.nextAction.name,
           type: ActionType.SPLIT,
           displayName: 'Split',
@@ -2355,6 +2392,7 @@ describe('Split', () => {
       const secondOperation: FlowOperationRequest = {
         type: FlowOperationType.UPDATE_ACTION,
         request: {
+          id: flowVersionWithSplit.trigger.nextAction.id,
           name: flowVersionWithSplit.trigger.nextAction.name,
           type: ActionType.SPLIT,
           displayName: 'Split',
@@ -2396,6 +2434,7 @@ describe('Split', () => {
         updatedBy: '',
         displayName: 'Flow 1',
         trigger: {
+          id: 'trigger',
           name: 'trigger',
           type: TriggerType.EMPTY,
           valid: false,
@@ -2505,6 +2544,7 @@ describe('Split', () => {
           request: {
             parentStep: 'trigger',
             action: {
+              id: 'step_1',
               type: 'SPLIT',
               branches: [],
               settings: {
@@ -2555,6 +2595,7 @@ describe('Split', () => {
             parentStep: 'step_1',
             stepLocationRelativeToParent: 'INSIDE_SPLIT',
             action: {
+              id: 'step_2',
               type: 'CODE',
               settings: {
                 input: {},
@@ -2608,6 +2649,7 @@ describe('Split', () => {
         flowId: 'AUQ1poMROcB8JEhEtBFMl',
         displayName: 'Untitled',
         trigger: {
+          id: 'trigger',
           displayName: 'Select Trigger',
           name: 'trigger',
           valid: false,
@@ -2668,6 +2710,7 @@ describe('Split', () => {
           request: {
             parentStep: 'step_1',
             action: {
+              id: 'step_3',
               name: 'step_3',
               type: ActionType.BRANCH,
               valid: false,
@@ -2702,6 +2745,7 @@ describe('bulkAddActions', () => {
     description: '',
     displayName: 'Untitled',
     trigger: {
+      id: 'trigger',
       name: 'trigger',
       type: TriggerType.EMPTY,
       valid: false,
@@ -3264,11 +3308,12 @@ describe('duplicateStep', () => {
     created: '2023-05-24T00:16:41.353Z',
     updated: '2023-05-24T00:16:41.353Z',
     flowId: 'lod6JEdKyPlvrnErdnrGa',
-    displayName: 'Test Flow',
+    displayName: 'Standup Reminder',
     updatedBy: '',
     valid: true,
     state: FlowVersionState.DRAFT,
     trigger: {
+      id: 'trigger',
       name: 'trigger',
       type: TriggerType.EMPTY,
       valid: true,

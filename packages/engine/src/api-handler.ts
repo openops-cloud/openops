@@ -1,6 +1,7 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import {
   blocksBuilder,
+  getFastifyBodyLimitOrThrow,
   logger,
   runWithLogContext,
   setStopHandlers,
@@ -11,9 +12,7 @@ import { StatusCodes } from 'http-status-codes';
 import { executeEngine } from './engine-executor';
 import { EngineRequest } from './main';
 
-const app = fastify({
-  bodyLimit: 6 * 1024 * 1024, // 6MB same as engine api-handler & nginx.conf
-});
+const app = fastify({ bodyLimit: getFastifyBodyLimitOrThrow() });
 
 const engineController: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.post(
@@ -26,10 +25,15 @@ const engineController: FastifyPluginAsyncTypebox = async (fastify) => {
       },
     },
     async (request, reply) => {
+      const requestIdHeaders = request.headers;
+      const requestId = Array.isArray(requestIdHeaders)
+        ? requestIdHeaders[0]
+        : requestIdHeaders;
+
       await runWithLogContext(
         {
           deadlineTimestamp: request.body.deadlineTimestamp.toString(),
-          requestId: request.headers?.['requestid'] ?? request.id,
+          requestId: requestId ?? request.id,
           operationType: request.body.operationType,
         },
         () => handleRequest(request, reply),

@@ -61,9 +61,11 @@ export const slack = createBlock({
         return 'https://slack.com/api';
       },
       auth: slackAuth,
-      authMapping: async (auth) => {
+      authMapping: async (context: any) => {
         return {
-          Authorization: `Bearer ${(auth as OAuth2PropertyValue).access_token}`,
+          Authorization: `Bearer ${
+            (context.auth as OAuth2PropertyValue).access_token
+          }`,
         };
       },
     }),

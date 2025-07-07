@@ -156,6 +156,8 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
   };
 
   describe('POST / (new message endpoint)', () => {
+    const systemPrompt = 'system prompt';
+    const emptyToolsSystemPrompt = `${systemPrompt}\n\nMCP tools are not available in this chat. Do not claim access or simulate responses from them under any circumstance.`;
     const mockChatContext = { chatId: 'test-chat-id' };
     const mockMessages = [{ role: 'user', content: 'previous message' }];
     const mockAiConfig = {
@@ -173,7 +175,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
     const mockLanguageModel = {} as LanguageModel;
 
     const mockAllTools = {
-      client: [],
+      mcpClients: [],
       tools: {
         tool1: { description: 'Tool 1', parameters: {} },
         tool2: { description: 'Tool 2', parameters: {} },
@@ -194,7 +196,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
       (getAiProviderLanguageModel as jest.Mock).mockResolvedValue(
         mockLanguageModel,
       );
-      (getMcpSystemPrompt as jest.Mock).mockResolvedValue('system prompt');
+      (getMcpSystemPrompt as jest.Mock).mockResolvedValue(systemPrompt);
 
       await aiMCPChatController(mockApp, {} as FastifyPluginOptions);
     });
@@ -225,17 +227,53 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           mcp_analytics_superset: {
             description: 'Analytics tool',
             parameters: {},
+            toolProvider: 'superset',
           },
-          mcp_table_tool: { description: 'Table tool', parameters: {} },
+          mcp_table_tool: {
+            description: 'Table tool',
+            parameters: {},
+            toolProvider: 'tables',
+          },
+          openops_mcp_tool: {
+            description: 'Table tool',
+            parameters: {},
+            toolProvider: 'openops',
+          },
         },
-        expected: { isAnalyticsLoaded: true, isTablesLoaded: true },
+        expected: {
+          isAnalyticsLoaded: true,
+          isTablesLoaded: true,
+          isOpenOpsMCPEnabled: true,
+          isAwsCostMcpDisabled: true,
+        },
+      },
+      {
+        selectedTools: {
+          tool1: { description: 'Tool 1', parameters: {} },
+          openops_mcp_tool: {
+            description: 'Table tool',
+            parameters: {},
+            toolProvider: 'openops',
+          },
+        },
+        expected: {
+          isAnalyticsLoaded: false,
+          isTablesLoaded: false,
+          isOpenOpsMCPEnabled: true,
+          isAwsCostMcpDisabled: true,
+        },
       },
       {
         selectedTools: {
           tool1: { description: 'Tool 1', parameters: {} },
           tool2: { description: 'Tool 2', parameters: {} },
         },
-        expected: { isAnalyticsLoaded: false, isTablesLoaded: false },
+        expected: {
+          isAnalyticsLoaded: false,
+          isTablesLoaded: false,
+          isOpenOpsMCPEnabled: false,
+          isAwsCostMcpDisabled: true,
+        },
       },
       {
         selectedTools: {
@@ -243,19 +281,34 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           mcp_analytics_superset: {
             description: 'Analytics tool',
             parameters: {},
+            toolProvider: 'superset',
           },
         },
-        expected: { isAnalyticsLoaded: true, isTablesLoaded: false },
+        expected: {
+          isAnalyticsLoaded: true,
+          isTablesLoaded: false,
+          isOpenOpsMCPEnabled: false,
+          isAwsCostMcpDisabled: true,
+        },
       },
       {
         selectedTools: {
           tool1: { description: 'Tool 1', parameters: {} },
-          mcp_table_tool: { description: 'Table tool', parameters: {} },
+          mcp_table_tool: {
+            description: 'Table tool',
+            parameters: {},
+            toolProvider: 'tables',
+          },
         },
-        expected: { isAnalyticsLoaded: false, isTablesLoaded: true },
+        expected: {
+          isAnalyticsLoaded: false,
+          isTablesLoaded: true,
+          isOpenOpsMCPEnabled: false,
+          isAwsCostMcpDisabled: true,
+        },
       },
     ])(
-      'should handle analytics/tables flags when tools are $expected.isAnalyticsLoaded/$expected.isTablesLoaded',
+      'should handle analytics/tables/openops flags when tools are $expected.isAnalyticsLoaded/$expected.isTablesLoaded/$expected.isOpenOpsMCPEnabled',
       async ({ selectedTools, expected }) => {
         (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);
         (selectRelevantTools as jest.Mock).mockResolvedValue(selectedTools);
@@ -273,21 +326,45 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
     it.each([
       {
         selectedTools: undefined,
-        expected: { isAnalyticsLoaded: false, isTablesLoaded: false },
+        expected: {
+          isAnalyticsLoaded: false,
+          isTablesLoaded: false,
+          isOpenOpsMCPEnabled: false,
+          isAwsCostMcpDisabled: true,
+          expectedSystemPrompt: emptyToolsSystemPrompt,
+        },
       },
       {
         selectedTools: {},
-        expected: { isAnalyticsLoaded: false, isTablesLoaded: false },
+        expected: {
+          isAnalyticsLoaded: false,
+          isTablesLoaded: false,
+          isOpenOpsMCPEnabled: false,
+          isAwsCostMcpDisabled: true,
+          expectedSystemPrompt: emptyToolsSystemPrompt,
+        },
       },
       {
         selectedTools: null,
-        expected: { isAnalyticsLoaded: false, isTablesLoaded: false },
+        expected: {
+          isAnalyticsLoaded: false,
+          isTablesLoaded: false,
+          isOpenOpsMCPEnabled: false,
+          isAwsCostMcpDisabled: true,
+          expectedSystemPrompt: emptyToolsSystemPrompt,
+        },
       },
       {
         selectedTools: {
           tool1: { description: 'Tool 1', parameters: {} },
         },
-        expected: { isAnalyticsLoaded: false, isTablesLoaded: false },
+        expected: {
+          isAnalyticsLoaded: false,
+          isTablesLoaded: false,
+          isOpenOpsMCPEnabled: false,
+          isAwsCostMcpDisabled: true,
+          expectedSystemPrompt: systemPrompt,
+        },
       },
     ])(
       'should pass filtered tools to streamText via pipeDataStreamToResponse with $selectedTools',
@@ -301,14 +378,95 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           mockReply as unknown as FastifyReply,
         );
 
-        expect(getMcpSystemPrompt).toHaveBeenCalledWith(expected);
+        expect(getMcpSystemPrompt).toHaveBeenCalledWith({
+          isAnalyticsLoaded: expected.isAnalyticsLoaded,
+          isTablesLoaded: expected.isTablesLoaded,
+          isOpenOpsMCPEnabled: expected.isOpenOpsMCPEnabled,
+          isAwsCostMcpDisabled: expected.isAwsCostMcpDisabled,
+        });
         expect(pipeDataStreamToResponse).toHaveBeenCalled();
         expect(streamText).toHaveBeenCalledWith(
           expect.objectContaining({
-            tools: selectedTools,
+            tools: selectedTools ?? {},
+            system: expected.expectedSystemPrompt,
           }),
         );
       },
     );
+  });
+
+  it('should include all openops tools from the full tool set when a relevant openops tool is present in selectedTools', async () => {
+    const openopsTools = {
+      openops_tool1: {
+        description: 'OpenOps Tool 1',
+        parameters: {},
+        toolProvider: 'openops',
+      },
+      openops_tool2: {
+        description: 'OpenOps Tool 2',
+        parameters: {},
+        toolProvider: 'openops',
+      },
+      unrelated_tool: {
+        description: 'Other Tool',
+        parameters: {},
+        toolProvider: 'tables',
+      },
+    };
+    (getMCPTools as jest.Mock).mockResolvedValue({
+      mcpClients: [],
+      tools: openopsTools,
+    });
+
+    const selectedTools = {
+      openops_tool1: {
+        description: 'OpenOps Tool 1',
+        parameters: {},
+        toolProvider: 'openops',
+      },
+    };
+    (selectRelevantTools as jest.Mock).mockResolvedValue(selectedTools);
+
+    const postHandler = handlers['/'];
+    await postHandler(
+      mockRequest as FastifyRequest,
+      mockReply as unknown as FastifyReply,
+    );
+
+    expect(streamText).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tools: {
+          openops_tool1: openopsTools.openops_tool1,
+          openops_tool2: openopsTools.openops_tool2,
+        },
+      }),
+    );
+  });
+
+  it('should include AWS cost MCP configuration hint when MCP is not available', async () => {
+    const mockToolsWithoutCost = {
+      mcpClients: [],
+      tools: {
+        tool1: { description: 'Tool 1', parameters: {} },
+      },
+    };
+
+    (getMCPTools as jest.Mock).mockResolvedValue(mockToolsWithoutCost);
+    (selectRelevantTools as jest.Mock).mockResolvedValue({
+      tool1: { description: 'Tool 1', parameters: {} },
+    });
+
+    const postHandler = handlers['/'];
+    await postHandler(
+      mockRequest as FastifyRequest,
+      mockReply as unknown as FastifyReply,
+    );
+
+    expect(getMcpSystemPrompt).toHaveBeenCalledWith({
+      isAnalyticsLoaded: false,
+      isTablesLoaded: false,
+      isOpenOpsMCPEnabled: false,
+      isAwsCostMcpDisabled: true,
+    });
   });
 });

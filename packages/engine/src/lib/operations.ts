@@ -31,7 +31,6 @@ import { testExecutionContext } from './handler/context/test-execution-context';
 import { flowExecutor } from './handler/flow-executor';
 import { blockHelper } from './helper/block-helper';
 import { triggerHelper } from './helper/trigger-helper';
-import { progressService } from './services/progress.service';
 import { utils } from './utils';
 
 const executeFlow = async (
@@ -39,20 +38,13 @@ const executeFlow = async (
   context: FlowExecutorContext,
 ): Promise<EngineResponse<Pick<FlowRunResponse, 'status' | 'error'>>> => {
   const constants = EngineConstants.fromExecuteFlowInput(input);
-  const output = await flowExecutor.execute({
-    action: input.flowVersion.trigger.nextAction,
+
+  const response = await flowExecutor.triggerFlowExecutor({
+    trigger: input.flowVersion.trigger,
     executionState: context,
     constants,
   });
-  const newContext =
-    output.verdict === ExecutionVerdict.RUNNING
-      ? output.setVerdict(ExecutionVerdict.SUCCEEDED, output.verdictResponse)
-      : output;
-  await progressService.sendUpdate({
-    engineConstants: constants,
-    flowExecutorContext: newContext,
-  });
-  const response = await newContext.toResponse();
+
   return {
     status: EngineResponseStatus.OK,
     response: {
@@ -92,9 +84,11 @@ async function executeStep(
     constants: EngineConstants.fromExecuteStepInput(input),
   });
 
+  const stepResult = output.steps[step.name];
   return {
     success: output.verdict !== ExecutionVerdict.FAILED,
-    output: cleanSampleData(output.steps[step.name]),
+    output: cleanSampleData(stepResult),
+    input: stepResult.input,
   };
 }
 
@@ -250,15 +244,9 @@ export async function execute(
         appendToContext({
           authType: input.auth.type,
           projectId: input.projectId,
-          blockName: input.block.blockName,
-          blockType: input.block.blockType,
-          blockVersion: input.block.blockVersion,
         });
 
-        const output = await blockHelper.executeValidateAuth({
-          params: input,
-          blocksSource: EngineConstants.BLOCK_SOURCES,
-        });
+        const output = await blockHelper.executeValidateAuth(input);
 
         return {
           status: EngineResponseStatus.OK,

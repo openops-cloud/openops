@@ -1,18 +1,14 @@
 import { BlockProperty } from '@openops/blocks-framework';
 import {
-  Button,
-  cn,
-  DYNAMIC_TOGGLE_VALUES,
-  DynamicToggle,
-  DynamicToggleOption,
-  DynamicToggleValue,
   FormItem,
   FormLabel,
+  GenerateWithAIButton,
   ReadMoreDescription,
+  ToggleSwitch,
+  ToggleSwitchOption,
 } from '@openops/components/ui';
 import { Action, isNil, Trigger } from '@openops/shared';
 import { t } from 'i18next';
-import { Sparkles } from 'lucide-react';
 import { useCallback, useContext, useEffect } from 'react';
 import { ControllerRenderProps, useFormContext } from 'react-hook-form';
 
@@ -22,7 +18,6 @@ import { CUSTOMIZED_INPUT_KEY, isDynamicViewToggled } from './utils';
 import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
 import { ArrayFieldContext } from '@/app/features/builder/block-properties/dynamic-array/array-field-context';
 import { useAppStore } from '@/app/store/app-store';
-import { Link } from 'react-router-dom';
 import { useSafeBuilderStateContext } from '../builder-hooks';
 
 type inputNameLiteral = `settings.input.${string}`;
@@ -57,14 +52,19 @@ const getInitialFieldValue = (
   return fieldValue ?? defaultValue ?? null;
 };
 
-const toggleOptions: DynamicToggleOption[] = [
+const DYNAMIC_TOGGLE_VALUES = {
+  STATIC: 'Static',
+  DYNAMIC: 'Dynamic',
+};
+
+const TOGGLE_OPTIONS: ToggleSwitchOption[] = [
   {
-    value: 'Static',
+    value: DYNAMIC_TOGGLE_VALUES.STATIC,
     label: t('Static'),
     tooltipText: t('Use a static pre-defined value'),
   },
   {
-    value: 'Dynamic',
+    value: DYNAMIC_TOGGLE_VALUES.DYNAMIC,
     label: t('Dynamic'),
     tooltipText: t(
       'Static values stay the same, while dynamic values update based on data from other steps',
@@ -77,7 +77,7 @@ type FormLabelButtonProps = {
   allowDynamicValues: boolean;
   disabled: boolean;
   dynamicViewToggled: boolean;
-  handleDynamicValueChange: (value: DynamicToggleValue) => void;
+  handleDynamicValueChange: (value: string) => void;
   onGenerateWithAIClick: () => void;
 };
 
@@ -101,33 +101,21 @@ const FormLabelButton = ({
     property && 'supportsAI' in property && property.supportsAI && !readonly;
 
   if (shouldShowAIButton) {
-    return hasActiveAiSettings ? (
-      <Button
-        variant="link"
-        className={cn('h-5 pr-0 py-0 gap-[5px]', {
-          'text-blueAccent-300': isAiChatVisible,
-        })}
-        onClick={onGenerateWithAIClick}
-        loading={isLoading}
-      >
-        <Sparkles size={20} />
-        {t('Generate with AI')}
-      </Button>
-    ) : (
-      <Link
-        to="/settings/ai"
-        className="flex items-center h-5 pr-0 py-0 text-blueAccent-300 gap-[5px] hover:underline"
-      >
-        <Sparkles size={20} />
-        {t('Configure AI')}
-      </Link>
+    return (
+      <GenerateWithAIButton
+        hasActiveAiSettings={hasActiveAiSettings}
+        isLoading={isLoading}
+        isAiChatVisible={!!isAiChatVisible}
+        settingsPath="/settings/ai"
+        onGenerateWithAIClick={onGenerateWithAIClick}
+      />
     );
   }
 
   if (allowDynamicValues) {
     return (
-      <DynamicToggle
-        options={toggleOptions}
+      <ToggleSwitch
+        options={TOGGLE_OPTIONS}
         onChange={handleDynamicValueChange}
         defaultValue={
           dynamicViewToggled
@@ -195,7 +183,7 @@ const AutoFormFieldWrapper = ({
   }, [propertyName, inputName, arrayFieldContext]);
 
   // array fields use the dynamicViewToggled property to specify if a property is toggled
-  function handleChange(value: DynamicToggleValue) {
+  function handleChange(value: string) {
     const isInDynamicView = value === DYNAMIC_TOGGLE_VALUES.DYNAMIC;
     if (arrayFieldContext) {
       form.setValue(

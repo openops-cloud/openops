@@ -13,10 +13,10 @@ jobs:
     name: Install Dependencies
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.2.2
       - name: Lookup node_modules cache
         id: node-modules-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v4.2.3
         with:
           path: node_modules
           key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
@@ -30,15 +30,16 @@ jobs:
     needs: install
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.2.2
       - name: Restore node_modules cache
         id: node-modules-cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v4.2.3
         with:
           path: node_modules
           key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
+          fail-on-cache-miss: true
       - name: Restore NX cache
-        uses: actions/cache@v4
+        uses: actions/cache@v4.2.3
         with:
           path: .nx/cache
           key: nx-lint-${{ github.sha }}
@@ -58,12 +59,12 @@ jobs:
       contents: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.2.2
         with:
           ref: ${{ github.head_ref }}
       - name: Restore node_modules cache
         id: node-modules-cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v4.2.3
         with:
           path: node_modules
           key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
@@ -77,7 +78,7 @@ jobs:
           fi
       - name: Commit changes for dependabot
         if: failure() && startsWith(github.head_ref, 'dependabot/')
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@778341af668090896ca464160c2def5d1d1a3eb0
         with:
           commit_message: Update THIRD_PARTY_LICENSES.txt
   test:
@@ -98,15 +99,16 @@ jobs:
     needs: install
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.2.2
       - name: Restore node_modules cache
         id: node-modules-cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v4.2.3
         with:
           path: node_modules
           key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
+          fail-on-cache-miss: true
       - name: Restore NX cache
-        uses: actions/cache@v4
+        uses: actions/cache@v4.2.3
         with:
           path: .nx/cache
           key: nx-test-${{ matrix.test-suits.key || matrix.test-suits.name }}-${{ github.sha }}
@@ -115,7 +117,7 @@ jobs:
       - name: Test
         if: steps.nx-test-cache.outputs.cache-hit != 'true'
         continue-on-error: false
-        uses: nick-fields/retry@v3
+        uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08
         with:
           timeout_minutes: 10
           max_attempts: 3
@@ -130,15 +132,16 @@ jobs:
     needs: install
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.2.2
       - name: Restore node_modules cache
         id: node-modules-cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v4.2.3
         with:
           path: node_modules
           key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
+          fail-on-cache-miss: true
       - name: Restore NX cache
-        uses: actions/cache@v4
+        uses: actions/cache@v4.2.3
         with:
           path: .nx/cache
           key: nx-build-${{ github.sha }}
@@ -151,7 +154,7 @@ jobs:
           npx nx run-many --target=build
           ./tools/truncate-nx-cache.sh
       - name: Save build cache
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v4.2.3
         with:
           path: dist
           key: dist-${{ github.sha }}
@@ -165,23 +168,23 @@ jobs:
             - name: Engine
               file: engine.Dockerfile
               repository: openops-engine
-    name: Build ${{ matrix.target.name }} Image
+            platform: [amd64, arm64]
+    name: Build ${{ matrix.target.name }} Image for ${{ matrix.platform }}
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.platform == 'amd64' && 'ubuntu-latest' || 'ubuntu-arm64' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.2.2
       - name: Restore build cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v4.2.3
         with:
           path: dist
           key: dist-${{ github.sha }}
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+          fail-on-cache-miss: true
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v3.11.1
       - name: Configure AWS credentials
         if: vars.ECR_REGION
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v4.2.1
         with:
           aws-access-key-id: ${{ secrets.ECR_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.ECR_SECRET_ACCESS_KEY }}
@@ -189,10 +192,10 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         if: vars.ECR_REGION
-        uses: aws-actions/amazon-ecr-login@v2
+        uses: aws-actions/amazon-ecr-login@v2.0.1
       - name: Format image tag parts
         env:
-          BRANCH: ${{ github.ref_name }}
+          BRANCH: ${{ github.head_ref || github.ref_name }}
           SHA: ${{ github.event.pull_request.head.sha || github.sha }}
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
@@ -201,39 +204,75 @@ jobs:
           echo SHORT_SHA=${SHA::8} >> "$GITHUB_ENV"
       - name: Build image
         if: vars.ECR_REGION
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v6.18.0
         with:
           context: .
           file: ./${{ matrix.target.file }}
           build-args: VERSION=${{ env.SHORT_SHA }}
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/${{ matrix.platform }}
           provenance: false
           push: true
           tags: |
-            ${{ env.REPOSITORY_URI }}:${{ env.SHORT_SHA }}
-            ${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}-${{ env.SHORT_SHA }}
-            ${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}
+            ${{ env.REPOSITORY_URI }}:${{ env.SHORT_SHA }}-${{ matrix.platform }}
+            ${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}-${{ env.SHORT_SHA }}-${{ matrix.platform }}
+            ${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}-${{ matrix.platform }}
           cache-from: |
-            type=registry,ref=${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}-cache
-            type=registry,ref=${{ env.REPOSITORY_URI }}:main-cache
-          cache-to: mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}-cache
-      - name: Push single-arch manifest for the engine
-        if: vars.ECR_REGION && matrix.target.name == 'Engine'
-        env:
-          SHA_TAG: ${{ env.REPOSITORY_URI }}:${{ env.SHORT_SHA }}
-          BRANCH_TAG: ${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}
-        run: |
-          docker pull $SHA_TAG
-          docker tag $SHA_TAG ${SHA_TAG}-amd64 && docker push ${SHA_TAG}-amd64
-          docker tag $SHA_TAG ${BRANCH_TAG}-amd64 && docker push ${BRANCH_TAG}-amd64
+            type=registry,ref=${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}-${{ matrix.platform }}-cache
+            type=registry,ref=${{ env.REPOSITORY_URI }}:main-${{ matrix.platform }}-cache
+          cache-to: mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=${{ env.REPOSITORY_URI }}:${{ env.SANITIZED_BRANCH }}-${{ matrix.platform }}-cache
       - name: Build image
         if: ${{ !vars.ECR_REGION }}
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v6.18.0
         with:
           context: .
           file: ./${{ matrix.target.file }}
           build-args: VERSION=${{ env.SHORT_SHA }}
           provenance: false
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/${{ matrix.platform }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+  create-manifest:
+    if: ${{ vars.ECR_REGION }}
+    strategy:
+      matrix:
+        repository: [openops-app, openops-engine]
+    name: Create and Push Manifest for ${{ matrix.repository }}
+    runs-on: ubuntu-latest
+    needs: build-images
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4.2.1
+        with:
+          aws-access-key-id: ${{ secrets.ECR_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.ECR_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.ECR_REGION }}
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2.0.1
+      - name: Format image tag components
+        env:
+          BRANCH: ${{ github.head_ref || github.ref_name }}
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          echo SANITIZED_BRANCH=${BRANCH//[\/.:_]/-} >> "$GITHUB_ENV"
+          echo BASE_REPOSITORY_URI=${{ steps.login-ecr.outputs.registry }}/openops/${{ matrix.repository }} >> "$GITHUB_ENV"
+          echo SHORT_SHA=${SHA::8} >> "$GITHUB_ENV"
+      - name: Create and push manifests
+        run: |
+          # Create and push SHA manifest
+          docker manifest create --amend $BASE_REPOSITORY_URI:$SHORT_SHA \
+            $BASE_REPOSITORY_URI:${SHORT_SHA}-amd64 \
+            $BASE_REPOSITORY_URI:${SHORT_SHA}-arm64
+          docker manifest push $BASE_REPOSITORY_URI:$SHORT_SHA
+
+          echo "✅ Successfully pushed image $BASE_REPOSITORY_URI:$SHORT_SHA" >> $GITHUB_STEP_SUMMARY
+
+          # Create and push branch-manifest
+          docker manifest create --amend $BASE_REPOSITORY_URI:$SANITIZED_BRANCH \
+            $BASE_REPOSITORY_URI:${SANITIZED_BRANCH}-amd64 \
+            $BASE_REPOSITORY_URI:${SANITIZED_BRANCH}-arm64
+          docker manifest push $BASE_REPOSITORY_URI:$SANITIZED_BRANCH
+
+          echo "✅ Successfully pushed image $BASE_REPOSITORY_URI:$SANITIZED_BRANCH" >> $GITHUB_STEP_SUMMARY
+
+

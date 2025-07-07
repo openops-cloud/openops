@@ -25,6 +25,7 @@ jest.mock('../../../src/app/blocks/block-metadata-service', () => ({
 
 import { logger } from '@openops/server-shared';
 import {
+  getAuthProviderMetadata,
   getProviderMetadataForAllBlocks,
   resolveProvidersForBlocks,
 } from '../../../src/app/app-connection/connection-providers-resolver';
@@ -65,7 +66,7 @@ describe('resolveProvidersForBlocks', () => {
     listBlocksMock.mockResolvedValue(blocks);
 
     const result = await resolveProvidersForBlocks(
-      ['block1', 'block2'],
+      ['block1', 'block2', 'block3'],
       projectId,
     );
 
@@ -78,8 +79,10 @@ describe('resolveProvidersForBlocks', () => {
       edition,
     });
 
-    expect(result).toEqual(['AWS', 'Github']);
-    expect(result.length).toBe(2);
+    expect(result).toEqual({
+      AWS: ['block1', 'block3'],
+      Github: ['block2'],
+    });
   });
 
   test('should handle non-existent blocks', async () => {
@@ -103,8 +106,9 @@ describe('resolveProvidersForBlocks', () => {
       'Block not found. Block name: non-existent-block',
     );
 
-    expect(result).toEqual(['AWS']);
-    expect(result.length).toBe(1);
+    expect(result).toEqual({
+      AWS: ['block1'],
+    });
   });
 
   test('should deduplicate providers', async () => {
@@ -130,8 +134,9 @@ describe('resolveProvidersForBlocks', () => {
       projectId,
     );
 
-    expect(result).toEqual(['AWS']);
-    expect(result.length).toBe(1);
+    expect(result).toEqual({
+      AWS: ['block1', 'block2'],
+    });
   });
 
   test('should handle blocks without providers', async () => {
@@ -159,8 +164,9 @@ describe('resolveProvidersForBlocks', () => {
       projectId,
     );
 
-    expect(result).toEqual(['AWS']);
-    expect(result.length).toBe(1);
+    expect(result).toEqual({
+      AWS: ['block1'],
+    });
   });
 
   test('should return empty array for empty block list', async () => {
@@ -177,8 +183,7 @@ describe('resolveProvidersForBlocks', () => {
 
     const result = await resolveProvidersForBlocks([], projectId);
 
-    expect(result).toEqual([]);
-    expect(result.length).toBe(0);
+    expect(result).toEqual({});
   });
 });
 
@@ -264,5 +269,103 @@ describe('getProviderMetadataForAllBlocks', () => {
     listBlocksMock.mockResolvedValue(blocks);
     const result = await getProviderMetadataForAllBlocks(projectId);
     expect(result).toEqual({});
+  });
+});
+
+describe('getAuthProviderMetadata', () => {
+  const projectId = 'project-123';
+  const release = 'release-1.0';
+  const edition = 'community';
+  const authProviderKey = 'AWS';
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    getCurrentReleaseMock.mockResolvedValue(release);
+    getEditionMock.mockReturnValue(edition);
+  });
+
+  test('should return auth metadata for a block with matching authProviderKey', async () => {
+    const blocks = [
+      {
+        name: 'block1',
+        auth: {
+          authProviderKey: 'GitHub',
+          authProviderDisplayName: 'GitHub',
+          authProviderLogoUrl: 'github-logo.png',
+        },
+      },
+      {
+        name: 'block2',
+        auth: {
+          authProviderKey: 'AWS',
+          authProviderDisplayName: 'Amazon Web Services',
+          authProviderLogoUrl: 'aws-logo.png',
+          secretKeys: ['accessKey', 'secretKey'],
+        },
+      },
+    ];
+
+    listBlocksMock.mockResolvedValue(blocks);
+
+    const result = await getAuthProviderMetadata(authProviderKey, projectId);
+
+    expect(getCurrentReleaseMock).toHaveBeenCalled();
+    expect(getEditionMock).toHaveBeenCalled();
+    expect(listBlocksMock).toHaveBeenCalledWith({
+      includeHidden: false,
+      projectId,
+      release,
+      edition,
+    });
+
+    expect(result).toEqual({
+      authProviderKey: 'AWS',
+      authProviderDisplayName: 'Amazon Web Services',
+      authProviderLogoUrl: 'aws-logo.png',
+      secretKeys: ['accessKey', 'secretKey'],
+    });
+  });
+
+  test('should return undefined if no block has matching authProviderKey', async () => {
+    const blocks = [
+      {
+        name: 'block1',
+        auth: {
+          authProviderKey: 'GitHub',
+          authProviderDisplayName: 'GitHub',
+          authProviderLogoUrl: 'github-logo.png',
+        },
+      },
+    ];
+
+    listBlocksMock.mockResolvedValue(blocks);
+
+    const result = await getAuthProviderMetadata(
+      'NonExistentProvider',
+      projectId,
+    );
+
+    expect(result).toBeUndefined();
+  });
+
+  test('should return undefined if blocks list is empty', async () => {
+    listBlocksMock.mockResolvedValue([]);
+
+    const result = await getAuthProviderMetadata(authProviderKey, projectId);
+
+    expect(result).toBeUndefined();
+  });
+
+  test('should return undefined if blocks have no auth property', async () => {
+    const blocks = [
+      { name: 'block1', auth: null },
+      { name: 'block2', auth: {} },
+    ];
+
+    listBlocksMock.mockResolvedValue(blocks);
+
+    const result = await getAuthProviderMetadata(authProviderKey, projectId);
+
+    expect(result).toBeUndefined();
   });
 });

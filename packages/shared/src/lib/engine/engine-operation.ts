@@ -46,7 +46,7 @@ export type BaseEngineOperation = {
 };
 
 export type ExecuteValidateAuthOperation = BaseEngineOperation & {
-  block: BlockPackage;
+  authProperty: unknown;
   auth: AppConnectionValue;
 };
 
@@ -136,6 +136,7 @@ type ExecuteTestOrRunTriggerResponse = {
   success: boolean;
   message?: string;
   output: unknown[];
+  input: unknown;
 };
 
 type ExecuteHandshakeTriggerResponse = {
@@ -176,6 +177,7 @@ export type ExecuteTriggerResponse<H extends TriggerHookType> =
 
 export type ExecuteActionResponse = {
   success: boolean;
+  input: unknown;
   output: unknown;
 };
 

@@ -5,7 +5,6 @@ import {
 } from '@fastify/type-provider-typebox';
 import {
   AppConnectionWithoutSensitiveData,
-  FlagId,
   ListAppConnectionsRequestQuery,
   OpenOpsId,
   PatchAppConnectionRequestBody,
@@ -16,14 +15,12 @@ import {
   UpsertAppConnectionRequestBody,
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
-import { blockMetadataService } from '../blocks/block-metadata-service';
-import { devFlagsService } from '../flags/dev-flags.service';
 import { sendConnectionDeletedEvent } from '../telemetry/event-models';
 import { appConnectionService } from './app-connection-service/app-connection-service';
 import { redactSecrets, removeSensitiveData } from './app-connection-utils';
 import {
+  getAuthProviderMetadata,
   getProviderMetadataForAllBlocks,
-  resolveProvidersForBlocks,
 } from './connection-providers-resolver';
 
 export const appConnectionController: FastifyPluginCallbackTypebox = (
@@ -44,20 +41,19 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
   });
 
   app.patch('/', PatchAppConnectionRequest, async (request, reply) => {
-    const block = await blockMetadataService.getOrThrow({
-      name: request.body.blockName,
-      projectId: request.principal.projectId,
-      version: undefined,
-    });
+    const authProperty = await getAuthProviderMetadata(
+      request.body.authProviderKey,
+      request.principal.projectId,
+    );
 
     const appConnection = await appConnectionService.patch({
       userId: request.principal.id,
       projectId: request.principal.projectId,
       request: request.body,
-      block,
+      authProperty,
     });
 
-    const redactedValue = redactSecrets(block.auth, appConnection.value);
+    const redactedValue = redactSecrets(authProperty, appConnection.value);
 
     const result = redactedValue
       ? {
@@ -73,26 +69,9 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
     '/',
     ListAppConnectionsRequest,
     async (request): Promise<SeekPage<AppConnectionWithoutSensitiveData>> => {
-      const { name, status, cursor, limit } = request.query;
-      let { blockNames, authProviders } = request.query;
-
-      const featureFlag = await devFlagsService.getOne(
-        FlagId.USE_CONNECTIONS_PROVIDER,
-      );
-      if (blockNames && featureFlag?.value) {
-        const blockProviders = await resolveProvidersForBlocks(
-          blockNames,
-          request.principal.projectId,
-        );
-
-        blockNames = [];
-        authProviders = authProviders ?? [];
-        authProviders.push(...blockProviders);
-      }
+      const { name, status, cursor, limit, authProviders } = request.query;
 
       const appConnections = await appConnectionService.list({
-        // TODO: remove blockNames from this request
-        blockNames,
         name,
         status,
         projectId: request.principal.projectId,
@@ -111,22 +90,22 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
     '/:id',
     GetAppConnectionRequest,
     async (request, reply): Promise<any> => {
+      const projectId = request.principal.projectId;
       const connection = await appConnectionService.getOneOrThrow({
         id: request.params.id,
-        projectId: request.principal.projectId,
+        projectId,
       });
 
-      const block = await blockMetadataService.get({
-        name: connection.blockName,
-        projectId: request.principal.projectId,
-        version: undefined,
-      });
+      const authProperty = await getAuthProviderMetadata(
+        connection.authProviderKey,
+        projectId,
+      );
 
-      if (!block) {
+      if (!authProperty) {
         return reply.status(StatusCodes.BAD_REQUEST);
       }
 
-      const redactedValue = redactSecrets(block.auth, connection.value);
+      const redactedValue = redactSecrets(authProperty, connection.value);
 
       return redactedValue
         ? {
@@ -153,7 +132,7 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
       sendConnectionDeletedEvent(
         request.principal.id,
         connection.projectId,
-        connection.blockName,
+        connection.authProviderKey,
       );
 
       await reply.status(StatusCodes.NO_CONTENT).send();
@@ -182,7 +161,7 @@ const UpsertAppConnectionRequest = {
     tags: ['app-connections'],
     security: [SERVICE_KEY_SECURITY_OPENAPI],
     description:
-      'Create or update an app connection based on the app name. This endpoint handles both new connection creation and updates to existing connections, supporting various authentication types including OAuth2, Basic Auth, and Custom Auth.',
+      'Create a new app connection. This endpoint is used for initial connection setup and supports various authentication types including OAuth2, Basic Auth, and Custom Auth. The connection is automatically encrypted and stored securely. Returns the created connection with sensitive data redacted.',
     body: UpsertAppConnectionRequestBody,
     Response: {
       [StatusCodes.CREATED]: AppConnectionWithoutSensitiveData,
@@ -199,7 +178,7 @@ const PatchAppConnectionRequest = {
     tags: ['app-connections'],
     security: [SERVICE_KEY_SECURITY_OPENAPI],
     description:
-      "Update an existing app connection based on the connection ID. This endpoint allows modification of connection settings, authentication details, and other configuration parameters while maintaining the connection's identity.",
+      "Update an existing app connection's configuration. This endpoint is used for modifying an existing connection and requires the connection to already exist. All changes are validated and encrypted before storage. The connection's name and type cannot be changed. Returns the updated connection with sensitive data redacted.",
     body: PatchAppConnectionRequestBody,
     Response: {
       [StatusCodes.OK]: AppConnectionWithoutSensitiveData,
@@ -217,7 +196,7 @@ const ListAppConnectionsRequest = {
     security: [SERVICE_KEY_SECURITY_OPENAPI],
     querystring: ListAppConnectionsRequestQuery,
     description:
-      'List all app connections in the project with filtering and pagination options. This endpoint supports filtering by name, block type, and status, and includes pagination controls for large result sets.',
+      'List all app connections in the project with advanced filtering and pagination capabilities. Supports filtering by name, block type, status, and authentication provider. Results are paginated and include metadata about each connection. All sensitive data is automatically redacted in the response.',
     response: {
       [StatusCodes.OK]: SeekPage(AppConnectionWithoutSensitiveData),
     },
@@ -251,7 +230,7 @@ const GetAppConnectionRequest = {
   schema: {
     tags: ['app-connections'],
     description:
-      'Get an app connection by its ID. This endpoint retrieves detailed information about a specific app connection, including its configuration, settings, and current status. Sensitive data such as authentication tokens and secrets is automatically redacted in the response for security.',
+      'Get detailed information about a specific app connection by its ID. This endpoint retrieves the complete connection configuration, settings, and current status. All sensitive data such as authentication tokens, secrets, and credentials is automatically redacted in the response for security. Returns a 404 error if the connection is not found.',
     params: Type.Object({
       id: OpenOpsId,
     }),
@@ -277,7 +256,8 @@ const GetConnectionMetadataRequest = {
   schema: {
     tags: ['app-connections'],
     security: [SERVICE_KEY_SECURITY_OPENAPI],
-    description: 'Get authentication metadata for all available connections',
+    description:
+      'Retrieve comprehensive metadata about all available connection types and their authentication requirements. This endpoint provides detailed information about supported authentication methods, required fields, and configuration options for each connection type. Useful for building connection configuration interfaces.',
     response: {
       [StatusCodes.OK]: Type.Record(Type.String(), Type.Unknown()),
     },

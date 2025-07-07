@@ -6,7 +6,7 @@ import { flagService } from '../flags/flag.service';
 export async function resolveProvidersForBlocks(
   blockNames: string[],
   projectId: string,
-): Promise<string[]> {
+): Promise<Record<string, string[]>> {
   const release = await flagService.getCurrentRelease();
   const edition = system.getEdition();
 
@@ -17,7 +17,7 @@ export async function resolveProvidersForBlocks(
     edition,
   });
 
-  const authProviders: string[] = [];
+  const blockToProvider: Record<string, string[]> = {};
   const blockMap = new Map(blocks.map((b) => [b.name, b]));
 
   for (const blockName of blockNames) {
@@ -28,12 +28,18 @@ export async function resolveProvidersForBlocks(
     }
 
     const authProviderKey = block.auth?.authProviderKey;
-    if (authProviderKey) {
-      authProviders.push(authProviderKey);
+    if (!authProviderKey) {
+      continue;
+    }
+
+    if (blockToProvider[authProviderKey]) {
+      blockToProvider[authProviderKey].push(blockName);
+    } else {
+      blockToProvider[authProviderKey] = [blockName];
     }
   }
 
-  return [...new Set(authProviders)];
+  return blockToProvider;
 }
 
 type ProviderMetadata = BlockAuthProperty & {
@@ -67,4 +73,22 @@ export async function getProviderMetadataForAllBlocks(
   }
 
   return providerMetadata;
+}
+
+export async function getAuthProviderMetadata(
+  authProviderKey: string,
+  projectId: string,
+): Promise<BlockAuthProperty | undefined> {
+  const release = await flagService.getCurrentRelease();
+  const edition = system.getEdition();
+
+  const blocks = await blockMetadataService.list({
+    includeHidden: false,
+    projectId,
+    release,
+    edition,
+  });
+
+  return blocks.find((block) => block.auth?.authProviderKey === authProviderKey)
+    ?.auth;
 }

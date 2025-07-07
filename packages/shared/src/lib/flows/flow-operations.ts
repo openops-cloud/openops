@@ -9,7 +9,7 @@ import {
   SplitActionSchema,
 } from './actions/action';
 import { FlowStatus } from './flow';
-import { BlockTrigger, EmptyTrigger, Trigger } from './triggers/trigger';
+import { Trigger, UpdateTriggerRequest } from './triggers/trigger';
 
 export enum FlowOperationType {
   LOCK_AND_PUBLISH = 'LOCK_AND_PUBLISH',
@@ -47,11 +47,20 @@ export const LockFlowRequest = Type.Object({});
 
 export type LockFlowRequest = Static<typeof LockFlowRequest>;
 
+export const AppConnectionsWithSupportedBlocks = Type.Object({
+  ...AppConnectionWithoutSensitiveData.properties,
+  supportedBlocks: Type.Array(Type.String()),
+});
+
+export type AppConnectionsWithSupportedBlocks = Static<
+  typeof AppConnectionsWithSupportedBlocks
+>;
+
 export const ImportFlowRequest = Type.Object({
   displayName: Type.String({}),
   description: Type.Optional(Type.String({})),
-  trigger: Trigger,
-  connections: Type.Optional(Type.Array(AppConnectionWithoutSensitiveData)),
+  trigger: Type.Omit(Trigger, ['id']),
+  connections: Type.Optional(Type.Array(AppConnectionsWithSupportedBlocks)),
 });
 
 export type ImportFlowRequest = Static<typeof ImportFlowRequest>;
@@ -109,9 +118,6 @@ export const AddActionRequest = Type.Object({
   action: UpdateActionRequest,
 });
 export type AddActionRequest = Static<typeof AddActionRequest>;
-
-export const UpdateTriggerRequest = Type.Union([EmptyTrigger, BlockTrigger]);
-export type UpdateTriggerRequest = Static<typeof UpdateTriggerRequest>;
 
 export const UpdateFlowStatusRequest = Type.Object({
   status: Type.Enum(FlowStatus),

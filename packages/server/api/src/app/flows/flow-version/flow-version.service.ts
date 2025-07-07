@@ -2,7 +2,7 @@ import { BlockPropertyMap, PropertyType } from '@openops/blocks-framework';
 import { logger } from '@openops/server-shared';
 import {
   ActionType,
-  AppConnectionWithoutSensitiveData,
+  AppConnectionsWithSupportedBlocks,
   ApplicationError,
   BlockActionSettings,
   BlockTriggerSettings,
@@ -441,7 +441,7 @@ function handleImportFlowOperation(
   operations.push(
     ...flowHelper.getImportOperations(
       operation.trigger,
-      operation.connections as AppConnectionWithoutSensitiveData[],
+      operation.connections as AppConnectionsWithSupportedBlocks[],
     ),
   );
   return operations;

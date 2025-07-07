@@ -29,6 +29,7 @@ export const useAiAssistantChat = () => {
     handleSubmit,
     status,
     setMessages,
+    stop: stopChat,
   } = useChat({
     api: '/api/v1/ai/conversation',
     maxSteps: 5,
@@ -61,6 +62,7 @@ export const useAiAssistantChat = () => {
     chatId.current = null;
 
     try {
+      stopChat();
       if (oldChatId) {
         await aiAssistantChatApi.delete(oldChatId);
 
@@ -78,7 +80,7 @@ export const useAiAssistantChat = () => {
         `There was an error deleting existing chat and creating a new one: ${error}`,
       );
     }
-  }, [queryClient, setMessages]);
+  }, [queryClient, setMessages, stopChat]);
 
   return {
     messages,

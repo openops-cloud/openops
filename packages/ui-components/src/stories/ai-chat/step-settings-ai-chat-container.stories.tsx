@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { action } from '@storybook/addon-actions';
-import { useArgs } from '@storybook/preview-api';
+import { useArgs, useRef } from '@storybook/preview-api';
 import type { Meta, StoryObj } from '@storybook/react';
 import { fn } from '@storybook/test';
 import {
@@ -45,6 +45,8 @@ const meta = {
     ),
   ],
   render: (args) => {
+    const lastUserMessageRef = useRef<HTMLDivElement | null>(null);
+    const lastAssistantMessageRef = useRef<HTMLDivElement | null>(null);
     const [
       { containerSize, showAiChat, setShowAiChat, toggleContainerSizeState },
       updateArgs,
@@ -71,6 +73,9 @@ const meta = {
           toggleContainerSizeState={onToggleContainerSizeState}
           showAiChat={showAiChat}
           className="static"
+          lastUserMessageRef={lastUserMessageRef}
+          lastAssistantMessageRef={lastAssistantMessageRef}
+          messages={sampleAIChatMessages}
         ></StepSettingsAiChatContainer>
       </>
     );
@@ -123,6 +128,8 @@ export const Populated: Story = {
     isEmpty: false,
   },
   render: (args) => {
+    const lastUserMessageRef = useRef<HTMLDivElement | null>(null);
+    const lastAssistantMessageRef = useRef<HTMLDivElement | null>(null);
     const [
       { containerSize, showAiChat, setShowAiChat, toggleContainerSizeState },
       updateArgs,
@@ -149,6 +156,9 @@ export const Populated: Story = {
           toggleContainerSizeState={onToggleContainerSizeState}
           showAiChat={showAiChat}
           className="static"
+          lastUserMessageRef={lastUserMessageRef}
+          lastAssistantMessageRef={lastAssistantMessageRef}
+          messages={sampleAIChatMessages}
         >
           <AIChatMessages
             messages={sampleAIChatMessages}

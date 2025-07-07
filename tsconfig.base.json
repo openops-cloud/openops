@@ -24,6 +24,7 @@
       "@openops/block-apitable": ["packages/blocks/apitable/src/index.ts"],
       "@openops/block-apollo": ["packages/blocks/apollo/src/index.ts"],
       "@openops/block-approval": ["packages/blocks/approval/src/index.ts"],
+      "@openops/block-archera": ["packages/blocks/archera/src/index.ts"],
       "@openops/block-asana": ["packages/blocks/asana/src/index.ts"],
       "@openops/block-assemblyai": ["packages/blocks/assemblyai/src/index.ts"],
       "@openops/block-aws": ["packages/blocks/aws/src/index.ts"],
@@ -58,9 +59,16 @@
       "@openops/block-clearout": ["packages/blocks/clearout/src/index.ts"],
       "@openops/block-clickup": ["packages/blocks/clickup/src/index.ts"],
       "@openops/block-clockodo": ["packages/blocks/clockodo/src/index.ts"],
+      "@openops/block-cloudability": [
+        "packages/blocks/cloudability/src/index.ts"
+      ],
       "@openops/block-cloudformation": [
         "packages/blocks/cloudformation/src/index.ts"
       ],
+      "@openops/block-cloudhealth": [
+        "packages/blocks/cloudhealth/src/index.ts"
+      ],
+      "@openops/block-cloudzero": ["packages/blocks/cloudzero/src/index.ts"],
       "@openops/block-connections": [
         "packages/blocks/connections/src/index.ts"
       ],

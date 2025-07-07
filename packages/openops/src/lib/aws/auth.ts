@@ -1,7 +1,12 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 import { BlockAuth, Property } from '@openops/blocks-framework';
+import { SharedSystemProp, system } from '@openops/server-shared';
 import { parseArn } from './arn-handler';
 import { assumeRole } from './sts-common';
+
+const isImplicitRoleEnabled = system.getBoolean(
+  SharedSystemProp.AWS_ENABLE_IMPLICIT_ROLE,
+);
 
 export interface AwsCredentials {
   accessKeyId: string;
@@ -165,18 +170,39 @@ export const amazonAuth = BlockAuth.CustomAuth({
   authProviderKey: 'AWS',
   authProviderDisplayName: 'AWS',
   authProviderLogoUrl: `https://static.openops.com/blocks/aws.png`,
+  description: `
+ **🧪 Sandbox or evaluation environment**
+ <br>You may use access key credentials by manually providing both the Access Key ID and Secret Access Key.
+
+
+ **🔐 Production environment**<br>
+Use the AWS IAM role assigned to the hosting environment:
+- Set the environment variable in your installation: **OPS_AWS_ENABLE_IMPLICIT_ROLE=true**. Refer to [OpenOps docs](https://docs.openops.com/cloud-access/access-levels-permissions#connecting-using-an-iam-role-attached-to-your-ec2-instance) for details.
+- Leave "Access Key ID" and "Secret Access Key" empty.
+
+
+ **🏆 Enterprise capabilities (Paid Offering, Ideal for enterprise-scale environments)**<br>
+For large or complex setups, enhanced features are available, including:
+- Automatic account discovery
+- Integration with secret management systems for credential handling
+<br>
+ [Explore our commercial offering](https://www.openops.com/pricing/)
+  `,
   props: {
-    accessKeyId: Property.SecretText({
-      displayName: 'Access Key ID',
-      required: true,
-    }),
-    secretAccessKey: Property.SecretText({
-      displayName: 'Secret Access Key',
-      required: true,
-    }),
     defaultRegion: Property.ShortText({
       displayName: 'Default Region',
       required: true,
+      defaultValue: 'us-east-1',
+    }),
+    accessKeyId: Property.SecretText({
+      displayName:
+        'Access Key ID' + (isImplicitRoleEnabled ? ' (optional)' : ''),
+      required: !isImplicitRoleEnabled,
+    }),
+    secretAccessKey: Property.SecretText({
+      displayName:
+        'Secret Access Key' + (isImplicitRoleEnabled ? ' (optional)' : ''),
+      required: !isImplicitRoleEnabled,
     }),
     endpoint: Property.ShortText({
       displayName: 'Custom Endpoint (optional)',
@@ -202,18 +228,22 @@ export const amazonAuth = BlockAuth.CustomAuth({
     }),
   },
   required: true,
-});
+  validate: async ({ auth }) => {
+    if (!auth.defaultRegion) {
+      return { valid: false, error: 'Default region is required' };
+    }
 
-export function isAwsAuth(obj: any): obj is AwsAuth {
-  return (
-    obj !== null &&
-    typeof obj === 'object' &&
-    Object.prototype.hasOwnProperty.call(obj, 'accessKeyId') &&
-    typeof obj.accessKeyId === 'string' &&
-    Object.prototype.hasOwnProperty.call(obj, 'secretAccessKey') &&
-    typeof obj.secretAccessKey === 'string'
-  );
-}
+    if (!auth.accessKeyId && !isImplicitRoleEnabled) {
+      return { valid: false, error: 'Access Key ID is required' };
+    }
+
+    if (!auth.secretAccessKey && !isImplicitRoleEnabled) {
+      return { valid: false, error: 'Secret Access Key is required' };
+    }
+
+    return { valid: true };
+  },
+});
 
 export function getRoleForAccount(
   auth: any,

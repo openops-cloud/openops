@@ -1,5 +1,6 @@
 import { AppSystemProp, distributedLock, system } from '@openops/server-shared';
 import {
+  AppConnectionsWithSupportedBlocks,
   ApplicationError,
   CreateEmptyFlowRequest,
   Cursor,
@@ -19,12 +20,13 @@ import {
   PopulatedFlow,
   ProjectId,
   SeekPage,
-  Trigger,
+  TriggerWithOptionalId,
   UNCATEGORIZED_FOLDER_ID,
   UserId,
 } from '@openops/shared';
 import { EntityManager, In, IsNull } from 'typeorm';
 import { appConnectionService } from '../../app-connection/app-connection-service/app-connection-service';
+import { resolveProvidersForBlocks } from '../../app-connection/connection-providers-resolver';
 import { transaction } from '../../core/db/transaction';
 import { buildPaginator } from '../../helper/pagination/build-paginator';
 import { paginationHelper } from '../../helper/pagination/pagination-utils';
@@ -75,12 +77,11 @@ export const flowService = {
       },
     });
 
-    const connectionsList = connectionIds.length
-      ? await appConnectionService.listActiveConnectionsByIds(
-          projectId,
-          connectionIds,
-        )
-      : [];
+    const connectionsList = await getConnections(
+      projectId,
+      trigger,
+      connectionIds,
+    );
 
     const updatedFlow = await update({
       id: newFlow.id,
@@ -624,6 +625,37 @@ const assertFlowIsNotNull: <T extends Flow>(
   }
 };
 
+const getConnections = async (
+  projectId: string,
+  trigger: TriggerWithOptionalId,
+  connectionIds: string[],
+): Promise<AppConnectionsWithSupportedBlocks[]> => {
+  if (!connectionIds.length) {
+    return [];
+  }
+
+  const connectionsList = await appConnectionService.listActiveConnectionsByIds(
+    projectId,
+    connectionIds,
+  );
+
+  const blockNames = flowHelper
+    .getAllSteps(trigger)
+    .map((b) => b.settings?.blockName)
+    .filter(Boolean);
+  const blockToProviderMap = await resolveProvidersForBlocks(
+    blockNames,
+    projectId,
+  );
+
+  return connectionsList.map((connection) => {
+    return {
+      ...connection,
+      supportedBlocks: blockToProviderMap[connection.authProviderKey],
+    };
+  });
+};
+
 type CreateParams = {
   userId: UserId;
   projectId: ProjectId;
@@ -636,7 +668,7 @@ type CreateFromTemplateParams = {
   userId: UserId;
   displayName: string;
   description: string | undefined;
-  trigger: Trigger;
+  trigger: TriggerWithOptionalId;
   connectionIds: string[];
   isSample: boolean;
 };

@@ -1,6 +1,7 @@
 import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { ToolSet } from 'ai';
 import { FastifyInstance } from 'fastify';
+import { getCostTools } from './cost-tools';
 import { getDocsTools } from './docs-tools';
 import { getOpenOpsTools } from './openops-tools';
 import { getSupersetTools } from './superset-tools';
@@ -14,6 +15,7 @@ export type MCPTool = {
 export const getMCPTools = async (
   app: FastifyInstance,
   authToken: string,
+  projectId: string,
 ): Promise<{
   mcpClients: unknown[];
   tools: ToolSet;
@@ -23,6 +25,16 @@ export const getMCPTools = async (
   const openopsTools = await safeGetTools('openops', () =>
     getOpenOpsTools(app, authToken),
   );
+
+  const { costExplorer, costAnalysis } = await getCostTools(projectId);
+  const costExplorerTools = {
+    client: costExplorer.client,
+    toolSet: costExplorer.toolSet,
+  };
+  const costAnalysisTools = {
+    client: costAnalysis.client,
+    toolSet: costAnalysis.toolSet,
+  };
 
   const loadExperimentalTools = system.getBoolean(
     AppSystemProp.LOAD_EXPERIMENTAL_MCP_TOOLS,
@@ -42,10 +54,19 @@ export const getMCPTools = async (
     ...docsTools.toolSet,
     ...tablesTools.toolSet,
     ...openopsTools.toolSet,
+    ...costExplorerTools.toolSet,
+    ...costAnalysisTools.toolSet,
   } as ToolSet;
 
   return {
-    mcpClients: [supersetTools.client, docsTools.client, tablesTools.client],
+    mcpClients: [
+      supersetTools.client,
+      docsTools.client,
+      tablesTools.client,
+      openopsTools.client,
+      costExplorerTools.client,
+      costAnalysisTools.client,
+    ],
     tools: toolSet,
   };
 };

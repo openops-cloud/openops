@@ -28,6 +28,9 @@ export type ApplicationErrorParams =
   | FlowIsLockedErrorParams
   | FlowOperationErrorParams
   | FlowRunNotFoundErrorParams
+  | InvalidUserEmailErrorParams
+  | InvalidUserPasswordErrorParams
+  | InvalidNameForUserErrorParams
   | InvalidApiKeyParams
   | InvalidAppConnectionParams
   | InvalidBearerTokenParams
@@ -62,7 +65,8 @@ export type ApplicationErrorParams =
   | ActivationKeyNotAlreadyActivated
   | EmailAlreadyHasActivationKey
   | FolderAlreadyExists
-  | TemplateNotFound;
+  | TemplateNotFound
+  | OpenAICompatibleProviderBaseURLRequired;
 
 export type BaseErrorParams<T, V> = {
   code: T;
@@ -82,7 +86,7 @@ export type InvalidClaimParams = BaseErrorParams<
 >;
 export type InvalidCloudClaimParams = BaseErrorParams<
   ErrorCode.INVALID_CLOUD_CLAIM,
-  { blockName: string }
+  { authProviderKey: string }
 >;
 
 export type InvalidBearerTokenParams = BaseErrorParams<
@@ -156,6 +160,28 @@ export type EmailIsNotVerifiedErrorParams = BaseErrorParams<
   ErrorCode.EMAIL_IS_NOT_VERIFIED,
   {
     email: string;
+  }
+>;
+
+export type InvalidUserEmailErrorParams = BaseErrorParams<
+  ErrorCode.INVALID_USER_EMAIL,
+  {
+    email: string;
+  }
+>;
+
+export type InvalidUserPasswordErrorParams = BaseErrorParams<
+  ErrorCode.INVALID_USER_PASSWORD,
+  {
+    message: string;
+  }
+>;
+
+export type InvalidNameForUserErrorParams = BaseErrorParams<
+  ErrorCode.INVALID_NAME_FOR_USER,
+  {
+    message: string;
+    name: string;
   }
 >;
 
@@ -399,6 +425,13 @@ export type TemplateNotFound = BaseErrorParams<
   }
 >;
 
+export type OpenAICompatibleProviderBaseURLRequired = BaseErrorParams<
+  ErrorCode.OPENAI_COMPATIBLE_PROVIDER_BASE_URL_REQUIRED,
+  {
+    message: string;
+  }
+>;
+
 export enum ErrorCode {
   AUTHENTICATION = 'AUTHENTICATION',
   AUTHORIZATION = 'AUTHORIZATION',
@@ -419,6 +452,9 @@ export enum ErrorCode {
   FLOW_IN_USE = 'FLOW_IN_USE',
   FLOW_RUN_NOT_FOUND = 'FLOW_RUN_NOT_FOUND',
   INVALID_API_KEY = 'INVALID_API_KEY',
+  INVALID_USER_EMAIL = 'INVALID_USER_EMAIL',
+  INVALID_USER_PASSWORD = 'INVALID_USER_PASSWORD',
+  INVALID_NAME_FOR_USER = 'INVALID_NAME_FOR_USER',
   INVALID_APP_CONNECTION = 'INVALID_APP_CONNECTION',
   INVALID_BEARER_TOKEN = 'INVALID_BEARER_TOKEN',
   INVALID_CLAIM = 'INVALID_CLAIM',
@@ -450,4 +486,5 @@ export enum ErrorCode {
   EMAIL_ALREADY_HAS_ACTIVATION_KEY = 'EMAIL_ALREADY_HAS_ACTIVATION_KEY',
   FOLDER_ALREADY_EXISTS = 'FOLDER_ALREADY_EXISTS',
   TEMPLATE_NOT_FOUND = 'TEMPLATE_NOT_FOUND',
+  OPENAI_COMPATIBLE_PROVIDER_BASE_URL_REQUIRED = 'OPENAI_COMPATIBLE_PROVIDER_BASE_URL_REQUIRED',
 }

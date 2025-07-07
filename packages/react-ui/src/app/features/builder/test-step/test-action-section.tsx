@@ -4,8 +4,7 @@ import {
   INTERNAL_ERROR_TOAST,
   useToast,
 } from '@openops/components/ui';
-import { useMutation } from '@tanstack/react-query';
-import dayjs from 'dayjs';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { t } from 'i18next';
 import React, { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
@@ -22,14 +21,15 @@ import { formatUtils } from '@/app/lib/utils';
 import {
   Action,
   ActionType,
-  FlagId,
   isNil,
   RiskLevel,
   StepRunResponse,
 } from '@openops/shared';
 
-import { flagsHooks } from '@/app/common/hooks/flags-hooks';
-import { stepTestOutputCache } from '../data-selector/data-selector-cache';
+import {
+  setStepOutputCache,
+  stepTestOutputCache,
+} from '../data-selector/data-selector-cache';
 import { stepTestOutputHooks } from './step-test-output-hooks';
 import { TestSampleDataViewer } from './test-sample-data-viewer';
 import { TestButtonTooltip } from './test-step-tooltip';
@@ -48,6 +48,7 @@ const TestActionSection = React.memo(
     );
     const form = useFormContext<Action>();
     const formValues = form.getValues();
+    const queryClient = useQueryClient();
 
     const [isValid, setIsValid] = useState(false);
 
@@ -61,18 +62,11 @@ const TestActionSection = React.memo(
       setIsValid(form.formState.isValid);
     }, [form.formState.isValid]);
 
-    const {
-      data: testOutputData,
-      isLoading: isLoadingTestOutput,
-      refetch: refetchTestOutput,
-    } = stepTestOutputHooks.useStepTestOutputFormData(flowVersionId, form);
+    const { data: stepData, isLoading: isLoadingStepData } =
+      stepTestOutputHooks.useStepTestOutputFormData(flowVersionId, form);
 
     const sampleDataExists =
-      !isNil(testOutputData?.lastTestDate) || !isNil(errorMessage);
-
-    const { data: useNewExternalTestData = false } = flagsHooks.useFlag(
-      FlagId.USE_NEW_EXTERNAL_TESTDATA,
-    );
+      !isNil(stepData?.lastTestDate) || !isNil(errorMessage);
 
     const socket = useSocket();
 
@@ -90,25 +84,13 @@ const TestActionSection = React.memo(
         );
         if (stepResponse.success) {
           setErrorMessage(undefined);
-
-          if (useNewExternalTestData) {
-            stepTestOutputCache.setStepData(formValues.id!, {
-              output: formattedResponse,
-              lastTestDate: dayjs().toISOString(),
-            });
-          } else {
-            form.setValue(
-              'settings.inputUiInfo.currentSelectedData',
-              formattedResponse,
-              { shouldValidate: true },
-            );
-            form.setValue(
-              'settings.inputUiInfo.lastTestDate',
-              dayjs().toISOString(),
-              { shouldValidate: true },
-            );
-          }
-          refetchTestOutput();
+          setStepOutputCache({
+            stepId: formValues.id,
+            flowVersionId,
+            output: stepResponse.output,
+            input: stepResponse.input,
+            queryClient,
+          });
         } else {
           setErrorMessage(testStepUtils.formatErrorMessage(formattedResponse));
         }
@@ -119,12 +101,11 @@ const TestActionSection = React.memo(
       },
     });
 
-    const isTesting = isPending || isLoadingTestOutput;
+    const isTesting = isPending ?? isLoadingStepData;
 
     const handleTest = () => {
-      if (useNewExternalTestData) {
-        stepTestOutputCache.resetExpandedForStep(formValues.id!);
-      }
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      stepTestOutputCache.resetExpandedForStep(formValues.id);
       if (
         selectedStep.type === ActionType.BLOCK &&
         selectedStepTemplateModel?.riskLevel === RiskLevel.HIGH
@@ -139,9 +120,7 @@ const TestActionSection = React.memo(
 
     const confirmRiskyStep = () => {
       setRiskyStepConfirmationMessage(null);
-      if (useNewExternalTestData) {
-        stepTestOutputCache.resetExpandedForStep(formValues.id!);
-      }
+      stepTestOutputCache.resetExpandedForStep(formValues.id);
       mutate();
     };
 
@@ -157,7 +136,7 @@ const TestActionSection = React.memo(
 
     if (!sampleDataExists) {
       return (
-        <div className="flex-grow flex justify-center items-center w-full h-full">
+        <div className="flex justify-center items-start w-full h-full">
           <TestButtonTooltip disabled={!isValid} aria-label="Test Step Button">
             <Button
               variant="outline"
@@ -182,10 +161,10 @@ const TestActionSection = React.memo(
         isValid={isValid}
         isSaving={isSaving}
         isTesting={isTesting}
-        currentSelectedData={testOutputData?.output}
+        outputData={stepData?.output}
+        inputData={stepData?.input}
         errorMessage={errorMessage}
-        lastTestDate={testOutputData?.lastTestDate}
-        type={formValues.type}
+        lastTestDate={stepData?.lastTestDate}
       />
     );
   },

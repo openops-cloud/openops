@@ -1,4 +1,4 @@
-import { JsonViewer, ScrollArea } from '@openops/components/ui';
+import { TestStepDataViewer } from '@openops/components/ui';
 import { t } from 'i18next';
 import { Timer } from 'lucide-react';
 import React from 'react';
@@ -29,42 +29,33 @@ const FlowStepInputOutput = React.memo(
       : undefined;
 
     const { theme } = useTheme();
+    if (!stepDetails) {
+      return null;
+    }
     return (
-      <ScrollArea className="h-full p-4 ">
-        {stepDetails && (
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2 justify-start mb-4">
-              <StepStatusIcon
-                status={stepDetails.status}
-                size="5"
-              ></StepStatusIcon>
-              <div>{selectedStep?.displayName}</div>
-            </div>
-            <div className="flex items-center gap-1 justify-start">
-              {durationEnabled && (
-                <>
-                  {' '}
-                  <Timer className="w-5 h-5" />{' '}
-                  <span>
-                    {t('Duration')}:{' '}
-                    {formatUtils.formatDuration(
-                      stepDetails.duration ?? 0,
-                      false,
-                    )}
-                  </span>
-                </>
-              )}
-            </div>
-            <JsonViewer
-              title={t('Input')}
-              json={stepDetails.input}
-              theme={theme}
-            />
-            <div className="mt-4"></div>
-            <JsonViewer title={t('Output')} json={stepOutput} theme={theme} />
-          </div>
-        )}
-      </ScrollArea>
+      <div className="h-full flex flex-col gap-2 p-4">
+        <div className="flex items-center gap-2 justify-start mb-4">
+          <StepStatusIcon status={stepDetails.status} size="5"></StepStatusIcon>
+          <div>{selectedStep?.displayName}</div>
+        </div>
+        <div className="flex items-center gap-1 justify-start">
+          {durationEnabled && (
+            <>
+              {' '}
+              <Timer className="w-5 h-5" />{' '}
+              <span>
+                {t('Duration')}:{' '}
+                {formatUtils.formatDuration(stepDetails.duration ?? 0, false)}
+              </span>
+            </>
+          )}
+        </div>
+        <TestStepDataViewer
+          inputJson={stepDetails.input}
+          outputJson={stepOutput}
+          theme={theme}
+        />
+      </div>
     );
   },
 );

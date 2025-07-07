@@ -7,7 +7,7 @@ const tokenLifetimeMinutes = system.getNumber(
 );
 
 const tokenLifetimeSeconds = tokenLifetimeMinutes
-  ? tokenLifetimeMinutes * 60 - 60 // Subtract 60 seconds to ensure the cache expired before the token
+  ? (tokenLifetimeMinutes - 10) * 60 // Subtract 10 minutes to ensure the cache expired before the token
   : undefined;
 
 export interface AuthTokens {

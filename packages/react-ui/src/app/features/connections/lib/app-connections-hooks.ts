@@ -8,10 +8,16 @@ import {
 } from '@openops/shared';
 import { appConnectionsApi } from './app-connections-api';
 
+/**
+ * Maximum number of connections to fetch when we want to get all connections.
+ * This value is high enough to ensure we get all connections in practice.
+ */
+export const FETCH_ALL_CONNECTIONS_LIMIT = 100;
+
 export const appConnectionsHooks = {
   useConnections: (request: ListAppConnectionsRequestQuery) => {
     return useQuery({
-      queryKey: [QueryKeys.appConnections, request?.blockNames],
+      queryKey: [QueryKeys.appConnections, request?.authProviders],
       queryFn: () => {
         return appConnectionsApi.list(request);
       },
@@ -30,17 +36,12 @@ export const appConnectionsHooks = {
       staleTime: 0,
     });
   },
-  useGroupedConnections: (
-    request: ListAppConnectionsRequestQuery,
-    useConnectionsProvider: boolean,
-  ) => {
+  useGroupedConnections: (request: ListAppConnectionsRequestQuery) => {
     return useQuery({
-      queryKey: [QueryKeys.appConnections, request?.blockNames],
+      queryKey: [QueryKeys.appConnections, request?.authProviders],
       queryFn: () => appConnectionsApi.list(request),
       staleTime: 0,
-      select: useConnectionsProvider
-        ? groupedConnectionsSelector
-        : legacyGroupedConnectionsSelector,
+      select: groupedConnectionsSelector,
     });
   },
   useConnectionsMetadata: () => {
@@ -52,27 +53,10 @@ export const appConnectionsHooks = {
   },
 };
 
-/**
- * @deprecated
- */
-const legacyGroupedConnectionsSelector = (
-  connectionsPage: SeekPage<AppConnectionWithoutSensitiveData>,
-): Record<string, AppConnectionWithoutSensitiveData[]> => {
-  return connectionsPage.data.reduce<
-    Record<string, AppConnectionWithoutSensitiveData[]>
-  >((acc, connection) => {
-    if (!acc[connection.blockName]) {
-      acc[connection.blockName] = [];
-    }
-    acc[connection.blockName].push(connection);
-    return acc;
-  }, {});
-};
-
 export const groupedConnectionsSelector = (
   connectionsPage: SeekPage<AppConnectionWithoutSensitiveData>,
 ): Record<string, AppConnectionWithoutSensitiveData[]> => {
-  const connectionsByProvider = connectionsPage.data.reduce<
+  return connectionsPage.data.reduce<
     Record<string, AppConnectionWithoutSensitiveData[]>
   >((acc, connection) => {
     if (connection.authProviderKey && !acc[connection.authProviderKey]) {
@@ -82,24 +66,4 @@ export const groupedConnectionsSelector = (
     acc[connection.authProviderKey!].push(connection);
     return acc;
   }, {});
-
-  const connectionsByBlock = connectionsPage.data.reduce<
-    Record<string, AppConnectionWithoutSensitiveData[]>
-  >((acc, connection) => {
-    if (!acc[connection.blockName]) {
-      acc[connection.blockName] = [];
-    }
-
-    if (acc[connection.blockName].length > 0) {
-      return acc;
-    }
-
-    acc[connection.blockName].push(
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      ...(connectionsByProvider[connection.authProviderKey!] ?? []),
-    );
-    return acc;
-  }, {});
-
-  return connectionsByBlock;
 };

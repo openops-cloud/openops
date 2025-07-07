@@ -11,6 +11,10 @@ import {
   mockFlowVersionWithSplit,
 } from './mockFlowVersion';
 
+jest.mock('i18next', () => ({
+  t: (key: string) => key,
+}));
+
 export const checkNonSelectableNodes = (nodes: WorkflowNode[]) => {
   nodes
     .filter((node) => {
@@ -18,6 +22,7 @@ export const checkNonSelectableNodes = (nodes: WorkflowNode[]) => {
         node.type === WorkflowNodeType.PLACEHOLDER ||
         node.type === WorkflowNodeType.LOOP_PLACEHOLDER ||
         node.type === WorkflowNodeType.BIG_BUTTON ||
+        node.type === WorkflowNodeType.BRANCH_LABEL ||
         node.data.step?.type === TriggerType.EMPTY ||
         node.data.step?.type === TriggerType.BLOCK
       );
@@ -90,10 +95,18 @@ describe('flowCanvasUtils', () => {
             stepLocationRelativeToParent: 'INSIDE_TRUE_BRANCH',
           },
           {
+            isDefaultBranch: false,
+            label: 'True',
+          },
+          {
             parentStep: 'step_1',
             stepLocationRelativeToParent: 'INSIDE_FALSE_BRANCH',
           },
-          { step: undefined },
+          {
+            isDefaultBranch: false,
+            label: 'False',
+          },
+          {},
         ];
 
         expect(result.nodes.map((x) => x.data)).toEqual(expectedResultNodes);
@@ -475,14 +488,22 @@ describe('flowCanvasUtils', () => {
             },
           },
           {
+            branchNodeId: 'l1oGme34T2HzW-DdOPC6C',
             parentStep: 'step_1',
             stepLocationRelativeToParent: 'INSIDE_SPLIT',
-            branchNodeId: 'l1oGme34T2HzW-DdOPC6C',
           },
           {
+            isDefaultBranch: false,
+            label: 'Branch 1',
+          },
+          {
+            branchNodeId: 'PYE3ImwaEw4i8dbRZCJQv',
             parentStep: 'step_1',
             stepLocationRelativeToParent: 'INSIDE_SPLIT',
-            branchNodeId: 'PYE3ImwaEw4i8dbRZCJQv',
+          },
+          {
+            isDefaultBranch: false,
+            label: 'Branch 2',
           },
           {},
         ];

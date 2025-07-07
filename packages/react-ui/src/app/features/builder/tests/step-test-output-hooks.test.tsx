@@ -1,9 +1,12 @@
-import { FlowOperationType, flowHelper } from '@openops/shared';
+import { flowHelper } from '@openops/shared';
 import { act, renderHook } from '@testing-library/react';
-import { stepTestOutputHooks } from '../test-step/step-test-output-hooks';
-
+import { flagsHooks } from '../../../common/hooks/flags-hooks';
 import { useBuilderStateContext } from '../builder-hooks';
 import { useStepSettingsContext } from '../step-settings/step-settings-context';
+import {
+  stepTestOutputHooks,
+  validateSampleDataSize,
+} from '../test-step/step-test-output-hooks';
 
 jest.mock('../step-settings/step-settings-context', () => ({
   useStepSettingsContext: jest.fn(),
@@ -13,11 +16,24 @@ jest.mock('../builder-hooks', () => ({
   useBuilderStateContext: jest.fn(),
 }));
 
+jest.mock('../../../common/hooks/flags-hooks', () => ({
+  flagsHooks: {
+    useFlag: jest.fn(),
+  },
+}));
+
 jest.mock('@openops/shared', () => ({
   ...jest.requireActual('@openops/shared'),
   flowHelper: {
     isTrigger: jest.fn(),
   },
+}));
+
+jest.mock('i18next', () => ({
+  t: jest.fn(
+    (_, options) =>
+      `Sample data is too large. The maximum allowed size is ${options?.maxKb} KB.`,
+  ),
 }));
 
 const mockUseStepSettingsContext =
@@ -38,6 +54,11 @@ const mockStep = {
   valid: true,
 };
 
+const mockSetValue = jest.fn();
+const mockForm = {
+  setValue: mockSetValue,
+} as any;
+
 describe('stepTestOutputHooks.useSaveSelectedStepSampleData', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -48,13 +69,14 @@ describe('stepTestOutputHooks.useSaveSelectedStepSampleData', () => {
       selectedStepTemplateModel: null,
       blockModel: null,
     } as any);
+    (flagsHooks.useFlag as jest.Mock).mockReturnValue({ data: 5 });
   });
 
   it('should return a function that can be called with sample data', () => {
     mockFlowHelper.isTrigger.mockReturnValue(false);
 
     const { result } = renderHook(() =>
-      stepTestOutputHooks.useSaveSelectedStepSampleData(),
+      stepTestOutputHooks.useSaveSelectedStepSampleData(mockForm),
     );
 
     expect(typeof result.current).toBe('function');
@@ -65,23 +87,17 @@ describe('stepTestOutputHooks.useSaveSelectedStepSampleData', () => {
     mockFlowHelper.isTrigger.mockReturnValue(false);
 
     const { result } = renderHook(() =>
-      stepTestOutputHooks.useSaveSelectedStepSampleData(),
+      stepTestOutputHooks.useSaveSelectedStepSampleData(mockForm),
     );
 
     act(() => {
       result.current(testSampleData);
     });
 
-    expect(mockFlowHelper.isTrigger).toHaveBeenCalledWith(mockStep.type);
-    expect(mockApplyOperation).toHaveBeenCalledWith(
-      {
-        type: FlowOperationType.UPDATE_ACTION,
-        request: expect.objectContaining({
-          id: 'step-123',
-          name: 'test-step',
-        }),
-      },
-      expect.any(Function),
+    expect(mockSetValue).toHaveBeenCalledWith(
+      'settings.inputUiInfo.sampleData',
+      testSampleData,
+      { shouldValidate: true },
     );
   });
 
@@ -90,23 +106,17 @@ describe('stepTestOutputHooks.useSaveSelectedStepSampleData', () => {
     mockFlowHelper.isTrigger.mockReturnValue(true);
 
     const { result } = renderHook(() =>
-      stepTestOutputHooks.useSaveSelectedStepSampleData(),
+      stepTestOutputHooks.useSaveSelectedStepSampleData(mockForm),
     );
 
     act(() => {
       result.current(testSampleData);
     });
 
-    expect(mockFlowHelper.isTrigger).toHaveBeenCalledWith(mockStep.type);
-    expect(mockApplyOperation).toHaveBeenCalledWith(
-      {
-        type: FlowOperationType.UPDATE_TRIGGER,
-        request: expect.objectContaining({
-          id: 'step-123',
-          name: 'test-step',
-        }),
-      },
-      expect.any(Function),
+    expect(mockSetValue).toHaveBeenCalledWith(
+      'settings.inputUiInfo.sampleData',
+      testSampleData,
+      { shouldValidate: true },
     );
   });
 
@@ -115,18 +125,17 @@ describe('stepTestOutputHooks.useSaveSelectedStepSampleData', () => {
     mockFlowHelper.isTrigger.mockReturnValue(false);
 
     const { result } = renderHook(() =>
-      stepTestOutputHooks.useSaveSelectedStepSampleData(),
+      stepTestOutputHooks.useSaveSelectedStepSampleData(mockForm),
     );
 
     act(() => {
       result.current(testSampleData);
     });
 
-    const applyOperationCall = mockApplyOperation.mock.calls[0];
-    const operationRequest = applyOperationCall[0];
-
-    expect(operationRequest.request.settings.inputUiInfo.sampleData).toEqual(
+    expect(mockSetValue).toHaveBeenCalledWith(
+      'settings.inputUiInfo.sampleData',
       testSampleData,
+      { shouldValidate: true },
     );
   });
 
@@ -134,27 +143,88 @@ describe('stepTestOutputHooks.useSaveSelectedStepSampleData', () => {
     mockFlowHelper.isTrigger.mockReturnValue(false);
 
     const { result } = renderHook(() =>
-      stepTestOutputHooks.useSaveSelectedStepSampleData(),
+      stepTestOutputHooks.useSaveSelectedStepSampleData(mockForm),
     );
 
     act(() => {
       result.current(null);
     });
 
-    const applyOperationCall = mockApplyOperation.mock.calls[0];
-    const operationRequest = applyOperationCall[0];
-
-    expect(operationRequest.request.settings.inputUiInfo.sampleData).toBeNull();
+    expect(mockSetValue).toHaveBeenCalledWith(
+      'settings.inputUiInfo.sampleData',
+      null,
+      { shouldValidate: true },
+    );
 
     act(() => {
       result.current(undefined);
     });
 
-    const secondCall = mockApplyOperation.mock.calls[1];
-    const secondRequest = secondCall[0];
+    expect(mockSetValue).toHaveBeenCalledWith(
+      'settings.inputUiInfo.sampleData',
+      undefined,
+      { shouldValidate: true },
+    );
+  });
+});
 
-    expect(
-      secondRequest.request.settings.inputUiInfo.sampleData,
-    ).toBeUndefined();
+describe('validateSampleDataSize', () => {
+  const sizeLimitKb = 5;
+  const expectedErrorMessage =
+    'Sample data is too large. The maximum allowed size is 5 KB.';
+
+  it.each([
+    {
+      name: 'should validate small object',
+      sampleData: { key: 'value' },
+      expected: { isValid: true },
+    },
+    {
+      name: 'should validate valid json string',
+      sampleData: JSON.stringify({ key: 'value' }),
+      expected: { isValid: true },
+    },
+    {
+      name: 'should reject large string',
+      sampleData: 'x'.repeat(5 * 1024) + 'y',
+      expected: {
+        isValid: false,
+        errorMessage: expectedErrorMessage,
+      },
+    },
+    {
+      name: 'should reject large json object',
+      sampleData: JSON.stringify(
+        Object.fromEntries(
+          Array.from({ length: 1000 }, (_, i) => [`key${i}`, `value${i}`]),
+        ),
+      ),
+      expected: {
+        isValid: false,
+        errorMessage: expectedErrorMessage,
+      },
+    },
+    {
+      name: 'should handle null input',
+      sampleData: null,
+      expected: { isValid: true },
+    },
+    {
+      name: 'should handle undefined input',
+      sampleData: undefined,
+      expected: { isValid: true },
+    },
+    {
+      name: 'should handle empty string',
+      sampleData: '',
+      expected: { isValid: true },
+    },
+  ])('$name', ({ sampleData, expected }) => {
+    const result = validateSampleDataSize(sampleData, sizeLimitKb);
+
+    expect(result.isValid).toBe(expected.isValid);
+    if (expected.errorMessage) {
+      expect(result.errorMessage).toBe(expected.errorMessage);
+    }
   });
 });

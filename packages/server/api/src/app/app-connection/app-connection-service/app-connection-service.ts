@@ -1,4 +1,4 @@
-import { BlockMetadataModel } from '@openops/blocks-framework';
+import { BlockAuthProperty } from '@openops/blocks-framework';
 import {
   distributedLock,
   encryptUtils,
@@ -82,9 +82,17 @@ export const appConnectionService = {
     });
 
     if (existingConnection) {
-      sendConnectionUpdatedEvent(params.userId, projectId, request.blockName);
+      sendConnectionUpdatedEvent(
+        params.userId,
+        projectId,
+        request.authProviderKey,
+      );
     } else {
-      sendConnectionCreatedEvent(params.userId, projectId, request.blockName);
+      sendConnectionCreatedEvent(
+        params.userId,
+        projectId,
+        request.authProviderKey,
+      );
     }
 
     return decryptConnection(updatedConnection);
@@ -113,7 +121,7 @@ export const appConnectionService = {
     const restoredConnectionValue = restoreRedactedSecrets(
       request.value,
       decryptedExisting.value,
-      params.block.auth,
+      params.authProperty,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ) as any;
 
@@ -138,7 +146,11 @@ export const appConnectionService = {
       projectId,
     });
 
-    sendConnectionUpdatedEvent(params.userId, projectId, request.blockName);
+    sendConnectionUpdatedEvent(
+      params.userId,
+      projectId,
+      request.authProviderKey,
+    );
 
     return {
       ...existingConnection,
@@ -207,7 +219,6 @@ export const appConnectionService = {
 
   async list({
     projectId,
-    blockNames,
     cursorRequest,
     name,
     status,
@@ -230,9 +241,6 @@ export const appConnectionService = {
     const querySelector: Record<string, string | FindOperator<string>> = {
       projectId,
     };
-    if (!isNil(blockNames) && blockNames.length > 0) {
-      querySelector.blockName = In(blockNames);
-    }
     if (!isNil(name)) {
       querySelector.name = ILike(`%${name}%`);
     }
@@ -279,7 +287,6 @@ export const appConnectionService = {
         limit: 1000,
         projectId,
         connectionsIds,
-        blockNames: undefined,
         cursorRequest: null,
         name: undefined,
         status: [AppConnectionStatus.ACTIVE],
@@ -302,12 +309,12 @@ const validateConnectionValue = async (
     case AppConnectionType.PLATFORM_OAUTH2: {
       const tokenUrl = await oauth2Util.getOAuth2TokenUrl({
         projectId,
-        blockName: connection.blockName,
+        authProviderKey: connection.authProviderKey,
         props: connection.value.props,
       });
       return oauth2Handler[connection.value.type].claim({
         projectId,
-        blockName: connection.blockName,
+        authProviderKey: connection.authProviderKey,
         request: {
           grantType: OAuth2GrantType.AUTHORIZATION_CODE,
           code: connection.value.code,
@@ -323,12 +330,12 @@ const validateConnectionValue = async (
     case AppConnectionType.CLOUD_OAUTH2: {
       const tokenUrl = await oauth2Util.getOAuth2TokenUrl({
         projectId,
-        blockName: connection.blockName,
+        authProviderKey: connection.authProviderKey,
         props: connection.value.props,
       });
       const auth = await oauth2Handler[connection.value.type].claim({
         projectId,
-        blockName: connection.blockName,
+        authProviderKey: connection.authProviderKey,
         request: {
           tokenUrl,
           grantType: OAuth2GrantType.AUTHORIZATION_CODE,
@@ -340,7 +347,7 @@ const validateConnectionValue = async (
         },
       });
       await engineValidateAuth({
-        blockName: connection.blockName,
+        authProviderKey: connection.authProviderKey,
         projectId,
         auth,
       });
@@ -349,12 +356,12 @@ const validateConnectionValue = async (
     case AppConnectionType.OAUTH2: {
       const tokenUrl = await oauth2Util.getOAuth2TokenUrl({
         projectId,
-        blockName: connection.blockName,
+        authProviderKey: connection.authProviderKey,
         props: connection.value.props,
       });
       return oauth2Handler[connection.value.type].claim({
         projectId,
-        blockName: connection.blockName,
+        authProviderKey: connection.authProviderKey,
         request: {
           tokenUrl,
           code: connection.value.code,
@@ -372,7 +379,7 @@ const validateConnectionValue = async (
     case AppConnectionType.BASIC_AUTH:
     case AppConnectionType.SECRET_TEXT:
       await engineValidateAuth({
-        blockName: connection.blockName,
+        authProviderKey: connection.authProviderKey,
         projectId,
         auth: connection.value,
       });
@@ -464,21 +471,21 @@ async function refresh(connection: AppConnection): Promise<AppConnection> {
   switch (connection.value.type) {
     case AppConnectionType.PLATFORM_OAUTH2:
       connection.value = await oauth2Handler[connection.value.type].refresh({
-        blockName: connection.blockName,
+        authProviderKey: connection.authProviderKey,
         projectId: connection.projectId,
         connectionValue: connection.value,
       });
       break;
     case AppConnectionType.CLOUD_OAUTH2:
       connection.value = await oauth2Handler[connection.value.type].refresh({
-        blockName: connection.blockName,
+        authProviderKey: connection.authProviderKey,
         projectId: connection.projectId,
         connectionValue: connection.value,
       });
       break;
     case AppConnectionType.OAUTH2:
       connection.value = await oauth2Handler[connection.value.type].refresh({
-        blockName: connection.blockName,
+        authProviderKey: connection.authProviderKey,
         projectId: connection.projectId,
         connectionValue: connection.value,
       });
@@ -499,7 +506,7 @@ type PatchParams = {
   userId: UserId;
   projectId: ProjectId;
   request: PatchAppConnectionRequestBody;
-  block: BlockMetadataModel;
+  authProperty: BlockAuthProperty | undefined;
 };
 
 type GetOneByName = {
@@ -519,7 +526,6 @@ type DeleteParams = {
 
 type ListParams = {
   projectId: ProjectId;
-  blockNames: string[] | undefined;
   connectionsIds?: string[];
   cursorRequest: Cursor | null;
   name: string | undefined;

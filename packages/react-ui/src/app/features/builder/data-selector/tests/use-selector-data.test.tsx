@@ -37,7 +37,6 @@ function setupHook(options = {}) {
       useSelectorData({
         stepIds: merged.stepIds,
         flowVersionId: merged.flowVersionId,
-        useNewExternalTestData: merged.useNewExternalTestData,
         isDataSelectorVisible: merged.isDataSelectorVisible,
         initialLoad: merged.initialLoad,
         setInitialLoad: merged.setInitialLoad,
@@ -112,23 +111,6 @@ describe('useSelectorData', () => {
     expect(stepTestOutputCache.getStepData('b')).toEqual(stepBData);
     expect(stepTestOutputCache.getStepData('c')).toEqual(testData.c);
     expect(forceRerender).toHaveBeenCalledTimes(1);
-  });
-
-  it('does not fetch if useNewExternalTestData is false', async () => {
-    const stepIds = ['a'];
-    const flowVersionId = 'fv3';
-    (flowsApi.getStepTestOutputBulk as jest.Mock).mockClear();
-
-    const initialLoad = true;
-    const { result } = setupHook({
-      stepIds,
-      flowVersionId,
-      useNewExternalTestData: false,
-      initialLoad,
-    });
-    await waitFor(() => !result.current.isLoading);
-    expect(flowsApi.getStepTestOutputBulk).not.toHaveBeenCalled();
-    expect(forceRerender).not.toHaveBeenCalled();
   });
 
   it('does not fetch if stepIds is empty', async () => {

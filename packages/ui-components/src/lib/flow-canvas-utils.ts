@@ -8,6 +8,7 @@ import {
   Trigger,
   TriggerType,
 } from '@openops/shared';
+import { t } from 'i18next';
 import { nanoid } from 'nanoid';
 
 const VERTICAL_OFFSET = 160;
@@ -20,6 +21,10 @@ const VERTICAL_OFFSET_CORRECTION = 50;
 export const LINE_WIDTH = 1;
 export const NODE_WIDTH = 260;
 export const DRAGGED_STEP_TAG = 'dragged-step';
+export const BRANCH_LABEL_WIDTH = 118;
+export const BRANCH_LABEL_HEIGHT = 30;
+const BUTTON_VERTICAL_OFFSET = 10;
+const BUTTON_VERTICAL_OFFSET_INSIDE_CONDITION_OR_SPLIT = 20;
 
 export enum WorkflowNodeType {
   LOOP_PLACEHOLDER = 'loopPlaceholder',
@@ -27,6 +32,7 @@ export enum WorkflowNodeType {
   BIG_BUTTON = 'bigButton',
   STEP_NODE = 'stepNode',
   SMALL_BUTTON = 'smallButton',
+  BRANCH_LABEL = 'branchLabel',
 }
 
 export const OPS_NODE_SIZE: Record<
@@ -52,6 +58,10 @@ export const OPS_NODE_SIZE: Record<
   [WorkflowNodeType.SMALL_BUTTON]: {
     height: SMALL_BUTTON_SIZE,
     width: SMALL_BUTTON_SIZE,
+  },
+  [WorkflowNodeType.BRANCH_LABEL]: {
+    height: BRANCH_LABEL_HEIGHT,
+    width: BRANCH_LABEL_WIDTH,
   },
 };
 
@@ -276,11 +286,96 @@ function buildChildrenGraph(
       graph.edges[graph.edges.length - 1].data.addButton = false;
     }
 
+    // Inject branchLabel node for split/branch edges
+    if (
+      isInsideLocations(
+        [
+          StepLocationRelativeToParent.INSIDE_SPLIT,
+          StepLocationRelativeToParent.INSIDE_TRUE_BRANCH,
+          StepLocationRelativeToParent.INSIDE_FALSE_BRANCH,
+        ],
+        locations[idx],
+      )
+    ) {
+      addBranchLabel(graph, childGraphAfterOffset, locations, idx);
+    }
+
     deltaLeftX += cbx.width + HORIZONTAL_SPACE_BETWEEN_NODES;
   });
   graph = mergeGraph(graph, commonPartGraph);
   return graph;
 }
+
+const addBranchLabel = (
+  graph: Graph,
+  childGraphAfterOffset: Graph,
+  locations: StepLocationRelativeToParent[],
+  idx: number,
+) => {
+  const parentNode = graph.nodes[0];
+  const childNode = childGraphAfterOffset.nodes[0];
+
+  const targetX =
+    childNode.position.x + OPS_NODE_SIZE[childNode.type].width / 2;
+  const targetY = childNode.position.y;
+  const targetType = childNode.type;
+  const targetYWithPlaceHolder =
+    targetY +
+    (flowCanvasUtils.isPlaceHolder(targetType)
+      ? OPS_NODE_SIZE[targetType].height + 10
+      : 0);
+
+  const labelVerticalOffset = 110;
+  const labelX = targetX - BRANCH_LABEL_WIDTH / 2;
+  const labelY =
+    targetYWithPlaceHolder - labelVerticalOffset / 2 - BRANCH_LABEL_HEIGHT / 2;
+
+  graph.nodes.push(
+    createBranchLabel(parentNode, childNode, locations, idx, labelX, labelY),
+  );
+};
+
+const getLabelText = (
+  location: StepLocationRelativeToParent,
+  parentNode: WorkflowNode,
+  childNode: WorkflowNode,
+) => {
+  if (location === StepLocationRelativeToParent.INSIDE_TRUE_BRANCH) {
+    return t('True');
+  }
+  if (location === StepLocationRelativeToParent.INSIDE_FALSE_BRANCH) {
+    return t('False');
+  }
+  return parentNode?.data?.step?.settings?.options?.find(
+    (o: { id: string }) => o.id === childNode?.data?.branchNodeId,
+  )?.name;
+};
+
+const createBranchLabel = (
+  parentNode: WorkflowNode,
+  childNode: WorkflowNode,
+  locations: StepLocationRelativeToParent[],
+  idx: number,
+  xPosition: number,
+  yPosition: number,
+) => {
+  const isDefaultBranch =
+    locations[idx] === StepLocationRelativeToParent.INSIDE_SPLIT &&
+    parentNode?.data?.step?.settings.defaultBranch ===
+      childNode?.data?.branchNodeId;
+
+  return {
+    id: `${parentNode.id}-branch-label-${idx}`,
+    position: { x: xPosition, y: yPosition },
+    type: WorkflowNodeType.BRANCH_LABEL,
+    data: {
+      label: getLabelText(locations[idx], parentNode, childNode),
+      isDefaultBranch,
+    },
+    selectable: false,
+    draggable: false,
+  };
+};
 
 // hide add button in middle branch when having uneven number of branches in a split
 const shouldHideAddButton = (
@@ -449,6 +544,15 @@ export function getEdgePath({
 }) {
   const ARROW_DOWN = 'm6 -6 l-6 6 m-6 -6 l6 6';
 
+  const isInsideConditionOrSplit = isInsideLocations(
+    [
+      StepLocationRelativeToParent.INSIDE_SPLIT,
+      StepLocationRelativeToParent.INSIDE_TRUE_BRANCH,
+      StepLocationRelativeToParent.INSIDE_FALSE_BRANCH,
+    ],
+    data.stepLocationRelativeToParent,
+  );
+
   const targetYWithPlaceHolder =
     targetY +
     (flowCanvasUtils.isPlaceHolder(data.targetType)
@@ -467,7 +571,7 @@ export function getEdgePath({
     };
   }
 
-  const FIRST_LINE_LENGTH = 55 * lengthMultiplier;
+  const FIRST_LINE_LENGTH = 52 * lengthMultiplier;
   const ARC_LEFT = 'a15,15 0 0,0 -15,15';
   const ARC_RIGHT = 'a15,15 0 0,1 15,15';
   const ARC_LEFT_DOWN = 'a15,15 0 0,1 -15,15';
@@ -475,10 +579,13 @@ export function getEdgePath({
   const ARC_LENGTH = 15;
   const SIGN = sourceX > targetX ? -1 : 1;
 
+  const buttonVerticalOffset = isInsideConditionOrSplit
+    ? BUTTON_VERTICAL_OFFSET_INSIDE_CONDITION_OR_SPLIT
+    : BUTTON_VERTICAL_OFFSET;
   return {
     buttonPosition: {
       x: targetX - BUTTON_SIZE.width / 2,
-      y: targetYWithPlaceHolder - FIRST_LINE_LENGTH / 2 - 10,
+      y: targetYWithPlaceHolder - FIRST_LINE_LENGTH / 2 - buttonVerticalOffset,
     },
     edgePath: `M${sourceX} ${sourceY}
     v${
@@ -515,7 +622,15 @@ export const getLengthMultiplier = ({
   isInsideBranch: boolean;
   isInsideSplit: boolean;
   isInsideLoop: boolean;
-}) => (isInsideSplit || isInsideBranch || isInsideLoop ? 1.7 : 1);
+}) => {
+  if (isInsideLoop) {
+    return 1.85;
+  }
+  if (isInsideSplit || isInsideBranch) {
+    return 1.5;
+  }
+  return 1;
+};
 
 type Step = Action | Trigger;
 
@@ -526,6 +641,11 @@ type BoundingBox = {
   widthRight: number;
 };
 
+const isInsideLocations = (
+  locations: StepLocationRelativeToParent[],
+  location: StepLocationRelativeToParent,
+) => locations.includes(location);
+
 export type WorkflowNode = {
   id: string;
   position: { x: number; y: number };
@@ -535,6 +655,8 @@ export type WorkflowNode = {
     parentStep?: string;
     stepLocationRelativeToParent?: StepLocationRelativeToParent;
     branchNodeId?: string;
+    label?: string;
+    isDefaultBranch?: boolean;
   };
   selectable?: boolean;
   selected?: boolean;

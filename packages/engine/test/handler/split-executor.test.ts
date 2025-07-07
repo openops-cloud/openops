@@ -8,7 +8,7 @@ const executeFlowMock = jest.fn().mockResolvedValue('result from flowExecutor')
 
 jest.mock('../../src/lib/handler/flow-executor', () => ({
     flowExecutor: {
-        execute: executeFlowMock,
+        executeFromAction: executeFlowMock,
     },
 }))
 

@@ -12,7 +12,6 @@ jest.mock('@openops/server-shared', () => ({
 const openopsCommonMock = {
   ...jest.requireActual('@openops/common'),
   authenticateDefaultUserInOpenOpsTables: jest.fn(),
-  getRowByPrimaryKeyValue: jest.fn(),
   getPrimaryKeyFieldFromFields: jest.fn(),
   getTableFields: jest.fn().mockResolvedValue([{}]),
   openopsTablesDropdownProperty: jest.fn().mockReturnValue({
@@ -20,8 +19,7 @@ const openopsCommonMock = {
     defaultValue: false,
     type: 'DROPDOWN',
   }),
-  updateRow: jest.fn(),
-  addRow: jest.fn(),
+  upsertRow: jest.fn(),
 };
 
 jest.mock('@openops/common', () => openopsCommonMock);
@@ -106,7 +104,7 @@ describe('updateRowAction', () => {
       .mockReturnValueOnce(1)
       .mockReturnValue([{ id: 1, primary: true }]);
 
-    openopsCommonMock.addRow.mockResolvedValue('mock result');
+    openopsCommonMock.upsertRow.mockResolvedValue('mock result');
 
     const context = createContext();
 
@@ -122,19 +120,18 @@ describe('updateRowAction', () => {
     ).toHaveBeenCalledWith();
   });
 
-  test('should update fields', async () => {
+  test('should invoke upsertRow operation', async () => {
     openopsCommonMock.getPrimaryKeyFieldFromFields.mockReturnValue({
       name: 'primary key field',
       type: 'text',
     });
-    openopsCommonMock.getRowByPrimaryKeyValue.mockResolvedValue({ id: 1 });
 
     cacheWrapperMock.getOrAdd.mockReturnValueOnce(1).mockReturnValue([
       { id: 1, primary: true, name: 'id' },
       { id: 2, primary: false, name: 'field1' },
     ]);
 
-    openopsCommonMock.updateRow.mockResolvedValue('mock result');
+    openopsCommonMock.upsertRow.mockResolvedValue('mock result');
     const context = createContext({
       tableName: 'Opportunity',
       rowPrimaryKey: { rowPrimaryKey: 'some primary key value' },
@@ -145,83 +142,11 @@ describe('updateRowAction', () => {
         },
       ],
     });
-
     const result = (await updateRecordAction.run(context)) as any;
 
     validateWrapperCall(context);
-    expect(result).toBe('mock result');
-    expect(openopsCommonMock.getRowByPrimaryKeyValue).toHaveBeenCalledTimes(1);
-    expect(openopsCommonMock.getRowByPrimaryKeyValue).toHaveBeenCalledWith(
-      'some databaseToken',
-      1,
-      'some primary key value',
-      'primary key field',
-      'text',
-    );
-    expect(
-      openopsCommonMock.getPrimaryKeyFieldFromFields,
-    ).toHaveBeenCalledTimes(1);
-    expect(openopsCommonMock.getPrimaryKeyFieldFromFields).toHaveBeenCalledWith(
-      [
-        { id: 1, primary: true, name: 'id' },
-        { id: 2, primary: false, name: 'field1' },
-      ],
-    );
-    expect(openopsCommonMock.updateRow).toHaveBeenCalledTimes(1);
-    expect(openopsCommonMock.updateRow).toHaveBeenCalledWith({
-      tableId: 1,
-      token: 'some databaseToken',
-      rowId: 1,
-      fields: { field1: 'new value' },
-    });
-  });
-
-  test('should create record if doesnt exist', async () => {
-    cacheWrapperMock.getOrAdd.mockReturnValueOnce(1).mockReturnValue([
-      { id: 1, primary: true, name: 'id' },
-      { id: 2, primary: false, name: 'field1' },
-    ]);
-    openopsCommonMock.getPrimaryKeyFieldFromFields.mockReturnValue({
-      name: 'primary key field',
-      type: 'text',
-    });
-    openopsCommonMock.getRowByPrimaryKeyValue.mockResolvedValue(undefined);
-    openopsCommonMock.addRow.mockResolvedValue('mock result');
-    const context = createContext({
-      tableName: 'Opportunity',
-      rowPrimaryKey: { rowPrimaryKey: 'some primary key value' },
-      fieldsProperties: [
-        {
-          fieldName: 'field1',
-          newFieldValue: { newFieldValue: 'new value' },
-        },
-      ],
-    });
-
-    const result = (await updateRecordAction.run(context)) as any;
-
-    validateWrapperCall(context);
-    expect(result).toBe('mock result');
-    expect(openopsCommonMock.getRowByPrimaryKeyValue).toHaveBeenCalledTimes(1);
-    expect(openopsCommonMock.getRowByPrimaryKeyValue).toHaveBeenCalledWith(
-      'some databaseToken',
-      1,
-      'some primary key value',
-      'primary key field',
-      'text',
-    );
-    expect(openopsCommonMock.updateRow).not.toHaveBeenCalled();
-    expect(
-      openopsCommonMock.getPrimaryKeyFieldFromFields,
-    ).toHaveBeenCalledTimes(1);
-    expect(openopsCommonMock.getPrimaryKeyFieldFromFields).toHaveBeenCalledWith(
-      [
-        { id: 1, primary: true, name: 'id' },
-        { id: 2, primary: false, name: 'field1' },
-      ],
-    );
-    expect(openopsCommonMock.addRow).toHaveBeenCalledTimes(1);
-    expect(openopsCommonMock.addRow).toHaveBeenCalledWith({
+    expect(openopsCommonMock.upsertRow).toHaveBeenCalledTimes(1);
+    expect(openopsCommonMock.upsertRow).toHaveBeenCalledWith({
       tableId: 1,
       token: 'some databaseToken',
       fields: {
@@ -229,18 +154,18 @@ describe('updateRowAction', () => {
         field1: 'new value',
       },
     });
+    expect(result).toBe('mock result');
   });
 
   test('should fail to add field if column does not exist', async () => {
     openopsCommonMock.getPrimaryKeyFieldFromFields.mockReturnValue({
       name: 'primary key field',
     });
-    openopsCommonMock.getRowByPrimaryKeyValue.mockResolvedValue({ id: 1 });
     cacheWrapperMock.getOrAdd
       .mockReturnValueOnce(1)
       .mockReturnValue([{ id: 1, primary: true, name: 'id' }]);
 
-    openopsCommonMock.updateRow.mockResolvedValue('mock result');
+    openopsCommonMock.upsertRow.mockResolvedValue('mock result');
     const context = createContext({
       tableName: 'Opportunity',
       rowPrimaryKey: { rowPrimaryKey: 'some primary key value' },
@@ -256,9 +181,7 @@ describe('updateRowAction', () => {
       'Column field1 does not exist in table Opportunity.',
     );
 
-    expect(openopsCommonMock.updateRow).not.toHaveBeenCalled();
-    expect(openopsCommonMock.getRowByPrimaryKeyValue).not.toHaveBeenCalled();
-    expect(openopsCommonMock.getRowByPrimaryKeyValue).not.toHaveBeenCalled();
+    expect(openopsCommonMock.upsertRow).not.toHaveBeenCalled();
     expect(
       openopsCommonMock.getPrimaryKeyFieldFromFields,
     ).not.toHaveBeenCalled();
@@ -274,9 +197,7 @@ describe('updateRowAction', () => {
         { id: 1, primary: true, name: 'id' },
         { id: 2, primary: false, name: 'field1' },
       ]);
-      openopsCommonMock.getPrimaryKeyFieldFromFields.mockReturnValue({
-        name: 'primary key field',
-      });
+
       const context = createContext({
         tableName: 'Opportunity',
         rowPrimaryKey: { rowPrimaryKey: rowPrimaryKey },
@@ -292,18 +213,7 @@ describe('updateRowAction', () => {
         'The primary key should be a string',
       );
 
-      expect(openopsCommonMock.getRowByPrimaryKeyValue).not.toHaveBeenCalled();
-      expect(openopsCommonMock.updateRow).not.toHaveBeenCalled();
-      expect(openopsCommonMock.addRow).not.toHaveBeenCalled();
-      expect(
-        openopsCommonMock.getPrimaryKeyFieldFromFields,
-      ).toHaveBeenCalledTimes(1);
-      expect(
-        openopsCommonMock.getPrimaryKeyFieldFromFields,
-      ).toHaveBeenCalledWith([
-        { id: 1, primary: true, name: 'id' },
-        { id: 2, primary: false, name: 'field1' },
-      ]);
+      expect(openopsCommonMock.upsertRow).not.toHaveBeenCalled();
     },
   );
 

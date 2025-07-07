@@ -24,10 +24,10 @@ import {
   FlagId,
   OpsEdition,
   SignInRequest,
+  emailRegex,
 } from '@openops/shared';
 import { useEffectOnce } from 'react-use';
 import { navigationUtil } from '../../../lib/navigation-util';
-import { emailRegex } from '../lib/password-validation-utils';
 
 const SignInSchema = Type.Object({
   email: Type.String({

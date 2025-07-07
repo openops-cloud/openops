@@ -21,16 +21,18 @@ import {
 import { flowWorkerController } from '../workers/worker-controller';
 import { flowRunService } from './flow-run/flow-run-service';
 import { flowVersionService } from './flow-version/flow-version.service';
+import { flowV2Controller } from './flow/flow-v2.controller';
 import { flowVersionController } from './flow/flow-version.controller';
 import { flowController } from './flow/flow.controller';
 import { stepRunService } from './step-run/step-run-service';
-import { testTriggerController } from './test-trigger/test-trigger-controller';
+import { testController } from './test/test.controller';
 
 export const flowModule: FastifyPluginAsyncTypebox = async (app) => {
   await app.register(flowWorkerController, { prefix: '/v1/worker/flows' });
   await app.register(flowVersionController, { prefix: '/v1/flow-versions' });
   await app.register(flowController, { prefix: '/v1/flows' });
-  await app.register(testTriggerController, { prefix: '/v1/test-trigger' });
+  await app.register(flowV2Controller, { prefix: '/v2/flows' });
+  await app.register(testController, { prefix: '/v1/test' });
   websocketService.addListener(WebsocketServerEvent.TEST_FLOW_RUN, (socket) => {
     return async (data: TestFlowRunRequestBody) => {
       let principal;
@@ -98,6 +100,7 @@ export const flowModule: FastifyPluginAsyncTypebox = async (app) => {
         const response: StepRunResponse = {
           id: data.id,
           success: stepRun.success,
+          input: stepRun.input,
           output: stepRun.output,
         };
         socket.emit(WebsocketClientEvent.TEST_STEP_FINISHED, response);

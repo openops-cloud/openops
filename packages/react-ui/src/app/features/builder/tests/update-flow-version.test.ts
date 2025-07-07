@@ -59,6 +59,8 @@ describe('updateFlowVersion', () => {
             displayName: 'step1',
             settings: {
               blockVersion: '1.0.0',
+              blockName: 'test-block',
+              actionName: 'test-action',
             },
           },
         },
@@ -220,5 +222,150 @@ describe('updateFlowVersion', () => {
 
     expect(clearStepSpy).toHaveBeenCalledWith('step_1');
     clearStepSpy.mockRestore();
+  });
+
+  describe('deleteChatRequest', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should call deleteChatRequest when deleting selected step with block and action names', async () => {
+      const operation = {
+        type: FlowOperationType.DELETE_ACTION,
+        request: { name: 'step_1' },
+      } as FlowOperationRequest;
+
+      (aiChatApi.open as jest.Mock).mockResolvedValue({ chatId: 'chat1' });
+      (aiChatApi.delete as jest.Mock).mockResolvedValue({});
+
+      updateFlowVersion(mockState, operation, mockOnError, mockSet);
+
+      await waitFor(() => {
+        expect(aiChatApi.open).toHaveBeenCalledWith(
+          'flow1',
+          'test-block',
+          'step_1',
+          'test-action',
+        );
+      });
+
+      await waitFor(() => {
+        expect(aiChatApi.delete).toHaveBeenCalledWith('chat1');
+      });
+    });
+
+    it('should not call deleteChatRequest when deleting non-selected step', async () => {
+      const operation = {
+        type: FlowOperationType.DELETE_ACTION,
+        request: { name: 'step_2' },
+      } as FlowOperationRequest;
+
+      updateFlowVersion(mockState, operation, mockOnError, mockSet);
+
+      await waitFor(() => {
+        expect(aiChatApi.open).not.toHaveBeenCalled();
+      });
+
+      await waitFor(() => {
+        expect(aiChatApi.delete).not.toHaveBeenCalled();
+      });
+    });
+
+    it('should not call deleteChatRequest when step has no block name', async () => {
+      const operation = {
+        type: FlowOperationType.DELETE_ACTION,
+        request: { name: 'step_1' },
+      } as FlowOperationRequest;
+
+      mockState.flowVersion.trigger.nextAction!.settings = {
+        blockVersion: '1.0.0',
+        actionName: 'test-action',
+      };
+
+      updateFlowVersion(mockState, operation, mockOnError, mockSet);
+
+      await waitFor(() => {
+        expect(aiChatApi.open).not.toHaveBeenCalled();
+      });
+
+      await waitFor(() => {
+        expect(aiChatApi.delete).not.toHaveBeenCalled();
+      });
+    });
+
+    it('should not call deleteChatRequest when step has no action name', async () => {
+      const operation = {
+        type: FlowOperationType.DELETE_ACTION,
+        request: { name: 'step_1' },
+      } as FlowOperationRequest;
+
+      mockState.flowVersion.trigger.nextAction!.settings = {
+        blockVersion: '1.0.0',
+        blockName: 'test-block',
+      };
+
+      updateFlowVersion(mockState, operation, mockOnError, mockSet);
+
+      await waitFor(() => {
+        expect(aiChatApi.open).not.toHaveBeenCalled();
+      });
+
+      await waitFor(() => {
+        expect(aiChatApi.delete).not.toHaveBeenCalled();
+      });
+    });
+
+    it('should handle errors in deleteChatRequest gracefully', async () => {
+      const operation = {
+        type: FlowOperationType.DELETE_ACTION,
+        request: { name: 'step_1' },
+      } as FlowOperationRequest;
+
+      (aiChatApi.open as jest.Mock).mockRejectedValue(new Error('API Error'));
+
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      updateFlowVersion(mockState, operation, mockOnError, mockSet);
+
+      await waitFor(() => {
+        expect(aiChatApi.open).toHaveBeenCalled();
+      });
+
+      await waitFor(() => {
+        expect(consoleSpy).toHaveBeenCalled();
+      });
+
+      consoleSpy.mockRestore();
+    });
+
+    it('should handle errors in aiChatApi.delete gracefully', async () => {
+      const operation = {
+        type: FlowOperationType.DELETE_ACTION,
+        request: { name: 'step_1' },
+      } as FlowOperationRequest;
+
+      (aiChatApi.open as jest.Mock).mockResolvedValue({ chatId: 'chat1' });
+      (aiChatApi.delete as jest.Mock).mockRejectedValue(
+        new Error('Delete Error'),
+      );
+
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      updateFlowVersion(mockState, operation, mockOnError, mockSet);
+
+      await waitFor(() => {
+        expect(aiChatApi.open).toHaveBeenCalled();
+      });
+
+      await waitFor(() => {
+        expect(aiChatApi.delete).toHaveBeenCalled();
+      });
+
+      await waitFor(() => {
+        expect(consoleSpy).toHaveBeenCalled();
+      });
+
+      consoleSpy.mockRestore();
+    });
   });
 });

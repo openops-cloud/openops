@@ -20,6 +20,7 @@ import {
   streamText,
   TextPart,
   ToolCallPart,
+  ToolChoice,
   ToolResultPart,
   ToolSet,
 } from 'ai';
@@ -110,6 +111,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
     const { mcpClients, tools } = await getMCPTools(
       app,
       request.headers.authorization?.replace('Bearer ', '') ?? '',
+      projectId,
     );
 
     const filteredTools = await selectRelevantTools({
@@ -119,16 +121,19 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       aiConfig,
     });
 
-    const isAnalyticsLoaded = Object.keys(filteredTools ?? {}).some((key) =>
-      key.includes('superset'),
-    );
-    const isTablesLoaded = Object.keys(filteredTools ?? {}).some((key) =>
-      key.includes('table'),
-    );
+    const isAwsCostMcpDisabled =
+      !hasToolProvider(tools, 'cost-analysis') &&
+      !hasToolProvider(tools, 'cost-explorer');
+
+    const isAnalyticsLoaded = hasToolProvider(filteredTools, 'superset');
+    const isTablesLoaded = hasToolProvider(filteredTools, 'tables');
+    const isOpenOpsMCPEnabled = hasToolProvider(filteredTools, 'openops');
 
     const systemPrompt = await getMcpSystemPrompt({
       isAnalyticsLoaded,
       isTablesLoaded,
+      isOpenOpsMCPEnabled,
+      isAwsCostMcpDisabled,
     });
 
     pipeDataStreamToResponse(reply.raw, {
@@ -142,7 +147,12 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
           messages,
           chatId,
           mcpClients,
-          filteredTools,
+          {
+            ...filteredTools,
+            ...(isOpenOpsMCPEnabled
+              ? collectToolsByProvider(tools, 'openops')
+              : {}),
+          },
         );
       },
 
@@ -236,13 +246,20 @@ async function streamMessages(
   tools?: ToolSet,
 ): Promise<void> {
   let stepCount = 0;
+
+  let toolChoice: ToolChoice<Record<string, never>> = 'auto';
+  if (!tools || Object.keys(tools).length === 0) {
+    toolChoice = 'none';
+    systemPrompt += `\n\nMCP tools are not available in this chat. Do not claim access or simulate responses from them under any circumstance.`;
+  }
+
   const result = streamText({
     model: languageModel,
     system: systemPrompt,
     messages,
     ...aiConfig.modelSettings,
     tools,
-    toolChoice: 'auto',
+    toolChoice,
     maxRetries: 1,
     maxSteps: MAX_RECURSION_DEPTH,
     async onStepFinish({ finishReason }): Promise<void> {
@@ -348,4 +365,26 @@ async function closeMCPClients(mcpClients: unknown[]): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await (mcpClient as any)?.close();
   }
+}
+
+function collectToolsByProvider(
+  tools: ToolSet | undefined,
+  provider: string,
+): ToolSet {
+  const result: ToolSet = {};
+  for (const [key, tool] of Object.entries(tools ?? {})) {
+    if ((tool as { toolProvider?: string }).toolProvider === provider) {
+      result[key] = tool;
+    }
+  }
+  return result;
+}
+
+export function hasToolProvider(
+  tools: ToolSet | undefined,
+  provider: string,
+): boolean {
+  return Object.values(tools ?? {}).some(
+    (tool) => (tool as { toolProvider?: string }).toolProvider === provider,
+  );
 }

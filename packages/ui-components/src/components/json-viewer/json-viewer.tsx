@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import { FileButton } from './file-button';
 import { HeaderButtons } from './header-buttons';
@@ -8,18 +8,32 @@ import { renderFileButton } from './render-file-button';
 
 type JsonViewerProps = {
   json: any;
-  title: string;
+  title?: string;
   readonly?: boolean;
   onChange?: (json: any) => void;
   theme?: string;
+  editorClassName?: string;
+  isEditModeEnabled?: boolean;
+  onEditModeChange?: (isEditModeEnabled: boolean) => void;
+  children?: ReactNode;
 };
 
-type JsonFormValues = {
+export type JsonFormValues = {
   jsonContent: string;
 };
 
 const JsonViewer = React.memo(
-  ({ json, title, readonly = true, onChange, theme }: JsonViewerProps) => {
+  ({
+    json,
+    title,
+    readonly = true,
+    onChange,
+    theme,
+    editorClassName,
+    isEditModeEnabled,
+    onEditModeChange,
+    children,
+  }: JsonViewerProps) => {
     const form = useForm<JsonFormValues>({
       defaultValues: {
         jsonContent: json,
@@ -31,11 +45,21 @@ const JsonViewer = React.memo(
       handleCopy,
       handleDownload,
       handleDownloadFile,
+      handleDelete,
       isFileUrl,
       isEditMode,
       setIsEditMode,
       apply,
-    } = useJsonViewer({ json, title, readonly, renderFileButton, onChange });
+    } = useJsonViewer({
+      json,
+      title,
+      readonly,
+      renderFileButton,
+      onChange,
+      form,
+      isEditModeEnabled,
+      onEditModeChange,
+    });
 
     if (isFileUrl) {
       return (
@@ -44,10 +68,10 @@ const JsonViewer = React.memo(
     }
 
     return (
-      <div className="rounded-lg border border-solid border-dividers">
-        <div className="px-4 py-3 flex border-solid border-b border-dividers items-center gap-2">
+      <div className="max-h-full w-full flex flex-col rounded-lg border border-solid overflow-hidden">
+        <div className="px-4 py-3 flex items-center gap-2 h-[61px]">
           <div className="flex-grow justify-center items-center">
-            <span className="text-sm">{title}</span>
+            {children ?? <span className="text-base font-medium">{title}</span>}
           </div>
           <HeaderButtons
             isEditMode={isEditMode}
@@ -55,20 +79,19 @@ const JsonViewer = React.memo(
             handleCopy={handleCopy}
             handleDownload={handleDownload}
             handleEdit={() => setIsEditMode(true)}
-            handleDelete={() => {
-              onChange && onChange(undefined);
-            }}
+            handleDelete={handleDelete}
+            showDeleteButton={!!json}
             apply={() => {
               apply(form.getValues('jsonContent'));
             }}
           />
         </div>
-
         <JsonContent
           isEditMode={isEditMode}
           json={json}
           form={form}
           theme={theme}
+          editorClassName={editorClassName}
         />
       </div>
     );

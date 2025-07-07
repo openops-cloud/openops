@@ -16,6 +16,8 @@ export async function makeHttpRequest<T>(
   body?: any,
   retryConfigs?: IAxiosRetryConfig,
 ): Promise<T> {
+  const startTimeCode = performance.now();
+
   try {
     const config = {
       method,
@@ -33,18 +35,24 @@ export async function makeHttpRequest<T>(
   } catch (error) {
     const axiosError = error as AxiosError;
     const logMessage = `Error making HTTP request. Url: "${url}"`;
+    const timeTaken = `${Math.floor(performance.now() - startTimeCode)}ms`;
 
     if (axiosError && axiosError.response?.data) {
       logger.error(logMessage, {
         ...axiosError.response?.data,
         status: axiosError.response?.status,
         statusText: axiosError.response?.statusText,
+        timeTaken,
       });
 
       throw new Error(JSON.stringify(axiosError.response?.data));
     }
 
-    logger.error(logMessage, error);
+    logger.error(logMessage, {
+      error,
+      timeTaken,
+    });
+
     throw error;
   }
 }

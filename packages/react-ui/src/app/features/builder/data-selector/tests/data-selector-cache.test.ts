@@ -1,4 +1,25 @@
-import { StepTestOutputCache } from '../data-selector-cache';
+import { QueryClient } from '@tanstack/react-query';
+import { QueryKeys } from '../../../../constants/query-keys';
+import { formatUtils } from '../../../../lib/utils';
+import {
+  setStepOutputCache,
+  StepTestOutputCache,
+  stepTestOutputCache,
+} from '../data-selector-cache';
+
+jest.mock('@/app/lib/utils', () => ({
+  formatUtils: {
+    formatStepInputOrOutput: jest.fn((data) => data),
+  },
+}));
+
+jest.mock('dayjs', () => {
+  const mockDayjs = () => ({
+    toISOString: () => '2024-01-01T00:00:00Z',
+  });
+  mockDayjs.extend = jest.fn();
+  return mockDayjs;
+});
 
 describe('StepTestOutputCache', () => {
   let cache: StepTestOutputCache;
@@ -54,5 +75,53 @@ describe('StepTestOutputCache', () => {
     cache.clearAll();
     expect(cache.getStepData('step1')).toBeUndefined();
     expect(cache.getExpanded('node1')).toBe(false);
+  });
+});
+
+describe('setStepOutputCache', () => {
+  let queryClient: QueryClient;
+
+  beforeEach(() => {
+    queryClient = new QueryClient();
+    queryClient.setQueryData = jest.fn();
+    (formatUtils.formatStepInputOrOutput as jest.Mock).mockImplementation(
+      (data) => data,
+    );
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should set data in both cache and query client', () => {
+    const stepId = 'test-step-id';
+    const flowVersionId = 'test-flow-version-id';
+    const output = { result: 'success' };
+    const input = { param: 'value' };
+
+    setStepOutputCache({
+      stepId,
+      flowVersionId,
+      output,
+      input,
+      queryClient,
+    });
+
+    expect(stepTestOutputCache.getStepData(stepId)).toEqual({
+      output: output,
+      lastTestDate: '2024-01-01T00:00:00Z',
+    });
+
+    expect(formatUtils.formatStepInputOrOutput).toHaveBeenCalledWith(output);
+    expect(formatUtils.formatStepInputOrOutput).toHaveBeenCalledWith(input);
+
+    expect(queryClient.setQueryData).toHaveBeenCalledWith(
+      [QueryKeys.stepTestOutput, flowVersionId, stepId],
+      {
+        output: output,
+        lastTestDate: '2024-01-01T00:00:00Z',
+        input: input,
+      },
+    );
   });
 });
