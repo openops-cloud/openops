@@ -1,6 +1,33 @@
 import { LinearDocument } from '@linear/sdk';
-import { DropdownOption, Property } from '@openops/blocks-framework';
+import { Property } from '@openops/blocks-framework';
 import { makeClient } from './client';
+
+type PaginatedResponse<T> = {
+  nodes: T[] | Promise<T[]>;
+  pageInfo: {
+    hasNextPage: boolean;
+    endCursor?: string;
+  };
+};
+
+async function fetchAllPaginatedItems<T>(
+  fetchPage: (cursor?: string) => Promise<PaginatedResponse<T>>,
+): Promise<T[]> {
+  const allItems: T[] = [];
+  let hasNextPage = true;
+  let cursor: string | undefined;
+
+  while (hasNextPage) {
+    const response = await fetchPage(cursor);
+    const nodes = await response.nodes;
+    allItems.push(...nodes);
+
+    hasNextPage = response.pageInfo.hasNextPage;
+    cursor = response.pageInfo.endCursor;
+  }
+
+  return allItems;
+}
 
 export const props = {
   team_id: (required = true) =>
@@ -19,32 +46,24 @@ export const props = {
           };
         }
         const client = makeClient(auth as string);
-        const options: DropdownOption<string>[] = [];
-
-        let hasNextPage = false;
-        let cursor;
-
-        do {
-          const teams = await client.listTeams({
+        const allTeams = await fetchAllPaginatedItems((cursor) =>
+          client.listTeams({
             orderBy: LinearDocument.PaginationOrderBy.UpdatedAt,
             first: 100,
             after: cursor,
-          });
-
-          for (const team of teams.nodes) {
-            options.push({ label: team.name, value: team.id });
-          }
-
-          hasNextPage = teams.pageInfo.hasNextPage;
-          cursor = teams.pageInfo.endCursor;
-        } while (hasNextPage);
+          }),
+        );
 
         return {
           disabled: false,
-          options,
+          options: allTeams.map((team) => ({
+            label: team.name,
+            value: team.id,
+          })),
         };
       },
     }),
+
   status_id: (required = false) =>
     Property.Dropdown({
       description: 'Status of the Issue',
@@ -60,39 +79,24 @@ export const props = {
           };
         }
         const client = makeClient(auth as string);
-        const options: DropdownOption<string>[] = [];
+        const filter: LinearDocument.WorkflowStatesQueryVariables['filter'] = {
+          team: { id: { eq: team_id as string } },
+        };
 
-        let hasNextPage = false;
-        let cursor;
-
-        do {
-          const filter: LinearDocument.WorkflowStatesQueryVariables = {
-            filter: {
-              team: {
-                id: {
-                  eq: team_id as string,
-                },
-              },
-            },
-            first: 100,
-            after: cursor,
-          };
-          const statusList = await client.listIssueStates(filter);
-
-          for (const status of statusList.nodes) {
-            options.push({ label: status.name, value: status.id });
-          }
-
-          hasNextPage = statusList.pageInfo.hasNextPage;
-          cursor = statusList.pageInfo.endCursor;
-        } while (hasNextPage);
+        const allStates = await fetchAllPaginatedItems((cursor) =>
+          client.listIssueStates({ filter, first: 100, after: cursor }),
+        );
 
         return {
           disabled: false,
-          options,
+          options: allStates.map((status) => ({
+            label: status.name,
+            value: status.id,
+          })),
         };
       },
     }),
+
   labels: (required = false) =>
     Property.MultiSelectDropdown({
       description: 'Labels for the Issue',
@@ -108,32 +112,24 @@ export const props = {
           };
         }
         const client = makeClient(auth as string);
-        const options: DropdownOption<string>[] = [];
-
-        let hasNextPage = false;
-        let cursor;
-
-        do {
-          const labels = await client.listIssueLabels({
+        const allLabels = await fetchAllPaginatedItems((cursor) =>
+          client.listIssueLabels({
             orderBy: LinearDocument.PaginationOrderBy.UpdatedAt,
             first: 100,
             after: cursor,
-          });
-
-          for (const label of labels.nodes) {
-            options.push({ label: label.name, value: label.id });
-          }
-
-          hasNextPage = labels.pageInfo.hasNextPage;
-          cursor = labels.pageInfo.endCursor;
-        } while (hasNextPage);
+          }),
+        );
 
         return {
           disabled: false,
-          options,
+          options: allLabels.map((label) => ({
+            label: label.name,
+            value: label.id,
+          })),
         };
       },
     }),
+
   assignee_id: (required = false) =>
     Property.Dropdown({
       description: 'Assignee of the Issue / Comment',
@@ -149,32 +145,24 @@ export const props = {
           };
         }
         const client = makeClient(auth as string);
-        const options: DropdownOption<string>[] = [];
-
-        let hasNextPage = false;
-        let cursor;
-
-        do {
-          const users = await client.listUsers({
+        const allUsers = await fetchAllPaginatedItems((cursor) =>
+          client.listUsers({
             orderBy: LinearDocument.PaginationOrderBy.UpdatedAt,
             first: 100,
             after: cursor,
-          });
-
-          for (const user of users.nodes) {
-            options.push({ label: user.name, value: user.id });
-          }
-
-          hasNextPage = users.pageInfo.hasNextPage;
-          cursor = users.pageInfo.endCursor;
-        } while (hasNextPage);
+          }),
+        );
 
         return {
           disabled: false,
-          options,
+          options: allUsers.map((user) => ({
+            label: user.name,
+            value: user.id,
+          })),
         };
       },
     }),
+
   priority_id: (required = false) =>
     Property.Dropdown({
       description: 'Priority of the Issue',
@@ -203,6 +191,7 @@ export const props = {
         };
       },
     }),
+
   issue_id: (required = true) =>
     Property.Dropdown({
       displayName: 'Issue',
@@ -257,32 +246,24 @@ export const props = {
           };
         }
         const client = makeClient(auth as string);
-        const options: DropdownOption<string>[] = [];
-
-        let hasNextPage = false;
-        let cursor;
-
-        do {
-          const projects = await client.listProjects({
+        const allProjects = await fetchAllPaginatedItems((cursor) =>
+          client.listProjects({
             orderBy: LinearDocument.PaginationOrderBy.UpdatedAt,
             first: 100,
             after: cursor,
-          });
-
-          for (const project of projects.nodes) {
-            options.push({ label: project.name, value: project.id });
-          }
-
-          hasNextPage = projects.pageInfo.hasNextPage;
-          cursor = projects.pageInfo.endCursor;
-        } while (hasNextPage);
+          }),
+        );
 
         return {
           disabled: false,
-          options,
+          options: allProjects.map((project) => ({
+            label: project.name,
+            value: project.id,
+          })),
         };
       },
     }),
+
   template_id: (required = false) =>
     Property.Dropdown({
       displayName: 'Template',
@@ -298,38 +279,20 @@ export const props = {
           };
         }
         const client = makeClient(auth as string);
-        const options: DropdownOption<string>[] = [];
-
-        let hasNextPage = false;
-        let cursor;
-
-        do {
-          const filter: Omit<
-            LinearDocument.Team_TemplatesQueryVariables,
-            'id'
-          > = {
+        const allTemplates = await fetchAllPaginatedItems((cursor) =>
+          client.listTeamsTemplates(team_id as string, {
             first: 100,
             after: cursor,
             orderBy: LinearDocument.PaginationOrderBy.UpdatedAt,
-          };
-          const templatesConnection = await client.listTeamsTemplates(
-            team_id as string,
-            filter,
-          );
-
-          const templates = await templatesConnection.nodes;
-
-          for (const template of templates) {
-            options.push({ label: template.name, value: template.id });
-          }
-
-          hasNextPage = templatesConnection.pageInfo.hasNextPage;
-          cursor = templatesConnection.pageInfo.endCursor;
-        } while (hasNextPage);
+          }),
+        );
 
         return {
           disabled: false,
-          options,
+          options: allTemplates.map((template) => ({
+            label: template.name,
+            value: template.id,
+          })),
         };
       },
     }),
