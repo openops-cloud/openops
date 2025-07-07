@@ -4,6 +4,10 @@ const setSerializedObjectMock = jest.fn();
 const deleteKeyMock = jest.fn();
 const acquireLockMock = jest.fn();
 const releaseMock = jest.fn();
+const loggerMock = {
+  debug: jest.fn(),
+  error: jest.fn(),
+};
 
 jest.mock('@openops/server-shared', () => ({
   hashUtils: {
@@ -17,17 +21,31 @@ jest.mock('@openops/server-shared', () => ({
   distributedLock: {
     acquireLock: acquireLockMock,
   },
+  logger: loggerMock,
+}));
+
+// Mock crypto.randomUUID
+const mockRandomUUID = jest.fn();
+jest.mock('node:crypto', () => ({
+  randomUUID: mockRandomUUID,
 }));
 
 import { CoreMessage } from 'ai';
 import {
+  ACTIVE_STREAM_SUFFIX,
   appendMessagesToChatHistory,
   appendMessagesToChatHistoryContext,
+  cancelActiveStream,
+  deleteActiveStream,
   deleteChatHistory,
   deleteChatHistoryContext,
   generateChatId,
   getChatContext,
   getChatHistory,
+  setActiveStream,
+  setupStreamCancellation,
+  STREAM_EXPIRE_TIME,
+  type StreamData,
 } from '../../../src/app/ai/chat/ai-chat.service';
 
 describe('generateChatId', () => {
@@ -226,5 +244,204 @@ describe('deleteChatHistory', () => {
 
     expect(deleteKeyMock).toHaveBeenCalledTimes(1);
     expect(deleteKeyMock).toHaveBeenCalledWith(`${chatId}:history`);
+  });
+});
+
+describe('Stream Cancellation', () => {
+  const chatId = 'stream-test-chat';
+  const userId = 'user123';
+  const requestId = 'req-456';
+  const mockAbortControllerId = 'abort-controller-123';
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+    mockRandomUUID.mockReturnValue('mock-uuid-123');
+    getSerializedObjectMock.mockResolvedValue(null);
+    setSerializedObjectMock.mockResolvedValue(undefined);
+    deleteKeyMock.mockResolvedValue(undefined);
+  });
+
+  describe('setActiveStream', () => {
+    it('should set active stream data in cache', async () => {
+      const streamData: StreamData = {
+        chatId,
+        userId,
+        timestamp: Date.now(),
+        requestId,
+        abortControllerId: mockAbortControllerId,
+      };
+
+      await setActiveStream(chatId, streamData);
+
+      expect(setSerializedObjectMock).toHaveBeenCalledWith(
+        `${chatId}:${ACTIVE_STREAM_SUFFIX}`,
+        streamData,
+        STREAM_EXPIRE_TIME,
+      );
+    });
+  });
+
+  describe('deleteActiveStream', () => {
+    it('should delete active stream from cache', async () => {
+      await deleteActiveStream(chatId);
+
+      expect(deleteKeyMock).toHaveBeenCalledWith(
+        `${chatId}:${ACTIVE_STREAM_SUFFIX}`,
+      );
+    });
+  });
+
+  describe('setupStreamCancellation', () => {
+    beforeEach(() => {
+      jest.resetAllMocks();
+      mockRandomUUID.mockReturnValue('mock-uuid-123');
+    });
+
+    it('should create abort controller and register stream data', async () => {
+      const abortController = await setupStreamCancellation(
+        chatId,
+        userId,
+        requestId,
+      );
+
+      expect(abortController).toBeInstanceOf(AbortController);
+      expect(mockRandomUUID).toHaveBeenCalled();
+      expect(setSerializedObjectMock).toHaveBeenCalledWith(
+        `${chatId}:${ACTIVE_STREAM_SUFFIX}`,
+        expect.objectContaining({
+          chatId,
+          userId,
+          requestId,
+          abortControllerId: `${chatId}-mock-uuid-123`,
+        }),
+        STREAM_EXPIRE_TIME,
+      );
+    });
+
+    it('should handle existing stream and log debug message', async () => {
+      const existingStreamData: StreamData = {
+        chatId,
+        userId: 'existing-user',
+        timestamp: Date.now() - 1000,
+        requestId: 'existing-req',
+        abortControllerId: 'existing-abort',
+      };
+
+      getSerializedObjectMock.mockResolvedValue(existingStreamData);
+
+      await setupStreamCancellation(chatId, userId, requestId);
+
+      expect(loggerMock.debug).toHaveBeenCalledWith(
+        'Overwriting existing stream',
+        {
+          chatId,
+          existingUserId: 'existing-user',
+          newUserId: userId,
+        },
+      );
+    });
+
+    it('should set up abort signal listener for cleanup', async () => {
+      const abortController = await setupStreamCancellation(
+        chatId,
+        userId,
+        requestId,
+      );
+
+      abortController.abort();
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(deleteKeyMock).toHaveBeenCalledWith(
+        `${chatId}:${ACTIVE_STREAM_SUFFIX}`,
+      );
+    });
+
+    it('should handle cleanup errors gracefully', async () => {
+      deleteKeyMock.mockRejectedValue(new Error('Cleanup error'));
+
+      const abortController = await setupStreamCancellation(
+        chatId,
+        userId,
+        requestId,
+      );
+
+      abortController.abort();
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(loggerMock.error).toHaveBeenCalledWith(
+        'Failed to cleanup stream',
+        {
+          chatId,
+          error: expect.any(Error),
+        },
+      );
+    });
+  });
+
+  describe('cancelActiveStream', () => {
+    beforeEach(() => {
+      jest.resetAllMocks();
+    });
+
+    it('should abort controller and cleanup when controller exists in registry', async () => {
+      await setupStreamCancellation(chatId, userId, requestId);
+
+      const streamData: StreamData = {
+        chatId,
+        userId,
+        timestamp: Date.now(),
+        requestId,
+        abortControllerId: `${chatId}-mock-uuid-123`,
+      };
+
+      getSerializedObjectMock.mockResolvedValue(streamData);
+
+      await cancelActiveStream(chatId);
+
+      expect(loggerMock.debug).toHaveBeenCalledWith(
+        'Aborting stream controller found in this instance',
+        {
+          chatId,
+          abortControllerId: `${chatId}-mock-uuid-123`,
+        },
+      );
+      expect(deleteKeyMock).toHaveBeenCalledWith(
+        `${chatId}:${ACTIVE_STREAM_SUFFIX}`,
+      );
+    });
+
+    it('should handle case when abort controller not found in registry', async () => {
+      const streamData: StreamData = {
+        chatId,
+        userId,
+        timestamp: Date.now(),
+        requestId,
+        abortControllerId: 'non-existent-controller',
+      };
+
+      getSerializedObjectMock.mockResolvedValue(streamData);
+
+      await cancelActiveStream(chatId);
+
+      expect(loggerMock.debug).toHaveBeenCalledWith(
+        'Abort controller not found in this instance, marking for cancellation',
+        {
+          chatId,
+          abortControllerId: 'non-existent-controller',
+        },
+      );
+      expect(deleteKeyMock).toHaveBeenCalledWith(
+        `${chatId}:${ACTIVE_STREAM_SUFFIX}`,
+      );
+    });
+
+    it('should handle errors during stream cancellation gracefully', async () => {
+      jest.resetAllMocks();
+      getSerializedObjectMock.mockRejectedValue(new Error('Cache error'));
+
+      await expect(cancelActiveStream(chatId)).rejects.toThrow('Cache error');
+    });
   });
 });
