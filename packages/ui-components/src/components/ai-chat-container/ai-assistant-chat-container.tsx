@@ -1,4 +1,4 @@
-import { AiScopeProps } from '@/components';
+import { AiScopeItem } from '@/components';
 import { UseChatHelpers } from '@ai-sdk/react';
 import { t } from 'i18next';
 import { Bot } from 'lucide-react';
@@ -10,7 +10,6 @@ import { BoxSize, ResizableArea } from '../resizable-area';
 import { AiChatInput, ChatStatus } from './ai-chat-input';
 import { AiChatSizeTogglers } from './ai-chat-size-togglers';
 import { AiModelSelectorProps } from './ai-model-selector';
-import { ScopeOption } from './ai-scope-selector';
 import { getBufferAreaHeight, getLastUserMessageId } from './ai-scroll-helpers';
 import { AI_CHAT_CONTAINER_SIZES, AiAssistantChatSizeState } from './types';
 import {
@@ -34,11 +33,12 @@ type AiAssistantChatContainerProps = {
   status?: ChatStatus;
   lastUserMessageRef: React.RefObject<HTMLDivElement>;
   lastAssistantMessageRef: React.RefObject<HTMLDivElement>;
-  availableScopeOptions?: ScopeOption[];
-  onScopeSelected?: (scope: ScopeOption) => void;
+  scopeOptions?: AiScopeItem[];
+  selectedScopeItems?: AiScopeItem[];
+  onScopeSelected?: (scope: AiScopeItem) => void;
+  onAiScopeItemRemove?: (id: string) => void;
 } & Pick<UseChatHelpers, 'input' | 'handleInputChange' | 'handleSubmit'> &
-  AiModelSelectorProps &
-  AiScopeProps;
+  AiModelSelectorProps;
 
 export const CHAT_MIN_WIDTH = 375;
 export const PARENT_INITIAL_HEIGHT_GAP = 220;
@@ -67,9 +67,9 @@ const AiAssistantChatContainer = ({
   status,
   lastUserMessageRef,
   lastAssistantMessageRef,
-  aiScopeItems,
+  scopeOptions,
   onAiScopeItemRemove,
-  availableScopeOptions = [],
+  selectedScopeItems,
   onScopeSelected,
 }: AiAssistantChatContainerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -226,9 +226,9 @@ const AiAssistantChatContainer = ({
                 isModelSelectorLoading={isModelSelectorLoading}
                 placeholder={t('Type your question here…')}
                 status={status}
-                aiScopeItems={aiScopeItems}
+                scopeOptions={scopeOptions}
                 onAiScopeItemRemove={onAiScopeItemRemove}
-                availableScopeOptions={availableScopeOptions}
+                selectedScopeItems={selectedScopeItems}
                 onScopeSelected={onScopeSelected}
               />
             </div>
