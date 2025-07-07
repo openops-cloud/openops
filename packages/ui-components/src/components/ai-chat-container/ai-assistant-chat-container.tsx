@@ -1,4 +1,3 @@
-import { AiScopeItem } from '@/components';
 import { UseChatHelpers } from '@ai-sdk/react';
 import { t } from 'i18next';
 import { Bot } from 'lucide-react';
@@ -10,6 +9,7 @@ import { BoxSize, ResizableArea } from '../resizable-area';
 import { AiChatInput, ChatStatus } from './ai-chat-input';
 import { AiChatSizeTogglers } from './ai-chat-size-togglers';
 import { AiModelSelectorProps } from './ai-model-selector';
+import { AiScopeItem } from './ai-scope-selector';
 import { getBufferAreaHeight, getLastUserMessageId } from './ai-scroll-helpers';
 import { AI_CHAT_CONTAINER_SIZES, AiAssistantChatSizeState } from './types';
 import {

@@ -1,7 +1,6 @@
 import { t } from 'i18next';
 import { Paperclip, Search, X } from 'lucide-react';
 import React, { useCallback, useMemo, useState } from 'react';
-import { BlockIcon } from '../../components';
 import { cn } from '../../lib/cn';
 import { Badge } from '../../ui/badge';
 import {
@@ -13,6 +12,7 @@ import {
 import { Input } from '../../ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '../../ui/popover';
 import { ScrollArea } from '../../ui/scroll-area';
+import { BlockIcon } from '../block-icon';
 
 export enum AiScopeType {
   STEP = 'STEP',
