@@ -18,7 +18,6 @@ type TestSampleDataViewerProps = {
   outputData: unknown;
   errorMessage: string | undefined;
   lastTestDate: string | undefined;
-  children?: React.ReactNode;
 };
 
 const TestSampleDataViewer = React.memo(
@@ -31,7 +30,6 @@ const TestSampleDataViewer = React.memo(
     outputData,
     errorMessage,
     lastTestDate,
-    children,
   }: TestSampleDataViewerProps) => {
     const formattedInputData = useMemo(
       () => formatUtils.formatStepInputOrOutput(inputData),
@@ -46,57 +44,54 @@ const TestSampleDataViewer = React.memo(
     const { theme } = useTheme();
 
     return (
-      <>
-        {!isTesting && children}
-        <div className="flex-grow flex flex-col w-full text-start gap-4">
-          <div className="flex justify-center items-center">
-            <div className="flex flex-col flex-grow gap-1">
-              <div className="text-md flex gap-1 justyf-center items-center">
-                {errorMessage ? (
-                  <>
-                    <StepStatusIcon
-                      status={StepOutputStatus.FAILED}
-                      size="5"
-                    ></StepStatusIcon>
-                    <span>{t('Testing Failed')}</span>
-                  </>
-                ) : (
-                  <>
-                    <StepStatusIcon
-                      status={StepOutputStatus.SUCCEEDED}
-                      size="5"
-                    ></StepStatusIcon>
-                    <span>{t('Tested Successfully')}</span>
-                  </>
-                )}
-              </div>
-              <div className="text-muted-foreground text-xs">
-                {lastTestDate &&
-                  !errorMessage &&
-                  formatUtils.formatDate(new Date(lastTestDate))}
-              </div>
+      <div className="h-full flex flex-col w-full text-start gap-4">
+        <div className="flex justify-center items-center">
+          <div className="flex flex-col flex-grow gap-1">
+            <div className="text-md flex gap-1 justyf-center items-center">
+              {errorMessage ? (
+                <>
+                  <StepStatusIcon
+                    status={StepOutputStatus.FAILED}
+                    size="5"
+                  ></StepStatusIcon>
+                  <span>{t('Testing Failed')}</span>
+                </>
+              ) : (
+                <>
+                  <StepStatusIcon
+                    status={StepOutputStatus.SUCCEEDED}
+                    size="5"
+                  ></StepStatusIcon>
+                  <span>{t('Tested Successfully')}</span>
+                </>
+              )}
             </div>
-            <TestButtonTooltip disabled={!isValid}>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={!isValid || isSaving}
-                keyboardShortcut="G"
-                onKeyboardShortcut={onRetest}
-                onClick={onRetest}
-                loading={isTesting}
-              >
-                {t('Retest')}
-              </Button>
-            </TestButtonTooltip>
+            <div className="text-muted-foreground text-xs">
+              {lastTestDate &&
+                !errorMessage &&
+                formatUtils.formatDate(new Date(lastTestDate))}
+            </div>
           </div>
-          <TestStepDataViewer
-            outputJson={errorMessage ?? formattedOutputData}
-            inputJson={formattedInputData}
-            theme={theme}
-          />
+          <TestButtonTooltip disabled={!isValid}>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={!isValid || isSaving}
+              keyboardShortcut="G"
+              onKeyboardShortcut={onRetest}
+              onClick={onRetest}
+              loading={isTesting}
+            >
+              {t('Retest')}
+            </Button>
+          </TestButtonTooltip>
         </div>
-      </>
+        <TestStepDataViewer
+          outputJson={errorMessage ?? formattedOutputData}
+          inputJson={formattedInputData}
+          theme={theme}
+        />
+      </div>
     );
   },
 );
