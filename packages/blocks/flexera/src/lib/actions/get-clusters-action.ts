@@ -13,7 +13,7 @@ export const getClustersAction = createAction({
       description: 'The account to get clusters from.',
       required: true,
       refreshers: ['auth'],
-      options: async ({ auth }) => {
+      options: async ({ auth }: any) => {
         const response = await httpClient.sendRequest({
           method: HttpMethod.GET,
           url: `https://api.spotinst.io/setup/account`,
