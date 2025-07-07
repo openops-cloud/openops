@@ -59,6 +59,9 @@
       "@openops/block-clearout": ["packages/blocks/clearout/src/index.ts"],
       "@openops/block-clickup": ["packages/blocks/clickup/src/index.ts"],
       "@openops/block-clockodo": ["packages/blocks/clockodo/src/index.ts"],
+      "@openops/block-cloudability": [
+        "packages/blocks/cloudability/src/index.ts"
+      ],
       "@openops/block-cloudformation": [
         "packages/blocks/cloudformation/src/index.ts"
       ],

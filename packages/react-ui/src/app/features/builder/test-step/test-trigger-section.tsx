@@ -235,19 +235,10 @@ const TestTriggerSection = React.memo(
           });
 
     return (
-      <div>
+      <div className="flex flex-col h-full">
         {outputDataSelected && !isSimulating && !isSavingMockdata && (
-          <TestSampleDataViewer
-            onRetest={isSimulation ? simulateTrigger : pollTrigger}
-            isValid={isValid}
-            isSaving={isSaving}
-            isTesting={isTesting}
-            outputData={currentTestOutput}
-            inputData={currentTestInput}
-            errorMessage={errorMessage}
-            lastTestDate={stepData?.lastTestDate}
-          >
-            {pollResults?.data && (
+          <>
+            {pollResults?.data && !isTesting && (
               <div className="mb-3">
                 <Select
                   value={currentSelectedId}
@@ -290,7 +281,19 @@ const TestTriggerSection = React.memo(
                 </span>
               </div>
             )}
-          </TestSampleDataViewer>
+            <div className="flex-1 overflow-hidden">
+              <TestSampleDataViewer
+                onRetest={isSimulation ? simulateTrigger : pollTrigger}
+                isValid={isValid}
+                isSaving={isSaving}
+                isTesting={isTesting}
+                outputData={currentTestOutput}
+                inputData={currentTestInput}
+                errorMessage={errorMessage}
+                lastTestDate={stepData?.lastTestDate}
+              />
+            </div>
+          </>
         )}
 
         {isSimulation && isSimulating && (
