@@ -71,7 +71,7 @@ describe('Progress Service', () => {
       expect(mockMakeHttpRequest).toHaveBeenCalledWith(
         'POST',
         'http://localhost:3000/v1/engine/update-run',
-        expect.any(Object), // AxiosHeaders
+        expect.any(Object),
         expect.objectContaining({
           executionCorrelationId: 'test-correlation-id-success',
           runId: 'test-run-id',
@@ -116,7 +116,7 @@ describe('Progress Service', () => {
 
       expect(mockMakeHttpRequest).toHaveBeenCalledTimes(1);
       const call = mockMakeHttpRequest.mock.calls[0];
-      const [method, url, headers, requestBody, retryConfig] = call;
+      const [method, url, _, requestBody] = call;
 
       expect(method).toBe('POST');
       expect(url).toBe('http://localhost:3000/v1/engine/update-run');
@@ -150,7 +150,7 @@ describe('Progress Service', () => {
 
       expect(mockMakeHttpRequest).toHaveBeenCalledTimes(1);
       const call = mockMakeHttpRequest.mock.calls[0];
-      const [method, url, headers, requestBody] = call;
+      const [_, __, ___, requestBody] = call;
       
       expect(requestBody.workerHandlerId).toBe(null);
     });
