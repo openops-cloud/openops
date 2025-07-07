@@ -79,7 +79,7 @@ export const linearUpdatedIssue = createTrigger({
     const client = makeClient(context.auth);
 
     // Create webhook configuration
-    const webhookConfig: any = {
+    const webhookConfig: LinearWebhookConfig = {
       label: 'ActiveBlocks Updated Issue',
       url: context.webhookUrl,
       allPublicTeams: true,
@@ -121,4 +121,12 @@ export const linearUpdatedIssue = createTrigger({
 
 interface WebhookInformation {
   webhookId: string;
+}
+
+interface LinearWebhookConfig {
+  label: string;
+  url: string;
+  allPublicTeams: boolean;
+  teamId?: string;
+  resourceTypes: string[];
 }
