@@ -1,16 +1,14 @@
 import { BlockAuth, createAction, Property } from '@openops/blocks-framework';
 import {
-  addRow,
   authenticateDefaultUserInOpenOpsTables,
   getFields,
   getPrimaryKeyFieldFromFields,
   getPropertyFromField,
-  getRowByPrimaryKeyValue,
   getTableFields,
   getTableIdByTableName,
   OpenOpsField,
   openopsTablesDropdownProperty,
-  updateRow,
+  upsertRow,
 } from '@openops/common';
 import { cacheWrapper } from '@openops/server-shared';
 import { convertToStringWithValidation, isEmpty } from '@openops/shared';
@@ -137,30 +135,11 @@ export const updateRecordAction = createAction({
 
     const primaryKeyField = getPrimaryKeyFieldFromFields(tableFields);
     const primaryKeyValue = getPrimaryKey(rowPrimaryKey['rowPrimaryKey']);
+    fieldsToUpdate[primaryKeyField.name] = primaryKeyValue;
 
-    const rowToUpdate = primaryKeyValue
-      ? await getRowByPrimaryKeyValue(
-          token,
-          tableId,
-          primaryKeyValue,
-          primaryKeyField.name,
-          primaryKeyField.type,
-        )
-      : undefined;
-
-    if (!rowToUpdate) {
-      fieldsToUpdate[primaryKeyField.name] = primaryKeyValue;
-      return await addRow({
-        tableId: tableId,
-        token: token,
-        fields: fieldsToUpdate,
-      });
-    }
-
-    return await updateRow({
+    return await upsertRow({
       tableId: tableId,
       token: token,
-      rowId: rowToUpdate.id,
       fields: fieldsToUpdate,
     });
   },

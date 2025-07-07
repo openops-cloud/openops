@@ -15,6 +15,11 @@ jest.mock('../../src/lib/services/storage.service', () => ({
   })),
 }))
 
+jest.mock('../../src/lib/services/progress.service', () => ({
+    progressService: {
+        sendUpdate: jest.fn().mockImplementation(() => Promise.resolve()),
+    },
+}))
 describe('flow with looping', () => {
 
     it('should execute iterations', async () => {
