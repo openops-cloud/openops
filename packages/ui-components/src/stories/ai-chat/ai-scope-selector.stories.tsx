@@ -1,6 +1,7 @@
 import { action } from '@storybook/addon-actions';
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
+import { ThemeAwareDecorator } from '../../../.storybook/decorators';
 import {
   AiScopeItem,
   AiScopeSelector,
@@ -58,6 +59,7 @@ const meta = {
   title: 'components/AiChat/AiScopeSelector',
   component: AiScopeSelector,
   tags: ['autodocs'],
+  decorators: [ThemeAwareDecorator],
   args: {
     options: sampleScopeOptions,
     onScopeSelected: action('Scope selected'),
