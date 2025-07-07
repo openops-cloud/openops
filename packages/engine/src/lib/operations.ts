@@ -18,6 +18,7 @@ import {
   FlowRunResponse,
   GenericStepOutput,
   isNil,
+  ResolveVariableOperation,
   StepOutput,
   StepOutputStatus,
   TriggerHookType,
@@ -31,6 +32,7 @@ import { testExecutionContext } from './handler/context/test-execution-context';
 import { flowExecutor } from './handler/flow-executor';
 import { blockHelper } from './helper/block-helper';
 import { triggerHelper } from './helper/trigger-helper';
+import { resolveVariable } from './resolve-variable';
 import { utils } from './utils';
 
 const executeFlow = async (
@@ -247,6 +249,23 @@ export async function execute(
         });
 
         const output = await blockHelper.executeValidateAuth(input);
+
+        return {
+          status: EngineResponseStatus.OK,
+          response: output,
+        };
+      }
+      case EngineOperationType.RESOLVE_VARIABLE: {
+        const input = operation as ResolveVariableOperation;
+
+        appendToContext({
+          projectId: input.projectId,
+          flowId: input.flowVersion.flowId,
+          flowVersionId: input.flowVersion.id,
+          ...(input.stepName && { stepName: input.stepName }),
+        });
+
+        const output = await resolveVariable(input);
 
         return {
           status: EngineResponseStatus.OK,
