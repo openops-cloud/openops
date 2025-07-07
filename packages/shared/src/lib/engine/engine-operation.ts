@@ -55,7 +55,7 @@ export type ExecuteValidateAuthOperation = BaseEngineOperation & {
 export type ResolveVariableOperation = BaseEngineOperation & {
   variableExpression: string;
   flowVersion: FlowVersion;
-  stepName?: string;
+  stepName: string;
   stepTestOutputs?: Record<OpenOpsId, string>;
 };
 

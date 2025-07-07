@@ -15,7 +15,7 @@ export async function resolveVariable(
       internalApiUrl: input.internalApiUrl,
       publicUrl: input.publicUrl,
       flowVersion: input.flowVersion,
-      stepName: input.stepName ?? 'variable_resolver',
+      stepName: input.stepName,
       stepTestOutputs: input.stepTestOutputs,
     });
 
