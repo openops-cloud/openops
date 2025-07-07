@@ -11,7 +11,6 @@ export const linearCreateComment = createAction({
   description: 'Create a new comment on an issue in Linear workspace',
   props: {
     team_id: props.team_id(),
-    user_id: props.assignee_id(),
     issue_id: props.issue_id(),
     body: Property.LongText({
       displayName: 'Comment Body',
