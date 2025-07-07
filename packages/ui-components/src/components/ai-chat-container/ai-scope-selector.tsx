@@ -1,7 +1,7 @@
 import { t } from 'i18next';
-import { Paperclip, Plus, Search } from 'lucide-react';
-import React, { useCallback, useEffect, useState } from 'react';
-import { BlockIcon, SearchInput } from '../../components';
+import { Paperclip, Search, X } from 'lucide-react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { BlockIcon } from '../../components';
 import { cn } from '../../lib/cn';
 import { Badge } from '../../ui/badge';
 import {
@@ -13,90 +13,126 @@ import {
 import { Input } from '../../ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '../../ui/popover';
 import { ScrollArea } from '../../ui/scroll-area';
-import { AiScopeType } from './ai-scope';
 
-export type ScopeOption = {
-  id: string;
+export enum AiScopeType {
+  STEP = 'STEP',
+}
+
+export type AiScopeItem = {
   displayName: string;
+  logoUrl: string;
+  id: string;
   type: AiScopeType;
 };
 
 export type AiScopeSelectorProps = {
-  availableScopeOptions: ScopeOption[];
-  onScopeSelected: (scope: ScopeOption) => void;
+  options: AiScopeItem[];
+  selectedItems: AiScopeItem[];
+  onScopeSelected: (scope: AiScopeItem) => void;
+  onAiScopeItemRemove?: (id: string) => void;
   className?: string;
 };
 
+const AiScopeItem = ({
+  item,
+  onRemove,
+}: {
+  item: AiScopeItem;
+  onRemove: (id: string) => void;
+}) => {
+  return (
+    <Badge
+      variant="outline"
+      className="flex items-center gap-2 px-1 rounded-xs overflow-hidden"
+    >
+      <BlockIcon
+        logoUrl={item.logoUrl}
+        displayName={item.displayName}
+        showTooltip={false}
+        size={'sm'}
+        className="size-[14px]"
+      ></BlockIcon>
+      <span className="flex-1 font-normal truncate text-[14px]">
+        {item.displayName}
+      </span>
+      <X
+        className="size-[13px] opacity-50"
+        role="button"
+        onClick={() => onRemove(item.id)}
+      />
+    </Badge>
+  );
+};
+
 const AiScopeSelector = ({
-  availableScopeOptions,
+  options,
   onScopeSelected,
+  selectedItems = [],
+  onAiScopeItemRemove,
   className,
 }: AiScopeSelectorProps) => {
   const [open, setOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
-  const hasOptions = !!availableScopeOptions?.length;
-  const [filteredOptions, setFilteredOptions] = useState<ScopeOption[]>([]);
 
-  useEffect(() => {
+  const filteredOptions = useMemo(() => {
+    const availableOptions = options.filter(
+      (option) => !selectedItems.some((item) => item.id === option.id),
+    );
+
     if (searchValue) {
-      setFilteredOptions(
-        availableScopeOptions.filter((scope) => {
-          return scope.displayName
-            .toLowerCase()
-            .includes(searchValue.toLowerCase());
-        }),
-      );
+      return availableOptions.filter((scope) => {
+        return scope.displayName
+          .toLowerCase()
+          .includes(searchValue.toLowerCase());
+      });
     } else {
-      setFilteredOptions([...availableScopeOptions]);
+      return availableOptions;
     }
-  }, [availableScopeOptions, searchValue]);
+  }, [options, searchValue, selectedItems]);
 
   const handleSelect = useCallback(
     (scopeId: string) => {
-      const selectedScope = availableScopeOptions.find(
-        (scope) => scope.id === scopeId,
-      );
+      const selectedScope = options.find((scope) => scope.id === scopeId);
       if (selectedScope) {
         onScopeSelected(selectedScope);
       }
     },
-    [availableScopeOptions, onScopeSelected],
+    [options, onScopeSelected],
   );
 
   const onOpenChange = useCallback(() => {
-    if (hasOptions) {
-      setOpen((open) => !open);
-      setSearchValue('');
-    } else {
-      setOpen(false);
-    }
-  }, [hasOptions]);
-
-  if (!hasOptions) {
-    return null;
-  }
+    setOpen((open) => !open);
+    setSearchValue('');
+  }, []);
 
   return (
-    <div className={cn('relative', className)}>
+    <div className="flex flex-col gap-2 relative">
       <Popover open={open} onOpenChange={onOpenChange}>
-        <PopoverTrigger>
+        <PopoverTrigger
+          disabled={!filteredOptions.length}
+          className={className}
+        >
           <Badge
-            variant="secondary"
-            className="flex items-center gap-1 rounded-xs text-xs font-medium cursor-pointer"
+            variant="outline"
+            className={cn(
+              'flex items-center gap-1 rounded-xs text-xs font-medium cursor-pointer w-fit',
+              { 'cursor-default': !filteredOptions.length },
+            )}
           >
             {t('Add step context...')}
             <Paperclip size={13} />
           </Badge>
         </PopoverTrigger>
 
-        <PopoverContent className="w-fit p-0" align="start">
+        <PopoverContent className="w-fit p-0" align="start" side="top">
           <Command className="bg-background">
             <div className={`relative mx-2 my-[6px] w-[190px]`}>
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
               <Input
-                type="search"
                 placeholder={t('Search')}
-                className={cn('pl-9 pr-4 bg-background')}
+                className={cn(
+                  'h-7 pl-9 pr-4 bg-background focus-visible:ring-0',
+                )}
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
               />
@@ -104,7 +140,7 @@ const AiScopeSelector = ({
             <CommandList>
               <ScrollArea
                 className="h-full"
-                viewPortClassName={'max-h-[200px] max-w-[190px]'}
+                viewPortClassName={'max-h-[114px] max-w-[200px]'}
               >
                 <CommandGroup>
                   {filteredOptions.map((scope) => (
@@ -112,15 +148,18 @@ const AiScopeSelector = ({
                       key={scope.id + scope.displayName}
                       value={scope.id}
                       onSelect={() => handleSelect(scope.id)}
-                      className="h-[27px] pl-1 truncate"
+                      className="w-full h-[27px] flex items-center justify-start gap-2 pl-1"
                     >
                       <BlockIcon
-                        logoUrl={scope.displayName}
+                        logoUrl={scope.logoUrl}
                         displayName={scope.displayName}
                         showTooltip={false}
                         size={'sm'}
+                        className="size-4"
                       ></BlockIcon>
-                      {scope.displayName}
+                      <span className="flex-1 truncate text-[14px]">
+                        {scope.displayName}
+                      </span>
                     </CommandItem>
                   ))}
                 </CommandGroup>
@@ -129,6 +168,20 @@ const AiScopeSelector = ({
           </Command>
         </PopoverContent>
       </Popover>
+
+      {selectedItems && selectedItems.length > 0 && onAiScopeItemRemove && (
+        <ScrollArea viewPortClassName="max-h-[82px]">
+          <div className="flex-1 flex flex-wrap gap-2 mr-3">
+            {selectedItems.map((item) => (
+              <AiScopeItem
+                key={item.id}
+                item={item}
+                onRemove={onAiScopeItemRemove}
+              />
+            ))}
+          </div>
+        </ScrollArea>
+      )}
     </div>
   );
 };
