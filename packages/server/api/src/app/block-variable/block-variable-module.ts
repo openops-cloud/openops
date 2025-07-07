@@ -39,7 +39,7 @@ const blockVariableController: FastifyPluginAsyncTypebox = async (app) => {
       variableExpression: request.variableExpression,
       flowVersion: flow.version,
       projectId,
-      stepName: request.stepName,
+      stepName: request.stepName ?? '',
       stepTestOutputs,
     });
 
