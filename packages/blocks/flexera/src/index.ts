@@ -24,7 +24,7 @@ export const flexera = createBlock({
             'For more information, visit the [Flexera API documentation](https://docs.spot.io/api/).',
         }),
       },
-      authMapping: async (auth) => ({
+      authMapping: async ({ auth }) => ({
         Authorization: `Bearer ${auth}`,
       }),
     }),
