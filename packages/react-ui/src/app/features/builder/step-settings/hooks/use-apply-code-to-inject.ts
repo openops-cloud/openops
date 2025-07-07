@@ -22,24 +22,21 @@ export const useApplyCodeToInject = ({
       return;
     }
 
-    switch (midpanelState.aiChatProperty.inputName) {
-      case 'settings.sourceCode':
-        form.setValue(
-          midpanelState.aiChatProperty.inputName,
-          {
-            code: midpanelState.codeToInject,
-            packageJson: '{}',
-          },
-          { shouldValidate: true },
-        );
-        break;
-      default:
-        form.setValue(
-          midpanelState.aiChatProperty.inputName,
-          midpanelState.codeToInject,
-          { shouldValidate: true },
-        );
-        break;
+    if (midpanelState.aiChatProperty.inputName === 'settings.sourceCode') {
+      form.setValue(
+        midpanelState.aiChatProperty.inputName,
+        {
+          code: midpanelState.codeToInject,
+          packageJson: '{}',
+        },
+        { shouldValidate: true },
+      );
+    } else {
+      form.setValue(
+        midpanelState.aiChatProperty.inputName,
+        midpanelState.codeToInject,
+        { shouldValidate: true },
+      );
     }
 
     applyMidpanelAction({ type: 'CLEAN_CODE_TO_INJECT' });
