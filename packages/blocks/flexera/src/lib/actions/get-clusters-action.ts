@@ -18,7 +18,7 @@ export const getClustersAction = createAction({
           method: HttpMethod.GET,
           url: `https://api.spotinst.io/setup/account`,
           headers: {
-            Authorization: `Basic ${auth}`,
+            Authorization: `Bearer ${auth}`,
           },
         });
 
