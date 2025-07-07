@@ -19,6 +19,7 @@ export enum EngineOperationType {
   EXECUTE_PROPERTY = 'EXECUTE_PROPERTY',
   EXECUTE_TRIGGER_HOOK = 'EXECUTE_TRIGGER_HOOK',
   EXECUTE_VALIDATE_AUTH = 'EXECUTE_VALIDATE_AUTH',
+  RESOLVE_VARIABLE = 'RESOLVE_VARIABLE',
 }
 
 export enum TriggerHookType {
@@ -36,7 +37,8 @@ export type EngineOperation =
   | ExecutePropsOptions
   | ExecuteTriggerOperation<TriggerHookType>
   | ExecuteExtractBlockMetadata
-  | ExecuteValidateAuthOperation;
+  | ExecuteValidateAuthOperation
+  | ResolveVariableOperation;
 
 export type BaseEngineOperation = {
   projectId: ProjectId;
@@ -48,6 +50,13 @@ export type BaseEngineOperation = {
 export type ExecuteValidateAuthOperation = BaseEngineOperation & {
   authProperty: unknown;
   auth: AppConnectionValue;
+};
+
+export type ResolveVariableOperation = BaseEngineOperation & {
+  variableExpression: string;
+  flowVersion: FlowVersion;
+  stepName?: string;
+  stepTestOutputs?: Record<OpenOpsId, string>;
 };
 
 export type ExecuteExtractBlockMetadata = BlockPackage;
@@ -195,6 +204,13 @@ type InvalidExecuteValidateAuthResponseOutput =
 export type ExecuteValidateAuthResponse =
   | ValidExecuteValidateAuthResponseOutput
   | InvalidExecuteValidateAuthResponseOutput;
+
+export type ResolveVariableResponse = {
+  success: boolean;
+  resolvedValue: unknown;
+  censoredValue: unknown;
+  error?: string;
+};
 
 export type ScheduleOptions = {
   cronExpression: string;

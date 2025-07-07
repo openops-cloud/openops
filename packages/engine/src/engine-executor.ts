@@ -3,8 +3,14 @@ import {
   logger,
   networkUtls,
 } from '@openops/server-shared';
-import { EngineOperationType, EngineResponse } from '@openops/shared';
+import {
+  EngineOperationType,
+  EngineResponse,
+  EngineResponseStatus,
+  ResolveVariableOperation,
+} from '@openops/shared';
 import { execute } from './lib/operations';
+import { resolveVariable } from './lib/resolve-variable';
 
 export async function executeEngine(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -19,7 +25,27 @@ export async function executeEngine(
   engineInput.publicUrl = await networkUtls.getPublicUrl();
   engineInput.internalApiUrl = networkUtls.getInternalApiUrl();
 
-  const result = await execute(operationType, engineInput);
+  let result: EngineResponse<unknown>;
+
+  // todo:
+  if ((operationType as string) === 'RESOLVE_VARIABLE') {
+    try {
+      const output = await resolveVariable(
+        engineInput as ResolveVariableOperation,
+      );
+      result = {
+        status: EngineResponseStatus.OK,
+        response: output,
+      };
+    } catch (error) {
+      result = {
+        status: EngineResponseStatus.ERROR,
+        response: (error as Error).message,
+      };
+    }
+  } else {
+    result = await execute(operationType, engineInput);
+  }
 
   const duration = Math.floor(performance.now() - startTime);
 

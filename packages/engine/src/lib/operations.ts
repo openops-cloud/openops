@@ -253,6 +253,13 @@ export async function execute(
           response: output,
         };
       }
+      default: {
+        logger.warn(`Unsupported operation type: ${operationType}`);
+        return {
+          status: EngineResponseStatus.ERROR,
+          response: `Unsupported operation type: ${operationType}`,
+        };
+      }
     }
   } catch (error) {
     logger.warn('Engine operation failed.', error);
