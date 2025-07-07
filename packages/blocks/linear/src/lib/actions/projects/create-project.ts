@@ -57,7 +57,7 @@ export const linearCreateProject = createAction({
         project: createdProject,
       };
     } else {
-      throw new Error(`Unexpected error: ${result}`);
+      throw new Error(`Unexpected error: ${JSON.stringify(result)}`);
     }
   },
 });
