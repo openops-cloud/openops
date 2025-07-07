@@ -20,7 +20,7 @@ export const getClusterAggregatedSummaryCostsAction = createAction({
       method: HttpMethod.GET,
       url: `https://api.spotinst.io/ocean/aws/k8s/cluster/${context.propsValue.clusterId}/aggregatedCosts/summary`,
       headers: {
-        Authorization: `Bearer ${context.auth.apiToken}`,
+        Authorization: `Bearer ${context.auth}`,
       },
     });
 

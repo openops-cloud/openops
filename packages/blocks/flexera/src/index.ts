@@ -1,5 +1,5 @@
 import { createCustomApiCallAction } from '@openops/blocks-common';
-import { createBlock } from '@openops/blocks-framework';
+import { createBlock, Property } from '@openops/blocks-framework';
 import { flexeraAuth } from './auth';
 import { getClusterAggregatedSummaryCostsAction } from './lib/actions/get-cluster-aggregated-summary-costs-action';
 import { getClustersAction } from './lib/actions/get-clusters-action';
@@ -16,8 +16,14 @@ export const flexera = createBlock({
     createCustomApiCallAction({
       baseUrl: () => 'https://api.spotinst.io',
       auth: flexeraAuth,
+      additionalProps: {
+        documentation: Property.MarkDown({
+          value:
+            'For more information, visit the [Flexera API documentation](https://docs.spot.io/api/).',
+        }),
+      },
       authMapping: async (auth) => ({
-        Authorization: `Bearer ${(auth as any).apiToken}`,
+        Authorization: `Bearer ${auth}`,
       }),
     }),
   ],

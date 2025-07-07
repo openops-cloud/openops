@@ -18,7 +18,7 @@ export const getClustersAction = createAction({
           method: HttpMethod.GET,
           url: `https://api.spotinst.io/setup/account`,
           headers: {
-            Authorization: `Basic ${(auth as any).apiToken}`,
+            Authorization: `Basic ${auth}`,
           },
         });
 
@@ -37,7 +37,7 @@ export const getClustersAction = createAction({
       method: HttpMethod.GET,
       url: `https://api.spotinst.io/ocean/aws/k8s/cluster?accountId=${context.propsValue.accountId}`,
       headers: {
-        Authorization: `Bearer ${context.auth.apiToken}`,
+        Authorization: `Bearer ${context.auth}`,
       },
     });
 
