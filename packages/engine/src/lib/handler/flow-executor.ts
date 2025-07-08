@@ -57,10 +57,7 @@ export const flowExecutor = {
         ? output.setVerdict(ExecutionVerdict.SUCCEEDED, output.verdictResponse)
         : output;
 
-    await progressService.sendUpdate({
-      engineConstants: constants,
-      flowExecutorContext: newContext,
-    });
+    await sendProgress(newContext, constants);
 
     return newContext.toResponse();
   },
