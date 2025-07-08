@@ -69,7 +69,7 @@ export const createColumns = (
     cell: ({ row }) => {
       const created = row.original.created;
       return (
-        <div className="text-left font-medium min-w-[150px]">
+        <div className="text-left font-regular min-w-[150px]">
           {formatUtils.formatDate(new Date(created))}
         </div>
       );
@@ -83,7 +83,7 @@ export const createColumns = (
     cell: ({ row }) => {
       const { updated } = row.original.version;
       return (
-        <div className="text-left font-medium min-w-[150px]">
+        <div className="text-left font-regular min-w-[150px]">
           {formatUtils.formatDate(new Date(updated))}
         </div>
       );
@@ -119,7 +119,7 @@ export const createColumns = (
       return (
         <div className="w-fit px-3 py-1 flex items-center gap-1 rounded-full border border-warning bg-warning-100">
           <CircleAlert size={16} className="text-warning" />
-          <span className="font-medium text-sm text-blueAccent-200 dark:text-primary text-nowrap">
+          <span className="font-regular text-sm text-blueAccent-200 dark:text-primary text-nowrap">
             {t('Not finished')}
           </span>
         </div>
