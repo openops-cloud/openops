@@ -137,6 +137,7 @@ const AiScopeSelector = ({
                 onChange={(e) => setSearchValue(e.target.value)}
               />
             </div>
+
             <CommandList>
               <ScrollArea
                 className="h-full"
