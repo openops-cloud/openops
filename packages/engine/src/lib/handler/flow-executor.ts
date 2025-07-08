@@ -106,7 +106,7 @@ export const flowExecutor = {
         duration: stepEndTime - stepStartTime,
       });
 
-      sendProgress(flowExecutionContext, constants);
+      await sendProgress(flowExecutionContext, constants);
 
       if (flowExecutionContext.verdict !== ExecutionVerdict.RUNNING) {
         break;
@@ -124,13 +124,9 @@ export const flowExecutor = {
 function sendProgress(
   flowExecutionContext: FlowExecutorContext,
   constants: EngineConstants,
-): void {
-  progressService
-    .sendUpdate({
-      engineConstants: constants,
-      flowExecutorContext: flowExecutionContext,
-    })
-    .catch((error) => {
-      logger.error('Error sending progress update', error);
-    });
+): Promise<void> {
+  return progressService.sendUpdate({
+    engineConstants: constants,
+    flowExecutorContext: flowExecutionContext,
+  });
 }

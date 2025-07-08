@@ -1,6 +1,7 @@
 import { makeHttpRequest } from '@openops/common';
 import { hashUtils, logger } from '@openops/server-shared';
 import { UpdateRunProgressRequest } from '@openops/shared';
+import { Mutex } from 'async-mutex';
 import { AxiosHeaders } from 'axios';
 import { EngineConstants } from '../handler/context/engine-constants';
 import { FlowExecutorContext } from '../handler/context/flow-execution-context';
@@ -9,11 +10,14 @@ import { throwIfExecutionTimeExceeded } from '../timeout-validator';
 const MAX_RETRIES = 3;
 
 let lastRequestHash: string | undefined = undefined;
+const lock = new Mutex();
 
 export const progressService = {
   sendUpdate: async (params: UpdateStepProgressParams): Promise<void> => {
-    throwIfExecutionTimeExceeded();
-    await sendUpdateRunRequest(params);
+    return lock.runExclusive(async () => {
+      throwIfExecutionTimeExceeded();
+      await sendUpdateRunRequest(params);
+    });
   },
 };
 
@@ -40,6 +44,10 @@ const sendUpdateRunRequest = async (
     runDetails: await flowExecutorContext.toResponse(),
     progressUpdateType: engineConstants.progressUpdateType,
   };
+
+  logger.debug(
+    `Sending progress update for ${request.runId} ${request.runDetails.status}`,
+  );
 
   // Request deduplication using hash comparison
   const requestHash = hashUtils.hashObject(request, (key, value) => {
