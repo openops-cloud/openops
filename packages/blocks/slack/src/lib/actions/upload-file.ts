@@ -1,11 +1,9 @@
-import {
-  AuthenticationType,
-  httpClient,
-  HttpMethod,
-  HttpRequest,
-} from '@openops/blocks-common';
 import { createAction, Property } from '@openops/blocks-framework';
-import { slackAuth } from '../common/authentication';
+import { slackAuth } from '../../index';
+import { WebClient } from '@slack/web-api';
+import {
+  slackChannel,
+} from '../common/props';
 
 export const uploadFile = createAction({
   auth: slackAuth,
@@ -21,32 +19,20 @@ export const uploadFile = createAction({
       displayName: 'Title',
       required: false,
     }),
+    filename: Property.ShortText({
+      displayName: 'Filename',
+      required: false,
+    }),
+    channel: slackChannel(false),
   },
   async run(context) {
     const token = context.auth.access_token;
-    const { file, title } = context.propsValue;
-    const formData = new FormData();
-    formData.append('file', new Blob([file.data]));
-    if (title !== undefined) {
-      formData.append('title', title);
-    }
-
-    const request: HttpRequest = {
-      url: `https://slack.com/api/files.upload`,
-      method: HttpMethod.POST,
-      body: formData,
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-      authentication: {
-        type: AuthenticationType.BEARER_TOKEN,
-        token,
-      },
-    };
-    const response = await httpClient.sendRequest(request);
-    if (!response.body.ok) {
-      throw new Error(response.body.error);
-    }
-    return response.body;
+    const { file, title, filename, channel } = context.propsValue;
+    const client = new WebClient(token);
+    return await client.files.uploadV2({
+      file_uploads: [{ file: file.data, filename: filename || file.filename }],
+      title: title,
+      channel_id: channel,
+    });
   },
 });
