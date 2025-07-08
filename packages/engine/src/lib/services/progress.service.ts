@@ -14,8 +14,8 @@ const lock = new Mutex();
 
 export const progressService = {
   sendUpdate: async (params: UpdateStepProgressParams): Promise<void> => {
+    throwIfExecutionTimeExceeded();
     return lock.runExclusive(async () => {
-      throwIfExecutionTimeExceeded();
       await sendUpdateRunRequest(params);
     });
   },
@@ -73,14 +73,14 @@ const sendUpdateRunRequest = async (
       {
         retries: MAX_RETRIES,
         retryDelay: (retryCount: number) => {
-          return (retryCount + 1) * 1000; // 1s, 2s, 3s
+          return (retryCount + 1) * 200; // 200ms, 400ms, 600ms
         },
       },
     );
   } catch (error) {
     logger.error(
       `Progress update failed after ${MAX_RETRIES} retries for status ${request.runDetails.status} on run ${request.runId}`,
-      error,
+      { error },
     );
   }
 };
