@@ -1,4 +1,4 @@
-import { logger, runWithTemporaryContext } from '@openops/server-shared';
+import { runWithTemporaryContext } from '@openops/server-shared';
 import {
   Action,
   ActionType,
