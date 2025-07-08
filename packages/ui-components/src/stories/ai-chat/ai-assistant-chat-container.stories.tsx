@@ -15,6 +15,7 @@ import {
 } from '../../components';
 import { TooltipProvider } from '../../ui/tooltip';
 import { sampleAIChatMessages } from './sample-messages';
+import { sampleScopeOptions } from './sample-scope-options';
 
 const useAiChatToggleAndDimensions = () => {
   const [{ aiChatSize, toggleAiChatState }, updateArgs] = useArgs();
@@ -189,6 +190,120 @@ export const WithMessages: Story = {
 export const WithMessagesCopyAndInject: Story = {
   args: {
     isEmpty: false,
+  },
+  parameters: {
+    chromatic: { delay: 500 },
+  },
+  render: (args) => {
+    const {
+      aiChatSize,
+      toggleAiChatStateSize,
+      dimensions,
+      updateDimensionsState,
+    } = useAiChatToggleAndDimensions();
+
+    const lastUserMessageRef = useRef<HTMLDivElement>(null);
+    const lastAssistantMessageRef = useRef<HTMLDivElement>(null);
+
+    return (
+      <AiAssistantChatContainer
+        {...args}
+        aiChatSize={aiChatSize}
+        toggleAiChatState={toggleAiChatStateSize}
+        dimensions={dimensions}
+        setDimensions={updateDimensionsState}
+        showAiChat={true}
+        className="relative w-full"
+        lastUserMessageRef={lastUserMessageRef}
+        lastAssistantMessageRef={lastAssistantMessageRef}
+        messages={sampleAIChatMessages}
+      >
+        <AIChatMessages
+          messages={sampleAIChatMessages}
+          onInject={action('Inject command')}
+          codeVariation={MarkdownCodeVariations.WithCopyAndInject}
+          lastUserMessageRef={lastUserMessageRef}
+          lastAssistantMessageRef={lastAssistantMessageRef}
+        />
+      </AiAssistantChatContainer>
+    );
+  },
+};
+
+/**
+ * AiAssistantChatContainer with scope selector functionality.
+ * This demonstrates how the component can be used to add context from steps to the AI conversation.
+ * Users can add and remove scope items to provide additional context to their queries.
+ */
+export const WithScopeSelector: Story = {
+  args: {
+    isEmpty: false,
+    scopeOptions: sampleScopeOptions,
+    selectedScopeItems: [],
+    onScopeSelected: action('Scope selected'),
+    onAiScopeItemRemove: action('Scope item removed'),
+  },
+  parameters: {
+    chromatic: { delay: 500 },
+  },
+  render: (args) => {
+    const {
+      aiChatSize,
+      toggleAiChatStateSize,
+      dimensions,
+      updateDimensionsState,
+    } = useAiChatToggleAndDimensions();
+
+    const lastUserMessageRef = useRef<HTMLDivElement>(null);
+    const lastAssistantMessageRef = useRef<HTMLDivElement>(null);
+
+    return (
+      <AiAssistantChatContainer
+        {...args}
+        aiChatSize={aiChatSize}
+        toggleAiChatState={toggleAiChatStateSize}
+        dimensions={dimensions}
+        setDimensions={updateDimensionsState}
+        showAiChat={true}
+        className="relative w-full"
+        lastUserMessageRef={lastUserMessageRef}
+        lastAssistantMessageRef={lastAssistantMessageRef}
+        messages={sampleAIChatMessages}
+      >
+        <AIChatMessages
+          messages={sampleAIChatMessages}
+          onInject={action('Inject command')}
+          codeVariation={MarkdownCodeVariations.WithCopyAndInject}
+          lastUserMessageRef={lastUserMessageRef}
+          lastAssistantMessageRef={lastAssistantMessageRef}
+        />
+      </AiAssistantChatContainer>
+    );
+  },
+};
+
+/**
+ * AiAssistantChatContainer with pre-selected scope items.
+ * This demonstrates how the component looks when scope items are already selected.
+ */
+export const WithPreselectedScopeItems: Story = {
+  args: {
+    isEmpty: false,
+    scopeOptions: sampleScopeOptions,
+    selectedScopeItems: [
+      sampleScopeOptions[0],
+      sampleScopeOptions[2],
+      sampleScopeOptions[3],
+      sampleScopeOptions[4],
+      sampleScopeOptions[5],
+      sampleScopeOptions[6],
+      sampleScopeOptions[7],
+      sampleScopeOptions[8],
+      sampleScopeOptions[9],
+      sampleScopeOptions[10],
+    ],
+    onScopeSelected: action('Scope selected'),
+    onAiScopeItemRemove: action('Scope item removed'),
   },
   parameters: {
     chromatic: { delay: 500 },
