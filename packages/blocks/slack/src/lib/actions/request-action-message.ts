@@ -1,277 +1,34 @@
-import { createAction, StoreScope } from '@openops/blocks-framework';
-import { networkUtls, SharedSystemProp, system } from '@openops/server-shared';
+import { createAction } from '@openops/blocks-framework';
+import { slackAuth } from '../..';
+import { assertNotNullOrUndefined } from '@openops/shared';
 import {
-  assertNotNullOrUndefined,
-  ExecutionType,
-  isEmpty,
-} from '@openops/shared';
-import { slackAuth } from '../common/authentication';
-import { getSlackIdFromPropertyInput } from '../common/get-slack-users';
-import { MessageInfo } from '../common/message-result';
-import {
-  actions,
-  headerText,
+  profilePicture,
   text,
-  timeoutInDays,
+  slackChannel,
   username,
-  usersAndChannels,
+  actions,
+  singleSelectChannelInfo,
 } from '../common/props';
-import { slackSendMessage } from '../common/utils';
-import {
-  onReceivedInteraction,
-  waitForInteraction,
-} from '../common/wait-for-interaction';
+import { requestAction } from '../common/request-action';
 
 export const requestActionMessageAction = createAction({
   auth: slackAuth,
   name: 'request_action_message',
-  displayName: 'Request Action',
+  displayName: 'Request Action in A Channel',
   description:
-    'Send a message to a user or a channel and wait until an action is selected',
+    'Send a message in a channel and wait until an action is selected',
   props: {
-    conversationId: usersAndChannels,
-    headerText,
+    info: singleSelectChannelInfo,
+    channel: slackChannel(true),
     text,
     actions,
     username,
-    timeoutInDays,
+    profilePicture,
   },
   async run(context) {
-    if (context.executionType === ExecutionType.BEGIN) {
-      const slackSendMessageResponse: MessageInfo =
-        await sendMessageAskingForAction(context);
+    const { channel } = context.propsValue;
+    assertNotNullOrUndefined(channel, 'channel');
 
-      await context.store.put(
-        `slackMessage_${context.currentExecutionPath}`,
-        slackSendMessageResponse,
-        StoreScope.FLOW_RUN,
-      );
-
-      return await waitForInteraction(
-        slackSendMessageResponse,
-        context.propsValue.timeoutInDays,
-        context,
-        context.currentExecutionPath,
-      );
-    }
-
-    const messageObj: MessageInfo | null = await context.store.get(
-      `slackMessage_${context.currentExecutionPath}`,
-      StoreScope.FLOW_RUN,
-    );
-
-    if (!messageObj) {
-      throw new Error(
-        'Could not fetch slack message from store, context.currentExecutionPath: ' +
-          context.currentExecutionPath,
-      );
-    }
-
-    const actions = context.propsValue.actions as SlackActionDefinition[];
-    const actionLabels = actions.map((action) => {
-      return action.buttonText;
-    });
-
-    return await onReceivedInteraction(
-      messageObj,
-      actionLabels,
-      context,
-      context.currentExecutionPath,
-    );
+    return await requestAction(channel, context);
   },
 });
-
-const sendMessageAskingForAction = async (
-  context: any,
-): Promise<MessageInfo> => {
-  const { actions } = context.propsValue;
-  assertNotNullOrUndefined(actions, 'actions');
-
-  if (!actions.length) {
-    throw new Error(`Must have at least one button action`);
-  }
-
-  const token = context.auth.access_token;
-  assertNotNullOrUndefined(token, 'token');
-
-  const { text, username, conversationId, headerText } = context.propsValue;
-
-  assertNotNullOrUndefined(text, 'text');
-  assertNotNullOrUndefined(conversationId, 'conversationId');
-
-  const userOrChannelId = await getSlackIdFromPropertyInput(
-    token,
-    conversationId,
-  );
-
-  const enableSlackInteractions =
-    system.getBoolean(SharedSystemProp.SLACK_ENABLE_INTERACTIONS) ?? true;
-
-  if (!enableSlackInteractions) {
-    const baseUrl = await networkUtls.getPublicUrl();
-
-    actions.forEach((action: SlackActionDefinition) => {
-      const resumeUrl = context.generateResumeUrl(
-        {
-          queryParams: {
-            executionCorrelationId: context.run.pauseId,
-            actionClicked: action.buttonText,
-          },
-        },
-        baseUrl,
-      );
-      action.url = `https://static.openops.com/html/resume_execution.html?isTest=${
-        context.run.isTest
-      }&redirectUrl=${encodeURIComponent(resumeUrl)}`;
-    });
-  }
-
-  const blocks = createMessageBlocks(headerText, text, actions);
-
-  return await slackSendMessage({
-    token,
-    text,
-    username,
-    conversationId: userOrChannelId,
-    blocks: blocks,
-    eventPayload: {
-      interactionsDisabled: !enableSlackInteractions,
-      domain: context.server.publicUrl,
-      isTest: context.run.isTest,
-      resumeUrl: context.generateResumeUrl({
-        queryParams: {
-          executionCorrelationId: context.run.pauseId,
-        },
-      }),
-    },
-  });
-};
-
-interface SlackElement {
-  type: string;
-  text: SlackText;
-  style?: string;
-  confirm?: ConfirmationPrompt;
-  url?: string;
-}
-
-interface SlackText {
-  type: string;
-  text: string;
-}
-
-interface ConfirmationPrompt {
-  title: SlackText;
-  text: SlackText;
-  deny: SlackText;
-  confirm: SlackText;
-}
-
-interface SlackActionDefinition {
-  buttonText: string;
-  buttonStyle: string;
-  confirmationPrompt: boolean;
-  confirmationPromptText: string;
-  url?: string;
-}
-
-function createButton(action: SlackActionDefinition): SlackElement {
-  const {
-    buttonText,
-    buttonStyle,
-    confirmationPrompt,
-    confirmationPromptText,
-    url,
-  } = action;
-
-  const button: SlackElement = {
-    type: 'button',
-    text: {
-      type: 'plain_text',
-      text: buttonText,
-    },
-    url,
-  };
-
-  if (buttonStyle === 'danger' || buttonStyle === 'primary') {
-    button.style = buttonStyle;
-  }
-
-  if (confirmationPrompt) {
-    button.confirm = createConfirmationPrompt(confirmationPromptText);
-  }
-
-  return button;
-}
-
-function createConfirmationPrompt(
-  confirmationPromptText: string,
-): ConfirmationPrompt {
-  const defaultText = 'Are you sure?';
-  const text = isEmpty(confirmationPromptText?.trim())
-    ? defaultText
-    : confirmationPromptText;
-
-  return {
-    deny: {
-      text: 'Cancel',
-      type: 'plain_text',
-    },
-    text: {
-      text: text,
-      type: 'plain_text',
-    },
-    title: {
-      text: defaultText,
-      type: 'plain_text',
-    },
-    confirm: {
-      text: 'Confirm',
-      type: 'plain_text',
-    },
-  };
-}
-
-function createMessageBlocks(
-  headerText: string,
-  messageText: string,
-  actions: { buttonText: string; buttonStyle: string }[],
-): any[] {
-  const actionElements: SlackElement[] = actions.map((action: any) =>
-    createButton(action),
-  );
-  const headerBlocks = [];
-
-  if (headerText !== null && headerText.trim().length !== 0) {
-    headerBlocks.push(
-      ...[
-        {
-          type: 'section',
-          text: {
-            type: 'mrkdwn',
-            text: `*${headerText}*`,
-          },
-        },
-        {
-          type: 'divider',
-        },
-      ],
-    );
-  }
-
-  return [
-    ...headerBlocks,
-    {
-      type: 'section',
-      text: {
-        type: 'mrkdwn',
-        text: `${messageText}`,
-      },
-    },
-    {
-      type: 'actions',
-      block_id: 'actions',
-      elements: actionElements,
-    },
-  ];
-}

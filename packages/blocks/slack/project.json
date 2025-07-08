@@ -1,38 +1,35 @@
 {
   "name": "blocks-slack",
-  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/blocks/slack/src",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/blocks/community/slack/src",
   "projectType": "library",
   "targets": {
     "lint": {
       "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"]
+      "outputs": [
+        "{options.outputFile}"
+      ]
     },
     "build": {
       "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
-        "outputPath": "dist/packages/blocks/slack",
-        "tsConfig": "packages/blocks/slack/tsconfig.lib.json",
-        "packageJson": "packages/blocks/slack/package.json",
-        "main": "packages/blocks/slack/src/index.ts",
-        "assets": ["packages/blocks/slack/*.md"],
+        "outputPath": "dist/packages/blocks/community/slack",
+        "tsConfig": "packages/blocks/community/slack/tsconfig.lib.json",
+        "packageJson": "packages/blocks/community/slack/package.json",
+        "main": "packages/blocks/community/slack/src/index.ts",
+        "assets": [
+          "packages/blocks/community/slack/*.md",
+          {
+            "input": "packages/blocks/community/slack/src/i18n",
+            "output": "./src/i18n",
+            "glob": "**/!(i18n.json)"
+          }
+        ],
         "buildableProjectDepsInPackageJsonType": "dependencies",
         "updateBuildableProjectDepsInPackageJson": true
-      }
-    },
-    "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-      "options": {
-        "jestConfig": "packages/blocks/slack/jest.config.ts",
-        "passWithNoTests": true
-      },
-      "configurations": {
-        "ci": {
-          "ci": true,
-          "codeCoverage": true
-        }
       }
     }
   },

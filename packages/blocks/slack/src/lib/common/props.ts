@@ -1,102 +1,61 @@
-import {
-  OAuth2PropertyValue,
-  Property,
-  Validators,
-} from '@openops/blocks-framework';
-import { getSlackChannels, getSlackUsers } from './slack-api-request';
+import { OAuth2PropertyValue, Property } from '@openops/blocks-framework';
+import { UsersListResponse, WebClient } from '@slack/web-api';
 
-export const slackChannel = Property.Dropdown({
-  displayName: 'Channel',
-  description: 'Channel, private group, or IM channel to send message to.',
-  required: true,
-  refreshers: ['auth'],
-  async options({ auth }) {
-    if (!auth) {
-      return noAuth();
-    }
+const slackChannelBotInstruction = `
+	Please make sure add the bot to the channel by following these steps:
+	  1. Type /invite in the channel's chat.
+	  2. Click on Add apps to this channel.
+	  3. Search for and add the bot.
+  `
 
-    const channels = await getChannelOptions(auth as OAuth2PropertyValue);
-
-    return {
-      disabled: false,
-      placeholder: 'Select channel',
-      options: channels,
-    };
-  },
+export const multiSelectChannelInfo = Property.MarkDown({
+  value: slackChannelBotInstruction +
+    `\n**Note**: If you can't find the channel in the dropdown list (which fetches up to 2000 channels), please click on the **(F)** and type the channel ID directly in an array like this: \`{\`{ ['your_channel_id_1', 'your_channel_id_2', ...] \`}\`}`,
 });
 
-export const user = Property.Dropdown<string>({
-  displayName: 'User',
-  description: 'Message receiver',
-  required: true,
-  refreshers: ['auth'],
-  async options({ auth }) {
-    if (!auth) {
-      return noAuth();
-    }
-
-    const options = await getUserOptions(auth as OAuth2PropertyValue);
-
-    return {
-      disabled: false,
-      placeholder: 'Select user',
-      options: options,
-    };
-  },
+export const singleSelectChannelInfo = Property.MarkDown({
+  value: slackChannelBotInstruction +
+    `\n**Note**: If you can't find the channel in the dropdown list (which fetches up to 2000 channels), please click on the **(F)** and type the channel ID directly.
+  `,
 });
 
-export const usersAndChannels = Property.Dropdown<string>({
-  displayName: 'Recipient Channel or User',
-  description: 'Channel or User to send the message to.',
-  required: true,
-  refreshers: ['auth'],
-  async options({ auth }) {
-    if (!auth) {
-      return noAuth();
-    }
+export const slackChannel = <R extends boolean>(required: R) =>
+  Property.Dropdown<string, R>({
+    displayName: 'Channel',
+    description:
+      "You can get the Channel ID by right-clicking on the channel and selecting 'View Channel Details.'",
+    required,
+    refreshers: [],
+    async options({ auth }) {
+      if (!auth) {
+        return {
+          disabled: true,
+          placeholder: 'connect slack account',
+          options: [],
+        };
+      }
+      const authentication = auth as OAuth2PropertyValue;
+      const accessToken = authentication['access_token'];
 
-    const channelOptions = await getChannelOptions(auth as OAuth2PropertyValue);
-    const userOptions = await getUserOptions(auth as OAuth2PropertyValue);
+      const channels = await getChannels(accessToken);
 
-    return {
-      disabled: false,
-      placeholder: 'Select a channel or a user',
-      options: channelOptions.concat(userOptions),
-    };
-  },
-});
-
-async function getUserOptions(auth: OAuth2PropertyValue): Promise<Option[]> {
-  const accessToken = (auth as OAuth2PropertyValue).access_token;
-  const users = await getSlackUsers(accessToken);
-
-  const options: Option[] = users.map((user) => ({
-    label: user.profile.email
-      ? `${user.name} (${user.profile.email})`
-      : user.name,
-    value: user.id,
-  }));
-
-  return options;
-}
-
-async function getChannelOptions(auth: OAuth2PropertyValue): Promise<Option[]> {
-  const accessToken = auth.access_token;
-  const channels = await getSlackChannels(accessToken);
-
-  const options: Option[] = channels.map(
-    (channel: { name: string; id: string }) => ({
-      label: channel.name,
-      value: channel.id,
-    }),
-  );
-
-  return options;
-}
+      return {
+        disabled: false,
+        placeholder: 'Select channel',
+        options: channels,
+      };
+    },
+  });
 
 export const username = Property.ShortText({
   displayName: 'Username',
-  description: 'Sender username',
+  description: 'The username of the bot',
+  required: false,
+});
+
+export const profilePicture = Property.ShortText({
+  displayName: 'Profile Picture',
+  description: 'The profile picture of the bot',
   required: false,
 });
 
@@ -106,78 +65,79 @@ export const blocks = Property.Json({
   required: false,
 });
 
-export const text = Property.LongText({
-  displayName: 'Message',
-  description: 'The text of your message',
+export const userId = Property.Dropdown<string>({
+  displayName: 'User',
   required: true,
+  refreshers: [],
+  async options({ auth }) {
+    if (!auth) {
+      return {
+        disabled: true,
+        placeholder: 'connect slack account',
+        options: [],
+      };
+    }
+
+    const accessToken = (auth as OAuth2PropertyValue).access_token;
+
+    const client = new WebClient(accessToken);
+    const users: { label: string; value: string }[] = [];
+    for await (const page of client.paginate('users.list', {
+      limit: 1000, // Only limits page size, not total number of results
+    })) {
+      const response = page as UsersListResponse;
+      if (response.members) {
+        users.push(
+          ...response.members
+            .filter((member) => !member.deleted)
+            .map((member) => {
+              return { label: member.name || '', value: member.id || '' };
+            })
+        );
+      }
+    }
+    return {
+      disabled: false,
+      placeholder: 'Select User',
+      options: users,
+    };
+  },
 });
 
-export const headerText = Property.LongText({
-  displayName: 'Header',
-  description: 'The header of your message',
-  required: false,
+export const text = Property.LongText({
+  displayName: 'Message',
+  required: true,
 });
 
 export const actions = Property.Array({
   displayName: 'Action Buttons',
   required: true,
-  defaultValue: [
-    {
-      buttonText: 'Approve',
-      buttonStyle: 'primary',
-      confirmationPrompt: true,
-      confirmationPromptText: 'Are you sure you want to do this action?',
-    },
-    { buttonText: 'Dismiss', buttonStyle: 'danger', confirmationPrompt: false },
-    { buttonText: 'Snooze', buttonStyle: '', confirmationPrompt: false },
-  ],
-  properties: {
-    buttonText: Property.ShortText({
-      displayName: 'Button text',
-      required: true,
-    }),
-    buttonStyle: Property.StaticDropdown({
-      displayName: 'Button color',
-      required: false,
-      defaultValue: '',
-      options: {
-        options: [
-          { label: 'Transparent', value: '' },
-          { label: 'Red', value: 'danger' },
-          { label: 'Green', value: 'primary' },
-        ],
-      },
-    }),
-    confirmationPrompt: Property.Checkbox({
-      displayName: 'Add confirmation popup',
-      required: false,
-      defaultValue: false,
-    }),
-    confirmationPromptText: Property.LongText({
-      displayName: `Confirmation popup text`,
-      description: '',
-      required: false,
-    }),
-  },
 });
 
-export const timeoutInDays = Property.Number({
-  displayName: 'Wait Timeout in Days',
-  description: 'Number of days to wait for an action.',
-  defaultValue: 3,
-  required: true,
-  validators: [Validators.minValue(1)],
-});
+export async function getChannels(accessToken: string) {
+  const client = new WebClient(accessToken);
+  const channels: { label: string; value: string }[] = [];
+  const CHANNELS_LIMIT = 2000;
 
-interface Option {
-  label: string;
-  value: string;
-}
+  let cursor;
+  do {
+    const response = await client.conversations.list({
+      types: 'public_channel,private_channel',
+      exclude_archived: true,
+      limit: 1000,
+      cursor,
+    });
 
-function noAuth() {
-  return {
-    disabled: true,
-    placeholder: 'connect slack account',
-    options: [],
-  };
+    if (response.channels) {
+      channels.push(
+        ...response.channels.map((channel) => {
+          return { label: channel.name || '', value: channel.id || '' };
+        })
+      );
+    }
+
+    cursor = response.response_metadata?.next_cursor;
+  } while (cursor && channels.length < CHANNELS_LIMIT);
+
+  return channels;
 }
