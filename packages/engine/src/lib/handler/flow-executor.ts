@@ -1,4 +1,4 @@
-import { logger, runWithTemporaryContext } from '@openops/server-shared';
+import { runWithTemporaryContext } from '@openops/server-shared';
 import {
   Action,
   ActionType,
@@ -57,7 +57,7 @@ export const flowExecutor = {
         ? output.setVerdict(ExecutionVerdict.SUCCEEDED, output.verdictResponse)
         : output;
 
-    sendProgress(newContext, constants);
+    await sendProgress(newContext, constants);
 
     return newContext.toResponse();
   },
@@ -103,7 +103,7 @@ export const flowExecutor = {
         duration: stepEndTime - stepStartTime,
       });
 
-      sendProgress(flowExecutionContext, constants);
+      await sendProgress(flowExecutionContext, constants);
 
       if (flowExecutionContext.verdict !== ExecutionVerdict.RUNNING) {
         break;
@@ -121,13 +121,9 @@ export const flowExecutor = {
 function sendProgress(
   flowExecutionContext: FlowExecutorContext,
   constants: EngineConstants,
-): void {
-  progressService
-    .sendUpdate({
-      engineConstants: constants,
-      flowExecutorContext: flowExecutionContext,
-    })
-    .catch((error) => {
-      logger.error('Error sending progress update', error);
-    });
+): Promise<void> {
+  return progressService.sendUpdate({
+    engineConstants: constants,
+    flowExecutorContext: flowExecutionContext,
+  });
 }
