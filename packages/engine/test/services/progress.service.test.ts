@@ -346,9 +346,9 @@ describe('Progress Service', () => {
       const call = mockMakeHttpRequest.mock.calls[0];
       const [_, __, ___, ____, options] = call;
       
-      expect(options.retryDelay(0)).toBe(1000); // 1st retry: 1s
-      expect(options.retryDelay(1)).toBe(2000); // 2nd retry: 2s
-      expect(options.retryDelay(2)).toBe(3000); // 3rd retry: 3s
+      expect(options.retryDelay(0)).toBe(200); // 1st retry: 200ms
+      expect(options.retryDelay(1)).toBe(400); // 2nd retry: 400ms
+      expect(options.retryDelay(2)).toBe(600); // 3rd retry: 600ms
     });
   });
 }); 
