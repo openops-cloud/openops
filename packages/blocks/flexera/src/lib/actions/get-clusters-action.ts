@@ -5,7 +5,7 @@ import { flexeraAuth } from '../../auth';
 export const getClustersAction = createAction({
   auth: flexeraAuth,
   name: 'flexera_get_clusters',
-  description: 'Get Clusters from Flexera',
+  description: 'Get Clusters',
   displayName: 'Get Clusters',
   props: {
     accountId: Property.Dropdown({
