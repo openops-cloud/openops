@@ -2,7 +2,13 @@ import { QueryKeys } from '@/app/constants/query-keys';
 import { authenticationSession } from '@/app/lib/authentication-session';
 import { Message, useChat } from '@ai-sdk/react';
 import { toast } from '@openops/components/ui';
-import { flowHelper, FlowVersion } from '@openops/shared';
+import {
+  Action,
+  ActionType,
+  flowHelper,
+  FlowVersion,
+  TriggerWithOptionalId,
+} from '@openops/shared';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { t } from 'i18next';
 import { nanoid } from 'nanoid';
@@ -34,15 +40,15 @@ export const useStepSettingsAiChat = (
       if (!stepDetails || !selectedStep) {
         return;
       }
+
       return aiChatApi.open(
         flowVersion.flowId,
-        stepDetails?.settings?.blockName,
+        getBlockName(stepDetails),
         selectedStep,
-        stepDetails.settings.actionName,
+        getActionName(stepDetails),
       );
     },
-    enabled:
-      !!stepDetails?.settings?.blockName && !!stepDetails?.settings?.actionName,
+    enabled: !!getBlockName(stepDetails) && !!getActionName(stepDetails),
   });
 
   const {
@@ -111,6 +117,7 @@ export const useStepSettingsAiChat = (
     queryClient,
     selectedStep,
     setMessages,
+    stopChat,
   ]);
 
   return {
@@ -124,4 +131,27 @@ export const useStepSettingsAiChat = (
     isOpenAiChatPending,
     isEmpty: !messages.length,
   };
+};
+
+const CODE_BLOCK_NAME = '@openops/code';
+const CODE_ACTION_NAME = 'code';
+
+const getBlockName = (
+  stepDetails: Action | TriggerWithOptionalId | undefined,
+) => {
+  if (stepDetails?.settings?.blockName) {
+    return stepDetails?.settings?.blockName;
+  }
+
+  return stepDetails?.type === ActionType.CODE ? CODE_BLOCK_NAME : '';
+};
+
+const getActionName = (
+  stepDetails: Action | TriggerWithOptionalId | undefined,
+) => {
+  if (stepDetails?.settings?.actionName) {
+    return stepDetails?.settings?.actionName;
+  }
+
+  return stepDetails?.type === ActionType.CODE ? CODE_ACTION_NAME : '';
 };
