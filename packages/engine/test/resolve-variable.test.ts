@@ -14,8 +14,8 @@ describe('resolveVariable', () => {
   const mockInput: ResolveVariableOperation = {
     projectId: 'test-project-id',
     engineToken: 'test-engine-token',
-    internalApiUrl: 'http://test-api.com',
-    publicUrl: 'http://test-public.com',
+    internalApiUrl: 'https://test-api.com',
+    publicUrl: 'https://test-public.com',
     flowVersion: {
       id: 'flow-version-id',
       flowId: 'flow-id',
