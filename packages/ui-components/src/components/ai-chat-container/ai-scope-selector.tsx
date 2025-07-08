@@ -33,7 +33,7 @@ export type AiScopeSelectorProps = {
   className?: string;
 };
 
-const AiScopeItem = ({
+const AiScopeBadge = ({
   item,
   onRemove,
 }: {
@@ -145,7 +145,7 @@ const AiScopeSelector = ({
                 <CommandGroup>
                   {filteredOptions.map((scope) => (
                     <CommandItem
-                      key={scope.id + scope.displayName}
+                      key={scope.id}
                       value={scope.id}
                       onSelect={() => handleSelect(scope.id)}
                       className="w-full h-[27px] flex items-center justify-start gap-2 pl-1"
@@ -173,7 +173,7 @@ const AiScopeSelector = ({
         <ScrollArea viewPortClassName="max-h-[82px]">
           <div className="flex-1 flex flex-wrap gap-2 mr-3">
             {selectedItems.map((item) => (
-              <AiScopeItem
+              <AiScopeBadge
                 key={item.id}
                 item={item}
                 onRemove={onAiScopeItemRemove}
