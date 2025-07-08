@@ -9,6 +9,7 @@ import { BoxSize, ResizableArea } from '../resizable-area';
 import { AiChatInput, ChatStatus } from './ai-chat-input';
 import { AiChatSizeTogglers } from './ai-chat-size-togglers';
 import { AiModelSelectorProps } from './ai-model-selector';
+import { AiScopeItem } from './ai-scope-selector';
 import { getBufferAreaHeight, getLastUserMessageId } from './ai-scroll-helpers';
 import { AI_CHAT_CONTAINER_SIZES, AiAssistantChatSizeState } from './types';
 import {
@@ -32,6 +33,10 @@ type AiAssistantChatContainerProps = {
   status?: ChatStatus;
   lastUserMessageRef: React.RefObject<HTMLDivElement>;
   lastAssistantMessageRef: React.RefObject<HTMLDivElement>;
+  scopeOptions?: AiScopeItem[];
+  selectedScopeItems?: AiScopeItem[];
+  onScopeSelected?: (scope: AiScopeItem) => void;
+  onAiScopeItemRemove?: (id: string) => void;
 } & Pick<UseChatHelpers, 'input' | 'handleInputChange' | 'handleSubmit'> &
   AiModelSelectorProps;
 
@@ -62,6 +67,10 @@ const AiAssistantChatContainer = ({
   status,
   lastUserMessageRef,
   lastAssistantMessageRef,
+  scopeOptions,
+  onAiScopeItemRemove,
+  selectedScopeItems,
+  onScopeSelected,
 }: AiAssistantChatContainerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollViewportRef = useRef<HTMLDivElement>(null);
@@ -217,6 +226,10 @@ const AiAssistantChatContainer = ({
                 isModelSelectorLoading={isModelSelectorLoading}
                 placeholder={t('Type your question here…')}
                 status={status}
+                scopeOptions={scopeOptions}
+                onAiScopeItemRemove={onAiScopeItemRemove}
+                selectedScopeItems={selectedScopeItems}
+                onScopeSelected={onScopeSelected}
               />
             </div>
           </div>
