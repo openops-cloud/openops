@@ -63,7 +63,7 @@ const ExecuteVariableRequest = {
   },
   schema: {
     description:
-      "Execute variable resolution to get the resolved value of a variable expression within a flow context. This endpoint resolves variables like {{trigger['headers']}} or {{step_2}} and returns both the resolved value and a censored version.",
+      "Execute variable resolution to get the resolved value of a variable expression within a flow context. This endpoint resolves variables like {{trigger['headers']}} or {{step_2}} and returns the resolved value.",
     body: Type.Object({
       flowId: Type.String({
         description: 'The ID of the flow containing the variable context',
