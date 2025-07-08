@@ -42,6 +42,12 @@ export const AiChatInput = ({
   scopeOptions,
   onScopeSelected,
 }: AiChatInputProps) => {
+  const showScopeSelector =
+    scopeOptions &&
+    selectedScopeItems &&
+    onScopeSelected &&
+    onAiScopeItemRemove;
+
   return (
     <div
       className={cn(
@@ -49,17 +55,14 @@ export const AiChatInput = ({
         className,
       )}
     >
-      {scopeOptions &&
-        selectedScopeItems &&
-        onScopeSelected &&
-        onAiScopeItemRemove && (
-          <AiScopeSelector
-            options={scopeOptions}
-            onScopeSelected={onScopeSelected}
-            selectedItems={selectedScopeItems}
-            onAiScopeItemRemove={onAiScopeItemRemove}
-          />
-        )}
+      {showScopeSelector && (
+        <AiScopeSelector
+          options={scopeOptions}
+          onScopeSelected={onScopeSelected}
+          selectedItems={selectedScopeItems}
+          onAiScopeItemRemove={onAiScopeItemRemove}
+        />
+      )}
       <div className="relative overflow-hidden">
         <ScrollArea
           className="h-full pr-12 py-2"

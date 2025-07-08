@@ -105,6 +105,9 @@ const AiScopeSelector = ({
     setSearchValue('');
   }, []);
 
+  const showSelectedItems =
+    selectedItems && selectedItems.length > 0 && onAiScopeItemRemove;
+
   return (
     <div className="flex flex-col gap-2 relative">
       <Popover open={open} onOpenChange={onOpenChange}>
@@ -169,7 +172,7 @@ const AiScopeSelector = ({
         </PopoverContent>
       </Popover>
 
-      {selectedItems && selectedItems.length > 0 && onAiScopeItemRemove && (
+      {showSelectedItems && (
         <ScrollArea viewPortClassName="max-h-[82px]">
           <div className="flex-1 flex flex-wrap gap-2 mr-3">
             {selectedItems.map((item) => (
