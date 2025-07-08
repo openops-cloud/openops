@@ -6,6 +6,8 @@ import { EngineConstants } from '../handler/context/engine-constants';
 import { FlowExecutorContext } from '../handler/context/flow-execution-context';
 import { throwIfExecutionTimeExceeded } from '../timeout-validator';
 
+const MAX_RETRIES = 3;
+
 let lastRequestHash: string | undefined = undefined;
 
 export const progressService = {
@@ -51,21 +53,28 @@ const sendUpdateRunRequest = async (
 
   lastRequestHash = requestHash;
 
-  await makeHttpRequest(
-    'POST',
-    url.toString(),
-    new AxiosHeaders({
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${engineConstants.engineToken}`,
-    }),
-    request,
-    {
-      retries: 3,
-      retryDelay: (retryCount: number) => {
-        return (retryCount + 1) * 1000; // 1s, 2s, 3s
+  try {
+    await makeHttpRequest(
+      'POST',
+      url.toString(),
+      new AxiosHeaders({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${engineConstants.engineToken}`,
+      }),
+      request,
+      {
+        retries: MAX_RETRIES,
+        retryDelay: (retryCount: number) => {
+          return (retryCount + 1) * 1000; // 1s, 2s, 3s
+        },
       },
-    },
-  );
+    );
+  } catch (error) {
+    logger.error(
+      `Progress update failed after ${MAX_RETRIES} retries for status ${request.runDetails.status} on run ${request.runId}`,
+      error,
+    );
+  }
 };
 
 type UpdateStepProgressParams = {
