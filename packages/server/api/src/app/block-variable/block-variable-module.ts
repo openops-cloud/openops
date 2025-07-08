@@ -2,7 +2,12 @@ import {
   FastifyPluginAsyncTypebox,
   Type,
 } from '@fastify/type-provider-typebox';
-import { encodeStepOutputs, flowHelper } from '@openops/shared';
+import {
+  encodeStepOutputs,
+  EndpointScope,
+  flowHelper,
+  PrincipalType,
+} from '@openops/shared';
 import { engineRunner } from 'server-worker';
 import { accessTokenManager } from '../authentication/lib/access-token-manager';
 import { flowService } from '../flows/flow/flow.service';
@@ -48,6 +53,10 @@ const blockVariableController: FastifyPluginAsyncTypebox = async (app) => {
 };
 
 const ExecuteVariableRequest = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+    scope: EndpointScope.ORGANIZATION,
+  },
   schema: {
     description:
       "Execute variable resolution to get the resolved value of a variable expression within a flow context. This endpoint resolves variables like {{trigger['headers']}} or {{step_2}} and returns both the resolved value and a censored version.",
