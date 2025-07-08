@@ -57,7 +57,14 @@ export const flowExecutor = {
         ? output.setVerdict(ExecutionVerdict.SUCCEEDED, output.verdictResponse)
         : output;
 
-    sendProgress(newContext, constants);
+    try {
+      await progressService.sendUpdate({
+        engineConstants: constants,
+        flowExecutorContext: newContext,
+      });
+    } catch (error) {
+      logger.error('CRITICAL: Final progress update failed', error);
+    }
 
     return newContext.toResponse();
   },

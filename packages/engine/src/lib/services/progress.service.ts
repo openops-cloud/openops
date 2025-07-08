@@ -1,7 +1,6 @@
 import { makeHttpRequest } from '@openops/common';
 import { hashUtils, logger } from '@openops/server-shared';
 import { UpdateRunProgressRequest } from '@openops/shared';
-import { Mutex } from 'async-mutex';
 import { AxiosHeaders } from 'axios';
 import { EngineConstants } from '../handler/context/engine-constants';
 import { FlowExecutorContext } from '../handler/context/flow-execution-context';
@@ -9,14 +8,10 @@ import { throwIfExecutionTimeExceeded } from '../timeout-validator';
 
 let lastRequestHash: string | undefined = undefined;
 
-const lock = new Mutex();
-
 export const progressService = {
   sendUpdate: async (params: UpdateStepProgressParams): Promise<void> => {
     throwIfExecutionTimeExceeded();
-    return lock.runExclusive(async () => {
-      await sendUpdateRunRequest(params);
-    });
+    await sendUpdateRunRequest(params);
   },
 };
 
