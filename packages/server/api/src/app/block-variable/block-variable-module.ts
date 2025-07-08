@@ -48,7 +48,11 @@ const blockVariableController: FastifyPluginAsyncTypebox = async (app) => {
       stepTestOutputs,
     });
 
-    return result;
+    return {
+      success: result.success,
+      value: result.censoredValue,
+      error: result.error,
+    };
   });
 };
 
@@ -83,11 +87,8 @@ const ExecuteVariableRequest = {
         success: Type.Boolean({
           description: 'Whether the variable resolution was successful',
         }),
-        resolvedValue: Type.Unknown({
+        value: Type.Unknown({
           description: 'The resolved value of the variable expression',
-        }),
-        censoredValue: Type.Unknown({
-          description: 'The censored version with sensitive data redacted',
         }),
         error: Type.Optional(
           Type.String({

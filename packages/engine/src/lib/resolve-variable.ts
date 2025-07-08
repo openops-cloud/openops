@@ -40,11 +40,21 @@ export async function resolveVariable(
       censoredValue: censoredInput,
     };
   } catch (error) {
+    let errorMessage: string;
+
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    } else if (typeof error === 'string') {
+      errorMessage = error;
+    } else {
+      errorMessage = String(error);
+    }
+
     return {
       success: false,
       resolvedValue: null,
       censoredValue: null,
-      error: (error as Error).message,
+      error: errorMessage,
     };
   }
 }
