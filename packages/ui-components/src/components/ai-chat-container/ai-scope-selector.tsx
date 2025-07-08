@@ -131,7 +131,7 @@ const AiScopeSelector = ({
               <Input
                 placeholder={t('Search')}
                 className={cn(
-                  'h-7 pl-9 pr-4 bg-background focus-visible:ring-0',
+                  'h-7 pl-9 pr-4 bg-background focus-visible:ring-0 focus-visible:ring-offset-0 rounded-sm',
                 )}
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
@@ -157,7 +157,7 @@ const AiScopeSelector = ({
                         size={'sm'}
                         className="size-4"
                       ></BlockIcon>
-                      <span className="flex-1 truncate text-[14px]">
+                      <span className="flex-1 truncate text-xs">
                         {scope.displayName}
                       </span>
                     </CommandItem>
