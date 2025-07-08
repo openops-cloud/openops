@@ -1,12 +1,15 @@
+import { makeHttpRequest } from '@openops/common';
 import { hashUtils, logger } from '@openops/server-shared';
 import { UpdateRunProgressRequest } from '@openops/shared';
 import { Mutex } from 'async-mutex';
+import { AxiosHeaders } from 'axios';
 import { EngineConstants } from '../handler/context/engine-constants';
 import { FlowExecutorContext } from '../handler/context/flow-execution-context';
 import { throwIfExecutionTimeExceeded } from '../timeout-validator';
 
-let lastRequestHash: string | undefined = undefined;
+const MAX_RETRIES = 3;
 
+let lastRequestHash: string | undefined = undefined;
 const lock = new Mutex();
 
 export const progressService = {
@@ -42,6 +45,10 @@ const sendUpdateRunRequest = async (
     progressUpdateType: engineConstants.progressUpdateType,
   };
 
+  logger.debug(
+    `Sending progress update for ${request.runId} ${request.runDetails.status}`,
+  );
+
   // Request deduplication using hash comparison
   const requestHash = hashUtils.hashObject(request, (key, value) => {
     if (key === 'duration') return undefined;
@@ -54,14 +61,28 @@ const sendUpdateRunRequest = async (
 
   lastRequestHash = requestHash;
 
-  await fetch(url.toString(), {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${engineConstants.engineToken}`,
-    },
-    body: JSON.stringify(request),
-  });
+  try {
+    await makeHttpRequest(
+      'POST',
+      url.toString(),
+      new AxiosHeaders({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${engineConstants.engineToken}`,
+      }),
+      request,
+      {
+        retries: MAX_RETRIES,
+        retryDelay: (retryCount: number) => {
+          return (retryCount + 1) * 200; // 200ms, 400ms, 600ms
+        },
+      },
+    );
+  } catch (error) {
+    logger.error(
+      `Progress update failed after ${MAX_RETRIES} retries for status ${request.runDetails.status} on run ${request.runId}`,
+      { error },
+    );
+  }
 };
 
 type UpdateStepProgressParams = {

@@ -8,7 +8,6 @@ const makeTemplate = (partial: Partial<any>): any => ({
   updated: '',
   description: '',
   blocks: [],
-  pieces: [],
   isSample: false,
   isGettingStarted: false,
   ...partial,

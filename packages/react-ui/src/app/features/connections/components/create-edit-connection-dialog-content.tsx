@@ -224,8 +224,11 @@ const CreateEditConnectionDialogContent = ({
       </DialogHeader>
       <ScrollArea className="h-full">
         <Markdown
+          containerClassName="bg-secondary"
           markdown={auth?.description}
           codeVariation={MarkdownCodeVariations.WithoutCopy}
+          textClassName="!my-0"
+          listClassName="!my-0"
         ></Markdown>
         {auth?.description && <Separator className="my-4" />}
         <Form {...form}>

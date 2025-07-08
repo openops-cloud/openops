@@ -136,7 +136,7 @@ const TestActionSection = React.memo(
 
     if (!sampleDataExists) {
       return (
-        <div className="flex-grow flex justify-center items-center w-full h-full">
+        <div className="flex justify-center items-start w-full h-full">
           <TestButtonTooltip disabled={!isValid} aria-label="Test Step Button">
             <Button
               variant="outline"
