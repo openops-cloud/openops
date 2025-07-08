@@ -71,18 +71,19 @@ const CodeMirrorEditor = React.memo(
       styleTheme,
       EditorState.readOnly.of(readonly),
       EditorView.editable.of(!readonly),
+      EditorView.lineWrapping,
       json(),
     ];
     const ref = useRef<ReactCodeMirrorRef>(null);
 
     return (
-      <div className={cn('flex flex-col gap-2 p-1', containerClassName)}>
+      <div className={cn('h-full flex flex-col gap-2', containerClassName)}>
         <CodeMirror
           ref={ref}
           value={convertToString(value)}
           placeholder={placeholder}
           className={cn('border-t', className)}
-          height="250px"
+          height="100%"
           width="100%"
           maxWidth="100%"
           basicSetup={{
@@ -93,6 +94,7 @@ const CodeMirrorEditor = React.memo(
             autocompletion: true,
             highlightActiveLine: !readonly,
           }}
+          indentWithTab={false}
           lang="json"
           onChange={onChange}
           theme={editorTheme}
