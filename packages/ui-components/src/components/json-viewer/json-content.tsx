@@ -10,6 +10,7 @@ import {
   FormItem,
   FormMessage,
 } from '../../ui/form';
+import { ScrollArea } from '../../ui/scroll-area';
 import { CodeMirrorEditor } from '../json-editor';
 
 type JsonFormValues = {
@@ -39,35 +40,37 @@ export const JsonContent = ({
   if (isEditMode) {
     return (
       <Form {...form}>
-        <form>
-          <FormField
-            control={form.control}
-            name="jsonContent"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <CodeMirrorEditor
-                    value={field.value}
-                    placeholder={t('Paste sample data here')}
-                    readonly={false}
-                    theme={theme}
-                    containerClassName={editorClassName}
-                    onChange={(value) => {
-                      field.onChange(tryParseJson(value));
-                    }}
-                  />
-                </FormControl>
-                <FormMessage className="ml-4 pb-1" />
-              </FormItem>
-            )}
-          />
-        </form>
+        <ScrollArea className="h-full overflow-hidden">
+          <form>
+            <FormField
+              control={form.control}
+              name="jsonContent"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <CodeMirrorEditor
+                      value={field.value}
+                      placeholder={t('Paste sample data here')}
+                      readonly={false}
+                      theme={theme}
+                      containerClassName={editorClassName}
+                      onChange={(value) => {
+                        field.onChange(tryParseJson(value));
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage className="ml-4 pb-1" />
+                </FormItem>
+              )}
+            />
+          </form>
+        </ScrollArea>
       </Form>
     );
   }
 
   return (
-    <div>
+    <ScrollArea className="h-full overflow-hidden">
       {isNil(json) ? (
         <pre className="text-sm whitespace-pre-wrap overflow-x-auto p-2 border-t">
           {json === null ? 'null' : 'undefined'}
@@ -86,17 +89,15 @@ export const JsonContent = ({
           )}
           {(typeof json === 'object' ||
             (typeof json === 'string' && !isEmptyString)) && (
-            <div className="overflow-auto">
-              <CodeMirrorEditor
-                value={json}
-                readonly={true}
-                theme={theme}
-                containerClassName={editorClassName}
-              />
-            </div>
+            <CodeMirrorEditor
+              value={json}
+              readonly={true}
+              theme={theme}
+              containerClassName={editorClassName}
+            />
           )}
         </>
       )}
-    </div>
+    </ScrollArea>
   );
 };

@@ -123,6 +123,9 @@ async function addDelayedRun(): Promise<void> {
             progressUpdateType:
               flowRun.pauseMetadata.progressUpdateType ??
               ProgressUpdateType.NONE,
+            resumePayload: {
+              ...flowRun.pauseMetadata,
+            },
           },
           delay,
         })

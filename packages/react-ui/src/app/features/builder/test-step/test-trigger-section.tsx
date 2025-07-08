@@ -86,7 +86,7 @@ const TestTriggerSection = React.memo(
       undefined,
     );
 
-    const { data: testOutputData, isLoading: isLoadingTestOutput } =
+    const { data: stepData, isLoading: isLoadingStepData } =
       stepTestOutputHooks.useStepTestOutputFormData(flowVersionId, form);
 
     const [currentSelectedId, setCurrentSelectedId] = useState<
@@ -174,7 +174,7 @@ const TestTriggerSection = React.memo(
       },
     });
 
-    const isTesting = isPending || isLoadingTestOutput;
+    const isTesting = isPending ?? isLoadingStepData;
 
     function updateSelectedData(data: TriggerEvent) {
       stepTestOutputCache.setStepData(formValues.id, {
@@ -185,6 +185,7 @@ const TestTriggerSection = React.memo(
         stepId: formValues.id,
         flowVersionId,
         output: data.payload,
+        input: data.input,
         queryClient,
       });
     }
@@ -200,11 +201,13 @@ const TestTriggerSection = React.memo(
       staleTime: 0,
     });
 
-    const currentTestOutput = testOutputData?.output;
+    const currentTestOutput = stepData?.output;
+    const currentTestInput = stepData?.input;
+
     const outputDataSelected =
       !isNil(currentTestOutput) || !isNil(errorMessage);
 
-    const isTestedBefore = !isNil(testOutputData?.lastTestDate);
+    const isTestedBefore = !isNil(stepData?.lastTestDate);
 
     useEffect(() => {
       const selectedId = getSelectedId(
@@ -232,18 +235,10 @@ const TestTriggerSection = React.memo(
           });
 
     return (
-      <div>
+      <div className="flex flex-col h-full">
         {outputDataSelected && !isSimulating && !isSavingMockdata && (
-          <TestSampleDataViewer
-            onRetest={isSimulation ? simulateTrigger : pollTrigger}
-            isValid={isValid}
-            isSaving={isSaving}
-            isTesting={isTesting}
-            data={currentTestOutput}
-            errorMessage={errorMessage}
-            lastTestDate={testOutputData?.lastTestDate}
-          >
-            {pollResults?.data && (
+          <>
+            {pollResults?.data && !isTesting && (
               <div className="mb-3">
                 <Select
                   value={currentSelectedId}
@@ -286,7 +281,19 @@ const TestTriggerSection = React.memo(
                 </span>
               </div>
             )}
-          </TestSampleDataViewer>
+            <div className="flex-1 overflow-hidden">
+              <TestSampleDataViewer
+                onRetest={isSimulation ? simulateTrigger : pollTrigger}
+                isValid={isValid}
+                isSaving={isSaving}
+                isTesting={isTesting}
+                outputData={currentTestOutput}
+                inputData={currentTestInput}
+                errorMessage={errorMessage}
+                lastTestDate={stepData?.lastTestDate}
+              />
+            </div>
+          </>
         )}
 
         {isSimulation && isSimulating && (

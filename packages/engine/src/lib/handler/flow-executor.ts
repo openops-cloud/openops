@@ -1,5 +1,11 @@
-import { logger, runWithTemporaryContext } from '@openops/server-shared';
-import { Action, ActionType, isNil, ProgressUpdateType } from '@openops/shared';
+import { runWithTemporaryContext } from '@openops/server-shared';
+import {
+  Action,
+  ActionType,
+  FlowRunResponse,
+  isNil,
+  Trigger,
+} from '@openops/shared';
 import { performance } from 'node:perf_hooks';
 import { progressService } from '../services/progress.service';
 import { throwIfExecutionTimeExceeded } from '../timeout-validator';
@@ -31,7 +37,31 @@ export const flowExecutor = {
     }
     return executor;
   },
-  async execute({
+  async triggerFlowExecutor({
+    trigger,
+    constants,
+    executionState,
+  }: {
+    trigger: Trigger;
+    executionState: FlowExecutorContext;
+    constants: EngineConstants;
+  }): Promise<FlowRunResponse> {
+    const output = await flowExecutor.executeFromAction({
+      action: trigger.nextAction,
+      executionState,
+      constants,
+    });
+
+    const newContext =
+      output.verdict === ExecutionVerdict.RUNNING
+        ? output.setVerdict(ExecutionVerdict.SUCCEEDED, output.verdictResponse)
+        : output;
+
+    await sendProgress(newContext, constants);
+
+    return newContext.toResponse();
+  },
+  async executeFromAction({
     action,
     constants,
     executionState,
@@ -73,29 +103,27 @@ export const flowExecutor = {
         duration: stepEndTime - stepStartTime,
       });
 
+      await sendProgress(flowExecutionContext, constants);
+
       if (flowExecutionContext.verdict !== ExecutionVerdict.RUNNING) {
         break;
-      }
-
-      const isNotNested = flowExecutionContext.currentPath.path.length === 0;
-      const sendContinuousProgress =
-        isNotNested &&
-        constants.progressUpdateType === ProgressUpdateType.TEST_FLOW;
-      if (sendContinuousProgress) {
-        progressService
-          .sendUpdate({
-            engineConstants: constants,
-            flowExecutorContext: flowExecutionContext,
-          })
-          .catch((error) => {
-            logger.error('Error sending progress update', error);
-          });
       }
 
       currentAction = currentAction.nextAction;
     }
 
     const flowEndTime = performance.now();
+
     return flowExecutionContext.setDuration(flowEndTime - flowStartTime);
   },
 };
+
+function sendProgress(
+  flowExecutionContext: FlowExecutorContext,
+  constants: EngineConstants,
+): Promise<void> {
+  return progressService.sendUpdate({
+    engineConstants: constants,
+    flowExecutorContext: flowExecutionContext,
+  });
+}

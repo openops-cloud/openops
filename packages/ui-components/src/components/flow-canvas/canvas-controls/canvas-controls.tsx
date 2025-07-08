@@ -59,9 +59,12 @@ const CanvasControls = ({
         className,
       )}
     >
-      {!readonly && <PanningModeToggleControl />}
-
-      <VerticalDivider height={24} />
+      {!readonly && (
+        <>
+          <PanningModeToggleControl />
+          <VerticalDivider height={24} />
+        </>
+      )}
 
       <Tooltip>
         <TooltipTrigger asChild>

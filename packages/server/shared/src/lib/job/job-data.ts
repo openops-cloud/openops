@@ -36,6 +36,11 @@ export const RepeatingJobData = Type.Object({
 });
 export type RepeatingJobData = Static<typeof RepeatingJobData>;
 
+export const ResumePayload = Type.Object({
+  executionCorrelationId: Type.Optional(Type.String()),
+  path: Type.Optional(Type.String()),
+});
+
 // Never change without increasing LATEST_JOB_DATA_SCHEMA_VERSION, and adding a migration
 export const DelayedJobData = Type.Object({
   projectId: Type.String(),
@@ -43,6 +48,7 @@ export const DelayedJobData = Type.Object({
   schemaVersion: Type.Number(),
   flowVersionId: Type.String(),
   runId: Type.String(),
+  resumePayload: Type.Optional(ResumePayload),
   executionCorrelationId: Type.String(),
   synchronousHandlerId: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   progressUpdateType: Type.Optional(Type.Enum(ProgressUpdateType)),
