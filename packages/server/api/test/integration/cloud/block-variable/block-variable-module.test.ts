@@ -6,13 +6,26 @@ jest.mock('@openops/common', () => commonMock);
 
 const flowServiceMock = {
   getOnePopulatedOrThrow: jest.fn(),
+  getAllEnabled: jest.fn(),
 };
 jest.mock('../../../../src/app/flows/flow/flow.service', () => ({
   flowService: flowServiceMock,
 }));
 
+const flowVersionServiceMock = {
+  getOneOrThrow: jest.fn(),
+};
+jest.mock(
+  '../../../../src/app/flows/flow-version/flow-version.service',
+  () => ({
+    flowVersionService: flowVersionServiceMock,
+  }),
+);
+
 const accessTokenManagerMock = {
   generateEngineToken: jest.fn(),
+  generateWorkerToken: jest.fn(),
+  extractPrincipal: jest.fn(),
 };
 jest.mock(
   '../../../../src/app/authentication/lib/access-token-manager',
@@ -34,10 +47,29 @@ jest.mock(
 const engineRunnerMock = {
   executeVariable: jest.fn(),
 };
+const flowWorkerMock = {
+  init: jest.fn(),
+  close: jest.fn(),
+  start: jest.fn(),
+};
 jest.mock('server-worker', () => ({
   engineRunner: engineRunnerMock,
+  flowWorker: flowWorkerMock,
 }));
 
+const triggerUtilsMock = {
+  getBlockTrigger: jest.fn(),
+};
+jest.mock('../../../../src/app/flows/trigger/hooks/trigger-utils', () => ({
+  triggerUtils: triggerUtilsMock,
+}));
+
+jest.mock('@openops/server-shared', () => ({
+  ...jest.requireActual('@openops/server-shared'),
+  blocksBuilder: jest.fn(),
+}));
+
+import { blocksBuilder } from '@openops/server-shared';
 import { PrincipalType } from '@openops/shared';
 import { FastifyInstance } from 'fastify';
 import { StatusCodes } from 'http-status-codes';
@@ -48,6 +80,34 @@ import { generateMockToken } from '../../../helpers/auth';
 let app: FastifyInstance | null = null;
 
 beforeAll(async () => {
+  flowServiceMock.getAllEnabled.mockResolvedValue([]);
+  flowVersionServiceMock.getOneOrThrow.mockResolvedValue({
+    id: 'mock-version-id',
+    trigger: {
+      id: 'trigger-id',
+      type: 'webhook',
+      name: 'trigger',
+      settings: {},
+      nextAction: undefined,
+    },
+  });
+  accessTokenManagerMock.generateWorkerToken.mockResolvedValue(
+    'mock-worker-token',
+  );
+  accessTokenManagerMock.extractPrincipal.mockResolvedValue({
+    id: 'test-user-id',
+    type: PrincipalType.USER,
+    projectId: 'test-project-id',
+    organization: {
+      id: 'test-org-id',
+    },
+  });
+  flowWorkerMock.init.mockResolvedValue(undefined);
+  flowWorkerMock.close.mockResolvedValue(undefined);
+  flowWorkerMock.start.mockResolvedValue(undefined);
+  triggerUtilsMock.getBlockTrigger.mockResolvedValue(null);
+  (blocksBuilder as jest.Mock).mockResolvedValue(undefined);
+
   await databaseConnection().initialize();
   app = await setupServer();
 });
@@ -61,9 +121,11 @@ describe('POST /v1/block-variable/execute-variable', () => {
   const mockFlow = {
     version: {
       trigger: {
+        id: 'trigger-id',
         name: 'trigger',
         type: 'webhook',
         settings: {},
+        nextAction: undefined,
       },
     },
   };
@@ -73,21 +135,41 @@ describe('POST /v1/block-variable/execute-variable', () => {
   const mockVariableResult = {
     success: true,
     censoredValue: 'test-value',
-    error: null,
+    error: '',
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
     flowServiceMock.getOnePopulatedOrThrow.mockResolvedValue(mockFlow);
+    flowServiceMock.getAllEnabled.mockResolvedValue([]);
+    flowVersionServiceMock.getOneOrThrow.mockResolvedValue({
+      id: 'mock-version-id',
+      trigger: {
+        id: 'trigger-id',
+        type: 'webhook',
+        name: 'trigger',
+        settings: {},
+        nextAction: undefined,
+      },
+    });
     accessTokenManagerMock.generateEngineToken.mockResolvedValue(
       mockEngineToken,
     );
+    accessTokenManagerMock.extractPrincipal.mockResolvedValue({
+      id: 'test-user-id',
+      type: PrincipalType.USER,
+      projectId: 'test-project-id',
+      organization: {
+        id: 'test-org-id',
+      },
+    });
     flowStepTestOutputServiceMock.listEncrypted.mockResolvedValue(
       mockStepOutputs,
     );
     engineRunnerMock.executeVariable.mockResolvedValue({
       result: mockVariableResult,
     });
+    triggerUtilsMock.getBlockTrigger.mockResolvedValue(null);
   });
 
   const createMockToken = async (): Promise<string> =>
@@ -145,7 +227,7 @@ describe('POST /v1/block-variable/execute-variable', () => {
     expect(JSON.parse(response?.body as string)).toEqual({
       success: true,
       value: 'test-value',
-      error: null,
+      error: '',
     });
 
     expect(flowServiceMock.getOnePopulatedOrThrow).toHaveBeenCalledWith({
@@ -160,7 +242,7 @@ describe('POST /v1/block-variable/execute-variable', () => {
 
     expect(flowStepTestOutputServiceMock.listEncrypted).toHaveBeenCalledWith({
       flowVersionId: requestBody.flowVersionId,
-      stepIds: ['trigger'],
+      stepIds: ['trigger-id'],
     });
 
     expect(engineRunnerMock.executeVariable).toHaveBeenCalledWith(
@@ -192,7 +274,7 @@ describe('POST /v1/block-variable/execute-variable', () => {
     expect(JSON.parse(response?.body as string)).toEqual({
       success: true,
       value: 'test-value',
-      error: null,
+      error: '',
     });
 
     expect(engineRunnerMock.executeVariable).toHaveBeenCalledWith(
@@ -372,7 +454,7 @@ describe('POST /v1/block-variable/execute-variable', () => {
     expect(JSON.parse(response?.body as string)).toEqual({
       success: true,
       value: 'test-value',
-      error: null,
+      error: '',
     });
   });
 });
