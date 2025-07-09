@@ -10,6 +10,10 @@ export type OpenChatRequest = Static<typeof OpenChatRequest>;
 
 export const OpenChatMCPRequest = Type.Object({
   chatId: Type.Optional(Type.String()),
+  workflowId: Type.Optional(Type.String()),
+  blockName: Type.Optional(Type.String()),
+  stepName: Type.Optional(Type.String()),
+  actionName: Type.Optional(Type.String()),
 });
 export type OpenChatMCPRequest = Static<typeof OpenChatMCPRequest>;
 

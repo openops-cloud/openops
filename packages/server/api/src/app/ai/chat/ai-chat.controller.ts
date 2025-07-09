@@ -44,11 +44,14 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
 
       const chats = await getAllChatsForUserAndProject(userId, projectId);
       return reply.code(200).send({
-        chats: chats.map((chat) => ({
-          chatId: chat.chatId,
-          context: chat.context,
-          messages: chat.messages,
-        })),
+        chats: chats.map(
+          (chat) =>
+            ({
+              chatId: chat.chatId,
+              context: chat.context,
+              messages: chat.messages,
+            } as any),
+        ),
       });
     },
   );
@@ -70,7 +73,7 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
       const chatId = generateChatId({
         ...chatContext,
         userId,
-      });
+      } as any);
 
       const messages = await getChatHistory(chatId, userId, projectId);
 

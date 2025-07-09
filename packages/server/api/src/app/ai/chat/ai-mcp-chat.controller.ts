@@ -42,7 +42,7 @@ import {
   saveChatHistory,
 } from './ai-chat.service';
 import { generateMessageId } from './ai-message-id-generator';
-import { getMcpSystemPrompt } from './prompts.service';
+import { getMcpSystemPrompt, getSystemPrompt } from './prompts.service';
 import { selectRelevantTools } from './tools.service';
 
 const MAX_RECURSION_DEPTH = 10;
@@ -56,11 +56,14 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
 
       const chats = await getAllChatsForUserAndProject(userId, projectId);
       return reply.code(200).send({
-        chats: chats.map((chat) => ({
-          chatId: chat.chatId,
-          context: chat.context,
-          messages: chat.messages,
-        })),
+        chats: chats.map(
+          (chat) =>
+            ({
+              chatId: chat.chatId,
+              context: chat.context,
+              messages: chat.messages,
+            } as any),
+        ),
       });
     },
   );
@@ -93,7 +96,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         chatId: newChatId,
         userId,
       });
-      const chatContext = { chatId: newChatId };
+      const chatContext = { ...request.body, chatId: newChatId };
 
       await createChatContext(chatId, userId, projectId, chatContext);
       const messages = await getChatHistory(chatId, userId, projectId);
@@ -136,33 +139,56 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       content: request.body.message,
     });
 
-    const { mcpClients, tools } = await getMCPTools(
-      app,
-      request.headers.authorization?.replace('Bearer ', '') ?? '',
-      projectId,
-    );
+    let systemPrompt;
+    let mcpClients: unknown[] = [];
+    let relevantTools: ToolSet | undefined;
 
-    const filteredTools = await selectRelevantTools({
-      messages,
-      tools,
-      languageModel,
-      aiConfig,
-    });
+    if (
+      !chatContext.actionName ||
+      !chatContext.blockName ||
+      !chatContext.stepName ||
+      !chatContext.workflowId
+    ) {
+      const toolSet = await getMCPTools(
+        app,
+        request.headers.authorization?.replace('Bearer ', '') ?? '',
+        projectId,
+      );
 
-    const isAwsCostMcpDisabled =
-      !hasToolProvider(tools, 'cost-analysis') &&
-      !hasToolProvider(tools, 'cost-explorer');
+      mcpClients = toolSet.mcpClients;
+      mcpClients = toolSet.mcpClients;
 
-    const isAnalyticsLoaded = hasToolProvider(filteredTools, 'superset');
-    const isTablesLoaded = hasToolProvider(filteredTools, 'tables');
-    const isOpenOpsMCPEnabled = hasToolProvider(filteredTools, 'openops');
+      const filteredTools = await selectRelevantTools({
+        messages,
+        tools: toolSet.tools,
+        languageModel,
+        aiConfig,
+      });
 
-    const systemPrompt = await getMcpSystemPrompt({
-      isAnalyticsLoaded,
-      isTablesLoaded,
-      isOpenOpsMCPEnabled,
-      isAwsCostMcpDisabled,
-    });
+      const isAwsCostMcpDisabled =
+        !hasToolProvider(toolSet.tools, 'cost-analysis') &&
+        !hasToolProvider(toolSet.tools, 'cost-explorer');
+
+      const isAnalyticsLoaded = hasToolProvider(filteredTools, 'superset');
+      const isTablesLoaded = hasToolProvider(filteredTools, 'tables');
+      const isOpenOpsMCPEnabled = hasToolProvider(filteredTools, 'openops');
+
+      relevantTools = {
+        ...filteredTools,
+        ...(isOpenOpsMCPEnabled
+          ? collectToolsByProvider(toolSet.tools, 'openops')
+          : {}),
+      };
+
+      systemPrompt = await getMcpSystemPrompt({
+        isAnalyticsLoaded,
+        isTablesLoaded,
+        isOpenOpsMCPEnabled,
+        isAwsCostMcpDisabled,
+      });
+    } else {
+      systemPrompt = await getSystemPrompt(chatContext);
+    }
 
     pipeDataStreamToResponse(reply.raw, {
       execute: async (dataStreamWriter) => {
@@ -177,12 +203,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
           mcpClients,
           userId,
           projectId,
-          {
-            ...filteredTools,
-            ...(isOpenOpsMCPEnabled
-              ? collectToolsByProvider(tools, 'openops')
-              : {}),
-          },
+          relevantTools,
         );
       },
 

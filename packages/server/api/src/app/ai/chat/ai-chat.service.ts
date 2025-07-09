@@ -38,10 +38,10 @@ export type MCPChatContext = {
 };
 
 export type ChatContext = {
-  workflowId: string;
-  blockName: string;
-  stepName: string;
-  actionName: string;
+  workflowId?: string;
+  blockName?: string;
+  stepName?: string;
+  actionName?: string;
 };
 
 export const generateChatId = (params: {
