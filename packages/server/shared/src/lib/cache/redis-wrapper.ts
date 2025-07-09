@@ -92,6 +92,11 @@ const getRedisClient = (): Redis => {
   return client;
 };
 
+const getKeysByPattern = async (pattern: string): Promise<string[]> => {
+  const redis = getRedisClient();
+  return redis.keys(pattern);
+};
+
 export const redisWrapper = {
   setKey,
   getKey,
@@ -100,4 +105,5 @@ export const redisWrapper = {
   keyExists,
   setSerializedObject,
   getSerializedObject,
+  getKeysByPattern,
 };

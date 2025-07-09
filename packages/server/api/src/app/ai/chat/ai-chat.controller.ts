@@ -3,6 +3,7 @@ import { getAiProviderLanguageModel } from '@openops/common';
 import { encryptUtils, logger } from '@openops/server-shared';
 import {
   DeleteChatHistoryRequest,
+  GetAllChatsResponse,
   NewMessageRequest,
   OpenChatRequest,
   OpenChatResponse,
@@ -26,6 +27,7 @@ import {
   createChatContext,
   deleteChatHistory,
   generateChatId,
+  getAllChatsForUserAndProject,
   getChatContext,
   getChatHistory,
   saveChatHistory,
@@ -33,6 +35,24 @@ import {
 import { getSystemPrompt } from './prompts.service';
 
 export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
+  app.get(
+    '/all',
+    GetAllChatsOptions,
+    async (request, reply): Promise<GetAllChatsResponse> => {
+      const userId = request.principal.id;
+      const projectId = request.principal.projectId;
+
+      const chats = await getAllChatsForUserAndProject(userId, projectId);
+      return reply.code(200).send({
+        chats: chats.map((chat) => ({
+          chatId: chat.chatId,
+          context: chat.context,
+          messages: chat.messages,
+        })),
+      });
+    },
+  );
+
   app.post(
     '/open',
     OpenChatOptions,
@@ -44,15 +64,18 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
         actionName: request.body.actionName,
       };
 
+      const userId = request.principal.id;
+      const projectId = request.principal.projectId;
+
       const chatId = generateChatId({
         ...chatContext,
-        userId: request.principal.id,
+        userId,
       });
 
-      const messages = await getChatHistory(chatId);
+      const messages = await getChatHistory(chatId, userId, projectId);
 
       if (messages.length === 0) {
-        await createChatContext(chatId, chatContext);
+        await createChatContext(chatId, userId, projectId, chatContext);
       }
 
       return reply.code(200).send({
@@ -65,7 +88,8 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
   app.post('/conversation', NewMessageOptions, async (request, reply) => {
     const chatId = request.body.chatId;
     const projectId = request.principal.projectId;
-    const chatContext = await getChatContext(chatId);
+    const userId = request.principal.id;
+    const chatContext = await getChatContext(chatId, userId, projectId);
     if (!chatContext) {
       return reply
         .code(404)
@@ -87,7 +111,7 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
       providerSettings: aiConfig.providerSettings,
     });
 
-    const messages = await getChatHistory(chatId);
+    const messages = await getChatHistory(chatId, userId, projectId);
     messages.push({
       role: 'user',
       content: request.body.message,
@@ -105,7 +129,7 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
               messages.push(getResponseObject(r));
             });
 
-            await saveChatHistory(chatId, messages);
+            await saveChatHistory(chatId, userId, projectId, messages);
           },
         });
 
@@ -140,9 +164,11 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
     DeleteChatOptions,
     async (request, reply) => {
       const { chatId } = request.params;
+      const userId = request.principal.id;
+      const projectId = request.principal.projectId;
 
       try {
-        await deleteChatHistory(chatId);
+        await deleteChatHistory(chatId, userId, projectId);
         return await reply.code(StatusCodes.OK).send();
       } catch (error) {
         logger.error('Failed to delete chat history with error: ', error);
@@ -187,6 +213,20 @@ const DeleteChatOptions = {
     description:
       'Delete a chat session and its associated history. This endpoint removes all messages and context data for the specified chat ID, effectively ending the conversation.',
     params: DeleteChatHistoryRequest,
+  },
+};
+
+const GetAllChatsOptions = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
+  },
+  schema: {
+    tags: ['ai', 'ai-chat'],
+    description:
+      'Retrieve all chat sessions for the authenticated user and project. This endpoint returns all chat IDs, contexts, and messages for the user.',
+    response: {
+      200: GetAllChatsResponse,
+    },
   },
 };
 

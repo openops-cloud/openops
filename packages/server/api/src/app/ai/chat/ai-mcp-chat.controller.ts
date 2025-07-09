@@ -4,6 +4,7 @@ import { encryptUtils, logger } from '@openops/server-shared';
 import {
   AiConfig,
   DeleteChatHistoryRequest,
+  GetAllChatsResponse,
   NewMessageRequest,
   OpenChatMCPRequest,
   OpenChatResponse,
@@ -35,6 +36,7 @@ import {
   createChatContext,
   deleteChatHistory,
   generateChatIdForMCP,
+  getAllChatsForUserAndProject,
   getChatContext,
   getChatHistory,
   saveChatHistory,
@@ -45,18 +47,40 @@ import { selectRelevantTools } from './tools.service';
 
 const MAX_RECURSION_DEPTH = 10;
 export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
+  app.get(
+    '/all',
+    GetAllChatsOptions,
+    async (request, reply): Promise<GetAllChatsResponse> => {
+      const userId = request.principal.id;
+      const projectId = request.principal.projectId;
+
+      const chats = await getAllChatsForUserAndProject(userId, projectId);
+      return reply.code(200).send({
+        chats: chats.map((chat) => ({
+          chatId: chat.chatId,
+          context: chat.context,
+          messages: chat.messages,
+        })),
+      });
+    },
+  );
+
   app.post(
     '/open',
     OpenChatOptions,
     async (request, reply): Promise<OpenChatResponse> => {
       const { chatId: inputChatId } = request.body;
-      const { id: userId } = request.principal;
+      const { id: userId, projectId } = request.principal;
 
       if (inputChatId) {
-        const existingContext = await getChatContext(inputChatId);
+        const existingContext = await getChatContext(
+          inputChatId,
+          userId,
+          projectId,
+        );
 
         if (existingContext) {
-          const messages = await getChatHistory(inputChatId);
+          const messages = await getChatHistory(inputChatId, userId, projectId);
           return reply.code(200).send({
             chatId: inputChatId,
             messages,
@@ -65,11 +89,14 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       }
 
       const newChatId = openOpsId();
-      const chatId = generateChatIdForMCP({ chatId: newChatId, userId });
+      const chatId = generateChatIdForMCP({
+        chatId: newChatId,
+        userId,
+      });
       const chatContext = { chatId: newChatId };
 
-      await createChatContext(chatId, chatContext);
-      const messages = await getChatHistory(chatId);
+      await createChatContext(chatId, userId, projectId, chatContext);
+      const messages = await getChatHistory(chatId, userId, projectId);
 
       return reply.code(200).send({
         chatId,
@@ -80,7 +107,8 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
   app.post('/', NewMessageOptions, async (request, reply) => {
     const chatId = request.body.chatId;
     const projectId = request.principal.projectId;
-    const chatContext = await getChatContext(chatId);
+    const userId = request.principal.id;
+    const chatContext = await getChatContext(chatId, userId, projectId);
     if (!chatContext) {
       return reply
         .code(404)
@@ -102,7 +130,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       providerSettings: aiConfig.providerSettings,
     });
 
-    const messages = await getChatHistory(chatId);
+    const messages = await getChatHistory(chatId, userId, projectId);
     messages.push({
       role: 'user',
       content: request.body.message,
@@ -147,6 +175,8 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
           messages,
           chatId,
           mcpClients,
+          userId,
+          projectId,
           {
             ...filteredTools,
             ...(isOpenOpsMCPEnabled
@@ -186,9 +216,11 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
 
   app.delete('/:chatId', DeleteChatOptions, async (request, reply) => {
     const { chatId } = request.params;
+    const userId = request.principal.id;
+    const projectId = request.principal.projectId;
 
     try {
-      await deleteChatHistory(chatId);
+      await deleteChatHistory(chatId, userId, projectId);
       return await reply.code(StatusCodes.OK).send();
     } catch (error) {
       logger.error('Failed to delete chat history with error: ', error);
@@ -235,6 +267,20 @@ const DeleteChatOptions = {
   },
 };
 
+const GetAllChatsOptions = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
+  },
+  schema: {
+    tags: ['ai', 'ai-chat-mcp'],
+    description:
+      'Retrieve all MCP chat sessions for the authenticated user and project. This endpoint returns all chat IDs, contexts, and messages for the user.',
+    response: {
+      200: GetAllChatsResponse,
+    },
+  },
+};
+
 async function streamMessages(
   dataStreamWriter: DataStreamWriter,
   languageModel: LanguageModel,
@@ -243,6 +289,8 @@ async function streamMessages(
   messages: CoreMessage[],
   chatId: string,
   mcpClients: unknown[],
+  userId: string,
+  projectId: string,
   tools?: ToolSet,
 ): Promise<void> {
   let stepCount = 0;
@@ -276,7 +324,7 @@ async function streamMessages(
         filteredMessages.push(getResponseObject(r));
       });
 
-      await saveChatHistory(chatId, filteredMessages);
+      await saveChatHistory(chatId, userId, projectId, filteredMessages);
       await closeMCPClients(mcpClients);
     },
   });

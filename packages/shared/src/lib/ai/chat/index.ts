@@ -47,3 +47,39 @@ export const DeleteChatHistoryRequest = Type.Object({
 });
 
 export type DeleteChatHistoryRequest = Static<typeof DeleteChatHistoryRequest>;
+
+export const GetAllChatsResponse = Type.Object({
+  chats: Type.Array(
+    Type.Object({
+      chatId: Type.String(),
+      context: Type.Union([
+        Type.Object({
+          workflowId: Type.String(),
+          blockName: Type.String(),
+          stepName: Type.String(),
+          actionName: Type.String(),
+        }),
+        Type.Object({
+          chatId: Type.String(),
+        }),
+        Type.Null(),
+      ]),
+      messages: Type.Array(
+        Type.Object({
+          role: Type.String(),
+          content: Type.Union([
+            Type.String(),
+            Type.Array(
+              Type.Object({
+                type: Type.String(),
+                text: Type.Optional(Type.String()),
+              }),
+            ),
+          ]),
+        }),
+      ),
+    }),
+  ),
+});
+
+export type GetAllChatsResponse = Static<typeof GetAllChatsResponse>;

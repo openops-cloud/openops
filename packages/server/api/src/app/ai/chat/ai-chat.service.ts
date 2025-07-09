@@ -9,16 +9,28 @@ import { CoreMessage } from 'ai';
 const DEFAULT_EXPIRE_TIME = 86400;
 const LOCK_EXPIRE_TIME = 30000;
 
-const chatContextKey = (chatId: string): string => {
-  return `${chatId}:context`;
+const chatContextKey = (
+  chatId: string,
+  userId: string,
+  projectId: string,
+): string => {
+  return `${projectId}:${userId}:${chatId}:context`;
 };
 
-const chatHistoryKey = (chatId: string): string => {
-  return `${chatId}:history`;
+const chatHistoryKey = (
+  chatId: string,
+  userId: string,
+  projectId: string,
+): string => {
+  return `${projectId}:${userId}:${chatId}:history`;
 };
 
-const chatHistoryContextKey = (chatId: string): string => {
-  return `${chatId}:context:history`;
+const chatHistoryContextKey = (
+  chatId: string,
+  userId: string,
+  projectId: string,
+): string => {
+  return `${projectId}:${userId}:${chatId}:context:history`;
 };
 
 export type MCPChatContext = {
@@ -60,10 +72,12 @@ export const generateChatIdForMCP = (params: {
 
 export const createChatContext = async (
   chatId: string,
+  userId: string,
+  projectId: string,
   context: ChatContext | MCPChatContext,
 ): Promise<void> => {
   await cacheWrapper.setSerializedObject(
-    chatContextKey(chatId),
+    chatContextKey(chatId, userId, projectId),
     context,
     DEFAULT_EXPIRE_TIME,
   );
@@ -71,15 +85,21 @@ export const createChatContext = async (
 
 export const getChatContext = async (
   chatId: string,
+  userId: string,
+  projectId: string,
 ): Promise<ChatContext | null> => {
-  return cacheWrapper.getSerializedObject(chatContextKey(chatId));
+  return cacheWrapper.getSerializedObject(
+    chatContextKey(chatId, userId, projectId),
+  );
 };
 
 export const getChatHistory = async (
   chatId: string,
+  userId: string,
+  projectId: string,
 ): Promise<CoreMessage[]> => {
   const messages = await cacheWrapper.getSerializedObject<CoreMessage[]>(
-    chatHistoryKey(chatId),
+    chatHistoryKey(chatId, userId, projectId),
   );
 
   return messages ?? [];
@@ -87,10 +107,12 @@ export const getChatHistory = async (
 
 export const saveChatHistory = async (
   chatId: string,
+  userId: string,
+  projectId: string,
   messages: CoreMessage[],
 ): Promise<void> => {
   await cacheWrapper.setSerializedObject(
-    chatHistoryKey(chatId),
+    chatHistoryKey(chatId, userId, projectId),
     messages,
     DEFAULT_EXPIRE_TIME,
   );
@@ -98,33 +120,41 @@ export const saveChatHistory = async (
 
 export const appendMessagesToChatHistory = async (
   chatId: string,
+  userId: string,
+  projectId: string,
   messages: CoreMessage[],
 ): Promise<void> => {
   const chatLock = await distributedLock.acquireLock({
-    key: `lock:${chatHistoryKey(chatId)}`,
+    key: `lock:${chatHistoryKey(chatId, userId, projectId)}`,
     timeout: LOCK_EXPIRE_TIME,
   });
 
   try {
-    const existingMessages = await getChatHistory(chatId);
+    const existingMessages = await getChatHistory(chatId, userId, projectId);
 
     existingMessages.push(...messages);
 
-    await saveChatHistory(chatId, existingMessages);
+    await saveChatHistory(chatId, userId, projectId, existingMessages);
   } finally {
     await chatLock.release();
   }
 };
 
-export const deleteChatHistory = async (chatId: string): Promise<void> => {
-  await cacheWrapper.deleteKey(chatHistoryKey(chatId));
+export const deleteChatHistory = async (
+  chatId: string,
+  userId: string,
+  projectId: string,
+): Promise<void> => {
+  await cacheWrapper.deleteKey(chatHistoryKey(chatId, userId, projectId));
 };
 
 export const getChatHistoryContext = async (
   chatId: string,
+  userId: string,
+  projectId: string,
 ): Promise<CoreMessage[]> => {
   const messages = await cacheWrapper.getSerializedObject<CoreMessage[]>(
-    chatHistoryContextKey(chatId),
+    chatHistoryContextKey(chatId, userId, projectId),
   );
 
   return messages ?? [];
@@ -132,10 +162,12 @@ export const getChatHistoryContext = async (
 
 export const saveChatHistoryContext = async (
   chatId: string,
+  userId: string,
+  projectId: string,
   messages: CoreMessage[],
 ): Promise<void> => {
   await cacheWrapper.setSerializedObject(
-    chatHistoryContextKey(chatId),
+    chatHistoryContextKey(chatId, userId, projectId),
     messages,
     DEFAULT_EXPIRE_TIME,
   );
@@ -143,19 +175,25 @@ export const saveChatHistoryContext = async (
 
 export async function appendMessagesToChatHistoryContext(
   chatId: string,
+  userId: string,
+  projectId: string,
   newMessages: CoreMessage[],
 ): Promise<CoreMessage[]> {
   const historyLock = await distributedLock.acquireLock({
-    key: `lock:${chatHistoryContextKey(chatId)}`,
+    key: `lock:${chatHistoryContextKey(chatId, userId, projectId)}`,
     timeout: LOCK_EXPIRE_TIME,
   });
 
   try {
-    const existingMessages = await getChatHistoryContext(chatId);
+    const existingMessages = await getChatHistoryContext(
+      chatId,
+      userId,
+      projectId,
+    );
 
     existingMessages.push(...newMessages);
 
-    await saveChatHistoryContext(chatId, existingMessages);
+    await saveChatHistoryContext(chatId, userId, projectId, existingMessages);
 
     return existingMessages;
   } finally {
@@ -165,6 +203,47 @@ export async function appendMessagesToChatHistoryContext(
 
 export const deleteChatHistoryContext = async (
   chatId: string,
+  userId: string,
+  projectId: string,
 ): Promise<void> => {
-  await cacheWrapper.deleteKey(chatHistoryContextKey(chatId));
+  await cacheWrapper.deleteKey(
+    chatHistoryContextKey(chatId, userId, projectId),
+  );
+};
+
+export type ChatInfo = {
+  chatId: string;
+  context: ChatContext | MCPChatContext | null;
+  messages: CoreMessage[];
+};
+
+export const getAllChatsForUserAndProject = async (
+  userId: string,
+  projectId: string,
+): Promise<ChatInfo[]> => {
+  // Get all chat context keys for this user and project
+  const pattern = `${projectId}:${userId}:*:context`;
+  const contextKeys = await cacheWrapper.getKeysByPattern(pattern);
+
+  const chats: ChatInfo[] = [];
+
+  for (const contextKey of contextKeys) {
+    // Extract chatId from the key pattern: projectId:userId:chatId:context
+    const parts = contextKey.split(':');
+    if (parts.length >= 3) {
+      const chatId = parts[2];
+
+      // Get context and messages for this chat
+      const context = await getChatContext(chatId, userId, projectId);
+      const messages = await getChatHistory(chatId, userId, projectId);
+
+      chats.push({
+        chatId,
+        context,
+        messages,
+      });
+    }
+  }
+
+  return chats;
 };
