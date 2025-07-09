@@ -1,5 +1,6 @@
 import { jest } from '@jest/globals';
 import {
+  ChatContext,
   encodeStepOutputs,
   EngineResponseStatus,
   flowHelper,
@@ -75,47 +76,49 @@ describe('ContextEnrichmentService', () => {
   });
 
   describe('enrichContext', () => {
-    it('should resolve variables and return enriched context', async () => {
+    const setupMockFlow = () => {
       const mockFlow = {
         version: {
-          trigger: {
-            id: 'trigger-id',
-            nextAction: {
-              id: 'step-2',
-              stepName: 'step_2',
-            },
-          },
+          trigger: { id: 'trigger-id' },
         },
       } as PopulatedFlow;
-
-      const mockInputContext = {
-        flowId: mockFlowId,
-        flowVersionId: mockFlowVersionId,
-        steps: [
-          {
-            id: 'step-1',
-            stepName: 'step_1',
-            variables: [
-              {
-                name: 'variable1',
-                value: '{{trigger.data}}',
-              },
-              {
-                name: 'variable2',
-                value: '{{step_2.output}}',
-              },
-            ],
-          },
-        ],
-      };
 
       mockFlowService.getOnePopulatedOrThrow.mockResolvedValue(mockFlow);
       mockAccessTokenManager.generateEngineToken.mockResolvedValue(
         mockEngineToken,
       );
-      mockFlowHelper.getAllStepIds.mockReturnValue(['step-1', 'step-2']);
+      mockFlowHelper.getAllStepIds.mockReturnValue(['step-1']);
       mockFlowStepTestOutputService.listEncrypted.mockResolvedValue([]);
       mockEncodeStepOutputs.mockReturnValue({});
+
+      return mockFlow;
+    };
+
+    const createMockInputContext = (): ChatContext => ({
+      flowId: mockFlowId,
+      flowVersionId: mockFlowVersionId,
+      steps: [
+        {
+          id: 'step-1',
+          stepName: 'step_1',
+          variables: [
+            {
+              name: 'variable1',
+              value: '{{trigger.data}}',
+            },
+          ],
+        },
+      ],
+    });
+
+    it('should resolve variables and return enriched context', async () => {
+      setupMockFlow();
+
+      const mockInputContext = createMockInputContext();
+      mockInputContext.steps[0].variables?.push({
+        name: 'variable2',
+        value: '{{step_2.output}}',
+      });
 
       mockEngineRunner.executeVariable
         .mockResolvedValueOnce({
@@ -147,7 +150,7 @@ describe('ContextEnrichmentService', () => {
             variables: [
               {
                 name: 'variable1',
-                value: { data: 'test-data' },
+                value: '{\n  "data": "test-data"\n}',
               },
               {
                 name: 'variable2',
@@ -180,7 +183,7 @@ describe('ContextEnrichmentService', () => {
         steps: [
           {
             id: 'step-1',
-            stepName: 'Step 1',
+            stepName: 'step_1',
           },
         ],
       };
@@ -201,7 +204,7 @@ describe('ContextEnrichmentService', () => {
         steps: [
           {
             id: 'step-1',
-            stepName: 'Step 1',
+            stepName: 'step_1',
             variables: undefined,
           },
         ],
@@ -223,7 +226,7 @@ describe('ContextEnrichmentService', () => {
         steps: [
           {
             id: 'step-1',
-            stepName: 'Step 1',
+            stepName: 'step_1',
             variables: [
               {
                 name: 'variable1',
@@ -260,7 +263,7 @@ describe('ContextEnrichmentService', () => {
         steps: [
           {
             id: 'step-1',
-            stepName: 'Step 1',
+            stepName: 'step_1',
             variables: [
               {
                 name: 'variable1',
@@ -285,7 +288,7 @@ describe('ContextEnrichmentService', () => {
         steps: [
           {
             id: 'step-1',
-            stepName: 'Step 1',
+            stepName: 'step_1',
             variables: [
               {
                 name: 'variable1',
@@ -316,7 +319,7 @@ describe('ContextEnrichmentService', () => {
         steps: [
           {
             id: 'step-1',
-            stepName: 'Step 1',
+            stepName: 'step_1',
             variables: [
               {
                 name: 'variable1',
@@ -325,6 +328,129 @@ describe('ContextEnrichmentService', () => {
             ],
           },
         ],
+      });
+    });
+
+    it.each([
+      {
+        description: 'truncate long string values',
+        inputValue: 'x'.repeat(1500),
+        expectedCheck: (value: string): void => {
+          expect(value).toBe('x'.repeat(1000) + '... [truncated]');
+        },
+      },
+      {
+        description: 'truncate large object values',
+        inputValue: {
+          Reservations: [
+            {
+              Instances: [
+                {
+                  InstanceId: 'i-123',
+                  State: { Name: 'running' },
+                  Tags: Array.from({ length: 100 }, (_, i) => ({
+                    Key: `tag-${i}`,
+                    Value: `value-${i}`,
+                  })),
+                },
+              ],
+            },
+          ],
+        },
+        expectedCheck: (value: string): void => {
+          expect(value).toContain('... [truncated]');
+          expect(value).toContain('"InstanceId": "i-123"');
+          expect(value).toContain('"Reservations"');
+        },
+      },
+      {
+        description: 'serialize arrays properly',
+        inputValue: [
+          { id: 1, name: 'item1' },
+          { id: 2, name: 'item2' },
+        ],
+        expectedCheck: (value: string): void => {
+          const expectedJson = JSON.stringify(
+            [
+              { id: 1, name: 'item1' },
+              { id: 2, name: 'item2' },
+            ],
+            null,
+            2,
+          );
+          expect(value).toBe(expectedJson);
+        },
+      },
+    ])('should $description', async ({ inputValue, expectedCheck }) => {
+      setupMockFlow();
+      const mockInputContext = createMockInputContext();
+
+      mockEngineRunner.executeVariable.mockResolvedValue({
+        status: 'OK' as EngineResponseStatus,
+        result: {
+          success: true,
+          resolvedValue: inputValue,
+          censoredValue: inputValue,
+        },
+      });
+
+      const result = await enrichContext(mockInputContext, mockProjectId);
+
+      const value = result.steps[0]?.variables?.[0]?.value as string;
+      expectedCheck(value);
+    });
+
+    it.each([
+      {
+        description: 'null values',
+        inputValue: null,
+        expectedOutput: 'null',
+      },
+      {
+        description: 'undefined values',
+        inputValue: undefined,
+        expectedOutput: 'undefined',
+      },
+      {
+        description: 'circular references gracefully',
+        inputValue: ((): Record<string, unknown> => {
+          const circularObj: Record<string, unknown> = { name: 'test' };
+          circularObj.self = circularObj;
+          return circularObj;
+        })(),
+        expectedOutput: '{\n  "name": "test",\n  "self": ""\n}',
+      },
+    ])('should handle $description', async ({ inputValue, expectedOutput }) => {
+      setupMockFlow();
+      const mockInputContext = createMockInputContext();
+
+      mockEngineRunner.executeVariable.mockResolvedValue({
+        status: 'OK' as EngineResponseStatus,
+        result: {
+          success: true,
+          resolvedValue: inputValue,
+          censoredValue: inputValue,
+        },
+      });
+
+      const result = await enrichContext(mockInputContext, mockProjectId);
+
+      expect(result.steps[0]?.variables?.[0]?.value).toBe(expectedOutput);
+    });
+
+    it('should return empty steps when no steps provided', async () => {
+      const mockInputContext = {
+        flowId: mockFlowId,
+        flowVersionId: mockFlowVersionId,
+        steps: [],
+      };
+
+      const result = await enrichContext(mockInputContext, mockProjectId);
+
+      expect(result).toEqual({
+        flowId: mockFlowId,
+        flowVersionId: mockFlowVersionId,
+        steps: [],
       });
     });
   });

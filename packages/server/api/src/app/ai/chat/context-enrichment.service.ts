@@ -50,6 +50,39 @@ export async function enrichContext(
   }
 }
 
+function truncateForLLM(value: unknown, maxLength = 1000): string {
+  let stringValue: string;
+
+  try {
+    if (typeof value === 'object' && value !== null) {
+      const seen = new WeakSet();
+      stringValue = JSON.stringify(
+        value,
+        (_, val) => {
+          if (typeof val === 'object' && val !== null) {
+            if (seen.has(val)) {
+              return '';
+            }
+            seen.add(val);
+          }
+          return val;
+        },
+        2,
+      );
+    } else {
+      stringValue = String(value);
+    }
+  } catch (error) {
+    stringValue = String(value);
+  }
+
+  if (stringValue.length <= maxLength) {
+    return stringValue;
+  }
+
+  return stringValue.substring(0, maxLength) + '... [truncated]';
+}
+
 async function getFlowData(
   additionalContext: ChatContext,
   projectId: string,
@@ -210,6 +243,8 @@ async function resolveVariable(
 
   return {
     name: variable.name,
-    value: result.success ? result.censoredValue : String(result.error),
+    value: result.success
+      ? truncateForLLM(result.censoredValue)
+      : String(result.error),
   };
 }
