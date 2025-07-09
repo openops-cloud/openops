@@ -16,7 +16,7 @@ export const finoutAuth = BlockAuth.CustomAuth({
       displayName: 'Client ID',
       required: true,
     }),
-    secretKey: Property.ShortText({
+    secretKey: Property.SecretText({
       displayName: 'Secret Key',
       required: true,
     }),
