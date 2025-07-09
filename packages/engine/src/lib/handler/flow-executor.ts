@@ -122,6 +122,9 @@ function sendProgress(
   flowExecutionContext: FlowExecutorContext,
   constants: EngineConstants,
 ): Promise<void> {
+  if (isNil(constants.executionCorrelationId)) {
+    return Promise.resolve();
+  }
   return progressService.sendUpdate({
     engineConstants: constants,
     flowExecutorContext: flowExecutionContext,
