@@ -24,7 +24,6 @@ jest.mock('@openops/server-shared', () => ({
   logger: loggerMock,
 }));
 
-// Mock crypto.randomUUID
 const mockRandomUUID = jest.fn();
 jest.mock('node:crypto', () => ({
   randomUUID: mockRandomUUID,
