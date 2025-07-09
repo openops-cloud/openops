@@ -15,8 +15,8 @@ export const finout = createBlock({
       baseUrl: () => 'https://app.finout.io/v1',
       auth: finoutAuth,
       authMapping: async ({ auth }: any) => ({
-        'x-finout-client-id': `Bearer ${auth.clientId}`,
-        'x-finout-secret-key': `Bearer ${auth.secretKey}`,
+        'x-finout-client-id': auth.clientId,
+        'x-finout-secret-key': auth.secretKey,
       }),
       additionalProps: {
         documentation: Property.MarkDown({
