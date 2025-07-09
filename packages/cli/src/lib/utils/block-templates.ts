@@ -1,5 +1,6 @@
 import { exec } from 'child_process';
 import { writeFile } from 'fs/promises';
+import path from 'path';
 import { promisify } from 'util';
 
 const execAsync = promisify(exec);
@@ -265,12 +266,12 @@ describe('block declaration tests', () => {
 `;
   }
 
-  await mkdir(path.join('packages', 'blocks', blockName, 'test'), { recursive: true });
+  const testFolder = path.join('packages', 'blocks', blockName, 'test');
+  await mkdir(testFolder, {
+    recursive: true,
+  });
 
-  await writeFile(
-    path.join('packages', 'blocks', blockName, 'test', 'index.test.ts'),
-    testTemplate,
-  );
+  await writeFile(path.join(testFolder, 'index.test.ts'), testTemplate);
 
   await formatBlockFolder(blockName);
 };
