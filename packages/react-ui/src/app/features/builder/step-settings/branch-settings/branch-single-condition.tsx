@@ -47,7 +47,7 @@ export const textToBranchOperation: Record<BranchOperator, string> = {
   [BranchOperator.LIST_COUNT_IS_LESS_THAN]: t('(List length) Is less than'),
   [BranchOperator.LIST_COUNT_IS_EQUAL_TO]: t('(List length) Is equal to'),
   [BranchOperator.LIST_CONTAINS]: t('(List) Contains'),
-  [BranchOperator.LIST_NOT_CONTAINS]: t('(List) Not Contains'),
+  [BranchOperator.LIST_NOT_CONTAINS]: t('(List) Does not contain'),
   [BranchOperator.DATE_IS_BEFORE]: t('(Date) Is before'),
   [BranchOperator.DATE_IS_AFTER]: t('(Date) Is after'),
 };

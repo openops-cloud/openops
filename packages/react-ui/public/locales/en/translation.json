@@ -189,7 +189,7 @@
   "(List length) Is less than": "(List length) Is less than",
   "(List length) Is equal to": "(List length) Is equal to",
   "(List) Contains": "(List) Contains",
-  "(List) Not Contains": "(List) Not Contains",
+  "(List) Does not contain": "(List) Does not contain",
   "(Date) Is before": "(Date) Is before",
   "(Date) Is after": "(Date) Is after",
   "First value": "First value",
