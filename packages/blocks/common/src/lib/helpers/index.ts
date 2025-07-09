@@ -34,6 +34,7 @@ export function createCustomApiCallAction({
   displayName,
   name,
   additionalProps,
+  additionalQueryParamsMapping,
 }: {
   auth?: BlockAuthProperty;
   baseUrl: (auth?: unknown) => string;
@@ -41,6 +42,10 @@ export function createCustomApiCallAction({
     auth: unknown;
     propsValue: unknown;
   }) => Promise<HttpHeaders>;
+  additionalQueryParamsMapping?: (context: {
+    auth: unknown;
+    propsValue: unknown;
+  }) => Promise<QueryParams>;
   description?: string | null;
   displayName?: string | null;
   name?: string | null;
@@ -108,7 +113,7 @@ export function createCustomApiCallAction({
     },
 
     run: async (context) => {
-      const { method, url, headers, queryParams, body, failsafe, timeout } =
+      const { method, url, headers, body, failsafe, timeout } =
         context.propsValue;
 
       assertNotNullOrUndefined(method, 'Method');
@@ -125,11 +130,25 @@ export function createCustomApiCallAction({
         }
       }
 
+      let queryParamsValue: Record<string, unknown> =
+        context.propsValue.queryParams || {};
+
+      if (additionalQueryParamsMapping) {
+        const additionalQueryParams = await additionalQueryParamsMapping(
+          context,
+        );
+
+        queryParamsValue = {
+          ...queryParamsValue,
+          ...additionalQueryParams,
+        };
+      }
+
       const request: HttpRequest<Record<string, unknown>> = {
         method,
         url: url['url'],
         headers: headersValue,
-        queryParams: queryParams as QueryParams,
+        queryParams: queryParamsValue as QueryParams,
         timeout: timeout ? timeout * 1000 : 0,
       };
 

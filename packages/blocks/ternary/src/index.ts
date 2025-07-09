@@ -1,4 +1,5 @@
-import { createBlock } from '@openops/blocks-framework';
+import { createCustomApiCallAction } from '@openops/blocks-common';
+import { createBlock, Property } from '@openops/blocks-framework';
 import { BlockCategory } from '@openops/shared';
 import { getBudgets } from './lib/actions/get-budgets';
 import { getDataIntegrations } from './lib/actions/get-data-integrations';
@@ -15,10 +16,22 @@ export const ternary = createBlock({
   actions: [
     getDataIntegrations,
     getBudgets,
-    // forecasting
-    // cost allocation?
-    //getUsageRecommendations,
-    //updateUsageRecommendations,
+    createCustomApiCallAction({
+      baseUrl: (auth: any) => `${auth.apiURL}/api/`,
+      auth: ternaryCloudAuth,
+      additionalProps: {
+        documentation: Property.MarkDown({
+          value:
+            'For more information, visit the [Ternary API documentation](https://docs.ternary.app/reference/api).',
+        }),
+      },
+      additionalQueryParamsMapping: async ({ auth }: any) => ({
+        tenantID: auth.tenantId,
+      }),
+      authMapping: async ({ auth }: any) => ({
+        Authorization: `Bearer ${auth.apiKey}`,
+      }),
+    }),
   ],
   triggers: [],
 });
