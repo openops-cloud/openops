@@ -35,6 +35,7 @@ import { aiModule } from './ai/ai.module';
 import { appConnectionModule } from './app-connection/app-connection.module';
 import { appEventRoutingModule } from './app-event-routing/app-event-routing.module';
 import { authenticationModule } from './authentication/authentication.module';
+import { blockVariableModule } from './block-variable/block-variable-module';
 import { blockModule } from './blocks/base-block-module';
 import { blockSyncService } from './blocks/block-sync-service';
 import { communityBlocksModule } from './blocks/community-block-module';
@@ -211,6 +212,7 @@ export const setupApp = async (
   await app.register(userInfoModule);
   await app.register(userSettingsModule);
   await app.register(aiModule);
+  await app.register(blockVariableModule);
 
   app.get(
     '/redirect',

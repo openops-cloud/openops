@@ -19,6 +19,8 @@ import {
   ExecuteValidateAuthResponse,
   FlowRunResponse,
   FlowVersionState,
+  ResolveVariableOperation,
+  ResolveVariableResponse,
   ResumeExecuteFlowOperation,
   SourceCode,
   TriggerHookType,
@@ -50,6 +52,7 @@ export type EngineHelperValidateAuthResult = ExecuteValidateAuthResponse;
 
 export type EngineHelperCodeResult = ExecuteActionResponse;
 export type EngineHelperExtractBlockInformation = BlockMetadata;
+export type EngineHelperVariableResult = ResolveVariableResponse;
 
 export type EngineHelperResult =
   | EngineHelperFlowResult
@@ -58,7 +61,8 @@ export type EngineHelperResult =
   | EngineHelperCodeResult
   | EngineHelperExtractBlockInformation
   | EngineHelperActionResult
-  | EngineHelperValidateAuthResult;
+  | EngineHelperValidateAuthResult
+  | EngineHelperVariableResult;
 
 export type EngineHelperResponse<Result extends EngineHelperResult> = {
   status: EngineResponseStatus;
@@ -97,4 +101,8 @@ export type EngineRunner = {
     engineToken: string,
     operation: Omit<ExecutePropsOptions, EngineConstants>,
   ): Promise<EngineHelperResponse<EngineHelperPropResult>>;
+  executeVariable(
+    engineToken: string,
+    operation: Omit<ResolveVariableOperation, EngineConstants>,
+  ): Promise<EngineHelperResponse<EngineHelperVariableResult>>;
 };
