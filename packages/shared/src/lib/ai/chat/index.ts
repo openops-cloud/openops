@@ -48,18 +48,18 @@ export const StepContext = Type.Object({
 });
 export type StepContext = Static<typeof StepContext>;
 
-export const ChatContext = Type.Object({
+export const ChatFlowContext = Type.Object({
   flowId: Type.String(),
   flowVersionId: Type.String(),
   steps: Type.Array(StepContext),
 });
 
-export type ChatContext = Static<typeof ChatContext>;
+export type ChatFlowContext = Static<typeof ChatFlowContext>;
 
 export const NewMessageRequest = Type.Object({
   chatId: Type.String(),
   message: Type.String(),
-  additionalContext: Type.Optional(ChatContext),
+  additionalContext: Type.Optional(ChatFlowContext),
 });
 
 export type NewMessageRequest = Static<typeof NewMessageRequest>;
