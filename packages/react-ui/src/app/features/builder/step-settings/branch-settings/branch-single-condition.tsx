@@ -25,7 +25,7 @@ export const textToBranchOperation: Record<BranchOperator, string> = {
   [BranchOperator.TEXT_CONTAINS]: t('(Text) Contains'),
   [BranchOperator.TEXT_DOES_NOT_CONTAIN]: t('(Text) Does not contain'),
   [BranchOperator.TEXT_EXACTLY_MATCHES]: t('(Text) Is'),
-  [BranchOperator.TEXT_DOES_NOT_EXACTLY_MATCH]: t('(Text) Is Not'),
+  [BranchOperator.TEXT_DOES_NOT_EXACTLY_MATCH]: t('(Text) Is not'),
   [BranchOperator.TEXT_STARTS_WITH]: t('(Text) Starts with'),
   [BranchOperator.TEXT_DOES_NOT_START_WITH]: t('(Text) Does not start with'),
   [BranchOperator.TEXT_ENDS_WITH]: t('(Text) Ends with'),
