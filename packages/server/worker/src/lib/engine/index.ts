@@ -11,6 +11,7 @@ import {
   ExecuteStepOperation,
   ExecuteTriggerOperation,
   ExecuteValidateAuthOperation,
+  ResolveVariableOperation,
   TriggerHookType,
 } from '@openops/shared';
 import { webhookUtils } from '../utils/webhook-utils';
@@ -112,5 +113,16 @@ export const engineRunner: EngineRunner = {
     };
 
     return callEngineLambda(EngineOperationType.EXECUTE_STEP, input);
+  },
+
+  async executeVariable(engineToken, operation) {
+    const input: ResolveVariableOperation = {
+      ...operation,
+      publicUrl: await networkUtls.getPublicUrl(),
+      internalApiUrl: networkUtls.getInternalApiUrl(),
+      engineToken,
+    };
+
+    return callEngineLambda(EngineOperationType.RESOLVE_VARIABLE, input);
   },
 };
