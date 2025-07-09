@@ -249,8 +249,6 @@ describe('deleteChatHistory', () => {
 
 describe('Stream Cancellation', () => {
   const chatId = 'stream-test-chat';
-  const userId = 'user123';
-  const requestId = 'req-456';
   const mockAbortControllerId = 'abort-controller-123';
 
   beforeEach(() => {
@@ -265,9 +263,6 @@ describe('Stream Cancellation', () => {
     it('should set active stream data in cache', async () => {
       const streamData: StreamData = {
         chatId,
-        userId,
-        timestamp: Date.now(),
-        requestId,
         abortControllerId: mockAbortControllerId,
       };
 
@@ -298,11 +293,7 @@ describe('Stream Cancellation', () => {
     });
 
     it('should create abort controller and register stream data', async () => {
-      const abortController = await setupStreamCancellation(
-        chatId,
-        userId,
-        requestId,
-      );
+      const abortController = await setupStreamCancellation(chatId);
 
       expect(abortController).toBeInstanceOf(AbortController);
       expect(mockRandomUUID).toHaveBeenCalled();
@@ -310,8 +301,6 @@ describe('Stream Cancellation', () => {
         `${chatId}:${ACTIVE_STREAM_SUFFIX}`,
         expect.objectContaining({
           chatId,
-          userId,
-          requestId,
           abortControllerId: `${chatId}-mock-uuid-123`,
         }),
         STREAM_EXPIRE_TIME,
@@ -321,32 +310,23 @@ describe('Stream Cancellation', () => {
     it('should handle existing stream and log debug message', async () => {
       const existingStreamData: StreamData = {
         chatId,
-        userId: 'existing-user',
-        timestamp: Date.now() - 1000,
-        requestId: 'existing-req',
         abortControllerId: 'existing-abort',
       };
 
       getSerializedObjectMock.mockResolvedValue(existingStreamData);
 
-      await setupStreamCancellation(chatId, userId, requestId);
+      await setupStreamCancellation(chatId);
 
       expect(loggerMock.debug).toHaveBeenCalledWith(
         'Overwriting existing stream',
         {
           chatId,
-          existingUserId: 'existing-user',
-          newUserId: userId,
         },
       );
     });
 
     it('should set up abort signal listener for cleanup', async () => {
-      const abortController = await setupStreamCancellation(
-        chatId,
-        userId,
-        requestId,
-      );
+      const abortController = await setupStreamCancellation(chatId);
 
       abortController.abort();
 
@@ -360,11 +340,7 @@ describe('Stream Cancellation', () => {
     it('should handle cleanup errors gracefully', async () => {
       deleteKeyMock.mockRejectedValue(new Error('Cleanup error'));
 
-      const abortController = await setupStreamCancellation(
-        chatId,
-        userId,
-        requestId,
-      );
+      const abortController = await setupStreamCancellation(chatId);
 
       abortController.abort();
 
@@ -386,13 +362,10 @@ describe('Stream Cancellation', () => {
     });
 
     it('should abort controller and cleanup when controller exists in registry', async () => {
-      await setupStreamCancellation(chatId, userId, requestId);
+      await setupStreamCancellation(chatId);
 
       const streamData: StreamData = {
         chatId,
-        userId,
-        timestamp: Date.now(),
-        requestId,
         abortControllerId: `${chatId}-mock-uuid-123`,
       };
 
@@ -415,9 +388,6 @@ describe('Stream Cancellation', () => {
     it('should handle case when abort controller not found in registry', async () => {
       const streamData: StreamData = {
         chatId,
-        userId,
-        timestamp: Date.now(),
-        requestId,
         abortControllerId: 'non-existent-controller',
       };
 

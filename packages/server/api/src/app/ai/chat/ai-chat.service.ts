@@ -180,9 +180,6 @@ export const STREAM_EXPIRE_TIME = 300;
 
 export type StreamData = {
   chatId: string;
-  userId: string;
-  timestamp: number;
-  requestId?: string;
   abortControllerId?: string;
 };
 
@@ -239,8 +236,6 @@ export const cancelActiveStream = async (chatId: string): Promise<void> => {
 
 export const setupStreamCancellation = async (
   chatId: string,
-  userId: string,
-  requestId: string,
 ): Promise<AbortController> => {
   const abortController = new AbortController();
   const abortControllerId = `${chatId}-${randomUUID()}`;
@@ -249,9 +244,6 @@ export const setupStreamCancellation = async (
 
   const streamData: StreamData = {
     chatId,
-    userId,
-    timestamp: Date.now(),
-    requestId,
     abortControllerId,
   };
 
@@ -259,8 +251,6 @@ export const setupStreamCancellation = async (
   if (existingStream) {
     logger.debug('Overwriting existing stream', {
       chatId,
-      existingUserId: existingStream.userId,
-      newUserId: streamData.userId,
     });
   }
 

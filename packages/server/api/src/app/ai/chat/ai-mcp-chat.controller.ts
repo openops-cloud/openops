@@ -138,11 +138,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       isAwsCostMcpDisabled,
     });
 
-    const streamAbortController = await setupStreamCancellation(
-      chatId,
-      request.principal.id,
-      request.id,
-    );
+    const streamAbortController = await setupStreamCancellation(chatId);
 
     pipeDataStreamToResponse(reply.raw, {
       execute: async (dataStreamWriter) => {

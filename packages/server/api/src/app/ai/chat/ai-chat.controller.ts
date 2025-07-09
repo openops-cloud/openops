@@ -95,11 +95,7 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
       content: request.body.message,
     });
 
-    const streamAbortController = await setupStreamCancellation(
-      chatId,
-      request.principal.id,
-      request.id,
-    );
+    const streamAbortController = await setupStreamCancellation(chatId);
 
     pipeDataStreamToResponse(reply.raw, {
       execute: async (dataStreamWriter) => {
