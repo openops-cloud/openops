@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals';
 import {
-  ChatContext,
+  ChatFlowContext,
   encodeStepOutputs,
   EngineResponseStatus,
   flowHelper,
@@ -94,7 +94,7 @@ describe('ContextEnrichmentService', () => {
       return mockFlow;
     };
 
-    const createMockInputContext = (): ChatContext => ({
+    const createMockInputContext = (): ChatFlowContext => ({
       flowId: mockFlowId,
       flowVersionId: mockFlowVersionId,
       steps: [

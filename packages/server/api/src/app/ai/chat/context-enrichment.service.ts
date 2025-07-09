@@ -1,6 +1,6 @@
 import { logger } from '@openops/server-shared';
 import {
-  ChatContext,
+  ChatFlowContext,
   encodeStepOutputs,
   flowHelper,
   OpenOpsId,
@@ -20,9 +20,9 @@ type FlowData = {
 };
 
 export async function enrichContext(
-  additionalContext: ChatContext,
+  additionalContext: ChatFlowContext,
   projectId: string,
-): Promise<ChatContext> {
+): Promise<ChatFlowContext> {
   try {
     if (!additionalContext.steps) {
       return {
@@ -84,7 +84,7 @@ function truncateForLLM(value: unknown, maxLength = 1000): string {
 }
 
 async function getFlowData(
-  additionalContext: ChatContext,
+  additionalContext: ChatFlowContext,
   projectId: string,
 ): Promise<FlowData> {
   const [flow, engineToken] = await Promise.all([
@@ -105,7 +105,7 @@ async function getFlowData(
 }
 
 async function getFlow(
-  additionalContext: ChatContext,
+  additionalContext: ChatFlowContext,
   projectId: string,
 ): Promise<PopulatedFlow> {
   try {
