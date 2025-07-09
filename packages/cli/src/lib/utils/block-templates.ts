@@ -270,7 +270,6 @@ describe('block declaration tests', () => {
   await mkdir(testFolder, {
     recursive: true,
   });
-
   await writeFile(path.join(testFolder, 'index.test.ts'), testTemplate);
 
   await formatBlockFolder(blockName);
