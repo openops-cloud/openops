@@ -8,7 +8,7 @@ You can generate an API token by following the instructions in the [Finout API d
 export const finoutAuth = BlockAuth.CustomAuth({
   authProviderKey: 'finout',
   authProviderDisplayName: 'Finout',
-  authProviderLogoUrl: 'https://static.openops.com/blocks/finout.svg',
+  authProviderLogoUrl: 'https://static.openops.com/blocks/finout.png',
   description: markdown,
   required: true,
   props: {
