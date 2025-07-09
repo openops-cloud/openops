@@ -199,7 +199,7 @@ async function resolveVariable(
   step: StepContext,
   flowData: FlowData,
   projectId: string,
-): Promise<{ name: string; value: string }> {
+): Promise<{ name: string; value: unknown }> {
   const { result } = await engineRunner.executeVariable(flowData.engineToken, {
     variableExpression: variable.value,
     flowVersion: flowData.flow.version,
@@ -210,8 +210,6 @@ async function resolveVariable(
 
   return {
     name: variable.name,
-    value: result.success
-      ? JSON.stringify(result.censoredValue)
-      : String(result.error),
+    value: result.success ? result.censoredValue : String(result.error),
   };
 }

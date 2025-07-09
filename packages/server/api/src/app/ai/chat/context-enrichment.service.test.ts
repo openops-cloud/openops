@@ -147,11 +147,11 @@ describe('ContextEnrichmentService', () => {
             variables: [
               {
                 name: 'variable1',
-                value: JSON.stringify({ data: 'test-data' }),
+                value: { data: 'test-data' },
               },
               {
                 name: 'variable2',
-                value: JSON.stringify('step-2-output'),
+                value: 'step-2-output',
               },
             ],
           },

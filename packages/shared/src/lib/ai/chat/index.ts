@@ -37,7 +37,7 @@ export type OpenChatResponse = Static<typeof OpenChatResponse>;
 
 export const VariableContext = Type.Object({
   name: Type.String(),
-  value: Type.String(),
+  value: Type.Any(),
 });
 export type VariableContext = Static<typeof VariableContext>;
 
