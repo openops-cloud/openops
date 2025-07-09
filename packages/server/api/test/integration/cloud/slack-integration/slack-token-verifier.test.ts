@@ -196,6 +196,7 @@ describe('Slack token verifier', () => {
     expect(result).toBe(false);
     expect(loggerMock.error).toHaveBeenCalledWith(
       '[Slack signature verification] error',
+      { error: new Error('some error') },
     );
   });
 });
