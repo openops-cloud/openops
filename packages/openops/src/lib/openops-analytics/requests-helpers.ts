@@ -57,7 +57,10 @@ async function makeOpenOpsAnalyticsV1ApiRequest<T>(
     return response.data;
   } catch (error) {
     if (!allowErrors) {
-      logger.error(`Error calling OpenOps Analytics. Route: "${route}"`, error);
+      logger.error(`Error calling OpenOps Analytics. Route: "${route}"`, {
+        error,
+        route,
+      });
     }
 
     throw error;

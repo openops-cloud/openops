@@ -68,7 +68,7 @@ async function executeWithConcurrencyLimit<T>(
   try {
     return await fn();
   } catch (error) {
-    logger.error('Error in locked row operation:', error);
+    logger.error('Error in locked row operation:', { error });
     throw error;
   } finally {
     release();

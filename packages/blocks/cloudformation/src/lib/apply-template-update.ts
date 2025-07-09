@@ -29,7 +29,7 @@ export async function applyTemplateUpdate(
 
   if (!response.StackId) {
     const message = `No template found for stack: ${arn}`;
-    logger.error(message, response);
+    logger.error(message, { response });
     throw new Error(message);
   }
 

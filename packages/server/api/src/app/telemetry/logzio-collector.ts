@@ -55,7 +55,7 @@ export function startMetricsCollector(): void {
 
   metricsIntervalId = setInterval(() => {
     sendMetrics().catch((error) => {
-      logger.error('Error in metrics collector.', error);
+      logger.error('Error in metrics collector.', { error });
     });
   }, 60 * 1000);
 }
@@ -69,6 +69,6 @@ export async function flushMetricsCollector(): Promise<void> {
 
     await sendMetrics();
   } catch (error) {
-    logger.error('Error flushing metrics collector.', error);
+    logger.error('Error flushing metrics collector.', { error });
   }
 }

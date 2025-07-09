@@ -54,7 +54,9 @@ export class RegistryBlockManager extends BlockManager {
         key: contextKey,
         value: contextValue,
       });
-      logger.error('Failed to install blocks', enrichedError);
+      logger.error('Failed to install blocks', {
+        error: enrichedError,
+      });
 
       throw enrichedError;
     }

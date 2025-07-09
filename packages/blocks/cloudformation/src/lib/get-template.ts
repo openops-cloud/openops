@@ -19,7 +19,7 @@ export async function getCloudFormationTemplate(
 
   if (!response.TemplateBody) {
     const message = `No template found for stack: ${arn}`;
-    logger.error(message, response);
+    logger.error(message, { response });
     throw new Error(message);
   }
 

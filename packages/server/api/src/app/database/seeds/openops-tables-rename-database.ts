@@ -65,10 +65,9 @@ export const updateOpenopsTablesDatabase = async (): Promise<void> => {
         name: 'newDeploymentSkipRenameOpenopsTablesDatabase',
       });
     } else {
-      logger.error(
-        'An error occurred renaming OpenOps Tables database.',
+      logger.error('An error occurred renaming OpenOps Tables database.', {
         error,
-      );
+      });
     }
   }
 };

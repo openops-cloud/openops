@@ -72,6 +72,8 @@ export const deleteOldOpportunitiesTable = async (): Promise<void> => {
 
     await setOldOpportunitiesTableDeleted();
   } catch (error: unknown) {
-    logger.error('An error occurred deleting old opportunities table.', error);
+    logger.error('An error occurred deleting old opportunities table.', {
+      error,
+    });
   }
 };

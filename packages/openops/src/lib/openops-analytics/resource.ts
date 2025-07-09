@@ -30,7 +30,7 @@ export async function tryGetResource<T>(
       error,
     )}`;
 
-    logger.error(errorMessage, error);
+    logger.error(errorMessage, { error });
     throw new Error(errorMessage);
   }
 }

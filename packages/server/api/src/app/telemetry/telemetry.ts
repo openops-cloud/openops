@@ -53,14 +53,17 @@ export const telemetry = {
           sendToCollector(telemetryCollectorUrl, timeseries).catch((error) => {
             logger.error(
               'Error sending telemetry event to OpenOps Collector.',
-              error,
+              { error, event },
             );
           });
           return;
         }
 
         saveMetric(timeseries).catch((error) => {
-          logger.error('Error sending telemetry event to Logzio.', error);
+          logger.error('Error sending telemetry event to Logzio.', {
+            error,
+            event,
+          });
         });
       })
       .catch((error) => {
