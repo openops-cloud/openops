@@ -106,6 +106,7 @@
       "@openops/block-file-helper": [
         "packages/blocks/file-helper/src/index.ts"
       ],
+      "@openops/block-finout": ["packages/blocks/finout/src/index.ts"],
       "@openops/block-flexera": ["packages/blocks/flexera/src/index.ts"],
       "@openops/block-fliqr-ai": ["packages/blocks/fliqr-ai/src/index.ts"],
       "@openops/block-flowise": ["packages/blocks/flowise/src/index.ts"],

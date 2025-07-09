@@ -149,4 +149,24 @@ jobs:
           RELEASE_URL: ${{ needs.create-github-release.outputs.download_url }}
         run: |
           gh workflow run "Deploy Docker Compose Release" -R openops-cloud/devops -f release_version=${VERSION} -f release_url=${RELEASE_URL} -r main
+  trigger-docs-update:
+    name: Trigger docs update
+    needs: [get-version, create-github-release]
+    runs-on: ubuntu-latest
+    if: ${{ success() && github.repository == 'openops-cloud/openops' }}
+    steps:
+      - name: Get GitHub App token
+        id: app_token
+        uses: actions/create-github-app-token@v2.0.6
+        with:
+          app-id: ${{ vars.DEVOPS_GITHUB_APP_ID }}
+          private-key: ${{ secrets.DEVOPS_GITHUB_APP_PEM }}
+          owner: ${{ github.repository_owner }}
 
+      - name: Trigger docs workflow
+        env:
+          GITHUB_TOKEN: ${{ steps.app_token.outputs.token }}
+        run: |
+          gh workflow run update-release-version.yml \
+            --repo openops-cloud/docs \
+            --field version=${{ needs.get-version.outputs.version }}
