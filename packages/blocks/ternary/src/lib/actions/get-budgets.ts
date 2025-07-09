@@ -6,7 +6,7 @@ import { ternaryCloudAuth } from '../common/auth';
 export const getBudgets = createAction({
   name: 'get_budgets',
   displayName: 'Get budgets',
-  description: 'Fetch budgets from Ternary.',
+  description: 'Fetch budgets',
   auth: ternaryCloudAuth,
   props: {},
   run: async ({ auth }) => {

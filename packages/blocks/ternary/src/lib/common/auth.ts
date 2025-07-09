@@ -2,13 +2,16 @@ import { HttpError, HttpMethod } from '@openops/blocks-common';
 import { BlockAuth, Property, Validators } from '@openops/blocks-framework';
 import { sendTernaryRequest } from './index';
 
+const markdown = `
+Authenticate with your Ternary API Token to access Ternary services.
+You can generate an API token by following the instructions in the [Ternary API documentation](https://docs.ternary.app/reference/using-the-api).
+`;
+
 export const ternaryCloudAuth = BlockAuth.CustomAuth({
   authProviderKey: 'Ternary',
   authProviderDisplayName: 'Ternary',
   authProviderLogoUrl: `https://static.openops.com/blocks/ternary.png`,
-  description: `
-Ternary API documentation:
-https://docs.ternary.app/reference/using-the-api`,
+  description: markdown,
   required: true,
   props: {
     apiKey: Property.SecretText({
