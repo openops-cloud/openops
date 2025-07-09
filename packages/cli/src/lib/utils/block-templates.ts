@@ -265,6 +265,8 @@ describe('block declaration tests', () => {
 `;
   }
 
+  await mkdir(`packages/blocks/${blockName}/test`, { recursive: true });
+
   await writeFile(
     `packages/blocks/${blockName}/test/index.test.ts`,
     testTemplate,
