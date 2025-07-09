@@ -242,10 +242,9 @@ describe('selectRelevantTools', () => {
       });
 
       expect(result).toBeUndefined();
-      expect(logger.error).toHaveBeenCalledWith(
-        'Error selecting tools',
-        mockError,
-      );
+      expect(logger.error).toHaveBeenCalledWith('Error selecting tools', {
+        error: mockError,
+      });
     });
   });
 
