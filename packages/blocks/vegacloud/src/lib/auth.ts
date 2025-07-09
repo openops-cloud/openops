@@ -11,12 +11,12 @@ export const vegacloudAuth = BlockAuth.CustomAuth({
   description: markdown,
   required: true,
   props: {
-    clientId: Property.SecretText({
-      displayName: 'Client ID',
-      required: true,
-    }),
     clientSecret: Property.SecretText({
       displayName: 'Client Secret',
+      required: true,
+    }),
+    clientId: Property.SecretText({
+      displayName: 'Client ID',
       required: true,
     }),
     realm: Property.ShortText({

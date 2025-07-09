@@ -13,7 +13,7 @@ export const vegacloud = createBlock({
   categories: [BlockCategory.FINOPS],
   actions: [
     createCustomApiCallAction({
-      baseUrl: () => 'https://api.vegacloud.com',
+      baseUrl: () => 'https://api.vegacloud.io/vegaapi/',
       auth: vegacloudAuth,
       additionalProps: {
         documentation: Property.MarkDown({
@@ -23,10 +23,14 @@ export const vegacloud = createBlock({
       },
       authMapping: async (context: any) => {
         const { clientId, clientSecret, realm } = context.auth;
-        const jwt = await generateJwt(clientId, clientSecret, realm);
+        const { access_token } = await generateJwt(
+          clientId,
+          clientSecret,
+          realm,
+        );
 
         return {
-          Authorization: `Bearer ${jwt}`,
+          Authorization: `Bearer ${access_token}`,
           'Content-Type': 'application/json',
         };
       },
