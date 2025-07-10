@@ -87,13 +87,9 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
 
     pipeDataStreamToResponse(reply.raw, {
       execute: async (dataStreamWriter) => {
-        const enrichedContext = request.body.additionalContext
-          ? await enrichContext(request.body.additionalContext, projectId)
-          : undefined;
-
         const result = streamText({
           model: languageModel,
-          system: await getSystemPrompt(chatContext, enrichedContext),
+          system: await getSystemPrompt(chatContext),
           messages,
           ...aiConfig.modelSettings,
           async onFinish({ response }) {
