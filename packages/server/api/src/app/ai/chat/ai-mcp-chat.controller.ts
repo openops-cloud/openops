@@ -32,14 +32,12 @@ import {
 import { aiConfigService } from '../config/ai-config.service';
 import { getMCPTools } from '../mcp/mcp-tools';
 import {
-  cancelActiveStream,
   createChatContext,
   deleteChatHistory,
   generateChatIdForMCP,
   getChatContext,
   getChatHistory,
   saveChatHistory,
-  setupStreamCancellation,
 } from './ai-chat.service';
 import { generateMessageId } from './ai-message-id-generator';
 import { getMcpSystemPrompt } from './prompts.service';
@@ -138,8 +136,6 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       isAwsCostMcpDisabled,
     });
 
-    const streamAbortController = await setupStreamCancellation(chatId);
-
     pipeDataStreamToResponse(reply.raw, {
       execute: async (dataStreamWriter) => {
         logger.debug('Send user message to LLM.');
@@ -151,7 +147,6 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
           messages,
           chatId,
           mcpClients,
-          streamAbortController,
           {
             ...filteredTools,
             ...(isOpenOpsMCPEnabled
@@ -162,8 +157,6 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       },
 
       onError: (error) => {
-        streamAbortController.abort();
-
         const message = error instanceof Error ? error.message : String(error);
         sendAiChatFailureEvent({
           projectId,
@@ -195,7 +188,6 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
     const { chatId } = request.params;
 
     try {
-      await cancelActiveStream(chatId);
       await deleteChatHistory(chatId);
       return await reply.code(StatusCodes.OK).send();
     } catch (error) {
@@ -251,7 +243,6 @@ async function streamMessages(
   messages: CoreMessage[],
   chatId: string,
   mcpClients: unknown[],
-  streamAbortController: AbortController,
   tools?: ToolSet,
 ): Promise<void> {
   let stepCount = 0;
@@ -271,7 +262,6 @@ async function streamMessages(
     toolChoice,
     maxRetries: 1,
     maxSteps: MAX_RECURSION_DEPTH,
-    abortSignal: streamAbortController.signal,
     async onStepFinish({ finishReason }): Promise<void> {
       stepCount++;
       if (finishReason !== 'stop' && stepCount >= MAX_RECURSION_DEPTH) {
@@ -281,8 +271,6 @@ async function streamMessages(
       }
     },
     async onFinish({ response }): Promise<void> {
-      streamAbortController.abort();
-
       const filteredMessages = removeToolMessages(messages);
       response.messages.forEach((r) => {
         filteredMessages.push(getResponseObject(r));

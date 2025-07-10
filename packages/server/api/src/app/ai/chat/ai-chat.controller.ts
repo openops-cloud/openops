@@ -22,7 +22,6 @@ import {
 } from '../../telemetry/event-models/ai';
 import { aiConfigService } from '../config/ai-config.service';
 import {
-  cancelActiveStream,
   ChatContext,
   createChatContext,
   deleteChatHistory,
@@ -30,7 +29,6 @@ import {
   getChatContext,
   getChatHistory,
   saveChatHistory,
-  setupStreamCancellation,
 } from './ai-chat.service';
 import { getSystemPrompt } from './prompts.service';
 
@@ -95,8 +93,6 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
       content: request.body.message,
     });
 
-    const streamAbortController = await setupStreamCancellation(chatId);
-
     pipeDataStreamToResponse(reply.raw, {
       execute: async (dataStreamWriter) => {
         const result = streamText({
@@ -104,9 +100,7 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
           system: await getSystemPrompt(chatContext),
           messages,
           ...aiConfig.modelSettings,
-          abortSignal: streamAbortController.signal,
           async onFinish({ response }) {
-            streamAbortController.abort();
             response.messages.forEach((r) => {
               messages.push(getResponseObject(r));
             });
@@ -124,8 +118,6 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
         });
       },
       onError: (error) => {
-        streamAbortController.abort();
-
         const errorMessage =
           error instanceof Error ? error.message : String(error);
 
@@ -150,7 +142,6 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
       const { chatId } = request.params;
 
       try {
-        await cancelActiveStream(chatId);
         await deleteChatHistory(chatId);
         return await reply.code(StatusCodes.OK).send();
       } catch (error) {

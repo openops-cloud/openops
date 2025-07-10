@@ -12,7 +12,6 @@ import {
 import {
   getChatContext,
   getChatHistory,
-  setupStreamCancellation,
 } from '../../../src/app/ai/chat/ai-chat.service';
 import { aiMCPChatController } from '../../../src/app/ai/chat/ai-mcp-chat.controller';
 import { getMcpSystemPrompt } from '../../../src/app/ai/chat/prompts.service';
@@ -76,9 +75,6 @@ jest.mock('../../../src/app/ai/chat/ai-chat.service', () => ({
   saveChatHistory: jest.fn(),
   generateChatIdForMCP: jest.fn(),
   createChatContext: jest.fn(),
-  setupStreamCancellation: jest.fn(),
-  cancelActiveStream: jest.fn(),
-  deleteChatHistory: jest.fn(),
 }));
 
 jest.mock('../../../src/app/ai/chat/prompts.service', () => ({
@@ -201,10 +197,6 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
         mockLanguageModel,
       );
       (getMcpSystemPrompt as jest.Mock).mockResolvedValue(systemPrompt);
-      (setupStreamCancellation as jest.Mock).mockResolvedValue({
-        signal: {},
-        abort: jest.fn(),
-      });
 
       await aiMCPChatController(mockApp, {} as FastifyPluginOptions);
     });
