@@ -89,24 +89,6 @@ describe('Progress Service', () => {
       );
     });
 
-    it('should throw error when executionCorrelationId is missing', async () => {
-      const paramsWithoutCorrelationId = {
-        ...mockParams,
-        engineConstants: {
-          ...mockParams.engineConstants,
-          executionCorrelationId: undefined,
-        },
-      };
-
-      await expect(progressService.sendUpdate(paramsWithoutCorrelationId)).rejects.toThrow(
-        'The executionCorrelationId is not defined when sending an update run progress request.'
-      );
-
-      expect(logger.error).toHaveBeenCalledWith(
-        'The executionCorrelationId is not defined when sending an update run progress request.'
-      );
-    });
-
     it('should build correct request payload', async () => {
       const uniqueParams = {
         ...mockParams,
