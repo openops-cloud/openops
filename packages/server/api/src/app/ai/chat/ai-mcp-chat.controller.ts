@@ -10,6 +10,7 @@ import {
   OpenChatResponse,
   openOpsId,
   PrincipalType,
+  UpdateChatContextRequest,
 } from '@openops/shared';
 import {
   CoreAssistantMessage,
@@ -48,7 +49,7 @@ import { selectRelevantTools } from './tools.service';
 const MAX_RECURSION_DEPTH = 10;
 export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
   app.get(
-    '/all',
+    '/',
     GetAllChatsOptions,
     async (request, reply): Promise<GetAllChatsResponse> => {
       const userId = request.principal.id;
@@ -92,7 +93,11 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         chatId: newChatId,
         userId,
       });
-      const chatContext = { ...request.body, chatId: newChatId };
+      const chatContext = {
+        name: 'New chat',
+        ...request.body,
+        chatId: newChatId,
+      };
 
       await createChatContext(chatId, userId, projectId, chatContext);
       const messages = await getChatHistory(chatId, userId, projectId);
@@ -100,6 +105,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       return reply.code(200).send({
         chatId,
         messages,
+        context: chatContext,
       });
     },
   );
@@ -246,6 +252,31 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       });
     }
   });
+
+  app.put('/', UpdateChatContextOptions, async (request, reply) => {
+    const { chatId, context } = request.body;
+    const userId = request.principal.id;
+    const projectId = request.principal.projectId;
+
+    try {
+      const existingContext = await getChatContext(chatId, userId, projectId);
+      if (!existingContext) {
+        return await reply
+          .code(StatusCodes.NOT_FOUND)
+          .send('No chat session found for the provided chat ID.');
+      }
+
+      const updatedContext = { ...existingContext, ...context };
+      await createChatContext(chatId, userId, projectId, updatedContext);
+
+      return await reply.code(StatusCodes.OK).send();
+    } catch (error) {
+      logger.error('Failed to update chat context with error: ', error);
+      return reply.code(StatusCodes.INTERNAL_SERVER_ERROR).send({
+        message: 'Failed to update chat context',
+      });
+    }
+  });
 };
 
 const OpenChatOptions = {
@@ -295,6 +326,18 @@ const GetAllChatsOptions = {
     response: {
       200: GetAllChatsResponse,
     },
+  },
+};
+
+const UpdateChatContextOptions = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
+  },
+  schema: {
+    tags: ['ai', 'ai-chat-mcp'],
+    description:
+      'Update the context of an existing MCP chat session. This endpoint allows updating any field in the chat context for the specified chat ID.',
+    body: UpdateChatContextRequest,
   },
 };
 

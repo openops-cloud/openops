@@ -14,6 +14,7 @@ export const OpenChatMCPRequest = Type.Object({
   blockName: Type.Optional(Type.String()),
   stepName: Type.Optional(Type.String()),
   actionName: Type.Optional(Type.String()),
+  name: Type.Optional(Type.String()),
 });
 export type OpenChatMCPRequest = Static<typeof OpenChatMCPRequest>;
 
@@ -35,6 +36,13 @@ export const OpenChatResponse = Type.Object({
       }),
     ),
   ),
+  context: Type.Object({
+    workflowId: Type.Optional(Type.String()),
+    blockName: Type.Optional(Type.String()),
+    stepName: Type.Optional(Type.String()),
+    actionName: Type.Optional(Type.String()),
+    name: Type.Optional(Type.String()),
+  }),
 });
 
 export type OpenChatResponse = Static<typeof OpenChatResponse>;
@@ -63,6 +71,7 @@ export const GetAllChatsResponse = Type.Object({
           stepName: Type.Optional(Type.String()),
           actionName: Type.Optional(Type.String()),
           chatId: Type.Optional(Type.String()),
+          name: Type.Optional(Type.String()),
         }),
         Type.Null(),
       ]),
@@ -71,3 +80,16 @@ export const GetAllChatsResponse = Type.Object({
 });
 
 export type GetAllChatsResponse = Static<typeof GetAllChatsResponse>;
+
+export const UpdateChatContextRequest = Type.Object({
+  chatId: Type.String(),
+  context: Type.Object({
+    workflowId: Type.Optional(Type.String()),
+    blockName: Type.Optional(Type.String()),
+    stepName: Type.Optional(Type.String()),
+    actionName: Type.Optional(Type.String()),
+    name: Type.Optional(Type.String()),
+  }),
+});
+
+export type UpdateChatContextRequest = Static<typeof UpdateChatContextRequest>;

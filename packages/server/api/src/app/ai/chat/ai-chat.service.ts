@@ -39,6 +39,7 @@ export type MCPChatContext = {
   blockName?: string;
   stepName?: string;
   actionName?: string;
+  name?: string;
 };
 
 export type ChatContext = {
