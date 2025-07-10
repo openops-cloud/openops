@@ -36,7 +36,7 @@ export const getMcpSystemPrompt = async ({
   return allPrompts.join('\n\n');
 };
 
-export const getSystemPrompt = async (
+export const getBlockSystemPrompt = async (
   context: ChatContext,
 ): Promise<string> => {
   switch (context.blockName) {
@@ -59,7 +59,7 @@ export const getSystemPrompt = async (
     case '@openops/code':
       return `Generate code with this interface, based on what the user wants to transform. Inputs are passed as an object. The code should be executable in isolated-vm (Secure & isolated JS environments for nodejs).
       if you see inputs variables truncated, keep in mind that the final code will receive the full object as inputs and NOT stringified!
-      export const code = async (inputs) => {  
+      export const code = async (inputs) => {
       // do transformation logic here
       return ...; };
       `;

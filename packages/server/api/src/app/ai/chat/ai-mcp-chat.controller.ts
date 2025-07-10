@@ -42,7 +42,7 @@ import {
   saveChatHistory,
 } from './ai-chat.service';
 import { generateMessageId } from './ai-message-id-generator';
-import { getMcpSystemPrompt, getSystemPrompt } from './prompts.service';
+import { getBlockSystemPrompt, getMcpSystemPrompt } from './prompts.service';
 import { selectRelevantTools } from './tools.service';
 
 const MAX_RECURSION_DEPTH = 10;
@@ -199,7 +199,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         isAwsCostMcpDisabled,
       });
     } else {
-      systemPrompt = await getSystemPrompt(chatContext);
+      systemPrompt = await getBlockSystemPrompt(chatContext);
     }
 
     pipeDataStreamToResponse(reply.raw, {

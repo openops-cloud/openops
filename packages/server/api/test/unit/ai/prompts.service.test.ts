@@ -19,7 +19,7 @@ jest.mock('@openops/server-shared', () => ({
   },
 }));
 
-import { getSystemPrompt } from '../../../src/app/ai/chat/prompts.service';
+import { getBlockSystemPrompt } from '../../../src/app/ai/chat/prompts.service';
 
 describe('getSystemPrompt', () => {
   beforeEach(() => {
@@ -51,7 +51,7 @@ describe('getSystemPrompt', () => {
       getMock.mockReturnValue('https://example.com/prompts/');
       mockFetch.mockResolvedValueOnce(mockResponse(promptContent));
 
-      const result = await getSystemPrompt({
+      const result = await getBlockSystemPrompt({
         blockName,
         workflowId: 'workflowId',
         stepName: 'stepName',
@@ -115,7 +115,7 @@ describe('getSystemPrompt', () => {
       getMock.mockReturnValue(location);
       readFileMock.mockResolvedValueOnce(promptContent);
 
-      const result = await getSystemPrompt({
+      const result = await getBlockSystemPrompt({
         blockName,
         workflowId: 'workflowId',
         stepName: 'stepName',
@@ -132,7 +132,7 @@ describe('getSystemPrompt', () => {
   );
 
   it('should return empty string for unknown block', async () => {
-    const result = await getSystemPrompt({
+    const result = await getBlockSystemPrompt({
       blockName: 'some-other-block',
       workflowId: 'workflowId',
       stepName: 'stepName',
@@ -149,7 +149,7 @@ describe('getSystemPrompt', () => {
     mockFetch.mockResolvedValueOnce({ ok: false, statusText: 'Not Found' });
     readFileMock.mockResolvedValueOnce(promptContent);
 
-    const result = await getSystemPrompt({
+    const result = await getBlockSystemPrompt({
       blockName: '@openops/block-aws',
       workflowId: 'workflowId',
       stepName: 'stepName',
@@ -185,7 +185,7 @@ describe('getSystemPrompt', () => {
       getMock.mockReturnValue('https://example.com/prompts/');
       mockFetch.mockResolvedValueOnce(mockResponse(promptContent));
 
-      const result = await getSystemPrompt({
+      const result = await getBlockSystemPrompt({
         blockName,
         workflowId: 'workflowId',
         stepName: 'stepName',

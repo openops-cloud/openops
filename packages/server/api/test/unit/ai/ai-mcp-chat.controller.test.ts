@@ -14,7 +14,10 @@ import {
   getChatHistory,
 } from '../../../src/app/ai/chat/ai-chat.service';
 import { aiMCPChatController } from '../../../src/app/ai/chat/ai-mcp-chat.controller';
-import { getMcpSystemPrompt } from '../../../src/app/ai/chat/prompts.service';
+import {
+  getBlockSystemPrompt,
+  getMcpSystemPrompt,
+} from '../../../src/app/ai/chat/prompts.service';
 import { selectRelevantTools } from '../../../src/app/ai/chat/tools.service';
 import { aiConfigService } from '../../../src/app/ai/config/ai-config.service';
 import { getMCPTools } from '../../../src/app/ai/mcp/mcp-tools';
@@ -79,6 +82,7 @@ jest.mock('../../../src/app/ai/chat/ai-chat.service', () => ({
 
 jest.mock('../../../src/app/ai/chat/prompts.service', () => ({
   getMcpSystemPrompt: jest.fn(),
+  getBlockSystemPrompt: jest.fn(),
 }));
 
 jest.mock('../../../src/app/ai/chat/tools.service', () => ({
@@ -218,6 +222,26 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
       });
+    });
+
+    it('should not call tools and load only promt', async () => {
+      (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);
+      (getChatContext as jest.Mock).mockResolvedValue({
+        ...mockChatContext,
+        workflowId: 'workflowId',
+        blockName: 'blockName',
+        stepName: 'stepName',
+        actionName: 'actionName',
+      });
+      const postHandler = handlers['/'];
+      expect(postHandler).toBeDefined();
+
+      await postHandler(
+        mockRequest as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(getBlockSystemPrompt).toHaveBeenCalled();
     });
 
     it.each([

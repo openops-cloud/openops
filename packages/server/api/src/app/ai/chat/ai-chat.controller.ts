@@ -30,7 +30,7 @@ import {
   getChatHistory,
   saveChatHistory,
 } from './ai-chat.service';
-import { getSystemPrompt } from './prompts.service';
+import { getBlockSystemPrompt } from './prompts.service';
 
 export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
   app.post(
@@ -101,7 +101,7 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
       execute: async (dataStreamWriter) => {
         const result = streamText({
           model: languageModel,
-          system: await getSystemPrompt(chatContext),
+          system: await getBlockSystemPrompt(chatContext),
           messages,
           ...aiConfig.modelSettings,
           async onFinish({ response }) {
