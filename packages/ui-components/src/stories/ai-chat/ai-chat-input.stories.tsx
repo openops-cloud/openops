@@ -1,6 +1,8 @@
 import { action } from '@storybook/addon-actions';
 import type { Meta, StoryObj } from '@storybook/react';
 import { AiChatInput } from '../../components/ai-chat-container/ai-chat-input';
+import { TooltipProvider } from '../../ui/tooltip';
+import { sampleScopeOptions } from './sample-scope-options';
 
 /**
  * `AiChatInput` is a comprehensive chat input component for AI interactions.
@@ -10,9 +12,11 @@ import { AiChatInput } from '../../components/ai-chat-container/ai-chat-input';
  * - A send button for submitting messages
  * - An integrated model selector for choosing AI models
  * - Support for keyboard shortcuts (Enter to send, Shift+Enter for new line)
+ * - An optional scope selector for adding context to AI conversations
  *
  * The component handles user input, message submission, and model selection in one unified interface.
  */
+
 const meta = {
   title: 'components/AiChat/AiChatInput',
   component: AiChatInput,
@@ -36,6 +40,13 @@ const meta = {
   },
   parameters: {
     layout: 'centered',
+  },
+  render: (args) => {
+    return (
+      <TooltipProvider>
+        <AiChatInput {...args} />
+      </TooltipProvider>
+    );
   },
 } satisfies Meta<typeof AiChatInput>;
 
@@ -88,5 +99,47 @@ export const LoadingModels: Story = {
 export const CustomPlaceholder: Story = {
   args: {
     placeholder: 'Ask me anything about OpenOps...',
+  },
+};
+
+/**
+ * AiChatInput with scope selector functionality.
+ * This demonstrates how the component can be used to add context from steps to the AI conversation.
+ * Users can add and remove scope items to provide additional context to their queries.
+ */
+export const WithScopeSelector: Story = {
+  args: {
+    input: '',
+    placeholder: 'Type your message here...',
+    scopeOptions: sampleScopeOptions,
+    selectedScopeItems: [],
+    onScopeSelected: action('Scope selected'),
+    onAiScopeItemRemove: action('Scope item removed'),
+  },
+};
+
+/**
+ * AiChatInput with pre-selected scope items.
+ * This demonstrates how the component looks when scope items are already selected.
+ */
+export const WithPreselectedScopeItems: Story = {
+  args: {
+    input: 'How can I optimize this code?',
+    placeholder: 'Type your message here...',
+    scopeOptions: sampleScopeOptions,
+    selectedScopeItems: [
+      sampleScopeOptions[0],
+      sampleScopeOptions[2],
+      sampleScopeOptions[3],
+      sampleScopeOptions[4],
+      sampleScopeOptions[5],
+      sampleScopeOptions[6],
+      sampleScopeOptions[7],
+      sampleScopeOptions[8],
+      sampleScopeOptions[9],
+      sampleScopeOptions[10],
+    ],
+    onScopeSelected: action('Scope selected'),
+    onAiScopeItemRemove: action('Scope item removed'),
   },
 };

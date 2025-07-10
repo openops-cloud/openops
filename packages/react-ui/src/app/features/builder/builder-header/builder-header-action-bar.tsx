@@ -74,7 +74,7 @@ const BuilderHeaderActionBar = ({
             })}
           >
             <History size={ICON_SIZE_SMALL} />
-            {t('Versions History')}
+            {t('Version History')}
           </DropdownMenuItem>
         )}
 

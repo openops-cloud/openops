@@ -4,6 +4,7 @@ import {
 } from '@fastify/type-provider-typebox';
 import {
   GetRunForWorkerRequest,
+  logger,
   SharedSystemProp,
   system,
   UpdateFailureCountRequest,
@@ -124,6 +125,10 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
         await getFlowResponse(runDetails),
       );
     }
+
+    logger.debug(
+      `Updating run ${runId} to ${getTerminalStatus(runDetails.status)}`,
+    );
 
     const populatedRun = await flowRunService.updateStatus({
       flowRunId: runId,

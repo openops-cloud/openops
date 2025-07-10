@@ -14,6 +14,8 @@ import { FolderBadge } from '@/app/features/folders/component/folder-badge';
 import { formatUtils } from '@/app/lib/utils';
 import { flowHelper, PopulatedFlow } from '@openops/shared';
 
+const FLOWS_CELL_TEXT_CLASS = 'text-left font-normal min-w-[150px]';
+
 export const createColumns = (
   onTableRefresh: () => void,
 ): (ColumnDef<RowDataWithActions<PopulatedFlow>> & {
@@ -69,7 +71,7 @@ export const createColumns = (
     cell: ({ row }) => {
       const created = row.original.created;
       return (
-        <div className="text-left font-medium min-w-[150px]">
+        <div className={FLOWS_CELL_TEXT_CLASS}>
           {formatUtils.formatDate(new Date(created))}
         </div>
       );
@@ -83,7 +85,7 @@ export const createColumns = (
     cell: ({ row }) => {
       const { updated } = row.original.version;
       return (
-        <div className="text-left font-medium min-w-[150px]">
+        <div className={FLOWS_CELL_TEXT_CLASS}>
           {formatUtils.formatDate(new Date(updated))}
         </div>
       );
@@ -119,7 +121,7 @@ export const createColumns = (
       return (
         <div className="w-fit px-3 py-1 flex items-center gap-1 rounded-full border border-warning bg-warning-100">
           <CircleAlert size={16} className="text-warning" />
-          <span className="font-medium text-sm text-blueAccent-200 dark:text-primary text-nowrap">
+          <span className="font-normal text-sm text-blueAccent-200 dark:text-primary text-nowrap">
             {t('Not finished')}
           </span>
         </div>
