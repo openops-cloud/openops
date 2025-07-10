@@ -24,10 +24,8 @@ import { TextInputWithMentions } from '../../block-properties/text-input-with-me
 export const textToBranchOperation: Record<BranchOperator, string> = {
   [BranchOperator.TEXT_CONTAINS]: t('(Text) Contains'),
   [BranchOperator.TEXT_DOES_NOT_CONTAIN]: t('(Text) Does not contain'),
-  [BranchOperator.TEXT_EXACTLY_MATCHES]: t('(Text) Exactly matches'),
-  [BranchOperator.TEXT_DOES_NOT_EXACTLY_MATCH]: t(
-    '(Text) Does not exactly match',
-  ),
+  [BranchOperator.TEXT_EXACTLY_MATCHES]: t('(Text) Is'),
+  [BranchOperator.TEXT_DOES_NOT_EXACTLY_MATCH]: t('(Text) Is not'),
   [BranchOperator.TEXT_STARTS_WITH]: t('(Text) Starts with'),
   [BranchOperator.TEXT_DOES_NOT_START_WITH]: t('(Text) Does not start with'),
   [BranchOperator.TEXT_ENDS_WITH]: t('(Text) Ends with'),
@@ -47,7 +45,7 @@ export const textToBranchOperation: Record<BranchOperator, string> = {
   [BranchOperator.LIST_COUNT_IS_LESS_THAN]: t('(List length) Is less than'),
   [BranchOperator.LIST_COUNT_IS_EQUAL_TO]: t('(List length) Is equal to'),
   [BranchOperator.LIST_CONTAINS]: t('(List) Contains'),
-  [BranchOperator.LIST_NOT_CONTAINS]: t('(List) Not Contains'),
+  [BranchOperator.LIST_NOT_CONTAINS]: t('(List) Does not contain'),
   [BranchOperator.DATE_IS_BEFORE]: t('(Date) Is before'),
   [BranchOperator.DATE_IS_AFTER]: t('(Date) Is after'),
 };
