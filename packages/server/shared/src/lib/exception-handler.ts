@@ -2,7 +2,7 @@ import { logger } from './logger';
 
 export const exceptionHandler = {
   handle: (e: unknown): void => {
-    logger.error('Caught an unknown exception', e);
+    logger.error('Caught an unknown exception', { error: e });
   },
 };
 

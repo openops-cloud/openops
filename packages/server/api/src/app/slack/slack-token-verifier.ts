@@ -56,12 +56,14 @@ async function verifyWithOAuthProxy(
     );
 
     if (response?.error) {
-      logger.error(`${response.error}`);
+      logger.error(`[Slack signature verification] error`, {
+        error: response.error,
+      });
     }
 
     return response?.result;
   } catch (error) {
-    logger.error(`[Slack signature verification] ${error}`);
+    logger.error(`[Slack signature verification] error`, { error });
     return false;
   }
 }

@@ -48,7 +48,7 @@ export async function getDocsTools(): Promise<MCPTool> {
           );
           return result;
         } catch (error) {
-          logger.error('docsMcpClient error:', error);
+          logger.error('docsMcpClient error:', { error });
           return Promise.resolve({
             success: false,
             error: error instanceof Error ? error.message : String(error),

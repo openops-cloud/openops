@@ -48,10 +48,9 @@ export async function getResourcesLogicalId(
     commandResult.exitCode !== 0 ||
     commandResult.stdError
   ) {
-    logger.error(
-      'Failed to execute command to get resources logical id.',
+    logger.error('Failed to execute command to get resources logical id.', {
       commandResult,
-    );
+    });
     throw new Error('Failed to execute command to get resources logical id.');
   }
 
@@ -87,7 +86,7 @@ export async function deleteResource(
     const commandResult = await executeYQCommand(command);
 
     if (commandResult.exitCode !== 0 || commandResult.stdError) {
-      logger.error('Failed to modify the template.', commandResult);
+      logger.error('Failed to modify the template.', { commandResult });
       throw new Error(
         `Failed to modify the template. ${JSON.stringify(commandResult)}`,
       );
@@ -113,7 +112,7 @@ async function updateTemplateCommand(
   const commandResult = await executeYQCommand(command);
 
   if (commandResult.exitCode !== 0 || commandResult.stdError) {
-    logger.error('Failed to modify the template.', commandResult);
+    logger.error('Failed to modify the template.', { commandResult });
     throw new Error(
       `Failed to modify the template. ${JSON.stringify(commandResult)}`,
     );

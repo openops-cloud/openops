@@ -38,8 +38,8 @@ const start = async (app: FastifyInstance): Promise<void> => {
     if (system.isApp()) {
       await appPostBoot();
     }
-  } catch (err) {
-    logger.error('Error starting server', err);
+  } catch (error) {
+    logger.error('Error starting server', { error });
     await sendLogs();
     process.exit(1);
   }
