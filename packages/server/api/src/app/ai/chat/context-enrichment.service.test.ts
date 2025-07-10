@@ -16,6 +16,9 @@ jest.mock('@openops/server-shared', () => ({
   logger: {
     error: jest.fn(),
   },
+  safeStringifyAndTruncate: jest.fn().mockImplementation((value) => {
+    return JSON.stringify(value);
+  }),
 }));
 
 jest.mock('../../../app/authentication/lib/access-token-manager', () => ({
@@ -150,11 +153,11 @@ describe('ContextEnrichmentService', () => {
             variables: [
               {
                 name: 'variable1',
-                value: '{\n  "data": "test-data"\n}',
+                value: JSON.stringify({ data: 'test-data' }),
               },
               {
                 name: 'variable2',
-                value: 'step-2-output',
+                value: JSON.stringify('step-2-output'),
               },
             ],
           },
@@ -333,75 +336,6 @@ describe('ContextEnrichmentService', () => {
 
     it.each([
       {
-        description: 'truncate long string values',
-        inputValue: 'x'.repeat(1500),
-        expectedCheck: (value: string): void => {
-          expect(value).toBe('x'.repeat(1000) + '... [truncated]');
-        },
-      },
-      {
-        description: 'truncate large object values',
-        inputValue: {
-          Reservations: [
-            {
-              Instances: [
-                {
-                  InstanceId: 'i-123',
-                  State: { Name: 'running' },
-                  Tags: Array.from({ length: 100 }, (_, i) => ({
-                    Key: `tag-${i}`,
-                    Value: `value-${i}`,
-                  })),
-                },
-              ],
-            },
-          ],
-        },
-        expectedCheck: (value: string): void => {
-          expect(value).toContain('... [truncated]');
-          expect(value).toContain('"InstanceId": "i-123"');
-          expect(value).toContain('"Reservations"');
-        },
-      },
-      {
-        description: 'serialize arrays properly',
-        inputValue: [
-          { id: 1, name: 'item1' },
-          { id: 2, name: 'item2' },
-        ],
-        expectedCheck: (value: string): void => {
-          const expectedJson = JSON.stringify(
-            [
-              { id: 1, name: 'item1' },
-              { id: 2, name: 'item2' },
-            ],
-            null,
-            2,
-          );
-          expect(value).toBe(expectedJson);
-        },
-      },
-    ])('should $description', async ({ inputValue, expectedCheck }) => {
-      setupMockFlow();
-      const mockInputContext = createMockInputContext();
-
-      mockEngineRunner.executeVariable.mockResolvedValue({
-        status: 'OK' as EngineResponseStatus,
-        result: {
-          success: true,
-          resolvedValue: inputValue,
-          censoredValue: inputValue,
-        },
-      });
-
-      const result = await enrichContext(mockInputContext, mockProjectId);
-
-      const value = result.steps[0]?.variables?.[0]?.value as string;
-      expectedCheck(value);
-    });
-
-    it.each([
-      {
         description: 'null values',
         inputValue: null,
         expectedOutput: 'null',
@@ -409,16 +343,7 @@ describe('ContextEnrichmentService', () => {
       {
         description: 'undefined values',
         inputValue: undefined,
-        expectedOutput: 'undefined',
-      },
-      {
-        description: 'circular references gracefully',
-        inputValue: ((): Record<string, unknown> => {
-          const circularObj: Record<string, unknown> = { name: 'test' };
-          circularObj.self = circularObj;
-          return circularObj;
-        })(),
-        expectedOutput: '{\n  "name": "test",\n  "self": ""\n}',
+        expectedOutput: undefined,
       },
     ])('should handle $description', async ({ inputValue, expectedOutput }) => {
       setupMockFlow();
