@@ -12,7 +12,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from './dropdown-menu';
-import { Separator } from './seperator';
+import { Separator } from './separator';
 import { TextWithIcon } from './text-with-icon';
 import { Tooltip, TooltipContent, TooltipTrigger } from './tooltip';
 

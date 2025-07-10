@@ -102,17 +102,19 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       providerSettings: aiConfig.providerSettings,
     });
 
-    const messages = await getChatHistory(chatId);
-    messages.push({
-      role: 'user',
-      content: request.body.message,
-    });
+    // const messages = await getChatHistory(chatId);
+    // messages.push({
+    //   role: 'user',
+    //   content: request.body.message,
+    // });
 
     const { mcpClients, tools } = await getMCPTools(
       app,
       request.headers.authorization?.replace('Bearer ', '') ?? '',
       projectId,
     );
+
+    const messages = request.body.messages as CoreMessage[];
 
     const filteredTools = await selectRelevantTools({
       messages,

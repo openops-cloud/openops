@@ -10,6 +10,7 @@ import {
 } from '@openops/shared';
 import {
   CoreAssistantMessage,
+  CoreMessage,
   CoreToolMessage,
   pipeDataStreamToResponse,
   streamText,
@@ -87,11 +88,13 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
       providerSettings: aiConfig.providerSettings,
     });
 
-    const messages = await getChatHistory(chatId);
-    messages.push({
-      role: 'user',
-      content: request.body.message,
-    });
+    // const messages = await getChatHistory(chatId);
+    // messages.push({
+    //   role: 'user',
+    //   content: request.body.message,
+    // });
+
+    const messages = request.body.messages as CoreMessage[];
 
     pipeDataStreamToResponse(reply.raw, {
       execute: async (dataStreamWriter) => {

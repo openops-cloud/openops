@@ -37,7 +37,18 @@ export type OpenChatResponse = Static<typeof OpenChatResponse>;
 
 export const NewMessageRequest = Type.Object({
   chatId: Type.String(),
-  message: Type.String(),
+  // message: Type.String(),
+  messages: Type.Array(
+    Type.Object({
+      role: Type.String(),
+      content: Type.Array(
+        Type.Object({
+          type: Type.Literal('text'),
+          text: Type.String(),
+        }),
+      ),
+    }),
+  ),
 });
 
 export type NewMessageRequest = Static<typeof NewMessageRequest>;

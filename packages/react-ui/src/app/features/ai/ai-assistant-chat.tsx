@@ -14,6 +14,7 @@ import {
   PARENT_MAX_HEIGHT_GAP,
 } from '@openops/components/ui';
 import { useCallback, useMemo, useRef } from 'react';
+import { AssistantV2 } from './assistant-v2';
 
 type AiAssistantChatProps = {
   middlePanelSize: {
@@ -152,13 +153,14 @@ const AiAssistantChat = ({
       lastUserMessageRef={lastUserMessageRef}
       lastAssistantMessageRef={lastAssistantMessageRef}
     >
-      <AiAssistantConversation
+      <AssistantV2 />
+      {/* <AiAssistantConversation
         messages={messages}
         status={status}
         isPending={isOpenAiChatPending}
         lastUserMessageRef={lastUserMessageRef}
         lastAssistantMessageRef={lastAssistantMessageRef}
-      />
+      /> */}
     </AiAssistantChatContainer>
   );
 };
