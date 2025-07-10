@@ -1,9 +1,13 @@
+import { getAiProviderLanguageModel } from '@openops/common';
 import {
   cacheWrapper,
   distributedLock,
+  encryptUtils,
   hashUtils,
 } from '@openops/server-shared';
-import { CoreMessage } from 'ai';
+import { AiConfig } from '@openops/shared';
+import { CoreMessage, LanguageModel } from 'ai';
+import { aiConfigService } from '../config/ai-config.service';
 
 // Chat expiration time is 24 hour
 const DEFAULT_EXPIRE_TIME = 86400;
@@ -168,3 +172,39 @@ export const deleteChatHistoryContext = async (
 ): Promise<void> => {
   await cacheWrapper.deleteKey(chatHistoryContextKey(chatId));
 };
+
+export async function getLLMConfig(
+  projectId: string,
+): Promise<
+  { aiConfig: AiConfig; languageModel: LanguageModel } | { error: string }
+> {
+  const aiConfig = await aiConfigService.getActiveConfigWithApiKey(projectId);
+  if (!aiConfig) {
+    return { error: 'No active AI configuration found for the project.' };
+  }
+
+  const apiKey = encryptUtils.decryptString(JSON.parse(aiConfig.apiKey));
+  const languageModel = await getAiProviderLanguageModel({
+    apiKey,
+    model: aiConfig.model,
+    provider: aiConfig.provider,
+    providerSettings: aiConfig.providerSettings,
+  });
+
+  return { aiConfig, languageModel };
+}
+
+export async function getConversation(
+  chatId: string,
+): Promise<
+  { chatContext: ChatContext; messages: CoreMessage[] } | { error: string }
+> {
+  const chatContext = await getChatContext(chatId);
+  if (!chatContext) {
+    return { error: 'No chat session found for the provided chat ID.' };
+  }
+
+  const messages = await getChatHistory(chatId);
+
+  return { chatContext, messages };
+}

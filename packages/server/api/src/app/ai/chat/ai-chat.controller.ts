@@ -1,6 +1,5 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { getAiProviderLanguageModel } from '@openops/common';
-import { encryptUtils, logger } from '@openops/server-shared';
+import { logger } from '@openops/server-shared';
 import {
   DeleteChatHistoryRequest,
   NewMessageRequest,
@@ -20,16 +19,18 @@ import {
   sendAiChatFailureEvent,
   sendAiChatMessageSendEvent,
 } from '../../telemetry/event-models/ai';
-import { aiConfigService } from '../config/ai-config.service';
 import {
   ChatContext,
   createChatContext,
   deleteChatHistory,
   generateChatId,
-  getChatContext,
   getChatHistory,
+  getConversation,
+  getLLMConfig,
   saveChatHistory,
 } from './ai-chat.service';
+import { streamCode } from './code.service';
+import { enrichContext } from './context-enrichment.service';
 import { getSystemPrompt } from './prompts.service';
 
 export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
@@ -65,39 +66,34 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
   app.post('/conversation', NewMessageOptions, async (request, reply) => {
     const chatId = request.body.chatId;
     const projectId = request.principal.projectId;
-    const chatContext = await getChatContext(chatId);
-    if (!chatContext) {
-      return reply
-        .code(404)
-        .send('No chat session found for the provided chat ID.');
+
+    const conversationResult = await getConversation(chatId);
+    if ('error' in conversationResult) {
+      return reply.code(404).send(conversationResult.error);
     }
 
-    const aiConfig = await aiConfigService.getActiveConfigWithApiKey(projectId);
-    if (!aiConfig) {
-      return reply
-        .code(404)
-        .send('No active AI configuration found for the project.');
+    const llmConfigResult = await getLLMConfig(projectId);
+    if ('error' in llmConfigResult) {
+      return reply.code(404).send(llmConfigResult.error);
     }
 
-    const apiKey = encryptUtils.decryptString(JSON.parse(aiConfig.apiKey));
-    const languageModel = await getAiProviderLanguageModel({
-      apiKey,
-      model: aiConfig.model,
-      provider: aiConfig.provider,
-      providerSettings: aiConfig.providerSettings,
-    });
-
-    const messages = await getChatHistory(chatId);
-    messages.push({
+    conversationResult.messages.push({
       role: 'user',
       content: request.body.message,
     });
 
+    const { chatContext, messages } = conversationResult;
+    const { aiConfig, languageModel } = llmConfigResult;
+
     pipeDataStreamToResponse(reply.raw, {
       execute: async (dataStreamWriter) => {
+        const enrichedContext = request.body.additionalContext
+          ? await enrichContext(request.body.additionalContext, projectId)
+          : undefined;
+
         const result = streamText({
           model: languageModel,
-          system: await getSystemPrompt(chatContext),
+          system: await getSystemPrompt(chatContext, enrichedContext),
           messages,
           ...aiConfig.modelSettings,
           async onFinish({ response }) {
@@ -133,6 +129,42 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
         return errorMessage;
       },
     });
+  });
+
+  app.post('/code', CodeGenerationOptions, async (request, reply) => {
+    const chatId = request.body.chatId;
+    const projectId = request.principal.projectId;
+
+    const conversationResult = await getConversation(chatId);
+    if ('error' in conversationResult) {
+      return reply.code(404).send(conversationResult.error);
+    }
+
+    const llmConfigResult = await getLLMConfig(projectId);
+    if ('error' in llmConfigResult) {
+      return reply.code(404).send(llmConfigResult.error);
+    }
+
+    conversationResult.messages.push({
+      role: 'user',
+      content: request.body.message,
+    });
+
+    const { chatContext, messages } = conversationResult;
+    const { aiConfig, languageModel } = llmConfigResult;
+
+    const enrichedContext = request.body.additionalContext
+      ? await enrichContext(request.body.additionalContext, projectId)
+      : undefined;
+
+    const result = streamCode({
+      messages,
+      languageModel,
+      aiConfig,
+      systemPrompt: await getSystemPrompt(chatContext, enrichedContext),
+    });
+
+    return result.toTextStreamResponse();
   });
 
   app.delete(
@@ -174,6 +206,18 @@ const NewMessageOptions = {
     tags: ['ai', 'ai-chat'],
     description:
       'Send a message to the AI chat session and receive a streaming response. This endpoint processes the user message, generates an AI response using the configured language model, and maintains the conversation history.',
+    body: NewMessageRequest,
+  },
+};
+
+const CodeGenerationOptions = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
+  },
+  schema: {
+    tags: ['ai', 'ai-chat'],
+    description:
+      "Generate code based on the user's request. This endpoint processes the user message and generates a code response using the configured language model.",
     body: NewMessageRequest,
   },
 };

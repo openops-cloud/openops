@@ -7,10 +7,11 @@ import {
   PopulatedFlow,
 } from '@openops/shared';
 import { engineRunner } from 'server-worker';
-import { accessTokenManager } from '../../../app/authentication/lib/access-token-manager';
-import { flowService } from '../../../app/flows/flow/flow.service';
-import { flowStepTestOutputService } from '../../../app/flows/step-test-output/flow-step-test-output.service';
-import { enrichContext } from './context-enrichment.service';
+
+import { enrichContext } from '../../../src/app/ai/chat/context-enrichment.service';
+import { accessTokenManager } from '../../../src/app/authentication/lib/access-token-manager';
+import { flowService } from '../../../src/app/flows/flow/flow.service';
+import { flowStepTestOutputService } from '../../../src/app/flows/step-test-output/flow-step-test-output.service';
 
 jest.mock('@openops/server-shared', () => ({
   logger: {
@@ -21,20 +22,20 @@ jest.mock('@openops/server-shared', () => ({
   }),
 }));
 
-jest.mock('../../../app/authentication/lib/access-token-manager', () => ({
+jest.mock('../../../src/app/authentication/lib/access-token-manager', () => ({
   accessTokenManager: {
     generateEngineToken: jest.fn(),
   },
 }));
 
-jest.mock('../../../app/flows/flow/flow.service', () => ({
+jest.mock('../../../src/app/flows/flow/flow.service', () => ({
   flowService: {
     getOnePopulatedOrThrow: jest.fn(),
   },
 }));
 
 jest.mock(
-  '../../../app/flows/step-test-output/flow-step-test-output.service',
+  '../../../src/app/flows/step-test-output/flow-step-test-output.service',
   () => ({
     flowStepTestOutputService: {
       listEncrypted: jest.fn(),
