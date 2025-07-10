@@ -1,3 +1,5 @@
+import { logger } from './logger';
+
 const TRUNCATION_DEFAULT_MAX_LENGTH = 1000;
 const TRUNCATION_DEFAULT_TRUNCATE_MESSAGE = '... [truncated]';
 
@@ -28,7 +30,8 @@ export function safeStringifyAndTruncate(
       stringValue = String(value);
     }
   } catch (error) {
-    stringValue = String(value);
+    logger.error('Failed to stringify value', { error });
+    stringValue = '';
   }
 
   if (stringValue.length <= maxLength) {

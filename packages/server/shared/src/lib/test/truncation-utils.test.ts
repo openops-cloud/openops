@@ -162,17 +162,18 @@ describe('safeStringifyAndTruncate', () => {
   });
 
   describe('error handling', () => {
-    it('should handle objects that fail to stringify', () => {
+    it('should handle objects that fail both stringify and string conversion', () => {
       const problematicObj = {
-        // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
         toJSON: () => {
           throw new Error('JSON serialization failed');
+        },
+        toString: () => {
+          throw new Error('String conversion failed');
         },
       };
 
       const result = safeStringifyAndTruncate(problematicObj);
-      // Should fallback to String() conversion
-      expect(result).toBe('[object Object]');
+      expect(result).toBe('');
     });
 
     it.each([
