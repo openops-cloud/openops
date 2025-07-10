@@ -1,6 +1,7 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { logger } from '@openops/server-shared';
 import {
+  ApplicationError,
   DeleteChatHistoryRequest,
   NewMessageRequest,
   OpenChatRequest,
@@ -67,100 +68,104 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
     const chatId = request.body.chatId;
     const projectId = request.principal.projectId;
 
-    const conversationResult = await getConversation(chatId);
-    if ('error' in conversationResult) {
-      return reply.code(404).send(conversationResult.error);
+    try {
+      const conversationResult = await getConversation(chatId);
+      const llmConfigResult = await getLLMConfig(projectId);
+
+      conversationResult.messages.push({
+        role: 'user',
+        content: request.body.message,
+      });
+
+      const { chatContext, messages } = conversationResult;
+      const { aiConfig, languageModel } = llmConfigResult;
+
+      pipeDataStreamToResponse(reply.raw, {
+        execute: async (dataStreamWriter) => {
+          const result = streamText({
+            model: languageModel,
+            system: await getSystemPrompt(chatContext),
+            messages,
+            ...aiConfig.modelSettings,
+            async onFinish({ response }) {
+              response.messages.forEach((r) => {
+                messages.push(getResponseObject(r));
+              });
+
+              await saveChatHistory(chatId, messages);
+            },
+          });
+
+          result.mergeIntoDataStream(dataStreamWriter);
+          sendAiChatMessageSendEvent({
+            projectId,
+            userId: request.principal.id,
+            chatId,
+            provider: aiConfig.provider,
+          });
+        },
+        onError: (error) => {
+          const errorMessage =
+            error instanceof Error ? error.message : String(error);
+
+          sendAiChatFailureEvent({
+            projectId,
+            userId: request.principal.id,
+            chatId,
+            errorMessage,
+            provider: aiConfig.provider,
+            model: aiConfig.model,
+          });
+
+          return errorMessage;
+        },
+      });
+    } catch (error) {
+      if (error instanceof ApplicationError) {
+        return reply.code(400).send({ message: error.message });
+      }
+
+      logger.error('Failed to process conversation with error: ', error);
+      return reply.code(500).send({ message: 'Internal server error' });
     }
-
-    const llmConfigResult = await getLLMConfig(projectId);
-    if ('error' in llmConfigResult) {
-      return reply.code(404).send(llmConfigResult.error);
-    }
-
-    conversationResult.messages.push({
-      role: 'user',
-      content: request.body.message,
-    });
-
-    const { chatContext, messages } = conversationResult;
-    const { aiConfig, languageModel } = llmConfigResult;
-
-    pipeDataStreamToResponse(reply.raw, {
-      execute: async (dataStreamWriter) => {
-        const result = streamText({
-          model: languageModel,
-          system: await getSystemPrompt(chatContext),
-          messages,
-          ...aiConfig.modelSettings,
-          async onFinish({ response }) {
-            response.messages.forEach((r) => {
-              messages.push(getResponseObject(r));
-            });
-
-            await saveChatHistory(chatId, messages);
-          },
-        });
-
-        result.mergeIntoDataStream(dataStreamWriter);
-        sendAiChatMessageSendEvent({
-          projectId,
-          userId: request.principal.id,
-          chatId,
-          provider: aiConfig.provider,
-        });
-      },
-      onError: (error) => {
-        const errorMessage =
-          error instanceof Error ? error.message : String(error);
-
-        sendAiChatFailureEvent({
-          projectId,
-          userId: request.principal.id,
-          chatId,
-          errorMessage,
-          provider: aiConfig.provider,
-          model: aiConfig.model,
-        });
-
-        return errorMessage;
-      },
-    });
   });
 
   app.post('/code', CodeGenerationOptions, async (request, reply) => {
     const chatId = request.body.chatId;
     const projectId = request.principal.projectId;
 
-    const conversationResult = await getConversation(chatId);
-    if ('error' in conversationResult) {
-      return reply.code(404).send(conversationResult.error);
+    try {
+      const conversationResult = await getConversation(chatId);
+      const llmConfigResult = await getLLMConfig(projectId);
+
+      conversationResult.messages.push({
+        role: 'user',
+        content: request.body.message,
+      });
+
+      const { chatContext, messages } = conversationResult;
+      const { aiConfig, languageModel } = llmConfigResult;
+
+      const enrichedContext = request.body.additionalContext
+        ? await enrichContext(request.body.additionalContext, projectId)
+        : undefined;
+
+      const result = streamCode({
+        messages,
+        languageModel,
+        aiConfig,
+        systemPrompt: await getSystemPrompt(chatContext, enrichedContext),
+      });
+
+      return result.toTextStreamResponse();
+    } catch (error) {
+      if (error instanceof ApplicationError) {
+        return reply.code(400).send({ message: error.message });
+      }
+
+      logger.error('Failed to process code generation with error: ', error);
+      return reply.code(500).send({ message: 'Internal server error' });
     }
-
-    const llmConfigResult = await getLLMConfig(projectId);
-    if ('error' in llmConfigResult) {
-      return reply.code(404).send(llmConfigResult.error);
-    }
-
-    conversationResult.messages.push({
-      role: 'user',
-      content: request.body.message,
-    });
-
-    const { chatContext, messages } = conversationResult;
-    const { aiConfig, languageModel } = llmConfigResult;
-
-    const enrichedContext = request.body.additionalContext
-      ? await enrichContext(request.body.additionalContext, projectId)
-      : undefined;
-
-    const result = streamCode({
-      messages,
-      languageModel,
-      aiConfig,
-      systemPrompt: await getSystemPrompt(chatContext, enrichedContext),
-    });
-
-    return result.toTextStreamResponse();
   });
 
   app.delete(

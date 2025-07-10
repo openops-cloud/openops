@@ -5,7 +5,7 @@ import {
   encryptUtils,
   hashUtils,
 } from '@openops/server-shared';
-import { AiConfig } from '@openops/shared';
+import { AiConfig, ApplicationError, ErrorCode } from '@openops/shared';
 import { CoreMessage, LanguageModel } from 'ai';
 import { aiConfigService } from '../config/ai-config.service';
 
@@ -175,12 +175,17 @@ export const deleteChatHistoryContext = async (
 
 export async function getLLMConfig(
   projectId: string,
-): Promise<
-  { aiConfig: AiConfig; languageModel: LanguageModel } | { error: string }
-> {
+): Promise<{ aiConfig: AiConfig; languageModel: LanguageModel }> {
   const aiConfig = await aiConfigService.getActiveConfigWithApiKey(projectId);
   if (!aiConfig) {
-    return { error: 'No active AI configuration found for the project.' };
+    throw new ApplicationError({
+      code: ErrorCode.ENTITY_NOT_FOUND,
+      params: {
+        message: 'No active AI configuration found for the project.',
+        entityType: 'AI Configuration',
+        entityId: projectId,
+      },
+    });
   }
 
   const apiKey = encryptUtils.decryptString(JSON.parse(aiConfig.apiKey));
@@ -196,12 +201,17 @@ export async function getLLMConfig(
 
 export async function getConversation(
   chatId: string,
-): Promise<
-  { chatContext: ChatContext; messages: CoreMessage[] } | { error: string }
-> {
+): Promise<{ chatContext: ChatContext; messages: CoreMessage[] }> {
   const chatContext = await getChatContext(chatId);
   if (!chatContext) {
-    return { error: 'No chat session found for the provided chat ID.' };
+    throw new ApplicationError({
+      code: ErrorCode.ENTITY_NOT_FOUND,
+      params: {
+        message: 'No chat session found for the provided chat ID.',
+        entityType: 'Chat Session',
+        entityId: chatId,
+      },
+    });
   }
 
   const messages = await getChatHistory(chatId);

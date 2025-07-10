@@ -287,30 +287,24 @@ describe('getLLMConfig', () => {
     });
   });
 
-  it('should return error when no AI configuration is found', async () => {
+  it('should throw ApplicationError when no AI configuration is found', async () => {
     getActiveConfigWithApiKeyMock.mockResolvedValue(null);
 
-    const result = await getLLMConfig(projectId);
+    await expect(getLLMConfig(projectId)).rejects.toThrow('ENTITY_NOT_FOUND');
 
     expect(getActiveConfigWithApiKeyMock).toHaveBeenCalledWith(projectId);
     expect(decryptStringMock).not.toHaveBeenCalled();
     expect(getAiProviderLanguageModelMock).not.toHaveBeenCalled();
-    expect(result).toEqual({
-      error: 'No active AI configuration found for the project.',
-    });
   });
 
-  it('should return error when no AI configuration is found (undefined)', async () => {
+  it('should throw ApplicationError when no AI configuration is found (undefined)', async () => {
     getActiveConfigWithApiKeyMock.mockResolvedValue(undefined);
 
-    const result = await getLLMConfig(projectId);
+    await expect(getLLMConfig(projectId)).rejects.toThrow('ENTITY_NOT_FOUND');
 
     expect(getActiveConfigWithApiKeyMock).toHaveBeenCalledWith(projectId);
     expect(decryptStringMock).not.toHaveBeenCalled();
     expect(getAiProviderLanguageModelMock).not.toHaveBeenCalled();
-    expect(result).toEqual({
-      error: 'No active AI configuration found for the project.',
-    });
   });
 });
 
@@ -346,28 +340,22 @@ describe('getConversation', () => {
     });
   });
 
-  it('should return error when no chat context is found', async () => {
+  it('should throw ApplicationError when no chat context is found', async () => {
     getSerializedObjectMock.mockResolvedValueOnce(null);
 
-    const result = await getConversation(chatId);
+    await expect(getConversation(chatId)).rejects.toThrow('ENTITY_NOT_FOUND');
 
     expect(getSerializedObjectMock).toHaveBeenCalledWith(`${chatId}:context`);
     expect(getSerializedObjectMock).toHaveBeenCalledTimes(1);
-    expect(result).toEqual({
-      error: 'No chat session found for the provided chat ID.',
-    });
   });
 
-  it('should return error when chat context is undefined', async () => {
+  it('should throw ApplicationError when chat context is undefined', async () => {
     getSerializedObjectMock.mockResolvedValueOnce(undefined);
 
-    const result = await getConversation(chatId);
+    await expect(getConversation(chatId)).rejects.toThrow('ENTITY_NOT_FOUND');
 
     expect(getSerializedObjectMock).toHaveBeenCalledWith(`${chatId}:context`);
     expect(getSerializedObjectMock).toHaveBeenCalledTimes(1);
-    expect(result).toEqual({
-      error: 'No chat session found for the provided chat ID.',
-    });
   });
 
   it('should return empty messages array when no messages are found', async () => {
