@@ -142,9 +142,13 @@ const McpSettingsForm = ({
                   className="text-sm font-normal mt-1"
                 >
                   {t('Connection')}
-                  {awsCost?.enabled && (
-                    <span className="text-destructive">*</span>
-                  )}
+                  <span
+                    className={
+                      awsCost?.enabled ? 'text-destructive' : 'opacity-0'
+                    }
+                  >
+                    *
+                  </span>
                 </Label>
                 <SearchableSelect
                   loading={isAwsConnectionsLoading}
