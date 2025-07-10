@@ -58,30 +58,14 @@ export const GetAllChatsResponse = Type.Object({
       chatId: Type.String(),
       context: Type.Union([
         Type.Object({
-          workflowId: Type.String(),
-          blockName: Type.String(),
-          stepName: Type.String(),
-          actionName: Type.String(),
-        }),
-        Type.Object({
-          chatId: Type.String(),
+          workflowId: Type.Optional(Type.String()),
+          blockName: Type.Optional(Type.String()),
+          stepName: Type.Optional(Type.String()),
+          actionName: Type.Optional(Type.String()),
+          chatId: Type.Optional(Type.String()),
         }),
         Type.Null(),
       ]),
-      messages: Type.Array(
-        Type.Object({
-          role: Type.String(),
-          content: Type.Union([
-            Type.String(),
-            Type.Array(
-              Type.Object({
-                type: Type.String(),
-                text: Type.Optional(Type.String()),
-              }),
-            ),
-          ]),
-        }),
-      ),
     }),
   ),
 });

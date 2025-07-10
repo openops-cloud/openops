@@ -27,7 +27,6 @@ import {
   createChatContext,
   deleteChatHistory,
   generateChatId,
-  getAllChatsForUserAndProject,
   getChatContext,
   getChatHistory,
   saveChatHistory,
@@ -35,27 +34,6 @@ import {
 import { getSystemPrompt } from './prompts.service';
 
 export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
-  app.get(
-    '/all',
-    GetAllChatsOptions,
-    async (request, reply): Promise<GetAllChatsResponse> => {
-      const userId = request.principal.id;
-      const projectId = request.principal.projectId;
-
-      const chats = await getAllChatsForUserAndProject(userId, projectId);
-      return reply.code(200).send({
-        chats: chats.map(
-          (chat) =>
-            ({
-              chatId: chat.chatId,
-              context: chat.context,
-              messages: chat.messages,
-            } as any),
-        ),
-      });
-    },
-  );
-
   app.post(
     '/open',
     OpenChatOptions,
@@ -73,7 +51,7 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
       const chatId = generateChatId({
         ...chatContext,
         userId,
-      } as any);
+      });
 
       const messages = await getChatHistory(chatId, userId, projectId);
 
