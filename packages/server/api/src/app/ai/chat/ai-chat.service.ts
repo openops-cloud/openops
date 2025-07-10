@@ -215,34 +215,3 @@ export const deleteChatHistoryContext = async (
     chatHistoryContextKey(chatId, userId, projectId),
   );
 };
-
-export type ChatInfo = {
-  chatId: string;
-  context: MCPChatContext | null;
-};
-
-export const getAllChatsForUserAndProject = async (
-  userId: string,
-  projectId: string,
-): Promise<ChatInfo[]> => {
-  const pattern = `${projectId}:${userId}:*:context`;
-  const contextKeys = await cacheWrapper.getKeysByPattern(pattern);
-
-  const chats: ChatInfo[] = [];
-
-  for (const contextKey of contextKeys) {
-    const parts = contextKey.split(':');
-    if (parts.length >= 3) {
-      const chatId = parts[2];
-
-      const context = await getChatContext(chatId, userId, projectId);
-
-      chats.push({
-        chatId,
-        context,
-      });
-    }
-  }
-
-  return chats;
-};

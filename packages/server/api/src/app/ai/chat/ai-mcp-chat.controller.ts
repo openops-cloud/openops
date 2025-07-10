@@ -4,13 +4,11 @@ import { encryptUtils, logger } from '@openops/server-shared';
 import {
   AiConfig,
   DeleteChatHistoryRequest,
-  GetAllChatsResponse,
   NewMessageRequest,
   OpenChatMCPRequest,
   OpenChatResponse,
   openOpsId,
   PrincipalType,
-  UpdateChatContextRequest,
 } from '@openops/shared';
 import {
   CoreAssistantMessage,
@@ -34,10 +32,11 @@ import {
 import { aiConfigService } from '../config/ai-config.service';
 import { getMCPTools } from '../mcp/mcp-tools';
 import {
+  ChatContext,
   createChatContext,
   deleteChatHistory,
+  generateChatId,
   generateChatIdForMCP,
-  getAllChatsForUserAndProject,
   getChatContext,
   getChatHistory,
   saveChatHistory,
@@ -48,23 +47,6 @@ import { selectRelevantTools } from './tools.service';
 
 const MAX_RECURSION_DEPTH = 10;
 export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
-  app.get(
-    '/',
-    GetAllChatsOptions,
-    async (request, reply): Promise<GetAllChatsResponse> => {
-      const userId = request.principal.id;
-      const projectId = request.principal.projectId;
-
-      const chats = await getAllChatsForUserAndProject(userId, projectId);
-      return reply.code(200).send({
-        chats: chats.map((chat) => ({
-          chatId: chat.chatId,
-          context: chat.context,
-        })),
-      });
-    },
-  );
-
   app.post(
     '/open',
     OpenChatOptions,
@@ -86,6 +68,34 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
             messages,
           });
         }
+      } else if (
+        request.body.workflowId &&
+        request.body.blockName &&
+        request.body.stepName &&
+        request.body.actionName
+      ) {
+        const context: ChatContext = {
+          workflowId: request.body.workflowId,
+          blockName: request.body.blockName,
+          stepName: request.body.stepName,
+          actionName: request.body.actionName,
+        };
+
+        const chatId = generateChatId({
+          ...context,
+          userId,
+        });
+
+        const messages = await getChatHistory(chatId, userId, projectId);
+
+        if (messages.length === 0) {
+          await createChatContext(chatId, userId, projectId, context);
+        }
+
+        return reply.code(200).send({
+          chatId,
+          messages,
+        });
       }
 
       const newChatId = openOpsId();
@@ -252,31 +262,6 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       });
     }
   });
-
-  app.put('/', UpdateChatContextOptions, async (request, reply) => {
-    const { chatId, context } = request.body;
-    const userId = request.principal.id;
-    const projectId = request.principal.projectId;
-
-    try {
-      const existingContext = await getChatContext(chatId, userId, projectId);
-      if (!existingContext) {
-        return await reply
-          .code(StatusCodes.NOT_FOUND)
-          .send('No chat session found for the provided chat ID.');
-      }
-
-      const updatedContext = { ...existingContext, ...context };
-      await createChatContext(chatId, userId, projectId, updatedContext);
-
-      return await reply.code(StatusCodes.OK).send();
-    } catch (error) {
-      logger.error('Failed to update chat context with error: ', error);
-      return reply.code(StatusCodes.INTERNAL_SERVER_ERROR).send({
-        message: 'Failed to update chat context',
-      });
-    }
-  });
 };
 
 const OpenChatOptions = {
@@ -312,32 +297,6 @@ const DeleteChatOptions = {
     description:
       'Delete an MCP chat session and its associated history. This endpoint removes all messages, context data, and MCP tool states for the specified chat ID, effectively ending the conversation.',
     params: DeleteChatHistoryRequest,
-  },
-};
-
-const GetAllChatsOptions = {
-  config: {
-    allowedPrincipals: [PrincipalType.USER],
-  },
-  schema: {
-    tags: ['ai', 'ai-chat-mcp'],
-    description:
-      'Retrieve all MCP chat sessions for the authenticated user and project. This endpoint returns all chat IDs, contexts, and messages for the user.',
-    response: {
-      200: GetAllChatsResponse,
-    },
-  },
-};
-
-const UpdateChatContextOptions = {
-  config: {
-    allowedPrincipals: [PrincipalType.USER],
-  },
-  schema: {
-    tags: ['ai', 'ai-chat-mcp'],
-    description:
-      'Update the context of an existing MCP chat session. This endpoint allows updating any field in the chat context for the specified chat ID.',
-    body: UpdateChatContextRequest,
   },
 };
 

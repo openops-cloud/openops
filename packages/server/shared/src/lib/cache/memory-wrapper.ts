@@ -50,21 +50,6 @@ async function getOrAdd<T, Args extends unknown[]>(
   throw new Error('Not implemented');
 }
 
-const getKeysByPattern = async (pattern: string): Promise<string[]> => {
-  const keys: string[] = [];
-  const regexPattern = new RegExp(
-    `^${pattern.replace(/\*/g, '.*').replace(/\?/g, '.')}$`,
-  );
-
-  for (const key of cache.keys()) {
-    if (regexPattern.test(key)) {
-      keys.push(key);
-    }
-  }
-
-  return keys;
-};
-
 export const memoryWrapper = {
   setKey,
   getKey,
@@ -73,5 +58,4 @@ export const memoryWrapper = {
   keyExists,
   setSerializedObject,
   getSerializedObject,
-  getKeysByPattern,
 };
