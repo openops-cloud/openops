@@ -44,15 +44,18 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
         actionName: request.body.actionName,
       };
 
+      const userId = request.principal.id;
+      const projectId = request.principal.projectId;
+
       const chatId = generateChatId({
         ...chatContext,
-        userId: request.principal.id,
+        userId,
       });
 
-      const messages = await getChatHistory(chatId);
+      const messages = await getChatHistory(chatId, userId, projectId);
 
       if (messages.length === 0) {
-        await createChatContext(chatId, chatContext);
+        await createChatContext(chatId, userId, projectId, chatContext);
       }
 
       return reply.code(200).send({
@@ -65,7 +68,8 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
   app.post('/conversation', NewMessageOptions, async (request, reply) => {
     const chatId = request.body.chatId;
     const projectId = request.principal.projectId;
-    const chatContext = await getChatContext(chatId);
+    const userId = request.principal.id;
+    const chatContext = await getChatContext(chatId, userId, projectId);
     if (!chatContext) {
       return reply
         .code(404)
@@ -87,7 +91,7 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
       providerSettings: aiConfig.providerSettings,
     });
 
-    const messages = await getChatHistory(chatId);
+    const messages = await getChatHistory(chatId, userId, projectId);
     messages.push({
       role: 'user',
       content: request.body.message,
@@ -105,7 +109,7 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
               messages.push(getResponseObject(r));
             });
 
-            await saveChatHistory(chatId, messages);
+            await saveChatHistory(chatId, userId, projectId, messages);
           },
         });
 
@@ -140,9 +144,11 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
     DeleteChatOptions,
     async (request, reply) => {
       const { chatId } = request.params;
+      const userId = request.principal.id;
+      const projectId = request.principal.projectId;
 
       try {
-        await deleteChatHistory(chatId);
+        await deleteChatHistory(chatId, userId, projectId);
         return await reply.code(StatusCodes.OK).send();
       } catch (error) {
         logger.error('Failed to delete chat history with error: ', error);
