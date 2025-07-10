@@ -189,7 +189,7 @@ export async function addRow(addRowParams: AddRowParams) {
 }
 
 export async function deleteRow(deleteRowParams: DeleteRowParams) {
-  const url = `api/database/rows/table/${deleteRowParams.tableId}/${deleteRowParams.rowId}/?user_field_names=true`;
+  const url = `api/database/rows/table/${deleteRowParams.tableId}/${deleteRowParams.rowId}/`;
 
   return executeWithConcurrencyLimit(
     async () => {
