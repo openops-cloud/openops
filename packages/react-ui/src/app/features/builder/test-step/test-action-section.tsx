@@ -26,6 +26,8 @@ import {
   StepRunResponse,
 } from '@openops/shared';
 
+import { QueryKeys } from '@/app/constants/query-keys';
+import dayjs from 'dayjs';
 import {
   setStepOutputCache,
   stepTestOutputCache,
@@ -93,6 +95,14 @@ const TestActionSection = React.memo(
           });
         } else {
           setErrorMessage(testStepUtils.formatErrorMessage(formattedResponse));
+          queryClient.setQueryData(
+            [QueryKeys.stepTestOutput, flowVersionId, formValues.id],
+            {
+              output: formatUtils.formatStepInputOrOutput(formattedResponse),
+              lastTestDate: dayjs().toISOString(),
+              input: formatUtils.formatStepInputOrOutput(stepResponse.input),
+            },
+          );
         }
       },
       onError: (error) => {
