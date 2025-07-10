@@ -4,7 +4,7 @@ import {
   cn,
   StepSettingsAiChatContainer,
 } from '@openops/components/ui';
-import { FlowVersion } from '@openops/shared';
+import { flowHelper, FlowVersion } from '@openops/shared';
 import { useCallback, useRef } from 'react';
 import { useAiModelSelector } from '../../ai/lib/ai-model-selector-hook';
 import { useBuilderStateContext } from '../builder-hooks';
@@ -36,6 +36,10 @@ const StepSettingsAiChat = ({
     state.applyMidpanelAction,
   ]);
 
+  const currentStepData = selectedStep
+    ? flowHelper.getStep(flowVersion, selectedStep)
+    : undefined;
+
   const {
     messages,
     input,
@@ -46,7 +50,7 @@ const StepSettingsAiChat = ({
     enableNewChat,
     isOpenAiChatPending,
     isEmpty,
-  } = useStepSettingsAiChat(flowVersion, selectedStep);
+  } = useStepSettingsAiChat(flowVersion, selectedStep, currentStepData);
 
   const {
     selectedModel,

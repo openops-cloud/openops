@@ -30,6 +30,7 @@ import {
   getChatHistory,
   saveChatHistory,
 } from './ai-chat.service';
+import { enrichContext } from './context-enrichment.service';
 import { getSystemPrompt } from './prompts.service';
 
 export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
@@ -93,11 +94,19 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
       content: request.body.message,
     });
 
+    if (chatContext.blockName === '@openops/code') {
+      // create new service later, but for now return structured output
+    }
+
     pipeDataStreamToResponse(reply.raw, {
       execute: async (dataStreamWriter) => {
+        const enrichedContext = request.body.additionalContext
+          ? await enrichContext(request.body.additionalContext, projectId)
+          : undefined;
+
         const result = streamText({
           model: languageModel,
-          system: await getSystemPrompt(chatContext),
+          system: await getSystemPrompt(chatContext, enrichedContext),
           messages,
           ...aiConfig.modelSettings,
           async onFinish({ response }) {

@@ -51,7 +51,7 @@ export const useStepSettingsContext = () => {
   const context = useContext(StepSettingsContext);
   if (context === undefined) {
     throw new Error(
-      'useBlockSettingsContext must be used within a BlockSettingsProvider',
+      'useStepSettingsContext must be used within a StepSettingsProvider',
     );
   }
   return context;

@@ -18,6 +18,7 @@ import { aiChatApi } from './chat-api';
 export const useStepSettingsAiChat = (
   flowVersion: FlowVersion,
   selectedStep: string,
+  stepData?: Action | TriggerWithOptionalId,
 ) => {
   const [chatSessionKey, setChatSessionKey] = useState<string>(nanoid());
   const queryClient = useQueryClient();
@@ -67,10 +68,24 @@ export const useStepSettingsAiChat = (
       chatId: openChatResponse?.chatId,
     },
     initialMessages: openChatResponse?.messages as Message[],
-    experimental_prepareRequestBody: () => ({
-      chatId: openChatResponse?.chatId,
-      message: input,
-    }),
+    experimental_prepareRequestBody: () => {
+      const isCodeBlock = getBlockName(stepDetails) === CODE_BLOCK_NAME;
+      let additionalContext = undefined;
+
+      if (isCodeBlock && stepData && flowVersion.id) {
+        additionalContext = createAdditionalContext(
+          flowVersion,
+          selectedStep,
+          stepData,
+        );
+      }
+
+      return {
+        chatId: openChatResponse?.chatId,
+        message: input,
+        additionalContext,
+      };
+    },
     headers: {
       Authorization: `Bearer ${authenticationSession.getToken()}`,
     },
@@ -154,4 +169,28 @@ const getActionName = (
   }
 
   return stepDetails?.type === ActionType.CODE ? CODE_ACTION_NAME : '';
+};
+
+const createAdditionalContext = (
+  flowVersion: FlowVersion,
+  selectedStep: string,
+  stepData?: Action | TriggerWithOptionalId,
+) => {
+  const stepVariables = stepData?.settings?.input || {};
+  const variables = Object.entries(stepVariables).map(([name, value]) => ({
+    name,
+    value: String(value || ''),
+  }));
+
+  return {
+    flowId: flowVersion.flowId,
+    flowVersionId: flowVersion.id,
+    steps: [
+      {
+        id: selectedStep,
+        stepName: selectedStep,
+        variables: variables.length > 0 ? variables : undefined,
+      },
+    ],
+  };
 };
