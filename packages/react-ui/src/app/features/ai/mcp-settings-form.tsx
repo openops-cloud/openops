@@ -107,9 +107,8 @@ const McpSettingsForm = ({
                   className="w-3 h-3 rounded-[3px] mt-1 data-[state=checked]:!bg-primary-200 data-[state=checked]:!border-primary-200"
                 />
                 <Label
-                  htmlFor="awsCost.enabled"
+                  htmlFor="aws-cost-enabled"
                   className="text-sm !mt-1 whitespace-nowrap font-normal"
-                  style={{ marginTop: '0rem' }}
                 >
                   {t('AWS Cost')}
                 </Label>
