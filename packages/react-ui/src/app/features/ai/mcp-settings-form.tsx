@@ -104,7 +104,7 @@ const McpSettingsForm = ({
                   id="aws-cost-enabled"
                   checked={field.value}
                   onCheckedChange={field.onChange}
-                  className="w-3 h-3 rounded-[3px] mt-1 data-[state=checked]:!bg-primary-200 data-[state=checked]:!border-primary-200"
+                  className="flex items-center justify-center rounded-[3px] mt-1 data-[state=checked]:!bg-primary-200 data-[state=checked]:!border-primary-200 w-3 h-3 [&_svg]:w-3 [&_svg]:h-3"
                 />
                 <Label
                   htmlFor="aws-cost-enabled"
