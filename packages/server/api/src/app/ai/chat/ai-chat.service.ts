@@ -248,8 +248,10 @@ export async function getLLMConfig(
 
 export async function getConversation(
   chatId: string,
+  userId: string,
+  projectId: string,
 ): Promise<{ chatContext: ChatContext; messages: CoreMessage[] }> {
-  const chatContext = await getChatContext(chatId);
+  const chatContext = await getChatContext(chatId, userId, projectId);
   if (!chatContext) {
     throw new ApplicationError({
       code: ErrorCode.ENTITY_NOT_FOUND,
@@ -261,7 +263,7 @@ export async function getConversation(
     });
   }
 
-  const messages = await getChatHistory(chatId);
+  const messages = await getChatHistory(chatId, userId, projectId);
 
   return { chatContext, messages };
 }

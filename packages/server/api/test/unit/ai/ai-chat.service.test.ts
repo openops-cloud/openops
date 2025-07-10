@@ -363,7 +363,8 @@ describe('getLLMConfig', () => {
 
 describe('getConversation', () => {
   const chatId = 'chat-conversation-test';
-
+  const userId = 'user-123';
+  const projectId = 'project-123';
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -383,10 +384,14 @@ describe('getConversation', () => {
     getSerializedObjectMock.mockResolvedValueOnce(mockChatContext);
     getSerializedObjectMock.mockResolvedValueOnce(mockMessages);
 
-    const result = await getConversation(chatId);
+    const result = await getConversation(chatId, userId, projectId);
 
-    expect(getSerializedObjectMock).toHaveBeenCalledWith(`${chatId}:context`);
-    expect(getSerializedObjectMock).toHaveBeenCalledWith(`${chatId}:history`);
+    expect(getSerializedObjectMock).toHaveBeenCalledWith(
+      `${projectId}:${userId}:${chatId}:context`,
+    );
+    expect(getSerializedObjectMock).toHaveBeenCalledWith(
+      `${projectId}:${userId}:${chatId}:history`,
+    );
     expect(result).toEqual({
       chatContext: mockChatContext,
       messages: mockMessages,
@@ -396,18 +401,26 @@ describe('getConversation', () => {
   it('should throw ApplicationError when no chat context is found', async () => {
     getSerializedObjectMock.mockResolvedValueOnce(null);
 
-    await expect(getConversation(chatId)).rejects.toThrow('ENTITY_NOT_FOUND');
+    await expect(getConversation(chatId, userId, projectId)).rejects.toThrow(
+      'ENTITY_NOT_FOUND',
+    );
 
-    expect(getSerializedObjectMock).toHaveBeenCalledWith(`${chatId}:context`);
+    expect(getSerializedObjectMock).toHaveBeenCalledWith(
+      `${projectId}:${userId}:${chatId}:context`,
+    );
     expect(getSerializedObjectMock).toHaveBeenCalledTimes(1);
   });
 
   it('should throw ApplicationError when chat context is undefined', async () => {
     getSerializedObjectMock.mockResolvedValueOnce(undefined);
 
-    await expect(getConversation(chatId)).rejects.toThrow('ENTITY_NOT_FOUND');
+    await expect(getConversation(chatId, userId, projectId)).rejects.toThrow(
+      'ENTITY_NOT_FOUND',
+    );
 
-    expect(getSerializedObjectMock).toHaveBeenCalledWith(`${chatId}:context`);
+    expect(getSerializedObjectMock).toHaveBeenCalledWith(
+      `${projectId}:${userId}:${chatId}:context`,
+    );
     expect(getSerializedObjectMock).toHaveBeenCalledTimes(1);
   });
 
@@ -422,10 +435,14 @@ describe('getConversation', () => {
     getSerializedObjectMock.mockResolvedValueOnce(mockChatContext);
     getSerializedObjectMock.mockResolvedValueOnce(null);
 
-    const result = await getConversation(chatId);
+    const result = await getConversation(chatId, userId, projectId);
 
-    expect(getSerializedObjectMock).toHaveBeenCalledWith(`${chatId}:context`);
-    expect(getSerializedObjectMock).toHaveBeenCalledWith(`${chatId}:history`);
+    expect(getSerializedObjectMock).toHaveBeenCalledWith(
+      `${projectId}:${userId}:${chatId}:context`,
+    );
+    expect(getSerializedObjectMock).toHaveBeenCalledWith(
+      `${projectId}:${userId}:${chatId}:history`,
+    );
     expect(result).toEqual({ chatContext: mockChatContext, messages: [] });
   });
 });

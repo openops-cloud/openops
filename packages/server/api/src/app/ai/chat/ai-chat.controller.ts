@@ -73,7 +73,11 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
     const userId = request.principal.id;
 
     try {
-      const conversationResult = await getConversation(chatId);
+      const conversationResult = await getConversation(
+        chatId,
+        userId,
+        projectId,
+      );
       const llmConfigResult = await getLLMConfig(projectId);
 
       conversationResult.messages.push({
@@ -137,9 +141,14 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
   app.post('/code', CodeGenerationOptions, async (request, reply) => {
     const chatId = request.body.chatId;
     const projectId = request.principal.projectId;
+    const userId = request.principal.id;
 
     try {
-      const conversationResult = await getConversation(chatId);
+      const conversationResult = await getConversation(
+        chatId,
+        userId,
+        projectId,
+      );
       const llmConfigResult = await getLLMConfig(projectId);
 
       conversationResult.messages.push({
