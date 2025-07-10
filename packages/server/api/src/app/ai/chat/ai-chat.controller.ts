@@ -3,7 +3,6 @@ import { getAiProviderLanguageModel } from '@openops/common';
 import { encryptUtils, logger } from '@openops/server-shared';
 import {
   DeleteChatHistoryRequest,
-  GetAllChatsResponse,
   NewMessageRequest,
   OpenChatRequest,
   OpenChatResponse,
