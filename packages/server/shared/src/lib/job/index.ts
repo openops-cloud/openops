@@ -112,6 +112,9 @@ export function getEngineTimeout(operationType: EngineOperationType): number {
     case EngineOperationType.EXECUTE_VALIDATE_AUTH:
     case EngineOperationType.EXTRACT_BLOCK_METADATA:
     case EngineOperationType.EXECUTE_TRIGGER_HOOK:
+    case EngineOperationType.RESOLVE_VARIABLE:
+      return triggerTimeoutSandbox;
+    default:
       return triggerTimeoutSandbox;
   }
 }

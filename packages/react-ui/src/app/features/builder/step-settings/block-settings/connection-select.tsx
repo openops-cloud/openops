@@ -59,7 +59,7 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
     limit: FETCH_ALL_CONNECTIONS_LIMIT,
   });
 
-  const { data: reconnectConnection, isFetching: isFetchingConnection } =
+  const { data: reconnectConnection, isLoading: isLoadingConnection } =
     appConnectionsHooks.useConnection({
       id: reconnectConnectionId,
     });
@@ -109,7 +109,7 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
               inputName="settings.input.auth"
               allowDynamicValues={!params.isTrigger}
             >
-              {connectionDialogOpen && !isFetchingConnection && (
+              {connectionDialogOpen && !isLoadingConnection && (
                 <DynamicFormValidationProvider>
                   <CreateOrEditConnectionDialog
                     connectionToEdit={reconnectConnection ?? null}
