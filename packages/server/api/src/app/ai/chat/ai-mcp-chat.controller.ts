@@ -1,8 +1,8 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { getAiProviderLanguageModel } from '@openops/common';
-import { encryptUtils, logger } from '@openops/server-shared';
+import { logger } from '@openops/server-shared';
 import {
   AiConfig,
+  ApplicationError,
   DeleteChatHistoryRequest,
   NewMessageRequest,
   OpenChatMCPRequest,
@@ -29,7 +29,6 @@ import {
   sendAiChatFailureEvent,
   sendAiChatMessageSendEvent,
 } from '../../telemetry/event-models/ai';
-import { aiConfigService } from '../config/ai-config.service';
 import { getMCPTools } from '../mcp/mcp-tools';
 import {
   ChatContext,
@@ -39,9 +38,13 @@ import {
   generateChatIdForMCP,
   getChatContext,
   getChatHistory,
+  getConversation,
+  getLLMConfig,
   saveChatHistory,
 } from './ai-chat.service';
 import { generateMessageId } from './ai-message-id-generator';
+import { streamCode } from './code.service';
+import { enrichContext } from './context-enrichment.service';
 import { getBlockSystemPrompt, getMcpSystemPrompt } from './prompts.service';
 import { selectRelevantTools } from './tools.service';
 
@@ -123,128 +126,169 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
     const chatId = request.body.chatId;
     const projectId = request.principal.projectId;
     const userId = request.principal.id;
-    const chatContext = await getChatContext(chatId, userId, projectId);
-    if (!chatContext) {
-      return reply
-        .code(404)
-        .send('No chat session found for the provided chat ID.');
-    }
 
-    const aiConfig = await aiConfigService.getActiveConfigWithApiKey(projectId);
-    if (!aiConfig) {
-      return reply
-        .code(404)
-        .send('No active AI configuration found for the project.');
-    }
-
-    const apiKey = encryptUtils.decryptString(JSON.parse(aiConfig.apiKey));
-    const languageModel = await getAiProviderLanguageModel({
-      apiKey,
-      model: aiConfig.model,
-      provider: aiConfig.provider,
-      providerSettings: aiConfig.providerSettings,
-    });
-
-    const messages = await getChatHistory(chatId, userId, projectId);
-    messages.push({
-      role: 'user',
-      content: request.body.message,
-    });
-
-    let systemPrompt;
-    let mcpClients: unknown[] = [];
-    let relevantTools: ToolSet | undefined;
-
-    if (
-      !chatContext.actionName ||
-      !chatContext.blockName ||
-      !chatContext.stepName ||
-      !chatContext.workflowId
-    ) {
-      const toolSet = await getMCPTools(
-        app,
-        request.headers.authorization?.replace('Bearer ', '') ?? '',
+    try {
+      const conversationResult = await getConversation(
+        chatId,
+        userId,
         projectId,
       );
+      const llmConfigResult = await getLLMConfig(projectId);
 
-      mcpClients = toolSet.mcpClients;
-      mcpClients = toolSet.mcpClients;
-
-      const filteredTools = await selectRelevantTools({
-        messages,
-        tools: toolSet.tools,
-        languageModel,
-        aiConfig,
+      conversationResult.messages.push({
+        role: 'user',
+        content: request.body.message,
       });
 
-      const isAwsCostMcpDisabled =
-        !hasToolProvider(toolSet.tools, 'cost-analysis') &&
-        !hasToolProvider(toolSet.tools, 'cost-explorer');
+      const { chatContext, messages } = conversationResult;
+      const { aiConfig, languageModel } = llmConfigResult;
 
-      const isAnalyticsLoaded = hasToolProvider(filteredTools, 'superset');
-      const isTablesLoaded = hasToolProvider(filteredTools, 'tables');
-      const isOpenOpsMCPEnabled = hasToolProvider(filteredTools, 'openops');
+      let systemPrompt;
+      let mcpClients: unknown[] = [];
+      let relevantTools: ToolSet | undefined;
 
-      relevantTools = {
-        ...filteredTools,
-        ...(isOpenOpsMCPEnabled
-          ? collectToolsByProvider(toolSet.tools, 'openops')
-          : {}),
-      };
-
-      systemPrompt = await getMcpSystemPrompt({
-        isAnalyticsLoaded,
-        isTablesLoaded,
-        isOpenOpsMCPEnabled,
-        isAwsCostMcpDisabled,
-      });
-    } else {
-      systemPrompt = await getBlockSystemPrompt(chatContext);
-    }
-
-    pipeDataStreamToResponse(reply.raw, {
-      execute: async (dataStreamWriter) => {
-        logger.debug('Send user message to LLM.');
-        await streamMessages(
-          dataStreamWriter,
-          languageModel,
-          systemPrompt,
-          aiConfig,
-          messages,
-          chatId,
-          mcpClients,
-          userId,
+      if (
+        !chatContext.actionName ||
+        !chatContext.blockName ||
+        !chatContext.stepName ||
+        !chatContext.workflowId
+      ) {
+        const toolSet = await getMCPTools(
+          app,
+          request.headers.authorization?.replace('Bearer ', '') ?? '',
           projectId,
-          relevantTools,
         );
-      },
 
-      onError: (error) => {
-        const message = error instanceof Error ? error.message : String(error);
-        sendAiChatFailureEvent({
-          projectId,
-          userId: request.principal.id,
-          chatId,
-          errorMessage: message,
-          provider: aiConfig.provider,
-          model: aiConfig.model,
+        mcpClients = toolSet.mcpClients;
+        mcpClients = toolSet.mcpClients;
+
+        const filteredTools = await selectRelevantTools({
+          messages,
+          tools: toolSet.tools,
+          languageModel,
+          aiConfig,
         });
 
-        endStreamWithErrorMessage(reply.raw, message);
-        closeMCPClients(mcpClients).catch((e) =>
-          logger.warn('Failed to close mcp client.', e),
-        );
-        logger.warn(message, error);
-        return message;
-      },
-    });
+        const isAwsCostMcpDisabled =
+          !hasToolProvider(toolSet.tools, 'cost-analysis') &&
+          !hasToolProvider(toolSet.tools, 'cost-explorer');
 
-    sendAiChatMessageSendEvent({
-      projectId,
-      userId: request.principal.id,
-      chatId,
-      provider: aiConfig.provider,
-    });
+        const isAnalyticsLoaded = hasToolProvider(filteredTools, 'superset');
+        const isTablesLoaded = hasToolProvider(filteredTools, 'tables');
+        const isOpenOpsMCPEnabled = hasToolProvider(filteredTools, 'openops');
+
+        relevantTools = {
+          ...filteredTools,
+          ...(isOpenOpsMCPEnabled
+            ? collectToolsByProvider(toolSet.tools, 'openops')
+            : {}),
+        };
+
+        systemPrompt = await getMcpSystemPrompt({
+          isAnalyticsLoaded,
+          isTablesLoaded,
+          isOpenOpsMCPEnabled,
+          isAwsCostMcpDisabled,
+        });
+      } else {
+        systemPrompt = await getBlockSystemPrompt(chatContext);
+      }
+
+      pipeDataStreamToResponse(reply.raw, {
+        execute: async (dataStreamWriter) => {
+          logger.debug('Send user message to LLM.');
+          await streamMessages(
+            dataStreamWriter,
+            languageModel,
+            systemPrompt,
+            aiConfig,
+            messages,
+            chatId,
+            mcpClients,
+            userId,
+            projectId,
+            relevantTools,
+          );
+        },
+
+        onError: (error) => {
+          const message =
+            error instanceof Error ? error.message : String(error);
+          sendAiChatFailureEvent({
+            projectId,
+            userId: request.principal.id,
+            chatId,
+            errorMessage: message,
+            provider: aiConfig.provider,
+            model: aiConfig.model,
+          });
+
+          endStreamWithErrorMessage(reply.raw, message);
+          closeMCPClients(mcpClients).catch((e) =>
+            logger.warn('Failed to close mcp client.', e),
+          );
+          logger.warn(message, error);
+          return message;
+        },
+      });
+
+      sendAiChatMessageSendEvent({
+        projectId,
+        userId: request.principal.id,
+        chatId,
+        provider: aiConfig.provider,
+      });
+    } catch (error) {
+      if (error instanceof ApplicationError) {
+        return reply.code(400).send({ message: error.message });
+      }
+
+      logger.error('Failed to process conversation with error: ', error);
+      return reply.code(500).send({ message: 'Internal server error' });
+    }
+  });
+
+  app.post('/code', CodeGenerationOptions, async (request, reply) => {
+    const chatId = request.body.chatId;
+    const projectId = request.principal.projectId;
+    const userId = request.principal.id;
+
+    try {
+      const conversationResult = await getConversation(
+        chatId,
+        userId,
+        projectId,
+      );
+      const llmConfigResult = await getLLMConfig(projectId);
+
+      conversationResult.messages.push({
+        role: 'user',
+        content: request.body.message,
+      });
+
+      const { chatContext, messages } = conversationResult;
+      const { aiConfig, languageModel } = llmConfigResult;
+
+      const enrichedContext = request.body.additionalContext
+        ? await enrichContext(request.body.additionalContext, projectId)
+        : undefined;
+
+      const result = streamCode({
+        messages,
+        languageModel,
+        aiConfig,
+        systemPrompt: await getBlockSystemPrompt(chatContext, enrichedContext),
+      });
+
+      return result.toTextStreamResponse();
+    } catch (error) {
+      if (error instanceof ApplicationError) {
+        return reply.code(400).send({ message: error.message });
+      }
+
+      logger.error('Failed to process code generation with error: ', error);
+      return reply.code(500).send({ message: 'Internal server error' });
+    }
   });
 
   app.delete('/:chatId', DeleteChatOptions, async (request, reply) => {
@@ -284,6 +328,18 @@ const NewMessageOptions = {
     tags: ['ai', 'ai-chat-mcp'],
     description:
       'Send a message to the MCP chat session and receive a streaming response. This endpoint processes the user message, generates an AI response using the configured language model, and maintains the conversation history while integrating with MCP tools.',
+    body: NewMessageRequest,
+  },
+};
+
+const CodeGenerationOptions = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
+  },
+  schema: {
+    tags: ['ai', 'ai-chat'],
+    description:
+      "Generate code based on the user's request. This endpoint processes the user message and generates a code response using the configured language model.",
     body: NewMessageRequest,
   },
 };
