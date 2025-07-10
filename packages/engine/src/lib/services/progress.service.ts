@@ -27,18 +27,9 @@ const sendUpdateRunRequest = async (
   const { flowExecutorContext, engineConstants } = params;
   const url = new URL(`${engineConstants.internalApiUrl}v1/engine/update-run`);
 
-  if (!engineConstants.executionCorrelationId) {
-    // This should never happen
-    logger.error(
-      'The executionCorrelationId is not defined when sending an update run progress request.',
-    );
-    throw new Error(
-      'The executionCorrelationId is not defined when sending an update run progress request.',
-    );
-  }
-
   const request: UpdateRunProgressRequest = {
-    executionCorrelationId: engineConstants.executionCorrelationId,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    executionCorrelationId: engineConstants.executionCorrelationId!,
     runId: engineConstants.flowRunId,
     workerHandlerId: engineConstants.serverHandlerId ?? null,
     runDetails: await flowExecutorContext.toResponse(),
