@@ -104,11 +104,11 @@ const McpSettingsForm = ({
                   id="aws-cost-enabled"
                   checked={field.value}
                   onCheckedChange={field.onChange}
-                  className="rounded-[3px] data-[state=checked]:!bg-primary-200 data-[state=checked]:!border-primary-200"
+                  className="w-3 h-3 rounded-[3px] mt-1 data-[state=checked]:!bg-primary-200 data-[state=checked]:!border-primary-200"
                 />
                 <Label
                   htmlFor="awsCost.enabled"
-                  className="text-base mt-0 whitespace-nowrap font-normal"
+                  className="text-sm !mt-1 whitespace-nowrap font-normal"
                   style={{ marginTop: '0rem' }}
                 >
                   {t('AWS Cost')}
@@ -140,7 +140,7 @@ const McpSettingsForm = ({
               <FormItem className="flex gap-8 items-center w-full">
                 <Label
                   htmlFor="awsCost.connectionName"
-                  className="text-base font-normal"
+                  className="text-sm font-normal mt-1"
                 >
                   {t('Connection')}
                   {awsCost?.enabled && (
