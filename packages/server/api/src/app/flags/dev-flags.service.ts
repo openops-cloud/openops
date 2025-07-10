@@ -20,7 +20,7 @@ async function getAll(): Promise<Flag[]> {
   flags = [
     {
       id: FlagId.CODE_WITH_AI,
-      value: true,
+      value: false,
       created,
       updated,
     },
