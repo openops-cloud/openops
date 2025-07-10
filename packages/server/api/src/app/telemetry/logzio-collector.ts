@@ -1,7 +1,6 @@
 import { logger, SharedSystemProp, system } from '@openops/server-shared';
 import { Mutex } from 'async-mutex';
 import { pushTimeseries, Timeseries } from 'prometheus-remote-write';
-import { TelemetryEvent } from './telemetry-event';
 
 const logzioMetricToken = system.getOrThrow<string>(
   SharedSystemProp.LOGZIO_METRICS_TOKEN,
@@ -21,6 +20,7 @@ async function sendMetrics(): Promise<void> {
       }
 
       const metricsToSend = [...metrics];
+
       await pushTimeseries(metricsToSend, {
         url: 'https://listener.logz.io:8053',
         headers: {
@@ -33,6 +33,7 @@ async function sendMetrics(): Promise<void> {
       logger.error('Failed to send telemetry events to Logzio.', {
         error,
         metricsCount: metrics.length,
+        metrics,
       });
     }
   });

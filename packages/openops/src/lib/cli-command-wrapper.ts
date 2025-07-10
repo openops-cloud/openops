@@ -37,6 +37,7 @@ export async function runCliCommand(
     logger.error(`Failed to run the ${cliTool} command.`, {
       commandResult,
       command,
+      cliTool,
     });
     throw new Error(
       `Failed to run the ${cliTool} command: '${command}'. Error: ${JSON.stringify(
