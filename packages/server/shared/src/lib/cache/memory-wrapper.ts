@@ -56,7 +56,6 @@ const getKeysByPattern = async (pattern: string): Promise<string[]> => {
     `^${pattern.replace(/\*/g, '.*').replace(/\?/g, '.')}$`,
   );
 
-  // Iterate through all keys in the cache
   for (const key of cache.keys()) {
     if (regexPattern.test(key)) {
       keys.push(key);

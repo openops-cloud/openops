@@ -218,7 +218,6 @@ export const deleteChatHistoryContext = async (
 export type ChatInfo = {
   chatId: string;
   context: MCPChatContext | null;
-  messages: CoreMessage[];
 };
 
 export const getAllChatsForUserAndProject = async (
@@ -236,12 +235,10 @@ export const getAllChatsForUserAndProject = async (
       const chatId = parts[2];
 
       const context = await getChatContext(chatId, userId, projectId);
-      const messages = await getChatHistory(chatId, userId, projectId);
 
       chats.push({
         chatId,
         context,
-        messages,
       });
     }
   }

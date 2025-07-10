@@ -197,20 +197,6 @@ const DeleteChatOptions = {
   },
 };
 
-const GetAllChatsOptions = {
-  config: {
-    allowedPrincipals: [PrincipalType.USER],
-  },
-  schema: {
-    tags: ['ai', 'ai-chat'],
-    description:
-      'Retrieve all chat sessions for the authenticated user and project. This endpoint returns all chat IDs, contexts, and messages for the user.',
-    response: {
-      200: GetAllChatsResponse,
-    },
-  },
-};
-
 function getResponseObject(message: CoreAssistantMessage | CoreToolMessage): {
   role: 'assistant';
   content: string | Array<TextPart>;

@@ -59,7 +59,6 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         chats: chats.map((chat) => ({
           chatId: chat.chatId,
           context: chat.context,
-          messages: chat.messages,
         })),
       });
     },
