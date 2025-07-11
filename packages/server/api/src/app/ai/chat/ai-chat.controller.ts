@@ -2,6 +2,7 @@ import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { logger } from '@openops/server-shared';
 import {
   ApplicationError,
+  CodeSchema,
   DeleteChatHistoryRequest,
   NewMessageRequest,
   OpenChatRequest,
@@ -157,7 +158,23 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
         systemPrompt: await getSystemPrompt(chatContext, enrichedContext),
       });
 
-      return result.toTextStreamResponse();
+      const response = (await result
+        .toTextStreamResponse()
+        .json()) as CodeSchema;
+
+      // todo in shared
+      const messageInHistory =
+        `\`\`\`typescript\n${response.code}\n\`\`\`\n\n${response.description}` +
+        '\n\n' +
+        `\`\`\`json\n${response.packageJson}\n\`\`\``;
+      await saveChatHistory(chatId, [
+        ...messages,
+        {
+          role: 'assistant',
+          content: messageInHistory,
+        },
+      ]);
+      return response;
     } catch (error) {
       if (error instanceof ApplicationError) {
         return reply.code(400).send({ message: error.message });

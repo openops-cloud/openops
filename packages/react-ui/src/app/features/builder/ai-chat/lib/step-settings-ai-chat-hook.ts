@@ -1,10 +1,16 @@
 import { QueryKeys } from '@/app/constants/query-keys';
 import { authenticationSession } from '@/app/lib/authentication-session';
-import { Message, useChat } from '@ai-sdk/react';
+import {
+  Message,
+  useChat,
+  experimental_useObject as useObject,
+} from '@ai-sdk/react';
 import { toast } from '@openops/components/ui';
 import {
   Action,
   ActionType,
+  CodeSchema,
+  codeSchema,
   flowHelper,
   FlowVersion,
   TriggerWithOptionalId,
@@ -15,6 +21,10 @@ import { nanoid } from 'nanoid';
 import { useCallback, useEffect, useState } from 'react';
 import { aiChatApi } from './chat-api';
 
+// todo move to shared && use in prompt service
+const CODE_BLOCK_NAME = '@openops/code';
+const CODE_ACTION_NAME = 'code';
+
 export const useStepSettingsAiChat = (
   flowVersion: FlowVersion,
   selectedStep: string,
@@ -24,6 +34,7 @@ export const useStepSettingsAiChat = (
   const [enableNewChat, setEnableNewChat] = useState(true);
 
   const stepDetails = flowHelper.getStep(flowVersion, selectedStep);
+  const isCodeBlock = getBlockName(stepDetails) === CODE_BLOCK_NAME;
 
   useEffect(() => {
     setChatSessionKey(nanoid());
@@ -59,6 +70,7 @@ export const useStepSettingsAiChat = (
     status,
     setMessages,
     stop: stopChat,
+    setInput,
   } = useChat({
     id: chatSessionKey,
     api: 'api/v1/ai/chat/conversation',
@@ -73,6 +85,31 @@ export const useStepSettingsAiChat = (
     }),
     headers: {
       Authorization: `Bearer ${authenticationSession.getToken()}`,
+    },
+  });
+
+  const { submit: submitCodeRequest, isLoading: isCodeGenerating } = useObject({
+    api: 'api/v1/ai/chat/code',
+    schema: codeSchema,
+    headers: {
+      Authorization: `Bearer ${authenticationSession.getToken()}`,
+      'Content-Type': 'application/json',
+    },
+
+    onFinish: ({ object }: { object: CodeSchema | undefined }) => {
+      if (object) {
+        const assistantMessage: Message = {
+          id: nanoid(),
+          role: 'assistant',
+          content:
+            `\`\`\`typescript\n${object.code}\n\`\`\`\n\n${object.description}` +
+            '\n\n' +
+            `\`\`\`json\n${object.packageJson}\n\`\`\``,
+          createdAt: new Date(),
+        };
+
+        setMessages((prev) => [...prev, assistantMessage]);
+      }
     },
   });
 
@@ -120,21 +157,59 @@ export const useStepSettingsAiChat = (
     stopChat,
   ]);
 
+  const handleCodeSubmit = useCallback(
+    (event?: { preventDefault?: () => void }) => {
+      event?.preventDefault?.();
+
+      if (!input.trim()) return;
+
+      // Add user message to chat
+      const userMessage: Message = {
+        id: nanoid(),
+        role: 'user',
+        content: input,
+        createdAt: new Date(),
+      };
+
+      setMessages((prev) => [...prev, userMessage]);
+
+      const additionalContext =
+        stepDetails && flowVersion.id
+          ? createAdditionalContext(flowVersion, selectedStep, stepDetails)
+          : undefined;
+
+      submitCodeRequest({
+        chatId: openChatResponse?.chatId,
+        message: input,
+        additionalContext,
+      });
+
+      setInput('');
+    },
+    [
+      input,
+      openChatResponse?.chatId,
+      stepDetails,
+      flowVersion,
+      selectedStep,
+      setMessages,
+      submitCodeRequest,
+      setInput,
+    ],
+  );
+
   return {
     messages,
     input,
     handleInputChange,
-    handleSubmit,
-    status,
+    handleSubmit: isCodeBlock ? handleCodeSubmit : handleSubmit,
+    status: isCodeBlock ? (isCodeGenerating ? 'streaming' : 'ready') : status,
     onNewChatClick,
     enableNewChat,
     isOpenAiChatPending,
     isEmpty: !messages.length,
   };
 };
-
-const CODE_BLOCK_NAME = '@openops/code';
-const CODE_ACTION_NAME = 'code';
 
 const getBlockName = (
   stepDetails: Action | TriggerWithOptionalId | undefined,
@@ -154,4 +229,28 @@ const getActionName = (
   }
 
   return stepDetails?.type === ActionType.CODE ? CODE_ACTION_NAME : '';
+};
+
+const createAdditionalContext = (
+  flowVersion: FlowVersion,
+  selectedStep: string,
+  stepData?: Action | TriggerWithOptionalId,
+) => {
+  const stepVariables = stepData?.settings?.input || {};
+  const variables = Object.entries(stepVariables).map(([name, value]) => ({
+    name,
+    value: String(value || ''),
+  }));
+
+  return {
+    flowId: flowVersion.flowId,
+    flowVersionId: flowVersion.id,
+    steps: [
+      {
+        id: selectedStep,
+        stepName: selectedStep,
+        variables: variables.length > 0 ? variables : undefined,
+      },
+    ],
+  };
 };

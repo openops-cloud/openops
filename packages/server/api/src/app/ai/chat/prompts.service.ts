@@ -41,8 +41,12 @@ export const getSystemPrompt = async (
   context: ChatContext,
   enrichedContext?: ChatFlowContext,
 ): Promise<string> => {
-  const enrichedContextString = enrichedContext
-    ? `\n\nAdditional Context:\n${JSON.stringify(enrichedContext, null, 2)}`
+  const enrichedContextString = enrichedContext?.steps?.some((s) => s.variables)
+    ? `\n\nAdditional Context:\n${JSON.stringify(
+        enrichedContext.steps.map((s) => s.variables),
+        null,
+        2,
+      )}`
     : '';
 
   switch (context.blockName) {
@@ -63,8 +67,8 @@ export const getSystemPrompt = async (
       return loadPrompt('databricks.txt');
     // wip until the final ticket is implemented
     case '@openops/code':
-      return `Generate code with this interface, based on what the user wants to transform. Inputs are passed as an object. The code should be executable in isolated-vm (Secure & isolated JS environments for nodejs). It should be robust and fail-safe.
-      if you see inputs variables truncated, keep in mind that the final code will receive the full object as inputs and NOT stringified!
+      return `Generate code with this interface, based on the user's request. The code should be executable in isolated-vm (Secure & isolated JS environments for nodejs).
+      It should be robust and easy to read.
       
       // example packages to import (only if needed)
       import x from 'x';
@@ -77,7 +81,7 @@ export const getSystemPrompt = async (
 
       If there is some package the user wants to use, or necessary for the processing, also provide a separate package.json file with the dependencies.
       NEVER USE require, use import instead. Keep in mind isolated-vm has no access to any native Node.js modules, such as "fs", "process", "http", "crypto", etc.
-      If there are any variables in the following context, use them in the code:
+      If there are any variables in the following context, use them in the code. If you see inputs variables truncated, keep in mind that the final code will receive the full object as inputs and NOT stringified! Verify both cases, if input variables are objects or strings.
       ${enrichedContextString}`;
     default:
       return '';
