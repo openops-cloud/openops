@@ -189,7 +189,7 @@ export async function getConversation(
   return { chatContext, messages };
 }
 
-export const handleControllerError = (
+export const handleError = (
   error: unknown,
   reply: FastifyReply,
   context?: string,

@@ -248,6 +248,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
       );
 
       expect(getBlockSystemPrompt).toHaveBeenCalled();
+      expect(getMCPTools).not.toHaveBeenCalled();
     });
 
     it.each([

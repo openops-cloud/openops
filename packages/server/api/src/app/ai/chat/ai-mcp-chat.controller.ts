@@ -38,7 +38,7 @@ import {
   getChatHistory,
   getConversation,
   getLLMConfig,
-  handleControllerError,
+  handleError,
   MCPChatContext,
   saveChatHistory,
 } from './ai-chat.service';
@@ -237,7 +237,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         provider: aiConfig.provider,
       });
     } catch (error) {
-      return handleControllerError(error, reply, 'conversation');
+      return handleError(error, reply, 'conversation');
     }
   });
 
@@ -275,7 +275,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
 
       return result.toTextStreamResponse();
     } catch (error) {
-      return handleControllerError(error, reply, 'code generation');
+      return handleError(error, reply, 'code generation');
     }
   });
 
@@ -288,7 +288,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       await deleteChatHistory(chatId, userId, projectId);
       return await reply.code(StatusCodes.OK).send();
     } catch (error) {
-      return handleControllerError(error, reply, 'delete chat history');
+      return handleError(error, reply, 'delete chat history');
     }
   });
 };
