@@ -1,5 +1,5 @@
 import {
-  axiosTablesSeedRetryConfig,
+  axiosTablesRetryConfig,
   createAxiosHeaders,
   getFields,
   getPrimaryKeyFieldFromFields,
@@ -45,7 +45,7 @@ export async function addFields(token: string, tableId: number) {
       type: 'text',
     },
     createAxiosHeaders(token),
-    axiosTablesSeedRetryConfig,
+    axiosTablesRetryConfig,
   );
   logger.debug(
     `[Seeding Auto EC2 instances shutdown table] After adding primary field Arn with id: ${primaryField.id}`,
@@ -74,7 +74,7 @@ async function addField(
     createFieldEndpoint,
     fieldBody,
     createAxiosHeaders(token),
-    axiosTablesSeedRetryConfig,
+    axiosTablesRetryConfig,
   );
 
   logger.debug(

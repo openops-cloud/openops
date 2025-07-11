@@ -1,5 +1,5 @@
 import {
-  axiosTablesSeedRetryConfig,
+  axiosTablesRetryConfig,
   createAxiosHeaders,
   makeOpenOpsTablesGet,
 } from './requests-helpers';
@@ -17,7 +17,7 @@ export async function getDefaultDatabaseId(
     await makeOpenOpsTablesGet<Application>(
       `api/applications/`,
       authenticationHeader,
-      axiosTablesSeedRetryConfig,
+      axiosTablesRetryConfig,
     );
 
   const defaultDatabase: Application | undefined = getTablesResult

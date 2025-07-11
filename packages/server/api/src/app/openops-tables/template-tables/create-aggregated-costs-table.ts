@@ -1,5 +1,5 @@
 import {
-  axiosTablesSeedRetryConfig,
+  axiosTablesRetryConfig,
   createAxiosHeaders,
   getFields,
   getPrimaryKeyFieldFromFields,
@@ -48,7 +48,7 @@ export async function addFields(token: string, tableId: number) {
       type: 'text',
     },
     createAxiosHeaders(token),
-    axiosTablesSeedRetryConfig,
+    axiosTablesRetryConfig,
   );
   logger.debug(
     `${SEED_LOG_HEADER} After adding primary field ${primaryField.name} with id: ${primaryField.id}`,
@@ -84,7 +84,7 @@ async function addField(
     createFieldEndpoint,
     fieldBody,
     createAxiosHeaders(token),
-    axiosTablesSeedRetryConfig,
+    axiosTablesRetryConfig,
   );
 
   logger.debug(

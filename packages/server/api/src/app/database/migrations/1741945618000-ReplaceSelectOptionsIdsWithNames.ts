@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
-  axiosTablesSeedRetryConfig,
+  axiosTablesRetryConfig,
   getTableFields,
   SelectOpenOpsField,
 } from '@openops/common';
@@ -63,7 +63,7 @@ const getFieldsFromCache = async (tableName: string) => {
   try {
     fields = (await getTableFields(
       tableName,
-      axiosTablesSeedRetryConfig,
+      axiosTablesRetryConfig,
     )) as SelectOpenOpsField[];
   } catch (e) {
     logger.error(`Failed to get fields for table ${tableName}`, e);

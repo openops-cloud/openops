@@ -12,39 +12,32 @@ export function createAxiosHeaders(token: string): AxiosHeaders {
   });
 }
 
-export const RETRY_DELAY_MS = 1000;
-const calculateRetryDelayMs = (retryCount: number) =>
-  retryCount * RETRY_DELAY_MS;
+const RETRY_DELAY_MS = 1000;
 
-export const axiosTablesSeedRetryConfig: IAxiosRetryConfig = {
-  retries: 3,
-  retryDelay: (retryCount: number) => {
-    logger.debug(
-      `The request failed due to a conflict. Request count: ${retryCount}`,
-    );
-    return calculateRetryDelayMs(retryCount);
-  },
-  retryCondition: (error: AxiosError) => {
-    return (
-      (error?.response?.status &&
-        error?.response?.status === StatusCodes.CONFLICT) ||
-      false
-    );
-  },
+const getStatusText = (statusCode: number): string => {
+  const statusEntry = Object.entries(StatusCodes).find(
+    ([_, value]) => value === statusCode,
+  );
+  return statusEntry ? `${statusCode} ${statusEntry[0]}` : `${statusCode}`;
 };
 
-export const axiosTablesBadGatewayRetryConfig: IAxiosRetryConfig = {
+export const axiosTablesRetryConfig: IAxiosRetryConfig = {
   retries: 3,
-  retryDelay: (retryCount: number) => {
-    logger.warn(
-      `The request failed due to a bad gateway. Request count: ${retryCount}`,
+  retryDelay: (retryCount: number, error: AxiosError) => {
+    const statusText = error?.response?.status
+      ? getStatusText(error.response.status)
+      : 'unknown status';
+    logger.debug(
+      `The request failed with status ${statusText}. Request count: ${retryCount}`,
     );
-    return calculateRetryDelayMs(retryCount);
+    return retryCount * RETRY_DELAY_MS;
   },
   retryCondition: (error: AxiosError) => {
     return (
       (error?.response?.status &&
-        error?.response?.status === StatusCodes.BAD_GATEWAY) ||
+        [StatusCodes.BAD_GATEWAY, StatusCodes.CONFLICT].includes(
+          error.response.status,
+        )) ||
       false
     );
   },
