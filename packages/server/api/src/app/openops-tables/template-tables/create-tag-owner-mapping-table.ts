@@ -1,5 +1,5 @@
 import {
-  axiosTablesSeedRetryConfig,
+  axiosTablesRetryConfig,
   createAxiosHeaders,
   getFields,
   getPrimaryKeyFieldFromFields,
@@ -50,7 +50,7 @@ export async function addFields(
       type: 'text',
     },
     createAxiosHeaders(token),
-    axiosTablesSeedRetryConfig,
+    axiosTablesRetryConfig,
   );
   logger.debug(
     `[Seeding Tag-Owner mapping table] After adding primary field Owner tag value with id: ${primaryField.id}`,
@@ -80,7 +80,7 @@ async function addField(
     createFieldEndpoint,
     fieldBody,
     createAxiosHeaders(token),
-    axiosTablesSeedRetryConfig,
+    axiosTablesRetryConfig,
   );
 
   logger.debug(

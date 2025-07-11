@@ -1,5 +1,5 @@
 import {
-  axiosTablesSeedRetryConfig,
+  axiosTablesRetryConfig,
   createAxiosHeaders,
   makeOpenOpsTablesPost,
 } from '@openops/common';
@@ -27,6 +27,6 @@ export async function createTable(
     `api/database/tables/database/${databaseId}/`,
     requestBody,
     createAxiosHeaders(token),
-    axiosTablesSeedRetryConfig,
+    axiosTablesRetryConfig,
   );
 }
