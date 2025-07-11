@@ -2,7 +2,6 @@ import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { logger } from '@openops/server-shared';
 import {
   AiConfig,
-  ApplicationError,
   DeleteChatHistoryRequest,
   NewMessageRequest,
   OpenChatMCPRequest,
@@ -31,7 +30,6 @@ import {
 } from '../../telemetry/event-models/ai';
 import { getMCPTools } from '../mcp/mcp-tools';
 import {
-  ChatContext,
   createChatContext,
   deleteChatHistory,
   generateChatId,
@@ -40,6 +38,8 @@ import {
   getChatHistory,
   getConversation,
   getLLMConfig,
+  handleControllerError,
+  MCPChatContext,
   saveChatHistory,
 } from './ai-chat.service';
 import { generateMessageId } from './ai-message-id-generator';
@@ -77,7 +77,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         request.body.stepName &&
         request.body.actionName
       ) {
-        const context: ChatContext = {
+        const context: MCPChatContext = {
           workflowId: request.body.workflowId,
           blockName: request.body.blockName,
           stepName: request.body.stepName,
@@ -107,7 +107,6 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         userId,
       });
       const chatContext = {
-        name: 'New chat',
         ...request.body,
         chatId: newChatId,
       };
@@ -118,7 +117,6 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       return reply.code(200).send({
         chatId,
         messages,
-        context: chatContext,
       });
     },
   );
@@ -239,12 +237,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         provider: aiConfig.provider,
       });
     } catch (error) {
-      if (error instanceof ApplicationError) {
-        return reply.code(400).send({ message: error.message });
-      }
-
-      logger.error('Failed to process conversation with error: ', error);
-      return reply.code(500).send({ message: 'Internal server error' });
+      return handleControllerError(error, reply, 'conversation');
     }
   });
 
@@ -282,12 +275,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
 
       return result.toTextStreamResponse();
     } catch (error) {
-      if (error instanceof ApplicationError) {
-        return reply.code(400).send({ message: error.message });
-      }
-
-      logger.error('Failed to process code generation with error: ', error);
-      return reply.code(500).send({ message: 'Internal server error' });
+      return handleControllerError(error, reply, 'code generation');
     }
   });
 
@@ -300,10 +288,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       await deleteChatHistory(chatId, userId, projectId);
       return await reply.code(StatusCodes.OK).send();
     } catch (error) {
-      logger.error('Failed to delete chat history with error: ', { error });
-      return reply.code(StatusCodes.INTERNAL_SERVER_ERROR).send({
-        message: 'Failed to delete chat history',
-      });
+      return handleControllerError(error, reply, 'delete chat history');
     }
   });
 };

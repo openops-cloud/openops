@@ -4,9 +4,11 @@ import {
   distributedLock,
   encryptUtils,
   hashUtils,
+  logger,
 } from '@openops/server-shared';
 import { AiConfig, ApplicationError, ErrorCode } from '@openops/shared';
 import { CoreMessage, LanguageModel } from 'ai';
+import { FastifyReply } from 'fastify';
 import { aiConfigService } from '../config/ai-config.service';
 
 // Chat expiration time is 24 hour
@@ -29,37 +31,19 @@ const chatHistoryKey = (
   return `${projectId}:${userId}:${chatId}:history`;
 };
 
-const chatHistoryContextKey = (
-  chatId: string,
-  userId: string,
-  projectId: string,
-): string => {
-  return `${projectId}:${userId}:${chatId}:context:history`;
-};
-
 export type MCPChatContext = {
   chatId?: string;
   workflowId?: string;
   blockName?: string;
   stepName?: string;
   actionName?: string;
-  name?: string;
 };
 
-export type ChatContext = {
-  workflowId: string;
-  blockName: string;
-  stepName: string;
-  actionName: string;
-};
-
-export const generateChatId = (params: {
-  workflowId: string;
-  blockName: string;
-  stepName: string;
-  actionName: string;
-  userId: string;
-}): string => {
+export const generateChatId = (
+  params: MCPChatContext & {
+    userId: string;
+  },
+): string => {
   return hashUtils.hashObject({
     workflowId: params.workflowId,
     blockName: params.blockName,
@@ -83,7 +67,7 @@ export const createChatContext = async (
   chatId: string,
   userId: string,
   projectId: string,
-  context: ChatContext | MCPChatContext,
+  context: MCPChatContext,
 ): Promise<void> => {
   await cacheWrapper.setSerializedObject(
     chatContextKey(chatId, userId, projectId),
@@ -96,7 +80,7 @@ export const getChatContext = async (
   chatId: string,
   userId: string,
   projectId: string,
-): Promise<ChatContext | null> => {
+): Promise<MCPChatContext | null> => {
   return cacheWrapper.getSerializedObject(
     chatContextKey(chatId, userId, projectId),
   );
@@ -157,69 +141,6 @@ export const deleteChatHistory = async (
   await cacheWrapper.deleteKey(chatHistoryKey(chatId, userId, projectId));
 };
 
-export const getChatHistoryContext = async (
-  chatId: string,
-  userId: string,
-  projectId: string,
-): Promise<CoreMessage[]> => {
-  const messages = await cacheWrapper.getSerializedObject<CoreMessage[]>(
-    chatHistoryContextKey(chatId, userId, projectId),
-  );
-
-  return messages ?? [];
-};
-
-export const saveChatHistoryContext = async (
-  chatId: string,
-  userId: string,
-  projectId: string,
-  messages: CoreMessage[],
-): Promise<void> => {
-  await cacheWrapper.setSerializedObject(
-    chatHistoryContextKey(chatId, userId, projectId),
-    messages,
-    DEFAULT_EXPIRE_TIME,
-  );
-};
-
-export async function appendMessagesToChatHistoryContext(
-  chatId: string,
-  userId: string,
-  projectId: string,
-  newMessages: CoreMessage[],
-): Promise<CoreMessage[]> {
-  const historyLock = await distributedLock.acquireLock({
-    key: `lock:${chatHistoryContextKey(chatId, userId, projectId)}`,
-    timeout: LOCK_EXPIRE_TIME,
-  });
-
-  try {
-    const existingMessages = await getChatHistoryContext(
-      chatId,
-      userId,
-      projectId,
-    );
-
-    existingMessages.push(...newMessages);
-
-    await saveChatHistoryContext(chatId, userId, projectId, existingMessages);
-
-    return existingMessages;
-  } finally {
-    await historyLock.release();
-  }
-}
-
-export const deleteChatHistoryContext = async (
-  chatId: string,
-  userId: string,
-  projectId: string,
-): Promise<void> => {
-  await cacheWrapper.deleteKey(
-    chatHistoryContextKey(chatId, userId, projectId),
-  );
-};
-
 export async function getLLMConfig(
   projectId: string,
 ): Promise<{ aiConfig: AiConfig; languageModel: LanguageModel }> {
@@ -250,7 +171,7 @@ export async function getConversation(
   chatId: string,
   userId: string,
   projectId: string,
-): Promise<{ chatContext: ChatContext; messages: CoreMessage[] }> {
+): Promise<{ chatContext: MCPChatContext; messages: CoreMessage[] }> {
   const chatContext = await getChatContext(chatId, userId, projectId);
   if (!chatContext) {
     throw new ApplicationError({
@@ -267,3 +188,16 @@ export async function getConversation(
 
   return { chatContext, messages };
 }
+
+export const handleControllerError = (
+  error: unknown,
+  reply: FastifyReply,
+  context?: string,
+): FastifyReply => {
+  if (error instanceof ApplicationError) {
+    return reply.code(400).send({ message: error.message });
+  }
+
+  logger.error(`Failed to process ${context || 'request'} with error: `, error);
+  return reply.code(500).send({ message: 'Internal server error' });
+};
