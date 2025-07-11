@@ -1,6 +1,5 @@
 'use client';
 
-// import { AppSidebar } from '@/ui/app-sidebar';
 import { authenticationSession } from '@/app/lib/authentication-session';
 import {
   AssistantRuntimeProvider,
@@ -47,16 +46,6 @@ export const AssistantV2 = () => {
 
   return (
     <AssistantRuntimeProvider runtime={runtime}>
-      {/* <SidebarProvider>
-        <SidebarInset>
-          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-            <SidebarTrigger />
-            <Separator orientation="vertical" className="mr-2 h-4" />
-          </header>
-          <Thread />
-        </SidebarInset>
-      </SidebarProvider> */}
-
       <div className="flex flex-col">
         <Thread />
       </div>
