@@ -69,3 +69,5 @@ export const DeleteChatHistoryRequest = Type.Object({
 });
 
 export type DeleteChatHistoryRequest = Static<typeof DeleteChatHistoryRequest>;
+
+export * from './code-output-structure';

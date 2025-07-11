@@ -1,19 +1,10 @@
-import { AiConfig } from '@openops/shared';
+import { AiConfig, CodeSchema, codeSchema } from '@openops/shared';
 import {
   CoreMessage,
   LanguageModel,
   streamObject,
   StreamObjectResult,
 } from 'ai';
-import { z } from 'zod';
-
-const codeSchema = z.object({
-  code: z.string(),
-  packageJson: z.string(),
-  description: z.string(),
-});
-
-type CodeSchema = z.infer<typeof codeSchema>;
 
 export const streamCode = ({
   messages,
