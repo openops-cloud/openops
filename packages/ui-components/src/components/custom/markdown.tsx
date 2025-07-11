@@ -15,6 +15,7 @@ import { clipboardUtils } from '../../lib/clipboard-utils';
 import { cn } from '../../lib/cn';
 import { COPY_PASTE_TOAST_DURATION } from '../../lib/constants';
 import { CodeMirrorEditor } from '../json-editor';
+import { MonacoLanguage } from '../json-editor/code-mirror-editor';
 import { CodeVariations, MarkdownCodeVariations } from './types';
 
 function applyVariables(markdown: string, variables: Record<string, string>) {
@@ -56,25 +57,24 @@ const Container = ({
     children
   );
 
-const getLanguageExtensionForCode = (className?: string): Extension[] => {
-  if (!className) return [];
+const getLanguageExtensionForCode = (
+  className?: string,
+): MonacoLanguage | undefined => {
+  if (!className) return 'json';
 
-  if (className.includes('language-json')) return [json()];
+  if (className.includes('language-json')) return 'json';
   if (
     className.includes('language-javascript') ||
     className.includes('language-js')
   )
-    return [javascript()];
+    return 'javascript';
   if (
     className.includes('language-typescript') ||
     className.includes('language-ts')
   )
-    return [javascript({ typescript: true })];
-  if (className.includes('language-jsx')) return [javascript({ jsx: true })];
-  if (className.includes('language-tsx'))
-    return [javascript({ jsx: true, typescript: true })];
-
-  return [];
+    return 'typescript';
+  if (className.includes('language-jsx')) return 'javascript';
+  if (className.includes('language-tsx')) return 'typescript';
 };
 
 const CodeViewer = ({
@@ -95,7 +95,7 @@ const CodeViewer = ({
       className="border border-solid rounded"
       containerClassName="h-auto"
       theme={theme}
-      languageExtensions={getLanguageExtensionForCode(className)}
+      language={getLanguageExtensionForCode(className)}
     />
   );
 };
