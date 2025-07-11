@@ -9,6 +9,7 @@ import { t } from 'i18next';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 
+import { useTheme } from '@/app/common/providers/theme-provider';
 import { TextInputWithMentions } from '../block-properties/text-input-with-mentions';
 
 const markdown = t(
@@ -21,6 +22,7 @@ type LoopsSettingsProps = {
 
 const LoopsSettings = React.memo(({ readonly }: LoopsSettingsProps) => {
   const form = useFormContext<LoopOnItemsAction>();
+  const { theme } = useTheme();
 
   return (
     <FormField
@@ -28,7 +30,7 @@ const LoopsSettings = React.memo(({ readonly }: LoopsSettingsProps) => {
       name="settings.items"
       render={({ field }) => (
         <FormItem className="flex flex-col gap-2">
-          <Markdown markdown={markdown} />
+          <Markdown markdown={markdown} theme={theme} />
           <FormLabel>{t('Items')}</FormLabel>
           <TextInputWithMentions
             disabled={readonly}

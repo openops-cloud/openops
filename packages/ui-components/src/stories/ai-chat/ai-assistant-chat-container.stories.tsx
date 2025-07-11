@@ -6,6 +6,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { fn } from '@storybook/test';
 
 import { useRef } from 'react';
+import { ThemeAwareContainer } from '../../../.storybook/decorators';
 import {
   AI_CHAT_CONTAINER_SIZES,
   AiAssistantChatContainer,
@@ -175,7 +176,8 @@ export const WithMessages: Story = {
         lastAssistantMessageRef={lastAssistantMessageRef}
         messages={sampleAIChatMessages}
       >
-        <AIChatMessages
+        <ThemeAwareContainer
+          component={AIChatMessages}
           messages={sampleAIChatMessages}
           onInject={action('Inject command')}
           codeVariation={MarkdownCodeVariations.WithCopyMultiline}
@@ -218,7 +220,8 @@ export const WithMessagesCopyAndInject: Story = {
         lastAssistantMessageRef={lastAssistantMessageRef}
         messages={sampleAIChatMessages}
       >
-        <AIChatMessages
+        <ThemeAwareContainer
+          component={AIChatMessages}
           messages={sampleAIChatMessages}
           onInject={action('Inject command')}
           codeVariation={MarkdownCodeVariations.WithCopyAndInject}
@@ -270,7 +273,8 @@ export const WithScopeSelector: Story = {
         lastAssistantMessageRef={lastAssistantMessageRef}
         messages={sampleAIChatMessages}
       >
-        <AIChatMessages
+        <ThemeAwareContainer
+          component={AIChatMessages}
           messages={sampleAIChatMessages}
           onInject={action('Inject command')}
           codeVariation={MarkdownCodeVariations.WithCopyAndInject}
@@ -332,7 +336,8 @@ export const WithPreselectedScopeItems: Story = {
         lastAssistantMessageRef={lastAssistantMessageRef}
         messages={sampleAIChatMessages}
       >
-        <AIChatMessages
+        <ThemeAwareContainer
+          component={AIChatMessages}
           messages={sampleAIChatMessages}
           onInject={action('Inject command')}
           codeVariation={MarkdownCodeVariations.WithCopyAndInject}

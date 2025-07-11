@@ -1,3 +1,4 @@
+import { useTheme } from '@/app/common/providers/theme-provider';
 import { UseChatHelpers } from '@ai-sdk/react';
 import { UIMessage } from '@ai-sdk/ui-utils';
 import {
@@ -28,6 +29,7 @@ const StepSettingsAiConversation = ({
   lastUserMessageRef,
   lastAssistantMessageRef,
 }: ConversationProps) => {
+  const { theme } = useTheme();
   const dispatch = useBuilderStateContext((state) => state.applyMidpanelAction);
 
   const onInject = useCallback(
@@ -62,6 +64,7 @@ const StepSettingsAiConversation = ({
         codeVariation={MarkdownCodeVariations.WithCopyAndInject}
         lastUserMessageRef={lastUserMessageRef}
         lastAssistantMessageRef={lastAssistantMessageRef}
+        theme={theme}
       />
       {[ChatStatus.STREAMING, ChatStatus.SUBMITTED].includes(status) && (
         <LoadingSpinner />

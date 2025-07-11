@@ -11,7 +11,7 @@ type JsonViewerProps = {
   title?: string;
   readonly?: boolean;
   onChange?: (json: any) => void;
-  theme?: string;
+  theme: string;
   editorClassName?: string;
   isEditModeEnabled?: boolean;
   onEditModeChange?: (isEditModeEnabled: boolean) => void;

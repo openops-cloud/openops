@@ -14,6 +14,7 @@ import { useFormContext } from 'react-hook-form';
 import { DictionaryProperty } from '../../block-properties/dictionary-property';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
+import { useTheme } from '@/app/common/providers/theme-provider';
 import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
 import { useAppStore } from '@/app/store/app-store';
 import { PropertyType } from '@openops/blocks-framework';
@@ -30,6 +31,7 @@ type CodeSettingsProps = {
 };
 
 const CodeSettings = React.memo(({ readonly }: CodeSettingsProps) => {
+  const { theme } = useTheme();
   const form = useFormContext<CodeAction>();
   const codeWithAiEnabled = flagsHooks.useFlag<boolean>(
     FlagId.CODE_WITH_AI,
@@ -72,7 +74,7 @@ const CodeSettings = React.memo(({ readonly }: CodeSettingsProps) => {
         render={({ field }) => (
           <FormItem>
             <div className="pb-4">
-              <Markdown markdown={markdown} />
+              <Markdown markdown={markdown} theme={theme} />
             </div>
 
             <div className="flex items-center justify-between">

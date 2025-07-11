@@ -8,7 +8,7 @@ type TestStepDataViewerProps = {
   outputJson: any;
   readonly?: boolean;
   onChange?: (json: any) => void;
-  theme?: string;
+  theme: string;
   editorClassName?: string;
 };
 
