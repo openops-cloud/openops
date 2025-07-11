@@ -18,7 +18,17 @@ const getStatusText = (statusCode: number): string => {
   const statusEntry = Object.entries(StatusCodes).find(
     ([_, value]) => value === statusCode,
   );
-  return statusEntry ? `${statusCode} ${statusEntry[0]}` : `${statusCode}`;
+  if (!statusEntry) {
+    return `${statusCode}`;
+  }
+
+  const statusKey = statusEntry[0];
+  const statusText = statusKey
+    .split('_')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+
+  return `${statusCode} ${statusText}`;
 };
 
 export const axiosTablesRetryConfig: IAxiosRetryConfig = {
