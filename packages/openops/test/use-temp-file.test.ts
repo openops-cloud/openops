@@ -64,7 +64,7 @@ describe('useTempFile', () => {
     expect(mockUnlink).toHaveBeenCalledWith(expect.stringContaining('/tmp/'));
     expect(mockError).toHaveBeenCalledWith(
       'Error occurred while removing temporary file',
-      expect.any(Error),
+      expect.objectContaining({ error: expect.any(Error) }),
     );
   });
 

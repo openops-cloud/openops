@@ -1,5 +1,5 @@
 import { createCustomApiCallAction } from '@openops/blocks-common';
-import { createBlock } from '@openops/blocks-framework';
+import { createBlock, Property } from '@openops/blocks-framework';
 import { BlockCategory } from '@openops/shared';
 import { archeraAuth } from './auth';
 import { applyCommitmentPlanAction } from './lib/actions/apply-plan';
@@ -26,6 +26,12 @@ export const archera = createBlock({
     createCustomApiCallAction({
       baseUrl: (auth: any) => `https://api.archera.ai/v1/org/${auth.orgId}`,
       auth: archeraAuth,
+      additionalProps: {
+        documentation: Property.MarkDown({
+          value:
+            'For more information, visit the [Archera API documentation](https://api.archera.ai/docs).',
+        }),
+      },
       authMapping: async (context) => ({
         'x-api-key': (context.auth as any).apiToken,
       }),

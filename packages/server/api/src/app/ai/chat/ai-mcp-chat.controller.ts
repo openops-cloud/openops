@@ -102,12 +102,6 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       providerSettings: aiConfig.providerSettings,
     });
 
-    // const messages = await getChatHistory(chatId);
-    // messages.push({
-    //   role: 'user',
-    //   content: request.body.message,
-    // });
-
     const { mcpClients, tools } = await getMCPTools(
       app,
       request.headers.authorization?.replace('Bearer ', '') ?? '',
@@ -193,7 +187,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       await deleteChatHistory(chatId);
       return await reply.code(StatusCodes.OK).send();
     } catch (error) {
-      logger.error('Failed to delete chat history with error: ', error);
+      logger.error('Failed to delete chat history with error: ', { error });
       return reply.code(StatusCodes.INTERNAL_SERVER_ERROR).send({
         message: 'Failed to delete chat history',
       });

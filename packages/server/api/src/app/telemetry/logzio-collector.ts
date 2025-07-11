@@ -1,7 +1,6 @@
 import { logger, SharedSystemProp, system } from '@openops/server-shared';
 import { Mutex } from 'async-mutex';
 import { pushTimeseries, Timeseries } from 'prometheus-remote-write';
-import { TelemetryEvent } from './telemetry-event';
 
 const logzioMetricToken = system.getOrThrow<string>(
   SharedSystemProp.LOGZIO_METRICS_TOKEN,
@@ -21,6 +20,7 @@ async function sendMetrics(): Promise<void> {
       }
 
       const metricsToSend = [...metrics];
+
       await pushTimeseries(metricsToSend, {
         url: 'https://listener.logz.io:8053',
         headers: {
@@ -33,6 +33,7 @@ async function sendMetrics(): Promise<void> {
       logger.error('Failed to send telemetry events to Logzio.', {
         error,
         metricsCount: metrics.length,
+        metrics,
       });
     }
   });
@@ -55,7 +56,7 @@ export function startMetricsCollector(): void {
 
   metricsIntervalId = setInterval(() => {
     sendMetrics().catch((error) => {
-      logger.error('Error in metrics collector.', error);
+      logger.error('Error in metrics collector.', { error });
     });
   }, 60 * 1000);
 }
@@ -69,6 +70,6 @@ export async function flushMetricsCollector(): Promise<void> {
 
     await sendMetrics();
   } catch (error) {
-    logger.error('Error flushing metrics collector.', error);
+    logger.error('Error flushing metrics collector.', { error });
   }
 }

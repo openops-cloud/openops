@@ -63,12 +63,13 @@ const semaphore = TablesAccessSemaphore.getInstance();
 
 async function executeWithConcurrencyLimit<T>(
   fn: () => Promise<T>,
+  onError: (error: Error) => void,
 ): Promise<T> {
   const [value, release] = await semaphore.acquire();
   try {
     return await fn();
   } catch (error) {
-    logger.error('Error in locked row operation:', error);
+    onError(error as Error);
     throw error;
   } finally {
     release();
@@ -76,83 +77,133 @@ async function executeWithConcurrencyLimit<T>(
 }
 
 export async function getRows(getRowsParams: GetRowsParams) {
-  return executeWithConcurrencyLimit(async () => {
-    if (
-      getRowsParams.filters &&
-      getRowsParams.filters.length > 1 &&
-      getRowsParams.filterType == null
-    ) {
-      throw new Error('Filter type must be provided when filters are provided');
-    }
+  if (
+    getRowsParams.filters &&
+    getRowsParams.filters.length > 1 &&
+    getRowsParams.filterType == null
+  ) {
+    throw new Error('Filter type must be provided when filters are provided');
+  }
 
-    const params = new URLSearchParams();
+  const params = new URLSearchParams();
 
-    params.append('user_field_names', `true`);
-    getRowsParams.filters?.forEach((filter) => {
-      params.append(
-        `${buildSimpleFilterUrlParam(`${filter.fieldName}`, filter.type)}`,
-        `${filter.value}`,
-      );
-    });
-    if (getRowsParams.filterType) {
-      params.append('filter_type', `${getRowsParams.filterType}`);
-    }
-
-    const paramsString = params.toString();
-    const baseUrl = `api/database/rows/table/${getRowsParams.tableId}/`;
-    const url = paramsString ? baseUrl + `?${paramsString}` : baseUrl;
-
-    const authenticationHeader = createAxiosHeaders(getRowsParams.token);
-    const getRowsResult = await makeOpenOpsTablesGet<{ results: any[] }[]>(
-      url,
-      authenticationHeader,
+  params.append('user_field_names', `true`);
+  getRowsParams.filters?.forEach((filter) => {
+    params.append(
+      `${buildSimpleFilterUrlParam(`${filter.fieldName}`, filter.type)}`,
+      `${filter.value}`,
     );
-
-    return getRowsResult.flatMap((row: any) => row.results);
   });
+  if (getRowsParams.filterType) {
+    params.append('filter_type', `${getRowsParams.filterType}`);
+  }
+
+  const paramsString = params.toString();
+  const baseUrl = `api/database/rows/table/${getRowsParams.tableId}/`;
+  const url = paramsString ? baseUrl + `?${paramsString}` : baseUrl;
+  const authenticationHeader = createAxiosHeaders(getRowsParams.token);
+
+  return executeWithConcurrencyLimit(
+    async () => {
+      const getRowsResult = await makeOpenOpsTablesGet<{ results: any[] }[]>(
+        url,
+        authenticationHeader,
+      );
+
+      return getRowsResult.flatMap((row: any) => row.results);
+    },
+    (error) => {
+      logger.error('Error while getting rows:', {
+        error,
+        url,
+        ...getRowsParams,
+      });
+    },
+  );
 }
 
 export async function updateRow(updateRowParams: UpdateRowParams) {
-  return executeWithConcurrencyLimit(async () => {
-    const authenticationHeader = createAxiosHeaders(updateRowParams.token);
-    return await makeOpenOpsTablesPatch(
-      `api/database/rows/table/${updateRowParams.tableId}/${updateRowParams.rowId}/?user_field_names=true`,
-      updateRowParams.fields,
-      authenticationHeader,
-    );
-  });
+  const url = `api/database/rows/table/${updateRowParams.tableId}/${updateRowParams.rowId}/?user_field_names=true`;
+
+  return executeWithConcurrencyLimit(
+    async () => {
+      const authenticationHeader = createAxiosHeaders(updateRowParams.token);
+      return await makeOpenOpsTablesPatch(
+        url,
+        updateRowParams.fields,
+        authenticationHeader,
+      );
+    },
+    (error) => {
+      logger.error('Error while updating row:', {
+        error,
+        url,
+        ...updateRowParams,
+      });
+    },
+  );
 }
 
 export async function upsertRow(upsertRowParams: UpsertRowParams) {
-  return executeWithConcurrencyLimit(async () => {
-    const authenticationHeader = createAxiosHeaders(upsertRowParams.token);
-    return await makeOpenOpsTablesPut(
-      `api/database/rows/table/${upsertRowParams.tableId}/upsert/?user_field_names=true`,
-      upsertRowParams.fields,
-      authenticationHeader,
-    );
-  });
+  const url = `api/database/rows/table/${upsertRowParams.tableId}/upsert/?user_field_names=true`;
+
+  return executeWithConcurrencyLimit(
+    async () => {
+      const authenticationHeader = createAxiosHeaders(upsertRowParams.token);
+      return await makeOpenOpsTablesPut(
+        url,
+        upsertRowParams.fields,
+        authenticationHeader,
+      );
+    },
+    (error) => {
+      logger.error('Error while upserting row:', {
+        error,
+        url,
+        ...upsertRowParams,
+      });
+    },
+  );
 }
 
 export async function addRow(addRowParams: AddRowParams) {
-  return executeWithConcurrencyLimit(async () => {
-    const authenticationHeader = createAxiosHeaders(addRowParams.token);
-    return await makeOpenOpsTablesPost(
-      `api/database/rows/table/${addRowParams.tableId}/?user_field_names=true`,
-      addRowParams.fields,
-      authenticationHeader,
-    );
-  });
+  const url = `api/database/rows/table/${addRowParams.tableId}/?user_field_names=true`;
+
+  return executeWithConcurrencyLimit(
+    async () => {
+      const authenticationHeader = createAxiosHeaders(addRowParams.token);
+      return await makeOpenOpsTablesPost(
+        url,
+        addRowParams.fields,
+        authenticationHeader,
+      );
+    },
+    (error) => {
+      logger.error('Error while adding row:', {
+        error,
+        url,
+        ...addRowParams,
+      });
+    },
+  );
 }
 
 export async function deleteRow(deleteRowParams: DeleteRowParams) {
-  return executeWithConcurrencyLimit(async () => {
-    const authenticationHeader = createAxiosHeaders(deleteRowParams.token);
-    return await makeOpenOpsTablesDelete(
-      `api/database/rows/table/${deleteRowParams.tableId}/${deleteRowParams.rowId}/`,
-      authenticationHeader,
-    );
-  });
+  const url = `api/database/rows/table/${deleteRowParams.tableId}/${deleteRowParams.rowId}/`;
+
+  return executeWithConcurrencyLimit(
+    async () => {
+      const authenticationHeader = createAxiosHeaders(deleteRowParams.token);
+      return await makeOpenOpsTablesDelete(url, authenticationHeader);
+    },
+    (error) => {
+      logger.error('Error while deleting row:', {
+        error,
+        url,
+        ...deleteRowParams,
+      });
+    },
+  );
 }
 
 export async function getRowByPrimaryKeyValue(

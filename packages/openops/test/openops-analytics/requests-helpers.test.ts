@@ -120,7 +120,7 @@ describe('axios request', () => {
       });
       expect(loggerMock.error).toHaveBeenCalledWith(
         'Error calling OpenOps Analytics. Route: "test/route/api"',
-        expect.any(Error),
+        expect.objectContaining({ error: expect.any(Error) }),
       );
     };
 

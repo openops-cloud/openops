@@ -64,7 +64,7 @@ export async function selectRelevantTools({
         .slice(0, MAX_SELECTED_TOOLS),
     );
   } catch (error) {
-    logger.error('Error selecting tools', error);
+    logger.error('Error selecting tools', { error });
     return;
   }
 }
