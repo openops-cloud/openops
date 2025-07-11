@@ -45,6 +45,7 @@ export const useAiAssistantChat = () => {
     maxSteps: 5,
     body: {
       chatId: openChatResponse?.chatId,
+      // messages: messages,
     },
     initialMessages: openChatResponse?.messages as Message[],
     initialInput: aiChatInput,

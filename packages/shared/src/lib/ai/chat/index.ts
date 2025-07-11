@@ -1,5 +1,27 @@
 import { Static, Type } from '@sinclair/typebox';
 
+// --- Content Part Types ---
+const TextPart = Type.Object({
+  type: Type.Literal('text'),
+  text: Type.String(),
+});
+
+const ToolCallPart = Type.Object({
+  type: Type.Literal('tool-call'),
+  toolCallId: Type.String(),
+  toolName: Type.String(),
+  args: Type.Any(),
+});
+
+const ToolResultPart = Type.Object({
+  type: Type.Literal('tool-result'),
+  toolCallId: Type.String(),
+  toolName: Type.String(),
+  result: Type.Any(),
+});
+
+const MessageContentPart = Type.Union([TextPart, ToolCallPart, ToolResultPart]);
+
 export const OpenChatRequest = Type.Object({
   workflowId: Type.String(),
   blockName: Type.String(),
@@ -19,15 +41,7 @@ export const OpenChatResponse = Type.Object({
     Type.Array(
       Type.Object({
         role: Type.String(),
-        content: Type.Union([
-          Type.String(),
-          Type.Array(
-            Type.Object({
-              type: Type.Literal('text'),
-              text: Type.String(),
-            }),
-          ),
-        ]),
+        content: Type.Array(MessageContentPart),
       }),
     ),
   ),
@@ -58,7 +72,12 @@ export type ChatFlowContext = Static<typeof ChatFlowContext>;
 
 export const NewMessageRequest = Type.Object({
   chatId: Type.String(),
-  message: Type.String(),
+  messages: Type.Array(
+    Type.Object({
+      role: Type.String(),
+      content: Type.Array(MessageContentPart),
+    }),
+  ),
   additionalContext: Type.Optional(ChatFlowContext),
 });
 

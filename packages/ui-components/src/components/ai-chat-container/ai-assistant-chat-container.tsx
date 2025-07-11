@@ -1,3 +1,4 @@
+// import { AssistantV2 } from '@/app/features/ai/assistant-v2';
 import { UseChatHelpers } from '@ai-sdk/react';
 import { t } from 'i18next';
 import { Bot } from 'lucide-react';
@@ -109,25 +110,25 @@ const AiAssistantChatContainer = ({
     scrollViewportRef,
   });
 
-  const height = dimensions.height ?? 0;
-  const lastMsgHeight = lastUserMessageRef.current?.offsetHeight ?? 0;
-  const currentBufferAreaHeight = streamingEndRef.current?.offsetHeight ?? 0;
-  const lastAssistantMsgHeight =
-    lastAssistantMessageRef?.current?.offsetHeight ?? 0;
+  // const height = dimensions.height ?? 0;
+  // const lastMsgHeight = lastUserMessageRef.current?.offsetHeight ?? 0;
+  // const currentBufferAreaHeight = streamingEndRef.current?.offsetHeight ?? 0;
+  // const lastAssistantMsgHeight =
+  //   lastAssistantMessageRef?.current?.offsetHeight ?? 0;
 
-  const hasNewMessage =
-    lastUserMessageIndex.current !== null &&
-    lastUserMessageIndex.current !== messages.length - 2;
+  // const hasNewMessage =
+  //   lastUserMessageIndex.current !== null &&
+  //   lastUserMessageIndex.current !== messages.length - 2;
 
-  const bufferAreaHeight = hasNewMessage
-    ? getBufferAreaHeight(
-        height,
-        currentBufferAreaHeight,
-        lastMsgHeight,
-        lastAssistantMsgHeight,
-        status,
-      )
-    : 0;
+  // const bufferAreaHeight = hasNewMessage
+  //   ? getBufferAreaHeight(
+  //       height,
+  //       currentBufferAreaHeight,
+  //       lastMsgHeight,
+  //       lastAssistantMsgHeight,
+  //       status,
+  //     )
+  //   : 0;
 
   return (
     <div
@@ -162,7 +163,8 @@ const AiAssistantChatContainer = ({
         className="static p-0"
         scrollAreaClassName="pr-0"
       >
-        <div className="h-full flex flex-col">
+        {children}
+        {/* <div className="h-full flex flex-col">
           <div className="flex justify-between items-center px-4 py-2 gap-2 text-md dark:text-primary font-bold border-b border-gray-200">
             <div className="flex items-center gap-2">
               <div className="size-8 flex justify-center items-center bg-background bg-gradient-to-b from-ring/40 to-primary-200/40 rounded-xl">
@@ -233,7 +235,7 @@ const AiAssistantChatContainer = ({
               />
             </div>
           </div>
-        </div>
+        </div> */}
       </ResizableArea>
     </div>
   );

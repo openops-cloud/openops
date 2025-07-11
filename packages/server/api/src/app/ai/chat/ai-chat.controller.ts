@@ -10,6 +10,7 @@ import {
 } from '@openops/shared';
 import {
   CoreAssistantMessage,
+  CoreMessage,
   CoreToolMessage,
   pipeDataStreamToResponse,
   streamText,
@@ -72,12 +73,8 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
       const conversationResult = await getConversation(chatId);
       const llmConfigResult = await getLLMConfig(projectId);
 
-      conversationResult.messages.push({
-        role: 'user',
-        content: request.body.message,
-      });
-
-      const { chatContext, messages } = conversationResult;
+      const messages = request.body.messages as CoreMessage[];
+      const { chatContext } = conversationResult;
       const { aiConfig, languageModel } = llmConfigResult;
 
       pipeDataStreamToResponse(reply.raw, {
@@ -138,12 +135,8 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
       const conversationResult = await getConversation(chatId);
       const llmConfigResult = await getLLMConfig(projectId);
 
-      conversationResult.messages.push({
-        role: 'user',
-        content: request.body.message,
-      });
-
-      const { chatContext, messages } = conversationResult;
+      const messages = request.body.messages as CoreMessage[];
+      const { chatContext } = conversationResult;
       const { aiConfig, languageModel } = llmConfigResult;
 
       const enrichedContext = request.body.additionalContext
