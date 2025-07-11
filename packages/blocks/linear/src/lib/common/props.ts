@@ -2,6 +2,8 @@ import { LinearDocument } from '@linear/sdk';
 import { Property } from '@openops/blocks-framework';
 import { makeClient } from './client';
 
+const LABELS_PAGE_SIZE = 100;
+
 type PaginatedResponse<T> = {
   nodes: T[] | Promise<T[]>;
   pageInfo: {
@@ -129,7 +131,7 @@ export const props = {
               },
             },
             orderBy: LinearDocument.PaginationOrderBy.UpdatedAt,
-            first: 100,
+            first: LABELS_PAGE_SIZE,
             after: cursor,
           }),
         );
