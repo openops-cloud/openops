@@ -13,7 +13,13 @@ import React, { useMemo } from 'react';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
-import { FlagId, isNil, RunEnvironment } from '@openops/shared';
+import {
+  ActionType,
+  FlagId,
+  isNil,
+  RunEnvironment,
+  StepOutput,
+} from '@openops/shared';
 import { LeftSideBarType } from '../builder-types';
 
 import { useEffectOnce } from 'react-use';
@@ -50,15 +56,38 @@ const FlowRunDetails = React.memo(() => {
     ];
   });
 
-  const selectedStepOutput = useMemo(() => {
-    return run && selectedStep && run.steps
-      ? flowRunUtils.extractStepOutput(
-          selectedStep,
-          loopsIndexes,
-          run.steps,
-          flowVersion.trigger,
-        )
-      : null;
+  const selectedStepTestData = useMemo(() => {
+    const testData =
+      run && selectedStep && run.steps
+        ? flowRunUtils.extractStepOutput(
+            selectedStep,
+            loopsIndexes,
+            run.steps,
+            flowVersion.trigger,
+          )
+        : null;
+    if (
+      !testData ||
+      testData.type !== ActionType.LOOP_ON_ITEMS ||
+      !testData.output?.index ||
+      !testData.input ||
+      !selectedStep
+    ) {
+      return testData;
+    }
+    try {
+      return {
+        ...testData,
+        output: {
+          item: (testData.input as { items: any }).items?.[
+            loopsIndexes[selectedStep]
+          ],
+          index: loopsIndexes[selectedStep] + 1,
+        },
+      } as StepOutput;
+    } catch {
+      return testData;
+    }
   }, [run, selectedStep, loopsIndexes, flowVersion.trigger]);
 
   const message = getRunMessage(run, rententionDays);
@@ -122,12 +151,12 @@ const FlowRunDetails = React.memo(() => {
           )}
         </CardList>
       </ResizablePanel>
-      {selectedStepOutput && (
+      {selectedStepTestData && (
         <>
           <ResizableHandle withHandle={true} />
           <ResizablePanel defaultValue={25}>
             <FlowStepInputOutput
-              stepDetails={selectedStepOutput}
+              stepDetails={selectedStepTestData}
             ></FlowStepInputOutput>
           </ResizablePanel>
         </>
