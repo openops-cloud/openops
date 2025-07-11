@@ -2,6 +2,7 @@ import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { logger } from '@openops/server-shared';
 import {
   AiConfig,
+  ApplicationError,
   DeleteChatHistoryRequest,
   NewMessageRequest,
   OpenChatMCPRequest,
@@ -23,6 +24,7 @@ import {
   ToolResultPart,
   ToolSet,
 } from 'ai';
+import { FastifyReply } from 'fastify';
 import { StatusCodes } from 'http-status-codes';
 import {
   sendAiChatFailureEvent,
@@ -38,7 +40,6 @@ import {
   getChatHistory,
   getConversation,
   getLLMConfig,
-  handleError,
   MCPChatContext,
   saveChatHistory,
 } from './ai-chat.service';
@@ -495,4 +496,17 @@ export function hasToolProvider(
   return Object.values(tools ?? {}).some(
     (tool) => (tool as { toolProvider?: string }).toolProvider === provider,
   );
+}
+
+function handleError(
+  error: unknown,
+  reply: FastifyReply,
+  context?: string,
+): FastifyReply {
+  if (error instanceof ApplicationError) {
+    return reply.code(400).send({ message: error.message });
+  }
+
+  logger.error(`Failed to process ${context || 'request'} with error: `, error);
+  return reply.code(500).send({ message: 'Internal server error' });
 }

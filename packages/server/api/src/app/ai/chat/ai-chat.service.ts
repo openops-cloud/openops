@@ -4,11 +4,9 @@ import {
   distributedLock,
   encryptUtils,
   hashUtils,
-  logger,
 } from '@openops/server-shared';
 import { AiConfig, ApplicationError, ErrorCode } from '@openops/shared';
 import { CoreMessage, LanguageModel } from 'ai';
-import { FastifyReply } from 'fastify';
 import { aiConfigService } from '../config/ai-config.service';
 
 // Chat expiration time is 24 hour
@@ -188,16 +186,3 @@ export async function getConversation(
 
   return { chatContext, messages };
 }
-
-export const handleError = (
-  error: unknown,
-  reply: FastifyReply,
-  context?: string,
-): FastifyReply => {
-  if (error instanceof ApplicationError) {
-    return reply.code(400).send({ message: error.message });
-  }
-
-  logger.error(`Failed to process ${context || 'request'} with error: `, error);
-  return reply.code(500).send({ message: 'Internal server error' });
-};
