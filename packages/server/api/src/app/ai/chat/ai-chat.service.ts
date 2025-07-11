@@ -13,36 +13,35 @@ import { aiConfigService } from '../config/ai-config.service';
 const DEFAULT_EXPIRE_TIME = 86400;
 const LOCK_EXPIRE_TIME = 30000;
 
-const chatContextKey = (chatId: string): string => {
-  return `${chatId}:context`;
+const chatContextKey = (
+  chatId: string,
+  userId: string,
+  projectId: string,
+): string => {
+  return `${projectId}:${userId}:${chatId}:context`;
 };
 
-const chatHistoryKey = (chatId: string): string => {
-  return `${chatId}:history`;
-};
-
-const chatHistoryContextKey = (chatId: string): string => {
-  return `${chatId}:context:history`;
+const chatHistoryKey = (
+  chatId: string,
+  userId: string,
+  projectId: string,
+): string => {
+  return `${projectId}:${userId}:${chatId}:history`;
 };
 
 export type MCPChatContext = {
-  chatId: string;
+  chatId?: string;
+  workflowId?: string;
+  blockName?: string;
+  stepName?: string;
+  actionName?: string;
 };
 
-export type ChatContext = {
-  workflowId: string;
-  blockName: string;
-  stepName: string;
-  actionName: string;
-};
-
-export const generateChatId = (params: {
-  workflowId: string;
-  blockName: string;
-  stepName: string;
-  actionName: string;
-  userId: string;
-}): string => {
+export const generateChatId = (
+  params: MCPChatContext & {
+    userId: string;
+  },
+): string => {
   return hashUtils.hashObject({
     workflowId: params.workflowId,
     blockName: params.blockName,
@@ -64,10 +63,12 @@ export const generateChatIdForMCP = (params: {
 
 export const createChatContext = async (
   chatId: string,
-  context: ChatContext | MCPChatContext,
+  userId: string,
+  projectId: string,
+  context: MCPChatContext,
 ): Promise<void> => {
   await cacheWrapper.setSerializedObject(
-    chatContextKey(chatId),
+    chatContextKey(chatId, userId, projectId),
     context,
     DEFAULT_EXPIRE_TIME,
   );
@@ -75,15 +76,21 @@ export const createChatContext = async (
 
 export const getChatContext = async (
   chatId: string,
-): Promise<ChatContext | null> => {
-  return cacheWrapper.getSerializedObject(chatContextKey(chatId));
+  userId: string,
+  projectId: string,
+): Promise<MCPChatContext | null> => {
+  return cacheWrapper.getSerializedObject(
+    chatContextKey(chatId, userId, projectId),
+  );
 };
 
 export const getChatHistory = async (
   chatId: string,
+  userId: string,
+  projectId: string,
 ): Promise<CoreMessage[]> => {
   const messages = await cacheWrapper.getSerializedObject<CoreMessage[]>(
-    chatHistoryKey(chatId),
+    chatHistoryKey(chatId, userId, projectId),
   );
 
   return messages ?? [];
@@ -91,10 +98,12 @@ export const getChatHistory = async (
 
 export const saveChatHistory = async (
   chatId: string,
+  userId: string,
+  projectId: string,
   messages: CoreMessage[],
 ): Promise<void> => {
   await cacheWrapper.setSerializedObject(
-    chatHistoryKey(chatId),
+    chatHistoryKey(chatId, userId, projectId),
     messages,
     DEFAULT_EXPIRE_TIME,
   );
@@ -102,75 +111,32 @@ export const saveChatHistory = async (
 
 export const appendMessagesToChatHistory = async (
   chatId: string,
+  userId: string,
+  projectId: string,
   messages: CoreMessage[],
 ): Promise<void> => {
   const chatLock = await distributedLock.acquireLock({
-    key: `lock:${chatHistoryKey(chatId)}`,
+    key: `lock:${chatHistoryKey(chatId, userId, projectId)}`,
     timeout: LOCK_EXPIRE_TIME,
   });
 
   try {
-    const existingMessages = await getChatHistory(chatId);
+    const existingMessages = await getChatHistory(chatId, userId, projectId);
 
     existingMessages.push(...messages);
 
-    await saveChatHistory(chatId, existingMessages);
+    await saveChatHistory(chatId, userId, projectId, existingMessages);
   } finally {
     await chatLock.release();
   }
 };
 
-export const deleteChatHistory = async (chatId: string): Promise<void> => {
-  await cacheWrapper.deleteKey(chatHistoryKey(chatId));
-};
-
-export const getChatHistoryContext = async (
+export const deleteChatHistory = async (
   chatId: string,
-): Promise<CoreMessage[]> => {
-  const messages = await cacheWrapper.getSerializedObject<CoreMessage[]>(
-    chatHistoryContextKey(chatId),
-  );
-
-  return messages ?? [];
-};
-
-export const saveChatHistoryContext = async (
-  chatId: string,
-  messages: CoreMessage[],
+  userId: string,
+  projectId: string,
 ): Promise<void> => {
-  await cacheWrapper.setSerializedObject(
-    chatHistoryContextKey(chatId),
-    messages,
-    DEFAULT_EXPIRE_TIME,
-  );
-};
-
-export async function appendMessagesToChatHistoryContext(
-  chatId: string,
-  newMessages: CoreMessage[],
-): Promise<CoreMessage[]> {
-  const historyLock = await distributedLock.acquireLock({
-    key: `lock:${chatHistoryContextKey(chatId)}`,
-    timeout: LOCK_EXPIRE_TIME,
-  });
-
-  try {
-    const existingMessages = await getChatHistoryContext(chatId);
-
-    existingMessages.push(...newMessages);
-
-    await saveChatHistoryContext(chatId, existingMessages);
-
-    return existingMessages;
-  } finally {
-    await historyLock.release();
-  }
-}
-
-export const deleteChatHistoryContext = async (
-  chatId: string,
-): Promise<void> => {
-  await cacheWrapper.deleteKey(chatHistoryContextKey(chatId));
+  await cacheWrapper.deleteKey(chatHistoryKey(chatId, userId, projectId));
 };
 
 export async function getLLMConfig(
@@ -201,8 +167,10 @@ export async function getLLMConfig(
 
 export async function getConversation(
   chatId: string,
-): Promise<{ chatContext: ChatContext; messages: CoreMessage[] }> {
-  const chatContext = await getChatContext(chatId);
+  userId: string,
+  projectId: string,
+): Promise<{ chatContext: MCPChatContext; messages: CoreMessage[] }> {
+  const chatContext = await getChatContext(chatId, userId, projectId);
   if (!chatContext) {
     throw new ApplicationError({
       code: ErrorCode.ENTITY_NOT_FOUND,
@@ -214,7 +182,7 @@ export async function getConversation(
     });
   }
 
-  const messages = await getChatHistory(chatId);
+  const messages = await getChatHistory(chatId, userId, projectId);
 
   return { chatContext, messages };
 }

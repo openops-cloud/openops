@@ -8,7 +8,7 @@ export const aiChatApi = {
     stepName: string,
     actionName: string,
   ) {
-    return api.post<OpenChatResponse>('/v1/ai/chat/open', {
+    return api.post<OpenChatResponse>('/v1/ai/conversation/open', {
       workflowId,
       blockName,
       stepName,
@@ -16,6 +16,6 @@ export const aiChatApi = {
     });
   },
   delete(chatId: string) {
-    return api.delete<void>(`/v1/ai/chat/conversation/${chatId}`);
+    return api.delete<void>(`/v1/ai/conversation/${chatId}`);
   },
 };

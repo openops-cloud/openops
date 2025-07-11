@@ -1,8 +1,8 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { getAiProviderLanguageModel } from '@openops/common';
-import { encryptUtils, logger } from '@openops/server-shared';
+import { logger } from '@openops/server-shared';
 import {
   AiConfig,
+  ApplicationError,
   DeleteChatHistoryRequest,
   NewMessageRequest,
   OpenChatMCPRequest,
@@ -24,23 +24,29 @@ import {
   ToolResultPart,
   ToolSet,
 } from 'ai';
+import { FastifyReply } from 'fastify';
 import { StatusCodes } from 'http-status-codes';
 import {
   sendAiChatFailureEvent,
   sendAiChatMessageSendEvent,
 } from '../../telemetry/event-models/ai';
-import { aiConfigService } from '../config/ai-config.service';
 import { getMCPTools } from '../mcp/mcp-tools';
 import {
   createChatContext,
   deleteChatHistory,
+  generateChatId,
   generateChatIdForMCP,
   getChatContext,
   getChatHistory,
+  getConversation,
+  getLLMConfig,
+  MCPChatContext,
   saveChatHistory,
 } from './ai-chat.service';
 import { generateMessageId } from './ai-message-id-generator';
-import { getMcpSystemPrompt } from './prompts.service';
+import { streamCode } from './code.service';
+import { enrichContext } from './context-enrichment.service';
+import { getBlockSystemPrompt, getMcpSystemPrompt } from './prompts.service';
 import { selectRelevantTools } from './tools.service';
 
 const MAX_RECURSION_DEPTH = 10;
@@ -50,26 +56,64 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
     OpenChatOptions,
     async (request, reply): Promise<OpenChatResponse> => {
       const { chatId: inputChatId } = request.body;
-      const { id: userId } = request.principal;
+      const { id: userId, projectId } = request.principal;
 
       if (inputChatId) {
-        const existingContext = await getChatContext(inputChatId);
+        const existingContext = await getChatContext(
+          inputChatId,
+          userId,
+          projectId,
+        );
 
         if (existingContext) {
-          const messages = await getChatHistory(inputChatId);
+          const messages = await getChatHistory(inputChatId, userId, projectId);
           return reply.code(200).send({
             chatId: inputChatId,
             messages,
           });
         }
+      } else if (
+        request.body.workflowId &&
+        request.body.blockName &&
+        request.body.stepName &&
+        request.body.actionName
+      ) {
+        const context: MCPChatContext = {
+          workflowId: request.body.workflowId,
+          blockName: request.body.blockName,
+          stepName: request.body.stepName,
+          actionName: request.body.actionName,
+        };
+
+        const chatId = generateChatId({
+          ...context,
+          userId,
+        });
+
+        const messages = await getChatHistory(chatId, userId, projectId);
+
+        if (messages.length === 0) {
+          await createChatContext(chatId, userId, projectId, context);
+        }
+
+        return reply.code(200).send({
+          chatId,
+          messages,
+        });
       }
 
       const newChatId = openOpsId();
-      const chatId = generateChatIdForMCP({ chatId: newChatId, userId });
-      const chatContext = { chatId: newChatId };
+      const chatId = generateChatIdForMCP({
+        chatId: newChatId,
+        userId,
+      });
+      const chatContext = {
+        ...request.body,
+        chatId: newChatId,
+      };
 
-      await createChatContext(chatId, chatContext);
-      const messages = await getChatHistory(chatId);
+      await createChatContext(chatId, userId, projectId, chatContext);
+      const messages = await getChatHistory(chatId, userId, projectId);
 
       return reply.code(200).send({
         chatId,
@@ -80,121 +124,172 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
   app.post('/', NewMessageOptions, async (request, reply) => {
     const chatId = request.body.chatId;
     const projectId = request.principal.projectId;
-    const chatContext = await getChatContext(chatId);
-    if (!chatContext) {
-      return reply
-        .code(404)
-        .send('No chat session found for the provided chat ID.');
-    }
+    const userId = request.principal.id;
 
-    const aiConfig = await aiConfigService.getActiveConfigWithApiKey(projectId);
-    if (!aiConfig) {
-      return reply
-        .code(404)
-        .send('No active AI configuration found for the project.');
-    }
+    try {
+      const conversationResult = await getConversation(
+        chatId,
+        userId,
+        projectId,
+      );
+      const llmConfigResult = await getLLMConfig(projectId);
 
-    const apiKey = encryptUtils.decryptString(JSON.parse(aiConfig.apiKey));
-    const languageModel = await getAiProviderLanguageModel({
-      apiKey,
-      model: aiConfig.model,
-      provider: aiConfig.provider,
-      providerSettings: aiConfig.providerSettings,
-    });
+      conversationResult.messages.push({
+        role: 'user',
+        content: request.body.message,
+      });
 
-    const messages = await getChatHistory(chatId);
-    messages.push({
-      role: 'user',
-      content: request.body.message,
-    });
+      const { chatContext, messages } = conversationResult;
+      const { aiConfig, languageModel } = llmConfigResult;
 
-    const { mcpClients, tools } = await getMCPTools(
-      app,
-      request.headers.authorization?.replace('Bearer ', '') ?? '',
-      projectId,
-    );
+      let systemPrompt;
+      let mcpClients: unknown[] = [];
+      let relevantTools: ToolSet | undefined;
 
-    const filteredTools = await selectRelevantTools({
-      messages,
-      tools,
-      languageModel,
-      aiConfig,
-    });
-
-    const isAwsCostMcpDisabled =
-      !hasToolProvider(tools, 'cost-analysis') &&
-      !hasToolProvider(tools, 'cost-explorer');
-
-    const isAnalyticsLoaded = hasToolProvider(filteredTools, 'superset');
-    const isTablesLoaded = hasToolProvider(filteredTools, 'tables');
-    const isOpenOpsMCPEnabled = hasToolProvider(filteredTools, 'openops');
-
-    const systemPrompt = await getMcpSystemPrompt({
-      isAnalyticsLoaded,
-      isTablesLoaded,
-      isOpenOpsMCPEnabled,
-      isAwsCostMcpDisabled,
-    });
-
-    pipeDataStreamToResponse(reply.raw, {
-      execute: async (dataStreamWriter) => {
-        logger.debug('Send user message to LLM.');
-        await streamMessages(
-          dataStreamWriter,
-          languageModel,
-          systemPrompt,
-          aiConfig,
-          messages,
-          chatId,
-          mcpClients,
-          {
-            ...filteredTools,
-            ...(isOpenOpsMCPEnabled
-              ? collectToolsByProvider(tools, 'openops')
-              : {}),
-          },
-        );
-      },
-
-      onError: (error) => {
-        const message = error instanceof Error ? error.message : String(error);
-        sendAiChatFailureEvent({
+      if (
+        !chatContext.actionName ||
+        !chatContext.blockName ||
+        !chatContext.stepName ||
+        !chatContext.workflowId
+      ) {
+        const toolSet = await getMCPTools(
+          app,
+          request.headers.authorization?.replace('Bearer ', '') ?? '',
           projectId,
-          userId: request.principal.id,
-          chatId,
-          errorMessage: message,
-          provider: aiConfig.provider,
-          model: aiConfig.model,
+        );
+
+        mcpClients = toolSet.mcpClients;
+        mcpClients = toolSet.mcpClients;
+
+        const filteredTools = await selectRelevantTools({
+          messages,
+          tools: toolSet.tools,
+          languageModel,
+          aiConfig,
         });
 
-        endStreamWithErrorMessage(reply.raw, message);
-        closeMCPClients(mcpClients).catch((e) =>
-          logger.warn('Failed to close mcp client.', e),
-        );
-        logger.warn(message, error);
-        return message;
-      },
-    });
+        const isAwsCostMcpDisabled =
+          !hasToolProvider(toolSet.tools, 'cost-analysis') &&
+          !hasToolProvider(toolSet.tools, 'cost-explorer');
 
-    sendAiChatMessageSendEvent({
-      projectId,
-      userId: request.principal.id,
-      chatId,
-      provider: aiConfig.provider,
-    });
+        const isAnalyticsLoaded = hasToolProvider(filteredTools, 'superset');
+        const isTablesLoaded = hasToolProvider(filteredTools, 'tables');
+        const isOpenOpsMCPEnabled = hasToolProvider(filteredTools, 'openops');
+
+        relevantTools = {
+          ...filteredTools,
+          ...(isOpenOpsMCPEnabled
+            ? collectToolsByProvider(toolSet.tools, 'openops')
+            : {}),
+        };
+
+        systemPrompt = await getMcpSystemPrompt({
+          isAnalyticsLoaded,
+          isTablesLoaded,
+          isOpenOpsMCPEnabled,
+          isAwsCostMcpDisabled,
+        });
+      } else {
+        systemPrompt = await getBlockSystemPrompt(chatContext);
+      }
+
+      pipeDataStreamToResponse(reply.raw, {
+        execute: async (dataStreamWriter) => {
+          logger.debug('Send user message to LLM.');
+          await streamMessages(
+            dataStreamWriter,
+            languageModel,
+            systemPrompt,
+            aiConfig,
+            messages,
+            chatId,
+            mcpClients,
+            userId,
+            projectId,
+            relevantTools,
+          );
+        },
+
+        onError: (error) => {
+          const message =
+            error instanceof Error ? error.message : String(error);
+          sendAiChatFailureEvent({
+            projectId,
+            userId: request.principal.id,
+            chatId,
+            errorMessage: message,
+            provider: aiConfig.provider,
+            model: aiConfig.model,
+          });
+
+          endStreamWithErrorMessage(reply.raw, message);
+          closeMCPClients(mcpClients).catch((e) =>
+            logger.warn('Failed to close mcp client.', e),
+          );
+          logger.warn(message, error);
+          return message;
+        },
+      });
+
+      sendAiChatMessageSendEvent({
+        projectId,
+        userId: request.principal.id,
+        chatId,
+        provider: aiConfig.provider,
+      });
+    } catch (error) {
+      return handleError(error, reply, 'conversation');
+    }
+  });
+
+  app.post('/code', CodeGenerationOptions, async (request, reply) => {
+    const chatId = request.body.chatId;
+    const projectId = request.principal.projectId;
+    const userId = request.principal.id;
+
+    try {
+      const conversationResult = await getConversation(
+        chatId,
+        userId,
+        projectId,
+      );
+      const llmConfigResult = await getLLMConfig(projectId);
+
+      conversationResult.messages.push({
+        role: 'user',
+        content: request.body.message,
+      });
+
+      const { chatContext, messages } = conversationResult;
+      const { aiConfig, languageModel } = llmConfigResult;
+
+      const enrichedContext = request.body.additionalContext
+        ? await enrichContext(request.body.additionalContext, projectId)
+        : undefined;
+
+      const result = streamCode({
+        messages,
+        languageModel,
+        aiConfig,
+        systemPrompt: await getBlockSystemPrompt(chatContext, enrichedContext),
+      });
+
+      return result.toTextStreamResponse();
+    } catch (error) {
+      return handleError(error, reply, 'code generation');
+    }
   });
 
   app.delete('/:chatId', DeleteChatOptions, async (request, reply) => {
     const { chatId } = request.params;
+    const userId = request.principal.id;
+    const projectId = request.principal.projectId;
 
     try {
-      await deleteChatHistory(chatId);
+      await deleteChatHistory(chatId, userId, projectId);
       return await reply.code(StatusCodes.OK).send();
     } catch (error) {
-      logger.error('Failed to delete chat history with error: ', { error });
-      return reply.code(StatusCodes.INTERNAL_SERVER_ERROR).send({
-        message: 'Failed to delete chat history',
-      });
+      return handleError(error, reply, 'delete chat history');
     }
   });
 };
@@ -223,6 +318,18 @@ const NewMessageOptions = {
   },
 };
 
+const CodeGenerationOptions = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
+  },
+  schema: {
+    tags: ['ai', 'ai-chat'],
+    description:
+      "Generate code based on the user's request. This endpoint processes the user message and generates a code response using the configured language model.",
+    body: NewMessageRequest,
+  },
+};
+
 const DeleteChatOptions = {
   config: {
     allowedPrincipals: [PrincipalType.USER],
@@ -243,6 +350,8 @@ async function streamMessages(
   messages: CoreMessage[],
   chatId: string,
   mcpClients: unknown[],
+  userId: string,
+  projectId: string,
   tools?: ToolSet,
 ): Promise<void> {
   let stepCount = 0;
@@ -276,7 +385,7 @@ async function streamMessages(
         filteredMessages.push(getResponseObject(r));
       });
 
-      await saveChatHistory(chatId, filteredMessages);
+      await saveChatHistory(chatId, userId, projectId, filteredMessages);
       await closeMCPClients(mcpClients);
     },
   });
@@ -387,4 +496,17 @@ export function hasToolProvider(
   return Object.values(tools ?? {}).some(
     (tool) => (tool as { toolProvider?: string }).toolProvider === provider,
   );
+}
+
+function handleError(
+  error: unknown,
+  reply: FastifyReply,
+  context?: string,
+): FastifyReply {
+  if (error instanceof ApplicationError) {
+    return reply.code(400).send({ message: error.message });
+  }
+
+  logger.error(`Failed to process ${context || 'request'} with error: `, error);
+  return reply.code(500).send({ message: 'Internal server error' });
 }
