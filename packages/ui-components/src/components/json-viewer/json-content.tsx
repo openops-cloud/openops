@@ -54,6 +54,7 @@ export const JsonContent = ({
                       readonly={false}
                       theme={theme}
                       containerClassName={editorClassName}
+                      height="100%"
                       onChange={(value) => {
                         field.onChange(tryParseJson(value));
                       }}

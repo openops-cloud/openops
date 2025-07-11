@@ -3,9 +3,10 @@ import { githubDark, githubLight } from '@uiw/codemirror-theme-github';
 import CodeMirror, {
   EditorState,
   EditorView,
+  Extension,
   ReactCodeMirrorRef,
 } from '@uiw/react-codemirror';
-import React, { RefObject, useRef } from 'react';
+import React, { RefObject, useMemo, useRef } from 'react';
 import { cn } from '../../lib/cn';
 
 const styleTheme = EditorView.baseTheme({
@@ -53,6 +54,9 @@ type CodeMirrorEditorProps = {
   containerClassName?: string;
   theme?: string;
   placeholder?: string;
+  languageExtensions?: Extension[];
+  height?: string;
+  showLineNumbers?: boolean;
 };
 
 const CodeMirrorEditor = React.memo(
@@ -65,15 +69,23 @@ const CodeMirrorEditor = React.memo(
     containerClassName,
     theme,
     placeholder,
+    languageExtensions,
+    height = '100%',
+    showLineNumbers = true,
   }: CodeMirrorEditorProps) => {
     const editorTheme = theme === 'dark' ? githubDark : githubLight;
-    const extensions = [
-      styleTheme,
-      EditorState.readOnly.of(readonly),
-      EditorView.editable.of(!readonly),
-      EditorView.lineWrapping,
-      json(),
-    ];
+
+    const extensions = useMemo(
+      () => [
+        styleTheme,
+        EditorState.readOnly.of(readonly),
+        EditorView.editable.of(!readonly),
+        EditorView.lineWrapping,
+        ...(languageExtensions || [json()]),
+      ],
+      [readonly, languageExtensions],
+    );
+
     const ref = useRef<ReactCodeMirrorRef>(null);
 
     return (
@@ -83,16 +95,17 @@ const CodeMirrorEditor = React.memo(
           value={convertToString(value)}
           placeholder={placeholder}
           className={cn('border-t', className)}
-          height="100%"
+          height={height}
           width="100%"
           maxWidth="100%"
           basicSetup={{
             foldGutter: readonly,
-            lineNumbers: true,
+            highlightActiveLineGutter: !readonly,
+            highlightActiveLine: !readonly,
+            lineNumbers: showLineNumbers,
             searchKeymap: false,
             lintKeymap: true,
             autocompletion: true,
-            highlightActiveLine: !readonly,
           }}
           indentWithTab={false}
           lang="json"
