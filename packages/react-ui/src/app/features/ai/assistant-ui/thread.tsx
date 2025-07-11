@@ -38,6 +38,7 @@ export const Thread: FC = () => {
             UserMessage: UserMessage,
             EditComposer: EditComposer,
             AssistantMessage: AssistantMessage,
+            ToolMessage: ToolMessage,
           }}
         />
 
@@ -86,22 +87,12 @@ const ThreadWelcomeSuggestions: FC = () => {
     <div className="mt-3 flex w-full items-stretch justify-center gap-4">
       <ThreadPrimitive.Suggestion
         className="hover:bg-muted/80 flex max-w-sm grow basis-0 flex-col items-center justify-center rounded-lg border p-3 transition-colors ease-in"
-        prompt="What is the weather in Tokyo?"
+        prompt="Let me see my first workflow"
         method="replace"
         autoSend
       >
         <span className="line-clamp-2 text-ellipsis text-sm font-semibold">
-          What is the weather in Tokyo?
-        </span>
-      </ThreadPrimitive.Suggestion>
-      <ThreadPrimitive.Suggestion
-        className="hover:bg-muted/80 flex max-w-sm grow basis-0 flex-col items-center justify-center rounded-lg border p-3 transition-colors ease-in"
-        prompt="What is assistant-ui?"
-        method="replace"
-        autoSend
-      >
-        <span className="line-clamp-2 text-ellipsis text-sm font-semibold">
-          What is assistant-ui?
+          Let me see my first workflow
         </span>
       </ThreadPrimitive.Suggestion>
     </div>
@@ -161,6 +152,15 @@ const UserMessage: FC = () => {
       </div>
 
       <BranchPicker className="col-span-full col-start-1 row-start-3 -mr-1 justify-end" />
+    </MessagePrimitive.Root>
+  );
+};
+
+const ToolMessage: FC<{ message: any }> = ({ message }) => {
+  // You can use your ToolFallback or create a more advanced UI
+  return (
+    <MessagePrimitive.Root className="w-full max-w-[var(--thread-max-width)] py-4">
+      <ToolFallback {...message.content?.[0]?.result} />
     </MessagePrimitive.Root>
   );
 };

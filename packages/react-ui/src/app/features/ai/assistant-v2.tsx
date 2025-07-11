@@ -33,6 +33,10 @@ export const AssistantV2 = () => {
     }
   };
 
+  const initialMessages: ThreadMessageLike[] = (
+    openChatResponse?.messages ?? []
+  ).filter((msg) => msg.role !== 'tool') as ThreadMessageLike[];
+
   const runtime = useChatRuntime({
     api: '/api/v1/ai/conversation',
     headers: {
@@ -41,7 +45,7 @@ export const AssistantV2 = () => {
     body: {
       chatId: openChatResponse?.chatId,
     },
-    initialMessages: openChatResponse?.messages as ThreadMessageLike[],
+    initialMessages,
   });
 
   return (

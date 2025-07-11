@@ -1,6 +1,7 @@
 export const AIChatMessageRole = {
   user: 'user',
   assistant: 'assistant',
+  tool: 'tool',
 } as const;
 
 export type AIChatMessage = {
