@@ -21,7 +21,7 @@ type JsonContentProps = {
   isEditMode: boolean;
   json: any;
   form: UseFormReturn<JsonFormValues>;
-  theme?: string;
+  theme: string;
   validateJson?: (value: string) => { valid: boolean; message?: string };
   editorClassName?: string;
 };

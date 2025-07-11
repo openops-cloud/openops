@@ -77,7 +77,36 @@ const getLanguageExtensionForCode = (className?: string): Extension[] => {
   return [];
 };
 
-const LanguageUrl = ({ content }: { content: string }) => {
+const CodeViewer = ({
+  content,
+  theme,
+  className,
+}: {
+  content: string;
+  theme: string;
+  className?: string;
+}) => {
+  return (
+    <CodeMirrorEditor
+      value={content}
+      readonly={true}
+      showLineNumbers={false}
+      height="auto"
+      className="border border-solid rounded"
+      containerClassName="h-auto"
+      theme={theme}
+      languageExtensions={getLanguageExtensionForCode(className)}
+    />
+  );
+};
+
+const LanguageUrl = ({
+  content,
+  theme,
+}: {
+  content: string;
+  theme: string;
+}) => {
   if (
     validator.isURL(content, {
       require_protocol: true,
@@ -99,16 +128,7 @@ const LanguageUrl = ({ content }: { content: string }) => {
     );
   }
 
-  return (
-    <CodeMirrorEditor
-      value={content}
-      readonly={true}
-      showLineNumbers={false}
-      height="auto"
-      className="border border-solid rounded"
-      containerClassName="h-auto"
-    />
-  );
+  return <CodeViewer content={content} theme={theme} />;
 };
 
 /*
@@ -191,27 +211,16 @@ const Markdown = React.memo(
               }
 
               const codeContent = String(props.children).trim();
-              const languageExtensions = getLanguageExtensionForCode(
-                props.className,
-              );
 
               return (
                 <div className="relative py-2 w-full">
                   {isLanguageUrl ? (
-                    <LanguageUrl content={codeContent} />
+                    <LanguageUrl content={codeContent} theme={theme} />
                   ) : (
-                    <CodeMirrorEditor
-                      value={codeContent}
-                      readonly={true}
-                      showLineNumbers={multilineVariation}
-                      height="auto"
-                      className={cn(
-                        'border border-solid rounded-lg overflow-hidden',
-                        multilineVariation ? '' : 'border border-solid rounded',
-                      )}
-                      containerClassName="h-auto"
-                      languageExtensions={languageExtensions}
+                    <CodeViewer
+                      content={codeContent}
                       theme={theme}
+                      className={props.className}
                     />
                   )}
                   {codeVariation === MarkdownCodeVariations.WithCopy && (
