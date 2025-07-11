@@ -52,7 +52,7 @@ type CodeMirrorEditorProps = {
   onChange?: (value: string) => void;
   className?: string;
   containerClassName?: string;
-  theme?: string;
+  theme: string;
   placeholder?: string;
   languageExtensions?: Extension[];
   height?: string;
