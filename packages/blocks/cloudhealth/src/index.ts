@@ -1,8 +1,11 @@
 import { createCustomApiCallAction } from '@openops/blocks-common';
 import { createBlock, Property } from '@openops/blocks-framework';
 import { BlockCategory } from '@openops/shared';
+import { getAssetMetadataAction } from './lib/actions/get-asset-metadata-action';
+import { getRecommendationsAction } from './lib/actions/get-recommendations-action';
+import { graphqlAction } from './lib/actions/graphql-action';
 import { cloudhealthAuth } from './lib/auth';
-import { graphqlAction } from './lib/graphql-action';
+import { BASE_CH_URL } from './lib/common/base-url';
 
 export const cloudhealth = createBlock({
   displayName: 'CloudHealth',
@@ -12,8 +15,11 @@ export const cloudhealth = createBlock({
   authors: [],
   categories: [BlockCategory.FINOPS],
   actions: [
+    getRecommendationsAction,
+    getAssetMetadataAction,
+
     createCustomApiCallAction({
-      baseUrl: () => 'https://chapi.cloudhealthtech.com/v1',
+      baseUrl: () => `${BASE_CH_URL}/`,
       auth: cloudhealthAuth,
       additionalProps: {
         documentation: Property.MarkDown({
@@ -25,7 +31,7 @@ export const cloudhealth = createBlock({
         Authorization: `Bearer ${context.auth as string}`,
         'Content-Type': 'application/json',
       }),
-      description: 'Make a custom REST API call to CloudHealth',
+      description: 'Make a custom REST API call',
       displayName: 'Custom REST API Call',
       name: 'custom_rest_api_call',
     }),
