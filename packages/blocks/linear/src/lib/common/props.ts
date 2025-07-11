@@ -102,18 +102,25 @@ export const props = {
       description: 'Labels for the Issue',
       displayName: 'Labels',
       required,
-      refreshers: ['auth'],
-      options: async ({ auth }) => {
-        if (!auth) {
+      refreshers: ['auth', 'team_id'],
+      options: async ({ auth, team_id }) => {
+        if (!auth || !team_id) {
           return {
             disabled: true,
-            placeholder: 'connect your account first',
+            placeholder: 'connect your account first and select team',
             options: [],
           };
         }
         const client = makeClient(auth as string);
         const allLabels = await fetchAllPaginatedItems((cursor) =>
           client.listIssueLabels({
+            filter: {
+              team: {
+                id: {
+                  eq: team_id as string,
+                },
+              },
+            },
             orderBy: LinearDocument.PaginationOrderBy.UpdatedAt,
             first: 100,
             after: cursor,
