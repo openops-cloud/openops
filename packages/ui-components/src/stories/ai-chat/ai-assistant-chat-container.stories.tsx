@@ -181,6 +181,8 @@ export const WithMessages: Story = {
           codeVariation={MarkdownCodeVariations.WithCopyMultiline}
           lastUserMessageRef={lastUserMessageRef}
           lastAssistantMessageRef={lastAssistantMessageRef}
+          // todo -> get theme from container
+          theme="light"
         />
       </AiAssistantChatContainer>
     );
@@ -224,6 +226,8 @@ export const WithMessagesCopyAndInject: Story = {
           codeVariation={MarkdownCodeVariations.WithCopyAndInject}
           lastUserMessageRef={lastUserMessageRef}
           lastAssistantMessageRef={lastAssistantMessageRef}
+          // todo -> get theme from container
+          theme="light"
         />
       </AiAssistantChatContainer>
     );
@@ -276,6 +280,8 @@ export const WithScopeSelector: Story = {
           codeVariation={MarkdownCodeVariations.WithCopyAndInject}
           lastUserMessageRef={lastUserMessageRef}
           lastAssistantMessageRef={lastAssistantMessageRef}
+          // todo -> get theme from container
+          theme="light"
         />
       </AiAssistantChatContainer>
     );
@@ -338,6 +344,8 @@ export const WithPreselectedScopeItems: Story = {
           codeVariation={MarkdownCodeVariations.WithCopyAndInject}
           lastUserMessageRef={lastUserMessageRef}
           lastAssistantMessageRef={lastAssistantMessageRef}
+          // todo -> get theme from container
+          theme="light"
         />
       </AiAssistantChatContainer>
     );

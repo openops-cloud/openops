@@ -164,6 +164,8 @@ export const Populated: Story = {
             messages={sampleAIChatMessages}
             onInject={action('Inject command')}
             codeVariation={MarkdownCodeVariations.WithCopyAndInject}
+            // todo -> get theme from container
+            theme={'light'}
           />
         </StepSettingsAiChatContainer>
       </>

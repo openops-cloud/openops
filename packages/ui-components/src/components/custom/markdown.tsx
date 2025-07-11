@@ -36,7 +36,7 @@ type MarkdownProps = {
   linkClassName?: string;
   codeVariation?: CodeVariations;
   handleInject?: (codeContent: string) => void;
-  theme?: string;
+  theme: string;
 };
 
 const Container = ({

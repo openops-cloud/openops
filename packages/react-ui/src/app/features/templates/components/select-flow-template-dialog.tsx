@@ -225,6 +225,7 @@ const SelectFlowTemplateDialogContent = ({
   handleTemplateSelect,
   onSearchInputChange,
 }: SelectFlowTemplateDialogContentProps) => {
+  const { theme } = useTheme();
   const ownerLogoUrl = useOwnerLogoUrl();
   const { isConnectedToCloudTemplates } = useCloudProfile();
   const { createPollingInterval } = useUserInfoPolling();
@@ -291,6 +292,7 @@ const SelectFlowTemplateDialogContent = ({
             useTemplate={useTemplate}
             expandPreview={expandPreview}
             ownerLogoUrl={ownerLogoUrl}
+            theme={theme}
           />
         ) : (
           <FlowTemplateList

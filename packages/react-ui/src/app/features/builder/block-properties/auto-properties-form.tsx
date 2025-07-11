@@ -94,7 +94,7 @@ type selectFormComponentForPropertyParams = {
   markdownVariables: Record<string, string>;
   useMentionTextInput: boolean;
   disabled: boolean;
-  theme?: string;
+  theme: string;
 };
 
 const selectFormComponentForProperty = ({
@@ -172,6 +172,7 @@ const selectFormComponentForProperty = ({
           markdown={property.description}
           variables={markdownVariables}
           codeVariation={MarkdownCodeVariations.WithCopyMultiline}
+          theme={theme}
         />
       );
     case PropertyType.STATIC_DROPDOWN:

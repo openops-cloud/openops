@@ -9,6 +9,7 @@ type AIChatMessagesProps = {
   codeVariation?: MarkdownCodeVariations;
   lastUserMessageRef?: React.RefObject<HTMLDivElement>;
   lastAssistantMessageRef?: React.RefObject<HTMLDivElement>;
+  theme: string;
 };
 
 const AIChatMessages = forwardRef<HTMLDivElement, AIChatMessagesProps>(
@@ -19,6 +20,7 @@ const AIChatMessages = forwardRef<HTMLDivElement, AIChatMessagesProps>(
       codeVariation = MarkdownCodeVariations.WithCopyMultiline,
       lastUserMessageRef,
       lastAssistantMessageRef,
+      theme,
     },
     ref,
   ) => {
@@ -60,6 +62,7 @@ const AIChatMessages = forwardRef<HTMLDivElement, AIChatMessagesProps>(
             onInject={onInject}
             codeVariation={codeVariation}
             ref={getMessageRef(index, message.role)}
+            theme={theme}
           />
         ))}
       </div>
@@ -73,8 +76,9 @@ const Message = forwardRef<
     message: AIChatMessage;
     onInject?: (code: string) => void;
     codeVariation: MarkdownCodeVariations;
+    theme: string;
   }
->(({ message, onInject, codeVariation }, ref) => {
+>(({ message, onInject, codeVariation, theme }, ref) => {
   const isUser = message.role === AIChatMessageRole.user;
 
   if (!isUser) {
@@ -84,6 +88,7 @@ const Message = forwardRef<
           content={message.content}
           onInject={onInject}
           codeVariation={codeVariation}
+          theme={theme}
         />
       </div>
     );
@@ -101,6 +106,7 @@ const Message = forwardRef<
         content={message.content}
         onInject={onInject}
         codeVariation={codeVariation}
+        theme={theme}
       />
     </div>
   );
@@ -112,10 +118,12 @@ const MessageContent = ({
   content,
   onInject,
   codeVariation,
+  theme,
 }: {
   content: string;
   onInject?: (code: string) => void;
   codeVariation: MarkdownCodeVariations;
+  theme: string;
 }) => (
   <Markdown
     markdown={content}
@@ -124,6 +132,7 @@ const MessageContent = ({
     handleInject={onInject}
     textClassName="text-sm"
     linkClassName="text-sm"
+    theme={theme}
   />
 );
 
