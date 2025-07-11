@@ -104,10 +104,17 @@ export const props = {
       required,
       refreshers: ['auth', 'team_id'],
       options: async ({ auth, team_id }) => {
-        if (!auth || !team_id) {
+        if (!auth) {
           return {
             disabled: true,
-            placeholder: 'connect your account first and select team',
+            placeholder: 'Connect your account first',
+            options: [],
+          };
+        }
+        if (!team_id) {
+          return {
+            disabled: true,
+            placeholder: 'Select a team to load labels',
             options: [],
           };
         }
