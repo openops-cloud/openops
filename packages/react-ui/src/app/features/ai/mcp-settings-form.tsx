@@ -104,12 +104,11 @@ const McpSettingsForm = ({
                   id="aws-cost-enabled"
                   checked={field.value}
                   onCheckedChange={field.onChange}
-                  className="rounded-[3px] data-[state=checked]:!bg-primary-200 data-[state=checked]:!border-primary-200"
+                  className="flex items-center justify-center rounded-[3px] mt-1 data-[state=checked]:!bg-primary-200 data-[state=checked]:!border-primary-200 w-3 h-3 [&_svg]:w-3 [&_svg]:h-3"
                 />
                 <Label
-                  htmlFor="awsCost.enabled"
-                  className="text-base mt-0 whitespace-nowrap font-normal"
-                  style={{ marginTop: '0rem' }}
+                  htmlFor="aws-cost-enabled"
+                  className="text-sm !mt-1 whitespace-nowrap font-normal"
                 >
                   {t('AWS Cost')}
                 </Label>
@@ -140,12 +139,10 @@ const McpSettingsForm = ({
               <FormItem className="flex gap-8 items-center w-full">
                 <Label
                   htmlFor="awsCost.connectionName"
-                  className="text-base font-normal"
+                  className="text-sm font-normal mt-1"
                 >
                   {t('Connection')}
-                  {awsCost?.enabled && (
-                    <span className="text-destructive">*</span>
-                  )}
+                  <span className="text-destructive">*</span>
                 </Label>
                 <SearchableSelect
                   loading={isAwsConnectionsLoading}
