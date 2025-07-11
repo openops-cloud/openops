@@ -5,6 +5,10 @@ import { IAxiosRetryConfig } from 'axios-retry';
 import { StatusCodes } from 'http-status-codes';
 import { makeHttpRequest } from '../axios-wrapper';
 
+const RETRY_DELAY_MS = 1000;
+
+export { RETRY_DELAY_MS };
+
 export function createAxiosHeaders(token: string): AxiosHeaders {
   return new AxiosHeaders({
     'Content-Type': 'application/json',
@@ -12,18 +16,38 @@ export function createAxiosHeaders(token: string): AxiosHeaders {
   });
 }
 
+const calculateRetryDelayMs = (retryCount: number) =>
+  retryCount * RETRY_DELAY_MS;
+
 export const axiosTablesSeedRetryConfig: IAxiosRetryConfig = {
   retries: 3,
   retryDelay: (retryCount: number) => {
     logger.debug(
       `The request failed due to a conflict. Request count: ${retryCount}`,
     );
-    return retryCount * 1000;
+    return calculateRetryDelayMs(retryCount);
   },
   retryCondition: (error: AxiosError) => {
     return (
       (error?.response?.status &&
         error?.response?.status === StatusCodes.CONFLICT) ||
+      false
+    );
+  },
+};
+
+export const axiosTablesBadGatewayRetryConfig: IAxiosRetryConfig = {
+  retries: 3,
+  retryDelay: (retryCount: number) => {
+    logger.warn(
+      `The request failed due to a bad gateway. Request count: ${retryCount}`,
+    );
+    return calculateRetryDelayMs(retryCount);
+  },
+  retryCondition: (error: AxiosError) => {
+    return (
+      (error?.response?.status &&
+        error?.response?.status === StatusCodes.BAD_GATEWAY) ||
       false
     );
   },

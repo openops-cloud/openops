@@ -4,7 +4,12 @@ const makeOpenOpsTablesPostMock = jest.fn();
 const makeOpenOpsTablesDeleteMock = jest.fn();
 const createAxiosHeadersMock = jest.fn();
 
+const actualRequestsHelpers = jest.requireActual(
+  '../../src/lib/openops-tables/requests-helpers',
+);
+
 jest.mock('../../src/lib/openops-tables/requests-helpers', () => ({
+  ...actualRequestsHelpers,
   makeOpenOpsTablesGet: makeOpenOpsTablesGetMock,
   makeOpenOpsTablesPatch: makeOpenOpsTablesPatchMock,
   makeOpenOpsTablesPost: makeOpenOpsTablesPostMock,
@@ -24,10 +29,16 @@ jest.mock('async-mutex', () => {
   };
 });
 
+import { AxiosError } from 'axios';
+import { StatusCodes } from 'http-status-codes';
 import {
   FilterType,
   ViewFilterTypesEnum,
 } from '../../src/lib/openops-tables/filters';
+import {
+  axiosTablesBadGatewayRetryConfig,
+  RETRY_DELAY_MS,
+} from '../../src/lib/openops-tables/requests-helpers';
 import {
   addRow,
   deleteRow,
@@ -76,6 +87,7 @@ describe('getRows', () => {
     expect(makeOpenOpsTablesGetMock).toHaveBeenCalledWith(
       'api/database/rows/table/1/?user_field_names=true',
       'some header',
+      axiosTablesBadGatewayRetryConfig,
     );
     expect(createAxiosHeadersMock).toBeCalledTimes(1);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
@@ -108,6 +120,7 @@ describe('getRows', () => {
     expect(makeOpenOpsTablesGetMock).toHaveBeenCalledWith(
       'api/database/rows/table/1/?user_field_names=true&filter__name1__boolean=value+field+1&filter__name2__equal=2&filter_type=AND',
       'some header',
+      axiosTablesBadGatewayRetryConfig,
     );
     expect(createAxiosHeadersMock).toBeCalledTimes(1);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
@@ -140,6 +153,7 @@ describe('getRows', () => {
     expect(makeOpenOpsTablesGetMock).toHaveBeenCalledWith(
       'api/database/rows/table/1/?user_field_names=true',
       'some header',
+      axiosTablesBadGatewayRetryConfig,
     );
     expect(createAxiosHeadersMock).toBeCalledTimes(1);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
@@ -192,6 +206,7 @@ describe('update row', () => {
       'api/database/rows/table/1/2/?user_field_names=true',
       { 'some field name one': 'value field1', 'some field name two': 2 },
       'some header',
+      axiosTablesBadGatewayRetryConfig,
     );
     expect(createAxiosHeadersMock).toBeCalledTimes(1);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
@@ -242,6 +257,7 @@ describe('add row', () => {
       'api/database/rows/table/1/?user_field_names=true',
       { 'some field name one': 'value field1', 'some field name two': 2 },
       'some header',
+      axiosTablesBadGatewayRetryConfig,
     );
     expect(createAxiosHeadersMock).toBeCalledTimes(1);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
@@ -285,6 +301,7 @@ describe('delete row', () => {
     expect(makeOpenOpsTablesDeleteMock).toHaveBeenCalledWith(
       'api/database/rows/table/1/2/',
       'some header',
+      axiosTablesBadGatewayRetryConfig,
     );
     expect(createAxiosHeadersMock).toBeCalledTimes(1);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
@@ -322,6 +339,7 @@ describe('getRowByPrimaryKeyValue', () => {
       expect(makeOpenOpsTablesGetMock).toHaveBeenCalledWith(
         `api/database/rows/table/1/?user_field_names=true&filter__primaryFieldName__${expected}=primaryKeyValue`,
         'some header',
+        axiosTablesBadGatewayRetryConfig,
       );
       expect(createAxiosHeadersMock).toBeCalledTimes(1);
       expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
@@ -359,9 +377,56 @@ describe('getRowByPrimaryKeyValue', () => {
       expect(makeOpenOpsTablesGetMock).toHaveBeenCalledWith(
         `api/database/rows/table/1/?user_field_names=true&filter__primaryFieldName__${expected}=primaryKeyValue`,
         'some header',
+        axiosTablesBadGatewayRetryConfig,
       );
       expect(createAxiosHeadersMock).toBeCalledTimes(1);
       expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
     },
   );
+});
+
+describe('axiosTablesBadGatewayRetryConfig', () => {
+  test('Should have correct retry configuration', () => {
+    expect(axiosTablesBadGatewayRetryConfig.retries).toBe(3);
+    expect(typeof axiosTablesBadGatewayRetryConfig.retryDelay).toBe('function');
+    expect(typeof axiosTablesBadGatewayRetryConfig.retryCondition).toBe(
+      'function',
+    );
+  });
+
+  test('Should retry on BAD_GATEWAY status', () => {
+    const retryCondition = axiosTablesBadGatewayRetryConfig.retryCondition!;
+    const mockAxiosError = {
+      response: { status: StatusCodes.BAD_GATEWAY },
+    } as AxiosError;
+
+    expect(retryCondition(mockAxiosError)).toBe(true);
+  });
+
+  test('Should not retry on other status codes', () => {
+    const retryCondition = axiosTablesBadGatewayRetryConfig.retryCondition!;
+    const mockAxiosError = {
+      response: { status: StatusCodes.INTERNAL_SERVER_ERROR },
+    } as AxiosError;
+
+    expect(retryCondition(mockAxiosError)).toBe(false);
+  });
+
+  test('Should not retry when no response status', () => {
+    const retryCondition = axiosTablesBadGatewayRetryConfig.retryCondition!;
+    const mockAxiosError = {
+      response: undefined,
+    } as AxiosError;
+
+    expect(retryCondition(mockAxiosError)).toBe(false);
+  });
+
+  test('Should use RETRY_DELAY_MS in retryDelay calculation', () => {
+    const retryDelay = axiosTablesBadGatewayRetryConfig.retryDelay!;
+    const dummyError = {} as AxiosError;
+    const retryCounts = [1, 2, 5, 10];
+    for (const count of retryCounts) {
+      expect(retryDelay(count, dummyError)).toBe(count * RETRY_DELAY_MS);
+    }
+  });
 });

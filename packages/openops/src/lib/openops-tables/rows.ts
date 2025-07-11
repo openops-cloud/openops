@@ -6,6 +6,7 @@ import {
   ViewFilterTypesEnum,
 } from '../openops-tables/filters';
 import {
+  axiosTablesBadGatewayRetryConfig,
   createAxiosHeaders,
   makeOpenOpsTablesDelete,
   makeOpenOpsTablesGet,
@@ -108,6 +109,7 @@ export async function getRows(getRowsParams: GetRowsParams) {
       const getRowsResult = await makeOpenOpsTablesGet<{ results: any[] }[]>(
         url,
         authenticationHeader,
+        axiosTablesBadGatewayRetryConfig,
       );
 
       return getRowsResult.flatMap((row: any) => row.results);
@@ -132,6 +134,7 @@ export async function updateRow(updateRowParams: UpdateRowParams) {
         url,
         updateRowParams.fields,
         authenticationHeader,
+        axiosTablesBadGatewayRetryConfig,
       );
     },
     (error) => {
@@ -154,6 +157,7 @@ export async function upsertRow(upsertRowParams: UpsertRowParams) {
         url,
         upsertRowParams.fields,
         authenticationHeader,
+        axiosTablesBadGatewayRetryConfig,
       );
     },
     (error) => {
@@ -176,6 +180,7 @@ export async function addRow(addRowParams: AddRowParams) {
         url,
         addRowParams.fields,
         authenticationHeader,
+        axiosTablesBadGatewayRetryConfig,
       );
     },
     (error) => {
@@ -194,7 +199,11 @@ export async function deleteRow(deleteRowParams: DeleteRowParams) {
   return executeWithConcurrencyLimit(
     async () => {
       const authenticationHeader = createAxiosHeaders(deleteRowParams.token);
-      return await makeOpenOpsTablesDelete(url, authenticationHeader);
+      return await makeOpenOpsTablesDelete(
+        url,
+        authenticationHeader,
+        axiosTablesBadGatewayRetryConfig,
+      );
     },
     (error) => {
       logger.error('Error while deleting row:', {
