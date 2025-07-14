@@ -1,3 +1,4 @@
+import { useTheme } from '@/app/common/providers/theme-provider';
 import { WorkflowOverviewHeader } from '@/app/features/builder/builder-header/workflow-overview/workflow-overview-header';
 import {
   BoxSize,
@@ -27,7 +28,7 @@ const WorkflowOverviewContent = ({
   const [isDocumentationInEditMode, setIsDocumentationInEditMode] = useState(
     !overview && !isWorkflowReadonly,
   );
-
+  const { theme } = useTheme();
   const [dimensions, setDimensions] = useState<BoxSize>(INITIAL_SIZE);
 
   return (
@@ -57,7 +58,7 @@ const WorkflowOverviewContent = ({
             ></Textarea>
           </div>
         ) : (
-          <Markdown withBorder={false} markdown={overview} />
+          <Markdown withBorder={false} markdown={overview} theme={theme} />
         )}
       </ResizableArea>
     </div>

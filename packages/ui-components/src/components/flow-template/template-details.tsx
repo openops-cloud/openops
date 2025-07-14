@@ -27,6 +27,7 @@ type TemplateDetailsProps = {
   nodeTypes: NodeTypes;
   template: Trigger | undefined;
   ownerLogoUrl: string;
+  theme: string;
 };
 
 const DESCRIPTION_MAX_LINES = 4;
@@ -40,6 +41,7 @@ export const TemplateDetails = ({
   useTemplate,
   expandPreview,
   ownerLogoUrl,
+  theme,
 }: TemplateDetailsProps) => {
   const [showFullDescription, setShowFullDescription] =
     useState<boolean>(false);
@@ -115,6 +117,7 @@ export const TemplateDetails = ({
               <Markdown
                 markdown={templateMetadata.description}
                 withBorder={false}
+                theme={theme}
               />
             </DialogDescription>
             {isDescriptionOverflowing && (

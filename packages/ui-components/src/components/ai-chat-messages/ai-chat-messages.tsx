@@ -1,7 +1,12 @@
 import { forwardRef } from 'react';
 import { cn } from '../../lib/cn';
 import { Markdown, MarkdownCodeVariations } from '../custom';
-import { AIChatMessage, AIChatMessageRole } from './types';
+import { CodeMirrorEditor, getLanguageExtensionForCode } from '../json-editor';
+import {
+  AIChatMessage,
+  AIChatMessageContent,
+  AIChatMessageRole,
+} from './types';
 
 type AIChatMessagesProps = {
   messages: AIChatMessage[];
@@ -9,6 +14,7 @@ type AIChatMessagesProps = {
   codeVariation?: MarkdownCodeVariations;
   lastUserMessageRef?: React.RefObject<HTMLDivElement>;
   lastAssistantMessageRef?: React.RefObject<HTMLDivElement>;
+  theme: string;
 };
 
 const AIChatMessages = forwardRef<HTMLDivElement, AIChatMessagesProps>(
@@ -19,6 +25,7 @@ const AIChatMessages = forwardRef<HTMLDivElement, AIChatMessagesProps>(
       codeVariation = MarkdownCodeVariations.WithCopyMultiline,
       lastUserMessageRef,
       lastAssistantMessageRef,
+      theme,
     },
     ref,
   ) => {
@@ -60,6 +67,7 @@ const AIChatMessages = forwardRef<HTMLDivElement, AIChatMessagesProps>(
             onInject={onInject}
             codeVariation={codeVariation}
             ref={getMessageRef(index, message.role)}
+            theme={theme}
           />
         ))}
       </div>
@@ -73,8 +81,9 @@ const Message = forwardRef<
     message: AIChatMessage;
     onInject?: (code: string) => void;
     codeVariation: MarkdownCodeVariations;
+    theme: string;
   }
->(({ message, onInject, codeVariation }, ref) => {
+>(({ message, onInject, codeVariation, theme }, ref) => {
   const isUser = message.role === AIChatMessageRole.user;
 
   if (!isUser) {
@@ -84,6 +93,7 @@ const Message = forwardRef<
           content={message.content}
           onInject={onInject}
           codeVariation={codeVariation}
+          theme={theme}
         />
       </div>
     );
@@ -101,6 +111,7 @@ const Message = forwardRef<
         content={message.content}
         onInject={onInject}
         codeVariation={codeVariation}
+        theme={theme}
       />
     </div>
   );
@@ -112,20 +123,103 @@ const MessageContent = ({
   content,
   onInject,
   codeVariation,
+  theme,
 }: {
-  content: string;
+  content: AIChatMessageContent;
   onInject?: (code: string) => void;
   codeVariation: MarkdownCodeVariations;
-}) => (
-  <Markdown
-    markdown={content}
-    withBorder={false}
-    codeVariation={codeVariation}
-    handleInject={onInject}
-    textClassName="text-sm"
-    linkClassName="text-sm"
-  />
-);
+  theme: string;
+}) => {
+  if (typeof content === 'string') {
+    return (
+      <Markdown
+        markdown={content}
+        withBorder={false}
+        codeVariation={codeVariation}
+        handleInject={onInject}
+        textClassName="text-sm"
+        linkClassName="text-sm"
+        theme={theme}
+      />
+    );
+  }
+
+  if (content.type === 'structured') {
+    return (
+      <div className="flex flex-col gap-2">
+        {content.parts.map((part, index) => {
+          const getContentPreview = () => {
+            if (typeof part.content === 'string') {
+              return part.content.substring(0, 20).replace(/\s/g, '');
+            }
+            if (typeof part.content === 'object' && part.content.code) {
+              return part.content.code.substring(0, 20).replace(/\s/g, '');
+            }
+            return 'unknown';
+          };
+          const stableKey = `${part.type}-${index}-${getContentPreview()}`;
+
+          switch (part.type) {
+            case 'text':
+              return (
+                <Markdown
+                  key={stableKey}
+                  markdown={part.content}
+                  withBorder={false}
+                  codeVariation={codeVariation}
+                  handleInject={onInject}
+                  textClassName="text-sm"
+                  linkClassName="text-sm"
+                  theme={theme}
+                />
+              );
+            case 'code':
+              return (
+                <div key={stableKey} className="relative py-2 w-full">
+                  <CodeMirrorEditor
+                    value={part.content}
+                    readonly={true}
+                    showLineNumbers={false}
+                    height="auto"
+                    className="border border-solid rounded"
+                    containerClassName="h-auto"
+                    theme={theme}
+                    languageExtensions={getLanguageExtensionForCode(
+                      part.language,
+                    )}
+                    editorLanguage={part.language}
+                  />
+                </div>
+              );
+            case 'sourcecode':
+              return (
+                <div key={stableKey} className="relative py-2 w-full">
+                  <CodeMirrorEditor
+                    value={part.content}
+                    readonly={true}
+                    showLineNumbers={false}
+                    height="auto"
+                    className="border border-solid rounded"
+                    containerClassName="h-auto"
+                    theme={theme}
+                    showTabs={true}
+                    languageExtensions={getLanguageExtensionForCode(
+                      'typescript',
+                    )}
+                    editorLanguage="typescript"
+                  />
+                </div>
+              );
+            default:
+              return null;
+          }
+        })}
+      </div>
+    );
+  }
+
+  return null;
+};
 
 AIChatMessages.displayName = 'AIChatMessages';
 export { AIChatMessages };

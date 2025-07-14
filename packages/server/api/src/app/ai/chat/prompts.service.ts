@@ -2,7 +2,7 @@ import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { ChatFlowContext } from '@openops/shared';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
-import { ChatContext } from './ai-chat.service';
+import { MCPChatContext } from './ai-chat.service';
 
 export const getMcpSystemPrompt = async ({
   isAnalyticsLoaded,
@@ -37,8 +37,8 @@ export const getMcpSystemPrompt = async ({
   return allPrompts.join('\n\n');
 };
 
-export const getSystemPrompt = async (
-  context: ChatContext,
+export const getBlockSystemPrompt = async (
+  context: MCPChatContext,
   enrichedContext?: ChatFlowContext,
 ): Promise<string> => {
   const enrichedContextString = enrichedContext?.steps?.some((s) => s.variables)
@@ -74,8 +74,8 @@ export const getSystemPrompt = async (
       import x from 'x';
       import y from 'y';
       import z from 'z';
-      
-      export const code = async (inputs) => {  
+
+      export const code = async (inputs) => {
       // do transformation logic here
       return ...; };
 

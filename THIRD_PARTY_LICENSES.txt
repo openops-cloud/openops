@@ -19494,6 +19494,7 @@ The following npm packages may be included in this product:
  - @codemirror/commands@6.6.1
  - @codemirror/lang-javascript@6.2.2
  - @codemirror/language@6.10.2
+ - @codemirror/legacy-modes@6.5.1
  - @codemirror/lint@6.8.1
  - @codemirror/search@6.5.6
  - @codemirror/state@6.4.1

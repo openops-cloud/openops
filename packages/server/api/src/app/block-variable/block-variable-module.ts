@@ -74,11 +74,13 @@ const ExecuteVariableRequest = {
       variableExpression: Type.String({
         description:
           'The variable expression to resolve (e.g., "{{trigger[\'headers\']}}and we also consider{{step_2}}")',
+        maxLength: 10000,
       }),
       stepName: Type.Optional(
         Type.String({
           description:
-            'Optional step name to exclude from the execution context',
+            'Optional step name for which the variable expression should be resolved',
+          maxLength: 100,
         }),
       ),
     }),
