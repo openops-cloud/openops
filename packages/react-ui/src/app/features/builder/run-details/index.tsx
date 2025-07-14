@@ -13,13 +13,7 @@ import React, { useMemo } from 'react';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
-import {
-  ActionType,
-  FlagId,
-  isNil,
-  RunEnvironment,
-  StepOutput,
-} from '@openops/shared';
+import { FlagId, isNil, RunEnvironment } from '@openops/shared';
 import { LeftSideBarType } from '../builder-types';
 
 import { useEffectOnce } from 'react-use';
@@ -57,37 +51,14 @@ const FlowRunDetails = React.memo(() => {
   });
 
   const selectedStepTestData = useMemo(() => {
-    const testData =
-      run && selectedStep && run.steps
-        ? flowRunUtils.extractStepOutput(
-            selectedStep,
-            loopsIndexes,
-            run.steps,
-            flowVersion.trigger,
-          )
-        : null;
-    if (
-      !testData ||
-      testData.type !== ActionType.LOOP_ON_ITEMS ||
-      !testData.output?.index ||
-      !testData.input ||
-      !selectedStep
-    ) {
-      return testData;
-    }
-    try {
-      return {
-        ...testData,
-        output: {
-          item: (testData.input as { items: any }).items?.[
-            loopsIndexes[selectedStep]
-          ],
-          index: loopsIndexes[selectedStep] + 1,
-        },
-      } as StepOutput;
-    } catch {
-      return testData;
-    }
+    return run && selectedStep && run.steps
+      ? flowRunUtils.extractLoopItemStepOutput(
+          selectedStep,
+          loopsIndexes,
+          run.steps,
+          flowVersion.trigger,
+        )
+      : null;
   }, [run, selectedStep, loopsIndexes, flowVersion.trigger]);
 
   const message = getRunMessage(run, rententionDays);
