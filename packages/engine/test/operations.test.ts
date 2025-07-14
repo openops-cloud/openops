@@ -1,4 +1,4 @@
-import { EngineOperationType, EngineResponseStatus, ExecutionType, ActionType, StepOutputStatus, flowHelper, TriggerType, PackageType, BlockType, RunEnvironment, ProgressUpdateType, FlowRunStatus, FlowVersionState } from '@openops/shared';
+import { EngineOperationType, EngineResponseStatus, ExecutionType, ActionType, StepOutputStatus, flowHelper, TriggerType, PackageType, BlockType, RunEnvironment, ProgressUpdateType, FlowRunStatus, FlowVersionState, GenericStepOutput } from '@openops/shared';
 import { execute } from '../src/lib/operations';
 import { blockHelper } from '../src/lib/helper/block-helper';
 import { triggerHelper } from '../src/lib/helper/trigger-helper';
@@ -26,6 +26,25 @@ const mockTestExecutionContext = testExecutionContext as jest.Mocked<typeof test
 const mockFlowHelper = flowHelper as jest.Mocked<typeof flowHelper>;
 
 describe('Engine Operations', () => {
+  const mockFlowVersion = {
+    id: 'flow-version-1',
+    created: '2023-01-01T00:00:00Z',
+    updated: '2023-01-01T00:00:00Z',
+    flowId: 'flow-1',
+    displayName: 'Test Flow',
+    valid: true,
+    state: FlowVersionState.DRAFT,
+    updatedBy: null,
+    trigger: {
+      id: 'trigger-1',
+      name: 'trigger-1',
+      valid: true,
+      displayName: 'Test Trigger',
+      type: TriggerType.EMPTY as TriggerType.EMPTY,
+      settings: {} as any,
+    },
+  } as any;
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -45,9 +64,9 @@ describe('Engine Operations', () => {
       mockBlockHelper.extractBlockMetadata.mockResolvedValue(mockMetadata);
 
       const operation = {
-        packageType: PackageType.REGISTRY as PackageType.REGISTRY,
+        packageType: PackageType.REGISTRY,
         blockName: 'test-block',
-        blockType: BlockType.OFFICIAL as BlockType,
+        blockType: BlockType.OFFICIAL,
         blockVersion: '1.0.0',
       };
 
@@ -66,9 +85,9 @@ describe('Engine Operations', () => {
       mockBlockHelper.extractBlockMetadata.mockRejectedValue(new Error(errorMessage));
 
       const operation = {
-        packageType: PackageType.REGISTRY as PackageType.REGISTRY,
+        packageType: PackageType.REGISTRY,
         blockName: 'non-existent-block',
-        blockType: BlockType.OFFICIAL as BlockType,
+        blockType: BlockType.OFFICIAL,
         blockVersion: '1.0.0',
       };
 
@@ -80,24 +99,6 @@ describe('Engine Operations', () => {
   });
 
   describe('EXECUTE_FLOW operation', () => {
-    const mockFlowVersion = {
-      id: 'flow-version-1',
-      created: '2023-01-01T00:00:00Z',
-      updated: '2023-01-01T00:00:00Z',
-      flowId: 'flow-1',
-      displayName: 'Test Flow',
-      valid: true,
-      state: FlowVersionState.DRAFT,
-      updatedBy: null,
-      trigger: {
-        id: 'trigger-1',
-        name: 'trigger-1',
-        valid: true,
-        displayName: 'Test Trigger',
-        type: TriggerType.EMPTY as TriggerType.EMPTY,
-        settings: {},
-      },
-    };
 
     it('should execute flow with BEGIN execution type', async () => {
       const mockFlowResponse = { 
@@ -114,7 +115,7 @@ describe('Engine Operations', () => {
         publicUrl: 'http://public.test',
         flowRunId: 'run-1',
         flowVersion: mockFlowVersion,
-        executionType: ExecutionType.BEGIN,
+        executionType: ExecutionType.BEGIN as ExecutionType.BEGIN,
         triggerPayload: { data: 'test' },
         engineToken: 'token-123',
         internalApiUrl: 'http://api.test',
@@ -147,7 +148,7 @@ describe('Engine Operations', () => {
         publicUrl: 'http://public.test',
         flowRunId: 'run-1',
         flowVersion: mockFlowVersion,
-        executionType: ExecutionType.RESUME,
+        executionType: ExecutionType.RESUME as ExecutionType.RESUME,
         tasks: 1,
         resumePayload: {
           body: {},
@@ -155,11 +156,11 @@ describe('Engine Operations', () => {
           queryParams: {}
         },
         steps: {
-          'step-1': {
+          'step-1': GenericStepOutput.create({
             type: ActionType.BLOCK,
-            status: FlowRunStatus.SUCCEEDED as FlowRunStatus.SUCCEEDED,
-            output: { result: 'success' },
-          },
+            status: StepOutputStatus.SUCCEEDED,
+            input: { data: 'test' },
+          }).setOutput({ result: 'success' }),
         },
         engineToken: 'token-123',
         internalApiUrl: 'http://api.test',
@@ -184,7 +185,7 @@ describe('Engine Operations', () => {
         publicUrl: 'http://public.test',
         flowRunId: 'run-1',
         flowVersion: mockFlowVersion,
-        executionType: ExecutionType.BEGIN,
+        executionType: ExecutionType.BEGIN as ExecutionType.BEGIN,
         triggerPayload: {},
         engineToken: 'token-123',
         internalApiUrl: 'http://api.test',
@@ -213,18 +214,15 @@ describe('Engine Operations', () => {
         engineToken: 'token-123',
         internalApiUrl: 'http://api.test',
         block: {
-          packageType: PackageType.REGISTRY as PackageType.REGISTRY,
+          packageType: PackageType.REGISTRY,
           blockName: 'test-block',
-          blockType: BlockType.OFFICIAL as BlockType,
+          blockType: BlockType.OFFICIAL,
           blockVersion: '1.0.0',
         },
         propertyName: 'testProperty',
         actionOrTriggerName: 'testAction',
         input: { testInput: 'value' },
-        flowVersion: {
-          id: 'flow-version-1',
-          flowId: 'flow-1',
-        },
+        flowVersion: mockFlowVersion,
         searchValue: 'test',
         stepTestOutputs: {},
       };
@@ -253,18 +251,15 @@ describe('Engine Operations', () => {
         engineToken: 'token-123',
         internalApiUrl: 'http://api.test',
         block: {
-          packageType: PackageType.REGISTRY as PackageType.REGISTRY,
+          packageType: PackageType.REGISTRY,
           blockName: 'test-block',
-          blockType: BlockType.OFFICIAL as BlockType,
+          blockType: BlockType.OFFICIAL,
           blockVersion: '1.0.0',
         },
         propertyName: 'testProperty',
         actionOrTriggerName: 'testAction',
         input: { testInput: 'value' },
-        flowVersion: {
-          id: 'flow-version-1',
-          flowId: 'flow-1',
-        },
+        flowVersion: mockFlowVersion,
         stepTestOutputs: {},
       };
 
@@ -304,8 +299,8 @@ describe('Engine Operations', () => {
         displayName: 'Test Step',
         type: ActionType.BLOCK,
         settings: {
-          packageType: PackageType.REGISTRY as PackageType.REGISTRY,
-          blockType: BlockType.OFFICIAL as BlockType,
+          packageType: PackageType.REGISTRY,
+          blockType: BlockType.OFFICIAL,
           blockName: 'test-block',
           blockVersion: '1.0.0',
           input: {},
@@ -320,20 +315,7 @@ describe('Engine Operations', () => {
         publicUrl: 'http://public.test',
         engineToken: 'token-123',
         internalApiUrl: 'http://api.test',
-        flowVersion: {
-          id: 'flow-version-1',
-          flowId: 'flow-1',
-          trigger: {
-            name: 'trigger-1',
-            type: TriggerType.EMPTY,
-          },
-          actions: [
-            {
-              name: 'test-step',
-              type: ActionType.BLOCK,
-            },
-          ],
-        },
+        flowVersion: mockFlowVersion,
         stepName: 'test-step',
         stepTestOutputs: {},
       };
@@ -382,8 +364,8 @@ describe('Engine Operations', () => {
         displayName: 'Test Step',
         type: ActionType.BLOCK,
         settings: {
-          packageType: PackageType.REGISTRY as PackageType.REGISTRY,
-          blockType: BlockType.OFFICIAL as BlockType,
+          packageType: PackageType.REGISTRY,
+          blockType: BlockType.OFFICIAL,
           blockName: 'test-block',
           blockVersion: '1.0.0',
           input: {},
@@ -398,20 +380,7 @@ describe('Engine Operations', () => {
         publicUrl: 'http://public.test',
         engineToken: 'token-123',
         internalApiUrl: 'http://api.test',
-        flowVersion: {
-          id: 'flow-version-1',
-          flowId: 'flow-1',
-          trigger: {
-            name: 'trigger-1',
-            type: TriggerType.EMPTY,
-          },
-          actions: [
-            {
-              name: 'test-step',
-              type: ActionType.BLOCK,
-            },
-          ],
-        },
+        flowVersion: mockFlowVersion,
         stepName: 'test-step',
         stepTestOutputs: {},
       };
@@ -433,10 +402,7 @@ describe('Engine Operations', () => {
         publicUrl: 'http://public.test',
         engineToken: 'token-123',
         internalApiUrl: 'http://api.test',
-        flowVersion: {
-          id: 'flow-version-1',
-          flowId: 'flow-1',
-        },
+        flowVersion: mockFlowVersion,
         hookType: 'WEBHOOK' as const,
         test: false,
         webhookUrl: 'https://webhook.test',
@@ -466,10 +432,7 @@ describe('Engine Operations', () => {
         publicUrl: 'http://public.test',
         engineToken: 'token-123',
         internalApiUrl: 'http://api.test',
-        flowVersion: {
-          id: 'flow-version-1',
-          flowId: 'flow-1',
-        },
+        flowVersion: mockFlowVersion,
         hookType: 'WEBHOOK' as const,
         test: false,
         webhookUrl: 'https://webhook.test',
@@ -544,10 +507,7 @@ describe('Engine Operations', () => {
         publicUrl: 'http://public.test',
         engineToken: 'token-123',
         internalApiUrl: 'http://api.test',
-        flowVersion: {
-          id: 'flow-version-1',
-          flowId: 'flow-1',
-        },
+        flowVersion: mockFlowVersion,
         variableExpression: 'test-variable',
         stepName: 'test-step',
       };
@@ -568,10 +528,7 @@ describe('Engine Operations', () => {
         publicUrl: 'http://public.test',
         engineToken: 'token-123',
         internalApiUrl: 'http://api.test',
-        flowVersion: {
-          id: 'flow-version-1',
-          flowId: 'flow-1',
-        },
+        flowVersion: mockFlowVersion,
         variableExpression: 'non-existent-variable',
         stepName: 'test-step',
       };
@@ -669,20 +626,7 @@ describe('Engine Operations', () => {
       const operation = {
         projectId: 'project-1',
         publicUrl: 'http://public.test',
-        flowVersion: {
-          id: 'flow-version-1',
-          flowId: 'flow-1',
-          trigger: {
-            name: 'trigger-1',
-            type: TriggerType.EMPTY,
-          },
-          actions: [
-            {
-              name: 'loop-step',
-              type: ActionType.LOOP_ON_ITEMS,
-            },
-          ],
-        },
+        flowVersion: mockFlowVersion,
         stepName: 'loop-step',
         internalApiUrl: 'http://api.test',
         engineToken: 'token-123',
@@ -731,8 +675,8 @@ describe('Engine Operations', () => {
         displayName: 'Failed Step',
         type: ActionType.BLOCK,
         settings: {
-          packageType: PackageType.REGISTRY as PackageType.REGISTRY,
-          blockType: BlockType.OFFICIAL as BlockType,
+          packageType: PackageType.REGISTRY,
+          blockType: BlockType.OFFICIAL,
           blockName: 'test-block',
           blockVersion: '1.0.0',
           input: {},
