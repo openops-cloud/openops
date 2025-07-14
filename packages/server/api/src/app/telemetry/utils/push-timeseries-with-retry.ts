@@ -1,6 +1,10 @@
 import { logger } from '@openops/server-shared';
 import { Timeseries, pushTimeseries } from 'prometheus-remote-write';
-import { PushTimeseriesConfig } from '../logzio-collector';
+
+type PushTimeseriesConfig = {
+  url: string;
+  headers?: Record<string, string>;
+};
 
 const DEFAULT_MAX_RETRIES = 3;
 

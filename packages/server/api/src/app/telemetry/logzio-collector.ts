@@ -13,11 +13,6 @@ const environmentName = system.getOrThrow<string>(
 const lock = new Mutex();
 let metrics: Timeseries[] = [];
 
-export type PushTimeseriesConfig = {
-  url: string;
-  headers?: Record<string, string>;
-};
-
 async function sendMetrics(): Promise<void> {
   await lock.runExclusive(async () => {
     try {
