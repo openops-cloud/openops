@@ -38,7 +38,7 @@ This will show you:
     role: 'assistant',
     content: `Here's the AWS CLI command to get the cost data:
 
-\`\`\`text
+\`\`\`bash
 aws ce get-cost-and-usage \\
 --time-period Start=$(date -d "last month" '+%Y-%m-01'),End=$(date '+%Y-%m-01') \\
 --granularity MONTHLY \\
