@@ -36,8 +36,8 @@ const HomeGetStarted = ({
     >
       <div className="p-6 flex flex-col gap-4 bg-secondary font-bold">
         <h2 className="text-[24px]">{t('Get started')}</h2>
-        <div className="flex items-center justify-between gap-4 flex-wrap @[1160px]:flex-nowrap">
-          <div className="w-full @[1160px]:w-[50%] flex flex-col gap-[10px]">
+        <div className="flex items-start justify-between gap-4 flex-wrap @[1160px]:flex-nowrap">
+          <div className="w-full @[1160px]:w-[50%] flex flex-col gap-[8px]">
             <h3>{t('Start with our Sample template')}</h3>
             <div className="flex gap-2">
               {displayedTemplates.map((template, index) => (
@@ -49,7 +49,7 @@ const HomeGetStarted = ({
               ))}
             </div>
           </div>
-          <div className="w-full flex flex-col gap-[10px]">
+          <div className="w-full flex flex-col gap-[8px]">
             <h3>{t('Quick links')}</h3>
             <div className="w-full grid grid-cols-2 gap-2 @[900px]:grid-cols-4 font-normal">
               <KnowledgeBaseCard
