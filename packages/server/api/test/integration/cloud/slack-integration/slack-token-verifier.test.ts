@@ -172,7 +172,10 @@ describe('Slack token verifier', () => {
     } as unknown as FastifyRequest);
 
     expect(result).toBe(false);
-    expect(loggerMock.error).toHaveBeenCalledWith('Invalid signature');
+    expect(loggerMock.error).toHaveBeenCalledWith(
+      '[Slack signature verification] error',
+      { error: 'Invalid signature' },
+    );
   });
 
   test('should log error if lambda verification throws', async () => {
@@ -192,7 +195,8 @@ describe('Slack token verifier', () => {
 
     expect(result).toBe(false);
     expect(loggerMock.error).toHaveBeenCalledWith(
-      '[Slack signature verification] Error: some error',
+      '[Slack signature verification] error',
+      { error: new Error('some error') },
     );
   });
 });

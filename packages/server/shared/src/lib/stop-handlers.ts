@@ -26,8 +26,8 @@ const stop = async (
     await app.close();
     await sendLogs();
     process.exit(0);
-  } catch (err) {
-    logger.error('Error stopping app', err);
+  } catch (error) {
+    logger.error('Error stopping app', { error });
     await sendLogs();
     process.exit(1);
   }

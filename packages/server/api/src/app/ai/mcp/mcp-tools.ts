@@ -84,7 +84,7 @@ async function safeGetTools(
 
     return mcpTool;
   } catch (error) {
-    logger.error(`Error loading tools for ${name}:`, error);
+    logger.error(`Error loading tools for ${name}:`, { error });
     return {};
   }
 }

@@ -18,7 +18,9 @@ export async function useTempFile<T>(
     try {
       await fs.unlink(tempFileName);
     } catch (unlinkError) {
-      logger.error('Error occurred while removing temporary file', unlinkError);
+      logger.error('Error occurred while removing temporary file', {
+        error: unlinkError,
+      });
     }
   }
 
