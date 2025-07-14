@@ -25,9 +25,6 @@ import {
   RiskLevel,
   StepRunResponse,
 } from '@openops/shared';
-
-import { QueryKeys } from '@/app/constants/query-keys';
-import dayjs from 'dayjs';
 import {
   setStepOutputCache,
   stepTestOutputCache,
@@ -86,24 +83,16 @@ const TestActionSection = React.memo(
         );
         if (stepResponse.success) {
           setErrorMessage(undefined);
-          setStepOutputCache({
-            stepId: formValues.id,
-            flowVersionId,
-            output: stepResponse.output,
-            input: stepResponse.input,
-            queryClient,
-          });
         } else {
           setErrorMessage(testStepUtils.formatErrorMessage(formattedResponse));
-          queryClient.setQueryData(
-            [QueryKeys.stepTestOutput, flowVersionId, formValues.id],
-            {
-              output: formatUtils.formatStepInputOrOutput(formattedResponse),
-              lastTestDate: dayjs().toISOString(),
-              input: formatUtils.formatStepInputOrOutput(stepResponse.input),
-            },
-          );
         }
+        setStepOutputCache({
+          stepId: formValues.id,
+          flowVersionId,
+          output: stepResponse.output,
+          input: stepResponse.input,
+          queryClient,
+        });
       },
       onError: (error) => {
         console.error(error);
