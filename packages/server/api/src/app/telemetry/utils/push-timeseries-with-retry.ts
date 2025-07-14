@@ -14,7 +14,7 @@ export async function pushTimeseriesWithRetry(
   maxRetries = DEFAULT_MAX_RETRIES,
 ): Promise<void> {
   let retryCount = 0;
-  let lastError;
+  let lastError: unknown;
   while (retryCount < maxRetries) {
     try {
       await pushTimeseries(timeseries, config);
