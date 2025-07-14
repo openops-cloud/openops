@@ -113,23 +113,35 @@ const CodeMirrorEditor = React.memo(
     return (
       <div className={cn('h-full flex flex-col gap-2', containerClassName)}>
         {shouldShowTabs && (
-          <div className="flex justify-start gap-4 items-center">
-            <div
-              className={cn('text-sm cursor-pointer', {
-                'font-bold': activeTab === 'code',
-              })}
+          <div className="flex justify-start gap-4 items-center" role="tablist">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'code'}
+              className={cn(
+                'text-sm cursor-pointer bg-transparent border-none p-0 hover:opacity-75',
+                {
+                  'font-bold': activeTab === 'code',
+                },
+              )}
               onClick={() => handleTabClick('code')}
             >
               {t('Code')}
-            </div>
-            <div
-              className={cn('text-sm cursor-pointer', {
-                'font-bold': activeTab === 'packageJson',
-              })}
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'packageJson'}
+              className={cn(
+                'text-sm cursor-pointer bg-transparent border-none p-0 hover:opacity-75',
+                {
+                  'font-bold': activeTab === 'packageJson',
+                },
+              )}
               onClick={() => handleTabClick('packageJson')}
             >
               {t('Dependencies')}
-            </div>
+            </button>
           </div>
         )}
         <CodeMirror
