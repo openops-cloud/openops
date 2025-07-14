@@ -72,13 +72,13 @@ const DataSelector = ({
       const cached = stepTestOutputCache.getStepData(id);
       const step = pathToTargetStep.find((s) => s.id === id);
       const sampleData = step?.settings.inputUiInfo?.sampleData;
+      const hasStepSampleData = dataSelectorUtils.hasStepSampleData(step);
 
       if (cached) {
         stepTestOutput[id] = {
           ...cached,
-          output: dataSelectorUtils.hasStepSampleData(step)
-            ? sampleData
-            : cached.output,
+          output: hasStepSampleData ? sampleData : cached.output,
+          success: hasStepSampleData ? true : cached.success,
         };
       }
     });

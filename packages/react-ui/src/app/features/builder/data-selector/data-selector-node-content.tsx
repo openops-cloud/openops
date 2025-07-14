@@ -1,13 +1,15 @@
-import { BlockIcon, Button, TooltipWrapper } from '@openops/components/ui';
+import { BlockIcon, Button, cn, TooltipWrapper } from '@openops/components/ui';
 import { t } from 'i18next';
 import { ChevronDown, ChevronUp, Info } from 'lucide-react';
 
-import { flowHelper } from '@openops/shared';
+import { flowHelper, isNil, StepOutputStatus } from '@openops/shared';
 
 import { useRipple } from '../../../common/providers/theme-provider';
 import { blocksHooks } from '../../blocks/lib/blocks-hook';
 import { useBuilderStateContext } from '../builder-hooks';
 
+import { flowRunUtils } from '@/app/features/flow-runs/lib/flow-run-utils';
+import React from 'react';
 import { dataSelectorUtils, MentionTreeNode } from './data-selector-utils';
 
 const ToggleIcon = ({ expanded }: { expanded: boolean }) => {
@@ -17,6 +19,49 @@ const ToggleIcon = ({ expanded }: { expanded: boolean }) => {
   ) : (
     <ChevronDown height={toggleIconSize} width={toggleIconSize}></ChevronDown>
   );
+};
+
+const NodeStatusIcon = ({
+  stepHasSampleData,
+  success,
+}: {
+  stepHasSampleData: boolean;
+  success: boolean | null | undefined;
+}) => {
+  if (stepHasSampleData) {
+    return (
+      <TooltipWrapper
+        tooltipText={t('Step contains sample data')}
+        tooltipPlacement="bottom"
+      >
+        <Info
+          className="min-w-4 w-4 h-4 text-blueAccent"
+          role="img"
+          aria-label={t('Step contains sample data')}
+        />
+      </TooltipWrapper>
+    );
+  } else {
+    if (isNil(success)) {
+      return null;
+    }
+    const { Icon } = flowRunUtils.getStatusIconForStep(
+      success ? StepOutputStatus.SUCCEEDED : StepOutputStatus.FAILED,
+    );
+    const message = success ? 'Tested Successfully' : 'Testing failed';
+    return (
+      <TooltipWrapper tooltipText={t(message)} tooltipPlacement="bottom">
+        <Icon
+          className={cn('size-4', {
+            'text-success-300': success,
+            'text-destructive-300': !success,
+          })}
+          role="img"
+          aria-label={t(message)}
+        />
+      </TooltipWrapper>
+    );
+  }
 };
 
 type DataSelectorNodeContentProps = {
@@ -96,18 +141,10 @@ const DataSelectorNodeContent = ({
           </div>
         )}
         <div className="truncate">{node.data.displayName}</div>
-        {stepHasSampleData && (
-          <TooltipWrapper
-            tooltipText={t('Step contains sample data')}
-            tooltipPlacement="bottom"
-          >
-            <Info
-              className="min-w-4 w-4 h-4 text-blueAccent"
-              role="img"
-              aria-label={t('Step contains sample data')}
-            />
-          </TooltipWrapper>
-        )}
+        <NodeStatusIcon
+          stepHasSampleData={stepHasSampleData}
+          success={node.data.success}
+        />
         {showNodeValue && (
           <>
             <div className="flex-shrink-0">:</div>
