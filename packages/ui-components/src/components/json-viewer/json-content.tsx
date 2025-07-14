@@ -2,7 +2,6 @@ import { isNil } from '@openops/shared';
 import { t } from 'i18next';
 import { useMemo } from 'react';
 import { UseFormReturn } from 'react-hook-form';
-import { tryParseJson } from '../../lib/json-utils';
 import {
   Form,
   FormControl,
@@ -56,7 +55,7 @@ export const JsonContent = ({
                       containerClassName={editorClassName}
                       height="100%"
                       onChange={(value) => {
-                        field.onChange(tryParseJson(value));
+                        field.onChange(value);
                       }}
                     />
                   </FormControl>
