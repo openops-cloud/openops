@@ -1,4 +1,4 @@
-import { graphqlAction } from '../src/lib/graphql-action';
+import { graphqlAction } from '../src/lib/actions/graphql-action';
 
 describe('GraphQL Action', () => {
   const mockApiKey = 'test-api-key';

@@ -5,8 +5,8 @@ import { BASE_CH_URL } from '../common/base-url';
 
 const BASE_ASSET_URL = `${BASE_CH_URL}/api`;
 
-export const getAssetMetadataAction = createAction({
-  name: 'cloudhealth_get_asset_metadata',
+export const searchAssetsAction = createAction({
+  name: 'cloudhealth_search_assets',
   displayName: 'Search Assets',
   description: 'Retrieve assets that match specific criteria',
   auth: cloudhealthAuth,

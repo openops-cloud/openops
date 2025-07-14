@@ -1,9 +1,9 @@
 import { createCustomApiCallAction } from '@openops/blocks-common';
 import { createBlock, Property } from '@openops/blocks-framework';
 import { BlockCategory } from '@openops/shared';
-import { getAssetMetadataAction } from './lib/actions/get-asset-metadata-action';
 import { getRecommendationsAction } from './lib/actions/get-recommendations-action';
 import { graphqlAction } from './lib/actions/graphql-action';
+import { searchAssetsAction } from './lib/actions/search-assets-action';
 import { cloudhealthAuth } from './lib/auth';
 import { BASE_CH_URL } from './lib/common/base-url';
 
@@ -16,7 +16,7 @@ export const cloudhealth = createBlock({
   categories: [BlockCategory.FINOPS],
   actions: [
     getRecommendationsAction,
-    getAssetMetadataAction,
+    searchAssetsAction,
 
     createCustomApiCallAction({
       baseUrl: () => `${BASE_CH_URL}/`,
