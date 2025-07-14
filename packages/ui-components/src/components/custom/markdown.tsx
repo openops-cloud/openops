@@ -3,10 +3,6 @@ import { Alert, AlertDescription } from '../../ui/alert';
 import { Button } from '../../ui/button';
 import { useToast } from '../../ui/use-toast';
 
-import { javascript } from '@codemirror/lang-javascript';
-import { json } from '@codemirror/lang-json';
-// import { shell } from '@codemirror/legacy-modes/mode/shell';
-import { Extension } from '@uiw/react-codemirror';
 import { t } from 'i18next';
 import { Copy, Plus } from 'lucide-react';
 import React, { useCallback } from 'react';
@@ -16,7 +12,27 @@ import { clipboardUtils } from '../../lib/clipboard-utils';
 import { cn } from '../../lib/cn';
 import { COPY_PASTE_TOAST_DURATION } from '../../lib/constants';
 import { CodeMirrorEditor } from '../json-editor';
+import { getLanguageExtensionForCode } from '../json-editor/code-mirror-utils';
 import { CodeVariations, MarkdownCodeVariations } from './types';
+
+function extractLanguageFromClassName(className?: string): string | undefined {
+  if (!className || typeof className !== 'string') {
+    return undefined;
+  }
+
+  const languagePrefix = 'language-';
+  const languageIndex = className.indexOf(languagePrefix);
+
+  if (languageIndex === -1) {
+    return undefined;
+  }
+
+  const startIndex = languageIndex + languagePrefix.length;
+  const remainingString = className.substring(startIndex);
+
+  const language = remainingString.split(/\s/)[0];
+  return language.length > 0 ? language : undefined;
+}
 
 function applyVariables(markdown: string, variables: Record<string, string>) {
   return markdown
@@ -57,31 +73,6 @@ const Container = ({
     children
   );
 
-const getLanguageExtensionForCode = (className?: string): Extension[] => {
-  if (!className) return [];
-
-  if (className.includes('language-json')) return [json()];
-  if (
-    className.includes('language-javascript') ||
-    className.includes('language-js')
-  )
-    return [javascript()];
-  if (
-    className.includes('language-typescript') ||
-    className.includes('language-ts')
-  )
-    return [javascript({ typescript: true })];
-
-  // if (
-  //   className.includes('language-bash') ||
-  //   className.includes('language-sh') ||
-  //   className.includes('language-shell')
-  // )
-  //   return [shell];
-
-  return [];
-};
-
 const CodeViewer = ({
   content,
   theme,
@@ -100,9 +91,9 @@ const CodeViewer = ({
       className="border border-solid rounded"
       containerClassName="h-auto"
       theme={theme}
-      // todo languag prop
       languageExtensions={getLanguageExtensionForCode(className)}
       showTabs={typeof content !== 'string' && 'packageJson' in content}
+      editorLanguage={extractLanguageFromClassName(className)}
     />
   );
 };
