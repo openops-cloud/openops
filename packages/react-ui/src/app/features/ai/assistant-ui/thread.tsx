@@ -38,7 +38,6 @@ export const Thread: FC = () => {
             UserMessage: UserMessage,
             EditComposer: EditComposer,
             AssistantMessage: AssistantMessage,
-            ToolMessage: ToolMessage,
           }}
         />
 
@@ -152,15 +151,6 @@ const UserMessage: FC = () => {
       </div>
 
       <BranchPicker className="col-span-full col-start-1 row-start-3 -mr-1 justify-end" />
-    </MessagePrimitive.Root>
-  );
-};
-
-const ToolMessage: FC<{ message: any }> = ({ message }) => {
-  // You can use your ToolFallback or create a more advanced UI
-  return (
-    <MessagePrimitive.Root className="w-full max-w-[var(--thread-max-width)] py-4">
-      <ToolFallback {...message.content?.[0]?.result} />
     </MessagePrimitive.Root>
   );
 };

@@ -1,4 +1,3 @@
-import { AiAssistantConversation } from '@/app/features/ai/ai-assistant-conversation';
 import { useAiAssistantChat } from '@/app/features/ai/lib/ai-assistant-chat-hook';
 import { useAiModelSelector } from '@/app/features/ai/lib/ai-model-selector-hook';
 import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
@@ -57,7 +56,6 @@ const AiAssistantChat = ({
     handleSubmit,
     status,
     createNewChat,
-    isOpenAiChatPending,
   } = useAiAssistantChat();
 
   const {
@@ -154,13 +152,6 @@ const AiAssistantChat = ({
       lastAssistantMessageRef={lastAssistantMessageRef}
     >
       <AssistantV2 />
-      {/* <AiAssistantConversation
-        messages={messages}
-        status={status}
-        isPending={isOpenAiChatPending}
-        lastUserMessageRef={lastUserMessageRef}
-        lastAssistantMessageRef={lastAssistantMessageRef}
-      /> */}
     </AiAssistantChatContainer>
   );
 };
