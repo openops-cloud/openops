@@ -94,7 +94,7 @@ describe('Engine Operations', () => {
         name: 'trigger-1',
         valid: true,
         displayName: 'Test Trigger',
-        type: TriggerType.EMPTY,
+        type: TriggerType.EMPTY as TriggerType.EMPTY,
         settings: {},
       },
     };
@@ -356,15 +356,7 @@ describe('Engine Operations', () => {
         publicUrl: 'http://public.test',
         engineToken: 'token-123',
         internalApiUrl: 'http://api.test',
-        flowVersion: {
-          id: 'flow-version-1',
-          flowId: 'flow-1',
-          trigger: {
-            name: 'trigger-1',
-            type: TriggerType.EMPTY,
-          },
-          actions: [],
-        },
+        flowVersion: mockFlowVersion,
         stepName: 'non-existent-step',
         stepTestOutputs: {},
       };
@@ -753,23 +745,10 @@ describe('Engine Operations', () => {
       const operation = {
         projectId: 'project-1',
         publicUrl: 'http://public.test',
-        flowVersion: {
-          id: 'flow-version-1',
-          flowId: 'flow-1',
-          trigger: {
-            name: 'trigger-1',
-            type: TriggerType.EMPTY,
-          },
-          actions: [
-            {
-              name: 'failed-step',
-              type: ActionType.BLOCK,
-            },
-          ],
-        },
-        stepName: 'failed-step',
-        internalApiUrl: 'http://api.test',
         engineToken: 'token-123',
+        internalApiUrl: 'http://api.test',
+        flowVersion: mockFlowVersion,
+        stepName: 'failed-step',
         stepTestOutputs: {},
       };
 
