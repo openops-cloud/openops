@@ -13,12 +13,13 @@ describe('block declaration tests', () => {
 
   test('should return block with correct number of actions', () => {
     expect(Object.keys(cloudhealth.actions()).length).toBe(4);
+
     expect(cloudhealth.actions()).toMatchObject({
       custom_rest_api_call: {
         name: 'custom_rest_api_call',
         requireAuth: true,
       },
-      get_recommendations: {
+      cloudhealth_get_recommendations: {
         name: 'cloudhealth_get_recommendations',
         requireAuth: true,
       },
@@ -26,7 +27,7 @@ describe('block declaration tests', () => {
         name: 'graphql_query',
         requireAuth: true,
       },
-      search_assets: {
+      cloudhealth_search_assets: {
         name: 'cloudhealth_search_assets',
         requireAuth: true,
       },
