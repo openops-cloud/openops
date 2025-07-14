@@ -5,6 +5,7 @@ import {
   DRAGGED_STEP_TAG,
   InvalidStepIcon,
   LoadingSpinner,
+  NODE_LABEL_OFFSET,
   OPS_NODE_SIZE,
   OverflowTooltip,
   SampleDataLabel,
@@ -156,7 +157,7 @@ const WorkflowStepNode = React.memo(
             className="absolute text-accent-foreground text-sm opacity-0 transition-all duration-300 group-hover:opacity-100"
             style={{
               top: `${OPS_NODE_SIZE.stepNode.height / 2 - 12}px`,
-              left: `calc(100% + 10px)`,
+              left: `calc(100% + ${NODE_LABEL_OFFSET}px)`,
             }}
           >
             {data.step?.name}

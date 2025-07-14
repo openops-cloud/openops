@@ -25,6 +25,7 @@ export const BRANCH_LABEL_WIDTH = 118;
 export const BRANCH_LABEL_HEIGHT = 30;
 const BUTTON_VERTICAL_OFFSET = 10;
 const BUTTON_VERTICAL_OFFSET_INSIDE_CONDITION_OR_SPLIT = 20;
+export const NODE_LABEL_OFFSET = 10;
 
 export enum WorkflowNodeType {
   LOOP_PLACEHOLDER = 'loopPlaceholder',
