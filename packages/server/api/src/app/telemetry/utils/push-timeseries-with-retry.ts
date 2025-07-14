@@ -1,5 +1,6 @@
 import { logger } from '@openops/server-shared';
-import { Timeseries, pushTimeseries } from 'prometheus-remote-write';
+import type { Timeseries } from 'prometheus-remote-write';
+import { pushTimeseries } from 'prometheus-remote-write';
 
 // Type for pushTimeseries config parameter
 export type PushTimeseriesConfig = {
@@ -8,6 +9,7 @@ export type PushTimeseriesConfig = {
 };
 
 const DEFAULT_MAX_RETRIES = 3;
+const BASE_DELAY_MS = 100;
 
 export async function pushTimeseriesWithRetry(
   timeseries: Timeseries[],
@@ -26,7 +28,7 @@ export async function pushTimeseriesWithRetry(
       retryCount++;
       if (retryCount < maxRetries) {
         logger.debug(`Retry ${retryCount} failed: ${err}`);
-        await delayFn(Math.pow(2, retryCount) * 100);
+        await delayFn(Math.pow(2, retryCount) * BASE_DELAY_MS);
       }
     }
   }

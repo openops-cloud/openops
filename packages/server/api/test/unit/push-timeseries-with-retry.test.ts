@@ -1,4 +1,5 @@
-import { Timeseries, pushTimeseries } from 'prometheus-remote-write';
+import type { Timeseries } from 'prometheus-remote-write';
+import { pushTimeseries } from 'prometheus-remote-write';
 import { pushTimeseriesWithRetry } from '../../src/app/telemetry/utils/push-timeseries-with-retry';
 
 jest.mock('prometheus-remote-write', () => ({
@@ -48,6 +49,7 @@ describe('pushTimeseriesWithRetry', () => {
     ).resolves.toBeUndefined();
     expect(pushTimeseries).toHaveBeenCalledTimes(2);
     expect(logger.debug).toHaveBeenCalledWith('Retry 1 failed: Error: fail');
+    expect(logger.debug).toHaveBeenCalledTimes(1);
     expect(mockDelayFn).toHaveBeenCalledWith(200);
   });
 
@@ -59,6 +61,7 @@ describe('pushTimeseriesWithRetry', () => {
     ).rejects.toThrow('fail');
     expect(pushTimeseries).toHaveBeenCalledTimes(2);
     expect(logger.debug).toHaveBeenCalledWith('Retry 1 failed: Error: fail');
+    expect(logger.debug).toHaveBeenCalledTimes(1);
     expect(mockDelayFn).toHaveBeenCalledWith(200);
   });
 
