@@ -1,7 +1,7 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { getAiProviderLanguageModel } from '@openops/common';
-import { encryptUtils, logger } from '@openops/server-shared';
+import { logger } from '@openops/server-shared';
 import {
+  ApplicationError,
   DeleteChatHistoryRequest,
   NewMessageRequest,
   OpenChatRequest,
@@ -20,16 +20,18 @@ import {
   sendAiChatFailureEvent,
   sendAiChatMessageSendEvent,
 } from '../../telemetry/event-models/ai';
-import { aiConfigService } from '../config/ai-config.service';
 import {
   ChatContext,
   createChatContext,
   deleteChatHistory,
   generateChatId,
-  getChatContext,
   getChatHistory,
+  getConversation,
+  getLLMConfig,
   saveChatHistory,
 } from './ai-chat.service';
+import { streamCode } from './code.service';
+import { enrichContext } from './context-enrichment.service';
 import { getSystemPrompt } from './prompts.service';
 
 export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
@@ -65,74 +67,105 @@ export const aiChatController: FastifyPluginAsyncTypebox = async (app) => {
   app.post('/conversation', NewMessageOptions, async (request, reply) => {
     const chatId = request.body.chatId;
     const projectId = request.principal.projectId;
-    const chatContext = await getChatContext(chatId);
-    if (!chatContext) {
-      return reply
-        .code(404)
-        .send('No chat session found for the provided chat ID.');
+
+    try {
+      const conversationResult = await getConversation(chatId);
+      const llmConfigResult = await getLLMConfig(projectId);
+
+      conversationResult.messages.push({
+        role: 'user',
+        content: request.body.message,
+      });
+
+      const { chatContext, messages } = conversationResult;
+      const { aiConfig, languageModel } = llmConfigResult;
+
+      pipeDataStreamToResponse(reply.raw, {
+        execute: async (dataStreamWriter) => {
+          const result = streamText({
+            model: languageModel,
+            system: await getSystemPrompt(chatContext),
+            messages,
+            ...aiConfig.modelSettings,
+            async onFinish({ response }) {
+              response.messages.forEach((r) => {
+                messages.push(getResponseObject(r));
+              });
+
+              await saveChatHistory(chatId, messages);
+            },
+          });
+
+          result.mergeIntoDataStream(dataStreamWriter);
+          sendAiChatMessageSendEvent({
+            projectId,
+            userId: request.principal.id,
+            chatId,
+            provider: aiConfig.provider,
+          });
+        },
+        onError: (error) => {
+          const errorMessage =
+            error instanceof Error ? error.message : String(error);
+
+          sendAiChatFailureEvent({
+            projectId,
+            userId: request.principal.id,
+            chatId,
+            errorMessage,
+            provider: aiConfig.provider,
+            model: aiConfig.model,
+          });
+
+          return errorMessage;
+        },
+      });
+    } catch (error) {
+      if (error instanceof ApplicationError) {
+        return reply.code(400).send({ message: error.message });
+      }
+
+      logger.error('Failed to process conversation with error: ', error);
+      return reply.code(500).send({ message: 'Internal server error' });
     }
+  });
 
-    const aiConfig = await aiConfigService.getActiveConfigWithApiKey(projectId);
-    if (!aiConfig) {
-      return reply
-        .code(404)
-        .send('No active AI configuration found for the project.');
+  app.post('/code', CodeGenerationOptions, async (request, reply) => {
+    const chatId = request.body.chatId;
+    const projectId = request.principal.projectId;
+
+    try {
+      const conversationResult = await getConversation(chatId);
+      const llmConfigResult = await getLLMConfig(projectId);
+
+      conversationResult.messages.push({
+        role: 'user',
+        content: request.body.message,
+      });
+
+      const { chatContext, messages } = conversationResult;
+      const { aiConfig, languageModel } = llmConfigResult;
+
+      const enrichedContext = request.body.additionalContext
+        ? await enrichContext(request.body.additionalContext, projectId)
+        : undefined;
+
+      const result = streamCode({
+        messages,
+        languageModel,
+        aiConfig,
+        systemPrompt: await getSystemPrompt(chatContext, enrichedContext),
+      });
+
+      return result.toTextStreamResponse();
+    } catch (error) {
+      if (error instanceof ApplicationError) {
+        return reply.code(400).send({ message: error.message });
+      }
+
+      logger.error('Failed to process code generation with error: ', error);
+      return reply.code(500).send({ message: 'Internal server error' });
     }
-
-    const apiKey = encryptUtils.decryptString(JSON.parse(aiConfig.apiKey));
-    const languageModel = await getAiProviderLanguageModel({
-      apiKey,
-      model: aiConfig.model,
-      provider: aiConfig.provider,
-      providerSettings: aiConfig.providerSettings,
-    });
-
-    const messages = await getChatHistory(chatId);
-    messages.push({
-      role: 'user',
-      content: request.body.message,
-    });
-
-    pipeDataStreamToResponse(reply.raw, {
-      execute: async (dataStreamWriter) => {
-        const result = streamText({
-          model: languageModel,
-          system: await getSystemPrompt(chatContext),
-          messages,
-          ...aiConfig.modelSettings,
-          async onFinish({ response }) {
-            response.messages.forEach((r) => {
-              messages.push(getResponseObject(r));
-            });
-
-            await saveChatHistory(chatId, messages);
-          },
-        });
-
-        result.mergeIntoDataStream(dataStreamWriter);
-        sendAiChatMessageSendEvent({
-          projectId,
-          userId: request.principal.id,
-          chatId,
-          provider: aiConfig.provider,
-        });
-      },
-      onError: (error) => {
-        const errorMessage =
-          error instanceof Error ? error.message : String(error);
-
-        sendAiChatFailureEvent({
-          projectId,
-          userId: request.principal.id,
-          chatId,
-          errorMessage,
-          provider: aiConfig.provider,
-          model: aiConfig.model,
-        });
-
-        return errorMessage;
-      },
-    });
   });
 
   app.delete(
@@ -174,6 +207,18 @@ const NewMessageOptions = {
     tags: ['ai', 'ai-chat'],
     description:
       'Send a message to the AI chat session and receive a streaming response. This endpoint processes the user message, generates an AI response using the configured language model, and maintains the conversation history.',
+    body: NewMessageRequest,
+  },
+};
+
+const CodeGenerationOptions = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
+  },
+  schema: {
+    tags: ['ai', 'ai-chat'],
+    description:
+      "Generate code based on the user's request. This endpoint processes the user message and generates a code response using the configured language model.",
     body: NewMessageRequest,
   },
 };

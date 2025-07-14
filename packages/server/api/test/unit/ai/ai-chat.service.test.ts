@@ -4,6 +4,9 @@ const setSerializedObjectMock = jest.fn();
 const deleteKeyMock = jest.fn();
 const acquireLockMock = jest.fn();
 const releaseMock = jest.fn();
+const decryptStringMock = jest.fn();
+const getActiveConfigWithApiKeyMock = jest.fn();
+const getAiProviderLanguageModelMock = jest.fn();
 
 jest.mock('@openops/server-shared', () => ({
   hashUtils: {
@@ -17,6 +20,19 @@ jest.mock('@openops/server-shared', () => ({
   distributedLock: {
     acquireLock: acquireLockMock,
   },
+  encryptUtils: {
+    decryptString: decryptStringMock,
+  },
+}));
+
+jest.mock('@openops/common', () => ({
+  getAiProviderLanguageModel: getAiProviderLanguageModelMock,
+}));
+
+jest.mock('../../../src/app/ai/config/ai-config.service', () => ({
+  aiConfigService: {
+    getActiveConfigWithApiKey: getActiveConfigWithApiKeyMock,
+  },
 }));
 
 import { CoreMessage } from 'ai';
@@ -28,6 +44,8 @@ import {
   generateChatId,
   getChatContext,
   getChatHistory,
+  getConversation,
+  getLLMConfig,
 } from '../../../src/app/ai/chat/ai-chat.service';
 
 describe('generateChatId', () => {
@@ -226,5 +244,135 @@ describe('deleteChatHistory', () => {
 
     expect(deleteKeyMock).toHaveBeenCalledTimes(1);
     expect(deleteKeyMock).toHaveBeenCalledWith(`${chatId}:history`);
+  });
+});
+
+describe('getLLMConfig', () => {
+  const projectId = 'test-project-123';
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should return aiConfig and languageModel when successful', async () => {
+    const mockAiConfig = {
+      id: 'config-123',
+      apiKey: '{"encrypted": "api-key"}',
+      model: 'gpt-4',
+      provider: 'OPENAI',
+      providerSettings: { temperature: 0.7 },
+    };
+    const mockDecryptedApiKey = 'decrypted-api-key';
+    const mockLanguageModel = { id: 'model-123', type: 'LanguageModel' };
+
+    getActiveConfigWithApiKeyMock.mockResolvedValue(mockAiConfig);
+    decryptStringMock.mockReturnValue(mockDecryptedApiKey);
+    getAiProviderLanguageModelMock.mockResolvedValue(mockLanguageModel);
+
+    const result = await getLLMConfig(projectId);
+
+    expect(getActiveConfigWithApiKeyMock).toHaveBeenCalledWith(projectId);
+    expect(decryptStringMock).toHaveBeenCalledWith(
+      JSON.parse(mockAiConfig.apiKey),
+    );
+    expect(getAiProviderLanguageModelMock).toHaveBeenCalledWith({
+      apiKey: mockDecryptedApiKey,
+      model: mockAiConfig.model,
+      provider: mockAiConfig.provider,
+      providerSettings: mockAiConfig.providerSettings,
+    });
+    expect(result).toEqual({
+      aiConfig: mockAiConfig,
+      languageModel: mockLanguageModel,
+    });
+  });
+
+  it('should throw ApplicationError when no AI configuration is found', async () => {
+    getActiveConfigWithApiKeyMock.mockResolvedValue(null);
+
+    await expect(getLLMConfig(projectId)).rejects.toThrow('ENTITY_NOT_FOUND');
+
+    expect(getActiveConfigWithApiKeyMock).toHaveBeenCalledWith(projectId);
+    expect(decryptStringMock).not.toHaveBeenCalled();
+    expect(getAiProviderLanguageModelMock).not.toHaveBeenCalled();
+  });
+
+  it('should throw ApplicationError when no AI configuration is found (undefined)', async () => {
+    getActiveConfigWithApiKeyMock.mockResolvedValue(undefined);
+
+    await expect(getLLMConfig(projectId)).rejects.toThrow('ENTITY_NOT_FOUND');
+
+    expect(getActiveConfigWithApiKeyMock).toHaveBeenCalledWith(projectId);
+    expect(decryptStringMock).not.toHaveBeenCalled();
+    expect(getAiProviderLanguageModelMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('getConversation', () => {
+  const chatId = 'chat-conversation-test';
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should return chatContext and messages when successful', async () => {
+    const mockChatContext = {
+      workflowId: 'workflow-123',
+      blockName: 'block-test',
+      stepName: 'step-test',
+      actionName: 'action-test',
+    };
+    const mockMessages: CoreMessage[] = [
+      { role: 'user', content: 'Hello' },
+      { role: 'assistant', content: 'Hi there!' },
+    ];
+
+    getSerializedObjectMock.mockResolvedValueOnce(mockChatContext);
+    getSerializedObjectMock.mockResolvedValueOnce(mockMessages);
+
+    const result = await getConversation(chatId);
+
+    expect(getSerializedObjectMock).toHaveBeenCalledWith(`${chatId}:context`);
+    expect(getSerializedObjectMock).toHaveBeenCalledWith(`${chatId}:history`);
+    expect(result).toEqual({
+      chatContext: mockChatContext,
+      messages: mockMessages,
+    });
+  });
+
+  it('should throw ApplicationError when no chat context is found', async () => {
+    getSerializedObjectMock.mockResolvedValueOnce(null);
+
+    await expect(getConversation(chatId)).rejects.toThrow('ENTITY_NOT_FOUND');
+
+    expect(getSerializedObjectMock).toHaveBeenCalledWith(`${chatId}:context`);
+    expect(getSerializedObjectMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('should throw ApplicationError when chat context is undefined', async () => {
+    getSerializedObjectMock.mockResolvedValueOnce(undefined);
+
+    await expect(getConversation(chatId)).rejects.toThrow('ENTITY_NOT_FOUND');
+
+    expect(getSerializedObjectMock).toHaveBeenCalledWith(`${chatId}:context`);
+    expect(getSerializedObjectMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('should return empty messages array when no messages are found', async () => {
+    const mockChatContext = {
+      workflowId: 'workflow-123',
+      blockName: 'block-test',
+      stepName: 'step-test',
+      actionName: 'action-test',
+    };
+
+    getSerializedObjectMock.mockResolvedValueOnce(mockChatContext);
+    getSerializedObjectMock.mockResolvedValueOnce(null);
+
+    const result = await getConversation(chatId);
+
+    expect(getSerializedObjectMock).toHaveBeenCalledWith(`${chatId}:context`);
+    expect(getSerializedObjectMock).toHaveBeenCalledWith(`${chatId}:history`);
+    expect(result).toEqual({ chatContext: mockChatContext, messages: [] });
   });
 });
