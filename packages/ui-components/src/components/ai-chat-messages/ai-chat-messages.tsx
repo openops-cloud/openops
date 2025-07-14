@@ -1,7 +1,12 @@
 import { forwardRef } from 'react';
 import { cn } from '../../lib/cn';
 import { Markdown, MarkdownCodeVariations } from '../custom';
-import { AIChatMessage, AIChatMessageRole } from './types';
+import { CodeMirrorEditor, getLanguageExtensionForCode } from '../json-editor';
+import {
+  AIChatMessage,
+  AIChatMessageContent,
+  AIChatMessageRole,
+} from './types';
 
 type AIChatMessagesProps = {
   messages: AIChatMessage[];
@@ -120,21 +125,87 @@ const MessageContent = ({
   codeVariation,
   theme,
 }: {
-  content: string;
+  content: AIChatMessageContent;
   onInject?: (code: string) => void;
   codeVariation: MarkdownCodeVariations;
   theme: string;
-}) => (
-  <Markdown
-    markdown={content}
-    withBorder={false}
-    codeVariation={codeVariation}
-    handleInject={onInject}
-    textClassName="text-sm"
-    linkClassName="text-sm"
-    theme={theme}
-  />
-);
+}) => {
+  if (typeof content === 'string') {
+    return (
+      <Markdown
+        markdown={content}
+        withBorder={false}
+        codeVariation={codeVariation}
+        handleInject={onInject}
+        textClassName="text-sm"
+        linkClassName="text-sm"
+        theme={theme}
+      />
+    );
+  }
+
+  if (content.type === 'structured') {
+    return (
+      <div className="flex flex-col gap-2">
+        {content.parts.map((part, index) => {
+          switch (part.type) {
+            case 'text':
+              return (
+                <Markdown
+                  key={index}
+                  markdown={part.content}
+                  withBorder={false}
+                  codeVariation={codeVariation}
+                  handleInject={onInject}
+                  textClassName="text-sm"
+                  linkClassName="text-sm"
+                  theme={theme}
+                />
+              );
+            case 'code':
+              return (
+                <div key={index} className="relative py-2 w-full">
+                  <CodeMirrorEditor
+                    value={part.content}
+                    readonly={true}
+                    showLineNumbers={false}
+                    height="auto"
+                    className="border border-solid rounded"
+                    containerClassName="h-auto"
+                    theme={theme}
+                    languageExtensions={getLanguageExtensionForCode(
+                      part.language ? `language-${part.language}` : undefined,
+                    )}
+                    editorLanguage={part.language}
+                  />
+                </div>
+              );
+            case 'sourcecode':
+              return (
+                <div key={index} className="relative py-2 w-full">
+                  <CodeMirrorEditor
+                    value={part.content}
+                    readonly={true}
+                    showLineNumbers={false}
+                    height="auto"
+                    className="border border-solid rounded"
+                    containerClassName="h-auto"
+                    theme={theme}
+                    showTabs={true}
+                    editorLanguage="typescript"
+                  />
+                </div>
+              );
+            default:
+              return null;
+          }
+        })}
+      </div>
+    );
+  }
+
+  return null;
+};
 
 AIChatMessages.displayName = 'AIChatMessages';
 export { AIChatMessages };

@@ -65,6 +65,22 @@ export const CLIExampleWithoutInject: Story = {
   },
 };
 
+export const SourceCodeExample: Story = {
+  args: {
+    onInject: fn(),
+    codeVariation: MarkdownCodeVariations.WithCopyAndInject,
+    messages: sampleAIChatMessages.slice(4),
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Demonstrates SourceCode message functionality with tabbed interface',
+      },
+    },
+  },
+};
+
 export const EmptyChat: Story = {
   args: {
     messages: [],

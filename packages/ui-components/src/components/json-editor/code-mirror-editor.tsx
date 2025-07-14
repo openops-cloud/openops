@@ -62,7 +62,7 @@ type CodeMirrorEditorProps = {
   height?: string;
   showLineNumbers?: boolean;
   showTabs?: boolean;
-  editorLanguage?: 'string';
+  editorLanguage?: string;
 };
 
 const isSourceCodeObject = (value: unknown): value is SourceCode => {
