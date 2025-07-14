@@ -1,4 +1,4 @@
-import { EngineOperationType, EngineResponseStatus, ExecutionType, ActionType, StepOutputStatus, flowHelper, TriggerType } from '@openops/shared';
+import { EngineOperationType, EngineResponseStatus, ExecutionType, ActionType, StepOutputStatus, flowHelper, TriggerType, PackageType, BlockType, RunEnvironment, ProgressUpdateType } from '@openops/shared';
 import { execute } from '../src/lib/operations';
 import { blockHelper } from '../src/lib/helper/block-helper';
 import { triggerHelper } from '../src/lib/helper/trigger-helper';
@@ -32,12 +32,22 @@ describe('Engine Operations', () => {
 
   describe('EXTRACT_BLOCK_METADATA operation', () => {
     it('should extract block metadata successfully', async () => {
-      const mockMetadata = { version: '1.0.0', actions: [] };
+      const mockMetadata = { 
+        name: 'test-block',
+        displayName: 'Test Block',
+        logoUrl: 'https://example.com/logo.png',
+        description: 'A test block',
+        authors: ['Test Author'],
+        version: '1.0.0', 
+        actions: {},
+        triggers: {}
+      };
       mockBlockHelper.extractBlockMetadata.mockResolvedValue(mockMetadata);
 
       const operation = {
+        packageType: PackageType.REGISTRY,
         blockName: 'test-block',
-        blockType: 'action',
+        blockType: BlockType.ACTION,
         blockVersion: '1.0.0',
       };
 
@@ -56,8 +66,9 @@ describe('Engine Operations', () => {
       mockBlockHelper.extractBlockMetadata.mockRejectedValue(new Error(errorMessage));
 
       const operation = {
+        packageType: PackageType.REGISTRY,
         blockName: 'non-existent-block',
-        blockType: 'action',
+        blockType: BlockType.ACTION,
         blockVersion: '1.0.0',
       };
 
@@ -79,7 +90,13 @@ describe('Engine Operations', () => {
     };
 
     it('should execute flow with BEGIN execution type', async () => {
-      const mockFlowResponse = { status: StepOutputStatus.SUCCEEDED, error: null };
+      const mockFlowResponse = { 
+        status: StepOutputStatus.SUCCEEDED,
+        steps: {},
+        duration: 1000,
+        tasks: 1,
+        tags: []
+      };
       mockFlowExecutor.triggerFlowExecutor.mockResolvedValue(mockFlowResponse);
 
       const operation = {
@@ -89,8 +106,12 @@ describe('Engine Operations', () => {
         flowVersion: mockFlowVersion,
         executionType: ExecutionType.BEGIN,
         triggerPayload: { data: 'test' },
-        tasks: 0,
-        steps: {},
+        engineToken: 'token-123',
+        internalApiUrl: 'http://api.test',
+        executionCorrelationId: 'corr-123',
+        runEnvironment: RunEnvironment.TESTING,
+        serverHandlerId: null,
+        progressUpdateType: ProgressUpdateType.NONE,
       };
 
       const result = await execute(EngineOperationType.EXECUTE_FLOW, operation);
@@ -98,12 +119,17 @@ describe('Engine Operations', () => {
       expect(result.status).toBe(EngineResponseStatus.OK);
       expect(result.response).toEqual({
         status: mockFlowResponse.status,
-        error: mockFlowResponse.error,
       });
     });
 
     it('should execute flow with RESUME execution type', async () => {
-      const mockFlowResponse = { status: StepOutputStatus.SUCCEEDED, error: null };
+      const mockFlowResponse = { 
+        status: StepOutputStatus.SUCCEEDED,
+        steps: {},
+        duration: 1000,
+        tasks: 1,
+        tags: []
+      };
       mockFlowExecutor.triggerFlowExecutor.mockResolvedValue(mockFlowResponse);
 
       const operation = {
@@ -121,6 +147,8 @@ describe('Engine Operations', () => {
             output: { result: 'success' },
           },
         },
+        engineToken: 'token-123',
+        internalApiUrl: 'http://api.test',
       };
 
       const result = await execute(EngineOperationType.EXECUTE_FLOW, operation);
@@ -142,6 +170,8 @@ describe('Engine Operations', () => {
         triggerPayload: {},
         tasks: 0,
         steps: {},
+        engineToken: 'token-123',
+        internalApiUrl: 'http://api.test',
       };
 
       const result = await execute(EngineOperationType.EXECUTE_FLOW, operation);
@@ -160,20 +190,23 @@ describe('Engine Operations', () => {
       const operation = {
         projectId: 'project-1',
         publicUrl: 'http://public.test',
+        engineToken: 'token-123',
+        internalApiUrl: 'http://api.test',
         block: {
+          packageType: 'REGISTRY' as const,
           blockName: 'test-block',
-          blockType: 'action',
+          blockType: 'action' as const,
           blockVersion: '1.0.0',
         },
         propertyName: 'testProperty',
+        actionOrTriggerName: 'testAction',
+        input: { testInput: 'value' },
         flowVersion: {
           id: 'flow-version-1',
           flowId: 'flow-1',
         },
-        internalApiUrl: 'http://api.test',
-        engineToken: 'token-123',
-        stepTestOutputs: {},
         searchValue: 'test',
+        stepTestOutputs: {},
       };
 
       const result = await execute(EngineOperationType.EXECUTE_PROPERTY, operation);
@@ -197,18 +230,21 @@ describe('Engine Operations', () => {
       const operation = {
         projectId: 'project-1',
         publicUrl: 'http://public.test',
+        engineToken: 'token-123',
+        internalApiUrl: 'http://api.test',
         block: {
+          packageType: 'REGISTRY' as const,
           blockName: 'test-block',
-          blockType: 'action',
+          blockType: 'action' as const,
           blockVersion: '1.0.0',
         },
         propertyName: 'testProperty',
+        actionOrTriggerName: 'testAction',
+        input: { testInput: 'value' },
         flowVersion: {
           id: 'flow-version-1',
           flowId: 'flow-1',
         },
-        internalApiUrl: 'http://api.test',
-        engineToken: 'token-123',
         stepTestOutputs: {},
       };
 
@@ -242,13 +278,28 @@ describe('Engine Operations', () => {
       mockFlowExecutor.getExecutorForAction.mockReturnValue(mockExecutor);
       mockTestExecutionContext.stateFromFlowVersion.mockResolvedValue({} as any);
       mockFlowHelper.getStep.mockReturnValue({
+        id: 'test-step-id',
         name: 'test-step',
+        valid: true,
+        displayName: 'Test Step',
         type: ActionType.BLOCK,
+        settings: {
+          packageType: 'REGISTRY' as const,
+          blockType: 'action' as const,
+          blockName: 'test-block',
+          blockVersion: '1.0.0',
+          input: {},
+          inputUiInfo: {
+            customizedInputs: {},
+          },
+        },
       });
 
       const operation = {
         projectId: 'project-1',
         publicUrl: 'http://public.test',
+        engineToken: 'token-123',
+        internalApiUrl: 'http://api.test',
         flowVersion: {
           id: 'flow-version-1',
           flowId: 'flow-1',
@@ -264,8 +315,6 @@ describe('Engine Operations', () => {
           ],
         },
         stepName: 'test-step',
-        internalApiUrl: 'http://api.test',
-        engineToken: 'token-123',
         stepTestOutputs: {},
       };
 
@@ -285,6 +334,8 @@ describe('Engine Operations', () => {
       const operation = {
         projectId: 'project-1',
         publicUrl: 'http://public.test',
+        engineToken: 'token-123',
+        internalApiUrl: 'http://api.test',
         flowVersion: {
           id: 'flow-version-1',
           flowId: 'flow-1',
@@ -295,8 +346,6 @@ describe('Engine Operations', () => {
           actions: [],
         },
         stepName: 'non-existent-step',
-        internalApiUrl: 'http://api.test',
-        engineToken: 'token-123',
         stepTestOutputs: {},
       };
 
@@ -315,13 +364,28 @@ describe('Engine Operations', () => {
       mockFlowExecutor.getExecutorForAction.mockReturnValue(mockExecutor);
       mockTestExecutionContext.stateFromFlowVersion.mockResolvedValue({} as any);
       mockFlowHelper.getStep.mockReturnValue({
+        id: 'test-step-id',
         name: 'test-step',
+        valid: true,
+        displayName: 'Test Step',
         type: ActionType.BLOCK,
+        settings: {
+          packageType: 'REGISTRY' as const,
+          blockType: 'action' as const,
+          blockName: 'test-block',
+          blockVersion: '1.0.0',
+          input: {},
+          inputUiInfo: {
+            customizedInputs: {},
+          },
+        },
       });
 
       const operation = {
         projectId: 'project-1',
         publicUrl: 'http://public.test',
+        engineToken: 'token-123',
+        internalApiUrl: 'http://api.test',
         flowVersion: {
           id: 'flow-version-1',
           flowId: 'flow-1',
@@ -337,8 +401,6 @@ describe('Engine Operations', () => {
           ],
         },
         stepName: 'test-step',
-        internalApiUrl: 'http://api.test',
-        engineToken: 'token-123',
         stepTestOutputs: {},
       };
 
@@ -357,12 +419,20 @@ describe('Engine Operations', () => {
       const operation = {
         projectId: 'project-1',
         publicUrl: 'http://public.test',
+        engineToken: 'token-123',
+        internalApiUrl: 'http://api.test',
         flowVersion: {
           id: 'flow-version-1',
           flowId: 'flow-1',
         },
-        hookType: 'WEBHOOK',
-        triggerPayload: { data: 'test' },
+        hookType: 'WEBHOOK' as const,
+        test: false,
+        webhookUrl: 'https://webhook.test',
+        triggerPayload: { 
+          body: { data: 'test' },
+          headers: {},
+          queryParams: {}
+        },
       };
 
       const result = await execute(EngineOperationType.EXECUTE_TRIGGER_HOOK, operation);
@@ -382,12 +452,20 @@ describe('Engine Operations', () => {
       const operation = {
         projectId: 'project-1',
         publicUrl: 'http://public.test',
+        engineToken: 'token-123',
+        internalApiUrl: 'http://api.test',
         flowVersion: {
           id: 'flow-version-1',
           flowId: 'flow-1',
         },
-        hookType: 'WEBHOOK',
-        triggerPayload: { data: 'test' },
+        hookType: 'WEBHOOK' as const,
+        test: false,
+        webhookUrl: 'https://webhook.test',
+        triggerPayload: { 
+          body: { data: 'test' },
+          headers: {},
+          queryParams: {}
+        },
       };
 
       const result = await execute(EngineOperationType.EXECUTE_TRIGGER_HOOK, operation);
@@ -405,6 +483,9 @@ describe('Engine Operations', () => {
       const operation = {
         projectId: 'project-1',
         publicUrl: 'http://public.test',
+        engineToken: 'token-123',
+        internalApiUrl: 'http://api.test',
+        authProperty: {},
         auth: {
           type: 'BEARER_TOKEN',
           token: 'test-token',
@@ -425,6 +506,9 @@ describe('Engine Operations', () => {
       const operation = {
         projectId: 'project-1',
         publicUrl: 'http://public.test',
+        engineToken: 'token-123',
+        internalApiUrl: 'http://api.test',
+        authProperty: {},
         auth: {
           type: 'BEARER_TOKEN',
           token: 'invalid-token',
@@ -446,11 +530,13 @@ describe('Engine Operations', () => {
       const operation = {
         projectId: 'project-1',
         publicUrl: 'http://public.test',
+        engineToken: 'token-123',
+        internalApiUrl: 'http://api.test',
         flowVersion: {
           id: 'flow-version-1',
           flowId: 'flow-1',
         },
-        variableName: 'test-variable',
+        variableExpression: 'test-variable',
         stepName: 'test-step',
       };
 
@@ -468,11 +554,14 @@ describe('Engine Operations', () => {
       const operation = {
         projectId: 'project-1',
         publicUrl: 'http://public.test',
+        engineToken: 'token-123',
+        internalApiUrl: 'http://api.test',
         flowVersion: {
           id: 'flow-version-1',
           flowId: 'flow-1',
         },
-        variableName: 'non-existent-variable',
+        variableExpression: 'non-existent-variable',
+        stepName: 'test-step',
       };
 
       const result = await execute(EngineOperationType.RESOLVE_VARIABLE, operation);
@@ -552,8 +641,17 @@ describe('Engine Operations', () => {
       mockFlowExecutor.getExecutorForAction.mockReturnValue(mockExecutor);
       mockTestExecutionContext.stateFromFlowVersion.mockResolvedValue({} as any);
       mockFlowHelper.getStep.mockReturnValue({
+        id: 'loop-step-id',
         name: 'loop-step',
+        valid: true,
+        displayName: 'Loop Step',
         type: ActionType.LOOP_ON_ITEMS,
+        settings: {
+          items: '{{items}}',
+          inputUiInfo: {
+            customizedInputs: {},
+          },
+        },
       });
 
       const operation = {
@@ -615,8 +713,21 @@ describe('Engine Operations', () => {
       mockFlowExecutor.getExecutorForAction.mockReturnValue(mockExecutor);
       mockTestExecutionContext.stateFromFlowVersion.mockResolvedValue({} as any);
       mockFlowHelper.getStep.mockReturnValue({
+        id: 'failed-step-id',
         name: 'failed-step',
+        valid: true,
+        displayName: 'Failed Step',
         type: ActionType.BLOCK,
+        settings: {
+          packageType: 'REGISTRY' as const,
+          blockType: 'action' as const,
+          blockName: 'test-block',
+          blockVersion: '1.0.0',
+          input: {},
+          inputUiInfo: {
+            customizedInputs: {},
+          },
+        },
       });
 
       const operation = {

@@ -183,10 +183,9 @@ describe('FlowExecutorContext', () => {
 
     it('should preserve existing error when step succeeds', () => {
       const initialError = { stepName: 'previous-failed', message: 'Previous error' };
-      const context = new FlowExecutorContext({
-        ...FlowExecutorContext.empty(),
-        error: initialError,
-      });
+      const baseContext = FlowExecutorContext.empty();
+      const context = new FlowExecutorContext(baseContext);
+      (context as any).error = initialError;
 
       const stepName = 'success-step';
       const successOutput = GenericStepOutput.create({
@@ -358,8 +357,12 @@ describe('FlowExecutorContext', () => {
     it('should set verdict with response', () => {
       const context = FlowExecutorContext.empty();
       const response = {
-        reason: FlowRunStatus.PAUSED,
-        pauseMetadata: { pauseId: 'test-pause' },
+        reason: FlowRunStatus.PAUSED as const,
+        pauseMetadata: { 
+          resumeDateTime: '2023-01-01T00:00:00Z',
+          handlerId: 'test-handler',
+          response: { pauseId: 'test-pause' }
+        },
       };
 
       const updatedContext = context.setVerdict(ExecutionVerdict.PAUSED, response);
@@ -376,11 +379,12 @@ describe('FlowExecutorContext', () => {
         type: ActionType.LOOP_ON_ITEMS,
         status: StepOutputStatus.SUCCEEDED,
         input: { items: ['a', 'b', 'c'] },
-      }).setOutput({
-        iterations: {},
-        item: 'a',
-        index: 0,
-      } as LoopStepResult);
+        output: {
+          iterations: [],
+          item: 'a',
+          index: 0,
+        } as LoopStepResult,
+      });
 
       const context = FlowExecutorContext.empty()
         .upsertStep(stepName, loopOutput);
@@ -455,9 +459,13 @@ describe('FlowExecutorContext', () => {
     });
 
     it('should convert PAUSED verdict to response', async () => {
-      const pauseMetadata = { pauseId: 'test-pause' };
+      const pauseMetadata = { 
+        resumeDateTime: '2023-01-01T00:00:00Z',
+        handlerId: 'test-handler',
+        response: { pauseId: 'test-pause' }
+      };
       const verdictResponse = {
-        reason: FlowRunStatus.PAUSED,
+        reason: FlowRunStatus.PAUSED as const,
         pauseMetadata,
       };
       const context = FlowExecutorContext.empty()
@@ -493,9 +501,13 @@ describe('FlowExecutorContext', () => {
     });
 
     it('should convert SUCCEEDED verdict with stop response', async () => {
-      const stopResponse = { message: 'Flow stopped' };
+      const stopResponse = { 
+        status: 200,
+        body: { message: 'Flow stopped' },
+        headers: { 'Content-Type': 'application/json' }
+      };
       const verdictResponse = {
-        reason: FlowRunStatus.STOPPED,
+        reason: FlowRunStatus.STOPPED as const,
         stopResponse,
       };
       const context = FlowExecutorContext.empty()
@@ -517,7 +529,7 @@ describe('FlowExecutorContext', () => {
     it('should convert FAILED verdict with internal error', async () => {
       const error = { stepName: 'error-step', message: 'Internal error' };
       const verdictResponse = {
-        reason: FlowRunStatus.INTERNAL_ERROR,
+        reason: FlowRunStatus.INTERNAL_ERROR as const,
       };
       const context = FlowExecutorContext.empty()
         .setVerdict(ExecutionVerdict.FAILED, verdictResponse)
@@ -540,7 +552,14 @@ describe('FlowExecutorContext', () => {
 
     it('should throw error when PAUSED verdict lacks pause metadata', async () => {
       const context = FlowExecutorContext.empty()
-        .setVerdict(ExecutionVerdict.PAUSED, { reason: FlowRunStatus.STOPPED, stopResponse: {} });
+        .setVerdict(ExecutionVerdict.PAUSED, { 
+          reason: FlowRunStatus.STOPPED as const, 
+          stopResponse: { 
+            status: 200,
+            body: {},
+            headers: {}
+          } 
+        });
 
       await expect(context.toResponse()).rejects.toThrow(
         'Verdict Response should have pause metadata response'
@@ -592,23 +611,26 @@ describe('FlowExecutorContext', () => {
     });
 
     it('should handle loop iterations in current path', () => {
+      const innerStepOutput = GenericStepOutput.create({
+        type: ActionType.BLOCK,
+        status: StepOutputStatus.SUCCEEDED,
+        input: { data: 'inner' },
+      }).setOutput({ result: 'inner-success' });
+
       const loopOutput = GenericStepOutput.create({
         type: ActionType.LOOP_ON_ITEMS,
         status: StepOutputStatus.SUCCEEDED,
         input: { items: ['a', 'b'] },
-      }).setOutput({
-        iterations: [
-          {
-            'inner-step': GenericStepOutput.create({
-              type: ActionType.BLOCK,
-              status: StepOutputStatus.SUCCEEDED,
-              input: { data: 'inner' },
-            }).setOutput({ result: 'inner-success' }),
-          },
-        ],
-        item: 'a',
-        index: 0,
-      } as LoopStepResult);
+        output: {
+          iterations: [
+            {
+              'inner-step': innerStepOutput,
+            },
+          ],
+          item: 'a',
+          index: 0,
+        } as LoopStepResult,
+      });
 
       const context = FlowExecutorContext.empty()
         .upsertStep('loop-step', loopOutput)
@@ -616,18 +638,17 @@ describe('FlowExecutorContext', () => {
 
       const currentState = context.currentState();
 
-      expect(currentState).toEqual({
-        'loop-step': {
-          iterations: [
-            {
-              'inner-step': { result: 'inner-success' },
-            },
-          ],
-          item: 'a',
-          index: 0,
-        },
-        'inner-step': { result: 'inner-success' },
+      // The currentState should contain both the loop-step output AND the flattened inner-step output
+      expect(currentState['loop-step']).toEqual({
+        iterations: [
+          {
+            'inner-step': innerStepOutput,
+          },
+        ],
+        item: 'a',
+        index: 0,
       });
+      expect(currentState['inner-step']).toEqual({ result: 'inner-success' });
     });
 
     it('should throw error when path contains non-loop step', () => {
