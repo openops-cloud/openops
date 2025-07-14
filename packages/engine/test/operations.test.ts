@@ -1,4 +1,4 @@
-import { EngineOperationType, EngineResponseStatus, ExecutionType, ActionType, StepOutputStatus, flowHelper, TriggerType, PackageType, BlockType, RunEnvironment, ProgressUpdateType } from '@openops/shared';
+import { EngineOperationType, EngineResponseStatus, ExecutionType, ActionType, StepOutputStatus, flowHelper, TriggerType, PackageType, BlockType, RunEnvironment, ProgressUpdateType, FlowRunStatus, FlowVersionState } from '@openops/shared';
 import { execute } from '../src/lib/operations';
 import { blockHelper } from '../src/lib/helper/block-helper';
 import { triggerHelper } from '../src/lib/helper/trigger-helper';
@@ -45,9 +45,9 @@ describe('Engine Operations', () => {
       mockBlockHelper.extractBlockMetadata.mockResolvedValue(mockMetadata);
 
       const operation = {
-        packageType: PackageType.REGISTRY,
+        packageType: PackageType.REGISTRY as PackageType.REGISTRY,
         blockName: 'test-block',
-        blockType: BlockType.ACTION,
+        blockType: BlockType.OFFICIAL as BlockType,
         blockVersion: '1.0.0',
       };
 
@@ -66,9 +66,9 @@ describe('Engine Operations', () => {
       mockBlockHelper.extractBlockMetadata.mockRejectedValue(new Error(errorMessage));
 
       const operation = {
-        packageType: PackageType.REGISTRY,
+        packageType: PackageType.REGISTRY as PackageType.REGISTRY,
         blockName: 'non-existent-block',
-        blockType: BlockType.ACTION,
+        blockType: BlockType.OFFICIAL as BlockType,
         blockVersion: '1.0.0',
       };
 
@@ -82,16 +82,26 @@ describe('Engine Operations', () => {
   describe('EXECUTE_FLOW operation', () => {
     const mockFlowVersion = {
       id: 'flow-version-1',
+      created: '2023-01-01T00:00:00Z',
+      updated: '2023-01-01T00:00:00Z',
       flowId: 'flow-1',
+      displayName: 'Test Flow',
+      valid: true,
+      state: FlowVersionState.DRAFT,
+      updatedBy: null,
       trigger: {
+        id: 'trigger-1',
         name: 'trigger-1',
-        type: ActionType.BLOCK,
+        valid: true,
+        displayName: 'Test Trigger',
+        type: TriggerType.EMPTY,
+        settings: {},
       },
     };
 
     it('should execute flow with BEGIN execution type', async () => {
       const mockFlowResponse = { 
-        status: StepOutputStatus.SUCCEEDED,
+        status: FlowRunStatus.SUCCEEDED as FlowRunStatus.SUCCEEDED,
         steps: {},
         duration: 1000,
         tasks: 1,
@@ -124,7 +134,7 @@ describe('Engine Operations', () => {
 
     it('should execute flow with RESUME execution type', async () => {
       const mockFlowResponse = { 
-        status: StepOutputStatus.SUCCEEDED,
+        status: FlowRunStatus.SUCCEEDED as FlowRunStatus.SUCCEEDED,
         steps: {},
         duration: 1000,
         tasks: 1,
@@ -138,17 +148,25 @@ describe('Engine Operations', () => {
         flowRunId: 'run-1',
         flowVersion: mockFlowVersion,
         executionType: ExecutionType.RESUME,
-        triggerPayload: {},
         tasks: 1,
+        resumePayload: {
+          body: {},
+          headers: {},
+          queryParams: {}
+        },
         steps: {
           'step-1': {
             type: ActionType.BLOCK,
-            status: StepOutputStatus.SUCCEEDED,
+            status: FlowRunStatus.SUCCEEDED as FlowRunStatus.SUCCEEDED,
             output: { result: 'success' },
           },
         },
         engineToken: 'token-123',
         internalApiUrl: 'http://api.test',
+        executionCorrelationId: 'corr-123',
+        runEnvironment: RunEnvironment.TESTING,
+        serverHandlerId: null,
+        progressUpdateType: ProgressUpdateType.NONE,
       };
 
       const result = await execute(EngineOperationType.EXECUTE_FLOW, operation);
@@ -168,10 +186,12 @@ describe('Engine Operations', () => {
         flowVersion: mockFlowVersion,
         executionType: ExecutionType.BEGIN,
         triggerPayload: {},
-        tasks: 0,
-        steps: {},
         engineToken: 'token-123',
         internalApiUrl: 'http://api.test',
+        executionCorrelationId: 'corr-123',
+        runEnvironment: RunEnvironment.TESTING,
+        serverHandlerId: null,
+        progressUpdateType: ProgressUpdateType.NONE,
       };
 
       const result = await execute(EngineOperationType.EXECUTE_FLOW, operation);
@@ -193,9 +213,9 @@ describe('Engine Operations', () => {
         engineToken: 'token-123',
         internalApiUrl: 'http://api.test',
         block: {
-          packageType: 'REGISTRY' as const,
+          packageType: PackageType.REGISTRY as PackageType.REGISTRY,
           blockName: 'test-block',
-          blockType: 'action' as const,
+          blockType: BlockType.OFFICIAL as BlockType,
           blockVersion: '1.0.0',
         },
         propertyName: 'testProperty',
@@ -233,9 +253,9 @@ describe('Engine Operations', () => {
         engineToken: 'token-123',
         internalApiUrl: 'http://api.test',
         block: {
-          packageType: 'REGISTRY' as const,
+          packageType: PackageType.REGISTRY as PackageType.REGISTRY,
           blockName: 'test-block',
-          blockType: 'action' as const,
+          blockType: BlockType.OFFICIAL as BlockType,
           blockVersion: '1.0.0',
         },
         propertyName: 'testProperty',
@@ -259,7 +279,7 @@ describe('Engine Operations', () => {
     it('should execute step successfully', async () => {
       const mockStepOutput = {
         type: ActionType.BLOCK,
-        status: StepOutputStatus.SUCCEEDED,
+        status: FlowRunStatus.SUCCEEDED as FlowRunStatus.SUCCEEDED,
         output: { result: 'success' },
         input: { data: 'test' },
       };
@@ -284,8 +304,8 @@ describe('Engine Operations', () => {
         displayName: 'Test Step',
         type: ActionType.BLOCK,
         settings: {
-          packageType: 'REGISTRY' as const,
-          blockType: 'action' as const,
+          packageType: PackageType.REGISTRY as PackageType.REGISTRY,
+          blockType: BlockType.OFFICIAL as BlockType,
           blockName: 'test-block',
           blockVersion: '1.0.0',
           input: {},
@@ -370,8 +390,8 @@ describe('Engine Operations', () => {
         displayName: 'Test Step',
         type: ActionType.BLOCK,
         settings: {
-          packageType: 'REGISTRY' as const,
-          blockType: 'action' as const,
+          packageType: PackageType.REGISTRY as PackageType.REGISTRY,
+          blockType: BlockType.OFFICIAL as BlockType,
           blockName: 'test-block',
           blockVersion: '1.0.0',
           input: {},
@@ -618,7 +638,7 @@ describe('Engine Operations', () => {
     it('should clean loop sample data correctly', async () => {
       const mockStepOutput = {
         type: ActionType.LOOP_ON_ITEMS,
-        status: StepOutputStatus.SUCCEEDED,
+        status: FlowRunStatus.SUCCEEDED as FlowRunStatus.SUCCEEDED,
         output: {
           item: 'test-item',
           index: 0,
@@ -719,8 +739,8 @@ describe('Engine Operations', () => {
         displayName: 'Failed Step',
         type: ActionType.BLOCK,
         settings: {
-          packageType: 'REGISTRY' as const,
-          blockType: 'action' as const,
+          packageType: PackageType.REGISTRY as PackageType.REGISTRY,
+          blockType: BlockType.OFFICIAL as BlockType,
           blockName: 'test-block',
           blockVersion: '1.0.0',
           input: {},
