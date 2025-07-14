@@ -25,7 +25,6 @@ import {
   RiskLevel,
   StepRunResponse,
 } from '@openops/shared';
-
 import {
   setStepOutputCache,
   stepTestOutputCache,
@@ -84,16 +83,16 @@ const TestActionSection = React.memo(
         );
         if (stepResponse.success) {
           setErrorMessage(undefined);
-          setStepOutputCache({
-            stepId: formValues.id,
-            flowVersionId,
-            output: stepResponse.output,
-            input: stepResponse.input,
-            queryClient,
-          });
         } else {
           setErrorMessage(testStepUtils.formatErrorMessage(formattedResponse));
         }
+        setStepOutputCache({
+          stepId: formValues.id,
+          flowVersionId,
+          output: stepResponse.output,
+          input: stepResponse.input,
+          queryClient,
+        });
       },
       onError: (error) => {
         console.error(error);

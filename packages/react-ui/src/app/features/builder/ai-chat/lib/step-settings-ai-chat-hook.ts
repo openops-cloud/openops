@@ -61,7 +61,7 @@ export const useStepSettingsAiChat = (
     stop: stopChat,
   } = useChat({
     id: chatSessionKey,
-    api: 'api/v1/ai/chat/conversation',
+    api: 'api/v1/ai/conversation',
     maxSteps: 5,
     body: {
       chatId: openChatResponse?.chatId,
