@@ -5,6 +5,7 @@ import { useToast } from '../../ui/use-toast';
 
 import { javascript } from '@codemirror/lang-javascript';
 import { json } from '@codemirror/lang-json';
+// import { shell } from '@codemirror/legacy-modes/mode/shell';
 import { Extension } from '@uiw/react-codemirror';
 import { t } from 'i18next';
 import { Copy, Plus } from 'lucide-react';
@@ -70,9 +71,13 @@ const getLanguageExtensionForCode = (className?: string): Extension[] => {
     className.includes('language-ts')
   )
     return [javascript({ typescript: true })];
-  if (className.includes('language-jsx')) return [javascript({ jsx: true })];
-  if (className.includes('language-tsx'))
-    return [javascript({ jsx: true, typescript: true })];
+
+  // if (
+  //   className.includes('language-bash') ||
+  //   className.includes('language-sh') ||
+  //   className.includes('language-shell')
+  // )
+  //   return [shell];
 
   return [];
 };
@@ -95,7 +100,9 @@ const CodeViewer = ({
       className="border border-solid rounded"
       containerClassName="h-auto"
       theme={theme}
+      // todo languag prop
       languageExtensions={getLanguageExtensionForCode(className)}
+      showTabs={typeof content !== 'string' && 'packageJson' in content}
     />
   );
 };

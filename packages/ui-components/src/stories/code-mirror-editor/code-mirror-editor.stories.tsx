@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { Controller, useForm } from 'react-hook-form';
 
+import { SourceCode } from '@openops/shared';
 import { CodeMirrorEditor } from '../../components/json-editor';
 import { tryParseJson } from '../../lib/json-utils';
 
@@ -15,14 +16,10 @@ const meta = {
     layout: 'centered',
   },
   decorators: [
-    (Story) => {
+    (Story, { args }) => {
       const form = useForm({
         defaultValues: {
-          jsonContent: {
-            name: 'John Doe',
-            age: 30,
-            email: 'john.doe@example.com',
-          },
+          content: args.value,
         },
       });
 
@@ -31,18 +28,35 @@ const meta = {
           <form>
             <Controller
               control={form.control}
-              name="jsonContent"
-              render={({ field }) => (
-                <Story
-                  args={
-                    {
-                      value: field.value,
-                      onChange: (value: string) =>
-                        field.onChange(tryParseJson(value)),
-                    } as any
-                  }
-                />
-              )}
+              name="content"
+              render={({ field }) => {
+                // For JSON stories, display the object as formatted JSON string
+                const displayValue = (args as any).parseJson
+                  ? JSON.stringify(field.value, null, 2)
+                  : field.value;
+
+                return (
+                  <Story
+                    args={
+                      {
+                        ...args,
+                        value: displayValue,
+                        onChange: (value: unknown) => {
+                          // Handle JSON string parsing if needed
+                          if (
+                            (args as any).parseJson &&
+                            typeof value === 'string'
+                          ) {
+                            field.onChange(tryParseJson(value));
+                          } else {
+                            field.onChange(value);
+                          }
+                        },
+                      } as any
+                    }
+                  />
+                );
+              }}
             />
           </form>
         </div>
@@ -56,82 +70,46 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 /**
- * The default view of the JSON editor, allowing users to edit JSON content with syntax highlighting.
+ * String input - shows a single editor without tabs
  */
-export const Default: Story = {
+export const StringInput: Story = {
   args: {
+    value: 'echo "Hello World"',
+    theme: 'light',
     readonly: false,
+    showTabs: false,
   } as any,
 };
 
 /**
- * The JSON editor with complex nested JSON data.
+ * SourceCode object with tabs - shows Code and Dependencies tabs
  */
-export const ComplexJson: Story = {
-  args: {} as any,
-  decorators: [
-    (Story) => {
-      const form = useForm({
-        defaultValues: {
-          jsonContent: {
-            id: '12345',
-            created_at: '2023-01-01T12:00:00Z',
-            user: {
-              id: 'user_789',
-              name: 'Jane Smith',
-              email: 'jane.smith@example.com',
-              settings: {
-                notifications: {
-                  email: true,
-                  push: false,
-                  sms: true,
-                },
-                theme: 'dark',
-                language: 'en-US',
-              },
-            },
-            items: [
-              {
-                id: 'item_1',
-                name: 'Product A',
-                price: 19.99,
-                quantity: 2,
-              },
-              {
-                id: 'item_2',
-                name: 'Product B',
-                price: 29.99,
-                quantity: 1,
-              },
-            ],
-            total: 69.97,
-            status: 'completed',
-          },
-        },
-      });
+export const SourceCodeWithTabs: Story = {
+  args: {
+    value: {
+      code: 'export const greeting = "Hello World!";\nconsole.log(greeting);',
+      packageJson:
+        '{\n  "name": "example",\n  "version": "1.0.0",\n  "dependencies": {\n    "lodash": "^4.17.21"\n  }\n}',
+    } as SourceCode,
+    theme: 'light',
+    readonly: false,
+    showTabs: true,
+  } as any,
+};
 
-      return (
-        <div style={{ width: '600px' }}>
-          <form>
-            <Controller
-              control={form.control}
-              name="jsonContent"
-              render={({ field }) => (
-                <Story
-                  args={
-                    {
-                      value: field.value,
-                      onChange: (value: string) =>
-                        field.onChange(tryParseJson(value)),
-                      readonly: false,
-                    } as any
-                  }
-                />
-              )}
-            />
-          </form>
-        </div>
-      );
+/**
+ * JSON data as string - for backward compatibility with parsing
+ */
+export const JsonAsString: Story = {
+  args: {
+    value: {
+      name: 'John Doe',
+      age: 30,
+      email: 'john.doe@example.com',
     },
-  ],
+    theme: 'light',
+    readonly: false,
+    showTabs: false,
+    parseJson: true,
+  } as any,
 };
