@@ -12,6 +12,7 @@ import { cn } from '../../lib/cn';
 
 import { SourceCode } from '@openops/shared';
 import { t } from 'i18next';
+import { convertToString, isSourceCodeObject } from './code-mirror-utils';
 
 const styleTheme = EditorView.baseTheme({
   '&.cm-editor.cm-focused': {
@@ -19,41 +20,11 @@ const styleTheme = EditorView.baseTheme({
   },
 });
 
-const convertToString = (value: unknown): string => {
-  if (typeof value === 'string') {
-    return value;
-  }
-  try {
-    return JSON.stringify(value, null, 2);
-  } catch (error) {
-    if (
-      error instanceof Error &&
-      error.message.includes('circular structure')
-    ) {
-      const seen = new WeakSet();
-      return JSON.stringify(
-        value,
-        (_, val) => {
-          if (typeof val === 'object' && val !== null) {
-            if (seen.has(val)) {
-              return '';
-            }
-            seen.add(val);
-          }
-          return val;
-        },
-        2,
-      );
-    }
-    return String(value);
-  }
-};
-
 type CodeMirrorEditorProps = {
-  value: SourceCode | unknown;
+  value: unknown;
   readonly?: boolean;
   onFocus?: (ref: RefObject<ReactCodeMirrorRef>) => void;
-  onChange?: (value: SourceCode | unknown) => void;
+  onChange?: (value: unknown) => void;
   className?: string;
   containerClassName?: string;
   theme: string;
@@ -63,17 +34,6 @@ type CodeMirrorEditorProps = {
   showLineNumbers?: boolean;
   showTabs?: boolean;
   editorLanguage?: string;
-};
-
-const isSourceCodeObject = (value: unknown): value is SourceCode => {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    'code' in value &&
-    'packageJson' in value &&
-    typeof (value as any).code === 'string' &&
-    typeof (value as any).packageJson === 'string'
-  );
 };
 
 const CodeMirrorEditor = React.memo(

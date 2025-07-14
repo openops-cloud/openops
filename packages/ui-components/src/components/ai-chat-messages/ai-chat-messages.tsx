@@ -148,11 +148,22 @@ const MessageContent = ({
     return (
       <div className="flex flex-col gap-2">
         {content.parts.map((part, index) => {
+          const getContentPreview = () => {
+            if (typeof part.content === 'string') {
+              return part.content.substring(0, 20).replace(/\s/g, '');
+            }
+            if (typeof part.content === 'object' && part.content.code) {
+              return part.content.code.substring(0, 20).replace(/\s/g, '');
+            }
+            return 'unknown';
+          };
+          const stableKey = `${part.type}-${index}-${getContentPreview()}`;
+
           switch (part.type) {
             case 'text':
               return (
                 <Markdown
-                  key={index}
+                  key={stableKey}
                   markdown={part.content}
                   withBorder={false}
                   codeVariation={codeVariation}
@@ -164,7 +175,7 @@ const MessageContent = ({
               );
             case 'code':
               return (
-                <div key={index} className="relative py-2 w-full">
+                <div key={stableKey} className="relative py-2 w-full">
                   <CodeMirrorEditor
                     value={part.content}
                     readonly={true}
@@ -173,16 +184,13 @@ const MessageContent = ({
                     className="border border-solid rounded"
                     containerClassName="h-auto"
                     theme={theme}
-                    languageExtensions={getLanguageExtensionForCode(
-                      part.language ? `language-${part.language}` : undefined,
-                    )}
                     editorLanguage={part.language}
                   />
                 </div>
               );
             case 'sourcecode':
               return (
-                <div key={index} className="relative py-2 w-full">
+                <div key={stableKey} className="relative py-2 w-full">
                   <CodeMirrorEditor
                     value={part.content}
                     readonly={true}
@@ -192,6 +200,9 @@ const MessageContent = ({
                     containerClassName="h-auto"
                     theme={theme}
                     showTabs={true}
+                    languageExtensions={getLanguageExtensionForCode(
+                      'typescript',
+                    )}
                     editorLanguage="typescript"
                   />
                 </div>
