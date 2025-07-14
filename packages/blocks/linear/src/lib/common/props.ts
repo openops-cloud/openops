@@ -2,6 +2,8 @@ import { LinearDocument } from '@linear/sdk';
 import { Property } from '@openops/blocks-framework';
 import { makeClient } from './client';
 
+const LABELS_PAGE_SIZE = 100;
+
 type PaginatedResponse<T> = {
   nodes: T[] | Promise<T[]>;
   pageInfo: {
@@ -102,20 +104,34 @@ export const props = {
       description: 'Labels for the Issue',
       displayName: 'Labels',
       required,
-      refreshers: ['auth'],
-      options: async ({ auth }) => {
+      refreshers: ['auth', 'team_id'],
+      options: async ({ auth, team_id }) => {
         if (!auth) {
           return {
             disabled: true,
-            placeholder: 'connect your account first',
+            placeholder: 'Connect your account first',
+            options: [],
+          };
+        }
+        if (!team_id) {
+          return {
+            disabled: true,
+            placeholder: 'Select a team to load labels',
             options: [],
           };
         }
         const client = makeClient(auth as string);
         const allLabels = await fetchAllPaginatedItems((cursor) =>
           client.listIssueLabels({
+            filter: {
+              team: {
+                id: {
+                  eq: team_id as string,
+                },
+              },
+            },
             orderBy: LinearDocument.PaginationOrderBy.UpdatedAt,
-            first: 100,
+            first: LABELS_PAGE_SIZE,
             after: cursor,
           }),
         );
