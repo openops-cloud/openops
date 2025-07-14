@@ -184,6 +184,9 @@ const MessageContent = ({
                     className="border border-solid rounded"
                     containerClassName="h-auto"
                     theme={theme}
+                    languageExtensions={getLanguageExtensionForCode(
+                      part.language,
+                    )}
                     editorLanguage={part.language}
                   />
                 </div>
