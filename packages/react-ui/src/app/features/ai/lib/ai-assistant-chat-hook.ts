@@ -2,7 +2,7 @@ import { QueryKeys } from '@/app/constants/query-keys';
 import { aiAssistantChatApi } from '@/app/features/ai/lib/ai-assistant-chat-api';
 import { authenticationSession } from '@/app/lib/authentication-session';
 import { useAppStore } from '@/app/store/app-store';
-import { Message, useChat } from '@ai-sdk/react';
+import { useChat } from '@ai-sdk/react';
 import { toast } from '@openops/components/ui';
 import { OpenChatResponse } from '@openops/shared';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -45,9 +45,8 @@ export const useAiAssistantChat = () => {
     maxSteps: 5,
     body: {
       chatId: openChatResponse?.chatId,
-      // messages: messages,
     },
-    initialMessages: openChatResponse?.messages as Message[],
+    initialMessages: openChatResponse?.messages as any,
     initialInput: aiChatInput,
     experimental_prepareRequestBody: () => ({
       chatId: openChatResponse?.chatId,

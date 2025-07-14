@@ -1,17 +1,12 @@
-// import { AssistantV2 } from '@/app/features/ai/assistant-v2';
 import { UseChatHelpers } from '@ai-sdk/react';
-import { t } from 'i18next';
-import { Bot } from 'lucide-react';
 import { ReactNode, useEffect, useRef } from 'react';
 import { cn } from '../../lib/cn';
-import { ScrollArea } from '../../ui/scroll-area';
 import { AIChatMessageRole } from '../ai-chat-messages';
 import { BoxSize, ResizableArea } from '../resizable-area';
-import { AiChatInput, ChatStatus } from './ai-chat-input';
-import { AiChatSizeTogglers } from './ai-chat-size-togglers';
+import { ChatStatus } from './ai-chat-input';
 import { AiModelSelectorProps } from './ai-model-selector';
 import { AiScopeItem } from './ai-scope-selector';
-import { getBufferAreaHeight, getLastUserMessageId } from './ai-scroll-helpers';
+import { getLastUserMessageId } from './ai-scroll-helpers';
 import { AI_CHAT_CONTAINER_SIZES, AiAssistantChatSizeState } from './types';
 import {
   useScrollToBottomOnOpen,
@@ -49,29 +44,13 @@ const AiAssistantChatContainer = ({
   dimensions,
   setDimensions,
   maxSize,
-  toggleAiChatState,
   aiChatSize,
   showAiChat,
-  onCloseClick,
-  onCreateNewChatClick,
   isEmpty = true,
   className,
   children,
   messages = [],
-  handleInputChange,
   handleSubmit,
-  input,
-  availableModels,
-  selectedModel,
-  onModelSelected,
-  isModelSelectorLoading,
-  status,
-  lastUserMessageRef,
-  lastAssistantMessageRef,
-  scopeOptions,
-  onAiScopeItemRemove,
-  selectedScopeItems,
-  onScopeSelected,
 }: AiAssistantChatContainerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollViewportRef = useRef<HTMLDivElement>(null);
@@ -110,26 +89,6 @@ const AiAssistantChatContainer = ({
     scrollViewportRef,
   });
 
-  // const height = dimensions.height ?? 0;
-  // const lastMsgHeight = lastUserMessageRef.current?.offsetHeight ?? 0;
-  // const currentBufferAreaHeight = streamingEndRef.current?.offsetHeight ?? 0;
-  // const lastAssistantMsgHeight =
-  //   lastAssistantMessageRef?.current?.offsetHeight ?? 0;
-
-  // const hasNewMessage =
-  //   lastUserMessageIndex.current !== null &&
-  //   lastUserMessageIndex.current !== messages.length - 2;
-
-  // const bufferAreaHeight = hasNewMessage
-  //   ? getBufferAreaHeight(
-  //       height,
-  //       currentBufferAreaHeight,
-  //       lastMsgHeight,
-  //       lastAssistantMsgHeight,
-  //       status,
-  //     )
-  //   : 0;
-
   return (
     <div
       ref={containerRef}
@@ -164,78 +123,6 @@ const AiAssistantChatContainer = ({
         scrollAreaClassName="pr-0"
       >
         {children}
-        {/* <div className="h-full flex flex-col">
-          <div className="flex justify-between items-center px-4 py-2 gap-2 text-md dark:text-primary font-bold border-b border-gray-200">
-            <div className="flex items-center gap-2">
-              <div className="size-8 flex justify-center items-center bg-background bg-gradient-to-b from-ring/40 to-primary-200/40 rounded-xl">
-                <Bot size={20} />
-              </div>
-              {t('AI Assistant')}
-            </div>
-            <div className="flex items-center gap-2">
-              <AiChatSizeTogglers
-                state={aiChatSize}
-                toggleContainerSizeState={toggleAiChatState}
-                onCloseClick={onCloseClick}
-                enableNewChat={!isEmpty}
-                onNewChatClick={onCreateNewChatClick}
-              />
-            </div>
-          </div>
-          <div className="overflow-hidden flex-1">
-            <div className="py-4 flex flex-col h-full">
-              <ScrollArea
-                className="h-full w-full flex-1"
-                viewPortRef={scrollViewportRef}
-              >
-                <div className="h-full w-full px-6 flex flex-col flex-1">
-                  {isEmpty ? (
-                    <div
-                      className={
-                        'flex-1 flex flex-col items-center justify-center gap-1'
-                      }
-                    >
-                      <span className="inline-block max-w-[220px] text-center dark:text-primary text-base font-bold leading-[25px]">
-                        {t('Welcome to')}
-                        <br />
-                        {t('OpenOps AI Assistant!')}
-                      </span>
-                      <span className="text-[14px] font-normal">
-                        {t('How can I help you today?')}
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col">
-                      {children}
-                      <div
-                        ref={streamingEndRef}
-                        id="streaming-end"
-                        style={{
-                          height: bufferAreaHeight,
-                        }}
-                      />
-                    </div>
-                  )}
-                </div>
-              </ScrollArea>
-              <AiChatInput
-                input={input}
-                handleInputChange={handleInputChange}
-                handleSubmit={handleSubmit}
-                availableModels={availableModels}
-                selectedModel={selectedModel}
-                onModelSelected={onModelSelected}
-                isModelSelectorLoading={isModelSelectorLoading}
-                placeholder={t('Type your question here…')}
-                status={status}
-                scopeOptions={scopeOptions}
-                onAiScopeItemRemove={onAiScopeItemRemove}
-                selectedScopeItems={selectedScopeItems}
-                onScopeSelected={onScopeSelected}
-              />
-            </div>
-          </div>
-        </div> */}
       </ResizableArea>
     </div>
   );
