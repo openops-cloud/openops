@@ -97,8 +97,10 @@ export const getAssetMetadataAction = createAction({
         'Content-Type': 'application/json',
       },
       queryParams: {
-        assetType,
-        fields: fields.map((f) => `${f.fieldName}=${f.value}`).join('&'),
+        name: assetType,
+        fields: ((fields as any).fields ?? [])
+          .map((f: any) => `${f.fieldName}=${f.value}`)
+          .join('&'),
         api_version: '2',
       },
     });
@@ -120,7 +122,7 @@ async function getAssetFields(
     },
   });
 
-  return response.body.map((field: any) => ({
+  return response.body?.attributes?.map((field: any) => ({
     name: field.name,
     type: field.type,
   }));
