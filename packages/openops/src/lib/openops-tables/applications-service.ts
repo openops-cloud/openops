@@ -1,8 +1,4 @@
-import {
-  axiosTablesRetryConfig,
-  createAxiosHeaders,
-  makeOpenOpsTablesGet,
-} from './requests-helpers';
+import { createAxiosHeaders, makeOpenOpsTablesGet } from './requests-helpers';
 import { Application } from './types';
 
 export const OPENOPS_DEFAULT_DATABASE_NAME = 'OpenOps Dataset';
@@ -17,7 +13,6 @@ export async function getDefaultDatabaseId(
     await makeOpenOpsTablesGet<Application>(
       `api/applications/`,
       authenticationHeader,
-      axiosTablesRetryConfig,
     );
 
   const defaultDatabase: Application | undefined = getTablesResult

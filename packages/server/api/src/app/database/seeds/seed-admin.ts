@@ -1,7 +1,4 @@
-import {
-  authenticateDefaultUserInOpenOpsTables,
-  axiosTablesRetryConfig,
-} from '@openops/common';
+import { authenticateDefaultUserInOpenOpsTables } from '@openops/common';
 import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { OrganizationRole, User } from '@openops/shared';
 import { authenticationService } from '../../authentication/authentication-service';
@@ -48,9 +45,7 @@ async function createAdmin(email: string, password: string) {
     newsLetter: false,
   });
 
-  const { token } = await authenticateDefaultUserInOpenOpsTables(
-    axiosTablesRetryConfig,
-  );
+  const { token } = await authenticateDefaultUserInOpenOpsTables();
 
   const { workspaceId, databaseId } =
     await openopsTables.createDefaultWorkspaceAndDatabase(token);

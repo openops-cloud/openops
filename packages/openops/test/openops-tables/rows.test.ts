@@ -102,7 +102,6 @@ describe('getRows', () => {
     expect(makeOpenOpsTablesGetMock).toHaveBeenCalledWith(
       'api/database/rows/table/1/?user_field_names=true',
       'some header',
-      expectRetryConfig,
     );
     expect(createAxiosHeadersMock).toBeCalledTimes(1);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
@@ -135,7 +134,6 @@ describe('getRows', () => {
     expect(makeOpenOpsTablesGetMock).toHaveBeenCalledWith(
       'api/database/rows/table/1/?user_field_names=true&filter__name1__boolean=value+field+1&filter__name2__equal=2&filter_type=AND',
       'some header',
-      expectRetryConfig,
     );
     expect(createAxiosHeadersMock).toBeCalledTimes(1);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
@@ -168,7 +166,6 @@ describe('getRows', () => {
     expect(makeOpenOpsTablesGetMock).toHaveBeenCalledWith(
       'api/database/rows/table/1/?user_field_names=true',
       'some header',
-      expectRetryConfig,
     );
     expect(createAxiosHeadersMock).toBeCalledTimes(1);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
@@ -221,7 +218,6 @@ describe('update row', () => {
       'api/database/rows/table/1/2/?user_field_names=true',
       { 'some field name one': 'value field1', 'some field name two': 2 },
       'some header',
-      expectRetryConfig,
     );
     expect(createAxiosHeadersMock).toBeCalledTimes(1);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
@@ -272,7 +268,6 @@ describe('add row', () => {
       'api/database/rows/table/1/?user_field_names=true',
       { 'some field name one': 'value field1', 'some field name two': 2 },
       'some header',
-      expectRetryConfig,
     );
     expect(createAxiosHeadersMock).toBeCalledTimes(1);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
@@ -316,7 +311,6 @@ describe('delete row', () => {
     expect(makeOpenOpsTablesDeleteMock).toHaveBeenCalledWith(
       'api/database/rows/table/1/2/',
       'some header',
-      expectRetryConfig,
     );
     expect(createAxiosHeadersMock).toBeCalledTimes(1);
     expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
@@ -354,7 +348,6 @@ describe('getRowByPrimaryKeyValue', () => {
       expect(makeOpenOpsTablesGetMock).toHaveBeenCalledWith(
         `api/database/rows/table/1/?user_field_names=true&filter__primaryFieldName__${expected}=primaryKeyValue`,
         'some header',
-        expectRetryConfig,
       );
       expect(createAxiosHeadersMock).toBeCalledTimes(1);
       expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
@@ -392,7 +385,6 @@ describe('getRowByPrimaryKeyValue', () => {
       expect(makeOpenOpsTablesGetMock).toHaveBeenCalledWith(
         `api/database/rows/table/1/?user_field_names=true&filter__primaryFieldName__${expected}=primaryKeyValue`,
         'some header',
-        expectRetryConfig,
       );
       expect(createAxiosHeadersMock).toBeCalledTimes(1);
       expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
