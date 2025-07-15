@@ -511,12 +511,12 @@ describe('flowRunUtils.extractLoopItemStepOutput', () => {
   };
 
   it('processes loop item output correctly', () => {
-    const loopIndexes = { loopStep: 1 };
+    const loopIndexes = { loopStep: 0 };
     const output = {
       loopStep: {
         type: ActionType.LOOP_ON_ITEMS,
         input: { items: ['item0', 'item1', 'item2'] },
-        output: { index: 2 },
+        output: { index: 1 },
       },
     };
 
@@ -531,8 +531,35 @@ describe('flowRunUtils.extractLoopItemStepOutput', () => {
       type: ActionType.LOOP_ON_ITEMS,
       input: { items: ['item0', 'item1', 'item2'] },
       output: {
-        item: 'item1',
-        index: 2,
+        item: 'item0',
+        index: 1,
+      },
+    });
+  });
+
+  it('processes loop item output correctly 123', () => {
+    const loopIndexes = { loopStep: 2 };
+    const output = {
+      loopStep: {
+        type: ActionType.LOOP_ON_ITEMS,
+        input: { items: ['item0', 'item1', 'item2'] },
+        output: { index: 3 },
+      },
+    };
+
+    const result = flowRunUtils.extractLoopItemStepOutput(
+      'loopStep',
+      loopIndexes,
+      output as any,
+      trigger as any,
+    );
+
+    expect(result).toEqual({
+      type: ActionType.LOOP_ON_ITEMS,
+      input: { items: ['item0', 'item1', 'item2'] },
+      output: {
+        item: 'item2',
+        index: 3,
       },
     });
   });
