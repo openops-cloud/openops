@@ -21,7 +21,10 @@ import { flowRunUtils } from '../../flow-runs/lib/flow-run-utils';
 import { RUN_DETAILS_STEP_CARD_ID_PREFIX } from './constants';
 import { FlowStepDetailsCardItem } from './flow-step-details-card-item';
 import { FlowStepInputOutput } from './flow-step-input-output';
-import { getRunMessage } from './run-details-helpers';
+import {
+  getExecutedStepsInDefinitionOrder,
+  getRunMessage,
+} from './run-details-helpers';
 
 const FlowRunDetails = React.memo(() => {
   const { data: rententionDays } = flagsHooks.useFlag<number>(
@@ -37,8 +40,11 @@ const FlowRunDetails = React.memo(() => {
     selectedStep,
     selectStepByName,
   ] = useBuilderStateContext((state) => {
-    const steps =
-      state.run && state.run.steps ? Object.keys(state.run.steps) : [];
+    const steps = getExecutedStepsInDefinitionOrder(
+      state.run,
+      state.flowVersion,
+    );
+
     return [
       state.setLeftSidebar,
       state.run,

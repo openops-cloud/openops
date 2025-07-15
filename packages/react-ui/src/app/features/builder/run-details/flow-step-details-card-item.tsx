@@ -20,6 +20,7 @@ import { useCenterWorkflowViewOntoStep } from '@/app/features/builder/hooks/cent
 import { StepStatusIcon } from '@/app/features/flow-runs/components/step-status-icon';
 import { RUN_DETAILS_STEP_CARD_ID_PREFIX } from './constants';
 import { LoopIterationInput } from './loop-iteration-input';
+import { getChildStepsInDefinitionOrder } from './run-details-helpers';
 
 type FlowStepDetailsCardProps = {
   stepName: string;
@@ -80,13 +81,27 @@ const FlowStepDetailsCardItem = ({
 
   const isStepSelected = selectedStep === stepName;
 
-  const children =
-    stepOutput &&
-    stepOutput.output &&
-    stepOutput.type === ActionType.LOOP_ON_ITEMS &&
-    stepOutput.output.iterations[loopsIndexes[stepName]]
-      ? Object.keys(stepOutput.output.iterations[loopsIndexes[stepName]])
-      : [];
+  const children = useMemo(() => {
+    if (
+      stepOutput &&
+      stepOutput.output &&
+      stepOutput.type === ActionType.LOOP_ON_ITEMS &&
+      stepOutput.output.iterations[loopsIndexes[stepName]]
+    ) {
+      const definitionOrder = getChildStepsInDefinitionOrder(
+        stepName,
+        flowVersion,
+      );
+      const executedSteps = Object.keys(
+        stepOutput.output.iterations[loopsIndexes[stepName]],
+      );
+
+      return definitionOrder.filter((stepName) =>
+        executedSteps.includes(stepName),
+      );
+    }
+    return [];
+  }, [stepOutput, loopsIndexes, stepName, flowVersion]);
 
   const { stepMetadata } = blocksHooks.useStepMetadata({
     step: step,
