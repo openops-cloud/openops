@@ -1,10 +1,8 @@
 import { SourceCode } from '@openops/shared';
 import { t } from 'i18next';
-import { Copy, Plus } from 'lucide-react';
 import { forwardRef } from 'react';
-import { useCopyToClipboard } from '../../hooks/use-copy-to-clipboard';
 import { cn } from '../../lib/cn';
-import { Button } from '../../ui/button';
+import { CodeActions } from '../code-actions';
 import { Markdown, MarkdownCodeVariations } from '../custom';
 import { CodeMirrorEditor, getLanguageExtensionForCode } from '../json-editor';
 import {
@@ -135,7 +133,6 @@ const MessageContent = ({
   codeVariation: MarkdownCodeVariations;
   theme: string;
 }) => {
-  const { copyToClipboard } = useCopyToClipboard();
   if (typeof content === 'string') {
     return (
       <Markdown
@@ -196,30 +193,13 @@ const MessageContent = ({
                     )}
                     editorLanguage="typescript"
                   />
-                  <div className="flex gap-2 items-center justify-end mt-1">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="rounded p-2 inline-flex items-center justify-center text-xs font-sans"
-                      onClick={() => {
-                        if (onInject) {
-                          onInject(part.content);
-                        }
-                      }}
-                    >
-                      <Plus className="w-4 h-4" />
-                      {t('Use code')}
-                    </Button>
-
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="rounded p-2 inline-flex items-center justify-center"
-                      onClick={() => copyToClipboard(part.content?.code ?? '')}
-                    >
-                      <Copy className="w-4 h-4" />
-                    </Button>
-                  </div>
+                  <CodeActions
+                    content={part.content?.code ?? ''}
+                    onInject={
+                      onInject ? (_) => onInject(part.content) : undefined
+                    }
+                    injectButtonText={t('Use code')}
+                  />
                 </div>
               );
             default:

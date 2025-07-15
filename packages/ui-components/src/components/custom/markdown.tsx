@@ -3,12 +3,13 @@ import { Alert, AlertDescription } from '../../ui/alert';
 import { Button } from '../../ui/button';
 
 import { t } from 'i18next';
-import { Copy, Plus } from 'lucide-react';
+import { Copy } from 'lucide-react';
 import React, { useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import validator from 'validator';
 import { useCopyToClipboard } from '../../hooks/use-copy-to-clipboard';
 import { cn } from '../../lib/cn';
+import { CodeActions } from '../code-actions';
 import { CodeMirrorEditor } from '../json-editor';
 import { getLanguageExtensionForCode } from '../json-editor/code-mirror-utils';
 import { CodeVariations, MarkdownCodeVariations } from './types';
@@ -202,29 +203,20 @@ const Markdown = React.memo(
                     </Button>
                   )}
                   {multilineVariation && (
-                    <div className="flex gap-2 items-center justify-end mt-1">
-                      {codeVariation ===
-                        MarkdownCodeVariations.WithCopyAndInject && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="rounded p-2 inline-flex items-center justify-center text-xs font-sans"
-                          onClick={() => onInjectCode(codeContent)}
-                        >
-                          <Plus className="w-4 h-4" />
-                          {t('Inject command')}
-                        </Button>
-                      )}
-
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="rounded p-2 inline-flex items-center justify-center"
-                        onClick={() => copyToClipboard(codeContent)}
-                      >
-                        <Copy className="w-4 h-4" />
-                      </Button>
-                    </div>
+                    <CodeActions
+                      content={codeContent}
+                      onInject={
+                        codeVariation ===
+                        MarkdownCodeVariations.WithCopyAndInject
+                          ? () => onInjectCode(codeContent)
+                          : undefined
+                      }
+                      injectButtonText={t('Inject command')}
+                      showInjectButton={
+                        codeVariation ===
+                        MarkdownCodeVariations.WithCopyAndInject
+                      }
+                    />
                   )}
                 </div>
               );
