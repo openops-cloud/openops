@@ -218,25 +218,6 @@ export const ASSET_CONFIGS = {
   },
 } as const;
 
-// function buildProcessingFlags(
-//   assetType: AssetType,
-// ): { key: string; value: string }[] {
-//   const flags: { key: string; value: string }[] = [];
-
-//   const burstableTypes: AssetType[] = [
-//     'AWS_EC2',
-//     'AWS_RDS',
-//     'AWS_ELASTICACHE',
-//     'AWS_REDSHIFT',
-//     'AZURE_VM',
-//   ];
-//   if (burstableTypes.includes(assetType)) {
-//     flags.push({ key: 'recommendBurstable', value: 'true' });
-//   }
-
-//   return flags;
-// }
-
 function generateRightsizingQuery(assetType: AssetType): string {
   const config = ASSET_CONFIGS[assetType];
 
@@ -288,7 +269,7 @@ function generateRightsizingQuery(assetType: AssetType): string {
 
 function generateQueryVariables(
   assetType: AssetType,
-  mandatoryFields: Record<string, string[]>,
+  additionalFilters: Record<string, any>,
   evaluationDuration: string,
   options: {
     returnAllInstances?: boolean;
@@ -305,12 +286,12 @@ function generateQueryVariables(
     returnAllInstances: options.returnAllInstances ?? false,
   };
 
-  const filterCriteria = Object.entries(mandatoryFields).map(
-    ([field, values]) => ({
+  const filterCriteria = Object.entries(additionalFilters)
+    .filter(([, value]) => value !== null && value !== undefined)
+    .map(([field, value]) => ({
       name: field,
-      values,
-    }),
-  );
+      values: [typeof value === 'string' ? value : String(value)],
+    }));
 
   if (filterCriteria.length > 0) {
     requestInput['filterOptions'] = { otherCriteria: filterCriteria };
@@ -318,7 +299,7 @@ function generateQueryVariables(
 
   const variables: Record<string, any> = {
     requestInput,
-    sortRules: [{ field: 'projectedMonthlySavings', direction: 'DESC' }],
+    sortRules: [],
     first: options.first,
     after: options.after,
   };
@@ -328,7 +309,7 @@ function generateQueryVariables(
 
 export function generateQuery(
   assetType: AssetType,
-  mandatoryFields: Record<string, string[]>,
+  additionalFilters: Record<string, any>,
   evaluationDuration: string,
   options: {
     returnAllInstances?: boolean;
@@ -340,7 +321,7 @@ export function generateQuery(
     query: generateRightsizingQuery(assetType),
     variables: generateQueryVariables(
       assetType,
-      mandatoryFields,
+      additionalFilters,
       evaluationDuration,
       options,
     ),

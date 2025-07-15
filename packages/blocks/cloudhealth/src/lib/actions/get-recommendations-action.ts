@@ -118,7 +118,7 @@ async function aws_account_id(
   }
 
   return Property.StaticDropdown({
-    displayName: 'AWS Account ID',
+    displayName: 'Filter by AWS Account ID',
     description: 'The AWS account ID to filter recommendations by.',
     required: false,
     options: {
@@ -126,7 +126,7 @@ async function aws_account_id(
       disabled: disabled,
       options: awsAccounts.map((account: any) => ({
         label: account.name,
-        value: `${account.id}`,
+        value: account.id,
       })),
     },
   });
@@ -147,7 +147,7 @@ async function azure_subscription_id(
   }
 
   return Property.StaticDropdown({
-    displayName: 'Azure Subscription ID',
+    displayName: 'Filter by Azure Subscription ID',
     description: 'The Azure subscription ID to filter recommendations by.',
     required: false,
     options: {
@@ -155,7 +155,7 @@ async function azure_subscription_id(
       disabled: disabled,
       options: azureSubscriptions.map((subscription: any) => ({
         label: subscription.name,
-        value: `${subscription.id}`,
+        value: subscription.id,
       })),
     },
   });
