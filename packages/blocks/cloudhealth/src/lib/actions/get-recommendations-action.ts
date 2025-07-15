@@ -126,7 +126,7 @@ async function aws_account_id(
       disabled: disabled,
       options: awsAccounts.map((account: any) => ({
         label: account.name,
-        value: account.id,
+        value: `${account.id}`,
       })),
     },
   });
@@ -155,7 +155,7 @@ async function azure_subscription_id(
       disabled: disabled,
       options: azureSubscriptions.map((subscription: any) => ({
         label: subscription.name,
-        value: subscription.id,
+        value: `${subscription.id}`,
       })),
     },
   });
