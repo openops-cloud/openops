@@ -13,7 +13,6 @@ const SampleDataIcon = () => {
     >
       <Info
         className="min-w-4 w-4 h-4 text-blueAccent"
-        role="img"
         aria-label={t('Step contains sample data')}
       />
     </TooltipWrapper>
