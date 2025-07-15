@@ -42,7 +42,6 @@ describe('createOpportunityTable', () => {
       'api/database/fields/1/',
       { name: 'ID', type: 'uuid' },
       'some header',
-      expect.any(Object),
     );
 
     const expectedCalls = [
@@ -133,7 +132,6 @@ describe('createOpportunityTable', () => {
         'api/database/fields/table/1/',
         call,
         'some header',
-        expect.any(Object),
       );
     });
   });
