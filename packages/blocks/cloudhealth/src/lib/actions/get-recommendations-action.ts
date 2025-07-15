@@ -43,24 +43,26 @@ export const getRecommendationsAction = createAction({
           return {} as any;
         }
 
-        const result = mandatoryFieldNames.map(async (field) => {
+        const result: Record<string, any> = {};
+        for (const field of mandatoryFieldNames) {
           switch (field) {
-            case 'aws_account_id':
-              return {
-                aws_account_id: aws_account_id(await getAwsAccounts(auth)),
-              };
-            case 'azure_subscription_id':
-              return {
-                azure_subscription_id: azure_subscription_id(
-                  await getAzureSubscriptions(auth),
-                ),
-              };
+            case 'aws_account_id': {
+              result['aws_account_id'] = await aws_account_id(auth);
+              break;
+            }
+            case 'azure_subscription_id': {
+              result['azure_subscription_id'] = await azure_subscription_id(
+                auth,
+              );
+              break;
+            }
             case 'cloud_provider':
-              return { cloud_provider: cloud_provider() };
+              result['cloud_provider'] = cloud_provider();
+              break;
             default:
-              return {};
+              break;
           }
-        });
+        }
 
         return result;
       },
@@ -101,15 +103,27 @@ export const getRecommendationsAction = createAction({
   },
 });
 
-function aws_account_id(
-  awsAccounts: unknown[],
-): StaticDropdownProperty<string, boolean> {
+async function aws_account_id(
+  apiKey: string,
+): Promise<StaticDropdownProperty<string, boolean>> {
+  let awsAccounts: unknown[] = [];
+  let error: string | undefined;
+  let disabled = false;
+
+  try {
+    awsAccounts = await getAwsAccounts(apiKey);
+  } catch (e) {
+    disabled = true;
+    error = extractErrorMessage(e);
+  }
+
   return Property.StaticDropdown({
     displayName: 'AWS Account ID',
     description: 'The AWS account ID to filter recommendations by.',
     required: false,
     options: {
-      disabled: false,
+      error: error,
+      disabled: disabled,
       options: awsAccounts.map((account: any) => ({
         label: account.name,
         value: account.id,
@@ -118,15 +132,27 @@ function aws_account_id(
   });
 }
 
-function azure_subscription_id(
-  azureSubscriptions: unknown[],
-): StaticDropdownProperty<string, boolean> {
+async function azure_subscription_id(
+  apiKey: string,
+): Promise<StaticDropdownProperty<string, boolean>> {
+  let azureSubscriptions: unknown[] = [];
+  let error: string | undefined;
+  let disabled = false;
+
+  try {
+    azureSubscriptions = await getAzureSubscriptions(apiKey);
+  } catch (e) {
+    disabled = true;
+    error = extractErrorMessage(e);
+  }
+
   return Property.StaticDropdown({
     displayName: 'Azure Subscription ID',
     description: 'The Azure subscription ID to filter recommendations by.',
     required: false,
     options: {
-      disabled: false,
+      error: error,
+      disabled: disabled,
       options: azureSubscriptions.map((subscription: any) => ({
         label: subscription.name,
         value: subscription.id,
@@ -148,4 +174,18 @@ function cloud_provider(): StaticDropdownProperty<string, boolean> {
       ],
     },
   });
+}
+
+function extractErrorMessage(
+  e: unknown,
+  defaultMsg = 'An unknown error occurred',
+): string {
+  if (e instanceof Error && e.message) {
+    return e.message;
+  }
+
+  if (typeof e === 'string' && e.trim() !== '') {
+    return e;
+  }
+  return defaultMsg;
 }
