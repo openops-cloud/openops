@@ -199,12 +199,19 @@ export const useStepSettingsAiChat = (
     ],
   );
 
+  const getStatus = useCallback(() => {
+    if (isCodeBlock) {
+      return isCodeGenerating ? 'streaming' : 'ready';
+    }
+    return status;
+  }, [isCodeBlock, isCodeGenerating, status]);
+
   return {
     messages,
     input,
     handleInputChange,
     handleSubmit: isCodeBlock ? handleCodeSubmit : handleSubmit,
-    status: isCodeBlock ? (isCodeGenerating ? 'streaming' : 'ready') : status,
+    status: getStatus(),
     onNewChatClick,
     enableNewChat,
     isOpenAiChatPending,
