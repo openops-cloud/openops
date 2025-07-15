@@ -267,28 +267,28 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         ? await enrichContext(request.body.additionalContext, projectId)
         : undefined;
 
+      const prompt = await getBlockSystemPrompt(chatContext, enrichedContext);
+
       const result = streamCode({
         messages,
         languageModel,
         aiConfig,
-        systemPrompt: await getBlockSystemPrompt(chatContext, enrichedContext),
-      });
-
-      result.object
-        .then(async (object) => {
+        systemPrompt: prompt,
+        onFinish: async (result) => {
           const assistantMessage: CoreMessage = {
             role: 'assistant',
-            content: JSON.stringify(object),
+            content: JSON.stringify(result.object),
           };
 
           await saveChatHistory(chatId, userId, projectId, [
             ...messages,
             assistantMessage,
           ]);
-        })
-        .catch((error) => {
-          logger.error('Failed to save chat history', error);
-        });
+        },
+        onError: (error) => {
+          logger.error('Failed to generate code', error);
+        },
+      });
 
       return result.toTextStreamResponse();
     } catch (error) {
