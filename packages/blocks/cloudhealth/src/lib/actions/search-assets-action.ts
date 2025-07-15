@@ -2,6 +2,7 @@ import { httpClient, HttpMethod } from '@openops/blocks-common';
 import { createAction, Property } from '@openops/blocks-framework';
 import { cloudhealthAuth } from '../auth';
 import { BASE_CH_URL } from '../common/base-url';
+import { extractErrorMessage } from '../common/extract-error-message';
 import { getAssetTypes } from '../common/get-asset-types';
 
 const BASE_ASSET_URL = `${BASE_CH_URL}/api`;
@@ -26,9 +27,20 @@ export const searchAssetsAction = createAction({
           };
         }
 
-        const assetTypes = await getAssetTypes(auth);
+        let error: string | undefined = undefined;
+        let disabled = false;
+        let assetTypes: string[] = [];
+
+        try {
+          assetTypes = await getAssetTypes(auth);
+        } catch (e) {
+          error = extractErrorMessage(e);
+          disabled = true;
+        }
 
         return {
+          error: error,
+          disabled: disabled,
           options: assetTypes.map((type) => ({
             label: type,
             value: type,
@@ -46,10 +58,19 @@ export const searchAssetsAction = createAction({
         }
         const properties: { [key: string]: any } = {};
 
-        const assetFields = await getAssetFields(
-          auth as any,
-          assetType as unknown as string,
-        );
+        let error: string | undefined = undefined;
+        let assetFields: { name: string }[] = [];
+        let disabled = false;
+
+        try {
+          assetFields = await getAssetFields(
+            auth as any,
+            assetType as unknown as string,
+          );
+        } catch (e) {
+          error = extractErrorMessage(e);
+          disabled = true;
+        }
 
         properties['fields'] = Property.Array({
           displayName: 'Fields to filter by',
@@ -59,6 +80,8 @@ export const searchAssetsAction = createAction({
               displayName: 'Field name',
               required: true,
               options: {
+                error: error,
+                disabled: disabled,
                 options: assetFields.map((f) => ({
                   label: f.name,
                   value: f.name,
@@ -97,7 +120,7 @@ export const searchAssetsAction = createAction({
       },
     });
 
-    return response;
+    return response.body;
   },
 });
 

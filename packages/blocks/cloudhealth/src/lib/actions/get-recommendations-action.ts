@@ -5,6 +5,7 @@ import {
 } from '@openops/blocks-framework';
 import { cloudhealthAuth } from '../auth';
 import { executeGraphQLQuery } from '../common/execute-graphql-query';
+import { extractErrorMessage } from '../common/extract-error-message';
 import { getAwsAccounts } from '../common/get-aws-accounts';
 import { getAzureSubscriptions } from '../common/get-azure-subscriptions';
 import {
@@ -174,18 +175,4 @@ function cloud_provider(): StaticDropdownProperty<string, boolean> {
       ],
     },
   });
-}
-
-function extractErrorMessage(
-  e: unknown,
-  defaultMsg = 'An unknown error occurred',
-): string {
-  if (e instanceof Error && e.message) {
-    return e.message;
-  }
-
-  if (typeof e === 'string' && e.trim() !== '') {
-    return e;
-  }
-  return defaultMsg;
 }
