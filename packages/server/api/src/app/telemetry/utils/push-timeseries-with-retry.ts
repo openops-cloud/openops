@@ -1,7 +1,6 @@
 import { logger } from '@openops/server-shared';
 import { pushTimeseries, Timeseries } from 'prometheus-remote-write';
 
-// Type for pushTimeseries config parameter
 export type PushTimeseriesConfig = {
   url: string;
   headers?: Record<string, string>;
