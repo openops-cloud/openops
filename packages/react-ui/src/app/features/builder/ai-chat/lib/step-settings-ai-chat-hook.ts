@@ -5,11 +5,10 @@ import {
   useChat,
   experimental_useObject as useObject,
 } from '@ai-sdk/react';
-import { toast } from '@openops/components/ui';
+import { AIChatMessage, toast } from '@openops/components/ui';
 import {
   Action,
   ActionType,
-  CodeSchema,
   codeSchema,
   flowHelper,
   FlowVersion,
@@ -78,7 +77,7 @@ export const useStepSettingsAiChat = (
     body: {
       chatId: openChatResponse?.chatId,
     },
-    initialMessages: openChatResponse?.messages as Message[],
+    initialMessages: openChatResponse?.messages as AIChatMessage[],
     experimental_prepareRequestBody: () => ({
       chatId: openChatResponse?.chatId,
       message: input,
@@ -89,27 +88,50 @@ export const useStepSettingsAiChat = (
   });
 
   const { submit: submitCodeRequest, isLoading: isCodeGenerating } = useObject({
-    api: 'api/v1/ai/chat/code',
+    id: `code-${chatSessionKey}`,
+    api: 'api/v1/ai/conversation/code',
     schema: codeSchema,
     headers: {
       Authorization: `Bearer ${authenticationSession.getToken()}`,
       'Content-Type': 'application/json',
     },
-
-    onFinish: ({ object }: { object: CodeSchema | undefined }) => {
+    onFinish: ({ object }: { object: any }) => {
       if (object) {
-        const assistantMessage: Message = {
+        const parts = [];
+
+        if (object.code || object.packageJson) {
+          parts.push({
+            type: 'sourcecode' as const,
+            content: {
+              packageJson: object.packageJson || '',
+              code: object.code || '',
+            },
+          });
+        }
+
+        if (object.description) {
+          parts.push({
+            type: 'text' as const,
+            content: object.description,
+          });
+        }
+
+        const assistantMessage: AIChatMessage = {
           id: nanoid(),
           role: 'assistant',
-          content:
-            `\`\`\`typescript\n${object.code}\n\`\`\`\n\n${object.description}` +
-            '\n\n' +
-            `\`\`\`json\n${object.packageJson}\n\`\`\``,
-          createdAt: new Date(),
+          content: { parts },
         };
 
         setMessages((prev) => [...prev, assistantMessage]);
       }
+    },
+    onError: (error) => {
+      toast({
+        title: t('Code generation failed'),
+        description: error.message || 'An unexpected error occurred',
+        duration: 5000,
+      });
+      console.error(error);
     },
   });
 
@@ -163,7 +185,6 @@ export const useStepSettingsAiChat = (
 
       if (!input.trim()) return;
 
-      // Add user message to chat
       const userMessage: Message = {
         id: nanoid(),
         role: 'user',

@@ -8,7 +8,6 @@ export enum AIChatMessageRole {
 export type AIChatMessageContent =
   | string
   | {
-      type: 'structured';
       parts: (
         | { type: 'text'; content: string }
         | { type: 'code'; content: string; language?: string }

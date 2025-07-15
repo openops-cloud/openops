@@ -46,9 +46,13 @@ const StepSettingsAiConversation = ({
         message.role.toLowerCase() === 'user'
           ? AIChatMessageRole.user
           : AIChatMessageRole.assistant,
-      content: Array.isArray(message.content)
-        ? message.content.map((c) => c.text).join()
-        : message.content,
+      content:
+        // todo
+        typeof message.content === 'string'
+          ? message.content
+          : Array.isArray(message.content)
+          ? message.content.map((c) => c.text).join()
+          : message.content,
     }));
   }, [messages]);
 
@@ -66,9 +70,9 @@ const StepSettingsAiConversation = ({
         lastAssistantMessageRef={lastAssistantMessageRef}
         theme={theme}
       />
-      {[ChatStatus.STREAMING, ChatStatus.SUBMITTED].includes(status) && (
-        <LoadingSpinner />
-      )}
+      {[ChatStatus.STREAMING, ChatStatus.SUBMITTED].includes(
+        status as ChatStatus,
+      ) && <LoadingSpinner />}
     </div>
   );
 };

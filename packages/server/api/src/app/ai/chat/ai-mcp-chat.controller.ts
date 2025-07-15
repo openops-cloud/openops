@@ -274,6 +274,19 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         systemPrompt: await getBlockSystemPrompt(chatContext, enrichedContext),
       });
 
+      result.object
+        .then(async (object) => {
+          await saveChatHistory(chatId, userId, projectId, [
+            {
+              role: 'assistant',
+              content: JSON.stringify(object),
+            },
+          ]);
+        })
+        .catch((error) => {
+          logger.error('Failed to save chat history', error);
+        });
+
       return result.toTextStreamResponse();
     } catch (error) {
       return handleError(error, reply, 'code generation');
