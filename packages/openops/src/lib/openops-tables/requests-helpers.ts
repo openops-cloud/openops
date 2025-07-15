@@ -159,7 +159,6 @@ export async function makeOpenOpsTablesRequest<T>(
   url?: string,
   retryConfigs = axiosTablesRetryConfig,
 ): Promise<T> {
-  console.warn('retryConfigs', retryConfigs);
   const baseUrl = system.get(AppSystemProp.OPENOPS_TABLES_API_URL);
 
   return await makeHttpRequest(
