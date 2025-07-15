@@ -29,10 +29,11 @@ import {
 describe('axios request', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    systemMock.get.mockReturnValue('http://mockapi.com');
+    systemMock.get.mockReturnValue('https://mockapi.com');
   });
 
   const header = new AxiosHeaders({ some: 'header' });
+  const TEST_URL = 'https://mockapi.com/openops-tables/test/route/api';
 
   const retryConfigTestCases = [
     {
@@ -65,7 +66,7 @@ describe('axios request', () => {
       expect(result).toEqual([{ next: undefined }]);
       expect(httpRequestMock).toHaveBeenCalledWith(
         'GET',
-        'http://mockapi.com/openops-tables/test/route/api',
+        TEST_URL,
         header,
         undefined,
         expectedRetryConfig,
@@ -88,7 +89,7 @@ describe('axios request', () => {
       expect(result).toEqual('mockResult');
       expect(httpRequestMock).toHaveBeenCalledWith(
         'PATCH',
-        'http://mockapi.com/openops-tables/test/route/api',
+        TEST_URL,
         header,
         { body: 'info' },
         expectedRetryConfig,
@@ -111,7 +112,7 @@ describe('axios request', () => {
       expect(result).toEqual('mockResult');
       expect(httpRequestMock).toHaveBeenCalledWith(
         'POST',
-        'http://mockapi.com/openops-tables/test/route/api',
+        TEST_URL,
         header,
         { body: 'info' },
         expectedRetryConfig,
@@ -134,7 +135,7 @@ describe('axios request', () => {
       expect(result).toEqual('mockResult');
       expect(httpRequestMock).toHaveBeenCalledWith(
         'PUT',
-        'http://mockapi.com/openops-tables/test/route/api',
+        TEST_URL,
         header,
         { body: 'info' },
         expectedRetryConfig,
@@ -156,7 +157,7 @@ describe('axios request', () => {
       expect(result).toEqual('mockResult');
       expect(httpRequestMock).toHaveBeenCalledWith(
         'DELETE',
-        'http://mockapi.com/openops-tables/test/route/api',
+        TEST_URL,
         header,
         undefined,
         expectedRetryConfig,
@@ -196,7 +197,7 @@ describe('axios request', () => {
       expect(httpRequestMock).toHaveBeenNthCalledWith(
         1,
         'GET',
-        'http://mockapi.com/openops-tables/test/route/api',
+        TEST_URL,
         header,
         undefined,
         expectedRetryConfig,
