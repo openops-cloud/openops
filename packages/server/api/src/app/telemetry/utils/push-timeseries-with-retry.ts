@@ -27,7 +27,7 @@ export async function pushTimeseriesWithRetry(
       lastError = err;
       retryCount++;
       if (retryCount < maxRetries) {
-        logger.debug(`Retry ${retryCount} failed: ${err}`);
+        logger.debug(`Retry ${retryCount}`, { error: err });
         await delayFn(Math.pow(2, retryCount) * BASE_DELAY_MS);
       }
     }
