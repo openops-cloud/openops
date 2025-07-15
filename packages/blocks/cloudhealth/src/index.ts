@@ -7,6 +7,7 @@ import { getGcpProjectsAction } from './lib/actions/get-gcp-projections-action';
 import { getRecommendationsAction } from './lib/actions/get-recommendations-action';
 import { graphqlAction } from './lib/actions/graphql-action';
 import { searchAssetsAction } from './lib/actions/search-assets-action';
+import { tagAssetAction } from './lib/actions/tag-asset-action';
 import { cloudhealthAuth } from './lib/auth';
 import { BASE_CH_URL } from './lib/common/base-url';
 
@@ -23,6 +24,7 @@ export const cloudhealth = createBlock({
     getGcpProjectsAction,
     getRecommendationsAction,
     searchAssetsAction,
+    tagAssetAction,
 
     createCustomApiCallAction({
       baseUrl: () => `${BASE_CH_URL}/`,

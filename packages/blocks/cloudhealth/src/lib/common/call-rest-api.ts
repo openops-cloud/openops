@@ -15,3 +15,20 @@ export async function makeGetRequest<T = unknown>(
   });
   return response.body;
 }
+
+export async function makePostRequest<T = unknown>(
+  apiKey: string,
+  path: string,
+  body: unknown,
+): Promise<T> {
+  const response = await httpClient.sendRequest<T>({
+    method: HttpMethod.POST,
+    url: `${BASE_CH_URL}${path}`,
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: body,
+  });
+  return response.body;
+}

@@ -2,6 +2,7 @@ import { httpClient, HttpMethod } from '@openops/blocks-common';
 import { createAction, Property } from '@openops/blocks-framework';
 import { cloudhealthAuth } from '../auth';
 import { BASE_CH_URL } from '../common/base-url';
+import { getAssetTypes } from '../common/get-asset-types';
 
 const BASE_ASSET_URL = `${BASE_CH_URL}/api`;
 
@@ -25,17 +26,10 @@ export const searchAssetsAction = createAction({
           };
         }
 
-        const assetTypes = await httpClient.sendRequest<string[]>({
-          method: HttpMethod.GET,
-          url: BASE_ASSET_URL,
-          headers: {
-            Authorization: `Bearer ${auth}`,
-            'Content-Type': 'application/json',
-          },
-        });
+        const assetTypes = await getAssetTypes(auth);
 
         return {
-          options: assetTypes.body.map((type) => ({
+          options: assetTypes.map((type) => ({
             label: type,
             value: type,
           })),
@@ -56,8 +50,6 @@ export const searchAssetsAction = createAction({
           auth as any,
           assetType as unknown as string,
         );
-
-        console.log('Asset fields:', assetFields);
 
         properties['fields'] = Property.Array({
           displayName: 'Fields to filter by',
