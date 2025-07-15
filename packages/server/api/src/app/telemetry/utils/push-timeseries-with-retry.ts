@@ -44,9 +44,5 @@ export async function pushTimeseriesWithRetry(
       }
     }
   }
-  if (lastError instanceof Error) {
-    throw lastError;
-  } else {
-    throw new Error(`Unknown error: ${String(lastError)}`);
-  }
+  throw lastError;
 }
