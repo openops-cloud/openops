@@ -98,8 +98,8 @@ export const searchAssetsAction = createAction({
       },
       queryParams: {
         name: assetType,
-        fields: ((fields as any).fields ?? [])
-          .map((f: any) => `${f.fieldName}=${f.value}`)
+        query: ((fields as any).fields ?? [])
+          .map((f: any) => `${f.fieldName}='${f.value}'`)
           .join('&'),
         api_version: '2',
       },

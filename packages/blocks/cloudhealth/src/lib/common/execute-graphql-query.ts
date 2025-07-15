@@ -39,7 +39,14 @@ export async function executeGraphQLQuery<T>({
   }
 
   if (!response.ok) {
-    errorMessages.push(`GraphQL request failed: ${response.statusText}`);
+    errorMessages.push(
+      `GraphQL request failed.
+      Request: ${JSON.stringify({
+        query,
+        variables,
+      })}.
+      Response: ${response.statusText}`,
+    );
   }
 
   if (errorMessages.length > 0) {
