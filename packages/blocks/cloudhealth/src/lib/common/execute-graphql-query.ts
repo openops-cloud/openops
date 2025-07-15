@@ -28,7 +28,12 @@ export async function executeGraphQLQuery<T>({
   if (result.errors) {
     errorMessages.push(
       `GraphQL Error: ${result.errors
-        .map((error: any) => error.message)
+        .map(
+          (error: any) =>
+            error.message +
+            '\n' +
+            (error.extensions?.errorMessages?.join(', ') || ''),
+        )
         .join(' | ')}`,
     );
   }

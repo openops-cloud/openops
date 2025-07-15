@@ -1,6 +1,12 @@
-import { createAction, Property } from '@openops/blocks-framework';
+import {
+  createAction,
+  Property,
+  StaticDropdownProperty,
+} from '@openops/blocks-framework';
 import { cloudhealthAuth } from '../auth';
 import { executeGraphQLQuery } from '../common/execute-graphql-query';
+import { getAwsAccounts } from '../common/get-aws-accounts';
+import { getAzureSubscriptions } from '../common/get-azure-subscriptions';
 import {
   ASSET_CONFIGS,
   generateQuery,
@@ -28,23 +34,35 @@ export const getRecommendationsAction = createAction({
       description: 'Additional filters to apply to the recommendations.',
       required: false,
       refreshers: ['recommendationType'],
-      props: async (context: any) => {
-        const { recommendationType } = context.propsValue as any;
-
-        const mandatoryFields =
+      props: async ({ auth, recommendationType }: any) => {
+        const mandatoryFieldNames =
           ASSET_CONFIGS[recommendationType as keyof typeof ASSET_CONFIGS]
             .mandatoryFields;
 
-        if (!mandatoryFields) {
+        if (!mandatoryFieldNames || mandatoryFieldNames.length === 0) {
           return {} as any;
         }
 
-        return mandatoryFields.reduce((acc, key) => {
-          if (key in MANDATORY_FIELDS) {
-            acc[key] = MANDATORY_FIELDS[key as keyof typeof MANDATORY_FIELDS];
+        const result = mandatoryFieldNames.map(async (field) => {
+          switch (field) {
+            case 'aws_account_id':
+              return {
+                aws_account_id: aws_account_id(await getAwsAccounts(auth)),
+              };
+            case 'azure_subscription_id':
+              return {
+                azure_subscription_id: azure_subscription_id(
+                  await getAzureSubscriptions(auth),
+                ),
+              };
+            case 'cloud_provider':
+              return { cloud_provider: cloud_provider() };
+            default:
+              return {};
           }
-          return acc;
-        }, {} as Record<string, (typeof MANDATORY_FIELDS)[keyof typeof MANDATORY_FIELDS]>);
+        });
+
+        return result;
       },
     }),
     evaluationDuration: Property.StaticDropdown({
@@ -83,28 +101,44 @@ export const getRecommendationsAction = createAction({
   },
 });
 
-export const MANDATORY_FIELDS = {
-  aws_account_id: Property.Dropdown({
+function aws_account_id(
+  awsAccounts: unknown[],
+): StaticDropdownProperty<string, boolean> {
+  return Property.StaticDropdown({
     displayName: 'AWS Account ID',
-    description: 'The AWS account ID for the asset.',
-    required: true,
-    refreshers: ['auth', 'recommendationType'],
-    options: async ({ auth }: any) => {
-      return [] as any;
+    description: 'The AWS account ID to filter recommendations by.',
+    required: false,
+    options: {
+      disabled: false,
+      options: awsAccounts.map((account: any) => ({
+        label: account.name,
+        value: account.id,
+      })),
     },
-  }),
-  azure_subscription_id: Property.Dropdown({
+  });
+}
+
+function azure_subscription_id(
+  azureSubscriptions: unknown[],
+): StaticDropdownProperty<string, boolean> {
+  return Property.StaticDropdown({
     displayName: 'Azure Subscription ID',
-    description: 'The Azure subscription ID for the asset.',
-    required: true,
-    refreshers: ['auth', 'recommendationType'],
-    options: async ({ auth }: any) => {
-      return [] as any;
+    description: 'The Azure subscription ID to filter recommendations by.',
+    required: false,
+    options: {
+      disabled: false,
+      options: azureSubscriptions.map((subscription: any) => ({
+        label: subscription.name,
+        value: subscription.id,
+      })),
     },
-  }),
-  cloud_provider: Property.StaticDropdown({
+  });
+}
+
+function cloud_provider(): StaticDropdownProperty<string, boolean> {
+  return Property.StaticDropdown({
     displayName: 'Cloud Provider',
-    description: 'The cloud provider for the asset.',
+    description: 'The cloud provider to filter recommendations by.',
     required: true,
     options: {
       options: [
@@ -113,5 +147,5 @@ export const MANDATORY_FIELDS = {
         { label: 'GCP', value: 'gcp' },
       ],
     },
-  }),
-};
+  });
+}
