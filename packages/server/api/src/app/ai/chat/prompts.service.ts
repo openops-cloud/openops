@@ -41,12 +41,6 @@ export const getBlockSystemPrompt = async (
   context: MCPChatContext,
   enrichedContext?: ChatFlowContext,
 ): Promise<string> => {
-  const enrichedContextString = enrichedContext?.steps?.some((s) => s.variables)
-    ? `\n\nVariables used in the code inputs:\n${JSON.stringify(
-        enrichedContext.steps.map((s) => s.variables),
-      )}\n\n`
-    : '';
-
   switch (context.blockName) {
     case '@openops/block-aws':
       return loadPrompt('aws-cli.txt');
@@ -63,8 +57,16 @@ export const getBlockSystemPrompt = async (
       return loadPrompt('snowflake.txt');
     case '@openops/block-databricks':
       return loadPrompt('databricks.txt');
-    // wip until the final ticket is implemented
-    case CODE_BLOCK_NAME:
+    case CODE_BLOCK_NAME: {
+      const enrichedContextString = enrichedContext?.steps?.some(
+        (s) => s.variables,
+      )
+        ? `\n\nVariables used in the code inputs:\n${JSON.stringify(
+            enrichedContext.steps.map((s) => s.variables),
+          )}\n\n`
+        : '';
+
+      // wip until the final ticket is implemented
       return `Generate code with this interface, based on the user's request. The code should be executable in isolated-vm (Secure & isolated JS environments for nodejs).
       It should be robust and easy to read.
       
@@ -81,6 +83,7 @@ export const getBlockSystemPrompt = async (
       NEVER USE require, use import instead. Keep in mind isolated-vm has no access to any native Node.js modules, such as "fs", "process", "http", "crypto", etc.
       If there are any variables in the following context, use them in the code. If you see inputs variables truncated, keep in mind that the final code will receive the full object as inputs and NOT stringified! Verify both cases, if input variables are objects or strings.
       ${enrichedContextString}`;
+    }
     default:
       return '';
   }
