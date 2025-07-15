@@ -276,11 +276,14 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
 
       result.object
         .then(async (object) => {
+          const assistantMessage: CoreMessage = {
+            role: 'assistant',
+            content: JSON.stringify(object),
+          };
+
           await saveChatHistory(chatId, userId, projectId, [
-            {
-              role: 'assistant',
-              content: JSON.stringify(object),
-            },
+            ...messages,
+            assistantMessage,
           ]);
         })
         .catch((error) => {

@@ -1,4 +1,4 @@
-import { AiConfig, CodeSchema, codeSchema } from '@openops/shared';
+import { AiConfig, CodeLLMSchema, codeLLMSchema } from '@openops/shared';
 import {
   CoreMessage,
   LanguageModel,
@@ -16,11 +16,11 @@ export const streamCode = ({
   languageModel: LanguageModel;
   aiConfig: AiConfig;
   systemPrompt: string;
-}): StreamObjectResult<Partial<CodeSchema>, CodeSchema, never> =>
+}): StreamObjectResult<Partial<CodeLLMSchema>, CodeLLMSchema, never> =>
   streamObject({
     model: languageModel,
     system: systemPrompt,
     messages,
-    schema: codeSchema,
+    schema: codeLLMSchema,
     ...aiConfig.modelSettings,
   });

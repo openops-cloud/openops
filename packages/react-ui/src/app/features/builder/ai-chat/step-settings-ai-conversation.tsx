@@ -10,7 +10,7 @@ import {
   MarkdownCodeVariations,
   tryParseJson,
 } from '@openops/components/ui';
-import { CodeSchema, OpenChatResponse, SourceCode } from '@openops/shared';
+import { CodeLLMSchema, OpenChatResponse, SourceCode } from '@openops/shared';
 import { useCallback, useMemo } from 'react';
 import { useBuilderStateContext } from '../builder-hooks';
 
@@ -42,39 +42,29 @@ const StepSettingsAiConversation = ({
 
   const uiMessages: AIChatMessage[] = useMemo(() => {
     return messages.map((message: MessageType, idx) => {
-      // todo
-      if (message.role.toLowerCase() === AIChatMessageRole.assistant) {
-        const parsed = tryParseJson(message.content) as CodeSchema;
+      if (
+        message.role.toLowerCase() === AIChatMessageRole.assistant &&
+        isCodeMessage(message)
+      ) {
+        const codeSchema = message.annotations?.find(
+          (annotation: any): annotation is CodeLLMSchema =>
+            typeof annotation === 'object' &&
+            annotation !== null &&
+            'code' in annotation &&
+            'description' in annotation,
+        );
 
-        if (parsed && parsed.code && parsed.description) {
-          return {
-            id: message && 'id' in message ? message.id : String(idx),
-            role: AIChatMessageRole.assistant,
-            content: {
-              parts: [
-                {
-                  type: 'sourcecode',
-                  content: parsed,
-                },
-                {
-                  type: 'text',
-                  content: parsed.description,
-                },
-              ],
-            },
-          };
+        if (codeSchema) {
+          return createCodeMessage(message, idx, codeSchema);
+        }
+
+        // when loading data from the history it's serialized as string
+        const parsed = tryParseJson(message.content) as CodeLLMSchema;
+        if (parsed?.code && parsed?.description) {
+          return createCodeMessage(message, idx, parsed);
         }
       }
-      return {
-        id: message && 'id' in message ? message.id : String(idx),
-        role:
-          message.role.toLowerCase() === 'user'
-            ? AIChatMessageRole.user
-            : AIChatMessageRole.assistant,
-        content: Array.isArray(message.content)
-          ? message.content.map((c) => c.text).join()
-          : message.content,
-      };
+      return createMessage(message, idx);
     });
   }, [messages]);
 
@@ -97,6 +87,61 @@ const StepSettingsAiConversation = ({
       ) && <LoadingSpinner />}
     </div>
   );
+};
+
+const isCodeMessage = (
+  message: MessageType,
+): message is UIMessage & { annotations: CodeLLMSchema[] } =>
+  ('annotations' in message &&
+    !!message?.annotations?.length &&
+    message.annotations?.some(
+      (annotation) =>
+        typeof annotation === 'object' &&
+        annotation !== null &&
+        'code' in annotation &&
+        'description' in annotation,
+    )) ||
+  (typeof message.content === 'string' &&
+    (tryParseJson(message.content) as CodeLLMSchema)?.code !== undefined);
+
+const getMessageId = (message: MessageType, idx: number): string => {
+  return message && 'id' in message ? message.id : String(idx);
+};
+
+const createCodeMessage = (
+  message: MessageType,
+  idx: number,
+  parsed: CodeLLMSchema,
+): AIChatMessage => {
+  return {
+    id: getMessageId(message, idx),
+    role: AIChatMessageRole.assistant,
+    content: {
+      parts: [
+        {
+          type: 'sourcecode',
+          content: parsed,
+        },
+        {
+          type: 'text',
+          content: parsed.description,
+        },
+      ],
+    },
+  };
+};
+
+const createMessage = (message: MessageType, idx: number): AIChatMessage => {
+  return {
+    id: getMessageId(message, idx),
+    role:
+      message.role.toLowerCase() === 'user'
+        ? AIChatMessageRole.user
+        : AIChatMessageRole.assistant,
+    content: Array.isArray(message.content)
+      ? message.content.map((c) => c.text).join()
+      : message.content,
+  };
 };
 
 StepSettingsAiConversation.displayName = 'StepSettingsAiConversation';

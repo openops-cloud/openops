@@ -10,8 +10,8 @@ import {
   Action,
   ActionType,
   CODE_BLOCK_NAME,
-  CodeSchema,
-  codeSchema,
+  codeLLMSchema,
+  CodeLLMSchema,
   flowHelper,
   FlowVersion,
   TriggerWithOptionalId,
@@ -88,17 +88,19 @@ export const useStepSettingsAiChat = (
   const { submit: submitCodeRequest, isLoading: isCodeGenerating } = useObject({
     id: `code-${chatSessionKey}`,
     api: 'api/v1/ai/conversation/code',
-    schema: codeSchema,
+    schema: codeLLMSchema,
     headers: {
       Authorization: `Bearer ${authenticationSession.getToken()}`,
       'Content-Type': 'application/json',
     },
-    onFinish: ({ object }: { object: CodeSchema | undefined }) => {
+    onFinish: ({ object }: { object: CodeLLMSchema | undefined }) => {
       if (object) {
         const assistantMessage: Message = {
           id: nanoid(),
           role: 'assistant',
-          content: JSON.stringify(object),
+          content: object.description,
+          createdAt: new Date(),
+          annotations: [object],
         };
 
         setMessages((prev) => [...prev, assistantMessage]);
