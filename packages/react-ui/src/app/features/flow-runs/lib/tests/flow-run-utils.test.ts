@@ -61,11 +61,11 @@ describe('flowRunUtils.extractStepOutput', () => {
       output as any,
       trigger as any,
     );
-    expect(result).toEqual({ value: 'b' }); // loop2[1] -> child
+    expect(result).toEqual({ value: 'b' });
   });
 
   it('returns undefined if loop index is out of bounds', () => {
-    const badIndexes = { loop1: 5, loop2: 0 }; // loop1 has only 1 iteration
+    const badIndexes = { loop1: 5, loop2: 0 };
     const result = flowRunUtils.extractStepOutput(
       'child',
       badIndexes,
@@ -492,7 +492,166 @@ describe('flowRunUtils.findLoopsState', () => {
       run,
       currentLoopsState,
     );
-    // Since the failed step is the parent loop, should just return the current state
     expect(result).toEqual({ loop1: 1 });
+  });
+});
+
+describe('flowRunUtils.extractLoopItemStepOutput', () => {
+  const trigger = {
+    name: 'trigger',
+    type: 'TRIGGER',
+    nextAction: {
+      name: 'loopStep',
+      type: ActionType.LOOP_ON_ITEMS,
+      firstLoopAction: {
+        name: 'childStep',
+        type: ActionType.CODE,
+      },
+    },
+  };
+
+  it('processes loop item output correctly', () => {
+    const loopIndexes = { loopStep: 0 };
+    const output = {
+      loopStep: {
+        type: ActionType.LOOP_ON_ITEMS,
+        input: { items: ['item0', 'item1', 'item2'] },
+        output: { index: 1 },
+      },
+    };
+
+    const result = flowRunUtils.extractLoopItemStepOutput(
+      'loopStep',
+      loopIndexes,
+      output as any,
+      trigger as any,
+    );
+
+    expect(result).toEqual({
+      type: ActionType.LOOP_ON_ITEMS,
+      input: { items: ['item0', 'item1', 'item2'] },
+      output: {
+        item: 'item0',
+        index: 1,
+      },
+    });
+  });
+
+  it('processes loop item output correctly 123', () => {
+    const loopIndexes = { loopStep: 2 };
+    const output = {
+      loopStep: {
+        type: ActionType.LOOP_ON_ITEMS,
+        input: { items: ['item0', 'item1', 'item2'] },
+        output: { index: 3 },
+      },
+    };
+
+    const result = flowRunUtils.extractLoopItemStepOutput(
+      'loopStep',
+      loopIndexes,
+      output as any,
+      trigger as any,
+    );
+
+    expect(result).toEqual({
+      type: ActionType.LOOP_ON_ITEMS,
+      input: { items: ['item0', 'item1', 'item2'] },
+      output: {
+        item: 'item2',
+        index: 3,
+      },
+    });
+  });
+
+  it('returns original output when step is not a loop', () => {
+    const output = {
+      nonLoopStep: {
+        type: ActionType.CODE,
+        input: { data: 'test' },
+        output: { result: 'success' },
+      },
+    };
+
+    const result = flowRunUtils.extractLoopItemStepOutput(
+      'nonLoopStep',
+      {},
+      output as any,
+      trigger as any,
+    );
+
+    expect(result).toEqual({
+      type: ActionType.CODE,
+      input: { data: 'test' },
+      output: { result: 'success' },
+    });
+  });
+
+  it('returns original output when loop step has no output index', () => {
+    const output = {
+      loopStep: {
+        type: ActionType.LOOP_ON_ITEMS,
+        input: { items: ['item0', 'item1'] },
+        output: {},
+      },
+    };
+
+    const result = flowRunUtils.extractLoopItemStepOutput(
+      'loopStep',
+      { loopStep: 0 },
+      output as any,
+      trigger as any,
+    );
+
+    expect(result).toEqual({
+      type: ActionType.LOOP_ON_ITEMS,
+      input: { items: ['item0', 'item1'] },
+      output: {},
+    });
+  });
+
+  it('returns original output when loop step has no input', () => {
+    const output = {
+      loopStep: {
+        type: ActionType.LOOP_ON_ITEMS,
+        output: { index: 1 },
+      },
+    };
+
+    const result = flowRunUtils.extractLoopItemStepOutput(
+      'loopStep',
+      { loopStep: 0 },
+      output as any,
+      trigger as any,
+    );
+
+    expect(result).toEqual({
+      type: ActionType.LOOP_ON_ITEMS,
+      output: { index: 1 },
+    });
+  });
+
+  it('returns original output when an error occurs', () => {
+    const loopIndexes = { loopStep: 5 };
+    const output = {
+      loopStep: {
+        type: ActionType.LOOP_ON_ITEMS,
+        input: { items: 123 },
+        output: { index: 6 },
+      },
+    };
+
+    const result = flowRunUtils.extractLoopItemStepOutput(
+      'loopStep',
+      loopIndexes,
+      output as any,
+      trigger as any,
+    );
+
+    expect(result).toEqual({
+      type: ActionType.LOOP_ON_ITEMS,
+      input: { items: 123 },
+      output: { index: 6 },
+    });
   });
 });

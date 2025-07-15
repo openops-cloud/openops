@@ -1,6 +1,5 @@
 const decryptStringMock = jest.fn().mockReturnValue('test-encrypt');
 
-import { getAiProviderLanguageModel } from '@openops/common';
 import { AiProviderEnum, PrincipalType } from '@openops/shared';
 import { LanguageModel, pipeDataStreamToResponse, streamText } from 'ai';
 import {
@@ -10,13 +9,15 @@ import {
   FastifyRequest,
 } from 'fastify';
 import {
-  getChatContext,
-  getChatHistory,
+  getConversation,
+  getLLMConfig,
 } from '../../../src/app/ai/chat/ai-chat.service';
 import { aiMCPChatController } from '../../../src/app/ai/chat/ai-mcp-chat.controller';
-import { getMcpSystemPrompt } from '../../../src/app/ai/chat/prompts.service';
+import {
+  getBlockSystemPrompt,
+  getMcpSystemPrompt,
+} from '../../../src/app/ai/chat/prompts.service';
 import { selectRelevantTools } from '../../../src/app/ai/chat/tools.service';
-import { aiConfigService } from '../../../src/app/ai/config/ai-config.service';
 import { getMCPTools } from '../../../src/app/ai/mcp/mcp-tools';
 
 jest.mock('@openops/server-shared', () => ({
@@ -59,14 +60,16 @@ jest.mock('@openops/common', () => ({
   getAiProviderLanguageModel: jest.fn(),
 }));
 
-jest.mock('../../../src/app/ai/config/ai-config.service', () => ({
-  aiConfigService: {
-    getActiveConfigWithApiKey: jest.fn(),
-  },
-}));
-
 jest.mock('../../../src/app/ai/mcp/mcp-tools', () => ({
   getMCPTools: jest.fn(),
+}));
+
+jest.mock('../../../src/app/ai/chat/context-enrichment.service', () => ({
+  enrichContext: jest.fn(),
+}));
+
+jest.mock('../../../src/app/ai/chat/code.service', () => ({
+  streamCode: jest.fn(),
 }));
 
 jest.mock('../../../src/app/ai/chat/ai-chat.service', () => ({
@@ -74,11 +77,15 @@ jest.mock('../../../src/app/ai/chat/ai-chat.service', () => ({
   getChatHistory: jest.fn(),
   saveChatHistory: jest.fn(),
   generateChatIdForMCP: jest.fn(),
+  generateChatId: jest.fn(),
   createChatContext: jest.fn(),
+  getConversation: jest.fn(),
+  getLLMConfig: jest.fn(),
 }));
 
 jest.mock('../../../src/app/ai/chat/prompts.service', () => ({
   getMcpSystemPrompt: jest.fn(),
+  getBlockSystemPrompt: jest.fn(),
 }));
 
 jest.mock('../../../src/app/ai/chat/tools.service', () => ({
@@ -187,15 +194,15 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
 
       handlers = {};
 
-      (getChatContext as jest.Mock).mockResolvedValue(mockChatContext);
-      (getChatHistory as jest.Mock).mockResolvedValue([...mockMessages]);
-      (
-        aiConfigService.getActiveConfigWithApiKey as jest.Mock
-      ).mockResolvedValue(mockAiConfig);
-      decryptStringMock.mockReturnValue('decrypted-api-key');
-      (getAiProviderLanguageModel as jest.Mock).mockResolvedValue(
-        mockLanguageModel,
-      );
+      (getConversation as jest.Mock).mockResolvedValue({
+        chatContext: mockChatContext,
+        messages: [...mockMessages],
+      });
+      (getLLMConfig as jest.Mock).mockResolvedValue({
+        aiConfig: mockAiConfig,
+        languageModel: mockLanguageModel,
+      });
+
       (getMcpSystemPrompt as jest.Mock).mockResolvedValue(systemPrompt);
 
       await aiMCPChatController(mockApp, {} as FastifyPluginOptions);
@@ -218,6 +225,30 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
         languageModel: mockLanguageModel,
         aiConfig: mockAiConfig,
       });
+    });
+
+    it('should not call tools and load only promt', async () => {
+      (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);
+      (getConversation as jest.Mock).mockResolvedValue({
+        chatContext: {
+          ...mockChatContext,
+          workflowId: 'workflowId',
+          blockName: 'blockName',
+          stepName: 'stepName',
+          actionName: 'actionName',
+        },
+        messages: [...mockMessages],
+      });
+      const postHandler = handlers['/'];
+      expect(postHandler).toBeDefined();
+
+      await postHandler(
+        mockRequest as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(getBlockSystemPrompt).toHaveBeenCalled();
+      expect(getMCPTools).not.toHaveBeenCalled();
     });
 
     it.each([

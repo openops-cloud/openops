@@ -12,12 +12,12 @@ export const pelanor = createBlock({
   categories: [BlockCategory.FINOPS],
   actions: [
     createCustomApiCallAction({
-      baseUrl: () => 'https://api.pelanor.io/',
+      baseUrl: (auth: any) => auth.apiUrl,
       auth: pelanorAuth,
       additionalProps: {
         documentation: Property.MarkDown({
           value:
-            'For more information, visit the [Pelanor API documentation](https://demo.pelanor.io/api-docs).',
+            'For more information, visit the [Pelanor API documentation](https://app.pelanor.io/api-docs).',
         }),
       },
       authMapping: async ({ auth }: any) => ({
