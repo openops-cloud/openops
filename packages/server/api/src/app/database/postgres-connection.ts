@@ -27,6 +27,7 @@ import { SetBlockNameAsNullableInConnectionsTable1749809813762 } from './migrati
 import { RemoveBlockNameFromConnectionsTable1750161024797 } from './migrations/1750161024797-RemoveBlockNameFromConnectionsTable';
 import { AddInputToTestOutputTable1750933522145 } from './migrations/1750933522145-AddInputToTestOutputTable';
 import { AddInputToTriggerEventTable1751282188913 } from './migrations/1751282188913-AddInputToTriggerEventTable';
+import { AddSuccessToFlowStepTestOutputTable1752487641303 } from './migrations/1752487641303-AddSuccessToFlowStepTestOutputTable';
 
 const getSslConfig = (): boolean | TlsOptions => {
   const useSsl = system.get(AppSystemProp.POSTGRES_USE_SSL);
@@ -62,6 +63,7 @@ const getMigrations = (): (new () => MigrationInterface)[] => {
     RemoveBlockNameFromConnectionsTable1750161024797,
     AddInputToTestOutputTable1750933522145,
     AddInputToTriggerEventTable1751282188913,
+    AddSuccessToFlowStepTestOutputTable1752487641303,
   ];
 };
 
