@@ -48,7 +48,7 @@ describe('pushTimeseriesWithRetry', () => {
       pushTimeseriesWithRetry(timeseries, config, 2, mockDelayFn),
     ).resolves.toBeUndefined();
     expect(pushTimeseries).toHaveBeenCalledTimes(2);
-    expect(logger.debug).toHaveBeenCalledWith('Retry 1 failed: Error: fail');
+    expect(logger.debug).toHaveBeenCalledWith('Retry 1', { error });
     expect(logger.debug).toHaveBeenCalledTimes(1);
     expect(mockDelayFn).toHaveBeenCalledWith(200);
   });
@@ -60,7 +60,7 @@ describe('pushTimeseriesWithRetry', () => {
       pushTimeseriesWithRetry(timeseries, config, 2, mockDelayFn),
     ).rejects.toThrow('fail');
     expect(pushTimeseries).toHaveBeenCalledTimes(2);
-    expect(logger.debug).toHaveBeenCalledWith('Retry 1 failed: Error: fail');
+    expect(logger.debug).toHaveBeenCalledWith('Retry 1', { error });
     expect(logger.debug).toHaveBeenCalledTimes(1);
     expect(mockDelayFn).toHaveBeenCalledWith(200);
   });
@@ -72,12 +72,8 @@ describe('pushTimeseriesWithRetry', () => {
       pushTimeseriesWithRetry(timeseries, config, 3, mockDelayFn),
     ).rejects.toThrow('network error');
     expect(pushTimeseries).toHaveBeenCalledTimes(3);
-    expect(logger.debug).toHaveBeenCalledWith(
-      'Retry 1 failed: Error: network error',
-    );
-    expect(logger.debug).toHaveBeenCalledWith(
-      'Retry 2 failed: Error: network error',
-    );
+    expect(logger.debug).toHaveBeenCalledWith('Retry 1', { error });
+    expect(logger.debug).toHaveBeenCalledWith('Retry 2', { error });
     expect(logger.debug).toHaveBeenCalledTimes(2);
     expect(mockDelayFn).toHaveBeenCalledWith(200);
     expect(mockDelayFn).toHaveBeenCalledWith(400);
