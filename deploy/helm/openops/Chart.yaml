@@ -1,0 +1,6 @@
+apiVersion: v2
+name: openops
+description: A Helm chart for OpenOps application
+type: application
+version: 0.1.0
+appVersion: "latest"

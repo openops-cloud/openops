@@ -1,0 +1,171 @@
+global:
+  version: "latest"
+  
+image:
+  repository: public.ecr.aws/openops
+  pullPolicy: IfNotPresent
+
+app:
+  name: openops-app
+  image: openops-app
+  replicas: 1
+  env:
+    component: app
+    tablesVersion: "0.2.6"
+    analyticsVersion: "0.14.1"
+    cachePath: "./cache"
+    configPath: "./config"
+    environment: "prod"
+    environmentName: "kubernetes"
+    frontendUrl: "http://localhost"
+    publicUrl: "http://localhost"
+    triggerDefaultPollInterval: "1"
+    webhookTimeoutSeconds: "30"
+    blocksSource: "FILE"
+    blocksSyncMode: "NONE"
+    enableHostSession: "false"
+    execFileMaxBufferSizeMb: ""
+    queueMode: "REDIS"
+    redisHost: "redis"
+    redisPort: "6379"
+    dbType: "POSTGRES"
+    slackEnableInteractions: "true"
+    tablesApiUrl: "http://openops-tables"
+    maxConcurrentTablesRequests: "100"
+    analyticsPublicUrl: "http://localhost"
+    analyticsPrivateUrl: "http://openops-analytics:8088"
+    engineUrl: "http://openops-engine:3005/execute"
+    executionMode: "SANDBOX_CODE_ONLY"
+    logLevel: "info"
+    logPretty: "false"
+    telemetryCollectorUrl: "https://telemetry.openops.com/save"
+    darkThemeEnabled: "false"
+    codeBlockMemoryLimitInMb: "256"
+    awsEnableImplicitRole: ""
+    hostAzureConfigDir: ""
+    hostCloudsdkConfig: ""
+
+engine:
+  name: openops-engine
+  image: openops-engine
+  replicas: 1
+  env:
+    component: engine
+    baseCodeDirectory: /tmp/codes
+    serverApiUrl: http://openops-app/api/
+    cachePath: "./cache"
+    configPath: "./config"
+    environment: "prod"
+    environmentName: "kubernetes"
+    frontendUrl: "http://localhost"
+    publicUrl: "http://localhost"
+    triggerDefaultPollInterval: "1"
+    webhookTimeoutSeconds: "30"
+    blocksSource: "FILE"
+    blocksSyncMode: "NONE"
+    enableHostSession: "false"
+    execFileMaxBufferSizeMb: ""
+    queueMode: "REDIS"
+    redisHost: "redis"
+    redisPort: "6379"
+    dbType: "POSTGRES"
+    slackEnableInteractions: "true"
+    engineUrl: "http://openops-engine:3005/execute"
+    executionMode: "SANDBOX_CODE_ONLY"
+    logLevel: "info"
+    logPretty: "false"
+    telemetryCollectorUrl: "https://telemetry.openops.com/save"
+    darkThemeEnabled: "false"
+    codeBlockMemoryLimitInMb: "256"
+    awsEnableImplicitRole: ""
+    hostAzureConfigDir: ""
+    hostCloudsdkConfig: ""
+
+tables:
+  name: openops-tables
+  image: openops-tables
+  tag: "0.2.6"
+  replicas: 1
+  env:
+    privateUrl: http://openops-tables
+    extraAllowedHosts: "*"
+    syncTemplatesOnStartup: "false"
+    migrateOnStartup: "true"
+    disableVolumeCheck: "yes"
+    redisUrl: redis://redis:6379/0
+  storage:
+    size: 10Gi
+    storageClass: ""
+
+analytics:
+  name: openops-analytics
+  image: openops-analytics
+  tag: "0.14.1"
+  replicas: 1
+  env:
+    gunicornLogLevel: "debug"
+    databaseDialect: "postgresql"
+    databaseDb: "analytics"
+    databaseHost: "postgres"
+    databasePort: "5432"
+    featureAllowAdhocSubquery: "true"
+
+postgres:
+  name: postgres
+  image: postgres
+  tag: "14.4"
+  replicas: 1
+  env:
+    maxConnections: "300"
+  storage:
+    size: 20Gi
+    storageClass: ""
+  service:
+    port: 5432
+
+redis:
+  name: redis
+  image: redis
+  tag: "7.4.0"
+  replicas: 1
+  storage:
+    size: 5Gi
+    storageClass: ""
+  service:
+    port: 6379
+
+nginx:
+  name: nginx
+  image: nginx
+  tag: "1.27.4"
+  replicas: 1
+  service:
+    port: 80
+    type: LoadBalancer
+
+secrets:
+  encryptionKey: ""
+  jwtSecret: ""
+  adminEmail: ""
+  adminPassword: ""
+  analyticsAdminPassword: ""
+  analyticsPoweruserPassword: ""
+  postgresUsername: ""
+  postgresPassword: ""
+  postgresDatabase: ""
+  tablesPublicUrl: ""
+  tablesDbHost: ""
+  jwtTokenLifetimeHours: "24"
+  tablesTokenLifetimeMinutes: "60"
+  tablesDatabaseName: ""
+  postgresHost: ""
+  postgresPort: "5432"
+  apiKey: ""
+  slackAppSigningSecret: "placeholder"
+  logzioToken: "placeholder"
+  logzioMetricsToken: "placeholder"
+  chromaticProjectToken: "placeholder"
+
+volumes:
+  azureConfigDir: ""
+  cloudsdkConfig: ""

@@ -1,0 +1,38 @@
+global:
+  version: "latest"
+
+secrets:
+  encryptionKey: "example-encryption-key-change-me"
+  jwtSecret: "example-jwt-secret-change-me"
+  adminEmail: "admin@example.com"
+  adminPassword: "admin123"
+  analyticsAdminPassword: "analytics123"
+  analyticsPoweruserPassword: "poweruser123"
+  postgresUsername: "postgres"
+  postgresPassword: "postgres123"
+  postgresDatabase: "openops"
+  tablesPublicUrl: "http://localhost/openops-tables"
+  tablesDbHost: "postgres"
+  jwtTokenLifetimeHours: "24"
+  tablesTokenLifetimeMinutes: "60"
+  tablesDatabaseName: "tables"
+  postgresHost: "postgres"
+  postgresPort: "5432"
+
+# Use default storage class for Minikube
+tables:
+  storage:
+    storageClass: "standard"
+    
+postgres:
+  storage:
+    storageClass: "standard"
+    
+redis:
+  storage:
+    storageClass: "standard"
+
+# Use NodePort for easier access in Minikube
+nginx:
+  service:
+    type: NodePort

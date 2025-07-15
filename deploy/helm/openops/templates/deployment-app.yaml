@@ -1,0 +1,216 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.app.name }}
+  labels:
+    app: {{ .Values.app.name }}
+spec:
+  replicas: {{ .Values.app.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.app.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.app.name }}
+    spec:
+      containers:
+      - name: {{ .Values.app.name }}
+        image: {{ .Values.image.repository }}/{{ .Values.app.image }}:{{ .Values.global.version }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+        - name: NODE_OPTIONS
+          value: "--no-node-snapshot"
+        - name: OPS_COMPONENT
+          value: "{{ .Values.app.env.component }}"
+        - name: OPS_VERSION
+          value: "{{ .Values.global.version }}"
+        - name: OPS_OPENOPS_TABLES_VERSION
+          value: "{{ .Values.app.env.tablesVersion }}"
+        - name: OPS_ANALYTICS_VERSION
+          value: "{{ .Values.app.env.analyticsVersion }}"
+        - name: OPS_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: openops-secrets
+              key: apiKey
+        - name: OPS_CACHE_PATH
+          value: "{{ .Values.app.env.cachePath }}"
+        - name: OPS_CONFIG_PATH
+          value: "{{ .Values.app.env.configPath }}"
+        - name: OPS_ENVIRONMENT
+          value: "{{ .Values.app.env.environment }}"
+        - name: OPS_ENVIRONMENT_NAME
+          value: "{{ .Values.app.env.environmentName }}"
+        - name: OPS_FRONTEND_URL
+          value: "{{ .Values.app.env.frontendUrl }}"
+        - name: OPS_PUBLIC_URL
+          value: "{{ .Values.app.env.publicUrl }}"
+        - name: OPS_TRIGGER_DEFAULT_POLL_INTERVAL
+          value: "{{ .Values.app.env.triggerDefaultPollInterval }}"
+        - name: OPS_WEBHOOK_TIMEOUT_SECONDS
+          value: "{{ .Values.app.env.webhookTimeoutSeconds }}"
+        - name: OPS_BLOCKS_SOURCE
+          value: "{{ .Values.app.env.blocksSource }}"
+        - name: OPS_BLOCKS_SYNC_MODE
+          value: "{{ .Values.app.env.blocksSyncMode }}"
+        - name: OPS_ENABLE_HOST_SESSION
+          value: "{{ .Values.app.env.enableHostSession }}"
+        - name: OPS_EXEC_FILE_MAX_BUFFER_SIZE_MB
+          value: "{{ .Values.app.env.execFileMaxBufferSizeMb }}"
+        - name: OPS_QUEUE_MODE
+          value: "{{ .Values.app.env.queueMode }}"
+        - name: OPS_REDIS_HOST
+          value: "{{ .Values.app.env.redisHost }}"
+        - name: OPS_REDIS_PORT
+          value: "{{ .Values.app.env.redisPort }}"
+        - name: OPS_DB_TYPE
+          value: "{{ .Values.app.env.dbType }}"
+        - name: OPS_SLACK_APP_SIGNING_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: openops-secrets
+              key: slackAppSigningSecret
+        - name: OPS_SLACK_ENABLE_INTERACTIONS
+          value: "{{ .Values.app.env.slackEnableInteractions }}"
+        - name: OPS_OPENOPS_TABLES_API_URL
+          value: "{{ .Values.app.env.tablesApiUrl }}"
+        - name: OPS_MAX_CONCURRENT_TABLES_REQUESTS
+          value: "{{ .Values.app.env.maxConcurrentTablesRequests }}"
+        - name: OPS_ANALYTICS_PUBLIC_URL
+          value: "{{ .Values.app.env.analyticsPublicUrl }}"
+        - name: OPS_ANALYTICS_PRIVATE_URL
+          value: "{{ .Values.app.env.analyticsPrivateUrl }}"
+        - name: OPS_ENGINE_URL
+          value: "{{ .Values.app.env.engineUrl }}"
+        - name: OPS_EXECUTION_MODE
+          value: "{{ .Values.app.env.executionMode }}"
+        - name: OPS_LOGZIO_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: openops-secrets
+              key: logzioToken
+        - name: OPS_LOGZIO_METRICS_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: openops-secrets
+              key: logzioMetricsToken
+        - name: OPS_LOG_LEVEL
+          value: "{{ .Values.app.env.logLevel }}"
+        - name: OPS_LOG_PRETTY
+          value: "{{ .Values.app.env.logPretty }}"
+        - name: OPS_TELEMETRY_COLLECTOR_URL
+          value: "{{ .Values.app.env.telemetryCollectorUrl }}"
+        - name: CHROMATIC_PROJECT_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: openops-secrets
+              key: chromaticProjectToken
+        - name: OPS_DARK_THEME_ENABLED
+          value: "{{ .Values.app.env.darkThemeEnabled }}"
+        - name: OPS_CODE_BLOCK_MEMORY_LIMIT_IN_MB
+          value: "{{ .Values.app.env.codeBlockMemoryLimitInMb }}"
+        - name: OPS_AWS_ENABLE_IMPLICIT_ROLE
+          value: "{{ .Values.app.env.awsEnableImplicitRole }}"
+        - name: HOST_AZURE_CONFIG_DIR
+          value: "{{ .Values.app.env.hostAzureConfigDir }}"
+        - name: HOST_CLOUDSDK_CONFIG
+          value: "{{ .Values.app.env.hostCloudsdkConfig }}"
+        - name: OPS_ENCRYPTION_KEY
+          valueFrom:
+            secretKeyRef:
+              name: openops-secrets
+              key: encryptionKey
+        - name: OPS_JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: openops-secrets
+              key: jwtSecret
+        - name: OPS_OPENOPS_ADMIN_EMAIL
+          valueFrom:
+            secretKeyRef:
+              name: openops-secrets
+              key: adminEmail
+        - name: OPS_OPENOPS_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: openops-secrets
+              key: adminPassword
+        - name: OPS_JWT_TOKEN_LIFETIME_HOURS
+          valueFrom:
+            secretKeyRef:
+              name: openops-secrets
+              key: jwtTokenLifetimeHours
+        - name: OPS_TABLES_TOKEN_LIFETIME_MINUTES
+          valueFrom:
+            secretKeyRef:
+              name: openops-secrets
+              key: tablesTokenLifetimeMinutes
+        - name: OPS_POSTGRES_HOST
+          valueFrom:
+            secretKeyRef:
+              name: openops-secrets
+              key: postgresHost
+        - name: OPS_POSTGRES_PORT
+          valueFrom:
+            secretKeyRef:
+              name: openops-secrets
+              key: postgresPort
+        - name: OPS_POSTGRES_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: openops-secrets
+              key: postgresUsername
+        - name: OPS_POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: openops-secrets
+              key: postgresPassword
+        - name: OPS_POSTGRES_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: openops-secrets
+              key: postgresDatabase
+        - name: OPS_OPENOPS_TABLES_PUBLIC_URL
+          valueFrom:
+            secretKeyRef:
+              name: openops-secrets
+              key: tablesPublicUrl
+        - name: OPS_OPENOPS_TABLES_DATABASE_NAME
+          valueFrom:
+            secretKeyRef:
+              name: openops-secrets
+              key: tablesDatabaseName
+        - name: OPS_OPENOPS_TABLES_DB_HOST
+          valueFrom:
+            secretKeyRef:
+              name: openops-secrets
+              key: tablesDbHost
+        - name: OPS_ANALYTICS_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: openops-secrets
+              key: analyticsAdminPassword
+        - name: ANALYTICS_POWERUSER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: openops-secrets
+              key: analyticsPoweruserPassword
+        - name: ANALYTICS_ALLOW_ADHOC_SUBQUERY
+          value: "{{ .Values.analytics.env.featureAllowAdhocSubquery }}"
+        - name: POSTGRES_MAX_CONNECTIONS
+          value: "{{ .Values.postgres.env.maxConnections }}"
+        ports:
+        - containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 30
