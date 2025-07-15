@@ -17,6 +17,7 @@ jest.mock('@openops/server-shared', () => ({
 import { AppSystemProp } from '@openops/server-shared';
 import { AxiosHeaders } from 'axios';
 import {
+  axiosTablesRetryConfig,
   makeOpenOpsTablesGet,
   makeOpenOpsTablesPatch,
   makeOpenOpsTablesPost,
@@ -41,7 +42,7 @@ describe('axios request', () => {
       'http://mockapi.com/openops-tables/test/route/api',
       header,
       undefined,
-      undefined,
+      axiosTablesRetryConfig,
     );
   });
 
@@ -60,7 +61,7 @@ describe('axios request', () => {
       'http://mockapi.com/openops-tables/test/route/api',
       header,
       { body: 'info' },
-      undefined,
+      axiosTablesRetryConfig,
     );
   });
 
@@ -79,7 +80,7 @@ describe('axios request', () => {
       'http://mockapi.com/openops-tables/test/route/api',
       header,
       { body: 'info' },
-      undefined,
+      axiosTablesRetryConfig,
     );
   });
 
@@ -112,7 +113,7 @@ describe('axios request', () => {
       'http://mockapi.com/openops-tables/test/route/api',
       header,
       undefined,
-      undefined,
+      axiosTablesRetryConfig,
     );
 
     expect(httpRequestMock).toHaveBeenNthCalledWith(
@@ -121,7 +122,7 @@ describe('axios request', () => {
       'next url',
       header,
       undefined,
-      undefined,
+      axiosTablesRetryConfig,
     );
 
     expect(httpRequestMock).toHaveBeenNthCalledWith(
@@ -130,7 +131,7 @@ describe('axios request', () => {
       'next url two',
       header,
       undefined,
-      undefined,
+      axiosTablesRetryConfig,
     );
   });
 });
