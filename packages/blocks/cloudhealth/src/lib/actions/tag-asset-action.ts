@@ -2,6 +2,7 @@ import { createAction, Property } from '@openops/blocks-framework';
 import { cloudhealthAuth } from '../auth';
 import { makePostRequest } from '../common/call-rest-api';
 import { getAssetTypes } from '../common/get-asset-types';
+import { safeFetch } from '../common/safe-fetch';
 
 export const tagAssetAction = createAction({
   name: 'cloudhealth_tag_asset',
@@ -23,9 +24,15 @@ export const tagAssetAction = createAction({
           };
         }
 
-        const assetTypes = await getAssetTypes(auth);
+        const {
+          data: assetTypes,
+          error,
+          disabled,
+        } = await safeFetch(() => getAssetTypes(auth));
 
         return {
+          error: error,
+          disabled: disabled,
           options: assetTypes.map((type) => ({
             label: type,
             value: type,
@@ -33,7 +40,7 @@ export const tagAssetAction = createAction({
         };
       },
     }),
-    assetId: Property.ShortText({
+    assetId: Property.Number({
       displayName: 'Asset ID',
       description: 'The ID of the asset to tag.',
       required: true,
@@ -48,17 +55,17 @@ export const tagAssetAction = createAction({
     const { assetType, assetId, tags } = context.propsValue;
 
     try {
-      const result = await makePostRequest(context.auth, `/custom_tags`, {
+      return await makePostRequest(context.auth, `/v1/custom_tags`, {
         tag_groups: [
           {
             asset_type: assetType,
-            asset_id: assetId,
-            tags,
+            ids: [assetId],
+            tags: Object.entries(tags).map(([key, value]) => {
+              return { key: key, value: value };
+            }),
           },
         ],
       });
-
-      return result;
     } catch (error) {
       throw new Error(
         `Failed to tag asset ${assetType} with ID ${assetId}: ${error}`,

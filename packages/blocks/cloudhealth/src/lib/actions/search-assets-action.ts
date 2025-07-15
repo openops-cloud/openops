@@ -2,8 +2,8 @@ import { httpClient, HttpMethod } from '@openops/blocks-common';
 import { createAction, Property } from '@openops/blocks-framework';
 import { cloudhealthAuth } from '../auth';
 import { BASE_CH_URL } from '../common/base-url';
-import { extractErrorMessage } from '../common/extract-error-message';
 import { getAssetTypes } from '../common/get-asset-types';
+import { safeFetch } from '../common/safe-fetch';
 
 const BASE_ASSET_URL = `${BASE_CH_URL}/api`;
 
@@ -27,16 +27,11 @@ export const searchAssetsAction = createAction({
           };
         }
 
-        let error: string | undefined = undefined;
-        let disabled = false;
-        let assetTypes: string[] = [];
-
-        try {
-          assetTypes = await getAssetTypes(auth);
-        } catch (e) {
-          error = extractErrorMessage(e);
-          disabled = true;
-        }
+        const {
+          data: assetTypes,
+          error,
+          disabled,
+        } = await safeFetch(() => getAssetTypes(auth));
 
         return {
           error: error,
@@ -58,19 +53,13 @@ export const searchAssetsAction = createAction({
         }
         const properties: { [key: string]: any } = {};
 
-        let error: string | undefined = undefined;
-        let assetFields: { name: string }[] = [];
-        let disabled = false;
-
-        try {
-          assetFields = await getAssetFields(
-            auth as any,
-            assetType as unknown as string,
-          );
-        } catch (e) {
-          error = extractErrorMessage(e);
-          disabled = true;
-        }
+        const {
+          data: assetFields,
+          error,
+          disabled,
+        } = await safeFetch(() =>
+          getAssetFields(auth as any, assetType as unknown as string),
+        );
 
         properties['fields'] = Property.Array({
           displayName: 'Fields to filter by',
