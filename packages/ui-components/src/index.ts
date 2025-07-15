@@ -77,6 +77,9 @@ export * from './lib/use-element-size';
 export * from './lib/use-forwarded-ref';
 export * from './lib/user-agent-utils';
 
+/* export hooks */
+export * from './hooks/use-copy-to-clipboard';
+
 /* export custom components */
 export * from './components';
 

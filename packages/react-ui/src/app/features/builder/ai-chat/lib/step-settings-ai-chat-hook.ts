@@ -5,10 +5,12 @@ import {
   useChat,
   experimental_useObject as useObject,
 } from '@ai-sdk/react';
-import { AIChatMessage, toast } from '@openops/components/ui';
+import { toast } from '@openops/components/ui';
 import {
   Action,
   ActionType,
+  CODE_BLOCK_NAME,
+  CodeSchema,
   codeSchema,
   flowHelper,
   FlowVersion,
@@ -19,10 +21,6 @@ import { t } from 'i18next';
 import { nanoid } from 'nanoid';
 import { useCallback, useEffect, useState } from 'react';
 import { aiChatApi } from './chat-api';
-
-// todo move to shared && use in prompt service
-const CODE_BLOCK_NAME = '@openops/code';
-const CODE_ACTION_NAME = 'code';
 
 export const useStepSettingsAiChat = (
   flowVersion: FlowVersion,
@@ -95,7 +93,7 @@ export const useStepSettingsAiChat = (
       Authorization: `Bearer ${authenticationSession.getToken()}`,
       'Content-Type': 'application/json',
     },
-    onFinish: ({ object }: { object: any }) => {
+    onFinish: ({ object }: { object: CodeSchema | undefined }) => {
       if (object) {
         const assistantMessage: Message = {
           id: nanoid(),
@@ -163,7 +161,6 @@ export const useStepSettingsAiChat = (
   const handleCodeSubmit = useCallback(
     (event?: { preventDefault?: () => void }) => {
       event?.preventDefault?.();
-
       if (!input.trim()) return;
 
       const userMessage: Message = {
@@ -230,7 +227,7 @@ const getActionName = (
     return stepDetails?.settings?.actionName;
   }
 
-  return stepDetails?.type === ActionType.CODE ? CODE_ACTION_NAME : '';
+  return stepDetails?.type === ActionType.CODE ? ActionType.CODE : '';
 };
 
 const createAdditionalContext = (

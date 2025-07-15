@@ -2,6 +2,7 @@ import { SourceCode } from '@openops/shared';
 import { t } from 'i18next';
 import { Copy, Plus } from 'lucide-react';
 import { forwardRef } from 'react';
+import { useCopyToClipboard } from '../../hooks/use-copy-to-clipboard';
 import { cn } from '../../lib/cn';
 import { Button } from '../../ui/button';
 import { Markdown, MarkdownCodeVariations } from '../custom';
@@ -134,6 +135,7 @@ const MessageContent = ({
   codeVariation: MarkdownCodeVariations;
   theme: string;
 }) => {
+  const { copyToClipboard } = useCopyToClipboard();
   if (typeof content === 'string') {
     return (
       <Markdown
@@ -206,17 +208,17 @@ const MessageContent = ({
                       }}
                     >
                       <Plus className="w-4 h-4" />
-                      {t('Inject command')}
+                      {t('Use code')}
                     </Button>
 
-                    {/* <Button
+                    <Button
                       size="sm"
                       variant="ghost"
                       className="rounded p-2 inline-flex items-center justify-center"
                       onClick={() => copyToClipboard(part.content?.code ?? '')}
                     >
                       <Copy className="w-4 h-4" />
-                    </Button> */}
+                    </Button>
                   </div>
                 </div>
               );

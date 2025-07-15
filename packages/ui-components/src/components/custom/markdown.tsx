@@ -1,16 +1,14 @@
 import { Alert, AlertDescription } from '../../ui/alert';
 
 import { Button } from '../../ui/button';
-import { useToast } from '../../ui/use-toast';
 
 import { t } from 'i18next';
 import { Copy, Plus } from 'lucide-react';
 import React, { useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import validator from 'validator';
-import { clipboardUtils } from '../../lib/clipboard-utils';
+import { useCopyToClipboard } from '../../hooks/use-copy-to-clipboard';
 import { cn } from '../../lib/cn';
-import { COPY_PASTE_TOAST_DURATION } from '../../lib/constants';
 import { CodeMirrorEditor } from '../json-editor';
 import { getLanguageExtensionForCode } from '../json-editor/code-mirror-utils';
 import { CodeVariations, MarkdownCodeVariations } from './types';
@@ -145,34 +143,7 @@ const Markdown = React.memo(
     handleInject,
     theme,
   }: MarkdownProps) => {
-    const { toast } = useToast();
-
-    const showCopySuccessToast = () =>
-      toast({
-        title: t('Copied to clipboard'),
-        duration: COPY_PASTE_TOAST_DURATION,
-      });
-
-    const showCopyFailureToast = () =>
-      toast({
-        title: t('Failed to copy to clipboard'),
-        duration: COPY_PASTE_TOAST_DURATION,
-      });
-
-    const copyToClipboard = (text: string) => {
-      if (navigator.clipboard) {
-        navigator.clipboard
-          .writeText(text)
-          .then(showCopySuccessToast)
-          .catch(showCopyFailureToast);
-      } else {
-        clipboardUtils.copyInInsecureContext({
-          text,
-          onSuccess: showCopySuccessToast,
-          onError: showCopyFailureToast,
-        });
-      }
-    };
+    const { copyToClipboard } = useCopyToClipboard();
 
     const multilineVariation =
       codeVariation === MarkdownCodeVariations.WithCopyAndInject ||

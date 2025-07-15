@@ -1,5 +1,5 @@
 import { AppSystemProp, logger, system } from '@openops/server-shared';
-import { ChatFlowContext } from '@openops/shared';
+import { ChatFlowContext, CODE_BLOCK_NAME } from '@openops/shared';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 import { MCPChatContext } from './ai-chat.service';
@@ -42,11 +42,9 @@ export const getBlockSystemPrompt = async (
   enrichedContext?: ChatFlowContext,
 ): Promise<string> => {
   const enrichedContextString = enrichedContext?.steps?.some((s) => s.variables)
-    ? `\n\nAdditional Context:\n${JSON.stringify(
+    ? `\n\nVariables used in the code inputs:\n${JSON.stringify(
         enrichedContext.steps.map((s) => s.variables),
-        null,
-        2,
-      )}`
+      )}\n\n`
     : '';
 
   switch (context.blockName) {
@@ -66,7 +64,7 @@ export const getBlockSystemPrompt = async (
     case '@openops/block-databricks':
       return loadPrompt('databricks.txt');
     // wip until the final ticket is implemented
-    case '@openops/code':
+    case CODE_BLOCK_NAME:
       return `Generate code with this interface, based on the user's request. The code should be executable in isolated-vm (Secure & isolated JS environments for nodejs).
       It should be robust and easy to read.
       
