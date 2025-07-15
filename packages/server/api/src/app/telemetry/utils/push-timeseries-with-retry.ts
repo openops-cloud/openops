@@ -11,6 +11,19 @@ export type PushTimeseriesConfig = {
 const DEFAULT_MAX_RETRIES = 3;
 const BASE_DELAY_MS = 100;
 
+/**
+ * Calculates exponential backoff delay for retry attempts
+ * @param retryCount - Current retry attempt number (0-based)
+ * @param baseDelayMs - Base delay in milliseconds
+ * @returns Delay in milliseconds
+ */
+function calculateBackoffDelay(
+  retryCount: number,
+  baseDelayMs: number,
+): number {
+  return Math.pow(2, retryCount) * baseDelayMs;
+}
+
 export async function pushTimeseriesWithRetry(
   timeseries: Timeseries[],
   config: PushTimeseriesConfig,
@@ -28,7 +41,7 @@ export async function pushTimeseriesWithRetry(
       retryCount++;
       if (retryCount < maxRetries) {
         logger.debug(`Retry ${retryCount}`, { error: err });
-        await delayFn(Math.pow(2, retryCount) * BASE_DELAY_MS);
+        await delayFn(calculateBackoffDelay(retryCount, BASE_DELAY_MS));
       }
     }
   }
