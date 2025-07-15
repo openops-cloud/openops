@@ -77,7 +77,7 @@ export const useStepSettingsAiChat = (
     body: {
       chatId: openChatResponse?.chatId,
     },
-    initialMessages: openChatResponse?.messages as AIChatMessage[],
+    initialMessages: openChatResponse?.messages as Message[],
     experimental_prepareRequestBody: () => ({
       chatId: openChatResponse?.chatId,
       message: input,
@@ -97,29 +97,10 @@ export const useStepSettingsAiChat = (
     },
     onFinish: ({ object }: { object: any }) => {
       if (object) {
-        const parts = [];
-
-        if (object.code || object.packageJson) {
-          parts.push({
-            type: 'sourcecode' as const,
-            content: {
-              packageJson: object.packageJson || '',
-              code: object.code || '',
-            },
-          });
-        }
-
-        if (object.description) {
-          parts.push({
-            type: 'text' as const,
-            content: object.description,
-          });
-        }
-
-        const assistantMessage: AIChatMessage = {
+        const assistantMessage: Message = {
           id: nanoid(),
           role: 'assistant',
-          content: { parts },
+          content: JSON.stringify(object),
         };
 
         setMessages((prev) => [...prev, assistantMessage]);

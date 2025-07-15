@@ -1,5 +1,9 @@
+import { SourceCode } from '@openops/shared';
+import { t } from 'i18next';
+import { Copy, Plus } from 'lucide-react';
 import { forwardRef } from 'react';
 import { cn } from '../../lib/cn';
+import { Button } from '../../ui/button';
 import { Markdown, MarkdownCodeVariations } from '../custom';
 import { CodeMirrorEditor, getLanguageExtensionForCode } from '../json-editor';
 import {
@@ -10,7 +14,7 @@ import {
 
 type AIChatMessagesProps = {
   messages: AIChatMessage[];
-  onInject?: (code: string) => void;
+  onInject?: (code: string | SourceCode) => void;
   codeVariation?: MarkdownCodeVariations;
   lastUserMessageRef?: React.RefObject<HTMLDivElement>;
   lastAssistantMessageRef?: React.RefObject<HTMLDivElement>;
@@ -79,7 +83,7 @@ const Message = forwardRef<
   HTMLDivElement,
   {
     message: AIChatMessage;
-    onInject?: (code: string) => void;
+    onInject?: (code: string | SourceCode) => void;
     codeVariation: MarkdownCodeVariations;
     theme: string;
   }
@@ -126,7 +130,7 @@ const MessageContent = ({
   theme,
 }: {
   content: AIChatMessageContent;
-  onInject?: (code: string) => void;
+  onInject?: (code: string | SourceCode) => void;
   codeVariation: MarkdownCodeVariations;
   theme: string;
 }) => {
@@ -144,7 +148,7 @@ const MessageContent = ({
     );
   }
 
-  if (content.type === 'structured') {
+  if (Array.isArray(content.parts) && content.parts.length > 0) {
     return (
       <div className="flex flex-col gap-2">
         {content.parts.map((part, index) => {
@@ -173,24 +177,6 @@ const MessageContent = ({
                   theme={theme}
                 />
               );
-            case 'code':
-              return (
-                <div key={stableKey} className="relative py-2 w-full">
-                  <CodeMirrorEditor
-                    value={part.content}
-                    readonly={true}
-                    showLineNumbers={false}
-                    height="auto"
-                    className="border border-solid rounded"
-                    containerClassName="h-auto"
-                    theme={theme}
-                    languageExtensions={getLanguageExtensionForCode(
-                      part.language,
-                    )}
-                    editorLanguage={part.language}
-                  />
-                </div>
-              );
             case 'sourcecode':
               return (
                 <div key={stableKey} className="relative py-2 w-full">
@@ -208,6 +194,30 @@ const MessageContent = ({
                     )}
                     editorLanguage="typescript"
                   />
+                  <div className="flex gap-2 items-center justify-end mt-1">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="rounded p-2 inline-flex items-center justify-center text-xs font-sans"
+                      onClick={() => {
+                        if (onInject) {
+                          onInject(part.content);
+                        }
+                      }}
+                    >
+                      <Plus className="w-4 h-4" />
+                      {t('Inject command')}
+                    </Button>
+
+                    {/* <Button
+                      size="sm"
+                      variant="ghost"
+                      className="rounded p-2 inline-flex items-center justify-center"
+                      onClick={() => copyToClipboard(part.content?.code ?? '')}
+                    >
+                      <Copy className="w-4 h-4" />
+                    </Button> */}
+                  </div>
                 </div>
               );
             default:

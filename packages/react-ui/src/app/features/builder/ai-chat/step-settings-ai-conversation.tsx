@@ -8,8 +8,9 @@ import {
   ChatStatus,
   LoadingSpinner,
   MarkdownCodeVariations,
+  tryParseJson,
 } from '@openops/components/ui';
-import { OpenChatResponse } from '@openops/shared';
+import { CodeSchema, OpenChatResponse, SourceCode } from '@openops/shared';
 import { useCallback, useMemo } from 'react';
 import { useBuilderStateContext } from '../builder-hooks';
 
@@ -33,27 +34,48 @@ const StepSettingsAiConversation = ({
   const dispatch = useBuilderStateContext((state) => state.applyMidpanelAction);
 
   const onInject = useCallback(
-    (code: string) => {
+    (code: string | SourceCode) => {
       dispatch({ type: 'ADD_CODE_TO_INJECT', code });
     },
     [dispatch],
   );
 
   const uiMessages: AIChatMessage[] = useMemo(() => {
-    return messages.map((message: MessageType, idx) => ({
-      id: message && 'id' in message ? message.id : String(idx),
-      role:
-        message.role.toLowerCase() === 'user'
-          ? AIChatMessageRole.user
-          : AIChatMessageRole.assistant,
-      content:
-        // todo
-        typeof message.content === 'string'
-          ? message.content
-          : Array.isArray(message.content)
+    return messages.map((message: MessageType, idx) => {
+      // todo
+      if (message.role.toLowerCase() === AIChatMessageRole.assistant) {
+        const parsed = tryParseJson(message.content) as CodeSchema;
+
+        if (parsed && parsed.code && parsed.description) {
+          return {
+            id: message && 'id' in message ? message.id : String(idx),
+            role: AIChatMessageRole.assistant,
+            content: {
+              parts: [
+                {
+                  type: 'sourcecode',
+                  content: parsed,
+                },
+                {
+                  type: 'text',
+                  content: parsed.description,
+                },
+              ],
+            },
+          };
+        }
+      }
+      return {
+        id: message && 'id' in message ? message.id : String(idx),
+        role:
+          message.role.toLowerCase() === 'user'
+            ? AIChatMessageRole.user
+            : AIChatMessageRole.assistant,
+        content: Array.isArray(message.content)
           ? message.content.map((c) => c.text).join()
           : message.content,
-    }));
+      };
+    });
   }, [messages]);
 
   if (isPending) {
