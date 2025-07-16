@@ -8,11 +8,11 @@ const markdownProperty = `
 
 **Agent Email**: The email you use to log in to Zendesk.
 
-**API Token**: You can find this in the Zendesk Admin Panel under Settings > APIs > Zendesk API.
+**API Token**: You can find this in the Zendesk Admin Panel under Settings > Apps & Integrations > API Tokens.
 `;
 
 export const zendeskAuth = BlockAuth.CustomAuth({
-  authProviderKey: 'zendesk',
+  authProviderKey: 'Zendesk',
   authProviderDisplayName: 'Zendesk',
   authProviderLogoUrl: 'https://static.openops.com/blocks/zendesk.png',
   description: markdownProperty,
