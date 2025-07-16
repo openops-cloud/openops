@@ -4,10 +4,10 @@ import { makePostRequest } from '../common/call-rest-api';
 import { getAssetTypes } from '../common/get-asset-types';
 import { safeFetch } from '../common/safe-fetch';
 
-export const tagAssetAction = createAction({
-  name: 'cloudhealth_tag_asset',
-  displayName: 'Add or Update Asset Tags',
-  description: 'Add or Update Asset Tags',
+export const removeTagAssetAction = createAction({
+  name: 'cloudhealth_remove_tag_asset',
+  displayName: 'Remove Asset Tags',
+  description: 'Remove Asset Tags',
   auth: cloudhealthAuth,
   props: {
     assetType: Property.Dropdown({
@@ -45,9 +45,9 @@ export const tagAssetAction = createAction({
       description: 'The ID of the asset to tag.',
       required: true,
     }),
-    tags: Property.Object({
-      displayName: 'Tags to Add or Update',
-      description: 'Name and value of the tag to be added or updated',
+    tags: Property.Array({
+      displayName: 'Tags to Remove',
+      description: 'Name the tags to remove',
       required: true,
     }),
   },
@@ -60,15 +60,15 @@ export const tagAssetAction = createAction({
           {
             asset_type: assetType,
             ids: [assetId],
-            tags: Object.entries(tags).map(([key, value]) => {
-              return { key: key, value: value };
+            tags: tags.map((tag) => {
+              return { key: tag, value: null };
             }),
           },
         ],
       });
     } catch (error) {
       throw new Error(
-        `Failed to save tags for asset ${assetType} with ID ${assetId}: ${error}`,
+        `Failed to remove tags from asset ${assetType} with ID ${assetId}: ${error}`,
       );
     }
   },

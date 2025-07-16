@@ -12,7 +12,7 @@ describe('block declaration tests', () => {
   });
 
   test('should return block with correct number of actions', () => {
-    expect(Object.keys(cloudhealth.actions()).length).toBe(8);
+    expect(Object.keys(cloudhealth.actions()).length).toBe(9);
 
     expect(cloudhealth.actions()).toMatchObject({
       custom_rest_api_call: {
@@ -45,6 +45,10 @@ describe('block declaration tests', () => {
       },
       cloudhealth_get_gcp_projects: {
         name: 'cloudhealth_get_gcp_projects',
+        requireAuth: true,
+      },
+      cloudhealth_remove_tag_asset: {
+        name: 'cloudhealth_remove_tag_asset',
         requireAuth: true,
       },
     });
