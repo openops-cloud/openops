@@ -135,8 +135,8 @@ async function triggerLoopIterations(
 ): Promise<void> {
   let loopExecutionState = loopExecutionContext.executionState;
   const loopIterations = loopExecutionContext.iterations;
-
   const originalPauseId = loopExecutionState.pauseId;
+
   for (let i = 0; i < resolvedInput.items.length; ++i) {
     const newCurrentPath = loopExecutionState.currentPath.loopIteration({
       loopName: action.name,
@@ -166,7 +166,6 @@ async function triggerLoopIterations(
     });
 
     loopIterations[i] = cloneDeep(loopExecutionState);
-
     loopExecutionState = loopExecutionState
       .setVerdict(ExecutionVerdict.RUNNING)
       .setCurrentPath(loopExecutionState.currentPath.removeLast())
