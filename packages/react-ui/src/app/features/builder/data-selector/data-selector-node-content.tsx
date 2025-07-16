@@ -1,6 +1,6 @@
-import { BlockIcon, Button, TooltipWrapper } from '@openops/components/ui';
+import { BlockIcon, Button } from '@openops/components/ui';
 import { t } from 'i18next';
-import { ChevronDown, ChevronUp, Info } from 'lucide-react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 import { flowHelper } from '@openops/shared';
 
@@ -8,6 +8,8 @@ import { useRipple } from '../../../common/providers/theme-provider';
 import { blocksHooks } from '../../blocks/lib/blocks-hook';
 import { useBuilderStateContext } from '../builder-hooks';
 
+import { DataSelectorNodeStatusIcon } from '@/app/features/builder/data-selector/data-selector-node-status-icon';
+import React from 'react';
 import { dataSelectorUtils, MentionTreeNode } from './data-selector-utils';
 
 const ToggleIcon = ({ expanded }: { expanded: boolean }) => {
@@ -96,18 +98,10 @@ const DataSelectorNodeContent = ({
           </div>
         )}
         <div className="truncate">{node.data.displayName}</div>
-        {stepHasSampleData && (
-          <TooltipWrapper
-            tooltipText={t('Step contains sample data')}
-            tooltipPlacement="bottom"
-          >
-            <Info
-              className="min-w-4 w-4 h-4 text-blueAccent"
-              role="img"
-              aria-label={t('Step contains sample data')}
-            />
-          </TooltipWrapper>
-        )}
+        <DataSelectorNodeStatusIcon
+          stepHasSampleData={stepHasSampleData}
+          success={node.data.success}
+        />
         {showNodeValue && (
           <>
             <div className="flex-shrink-0">:</div>

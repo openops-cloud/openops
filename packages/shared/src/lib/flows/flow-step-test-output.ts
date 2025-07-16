@@ -17,7 +17,7 @@ export type StepOutputWithData = {
   input: unknown;
   output: unknown;
   lastTestDate: string;
-  success: boolean;
+  success: boolean | null;
 };
 
 export function encodeStepOutputs(
