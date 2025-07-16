@@ -1,7 +1,7 @@
 import { createCustomApiCallAction } from '@openops/blocks-common';
 import { createBlock, Property } from '@openops/blocks-framework';
 import { BlockCategory } from '@openops/shared';
-import { getAssetPerspectives } from './lib/actions/get-asset-perspectives';
+import { getAssetPerspectivesAction } from './lib/actions/get-asset-perspectives';
 import { getAwsAccountsAction } from './lib/actions/get-aws-accounts-action';
 import { getAzureSubscriptionsAction } from './lib/actions/get-azure-subscriptions-action';
 import { getGcpProjectsAction } from './lib/actions/get-gcp-projections-action';
@@ -23,7 +23,7 @@ export const cloudhealth = createBlock({
   actions: [
     getRecommendationsAction,
     searchAssetsAction,
-    getAssetPerspectives,
+    getAssetPerspectivesAction,
     tagAssetAction,
     removeTagAssetAction,
     getAwsAccountsAction,

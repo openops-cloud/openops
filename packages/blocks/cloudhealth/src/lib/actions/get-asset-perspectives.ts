@@ -5,7 +5,7 @@ import { getAssetTypes } from '../common/get-asset-types';
 import { safeFetch } from '../common/safe-fetch';
 import { searchAssets } from '../common/search-assets';
 
-export const getAssetPerspectives = createAction({
+export const getAssetPerspectivesAction = createAction({
   name: 'cloudhealth_get_asset_perspectives',
   displayName: 'Get Asset Perspectives',
   description: 'Retrieve perspectives for a specific asset',
@@ -91,7 +91,8 @@ export const getAssetPerspectives = createAction({
       fields: { fieldName: string; value: string }[];
     };
 
-    const assets = await searchAssets(context.auth, assetType, fields);
+    const assets: any[] = await searchAssets(context.auth, assetType, fields);
+    const results = [];
 
     if (!assets || assets.length === 0) {
       throw new Error(
@@ -101,22 +102,30 @@ export const getAssetPerspectives = createAction({
       );
     }
 
-    if (!assets[0].groups) {
-      return {};
+    for (const asset of assets) {
+      const perspectives = getAssetPerspectives(asset);
+      results.push({
+        asset: asset,
+        perspectives: perspectives,
+      });
     }
 
-    const perspectivesString = (assets[0].groups ?? '') as string;
-    const perspectives = perspectivesString
-      .split(',')
-      .map((s) => s.trim())
-      .filter(Boolean);
-
-    const perspectivesAsObject = perspectives.reduce((acc, item) => {
-      const [key, ...rest] = item.split(':');
-      acc[key.trim()] = rest.join(':').trim();
-      return acc;
-    }, {} as Record<string, string>);
-
-    return perspectivesAsObject;
+    return results;
   },
 });
+
+function getAssetPerspectives(asset: any): Record<string, string> {
+  const perspectivesString = (asset.groups ?? '') as string;
+  const perspectives = perspectivesString
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  const perspectivesAsObject = perspectives.reduce((acc, item) => {
+    const [key, ...rest] = item.split(':');
+    acc[key.trim()] = rest.join(':').trim();
+    return acc;
+  }, {} as Record<string, string>);
+
+  return perspectivesAsObject;
+}
