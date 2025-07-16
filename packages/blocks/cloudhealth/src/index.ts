@@ -19,12 +19,12 @@ export const cloudhealth = createBlock({
   authors: [],
   categories: [BlockCategory.FINOPS],
   actions: [
-    getAwsAccountsAction,
-    getAzureSubscriptionsAction,
-    getGcpProjectsAction,
     getRecommendationsAction,
     searchAssetsAction,
     tagAssetAction,
+    getAwsAccountsAction,
+    getAzureSubscriptionsAction,
+    getGcpProjectsAction,
 
     createCustomApiCallAction({
       baseUrl: () => `${BASE_CH_URL}/`,
