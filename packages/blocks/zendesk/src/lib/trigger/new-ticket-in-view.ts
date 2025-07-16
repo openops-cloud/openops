@@ -11,24 +11,22 @@ import {
   Property,
   TriggerStrategy,
 } from '@openops/blocks-framework';
-import { logger } from '@openops/server-shared';
 import { zendeskAuth } from '../..';
 
 export const newTicketInView = createTrigger({
   auth: zendeskAuth,
   name: 'new_ticket_in_view',
-  displayName: 'New ticket in view',
+  displayName: 'New Ticket In View',
   description: 'Triggers when a new ticket is created in a view',
   type: TriggerStrategy.POLLING,
   props: {
     view_id: Property.Dropdown({
       displayName: 'View',
       description: 'The view to monitor for new tickets',
-      refreshers: [],
+      refreshers: ['auth'],
       required: true,
       options: async ({ auth }) => {
         const authentication = auth as AuthProps;
-        logger.info('Fetching views for authentication:', authentication);
         if (
           !authentication?.['email'] ||
           !authentication?.['subdomain'] ||
@@ -49,8 +47,6 @@ export const newTicketInView = createTrigger({
             password: authentication.token,
           },
         });
-        //console.log('Views response:', response);
-        logger.info('Views response:', response);
         return {
           placeholder: 'Select a view',
           options: response.body.views.map((view: any) => ({
@@ -127,7 +123,6 @@ export const newTicketInView = createTrigger({
       auth: context.auth,
       store: context.store,
       propsValue: context.propsValue,
-      // files: context.files, // removed, not a valid property
     });
   },
   test: async (context) => {
@@ -135,7 +130,6 @@ export const newTicketInView = createTrigger({
       auth: context.auth,
       store: context.store,
       propsValue: context.propsValue,
-      // files: context.files, // removed, not a valid property
     });
   },
 });

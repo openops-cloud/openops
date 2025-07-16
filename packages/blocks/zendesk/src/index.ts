@@ -14,7 +14,7 @@ const markdownProperty = `
 export const zendeskAuth = BlockAuth.CustomAuth({
   authProviderKey: 'zendesk',
   authProviderDisplayName: 'Zendesk',
-  authProviderLogoUrl: 'https://cdn.openops.com/blocks/zendesk.png',
+  authProviderLogoUrl: 'https://static.openops.com/blocks/zendesk.png',
   description: markdownProperty,
   required: true,
   props: {
@@ -23,7 +23,7 @@ export const zendeskAuth = BlockAuth.CustomAuth({
       description: 'The email address you use to login to Zendesk',
       required: true,
     }),
-    token: Property.ShortText({
+    token: Property.SecretText({
       displayName: 'Token',
       description: 'The API token you can generate in Zendesk',
       required: true,
@@ -41,7 +41,7 @@ export const zendesk = createBlock({
   description: 'Customer service software and support ticket system',
 
   minimumSupportedRelease: '0.30.0',
-  logoUrl: 'https://cdn.openops.com/blocks/zendesk.png',
+  logoUrl: 'https://static.openops.com/blocks/zendesk.png',
   authors: ['kishanprmr', 'MoShizzle', 'khaledmashaly', 'abuaboud'],
   categories: [BlockCategory.COLLABORATION],
   auth: zendeskAuth,
