@@ -1,10 +1,10 @@
 import { makeGetRequest } from './call-rest-api';
 
-export async function searchAsset(
+export async function searchAssets(
   apiKey: string,
   assetType: string,
   fields: { fieldName: string; value: string }[],
-) {
+): Promise<any[]> {
   const queryParams = {
     name: assetType,
     query: ((fields as any).fields ?? [])

@@ -3,7 +3,7 @@ import { cloudhealthAuth } from '../auth';
 import { getAssetFields } from '../common/get-asset-fields';
 import { getAssetTypes } from '../common/get-asset-types';
 import { safeFetch } from '../common/safe-fetch';
-import { searchAsset } from '../common/seach-asset';
+import { searchAssets } from '../common/search-assets';
 
 export const searchAssetsAction = createAction({
   name: 'cloudhealth_search_assets',
@@ -91,6 +91,6 @@ export const searchAssetsAction = createAction({
       fields: { fieldName: string; value: string }[];
     };
 
-    return await searchAsset(context.auth, assetType, fields);
+    return await searchAssets(context.auth, assetType, fields);
   },
 });

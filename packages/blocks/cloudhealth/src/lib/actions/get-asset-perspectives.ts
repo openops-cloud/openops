@@ -3,7 +3,7 @@ import { cloudhealthAuth } from '../auth';
 import { getAssetFields } from '../common/get-asset-fields';
 import { getAssetTypes } from '../common/get-asset-types';
 import { safeFetch } from '../common/safe-fetch';
-import { searchAsset } from '../common/seach-asset';
+import { searchAssets } from '../common/search-assets';
 
 export const getAssetPerspectives = createAction({
   name: 'cloudhealth_get_asset_perspectives',
@@ -91,8 +91,21 @@ export const getAssetPerspectives = createAction({
       fields: { fieldName: string; value: string }[];
     };
 
-    const asset = await searchAsset(context.auth, assetType, fields);
-    const perspectivesString = (asset?.[0].groups ?? '') as string;
+    const assets = await searchAssets(context.auth, assetType, fields);
+
+    if (!assets || assets.length === 0) {
+      throw new Error(
+        `No assets found for type: ${assetType} with provided fields: ${JSON.stringify(
+          fields,
+        )}`,
+      );
+    }
+
+    if (!assets[0].groups) {
+      return {};
+    }
+
+    const perspectivesString = (assets[0].groups ?? '') as string;
     const perspectives = perspectivesString
       .split(',')
       .map((s) => s.trim())
