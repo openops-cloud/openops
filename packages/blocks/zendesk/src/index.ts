@@ -1,9 +1,5 @@
 import { createCustomApiCallAction } from '@openops/blocks-common';
-import {
-  BlockAuth,
-  Property,
-  createBlock,
-} from '@openops/blocks-framework';
+import { BlockAuth, Property, createBlock } from '@openops/blocks-framework';
 import { BlockCategory } from '@openops/shared';
 import { newTicketInView } from './lib/trigger/new-ticket-in-view';
 
@@ -16,7 +12,11 @@ const markdownProperty = `
 `;
 
 export const zendeskAuth = BlockAuth.CustomAuth({
+  authProviderKey: 'zendesk',
+  authProviderDisplayName: 'Zendesk',
+  authProviderLogoUrl: 'https://cdn.openops.com/blocks/zendesk.png',
   description: markdownProperty,
+  required: true,
   props: {
     email: Property.ShortText({
       displayName: 'Agent Email',
@@ -34,7 +34,6 @@ export const zendeskAuth = BlockAuth.CustomAuth({
       required: true,
     }),
   },
-  required: true,
 });
 
 export const zendesk = createBlock({
@@ -43,23 +42,27 @@ export const zendesk = createBlock({
 
   minimumSupportedRelease: '0.30.0',
   logoUrl: 'https://cdn.openops.com/blocks/zendesk.png',
-  authors: ["kishanprmr","MoShizzle","khaledmashaly","abuaboud"],
-  categories: [BlockCategory.CUSTOMER_SUPPORT],
+  authors: ['kishanprmr', 'MoShizzle', 'khaledmashaly', 'abuaboud'],
+  categories: [BlockCategory.COLLABORATION],
   auth: zendeskAuth,
   actions: [
     createCustomApiCallAction({
-      baseUrl: (auth) =>
-        `https://${
-          (auth as { subdomain: string }).subdomain
-        }.zendesk.com/api/v2`,
+      baseUrl: (auth) => {
+        const { subdomain } = auth as unknown as { subdomain: string };
+        return `https://${subdomain}.zendesk.com/api/v2`;
+      },
       auth: zendeskAuth,
-      authMapping: async (auth) => ({
-        Authorization: `Basic ${Buffer.from(
-          `${(auth as { email: string }).email}/token:${
-            (auth as { token: string }).token
-          }`
-        ).toString('base64')}`,
-      }),
+      authMapping: async (auth) => {
+        const { email, token } = auth as unknown as {
+          email: string;
+          token: string;
+        };
+        return {
+          Authorization: `Basic ${Buffer.from(
+            `${email}/token:${token}`,
+          ).toString('base64')}`,
+        };
+      },
     }),
   ],
   triggers: [newTicketInView],

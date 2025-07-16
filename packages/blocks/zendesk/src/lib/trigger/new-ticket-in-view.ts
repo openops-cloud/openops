@@ -11,6 +11,7 @@ import {
   Property,
   TriggerStrategy,
 } from '@openops/blocks-framework';
+import { logger } from '@openops/server-shared';
 import { zendeskAuth } from '../..';
 
 export const newTicketInView = createTrigger({
@@ -27,6 +28,7 @@ export const newTicketInView = createTrigger({
       required: true,
       options: async ({ auth }) => {
         const authentication = auth as AuthProps;
+        logger.info('Fetching views for authentication:', authentication);
         if (
           !authentication?.['email'] ||
           !authentication?.['subdomain'] ||
@@ -47,6 +49,8 @@ export const newTicketInView = createTrigger({
             password: authentication.token,
           },
         });
+        //console.log('Views response:', response);
+        logger.info('Views response:', response);
         return {
           placeholder: 'Select a view',
           options: response.body.views.map((view: any) => ({
@@ -123,7 +127,7 @@ export const newTicketInView = createTrigger({
       auth: context.auth,
       store: context.store,
       propsValue: context.propsValue,
-      files: context.files,
+      // files: context.files, // removed, not a valid property
     });
   },
   test: async (context) => {
@@ -131,7 +135,7 @@ export const newTicketInView = createTrigger({
       auth: context.auth,
       store: context.store,
       propsValue: context.propsValue,
-      files: context.files,
+      // files: context.files, // removed, not a valid property
     });
   },
 });
