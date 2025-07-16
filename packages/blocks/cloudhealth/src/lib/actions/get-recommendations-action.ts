@@ -38,15 +38,22 @@ export const getRecommendationsAction = createAction({
         ],
       },
     }),
+    limit: Property.Number({
+      displayName: 'Limit',
+      description: 'The maximum number of recommendations to return.',
+      required: false,
+      defaultValue: undefined,
+    }),
   },
   async run(context) {
-    const { recommendationType, evaluationDuration } =
+    const { recommendationType, evaluationDuration, limit } =
       context.propsValue as any;
 
     const { query, variables } = generateQuery(
       recommendationType,
       {},
       evaluationDuration,
+      { first: limit },
     );
 
     const apiKey = context.auth;

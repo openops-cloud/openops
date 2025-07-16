@@ -5,10 +5,10 @@ import { getAssetTypes } from '../common/get-asset-types';
 import { safeFetch } from '../common/safe-fetch';
 import { searchAsset } from '../common/seach-asset';
 
-export const searchAssetsAction = createAction({
-  name: 'cloudhealth_search_assets',
-  displayName: 'Search Assets',
-  description: 'Retrieve assets that match specific criteria',
+export const getAssetPerspectives = createAction({
+  name: 'cloudhealth_get_asset_perspectives',
+  displayName: 'Get Asset Perspectives',
+  description: 'Retrieve perspectives for a specific asset',
   auth: cloudhealthAuth,
   props: {
     assetType: Property.Dropdown({
@@ -91,6 +91,19 @@ export const searchAssetsAction = createAction({
       fields: { fieldName: string; value: string }[];
     };
 
-    return await searchAsset(context.auth, assetType, fields);
+    const asset = await searchAsset(context.auth, assetType, fields);
+    const perspectivesString = (asset?.[0].groups ?? '') as string;
+    const perspectives = perspectivesString
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    const perspectivesAsObject = perspectives.reduce((acc, item) => {
+      const [key, ...rest] = item.split(':');
+      acc[key.trim()] = rest.join(':').trim();
+      return acc;
+    }, {} as Record<string, string>);
+
+    return perspectivesAsObject;
   },
 });
