@@ -47,8 +47,7 @@ import {
 } from '@openops/shared';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
-import { AiAssistantBuilderChat } from '@/app/features/ai/ai-assistant-builder-chat';
-import { useAppStore } from '@/app/store/app-store';
+import { AiChatResizablePanel } from '@/app/features/builder/ai-chat/ai-chat-resizable-panel';
 import {
   RESIZABLE_PANEL_GROUP,
   RESIZABLE_PANEL_IDS,
@@ -178,9 +177,7 @@ const BuilderPage = () => {
       };
     },
   );
-  const { isAiChatOpened } = useAppStore((s) => ({
-    isAiChatOpened: s.isAiChatOpened,
-  }));
+
   const [middlePanelRef, rawMiddlePanelSize] = useMeasure<HTMLDivElement>();
   const [leftSidePanelRef, leftSidePanelSize] = useMeasure<HTMLDivElement>();
   const [isDraggingHandle, setIsDraggingHandle] = useState(false);
@@ -290,24 +287,10 @@ const BuilderPage = () => {
               disabled={leftSidebar === LeftSideBarType.NONE}
               onDragging={setIsDraggingHandle}
             />
-            {showChatInResizablePanel && isAiChatOpened && (
-              <>
-                <ResizablePanel
-                  order={2}
-                  id={RESIZABLE_PANEL_IDS.AI_CHAT}
-                  className="min-w-[350px]"
-                >
-                  <div className="w-full h-full p-1 pr-2 flex bg-secondary">
-                    <AiAssistantBuilderChat />
-                  </div>
-                </ResizablePanel>
-                <ResizableHandle
-                  className="w-0"
-                  disabled={leftSidebar === LeftSideBarType.NONE}
-                  onDragging={setIsDraggingHandle}
-                />
-              </>
-            )}
+            <AiChatResizablePanel
+              isDraggingHandle={isDraggingHandle}
+              onDragging={setIsDraggingHandle}
+            />
 
             <ResizablePanel order={3} id={RESIZABLE_PANEL_IDS.MAIN}>
               {readonly ? (
