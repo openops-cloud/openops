@@ -6,6 +6,7 @@ import { getAzureSubscriptionsAction } from './lib/actions/get-azure-subscriptio
 import { getGcpProjectsAction } from './lib/actions/get-gcp-projections-action';
 import { getRecommendationsAction } from './lib/actions/get-recommendations-action';
 import { graphqlAction } from './lib/actions/graphql-action';
+import { removeTagAssetAction } from './lib/actions/remove-tag-asset-action';
 import { searchAssetsAction } from './lib/actions/search-assets-action';
 import { tagAssetAction } from './lib/actions/tag-asset-action';
 import { cloudhealthAuth } from './lib/auth';
@@ -22,6 +23,7 @@ export const cloudhealth = createBlock({
     getRecommendationsAction,
     searchAssetsAction,
     tagAssetAction,
+    removeTagAssetAction,
     getAwsAccountsAction,
     getAzureSubscriptionsAction,
     getGcpProjectsAction,
