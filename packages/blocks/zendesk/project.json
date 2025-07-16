@@ -6,26 +6,20 @@
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/blocks/zendesk",
         "tsConfig": "packages/blocks/zendesk/tsconfig.lib.json",
         "packageJson": "packages/blocks/zendesk/package.json",
         "main": "packages/blocks/zendesk/src/index.ts",
-        "assets": [
-          "packages/blocks/zendesk/*.md"
-        ],
+        "assets": ["packages/blocks/zendesk/*.md"],
         "buildableProjectDepsInPackageJsonType": "dependencies",
         "updateBuildableProjectDepsInPackageJson": true
       }
     },
     "lint": {
       "executor": "@nx/eslint:lint",
-      "outputs": [
-        "{options.outputFile}"
-      ]
+      "outputs": ["{options.outputFile}"]
     }
   },
   "tags": []
