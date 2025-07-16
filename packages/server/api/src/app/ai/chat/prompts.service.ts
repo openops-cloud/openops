@@ -1,5 +1,5 @@
 import { AppSystemProp, logger, system } from '@openops/server-shared';
-import { ChatFlowContext, CODE_BLOCK_NAME } from '@openops/shared';
+import { ChatFlowContext, CODE_BLOCK_NAME, isNil } from '@openops/shared';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 import { MCPChatContext } from './ai-chat.service';
@@ -58,14 +58,27 @@ export const getBlockSystemPrompt = async (
     case '@openops/block-databricks':
       return loadPrompt('databricks.txt');
     case CODE_BLOCK_NAME: {
-      const resolvedVariables = enrichedContext?.steps?.some((s) => s.variables)
-        ? `\n\nVariables used in the code inputs:\n${JSON.stringify(
-            enrichedContext.steps.map((s) => s.variables),
-          )}\n\n`
-        : '';
+      let enhancedPrompt = '';
+
+      if (enrichedContext?.steps?.some((s) => s.variables)) {
+        enhancedPrompt += `
+        \n\n ## Inputs properties and sample values:\n${JSON.stringify(
+          enrichedContext.steps.map((s) =>
+            s.variables?.map((v) => ({
+              [`inputs.${v.name}`]: v.value,
+            })),
+          ),
+        )}\n\n`;
+      }
+
+      if (!isNil(enrichedContext?.currentStepData)) {
+        enhancedPrompt += `
+        ## Current output: ${JSON.stringify(enrichedContext.currentStepData)}
+        \n\n`;
+      }
 
       const basePrompt = await loadPrompt('code.txt');
-      return `${basePrompt}${resolvedVariables}`;
+      return `${basePrompt} ${enhancedPrompt}`;
     }
     default:
       return '';

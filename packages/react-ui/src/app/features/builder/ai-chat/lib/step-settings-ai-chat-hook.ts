@@ -9,6 +9,7 @@ import { toast } from '@openops/components/ui';
 import {
   Action,
   ActionType,
+  ChatFlowContext,
   CODE_BLOCK_NAME,
   codeLLMSchema,
   CodeLLMSchema,
@@ -176,7 +177,7 @@ export const useStepSettingsAiChat = (
 
       const additionalContext =
         stepDetails && flowVersion.id
-          ? createAdditionalContext(flowVersion, selectedStep, stepDetails)
+          ? createAdditionalContext(flowVersion, stepDetails)
           : undefined;
 
       submitCodeRequest({
@@ -192,7 +193,6 @@ export const useStepSettingsAiChat = (
       openChatResponse?.chatId,
       stepDetails,
       flowVersion,
-      selectedStep,
       setMessages,
       submitCodeRequest,
       setInput,
@@ -241,9 +241,8 @@ const getActionName = (
 
 const createAdditionalContext = (
   flowVersion: FlowVersion,
-  selectedStep: string,
   stepData?: Action | TriggerWithOptionalId,
-) => {
+): ChatFlowContext => {
   const stepVariables = stepData?.settings?.input || {};
   const variables = Object.entries(stepVariables).map(([name, value]) => ({
     name,
@@ -253,10 +252,11 @@ const createAdditionalContext = (
   return {
     flowId: flowVersion.flowId,
     flowVersionId: flowVersion.id,
+    currentStepId: stepData?.id ?? '',
     steps: [
       {
-        id: selectedStep,
-        stepName: selectedStep,
+        id: stepData?.id ?? '',
+        stepName: stepData?.name ?? '',
         variables: variables.length > 0 ? variables : undefined,
       },
     ],

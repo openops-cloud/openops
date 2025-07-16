@@ -220,7 +220,7 @@ describe('getSystemPrompt', () => {
         actionName: 'code_action',
       });
 
-      expect(result).toBe(baseCodePrompt);
+      expect(result).toBe(`${baseCodePrompt} `);
       expect(fetch).toHaveBeenCalledWith(
         'https://example.com/prompts/code.txt',
       );
@@ -237,7 +237,7 @@ describe('getSystemPrompt', () => {
         actionName: 'code_action',
       });
 
-      expect(result).toBe(baseCodePrompt);
+      expect(result).toBe(`${baseCodePrompt} `);
       expect(fetch).not.toHaveBeenCalled();
       expect(readFileMock).toHaveBeenCalledWith(
         expect.stringContaining('code.txt'),
@@ -278,17 +278,13 @@ describe('getSystemPrompt', () => {
         enrichedContext,
       );
 
-      const expectedVariables = `\n\nVariables used in the code inputs:\n${JSON.stringify(
-        [
-          [
-            { name: 'var1', value: 'value1' },
-            { name: 'var2', value: 'value2' },
-          ],
-          [{ name: 'var3', value: 'value3' }],
-        ],
-      )}\n\n`;
+      const expectedVariables = `
+        \n\n ## Inputs properties and sample values:\n${JSON.stringify([
+          [{ 'inputs.var1': 'value1' }, { 'inputs.var2': 'value2' }],
+          [{ 'inputs.var3': 'value3' }],
+        ])}\n\n`;
 
-      expect(result).toBe(`${baseCodePrompt}${expectedVariables}`);
+      expect(result).toBe(`${baseCodePrompt} ${expectedVariables}`);
       expect(readFileMock).toHaveBeenCalledWith(
         expect.stringContaining('code.txt'),
         'utf-8',
@@ -317,7 +313,7 @@ describe('getSystemPrompt', () => {
         enrichedContext,
       );
 
-      expect(result).toBe(baseCodePrompt);
+      expect(result).toBe(`${baseCodePrompt} `);
       expect(readFileMock).toHaveBeenCalledWith(
         expect.stringContaining('code.txt'),
         'utf-8',
@@ -343,7 +339,7 @@ describe('getSystemPrompt', () => {
         enrichedContext,
       );
 
-      expect(result).toBe(baseCodePrompt);
+      expect(result).toBe(`${baseCodePrompt} `);
       expect(readFileMock).toHaveBeenCalledWith(
         expect.stringContaining('code.txt'),
         'utf-8',
@@ -384,15 +380,14 @@ describe('getSystemPrompt', () => {
         enrichedContext,
       );
 
-      const expectedVariables = `\n\nVariables used in the code inputs:\n${JSON.stringify(
-        [
-          [{ name: 'var1', value: 'value1' }],
-          undefined,
-          [{ name: 'var2', value: 'value2' }],
-        ],
-      )}\n\n`;
+      const expectedVariables = `
+        \n\n ## Inputs properties and sample values:\n${JSON.stringify([
+          [{ 'inputs.var1': 'value1' }],
+          null,
+          [{ 'inputs.var2': 'value2' }],
+        ])}\n\n`;
 
-      expect(result).toBe(`${baseCodePrompt}${expectedVariables}`);
+      expect(result).toBe(`${baseCodePrompt} ${expectedVariables}`);
     });
 
     it('should fallback to local file when cloud fetch fails for code block', async () => {
@@ -406,7 +401,7 @@ describe('getSystemPrompt', () => {
         actionName: 'code_action',
       });
 
-      expect(result).toBe(baseCodePrompt);
+      expect(result).toBe(`${baseCodePrompt} `);
       expect(fetch).toHaveBeenCalledWith(
         'https://example.com/prompts/code.txt',
       );

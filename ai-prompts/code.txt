@@ -40,7 +40,7 @@ export const code = async (inputs) => {
 ## Input Handling
 
 The `inputs` parameter contains all the data needed for your code.
-If you see inputs variables truncated, keep in mind that the final code will receive the full object as inputs and NOT stringified! 
+If you see inputs properties values are truncated, keep in mind that the final code will receive the full object as inputs and NOT stringified! 
 Verify and handle both cases, if input variables are objects or strings.
 
 - **Type**: Always an object
