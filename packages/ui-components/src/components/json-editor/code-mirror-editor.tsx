@@ -1,5 +1,6 @@
 import { javascript } from '@codemirror/lang-javascript';
 import { json } from '@codemirror/lang-json';
+import { SourceCode } from '@openops/shared';
 import { githubDark, githubLight } from '@uiw/codemirror-theme-github';
 import CodeMirror, {
   EditorState,
@@ -7,11 +8,10 @@ import CodeMirror, {
   Extension,
   ReactCodeMirrorRef,
 } from '@uiw/react-codemirror';
+import { t } from 'i18next';
 import React, { RefObject, useMemo, useRef, useState } from 'react';
 import { cn } from '../../lib/cn';
-
-import { SourceCode } from '@openops/shared';
-import { t } from 'i18next';
+import { Theme } from '../../lib/theme';
 import { convertToString, isSourceCodeObject } from './code-mirror-utils';
 
 const styleTheme = EditorView.baseTheme({
@@ -27,7 +27,7 @@ type CodeMirrorEditorProps = {
   onChange?: (value: unknown) => void;
   className?: string;
   containerClassName?: string;
-  theme: string;
+  theme: Theme;
   placeholder?: string;
   languageExtensions?: Extension[];
   height?: string;

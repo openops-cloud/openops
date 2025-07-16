@@ -1,5 +1,6 @@
 import { forwardRef } from 'react';
 import { cn } from '../../lib/cn';
+import { Theme } from '../../lib/theme';
 import { Markdown, MarkdownCodeVariations } from '../custom';
 import { CodeMirrorEditor, getLanguageExtensionForCode } from '../json-editor';
 import {
@@ -14,7 +15,7 @@ type AIChatMessagesProps = {
   codeVariation?: MarkdownCodeVariations;
   lastUserMessageRef?: React.RefObject<HTMLDivElement>;
   lastAssistantMessageRef?: React.RefObject<HTMLDivElement>;
-  theme: string;
+  theme: Theme;
 };
 
 const AIChatMessages = forwardRef<HTMLDivElement, AIChatMessagesProps>(
@@ -81,7 +82,7 @@ const Message = forwardRef<
     message: AIChatMessage;
     onInject?: (code: string) => void;
     codeVariation: MarkdownCodeVariations;
-    theme: string;
+    theme: Theme;
   }
 >(({ message, onInject, codeVariation, theme }, ref) => {
   const isUser = message.role === AIChatMessageRole.user;
@@ -128,7 +129,7 @@ const MessageContent = ({
   content: AIChatMessageContent;
   onInject?: (code: string) => void;
   codeVariation: MarkdownCodeVariations;
-  theme: string;
+  theme: Theme;
 }) => {
   if (typeof content === 'string') {
     return (

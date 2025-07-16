@@ -10,7 +10,7 @@ import ReactMarkdown from 'react-markdown';
 import validator from 'validator';
 import { clipboardUtils } from '../../lib/clipboard-utils';
 import { cn } from '../../lib/cn';
-import { COPY_PASTE_TOAST_DURATION } from '../../lib/constants';
+import { Theme } from '../../lib/theme';
 import { CodeMirrorEditor } from '../json-editor';
 import { getLanguageExtensionForCode } from '../json-editor/code-mirror-utils';
 import { CodeVariations, MarkdownCodeVariations } from './types';
@@ -53,7 +53,7 @@ type MarkdownProps = {
   linkClassName?: string;
   codeVariation?: CodeVariations;
   handleInject?: (codeContent: string) => void;
-  theme: string;
+  theme: Theme;
 };
 
 const Container = ({
@@ -79,7 +79,7 @@ const CodeViewer = ({
   className,
 }: {
   content: string;
-  theme: string;
+  theme: Theme;
   className?: string;
 }) => {
   return (
@@ -98,13 +98,7 @@ const CodeViewer = ({
   );
 };
 
-const LanguageUrl = ({
-  content,
-  theme,
-}: {
-  content: string;
-  theme: string;
-}) => {
+const LanguageUrl = ({ content, theme }: { content: string; theme: Theme }) => {
   if (
     validator.isURL(content, {
       require_protocol: true,

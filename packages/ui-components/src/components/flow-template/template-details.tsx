@@ -27,7 +27,7 @@ type TemplateDetailsProps = {
   nodeTypes: NodeTypes;
   template: Trigger | undefined;
   ownerLogoUrl: string;
-  theme: string;
+  theme: Theme;
 };
 
 const DESCRIPTION_MAX_LINES = 4;

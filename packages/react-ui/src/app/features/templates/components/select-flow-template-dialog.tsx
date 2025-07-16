@@ -1,4 +1,4 @@
-import { Theme, useTheme } from '@/app/common/providers/theme-provider';
+import { useTheme } from '@/app/common/providers/theme-provider';
 import { SEARCH_PARAMS } from '@/app/constants/search-params';
 import { flowsApi } from '@/app/features/flows/lib/flows-api';
 import { ConnectionsPicker } from '@/app/features/templates/components/connections-picker/connections-picker';
@@ -27,6 +27,7 @@ import {
   StepPlaceHolder,
   TemplateDetails,
   TemplateEdge,
+  Theme,
   toast,
   VerticalDivider,
 } from '@openops/components/ui';
