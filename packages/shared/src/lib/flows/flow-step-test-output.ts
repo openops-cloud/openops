@@ -8,6 +8,7 @@ export const FlowStepTestOutput = Type.Object({
   flowVersionId: Type.String(),
   input: Type.Unknown(),
   output: Type.Unknown(),
+  success: Type.Boolean(),
 });
 
 export type FlowStepTestOutput = Static<typeof FlowStepTestOutput>;
@@ -16,6 +17,7 @@ export type StepOutputWithData = {
   input: unknown;
   output: unknown;
   lastTestDate: string;
+  success: boolean | null;
 };
 
 export function encodeStepOutputs(

@@ -13,6 +13,7 @@ import {
   Markdown,
   MarkdownCodeVariations,
   Switch,
+  Theme,
   tryParseJson,
 } from '@openops/components/ui';
 import { isNil } from '@openops/shared';
@@ -94,7 +95,7 @@ type selectFormComponentForPropertyParams = {
   markdownVariables: Record<string, string>;
   useMentionTextInput: boolean;
   disabled: boolean;
-  theme: string;
+  theme: Theme;
 };
 
 const selectFormComponentForProperty = ({

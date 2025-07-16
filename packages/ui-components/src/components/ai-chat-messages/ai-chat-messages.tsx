@@ -2,9 +2,11 @@ import { SourceCode } from '@openops/shared';
 import { t } from 'i18next';
 import { forwardRef } from 'react';
 import { cn } from '../../lib/cn';
+import { Theme } from '../../lib/theme';
 import { CodeActions } from '../code-actions';
 import { Markdown, MarkdownCodeVariations } from '../custom';
-import { CodeMirrorEditor, getLanguageExtensionForCode } from '../json-editor';
+import { CodeMirrorEditor } from '../json-editor';
+import { getLanguageExtensionForCode } from '../json-editor/code-mirror-utils';
 import {
   AIChatMessage,
   AIChatMessageContent,
@@ -17,7 +19,7 @@ type AIChatMessagesProps = {
   codeVariation?: MarkdownCodeVariations;
   lastUserMessageRef?: React.RefObject<HTMLDivElement>;
   lastAssistantMessageRef?: React.RefObject<HTMLDivElement>;
-  theme: string;
+  theme?: Theme;
 };
 
 const AIChatMessages = forwardRef<HTMLDivElement, AIChatMessagesProps>(
@@ -28,7 +30,7 @@ const AIChatMessages = forwardRef<HTMLDivElement, AIChatMessagesProps>(
       codeVariation = MarkdownCodeVariations.WithCopyMultiline,
       lastUserMessageRef,
       lastAssistantMessageRef,
-      theme,
+      theme = Theme.LIGHT,
     },
     ref,
   ) => {
@@ -69,8 +71,8 @@ const AIChatMessages = forwardRef<HTMLDivElement, AIChatMessagesProps>(
             message={message}
             onInject={onInject}
             codeVariation={codeVariation}
-            ref={getMessageRef(index, message.role)}
             theme={theme}
+            ref={getMessageRef(index, message.role)}
           />
         ))}
       </div>
@@ -84,7 +86,7 @@ const Message = forwardRef<
     message: AIChatMessage;
     onInject?: (code: string | SourceCode) => void;
     codeVariation: MarkdownCodeVariations;
-    theme: string;
+    theme: Theme;
   }
 >(({ message, onInject, codeVariation, theme }, ref) => {
   const isUser = message.role === AIChatMessageRole.user;
@@ -114,7 +116,6 @@ const Message = forwardRef<
         content={message.content}
         onInject={onInject}
         codeVariation={codeVariation}
-        theme={theme}
       />
     </div>
   );
@@ -126,12 +127,11 @@ const MessageContent = ({
   content,
   onInject,
   codeVariation,
-  theme,
 }: {
   content: AIChatMessageContent;
   onInject?: (code: string | SourceCode) => void;
   codeVariation: MarkdownCodeVariations;
-  theme: string;
+  theme: Theme;
 }) => {
   if (typeof content === 'string') {
     return (

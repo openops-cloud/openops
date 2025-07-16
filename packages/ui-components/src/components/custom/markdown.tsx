@@ -9,6 +9,7 @@ import ReactMarkdown from 'react-markdown';
 import validator from 'validator';
 import { useCopyToClipboard } from '../../hooks/use-copy-to-clipboard';
 import { cn } from '../../lib/cn';
+import { Theme } from '../../lib/theme';
 import { CodeActions } from '../code-actions';
 import { CodeMirrorEditor } from '../json-editor';
 import { getLanguageExtensionForCode } from '../json-editor/code-mirror-utils';
@@ -52,7 +53,7 @@ type MarkdownProps = {
   linkClassName?: string;
   codeVariation?: CodeVariations;
   handleInject?: (codeContent: string) => void;
-  theme: string;
+  theme: Theme;
 };
 
 const Container = ({
@@ -78,7 +79,7 @@ const CodeViewer = ({
   className,
 }: {
   content: string;
-  theme: string;
+  theme: Theme;
   className?: string;
 }) => {
   return (
@@ -97,13 +98,7 @@ const CodeViewer = ({
   );
 };
 
-const LanguageUrl = ({
-  content,
-  theme,
-}: {
-  content: string;
-  theme: string;
-}) => {
+const LanguageUrl = ({ content, theme }: { content: string; theme: Theme }) => {
   if (
     validator.isURL(content, {
       require_protocol: true,
