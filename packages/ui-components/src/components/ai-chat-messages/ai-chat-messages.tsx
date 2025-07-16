@@ -116,6 +116,7 @@ const Message = forwardRef<
         content={message.content}
         onInject={onInject}
         codeVariation={codeVariation}
+        theme={theme}
       />
     </div>
   );
@@ -127,6 +128,7 @@ const MessageContent = ({
   content,
   onInject,
   codeVariation,
+  theme,
 }: {
   content: AIChatMessageContent;
   onInject?: (code: string | SourceCode) => void;
