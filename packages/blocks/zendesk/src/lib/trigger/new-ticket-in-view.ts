@@ -33,7 +33,7 @@ export const newTicketInView = createTrigger({
           !authentication?.['token']
         ) {
           return {
-            placeholder: 'Fill your authentication first',
+            placeholder: 'Create a connection first',
             disabled: true,
             options: [],
           };
