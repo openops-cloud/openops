@@ -58,7 +58,9 @@ export const getBlockSystemPrompt = async (
     case '@openops/block-databricks':
       return loadPrompt('databricks.txt');
     case CODE_BLOCK_NAME: {
-      const resolvedVariables = enrichedContext?.steps?.some((s) => s.variables?.length > 0)
+      const resolvedVariables = enrichedContext?.steps?.some(
+        (s) => s.variables && s.variables.length > 0,
+      )
         ? `\n\nVariables used in the code inputs:\n${JSON.stringify(
             enrichedContext.steps.map((s) => s.variables),
           )}\n\n`
