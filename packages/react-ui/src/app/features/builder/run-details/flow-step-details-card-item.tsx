@@ -16,6 +16,7 @@ import { formatUtils } from '@/app/lib/utils';
 import { ActionType, FlagId, flowHelper } from '@openops/shared';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
+import { RightSideBarType } from '@/app/features/builder/builder-types';
 import { useCenterWorkflowViewOntoStep } from '@/app/features/builder/hooks/center-workflow-view-onto-step';
 import { StepStatusIcon } from '@/app/features/flow-runs/components/step-status-icon';
 import { RUN_DETAILS_STEP_CARD_ID_PREFIX } from './constants';
@@ -42,6 +43,7 @@ const FlowStepDetailsCardItem = ({
     selectStepByName,
     run,
     flowVersion,
+    rightSidebar,
   ] = useBuilderStateContext((state) => {
     const step = flowHelper.getStep(state.flowVersion, stepName);
     const stepIndex = flowHelper
@@ -56,6 +58,7 @@ const FlowStepDetailsCardItem = ({
       state.selectStepByName,
       state.run,
       state.flowVersion,
+      state.rightSidebar,
     ];
   });
 
@@ -97,7 +100,10 @@ const FlowStepDetailsCardItem = ({
 
   const onStepClick = useCallback(() => {
     if (!isStepSelected) {
-      selectStepByName(stepName);
+      selectStepByName(
+        stepName,
+        rightSidebar === RightSideBarType.BLOCK_SETTINGS,
+      );
       centerWorkflowViewOntoStep(stepName);
       setIsOpen(true);
     } else {
@@ -110,6 +116,7 @@ const FlowStepDetailsCardItem = ({
     selectStepByName,
     centerWorkflowViewOntoStep,
     setIsOpen,
+    rightSidebar,
   ]);
 
   return (
