@@ -13,363 +13,351 @@ describe('getPredefinedRecommendationsDropdownProperty', () => {
         options: [
           {
             label: 'AMI Orphaned Snapshot',
-            value: { filters: { type_id: ['ami-orphaned-snapshot'] } },
+            value: 'ami-orphaned-snapshot',
           },
           {
             label: 'AWS Backup Outdated Snapshot',
-            value: { filters: { type_id: ['backup-outdated-snapshot'] } },
+            value: 'backup-outdated-snapshot',
           },
           {
             label: 'Duplicate CloudTrail',
-            value: { filters: { type_id: ['cloudtrail-duplicate-trails'] } },
+            value: 'cloudtrail-duplicate-trails',
           },
           {
             label: 'CloudWatch Logs Class Change',
-            value: { filters: { type_id: ['cloudwatch-logs-class-change'] } },
+            value: 'cloudwatch-logs-class-change',
           },
           {
             label: 'DocumentDB Idle',
-            value: { filters: { type_id: ['documentdb-util-low'] } },
+            value: 'documentdb-util-low',
           },
           {
             label: 'DynamoDB Idle',
-            value: { filters: { type_id: ['dynamodb-idle'] } },
+            value: 'dynamodb-idle',
           },
           {
             label: 'EBS Outdated Snapshot',
-            value: { filters: { type_id: ['ebs-outdated-snapshot'] } },
+            value: 'ebs-outdated-snapshot',
           },
           {
             label: 'EBS Type Change',
-            value: { filters: { type_id: ['ebs-type-change'] } },
+            value: 'ebs-type-change',
           },
           {
             label: 'EBS Unattached',
-            value: { filters: { type_id: ['ebs-unattached'] } },
+            value: 'ebs-unattached',
           },
           {
             label: 'EBS Generation Upgrade',
-            value: { filters: { type_id: ['ebs-upgrade'] } },
+            value: 'ebs-upgrade',
           },
           {
             label: 'EC2 Idle',
-            value: { filters: { type_id: ['ec2-idle'] } },
+            value: 'ec2-idle',
           },
           {
             label: 'EC2 Rightsizing',
-            value: { filters: { type_id: ['ec2-low-cpu-usage'] } },
+            value: 'ec2-low-cpu-usage',
           },
           {
             label: 'Compute Savings Plan',
-            value: { filters: { type_id: ['ec2-savings-plans'] } },
+            value: 'ec2-savings-plans',
           },
           {
             label: 'EC2 Stopped Instance',
-            value: { filters: { type_id: ['ec2-stopped-instance'] } },
+            value: 'ec2-stopped-instance',
           },
           {
             label: 'Data Transfer between availability zones',
-            value: { filters: { type_id: ['ec2-udt'] } },
+            value: 'ec2-udt',
           },
           {
             label: 'ECS Fargate Rightsizing',
-            value: { filters: { type_id: ['ecs-fargate'] } },
+            value: 'ecs-fargate',
           },
           {
             label: 'EKS Extended Support',
-            value: { filters: { type_id: ['eks-extended-support'] } },
+            value: 'eks-extended-support',
           },
           {
             label: 'ElastiCache Reserved Instance',
-            value: { filters: { type_id: ['elasticache-ri'] } },
+            value: 'elasticache-ri',
           },
           {
             label: 'ElastiCache Idle',
-            value: { filters: { type_id: ['elasticache-util-low'] } },
+            value: 'elasticache-util-low',
           },
           {
             label: 'ElasticSearch Idle',
-            value: { filters: { type_id: ['es-util-low'] } },
+            value: 'es-util-low',
           },
           {
             label: 'Load Balancer Idle',
-            value: { filters: { type_id: ['idle-load-balancer'] } },
+            value: 'idle-load-balancer',
           },
           {
             label: 'IP migration v4 to v6',
-            value: { filters: { type_id: ['ip-public-ipv4'] } },
+            value: 'ip-public-ipv4',
           },
           {
             label: 'IP Unattached',
-            value: { filters: { type_id: ['ip-unattached'] } },
+            value: 'ip-unattached',
           },
           {
             label: 'K8s Workload Rightsizing',
-            value: { filters: { type_id: ['k8s-workload-rightsizing'] } },
+            value: 'k8s-workload-rightsizing',
           },
           {
             label: 'Kinesis Idle',
-            value: { filters: { type_id: ['kinesis-util-low'] } },
+            value: 'kinesis-util-low',
           },
           {
             label: 'Disabled KMS',
-            value: { filters: { type_id: ['kms-idle'] } },
+            value: 'kms-idle',
           },
           {
             label: 'Old KMS',
-            value: { filters: { type_id: ['kms-old'] } },
+            value: 'kms-old',
           },
           {
             label: 'NAT Gateway Idle',
-            value: { filters: { type_id: ['nat-gateway-util-low'] } },
+            value: 'nat-gateway-util-low',
           },
           {
             label: 'Neptune DB Idle',
-            value: { filters: { type_id: ['neptune-util-low'] } },
+            value: 'neptune-util-low',
           },
           {
             label: 'OpenSearch Extended Support',
-            value: { filters: { type_id: ['opensearch-extended-support'] } },
+            value: 'opensearch-extended-support',
           },
           {
             label: 'OpenSearch Reserved Instance',
-            value: { filters: { type_id: ['opensearch-ri'] } },
+            value: 'opensearch-ri',
           },
           {
             label: 'Operation System',
-            value: { filters: { type_id: ['operation-system'] } },
+            value: 'operation-system',
           },
           {
             label: 'RDS Rightsizing',
-            value: { filters: { type_id: ['rds-class-change'] } },
+            value: 'rds-class-change',
           },
           {
             label: 'RDS Extended Support',
-            value: { filters: { type_id: ['rds-extended-support'] } },
+            value: 'rds-extended-support',
           },
           {
             label: 'RDS Instance Idle',
-            value: { filters: { type_id: ['rds-idle'] } },
+            value: 'rds-idle',
           },
           {
             label: 'RDS Provisioned IOPS',
-            value: { filters: { type_id: ['rds-iops-change'] } },
+            value: 'rds-iops-change',
           },
           {
             label: 'RDS Aurora I/O Optimized Configuration',
-            value: { filters: { type_id: ['rds-iops-optimized'] } },
+            value: 'rds-iops-optimized',
           },
           {
             label: 'RDS Reserved Instance',
-            value: { filters: { type_id: ['rds-ri'] } },
+            value: 'rds-ri',
           },
           {
             label: 'RDS Storage Type Change',
-            value: { filters: { type_id: ['rds-storage-type-change'] } },
+            value: 'rds-storage-type-change',
           },
           {
             label: 'RDS Generation Upgrade',
-            value: { filters: { type_id: ['rds-version-upgrade'] } },
+            value: 'rds-version-upgrade',
           },
           {
             label: 'Redshift Reserved Instance',
-            value: { filters: { type_id: ['redshift-ri'] } },
+            value: 'redshift-ri',
           },
           {
             label: 'Redshift Idle',
-            value: { filters: { type_id: ['redshift-util-low'] } },
+            value: 'redshift-util-low',
           },
           {
             label: 'Region Migration',
-            value: { filters: { type_id: ['region-migration'] } },
+            value: 'region-migration',
           },
           {
             label: 'S3 Inactive',
-            value: { filters: { type_id: ['s3-idle'] } },
+            value: 's3-idle',
           },
           {
             label: 'S3 Multipart upload',
-            value: { filters: { type_id: ['s3-multipart-upload'] } },
+            value: 's3-multipart-upload',
           },
           {
             label: 'S3 Storage Class',
-            value: { filters: { type_id: ['s3-storage-class'] } },
+            value: 's3-storage-class',
           },
           {
             label: 'S3 Versioning',
-            value: { filters: { type_id: ['s3-versioning'] } },
+            value: 's3-versioning',
           },
           {
             label: 'Unused Secrets',
-            value: { filters: { type_id: ['unused-secrets'] } },
+            value: 'unused-secrets',
           },
           {
             label: 'EC2 Generation Upgrade',
-            value: { filters: { type_id: ['version-upgrade'] } },
+            value: 'version-upgrade',
           },
           {
             label: 'VPC Endpoint Idle',
-            value: { filters: { type_id: ['vpc-endpoint-idle'] } },
+            value: 'vpc-endpoint-idle',
           },
           {
             label: 'App Service Reserved Capacity',
-            value: {
-              filters: { type_id: ['azure-app-service-reserved-capacity'] },
-            },
+            value: 'azure-app-service-reserved-capacity',
           },
           {
             label: 'CosmosDB Reserved Capacity',
-            value: {
-              filters: { type_id: ['azure-cosmos-db-reserved-capacity'] },
-            },
+            value: 'azure-cosmos-db-reserved-capacity',
           },
           {
             label: 'CosmosDB Rightsizing',
-            value: { filters: { type_id: ['azure-cosmos-db-right-sizing'] } },
+            value: 'azure-cosmos-db-right-sizing',
           },
           {
             label: 'CosmosDB Idle',
-            value: { filters: { type_id: ['azure-cosmos-idle'] } },
+            value: 'azure-cosmos-idle',
           },
           {
             label: 'Data Explorer Reserved Capacity',
-            value: {
-              filters: { type_id: ['azure-data-explorer-reserved-capacity'] },
-            },
+            value: 'azure-data-explorer-reserved-capacity',
           },
           {
             label: 'DataBase Reserved Instance',
-            value: { filters: { type_id: ['azure-db-ri'] } },
+            value: 'azure-db-ri',
           },
           {
             label: 'Disk Type Change',
-            value: { filters: { type_id: ['azure-disk-type-change'] } },
+            value: 'azure-disk-type-change',
           },
           {
             label: 'Disk Unattached',
-            value: { filters: { type_id: ['azure-disk-unattached'] } },
+            value: 'azure-disk-unattached',
           },
           {
             label: 'Example',
-            value: { filters: { type_id: ['azure-example'] } },
+            value: 'azure-example',
           },
           {
             label: 'Load Balancer Idle',
-            value: { filters: { type_id: ['azure-idle-load-balancer'] } },
+            value: 'azure-idle-load-balancer',
           },
           {
             label: 'IP Unattached',
-            value: { filters: { type_id: ['azure-ip-unattached'] } },
+            value: 'azure-ip-unattached',
           },
           {
             label: 'K8s Workload Rightsizing',
-            value: { filters: { type_id: ['azure-k8s-workload-rightsizing'] } },
+            value: 'azure-k8s-workload-rightsizing',
           },
           {
             label: 'Kusto Unused Data',
-            value: { filters: { type_id: ['azure-kusto-unused-data'] } },
+            value: 'azure-kusto-unused-data',
           },
           {
             label: 'MariaDB Idle',
-            value: { filters: { type_id: ['azure-maria-idle'] } },
+            value: 'azure-maria-idle',
           },
           {
             label: 'MySQL Idle',
-            value: { filters: { type_id: ['azure-mysql-idle'] } },
+            value: 'azure-mysql-idle',
           },
           {
             label: 'MySQL Reserved Capacity',
-            value: { filters: { type_id: ['azure-mysql-reserved-capacity'] } },
+            value: 'azure-mysql-reserved-capacity',
           },
           {
             label: 'Snapshot Outdated',
-            value: { filters: { type_id: ['azure-outdated-snapshot'] } },
+            value: 'azure-outdated-snapshot',
           },
           {
             label: 'PostgresSQL Idle',
-            value: { filters: { type_id: ['azure-postgres-idle'] } },
+            value: 'azure-postgres-idle',
           },
           {
             label: 'PostgreSQL Reserved Capacity',
-            value: {
-              filters: { type_id: ['azure-postgresql-reserved-capacity'] },
-            },
+            value: 'azure-postgresql-reserved-capacity',
           },
           {
             label: 'Redis Reserved Capacity',
-            value: { filters: { type_id: ['azure-redis-reserved-capacity'] } },
+            value: 'azure-redis-reserved-capacity',
           },
           {
             label: 'Snapshot Migration',
-            value: { filters: { type_id: ['azure-snapshot-migration'] } },
+            value: 'azure-snapshot-migration',
           },
           {
             label: 'SQL Data Warehouse Reserved Capacity',
-            value: {
-              filters: {
-                type_id: ['azure-sql-data-warehouse-reserved-capacity'],
-              },
-            },
+            value: 'azure-sql-data-warehouse-reserved-capacity',
           },
           {
             label: 'SQL Idle',
-            value: { filters: { type_id: ['azure-sql-idle'] } },
+            value: 'azure-sql-idle',
           },
           {
             label: 'SQL Reserved Capacity',
-            value: { filters: { type_id: ['azure-sql-reserved-capacity'] } },
+            value: 'azure-sql-reserved-capacity',
           },
           {
             label: 'Azure SQL Database Rightsizing',
-            value: { filters: { type_id: ['azure-sql-rightsizing'] } },
+            value: 'azure-sql-rightsizing',
           },
           {
             label: 'Virtual Machine Idle',
-            value: { filters: { type_id: ['azure-vm-idle'] } },
+            value: 'azure-vm-idle',
           },
           {
             label: 'Virtual Machine Reserved Instance',
-            value: { filters: { type_id: ['azure-vm-ri'] } },
+            value: 'azure-vm-ri',
           },
           {
             label: 'Virtual Machine Rightsizing',
-            value: { filters: { type_id: ['azure-vm-rightsizing'] } },
+            value: 'azure-vm-rightsizing',
           },
           {
             label: 'Compute Saving Plans',
-            value: { filters: { type_id: ['azure-vm-sp'] } },
+            value: 'azure-vm-sp',
           },
           {
             label: 'Virtual Machine Stopped',
-            value: { filters: { type_id: ['azure-vm-stopped'] } },
+            value: 'azure-vm-stopped',
           },
           {
             label: 'Disk Unattached',
-            value: { filters: { type_id: ['gcp-disk-unattached'] } },
+            value: 'gcp-disk-unattached',
           },
           {
             label: 'Example',
-            value: { filters: { type_id: ['gcp-example'] } },
+            value: 'gcp-example',
           },
           {
             label: 'IP Idle',
-            value: { filters: { type_id: ['gcp-ip-idle'] } },
+            value: 'gcp-ip-idle',
           },
           {
             label: 'Commitment Usage Discount',
-            value: { filters: { type_id: ['gcp-usage-commitment'] } },
+            value: 'gcp-usage-commitment',
           },
           {
             label: 'Virtual Machine Idle',
-            value: { filters: { type_id: ['gcp-vm-idle'] } },
+            value: 'gcp-vm-idle',
           },
           {
             label: 'Virtual Machine Rightsizing',
-            value: { filters: { type_id: ['gcp-vm-rightsizing'] } },
+            value: 'gcp-vm-rightsizing',
           },
           {
             label: 'Virtual Machine Stopped',
-            value: { filters: { type_id: ['gcp-vm-stopped'] } },
+            value: 'gcp-vm-stopped',
           },
         ],
       },
