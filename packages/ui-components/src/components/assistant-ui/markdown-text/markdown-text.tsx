@@ -53,13 +53,15 @@ const useCopyToClipboard = ({
   const copyToClipboard = (value: string) => {
     if (!value) return;
 
-    navigator.clipboard.writeText(value)
+    navigator.clipboard
+      .writeText(value)
       .then(() => {
         setIsCopied(true);
         setTimeout(() => setIsCopied(false), copiedDuration);
       })
       .catch((error) => {
-        console.error("Failed to copy to clipboard:", error);
+        // eslint-disable-next-line no-console
+        console.debug('Failed to copy to clipboard:', error);
       });
   };
 
