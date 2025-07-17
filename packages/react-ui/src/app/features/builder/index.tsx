@@ -217,7 +217,7 @@ const BuilderPage = () => {
 
   const { setPanelsSize } = useResizablePanelGroup();
 
-  const showChatInResizablePanel = flagsHooks.useFlag<string>(
+  const showChatInResizablePanel = flagsHooks.useFlag<boolean>(
     FlagId.SHOW_CHAT_IN_RESIZABLE_PANEL,
   ).data;
 

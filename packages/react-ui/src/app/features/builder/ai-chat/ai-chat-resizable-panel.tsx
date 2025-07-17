@@ -26,7 +26,7 @@ const AiChatResizablePanel = ({
   isDraggingHandle,
   onDragging,
 }: AiChatResizablePanelProps) => {
-  const showChatInResizablePanel = flagsHooks.useFlag<string>(
+  const showChatInResizablePanel = flagsHooks.useFlag<boolean>(
     FlagId.SHOW_CHAT_IN_RESIZABLE_PANEL,
   ).data;
 
@@ -39,11 +39,11 @@ const AiChatResizablePanel = ({
 
   const resizablePanelRef = useRef<ImperativePanelHandle | null>(null);
 
+  const [hasMounted, setHasMounted] = useState(false);
+
   useEffect(() => {
     setHasMounted(true);
   }, []);
-
-  const [hasMounted, setHasMounted] = useState(false);
 
   const { getPanelSize } = useResizablePanelGroup();
 
