@@ -5,8 +5,7 @@ import { cn } from '../../lib/cn';
 import { Theme } from '../../lib/theme';
 import { CodeActions } from '../code-actions';
 import { Markdown, MarkdownCodeVariations } from '../custom';
-import { CodeMirrorEditor } from '../json-editor';
-import { getLanguageExtensionForCode } from '../json-editor/code-mirror-utils';
+import { CodeMirrorEditor, getLanguageExtensionForCode } from '../json-editor';
 import {
   AIChatMessage,
   AIChatMessageContent,
@@ -30,7 +29,7 @@ const AIChatMessages = forwardRef<HTMLDivElement, AIChatMessagesProps>(
       codeVariation = MarkdownCodeVariations.WithCopyMultiline,
       lastUserMessageRef,
       lastAssistantMessageRef,
-      theme = Theme.LIGHT,
+      theme,
     },
     ref,
   ) => {
@@ -71,8 +70,8 @@ const AIChatMessages = forwardRef<HTMLDivElement, AIChatMessagesProps>(
             message={message}
             onInject={onInject}
             codeVariation={codeVariation}
-            theme={theme}
             ref={getMessageRef(index, message.role)}
+            theme={theme}
           />
         ))}
       </div>
