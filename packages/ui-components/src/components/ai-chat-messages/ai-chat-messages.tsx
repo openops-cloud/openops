@@ -1,6 +1,9 @@
+import { SourceCode } from '@openops/shared';
+import { t } from 'i18next';
 import { forwardRef } from 'react';
 import { cn } from '../../lib/cn';
 import { Theme } from '../../lib/theme';
+import { CodeActions } from '../code-actions';
 import { Markdown, MarkdownCodeVariations } from '../custom';
 import { CodeMirrorEditor, getLanguageExtensionForCode } from '../json-editor';
 import {
@@ -11,11 +14,11 @@ import {
 
 type AIChatMessagesProps = {
   messages: AIChatMessage[];
-  onInject?: (code: string) => void;
+  onInject?: (code: string | SourceCode) => void;
   codeVariation?: MarkdownCodeVariations;
   lastUserMessageRef?: React.RefObject<HTMLDivElement>;
   lastAssistantMessageRef?: React.RefObject<HTMLDivElement>;
-  theme: Theme;
+  theme?: Theme;
 };
 
 const AIChatMessages = forwardRef<HTMLDivElement, AIChatMessagesProps>(
@@ -80,7 +83,7 @@ const Message = forwardRef<
   HTMLDivElement,
   {
     message: AIChatMessage;
-    onInject?: (code: string) => void;
+    onInject?: (code: string | SourceCode) => void;
     codeVariation: MarkdownCodeVariations;
     theme: Theme;
   }
@@ -127,7 +130,7 @@ const MessageContent = ({
   theme,
 }: {
   content: AIChatMessageContent;
-  onInject?: (code: string) => void;
+  onInject?: (code: string | SourceCode) => void;
   codeVariation: MarkdownCodeVariations;
   theme: Theme;
 }) => {
@@ -145,7 +148,7 @@ const MessageContent = ({
     );
   }
 
-  if (content.type === 'structured') {
+  if (Array.isArray(content.parts) && content.parts.length > 0) {
     return (
       <div className="flex flex-col gap-2">
         {content.parts.map((part, index) => {
@@ -174,24 +177,6 @@ const MessageContent = ({
                   theme={theme}
                 />
               );
-            case 'code':
-              return (
-                <div key={stableKey} className="relative py-2 w-full">
-                  <CodeMirrorEditor
-                    value={part.content}
-                    readonly={true}
-                    showLineNumbers={false}
-                    height="auto"
-                    className="border border-solid rounded"
-                    containerClassName="h-auto"
-                    theme={theme}
-                    languageExtensions={getLanguageExtensionForCode(
-                      part.language,
-                    )}
-                    editorLanguage={part.language}
-                  />
-                </div>
-              );
             case 'sourcecode':
               return (
                 <div key={stableKey} className="relative py-2 w-full">
@@ -208,6 +193,13 @@ const MessageContent = ({
                       'typescript',
                     )}
                     editorLanguage="typescript"
+                  />
+                  <CodeActions
+                    content={part.content?.code ?? ''}
+                    onInject={
+                      onInject ? (_) => onInject(part.content) : undefined
+                    }
+                    injectButtonText={t('Use code')}
                   />
                 </div>
               );
