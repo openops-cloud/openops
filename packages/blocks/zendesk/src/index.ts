@@ -53,7 +53,7 @@ export const zendesk = createBlock({
       },
       auth: zendeskAuth,
       authMapping: async ({ auth }) => {
-        const { email, token } = auth as unknown as {
+        const { email, token } = auth as {
           email: string;
           token: string;
         };
