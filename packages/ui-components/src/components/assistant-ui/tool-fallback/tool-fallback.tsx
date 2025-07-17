@@ -11,11 +11,11 @@ export const ToolFallback: ToolCallContentPartComponent = ({
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(true);
   return (
-    <div className="mb-4 flex w-full flex-col gap-3 rounded-lg border py-3">
+    <div className="mb-4 flex w-full flex-col gap-3 rounded-lg border border-border bg-background py-3">
       <div className="flex items-center gap-2 px-4">
-        <CheckIcon className="size-4" />
-        <p className="">
-          {t('Used tool:')} <b>{toolName}</b>
+        <CheckIcon className="size-4 text-foreground" />
+        <p className="text-foreground">
+          {t('Used tool:')} <b className="text-foreground">{toolName}</b>
         </p>
         <div className="flex-grow" />
         <Button onClick={() => setIsCollapsed(!isCollapsed)}>
@@ -23,14 +23,16 @@ export const ToolFallback: ToolCallContentPartComponent = ({
         </Button>
       </div>
       {!isCollapsed && (
-        <div className="flex flex-col gap-2 border-t pt-2">
+        <div className="flex flex-col gap-2 border-t border-border pt-2">
           <div className="px-4">
-            <pre className="whitespace-pre-wrap">{argsText}</pre>
+            <pre className="whitespace-pre-wrap text-foreground">
+              {argsText}
+            </pre>
           </div>
           {result !== undefined && (
-            <div className="border-t border-dashed px-4 pt-2">
-              <p className="font-semibold">Result:</p>
-              <pre className="whitespace-pre-wrap">
+            <div className="border-t border-dashed border-border px-4 pt-2">
+              <p className="font-semibold text-foreground">Result:</p>
+              <pre className="whitespace-pre-wrap text-foreground">
                 {typeof result === 'string'
                   ? result
                   : JSON.stringify(result, null, 2)}

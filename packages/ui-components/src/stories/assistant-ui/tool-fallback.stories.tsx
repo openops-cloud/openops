@@ -1,7 +1,10 @@
+import { expect } from '@storybook/jest';
 import type { Meta, StoryObj } from '@storybook/react';
+import { userEvent, waitFor } from '@storybook/testing-library';
 import { FC } from 'react';
 
 import { ToolFallback } from '../../components/assistant-ui/tool-fallback';
+import { selectLightOrDarkCanvas } from '../../test-utils/select-themed-canvas.util';
 
 const ToolFallbackWrapper: FC<{
   toolName: string;
@@ -106,5 +109,92 @@ export const ComplexData: Story = {
         { month: 'Mar', revenue: 98000, trend: 'down' },
       ],
     },
+  },
+};
+
+/**
+ * Tool call with complex JSON arguments and structured result.
+ */
+export const Expanded: Story = {
+  args: ComplexData.args,
+  play: async ({ canvasElement }) => {
+    const canvas = selectLightOrDarkCanvas(canvasElement);
+
+    // Find the expand/collapse button (chevron)
+    const expandButton = await canvas.findByRole('button');
+    expect(expandButton).toBeInTheDocument();
+
+    // Initially, the content should be collapsed (not visible)
+    // Use a more specific selector to avoid multiple matches
+    const argsContent = canvas.queryByText((content, element) => {
+      return !!(
+        element?.textContent?.includes('dataset') &&
+        element?.textContent?.includes('sales_data_2024') &&
+        element?.tagName === 'PRE'
+      );
+    });
+    expect(argsContent).not.toBeInTheDocument();
+
+    // Click the expand button
+    await userEvent.click(expandButton);
+
+    // Wait for the animation to complete and content to be visible
+    await waitFor(
+      () => {
+        expect(
+          canvas.getByText((content, element) => {
+            return !!(
+              element?.textContent?.includes('dataset') &&
+              element?.textContent?.includes('sales_data_2024') &&
+              element?.tagName === 'PRE'
+            );
+          }),
+        ).toBeInTheDocument();
+      },
+      { timeout: 1000 },
+    );
+
+    // Verify that the arguments are displayed using flexible text matching
+    // Target specific pre elements to avoid multiple matches
+    const argsPre = canvas.getByText((content, element) => {
+      return !!(
+        element?.textContent?.includes('filters') &&
+        element?.textContent?.includes('date_range') &&
+        element?.tagName === 'PRE'
+      );
+    });
+    expect(argsPre).toBeInTheDocument();
+
+    // Verify specific content within the args pre element
+    expect(argsPre).toHaveTextContent('categories');
+    expect(argsPre).toHaveTextContent('electronics');
+    expect(argsPre).toHaveTextContent('metrics');
+    expect(argsPre).toHaveTextContent('revenue');
+
+    // Verify that the result section is displayed
+    expect(canvas.getByText('Result:')).toBeInTheDocument();
+
+    // Find the result pre element
+    const resultPre = canvas.getByText((content, element) => {
+      return !!(
+        element?.textContent?.includes('total_revenue') &&
+        element?.textContent?.includes('1250000') &&
+        element?.tagName === 'PRE'
+      );
+    });
+    expect(resultPre).toBeInTheDocument();
+
+    // Verify specific content within the result pre element
+    expect(resultPre).toHaveTextContent('total_units');
+    expect(resultPre).toHaveTextContent('45000');
+    expect(resultPre).toHaveTextContent('avg_profit_margin');
+    expect(resultPre).toHaveTextContent('0.23');
+    expect(resultPre).toHaveTextContent('electronics');
+    expect(resultPre).toHaveTextContent('clothing');
+    expect(resultPre).toHaveTextContent('books');
+    expect(resultPre).toHaveTextContent('trends');
+    expect(resultPre).toHaveTextContent('Jan');
+    expect(resultPre).toHaveTextContent('Feb');
+    expect(resultPre).toHaveTextContent('Mar');
   },
 };
