@@ -38,7 +38,7 @@ export const getRecommendationsAction = createAction({
 
       const accounts = context.propsValue.accounts as any[];
       const recommendationTypes = context.propsValue.recommendationTypes as
-        | { filters: { type_id: string[] } }[]
+        | string[]
         | undefined;
 
       const props = {
@@ -53,17 +53,10 @@ export const getRecommendationsAction = createAction({
       addClosedAndDoneDateFilters(filters, context.propsValue);
 
       if (recommendationTypes) {
-        const filterTypes: Record<string, string[]> = {};
-        for (const type of recommendationTypes) {
-          for (const [key, value] of Object.entries(type.filters)) {
-            filterTypes[key] = filterTypes[key] || [];
-            filterTypes[key].push(...value);
-          }
-        }
-
-        for (const [key, value] of Object.entries(filterTypes)) {
-          addFilterIfValid(filters, key, { eq: value, negate: false });
-        }
+        addFilterIfValid(filters, 'type_id', {
+          eq: recommendationTypes,
+          negate: false,
+        });
       }
 
       const anodotTokens = await authenticateUserWithAnodot(
