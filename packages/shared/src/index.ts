@@ -31,6 +31,7 @@ export * from './lib/flow-run/flow-run';
 export * from './lib/flow-run/test-flow-run-request';
 export * from './lib/flows';
 export * from './lib/flows/actions/action';
+export * from './lib/flows/actions/frontend-blocks';
 export * from './lib/flows/dto/count-flows-request';
 export * from './lib/flows/dto/create-flow-request';
 export * from './lib/flows/dto/flow-template-request';

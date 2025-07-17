@@ -1,10 +1,17 @@
 import { QueryKeys } from '@/app/constants/query-keys';
 import { authenticationSession } from '@/app/lib/authentication-session';
-import { Message, useChat } from '@ai-sdk/react';
+import {
+  Message,
+  useChat,
+  experimental_useObject as useObject,
+} from '@ai-sdk/react';
 import { toast } from '@openops/components/ui';
 import {
   Action,
   ActionType,
+  CODE_BLOCK_NAME,
+  codeLLMSchema,
+  CodeLLMSchema,
   flowHelper,
   FlowVersion,
   TriggerWithOptionalId,
@@ -24,6 +31,7 @@ export const useStepSettingsAiChat = (
   const [enableNewChat, setEnableNewChat] = useState(true);
 
   const stepDetails = flowHelper.getStep(flowVersion, selectedStep);
+  const isCodeBlock = getBlockName(stepDetails) === CODE_BLOCK_NAME;
 
   useEffect(() => {
     setChatSessionKey(nanoid());
@@ -59,6 +67,7 @@ export const useStepSettingsAiChat = (
     status,
     setMessages,
     stop: stopChat,
+    setInput,
   } = useChat({
     id: chatSessionKey,
     api: 'api/v1/ai/conversation',
@@ -73,6 +82,37 @@ export const useStepSettingsAiChat = (
     }),
     headers: {
       Authorization: `Bearer ${authenticationSession.getToken()}`,
+    },
+  });
+
+  const { submit: submitCodeRequest, isLoading: isCodeGenerating } = useObject({
+    id: `code-${chatSessionKey}`,
+    api: 'api/v1/ai/conversation/code',
+    schema: codeLLMSchema,
+    headers: {
+      Authorization: `Bearer ${authenticationSession.getToken()}`,
+      'Content-Type': 'application/json',
+    },
+    onFinish: ({ object }: { object: CodeLLMSchema | undefined }) => {
+      if (object) {
+        const assistantMessage: Message = {
+          id: nanoid(),
+          role: 'assistant',
+          content: object.description,
+          createdAt: new Date(),
+          annotations: [object],
+        };
+
+        setMessages((prev) => [...prev, assistantMessage]);
+      }
+    },
+    onError: (error) => {
+      toast({
+        title: t('Code generation failed'),
+        description: error.message || 'An unexpected error occurred',
+        duration: 5000,
+      });
+      console.error(error);
     },
   });
 
@@ -120,21 +160,64 @@ export const useStepSettingsAiChat = (
     stopChat,
   ]);
 
+  const handleCodeSubmit = useCallback(
+    (event?: { preventDefault?: () => void }) => {
+      event?.preventDefault?.();
+      if (!input.trim()) return;
+
+      const userMessage: Message = {
+        id: nanoid(),
+        role: 'user',
+        content: input,
+        createdAt: new Date(),
+      };
+
+      setMessages((prev) => [...prev, userMessage]);
+
+      const additionalContext =
+        stepDetails && flowVersion.id
+          ? createAdditionalContext(flowVersion, selectedStep, stepDetails)
+          : undefined;
+
+      submitCodeRequest({
+        chatId: openChatResponse?.chatId,
+        message: input,
+        additionalContext,
+      });
+
+      setInput('');
+    },
+    [
+      input,
+      openChatResponse?.chatId,
+      stepDetails,
+      flowVersion,
+      selectedStep,
+      setMessages,
+      submitCodeRequest,
+      setInput,
+    ],
+  );
+
+  const getStatus = useCallback(() => {
+    if (isCodeBlock) {
+      return isCodeGenerating ? 'streaming' : 'ready';
+    }
+    return status;
+  }, [isCodeBlock, isCodeGenerating, status]);
+
   return {
     messages,
     input,
     handleInputChange,
-    handleSubmit,
-    status,
+    handleSubmit: isCodeBlock ? handleCodeSubmit : handleSubmit,
+    status: getStatus(),
     onNewChatClick,
     enableNewChat,
     isOpenAiChatPending,
     isEmpty: !messages.length,
   };
 };
-
-const CODE_BLOCK_NAME = '@openops/code';
-const CODE_ACTION_NAME = 'code';
 
 const getBlockName = (
   stepDetails: Action | TriggerWithOptionalId | undefined,
@@ -153,5 +236,29 @@ const getActionName = (
     return stepDetails?.settings?.actionName;
   }
 
-  return stepDetails?.type === ActionType.CODE ? CODE_ACTION_NAME : '';
+  return stepDetails?.type === ActionType.CODE ? ActionType.CODE : '';
+};
+
+const createAdditionalContext = (
+  flowVersion: FlowVersion,
+  selectedStep: string,
+  stepData?: Action | TriggerWithOptionalId,
+) => {
+  const stepVariables = stepData?.settings?.input || {};
+  const variables = Object.entries(stepVariables).map(([name, value]) => ({
+    name,
+    value: String(value || ''),
+  }));
+
+  return {
+    flowId: flowVersion.flowId,
+    flowVersionId: flowVersion.id,
+    steps: [
+      {
+        id: selectedStep,
+        stepName: selectedStep,
+        variables: variables.length > 0 ? variables : undefined,
+      },
+    ],
+  };
 };

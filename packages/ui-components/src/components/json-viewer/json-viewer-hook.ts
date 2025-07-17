@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client';
 import { UseFormReturn } from 'react-hook-form';
 import { clipboardUtils } from '../../lib/clipboard-utils';
 import { COPY_PASTE_TOAST_DURATION } from '../../lib/constants';
+import { tryParseJson } from '../../lib/json-utils';
 import { toast } from '../../ui/use-toast';
 import { JsonFormValues } from './json-viewer';
 
@@ -115,7 +116,7 @@ export const useJsonViewer = ({
 
   const apply = (json: string) => {
     if (onChange) {
-      onChange(json);
+      onChange(tryParseJson(json));
     }
     editModeChange(false);
   };
