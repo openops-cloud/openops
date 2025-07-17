@@ -1,4 +1,4 @@
-import { BlockAuth, Property, Validators } from '@openops/blocks-framework';
+import { BlockAuth, Property } from '@openops/blocks-framework';
 
 const markdown = `
 Authenticate with your Flexera Refresh Token to access Flexera services.
@@ -13,19 +13,33 @@ export const flexeraAuth = BlockAuth.CustomAuth({
   description: markdown,
   required: true,
   props: {
-    apiUrl: Property.ShortText({
-      displayName: 'API URL',
-      description: `US: https://api.flexera.com/
-EU: https://api.flexera.eu/
-APAC: https://api.flexera.au/`,
+    appRegion: Property.StaticDropdown({
+      displayName: 'App Region',
+      description: `Select the region where your Flexera application is hosted.`,
       required: true,
-      validators: [Validators.url],
-      defaultValue: 'https://api.flexera.com/',
+      options: {
+        options: [
+          { label: 'US', value: 'us' },
+          { label: 'EMEA', value: 'eu' },
+          { label: 'APAC', value: 'apac' },
+        ],
+      },
+      defaultValue: 'us',
     }),
     refreshToken: Property.SecretText({
       required: true,
       displayName: 'Refresh Token',
       description: 'The refresh token to use to connect to Flexera',
+    }),
+    orgId: Property.ShortText({
+      displayName: 'Organization ID',
+      description: 'The organization ID to use for Flexera API calls.',
+      required: true,
+    }),
+    projectId: Property.ShortText({
+      displayName: 'Project ID',
+      description: 'The project ID to use for Flexera API calls.',
+      required: true,
     }),
   },
 });

@@ -1,9 +1,10 @@
 import { createCustomApiCallAction } from '@openops/blocks-common';
 import { createBlock, Property } from '@openops/blocks-framework';
-import { makeHttpRequest } from '@openops/common';
 import { BlockCategory } from '@openops/shared';
-import { parse } from 'tldts';
+import { getIncidentAction } from './lib/actions/get-incidents-action';
+import { getActiveRecommendationsAction } from './lib/actions/get-recommendations-action';
 import { flexeraAuth } from './lib/auth';
+import { generateAccessToken } from './lib/common/make-request';
 
 export const flexera = createBlock({
   displayName: 'Flexera',
@@ -13,6 +14,9 @@ export const flexera = createBlock({
   authors: [],
   categories: [BlockCategory.FINOPS],
   actions: [
+    getActiveRecommendationsAction,
+    getIncidentAction,
+    // getIncidentActionsAction,
     createCustomApiCallAction({
       baseUrl: (auth: any) => auth.apiUrl,
       auth: flexeraAuth,
@@ -23,8 +27,10 @@ export const flexera = createBlock({
         }),
       },
       authMapping: async ({ auth }: any) => {
-        const { apiUrl, refreshToken } = auth;
-        const accessToken = await generateAccessToken(refreshToken, apiUrl);
+        const accessToken = await generateAccessToken({
+          refreshToken: auth.refreshToken,
+          appRegion: auth.appRegion,
+        });
 
         return {
           Authorization: `Bearer ${accessToken}`,
@@ -35,25 +41,3 @@ export const flexera = createBlock({
   ],
   triggers: [],
 });
-
-async function generateAccessToken(
-  refreshToken: string,
-  apiUrl: string,
-): Promise<string> {
-  const domain = parse(apiUrl).domain;
-  const url = `https://login.${domain}/oidc/token`;
-
-  const body = {
-    grant_type: 'refresh_token',
-    refresh_token: refreshToken,
-  };
-
-  const result = await makeHttpRequest<{ access_token: string }>(
-    'POST',
-    url,
-    undefined,
-    body,
-  );
-
-  return result.access_token;
-}
