@@ -20,7 +20,7 @@ export const useResizablePanelGroup = () => {
       return 0;
     }
     try {
-      return +sizeJson;
+      return Number(sizeJson);
     } catch {
       return 0;
     }
