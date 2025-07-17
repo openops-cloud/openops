@@ -1,16 +1,17 @@
 import { Property } from '@openops/blocks-framework';
 
 export function getPredefinedRecommendationsDropdownProperty() {
-  return Property.StaticDropdown({
+  return Property.StaticMultiSelectDropdown({
     displayName: 'Recommendation',
     description: 'The type of recommendations to fetch',
     options: {
+      disabled: false,
       options: recommendationTypes.map((type: any) => ({
         label: type.label,
         value: { filters: type.filters },
       })),
     },
-    required: true,
+    required: false,
   });
 }
 

@@ -24,7 +24,7 @@ export const getRecommendationsAction = createAction({
   props: {
     accounts: accountProperty(),
 
-    recommendationType: getPredefinedRecommendationsDropdownProperty(),
+    recommendationTypes: getPredefinedRecommendationsDropdownProperty(),
 
     customStatus: customStatusProperty(),
 
@@ -37,6 +37,9 @@ export const getRecommendationsAction = createAction({
       const { authUrl, apiUrl, username, password } = context.auth;
 
       const accounts = context.propsValue.accounts as any[];
+      const recommendationTypes = context.propsValue.recommendationTypes as
+        | { filters: { type_id: string[] } }[]
+        | undefined;
 
       const props = {
         ...context.propsValue,
@@ -49,12 +52,19 @@ export const getRecommendationsAction = createAction({
       addCustomStatusFilters(filters, context.propsValue);
       addClosedAndDoneDateFilters(filters, context.propsValue);
 
-      Object.entries(context.propsValue.recommendationType.filters).forEach(
-        ([key, eq]) => {
-          const filterObject = { eq, negate: false };
-          addFilterIfValid(filters, key, filterObject);
-        },
-      );
+      if (recommendationTypes) {
+        const filterTypes: Record<string, string[]> = {};
+        for (const type of recommendationTypes) {
+          for (const [key, value] of Object.entries(type.filters)) {
+            filterTypes[key] = filterTypes[key] || [];
+            filterTypes[key].push(...value);
+          }
+        }
+
+        for (const [key, value] of Object.entries(filterTypes)) {
+          addFilterIfValid(filters, key, { eq: value, negate: false });
+        }
+      }
 
       const anodotTokens = await authenticateUserWithAnodot(
         authUrl,
