@@ -4,6 +4,7 @@ import { BASE_CH_URL } from './base-url';
 export async function makeGetRequest<T = unknown>(
   apiKey: string,
   path: string,
+  queryParams?: Record<string, string>,
 ): Promise<T[]> {
   const response = await httpClient.sendRequest<T[]>({
     method: HttpMethod.GET,
@@ -12,6 +13,7 @@ export async function makeGetRequest<T = unknown>(
       Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
     },
+    queryParams,
   });
   return response.body;
 }
