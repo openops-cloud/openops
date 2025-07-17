@@ -5,10 +5,10 @@ describe('getPredefinedRecommendationsDropdownProperty', () => {
     const result = getPredefinedRecommendationsDropdownProperty();
 
     expect(result).toMatchObject({
-      required: true,
+      required: false,
       displayName: 'Recommendation',
       description: 'The type of recommendations to fetch',
-      type: 'STATIC_DROPDOWN',
+      type: 'STATIC_MULTI_SELECT_DROPDOWN',
       options: {
         options: [
           {
