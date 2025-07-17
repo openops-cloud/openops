@@ -18,7 +18,11 @@ export const ToolFallback: ToolCallContentPartComponent = ({
           {t('Used tool:')} <b className="text-foreground">{toolName}</b>
         </p>
         <div className="flex-grow" />
-        <Button onClick={() => setIsCollapsed(!isCollapsed)}>
+        <Button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          aria-expanded={!isCollapsed}
+          aria-controls="collapsible-content"
+        >
           {isCollapsed ? <ChevronDownIcon /> : <ChevronUpIcon />}
         </Button>
       </div>
