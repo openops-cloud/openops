@@ -37,7 +37,7 @@ const AiChatResizablePanel = ({
   const { hasActiveAiSettings, isLoading } =
     aiSettingsHooks.useHasActiveAiSettings();
 
-  const resiablePanelRef = useRef<ImperativePanelHandle | null>(null);
+  const resizablePanelRef = useRef<ImperativePanelHandle | null>(null);
 
   useEffect(() => {
     setHasMounted(true);
@@ -67,20 +67,20 @@ const AiChatResizablePanel = ({
   }, [getPanelSize, showChat]);
 
   useEffect(() => {
-    if (!resiablePanelRef.current) {
+    if (!resizablePanelRef.current) {
       return;
     }
     if (showChat) {
-      resiablePanelRef.current?.expand(getDefaultPanelSize());
+      resizablePanelRef.current?.expand(getDefaultPanelSize());
     } else {
-      resiablePanelRef.current?.collapse();
+      resizablePanelRef.current?.collapse();
     }
   }, [getDefaultPanelSize, showChat]);
 
   return (
     <>
       <ResizablePanel
-        ref={resiablePanelRef}
+        ref={resizablePanelRef}
         order={2}
         id={RESIZABLE_PANEL_IDS.AI_CHAT}
         className={cn('duration-0 min-w-0 ', {
