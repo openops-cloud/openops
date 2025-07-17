@@ -13,6 +13,20 @@ import {
 } from '@openops/blocks-framework';
 import { zendeskAuth } from '../..';
 
+interface ZendeskView {
+  id: number;
+  title: string;
+  active: boolean;
+  position: number;
+  description?: string | null;
+  conditions?: object;
+  created_at?: string;
+  default?: boolean;
+  execution?: object;
+  restriction?: object | null;
+  updated_at?: string;
+}
+
 export const newTicketInView = createTrigger({
   auth: zendeskAuth,
   name: 'new_ticket_in_view',
@@ -38,18 +52,20 @@ export const newTicketInView = createTrigger({
             options: [],
           };
         }
-        const response = await httpClient.sendRequest<{ views: any[] }>({
-          url: `https://${authentication.subdomain}.zendesk.com/api/v2/views.json`,
-          method: HttpMethod.GET,
-          authentication: {
-            type: AuthenticationType.BASIC,
-            username: authentication.email + '/token',
-            password: authentication.token,
+        const response = await httpClient.sendRequest<{ views: ZendeskView[] }>(
+          {
+            url: `https://${authentication.subdomain}.zendesk.com/api/v2/views.json`,
+            method: HttpMethod.GET,
+            authentication: {
+              type: AuthenticationType.BASIC,
+              username: authentication.email + '/token',
+              password: authentication.token,
+            },
           },
-        });
+        );
         return {
           placeholder: 'Select a view',
-          options: response.body.views.map((view: any) => ({
+          options: response.body.views.map((view: ZendeskView) => ({
             label: view.title,
             value: view.id,
           })),
@@ -140,7 +156,7 @@ type AuthProps = {
   subdomain: string;
 };
 
-const polling: Polling<AuthProps, { view_id: string }> = {
+const polling: Polling<AuthProps, { view_id: number }> = {
   strategy: DedupeStrategy.LAST_ITEM,
   items: async ({ auth, propsValue }) => {
     const items = await getTickets(auth, propsValue.view_id);
@@ -151,7 +167,7 @@ const polling: Polling<AuthProps, { view_id: string }> = {
   },
 };
 
-async function getTickets(authentication: AuthProps, view_id: string) {
+async function getTickets(authentication: AuthProps, view_id: number) {
   const { email, token, subdomain } = authentication;
   const response = await httpClient.sendRequest<{ tickets: any[] }>({
     url: `https://${subdomain}.zendesk.com/api/v2/views/${view_id}/tickets.json?sort_order=desc&sort_by=created_at&per_page=200`,
