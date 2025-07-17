@@ -1,14 +1,11 @@
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { useResizablePanelGroup } from '@/app/common/hooks/use-resizable-panel-group';
-import {
-  RESIZABLE_PANEL_GROUP,
-  RESIZABLE_PANEL_IDS,
-} from '@/app/constants/layout';
+import { RESIZABLE_PANEL_IDS } from '@/app/constants/layout';
 import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
 import { useAppStore } from '@/app/store/app-store';
 import { cn, ResizableHandle, ResizablePanel } from '@openops/components/ui';
 import { FlagId } from '@openops/shared';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ImperativePanelHandle } from 'react-resizable-panels';
 
 const AiChatResizablePanelContent = ({ showChat }: { showChat: boolean }) => {
@@ -48,7 +45,7 @@ const AiChatResizablePanel = ({
 
   const [hasMounted, setHasMounted] = useState(false);
 
-  const { getPanelGroupSize } = useResizablePanelGroup();
+  const { getPanelSize } = useResizablePanelGroup();
 
   const showChat = useMemo(() => {
     return (
@@ -64,17 +61,21 @@ const AiChatResizablePanel = ({
     showChatInResizablePanel,
   ]);
 
+  const getDefaultPanelSize = useCallback(() => {
+    if (!showChat) return 0;
+    return getPanelSize(RESIZABLE_PANEL_IDS.AI_CHAT) ?? 20;
+  }, [getPanelSize, showChat]);
+
   useEffect(() => {
     if (!resiablePanelRef.current) {
       return;
     }
     if (showChat) {
-      const panelGroupSize = getPanelGroupSize(RESIZABLE_PANEL_GROUP)[1] ?? 20;
-      resiablePanelRef.current?.expand(panelGroupSize);
+      resiablePanelRef.current?.expand(getDefaultPanelSize());
     } else {
       resiablePanelRef.current?.collapse();
     }
-  }, [showChat, getPanelGroupSize]);
+  }, [getDefaultPanelSize, showChat]);
 
   return (
     <>
@@ -82,12 +83,13 @@ const AiChatResizablePanel = ({
         ref={resiablePanelRef}
         order={2}
         id={RESIZABLE_PANEL_IDS.AI_CHAT}
-        collapsible={true}
         className={cn('duration-0 min-w-0 ', {
           'min-w-[350px]': showChat,
           'transition-all duration-200 ease-in-out':
             !isDraggingHandle && hasMounted,
         })}
+        collapsible={true}
+        defaultSize={getDefaultPanelSize()}
       >
         <AiChatResizablePanelContent showChat={showChat} />
       </ResizablePanel>

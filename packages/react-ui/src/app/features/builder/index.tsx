@@ -30,7 +30,6 @@ import { useRunProgress } from '@/app/features/builder/hooks/use-run-progress';
 
 import { useResizablePanelGroup } from '@/app/common/hooks/use-resizable-panel-group';
 import { useSocket } from '@/app/common/providers/socket-provider';
-import { PanelSizes } from '@/app/common/types/panel-sizes';
 import { FLOW_CANVAS_Y_OFFESET } from '@/app/constants/flow-canvas';
 import { SEARCH_PARAMS } from '@/app/constants/search-params';
 import { AiAssistantButton } from '@/app/features/ai/ai-assistant-button';
@@ -48,10 +47,7 @@ import {
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { AiChatResizablePanel } from '@/app/features/builder/ai-chat/ai-chat-resizable-panel';
-import {
-  RESIZABLE_PANEL_GROUP,
-  RESIZABLE_PANEL_IDS,
-} from '../../constants/layout';
+import { RESIZABLE_PANEL_IDS } from '../../constants/layout';
 import {
   LEFT_SIDEBAR_MIN_EFFECTIVE_WIDTH,
   LEFT_SIDEBAR_MIN_SIZE,
@@ -219,7 +215,7 @@ const BuilderPage = () => {
 
   const { switchToDraft, isSwitchingToDraftPending } = useSwitchToDraft();
 
-  const { setPanelGroupSize } = useResizablePanelGroup();
+  const { setPanelsSize } = useResizablePanelGroup();
 
   const showChatInResizablePanel = flagsHooks.useFlag<string>(
     FlagId.SHOW_CHAT_IN_RESIZABLE_PANEL,
@@ -237,6 +233,16 @@ const BuilderPage = () => {
       height: rawMiddlePanelSize.height - MIDDLE_PANEL_TOP_OFFSET,
     };
   }, [rawMiddlePanelSize.height, rawMiddlePanelSize.width]);
+
+  const onResize = useCallback(
+    (size: number[]) => {
+      setPanelsSize({
+        [RESIZABLE_PANEL_IDS.LEFT_SIDEBAR]: size[0],
+        [RESIZABLE_PANEL_IDS.AI_CHAT]: size[1],
+      });
+    },
+    [setPanelsSize],
+  );
 
   return (
     <div className="flex h-screen w-screen flex-col relative">
@@ -257,9 +263,7 @@ const BuilderPage = () => {
           <ResizablePanelGroup
             direction="horizontal"
             className="absolute left-0 top-0"
-            onLayout={(size) => {
-              setPanelGroupSize(RESIZABLE_PANEL_GROUP, size as PanelSizes);
-            }}
+            onLayout={onResize}
           >
             <LeftSidebarResizablePanel
               minSize={LEFT_SIDEBAR_MIN_SIZE}
