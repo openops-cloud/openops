@@ -27,6 +27,32 @@ interface ZendeskView {
   updated_at?: string;
 }
 
+interface ZendeskTicket {
+  id: number;
+  subject: string;
+  status: string;
+  description?: string;
+  priority?: string;
+  type?: string;
+  requester_id?: number;
+  submitter_id?: number;
+  assignee_id?: number;
+  organization_id?: number;
+  group_id?: number;
+  tags?: string[];
+  created_at?: string;
+  updated_at?: string;
+  raw_subject?: string;
+  satisfaction_rating?: object | null;
+  custom_fields?: any[];
+  custom_status_id?: number;
+  ticket_form_id?: number;
+  brand_id?: number;
+  allow_channelback?: boolean;
+  allow_attachments?: boolean;
+  from_messaging_channel?: boolean;
+}
+
 export const newTicketInView = createTrigger({
   auth: zendeskAuth,
   name: 'new_ticket_in_view',
@@ -169,7 +195,7 @@ const polling: Polling<AuthProps, { view_id: number }> = {
 
 async function getTickets(authentication: AuthProps, view_id: number) {
   const { email, token, subdomain } = authentication;
-  const response = await httpClient.sendRequest<{ tickets: any[] }>({
+  const response = await httpClient.sendRequest<{ tickets: ZendeskTicket[] }>({
     url: `https://${subdomain}.zendesk.com/api/v2/views/${view_id}/tickets.json?sort_order=desc&sort_by=created_at&per_page=200`,
     method: HttpMethod.GET,
     authentication: {
