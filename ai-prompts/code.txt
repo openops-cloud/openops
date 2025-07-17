@@ -25,7 +25,7 @@ export const code = async (inputs) => {
 - **NO** `require()` statements - use ES6 `import` only
 - **NO** access to Node.js native modules: `fs`, `process`, `http`, `crypto`, `path`, `os`, etc.
 - **NO** file system operations
-- **NO** network requests, meaing we can't use libraries that relly on HTTP request like `aws-sdk`
+- **NO** network requests, meaning we can't use libraries that rely on HTTP requests like `aws-sdk`
 - **NO** environment variables access
 
 ### ✅ ALLOWED:
