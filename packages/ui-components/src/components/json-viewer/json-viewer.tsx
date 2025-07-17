@@ -1,5 +1,6 @@
 import React, { ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
+import { Theme } from '../../lib/theme';
 import { FileButton } from './file-button';
 import { HeaderButtons } from './header-buttons';
 import { JsonContent } from './json-content';
@@ -11,7 +12,7 @@ type JsonViewerProps = {
   title?: string;
   readonly?: boolean;
   onChange?: (json: any) => void;
-  theme?: string;
+  theme: Theme;
   editorClassName?: string;
   isEditModeEnabled?: boolean;
   onEditModeChange?: (isEditModeEnabled: boolean) => void;

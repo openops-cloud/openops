@@ -5,13 +5,34 @@ import { useToast } from '../../ui/use-toast';
 
 import { t } from 'i18next';
 import { Copy, Plus } from 'lucide-react';
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import validator from 'validator';
 import { clipboardUtils } from '../../lib/clipboard-utils';
 import { cn } from '../../lib/cn';
-import { COPY_PASTE_TOAST_DURATION } from '../../lib/constants';
+import { Theme } from '../../lib/theme';
+import { CodeMirrorEditor } from '../json-editor';
+import { getLanguageExtensionForCode } from '../json-editor/code-mirror-utils';
 import { CodeVariations, MarkdownCodeVariations } from './types';
+
+function extractLanguageFromClassName(className?: string): string | undefined {
+  if (!className || typeof className !== 'string') {
+    return undefined;
+  }
+
+  const languagePrefix = 'language-';
+  const languageIndex = className.indexOf(languagePrefix);
+
+  if (languageIndex === -1) {
+    return undefined;
+  }
+
+  const startIndex = languageIndex + languagePrefix.length;
+  const remainingString = className.substring(startIndex);
+
+  const language = remainingString.split(/\s/)[0];
+  return language.length > 0 ? language : undefined;
+}
 
 function applyVariables(markdown: string, variables: Record<string, string>) {
   return markdown
@@ -32,6 +53,7 @@ type MarkdownProps = {
   linkClassName?: string;
   codeVariation?: CodeVariations;
   handleInject?: (codeContent: string) => void;
+  theme: Theme;
 };
 
 const Container = ({
@@ -51,61 +73,32 @@ const Container = ({
     children
   );
 
-const LanguageText = ({
+const CodeViewer = ({
   content,
-  multilineVariation = false,
+  theme,
+  className,
 }: {
   content: string;
-  multilineVariation?: boolean;
+  theme: Theme;
+  className?: string;
 }) => {
-  const divRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const div = divRef.current;
-    if (div) {
-      const updateHeight = () => {
-        requestAnimationFrame(() => {
-          div.style.height = 'auto';
-          div.style.height =
-            div.scrollHeight > 32 ? div.scrollHeight + 'px' : '32px';
-        });
-      };
-
-      const observer = new ResizeObserver(updateHeight);
-      observer.observe(div);
-
-      updateHeight();
-
-      return () => {
-        observer.disconnect();
-      };
-    }
-  }, [content]);
-
-  if (multilineVariation) {
-    return (
-      <div
-        ref={divRef}
-        className="p-4 text-sm block w-full leading-tight bg-input rounded-lg border-none overflow-y-hidden resize-none"
-        contentEditable={false}
-        role="textbox"
-        suppressContentEditableWarning
-      >
-        {content}
-      </div>
-    );
-  }
-
   return (
-    <input
-      type="text"
-      className="col-span-6 bg-background border border-solid text-sm rounded block w-full p-2.5"
+    <CodeMirrorEditor
       value={content}
-      disabled
+      readonly={true}
+      showLineNumbers={false}
+      height="auto"
+      className="border border-solid rounded"
+      containerClassName="h-auto"
+      theme={theme}
+      languageExtensions={getLanguageExtensionForCode(className)}
+      showTabs={typeof content !== 'string' && 'packageJson' in content}
+      editorLanguage={extractLanguageFromClassName(className)}
     />
   );
 };
-const LanguageUrl = ({ content }: { content: string }) => {
+
+const LanguageUrl = ({ content, theme }: { content: string; theme: Theme }) => {
   if (
     validator.isURL(content, {
       require_protocol: true,
@@ -127,7 +120,7 @@ const LanguageUrl = ({ content }: { content: string }) => {
     );
   }
 
-  return <LanguageText content={content} />;
+  return <CodeViewer content={content} theme={theme} />;
 };
 
 /*
@@ -144,6 +137,7 @@ const Markdown = React.memo(
     textClassName,
     linkClassName,
     handleInject,
+    theme,
   }: MarkdownProps) => {
     const { toast } = useToast();
 
@@ -173,6 +167,7 @@ const Markdown = React.memo(
         });
       }
     };
+
     const multilineVariation =
       codeVariation === MarkdownCodeVariations.WithCopyAndInject ||
       codeVariation === MarkdownCodeVariations.WithCopyMultiline;
@@ -212,11 +207,12 @@ const Markdown = React.memo(
               return (
                 <div className="relative py-2 w-full">
                   {isLanguageUrl ? (
-                    <LanguageUrl content={codeContent} />
+                    <LanguageUrl content={codeContent} theme={theme} />
                   ) : (
-                    <LanguageText
+                    <CodeViewer
                       content={codeContent}
-                      multilineVariation={multilineVariation}
+                      theme={theme}
+                      className={props.className}
                     />
                   )}
                   {codeVariation === MarkdownCodeVariations.WithCopy && (

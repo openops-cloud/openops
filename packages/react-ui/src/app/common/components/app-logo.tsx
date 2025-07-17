@@ -1,8 +1,8 @@
-import { cn } from '@openops/components/ui';
+import { cn, Theme } from '@openops/components/ui';
 import { forwardRef, useEffect, useState } from 'react';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
-import { Theme, useTheme } from '@/app/common/providers/theme-provider';
+import { useTheme } from '@/app/common/providers/theme-provider';
 
 type Props = {
   className?: string;

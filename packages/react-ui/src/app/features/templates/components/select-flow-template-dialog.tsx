@@ -1,4 +1,4 @@
-import { Theme, useTheme } from '@/app/common/providers/theme-provider';
+import { useTheme } from '@/app/common/providers/theme-provider';
 import { SEARCH_PARAMS } from '@/app/constants/search-params';
 import { flowsApi } from '@/app/features/flows/lib/flows-api';
 import { ConnectionsPicker } from '@/app/features/templates/components/connections-picker/connections-picker';
@@ -27,6 +27,7 @@ import {
   StepPlaceHolder,
   TemplateDetails,
   TemplateEdge,
+  Theme,
   toast,
   VerticalDivider,
 } from '@openops/components/ui';
@@ -225,6 +226,7 @@ const SelectFlowTemplateDialogContent = ({
   handleTemplateSelect,
   onSearchInputChange,
 }: SelectFlowTemplateDialogContentProps) => {
+  const { theme } = useTheme();
   const ownerLogoUrl = useOwnerLogoUrl();
   const { isConnectedToCloudTemplates } = useCloudProfile();
   const { createPollingInterval } = useUserInfoPolling();
@@ -291,6 +293,7 @@ const SelectFlowTemplateDialogContent = ({
             useTemplate={useTemplate}
             expandPreview={expandPreview}
             ownerLogoUrl={ownerLogoUrl}
+            theme={theme}
           />
         ) : (
           <FlowTemplateList
