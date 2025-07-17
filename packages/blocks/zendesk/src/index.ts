@@ -52,7 +52,7 @@ export const zendesk = createBlock({
         return `https://${subdomain}.zendesk.com/api/v2`;
       },
       auth: zendeskAuth,
-      authMapping: async (auth) => {
+      authMapping: async ({ auth }) => {
         const { email, token } = auth as unknown as {
           email: string;
           token: string;
