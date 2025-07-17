@@ -48,11 +48,11 @@ export const zendesk = createBlock({
   actions: [
     createCustomApiCallAction({
       baseUrl: (auth) => {
-        const { subdomain } = auth as unknown as { subdomain: string };
+        const { subdomain } = auth as { subdomain: string };
         return `https://${subdomain}.zendesk.com/api/v2`;
       },
       auth: zendeskAuth,
-      authMapping: async (auth) => {
+      authMapping: async ({ auth }) => {
         const { email, token } = auth as unknown as {
           email: string;
           token: string;
