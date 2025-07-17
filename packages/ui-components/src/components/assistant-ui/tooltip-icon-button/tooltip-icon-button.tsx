@@ -28,9 +28,9 @@ export const TooltipIconButton = forwardRef<
             {...rest}
             className={cn('size-6 p-1', className)}
             ref={ref}
+            aria-label={tooltip}
           >
             {children}
-            <span className="sr-only">{tooltip}</span>
           </Button>
         </TooltipTrigger>
         <TooltipContent side={side}>{tooltip}</TooltipContent>
