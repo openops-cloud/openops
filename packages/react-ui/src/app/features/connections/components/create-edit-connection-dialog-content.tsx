@@ -1,3 +1,4 @@
+import { useTheme } from '@/app/common/providers/theme-provider';
 import { QueryKeys } from '@/app/constants/query-keys';
 import { useDynamicFormValidationContext } from '@/app/features/builder/dynamic-form-validation/dynamic-form-validation-context';
 import { appConnectionsApi } from '@/app/features/connections/lib/app-connections-api';
@@ -78,6 +79,7 @@ const CreateEditConnectionDialogContent = ({
   showBackButton = false,
   setOpen,
 }: CreateEditConnectionDialogContentProps) => {
+  const { theme } = useTheme();
   const { data: connectionsMetadata } =
     appConnectionsHooks.useConnectionsMetadata();
 
@@ -229,6 +231,7 @@ const CreateEditConnectionDialogContent = ({
           codeVariation={MarkdownCodeVariations.WithoutCopy}
           textClassName="!my-0"
           listClassName="!my-0"
+          theme={theme}
         ></Markdown>
         {auth?.description && <Separator className="my-4" />}
         <Form {...form}>

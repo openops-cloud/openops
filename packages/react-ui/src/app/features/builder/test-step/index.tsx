@@ -1,3 +1,4 @@
+import { useTheme } from '@/app/common/providers/theme-provider';
 import { useStepSettingsContext } from '@/app/features/builder/step-settings/step-settings-context';
 import { stepTestOutputHooks } from '@/app/features/builder/test-step/step-test-output-hooks';
 import {
@@ -32,6 +33,7 @@ enum TabListEnum {
 
 const TestStepContainer = React.memo(
   ({ flowVersionId, isSaving, type, flowId }: TestStepContainerProps) => {
+    const { theme } = useTheme();
     const form = useFormContext<Action | Trigger>();
     const useSaveSelectedStepSampleData =
       stepTestOutputHooks.useSaveSelectedStepSampleData(form);
@@ -98,6 +100,7 @@ const TestStepContainer = React.memo(
               outputJson={selectedStep?.settings?.inputUiInfo?.sampleData ?? ''}
               onChange={useSaveSelectedStepSampleData}
               readonly={false}
+              theme={theme}
             />
           </div>
         </TabsContent>
