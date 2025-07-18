@@ -1,5 +1,6 @@
 import { HttpMethod } from '@openops/blocks-common';
 import { createAction } from '@openops/blocks-framework';
+import { logger } from '@openops/server-shared';
 import { sendTernaryRequest } from '../common';
 import { ternaryCloudAuth } from '../common/auth';
 
@@ -20,10 +21,9 @@ export const getDataIntegrations = createAction({
         },
       });
       return response.body as object;
-    } catch (e) {
-      console.error('Error getting data integrations!');
-      console.error(e);
-      return e;
+    } catch (error) {
+      logger.error('Error getting data integrations!', error);
+      throw error;
     }
   },
 });

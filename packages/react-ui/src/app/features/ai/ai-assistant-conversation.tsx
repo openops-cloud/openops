@@ -54,9 +54,9 @@ const AiAssistantConversation = ({
         lastAssistantMessageRef={lastAssistantMessageRef}
         theme={theme}
       />
-      {[ChatStatus.STREAMING, ChatStatus.SUBMITTED].includes(status) && (
-        <LoadingSpinner />
-      )}
+      {[ChatStatus.STREAMING, ChatStatus.SUBMITTED].includes(
+        status as ChatStatus,
+      ) && <LoadingSpinner />}
     </div>
   );
 };

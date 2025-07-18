@@ -1,12 +1,13 @@
 const mockFetch = jest.fn();
+const readFileMock = jest.fn();
+const getMock = jest.fn();
+
 global.fetch = mockFetch;
 
-const readFileMock = jest.fn();
 jest.mock('fs/promises', () => ({
   readFile: readFileMock,
 }));
 
-const getMock = jest.fn();
 jest.mock('@openops/server-shared', () => ({
   logger: {
     error: jest.fn(),
@@ -19,6 +20,7 @@ jest.mock('@openops/server-shared', () => ({
   },
 }));
 
+import { CODE_BLOCK_NAME } from '@openops/shared';
 import { getBlockSystemPrompt } from '../../../src/app/ai/chat/prompts.service';
 
 describe('getSystemPrompt', () => {
@@ -199,6 +201,221 @@ describe('getSystemPrompt', () => {
       );
     },
   );
+
+  describe('code block tests', () => {
+    const baseCodePrompt = 'Base code prompt content';
+
+    beforeEach(() => {
+      readFileMock.mockResolvedValue(baseCodePrompt);
+    });
+
+    it('should load code block prompt from cloud without enriched context', async () => {
+      getMock.mockReturnValue('https://example.com/prompts/');
+      mockFetch.mockResolvedValueOnce(mockResponse(baseCodePrompt));
+
+      const result = await getBlockSystemPrompt({
+        blockName: CODE_BLOCK_NAME,
+        workflowId: 'workflowId',
+        stepName: 'stepName',
+        actionName: 'code_action',
+      });
+
+      expect(result).toBe(baseCodePrompt);
+      expect(fetch).toHaveBeenCalledWith(
+        'https://example.com/prompts/code.txt',
+      );
+      expect(readFileMock).not.toHaveBeenCalled();
+    });
+
+    it('should load code block prompt from local file without enriched context', async () => {
+      getMock.mockReturnValue('');
+
+      const result = await getBlockSystemPrompt({
+        blockName: CODE_BLOCK_NAME,
+        workflowId: 'workflowId',
+        stepName: 'stepName',
+        actionName: 'code_action',
+      });
+
+      expect(result).toBe(baseCodePrompt);
+      expect(fetch).not.toHaveBeenCalled();
+      expect(readFileMock).toHaveBeenCalledWith(
+        expect.stringContaining('code.txt'),
+        'utf-8',
+      );
+    });
+
+    it('should include variables when enriched context has steps with variables', async () => {
+      getMock.mockReturnValue('');
+
+      const enrichedContext = {
+        flowId: 'test-flow-id',
+        flowVersionId: 'test-flow-version-id',
+        steps: [
+          {
+            id: 'step1',
+            stepName: 'step1',
+            variables: [
+              { name: 'var1', value: 'value1' },
+              { name: 'var2', value: 'value2' },
+            ],
+          },
+          {
+            id: 'step2',
+            stepName: 'step2',
+            variables: [{ name: 'var3', value: 'value3' }],
+          },
+        ],
+      };
+
+      const result = await getBlockSystemPrompt(
+        {
+          blockName: CODE_BLOCK_NAME,
+          workflowId: 'workflowId',
+          stepName: 'stepName',
+          actionName: 'code_action',
+        },
+        enrichedContext,
+      );
+
+      const expectedVariables = `\n\nVariables used in the code inputs:\n${JSON.stringify(
+        [
+          [
+            { name: 'var1', value: 'value1' },
+            { name: 'var2', value: 'value2' },
+          ],
+          [{ name: 'var3', value: 'value3' }],
+        ],
+      )}\n\n`;
+
+      expect(result).toBe(`${baseCodePrompt}${expectedVariables}`);
+      expect(readFileMock).toHaveBeenCalledWith(
+        expect.stringContaining('code.txt'),
+        'utf-8',
+      );
+    });
+
+    it('should not include variables when enriched context has steps without variables', async () => {
+      getMock.mockReturnValue('');
+
+      const enrichedContext = {
+        flowId: 'test-flow-id',
+        flowVersionId: 'test-flow-version-id',
+        steps: [
+          { id: 'step1', stepName: 'step1' },
+          { id: 'step2', stepName: 'step2' },
+        ],
+      };
+
+      const result = await getBlockSystemPrompt(
+        {
+          blockName: CODE_BLOCK_NAME,
+          workflowId: 'workflowId',
+          stepName: 'stepName',
+          actionName: 'code_action',
+        },
+        enrichedContext,
+      );
+
+      expect(result).toBe(baseCodePrompt);
+      expect(readFileMock).toHaveBeenCalledWith(
+        expect.stringContaining('code.txt'),
+        'utf-8',
+      );
+    });
+
+    it('should not include variables when enriched context has no steps', async () => {
+      getMock.mockReturnValue('');
+
+      const enrichedContext = {
+        flowId: 'test-flow-id',
+        flowVersionId: 'test-flow-version-id',
+        steps: [],
+      };
+
+      const result = await getBlockSystemPrompt(
+        {
+          blockName: CODE_BLOCK_NAME,
+          workflowId: 'workflowId',
+          stepName: 'stepName',
+          actionName: 'code_action',
+        },
+        enrichedContext,
+      );
+
+      expect(result).toBe(baseCodePrompt);
+      expect(readFileMock).toHaveBeenCalledWith(
+        expect.stringContaining('code.txt'),
+        'utf-8',
+      );
+    });
+
+    it('should handle mixed steps with and without variables', async () => {
+      getMock.mockReturnValue('');
+
+      const enrichedContext = {
+        flowId: 'test-flow-id',
+        flowVersionId: 'test-flow-version-id',
+        steps: [
+          {
+            id: 'step1',
+            stepName: 'step1',
+            variables: [{ name: 'var1', value: 'value1' }],
+          },
+          {
+            id: 'step2',
+            stepName: 'step2',
+          },
+          {
+            id: 'step3',
+            stepName: 'step3',
+            variables: [{ name: 'var2', value: 'value2' }],
+          },
+        ],
+      };
+
+      const result = await getBlockSystemPrompt(
+        {
+          blockName: CODE_BLOCK_NAME,
+          workflowId: 'workflowId',
+          stepName: 'stepName',
+          actionName: 'code_action',
+        },
+        enrichedContext,
+      );
+
+      const expectedVariables = `\n\nVariables used in the code inputs:\n${JSON.stringify(
+        [
+          [{ name: 'var1', value: 'value1' }],
+          undefined,
+          [{ name: 'var2', value: 'value2' }],
+        ],
+      )}\n\n`;
+
+      expect(result).toBe(`${baseCodePrompt}${expectedVariables}`);
+    });
+
+    it('should fallback to local file when cloud fetch fails for code block', async () => {
+      getMock.mockReturnValue('https://example.com/prompts/');
+      mockFetch.mockResolvedValueOnce({ ok: false, statusText: 'Not Found' });
+
+      const result = await getBlockSystemPrompt({
+        blockName: CODE_BLOCK_NAME,
+        workflowId: 'workflowId',
+        stepName: 'stepName',
+        actionName: 'code_action',
+      });
+
+      expect(result).toBe(baseCodePrompt);
+      expect(fetch).toHaveBeenCalledWith(
+        'https://example.com/prompts/code.txt',
+      );
+      expect(readFileMock).toHaveBeenCalledWith(
+        expect.stringContaining('code.txt'),
+        'utf-8',
+      );
+    });
+  });
 });
 
 function mockResponse(body: string, ok = true, statusText = 'OK'): Response {
