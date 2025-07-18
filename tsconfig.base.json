@@ -108,6 +108,9 @@
       ],
       "@openops/block-finout": ["packages/blocks/finout/src/index.ts"],
       "@openops/block-flexera": ["packages/blocks/flexera/src/index.ts"],
+      "@openops/block-flexera-one": [
+        "packages/blocks/flexera-one/src/index.ts"
+      ],
       "@openops/block-fliqr-ai": ["packages/blocks/fliqr-ai/src/index.ts"],
       "@openops/block-flowise": ["packages/blocks/flowise/src/index.ts"],
       "@openops/block-flowlu": ["packages/blocks/flowlu/src/index.ts"],
