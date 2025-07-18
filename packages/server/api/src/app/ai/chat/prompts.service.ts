@@ -60,7 +60,11 @@ export const getBlockSystemPrompt = async (
     case CODE_BLOCK_NAME: {
       let enhancedPrompt = '';
 
-      if (enrichedContext?.steps?.some((s) => s.variables)) {
+      if (
+        enrichedContext?.steps?.some(
+          (s) => s.variables && s.variables.length > 0,
+        )
+      ) {
         enhancedPrompt += `
         \n\n ## Inputs properties and sample values:\n${JSON.stringify(
           enrichedContext.steps.map((s) =>
