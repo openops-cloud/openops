@@ -1,3 +1,4 @@
+import { isLLMTelemetryEnabled } from '@openops/common';
 import { AiConfig, CodeLLMSchema, codeLLMSchema } from '@openops/shared';
 import {
   CoreMessage,
@@ -36,7 +37,5 @@ export const streamCode = ({
     ...aiConfig.modelSettings,
     onFinish,
     onError,
-    experimental_telemetry: {
-      isEnabled: true,
-    },
+    experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
   });
