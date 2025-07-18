@@ -14,8 +14,8 @@ import {
   flowHelper,
   FlowVersion,
   TriggerWithOptionalId,
-  unifiedCodeResponseSchema,
-  UnifiedResponseSchema,
+  unifiedCodeLLMSchema,
+  UnifiedCodeLLMSchema,
 } from '@openops/shared';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { t } from 'i18next';
@@ -89,17 +89,17 @@ export const useStepSettingsAiChat = (
   const { submit: submitCodeRequest, isLoading: isCodeGenerating } = useObject({
     id: `code-${chatSessionKey}`,
     api: 'api/v1/ai/conversation/code',
-    schema: unifiedCodeResponseSchema,
+    schema: unifiedCodeLLMSchema,
     headers: {
       Authorization: `Bearer ${authenticationSession.getToken()}`,
       'Content-Type': 'application/json',
     },
-    onFinish: ({ object }: { object: UnifiedResponseSchema | undefined }) => {
+    onFinish: ({ object }: { object: UnifiedCodeLLMSchema | undefined }) => {
       if (object) {
         const assistantMessage: Message = {
           id: nanoid(),
           role: 'assistant',
-          content: object.textAnswer ?? '',
+          content: object.textAnswer,
           createdAt: new Date(),
           annotations: [object],
         };

@@ -110,10 +110,7 @@ const createCodeMessage = (
   idx: number,
   parsed: CodeSchema,
 ): AIChatMessage => {
-  return parsed.type === 'code' &&
-    parsed.textAnswer &&
-    parsed.code &&
-    parsed.packageJson
+  return parsed.type === 'code'
     ? {
         id: getMessageId(message, idx),
         role: AIChatMessageRole.assistant,

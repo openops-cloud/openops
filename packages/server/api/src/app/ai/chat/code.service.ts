@@ -1,8 +1,8 @@
 import { logger } from '@openops/server-shared';
 import {
   AiConfig,
-  unifiedCodeResponseSchema,
-  UnifiedResponseSchema,
+  unifiedCodeLLMSchema,
+  UnifiedCodeLLMSchema,
 } from '@openops/shared';
 import {
   CoreMessage,
@@ -17,7 +17,7 @@ type StreamCodeOptions = {
   languageModel: LanguageModel;
   aiConfig: AiConfig;
   systemPrompt: string;
-  onFinish: StreamObjectOnFinishCallback<UnifiedResponseSchema> | undefined;
+  onFinish: StreamObjectOnFinishCallback<UnifiedCodeLLMSchema> | undefined;
   onError: (error: unknown) => void;
 };
 
@@ -29,8 +29,8 @@ export const streamCode = ({
   onFinish,
   onError,
 }: StreamCodeOptions): StreamObjectResult<
-  Partial<UnifiedResponseSchema>,
-  UnifiedResponseSchema,
+  Partial<UnifiedCodeLLMSchema>,
+  UnifiedCodeLLMSchema,
   never
 > => {
   logger.debug('streamCode', {
@@ -44,6 +44,6 @@ export const streamCode = ({
     ...aiConfig.modelSettings,
     onFinish,
     onError,
-    schema: unifiedCodeResponseSchema,
+    schema: unifiedCodeLLMSchema,
   });
 };
