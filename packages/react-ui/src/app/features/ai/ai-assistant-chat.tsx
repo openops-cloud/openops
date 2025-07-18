@@ -115,7 +115,7 @@ const AiAssistantChat = ({
   if (isLoading) {
     return null;
   }
-/*
+
   if (!hasActiveAiSettings && isAiChatOpened) {
     return (
       <NoAiEnabledPopover
@@ -124,7 +124,7 @@ const AiAssistantChat = ({
       />
     );
   }
-*/
+
   return (
     <AiAssistantChatContainer
       dimensions={sizes.current}
