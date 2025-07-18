@@ -18,7 +18,7 @@ type AIChatMessagesProps = {
   codeVariation?: MarkdownCodeVariations;
   lastUserMessageRef?: React.RefObject<HTMLDivElement>;
   lastAssistantMessageRef?: React.RefObject<HTMLDivElement>;
-  theme?: Theme;
+  theme: Theme;
 };
 
 const AIChatMessages = forwardRef<HTMLDivElement, AIChatMessagesProps>(

@@ -58,31 +58,16 @@ export const getBlockSystemPrompt = async (
     case '@openops/block-databricks':
       return loadPrompt('databricks.txt');
     case CODE_BLOCK_NAME: {
-      const enrichedContextString = enrichedContext?.steps?.some(
-        (s) => s.variables,
+      const resolvedVariables = enrichedContext?.steps?.some(
+        (s) => s.variables && s.variables.length > 0,
       )
         ? `\n\nVariables used in the code inputs:\n${JSON.stringify(
             enrichedContext.steps.map((s) => s.variables),
           )}\n\n`
         : '';
 
-      // wip until the final ticket is implemented
-      return `Generate code with this interface, based on the user's request. The code should be executable in isolated-vm (Secure & isolated JS environments for nodejs).
-      It should be robust and easy to read.
-      
-      // example packages to import (only if needed)
-      import x from 'x';
-      import y from 'y';
-      import z from 'z';
-
-      export const code = async (inputs) => {
-      // do transformation logic here
-      return ...; };
-
-      If there is some package the user wants to use, or necessary for the processing, also provide a separate package.json file with the dependencies.
-      NEVER USE require, use import instead. Keep in mind isolated-vm has no access to any native Node.js modules, such as "fs", "process", "http", "crypto", etc.
-      If there are any variables in the following context, use them in the code. If you see inputs variables truncated, keep in mind that the final code will receive the full object as inputs and NOT stringified! Verify both cases, if input variables are objects or strings.
-      ${enrichedContextString}`;
+      const basePrompt = await loadPrompt('code.txt');
+      return `${basePrompt}${resolvedVariables}`;
     }
     default:
       return '';
