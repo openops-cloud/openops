@@ -341,7 +341,7 @@ describe('validateAiProviderConfig tests', () => {
     expect(openAIProviderMock.createLanguageModel).toHaveBeenCalledWith({
       apiKey: aiConfig.apiKey,
       model: aiConfig.model,
-      providerSettings: { experimental_telemetry: { isEnabled: false } },
+      providerSettings: {},
     });
   });
 });
