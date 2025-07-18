@@ -2,7 +2,7 @@ import { isNil } from '@openops/shared';
 import { t } from 'i18next';
 import { useMemo } from 'react';
 import { UseFormReturn } from 'react-hook-form';
-import { tryParseJson } from '../../lib/json-utils';
+import { Theme } from '../../lib/theme';
 import {
   Form,
   FormControl,
@@ -21,7 +21,7 @@ type JsonContentProps = {
   isEditMode: boolean;
   json: any;
   form: UseFormReturn<JsonFormValues>;
-  theme?: string;
+  theme: Theme;
   validateJson?: (value: string) => { valid: boolean; message?: string };
   editorClassName?: string;
 };
@@ -54,8 +54,9 @@ export const JsonContent = ({
                       readonly={false}
                       theme={theme}
                       containerClassName={editorClassName}
+                      height="100%"
                       onChange={(value) => {
-                        field.onChange(tryParseJson(value));
+                        field.onChange(value);
                       }}
                     />
                   </FormControl>

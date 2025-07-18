@@ -72,10 +72,14 @@ export * from './lib/compose-refs';
 export * from './lib/constants';
 export * from './lib/flow-canvas-utils';
 export * from './lib/json-utils';
+export * from './lib/theme';
 export * from './lib/types';
 export * from './lib/use-element-size';
 export * from './lib/use-forwarded-ref';
 export * from './lib/user-agent-utils';
+
+/* export hooks */
+export * from './hooks/use-copy-to-clipboard';
 
 /* export custom components */
 export * from './components';
