@@ -92,13 +92,13 @@ const ThreadWelcomeSuggestions: FC<{
 }> = ({ suggestions }) => {
   return (
     <div className="mt-3 flex w-full items-stretch justify-center gap-4">
-      {suggestions.map(({ prompt, label }, idx) => (
+      {suggestions.map(({ prompt, label }) => (
         <ThreadPrimitive.Suggestion
           className="hover:bg-muted/80 flex max-w-sm grow basis-0 flex-col items-center justify-center rounded-lg border p-3 transition-colors ease-in"
           prompt={prompt}
           method="replace"
           autoSend
-          key={idx}
+          key={`${prompt}-${label}`}
         >
           <span className="line-clamp-2 text-ellipsis text-sm font-semibold">
             {label}

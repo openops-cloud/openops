@@ -1,4 +1,4 @@
-import React, { createContext, ReactNode, useContext } from 'react';
+import React, { createContext, ReactNode, useContext, useMemo } from 'react';
 
 export interface ThreadWelcomeData {
   greeting: string;
@@ -18,10 +18,13 @@ export const ThreadWelcomeProvider: React.FC<ThreadWelcomeProviderProps> = ({
   suggestions,
   children,
 }) => {
-  const value: ThreadWelcomeData = {
-    greeting,
-    suggestions,
-  };
+  const value: ThreadWelcomeData = useMemo(
+    () => ({
+      greeting,
+      suggestions,
+    }),
+    [greeting, suggestions],
+  );
 
   return (
     <ThreadWelcomeContext.Provider value={value}>
