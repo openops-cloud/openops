@@ -1,6 +1,3 @@
-'use client';
-
-import { authenticationSession } from '@/app/lib/authentication-session';
 import { AssistantRuntimeProvider } from '@assistant-ui/react';
 
 import { useVercelUseChatRuntime } from '@assistant-ui/react-ai-sdk';
@@ -13,8 +10,8 @@ import { OpenChatResponse } from '@openops/shared';
 import { useQuery } from '@tanstack/react-query';
 import { t } from 'i18next';
 import { useMemo, useRef } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import { aiAssistantChatApi } from '../lib/ai-assistant-chat-api';
-
 const prompts = [
   t('What is the most recent workflow?'),
   t('What is my last failed run?'),
@@ -52,14 +49,13 @@ export const AssistantUiChat = () => {
         messages?.map((msg) => {
           if (typeof msg.content === 'string') {
             return {
-              id: msg.id || Math.random().toString(),
+              id: msg.id || uuidv4(),
               role: msg.role,
               content: msg.content,
             };
           }
 
           if (Array.isArray(msg.content)) {
-            // Convert array content to string for assistant messages
             const contentString = msg.content
               .map((part: any) => {
                 if (part.type === 'text' && part.text) {
@@ -70,14 +66,14 @@ export const AssistantUiChat = () => {
               .join('');
 
             return {
-              id: msg.id || Math.random().toString(),
+              id: msg.id || uuidv4(),
               role: msg.role,
               content: contentString,
             };
           }
 
           return {
-            id: msg.id || Math.random().toString(),
+            id: msg.id || uuidv4(),
             role: msg.role,
             content: msg.content || '',
           };
