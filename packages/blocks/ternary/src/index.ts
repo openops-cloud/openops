@@ -26,7 +26,7 @@ export const ternary = createBlock({
       additionalProps: {
         documentation: Property.MarkDown({
           value:
-            'For more information, visit the [Ternary API documentation](https://docs.ternary.app/reference/using-the-api).',
+            'For more information, visit the [Ternary API documentation](https://docs.ternary.app/reference/api).',
         }),
       },
       authMapping: async ({ auth }: any) => {
