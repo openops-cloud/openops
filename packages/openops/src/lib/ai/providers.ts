@@ -1,3 +1,4 @@
+import { SharedSystemProp, system } from '@openops/server-shared';
 import {
   AiProviderEnum,
   ApplicationError,
@@ -81,7 +82,6 @@ export const getAiProviderLanguageModel = async (aiConfig: {
     model: aiConfig.model,
     providerSettings: {
       ...sanitizedSettings,
-      experimental_telemetry: { enabled: false },
     },
   });
 };
@@ -128,6 +128,10 @@ export const validateAiProviderConfig = async (
 
   return { valid: true };
 };
+
+export const isLLMTelemetryEnabled = () =>
+  !!system.get(SharedSystemProp.LANGFUSE_SECRET_KEY) &&
+  !!system.get(SharedSystemProp.LANGFUSE_PUBLIC_KEY);
 
 const invalidConfigError = (
   errorName: string,

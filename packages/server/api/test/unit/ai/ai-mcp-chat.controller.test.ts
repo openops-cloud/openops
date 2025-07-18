@@ -58,6 +58,7 @@ jest.mock('@openops/server-shared', () => ({
 
 jest.mock('@openops/common', () => ({
   getAiProviderLanguageModel: jest.fn(),
+  isLLMTelemetryEnabled: jest.fn().mockReturnValue(false),
 }));
 
 jest.mock('../../../src/app/ai/mcp/mcp-tools', () => ({

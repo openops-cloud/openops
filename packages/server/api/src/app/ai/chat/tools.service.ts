@@ -1,3 +1,4 @@
+import { isLLMTelemetryEnabled } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { AiConfig } from '@openops/shared';
 import { CoreMessage, generateObject, LanguageModel, ToolSet } from 'ai';
@@ -43,6 +44,7 @@ export async function selectRelevantTools({
       system: getSystemPrompt(toolList),
       messages,
       ...aiConfig.modelSettings,
+      experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
     });
 
     let selectedToolNames = toolSelectionResult.tool_names;
