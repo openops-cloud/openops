@@ -8,6 +8,7 @@ import { BlockCategory } from '@openops/shared';
 import { getBudgets } from './lib/actions/get-budgets';
 import { getDataIntegrations } from './lib/actions/get-data-integrations';
 import { ternaryCloudAuth } from './lib/common/auth';
+import { createCase } from './lib/actions/create-case';
 
 export const ternary = createBlock({
   displayName: 'Ternary',
@@ -24,6 +25,7 @@ export const ternary = createBlock({
     // cost allocation?
     //getUsageRecommendations,
     //updateUsageRecommendations,
+    createCase,
     createCustomApiCallAction({
       baseUrl: (auth: unknown) => (auth as { apiURL: string }).apiURL,
       auth: ternaryCloudAuth,
