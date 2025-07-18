@@ -36,4 +36,7 @@ export const streamCode = ({
     ...aiConfig.modelSettings,
     onFinish,
     onError,
+    experimental_telemetry: {
+      isEnabled: true,
+    },
   });

@@ -387,6 +387,9 @@ async function streamMessages(
     toolChoice,
     maxRetries: 1,
     maxSteps: MAX_RECURSION_DEPTH,
+    experimental_telemetry: {
+      isEnabled: true,
+    },
     async onStepFinish({ finishReason }): Promise<void> {
       stepCount++;
       if (finishReason !== 'stop' && stepCount >= MAX_RECURSION_DEPTH) {

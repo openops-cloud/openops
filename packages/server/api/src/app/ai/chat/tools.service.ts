@@ -43,6 +43,9 @@ export async function selectRelevantTools({
       system: getSystemPrompt(toolList),
       messages,
       ...aiConfig.modelSettings,
+      experimental_telemetry: {
+        isEnabled: true,
+      },
     });
 
     let selectedToolNames = toolSelectionResult.tool_names;

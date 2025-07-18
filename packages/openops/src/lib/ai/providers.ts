@@ -81,7 +81,7 @@ export const getAiProviderLanguageModel = async (aiConfig: {
     model: aiConfig.model,
     providerSettings: {
       ...sanitizedSettings,
-      experimental_telemetry: { enabled: false },
+      experimental_telemetry: { isEnabled: true },
     },
   });
 };
