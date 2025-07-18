@@ -5,19 +5,15 @@ import {
   ResizablePanelGroup,
   ScrollArea,
 } from '@openops/components/ui';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import { DashboardSideMenu } from '@/app/features/navigation/side-menu/dashboard/dashboard-side-menu';
 
 import { AllowOnlyLoggedInUserOnlyGuard } from '@/app/common/guards/allow-logged-in-user-only-guard';
 import { useResizablePanelGroup } from '@/app/common/hooks/use-resizable-panel-group';
-import { PanelSizes } from '@/app/common/types/panel-sizes';
 import { useAppStore } from '@/app/store/app-store';
 import { useMeasure } from 'react-use';
-import {
-  RESIZABLE_PANEL_GROUP,
-  RESIZABLE_PANEL_IDS,
-} from '../../constants/layout';
+import { RESIZABLE_PANEL_IDS } from '../../constants/layout';
 import {
   LEFT_SIDEBAR_MAX_SIZE,
   LEFT_SIDEBAR_MIN_EFFECTIVE_WIDTH,
@@ -47,16 +43,21 @@ export function DashboardContainer({
   }));
   const [middlePanelRef, middlePanelSize] = useMeasure<HTMLDivElement>();
 
-  const { setPanelGroupSize } = useResizablePanelGroup();
+  const { setPanelsSize } = useResizablePanelGroup();
+
+  const onResize = useCallback(
+    (size: number[]) => {
+      setPanelsSize({ [RESIZABLE_PANEL_IDS.LEFT_SIDEBAR]: size[0] });
+    },
+    [setPanelsSize],
+  );
 
   return (
     <AllowOnlyLoggedInUserOnlyGuard>
       <ResizablePanelGroup
         direction="horizontal"
         id="dashboard"
-        onLayout={(size) => {
-          setPanelGroupSize(RESIZABLE_PANEL_GROUP, size as PanelSizes);
-        }}
+        onLayout={onResize}
       >
         <LeftSidebarResizablePanel
           minSize={isMinimized ? SIDEBAR_MINIMIZED_WIDTH : SIDEBAR_MIN_SIZE}
