@@ -3,7 +3,7 @@ import { accountProperty } from './account-property';
 import { anadotAuth } from './anodot-auth-property';
 import { closedAndDoneRecommendationsProperty } from './api-filters/closed-and-done-recommendations-property';
 import { customStatusProperty } from './api-filters/custom-status-property';
-import { getPredefinedRecommendationsDropdownProperty } from './api-filters/get-x-recommendation-property';
+import { getPredefinedRecommendationsDropdownProperty } from './api-filters/get-predefined-recommendation-property';
 import { openedRecommendationsProperty } from './api-filters/opened-recommendations-property';
 import { buildUserAccountApiKey } from './common/anodot-requests-helpers';
 import { authenticateUserWithAnodot } from './common/auth';

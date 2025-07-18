@@ -31,6 +31,5 @@ function updateJsonObject(obj: any): void {
   ) {
     obj.settings.input.recommendationTypes =
       obj.settings?.input?.recommendationType?.filters?.type_id || [];
-    obj.settings.input.recommendationType = undefined;
   }
 }

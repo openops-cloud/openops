@@ -1,4 +1,4 @@
-import { getPredefinedRecommendationsDropdownProperty } from '../../src/lib/api-filters/get-x-recommendation-property';
+import { getPredefinedRecommendationsDropdownProperty } from '../../src/lib/api-filters/get-predefined-recommendation-property';
 
 describe('getPredefinedRecommendationsDropdownProperty', () => {
   test('should return expected property', async () => {
