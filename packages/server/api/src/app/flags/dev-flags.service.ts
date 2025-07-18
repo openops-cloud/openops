@@ -24,6 +24,12 @@ async function getAll(): Promise<Flag[]> {
       created,
       updated,
     },
+    {
+      id: FlagId.ASSISTANT_UI_PLAYGROUND_ENABLED,
+      value: false,
+      created,
+      updated,
+    },
   ];
 
   return flags;

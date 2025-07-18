@@ -1,3 +1,4 @@
+import { AI_ASSISTANT_LS_KEY } from '@/app/constants/ai';
 import { QueryKeys } from '@/app/constants/query-keys';
 import { aiAssistantChatApi } from '@/app/features/ai/lib/ai-assistant-chat-api';
 import { authenticationSession } from '@/app/lib/authentication-session';
@@ -9,7 +10,6 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { t } from 'i18next';
 import { useCallback, useEffect, useRef } from 'react';
 
-const AI_ASSISTANT_LS_KEY = 'ai_assistant_chat_id';
 const AI_ASSISTANT_SESSION_ID = 'ai_assistant_session_id';
 
 export const useAiAssistantChat = () => {
