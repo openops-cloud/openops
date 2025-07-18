@@ -74,6 +74,7 @@ export const getBlockSystemPrompt = async (
       if (!isNil(enrichedContext?.currentStepData)) {
         enhancedPrompt += `
         ## Current output: ${JSON.stringify(enrichedContext.currentStepData)}
+        If there is any error in the output, you need to fix the previous code.
         \n\n`;
       }
 

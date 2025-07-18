@@ -281,6 +281,9 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
             role: 'assistant',
             content: JSON.stringify(result.object),
           };
+          logger.debug('streamCode finished', {
+            result,
+          });
 
           await saveChatHistory(chatId, userId, projectId, [
             ...messages,
@@ -288,7 +291,10 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
           ]);
         },
         onError: (error) => {
-          logger.error('Failed to generate code', error);
+          logger.error('Failed to generate code', {
+            error,
+          });
+          throw error;
         },
       });
 
