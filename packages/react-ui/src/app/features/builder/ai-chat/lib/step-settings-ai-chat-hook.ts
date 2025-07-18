@@ -9,12 +9,13 @@ import { toast } from '@openops/components/ui';
 import {
   Action,
   ActionType,
+  ChatFlowContext,
   CODE_BLOCK_NAME,
-  codeLLMSchema,
-  CodeLLMSchema,
   flowHelper,
   FlowVersion,
   TriggerWithOptionalId,
+  unifiedCodeLLMSchema,
+  UnifiedCodeLLMSchema,
 } from '@openops/shared';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { t } from 'i18next';
@@ -88,17 +89,17 @@ export const useStepSettingsAiChat = (
   const { submit: submitCodeRequest, isLoading: isCodeGenerating } = useObject({
     id: `code-${chatSessionKey}`,
     api: 'api/v1/ai/conversation/code',
-    schema: codeLLMSchema,
+    schema: unifiedCodeLLMSchema,
     headers: {
       Authorization: `Bearer ${authenticationSession.getToken()}`,
       'Content-Type': 'application/json',
     },
-    onFinish: ({ object }: { object: CodeLLMSchema | undefined }) => {
+    onFinish: ({ object }: { object: UnifiedCodeLLMSchema | undefined }) => {
       if (object) {
         const assistantMessage: Message = {
           id: nanoid(),
           role: 'assistant',
-          content: object.description,
+          content: object.textAnswer,
           createdAt: new Date(),
           annotations: [object],
         };
@@ -176,7 +177,7 @@ export const useStepSettingsAiChat = (
 
       const additionalContext =
         stepDetails && flowVersion.id
-          ? createAdditionalContext(flowVersion, selectedStep, stepDetails)
+          ? createAdditionalContext(flowVersion, stepDetails)
           : undefined;
 
       submitCodeRequest({
@@ -192,7 +193,6 @@ export const useStepSettingsAiChat = (
       openChatResponse?.chatId,
       stepDetails,
       flowVersion,
-      selectedStep,
       setMessages,
       submitCodeRequest,
       setInput,
@@ -241,9 +241,8 @@ const getActionName = (
 
 const createAdditionalContext = (
   flowVersion: FlowVersion,
-  selectedStep: string,
   stepData?: Action | TriggerWithOptionalId,
-) => {
+): ChatFlowContext => {
   const stepVariables = stepData?.settings?.input || {};
   const variables = Object.entries(stepVariables).map(([name, value]) => ({
     name,
@@ -253,10 +252,11 @@ const createAdditionalContext = (
   return {
     flowId: flowVersion.flowId,
     flowVersionId: flowVersion.id,
+    currentStepId: stepData?.id ?? '',
     steps: [
       {
-        id: selectedStep,
-        stepName: selectedStep,
+        id: stepData?.id ?? '',
+        stepName: stepData?.name ?? '',
         variables: variables.length > 0 ? variables : undefined,
       },
     ],

@@ -1,18 +1,23 @@
 ---
 description: Coding guidelines
-globs: 
+globs:
 alwaysApply: true
 ---
+
 ---
+
 ## General Principles
+
 - **Follow existing code style and patterns in the repository.**
 - **Write clear, self-documenting code** with descriptive variable and function names.
 - **Include comments** for complex logic or non-obvious behavior.
 - **Write tests** for new functionality and any changes.
 - **Update documentation** for user-facing changes.
+
 ---
 
 ## Formatting & Linting
+
 - **Indentation:** 2 spaces (TypeScript/JavaScript).
 - **Line length:** 100–120 characters preferred.
 - **Braces:** Required for all control blocks, even single-line.
@@ -26,14 +31,20 @@ alwaysApply: true
     nx lint <package-name>
     ```
 - **Formatting:** Follow Prettier rules if configured.
+
 ---
+
 ## Naming Conventions
+
 - **Variables/Functions:** `camelCase`
 - **Classes/Types:** `PascalCase`
 - **Constants:** `UPPER_SNAKE_CASE`
 - **Files:** Use lowercase with hyphens (e.g., `user-profile.ts`)
+
 ---
+
 ## Language-Specific Notes
+
 - **TypeScript/JavaScript (Nx Monorepo):**
   - Use types and interfaces where appropriate.
   - Prefer `const` over `let` or `var`.
@@ -43,20 +54,30 @@ alwaysApply: true
   - Place unit tests alongside the code in a `tests` folder
   - Use Jest for testing
 - **Shell scripts:** Use `#!/usr/bin/env bash` and indent with 2 spaces.
+
 ---
+
 ## Comments
+
 - Explain _why_ something is done, not _what_ (the code should be self-explanatory).
 - Use `TODO:` for actionable technical debt.
 - Document public functions, classes, and modules.
+
 ---
+
 ## Dependencies
+
 - Do not introduce new dependencies without discussion.
 - Keep dependency lists minimal and up-to-date.
+
 ---
+
 ## Tooling
+
 - Respect `.editorconfig`, `.eslintrc`, `.prettierrc`, and other config files in the repository.
 
 ### Testing & Linting
+
 Use nx at the root of the project to run unit tests, for example:
 nx test react-ui
 nx lint react-ui
@@ -65,7 +86,9 @@ nx test-unit server-api
 nx test engine
 
 ---
+
 ## Example (TypeScript)
+
 ```typescript
 // Good Example
 export function getUserProfile(userId: string): UserProfile {
@@ -78,8 +101,10 @@ export function getUserProfile(userId: string): UserProfile {
 ```
 
 ## Frontend Guidelines
+
 - Use the `react-ui` package for main application logic.
 - Place pure, reusable components in the `ui-components` package, documented in Storybook.
+- Don't do breaking changes to existing code interfaces (like component props or names, unless this was discussed)
 - **Tech stack must strictly use:**
   - React 18
   - Zustand
@@ -91,6 +116,7 @@ export function getUserProfile(userId: string): UserProfile {
 - Follow best practices for React hooks.
 - Prefer small, composable components. Extract helper functions where possible.
 - Use `cn` utility to group tailwind classnames, for example:
+
 ```
     <div
       className={cn(
@@ -107,4 +133,3 @@ export function getUserProfile(userId: string): UserProfile {
       {t('Sample output data')}
     </div>
 ```
-

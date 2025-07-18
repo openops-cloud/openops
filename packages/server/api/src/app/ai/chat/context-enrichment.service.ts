@@ -19,9 +19,20 @@ type FlowData = {
   stepTestOutputs: Record<OpenOpsId, string>;
 };
 
+export enum IncludeOptions {
+  ALWAYS = 'always',
+  NEVER = 'never',
+  ONLY_IF_ERROR = 'only-if-error',
+}
+
+type Options = {
+  includeCurrentStepOutput: IncludeOptions;
+};
+
 export async function enrichContext(
   additionalContext: ChatFlowContext,
   projectId: string,
+  options?: Options,
 ): Promise<ChatFlowContext> {
   try {
     if (!additionalContext.steps) {
@@ -39,15 +50,54 @@ export async function enrichContext(
       projectId,
     );
 
+    const currentStepData = await getCurrentStepData(
+      additionalContext,
+      options,
+    );
+
     return {
       flowId: additionalContext.flowId,
       flowVersionId: additionalContext.flowVersionId,
       steps: enrichedSteps,
+      currentStepId: additionalContext.currentStepId,
+      currentStepData,
     };
   } catch (error) {
     logger.error('Failed to enrich context', { error });
     throw error;
   }
+}
+
+async function getCurrentStepData(
+  additionalContext: ChatFlowContext,
+  options?: Options,
+): Promise<string> {
+  if (additionalContext.currentStepId) {
+    const stepOutput = await flowStepTestOutputService.listDecrypted({
+      flowVersionId: additionalContext.flowVersionId,
+      stepIds: [additionalContext.currentStepId],
+    });
+
+    const currentStepOutput = stepOutput?.[0];
+
+    if (!currentStepOutput) {
+      return '';
+    }
+
+    const currentStepData = safeStringifyAndTruncate(currentStepOutput.output);
+
+    switch (options?.includeCurrentStepOutput) {
+      case IncludeOptions.ALWAYS:
+        return currentStepData;
+      case IncludeOptions.NEVER:
+        return '';
+      case IncludeOptions.ONLY_IF_ERROR:
+        return currentStepOutput.success ? '' : currentStepData;
+      default:
+        return '';
+    }
+  }
+  return '';
 }
 
 async function getFlowData(
