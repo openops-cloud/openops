@@ -70,7 +70,6 @@ const AIChatMessages = forwardRef<HTMLDivElement, AIChatMessagesProps>(
             message={message}
             onInject={onInject}
             codeVariation={codeVariation}
-            theme={theme}
             ref={getMessageRef(index, message.role)}
             theme={theme}
           />
