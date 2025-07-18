@@ -139,7 +139,9 @@ export const createBuilderStore = (initialState: BuilderInitialState) =>
               ) {
                 return {
                   selectedStep: stepName,
-                  rightSidebar: RightSideBarType.BLOCK_SETTINGS,
+                  rightSidebar: openRightSideBar
+                    ? RightSideBarType.BLOCK_SETTINGS
+                    : RightSideBarType.NONE,
                   leftSidebar: getLeftSidebarOnSelectStep(state),
                 };
               }
