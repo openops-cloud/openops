@@ -22,6 +22,4 @@ export const unifiedCodeLLMSchema = z.object({
   textAnswer: z.string().describe(textAnswerDescription),
 });
 
-z.discriminatedUnion;
-
 export type UnifiedCodeLLMSchema = z.infer<typeof unifiedCodeLLMSchema>;
