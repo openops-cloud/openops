@@ -147,6 +147,7 @@ export enum SharedSystemProp {
 
   LANGFUSE_SECRET_KEY = 'LANGFUSE_SECRET_KEY',
   LANGFUSE_PUBLIC_KEY = 'LANGFUSE_PUBLIC_KEY',
+  LANGFUSE_HOST = 'LANGFUSE_HOST',
 }
 
 export enum WorkerSystemProps {

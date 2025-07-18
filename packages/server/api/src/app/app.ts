@@ -75,6 +75,7 @@ export const setupApp = async (
     traceExporter: new LangfuseExporter({
       secretKey: system.get(SharedSystemProp.LANGFUSE_SECRET_KEY),
       publicKey: system.get(SharedSystemProp.LANGFUSE_PUBLIC_KEY),
+      baseUrl: system.get(SharedSystemProp.LANGFUSE_HOST),
       environment: system.get(SharedSystemProp.ENVIRONMENT_NAME),
     }) as SpanExporter,
     instrumentations: [getNodeAutoInstrumentations()],
