@@ -62,7 +62,7 @@ export async function onReceivedInteraction(
 ): Promise<WaitForInteractionResult> {
   const resumePayload = context.resumePayload
     ?.queryParams as unknown as InteractionPayload;
-  const isResumedDueToUserAction = resumePayload && resumePayload.userName;
+  const isResumedDueToUserAction = resumePayload && resumePayload.actionClicked;
 
   if (!isResumedDueToUserAction) {
     const updatedMessage = await messageExpired(context, messageObj);
