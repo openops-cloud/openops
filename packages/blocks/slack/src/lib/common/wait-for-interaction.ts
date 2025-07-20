@@ -8,16 +8,19 @@ import {
   buildActionBlock,
   buildExpiredMessageBlock,
   InteractionPayload,
+  parseUserSelection,
   removeActionBlocks,
+  UserSelection,
 } from '../common/message-interactions';
 import { slackUpdateMessage } from '../common/utils';
 import { MessageInfo } from './message-result';
 
 export interface WaitForInteractionResult {
   user: string;
-  action: string;
+  action: string | string[];
   message: MessageInfo;
   isExpired: boolean | undefined;
+  userSelection: UserSelection | UserSelection[] | undefined;
 }
 
 export async function waitForInteraction(
@@ -45,6 +48,7 @@ export async function waitForInteraction(
   return {
     user: '',
     action: '',
+    userSelection: undefined,
     isExpired: undefined,
     message: messageObj,
   };
@@ -58,25 +62,38 @@ export async function onReceivedInteraction(
 ): Promise<WaitForInteractionResult> {
   const resumePayload = context.resumePayload
     ?.queryParams as unknown as InteractionPayload;
-  const isResumedDueToButtonClicked =
-    resumePayload && resumePayload.actionClicked;
+  const isResumedDueToUserAction = resumePayload && resumePayload.userName;
 
-  if (!isResumedDueToButtonClicked) {
+  if (!isResumedDueToUserAction) {
     const updatedMessage = await messageExpired(context, messageObj);
 
     return {
       user: '',
       action: '',
+      userSelection: undefined,
       isExpired: true,
       message: updatedMessage,
     };
   }
 
-  const isResumeForAButtonOnThisMessage =
-    resumePayload.path === currentExecutionPath &&
-    actions.includes(resumePayload.actionClicked);
+  const userSelection = parseUserSelection(
+    resumePayload.actionClicked,
+    resumePayload.actionType,
+  );
 
-  if (!isResumeForAButtonOnThisMessage) {
+  const isResumeForButtonOnThisMessage =
+    resumePayload.actionType === 'button' &&
+    actions.includes((userSelection as UserSelection).value);
+
+  const isResumeForNonButtonOnThisMessage =
+    resumePayload.actionType !== 'button' &&
+    actions.includes(resumePayload.actionType);
+
+  const isResumeForThisMessage =
+    resumePayload.path === currentExecutionPath &&
+    (isResumeForButtonOnThisMessage || isResumeForNonButtonOnThisMessage);
+
+  if (!isResumeForThisMessage) {
     const pauseMetadata = await context.store.get(
       `pauseMetadata_${currentExecutionPath}`,
       StoreScope.FLOW_RUN,
@@ -93,6 +110,7 @@ export async function onReceivedInteraction(
     return {
       user: '',
       action: '',
+      userSelection: undefined,
       isExpired: undefined,
       message: messageObj,
     };
@@ -101,14 +119,17 @@ export async function onReceivedInteraction(
   const updatedMessage = await actionReceived(
     context,
     messageObj,
-    resumePayload.actionClicked,
+    userSelection,
     resumePayload.userName,
   );
 
   return {
     user: resumePayload.userName,
-    action: resumePayload.actionClicked,
+    action: Array.isArray(userSelection)
+      ? userSelection.map((opt) => opt.value)
+      : userSelection.value,
     message: updatedMessage,
+    userSelection,
     isExpired: false,
   };
 }
@@ -149,11 +170,11 @@ async function updateMessage(
 async function actionReceived(
   context: ActionContext,
   slackMessage: MessageInfo,
-  actionText: string,
+  userSelection: UserSelection | UserSelection[],
   userName: string,
 ): Promise<MessageInfo> {
   return await updateMessage(context, slackMessage, () => {
-    return buildActionBlock(userName, actionText);
+    return buildActionBlock(userName, userSelection);
   });
 }
 

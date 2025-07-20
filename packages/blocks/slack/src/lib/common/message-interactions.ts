@@ -1,8 +1,10 @@
 import { isEmpty } from '@openops/shared';
+import { array } from 'zod';
 
 export interface InteractionPayload {
   userName: string;
   actionClicked: string;
+  actionType: string;
   path: string;
 }
 
@@ -27,10 +29,17 @@ export function removeActionBlocks(blocks: any): any[] {
   }, []);
 }
 
-export function buildActionBlock(user: string, button: string) {
+export function buildActionBlock(
+  user: string,
+  userSelection: UserSelection | UserSelection[],
+) {
+  const clickedOnText = Array.isArray(userSelection)
+    ? userSelection.map((opt) => opt.displayText).join(', ')
+    : userSelection.displayText;
+
   const whoClickedText = !isEmpty(user)
-    ? `user @${user} clicked on '${button}'`
-    : `clicked on '${button}'`;
+    ? `user @${user} clicked on '${clickedOnText}'`
+    : `clicked on '${clickedOnText}'`;
 
   const modifiedBlocks = [
     { type: 'divider' },
@@ -59,4 +68,24 @@ export function buildExpiredMessageBlock() {
   ];
 
   return modifiedBlocks;
+}
+
+export function parseUserSelection(
+  userSelection: string,
+  actionType: string,
+): UserSelection | UserSelection[] {
+  if (actionType === 'button') {
+    return {
+      value: userSelection,
+      displayText: userSelection,
+    };
+  }
+  const parsedSelection = JSON.parse(userSelection);
+
+  return parsedSelection;
+}
+
+export interface UserSelection {
+  value: string;
+  displayText: string;
 }
