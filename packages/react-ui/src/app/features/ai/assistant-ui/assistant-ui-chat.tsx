@@ -2,7 +2,10 @@ import { AssistantRuntimeProvider } from '@assistant-ui/react';
 
 import { useVercelUseChatRuntime } from '@assistant-ui/react-ai-sdk';
 
-import { AI_ASSISTANT_LS_KEY } from '@/app/constants/ai';
+import {
+  AI_ASSISTANT_LS_KEY,
+  AI_ASSISTANT_SESSION_ID,
+} from '@/app/constants/ai';
 import { QueryKeys } from '@/app/constants/query-keys';
 import { Message, useChat } from '@ai-sdk/react';
 import { Thread, ThreadWelcomeProvider } from '@openops/components/ui';
@@ -40,8 +43,6 @@ export const AssistantUiChat = () => {
       chatId.current = conversation.chatId;
     }
   };
-
-  const AI_ASSISTANT_SESSION_ID = 'ai_assistant_session_id';
 
   const convertedMessages = useMemo(() => {
     const convertMessages = (messages: any[] | undefined): Message[] => {
