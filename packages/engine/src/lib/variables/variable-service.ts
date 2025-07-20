@@ -197,12 +197,16 @@ export class VariableService {
 
     const flattenedSteps = executionState.currentState();
     const resolvedInput = await this.resolveInternally(
-      JSON.parse(JSON.stringify(unresolvedInput)),
+      isString(unresolvedInput)
+        ? unresolvedInput
+        : JSON.parse(JSON.stringify(unresolvedInput)),
       flattenedSteps,
       false,
     );
     const censoredInput = await this.resolveInternally(
-      JSON.parse(JSON.stringify(unresolvedInput)),
+      isString(unresolvedInput)
+        ? unresolvedInput
+        : JSON.parse(JSON.stringify(unresolvedInput)),
       flattenedSteps,
       true,
     );

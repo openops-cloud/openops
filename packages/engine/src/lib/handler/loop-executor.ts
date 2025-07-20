@@ -6,6 +6,7 @@ import {
   ActionType,
   FlowRunStatus,
   isNil,
+  isString,
   LoopOnItemsAction,
   LoopStepOutput,
   LoopStepResult,
@@ -13,6 +14,7 @@ import {
 } from '@openops/shared';
 import cloneDeep from 'lodash.clonedeep';
 import { nanoid } from 'nanoid';
+import { string } from 'zod';
 import { createContextStore } from '../services/storage.service';
 import { BaseExecutor } from './base-executor';
 import { EngineConstants } from './context/engine-constants';
@@ -45,13 +47,33 @@ export const loopExecutor: BaseExecutor<LoopOnItemsAction> = {
       path: string;
     };
 
-    const { resolvedInput, censoredInput } =
-      await constants.variableService.resolve<LoopOnActionResolvedSettings>({
-        unresolvedInput: {
-          items: action.settings.items,
-        },
-        executionState,
-      });
+    // eslint-disable-next-line prefer-const
+    const {
+      resolvedInput,
+      censoredInput,
+    }: {
+      resolvedInput: LoopOnActionResolvedSettings;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      censoredInput: any;
+    } = await constants.variableService.resolve<LoopOnActionResolvedSettings>({
+      unresolvedInput: {
+        items: action.settings.items,
+      },
+      executionState,
+    });
+
+    if (isString(resolvedInput.items)) {
+      resolvedInput.items = JSON.parse(resolvedInput.items);
+    }
+    if (!Array.isArray(resolvedInput.items)) {
+      resolvedInput.items = [resolvedInput.items];
+    }
+    if (isString(censoredInput.items)) {
+      censoredInput.items = JSON.parse(censoredInput.items);
+    }
+    if (!Array.isArray(censoredInput.items)) {
+      censoredInput.items = [censoredInput.items];
+    }
 
     let stepOutput = LoopStepOutput.init({
       input: censoredInput,
