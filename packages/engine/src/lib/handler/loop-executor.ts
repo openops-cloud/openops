@@ -14,7 +14,6 @@ import {
 } from '@openops/shared';
 import cloneDeep from 'lodash.clonedeep';
 import { nanoid } from 'nanoid';
-import { string } from 'zod';
 import { createContextStore } from '../services/storage.service';
 import { BaseExecutor } from './base-executor';
 import { EngineConstants } from './context/engine-constants';
