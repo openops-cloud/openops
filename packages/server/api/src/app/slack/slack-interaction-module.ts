@@ -91,18 +91,6 @@ const slackInteractionController: FastifyPluginCallbackTypebox = (
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-function-return-type
 async function evaluateUserInteraction(payload: any, reply: FastifyReply) {
-  if (payload.message.metadata.event_payload.isTest) {
-    logger.debug('Ignoring a Slack interaction: test message', { payload });
-
-    const userId = payload.user.id;
-    const responseUrl = payload.response_url;
-    const ephemeralText =
-      'Test succeeded. Slack interactions are disabled in test mode and are only available when running the entire workflow.';
-    await sendEphemeralMessage({ responseUrl, ephemeralText, userId });
-
-    return reply.code(200).send({ text: 'Finished sending ephemeral' });
-  }
-
   const interactionsDisabled: boolean =
     payload.message.metadata.event_payload.interactionsDisabled;
 
@@ -120,6 +108,18 @@ async function evaluateUserInteraction(payload: any, reply: FastifyReply) {
     });
 
     return reply.code(200).send({ text: 'Message interactions are disabled' });
+  }
+
+  if (payload.message.metadata.event_payload.isTest) {
+    logger.debug('Ignoring a Slack interaction: test message', { payload });
+
+    const userId = payload.user.id;
+    const responseUrl = payload.response_url;
+    const ephemeralText =
+      'Test succeeded. Slack interactions are disabled in test mode and are only available when running the entire workflow.';
+    await sendEphemeralMessage({ responseUrl, ephemeralText, userId });
+
+    return reply.code(200).send({ text: 'Finished sending ephemeral' });
   }
 
   const userSelection = getUserSelection(payload.actions);

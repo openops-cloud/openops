@@ -8,7 +8,6 @@ import {
   buildActionBlock,
   buildExpiredMessageBlock,
   InteractionPayload,
-  parseUserSelection,
   removeActionBlocks,
   UserSelection,
 } from '../common/message-interactions';
@@ -20,7 +19,7 @@ export interface WaitForInteractionResult {
   action: string | string[];
   message: MessageInfo;
   isExpired: boolean | undefined;
-  userSelection: UserSelection | UserSelection[] | undefined;
+  userSelection: UserSelection | UserSelection[] | null;
 }
 
 export async function waitForInteraction(
@@ -48,7 +47,7 @@ export async function waitForInteraction(
   return {
     user: '',
     action: '',
-    userSelection: undefined,
+    userSelection: null,
     isExpired: undefined,
     message: messageObj,
   };
@@ -70,16 +69,13 @@ export async function onReceivedInteraction(
     return {
       user: '',
       action: '',
-      userSelection: undefined,
+      userSelection: null,
       isExpired: true,
       message: updatedMessage,
     };
   }
 
-  const userSelection = parseUserSelection(
-    resumePayload.actionClicked,
-    resumePayload.actionType,
-  );
+  const userSelection = JSON.parse(resumePayload.actionClicked);
 
   const isResumeForButtonOnThisMessage =
     resumePayload.actionType === 'button' &&
@@ -110,7 +106,7 @@ export async function onReceivedInteraction(
     return {
       user: '',
       action: '',
-      userSelection: undefined,
+      userSelection: null,
       isExpired: undefined,
       message: messageObj,
     };

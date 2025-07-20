@@ -1,5 +1,4 @@
 import { isEmpty } from '@openops/shared';
-import { array } from 'zod';
 
 export interface InteractionPayload {
   userName: string;
@@ -68,21 +67,6 @@ export function buildExpiredMessageBlock() {
   ];
 
   return modifiedBlocks;
-}
-
-export function parseUserSelection(
-  userSelection: string,
-  actionType: string,
-): UserSelection | UserSelection[] {
-  if (actionType === 'button') {
-    return {
-      value: userSelection,
-      displayText: userSelection,
-    };
-  }
-  const parsedSelection = JSON.parse(userSelection);
-
-  return parsedSelection;
 }
 
 export interface UserSelection {
