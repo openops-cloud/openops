@@ -28,15 +28,6 @@ type ContentPart = TextContentPart;
 interface ExtendedServerMessage extends ServerMessage {
   id?: string;
 }
-const prompts = [
-  t('What is the most recent workflow?'),
-  t('What is my last failed run?'),
-];
-
-const suggestions = prompts.map((prompt) => ({
-  prompt,
-  label: prompt,
-}));
 
 export const AssistantUiChat = () => {
   const chatId = useRef(localStorage.getItem(AI_ASSISTANT_LS_KEY));
@@ -103,6 +94,8 @@ export const AssistantUiChat = () => {
     );
   }, [openChatResponse?.messages]);
 
+  console.log(convertedMessages);
+
   const chat = useChat({
     id: AI_ASSISTANT_SESSION_ID,
     api: '/api/v1/ai/conversation',
@@ -124,10 +117,7 @@ export const AssistantUiChat = () => {
 
   return (
     <AssistantRuntimeProvider runtime={runtime}>
-      <ThreadWelcomeProvider
-        greeting={t('How can I help you today?')}
-        suggestions={suggestions}
-      >
+      <ThreadWelcomeProvider greeting={t('How can I help you today?')}>
         <div className="flex flex-col">
           <Thread />
         </div>

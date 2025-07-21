@@ -2,28 +2,24 @@ import React, { createContext, ReactNode, useContext, useMemo } from 'react';
 
 export interface ThreadWelcomeData {
   greeting: string;
-  suggestions: { prompt: string; label: string }[];
 }
 
 const ThreadWelcomeContext = createContext<ThreadWelcomeData | null>(null);
 
 interface ThreadWelcomeProviderProps {
   greeting: string;
-  suggestions: { prompt: string; label: string }[];
   children: ReactNode;
 }
 
 export const ThreadWelcomeProvider: React.FC<ThreadWelcomeProviderProps> = ({
   greeting,
-  suggestions,
   children,
 }) => {
   const value: ThreadWelcomeData = useMemo(
     () => ({
       greeting,
-      suggestions,
     }),
-    [greeting, suggestions],
+    [greeting],
   );
 
   return (
