@@ -5,9 +5,10 @@ export function getUserSelection(
   | { value: string; displayText: string }
   | { value: string; displayText: string }[]
   | undefined {
-  if (!Array.isArray(payload) || payload.length === 0) {
+  if (!payload || !Array.isArray(payload) || payload.length === 0) {
     return undefined;
   }
+
   const action = payload[0];
   switch (action.type) {
     case 'button':
