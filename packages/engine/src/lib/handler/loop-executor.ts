@@ -4,6 +4,7 @@ import {
   ActionType,
   FlowRunStatus,
   isNil,
+  isString,
   LoopOnItemsAction,
   LoopStepOutput,
   LoopStepResult,
@@ -43,13 +44,22 @@ export const loopExecutor: BaseExecutor<LoopOnItemsAction> = {
       path: string;
     };
 
-    const { resolvedInput, censoredInput } =
-      await constants.variableService.resolve<LoopOnActionResolvedSettings>({
-        unresolvedInput: {
-          items: action.settings.items,
-        },
-        executionState,
-      });
+    const {
+      resolvedInput,
+      censoredInput,
+    }: {
+      resolvedInput: LoopOnActionResolvedSettings;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      censoredInput: any;
+    } = await constants.variableService.resolve<LoopOnActionResolvedSettings>({
+      unresolvedInput: {
+        items: action.settings.items,
+      },
+      executionState,
+    });
+
+    resolvedInput.items = processItems(resolvedInput.items);
+    censoredInput.items = processItems(censoredInput.items);
 
     let stepOutput = LoopStepOutput.init({
       input: censoredInput,
@@ -124,6 +134,18 @@ export const loopExecutor: BaseExecutor<LoopOnItemsAction> = {
     return generateNextFlowContext(store, executionState, numberOfIterations);
   },
 };
+
+function processItems(items: readonly unknown[]): readonly unknown[] {
+  if (isString(items)) {
+    items = JSON.parse(items);
+  }
+
+  if (!Array.isArray(items)) {
+    items = [items];
+  }
+
+  return items;
+}
 
 async function triggerLoopIterations(
   resolvedInput: LoopOnActionResolvedSettings,
