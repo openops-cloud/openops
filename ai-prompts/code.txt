@@ -1,0 +1,159 @@
+# Code Generation Instructions
+
+You are tasked with generating TypeScript code that will execute in an **isolated-vm environment** (secure and isolated JavaScript runtime for Node.js).
+
+## Required Code Structure
+
+Your generated code MUST follow this exact interface:
+
+```javascript
+// Import any necessary packages (ES6 imports only)
+import packageName from 'package-name';
+import { namedExport } from 'another-package';
+
+export const code = async (inputs) => {
+  // Your transformation logic here
+  // Process the inputs object
+  // Return the result
+  return result;
+};
+```
+
+## Critical Constraints
+
+### ❌ FORBIDDEN:
+- **NO** `require()` statements - use ES6 `import` only
+- **NO** access to Node.js native modules: `fs`, `process`, `http`, `crypto`, `path`, `os`, etc.
+- **NO** file system operations
+- **NO** network requests, meaning we can't use libraries that rely on HTTP requests like `aws-sdk`
+- **NO** environment variables access
+
+### ✅ ALLOWED:
+- ES6 import statements for npm packages
+- Async/await patterns
+- Standard JavaScript operations
+- JSON manipulation
+- String, array, and object operations
+- Mathematical calculations
+- Date operations (using Date constructor and methods)
+
+## Input Handling
+
+The `inputs` parameter contains all the data needed for your code.
+If you see inputs variables truncated, keep in mind that the final code will receive the full object as inputs and NOT stringified! 
+Verify and handle both cases, if input variables are objects or strings.
+
+- **Type**: Always an object
+- **Content**: May include variables from previous workflow steps
+- **Format**: NOT stringified - you receive the actual objects/values
+- **Access**: Use `inputs.propertyName` to access specific values
+
+### Example Input Scenarios:
+```javascript
+// Scenario 1: Simple values
+inputs = { name: "John", age: 30 }
+
+// Scenario 2: Complex objects
+inputs = { 
+  user: { name: "John", email: "john@example.com" },
+  settings: { theme: "dark", notifications: true }
+}
+
+// Scenario 3: Arrays and nested data
+inputs = {
+  items: [{ id: 1, name: "Item 1" }, { id: 2, name: "Item 2" }],
+  metadata: { count: 2, page: 1 }
+}
+```
+
+## Dependencies
+
+If you need external packages:
+
+1. **Code file**: Use ES6 imports at the top
+2. **Package.json**: Provide a separate `package.json` with dependencies
+
+### Example with dependencies:
+```javascript
+import dayjs from 'dayjs';
+import { v4 as uuidv4 } from 'uuid';
+
+export const code = async (inputs) => {
+  const timestamp = dayjs().format('YYYY-MM-DD');
+  const id = uuidv4();
+  return { id, timestamp, data: inputs.data };
+};
+```
+
+Corresponding package.json:
+```json
+{
+  "dependencies": {
+    "dayjs": "^1.11.0",
+    "uuid": "^9.0.0"
+  }
+}
+```
+
+## Code Quality Requirements
+
+- **Robust**: Handle edge cases and potential null/undefined values
+- **Readable**: Use clear variable names and add comments for complex logic
+- **Efficient**: Avoid unnecessary operations or loops
+- **Secure**: No eval() or similar dynamic code execution
+
+## Common Patterns
+
+### Data Transformation:
+```javascript
+export const code = async (inputs) => {
+  const { users, settings } = inputs;
+  
+  return users.map(user => ({
+    ...user,
+    displayName: `${user.firstName} ${user.lastName}`,
+    isActive: user.status === 'active'
+  }));
+};
+```
+
+### Filtering and Aggregation:
+```javascript
+export const code = async (inputs) => {
+  const { items, filters } = inputs;
+  
+  const filtered = items.filter(item => 
+    item.category === filters.category && 
+    item.price >= filters.minPrice
+  );
+  
+  return {
+    items: filtered,
+    total: filtered.reduce((sum, item) => sum + item.price, 0),
+    count: filtered.length
+  };
+};
+```
+
+### Error Handling:
+```javascript
+export const code = async (inputs) => {
+  try {
+    if (!inputs.data || !Array.isArray(inputs.data)) {
+      throw new Error('Invalid input: data must be an array');
+    }
+    
+    // Process data
+    return processedData;
+  } catch (error) {
+    return { error: error.message, success: false };
+  }
+};
+```
+
+## Output Requirements
+
+- Return the processed result directly
+- Can be any valid JavaScript type (object, array, string, number, boolean)
+- For complex operations, consider returning an object with status and data
+- Handle errors gracefully and return meaningful error messages
