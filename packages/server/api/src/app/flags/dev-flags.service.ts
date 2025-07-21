@@ -24,6 +24,12 @@ async function getAll(): Promise<Flag[]> {
       created,
       updated,
     },
+    {
+      id: FlagId.SHOW_CHAT_IN_RESIZABLE_PANEL,
+      value: false,
+      created,
+      updated,
+    },
   ];
 
   return flags;
