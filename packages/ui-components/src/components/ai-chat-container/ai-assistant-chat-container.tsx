@@ -11,6 +11,7 @@ import { AiChatSizeTogglers } from './ai-chat-size-togglers';
 import { AiModelSelectorProps } from './ai-model-selector';
 import { AiScopeItem } from './ai-scope-selector';
 import { getBufferAreaHeight, getLastUserMessageId } from './ai-scroll-helpers';
+import { BetaLabel } from './beta-label';
 import { AI_CHAT_CONTAINER_SIZES, AiAssistantChatSizeState } from './types';
 import {
   useScrollToBottomOnOpen,
@@ -169,11 +170,7 @@ const AiAssistantChatContainer = ({
                 <Bot size={20} />
               </div>
               {t('AI Assistant')}
-              <div className="flex items-center justify-center w-[38px] h-[19px] flex-shrink-0 rounded-[4px] border border-gray-200 bg-white">
-                <div className="flex items-center justify-center w-[28px] h-[18px] flex-shrink-0 text-[#3F395A] font-bold text-[12px] leading-none font-satoshi">
-                  Beta
-                </div>
-              </div>
+              <BetaLabel />
             </div>
             <div className="flex items-center">
               <AiChatSizeTogglers
