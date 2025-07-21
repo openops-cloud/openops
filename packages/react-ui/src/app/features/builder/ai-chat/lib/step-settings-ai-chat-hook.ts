@@ -6,6 +6,7 @@ import {
   useChat,
   experimental_useObject as useObject,
 } from '@ai-sdk/react';
+import { BlockMetadataModel } from '@openops/blocks-framework';
 import { toast } from '@openops/components/ui';
 import {
   Action,
@@ -25,6 +26,8 @@ import { nanoid } from 'nanoid';
 import { useCallback, useEffect, useState } from 'react';
 import { aiChatApi } from './chat-api';
 
+type StepDetails = Action | TriggerWithOptionalId | undefined;
+
 export const useStepSettingsAiChat = (
   flowVersion: FlowVersion,
   selectedStep: string,
@@ -36,7 +39,6 @@ export const useStepSettingsAiChat = (
   const stepDetails = flowHelper.getStep(flowVersion, selectedStep);
   const isCodeBlock = getBlockName(stepDetails) === CODE_BLOCK_NAME;
 
-  // Get full block metadata to check for AI support
   const { blockModel } = blocksHooks.useBlock({
     name: getBlockName(stepDetails) || '',
     version: stepDetails?.settings?.blockVersion,
@@ -47,9 +49,8 @@ export const useStepSettingsAiChat = (
     setChatSessionKey(nanoid());
   }, [selectedStep]);
 
-  // Check if the step supports AI
   const supportsAI =
-    isCodeBlock || checkStepSupportsAI(stepDetails, blockModel);
+    isCodeBlock || doesActionSupportsAI(stepDetails, blockModel);
 
   const { isPending: isOpenAiChatPending, data: openChatResponse } = useQuery({
     queryKey: [
@@ -233,9 +234,7 @@ export const useStepSettingsAiChat = (
   };
 };
 
-const getBlockName = (
-  stepDetails: Action | TriggerWithOptionalId | undefined,
-) => {
+const getBlockName = (stepDetails: StepDetails) => {
   if (stepDetails?.settings?.blockName) {
     return stepDetails?.settings?.blockName;
   }
@@ -243,9 +242,7 @@ const getBlockName = (
   return stepDetails?.type === ActionType.CODE ? CODE_BLOCK_NAME : '';
 };
 
-const getActionName = (
-  stepDetails: Action | TriggerWithOptionalId | undefined,
-) => {
+const getActionName = (stepDetails: StepDetails) => {
   if (stepDetails?.settings?.actionName) {
     return stepDetails?.settings?.actionName;
   }
@@ -255,7 +252,7 @@ const getActionName = (
 
 const createAdditionalContext = (
   flowVersion: FlowVersion,
-  stepData?: Action | TriggerWithOptionalId,
+  stepData?: StepDetails,
 ): ChatFlowContext => {
   const stepVariables = stepData?.settings?.input || {};
   const variables = Object.entries(stepVariables).map(([name, value]) => ({
@@ -277,9 +274,9 @@ const createAdditionalContext = (
   };
 };
 
-const checkStepSupportsAI = (
-  stepDetails: Action | TriggerWithOptionalId | undefined,
-  blockModel: any,
+const doesActionSupportsAI = (
+  stepDetails: StepDetails,
+  blockModel: BlockMetadataModel | undefined,
 ): boolean => {
   if (!stepDetails || !blockModel) {
     return false;
@@ -290,12 +287,12 @@ const checkStepSupportsAI = (
     return false;
   }
 
-  const actionOrTrigger =
-    stepDetails.type === ActionType.BLOCK
-      ? blockModel.actions?.[actionName]
-      : stepDetails.type === TriggerType.BLOCK
-      ? blockModel.triggers?.[actionName]
-      : null;
+  let actionOrTrigger = null;
+  if (stepDetails.type === ActionType.BLOCK) {
+    actionOrTrigger = blockModel.actions?.[actionName];
+  } else if (stepDetails.type === TriggerType.BLOCK) {
+    actionOrTrigger = blockModel.triggers?.[actionName];
+  }
 
   if (!actionOrTrigger?.props) {
     return false;
