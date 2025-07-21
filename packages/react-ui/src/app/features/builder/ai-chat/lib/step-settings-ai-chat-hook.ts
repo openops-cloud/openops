@@ -1,4 +1,5 @@
 import { QueryKeys } from '@/app/constants/query-keys';
+import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
 import { authenticationSession } from '@/app/lib/authentication-session';
 import {
   Message,
@@ -13,6 +14,7 @@ import {
   CODE_BLOCK_NAME,
   flowHelper,
   FlowVersion,
+  TriggerType,
   TriggerWithOptionalId,
   unifiedCodeLLMSchema,
   UnifiedCodeLLMSchema,
@@ -34,9 +36,20 @@ export const useStepSettingsAiChat = (
   const stepDetails = flowHelper.getStep(flowVersion, selectedStep);
   const isCodeBlock = getBlockName(stepDetails) === CODE_BLOCK_NAME;
 
+  // Get full block metadata to check for AI support
+  const { blockModel } = blocksHooks.useBlock({
+    name: getBlockName(stepDetails) || '',
+    version: stepDetails?.settings?.blockVersion,
+    enabled: !!getBlockName(stepDetails) && !isCodeBlock,
+  });
+
   useEffect(() => {
     setChatSessionKey(nanoid());
   }, [selectedStep]);
+
+  // Check if the step supports AI
+  const supportsAI =
+    isCodeBlock || checkStepSupportsAI(stepDetails, blockModel);
 
   const { isPending: isOpenAiChatPending, data: openChatResponse } = useQuery({
     queryKey: [
@@ -57,7 +70,8 @@ export const useStepSettingsAiChat = (
         getActionName(stepDetails),
       );
     },
-    enabled: !!getBlockName(stepDetails) && !!getActionName(stepDetails),
+    enabled:
+      !!getBlockName(stepDetails) && !!getActionName(stepDetails) && supportsAI,
   });
 
   const {
@@ -261,4 +275,33 @@ const createAdditionalContext = (
       },
     ],
   };
+};
+
+const checkStepSupportsAI = (
+  stepDetails: Action | TriggerWithOptionalId | undefined,
+  blockModel: any,
+): boolean => {
+  if (!stepDetails || !blockModel) {
+    return false;
+  }
+
+  const actionName = getActionName(stepDetails);
+  if (!actionName) {
+    return false;
+  }
+
+  const actionOrTrigger =
+    stepDetails.type === ActionType.BLOCK
+      ? blockModel.actions?.[actionName]
+      : stepDetails.type === TriggerType.BLOCK
+      ? blockModel.triggers?.[actionName]
+      : null;
+
+  if (!actionOrTrigger?.props) {
+    return false;
+  }
+
+  return Object.values(actionOrTrigger.props).some(
+    (prop: any) => prop?.supportsAI === true,
+  );
 };
