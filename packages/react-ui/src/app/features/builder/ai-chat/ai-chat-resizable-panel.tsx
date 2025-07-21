@@ -1,33 +1,20 @@
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { useResizablePanelGroup } from '@/app/common/hooks/use-resizable-panel-group';
 import { RESIZABLE_PANEL_IDS } from '@/app/constants/layout';
+import AssistantUiChat from '@/app/features/ai/assistant-ui/assistant-ui-chat';
 import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
 import { useAppStore } from '@/app/store/app-store';
 import { cn, ResizableHandle, ResizablePanel } from '@openops/components/ui';
 import { FlagId } from '@openops/shared';
-import {
-  lazy,
-  Suspense,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ImperativePanelHandle } from 'react-resizable-panels';
 
 const AiChatResizablePanelContent = ({ showChat }: { showChat: boolean }) => {
   if (!showChat) return null;
 
-  const AssistantUiChat = lazy(
-    () => import('@/app/features/ai/assistant-ui/assistant-ui-chat'),
-  );
-
   return (
     <div className="w-full h-full flex p-1 pr-2 bg-secondary">
-      <Suspense>
-        <AssistantUiChat />
-      </Suspense>
+      <AssistantUiChat />
     </div>
   );
 };
