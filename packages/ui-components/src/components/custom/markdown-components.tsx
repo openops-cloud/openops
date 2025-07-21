@@ -104,11 +104,13 @@ export function createMarkdownComponents({
     hr: ({ node, ...props }: any) => (
       <hr className="my-5 border-b" aria-hidden="true" {...props} />
     ),
-    table: ({ node, ...props }: any) => (
+    table: ({ node, children, ...props }: any) => (
       <table
         className="my-5 w-full border-separate border-spacing-0 overflow-y-auto"
         {...props}
-      />
+      >
+        {children}
+      </table>
     ),
     th: ({ node, ...props }: any) => (
       <th

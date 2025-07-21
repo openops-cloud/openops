@@ -15,6 +15,18 @@ import { t } from 'i18next';
 import { useMemo, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { aiAssistantChatApi } from '../lib/ai-assistant-chat-api';
+import { ServerMessage } from '../lib/types';
+
+interface TextContentPart {
+  type: 'text';
+  text: string;
+}
+
+type ContentPart = TextContentPart;
+
+interface ExtendedServerMessage extends ServerMessage {
+  id?: string;
+}
 const prompts = [
   t('What is the most recent workflow?'),
   t('What is my last failed run?'),
@@ -45,44 +57,49 @@ export const AssistantUiChat = () => {
   };
 
   const convertedMessages = useMemo(() => {
-    const convertMessages = (messages: any[] | undefined): Message[] => {
-      return (
-        messages?.map((msg) => {
-          if (typeof msg.content === 'string') {
-            return {
-              id: msg.id || uuidv4(),
-              role: msg.role,
-              content: msg.content,
-            };
+    const createMessage = (msg: ExtendedServerMessage): Message => ({
+      id: msg.id || uuidv4(),
+      role: msg.role as Message['role'],
+      content: typeof msg.content === 'string' ? msg.content : '',
+    });
+
+    const extractTextFromContent = (content: ContentPart[]): string => {
+      return content
+        .map((part: ContentPart) => {
+          if (part.type === 'text' && part.text) {
+            return part.text;
           }
-
-          if (Array.isArray(msg.content)) {
-            const contentString = msg.content
-              .map((part: any) => {
-                if (part.type === 'text' && part.text) {
-                  return part.text;
-                }
-                return '';
-              })
-              .join('');
-
-            return {
-              id: msg.id || uuidv4(),
-              role: msg.role,
-              content: contentString,
-            };
-          }
-
-          return {
-            id: msg.id || uuidv4(),
-            role: msg.role,
-            content: msg.content || '',
-          };
-        }) || []
-      );
+          return '';
+        })
+        .join('');
     };
 
-    return convertMessages(openChatResponse?.messages);
+    const convertMessage = (msg: ExtendedServerMessage): Message => {
+      if (typeof msg.content === 'string') {
+        return createMessage(msg);
+      }
+
+      if (Array.isArray(msg.content)) {
+        const contentString = extractTextFromContent(msg.content);
+        return {
+          id: msg.id || uuidv4(),
+          role: msg.role as Message['role'],
+          content: contentString,
+        };
+      }
+
+      return createMessage(msg);
+    };
+
+    const convertMessages = (
+      messages: ExtendedServerMessage[] | undefined,
+    ): Message[] => {
+      return messages?.map(convertMessage) || [];
+    };
+
+    return convertMessages(
+      openChatResponse?.messages as ExtendedServerMessage[],
+    );
   }, [openChatResponse?.messages]);
 
   const chat = useChat({
