@@ -16212,7 +16212,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 The following npm package may be included in this product:
 
- - zod-to-json-schema@3.24.5
+ - zod-to-json-schema@3.24.6
 
 This package contains the following license:
 
@@ -21860,6 +21860,8 @@ SOFTWARE.
 
 The following npm packages may be included in this product:
 
+ - @assistant-ui/react-ai-sdk@0.10.15
+ - @assistant-ui/react-edge@0.2.13
  - @assistant-ui/react-markdown@0.10.6
  - @assistant-ui/react@0.10.25
  - assistant-cloud@0.0.3
