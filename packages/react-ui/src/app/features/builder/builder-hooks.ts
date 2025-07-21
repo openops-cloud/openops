@@ -220,7 +220,6 @@ export const createBuilderStore = (initialState: BuilderInitialState) =>
                 run,
                 flowVersion,
                 leftSidebar: LeftSideBarType.RUN_DETAILS,
-                rightSidebar: RightSideBarType.BLOCK_SETTINGS,
                 selectedStep: run.steps
                   ? flowRunUtils.findFailedStep(run)?.stepName ??
                     state.selectedStep ??

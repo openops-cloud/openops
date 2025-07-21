@@ -1,6 +1,7 @@
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { useResizablePanelGroup } from '@/app/common/hooks/use-resizable-panel-group';
 import { RESIZABLE_PANEL_IDS } from '@/app/constants/layout';
+import AssistantUiChat from '@/app/features/ai/assistant-ui/assistant-ui-chat';
 import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
 import { useAppStore } from '@/app/store/app-store';
 import { cn, ResizableHandle, ResizablePanel } from '@openops/components/ui';
@@ -10,9 +11,10 @@ import { ImperativePanelHandle } from 'react-resizable-panels';
 
 const AiChatResizablePanelContent = ({ showChat }: { showChat: boolean }) => {
   if (!showChat) return null;
+
   return (
     <div className="w-full h-full flex p-1 pr-2 bg-secondary">
-      <div className="h-full flex-1 bg-red-500 ">ChatPlaceholder</div>
+      <AssistantUiChat />
     </div>
   );
 };
@@ -27,7 +29,7 @@ const AiChatResizablePanel = ({
   onDragging,
 }: AiChatResizablePanelProps) => {
   const showChatInResizablePanel = flagsHooks.useFlag<boolean>(
-    FlagId.SHOW_CHAT_IN_RESIZABLE_PANEL,
+    FlagId.ASSISTANT_UI_ENABLED,
   ).data;
 
   const { isAiChatOpened } = useAppStore((s) => ({

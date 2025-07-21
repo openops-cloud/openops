@@ -1,5 +1,7 @@
 export * from './ai-chat-container';
 export * from './ai-chat-messages';
+export * from './assistant-ui/thread';
+export * from './assistant-ui/thread-welcome-context';
 export * from './block-icon';
 export * from './builder-sidebar/sidebar-header';
 export * from './builder-tree-view';

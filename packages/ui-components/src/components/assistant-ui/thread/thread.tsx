@@ -28,13 +28,8 @@ import { TooltipIconButton } from '../tooltip-icon-button';
 
 export const Thread: FC = () => {
   return (
-    <ThreadPrimitive.Root
-      className="bg-background box-border flex h-full flex-col overflow-hidden"
-      style={{
-        ['--thread-max-width' as string]: '42rem',
-      }}
-    >
-      <ThreadPrimitive.Viewport className="flex h-full flex-col items-center overflow-y-scroll scroll-smooth bg-inherit px-4 pt-8">
+    <ThreadPrimitive.Root className="bg-background box-border flex h-full flex-col overflow-hidden">
+      <ThreadPrimitive.Viewport className="flex h-full flex-col items-center overflow-y-auto scroll-smooth bg-inherit px-4 pt-8">
         <ThreadWelcome />
 
         <ThreadPrimitive.Messages
@@ -73,7 +68,7 @@ const ThreadScrollToBottom: FC = () => {
 };
 
 const ThreadWelcome: FC = () => {
-  const { greeting, suggestions } = useThreadWelcome();
+  const { greeting } = useThreadWelcome();
 
   return (
     <ThreadPrimitive.Empty>
@@ -81,31 +76,8 @@ const ThreadWelcome: FC = () => {
         <div className="flex w-full flex-grow flex-col items-center justify-center">
           <p className="mt-4 font-medium">{greeting}</p>
         </div>
-        <ThreadWelcomeSuggestions suggestions={suggestions} />
       </div>
     </ThreadPrimitive.Empty>
-  );
-};
-
-const ThreadWelcomeSuggestions: FC<{
-  suggestions: { prompt: string; label: string }[];
-}> = ({ suggestions }) => {
-  return (
-    <div className="mt-3 flex w-full items-stretch justify-center gap-4">
-      {suggestions.map(({ prompt, label }) => (
-        <ThreadPrimitive.Suggestion
-          className="hover:bg-muted/80 flex max-w-sm grow basis-0 flex-col items-center justify-center rounded-lg border p-3 transition-colors ease-in"
-          prompt={prompt}
-          method="replace"
-          autoSend
-          key={`${prompt}-${label}`}
-        >
-          <span className="line-clamp-2 text-ellipsis text-sm font-semibold">
-            {label}
-          </span>
-        </ThreadPrimitive.Suggestion>
-      ))}
-    </div>
   );
 };
 
