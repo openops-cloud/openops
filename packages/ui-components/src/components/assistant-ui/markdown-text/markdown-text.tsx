@@ -1,3 +1,5 @@
+import '@assistant-ui/react-markdown/styles/dot.css';
+
 import {
   CodeHeaderProps,
   MarkdownTextPrimitive,
