@@ -1,6 +1,10 @@
 import { createCustomApiCallAction } from '@openops/blocks-common';
 import { createBlock, Property } from '@openops/blocks-framework';
 import { BlockCategory } from '@openops/shared';
+import { getAwsRecommendationsAction } from './lib/actions/get-aws-recommendations-action';
+import { getAzureRecommendationsAction } from './lib/actions/get-azure-recommendations-action';
+import { getContainersRecommendationsAction } from './lib/actions/get-container-recommendations-action';
+import { getGcpRecommendationsAction } from './lib/actions/get-gcp-recommendations-action';
 import { cloudabilityAuth } from './lib/auth';
 
 const markdown = `
@@ -15,6 +19,10 @@ export const cloudability = createBlock({
   authors: [],
   categories: [BlockCategory.FINOPS],
   actions: [
+    getAwsRecommendationsAction,
+    getAzureRecommendationsAction,
+    getGcpRecommendationsAction,
+    getContainersRecommendationsAction,
     createCustomApiCallAction({
       baseUrl: (auth: any) => auth.apiUrl,
       auth: cloudabilityAuth,
