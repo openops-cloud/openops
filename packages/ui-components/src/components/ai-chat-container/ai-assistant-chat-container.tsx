@@ -169,13 +169,13 @@ const AiAssistantChatContainer = ({
                 <Bot size={20} />
               </div>
               {t('AI Assistant')}
-              <div className="flex items-center justify-center w-[38px] h-[19px] flex-shrink-0 rounded-[4px] border border-[#E5E7EB] bg-white">
+              <div className="flex items-center justify-center w-[38px] h-[19px] flex-shrink-0 rounded-[4px] border border-gray-200 bg-white">
                 <div className="flex items-center justify-center w-[28px] h-[18px] flex-shrink-0 text-[#3F395A] font-bold text-[12px] leading-none font-satoshi">
                   Beta
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center">
               <AiChatSizeTogglers
                 state={aiChatSize}
                 toggleContainerSizeState={toggleAiChatState}
