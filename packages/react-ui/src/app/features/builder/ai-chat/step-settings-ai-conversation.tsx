@@ -110,27 +110,29 @@ const createCodeMessage = (
   idx: number,
   parsed: CodeSchema,
 ): AIChatMessage => {
-  return parsed.type === 'code'
-    ? {
-        id: getMessageId(message, idx),
-        role: AIChatMessageRole.assistant,
-        content: {
-          parts: [
-            {
-              type: 'sourcecode',
-              content: {
-                code: parsed.code,
-                packageJson: parsed.packageJson,
-              },
-            },
-            {
-              type: 'text',
-              content: parsed.textAnswer,
-            },
-          ],
+  if (parsed.type !== 'code') {
+    return createMessage(message, idx);
+  }
+
+  return {
+    id: getMessageId(message, idx),
+    role: AIChatMessageRole.assistant,
+    content: {
+      parts: [
+        {
+          type: 'sourcecode',
+          content: {
+            code: parsed.code,
+            packageJson: parsed.packageJson,
+          },
         },
-      }
-    : createMessage(message, idx);
+        {
+          type: 'text',
+          content: parsed.textAnswer,
+        },
+      ],
+    },
+  };
 };
 
 const createMessage = (message: MessageType, idx: number): AIChatMessage => {
