@@ -342,7 +342,7 @@ const createRoutes = () => {
   }
 
   const isAiAssistantPlaygroundEnabled = flagsHooks.useFlag<boolean>(
-    FlagId.ASSISTANT_UI_PLAYGROUND_ENABLED,
+    FlagId.ASSISTANT_UI_ENABLED,
   ).data;
 
   if (isAiAssistantPlaygroundEnabled) {

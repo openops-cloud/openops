@@ -25,13 +25,7 @@ async function getAll(): Promise<Flag[]> {
       updated,
     },
     {
-      id: FlagId.ASSISTANT_UI_PLAYGROUND_ENABLED,
-      value: false,
-      created,
-      updated,
-    },
-    {
-      id: FlagId.SHOW_CHAT_IN_RESIZABLE_PANEL,
+      id: FlagId.ASSISTANT_UI_ENABLED,
       value: false,
       created,
       updated,

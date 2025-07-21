@@ -44,7 +44,7 @@ const AiChatResizablePanel = ({
   onDragging,
 }: AiChatResizablePanelProps) => {
   const showChatInResizablePanel = flagsHooks.useFlag<boolean>(
-    FlagId.SHOW_CHAT_IN_RESIZABLE_PANEL,
+    FlagId.ASSISTANT_UI_ENABLED,
   ).data;
 
   const { isAiChatOpened } = useAppStore((s) => ({
