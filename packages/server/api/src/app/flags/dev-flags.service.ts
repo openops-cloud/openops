@@ -26,7 +26,7 @@ async function getAll(): Promise<Flag[]> {
     },
     {
       id: FlagId.SHOW_CHAT_IN_RESIZABLE_PANEL,
-      value: true,
+      value: false,
       created,
       updated,
     },
