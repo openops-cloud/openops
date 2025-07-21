@@ -10,9 +10,9 @@ import {
   InteractionPayload,
   removeActionBlocks,
   UserSelection,
-} from '../common/message-interactions';
-import { slackUpdateMessage } from '../common/utils';
+} from './message-interactions';
 import { MessageInfo } from './message-result';
+import { slackUpdateMessage } from './utils';
 
 export interface WaitForInteractionResult {
   user: string;
@@ -77,17 +77,13 @@ export async function onReceivedInteraction(
 
   const userSelection = JSON.parse(resumePayload.actionClicked);
 
-  const isResumeForButtonOnThisMessage =
-    resumePayload.actionType === 'button' &&
-    actions.includes((userSelection as UserSelection).value);
-
-  const isResumeForNonButtonOnThisMessage =
-    resumePayload.actionType !== 'button' &&
-    actions.includes(resumePayload.actionType);
+  const isResumeForActionOnThisMessage =
+    actions.includes(resumePayload.actionType) ||
+    actions.includes((userSelection as UserSelection)?.value);
 
   const isResumeForThisMessage =
     resumePayload.path === currentExecutionPath &&
-    (isResumeForButtonOnThisMessage || isResumeForNonButtonOnThisMessage);
+    isResumeForActionOnThisMessage;
 
   if (!isResumeForThisMessage) {
     const pauseMetadata = await context.store.get(

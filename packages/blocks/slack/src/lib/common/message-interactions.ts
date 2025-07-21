@@ -37,10 +37,10 @@ export function buildActionBlock(
     : userSelection.displayText;
 
   const whoClickedText = !isEmpty(user)
-    ? `user @${user} clicked on '${clickedOnText}'`
-    : `clicked on '${clickedOnText}'`;
+    ? `user @${user} selected '${clickedOnText}'`
+    : `selected '${clickedOnText}'`;
 
-  const modifiedBlocks = [
+  return [
     { type: 'divider' },
     {
       type: 'section',
@@ -50,8 +50,6 @@ export function buildActionBlock(
       },
     },
   ];
-
-  return modifiedBlocks;
 }
 
 export function buildExpiredMessageBlock() {
