@@ -46,7 +46,6 @@ export const loopExecutor: BaseExecutor<LoopOnItemsAction> = {
       path: string;
     };
 
-    // eslint-disable-next-line prefer-const
     const {
       resolvedInput,
       censoredInput,
@@ -61,18 +60,8 @@ export const loopExecutor: BaseExecutor<LoopOnItemsAction> = {
       executionState,
     });
 
-    if (isString(resolvedInput.items)) {
-      resolvedInput.items = JSON.parse(resolvedInput.items);
-    }
-    if (!Array.isArray(resolvedInput.items)) {
-      resolvedInput.items = [resolvedInput.items];
-    }
-    if (isString(censoredInput.items)) {
-      censoredInput.items = JSON.parse(censoredInput.items);
-    }
-    if (!Array.isArray(censoredInput.items)) {
-      censoredInput.items = [censoredInput.items];
-    }
+    resolvedInput.items = processItems(resolvedInput.items);
+    censoredInput.items = processItems(censoredInput.items);
 
     let stepOutput = LoopStepOutput.init({
       input: censoredInput,
@@ -142,6 +131,18 @@ export const loopExecutor: BaseExecutor<LoopOnItemsAction> = {
     return generateNextFlowContext(store, executionState, numberOfIterations);
   },
 };
+
+function processItems(items: readonly unknown[]): readonly unknown[] {
+  if (isString(items)) {
+    items = JSON.parse(items);
+  }
+
+  if (!Array.isArray(items)) {
+    items = [items];
+  }
+
+  return items;
+}
 
 function triggerLoopIterations(
   resolvedInput: LoopOnActionResolvedSettings,
