@@ -16,13 +16,11 @@ export async function getVirtualTagById(
   auth: FinOutAuth,
   tagId: string,
 ): Promise<VirtualTag> {
-  const response = await makeRequest({
+  return await makeRequest({
     endpoint: `virtual-tags/${tagId}`,
     method: HttpMethod.GET,
     auth,
   });
-
-  return response;
 }
 
 export async function updateTag(
@@ -30,14 +28,12 @@ export async function updateTag(
   tagId: string,
   tag: VirtualTag,
 ): Promise<VirtualTag> {
-  const response = await makeRequest({
+  return await makeRequest({
     endpoint: `virtual-tags/${tagId}`,
     method: HttpMethod.PUT,
     auth,
     body: tag,
   });
-
-  return response;
 }
 
 export interface VirtualTag {
@@ -57,9 +53,4 @@ export interface VirtualTagRule {
     operator: string;
     value: string[];
   };
-}
-
-interface VirtualTagWithValues extends VirtualTag {
-  tagKey: string;
-  values: string[];
 }

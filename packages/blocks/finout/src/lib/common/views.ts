@@ -11,7 +11,7 @@ export async function getViews(
     auth,
   });
 
-  const views = (await response.data) as any[];
+  const views = response.data as any[];
 
   return views;
 }

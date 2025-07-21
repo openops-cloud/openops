@@ -23,7 +23,7 @@ export async function makeRequest({
       'x-finout-client-id': auth.clientId,
       'x-finout-secret-key': auth.secretKey,
     },
-    body: JSON.stringify(body),
+    body,
     queryParams,
   });
 
