@@ -25,11 +25,9 @@ const AiChatResizablePanelContent = ({ showChat }: { showChat: boolean }) => {
 
   return (
     <div className="w-full h-full flex p-1 pr-2 bg-secondary">
-      <div className="h-full flex-1 bg-red-500 ">
-        <Suspense>
-          <AssistantUiChat />
-        </Suspense>
-      </div>
+      <Suspense>
+        <AssistantUiChat />
+      </Suspense>
     </div>
   );
 };
