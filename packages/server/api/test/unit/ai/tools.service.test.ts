@@ -9,15 +9,23 @@ import {
 } from 'ai';
 import { selectRelevantTools } from '../../../src/app/ai/chat/tools.service';
 
+jest.mock('ai', () => ({
+  generateObject: jest.fn(),
+}));
+
+jest.mock('@openops/common', () => ({
+  isLLMTelemetryEnabled: jest.fn().mockReturnValue(false),
+}));
+
 jest.mock('@openops/server-shared', () => ({
   logger: {
     error: jest.fn(),
     warn: jest.fn(),
   },
-}));
-
-jest.mock('ai', () => ({
-  generateObject: jest.fn(),
+  system: {
+    get: jest.fn().mockReturnValue('mock-value'),
+    getBoolean: jest.fn().mockReturnValue(false),
+  },
 }));
 
 describe('selectRelevantTools', () => {
