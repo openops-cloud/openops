@@ -5,6 +5,7 @@ import { fastifyRequestContext } from '@fastify/request-context';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import { BlockMetadata } from '@openops/blocks-framework';
+import { isLLMTelemetryEnabled } from '@openops/common';
 import {
   AppSystemProp,
   getRedisConnection,
@@ -71,16 +72,18 @@ import { workerModule } from './workers/worker-module';
 export const setupApp = async (
   app: FastifyInstance,
 ): Promise<FastifyInstance> => {
-  const otelSDK = new NodeSDK({
-    traceExporter: new LangfuseExporter({
-      secretKey: system.get(SharedSystemProp.LANGFUSE_SECRET_KEY),
-      publicKey: system.get(SharedSystemProp.LANGFUSE_PUBLIC_KEY),
-      baseUrl: system.get(SharedSystemProp.LANGFUSE_HOST),
-      environment: system.get(SharedSystemProp.ENVIRONMENT_NAME),
-    }) as SpanExporter,
-    instrumentations: [getNodeAutoInstrumentations()],
-  });
-  otelSDK.start();
+  const otelSDK = isLLMTelemetryEnabled()
+    ? new NodeSDK({
+        traceExporter: new LangfuseExporter({
+          secretKey: system.get(SharedSystemProp.LANGFUSE_SECRET_KEY),
+          publicKey: system.get(SharedSystemProp.LANGFUSE_PUBLIC_KEY),
+          baseUrl: system.get(SharedSystemProp.LANGFUSE_HOST),
+          environment: system.get(SharedSystemProp.ENVIRONMENT_NAME),
+        }) as SpanExporter,
+        instrumentations: [getNodeAutoInstrumentations()],
+      })
+    : undefined;
+  otelSDK?.start();
 
   await app.register(swagger, {
     hideUntagged: false,
@@ -261,7 +264,7 @@ export const setupApp = async (
     await flowConsumer.close();
     await systemJobsSchedule.close();
     await webhookResponseWatcher.shutdown();
-    await otelSDK.shutdown();
+    await otelSDK?.shutdown();
   });
 
   await app.register(cookie, {
