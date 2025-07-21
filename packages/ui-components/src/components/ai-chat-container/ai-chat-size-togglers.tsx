@@ -22,37 +22,39 @@ const AiChatSizeTogglers = ({
 }: AiChatSizeTogglersProps) => {
   return (
     <>
+      <TooltipWrapper tooltipText={t('New chat')}>
+        <span>
+          <NewAiChatButton
+            enableNewChat={enableNewChat}
+            onNewChatClick={onNewChatClick}
+          />
+        </span>
+      </TooltipWrapper>
       <TooltipWrapper
         tooltipText={
           state === AI_CHAT_CONTAINER_SIZES.EXPANDED ? t('Dock') : t('Expand')
         }
       >
-        <>
-          <NewAiChatButton
-            enableNewChat={enableNewChat}
-            onNewChatClick={onNewChatClick}
-          />
-          <Button
-            size="icon"
-            className="text-outline"
-            onClick={(e) => {
-              e.stopPropagation();
+        <Button
+          size="icon"
+          className="text-outline"
+          onClick={(e) => {
+            e.stopPropagation();
 
-              if (state === AI_CHAT_CONTAINER_SIZES.EXPANDED) {
-                toggleContainerSizeState(AI_CHAT_CONTAINER_SIZES.DOCKED);
-              } else {
-                toggleContainerSizeState(AI_CHAT_CONTAINER_SIZES.EXPANDED);
-              }
-            }}
-            variant="basic"
-          >
-            {state === AI_CHAT_CONTAINER_SIZES.EXPANDED ? (
-              <MinimizeIcon size={16} />
-            ) : (
-              <ExpandIcon size={16} />
-            )}
-          </Button>
-        </>
+            if (state === AI_CHAT_CONTAINER_SIZES.EXPANDED) {
+              toggleContainerSizeState(AI_CHAT_CONTAINER_SIZES.DOCKED);
+            } else {
+              toggleContainerSizeState(AI_CHAT_CONTAINER_SIZES.EXPANDED);
+            }
+          }}
+          variant="basic"
+        >
+          {state === AI_CHAT_CONTAINER_SIZES.EXPANDED ? (
+            <MinimizeIcon size={16} />
+          ) : (
+            <ExpandIcon size={16} />
+          )}
+        </Button>
       </TooltipWrapper>
       <TooltipWrapper tooltipText={t('Close')}>
         <Button
