@@ -94,6 +94,7 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [AppSystemProp.AWS_MCP_COST_PATH]: '/root/.mcp/aws-cost',
   [AppSystemProp.SAMPLE_DATA_SIZE_LIMIT_KB]: '100',
   [AppSystemProp.REQUEST_BODY_LIMIT]: '10',
+  [SharedSystemProp.LANGFUSE_HOST]: 'https://us.cloud.langfuse.com',
 };
 
 export const system = {
