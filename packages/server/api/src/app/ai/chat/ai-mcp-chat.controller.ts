@@ -46,7 +46,7 @@ import {
 } from './ai-chat.service';
 import { generateMessageId } from './ai-message-id-generator';
 import { streamCode } from './code.service';
-import { enrichContext } from './context-enrichment.service';
+import { enrichContext, IncludeOptions } from './context-enrichment.service';
 import { getBlockSystemPrompt, getMcpSystemPrompt } from './prompts.service';
 import { selectRelevantTools } from './tools.service';
 
@@ -265,7 +265,9 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       const { aiConfig, languageModel } = llmConfigResult;
 
       const enrichedContext = request.body.additionalContext
-        ? await enrichContext(request.body.additionalContext, projectId)
+        ? await enrichContext(request.body.additionalContext, projectId, {
+            includeCurrentStepOutput: IncludeOptions.ALWAYS,
+          })
         : undefined;
 
       const prompt = await getBlockSystemPrompt(chatContext, enrichedContext);
@@ -280,6 +282,9 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
             role: 'assistant',
             content: JSON.stringify(result.object),
           };
+          logger.debug('streamCode finished', {
+            result,
+          });
 
           await saveChatHistory(chatId, userId, projectId, [
             ...messages,
@@ -287,7 +292,10 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
           ]);
         },
         onError: (error) => {
-          logger.error('Failed to generate code', error);
+          logger.error('Failed to generate code', {
+            error,
+          });
+          throw error;
         },
       });
 

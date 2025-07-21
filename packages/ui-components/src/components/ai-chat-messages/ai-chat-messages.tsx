@@ -148,7 +148,7 @@ const MessageContent = ({
     );
   }
 
-  if (Array.isArray(content.parts) && content.parts.length > 0) {
+  if (content && Array.isArray(content.parts) && content.parts.length > 0) {
     return (
       <div className="flex flex-col gap-2">
         {content.parts.map((part, index) => {
