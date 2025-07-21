@@ -208,7 +208,7 @@
     "localforage": "1.10.0",
     "lodash-es": "4.17.21",
     "lodash.clonedeep": "4.5.0",
-    "logzio-nodejs": "2.3.0",
+    "logzio-nodejs": "2.5.0",
     "lottie-web": "5.12.2",
     "lru-cache": "7.18.3",
     "lucide-react": "0.407.0",
