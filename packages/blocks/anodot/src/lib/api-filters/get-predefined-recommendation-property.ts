@@ -7,10 +7,12 @@ export function getPredefinedRecommendationsDropdownProperty() {
     description: 'The type of recommendations to fetch',
     options: {
       disabled: false,
-      options: Object.entries(recommendationTypes).map(([label, value]) => ({
-        label,
-        value,
-      })),
+      options: Object.entries(recommendationTypes)
+        .map(([label, value]) => ({
+          label,
+          value,
+        }))
+        .sort((a, b) => a.label.localeCompare(b.label)),
     },
     required: false,
   });
