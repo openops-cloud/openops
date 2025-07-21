@@ -94,8 +94,6 @@ export const AssistantUiChat = () => {
     );
   }, [openChatResponse?.messages]);
 
-  console.log(convertedMessages);
-
   const chat = useChat({
     id: AI_ASSISTANT_SESSION_ID,
     api: '/api/v1/ai/conversation',
