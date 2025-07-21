@@ -1,7 +1,6 @@
 import { t } from 'i18next';
-import { ExpandIcon, MinimizeIcon, X as XIcon } from 'lucide-react';
+import { ExpandIcon, MinimizeIcon, SquarePen, X as XIcon } from 'lucide-react';
 import { Button } from '../../ui/button';
-import { NewAiChatButton } from '../new-ai-chat-button';
 import { TooltipWrapper } from '../tooltip-wrapper';
 import { AI_CHAT_CONTAINER_SIZES, AiCliChatContainerSizeState } from './types';
 
@@ -23,12 +22,18 @@ const AiChatSizeTogglers = ({
   return (
     <>
       <TooltipWrapper tooltipText={t('New chat')}>
-        <span>
-          <NewAiChatButton
-            enableNewChat={enableNewChat}
-            onNewChatClick={onNewChatClick}
-          />
-        </span>
+        <Button
+          onClick={(e) => {
+            e.stopPropagation();
+            onNewChatClick();
+          }}
+          disabled={!enableNewChat}
+          variant="basic"
+          size="icon"
+          className="text-outline"
+        >
+          <SquarePen size={16} />
+        </Button>
       </TooltipWrapper>
       <TooltipWrapper
         tooltipText={
