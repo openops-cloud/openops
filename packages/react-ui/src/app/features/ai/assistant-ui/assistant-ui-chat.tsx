@@ -29,7 +29,7 @@ interface ExtendedServerMessage extends ServerMessage {
   id?: string;
 }
 
-export const AssistantUiChat = () => {
+const AssistantUiChat = () => {
   const chatId = useRef(localStorage.getItem(AI_ASSISTANT_LS_KEY));
 
   const { data: openChatResponse } = useQuery({
@@ -123,3 +123,5 @@ export const AssistantUiChat = () => {
     </AssistantRuntimeProvider>
   );
 };
+
+export default AssistantUiChat;
