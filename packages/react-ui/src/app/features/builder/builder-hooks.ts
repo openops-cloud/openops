@@ -139,16 +139,16 @@ export const createBuilderStore = (initialState: BuilderInitialState) =>
               ) {
                 return {
                   selectedStep: stepName,
-                  rightSidebar: openRightSideBar
-                    ? RightSideBarType.BLOCK_SETTINGS
-                    : RightSideBarType.NONE,
+                  rightSidebar: RightSideBarType.BLOCK_SETTINGS,
                   leftSidebar: getLeftSidebarOnSelectStep(state),
                 };
               }
 
               return {
                 selectedStep: stepName,
-                rightSidebar: RightSideBarType.BLOCK_SETTINGS,
+                rightSidebar: openRightSideBar
+                  ? RightSideBarType.BLOCK_SETTINGS
+                  : RightSideBarType.NONE,
                 leftSidebar: getLeftSidebarOnSelectStep(state),
                 midpanelState: {
                   ...state.midpanelState,
@@ -220,7 +220,6 @@ export const createBuilderStore = (initialState: BuilderInitialState) =>
                 run,
                 flowVersion,
                 leftSidebar: LeftSideBarType.RUN_DETAILS,
-                rightSideBar: RightSideBarType.NONE,
                 selectedStep: run.steps
                   ? flowRunUtils.findFailedStep(run)?.stepName ??
                     state.selectedStep ??
