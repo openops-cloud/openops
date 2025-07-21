@@ -52,7 +52,7 @@ export function getUserSelection(
         value: action.selected_channel,
         displayText: action.selected_channel,
       };
-    case '  ':
+    case 'users_select':
       return {
         value: action.selected_user,
         displayText: action.selected_user,
