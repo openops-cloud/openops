@@ -23,7 +23,7 @@ export const initLogzioLogger = (): ILogzioLogger | undefined => {
           component,
           version,
         },
-        addOtelContext: false
+        addOtelContext: false,
       });
     }
   } catch (e) {

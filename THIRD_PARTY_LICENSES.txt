@@ -1933,9 +1933,7 @@ The following npm packages may be included in this product:
  - @opentelemetry/api-logs@0.203.0
  - @opentelemetry/api@1.9.0
  - @opentelemetry/auto-instrumentations-node@0.62.0
- - @opentelemetry/context-async-hooks@1.30.1
  - @opentelemetry/context-async-hooks@2.0.1
- - @opentelemetry/core@1.30.1
  - @opentelemetry/core@2.0.1
  - @opentelemetry/exporter-logs-otlp-grpc@0.203.0
  - @opentelemetry/exporter-logs-otlp-http@0.203.0
@@ -1993,29 +1991,23 @@ The following npm packages may be included in this product:
  - @opentelemetry/otlp-grpc-exporter-base@0.203.0
  - @opentelemetry/otlp-transformer@0.203.0
  - @opentelemetry/propagation-utils@0.31.3
- - @opentelemetry/propagator-b3@1.30.1
  - @opentelemetry/propagator-b3@2.0.1
- - @opentelemetry/propagator-jaeger@1.30.1
  - @opentelemetry/propagator-jaeger@2.0.1
  - @opentelemetry/redis-common@0.38.0
  - @opentelemetry/resource-detector-alibaba-cloud@0.31.3
  - @opentelemetry/resource-detector-aws@2.3.0
  - @opentelemetry/resource-detector-container@0.7.3
  - @opentelemetry/resource-detector-gcp@0.37.0
- - @opentelemetry/resources@1.30.1
  - @opentelemetry/resources@2.0.1
  - @opentelemetry/sdk-logs@0.203.0
  - @opentelemetry/sdk-metrics@2.0.1
  - @opentelemetry/sdk-node@0.203.0
- - @opentelemetry/sdk-trace-base@1.30.1
  - @opentelemetry/sdk-trace-base@2.0.1
- - @opentelemetry/sdk-trace-node@1.30.1
  - @opentelemetry/sdk-trace-node@2.0.1
- - @opentelemetry/semantic-conventions@1.28.0
  - @opentelemetry/semantic-conventions@1.36.0
  - @opentelemetry/sql-common@0.41.0
  - @pkgjs/parseargs@0.11.0
- - logzio-nodejs@2.3.0
+ - logzio-nodejs@2.5.0
 
 These packages each contain the following license:
 
