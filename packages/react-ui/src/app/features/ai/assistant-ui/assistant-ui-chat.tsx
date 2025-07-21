@@ -7,6 +7,7 @@ import {
   AI_ASSISTANT_SESSION_ID,
 } from '@/app/constants/ai';
 import { QueryKeys } from '@/app/constants/query-keys';
+import { authenticationSession } from '@/app/lib/authentication-session';
 import { Message, useChat } from '@ai-sdk/react';
 import { Thread, ThreadWelcomeProvider } from '@openops/components/ui';
 import { OpenChatResponse } from '@openops/shared';
