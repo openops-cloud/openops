@@ -68,7 +68,9 @@ export function createMarkdownComponents({
           textClassName,
         )}
         {...props}
-      />
+      >
+        {children}
+      </p>
     ),
     ul: ({ node, ...props }: any) => (
       <ul
