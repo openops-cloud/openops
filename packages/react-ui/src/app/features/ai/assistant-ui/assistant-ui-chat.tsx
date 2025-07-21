@@ -1,7 +1,3 @@
-import { AssistantRuntimeProvider } from '@assistant-ui/react';
-
-import { useVercelUseChatRuntime } from '@assistant-ui/react-ai-sdk';
-
 import {
   AI_ASSISTANT_LS_KEY,
   AI_ASSISTANT_SESSION_ID,
@@ -9,11 +5,17 @@ import {
 import { QueryKeys } from '@/app/constants/query-keys';
 import { authenticationSession } from '@/app/lib/authentication-session';
 import { Message, useChat } from '@ai-sdk/react';
-import { Thread, ThreadWelcomeProvider } from '@openops/components/ui';
+import { AssistantRuntimeProvider } from '@assistant-ui/react';
+import { useVercelUseChatRuntime } from '@assistant-ui/react-ai-sdk';
+import {
+  ChatStatus,
+  Thread,
+  ThreadWelcomeProvider,
+} from '@openops/components/ui';
 import { OpenChatResponse } from '@openops/shared';
 import { useQuery } from '@tanstack/react-query';
 import { t } from 'i18next';
-import { useMemo, useRef } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { aiAssistantChatApi } from '../lib/ai-assistant-chat-api';
 import { ServerMessage } from '../lib/types';
@@ -29,7 +31,7 @@ interface ExtendedServerMessage extends ServerMessage {
   id?: string;
 }
 
-const AssistantUiChat = () => {
+export const useAssistantChat = () => {
   const chatId = useRef(localStorage.getItem(AI_ASSISTANT_LS_KEY));
 
   const { data: openChatResponse } = useQuery({
@@ -111,7 +113,43 @@ const AssistantUiChat = () => {
       Authorization: `Bearer ${authenticationSession.getToken()}`,
     },
   });
+
   const runtime = useVercelUseChatRuntime(chat);
+
+  const chatStatus = useMemo((): ChatStatus | undefined => {
+    switch (chat.status) {
+      case 'streaming':
+        return ChatStatus.STREAMING;
+      case 'submitted':
+        return ChatStatus.SUBMITTED;
+      case 'ready':
+        return ChatStatus.READY;
+      case 'error':
+        return ChatStatus.ERROR;
+      default:
+        return undefined;
+    }
+  }, [chat.status]);
+
+  const createNewChat = useCallback(() => {
+    localStorage.removeItem(AI_ASSISTANT_LS_KEY);
+    chatId.current = null;
+    chat.setMessages([]);
+  }, [chat]);
+
+  return {
+    runtime,
+    messages: chat.messages,
+    input: chat.input,
+    handleInputChange: chat.handleInputChange,
+    handleSubmit: chat.handleSubmit,
+    status: chatStatus,
+    createNewChat,
+  };
+};
+
+const AssistantUiChat = () => {
+  const { runtime } = useAssistantChat();
 
   return (
     <AssistantRuntimeProvider runtime={runtime}>

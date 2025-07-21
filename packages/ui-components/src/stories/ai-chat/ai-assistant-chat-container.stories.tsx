@@ -16,7 +16,6 @@ import {
 } from '../../components';
 import { TooltipProvider } from '../../ui/tooltip';
 import { sampleAIChatMessages } from './sample-messages';
-import { sampleScopeOptions } from './sample-scope-options';
 
 const useAiChatToggleAndDimensions = () => {
   const [{ aiChatSize, toggleAiChatState }, updateArgs] = useArgs();
@@ -93,16 +92,10 @@ const meta = {
     },
     showAiChat: false,
     onCloseClick: action('onCloseClick'),
-    input: '',
-    handleInputChange: action('handleInputChange'),
     handleSubmit: action('handleSubmit'),
     aiChatSize: 'docked',
     toggleAiChatState: fn(),
     onCreateNewChatClick: action('onNewChatClick'),
-    availableModels: ['gpt-3.5-turbo', 'gpt-4', 'claude-2'],
-    selectedModel: 'gpt-4',
-    onModelSelected: action('onModelSelected'),
-    isModelSelectorLoading: false,
   },
 
   tags: ['autodocs'],
@@ -116,8 +109,6 @@ const meta = {
     ),
   ],
   render: (args) => {
-    const lastUserMessageRef = useRef<HTMLDivElement>(null);
-    const lastAssistantMessageRef = useRef<HTMLDivElement>(null);
     const {
       aiChatSize,
       toggleAiChatStateSize,
@@ -134,8 +125,6 @@ const meta = {
         setDimensions={updateDimensionsState}
         showAiChat={true}
         className="relative w-full"
-        lastUserMessageRef={lastUserMessageRef}
-        lastAssistantMessageRef={lastAssistantMessageRef}
       ></AiAssistantChatContainer>
     );
   },
@@ -172,9 +161,6 @@ export const WithMessages: Story = {
         setDimensions={updateDimensionsState}
         showAiChat={true}
         className="relative w-full"
-        lastUserMessageRef={lastUserMessageRef}
-        lastAssistantMessageRef={lastAssistantMessageRef}
-        messages={sampleAIChatMessages}
       >
         <ThemeAwareContainer
           component={AIChatMessages}
@@ -216,9 +202,6 @@ export const WithMessagesCopyAndInject: Story = {
         setDimensions={updateDimensionsState}
         showAiChat={true}
         className="relative w-full"
-        lastUserMessageRef={lastUserMessageRef}
-        lastAssistantMessageRef={lastAssistantMessageRef}
-        messages={sampleAIChatMessages}
       >
         <ThemeAwareContainer
           component={AIChatMessages}
@@ -241,10 +224,6 @@ export const WithMessagesCopyAndInject: Story = {
 export const WithScopeSelector: Story = {
   args: {
     isEmpty: false,
-    scopeOptions: sampleScopeOptions,
-    selectedScopeItems: [],
-    onScopeSelected: action('Scope selected'),
-    onAiScopeItemRemove: action('Scope item removed'),
   },
   parameters: {
     chromatic: { delay: 500 },
@@ -269,9 +248,6 @@ export const WithScopeSelector: Story = {
         setDimensions={updateDimensionsState}
         showAiChat={true}
         className="relative w-full"
-        lastUserMessageRef={lastUserMessageRef}
-        lastAssistantMessageRef={lastAssistantMessageRef}
-        messages={sampleAIChatMessages}
       >
         <ThemeAwareContainer
           component={AIChatMessages}
@@ -293,21 +269,6 @@ export const WithScopeSelector: Story = {
 export const WithPreselectedScopeItems: Story = {
   args: {
     isEmpty: false,
-    scopeOptions: sampleScopeOptions,
-    selectedScopeItems: [
-      sampleScopeOptions[0],
-      sampleScopeOptions[2],
-      sampleScopeOptions[3],
-      sampleScopeOptions[4],
-      sampleScopeOptions[5],
-      sampleScopeOptions[6],
-      sampleScopeOptions[7],
-      sampleScopeOptions[8],
-      sampleScopeOptions[9],
-      sampleScopeOptions[10],
-    ],
-    onScopeSelected: action('Scope selected'),
-    onAiScopeItemRemove: action('Scope item removed'),
   },
   parameters: {
     chromatic: { delay: 500 },
@@ -332,9 +293,6 @@ export const WithPreselectedScopeItems: Story = {
         setDimensions={updateDimensionsState}
         showAiChat={true}
         className="relative w-full"
-        lastUserMessageRef={lastUserMessageRef}
-        lastAssistantMessageRef={lastAssistantMessageRef}
-        messages={sampleAIChatMessages}
       >
         <ThemeAwareContainer
           component={AIChatMessages}

@@ -1,8 +1,6 @@
-import { AiAssistantConversation } from '@/app/features/ai/ai-assistant-conversation';
-import { useAiAssistantChat } from '@/app/features/ai/lib/ai-assistant-chat-hook';
-import { useAiModelSelector } from '@/app/features/ai/lib/ai-model-selector-hook';
 import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
 import { useAppStore } from '@/app/store/app-store';
+import { AssistantRuntimeProvider } from '@assistant-ui/react';
 import {
   AI_CHAT_CONTAINER_SIZES,
   AiAssistantChatContainer,
@@ -12,8 +10,12 @@ import {
   NoAiEnabledPopover,
   PARENT_INITIAL_HEIGHT_GAP,
   PARENT_MAX_HEIGHT_GAP,
+  Thread,
+  ThreadWelcomeProvider,
 } from '@openops/components/ui';
-import { useCallback, useMemo, useRef } from 'react';
+import { t } from 'i18next';
+import { useCallback, useMemo } from 'react';
+import { useAssistantChat } from './assistant-ui/assistant-ui-chat';
 
 type AiAssistantChatProps = {
   middlePanelSize: {
@@ -31,8 +33,6 @@ const AiAssistantChat = ({
   middlePanelSize,
   className,
 }: AiAssistantChatProps) => {
-  const lastUserMessageRef = useRef<HTMLDivElement>(null);
-  const lastAssistantMessageRef = useRef<HTMLDivElement>(null);
   const {
     isAiChatOpened,
     setIsAiChatOpened,
@@ -49,22 +49,7 @@ const AiAssistantChat = ({
     setAiChatDimensions: s.setAiChatDimensions,
   }));
 
-  const {
-    messages,
-    input,
-    handleInputChange,
-    handleSubmit,
-    status,
-    createNewChat,
-    isOpenAiChatPending,
-  } = useAiAssistantChat();
-
-  const {
-    selectedModel,
-    availableModels,
-    onModelSelected,
-    isLoading: isModelSelectorLoading,
-  } = useAiModelSelector();
+  const { runtime, messages, handleSubmit, createNewChat } = useAssistantChat();
 
   const sizes = useMemo(() => {
     const calculatedWidth = middlePanelSize.width * CHAT_WIDTH_FACTOR;
@@ -126,40 +111,25 @@ const AiAssistantChat = ({
   }
 
   return (
-    <AiAssistantChatContainer
-      dimensions={sizes.current}
-      setDimensions={setAiChatDimensions}
-      maxSize={sizes.max}
-      showAiChat={isAiChatOpened}
-      onCloseClick={() => setIsAiChatOpened(false)}
-      className={cn('left-4 bottom-[17px]', className)}
-      handleInputChange={handleInputChange}
-      handleSubmit={handleSubmit}
-      input={input}
-      isEmpty={!messages?.length}
-      onCreateNewChatClick={createNewChat}
-      toggleAiChatState={onToggleAiChatState}
-      aiChatSize={aiChatSize}
-      availableModels={availableModels}
-      selectedModel={selectedModel}
-      isModelSelectorLoading={isModelSelectorLoading}
-      onModelSelected={onModelSelected}
-      messages={messages.map((m, idx) => ({
-        id: m.id ?? String(idx),
-        role: m.role,
-      }))}
-      status={status}
-      lastUserMessageRef={lastUserMessageRef}
-      lastAssistantMessageRef={lastAssistantMessageRef}
-    >
-      <AiAssistantConversation
-        messages={messages}
-        status={status}
-        isPending={isOpenAiChatPending}
-        lastUserMessageRef={lastUserMessageRef}
-        lastAssistantMessageRef={lastAssistantMessageRef}
-      />
-    </AiAssistantChatContainer>
+    <AssistantRuntimeProvider runtime={runtime}>
+      <AiAssistantChatContainer
+        dimensions={sizes.current}
+        setDimensions={setAiChatDimensions}
+        maxSize={sizes.max}
+        showAiChat={isAiChatOpened}
+        onCloseClick={() => setIsAiChatOpened(false)}
+        className={cn('left-4 bottom-[17px]', className)}
+        handleSubmit={handleSubmit}
+        isEmpty={!messages?.length}
+        onCreateNewChatClick={createNewChat}
+        toggleAiChatState={onToggleAiChatState}
+        aiChatSize={aiChatSize}
+      >
+        <ThreadWelcomeProvider greeting={t('How can I help you today?')}>
+          <Thread />
+        </ThreadWelcomeProvider>
+      </AiAssistantChatContainer>
+    </AssistantRuntimeProvider>
   );
 };
 
