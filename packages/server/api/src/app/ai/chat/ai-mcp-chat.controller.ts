@@ -1,4 +1,5 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
+import { isLLMTelemetryEnabled } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import {
   AiConfig,
@@ -395,6 +396,7 @@ async function streamMessages(
     toolChoice,
     maxRetries: 1,
     maxSteps: MAX_RECURSION_DEPTH,
+    experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
     async onStepFinish({ finishReason }): Promise<void> {
       stepCount++;
       if (finishReason !== 'stop' && stepCount >= MAX_RECURSION_DEPTH) {

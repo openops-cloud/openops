@@ -5,6 +5,7 @@ import { fastifyRequestContext } from '@fastify/request-context';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import { BlockMetadata } from '@openops/blocks-framework';
+import { isLLMTelemetryEnabled } from '@openops/common';
 import {
   AppSystemProp,
   getRedisConnection,
@@ -25,10 +26,14 @@ import {
   spreadIfDefined,
   UserInvitation,
 } from '@openops/shared';
-import { createAdapter } from '@socket.io/redis-adapter';
+import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { NodeSDK } from '@opentelemetry/sdk-node';
+import { SpanExporter } from '@opentelemetry/sdk-trace-base';
+import { createAdapter, RedisAdapter } from '@socket.io/redis-adapter';
 import chalk from 'chalk';
 import { FastifyInstance, FastifyRequest, HTTPMethods } from 'fastify';
 import fastifySocketIO from 'fastify-socket.io';
+import { LangfuseExporter } from 'langfuse-vercel';
 import * as process from 'node:process';
 import { Socket } from 'socket.io';
 import { aiModule } from './ai/ai.module';
@@ -67,6 +72,19 @@ import { workerModule } from './workers/worker-module';
 export const setupApp = async (
   app: FastifyInstance,
 ): Promise<FastifyInstance> => {
+  const otelSDK = isLLMTelemetryEnabled()
+    ? new NodeSDK({
+        traceExporter: new LangfuseExporter({
+          secretKey: system.get(SharedSystemProp.LANGFUSE_SECRET_KEY),
+          publicKey: system.get(SharedSystemProp.LANGFUSE_PUBLIC_KEY),
+          baseUrl: system.get(SharedSystemProp.LANGFUSE_HOST),
+          environment: system.get(SharedSystemProp.ENVIRONMENT_NAME),
+        }) as SpanExporter,
+        instrumentations: [getNodeAutoInstrumentations()],
+      })
+    : undefined;
+  otelSDK?.start();
+
   await app.register(swagger, {
     hideUntagged: false,
     openapi: {
@@ -126,7 +144,7 @@ export const setupApp = async (
     }),
   });
 
-  app.addHook('onSend', async (request, reply) => {
+  app.addHook('onSend', async (_, reply) => {
     void reply.headers({ 'X-Version': system.get(SharedSystemProp.VERSION) });
   });
 
@@ -175,6 +193,7 @@ export const setupApp = async (
   app.addHook('onRequest', async (request, reply) => {
     const route = app.hasRoute({
       method: request.method as HTTPMethods,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       url: request.routeOptions.url!,
     });
 
@@ -245,6 +264,7 @@ export const setupApp = async (
     await flowConsumer.close();
     await systemJobsSchedule.close();
     await webhookResponseWatcher.shutdown();
+    await otelSDK?.shutdown();
   });
 
   await app.register(cookie, {
@@ -265,7 +285,9 @@ export const setupApp = async (
   return app;
 };
 
-async function getAdapter() {
+async function getAdapter(): Promise<
+  ((nsp: unknown) => RedisAdapter) | undefined
+> {
   const queue = system.getOrThrow<QueueMode>(AppSystemProp.QUEUE_MODE);
   switch (queue) {
     case QueueMode.MEMORY: {
