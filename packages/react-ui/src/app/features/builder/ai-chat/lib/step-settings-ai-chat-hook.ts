@@ -1,10 +1,12 @@
 import { QueryKeys } from '@/app/constants/query-keys';
+import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
 import { authenticationSession } from '@/app/lib/authentication-session';
 import {
   Message,
   useChat,
   experimental_useObject as useObject,
 } from '@ai-sdk/react';
+import { BlockMetadataModel } from '@openops/blocks-framework';
 import { toast } from '@openops/components/ui';
 import {
   Action,
@@ -13,6 +15,7 @@ import {
   CODE_BLOCK_NAME,
   flowHelper,
   FlowVersion,
+  TriggerType,
   TriggerWithOptionalId,
   unifiedCodeLLMSchema,
   UnifiedCodeLLMSchema,
@@ -22,6 +25,8 @@ import { t } from 'i18next';
 import { nanoid } from 'nanoid';
 import { useCallback, useEffect, useState } from 'react';
 import { aiChatApi } from './chat-api';
+
+type StepDetails = Action | TriggerWithOptionalId | undefined;
 
 export const useStepSettingsAiChat = (
   flowVersion: FlowVersion,
@@ -34,9 +39,18 @@ export const useStepSettingsAiChat = (
   const stepDetails = flowHelper.getStep(flowVersion, selectedStep);
   const isCodeBlock = getBlockName(stepDetails) === CODE_BLOCK_NAME;
 
+  const { blockModel } = blocksHooks.useBlock({
+    name: getBlockName(stepDetails) || '',
+    version: stepDetails?.settings?.blockVersion,
+    enabled: !!getBlockName(stepDetails) && !isCodeBlock,
+  });
+
   useEffect(() => {
     setChatSessionKey(nanoid());
   }, [selectedStep]);
+
+  const supportsAI =
+    isCodeBlock || doesActionSupportsAI(stepDetails, blockModel);
 
   const { isPending: isOpenAiChatPending, data: openChatResponse } = useQuery({
     queryKey: [
@@ -57,7 +71,8 @@ export const useStepSettingsAiChat = (
         getActionName(stepDetails),
       );
     },
-    enabled: !!getBlockName(stepDetails) && !!getActionName(stepDetails),
+    enabled:
+      !!getBlockName(stepDetails) && !!getActionName(stepDetails) && supportsAI,
   });
 
   const {
@@ -219,9 +234,7 @@ export const useStepSettingsAiChat = (
   };
 };
 
-const getBlockName = (
-  stepDetails: Action | TriggerWithOptionalId | undefined,
-) => {
+const getBlockName = (stepDetails: StepDetails) => {
   if (stepDetails?.settings?.blockName) {
     return stepDetails?.settings?.blockName;
   }
@@ -229,9 +242,7 @@ const getBlockName = (
   return stepDetails?.type === ActionType.CODE ? CODE_BLOCK_NAME : '';
 };
 
-const getActionName = (
-  stepDetails: Action | TriggerWithOptionalId | undefined,
-) => {
+const getActionName = (stepDetails: StepDetails) => {
   if (stepDetails?.settings?.actionName) {
     return stepDetails?.settings?.actionName;
   }
@@ -241,7 +252,7 @@ const getActionName = (
 
 const createAdditionalContext = (
   flowVersion: FlowVersion,
-  stepData?: Action | TriggerWithOptionalId,
+  stepData?: StepDetails,
 ): ChatFlowContext => {
   const stepVariables = stepData?.settings?.input || {};
   const variables = Object.entries(stepVariables).map(([name, value]) => ({
@@ -261,4 +272,33 @@ const createAdditionalContext = (
       },
     ],
   };
+};
+
+const doesActionSupportsAI = (
+  stepDetails: StepDetails,
+  blockModel: BlockMetadataModel | undefined,
+): boolean => {
+  if (!stepDetails || !blockModel) {
+    return false;
+  }
+
+  const actionName = getActionName(stepDetails);
+  if (!actionName) {
+    return false;
+  }
+
+  let actionOrTrigger = null;
+  if (stepDetails.type === ActionType.BLOCK) {
+    actionOrTrigger = blockModel.actions?.[actionName];
+  } else if (stepDetails.type === TriggerType.BLOCK) {
+    actionOrTrigger = blockModel.triggers?.[actionName];
+  }
+
+  if (!actionOrTrigger?.props) {
+    return false;
+  }
+
+  return Object.values(actionOrTrigger.props).some(
+    (prop: any) => prop?.supportsAI === true,
+  );
 };
