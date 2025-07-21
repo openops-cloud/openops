@@ -13,43 +13,55 @@ export function createMarkdownComponents({
   linkClassName,
 }: MarkdownComponentsConfig) {
   return {
-    h1: ({ node, ...props }: any) => (
+    h1: ({ node, children, ...props }: any) => (
       <h1
         className="scroll-m-20 text-3xl font-bold tracking-tight mt-1"
         {...props}
-      />
+      >
+        {children}
+      </h1>
     ),
-    h2: ({ node, ...props }: any) => (
+    h2: ({ node, children, ...props }: any) => (
       <h2
         className="scroll-m-20 text-2xl font-semibold tracking-tight mt-4"
         {...props}
-      />
+      >
+        {children}
+      </h2>
     ),
-    h3: ({ node, ...props }: any) => (
+    h3: ({ node, children, ...props }: any) => (
       <h3
         className="scroll-m-20 text-xl font-semibold tracking-tight mt-2"
         {...props}
-      />
+      >
+        {children}
+      </h3>
     ),
-    h4: ({ node, ...props }: any) => (
+    h4: ({ node, children, ...props }: any) => (
       <h4
         className="scroll-m-20 text-lg font-semibold tracking-tight mt-2"
         {...props}
-      />
+      >
+        {children}
+      </h4>
     ),
-    h5: ({ node, ...props }: any) => (
+    h5: ({ node, children, ...props }: any) => (
       <h5
         className="scroll-m-20 text-base font-semibold tracking-tight mt-2"
         {...props}
-      />
+      >
+        {children}
+      </h5>
     ),
-    h6: ({ node, ...props }: any) => (
+    h6: ({ node, children, ...props }: any) => (
       <h6
         className="scroll-m-20 text-sm font-semibold tracking-tight mt-2"
         {...props}
-      />
+      >
+        {children}
+      </h6>
     ),
-    p: ({ node, ...props }: any) => (
+    p: ({ node, children, ...props }: any) => (
       <p
         className={cn(
           'leading-7 mt-2 [&:not(:first-child)]:my-2',
@@ -73,7 +85,7 @@ export function createMarkdownComponents({
     li: ({ node, ...props }: any) => (
       <li className={cn(textClassName)} {...props} />
     ),
-    a: ({ node, ...props }: any) => (
+    a: ({ node, children, ...props }: any) => (
       <a
         target="_blank"
         rel="noopener noreferrer"
@@ -82,7 +94,9 @@ export function createMarkdownComponents({
           linkClassName,
         )}
         {...props}
-      />
+      >
+        {children}
+      </a>
     ),
     blockquote: ({ node, ...props }: any) => (
       <blockquote className="mt-6 border-l-2 pl-6 italic" {...props} />
