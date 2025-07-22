@@ -1,3 +1,9 @@
+const makeRequestMock = {
+  makeRequest: jest.fn(),
+};
+
+jest.mock('../../src/lib/common/make-request', () => makeRequestMock);
+
 import { getReportAction } from '../../src/lib/actions/get-report-action';
 
 describe('getReportAction', () => {
@@ -10,18 +16,27 @@ describe('getReportAction', () => {
     });
   });
 
-  test('should have correct action metadata', () => {
-    expect(getReportAction.name).toBe('cloudfix_get_report');
-    expect(getReportAction.displayName).toBe('Get Report');
-    expect(getReportAction.description).toBe(
-      'Get a report for a specific recommendation.',
-    );
-    expect(getReportAction.requireAuth).toBe(true);
-  });
+  test('should call makeRequest with correct endpoint', async () => {
+    makeRequestMock.makeRequest.mockResolvedValue('mockResult');
 
-  test('should have correct recommendationId description', () => {
-    expect(getReportAction.props.recommendationId.description).toBe(
-      'The ID of the recommendation to get a report for',
-    );
+    const context = {
+      ...jest.requireActual('@openops/blocks-framework'),
+      propsValue: {
+        recommendationId: 'some recommendationId',
+      },
+      auth: {
+        apiUrl: 'https://api.cloudfix.com',
+        apiKey: 'test-api-key',
+      },
+    };
+
+    const result = await getReportAction.run(context);
+
+    expect(result).toBe('mockResult');
+    expect(makeRequestMock.makeRequest).toHaveBeenCalledWith({
+      endpoint: '/report?recommendationId=some recommendationId',
+      method: 'GET',
+      auth: context.auth,
+    });
   });
 });

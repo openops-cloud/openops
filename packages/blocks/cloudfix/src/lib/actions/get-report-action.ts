@@ -4,7 +4,7 @@ import { cloudfixAuth, CloudfixAuth } from '../common/auth';
 import { makeRequest } from '../common/make-request';
 
 export const getReportAction = createAction({
-  name: 'cloudfix_get_report',
+  name: 'get_report',
   displayName: 'Get Report',
   description: 'Get a report for a specific recommendation.',
   auth: cloudfixAuth,
@@ -16,7 +16,7 @@ export const getReportAction = createAction({
     }),
   },
   async run(context) {
-    const recommendationId = context.propsValue['recommendationId'] as string;
+    const recommendationId = context.propsValue.recommendationId;
 
     const response = await makeRequest({
       auth: context.auth as CloudfixAuth,

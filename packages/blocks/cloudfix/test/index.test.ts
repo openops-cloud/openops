@@ -14,24 +14,24 @@ describe('block declaration tests', () => {
   test('should return block with correct number of actions', () => {
     expect(Object.keys(cloudfix.actions()).length).toBe(6);
     expect(cloudfix.actions()).toMatchObject({
-      cloudfix_get_recommendations: {
-        name: 'cloudfix_get_recommendations',
+      get_recommendations: {
+        name: 'get_recommendations',
         requireAuth: true,
       },
-      cloudfix_create_change_requests: {
-        name: 'cloudfix_create_change_requests',
+      create_change_requests: {
+        name: 'create_change_requests',
         requireAuth: true,
       },
-      cloudfix_postpone_recommendations: {
-        name: 'cloudfix_postpone_recommendations',
+      postpone_recommendations: {
+        name: 'postpone_recommendations',
         requireAuth: true,
       },
-      cloudfix_get_recommendations_summary: {
-        name: 'cloudfix_get_recommendations_summary',
+      get_recommendations_summary: {
+        name: 'get_recommendations_summary',
         requireAuth: true,
       },
-      cloudfix_get_report: {
-        name: 'cloudfix_get_report',
+      get_report: {
+        name: 'get_report',
         requireAuth: true,
       },
       custom_api_call: {

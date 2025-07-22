@@ -4,10 +4,9 @@ import { cloudfixAuth, CloudfixAuth } from '../common/auth';
 import { makeRequest } from '../common/make-request';
 
 export const getRecommendationsAction = createAction({
-  name: 'cloudfix_get_recommendations',
+  name: 'get_recommendations',
   displayName: 'Get Recommendations',
-  description:
-    'Get recommendations from CloudFix with filtering and pagination options.',
+  description: 'Get recommendations with filtering',
   auth: cloudfixAuth,
   props: {
     finderFixerId: Property.ShortText({
@@ -61,91 +60,71 @@ export const getRecommendationsAction = createAction({
       options: {
         options: [
           { label: 'Manual Approval', value: 'MANUAL_APPROVAL' },
-          { label: 'Suggested', value: 'SUGGESTED' },
+          { label: 'Suggested', value: 'Suggested' },
           { label: 'Scheduled', value: 'SCHEDULED' },
           { label: 'In Progress', value: 'IN_PROGRESS' },
+          { label: 'Disabled', value: 'Disabled' },
         ],
       },
     }),
   },
   async run(context) {
-    const finderFixerId = context.propsValue['finderFixerId'];
-    const pageNumber = context.propsValue['pageNumber'];
-    const pageLimit = context.propsValue['pageLimit'];
-    const sortBy = context.propsValue['sortBy'];
-    const sortOrder = context.propsValue['sortOrder'];
-    const includeParameters = context.propsValue['includeParameters'];
-    const status = context.propsValue['status'];
-
-    const queryParams = buildQueryParams({
-      finderFixerId,
-      pageNumber,
-      pageLimit,
-      sortBy,
-      sortOrder,
-      includeParameters,
-      status,
-    });
+    const queryParamsString = buildQueryParams(context.propsValue);
 
     const response = await makeRequest({
       auth: context.auth as CloudfixAuth,
-      endpoint: '/recommendations',
+      endpoint: queryParamsString
+        ? `/recommendations?${queryParamsString}`
+        : '/recommendations',
       method: HttpMethod.GET,
-      queryParams,
     });
 
     return response;
   },
 });
 
-function buildQueryParams(params: {
-  finderFixerId?: string;
-  pageNumber?: number;
-  pageLimit?: number;
-  sortBy?: string;
-  sortOrder?: string;
-  includeParameters?: boolean;
-  status?: string[];
-}): Record<string, string> {
-  const queryParams = new URLSearchParams();
+function buildQueryParams(propsValue: any): string {
+  const {
+    finderFixerId,
+    pageNumber,
+    pageLimit,
+    sortBy,
+    sortOrder,
+    includeParameters,
+    status,
+  } = propsValue;
 
-  if (params.finderFixerId) {
-    queryParams.append('finderFixerId', params.finderFixerId);
+  const params = new URLSearchParams();
+
+  if (finderFixerId) {
+    params.append('finderFixerId', finderFixerId);
   }
 
-  if (params.pageNumber) {
-    queryParams.append('pageNumber', params.pageNumber.toString());
+  if (pageNumber) {
+    params.append('pageNumber', pageNumber.toString());
   }
 
-  if (params.pageLimit) {
-    queryParams.append('pageLimit', params.pageLimit.toString());
+  if (pageLimit) {
+    params.append('pageLimit', pageLimit.toString());
   }
 
-  if (params.sortBy) {
-    queryParams.append('sortBy', params.sortBy);
+  if (sortBy) {
+    params.append('sortBy', sortBy);
   }
 
-  if (params.sortOrder) {
-    queryParams.append('sortOrder', params.sortOrder);
+  if (sortOrder) {
+    params.append('sortOrder', sortOrder);
   }
 
-  if (params.includeParameters !== undefined) {
-    queryParams.append(
-      'includeParameters',
-      params.includeParameters.toString(),
-    );
+  if (includeParameters !== undefined) {
+    params.append('includeParameters', includeParameters.toString());
   }
-
-  if (params.status && params.status.length > 0) {
-    params.status.forEach((s: string) => {
-      queryParams.append('status', s);
+  // TODO: this doesnt work
+  if (status && status.length > 0) {
+    status.forEach((statusValue: string) => {
+      params.append('status', statusValue);
     });
   }
 
-  const result: Record<string, string> = {};
-  queryParams.forEach((value, key) => {
-    result[key] = value;
-  });
-
-  return result;
+  return params.toString();
 }

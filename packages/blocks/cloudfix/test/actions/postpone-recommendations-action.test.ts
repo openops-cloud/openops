@@ -1,3 +1,9 @@
+const makeRequestMock = {
+  makeRequest: jest.fn(),
+};
+
+jest.mock('../../src/lib/common/make-request', () => makeRequestMock);
+
 import { postponeRecommendationsAction } from '../../src/lib/actions/postpone-recommendations-action';
 
 describe('postponeRecommendationsAction', () => {
@@ -18,39 +24,34 @@ describe('postponeRecommendationsAction', () => {
     });
   });
 
-  test('should have correct action metadata', () => {
-    expect(postponeRecommendationsAction.name).toBe(
-      'cloudfix_postpone_recommendations',
-    );
-    expect(postponeRecommendationsAction.displayName).toBe(
-      'Postpone Recommendations',
-    );
-    expect(postponeRecommendationsAction.description).toBe(
-      'Postpone recommendations until a specified date.',
-    );
-    expect(postponeRecommendationsAction.requireAuth).toBe(true);
-  });
+  test('should call makeRequest with correct endpoint', async () => {
+    makeRequestMock.makeRequest.mockResolvedValue('mockResult');
 
-  test('should have correct array properties for recommendationIds', () => {
-    const recommendationIdsProps =
-      postponeRecommendationsAction.props.recommendationIds.properties;
-    expect(recommendationIdsProps).toMatchObject({
-      recommendationId: {
-        required: true,
-        type: 'SHORT_TEXT',
+    const context = {
+      ...jest.requireActual('@openops/blocks-framework'),
+      propsValue: {
+        recommendationIds: ['some recommendationId'],
+        postponeUntil: '2024-12-31T23:59:59.000Z',
+        reason: 'some reason',
+      },
+      auth: {
+        apiUrl: 'https://api.cloudfix.com',
+        apiKey: 'test-api-key',
+      },
+    };
+
+    const result = await postponeRecommendationsAction.run(context);
+
+    expect(result).toBe('mockResult');
+    expect(makeRequestMock.makeRequest).toHaveBeenCalledWith({
+      endpoint: '/recommendations/postpone',
+      method: 'POST',
+      auth: context.auth,
+      body: {
+        recommendationIds: ['some recommendationId'],
+        postponeUntil: 1735689599000,
+        reason: 'some reason',
       },
     });
-  });
-
-  test('should have correct postponeUntil description', () => {
-    expect(postponeRecommendationsAction.props.postponeUntil.description).toBe(
-      'The date and time until which to postpone the recommendations. Format ISO yyyy-mm-ddT00:00:00.000Z',
-    );
-  });
-
-  test('should have correct reason description', () => {
-    expect(postponeRecommendationsAction.props.reason.description).toBe(
-      'The reason for postponing the recommendations',
-    );
   });
 });

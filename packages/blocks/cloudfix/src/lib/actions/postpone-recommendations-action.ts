@@ -4,7 +4,7 @@ import { cloudfixAuth, CloudfixAuth } from '../common/auth';
 import { makeRequest } from '../common/make-request';
 
 export const postponeRecommendationsAction = createAction({
-  name: 'cloudfix_postpone_recommendations',
+  name: 'postpone_recommendations',
   displayName: 'Postpone Recommendations',
   description: 'Postpone recommendations until a specified date.',
   auth: cloudfixAuth,
@@ -13,13 +13,6 @@ export const postponeRecommendationsAction = createAction({
       displayName: 'Recommendation IDs',
       description: 'Array of recommendation IDs to postpone',
       required: true,
-      properties: {
-        recommendationId: Property.ShortText({
-          displayName: 'Recommendation ID',
-          description: 'The ID of the recommendation',
-          required: true,
-        }),
-      },
     }),
     postponeUntil: Property.DateTime({
       displayName: 'Postpone Until',
@@ -35,12 +28,10 @@ export const postponeRecommendationsAction = createAction({
     // TODO: add property list for how long
   },
   async run(context) {
-    const recommendationIds = context.propsValue['recommendationIds'] as any[];
-    const postponeUntil = context.propsValue['postponeUntil'] as string;
-    const reason = context.propsValue['reason'] as string;
+    const { recommendationIds, postponeUntil, reason } = context.propsValue;
 
     const body = {
-      recommendationIds: recommendationIds.map((item) => item.recommendationId),
+      recommendationIds: recommendationIds,
       postponeUntil: new Date(postponeUntil).getTime(),
       reason,
     };

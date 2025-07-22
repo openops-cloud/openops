@@ -1,10 +1,10 @@
 import { HttpMethod } from '@openops/blocks-common';
-import { createAction, Property } from '@openops/blocks-framework';
+import { createAction } from '@openops/blocks-framework';
 import { cloudfixAuth, CloudfixAuth } from '../common/auth';
 import { makeRequest } from '../common/make-request';
 
 export const getRecommendationsSummaryAction = createAction({
-  name: 'cloudfix_get_recommendations_summary',
+  name: 'get_recommendations_summary',
   displayName: 'Get Recommendations Summary',
   description: 'Get a summary of recommendations.',
   auth: cloudfixAuth,

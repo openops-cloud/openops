@@ -1,3 +1,9 @@
+const makeRequestMock = {
+  makeRequest: jest.fn(),
+};
+
+jest.mock('../../src/lib/common/make-request', () => makeRequestMock);
+
 import { createChangeRequestsAction } from '../../src/lib/actions/create-change-requests-action';
 
 describe('createChangeRequestsAction', () => {
@@ -14,33 +20,32 @@ describe('createChangeRequestsAction', () => {
     });
   });
 
-  test('should have correct action metadata', () => {
-    expect(createChangeRequestsAction.name).toBe(
-      'cloudfix_create_change_requests',
-    );
-    expect(createChangeRequestsAction.displayName).toBe(
-      'Create Change Requests',
-    );
-    expect(createChangeRequestsAction.description).toBe(
-      'Create change requests from recommendations.',
-    );
-    expect(createChangeRequestsAction.requireAuth).toBe(true);
-  });
+  test('should call makeRequest with correct endpoint', async () => {
+    makeRequestMock.makeRequest.mockResolvedValue('mockResult');
 
-  test('should have correct array properties for recommendationIds', () => {
-    const recommendationIdsProps =
-      createChangeRequestsAction.props.recommendationIds.properties;
-    expect(recommendationIdsProps).toMatchObject({
-      recommendationId: {
-        required: true,
-        type: 'SHORT_TEXT',
+    const context = {
+      ...jest.requireActual('@openops/blocks-framework'),
+      auth: {
+        apiUrl: 'https://api.cloudfix.com',
+        apiKey: 'test-api-key',
+      },
+      propsValue: {
+        recommendationIds: ['some recommendationId'],
+        executeOnSchedule: true,
+      },
+    };
+
+    const result = await createChangeRequestsAction.run(context);
+
+    expect(result).toBe('mockResult');
+    expect(makeRequestMock.makeRequest).toHaveBeenCalledWith({
+      endpoint: '/create-change-requests',
+      method: 'POST',
+      auth: context.auth,
+      body: {
+        recommendationIds: ['some recommendationId'],
+        executeOnSchedule: true,
       },
     });
-  });
-
-  test('should have correct executeOnSchedule default value', () => {
-    expect(
-      createChangeRequestsAction.props.executeOnSchedule.defaultValue,
-    ).toBe(false);
   });
 });

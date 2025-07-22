@@ -1,3 +1,9 @@
+const makeRequestMock = {
+  makeRequest: jest.fn(),
+};
+
+jest.mock('../../src/lib/common/make-request', () => makeRequestMock);
+
 import { getRecommendationsAction } from '../../src/lib/actions/get-recommendations-action';
 
 describe('getRecommendationsAction', () => {
@@ -34,53 +40,35 @@ describe('getRecommendationsAction', () => {
     });
   });
 
-  test('should have correct action metadata', () => {
-    expect(getRecommendationsAction.name).toBe('cloudfix_get_recommendations');
-    expect(getRecommendationsAction.displayName).toBe('Get Recommendations');
-    expect(getRecommendationsAction.description).toBe(
-      'Get recommendations from CloudFix with filtering and pagination options.',
-    );
-    expect(getRecommendationsAction.requireAuth).toBe(true);
-  });
+  test('should call makeRequest with correct endpoint', async () => {
+    makeRequestMock.makeRequest.mockResolvedValue('mockResult');
+    const auth = {
+      apiUrl: 'https://api.cloudfix.com',
+      apiKey: 'test-api-key',
+    };
 
-  test('should have correct sortBy options', () => {
-    const sortByOptions = getRecommendationsAction.props.sortBy.options.options;
-    expect(sortByOptions).toContainEqual({
-      label: 'Scheduled At',
-      value: 'scheduledAt',
-    });
-  });
+    const context = {
+      ...jest.requireActual('@openops/blocks-framework'),
+      auth,
+      propsValue: {
+        finderFixerId: 'some finderFixerId',
+        pageNumber: 1,
+        pageLimit: 10,
+        sortBy: 'some sortBy',
+        sortOrder: 'some sortOrder',
+        includeParameters: true,
+        status: ['some status', 'some status 2'],
+      },
+    };
 
-  test('should have correct sortOrder options', () => {
-    const sortOrderOptions =
-      getRecommendationsAction.props.sortOrder.options.options;
-    expect(sortOrderOptions).toContainEqual({
-      label: 'Ascending',
-      value: 'ASC',
-    });
-    expect(sortOrderOptions).toContainEqual({
-      label: 'Descending',
-      value: 'DESC',
-    });
-  });
+    const result = await getRecommendationsAction.run(context);
 
-  test('should have correct status options', () => {
-    const statusOptions = getRecommendationsAction.props.status.options.options;
-    expect(statusOptions).toContainEqual({
-      label: 'Manual Approval',
-      value: 'MANUAL_APPROVAL',
-    });
-    expect(statusOptions).toContainEqual({
-      label: 'Suggested',
-      value: 'SUGGESTED',
-    });
-    expect(statusOptions).toContainEqual({
-      label: 'Scheduled',
-      value: 'SCHEDULED',
-    });
-    expect(statusOptions).toContainEqual({
-      label: 'In Progress',
-      value: 'IN_PROGRESS',
+    expect(result).toBe('mockResult');
+    expect(makeRequestMock.makeRequest).toHaveBeenCalledWith({
+      endpoint:
+        '/recommendations?finderFixerId=some%20finderFixerId&pageNumber=1&pageLimit=10&sortBy=some%20sortBy&sortOrder=some%20sortOrder&includeParameters=true&status=some%20status&status=some%20status%202',
+      method: 'GET',
+      auth,
     });
   });
 });

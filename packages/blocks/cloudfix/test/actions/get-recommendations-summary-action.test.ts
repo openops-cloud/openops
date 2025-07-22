@@ -1,20 +1,31 @@
+const makeRequestMock = {
+  makeRequest: jest.fn(),
+};
+
+jest.mock('../../src/lib/common/make-request', () => makeRequestMock);
+
 import { getRecommendationsSummaryAction } from '../../src/lib/actions/get-recommendations-summary-action';
 
 describe('getRecommendationsSummaryAction', () => {
-  test('should create action with no properties', () => {
-    expect(getRecommendationsSummaryAction.props).toEqual({});
-  });
+  test('should call makeRequest with correct endpoint', async () => {
+    makeRequestMock.makeRequest.mockResolvedValue('mockResult');
 
-  test('should have correct action metadata', () => {
-    expect(getRecommendationsSummaryAction.name).toBe(
-      'cloudfix_get_recommendations_summary',
-    );
-    expect(getRecommendationsSummaryAction.displayName).toBe(
-      'Get Recommendations Summary',
-    );
-    expect(getRecommendationsSummaryAction.description).toBe(
-      'Get a summary of recommendations.',
-    );
-    expect(getRecommendationsSummaryAction.requireAuth).toBe(true);
+    const context = {
+      ...jest.requireActual('@openops/blocks-framework'),
+      propsValue: {},
+      auth: {
+        apiUrl: 'https://api.cloudfix.com',
+        apiKey: 'test-api-key',
+      },
+    };
+
+    const result = await getRecommendationsSummaryAction.run(context);
+
+    expect(result).toBe('mockResult');
+    expect(makeRequestMock.makeRequest).toHaveBeenCalledWith({
+      endpoint: '/recommendations/summary',
+      method: 'GET',
+      auth: context.auth,
+    });
   });
 });

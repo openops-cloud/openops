@@ -5,7 +5,7 @@ import { cloudfixAuth, CloudfixAuth } from '../common/auth';
 import { makeRequest } from '../common/make-request';
 
 export const createChangeRequestsAction = createAction({
-  name: 'cloudfix_create_change_requests',
+  name: 'create_change_requests',
   displayName: 'Create Change Requests',
   description: 'Create change requests from recommendations.',
   auth: cloudfixAuth,
@@ -15,13 +15,6 @@ export const createChangeRequestsAction = createAction({
       displayName: 'Recommendation IDs',
       description: 'Array of recommendation IDs to create change requests for',
       required: true,
-      properties: {
-        recommendationId: Property.ShortText({
-          displayName: 'Recommendation ID',
-          description: 'The ID of the recommendation',
-          required: true,
-        }),
-      },
     }),
     executeOnSchedule: Property.Checkbox({
       displayName: 'Execute On Schedule',
@@ -31,13 +24,10 @@ export const createChangeRequestsAction = createAction({
     }),
   },
   async run(context) {
-    const recommendationIds = context.propsValue['recommendationIds'] as any[];
-    const executeOnSchedule = context.propsValue[
-      'executeOnSchedule'
-    ] as boolean;
+    const { recommendationIds, executeOnSchedule } = context.propsValue;
 
     const body = {
-      recommendationIds: recommendationIds.map((item) => item.recommendationId),
+      recommendationIds: recommendationIds,
       executeOnSchedule,
     };
 
