@@ -146,43 +146,9 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         projectId,
       );
       const llmConfigResult = await getLLMConfig(projectId);
-      let messageContent: string;
-      if (request.body.messages) {
-        if (request.body.messages.length === 0) {
-          return await reply.code(400).send({
-            message:
-              'Messages array cannot be empty. Please provide at least one message or use the message field instead.',
-          });
-        }
-
-        const lastMessage =
-          request.body.messages[request.body.messages.length - 1];
-        if (
-          !lastMessage.content ||
-          !Array.isArray(lastMessage.content) ||
-          lastMessage.content.length === 0
-        ) {
-          return await reply.code(400).send({
-            message:
-              'Last message must have valid content array with at least one element.',
-          });
-        }
-
-        const firstContentElement = lastMessage.content[0];
-        if (
-          !firstContentElement ||
-          typeof firstContentElement !== 'object' ||
-          !('text' in firstContentElement)
-        ) {
-          return await reply.code(400).send({
-            message:
-              'Last message must have a text content element as the first element.',
-          });
-        }
-
-        messageContent = String(firstContentElement.text);
-      } else {
-        messageContent = request.body.message;
+      const messageContent = await getUserMessage(request.body, reply);
+      if (messageContent === null) {
+        return; // Error response already sent
       }
       conversationResult.messages.push({
         role: 'user',
@@ -584,4 +550,53 @@ function handleError(
 
   logger.error(`Failed to process ${context || 'request'} with error: `, error);
   return reply.code(500).send({ message: 'Internal server error' });
+}
+
+/**
+ * Extracts the user message content from the request body.
+ * Returns the message content as string, or null if validation fails (error response sent).
+ */
+async function getUserMessage(
+  body: NewMessageRequest,
+  reply: FastifyReply,
+): Promise<string | null> {
+  if (body.messages) {
+    if (body.messages.length === 0) {
+      await reply.code(400).send({
+        message:
+          'Messages array cannot be empty. Please provide at least one message or use the message field instead.',
+      });
+      return null;
+    }
+
+    const lastMessage = body.messages[body.messages.length - 1];
+    if (
+      !lastMessage.content ||
+      !Array.isArray(lastMessage.content) ||
+      lastMessage.content.length === 0
+    ) {
+      await reply.code(400).send({
+        message:
+          'Last message must have valid content array with at least one element.',
+      });
+      return null;
+    }
+
+    const firstContentElement = lastMessage.content[0];
+    if (
+      !firstContentElement ||
+      typeof firstContentElement !== 'object' ||
+      !('text' in firstContentElement)
+    ) {
+      await reply.code(400).send({
+        message:
+          'Last message must have a text content element as the first element.',
+      });
+      return null;
+    }
+
+    return String(firstContentElement.text);
+  } else {
+    return body.message;
+  }
 }
