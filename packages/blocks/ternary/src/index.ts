@@ -1,12 +1,10 @@
 import { createCustomApiCallAction } from '@openops/blocks-common';
-import {
-  BlockAuthProperty,
-  createBlock,
-  Property,
-} from '@openops/blocks-framework';
+import { createBlock, Property } from '@openops/blocks-framework';
 import { BlockCategory } from '@openops/shared';
 import { getBudgets } from './lib/actions/get-budgets';
+import { getCases } from './lib/actions/get-cases';
 import { getDataIntegrations } from './lib/actions/get-data-integrations';
+import { getUsageRecommendations } from './lib/actions/usage-recommendations';
 import { ternaryCloudAuth } from './lib/common/auth';
 import { createCase } from './lib/actions/create-case';
 
@@ -21,11 +19,9 @@ export const ternary = createBlock({
   actions: [
     getDataIntegrations,
     getBudgets,
-    // forecasting
-    // cost allocation?
-    //getUsageRecommendations,
-    //updateUsageRecommendations,
+    getCases,
     createCase,
+    getUsageRecommendations,
     createCustomApiCallAction({
       baseUrl: (auth: unknown) => (auth as { apiURL: string }).apiURL,
       auth: ternaryCloudAuth,
