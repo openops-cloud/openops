@@ -1,13 +1,5 @@
 import { ThreadMessageLike } from '@assistant-ui/react';
 
-/**
- * Message content can be either a string or an array of content parts
- */
-type MessageContent = string | MessageContentPart[];
-
-/**
- * Individual content part in a message
- */
 interface MessageContentPart {
   type: string;
   text?: string;
@@ -17,8 +9,10 @@ interface MessageContentPart {
 }
 
 /**
- * Base message structure from server response
+ * Message content can be either a string or an array of content parts
  */
+type MessageContent = string | MessageContentPart[];
+
 interface ServerMessage {
   role: string;
   content: MessageContent;
@@ -60,62 +54,101 @@ export function mergeToolResults(
   const merged: NormalizedMessage[] = [];
 
   for (const msg of messages) {
-    if (
-      msg.role === 'tool' &&
-      Array.isArray(msg.content) &&
-      msg.content.length > 0
-    ) {
-      const toolResult = msg.content[0] as ToolResult;
-      const toolCallId = toolResult?.toolCallId;
-
-      if (toolCallId) {
-        for (let j = merged.length - 1; j >= 0; j--) {
-          const prev = merged[j];
-          if (prev.role === 'assistant' && Array.isArray(prev.content)) {
-            const toolCallPart = prev.content.find(
-              (part: MessageContentPart) =>
-                part.type === 'tool-call' && part.toolCallId === toolCallId,
-            );
-            if (toolCallPart) {
-              // Only assign the actual result payload, not the whole toolResult object.
-              // This is required because the AI SDK and assistant-ui expect the 'result' property
-              // on a 'tool-call' part to be the tool's output, not a nested object with type/toolCallId/etc.
-              toolCallPart.result = toolResult.result;
-              break;
-            }
-          }
-        }
-        continue;
-      }
+    if (isToolMessage(msg) && shouldSkipToolMessage(msg, merged)) {
+      continue;
     }
 
-    const normalizedMsg: NormalizedMessage = { ...msg, content: [] };
-
-    if (typeof msg.content === 'string') {
-      normalizedMsg.content = [
-        {
-          type: 'text',
-          text: msg.content,
-        },
-      ];
-    } else if (Array.isArray(msg.content)) {
-      normalizedMsg.content = msg.content.map(
-        (part: MessageContentPart | string) => {
-          if (typeof part === 'string') {
-            return {
-              type: 'text',
-              text: part,
-            };
-          }
-          return part;
-        },
-      );
-    } else if (msg.content && typeof msg.content === 'object') {
-      normalizedMsg.content = [msg.content as MessageContentPart];
-    }
-
+    const normalizedMsg = normalizeMessage(msg);
     merged.push(normalizedMsg);
   }
 
   return merged as ThreadMessageLike[];
+}
+
+function isToolMessage(msg: ServerMessage): boolean {
+  return (
+    msg.role === 'tool' && Array.isArray(msg.content) && msg.content.length > 0
+  );
+}
+
+/**
+ * Check if a tool message should be skipped (merged into assistant message)
+ */
+function shouldSkipToolMessage(
+  msg: ServerMessage,
+  merged: NormalizedMessage[],
+): boolean {
+  const toolResult = msg.content[0] as ToolResult;
+  const toolCallId = toolResult?.toolCallId;
+
+  if (!toolCallId) {
+    return false;
+  }
+
+  mergeToolResultIntoAssistant(toolResult, merged);
+
+  return true;
+}
+
+/**
+ * Merge tool result into the corresponding assistant message
+ */
+function mergeToolResultIntoAssistant(
+  toolResult: ToolResult,
+  merged: NormalizedMessage[],
+): boolean {
+  for (let j = merged.length - 1; j >= 0; j--) {
+    const prev = merged[j];
+    if (prev.role === 'assistant' && Array.isArray(prev.content)) {
+      const toolCallPart = prev.content.find(
+        (part: MessageContentPart) =>
+          part.type === 'tool-call' &&
+          part.toolCallId === toolResult.toolCallId,
+      );
+      if (toolCallPart) {
+        toolCallPart.result = toolResult.result;
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+/**
+ * Normalize message content to consistent format
+ */
+function normalizeMessage(msg: ServerMessage): NormalizedMessage {
+  const normalizedMsg: NormalizedMessage = { ...msg, content: [] };
+
+  if (typeof msg.content === 'string') {
+    normalizedMsg.content = [
+      {
+        type: 'text',
+        text: msg.content,
+      },
+    ];
+  } else if (Array.isArray(msg.content)) {
+    normalizedMsg.content = normalizeContentArray(msg.content);
+  } else if (msg.content && typeof msg.content === 'object') {
+    normalizedMsg.content = [msg.content as MessageContentPart];
+  }
+
+  return normalizedMsg;
+}
+
+/**
+ * Normalize content array to ensure consistent structure
+ */
+function normalizeContentArray(
+  content: (MessageContentPart | string)[],
+): MessageContentPart[] {
+  return content.map((part: MessageContentPart | string) => {
+    if (typeof part === 'string') {
+      return {
+        type: 'text',
+        text: part,
+      };
+    }
+    return part;
+  });
 }
