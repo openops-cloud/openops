@@ -2,12 +2,12 @@ import { action } from '@storybook/addon-actions';
 import type { Meta, StoryObj } from '@storybook/react';
 import { Bell, BookOpen, HelpCircle, Settings } from 'lucide-react';
 
-import { AiChatHeader } from '../../components/assistant-ui/ai-chat-header';
+import { AssistantTopBar } from '../../components/assistant-ui/assistant-top-bar';
 import { Button } from '../../ui/button';
 import { TooltipProvider } from '../../ui/tooltip';
 
 /**
- * `AiChatHeader` is a header component for AI chat interfaces.
+ * `AssistantTopBar` is a header component for AI chat interfaces.
  *
  * It provides:
  * - A new chat button for starting fresh conversations
@@ -18,8 +18,8 @@ import { TooltipProvider } from '../../ui/tooltip';
  * The component handles user interactions like creating new chats and closing the chat interface.
  */
 const meta = {
-  title: 'assistant-ui/AiChatHeader',
-  component: AiChatHeader,
+  title: 'assistant-ui/AssistantTopBar',
+  component: AssistantTopBar,
   tags: ['autodocs'],
   args: {
     onClose: action('Close clicked'),
@@ -54,20 +54,20 @@ const meta = {
       </TooltipProvider>
     ),
   ],
-} satisfies Meta<typeof AiChatHeader>;
+} satisfies Meta<typeof AssistantTopBar>;
 
 export default meta;
 
 type Story = StoryObj<typeof meta>;
 
 /**
- * The default AiChatHeader with enabled new chat button.
+ * The default AssistantTopBar with enabled new chat button.
  * Users can click the new chat button to start a fresh conversation or the close button to dismiss the chat interface.
  */
 export const Default: Story = {};
 
 /**
- * AiChatHeader with the new chat button disabled.
+ * AssistantTopBar with the new chat button disabled.
  * This demonstrates how the component appears when starting a new chat is not allowed.
  */
 export const NewChatDisabled: Story = {
@@ -77,7 +77,7 @@ export const NewChatDisabled: Story = {
 };
 
 /**
- * AiChatHeader with additional action buttons.
+ * AssistantTopBar with additional action buttons.
  * This demonstrates how the component can be extended with custom controls.
  */
 export const WithActionButtons: Story = {
@@ -106,7 +106,7 @@ export const WithActionButtons: Story = {
 };
 
 /**
- * AiChatHeader with a single additional button.
+ * AssistantTopBar with a single additional button.
  * This demonstrates a simpler customization with just one extra control.
  */
 export const WithSingleButton: Story = {
@@ -125,7 +125,7 @@ export const WithSingleButton: Story = {
 };
 
 /**
- * AiChatHeader with multiple action buttons and disabled new chat.
+ * AssistantTopBar with multiple action buttons and disabled new chat.
  * This demonstrates a more complex configuration with multiple custom controls and a disabled state.
  */
 export const ComplexExample: Story = {
@@ -155,11 +155,13 @@ export const ComplexExample: Story = {
 };
 
 /**
- * AiChatHeader with a custom new chat icon.
+ * AssistantTopBar with a custom new chat icon.
  * This demonstrates how the component would look with a different icon for the new chat button.
  */
 export const CustomNewChatIcon: Story = {
-  render: (args) => <AiChatHeader {...args}>{args.children}</AiChatHeader>,
+  render: (args) => (
+    <AssistantTopBar {...args}>{args.children}</AssistantTopBar>
+  ),
   args: {
     children: null,
   },

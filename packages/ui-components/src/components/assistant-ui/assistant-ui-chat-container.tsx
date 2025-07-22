@@ -3,13 +3,13 @@ import {
   AssistantRuntimeProvider,
 } from '@assistant-ui/react';
 import { t } from 'i18next';
-import { AiChatHeader, AiChatHeaderProps } from './ai-chat-header';
+import { AssistantTopBar, AssistantTopBarProps } from './assistant-top-bar';
 import { Thread } from './thread';
 import { ThreadWelcomeProvider } from './thread-welcome-context';
 
 type AssistantUiChatContainerProps = {
   runtime: AssistantRuntime;
-} & AiChatHeaderProps;
+} & AssistantTopBarProps;
 
 const AssistantUiChatContainer = ({
   onClose,
@@ -20,13 +20,13 @@ const AssistantUiChatContainer = ({
 }: AssistantUiChatContainerProps) => {
   return (
     <div className="h-full w-full flex flex-col bg-background rounded-sm overflow-hidden">
-      <AiChatHeader
+      <AssistantTopBar
         onClose={onClose}
         onNewChat={onNewChat}
         enableNewChat={enableNewChat}
       >
         {children}
-      </AiChatHeader>
+      </AssistantTopBar>
       <AssistantRuntimeProvider runtime={runtime}>
         <ThreadWelcomeProvider greeting={t('How can I help you today?')}>
           <Thread />

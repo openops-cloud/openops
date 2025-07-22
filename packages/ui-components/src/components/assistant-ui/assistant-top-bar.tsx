@@ -4,19 +4,19 @@ import { ReactNode } from 'react';
 import { TooltipWrapper } from '../../components/tooltip-wrapper';
 import { Button } from '../../ui/button';
 
-type AiChatHeaderProps = {
+type AssistantTopBarProps = {
   onClose: () => void;
   onNewChat: () => void;
   enableNewChat: boolean;
   children: ReactNode;
 };
 
-const AiChatHeader = ({
+const AssistantTopBar = ({
   onNewChat,
   onClose,
   enableNewChat,
   children,
-}: AiChatHeaderProps) => {
+}: AssistantTopBarProps) => {
   return (
     <div className="flex justify-between items-center px-4 py-2 gap-2 text-md dark:text-primary font-bold border-b border-gray-200">
       <div className="flex items-center gap-2">
@@ -56,5 +56,5 @@ const AiChatHeader = ({
   );
 };
 
-AiChatHeader.displayName = 'AiChatHeader';
-export { AiChatHeader, AiChatHeaderProps };
+AssistantTopBar.displayName = 'AssistantTopBar';
+export { AssistantTopBar, AssistantTopBarProps };
