@@ -62,6 +62,7 @@
       "@openops/block-cloudability": [
         "packages/blocks/cloudability/src/index.ts"
       ],
+      "@openops/block-cloudfix": ["packages/blocks/cloudfix/src/index.ts"],
       "@openops/block-cloudformation": [
         "packages/blocks/cloudformation/src/index.ts"
       ],
