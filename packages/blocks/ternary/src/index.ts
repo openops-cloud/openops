@@ -1,6 +1,5 @@
 import { createCustomApiCallAction } from '@openops/blocks-common';
 import {
-  BlockAuthProperty,
   createBlock,
   Property,
 } from '@openops/blocks-framework';
