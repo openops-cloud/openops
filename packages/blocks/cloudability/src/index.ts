@@ -1,6 +1,9 @@
 import { createCustomApiCallAction } from '@openops/blocks-common';
 import { createBlock, Property } from '@openops/blocks-framework';
 import { BlockCategory } from '@openops/shared';
+import { getRecommendationsAction } from './lib/actions/get-recommendations-action';
+import { snoozeRecommendationAction } from './lib/actions/snooze-recommendations-action';
+import { unsnoozeRecommendationAction } from './lib/actions/unsnooze-recommendations-action';
 import { cloudabilityAuth } from './lib/auth';
 
 const markdown = `
@@ -15,6 +18,9 @@ export const cloudability = createBlock({
   authors: [],
   categories: [BlockCategory.FINOPS],
   actions: [
+    getRecommendationsAction,
+    snoozeRecommendationAction,
+    unsnoozeRecommendationAction,
     createCustomApiCallAction({
       baseUrl: (auth: any) => auth.apiUrl,
       auth: cloudabilityAuth,
