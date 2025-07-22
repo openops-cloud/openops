@@ -35,3 +35,8 @@ APAC: https://api-au.cloudability.com/v3`,
     }),
   },
 });
+
+export interface CloudabilityAuth {
+  apiUrl: string;
+  apiKey: string;
+}
