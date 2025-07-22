@@ -5,7 +5,7 @@ import { Message, useChat } from '@ai-sdk/react';
 import { AssistantUiChatContainer } from '@openops/components/ui';
 import { OpenChatResponse } from '@openops/shared';
 import { useQuery } from '@tanstack/react-query';
-import { useMemo, useRef } from 'react';
+import { ReactNode, useMemo, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { aiAssistantChatApi } from '../lib/ai-assistant-chat-api';
 
@@ -25,9 +25,10 @@ interface ExtendedServerMessage extends ServerMessage {
 
 type AssistantUiChatProps = {
   onClose: () => void;
+  children?: ReactNode;
 };
 
-const AssistantUiChat = ({ onClose }: AssistantUiChatProps) => {
+const AssistantUiChat = ({ onClose, children }: AssistantUiChatProps) => {
   const chatId = useRef(localStorage.getItem(AI_ASSISTANT_LS_KEY));
 
   const { data: openChatResponse } = useQuery({
@@ -111,7 +112,16 @@ const AssistantUiChat = ({ onClose }: AssistantUiChatProps) => {
   });
   const runtime = useVercelUseChatRuntime(chat);
 
-  return <AssistantUiChatContainer onCloseClick={onClose} runtime={runtime} />;
+  return (
+    <AssistantUiChatContainer
+      onClose={onClose}
+      runtime={runtime}
+      onNewChat={() => {}}
+      enableNewChat={true}
+    >
+      {children}
+    </AssistantUiChatContainer>
+  );
 };
 
 export default AssistantUiChat;
