@@ -4,12 +4,13 @@ import {
 } from '@assistant-ui/react';
 import { t } from 'i18next';
 import { AssistantTopBar, AssistantTopBarProps } from './assistant-top-bar';
-import { Thread } from './thread';
+import { Thread, ThreadProps } from './thread';
 import { ThreadWelcomeProvider } from './thread-welcome-context';
 
 type AssistantUiChatContainerProps = {
   runtime: AssistantRuntime;
-} & AssistantTopBarProps;
+} & AssistantTopBarProps &
+  ThreadProps;
 
 const AssistantUiChatContainer = ({
   onClose,
@@ -17,6 +18,10 @@ const AssistantUiChatContainer = ({
   enableNewChat,
   runtime,
   title,
+  availableModels,
+  selectedModel,
+  onModelSelected,
+  isModelSelectorLoading,
   children,
 }: AssistantUiChatContainerProps) => {
   return (
@@ -31,7 +36,12 @@ const AssistantUiChatContainer = ({
       </AssistantTopBar>
       <AssistantRuntimeProvider runtime={runtime}>
         <ThreadWelcomeProvider greeting={t('How can I help you today?')}>
-          <Thread />
+          <Thread
+            availableModels={availableModels}
+            onModelSelected={onModelSelected}
+            selectedModel={selectedModel}
+            isModelSelectorLoading={isModelSelectorLoading}
+          />
         </ThreadWelcomeProvider>
       </AssistantRuntimeProvider>
     </div>

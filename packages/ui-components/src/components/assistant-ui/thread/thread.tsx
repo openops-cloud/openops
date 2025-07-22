@@ -5,6 +5,7 @@ import {
   MessagePrimitive,
   ThreadPrimitive,
 } from '@assistant-ui/react';
+import { t } from 'i18next';
 import {
   ArrowDownIcon,
   CheckIcon,
@@ -16,17 +17,26 @@ import {
   RefreshCwIcon,
   SendHorizontalIcon,
 } from 'lucide-react';
-import type { FC } from 'react';
-import { Button } from '../../../ui/button';
-
-import { t } from 'i18next';
+import React, { FC } from 'react';
 import { cn } from '../../../lib/cn';
+import { Button } from '../../../ui/button';
+import {
+  AiModelSelector,
+  AiModelSelectorProps,
+} from '../../ai-chat-container/ai-model-selector';
 import { MarkdownText } from '../markdown-text';
 import { useThreadWelcome } from '../thread-welcome-context';
 import { ToolFallback } from '../tool-fallback';
 import { TooltipIconButton } from '../tooltip-icon-button';
 
-export const Thread: FC = () => {
+export type ThreadProps = ComposerProps;
+
+export const Thread = ({
+  availableModels,
+  selectedModel,
+  onModelSelected,
+  isModelSelectorLoading,
+}: ThreadProps) => {
   return (
     <ThreadPrimitive.Root className="bg-background box-border flex h-full flex-col overflow-hidden">
       <ThreadPrimitive.Viewport className="flex h-full flex-col items-center overflow-y-auto scroll-smooth bg-inherit px-4 pt-8">
@@ -46,7 +56,12 @@ export const Thread: FC = () => {
 
         <div className="sticky bottom-0 mt-3 flex w-full max-w-[var(--thread-max-width)] flex-col items-center justify-end rounded-t-lg bg-inherit pb-4">
           <ThreadScrollToBottom />
-          <Composer />
+          <Composer
+            availableModels={availableModels}
+            selectedModel={selectedModel}
+            onModelSelected={onModelSelected}
+            isModelSelectorLoading={isModelSelectorLoading}
+          />
         </div>
       </ThreadPrimitive.Viewport>
     </ThreadPrimitive.Root>
@@ -81,9 +96,16 @@ const ThreadWelcome: FC = () => {
   );
 };
 
-const Composer: FC = () => {
+type ComposerProps = AiModelSelectorProps;
+
+const Composer = ({
+  availableModels,
+  selectedModel,
+  onModelSelected,
+  isModelSelectorLoading,
+}: ComposerProps) => {
   return (
-    <ComposerPrimitive.Root className="focus-within:border-ring/20 flex w-full flex-wrap items-end rounded-lg border bg-inherit px-2.5 shadow-sm transition-colors ease-in">
+    <ComposerPrimitive.Root className="relative focus-within:border-ring/20 flex w-full flex-wrap items-end rounded-lg border bg-inherit px-2.5 shadow-sm transition-colors ease-in pb-9">
       <ComposerPrimitive.Input
         rows={1}
         autoFocus
@@ -91,6 +113,14 @@ const Composer: FC = () => {
         className="placeholder:text-muted-foreground max-h-40 flex-grow resize-none border-none bg-transparent px-2 py-4 text-sm outline-none focus:ring-0 disabled:cursor-not-allowed"
       />
       <ComposerAction />
+
+      <AiModelSelector
+        availableModels={availableModels}
+        selectedModel={selectedModel}
+        onModelSelected={onModelSelected}
+        isModelSelectorLoading={isModelSelectorLoading}
+        className="absolute left-3 bottom-3"
+      />
     </ComposerPrimitive.Root>
   );
 };

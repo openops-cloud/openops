@@ -4,6 +4,7 @@ import { useChatRuntime } from '@assistant-ui/react-ai-sdk';
 
 import { AI_ASSISTANT_LS_KEY } from '@/app/constants/ai';
 import { QueryKeys } from '@/app/constants/query-keys';
+import { useAiModelSelector } from '@/app/features/ai/lib/ai-model-selector-hook';
 import { authenticationSession } from '@/app/lib/authentication-session';
 import { AssistantUiChatContainer } from '@openops/components/ui';
 import { OpenChatResponse } from '@openops/shared';
@@ -66,6 +67,13 @@ const AssistantUiChat = ({
     [openChatResponse?.chatId, openChatResponse?.messages],
   );
 
+  const {
+    selectedModel,
+    availableModels,
+    onModelSelected,
+    isLoading: isModelSelectorLoading,
+  } = useAiModelSelector();
+
   const runtime = useChatRuntime(runtimeConfig);
 
   if (isLoading || !openChatResponse) {
@@ -95,6 +103,10 @@ const AssistantUiChat = ({
       onNewChat={() => {}}
       title={title}
       enableNewChat={true}
+      availableModels={availableModels}
+      onModelSelected={onModelSelected}
+      isModelSelectorLoading={isModelSelectorLoading}
+      selectedModel={selectedModel}
     >
       {children}
     </AssistantUiChatContainer>
