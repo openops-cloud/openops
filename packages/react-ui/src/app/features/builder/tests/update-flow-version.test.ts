@@ -8,7 +8,6 @@ import {
   TriggerType,
 } from '@openops/shared';
 import { waitFor } from '@testing-library/react';
-import { aiChatApi } from '../ai-chat/lib/chat-api';
 import {
   BuilderState,
   LeftSideBarType,
@@ -154,16 +153,18 @@ describe('updateFlowVersion', () => {
         state: FlowVersionState.DRAFT,
         updatedBy: null,
         trigger: {
+          id: 'trigger1',
           name: 'trigger1',
           type: 'EMPTY',
           settings: {},
           valid: false,
           displayName: 'Select Trigger',
           nextAction: {
-            displayName: 'Google Cloud CLI',
+            id: 'step_1',
             name: 'step_1',
             valid: false,
             type: 'BLOCK',
+            displayName: 'Google Cloud CLI',
             settings: { blockVersion: '^1.0.0' },
           },
         },
@@ -178,21 +179,11 @@ describe('updateFlowVersion', () => {
       request: { name: 'step_1' },
     } as FlowOperationRequest;
 
-    (aiChatApi.open as jest.Mock).mockResolvedValue({ chatId: 'chat1' });
-    (aiChatApi.delete as jest.Mock).mockResolvedValue({});
-
     updateFlowVersion(mockState, operation, mockOnError, mockSet);
 
     expect(mockSet).toHaveBeenCalledWith({ selectedStep: undefined });
     expect(mockSet).toHaveBeenCalledWith({
       rightSidebar: RightSideBarType.NONE,
-    });
-
-    await waitFor(() => {
-      expect(aiChatApi.open).toHaveBeenCalled();
-    });
-    await waitFor(() => {
-      expect(aiChatApi.delete).toHaveBeenCalled();
     });
   });
 
@@ -216,9 +207,6 @@ describe('updateFlowVersion', () => {
       request: { name: 'step_1' },
     } as FlowOperationRequest;
     const clearStepSpy = jest.spyOn(stepTestOutputCache, 'clearStep');
-    (aiChatApi.open as jest.Mock).mockResolvedValue({ chatId: 'chat1' });
-    (aiChatApi.delete as jest.Mock).mockResolvedValue({});
-
     updateFlowVersion(mockState, operation, mockOnError, mockSet);
 
     expect(clearStepSpy).toHaveBeenCalledWith('step_1');

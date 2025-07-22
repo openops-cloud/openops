@@ -72,7 +72,10 @@ export const useStepSettingsAiChat = (
       );
     },
     enabled:
-      !!getBlockName(stepDetails) && !!getActionName(stepDetails) && supportsAI,
+      !!getBlockName(stepDetails) &&
+      !!getActionName(stepDetails) &&
+      supportsAI &&
+      !!stepDetails?.id,
   });
 
   const {
