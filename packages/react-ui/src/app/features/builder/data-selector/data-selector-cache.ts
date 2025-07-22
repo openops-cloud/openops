@@ -4,7 +4,7 @@ import { StepOutputWithData } from '@openops/shared';
 import { QueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 
-type StepOutputData = Omit<StepOutputWithData, 'input'>;
+export type StepOutputData = Omit<StepOutputWithData, 'input'>;
 
 /**
  * StepTestOutputCache manages test output and expanded state for steps in the Data Selector.
@@ -85,16 +85,19 @@ export function setStepOutputCache({
   output,
   input,
   queryClient,
+  success,
 }: {
   stepId: string;
   flowVersionId: string;
   output: unknown;
   input: unknown;
   queryClient: QueryClient;
+  success: boolean;
 }) {
   const stepTestOutput: StepOutputData = {
     output: formatUtils.formatStepInputOrOutput(output),
     lastTestDate: dayjs().toISOString(),
+    success,
   };
   stepTestOutputCache.setStepData(stepId, stepTestOutput);
   queryClient.setQueryData([QueryKeys.stepTestOutput, flowVersionId, stepId], {

@@ -25,7 +25,6 @@ import {
   RiskLevel,
   StepRunResponse,
 } from '@openops/shared';
-
 import {
   setStepOutputCache,
   stepTestOutputCache,
@@ -33,7 +32,6 @@ import {
 import { stepTestOutputHooks } from './step-test-output-hooks';
 import { TestSampleDataViewer } from './test-sample-data-viewer';
 import { TestButtonTooltip } from './test-step-tooltip';
-import { testStepUtils } from './test-step-utils';
 
 type TestActionComponentProps = {
   isSaving: boolean;
@@ -70,6 +68,14 @@ const TestActionSection = React.memo(
 
     const socket = useSocket();
 
+    useEffect(() => {
+      if (stepData?.success === false) {
+        setErrorMessage(formatUtils.formatStepInputOrOutput(stepData.output));
+      } else {
+        setErrorMessage(undefined);
+      }
+    }, [stepData]);
+
     const { mutate, isPending } = useMutation<StepRunResponse, Error, void>({
       mutationFn: async () => {
         const response = await flowsApi.testStep(socket, {
@@ -79,21 +85,14 @@ const TestActionSection = React.memo(
         return response;
       },
       onSuccess: (stepResponse) => {
-        const formattedResponse = formatUtils.formatStepInputOrOutput(
-          stepResponse.output,
-        );
-        if (stepResponse.success) {
-          setErrorMessage(undefined);
-          setStepOutputCache({
-            stepId: formValues.id,
-            flowVersionId,
-            output: stepResponse.output,
-            input: stepResponse.input,
-            queryClient,
-          });
-        } else {
-          setErrorMessage(testStepUtils.formatErrorMessage(formattedResponse));
-        }
+        setStepOutputCache({
+          stepId: formValues.id,
+          flowVersionId,
+          output: stepResponse.output,
+          input: stepResponse.input,
+          queryClient,
+          success: stepResponse.success,
+        });
       },
       onError: (error) => {
         console.error(error);

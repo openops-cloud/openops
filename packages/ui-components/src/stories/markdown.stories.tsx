@@ -216,19 +216,16 @@ aws ec2 describe-instances
 `,
   },
   play: async ({ canvasElement, args }) => {
-    const textarea =
-      selectLightOrDarkCanvas(canvasElement).getByRole('textbox');
+    const canvas = selectLightOrDarkCanvas(canvasElement);
+    const codeContent = await canvas.findByRole('textbox');
 
-    expect(textarea).toHaveTextContent('aws ec2 describe-instances');
-    expect(textarea).toHaveAttribute('contenteditable', 'false');
-    expect(textarea).toHaveClass('bg-input');
+    expect(codeContent).toBeInTheDocument();
+    expect(codeContent).toHaveTextContent('aws ec2 describe-instances');
+    expect(codeContent).toHaveClass('cm-content');
 
     expect(args.handleInject).not.toHaveBeenCalled();
 
-    const injectButton = selectLightOrDarkCanvas(canvasElement).getByRole(
-      'button',
-      { name: 'Inject command' },
-    );
+    const injectButton = canvas.getByRole('button', { name: 'Inject command' });
 
     fireEvent.click(injectButton);
 
@@ -249,14 +246,14 @@ aws s3 sync\n  --exclude "*"\n  --include "*.jpg"\n  <local-dir> s3://<bucket-na
 `,
   },
   play: async ({ canvasElement }) => {
-    const textarea =
-      selectLightOrDarkCanvas(canvasElement).getByRole('textbox');
+    const canvas = selectLightOrDarkCanvas(canvasElement);
+    const codeContent = await canvas.findByRole('textbox');
 
-    expect(textarea).toHaveTextContent(
-      'aws s3 sync --exclude "*" --include "*.jpg" <local-dir> s3://<bucket-name>',
+    expect(codeContent).toBeInTheDocument();
+    expect(codeContent).toHaveTextContent(
+      /aws s3 sync.*--exclude.*--include.*<local-dir> s3:\/\/<bucket-name>/,
     );
-    expect(textarea).toHaveAttribute('contenteditable', 'false');
-    expect(textarea).toHaveClass('bg-input');
+    expect(codeContent).toHaveClass('cm-content');
   },
 };
 

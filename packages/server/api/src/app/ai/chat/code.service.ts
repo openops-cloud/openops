@@ -1,35 +1,51 @@
-import { AiConfig } from '@openops/shared';
+import { isLLMTelemetryEnabled } from '@openops/common';
+import { logger } from '@openops/server-shared';
+import {
+  AiConfig,
+  unifiedCodeLLMSchema,
+  UnifiedCodeLLMSchema,
+} from '@openops/shared';
 import {
   CoreMessage,
   LanguageModel,
   streamObject,
+  StreamObjectOnFinishCallback,
   StreamObjectResult,
 } from 'ai';
-import { z } from 'zod';
 
-const codeSchema = z.object({
-  code: z.string(),
-  packageJson: z.string(),
-  description: z.string(),
-});
-
-type CodeSchema = z.infer<typeof codeSchema>;
+type StreamCodeOptions = {
+  messages: CoreMessage[];
+  languageModel: LanguageModel;
+  aiConfig: AiConfig;
+  systemPrompt: string;
+  onFinish: StreamObjectOnFinishCallback<UnifiedCodeLLMSchema> | undefined;
+  onError: (error: unknown) => void;
+};
 
 export const streamCode = ({
   messages,
   languageModel,
   aiConfig,
   systemPrompt,
-}: {
-  messages: CoreMessage[];
-  languageModel: LanguageModel;
-  aiConfig: AiConfig;
-  systemPrompt: string;
-}): StreamObjectResult<Partial<CodeSchema>, CodeSchema, never> =>
-  streamObject({
+  onFinish,
+  onError,
+}: StreamCodeOptions): StreamObjectResult<
+  Partial<UnifiedCodeLLMSchema>,
+  UnifiedCodeLLMSchema,
+  never
+> => {
+  logger.debug('streamCode', {
+    messages,
+    systemPrompt,
+  });
+  return streamObject({
     model: languageModel,
     system: systemPrompt,
     messages,
-    schema: codeSchema,
     ...aiConfig.modelSettings,
+    onFinish,
+    onError,
+    schema: unifiedCodeLLMSchema,
+    experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
   });
+};

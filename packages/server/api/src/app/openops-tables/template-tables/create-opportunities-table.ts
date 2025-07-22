@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
-  axiosTablesSeedRetryConfig,
   createAxiosHeaders,
   getFields,
   getPrimaryKeyFieldFromFields,
@@ -38,7 +37,6 @@ export async function createOpportunitiesTable(
       type: 'uuid',
     },
     createAxiosHeaders(token),
-    axiosTablesSeedRetryConfig,
   );
   logger.debug(
     `[Seeding ${SEED_OPENOPS_TABLE_NAME} table] After adding primary field ID with id: ${primaryField.id}`,
@@ -155,7 +153,6 @@ async function addField(token: string, tableId: number, fieldBody: any) {
     createFieldEndpoint,
     fieldBody,
     createAxiosHeaders(token),
-    axiosTablesSeedRetryConfig,
   );
 
   logger.debug(

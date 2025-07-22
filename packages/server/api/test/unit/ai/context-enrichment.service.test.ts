@@ -8,7 +8,10 @@ import {
 } from '@openops/shared';
 import { engineRunner } from 'server-worker';
 
-import { enrichContext } from '../../../src/app/ai/chat/context-enrichment.service';
+import {
+  enrichContext,
+  IncludeOptions,
+} from '../../../src/app/ai/chat/context-enrichment.service';
 import { accessTokenManager } from '../../../src/app/authentication/lib/access-token-manager';
 import { flowService } from '../../../src/app/flows/flow/flow.service';
 import { flowStepTestOutputService } from '../../../src/app/flows/step-test-output/flow-step-test-output.service';
@@ -39,6 +42,7 @@ jest.mock(
   () => ({
     flowStepTestOutputService: {
       listEncrypted: jest.fn(),
+      listDecrypted: jest.fn(),
     },
   }),
 );
@@ -147,6 +151,8 @@ describe('ContextEnrichmentService', () => {
       expect(result).toEqual({
         flowId: mockFlowId,
         flowVersionId: mockFlowVersionId,
+        currentStepId: undefined,
+        currentStepData: '',
         steps: [
           {
             id: 'step-1',
@@ -205,6 +211,8 @@ describe('ContextEnrichmentService', () => {
       expect(result).toEqual({
         flowId: mockFlowId,
         flowVersionId: mockFlowVersionId,
+        currentStepId: undefined,
+        currentStepData: '',
         steps: [
           {
             id: 'step-1',
@@ -264,6 +272,8 @@ describe('ContextEnrichmentService', () => {
       expect(result).toEqual({
         flowId: mockFlowId,
         flowVersionId: mockFlowVersionId,
+        currentStepId: undefined,
+        currentStepData: '',
         steps: [
           {
             id: 'step-1',
@@ -320,6 +330,8 @@ describe('ContextEnrichmentService', () => {
       expect(result).toEqual({
         flowId: mockFlowId,
         flowVersionId: mockFlowVersionId,
+        currentStepId: undefined,
+        currentStepData: '',
         steps: [
           {
             id: 'step-1',
@@ -376,7 +388,174 @@ describe('ContextEnrichmentService', () => {
       expect(result).toEqual({
         flowId: mockFlowId,
         flowVersionId: mockFlowVersionId,
+        currentStepId: undefined,
+        currentStepData: '',
         steps: [],
+      });
+    });
+
+    describe('getCurrentStepData functionality', () => {
+      const mockCurrentStepId = 'current-step-id';
+
+      beforeEach(() => {
+        setupMockFlow();
+      });
+
+      it.each([
+        {
+          description:
+            'should include current step data when includeCurrentStepOutput is ALWAYS',
+          includeOption: IncludeOptions.ALWAYS,
+          stepSuccess: true,
+          stepOutput: { result: 'success', data: 'test-output' },
+          expectedData: JSON.stringify({
+            result: 'success',
+            data: 'test-output',
+          }),
+          shouldCallService: true,
+        },
+        {
+          description:
+            'should not include current step data when includeCurrentStepOutput is NEVER',
+          includeOption: IncludeOptions.NEVER,
+          stepSuccess: true,
+          stepOutput: { result: 'success', data: 'test-output' },
+          expectedData: '',
+          shouldCallService: true,
+        },
+        {
+          description:
+            'should not include current step data when no options provided (default behavior)',
+          includeOption: undefined,
+          stepSuccess: true,
+          stepOutput: { result: 'success', data: 'test-output' },
+          expectedData: '',
+          shouldCallService: true,
+        },
+      ])(
+        '$description',
+        async ({
+          includeOption,
+          stepSuccess,
+          stepOutput,
+          expectedData,
+          shouldCallService,
+        }) => {
+          const mockStepOutput = {
+            id: 'output-id-1',
+            created: '2023-01-01T00:00:00.000Z',
+            updated: '2023-01-01T00:00:00.000Z',
+            input: {},
+            stepId: mockCurrentStepId,
+            flowVersionId: mockFlowVersionId,
+            output: stepOutput,
+            success: stepSuccess,
+          };
+
+          mockFlowStepTestOutputService.listDecrypted.mockResolvedValue([
+            mockStepOutput,
+          ]);
+
+          const mockInputContext = {
+            ...createMockInputContext(),
+            currentStepId: mockCurrentStepId,
+          };
+
+          const options = includeOption
+            ? { includeCurrentStepOutput: includeOption }
+            : undefined;
+          const result = await enrichContext(
+            mockInputContext,
+            mockProjectId,
+            options,
+          );
+
+          expect(result.currentStepId).toBe(mockCurrentStepId);
+          expect(result.currentStepData).toBe(expectedData);
+
+          if (shouldCallService) {
+            expect(
+              mockFlowStepTestOutputService.listDecrypted,
+            ).toHaveBeenCalledWith({
+              flowVersionId: mockFlowVersionId,
+              stepIds: [mockCurrentStepId],
+            });
+          }
+        },
+      );
+
+      it.each([
+        {
+          description:
+            'should include current step data when includeCurrentStepOutput is ONLY_IF_ERROR and step failed',
+          stepSuccess: false,
+          stepOutput: { error: 'Something went wrong' },
+          expectedData: JSON.stringify({ error: 'Something went wrong' }),
+        },
+        {
+          description:
+            'should not include current step data when includeCurrentStepOutput is ONLY_IF_ERROR and step succeeded',
+          stepSuccess: true,
+          stepOutput: { result: 'success', data: 'test-output' },
+          expectedData: '',
+        },
+      ])('$description', async ({ stepSuccess, stepOutput, expectedData }) => {
+        const mockStepOutput = {
+          id: 'output-id-2',
+          created: '2023-01-01T00:00:00.000Z',
+          updated: '2023-01-01T00:00:00.000Z',
+          input: {},
+          stepId: mockCurrentStepId,
+          flowVersionId: mockFlowVersionId,
+          output: stepOutput,
+          success: stepSuccess,
+        };
+
+        mockFlowStepTestOutputService.listDecrypted.mockResolvedValue([
+          mockStepOutput,
+        ]);
+
+        const mockInputContext = {
+          ...createMockInputContext(),
+          currentStepId: mockCurrentStepId,
+        };
+
+        const result = await enrichContext(mockInputContext, mockProjectId, {
+          includeCurrentStepOutput: IncludeOptions.ONLY_IF_ERROR,
+        });
+
+        expect(result.currentStepId).toBe(mockCurrentStepId);
+        expect(result.currentStepData).toBe(expectedData);
+      });
+
+      it('should return empty string when no current step output found', async () => {
+        mockFlowStepTestOutputService.listDecrypted.mockResolvedValue([]);
+
+        const mockInputContext = {
+          ...createMockInputContext(),
+          currentStepId: mockCurrentStepId,
+        };
+
+        const result = await enrichContext(mockInputContext, mockProjectId, {
+          includeCurrentStepOutput: IncludeOptions.ALWAYS,
+        });
+
+        expect(result.currentStepId).toBe(mockCurrentStepId);
+        expect(result.currentStepData).toBe('');
+      });
+
+      it('should not call listDecrypted when no currentStepId provided', async () => {
+        const mockInputContext = createMockInputContext();
+
+        const result = await enrichContext(mockInputContext, mockProjectId, {
+          includeCurrentStepOutput: IncludeOptions.ALWAYS,
+        });
+
+        expect(result.currentStepId).toBeUndefined();
+        expect(result.currentStepData).toBe('');
+        expect(
+          mockFlowStepTestOutputService.listDecrypted,
+        ).not.toHaveBeenCalled();
       });
     });
   });

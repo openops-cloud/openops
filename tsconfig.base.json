@@ -108,6 +108,9 @@
       ],
       "@openops/block-finout": ["packages/blocks/finout/src/index.ts"],
       "@openops/block-flexera": ["packages/blocks/flexera/src/index.ts"],
+      "@openops/block-flexera-one": [
+        "packages/blocks/flexera-one/src/index.ts"
+      ],
       "@openops/block-fliqr-ai": ["packages/blocks/fliqr-ai/src/index.ts"],
       "@openops/block-flowise": ["packages/blocks/flowise/src/index.ts"],
       "@openops/block-flowlu": ["packages/blocks/flowlu/src/index.ts"],
@@ -236,6 +239,7 @@
       "@openops/block-pastebin": ["packages/blocks/pastebin/src/index.ts"],
       "@openops/block-pastefy": ["packages/blocks/pastefy/src/index.ts"],
       "@openops/block-pdf": ["packages/blocks/pdf/src/index.ts"],
+      "@openops/block-pelanor": ["packages/blocks/pelanor/src/index.ts"],
       "@openops/block-perplexity-ai": [
         "packages/blocks/perplexity-ai/src/index.ts"
       ],

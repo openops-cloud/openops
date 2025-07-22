@@ -1,5 +1,4 @@
 import {
-  axiosTablesSeedRetryConfig,
   createAxiosHeaders,
   getFields,
   getPrimaryKeyFieldFromFields,
@@ -49,7 +48,6 @@ export async function addFields(
       type: 'text',
     },
     createAxiosHeaders(token),
-    axiosTablesSeedRetryConfig,
   );
   logger.debug(
     `[Seeding Resource BU tag assignment table] After adding primary field Resource identifier with id: ${primaryField.id}`,
@@ -95,7 +93,6 @@ async function addField(
     createFieldEndpoint,
     fieldBody,
     createAxiosHeaders(token),
-    axiosTablesSeedRetryConfig,
   );
 
   logger.debug(

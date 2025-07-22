@@ -1,6 +1,5 @@
 import {
   AuthenticationType,
-  HttpMethod,
   HttpRequest,
   httpClient,
 } from '@openops/blocks-common';
@@ -19,7 +18,6 @@ export async function sendTernaryRequest(
   return httpClient.sendRequest({
     ...request,
     url: `${request.auth.apiURL}/api/${request.url}`,
-    method: HttpMethod.GET,
     authentication: {
       type: AuthenticationType.BEARER_TOKEN,
       token: request.auth.apiKey,
@@ -31,10 +29,13 @@ function validateJwt(token: string): boolean {
   if (!token) {
     return false;
   }
+
   try {
     const decoded = jwtDecode(token);
+
     const isValid =
       decoded && decoded.exp && dayjs().isBefore(dayjs.unix(decoded.exp));
+
     return !!isValid;
   } catch (e) {
     return false;

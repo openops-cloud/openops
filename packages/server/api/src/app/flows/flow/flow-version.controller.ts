@@ -153,6 +153,7 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
             input: flowStepTestOutput.input,
             output: flowStepTestOutput.output,
             lastTestDate: flowStepTestOutput.updated,
+            success: flowStepTestOutput.success,
           },
         ]),
       );
@@ -175,6 +176,7 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
           stepId: Type.String(),
           input: Type.Any(),
           output: Type.Any(),
+          success: Type.Boolean(),
         }),
         response: {
           [StatusCodes.OK]: Type.Object({
@@ -194,7 +196,7 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
     },
     async (request, reply) => {
       const { flowVersionId } = request.params;
-      const { stepId, input, output } = request.body;
+      const { stepId, input, output, success } = request.body;
       try {
         const flowVersion = await flowVersionService.getOneOrThrow(
           flowVersionId,
@@ -212,6 +214,7 @@ export const flowVersionController: FastifyPluginAsyncTypebox = async (
           flowVersionId,
           input,
           output,
+          success,
         });
         await reply.status(StatusCodes.OK).send({
           success: true,

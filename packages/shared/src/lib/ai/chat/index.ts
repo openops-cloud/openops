@@ -1,16 +1,14 @@
 import { Static, Type } from '@sinclair/typebox';
 
-export const OpenChatRequest = Type.Object({
-  workflowId: Type.String(),
-  blockName: Type.String(),
-  stepName: Type.String(),
-  actionName: Type.String(),
-});
-export type OpenChatRequest = Static<typeof OpenChatRequest>;
-
-export const OpenChatMCPRequest = Type.Object({
+export const BlockContext = Type.Object({
   chatId: Type.Optional(Type.String()),
+  workflowId: Type.Optional(Type.String()),
+  blockName: Type.Optional(Type.String()),
+  stepName: Type.Optional(Type.String()),
+  actionName: Type.Optional(Type.String()),
 });
+
+export const OpenChatMCPRequest = BlockContext;
 export type OpenChatMCPRequest = Static<typeof OpenChatMCPRequest>;
 
 export const OpenChatResponse = Type.Object({
@@ -51,6 +49,8 @@ export type StepContext = Static<typeof StepContext>;
 export const ChatFlowContext = Type.Object({
   flowId: Type.String(),
   flowVersionId: Type.String(),
+  currentStepId: Type.Optional(Type.String()),
+  currentStepData: Type.Optional(Type.Any()),
   steps: Type.Array(StepContext),
 });
 
@@ -69,3 +69,5 @@ export const DeleteChatHistoryRequest = Type.Object({
 });
 
 export type DeleteChatHistoryRequest = Static<typeof DeleteChatHistoryRequest>;
+
+export * from './code-output-structure';
