@@ -30,7 +30,7 @@ const CopyToClipboardInput = ({ textToCopy }: CopyToClipboardInputProps) => {
         disabled
       />
       <button
-        className="absolute right-2 top-1/2 -translate-y-1/2 bg-background rounded-lg p-2 inline-flex items-center justify-center"
+        className="absolute right-2 top-1/2 -translate-y-1/2 bg-background rounded-lg p-2 inline-flex items-center justify-center flex-shrink-0"
         onClick={() => copyToClipboard(textToCopy)}
       >
         {isPending ? (

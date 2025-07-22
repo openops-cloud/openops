@@ -282,9 +282,6 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
             role: 'assistant',
             content: JSON.stringify(result.object),
           };
-          logger.debug('streamCode finished', {
-            result,
-          });
 
           await saveChatHistory(chatId, userId, projectId, [
             ...messages,

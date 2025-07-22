@@ -47,7 +47,7 @@ const AiAssistantChat = ({
     setAiChatDimensions: s.setAiChatDimensions,
   }));
 
-  const { messages, handleSubmit, createNewChat } = useAssistantChat();
+  const { messages, createNewChat } = useAssistantChat();
 
   const sizes = useMemo(() => {
     const calculatedWidth = middlePanelSize.width * CHAT_WIDTH_FACTOR;
@@ -116,7 +116,6 @@ const AiAssistantChat = ({
       showAiChat={isAiChatOpened}
       onCloseClick={() => setIsAiChatOpened(false)}
       className={cn('left-4 bottom-[17px]', className)}
-      handleSubmit={handleSubmit}
       isEmpty={!messages?.length}
       onCreateNewChatClick={createNewChat}
       toggleAiChatState={onToggleAiChatState}

@@ -42,7 +42,7 @@ export const CodeActions = ({
         content={content}
         tooltip={t('Copy')}
         size="sm"
-        className="rounded p-2 inline-flex items-center justify-center"
+        className="rounded p-0 inline-flex items-center justify-center flex-shrink-0 text-foreground"
       />
     </div>
   );

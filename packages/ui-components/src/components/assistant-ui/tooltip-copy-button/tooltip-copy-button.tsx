@@ -1,6 +1,5 @@
 import { t } from 'i18next';
-import { CheckIcon, CopyIcon } from 'lucide-react';
-import { useState } from 'react';
+import { CopyIcon } from 'lucide-react';
 import { useCopyToClipboard } from '../../../hooks/use-copy-to-clipboard';
 import { cn } from '../../../lib/cn';
 import { TooltipIconButton } from '../tooltip-icon-button';
@@ -29,13 +28,10 @@ export const TooltipCopyButton = ({
   iconClassName = 'w-4 h-4',
 }: TooltipCopyButtonProps) => {
   const { copyToClipboard } = useCopyToClipboard();
-  const [isCopied, setIsCopied] = useState(false);
 
   const handleCopy = () => {
-    if (!content || isCopied) return;
+    if (!content) return;
     copyToClipboard(content);
-    setIsCopied(true);
-    setTimeout(() => setIsCopied(false), 2000);
   };
 
   return (
@@ -49,11 +45,7 @@ export const TooltipCopyButton = ({
       )}
       onClick={handleCopy}
     >
-      {isCopied ? (
-        <CheckIcon className={iconClassName} />
-      ) : (
-        <CopyIcon className={iconClassName} />
-      )}
+      <CopyIcon className={iconClassName} />
     </TooltipIconButton>
   );
 };

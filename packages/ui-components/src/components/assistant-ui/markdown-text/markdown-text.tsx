@@ -5,6 +5,7 @@ import {
   unstable_memoizeMarkdownComponents as memoizeMarkdownComponents,
   useIsMarkdownCodeBlock,
 } from '@assistant-ui/react-markdown';
+import { SourceCode } from '@openops/shared';
 import { t } from 'i18next';
 import { memo, useCallback, useMemo } from 'react';
 import remarkGfm from 'remark-gfm';
@@ -82,7 +83,8 @@ const CodeComponent = memo(
     children?: React.ReactNode;
     theme: Theme;
     codeVariation: CodeVariations;
-    onInjectCode: (codeContent: string) => void;
+    // todo correct signature everywhere
+    onInjectCode: (codeContent: string | SourceCode) => void;
     status?: { type: string; reason?: string };
     [key: string]: any;
   }) => {
@@ -105,6 +107,7 @@ const CodeComponent = memo(
     }
 
     const codeContent = String(children).trim();
+    console.log('codeContent', codeContent);
     const multilineVariation =
       codeVariation === MarkdownCodeVariations.WithCopyAndInject ||
       codeVariation === MarkdownCodeVariations.WithCopyMultiline;
@@ -112,18 +115,17 @@ const CodeComponent = memo(
     return (
       <div className="relative py-2 w-full flex flex-col">
         {isStreaming ? (
-          // During streaming: Use simple pre-formatted text to avoid CodeMirror re-renders
+          // during streaming: use simple pre-formatted text to avoid CodeMirror re-renders & layout shift issues
           <pre
             className={cn(
               'border border-solid rounded bg-background p-3 text-sm overflow-x-auto',
               'font-mono whitespace-pre-wrap break-words',
-              'min-h-[120px]', // Reserve minimum space to prevent layout shift
+              'min-h-[120px]', // reserve minimum space to prevent layout shift
             )}
           >
             <code className={className}>{codeContent}</code>
           </pre>
         ) : (
-          // When complete: Use full CodeMirror for syntax highlighting
           <CodeViewer
             content={codeContent}
             theme={theme}
@@ -160,7 +162,7 @@ CodeComponent.displayName = 'CodeComponent';
 type MarkdownTextProps = {
   theme: Theme;
   codeVariation?: CodeVariations;
-  handleInject?: (codeContent: string) => void;
+  handleInject?: (codeContent: string | SourceCode) => void;
   textClassName?: string;
   listClassName?: string;
   linkClassName?: string;
@@ -187,15 +189,18 @@ const MarkdownTextImpl = ({
 
   const memoizedComponents = useMemo(() => {
     return memoizeMarkdownComponents({
-      code: (props: any) => (
-        <CodeComponent
-          {...props}
-          theme={theme}
-          codeVariation={codeVariation}
-          onInjectCode={onInjectCode}
-          status={status}
-        />
-      ),
+      code: (props: any) => {
+        console.log('MarkdownTextImpl -> code', props);
+        return (
+          <CodeComponent
+            {...props}
+            theme={theme}
+            codeVariation={codeVariation}
+            onInjectCode={onInjectCode}
+            status={status}
+          />
+        );
+      },
       ...createMarkdownComponents({
         textClassName,
         listClassName,

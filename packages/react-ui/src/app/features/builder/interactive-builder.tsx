@@ -18,7 +18,7 @@ import {
 } from '@openops/shared';
 import React, { MutableRefObject, useCallback, useEffect, useRef } from 'react';
 import { useDebounceCallback } from 'usehooks-ts';
-import { StepSettingsAiChat } from './ai-chat/step-settings-ai-chat';
+import { StepSettingsAiChat } from './ai-chat-assistant-ui';
 import { textMentionUtils } from './block-properties/text-input-with-mentions/text-input-utils';
 import { BuilderHeader } from './builder-header/builder-header';
 import { useBuilderStateContext } from './builder-hooks';
@@ -178,11 +178,13 @@ const InteractiveBuilder = ({
           className="flex flex-col absolute bottom-0 right-0"
           ref={containerRef}
         >
-          <StepSettingsAiChat
-            middlePanelSize={middlePanelSize}
-            selectedStep={selectedStep}
-            flowVersion={flowVersion}
-          />
+          {selectedStep && (
+            <StepSettingsAiChat
+              middlePanelSize={middlePanelSize}
+              selectedStep={selectedStep}
+              flowVersion={flowVersion}
+            />
+          )}
           <DataSelector
             parentHeight={middlePanelSize.height}
             parentWidth={middlePanelSize.width}

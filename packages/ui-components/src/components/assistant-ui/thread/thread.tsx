@@ -19,37 +19,50 @@ import {
 import type { FC } from 'react';
 import { Button } from '../../../ui/button';
 
+import { SourceCode } from '@openops/shared';
 import { t } from 'i18next';
 import { memo, useMemo } from 'react';
 import { cn } from '../../../lib/cn';
+import { tryParseJson } from '../../../lib/json-utils';
 import { Theme } from '../../../lib/theme';
 import { MarkdownText } from '../markdown-text';
 import { useThreadWelcome } from '../thread-welcome-context';
 import { ToolFallback } from '../tool-fallback';
 import { TooltipIconButton } from '../tooltip-icon-button';
 
-const MarkdownTextWrapper = memo(({ theme, ...props }: any) => {
-  return <MarkdownText {...props} theme={theme} />;
+const MarkdownTextWrapper = memo(({ theme, onInject, ...props }: any) => {
+  return <MarkdownText {...props} theme={theme} handleInject={onInject} />;
 });
 MarkdownTextWrapper.displayName = 'MarkdownTextWrapper';
 
-const AssistantMessageWrapper = memo(({ theme }: { theme: Theme }) => {
-  return <AssistantMessage theme={theme} />;
-});
+const AssistantMessageWrapper = memo(
+  ({
+    theme,
+    onInject,
+  }: {
+    theme: Theme;
+    onInject?: (code: string | SourceCode) => void;
+  }) => {
+    return <AssistantMessage theme={theme} onInject={onInject} />;
+  },
+);
 AssistantMessageWrapper.displayName = 'AssistantMessageWrapper';
 
 type ThreadProps = {
   theme: Theme;
+  onInject?: (code: string | SourceCode) => void;
 };
 
-export const Thread = ({ theme }: ThreadProps) => {
+export const Thread = ({ theme, onInject }: ThreadProps) => {
   const messageComponents = useMemo(
     () => ({
       UserMessage: UserMessage,
       EditComposer: EditComposer,
-      AssistantMessage: () => <AssistantMessageWrapper theme={theme} />,
+      AssistantMessage: () => (
+        <AssistantMessageWrapper theme={theme} onInject={onInject} />
+      ),
     }),
-    [theme],
+    [theme, onInject],
   );
 
   return (
@@ -190,13 +203,43 @@ const EditComposer: FC = () => {
   );
 };
 
-const AssistantMessage: FC<{ theme: Theme }> = ({ theme }) => {
+const AssistantMessage: FC<{
+  theme: Theme;
+  onInject?: (code: string | SourceCode) => void;
+}> = ({ theme, onInject }) => {
   const messageComponents = useMemo(
     () => ({
-      Text: (props: any) => <MarkdownTextWrapper {...props} theme={theme} />,
+      Text: (props: any) => {
+        const parsed: any = tryParseJson(props.text);
+        if (parsed?.type === 'code') {
+          return (
+            <>
+              <MarkdownTextWrapper
+                {...props}
+                text={{
+                  code: parsed.code,
+                  packageJson: parsed.packageJson,
+                }}
+                theme={theme}
+                onInject={onInject}
+              />
+              <MarkdownTextWrapper
+                {...props}
+                text={parsed.textAnswer}
+                theme={theme}
+                onInject={onInject}
+              />
+            </>
+          );
+        }
+
+        return (
+          <MarkdownTextWrapper {...props} theme={theme} onInject={onInject} />
+        );
+      },
       tools: { Fallback: ToolFallback },
     }),
-    [theme],
+    [theme, onInject],
   );
 
   return (
