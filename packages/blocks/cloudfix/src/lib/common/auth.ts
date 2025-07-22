@@ -1,14 +1,13 @@
 import { BlockAuth, Property, Validators } from '@openops/blocks-framework';
 
 const markdown = `
-To get your Cloudfix API key:
+To get your CloudFix API key:
 
-1. Log into your Cloudfix account
-2. Navigate to Settings > API Keys
-3. Generate a new API key or copy an existing one
+1. From the CloudFix app, click on "Settings" on the top menu.
+2. Then, click on the "API Tokens" tab, and then "Create Token" button. 
+3. Enter a name for your token, and select an appropriate role - Reader, Resource Manager, or Runbook Manager.
 
-For more information, visit the [Cloudfix API documentation](https://docs.cloudfix.com/reference/introduction).
-`;
+For more information, visit the [CloudFix API documentation](https://docs.cloudfix.com/reference/introduction).`;
 
 export const cloudfixAuth = BlockAuth.CustomAuth({
   required: true,
@@ -19,7 +18,7 @@ export const cloudfixAuth = BlockAuth.CustomAuth({
   props: {
     apiUrl: Property.ShortText({
       displayName: 'API URL',
-      description: 'The base URL for the Cloudfix API',
+      description: 'The base URL for the CloudFix API',
       required: true,
       validators: [Validators.url],
       defaultValue: 'https://preview.app.cloudfix.com/api/v3',
@@ -27,7 +26,7 @@ export const cloudfixAuth = BlockAuth.CustomAuth({
     apiKey: Property.SecretText({
       required: true,
       displayName: 'API Key',
-      description: 'The API key to use to connect to Cloudfix',
+      description: 'The API key to use to connect to CloudFix',
     }),
   },
 });

@@ -3,6 +3,10 @@ import { createBlock, Property } from '@openops/blocks-framework';
 import { BlockCategory } from '@openops/shared';
 import { cloudfixAuth } from './lib/common/auth';
 
+const markdown = `
+For more information, visit the [CloudFix API documentation](https://docs.cloudfix.com/reference/introduction).
+`;
+
 export const cloudfix = createBlock({
   displayName: 'CloudFix',
   auth: cloudfixAuth,
@@ -16,7 +20,7 @@ export const cloudfix = createBlock({
       auth: cloudfixAuth,
       additionalProps: {
         documentation: Property.MarkDown({
-          value: 'TODO',
+          value: markdown,
         }),
       },
       authMapping: async (context) => ({
