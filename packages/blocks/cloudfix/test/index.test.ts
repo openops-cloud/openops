@@ -12,8 +12,28 @@ describe('block declaration tests', () => {
   });
 
   test('should return block with correct number of actions', () => {
-    expect(Object.keys(cloudfix.actions()).length).toBe(1);
+    expect(Object.keys(cloudfix.actions()).length).toBe(6);
     expect(cloudfix.actions()).toMatchObject({
+      cloudfix_get_recommendations: {
+        name: 'cloudfix_get_recommendations',
+        requireAuth: true,
+      },
+      cloudfix_create_change_requests: {
+        name: 'cloudfix_create_change_requests',
+        requireAuth: true,
+      },
+      cloudfix_postpone_recommendations: {
+        name: 'cloudfix_postpone_recommendations',
+        requireAuth: true,
+      },
+      cloudfix_get_recommendations_summary: {
+        name: 'cloudfix_get_recommendations_summary',
+        requireAuth: true,
+      },
+      cloudfix_get_report: {
+        name: 'cloudfix_get_report',
+        requireAuth: true,
+      },
       custom_api_call: {
         name: 'custom_api_call',
         requireAuth: true,
@@ -27,5 +47,15 @@ describe('block declaration tests', () => {
 
   test('should return block with correct categories', () => {
     expect(cloudfix.categories).toContain('FINOPS');
+  });
+
+  test('should return block with correct minimum supported release', () => {
+    expect(cloudfix.minimumSupportedRelease).toBe('0.20.0');
+  });
+
+  test('should return block with correct logo URL', () => {
+    expect(cloudfix.logoUrl).toBe(
+      'https://static.openops.com/blocks/cloudfix.png',
+    );
   });
 });

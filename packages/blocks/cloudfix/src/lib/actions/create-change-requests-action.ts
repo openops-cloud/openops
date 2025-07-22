@@ -1,0 +1,53 @@
+import { HttpMethod } from '@openops/blocks-common';
+import { createAction, Property } from '@openops/blocks-framework';
+import { RiskLevel } from '@openops/shared';
+import { cloudfixAuth, CloudfixAuth } from '../common/auth';
+import { makeRequest } from '../common/make-request';
+
+export const createChangeRequestsAction = createAction({
+  name: 'cloudfix_create_change_requests',
+  displayName: 'Create Change Requests',
+  description: 'Create change requests from recommendations.',
+  auth: cloudfixAuth,
+  riskLevel: RiskLevel.HIGH,
+  props: {
+    recommendationIds: Property.Array({
+      displayName: 'Recommendation IDs',
+      description: 'Array of recommendation IDs to create change requests for',
+      required: true,
+      properties: {
+        recommendationId: Property.ShortText({
+          displayName: 'Recommendation ID',
+          description: 'The ID of the recommendation',
+          required: true,
+        }),
+      },
+    }),
+    executeOnSchedule: Property.Checkbox({
+      displayName: 'Execute On Schedule',
+      description: 'Whether to execute the change requests on schedule',
+      required: false,
+      defaultValue: false,
+    }),
+  },
+  async run(context) {
+    const recommendationIds = context.propsValue['recommendationIds'] as any[];
+    const executeOnSchedule = context.propsValue[
+      'executeOnSchedule'
+    ] as boolean;
+
+    const body = {
+      recommendationIds: recommendationIds.map((item) => item.recommendationId),
+      executeOnSchedule,
+    };
+
+    const response = await makeRequest({
+      auth: context.auth as CloudfixAuth,
+      endpoint: '/create-change-requests',
+      method: HttpMethod.POST,
+      body,
+    });
+
+    return response;
+  },
+});
