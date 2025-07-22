@@ -51,6 +51,7 @@ const InteractiveBuilder = ({
   middlePanelSize,
   flowVersion,
   lefSideBarContainerWidth,
+  showAiChat,
 }: {
   selectedStep: string | null;
   clearSelectedStep: () => void;
@@ -61,6 +62,7 @@ const InteractiveBuilder = ({
   };
   lefSideBarContainerWidth: number;
   flowVersion: FlowVersion;
+  showAiChat: boolean;
 }) => {
   const { onPaste } = usePaste();
 
@@ -156,10 +158,13 @@ const InteractiveBuilder = ({
     >
       <div ref={middlePanelRef} className="relative h-full w-full">
         <BuilderHeader />
-        <AiAssistantChat
-          middlePanelSize={middlePanelSize}
-          className={'left-4 bottom-[70px]'}
-        />
+        {showAiChat && (
+          <AiAssistantChat
+            middlePanelSize={middlePanelSize}
+            className={'left-4 bottom-[70px]'}
+          />
+        )}
+
         <CanvasControls
           topOffset={FLOW_CANVAS_Y_OFFESET}
           className={cn({

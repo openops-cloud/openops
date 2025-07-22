@@ -30,7 +30,6 @@ import { useRunProgress } from '@/app/features/builder/hooks/use-run-progress';
 
 import { useResizablePanelGroup } from '@/app/common/hooks/use-resizable-panel-group';
 import { useSocket } from '@/app/common/providers/socket-provider';
-import { PanelSizes } from '@/app/common/types/panel-sizes';
 import { FLOW_CANVAS_Y_OFFESET } from '@/app/constants/flow-canvas';
 import { SEARCH_PARAMS } from '@/app/constants/search-params';
 import { AiAssistantButton } from '@/app/features/ai/ai-assistant-button';
@@ -38,6 +37,7 @@ import {
   Action,
   ActionType,
   BlockTrigger,
+  FlagId,
   flowHelper,
   isNil,
   Trigger,
@@ -45,10 +45,9 @@ import {
   WebsocketClientEvent,
 } from '@openops/shared';
 
-import {
-  RESIZABLE_PANEL_GROUP,
-  RESIZABLE_PANEL_IDS,
-} from '../../constants/layout';
+import { flagsHooks } from '@/app/common/hooks/flags-hooks';
+import { AiChatResizablePanel } from '@/app/features/builder/ai-chat/ai-chat-resizable-panel';
+import { RESIZABLE_PANEL_IDS } from '../../constants/layout';
 import {
   LEFT_SIDEBAR_MIN_EFFECTIVE_WIDTH,
   LEFT_SIDEBAR_MIN_SIZE,
@@ -174,6 +173,7 @@ const BuilderPage = () => {
       };
     },
   );
+
   const [middlePanelRef, rawMiddlePanelSize] = useMeasure<HTMLDivElement>();
   const [leftSidePanelRef, leftSidePanelSize] = useMeasure<HTMLDivElement>();
   const [isDraggingHandle, setIsDraggingHandle] = useState(false);
@@ -215,7 +215,11 @@ const BuilderPage = () => {
 
   const { switchToDraft, isSwitchingToDraftPending } = useSwitchToDraft();
 
-  const { setPanelGroupSize } = useResizablePanelGroup();
+  const { setPanelsSize } = useResizablePanelGroup();
+
+  const showChatInResizablePanel = flagsHooks.useFlag<boolean>(
+    FlagId.ASSISTANT_UI_ENABLED,
+  ).data;
 
   const isRightSidebarVisible =
     rightSidebar === RightSideBarType.BLOCK_SETTINGS &&
@@ -229,6 +233,16 @@ const BuilderPage = () => {
       height: rawMiddlePanelSize.height - MIDDLE_PANEL_TOP_OFFSET,
     };
   }, [rawMiddlePanelSize.height, rawMiddlePanelSize.width]);
+
+  const onResize = useCallback(
+    (size: number[]) => {
+      setPanelsSize({
+        [RESIZABLE_PANEL_IDS.LEFT_SIDEBAR]: size[0],
+        [RESIZABLE_PANEL_IDS.AI_CHAT]: size[1],
+      });
+    },
+    [setPanelsSize],
+  );
 
   return (
     <div className="flex h-screen w-screen flex-col relative">
@@ -249,9 +263,7 @@ const BuilderPage = () => {
           <ResizablePanelGroup
             direction="horizontal"
             className="absolute left-0 top-0"
-            onLayout={(size) => {
-              setPanelGroupSize(RESIZABLE_PANEL_GROUP, size as PanelSizes);
-            }}
+            onLayout={onResize}
           >
             <LeftSidebarResizablePanel
               minSize={LEFT_SIDEBAR_MIN_SIZE}
@@ -279,16 +291,22 @@ const BuilderPage = () => {
               disabled={leftSidebar === LeftSideBarType.NONE}
               onDragging={setIsDraggingHandle}
             />
+            <AiChatResizablePanel
+              isDraggingHandle={isDraggingHandle}
+              onDragging={setIsDraggingHandle}
+            />
 
-            <ResizablePanel order={2} id={RESIZABLE_PANEL_IDS.MAIN}>
+            <ResizablePanel order={3} id={RESIZABLE_PANEL_IDS.MAIN}>
               {readonly ? (
                 <ReadonlyCanvasProvider>
                   <div ref={middlePanelRef} className="relative h-full w-full">
                     <BuilderHeader />
-                    <AiAssistantChat
-                      middlePanelSize={middlePanelSize}
-                      className={'left-4 bottom-[70px]'}
-                    />
+                    {!showChatInResizablePanel && (
+                      <AiAssistantChat
+                        middlePanelSize={middlePanelSize}
+                        className={'left-4 bottom-[70px]'}
+                      />
+                    )}
                     {leftSidebar === LeftSideBarType.NONE && (
                       <AiAssistantButton className="size-[42px] absolute left-4 bottom-[10px] z-50" />
                     )}
@@ -318,6 +336,7 @@ const BuilderPage = () => {
                   middlePanelSize={middlePanelSize}
                   flowVersion={flowVersion}
                   lefSideBarContainerWidth={leftSidePanelSize?.width || 0}
+                  showAiChat={!showChatInResizablePanel}
                 />
               )}
             </ResizablePanel>
@@ -336,7 +355,7 @@ const BuilderPage = () => {
                 defaultSize={0}
                 minSize={0}
                 maxSize={60}
-                order={3}
+                order={4}
                 className={cn('min-w-0 bg-background z-30', {
                   [minWidthOfSidebar]: isRightSidebarVisible,
                 })}

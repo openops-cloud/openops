@@ -10,7 +10,7 @@ import {
   MarkdownCodeVariations,
   tryParseJson,
 } from '@openops/components/ui';
-import { CodeLLMSchema, OpenChatResponse, SourceCode } from '@openops/shared';
+import { CodeSchema, OpenChatResponse, SourceCode } from '@openops/shared';
 import { useCallback, useMemo } from 'react';
 import { useBuilderStateContext } from '../builder-hooks';
 
@@ -47,11 +47,8 @@ const StepSettingsAiConversation = ({
         isCodeMessage(message)
       ) {
         const codeSchema = message.annotations?.find(
-          (annotation: any): annotation is CodeLLMSchema =>
-            typeof annotation === 'object' &&
-            annotation !== null &&
-            'code' in annotation &&
-            'description' in annotation,
+          (annotation: any): annotation is CodeSchema =>
+            annotation.type === 'code',
         );
 
         if (codeSchema) {
@@ -59,8 +56,8 @@ const StepSettingsAiConversation = ({
         }
 
         // when loading data from the history it's serialized as string
-        const parsed = tryParseJson(message.content) as CodeLLMSchema;
-        if (parsed?.code && parsed?.description) {
+        const parsed = tryParseJson(message.content) as CodeSchema;
+        if (parsed?.type === 'code') {
           return createCodeMessage(message, idx, parsed);
         }
       }
@@ -91,18 +88,18 @@ const StepSettingsAiConversation = ({
 
 const isCodeMessage = (
   message: MessageType,
-): message is UIMessage & { annotations: CodeLLMSchema[] } =>
+): message is UIMessage & { annotations: CodeSchema[] } =>
   ('annotations' in message &&
     !!message?.annotations?.length &&
     message.annotations?.some(
       (annotation) =>
+        annotation &&
         typeof annotation === 'object' &&
-        annotation !== null &&
-        'code' in annotation &&
-        'description' in annotation,
+        'type' in annotation &&
+        annotation?.type === 'code',
     )) ||
   (typeof message.content === 'string' &&
-    (tryParseJson(message.content) as CodeLLMSchema)?.code !== undefined);
+    (tryParseJson(message.content) as CodeSchema)?.type === 'code');
 
 const getMessageId = (message: MessageType, idx: number): string => {
   return message && 'id' in message ? message.id : String(idx);
@@ -111,8 +108,12 @@ const getMessageId = (message: MessageType, idx: number): string => {
 const createCodeMessage = (
   message: MessageType,
   idx: number,
-  parsed: CodeLLMSchema,
+  parsed: CodeSchema,
 ): AIChatMessage => {
+  if (parsed.type !== 'code') {
+    return createMessage(message, idx);
+  }
+
   return {
     id: getMessageId(message, idx),
     role: AIChatMessageRole.assistant,
@@ -120,11 +121,14 @@ const createCodeMessage = (
       parts: [
         {
           type: 'sourcecode',
-          content: parsed,
+          content: {
+            code: parsed.code,
+            packageJson: parsed.packageJson,
+          },
         },
         {
           type: 'text',
-          content: parsed.description,
+          content: parsed.textAnswer,
         },
       ],
     },

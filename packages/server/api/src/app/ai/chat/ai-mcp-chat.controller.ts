@@ -1,4 +1,5 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
+import { isLLMTelemetryEnabled } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import {
   AiConfig,
@@ -37,7 +38,7 @@ import {
   generateChatId,
   generateChatIdForMCP,
   getChatContext,
-  getChatHistory,
+  getChatHistoryWithMergedTools,
   getConversation,
   getLLMConfig,
   MCPChatContext,
@@ -45,7 +46,7 @@ import {
 } from './ai-chat.service';
 import { generateMessageId } from './ai-message-id-generator';
 import { streamCode } from './code.service';
-import { enrichContext } from './context-enrichment.service';
+import { enrichContext, IncludeOptions } from './context-enrichment.service';
 import { getBlockSystemPrompt, getMcpSystemPrompt } from './prompts.service';
 import { selectRelevantTools } from './tools.service';
 
@@ -66,7 +67,11 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         );
 
         if (existingContext) {
-          const messages = await getChatHistory(inputChatId, userId, projectId);
+          const messages = await getChatHistoryWithMergedTools(
+            inputChatId,
+            userId,
+            projectId,
+          );
           return reply.code(200).send({
             chatId: inputChatId,
             messages,
@@ -90,7 +95,11 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
           userId,
         });
 
-        const messages = await getChatHistory(chatId, userId, projectId);
+        const messages = await getChatHistoryWithMergedTools(
+          chatId,
+          userId,
+          projectId,
+        );
 
         if (messages.length === 0) {
           await createChatContext(chatId, userId, projectId, context);
@@ -113,7 +122,11 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       };
 
       await createChatContext(chatId, userId, projectId, chatContext);
-      const messages = await getChatHistory(chatId, userId, projectId);
+      const messages = await getChatHistoryWithMergedTools(
+        chatId,
+        userId,
+        projectId,
+      );
 
       return reply.code(200).send({
         chatId,
@@ -133,10 +146,13 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         projectId,
       );
       const llmConfigResult = await getLLMConfig(projectId);
-
+      const messageContent = await getUserMessage(request.body, reply);
+      if (messageContent === null) {
+        return; // Error response already sent
+      }
       conversationResult.messages.push({
         role: 'user',
-        content: request.body.message,
+        content: messageContent,
       });
 
       const { chatContext, messages } = conversationResult;
@@ -264,7 +280,9 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       const { aiConfig, languageModel } = llmConfigResult;
 
       const enrichedContext = request.body.additionalContext
-        ? await enrichContext(request.body.additionalContext, projectId)
+        ? await enrichContext(request.body.additionalContext, projectId, {
+            includeCurrentStepOutput: IncludeOptions.ALWAYS,
+          })
         : undefined;
 
       const prompt = await getBlockSystemPrompt(chatContext, enrichedContext);
@@ -279,6 +297,9 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
             role: 'assistant',
             content: JSON.stringify(result.object),
           };
+          logger.debug('streamCode finished', {
+            result,
+          });
 
           await saveChatHistory(chatId, userId, projectId, [
             ...messages,
@@ -286,7 +307,10 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
           ]);
         },
         onError: (error) => {
-          logger.error('Failed to generate code', error);
+          logger.error('Failed to generate code', {
+            error,
+          });
+          throw error;
         },
       });
 
@@ -387,6 +411,7 @@ async function streamMessages(
     toolChoice,
     maxRetries: 1,
     maxSteps: MAX_RECURSION_DEPTH,
+    experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
     async onStepFinish({ finishReason }): Promise<void> {
       stepCount++;
       if (finishReason !== 'stop' && stepCount >= MAX_RECURSION_DEPTH) {
@@ -525,4 +550,53 @@ function handleError(
 
   logger.error(`Failed to process ${context || 'request'} with error: `, error);
   return reply.code(500).send({ message: 'Internal server error' });
+}
+
+/**
+ * Extracts the user message content from the request body.
+ * Returns the message content as string, or null if validation fails (error response sent).
+ */
+async function getUserMessage(
+  body: NewMessageRequest,
+  reply: FastifyReply,
+): Promise<string | null> {
+  if (body.messages) {
+    if (body.messages.length === 0) {
+      await reply.code(400).send({
+        message:
+          'Messages array cannot be empty. Please provide at least one message or use the message field instead.',
+      });
+      return null;
+    }
+
+    const lastMessage = body.messages[body.messages.length - 1];
+    if (
+      !lastMessage.content ||
+      !Array.isArray(lastMessage.content) ||
+      lastMessage.content.length === 0
+    ) {
+      await reply.code(400).send({
+        message:
+          'Last message must have valid content array with at least one element.',
+      });
+      return null;
+    }
+
+    const firstContentElement = lastMessage.content[0];
+    if (
+      !firstContentElement ||
+      typeof firstContentElement !== 'object' ||
+      !('text' in firstContentElement)
+    ) {
+      await reply.code(400).send({
+        message:
+          'Last message must have a text content element as the first element.',
+      });
+      return null;
+    }
+
+    return String(firstContentElement.text);
+  } else {
+    return body.message;
+  }
 }

@@ -1,4 +1,10 @@
-import { AiConfig, CodeLLMSchema, codeLLMSchema } from '@openops/shared';
+import { isLLMTelemetryEnabled } from '@openops/common';
+import { logger } from '@openops/server-shared';
+import {
+  AiConfig,
+  unifiedCodeLLMSchema,
+  UnifiedCodeLLMSchema,
+} from '@openops/shared';
 import {
   CoreMessage,
   LanguageModel,
@@ -12,7 +18,7 @@ type StreamCodeOptions = {
   languageModel: LanguageModel;
   aiConfig: AiConfig;
   systemPrompt: string;
-  onFinish: StreamObjectOnFinishCallback<CodeLLMSchema> | undefined;
+  onFinish: StreamObjectOnFinishCallback<UnifiedCodeLLMSchema> | undefined;
   onError: (error: unknown) => void;
 };
 
@@ -24,16 +30,22 @@ export const streamCode = ({
   onFinish,
   onError,
 }: StreamCodeOptions): StreamObjectResult<
-  Partial<CodeLLMSchema>,
-  CodeLLMSchema,
+  Partial<UnifiedCodeLLMSchema>,
+  UnifiedCodeLLMSchema,
   never
-> =>
-  streamObject({
+> => {
+  logger.debug('streamCode', {
+    messages,
+    systemPrompt,
+  });
+  return streamObject({
     model: languageModel,
     system: systemPrompt,
     messages,
-    schema: codeLLMSchema,
     ...aiConfig.modelSettings,
     onFinish,
     onError,
+    schema: unifiedCodeLLMSchema,
+    experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
   });
+};

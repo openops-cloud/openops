@@ -3,7 +3,7 @@ import { accountProperty } from './account-property';
 import { anadotAuth } from './anodot-auth-property';
 import { closedAndDoneRecommendationsProperty } from './api-filters/closed-and-done-recommendations-property';
 import { customStatusProperty } from './api-filters/custom-status-property';
-import { getPredefinedRecommendationsDropdownProperty } from './api-filters/get-x-recommendation-property';
+import { getPredefinedRecommendationsDropdownProperty } from './api-filters/get-predefined-recommendation-property';
 import { openedRecommendationsProperty } from './api-filters/opened-recommendations-property';
 import { buildUserAccountApiKey } from './common/anodot-requests-helpers';
 import { authenticateUserWithAnodot } from './common/auth';
@@ -24,7 +24,7 @@ export const getRecommendationsAction = createAction({
   props: {
     accounts: accountProperty(),
 
-    recommendationType: getPredefinedRecommendationsDropdownProperty(),
+    recommendationTypes: getPredefinedRecommendationsDropdownProperty(),
 
     customStatus: customStatusProperty(),
 
@@ -37,6 +37,9 @@ export const getRecommendationsAction = createAction({
       const { authUrl, apiUrl, username, password } = context.auth;
 
       const accounts = context.propsValue.accounts as any[];
+      const recommendationTypes = context.propsValue.recommendationTypes as
+        | string[]
+        | undefined;
 
       const props = {
         ...context.propsValue,
@@ -49,12 +52,12 @@ export const getRecommendationsAction = createAction({
       addCustomStatusFilters(filters, context.propsValue);
       addClosedAndDoneDateFilters(filters, context.propsValue);
 
-      Object.entries(context.propsValue.recommendationType.filters).forEach(
-        ([key, eq]) => {
-          const filterObject = { eq, negate: false };
-          addFilterIfValid(filters, key, filterObject);
-        },
-      );
+      if (recommendationTypes) {
+        addFilterIfValid(filters, 'type_id', {
+          eq: recommendationTypes,
+          negate: false,
+        });
+      }
 
       const anodotTokens = await authenticateUserWithAnodot(
         authUrl,

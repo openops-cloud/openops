@@ -83,7 +83,6 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [AppSystemProp.AZURE_API_VERSION]: '2024-07-01',
   [SharedSystemProp.INTERNAL_OAUTH_PROXY_URL]: 'https://oauth.openops.com',
   [AppSystemProp.CODE_BLOCK_MEMORY_LIMIT_IN_MB]: '128',
-  [SharedSystemProp.INTERNAL_PARALLEL_LOOP_ITERATIONS_LIMIT]: '1',
   [AppSystemProp.AI_PROMPTS_LOCATION]:
     'https://raw.githubusercontent.com/openops-cloud/openops/main/ai-prompts',
   [AppSystemProp.SUPERSET_MCP_SERVER_PATH]: '/root/.mcp/superset',
@@ -94,6 +93,7 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [AppSystemProp.AWS_MCP_COST_PATH]: '/root/.mcp/aws-cost',
   [AppSystemProp.SAMPLE_DATA_SIZE_LIMIT_KB]: '100',
   [AppSystemProp.REQUEST_BODY_LIMIT]: '10',
+  [SharedSystemProp.LANGFUSE_HOST]: 'https://us.cloud.langfuse.com',
 };
 
 export const system = {

@@ -1,9 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useResizablePanelGroup } from '@/app/common/hooks/use-resizable-panel-group';
-import {
-  RESIZABLE_PANEL_GROUP,
-  RESIZABLE_PANEL_IDS,
-} from '@/app/constants/layout';
+import { RESIZABLE_PANEL_IDS } from '@/app/constants/layout';
 import {
   LEFT_SIDEBAR_MAX_SIZE,
   LEFT_SIDEBAR_MIN_SIZE,
@@ -35,11 +32,11 @@ const LeftSidebarResizablePanel: React.FC<LeftSidebarResizablePanelProps> = ({
   ...props
 }) => {
   const sidebarRef = useRef<ImperativePanelHandle | null>(null);
-  const { getPanelGroupSize } = useResizablePanelGroup();
+  const { getPanelSize } = useResizablePanelGroup();
 
   const getExpandedPanelSizeFromLocalStorage = useCallback((): number => {
-    const panelGroupSize = getPanelGroupSize(RESIZABLE_PANEL_GROUP);
-    return panelGroupSize[0] || LEFT_SIDEBAR_MIN_SIZE;
+    const panelSize = getPanelSize(RESIZABLE_PANEL_IDS.LEFT_SIDEBAR);
+    return panelSize || LEFT_SIDEBAR_MIN_SIZE;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

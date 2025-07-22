@@ -49,6 +49,8 @@ export type StepContext = Static<typeof StepContext>;
 export const ChatFlowContext = Type.Object({
   flowId: Type.String(),
   flowVersionId: Type.String(),
+  currentStepId: Type.Optional(Type.String()),
+  currentStepData: Type.Optional(Type.Any()),
   steps: Type.Array(StepContext),
 });
 
@@ -57,6 +59,18 @@ export type ChatFlowContext = Static<typeof ChatFlowContext>;
 export const NewMessageRequest = Type.Object({
   chatId: Type.String(),
   message: Type.String(),
+  messages: Type.Optional(
+    Type.Array(
+      Type.Object({
+        role: Type.Union([
+          Type.Literal('user'),
+          Type.Literal('assistant'),
+          Type.Literal('tool'),
+        ]),
+        content: Type.Any(),
+      }),
+    ),
+  ),
   additionalContext: Type.Optional(ChatFlowContext),
 });
 

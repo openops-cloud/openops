@@ -1,7 +1,3 @@
-import { Alert, AlertDescription } from '../../ui/alert';
-
-import { Button } from '../../ui/button';
-
 import { t } from 'i18next';
 import { Copy } from 'lucide-react';
 import React, { useCallback } from 'react';
@@ -10,9 +6,12 @@ import validator from 'validator';
 import { useCopyToClipboard } from '../../hooks/use-copy-to-clipboard';
 import { cn } from '../../lib/cn';
 import { Theme } from '../../lib/theme';
+import { Alert, AlertDescription } from '../../ui/alert';
+import { Button } from '../../ui/button';
 import { CodeActions } from '../code-actions';
 import { CodeMirrorEditor } from '../json-editor';
 import { getLanguageExtensionForCode } from '../json-editor/code-mirror-utils';
+import { createMarkdownComponents } from './markdown-components';
 import { CodeVariations, MarkdownCodeVariations } from './types';
 
 function extractLanguageFromClassName(className?: string): string | undefined {
@@ -216,65 +215,11 @@ const Markdown = React.memo(
                 </div>
               );
             },
-            h1: ({ node, ...props }) => (
-              <h1
-                className="scroll-m-20 text-3xl font-bold tracking-tight mt-1"
-                {...props}
-              />
-            ),
-            h2: ({ node, ...props }) => (
-              <h2
-                className="scroll-m-20 text-2xl font-semibold tracking-tight mt-4"
-                {...props}
-              />
-            ),
-            h3: ({ node, ...props }) => (
-              <h3
-                className="scroll-m-20 text-xl font-semibold tracking-tight mt-2"
-                {...props}
-              />
-            ),
-            p: ({ node, ...props }) => (
-              <p
-                className={cn(
-                  'leading-7 mt-2 [&:not(:first-child)]:my-2',
-                  textClassName,
-                )}
-                {...props}
-              />
-            ),
-            ul: ({ node, ...props }) => (
-              <ul
-                className={cn('my-2 ml-6 list-disc [&>li]:mt-2', listClassName)}
-                {...props}
-              />
-            ),
-            ol: ({ node, ...props }) => (
-              <ol
-                className={cn(
-                  'my-6 ml-6 list-decimal [&>li]:mt-2',
-                  listClassName,
-                )}
-                {...props}
-              />
-            ),
-            li: ({ node, ...props }) => (
-              <li className={cn(textClassName)} {...props} />
-            ),
-            a: ({ node, ...props }) => (
-              <a
-                target="_blank"
-                rel="noopener noreferrer"
-                className={cn(
-                  'font-medium text-primary underline underline-offset-4',
-                  linkClassName,
-                )}
-                {...props}
-              />
-            ),
-            blockquote: ({ node, ...props }) => (
-              <blockquote className="mt-6 border-l-2 pl-6 italic" {...props} />
-            ),
+            ...createMarkdownComponents({
+              textClassName,
+              listClassName,
+              linkClassName,
+            }),
           }}
         >
           {markdownProcessed}

@@ -103,7 +103,7 @@ describe('flow with pause', () => {
         expect(pauseResult.verdict).toBe(ExecutionVerdict.PAUSED)
         expect(pauseResult.verdictResponse).toEqual({
             'pauseMetadata': {
-                executionCorrelationId: 'mocked-id',
+                executionCorrelationId: 'executionCorrelationId',
             },
             'reason': 'PAUSED',
         })

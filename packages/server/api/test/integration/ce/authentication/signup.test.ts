@@ -14,6 +14,7 @@ jest.mock('jwt-decode', () => ({
 jest.mock('@openops/common', () => ({
   authenticateUserInOpenOpsTables: authUserMock,
   authenticateDefaultUserInOpenOpsTables: authUserMock,
+  isLLMTelemetryEnabled: jest.fn().mockReturnValue(false),
 }));
 
 jest.mock('../../../../src/app/openops-tables/index', () => ({

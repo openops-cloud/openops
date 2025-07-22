@@ -34,9 +34,9 @@ describe('getRecommendationsAction', () => {
         required: true,
         type: 'MULTI_SELECT_DROPDOWN',
       },
-      recommendationType: {
-        required: true,
-        type: 'STATIC_DROPDOWN',
+      recommendationTypes: {
+        required: false,
+        type: 'STATIC_MULTI_SELECT_DROPDOWN',
       },
       customStatus: {
         required: true,
@@ -60,9 +60,7 @@ describe('getRecommendationsAction', () => {
       accounts: [
         { accountKey: 'key1', divisionId: 'div1', accountName: 'account1' },
       ],
-      recommendationType: {
-        filters: { type_id: ['aws-backup-outdated-snapshot'] },
-      },
+      recommendationTypes: ['aws-backup-outdated-snapshot'],
       openedRecommendations: { from: '2021-01-01', to: '2021-12-31' },
     });
 
@@ -112,9 +110,7 @@ describe('getRecommendationsAction', () => {
           divisionId: 9,
         },
       ],
-      recommendationType: {
-        filters: { type_id: ['aws-backup-outdated-snapshot'] },
-      },
+      recommendationTypes: ['aws-backup-outdated-snapshot'],
       customStatus: {},
       openedRecommendations: { from: '1', to: '2' },
       closedAndDoneRecommendationsProperty: {},
