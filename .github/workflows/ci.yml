@@ -60,12 +60,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout for Dependabot PR
-        if: startsWith(github.head_ref, 'dependabot/')
+        if: ${{ startsWith(github.head_ref || '', 'dependabot/') }}
         uses: actions/checkout@v4.2.2
         with:
           ref: ${{ github.head_ref }}
       - name: Checkout for others
-        if: !startsWith(github.head_ref, 'dependabot/')
+        if: ${{ !startsWith(github.head_ref || '', 'dependabot/') }}
         uses: actions/checkout@v4.2.2
       - name: Restore node_modules cache
         id: node-modules-cache
