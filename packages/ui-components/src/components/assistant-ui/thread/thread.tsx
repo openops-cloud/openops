@@ -21,12 +21,17 @@ import { Button } from '../../../ui/button';
 
 import { t } from 'i18next';
 import { cn } from '../../../lib/cn';
+import { Theme } from '../../../lib/theme';
 import { MarkdownText } from '../markdown-text';
 import { useThreadWelcome } from '../thread-welcome-context';
 import { ToolFallback } from '../tool-fallback';
 import { TooltipIconButton } from '../tooltip-icon-button';
 
-export const Thread: FC = () => {
+type ThreadProps = {
+  theme: Theme;
+};
+
+export const Thread = ({ theme }: ThreadProps) => {
   return (
     <ThreadPrimitive.Root className="bg-background box-border flex h-full flex-col overflow-hidden">
       <ThreadPrimitive.Viewport className="flex h-full flex-col items-center overflow-y-auto scroll-smooth bg-inherit px-4 pt-8">
@@ -36,7 +41,7 @@ export const Thread: FC = () => {
           components={{
             UserMessage: UserMessage,
             EditComposer: EditComposer,
-            AssistantMessage: AssistantMessage,
+            AssistantMessage: () => <AssistantMessage theme={theme} />,
           }}
         />
 
@@ -171,12 +176,19 @@ const EditComposer: FC = () => {
   );
 };
 
-const AssistantMessage: FC = () => {
+const AssistantMessage: FC<{ theme: Theme }> = ({ theme }) => {
+  const MarkdownTextWrapper = (props: any) => {
+    return <MarkdownText {...props} theme={theme} />;
+  };
+
   return (
     <MessagePrimitive.Root className="grid grid-cols-[auto_auto_1fr] grid-rows-[auto_1fr] relative w-full max-w-[var(--thread-max-width)] py-4">
       <div className="text-foreground max-w-[calc(var(--thread-max-width)*0.8)] break-words leading-7 col-span-2 col-start-2 row-start-1 my-1.5">
         <MessagePrimitive.Content
-          components={{ Text: MarkdownText, tools: { Fallback: ToolFallback } }}
+          components={{
+            Text: MarkdownTextWrapper,
+            tools: { Fallback: ToolFallback },
+          }}
         />
       </div>
 

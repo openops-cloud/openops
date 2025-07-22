@@ -1,3 +1,4 @@
+import { useTheme } from '@/app/common/providers/theme-provider';
 import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
 import { useAppStore } from '@/app/store/app-store';
 import { AssistantRuntimeProvider } from '@assistant-ui/react';
@@ -33,6 +34,7 @@ const AiAssistantChat = ({
   middlePanelSize,
   className,
 }: AiAssistantChatProps) => {
+  const { theme } = useTheme();
   const {
     isAiChatOpened,
     setIsAiChatOpened,
@@ -126,7 +128,7 @@ const AiAssistantChat = ({
         aiChatSize={aiChatSize}
       >
         <ThreadWelcomeProvider greeting={t('How can I help you today?')}>
-          <Thread />
+          <Thread theme={theme} />
         </ThreadWelcomeProvider>
       </AiAssistantChatContainer>
     </AssistantRuntimeProvider>

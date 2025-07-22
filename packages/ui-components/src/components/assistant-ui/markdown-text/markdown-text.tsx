@@ -89,7 +89,7 @@ const LanguageUrl = ({ content, theme }: { content: string; theme: Theme }) => {
 };
 
 type MarkdownTextProps = {
-  theme?: Theme;
+  theme: Theme;
   codeVariation?: CodeVariations;
   handleInject?: (codeContent: string) => void;
   textClassName?: string;
@@ -98,7 +98,7 @@ type MarkdownTextProps = {
 };
 
 const MarkdownTextImpl = ({
-  theme = Theme.LIGHT,
+  theme,
   codeVariation = MarkdownCodeVariations.WithCopy,
   handleInject,
   textClassName,

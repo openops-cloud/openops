@@ -2,6 +2,7 @@ import { AssistantRuntimeProvider } from '@assistant-ui/react';
 
 import { useVercelUseChatRuntime } from '@assistant-ui/react-ai-sdk';
 
+import { useTheme } from '@/app/common/providers/theme-provider';
 import { AI_ASSISTANT_LS_KEY, ASSISTANT_UI_CHAT_ID } from '@/app/constants/ai';
 import { QueryKeys } from '@/app/constants/query-keys';
 import { authenticationSession } from '@/app/lib/authentication-session';
@@ -149,12 +150,13 @@ export const useAssistantChat = () => {
 
 const AssistantUiChat = () => {
   const { runtime } = useAssistantChat();
+  const { theme } = useTheme();
 
   return (
     <AssistantRuntimeProvider runtime={runtime}>
       <ThreadWelcomeProvider greeting={t('How can I help you today?')}>
         <div className="flex flex-col">
-          <Thread />
+          <Thread theme={theme} />
         </div>
       </ThreadWelcomeProvider>
     </AssistantRuntimeProvider>
