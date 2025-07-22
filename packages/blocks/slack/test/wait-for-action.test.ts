@@ -62,6 +62,7 @@ describe('waitForAction', () => {
       user: '',
       isExpired: undefined,
       message: context.propsValue.message,
+      userSelection: null,
     });
 
     expect(pauseMock).toHaveBeenCalledTimes(1);
@@ -88,6 +89,7 @@ describe('waitForAction', () => {
       action: '',
       isExpired: true,
       message: 'some updated message',
+      userSelection: null,
     });
 
     expect(slackUpdateMessageMock).toHaveBeenCalledTimes(1);
@@ -109,65 +111,26 @@ describe('waitForAction', () => {
     );
   });
 
-  test('should update message when resume is triggered with a selected user action and username exists', async () => {
-    slackUpdateMessageMock.mockResolvedValue('some updated message');
-
-    const context = createContext({
-      executionType: ExecutionType.RESUME,
-      currentExecutionPath: 'some step',
-      actions: ['some action'],
-      resumePayload: {
-        queryParams: {
-          userName: 'some_user',
-          actionClicked: 'some action',
-          path: 'step_1',
-        },
-      },
-    });
-
-    const result = (await waitForAction.run(context)) as any;
-
-    expect(result).toStrictEqual({
-      action: 'some action',
-      user: 'some_user',
-      isExpired: false,
-      message: 'some updated message',
-    });
-
-    expect(slackUpdateMessageMock).toHaveBeenCalledTimes(1);
-    expect(slackUpdateMessageMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        blocks: expect.arrayContaining([expect.anything()]),
-      }),
-    );
-
-    const lastCallArgs =
-      slackUpdateMessageMock.mock.calls[
-        slackUpdateMessageMock.mock.calls.length - 1
-      ][0];
-    const blocksArray = lastCallArgs.blocks;
-    const lastBlock = blocksArray[blocksArray.length - 1];
-
-    expect(lastBlock.text.text).toBe(
-      `*:white_check_mark: Action received: user @some_user clicked on 'some action'*`,
-    );
-    expect(context.store.get).not.toHaveBeenCalled();
-    expect(context.store.put).not.toHaveBeenCalled();
-  });
-
-  test.each([null, undefined, ''])(
-    'should update message when resume is triggered with a selected user action and no username',
-    async (username) => {
+  test.each([
+    ['button', 'some button', 'button'],
+    ['datepicker', 'datepicker', 'datepicker'],
+  ])(
+    'should update message when resume is triggered with a selected user action and username exists',
+    async (actionType: string, actionText: string, actionValue: string) => {
       slackUpdateMessageMock.mockResolvedValue('some updated message');
 
       const context = createContext({
         executionType: ExecutionType.RESUME,
         currentExecutionPath: 'some step',
-        actions: ['some action'],
+        actions: [actionType],
         resumePayload: {
           queryParams: {
-            userName: username,
-            actionClicked: 'some action',
+            userName: 'some_user',
+            actionType: actionType,
+            actionClicked: JSON.stringify({
+              value: actionValue,
+              displayText: actionText,
+            }),
             path: 'step_1',
           },
         },
@@ -176,10 +139,14 @@ describe('waitForAction', () => {
       const result = (await waitForAction.run(context)) as any;
 
       expect(result).toStrictEqual({
-        action: 'some action',
-        user: username,
+        action: actionType,
+        user: 'some_user',
         isExpired: false,
         message: 'some updated message',
+        userSelection: {
+          displayText: actionText,
+          value: actionValue,
+        },
       });
 
       expect(slackUpdateMessageMock).toHaveBeenCalledTimes(1);
@@ -197,7 +164,130 @@ describe('waitForAction', () => {
       const lastBlock = blocksArray[blocksArray.length - 1];
 
       expect(lastBlock.text.text).toBe(
-        `*:white_check_mark: Action received: clicked on 'some action'*`,
+        `*:white_check_mark: Action received: user @some_user selected '${actionText}'*`,
+      );
+      expect(context.store.get).not.toHaveBeenCalled();
+      expect(context.store.put).not.toHaveBeenCalled();
+    },
+  );
+
+  test('should update message when resume is triggered with an array of selected user actions and username exists', async () => {
+    slackUpdateMessageMock.mockResolvedValue('some updated message');
+
+    const context = createContext({
+      executionType: ExecutionType.RESUME,
+      currentExecutionPath: 'some step',
+      actions: ['multi_static_select'],
+      resumePayload: {
+        queryParams: {
+          userName: 'some_user',
+          actionType: 'multi_static_select',
+          actionClicked: JSON.stringify([
+            {
+              value: 'value 1',
+              displayText: 'text 1',
+            },
+            {
+              value: 'value 2',
+              displayText: 'text 2',
+            },
+          ]),
+          path: 'step_1',
+        },
+      },
+    });
+
+    const result = (await waitForAction.run(context)) as any;
+
+    expect(result).toStrictEqual({
+      action: ['value 1', 'value 2'],
+      user: 'some_user',
+      isExpired: false,
+      message: 'some updated message',
+      userSelection: [
+        {
+          value: 'value 1',
+          displayText: 'text 1',
+        },
+        {
+          value: 'value 2',
+          displayText: 'text 2',
+        },
+      ],
+    });
+
+    expect(slackUpdateMessageMock).toHaveBeenCalledTimes(1);
+    expect(slackUpdateMessageMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        blocks: expect.arrayContaining([expect.anything()]),
+      }),
+    );
+
+    const lastCallArgs =
+      slackUpdateMessageMock.mock.calls[
+        slackUpdateMessageMock.mock.calls.length - 1
+      ][0];
+    const blocksArray = lastCallArgs.blocks;
+    const lastBlock = blocksArray[blocksArray.length - 1];
+
+    expect(lastBlock.text.text).toBe(
+      `*:white_check_mark: Action received: user @some_user selected 'text 1, text 2'*`,
+    );
+    expect(context.store.get).not.toHaveBeenCalled();
+    expect(context.store.put).not.toHaveBeenCalled();
+  });
+
+  test.each([null, undefined, ''])(
+    'should update message when resume is triggered with a selected user action and no username',
+    async (username) => {
+      slackUpdateMessageMock.mockResolvedValue('some updated message');
+
+      const context = createContext({
+        executionType: ExecutionType.RESUME,
+        currentExecutionPath: 'some step',
+        actions: ['some action'],
+        resumePayload: {
+          queryParams: {
+            userName: username,
+            actionType: 'button',
+            actionClicked: JSON.stringify({
+              value: 'some action',
+              displayText: 'some action',
+            }),
+            path: 'step_1',
+          },
+        },
+      });
+
+      const result = (await waitForAction.run(context)) as any;
+
+      expect(result).toStrictEqual({
+        action: 'some action',
+        user: username,
+        isExpired: false,
+        message: 'some updated message',
+        userSelection: {
+          displayText: 'some action',
+          value: 'some action',
+        },
+      });
+
+      expect(slackUpdateMessageMock).toHaveBeenCalledTimes(1);
+      expect(slackUpdateMessageMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          blocks: expect.arrayContaining([expect.anything()]),
+        }),
+      );
+
+      const lastCallArgs =
+        slackUpdateMessageMock.mock.calls[
+          slackUpdateMessageMock.mock.calls.length - 1
+        ][0];
+      const blocksArray = lastCallArgs.blocks;
+      const lastBlock = blocksArray[blocksArray.length - 1];
+
+      expect(lastBlock.text.text).toBe(
+        `*:white_check_mark: Action received: selected 'some action'*`,
       );
       expect(context.store.get).not.toHaveBeenCalled();
       expect(context.store.put).not.toHaveBeenCalled();
@@ -212,7 +302,11 @@ describe('waitForAction', () => {
       resumePayload: {
         queryParams: {
           userName: 'some_user',
-          actionClicked: 'some action',
+          actionType: 'button',
+          actionClicked: JSON.stringify({
+            value: 'some action',
+            displayText: 'some action',
+          }),
           path: 'some other step',
         },
       },
@@ -225,6 +319,7 @@ describe('waitForAction', () => {
       action: '',
       isExpired: undefined,
       message: context.propsValue.message,
+      userSelection: null,
     });
     expect(pauseMock).toHaveBeenCalledTimes(1);
     expect(context.store.get).toHaveBeenCalledTimes(1);
@@ -243,7 +338,11 @@ describe('waitForAction', () => {
       resumePayload: {
         queryParams: {
           userName: 'some_user',
-          actionClicked: 'invalid action',
+          actionType: 'button',
+          actionClicked: JSON.stringify({
+            value: 'invalid action',
+            displayText: 'invalid action',
+          }),
           path: 'some step',
         },
       },
@@ -256,6 +355,7 @@ describe('waitForAction', () => {
       action: '',
       isExpired: undefined,
       message: context.propsValue.message,
+      userSelection: null,
     });
     expect(pauseMock).toHaveBeenCalledTimes(1);
     expect(context.store.get).toHaveBeenCalledTimes(1);
@@ -278,7 +378,11 @@ describe('waitForAction', () => {
         queryParams: {
           path: 'step_2',
           userName: 'some_user',
-          actionClicked: 'some action',
+          actionType: 'button',
+          actionClicked: JSON.stringify({
+            value: 'some action',
+            displayText: 'some action',
+          }),
         },
       },
     });
