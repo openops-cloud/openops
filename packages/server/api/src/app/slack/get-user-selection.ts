@@ -5,15 +5,16 @@ export function getUserSelection(
   | { value: string; displayText: string }
   | { value: string; displayText: string }[]
   | undefined {
-  if (!Array.isArray(payload) || payload.length === 0) {
+  if (!payload || !Array.isArray(payload) || payload.length === 0) {
     return undefined;
   }
+
   const action = payload[0];
   switch (action.type) {
     case 'button':
       return {
-        value: action.text.text,
-        displayText: action.text.text,
+        value: action.text?.text,
+        displayText: action.text?.text,
       };
     case 'timepicker':
       return {
@@ -27,20 +28,20 @@ export function getUserSelection(
       };
     case 'static_select':
       return {
-        value: action.selected_option.value,
-        displayText: action.selected_option.text.text,
+        value: action.selected_option?.value,
+        displayText: action.selected_option?.text?.text,
       };
     case 'multi_static_select':
       return action.selected_options.map(
         (opt: { text: { text: string }; value: string }) => ({
           value: opt.value,
-          displayText: opt.text.text,
+          displayText: opt.text?.text,
         }),
       );
     case 'radio_buttons':
       return {
-        value: action.selected_option.value,
-        displayText: action.selected_option.text.text,
+        value: action.selected_option?.value,
+        displayText: action.selected_option?.text?.text,
       };
     case 'conversations_select':
       return {

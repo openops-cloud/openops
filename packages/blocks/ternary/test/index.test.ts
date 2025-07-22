@@ -12,7 +12,7 @@ describe('block declaration tests', () => {
   });
 
   test('should return block with correct number of actions', () => {
-    expect(Object.keys(ternary.actions()).length).toBe(2);
+    expect(Object.keys(ternary.actions()).length).toBe(3);
     expect(ternary.actions()).toMatchObject({
       get_data_integrations: {
         name: 'get_data_integrations',
@@ -20,6 +20,10 @@ describe('block declaration tests', () => {
       },
       get_budgets: {
         name: 'get_budgets',
+        requireAuth: true,
+      },
+      custom_api_call: {
+        name: 'custom_api_call',
         requireAuth: true,
       },
     });

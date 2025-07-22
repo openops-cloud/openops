@@ -232,6 +232,7 @@ describe('Slack API', () => {
           {
             type: 'button',
             action_id: 'some_id',
+            text: 'text',
           },
         ],
         user: {
