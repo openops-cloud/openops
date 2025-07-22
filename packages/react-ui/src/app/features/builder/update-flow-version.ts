@@ -3,10 +3,8 @@ import {
   flowHelper,
   FlowOperationRequest,
   FlowOperationType,
-  FlowVersion,
 } from '@openops/shared';
 import { flowsApi } from '../flows/lib/flows-api';
-import { aiChatApi } from './ai-chat/lib/chat-api';
 import { BuilderState, RightSideBarType } from './builder-types';
 import { stepTestOutputCache } from './data-selector/data-selector-cache';
 
