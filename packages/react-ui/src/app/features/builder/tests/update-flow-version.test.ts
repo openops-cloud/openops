@@ -212,5 +212,4 @@ describe('updateFlowVersion', () => {
     expect(clearStepSpy).toHaveBeenCalledWith('step_1');
     clearStepSpy.mockRestore();
   });
-
 });
