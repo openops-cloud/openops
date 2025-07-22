@@ -22,7 +22,7 @@ export const getCostAlerts = createAction({
       });
       return response.body as any[];
     } catch (e) {
-      logger.error('Error getting cost alert list..', e);
+      logger.error('Error getting cost alert list.', e);
       throw e;
     }
   },
