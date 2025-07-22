@@ -19,7 +19,7 @@ const AiChatResizablePanelContent = ({
   if (!showChat) return null;
 
   return (
-    <div className="w-full h-full flex px-2 bg-secondary">
+    <div className="w-full h-full flex pl-2 bg-secondary ">
       <AssistantUiChat onClose={onCloseButtonClick} />
     </div>
   );
@@ -92,7 +92,7 @@ const AiChatResizablePanel = ({
         ref={resizablePanelRef}
         order={2}
         id={RESIZABLE_PANEL_IDS.AI_CHAT}
-        className={cn('duration-0 min-w-0 ', {
+        className={cn('duration-0 min-w-0 shadow-sidebar', {
           'min-w-[350px]': showChat,
           'transition-all duration-200 ease-in-out':
             !isDraggingHandle && hasMounted,
@@ -106,7 +106,9 @@ const AiChatResizablePanel = ({
         />
       </ResizablePanel>
       <ResizableHandle
-        className="w-0"
+        className={cn('w-0', {
+          'w-2': showChat,
+        })}
         onDragging={onDragging}
         disabled={!showChat}
       />
