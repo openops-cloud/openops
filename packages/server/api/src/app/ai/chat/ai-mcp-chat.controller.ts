@@ -38,7 +38,7 @@ import {
   generateChatId,
   generateChatIdForMCP,
   getChatContext,
-  getChatHistory,
+  getChatHistoryWithMergedTools,
   getConversation,
   getLLMConfig,
   MCPChatContext,
@@ -67,7 +67,11 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         );
 
         if (existingContext) {
-          const messages = await getChatHistory(inputChatId, userId, projectId);
+          const messages = await getChatHistoryWithMergedTools(
+            inputChatId,
+            userId,
+            projectId,
+          );
           return reply.code(200).send({
             chatId: inputChatId,
             messages,
@@ -91,7 +95,11 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
           userId,
         });
 
-        const messages = await getChatHistory(chatId, userId, projectId);
+        const messages = await getChatHistoryWithMergedTools(
+          chatId,
+          userId,
+          projectId,
+        );
 
         if (messages.length === 0) {
           await createChatContext(chatId, userId, projectId, context);
@@ -114,7 +122,11 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       };
 
       await createChatContext(chatId, userId, projectId, chatContext);
-      const messages = await getChatHistory(chatId, userId, projectId);
+      const messages = await getChatHistoryWithMergedTools(
+        chatId,
+        userId,
+        projectId,
+      );
 
       return reply.code(200).send({
         chatId,
@@ -134,10 +146,13 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         projectId,
       );
       const llmConfigResult = await getLLMConfig(projectId);
-
+      const messageContent = await getUserMessage(request.body, reply);
+      if (messageContent === null) {
+        return; // Error response already sent
+      }
       conversationResult.messages.push({
         role: 'user',
-        content: request.body.message,
+        content: messageContent,
       });
 
       const { chatContext, messages } = conversationResult;
@@ -535,4 +550,53 @@ function handleError(
 
   logger.error(`Failed to process ${context || 'request'} with error: `, error);
   return reply.code(500).send({ message: 'Internal server error' });
+}
+
+/**
+ * Extracts the user message content from the request body.
+ * Returns the message content as string, or null if validation fails (error response sent).
+ */
+async function getUserMessage(
+  body: NewMessageRequest,
+  reply: FastifyReply,
+): Promise<string | null> {
+  if (body.messages) {
+    if (body.messages.length === 0) {
+      await reply.code(400).send({
+        message:
+          'Messages array cannot be empty. Please provide at least one message or use the message field instead.',
+      });
+      return null;
+    }
+
+    const lastMessage = body.messages[body.messages.length - 1];
+    if (
+      !lastMessage.content ||
+      !Array.isArray(lastMessage.content) ||
+      lastMessage.content.length === 0
+    ) {
+      await reply.code(400).send({
+        message:
+          'Last message must have valid content array with at least one element.',
+      });
+      return null;
+    }
+
+    const firstContentElement = lastMessage.content[0];
+    if (
+      !firstContentElement ||
+      typeof firstContentElement !== 'object' ||
+      !('text' in firstContentElement)
+    ) {
+      await reply.code(400).send({
+        message:
+          'Last message must have a text content element as the first element.',
+      });
+      return null;
+    }
+
+    return String(firstContentElement.text);
+  } else {
+    return body.message;
+  }
 }
