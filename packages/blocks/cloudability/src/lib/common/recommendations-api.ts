@@ -109,10 +109,12 @@ export enum Vendor {
   GCP = 'GCP',
   Containers = 'Containers',
 }
+
 export enum Duration {
   TenDay = 'ten-day',
   ThirtyDay = 'thirty-day',
 }
+
 export enum CostBasis {
   OnDemand = 'on-demand',
   Effective = 'effective',
