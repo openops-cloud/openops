@@ -6,6 +6,7 @@ import { getCases } from './lib/actions/get-cases';
 import { getDataIntegrations } from './lib/actions/get-data-integrations';
 import { getUsageRecommendations } from './lib/actions/usage-recommendations';
 import { ternaryCloudAuth } from './lib/common/auth';
+import { getCostAlerts } from './lib/actions/get-cost-alerts';
 
 export const ternary = createBlock({
   displayName: 'Ternary',
@@ -19,6 +20,7 @@ export const ternary = createBlock({
     getDataIntegrations,
     getBudgets,
     getCases,
+    getCostAlerts,
     getUsageRecommendations,
     createCustomApiCallAction({
       baseUrl: (auth: unknown) => (auth as { apiURL: string }).apiURL,
