@@ -1,8 +1,5 @@
 import { createCustomApiCallAction } from '@openops/blocks-common';
-import {
-  createBlock,
-  Property,
-} from '@openops/blocks-framework';
+import { createBlock, Property } from '@openops/blocks-framework';
 import { BlockCategory } from '@openops/shared';
 import { getBudgets } from './lib/actions/get-budgets';
 import { getCases } from './lib/actions/get-cases';
