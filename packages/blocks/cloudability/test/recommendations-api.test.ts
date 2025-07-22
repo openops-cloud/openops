@@ -104,7 +104,11 @@ describe('recommendations-api', () => {
   });
 
   describe('snoozeRecommendations', () => {
-    test('calls makeRequest with correct body', async () => {
+    test.each([
+      ['never', 'never'],
+      ['2025-12-31', '2025-12-31'],
+      ['2024-01-01T00:00:00Z', '2024-01-01'],
+    ])('calls makeRequest with correct body', async (snoozeUntil, expected) => {
       (makeRequest as jest.Mock).mockResolvedValue({ success: true });
       const result = await snoozeRecommendations({
         auth: mockAuth,
@@ -112,7 +116,7 @@ describe('recommendations-api', () => {
         recommendationType: 'rightsizing',
         accountId: 'acc1',
         resourceIds: ['r1', 'r2'],
-        snoozeUntil: '2025-12-31',
+        snoozeUntil: snoozeUntil,
       });
 
       expect(makeRequest).toHaveBeenCalledWith(
@@ -120,7 +124,7 @@ describe('recommendations-api', () => {
           endpoint: '/rightsizing/AWS/recommendations/rightsizing/snooze',
           method: HttpMethod.POST,
           body: {
-            expiresOn: '2025-12-31',
+            expiresOn: expected,
             resources: { acc1: ['r1', 'r2'] },
           },
         }),

@@ -1,5 +1,6 @@
 import { HttpMethod } from '@openops/blocks-common';
 import { isEmpty } from '@openops/shared';
+import { format } from 'date-fns';
 import { CloudabilityAuth } from '../auth';
 import { makeRequest } from './make-request';
 
@@ -59,12 +60,17 @@ export async function snoozeRecommendations({
 }): Promise<any> {
   const url = `/rightsizing/${vendor}/recommendations/${recommendationType}/snooze`;
 
+  const snoozedUntilValue =
+    snoozeUntil?.toLowerCase() === 'never'
+      ? 'never'
+      : format(new Date(snoozeUntil), 'yyyy-MM-dd');
+
   const response = await makeRequest({
     auth,
     endpoint: url,
     method: HttpMethod.POST,
     body: {
-      expiresOn: snoozeUntil,
+      expiresOn: snoozedUntilValue,
       resources: {
         [accountId]: resourceIds,
       },

@@ -24,10 +24,10 @@ export const snoozeRecommendationAction = createAction({
       description: 'The IDs of the resources to snooze recommendations for.',
       required: true,
     }),
-    snoozeUntil: Property.DateTime({
+    snoozeUntil: Property.ShortText({
       displayName: 'Snooze Until',
       description:
-        'The date and time until the recommendation should be snoozed. Format: YYYY-MM-DDTHH:mm:ssZ. Use "never" to snooze indefinitely.',
+        'The date and time until the recommendation should be snoozed. Format: yyyy-MM-dd. Use "never" to snooze indefinitely.',
       required: true,
     }),
   },
