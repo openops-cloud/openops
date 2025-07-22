@@ -9,12 +9,18 @@ import { FlagId } from '@openops/shared';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ImperativePanelHandle } from 'react-resizable-panels';
 
-const AiChatResizablePanelContent = ({ showChat }: { showChat: boolean }) => {
+const AiChatResizablePanelContent = ({
+  showChat,
+  onCloseButtonClick,
+}: {
+  showChat: boolean;
+  onCloseButtonClick: () => void;
+}) => {
   if (!showChat) return null;
 
   return (
     <div className="w-full h-full flex p-1 pr-2 bg-secondary">
-      <AssistantUiChat />
+      <AssistantUiChat onClose={onCloseButtonClick} />
     </div>
   );
 };
@@ -32,8 +38,9 @@ const AiChatResizablePanel = ({
     FlagId.ASSISTANT_UI_ENABLED,
   ).data;
 
-  const { isAiChatOpened } = useAppStore((s) => ({
+  const { isAiChatOpened, setIsAiChatOpened } = useAppStore((s) => ({
     isAiChatOpened: s.isAiChatOpened,
+    setIsAiChatOpened: s.setIsAiChatOpened,
   }));
 
   const { hasActiveAiSettings, isLoading } =
@@ -93,7 +100,10 @@ const AiChatResizablePanel = ({
         collapsible={true}
         defaultSize={getDefaultPanelSize()}
       >
-        <AiChatResizablePanelContent showChat={showChat} />
+        <AiChatResizablePanelContent
+          showChat={showChat}
+          onCloseButtonClick={() => setIsAiChatOpened(false)}
+        />
       </ResizablePanel>
       <ResizableHandle
         className="w-0"
