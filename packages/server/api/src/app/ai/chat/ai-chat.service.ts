@@ -8,6 +8,8 @@ import {
 import { AiConfig, ApplicationError, ErrorCode } from '@openops/shared';
 import { CoreMessage, LanguageModel } from 'ai';
 import { aiConfigService } from '../config/ai-config.service';
+import { MessageWithMergedToolResults } from './types';
+import { mergeToolResultsIntoMessages } from './utils';
 
 // Chat expiration time is 24 hour
 const DEFAULT_EXPIRE_TIME = 86400;
@@ -94,6 +96,18 @@ export const getChatHistory = async (
   );
 
   return messages ?? [];
+};
+
+/**
+ * Get chat history with tool results merged into assistant messages.
+ */
+export const getChatHistoryWithMergedTools = async (
+  chatId: string,
+  userId: string,
+  projectId: string,
+): Promise<MessageWithMergedToolResults[]> => {
+  const messages = await getChatHistory(chatId, userId, projectId);
+  return mergeToolResultsIntoMessages(messages);
 };
 
 export const saveChatHistory = async (

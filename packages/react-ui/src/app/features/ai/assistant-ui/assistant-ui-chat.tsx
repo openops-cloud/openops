@@ -14,7 +14,6 @@ import { useQuery } from '@tanstack/react-query';
 import { t } from 'i18next';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { aiAssistantChatApi } from '../lib/ai-assistant-chat-api';
-import { mergeToolResults } from '../lib/assistant-ui-utils';
 
 const PLACEHOLDER_MESSAGE_INTEROP = 'satisfy-schema';
 
@@ -38,13 +37,6 @@ const AssistantUiChat = () => {
     }
   };
 
-  const initialMessages: ThreadMessageLike[] = useMemo(() => {
-    if (isLoading || !openChatResponse?.messages) {
-      return [];
-    }
-    return mergeToolResults(openChatResponse.messages);
-  }, [isLoading, openChatResponse?.messages]);
-
   useEffect(() => {
     if (!isLoading && openChatResponse) {
       setShouldRenderChat(true);
@@ -59,12 +51,12 @@ const AssistantUiChat = () => {
         chatId: openChatResponse?.chatId,
         message: PLACEHOLDER_MESSAGE_INTEROP,
       },
-      initialMessages,
+      initialMessages: openChatResponse?.messages as ThreadMessageLike[],
       headers: {
         Authorization: `Bearer ${authenticationSession.getToken()}`,
       },
     }),
-    [openChatResponse?.chatId, initialMessages],
+    [openChatResponse?.chatId, openChatResponse?.messages],
   );
 
   const runtime = useChatRuntime(runtimeConfig);

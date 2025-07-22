@@ -38,7 +38,7 @@ import {
   generateChatId,
   generateChatIdForMCP,
   getChatContext,
-  getChatHistory,
+  getChatHistoryWithMergedTools,
   getConversation,
   getLLMConfig,
   MCPChatContext,
@@ -67,7 +67,11 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         );
 
         if (existingContext) {
-          const messages = await getChatHistory(inputChatId, userId, projectId);
+          const messages = await getChatHistoryWithMergedTools(
+            inputChatId,
+            userId,
+            projectId,
+          );
           return reply.code(200).send({
             chatId: inputChatId,
             messages,
@@ -91,7 +95,11 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
           userId,
         });
 
-        const messages = await getChatHistory(chatId, userId, projectId);
+        const messages = await getChatHistoryWithMergedTools(
+          chatId,
+          userId,
+          projectId,
+        );
 
         if (messages.length === 0) {
           await createChatContext(chatId, userId, projectId, context);
@@ -114,7 +122,11 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       };
 
       await createChatContext(chatId, userId, projectId, chatContext);
-      const messages = await getChatHistory(chatId, userId, projectId);
+      const messages = await getChatHistoryWithMergedTools(
+        chatId,
+        userId,
+        projectId,
+      );
 
       return reply.code(200).send({
         chatId,
