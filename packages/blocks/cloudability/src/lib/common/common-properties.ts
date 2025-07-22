@@ -49,6 +49,7 @@ export function getRecommendationTypesProperty() {
   };
 }
 
+// https://www.ibm.com/docs/en/cloudability-commercial/cloudability-standard/saas?topic=api-rightsizing-end-points
 function getRecommendationTypesByVendor(
   vendor: Vendor,
 ): { label: string; value: string }[] {
