@@ -19,8 +19,7 @@ export const cloudfixAuth = BlockAuth.CustomAuth({
   props: {
     apiUrl: Property.ShortText({
       displayName: 'API URL',
-      description:
-        'The base URL for the Cloudfix API (e.g., https://api.cloudfix.com)',
+      description: 'The base URL for the Cloudfix API',
       required: true,
       validators: [Validators.url],
       defaultValue: 'https://preview.app.cloudfix.com/api/v3',
