@@ -6,6 +6,7 @@ import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
 import { useAppStore } from '@/app/store/app-store';
 import { cn, ResizableHandle, ResizablePanel } from '@openops/components/ui';
 import { FlagId } from '@openops/shared';
+import { t } from 'i18next';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ImperativePanelHandle } from 'react-resizable-panels';
 
@@ -20,7 +21,7 @@ const AiChatResizablePanelContent = ({
 
   return (
     <div className="w-full h-full flex pl-2 bg-secondary ">
-      <AssistantUiChat onClose={onCloseButtonClick} />
+      <AssistantUiChat onClose={onCloseButtonClick} title={t('AI Assistant')} />
     </div>
   );
 };

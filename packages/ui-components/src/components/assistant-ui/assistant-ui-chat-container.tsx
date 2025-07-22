@@ -16,6 +16,7 @@ const AssistantUiChatContainer = ({
   onNewChat,
   enableNewChat,
   runtime,
+  title,
   children,
 }: AssistantUiChatContainerProps) => {
   return (
@@ -24,6 +25,7 @@ const AssistantUiChatContainer = ({
         onClose={onClose}
         onNewChat={onNewChat}
         enableNewChat={enableNewChat}
+        title={title}
       >
         {children}
       </AssistantTopBar>

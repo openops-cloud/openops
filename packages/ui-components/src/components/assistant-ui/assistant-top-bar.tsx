@@ -8,6 +8,7 @@ type AssistantTopBarProps = {
   onClose: () => void;
   onNewChat: () => void;
   enableNewChat: boolean;
+  title?: string;
   children: ReactNode;
 };
 
@@ -15,6 +16,7 @@ const AssistantTopBar = ({
   onNewChat,
   onClose,
   enableNewChat,
+  title,
   children,
 }: AssistantTopBarProps) => {
   return (
@@ -34,7 +36,7 @@ const AssistantTopBar = ({
             <SquarePen size={20} />
           </Button>
         </TooltipWrapper>
-        {t('AI Assistant')}
+        {title}
       </div>
       <div className="flex items-center gap-2">
         {children}

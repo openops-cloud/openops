@@ -2,6 +2,7 @@ import { action } from '@storybook/addon-actions';
 import type { Meta, StoryObj } from '@storybook/react';
 import { Bell, BookOpen, HelpCircle, Settings } from 'lucide-react';
 
+import { ThemeAwareDecorator } from '../../../.storybook/decorators';
 import { AssistantTopBar } from '../../components/assistant-ui/assistant-top-bar';
 import { Button } from '../../ui/button';
 import { TooltipProvider } from '../../ui/tooltip';
@@ -25,6 +26,7 @@ const meta = {
     onClose: action('Close clicked'),
     onNewChat: action('New chat clicked'),
     enableNewChat: true,
+    title: 'AI Assistant',
     children: null,
   },
   argTypes: {
@@ -46,6 +48,7 @@ const meta = {
     layout: 'centered',
   },
   decorators: [
+    ThemeAwareDecorator,
     (Story) => (
       <TooltipProvider>
         <div className="w-[600px] border border-gray-200 rounded-md">

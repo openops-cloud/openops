@@ -25,10 +25,15 @@ interface ExtendedServerMessage extends ServerMessage {
 
 type AssistantUiChatProps = {
   onClose: () => void;
+  title?: string;
   children?: ReactNode;
 };
 
-const AssistantUiChat = ({ onClose, children }: AssistantUiChatProps) => {
+const AssistantUiChat = ({
+  onClose,
+  children,
+  title,
+}: AssistantUiChatProps) => {
   const chatId = useRef(localStorage.getItem(AI_ASSISTANT_LS_KEY));
 
   const { data: openChatResponse } = useQuery({
@@ -117,6 +122,7 @@ const AssistantUiChat = ({ onClose, children }: AssistantUiChatProps) => {
       onClose={onClose}
       runtime={runtime}
       onNewChat={() => {}}
+      title={title}
       enableNewChat={true}
     >
       {children}
