@@ -1,12 +1,11 @@
-import {
-  AI_ASSISTANT_LS_KEY,
-  AI_ASSISTANT_SESSION_ID,
-} from '@/app/constants/ai';
+import { AssistantRuntimeProvider } from '@assistant-ui/react';
+
+import { useVercelUseChatRuntime } from '@assistant-ui/react-ai-sdk';
+
+import { AI_ASSISTANT_LS_KEY, ASSISTANT_UI_CHAT_ID } from '@/app/constants/ai';
 import { QueryKeys } from '@/app/constants/query-keys';
 import { authenticationSession } from '@/app/lib/authentication-session';
 import { Message, useChat } from '@ai-sdk/react';
-import { AssistantRuntimeProvider } from '@assistant-ui/react';
-import { useVercelUseChatRuntime } from '@assistant-ui/react-ai-sdk';
 import {
   ChatStatus,
   Thread,
@@ -97,7 +96,7 @@ export const useAssistantChat = () => {
   }, [openChatResponse?.messages]);
 
   const chat = useChat({
-    id: AI_ASSISTANT_SESSION_ID,
+    id: ASSISTANT_UI_CHAT_ID,
     api: '/api/v1/ai/conversation',
     maxSteps: 5,
     body: {

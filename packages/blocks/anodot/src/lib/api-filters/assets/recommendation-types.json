@@ -78,7 +78,7 @@
   "Azure Virtual Machine Rightsizing": "azure-vm-rightsizing",
   "Azure Compute Saving Plans": "azure-vm-sp",
   "Azure Virtual Machine Stopped": "azure-vm-stopped",
-  "Disk Unattached": "gcp-disk-unattached",
+  "GCP Disk Unattached": "gcp-disk-unattached",
   "GCP IP Idle": "gcp-ip-idle",
   "GCP Commitment Usage Discount": "gcp-usage-commitment",
   "GCP Virtual Machine Idle": "gcp-vm-idle",
