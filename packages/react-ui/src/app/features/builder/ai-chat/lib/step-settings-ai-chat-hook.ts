@@ -67,7 +67,7 @@ export const useStepSettingsAiChat = (
       return aiChatApi.open(
         flowVersion.flowId,
         getBlockName(stepDetails),
-        selectedStep,
+        stepDetails?.id ?? '',
         getActionName(stepDetails),
       );
     },

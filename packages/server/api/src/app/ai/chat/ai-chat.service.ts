@@ -33,7 +33,7 @@ export type MCPChatContext = {
   chatId?: string;
   workflowId?: string;
   blockName?: string;
-  stepName?: string;
+  stepId?: string;
   actionName?: string;
 };
 
@@ -45,7 +45,7 @@ export const generateChatId = (
   return hashUtils.hashObject({
     workflowId: params.workflowId,
     blockName: params.blockName,
-    stepName: params.stepName,
+    stepId: params.stepId,
     actionName: params.actionName,
     userId: params.userId,
   });
