@@ -155,9 +155,7 @@ const AssistantUiChat = () => {
   return (
     <AssistantRuntimeProvider runtime={runtime}>
       <ThreadWelcomeProvider greeting={t('How can I help you today?')}>
-        <div className="flex flex-col">
-          <Thread theme={theme} />
-        </div>
+        <Thread theme={theme} />
       </ThreadWelcomeProvider>
     </AssistantRuntimeProvider>
   );

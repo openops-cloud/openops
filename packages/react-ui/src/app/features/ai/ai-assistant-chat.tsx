@@ -1,7 +1,5 @@
-import { useTheme } from '@/app/common/providers/theme-provider';
 import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
 import { useAppStore } from '@/app/store/app-store';
-import { AssistantRuntimeProvider } from '@assistant-ui/react';
 import {
   AI_CHAT_CONTAINER_SIZES,
   AiAssistantChatContainer,
@@ -11,12 +9,11 @@ import {
   NoAiEnabledPopover,
   PARENT_INITIAL_HEIGHT_GAP,
   PARENT_MAX_HEIGHT_GAP,
-  Thread,
-  ThreadWelcomeProvider,
 } from '@openops/components/ui';
-import { t } from 'i18next';
 import { useCallback, useMemo } from 'react';
-import { useAssistantChat } from './assistant-ui/assistant-ui-chat';
+import AssistantUiChat, {
+  useAssistantChat,
+} from './assistant-ui/assistant-ui-chat';
 
 type AiAssistantChatProps = {
   middlePanelSize: {
@@ -34,7 +31,6 @@ const AiAssistantChat = ({
   middlePanelSize,
   className,
 }: AiAssistantChatProps) => {
-  const { theme } = useTheme();
   const {
     isAiChatOpened,
     setIsAiChatOpened,
@@ -51,7 +47,7 @@ const AiAssistantChat = ({
     setAiChatDimensions: s.setAiChatDimensions,
   }));
 
-  const { runtime, messages, handleSubmit, createNewChat } = useAssistantChat();
+  const { messages, handleSubmit, createNewChat } = useAssistantChat();
 
   const sizes = useMemo(() => {
     const calculatedWidth = middlePanelSize.width * CHAT_WIDTH_FACTOR;
@@ -113,25 +109,21 @@ const AiAssistantChat = ({
   }
 
   return (
-    <AssistantRuntimeProvider runtime={runtime}>
-      <AiAssistantChatContainer
-        dimensions={sizes.current}
-        setDimensions={setAiChatDimensions}
-        maxSize={sizes.max}
-        showAiChat={isAiChatOpened}
-        onCloseClick={() => setIsAiChatOpened(false)}
-        className={cn('left-4 bottom-[17px]', className)}
-        handleSubmit={handleSubmit}
-        isEmpty={!messages?.length}
-        onCreateNewChatClick={createNewChat}
-        toggleAiChatState={onToggleAiChatState}
-        aiChatSize={aiChatSize}
-      >
-        <ThreadWelcomeProvider greeting={t('How can I help you today?')}>
-          <Thread theme={theme} />
-        </ThreadWelcomeProvider>
-      </AiAssistantChatContainer>
-    </AssistantRuntimeProvider>
+    <AiAssistantChatContainer
+      dimensions={sizes.current}
+      setDimensions={setAiChatDimensions}
+      maxSize={sizes.max}
+      showAiChat={isAiChatOpened}
+      onCloseClick={() => setIsAiChatOpened(false)}
+      className={cn('left-4 bottom-[17px]', className)}
+      handleSubmit={handleSubmit}
+      isEmpty={!messages?.length}
+      onCreateNewChatClick={createNewChat}
+      toggleAiChatState={onToggleAiChatState}
+      aiChatSize={aiChatSize}
+    >
+      <AssistantUiChat />
+    </AiAssistantChatContainer>
   );
 };
 

@@ -8,7 +8,6 @@ import {
 import { t } from 'i18next';
 import { memo, useCallback } from 'react';
 import remarkGfm from 'remark-gfm';
-import validator from 'validator';
 import { Theme } from '../../../lib/theme';
 import { CodeActions } from '../../code-actions';
 import { createMarkdownComponents } from '../../custom/markdown-components';
@@ -64,30 +63,6 @@ const CodeViewer = ({
   );
 };
 
-const LanguageUrl = ({ content, theme }: { content: string; theme: Theme }) => {
-  if (
-    validator.isURL(content, {
-      require_protocol: true,
-      require_tld: false,
-    })
-  ) {
-    return (
-      <a
-        href={content}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="col-span-6 bg-background border border-solid text-sm rounded block w-full p-2.5 truncate hover:underline"
-      >
-        <span className="w-[calc(100%-23px)] inline-flex truncate">
-          {content}
-        </span>
-      </a>
-    );
-  }
-
-  return <CodeViewer content={content} theme={theme} />;
-};
-
 type MarkdownTextProps = {
   theme: Theme;
   codeVariation?: CodeVariations;
@@ -140,30 +115,19 @@ const MarkdownTextImpl = ({
             );
           }
 
-          const isLanguageText = className?.includes('language');
-          const isLanguageUrl = className?.includes('language-url');
-
           if (!children) {
             return null;
-          }
-
-          if (!isLanguageText && !isLanguageUrl) {
-            return <code {...props} className="text-wrap" />;
           }
 
           const codeContent = String(children).trim();
 
           return (
             <div className="relative py-2 w-full flex flex-col">
-              {isLanguageUrl ? (
-                <LanguageUrl content={codeContent} theme={theme} />
-              ) : (
-                <CodeViewer
-                  content={codeContent}
-                  theme={theme}
-                  className={className}
-                />
-              )}
+              <CodeViewer
+                content={codeContent}
+                theme={theme}
+                className={className}
+              />
               {codeVariation === MarkdownCodeVariations.WithCopy && (
                 <TooltipCopyButton
                   content={codeContent}
