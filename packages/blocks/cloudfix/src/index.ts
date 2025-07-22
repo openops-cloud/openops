@@ -7,7 +7,7 @@ export const cloudfix = createBlock({
   displayName: 'CloudFix',
   auth: cloudfixAuth,
   minimumSupportedRelease: '0.20.0',
-  logoUrl: 'https://static.openops.com/blocks/cloudfix.svg',
+  logoUrl: 'https://static.openops.com/blocks/cloudfix.png',
   authors: [],
   categories: [BlockCategory.FINOPS],
   actions: [
