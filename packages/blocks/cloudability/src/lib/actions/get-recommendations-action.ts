@@ -64,7 +64,6 @@ export const getRecommendationsAction = createAction({
       displayName: 'Limit',
       description: 'The maximum number of recommendations to return.',
       required: false,
-      defaultValue: undefined,
     }),
     additionalFilters: Property.Array({
       displayName: 'Additional Filters',
