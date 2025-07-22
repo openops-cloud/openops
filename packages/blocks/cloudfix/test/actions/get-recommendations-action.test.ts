@@ -17,11 +17,11 @@ describe('getRecommendationsAction', () => {
       },
       sortBy: {
         required: false,
-        type: 'DROPDOWN',
+        type: 'STATIC_DROPDOWN',
       },
       sortOrder: {
         required: false,
-        type: 'DROPDOWN',
+        type: 'STATIC_DROPDOWN',
       },
       includeParameters: {
         required: false,
@@ -29,7 +29,7 @@ describe('getRecommendationsAction', () => {
       },
       status: {
         required: false,
-        type: 'MULTI_SELECT_DROPDOWN',
+        type: 'STATIC_MULTI_SELECT_DROPDOWN',
       },
     });
   });
@@ -38,33 +38,49 @@ describe('getRecommendationsAction', () => {
     expect(getRecommendationsAction.name).toBe('cloudfix_get_recommendations');
     expect(getRecommendationsAction.displayName).toBe('Get Recommendations');
     expect(getRecommendationsAction.description).toBe(
-      'Get recommendations from Cloudfix with filtering and pagination options.',
+      'Get recommendations from CloudFix with filtering and pagination options.',
     );
     expect(getRecommendationsAction.requireAuth).toBe(true);
   });
 
   test('should have correct sortBy options', () => {
-    const sortByOptions = getRecommendationsAction.props.sortBy.options;
-    expect(sortByOptions).toContain('scheduledAt');
-    expect(sortByOptions).toContain('createdAt');
-    expect(sortByOptions).toContain('updatedAt');
-    expect(sortByOptions).toContain('priority');
+    const sortByOptions = getRecommendationsAction.props.sortBy.options.options;
+    expect(sortByOptions).toContainEqual({
+      label: 'Scheduled At',
+      value: 'scheduledAt',
+    });
   });
 
   test('should have correct sortOrder options', () => {
-    const sortOrderOptions = getRecommendationsAction.props.sortOrder.options;
-    expect(sortOrderOptions).toContain('ASC');
-    expect(sortOrderOptions).toContain('DESC');
+    const sortOrderOptions =
+      getRecommendationsAction.props.sortOrder.options.options;
+    expect(sortOrderOptions).toContainEqual({
+      label: 'Ascending',
+      value: 'ASC',
+    });
+    expect(sortOrderOptions).toContainEqual({
+      label: 'Descending',
+      value: 'DESC',
+    });
   });
 
   test('should have correct status options', () => {
-    const statusOptions = getRecommendationsAction.props.status.options;
-    expect(statusOptions).toContain('MANUAL_APPROVAL');
-    expect(statusOptions).toContain('SUGGESTED');
-    expect(statusOptions).toContain('SCHEDULED');
-    expect(statusOptions).toContain('IN_PROGRESS');
-    expect(statusOptions).toContain('COMPLETED');
-    expect(statusOptions).toContain('FAILED');
-    expect(statusOptions).toContain('CANCELLED');
+    const statusOptions = getRecommendationsAction.props.status.options.options;
+    expect(statusOptions).toContainEqual({
+      label: 'Manual Approval',
+      value: 'MANUAL_APPROVAL',
+    });
+    expect(statusOptions).toContainEqual({
+      label: 'Suggested',
+      value: 'SUGGESTED',
+    });
+    expect(statusOptions).toContainEqual({
+      label: 'Scheduled',
+      value: 'SCHEDULED',
+    });
+    expect(statusOptions).toContainEqual({
+      label: 'In Progress',
+      value: 'IN_PROGRESS',
+    });
   });
 });

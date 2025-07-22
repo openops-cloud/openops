@@ -12,8 +12,8 @@ describe('postponeRecommendationsAction', () => {
         type: 'DATE_TIME',
       },
       reason: {
-        required: true,
-        type: 'LONG_TEXT',
+        required: false,
+        type: 'SHORT_TEXT',
       },
     });
   });
@@ -44,7 +44,7 @@ describe('postponeRecommendationsAction', () => {
 
   test('should have correct postponeUntil description', () => {
     expect(postponeRecommendationsAction.props.postponeUntil.description).toBe(
-      'The date and time to postpone the recommendations until',
+      'The date and time until which to postpone the recommendations. Format ISO yyyy-mm-ddT00:00:00.000Z',
     );
   });
 

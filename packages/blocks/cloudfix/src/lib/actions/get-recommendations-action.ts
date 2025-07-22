@@ -27,6 +27,7 @@ export const getRecommendationsAction = createAction({
       required: false,
       defaultValue: 200,
     }),
+    // TODO: verify if theres more fields OR if it can be any field on a recommendation
     sortBy: Property.StaticDropdown({
       displayName: 'Sort By',
       description: 'The field to sort the recommendations by',
@@ -52,6 +53,7 @@ export const getRecommendationsAction = createAction({
       required: false,
       defaultValue: true,
     }),
+    // TODO: verify these are all statuses
     status: Property.StaticMultiSelectDropdown({
       displayName: 'Status Filter',
       description: 'Filter recommendations by status',

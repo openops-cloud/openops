@@ -8,7 +8,7 @@ describe('createChangeRequestsAction', () => {
         type: 'ARRAY',
       },
       executeOnSchedule: {
-        required: true,
+        required: false,
         type: 'CHECKBOX',
       },
     });

@@ -15,6 +15,8 @@ export async function makeRequest({
   body?: any;
 }) {
   const { apiKey } = auth;
+
+  // TODO: verify encoding is needed
   const encoded = Buffer.from(`${apiKey}:`).toString('base64');
 
   const response = await httpClient.sendRequest({
