@@ -168,7 +168,19 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
           });
         }
 
-        messageContent = String(lastMessage.content[0].text);
+        const firstContentElement = lastMessage.content[0];
+        if (
+          !firstContentElement ||
+          typeof firstContentElement !== 'object' ||
+          !('text' in firstContentElement)
+        ) {
+          return await reply.code(400).send({
+            message:
+              'Last message must have a text content element as the first element.',
+          });
+        }
+
+        messageContent = String(firstContentElement.text);
       } else {
         messageContent = request.body.message;
       }
