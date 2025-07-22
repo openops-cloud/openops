@@ -1,18 +1,15 @@
-import { AssistantRuntimeProvider } from '@assistant-ui/react';
-
-import { useVercelUseChatRuntime } from '@assistant-ui/react-ai-sdk';
-
 import { AI_ASSISTANT_LS_KEY, ASSISTANT_UI_CHAT_ID } from '@/app/constants/ai';
 import { QueryKeys } from '@/app/constants/query-keys';
 import { authenticationSession } from '@/app/lib/authentication-session';
 import { Message, useChat } from '@ai-sdk/react';
-import { Thread, ThreadWelcomeProvider } from '@openops/components/ui';
+import { AssistantUiChatContainer } from '@openops/components/ui';
 import { OpenChatResponse } from '@openops/shared';
 import { useQuery } from '@tanstack/react-query';
-import { t } from 'i18next';
-import { useMemo, useRef } from 'react';
+import { ReactNode, useMemo, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { aiAssistantChatApi } from '../lib/ai-assistant-chat-api';
+
+import { useVercelUseChatRuntime } from '@assistant-ui/react-ai-sdk';
 import { ServerMessage } from '../lib/types';
 
 interface TextContentPart {
@@ -26,7 +23,17 @@ interface ExtendedServerMessage extends ServerMessage {
   id?: string;
 }
 
-const AssistantUiChat = () => {
+type AssistantUiChatProps = {
+  onClose: () => void;
+  title?: string;
+  children?: ReactNode;
+};
+
+const AssistantUiChat = ({
+  onClose,
+  children,
+  title,
+}: AssistantUiChatProps) => {
   const chatId = useRef(localStorage.getItem(AI_ASSISTANT_LS_KEY));
 
   const { data: openChatResponse } = useQuery({
@@ -111,13 +118,15 @@ const AssistantUiChat = () => {
   const runtime = useVercelUseChatRuntime(chat);
 
   return (
-    <AssistantRuntimeProvider runtime={runtime}>
-      <ThreadWelcomeProvider greeting={t('How can I help you today?')}>
-        <div className="flex flex-col">
-          <Thread />
-        </div>
-      </ThreadWelcomeProvider>
-    </AssistantRuntimeProvider>
+    <AssistantUiChatContainer
+      onClose={onClose}
+      runtime={runtime}
+      onNewChat={() => {}}
+      title={title}
+      enableNewChat={true}
+    >
+      {children}
+    </AssistantUiChatContainer>
   );
 };
 
