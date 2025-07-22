@@ -16,6 +16,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { aiAssistantChatApi } from '../lib/ai-assistant-chat-api';
 import { mergeToolResults } from '../lib/assistant-ui-utils';
 
+const PLACEHOLDER_MESSAGE_INTEROP = 'satisfy-schema';
+
 const AssistantUiChat = () => {
   const chatId = useRef(localStorage.getItem(AI_ASSISTANT_LS_KEY));
   const [shouldRenderChat, setShouldRenderChat] = useState(false);
@@ -55,7 +57,7 @@ const AssistantUiChat = () => {
       maxSteps: 5,
       body: {
         chatId: openChatResponse?.chatId,
-        message: 'satisfy-schema',
+        message: PLACEHOLDER_MESSAGE_INTEROP,
       },
       initialMessages,
       headers: {
