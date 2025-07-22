@@ -1,11 +1,12 @@
 import { HttpMethod } from '@openops/blocks-common';
+import { isEmpty } from '@openops/shared';
 import { CloudabilityAuth } from '../auth';
 import { makeRequest } from './make-request';
 
 export async function getRecommendations({
   auth,
   vendor,
-  type,
+  recommendationType,
   duration,
   limit,
   filters,
@@ -14,14 +15,14 @@ export async function getRecommendations({
 }: {
   auth: CloudabilityAuth;
   vendor: Vendor;
-  type: string;
+  recommendationType: string;
   duration: Duration;
-  limit: number | undefined;
+  limit: string | undefined;
   filters: string[];
   basis: CostBasis;
   includeSnoozed: IncludeSnoozed;
 }): Promise<any[]> {
-  const url = `/rightsizing/${vendor}/recommendations/${type}`;
+  const url = `/rightsizing/${vendor}/recommendations/${recommendationType}`;
 
   const response = await makeRequest({
     auth,
@@ -31,8 +32,69 @@ export async function getRecommendations({
       duration,
       basis,
       filters: filters.join(','),
-      ...(includeSnoozed === 'NO_SNOOZED' ? {} : { option: includeSnoozed }),
-      ...(limit ? { limit: limit.toString() } : {}),
+      ...(includeSnoozed === 'NO_SNOOZED' ? {} : { options: includeSnoozed }),
+      ...(!limit || isEmpty(limit) ? {} : { limit: limit, offset: '0' }),
+    },
+  });
+
+  return response;
+}
+
+export async function snoozeRecommendations({
+  auth,
+  vendor,
+  recommendationType,
+  accountId,
+  resourceIds,
+  snoozeUntil,
+}: {
+  auth: CloudabilityAuth;
+  vendor: Vendor;
+  recommendationType: string;
+  accountId: string;
+  resourceIds: string[];
+  snoozeUntil: string;
+}): Promise<any> {
+  const url = `/rightsizing/${vendor}/recommendations/${recommendationType}/snooze`;
+
+  const response = await makeRequest({
+    auth,
+    endpoint: url,
+    method: HttpMethod.POST,
+    body: {
+      expiresOn: snoozeUntil,
+      resources: {
+        [accountId]: resourceIds,
+      },
+    },
+  });
+
+  return response;
+}
+
+export async function unsnoozeRecommendations({
+  auth,
+  vendor,
+  recommendationType,
+  accountId,
+  resourceIds,
+}: {
+  auth: CloudabilityAuth;
+  vendor: Vendor;
+  recommendationType: string;
+  accountId: string;
+  resourceIds: string[];
+}): Promise<any> {
+  const url = `/rightsizing/${vendor}/recommendations/${recommendationType}/unsnooze`;
+
+  const response = await makeRequest({
+    auth,
+    endpoint: url,
+    method: HttpMethod.POST,
+    body: {
+      resources: {
+        [accountId]: resourceIds,
+      },
     },
   });
 
