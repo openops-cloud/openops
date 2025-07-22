@@ -12,6 +12,10 @@ export async function sendTernaryRequest(
   request: HttpRequest & { auth: ternaryAuth },
 ) {
   const validJwt = validateJwt(request.auth.apiKey);
+  if (!validJwt) {
+    throw new Error('Invalid JWT');
+  }
+
   return httpClient.sendRequest({
     ...request,
     url: `${request.auth.apiURL}/api/${request.url}`,
@@ -29,12 +33,9 @@ function validateJwt(token: string): boolean {
   }
   try {
     const decoded = jwtDecode(token);
-    if (!decoded) {
-      return false;
-    }
-
-    const isValid = !decoded.exp || dayjs().isBefore(dayjs.unix(decoded.exp));
-    return isValid ? true : false;
+    const isValid =
+      decoded && decoded.exp && dayjs().isBefore(dayjs.unix(decoded.exp));
+    return !!isValid;
   } catch (e) {
     return false;
   }

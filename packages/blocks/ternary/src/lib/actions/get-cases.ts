@@ -1,5 +1,6 @@
 import { HttpMethod } from '@openops/blocks-common';
 import { createAction } from '@openops/blocks-framework';
+import { logger } from '@openops/server-shared';
 import { sendTernaryRequest } from '../common';
 import { ternaryCloudAuth } from '../common/auth';
 
@@ -21,9 +22,8 @@ export const getCases = createAction({
       });
       return response.body as any[];
     } catch (e) {
-      console.error('Error getting case management cases!');
-      console.error(e);
-      return e;
+      logger.error('Error getting case management cases.', e);
+      throw e;
     }
   },
 });
