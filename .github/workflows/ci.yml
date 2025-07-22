@@ -59,9 +59,14 @@ jobs:
       contents: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.2.2
+      - name: Checkout for Dependabot PR
+        if: ${{ startsWith(github.head_ref || '', 'dependabot/') }}
+        uses: actions/checkout@v4.2.2
         with:
           ref: ${{ github.head_ref }}
+      - name: Checkout for others
+        if: ${{ !startsWith(github.head_ref || '', 'dependabot/') }}
+        uses: actions/checkout@v4.2.2
       - name: Restore node_modules cache
         id: node-modules-cache
         uses: actions/cache/restore@v4.2.3
