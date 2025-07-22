@@ -63,7 +63,7 @@ function mergeToolResultIntoAssistant(
       const toolCallPart = prev.content.find(
         (part) =>
           part.type === 'tool-call' &&
-          (part as ToolCallPartWithResult).toolCallId === toolResult.toolCallId,
+          part.toolCallId === toolResult.toolCallId,
       );
       if (toolCallPart) {
         (toolCallPart as ToolCallPartWithResult).result = toolResult.result;
