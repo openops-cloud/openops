@@ -17,9 +17,19 @@ export const kion = createBlock({
       },
       auth: kionAuth,
       additionalProps: {
-        documentation: Property.MarkDown({
-          value:
-            'For more information, visit the [Kion API documentation](https://support.kion.io/hc/en-us/articles/360055160791-App-API-Access).',
+        documentation: Property.DynamicProperties({
+          displayName: '',
+          refreshers: ['auth'],
+          required: false,
+          props: async ({ auth }) => {
+            return {
+              docs: Property.MarkDown({
+                value: `For more information, visit the [Kion API documentation](${
+                  (auth as KionAuth).instanceUrl
+                }/swagger).`,
+              }),
+            } as any;
+          },
         }),
       },
       authMapping: async (context) => {
