@@ -134,10 +134,35 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         projectId,
       );
       const llmConfigResult = await getLLMConfig(projectId);
+      let messageContent: string;
+      if (request.body.messages) {
+        if (request.body.messages.length === 0) {
+          return await reply.code(400).send({
+            message:
+              'Messages array cannot be empty. Please provide at least one message or use the message field instead.',
+          });
+        }
 
+        const lastMessage =
+          request.body.messages[request.body.messages.length - 1];
+        if (
+          !lastMessage.content ||
+          !Array.isArray(lastMessage.content) ||
+          lastMessage.content.length === 0
+        ) {
+          return await reply.code(400).send({
+            message:
+              'Last message must have valid content array with at least one element.',
+          });
+        }
+
+        messageContent = String(lastMessage.content[0].text);
+      } else {
+        messageContent = request.body.message;
+      }
       conversationResult.messages.push({
         role: 'user',
-        content: request.body.message,
+        content: messageContent,
       });
 
       const { chatContext, messages } = conversationResult;
