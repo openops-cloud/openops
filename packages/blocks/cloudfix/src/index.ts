@@ -8,6 +8,10 @@ import { getReportAction } from './lib/actions/get-report-action';
 import { postponeRecommendationsAction } from './lib/actions/postpone-recommendations-action';
 import { cloudfixAuth } from './lib/common/auth';
 
+const markdown = `
+For more information, visit the [CloudFix API documentation](https://docs.cloudfix.com/reference/introduction).
+`;
+
 export const cloudfix = createBlock({
   displayName: 'CloudFix',
   auth: cloudfixAuth,
@@ -26,7 +30,7 @@ export const cloudfix = createBlock({
       auth: cloudfixAuth,
       additionalProps: {
         documentation: Property.MarkDown({
-          value: 'TODO',
+          value: markdown,
         }),
       },
       authMapping: async (context) => ({
