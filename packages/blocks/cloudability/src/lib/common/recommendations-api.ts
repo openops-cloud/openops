@@ -11,7 +11,7 @@ export async function getRecommendations({
   limit,
   filters,
   basis,
-  includeSnoozed,
+  snoozedFilter,
 }: {
   auth: CloudabilityAuth;
   vendor: Vendor;
@@ -20,7 +20,7 @@ export async function getRecommendations({
   limit: string | undefined;
   filters: string[];
   basis: CostBasis;
-  includeSnoozed: IncludeSnoozed;
+  snoozedFilter: SnoozedFilter;
 }): Promise<any[]> {
   const url = `/rightsizing/${vendor}/recommendations/${recommendationType}`;
 
@@ -32,8 +32,10 @@ export async function getRecommendations({
       duration,
       basis,
       filters: filters.join(','),
-      ...(includeSnoozed === 'NO_SNOOZED' ? {} : { options: includeSnoozed }),
-      ...(!limit || isEmpty(limit) ? {} : { limit: limit, offset: '0' }),
+      ...(snoozedFilter === 'NO_SNOOZED' ? {} : { options: snoozedFilter }),
+      ...(!limit || isEmpty(limit) || isNaN(Number(limit))
+        ? {}
+        : { limit: limit, offset: '0' }),
     },
   });
 
@@ -116,7 +118,7 @@ export enum CostBasis {
   Effective = 'effective',
 }
 
-export enum IncludeSnoozed {
+export enum SnoozedFilter {
   NO_SNOOZED = 'NO_SNOOZED',
   INCLUDE_SNOOZED = 'INCLUDE_SNOOZED',
   ONLY_SNOOZED = 'ONLY_SNOOZED',

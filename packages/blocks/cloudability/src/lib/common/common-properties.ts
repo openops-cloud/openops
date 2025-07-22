@@ -29,7 +29,7 @@ export function getRecommendationTypesProperty() {
           vendor as Vendor,
         );
 
-        if (!recommendationTypes || recommendationTypes.length === 0) {
+        if (!recommendationTypes?.length) {
           return {
             disabled: true,
             options: [],

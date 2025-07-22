@@ -21,7 +21,7 @@ export const unsnoozeRecommendationAction = createAction({
     }),
     resourceIds: Property.Array({
       displayName: 'Resource IDs',
-      description: 'The IDs of the resources to snooze recommendations for.',
+      description: 'The IDs of the resources to unsnooze recommendations for.',
       required: true,
     }),
   },

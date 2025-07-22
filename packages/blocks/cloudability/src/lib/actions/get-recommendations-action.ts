@@ -1,4 +1,4 @@
-import { createAction, Property, Validators } from '@openops/blocks-framework';
+import { createAction, Property } from '@openops/blocks-framework';
 import { cloudabilityAuth } from '../auth';
 import {
   getRecommendationTypesProperty,
@@ -8,8 +8,7 @@ import {
   CostBasis,
   Duration,
   getRecommendations,
-  IncludeSnoozed,
-  Vendor,
+  SnoozedFilter,
 } from '../common/recommendations-api';
 
 export const getRecommendationsAction = createAction({
@@ -25,11 +24,11 @@ export const getRecommendationsAction = createAction({
       description:
         'The look back period in days, used for calculating the recommendations.',
       required: true,
-      defaultValue: 'ten-day',
+      defaultValue: Duration.TenDay,
       options: {
         options: [
-          { label: 'Last 10 Days', value: 'ten-day' },
-          { label: 'Last 30 Days', value: 'thirty-day' },
+          { label: 'Last 10 Days', value: Duration.TenDay },
+          { label: 'Last 30 Days', value: Duration.ThirtyDay },
         ],
       },
     }),
@@ -37,24 +36,27 @@ export const getRecommendationsAction = createAction({
       displayName: 'Cost Basis',
       description: 'The cost basis for the recommendations.',
       required: true,
-      defaultValue: 'on-demand',
+      defaultValue: CostBasis.OnDemand,
       options: {
         options: [
-          { label: 'On-Demand', value: 'on-demand' },
-          { label: 'Effective', value: 'effective' },
+          { label: 'On-Demand', value: CostBasis.OnDemand },
+          { label: 'Effective', value: CostBasis.Effective },
         ],
       },
     }),
-    includeSnoozed: Property.StaticDropdown({
+    snoozedFilter: Property.StaticDropdown({
       displayName: 'Recommendations Status',
       description: 'Whether to include recommendations that have been snoozed.',
       required: true,
-      defaultValue: 'NO_SNOOZED',
+      defaultValue: SnoozedFilter.NO_SNOOZED,
       options: {
         options: [
-          { label: 'Show Only Active', value: 'NO_SNOOZED' },
-          { label: 'Show All (including snoozed)', value: 'INCLUDE_SNOOZED' },
-          { label: 'Show Only Snoozed', value: 'ONLY_SNOOZED' },
+          { label: 'Show Only Active', value: SnoozedFilter.NO_SNOOZED },
+          {
+            label: 'Show All (including snoozed)',
+            value: SnoozedFilter.INCLUDE_SNOOZED,
+          },
+          { label: 'Show Only Snoozed', value: SnoozedFilter.ONLY_SNOOZED },
         ],
       },
     }),
@@ -79,19 +81,19 @@ export const getRecommendationsAction = createAction({
       limit,
       additionalFilters,
       basis,
-      includeSnoozed,
+      snoozedFilter,
     } = context.propsValue;
     const { auth } = context;
 
     const result = await getRecommendations({
       auth,
-      vendor: vendor as Vendor,
+      vendor: vendor,
       recommendationType: recommendationType,
-      duration: duration as Duration,
+      duration: duration,
       limit,
       filters: additionalFilters as string[],
-      basis: basis as CostBasis,
-      includeSnoozed: includeSnoozed as IncludeSnoozed,
+      basis: basis,
+      snoozedFilter: snoozedFilter,
     });
 
     return result;
