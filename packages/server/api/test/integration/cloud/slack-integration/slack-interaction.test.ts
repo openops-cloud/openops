@@ -147,7 +147,7 @@ describe('Slack API', () => {
       });
     });
 
-    test('should return 200 Ok if action is not a button', async () => {
+    test('should return 200 and send an ephemeral message if the interactive element is not of a supported type', async () => {
       verifySignatureMock.mockReturnValueOnce(true);
 
       const payload = JSON.stringify({
@@ -156,17 +156,31 @@ describe('Slack API', () => {
             type: 'some type',
           },
         ],
+        user: {
+          id: 'some_user_id',
+          name: 'some_user_name',
+        },
         message: {
           metadata: {
             event_payload: {},
           },
         },
+        response_url:
+          'https://hooks.slack.com/actions/XXXXXXXX/XXXXXXXXX/XXXXXXXXX',
       });
 
       const response = await makeRequest(payload);
 
       expect(response?.statusCode).toBe(StatusCodes.OK);
-      expect(response?.json()).toEqual({ text: 'Received interaction' });
+      expect(axiosGetMock).not.toHaveBeenCalled();
+      expect(sendEphemeralMessageMock).toHaveBeenCalledTimes(1);
+      expect(sendEphemeralMessageMock).toHaveBeenCalledWith({
+        ephemeralText:
+          '⚠️ Warning: Unsupported action type: some type. Please change the workflow to use supported action types: button, select, datepicker, timepicker, or radio buttons.',
+        responseUrl:
+          'https://hooks.slack.com/actions/XXXXXXXX/XXXXXXXXX/XXXXXXXXX',
+        userId: 'some_user_id',
+      });
     });
 
     test('should return 200 and send an ephemeral message if the message is a test message', async () => {
@@ -218,6 +232,7 @@ describe('Slack API', () => {
           {
             type: 'button',
             action_id: 'some_id',
+            text: 'text',
           },
         ],
         user: {

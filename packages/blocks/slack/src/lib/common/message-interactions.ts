@@ -3,6 +3,7 @@ import { isEmpty } from '@openops/shared';
 export interface InteractionPayload {
   userName: string;
   actionClicked: string;
+  actionType: string;
   path: string;
 }
 
@@ -27,12 +28,19 @@ export function removeActionBlocks(blocks: any): any[] {
   }, []);
 }
 
-export function buildActionBlock(user: string, button: string) {
-  const whoClickedText = !isEmpty(user)
-    ? `user @${user} clicked on '${button}'`
-    : `clicked on '${button}'`;
+export function buildActionBlock(
+  user: string,
+  userSelection: UserSelection | UserSelection[],
+) {
+  const clickedOnText = Array.isArray(userSelection)
+    ? userSelection.map((opt) => opt.displayText).join(', ')
+    : userSelection.displayText;
 
-  const modifiedBlocks = [
+  const whoClickedText = !isEmpty(user)
+    ? `user @${user} selected '${clickedOnText}'`
+    : `selected '${clickedOnText}'`;
+
+  return [
     { type: 'divider' },
     {
       type: 'section',
@@ -42,8 +50,6 @@ export function buildActionBlock(user: string, button: string) {
       },
     },
   ];
-
-  return modifiedBlocks;
 }
 
 export function buildExpiredMessageBlock() {
@@ -59,4 +65,9 @@ export function buildExpiredMessageBlock() {
   ];
 
   return modifiedBlocks;
+}
+
+export interface UserSelection {
+  value: string;
+  displayText: string;
 }
