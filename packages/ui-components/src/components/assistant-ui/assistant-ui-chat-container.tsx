@@ -36,11 +36,11 @@ const AssistantUiChatContainer = ({
                 onNewChat();
               }}
               disabled={!enableNewChat}
-              variant="basic"
+              variant="secondary"
               size="icon"
               className="text-outline size-[22px]"
             >
-              <SquarePen size={13} />
+              <SquarePen size={16} />
             </Button>
           </TooltipWrapper>
           {t('AI Assistant')}
@@ -55,7 +55,7 @@ const AssistantUiChatContainer = ({
                 e.stopPropagation();
                 onClose();
               }}
-              className="text-outline"
+              className="text-outline size-[37px]"
             >
               <XIcon size={20} />
             </Button>
