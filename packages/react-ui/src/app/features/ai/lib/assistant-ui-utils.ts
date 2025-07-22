@@ -59,9 +59,7 @@ export function mergeToolResults(
 ): ThreadMessageLike[] {
   const merged: NormalizedMessage[] = [];
 
-  for (let i = 0; i < messages.length; i++) {
-    const msg = messages[i];
-
+  for (const msg of messages) {
     if (
       msg.role === 'tool' &&
       Array.isArray(msg.content) &&

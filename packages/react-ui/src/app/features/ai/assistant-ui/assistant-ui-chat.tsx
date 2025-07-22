@@ -40,7 +40,7 @@ const AssistantUiChat = () => {
     if (isLoading || !openChatResponse?.messages) {
       return [];
     }
-    return mergeToolResults(openChatResponse.messages) as ThreadMessageLike[];
+    return mergeToolResults(openChatResponse.messages);
   }, [isLoading, openChatResponse?.messages]);
 
   useEffect(() => {
@@ -57,7 +57,7 @@ const AssistantUiChat = () => {
         chatId: openChatResponse?.chatId,
         message: 'satisfy-schema',
       },
-      initialMessages: initialMessages as ThreadMessageLike[],
+      initialMessages,
       headers: {
         Authorization: `Bearer ${authenticationSession.getToken()}`,
       },
