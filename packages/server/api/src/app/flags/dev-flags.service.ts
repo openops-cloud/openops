@@ -26,7 +26,7 @@ async function getAll(): Promise<Flag[]> {
     },
     {
       id: FlagId.ASSISTANT_UI_ENABLED,
-      value: true,
+      value: false,
       created,
       updated,
     },
