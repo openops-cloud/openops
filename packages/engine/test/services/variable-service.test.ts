@@ -647,7 +647,7 @@ describe('Variable Service', () => {
     const input = {
       value1: 40,
       value2: 4,
-      value3: 4,
+      value3: '4',
     };
     const props = {
       value1: Property.Number({
