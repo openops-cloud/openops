@@ -3,42 +3,46 @@ import { createAction, Property } from '@openops/blocks-framework';
 import { cloudfixAuth, CloudfixAuth } from '../common/auth';
 import { makeRequest } from '../common/make-request';
 
-enum RecommendationStatus {
-  SUGGESTED = 'SUGGESTED',
-  MANUAL_APPROVAL = 'MANUAL_APPROVAL',
-  SCHEDULED = 'SCHEDULED',
-  IN_PROGRESS = 'IN_PROGRESS',
-}
-
-enum SortByField {
-  ANNUAL_SAVINGS = 'annualSavings',
-  UPDATED_AT = 'updatedAt',
-  ANNUAL_COST = 'annualCost',
-  SCHEDULED_AT = 'scheduledAt',
-}
-
 export const getRecommendationsAction = createAction({
   name: 'get_recommendations',
   displayName: 'Get Recommendations',
   description: 'Get recommendations with filtering',
   auth: cloudfixAuth,
   props: {
-    finderFixerId: Property.ShortText({
-      displayName: 'Finder Fixer ID',
-      description: 'The ID of the finder fixer',
+    status: Property.StaticMultiSelectDropdown({
+      displayName: 'Status Filter',
+      description: 'Filter recommendations by status',
       required: false,
-    }),
-    pageNumber: Property.Number({
-      displayName: 'Page Number',
-      description: 'The page number for pagination (starts from 1)',
-      required: false,
-      defaultValue: 1,
-    }),
-    pageLimit: Property.Number({
-      displayName: 'Page Limit',
-      description: 'The maximum number of recommendations per page',
-      required: false,
-      defaultValue: 200,
+      options: {
+        options: [
+          { label: 'Suggested', value: 'SUGGESTED' },
+          { label: 'Scheduled', value: 'SCHEDULED' },
+          { label: 'Failed', value: 'FAILED' },
+          { label: 'Completed', value: 'COMPLETED' },
+          { label: 'Rejected', value: 'REJECTED' },
+          { label: 'In Progress', value: 'IN_PROGRESS' },
+          {
+            label: 'Manual Approval',
+            value: 'MANUAL_APPROVAL',
+          },
+          {
+            label: 'No Longer Applicable',
+            value: 'NO_LONGER_APPLICABLE',
+          },
+          {
+            label: 'Resource Deleted',
+            value: 'RESOURCE_DELETED',
+          },
+          {
+            label: 'Resource Fixed',
+            value: 'RESOURCE_FIXED',
+          },
+          {
+            label: 'Manually Fixed',
+            value: 'MANUALLY_FIXED',
+          },
+        ],
+      },
     }),
     sortBy: Property.StaticDropdown({
       displayName: 'Sort By',
@@ -46,13 +50,13 @@ export const getRecommendationsAction = createAction({
       required: false,
       options: {
         options: [
-          { label: 'Scheduled At', value: SortByField.SCHEDULED_AT },
-          { label: 'Updated At', value: SortByField.UPDATED_AT },
-          { label: 'Annual Savings', value: SortByField.ANNUAL_SAVINGS },
-          { label: 'Annual Cost', value: SortByField.ANNUAL_COST },
+          { label: 'Scheduled At', value: 'scheduledAt' },
+          { label: 'Updated At', value: 'updatedAt' },
+          { label: 'Annual Savings', value: 'annualSavings' },
+          { label: 'Annual Cost', value: 'annualCost' },
         ],
       },
-      defaultValue: SortByField.SCHEDULED_AT,
+      defaultValue: 'scheduledAt',
     }),
     sortOrder: Property.StaticDropdown({
       displayName: 'Sort Order',
@@ -70,23 +74,23 @@ export const getRecommendationsAction = createAction({
       displayName: 'Include Parameters',
       description: 'Whether to include parameters in the response',
       required: false,
-      defaultValue: true,
     }),
-    status: Property.StaticMultiSelectDropdown({
-      displayName: 'Status Filter',
-      description: 'Filter recommendations by status',
+    finderFixerId: Property.ShortText({
+      displayName: 'Finder Fixer ID',
+      description: 'The ID of the finder fixer',
       required: false,
-      options: {
-        options: [
-          { label: 'Suggested', value: RecommendationStatus.SUGGESTED },
-          {
-            label: 'Manual Approval',
-            value: RecommendationStatus.MANUAL_APPROVAL,
-          },
-          { label: 'Scheduled', value: RecommendationStatus.SCHEDULED },
-          { label: 'In Progress', value: RecommendationStatus.IN_PROGRESS },
-        ],
-      },
+    }),
+    pageNumber: Property.Number({
+      displayName: 'Page Number',
+      description: 'The page number for pagination (starts from 1)',
+      required: false,
+      defaultValue: 1,
+    }),
+    pageLimit: Property.Number({
+      displayName: 'Page Limit',
+      description: 'The maximum number of recommendations per page',
+      required: false,
+      defaultValue: 200,
     }),
   },
   async run(context) {
