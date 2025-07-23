@@ -5,7 +5,7 @@ describe('cloudfixAuth', () => {
     expect(cloudfixAuth).toMatchObject({
       required: true,
       authProviderKey: 'cloudfix',
-      authProviderDisplayName: 'Cloudfix',
+      authProviderDisplayName: 'CloudFix',
       authProviderLogoUrl: 'https://static.openops.com/blocks/cloudfix.png',
     });
   });

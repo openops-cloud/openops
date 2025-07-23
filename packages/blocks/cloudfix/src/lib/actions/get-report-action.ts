@@ -20,7 +20,7 @@ export const getReportAction = createAction({
 
     const response = await makeRequest({
       auth: context.auth as CloudfixAuth,
-      endpoint: `/report?recommendationId=${recommendationId}`,
+      endpoint: `/recommendations/report?recommendationId=${recommendationId}`,
       method: HttpMethod.GET,
     });
 

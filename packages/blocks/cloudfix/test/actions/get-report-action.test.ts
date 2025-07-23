@@ -34,7 +34,8 @@ describe('getReportAction', () => {
 
     expect(result).toBe('mockResult');
     expect(makeRequestMock.makeRequest).toHaveBeenCalledWith({
-      endpoint: '/report?recommendationId=some recommendationId',
+      endpoint:
+        '/recommendations/report?recommendationId=some recommendationId',
       method: 'GET',
       auth: context.auth,
     });
