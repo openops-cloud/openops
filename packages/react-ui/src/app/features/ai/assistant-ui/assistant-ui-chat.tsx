@@ -74,6 +74,9 @@ const AssistantUiChat = ({
     [openChatResponse?.chatId, openChatResponse?.messages],
   );
 
+  const runtime = useChatRuntime(runtimeConfig);
+  const [hasMessages, setHasMessages] = useState(!!openChatResponse?.messages);
+
   const queryClient = useQueryClient();
 
   const createNewChat = useCallback(async () => {
@@ -83,6 +86,7 @@ const AssistantUiChat = ({
 
     try {
       if (oldChatId) {
+        runtime.thread.cancelRun();
         await queryClient.invalidateQueries({
           queryKey: [QueryKeys.openAiAssistantChat, oldChatId],
         });
@@ -97,7 +101,7 @@ const AssistantUiChat = ({
         `There was an error deleting existing chat and creating a new one: ${error}`,
       );
     }
-  }, [queryClient]);
+  }, [queryClient, runtime.thread]);
 
   const {
     selectedModel,
@@ -105,9 +109,6 @@ const AssistantUiChat = ({
     onModelSelected,
     isLoading: isModelSelectorLoading,
   } = useAiModelSelector();
-
-  const runtime = useChatRuntime(runtimeConfig);
-  const [hasMessages, setHasMessages] = useState(!!openChatResponse?.messages);
 
   useEffect(() => {
     const unsubscribe = runtime.thread.subscribe(() => {
