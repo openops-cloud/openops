@@ -6,7 +6,7 @@ describe('block declaration tests', () => {
       type: 'CUSTOM_AUTH',
       required: true,
       authProviderKey: 'cloudfix',
-      authProviderDisplayName: 'Cloudfix',
+      authProviderDisplayName: 'CloudFix',
       authProviderLogoUrl: 'https://static.openops.com/blocks/cloudfix.png',
     });
   });
