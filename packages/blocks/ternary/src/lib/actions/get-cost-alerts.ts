@@ -7,7 +7,7 @@ import { ternaryCloudAuth } from '../common/auth';
 export const getCostAlerts = createAction({
   name: 'get_cost_alerts',
   displayName: 'Get Cost Alerts',
-  description: 'Fetch the list of cost alerts.',
+  description: 'Get Cost Alerts.',
   auth: ternaryCloudAuth,
   props: {},
   run: async ({ auth }) => {
