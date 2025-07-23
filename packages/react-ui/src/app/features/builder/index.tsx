@@ -46,6 +46,7 @@ import {
 } from '@openops/shared';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
+import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
 import { AiChatResizablePanel } from '@/app/features/builder/ai-chat/ai-chat-resizable-panel';
 import { RESIZABLE_PANEL_IDS } from '../../constants/layout';
 import {
@@ -53,6 +54,7 @@ import {
   LEFT_SIDEBAR_MIN_SIZE,
 } from '../../constants/sidebar';
 import { AiAssistantChat } from '../ai/ai-assistant-chat';
+import { AiConfigurationPrompt } from '../ai/ai-configuration-prompt';
 import { blocksHooks } from '../blocks/lib/blocks-hook';
 import { RunDetailsBar } from '../flow-runs/components/run-details-bar';
 import { FlowSideMenu } from '../navigation/side-menu/flow/flow-side-menu';
@@ -307,6 +309,7 @@ const BuilderPage = () => {
                         className={'left-4 bottom-[70px]'}
                       />
                     )}
+                    <AiConfigurationPrompt className={'left-4 bottom-[70px]'} />
                     {leftSidebar === LeftSideBarType.NONE && (
                       <AiAssistantButton className="size-[42px] absolute left-4 bottom-[10px] z-50" />
                     )}

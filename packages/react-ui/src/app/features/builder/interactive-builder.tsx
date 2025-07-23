@@ -1,6 +1,7 @@
 import { FLOW_CANVAS_Y_OFFESET } from '@/app/constants/flow-canvas';
 import { AiAssistantButton } from '@/app/features/ai/ai-assistant-button';
 import { AiAssistantChat } from '@/app/features/ai/ai-assistant-chat';
+import { AiConfigurationPrompt } from '@/app/features/ai/ai-configuration-prompt';
 import { useAppStore } from '@/app/store/app-store';
 import {
   AI_CHAT_CONTAINER_SIZES,
@@ -164,7 +165,7 @@ const InteractiveBuilder = ({
             className={'left-4 bottom-[70px]'}
           />
         )}
-
+        <AiConfigurationPrompt className={'left-4 bottom-[70px]'} />
         <CanvasControls
           topOffset={FLOW_CANVAS_Y_OFFESET}
           className={cn({
