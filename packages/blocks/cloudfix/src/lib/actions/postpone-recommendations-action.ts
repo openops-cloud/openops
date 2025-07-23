@@ -25,7 +25,6 @@ export const postponeRecommendationsAction = createAction({
       description: 'The reason for postponing the recommendations',
       required: false,
     }),
-    // TODO: add property list for how long
   },
   async run(context) {
     const { recommendationIds, postponeUntil, reason } = context.propsValue;
