@@ -1,5 +1,5 @@
 import { createCustomApiCallAction } from '@openops/blocks-common';
-import { createBlock, Property } from '@openops/blocks-framework';
+import { createBlock } from '@openops/blocks-framework';
 import { BlockCategory } from '@openops/shared';
 import { cloudfixAuth } from './lib/common/auth';
 
