@@ -98,7 +98,7 @@ const AssistantUiChat = ({
         duration: 3000,
       });
       console.error(
-        `There was an error deleting existing chat and creating a new one: ${error}`,
+        `There was an error canceling the current run and invalidating queries while creating a new chat: ${error}`,
       );
     }
   }, [queryClient, runtime.thread]);
