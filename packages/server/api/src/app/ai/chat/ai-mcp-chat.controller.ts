@@ -421,15 +421,10 @@ async function streamMessages(
       }
     },
     async onFinish({ response }): Promise<void> {
-      await saveChatHistory(
-        chatId, 
-        userId, 
-        projectId, 
-        [
-          ...messages,
-          ...response.messages.map(getResponseObject),
-        ]
-      );
+      await saveChatHistory(chatId, userId, projectId, [
+        ...messages,
+        ...response.messages.map(getResponseObject),
+      ]);
       await closeMCPClients(mcpClients);
     },
   });
