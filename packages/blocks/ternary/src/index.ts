@@ -1,7 +1,7 @@
 import { createCustomApiCallAction } from '@openops/blocks-common';
 import { createBlock, Property } from '@openops/blocks-framework';
 import { BlockCategory } from '@openops/shared';
-import { createCase } from './lib/actions/create-case';
+import { createCaseAction } from './lib/actions/create-case';
 import { getBudgets } from './lib/actions/get-budgets';
 import { getCasesAction } from './lib/actions/get-cases';
 import { getCostAlertsAction } from './lib/actions/get-cost-alerts';
@@ -20,7 +20,7 @@ export const ternary = createBlock({
   actions: [
     getDataIntegrations,
     getBudgets,
-    createCase,
+    createCaseAction,
     getCasesAction,
     getCostAlertsAction,
     getUsers,

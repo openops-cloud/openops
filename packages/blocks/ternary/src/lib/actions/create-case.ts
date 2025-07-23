@@ -5,8 +5,9 @@ import { sendTernaryRequest } from '../common';
 import { ternaryCloudAuth } from '../common/auth';
 import { getCaseTypesProperty } from '../common/case-types-property';
 import { getResourceTypesProperty } from '../common/resource-types-property';
+import { getUsersIDsDropdownProperty } from '../common/users';
 
-export const createCase = createAction({
+export const createCaseAction = createAction({
   name: 'create_case',
   displayName: 'Create a case',
   description: 'Create a case in Ternary.',
@@ -26,14 +27,8 @@ export const createCase = createAction({
     }),
     resourceType: getResourceTypesProperty(),
     caseType: getCaseTypesProperty(),
-    assigneeIDs: Property.Array({
-      displayName: 'Case assignee IDs',
-      required: false,
-    }),
-    followerIDs: Property.Array({
-      displayName: 'Case follower IDs',
-      required: false,
-    }),
+    assigneeIDs: getUsersIDsDropdownProperty('Case assignee IDs'),
+    followerIDs: getUsersIDsDropdownProperty('Case follower IDs'),
     forecastContext: Property.Number({
       displayName: 'Forecast context number',
       required: false,
