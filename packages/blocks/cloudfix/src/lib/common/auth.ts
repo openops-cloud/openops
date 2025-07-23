@@ -10,7 +10,7 @@ To get your CloudFix API key:
 export const cloudfixAuth = BlockAuth.CustomAuth({
   required: true,
   authProviderKey: 'cloudfix',
-  authProviderDisplayName: 'Cloudfix',
+  authProviderDisplayName: 'CloudFix',
   authProviderLogoUrl: 'https://static.openops.com/blocks/cloudfix.png',
   description: markdown,
   props: {

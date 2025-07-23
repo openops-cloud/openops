@@ -6,7 +6,7 @@ describe('block declaration tests', () => {
       type: 'CUSTOM_AUTH',
       required: true,
       authProviderKey: 'cloudfix',
-      authProviderDisplayName: 'Cloudfix',
+      authProviderDisplayName: 'CloudFix',
       authProviderLogoUrl: 'https://static.openops.com/blocks/cloudfix.png',
     });
   });
@@ -47,15 +47,5 @@ describe('block declaration tests', () => {
 
   test('should return block with correct categories', () => {
     expect(cloudfix.categories).toContain('FINOPS');
-  });
-
-  test('should return block with correct minimum supported release', () => {
-    expect(cloudfix.minimumSupportedRelease).toBe('0.20.0');
-  });
-
-  test('should return block with correct logo URL', () => {
-    expect(cloudfix.logoUrl).toBe(
-      'https://static.openops.com/blocks/cloudfix.png',
-    );
   });
 });

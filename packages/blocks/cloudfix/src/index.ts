@@ -1,5 +1,5 @@
 import { createCustomApiCallAction } from '@openops/blocks-common';
-import { createBlock, Property } from '@openops/blocks-framework';
+import { createBlock } from '@openops/blocks-framework';
 import { BlockCategory } from '@openops/shared';
 import { createChangeRequestsAction } from './lib/actions/create-change-requests-action';
 import { getRecommendationsAction } from './lib/actions/get-recommendations-action';
@@ -25,7 +25,7 @@ export const cloudfix = createBlock({
       baseUrl: (auth: any) => auth.apiUrl,
       auth: cloudfixAuth,
       authMapping: async (context) => ({
-        Bearer: (context.auth as any).apiToken,
+        Bearer: (context.auth as any).apiKey,
       }),
     }),
   ],
