@@ -60,10 +60,9 @@ export const getRecommendationsAction = createAction({
       options: {
         options: [
           { label: 'Manual Approval', value: 'MANUAL_APPROVAL' },
-          { label: 'Suggested', value: 'Suggested' },
+          { label: 'Suggested', value: 'SUGGESTED' },
           { label: 'Scheduled', value: 'SCHEDULED' },
           { label: 'In Progress', value: 'IN_PROGRESS' },
-          { label: 'Disabled', value: 'Disabled' },
         ],
       },
     }),
@@ -94,37 +93,39 @@ function buildQueryParams(propsValue: any): string {
     status,
   } = propsValue;
 
-  const params = new URLSearchParams();
+  const params: string[] = [];
 
   if (finderFixerId) {
-    params.append('finderFixerId', finderFixerId);
+    params.push(`finderFixerId=${encodeURIComponent(finderFixerId)}`);
   }
 
   if (pageNumber) {
-    params.append('pageNumber', pageNumber.toString());
+    params.push(`pageNumber=${encodeURIComponent(pageNumber.toString())}`);
   }
 
   if (pageLimit) {
-    params.append('pageLimit', pageLimit.toString());
+    params.push(`pageLimit=${encodeURIComponent(pageLimit.toString())}`);
   }
 
   if (sortBy) {
-    params.append('sortBy', sortBy);
+    params.push(`sortBy=${encodeURIComponent(sortBy)}`);
   }
 
   if (sortOrder) {
-    params.append('sortOrder', sortOrder);
+    params.push(`sortOrder=${encodeURIComponent(sortOrder)}`);
   }
 
   if (includeParameters !== undefined) {
-    params.append('includeParameters', includeParameters.toString());
+    params.push(
+      `includeParameters=${encodeURIComponent(includeParameters.toString())}`,
+    );
   }
-  // TODO: this doesnt work
+
   if (status && status.length > 0) {
     status.forEach((statusValue: string) => {
-      params.append('status', statusValue);
+      params.push(`status=${encodeURIComponent(statusValue)}`);
     });
   }
 
-  return params.toString();
+  return params.join('&');
 }
