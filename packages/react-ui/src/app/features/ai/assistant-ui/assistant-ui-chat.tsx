@@ -1,40 +1,35 @@
-import { AssistantRuntimeProvider } from '@assistant-ui/react';
+import { ThreadMessageLike } from '@assistant-ui/react';
 
-import { useVercelUseChatRuntime } from '@assistant-ui/react-ai-sdk';
+import { useChatRuntime } from '@assistant-ui/react-ai-sdk';
 
-import { useTheme } from '@/app/common/providers/theme-provider';
-import { AI_ASSISTANT_LS_KEY, ASSISTANT_UI_CHAT_ID } from '@/app/constants/ai';
+import { AI_ASSISTANT_LS_KEY } from '@/app/constants/ai';
 import { QueryKeys } from '@/app/constants/query-keys';
+import { useAiModelSelector } from '@/app/features/ai/lib/ai-model-selector-hook';
 import { authenticationSession } from '@/app/lib/authentication-session';
-import { Message, useChat } from '@ai-sdk/react';
-import {
-  ChatStatus,
-  Thread,
-  ThreadWelcomeProvider,
-} from '@openops/components/ui';
+import { AssistantUiChatContainer } from '@openops/components/ui';
 import { OpenChatResponse } from '@openops/shared';
 import { useQuery } from '@tanstack/react-query';
 import { t } from 'i18next';
-import { useCallback, useMemo, useRef } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { aiAssistantChatApi } from '../lib/ai-assistant-chat-api';
-import { ServerMessage } from '../lib/types';
 
-interface TextContentPart {
-  type: 'text';
-  text: string;
-}
+const PLACEHOLDER_MESSAGE_INTEROP = 'satisfy-schema';
 
-type ContentPart = TextContentPart;
+type AssistantUiChatProps = {
+  onClose: () => void;
+  title?: string;
+  children?: ReactNode;
+};
 
-interface ExtendedServerMessage extends ServerMessage {
-  id?: string;
-}
-
-export const useAssistantChat = () => {
+const AssistantUiChat = ({
+  onClose,
+  children,
+  title,
+}: AssistantUiChatProps) => {
   const chatId = useRef(localStorage.getItem(AI_ASSISTANT_LS_KEY));
+  const [shouldRenderChat, setShouldRenderChat] = useState(false);
 
-  const { data: openChatResponse } = useQuery({
+  const { data: openChatResponse, isLoading } = useQuery({
     queryKey: [QueryKeys.openAiAssistantChat, chatId.current],
     queryFn: async () => {
       const conversation = await aiAssistantChatApi.open(chatId.current);
@@ -50,114 +45,71 @@ export const useAssistantChat = () => {
     }
   };
 
-  const convertedMessages = useMemo(() => {
-    const createMessage = (msg: ExtendedServerMessage): Message => ({
-      id: msg.id || uuidv4(),
-      role: msg.role as Message['role'],
-      content: typeof msg.content === 'string' ? msg.content : '',
-    });
-
-    const extractTextFromContent = (content: ContentPart[]): string => {
-      return content
-        .map((part: ContentPart) => {
-          if (part.type === 'text' && part.text) {
-            return part.text;
-          }
-          return '';
-        })
-        .join('');
-    };
-
-    const convertMessage = (msg: ExtendedServerMessage): Message => {
-      if (typeof msg.content === 'string') {
-        return createMessage(msg);
-      }
-
-      if (Array.isArray(msg.content)) {
-        const contentString = extractTextFromContent(msg.content);
-        return {
-          id: msg.id || uuidv4(),
-          role: msg.role as Message['role'],
-          content: contentString,
-        };
-      }
-
-      return createMessage(msg);
-    };
-
-    const convertMessages = (
-      messages: ExtendedServerMessage[] | undefined,
-    ): Message[] => {
-      return messages?.map(convertMessage) || [];
-    };
-
-    return convertMessages(
-      openChatResponse?.messages as ExtendedServerMessage[],
-    );
-  }, [openChatResponse?.messages]);
-
-  const chat = useChat({
-    id: ASSISTANT_UI_CHAT_ID,
-    api: '/api/v1/ai/conversation',
-    maxSteps: 5,
-    body: {
-      chatId: openChatResponse?.chatId,
-    },
-    initialMessages: convertedMessages,
-    experimental_prepareRequestBody: () => ({
-      chatId: openChatResponse?.chatId,
-      message: chat.input,
-    }),
-
-    headers: {
-      Authorization: `Bearer ${authenticationSession.getToken()}`,
-    },
-  });
-
-  const runtime = useVercelUseChatRuntime(chat);
-
-  const chatStatus = useMemo((): ChatStatus | undefined => {
-    switch (chat.status) {
-      case 'streaming':
-        return ChatStatus.STREAMING;
-      case 'submitted':
-        return ChatStatus.SUBMITTED;
-      case 'ready':
-        return ChatStatus.READY;
-      case 'error':
-        return ChatStatus.ERROR;
-      default:
-        return undefined;
+  useEffect(() => {
+    if (!isLoading && openChatResponse) {
+      setShouldRenderChat(true);
     }
-  }, [chat.status]);
+  }, [isLoading, openChatResponse]);
 
-  const createNewChat = useCallback(() => {
-    localStorage.removeItem(AI_ASSISTANT_LS_KEY);
-    chatId.current = null;
-    chat.setMessages([]);
-  }, [chat]);
+  const runtimeConfig = useMemo(
+    () => ({
+      api: '/api/v1/ai/conversation',
+      maxSteps: 5,
+      body: {
+        chatId: openChatResponse?.chatId,
+        message: PLACEHOLDER_MESSAGE_INTEROP,
+      },
+      initialMessages: openChatResponse?.messages as ThreadMessageLike[],
+      headers: {
+        Authorization: `Bearer ${authenticationSession.getToken()}`,
+      },
+    }),
+    [openChatResponse?.chatId, openChatResponse?.messages],
+  );
 
-  return {
-    runtime,
-    messages: chat.messages,
-    input: chat.input,
-    handleInputChange: chat.handleInputChange,
-    handleSubmit: chat.handleSubmit,
-    status: chatStatus,
-    createNewChat,
-  };
-};
+  const {
+    selectedModel,
+    availableModels,
+    onModelSelected,
+    isLoading: isModelSelectorLoading,
+  } = useAiModelSelector();
 
-const AssistantUiChat = () => {
-  const { runtime } = useAssistantChat();
-  const { theme } = useTheme();
+  const runtime = useChatRuntime(runtimeConfig);
+
+  if (isLoading || !openChatResponse) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="text-sm text-muted-foreground">
+          {t('Loading chat...')}
+        </div>
+      </div>
+    );
+  }
+
+  if (!shouldRenderChat) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="text-sm text-muted-foreground">
+          {t('Initializing chat...')}
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <AssistantRuntimeProvider runtime={runtime}>
-      <ThreadWelcomeProvider greeting={t('How can I help you today?')}>
-        <Thread theme={theme} />
-      </ThreadWelcomeProvider>
-    </AssistantRuntimeProvider>
+    <AssistantUiChatContainer
+      onClose={onClose}
+      runtime={runtime}
+      onNewChat={() => {}}
+      title={title}
+      enableNewChat={true}
+      availableModels={availableModels}
+      onModelSelected={onModelSelected}
+      isModelSelectorLoading={isModelSelectorLoading}
+      selectedModel={selectedModel}
+    >
+      {children}
+    </AssistantUiChatContainer>
   );
 };
 

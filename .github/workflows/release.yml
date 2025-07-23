@@ -83,8 +83,6 @@ jobs:
     env:
       VERSION: ${{ needs.get-version.outputs.version }}
       RELEASE_DC_FILENAME: openops-dc-${{ needs.get-version.outputs.version }}.zip
-    outputs:
-      download_url: ${{ steps.upload-release.outputs.download_url }}
     steps:
       - uses: actions/checkout@v4.2.2
       - name: Update version in docker-compose
@@ -116,19 +114,16 @@ jobs:
           aws-region: us-east-2
       - name: Upload release to S3
         id: upload-release
-        env:
-          DOWNLOAD_URL: https://files.openops.com/releases/${{ env.VERSION }}/${{ env.RELEASE_DC_FILENAME}}
         run: |
           aws s3 cp deploy/docker-compose/$RELEASE_DC_FILENAME s3://openops/releases/$VERSION/$RELEASE_DC_FILENAME
           cat <<EOF >> $GITHUB_STEP_SUMMARY
-          Also available at $DOWNLOAD_URL .
+          Also available at https://files.openops.com/releases/${{ env.VERSION }}/${{ env.RELEASE_DC_FILENAME}} .
 
           Can be installed using:
           \`\`\`
-          curl -fsS https://openops.sh/install | OPENOPS_URL=$DOWNLOAD_URL OPENOPS_VERSION=$VERSION sh
+          curl -fsS https://openops.sh/install | OPENOPS_VERSION=$VERSION sh
           \`\`\`
           EOF
-          echo "download_url=$DOWNLOAD_URL" >> $GITHUB_OUTPUT
   trigger-deployment:
     name: Trigger a deployment
     needs: [get-version, create-github-release]
@@ -146,9 +141,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.app_token.outputs.token }}
           VERSION: ${{ needs.get-version.outputs.version }}
-          RELEASE_URL: ${{ needs.create-github-release.outputs.download_url }}
         run: |
-          gh workflow run "Deploy Docker Compose Release" -R openops-cloud/devops -f release_version=${VERSION} -f release_url=${RELEASE_URL} -r main
+          gh workflow run "Deploy Docker Compose Release" -R openops-cloud/devops -f release_version=${VERSION} -r main
   trigger-docs-update:
     name: Trigger docs update
     needs: [get-version, create-github-release]
@@ -162,7 +156,6 @@ jobs:
           app-id: ${{ vars.DEVOPS_GITHUB_APP_ID }}
           private-key: ${{ secrets.DEVOPS_GITHUB_APP_PEM }}
           owner: ${{ github.repository_owner }}
-
       - name: Trigger docs workflow
         env:
           GITHUB_TOKEN: ${{ steps.app_token.outputs.token }}

@@ -11,7 +11,6 @@ export async function sendTernaryRequest(
   request: HttpRequest & { auth: ternaryAuth },
 ) {
   const validJwt = validateJwt(request.auth.apiKey);
-
   if (!validJwt) {
     throw new Error('Invalid JWT');
   }

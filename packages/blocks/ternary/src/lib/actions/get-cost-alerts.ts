@@ -4,10 +4,10 @@ import { logger } from '@openops/server-shared';
 import { sendTernaryRequest } from '../common';
 import { ternaryCloudAuth } from '../common/auth';
 
-export const getUsageRecommendations = createAction({
-  name: 'get_usage_recommendations',
-  displayName: 'Get usage recommendations',
-  description: 'Fetch usage recommendations from Ternary.',
+export const getCostAlerts = createAction({
+  name: 'get_cost_alerts',
+  displayName: 'Get Cost Alerts',
+  description: 'Get Cost Alerts.',
   auth: ternaryCloudAuth,
   props: {},
   run: async ({ auth }) => {
@@ -15,14 +15,14 @@ export const getUsageRecommendations = createAction({
       const response = await sendTernaryRequest({
         auth: auth,
         method: HttpMethod.GET,
-        url: 'recommendations',
+        url: 'cost-alerts',
         queryParams: {
           tenantID: auth.tenantId,
         },
       });
-      return response.body as object;
+      return response.body as any[];
     } catch (e) {
-      logger.error('Error getting usage recommendations.', e);
+      logger.error('Error getting cost alert list.', e);
       throw e;
     }
   },

@@ -22,10 +22,10 @@ https://docs.ternary.app/reference/using-the-api`,
       required: true,
     }),
     apiURL: Property.ShortText({
-      displayName: 'API URL',
+      displayName: 'Base URL',
       defaultValue: '',
       description:
-        'For example: https://core-api.eu.ternary.app\nNote: For the Net Cost block, you need to set the API URL to https://api.eu.ternary.app',
+        'For example: https://core-api.eu.ternary.app\nNote: For the Net Cost block, you need to set the Base URL to https://api.eu.ternary.app',
       required: true,
       validators: [Validators.url],
     }),
