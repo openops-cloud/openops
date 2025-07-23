@@ -221,16 +221,15 @@ export class Validators {
   static number: TypedValidatorFn<ValidationInputType.NUMBER> = {
     type: ValidationInputType.NUMBER,
     fn: (property, processedValue, userInput) => {
-      const emptyUserInput =
-        typeof userInput === 'string'
-          ? isEmpty(userInput.trim())
-          : typeof userInput !== 'number';
-
-      if (!property.required && emptyUserInput) {
-        return null;
+      let emptyInput = false;
+      if (typeof userInput === 'string') {
+        emptyInput = isEmpty(userInput.trim());
+        if (!property.required && emptyInput) {
+          return null;
+        }
       }
 
-      if (isNaN(processedValue) || emptyUserInput) {
+      if (isNaN(processedValue) || emptyInput) {
         return formatErrorMessage(ErrorMessages.NUMBER, { userInput });
       }
 
