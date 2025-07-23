@@ -24,4 +24,5 @@ export enum ErrorMessages {
   NON_ZERO = 'The value: {userInput} must be a non-zero value',
   PHONE_NUMBER = 'The phone number entered is not a valid phone number',
   MAX_ARRAY_LENGTH = 'The array may not contain more than {length} items',
+  BOOLEAN = 'Expected boolean, but found value: {userInput}',
 }
