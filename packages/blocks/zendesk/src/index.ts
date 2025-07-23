@@ -52,6 +52,12 @@ export const zendesk = createBlock({
         return `https://${subdomain}.zendesk.com/api/v2`;
       },
       auth: zendeskAuth,
+      additionalProps: {
+        documentation: Property.MarkDown({
+          value:
+            'For more information, visit the [Zendesk API documentation](https://developer.zendesk.com/api-reference/).',
+        }),
+      },
       authMapping: async ({ auth }) => {
         const { email, token } = auth as {
           email: string;
