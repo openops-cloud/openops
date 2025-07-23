@@ -6,11 +6,18 @@ import { AI_ASSISTANT_LS_KEY } from '@/app/constants/ai';
 import { QueryKeys } from '@/app/constants/query-keys';
 import { useAiModelSelector } from '@/app/features/ai/lib/ai-model-selector-hook';
 import { authenticationSession } from '@/app/lib/authentication-session';
-import { AssistantUiChatContainer } from '@openops/components/ui';
+import { AssistantUiChatContainer, toast } from '@openops/components/ui';
 import { OpenChatResponse } from '@openops/shared';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { t } from 'i18next';
-import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { aiAssistantChatApi } from '../lib/ai-assistant-chat-api';
 
 const PLACEHOLDER_MESSAGE_INTEROP = 'satisfy-schema';
@@ -67,6 +74,31 @@ const AssistantUiChat = ({
     [openChatResponse?.chatId, openChatResponse?.messages],
   );
 
+  const queryClient = useQueryClient();
+
+  const createNewChat = useCallback(async () => {
+    const oldChatId = chatId.current;
+
+    chatId.current = null;
+
+    try {
+      if (oldChatId) {
+        await queryClient.invalidateQueries({
+          queryKey: [QueryKeys.openAiAssistantChat, oldChatId],
+        });
+      }
+      setHasMessages(false);
+    } catch (error) {
+      toast({
+        title: t('There was an error creating the new chat, please try again'),
+        duration: 3000,
+      });
+      console.error(
+        `There was an error deleting existing chat and creating a new one: ${error}`,
+      );
+    }
+  }, [queryClient]);
+
   const {
     selectedModel,
     availableModels,
@@ -75,10 +107,19 @@ const AssistantUiChat = ({
   } = useAiModelSelector();
 
   const runtime = useChatRuntime(runtimeConfig);
+  const [hasMessages, setHasMessages] = useState(!!openChatResponse?.messages);
+
+  useEffect(() => {
+    const unsubscribe = runtime.thread.subscribe(() => {
+      setHasMessages(!!runtime.thread.getState().messages?.length);
+    });
+
+    return () => unsubscribe();
+  }, [runtime.thread]);
 
   if (isLoading || !openChatResponse) {
     return (
-      <div className="flex h-full items-center justify-center">
+      <div className="w-full flex h-full items-center justify-center bg-background">
         <div className="text-sm text-muted-foreground">
           {t('Loading chat...')}
         </div>
@@ -88,7 +129,7 @@ const AssistantUiChat = ({
 
   if (!shouldRenderChat) {
     return (
-      <div className="flex h-full items-center justify-center">
+      <div className="w-full flex h-full items-center justify-center bg-background">
         <div className="text-sm text-muted-foreground">
           {t('Initializing chat...')}
         </div>
@@ -100,9 +141,9 @@ const AssistantUiChat = ({
     <AssistantUiChatContainer
       onClose={onClose}
       runtime={runtime}
-      onNewChat={() => {}}
+      onNewChat={createNewChat}
       title={title}
-      enableNewChat={true}
+      enableNewChat={hasMessages}
       availableModels={availableModels}
       onModelSelected={onModelSelected}
       isModelSelectorLoading={isModelSelectorLoading}
