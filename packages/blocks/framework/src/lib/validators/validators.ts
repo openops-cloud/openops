@@ -221,6 +221,10 @@ export class Validators {
   static number: TypedValidatorFn<ValidationInputType.NUMBER> = {
     type: ValidationInputType.NUMBER,
     fn: (property, processedValue, userInput) => {
+      if (!property.required && userInput.trim() === '') {
+        return null;
+      }
+
       if (isNaN(processedValue)) {
         return formatErrorMessage(ErrorMessages.NUMBER, { userInput });
       }
