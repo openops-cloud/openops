@@ -5,9 +5,7 @@ To get your CloudFix API key:
 
 1. From the CloudFix app, click on "Settings" on the top menu.
 2. Then, click on the "API Tokens" tab, and then "Create Token" button. 
-3. Enter a name for your token, and select an appropriate role - Reader, Resource Manager, or Runbook Manager.
-
-For more information, visit the [CloudFix API documentation](https://docs.cloudfix.com/reference/introduction).`;
+3. Enter a name for your token, and select an appropriate role - Reader, Resource Manager, or Runbook Manager.`;
 
 export const cloudfixAuth = BlockAuth.CustomAuth({
   required: true,
