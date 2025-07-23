@@ -221,7 +221,15 @@ export class Validators {
   static number: TypedValidatorFn<ValidationInputType.NUMBER> = {
     type: ValidationInputType.NUMBER,
     fn: (property, processedValue, userInput) => {
-      if (isNaN(processedValue)) {
+      let emptyInput = false;
+      if (typeof userInput === 'string') {
+        emptyInput = isEmpty(userInput.trim());
+        if (!property.required && emptyInput) {
+          return null;
+        }
+      }
+
+      if (isNaN(processedValue) || emptyInput) {
         return formatErrorMessage(ErrorMessages.NUMBER, { userInput });
       }
 
