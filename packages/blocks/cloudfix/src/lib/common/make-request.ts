@@ -16,14 +16,11 @@ export async function makeRequest({
 }) {
   const { apiKey } = auth;
 
-  // TODO: verify encoding is needed
-  const encoded = Buffer.from(`${apiKey}:`).toString('base64');
-
   const response = await httpClient.sendRequest({
     method,
     url: `${auth.apiUrl}${endpoint}`,
     headers: {
-      Authorization: `Bearer ${encoded}`,
+      Authorization: `Bearer ${apiKey}`,
     },
     body,
     queryParams,

@@ -3,6 +3,20 @@ import { createAction, Property } from '@openops/blocks-framework';
 import { cloudfixAuth, CloudfixAuth } from '../common/auth';
 import { makeRequest } from '../common/make-request';
 
+enum RecommendationStatus {
+  SUGGESTED = 'SUGGESTED',
+  MANUAL_APPROVAL = 'MANUAL_APPROVAL',
+  SCHEDULED = 'SCHEDULED',
+  IN_PROGRESS = 'IN_PROGRESS',
+}
+
+enum SortByField {
+  ANNUAL_SAVINGS = 'annualSavings',
+  UPDATED_AT = 'updatedAt',
+  ANNUAL_COST = 'annualCost',
+  SCHEDULED_AT = 'scheduledAt',
+}
+
 export const getRecommendationsAction = createAction({
   name: 'get_recommendations',
   displayName: 'Get Recommendations',
@@ -26,14 +40,19 @@ export const getRecommendationsAction = createAction({
       required: false,
       defaultValue: 200,
     }),
-    // TODO: verify if theres more fields OR if it can be any field on a recommendation
     sortBy: Property.StaticDropdown({
       displayName: 'Sort By',
       description: 'The field to sort the recommendations by',
       required: false,
       options: {
-        options: [{ label: 'Scheduled At', value: 'scheduledAt' }],
+        options: [
+          { label: 'Scheduled At', value: SortByField.SCHEDULED_AT },
+          { label: 'Updated At', value: SortByField.UPDATED_AT },
+          { label: 'Annual Savings', value: SortByField.ANNUAL_SAVINGS },
+          { label: 'Annual Cost', value: SortByField.ANNUAL_COST },
+        ],
       },
+      defaultValue: SortByField.SCHEDULED_AT,
     }),
     sortOrder: Property.StaticDropdown({
       displayName: 'Sort Order',
@@ -45,6 +64,7 @@ export const getRecommendationsAction = createAction({
           { label: 'Ascending', value: 'ASC' },
         ],
       },
+      defaultValue: 'DESC',
     }),
     includeParameters: Property.Checkbox({
       displayName: 'Include Parameters',
@@ -52,17 +72,19 @@ export const getRecommendationsAction = createAction({
       required: false,
       defaultValue: true,
     }),
-    // TODO: verify these are all statuses
     status: Property.StaticMultiSelectDropdown({
       displayName: 'Status Filter',
       description: 'Filter recommendations by status',
       required: false,
       options: {
         options: [
-          { label: 'Manual Approval', value: 'MANUAL_APPROVAL' },
-          { label: 'Suggested', value: 'SUGGESTED' },
-          { label: 'Scheduled', value: 'SCHEDULED' },
-          { label: 'In Progress', value: 'IN_PROGRESS' },
+          { label: 'Suggested', value: RecommendationStatus.SUGGESTED },
+          {
+            label: 'Manual Approval',
+            value: RecommendationStatus.MANUAL_APPROVAL,
+          },
+          { label: 'Scheduled', value: RecommendationStatus.SCHEDULED },
+          { label: 'In Progress', value: RecommendationStatus.IN_PROGRESS },
         ],
       },
     }),
