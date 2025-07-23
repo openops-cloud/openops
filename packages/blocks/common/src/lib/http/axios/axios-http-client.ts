@@ -1,4 +1,3 @@
-import { logger } from '@openops/server-shared';
 import axios, { AxiosRequestConfig } from 'axios';
 import { BaseHttpClient } from '../core/base-http-client';
 import { DelegatingAuthenticationConverter } from '../core/delegating-authentication-converter';
@@ -41,13 +40,6 @@ export class AxiosHttpClient extends BaseHttpClient {
         timeout,
       };
 
-      logger.debug('=== Full HTTP Request URL ===');
-      logger.debug(
-        'LEYLA Final URL with params:',
-        `${urlWithoutQueryParams}?${queryParams.toString()}`,
-      );
-      logger.debug('============================');
-
       const response = await axios.request(config);
 
       return {
@@ -56,13 +48,13 @@ export class AxiosHttpClient extends BaseHttpClient {
         body: response.data,
       };
     } catch (e) {
-      logger.error('[HttpClient#sendRequest] error:', e);
+      console.error('[HttpClient#sendRequest] error:', e);
       if (axios.isAxiosError(e)) {
-        logger.error(
+        console.error(
           '[HttpClient#sendRequest] error, responseStatus:',
           e.response?.status,
         );
-        logger.error(
+        console.error(
           '[HttpClient#sendRequest] error, responseBody:',
           e.response?.data,
         );
