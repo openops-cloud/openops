@@ -160,7 +160,6 @@ describe('updateFlowVersion', () => {
           valid: false,
           displayName: 'Select Trigger',
           nextAction: {
-            id: 'step_1',
             name: 'step_1',
             valid: false,
             type: 'BLOCK',
