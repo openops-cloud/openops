@@ -46,7 +46,6 @@ import {
 } from '@openops/shared';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
-import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
 import { AiChatResizablePanel } from '@/app/features/builder/ai-chat/ai-chat-resizable-panel';
 import { RESIZABLE_PANEL_IDS } from '../../constants/layout';
 import {
