@@ -242,6 +242,9 @@
       "@openops/block-pastefy": ["packages/blocks/pastefy/src/index.ts"],
       "@openops/block-pdf": ["packages/blocks/pdf/src/index.ts"],
       "@openops/block-pelanor": ["packages/blocks/pelanor/src/index.ts"],
+      "@openops/block-perfectscale": [
+        "packages/blocks/perfectscale/src/index.ts"
+      ],
       "@openops/block-perplexity-ai": [
         "packages/blocks/perplexity-ai/src/index.ts"
       ],
