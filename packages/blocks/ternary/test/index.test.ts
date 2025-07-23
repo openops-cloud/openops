@@ -12,7 +12,7 @@ describe('block declaration tests', () => {
   });
 
   test('should return block with correct number of actions', () => {
-    expect(Object.keys(ternary.actions()).length).toBe(6);
+    expect(Object.keys(ternary.actions()).length).toBe(7);
     expect(ternary.actions()).toMatchObject({
       get_data_integrations: {
         name: 'get_data_integrations',
@@ -28,6 +28,10 @@ describe('block declaration tests', () => {
       },
       get_cost_alerts: {
         name: 'get_cost_alerts',
+        requireAuth: true,
+      },
+      get_users: {
+        name: 'get_users',
         requireAuth: true,
       },
       get_usage_recommendations: {
