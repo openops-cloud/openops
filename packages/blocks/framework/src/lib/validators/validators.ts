@@ -364,6 +364,15 @@ export class Validators {
     },
   };
 
+  static boolean: TypedValidatorFn<ValidationInputType.ANY> = {
+    type: ValidationInputType.ANY,
+    fn: (property, processedValue, userInput) => {
+      return isBoolean(processedValue)
+        ? null
+        : formatErrorMessage(ErrorMessages.BOOLEAN, { userInput });
+    },
+  };
+
   static oneOf(values: unknown[]): TypedValidatorFn<any> {
     return {
       type: ValidationInputType.ANY,
@@ -416,4 +425,13 @@ export class Validators {
       },
     };
   }
+}
+
+function isBoolean(processedValue: unknown): boolean {
+  return (
+    typeof processedValue === 'boolean' ||
+    (typeof processedValue === 'string' &&
+      (processedValue.toLowerCase() === 'true' ||
+        processedValue.toLowerCase() === 'false'))
+  );
 }
