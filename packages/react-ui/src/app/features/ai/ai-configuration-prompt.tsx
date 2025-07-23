@@ -2,13 +2,11 @@ import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
 import { useAppStore } from '@/app/store/app-store';
 import { cn, NoAiEnabledPopover } from '@openops/components/ui';
 
-type NoAiEnabledPopoverWrapperProps = {
+type AiConfigurationPromptProps = {
   className?: string;
 };
 
-const AiConfigurationPrompt = ({
-  className,
-}: NoAiEnabledPopoverWrapperProps) => {
+const AiConfigurationPrompt = ({ className }: AiConfigurationPromptProps) => {
   const { hasActiveAiSettings } = aiSettingsHooks.useHasActiveAiSettings();
 
   const { isAiChatOpened, setIsAiChatOpened } = useAppStore((s) => ({
