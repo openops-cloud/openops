@@ -6,7 +6,7 @@ import { getUsersList } from '../common/users';
 export const getUsers = createAction({
   name: 'get_users',
   displayName: 'Get Users',
-  description: 'Get list of Users.',
+  description: 'Get a list of users.',
   auth: ternaryCloudAuth,
   props: {
     includeSettings: Property.Checkbox({
