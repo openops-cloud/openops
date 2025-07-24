@@ -18,13 +18,13 @@ export const ternary = createBlock({
   categories: [BlockCategory.FINOPS],
   authors: ['Quilyx'],
   actions: [
-    getDataIntegrations,
     getBudgets,
+    getCostAlertsAction,
+    getUsageRecommendations,
+    getDataIntegrations,
     createCaseAction,
     getCasesAction,
-    getCostAlertsAction,
     getUsers,
-    getUsageRecommendations,
     createCustomApiCallAction({
       baseUrl: (auth: unknown) => (auth as { apiURL: string }).apiURL,
       auth: ternaryCloudAuth,

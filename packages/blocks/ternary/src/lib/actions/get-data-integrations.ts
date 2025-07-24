@@ -6,8 +6,8 @@ import { ternaryCloudAuth } from '../common/auth';
 
 export const getDataIntegrations = createAction({
   name: 'get_data_integrations',
-  displayName: 'Get data integrations',
-  description: 'Fetch data integrations from Ternary.',
+  displayName: 'Get Data Integrations',
+  description: 'Get Data Integrations',
   auth: ternaryCloudAuth,
   props: {},
   run: async ({ auth }) => {

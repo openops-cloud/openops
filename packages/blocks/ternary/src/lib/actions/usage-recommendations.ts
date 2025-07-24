@@ -6,8 +6,8 @@ import { ternaryCloudAuth } from '../common/auth';
 
 export const getUsageRecommendations = createAction({
   name: 'get_usage_recommendations',
-  displayName: 'Get usage recommendations',
-  description: 'Fetch usage recommendations from Ternary.',
+  displayName: 'Get Usage Recommendations',
+  description: 'Get Usage Recommendations',
   auth: ternaryCloudAuth,
   props: {},
   run: async ({ auth }) => {

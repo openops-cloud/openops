@@ -9,8 +9,8 @@ import { getUsersIDsDropdownProperty } from '../common/users';
 
 export const createCaseAction = createAction({
   name: 'create_case',
-  displayName: 'Create a case',
-  description: 'Create a case in Ternary.',
+  displayName: 'Create a Case',
+  description: 'Create a Case',
   auth: ternaryCloudAuth,
   props: {
     resourceID: Property.ShortText({

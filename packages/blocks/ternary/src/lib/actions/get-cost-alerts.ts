@@ -6,8 +6,8 @@ import { CasesFilter, getCases } from '../common/cases-api';
 
 export const getCostAlertsAction = createAction({
   name: 'get_cost_alerts',
-  displayName: 'Get Cost Alerts',
-  description: 'Get Cost Alerts.',
+  displayName: 'Get Anomalies',
+  description: 'Get Anomalies',
   auth: ternaryCloudAuth,
   props: {
     statusFilter: Property.StaticMultiSelectDropdown({
