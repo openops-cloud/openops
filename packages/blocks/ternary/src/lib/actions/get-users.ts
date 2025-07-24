@@ -10,7 +10,7 @@ export const getUsers = createAction({
   auth: ternaryCloudAuth,
   props: {
     includeSettings: Property.Checkbox({
-      displayName: 'Include Settings',
+      displayName: 'Include settings',
       description: 'Include the tenant settings',
       required: false,
     }),

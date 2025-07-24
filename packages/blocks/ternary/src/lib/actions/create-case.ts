@@ -15,14 +15,17 @@ export const createCaseAction = createAction({
   props: {
     resourceID: Property.ShortText({
       displayName: 'Resource ID',
-      required: true,
-    }),
-    description: Property.LongText({
-      displayName: 'Case description',
+      description: '',
       required: true,
     }),
     caseName: Property.ShortText({
       displayName: 'Case name',
+      description: '',
+      required: true,
+    }),
+    description: Property.LongText({
+      displayName: 'Case description',
+      description: '',
       required: true,
     }),
     resourceType: getResourceTypesProperty(),
@@ -31,10 +34,12 @@ export const createCaseAction = createAction({
     followerIDs: getUsersIDsDropdownProperty('Case follower IDs'),
     forecastContext: Property.Number({
       displayName: 'Forecast context number',
+      description: '',
       required: false,
     }),
     linkToJira: Property.Checkbox({
       displayName: 'Link case to Jira',
+      description: '',
       required: false,
     }),
   },
