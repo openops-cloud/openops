@@ -1,10 +1,11 @@
 import { createCustomApiCallAction } from '@openops/blocks-common';
 import { createBlock, Property } from '@openops/blocks-framework';
-import { makeHttpRequest } from '@openops/common';
 import { BlockCategory } from '@openops/shared';
+import { getClusterWorkloadsAction } from './lib/actions/get-cluster-workloads-action';
+import { getClustersAction } from './lib/actions/get-clusters-action';
+import { getRecommendationsAction } from './lib/actions/get-recommendations';
 import { PerfectScaleAuth, perfectscaleAuth } from './lib/auth';
-
-const BASE_URL = 'https://api.app.perfectscale.io/public/v1/';
+import { BASE_URL, generateAccessToken } from './lib/common/make-request';
 
 export const perfectscale = createBlock({
   displayName: 'PerfectScale',
@@ -14,6 +15,9 @@ export const perfectscale = createBlock({
   authors: [],
   categories: [BlockCategory.FINOPS],
   actions: [
+    getClustersAction,
+    getClusterWorkloadsAction,
+    getRecommendationsAction,
     createCustomApiCallAction({
       baseUrl: () => BASE_URL,
       auth: perfectscaleAuth,
@@ -37,26 +41,3 @@ export const perfectscale = createBlock({
   ],
   triggers: [],
 });
-
-async function generateAccessToken({
-  clientSecret,
-  clientId,
-}: {
-  clientSecret: string;
-  clientId: string;
-}) {
-  const url = `${BASE_URL}auth/public_auth`;
-
-  const body = JSON.stringify({
-    client_id: clientId,
-    client_secret: clientSecret,
-  });
-
-  const result = await makeHttpRequest<any>('POST', url, undefined, body);
-
-  if (!result || !result.data || !result.data.access_token) {
-    throw new Error('Failed to generate access token from PerfectScale');
-  }
-
-  return result.data.access_token;
-}
