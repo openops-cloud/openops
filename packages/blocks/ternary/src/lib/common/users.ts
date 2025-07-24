@@ -31,6 +31,14 @@ export function getUsersIDsDropdownProperty(
     required: required,
     options: async ({ auth }: any) => {
       try {
+        if (!auth) {
+          return {
+            disabled: true,
+            options: [],
+            placeholder: 'Please authenticate first',
+          };
+        }
+
         const usersList = (await getUsersList(auth as ternaryAuth)) as any as {
           users: { email: string; id: string }[];
         };
