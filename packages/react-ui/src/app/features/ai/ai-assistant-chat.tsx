@@ -1,3 +1,6 @@
+import { AiAssistantConversation } from '@/app/features/ai/ai-assistant-conversation';
+import { useAiAssistantChat } from '@/app/features/ai/lib/ai-assistant-chat-hook';
+import { useAiModelSelector } from '@/app/features/ai/lib/ai-model-selector-hook';
 import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
 import { useAppStore } from '@/app/store/app-store';
 import {
@@ -10,10 +13,7 @@ import {
   PARENT_INITIAL_HEIGHT_GAP,
   PARENT_MAX_HEIGHT_GAP,
 } from '@openops/components/ui';
-import { t } from 'i18next';
-import { useCallback, useMemo } from 'react';
-import AssistantUiChat from './assistant-ui/assistant-ui-chat';
-import { useAssistantChat } from './lib/assistant-ui-chat-hook';
+import { useCallback, useMemo, useRef } from 'react';
 
 type AiAssistantChatProps = {
   middlePanelSize: {
@@ -31,6 +31,8 @@ const AiAssistantChat = ({
   middlePanelSize,
   className,
 }: AiAssistantChatProps) => {
+  const lastUserMessageRef = useRef<HTMLDivElement>(null);
+  const lastAssistantMessageRef = useRef<HTMLDivElement>(null);
   const {
     isAiChatOpened,
     setIsAiChatOpened,
@@ -47,7 +49,22 @@ const AiAssistantChat = ({
     setAiChatDimensions: s.setAiChatDimensions,
   }));
 
-  const { hasMessages, createNewChat } = useAssistantChat();
+  const {
+    messages,
+    input,
+    handleInputChange,
+    handleSubmit,
+    status,
+    createNewChat,
+    isOpenAiChatPending,
+  } = useAiAssistantChat();
+
+  const {
+    selectedModel,
+    availableModels,
+    onModelSelected,
+    isLoading: isModelSelectorLoading,
+  } = useAiModelSelector();
 
   const sizes = useMemo(() => {
     const calculatedWidth = middlePanelSize.width * CHAT_WIDTH_FACTOR;
@@ -116,14 +133,31 @@ const AiAssistantChat = ({
       showAiChat={isAiChatOpened}
       onCloseClick={() => setIsAiChatOpened(false)}
       className={cn('left-4 bottom-[17px]', className)}
-      isEmpty={hasMessages}
+      handleInputChange={handleInputChange}
+      handleSubmit={handleSubmit}
+      input={input}
+      isEmpty={!messages?.length}
       onCreateNewChatClick={createNewChat}
       toggleAiChatState={onToggleAiChatState}
       aiChatSize={aiChatSize}
+      availableModels={availableModels}
+      selectedModel={selectedModel}
+      isModelSelectorLoading={isModelSelectorLoading}
+      onModelSelected={onModelSelected}
+      messages={messages.map((m, idx) => ({
+        id: m.id ?? String(idx),
+        role: m.role,
+      }))}
+      status={status}
+      lastUserMessageRef={lastUserMessageRef}
+      lastAssistantMessageRef={lastAssistantMessageRef}
     >
-      <AssistantUiChat
-        onClose={() => setIsAiChatOpened(false)}
-        title={t('AI Assistant')}
+      <AiAssistantConversation
+        messages={messages}
+        status={status}
+        isPending={isOpenAiChatPending}
+        lastUserMessageRef={lastUserMessageRef}
+        lastAssistantMessageRef={lastAssistantMessageRef}
       />
     </AiAssistantChatContainer>
   );
