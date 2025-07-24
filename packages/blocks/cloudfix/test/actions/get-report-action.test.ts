@@ -34,10 +34,12 @@ describe('getReportAction', () => {
 
     expect(result).toBe('mockResult');
     expect(makeRequestMock.makeRequest).toHaveBeenCalledWith({
-      endpoint:
-        '/recommendations/report?recommendationId=some recommendationId',
+      endpoint: '/recommendations/report',
       method: 'GET',
       auth: context.auth,
+      queryParams: {
+        recommendationId: 'some recommendationId',
+      },
     });
   });
 });
