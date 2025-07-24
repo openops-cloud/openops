@@ -22,7 +22,7 @@ export const getRecommendationsAction = createAction({
           { label: 'Rejected', value: 'REJECTED' },
           { label: 'In Progress', value: 'IN_PROGRESS' },
           {
-            label: 'Manual Approval',
+            label: 'Ready',
             value: 'MANUAL_APPROVAL',
           },
           {
