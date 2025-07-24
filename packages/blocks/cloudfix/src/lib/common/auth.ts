@@ -21,15 +21,15 @@ export const cloudfixAuth = BlockAuth.CustomAuth({
       validators: [Validators.url],
       defaultValue: 'https://preview.app.cloudfix.com/api/v3',
     }),
-    apiKey: Property.SecretText({
+    apiToken: Property.SecretText({
       required: true,
-      displayName: 'API Key',
-      description: 'The API key to use to connect to CloudFix',
+      displayName: 'API Token',
+      description: 'The API token to use to connect to CloudFix',
     }),
   },
 });
 
 export interface CloudfixAuth {
   apiUrl: string;
-  apiKey: string;
+  apiToken: string;
 }

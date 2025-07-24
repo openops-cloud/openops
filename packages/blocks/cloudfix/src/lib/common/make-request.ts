@@ -14,13 +14,13 @@ export async function makeRequest({
   queryParams?: Record<string, string>;
   body?: any;
 }) {
-  const { apiKey } = auth;
+  const { apiToken } = auth;
 
   const response = await httpClient.sendRequest({
     method,
     url: `${auth.apiUrl}${endpoint}`,
     headers: {
-      Authorization: `Bearer ${apiKey}`,
+      Authorization: `Bearer ${apiToken}`,
     },
     body,
     queryParams,
