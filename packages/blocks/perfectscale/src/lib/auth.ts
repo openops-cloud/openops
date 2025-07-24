@@ -21,7 +21,7 @@ export const perfectscaleAuth = BlockAuth.CustomAuth({
       displayName: 'Client ID',
       required: true,
     }),
-    clientSecret: Property.ShortText({
+    clientSecret: Property.SecretText({
       displayName: 'Client Secret',
       description: 'The client secret',
       required: true,
