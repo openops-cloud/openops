@@ -11,6 +11,7 @@ import { DashboardSideMenu } from '@/app/features/navigation/side-menu/dashboard
 
 import { AllowOnlyLoggedInUserOnlyGuard } from '@/app/common/guards/allow-logged-in-user-only-guard';
 import { useResizablePanelGroup } from '@/app/common/hooks/use-resizable-panel-group';
+import { AiConfigurationPrompt } from '@/app/features/ai/ai-configuration-prompt';
 import { useAppStore } from '@/app/store/app-store';
 import { useMeasure } from 'react-use';
 import { RESIZABLE_PANEL_IDS } from '../../constants/layout';
@@ -94,6 +95,7 @@ export function DashboardContainer({
           className="flex-1"
         >
           <div ref={middlePanelRef} className="relative h-full w-full">
+            <AiConfigurationPrompt />
             <AiAssistantChat middlePanelSize={middlePanelSize} />
             <DashboardContent
               pageHeader={pageHeader}
