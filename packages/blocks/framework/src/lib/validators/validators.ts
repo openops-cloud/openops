@@ -221,7 +221,15 @@ export class Validators {
   static number: TypedValidatorFn<ValidationInputType.NUMBER> = {
     type: ValidationInputType.NUMBER,
     fn: (property, processedValue, userInput) => {
-      if (isNaN(processedValue)) {
+      let emptyInput = false;
+      if (typeof userInput === 'string') {
+        emptyInput = isEmpty(userInput.trim());
+        if (!property.required && emptyInput) {
+          return null;
+        }
+      }
+
+      if (isNaN(processedValue) || emptyInput) {
         return formatErrorMessage(ErrorMessages.NUMBER, { userInput });
       }
 
@@ -364,6 +372,15 @@ export class Validators {
     },
   };
 
+  static boolean: TypedValidatorFn<ValidationInputType.ANY> = {
+    type: ValidationInputType.ANY,
+    fn: (property, processedValue, userInput) => {
+      return isBoolean(processedValue)
+        ? null
+        : formatErrorMessage(ErrorMessages.BOOLEAN, { userInput });
+    },
+  };
+
   static oneOf(values: unknown[]): TypedValidatorFn<any> {
     return {
       type: ValidationInputType.ANY,
@@ -416,4 +433,13 @@ export class Validators {
       },
     };
   }
+}
+
+function isBoolean(processedValue: unknown): boolean {
+  return (
+    typeof processedValue === 'boolean' ||
+    (typeof processedValue === 'string' &&
+      (processedValue.toLowerCase() === 'true' ||
+        processedValue.toLowerCase() === 'false'))
+  );
 }

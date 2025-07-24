@@ -56,7 +56,7 @@ describe('getSystemPrompt', () => {
       const result = await getBlockSystemPrompt({
         blockName,
         workflowId: 'workflowId',
-        stepName: 'stepName',
+        stepId: 'stepId',
         actionName,
       });
 
@@ -120,7 +120,7 @@ describe('getSystemPrompt', () => {
       const result = await getBlockSystemPrompt({
         blockName,
         workflowId: 'workflowId',
-        stepName: 'stepName',
+        stepId: 'stepId',
         actionName,
       });
 
@@ -137,7 +137,7 @@ describe('getSystemPrompt', () => {
     const result = await getBlockSystemPrompt({
       blockName: 'some-other-block',
       workflowId: 'workflowId',
-      stepName: 'stepName',
+      stepId: 'stepId',
       actionName: 'some-other-action',
     });
 
@@ -154,7 +154,7 @@ describe('getSystemPrompt', () => {
     const result = await getBlockSystemPrompt({
       blockName: '@openops/block-aws',
       workflowId: 'workflowId',
-      stepName: 'stepName',
+      stepId: 'stepId',
       actionName: 'aws-cli',
     });
 
@@ -190,7 +190,7 @@ describe('getSystemPrompt', () => {
       const result = await getBlockSystemPrompt({
         blockName,
         workflowId: 'workflowId',
-        stepName: 'stepName',
+        stepId: 'stepId',
         actionName,
       });
 
@@ -216,7 +216,7 @@ describe('getSystemPrompt', () => {
       const result = await getBlockSystemPrompt({
         blockName: CODE_BLOCK_NAME,
         workflowId: 'workflowId',
-        stepName: 'stepName',
+        stepId: 'stepId',
         actionName: 'code_action',
       });
 
@@ -233,7 +233,7 @@ describe('getSystemPrompt', () => {
       const result = await getBlockSystemPrompt({
         blockName: CODE_BLOCK_NAME,
         workflowId: 'workflowId',
-        stepName: 'stepName',
+        stepId: 'stepId',
         actionName: 'code_action',
       });
 
@@ -272,7 +272,7 @@ describe('getSystemPrompt', () => {
         {
           blockName: CODE_BLOCK_NAME,
           workflowId: 'workflowId',
-          stepName: 'stepName',
+          stepId: 'stepId',
           actionName: 'code_action',
         },
         enrichedContext,
@@ -307,7 +307,7 @@ describe('getSystemPrompt', () => {
         {
           blockName: CODE_BLOCK_NAME,
           workflowId: 'workflowId',
-          stepName: 'stepName',
+          stepId: 'stepId',
           actionName: 'code_action',
         },
         enrichedContext,
@@ -333,7 +333,7 @@ describe('getSystemPrompt', () => {
         {
           blockName: CODE_BLOCK_NAME,
           workflowId: 'workflowId',
-          stepName: 'stepName',
+          stepId: 'stepId',
           actionName: 'code_action',
         },
         enrichedContext,
@@ -374,7 +374,7 @@ describe('getSystemPrompt', () => {
         {
           blockName: CODE_BLOCK_NAME,
           workflowId: 'workflowId',
-          stepName: 'stepName',
+          stepId: 'stepId',
           actionName: 'code_action',
         },
         enrichedContext,
@@ -397,7 +397,7 @@ describe('getSystemPrompt', () => {
       const result = await getBlockSystemPrompt({
         blockName: CODE_BLOCK_NAME,
         workflowId: 'workflowId',
-        stepName: 'stepName',
+        stepId: 'stepId',
         actionName: 'code_action',
       });
 
