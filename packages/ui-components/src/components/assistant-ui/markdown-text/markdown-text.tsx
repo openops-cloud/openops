@@ -12,60 +12,10 @@ import { Theme } from '../../../lib/theme';
 import { CodeActions } from '../../code-actions';
 import { createMarkdownComponents } from '../../custom/markdown-components';
 import { CodeVariations, MarkdownCodeVariations } from '../../custom/types';
-import { CodeMirrorEditor } from '../../json-editor';
-import { getLanguageExtensionForCode } from '../../json-editor/code-mirror-utils';
 
 import { cn } from '../../../lib/cn';
+import { MarkdownCodeViewer } from '../../custom/markdown-code-viewer';
 import { TooltipCopyButton } from '../tooltip-copy-button';
-
-// todo - reuse this
-function extractLanguageFromClassName(className?: string): string | undefined {
-  if (!className || typeof className !== 'string') {
-    return undefined;
-  }
-
-  const languagePrefix = 'language-';
-  const languageIndex = className.indexOf(languagePrefix);
-
-  if (languageIndex === -1) {
-    return undefined;
-  }
-
-  const startIndex = languageIndex + languagePrefix.length;
-  const remainingString = className.substring(startIndex);
-
-  const language = remainingString.split(/\s/)[0];
-  return language.length > 0 ? language : undefined;
-}
-
-// todo extract
-const CodeViewer = memo(
-  ({
-    content,
-    theme,
-    className,
-  }: {
-    content: string;
-    theme: Theme;
-    className?: string;
-  }) => {
-    return (
-      <CodeMirrorEditor
-        value={content}
-        readonly={true}
-        showLineNumbers={false}
-        height="auto"
-        className="border border-solid rounded"
-        containerClassName="h-auto"
-        theme={theme}
-        languageExtensions={getLanguageExtensionForCode(className)}
-        showTabs={typeof content !== 'string' && 'packageJson' in content}
-        editorLanguage={extractLanguageFromClassName(className)}
-      />
-    );
-  },
-);
-CodeViewer.displayName = 'CodeViewer';
 
 // Extracted Code component to prevent recreation on every render
 const CodeComponent = memo(
@@ -123,8 +73,7 @@ const CodeComponent = memo(
             <code className={className}>{codeContent}</code>
           </pre>
         ) : (
-          // When complete: Use full CodeMirror for syntax highlighting
-          <CodeViewer
+          <MarkdownCodeViewer
             content={codeContent}
             theme={theme}
             className={className}
