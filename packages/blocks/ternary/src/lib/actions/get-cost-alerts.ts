@@ -12,7 +12,7 @@ export const getCostAlertsAction = createAction({
   props: {
     statusFilter: Property.StaticMultiSelectDropdown({
       displayName: 'Status',
-      description: 'Filter by status',
+      description: 'Filter by status.',
       required: true,
       defaultValue: [AlertStatus.ACTIVE],
       options: {
