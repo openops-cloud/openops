@@ -36,7 +36,7 @@ const AssistantUiChat = ({
 
   if (isLoading || !openChatResponse) {
     return (
-      <div className="flex h-full items-center justify-center">
+      <div className="w-full flex h-full items-center justify-center bg-background">
         <div className="text-sm text-muted-foreground">
           {t('Loading chat...')}
         </div>
@@ -46,7 +46,7 @@ const AssistantUiChat = ({
 
   if (!shouldRenderChat) {
     return (
-      <div className="flex h-full items-center justify-center">
+      <div className="w-full flex h-full items-center justify-center bg-background">
         <div className="text-sm text-muted-foreground">
           {t('Initializing chat...')}
         </div>
