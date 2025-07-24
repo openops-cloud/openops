@@ -6,7 +6,7 @@ import {
   hashUtils,
 } from '@openops/server-shared';
 import { AiConfig, ApplicationError, ErrorCode } from '@openops/shared';
-import { CoreMessage, LanguageModel } from 'ai';
+import { CoreMessage, LanguageModel, generateText } from 'ai';
 import { aiConfigService } from '../config/ai-config.service';
 import { MessageWithMergedToolResults } from './types';
 import { mergeToolResultsIntoMessages } from './utils';
@@ -37,7 +37,45 @@ export type MCPChatContext = {
   blockName?: string;
   stepId?: string;
   actionName?: string;
+  chatName?: string;
+  userMessageCount?: number;
 };
+
+export const incrementUserMessageCount = async (
+  chatId: string,
+  userId: string,
+  projectId: string,
+): Promise<MCPChatContext> => {
+  const context = (await getChatContext(chatId, userId, projectId)) || {};
+  context.userMessageCount = (context.userMessageCount || 0) + 1;
+  await createChatContext(chatId, userId, projectId, context);
+  return context;
+};
+
+export async function generateChatName(
+  messages: CoreMessage[],
+  projectId: string,
+): Promise<string> {
+  const { languageModel } = await getLLMConfig(projectId);
+  const prompt: CoreMessage[] = [
+    {
+      role: 'assistant',
+      content: `
+      You are an AI assistant on the OpenOps platform, where users interact about FinOps, cloud providers (AWS, Azure, GCP), OpenOps features, and workflow automation.
+      Given the following conversation, suggest a short, descriptive name (max five words) that best summarizes the main topic, question, or action discussed in this chat. 
+      The name should be specific (not generic like "Chat" or "Conversation"), and reflect the user's intent (e.g., "AWS Cost Optimization", "Create Budget Workflow", "OpenOps Integration Help").
+      Limit the name to five words or less.
+      Respond with only the name.
+      `,
+    } as const,
+    ...messages,
+  ];
+  const response = await generateText({
+    model: languageModel,
+    messages: prompt,
+  });
+  return response.text.trim();
+}
 
 export const generateChatId = (
   params: MCPChatContext & {

@@ -37,10 +37,12 @@ import {
   deleteChatHistory,
   generateChatId,
   generateChatIdForMCP,
+  generateChatName,
   getChatContext,
   getChatHistoryWithMergedTools,
   getConversation,
   getLLMConfig,
+  incrementUserMessageCount,
   MCPChatContext,
   saveChatHistory,
 } from './ai-chat.service';
@@ -75,6 +77,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
           return reply.code(200).send({
             chatId: inputChatId,
             messages,
+            chatName: existingContext.chatName,
           });
         }
       } else if (
@@ -128,9 +131,11 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         projectId,
       );
 
+      const storedContext = await getChatContext(chatId, userId, projectId);
       return reply.code(200).send({
         chatId,
         messages,
+        chatName: storedContext?.chatName,
       });
     },
   );
@@ -155,6 +160,23 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         content: messageContent,
       });
 
+      const updatedContext = await incrementUserMessageCount(
+        chatId,
+        userId,
+        projectId,
+      );
+      if (
+        (updatedContext.userMessageCount ?? 0) >= 3 &&
+        !updatedContext.chatName
+      ) {
+        const name = await generateChatName(
+          conversationResult.messages,
+          projectId,
+        );
+        updatedContext.chatName = name;
+        await createChatContext(chatId, userId, projectId, updatedContext);
+      }
+
       const { chatContext, messages } = conversationResult;
       const { aiConfig, languageModel } = llmConfigResult;
 
@@ -174,7 +196,6 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
           projectId,
         );
 
-        mcpClients = toolSet.mcpClients;
         mcpClients = toolSet.mcpClients;
 
         const filteredTools = await selectRelevantTools({
