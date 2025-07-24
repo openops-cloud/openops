@@ -116,7 +116,6 @@ export async function getRows(getRowsParams: GetRowsParams) {
       logger.error('Error while getting rows:', {
         error,
         url,
-        ...getRowsParams,
       });
     },
   );
@@ -182,7 +181,6 @@ export async function addRow(addRowParams: AddRowParams) {
       logger.error('Error while adding row:', {
         error,
         url,
-        ...addRowParams,
       });
     },
   );
