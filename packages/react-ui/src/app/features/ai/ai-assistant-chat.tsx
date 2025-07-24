@@ -10,10 +10,10 @@ import {
   PARENT_INITIAL_HEIGHT_GAP,
   PARENT_MAX_HEIGHT_GAP,
 } from '@openops/components/ui';
+import { t } from 'i18next';
 import { useCallback, useMemo } from 'react';
-import AssistantUiChat, {
-  useAssistantChat,
-} from './assistant-ui/assistant-ui-chat';
+import AssistantUiChat from './assistant-ui/assistant-ui-chat';
+import { useAssistantChat } from './lib/assistant-ui-chat-hook';
 
 type AiAssistantChatProps = {
   middlePanelSize: {
@@ -47,7 +47,7 @@ const AiAssistantChat = ({
     setAiChatDimensions: s.setAiChatDimensions,
   }));
 
-  const { messages, handleSubmit, createNewChat } = useAssistantChat();
+  const { hasMessages, createNewChat } = useAssistantChat();
 
   const sizes = useMemo(() => {
     const calculatedWidth = middlePanelSize.width * CHAT_WIDTH_FACTOR;
@@ -116,13 +116,15 @@ const AiAssistantChat = ({
       showAiChat={isAiChatOpened}
       onCloseClick={() => setIsAiChatOpened(false)}
       className={cn('left-4 bottom-[17px]', className)}
-      handleSubmit={handleSubmit}
-      isEmpty={!messages?.length}
+      isEmpty={hasMessages}
       onCreateNewChatClick={createNewChat}
       toggleAiChatState={onToggleAiChatState}
       aiChatSize={aiChatSize}
     >
-      <AssistantUiChat />
+      <AssistantUiChat
+        onClose={() => setIsAiChatOpened(false)}
+        title={t('AI Assistant')}
+      />
     </AiAssistantChatContainer>
   );
 };

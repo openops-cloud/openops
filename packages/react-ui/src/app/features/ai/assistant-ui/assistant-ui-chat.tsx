@@ -1,19 +1,9 @@
-import { ThreadMessageLike } from '@assistant-ui/react';
-
-import { useChatRuntime } from '@assistant-ui/react-ai-sdk';
-
-import { AI_ASSISTANT_LS_KEY } from '@/app/constants/ai';
-import { QueryKeys } from '@/app/constants/query-keys';
+import { useTheme } from '@/app/common/providers/theme-provider';
 import { useAiModelSelector } from '@/app/features/ai/lib/ai-model-selector-hook';
-import { authenticationSession } from '@/app/lib/authentication-session';
+import { useAssistantChat } from '@/app/features/ai/lib/assistant-ui-chat-hook';
 import { AssistantUiChatContainer } from '@openops/components/ui';
-import { OpenChatResponse } from '@openops/shared';
-import { useQuery } from '@tanstack/react-query';
 import { t } from 'i18next';
-import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
-import { aiAssistantChatApi } from '../lib/ai-assistant-chat-api';
-
-const PLACEHOLDER_MESSAGE_INTEROP = 'satisfy-schema';
+import { ReactNode } from 'react';
 
 type AssistantUiChatProps = {
   onClose: () => void;
@@ -26,46 +16,16 @@ const AssistantUiChat = ({
   children,
   title,
 }: AssistantUiChatProps) => {
-  const chatId = useRef(localStorage.getItem(AI_ASSISTANT_LS_KEY));
-  const [shouldRenderChat, setShouldRenderChat] = useState(false);
+  const {
+    runtime,
+    shouldRenderChat,
+    openChatResponse,
+    isLoading,
+    hasMessages,
+    createNewChat,
+  } = useAssistantChat();
 
-  const { data: openChatResponse, isLoading } = useQuery({
-    queryKey: [QueryKeys.openAiAssistantChat, chatId.current],
-    queryFn: async () => {
-      const conversation = await aiAssistantChatApi.open(chatId.current);
-      onConversationRetrieved(conversation);
-      return conversation;
-    },
-  });
-
-  const onConversationRetrieved = (conversation: OpenChatResponse) => {
-    if (conversation.chatId) {
-      localStorage.setItem(AI_ASSISTANT_LS_KEY, conversation.chatId);
-      chatId.current = conversation.chatId;
-    }
-  };
-
-  useEffect(() => {
-    if (!isLoading && openChatResponse) {
-      setShouldRenderChat(true);
-    }
-  }, [isLoading, openChatResponse]);
-
-  const runtimeConfig = useMemo(
-    () => ({
-      api: '/api/v1/ai/conversation',
-      maxSteps: 5,
-      body: {
-        chatId: openChatResponse?.chatId,
-        message: PLACEHOLDER_MESSAGE_INTEROP,
-      },
-      initialMessages: openChatResponse?.messages as ThreadMessageLike[],
-      headers: {
-        Authorization: `Bearer ${authenticationSession.getToken()}`,
-      },
-    }),
-    [openChatResponse?.chatId, openChatResponse?.messages],
-  );
+  const { theme } = useTheme();
 
   const {
     selectedModel,
@@ -73,8 +33,6 @@ const AssistantUiChat = ({
     onModelSelected,
     isLoading: isModelSelectorLoading,
   } = useAiModelSelector();
-
-  const runtime = useChatRuntime(runtimeConfig);
 
   if (isLoading || !openChatResponse) {
     return (
@@ -100,13 +58,14 @@ const AssistantUiChat = ({
     <AssistantUiChatContainer
       onClose={onClose}
       runtime={runtime}
-      onNewChat={() => {}}
+      onNewChat={createNewChat}
       title={title}
-      enableNewChat={true}
+      enableNewChat={hasMessages}
       availableModels={availableModels}
       onModelSelected={onModelSelected}
       isModelSelectorLoading={isModelSelectorLoading}
       selectedModel={selectedModel}
+      theme={theme}
     >
       {children}
     </AssistantUiChatContainer>

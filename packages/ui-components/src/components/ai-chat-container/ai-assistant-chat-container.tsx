@@ -20,7 +20,6 @@ type AiAssistantChatContainerProps = {
   isEmpty: boolean;
   className?: string;
   children?: ReactNode;
-  handleSubmit: () => void;
 };
 
 export const CHAT_MIN_WIDTH = 375;
@@ -39,7 +38,6 @@ const AiAssistantChatContainer = ({
   isEmpty = true,
   className,
   children,
-  handleSubmit,
 }: AiAssistantChatContainerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -53,16 +51,6 @@ const AiAssistantChatContainer = ({
         },
         className,
       )}
-      onKeyDown={(e) => {
-        if (
-          document.activeElement === containerRef.current &&
-          e.key === 'Enter'
-        ) {
-          e.preventDefault();
-          e.stopPropagation();
-          handleSubmit();
-        }
-      }}
     >
       <ResizableArea
         dimensions={dimensions}

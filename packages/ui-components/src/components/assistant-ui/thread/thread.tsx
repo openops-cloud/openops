@@ -41,7 +41,7 @@ const AssistantMessageWrapper = memo(({ theme }: { theme: Theme }) => {
 });
 AssistantMessageWrapper.displayName = 'AssistantMessageWrapper';
 
-type ThreadProps = {
+export type ThreadProps = {
   theme: Theme;
 } & ComposerProps;
 
