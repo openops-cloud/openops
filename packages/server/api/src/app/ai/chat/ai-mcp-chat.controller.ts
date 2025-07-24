@@ -421,12 +421,10 @@ async function streamMessages(
       }
     },
     async onFinish({ response }): Promise<void> {
-      const filteredMessages = removeToolMessages(messages);
-      response.messages.forEach((r) => {
-        filteredMessages.push(getResponseObject(r));
-      });
-
-      await saveChatHistory(chatId, userId, projectId, filteredMessages);
+      await saveChatHistory(chatId, userId, projectId, [
+        ...messages,
+        ...response.messages.map(getResponseObject),
+      ]);
       await closeMCPClients(mcpClients);
     },
   });
@@ -448,26 +446,6 @@ function endStreamWithErrorMessage(
   dataStreamWriter.write(
     `d:{"finishReason":"stop","usage":{"promptTokens":null,"completionTokens":null}}\n`,
   );
-}
-
-function removeToolMessages(messages: CoreMessage[]): CoreMessage[] {
-  return messages.filter((m) => {
-    if (m.role === 'tool') {
-      return false;
-    }
-
-    if (m.role === 'assistant' && Array.isArray(m.content)) {
-      const newContent = m.content.filter((part) => part.type !== 'tool-call');
-
-      if (newContent.length === 0) {
-        return false;
-      }
-
-      m.content = newContent;
-    }
-
-    return true;
-  });
 }
 
 function getResponseObject(
