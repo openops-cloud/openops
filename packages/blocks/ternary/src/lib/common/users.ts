@@ -28,7 +28,7 @@ export function getUsersIDsDropdownProperty(
     displayName,
     description: 'Select one or more users from the list',
     refreshers: ['auth'],
-    required: required,
+    required,
     options: async ({ auth }: any) => {
       try {
         if (!auth) {
