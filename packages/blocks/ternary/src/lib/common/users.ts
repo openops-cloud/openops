@@ -1,7 +1,7 @@
 import { HttpMethod } from '@openops/blocks-common';
 import { Property } from '@openops/blocks-framework';
 import { ternaryAuth } from './auth';
-import { sendTernaryRequest } from './index';
+import { sendTernaryRequest } from './send-ternary-request';
 
 export async function getUsersList(
   auth: ternaryAuth,

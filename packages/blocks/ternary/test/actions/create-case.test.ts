@@ -1,7 +1,7 @@
 import { HttpMethod } from '@openops/blocks-common';
 import { logger } from '@openops/server-shared';
 import { createCaseAction } from '../../src/lib/actions/create-case';
-import { sendTernaryRequest } from '../../src/lib/common';
+import { sendTernaryRequest } from '../../src/lib/common/send-ternary-request';
 
 jest.mock('@openops/server-shared', () => ({
   logger: {
@@ -9,7 +9,7 @@ jest.mock('@openops/server-shared', () => ({
   },
 }));
 
-jest.mock('../../src/lib/common', () => ({
+jest.mock('../../src/lib/common/send-ternary-request', () => ({
   sendTernaryRequest: jest.fn(),
 }));
 

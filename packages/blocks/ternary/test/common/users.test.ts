@@ -1,8 +1,8 @@
 import { Property } from '@openops/blocks-framework';
-import { sendTernaryRequest } from '../../src/lib/common';
+import { sendTernaryRequest } from '../../src/lib/common/send-ternary-request';
 import { getUsersIDsDropdownProperty } from '../../src/lib/common/users';
 
-jest.mock('../../src/lib/common', () => ({
+jest.mock('../../src/lib/common/send-ternary-request', () => ({
   sendTernaryRequest: jest.fn(),
 }));
 

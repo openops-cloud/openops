@@ -1,6 +1,6 @@
 import { HttpMethod } from '@openops/blocks-common';
-import { sendTernaryRequest } from '.';
 import { ternaryAuth } from './auth';
+import { sendTernaryRequest } from './send-ternary-request';
 
 export async function getCostAlerts(auth: ternaryAuth) {
   const response = await sendTernaryRequest({
