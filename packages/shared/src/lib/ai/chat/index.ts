@@ -4,7 +4,7 @@ export const BlockContext = Type.Object({
   chatId: Type.Optional(Type.String()),
   workflowId: Type.Optional(Type.String()),
   blockName: Type.Optional(Type.String()),
-  stepName: Type.Optional(Type.String()),
+  stepId: Type.Optional(Type.String()),
   actionName: Type.Optional(Type.String()),
 });
 

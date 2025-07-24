@@ -477,7 +477,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           ...mockChatContext,
           workflowId: 'workflowId',
           blockName: 'blockName',
-          stepName: 'stepName',
+          stepId: 'stepId',
           actionName: 'actionName',
         },
         messages: [...mockMessages],
