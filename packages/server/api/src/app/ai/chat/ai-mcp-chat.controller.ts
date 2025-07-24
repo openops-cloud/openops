@@ -80,13 +80,13 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       } else if (
         request.body.workflowId &&
         request.body.blockName &&
-        request.body.stepName &&
+        request.body.stepId &&
         request.body.actionName
       ) {
         const context: MCPChatContext = {
           workflowId: request.body.workflowId,
           blockName: request.body.blockName,
-          stepName: request.body.stepName,
+          stepId: request.body.stepId,
           actionName: request.body.actionName,
         };
 
@@ -165,7 +165,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       if (
         !chatContext.actionName ||
         !chatContext.blockName ||
-        !chatContext.stepName ||
+        !chatContext.stepId ||
         !chatContext.workflowId
       ) {
         const toolSet = await getMCPTools(

@@ -67,12 +67,15 @@ export const useStepSettingsAiChat = (
       return aiChatApi.open(
         flowVersion.flowId,
         getBlockName(stepDetails),
-        selectedStep,
+        stepDetails?.id ?? '',
         getActionName(stepDetails),
       );
     },
     enabled:
-      !!getBlockName(stepDetails) && !!getActionName(stepDetails) && supportsAI,
+      !!getBlockName(stepDetails) &&
+      !!getActionName(stepDetails) &&
+      supportsAI &&
+      !!stepDetails?.id,
   });
 
   const {
