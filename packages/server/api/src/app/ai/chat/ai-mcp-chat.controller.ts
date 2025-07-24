@@ -199,7 +199,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         mcpClients = toolSet.mcpClients;
 
         const filteredTools = await selectRelevantTools({
-          messages,
+          messages: conversationResult.messages,
           tools: toolSet.tools,
           languageModel,
           aiConfig,
