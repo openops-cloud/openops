@@ -20,12 +20,12 @@ export const createCaseAction = createAction({
     }),
     caseName: Property.ShortText({
       displayName: 'Name',
-      description: 'Case name.',
+      description: 'Case name',
       required: true,
     }),
     description: Property.LongText({
       displayName: 'Description',
-      description: 'Case description.',
+      description: 'Case description',
       required: true,
     }),
     caseType: getCaseTypesProperty(),
