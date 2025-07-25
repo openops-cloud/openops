@@ -5,7 +5,7 @@ import { cn } from '../../../lib/cn';
 import { OverflowTooltip } from '../../overflow-tooltip';
 import { TooltipWrapper } from '../../tooltip-wrapper';
 
-type AssistantUiHistoryItem = {
+type AssistantUiHistoryItemProps = {
   displayName: string;
   isActive: boolean;
   onClick: () => void;
@@ -19,7 +19,7 @@ const AssistantUiHistoryItem = ({
   onClick,
   onDelete,
   onRename,
-}: AssistantUiHistoryItem) => {
+}: AssistantUiHistoryItemProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(displayName);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -123,7 +123,6 @@ const AssistantUiHistoryItem = ({
           <TooltipWrapper tooltipText={t('Rename')}>
             <Pencil
               role="button"
-              data-testid="edit-flow"
               size={13}
               className="text-primary cursor-pointer"
               onClick={(event) => {
@@ -136,7 +135,6 @@ const AssistantUiHistoryItem = ({
           <TooltipWrapper tooltipText={t('Delete')}>
             <X
               role="button"
-              data-testid="edit-flow"
               size={13}
               className="text-primary cursor-pointer"
               onClick={(event) => {
