@@ -11,6 +11,7 @@ import {
 import {
   getConversation,
   getLLMConfig,
+  incrementUserMessageCount, // ADD THIS IMPORT
 } from '../../../src/app/ai/chat/ai-chat.service';
 import { aiMCPChatController } from '../../../src/app/ai/chat/ai-mcp-chat.controller';
 import {
@@ -82,6 +83,8 @@ jest.mock('../../../src/app/ai/chat/ai-chat.service', () => ({
   createChatContext: jest.fn(),
   getConversation: jest.fn(),
   getLLMConfig: jest.fn(),
+  incrementUserMessageCount: jest.fn(), // ADD THIS MISSING MOCK
+  getChatHistoryWithMergedTools: jest.fn(),
 }));
 
 jest.mock('../../../src/app/ai/chat/prompts.service', () => ({
@@ -204,6 +207,12 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
         languageModel: mockLanguageModel,
       });
 
+      // ADD THIS MISSING MOCK
+      (incrementUserMessageCount as jest.Mock).mockResolvedValue({
+        ...mockChatContext,
+        userMessageCount: 1,
+      });
+
       (getMcpSystemPrompt as jest.Mock).mockResolvedValue(systemPrompt);
 
       await aiMCPChatController(mockApp, {} as FastifyPluginOptions);
@@ -212,6 +221,9 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
     describe('messages handling', () => {
       it('should extract message content from messages array when provided', async () => {
         (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);
+        (selectRelevantTools as jest.Mock).mockResolvedValue(
+          mockAllTools.tools,
+        );
 
         const requestWithMessages = {
           ...mockRequest,
@@ -253,6 +265,9 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
 
       it('should handle messages with tool role in request body', async () => {
         (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);
+        (selectRelevantTools as jest.Mock).mockResolvedValue(
+          mockAllTools.tools,
+        );
 
         const requestWithToolMessages = {
           ...mockRequest,
@@ -311,6 +326,9 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
 
       it('should fall back to message field when messages array is not provided', async () => {
         (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);
+        (selectRelevantTools as jest.Mock).mockResolvedValue(
+          mockAllTools.tools,
+        );
 
         const requestWithMessageOnly = {
           ...mockRequest,
@@ -338,8 +356,6 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
       });
 
       it('should handle empty messages array gracefully', async () => {
-        (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);
-
         const requestWithEmptyMessages = {
           ...mockRequest,
           body: {
@@ -355,30 +371,20 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           mockReply as unknown as FastifyReply,
         );
 
-        if ((selectRelevantTools as jest.Mock).mock.calls.length === 0) {
-          expect(mockReply.code).toHaveBeenCalledWith(400);
-          expect(mockReply.send).toHaveBeenCalledWith(
-            expect.objectContaining({
-              message:
-                'Messages array cannot be empty. Please provide at least one message or use the message field instead.',
-            }),
-          );
-        } else {
-          expect(selectRelevantTools).toHaveBeenCalledWith({
-            messages: [
-              ...mockMessages,
-              { role: 'user', content: 'test message' },
-            ],
-            tools: mockAllTools.tools,
-            languageModel: mockLanguageModel,
-            aiConfig: mockAiConfig,
-          });
-        }
+        // Should result in a 400 error response
+        expect(mockReply.code).toHaveBeenCalledWith(400);
+        expect(mockReply.send).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message:
+              'Messages array cannot be empty. Please provide at least one message or use the message field instead.',
+          }),
+        );
+
+        // Should NOT call selectRelevantTools since validation failed
+        expect(selectRelevantTools).not.toHaveBeenCalled();
       });
 
       it('should handle invalid content structure in last message', async () => {
-        (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);
-
         const requestWithInvalidContent = {
           ...mockRequest,
           body: {
@@ -407,17 +413,26 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
               'Last message must have valid content array with at least one element.',
           }),
         );
+
+        // Should NOT call selectRelevantTools since validation failed
+        expect(selectRelevantTools).not.toHaveBeenCalled();
       });
 
       it('should handle messages with complex content structure', async () => {
         (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);
+        (selectRelevantTools as jest.Mock).mockResolvedValue(
+          mockAllTools.tools,
+        );
 
         const requestWithComplexContent = {
           ...mockRequest,
           body: {
             chatId: 'test-chat-id',
             messages: [
-              { role: 'user', content: 'simple string content' },
+              {
+                role: 'user',
+                content: [{ type: 'text', text: 'simple string content' }],
+              },
               {
                 role: 'assistant',
                 content: [{ type: 'text', text: 'assistant response' }],
@@ -453,6 +468,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
 
     it('should call selectRelevantTools with the correct parameters', async () => {
       (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);
+      (selectRelevantTools as jest.Mock).mockResolvedValue(mockAllTools.tools);
 
       const postHandler = handlers['/'];
       expect(postHandler).toBeDefined();
@@ -470,8 +486,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
       });
     });
 
-    it('should not call tools and load only promt', async () => {
-      (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);
+    it('should not call tools and load only prompt', async () => {
       (getConversation as jest.Mock).mockResolvedValue({
         chatContext: {
           ...mockChatContext,
@@ -482,6 +497,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
         },
         messages: [...mockMessages],
       });
+
       const postHandler = handlers['/'];
       expect(postHandler).toBeDefined();
 
@@ -492,6 +508,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
 
       expect(getBlockSystemPrompt).toHaveBeenCalled();
       expect(getMCPTools).not.toHaveBeenCalled();
+      expect(selectRelevantTools).not.toHaveBeenCalled();
     });
 
     it.each([
