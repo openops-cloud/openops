@@ -60,7 +60,7 @@ const AssistantUiChat = ({
 
   const runtimeConfig = useMemo(
     () => ({
-      api: '/api/v1/ai/conversation ',
+      api: '/api/v1/ai/conversation',
       maxSteps: 5,
       body: {
         chatId: openChatResponse?.chatId,
