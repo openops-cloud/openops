@@ -8,6 +8,7 @@ import {
 import { AiConfig, ApplicationError, ErrorCode } from '@openops/shared';
 import { CoreMessage, LanguageModel, generateText } from 'ai';
 import { aiConfigService } from '../config/ai-config.service';
+import { loadPrompt } from './prompts.service';
 import { MessageWithMergedToolResults } from './types';
 import { mergeToolResultsIntoMessages } from './utils';
 
@@ -57,16 +58,11 @@ export async function generateChatName(
   projectId: string,
 ): Promise<string> {
   const { languageModel } = await getLLMConfig(projectId);
+  const systemPrompt = await loadPrompt('chat-name.txt');
   const prompt: CoreMessage[] = [
     {
       role: 'system',
-      content: `
-      You are an AI assistant on the OpenOps platform, where users interact about FinOps, cloud providers (AWS, Azure, GCP), OpenOps features, and workflow automation.
-      Given the following conversation, suggest a short, descriptive name (max five words) that best summarizes the main topic, question, or action discussed in this chat. 
-      The name should be specific (not generic like "Chat" or "Conversation"), and reflect the user's intent (e.g., "AWS Cost Optimization", "Create Budget Workflow", "OpenOps Integration Help").
-      Limit the name to five words or less.
-      Respond with only the name.
-      `,
+      content: systemPrompt,
     } as const,
     ...messages,
   ];
