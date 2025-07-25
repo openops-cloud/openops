@@ -1,15 +1,10 @@
 import { AiConfig, AiProviderEnum } from '@openops/shared';
-import {
-  CoreMessage,
-  CoreUserMessage,
-  LanguageModel,
-  ToolSet,
-} from 'ai';
+import { CoreMessage, CoreUserMessage, LanguageModel, ToolSet } from 'ai';
 import { FastifyInstance } from 'fastify';
 
-const getMCPToolsMock = jest.fn();
+const startMCPToolsMock = jest.fn();
 jest.mock('../../../src/app/ai/mcp/tools-initializer', () => ({
-  getMCPTools: getMCPToolsMock,
+  startMCPTools: startMCPToolsMock,
 }));
 
 const selectRelevantToolsMock = jest.fn();
@@ -61,7 +56,7 @@ describe('getMCPToolsContext', () => {
 
   it('should return empty objects with no tools available message', async () => {
     getMcpSystemPromptMock.mockResolvedValue('');
-    getMCPToolsMock.mockResolvedValue({
+    startMCPToolsMock.mockResolvedValue({
       mcpClients: [],
       tools: {},
     });
@@ -83,6 +78,8 @@ describe('getMCPToolsContext', () => {
       systemPrompt:
         '\n\nMCP tools are not available in this chat. Do not claim access or simulate responses from them under any circumstance.',
     });
+    expect(getMcpSystemPromptMock).toHaveBeenCalled();
+    expect(startMCPToolsMock).toHaveBeenCalled();
   });
 
   it('should handle tools with no descriptions', async () => {
@@ -96,7 +93,7 @@ describe('getMCPToolsContext', () => {
       },
     };
 
-    getMCPToolsMock.mockResolvedValue({
+    startMCPToolsMock.mockResolvedValue({
       mcpClients: [],
       tools: mockTools,
     });
@@ -114,6 +111,8 @@ describe('getMCPToolsContext', () => {
     );
 
     expect(result.filteredTools).toEqual(mockTools);
+    expect(getMcpSystemPromptMock).toHaveBeenCalled();
+    expect(startMCPToolsMock).toHaveBeenCalled();
   });
 
   it('should return block prompt if context is complete', async () => {
@@ -135,6 +134,122 @@ describe('getMCPToolsContext', () => {
     );
 
     expect(result.mcpClients).toEqual([]);
+    expect(startMCPToolsMock).not.toHaveBeenCalled();
     expect(result.systemPrompt).toEqual('System prompt');
   });
+
+  it.each([
+    {
+      selectedTools: {
+        tool1: { description: 'Tool 1', parameters: {} },
+        mcp_analytics_superset: {
+          description: 'Analytics tool',
+          parameters: {},
+          toolProvider: 'superset',
+        },
+        mcp_table_tool: {
+          description: 'Table tool',
+          parameters: {},
+          toolProvider: 'tables',
+        },
+        openops_mcp_tool: {
+          description: 'Table tool',
+          parameters: {},
+          toolProvider: 'openops',
+        },
+      },
+      expected: {
+        isAnalyticsLoaded: true,
+        isTablesLoaded: true,
+        isOpenOpsMCPEnabled: true,
+        isAwsCostMcpDisabled: true,
+      },
+    },
+    {
+      selectedTools: {
+        tool1: { description: 'Tool 1', parameters: {} },
+        openops_mcp_tool: {
+          description: 'Table tool',
+          parameters: {},
+          toolProvider: 'openops',
+        },
+      },
+      expected: {
+        isAnalyticsLoaded: false,
+        isTablesLoaded: false,
+        isOpenOpsMCPEnabled: true,
+        isAwsCostMcpDisabled: true,
+      },
+    },
+    {
+      selectedTools: {
+        tool1: { description: 'Tool 1', parameters: {} },
+        tool2: { description: 'Tool 2', parameters: {} },
+      },
+      expected: {
+        isAnalyticsLoaded: false,
+        isTablesLoaded: false,
+        isOpenOpsMCPEnabled: false,
+        isAwsCostMcpDisabled: true,
+      },
+    },
+    {
+      selectedTools: {
+        tool1: { description: 'Tool 1', parameters: {} },
+        mcp_analytics_superset: {
+          description: 'Analytics tool',
+          parameters: {},
+          toolProvider: 'superset',
+        },
+      },
+      expected: {
+        isAnalyticsLoaded: true,
+        isTablesLoaded: false,
+        isOpenOpsMCPEnabled: false,
+        isAwsCostMcpDisabled: true,
+      },
+    },
+    {
+      selectedTools: {
+        tool1: { description: 'Tool 1', parameters: {} },
+        mcp_table_tool: {
+          description: 'Table tool',
+          parameters: {},
+          toolProvider: 'tables',
+        },
+      },
+      expected: {
+        isAnalyticsLoaded: false,
+        isTablesLoaded: true,
+        isOpenOpsMCPEnabled: false,
+        isAwsCostMcpDisabled: true,
+      },
+    },
+  ])(
+    'should handle analytics/tables/openops flags when tools are $expected.isAnalyticsLoaded/$expected.isTablesLoaded/$expected.isOpenOpsMCPEnabled',
+    async ({ selectedTools, expected }) => {
+      startMCPToolsMock.mockResolvedValue({
+        tool1: {
+          parameters: {},
+        },
+        tool2: {
+          description: 'Tool 2 description',
+          parameters: {},
+        },
+      });
+      selectRelevantToolsMock.mockResolvedValue(selectedTools);
+
+      await getMCPToolsContext(
+        mockApp,
+        'projectId',
+        'authToken',
+        mockAiConfig,
+        mockMessages,
+        mockChatContext,
+        mockLanguageModel,
+      );
+
+      expect(getMcpSystemPromptMock).toHaveBeenCalledWith(expected);
+    },
+  );
 });
