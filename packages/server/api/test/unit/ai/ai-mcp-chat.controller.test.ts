@@ -11,7 +11,6 @@ import {
 import {
   getConversation,
   getLLMConfig,
-  incrementUserMessageCount,
 } from '../../../src/app/ai/chat/ai-chat.service';
 import { aiMCPChatController } from '../../../src/app/ai/chat/ai-mcp-chat.controller';
 import {
@@ -83,7 +82,6 @@ jest.mock('../../../src/app/ai/chat/ai-chat.service', () => ({
   createChatContext: jest.fn(),
   getConversation: jest.fn(),
   getLLMConfig: jest.fn(),
-  incrementUserMessageCount: jest.fn(),
   getChatHistoryWithMergedTools: jest.fn(),
 }));
 
@@ -205,11 +203,6 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
       (getLLMConfig as jest.Mock).mockResolvedValue({
         aiConfig: mockAiConfig,
         languageModel: mockLanguageModel,
-      });
-
-      (incrementUserMessageCount as jest.Mock).mockResolvedValue({
-        ...mockChatContext,
-        userMessageCount: 1,
       });
 
       (getMcpSystemPrompt as jest.Mock).mockResolvedValue(systemPrompt);
@@ -680,54 +673,56 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
         );
       },
     );
-  });
 
-  it('should include all openops tools from the full tool set when a relevant openops tool is present in selectedTools', async () => {
-    const openopsTools = {
-      openops_tool1: {
-        description: 'OpenOps Tool 1',
-        parameters: {},
-        toolProvider: 'openops',
-      },
-      openops_tool2: {
-        description: 'OpenOps Tool 2',
-        parameters: {},
-        toolProvider: 'openops',
-      },
-      unrelated_tool: {
-        description: 'Other Tool',
-        parameters: {},
-        toolProvider: 'tables',
-      },
-    };
-    (getMCPTools as jest.Mock).mockResolvedValue({
-      mcpClients: [],
-      tools: openopsTools,
-    });
-
-    const selectedTools = {
-      openops_tool1: {
-        description: 'OpenOps Tool 1',
-        parameters: {},
-        toolProvider: 'openops',
-      },
-    };
-    (selectRelevantTools as jest.Mock).mockResolvedValue(selectedTools);
-
-    const postHandler = handlers['/'];
-    await postHandler(
-      mockRequest as FastifyRequest,
-      mockReply as unknown as FastifyReply,
-    );
-
-    expect(streamText).toHaveBeenCalledWith(
-      expect.objectContaining({
-        tools: {
-          openops_tool1: openopsTools.openops_tool1,
-          openops_tool2: openopsTools.openops_tool2,
+    it('should include all openops tools from the full tool set when a relevant openops tool is present in selectedTools', async () => {
+      const openopsTools = {
+        openops_tool1: {
+          description: 'OpenOps Tool 1',
+          parameters: {},
+          toolProvider: 'openops',
         },
-      }),
-    );
+        openops_tool2: {
+          description: 'OpenOps Tool 2',
+          parameters: {},
+          toolProvider: 'openops',
+        },
+        unrelated_tool: {
+          description: 'Other Tool',
+          parameters: {},
+          toolProvider: 'tables',
+        },
+      };
+
+      (getMCPTools as jest.Mock).mockResolvedValue({
+        mcpClients: [],
+        tools: openopsTools,
+      });
+
+      const selectedTools = {
+        openops_tool1: {
+          description: 'OpenOps Tool 1',
+          parameters: {},
+          toolProvider: 'openops',
+        },
+      };
+
+      (selectRelevantTools as jest.Mock).mockResolvedValue(selectedTools);
+
+      const postHandler = handlers['/'];
+      await postHandler(
+        mockRequest as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(streamText).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tools: {
+            openops_tool1: openopsTools.openops_tool1,
+            openops_tool2: openopsTools.openops_tool2,
+          },
+        }),
+      );
+    });
   });
 
   it('should include AWS cost MCP configuration hint when MCP is not available', async () => {
@@ -738,10 +733,33 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
       },
     };
 
+    (getConversation as jest.Mock).mockResolvedValue({
+      chatContext: { chatId: 'test-chat-id' },
+      messages: [{ role: 'user', content: 'previous message' }],
+    });
+    (getLLMConfig as jest.Mock).mockResolvedValue({
+      aiConfig: {
+        projectId: 'test-project-id',
+        provider: AiProviderEnum.ANTHROPIC,
+        model: 'claude-3-sonnet',
+        apiKey: JSON.stringify('encrypted-api-key'),
+        enabled: true,
+        providerSettings: {},
+        modelSettings: {},
+        created: '2023-01-01',
+        updated: '2023-01-01',
+        id: 'test-id',
+      },
+      languageModel: {} as LanguageModel,
+    });
+    (getMcpSystemPrompt as jest.Mock).mockResolvedValue('system prompt');
+
     (getMCPTools as jest.Mock).mockResolvedValue(mockToolsWithoutCost);
     (selectRelevantTools as jest.Mock).mockResolvedValue({
       tool1: { description: 'Tool 1', parameters: {} },
     });
+
+    await aiMCPChatController(mockApp, {} as FastifyPluginOptions);
 
     const postHandler = handlers['/'];
     await postHandler(

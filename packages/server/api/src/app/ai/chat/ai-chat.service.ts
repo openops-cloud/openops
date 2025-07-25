@@ -39,18 +39,6 @@ export type MCPChatContext = {
   stepId?: string;
   actionName?: string;
   chatName?: string;
-  userMessageCount?: number;
-};
-
-export const incrementUserMessageCount = async (
-  chatId: string,
-  userId: string,
-  projectId: string,
-): Promise<MCPChatContext> => {
-  const context = (await getChatContext(chatId, userId, projectId)) || {};
-  context.userMessageCount = (context.userMessageCount || 0) + 1;
-  await createChatContext(chatId, userId, projectId, context);
-  return context;
 };
 
 export async function generateChatName(

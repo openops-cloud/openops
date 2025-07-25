@@ -42,7 +42,6 @@ import {
   getChatHistoryWithMergedTools,
   getConversation,
   getLLMConfig,
-  incrementUserMessageCount,
   MCPChatContext,
   saveChatHistory,
 } from './ai-chat.service';
@@ -160,21 +159,22 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         content: messageContent,
       });
 
-      const updatedContext = await incrementUserMessageCount(
-        chatId,
-        userId,
-        projectId,
-      );
-      if (
-        (updatedContext.userMessageCount ?? 0) >= 3 &&
-        !updatedContext.chatName
-      ) {
+      const userMessageCount = conversationResult.messages.filter(
+        (msg) => msg.role === 'user',
+      ).length;
+
+      if (userMessageCount >= 3 && !conversationResult.chatContext.chatName) {
         const name = await generateChatName(
           conversationResult.messages,
           projectId,
         );
-        updatedContext.chatName = name;
-        await createChatContext(chatId, userId, projectId, updatedContext);
+        conversationResult.chatContext.chatName = name;
+        await createChatContext(
+          chatId,
+          userId,
+          projectId,
+          conversationResult.chatContext,
+        );
       }
 
       const { chatContext, messages } = conversationResult;
