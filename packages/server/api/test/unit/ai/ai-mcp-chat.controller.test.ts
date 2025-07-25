@@ -11,7 +11,7 @@ import {
 import {
   getConversation,
   getLLMConfig,
-  incrementUserMessageCount, // ADD THIS IMPORT
+  incrementUserMessageCount,
 } from '../../../src/app/ai/chat/ai-chat.service';
 import { aiMCPChatController } from '../../../src/app/ai/chat/ai-mcp-chat.controller';
 import {
@@ -83,7 +83,7 @@ jest.mock('../../../src/app/ai/chat/ai-chat.service', () => ({
   createChatContext: jest.fn(),
   getConversation: jest.fn(),
   getLLMConfig: jest.fn(),
-  incrementUserMessageCount: jest.fn(), // ADD THIS MISSING MOCK
+  incrementUserMessageCount: jest.fn(),
   getChatHistoryWithMergedTools: jest.fn(),
 }));
 
