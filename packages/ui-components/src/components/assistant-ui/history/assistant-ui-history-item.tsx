@@ -1,7 +1,7 @@
-import { cn } from '@/lib/cn';
 import { t } from 'i18next';
 import { Check, Pencil, X } from 'lucide-react';
 import { KeyboardEvent, useEffect, useRef, useState } from 'react';
+import { cn } from '../../../lib/cn';
 import { OverflowTooltip } from '../../overflow-tooltip';
 import { TooltipWrapper } from '../../tooltip-wrapper';
 

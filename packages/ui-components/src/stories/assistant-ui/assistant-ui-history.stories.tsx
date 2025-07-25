@@ -72,8 +72,7 @@ export const EmptyHistory: Story = {
 /**
  * AssistantUiHistory with the new chat button disabled.
  * This demonstrates how the component appears when creating a new chat is not allowed.
- * Note: The newChatDisabled prop is defined in the component type but not currently used in the implementation.
- */
+ **/
 export const NewChatDisabled: Story = {
   args: {
     newChatDisabled: true,
