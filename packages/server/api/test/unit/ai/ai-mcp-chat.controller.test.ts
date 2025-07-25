@@ -207,7 +207,6 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
         languageModel: mockLanguageModel,
       });
 
-      // ADD THIS MISSING MOCK
       (incrementUserMessageCount as jest.Mock).mockResolvedValue({
         ...mockChatContext,
         userMessageCount: 1,
@@ -371,7 +370,6 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           mockReply as unknown as FastifyReply,
         );
 
-        // Should result in a 400 error response
         expect(mockReply.code).toHaveBeenCalledWith(400);
         expect(mockReply.send).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -380,7 +378,6 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           }),
         );
 
-        // Should NOT call selectRelevantTools since validation failed
         expect(selectRelevantTools).not.toHaveBeenCalled();
       });
 
@@ -414,7 +411,6 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           }),
         );
 
-        // Should NOT call selectRelevantTools since validation failed
         expect(selectRelevantTools).not.toHaveBeenCalled();
       });
 
