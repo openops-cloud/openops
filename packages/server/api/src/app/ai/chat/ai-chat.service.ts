@@ -59,7 +59,7 @@ export async function generateChatName(
   const { languageModel } = await getLLMConfig(projectId);
   const prompt: CoreMessage[] = [
     {
-      role: 'assistant',
+      role: 'system',
       content: `
       You are an AI assistant on the OpenOps platform, where users interact about FinOps, cloud providers (AWS, Azure, GCP), OpenOps features, and workflow automation.
       Given the following conversation, suggest a short, descriptive name (max five words) that best summarizes the main topic, question, or action discussed in this chat. 
