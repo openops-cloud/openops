@@ -9,7 +9,6 @@ import {
   AiAssistantChatSizeState,
   CHAT_MIN_WIDTH,
   cn,
-  NoAiEnabledPopover,
   PARENT_INITIAL_HEIGHT_GAP,
   PARENT_MAX_HEIGHT_GAP,
 } from '@openops/components/ui';
@@ -112,17 +111,8 @@ const AiAssistantChat = ({
     setAiChatSize(newSize);
   }, [aiChatSize, setAiChatSize]);
 
-  if (isLoading) {
+  if (isLoading || (!hasActiveAiSettings && isAiChatOpened)) {
     return null;
-  }
-
-  if (!hasActiveAiSettings && isAiChatOpened) {
-    return (
-      <NoAiEnabledPopover
-        className={cn('absolute left-4 bottom-[17px] z-50', className)}
-        onCloseClick={() => setIsAiChatOpened(false)}
-      />
-    );
   }
 
   return (
