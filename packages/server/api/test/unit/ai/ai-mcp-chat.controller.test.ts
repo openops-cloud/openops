@@ -1,7 +1,5 @@
-const decryptStringMock = jest.fn().mockReturnValue('test-encrypt');
-
 import { AiProviderEnum, PrincipalType } from '@openops/shared';
-import { LanguageModel, pipeDataStreamToResponse, streamText } from 'ai';
+import { LanguageModel } from 'ai';
 import {
   FastifyInstance,
   FastifyPluginOptions,
@@ -13,12 +11,7 @@ import {
   getLLMConfig,
 } from '../../../src/app/ai/chat/ai-chat.service';
 import { aiMCPChatController } from '../../../src/app/ai/chat/ai-mcp-chat.controller';
-import {
-  getBlockSystemPrompt,
-  getMcpSystemPrompt,
-} from '../../../src/app/ai/chat/prompts.service';
-import { selectRelevantTools } from '../../../src/app/ai/chat/tools.service';
-import { getMCPTools } from '../../../src/app/ai/mcp/mcp-tools';
+import { getMCPToolsContext } from '../../../src/app/ai/mcp/tools-context-builder';
 
 jest.mock('@openops/server-shared', () => ({
   logger: {
@@ -52,7 +45,7 @@ jest.mock('@openops/server-shared', () => ({
     SQLITE3: 'SQLITE3',
   },
   encryptUtils: {
-    decryptString: decryptStringMock,
+    decryptString: jest.fn().mockReturnValue('test-encrypt'),
   },
 }));
 
@@ -61,7 +54,7 @@ jest.mock('@openops/common', () => ({
   isLLMTelemetryEnabled: jest.fn().mockReturnValue(false),
 }));
 
-jest.mock('../../../src/app/ai/mcp/mcp-tools', () => ({
+jest.mock('../../../src/app/ai/mcp/tools-initializer', () => ({
   getMCPTools: jest.fn(),
 }));
 
@@ -84,13 +77,8 @@ jest.mock('../../../src/app/ai/chat/ai-chat.service', () => ({
   getLLMConfig: jest.fn(),
 }));
 
-jest.mock('../../../src/app/ai/chat/prompts.service', () => ({
-  getMcpSystemPrompt: jest.fn(),
-  getBlockSystemPrompt: jest.fn(),
-}));
-
-jest.mock('../../../src/app/ai/chat/tools.service', () => ({
-  selectRelevantTools: jest.fn(),
+jest.mock('../../../src/app/ai/mcp/tools-context-builder', () => ({
+  getMCPToolsContext: jest.fn(),
 }));
 
 type MockDataStreamWriter = {
@@ -165,7 +153,6 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
 
   describe('POST / (new message endpoint)', () => {
     const systemPrompt = 'system prompt';
-    const emptyToolsSystemPrompt = `${systemPrompt}\n\nMCP tools are not available in this chat. Do not claim access or simulate responses from them under any circumstance.`;
     const mockChatContext = { chatId: 'test-chat-id' };
     const mockMessages = [{ role: 'user', content: 'previous message' }];
     const mockAiConfig = {
@@ -182,7 +169,8 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
     };
     const mockLanguageModel = {} as LanguageModel;
 
-    const mockAllTools = {
+    const mockToolsContext = {
+      systemPrompt: 'Prompt',
       mcpClients: [],
       tools: {
         tool1: { description: 'Tool 1', parameters: {} },
@@ -204,14 +192,12 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
         languageModel: mockLanguageModel,
       });
 
-      (getMcpSystemPrompt as jest.Mock).mockResolvedValue(systemPrompt);
-
       await aiMCPChatController(mockApp, {} as FastifyPluginOptions);
     });
 
     describe('messages handling', () => {
       it('should extract message content from messages array when provided', async () => {
-        (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);
+        (getMCPToolsContext as jest.Mock).mockResolvedValue(mockToolsContext);
 
         const requestWithMessages = {
           ...mockRequest,
@@ -240,19 +226,19 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           mockReply as unknown as FastifyReply,
         );
 
-        expect(selectRelevantTools).toHaveBeenCalledWith({
-          messages: [
-            ...mockMessages,
-            { role: 'user', content: 'latest message' },
-          ],
-          tools: mockAllTools.tools,
-          languageModel: mockLanguageModel,
-          aiConfig: mockAiConfig,
-        });
+        expect(getMCPToolsContext).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.anything(),
+          mockAiConfig,
+          [...mockMessages, { role: 'user', content: 'latest message' }],
+          expect.anything(),
+          mockLanguageModel,
+        );
       });
 
       it('should handle messages with tool role in request body', async () => {
-        (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);
+        (getMCPToolsContext as jest.Mock).mockResolvedValue(mockToolsContext);
 
         const requestWithToolMessages = {
           ...mockRequest,
@@ -298,19 +284,19 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           mockReply as unknown as FastifyReply,
         );
 
-        expect(selectRelevantTools).toHaveBeenCalledWith({
-          messages: [
-            ...mockMessages,
-            { role: 'user', content: 'latest message' },
-          ],
-          tools: mockAllTools.tools,
-          languageModel: mockLanguageModel,
-          aiConfig: mockAiConfig,
-        });
+        expect(getMCPToolsContext).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.anything(),
+          mockAiConfig,
+          [...mockMessages, { role: 'user', content: 'latest message' }],
+          expect.anything(),
+          mockLanguageModel,
+        );
       });
 
       it('should fall back to message field when messages array is not provided', async () => {
-        (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);
+        (getMCPToolsContext as jest.Mock).mockResolvedValue(mockToolsContext);
 
         const requestWithMessageOnly = {
           ...mockRequest,
@@ -326,19 +312,19 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           mockReply as unknown as FastifyReply,
         );
 
-        expect(selectRelevantTools).toHaveBeenCalledWith({
-          messages: [
-            ...mockMessages,
-            { role: 'user', content: 'fallback message' },
-          ],
-          tools: mockAllTools.tools,
-          languageModel: mockLanguageModel,
-          aiConfig: mockAiConfig,
-        });
+        expect(getMCPToolsContext).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.anything(),
+          mockAiConfig,
+          [...mockMessages, { role: 'user', content: 'fallback message' }],
+          expect.anything(),
+          mockLanguageModel,
+        );
       });
 
       it('should handle empty messages array gracefully', async () => {
-        (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);
+        (getMCPToolsContext as jest.Mock).mockResolvedValue(mockToolsContext);
 
         const requestWithEmptyMessages = {
           ...mockRequest,
@@ -355,7 +341,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           mockReply as unknown as FastifyReply,
         );
 
-        if ((selectRelevantTools as jest.Mock).mock.calls.length === 0) {
+        if ((getMCPToolsContext as jest.Mock).mock.calls.length === 0) {
           expect(mockReply.code).toHaveBeenCalledWith(400);
           expect(mockReply.send).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -364,20 +350,20 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
             }),
           );
         } else {
-          expect(selectRelevantTools).toHaveBeenCalledWith({
-            messages: [
-              ...mockMessages,
-              { role: 'user', content: 'test message' },
-            ],
-            tools: mockAllTools.tools,
-            languageModel: mockLanguageModel,
-            aiConfig: mockAiConfig,
-          });
+          expect(getMCPToolsContext).toHaveBeenCalledWith(
+            expect.anything(),
+            expect.anything(),
+            expect.anything(),
+            mockAiConfig,
+            [...mockMessages, { role: 'user', content: 'latest message' }],
+            expect.anything(),
+            mockLanguageModel,
+          );
         }
       });
 
       it('should handle invalid content structure in last message', async () => {
-        (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);
+        (getMCPToolsContext as jest.Mock).mockResolvedValue(mockToolsContext);
 
         const requestWithInvalidContent = {
           ...mockRequest,
@@ -410,7 +396,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
       });
 
       it('should handle messages with complex content structure', async () => {
-        (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);
+        (getMCPToolsContext as jest.Mock).mockResolvedValue(mockToolsContext);
 
         const requestWithComplexContent = {
           ...mockRequest,
@@ -439,20 +425,20 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           mockReply as unknown as FastifyReply,
         );
 
-        expect(selectRelevantTools).toHaveBeenCalledWith({
-          messages: [
-            ...mockMessages,
-            { role: 'user', content: 'complex message' },
-          ],
-          tools: mockAllTools.tools,
-          languageModel: mockLanguageModel,
-          aiConfig: mockAiConfig,
-        });
+        expect(getMCPToolsContext).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.anything(),
+          mockAiConfig,
+          [...mockMessages, { role: 'user', content: 'complex message' }],
+          expect.anything(),
+          mockLanguageModel,
+        );
       });
     });
 
-    it('should call selectRelevantTools with the correct parameters', async () => {
-      (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);
+    it('should call getMCPToolsContext with the correct parameters', async () => {
+      (getMCPToolsContext as jest.Mock).mockResolvedValue(mockToolsContext);
 
       const postHandler = handlers['/'];
       expect(postHandler).toBeDefined();
@@ -462,285 +448,15 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
         mockReply as unknown as FastifyReply,
       );
 
-      expect(selectRelevantTools).toHaveBeenCalledWith({
-        messages: [...mockMessages, { role: 'user', content: 'test message' }],
-        tools: mockAllTools.tools,
-        languageModel: mockLanguageModel,
-        aiConfig: mockAiConfig,
-      });
-    });
-
-    it('should not call tools and load only promt', async () => {
-      (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);
-      (getConversation as jest.Mock).mockResolvedValue({
-        chatContext: {
-          ...mockChatContext,
-          workflowId: 'workflowId',
-          blockName: 'blockName',
-          stepId: 'stepId',
-          actionName: 'actionName',
-        },
-        messages: [...mockMessages],
-      });
-      const postHandler = handlers['/'];
-      expect(postHandler).toBeDefined();
-
-      await postHandler(
-        mockRequest as FastifyRequest,
-        mockReply as unknown as FastifyReply,
+      expect(getMCPToolsContext).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        mockAiConfig,
+        [...mockMessages, { role: 'user', content: 'test message' }],
+        expect.anything(),
+        mockLanguageModel,
       );
-
-      expect(getBlockSystemPrompt).toHaveBeenCalled();
-      expect(getMCPTools).not.toHaveBeenCalled();
-    });
-
-    it.each([
-      {
-        selectedTools: {
-          tool1: { description: 'Tool 1', parameters: {} },
-          mcp_analytics_superset: {
-            description: 'Analytics tool',
-            parameters: {},
-            toolProvider: 'superset',
-          },
-          mcp_table_tool: {
-            description: 'Table tool',
-            parameters: {},
-            toolProvider: 'tables',
-          },
-          openops_mcp_tool: {
-            description: 'Table tool',
-            parameters: {},
-            toolProvider: 'openops',
-          },
-        },
-        expected: {
-          isAnalyticsLoaded: true,
-          isTablesLoaded: true,
-          isOpenOpsMCPEnabled: true,
-          isAwsCostMcpDisabled: true,
-        },
-      },
-      {
-        selectedTools: {
-          tool1: { description: 'Tool 1', parameters: {} },
-          openops_mcp_tool: {
-            description: 'Table tool',
-            parameters: {},
-            toolProvider: 'openops',
-          },
-        },
-        expected: {
-          isAnalyticsLoaded: false,
-          isTablesLoaded: false,
-          isOpenOpsMCPEnabled: true,
-          isAwsCostMcpDisabled: true,
-        },
-      },
-      {
-        selectedTools: {
-          tool1: { description: 'Tool 1', parameters: {} },
-          tool2: { description: 'Tool 2', parameters: {} },
-        },
-        expected: {
-          isAnalyticsLoaded: false,
-          isTablesLoaded: false,
-          isOpenOpsMCPEnabled: false,
-          isAwsCostMcpDisabled: true,
-        },
-      },
-      {
-        selectedTools: {
-          tool1: { description: 'Tool 1', parameters: {} },
-          mcp_analytics_superset: {
-            description: 'Analytics tool',
-            parameters: {},
-            toolProvider: 'superset',
-          },
-        },
-        expected: {
-          isAnalyticsLoaded: true,
-          isTablesLoaded: false,
-          isOpenOpsMCPEnabled: false,
-          isAwsCostMcpDisabled: true,
-        },
-      },
-      {
-        selectedTools: {
-          tool1: { description: 'Tool 1', parameters: {} },
-          mcp_table_tool: {
-            description: 'Table tool',
-            parameters: {},
-            toolProvider: 'tables',
-          },
-        },
-        expected: {
-          isAnalyticsLoaded: false,
-          isTablesLoaded: true,
-          isOpenOpsMCPEnabled: false,
-          isAwsCostMcpDisabled: true,
-        },
-      },
-    ])(
-      'should handle analytics/tables/openops flags when tools are $expected.isAnalyticsLoaded/$expected.isTablesLoaded/$expected.isOpenOpsMCPEnabled',
-      async ({ selectedTools, expected }) => {
-        (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);
-        (selectRelevantTools as jest.Mock).mockResolvedValue(selectedTools);
-
-        const postHandler = handlers['/'];
-        await postHandler(
-          mockRequest as FastifyRequest,
-          mockReply as unknown as FastifyReply,
-        );
-
-        expect(getMcpSystemPrompt).toHaveBeenCalledWith(expected);
-      },
-    );
-
-    it.each([
-      {
-        selectedTools: undefined,
-        expected: {
-          isAnalyticsLoaded: false,
-          isTablesLoaded: false,
-          isOpenOpsMCPEnabled: false,
-          isAwsCostMcpDisabled: true,
-          expectedSystemPrompt: emptyToolsSystemPrompt,
-        },
-      },
-      {
-        selectedTools: {},
-        expected: {
-          isAnalyticsLoaded: false,
-          isTablesLoaded: false,
-          isOpenOpsMCPEnabled: false,
-          isAwsCostMcpDisabled: true,
-          expectedSystemPrompt: emptyToolsSystemPrompt,
-        },
-      },
-      {
-        selectedTools: null,
-        expected: {
-          isAnalyticsLoaded: false,
-          isTablesLoaded: false,
-          isOpenOpsMCPEnabled: false,
-          isAwsCostMcpDisabled: true,
-          expectedSystemPrompt: emptyToolsSystemPrompt,
-        },
-      },
-      {
-        selectedTools: {
-          tool1: { description: 'Tool 1', parameters: {} },
-        },
-        expected: {
-          isAnalyticsLoaded: false,
-          isTablesLoaded: false,
-          isOpenOpsMCPEnabled: false,
-          isAwsCostMcpDisabled: true,
-          expectedSystemPrompt: systemPrompt,
-        },
-      },
-    ])(
-      'should pass filtered tools to streamText via pipeDataStreamToResponse with $selectedTools',
-      async ({ selectedTools, expected }) => {
-        (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);
-        (selectRelevantTools as jest.Mock).mockResolvedValue(selectedTools);
-
-        const postHandler = handlers['/'];
-        await postHandler(
-          mockRequest as FastifyRequest,
-          mockReply as unknown as FastifyReply,
-        );
-
-        expect(getMcpSystemPrompt).toHaveBeenCalledWith({
-          isAnalyticsLoaded: expected.isAnalyticsLoaded,
-          isTablesLoaded: expected.isTablesLoaded,
-          isOpenOpsMCPEnabled: expected.isOpenOpsMCPEnabled,
-          isAwsCostMcpDisabled: expected.isAwsCostMcpDisabled,
-        });
-        expect(pipeDataStreamToResponse).toHaveBeenCalled();
-        expect(streamText).toHaveBeenCalledWith(
-          expect.objectContaining({
-            tools: selectedTools ?? {},
-            system: expected.expectedSystemPrompt,
-          }),
-        );
-      },
-    );
-  });
-
-  it('should include all openops tools from the full tool set when a relevant openops tool is present in selectedTools', async () => {
-    const openopsTools = {
-      openops_tool1: {
-        description: 'OpenOps Tool 1',
-        parameters: {},
-        toolProvider: 'openops',
-      },
-      openops_tool2: {
-        description: 'OpenOps Tool 2',
-        parameters: {},
-        toolProvider: 'openops',
-      },
-      unrelated_tool: {
-        description: 'Other Tool',
-        parameters: {},
-        toolProvider: 'tables',
-      },
-    };
-    (getMCPTools as jest.Mock).mockResolvedValue({
-      mcpClients: [],
-      tools: openopsTools,
-    });
-
-    const selectedTools = {
-      openops_tool1: {
-        description: 'OpenOps Tool 1',
-        parameters: {},
-        toolProvider: 'openops',
-      },
-    };
-    (selectRelevantTools as jest.Mock).mockResolvedValue(selectedTools);
-
-    const postHandler = handlers['/'];
-    await postHandler(
-      mockRequest as FastifyRequest,
-      mockReply as unknown as FastifyReply,
-    );
-
-    expect(streamText).toHaveBeenCalledWith(
-      expect.objectContaining({
-        tools: {
-          openops_tool1: openopsTools.openops_tool1,
-          openops_tool2: openopsTools.openops_tool2,
-        },
-      }),
-    );
-  });
-
-  it('should include AWS cost MCP configuration hint when MCP is not available', async () => {
-    const mockToolsWithoutCost = {
-      mcpClients: [],
-      tools: {
-        tool1: { description: 'Tool 1', parameters: {} },
-      },
-    };
-
-    (getMCPTools as jest.Mock).mockResolvedValue(mockToolsWithoutCost);
-    (selectRelevantTools as jest.Mock).mockResolvedValue({
-      tool1: { description: 'Tool 1', parameters: {} },
-    });
-
-    const postHandler = handlers['/'];
-    await postHandler(
-      mockRequest as FastifyRequest,
-      mockReply as unknown as FastifyReply,
-    );
-
-    expect(getMcpSystemPrompt).toHaveBeenCalledWith({
-      isAnalyticsLoaded: false,
-      isTablesLoaded: false,
-      isOpenOpsMCPEnabled: false,
-      isAwsCostMcpDisabled: true,
     });
   });
 });

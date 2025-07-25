@@ -6,15 +6,6 @@ import { z } from 'zod';
 
 const MAX_SELECTED_TOOLS = 128;
 
-const getSystemPrompt = (
-  toolList: Array<{ name: string; description: string }>,
-): string => {
-  const toolsMessage = toolList
-    .map((t) => `- ${t.name}: ${t.description}`)
-    .join('\n');
-  return `Given the following conversation history and the list of available tools, select the tools that are most relevant to answer the user's request. Return an array of tool names.\n\nTools:\n${toolsMessage}.`;
-};
-
 export async function selectRelevantTools({
   messages,
   tools,
@@ -70,3 +61,12 @@ export async function selectRelevantTools({
     return;
   }
 }
+
+const getSystemPrompt = (
+  toolList: Array<{ name: string; description: string }>,
+): string => {
+  const toolsMessage = toolList
+    .map((t) => `- ${t.name}: ${t.description}`)
+    .join('\n');
+  return `Given the following conversation history and the list of available tools, select the tools that are most relevant to answer the user's request. Return an array of tool names.\n\nTools:\n${toolsMessage}.`;
+};
