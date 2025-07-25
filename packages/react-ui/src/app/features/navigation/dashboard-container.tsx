@@ -10,9 +10,11 @@ import React, { useCallback, useState } from 'react';
 import { DashboardSideMenu } from '@/app/features/navigation/side-menu/dashboard/dashboard-side-menu';
 
 import { AllowOnlyLoggedInUserOnlyGuard } from '@/app/common/guards/allow-logged-in-user-only-guard';
+import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { useResizablePanelGroup } from '@/app/common/hooks/use-resizable-panel-group';
 import { AiConfigurationPrompt } from '@/app/features/ai/ai-configuration-prompt';
 import { useAppStore } from '@/app/store/app-store';
+import { FlagId } from '@openops/shared';
 import { useMeasure } from 'react-use';
 import { RESIZABLE_PANEL_IDS } from '../../constants/layout';
 import {
@@ -21,6 +23,7 @@ import {
   LEFT_SIDEBAR_MIN_SIZE,
 } from '../../constants/sidebar';
 import { AiAssistantChat } from '../ai/ai-assistant-chat';
+import { AssistantUiChatPopup } from '../ai/assistant-ui/assistant-ui-chat-popup';
 import LeftSidebarResizablePanel from './side-menu/left-sidebar';
 
 type DashboardContainerProps = {
@@ -52,6 +55,10 @@ export function DashboardContainer({
     },
     [setPanelsSize],
   );
+
+  const assistantUiEnabled = flagsHooks.useFlag<boolean>(
+    FlagId.ASSISTANT_UI_ENABLED,
+  ).data;
 
   return (
     <AllowOnlyLoggedInUserOnlyGuard>
@@ -96,7 +103,12 @@ export function DashboardContainer({
         >
           <div ref={middlePanelRef} className="relative h-full w-full">
             <AiConfigurationPrompt />
-            <AiAssistantChat middlePanelSize={middlePanelSize} />
+            {assistantUiEnabled ? (
+              <AssistantUiChatPopup middlePanelSize={middlePanelSize} />
+            ) : (
+              <AiAssistantChat middlePanelSize={middlePanelSize} />
+            )}
+
             <DashboardContent
               pageHeader={pageHeader}
               useEntireInnerViewport={useEntireInnerViewport}
