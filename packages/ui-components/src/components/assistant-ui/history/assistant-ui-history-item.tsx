@@ -1,6 +1,7 @@
 import { cn } from '@/lib/cn';
 import { t } from 'i18next';
-import { X } from 'lucide-react';
+import { Check, Pencil, X } from 'lucide-react';
+import { KeyboardEvent, useEffect, useRef, useState } from 'react';
 import { OverflowTooltip } from '../../overflow-tooltip';
 import { TooltipWrapper } from '../../tooltip-wrapper';
 
@@ -9,6 +10,7 @@ type AssistantUiHistoryItem = {
   isActive: boolean;
   onClick: () => void;
   onDelete: () => void;
+  onRename: (newName: string) => void;
 };
 
 const AssistantUiHistoryItem = ({
@@ -16,9 +18,41 @@ const AssistantUiHistoryItem = ({
   isActive,
   onClick,
   onDelete,
+  onRename,
 }: AssistantUiHistoryItem) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedName, setEditedName] = useState(displayName);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isEditing]);
+
+  const handleRename = () => {
+    if (editedName.trim() && editedName !== displayName) {
+      onRename(editedName);
+    } else {
+      setEditedName(displayName);
+    }
+    setIsEditing(false);
+  };
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleRename();
+    } else if (e.key === 'Escape') {
+      setEditedName(displayName);
+      setIsEditing(false);
+    }
+  };
+
   return (
     <div
+      ref={containerRef}
       aria-selected={isActive}
       role="option"
       className={cn(
@@ -27,30 +61,83 @@ const AssistantUiHistoryItem = ({
           'bg-input': isActive,
         },
       )}
-      onClick={onClick}
+      onClick={isEditing ? undefined : onClick}
     >
-      <OverflowTooltip
-        text={displayName}
-        className="flex-1 font-normal  dark:text-primary text-sm leading-snug truncate select-none"
-      />
-      <div
-        className={cn(
-          'gap-2 items-center justify-center hidden group-hover:flex',
-        )}
-      >
-        <TooltipWrapper tooltipText={t('Delete')}>
-          <X
-            role="button"
-            data-testid="edit-flow"
-            size={13}
-            className="text-primary"
-            onClick={(event) => {
-              event.stopPropagation();
-              onDelete();
-            }}
+      {isEditing ? (
+        <div className="flex-1 flex items-center gap-2">
+          <input
+            ref={inputRef}
+            type="text"
+            value={editedName}
+            onChange={(e) => setEditedName(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onBlur={handleRename}
+            className="flex-1 bg-transparent border-none outline-none focus:ring-0 font-normal dark:text-primary text-sm leading-snug"
+            autoFocus
           />
-        </TooltipWrapper>
-      </div>
+          <TooltipWrapper tooltipText={t('Confirm')}>
+            <Check
+              role="button"
+              size={13}
+              className="text-primary cursor-pointer"
+              onClick={(event) => {
+                event.stopPropagation();
+                handleRename();
+              }}
+            />
+          </TooltipWrapper>
+          <TooltipWrapper tooltipText={t('Cancel')}>
+            <X
+              role="button"
+              size={13}
+              className="text-primary cursor-pointer"
+              onClick={(event) => {
+                event.stopPropagation();
+                setEditedName(displayName);
+                setIsEditing(false);
+              }}
+            />
+          </TooltipWrapper>
+        </div>
+      ) : (
+        <OverflowTooltip
+          text={displayName}
+          className="flex-1 font-normal dark:text-primary text-sm leading-snug truncate select-none"
+        />
+      )}
+      {!isEditing && (
+        <div
+          className={cn(
+            'gap-2 items-center justify-center hidden group-hover:flex',
+          )}
+        >
+          <TooltipWrapper tooltipText={t('Rename')}>
+            <Pencil
+              role="button"
+              data-testid="edit-flow"
+              size={13}
+              className="text-primary cursor-pointer"
+              onClick={(event) => {
+                event.stopPropagation();
+                setEditedName(displayName);
+                setIsEditing(true);
+              }}
+            />
+          </TooltipWrapper>
+          <TooltipWrapper tooltipText={t('Delete')}>
+            <X
+              role="button"
+              data-testid="edit-flow"
+              size={13}
+              className="text-primary cursor-pointer"
+              onClick={(event) => {
+                event.stopPropagation();
+                onDelete();
+              }}
+            />
+          </TooltipWrapper>
+        </div>
+      )}
     </div>
   );
 };

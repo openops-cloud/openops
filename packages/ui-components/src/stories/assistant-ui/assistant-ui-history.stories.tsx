@@ -25,6 +25,7 @@ const meta = {
     newChatDisabled: false,
     onChatSelected: action('Chat selected'),
     onChatDeleted: action('Chat deleted'),
+    onChatRenamed: action('Chat renamed'),
     chatItems: [
       { id: '1', displayName: 'Chat about API integration' },
       { id: '2', displayName: 'Workflow optimization discussion' },

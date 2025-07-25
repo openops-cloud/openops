@@ -11,6 +11,7 @@ type AssistantUiHistoryProps = {
   newChatDisabled: boolean;
   onChatSelected: (chatId: string) => void;
   onChatDeleted: (chatId: string) => void;
+  onChatRenamed?: (chatId: string, newName: string) => void;
   chatItems: { id: string; displayName: string }[];
   selectedItemId: string;
   className?: string;
@@ -21,6 +22,7 @@ const AssistantUiHistory = ({
   newChatDisabled,
   onChatDeleted,
   onChatSelected,
+  onChatRenamed,
   chatItems,
   selectedItemId,
   className,
@@ -51,6 +53,7 @@ const AssistantUiHistory = ({
               displayName={chatItem.displayName}
               onClick={() => onChatSelected(chatItem.id)}
               onDelete={() => onChatDeleted(chatItem.id)}
+              onRename={(newName) => onChatRenamed?.(chatItem.id, newName)}
               isActive={chatItem.id === selectedItemId}
             />
           ))}
