@@ -50,11 +50,19 @@ const AssistantUiHistoryItem = ({
     }
   };
 
+  const handleContainerKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (!isEditing && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault();
+      onClick();
+    }
+  };
+
   return (
     <div
       ref={containerRef}
       aria-selected={isActive}
       role="option"
+      tabIndex={isEditing ? -1 : 0}
       className={cn(
         'flex justify-between items-center gap-2 py-[9px] pl-[9px] pr-2 rounded-sm overflow-hidden cursor-pointer hover:bg-input hover:dark:bg-muted-foreground/80 group',
         {
@@ -62,6 +70,7 @@ const AssistantUiHistoryItem = ({
         },
       )}
       onClick={isEditing ? undefined : onClick}
+      onKeyDown={handleContainerKeyDown}
     >
       {isEditing ? (
         <div className="flex-1 flex items-center gap-2">
