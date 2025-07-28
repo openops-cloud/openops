@@ -10,7 +10,7 @@ export type ServerMessage = NonNullable<OpenChatResponse['messages']>[number];
 export type MessageType = ServerMessage | UIMessage;
 
 type TextItem = { type: 'text'; text: string };
-type ContentType = string | TextItem[] | unknown;
+type ContentType = string | TextItem[];
 
 export const createCodeMessage = (
   message: MessageType,
