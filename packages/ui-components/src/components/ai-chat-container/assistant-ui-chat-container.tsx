@@ -7,7 +7,6 @@ type AssistantUiResizableContainerProps = {
   dimensions: BoxSize;
   setDimensions: (dimensions: BoxSize) => void;
   maxSize: BoxSize;
-  toggleAiChatState: () => void;
   aiChatSize: AiAssistantChatSizeState;
   showAiChat: boolean;
   minWidth: number;
