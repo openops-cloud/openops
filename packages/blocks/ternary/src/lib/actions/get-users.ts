@@ -6,11 +6,11 @@ import { getUsersList } from '../common/users';
 export const getUsers = createAction({
   name: 'get_users',
   displayName: 'Get Users',
-  description: 'Get a list of users.',
+  description: 'Get Users',
   auth: ternaryCloudAuth,
   props: {
     includeSettings: Property.Checkbox({
-      displayName: 'Include Settings',
+      displayName: 'Include settings',
       description: 'Include the tenant settings',
       required: false,
     }),
