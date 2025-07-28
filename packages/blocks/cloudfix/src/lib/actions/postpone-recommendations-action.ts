@@ -10,7 +10,7 @@ export const postponeRecommendationsAction = createAction({
   auth: cloudfixAuth,
   props: {
     recommendationIds: Property.Array({
-      displayName: 'Recommendation ids',
+      displayName: 'Recommendation IDs',
       description: 'Array of recommendation IDs to postpone',
       required: true,
     }),

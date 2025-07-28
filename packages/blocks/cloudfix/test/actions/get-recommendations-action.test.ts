@@ -65,10 +65,18 @@ describe('getRecommendationsAction', () => {
 
     expect(result).toBe('mockResult');
     expect(makeRequestMock.makeRequest).toHaveBeenCalledWith({
-      endpoint:
-        '/recommendations?finderFixerId=some%20finderFixerId&pageNumber=1&pageLimit=10&sortBy=some%20sortBy&sortOrder=some%20sortOrder&includeParameters=true&status=some%20status&status=some%20status%202',
+      endpoint: '/recommendations',
       method: 'GET',
       auth,
+      queryParams: {
+        finderFixerId: 'some finderFixerId',
+        pageNumber: 1,
+        pageLimit: 10,
+        sortBy: 'some sortBy',
+        sortOrder: 'some sortOrder',
+        includeParameters: true,
+        status: ['some status', 'some status 2'],
+      },
     });
   });
 });

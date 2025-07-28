@@ -12,7 +12,7 @@ export const createChangeRequestsAction = createAction({
   riskLevel: RiskLevel.HIGH,
   props: {
     recommendationIds: Property.Array({
-      displayName: 'Recommendation ids',
+      displayName: 'Recommendation IDs',
       description: 'Array of recommendation IDs to create change requests for',
       required: true,
     }),

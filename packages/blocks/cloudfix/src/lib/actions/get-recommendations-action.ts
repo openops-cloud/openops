@@ -94,64 +94,54 @@ export const getRecommendationsAction = createAction({
     }),
   },
   async run(context) {
-    const queryParamsString = buildQueryParams(context.propsValue);
+    const {
+      finderFixerId,
+      pageNumber,
+      pageLimit,
+      sortBy,
+      sortOrder,
+      includeParameters,
+      status,
+    } = context.propsValue;
+
+    const queryParams: Record<string, string | string[] | number | boolean> =
+      {};
+
+    if (finderFixerId) {
+      queryParams['finderFixerId'] = finderFixerId;
+    }
+
+    if (pageNumber) {
+      queryParams['pageNumber'] = pageNumber;
+    }
+
+    if (pageLimit) {
+      queryParams['pageLimit'] = pageLimit;
+    }
+
+    if (sortBy) {
+      queryParams['sortBy'] = sortBy;
+    }
+
+    if (sortOrder) {
+      queryParams['sortOrder'] = sortOrder;
+    }
+
+    if (includeParameters !== undefined) {
+      queryParams['includeParameters'] = includeParameters;
+    }
+
+    if (status && status.length > 0) {
+      queryParams['status'] = status;
+    }
 
     const response = await makeRequest({
       auth: context.auth as CloudfixAuth,
-      endpoint: queryParamsString
-        ? `/recommendations?${queryParamsString}`
-        : '/recommendations',
+      endpoint: '/recommendations',
       method: HttpMethod.GET,
+      queryParams,
     });
 
     return response;
   },
 });
-
-function buildQueryParams(propsValue: any): string {
-  const {
-    finderFixerId,
-    pageNumber,
-    pageLimit,
-    sortBy,
-    sortOrder,
-    includeParameters,
-    status,
-  } = propsValue;
-
-  const params: string[] = [];
-
-  if (finderFixerId) {
-    params.push(`finderFixerId=${encodeURIComponent(finderFixerId)}`);
-  }
-
-  if (pageNumber) {
-    params.push(`pageNumber=${encodeURIComponent(pageNumber.toString())}`);
-  }
-
-  if (pageLimit) {
-    params.push(`pageLimit=${encodeURIComponent(pageLimit.toString())}`);
-  }
-
-  if (sortBy) {
-    params.push(`sortBy=${encodeURIComponent(sortBy)}`);
-  }
-
-  if (sortOrder) {
-    params.push(`sortOrder=${encodeURIComponent(sortOrder)}`);
-  }
-
-  if (includeParameters !== undefined) {
-    params.push(
-      `includeParameters=${encodeURIComponent(includeParameters.toString())}`,
-    );
-  }
-
-  if (status && status.length > 0) {
-    status.forEach((statusValue: string) => {
-      params.push(`status=${encodeURIComponent(statusValue)}`);
-    });
-  }
-
-  return params.join('&');
-}
