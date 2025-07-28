@@ -258,10 +258,11 @@ async function resolveVariable(
     stepTestOutputs: flowData.stepTestOutputs,
   });
 
+  const truncationLength = 30000;
   return {
     name: variable.name,
     value: result.success
-      ? safeStringifyAndTruncate(result.censoredValue)
+      ? safeStringifyAndTruncate(result.censoredValue, truncationLength)
       : String(result.error),
   };
 }
