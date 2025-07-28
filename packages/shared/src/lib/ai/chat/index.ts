@@ -76,6 +76,11 @@ export const NewMessageRequest = Type.Object({
 
 export type NewMessageRequest = Static<typeof NewMessageRequest>;
 
+export const ChatNameRequest = Type.Object({
+  chatId: Type.String(),
+});
+export type ChatNameRequest = Static<typeof ChatNameRequest>;
+
 export const DeleteChatHistoryRequest = Type.Object({
   chatId: Type.String(),
 });
