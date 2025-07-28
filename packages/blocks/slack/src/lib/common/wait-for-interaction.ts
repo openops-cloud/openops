@@ -75,7 +75,15 @@ export async function onReceivedInteraction(
     };
   }
 
-  const userSelection = JSON.parse(resumePayload.actionClicked);
+  let userSelection;
+  try {
+    userSelection = JSON.parse(resumePayload.actionClicked);
+  } catch {
+    userSelection = {
+      value: resumePayload.actionClicked,
+      displayText: resumePayload.actionClicked,
+    };
+  }
 
   const isResumeForActionOnThisMessage =
     actions.includes(resumePayload.actionType) ||
