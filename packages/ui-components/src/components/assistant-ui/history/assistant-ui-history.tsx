@@ -34,7 +34,7 @@ const AssistantUiHistory = ({
         className,
       )}
     >
-      <TooltipWrapper tooltipText={t('New chat')}>
+      <TooltipWrapper tooltipText={'New chat'}>
         <Button
           className="w-full flex items-center justify-start gap-2 enabled:hover:bg-input enabled:hover:dark:bg-muted-foreground/80 dark:text-primary font-normal"
           variant="ghost"
@@ -53,7 +53,11 @@ const AssistantUiHistory = ({
               displayName={chatItem.displayName}
               onClick={() => onChatSelected(chatItem.id)}
               onDelete={() => onChatDeleted(chatItem.id)}
-              onRename={(newName) => onChatRenamed?.(chatItem.id, newName)}
+              onRename={
+                onChatRenamed
+                  ? (newName) => onChatRenamed(chatItem.id, newName)
+                  : undefined
+              }
               isActive={chatItem.id === selectedItemId}
             />
           ))}

@@ -10,8 +10,11 @@ type AssistantUiHistoryItemProps = {
   isActive: boolean;
   onClick: () => void;
   onDelete: () => void;
-  onRename: (newName: string) => void;
+  onRename?: (newName: string) => void;
 };
+
+const ICON_CLASS_NAME =
+  'text-primary cursor-pointer hover:bg-gray-300 rounded-xs';
 
 const AssistantUiHistoryItem = ({
   displayName,
@@ -33,7 +36,7 @@ const AssistantUiHistoryItem = ({
   }, [isEditing]);
 
   const handleRename = () => {
-    if (editedName.trim() && editedName !== displayName) {
+    if (editedName.trim() && editedName !== displayName && onRename) {
       onRename(editedName);
     } else {
       setEditedName(displayName);
@@ -88,7 +91,7 @@ const AssistantUiHistoryItem = ({
             <Check
               role="button"
               size={13}
-              className="text-primary cursor-pointer"
+              className={ICON_CLASS_NAME}
               onClick={(event) => {
                 event.stopPropagation();
                 handleRename();
@@ -99,7 +102,7 @@ const AssistantUiHistoryItem = ({
             <X
               role="button"
               size={13}
-              className="text-primary cursor-pointer"
+              className={ICON_CLASS_NAME}
               onClick={(event) => {
                 event.stopPropagation();
                 setEditedName(displayName);
@@ -120,23 +123,26 @@ const AssistantUiHistoryItem = ({
             'gap-2 items-center justify-center hidden group-hover:flex',
           )}
         >
-          <TooltipWrapper tooltipText={t('Rename')}>
-            <Pencil
-              role="button"
-              size={13}
-              className="text-primary cursor-pointer"
-              onClick={(event) => {
-                event.stopPropagation();
-                setEditedName(displayName);
-                setIsEditing(true);
-              }}
-            />
-          </TooltipWrapper>
+          {onRename && (
+            <TooltipWrapper tooltipText={t('Rename')}>
+              <Pencil
+                role="button"
+                size={13}
+                className={ICON_CLASS_NAME}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setEditedName(displayName);
+                  setIsEditing(true);
+                }}
+              />
+            </TooltipWrapper>
+          )}
+
           <TooltipWrapper tooltipText={t('Delete')}>
             <X
               role="button"
               size={13}
-              className="text-primary cursor-pointer"
+              className={ICON_CLASS_NAME}
               onClick={(event) => {
                 event.stopPropagation();
                 onDelete();

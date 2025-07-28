@@ -127,3 +127,14 @@ export const CustomStyling: Story = {
     className: 'bg-slate-100 dark:bg-slate-800 rounded-lg p-2',
   },
 };
+
+/**
+ * AssistantUiHistory without rename functionality.
+ * This demonstrates how the component behaves when the rename handler is not provided.
+ * In this case, the rename option will not be available in the context menu of chat items.
+ */
+export const WithoutRenameHandler: Story = {
+  args: {
+    onChatRenamed: undefined,
+  },
+};
