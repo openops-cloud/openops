@@ -18,7 +18,7 @@ describe('block declaration tests', () => {
         name: 'get_budgets',
         requireAuth: true,
       },
-      get_cost_alerts: {
+      get_anomalies: {
         name: 'get_anomalies',
         requireAuth: true,
       },
