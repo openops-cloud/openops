@@ -13,7 +13,7 @@ type AssistantUiHistoryProps = {
   onChatDeleted: (chatId: string) => void;
   onChatRenamed?: (chatId: string, newName: string) => void;
   chatItems: { id: string; displayName: string }[];
-  selectedItemId: string;
+  selectedItemId?: string;
   className?: string;
 };
 
