@@ -7,6 +7,7 @@ import {
   FastifyRequest,
 } from 'fastify';
 import {
+  generateChatName,
   getConversation,
   getLLMConfig,
 } from '../../../src/app/ai/chat/ai-chat.service';
@@ -75,6 +76,7 @@ jest.mock('../../../src/app/ai/chat/ai-chat.service', () => ({
   createChatContext: jest.fn(),
   getConversation: jest.fn(),
   getLLMConfig: jest.fn(),
+  generateChatName: jest.fn(),
 }));
 
 jest.mock('../../../src/app/ai/mcp/tools-context-builder', () => ({
@@ -455,6 +457,83 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
         [...mockMessages, { role: 'user', content: 'test message' }],
         expect.anything(),
         mockLanguageModel,
+      );
+    });
+  });
+
+  describe('POST /chat-name (chat name generation)', () => {
+    let postHandler: RouteHandler;
+
+    beforeEach(async () => {
+      jest.clearAllMocks();
+      handlers = {};
+      await aiMCPChatController(mockApp, {} as FastifyPluginOptions);
+      postHandler = handlers['/chat-name'];
+    });
+
+    it('should return generated chat name for valid messages', async () => {
+      (getConversation as jest.Mock).mockResolvedValue({
+        messages: [
+          { role: 'user', content: 'How do I optimize AWS costs?' },
+          { role: 'assistant', content: 'You can use AWS Cost Explorer...' },
+        ],
+      });
+      (generateChatName as jest.Mock).mockResolvedValue(
+        'AWS Cost Optimization',
+      );
+
+      await postHandler(
+        { ...mockRequest, body: { chatId: 'test-chat-id' } } as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(mockReply.code).toHaveBeenCalledWith(200);
+      expect(mockReply.send).toHaveBeenCalledWith({
+        chatName: 'AWS Cost Optimization',
+      });
+    });
+
+    it('should return "New Chat" for empty messages', async () => {
+      (getConversation as jest.Mock).mockResolvedValue({ messages: [] });
+
+      await postHandler(
+        { ...mockRequest, body: { chatId: 'test-chat-id' } } as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(mockReply.code).toHaveBeenCalledWith(200);
+      expect(mockReply.send).toHaveBeenCalledWith({ chatName: 'New Chat' });
+    });
+
+    it('should return "New Chat" if LLM returns empty', async () => {
+      (getConversation as jest.Mock).mockResolvedValue({
+        messages: [
+          { role: 'user', content: 'Hello?' },
+          { role: 'assistant', content: 'Hi!' },
+        ],
+      });
+      (generateChatName as jest.Mock).mockResolvedValue('   ');
+
+      await postHandler(
+        { ...mockRequest, body: { chatId: 'test-chat-id' } } as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(mockReply.code).toHaveBeenCalledWith(200);
+      expect(mockReply.send).toHaveBeenCalledWith({ chatName: 'New Chat' });
+    });
+
+    it('should handle errors gracefully', async () => {
+      (getConversation as jest.Mock).mockRejectedValue(new Error('DB error'));
+
+      await postHandler(
+        { ...mockRequest, body: { chatId: 'test-chat-id' } } as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(mockReply.code).toHaveBeenCalledWith(500);
+      expect(mockReply.send).toHaveBeenCalledWith(
+        expect.objectContaining({ message: 'Internal server error' }),
       );
     });
   });

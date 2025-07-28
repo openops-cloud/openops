@@ -6,8 +6,9 @@ import {
   hashUtils,
 } from '@openops/server-shared';
 import { AiConfig, ApplicationError, ErrorCode } from '@openops/shared';
-import { CoreMessage, LanguageModel } from 'ai';
+import { CoreMessage, LanguageModel, generateText } from 'ai';
 import { aiConfigService } from '../config/ai-config.service';
+import { loadPrompt } from './prompts.service';
 import { MessageWithMergedToolResults } from './types';
 import { mergeToolResultsIntoMessages } from './utils';
 
@@ -62,6 +63,30 @@ export const generateChatIdForMCP = (params: {
     userId: params.userId,
   });
 };
+
+export async function generateChatName(
+  messages: CoreMessage[],
+  projectId: string,
+): Promise<string> {
+  const { languageModel } = await getLLMConfig(projectId);
+  const systemPrompt = await loadPrompt('chat-name.txt');
+  if (!systemPrompt.trim()) {
+    throw new Error('Failed to load prompt to generate the chat name.');
+  }
+  const prompt: CoreMessage[] = [
+    {
+      role: 'system',
+      content: systemPrompt,
+    } as const,
+    ...messages,
+  ];
+  const response = await generateText({
+    model: languageModel,
+    messages: prompt,
+    maxRetries: 2,
+  });
+  return response.text.trim();
+}
 
 export const createChatContext = async (
   chatId: string,

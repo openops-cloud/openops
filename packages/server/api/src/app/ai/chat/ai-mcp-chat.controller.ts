@@ -4,6 +4,7 @@ import { logger } from '@openops/server-shared';
 import {
   AiConfig,
   ApplicationError,
+  ChatNameRequest,
   DeleteChatHistoryRequest,
   NewMessageRequest,
   OpenChatMCPRequest,
@@ -37,6 +38,7 @@ import {
   deleteChatHistory,
   generateChatId,
   generateChatIdForMCP,
+  generateChatName,
   getChatContext,
   getChatHistoryWithMergedTools,
   getConversation,
@@ -50,6 +52,8 @@ import { enrichContext, IncludeOptions } from './context-enrichment.service';
 import { getBlockSystemPrompt } from './prompts.service';
 
 const MAX_RECURSION_DEPTH = 10;
+const DEFAULT_CHAT_NAME = 'New Chat';
+
 export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
   app.post(
     '/open',
@@ -221,6 +225,32 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
     }
   });
 
+  app.post('/chat-name', ChatNameOptions, async (request, reply) => {
+    const chatId = request.body.chatId;
+    const userId = request.principal.id;
+    const projectId = request.principal.projectId;
+
+    try {
+      const contextForChatName = await getConversation(
+        chatId,
+        userId,
+        projectId,
+      );
+      const messages = contextForChatName.messages;
+
+      if (messages.length === 0) {
+        return await reply.code(200).send({ chatName: DEFAULT_CHAT_NAME });
+      }
+
+      const rawChatName = await generateChatName(messages, projectId);
+      const chatName = rawChatName.trim() || DEFAULT_CHAT_NAME;
+
+      return await reply.code(200).send({ chatName });
+    } catch (error) {
+      return handleError(error, reply, 'generate chat name');
+    }
+  });
+
   app.post('/code', CodeGenerationOptions, async (request, reply) => {
     const chatId = request.body.chatId;
     const projectId = request.principal.projectId;
@@ -318,6 +348,17 @@ const NewMessageOptions = {
     description:
       'Send a message to the MCP chat session and receive a streaming response. This endpoint processes the user message, generates an AI response using the configured language model, and maintains the conversation history while integrating with MCP tools.',
     body: NewMessageRequest,
+  },
+};
+
+const ChatNameOptions = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
+  },
+  schema: {
+    tags: ['ai', 'ai-chat-mcp'],
+    description: 'Generate a chat name using LLM based on chat history.',
+    body: ChatNameRequest,
   },
 };
 
