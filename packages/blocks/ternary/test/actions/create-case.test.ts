@@ -149,9 +149,6 @@ describe('createCaseAction', () => {
         linkToJira: propsValue.linkToJira,
         assigneeIDs: propsValue.assigneeIDs,
         followerIDs: propsValue.followerIDs,
-        context: {
-          forecast: 12345,
-        },
       },
     });
   });
