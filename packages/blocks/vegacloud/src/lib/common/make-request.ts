@@ -1,6 +1,6 @@
 import { httpClient, HttpMethod } from '@openops/blocks-common';
 import { AxiosHeaders } from 'axios';
-import { VegaCloudAuth } from './auth';
+import { VegaCloudAuth } from '../auth';
 
 export async function generateJwt(
   auth: VegaCloudAuth,

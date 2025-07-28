@@ -1,7 +1,8 @@
 import { HttpMethod } from '@openops/blocks-common';
-import { createAction, Property } from '@openops/blocks-framework';
+import { createAction, Property, Validators } from '@openops/blocks-framework';
 import { VegaCloudAuth, vegacloudAuth } from '../auth';
-import { makeRequest } from '../common';
+import { getAnomalyFields } from '../common/get-anomaly-fields';
+import { makeRequest } from '../common/make-request';
 
 export const getAnomaliesAction = createAction({
   name: `vegacloud_get_anomalies`,
@@ -31,7 +32,7 @@ export const getAnomaliesAction = createAction({
         }
         const properties: { [key: string]: any } = {};
 
-        const filterFields = await getFields(auth as VegaCloudAuth);
+        const filterFields = await getAnomalyFields(auth as VegaCloudAuth);
 
         properties['additionalFilters'] = Property.Array({
           displayName: 'Fields to filter by',
@@ -82,15 +83,23 @@ export const getAnomaliesAction = createAction({
         return properties;
       },
     }),
+    limit: Property.Number({
+      displayName: 'Limit',
+      description: 'The maximum number of anomalies to return',
+      required: true,
+      defaultValue: 10000,
+      validators: [Validators.minValue(1)],
+    }),
   },
   async run(context) {
-    const { fromDate, toDate, additionalFilters } = context.propsValue;
+    const { fromDate, toDate, limit, additionalFilters } = context.propsValue;
     const { auth } = context;
 
     const result = await getAnomalies({
       auth,
       fromDate,
       toDate,
+      limit,
       additionalFilters: additionalFilters
         ? (additionalFilters['additionalFilters'] as any)
         : undefined,
@@ -104,11 +113,13 @@ async function getAnomalies({
   auth,
   fromDate,
   toDate,
+  limit,
   additionalFilters,
 }: {
   auth: VegaCloudAuth;
   fromDate: string;
   toDate: string;
+  limit: number;
   additionalFilters:
     | { fieldName: string; operator: string; value: string }[]
     | undefined;
@@ -127,22 +138,9 @@ async function getAnomalies({
     method: HttpMethod.GET,
     queryParams: {
       filter_by: query,
+      size: limit.toString(),
     },
   });
 
   return response;
-}
-
-async function getFields(auth: VegaCloudAuth): Promise<any[]> {
-  const response = await makeRequest({
-    auth,
-    url: 'https://data.api.vegacloud.io/query/schema',
-    method: HttpMethod.GET,
-  });
-
-  return (
-    response.result?.find(
-      (x: { model_name: string; fields: any[] }) => x.model_name === 'Anomaly',
-    )?.fields || []
-  );
 }

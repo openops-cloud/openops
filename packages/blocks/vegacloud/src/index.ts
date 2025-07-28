@@ -3,7 +3,7 @@ import { createBlock, Property } from '@openops/blocks-framework';
 import { BlockCategory } from '@openops/shared';
 import { getAnomaliesAction } from './lib/actions/get-anomalies-action';
 import { vegacloudAuth } from './lib/auth';
-import { generateJwt } from './lib/common';
+import { generateJwt } from './lib/common/make-request';
 
 export const vegacloud = createBlock({
   displayName: 'Vega Cloud',
