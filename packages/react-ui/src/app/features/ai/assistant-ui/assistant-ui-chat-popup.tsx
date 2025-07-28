@@ -1,20 +1,19 @@
-import { AiAssistantConversation } from '@/app/features/ai/ai-assistant-conversation';
-import { useAiAssistantChat } from '@/app/features/ai/lib/ai-assistant-chat-hook';
-import { useAiModelSelector } from '@/app/features/ai/lib/ai-model-selector-hook';
+import AssistantUiChat from '@/app/features/ai/assistant-ui/assistant-ui-chat';
 import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
 import { useAppStore } from '@/app/store/app-store';
 import {
   AI_CHAT_CONTAINER_SIZES,
-  AiAssistantChatContainer,
   AiAssistantChatSizeState,
-  CHAT_MIN_WIDTH,
+  AssistantUiResizableContainer,
+  Button,
   cn,
-  PARENT_INITIAL_HEIGHT_GAP,
-  PARENT_MAX_HEIGHT_GAP,
+  TooltipWrapper,
 } from '@openops/components/ui';
-import { useCallback, useMemo, useRef } from 'react';
+import { t } from 'i18next';
+import { ExpandIcon, MinimizeIcon } from 'lucide-react';
+import { useCallback, useMemo } from 'react';
 
-type AiAssistantChatProps = {
+type AssistantUiChatPopupProps = {
   middlePanelSize: {
     width: number;
     height: number;
@@ -25,13 +24,14 @@ type AiAssistantChatProps = {
 const CHAT_MAX_WIDTH = 600;
 const CHAT_EXPANDED_WIDTH_OFFSET = 32;
 const CHAT_WIDTH_FACTOR = 0.3;
+const PARENT_INITIAL_HEIGHT_GAP = 220;
+const PARENT_MAX_HEIGHT_GAP = 95;
+const CHAT_MIN_WIDTH = 375;
 
-const AiAssistantChat = ({
+const AssistantUiChatPopup = ({
   middlePanelSize,
   className,
-}: AiAssistantChatProps) => {
-  const lastUserMessageRef = useRef<HTMLDivElement>(null);
-  const lastAssistantMessageRef = useRef<HTMLDivElement>(null);
+}: AssistantUiChatPopupProps) => {
   const {
     isAiChatOpened,
     setIsAiChatOpened,
@@ -47,23 +47,6 @@ const AiAssistantChat = ({
     aiChatDimensions: s.aiChatDimensions,
     setAiChatDimensions: s.setAiChatDimensions,
   }));
-
-  const {
-    messages,
-    input,
-    handleInputChange,
-    handleSubmit,
-    status,
-    createNewChat,
-    isOpenAiChatPending,
-  } = useAiAssistantChat();
-
-  const {
-    selectedModel,
-    availableModels,
-    onModelSelected,
-    isLoading: isModelSelectorLoading,
-  } = useAiModelSelector();
 
   const sizes = useMemo(() => {
     const calculatedWidth = middlePanelSize.width * CHAT_WIDTH_FACTOR;
@@ -116,42 +99,49 @@ const AiAssistantChat = ({
   }
 
   return (
-    <AiAssistantChatContainer
+    <AssistantUiResizableContainer
       dimensions={sizes.current}
       setDimensions={setAiChatDimensions}
       maxSize={sizes.max}
       showAiChat={isAiChatOpened}
-      onCloseClick={() => setIsAiChatOpened(false)}
       className={cn('left-4 bottom-[17px]', className)}
-      handleInputChange={handleInputChange}
-      handleSubmit={handleSubmit}
-      input={input}
-      isEmpty={!messages?.length}
-      onCreateNewChatClick={createNewChat}
       toggleAiChatState={onToggleAiChatState}
+      minWidth={CHAT_MIN_WIDTH}
       aiChatSize={aiChatSize}
-      availableModels={availableModels}
-      selectedModel={selectedModel}
-      isModelSelectorLoading={isModelSelectorLoading}
-      onModelSelected={onModelSelected}
-      messages={messages.map((m, idx) => ({
-        id: m.id ?? String(idx),
-        role: m.role,
-      }))}
-      status={status}
-      lastUserMessageRef={lastUserMessageRef}
-      lastAssistantMessageRef={lastAssistantMessageRef}
     >
-      <AiAssistantConversation
-        messages={messages}
-        status={status}
-        isPending={isOpenAiChatPending}
-        lastUserMessageRef={lastUserMessageRef}
-        lastAssistantMessageRef={lastAssistantMessageRef}
-      />
-    </AiAssistantChatContainer>
+      <AssistantUiChat
+        onClose={() => {
+          setIsAiChatOpened(false);
+        }}
+        title={t('AI Assistant')}
+      >
+        <TooltipWrapper
+          tooltipText={
+            aiChatSize === AI_CHAT_CONTAINER_SIZES.EXPANDED
+              ? t('Dock')
+              : t('Expand')
+          }
+        >
+          <Button
+            size="icon"
+            className="text-outline"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleAiChatState();
+            }}
+            variant="basic"
+          >
+            {aiChatSize === AI_CHAT_CONTAINER_SIZES.EXPANDED ? (
+              <MinimizeIcon size={16} />
+            ) : (
+              <ExpandIcon size={16} />
+            )}
+          </Button>
+        </TooltipWrapper>
+      </AssistantUiChat>
+    </AssistantUiResizableContainer>
   );
 };
 
-AiAssistantChat.displayName = 'AiAssistantChat';
-export { AiAssistantChat };
+AssistantUiChatPopup.displayName = 'AssistantUiChatPopup';
+export { AssistantUiChatPopup };
