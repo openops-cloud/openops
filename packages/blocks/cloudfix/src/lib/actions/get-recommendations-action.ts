@@ -10,7 +10,7 @@ export const getRecommendationsAction = createAction({
   auth: cloudfixAuth,
   props: {
     status: Property.StaticMultiSelectDropdown({
-      displayName: 'Status Filter',
+      displayName: 'Status filter',
       description: 'Filter recommendations by status',
       required: false,
       options: {
@@ -45,7 +45,7 @@ export const getRecommendationsAction = createAction({
       },
     }),
     sortBy: Property.StaticDropdown({
-      displayName: 'Sort By',
+      displayName: 'Sort by',
       description: 'The field to sort the recommendations by',
       required: false,
       options: {
@@ -59,7 +59,7 @@ export const getRecommendationsAction = createAction({
       defaultValue: 'scheduledAt',
     }),
     sortOrder: Property.StaticDropdown({
-      displayName: 'Sort Order',
+      displayName: 'Sort order',
       description: 'The order to sort the recommendations',
       required: false,
       options: {
@@ -71,23 +71,23 @@ export const getRecommendationsAction = createAction({
       defaultValue: 'DESC',
     }),
     includeParameters: Property.Checkbox({
-      displayName: 'Include Parameters',
+      displayName: 'Include parameters',
       description: 'Whether to include parameters in the response',
       required: false,
     }),
     finderFixerId: Property.ShortText({
-      displayName: 'Finder Fixer ID',
+      displayName: 'Finder fixer ID',
       description: 'The ID of the finder fixer',
       required: false,
     }),
     pageNumber: Property.Number({
-      displayName: 'Page Number',
+      displayName: 'Page number',
       description: 'The page number for pagination (starts from 1)',
       required: false,
       defaultValue: 1,
     }),
     pageLimit: Property.Number({
-      displayName: 'Page Limit',
+      displayName: 'Page limit',
       description: 'The maximum number of recommendations per page',
       required: false,
       defaultValue: 200,

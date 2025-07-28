@@ -6,18 +6,18 @@ import { makeRequest } from '../common/make-request';
 export const postponeRecommendationsAction = createAction({
   name: 'postpone_recommendations',
   displayName: 'Postpone Recommendations',
-  description: 'Postpone recommendations until a specified date.',
+  description: 'Postpone recommendations until a specified date',
   auth: cloudfixAuth,
   props: {
     recommendationIds: Property.Array({
-      displayName: 'Recommendation IDs',
+      displayName: 'Recommendation ids',
       description: 'Array of recommendation IDs to postpone',
       required: true,
     }),
     postponeUntil: Property.DateTime({
-      displayName: 'Postpone Until',
+      displayName: 'Postpone until',
       description:
-        'The date and time until which to postpone the recommendations. Format ISO yyyy-mm-ddT00:00:00.000Z',
+        'The date and time until which to postpone the recommendations. Format ISO yyyy-mm-ddT00:00:00.000Z.',
       required: true,
     }),
     reason: Property.ShortText({

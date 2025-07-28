@@ -6,7 +6,7 @@ import { makeRequest } from '../common/make-request';
 export const getRecommendationsSummaryAction = createAction({
   name: 'get_recommendations_summary',
   displayName: 'Get Recommendations Summary',
-  description: 'Get a summary of recommendations.',
+  description: 'Get a summary of recommendations',
   auth: cloudfixAuth,
   props: {},
   async run(context) {

@@ -6,7 +6,7 @@ import { makeRequest } from '../common/make-request';
 export const getReportAction = createAction({
   name: 'get_report',
   displayName: 'Get Report',
-  description: 'Get a report for a specific recommendation.',
+  description: 'Get a report for a specific recommendation',
   auth: cloudfixAuth,
   props: {
     recommendationId: Property.ShortText({
