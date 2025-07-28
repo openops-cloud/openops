@@ -15,14 +15,14 @@ const ThreadExtraContext = createContext<ThreadExtraData | null>(null);
 export const ThreadExtraContextProvider: React.FC<
   ThreadExtraContextProviderProps
 > = ({ greeting, codeVariation, handleInject, children }) => {
+  const defaultGreeting = t('How can I help you today?');
   const value: ThreadExtraData = useMemo(
     () => ({
-      greeting: greeting ?? t('How can I help you today?'),
+      greeting: greeting ?? defaultGreeting,
       codeVariation,
       handleInject,
     }),
     [codeVariation, greeting, handleInject],
-  );
 
   return (
     <ThreadExtraContext.Provider value={value}>

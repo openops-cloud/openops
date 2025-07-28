@@ -8,7 +8,7 @@ const AssistantUiPlaygroundPage = () => {
   }, []);
   return (
     <div className="flex h-screen w-full flex-col">
-      <AssistantUiChat onClose={() => {}} handleInject={handleInject} />
+      <AssistantUiChat onClose={noop} handleInject={handleInject} />
     </div>
   );
 };
