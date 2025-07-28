@@ -34,7 +34,7 @@ const AssistantUiHistory = ({
         className,
       )}
     >
-      <TooltipWrapper tooltipText={'New chat'}>
+      <TooltipWrapper tooltipText={t('New chat')}>
         <Button
           className="w-full flex items-center justify-start gap-2 enabled:hover:bg-input enabled:hover:dark:bg-muted-foreground/80 dark:text-primary font-normal"
           variant="ghost"
