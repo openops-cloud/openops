@@ -26,7 +26,7 @@ const AssistantUiChatContainer = ({
   children,
 }: AssistantUiChatContainerProps) => {
   return (
-    <div className="h-full w-full flex flex-col bg-background rounded-sm overflow-hidden">
+    <div className="h-full w-full flex flex-col bg-background overflow-hidden">
       <AssistantTopBar
         onClose={onClose}
         onNewChat={onNewChat}
