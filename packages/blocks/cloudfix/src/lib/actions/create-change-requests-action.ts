@@ -27,7 +27,7 @@ export const createChangeRequestsAction = createAction({
     const { recommendationIds, executeOnSchedule } = context.propsValue;
 
     const body = {
-      recommendationIds: recommendationIds,
+      recommendationIds,
       executeOnSchedule,
     };
 
