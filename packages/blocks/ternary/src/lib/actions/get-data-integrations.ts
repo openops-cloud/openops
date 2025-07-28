@@ -1,8 +1,8 @@
 import { HttpMethod } from '@openops/blocks-common';
 import { createAction } from '@openops/blocks-framework';
 import { logger } from '@openops/server-shared';
-import { sendTernaryRequest } from '../common';
 import { ternaryCloudAuth } from '../common/auth';
+import { sendTernaryRequest } from '../common/send-ternary-request';
 
 export const getDataIntegrations = createAction({
   name: 'get_data_integrations',

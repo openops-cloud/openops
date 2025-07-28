@@ -1,10 +1,10 @@
 import { HttpMethod } from '@openops/blocks-common';
 import { createAction, Property } from '@openops/blocks-framework';
 import { logger } from '@openops/server-shared';
-import { sendTernaryRequest } from '../common';
 import { ternaryCloudAuth } from '../common/auth';
 import { getCaseTypesProperty } from '../common/case-types-property';
 import { getResourceTypesProperty } from '../common/resource-types-property';
+import { sendTernaryRequest } from '../common/send-ternary-request';
 import { getUsersIDsDropdownProperty } from '../common/users';
 
 export const createCaseAction = createAction({
