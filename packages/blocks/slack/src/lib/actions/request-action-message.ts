@@ -115,10 +115,7 @@ const sendMessageAskingForAction = async (
         {
           queryParams: {
             executionCorrelationId: context.run.pauseId,
-            actionClicked: JSON.stringify({
-              value: action.buttonText,
-              displayText: action.buttonText,
-            }),
+            actionClicked: action.buttonText,
           },
         },
         baseUrl,
