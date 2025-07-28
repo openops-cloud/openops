@@ -94,6 +94,7 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [AppSystemProp.SAMPLE_DATA_SIZE_LIMIT_KB]: '100',
   [AppSystemProp.REQUEST_BODY_LIMIT]: '10',
   [SharedSystemProp.LANGFUSE_HOST]: 'https://us.cloud.langfuse.com',
+  [AppSystemProp.ASSISTANT_UI_ENABLED]: 'false',
 };
 
 export const system = {
