@@ -75,15 +75,7 @@ export async function onReceivedInteraction(
     };
   }
 
-  let userSelection;
-  try {
-    userSelection = JSON.parse(resumePayload.actionClicked);
-  } catch {
-    userSelection = {
-      value: resumePayload.actionClicked,
-      displayText: resumePayload.actionClicked,
-    };
-  }
+  const userSelection = JSON.parse(resumePayload.actionClicked);
 
   const isResumeForActionOnThisMessage =
     actions.includes(resumePayload.actionType) ||
