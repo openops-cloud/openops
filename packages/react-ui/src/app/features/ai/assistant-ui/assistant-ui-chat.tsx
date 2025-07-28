@@ -9,12 +9,14 @@ type AssistantUiChatProps = {
   onClose: () => void;
   title?: string;
   children?: ReactNode;
+  handleInject?: (codeContent: string) => void;
 };
 
 const AssistantUiChat = ({
   onClose,
   children,
   title,
+  handleInject,
 }: AssistantUiChatProps) => {
   const {
     runtime,
@@ -66,6 +68,7 @@ const AssistantUiChat = ({
       isModelSelectorLoading={isModelSelectorLoading}
       selectedModel={selectedModel}
       theme={theme}
+      handleInject={handleInject}
     >
       {children}
     </AssistantUiChatContainer>

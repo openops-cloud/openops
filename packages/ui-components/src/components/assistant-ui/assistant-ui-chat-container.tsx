@@ -2,13 +2,15 @@ import {
   AssistantRuntime,
   AssistantRuntimeProvider,
 } from '@assistant-ui/react';
-import { t } from 'i18next';
+import { useMemo } from 'react';
+import { MarkdownCodeVariations } from '../custom';
 import { AssistantTopBar, AssistantTopBarProps } from './assistant-top-bar';
 import { Thread, ThreadProps } from './thread';
-import { ThreadWelcomeProvider } from './thread-welcome-context';
+import { ThreadExtraContextProvider } from './thread-extra-context';
 
 type AssistantUiChatContainerProps = {
   runtime: AssistantRuntime;
+  handleInject?: (codeContent: string) => void;
 } & AssistantTopBarProps &
   ThreadProps;
 
@@ -24,7 +26,14 @@ const AssistantUiChatContainer = ({
   isModelSelectorLoading,
   theme,
   children,
+  handleInject,
 }: AssistantUiChatContainerProps) => {
+  const codeVariation = useMemo(() => {
+    return handleInject
+      ? MarkdownCodeVariations.WithCopyAndInject
+      : MarkdownCodeVariations.WithCopy;
+  }, [handleInject]);
+
   return (
     <div className="h-full w-full flex flex-col bg-background rounded-sm overflow-hidden">
       <AssistantTopBar
@@ -36,7 +45,10 @@ const AssistantUiChatContainer = ({
         {children}
       </AssistantTopBar>
       <AssistantRuntimeProvider runtime={runtime}>
-        <ThreadWelcomeProvider greeting={t('How can I help you today?')}>
+        <ThreadExtraContextProvider
+          codeVariation={codeVariation}
+          handleInject={handleInject}
+        >
           <Thread
             availableModels={availableModels}
             onModelSelected={onModelSelected}
@@ -44,7 +56,7 @@ const AssistantUiChatContainer = ({
             isModelSelectorLoading={isModelSelectorLoading}
             theme={theme}
           />
-        </ThreadWelcomeProvider>
+        </ThreadExtraContextProvider>
       </AssistantRuntimeProvider>
     </div>
   );
