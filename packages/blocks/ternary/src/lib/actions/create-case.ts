@@ -15,7 +15,6 @@ export const createCaseAction = createAction({
   props: {
     resourceID: Property.ShortText({
       displayName: 'Resource ID',
-      description: '',
       required: true,
     }),
     caseName: Property.ShortText({
@@ -32,19 +31,15 @@ export const createCaseAction = createAction({
     resourceType: getResourceTypesProperty(),
     assigneeIDs: getUsersIDsDropdownProperty('Assignee IDs'),
     followerIDs: getUsersIDsDropdownProperty('Follower IDs'),
-    forecastContext: Property.Number({
-      displayName: 'Forecast context number',
-      description: '',
-      required: false,
-    }),
     linkToJira: Property.Checkbox({
       displayName: 'Link case to Jira',
-      description: '',
+      description:
+        'Indicates whether a Jira ticket should be created for this case',
       required: false,
     }),
   },
   run: async ({ auth, propsValue }) => {
-    const { assigneeIDs, followerIDs, forecastContext } = propsValue;
+    const { assigneeIDs, followerIDs } = propsValue;
 
     const body: Record<string, any> = {
       tenantID: auth.tenantId,
@@ -62,12 +57,6 @@ export const createCaseAction = createAction({
 
     if (followerIDs && followerIDs.length > 0) {
       body['followerIDs'] = followerIDs;
-    }
-
-    if (forecastContext) {
-      body['context'] = {
-        forecast: forecastContext,
-      };
     }
 
     try {
