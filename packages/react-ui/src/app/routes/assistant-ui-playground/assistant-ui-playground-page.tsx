@@ -1,4 +1,5 @@
 import AssistantUiChat from '@/app/features/ai/assistant-ui/assistant-ui-chat';
+import { noop } from 'lodash-es';
 import { useCallback } from 'react';
 
 const AssistantUiPlaygroundPage = () => {

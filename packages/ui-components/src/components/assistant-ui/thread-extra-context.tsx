@@ -22,7 +22,8 @@ export const ThreadExtraContextProvider: React.FC<
       codeVariation,
       handleInject,
     }),
-    [codeVariation, greeting, handleInject],
+    [codeVariation, defaultGreeting, greeting, handleInject],
+  );
 
   return (
     <ThreadExtraContext.Provider value={value}>
