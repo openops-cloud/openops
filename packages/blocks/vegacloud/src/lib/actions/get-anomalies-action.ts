@@ -73,7 +73,7 @@ export const getAnomaliesAction = createAction({
               },
             }),
             value: Property.ShortText({
-              displayName: 'Filter value',
+              displayName: 'Value',
               description: 'The value to filter the anomalies by',
               required: true,
             }),
