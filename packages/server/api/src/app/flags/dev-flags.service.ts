@@ -27,7 +27,7 @@ async function getAll(): Promise<Flag[]> {
     },
     {
       id: FlagId.ASSISTANT_UI_ENABLED,
-      value: system.get(AppSystemProp.ASSISTANT_UI_ENABLED),
+      value: system.getBoolean(AppSystemProp.ASSISTANT_UI_ENABLED),
       created,
       updated,
     },
