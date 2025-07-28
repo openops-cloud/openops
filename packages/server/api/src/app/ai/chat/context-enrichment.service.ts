@@ -29,6 +29,8 @@ type Options = {
   includeCurrentStepOutput: IncludeOptions;
 };
 
+const TRUNCATION_LENGTH = 30000;
+
 export async function enrichContext(
   additionalContext: ChatFlowContext,
   projectId: string,
@@ -258,11 +260,10 @@ async function resolveVariable(
     stepTestOutputs: flowData.stepTestOutputs,
   });
 
-  const truncationLength = 30000;
   return {
     name: variable.name,
     value: result.success
-      ? safeStringifyAndTruncate(result.censoredValue, truncationLength)
+      ? safeStringifyAndTruncate(result.censoredValue, TRUNCATION_LENGTH)
       : String(result.error),
   };
 }
