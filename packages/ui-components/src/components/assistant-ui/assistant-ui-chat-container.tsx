@@ -22,6 +22,7 @@ const AssistantUiChatContainer = ({
   selectedModel,
   onModelSelected,
   isModelSelectorLoading,
+  theme,
   children,
 }: AssistantUiChatContainerProps) => {
   return (
@@ -41,6 +42,7 @@ const AssistantUiChatContainer = ({
             onModelSelected={onModelSelected}
             selectedModel={selectedModel}
             isModelSelectorLoading={isModelSelectorLoading}
+            theme={theme}
           />
         </ThreadWelcomeProvider>
       </AssistantRuntimeProvider>

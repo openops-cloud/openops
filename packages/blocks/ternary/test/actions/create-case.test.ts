@@ -121,38 +121,6 @@ describe('createCaseAction', () => {
     });
   });
 
-  it('should include forecast context when provided', async () => {
-    const propsValue = {
-      resourceID: 'resource-123',
-      description: 'Test case description',
-      caseName: 'Test Case',
-      resourceType: 'AWS',
-      caseType: 'COST',
-      linkToJira: false,
-      forecastContext: 12345,
-    };
-
-    await createCaseAction.run(createContext(mockAuth, propsValue));
-
-    expect(sendTernaryRequest).toHaveBeenCalledWith({
-      auth: mockAuth,
-      method: HttpMethod.POST,
-      url: 'cases',
-      body: {
-        tenantID: mockAuth.tenantId,
-        resourceID: propsValue.resourceID,
-        description: propsValue.description,
-        name: propsValue.caseName,
-        resourceType: propsValue.resourceType,
-        type: propsValue.caseType,
-        linkToJira: propsValue.linkToJira,
-        context: {
-          forecast: 12345,
-        },
-      },
-    });
-  });
-
   it('should include all optional fields when provided', async () => {
     const propsValue = {
       resourceID: 'resource-123',
@@ -163,7 +131,6 @@ describe('createCaseAction', () => {
       linkToJira: true,
       assigneeIDs: ['user-1', 'user-2'],
       followerIDs: ['user-3', 'user-4'],
-      forecastContext: 12345,
     };
 
     await createCaseAction.run(createContext(mockAuth, propsValue));
@@ -182,9 +149,6 @@ describe('createCaseAction', () => {
         linkToJira: propsValue.linkToJira,
         assigneeIDs: propsValue.assigneeIDs,
         followerIDs: propsValue.followerIDs,
-        context: {
-          forecast: 12345,
-        },
       },
     });
   });

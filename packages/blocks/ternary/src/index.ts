@@ -22,8 +22,8 @@ export const ternary = createBlock({
     getCostAlertsAction,
     getUsageRecommendations,
     getDataIntegrations,
-    createCaseAction,
     getCasesAction,
+    createCaseAction,
     getUsers,
     createCustomApiCallAction({
       baseUrl: (auth: unknown) => (auth as { apiURL: string }).apiURL,

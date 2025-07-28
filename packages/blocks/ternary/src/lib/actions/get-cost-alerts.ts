@@ -25,8 +25,8 @@ export const getCostAlertsAction = createAction({
       },
     }),
     casesFilter: Property.StaticDropdown({
-      displayName: 'Case Status',
-      description: 'Whether to include alerts that have related cases.',
+      displayName: 'Case status',
+      description: 'Whether to include alerts that have related cases',
       required: true,
       options: {
         options: [

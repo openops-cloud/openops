@@ -16,6 +16,7 @@ import {
   ExecutionType,
   flowHelper,
   FlowRunResponse,
+  FlowRunStatus,
   GenericStepOutput,
   isNil,
   ResolveVariableOperation,
@@ -278,7 +279,12 @@ export async function execute(
     logger.warn('Engine operation failed.', error);
     return {
       status: EngineResponseStatus.ERROR,
-      response: utils.tryParseJson((error as Error).message),
+      response: {
+        status: FlowRunStatus.INTERNAL_ERROR,
+        error: {
+          message: utils.tryParseJson((error as Error).message),
+        },
+      },
     };
   }
 }

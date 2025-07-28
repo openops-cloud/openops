@@ -1,10 +1,10 @@
 import { HttpMethod } from '@openops/blocks-common';
 import { createAction, Property } from '@openops/blocks-framework';
 import { logger } from '@openops/server-shared';
+import { sendTernaryRequest } from '../common/send-ternary-request';
 import { ternaryCloudAuth } from '../common/auth';
 import { getCaseTypesProperty } from '../common/case-types-property';
 import { getResourceTypesProperty } from '../common/resource-types-property';
-import { sendTernaryRequest } from '../common/send-ternary-request';
 import { getUsersIDsDropdownProperty } from '../common/users';
 
 export const createCaseAction = createAction({
@@ -17,29 +17,29 @@ export const createCaseAction = createAction({
       displayName: 'Resource ID',
       required: true,
     }),
-    description: Property.LongText({
-      displayName: 'Case description',
-      required: true,
-    }),
     caseName: Property.ShortText({
-      displayName: 'Case name',
+      displayName: 'Name',
+      description: 'Case name',
       required: true,
     }),
-    resourceType: getResourceTypesProperty(),
-    caseType: getCaseTypesProperty(),
-    assigneeIDs: getUsersIDsDropdownProperty('Case assignee IDs'),
-    followerIDs: getUsersIDsDropdownProperty('Case follower IDs'),
-    forecastContext: Property.Number({
-      displayName: 'Forecast context number',
-      required: false,
+    description: Property.LongText({
+      displayName: 'Description',
+      description: 'Case description',
+      required: true,
     }),
+    caseType: getCaseTypesProperty(),
+    resourceType: getResourceTypesProperty(),
+    assigneeIDs: getUsersIDsDropdownProperty('Assignee IDs'),
+    followerIDs: getUsersIDsDropdownProperty('Follower IDs'),
     linkToJira: Property.Checkbox({
       displayName: 'Link case to Jira',
+      description:
+        'Indicates whether a Jira ticket should be created for this case',
       required: false,
     }),
   },
   run: async ({ auth, propsValue }) => {
-    const { assigneeIDs, followerIDs, forecastContext } = propsValue;
+    const { assigneeIDs, followerIDs } = propsValue;
 
     const body: Record<string, any> = {
       tenantID: auth.tenantId,
@@ -57,12 +57,6 @@ export const createCaseAction = createAction({
 
     if (followerIDs && followerIDs.length > 0) {
       body['followerIDs'] = followerIDs;
-    }
-
-    if (forecastContext) {
-      body['context'] = {
-        forecast: forecastContext,
-      };
     }
 
     try {

@@ -3,7 +3,8 @@ import caseTypes from '../api-filters/case-types.json';
 
 export function getCaseTypesProperty(): StaticDropdownProperty<string, true> {
   return Property.StaticDropdown({
-    displayName: 'Case type',
+    displayName: 'Type',
+    description: 'Case type',
     required: true,
     options: {
       options: caseTypes.map((value) => {

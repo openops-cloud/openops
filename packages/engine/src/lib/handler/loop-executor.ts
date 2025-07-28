@@ -3,6 +3,7 @@ import {
   Action,
   ActionType,
   FlowRunStatus,
+  isEmpty,
   isNil,
   isString,
   LoopOnItemsAction,
@@ -136,6 +137,10 @@ export const loopExecutor: BaseExecutor<LoopOnItemsAction> = {
 };
 
 function processItems(items: readonly unknown[]): readonly unknown[] {
+  if (isEmpty(items)) {
+    return [];
+  }
+
   if (isString(items)) {
     items = JSON.parse(items);
   }
