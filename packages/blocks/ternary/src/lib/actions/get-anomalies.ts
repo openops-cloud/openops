@@ -4,8 +4,8 @@ import { AlertStatus, getCostAlerts } from '../common/alerts-api';
 import { ternaryCloudAuth } from '../common/auth';
 import { CasesFilter, getCases } from '../common/cases-api';
 
-export const getCostAlertsAction = createAction({
-  name: 'get_cost_alerts',
+export const getAnomaliesAction = createAction({
+  name: 'get_anomalies',
   displayName: 'Get Anomalies',
   description: 'Get Anomalies',
   auth: ternaryCloudAuth,

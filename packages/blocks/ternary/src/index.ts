@@ -4,7 +4,7 @@ import { BlockCategory } from '@openops/shared';
 import { createCaseAction } from './lib/actions/create-case';
 import { getBudgets } from './lib/actions/get-budgets';
 import { getCasesAction } from './lib/actions/get-cases';
-import { getCostAlertsAction } from './lib/actions/get-cost-alerts';
+import { getAnomaliesAction } from './lib/actions/get-cost-alerts';
 import { getDataIntegrations } from './lib/actions/get-data-integrations';
 import { getUsers } from './lib/actions/get-users';
 import { getUsageRecommendations } from './lib/actions/usage-recommendations';
@@ -19,7 +19,7 @@ export const ternary = createBlock({
   authors: ['Quilyx'],
   actions: [
     getBudgets,
-    getCostAlertsAction,
+    getAnomaliesAction,
     getUsageRecommendations,
     getDataIntegrations,
     getCasesAction,
