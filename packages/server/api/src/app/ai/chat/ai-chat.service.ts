@@ -70,6 +70,9 @@ export async function generateChatName(
 ): Promise<string> {
   const { languageModel } = await getLLMConfig(projectId);
   const systemPrompt = await loadPrompt('chat-name.txt');
+  if (!systemPrompt.trim()) {
+    throw new Error('Failed to load prompt to generate the chat name.');
+  }
   const prompt: CoreMessage[] = [
     {
       role: 'system',

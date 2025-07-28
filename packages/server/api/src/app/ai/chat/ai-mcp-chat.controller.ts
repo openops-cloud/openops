@@ -278,7 +278,17 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         return await reply.code(200).send({ chatName });
       }
 
-      const rawChatName = await generateChatName(messages, projectId);
+      let rawChatName: string;
+      try {
+        rawChatName = await generateChatName(messages, projectId);
+      } catch (error) {
+        try {
+          rawChatName = await generateChatName(messages, projectId);
+        } catch (finalError) {
+          return await handleError(finalError, reply, 'generate chat name');
+        }
+      }
+
       const chatName = rawChatName.trim() || 'New Chat';
 
       return await reply.code(200).send({ chatName });
