@@ -3,6 +3,7 @@ import { useCallback } from 'react';
 
 const AssistantUiPlaygroundPage = () => {
   const handleInject = useCallback((codeContent: string) => {
+    // eslint-disable-next-line no-console
     console.log('inject codeContent: ', codeContent);
   }, []);
   return (
