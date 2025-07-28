@@ -1,7 +1,7 @@
 import { t } from 'i18next';
-import { Copy, Plus } from 'lucide-react';
-import { useCopyToClipboard } from '../../hooks/use-copy-to-clipboard';
+import { Plus } from 'lucide-react';
 import { Button } from '../../ui/button';
+import { TooltipCopyButton } from '../assistant-ui/tooltip-copy-button';
 
 export type CodeActionsProps = {
   content: string;
@@ -18,16 +18,10 @@ export const CodeActions = ({
   showInjectButton = true,
   className = 'flex gap-2 items-center justify-end mt-1',
 }: CodeActionsProps) => {
-  const { copyToClipboard } = useCopyToClipboard();
-
   const handleInject = () => {
     if (onInject) {
       onInject(content);
     }
-  };
-
-  const handleCopy = () => {
-    copyToClipboard(content);
   };
 
   return (
@@ -44,14 +38,12 @@ export const CodeActions = ({
         </Button>
       )}
 
-      <Button
+      <TooltipCopyButton
+        content={content}
+        tooltip={t('Copy')}
         size="sm"
-        variant="ghost"
-        className="rounded p-2 inline-flex items-center justify-center"
-        onClick={handleCopy}
-      >
-        <Copy className="w-4 h-4" />
-      </Button>
+        className="rounded inline-flex items-center justify-center"
+      />
     </div>
   );
 };

@@ -1,3 +1,4 @@
+name: openopsdev
 services:
   tables:
     container_name: tables

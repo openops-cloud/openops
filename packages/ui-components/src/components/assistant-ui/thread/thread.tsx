@@ -5,7 +5,6 @@ import {
   MessagePrimitive,
   ThreadPrimitive,
 } from '@assistant-ui/react';
-import { t } from 'i18next';
 import {
   ArrowDownIcon,
   CheckIcon,
@@ -17,38 +16,56 @@ import {
   RefreshCwIcon,
   SendHorizontalIcon,
 } from 'lucide-react';
-import React, { FC } from 'react';
+import React, { FC, memo, useMemo } from 'react';
 import { cn } from '../../../lib/cn';
 import { Button } from '../../../ui/button';
 import {
   AiModelSelector,
   AiModelSelectorProps,
 } from '../../ai-chat-container/ai-model-selector';
+
+import { t } from 'i18next';
+import { Theme } from '../../../lib/theme';
 import { MarkdownText } from '../markdown-text';
 import { useThreadWelcome } from '../thread-welcome-context';
 import { ToolFallback } from '../tool-fallback';
 import { TooltipIconButton } from '../tooltip-icon-button';
 
-export type ThreadProps = ComposerProps;
+const MarkdownTextWrapper = memo(({ theme, ...props }: any) => {
+  return <MarkdownText {...props} theme={theme} />;
+});
+MarkdownTextWrapper.displayName = 'MarkdownTextWrapper';
+
+const AssistantMessageWrapper = memo(({ theme }: { theme: Theme }) => {
+  return <AssistantMessage theme={theme} />;
+});
+AssistantMessageWrapper.displayName = 'AssistantMessageWrapper';
+
+export type ThreadProps = {
+  theme: Theme;
+} & ComposerProps;
 
 export const Thread = ({
+  theme,
   availableModels,
   selectedModel,
   onModelSelected,
   isModelSelectorLoading,
 }: ThreadProps) => {
+  const messageComponents = useMemo(
+    () => ({
+      UserMessage: UserMessage,
+      EditComposer: EditComposer,
+      AssistantMessage: () => <AssistantMessageWrapper theme={theme} />,
+    }),
+    [theme],
+  );
   return (
     <ThreadPrimitive.Root className="bg-background box-border flex h-full flex-col overflow-hidden">
       <ThreadPrimitive.Viewport className="flex h-full flex-col items-center overflow-y-auto scroll-smooth bg-inherit px-4 pt-8">
         <ThreadWelcome />
 
-        <ThreadPrimitive.Messages
-          components={{
-            UserMessage: UserMessage,
-            EditComposer: EditComposer,
-            AssistantMessage: AssistantMessage,
-          }}
-        />
+        <ThreadPrimitive.Messages components={messageComponents} />
 
         <ThreadPrimitive.If empty={false}>
           <div className="min-h-8 flex-grow" />
@@ -88,7 +105,7 @@ const ThreadWelcome: FC = () => {
   return (
     <ThreadPrimitive.Empty>
       <div className="flex w-full max-w-[var(--thread-max-width)] flex-grow flex-col">
-        <div className="flex w-full flex-grow flex-col items-center justify-center">
+        <div className="flex w-full h-full flex-grow flex-col items-center justify-center">
           <p className="mt-4 font-medium">{greeting}</p>
         </div>
       </div>
@@ -201,13 +218,19 @@ const EditComposer: FC = () => {
   );
 };
 
-const AssistantMessage: FC = () => {
+const AssistantMessage: FC<{ theme: Theme }> = ({ theme }) => {
+  const messageComponents = useMemo(
+    () => ({
+      Text: (props: any) => <MarkdownTextWrapper {...props} theme={theme} />,
+      tools: { Fallback: ToolFallback },
+    }),
+    [theme],
+  );
+
   return (
     <MessagePrimitive.Root className="grid grid-cols-[auto_auto_1fr] grid-rows-[auto_1fr] relative w-full max-w-[var(--thread-max-width)] py-4">
       <div className="text-foreground max-w-[calc(var(--thread-max-width)*0.8)] break-words leading-7 col-span-2 col-start-2 row-start-1 my-1.5">
-        <MessagePrimitive.Content
-          components={{ Text: MarkdownText, tools: { Fallback: ToolFallback } }}
-        />
+        <MessagePrimitive.Content components={messageComponents} />
       </div>
 
       <AssistantActionBar />
