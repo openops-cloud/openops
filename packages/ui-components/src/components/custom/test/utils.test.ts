@@ -5,12 +5,6 @@ describe('extractLanguageFromClassName', () => {
     expect(extractLanguageFromClassName(undefined)).toBeUndefined();
   });
 
-  it('should return undefined for non-string input', () => {
-    expect(extractLanguageFromClassName(123 as any)).toBeUndefined();
-    expect(extractLanguageFromClassName({} as any)).toBeUndefined();
-    expect(extractLanguageFromClassName([] as any)).toBeUndefined();
-  });
-
   it('should return undefined for strings without language prefix', () => {
     expect(extractLanguageFromClassName('')).toBeUndefined();
     expect(extractLanguageFromClassName('class-name')).toBeUndefined();

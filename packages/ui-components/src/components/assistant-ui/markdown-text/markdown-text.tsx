@@ -17,7 +17,6 @@ import { cn } from '../../../lib/cn';
 import { MarkdownCodeViewer } from '../../custom/markdown-code-viewer';
 import { TooltipCopyButton } from '../tooltip-copy-button';
 
-// Extracted Code component to prevent recreation on every render
 const CodeComponent = memo(
   ({
     className,

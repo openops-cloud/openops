@@ -1,7 +1,7 @@
 export function extractLanguageFromClassName(
   className?: string,
 ): string | undefined {
-  if (!className || typeof className !== 'string') {
+  if (!className) {
     return undefined;
   }
 
