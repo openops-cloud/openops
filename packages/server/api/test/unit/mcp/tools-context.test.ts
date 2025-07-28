@@ -226,7 +226,7 @@ describe('getMCPToolsContext', () => {
       },
     },
   ])(
-    'should handle analytics/tables/openops flags when tools are $expected.isAnalyticsLoaded/$expected.isTablesLoaded/$expected.isOpenOpsMCPEnabled',
+    'should set correct flags based on selected tools',
     async ({ selectedTools, expected }) => {
       startMCPToolsMock.mockResolvedValue({
         tool1: {
