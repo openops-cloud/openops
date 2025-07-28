@@ -152,7 +152,6 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
   };
 
   describe('POST / (new message endpoint)', () => {
-    const systemPrompt = 'system prompt';
     const mockChatContext = { chatId: 'test-chat-id' };
     const mockMessages = [{ role: 'user', content: 'previous message' }];
     const mockAiConfig = {
