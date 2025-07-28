@@ -16,11 +16,11 @@ export const cloudfix = createBlock({
   authors: [],
   categories: [BlockCategory.FINOPS],
   actions: [
-    getRecommendationsAction,
-    createChangeRequestsAction,
-    postponeRecommendationsAction,
-    getRecommendationsSummaryAction,
     getReportAction,
+    getRecommendationsAction,
+    getRecommendationsSummaryAction,
+    postponeRecommendationsAction,
+    createChangeRequestsAction,
     createCustomApiCallAction({
       baseUrl: (auth: any) => auth.apiUrl,
       auth: cloudfixAuth,
