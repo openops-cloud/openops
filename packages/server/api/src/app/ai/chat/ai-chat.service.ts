@@ -83,6 +83,7 @@ export async function generateChatName(
   const response = await generateText({
     model: languageModel,
     messages: prompt,
+    maxRetries: 2,
   });
   return response.text.trim();
 }
