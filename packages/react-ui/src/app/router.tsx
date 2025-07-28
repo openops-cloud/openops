@@ -341,26 +341,6 @@ const createRoutes = () => {
     });
   }
 
-  const isAiAssistantPlaygroundEnabled = flagsHooks.useFlag<boolean>(
-    FlagId.ASSISTANT_UI_ENABLED,
-  ).data;
-
-  if (isAiAssistantPlaygroundEnabled) {
-    const AssistantUiPlaygroundPage = lazy(
-      () => import('@/app/routes/assistant-ui-playground'),
-    );
-
-    routes.push({
-      path: '/assistant-ui',
-      element: (
-        <Suspense>
-          <AssistantUiPlaygroundPage />
-        </Suspense>
-      ),
-      errorElement: <RouteErrorBoundary />,
-    });
-  }
-
   if (!isDemoHomePage) {
     routes.push({
       path: '/',
