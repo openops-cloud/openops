@@ -116,6 +116,8 @@ export async function getRows(getRowsParams: GetRowsParams) {
       logger.error('Error while getting rows:', {
         error,
         url,
+        filters: getRowsParams.filters,
+        filterType: getRowsParams.filterType,
       });
     },
   );
@@ -137,7 +139,7 @@ export async function updateRow(updateRowParams: UpdateRowParams) {
       logger.error('Error while updating row:', {
         error,
         url,
-        ...updateRowParams,
+        fields: updateRowParams.fields,
       });
     },
   );
@@ -159,7 +161,7 @@ export async function upsertRow(upsertRowParams: UpsertRowParams) {
       logger.error('Error while upserting row:', {
         error,
         url,
-        ...upsertRowParams,
+        fields: upsertRowParams.fields,
       });
     },
   );
@@ -181,6 +183,7 @@ export async function addRow(addRowParams: AddRowParams) {
       logger.error('Error while adding row:', {
         error,
         url,
+        fields: addRowParams.fields,
       });
     },
   );
@@ -198,7 +201,6 @@ export async function deleteRow(deleteRowParams: DeleteRowParams) {
       logger.error('Error while deleting row:', {
         error,
         url,
-        ...deleteRowParams,
       });
     },
   );
