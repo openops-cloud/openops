@@ -90,7 +90,7 @@ export const getBlockSystemPrompt = async (
   }
 };
 
-async function loadPrompt(filename: string): Promise<string> {
+export async function loadPrompt(filename: string): Promise<string> {
   const promptsLocation = system.get<string>(AppSystemProp.AI_PROMPTS_LOCATION);
 
   if (promptsLocation) {
