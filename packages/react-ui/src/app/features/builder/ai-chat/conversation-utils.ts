@@ -9,72 +9,8 @@ import { CodeSchema, OpenChatResponse } from '@openops/shared';
 export type ServerMessage = NonNullable<OpenChatResponse['messages']>[number];
 export type MessageType = ServerMessage | UIMessage;
 
-const findInAnnotations = <T>(
-  message: UIMessage,
-  predicate: (annotation: unknown) => annotation is T,
-): T | undefined => {
-  return message.annotations?.find(predicate) as T;
-};
-
-const checkStringContent = (
-  content: string,
-  predicate: (obj: unknown) => boolean,
-): boolean => {
-  const parsed = tryParseJson(content);
-  return predicate(parsed);
-};
-
-const checkArrayContent = (
-  content: any[],
-  predicate: (obj: unknown) => boolean,
-): boolean => {
-  return content.some((item) => {
-    if (isTextItem(item)) {
-      return checkStringContent(item.text, predicate);
-    }
-    return false;
-  });
-};
-
-export const isCodeMessage = (message: MessageType): message is UIMessage => {
-  if (hasAnnotations(message)) {
-    return message.annotations?.some(isCodeSchema) ?? false;
-  }
-
-  if (typeof message.content === 'string') {
-    return checkStringContent(message.content, isCodeSchema);
-  }
-
-  if (Array.isArray(message.content)) {
-    return checkArrayContent(message.content, isCodeSchema);
-  }
-
-  return false;
-};
-
-export const extractCodeFromContent = (
-  message: MessageType,
-): CodeSchema | null => {
-  if (hasAnnotations(message)) {
-    const annotationCode = findInAnnotations(message, isCodeSchema);
-    if (annotationCode) return annotationCode;
-  }
-
-  if (Array.isArray(message.content)) {
-    for (const item of message.content) {
-      if (isTextItem(item)) {
-        const codeSchema = parseAndCheckSchema(item.text, isCodeSchema);
-        if (codeSchema) return codeSchema;
-      }
-    }
-  }
-
-  return null;
-};
-
-export const getMessageId = (message: MessageType, idx: number): string => {
-  return message && 'id' in message ? message.id : String(idx);
-};
+type TextItem = { type: 'text'; text: string };
+type ContentType = string | TextItem[] | unknown;
 
 export const createCodeMessage = (
   message: MessageType,
@@ -106,26 +42,6 @@ export const createCodeMessage = (
   };
 };
 
-const extractTextFromContent = (content: any): string => {
-  if (Array.isArray(content) && content.length > 0) {
-    const firstItem = content[0];
-    if (isTextItem(firstItem)) {
-      const replyMessage = parseAndCheckSchema(firstItem.text, isReplyMessage);
-      if (replyMessage) return replyMessage.textAnswer;
-    }
-  } else if (typeof content === 'string') {
-    const replyMessage = parseAndCheckSchema(content, isReplyMessage);
-    if (replyMessage) return replyMessage.textAnswer;
-  }
-  return content;
-};
-
-const formatArrayContent = (content: any[]): string => {
-  return content
-    .map((c) => (typeof c === 'object' && 'text' in c ? c.text : c))
-    .join();
-};
-
 export const createMessage = (
   message: MessageType,
   idx: number,
@@ -150,8 +66,84 @@ const hasAnnotations = (message: MessageType): message is UIMessage => {
   );
 };
 
-const isTextItem = (item: any): item is { type: 'text'; text: string } => {
-  return item.type === 'text' && typeof item.text === 'string';
+export const isCodeMessage = (message: MessageType): message is UIMessage => {
+  if (hasAnnotations(message)) {
+    return message.annotations?.some(isCodeSchema) ?? false;
+  }
+
+  if (typeof message.content === 'string') {
+    return checkStringContent(message.content, isCodeSchema);
+  }
+
+  if (Array.isArray(message.content)) {
+    return checkArrayContent(message.content, isCodeSchema);
+  }
+
+  return false;
+};
+
+export const extractCodeFromContent = (
+  message: MessageType,
+): CodeSchema | null => {
+  if (hasAnnotations(message)) {
+    const annotationCode = findInAnnotations(message, isCodeSchema);
+    if (annotationCode) return annotationCode;
+  }
+
+  if (typeof message.content === 'string') {
+    const codeSchema = parseAndCheckSchema(message.content, isCodeSchema);
+    if (codeSchema) return codeSchema;
+  }
+
+  if (Array.isArray(message.content)) {
+    for (const item of message.content) {
+      if (isTextItem(item)) {
+        const codeSchema = parseAndCheckSchema(item.text, isCodeSchema);
+        if (codeSchema) return codeSchema;
+      }
+    }
+  }
+
+  return null;
+};
+
+export const getMessageId = (message: MessageType, idx: number): string => {
+  return message && 'id' in message ? message.id : String(idx);
+};
+
+const extractTextFromContent = (content: ContentType): string => {
+  if (Array.isArray(content) && content.length > 0) {
+    const firstItem = content[0];
+    if (isTextItem(firstItem)) {
+      const replyMessage = parseAndCheckSchema(firstItem.text, isReplyMessage);
+      if (replyMessage) return replyMessage.textAnswer;
+    }
+  } else if (typeof content === 'string') {
+    const replyMessage = parseAndCheckSchema(content, isReplyMessage);
+    if (replyMessage) return replyMessage.textAnswer;
+  }
+  return content as string;
+};
+
+const formatArrayContent = (content: unknown[]): string => {
+  return content
+    .map((c) =>
+      typeof c === 'object' && c !== null && 'text' in c
+        ? (c as { text: string }).text
+        : c,
+    )
+    .join();
+};
+
+const isTextItem = (item: unknown): item is { type: 'text'; text: string } => {
+  return (
+    typeof item === 'object' &&
+    item !== null &&
+    'type' in item &&
+    item.type === 'text' &&
+    'text' in item &&
+    typeof (item as { text: unknown }).text === 'string'
+  );
 };
 
 const parseAndCheckSchema = <T>(
@@ -175,6 +167,33 @@ const isReplyMessage = (
     'type' in obj &&
     obj.type === 'reply' &&
     'textAnswer' in obj &&
-    typeof obj.textAnswer === 'string'
+    typeof (obj as { textAnswer: unknown }).textAnswer === 'string'
   );
+};
+
+const findInAnnotations = <T>(
+  message: UIMessage,
+  predicate: (annotation: unknown) => annotation is T,
+): T | undefined => {
+  return message.annotations?.find(predicate) as T;
+};
+
+const checkStringContent = (
+  content: string,
+  predicate: (obj: unknown) => boolean,
+): boolean => {
+  const parsed = tryParseJson(content);
+  return predicate(parsed);
+};
+
+const checkArrayContent = (
+  content: TextItem[],
+  predicate: (obj: unknown) => boolean,
+): boolean => {
+  return content.some((item) => {
+    if (isTextItem(item)) {
+      return checkStringContent(item.text, predicate);
+    }
+    return false;
+  });
 };
