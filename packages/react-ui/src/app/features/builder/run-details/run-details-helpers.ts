@@ -11,7 +11,7 @@ export function getRunMessage(
     run.status === FlowRunStatus.SCHEDULED
   )
     return null;
-  if (run.status === FlowRunStatus.INTERNAL_ERROR) {
+  if (run.status === FlowRunStatus.INTERNAL_ERROR && isNil(run.logsFileId)) {
     return t('There are no logs captured for this run.');
   }
   if (isNil(run.logsFileId)) {
