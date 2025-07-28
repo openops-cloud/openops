@@ -1,6 +1,6 @@
 import { HttpError, HttpMethod } from '@openops/blocks-common';
 import { BlockAuth, Property, Validators } from '@openops/blocks-framework';
-import { sendTernaryRequest } from './index';
+import { sendTernaryRequest } from './send-ternary-request';
 
 export const ternaryCloudAuth = BlockAuth.CustomAuth({
   authProviderKey: 'Ternary',

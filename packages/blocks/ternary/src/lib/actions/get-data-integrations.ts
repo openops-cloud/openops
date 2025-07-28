@@ -1,13 +1,13 @@
 import { HttpMethod } from '@openops/blocks-common';
 import { createAction } from '@openops/blocks-framework';
 import { logger } from '@openops/server-shared';
-import { sendTernaryRequest } from '../common';
 import { ternaryCloudAuth } from '../common/auth';
+import { sendTernaryRequest } from '../common/send-ternary-request';
 
 export const getDataIntegrations = createAction({
   name: 'get_data_integrations',
-  displayName: 'Get data integrations',
-  description: 'Fetch data integrations from Ternary.',
+  displayName: 'Get Data Integrations',
+  description: 'Get Data Integrations',
   auth: ternaryCloudAuth,
   props: {},
   run: async ({ auth }) => {
