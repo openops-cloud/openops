@@ -107,7 +107,7 @@ function extractErrorMessage(error: unknown): string {
   if (error.message.startsWith('Command failed: npx tsc ')) {
     return error.message
       .replace(/^(?:.|\n)+?stdout:/g, 'Compilation failed.\n')
-      .replace(/.+?\/send-ternary-request.ts.*?:/g, '\n');
+      .replace(/.+?\/index.ts.*?:/g, '\n');
   }
 
   return error.message;
