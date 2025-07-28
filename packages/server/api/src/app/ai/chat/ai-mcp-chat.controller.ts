@@ -53,6 +53,8 @@ import { getBlockSystemPrompt, getMcpSystemPrompt } from './prompts.service';
 import { selectRelevantTools } from './tools.service';
 
 const MAX_RECURSION_DEPTH = 10;
+const DEFAULT_CHAT_NAME = 'New Chat';
+
 export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
   app.post(
     '/open',
@@ -274,18 +276,11 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       const messages = contextForChatName.messages;
 
       if (messages.length === 0) {
-        const chatName = 'New Chat';
-        return await reply.code(200).send({ chatName });
+        return await reply.code(200).send({ chatName: DEFAULT_CHAT_NAME });
       }
 
-      let rawChatName: string;
-      try {
-        rawChatName = await generateChatName(messages, projectId);
-      } catch (error) {
-        return await handleError(error, reply, 'generate chat name');
-      }
-
-      const chatName = rawChatName.trim() || 'New Chat';
+      const rawChatName = await generateChatName(messages, projectId);
+      const chatName = rawChatName.trim() || DEFAULT_CHAT_NAME;
 
       return await reply.code(200).send({ chatName });
     } catch (error) {
