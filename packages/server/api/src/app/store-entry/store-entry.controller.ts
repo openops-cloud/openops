@@ -1,4 +1,7 @@
-import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
+import {
+  FastifyPluginAsyncTypebox,
+  Type,
+} from '@fastify/type-provider-typebox';
 import {
   DeleteStoreEntryRequest,
   GetStoreEntryRequest,
@@ -49,6 +52,15 @@ export const storeEntryController: FastifyPluginAsyncTypebox = async (
       });
     }
   });
+
+  fastify.get('/list', ListRequest, async (request, reply) => {
+    const entries = await storeEntryService.list({
+      projectId: request.principal.projectId,
+      prefix: request.query.prefix || '',
+    });
+
+    return { entries };
+  });
 };
 
 const CreateRequest = {
@@ -72,5 +84,15 @@ const DeleteStoreRequest = {
     querystring: DeleteStoreEntryRequest,
     description:
       "Delete a key-value store entry. This endpoint removes a specific key-value pair from the project's store. Note that this operation is restricted to engine principals only.",
+  },
+};
+
+const ListRequest = {
+  schema: {
+    querystring: Type.Object({
+      prefix: Type.Optional(Type.String()),
+    }),
+    description:
+      'List all keys in the store with an optional prefix filter. This endpoint returns all keys that start with the specified prefix.',
   },
 };

@@ -5,6 +5,7 @@ import {
   sanitizeObjectForPostgresql,
   StoreEntry,
 } from '@openops/shared';
+import { Like } from 'typeorm';
 import { repoFactory } from '../core/db/repo-factory';
 import { StoreEntryEntity } from './store-entry-entity';
 
@@ -61,5 +62,26 @@ export const storeEntryService = {
       projectId,
       key,
     });
+  },
+
+  async list({
+    projectId,
+    prefix,
+  }: {
+    projectId: ProjectId;
+    prefix: string;
+  }): Promise<Array<{ key: string; value: unknown }>> {
+    const whereCondition = prefix
+      ? { projectId, key: Like(`${prefix}%`) }
+      : { projectId };
+
+    const entries = await storeEntryRepo().find({
+      where: whereCondition,
+    });
+
+    return entries.map((entry) => ({
+      key: prefix ? entry.key.replace(prefix, '') : entry.key,
+      value: entry.value,
+    }));
   },
 };

@@ -16,11 +16,9 @@ export function getScopeAndKey(params: Params): {
     case BlockStoreScope.FLOW:
       return { scope: StoreScope.FLOW, key: params.key };
     case BlockStoreScope.RUN: {
-      const runId = params.isTest ? 'test-run' : params.runId;
-
       return {
-        scope: StoreScope.FLOW,
-        key: `run_${runId}/${params.key}`,
+        scope: StoreScope.FLOW_RUN,
+        key: params.key,
       };
     }
   }

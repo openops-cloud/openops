@@ -107,6 +107,32 @@ export const createStorageService = ({
         });
       }
     },
+
+    async list(
+      prefix: string,
+    ): Promise<Array<{ key: string; value: unknown }>> {
+      const url = buildListUrl(apiUrl, prefix);
+
+      try {
+        const response = await fetch(url, {
+          headers: {
+            Authorization: `Bearer ${engineToken}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to list keys: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        return result.entries || [];
+      } catch (e) {
+        return handleFetchError({
+          url,
+          cause: e,
+        });
+      }
+    },
   };
 };
 
@@ -149,6 +175,20 @@ export function createContextStore({
       }
       return storeEntry.value as T;
     },
+    async list(
+      scope = StoreScope.FLOW,
+    ): Promise<Array<{ key: string; value: unknown }>> {
+      const scopePrefix = createKey(prefix, scope, flowId, flowRunId, '');
+      const keyValuePairs = await createStorageService({
+        apiUrl,
+        engineToken,
+      }).list(scopePrefix);
+
+      return keyValuePairs.map((entry) => ({
+        key: scopePrefix ? entry.key.replace(scopePrefix, '') : entry.key,
+        value: entry.value,
+      }));
+    },
   };
 }
 
@@ -165,7 +205,7 @@ function createKey(
     case StoreScope.FLOW:
       return prefix + 'flow_' + flowId + '/' + key;
     case StoreScope.FLOW_RUN:
-      return prefix + 'flow_run_' + flowRunId + '/' + key;
+      return prefix + 'run_' + flowRunId + '/' + key;
   }
 }
 
@@ -176,6 +216,12 @@ const buildUrl = (apiUrl: string, key?: string): URL => {
     url.searchParams.set('key', key);
   }
 
+  return url;
+};
+
+const buildListUrl = (apiUrl: string, prefix: string): URL => {
+  const url = new URL(`${apiUrl}v1/store-entries/list`);
+  url.searchParams.set('prefix', prefix);
   return url;
 };
 
@@ -209,6 +255,7 @@ type StorageService = {
   get(key: string): Promise<StoreEntry | null>;
   put(request: PutStoreEntryRequest): Promise<StoreEntry | null>;
   delete(request: DeleteStoreEntryRequest): Promise<null>;
+  list(prefix: string): Promise<Array<{ key: string; value: unknown }>>;
 };
 
 type HandleResponseErrorParams = {
