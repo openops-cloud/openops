@@ -33,3 +33,12 @@
 input[type='search']::-webkit-search-cancel-button {
   cursor: pointer;
 }
+
+/* monaco editor scrollbar */
+.monaco-editor * .slider {
+  border-radius: 12px;
+  width: 8px !important;
+  height: 60px !important;
+  background-color: #e2e8f0 !important;
+  opacity: 0.9 !important;
+}

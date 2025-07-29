@@ -1,35 +1,10 @@
 import Editor from '@monaco-editor/react';
 import { SourceCode } from '@openops/shared';
 import { t } from 'i18next';
-import React, {
-  RefObject,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { editor } from 'monaco-editor';
+import React, { RefObject, useEffect, useRef, useState } from 'react';
 import { cn } from '../../lib/cn';
 import { convertToString, isSourceCodeObject } from './code-utils';
-
-const calculateLineHeight = (editor: any, monaco: any): number => {
-  try {
-    const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
-    if (lineHeight && lineHeight > 0) {
-      return lineHeight;
-    }
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error(error);
-  }
-
-  try {
-    const fontSize =
-      editor.getOption(monaco.editor.EditorOption.fontSize) || 14;
-    return Math.round(fontSize * 1.4);
-  } catch (error) {
-    return 20;
-  }
-};
 
 export type MonacoLanguage =
   | 'javascript'
@@ -72,9 +47,6 @@ type CodeEditorProps = {
   placeholder?: string;
   height?: string;
   showLineNumbers?: boolean;
-  minHeight?: number;
-  maxHeight?: number;
-  autoHeight?: boolean;
   language?: MonacoLanguage;
   showTabs?: boolean;
 };
@@ -89,20 +61,15 @@ const CodeEditor = React.memo(
     containerClassName,
     theme,
     placeholder,
-    height = '200px',
+    height = '100%',
     showLineNumbers = true,
-    minHeight = 100,
-    maxHeight = 500,
-    autoHeight = true,
     language = 'json',
     showTabs = false,
   }: CodeEditorProps) => {
     const editorTheme = theme === 'dark' ? 'vs-dark' : 'light';
     const ref = useRef<any>(null);
     const containerRef = useRef<HTMLDivElement>(null);
-    const [calculatedHeight, setCalculatedHeight] = useState<string>(height);
     const [isEditorReady, setIsEditorReady] = useState(false);
-    const [monacoInstance, setMonacoInstance] = useState<any>(null);
     const [showPlaceholder, setShowPlaceholder] = useState(false);
     const [hasTextFocus, setHasTextFocus] = useState(false);
 
@@ -148,36 +115,6 @@ const CodeEditor = React.memo(
       setCurrentLanguage(tab === 'packageJson' ? 'json' : 'typescript');
     };
 
-    const calculateContentHeight = useCallback(() => {
-      if (!autoHeight || !isEditorReady || !ref.current || !monacoInstance)
-        return;
-
-      const editor = ref.current;
-      const model = editor.getModel();
-
-      if (model) {
-        const lineCount = model.getLineCount();
-        const lineHeight = calculateLineHeight(editor, monacoInstance);
-        const contentHeight = lineCount * lineHeight;
-
-        const padding = 20;
-        const finalHeight = Math.max(
-          minHeight,
-          Math.min(maxHeight, contentHeight + padding),
-        );
-
-        setCalculatedHeight(`${finalHeight}px`);
-
-        setTimeout(() => {
-          editor.layout();
-        }, 0);
-      }
-    }, [autoHeight, isEditorReady, minHeight, maxHeight, monacoInstance]);
-
-    useEffect(() => {
-      calculateContentHeight();
-    }, [calculateContentHeight]);
-
     useEffect(() => {
       if (!containerRef.current || !isEditorReady) return;
 
@@ -194,9 +131,8 @@ const CodeEditor = React.memo(
       };
     }, [isEditorReady]);
 
-    const handleEditorDidMount = (editor: any, monaco: any) => {
+    const handleEditorDidMount = (editor: editor.IStandaloneCodeEditor) => {
       ref.current = editor;
-      setMonacoInstance(monaco);
       setIsEditorReady(true);
 
       editor.onDidFocusEditorText(() => {
@@ -207,29 +143,6 @@ const CodeEditor = React.memo(
       editor.onDidBlurEditorWidget(() => {
         setHasTextFocus(false);
       });
-
-      if (autoHeight) {
-        editor.onDidChangeModelContent(() => {
-          const model = editor.getModel();
-          if (model) {
-            const lineCount = model.getLineCount();
-            const lineHeight = calculateLineHeight(editor, monaco);
-            const contentHeight = lineCount * lineHeight;
-            const padding = 20;
-            const finalHeight = Math.max(
-              minHeight,
-              Math.min(maxHeight, contentHeight + padding),
-            );
-
-            setCalculatedHeight(`${finalHeight}px`);
-
-            // Trigger layout after height change
-            setTimeout(() => {
-              editor.layout();
-            }, 0);
-          }
-        });
-      }
     };
 
     const handleChange = (value: string | undefined) => {
@@ -237,7 +150,6 @@ const CodeEditor = React.memo(
 
       const stringValue = value || '';
 
-      // If input was a string, emit a string
       if (isStringValue) {
         onChange(stringValue);
         return;
@@ -263,8 +175,6 @@ const CodeEditor = React.memo(
         }, 0);
       }
     };
-
-    const effectiveHeight = autoHeight ? calculatedHeight : height;
 
     return (
       <div
@@ -303,7 +213,7 @@ const CodeEditor = React.memo(
             </button>
           </div>
         )}
-        <div className={cn('border-t relative', className)}>
+        <div className={cn('border-t relative h-full', className)}>
           {showPlaceholder && (
             <div
               className={cn(
@@ -315,12 +225,12 @@ const CodeEditor = React.memo(
               {placeholder}
             </div>
           )}
-          <div className={cn({ 'opacity-0': showPlaceholder })}>
+          <div className={cn('h-full', { 'opacity-0': showPlaceholder })}>
             <Editor
               value={formatValue(currentValue)}
               language={currentLanguage}
               theme={editorTheme}
-              height={effectiveHeight}
+              height={height}
               width="100%"
               onChange={handleChange}
               onMount={handleEditorDidMount}
@@ -352,6 +262,8 @@ const CodeEditor = React.memo(
                   autoFindInSelection: 'never',
                   seedSearchStringFromSelection: 'never',
                 },
+                // todo disable command pallette
+                commandPalette: false,
               }}
             />
           </div>
