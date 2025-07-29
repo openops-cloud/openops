@@ -11,7 +11,7 @@ import {
   FormMessage,
 } from '../../ui/form';
 import { ScrollArea } from '../../ui/scroll-area';
-import { CodeMirrorEditor } from '../json-editor';
+import { CodeEditor } from '../code-editor';
 
 type JsonFormValues = {
   jsonContent: string;
@@ -48,7 +48,7 @@ export const JsonContent = ({
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <CodeMirrorEditor
+                    <CodeEditor
                       value={field.value}
                       placeholder={t('Paste sample data here')}
                       readonly={false}
@@ -90,7 +90,7 @@ export const JsonContent = ({
           )}
           {(typeof json === 'object' ||
             (typeof json === 'string' && !isEmptyString)) && (
-            <CodeMirrorEditor
+            <CodeEditor
               value={json}
               readonly={true}
               theme={theme}

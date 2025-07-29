@@ -1,29 +1,24 @@
-import { javascript } from '@codemirror/lang-javascript';
-import { json } from '@codemirror/lang-json';
-import { StreamLanguage } from '@codemirror/language';
-import { shell } from '@codemirror/legacy-modes/mode/shell';
 import { SourceCode } from '@openops/shared';
-import { Extension } from '@uiw/react-codemirror';
+import { MonacoLanguage } from './code-editor';
 
-const shellLang = StreamLanguage.define(shell);
+export const getLanguageExtensionForCode = (
+  className?: string,
+): MonacoLanguage | undefined => {
+  if (!className) return 'json';
 
-export const getLanguageExtensionForCode = (language?: string): Extension[] => {
-  if (!language) return [];
-
-  if (language.includes('json')) return [json()];
-  if (language.includes('javascript') || language.includes('js'))
-    return [javascript()];
-  if (language.includes('typescript') || language.includes('ts'))
-    return [javascript({ typescript: true })];
-
+  if (className.includes('language-json')) return 'json';
   if (
-    language.includes('bash') ||
-    language.includes('sh') ||
-    language.includes('shell')
+    className.includes('language-javascript') ||
+    className.includes('language-js')
   )
-    return [shellLang];
-
-  return [];
+    return 'javascript';
+  if (
+    className.includes('language-typescript') ||
+    className.includes('language-ts')
+  )
+    return 'typescript';
+  if (className.includes('language-jsx')) return 'javascript';
+  if (className.includes('language-tsx')) return 'typescript';
 };
 
 export const convertToString = (value: unknown): string => {

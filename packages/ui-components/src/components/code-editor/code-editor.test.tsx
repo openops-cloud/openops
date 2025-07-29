@@ -1,8 +1,14 @@
-import { render } from '@testing-library/react';
+import { SourceCode } from '@openops/shared';
+import '@testing-library/jest-dom';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import { CodeMirrorEditor } from './code-mirror-editor';
+import { CodeEditor } from './code-editor';
 
-describe('CodeMirrorEditor', () => {
+jest.mock('i18next', () => ({
+  t: (key: string) => key,
+}));
+
+describe('CodeEditor', () => {
   describe('Basic Rendering', () => {
     it.each([
       ['JSON object', { name: 'test', value: 123 }],
@@ -19,9 +25,9 @@ describe('CodeMirrorEditor', () => {
       ['empty string', ''],
       ['empty object', {}],
       ['empty array', []],
-    ])('renders with %s value', (description, testValue) => {
+    ])('renders with %s value', (_, testValue) => {
       expect(() =>
-        render(<CodeMirrorEditor value={testValue} />),
+        render(<CodeEditor value={testValue} theme="light" />),
       ).not.toThrow();
     });
 
@@ -41,7 +47,7 @@ describe('CodeMirrorEditor', () => {
         metadata: null,
       };
       expect(() =>
-        render(<CodeMirrorEditor value={testValue} />),
+        render(<CodeEditor value={testValue} theme="light" />),
       ).not.toThrow();
     });
   });
@@ -54,7 +60,9 @@ describe('CodeMirrorEditor', () => {
     ])('renders in %s mode', (description, readonly) => {
       const testValue = { name: 'test' };
       expect(() =>
-        render(<CodeMirrorEditor value={testValue} readonly={readonly} />),
+        render(
+          <CodeEditor value={testValue} theme="light" readonly={readonly} />,
+        ),
       ).not.toThrow();
     });
   });
@@ -71,7 +79,12 @@ describe('CodeMirrorEditor', () => {
       const testValue = { name: 'test' };
       expect(() =>
         render(
-          <CodeMirrorEditor value={testValue} readonly={false} {...handlers} />,
+          <CodeEditor
+            value={testValue}
+            theme="light"
+            readonly={false}
+            {...handlers}
+          />,
         ),
       ).not.toThrow();
     });
@@ -90,7 +103,7 @@ describe('CodeMirrorEditor', () => {
     ])('renders with %s', (description, props) => {
       const testValue = { name: 'test' };
       expect(() =>
-        render(<CodeMirrorEditor value={testValue} {...props} />),
+        render(<CodeEditor value={testValue} theme="light" {...props} />),
       ).not.toThrow();
     });
   });
@@ -103,7 +116,86 @@ describe('CodeMirrorEditor', () => {
       ],
       ['without placeholder', { value: { name: 'test' } }],
     ])('renders %s', (description, props) => {
-      expect(() => render(<CodeMirrorEditor {...props} />)).not.toThrow();
+      expect(() =>
+        render(<CodeEditor {...props} theme="light" />),
+      ).not.toThrow();
+    });
+  });
+
+  describe('ShowTabs Functionality', () => {
+    const sourceCodeValue: SourceCode = {
+      code: 'export const greeting = "Hello World!";\nconsole.log(greeting);',
+      packageJson:
+        '{\n  "name": "example",\n  "version": "1.0.0",\n  "dependencies": {\n    "lodash": "^4.17.21"\n  }\n}',
+    };
+
+    it('shows tabs when showTabs is true and value is SourceCode', () => {
+      render(
+        <CodeEditor value={sourceCodeValue} theme="light" showTabs={true} />,
+      );
+
+      expect(screen.getByText('Code')).toBeInTheDocument();
+      expect(screen.getByText('Dependencies')).toBeInTheDocument();
+    });
+
+    it('does not show tabs when showTabs is false', () => {
+      render(
+        <CodeEditor value={sourceCodeValue} theme="light" showTabs={false} />,
+      );
+
+      expect(screen.queryByText('Code')).not.toBeInTheDocument();
+      expect(screen.queryByText('Dependencies')).not.toBeInTheDocument();
+    });
+
+    it('does not show tabs when value is not SourceCode object', () => {
+      render(
+        <CodeEditor value="simple string" theme="light" showTabs={true} />,
+      );
+
+      expect(screen.queryByText('Code')).not.toBeInTheDocument();
+      expect(screen.queryByText('Dependencies')).not.toBeInTheDocument();
+    });
+
+    it('switches between tabs when clicked', () => {
+      const onChange = jest.fn();
+      render(
+        <CodeEditor
+          value={sourceCodeValue}
+          theme="light"
+          showTabs={true}
+          onChange={onChange}
+        />,
+      );
+
+      const dependenciesTab = screen.getByText('Dependencies');
+      fireEvent.click(dependenciesTab);
+
+      // The tab should be visually selected (font-bold class)
+      expect(dependenciesTab).toHaveClass('font-bold');
+    });
+
+    it('handles SourceCode object changes correctly', () => {
+      const onChange = jest.fn();
+      render(
+        <CodeEditor
+          value={sourceCodeValue}
+          theme="light"
+          showTabs={true}
+          onChange={onChange}
+        />,
+      );
+
+      // The component should render without errors
+      expect(() =>
+        render(
+          <CodeEditor
+            value={sourceCodeValue}
+            theme="light"
+            showTabs={true}
+            onChange={onChange}
+          />,
+        ),
+      ).not.toThrow();
     });
   });
 
@@ -112,9 +204,8 @@ describe('CodeMirrorEditor', () => {
       const circularObj: any = { name: 'test' };
       circularObj.self = circularObj;
 
-      // The component should handle circular references"
       expect(() =>
-        render(<CodeMirrorEditor value={circularObj} />),
+        render(<CodeEditor value={circularObj} theme="light" />),
       ).not.toThrow();
     });
 
@@ -128,7 +219,7 @@ describe('CodeMirrorEditor', () => {
       };
 
       expect(() =>
-        render(<CodeMirrorEditor value={problematicValue} />),
+        render(<CodeEditor value={problematicValue} theme="light" />),
       ).not.toThrow();
     });
 
@@ -147,7 +238,7 @@ describe('CodeMirrorEditor', () => {
       }
 
       expect(() =>
-        render(<CodeMirrorEditor value={hugeObject} />),
+        render(<CodeEditor value={hugeObject} theme="light" />),
       ).not.toThrow();
     });
 
@@ -163,35 +254,36 @@ describe('CodeMirrorEditor', () => {
       ['multiple instances', [{ component: 1 }, { component: 2 }]],
     ])('handles %s', (description, testData) => {
       if (Array.isArray(testData)) {
-        // Handle multiple instances case
         expect(() =>
           render(
             <div>
               {testData.map((value, index) => (
-                <CodeMirrorEditor key={index} value={value} />
+                <CodeEditor key={index} value={value} theme="light" />
               ))}
             </div>,
           ),
         ).not.toThrow();
       } else {
-        // Handle single value case
         expect(() =>
-          render(<CodeMirrorEditor value={testData} />),
+          render(<CodeEditor value={testData} theme="light" />),
         ).not.toThrow();
       }
     });
 
     it('handles prop changes correctly', () => {
       const { rerender } = render(
-        <CodeMirrorEditor value={{ test: 1 }} readonly={false} />,
+        <CodeEditor value={{ test: 1 }} theme="light" readonly={false} />,
       );
 
       expect(() => {
-        rerender(<CodeMirrorEditor value={{ test: 2 }} readonly={true} />);
-        rerender(<CodeMirrorEditor value={{ test: 3 }} theme="dark" />);
         rerender(
-          <CodeMirrorEditor
+          <CodeEditor value={{ test: 2 }} theme="light" readonly={true} />,
+        );
+        rerender(<CodeEditor value={{ test: 3 }} theme="dark" />);
+        rerender(
+          <CodeEditor
             value={{ test: 4 }}
+            theme="light"
             placeholder="New placeholder"
           />,
         );

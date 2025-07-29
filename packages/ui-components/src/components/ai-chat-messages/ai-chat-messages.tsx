@@ -4,8 +4,8 @@ import { forwardRef } from 'react';
 import { cn } from '../../lib/cn';
 import { Theme } from '../../lib/theme';
 import { CodeActions } from '../code-actions';
+import { CodeEditor } from '../code-editor';
 import { Markdown, MarkdownCodeVariations } from '../custom';
-import { CodeMirrorEditor, getLanguageExtensionForCode } from '../json-editor';
 import {
   AIChatMessage,
   AIChatMessageContent,
@@ -180,7 +180,7 @@ const MessageContent = ({
             case 'sourcecode':
               return (
                 <div key={stableKey} className="relative py-2 w-full">
-                  <CodeMirrorEditor
+                  <CodeEditor
                     value={part.content}
                     readonly={true}
                     showLineNumbers={false}
@@ -189,10 +189,7 @@ const MessageContent = ({
                     containerClassName="h-auto"
                     theme={theme}
                     showTabs={true}
-                    languageExtensions={getLanguageExtensionForCode(
-                      'typescript',
-                    )}
-                    editorLanguage="typescript"
+                    language="typescript"
                   />
                   <CodeActions
                     content={part.content?.code ?? ''}

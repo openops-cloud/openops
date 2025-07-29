@@ -1,6 +1,5 @@
 import { Theme } from '../../lib/theme';
-import { CodeMirrorEditor, getLanguageExtensionForCode } from '../json-editor';
-import { extractLanguageFromClassName } from './utils';
+import { CodeEditor, getLanguageExtensionForCode } from '../code-editor';
 
 const MarkdownCodeViewer = ({
   content,
@@ -12,7 +11,7 @@ const MarkdownCodeViewer = ({
   className?: string;
 }) => {
   return (
-    <CodeMirrorEditor
+    <CodeEditor
       value={content}
       readonly={true}
       showLineNumbers={false}
@@ -20,9 +19,8 @@ const MarkdownCodeViewer = ({
       className="border border-solid rounded"
       containerClassName="h-auto"
       theme={theme}
-      languageExtensions={getLanguageExtensionForCode(className)}
+      language={getLanguageExtensionForCode(className)}
       showTabs={typeof content !== 'string' && 'packageJson' in content}
-      editorLanguage={extractLanguageFromClassName(className)}
     />
   );
 };

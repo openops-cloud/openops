@@ -6,7 +6,7 @@ import {
   PropertyType,
 } from '@openops/blocks-framework';
 import {
-  CodeMirrorEditor,
+  CodeEditor,
   FormControl,
   FormField,
   Input,
@@ -219,7 +219,7 @@ const selectFormComponentForProperty = ({
               disabled={disabled}
             ></BuilderJsonEditorWrapper>
           ) : (
-            <CodeMirrorEditor
+            <CodeEditor
               value={field.value}
               readonly={disabled}
               theme={theme}
@@ -227,7 +227,7 @@ const selectFormComponentForProperty = ({
                 field.onChange(tryParseJson(value));
               }}
               height="100%"
-            ></CodeMirrorEditor>
+            ></CodeEditor>
           )}
         </AutoFormFieldWrapper>
       );
