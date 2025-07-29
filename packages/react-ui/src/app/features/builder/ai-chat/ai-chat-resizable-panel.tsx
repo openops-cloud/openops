@@ -20,7 +20,7 @@ const AiChatResizablePanelContent = ({
   if (!showChat) return null;
 
   return (
-    <div className="w-full h-full flex pl-1 bg-secondary">
+    <div className="w-full h-full flex bg-secondary">
       <AssistantUiChat onClose={onCloseButtonClick} title={t('AI Assistant')} />
     </div>
   );

@@ -346,7 +346,7 @@ const BuilderPage = () => {
             <>
               <ResizableHandle
                 disabled={!isRightSidebarVisible}
-                withHandle={isRightSidebarVisible}
+                withHandle={false}
                 onDragging={setIsDraggingHandle}
                 className="z-50 w-0"
               />
@@ -358,7 +358,7 @@ const BuilderPage = () => {
                 minSize={0}
                 maxSize={60}
                 order={4}
-                className={cn('min-w-0 bg-background z-30', {
+                className={cn('min-w-0 bg-background z-30 shadow-sidebar', {
                   [minWidthOfSidebar]: isRightSidebarVisible,
                 })}
               >
