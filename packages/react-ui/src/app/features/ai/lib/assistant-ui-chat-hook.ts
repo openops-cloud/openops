@@ -49,16 +49,18 @@ export const useAssistantChat = (props?: UseAssistantChatProps) => {
   const { data: openChatResponse, isLoading } = useQuery({
     queryKey,
     queryFn: async () => {
+      let conversation: OpenChatResponse;
       if (selectedStep && flowVersion && stepDetails) {
-        return aiChatApi.open(
+        conversation = await aiChatApi.open(
           flowVersion.flowId,
           getBlockName(stepDetails),
           selectedStep,
           getActionName(stepDetails),
         );
+      } else {
+        conversation = await aiAssistantChatApi.open(chatId.current);
       }
 
-      const conversation = await aiAssistantChatApi.open(chatId.current);
       onConversationRetrieved(conversation);
       return conversation;
     },
