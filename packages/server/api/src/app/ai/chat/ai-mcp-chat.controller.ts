@@ -25,6 +25,7 @@ import {
   getLLMConfig,
   MCPChatContext,
   saveChatHistory,
+  updateChatName,
 } from './ai-chat.service';
 import { streamCode } from './code.service';
 import { enrichContext, IncludeOptions } from './context-enrichment.service';
@@ -167,6 +168,8 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
 
       const rawChatName = await generateChatName(messages, projectId);
       const chatName = rawChatName.trim() || DEFAULT_CHAT_NAME;
+
+      await updateChatName(chatId, userId, projectId, chatName);
 
       return await reply.code(200).send({ chatName });
     } catch (error) {

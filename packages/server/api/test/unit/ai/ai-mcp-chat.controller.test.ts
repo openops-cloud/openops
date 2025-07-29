@@ -10,6 +10,7 @@ import {
   generateChatName,
   getConversation,
   getLLMConfig,
+  updateChatName,
 } from '../../../src/app/ai/chat/ai-chat.service';
 import { aiMCPChatController } from '../../../src/app/ai/chat/ai-mcp-chat.controller';
 import { getMCPToolsContext } from '../../../src/app/ai/mcp/tools-context-builder';
@@ -77,6 +78,7 @@ jest.mock('../../../src/app/ai/chat/ai-chat.service', () => ({
   getConversation: jest.fn(),
   getLLMConfig: jest.fn(),
   generateChatName: jest.fn(),
+  updateChatName: jest.fn(),
 }));
 
 jest.mock('../../../src/app/ai/mcp/tools-context-builder', () => ({
@@ -521,6 +523,29 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
 
       expect(mockReply.code).toHaveBeenCalledWith(200);
       expect(mockReply.send).toHaveBeenCalledWith({ chatName: 'New Chat' });
+    });
+
+    it('should persist chatName in chat context', async () => {
+      (getConversation as jest.Mock).mockResolvedValue({
+        messages: [
+          { role: 'user', content: 'What is OpenOps?' },
+          { role: 'assistant', content: 'OpenOps is a platform...' },
+        ],
+      });
+      (generateChatName as jest.Mock).mockResolvedValue(
+        'OpenOps Platform Overview',
+      );
+      const postHandler = handlers['/chat-name'];
+      await postHandler(
+        { ...mockRequest, body: { chatId: 'test-chat-id' } } as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+      expect(updateChatName).toHaveBeenCalledWith(
+        'test-chat-id',
+        'test-user-id',
+        'test-project-id',
+        'OpenOps Platform Overview',
+      );
     });
 
     it('should handle errors gracefully', async () => {
