@@ -39,12 +39,12 @@ export const JsonContent = ({
   if (isEditMode) {
     return (
       <Form {...form}>
-        <form>
+        <form className="h-full">
           <FormField
             control={form.control}
             name="jsonContent"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="h-full">
                 <FormControl>
                   <CodeEditor
                     value={field.value}

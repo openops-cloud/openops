@@ -235,11 +235,12 @@ const CodeEditor = React.memo(
               onChange={handleChange}
               onMount={handleEditorDidMount}
               options={{
+                contextmenu: false,
                 readOnly: isReadOnly,
                 stickyScroll: {
                   enabled: false,
                 },
-                scrollBeyondLastColumn: 0,
+                // scrollBeyondLastColumn: 0,
                 wordWrap: 'on',
                 lineNumbers: showLineNumbers ? 'on' : 'off',
                 minimap: { enabled: false },
@@ -262,8 +263,6 @@ const CodeEditor = React.memo(
                   autoFindInSelection: 'never',
                   seedSearchStringFromSelection: 'never',
                 },
-                // todo disable command pallette
-                commandPalette: false,
               }}
             />
           </div>
