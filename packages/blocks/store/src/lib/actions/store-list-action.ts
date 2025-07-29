@@ -16,7 +16,7 @@ export const storageListAction = createAction({
   },
   props: {
     keyFilter: Property.ShortText({
-      displayName: 'Key Filter',
+      displayName: 'Key filter',
       description:
         'Regex pattern to filter keys (optional). Leave empty to return all keys.',
       required: false,
