@@ -38,6 +38,7 @@ export type MCPChatContext = {
   blockName?: string;
   stepId?: string;
   actionName?: string;
+  chatName?: string;
 };
 
 export const generateChatId = (
@@ -87,6 +88,22 @@ export async function generateChatName(
   });
   return response.text.trim();
 }
+
+export const updateChatName = async (
+  chatId: string,
+  userId: string,
+  projectId: string,
+  newChatName: string,
+): Promise<void> => {
+  const chatContext = await getChatContext(chatId, userId, projectId);
+  if (!chatContext) {
+    throw new Error('Chat context not found');
+  }
+
+  const updatedChatContext = { ...chatContext, chatName: newChatName };
+
+  await createChatContext(chatId, userId, projectId, updatedChatContext);
+};
 
 export const createChatContext = async (
   chatId: string,
