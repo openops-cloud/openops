@@ -67,35 +67,34 @@ export const JsonContent = ({
     );
   }
 
+  if (isNil(json)) {
+    return (
+      <pre className="text-sm whitespace-pre-wrap overflow-x-auto p-2 border-t">
+        {json === null ? 'null' : 'undefined'}
+      </pre>
+    );
+  }
+
   return (
     <>
-      {' '}
-      {isNil(json) ? (
+      {typeof json !== 'string' && typeof json !== 'object' && (
         <pre className="text-sm whitespace-pre-wrap overflow-x-auto p-2 border-t">
-          {json === null ? 'null' : 'undefined'}
+          {JSON.stringify(json)}
         </pre>
-      ) : (
-        <>
-          {typeof json !== 'string' && typeof json !== 'object' && (
-            <pre className="text-sm whitespace-pre-wrap overflow-x-auto p-2 border-t">
-              {JSON.stringify(json)}
-            </pre>
-          )}
-          {isEmptyString && (
-            <pre className="text-sm whitespace-pre-wrap overflow-x-auto p-2 border-t">
-              {json}
-            </pre>
-          )}
-          {(typeof json === 'object' ||
-            (typeof json === 'string' && !isEmptyString)) && (
-            <CodeEditor
-              value={json}
-              readonly={true}
-              theme={theme}
-              containerClassName={editorClassName}
-            />
-          )}
-        </>
+      )}
+      {isEmptyString && (
+        <pre className="text-sm whitespace-pre-wrap overflow-x-auto p-2 border-t">
+          {json}
+        </pre>
+      )}
+      {(typeof json === 'object' ||
+        (typeof json === 'string' && !isEmptyString)) && (
+        <CodeEditor
+          value={json}
+          readonly={true}
+          theme={theme}
+          containerClassName={editorClassName}
+        />
       )}
     </>
   );
