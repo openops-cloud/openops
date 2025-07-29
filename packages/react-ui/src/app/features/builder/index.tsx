@@ -268,7 +268,7 @@ const BuilderPage = () => {
           >
             <LeftSidebarResizablePanel
               minSize={LEFT_SIDEBAR_MIN_SIZE}
-              className={cn('min-w-0 w-0 bg-background z-20 shadow-sidebar', {
+              className={cn('min-w-0 w-0 bg-background z-[25] shadow-sidebar', {
                 [LEFT_SIDEBAR_MIN_EFFECTIVE_WIDTH]:
                   leftSidebar !== LeftSideBarType.NONE,
                 'max-w-0': leftSidebar === LeftSideBarType.NONE,

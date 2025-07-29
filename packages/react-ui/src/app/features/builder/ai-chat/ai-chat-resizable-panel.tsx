@@ -93,7 +93,7 @@ const AiChatResizablePanel = ({
         ref={resizablePanelRef}
         order={2}
         id={RESIZABLE_PANEL_IDS.AI_CHAT}
-        className={cn('duration-0 min-w-0 shadow-sidebar', {
+        className={cn('duration-0 min-w-0 shadow-sidebar z-20', {
           'min-w-[350px]': showChat,
           'transition-all duration-300': !isDraggingHandle && hasMounted,
         })}
@@ -106,9 +106,7 @@ const AiChatResizablePanel = ({
         />
       </ResizablePanel>
       <ResizableHandle
-        className={cn('w-0', {
-          'w-2': showChat,
-        })}
+        className={cn('w-0')}
         onDragging={onDragging}
         disabled={!showChat}
       />
