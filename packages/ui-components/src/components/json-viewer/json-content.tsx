@@ -40,32 +40,32 @@ export const JsonContent = ({
   if (isEditMode) {
     return (
       <Form {...form}>
-        <ScrollArea className="h-full overflow-hidden">
-          <form>
-            <FormField
-              control={form.control}
-              name="jsonContent"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <CodeMirrorEditor
-                      value={field.value}
-                      placeholder={t('Paste sample data here')}
-                      readonly={false}
-                      theme={theme}
-                      containerClassName={editorClassName}
-                      height="100%"
-                      onChange={(value) => {
-                        field.onChange(tryParseJson(value));
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage className="ml-4 pb-1" />
-                </FormItem>
-              )}
-            />
-          </form>
-        </ScrollArea>
+        {/* <ScrollArea className="h-full overflow-hidden"> */}
+        <form>
+          <FormField
+            control={form.control}
+            name="jsonContent"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <CodeMirrorEditor
+                    value={field.value}
+                    placeholder={t('Paste sample data here')}
+                    readonly={false}
+                    theme={theme}
+                    containerClassName={editorClassName}
+                    height="100%"
+                    onChange={(value) => {
+                      field.onChange(tryParseJson(value));
+                    }}
+                  />
+                </FormControl>
+                <FormMessage className="ml-4 pb-1" />
+              </FormItem>
+            )}
+          />
+        </form>
+        {/* </ScrollArea> */}
       </Form>
     );
   }

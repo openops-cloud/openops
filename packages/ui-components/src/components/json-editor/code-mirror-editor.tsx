@@ -288,6 +288,10 @@ const CodeMirrorEditor = React.memo(
             onMount={handleEditorDidMount}
             options={{
               readOnly: readonly,
+              stickyScroll: {
+                enabled: false,
+              },
+              scrollBeyondLastColumn: 0,
               wordWrap: 'on',
               lineNumbers: showLineNumbers ? 'on' : 'off',
               minimap: { enabled: false },
@@ -301,7 +305,8 @@ const CodeMirrorEditor = React.memo(
               renderLineHighlight: readonly ? 'none' : 'line',
               cursorBlinking: readonly ? 'solid' : 'blink',
               scrollbar: {
-                vertical: autoHeight ? 'hidden' : 'auto',
+                // vertical: autoHeight ? 'hidden' : 'auto',
+                vertical: 'auto',
                 horizontal: 'auto',
               },
               overviewRulerLanes: 0,
