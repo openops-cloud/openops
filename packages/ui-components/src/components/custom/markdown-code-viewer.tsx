@@ -10,6 +10,9 @@ const MarkdownCodeViewer = ({
   theme: Theme;
   className?: string;
 }) => {
+  const lines = content.split('\n').length ?? 1;
+  const calculatedHeight = Math.max(300, lines * 18);
+
   return (
     <CodeEditor
       value={content}
@@ -19,6 +22,7 @@ const MarkdownCodeViewer = ({
       theme={theme}
       language={getLanguageExtensionForCode(className)}
       showTabs={typeof content !== 'string' && 'packageJson' in content}
+      height={`${calculatedHeight}px`}
     />
   );
 };

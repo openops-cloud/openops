@@ -281,11 +281,8 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
               {placeholder}
             </div>
           )}
-          <div
-            className={cn('h-full min-h-0', { 'opacity-0': showPlaceholder })}
-          >
+          <div className={cn('h-full', { 'opacity-0': showPlaceholder })}>
             <Editor
-              loading={t('Loading...')}
               value={formatValue(currentValue)}
               language={currentLanguage}
               theme={editorTheme}
