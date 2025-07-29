@@ -6,14 +6,13 @@ import {
   GenerateWithAIButton,
   Markdown,
 } from '@openops/components/ui';
-import { CodeAction, FlagId } from '@openops/shared';
+import { CodeAction } from '@openops/shared';
 import { t } from 'i18next';
 import React, { useCallback } from 'react';
 import { useFormContext } from 'react-hook-form';
 
 import { DictionaryProperty } from '../../block-properties/dictionary-property';
 
-import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { useTheme } from '@/app/common/providers/theme-provider';
 import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
 import { useAppStore } from '@/app/store/app-store';
@@ -33,9 +32,6 @@ type CodeSettingsProps = {
 const CodeSettings = React.memo(({ readonly }: CodeSettingsProps) => {
   const { theme } = useTheme();
   const form = useFormContext<CodeAction>();
-  const codeWithAiEnabled = flagsHooks.useFlag<boolean>(
-    FlagId.CODE_WITH_AI,
-  ).data;
 
   const { setIsAiChatOpened } = useAppStore((s) => ({
     setIsAiChatOpened: s.setIsAiChatOpened,
@@ -98,7 +94,7 @@ const CodeSettings = React.memo(({ readonly }: CodeSettingsProps) => {
           <FormItem>
             <div className="flex items-center justify-between mb-2">
               <FormLabel>{t('Source Code')}</FormLabel>
-              {!readonly && codeWithAiEnabled && (
+              {!readonly && (
                 <GenerateWithAIButton
                   hasActiveAiSettings={hasActiveAiSettings}
                   isLoading={isLoading}
