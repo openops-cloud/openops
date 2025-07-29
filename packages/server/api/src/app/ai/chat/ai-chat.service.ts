@@ -100,9 +100,9 @@ export const updateChatName = async (
     throw new Error('Chat context not found');
   }
 
-  chatContext.chatName = newChatName;
+  const updatedChatContext = { ...chatContext, chatName: newChatName };
 
-  await createChatContext(chatId, userId, projectId, chatContext);
+  await createChatContext(chatId, userId, projectId, updatedChatContext);
 };
 
 export const createChatContext = async (
