@@ -4,6 +4,7 @@ import { logger } from '@openops/server-shared';
 import {
   AiConfig,
   ApplicationError,
+  ChatNameRequest,
   DeleteChatHistoryRequest,
   NewMessageRequest,
   OpenChatMCPRequest,
@@ -31,12 +32,13 @@ import {
   sendAiChatFailureEvent,
   sendAiChatMessageSendEvent,
 } from '../../telemetry/event-models/ai';
-import { getMCPTools } from '../mcp/mcp-tools';
+import { getMCPToolsContext } from '../mcp/tools-context-builder';
 import {
   createChatContext,
   deleteChatHistory,
   generateChatId,
   generateChatIdForMCP,
+  generateChatName,
   getChatContext,
   getChatHistoryWithMergedTools,
   getConversation,
@@ -47,10 +49,11 @@ import {
 import { generateMessageId } from './ai-message-id-generator';
 import { streamCode } from './code.service';
 import { enrichContext, IncludeOptions } from './context-enrichment.service';
-import { getBlockSystemPrompt, getMcpSystemPrompt } from './prompts.service';
-import { selectRelevantTools } from './tools.service';
+import { getBlockSystemPrompt } from './prompts.service';
 
 const MAX_RECURSION_DEPTH = 10;
+const DEFAULT_CHAT_NAME = 'New Chat';
+
 export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
   app.post(
     '/open',
@@ -138,6 +141,8 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
     const chatId = request.body.chatId;
     const projectId = request.principal.projectId;
     const userId = request.principal.id;
+    const authToken =
+      request.headers.authorization?.replace('Bearer ', '') ?? '';
 
     try {
       const conversationResult = await getConversation(
@@ -145,11 +150,13 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         userId,
         projectId,
       );
+
       const llmConfigResult = await getLLMConfig(projectId);
       const messageContent = await getUserMessage(request.body, reply);
       if (messageContent === null) {
         return; // Error response already sent
       }
+
       conversationResult.messages.push({
         role: 'user',
         content: messageContent,
@@ -158,56 +165,16 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       const { chatContext, messages } = conversationResult;
       const { aiConfig, languageModel } = llmConfigResult;
 
-      let systemPrompt;
-      let mcpClients: unknown[] = [];
-      let relevantTools: ToolSet | undefined;
-
-      if (
-        !chatContext.actionName ||
-        !chatContext.blockName ||
-        !chatContext.stepId ||
-        !chatContext.workflowId
-      ) {
-        const toolSet = await getMCPTools(
+      const { mcpClients, systemPrompt, filteredTools } =
+        await getMCPToolsContext(
           app,
-          request.headers.authorization?.replace('Bearer ', '') ?? '',
           projectId,
-        );
-
-        mcpClients = toolSet.mcpClients;
-        mcpClients = toolSet.mcpClients;
-
-        const filteredTools = await selectRelevantTools({
-          messages,
-          tools: toolSet.tools,
-          languageModel,
+          authToken,
           aiConfig,
-        });
-
-        const isAwsCostMcpDisabled =
-          !hasToolProvider(toolSet.tools, 'cost-analysis') &&
-          !hasToolProvider(toolSet.tools, 'cost-explorer');
-
-        const isAnalyticsLoaded = hasToolProvider(filteredTools, 'superset');
-        const isTablesLoaded = hasToolProvider(filteredTools, 'tables');
-        const isOpenOpsMCPEnabled = hasToolProvider(filteredTools, 'openops');
-
-        relevantTools = {
-          ...filteredTools,
-          ...(isOpenOpsMCPEnabled
-            ? collectToolsByProvider(toolSet.tools, 'openops')
-            : {}),
-        };
-
-        systemPrompt = await getMcpSystemPrompt({
-          isAnalyticsLoaded,
-          isTablesLoaded,
-          isOpenOpsMCPEnabled,
-          isAwsCostMcpDisabled,
-        });
-      } else {
-        systemPrompt = await getBlockSystemPrompt(chatContext);
-      }
+          messages,
+          chatContext,
+          languageModel,
+        );
 
       pipeDataStreamToResponse(reply.raw, {
         execute: async (dataStreamWriter) => {
@@ -222,7 +189,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
             mcpClients,
             userId,
             projectId,
-            relevantTools,
+            filteredTools,
           );
         },
 
@@ -255,6 +222,32 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       });
     } catch (error) {
       return handleError(error, reply, 'conversation');
+    }
+  });
+
+  app.post('/chat-name', ChatNameOptions, async (request, reply) => {
+    const chatId = request.body.chatId;
+    const userId = request.principal.id;
+    const projectId = request.principal.projectId;
+
+    try {
+      const contextForChatName = await getConversation(
+        chatId,
+        userId,
+        projectId,
+      );
+      const messages = contextForChatName.messages;
+
+      if (messages.length === 0) {
+        return await reply.code(200).send({ chatName: DEFAULT_CHAT_NAME });
+      }
+
+      const rawChatName = await generateChatName(messages, projectId);
+      const chatName = rawChatName.trim() || DEFAULT_CHAT_NAME;
+
+      return await reply.code(200).send({ chatName });
+    } catch (error) {
+      return handleError(error, reply, 'generate chat name');
     }
   });
 
@@ -355,6 +348,17 @@ const NewMessageOptions = {
     description:
       'Send a message to the MCP chat session and receive a streaming response. This endpoint processes the user message, generates an AI response using the configured language model, and maintains the conversation history while integrating with MCP tools.',
     body: NewMessageRequest,
+  },
+};
+
+const ChatNameOptions = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
+  },
+  schema: {
+    tags: ['ai', 'ai-chat-mcp'],
+    description: 'Generate a chat name using LLM based on chat history.',
+    body: ChatNameRequest,
   },
 };
 
@@ -493,28 +497,6 @@ async function closeMCPClients(mcpClients: unknown[]): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await (mcpClient as any)?.close();
   }
-}
-
-function collectToolsByProvider(
-  tools: ToolSet | undefined,
-  provider: string,
-): ToolSet {
-  const result: ToolSet = {};
-  for (const [key, tool] of Object.entries(tools ?? {})) {
-    if ((tool as { toolProvider?: string }).toolProvider === provider) {
-      result[key] = tool;
-    }
-  }
-  return result;
-}
-
-export function hasToolProvider(
-  tools: ToolSet | undefined,
-  provider: string,
-): boolean {
-  return Object.values(tools ?? {}).some(
-    (tool) => (tool as { toolProvider?: string }).toolProvider === provider,
-  );
 }
 
 function handleError(

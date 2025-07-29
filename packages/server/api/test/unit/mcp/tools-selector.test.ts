@@ -7,7 +7,8 @@ import {
   LanguageModel,
   ToolSet,
 } from 'ai';
-import { selectRelevantTools } from '../../../src/app/ai/chat/tools.service';
+
+import { selectRelevantTools } from '../../../src/app/ai/mcp/tools-selector';
 
 jest.mock('ai', () => ({
   generateObject: jest.fn(),
