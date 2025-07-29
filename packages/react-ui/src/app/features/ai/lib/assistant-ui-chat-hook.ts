@@ -1,28 +1,70 @@
 import { AI_ASSISTANT_LS_KEY } from '@/app/constants/ai';
 import { QueryKeys } from '@/app/constants/query-keys';
 import { aiAssistantChatApi } from '@/app/features/ai/lib/ai-assistant-chat-api';
+import { getActionName, getBlockName } from '@/app/features/blocks/lib/utils';
 import { authenticationSession } from '@/app/lib/authentication-session';
 import { ThreadMessageLike } from '@assistant-ui/react';
 import { useChatRuntime } from '@assistant-ui/react-ai-sdk';
 import { toast } from '@openops/components/ui';
-import { OpenChatResponse } from '@openops/shared';
+import { flowHelper, FlowVersion, OpenChatResponse } from '@openops/shared';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { t } from 'i18next';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { aiChatApi } from '../../builder/ai-chat/lib/chat-api';
 
 const PLACEHOLDER_MESSAGE_INTEROP = 'satisfy-schema';
 
-export const useAssistantChat = () => {
+interface UseAssistantChatProps {
+  flowVersion?: FlowVersion;
+  selectedStep?: string;
+}
+
+export const useAssistantChat = (props?: UseAssistantChatProps) => {
+  const { flowVersion, selectedStep } = props ?? {};
   const chatId = useRef(localStorage.getItem(AI_ASSISTANT_LS_KEY));
   const [shouldRenderChat, setShouldRenderChat] = useState(false);
 
+  const stepDetails =
+    flowVersion && selectedStep
+      ? flowHelper.getStep(flowVersion, selectedStep)
+      : undefined;
+
+  const queryKey = useMemo(() => {
+    const baseKey = [
+      selectedStep ? QueryKeys.openChat : QueryKeys.openAiAssistantChat,
+      selectedStep ? flowVersion?.flowId : chatId.current,
+    ];
+
+    if (selectedStep && stepDetails?.settings?.blockName) {
+      baseKey.push(stepDetails.settings.blockName);
+    }
+
+    if (selectedStep) {
+      baseKey.push(selectedStep);
+    }
+
+    return baseKey;
+  }, [selectedStep, flowVersion?.flowId, stepDetails?.settings?.blockName]);
+
   const { data: openChatResponse, isLoading } = useQuery({
-    queryKey: [QueryKeys.openAiAssistantChat, chatId.current],
+    queryKey,
     queryFn: async () => {
+      if (selectedStep && flowVersion && stepDetails) {
+        return aiChatApi.open(
+          flowVersion.flowId,
+          getBlockName(stepDetails),
+          selectedStep,
+          getActionName(stepDetails),
+        );
+      }
+
       const conversation = await aiAssistantChatApi.open(chatId.current);
       onConversationRetrieved(conversation);
       return conversation;
     },
+    enabled: selectedStep
+      ? !!getBlockName(stepDetails) && !!getActionName(stepDetails)
+      : true,
   });
 
   const onConversationRetrieved = (conversation: OpenChatResponse) => {
