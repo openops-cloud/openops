@@ -15,8 +15,8 @@ const meta = {
   parameters: {
     layout: 'centered',
   },
-  decorators: [
-    (Story, { args }) => {
+  render: (args) => {
+    const CodeEditorStory = () => {
       const form = useForm({
         defaultValues: {
           content: args.value,
@@ -25,24 +25,20 @@ const meta = {
 
       return (
         <div style={{ width: '800px', height: '400px' }}>
-          <form>
+          <form className="h-full">
             <Controller
               control={form.control}
               name="content"
               render={({ field }) => {
                 return (
                   <ThemeAwareContainer
-                    component={Story}
-                    args={
-                      {
-                        ...args,
-                        value: field.value,
-                        onChange: (value: unknown) => {
-                          field.onChange(value);
-                        },
-                        height: '200px',
-                      } as any
-                    }
+                    {...args}
+                    component={CodeEditor}
+                    onChange={(value: unknown) => {
+                      field.onChange(value);
+                    }}
+                    height="200px"
+                    value={field.value}
                   />
                 );
               }}
@@ -50,8 +46,10 @@ const meta = {
           </form>
         </div>
       );
-    },
-  ],
+    };
+
+    return <CodeEditorStory />;
+  },
 } satisfies Meta<typeof CodeEditor>;
 
 export default meta;
