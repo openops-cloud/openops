@@ -1,8 +1,6 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { isLLMTelemetryEnabled } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import {
-  AiConfig,
   ApplicationError,
   ChatNameRequest,
   DeleteChatHistoryRequest,
@@ -12,27 +10,9 @@ import {
   openOpsId,
   PrincipalType,
 } from '@openops/shared';
-import {
-  CoreAssistantMessage,
-  CoreMessage,
-  CoreToolMessage,
-  DataStreamWriter,
-  LanguageModel,
-  pipeDataStreamToResponse,
-  streamText,
-  TextPart,
-  ToolCallPart,
-  ToolChoice,
-  ToolResultPart,
-  ToolSet,
-} from 'ai';
+import { CoreMessage } from 'ai';
 import { FastifyReply } from 'fastify';
 import { StatusCodes } from 'http-status-codes';
-import {
-  sendAiChatFailureEvent,
-  sendAiChatMessageSendEvent,
-} from '../../telemetry/event-models/ai';
-import { getMCPToolsContext } from '../mcp/tools-context-builder';
 import {
   createChatContext,
   deleteChatHistory,
@@ -45,13 +25,13 @@ import {
   getLLMConfig,
   MCPChatContext,
   saveChatHistory,
+  updateChatName,
 } from './ai-chat.service';
-import { generateMessageId } from './ai-message-id-generator';
 import { streamCode } from './code.service';
 import { enrichContext, IncludeOptions } from './context-enrichment.service';
 import { getBlockSystemPrompt } from './prompts.service';
+import { handleUserMessage } from './user-message-handler';
 
-const MAX_RECURSION_DEPTH = 10;
 const DEFAULT_CHAT_NAME = 'New Chat';
 
 export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
@@ -139,86 +119,30 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
   );
   app.post('/', NewMessageOptions, async (request, reply) => {
     const chatId = request.body.chatId;
-    const projectId = request.principal.projectId;
     const userId = request.principal.id;
+    const projectId = request.principal.projectId;
     const authToken =
       request.headers.authorization?.replace('Bearer ', '') ?? '';
 
     try {
-      const conversationResult = await getConversation(
-        chatId,
-        userId,
-        projectId,
-      );
-
-      const llmConfigResult = await getLLMConfig(projectId);
       const messageContent = await getUserMessage(request.body, reply);
       if (messageContent === null) {
         return; // Error response already sent
       }
 
-      conversationResult.messages.push({
+      const newMessage: CoreMessage = {
         role: 'user',
         content: messageContent,
-      });
+      };
 
-      const { chatContext, messages } = conversationResult;
-      const { aiConfig, languageModel } = llmConfigResult;
-
-      const { mcpClients, systemPrompt, filteredTools } =
-        await getMCPToolsContext(
-          app,
-          projectId,
-          authToken,
-          aiConfig,
-          messages,
-          chatContext,
-          languageModel,
-        );
-
-      pipeDataStreamToResponse(reply.raw, {
-        execute: async (dataStreamWriter) => {
-          logger.debug('Send user message to LLM.');
-          await streamMessages(
-            dataStreamWriter,
-            languageModel,
-            systemPrompt,
-            aiConfig,
-            messages,
-            chatId,
-            mcpClients,
-            userId,
-            projectId,
-            filteredTools,
-          );
-        },
-
-        onError: (error) => {
-          const message =
-            error instanceof Error ? error.message : String(error);
-          sendAiChatFailureEvent({
-            projectId,
-            userId: request.principal.id,
-            chatId,
-            errorMessage: message,
-            provider: aiConfig.provider,
-            model: aiConfig.model,
-          });
-
-          endStreamWithErrorMessage(reply.raw, message);
-          closeMCPClients(mcpClients).catch((e) =>
-            logger.warn('Failed to close mcp client.', e),
-          );
-          logger.warn(message, error);
-          return message;
-        },
-      });
-
-      sendAiChatMessageSendEvent({
-        projectId,
-        userId: request.principal.id,
+      await handleUserMessage({
+        app,
         chatId,
-        provider: aiConfig.provider,
+        userId,
+        projectId,
+        authToken,
+        newMessage,
+        serverResponse: reply.raw,
       });
     } catch (error) {
       return handleError(error, reply, 'conversation');
@@ -244,6 +168,8 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
 
       const rawChatName = await generateChatName(messages, projectId);
       const chatName = rawChatName.trim() || DEFAULT_CHAT_NAME;
+
+      await updateChatName(chatId, userId, projectId, chatName);
 
       return await reply.code(200).send({ chatName });
     } catch (error) {
@@ -385,119 +311,6 @@ const DeleteChatOptions = {
     params: DeleteChatHistoryRequest,
   },
 };
-
-async function streamMessages(
-  dataStreamWriter: DataStreamWriter,
-  languageModel: LanguageModel,
-  systemPrompt: string,
-  aiConfig: AiConfig,
-  messages: CoreMessage[],
-  chatId: string,
-  mcpClients: unknown[],
-  userId: string,
-  projectId: string,
-  tools?: ToolSet,
-): Promise<void> {
-  let stepCount = 0;
-
-  let toolChoice: ToolChoice<Record<string, never>> = 'auto';
-  if (!tools || Object.keys(tools).length === 0) {
-    toolChoice = 'none';
-    systemPrompt += `\n\nMCP tools are not available in this chat. Do not claim access or simulate responses from them under any circumstance.`;
-  }
-
-  const result = streamText({
-    model: languageModel,
-    system: systemPrompt,
-    messages,
-    ...aiConfig.modelSettings,
-    tools,
-    toolChoice,
-    maxRetries: 1,
-    maxSteps: MAX_RECURSION_DEPTH,
-    experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
-    async onStepFinish({ finishReason }): Promise<void> {
-      stepCount++;
-      if (finishReason !== 'stop' && stepCount >= MAX_RECURSION_DEPTH) {
-        const message = `Maximum recursion depth (${MAX_RECURSION_DEPTH}) reached. Terminating recursion.`;
-        endStreamWithErrorMessage(dataStreamWriter, message);
-        logger.warn(message);
-      }
-    },
-    async onFinish({ response }): Promise<void> {
-      await saveChatHistory(chatId, userId, projectId, [
-        ...messages,
-        ...response.messages.map(getResponseObject),
-      ]);
-      await closeMCPClients(mcpClients);
-    },
-  });
-
-  result.mergeIntoDataStream(dataStreamWriter);
-}
-
-function endStreamWithErrorMessage(
-  dataStreamWriter: NodeJS.WritableStream | DataStreamWriter,
-  message: string,
-): void {
-  dataStreamWriter.write(`f:{"messageId":"${generateMessageId()}"}\n`);
-
-  dataStreamWriter.write(`0:"${message}"\n`);
-
-  dataStreamWriter.write(
-    `e:{"finishReason":"stop","usage":{"promptTokens":null,"completionTokens":null},"isContinued":false}\n`,
-  );
-  dataStreamWriter.write(
-    `d:{"finishReason":"stop","usage":{"promptTokens":null,"completionTokens":null}}\n`,
-  );
-}
-
-function getResponseObject(
-  message: CoreAssistantMessage | CoreToolMessage,
-): CoreToolMessage | CoreAssistantMessage {
-  const { role, content } = message;
-
-  if (role === 'tool') {
-    return {
-      role: message.role,
-      content: message.content as ToolResultPart[],
-    };
-  }
-
-  if (Array.isArray(content)) {
-    let hasToolCall = false;
-
-    for (const part of content) {
-      if (part.type === 'tool-call') {
-        hasToolCall = true;
-      } else if (part.type !== 'text') {
-        return {
-          role: 'assistant',
-          content: `Invalid message type received. Type: ${part.type}`,
-        };
-      }
-    }
-
-    return {
-      role,
-      content: hasToolCall
-        ? (content as ToolCallPart[])
-        : (content as TextPart[]),
-    };
-  }
-
-  return {
-    role: 'assistant',
-    content,
-  };
-}
-
-async function closeMCPClients(mcpClients: unknown[]): Promise<void> {
-  for (const mcpClient of mcpClients) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (mcpClient as any)?.close();
-  }
-}
 
 function handleError(
   error: unknown,
