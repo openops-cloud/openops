@@ -29,6 +29,8 @@ type Options = {
   includeCurrentStepOutput: IncludeOptions;
 };
 
+const TRUNCATION_LENGTH = 30000;
+
 export async function enrichContext(
   additionalContext: ChatFlowContext,
   projectId: string,
@@ -261,7 +263,7 @@ async function resolveVariable(
   return {
     name: variable.name,
     value: result.success
-      ? safeStringifyAndTruncate(result.censoredValue)
+      ? safeStringifyAndTruncate(result.censoredValue, TRUNCATION_LENGTH)
       : String(result.error),
   };
 }

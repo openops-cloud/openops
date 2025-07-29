@@ -3,7 +3,7 @@ export * from './ai-chat-messages';
 export * from './assistant-ui/assistant-top-bar';
 export * from './assistant-ui/assistant-ui-chat-container';
 export * from './assistant-ui/thread';
-export * from './assistant-ui/thread-welcome-context';
+export * from './assistant-ui/thread-extra-context';
 export * from './block-icon';
 export * from './builder-sidebar/sidebar-header';
 export * from './builder-tree-view';
