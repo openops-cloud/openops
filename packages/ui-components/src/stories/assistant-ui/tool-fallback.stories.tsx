@@ -10,7 +10,8 @@ const ToolFallbackWrapper: FC<{
   toolName: string;
   argsText: string;
   result?: any;
-}> = ({ toolName, argsText, result }) => {
+  status?: any;
+}> = ({ toolName, argsText, result, status = { type: 'complete' } }) => {
   const mockToolCall = {
     type: 'tool-call' as const,
     toolCallId: 'mock-tool-call-id',
@@ -20,7 +21,7 @@ const ToolFallbackWrapper: FC<{
     isError: false,
     argsText,
     artifact: undefined,
-    status: { type: 'complete' as const },
+    status,
     addResult: () => {},
   };
 
@@ -59,6 +60,30 @@ export const Basic: Story = {
     toolName: 'get_weather',
     argsText: '{"location": "New York", "unit": "celsius"}',
     result: '{"temperature": 22, "condition": "sunny", "humidity": 65}',
+  },
+};
+
+/**
+ * Tool call in a running state, showing the loading indicator.
+ */
+export const ToolCallInProgress: Story = {
+  args: {
+    toolName: 'get_weather',
+    argsText: '{"location": "New York", "unit": "celsius"}',
+    result: undefined,
+    status: { type: 'running' },
+  },
+};
+
+/**
+ * Tool call with an incomplete status, indicating the tool execution was not completed.
+ */
+export const ToolCallIncomplete: Story = {
+  args: {
+    toolName: 'get_weather',
+    argsText: '{"location": "New York", "unit": "celsius"}',
+    result: 'The tool execution was not completed.',
+    status: { type: 'incomplete' },
   },
 };
 
