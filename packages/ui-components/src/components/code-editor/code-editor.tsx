@@ -2,7 +2,13 @@ import Editor from '@monaco-editor/react';
 import { SourceCode } from '@openops/shared';
 import { t } from 'i18next';
 import { editor } from 'monaco-editor';
-import React, { RefObject, useEffect, useRef, useState } from 'react';
+import React, {
+  RefObject,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react';
 import { cn } from '../../lib/cn';
 import { convertToString, isSourceCodeObject } from './code-utils';
 
@@ -46,38 +52,61 @@ type CodeEditorProps = {
   theme: string;
   placeholder?: string;
   height?: string;
+  minHeight?: number;
   showLineNumbers?: boolean;
   language?: MonacoLanguage;
   showTabs?: boolean;
 };
 
-const CodeEditor = React.memo(
-  ({
-    value,
-    readonly = false,
-    onFocus,
-    onChange,
-    className,
-    containerClassName,
-    theme,
-    placeholder,
-    height = '100%',
-    showLineNumbers = true,
-    language = 'json',
-    showTabs = false,
-  }: CodeEditorProps) => {
+export interface CodeEditorRef {
+  layout: () => void;
+  focus: () => void;
+}
+
+const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
+  (
+    {
+      value,
+      readonly = false,
+      onFocus,
+      onChange,
+      className,
+      containerClassName,
+      theme,
+      placeholder,
+      height = '100%',
+      minHeight = 60,
+      showLineNumbers = true,
+      language = 'json',
+      showTabs = false,
+    }: CodeEditorProps,
+    ref: React.Ref<CodeEditorRef>,
+  ) => {
     const editorTheme = theme === 'dark' ? 'vs-dark' : 'light';
-    const ref = useRef<any>(null);
+    const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const [isEditorReady, setIsEditorReady] = useState(false);
     const [showPlaceholder, setShowPlaceholder] = useState(false);
     const [hasTextFocus, setHasTextFocus] = useState(false);
 
-    // Tab-related state
+    const getEffectiveHeight = () => {
+      if (typeof height === 'string' && height.includes('%')) {
+        return `max(${minHeight}px, ${height})`;
+      }
+
+      if (typeof height === 'string' && height.includes('px')) {
+        const numHeight = parseInt(height);
+        return Math.max(minHeight, numHeight) + 'px';
+      }
+
+      return `max(${minHeight}px, ${height})`;
+    };
+
     const isStringValue = typeof value === 'string';
     const sourceCodeObject = isSourceCodeObject(value) ? value : null;
     const shouldShowTabs = showTabs && sourceCodeObject !== null;
     const [activeTab, setActiveTab] = useState<keyof SourceCode>('code');
+
     const [currentLanguage, setCurrentLanguage] =
       useState<MonacoLanguage>(language);
 
@@ -101,7 +130,6 @@ const CodeEditor = React.memo(
     const isReadOnly = readonly || activeTab === 'packageJson';
     const hasContent = currentValue && String(currentValue).trim() !== '';
 
-    // Update placeholder visibility based on content and focus state
     useEffect(() => {
       if (placeholder && !hasContent && !hasTextFocus && !isReadOnly) {
         setShowPlaceholder(true);
@@ -118,32 +146,57 @@ const CodeEditor = React.memo(
     useEffect(() => {
       if (!containerRef.current || !isEditorReady) return;
 
+      let resizeTimeout: NodeJS.Timeout;
+
       const resizeObserver = new ResizeObserver(() => {
-        if (ref.current) {
-          ref.current.layout();
+        if (editorRef.current) {
+          clearTimeout(resizeTimeout);
+
+          resizeTimeout = setTimeout(() => {
+            if (editorRef.current) {
+              editorRef.current.layout();
+            }
+          }, 1);
         }
       });
 
       resizeObserver.observe(containerRef.current);
 
       return () => {
+        clearTimeout(resizeTimeout);
         resizeObserver.disconnect();
       };
     }, [isEditorReady]);
 
     const handleEditorDidMount = (editor: editor.IStandaloneCodeEditor) => {
-      ref.current = editor;
+      editorRef.current = editor;
       setIsEditorReady(true);
 
       editor.onDidFocusEditorText(() => {
         setHasTextFocus(true);
-        onFocus?.(ref);
+        onFocus?.(editorRef);
       });
 
       editor.onDidBlurEditorWidget(() => {
         setHasTextFocus(false);
       });
+
+      editor.layout();
     };
+
+    // exposed layout method via ref for manual control when needed
+    useImperativeHandle(ref, () => ({
+      layout: () => {
+        if (editorRef.current) {
+          editorRef.current.layout();
+        }
+      },
+      focus: () => {
+        if (editorRef.current) {
+          editorRef.current.focus();
+        }
+      },
+    }));
 
     const handleChange = (value: string | undefined) => {
       if (!onChange) return;
@@ -168,10 +221,12 @@ const CodeEditor = React.memo(
 
     const handlePlaceholderClick = () => {
       setShowPlaceholder(false);
-      if (ref.current) {
+      if (editorRef.current) {
         setTimeout(() => {
-          ref.current.layout();
-          ref.current.focus();
+          if (editorRef.current) {
+            editorRef.current.layout();
+            editorRef.current.focus();
+          }
         }, 0);
       }
     };
@@ -179,7 +234,8 @@ const CodeEditor = React.memo(
     return (
       <div
         ref={containerRef}
-        className={cn('h-full flex flex-col gap-2', containerClassName)}
+        className={cn('h-full flex flex-col gap-2 min-h-0', containerClassName)}
+        style={{ minHeight: `${minHeight}px` }}
       >
         {shouldShowTabs && (
           <div className="flex justify-start gap-4 items-center" role="tablist">
@@ -225,13 +281,15 @@ const CodeEditor = React.memo(
               {placeholder}
             </div>
           )}
-          <div className={cn('h-full', { 'opacity-0': showPlaceholder })}>
+          <div
+            className={cn('h-full min-h-0', { 'opacity-0': showPlaceholder })}
+          >
             <Editor
               loading={t('Loading...')}
               value={formatValue(currentValue)}
               language={currentLanguage}
               theme={editorTheme}
-              height={height}
+              height={getEffectiveHeight()}
               width="100%"
               onChange={handleChange}
               onMount={handleEditorDidMount}
@@ -254,8 +312,9 @@ const CodeEditor = React.memo(
                 renderLineHighlight: isReadOnly ? 'none' : 'line',
                 cursorBlinking: isReadOnly ? 'solid' : 'blink',
                 scrollbar: {
-                  vertical: 'auto',
+                  vertical: 'visible',
                   horizontal: 'auto',
+                  alwaysConsumeMouseWheel: false,
                 },
                 overviewRulerLanes: 0,
                 hideCursorInOverviewRuler: true,
@@ -263,6 +322,7 @@ const CodeEditor = React.memo(
                   autoFindInSelection: 'never',
                   seedSearchStringFromSelection: 'never',
                 },
+                fixedOverflowWidgets: true,
               }}
             />
           </div>

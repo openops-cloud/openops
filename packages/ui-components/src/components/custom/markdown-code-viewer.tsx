@@ -15,9 +15,7 @@ const MarkdownCodeViewer = ({
       value={content}
       readonly={true}
       showLineNumbers={false}
-      height="200px"
       className="border border-solid rounded"
-      // containerClassName="h-full"
       theme={theme}
       language={getLanguageExtensionForCode(className)}
       showTabs={typeof content !== 'string' && 'packageJson' in content}

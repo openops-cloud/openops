@@ -34,7 +34,6 @@ input[type='search']::-webkit-search-cancel-button {
   cursor: pointer;
 }
 
-/* monaco editor scrollbar */
 .monaco-editor * .slider {
   border-radius: 12px;
   width: 8px !important;

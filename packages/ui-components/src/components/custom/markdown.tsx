@@ -125,7 +125,6 @@ const Markdown = React.memo(
               }
 
               const codeContent = String(props.children).trim();
-              console.log(' codeContent', codeContent);
 
               return (
                 <div className="relative py-2 w-full">
