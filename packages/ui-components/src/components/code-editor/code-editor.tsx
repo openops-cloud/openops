@@ -227,6 +227,7 @@ const CodeEditor = React.memo(
           )}
           <div className={cn('h-full', { 'opacity-0': showPlaceholder })}>
             <Editor
+              loading={t('Loading...')}
               value={formatValue(currentValue)}
               language={currentLanguage}
               theme={editorTheme}
@@ -240,7 +241,6 @@ const CodeEditor = React.memo(
                 stickyScroll: {
                   enabled: false,
                 },
-                // scrollBeyondLastColumn: 0,
                 wordWrap: 'on',
                 lineNumbers: showLineNumbers ? 'on' : 'off',
                 minimap: { enabled: false },

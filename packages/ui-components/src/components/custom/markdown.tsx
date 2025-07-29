@@ -109,6 +109,8 @@ const Markdown = React.memo(
     return (
       <Container withBorder={withBorder} className={containerClassName}>
         <ReactMarkdown
+          disallowedElements={['pre']}
+          unwrapDisallowed
           components={{
             code(props) {
               const isLanguageText = props.className?.includes('language');
@@ -123,6 +125,7 @@ const Markdown = React.memo(
               }
 
               const codeContent = String(props.children).trim();
+              console.log(' codeContent', codeContent);
 
               return (
                 <div className="relative py-2 w-full">

@@ -184,12 +184,11 @@ const MessageContent = ({
                     value={part.content}
                     readonly={true}
                     showLineNumbers={false}
-                    height="auto"
                     className="border border-solid rounded"
-                    containerClassName="h-auto"
                     theme={theme}
                     showTabs={true}
                     language="typescript"
+                    height="200px"
                   />
                   <CodeActions
                     content={part.content?.code ?? ''}
