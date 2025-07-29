@@ -1,126 +1,140 @@
-import { SourceCode } from '@openops/shared';
 import type { Meta, StoryObj } from '@storybook/react';
+import { Controller, useForm } from 'react-hook-form';
+
+import { SourceCode } from '@openops/shared';
+import { ThemeAwareContainer } from '../../../.storybook/decorators';
 import { CodeEditor } from '../../components/code-editor';
 
+/**
+ * A Monaco-based code editor component that provides syntax highlighting, validation, and editing capabilities for various programming languages.
+ */
 const meta = {
   title: 'components/CodeEditor',
   component: CodeEditor,
+  tags: ['autodocs'],
   parameters: {
     layout: 'centered',
   },
-  tags: ['autodocs'],
-  argTypes: {
-    theme: {
-      control: { type: 'select' },
-      options: ['light', 'dark'],
+  decorators: [
+    (Story, { args }) => {
+      const form = useForm({
+        defaultValues: {
+          content: args.value,
+        },
+      });
+
+      return (
+        <div style={{ width: '800px', height: '400px' }}>
+          <form>
+            <Controller
+              control={form.control}
+              name="content"
+              render={({ field }) => {
+                return (
+                  <ThemeAwareContainer
+                    component={Story}
+                    args={
+                      {
+                        ...args,
+                        value: field.value,
+                        onChange: (value: unknown) => {
+                          field.onChange(value);
+                        },
+                        height: '200px',
+                      } as any
+                    }
+                  />
+                );
+              }}
+            />
+          </form>
+        </div>
+      );
     },
-    readonly: {
-      control: { type: 'boolean' },
-    },
-    showLineNumbers: {
-      control: { type: 'boolean' },
-    },
-    showTabs: {
-      control: { type: 'boolean' },
-    },
-    autoHeight: {
-      control: { type: 'boolean' },
-    },
-    language: {
-      control: { type: 'select' },
-      options: ['json', 'javascript', 'typescript', 'html', 'css', 'python'],
-    },
-  },
+  ],
 } satisfies Meta<typeof CodeEditor>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 /**
- * Basic JSON editor with light theme
+ * Basic string input - shows a single editor for simple code editing
  */
-export const Basic: Story = {
+export const StringInput: Story = {
   args: {
-    value: { name: 'John Doe', age: 30, city: 'New York' },
-    theme: 'light',
+    value: 'const greeting = "Hello World!";\nconsole.log(greeting);',
     readonly: false,
+    language: 'typescript',
     showLineNumbers: true,
-    height: '300px',
-  },
+    placeholder: 'Enter your code here...',
+  } as any,
 };
 
 /**
- * Dark theme JSON editor
- */
-export const DarkTheme: Story = {
-  args: {
-    value: { name: 'John Doe', age: 30, city: 'New York' },
-    theme: 'dark',
-    readonly: false,
-    showLineNumbers: true,
-    height: '300px',
-  },
-};
-
-/**
- * Readonly mode
- */
-export const Readonly: Story = {
-  args: {
-    value: { name: 'John Doe', age: 30, city: 'New York' },
-    theme: 'light',
-    readonly: true,
-    showLineNumbers: true,
-    height: '300px',
-  },
-};
-
-/**
- * JavaScript code editor
+ * JavaScript code with syntax highlighting
  */
 export const JavaScript: Story = {
   args: {
-    value: `function greet(name) {
-  return \`Hello, \${name}!\`;
-}
-
-console.log(greet('World'));`,
-    theme: 'light',
+    value:
+      'function fibonacci(n) {\n  if (n <= 1) return n;\n  return fibonacci(n - 1) + fibonacci(n - 2);\n}\n\nconsole.log(fibonacci(10));',
     readonly: false,
-    showLineNumbers: true,
     language: 'javascript',
-    height: '300px',
-  },
+    showLineNumbers: true,
+  } as any,
 };
 
 /**
- * TypeScript code editor
+ * Python code example
  */
-export const TypeScript: Story = {
+export const Python: Story = {
   args: {
-    value: `interface User {
-  name: string;
-  age: number;
-  city: string;
-}
-
-function greetUser(user: User): string {
-  return \`Hello, \${user.name} from \${user.city}!\`;
-}
-
-const user: User = {
-  name: 'John Doe',
-  age: 30,
-  city: 'New York'
+    value:
+      'def factorial(n):\n    if n == 0 or n == 1:\n        return 1\n    else:\n        return n * factorial(n - 1)\n\nprint(factorial(5))',
+    readonly: false,
+    language: 'python',
+    showLineNumbers: true,
+  } as any,
 };
 
-console.log(greetUser(user));`,
-    theme: 'light',
+/**
+ * JSON data editing
+ */
+export const JSON: Story = {
+  args: {
+    value:
+      '{\n  "name": "John Doe",\n  "age": 30,\n  "email": "john.doe@example.com",\n  "address": {\n    "street": "123 Main St",\n    "city": "Anytown",\n    "country": "USA"\n  }\n}',
+
     readonly: false,
+    language: 'json',
     showLineNumbers: true,
-    language: 'typescript',
-    height: '400px',
-  },
+  } as any,
+};
+
+/**
+ * SQL query example
+ */
+export const SQL: Story = {
+  args: {
+    value:
+      "SELECT u.name, u.email, COUNT(o.id) as order_count\nFROM users u\nLEFT JOIN orders o ON u.id = o.user_id\nWHERE u.created_at >= '2024-01-01'\nGROUP BY u.id, u.name, u.email\nORDER BY order_count DESC\nLIMIT 10;",
+    readonly: false,
+    language: 'sql',
+    showLineNumbers: true,
+  } as any,
+};
+
+/**
+ * YAML configuration file
+ */
+export const YAML: Story = {
+  args: {
+    value:
+      'version: \'3.8\'\nservices:\n  web:\n    image: nginx:latest\n    ports:\n      - "80:80"\n    volumes:\n      - ./html:/usr/share/nginx/html\n  database:\n    image: postgres:13\n    environment:\n      POSTGRES_DB: myapp\n      POSTGRES_USER: user\n      POSTGRES_PASSWORD: password',
+    readonly: false,
+    language: 'yaml',
+    showLineNumbers: true,
+  } as any,
 };
 
 /**
@@ -129,154 +143,64 @@ console.log(greetUser(user));`,
 export const SourceCodeWithTabs: Story = {
   args: {
     value: {
-      code: `export const greeting = "Hello World!";
-console.log(greeting);
-
-export function add(a: number, b: number): number {
-  return a + b;
-}`,
-      packageJson: `{
-  "name": "example",
-  "version": "1.0.0",
-  "description": "A sample project",
-  "main": "index.js",
-  "scripts": {
-    "start": "node index.js",
-    "test": "jest"
-  },
-  "dependencies": {
-    "lodash": "^4.17.21",
-    "axios": "^1.6.0"
-  },
-  "devDependencies": {
-    "@types/node": "^20.0.0",
-    "typescript": "^5.0.0"
-  }
-}`,
+      code: 'import { z } from "zod";\nimport { validateInput } from "./utils";\n\nconst userSchema = z.object({\n  name: z.string().min(1),\n  email: z.string().email(),\n  age: z.number().min(0).max(120)\n});\n\nexport function createUser(input: unknown) {\n  const validatedInput = userSchema.parse(input);\n  return validateInput(validatedInput);\n}',
+      packageJson:
+        '{\n  "name": "user-service",\n  "version": "1.0.0",\n  "dependencies": {\n    "zod": "^3.22.4",\n    "typescript": "^5.0.0"\n  },\n  "devDependencies": {\n    "@types/node": "^20.0.0",\n    "tsx": "^4.0.0"\n  }\n}',
     } as SourceCode,
-    theme: 'light',
     readonly: false,
     showTabs: true,
-    height: '400px',
-  },
-};
-
-/**
- * SourceCode object with tabs in dark theme
- */
-export const SourceCodeWithTabsDark: Story = {
-  args: {
-    value: {
-      code: `export const greeting = "Hello World!";
-console.log(greeting);
-
-export function add(a: number, b: number): number {
-  return a + b;
-}`,
-      packageJson: `{
-  "name": "example",
-  "version": "1.0.0",
-  "description": "A sample project",
-  "main": "index.js",
-  "scripts": {
-    "start": "node index.js",
-    "test": "jest"
-  },
-  "dependencies": {
-    "lodash": "^4.17.21",
-    "axios": "^1.6.0"
-  },
-  "devDependencies": {
-    "@types/node": "^20.0.0",
-    "typescript": "^5.0.0"
-  }
-}`,
-    } as SourceCode,
-    theme: 'dark',
-    readonly: false,
-    showTabs: true,
-    height: '400px',
-  },
-};
-
-/**
- * SourceCode object with tabs in readonly mode
- */
-export const SourceCodeWithTabsReadonly: Story = {
-  args: {
-    value: {
-      code: `export const greeting = "Hello World!";
-console.log(greeting);
-
-export function add(a: number, b: number): number {
-  return a + b;
-}`,
-      packageJson: `{
-  "name": "example",
-  "version": "1.0.0",
-  "description": "A sample project",
-  "main": "index.js",
-  "scripts": {
-    "start": "node index.js",
-    "test": "jest"
-  },
-  "dependencies": {
-    "lodash": "^4.17.21",
-    "axios": "^1.6.0"
-  },
-  "devDependencies": {
-    "@types/node": "^20.0.0",
-    "typescript": "^5.0.0"
-  }
-}`,
-    } as SourceCode,
-    theme: 'light',
-    readonly: true,
-    showTabs: true,
-    height: '400px',
-  },
-};
-
-/**
- * Auto-height editor that adjusts to content
- */
-export const AutoHeight: Story = {
-  args: {
-    value: `{
-  "name": "auto-height-example",
-  "version": "1.0.0",
-  "description": "This editor automatically adjusts its height based on content",
-  "main": "index.js",
-  "scripts": {
-    "start": "node index.js",
-    "test": "jest",
-    "build": "tsc",
-    "dev": "nodemon"
-  },
-  "dependencies": {
-    "express": "^4.18.0",
-    "cors": "^2.8.5"
-  }
-}`,
-    theme: 'light',
-    readonly: false,
+    language: 'typescript',
     showLineNumbers: true,
-    autoHeight: true,
-    minHeight: 100,
-    maxHeight: 600,
-  },
+  } as any,
 };
 
 /**
- * Editor with placeholder text
+ * Readonly mode - for displaying code without editing capabilities
+ */
+export const ReadonlyMode: Story = {
+  args: {
+    value: 'SELECT * FROM users WHERE active = true;',
+    readonly: true,
+    language: 'sql',
+    showLineNumbers: true,
+  } as any,
+};
+
+/**
+ * Without line numbers - cleaner appearance for simple code snippets
+ */
+export const WithoutLineNumbers: Story = {
+  args: {
+    value: 'echo "Hello World"\ndate\nwhoami',
+    readonly: false,
+    language: 'shell',
+    showLineNumbers: false,
+  } as any,
+};
+
+/**
+ * With placeholder text - shows when editor is empty
  */
 export const WithPlaceholder: Story = {
   args: {
     value: '',
-    theme: 'light',
     readonly: false,
+    language: 'typescript',
     showLineNumbers: true,
-    placeholder: 'Enter your JSON data here...',
-    height: '300px',
-  },
+    placeholder: 'Start typing your TypeScript code here...',
+  } as any,
+};
+
+/**
+ * Custom height - fixed pixel height instead of percentage
+ */
+export const CustomHeight: Story = {
+  args: {
+    value:
+      'function longFunction() {\n  // Line 1\n  // Line 2\n  // Line 3\n  // Line 4\n  // Line 5\n  // Line 6\n  // Line 7\n  // Line 8\n  // Line 9\n  // Line 10\n  return "This is a longer function";\n}',
+    readonly: false,
+    language: 'javascript',
+    showLineNumbers: true,
+    height: '100px',
+  } as any,
 };

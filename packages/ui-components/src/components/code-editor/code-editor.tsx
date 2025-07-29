@@ -296,10 +296,17 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
                 stickyScroll: {
                   enabled: false,
                 },
+                scrollBeyondLastLine: false,
+                scrollbar: {
+                  vertical: 'auto',
+                  horizontal: 'auto',
+                  alwaysConsumeMouseWheel: false,
+                  verticalScrollbarSize: 8,
+                  horizontalScrollbarSize: 8,
+                },
                 wordWrap: 'on',
                 lineNumbers: showLineNumbers ? 'on' : 'off',
                 minimap: { enabled: false },
-                scrollBeyondLastLine: false,
                 automaticLayout: true,
                 tabSize: 2,
                 insertSpaces: true,
@@ -308,11 +315,6 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
                 folding: isReadOnly,
                 renderLineHighlight: isReadOnly ? 'none' : 'line',
                 cursorBlinking: isReadOnly ? 'solid' : 'blink',
-                scrollbar: {
-                  vertical: 'visible',
-                  horizontal: 'auto',
-                  alwaysConsumeMouseWheel: false,
-                },
                 overviewRulerLanes: 0,
                 hideCursorInOverviewRuler: true,
                 find: {
