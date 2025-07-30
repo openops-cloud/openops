@@ -1,11 +1,6 @@
 import { logger } from '@openops/server-shared';
 import { AiConfig, AiProviderEnum } from '@openops/shared';
-import {
-  CoreMessage,
-  LanguageModel,
-  TextStreamPart,
-  ToolSet,
-} from 'ai';
+import { CoreMessage, LanguageModel, TextStreamPart, ToolSet } from 'ai';
 import { FastifyInstance } from 'fastify';
 import { ServerResponse } from 'node:http';
 import { handleUserMessage } from '../../../src/app/ai/chat/user-message-handler';
