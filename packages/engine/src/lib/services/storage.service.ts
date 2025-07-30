@@ -178,7 +178,7 @@ export function createContextStore({
     },
     async list(
       scope = StoreScope.FLOW,
-      keyPrefix?: string,
+      keyPrefix: string,
     ): Promise<Array<{ key: string; value: unknown }>> {
       let scopePrefix = createKey(prefix, scope, flowId, flowRunId, '');
 
