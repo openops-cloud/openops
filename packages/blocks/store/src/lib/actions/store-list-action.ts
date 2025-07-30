@@ -44,10 +44,8 @@ export const storageListAction = createAction({
 
     const entries = await context.store.list(scope);
 
-    // Filter entries based on scope and key filter
     let filteredEntries = entries;
 
-    // For RUN scope, we need to filter to only include entries with the run prefix
     if (context.propsValue.store_scope === BlockStoreScope.RUN && keyPrefix) {
       filteredEntries = entries.filter((entry) =>
         entry.key.startsWith(keyPrefix),
@@ -58,7 +56,6 @@ export const storageListAction = createAction({
       return filteredEntries.filter((entry) => {
         let keyName = entry.key;
 
-        // Remove the run prefix for RUN scope when applying user filter
         if (
           context.propsValue.store_scope === BlockStoreScope.RUN &&
           keyPrefix
@@ -66,7 +63,6 @@ export const storageListAction = createAction({
           keyName = entry.key.replace(keyPrefix, '');
         }
 
-        // For test runs, also remove the test-run prefix
         if (context.run.isTest) {
           keyName = keyName.replace(/^run_test-run\//, '');
         }
