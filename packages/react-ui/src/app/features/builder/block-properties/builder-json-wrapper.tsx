@@ -25,7 +25,6 @@ const BuilderJsonEditorWrapper = ({
       value={field.value}
       readonly={disabled ?? false}
       theme={theme}
-      height="100%"
       onFocus={(ref) => {
         setInsertStateHandler((propertyPath) => {
           ref.current?.view?.dispatch({

@@ -45,14 +45,13 @@ export const JsonContent = ({
             name="jsonContent"
             render={({ field }) => (
               <FormItem className="h-full">
-                <FormControl>
+                <FormControl className="h-full">
                   <CodeEditor
                     value={field.value}
                     placeholder={t('Paste sample data here')}
                     readonly={false}
                     theme={theme}
                     containerClassName={editorClassName}
-                    height="100%"
                     onChange={(value) => {
                       field.onChange(value);
                     }}
@@ -76,7 +75,7 @@ export const JsonContent = ({
   }
 
   return (
-    <>
+    <div className="h-full">
       {typeof json !== 'string' && typeof json !== 'object' && (
         <pre className="text-sm whitespace-pre-wrap overflow-x-auto p-2 border-t">
           {JSON.stringify(json)}
@@ -96,6 +95,6 @@ export const JsonContent = ({
           containerClassName={editorClassName}
         />
       )}
-    </>
+    </div>
   );
 };

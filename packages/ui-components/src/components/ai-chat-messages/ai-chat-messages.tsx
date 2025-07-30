@@ -188,7 +188,6 @@ const MessageContent = ({
                     theme={theme}
                     showTabs={true}
                     language="typescript"
-                    height="200px"
                   />
                   <CodeActions
                     content={part.content?.code ?? ''}

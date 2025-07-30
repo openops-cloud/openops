@@ -226,7 +226,6 @@ const selectFormComponentForProperty = ({
               onChange={(value) => {
                 field.onChange(tryParseJson(value));
               }}
-              height="100%"
             ></CodeEditor>
           )}
         </AutoFormFieldWrapper>

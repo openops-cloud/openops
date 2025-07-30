@@ -4,6 +4,7 @@ import { t } from 'i18next';
 import { editor } from 'monaco-editor';
 import React, {
   RefObject,
+  useCallback,
   useEffect,
   useImperativeHandle,
   useRef,
@@ -11,36 +12,7 @@ import React, {
 } from 'react';
 import { cn } from '../../lib/cn';
 import { convertToString, isSourceCodeObject } from './code-utils';
-
-export type MonacoLanguage =
-  | 'javascript'
-  | 'typescript'
-  | 'json'
-  | 'html'
-  | 'css'
-  | 'scss'
-  | 'less'
-  | 'python'
-  | 'java'
-  | 'csharp'
-  | 'cpp'
-  | 'go'
-  | 'rust'
-  | 'kotlin'
-  | 'swift'
-  | 'php'
-  | 'ruby'
-  | 'perl'
-  | 'sql'
-  | 'yaml'
-  | 'xml'
-  | 'markdown'
-  | 'dockerfile'
-  | 'shell'
-  | 'powershell'
-  | 'bat'
-  | 'ini'
-  | 'plaintext';
+import { MonacoLanguage } from './types';
 
 type CodeEditorProps = {
   value: unknown;
@@ -51,11 +23,11 @@ type CodeEditorProps = {
   containerClassName?: string;
   theme: string;
   placeholder?: string;
-  height?: string;
-  minHeight?: number;
   showLineNumbers?: boolean;
   language?: MonacoLanguage;
   showTabs?: boolean;
+  autoHeight?: boolean;
+  maxHeight?: number;
 };
 
 export interface CodeEditorRef {
@@ -74,11 +46,11 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
       containerClassName,
       theme,
       placeholder,
-      height = '100%',
-      minHeight = 60,
       showLineNumbers = true,
       language = 'json',
       showTabs = false,
+      autoHeight = true,
+      maxHeight,
     }: CodeEditorProps,
     ref: React.Ref<CodeEditorRef>,
   ) => {
@@ -88,19 +60,9 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
     const [isEditorReady, setIsEditorReady] = useState(false);
     const [showPlaceholder, setShowPlaceholder] = useState(false);
     const [hasTextFocus, setHasTextFocus] = useState(false);
-
-    const getEffectiveHeight = () => {
-      if (typeof height === 'string' && height.includes('%')) {
-        return `max(${minHeight}px, ${height})`;
-      }
-
-      if (typeof height === 'string' && height.includes('px')) {
-        const numHeight = parseInt(height);
-        return Math.max(minHeight, numHeight) + 'px';
-      }
-
-      return `max(${minHeight}px, ${height})`;
-    };
+    const [editorHeight, setEditorHeight] = useState<number | undefined>(
+      undefined,
+    );
 
     const isStringValue = typeof value === 'string';
     const sourceCodeObject = isSourceCodeObject(value) ? value : null;
@@ -130,6 +92,16 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
     const isReadOnly = readonly || activeTab === 'packageJson';
     const hasContent = currentValue && String(currentValue).trim() !== '';
 
+    const updateEditorHeight = useCallback(() => {
+      if (!editorRef.current || !autoHeight) return;
+
+      const contentHeight = Math.min(
+        maxHeight || 1000,
+        editorRef.current.getContentHeight(),
+      );
+      setEditorHeight(contentHeight);
+    }, [autoHeight, maxHeight]);
+
     useEffect(() => {
       if (placeholder && !hasContent && !hasTextFocus && !isReadOnly) {
         setShowPlaceholder(true);
@@ -137,6 +109,18 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
         setShowPlaceholder(false);
       }
     }, [placeholder, hasContent, hasTextFocus, isReadOnly]);
+
+    useEffect(() => {
+      if (autoHeight) {
+        updateEditorHeight();
+      }
+    }, [
+      currentValue,
+      activeTab,
+      autoHeight,
+      isEditorReady,
+      updateEditorHeight,
+    ]);
 
     const handleTabClick = (tab: keyof SourceCode) => {
       setActiveTab(tab);
@@ -156,7 +140,7 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
             if (editorRef.current) {
               editorRef.current.layout();
             }
-          }, 1);
+          }, 0);
         }
       });
 
@@ -181,14 +165,19 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
         setHasTextFocus(false);
       });
 
-      editor.layout();
+      if (autoHeight) {
+        editor.onDidContentSizeChange(updateEditorHeight);
+        updateEditorHeight();
+      }
     };
 
-    // exposed layout method via ref for manual control when needed
     useImperativeHandle(ref, () => ({
       layout: () => {
         if (editorRef.current) {
           editorRef.current.layout();
+          if (autoHeight) {
+            updateEditorHeight();
+          }
         }
       },
       focus: () => {
@@ -234,8 +223,7 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
     return (
       <div
         ref={containerRef}
-        className={cn('h-full flex flex-col gap-2 min-h-0', containerClassName)}
-        style={{ minHeight: `${minHeight}px` }}
+        className={cn('h-full flex flex-col gap-2', containerClassName)}
       >
         {shouldShowTabs && (
           <div className="flex justify-start gap-4 items-center" role="tablist">
@@ -269,7 +257,12 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
             </button>
           </div>
         )}
-        <div className={cn('border-t relative h-full', className)}>
+        <div
+          className={cn('border-t relative', className)}
+          style={{
+            height: autoHeight && editorHeight ? `${editorHeight}px` : '100%',
+          }}
+        >
           {showPlaceholder && (
             <div
               className={cn(
@@ -281,13 +274,18 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
               {placeholder}
             </div>
           )}
-          <div className={cn('h-full', { 'opacity-0': showPlaceholder })}>
+          <div
+            className={cn({ 'opacity-0': showPlaceholder })}
+            style={{
+              height: autoHeight && editorHeight ? `${editorHeight}px` : '100%',
+            }}
+          >
             <Editor
               value={formatValue(currentValue)}
               language={currentLanguage}
               theme={editorTheme}
-              height={getEffectiveHeight()}
               width="100%"
+              height={autoHeight && editorHeight ? `${editorHeight}px` : '100%'}
               onChange={handleChange}
               onMount={handleEditorDidMount}
               options={{
@@ -310,8 +308,8 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
                 automaticLayout: true,
                 tabSize: 2,
                 insertSpaces: true,
-                formatOnPaste: true,
-                formatOnType: true,
+                formatOnPaste: false,
+                formatOnType: false,
                 folding: isReadOnly,
                 renderLineHighlight: isReadOnly ? 'none' : 'line',
                 cursorBlinking: isReadOnly ? 'solid' : 'blink',

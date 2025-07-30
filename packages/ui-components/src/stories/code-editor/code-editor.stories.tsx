@@ -37,8 +37,9 @@ const meta = {
                     onChange={(value: unknown) => {
                       field.onChange(value);
                     }}
-                    height="200px"
                     value={field.value}
+                    autoHeight={true}
+                    maxHeight={200}
                   />
                 );
               }}

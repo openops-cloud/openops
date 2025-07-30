@@ -2,6 +2,11 @@ body {
   font-family: 'Satoshi', sans-serif;
 }
 
+.monaco-editor {
+  outline: 0;
+  --vscode-focusBorder: transparent !important;
+}
+
 .monaco-editor * > .slider {
   border-radius: 12px;
   background-color: #e2e8f0 !important;

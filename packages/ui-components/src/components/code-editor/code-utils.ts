@@ -1,5 +1,5 @@
 import { SourceCode } from '@openops/shared';
-import { MonacoLanguage } from './code-editor';
+import { MonacoLanguage } from './types';
 
 export const getLanguageExtensionForCode = (
   className?: string,
