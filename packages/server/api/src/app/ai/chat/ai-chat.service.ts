@@ -169,7 +169,7 @@ export const getAllChats = async (
 
     const context = await cacheWrapper.getSerializedObject<MCPChatContext>(key);
 
-    if (context && context.chatName) {
+    if (context?.chatName) {
       chats.push({
         chatId: longChatId,
         chatName: context.chatName || 'Untitled',

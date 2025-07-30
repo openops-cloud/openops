@@ -45,7 +45,9 @@ const scanKeys = async (pattern: string): Promise<string[]> => {
       keys.push(...resultKeys);
     });
     stream.on('end', () => resolve(keys));
-    stream.on('error', (err) => reject(err));
+    stream.on('error', (err) =>
+      reject(err instanceof Error ? err : new Error(String(err))),
+    );
   });
 };
 
