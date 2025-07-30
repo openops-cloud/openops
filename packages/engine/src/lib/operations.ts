@@ -24,6 +24,7 @@ import {
   StepOutputStatus,
   TriggerHookType,
 } from '@openops/shared';
+import sizeof from 'object-sizeof';
 import { EngineConstants } from './handler/context/engine-constants';
 import {
   ExecutionVerdict,
@@ -35,6 +36,8 @@ import { blockHelper } from './helper/block-helper';
 import { triggerHelper } from './helper/trigger-helper';
 import { resolveVariable } from './resolve-variable';
 import { utils } from './utils';
+
+const MAX_SIZE_FOR_ALL_ENTRIES = 1024 * 1024;
 
 const executeFlow = async (
   input: ExecuteFlowOperation,
@@ -88,9 +91,22 @@ async function executeStep(
   });
 
   const stepResult = output.steps[step.name];
+  const cleanedOutput = cleanSampleData(stepResult);
+
+  const outputSize = sizeof(cleanedOutput);
+  if (outputSize > MAX_SIZE_FOR_ALL_ENTRIES) {
+    const limitInMB = (MAX_SIZE_FOR_ALL_ENTRIES / (1024 * 1024)).toFixed(3);
+
+    return {
+      success: false,
+      output: `Step output size exceeds maximum allowed size (${limitInMB}MB). Workflow execution failed to prevent data loss.`,
+      input: stepResult.input,
+    };
+  }
+
   return {
     success: output.verdict !== ExecutionVerdict.FAILED,
-    output: cleanSampleData(stepResult),
+    output: cleanedOutput,
     input: stepResult.input,
   };
 }

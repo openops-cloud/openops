@@ -15,7 +15,6 @@ import {
   StopResponse,
 } from '@openops/shared';
 import { nanoid } from 'nanoid';
-import { loggingUtils } from '../../helper/logging-utils';
 import { StepExecutionPath } from './step-execution-path';
 
 export enum ExecutionVerdict {
@@ -244,7 +243,7 @@ export class FlowExecutorContext {
       duration: this.duration,
       tasks: this.tasks,
       tags: [...this.tags],
-      steps: await loggingUtils.trimExecution(this.steps),
+      steps: this.steps,
     };
     switch (this.verdict) {
       case ExecutionVerdict.FAILED: {
