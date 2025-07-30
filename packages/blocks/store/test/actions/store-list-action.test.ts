@@ -37,9 +37,9 @@ describe('storageListAction', () => {
     test('should list all entries when no key filter is provided', async () => {
       const mockContext = createMockContext();
       const mockEntries = [
-        { key: 'key1', value: 'value1' },
-        { key: 'key2', value: 'value2' },
-        { key: 'key3', value: 'value3' },
+        { key: 'run_test-run-id/key1', value: 'value1' },
+        { key: 'run_test-run-id/key2', value: 'value2' },
+        { key: 'run_test-run-id/key3', value: 'value3' },
       ];
 
       mockContext.store.list.mockResolvedValue(mockEntries);
@@ -53,8 +53,8 @@ describe('storageListAction', () => {
     test('should list all entries when key filter is empty string', async () => {
       const mockContext = createMockContext();
       const mockEntries = [
-        { key: 'key1', value: 'value1' },
-        { key: 'key2', value: 'value2' },
+        { key: 'run_test-run-id/key1', value: 'value1' },
+        { key: 'run_test-run-id/key2', value: 'value2' },
       ];
 
       mockContext.store.list.mockResolvedValue(mockEntries);
@@ -69,8 +69,8 @@ describe('storageListAction', () => {
     test('should list all entries when key filter is whitespace only', async () => {
       const mockContext = createMockContext();
       const mockEntries = [
-        { key: 'key1', value: 'value1' },
-        { key: 'key2', value: 'value2' },
+        { key: 'run_test-run-id/key1', value: 'value1' },
+        { key: 'run_test-run-id/key2', value: 'value2' },
       ];
 
       mockContext.store.list.mockResolvedValue(mockEntries);

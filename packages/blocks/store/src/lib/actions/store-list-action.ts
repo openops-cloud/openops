@@ -1,5 +1,5 @@
 import { createAction, Property } from '@openops/blocks-framework';
-import { common, getScopeAndKey } from './common';
+import { BlockStoreScope, common, getScopeAndKey } from './common';
 
 export const storageListAction = createAction({
   name: 'list',
@@ -24,7 +24,7 @@ export const storageListAction = createAction({
     store_scope: common.store_scope,
   },
   async run(context) {
-    const { scope } = getScopeAndKey({
+    const { scope, key: keyPrefix } = getScopeAndKey({
       runId: context.run.id,
       isTest: context.run.isTest,
       key: '',
@@ -44,16 +44,37 @@ export const storageListAction = createAction({
 
     const entries = await context.store.list(scope);
 
+    // Filter entries based on scope and key filter
+    let filteredEntries = entries;
+
+    // For RUN scope, we need to filter to only include entries with the run prefix
+    if (context.propsValue.store_scope === BlockStoreScope.RUN && keyPrefix) {
+      filteredEntries = entries.filter((entry) =>
+        entry.key.startsWith(keyPrefix),
+      );
+    }
+
     if (filterRegex) {
-      return entries.filter((entry) => {
+      return filteredEntries.filter((entry) => {
         let keyName = entry.key;
-        if (context.run.isTest) {
-          keyName = entry.key.replace(/^run_test-run\//, '');
+
+        // Remove the run prefix for RUN scope when applying user filter
+        if (
+          context.propsValue.store_scope === BlockStoreScope.RUN &&
+          keyPrefix
+        ) {
+          keyName = entry.key.replace(keyPrefix, '');
         }
+
+        // For test runs, also remove the test-run prefix
+        if (context.run.isTest) {
+          keyName = keyName.replace(/^run_test-run\//, '');
+        }
+
         return filterRegex?.test(keyName);
       });
     }
 
-    return entries;
+    return filteredEntries;
   },
 });
