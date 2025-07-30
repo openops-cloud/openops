@@ -11,7 +11,7 @@ import { AI_CHAT_CONTAINER_SIZES, AiCliChatContainerSizeState } from './types';
 
 const COLLAPSED_HEIGHT = 57;
 const DOCKED_HEIGHT = 450;
-const EXPANDED_HEIGHT = 180;
+const EXPANDED_HEIGHT_OFFSET = 122;
 const FULL_WIDTH_HEIGHT = 100;
 const EXPANDED_WIDTH_OFFSET = 40;
 const REGULAR_WIDTH = 450;
@@ -63,7 +63,7 @@ const StepSettingsAssistantUiChatContainer = ({
   } else if (containerSize === AI_CHAT_CONTAINER_SIZES.DOCKED) {
     height = DOCKED_HEIGHT;
   } else if (containerSize === AI_CHAT_CONTAINER_SIZES.EXPANDED) {
-    height = parentHeight - EXPANDED_HEIGHT;
+    height = parentHeight - EXPANDED_HEIGHT_OFFSET;
   } else {
     height = parentHeight - FULL_WIDTH_HEIGHT;
   }
