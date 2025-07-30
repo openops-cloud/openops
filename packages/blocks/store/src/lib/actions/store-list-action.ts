@@ -42,18 +42,10 @@ export const storageListAction = createAction({
       }
     }
 
-    const entries = await context.store.list(scope);
-
-    let filteredEntries = entries;
-
-    if (context.propsValue.store_scope === BlockStoreScope.RUN && keyPrefix) {
-      filteredEntries = entries.filter((entry) =>
-        entry.key.startsWith(keyPrefix),
-      );
-    }
+    const entries = await context.store.list(scope, keyPrefix);
 
     if (filterRegex) {
-      return filteredEntries.filter((entry) => {
+      return entries.filter((entry) => {
         let keyName = entry.key;
 
         if (
@@ -71,6 +63,6 @@ export const storageListAction = createAction({
       });
     }
 
-    return filteredEntries;
+    return entries;
   },
 });

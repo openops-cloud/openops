@@ -80,7 +80,7 @@ export const storeEntryService = {
     });
 
     return entries.map((entry) => ({
-      key: prefix ? entry.key.replace(prefix, '') : entry.key,
+      key: entry.key,
       value: entry.value,
     }));
   },

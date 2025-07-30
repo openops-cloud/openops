@@ -177,15 +177,21 @@ export function createContextStore({
     },
     async list(
       scope = StoreScope.FLOW,
+      keyPrefix?: string,
     ): Promise<Array<{ key: string; value: unknown }>> {
-      const scopePrefix = createKey(prefix, scope, flowId, flowRunId, '');
+      let scopePrefix = createKey(prefix, scope, flowId, flowRunId, '');
+
+      if (keyPrefix) {
+        scopePrefix = createKey(prefix, scope, flowId, flowRunId, keyPrefix);
+      }
+
       const keyValuePairs = await createStorageService({
         apiUrl,
         engineToken,
       }).list(scopePrefix);
 
       return keyValuePairs.map((entry) => ({
-        key: entry.key,
+        key: scopePrefix ? entry.key.replace(scopePrefix, '') : entry.key,
         value: entry.value,
       }));
     },

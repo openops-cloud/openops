@@ -188,7 +188,10 @@ export interface Store {
   put<T>(key: string, value: T, scope?: StoreScope): Promise<T>;
   get<T>(key: string, scope?: StoreScope): Promise<T | null>;
   delete(key: string, scope?: StoreScope): Promise<void>;
-  list(scope?: StoreScope): Promise<Array<{ key: string; value: unknown }>>;
+  list(
+    scope?: StoreScope,
+    keyPrefix?: string,
+  ): Promise<Array<{ key: string; value: unknown }>>;
 }
 
 export enum StoreScope {
