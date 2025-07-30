@@ -95,8 +95,10 @@ const AiChatResizablePanel = ({
         id={RESIZABLE_PANEL_IDS.AI_CHAT}
         className={cn('duration-0 min-w-0 shadow-sidebar z-20', {
           'min-w-[350px]': showChat,
-          'transition-all duration-300': !isDraggingHandle && hasMounted,
+          'transition-width transition-[min-width] duration-300':
+            !isDraggingHandle && hasMounted,
         })}
+        minSize={0}
         collapsible={true}
         defaultSize={getDefaultPanelSize()}
       >
