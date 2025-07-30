@@ -185,7 +185,7 @@ export function createContextStore({
       }).list(scopePrefix);
 
       return keyValuePairs.map((entry) => ({
-        key: scopePrefix ? entry.key.replace(scopePrefix, '') : entry.key,
+        key: entry.key,
         value: entry.value,
       }));
     },
