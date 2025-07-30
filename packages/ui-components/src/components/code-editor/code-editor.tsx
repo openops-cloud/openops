@@ -264,15 +264,18 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
           }}
         >
           {showPlaceholder && (
-            <div
+            <button
+              type="button"
               className={cn(
                 'absolute inset-0 z-10 flex items-center px-3 text-muted-foreground cursor-text',
                 'bg-background border border-input rounded-md',
+                'text-left',
               )}
               onClick={handlePlaceholderClick}
+              aria-label={t('Click to start editing')}
             >
               {placeholder}
-            </div>
+            </button>
           )}
           <div
             className={cn({ 'opacity-0': showPlaceholder })}
