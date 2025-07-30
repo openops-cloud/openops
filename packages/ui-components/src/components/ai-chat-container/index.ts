@@ -5,4 +5,5 @@ export * from './ai-scope-selector';
 export * from './assistant-ui-chat-container';
 export * from './no-ai-enabled-popover';
 export * from './step-settings-ai-chat-container';
+export * from './step-settings-assistant-ui-chat-container';
 export * from './types';
