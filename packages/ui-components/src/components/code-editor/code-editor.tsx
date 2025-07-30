@@ -26,8 +26,6 @@ type CodeEditorProps = {
   showLineNumbers?: boolean;
   language?: MonacoLanguage;
   showTabs?: boolean;
-  autoHeight?: boolean;
-  maxHeight?: number;
 };
 
 export interface CodeEditorRef {
@@ -49,8 +47,6 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
       showLineNumbers = true,
       language = 'json',
       showTabs = false,
-      autoHeight = true,
-      maxHeight,
     }: CodeEditorProps,
     ref: React.Ref<CodeEditorRef>,
   ) => {
@@ -60,9 +56,6 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
     const [isEditorReady, setIsEditorReady] = useState(false);
     const [showPlaceholder, setShowPlaceholder] = useState(false);
     const [hasTextFocus, setHasTextFocus] = useState(false);
-    const [editorHeight, setEditorHeight] = useState<number | undefined>(
-      undefined,
-    );
 
     const isStringValue = typeof value === 'string';
     const sourceCodeObject = isSourceCodeObject(value) ? value : null;
@@ -88,19 +81,40 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
       return String(value);
     };
 
+    const throttle = useCallback(
+      (func: (...args: any[]) => void, delay: number) => {
+        let timeoutId: NodeJS.Timeout;
+        let lastExecTime = 0;
+        return (...args: any[]) => {
+          const currentTime = Date.now();
+
+          if (currentTime - lastExecTime > delay) {
+            func(...args);
+            lastExecTime = currentTime;
+          } else {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+              func(...args);
+              lastExecTime = Date.now();
+            }, delay - (currentTime - lastExecTime));
+          }
+        };
+      },
+      [],
+    );
+
+    const throttledLayout = useCallback(() => {
+      const throttledFn = throttle(() => {
+        if (editorRef.current) {
+          editorRef.current.layout();
+        }
+      }, 16); // ~60fps
+      return throttledFn();
+    }, [throttle]);
+
     const currentValue = activeTab === 'code' ? code : packageJson;
     const isReadOnly = readonly || activeTab === 'packageJson';
     const hasContent = currentValue && String(currentValue).trim() !== '';
-
-    const updateEditorHeight = useCallback(() => {
-      if (!editorRef.current || !autoHeight) return;
-
-      const contentHeight = Math.min(
-        maxHeight || 1000,
-        editorRef.current.getContentHeight(),
-      );
-      setEditorHeight(contentHeight);
-    }, [autoHeight, maxHeight]);
 
     useEffect(() => {
       if (placeholder && !hasContent && !hasTextFocus && !isReadOnly) {
@@ -110,47 +124,27 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
       }
     }, [placeholder, hasContent, hasTextFocus, isReadOnly]);
 
-    useEffect(() => {
-      if (autoHeight) {
-        updateEditorHeight();
-      }
-    }, [
-      currentValue,
-      activeTab,
-      autoHeight,
-      isEditorReady,
-      updateEditorHeight,
-    ]);
-
     const handleTabClick = (tab: keyof SourceCode) => {
       setActiveTab(tab);
       setCurrentLanguage(tab === 'packageJson' ? 'json' : 'typescript');
     };
 
+    // ResizeObserver for container changes
     useEffect(() => {
-      if (!containerRef.current || !isEditorReady) return;
-
-      let resizeTimeout: NodeJS.Timeout;
+      if (!containerRef.current || typeof ResizeObserver === 'undefined')
+        return;
 
       const resizeObserver = new ResizeObserver(() => {
-        if (editorRef.current) {
-          clearTimeout(resizeTimeout);
-
-          resizeTimeout = setTimeout(() => {
-            if (editorRef.current) {
-              editorRef.current.layout();
-            }
-          }, 0);
-        }
+        // Use throttled layout for performance, following VSCode pattern
+        throttledLayout();
       });
 
       resizeObserver.observe(containerRef.current);
 
       return () => {
-        clearTimeout(resizeTimeout);
         resizeObserver.disconnect();
       };
-    }, [isEditorReady]);
+    }, [isEditorReady, throttledLayout]);
 
     const handleEditorDidMount = (editor: editor.IStandaloneCodeEditor) => {
       editorRef.current = editor;
@@ -165,21 +159,12 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
         setHasTextFocus(false);
       });
 
-      if (autoHeight) {
-        editor.onDidContentSizeChange(updateEditorHeight);
-        updateEditorHeight();
-      }
+      // Initial layout
+      editor.layout();
     };
 
     useImperativeHandle(ref, () => ({
-      layout: () => {
-        if (editorRef.current) {
-          editorRef.current.layout();
-          if (autoHeight) {
-            updateEditorHeight();
-          }
-        }
-      },
+      layout: throttledLayout,
       focus: () => {
         if (editorRef.current) {
           editorRef.current.focus();
@@ -213,7 +198,7 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
       if (editorRef.current) {
         setTimeout(() => {
           if (editorRef.current) {
-            editorRef.current.layout();
+            throttledLayout();
             editorRef.current.focus();
           }
         }, 0);
@@ -223,7 +208,7 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
     return (
       <div
         ref={containerRef}
-        className={cn('h-full flex flex-col gap-2', containerClassName)}
+        className={cn('h-full w-full flex flex-col gap-2', containerClassName)}
       >
         {shouldShowTabs && (
           <div className="flex justify-start gap-4 items-center" role="tablist">
@@ -257,12 +242,7 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
             </button>
           </div>
         )}
-        <div
-          className={cn('border-t relative', className)}
-          style={{
-            height: autoHeight && editorHeight ? `${editorHeight}px` : '100%',
-          }}
-        >
+        <div className={cn('border-t relative flex-1', className)}>
           {showPlaceholder && (
             <button
               type="button"
@@ -278,17 +258,17 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
             </button>
           )}
           <div
-            className={cn({ 'opacity-0': showPlaceholder })}
-            style={{
-              height: autoHeight && editorHeight ? `${editorHeight}px` : '100%',
-            }}
+            className={cn('w-full h-full', {
+              'opacity-0': showPlaceholder,
+            })}
           >
             <Editor
+              className="min-h-10"
               value={formatValue(currentValue)}
               language={currentLanguage}
               theme={editorTheme}
               width="100%"
-              height={autoHeight && editorHeight ? `${editorHeight}px` : '100%'}
+              height="100%"
               onChange={handleChange}
               onMount={handleEditorDidMount}
               options={{
@@ -308,7 +288,7 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
                 wordWrap: 'on',
                 lineNumbers: showLineNumbers ? 'on' : 'off',
                 minimap: { enabled: false },
-                automaticLayout: true,
+                automaticLayout: false,
                 tabSize: 2,
                 insertSpaces: true,
                 formatOnPaste: false,

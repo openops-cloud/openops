@@ -219,14 +219,16 @@ const selectFormComponentForProperty = ({
               disabled={disabled}
             ></BuilderJsonEditorWrapper>
           ) : (
-            <CodeEditor
-              value={field.value}
-              readonly={disabled}
-              theme={theme}
-              onChange={(value) => {
-                field.onChange(tryParseJson(value));
-              }}
-            ></CodeEditor>
+            <div className="min-h-20">
+              <CodeEditor
+                value={field.value}
+                readonly={disabled}
+                theme={theme}
+                onChange={(value) => {
+                  field.onChange(tryParseJson(value));
+                }}
+              ></CodeEditor>
+            </div>
           )}
         </AutoFormFieldWrapper>
       );

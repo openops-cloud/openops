@@ -179,16 +179,18 @@ const MessageContent = ({
               );
             case 'sourcecode':
               return (
-                <div key={stableKey} className="relative py-2 w-full">
-                  <CodeEditor
-                    value={part.content}
-                    readonly={true}
-                    showLineNumbers={false}
-                    className="border border-solid rounded"
-                    theme={theme}
-                    showTabs={true}
-                    language="typescript"
-                  />
+                <div key={stableKey} className="flex flex-col py-2">
+                  <div className="h-80">
+                    <CodeEditor
+                      value={part.content}
+                      readonly={true}
+                      showLineNumbers={false}
+                      className="border border-solid rounded"
+                      theme={theme}
+                      showTabs={true}
+                      language="typescript"
+                    />
+                  </div>
                   <CodeActions
                     content={part.content?.code ?? ''}
                     onInject={

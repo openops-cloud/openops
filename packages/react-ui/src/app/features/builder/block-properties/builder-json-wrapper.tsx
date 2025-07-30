@@ -21,25 +21,27 @@ const BuilderJsonEditorWrapper = ({
   const { theme } = useTheme();
 
   return (
-    <CodeEditor
-      value={field.value}
-      readonly={disabled ?? false}
-      theme={theme}
-      onFocus={(ref) => {
-        setInsertStateHandler((propertyPath) => {
-          ref.current?.view?.dispatch({
-            changes: {
-              from: ref.current.view.state.selection.main.head,
-              insert: `{{${propertyPath}}}`,
-            },
+    <div className="min-h-20">
+      <CodeEditor
+        value={field.value}
+        readonly={disabled ?? false}
+        theme={theme}
+        onFocus={(ref) => {
+          setInsertStateHandler((propertyPath) => {
+            ref.current?.view?.dispatch({
+              changes: {
+                from: ref.current.view.state.selection.main.head,
+                insert: `{{${propertyPath}}}`,
+              },
+            });
           });
-        });
-      }}
-      className={textMentionUtils.inputThatUsesMentionClass}
-      onChange={(value) => {
-        field.onChange(tryParseJson(value));
-      }}
-    />
+        }}
+        className={textMentionUtils.inputThatUsesMentionClass}
+        onChange={(value) => {
+          field.onChange(tryParseJson(value));
+        }}
+      />
+    </div>
   );
 };
 
