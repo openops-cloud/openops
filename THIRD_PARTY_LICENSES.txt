@@ -22438,9 +22438,9 @@ The following npm packages may be included in this product:
  - @assistant-ui/react-ai-sdk@0.10.15
  - @assistant-ui/react-edge@0.2.13
  - @assistant-ui/react-markdown@0.10.6
- - @assistant-ui/react@0.10.25
+ - @assistant-ui/react@0.10.29
  - assistant-cloud@0.0.3
- - assistant-stream@0.2.18
+ - assistant-stream@0.2.20
 
 These packages each contain the following license:
 

@@ -152,6 +152,34 @@ export const getChatHistoryWithMergedTools = async (
   return mergeToolResultsIntoMessages(messages);
 };
 
+export const getAllChats = async (
+  userId: string,
+  projectId: string,
+): Promise<{ chatId: string; chatName: string }[]> => {
+  const pattern = `${projectId}:${userId}:*:context`;
+  const keys = await cacheWrapper.scanKeys(pattern);
+  const chats: { chatId: string; chatName: string }[] = [];
+
+  for (const key of keys) {
+    const keyParts = key.split(':');
+    if (keyParts.length !== 4) {
+      continue;
+    }
+    const longChatId = keyParts[2];
+
+    const context = await cacheWrapper.getSerializedObject<MCPChatContext>(key);
+
+    if (context?.chatName) {
+      chats.push({
+        chatId: longChatId,
+        chatName: context.chatName,
+      });
+    }
+  }
+
+  return chats;
+};
+
 export const saveChatHistory = async (
   chatId: string,
   userId: string,
