@@ -73,6 +73,9 @@ export const ToolCallInProgress: Story = {
     result: undefined,
     status: { type: 'running' },
   },
+  parameters: {
+    chromatic: { disable: true },
+  },
 };
 
 /**
