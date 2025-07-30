@@ -1,5 +1,4 @@
 import { createAction, Property } from '@openops/blocks-framework';
-import { logger } from '@openops/server-shared';
 import { common, getScopeAndKey } from './common';
 
 export const storageListAction = createAction({
@@ -51,8 +50,7 @@ export const storageListAction = createAction({
         if (context.run.isTest) {
           keyName = entry.key.replace(/^run_test-run\//, '');
         }
-        logger.info(`LEYLAFiltering key: ${keyName}`);
-        return filterRegex!.test(keyName);
+        return filterRegex?.test(keyName);
       });
     }
 
