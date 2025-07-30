@@ -621,30 +621,6 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
       });
     });
 
-    it('should handle chats with default names', async () => {
-      const mockChats = [
-        { chatId: 'chat-1', chatName: 'Untitled' },
-        { chatId: 'chat-2', chatName: 'New Chat' },
-        { chatId: 'chat-3', chatName: 'Machine Learning Questions' },
-      ];
-
-      (getAllChats as jest.Mock).mockResolvedValue(mockChats);
-
-      await getHandler(
-        mockRequest as FastifyRequest,
-        mockReply as unknown as FastifyReply,
-      );
-
-      expect(getAllChats).toHaveBeenCalledWith(
-        'test-user-id',
-        'test-project-id',
-      );
-      expect(mockReply.code).toHaveBeenCalledWith(200);
-      expect(mockReply.send).toHaveBeenCalledWith({
-        chats: mockChats,
-      });
-    });
-
     it('should handle large number of chats', async () => {
       const mockChats = Array.from({ length: 50 }, (_, i) => ({
         chatId: `chat-${i + 1}`,

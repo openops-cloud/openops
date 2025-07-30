@@ -172,7 +172,7 @@ export const getAllChats = async (
     if (context?.chatName) {
       chats.push({
         chatId: longChatId,
-        chatName: context.chatName || 'Untitled',
+        chatName: context.chatName,
       });
     }
   }
