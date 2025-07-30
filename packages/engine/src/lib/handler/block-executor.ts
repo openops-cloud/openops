@@ -27,6 +27,7 @@ import {
   handleExecutionError,
   runWithExponentialBackoff,
 } from '../helper/error-handling';
+import { validateStepOutputSize } from '../helper/size-validation';
 import { createConnectionService } from '../services/connections.service';
 import { createFilesService } from '../services/files.service';
 import { createContextStore } from '../services/storage.service';
@@ -195,6 +196,18 @@ const executeAction: ActionHandler<BlockAction> = async ({
         : blockAction.run;
     const output = await runMethodToExecute(context);
     const newExecutionContext = executionState.addTags(hookResponse.tags);
+
+    const sizeValidation = validateStepOutputSize(output);
+    if (!sizeValidation.isValid) {
+      const failedStepOutput = stepOutput
+        .setStatus(StepOutputStatus.FAILED)
+        .setErrorMessage(sizeValidation.errorMessage!);
+
+      return newExecutionContext
+        .upsertStep(action.name, failedStepOutput)
+        .setVerdict(ExecutionVerdict.FAILED, undefined)
+        .increaseTask();
+    }
 
     if (hookResponse.stopped) {
       assertNotNullOrUndefined(hookResponse.stopResponse, 'stopResponse');
