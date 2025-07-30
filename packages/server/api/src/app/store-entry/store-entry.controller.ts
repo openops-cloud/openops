@@ -53,10 +53,10 @@ export const storeEntryController: FastifyPluginAsyncTypebox = async (
     }
   });
 
-  fastify.get('/list', ListRequest, async (request, reply) => {
+  fastify.get('/list', ListRequest, async (request) => {
     const entries = await storeEntryService.list({
       projectId: request.principal.projectId,
-      prefix: request.query.prefix || '',
+      prefix: request.query.prefix,
     });
 
     return { entries };
