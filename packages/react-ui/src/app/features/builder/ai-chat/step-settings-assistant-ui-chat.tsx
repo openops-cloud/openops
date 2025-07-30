@@ -67,6 +67,9 @@ const StepSettingsAssistantUiChat = ({
     isLoading: isModelSelectorLoading,
   } = useAiModelSelector();
 
+  const showFullWidth =
+    showDataSelector && dataSelectorSize === DataSelectorSizeState.EXPANDED;
+
   return (
     <StepSettingsAssistantUiChatContainer
       parentHeight={middlePanelSize.height}
@@ -77,6 +80,7 @@ const StepSettingsAssistantUiChat = ({
       handleInject={onInject}
       onNewChatClick={createNewChat}
       containerSize={aiContainerSize}
+      showFullWidth={showFullWidth}
       toggleContainerSizeState={onToggleContainerSizeState}
       onModelSelected={onModelSelected}
       isModelSelectorLoading={isModelSelectorLoading}

@@ -9,6 +9,13 @@ import { AssistantUiChatContainer } from '../assistant-ui/assistant-ui-chat-cont
 import { TooltipWrapper } from '../tooltip-wrapper';
 import { AI_CHAT_CONTAINER_SIZES, AiCliChatContainerSizeState } from './types';
 
+const COLLAPSED_HEIGHT = 57;
+const DOCKED_HEIGHT = 450;
+const EXPANDED_HEIGHT = 180;
+const FULL_WIDTH_HEIGHT = 100;
+const EXPANDED_WIDTH_OFFSET = 40;
+const REGULAR_WIDTH = 450;
+
 type StepSettingsAssistantUiChatContainerProps = {
   parentHeight: number;
   parentWidth: number;
@@ -26,6 +33,7 @@ type StepSettingsAssistantUiChatContainerProps = {
   runtime: AssistantRuntime;
   theme: Theme;
   handleInject: (code: string) => void;
+  showFullWidth: boolean;
 };
 
 const StepSettingsAssistantUiChatContainer = ({
@@ -45,22 +53,27 @@ const StepSettingsAssistantUiChatContainer = ({
   runtime,
   theme,
   handleInject,
+  showFullWidth,
 }: StepSettingsAssistantUiChatContainerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   let height: number;
   if (containerSize === AI_CHAT_CONTAINER_SIZES.COLLAPSED) {
-    height = 0;
+    height = COLLAPSED_HEIGHT;
   } else if (containerSize === AI_CHAT_CONTAINER_SIZES.DOCKED) {
-    height = 450;
+    height = DOCKED_HEIGHT;
   } else if (containerSize === AI_CHAT_CONTAINER_SIZES.EXPANDED) {
-    height = parentHeight - 180;
+    height = parentHeight - EXPANDED_HEIGHT;
   } else {
-    height = parentHeight - 100;
+    height = parentHeight - FULL_WIDTH_HEIGHT;
   }
 
-  const width =
-    containerSize !== AI_CHAT_CONTAINER_SIZES.EXPANDED ? 450 : parentWidth - 40;
+  let width: number;
+  if (containerSize === AI_CHAT_CONTAINER_SIZES.EXPANDED || showFullWidth) {
+    width = parentWidth - EXPANDED_WIDTH_OFFSET;
+  } else {
+    width = REGULAR_WIDTH;
+  }
 
   return (
     <div
@@ -91,7 +104,7 @@ const StepSettingsAssistantUiChatContainer = ({
         title={t('AI Chat')}
       >
         <div
-          className="text-md dark:text-primary items-center font-bold flex gap-2"
+          className="text-md dark:text-primary items-center font-bold flex"
           role="button"
           tabIndex={0}
           onClick={() => {
