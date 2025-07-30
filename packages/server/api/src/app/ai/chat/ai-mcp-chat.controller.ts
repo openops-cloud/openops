@@ -119,6 +119,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       });
     },
   );
+
   app.post('/', NewMessageOptions, async (request, reply) => {
     const chatId = request.body.chatId;
     const userId = request.principal.id;

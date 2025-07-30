@@ -125,7 +125,7 @@ async function streamLLMResponse(
   let stepCount = 0;
 
   try {
-    const textStream = getLLMAsyncStream({
+    const fullStream = getLLMAsyncStream({
       ...params,
       newMessages,
       maxRecursionDepth,
@@ -150,8 +150,8 @@ async function streamLLMResponse(
       },
     });
 
-    for await (const textPart of textStream) {
-      sendMessageToStream(params.serverResponse, textPart);
+    for await (const message of fullStream) {
+      sendMessageToStream(params.serverResponse, message);
     }
   } catch (error) {
     const errorMessage = unrecoverableError(params, error);
