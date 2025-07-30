@@ -1,16 +1,11 @@
 import { useTheme } from '@/app/common/providers/theme-provider';
-import { AssistantRuntimeProvider } from '@assistant-ui/react';
 import {
   AI_CHAT_CONTAINER_SIZES,
   AiCliChatContainerSizeState,
   cn,
-  MarkdownCodeVariations,
   StepSettingsAssistantUiChatContainer,
-  Thread,
-  ThreadExtraContextProvider,
 } from '@openops/components/ui';
 import { FlowVersion } from '@openops/shared';
-import { t } from 'i18next';
 import { useCallback } from 'react';
 import { useAiModelSelector } from '../../ai/lib/ai-model-selector-hook';
 import { useStepSettingsAssistantChat } from '../assistant-ui/hooks/use-step-settings-assistant-chat';
@@ -41,10 +36,8 @@ const StepSettingsAssistantUiChat = ({
     state.applyMidpanelAction,
   ]);
 
-  const { runtime, createNewChat, onInject } = useStepSettingsAssistantChat(
-    flowVersion,
-    selectedStep,
-  );
+  const { runtime, createNewChat, hasMessages, onInject } =
+    useStepSettingsAssistantChat(flowVersion, selectedStep);
 
   const onToggleContainerSizeState = useCallback(
     (size: AiCliChatContainerSizeState) => {
@@ -80,10 +73,17 @@ const StepSettingsAssistantUiChat = ({
       parentWidth={middlePanelSize.width}
       showAiChat={showAiChat}
       onCloseClick={onCloseClick}
-      enableNewChat={true}
+      enableNewChat={hasMessages}
+      handleInject={onInject}
       onNewChatClick={createNewChat}
       containerSize={aiContainerSize}
       toggleContainerSizeState={onToggleContainerSizeState}
+      onModelSelected={onModelSelected}
+      isModelSelectorLoading={isModelSelectorLoading}
+      selectedModel={selectedModel}
+      availableModels={availableModels}
+      theme={theme}
+      runtime={runtime}
       className={cn('right-0 static', {
         'children:transition-none':
           showDataSelector &&
@@ -91,23 +91,7 @@ const StepSettingsAssistantUiChat = ({
           aiContainerSize === AI_CHAT_CONTAINER_SIZES.COLLAPSED &&
           dataSelectorSize === DataSelectorSizeState.DOCKED,
       })}
-    >
-      <AssistantRuntimeProvider runtime={runtime}>
-        <ThreadExtraContextProvider
-          greeting={t('How can I help you?')}
-          handleInject={onInject}
-          codeVariation={MarkdownCodeVariations.WithCopyAndInject}
-        >
-          <Thread
-            theme={theme}
-            availableModels={availableModels}
-            onModelSelected={onModelSelected}
-            isModelSelectorLoading={isModelSelectorLoading}
-            selectedModel={selectedModel}
-          />
-        </ThreadExtraContextProvider>
-      </AssistantRuntimeProvider>
-    </StepSettingsAssistantUiChatContainer>
+    ></StepSettingsAssistantUiChatContainer>
   );
 };
 
