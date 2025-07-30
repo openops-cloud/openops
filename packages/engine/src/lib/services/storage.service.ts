@@ -205,7 +205,7 @@ function createKey(
     case StoreScope.FLOW:
       return prefix + 'flow_' + flowId + '/' + key;
     case StoreScope.FLOW_RUN:
-      return prefix + 'run_' + flowRunId + '/' + key;
+      return prefix + 'flow_run_' + flowRunId + '/' + key;
   }
 }
 

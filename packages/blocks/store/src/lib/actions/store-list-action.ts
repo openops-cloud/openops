@@ -1,4 +1,5 @@
 import { createAction, Property } from '@openops/blocks-framework';
+import { logger } from '@openops/server-shared';
 import { common, getScopeAndKey } from './common';
 
 export const storageListAction = createAction({
@@ -45,7 +46,14 @@ export const storageListAction = createAction({
     const entries = await context.store.list(scope);
 
     if (filterRegex) {
-      return entries.filter((entry) => filterRegex!.test(entry.key));
+      return entries.filter((entry) => {
+        let keyName = entry.key;
+        if (context.run.isTest) {
+          keyName = entry.key.replace(/^run_test-run\//, '');
+        }
+        logger.info(`LEYLAFiltering key: ${keyName}`);
+        return filterRegex!.test(keyName);
+      });
     }
 
     return entries;

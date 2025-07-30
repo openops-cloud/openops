@@ -2,10 +2,10 @@ import { BlockStoreScope } from '../../src/lib/actions/common';
 import { storageListAction } from '../../src/lib/actions/store-list-action';
 
 describe('storageListAction', () => {
-  const createMockContext = () => ({
+  const createMockContext = (isTest = false) => ({
     run: {
       id: 'test-run-id',
-      isTest: false,
+      isTest,
     },
     propsValue: {
       keyFilter: '',
@@ -25,11 +25,10 @@ describe('storageListAction', () => {
       expect(storageListAction.props).toMatchObject({
         keyFilter: {
           type: 'SHORT_TEXT',
-          required: true,
-          supportsAI: true,
+          required: false,
         },
         store_scope: {
-          type: 'DROPDOWN',
+          type: 'STATIC_DROPDOWN',
           required: true,
         },
       });
@@ -47,7 +46,7 @@ describe('storageListAction', () => {
 
       const result = await storageListAction.run(mockContext as any);
 
-      expect(mockContext.store.list).toHaveBeenCalledWith('FLOW_RUN');
+      expect(mockContext.store.list).toHaveBeenCalledWith('FLOW');
       expect(result).toEqual(mockEntries);
     });
 
@@ -63,7 +62,7 @@ describe('storageListAction', () => {
 
       const result = await storageListAction.run(mockContext as any);
 
-      expect(mockContext.store.list).toHaveBeenCalledWith('FLOW_RUN');
+      expect(mockContext.store.list).toHaveBeenCalledWith('FLOW');
       expect(result).toEqual(mockEntries);
     });
 
@@ -79,17 +78,17 @@ describe('storageListAction', () => {
 
       const result = await storageListAction.run(mockContext as any);
 
-      expect(mockContext.store.list).toHaveBeenCalledWith('FLOW_RUN');
+      expect(mockContext.store.list).toHaveBeenCalledWith('FLOW');
       expect(result).toEqual(mockEntries);
     });
 
-    test('should filter entries when valid regex pattern is provided', async () => {
-      const mockContext = createMockContext();
+    test('should filter entries when valid regex pattern is provided for regular run', async () => {
+      const mockContext = createMockContext(false);
       const mockEntries = [
-        { key: 'user_123', value: 'value1' },
-        { key: 'config_456', value: 'value2' },
-        { key: 'temp_789', value: 'value3' },
-        { key: 'user_999', value: 'value4' },
+        { key: 'run_test-run-id/user_123', value: 'value1' },
+        { key: 'run_test-run-id/config_456', value: 'value2' },
+        { key: 'run_test-run-id/temp_789', value: 'value3' },
+        { key: 'run_test-run-id/user_999', value: 'value4' },
       ];
 
       mockContext.store.list.mockResolvedValue(mockEntries);
@@ -97,19 +96,20 @@ describe('storageListAction', () => {
 
       const result = await storageListAction.run(mockContext as any);
 
-      expect(mockContext.store.list).toHaveBeenCalledWith('FLOW_RUN');
+      expect(mockContext.store.list).toHaveBeenCalledWith('FLOW');
       expect(result).toEqual([
-        { key: 'user_123', value: 'value1' },
-        { key: 'user_999', value: 'value4' },
+        { key: 'run_test-run-id/user_123', value: 'value1' },
+        { key: 'run_test-run-id/user_999', value: 'value4' },
       ]);
     });
 
-    test('should filter entries with case sensitive regex', async () => {
-      const mockContext = createMockContext();
+    test('should filter entries by key name only when test run', async () => {
+      const mockContext = createMockContext(true);
       const mockEntries = [
-        { key: 'User_123', value: 'value1' },
-        { key: 'user_456', value: 'value2' },
-        { key: 'USER_789', value: 'value3' },
+        { key: 'run_test-run/user_123', value: 'value1' },
+        { key: 'run_test-run/config_456', value: 'value2' },
+        { key: 'run_test-run/temp_789', value: 'value3' },
+        { key: 'run_test-run/user_999', value: 'value4' },
       ];
 
       mockContext.store.list.mockResolvedValue(mockEntries);
@@ -117,8 +117,49 @@ describe('storageListAction', () => {
 
       const result = await storageListAction.run(mockContext as any);
 
-      expect(mockContext.store.list).toHaveBeenCalledWith('FLOW_RUN');
-      expect(result).toEqual([{ key: 'user_456', value: 'value2' }]);
+      expect(mockContext.store.list).toHaveBeenCalledWith('FLOW');
+      expect(result).toEqual([
+        { key: 'run_test-run/user_123', value: 'value1' },
+        { key: 'run_test-run/user_999', value: 'value4' },
+      ]);
+    });
+
+    test('should filter entries with case sensitive regex for regular run', async () => {
+      const mockContext = createMockContext(false);
+      const mockEntries = [
+        { key: 'run_test-run-id/User_123', value: 'value1' },
+        { key: 'run_test-run-id/user_456', value: 'value2' },
+        { key: 'run_test-run-id/USER_789', value: 'value3' },
+      ];
+
+      mockContext.store.list.mockResolvedValue(mockEntries);
+      mockContext.propsValue.keyFilter = 'user_.*';
+
+      const result = await storageListAction.run(mockContext as any);
+
+      expect(mockContext.store.list).toHaveBeenCalledWith('FLOW');
+      expect(result).toEqual([
+        { key: 'run_test-run-id/user_456', value: 'value2' },
+      ]);
+    });
+
+    test('should filter entries with case sensitive regex for test run', async () => {
+      const mockContext = createMockContext(true);
+      const mockEntries = [
+        { key: 'run_test-run/User_123', value: 'value1' },
+        { key: 'run_test-run/user_456', value: 'value2' },
+        { key: 'run_test-run/USER_789', value: 'value3' },
+      ];
+
+      mockContext.store.list.mockResolvedValue(mockEntries);
+      mockContext.propsValue.keyFilter = 'user_.*';
+
+      const result = await storageListAction.run(mockContext as any);
+
+      expect(mockContext.store.list).toHaveBeenCalledWith('FLOW');
+      expect(result).toEqual([
+        { key: 'run_test-run/user_456', value: 'value2' },
+      ]);
     });
 
     test('should throw error when invalid regex pattern is provided', async () => {
@@ -162,7 +203,7 @@ describe('storageListAction', () => {
 
       await storageListAction.run(mockContext as any);
 
-      expect(mockContext.store.list).toHaveBeenCalledWith('FLOW_RUN');
+      expect(mockContext.store.list).toHaveBeenCalledWith('FLOW');
     });
 
     test('should handle empty result from store', async () => {
@@ -171,17 +212,17 @@ describe('storageListAction', () => {
 
       const result = await storageListAction.run(mockContext as any);
 
-      expect(mockContext.store.list).toHaveBeenCalledWith('FLOW_RUN');
+      expect(mockContext.store.list).toHaveBeenCalledWith('FLOW');
       expect(result).toEqual([]);
     });
 
-    test('should handle complex regex patterns', async () => {
-      const mockContext = createMockContext();
+    test('should handle complex regex patterns for regular run', async () => {
+      const mockContext = createMockContext(false);
       const mockEntries = [
-        { key: 'prod_user_123', value: 'value1' },
-        { key: 'dev_user_456', value: 'value2' },
-        { key: 'test_config_789', value: 'value3' },
-        { key: 'prod_config_999', value: 'value4' },
+        { key: 'run_test-run-id/prod_user_123', value: 'value1' },
+        { key: 'run_test-run-id/dev_user_456', value: 'value2' },
+        { key: 'run_test-run-id/test_config_789', value: 'value3' },
+        { key: 'run_test-run-id/prod_config_999', value: 'value4' },
       ];
 
       mockContext.store.list.mockResolvedValue(mockEntries);
@@ -189,11 +230,49 @@ describe('storageListAction', () => {
 
       const result = await storageListAction.run(mockContext as any);
 
-      expect(mockContext.store.list).toHaveBeenCalledWith('FLOW_RUN');
+      expect(mockContext.store.list).toHaveBeenCalledWith('FLOW');
       expect(result).toEqual([
-        { key: 'prod_user_123', value: 'value1' },
-        { key: 'prod_config_999', value: 'value4' },
+        { key: 'run_test-run-id/prod_user_123', value: 'value1' },
+        { key: 'run_test-run-id/prod_config_999', value: 'value4' },
       ]);
+    });
+
+    test('should handle complex regex patterns for test run', async () => {
+      const mockContext = createMockContext(true);
+      const mockEntries = [
+        { key: 'run_test-run/prod_user_123', value: 'value1' },
+        { key: 'run_test-run/dev_user_456', value: 'value2' },
+        { key: 'run_test-run/test_config_789', value: 'value3' },
+        { key: 'run_test-run/prod_config_999', value: 'value4' },
+      ];
+
+      mockContext.store.list.mockResolvedValue(mockEntries);
+      mockContext.propsValue.keyFilter = 'prod_.*_\\d+';
+
+      const result = await storageListAction.run(mockContext as any);
+
+      expect(mockContext.store.list).toHaveBeenCalledWith('FLOW');
+      expect(result).toEqual([
+        { key: 'run_test-run/prod_user_123', value: 'value1' },
+        { key: 'run_test-run/prod_config_999', value: 'value4' },
+      ]);
+    });
+
+    test('should filter by exact key name in test run', async () => {
+      const mockContext = createMockContext(true);
+      const mockEntries = [
+        { key: 'run_test-run/myKey', value: 'value1' },
+        { key: 'run_test-run/myKey_123', value: 'value2' },
+        { key: 'run_test-run/otherKey', value: 'value3' },
+      ];
+
+      mockContext.store.list.mockResolvedValue(mockEntries);
+      mockContext.propsValue.keyFilter = '^myKey$';
+
+      const result = await storageListAction.run(mockContext as any);
+
+      expect(mockContext.store.list).toHaveBeenCalledWith('FLOW');
+      expect(result).toEqual([{ key: 'run_test-run/myKey', value: 'value1' }]);
     });
   });
 });
