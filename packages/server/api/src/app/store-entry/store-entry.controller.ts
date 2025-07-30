@@ -90,9 +90,9 @@ const DeleteStoreRequest = {
 const ListRequest = {
   schema: {
     querystring: Type.Object({
-      prefix: Type.Optional(Type.String()),
+      prefix: Type.String(),
     }),
     description:
-      'List all keys in the store with an optional prefix filter. This endpoint returns all keys that start with the specified prefix.',
+      'List all keys in the store with a prefix filter. This endpoint returns all keys that start with the specified prefix.',
   },
 };
