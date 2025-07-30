@@ -49,11 +49,7 @@ const AiChatResizablePanel = ({
 
   const resizablePanelRef = useRef<ImperativePanelHandle | null>(null);
 
-  const [hasMounted, setHasMounted] = useState(false);
-
-  useEffect(() => {
-    setHasMounted(true);
-  }, []);
+  const [showChatDelayed, setShowChatDelayed] = useState(false);
 
   const { getPanelSize } = useResizablePanelGroup();
 
@@ -70,6 +66,12 @@ const AiChatResizablePanel = ({
     isLoading,
     showChatInResizablePanel,
   ]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setShowChatDelayed(showChat);
+    }, 300);
+  }, [showChat]);
 
   const getDefaultPanelSize = useCallback(() => {
     if (!showChat) return 0;
@@ -94,11 +96,9 @@ const AiChatResizablePanel = ({
         order={2}
         id={RESIZABLE_PANEL_IDS.AI_CHAT}
         className={cn('duration-0 min-w-0 shadow-sidebar z-20', {
-          'min-w-[350px]': showChat,
-          'transition-width transition-[min-width] duration-300':
-            !isDraggingHandle && hasMounted,
+          'min-w-[300px]': showChat && showChatDelayed,
         })}
-        minSize={0}
+        minSize={15}
         collapsible={true}
         defaultSize={getDefaultPanelSize()}
       >
