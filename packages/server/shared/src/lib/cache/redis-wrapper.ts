@@ -34,6 +34,21 @@ const keyExists = async (key: string): Promise<boolean> => {
   return result === 1;
 };
 
+const scanKeys = async (pattern: string): Promise<string[]> => {
+  const redis = getRedisClient();
+  const stream = redis.scanStream({
+    match: pattern,
+  });
+  const keys: string[] = [];
+  return new Promise((resolve, reject) => {
+    stream.on('data', (resultKeys) => {
+      keys.push(...resultKeys);
+    });
+    stream.on('end', () => resolve(keys));
+    stream.on('error', (err) => reject(err));
+  });
+};
+
 async function setSerializedObject<T>(
   key: string,
   obj: T,
@@ -100,4 +115,5 @@ export const redisWrapper = {
   keyExists,
   setSerializedObject,
   getSerializedObject,
+  scanKeys,
 };
