@@ -14,7 +14,6 @@ import {
   handleExecutionError,
   runWithExponentialBackoff,
 } from '../helper/error-handling';
-import { validateStepOutputSize } from '../helper/size-validation';
 import { ActionHandler, BaseExecutor } from './base-executor';
 import { EngineConstants } from './context/engine-constants';
 import {
@@ -74,18 +73,6 @@ const executeAction: ActionHandler<CodeAction> = async ({
       codeFile: artifactPath,
       inputs: resolvedInput,
     });
-
-    const sizeValidation = validateStepOutputSize(output);
-    if (!sizeValidation.isValid) {
-      const failedStepOutput = stepOutput
-        .setStatus(StepOutputStatus.FAILED)
-        .setErrorMessage(sizeValidation.errorMessage!);
-
-      return executionState
-        .upsertStep(action.name, failedStepOutput)
-        .setVerdict(ExecutionVerdict.FAILED, undefined)
-        .increaseTask();
-    }
 
     return executionState
       .upsertStep(action.name, stepOutput.setOutput(output))
