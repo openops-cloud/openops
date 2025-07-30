@@ -111,7 +111,8 @@ export const createStorageService = ({
     async list(
       prefix: string,
     ): Promise<Array<{ key: string; value: unknown }>> {
-      const url = buildListUrl(apiUrl, prefix);
+      const url = new URL(`${apiUrl}v1/store-entries/list`);
+      url.searchParams.set('prefix', prefix);
 
       try {
         const response = await fetch(url, {
@@ -222,12 +223,6 @@ const buildUrl = (apiUrl: string, key?: string): URL => {
     url.searchParams.set('key', key);
   }
 
-  return url;
-};
-
-const buildListUrl = (apiUrl: string, prefix: string): URL => {
-  const url = new URL(`${apiUrl}v1/store-entries/list`);
-  url.searchParams.set('prefix', prefix);
   return url;
 };
 
