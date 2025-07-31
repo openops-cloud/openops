@@ -90,17 +90,26 @@ async function executeStep(
 
   const stepResult = output.steps[step.name];
 
-  const updatedStepTestOutputs = {
-    ...input.stepTestOutputs,
-    [step.id]: stepResult,
-  };
-
-  const sizeValidation = validateStepOutputSize(updatedStepTestOutputs);
+  let steps: Record<string, unknown> = {};
+  if (input.stepTestOutputs) {
+    steps = Object.fromEntries(
+      flowHelper
+        .getAllSteps(input.flowVersion.trigger)
+        .map((item) => [item.name, input.stepTestOutputs?.[item.id!] ?? null]),
+    );
+  }
+  const sizeValidation = validateStepOutputSize({
+    flowVersion: input.flowVersion,
+    stepTestOutputs: {
+      ...steps,
+      [step.name]: stepResult,
+    },
+  });
 
   if (!sizeValidation.isValid) {
     return {
       success: false,
-      output: sizeValidation.errorMessage!,
+      output: sizeValidation.errorMessage,
       input: stepResult.input,
     };
   }

@@ -1,4 +1,9 @@
-import { FlowVersion, OpenOpsId, StepOutput } from '@openops/shared';
+import {
+  FlowVersion,
+  OpenOpsId,
+  StepOutput,
+  flowHelper,
+} from '@openops/shared';
 import sizeof from 'object-sizeof';
 
 const MAX_SIZE_FOR_ALL_ENTRIES = 1024 * 1024;
@@ -12,12 +17,13 @@ export type SizeValidationResult =
       errorMessage: string;
     };
 
-function formatStepSizes(steps: Record<string, unknown>): string {
+function formatStepSizes(
+  steps: Record<string, unknown>,
+  flowVersion?: FlowVersion,
+): string {
   const stepSizes = Object.entries(steps)
-    .map(([slug, data]) => {
-      const stepName = getStepDisplayName(data);
-      const displayName = stepName ? `${slug} (${stepName})` : slug;
-
+    .map(([stepName, data]) => {
+      const displayName = getStepDisplayName(stepName, flowVersion);
       return {
         displayName,
         sizeMB: sizeof(data) / (1024 * 1024),
@@ -30,18 +36,29 @@ function formatStepSizes(steps: Record<string, unknown>): string {
     .join('\n');
 }
 
-function getStepDisplayName(stepData: unknown): string | null {
-  if (stepData && typeof stepData === 'object' && stepData !== null) {
-    const data = stepData as Record<string, unknown>;
-    return (data.displayName as string) || (data.name as string) || null;
+function getStepDisplayName(
+  stepName: string,
+  flowVersion?: FlowVersion,
+): string {
+  if (!flowVersion) {
+    return stepName;
   }
-  return null;
+
+  const allSteps = flowHelper.getAllSteps(flowVersion.trigger);
+  const step = allSteps.find((s) => s.name === stepName);
+
+  if (step?.displayName) {
+    return `${step.displayName} (${step.name})`;
+  }
+
+  return stepName;
 }
 
 function buildErrorMessage(
   totalSizeMB: number,
   limitMB: number,
   steps?: Record<string, unknown>,
+  flowVersion?: FlowVersion,
 ): string {
   let message = `Workflow output size exceeds maximum allowed size.\n`;
   message += `Total size: ${totalSizeMB.toFixed(2)}MB (limit: ${limitMB.toFixed(
@@ -50,7 +67,7 @@ function buildErrorMessage(
 
   if (steps) {
     message += '\n\nStep sizes (largest first):\n';
-    message += formatStepSizes(steps);
+    message += formatStepSizes(steps, flowVersion);
   }
 
   return message;
@@ -82,13 +99,25 @@ export function validateStepOutputSize(
 
   const outputSizeMB = outputSize / (1024 * 1024);
   const limitMB = MAX_SIZE_FOR_ALL_ENTRIES / (1024 * 1024);
-  const steps =
-    'stepTestOutputs' in stepsOrOutput
-      ? (stepsOrOutput.stepTestOutputs as Record<string, unknown>)
-      : (stepsOrOutput as Record<string, unknown>);
+
+  if ('stepTestOutputs' in stepsOrOutput && 'flowVersion' in stepsOrOutput) {
+    return {
+      isValid: false,
+      errorMessage: buildErrorMessage(
+        outputSizeMB,
+        limitMB,
+        stepsOrOutput.stepTestOutputs as Record<string, unknown>,
+        stepsOrOutput.flowVersion as FlowVersion,
+      ),
+    };
+  }
 
   return {
     isValid: false,
-    errorMessage: buildErrorMessage(outputSizeMB, limitMB, steps),
+    errorMessage: buildErrorMessage(
+      outputSizeMB,
+      limitMB,
+      stepsOrOutput as Record<string, unknown>,
+    ),
   };
 }
