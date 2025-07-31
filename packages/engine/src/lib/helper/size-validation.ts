@@ -53,7 +53,7 @@ export const validateStepOutputSize = (
   stepsOrOutput: unknown,
 ): SizeValidationResult => {
   const outputSize = sizeof(stepsOrOutput);
-  const limitInMB = (MAX_SIZE_FOR_ALL_ENTRIES / (1024 * 1024)).toFixed(3);
+  const limitInMB = (MAX_SIZE_FOR_ALL_ENTRIES / (1024 * 1024)).toFixed(1);
 
   if (outputSize <= MAX_SIZE_FOR_ALL_ENTRIES) {
     return {
