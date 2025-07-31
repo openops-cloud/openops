@@ -35,9 +35,9 @@ function buildErrorMessage(
   steps: Record<string, unknown>,
 ): string {
   let message = `Workflow output size exceeds maximum allowed size.\n`;
-  message += `Total size: ${totalSizeMB.toFixed(2)}MB (limit: ${MAX_RUN_SIZE_IN_MB.toFixed(
+  message += `Total size: ${totalSizeMB.toFixed(
     2,
-  )}MB)`;
+  )}MB (limit: ${MAX_RUN_SIZE_IN_MB.toFixed(2)}MB)`;
 
   message += '\n\nStep sizes (largest first):\n';
   message += formatStepSizes(steps);
