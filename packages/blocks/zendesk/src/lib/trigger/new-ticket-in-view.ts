@@ -100,7 +100,6 @@ export const newTicketInView = createTrigger({
     }),
   },
   sampleData: {
-    url: 'https://openops.zendesk.com/api/v2/tickets/5.json',
     id: 5,
     external_id: null,
     via: {
