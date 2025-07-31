@@ -80,7 +80,7 @@ export const linearUpdatedIssue = createTrigger({
 
     // Create webhook configuration
     const webhookConfig: LinearWebhookConfig = {
-      label: 'ActiveBlocks Updated Issue',
+      label: 'OpenOps Updated Issue',
       url: context.webhookUrl,
       allPublicTeams: true,
       resourceTypes: ['Issue'],
