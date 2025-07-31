@@ -160,16 +160,6 @@ export class FlowExecutorContext {
     const targetMap = getStateAtPath({ currentPath: this.currentPath, steps });
     targetMap[stepName] = stepOutput;
 
-    const stepSize = sizeof(stepOutput.output || {});
-    const totalWorkflowSize = sizeof(steps);
-
-    logger.info(`[STEP_SIZE] Step: ${stepName}`, {
-      stepSizeBytes: stepSize,
-      stepSizeKB: (stepSize / 1024).toFixed(2),
-      totalWorkflowSizeBytes: totalWorkflowSize,
-      totalWorkflowSizeKB: (totalWorkflowSize / 1024).toFixed(2),
-    });
-
     const sizeValidation = validateStepOutputSize(steps);
 
     let processedStepOutput = stepOutput;
