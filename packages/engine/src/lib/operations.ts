@@ -90,13 +90,12 @@ async function executeStep(
 
   const stepResult = output.steps[step.name];
 
-  const sizeValidation = validateStepOutputSize({
-    ...input,
-    stepTestOutputs: {
-      ...input.stepTestOutputs,
-      [step.id]: stepResult,
-    },
-  });
+  const updatedStepTestOutputs = {
+    ...input.stepTestOutputs,
+    [step.id]: stepResult,
+  };
+
+  const sizeValidation = validateStepOutputSize(updatedStepTestOutputs);
 
   if (!sizeValidation.isValid) {
     return {
