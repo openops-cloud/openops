@@ -12,22 +12,24 @@ function formatStepSizes(steps: Record<string, unknown>): string {
   const stepSizes = Object.entries(steps)
     .map(([name, data]) => ({
       name,
-      sizeKB: sizeof(data) / 1024,
+      sizeMB: sizeof(data) / (1024 * 1024),
     }))
-    .sort((a, b) => b.sizeKB - a.sizeKB);
+    .sort((a, b) => b.sizeMB - a.sizeMB);
 
   return stepSizes
-    .map((step) => `  • ${step.name}: ${step.sizeKB.toFixed(2)}KB`)
+    .map((step) => `  • ${step.name}: ${step.sizeMB.toFixed(2)}MB`)
     .join('\n');
 }
 
 function buildErrorMessage(
-  totalSizeKB: number,
-  limitKB: number,
+  totalSizeMB: number,
+  limitMB: number,
   steps?: Record<string, unknown>,
 ): string {
   let message = `Workflow output size exceeds maximum allowed size.\n`;
-  message += `Total size: ${totalSizeKB.toFixed(2)}KB (limit: ${limitKB}KB)`;
+  message += `Total size: ${totalSizeMB.toFixed(2)}MB (limit: ${limitMB.toFixed(
+    2,
+  )}MB)`;
 
   if (steps) {
     message += '\n\nStep sizes (largest first):\n';
@@ -62,13 +64,13 @@ export function validateStepOutputSize(
     };
   }
 
-  const outputSizeKB = outputSize / 1024;
-  const limitKB = MAX_SIZE_FOR_ALL_ENTRIES / 1024;
+  const outputSizeMB = outputSize / (1024 * 1024);
+  const limitMB = MAX_SIZE_FOR_ALL_ENTRIES / (1024 * 1024);
   const steps = isStepsObject(stepsOrOutput) ? stepsOrOutput : undefined;
 
   return {
     isValid: false,
-    errorMessage: buildErrorMessage(outputSizeKB, limitKB, steps),
+    errorMessage: buildErrorMessage(outputSizeMB, limitMB, steps),
     limitInMB,
   };
 }
