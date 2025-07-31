@@ -16,6 +16,7 @@ import { FastifyReply } from 'fastify';
 import { StatusCodes } from 'http-status-codes';
 import {
   createChatContext,
+  DEFAULT_CHAT_NAME,
   deleteChatHistory,
   generateChatId,
   generateChatIdForMCP,
@@ -33,8 +34,6 @@ import { streamCode } from './code.service';
 import { enrichContext, IncludeOptions } from './context-enrichment.service';
 import { getBlockSystemPrompt } from './prompts.service';
 import { handleUserMessage } from './user-message-handler';
-
-const DEFAULT_CHAT_NAME = 'New Chat';
 
 export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
   app.post(

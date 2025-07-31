@@ -45,6 +45,7 @@ export const useAssistantChat = (props?: UseAssistantChatProps) => {
   const { flowVersion, selectedStep } = props ?? {};
   const chatId = useRef(localStorage.getItem(AI_ASSISTANT_LS_KEY));
   const [shouldRenderChat, setShouldRenderChat] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
 
   const stepDetails =
     flowVersion && selectedStep
@@ -85,6 +86,12 @@ export const useAssistantChat = (props?: UseAssistantChatProps) => {
       : true,
   });
 
+  const { data: chatsHistory } = useQuery({
+    queryKey: [QueryKeys.aiChatHistory],
+    queryFn: aiAssistantChatApi.listChats,
+    staleTime: Infinity,
+  });
+
   const onConversationRetrieved = (conversation: OpenChatResponse) => {
     if (conversation.chatId) {
       localStorage.setItem(AI_ASSISTANT_LS_KEY, conversation.chatId);
@@ -119,44 +126,49 @@ export const useAssistantChat = (props?: UseAssistantChatProps) => {
 
   const queryClient = useQueryClient();
 
-  const createNewChat = useCallback(async () => {
-    const oldChatId = chatId.current;
+  const openChat = useCallback(
+    async (newChatId?: string) => {
+      const oldChatId = chatId.current;
 
-    chatId.current = null;
+      chatId.current = newChatId ?? null;
 
-    try {
-      if (oldChatId) {
-        runtime.thread.cancelRun();
-        runtime.thread.reset();
+      try {
+        if (oldChatId) {
+          runtime.thread.cancelRun();
+          runtime.thread.reset();
 
-        const invalidationKey = buildQueryKey(
-          selectedStep,
-          flowVersion?.flowId,
-          oldChatId,
-          stepDetails?.settings?.blockName,
-        );
+          const invalidationKey = buildQueryKey(
+            selectedStep,
+            flowVersion?.flowId,
+            oldChatId,
+            stepDetails?.settings?.blockName,
+          );
 
-        await queryClient.invalidateQueries({
-          queryKey: invalidationKey,
+          await queryClient.invalidateQueries({
+            queryKey: invalidationKey,
+          });
+        }
+        setHasMessages(false);
+      } catch (error) {
+        toast({
+          title: t(
+            'There was an error creating the new chat, please try again',
+          ),
+          duration: 3000,
         });
+        console.error(
+          `There was an error canceling the current run and invalidating queries while creating a new chat: ${error}`,
+        );
       }
-      setHasMessages(false);
-    } catch (error) {
-      toast({
-        title: t('There was an error creating the new chat, please try again'),
-        duration: 3000,
-      });
-      console.error(
-        `There was an error canceling the current run and invalidating queries while creating a new chat: ${error}`,
-      );
-    }
-  }, [
-    flowVersion?.flowId,
-    queryClient,
-    runtime.thread,
-    selectedStep,
-    stepDetails?.settings?.blockName,
-  ]);
+    },
+    [
+      flowVersion?.flowId,
+      queryClient,
+      runtime.thread,
+      selectedStep,
+      stepDetails?.settings?.blockName,
+    ],
+  );
 
   useEffect(() => {
     const unsubscribe = runtime.thread.subscribe(() => {
@@ -172,6 +184,9 @@ export const useAssistantChat = (props?: UseAssistantChatProps) => {
     isLoading,
     openChatResponse,
     hasMessages,
-    createNewChat,
+    openChat,
+    chatsHistory,
+    showHistory,
+    setShowHistory,
   };
 };
