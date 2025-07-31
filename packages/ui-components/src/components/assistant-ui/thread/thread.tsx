@@ -30,6 +30,7 @@ import { MarkdownText } from '../markdown-text';
 import { useThreadExtraContext } from '../thread-extra-context';
 import { ToolFallback } from '../tool-fallback';
 import { TooltipIconButton } from '../tooltip-icon-button';
+import { GenerateCodeTool } from '../generate-code-tool/generate-code-tool';
 
 const MarkdownTextWrapper = memo(({ theme, ...props }: any) => {
   const { codeVariation, handleInject } = useThreadExtraContext();
@@ -230,7 +231,14 @@ const AssistantMessage: FC<{ theme: Theme }> = ({ theme }) => {
   const messageComponents = useMemo(
     () => ({
       Text: (props: any) => <MarkdownTextWrapper {...props} theme={theme} />,
-      tools: { Fallback: ToolFallback },
+      tools: {
+        Fallback: ToolFallback,
+        by_name: {
+          generate_code: (props: any) => (
+            <GenerateCodeTool {...props} theme={theme} />
+          ),
+        },
+      },
     }),
     [theme],
   );
