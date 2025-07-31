@@ -12,6 +12,7 @@ import {
 } from '@openops/shared';
 import cloneDeep from 'lodash.clonedeep';
 import { nanoid } from 'nanoid';
+import { isSizeValidationError } from '../helper/size-validation';
 import { createContextStore } from '../services/storage.service';
 import { BaseExecutor } from './base-executor';
 import { EngineConstants } from './context/engine-constants';
@@ -179,7 +180,6 @@ async function triggerLoopIterations(
       stepOutput = stepOutput.addIteration();
     }
 
-    // Generate new pauseId for each iteration
     const newId = nanoid();
     loopExecutionState = loopExecutionState
       .upsertStep(action.name, stepOutput)
@@ -193,6 +193,17 @@ async function triggerLoopIterations(
     });
 
     loopIterations[i] = cloneDeep(loopExecutionState);
+
+    if (
+      loopExecutionState.verdict === ExecutionVerdict.FAILED &&
+      isSizeValidationError(loopExecutionState.error?.message)
+    ) {
+      loopExecutionContext.executionState = loopExecutionState
+        .setCurrentPath(loopExecutionState.currentPath.removeLast())
+        .setPauseId(originalPauseId);
+      return;
+    }
+
     loopExecutionState = loopExecutionState
       .setVerdict(ExecutionVerdict.RUNNING)
       .setCurrentPath(loopExecutionState.currentPath.removeLast())
