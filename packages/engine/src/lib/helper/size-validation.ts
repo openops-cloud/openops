@@ -1,7 +1,10 @@
+import { AppSystemProp, system } from '@openops/server-shared';
 import { FlowVersion, OpenOpsId, StepOutput } from '@openops/shared';
 import sizeof from 'object-sizeof';
 
-const MAX_SIZE_FOR_ALL_ENTRIES = 1024 * 1024;
+const ONE_MB_IN_BYTES = 1024 * 1024;
+const MAX_RUN_SIZE_IN_MB =
+  system.getNumberOrThrow(AppSystemProp.REQUEST_BODY_LIMIT) - 0.5;
 
 export type SizeValidationResult =
   | {
@@ -17,7 +20,7 @@ function formatStepSizes(steps: Record<string, unknown>): string {
     .map(([stepName, data]) => {
       return {
         stepName,
-        sizeMB: sizeof(data) / (1024 * 1024),
+        sizeMB: sizeof(data) / ONE_MB_IN_BYTES,
       };
     })
     .sort((a, b) => b.sizeMB - a.sizeMB);
@@ -29,18 +32,15 @@ function formatStepSizes(steps: Record<string, unknown>): string {
 
 function buildErrorMessage(
   totalSizeMB: number,
-  limitMB: number,
-  steps?: Record<string, unknown>,
+  steps: Record<string, unknown>,
 ): string {
   let message = `Workflow output size exceeds maximum allowed size.\n`;
-  message += `Total size: ${totalSizeMB.toFixed(2)}MB (limit: ${limitMB.toFixed(
+  message += `Total size: ${totalSizeMB.toFixed(
     2,
-  )}MB)`;
+  )}MB (limit: ${MAX_RUN_SIZE_IN_MB.toFixed(2)}MB)`;
 
-  if (steps) {
-    message += '\n\nStep sizes (largest first):\n';
-    message += formatStepSizes(steps);
-  }
+  message += '\n\nStep sizes (largest first):\n';
+  message += formatStepSizes(steps);
 
   return message;
 }
@@ -63,21 +63,19 @@ export function validateStepOutputSize(
 ): SizeValidationResult {
   const outputSize = sizeof(stepsOrOutput);
 
-  if (outputSize <= MAX_SIZE_FOR_ALL_ENTRIES) {
+  if (outputSize <= MAX_RUN_SIZE_IN_MB * ONE_MB_IN_BYTES) {
     return {
       isValid: true,
     };
   }
 
-  const outputSizeMB = outputSize / (1024 * 1024);
-  const limitMB = MAX_SIZE_FOR_ALL_ENTRIES / (1024 * 1024);
+  const outputSizeMB = outputSize / ONE_MB_IN_BYTES;
 
   if ('stepTestOutputs' in stepsOrOutput && 'flowVersion' in stepsOrOutput) {
     return {
       isValid: false,
       errorMessage: buildErrorMessage(
         outputSizeMB,
-        limitMB,
         stepsOrOutput.stepTestOutputs as Record<string, unknown>,
       ),
     };
@@ -87,7 +85,6 @@ export function validateStepOutputSize(
     isValid: false,
     errorMessage: buildErrorMessage(
       outputSizeMB,
-      limitMB,
       stepsOrOutput as Record<string, unknown>,
     ),
   };
