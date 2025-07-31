@@ -103,7 +103,7 @@ async function executeStep(
   if (!sizeValidation.isValid) {
     return {
       success: false,
-      output: sizeValidation.errorMessage,
+      output: sizeValidation.errorMessage || 'Size validation failed',
       input: stepResult.input,
     };
   }

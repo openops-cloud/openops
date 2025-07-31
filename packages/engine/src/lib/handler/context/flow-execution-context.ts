@@ -180,7 +180,6 @@ export class FlowExecutorContext {
         .setErrorMessage(sizeValidation.errorMessage!);
 
       processedStepOutput.output = undefined;
-
       targetMap[stepName] = processedStepOutput;
 
       error = {

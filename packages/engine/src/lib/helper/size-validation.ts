@@ -1,6 +1,6 @@
 import sizeof from 'object-sizeof';
 
-const MAX_SIZE_FOR_ALL_ENTRIES = 50 * 1024;
+const MAX_SIZE_FOR_ALL_ENTRIES = 1024 * 1024;
 
 export type SizeValidationResult = {
   isValid: boolean;
