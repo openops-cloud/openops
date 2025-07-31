@@ -26,15 +26,6 @@ const GenerateCodeTool = ({
 }: GenerateCodeToolProps) => {
   const { handleInject } = useThreadExtraContext();
 
-  const codeContent = useMemo(
-    () =>
-      JSON.stringify({
-        code: result.code,
-        packageJson: result.packageJson,
-      }),
-    [result],
-  );
-
   return (
     <BaseToolWrapper toolName={toolName} status={status}>
       <div className="relative px-3 w-full">
@@ -51,7 +42,7 @@ const GenerateCodeTool = ({
           editorLanguage="typescript"
         />
         <CodeActions
-          content={codeContent}
+          content={result}
           onInject={handleInject}
           injectButtonText={t('Use code')}
         />

@@ -2,6 +2,7 @@ import {
   AssistantRuntime,
   AssistantRuntimeProvider,
 } from '@assistant-ui/react';
+import { SourceCode } from '@openops/shared';
 import { useMemo } from 'react';
 import { MarkdownCodeVariations } from '../custom';
 import { AssistantTopBar, AssistantTopBarProps } from './assistant-top-bar';
@@ -10,7 +11,7 @@ import { ThreadExtraContextProvider } from './thread-extra-context';
 
 type AssistantUiChatContainerProps = {
   runtime: AssistantRuntime;
-  handleInject?: (codeContent: string) => void;
+  handleInject?: (codeContent: string | SourceCode) => void;
 } & AssistantTopBarProps &
   ThreadProps;
 
