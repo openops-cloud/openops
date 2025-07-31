@@ -14,8 +14,9 @@ import {
   PrincipalType,
 } from '@openops/shared';
 import { CoreMessage } from 'ai';
-import { FastifyInstance, FastifyReply } from 'fastify';
+import { FastifyReply } from 'fastify';
 import { StatusCodes } from 'http-status-codes';
+import { v4 as uuidv4 } from 'uuid';
 import {
   createChatContext,
   deleteChatHistory,
@@ -33,7 +34,7 @@ import {
 } from './ai-chat.service';
 import { streamCode } from './code.service';
 import { enrichContext, IncludeOptions } from './context-enrichment.service';
-import { getBlockSystemPrompt, loadPrompt } from './prompts.service';
+import { getBlockSystemPrompt } from './prompts.service';
 import { handleUserMessage } from './user-message-handler';
 
 const DEFAULT_CHAT_NAME = 'New Chat';
@@ -460,9 +461,7 @@ async function handleCodeGenerationRequest({
     }
 
     // Create a mock tool call response
-    const toolCallId = `call_${Date.now()}_${Math.random()
-      .toString(36)
-      .substr(2, 9)}`;
+    const toolCallId = uuidv4();
 
     // Create the streaming response manually
     const encoder = new TextEncoder();
@@ -482,11 +481,12 @@ async function handleCodeGenerationRequest({
         const toolResult = {
           toolCallId,
           result: {
-            // success: true,
-            // toolType: 'code-generation',
-            // type: codeResult!.type,
-            code: codeResult!.code || '',
-            packageJson: codeResult!.packageJson || '{}',
+            code:
+              (codeResult as { code?: string; packageJson?: string }).code ||
+              '',
+            packageJson:
+              (codeResult as { code?: string; packageJson?: string })
+                .packageJson || '{}',
           },
         };
         controller.enqueue(encoder.encode(`a:${JSON.stringify(toolResult)}\n`));
@@ -504,15 +504,11 @@ async function handleCodeGenerationRequest({
           encoder.encode(`d:${JSON.stringify(finishMessage)}\n`),
         );
 
-        // Send text answer as a separate message
-        const textMessage = {
-          messageId: `msg_${Date.now()}_${Math.random()
-            .toString(36)
-            .substr(2, 9)}`,
-          content: codeResult!.textAnswer,
-        };
+        // Send text content as part of the assistant message
         controller.enqueue(
-          encoder.encode(`f:${JSON.stringify(textMessage)}\n`),
+          encoder.encode(
+            `0:"${(codeResult as { textAnswer: string }).textAnswer}"\n`,
+          ),
         );
 
         // Send finish for text message
@@ -533,9 +529,7 @@ async function handleCodeGenerationRequest({
     });
 
     // Save the conversation history in the correct format for mergeToolResultsIntoMessages
-    const saveToolCallId = `call_${Date.now()}_${Math.random()
-      .toString(36)
-      .substr(2, 9)}`;
+    const saveToolCallId = uuidv4();
 
     // Save assistant message with tool call and text (result will be merged by mergeToolResultsIntoMessages)
     const assistantMessage: CoreMessage = {
@@ -549,7 +543,7 @@ async function handleCodeGenerationRequest({
         },
         {
           type: 'text',
-          text: (codeResult as any).textAnswer || '',
+          text: (codeResult as { textAnswer: string }).textAnswer || '',
         },
       ],
     };
@@ -567,8 +561,12 @@ async function handleCodeGenerationRequest({
               {
                 type: 'text',
                 text: JSON.stringify({
-                  code: (codeResult as any).code || '',
-                  packageJson: (codeResult as any).packageJson || '{}',
+                  code:
+                    (codeResult as { code?: string; packageJson?: string })
+                      .code || '',
+                  packageJson:
+                    (codeResult as { code?: string; packageJson?: string })
+                      .packageJson || '{}',
                 }),
               },
             ],
