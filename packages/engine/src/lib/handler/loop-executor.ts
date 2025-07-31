@@ -193,6 +193,7 @@ async function triggerLoopIterations(
     });
 
     loopIterations[i] = cloneDeep(loopExecutionState);
+
     loopExecutionState = loopExecutionState
       .setVerdict(ExecutionVerdict.RUNNING)
       .setCurrentPath(loopExecutionState.currentPath.removeLast())
