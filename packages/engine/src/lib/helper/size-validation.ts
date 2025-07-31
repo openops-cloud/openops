@@ -8,7 +8,7 @@ const MAX_RUN_SIZE_IN_MB =
 
 const BASE_MESSAGE = 'Workflow output size exceeds maximum allowed size.';
 
-type SizeValidationResult =
+export type SizeValidationResult =
   | {
       isValid: true;
     }

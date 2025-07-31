@@ -1,4 +1,8 @@
-import { appendToContext, logger } from '@openops/server-shared';
+import {
+  appendToContext,
+  encryptAndCompress,
+  logger,
+} from '@openops/server-shared';
 import {
   Action,
   ActionType,
@@ -32,7 +36,10 @@ import {
 import { testExecutionContext } from './handler/context/test-execution-context';
 import { flowExecutor } from './handler/flow-executor';
 import { blockHelper } from './helper/block-helper';
-import { validateExecutionSize } from './helper/size-validation';
+import {
+  SizeValidationResult,
+  validateExecutionSize,
+} from './helper/size-validation';
 import { triggerHelper } from './helper/trigger-helper';
 import { resolveVariable } from './resolve-variable';
 import { utils } from './utils';
@@ -90,22 +97,7 @@ async function executeStep(
 
   const stepResult = output.steps[step.name];
 
-  let steps: Record<string, unknown> = {};
-  if (input.stepTestOutputs) {
-    steps = Object.fromEntries(
-      flowHelper
-        .getAllSteps(input.flowVersion.trigger)
-        .map((item) => [item.name, input.stepTestOutputs?.[item.id!] ?? null]),
-    );
-  }
-  const sizeValidation = validateExecutionSize({
-    flowVersion: input.flowVersion,
-    stepTestOutputs: {
-      ...steps,
-      [step.name]: stepResult,
-    },
-  });
-
+  const sizeValidation = await validateResultSize(input, stepResult, step.name);
   if (!sizeValidation.isValid) {
     return {
       success: false,
@@ -313,4 +305,31 @@ export async function execute(
       },
     };
   }
+}
+
+async function validateResultSize(
+  input: ExecuteStepOperation,
+  stepResult: StepOutput,
+  stepName: string,
+): Promise<SizeValidationResult> {
+  let steps: Record<string, unknown> = {};
+  if (input.stepTestOutputs) {
+    steps = Object.fromEntries(
+      flowHelper
+        .getAllSteps(input.flowVersion.trigger)
+        .map((item) => [item.name, input.stepTestOutputs?.[item.id!] ?? null]),
+    );
+  }
+
+  // Simulate the full size
+  const currentStepTestOutput = (await encryptAndCompress(stepResult)).toString(
+    'base64',
+  );
+  return validateExecutionSize({
+    flowVersion: input.flowVersion,
+    stepTestOutputs: {
+      ...steps,
+      [stepName]: currentStepTestOutput,
+    },
+  });
 }
