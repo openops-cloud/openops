@@ -1,3 +1,4 @@
+import { logger } from '@openops/server-shared';
 import {
   ActionType,
   assertEqual,
@@ -15,6 +16,7 @@ import {
   StopResponse,
 } from '@openops/shared';
 import { nanoid } from 'nanoid';
+import sizeof from 'object-sizeof';
 import { validateStepOutputSize } from '../../helper/size-validation';
 import { StepExecutionPath } from './step-execution-path';
 
@@ -152,37 +154,58 @@ export class FlowExecutorContext {
     stepName: string,
     stepOutput: StepOutput,
   ): FlowExecutorContext {
-    let processedStepOutput = stepOutput;
-
-    if (
-      stepOutput.status === StepOutputStatus.SUCCEEDED &&
-      stepOutput.output !== undefined
-    ) {
-      const sizeValidation = validateStepOutputSize(stepOutput.output);
-      if (!sizeValidation.isValid) {
-        processedStepOutput = stepOutput
-          .setStatus(StepOutputStatus.FAILED)
-          .setErrorMessage(sizeValidation.errorMessage!);
-      }
-    }
-
     const steps = {
       ...this.steps,
     };
     const targetMap = getStateAtPath({ currentPath: this.currentPath, steps });
-    targetMap[stepName] = processedStepOutput;
+    targetMap[stepName] = stepOutput;
 
-    const error =
-      processedStepOutput.status === StepOutputStatus.FAILED
+    // Log step size information
+    const stepSize = sizeof(stepOutput.output || {});
+    const totalWorkflowSize = sizeof(steps);
+
+    logger.info(`[STEP_SIZE] Step: ${stepName}`, {
+      stepSizeBytes: stepSize,
+      stepSizeKB: (stepSize / 1024).toFixed(2),
+      totalWorkflowSizeBytes: totalWorkflowSize,
+      totalWorkflowSizeKB: (totalWorkflowSize / 1024).toFixed(2),
+    });
+
+    const sizeValidation = validateStepOutputSize(steps);
+
+    let processedStepOutput = stepOutput;
+    let error =
+      stepOutput.status === StepOutputStatus.FAILED
         ? {
             stepName,
-            message: processedStepOutput.errorMessage,
+            message: stepOutput.errorMessage,
           }
         : this.error;
+
+    let verdict = this.verdict;
+    let verdictResponse = this.verdictResponse;
+
+    if (!sizeValidation.isValid) {
+      processedStepOutput = stepOutput
+        .setStatus(StepOutputStatus.FAILED)
+        .setErrorMessage(sizeValidation.errorMessage!);
+
+      targetMap[stepName] = processedStepOutput;
+
+      error = {
+        stepName,
+        message: sizeValidation.errorMessage!,
+      };
+
+      verdict = ExecutionVerdict.FAILED;
+      verdictResponse = undefined;
+    }
 
     return new FlowExecutorContext({
       ...this,
       tasks: this.tasks,
+      verdict,
+      verdictResponse,
       ...spreadIfDefined('error', error),
       steps,
     });

@@ -12,12 +12,12 @@ export const validateStepOutputSize = (
   output: unknown,
 ): SizeValidationResult => {
   const outputSize = sizeof(output);
-  const limitInMB = (MAX_SIZE_FOR_ALL_ENTRIES / (1024 * 1024)).toFixed(1);
+  const limitInMB = (MAX_SIZE_FOR_ALL_ENTRIES / (1024 * 1024)).toFixed(3);
 
   if (outputSize > MAX_SIZE_FOR_ALL_ENTRIES) {
     return {
       isValid: false,
-      errorMessage: `Step output size exceeds maximum allowed size (${limitInMB}MB). Workflow execution failed to prevent data loss.`,
+      errorMessage: `Workflow output size exceeds maximum allowed size (${limitInMB}MB).`,
       limitInMB,
     };
   }
