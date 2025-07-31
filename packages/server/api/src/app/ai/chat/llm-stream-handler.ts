@@ -21,6 +21,8 @@ type AICallSettings = {
   onFinish?: StreamTextOnFinishCallback<ToolSet>;
 };
 
+const MAX_RETRIES = 1
+
 export function getLLMAsyncStream(
   params: AICallSettings,
 ): AsyncIterable<TextStreamPart<ToolSet>> {
@@ -45,7 +47,7 @@ export function getLLMAsyncStream(
     ...aiConfig.modelSettings,
     tools,
     toolChoice,
-    maxRetries: 1,
+    maxRetries: MAX_RETRIES,
     maxSteps: maxRecursionDepth,
     toolCallStreaming: true,
     onStepFinish,
