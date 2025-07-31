@@ -3,13 +3,15 @@ import { useAiModelSelector } from '@/app/features/ai/lib/ai-model-selector-hook
 import { useAssistantChat } from '@/app/features/ai/lib/assistant-ui-chat-hook';
 import { AssistantUiChatContainer } from '@openops/components/ui';
 import { t } from 'i18next';
-import { ReactNode } from 'react';
+import { ReactNode, useCallback } from 'react';
+import { AssistantUiHistory } from '../../../../../../ui-components/src/components/assistant-ui/history/assistant-ui-history';
 
 type AssistantUiChatProps = {
   onClose: () => void;
   title?: string;
   children?: ReactNode;
   handleInject?: (codeContent: string) => void;
+  onHistroyToggle?: (isOpened: boolean) => void;
 };
 
 const AssistantUiChat = ({
@@ -24,7 +26,10 @@ const AssistantUiChat = ({
     openChatResponse,
     isLoading,
     hasMessages,
-    createNewChat,
+    openChat,
+    chatsHistory,
+    showHistory,
+    setShowHistory,
   } = useAssistantChat();
 
   const { theme } = useTheme();
@@ -35,6 +40,10 @@ const AssistantUiChat = ({
     onModelSelected,
     isLoading: isModelSelectorLoading,
   } = useAiModelSelector();
+
+  const toggleHistory = useCallback(() => {
+    setShowHistory((showHistory) => !showHistory);
+  }, [setShowHistory]);
 
   if (isLoading || !openChatResponse) {
     return (
@@ -57,21 +66,35 @@ const AssistantUiChat = ({
   }
 
   return (
-    <AssistantUiChatContainer
-      onClose={onClose}
-      runtime={runtime}
-      onNewChat={createNewChat}
-      title={title}
-      enableNewChat={hasMessages}
-      availableModels={availableModels}
-      onModelSelected={onModelSelected}
-      isModelSelectorLoading={isModelSelectorLoading}
-      selectedModel={selectedModel}
-      theme={theme}
-      handleInject={handleInject}
-    >
-      {children}
-    </AssistantUiChatContainer>
+    <div className="w-full h-full flex ">
+      {showHistory && (
+        <AssistantUiHistory
+          onNewChat={openChat}
+          newChatDisabled={!hasMessages}
+          onChatSelected={openChat}
+          onChatDeleted={function (chatId: string): void {
+            throw new Error('Function not implemented.');
+          }}
+          chatItems={chatsHistory ?? []}
+        />
+      )}
+      <AssistantUiChatContainer
+        onClose={onClose}
+        runtime={runtime}
+        onNewChat={openChat}
+        title={title}
+        enableNewChat={hasMessages}
+        availableModels={availableModels}
+        onModelSelected={onModelSelected}
+        isModelSelectorLoading={isModelSelectorLoading}
+        selectedModel={selectedModel}
+        theme={theme}
+        handleInject={handleInject}
+        onToggleHistory={toggleHistory}
+      >
+        {children}
+      </AssistantUiChatContainer>
+    </div>
   );
 };
 

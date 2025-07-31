@@ -48,6 +48,7 @@ export const QueryKeys = {
   dataSelectorStepTestOutput: 'data-selector-test-output',
   triggerEvents: 'triggerEvents',
   openChat: 'openChat',
+  aiChatHistory: 'aiChatHistory',
 
   // Blocks
   block: 'block',

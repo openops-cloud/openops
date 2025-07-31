@@ -16,6 +16,8 @@ import { mergeToolResultsIntoMessages } from './utils';
 const DEFAULT_EXPIRE_TIME = 86400;
 const LOCK_EXPIRE_TIME = 30000;
 
+export const DEFAULT_CHAT_NAME = 'New Chat';
+
 const chatContextKey = (
   chatId: string,
   userId: string,
@@ -160,6 +162,8 @@ export const getAllChats = async (
   const keys = await cacheWrapper.scanKeys(pattern);
   const chats: { chatId: string; chatName: string }[] = [];
 
+  console.log('KEYS ARE', keys);
+
   for (const key of keys) {
     const keyParts = key.split(':');
     if (keyParts.length !== 4) {
@@ -169,12 +173,10 @@ export const getAllChats = async (
 
     const context = await cacheWrapper.getSerializedObject<MCPChatContext>(key);
 
-    if (context?.chatName) {
-      chats.push({
-        chatId: longChatId,
-        chatName: context.chatName,
-      });
-    }
+    chats.push({
+      chatId: longChatId,
+      chatName: context?.chatName ?? DEFAULT_CHAT_NAME,
+    });
   }
 
   return chats;

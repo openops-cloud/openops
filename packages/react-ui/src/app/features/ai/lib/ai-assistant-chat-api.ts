@@ -10,4 +10,7 @@ export const aiAssistantChatApi = {
   delete(chatId: string) {
     return api.delete<void>(`/v1/ai/conversation/${chatId}`);
   },
+  listChats() {
+    return api.get<void>(`/v1/ai/conversation/all-chats`);
+  },
 };

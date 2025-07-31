@@ -27,6 +27,8 @@ const AssistantUiChatContainer = ({
   theme,
   children,
   handleInject,
+  onToggleHistory,
+  isHistoryOpened,
 }: AssistantUiChatContainerProps) => {
   const codeVariation = useMemo(() => {
     return handleInject
@@ -41,6 +43,8 @@ const AssistantUiChatContainer = ({
         onNewChat={onNewChat}
         enableNewChat={enableNewChat}
         title={title}
+        onToggleHistory={onToggleHistory}
+        isHistoryOpened={isHistoryOpened}
       >
         {children}
       </AssistantTopBar>
