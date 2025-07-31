@@ -253,7 +253,7 @@ export async function getConversation(
   chatId: string,
   userId: string,
   projectId: string,
-): Promise<{ chatContext: MCPChatContext; messages: CoreMessage[] }> {
+): Promise<{ chatContext: MCPChatContext; chatHistory: CoreMessage[] }> {
   const chatContext = await getChatContext(chatId, userId, projectId);
   if (!chatContext) {
     throw new ApplicationError({
@@ -266,7 +266,7 @@ export async function getConversation(
     });
   }
 
-  const messages = await getChatHistory(chatId, userId, projectId);
+  const chatHistory = await getChatHistory(chatId, userId, projectId);
 
-  return { chatContext, messages };
+  return { chatContext, chatHistory };
 }

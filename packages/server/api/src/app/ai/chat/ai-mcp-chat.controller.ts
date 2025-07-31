@@ -119,6 +119,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       });
     },
   );
+
   app.post('/', NewMessageOptions, async (request, reply) => {
     const chatId = request.body.chatId;
     const userId = request.principal.id;
@@ -157,18 +158,13 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
     const projectId = request.principal.projectId;
 
     try {
-      const contextForChatName = await getConversation(
-        chatId,
-        userId,
-        projectId,
-      );
-      const messages = contextForChatName.messages;
+      const { chatHistory } = await getConversation(chatId, userId, projectId);
 
-      if (messages.length === 0) {
+      if (chatHistory.length === 0) {
         return await reply.code(200).send({ chatName: DEFAULT_CHAT_NAME });
       }
 
-      const rawChatName = await generateChatName(messages, projectId);
+      const rawChatName = await generateChatName(chatHistory, projectId);
       const chatName = rawChatName.trim() || DEFAULT_CHAT_NAME;
 
       await updateChatName(chatId, userId, projectId, chatName);
@@ -192,12 +188,12 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       );
       const llmConfigResult = await getLLMConfig(projectId);
 
-      conversationResult.messages.push({
+      conversationResult.chatHistory.push({
         role: 'user',
         content: request.body.message,
       });
 
-      const { chatContext, messages } = conversationResult;
+      const { chatContext, chatHistory } = conversationResult;
       const { aiConfig, languageModel } = llmConfigResult;
 
       const enrichedContext = request.body.additionalContext
@@ -209,7 +205,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       const prompt = await getBlockSystemPrompt(chatContext, enrichedContext);
 
       const result = streamCode({
-        messages,
+        chatHistory,
         languageModel,
         aiConfig,
         systemPrompt: prompt,
@@ -223,7 +219,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
           });
 
           await saveChatHistory(chatId, userId, projectId, [
-            ...messages,
+            ...chatHistory,
             assistantMessage,
           ]);
         },
