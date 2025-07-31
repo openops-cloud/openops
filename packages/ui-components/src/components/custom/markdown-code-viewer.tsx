@@ -10,8 +10,6 @@ const MarkdownCodeViewer = ({
   theme: Theme;
   className?: string;
 }) => {
-  // const lineCount = content.split('\n').length;
-  // const height = lineCount * 22;
   return (
     <div className="h-auto">
       <CodeEditor

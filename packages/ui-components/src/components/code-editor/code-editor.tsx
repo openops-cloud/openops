@@ -1,6 +1,7 @@
 import Editor from '@monaco-editor/react';
 import { SourceCode } from '@openops/shared';
 import { t } from 'i18next';
+import { throttle } from 'lodash-es';
 import { editor } from 'monaco-editor';
 import React, {
   RefObject,
@@ -81,28 +82,6 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
       return String(value);
     };
 
-    const throttle = useCallback(
-      (func: (...args: any[]) => void, delay: number) => {
-        let timeoutId: NodeJS.Timeout;
-        let lastExecTime = 0;
-        return (...args: any[]) => {
-          const currentTime = Date.now();
-
-          if (currentTime - lastExecTime > delay) {
-            func(...args);
-            lastExecTime = currentTime;
-          } else {
-            clearTimeout(timeoutId);
-            timeoutId = setTimeout(() => {
-              func(...args);
-              lastExecTime = Date.now();
-            }, delay - (currentTime - lastExecTime));
-          }
-        };
-      },
-      [],
-    );
-
     const throttledLayout = useCallback(() => {
       const throttledFn = throttle(() => {
         if (editorRef.current) {
@@ -110,7 +89,7 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
         }
       }, 16); // ~60fps
       return throttledFn();
-    }, [throttle]);
+    }, []);
 
     const currentValue = activeTab === 'code' ? code : packageJson;
     const isReadOnly = readonly || activeTab === 'packageJson';
