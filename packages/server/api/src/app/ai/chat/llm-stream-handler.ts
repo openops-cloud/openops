@@ -21,7 +21,7 @@ type AICallSettings = {
   onFinish?: StreamTextOnFinishCallback<ToolSet>;
 };
 
-const MAX_RETRIES = 1
+const MAX_RETRIES = 1;
 
 export function getLLMAsyncStream(
   params: AICallSettings,
