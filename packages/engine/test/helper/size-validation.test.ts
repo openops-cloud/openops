@@ -27,7 +27,7 @@ describe('isSizeValidationError', () => {
   })
 
   it('should return false when error message is undefined', () => {
-    const result = isSizeValidationError(undefined)
+    const result = isSizeValidationError()
     expect(result).toBe(false)
   })
 })
