@@ -68,9 +68,10 @@ const AiChatResizablePanel = ({
   ]);
 
   useEffect(() => {
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       setShowChatDelayed(showChat);
     }, 300);
+    return () => clearTimeout(timeoutId);
   }, [showChat]);
 
   const getDefaultPanelSize = useCallback(() => {
