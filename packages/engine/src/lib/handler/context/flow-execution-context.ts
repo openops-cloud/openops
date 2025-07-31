@@ -15,7 +15,7 @@ import {
   StopResponse,
 } from '@openops/shared';
 import { nanoid } from 'nanoid';
-import { validateStepOutputSize } from '../../helper/size-validation';
+import { validateExecutionSize } from '../../helper/size-validation';
 import { StepExecutionPath } from './step-execution-path';
 
 export enum ExecutionVerdict {
@@ -158,15 +158,14 @@ export class FlowExecutorContext {
     const targetMap = getStateAtPath({ currentPath: this.currentPath, steps });
     targetMap[stepName] = stepOutput;
 
-    const sizeValidation = validateStepOutputSize(steps);
-
+    const sizeValidation = validateExecutionSize(steps);
     if (!sizeValidation.isValid) {
       return this.createSizeValidationFailureContext(
         stepName,
         stepOutput,
         steps,
         targetMap,
-        sizeValidation.errorMessage!,
+        sizeValidation.errorMessage,
       );
     }
 

@@ -6,7 +6,9 @@ const ONE_MB_IN_BYTES = 1024 * 1024;
 const MAX_RUN_SIZE_IN_MB =
   system.getNumberOrThrow(AppSystemProp.REQUEST_BODY_LIMIT) - 0.5;
 
-export type SizeValidationResult =
+const BASE_MESSAGE = 'Workflow output size exceeds maximum allowed size.';
+
+type SizeValidationResult =
   | {
       isValid: true;
     }
@@ -34,8 +36,7 @@ function buildErrorMessage(
   totalSizeMB: number,
   steps: Record<string, unknown>,
 ): string {
-  let message = `Workflow output size exceeds maximum allowed size.\n`;
-  message += `Total size: ${totalSizeMB.toFixed(
+  let message = `${BASE_MESSAGE}\nTotal size: ${totalSizeMB.toFixed(
     2,
   )}MB (limit: ${MAX_RUN_SIZE_IN_MB.toFixed(2)}MB)`;
 
@@ -46,14 +47,10 @@ function buildErrorMessage(
 }
 
 export function isSizeValidationError(errorMessage?: string): boolean {
-  return (
-    errorMessage?.includes(
-      'Workflow output size exceeds maximum allowed size',
-    ) ?? false
-  );
+  return errorMessage?.includes(BASE_MESSAGE) ?? false;
 }
 
-export function validateStepOutputSize(
+export function validateExecutionSize(
   stepsOrOutput:
     | Record<string, StepOutput>
     | {
@@ -70,22 +67,16 @@ export function validateStepOutputSize(
   }
 
   const outputSizeMB = outputSize / ONE_MB_IN_BYTES;
-
-  if ('stepTestOutputs' in stepsOrOutput && 'flowVersion' in stepsOrOutput) {
-    return {
-      isValid: false,
-      errorMessage: buildErrorMessage(
-        outputSizeMB,
-        stepsOrOutput.stepTestOutputs as Record<string, unknown>,
-      ),
-    };
-  }
+  const steps =
+    'stepTestOutputs' in stepsOrOutput && 'flowVersion' in stepsOrOutput
+      ? stepsOrOutput.stepTestOutputs
+      : stepsOrOutput;
 
   return {
     isValid: false,
     errorMessage: buildErrorMessage(
       outputSizeMB,
-      stepsOrOutput as Record<string, unknown>,
+      steps as Record<string, unknown>,
     ),
   };
 }

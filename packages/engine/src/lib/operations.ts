@@ -32,7 +32,7 @@ import {
 import { testExecutionContext } from './handler/context/test-execution-context';
 import { flowExecutor } from './handler/flow-executor';
 import { blockHelper } from './helper/block-helper';
-import { validateStepOutputSize } from './helper/size-validation';
+import { validateExecutionSize } from './helper/size-validation';
 import { triggerHelper } from './helper/trigger-helper';
 import { resolveVariable } from './resolve-variable';
 import { utils } from './utils';
@@ -98,7 +98,7 @@ async function executeStep(
         .map((item) => [item.name, input.stepTestOutputs?.[item.id!] ?? null]),
     );
   }
-  const sizeValidation = validateStepOutputSize({
+  const sizeValidation = validateExecutionSize({
     flowVersion: input.flowVersion,
     stepTestOutputs: {
       ...steps,
