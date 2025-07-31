@@ -79,7 +79,6 @@ export function validateStepOutputSize(
         outputSizeMB,
         limitMB,
         stepsOrOutput.stepTestOutputs as Record<string, unknown>,
-        stepsOrOutput.flowVersion as FlowVersion,
       ),
     };
   }

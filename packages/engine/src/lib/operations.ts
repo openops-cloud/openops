@@ -102,7 +102,7 @@ async function executeStep(
     flowVersion: input.flowVersion,
     stepTestOutputs: {
       ...steps,
-      [step.name]: stepResult.output,
+      [step.name]: stepResult,
     },
   });
 
