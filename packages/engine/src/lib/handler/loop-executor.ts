@@ -194,20 +194,17 @@ async function triggerLoopIterations(
 
     loopIterations[i] = cloneDeep(loopExecutionState);
 
-    if (
-      loopExecutionState.verdict === ExecutionVerdict.FAILED &&
-      isSizeValidationError(loopExecutionState.error?.message)
-    ) {
-      loopExecutionContext.executionState = loopExecutionState
-        .setCurrentPath(loopExecutionState.currentPath.removeLast())
-        .setPauseId(originalPauseId);
-      return;
-    }
-
     loopExecutionState = loopExecutionState
       .setVerdict(ExecutionVerdict.RUNNING)
       .setCurrentPath(loopExecutionState.currentPath.removeLast())
       .setPauseId(originalPauseId);
+
+    if (
+      loopIterations[i].verdict === ExecutionVerdict.FAILED &&
+      isSizeValidationError(loopIterations[i].error?.message)
+    ) {
+      break;
+    }
   }
 
   loopExecutionContext.executionState = loopExecutionState;

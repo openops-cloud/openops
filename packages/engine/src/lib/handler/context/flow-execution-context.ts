@@ -15,7 +15,6 @@ import {
   StopResponse,
 } from '@openops/shared';
 import { nanoid } from 'nanoid';
-import sizeof from 'object-sizeof';
 import { validateStepOutputSize } from '../../helper/size-validation';
 import { StepExecutionPath } from './step-execution-path';
 
