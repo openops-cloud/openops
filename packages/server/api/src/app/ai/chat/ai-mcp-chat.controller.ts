@@ -2,7 +2,9 @@ import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { logger } from '@openops/server-shared';
 import {
   ApplicationError,
+  ChatFlowContext,
   ChatNameRequest,
+  CODE_BLOCK_NAME,
   DeleteChatHistoryRequest,
   ListChatsResponse,
   NewMessageRequest,
@@ -12,7 +14,7 @@ import {
   PrincipalType,
 } from '@openops/shared';
 import { CoreMessage } from 'ai';
-import { FastifyReply } from 'fastify';
+import { FastifyInstance, FastifyReply } from 'fastify';
 import { StatusCodes } from 'http-status-codes';
 import {
   createChatContext,
@@ -31,7 +33,7 @@ import {
 } from './ai-chat.service';
 import { streamCode } from './code.service';
 import { enrichContext, IncludeOptions } from './context-enrichment.service';
-import { getBlockSystemPrompt } from './prompts.service';
+import { getBlockSystemPrompt, loadPrompt } from './prompts.service';
 import { handleUserMessage } from './user-message-handler';
 
 const DEFAULT_CHAT_NAME = 'New Chat';
@@ -132,20 +134,38 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         return; // Error response already sent
       }
 
-      const newMessage: CoreMessage = {
-        role: 'user',
-        content: messageContent,
-      };
+      const { chatContext } = await getConversation(chatId, userId, projectId);
+      const isCodeGenerationRequest =
+        chatContext?.blockName === CODE_BLOCK_NAME;
 
-      await handleUserMessage({
-        app,
-        chatId,
-        userId,
-        projectId,
-        authToken,
-        newMessage,
-        serverResponse: reply.raw,
-      });
+      if (isCodeGenerationRequest) {
+        logger.debug('Using code generation flow');
+        const response = await handleCodeGenerationRequest({
+          chatId,
+          userId,
+          projectId,
+          messageContent,
+          additionalContext: request.body.additionalContext,
+        });
+        return response;
+      } else {
+        logger.debug('Using normal conversation flow');
+        const newMessage: CoreMessage = {
+          role: 'user',
+          content: messageContent,
+        };
+
+        await handleUserMessage({
+          app,
+          chatId,
+          userId,
+          projectId,
+          authToken,
+          newMessage,
+          serverResponse: reply.raw,
+        });
+        return;
+      }
     } catch (error) {
       return handleError(error, reply, 'conversation');
     }
@@ -351,6 +371,229 @@ function handleError(
 
   logger.error(`Failed to process ${context || 'request'} with error: `, error);
   return reply.code(500).send({ message: 'Internal server error' });
+}
+
+/**
+ * Handles code generation requests using streamCode for structured output.
+ */
+async function handleCodeGenerationRequest({
+  chatId,
+  userId,
+  projectId,
+  messageContent,
+  additionalContext,
+}: {
+  chatId: string;
+  userId: string;
+  projectId: string;
+  messageContent: string;
+  additionalContext?: ChatFlowContext;
+}): Promise<Response> {
+  try {
+    const conversationResult = await getConversation(chatId, userId, projectId);
+    const llmConfigResult = await getLLMConfig(projectId);
+
+    conversationResult.messages.push({
+      role: 'user',
+      content: messageContent,
+    });
+
+    const { chatContext, messages } = conversationResult;
+    const { aiConfig, languageModel } = llmConfigResult;
+
+    const enrichedContext = additionalContext
+      ? await enrichContext(additionalContext, projectId, {
+          includeCurrentStepOutput: IncludeOptions.ALWAYS,
+        })
+      : undefined;
+
+    const prompt = await getBlockSystemPrompt(chatContext, enrichedContext);
+
+    logger.debug('Code generation prompt:', {
+      chatContext: JSON.stringify(chatContext),
+      enrichedContext: enrichedContext ? 'present' : 'absent',
+      promptLength: prompt.length,
+      promptPreview: prompt.substring(0, 200),
+    });
+
+    let codeResult: {
+      type: string;
+      code?: string;
+      packageJson?: string;
+      textAnswer: string;
+    } | null = null;
+
+    const result = streamCode({
+      messages,
+      languageModel,
+      aiConfig,
+      systemPrompt: prompt,
+      onFinish: async (result) => {
+        if (result.object) {
+          codeResult = result.object;
+        }
+      },
+      onError: (error) => {
+        logger.error('Failed to generate code', {
+          error,
+        });
+        throw error;
+      },
+    });
+
+    // Wait for the stream to complete and get the result
+    const streamResponse = result.toTextStreamResponse();
+    const reader = streamResponse.body?.getReader();
+    if (reader) {
+      let done = false;
+      while (!done) {
+        const result = await reader.read();
+        done = result.done;
+      }
+    }
+
+    // Wait a bit for onFinish to be called
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    if (!codeResult) {
+      throw new Error('No code generation result received');
+    }
+
+    // Create a mock tool call response
+    const toolCallId = `call_${Date.now()}_${Math.random()
+      .toString(36)
+      .substr(2, 9)}`;
+
+    // Create the streaming response manually
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      start(controller) {
+        // Send tool call start (use 9: prefix for tool calls)
+        const toolCallMessage = {
+          toolCallId,
+          toolName: 'generate_code',
+          args: { message: messageContent },
+        };
+        controller.enqueue(
+          encoder.encode(`9:${JSON.stringify(toolCallMessage)}\n`),
+        );
+
+        // Send tool call result
+        const toolResult = {
+          toolCallId,
+          result: {
+            // success: true,
+            // toolType: 'code-generation',
+            // type: codeResult!.type,
+            code: codeResult!.code || '',
+            packageJson: codeResult!.packageJson || '{}',
+          },
+        };
+        controller.enqueue(encoder.encode(`a:${JSON.stringify(toolResult)}\n`));
+
+        // Send finish message
+        const finishMessage = {
+          finishReason: 'tool-calls',
+          usage: { promptTokens: null, completionTokens: null },
+          isContinued: false,
+        };
+        controller.enqueue(
+          encoder.encode(`e:${JSON.stringify(finishMessage)}\n`),
+        );
+        controller.enqueue(
+          encoder.encode(`d:${JSON.stringify(finishMessage)}\n`),
+        );
+
+        // Send text answer as a separate message
+        const textMessage = {
+          messageId: `msg_${Date.now()}_${Math.random()
+            .toString(36)
+            .substr(2, 9)}`,
+          content: codeResult!.textAnswer,
+        };
+        controller.enqueue(
+          encoder.encode(`f:${JSON.stringify(textMessage)}\n`),
+        );
+
+        // Send finish for text message
+        const textFinishMessage = {
+          finishReason: 'stop',
+          usage: { promptTokens: null, completionTokens: null },
+          isContinued: false,
+        };
+        controller.enqueue(
+          encoder.encode(`e:${JSON.stringify(textFinishMessage)}\n`),
+        );
+        controller.enqueue(
+          encoder.encode(`d:${JSON.stringify(textFinishMessage)}\n`),
+        );
+
+        controller.close();
+      },
+    });
+
+    // Save the conversation history in the correct format for mergeToolResultsIntoMessages
+    const saveToolCallId = `call_${Date.now()}_${Math.random()
+      .toString(36)
+      .substr(2, 9)}`;
+
+    // Save assistant message with tool call and text (result will be merged by mergeToolResultsIntoMessages)
+    const assistantMessage: CoreMessage = {
+      role: 'assistant',
+      content: [
+        {
+          type: 'tool-call',
+          toolCallId: saveToolCallId,
+          toolName: 'generate_code',
+          args: { message: messageContent },
+        },
+        {
+          type: 'text',
+          text: (codeResult as any).textAnswer || '',
+        },
+      ],
+    };
+
+    // Save tool result message (will be merged into assistant message by mergeToolResultsIntoMessages)
+    const toolResultMessage: CoreMessage = {
+      role: 'tool',
+      content: [
+        {
+          type: 'tool-result',
+          toolCallId: saveToolCallId,
+          toolName: 'generate_code',
+          result: {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify({
+                  code: (codeResult as any).code || '',
+                  packageJson: (codeResult as any).packageJson || '{}',
+                }),
+              },
+            ],
+            isError: false,
+          },
+        },
+      ],
+    };
+
+    await saveChatHistory(chatId, userId, projectId, [
+      ...messages,
+      assistantMessage,
+      toolResultMessage,
+    ]);
+
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Transfer-Encoding': 'chunked',
+      },
+    });
+  } catch (error) {
+    logger.error('Error in handleCodeGenerationRequest:', error);
+    throw error;
+  }
 }
 
 /**
