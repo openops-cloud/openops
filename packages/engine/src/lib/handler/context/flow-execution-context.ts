@@ -1,4 +1,3 @@
-import { logger } from '@openops/server-shared';
 import {
   ActionType,
   assertEqual,
