@@ -10,7 +10,6 @@ import { useState } from 'react';
 import { Button } from '../../../ui/button';
 
 type BaseToolWrapperProps = {
-  isCollapsedDefault?: boolean;
   children?: React.ReactNode;
 } & Pick<ToolCallMessagePartProps, 'toolName' | 'status'>;
 
