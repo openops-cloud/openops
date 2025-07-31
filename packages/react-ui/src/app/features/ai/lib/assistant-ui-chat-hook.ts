@@ -19,6 +19,28 @@ interface UseAssistantChatProps {
   selectedStep?: string;
 }
 
+const buildQueryKey = (
+  selectedStep: string | undefined,
+  flowVersionId: string | undefined,
+  chatId: string | null,
+  blockName: string | undefined,
+) => {
+  const baseKey = [
+    selectedStep ? QueryKeys.openChat : QueryKeys.openAiAssistantChat,
+    selectedStep ? flowVersionId : chatId,
+  ];
+
+  if (selectedStep && blockName) {
+    baseKey.push(blockName);
+  }
+
+  if (selectedStep) {
+    baseKey.push(selectedStep);
+  }
+
+  return baseKey;
+};
+
 export const useAssistantChat = (props?: UseAssistantChatProps) => {
   const { flowVersion, selectedStep } = props ?? {};
   const chatId = useRef(localStorage.getItem(AI_ASSISTANT_LS_KEY));
@@ -29,22 +51,16 @@ export const useAssistantChat = (props?: UseAssistantChatProps) => {
       ? flowHelper.getStep(flowVersion, selectedStep)
       : undefined;
 
-  const queryKey = useMemo(() => {
-    const baseKey = [
-      selectedStep ? QueryKeys.openChat : QueryKeys.openAiAssistantChat,
-      selectedStep ? flowVersion?.flowId : chatId.current,
-    ];
-
-    if (selectedStep && stepDetails?.settings?.blockName) {
-      baseKey.push(stepDetails.settings.blockName);
-    }
-
-    if (selectedStep) {
-      baseKey.push(selectedStep);
-    }
-
-    return baseKey;
-  }, [selectedStep, flowVersion?.flowId, stepDetails?.settings?.blockName]);
+  const queryKey = useMemo(
+    () =>
+      buildQueryKey(
+        selectedStep,
+        flowVersion?.flowId,
+        chatId.current,
+        stepDetails?.settings?.blockName,
+      ),
+    [selectedStep, flowVersion?.flowId, stepDetails?.settings?.blockName],
+  );
 
   const { data: openChatResponse, isLoading } = useQuery({
     queryKey,
@@ -111,8 +127,17 @@ export const useAssistantChat = (props?: UseAssistantChatProps) => {
     try {
       if (oldChatId) {
         runtime.thread.cancelRun();
+        runtime.thread.reset();
+
+        const invalidationKey = buildQueryKey(
+          selectedStep,
+          flowVersion?.flowId,
+          oldChatId,
+          stepDetails?.settings?.blockName,
+        );
+
         await queryClient.invalidateQueries({
-          queryKey: [QueryKeys.openAiAssistantChat, oldChatId],
+          queryKey: invalidationKey,
         });
       }
       setHasMessages(false);
@@ -125,7 +150,13 @@ export const useAssistantChat = (props?: UseAssistantChatProps) => {
         `There was an error canceling the current run and invalidating queries while creating a new chat: ${error}`,
       );
     }
-  }, [queryClient, runtime.thread]);
+  }, [
+    flowVersion?.flowId,
+    queryClient,
+    runtime.thread,
+    selectedStep,
+    stepDetails?.settings?.blockName,
+  ]);
 
   useEffect(() => {
     const unsubscribe = runtime.thread.subscribe(() => {

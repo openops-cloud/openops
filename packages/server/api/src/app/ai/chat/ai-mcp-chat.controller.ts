@@ -4,6 +4,7 @@ import {
   ApplicationError,
   ChatNameRequest,
   DeleteChatHistoryRequest,
+  ListChatsResponse,
   NewMessageRequest,
   OpenChatMCPRequest,
   OpenChatResponse,
@@ -19,6 +20,7 @@ import {
   generateChatId,
   generateChatIdForMCP,
   generateChatName,
+  getAllChats,
   getChatContext,
   getChatHistoryWithMergedTools,
   getConversation,
@@ -239,6 +241,18 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
     }
   });
 
+  app.get('/all-chats', ListChatsOptions, async (request, reply) => {
+    const userId = request.principal.id;
+    const projectId = request.principal.projectId;
+
+    try {
+      const chats = await getAllChats(userId, projectId);
+      return await reply.code(StatusCodes.OK).send({ chats });
+    } catch (error) {
+      return handleError(error, reply, 'list chats');
+    }
+  });
+
   app.delete('/:chatId', DeleteChatOptions, async (request, reply) => {
     const { chatId } = request.params;
     const userId = request.principal.id;
@@ -309,6 +323,20 @@ const DeleteChatOptions = {
     description:
       'Delete an MCP chat session and its associated history. This endpoint removes all messages, context data, and MCP tool states for the specified chat ID, effectively ending the conversation.',
     params: DeleteChatHistoryRequest,
+  },
+};
+
+const ListChatsOptions = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
+  },
+  schema: {
+    tags: ['ai', 'ai-chat-mcp'],
+    description:
+      'This endpoint returns an array of all available chat sessions with chatId and chatName.',
+    response: {
+      200: ListChatsResponse,
+    },
   },
 };
 

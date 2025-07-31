@@ -8,6 +8,7 @@ import {
 } from 'fastify';
 import {
   generateChatName,
+  getAllChats,
   getConversation,
   getLLMConfig,
   updateChatName,
@@ -79,6 +80,7 @@ jest.mock('../../../src/app/ai/chat/ai-chat.service', () => ({
   getLLMConfig: jest.fn(),
   generateChatName: jest.fn(),
   updateChatName: jest.fn(),
+  getAllChats: jest.fn(),
 }));
 
 jest.mock('../../../src/app/ai/mcp/tools-context-builder', () => ({
@@ -125,6 +127,10 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
       return mockApp;
     }),
     delete: jest.fn((path: string, _: unknown, handler: RouteHandler) => {
+      handlers[path] = handler;
+      return mockApp;
+    }),
+    get: jest.fn((path: string, _: unknown, handler: RouteHandler) => {
       handlers[path] = handler;
       return mockApp;
     }),
@@ -559,6 +565,197 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
       expect(mockReply.code).toHaveBeenCalledWith(500);
       expect(mockReply.send).toHaveBeenCalledWith(
         expect.objectContaining({ message: 'Internal server error' }),
+      );
+    });
+  });
+
+  describe('GET /all-chats (list all chats)', () => {
+    let getHandler: RouteHandler;
+
+    beforeEach(async () => {
+      jest.clearAllMocks();
+      handlers = {};
+      await aiMCPChatController(mockApp, {} as FastifyPluginOptions);
+      getHandler = handlers['/all-chats'];
+    });
+
+    it('should return list of chats with chatId and chatName', async () => {
+      const mockChats = [
+        { chatId: 'chat-1', chatName: 'AWS Cost Optimization' },
+        { chatId: 'chat-2', chatName: 'Docker Container Setup' },
+        { chatId: 'chat-3', chatName: 'API Design Discussion' },
+      ];
+
+      (getAllChats as jest.Mock).mockResolvedValue(mockChats);
+
+      await getHandler(
+        mockRequest as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(getAllChats).toHaveBeenCalledWith(
+        'test-user-id',
+        'test-project-id',
+      );
+      expect(mockReply.code).toHaveBeenCalledWith(200);
+      expect(mockReply.send).toHaveBeenCalledWith({
+        chats: mockChats,
+      });
+    });
+
+    it('should return empty array when no chats exist', async () => {
+      (getAllChats as jest.Mock).mockResolvedValue([]);
+
+      await getHandler(
+        mockRequest as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(getAllChats).toHaveBeenCalledWith(
+        'test-user-id',
+        'test-project-id',
+      );
+      expect(mockReply.code).toHaveBeenCalledWith(200);
+      expect(mockReply.send).toHaveBeenCalledWith({
+        chats: [],
+      });
+    });
+
+    it('should handle large number of chats', async () => {
+      const mockChats = Array.from({ length: 50 }, (_, i) => ({
+        chatId: `chat-${i + 1}`,
+        chatName: `Chat Session ${i + 1}`,
+      }));
+
+      (getAllChats as jest.Mock).mockResolvedValue(mockChats);
+
+      await getHandler(
+        mockRequest as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(getAllChats).toHaveBeenCalledWith(
+        'test-user-id',
+        'test-project-id',
+      );
+      expect(mockReply.code).toHaveBeenCalledWith(200);
+      expect(mockReply.send).toHaveBeenCalledWith({
+        chats: mockChats,
+      });
+      expect(mockChats).toHaveLength(50);
+    });
+
+    it('should handle chats with special characters in names', async () => {
+      const mockChats = [
+        { chatId: 'chat-1', chatName: 'AWS S3 & CloudFront Setup' },
+        { chatId: 'chat-2', chatName: 'Node.js + Express.js Tutorial' },
+        { chatId: 'chat-3', chatName: 'React/TypeScript Best Practices' },
+        {
+          chatId: 'chat-4',
+          chatName: 'Database Migration (PostgreSQL → MongoDB)',
+        },
+      ];
+
+      (getAllChats as jest.Mock).mockResolvedValue(mockChats);
+
+      await getHandler(
+        mockRequest as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(getAllChats).toHaveBeenCalledWith(
+        'test-user-id',
+        'test-project-id',
+      );
+      expect(mockReply.code).toHaveBeenCalledWith(200);
+      expect(mockReply.send).toHaveBeenCalledWith({
+        chats: mockChats,
+      });
+    });
+
+    it('should handle service errors gracefully', async () => {
+      (getAllChats as jest.Mock).mockRejectedValue(
+        new Error('Cache service unavailable'),
+      );
+
+      await getHandler(
+        mockRequest as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(getAllChats).toHaveBeenCalledWith(
+        'test-user-id',
+        'test-project-id',
+      );
+      expect(mockReply.code).toHaveBeenCalledWith(500);
+      expect(mockReply.send).toHaveBeenCalledWith({
+        message: 'Internal server error',
+      });
+    });
+
+    it('should handle cache timeout errors', async () => {
+      (getAllChats as jest.Mock).mockRejectedValue(
+        new Error('Operation timed out'),
+      );
+
+      await getHandler(
+        mockRequest as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(getAllChats).toHaveBeenCalledWith(
+        'test-user-id',
+        'test-project-id',
+      );
+      expect(mockReply.code).toHaveBeenCalledWith(500);
+      expect(mockReply.send).toHaveBeenCalledWith({
+        message: 'Internal server error',
+      });
+    });
+
+    it('should call getAllChats with correct user and project parameters', async () => {
+      const customRequest = {
+        ...mockRequest,
+        principal: {
+          id: 'different-user-id',
+          projectId: 'different-project-id',
+          type: PrincipalType.USER,
+        },
+      };
+
+      (getAllChats as jest.Mock).mockResolvedValue([]);
+
+      await getHandler(
+        customRequest as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(getAllChats).toHaveBeenCalledWith(
+        'different-user-id',
+        'different-project-id',
+      );
+      expect(mockReply.code).toHaveBeenCalledWith(200);
+    });
+
+    it('should maintain proper response structure', async () => {
+      const mockChats = [{ chatId: 'test-id', chatName: 'Test Chat' }];
+
+      (getAllChats as jest.Mock).mockResolvedValue(mockChats);
+
+      await getHandler(
+        mockRequest as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(mockReply.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          chats: expect.arrayContaining([
+            expect.objectContaining({
+              chatId: expect.any(String),
+              chatName: expect.any(String),
+            }),
+          ]),
+        }),
       );
     });
   });

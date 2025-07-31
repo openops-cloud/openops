@@ -81,6 +81,17 @@ export const ChatNameRequest = Type.Object({
 });
 export type ChatNameRequest = Static<typeof ChatNameRequest>;
 
+export const ChatsSummary = Type.Object({
+  chatId: Type.String(),
+  chatName: Type.String(),
+});
+
+export const ListChatsResponse = Type.Object({
+  chats: Type.Array(ChatsSummary),
+});
+
+export type ListChatsResponse = Static<typeof ListChatsResponse>;
+
 export const DeleteChatHistoryRequest = Type.Object({
   chatId: Type.String(),
 });
