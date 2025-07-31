@@ -17,28 +17,17 @@ export type SizeValidationResult =
 
 function formatStepSizes(steps: Record<string, unknown>): string {
   const stepSizes = Object.entries(steps)
-    .map(([slug, data]) => {
-      const stepName = getStepDisplayName(data);
-      const displayName = stepName ? `${slug} (${stepName})` : slug;
-
+    .map(([stepName, data]) => {
       return {
-        displayName,
+        stepName,
         sizeMB: sizeof(data) / ONE_MB_IN_BYTES,
       };
     })
     .sort((a, b) => b.sizeMB - a.sizeMB);
 
   return stepSizes
-    .map((step) => `  • ${step.displayName}: ${step.sizeMB.toFixed(2)}MB`)
+    .map((step) => `  • ${step.stepName}: ${step.sizeMB.toFixed(2)}MB`)
     .join('\n');
-}
-
-function getStepDisplayName(stepData: unknown): string | null {
-  if (stepData && typeof stepData === 'object' && stepData !== null) {
-    const data = stepData as Record<string, unknown>;
-    return (data.displayName as string) || (data.name as string) || null;
-  }
-  return null;
 }
 
 function buildErrorMessage(
@@ -81,13 +70,22 @@ export function validateStepOutputSize(
   }
 
   const outputSizeMB = outputSize / ONE_MB_IN_BYTES;
-  const steps =
-    'stepTestOutputs' in stepsOrOutput
-      ? (stepsOrOutput.stepTestOutputs as Record<string, unknown>)
-      : (stepsOrOutput as Record<string, unknown>);
+
+  if ('stepTestOutputs' in stepsOrOutput && 'flowVersion' in stepsOrOutput) {
+    return {
+      isValid: false,
+      errorMessage: buildErrorMessage(
+        outputSizeMB,
+        stepsOrOutput.stepTestOutputs as Record<string, unknown>,
+      ),
+    };
+  }
 
   return {
     isValid: false,
-    errorMessage: buildErrorMessage(outputSizeMB, steps),
+    errorMessage: buildErrorMessage(
+      outputSizeMB,
+      stepsOrOutput as Record<string, unknown>,
+    ),
   };
 }

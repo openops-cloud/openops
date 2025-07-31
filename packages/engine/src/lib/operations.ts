@@ -98,7 +98,6 @@ async function executeStep(
         .map((item) => [item.name, input.stepTestOutputs?.[item.id!] ?? null]),
     );
   }
-
   const sizeValidation = validateStepOutputSize({
     flowVersion: input.flowVersion,
     stepTestOutputs: {
