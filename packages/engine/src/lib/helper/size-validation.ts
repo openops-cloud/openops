@@ -49,9 +49,9 @@ export function isSizeValidationError(errorMessage?: string): boolean {
   );
 }
 
-export const validateStepOutputSize = (
+export function validateStepOutputSize(
   stepsOrOutput: unknown,
-): SizeValidationResult => {
+): SizeValidationResult {
   const outputSize = sizeof(stepsOrOutput);
   const limitInMB = (MAX_SIZE_FOR_ALL_ENTRIES / (1024 * 1024)).toFixed(1);
 
@@ -62,13 +62,13 @@ export const validateStepOutputSize = (
     };
   }
 
-  const totalSizeKB = outputSize / 1024;
+  const outputSizeKB = outputSize / 1024;
   const limitKB = MAX_SIZE_FOR_ALL_ENTRIES / 1024;
   const steps = isStepsObject(stepsOrOutput) ? stepsOrOutput : undefined;
 
   return {
     isValid: false,
-    errorMessage: buildErrorMessage(totalSizeKB, limitKB, steps),
+    errorMessage: buildErrorMessage(outputSizeKB, limitKB, steps),
     limitInMB,
   };
-};
+}

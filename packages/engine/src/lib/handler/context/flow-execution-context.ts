@@ -162,41 +162,49 @@ export class FlowExecutorContext {
 
     const sizeValidation = validateStepOutputSize(steps);
 
-    let processedStepOutput = stepOutput;
-    let error =
-      stepOutput.status === StepOutputStatus.FAILED
-        ? {
-            stepName,
-            message: stepOutput.errorMessage,
-          }
-        : this.error;
-
-    let verdict = this.verdict;
-    let verdictResponse = this.verdictResponse;
-
     if (!sizeValidation.isValid) {
-      processedStepOutput = stepOutput
-        .setStatus(StepOutputStatus.FAILED)
-        .setErrorMessage(sizeValidation.errorMessage!);
-
-      processedStepOutput.output = undefined;
-      targetMap[stepName] = processedStepOutput;
-
-      error = {
+      return this.createSizeValidationFailureContext(
         stepName,
-        message: sizeValidation.errorMessage!,
-      };
-
-      verdict = ExecutionVerdict.FAILED;
-      verdictResponse = undefined;
+        stepOutput,
+        steps,
+        targetMap,
+        sizeValidation.errorMessage!,
+      );
     }
+
+    const error =
+      stepOutput.status === StepOutputStatus.FAILED
+        ? { stepName, message: stepOutput.errorMessage }
+        : this.error;
 
     return new FlowExecutorContext({
       ...this,
       tasks: this.tasks,
-      verdict,
-      verdictResponse,
       ...spreadIfDefined('error', error),
+      steps,
+    });
+  }
+
+  private createSizeValidationFailureContext(
+    stepName: string,
+    stepOutput: StepOutput,
+    steps: Record<string, StepOutput>,
+    targetMap: Record<string, StepOutput>,
+    errorMessage: string,
+  ): FlowExecutorContext {
+    const failedStepOutput = stepOutput
+      .setStatus(StepOutputStatus.FAILED)
+      .setErrorMessage(errorMessage);
+
+    failedStepOutput.output = undefined;
+    targetMap[stepName] = failedStepOutput;
+
+    return new FlowExecutorContext({
+      ...this,
+      tasks: this.tasks,
+      verdict: ExecutionVerdict.FAILED,
+      verdictResponse: undefined,
+      error: { stepName, message: errorMessage },
       steps,
     });
   }

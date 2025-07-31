@@ -90,20 +90,18 @@ async function executeStep(
 
   const stepResult = output.steps[step.name];
 
-  const totalData = {
+  const sizeValidation = validateStepOutputSize({
     ...input,
     stepTestOutputs: {
       ...input.stepTestOutputs,
       [step.id]: stepResult,
     },
-  };
-
-  const sizeValidation = validateStepOutputSize(totalData);
+  });
 
   if (!sizeValidation.isValid) {
     return {
       success: false,
-      output: sizeValidation.errorMessage || 'Size validation failed',
+      output: sizeValidation.errorMessage!,
       input: stepResult.input,
     };
   }
