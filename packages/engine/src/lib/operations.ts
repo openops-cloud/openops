@@ -32,6 +32,7 @@ import {
 import { testExecutionContext } from './handler/context/test-execution-context';
 import { flowExecutor } from './handler/flow-executor';
 import { blockHelper } from './helper/block-helper';
+import { validateStepOutputSize } from './helper/size-validation';
 import { triggerHelper } from './helper/trigger-helper';
 import { resolveVariable } from './resolve-variable';
 import { utils } from './utils';
@@ -88,6 +89,25 @@ async function executeStep(
   });
 
   const stepResult = output.steps[step.name];
+
+  const totalData = {
+    ...input,
+    stepTestOutputs: {
+      ...input.stepTestOutputs,
+      [step.id]: stepResult,
+    },
+  };
+
+  const sizeValidation = validateStepOutputSize(totalData);
+
+  if (!sizeValidation.isValid) {
+    return {
+      success: false,
+      output: sizeValidation.errorMessage,
+      input: stepResult.input,
+    };
+  }
+
   return {
     success: output.verdict !== ExecutionVerdict.FAILED,
     output: cleanSampleData(stepResult),
