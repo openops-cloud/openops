@@ -14,7 +14,7 @@ import {
 } from 'ai';
 
 type StreamCodeOptions = {
-  messages: CoreMessage[];
+  chatHistory: CoreMessage[];
   languageModel: LanguageModel;
   aiConfig: AiConfig;
   systemPrompt: string;
@@ -23,7 +23,7 @@ type StreamCodeOptions = {
 };
 
 export const streamCode = ({
-  messages,
+  chatHistory,
   languageModel,
   aiConfig,
   systemPrompt,
@@ -35,13 +35,13 @@ export const streamCode = ({
   never
 > => {
   logger.debug('streamCode', {
-    messages,
+    chatHistory,
     systemPrompt,
   });
   return streamObject({
     model: languageModel,
     system: systemPrompt,
-    messages,
+    messages: chatHistory,
     ...aiConfig.modelSettings,
     onFinish,
     onError,

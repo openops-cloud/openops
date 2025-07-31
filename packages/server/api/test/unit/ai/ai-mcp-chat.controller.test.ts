@@ -13,8 +13,11 @@ import {
   getLLMConfig,
   updateChatName,
 } from '../../../src/app/ai/chat/ai-chat.service';
-import { aiMCPChatController } from '../../../src/app/ai/chat/ai-mcp-chat.controller';
-import { getMCPToolsContext } from '../../../src/app/ai/mcp/tools-context-builder';
+
+const handleUserMessageMock = jest.fn();
+jest.mock('../../../src/app/ai/chat/user-message-handler', () => ({
+  handleUserMessage: handleUserMessageMock,
+}));
 
 jest.mock('@openops/server-shared', () => ({
   logger: {
@@ -35,6 +38,9 @@ jest.mock('@openops/server-shared', () => ({
       }
       return 'mock-value';
     }),
+    getNumberOrThrow: jest.fn((prop) => {
+      return 10;
+    }),
   },
   AppSystemProp: {
     DB_TYPE: 'DB_TYPE',
@@ -50,15 +56,6 @@ jest.mock('@openops/server-shared', () => ({
   encryptUtils: {
     decryptString: jest.fn().mockReturnValue('test-encrypt'),
   },
-}));
-
-jest.mock('@openops/common', () => ({
-  getAiProviderLanguageModel: jest.fn(),
-  isLLMTelemetryEnabled: jest.fn().mockReturnValue(false),
-}));
-
-jest.mock('../../../src/app/ai/mcp/tools-initializer', () => ({
-  getMCPTools: jest.fn(),
 }));
 
 jest.mock('../../../src/app/ai/chat/context-enrichment.service', () => ({
@@ -83,36 +80,7 @@ jest.mock('../../../src/app/ai/chat/ai-chat.service', () => ({
   getAllChats: jest.fn(),
 }));
 
-jest.mock('../../../src/app/ai/mcp/tools-context-builder', () => ({
-  getMCPToolsContext: jest.fn(),
-}));
-
-type MockDataStreamWriter = {
-  write: jest.Mock;
-  end: jest.Mock;
-};
-
-jest.mock('ai', () => {
-  const mockStreamText = jest.fn().mockReturnValue({
-    mergeIntoDataStream: jest.fn(),
-  });
-
-  return {
-    pipeDataStreamToResponse: jest.fn((_, options) => {
-      if (options?.execute) {
-        const mockWriter: MockDataStreamWriter = {
-          write: jest.fn(),
-          end: jest.fn(),
-        };
-        options.execute(mockWriter);
-      }
-      return { pipe: jest.fn() };
-    }),
-    streamText: mockStreamText,
-    DataStreamWriter: jest.fn(),
-    LanguageModel: jest.fn(),
-  };
-});
+import { aiMCPChatController } from '../../../src/app/ai/chat/ai-mcp-chat.controller';
 
 describe('AI MCP Chat Controller - Tool Service Interactions', () => {
   type RouteHandler = (
@@ -178,15 +146,6 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
     };
     const mockLanguageModel = {} as LanguageModel;
 
-    const mockToolsContext = {
-      systemPrompt: 'Prompt',
-      mcpClients: [],
-      tools: {
-        tool1: { description: 'Tool 1', parameters: {} },
-        tool2: { description: 'Tool 2', parameters: {} },
-      },
-    };
-
     beforeEach(async () => {
       jest.clearAllMocks();
 
@@ -204,251 +163,183 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
       await aiMCPChatController(mockApp, {} as FastifyPluginOptions);
     });
 
-    describe('messages handling', () => {
-      it('should extract message content from messages array when provided', async () => {
-        (getMCPToolsContext as jest.Mock).mockResolvedValue(mockToolsContext);
+    it('should extract message content from messages array when provided', async () => {
+      const requestWithMessages = {
+        ...mockRequest,
+        body: {
+          chatId: 'test-chat-id',
+          messages: [
+            {
+              role: 'user',
+              content: [{ type: 'text', text: 'first message' }],
+            },
+            {
+              role: 'assistant',
+              content: [{ type: 'text', text: 'assistant response' }],
+            },
+            {
+              role: 'user',
+              content: [{ type: 'text', text: 'latest message' }],
+            },
+          ],
+        },
+      };
 
-        const requestWithMessages = {
-          ...mockRequest,
-          body: {
-            chatId: 'test-chat-id',
-            messages: [
-              {
-                role: 'user',
-                content: [{ type: 'text', text: 'first message' }],
-              },
-              {
-                role: 'assistant',
-                content: [{ type: 'text', text: 'assistant response' }],
-              },
-              {
-                role: 'user',
-                content: [{ type: 'text', text: 'latest message' }],
-              },
-            ],
+      const postHandler = handlers['/'];
+      await postHandler(
+        requestWithMessages as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(handleUserMessageMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          newMessage: {
+            role: 'user',
+            content: 'latest message',
           },
-        };
+        }),
+      );
+    });
 
-        const postHandler = handlers['/'];
-        await postHandler(
-          requestWithMessages as FastifyRequest,
-          mockReply as unknown as FastifyReply,
-        );
+    it('should handle messages with tool role in request body', async () => {
+      const requestWithToolMessages = {
+        ...mockRequest,
+        body: {
+          chatId: 'test-chat-id',
+          messages: [
+            {
+              role: 'user',
+              content: [{ type: 'text', text: 'user question' }],
+            },
+            {
+              role: 'assistant',
+              content: [
+                {
+                  type: 'tool-call',
+                  toolCallId: 'call_123',
+                  name: 'get_weather',
+                  args: {},
+                },
+              ],
+            },
+            {
+              role: 'tool',
+              content: [
+                {
+                  type: 'tool-result',
+                  toolCallId: 'call_123',
+                  result: { temperature: 72 },
+                },
+              ],
+            },
+            {
+              role: 'user',
+              content: [{ type: 'text', text: 'latest message' }],
+            },
+          ],
+        },
+      };
 
-        expect(getMCPToolsContext).toHaveBeenCalledWith(
-          expect.anything(),
-          expect.anything(),
-          expect.anything(),
-          mockAiConfig,
-          [...mockMessages, { role: 'user', content: 'latest message' }],
-          expect.anything(),
-          mockLanguageModel,
-        );
-      });
+      const postHandler = handlers['/'];
+      await postHandler(
+        requestWithToolMessages as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
 
-      it('should handle messages with tool role in request body', async () => {
-        (getMCPToolsContext as jest.Mock).mockResolvedValue(mockToolsContext);
+      expect(handleUserMessageMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          newMessage: { role: 'user', content: 'latest message' },
+        }),
+      );
+    });
 
-        const requestWithToolMessages = {
-          ...mockRequest,
-          body: {
-            chatId: 'test-chat-id',
-            messages: [
-              {
-                role: 'user',
-                content: [{ type: 'text', text: 'user question' }],
-              },
-              {
-                role: 'assistant',
-                content: [
-                  {
-                    type: 'tool-call',
-                    toolCallId: 'call_123',
-                    name: 'get_weather',
-                    args: {},
-                  },
-                ],
-              },
-              {
-                role: 'tool',
-                content: [
-                  {
-                    type: 'tool-result',
-                    toolCallId: 'call_123',
-                    result: { temperature: 72 },
-                  },
-                ],
-              },
-              {
-                role: 'user',
-                content: [{ type: 'text', text: 'latest message' }],
-              },
-            ],
-          },
-        };
+    it('should fall back to message field when messages array is not provided', async () => {
+      const requestWithMessageOnly = {
+        ...mockRequest,
+        body: {
+          chatId: 'test-chat-id',
+          message: 'fallback message',
+        },
+      };
 
-        const postHandler = handlers['/'];
-        await postHandler(
-          requestWithToolMessages as FastifyRequest,
-          mockReply as unknown as FastifyReply,
-        );
+      const postHandler = handlers['/'];
+      await postHandler(
+        requestWithMessageOnly as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
 
-        expect(getMCPToolsContext).toHaveBeenCalledWith(
-          expect.anything(),
-          expect.anything(),
-          expect.anything(),
-          mockAiConfig,
-          [...mockMessages, { role: 'user', content: 'latest message' }],
-          expect.anything(),
-          mockLanguageModel,
-        );
-      });
+      expect(handleUserMessageMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          newMessage: { role: 'user', content: 'fallback message' },
+        }),
+      );
+    });
 
-      it('should fall back to message field when messages array is not provided', async () => {
-        (getMCPToolsContext as jest.Mock).mockResolvedValue(mockToolsContext);
+    it('should handle empty messages array gracefully', async () => {
+      const requestWithEmptyMessages = {
+        ...mockRequest,
+        body: {
+          chatId: 'test-chat-id',
+          messages: [],
+        },
+      };
 
-        const requestWithMessageOnly = {
-          ...mockRequest,
-          body: {
-            chatId: 'test-chat-id',
-            message: 'fallback message',
-          },
-        };
+      const postHandler = handlers['/'];
 
-        const postHandler = handlers['/'];
-        await postHandler(
-          requestWithMessageOnly as FastifyRequest,
-          mockReply as unknown as FastifyReply,
-        );
+      await postHandler(
+        requestWithEmptyMessages as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
 
-        expect(getMCPToolsContext).toHaveBeenCalledWith(
-          expect.anything(),
-          expect.anything(),
-          expect.anything(),
-          mockAiConfig,
-          [...mockMessages, { role: 'user', content: 'fallback message' }],
-          expect.anything(),
-          mockLanguageModel,
-        );
-      });
-
-      it('should handle empty messages array gracefully', async () => {
-        (getMCPToolsContext as jest.Mock).mockResolvedValue(mockToolsContext);
-
-        const requestWithEmptyMessages = {
-          ...mockRequest,
-          body: {
-            chatId: 'test-chat-id',
-            messages: [],
-          },
-        };
-
-        const postHandler = handlers['/'];
-
-        await postHandler(
-          requestWithEmptyMessages as FastifyRequest,
-          mockReply as unknown as FastifyReply,
-        );
-
-        if ((getMCPToolsContext as jest.Mock).mock.calls.length === 0) {
-          expect(mockReply.code).toHaveBeenCalledWith(400);
-          expect(mockReply.send).toHaveBeenCalledWith(
-            expect.objectContaining({
-              message:
-                'Messages array cannot be empty. Please provide at least one message or use the message field instead.',
-            }),
-          );
-        } else {
-          expect(getMCPToolsContext).toHaveBeenCalledWith(
-            expect.anything(),
-            expect.anything(),
-            expect.anything(),
-            mockAiConfig,
-            [...mockMessages, { role: 'user', content: 'latest message' }],
-            expect.anything(),
-            mockLanguageModel,
-          );
-        }
-      });
-
-      it('should handle invalid content structure in last message', async () => {
-        (getMCPToolsContext as jest.Mock).mockResolvedValue(mockToolsContext);
-
-        const requestWithInvalidContent = {
-          ...mockRequest,
-          body: {
-            chatId: 'test-chat-id',
-            messages: [
-              {
-                role: 'user',
-                content: [{ type: 'text', text: 'valid message' }],
-              },
-              { role: 'user', content: [] },
-            ],
-          },
-        };
-
-        const postHandler = handlers['/'];
-
-        await postHandler(
-          requestWithInvalidContent as FastifyRequest,
-          mockReply as unknown as FastifyReply,
-        );
-
+      if (handleUserMessageMock.mock.calls.length === 0) {
         expect(mockReply.code).toHaveBeenCalledWith(400);
         expect(mockReply.send).toHaveBeenCalledWith(
           expect.objectContaining({
             message:
-              'Last message must have valid content array with at least one element.',
+              'Messages array cannot be empty. Please provide at least one message or use the message field instead.',
           }),
         );
-      });
-
-      it('should handle messages with complex content structure', async () => {
-        (getMCPToolsContext as jest.Mock).mockResolvedValue(mockToolsContext);
-
-        const requestWithComplexContent = {
-          ...mockRequest,
-          body: {
-            chatId: 'test-chat-id',
-            messages: [
-              { role: 'user', content: 'simple string content' },
-              {
-                role: 'assistant',
-                content: [{ type: 'text', text: 'assistant response' }],
-              },
-              {
-                role: 'user',
-                content: [
-                  { type: 'text', text: 'complex message' },
-                  { type: 'text', text: ' with multiple parts' },
-                ],
-              },
-            ],
-          },
-        };
-
-        const postHandler = handlers['/'];
-        await postHandler(
-          requestWithComplexContent as FastifyRequest,
-          mockReply as unknown as FastifyReply,
+      } else {
+        expect(handleUserMessageMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            newMessage: { role: 'user', content: 'latest message' },
+          }),
         );
-
-        expect(getMCPToolsContext).toHaveBeenCalledWith(
-          expect.anything(),
-          expect.anything(),
-          expect.anything(),
-          mockAiConfig,
-          [...mockMessages, { role: 'user', content: 'complex message' }],
-          expect.anything(),
-          mockLanguageModel,
-        );
-      });
+      }
     });
 
-    it('should call getMCPToolsContext with the correct parameters', async () => {
-      (getMCPToolsContext as jest.Mock).mockResolvedValue(mockToolsContext);
+    it('should handle invalid content structure in last message', async () => {
+      const requestWithInvalidContent = {
+        ...mockRequest,
+        body: {
+          chatId: 'test-chat-id',
+          messages: [
+            {
+              role: 'user',
+              content: [{ type: 'text', text: 'valid message' }],
+            },
+            { role: 'user', content: [] },
+          ],
+        },
+      };
 
+      const postHandler = handlers['/'];
+
+      await postHandler(
+        requestWithInvalidContent as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(mockReply.code).toHaveBeenCalledWith(400);
+      expect(mockReply.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message:
+            'Last message must have valid content array with at least one element.',
+        }),
+      );
+    });
+
+    it('should call handleUserMessage with the correct parameters', async () => {
       const postHandler = handlers['/'];
       expect(postHandler).toBeDefined();
 
@@ -457,14 +348,10 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
         mockReply as unknown as FastifyReply,
       );
 
-      expect(getMCPToolsContext).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.anything(),
-        expect.anything(),
-        mockAiConfig,
-        [...mockMessages, { role: 'user', content: 'test message' }],
-        expect.anything(),
-        mockLanguageModel,
+      expect(handleUserMessageMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          newMessage: { role: 'user', content: 'test message' },
+        }),
       );
     });
   });
@@ -481,7 +368,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
 
     it('should return generated chat name for valid messages', async () => {
       (getConversation as jest.Mock).mockResolvedValue({
-        messages: [
+        chatHistory: [
           { role: 'user', content: 'How do I optimize AWS costs?' },
           { role: 'assistant', content: 'You can use AWS Cost Explorer...' },
         ],
@@ -502,7 +389,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
     });
 
     it('should return "New Chat" for empty messages', async () => {
-      (getConversation as jest.Mock).mockResolvedValue({ messages: [] });
+      (getConversation as jest.Mock).mockResolvedValue({ chatHistory: [] });
 
       await postHandler(
         { ...mockRequest, body: { chatId: 'test-chat-id' } } as FastifyRequest,
@@ -515,7 +402,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
 
     it('should return "New Chat" if LLM returns empty', async () => {
       (getConversation as jest.Mock).mockResolvedValue({
-        messages: [
+        chatHistory: [
           { role: 'user', content: 'Hello?' },
           { role: 'assistant', content: 'Hi!' },
         ],
@@ -533,7 +420,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
 
     it('should persist chatName in chat context', async () => {
       (getConversation as jest.Mock).mockResolvedValue({
-        messages: [
+        chatHistory: [
           { role: 'user', content: 'What is OpenOps?' },
           { role: 'assistant', content: 'OpenOps is a platform...' },
         ],
