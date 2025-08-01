@@ -157,14 +157,10 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
 
       if (isCodeGenerationRequest) {
         logger.debug('Using code generation flow');
-        const response = await handleCodeGenerationRequest(
-          generationRequestParams,
-        );
-        return response;
+        await handleCodeGenerationRequest(generationRequestParams);
       } else {
         logger.debug('Using normal conversation flow');
         await handleUserMessage(generationRequestParams);
-        return;
       }
     } catch (error) {
       return handleError(error, reply, 'conversation');
