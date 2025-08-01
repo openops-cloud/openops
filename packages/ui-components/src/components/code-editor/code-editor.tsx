@@ -53,7 +53,6 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
     const editorTheme = theme === 'dark' ? 'vs-dark' : 'light';
     const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
-    const editorWrapperRef = useRef<HTMLDivElement>(null);
     const rafIdRef = useRef<number | null>(null);
     const [isEditorReady, setIsEditorReady] = useState(false);
     const [showPlaceholder, setShowPlaceholder] = useState(false);
@@ -251,7 +250,6 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
             </button>
           )}
           <div
-            ref={editorWrapperRef}
             className={cn('w-full h-full', {
               'opacity-0': showPlaceholder,
             })}
