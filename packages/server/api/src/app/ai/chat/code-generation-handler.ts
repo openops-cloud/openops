@@ -16,6 +16,13 @@ import { enrichContext, IncludeOptions } from './context-enrichment.service';
 import { getBlockSystemPrompt } from './prompts.service';
 import { RequestContext } from './types';
 
+type CodeGenerationResult = {
+  type: string;
+  code?: string;
+  packageJson?: string;
+  textAnswer: string;
+};
+
 type CodeMessageParams = RequestContext & {
   newMessage: CoreMessage;
   additionalContext?: ChatFlowContext;
@@ -137,8 +144,8 @@ async function handleCodeGenerationError(
   });
 }
 
-/* 
-Handles code generation requests using streamCode for structured output.
+/*
+ * Handles code generation requests using streamCode for structured output.
  */
 export async function handleCodeGenerationRequest(
   params: CodeMessageParams,
@@ -189,12 +196,7 @@ export async function handleCodeGenerationRequest(
     provider: aiConfig.provider,
   });
 
-  let codeResult: {
-    type: string;
-    code?: string;
-    packageJson?: string;
-    textAnswer: string;
-  } | null = null;
+  let codeResult: CodeGenerationResult | null = null;
 
   let resolveResult: () => void;
   let rejectResult: (reason?: unknown) => void;
@@ -234,14 +236,14 @@ export async function handleCodeGenerationRequest(
       throw new Error('No code generation result received');
     }
 
+    // codeResult variable assigned in async callback so TS type narrowing not working as expected
+    const finalCodeResult = codeResult as CodeGenerationResult;
+
     const toolResult = {
       toolCallId,
       result: {
-        code:
-          (codeResult as { code?: string; packageJson?: string }).code || '',
-        packageJson:
-          (codeResult as { code?: string; packageJson?: string }).packageJson ||
-          '{}',
+        code: finalCodeResult.code || '',
+        packageJson: finalCodeResult.packageJson || '{}',
       },
     };
     serverResponse.write(`a:${JSON.stringify(toolResult)}\n`);
@@ -254,9 +256,7 @@ export async function handleCodeGenerationRequest(
     serverResponse.write(`e:${JSON.stringify(finishMessage)}\n`);
     serverResponse.write(`d:${JSON.stringify(finishMessage)}\n`);
 
-    serverResponse.write(
-      `0:"${(codeResult as { textAnswer: string }).textAnswer}"\n`,
-    );
+    serverResponse.write(`0:"${finalCodeResult.textAnswer}"\n`);
 
     const textFinishMessage = {
       finishReason: 'stop',
@@ -279,7 +279,7 @@ export async function handleCodeGenerationRequest(
         },
         {
           type: 'text',
-          text: (codeResult as { textAnswer: string }).textAnswer || '',
+          text: finalCodeResult.textAnswer || '',
         },
       ],
     };
@@ -296,12 +296,8 @@ export async function handleCodeGenerationRequest(
               {
                 type: 'text',
                 text: JSON.stringify({
-                  code:
-                    (codeResult as { code?: string; packageJson?: string })
-                      .code || '',
-                  packageJson:
-                    (codeResult as { code?: string; packageJson?: string })
-                      .packageJson || '{}',
+                  code: finalCodeResult.code || '',
+                  packageJson: finalCodeResult.packageJson || '{}',
                 }),
               },
             ],
