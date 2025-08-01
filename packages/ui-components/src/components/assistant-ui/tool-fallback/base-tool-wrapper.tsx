@@ -1,4 +1,4 @@
-import { ToolCallMessagePartProps } from '@assistant-ui/react/src/types/MessagePartComponentTypes';
+import { ToolCallMessagePartProps } from '@assistant-ui/react';
 import { t } from 'i18next';
 import {
   ChevronDownIcon,

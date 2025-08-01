@@ -26,11 +26,11 @@ import {
 
 import { t } from 'i18next';
 import { Theme } from '../../../lib/theme';
+import { GenerateCodeTool } from '../generate-code-tool/generate-code-tool';
 import { MarkdownText } from '../markdown-text';
 import { useThreadExtraContext } from '../thread-extra-context';
 import { ToolFallback } from '../tool-fallback';
 import { TooltipIconButton } from '../tooltip-icon-button';
-import { GenerateCodeTool } from '../generate-code-tool/generate-code-tool';
 
 const MarkdownTextWrapper = memo(({ theme, ...props }: any) => {
   const { codeVariation, handleInject } = useThreadExtraContext();
@@ -80,7 +80,7 @@ export const Thread = ({
           <div className="min-h-8 flex-grow" />
         </ThreadPrimitive.If>
 
-        <div className="sticky bottom-0 mt-3 flex w-full max-w-[var(--thread-max-width)] flex-col items-center justify-end rounded-t-lg bg-inherit pb-4">
+        <div className="sticky bottom-0 mt-3 flex w-full max-w-[var(--thread-max-width)] flex-col items-center justify-end rounded-t-lg bg-inherit pb-4 z-20">
           <ThreadScrollToBottom />
           <Composer
             availableModels={availableModels}
