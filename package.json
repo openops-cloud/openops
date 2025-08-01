@@ -28,7 +28,7 @@
     "build:blocks": "npx nx run-many -t build -p blocks-*",
     "build:server-worker": "npx nx run server-worker:build",
     "link:packages": "./tools/link-packages.sh",
-    "build:enterprise-api": "nx show projects | grep enterprise-apis && nx build enterprise-api || echo Enterprise package not available."
+    "build:enterprise-api": "nx show projects | grep enterprise-api && nx build enterprise-api || echo Enterprise package not available."
   },
   "private": true,
   "dependencies": {
