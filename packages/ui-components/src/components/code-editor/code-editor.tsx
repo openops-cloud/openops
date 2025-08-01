@@ -1,7 +1,6 @@
 import Editor from '@monaco-editor/react';
 import { SourceCode } from '@openops/shared';
 import { t } from 'i18next';
-import { throttle } from 'lodash-es';
 import { editor } from 'monaco-editor';
 import React, {
   RefObject,
@@ -54,6 +53,8 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
     const editorTheme = theme === 'dark' ? 'vs-dark' : 'light';
     const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const editorWrapperRef = useRef<HTMLDivElement>(null);
+    const rafIdRef = useRef<number | null>(null);
     const [isEditorReady, setIsEditorReady] = useState(false);
     const [showPlaceholder, setShowPlaceholder] = useState(false);
     const [hasTextFocus, setHasTextFocus] = useState(false);
@@ -82,13 +83,16 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
       return String(value);
     };
 
-    const throttledLayout = useCallback(() => {
-      const throttledFn = throttle(() => {
-        if (editorRef.current) {
-          editorRef.current.layout();
-        }
-      }, 16); // ~60fps
-      return throttledFn();
+    const rafLayout = useCallback(() => {
+      if (!rafIdRef.current) {
+        rafIdRef.current = requestAnimationFrame(() => {
+          rafIdRef.current = null;
+          if (editorRef.current) {
+            editorRef.current.layout({ width: 0, height: 0 });
+            editorRef.current.layout();
+          }
+        });
+      }
     }, []);
 
     const currentValue = activeTab === 'code' ? code : packageJson;
@@ -103,6 +107,16 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
       }
     }, [placeholder, hasContent, hasTextFocus, isReadOnly]);
 
+    // Cleanup any pending animation frames on unmount
+    useEffect(() => {
+      return () => {
+        if (rafIdRef.current) {
+          cancelAnimationFrame(rafIdRef.current);
+          rafIdRef.current = null;
+        }
+      };
+    }, []);
+
     const handleTabClick = (tab: keyof SourceCode) => {
       setActiveTab(tab);
       setCurrentLanguage(tab === 'packageJson' ? 'json' : 'typescript');
@@ -114,8 +128,8 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
         return;
 
       const resizeObserver = new ResizeObserver(() => {
-        // Use throttled layout for performance, following VSCode pattern
-        throttledLayout();
+        // Use requestAnimationFrame for performance, following modern best practices
+        rafLayout();
       });
 
       resizeObserver.observe(containerRef.current);
@@ -123,7 +137,7 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
       return () => {
         resizeObserver.disconnect();
       };
-    }, [isEditorReady, throttledLayout]);
+    }, [isEditorReady, rafLayout]);
 
     const handleEditorDidMount = (editor: editor.IStandaloneCodeEditor) => {
       editorRef.current = editor;
@@ -143,7 +157,7 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
     };
 
     useImperativeHandle(ref, () => ({
-      layout: throttledLayout,
+      layout: rafLayout,
       focus: () => {
         if (editorRef.current) {
           editorRef.current.focus();
@@ -177,7 +191,7 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
       if (editorRef.current) {
         setTimeout(() => {
           if (editorRef.current) {
-            throttledLayout();
+            rafLayout();
             editorRef.current.focus();
           }
         }, 0);
@@ -237,6 +251,7 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
             </button>
           )}
           <div
+            ref={editorWrapperRef}
             className={cn('w-full h-full', {
               'opacity-0': showPlaceholder,
             })}
