@@ -1,3 +1,4 @@
+import { SourceCode } from '@openops/shared';
 import { t } from 'i18next';
 import { CheckIcon, CopyIcon } from 'lucide-react';
 import { useState } from 'react';
@@ -6,7 +7,7 @@ import { cn } from '../../../lib/cn';
 import { TooltipIconButton } from '../tooltip-icon-button';
 
 type TooltipCopyButtonProps = {
-  content: string;
+  content: string | SourceCode;
   tooltip?: string;
   className?: string;
   variant?:
@@ -33,7 +34,7 @@ export const TooltipCopyButton = ({
 
   const handleCopy = () => {
     if (!content || isCopied) return;
-    copyToClipboard(content);
+    copyToClipboard(typeof content === 'string' ? content : content?.code);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
   };

@@ -1,11 +1,12 @@
+import { SourceCode } from '@openops/shared/src';
 import { t } from 'i18next';
 import { Plus } from 'lucide-react';
 import { Button } from '../../ui/button';
 import { TooltipCopyButton } from '../assistant-ui/tooltip-copy-button';
 
 export type CodeActionsProps = {
-  content: string;
-  onInject?: (content: string) => void;
+  content: string | SourceCode;
+  onInject?: (content: string | SourceCode) => void;
   injectButtonText?: string;
   showInjectButton?: boolean;
   className?: string;
