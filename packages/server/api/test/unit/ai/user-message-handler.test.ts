@@ -50,7 +50,7 @@ describe('User Message Handler', () => {
   const { getMCPToolsContext } = jest.requireMock(
     '../../../src/app/ai/mcp/tools-context-builder',
   );
-  const { getLLMConfig, getConversation, saveChatHistory } = jest.requireMock(
+  const { getLLMConfig, saveChatHistory } = jest.requireMock(
     '../../../src/app/ai/chat/ai-chat.service',
   );
 
@@ -103,6 +103,10 @@ describe('User Message Handler', () => {
     authToken: 'test-auth-token',
     newMessage: mockNewMessage,
     serverResponse: mockServerResponse,
+    conversation: {
+      chatContext: { chatId: 'test-chat-id' },
+      chatHistory: [...mockChatHistory],
+    },
   };
 
   beforeEach(() => {
@@ -112,11 +116,6 @@ describe('User Message Handler', () => {
     getLLMConfig.mockResolvedValue({
       aiConfig: mockAiConfig,
       languageModel: mockLanguageModel,
-    });
-
-    getConversation.mockResolvedValue({
-      chatContext: { chatId: 'test-chat-id' },
-      chatHistory: [...mockChatHistory],
     });
 
     getLLMAsyncStream.mockImplementation(
