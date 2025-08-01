@@ -68,6 +68,7 @@ import { websocketService } from './websockets/websockets.service';
 import { flowConsumer } from './workers/consumer';
 import { webhookResponseWatcher } from './workers/helper/webhook-response-watcher';
 import { workerModule } from './workers/worker-module';
+import { loadEnterpriseFeatures } from './enterprise-loader';
 
 export const setupApp = async (
   app: FastifyInstance,
@@ -232,6 +233,8 @@ export const setupApp = async (
   await app.register(userSettingsModule);
   await app.register(aiModule);
   await app.register(blockVariableModule);
+
+  await app.register(loadEnterpriseFeatures);
 
   app.get(
     '/redirect',

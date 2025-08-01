@@ -9,7 +9,7 @@
     "serve:backend": "nx run server-api:serve:development",
     "serve:engine": "nx run engine:serve:development",
     "license-check": "npx generate-license-file --overwrite --config ./tools/licenses/.generatelicensefile.json",
-    "dev": "npm run build:server-worker && npm run build:blocks && npm run link:packages && cross-env-shell FORCE_COLOR=true concurrently -n \"GUI,API,ENG\" -c \"bgBlue.bold,bgGreen.bold,bgRed.bold,bgYellow.bold\" \"npm:serve:frontend\" \"npm:serve:backend\" \"npm:serve:engine\"",
+    "dev": "npm run build:server-worker && npm run build:enterprise-api && npm run build:blocks && npm run link:packages && cross-env-shell FORCE_COLOR=true concurrently -n \"GUI,API,ENG\" -c \"bgBlue.bold,bgGreen.bold,bgRed.bold,bgYellow.bold\" \"npm:serve:frontend\" \"npm:serve:backend\" \"npm:serve:engine\"",
     "dev:backend": "cross-env-shell FORCE_COLOR=true concurrently -n \"API,ENG\" -c \"bgGreen.bold,bgRed.bold\" \"npm:serve:backend\" \"npm:serve:engine\"",
     "dev:frontend": "cross-env-shell FORCE_COLOR=true concurrently -n \"GUI,API,ENG\" -c \"bgBlue.bold,bgGreen.bold,bgRed.bold\" \"npm:serve:frontend\" \"npm:serve:backend\" \"npm:serve:engine\"",
     "start": "npm i --no-save && docker compose up -d --wait && npm run dev",
@@ -27,7 +27,8 @@
     "chromatic": "npx chromatic --",
     "build:blocks": "npx nx run-many -t build -p blocks-*",
     "build:server-worker": "npx nx run server-worker:build",
-    "link:packages": "./tools/link-packages.sh"
+    "link:packages": "./tools/link-packages.sh",
+    "build:enterprise-api": "nx show projects | grep enterprise-apis && nx build enterprise-api || echo Enterprise package not available."
   },
   "private": true,
   "dependencies": {

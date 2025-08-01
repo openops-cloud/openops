@@ -348,6 +348,7 @@
       "@openops/common": ["packages/openops/src/index.ts"],
       "@openops/components/ui": ["packages/ui-components/src/index.ts"],
       "@openops/engine": ["packages/engine/src/main.ts"],
+      "@openops/enterprise-api": ["packages/ee/enterprise-api/src/index.ts"],
       "@openops/server-shared": ["packages/server/shared/src/index.ts"],
       "@openops/shared": ["packages/shared/src/index.ts"],
       "Aminos": ["packages/blocks/Aminos/src/index.ts"],
