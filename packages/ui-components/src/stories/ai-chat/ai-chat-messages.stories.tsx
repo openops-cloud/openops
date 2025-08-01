@@ -80,9 +80,3 @@ export const SourceCodeExample: Story = {
     },
   },
 };
-
-export const EmptyChat: Story = {
-  args: {
-    messages: [],
-  },
-};
