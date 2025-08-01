@@ -1,13 +1,13 @@
 import { HttpMethod } from '@openops/blocks-common';
 import { createAction } from '@openops/blocks-framework';
 import { logger } from '@openops/server-shared';
-import { sendTernaryRequest } from '../common';
 import { ternaryCloudAuth } from '../common/auth';
+import { sendTernaryRequest } from '../common/send-ternary-request';
 
 export const getUsageRecommendations = createAction({
   name: 'get_usage_recommendations',
-  displayName: 'Get usage recommendations',
-  description: 'Fetch usage recommendations from Ternary.',
+  displayName: 'Get Usage Recommendations',
+  description: 'Get Usage Recommendations',
   auth: ternaryCloudAuth,
   props: {},
   run: async ({ auth }) => {

@@ -125,7 +125,7 @@ const Markdown = React.memo(
               const codeContent = String(props.children).trim();
 
               return (
-                <div className="relative py-2 w-full">
+                <div className="relative py-2">
                   {isLanguageUrl ? (
                     <LanguageUrl content={codeContent} theme={theme} />
                   ) : (

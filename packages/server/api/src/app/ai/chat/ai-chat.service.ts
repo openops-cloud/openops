@@ -6,8 +6,9 @@ import {
   hashUtils,
 } from '@openops/server-shared';
 import { AiConfig, ApplicationError, ErrorCode } from '@openops/shared';
-import { CoreMessage, LanguageModel } from 'ai';
+import { CoreMessage, LanguageModel, generateText } from 'ai';
 import { aiConfigService } from '../config/ai-config.service';
+import { loadPrompt } from './prompts.service';
 import { MessageWithMergedToolResults } from './types';
 import { mergeToolResultsIntoMessages } from './utils';
 
@@ -37,6 +38,7 @@ export type MCPChatContext = {
   blockName?: string;
   stepId?: string;
   actionName?: string;
+  chatName?: string;
 };
 
 export const generateChatId = (
@@ -61,6 +63,46 @@ export const generateChatIdForMCP = (params: {
     chatId: params.chatId,
     userId: params.userId,
   });
+};
+
+export async function generateChatName(
+  messages: CoreMessage[],
+  projectId: string,
+): Promise<string> {
+  const { languageModel } = await getLLMConfig(projectId);
+  const systemPrompt = await loadPrompt('chat-name.txt');
+  if (!systemPrompt.trim()) {
+    throw new Error('Failed to load prompt to generate the chat name.');
+  }
+  const prompt: CoreMessage[] = [
+    {
+      role: 'system',
+      content: systemPrompt,
+    } as const,
+    ...messages,
+  ];
+  const response = await generateText({
+    model: languageModel,
+    messages: prompt,
+    maxRetries: 2,
+  });
+  return response.text.trim();
+}
+
+export const updateChatName = async (
+  chatId: string,
+  userId: string,
+  projectId: string,
+  newChatName: string,
+): Promise<void> => {
+  const chatContext = await getChatContext(chatId, userId, projectId);
+  if (!chatContext) {
+    throw new Error('Chat context not found');
+  }
+
+  const updatedChatContext = { ...chatContext, chatName: newChatName };
+
+  await createChatContext(chatId, userId, projectId, updatedChatContext);
 };
 
 export const createChatContext = async (
@@ -108,6 +150,34 @@ export const getChatHistoryWithMergedTools = async (
 ): Promise<MessageWithMergedToolResults[]> => {
   const messages = await getChatHistory(chatId, userId, projectId);
   return mergeToolResultsIntoMessages(messages);
+};
+
+export const getAllChats = async (
+  userId: string,
+  projectId: string,
+): Promise<{ chatId: string; chatName: string }[]> => {
+  const pattern = `${projectId}:${userId}:*:context`;
+  const keys = await cacheWrapper.scanKeys(pattern);
+  const chats: { chatId: string; chatName: string }[] = [];
+
+  for (const key of keys) {
+    const keyParts = key.split(':');
+    if (keyParts.length !== 4) {
+      continue;
+    }
+    const longChatId = keyParts[2];
+
+    const context = await cacheWrapper.getSerializedObject<MCPChatContext>(key);
+
+    if (context?.chatName) {
+      chats.push({
+        chatId: longChatId,
+        chatName: context.chatName,
+      });
+    }
+  }
+
+  return chats;
 };
 
 export const saveChatHistory = async (
@@ -183,7 +253,7 @@ export async function getConversation(
   chatId: string,
   userId: string,
   projectId: string,
-): Promise<{ chatContext: MCPChatContext; messages: CoreMessage[] }> {
+): Promise<{ chatContext: MCPChatContext; chatHistory: CoreMessage[] }> {
   const chatContext = await getChatContext(chatId, userId, projectId);
   if (!chatContext) {
     throw new ApplicationError({
@@ -196,7 +266,7 @@ export async function getConversation(
     });
   }
 
-  const messages = await getChatHistory(chatId, userId, projectId);
+  const chatHistory = await getChatHistory(chatId, userId, projectId);
 
-  return { chatContext, messages };
+  return { chatContext, chatHistory };
 }

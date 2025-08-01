@@ -1,5 +1,5 @@
 import { jwtDecode } from 'jwt-decode';
-import { sendTernaryRequest } from '../../src/lib/common';
+import { sendTernaryRequest } from '../../src/lib/common/send-ternary-request';
 
 jest.mock('@openops/blocks-common', () => {
   return {

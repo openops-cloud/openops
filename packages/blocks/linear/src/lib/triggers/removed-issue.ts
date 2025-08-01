@@ -65,7 +65,7 @@ export const linearRemovedIssue = createTrigger({
   async onEnable(context) {
     const client = makeClient(context.auth);
     const webhook = await client.createWebhook({
-      label: 'ActiveBlocks Removed Issue',
+      label: 'OpenOps Removed Issue',
       url: context.webhookUrl,
       teamId: context.propsValue['team_id'],
       resourceTypes: ['Issue'],

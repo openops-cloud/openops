@@ -27,12 +27,20 @@ import {
 import { t } from 'i18next';
 import { Theme } from '../../../lib/theme';
 import { MarkdownText } from '../markdown-text';
-import { useThreadWelcome } from '../thread-welcome-context';
+import { useThreadExtraContext } from '../thread-extra-context';
 import { ToolFallback } from '../tool-fallback';
 import { TooltipIconButton } from '../tooltip-icon-button';
 
 const MarkdownTextWrapper = memo(({ theme, ...props }: any) => {
-  return <MarkdownText {...props} theme={theme} />;
+  const { codeVariation, handleInject } = useThreadExtraContext();
+  return (
+    <MarkdownText
+      {...props}
+      theme={theme}
+      codeVariation={codeVariation}
+      handleInject={handleInject}
+    />
+  );
 });
 MarkdownTextWrapper.displayName = 'MarkdownTextWrapper';
 
@@ -100,7 +108,7 @@ const ThreadScrollToBottom: FC = () => {
 };
 
 const ThreadWelcome: FC = () => {
-  const { greeting } = useThreadWelcome();
+  const { greeting } = useThreadExtraContext();
 
   return (
     <ThreadPrimitive.Empty>
