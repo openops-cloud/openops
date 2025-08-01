@@ -1,4 +1,3 @@
-import { AI_ASSISTANT_LS_KEY } from '@/app/constants/ai';
 import { QueryKeys } from '@/app/constants/query-keys';
 import { aiAssistantChatApi } from '@/app/features/ai/lib/ai-assistant-chat-api';
 import { getActionName, getBlockName } from '@/app/features/blocks/lib/utils';
@@ -9,7 +8,7 @@ import { toast } from '@openops/components/ui';
 import { flowHelper, FlowVersion, OpenChatResponse } from '@openops/shared';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { t } from 'i18next';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { aiChatApi } from '../../builder/ai-chat/lib/chat-api';
 
 const PLACEHOLDER_MESSAGE_INTEROP = 'satisfy-schema';
@@ -17,6 +16,8 @@ const PLACEHOLDER_MESSAGE_INTEROP = 'satisfy-schema';
 interface UseAssistantChatProps {
   flowVersion?: FlowVersion;
   selectedStep?: string;
+  chatId: string | null;
+  onChatIdChange: (chatId: string | null) => void;
 }
 
 const buildQueryKey = (
@@ -41,9 +42,8 @@ const buildQueryKey = (
   return baseKey;
 };
 
-export const useAssistantChat = (props?: UseAssistantChatProps) => {
-  const { flowVersion, selectedStep } = props ?? {};
-  const chatId = useRef(localStorage.getItem(AI_ASSISTANT_LS_KEY));
+export const useAssistantChat = (props: UseAssistantChatProps) => {
+  const { flowVersion, selectedStep, chatId, onChatIdChange } = props;
   const [shouldRenderChat, setShouldRenderChat] = useState(false);
 
   const stepDetails =
@@ -56,10 +56,15 @@ export const useAssistantChat = (props?: UseAssistantChatProps) => {
       buildQueryKey(
         selectedStep,
         flowVersion?.flowId,
-        chatId.current,
+        chatId,
         stepDetails?.settings?.blockName,
       ),
-    [selectedStep, flowVersion?.flowId, stepDetails?.settings?.blockName],
+    [
+      selectedStep,
+      flowVersion?.flowId,
+      chatId,
+      stepDetails?.settings?.blockName,
+    ],
   );
 
   const { data: openChatResponse, isLoading } = useQuery({
@@ -74,7 +79,7 @@ export const useAssistantChat = (props?: UseAssistantChatProps) => {
           getActionName(stepDetails),
         );
       } else {
-        conversation = await aiAssistantChatApi.open(chatId.current);
+        conversation = await aiAssistantChatApi.open(chatId);
       }
 
       onConversationRetrieved(conversation);
@@ -87,8 +92,12 @@ export const useAssistantChat = (props?: UseAssistantChatProps) => {
 
   const onConversationRetrieved = (conversation: OpenChatResponse) => {
     if (conversation.chatId) {
-      localStorage.setItem(AI_ASSISTANT_LS_KEY, conversation.chatId);
-      chatId.current = conversation.chatId;
+      onChatIdChange(conversation.chatId);
+      requestAnimationFrame(() => {
+        runtime.thread.reset(
+          (conversation.messages ?? []) as ThreadMessageLike[],
+        );
+      });
     }
   };
 
@@ -106,12 +115,11 @@ export const useAssistantChat = (props?: UseAssistantChatProps) => {
         chatId: openChatResponse?.chatId,
         message: PLACEHOLDER_MESSAGE_INTEROP,
       },
-      initialMessages: openChatResponse?.messages as ThreadMessageLike[],
       headers: {
         Authorization: `Bearer ${authenticationSession.getToken()}`,
       },
     }),
-    [openChatResponse?.chatId, openChatResponse?.messages],
+    [openChatResponse?.chatId],
   );
   const runtime = useChatRuntime(runtimeConfig);
 
@@ -120,14 +128,17 @@ export const useAssistantChat = (props?: UseAssistantChatProps) => {
   const queryClient = useQueryClient();
 
   const createNewChat = useCallback(async () => {
-    const oldChatId = chatId.current;
-
-    chatId.current = null;
+    const oldChatId = chatId;
 
     try {
       if (oldChatId) {
+        onChatIdChange(null);
         runtime.thread.cancelRun();
         runtime.thread.reset();
+
+        if (selectedStep && flowVersion) {
+          await aiChatApi.delete(oldChatId);
+        }
 
         const invalidationKey = buildQueryKey(
           selectedStep,
@@ -151,11 +162,13 @@ export const useAssistantChat = (props?: UseAssistantChatProps) => {
       );
     }
   }, [
-    flowVersion?.flowId,
-    queryClient,
+    chatId,
+    onChatIdChange,
     runtime.thread,
     selectedStep,
+    flowVersion,
     stepDetails?.settings?.blockName,
+    queryClient,
   ]);
 
   useEffect(() => {
