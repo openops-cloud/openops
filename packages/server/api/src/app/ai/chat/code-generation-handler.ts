@@ -25,6 +25,37 @@ const GENERATE_CODE_TOOL_NAME = 'generate_code';
 const ROLE_ASSISTANT = 'assistant';
 
 /**
+ * Processes a single line of JSON data and sends progress updates if it's a code result
+ */
+function processStreamLine(
+  line: string,
+  toolCallId: string,
+  serverResponse: NodeJS.WritableStream,
+): void {
+  if (!line.trim()) return;
+
+  try {
+    const data = JSON.parse(line);
+
+    if (data.type === 'code' && data.code) {
+      const partialResult = {
+        toolCallId,
+        result: {
+          code: data.code,
+          packageJson: data.packageJson || '{}',
+        },
+      };
+      serverResponse.write(`a:${JSON.stringify(partialResult)}\n`);
+    }
+  } catch (e) {
+    logger.debug('Error parsing JSON', {
+      error: e,
+      line,
+    });
+  }
+}
+
+/**
  * Streams code generation progress in real-time to the client
  */
 async function streamCodeGenerationProgress(
@@ -52,27 +83,7 @@ async function streamCodeGenerationProgress(
         buffer = lines.pop() || ''; // Keep incomplete line in buffer
 
         for (const line of lines) {
-          if (line.trim()) {
-            try {
-              const data = JSON.parse(line);
-
-              if (data.type === 'code' && data.code) {
-                const partialResult = {
-                  toolCallId,
-                  result: {
-                    code: data.code,
-                    packageJson: data.packageJson || '{}',
-                  },
-                };
-                serverResponse.write(`a:${JSON.stringify(partialResult)}\n`);
-              }
-            } catch (e) {
-              logger.debug('Error parsing JSON', {
-                error: e,
-                line,
-              });
-            }
-          }
+          processStreamLine(line, toolCallId, serverResponse);
         }
       }
     }
