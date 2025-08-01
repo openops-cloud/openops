@@ -33,7 +33,7 @@ jest.mock('../../../src/app/ai/chat/ai-chat.service', () => ({
   saveChatHistory: jest.fn().mockResolvedValue(undefined),
 }));
 
-jest.mock('../../../src/app/ai/chat/ai-message-id-generator', () => ({
+jest.mock('../../../src/app/ai/chat/ai-id-generators', () => ({
   generateMessageId: jest.fn().mockReturnValue('test-message-id'),
 }));
 

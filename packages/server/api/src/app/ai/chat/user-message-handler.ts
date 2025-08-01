@@ -10,7 +10,6 @@ import {
   ToolSet,
 } from 'ai';
 import { FastifyInstance } from 'fastify';
-import { ServerResponse } from 'node:http';
 import {
   sendAiChatFailureEvent,
   sendAiChatMessageSendEvent,
@@ -21,19 +20,13 @@ import {
   getLLMConfig,
   saveChatHistory,
 } from './ai-chat.service';
-import { generateMessageId } from './ai-message-id-generator';
+import { generateMessageId } from './ai-id-generators';
 import { getLLMAsyncStream } from './llm-stream-handler';
+import { RequestContext } from './types';
 
 const maxRecursionDepth = system.getNumberOrThrow(
   AppSystemProp.MAX_LLM_CALLS_WITHOUT_INTERACTION,
 );
-
-type RequestContext = {
-  userId: string;
-  chatId: string;
-  projectId: string;
-  serverResponse: ServerResponse;
-};
 
 type UserMessageParams = RequestContext & {
   authToken: string;

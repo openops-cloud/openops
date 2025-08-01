@@ -1,4 +1,5 @@
 import { TextPart, ToolCallPart } from 'ai';
+import { ServerResponse } from 'node:http';
 
 export type ToolResult = {
   toolCallId: string;
@@ -13,4 +14,11 @@ export type ToolCallPartWithResult = {
 export type MessageWithMergedToolResults = {
   role: 'user' | 'assistant' | 'system';
   content: string | (TextPart | ToolCallPartWithResult)[];
+};
+
+export type RequestContext = {
+  userId: string;
+  chatId: string;
+  projectId: string;
+  serverResponse: ServerResponse;
 };
