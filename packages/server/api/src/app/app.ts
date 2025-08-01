@@ -47,6 +47,7 @@ import { communityBlocksModule } from './blocks/community-block-module';
 import { rateLimitModule } from './core/security/rate-limit';
 import { securityHandlerChain } from './core/security/security-handler-chain';
 import { dashboardsModule } from './dashboards/dashboards-module';
+import { loadEnterpriseFeatures } from './enterprise-loader';
 import { fileModule } from './file/file.module';
 import { flagModule } from './flags/flag.module';
 import { flowTemplateModule } from './flow-template/flow-template.module';
@@ -68,7 +69,6 @@ import { websocketService } from './websockets/websockets.service';
 import { flowConsumer } from './workers/consumer';
 import { webhookResponseWatcher } from './workers/helper/webhook-response-watcher';
 import { workerModule } from './workers/worker-module';
-import { loadEnterpriseFeatures } from './enterprise-loader';
 
 export const setupApp = async (
   app: FastifyInstance,
