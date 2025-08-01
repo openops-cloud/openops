@@ -28,27 +28,28 @@ mkdir -p node_modules/@openops
 FRAMEWORK_PATH="dist/packages/blocks/framework"
 SHARED_PATH="dist/packages/shared"
 SERVER_SHARED_PATH="dist/packages/server/shared"
+ENTERPRISE_API_PATH="dist/packages/ee/enterprise-api"
 
 # Function to create symlink with error handling
 create_symlink() {
     local package_name="$1"
     local source_path="$2"
     local target_path="node_modules/$package_name"
-    
+
     echo "Processing: $package_name"
-    
+
     if [ ! -d "$source_path" ]; then
         echo "✗ Directory not found: $source_path"
         ((FAILED_COUNT++))
         return 1
     fi
-    
+
     if [ ! -f "$source_path/package.json" ]; then
         echo "✗ No package.json found: $source_path"
         ((FAILED_COUNT++))
         return 1
     fi
-    
+
     # Get absolute path - handle case where realpath might not be available
     local abs_source_path=""
     if command -v realpath >/dev/null 2>&1; then
@@ -67,7 +68,7 @@ create_symlink() {
             # Last resort: construct absolute path manually
             abs_source_path="$(cd "$source_path" && pwd)"
         fi
-        
+
         if [ -n "$abs_source_path" ]; then
             echo "  Source: $abs_source_path"
         else
@@ -76,14 +77,14 @@ create_symlink() {
             return 1
         fi
     fi
-    
+
     echo "  Target: $target_path"
-    
+
     # Remove existing symlink if it exists
     if rm -f "$target_path" 2>/dev/null; then
         echo "  Removed existing link"
     fi
-    
+
     # Create new symlink
     if ln -sf "$abs_source_path" "$target_path" 2>/dev/null; then
         echo "✓ Symlinked: $package_name"
@@ -94,7 +95,7 @@ create_symlink() {
         ((FAILED_COUNT++))
         return 1
     fi
-    
+
     echo "  ---"
 }
 
@@ -134,7 +135,16 @@ else
     exit 1
 fi
 
-echo "Step 4: Linking all other blocks..."
+echo "Step 4: Linking enterprise package..."
+if [ -f "$ENTERPRISE_API_PATH/package.json" ]; then
+    if ! create_symlink "@openops/enterprise-api" "$ENTERPRISE_API_PATH"; then
+        echo "⚠️ Failed to link enterprise-api package"
+    fi
+else
+    echo "⚠️ Enterprise package not found at $ENTERPRISE_API_PATH"
+fi
+
+echo "Step 5: Linking all other blocks..."
 
 echo "Available blocks in dist/packages/blocks:"
 ls -la dist/packages/blocks/ | head -10
@@ -180,4 +190,4 @@ elif [ $FAILED_COUNT -gt 0 ]; then
 else
     echo "✅ All packages are now accessible to the engine and API server!"
     exit 0
-fi 
+fi
