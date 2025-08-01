@@ -10,6 +10,16 @@ import { generateMessageId, generateToolId } from './ai-id-generators';
 import { streamCode } from './code.service';
 import { enrichContext, IncludeOptions } from './context-enrichment.service';
 import { getBlockSystemPrompt } from './prompts.service';
+import {
+  buildDoneMessage,
+  buildFinishMessage,
+  buildMessageIdMessage,
+  buildTextMessage,
+  buildToolCallDeltaMessage,
+  buildToolCallMessage,
+  buildToolCallStreamingStartMessage,
+  buildToolResultMessage,
+} from './stream-message-builder';
 import { Conversation, RequestContext } from './types';
 
 type CodeGenerationResult = {
@@ -165,13 +175,18 @@ function initializeToolCall(params: {
   const { toolCallId, toolName, message, serverResponse } = params;
 
   serverResponse.write(
-    `b:{"type":"tool-call-streaming-start","toolCallId":"${toolCallId}","toolName":"${toolName}"}\n`,
+    buildToolCallStreamingStartMessage(toolCallId, toolName),
   );
   serverResponse.write(
-    `c:{"type":"tool-call-delta","toolCallId":"${toolCallId}","toolName":"${toolName}","argsTextDelta":"{\\"message\\":\\"${message}\\"}"}\n`,
+    buildToolCallDeltaMessage(toolCallId, toolName, `{"message":"${message}"}`),
   );
   serverResponse.write(
-    `9:{"type":"tool-call","toolCallId":"${toolCallId}","toolName":"${toolName}","args":{"message":"${message}"}}\n`,
+    buildToolCallMessage({
+      type: 'tool-call',
+      toolCallId,
+      toolName,
+      args: { message },
+    }),
   );
 }
 
@@ -191,7 +206,7 @@ export async function handleCodeGenerationRequest(
     conversation: { chatContext, chatHistory },
   } = params;
 
-  serverResponse.write(`f:{"messageId":"${generateMessageId()}"}\n`);
+  serverResponse.write(buildMessageIdMessage(generateMessageId()));
 
   const toolCallId = generateToolId();
   initializeToolCall({
@@ -271,25 +286,15 @@ export async function handleCodeGenerationRequest(
         packageJson: finalCodeResult.packageJson || '{}',
       },
     };
-    serverResponse.write(`a:${JSON.stringify(toolResult)}\n`);
+    serverResponse.write(buildToolResultMessage(toolResult));
 
-    const finishMessage = {
-      finishReason: 'tool-calls',
-      usage: { promptTokens: null, completionTokens: null },
-      isContinued: false,
-    };
-    serverResponse.write(`e:${JSON.stringify(finishMessage)}\n`);
-    serverResponse.write(`d:${JSON.stringify(finishMessage)}\n`);
+    serverResponse.write(buildFinishMessage('tool-calls'));
+    serverResponse.write(buildDoneMessage('tool-calls'));
 
-    serverResponse.write(`0:"${finalCodeResult.textAnswer}"\n`);
+    serverResponse.write(buildTextMessage(finalCodeResult.textAnswer));
 
-    const textFinishMessage = {
-      finishReason: 'stop',
-      usage: { promptTokens: null, completionTokens: null },
-      isContinued: false,
-    };
-    serverResponse.write(`e:${JSON.stringify(textFinishMessage)}\n`);
-    serverResponse.write(`d:${JSON.stringify(textFinishMessage)}\n`);
+    serverResponse.write(buildFinishMessage('stop'));
+    serverResponse.write(buildDoneMessage('stop'));
 
     const saveToolCallId = generateToolId();
 
@@ -347,7 +352,7 @@ export async function handleCodeGenerationRequest(
       aiConfig,
     });
   } finally {
-    serverResponse.write(`d:{"finishReason":"stop"}\n`);
+    serverResponse.write(buildDoneMessage('stop'));
     serverResponse.end();
   }
 }

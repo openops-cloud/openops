@@ -18,6 +18,11 @@ import { getMCPToolsContext } from '../mcp/tools-context-builder';
 import { getLLMConfig, saveChatHistory } from './ai-chat.service';
 import { generateMessageId } from './ai-id-generators';
 import { getLLMAsyncStream } from './llm-stream-handler';
+import {
+  buildDoneMessage,
+  buildMessageIdMessage,
+  buildTextMessage,
+} from './stream-message-builder';
 import { Conversation, RequestContext } from './types';
 
 const maxRecursionDepth = system.getNumberOrThrow(
@@ -57,7 +62,7 @@ export async function handleUserMessage(
     conversation: { chatContext, chatHistory },
   } = params;
 
-  serverResponse.write(`f:{"messageId":"${generateMessageId()}"}\n`);
+  serverResponse.write(buildMessageIdMessage(generateMessageId()));
 
   const { aiConfig, languageModel } = await getLLMConfig(projectId);
 
@@ -99,7 +104,7 @@ export async function handleUserMessage(
     ]);
   } finally {
     await closeMCPClients(mcpClients);
-    serverResponse.write(`d:{"finishReason":"stop"}\n`);
+    serverResponse.write(buildDoneMessage('stop'));
     serverResponse.end();
   }
 }
@@ -153,7 +158,7 @@ function unrecoverableError(
 ): CoreAssistantMessage {
   const errorMessage = error instanceof Error ? error.message : String(error);
   streamParams.serverResponse.write(`0:"\\n\\n"\n`);
-  streamParams.serverResponse.write(`0:${JSON.stringify(errorMessage)}\n`);
+  streamParams.serverResponse.write(buildTextMessage(errorMessage));
   logger.warn(errorMessage, error);
 
   sendAiChatFailureEvent({
@@ -247,5 +252,5 @@ function sendTextMessageToStream(
   responseStream: NodeJS.WritableStream,
   message: string,
 ): void {
-  responseStream.write(`0:${JSON.stringify(message)}\n`);
+  responseStream.write(buildTextMessage(message));
 }
