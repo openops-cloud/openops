@@ -1,3 +1,4 @@
+import { Theme } from '@/lib/theme';
 import Editor from '@monaco-editor/react';
 import { SourceCode } from '@openops/shared';
 import { t } from 'i18next';
@@ -21,7 +22,7 @@ type CodeEditorProps = {
   onChange?: (value: string | SourceCode) => void;
   className?: string;
   containerClassName?: string;
-  theme: string;
+  theme: Theme;
   placeholder?: string;
   showLineNumbers?: boolean;
   language?: MonacoLanguage;
