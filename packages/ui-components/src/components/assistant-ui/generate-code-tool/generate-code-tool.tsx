@@ -26,7 +26,11 @@ const GenerateCodeTool = ({
   const { handleInject } = useThreadExtraContext();
 
   return (
-    <BaseToolWrapper toolName={toolName} status={status}>
+    <BaseToolWrapper
+      toolName={toolName}
+      status={status}
+      collapsedByDefault={false}
+    >
       <div className="relative px-3 w-full h-[300px] pb-10 overflow-hidden">
         <CodeEditor
           value={result}

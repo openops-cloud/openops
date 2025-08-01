@@ -10,6 +10,7 @@ import { useState } from 'react';
 import { Button } from '../../../ui/button';
 
 type BaseToolWrapperProps = {
+  collapsedByDefault?: boolean;
   children?: React.ReactNode;
 } & Pick<ToolCallMessagePartProps, 'toolName' | 'status'>;
 
@@ -17,8 +18,9 @@ const BaseToolWrapper = ({
   toolName,
   status,
   children,
+  collapsedByDefault = true,
 }: BaseToolWrapperProps) => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(collapsedByDefault);
 
   const isRunning = status?.type === 'running';
   const isIncomplete = status?.type === 'incomplete';
