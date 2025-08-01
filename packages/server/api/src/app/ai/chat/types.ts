@@ -1,5 +1,6 @@
-import { TextPart, ToolCallPart } from 'ai';
+import { CoreMessage, TextPart, ToolCallPart } from 'ai';
 import { ServerResponse } from 'node:http';
+import { MCPChatContext } from './ai-chat.service';
 
 export type ToolResult = {
   toolCallId: string;

@@ -141,6 +141,40 @@ async function handleCodeGenerationError(
   });
 }
 
+/**
+ * Extracts string content from a CoreMessage - in our context, content is always a string
+ */
+function getMessageText(message: CoreMessage): string {
+  if (typeof message.content !== 'string') {
+    throw new Error(
+      'Expected message content to be a string in code generation context',
+    );
+  }
+  return message.content;
+}
+
+/**
+ * Initializes a tool call by writing the necessary streaming messages to the server response
+ */
+function initializeToolCall(params: {
+  toolCallId: string;
+  toolName: string;
+  message: string;
+  serverResponse: NodeJS.WritableStream;
+}): void {
+  const { toolCallId, toolName, message, serverResponse } = params;
+
+  serverResponse.write(
+    `b:{"type":"tool-call-streaming-start","toolCallId":"${toolCallId}","toolName":"${toolName}"}\n`,
+  );
+  serverResponse.write(
+    `c:{"type":"tool-call-delta","toolCallId":"${toolCallId}","toolName":"${toolName}","argsTextDelta":"{\\"message\\":\\"${message}\\"}"}\n`,
+  );
+  serverResponse.write(
+    `9:{"type":"tool-call","toolCallId":"${toolCallId}","toolName":"${toolName}","args":{"message":"${message}"}}\n`,
+  );
+}
+
 /*
  * Handles code generation requests using streamCode for structured output.
  */
@@ -160,16 +194,12 @@ export async function handleCodeGenerationRequest(
   serverResponse.write(`f:{"messageId":"${generateMessageId()}"}\n`);
 
   const toolCallId = generateToolId();
-  serverResponse.write(
-    `b:{"type":"tool-call-streaming-start","toolCallId":"${toolCallId}","toolName":"${GENERATE_CODE_TOOL_NAME}"}\n`,
-  );
-  serverResponse.write(
-    `c:{"type":"tool-call-delta","toolCallId":"${toolCallId}","toolName":"${GENERATE_CODE_TOOL_NAME}","argsTextDelta":"{\\"message\\":\\"${newMessage.content}\\"}"}\n`,
-  );
-
-  serverResponse.write(
-    `9:{"type":"tool-call","toolCallId":"${toolCallId}","toolName":"${GENERATE_CODE_TOOL_NAME}","args":{"message":"${newMessage.content}"}}\n`,
-  );
+  initializeToolCall({
+    toolCallId,
+    toolName: GENERATE_CODE_TOOL_NAME,
+    message: getMessageText(newMessage),
+    serverResponse,
+  });
 
   const llmConfigResult = await getLLMConfig(projectId);
 
