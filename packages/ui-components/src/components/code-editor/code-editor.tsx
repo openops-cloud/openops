@@ -54,7 +54,7 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
     const editorTheme = theme === 'dark' ? 'vs-dark' : 'light';
     const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
-    const rafIdRef = useRef<number | null>(null);
+    const resizeIdRef = useRef<number | null>(null);
     const [isEditorReady, setIsEditorReady] = useState(false);
     const [showPlaceholder, setShowPlaceholder] = useState(false);
     const [hasTextFocus, setHasTextFocus] = useState(false);
@@ -83,10 +83,10 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
       return String(value);
     };
 
-    const rafLayout = useCallback(() => {
-      if (!rafIdRef.current) {
-        rafIdRef.current = requestAnimationFrame(() => {
-          rafIdRef.current = null;
+    const resizeEditor = useCallback(() => {
+      if (!resizeIdRef.current) {
+        resizeIdRef.current = requestAnimationFrame(() => {
+          resizeIdRef.current = null;
           if (editorRef.current) {
             editorRef.current.layout({ width: 0, height: 0 });
             editorRef.current.layout();
@@ -110,9 +110,9 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
     // Cleanup any pending animation frames on unmount
     useEffect(() => {
       return () => {
-        if (rafIdRef.current) {
-          cancelAnimationFrame(rafIdRef.current);
-          rafIdRef.current = null;
+        if (resizeIdRef.current) {
+          cancelAnimationFrame(resizeIdRef.current);
+          resizeIdRef.current = null;
         }
       };
     }, []);
@@ -129,7 +129,7 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
 
       const resizeObserver = new ResizeObserver(() => {
         // Use requestAnimationFrame for performance, following modern best practices
-        rafLayout();
+        resizeEditor();
       });
 
       resizeObserver.observe(containerRef.current);
@@ -137,7 +137,7 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
       return () => {
         resizeObserver.disconnect();
       };
-    }, [isEditorReady, rafLayout]);
+    }, [isEditorReady, resizeEditor]);
 
     const handleEditorDidMount = (editor: editor.IStandaloneCodeEditor) => {
       editorRef.current = editor;
@@ -157,7 +157,7 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
     };
 
     useImperativeHandle(ref, () => ({
-      layout: rafLayout,
+      layout: resizeEditor,
       focus: () => {
         if (editorRef.current) {
           editorRef.current.focus();
@@ -191,7 +191,7 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
       if (editorRef.current) {
         setTimeout(() => {
           if (editorRef.current) {
-            rafLayout();
+            resizeEditor();
             editorRef.current.focus();
           }
         }, 0);
