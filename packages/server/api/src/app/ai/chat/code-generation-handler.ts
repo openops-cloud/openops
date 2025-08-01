@@ -5,16 +5,12 @@ import {
   sendAiChatFailureEvent,
   sendAiChatMessageSendEvent,
 } from '../../telemetry/event-models';
-import {
-  getConversation,
-  getLLMConfig,
-  saveChatHistory,
-} from './ai-chat.service';
+import { getLLMConfig, saveChatHistory } from './ai-chat.service';
 import { generateMessageId, generateToolId } from './ai-id-generators';
 import { streamCode } from './code.service';
 import { enrichContext, IncludeOptions } from './context-enrichment.service';
 import { getBlockSystemPrompt } from './prompts.service';
-import { RequestContext } from './types';
+import { Conversation, RequestContext } from './types';
 
 type CodeGenerationResult = {
   type: string;
@@ -26,6 +22,7 @@ type CodeGenerationResult = {
 type CodeMessageParams = RequestContext & {
   newMessage: CoreMessage;
   additionalContext?: ChatFlowContext;
+  conversation: Conversation;
 };
 
 const GENERATE_CODE_TOOL_NAME = 'generate_code';
@@ -157,6 +154,7 @@ export async function handleCodeGenerationRequest(
     newMessage,
     additionalContext,
     serverResponse,
+    conversation: { chatContext, chatHistory },
   } = params;
 
   serverResponse.write(`f:{"messageId":"${generateMessageId()}"}\n`);
@@ -174,11 +172,8 @@ export async function handleCodeGenerationRequest(
   );
 
   const llmConfigResult = await getLLMConfig(projectId);
-  const conversationResult = await getConversation(chatId, userId, projectId);
 
-  conversationResult.chatHistory.push(newMessage);
-
-  const { chatContext, chatHistory } = conversationResult;
+  chatHistory.push(newMessage);
   const { aiConfig, languageModel } = llmConfigResult;
 
   const enrichedContext = additionalContext

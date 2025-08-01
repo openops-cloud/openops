@@ -22,3 +22,8 @@ export type RequestContext = {
   projectId: string;
   serverResponse: ServerResponse;
 };
+
+export type Conversation = {
+  chatContext: MCPChatContext;
+  chatHistory: CoreMessage[];
+};

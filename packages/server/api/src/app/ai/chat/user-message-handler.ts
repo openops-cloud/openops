@@ -15,14 +15,10 @@ import {
   sendAiChatMessageSendEvent,
 } from '../../telemetry/event-models';
 import { getMCPToolsContext } from '../mcp/tools-context-builder';
-import {
-  getConversation,
-  getLLMConfig,
-  saveChatHistory,
-} from './ai-chat.service';
+import { getLLMConfig, saveChatHistory } from './ai-chat.service';
 import { generateMessageId } from './ai-id-generators';
 import { getLLMAsyncStream } from './llm-stream-handler';
-import { RequestContext } from './types';
+import { Conversation, RequestContext } from './types';
 
 const maxRecursionDepth = system.getNumberOrThrow(
   AppSystemProp.MAX_LLM_CALLS_WITHOUT_INTERACTION,
@@ -32,6 +28,7 @@ type UserMessageParams = RequestContext & {
   authToken: string;
   app: FastifyInstance;
   newMessage: CoreMessage;
+  conversation: Conversation;
 };
 
 type ModelConfig = {
@@ -57,16 +54,12 @@ export async function handleUserMessage(
     authToken,
     newMessage,
     serverResponse,
+    conversation: { chatContext, chatHistory },
   } = params;
 
   serverResponse.write(`f:{"messageId":"${generateMessageId()}"}\n`);
 
   const { aiConfig, languageModel } = await getLLMConfig(projectId);
-  const { chatContext, chatHistory } = await getConversation(
-    chatId,
-    userId,
-    projectId,
-  );
 
   chatHistory.push(newMessage);
 

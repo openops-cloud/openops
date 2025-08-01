@@ -135,9 +135,9 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         return; // Error response already sent
       }
 
-      const { chatContext } = await getConversation(chatId, userId, projectId);
+      const conversation = await getConversation(chatId, userId, projectId);
       const isCodeGenerationRequest =
-        chatContext?.blockName === CODE_BLOCK_NAME;
+        conversation.chatContext?.blockName === CODE_BLOCK_NAME;
 
       const newMessage: CoreMessage = {
         role: 'user',
@@ -153,6 +153,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         newMessage,
         additionalContext: request.body.additionalContext,
         serverResponse: reply.raw,
+        conversation,
       };
 
       if (isCodeGenerationRequest) {
