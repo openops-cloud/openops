@@ -1,4 +1,6 @@
-import { TextPart, ToolCallPart } from 'ai';
+import { CoreMessage, TextPart, ToolCallPart } from 'ai';
+import { ServerResponse } from 'node:http';
+import { MCPChatContext } from './ai-chat.service';
 
 export type ToolResult = {
   toolCallId: string;
@@ -13,4 +15,16 @@ export type ToolCallPartWithResult = {
 export type MessageWithMergedToolResults = {
   role: 'user' | 'assistant' | 'system';
   content: string | (TextPart | ToolCallPartWithResult)[];
+};
+
+export type RequestContext = {
+  userId: string;
+  chatId: string;
+  projectId: string;
+  serverResponse: ServerResponse;
+};
+
+export type Conversation = {
+  chatContext: MCPChatContext;
+  chatHistory: CoreMessage[];
 };

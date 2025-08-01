@@ -3,6 +3,7 @@ import { logger } from '@openops/server-shared';
 import {
   ApplicationError,
   ChatNameRequest,
+  CODE_BLOCK_NAME,
   DeleteChatHistoryRequest,
   ListChatsResponse,
   NewMessageRequest,
@@ -29,6 +30,7 @@ import {
   saveChatHistory,
   updateChatName,
 } from './ai-chat.service';
+import { handleCodeGenerationRequest } from './code-generation-handler';
 import { streamCode } from './code.service';
 import { enrichContext, IncludeOptions } from './context-enrichment.service';
 import { getBlockSystemPrompt } from './prompts.service';
@@ -133,20 +135,34 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         return; // Error response already sent
       }
 
+      const conversation = await getConversation(chatId, userId, projectId);
+      const isCodeGenerationRequest =
+        conversation.chatContext?.blockName === CODE_BLOCK_NAME;
+
       const newMessage: CoreMessage = {
         role: 'user',
         content: messageContent,
       };
 
-      await handleUserMessage({
+      const generationRequestParams = {
         app,
+        authToken,
         chatId,
         userId,
         projectId,
-        authToken,
         newMessage,
+        additionalContext: request.body.additionalContext,
         serverResponse: reply.raw,
-      });
+        conversation,
+      };
+
+      if (isCodeGenerationRequest) {
+        logger.debug('Using code generation flow');
+        await handleCodeGenerationRequest(generationRequestParams);
+      } else {
+        logger.debug('Using normal conversation flow');
+        await handleUserMessage(generationRequestParams);
+      }
     } catch (error) {
       return handleError(error, reply, 'conversation');
     }

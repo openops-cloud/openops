@@ -66,6 +66,11 @@ jest.mock('../../../src/app/ai/chat/code.service', () => ({
   streamCode: jest.fn(),
 }));
 
+jest.mock('../../../src/app/telemetry/event-models', () => ({
+  sendAiChatFailureEvent: jest.fn(),
+  sendAiChatMessageSendEvent: jest.fn(),
+}));
+
 jest.mock('../../../src/app/ai/chat/ai-chat.service', () => ({
   getChatContext: jest.fn(),
   getChatHistory: jest.fn(),
