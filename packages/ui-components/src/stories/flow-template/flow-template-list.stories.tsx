@@ -1,8 +1,9 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect } from '@storybook/jest';
 import type { Meta, StoryObj } from '@storybook/react';
 import { fn, screen, userEvent, waitFor } from '@storybook/test';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import {
   FlowTemplateFilterSidebar,
@@ -29,10 +30,20 @@ const meta = {
     },
   },
   render: (args) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     const [selectedCategories, setSelectedCategories] = useState<string[]>([
       'Azure',
     ]);
+
+    const [searchInput, setSearchInput] = useState('');
+
+    const onSearchInputChange = useCallback(
+      (value: string) => {
+        args.onSearchInputChange(value);
+        setSearchInput(value);
+      },
+      [args],
+    );
+
     return (
       <TooltipProvider>
         <Dialog open={true} onOpenChange={() => {}}>
@@ -62,7 +73,11 @@ const meta = {
                   <VerticalDivider className="h-full" />
                 </>
               )}
-              <FlowTemplateList {...args} />
+              <FlowTemplateList
+                {...args}
+                searchText={searchInput}
+                onSearchInputChange={onSearchInputChange}
+              />
             </div>
           </DialogContent>
         </Dialog>
