@@ -1,9 +1,5 @@
-import { CoreMessage } from 'ai';
-import {
-  MessageWithMergedToolResults,
-  ToolCallPartWithResult,
-  ToolResult,
-} from './types';
+import { ModelMessage, ToolModelMessage, ToolResultPart } from 'ai';
+import { MessageWithMergedToolResults, ToolCallPartWithResult } from './types';
 
 /**
  * Merges tool result messages into their corresponding assistant tool-call parts.
@@ -11,12 +7,15 @@ import {
  * and assigns the result to the 'result' property.
  */
 export function mergeToolResultsIntoMessages(
-  messages: CoreMessage[],
+  messages: ModelMessage[],
 ): MessageWithMergedToolResults[] {
   const merged: MessageWithMergedToolResults[] = [];
 
   for (const msg of messages) {
-    if (isToolMessage(msg) && shouldSkipToolMessage(msg, merged)) {
+    if (
+      isToolMessage(msg) &&
+      shouldSkipToolMessage(msg as ToolModelMessage, merged)
+    ) {
       continue;
     }
 
@@ -27,7 +26,7 @@ export function mergeToolResultsIntoMessages(
   return merged;
 }
 
-function isToolMessage(msg: CoreMessage): boolean {
+function isToolMessage(msg: ModelMessage): boolean {
   return (
     msg.role === 'tool' && Array.isArray(msg.content) && msg.content.length > 0
   );
@@ -37,10 +36,10 @@ function isToolMessage(msg: CoreMessage): boolean {
  * Check if a tool message should be skipped (merged into assistant message)
  */
 function shouldSkipToolMessage(
-  msg: CoreMessage,
+  msg: ToolModelMessage,
   merged: MessageWithMergedToolResults[],
 ): boolean {
-  const toolResult = msg.content[0] as ToolResult;
+  const toolResult = msg.content[0];
   const toolCallId = toolResult?.toolCallId;
 
   if (!toolCallId) {
@@ -54,7 +53,7 @@ function shouldSkipToolMessage(
  * Merge tool result into the corresponding assistant message
  */
 function mergeToolResultIntoAssistant(
-  toolResult: ToolResult,
+  toolResult: ToolResultPart,
   merged: MessageWithMergedToolResults[],
 ): boolean {
   for (let j = merged.length - 1; j >= 0; j--) {
@@ -66,7 +65,7 @@ function mergeToolResultIntoAssistant(
           part.toolCallId === toolResult.toolCallId,
       );
       if (toolCallPart) {
-        (toolCallPart as ToolCallPartWithResult).result = toolResult.result;
+        (toolCallPart as ToolCallPartWithResult).output = toolResult.output;
         return true;
       }
     }
@@ -77,7 +76,7 @@ function mergeToolResultIntoAssistant(
 /**
  * Normalize message content to consistent format
  */
-function normalizeMessage(msg: CoreMessage): MessageWithMergedToolResults {
+function normalizeMessage(msg: ModelMessage): MessageWithMergedToolResults {
   const normalizedMsg = { ...msg } as MessageWithMergedToolResults;
 
   if (msg.content == null) {

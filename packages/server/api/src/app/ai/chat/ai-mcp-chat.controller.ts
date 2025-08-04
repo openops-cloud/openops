@@ -11,7 +11,7 @@ import {
   openOpsId,
   PrincipalType,
 } from '@openops/shared';
-import { CoreMessage } from 'ai';
+import { ModelMessage } from 'ai';
 import { FastifyReply } from 'fastify';
 import { StatusCodes } from 'http-status-codes';
 import {
@@ -133,7 +133,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         return; // Error response already sent
       }
 
-      const newMessage: CoreMessage = {
+      const newMessage: ModelMessage = {
         role: 'user',
         content: messageContent,
       };
@@ -210,7 +210,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         aiConfig,
         systemPrompt: prompt,
         onFinish: async (result) => {
-          const assistantMessage: CoreMessage = {
+          const assistantMessage: ModelMessage = {
             role: 'assistant',
             content: JSON.stringify(result.object),
           };

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CoreMessage } from 'ai';
+import { ModelMessage } from 'ai';
 import { mergeToolResultsIntoMessages } from '../../../src/app/ai/chat/utils';
 
 describe('mergeToolResultsIntoMessages', () => {
@@ -10,7 +10,7 @@ describe('mergeToolResultsIntoMessages', () => {
     });
 
     it('should handle single user message with string content', () => {
-      const messages: CoreMessage[] = [
+      const messages: ModelMessage[] = [
         {
           role: 'user',
           content: 'Hello, how are you?',
@@ -31,7 +31,7 @@ describe('mergeToolResultsIntoMessages', () => {
     });
 
     it('should handle single assistant message with string content', () => {
-      const messages: CoreMessage[] = [
+      const messages: ModelMessage[] = [
         {
           role: 'assistant',
           content: 'I am doing well, thank you!',
@@ -52,7 +52,7 @@ describe('mergeToolResultsIntoMessages', () => {
     });
 
     it('should handle message with array content', () => {
-      const messages: CoreMessage[] = [
+      const messages: ModelMessage[] = [
         {
           role: 'user',
           content: [
@@ -78,7 +78,7 @@ describe('mergeToolResultsIntoMessages', () => {
     });
 
     it('should handle message with mixed string and object content in array', () => {
-      const messages: CoreMessage[] = [
+      const messages: ModelMessage[] = [
         {
           role: 'assistant',
           content: [
@@ -112,7 +112,7 @@ describe('mergeToolResultsIntoMessages', () => {
     });
 
     it('should handle message with object content', () => {
-      const messages: CoreMessage[] = [
+      const messages: ModelMessage[] = [
         {
           role: 'user',
           content: [
@@ -140,7 +140,7 @@ describe('mergeToolResultsIntoMessages', () => {
 
   describe('tool result merging', () => {
     it('should merge tool result into assistant message with matching toolCallId', () => {
-      const messages: CoreMessage[] = [
+      const messages: ModelMessage[] = [
         {
           role: 'assistant',
           content: [
@@ -152,7 +152,7 @@ describe('mergeToolResultsIntoMessages', () => {
               type: 'tool-call',
               toolCallId: 'call_123',
               toolName: 'get_weather',
-              args: { location: 'New York' },
+              input: { location: 'New York' },
             },
           ],
         },
@@ -163,7 +163,10 @@ describe('mergeToolResultsIntoMessages', () => {
               type: 'tool-result',
               toolCallId: 'call_123',
               toolName: 'get_weather',
-              result: { temperature: 72, condition: 'sunny' },
+              output: {
+                type: 'json',
+                value: { temperature: 72, condition: 'sunny' },
+              },
             },
           ],
         },
@@ -181,13 +184,16 @@ describe('mergeToolResultsIntoMessages', () => {
         type: 'tool-call',
         toolCallId: 'call_123',
         toolName: 'get_weather',
-        args: { location: 'New York' },
-        result: { temperature: 72, condition: 'sunny' },
+        input: { location: 'New York' },
+        output: {
+          type: 'json',
+          value: { temperature: 72, condition: 'sunny' },
+        },
       });
     });
 
     it('should handle multiple tool calls and results', () => {
-      const messages: CoreMessage[] = [
+      const messages: ModelMessage[] = [
         {
           role: 'assistant',
           content: [
@@ -199,13 +205,13 @@ describe('mergeToolResultsIntoMessages', () => {
               type: 'tool-call',
               toolCallId: 'call_1',
               toolName: 'get_user_info',
-              args: { userId: '123' },
+              input: { userId: '123' },
             },
             {
               type: 'tool-call',
               toolCallId: 'call_2',
               toolName: 'get_weather',
-              args: { location: 'London' },
+              input: { location: 'London' },
             },
           ],
         },
@@ -216,7 +222,10 @@ describe('mergeToolResultsIntoMessages', () => {
               type: 'tool-result',
               toolCallId: 'call_1',
               toolName: 'get_user_info',
-              result: { name: 'John Doe', email: 'john@example.com' },
+              output: {
+                type: 'json',
+                value: { name: 'John Doe', email: 'john@example.com' },
+              },
             },
           ],
         },
@@ -227,7 +236,10 @@ describe('mergeToolResultsIntoMessages', () => {
               type: 'tool-result',
               toolCallId: 'call_2',
               toolName: 'get_weather',
-              result: { temperature: 15, condition: 'rainy' },
+              output: {
+                type: 'json',
+                value: { temperature: 15, condition: 'rainy' },
+              },
             },
           ],
         },
@@ -242,21 +254,27 @@ describe('mergeToolResultsIntoMessages', () => {
         type: 'tool-call',
         toolCallId: 'call_1',
         toolName: 'get_user_info',
-        args: { userId: '123' },
-        result: { name: 'John Doe', email: 'john@example.com' },
+        input: { userId: '123' },
+        output: {
+          type: 'json',
+          value: { name: 'John Doe', email: 'john@example.com' },
+        },
       });
 
       expect(result[0].content[2]).toEqual({
         type: 'tool-call',
         toolCallId: 'call_2',
         toolName: 'get_weather',
-        args: { location: 'London' },
-        result: { temperature: 15, condition: 'rainy' },
+        input: { location: 'London' },
+        output: {
+          type: 'json',
+          value: { temperature: 15, condition: 'rainy' },
+        },
       });
     });
 
     it('should not merge tool result if no matching toolCallId found', () => {
-      const messages: CoreMessage[] = [
+      const messages: ModelMessage[] = [
         {
           role: 'assistant',
           content: [
@@ -264,7 +282,7 @@ describe('mergeToolResultsIntoMessages', () => {
               type: 'tool-call',
               toolCallId: 'call_123',
               toolName: 'get_weather',
-              args: { location: 'New York' },
+              input: { location: 'New York' },
             },
           ],
         },
@@ -275,7 +293,10 @@ describe('mergeToolResultsIntoMessages', () => {
               type: 'tool-result',
               toolCallId: 'call_456',
               toolName: 'get_weather',
-              result: { temperature: 72, condition: 'sunny' },
+              output: {
+                type: 'json',
+                value: { temperature: 72, condition: 'sunny' },
+              },
             },
           ],
         },
@@ -287,14 +308,14 @@ describe('mergeToolResultsIntoMessages', () => {
         type: 'tool-call',
         toolCallId: 'call_123',
         toolName: 'get_weather',
-        args: { location: 'New York' },
+        input: { location: 'New York' },
       });
       expect((result[0].content[0] as any).result).toBeUndefined();
       expect(result[1].role).toBe('tool');
     });
 
     it('should handle tool message with non-array content', () => {
-      const messages: CoreMessage[] = [
+      const messages: ModelMessage[] = [
         {
           role: 'assistant',
           content: [
@@ -302,7 +323,7 @@ describe('mergeToolResultsIntoMessages', () => {
               type: 'tool-call',
               toolCallId: 'call_123',
               toolName: 'get_weather',
-              args: { location: 'New York' },
+              input: { location: 'New York' },
             },
           ],
         },
@@ -313,7 +334,10 @@ describe('mergeToolResultsIntoMessages', () => {
               type: 'tool-result',
               toolCallId: 'call_invalid',
               toolName: 'invalid_tool',
-              result: 'This should not be processed as a tool result',
+              output: {
+                type: 'text',
+                value: 'This should not be processed as a tool result',
+              },
             },
           ],
         },
@@ -328,7 +352,10 @@ describe('mergeToolResultsIntoMessages', () => {
           type: 'tool-result',
           toolCallId: 'call_invalid',
           toolName: 'invalid_tool',
-          result: 'This should not be processed as a tool result',
+          output: {
+            type: 'text',
+            value: 'This should not be processed as a tool result',
+          },
         },
       ]);
     });
@@ -336,7 +363,7 @@ describe('mergeToolResultsIntoMessages', () => {
 
   describe('message sequence handling', () => {
     it('should handle conversation with multiple messages', () => {
-      const messages: CoreMessage[] = [
+      const messages: ModelMessage[] = [
         {
           role: 'user',
           content: 'Hello',
@@ -360,7 +387,7 @@ describe('mergeToolResultsIntoMessages', () => {
               type: 'tool-call',
               toolCallId: 'call_123',
               toolName: 'get_weather',
-              args: { location: 'default' },
+              input: { location: 'default' },
             },
           ],
         },
@@ -371,7 +398,10 @@ describe('mergeToolResultsIntoMessages', () => {
               type: 'tool-result',
               toolCallId: 'call_123',
               toolName: 'get_weather',
-              result: { temperature: 75, condition: 'partly cloudy' },
+              output: {
+                type: 'json',
+                value: { temperature: 75, condition: 'partly cloudy' },
+              },
             },
           ],
         },
@@ -386,26 +416,29 @@ describe('mergeToolResultsIntoMessages', () => {
         type: 'tool-call',
         toolCallId: 'call_123',
         toolName: 'get_weather',
-        args: { location: 'default' },
-        result: { temperature: 75, condition: 'partly cloudy' },
+        input: { location: 'default' },
+        output: {
+          type: 'json',
+          value: { temperature: 75, condition: 'partly cloudy' },
+        },
       });
     });
 
     it('should preserve message order and metadata', () => {
-      const messages: CoreMessage[] = [
+      const messages: ModelMessage[] = [
         {
           role: 'user',
           content: 'Hello',
           id: 'msg_1',
           createdAt: new Date('2023-01-01'),
-        } as CoreMessage,
+        } as ModelMessage,
         {
           role: 'assistant',
           content: 'Hi!',
           id: 'msg_2',
           createdAt: new Date('2023-01-01'),
           annotations: [{ type: 'test', value: 'annotation' }],
-        } as CoreMessage,
+        } as ModelMessage,
       ];
 
       const result = mergeToolResultsIntoMessages(messages);
@@ -421,7 +454,7 @@ describe('mergeToolResultsIntoMessages', () => {
 
   describe('edge cases', () => {
     it('should handle null or undefined content gracefully', () => {
-      const messages: CoreMessage[] = [
+      const messages: ModelMessage[] = [
         {
           role: 'user',
           content: null as any,
@@ -439,7 +472,7 @@ describe('mergeToolResultsIntoMessages', () => {
     });
 
     it('should handle empty string content', () => {
-      const messages: CoreMessage[] = [
+      const messages: ModelMessage[] = [
         {
           role: 'user',
           content: '',
@@ -457,7 +490,7 @@ describe('mergeToolResultsIntoMessages', () => {
     });
 
     it('should handle empty array content', () => {
-      const messages: CoreMessage[] = [
+      const messages: ModelMessage[] = [
         {
           role: 'user',
           content: [],
@@ -470,7 +503,7 @@ describe('mergeToolResultsIntoMessages', () => {
     });
 
     it('should handle tool message with empty content array', () => {
-      const messages: CoreMessage[] = [
+      const messages: ModelMessage[] = [
         {
           role: 'assistant',
           content: [
@@ -478,7 +511,7 @@ describe('mergeToolResultsIntoMessages', () => {
               type: 'tool-call',
               toolCallId: 'call_123',
               toolName: 'get_weather',
-              args: { location: 'New York' },
+              input: { location: 'New York' },
             },
           ],
         },
@@ -495,7 +528,7 @@ describe('mergeToolResultsIntoMessages', () => {
     });
 
     it('should handle tool message with missing toolCallId', () => {
-      const messages: CoreMessage[] = [
+      const messages: ModelMessage[] = [
         {
           role: 'assistant',
           content: [
@@ -503,7 +536,7 @@ describe('mergeToolResultsIntoMessages', () => {
               type: 'tool-call',
               toolCallId: 'call_123',
               toolName: 'get_weather',
-              args: { location: 'New York' },
+              input: { location: 'New York' },
             },
           ],
         },
@@ -514,7 +547,10 @@ describe('mergeToolResultsIntoMessages', () => {
               type: 'tool-result',
               toolCallId: 'call_missing',
               toolName: 'get_weather',
-              result: { temperature: 72, condition: 'sunny' },
+              output: {
+                type: 'json',
+                value: { temperature: 72, condition: 'sunny' },
+              },
             },
           ],
         },
@@ -526,7 +562,7 @@ describe('mergeToolResultsIntoMessages', () => {
     });
 
     it('should handle tool message with string content instead of tool-result', () => {
-      const messages: CoreMessage[] = [
+      const messages: ModelMessage[] = [
         {
           role: 'assistant',
           content: [
@@ -534,7 +570,7 @@ describe('mergeToolResultsIntoMessages', () => {
               type: 'tool-call',
               toolCallId: 'call_123',
               toolName: 'get_weather',
-              args: { location: 'New York' },
+              input: { location: 'New York' },
             },
           ],
         },
@@ -545,7 +581,10 @@ describe('mergeToolResultsIntoMessages', () => {
               type: 'tool-result',
               toolCallId: 'call_invalid',
               toolName: 'invalid_tool',
-              result: 'This is not a tool result',
+              output: {
+                type: 'text',
+                value: 'This is not a tool result',
+              },
             },
           ],
         },
@@ -559,7 +598,10 @@ describe('mergeToolResultsIntoMessages', () => {
           type: 'tool-result',
           toolCallId: 'call_invalid',
           toolName: 'invalid_tool',
-          result: 'This is not a tool result',
+          output: {
+            type: 'text',
+            value: 'This is not a tool result',
+          },
         },
       ]);
     });
@@ -567,7 +609,7 @@ describe('mergeToolResultsIntoMessages', () => {
 
   describe('type safety', () => {
     it('should return MessageWithMergedToolResults[] type', () => {
-      const messages: CoreMessage[] = [
+      const messages: ModelMessage[] = [
         {
           role: 'user',
           content: 'Test message',
@@ -583,7 +625,7 @@ describe('mergeToolResultsIntoMessages', () => {
     });
 
     it('should handle system messages', () => {
-      const messages: CoreMessage[] = [
+      const messages: ModelMessage[] = [
         {
           role: 'system',
           content: 'You are a helpful assistant.',
@@ -604,7 +646,7 @@ describe('mergeToolResultsIntoMessages', () => {
 
   describe('complex scenarios', () => {
     it('should handle multiple assistant messages with tool calls', () => {
-      const messages: CoreMessage[] = [
+      const messages: ModelMessage[] = [
         {
           role: 'user',
           content: 'Get user info and weather',
@@ -616,7 +658,7 @@ describe('mergeToolResultsIntoMessages', () => {
               type: 'tool-call',
               toolCallId: 'call_1',
               toolName: 'get_user_info',
-              args: { userId: '123' },
+              input: { userId: '123' },
             },
           ],
         },
@@ -627,7 +669,10 @@ describe('mergeToolResultsIntoMessages', () => {
               type: 'tool-result',
               toolCallId: 'call_1',
               toolName: 'get_user_info',
-              result: { name: 'John', email: 'john@example.com' },
+              output: {
+                type: 'json',
+                value: { name: 'John', email: 'john@example.com' },
+              },
             },
           ],
         },
@@ -642,7 +687,7 @@ describe('mergeToolResultsIntoMessages', () => {
               type: 'tool-call',
               toolCallId: 'call_2',
               toolName: 'get_weather',
-              args: { location: 'New York' },
+              input: { location: 'New York' },
             },
           ],
         },
@@ -653,7 +698,10 @@ describe('mergeToolResultsIntoMessages', () => {
               type: 'tool-result',
               toolCallId: 'call_2',
               toolName: 'get_weather',
-              result: { temperature: 72, condition: 'sunny' },
+              output: {
+                type: 'json',
+                value: { temperature: 72, condition: 'sunny' },
+              },
             },
           ],
         },
@@ -667,8 +715,11 @@ describe('mergeToolResultsIntoMessages', () => {
         type: 'tool-call',
         toolCallId: 'call_1',
         toolName: 'get_user_info',
-        args: { userId: '123' },
-        result: { name: 'John', email: 'john@example.com' },
+        input: { userId: '123' },
+        output: {
+          type: 'json',
+          value: { name: 'John', email: 'john@example.com' },
+        },
       });
 
       expect(result[2].role).toBe('assistant');
@@ -676,13 +727,16 @@ describe('mergeToolResultsIntoMessages', () => {
         type: 'tool-call',
         toolCallId: 'call_2',
         toolName: 'get_weather',
-        args: { location: 'New York' },
-        result: { temperature: 72, condition: 'sunny' },
+        input: { location: 'New York' },
+        output: {
+          type: 'json',
+          value: { temperature: 72, condition: 'sunny' },
+        },
       });
     });
 
     it('should handle tool calls without corresponding tool results', () => {
-      const messages: CoreMessage[] = [
+      const messages: ModelMessage[] = [
         {
           role: 'assistant',
           content: [
@@ -690,13 +744,13 @@ describe('mergeToolResultsIntoMessages', () => {
               type: 'tool-call',
               toolCallId: 'call_1',
               toolName: 'get_weather',
-              args: { location: 'New York' },
+              input: { location: 'New York' },
             },
             {
               type: 'tool-call',
               toolCallId: 'call_2',
               toolName: 'get_user_info',
-              args: { userId: '123' },
+              input: { userId: '123' },
             },
           ],
         },
@@ -707,7 +761,10 @@ describe('mergeToolResultsIntoMessages', () => {
               type: 'tool-result',
               toolCallId: 'call_1',
               toolName: 'get_weather',
-              result: { temperature: 72, condition: 'sunny' },
+              output: {
+                type: 'json',
+                value: { temperature: 72, condition: 'sunny' },
+              },
             },
           ],
         },
@@ -722,15 +779,18 @@ describe('mergeToolResultsIntoMessages', () => {
         type: 'tool-call',
         toolCallId: 'call_1',
         toolName: 'get_weather',
-        args: { location: 'New York' },
-        result: { temperature: 72, condition: 'sunny' },
+        input: { location: 'New York' },
+        output: {
+          type: 'json',
+          value: { temperature: 72, condition: 'sunny' },
+        },
       });
 
       expect(result[0].content[1]).toEqual({
         type: 'tool-call',
         toolCallId: 'call_2',
         toolName: 'get_user_info',
-        args: { userId: '123' },
+        input: { userId: '123' },
       });
       expect((result[0].content[1] as any).result).toBeUndefined();
     });

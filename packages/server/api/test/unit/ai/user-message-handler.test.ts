@@ -1,6 +1,6 @@
 import { logger } from '@openops/server-shared';
 import { AiConfig, AiProviderEnum } from '@openops/shared';
-import { CoreMessage, LanguageModel, TextStreamPart, ToolSet } from 'ai';
+import { LanguageModel, ModelMessage, TextStreamPart, ToolSet } from 'ai';
 import { FastifyInstance } from 'fastify';
 import { ServerResponse } from 'node:http';
 import { handleUserMessage } from '../../../src/app/ai/chat/user-message-handler';
@@ -83,14 +83,14 @@ describe('User Message Handler', () => {
 
   const mockLanguageModel = {} as LanguageModel;
 
-  const mockChatHistory: CoreMessage[] = [
+  const mockChatHistory: ModelMessage[] = [
     {
       role: 'user',
       content: 'Hello',
     },
   ];
 
-  const mockNewMessage: CoreMessage = {
+  const mockNewMessage: ModelMessage = {
     role: 'user',
     content: 'How are you?',
   };
@@ -139,7 +139,7 @@ describe('User Message Handler', () => {
         return (async function* () {
           yield {
             type: 'text-delta',
-            textDelta: 'I am an AI assistant.',
+            text: 'I am an AI assistant.',
           } as TextStreamPart<ToolSet>;
         })();
       },

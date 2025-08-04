@@ -1,13 +1,7 @@
 import { TextPart, ToolCallPart } from 'ai';
 
-export type ToolResult = {
-  toolCallId: string;
-  result: unknown;
-  type?: string;
-};
-
 export type ToolCallPartWithResult = {
-  result?: unknown;
+  output?: unknown;
 } & ToolCallPart;
 
 export type MessageWithMergedToolResults = {

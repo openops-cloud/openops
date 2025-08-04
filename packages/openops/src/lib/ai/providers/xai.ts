@@ -1,5 +1,5 @@
 import { createXai } from '@ai-sdk/xai';
-import { LanguageModelV1 } from 'ai';
+import { LanguageModel } from 'ai';
 import { AiProvider } from '../providers';
 
 const xaiModels = [
@@ -28,7 +28,7 @@ function createLanguageModel(params: {
   apiKey: string;
   model: string;
   providerSettings?: Record<string, unknown>;
-}): LanguageModelV1 {
+}): LanguageModel {
   return createXai({
     apiKey: params.apiKey,
     ...params.providerSettings,
