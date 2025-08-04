@@ -2,12 +2,14 @@ import {
   FastifyPluginAsyncTypebox,
   Type,
 } from '@fastify/type-provider-typebox';
+import { TriggerStrategy } from '@openops/blocks-framework';
 import {
   ApplicationError,
   CountFlowsRequest,
   CreateEmptyFlowRequest,
   CreateFlowFromTemplateRequest,
   ErrorCode,
+  ExecutionType,
   FlowOperationRequest,
   FlowTemplateWithoutProjectInformation,
   FlowVersionMetadata,
@@ -17,10 +19,13 @@ import {
   ListFlowsRequest,
   ListFlowVersionRequest,
   OpenOpsId,
+  openOpsId,
   Permission,
   PopulatedFlow,
   Principal,
   PrincipalType,
+  ProgressUpdateType,
+  RunEnvironment,
   SeekPage,
   SERVICE_KEY_SECURITY_OPENAPI,
   TriggerWithOptionalId,
@@ -29,6 +34,7 @@ import dayjs from 'dayjs';
 import { StatusCodes } from 'http-status-codes';
 import { entitiesMustBeOwnedByCurrentProject } from '../../authentication/authorization';
 import { projectService } from '../../project/project-service';
+import { flowRunService } from '../flow-run/flow-run-service';
 import { flowVersionService } from '../flow-version/flow-version.service';
 import { flowService } from './flow.service';
 
@@ -137,6 +143,54 @@ export const flowController: FastifyPluginAsyncTypebox = async (app) => {
       flowId: flow.id,
       limit: request.query.limit ?? DEFAULT_PAGE_SIZE,
       cursorRequest: request.query.cursor ?? null,
+    });
+  });
+
+  app.post('/:id/run', RunFlowRequestOptions, async (request, reply) => {
+    const flow = await flowService.getOnePopulatedOrThrow({
+      id: request.params.id,
+      projectId: request.principal.projectId,
+    });
+
+    if (!flow.publishedVersionId) {
+      return reply.status(StatusCodes.BAD_REQUEST).send({
+        success: false,
+        message:
+          'Workflow must be published before it can be triggered manually',
+      });
+    }
+
+    const publishedFlow = await flowService.getOnePopulatedOrThrow({
+      id: request.params.id,
+      projectId: request.principal.projectId,
+      versionId: flow.publishedVersionId,
+    });
+
+    if (
+      publishedFlow.version.trigger.settings?.type !== TriggerStrategy.POLLING
+    ) {
+      return reply.status(StatusCodes.BAD_REQUEST).send({
+        success: false,
+        message: 'Only polling workflows can be triggered manually',
+      });
+    }
+
+    const flowRun = await flowRunService.start({
+      environment: RunEnvironment.PRODUCTION,
+      flowVersionId: publishedFlow.version.id,
+      projectId: request.principal.projectId,
+      payload: {},
+      executionType: ExecutionType.BEGIN,
+      synchronousHandlerId: undefined,
+      executionCorrelationId: openOpsId(),
+      progressUpdateType: ProgressUpdateType.NONE,
+    });
+
+    return reply.status(StatusCodes.OK).send({
+      success: true,
+      flowRunId: flowRun.id,
+      status: flowRun.status,
+      message: 'Workflow execution started successfully',
     });
   });
 };
@@ -322,6 +376,34 @@ const DeleteFlowRequestOptions = {
     }),
     response: {
       [StatusCodes.NO_CONTENT]: Type.Never(),
+    },
+  },
+};
+
+const RunFlowRequestOptions = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+    permission: Permission.WRITE_FLOW,
+  },
+  schema: {
+    tags: ['flows'],
+    description:
+      'Manually trigger a workflow execution. Only works for polling-type workflows.',
+    security: [SERVICE_KEY_SECURITY_OPENAPI],
+    params: Type.Object({
+      id: OpenOpsId,
+    }),
+    response: {
+      [StatusCodes.OK]: Type.Object({
+        success: Type.Boolean(),
+        flowRunId: Type.String(),
+        status: Type.String(),
+        message: Type.String(),
+      }),
+      [StatusCodes.BAD_REQUEST]: Type.Object({
+        success: Type.Boolean(),
+        message: Type.String(),
+      }),
     },
   },
 };
