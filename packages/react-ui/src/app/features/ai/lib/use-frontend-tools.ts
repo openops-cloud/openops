@@ -1,3 +1,4 @@
+import { UI_KIT_PACKAGE_NAME } from '@/app/constants/ui-kit';
 import { ReactNode, useEffect, useState } from 'react';
 
 export const useFrontendTools = () => {
@@ -9,8 +10,7 @@ export const useFrontendTools = () => {
   useEffect(() => {
     const loadTools = async () => {
       try {
-        const packageName = '@openops/ui-kit';
-        const { createFrontendTools } = await import(packageName);
+        const { createFrontendTools } = await import(UI_KIT_PACKAGE_NAME);
         const tools = createFrontendTools();
         setToolComponents(tools);
       } catch (error) {
