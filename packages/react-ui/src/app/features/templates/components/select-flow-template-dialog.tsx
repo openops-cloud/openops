@@ -349,7 +349,7 @@ const SelectFlowTemplateDialog = ({
     setSelectedServices([]);
     setSelectedCategories([]);
     resetTemplateDialog();
-  }, [isOpen, resetTemplateDialog, searchText]);
+  }, [isOpen, resetTemplateDialog]);
 
   useEffect(() => {
     resetTemplateDialog();
