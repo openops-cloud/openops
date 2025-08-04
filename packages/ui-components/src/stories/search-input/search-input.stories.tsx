@@ -2,7 +2,9 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
 import { SearchInput } from '../../components';
 
-const SearchInputWithState = (args: any) => {
+const SearchInputWithState = (
+  args: React.ComponentProps<typeof SearchInput>,
+) => {
   const [searchValue, setSearchValue] = useState(args.value);
 
   return (
