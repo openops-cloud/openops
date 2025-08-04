@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 
 export const useFrontendTools = () => {
-  const [toolComponents, setToolComponents] = useState<any>(null);
+  const [toolComponents, setToolComponents] = useState<
+    Record<string, ReactNode> | undefined
+  >(undefined);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
