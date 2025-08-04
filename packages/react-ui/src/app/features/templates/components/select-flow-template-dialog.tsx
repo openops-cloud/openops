@@ -38,11 +38,14 @@ import {
 import { useMutation } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDebounceValue } from 'usehooks-ts';
 import { popupFeatures } from '../../cloud/lib/popup';
 import { useCloudProfile } from '../../cloud/lib/use-cloud-profile';
 import { useUserInfoPolling } from '../../cloud/lib/use-user-info-polling';
 import { cloudTemplatesApi } from '../lib/cloud-templates-api';
 import { TemplateStepNodeWithMetadata } from './template-step-node-with-metadata';
+
+const TEMPLATE_FILTER_DEBOUNCE_DELAY = 300;
 
 type FlowTemplateFilterSidebarSkeletonLoaderProps = {
   numberOfSkeletons?: number;
@@ -188,7 +191,7 @@ FlowTemplateFilterSidebar.displayName = 'FlowTemplateFilterSidebar';
 type SelectFlowTemplateDialogContentProps = {
   isExpanded: boolean;
   selectedTemplate: FlowTemplateDto | undefined;
-  searchInitialValue: string;
+  searchText: string;
   selectedTemplateMetadata: FlowTemplateMetadataWithIntegrations | undefined;
   templates: FlowTemplateMetadataWithIntegrations[] | undefined;
   isTemplateListLoading: boolean;
@@ -215,7 +218,7 @@ const SelectFlowTemplateDialogContent = ({
   setSelectedServices,
   selectedCategories,
   setSelectedCategories,
-  searchInitialValue,
+  searchText,
   selectedTemplateMetadata,
   isTemplatePreselected,
   closeDetails,
@@ -300,7 +303,7 @@ const SelectFlowTemplateDialogContent = ({
             templates={templates}
             isLoading={isTemplateListLoading}
             onTemplateSelect={handleTemplateSelect}
-            searchInitialValue={searchInitialValue}
+            searchText={searchText}
             onSearchInputChange={onSearchInputChange}
             ownerLogoUrl={ownerLogoUrl}
             isFullCatalog={isFullCatalog}
@@ -352,15 +355,24 @@ const SelectFlowTemplateDialog = ({
   }, [isOpen, resetTemplateDialog]);
 
   useEffect(() => {
+    setSearchText('');
+  }, [selectedServices, selectedDomains, selectedCategories]);
+
+  useEffect(() => {
     resetTemplateDialog();
   }, [selectedServices, selectedDomains, resetTemplateDialog]);
 
   const useCloudTemplates = flagsHooks.useShouldFetchCloudTemplates();
 
+  const [debouncedSearchText] = useDebounceValue(
+    searchText,
+    TEMPLATE_FILTER_DEBOUNCE_DELAY,
+  );
+
   const { templatesWithIntegrations, isLoading: isTemplateListLoading } =
     templatesHooks.useTemplatesMetadataWithIntegrations({
       enabled: isOpen,
-      search: searchText,
+      search: debouncedSearchText,
       domains: selectedDomains,
       services: selectedServices,
       categories: selectedCategories,
@@ -505,7 +517,7 @@ const SelectFlowTemplateDialog = ({
               templates={templatesWithIntegrations}
               isTemplateListLoading={isTemplateListLoading}
               handleTemplateSelect={handleTemplateSelect}
-              searchInitialValue={searchText}
+              searchText={searchText}
               onSearchInputChange={setSearchText}
               selectedCategories={selectedCategories}
               setSelectedCategories={setSelectedCategories}
