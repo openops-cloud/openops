@@ -177,14 +177,16 @@ export function createContextStore({
       return storeEntry.value as T;
     },
     async list(
-      scope = StoreScope.FLOW,
+      scope: StoreScope,
       keyPrefix: string,
     ): Promise<Array<{ key: string; value: unknown }>> {
-      let scopePrefix = createKey(prefix, scope, flowId, flowRunId, '');
-
-      if (keyPrefix) {
-        scopePrefix = createKey(prefix, scope, flowId, flowRunId, keyPrefix);
-      }
+      const scopePrefix = createKey(
+        prefix,
+        scope,
+        flowId,
+        flowRunId,
+        keyPrefix,
+      );
 
       const keyValuePairs = await createStorageService({
         apiUrl,

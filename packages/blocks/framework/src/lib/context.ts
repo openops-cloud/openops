@@ -189,8 +189,8 @@ export interface Store {
   get<T>(key: string, scope?: StoreScope): Promise<T | null>;
   delete(key: string, scope?: StoreScope): Promise<void>;
   list(
-    scope?: StoreScope,
-    keyPrefix?: string,
+    scope: StoreScope,
+    keyPrefix: string,
   ): Promise<Array<{ key: string; value: unknown }>>;
 }
 
