@@ -41,7 +41,7 @@ axios.interceptors.response.use(
     ) {
       const axiosError = error as AxiosError;
       const url = axiosError.request.responseURL;
-      const isSignInRoute = url && url.includes('/v1/authentication/sign-in');
+      const isSignInRoute = url?.includes('/v1/authentication/sign-in');
 
       if (url !== OPENOPS_CLOUD_USER_INFO_API_URL && !isSignInRoute) {
         console.warn('JWT expired logging out');
