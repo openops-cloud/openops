@@ -1,6 +1,6 @@
 import { logger } from '@openops/server-shared';
 import { ChatFlowContext } from '@openops/shared';
-import { CoreMessage } from 'ai';
+import { ModelMessage } from 'ai';
 import { sendAiChatFailureEvent } from '../../telemetry/event-models';
 import { saveChatHistory } from './ai-chat.service';
 import { generateMessageId, generateToolId } from './ai-id-generators';
@@ -111,7 +111,7 @@ async function handleCodeGenerationError(
     chatId: string;
     userId: string;
     projectId: string;
-    chatHistory: CoreMessage[];
+    chatHistory: ModelMessage[];
     serverResponse: NodeJS.WritableStream;
     aiConfig: { provider: string; model: string };
   },
@@ -122,7 +122,7 @@ async function handleCodeGenerationError(
   params.serverResponse.write(`0:"\\n\\n"\n`);
   params.serverResponse.write(`0:${JSON.stringify(errorMessage)}\n`);
 
-  const errorAssistantMessage: CoreMessage = {
+  const errorAssistantMessage: ModelMessage = {
     role: ROLE_ASSISTANT,
     content: [
       {
@@ -150,7 +150,7 @@ async function handleCodeGenerationError(
 /**
  * Extracts string content from a CoreMessage - in our context, content is always a string
  */
-function getMessageText(message: CoreMessage): string {
+function getMessageText(message: ModelMessage): string {
   if (typeof message.content !== 'string') {
     throw new Error(
       'Expected message content to be a string in code generation context',
@@ -181,7 +181,7 @@ function initializeToolCall(params: {
       type: 'tool-call',
       toolCallId,
       toolName,
-      args: { message },
+      input: { message },
     }),
   );
 }
@@ -284,14 +284,14 @@ export async function handleCodeGenerationRequest(
 
     const saveToolCallId = generateToolId();
 
-    const assistantMessage: CoreMessage = {
+    const assistantMessage: ModelMessage = {
       role: ROLE_ASSISTANT,
       content: [
         {
           type: 'tool-call',
           toolCallId: saveToolCallId,
           toolName: GENERATE_CODE_TOOL_NAME,
-          args: { message: newMessage.content },
+          input: { message: newMessage.content },
         },
         {
           type: 'text',
@@ -300,25 +300,25 @@ export async function handleCodeGenerationRequest(
       ],
     };
 
-    const toolResultMessage: CoreMessage = {
+    const toolResultMessage: ModelMessage = {
       role: 'tool',
       content: [
         {
           type: 'tool-result',
           toolCallId: saveToolCallId,
           toolName: GENERATE_CODE_TOOL_NAME,
-          result: {
-            content: [
-              {
-                type: 'text',
-                text: JSON.stringify({
-                  code: finalCodeResult.code || '',
-                  packageJson: finalCodeResult.packageJson || '{}',
-                }),
-              },
-            ],
-            isError: false,
+          output: {
+            // content: [
+            //   {
+            type: 'json',
+            value: {
+              code: finalCodeResult.code || '',
+              packageJson: finalCodeResult.packageJson || '{}',
+            },
           },
+          // ],
+          // isError: false,
+          // },
         },
       ],
     };
