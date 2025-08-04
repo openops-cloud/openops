@@ -6,9 +6,7 @@ const SearchInputWithState = (args: any) => {
   const [searchValue, setSearchValue] = useState(args.value);
 
   return (
-    <div className="w-80 space-y-4">
-      <SearchInput {...args} value={searchValue} onChange={setSearchValue} />
-    </div>
+    <SearchInput {...args} value={searchValue} onChange={setSearchValue} />
   );
 };
 
