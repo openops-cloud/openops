@@ -95,7 +95,7 @@ ConnectedToCloud.args = {
   templates: mockAllTemplates,
   isLoading: false,
   onTemplateSelect: fn(),
-  searchInitialValue: '',
+  searchText: '',
   onSearchInputChange: fn(),
   isFullCatalog: true,
   ownerLogoUrl: 'https://static.openops.com/logos/logo.icon.positive.svg',
