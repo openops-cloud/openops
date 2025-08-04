@@ -57,9 +57,6 @@ describe('User Message Handler', () => {
   const { getLLMAsyncStream } = jest.requireMock(
     '../../../src/app/ai/chat/llm-stream-handler',
   );
-  const { sendAiChatMessageSendEvent } = jest.requireMock(
-    '../../../src/app/telemetry/event-models',
-  );
 
   const mockServerResponse = {
     write: jest.fn(),

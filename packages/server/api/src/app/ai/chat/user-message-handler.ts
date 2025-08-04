@@ -64,7 +64,6 @@ export async function handleUserMessage(
 
   chatHistory.push(newMessage);
 
-  // const { chatContext, chatHistory } = conversation;
   const { mcpClients, systemPrompt, filteredTools } = await getMCPToolsContext(
     app,
     projectId,

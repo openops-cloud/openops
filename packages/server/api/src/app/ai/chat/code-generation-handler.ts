@@ -214,8 +214,6 @@ export async function handleCodeGenerationRequest(
     serverResponse,
   });
 
-  // chatHistory.push(newMessage);
-
   const enrichedContext = additionalContext
     ? await enrichContext(additionalContext, projectId, {
         includeCurrentStepOutput: IncludeOptions.ALWAYS,
