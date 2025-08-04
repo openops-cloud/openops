@@ -48,15 +48,16 @@ describe('storageListAction', () => {
       expect(mockContext.store.list).toHaveBeenCalledWith(
         'FLOW',
         'run_test-run-id/',
+        undefined,
+        false,
       );
       expect(result).toEqual(mockEntries);
     });
 
-    test('should filter entries with regex pattern', async () => {
+    test('should pass regex pattern to server', async () => {
       const mockContext = createMockContext();
       const mockEntries = [
         { key: 'run_test-run-id/user_123', value: 'value1' },
-        { key: 'run_test-run-id/admin_456', value: 'value2' },
         { key: 'run_test-run-id/user_789', value: 'value3' },
       ];
 
@@ -65,10 +66,13 @@ describe('storageListAction', () => {
 
       const result = await storageListAction.run(mockContext as any);
 
-      expect(result).toEqual([
-        { key: 'run_test-run-id/user_123', value: 'value1' },
-        { key: 'run_test-run-id/user_789', value: 'value3' },
-      ]);
+      expect(mockContext.store.list).toHaveBeenCalledWith(
+        'FLOW',
+        'run_test-run-id/',
+        'user_.*',
+        false,
+      );
+      expect(result).toEqual(mockEntries);
     });
 
     test('should throw error when invalid regex pattern is provided', async () => {
@@ -89,7 +93,12 @@ describe('storageListAction', () => {
 
       await storageListAction.run(mockContext as any);
 
-      expect(mockContext.store.list).toHaveBeenCalledWith('COLLECTION', '');
+      expect(mockContext.store.list).toHaveBeenCalledWith(
+        'COLLECTION',
+        '',
+        undefined,
+        false,
+      );
     });
 
     test('should use correct scope for FLOW scope', async () => {
@@ -99,7 +108,12 @@ describe('storageListAction', () => {
 
       await storageListAction.run(mockContext as any);
 
-      expect(mockContext.store.list).toHaveBeenCalledWith('FLOW', '');
+      expect(mockContext.store.list).toHaveBeenCalledWith(
+        'FLOW',
+        '',
+        undefined,
+        false,
+      );
     });
 
     test('should use correct scope for RUN scope', async () => {
@@ -112,6 +126,22 @@ describe('storageListAction', () => {
       expect(mockContext.store.list).toHaveBeenCalledWith(
         'FLOW',
         'run_test-run-id/',
+        undefined,
+        false,
+      );
+    });
+
+    test('should pass isTest flag correctly', async () => {
+      const mockContext = createMockContext(true);
+      mockContext.store.list.mockResolvedValue([]);
+
+      await storageListAction.run(mockContext as any);
+
+      expect(mockContext.store.list).toHaveBeenCalledWith(
+        'FLOW',
+        'run_test-run-id/',
+        undefined,
+        true,
       );
     });
   });
