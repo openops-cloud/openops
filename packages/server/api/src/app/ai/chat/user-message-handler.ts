@@ -10,12 +10,9 @@ import {
   ToolSet,
 } from 'ai';
 import { FastifyInstance } from 'fastify';
-import {
-  sendAiChatFailureEvent,
-  sendAiChatMessageSendEvent,
-} from '../../telemetry/event-models';
+import { sendAiChatFailureEvent } from '../../telemetry/event-models';
 import { getMCPToolsContext } from '../mcp/tools-context-builder';
-import { getLLMConfig, saveChatHistory } from './ai-chat.service';
+import { saveChatHistory } from './ai-chat.service';
 import { generateMessageId } from './ai-id-generators';
 import { getLLMAsyncStream } from './llm-stream-handler';
 import {
@@ -23,18 +20,17 @@ import {
   buildMessageIdMessage,
   buildTextMessage,
 } from './stream-message-builder';
-import { Conversation, RequestContext } from './types';
+import { ChatProcessingContext, RequestContext } from './types';
 
 const maxRecursionDepth = system.getNumberOrThrow(
   AppSystemProp.MAX_LLM_CALLS_WITHOUT_INTERACTION,
 );
 
-type UserMessageParams = RequestContext & {
-  authToken: string;
-  app: FastifyInstance;
-  newMessage: CoreMessage;
-  conversation: Conversation;
-};
+export type UserMessageParams = RequestContext &
+  ChatProcessingContext & {
+    authToken: string;
+    app: FastifyInstance;
+  };
 
 type ModelConfig = {
   aiConfig: AiConfig;
@@ -55,19 +51,20 @@ export async function handleUserMessage(
     app,
     chatId,
     userId,
+    aiConfig,
     projectId,
     authToken,
     newMessage,
+    languageModel,
     serverResponse,
     conversation: { chatContext, chatHistory },
   } = params;
 
   serverResponse.write(buildMessageIdMessage(generateMessageId()));
 
-  const { aiConfig, languageModel } = await getLLMConfig(projectId);
-
   chatHistory.push(newMessage);
 
+  // const { chatContext, chatHistory } = conversation;
   const { mcpClients, systemPrompt, filteredTools } = await getMCPToolsContext(
     app,
     projectId,
@@ -77,13 +74,6 @@ export async function handleUserMessage(
     chatContext,
     languageModel,
   );
-
-  sendAiChatMessageSendEvent({
-    projectId,
-    userId,
-    chatId,
-    provider: aiConfig.provider,
-  });
 
   try {
     const newMessages = await streamLLMResponse({

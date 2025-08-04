@@ -1,11 +1,8 @@
 import { logger } from '@openops/server-shared';
 import { ChatFlowContext } from '@openops/shared';
 import { CoreMessage } from 'ai';
-import {
-  sendAiChatFailureEvent,
-  sendAiChatMessageSendEvent,
-} from '../../telemetry/event-models';
-import { getLLMConfig, saveChatHistory } from './ai-chat.service';
+import { sendAiChatFailureEvent } from '../../telemetry/event-models';
+import { saveChatHistory } from './ai-chat.service';
 import { generateMessageId, generateToolId } from './ai-id-generators';
 import { streamCode } from './code.service';
 import { enrichContext, IncludeOptions } from './context-enrichment.service';
@@ -20,7 +17,7 @@ import {
   buildToolCallStreamingStartMessage,
   buildToolResultMessage,
 } from './stream-message-builder';
-import { Conversation, RequestContext } from './types';
+import { ChatProcessingContext, RequestContext } from './types';
 
 type CodeGenerationResult = {
   type: string;
@@ -29,11 +26,10 @@ type CodeGenerationResult = {
   textAnswer: string;
 };
 
-type CodeMessageParams = RequestContext & {
-  newMessage: CoreMessage;
-  additionalContext?: ChatFlowContext;
-  conversation: Conversation;
-};
+type CodeMessageParams = RequestContext &
+  ChatProcessingContext & {
+    additionalContext?: ChatFlowContext;
+  };
 
 const GENERATE_CODE_TOOL_NAME = 'generate_code';
 const ROLE_ASSISTANT = 'assistant';
@@ -203,6 +199,8 @@ export async function handleCodeGenerationRequest(
     newMessage,
     additionalContext,
     serverResponse,
+    aiConfig,
+    languageModel,
     conversation: { chatContext, chatHistory },
   } = params;
 
@@ -216,10 +214,7 @@ export async function handleCodeGenerationRequest(
     serverResponse,
   });
 
-  const llmConfigResult = await getLLMConfig(projectId);
-
-  chatHistory.push(newMessage);
-  const { aiConfig, languageModel } = llmConfigResult;
+  // chatHistory.push(newMessage);
 
   const enrichedContext = additionalContext
     ? await enrichContext(additionalContext, projectId, {
@@ -228,13 +223,6 @@ export async function handleCodeGenerationRequest(
     : undefined;
 
   const prompt = await getBlockSystemPrompt(chatContext, enrichedContext);
-
-  sendAiChatMessageSendEvent({
-    projectId,
-    userId,
-    chatId,
-    provider: aiConfig.provider,
-  });
 
   let codeResult: CodeGenerationResult | null = null;
 

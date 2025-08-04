@@ -103,6 +103,8 @@ describe('User Message Handler', () => {
     authToken: 'test-auth-token',
     newMessage: mockNewMessage,
     serverResponse: mockServerResponse,
+    aiConfig: mockAiConfig,
+    languageModel: mockLanguageModel,
     conversation: {
       chatContext: { chatId: 'test-chat-id' },
       chatHistory: [...mockChatHistory],
@@ -152,13 +154,6 @@ describe('User Message Handler', () => {
       expect(mockServerResponse.write).toHaveBeenCalledWith(
         expect.stringContaining('f:{"messageId":"test-message-id"}'),
       );
-
-      expect(sendAiChatMessageSendEvent).toHaveBeenCalledWith({
-        projectId: 'test-project-id',
-        userId: 'test-user-id',
-        chatId: 'test-chat-id',
-        provider: AiProviderEnum.ANTHROPIC,
-      });
 
       expect(saveChatHistory).toHaveBeenCalledWith(
         'test-chat-id',

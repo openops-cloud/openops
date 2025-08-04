@@ -3,7 +3,6 @@ import { logger } from '@openops/server-shared';
 import {
   ApplicationError,
   ChatNameRequest,
-  CODE_BLOCK_NAME,
   DeleteChatHistoryRequest,
   ListChatsResponse,
   NewMessageRequest,
@@ -30,11 +29,10 @@ import {
   saveChatHistory,
   updateChatName,
 } from './ai-chat.service';
-import { handleCodeGenerationRequest } from './code-generation-handler';
+import { routeChatRequest } from './chat-request-router';
 import { streamCode } from './code.service';
 import { enrichContext, IncludeOptions } from './context-enrichment.service';
 import { getBlockSystemPrompt } from './prompts.service';
-import { handleUserMessage } from './user-message-handler';
 
 const DEFAULT_CHAT_NAME = 'New Chat';
 
@@ -123,46 +121,23 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
   );
 
   app.post('/', NewMessageOptions, async (request, reply) => {
-    const chatId = request.body.chatId;
-    const userId = request.principal.id;
-    const projectId = request.principal.projectId;
-    const authToken =
-      request.headers.authorization?.replace('Bearer ', '') ?? '';
-
     try {
       const messageContent = await getUserMessage(request.body, reply);
       if (messageContent === null) {
         return; // Error response already sent
       }
 
-      const conversation = await getConversation(chatId, userId, projectId);
-      const isCodeGenerationRequest =
-        conversation.chatContext?.blockName === CODE_BLOCK_NAME;
-
       const newMessage: CoreMessage = {
         role: 'user',
         content: messageContent,
       };
 
-      const generationRequestParams = {
+      await routeChatRequest({
         app,
-        authToken,
-        chatId,
-        userId,
-        projectId,
+        request,
         newMessage,
-        additionalContext: request.body.additionalContext,
         serverResponse: reply.raw,
-        conversation,
-      };
-
-      if (isCodeGenerationRequest) {
-        logger.debug('Using code generation flow');
-        await handleCodeGenerationRequest(generationRequestParams);
-      } else {
-        logger.debug('Using normal conversation flow');
-        await handleUserMessage(generationRequestParams);
-      }
+      });
     } catch (error) {
       return handleError(error, reply, 'conversation');
     }

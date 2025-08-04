@@ -14,9 +14,9 @@ import {
   updateChatName,
 } from '../../../src/app/ai/chat/ai-chat.service';
 
-const handleUserMessageMock = jest.fn();
-jest.mock('../../../src/app/ai/chat/user-message-handler', () => ({
-  handleUserMessage: handleUserMessageMock,
+const routeChatRequestMock = jest.fn();
+jest.mock('../../../src/app/ai/chat/chat-request-router', () => ({
+  routeChatRequest: routeChatRequestMock,
 }));
 
 jest.mock('@openops/server-shared', () => ({
@@ -196,7 +196,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
         mockReply as unknown as FastifyReply,
       );
 
-      expect(handleUserMessageMock).toHaveBeenCalledWith(
+      expect(routeChatRequestMock).toHaveBeenCalledWith(
         expect.objectContaining({
           newMessage: {
             role: 'user',
@@ -251,7 +251,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
         mockReply as unknown as FastifyReply,
       );
 
-      expect(handleUserMessageMock).toHaveBeenCalledWith(
+      expect(routeChatRequestMock).toHaveBeenCalledWith(
         expect.objectContaining({
           newMessage: { role: 'user', content: 'latest message' },
         }),
@@ -273,7 +273,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
         mockReply as unknown as FastifyReply,
       );
 
-      expect(handleUserMessageMock).toHaveBeenCalledWith(
+      expect(routeChatRequestMock).toHaveBeenCalledWith(
         expect.objectContaining({
           newMessage: { role: 'user', content: 'fallback message' },
         }),
@@ -296,7 +296,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
         mockReply as unknown as FastifyReply,
       );
 
-      if (handleUserMessageMock.mock.calls.length === 0) {
+      if (routeChatRequestMock.mock.calls.length === 0) {
         expect(mockReply.code).toHaveBeenCalledWith(400);
         expect(mockReply.send).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -305,7 +305,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           }),
         );
       } else {
-        expect(handleUserMessageMock).toHaveBeenCalledWith(
+        expect(routeChatRequestMock).toHaveBeenCalledWith(
           expect.objectContaining({
             newMessage: { role: 'user', content: 'latest message' },
           }),
@@ -353,7 +353,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
         mockReply as unknown as FastifyReply,
       );
 
-      expect(handleUserMessageMock).toHaveBeenCalledWith(
+      expect(routeChatRequestMock).toHaveBeenCalledWith(
         expect.objectContaining({
           newMessage: { role: 'user', content: 'test message' },
         }),
