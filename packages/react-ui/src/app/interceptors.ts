@@ -40,8 +40,10 @@ axios.interceptors.response.use(
       error.response.status === HttpStatusCode.Unauthorized
     ) {
       const axiosError = error as AxiosError;
+      const url = axiosError.request.responseURL;
+      const isSignInRoute = url && url.includes('/v1/authentication/sign-in');
 
-      if (axiosError.request.responseURL !== OPENOPS_CLOUD_USER_INFO_API_URL) {
+      if (url !== OPENOPS_CLOUD_USER_INFO_API_URL && !isSignInRoute) {
         console.warn('JWT expired logging out');
         authenticationSession.logOut({
           userInitiated: false,
