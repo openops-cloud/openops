@@ -1,5 +1,6 @@
 import { action } from '@storybook/addon-actions';
 import type { Meta, StoryObj } from '@storybook/react';
+import { ThemeAwareContainer } from '../../../.storybook/decorators';
 import { JsonViewer } from '../../components/json-viewer/json-viewer';
 
 /**
@@ -28,6 +29,13 @@ const meta = {
     title: 'User Information',
     readonly: true,
     theme: 'light',
+  },
+  render: (args) => {
+    return (
+      <div style={{ height: '200px', width: '400px' }}>
+        <ThemeAwareContainer {...args} component={JsonViewer} />
+      </div>
+    );
   },
 } satisfies Meta<typeof JsonViewer>;
 

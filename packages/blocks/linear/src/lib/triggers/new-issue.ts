@@ -65,7 +65,7 @@ export const linearNewIssue = createTrigger({
   async onEnable(context) {
     const client = makeClient(context.auth);
     const webhook = await client.createWebhook({
-      label: 'ActiveBlocks New Issue',
+      label: 'OpenOps New Issue',
       url: context.webhookUrl,
       teamId: context.propsValue['team_id'],
       resourceTypes: ['Issue'],

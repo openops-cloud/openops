@@ -12,7 +12,7 @@ export type MCPTool = {
   toolSet: ToolSet;
 };
 
-export const getMCPTools = async (
+export const startMCPTools = async (
   app: FastifyInstance,
   authToken: string,
   projectId: string,

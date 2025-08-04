@@ -3,6 +3,7 @@ import {
   Action,
   ActionType,
   FlowRunStatus,
+  isEmpty,
   isNil,
   isString,
   LoopOnItemsAction,
@@ -11,6 +12,7 @@ import {
 } from '@openops/shared';
 import cloneDeep from 'lodash.clonedeep';
 import { nanoid } from 'nanoid';
+import { isSizeValidationError } from '../helper/size-validation';
 import { createContextStore } from '../services/storage.service';
 import { BaseExecutor } from './base-executor';
 import { EngineConstants } from './context/engine-constants';
@@ -136,6 +138,10 @@ export const loopExecutor: BaseExecutor<LoopOnItemsAction> = {
 };
 
 function processItems(items: readonly unknown[]): readonly unknown[] {
+  if (isEmpty(items)) {
+    return [];
+  }
+
   if (isString(items)) {
     items = JSON.parse(items);
   }
@@ -174,7 +180,6 @@ async function triggerLoopIterations(
       stepOutput = stepOutput.addIteration();
     }
 
-    // Generate new pauseId for each iteration
     const newId = nanoid();
     loopExecutionState = loopExecutionState
       .upsertStep(action.name, stepOutput)
@@ -188,10 +193,18 @@ async function triggerLoopIterations(
     });
 
     loopIterations[i] = cloneDeep(loopExecutionState);
+
     loopExecutionState = loopExecutionState
       .setVerdict(ExecutionVerdict.RUNNING)
       .setCurrentPath(loopExecutionState.currentPath.removeLast())
       .setPauseId(originalPauseId);
+
+    if (
+      loopIterations[i].verdict === ExecutionVerdict.FAILED &&
+      isSizeValidationError(loopIterations[i].error?.message)
+    ) {
+      break;
+    }
   }
 
   loopExecutionContext.executionState = loopExecutionState;

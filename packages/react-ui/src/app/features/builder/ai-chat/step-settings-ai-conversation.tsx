@@ -1,6 +1,5 @@
 import { useTheme } from '@/app/common/providers/theme-provider';
 import { UseChatHelpers } from '@ai-sdk/react';
-import { UIMessage } from '@ai-sdk/ui-utils';
 import {
   AIChatMessage,
   AIChatMessageRole,
@@ -8,20 +7,23 @@ import {
   ChatStatus,
   LoadingSpinner,
   MarkdownCodeVariations,
-  tryParseJson,
 } from '@openops/components/ui';
-import { CodeSchema, OpenChatResponse, SourceCode } from '@openops/shared';
+import { SourceCode } from '@openops/shared';
 import { useCallback, useMemo } from 'react';
 import { useBuilderStateContext } from '../builder-hooks';
+import {
+  MessageType,
+  createCodeMessage,
+  createMessage,
+  extractCodeFromContent,
+  isCodeMessage,
+} from './conversation-utils';
 
 type ConversationProps = {
   isPending: boolean;
   lastUserMessageRef: React.RefObject<HTMLDivElement>;
   lastAssistantMessageRef: React.RefObject<HTMLDivElement>;
 } & Pick<UseChatHelpers, 'messages' | 'status'>;
-
-type ServerMessage = NonNullable<OpenChatResponse['messages']>[number];
-type MessageType = ServerMessage | UIMessage;
 
 const StepSettingsAiConversation = ({
   messages,
@@ -46,19 +48,9 @@ const StepSettingsAiConversation = ({
         message.role.toLowerCase() === AIChatMessageRole.assistant &&
         isCodeMessage(message)
       ) {
-        const codeSchema = message.annotations?.find(
-          (annotation: any): annotation is CodeSchema =>
-            annotation.type === 'code',
-        );
-
-        if (codeSchema) {
-          return createCodeMessage(message, idx, codeSchema);
-        }
-
-        // when loading data from the history it's serialized as string
-        const parsed = tryParseJson(message.content) as CodeSchema;
-        if (parsed?.type === 'code') {
-          return createCodeMessage(message, idx, parsed);
+        const codeFromContent = extractCodeFromContent(message);
+        if (codeFromContent) {
+          return createCodeMessage(message, idx, codeFromContent);
         }
       }
       return createMessage(message, idx);
@@ -84,68 +76,6 @@ const StepSettingsAiConversation = ({
       ) && <LoadingSpinner />}
     </div>
   );
-};
-
-const isCodeMessage = (
-  message: MessageType,
-): message is UIMessage & { annotations: CodeSchema[] } =>
-  ('annotations' in message &&
-    !!message?.annotations?.length &&
-    message.annotations?.some(
-      (annotation) =>
-        annotation &&
-        typeof annotation === 'object' &&
-        'type' in annotation &&
-        annotation?.type === 'code',
-    )) ||
-  (typeof message.content === 'string' &&
-    (tryParseJson(message.content) as CodeSchema)?.type === 'code');
-
-const getMessageId = (message: MessageType, idx: number): string => {
-  return message && 'id' in message ? message.id : String(idx);
-};
-
-const createCodeMessage = (
-  message: MessageType,
-  idx: number,
-  parsed: CodeSchema,
-): AIChatMessage => {
-  if (parsed.type !== 'code') {
-    return createMessage(message, idx);
-  }
-
-  return {
-    id: getMessageId(message, idx),
-    role: AIChatMessageRole.assistant,
-    content: {
-      parts: [
-        {
-          type: 'sourcecode',
-          content: {
-            code: parsed.code,
-            packageJson: parsed.packageJson,
-          },
-        },
-        {
-          type: 'text',
-          content: parsed.textAnswer,
-        },
-      ],
-    },
-  };
-};
-
-const createMessage = (message: MessageType, idx: number): AIChatMessage => {
-  return {
-    id: getMessageId(message, idx),
-    role:
-      message.role.toLowerCase() === 'user'
-        ? AIChatMessageRole.user
-        : AIChatMessageRole.assistant,
-    content: Array.isArray(message.content)
-      ? message.content.map((c) => c.text).join()
-      : message.content,
-  };
 };
 
 StepSettingsAiConversation.displayName = 'StepSettingsAiConversation';

@@ -6,7 +6,7 @@ import {
   useIsMarkdownCodeBlock,
 } from '@assistant-ui/react-markdown';
 import { t } from 'i18next';
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback } from 'react';
 import remarkGfm from 'remark-gfm';
 import { Theme } from '../../../lib/theme';
 import { CodeActions } from '../../code-actions';
@@ -17,92 +17,90 @@ import { cn } from '../../../lib/cn';
 import { MarkdownCodeViewer } from '../../custom/markdown-code-viewer';
 import { TooltipCopyButton } from '../tooltip-copy-button';
 
-const CodeComponent = memo(
-  ({
-    className,
-    children,
-    theme,
-    codeVariation,
-    onInjectCode,
-    status,
-    ...props
-  }: {
-    className?: string;
-    children?: React.ReactNode;
-    theme: Theme;
-    codeVariation: CodeVariations;
-    onInjectCode: (codeContent: string) => void;
-    status?: { type: string; reason?: string };
-    [key: string]: any;
-  }) => {
-    const isCodeBlock = useIsMarkdownCodeBlock();
-    const isStreaming = status?.type === 'running';
+const CodeComponent = ({
+  className,
+  children,
+  theme,
+  codeVariation,
+  onInjectCode,
+  status,
+  ...props
+}: {
+  className?: string;
+  children?: React.ReactNode;
+  theme: Theme;
+  codeVariation: CodeVariations;
+  onInjectCode: (codeContent: string) => void;
+  status?: { type: string; reason?: string };
+  [key: string]: any;
+}) => {
+  const isCodeBlock = useIsMarkdownCodeBlock();
+  const isStreaming = status?.type === 'running';
 
-    if (!isCodeBlock) {
-      return (
-        <code
-          className={cn('bg-muted rounded border font-semibold', className)}
-          {...props}
-        >
-          {children}
-        </code>
-      );
-    }
-
-    if (!children) {
-      return null;
-    }
-
-    const codeContent = String(children).trim();
-    const multilineVariation =
-      codeVariation === MarkdownCodeVariations.WithCopyAndInject ||
-      codeVariation === MarkdownCodeVariations.WithCopyMultiline;
-
+  if (!isCodeBlock) {
     return (
-      <div className="relative py-2 w-full flex flex-col">
-        {isStreaming ? (
-          // During streaming: Use simple pre-formatted text to avoid CodeMirror re-renders
-          <pre
-            className={cn(
-              'border border-solid rounded bg-background p-3 text-sm overflow-x-auto',
-              'font-mono whitespace-pre-wrap break-words',
-              'min-h-[120px]', // Reserve minimum space to prevent layout shift
-            )}
-          >
-            <code className={className}>{codeContent}</code>
-          </pre>
-        ) : (
-          <MarkdownCodeViewer
-            content={codeContent}
-            theme={theme}
-            className={className}
-          />
-        )}
-        {!isStreaming && codeVariation === MarkdownCodeVariations.WithCopy && (
-          <TooltipCopyButton
-            content={codeContent}
-            tooltip={t('Copy')}
-            className="self-end"
-          />
-        )}
-        {!isStreaming && multilineVariation && (
-          <CodeActions
-            content={codeContent}
-            onInject={
-              codeVariation === MarkdownCodeVariations.WithCopyAndInject
-                ? () => onInjectCode(codeContent)
-                : undefined
-            }
-            injectButtonText={t('Inject command')}
-            showInjectButton={
-              codeVariation === MarkdownCodeVariations.WithCopyAndInject
-            }
-          />
-        )}
-      </div>
+      <code
+        className={cn('bg-muted rounded border font-semibold', className)}
+        {...props}
+      >
+        {children}
+      </code>
     );
-  },
-);
+  }
+
+  if (!children) {
+    return null;
+  }
+
+  const codeContent = String(children).trim();
+  const multilineVariation =
+    codeVariation === MarkdownCodeVariations.WithCopyAndInject ||
+    codeVariation === MarkdownCodeVariations.WithCopyMultiline;
+
+  return (
+    <div className="relative py-2 w-full flex flex-col">
+      {isStreaming ? (
+        // During streaming: Use simple pre-formatted text to avoid CodeMirror re-renders
+        <pre
+          className={cn(
+            'border border-solid rounded bg-background p-3 text-sm overflow-x-auto',
+            'font-mono whitespace-pre-wrap break-words',
+            'min-h-[120px]', // Reserve minimum space to prevent layout shift
+          )}
+        >
+          <code className={className}>{codeContent}</code>
+        </pre>
+      ) : (
+        <MarkdownCodeViewer
+          content={codeContent}
+          theme={theme}
+          className={className}
+        />
+      )}
+      {!isStreaming && codeVariation === MarkdownCodeVariations.WithCopy && (
+        <TooltipCopyButton
+          content={codeContent}
+          tooltip={t('Copy')}
+          className="self-end"
+        />
+      )}
+      {!isStreaming && multilineVariation && (
+        <CodeActions
+          content={codeContent}
+          onInject={
+            codeVariation === MarkdownCodeVariations.WithCopyAndInject
+              ? () => onInjectCode(codeContent)
+              : undefined
+          }
+          injectButtonText={t('Inject command')}
+          showInjectButton={
+            codeVariation === MarkdownCodeVariations.WithCopyAndInject
+          }
+        />
+      )}
+    </div>
+  );
+};
 CodeComponent.displayName = 'CodeComponent';
 
 type MarkdownTextProps = {
@@ -133,9 +131,9 @@ const MarkdownTextImpl = ({
     [handleInject],
   );
 
-  const memoizedComponents = useMemo(() => {
-    return memoizeMarkdownComponents({
-      code: (props: any) => (
+  const CodeComponentWithStatus = useCallback(
+    (props: any) => {
+      return (
         <CodeComponent
           {...props}
           theme={theme}
@@ -143,28 +141,28 @@ const MarkdownTextImpl = ({
           onInjectCode={onInjectCode}
           status={status}
         />
-      ),
+      );
+    },
+    [theme, codeVariation, onInjectCode, status],
+  );
+
+  const components = {
+    code: CodeComponentWithStatus,
+    ...memoizeMarkdownComponents({
       ...createMarkdownComponents({
         textClassName,
         listClassName,
         linkClassName,
       }),
-    });
-  }, [
-    theme,
-    codeVariation,
-    onInjectCode,
-    textClassName,
-    listClassName,
-    linkClassName,
-    status,
-  ]);
+    }),
+  };
 
   return (
     <MarkdownTextPrimitive
+      key={status?.type}
       remarkPlugins={[remarkGfm]}
       className="aui-md"
-      components={memoizedComponents}
+      components={components}
     />
   );
 };

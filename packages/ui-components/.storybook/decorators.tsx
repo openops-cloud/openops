@@ -105,7 +105,7 @@ export const ThemeAwareContainer = ({
   }, []);
 
   return (
-    <div ref={containerRef}>
+    <div ref={containerRef} className="h-full">
       <Component {...props} theme={theme} />
     </div>
   );

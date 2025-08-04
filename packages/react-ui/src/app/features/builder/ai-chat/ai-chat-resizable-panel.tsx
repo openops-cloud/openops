@@ -20,7 +20,7 @@ const AiChatResizablePanelContent = ({
   if (!showChat) return null;
 
   return (
-    <div className="w-full h-full flex pl-2 bg-secondary ">
+    <div className="w-full h-full flex bg-secondary">
       <AssistantUiChat onClose={onCloseButtonClick} title={t('AI Assistant')} />
     </div>
   );
@@ -49,11 +49,7 @@ const AiChatResizablePanel = ({
 
   const resizablePanelRef = useRef<ImperativePanelHandle | null>(null);
 
-  const [hasMounted, setHasMounted] = useState(false);
-
-  useEffect(() => {
-    setHasMounted(true);
-  }, []);
+  const [showChatDelayed, setShowChatDelayed] = useState(false);
 
   const { getPanelSize } = useResizablePanelGroup();
 
@@ -70,6 +66,13 @@ const AiChatResizablePanel = ({
     isLoading,
     showChatInResizablePanel,
   ]);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setShowChatDelayed(showChat);
+    }, 300);
+    return () => clearTimeout(timeoutId);
+  }, [showChat]);
 
   const getDefaultPanelSize = useCallback(() => {
     if (!showChat) return 0;
@@ -93,11 +96,10 @@ const AiChatResizablePanel = ({
         ref={resizablePanelRef}
         order={2}
         id={RESIZABLE_PANEL_IDS.AI_CHAT}
-        className={cn('duration-0 min-w-0 shadow-sidebar', {
-          'min-w-[350px]': showChat,
-          'transition-all duration-200 ease-in-out':
-            !isDraggingHandle && hasMounted,
+        className={cn('duration-0 min-w-0 shadow-sidebar z-20', {
+          'min-w-[300px]': showChat && showChatDelayed,
         })}
+        minSize={15}
         collapsible={true}
         defaultSize={getDefaultPanelSize()}
       >
@@ -107,9 +109,7 @@ const AiChatResizablePanel = ({
         />
       </ResizablePanel>
       <ResizableHandle
-        className={cn('w-0', {
-          'w-2': showChat,
-        })}
+        className={cn('w-0')}
         onDragging={onDragging}
         disabled={!showChat}
       />
