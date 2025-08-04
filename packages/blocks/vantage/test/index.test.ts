@@ -1,9 +1,10 @@
 import { vantage } from '../src/index';
+import { vantageAuth } from '../src/lib/auth';
 
 describe('block declaration tests', () => {
   test('should return block with correct authentication', () => {
-    expect(vantage.auth).toMatchObject({
-      type: 'CUSTOM_AUTH',
+    expect(vantageAuth).toMatchObject({
+      type: 'SECRET_TEXT',
       required: true,
       authProviderKey: 'vantage',
       authProviderDisplayName: 'Vantage',
