@@ -87,10 +87,8 @@ export const storeEntryService = {
       let keyExpression = 'storeEntry.key';
 
       if (prefix) {
-        keyExpression = `REGEXP_REPLACE(storeEntry.key, '^${prefix.replace(
-          /[.*+?^${}()|[\]\\]/g,
-          '\\$&',
-        )}', '', 'g')`;
+        const escapedPrefix = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        keyExpression = `REGEXP_REPLACE(${keyExpression}, '^${escapedPrefix}', '', 'g')`;
       }
 
       if (isTestRun) {
@@ -102,9 +100,6 @@ export const storeEntryService = {
 
     const entries = await query.getMany();
 
-    return entries.map((entry) => ({
-      key: entry.key,
-      value: entry.value,
-    }));
+    return entries.map(({ key, value }) => ({ key, value }));
   },
 };
