@@ -11,6 +11,7 @@ import {
 } from 'ai';
 import { FastifyInstance } from 'fastify';
 import { sendAiChatFailureEvent } from '../../telemetry/event-models';
+import { addUiToolResults } from '../mcp/tool-utils';
 import { getMCPToolsContext } from '../mcp/tools-context-builder';
 import { AssistantUITools } from '../mcp/types';
 import { saveChatHistory } from './ai-chat.service';
@@ -94,7 +95,7 @@ export async function handleUserMessage(
 
     await saveChatHistory(chatId, userId, projectId, [
       ...chatHistory,
-      ...newMessages,
+      ...addUiToolResults(newMessages),
     ]);
   } finally {
     await closeMCPClients(mcpClients);
