@@ -72,6 +72,7 @@ export const NewMessageRequest = Type.Object({
     ),
   ),
   additionalContext: Type.Optional(ChatFlowContext),
+  tools: Type.Optional(Type.Record(Type.String(), Type.Any())),
 });
 
 export type NewMessageRequest = Static<typeof NewMessageRequest>;

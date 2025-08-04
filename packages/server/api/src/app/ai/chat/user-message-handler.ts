@@ -12,6 +12,7 @@ import {
 import { FastifyInstance } from 'fastify';
 import { sendAiChatFailureEvent } from '../../telemetry/event-models';
 import { getMCPToolsContext } from '../mcp/tools-context-builder';
+import { AssistantUITools } from '../mcp/types';
 import { saveChatHistory } from './ai-chat.service';
 import { generateMessageId } from './ai-id-generators';
 import { getLLMAsyncStream } from './llm-stream-handler';
@@ -30,6 +31,8 @@ type UserMessageParams = RequestContext &
   ChatProcessingContext & {
     authToken: string;
     app: FastifyInstance;
+  } & {
+    frontendTools: AssistantUITools;
   };
 
 type ModelConfig = {
@@ -58,6 +61,7 @@ export async function handleUserMessage(
     languageModel,
     serverResponse,
     conversation: { chatContext, chatHistory },
+    frontendTools,
   } = params;
 
   serverResponse.write(buildMessageIdMessage(generateMessageId()));
@@ -72,6 +76,7 @@ export async function handleUserMessage(
     chatHistory,
     chatContext,
     languageModel,
+    frontendTools,
   );
 
   try {

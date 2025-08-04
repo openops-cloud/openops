@@ -1,13 +1,16 @@
 import { AiConfig } from '@openops/shared';
 import { CoreMessage, LanguageModelV1, ToolSet } from 'ai';
 import { FastifyInstance } from 'fastify';
+import { JSONSchema7 } from 'json-schema';
 import { MCPChatContext } from '../chat/ai-chat.service';
 import {
   getBlockSystemPrompt,
   getMcpSystemPrompt,
 } from '../chat/prompts.service';
+import { formatFrontendTools } from './tool-utils';
 import { startMCPTools } from './tools-initializer';
 import { selectRelevantTools } from './tools-selector';
+import { AssistantUITools } from './types';
 
 export type MCPToolsContext = {
   mcpClients: unknown[];
@@ -23,6 +26,7 @@ export async function getMCPToolsContext(
   messages: CoreMessage[],
   chatContext: MCPChatContext,
   languageModel: LanguageModelV1,
+  frontendTools: AssistantUITools,
 ): Promise<MCPToolsContext> {
   if (
     !chatContext.actionName ||
@@ -36,9 +40,14 @@ export async function getMCPToolsContext(
       projectId,
     );
 
+    const allTools = {
+      ...tools,
+      ...formatFrontendTools(frontendTools),
+    };
+
     const filteredTools = await selectRelevantTools({
       messages,
-      tools,
+      tools: allTools,
       languageModel,
       aiConfig,
     });
