@@ -21,6 +21,5 @@ jobs:
       - name: Trigger sync
         env:
           GITHUB_TOKEN: ${{ steps.app_token.outputs.token }}
-          SHA: ${{ github.sha }}
         run: |
           gh workflow run deploy -f ref=${{ github.sha }} -R openops-cloud/openops-internal
