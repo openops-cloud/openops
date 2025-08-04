@@ -1,7 +1,6 @@
 import { AiConfig } from '@openops/shared';
 import { CoreMessage, LanguageModelV1, ToolSet } from 'ai';
 import { FastifyInstance } from 'fastify';
-import { JSONSchema7 } from 'json-schema';
 import { MCPChatContext } from '../chat/ai-chat.service';
 import {
   getBlockSystemPrompt,
@@ -12,22 +11,33 @@ import { startMCPTools } from './tools-initializer';
 import { selectRelevantTools } from './tools-selector';
 import { AssistantUITools } from './types';
 
+type MCPToolsContextParams = {
+  app: FastifyInstance;
+  projectId: string;
+  authToken: string;
+  aiConfig: AiConfig;
+  messages: CoreMessage[];
+  chatContext: MCPChatContext;
+  languageModel: LanguageModelV1;
+  frontendTools: AssistantUITools;
+};
+
 export type MCPToolsContext = {
   mcpClients: unknown[];
   systemPrompt: string;
   filteredTools?: ToolSet;
 };
 
-export async function getMCPToolsContext(
-  app: FastifyInstance,
-  projectId: string,
-  authToken: string,
-  aiConfig: AiConfig,
-  messages: CoreMessage[],
-  chatContext: MCPChatContext,
-  languageModel: LanguageModelV1,
-  frontendTools: AssistantUITools,
-): Promise<MCPToolsContext> {
+export async function getMCPToolsContext({
+  app,
+  projectId,
+  authToken,
+  aiConfig,
+  messages,
+  chatContext,
+  languageModel,
+  frontendTools,
+}: MCPToolsContextParams): Promise<MCPToolsContext> {
   if (
     !chatContext.actionName ||
     !chatContext.blockName ||

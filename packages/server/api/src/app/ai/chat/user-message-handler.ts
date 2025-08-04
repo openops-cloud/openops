@@ -69,16 +69,16 @@ export async function handleUserMessage(
 
   chatHistory.push(newMessage);
 
-  const { mcpClients, systemPrompt, filteredTools } = await getMCPToolsContext(
+  const { mcpClients, systemPrompt, filteredTools } = await getMCPToolsContext({
     app,
     projectId,
     authToken,
     aiConfig,
-    chatHistory,
+    messages: chatHistory,
     chatContext,
     languageModel,
     frontendTools,
-  );
+  });
 
   try {
     const newMessages = await streamLLMResponse({
