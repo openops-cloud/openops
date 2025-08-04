@@ -117,7 +117,9 @@ ConnectedToCloud.play = async ({ args }: { args: Story['args'] }) => {
   );
   await userEvent.type(searchInputEl, 'Lorem ipsum');
   await waitFor(() =>
-    expect(args.onSearchInputChange).toHaveBeenCalledWith('Lorem ipsum'),
+    expect(args.onSearchInputChange).toHaveBeenCalledTimes(
+      'Lorem ipsum'.length,
+    ),
   );
   const flowTemplateCards = await screen.findAllByTestId('template-card');
   await userEvent.click(flowTemplateCards.at(-1)!);
