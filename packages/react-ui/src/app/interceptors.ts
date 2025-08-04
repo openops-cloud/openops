@@ -49,6 +49,7 @@ axios.interceptors.response.use(
           isSignInRoute =
             parsedUrl.pathname === '/api/v1/authentication/sign-in';
         } catch (e) {
+          console.warn('Failed to parse URL in 401 interceptor:', url, e);
           isSignInRoute = false;
         }
       }
