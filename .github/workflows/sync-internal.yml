@@ -1,6 +1,4 @@
-name: Sync Internal
-
-run-name: Sync the internal repository
+name: Trigger sync
 
 on:
   workflow_run:
@@ -25,4 +23,4 @@ jobs:
           GITHUB_TOKEN: ${{ steps.app_token.outputs.token }}
           SHA: ${{ github.sha }}
         run: |
-          gh workflow run deploy -f revision=${SHA::8} -R openops-cloud/openops-internal
+          gh workflow run deploy -f ref=${{ github.sha }} -R openops-cloud/openops-internal
