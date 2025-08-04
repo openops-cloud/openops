@@ -12,7 +12,7 @@ import { FlowTemplateMetadataWithIntegrations } from './types';
 type FlowTemplateListProps = {
   templates: FlowTemplateMetadataWithIntegrations[] | undefined;
   isLoading: boolean;
-  searchInitialValue: string;
+  searchText: string;
   onTemplateSelect: (template: FlowTemplateMetadataWithIntegrations) => void;
   onSearchInputChange: (filter: string) => void;
   ownerLogoUrl: string;
@@ -23,7 +23,7 @@ type FlowTemplateListProps = {
 const FlowTemplateList = ({
   templates,
   isLoading,
-  searchInitialValue,
+  searchText,
   onTemplateSelect,
   onSearchInputChange,
   ownerLogoUrl,
@@ -46,9 +46,8 @@ const FlowTemplateList = ({
         {isFullCatalog && (
           <SearchInput
             placeholder={t('Search for template')}
-            initialValue={searchInitialValue}
+            value={searchText}
             onChange={onSearchInputChange}
-            debounceDelay={300}
             className="max-w-[327px] mr-8"
           />
         )}
