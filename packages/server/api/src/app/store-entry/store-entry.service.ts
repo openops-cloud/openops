@@ -68,33 +68,26 @@ export const storeEntryService = {
     projectId,
     prefix,
     filterRegex,
-    isTestRun,
   }: {
     projectId: ProjectId;
     prefix?: string;
     filterRegex?: string;
-    isTestRun?: boolean;
   }): Promise<Array<{ key: string; value: unknown }>> {
     const query = storeEntryRepo()
       .createQueryBuilder('storeEntry')
       .where('storeEntry.projectId = :projectId', { projectId });
 
+    let keyExpression = 'storeEntry.key';
+
     if (prefix) {
+      const escapedPrefix = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       query.andWhere('storeEntry.key LIKE :prefix', { prefix: `${prefix}%` });
+      if (filterRegex) {
+        keyExpression = `REGEXP_REPLACE(${keyExpression}, '^${escapedPrefix}', '', 'g')`;
+      }
     }
 
     if (filterRegex) {
-      let keyExpression = 'storeEntry.key';
-
-      if (prefix) {
-        const escapedPrefix = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        keyExpression = `REGEXP_REPLACE(${keyExpression}, '^${escapedPrefix}', '', 'g')`;
-      }
-
-      if (isTestRun) {
-        keyExpression = `REGEXP_REPLACE(${keyExpression}, '^run_test-run/', '', 'g')`;
-      }
-
       query.andWhere(`${keyExpression} ~ :filterRegex`, { filterRegex });
     }
 
