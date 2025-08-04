@@ -32,36 +32,21 @@ export const storageListAction = createAction({
     });
 
     const keyFilter = context.propsValue.keyFilter;
-    let filterRegex: RegExp | null = null;
 
     if (keyFilter && keyFilter.trim() !== '') {
       try {
-        filterRegex = new RegExp(keyFilter);
+        new RegExp(keyFilter);
       } catch (error) {
         throw new Error(`Invalid regex pattern: ${keyFilter}`);
       }
     }
 
-    const entries = await context.store.list(scope, keyPrefix);
-
-    if (filterRegex) {
-      return entries.filter((entry) => {
-        let keyName = entry.key;
-
-        if (
-          context.propsValue.store_scope === BlockStoreScope.RUN &&
-          keyPrefix
-        ) {
-          keyName = entry.key.replace(keyPrefix, '');
-        }
-
-        if (context.run.isTest) {
-          keyName = keyName.replace(/^run_test-run\//, '');
-        }
-
-        return filterRegex?.test(keyName);
-      });
-    }
+    const entries = await context.store.list(
+      scope,
+      keyPrefix,
+      keyFilter,
+      context.run.isTest,
+    );
 
     return entries;
   },

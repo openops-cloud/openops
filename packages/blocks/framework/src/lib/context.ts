@@ -191,6 +191,8 @@ export interface Store {
   list(
     scope: StoreScope,
     keyPrefix: string,
+    filterRegex?: string,
+    isTestRun?: boolean,
   ): Promise<Array<{ key: string; value: unknown }>>;
 }
 

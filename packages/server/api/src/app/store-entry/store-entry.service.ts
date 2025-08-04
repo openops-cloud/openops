@@ -67,17 +67,40 @@ export const storeEntryService = {
   async list({
     projectId,
     prefix,
+    filterRegex,
+    isTestRun,
   }: {
     projectId: ProjectId;
-    prefix: string;
+    prefix?: string;
+    filterRegex?: string;
+    isTestRun?: boolean;
   }): Promise<Array<{ key: string; value: unknown }>> {
-    const whereCondition = prefix
-      ? { projectId, key: Like(`${prefix}%`) }
-      : { projectId };
+    const query = storeEntryRepo()
+      .createQueryBuilder('storeEntry')
+      .where('storeEntry.projectId = :projectId', { projectId });
 
-    const entries = await storeEntryRepo().find({
-      where: whereCondition,
-    });
+    if (prefix) {
+      query.andWhere('storeEntry.key LIKE :prefix', { prefix: `${prefix}%` });
+    }
+
+    if (filterRegex) {
+      let keyExpression = 'storeEntry.key';
+
+      if (prefix) {
+        keyExpression = `REGEXP_REPLACE(storeEntry.key, '^${prefix.replace(
+          /[.*+?^${}()|[\]\\]/g,
+          '\\$&',
+        )}', '', 'g')`;
+      }
+
+      if (isTestRun) {
+        keyExpression = `REGEXP_REPLACE(${keyExpression}, '^run_test-run/', '', 'g')`;
+      }
+
+      query.andWhere(`${keyExpression} ~ :filterRegex`, { filterRegex });
+    }
+
+    const entries = await query.getMany();
 
     return entries.map((entry) => ({
       key: entry.key,

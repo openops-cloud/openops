@@ -57,6 +57,8 @@ export const storeEntryController: FastifyPluginAsyncTypebox = async (
     const entries = await storeEntryService.list({
       projectId: request.principal.projectId,
       prefix: request.query.prefix,
+      filterRegex: request.query.filterRegex,
+      isTestRun: request.query.isTestRun,
     });
 
     return { entries };
@@ -91,8 +93,10 @@ const ListRequest = {
   schema: {
     querystring: Type.Object({
       prefix: Type.String(),
+      filterRegex: Type.Optional(Type.String()),
+      isTestRun: Type.Optional(Type.Boolean()),
     }),
     description:
-      'List all keys in the store with a prefix filter. This endpoint returns all keys that start with the specified prefix.',
+      'List all keys in the store with a prefix filter and optional regex filtering. This endpoint returns all keys that start with the specified prefix and optionally match the regex pattern.',
   },
 };
