@@ -26,7 +26,7 @@ const maxRecursionDepth = system.getNumberOrThrow(
   AppSystemProp.MAX_LLM_CALLS_WITHOUT_INTERACTION,
 );
 
-export type UserMessageParams = RequestContext &
+type UserMessageParams = RequestContext &
   ChatProcessingContext & {
     authToken: string;
     app: FastifyInstance;

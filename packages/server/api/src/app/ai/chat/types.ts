@@ -22,7 +22,6 @@ export type RequestContext = {
   userId: string;
   chatId: string;
   projectId: string;
-
   serverResponse: ServerResponse;
 };
 
