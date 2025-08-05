@@ -1,10 +1,10 @@
-import { Theme } from '@/lib/theme';
 import { ToolCallMessagePartProps } from '@assistant-ui/react';
 import { t } from 'i18next';
 import {
   CodeEditor,
   getLanguageExtensionForCode,
 } from '../../../components/code-editor';
+import { Theme } from '../../../lib/theme';
 import { CodeActions } from '../../code-actions';
 import { useThreadExtraContext } from '../thread-extra-context';
 import { BaseToolWrapper } from '../tool-fallback';
