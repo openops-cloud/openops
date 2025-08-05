@@ -16,7 +16,7 @@ import {
   RefreshCwIcon,
   SendHorizontalIcon,
 } from 'lucide-react';
-import React, { FC, memo, useMemo } from 'react';
+import { FC, memo, useMemo } from 'react';
 import { cn } from '../../../lib/cn';
 import { Button } from '../../../ui/button';
 import {
@@ -26,6 +26,7 @@ import {
 
 import { t } from 'i18next';
 import { Theme } from '../../../lib/theme';
+import { GenerateCodeTool } from '../generate-code-tool/generate-code-tool';
 import { MarkdownText } from '../markdown-text';
 import { useThreadExtraContext } from '../thread-extra-context';
 import { ToolFallback } from '../tool-fallback';
@@ -79,7 +80,7 @@ export const Thread = ({
           <div className="min-h-8 flex-grow" />
         </ThreadPrimitive.If>
 
-        <div className="sticky bottom-0 mt-3 flex w-full max-w-[var(--thread-max-width)] flex-col items-center justify-end rounded-t-lg bg-inherit pb-4">
+        <div className="sticky bottom-0 mt-3 flex w-full max-w-[var(--thread-max-width)] flex-col items-center justify-end rounded-t-lg bg-inherit pb-4 z-20">
           <ThreadScrollToBottom />
           <Composer
             availableModels={availableModels}
@@ -230,7 +231,14 @@ const AssistantMessage: FC<{ theme: Theme }> = ({ theme }) => {
   const messageComponents = useMemo(
     () => ({
       Text: (props: any) => <MarkdownTextWrapper {...props} theme={theme} />,
-      tools: { Fallback: ToolFallback },
+      tools: {
+        Fallback: ToolFallback,
+        by_name: {
+          generate_code: (props: any) => (
+            <GenerateCodeTool {...props} theme={theme} />
+          ),
+        },
+      },
     }),
     [theme],
   );

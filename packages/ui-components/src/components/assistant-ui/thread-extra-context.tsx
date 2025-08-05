@@ -1,3 +1,4 @@
+import { SourceCode } from '@openops/shared';
 import { t } from 'i18next';
 import React, { createContext, ReactNode, useContext, useMemo } from 'react';
 import { CodeVariations } from '../custom';
@@ -5,7 +6,7 @@ import { CodeVariations } from '../custom';
 interface ThreadExtraContextProviderProps {
   greeting?: string;
   codeVariation?: CodeVariations;
-  handleInject?: (codeContent: string) => void;
+  handleInject?: (codeContent: string | SourceCode) => void;
   children: ReactNode;
 }
 
