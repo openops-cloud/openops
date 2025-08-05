@@ -22,4 +22,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.app_token.outputs.token }}
         run: |
-          gh workflow run sync -f ref=${{ github.sha }} -R openops-cloud/openops-internal
+          gh workflow run sync.yml -f ref=${{ github.sha }} -R openops-cloud/openops-internal
