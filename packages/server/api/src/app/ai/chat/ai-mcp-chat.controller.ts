@@ -29,10 +29,10 @@ import {
   saveChatHistory,
   updateChatName,
 } from './ai-chat.service';
+import { routeChatRequest } from './chat-request-router';
 import { streamCode } from './code.service';
 import { enrichContext, IncludeOptions } from './context-enrichment.service';
 import { getBlockSystemPrompt } from './prompts.service';
-import { handleUserMessage } from './user-message-handler';
 
 const DEFAULT_CHAT_NAME = 'New Chat';
 
@@ -121,12 +121,6 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
   );
 
   app.post('/', NewMessageOptions, async (request, reply) => {
-    const chatId = request.body.chatId;
-    const userId = request.principal.id;
-    const projectId = request.principal.projectId;
-    const authToken =
-      request.headers.authorization?.replace('Bearer ', '') ?? '';
-
     try {
       const messageContent = await getUserMessage(request.body, reply);
       if (messageContent === null) {
@@ -138,12 +132,9 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         content: messageContent,
       };
 
-      await handleUserMessage({
+      await routeChatRequest({
         app,
-        chatId,
-        userId,
-        projectId,
-        authToken,
+        request,
         newMessage,
         serverResponse: reply.raw,
       });

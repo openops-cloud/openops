@@ -33,7 +33,7 @@ jest.mock('../../../src/app/ai/chat/ai-chat.service', () => ({
   saveChatHistory: jest.fn().mockResolvedValue(undefined),
 }));
 
-jest.mock('../../../src/app/ai/chat/ai-message-id-generator', () => ({
+jest.mock('../../../src/app/ai/chat/ai-id-generators', () => ({
   generateMessageId: jest.fn().mockReturnValue('test-message-id'),
 }));
 
@@ -50,15 +50,12 @@ describe('User Message Handler', () => {
   const { getMCPToolsContext } = jest.requireMock(
     '../../../src/app/ai/mcp/tools-context-builder',
   );
-  const { getLLMConfig, getConversation, saveChatHistory } = jest.requireMock(
+  const { getLLMConfig, saveChatHistory } = jest.requireMock(
     '../../../src/app/ai/chat/ai-chat.service',
   );
 
   const { getLLMAsyncStream } = jest.requireMock(
     '../../../src/app/ai/chat/llm-stream-handler',
-  );
-  const { sendAiChatMessageSendEvent } = jest.requireMock(
-    '../../../src/app/telemetry/event-models',
   );
 
   const mockServerResponse = {
@@ -103,6 +100,12 @@ describe('User Message Handler', () => {
     authToken: 'test-auth-token',
     newMessage: mockNewMessage,
     serverResponse: mockServerResponse,
+    aiConfig: mockAiConfig,
+    languageModel: mockLanguageModel,
+    conversation: {
+      chatContext: { chatId: 'test-chat-id' },
+      chatHistory: [...mockChatHistory],
+    },
   };
 
   beforeEach(() => {
@@ -112,11 +115,6 @@ describe('User Message Handler', () => {
     getLLMConfig.mockResolvedValue({
       aiConfig: mockAiConfig,
       languageModel: mockLanguageModel,
-    });
-
-    getConversation.mockResolvedValue({
-      chatContext: { chatId: 'test-chat-id' },
-      chatHistory: [...mockChatHistory],
     });
 
     getLLMAsyncStream.mockImplementation(
@@ -153,13 +151,6 @@ describe('User Message Handler', () => {
       expect(mockServerResponse.write).toHaveBeenCalledWith(
         expect.stringContaining('f:{"messageId":"test-message-id"}'),
       );
-
-      expect(sendAiChatMessageSendEvent).toHaveBeenCalledWith({
-        projectId: 'test-project-id',
-        userId: 'test-user-id',
-        chatId: 'test-chat-id',
-        provider: AiProviderEnum.ANTHROPIC,
-      });
 
       expect(saveChatHistory).toHaveBeenCalledWith(
         'test-chat-id',

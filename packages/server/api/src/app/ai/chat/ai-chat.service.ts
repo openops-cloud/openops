@@ -9,7 +9,7 @@ import { AiConfig, ApplicationError, ErrorCode } from '@openops/shared';
 import { CoreMessage, LanguageModel, generateText } from 'ai';
 import { aiConfigService } from '../config/ai-config.service';
 import { loadPrompt } from './prompts.service';
-import { MessageWithMergedToolResults } from './types';
+import { Conversation, MessageWithMergedToolResults } from './types';
 import { mergeToolResultsIntoMessages } from './utils';
 
 // Chat expiration time is 24 hour
@@ -253,7 +253,7 @@ export async function getConversation(
   chatId: string,
   userId: string,
   projectId: string,
-): Promise<{ chatContext: MCPChatContext; chatHistory: CoreMessage[] }> {
+): Promise<Conversation> {
   const chatContext = await getChatContext(chatId, userId, projectId);
   if (!chatContext) {
     throw new ApplicationError({
