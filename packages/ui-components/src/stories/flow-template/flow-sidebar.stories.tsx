@@ -29,6 +29,7 @@ const meta = {
     selectedCategories: [],
     onDomainFilterClick: fn(),
     onServiceFilterClick: fn(),
+    onCategoryFilterClick: fn(),
     clearFilters: fn(),
   },
   parameters: {
@@ -70,5 +71,11 @@ export const Default: Story = {
 export const WithSelectedCategory: Story = {
   args: {
     selectedCategories: ['AWS'],
+  },
+  play: async ({ canvasElement, args: { onCategoryFilterClick } }) => {
+    const canvas = selectLightOrDarkCanvas(canvasElement);
+    const awsCategory = canvas.getByText('AWS');
+    await userEvent.click(awsCategory);
+    expect(onCategoryFilterClick).toHaveBeenCalledWith('AWS');
   },
 };

@@ -1,6 +1,6 @@
 import { httpClient, HttpMethod } from '@openops/blocks-common';
 import qs from 'qs';
-import { cloudfixAuth, CloudfixAuth } from './auth';
+import { CloudfixAuth } from './auth';
 
 export async function makeRequest({
   auth,
