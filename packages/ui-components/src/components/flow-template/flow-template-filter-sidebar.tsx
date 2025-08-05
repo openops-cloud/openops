@@ -76,9 +76,11 @@ type FlowTemplateFilterSidebarProps = {
   domains: string[];
   categories: TemplateSidebarCategory[];
   blocks?: BlockMetadataModelSummary[];
+  selectedBlocks: string[];
   selectedDomains: string[];
   selectedServices: string[];
   selectedCategories: string[];
+  onBlockFilterClick: (block: string) => void;
   onDomainFilterClick: (domain: string) => void;
   onServiceFilterClick: (service: string) => void;
   onCategoryFilterClick: (category: string) => void;
@@ -89,11 +91,13 @@ const FlowTemplateFilterSidebar = ({
   blocks,
   domains,
   categories,
+  selectedBlocks,
   selectedDomains,
   selectedServices,
   selectedCategories,
   onDomainFilterClick,
   onServiceFilterClick,
+  onBlockFilterClick,
   onCategoryFilterClick,
   clearFilters,
 }: FlowTemplateFilterSidebarProps) => {
@@ -157,11 +161,11 @@ const FlowTemplateFilterSidebar = ({
             <div className="flex flex-col w-full">
               {blocks.map((block) => (
                 <FlowTemplateFilterItem
-                  key={block.name}
-                  value={block.displayName}
+                  key={block.id}
+                  value={block.name}
                   displayName={block.displayName}
-                  onClick={onServiceFilterClick}
-                  isActive={selectedServices.includes(block.displayName)}
+                  onClick={onBlockFilterClick}
+                  isActive={selectedBlocks.includes(block.name)}
                   logoUrl={block.logoUrl}
                 />
               ))}
