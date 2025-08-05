@@ -18,7 +18,7 @@ Connecting to the Archera API
 export const archeraAuth = BlockAuth.CustomAuth({
   authProviderKey: 'Archera',
   authProviderDisplayName: 'Archera',
-  authProviderLogoUrl: `https://static.openops.com/blocks/archera.jpeg`,
+  authProviderLogoUrl: `https://static.openops.com/blocks/archera.svg`,
   description: markdown,
   required: true,
   props: {
