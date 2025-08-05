@@ -1,0 +1,25 @@
+name: Trigger sync
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success' && github.repository == 'openops-cloud/openops'
+    steps:
+      - name: Get token from Github App
+        id: app_token
+        uses: actions/create-github-app-token@v2.0.6
+        with:
+          app-id: ${{ vars.DEVOPS_GITHUB_APP_ID }}
+          private-key: ${{ secrets.DEVOPS_GITHUB_APP_PEM }}
+          owner: ${{ github.repository_owner }}
+      - name: Trigger sync
+        env:
+          GITHUB_TOKEN: ${{ steps.app_token.outputs.token }}
+        run: |
+          gh workflow run deploy -f ref=${{ github.sha }} -R openops-cloud/openops-internal
