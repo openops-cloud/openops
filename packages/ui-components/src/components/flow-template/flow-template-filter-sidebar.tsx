@@ -161,7 +161,7 @@ const FlowTemplateFilterSidebar = ({
             <div className="flex flex-col w-full">
               {blocks.map((block) => (
                 <FlowTemplateFilterItem
-                  key={block.id}
+                  key={block.name}
                   value={block.name}
                   displayName={block.displayName}
                   onClick={onBlockFilterClick}
