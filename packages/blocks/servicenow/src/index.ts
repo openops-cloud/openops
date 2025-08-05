@@ -25,7 +25,7 @@ export const servicenow = createBlock({
       authMapping: async (context: any) => {
         return generateAuthHeader({
           username: context.auth.username,
-          password: context.auth.username,
+          password: context.auth.password,
         });
       },
     }),
