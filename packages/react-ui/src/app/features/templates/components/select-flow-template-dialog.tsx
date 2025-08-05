@@ -129,7 +129,7 @@ const FlowTemplateFilterSidebarWrapper = ({
   });
 
   const blocksWithTemplates = blocks?.filter((block) =>
-    templateBlockNames?.includes(block.displayName),
+    templateBlockNames?.includes(block.name),
   );
 
   if (isTemplateFiltersLoading || isBlocksLoading || status === 'pending') {
