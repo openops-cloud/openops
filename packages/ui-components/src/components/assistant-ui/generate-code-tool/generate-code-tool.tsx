@@ -35,7 +35,7 @@ const GenerateCodeTool = ({ result, status, theme }: GenerateCodeToolProps) => {
     return (
       <Skeleton className="w-full h-[150px]">
         <div className="flex items-center justify-center h-full">
-          {t('Generating...')}
+          {t('Generating ...')}
         </div>
       </Skeleton>
     );
