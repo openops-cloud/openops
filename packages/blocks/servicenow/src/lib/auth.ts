@@ -37,13 +37,12 @@ export const servicenowAuth = BlockAuth.CustomAuth({
     try {
       await httpClient.sendRequest({
         method: HttpMethod.GET,
-        url: `https://${instanceName}.service-now.com/api/now/table/sys_user?sysparm_limit=1`,
+        url: `https://${instanceName}.service-now.com/api/now/ui/user/current_user`,
         headers: {
           ...generateAuthHeader({ username, password }),
           Accept: 'application/json',
         },
       });
-
       return { valid: true };
     } catch {
       return {
