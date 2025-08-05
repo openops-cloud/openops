@@ -33,7 +33,6 @@ export const storageListAction = createAction({
 
     let keyFilter = context.propsValue.keyFilter;
 
-    // Convert empty string to undefined
     if (!keyFilter || keyFilter.trim() === '') {
       keyFilter = undefined;
     }
