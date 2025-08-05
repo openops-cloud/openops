@@ -56,7 +56,7 @@ const FlowTemplateList = ({
       </div>
       {isFullCatalog && (
         <DialogDescription className="text-2xl font-medium text-primary-300 dark:text-primary">
-          {selectionHeading ?? t('All templates')}
+          {selectionHeading || t('All templates')}
         </DialogDescription>
       )}
 
