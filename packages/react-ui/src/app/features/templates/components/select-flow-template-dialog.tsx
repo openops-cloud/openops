@@ -287,10 +287,7 @@ const SelectFlowTemplateDialogContent = ({
   }
 
   const selectionHeading =
-    selectedCategories[0] ||
-    selectedDomains[0] ||
-    selectedServices[0] ||
-    t('All templates');
+    selectedCategories[0] || selectedDomains[0] || selectedServices[0];
 
   return (
     <>
