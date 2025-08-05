@@ -31,13 +31,9 @@ export const storageListAction = createAction({
       scope: context.propsValue.store_scope,
     });
 
-    let keyFilter = context.propsValue.keyFilter;
+    const keyFilter = context.propsValue.keyFilter;
 
-    if (!keyFilter || keyFilter.trim() === '') {
-      keyFilter = undefined;
-    }
-
-    if (keyFilter) {
+    if (keyFilter && keyFilter.trim() !== '') {
       try {
         new RegExp(keyFilter);
       } catch (error) {
