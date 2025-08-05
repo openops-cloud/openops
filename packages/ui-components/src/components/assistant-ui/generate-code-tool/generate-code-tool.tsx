@@ -67,9 +67,9 @@ const parseResult = (result: GenerateCodeResult): CodeResult => {
   }
 
   return !result.isError
-    ? (tryParseJson(result.content[0].text) as CodeResult)
+    ? (tryParseJson(result.content?.[0]?.text) as CodeResult)
     : {
-        code: 'Something error happened',
+        code: t('Something went wrong'),
         packageJson: '',
       };
 };
