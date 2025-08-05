@@ -9,7 +9,7 @@ import {
 } from '@assistant-ui/react-ai-sdk';
 import { toast } from '@openops/components/ui';
 import { flowHelper, FlowVersion, OpenChatResponse } from '@openops/shared';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { t } from 'i18next';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { aiChatApi } from '../../builder/ai-chat/lib/chat-api';
@@ -49,6 +49,8 @@ const buildQueryKey = (
 export const useAssistantChat = (props: UseAssistantChatProps) => {
   const { flowVersion, selectedStep, chatId, onChatIdChange } = props;
   const [shouldRenderChat, setShouldRenderChat] = useState(false);
+  const [pendingConversation, setPendingConversation] =
+    useState<OpenChatResponse | null>(null);
 
   const stepDetails =
     flowVersion && selectedStep
@@ -94,16 +96,14 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
       : true,
   });
 
-  const onConversationRetrieved = (conversation: OpenChatResponse) => {
-    if (conversation.chatId) {
-      onChatIdChange(conversation.chatId);
-      requestAnimationFrame(() => {
-        runtime.thread.reset(
-          (conversation.messages ?? []) as ThreadMessageLike[],
-        );
-      });
-    }
-  };
+  const onConversationRetrieved = useCallback(
+    (conversation: OpenChatResponse) => {
+      if (conversation.chatId) {
+        setPendingConversation(conversation);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     if (!isLoading && openChatResponse) {
@@ -133,12 +133,29 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
 
   const [hasMessages, setHasMessages] = useState(!!openChatResponse?.messages);
 
-  const queryClient = useQueryClient();
+  useEffect(() => {
+    if (pendingConversation && runtime && shouldRenderChat) {
+      if (pendingConversation.chatId !== chatId) {
+        onChatIdChange(pendingConversation.chatId);
+      }
+
+      if ((pendingConversation.messages?.length ?? 0) > 0) {
+        runtime.thread.reset(
+          (pendingConversation.messages ?? []) as ThreadMessageLike[],
+        );
+      } else {
+        runtime.threads.switchToNewThread();
+      }
+      setPendingConversation(null);
+    }
+  }, [pendingConversation, runtime, shouldRenderChat, onChatIdChange, chatId]);
 
   const createNewChat = useCallback(async () => {
     const oldChatId = chatId;
 
     try {
+      setPendingConversation(null);
+
       if (oldChatId) {
         onChatIdChange(null);
         runtime.thread.cancelRun();
@@ -147,17 +164,6 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
         if (selectedStep && flowVersion) {
           await aiChatApi.delete(oldChatId);
         }
-
-        const invalidationKey = buildQueryKey(
-          selectedStep,
-          flowVersion?.flowId,
-          oldChatId,
-          stepDetails?.settings?.blockName,
-        );
-
-        await queryClient.invalidateQueries({
-          queryKey: invalidationKey,
-        });
       }
       setHasMessages(false);
     } catch (error) {
@@ -169,15 +175,7 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
         `There was an error canceling the current run and invalidating queries while creating a new chat: ${error}`,
       );
     }
-  }, [
-    chatId,
-    onChatIdChange,
-    runtime.thread,
-    selectedStep,
-    flowVersion,
-    stepDetails?.settings?.blockName,
-    queryClient,
-  ]);
+  }, [chatId, onChatIdChange, runtime.thread, selectedStep, flowVersion]);
 
   useEffect(() => {
     const unsubscribe = runtime.thread.subscribe(() => {
