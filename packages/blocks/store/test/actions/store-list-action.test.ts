@@ -49,7 +49,6 @@ describe('storageListAction', () => {
         'FLOW',
         'run_test-run-id/',
         undefined,
-        false,
       );
       expect(result).toEqual(mockEntries);
     });
@@ -70,7 +69,6 @@ describe('storageListAction', () => {
         'FLOW',
         'run_test-run-id/',
         'user_.*',
-        false,
       );
       expect(result).toEqual(mockEntries);
     });
@@ -97,7 +95,6 @@ describe('storageListAction', () => {
         'COLLECTION',
         '',
         undefined,
-        false,
       );
     });
 
@@ -112,7 +109,6 @@ describe('storageListAction', () => {
         'FLOW',
         '',
         undefined,
-        false,
       );
     });
 
@@ -127,21 +123,6 @@ describe('storageListAction', () => {
         'FLOW',
         'run_test-run-id/',
         undefined,
-        false,
-      );
-    });
-
-    test('should pass isTest flag correctly', async () => {
-      const mockContext = createMockContext(true);
-      mockContext.store.list.mockResolvedValue([]);
-
-      await storageListAction.run(mockContext as any);
-
-      expect(mockContext.store.list).toHaveBeenCalledWith(
-        'FLOW',
-        'run_test-run-id/',
-        undefined,
-        true,
       );
     });
   });

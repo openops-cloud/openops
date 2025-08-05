@@ -5,7 +5,6 @@ import {
   sanitizeObjectForPostgresql,
   StoreEntry,
 } from '@openops/shared';
-import { Like } from 'typeorm';
 import { repoFactory } from '../core/db/repo-factory';
 import { StoreEntryEntity } from './store-entry-entity';
 
@@ -70,7 +69,7 @@ export const storeEntryService = {
     filterRegex,
   }: {
     projectId: ProjectId;
-    prefix?: string;
+    prefix: string;
     filterRegex?: string;
   }): Promise<Array<{ key: string; value: unknown }>> {
     const query = storeEntryRepo()
@@ -79,12 +78,10 @@ export const storeEntryService = {
 
     let keyExpression = 'storeEntry.key';
 
-    if (prefix) {
-      const escapedPrefix = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      query.andWhere('storeEntry.key LIKE :prefix', { prefix: `${prefix}%` });
-      if (filterRegex) {
-        keyExpression = `REGEXP_REPLACE(${keyExpression}, '^${escapedPrefix}', '', 'g')`;
-      }
+    const escapedPrefix = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    query.andWhere('storeEntry.key LIKE :prefix', { prefix: `${prefix}%` });
+    if (filterRegex) {
+      keyExpression = `REGEXP_REPLACE(${keyExpression}, '^${escapedPrefix}', '', 'g')`;
     }
 
     if (filterRegex) {

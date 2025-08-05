@@ -31,9 +31,14 @@ export const storageListAction = createAction({
       scope: context.propsValue.store_scope,
     });
 
-    const keyFilter = context.propsValue.keyFilter;
+    let keyFilter = context.propsValue.keyFilter;
 
-    if (keyFilter && keyFilter.trim() !== '') {
+    // Convert empty string to undefined
+    if (!keyFilter || keyFilter.trim() === '') {
+      keyFilter = undefined;
+    }
+
+    if (keyFilter) {
       try {
         new RegExp(keyFilter);
       } catch (error) {
@@ -41,12 +46,7 @@ export const storageListAction = createAction({
       }
     }
 
-    const entries = await context.store.list(
-      scope,
-      keyPrefix,
-      keyFilter,
-      context.run.isTest,
-    );
+    const entries = await context.store.list(scope, keyPrefix, keyFilter);
 
     return entries;
   },
