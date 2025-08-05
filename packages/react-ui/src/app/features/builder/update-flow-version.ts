@@ -1,8 +1,10 @@
+import { aiChatApi } from '@/app/features/builder/ai-chat/lib/chat-api';
 import { PromiseQueue } from '@/app/lib/promise-queue';
 import {
   flowHelper,
   FlowOperationRequest,
   FlowOperationType,
+  FlowVersion,
 } from '@openops/shared';
 import { flowsApi } from '../flows/lib/flows-api';
 import { BuilderState, RightSideBarType } from './builder-types';
@@ -36,6 +38,7 @@ export const updateFlowVersion = (
     if (operation.request.name === state.selectedStep) {
       set({ selectedStep: undefined });
       set({ rightSidebar: RightSideBarType.NONE });
+      deleteChatRequest(state.flowVersion, operation.request.name);
     }
   }
 
@@ -75,3 +78,25 @@ export const updateFlowVersion = (
   flowUpdatesQueue.add(updateRequest);
   return { flowVersion: newFlowVersion };
 };
+
+async function deleteChatRequest(flowVersion: FlowVersion, stepName: string) {
+  try {
+    const stepDetails = flowHelper.getStep(flowVersion, stepName);
+    const blockName = stepDetails?.settings?.blockName;
+    const actionName = stepDetails?.settings?.actionName;
+
+    if (!stepDetails?.id) {
+      return;
+    }
+
+    const chat = await aiChatApi.open(
+      flowVersion.flowId,
+      blockName,
+      stepDetails.id,
+      actionName,
+    );
+    await aiChatApi.delete(chat.chatId);
+  } catch (err) {
+    console.error(err);
+  }
+}

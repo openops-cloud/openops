@@ -25,7 +25,7 @@ export const cloudfix = createBlock({
       baseUrl: (auth: any) => auth.apiUrl,
       auth: cloudfixAuth,
       authMapping: async (context) => ({
-        Bearer: (context.auth as any).apiKey,
+        Authorization: 'Bearer ' + (context.auth as any).apiKey,
       }),
     }),
   ],
