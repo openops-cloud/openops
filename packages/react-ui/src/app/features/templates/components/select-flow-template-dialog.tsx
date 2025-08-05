@@ -33,12 +33,14 @@ import {
 } from '@openops/components/ui';
 import {
   AppConnectionsWithSupportedBlocks,
+  BlockCategory,
   FlowTemplateDto,
 } from '@openops/shared';
 import { useMutation } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDebounceValue } from 'usehooks-ts';
+import { blocksHooks } from '../../blocks/lib/blocks-hook';
 import { popupFeatures } from '../../cloud/lib/popup';
 import { useCloudProfile } from '../../cloud/lib/use-cloud-profile';
 import { useUserInfoPolling } from '../../cloud/lib/use-user-info-polling';
@@ -105,14 +107,28 @@ const FlowTemplateFilterSidebarWrapper = ({
 }: FlowTemplateFilterSidebarProps) => {
   const useCloudTemplates = flagsHooks.useShouldFetchCloudTemplates();
 
-  const { domains, categories, isLoading, status, isError } =
-    templatesHooks.useTemplateFilters({
-      enabled: true,
-      useCloudTemplates,
-      gettingStartedTemplateFilter: 'exclude',
-    });
+  const {
+    domains,
+    categories,
+    services,
+    isLoading: isTemplateFiltersLoading,
+    status,
+    isError,
+  } = templatesHooks.useTemplateFilters({
+    enabled: true,
+    useCloudTemplates,
+    gettingStartedTemplateFilter: 'exclude',
+  });
 
-  if (isLoading || status === 'pending') {
+  const { blocks, isLoading: isBlocksLoading } = blocksHooks.useBlocks({
+    categories: [BlockCategory.FINOPS],
+  });
+
+  const blocksWithTemplates = blocks?.filter((block) =>
+    services.includes(block.displayName),
+  );
+
+  if (isTemplateFiltersLoading || isBlocksLoading || status === 'pending') {
     return <FlowTemplateFilterSidebarSkeletonLoader numberOfSkeletons={12} />;
   }
 
@@ -154,6 +170,7 @@ const FlowTemplateFilterSidebarWrapper = ({
 
   return (
     <FlowTemplateFilterSidebar
+      blocks={blocksWithTemplates}
       domains={domains}
       categories={categories}
       selectedDomains={selectedDomains}
