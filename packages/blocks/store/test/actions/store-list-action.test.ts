@@ -48,7 +48,7 @@ describe('storageListAction', () => {
       expect(mockContext.store.list).toHaveBeenCalledWith(
         'FLOW',
         'run_test-run-id/',
-        undefined,
+        '',
       );
       expect(result).toEqual(mockEntries);
     });
@@ -91,11 +91,7 @@ describe('storageListAction', () => {
 
       await storageListAction.run(mockContext as any);
 
-      expect(mockContext.store.list).toHaveBeenCalledWith(
-        'COLLECTION',
-        '',
-        undefined,
-      );
+      expect(mockContext.store.list).toHaveBeenCalledWith('COLLECTION', '', '');
     });
 
     test('should use correct scope for FLOW scope', async () => {
@@ -105,11 +101,7 @@ describe('storageListAction', () => {
 
       await storageListAction.run(mockContext as any);
 
-      expect(mockContext.store.list).toHaveBeenCalledWith(
-        'FLOW',
-        '',
-        undefined,
-      );
+      expect(mockContext.store.list).toHaveBeenCalledWith('FLOW', '', '');
     });
 
     test('should use correct scope for RUN scope', async () => {
@@ -122,7 +114,7 @@ describe('storageListAction', () => {
       expect(mockContext.store.list).toHaveBeenCalledWith(
         'FLOW',
         'run_test-run-id/',
-        undefined,
+        '',
       );
     });
   });
