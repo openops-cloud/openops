@@ -13,7 +13,7 @@ export const archera = createBlock({
   displayName: 'Archera',
   auth: archeraAuth,
   minimumSupportedRelease: '0.20.0',
-  logoUrl: 'https://static.openops.com/blocks/archera.jpeg',
+  logoUrl: 'https://static.openops.com/blocks/archera.svg',
   categories: [BlockCategory.FINOPS],
   authors: ['Archera'],
   actions: [
