@@ -79,3 +79,13 @@ export const WithSelectedCategory: Story = {
     expect(onCategoryFilterClick).toHaveBeenCalledWith('AWS');
   },
 };
+
+/*
+ *  This story is used to test the sidebar with blocks.
+ */
+export const WithCloudProvidersCategory: Story = {
+  args: {
+    blocks: storyMocks.blocks,
+    selectedDomains: [],
+  },
+};
