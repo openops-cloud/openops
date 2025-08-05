@@ -3,13 +3,17 @@ import { aiAssistantChatApi } from '@/app/features/ai/lib/ai-assistant-chat-api'
 import { getActionName, getBlockName } from '@/app/features/blocks/lib/utils';
 import { authenticationSession } from '@/app/lib/authentication-session';
 import { ThreadMessageLike } from '@assistant-ui/react';
-import { useChatRuntime } from '@assistant-ui/react-ai-sdk';
+import {
+  useChatRuntime,
+  UseChatRuntimeOptions,
+} from '@assistant-ui/react-ai-sdk';
 import { toast } from '@openops/components/ui';
 import { flowHelper, FlowVersion, OpenChatResponse } from '@openops/shared';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { t } from 'i18next';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { aiChatApi } from '../../builder/ai-chat/lib/chat-api';
+import { createAdditionalContext } from './enrich-context';
 
 const PLACEHOLDER_MESSAGE_INTEROP = 'satisfy-schema';
 
@@ -107,20 +111,24 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
     }
   }, [isLoading, openChatResponse]);
 
-  const runtimeConfig = useMemo(
+  const runtimeConfig: UseChatRuntimeOptions = useMemo(
     () => ({
       api: '/api/v1/ai/conversation',
       maxSteps: 5,
       body: {
         chatId: openChatResponse?.chatId,
         message: PLACEHOLDER_MESSAGE_INTEROP,
+        additionalContext: flowVersion
+          ? createAdditionalContext(flowVersion, stepDetails)
+          : undefined,
       },
       headers: {
         Authorization: `Bearer ${authenticationSession.getToken()}`,
       },
     }),
-    [openChatResponse?.chatId],
+    [openChatResponse?.chatId, flowVersion, stepDetails],
   );
+
   const runtime = useChatRuntime(runtimeConfig);
 
   const [hasMessages, setHasMessages] = useState(!!openChatResponse?.messages);
