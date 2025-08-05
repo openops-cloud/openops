@@ -28,6 +28,7 @@ import {
   RunEnvironment,
   SeekPage,
   SERVICE_KEY_SECURITY_OPENAPI,
+  TriggerType,
   TriggerWithOptionalId,
 } from '@openops/shared';
 import dayjs from 'dayjs';
@@ -36,6 +37,7 @@ import { entitiesMustBeOwnedByCurrentProject } from '../../authentication/author
 import { projectService } from '../../project/project-service';
 import { flowRunService } from '../flow-run/flow-run-service';
 import { flowVersionService } from '../flow-version/flow-version.service';
+import { triggerUtils } from '../trigger/hooks/trigger-utils';
 import { flowService } from './flow.service';
 
 const DEFAULT_PAGE_SIZE = 10;
@@ -166,13 +168,12 @@ export const flowController: FastifyPluginAsyncTypebox = async (app) => {
       versionId: flow.publishedVersionId,
     });
 
-    if (
-      publishedFlow.version.trigger.settings?.type !== TriggerStrategy.POLLING
-    ) {
-      return reply.status(StatusCodes.BAD_REQUEST).send({
-        success: false,
-        message: 'Only polling workflows can be triggered manually',
-      });
+    const isValidTriggerType = await validateTriggerType(
+      publishedFlow,
+      request.principal.projectId,
+    );
+    if (!isValidTriggerType.success) {
+      return reply.status(StatusCodes.BAD_REQUEST).send(isValidTriggerType);
     }
 
     const flowRun = await flowRunService.start({
@@ -249,6 +250,33 @@ async function extractUserIdFromPrincipal(
   // TODO currently it's same as api service, but it's better to get it from api key service, in case we introduced more admin users
   const project = await projectService.getOneOrThrow(principal.projectId);
   return project.ownerId;
+}
+
+async function validateTriggerType(
+  flow: PopulatedFlow,
+  projectId: string,
+): Promise<{ success: boolean; message: string }> {
+  const blockTrigger = flow.version.trigger;
+
+  if (blockTrigger.type !== TriggerType.BLOCK) {
+    return {
+      success: false,
+      message: 'Only polling workflows can be triggered manually',
+    };
+  }
+
+  const metadata = await triggerUtils.getBlockTriggerOrThrow({
+    trigger: blockTrigger,
+    projectId,
+  });
+
+  return {
+    success: metadata.type === TriggerStrategy.POLLING,
+    message:
+      metadata.type === TriggerStrategy.POLLING
+        ? 'Trigger type validation successful'
+        : 'Only polling workflows can be triggered manually',
+  };
 }
 
 const CreateFlowRequestOptions = {
