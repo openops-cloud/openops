@@ -156,7 +156,7 @@ export const blocksHooks = {
   },
   useBlocks: ({ searchQuery, categories }: UseBlocksProps) => {
     const query = useQuery<BlockMetadataModelSummary[], Error>({
-      queryKey: [QueryKeys.blocks, searchQuery],
+      queryKey: [QueryKeys.blocks, searchQuery, categories],
       queryFn: () => blocksApi.list({ searchQuery, categories }),
       staleTime: searchQuery ? 0 : Infinity,
     });
