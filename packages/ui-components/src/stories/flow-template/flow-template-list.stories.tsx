@@ -121,6 +121,7 @@ ConnectedToCloud.args = {
   setSelectedServices: fn(),
   setSelectedCategories: fn(),
   onExploreMoreClick: fn(),
+  selectionHeading: 'Azure',
 };
 
 ConnectedToCloud.play = async ({ args }: { args: Story['args'] }) => {

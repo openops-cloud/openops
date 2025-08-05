@@ -10,6 +10,7 @@ import { NoTemplatesPlaceholder } from './no-templates-placeholder';
 import { FlowTemplateMetadataWithIntegrations } from './types';
 
 type FlowTemplateListProps = {
+  selectionHeading?: string;
   templates: FlowTemplateMetadataWithIntegrations[] | undefined;
   isLoading: boolean;
   searchText: string;
@@ -21,6 +22,7 @@ type FlowTemplateListProps = {
 };
 
 const FlowTemplateList = ({
+  selectionHeading,
   templates,
   isLoading,
   searchText,
@@ -54,7 +56,7 @@ const FlowTemplateList = ({
       </div>
       {isFullCatalog && (
         <DialogDescription className="text-2xl font-medium text-primary-300 dark:text-primary">
-          {t('All templates')}
+          {selectionHeading || t('All templates')}
         </DialogDescription>
       )}
 
