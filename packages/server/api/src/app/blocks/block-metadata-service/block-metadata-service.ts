@@ -1,4 +1,5 @@
 import {
+  BlockBase,
   BlockMetadata,
   BlockMetadataModel,
   BlockMetadataModelSummary,
@@ -71,6 +72,7 @@ type GetExactBlockVersionParams = {
 };
 
 export type BlockMetadataService = {
+  listAll(): Promise<BlockBase[]>;
   list(params: ListParams): Promise<BlockMetadataModelSummary[]>;
   get(params: GetOrThrowParams): Promise<BlockMetadataModel | undefined>;
   getOrThrow(params: GetOrThrowParams): Promise<BlockMetadataModel>;
