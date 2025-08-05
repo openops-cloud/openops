@@ -21,7 +21,7 @@ const BuilderJsonEditorWrapper = ({
   const { theme } = useTheme();
 
   return (
-    <div className="min-h-20">
+    <div className="h-48">
       <CodeEditor
         value={field.value}
         readonly={disabled ?? false}

@@ -5,6 +5,7 @@ import { useAssistantChat } from '@/app/features/ai/lib/assistant-ui-chat-hook';
 import { AssistantUiChatContainer } from '@openops/components/ui';
 import { t } from 'i18next';
 import { ReactNode, useCallback, useRef } from 'react';
+import { useFrontendTools } from '../lib/use-frontend-tools';
 
 type AssistantUiChatProps = {
   onClose: () => void;
@@ -33,6 +34,7 @@ const AssistantUiChat = ({
     chatId.current = id;
   }, []);
 
+  const { toolComponents, isLoading: isLoadingTools } = useFrontendTools();
   const {
     runtime,
     shouldRenderChat,
@@ -54,7 +56,7 @@ const AssistantUiChat = ({
     isLoading: isModelSelectorLoading,
   } = useAiModelSelector();
 
-  if (isLoading || !openChatResponse) {
+  if (isLoading || !openChatResponse || isLoadingTools) {
     return (
       <div className="w-full flex h-full items-center justify-center bg-background">
         <div className="text-sm text-muted-foreground">
@@ -87,6 +89,7 @@ const AssistantUiChat = ({
       selectedModel={selectedModel}
       theme={theme}
       handleInject={handleInject}
+      toolComponents={toolComponents}
     >
       {children}
     </AssistantUiChatContainer>
