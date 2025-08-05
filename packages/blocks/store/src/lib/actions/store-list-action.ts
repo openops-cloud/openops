@@ -1,5 +1,5 @@
 import { createAction, Property } from '@openops/blocks-framework';
-import { BlockStoreScope, common, getScopeAndKey } from './common';
+import { common, getScopeAndKey } from './common';
 
 export const storageListAction = createAction({
   name: 'list',

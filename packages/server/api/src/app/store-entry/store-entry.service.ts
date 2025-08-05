@@ -1,4 +1,3 @@
-import { logger } from '@openops/server-shared';
 import {
   openOpsId,
   ProjectId,
