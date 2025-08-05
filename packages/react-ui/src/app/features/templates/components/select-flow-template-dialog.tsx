@@ -285,6 +285,9 @@ const SelectFlowTemplateDialogContent = ({
     );
   }
 
+  const selectionHeading =
+    selectedCategories[0] || selectedDomains[0] || selectedServices[0];
+
   return (
     <>
       {isFullCatalog && (
@@ -317,6 +320,7 @@ const SelectFlowTemplateDialogContent = ({
           />
         ) : (
           <FlowTemplateList
+            selectionHeading={selectionHeading}
             templates={templates}
             isLoading={isTemplateListLoading}
             onTemplateSelect={handleTemplateSelect}
