@@ -37,7 +37,6 @@ import {
   FlowTemplateDto,
 } from '@openops/shared';
 import { useMutation } from '@tanstack/react-query';
-import { t } from 'i18next';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDebounceValue } from 'usehooks-ts';
