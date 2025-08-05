@@ -3,6 +3,7 @@ import { AI_ASSISTANT_LS_KEY } from '@/app/constants/ai';
 import { useAiModelSelector } from '@/app/features/ai/lib/ai-model-selector-hook';
 import { useAssistantChat } from '@/app/features/ai/lib/assistant-ui-chat-hook';
 import { AssistantUiChatContainer } from '@openops/components/ui';
+import { SourceCode } from '@openops/shared';
 import { t } from 'i18next';
 import { ReactNode, useCallback, useRef } from 'react';
 import { useFrontendTools } from '../lib/use-frontend-tools';
@@ -11,7 +12,7 @@ type AssistantUiChatProps = {
   onClose: () => void;
   title?: string;
   children?: ReactNode;
-  handleInject?: (codeContent: string) => void;
+  handleInject?: (codeContent: string | SourceCode) => void;
 };
 
 const AssistantUiChat = ({
