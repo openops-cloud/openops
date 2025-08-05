@@ -111,17 +111,12 @@ export const createStorageService = ({
     async list(
       prefix: string,
       filterRegex?: string,
-      isTestRun?: boolean,
     ): Promise<Array<{ key: string; value: unknown }>> {
       const url = new URL(`${apiUrl}v1/store-entries/list`);
       url.searchParams.set('prefix', prefix);
 
       if (filterRegex) {
         url.searchParams.set('filterRegex', filterRegex);
-      }
-
-      if (isTestRun !== undefined) {
-        url.searchParams.set('isTestRun', isTestRun.toString());
       }
 
       try {
@@ -190,7 +185,6 @@ export function createContextStore({
       scope: StoreScope,
       keyPrefix: string,
       filterRegex?: string,
-      isTestRun?: boolean,
     ): Promise<Array<{ key: string; value: unknown }>> {
       const scopePrefix = createKey(
         prefix,
@@ -203,7 +197,7 @@ export function createContextStore({
       const keyValuePairs = await createStorageService({
         apiUrl,
         engineToken,
-      }).list(scopePrefix, filterRegex, isTestRun);
+      }).list(scopePrefix, filterRegex);
 
       return keyValuePairs.map((entry) => ({
         key: entry.key.replace(scopePrefix, ''),
@@ -273,7 +267,6 @@ type StorageService = {
   list(
     prefix: string,
     filterRegex?: string,
-    isTestRun?: boolean,
   ): Promise<Array<{ key: string; value: unknown }>>;
 };
 

@@ -41,12 +41,7 @@ export const storageListAction = createAction({
       }
     }
 
-    const entries = await context.store.list(
-      scope,
-      keyPrefix,
-      keyFilter,
-      context.run.isTest,
-    );
+    const entries = await context.store.list(scope, keyPrefix, keyFilter);
 
     return entries;
   },
