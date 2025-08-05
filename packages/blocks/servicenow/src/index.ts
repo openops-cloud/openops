@@ -1,11 +1,7 @@
-import {
-  createCustomApiCallAction,
-  httpClient,
-  HttpMethod,
-} from '@openops/blocks-common';
+import { createCustomApiCallAction } from '@openops/blocks-common';
 import { createBlock, Property } from '@openops/blocks-framework';
 import { BlockCategory } from '@openops/shared';
-import { ServiceNowAuth, servicenowAuth } from './lib/auth';
+import { servicenowAuth } from './lib/auth';
 
 export const servicenow = createBlock({
   displayName: 'ServiceNow',

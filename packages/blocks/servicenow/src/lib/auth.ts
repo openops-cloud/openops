@@ -45,7 +45,7 @@ export const servicenowAuth = BlockAuth.CustomAuth({
       });
 
       return { valid: true };
-    } catch (error) {
+    } catch {
       return {
         valid: false,
         error:
