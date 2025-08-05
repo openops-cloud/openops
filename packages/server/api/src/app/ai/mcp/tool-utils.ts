@@ -22,6 +22,9 @@ export const formatFrontendTools = (tools: AssistantUITools): ToolSet =>
     ]),
   );
 
+const UI_TOOL_PREFIX = 'ui-';
+const UI_TOOL_RESULT_MESSAGE = 'Finished running tool';
+
 /**
  * Adds separate tool messages for UI tool calls (tools with names starting with 'ui-')
  * This ensures frontend tools have results in chat history for proper conversation flow
@@ -60,7 +63,7 @@ export function addUiToolResults(messages: CoreMessage[]): CoreMessage[] {
                   content: [
                     {
                       type: 'text',
-                      text: 'Finished running tool',
+                      text: UI_TOOL_RESULT_MESSAGE,
                     },
                   ],
                   isError: false,
@@ -89,7 +92,7 @@ function isToolCallPart(part: AssistantContent[number]): part is ToolCallPart {
 
 // opinionated type guard for UI tool calls
 function isUiToolCall(part: AssistantContent[number]): part is ToolCallPart {
-  return isToolCallPart(part) && part.toolName?.startsWith('ui-');
+  return isToolCallPart(part) && part.toolName?.startsWith(UI_TOOL_PREFIX);
 }
 
 function isToolCallWithResult(
