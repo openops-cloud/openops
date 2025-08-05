@@ -18,7 +18,7 @@ export const servicenow = createBlock({
       additionalProps: {
         documentation: Property.MarkDown({
           value:
-            'For more information, visit the [Servicenow API documentation](https://developer.servicenow.com/dev.do#!/reference/api/yokohama/rest/).',
+            'For more information, visit the [ServiceNow API documentation](https://developer.servicenow.com/dev.do#!/reference/api/yokohama/rest/).',
         }),
       },
       authMapping: async (context: any) => {
