@@ -26,40 +26,13 @@ export const servicenow = createBlock({
         }),
       },
       authMapping: async (context: any) => {
-        if (context.auth.username) {
-          return {
-            Authorization: `Basic ${Buffer.from(
-              `${context.auth.username}:${context.auth.password}`,
-            ).toString('base64')}`,
-          };
-        }
-
-        const accessToken = generateJwt(context.auth);
-
         return {
-          Authorization: `Bearer ${accessToken}`,
+          Authorization: `Basic ${Buffer.from(
+            `${context.auth.username}:${context.auth.password}`,
+          ).toString('base64')}`,
         };
       },
     }),
   ],
   triggers: [],
 });
-
-async function generateJwt(auth: ServiceNowAuth): Promise<string> {
-  const body = {
-    grant_type: 'client_credentials',
-    client_id: auth.clientId,
-    client_secret: auth.clientSecret,
-  };
-
-  const response = await httpClient.sendRequest({
-    method: HttpMethod.POST,
-    url: `https://${auth.instanceName}.service-now.com/oauth_token.do`,
-    body: body,
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-  });
-
-  return response.body.access_token;
-}

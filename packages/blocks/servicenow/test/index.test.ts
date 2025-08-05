@@ -6,7 +6,7 @@ describe('block declaration tests', () => {
       type: 'CUSTOM_AUTH',
       required: true,
       authProviderKey: 'servicenow',
-      authProviderDisplayName: 'Servicenow',
+      authProviderDisplayName: 'ServiceNow',
       authProviderLogoUrl: 'https://static.openops.com/blocks/servicenow.png',
     });
   });
