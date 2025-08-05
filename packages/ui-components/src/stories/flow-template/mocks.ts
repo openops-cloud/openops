@@ -1,4 +1,5 @@
 import { FlowTemplateMetadataWithIntegrations } from '@/components';
+import { BlockMetadataModelSummary } from '@openops/blocks-framework';
 
 const services = [
   'Compute',
@@ -237,12 +238,12 @@ const blocks: BlockMetadataModelSummary[] = [
     name: '@openops/block-archera',
     displayName: 'Archera',
     description: '',
-    logoUrl: 'https://static.openops.com/blocks/archera.jpeg',
+    logoUrl: 'https://static.openops.com/blocks/archera.svg',
     version: '0.0.1',
     auth: {
       authProviderKey: 'Archera',
       authProviderDisplayName: 'Archera',
-      authProviderLogoUrl: 'https://static.openops.com/blocks/archera.jpeg',
+      authProviderLogoUrl: 'https://static.openops.com/blocks/archera.svg',
       description:
         '\nConnecting to the Archera API\n\n1. Go to [https://app.archera.ai](https://app.archera.ai) and log in to your account.\n\n2. Once logged in, go to the API section here: [https://app.archera.ai/settings?section=user&tab=api](https://app.archera.ai/settings?section=user&tab=api)\n\n3. Click Create New API Key if you do not already have one.\n\n4. Copy and securely store your API key.\n\n4. Find your Organization ID: your Organization ID (org_id) is displayed in the API section.\n\n5. Paste your API key and OrgId into the respective fields below',
       required: true,
@@ -889,7 +890,7 @@ const blocks: BlockMetadataModelSummary[] = [
     auth: {
       authProviderKey: 'vegacloud',
       authProviderDisplayName: 'Vega Cloud',
-      authProviderLogoUrl: 'https://static.openops.com/blocks/vegacloud.png',
+      authProviderLogoUrl: 'https://static.openops.com/blocks/vegacloud.svg',
       description:
         '\nTo generate a Vega Cloud API Client ID and Secret, visit the [Vega Cloud API documentation](https://docs.vegacloud.io/docs/platformguide/platform_settings/profile_settings/apiclientreg).\n',
       required: true,
