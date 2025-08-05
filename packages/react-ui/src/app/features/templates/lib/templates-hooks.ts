@@ -126,6 +126,7 @@ export const templatesHooks = {
     gettingStartedTemplateFilter,
   }: TemplateBaseParams): {
     domains: string[];
+    services: string[];
     categories: TemplateSidebarCategory[];
     isLoading: boolean;
     status: 'error' | 'success' | 'pending';
@@ -141,7 +142,7 @@ export const templatesHooks = {
       useCloudTemplates,
       gettingStartedTemplateFilter,
     });
-    const [uniqueDomains, uniqueCategories] = useMemo(() => {
+    const [uniqueDomains, uniqueCategories, uniqueServices] = useMemo(() => {
       const uniqueDomainsSet = new Set<string>();
       const uniqueServicesSet = new Set<string>();
 
@@ -155,12 +156,14 @@ export const templatesHooks = {
       return [
         Array.from(uniqueDomainsSet).sort(sortFunction),
         uniqueCategories,
+        Array.from(uniqueServicesSet).sort(sortFunction),
       ];
     }, [templates]);
 
     return {
       domains: uniqueDomains,
       categories: uniqueCategories,
+      services: uniqueServices,
       isLoading,
       status,
       isError,
