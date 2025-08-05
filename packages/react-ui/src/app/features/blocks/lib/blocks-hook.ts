@@ -46,6 +46,7 @@ type UseBlockMetadata = {
 
 type UseBlocksProps = {
   searchQuery?: string;
+  categories?: BlockCategory[];
 };
 
 type UseMetadataProps = {
@@ -153,10 +154,10 @@ export const blocksHooks = {
         };
       });
   },
-  useBlocks: ({ searchQuery }: UseBlocksProps) => {
+  useBlocks: ({ searchQuery, categories }: UseBlocksProps) => {
     const query = useQuery<BlockMetadataModelSummary[], Error>({
       queryKey: [QueryKeys.blocks, searchQuery],
-      queryFn: () => blocksApi.list({ searchQuery }),
+      queryFn: () => blocksApi.list({ searchQuery, categories }),
       staleTime: searchQuery ? 0 : Infinity,
     });
     return {
