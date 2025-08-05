@@ -131,6 +131,8 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
 
   const runtime = useChatRuntime(runtimeConfig);
 
+  const [hasMessages, setHasMessages] = useState(!!openChatResponse?.messages);
+
   useEffect(() => {
     if (pendingConversation && runtime && shouldRenderChat) {
       if (pendingConversation.chatId !== chatId) {
@@ -147,8 +149,6 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
       setPendingConversation(null);
     }
   }, [pendingConversation, runtime, shouldRenderChat, onChatIdChange, chatId]);
-
-  const [hasMessages, setHasMessages] = useState(!!openChatResponse?.messages);
 
   const createNewChat = useCallback(async () => {
     const oldChatId = chatId;
