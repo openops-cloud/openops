@@ -1,4 +1,5 @@
 import {
+  BlockBase,
   BlockMetadata,
   BlockMetadataModel,
   BlockMetadataModelSummary,
@@ -28,6 +29,15 @@ const loadBlocksMetadata = async (): Promise<BlockMetadata[]> => {
 };
 export const FileBlockMetadataService = (): BlockMetadataService => {
   return {
+    async listAll(): Promise<BlockBase[]> {
+      return (await loadBlocksMetadata()).map((p) => {
+        return {
+          name: p.name,
+          displayName: p.displayName,
+          description: p.description,
+        };
+      });
+    },
     async list(params): Promise<BlockMetadataModelSummary[]> {
       const { projectId } = params;
       const originalBlocksMetadata: BlockMetadataSchema[] = (
