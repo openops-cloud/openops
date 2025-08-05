@@ -16,7 +16,7 @@ import {
   RefreshCwIcon,
   SendHorizontalIcon,
 } from 'lucide-react';
-import React, { FC, memo, useMemo } from 'react';
+import { FC, memo, useMemo } from 'react';
 import { cn } from '../../../lib/cn';
 import { Button } from '../../../ui/button';
 import {
