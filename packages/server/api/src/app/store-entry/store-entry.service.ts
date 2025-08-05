@@ -80,11 +80,9 @@ export const storeEntryService = {
 
     const escapedPrefix = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     query.andWhere('storeEntry.key LIKE :prefix', { prefix: `${prefix}%` });
-    if (filterRegex) {
-      keyExpression = `REGEXP_REPLACE(${keyExpression}, '^${escapedPrefix}', '', 'g')`;
-    }
 
     if (filterRegex) {
+      keyExpression = `REGEXP_REPLACE(${keyExpression}, '^${escapedPrefix}', '', 'g')`;
       query.andWhere(`${keyExpression} ~ :filterRegex`, { filterRegex });
     }
 
