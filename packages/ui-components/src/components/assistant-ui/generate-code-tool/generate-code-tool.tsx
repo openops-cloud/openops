@@ -5,9 +5,9 @@ import {
   getLanguageExtensionForCode,
 } from '../../../components/code-editor';
 import { Theme } from '../../../lib/theme';
+import { Skeleton } from '../../../ui/skeleton';
 import { CodeActions } from '../../code-actions';
 import { useThreadExtraContext } from '../thread-extra-context';
-import { BaseToolWrapper } from '../tool-fallback';
 
 type GenerateCodeToolProps = ToolCallMessagePartProps & {
   theme: Theme;
@@ -17,37 +17,36 @@ type GenerateCodeToolProps = ToolCallMessagePartProps & {
   };
 };
 
-const GenerateCodeTool = ({
-  toolName,
-  result,
-  status,
-  theme,
-}: GenerateCodeToolProps) => {
+const GenerateCodeTool = ({ result, status, theme }: GenerateCodeToolProps) => {
   const { handleInject } = useThreadExtraContext();
 
+  if (status.type !== 'complete') {
+    return (
+      <Skeleton className="w-full h-[150px]">
+        <div className="flex items-center justify-center h-full">
+          {t('Generating...')}
+        </div>
+      </Skeleton>
+    );
+  }
+
   return (
-    <BaseToolWrapper
-      toolName={toolName}
-      status={status}
-      collapsedByDefault={false}
-    >
-      <div className="relative px-3 w-full h-[300px] pb-10 overflow-hidden">
-        <CodeEditor
-          value={result}
-          readonly={true}
-          showLineNumbers={false}
-          className="border border-solid rounded"
-          theme={theme}
-          showTabs={true}
-          language={getLanguageExtensionForCode('typescript')}
-        />
-        <CodeActions
-          content={result}
-          onInject={handleInject}
-          injectButtonText={t('Use code')}
-        />
-      </div>
-    </BaseToolWrapper>
+    <div className="relative flex flex-col px-3 w-full h-[300px] overflow-hidden">
+      <CodeEditor
+        value={result}
+        readonly={true}
+        showLineNumbers={false}
+        className="border border-solid rounded"
+        theme={theme}
+        showTabs={true}
+        language={getLanguageExtensionForCode('language-typescript')}
+      />
+      <CodeActions
+        content={result}
+        onInject={handleInject}
+        injectButtonText={t('Use code')}
+      />
+    </div>
   );
 };
 
