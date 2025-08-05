@@ -1,3 +1,4 @@
+import { logger } from '@openops/server-shared';
 import {
   openOpsId,
   ProjectId,
@@ -85,11 +86,7 @@ export const storeEntryService = {
 
     if (filterRegex) {
       keyExpression = `REGEXP_REPLACE(${keyExpression}, '^${escapedPrefix}', '', 'g')`;
-
-      if (isTestRun) {
-        keyExpression = `REGEXP_REPLACE(${keyExpression}, '^run_test-run/', '', 'g')`;
-      }
-
+      keyExpression = `REGEXP_REPLACE(${keyExpression}, '^run_[^/]+/', '', 'g')`;
       query.andWhere(`${keyExpression} ~ :filterRegex`, { filterRegex });
     }
 
