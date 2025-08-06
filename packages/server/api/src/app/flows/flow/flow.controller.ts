@@ -293,7 +293,14 @@ async function validateTriggerType(
         metadata.type === TriggerStrategy.POLLING
           ? 'Trigger type validation successful'
           : 'Only polling workflows can be triggered manually',
-    };
+    if (metadata.type === TriggerStrategy.POLLING) {
+      return { success: true };
+    } else {
+      return {
+        success: false,
+        message: 'Only polling workflows can be triggered manually',
+      };
+    }
   } catch (error) {
     return {
       success: false,
