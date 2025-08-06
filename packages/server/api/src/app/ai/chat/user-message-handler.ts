@@ -264,11 +264,49 @@ function sendMessageToStream(
         })}`,
       );
       break;
+    case 'tool-input-start':
+      responseStream.write(
+        `data: ${JSON.stringify({
+          type: 'tool-input-start',
+          toolCallId: (message as any).id,
+          toolName: (message as any).toolName,
+        })}`,
+      );
+      break;
+    case 'tool-input-delta':
+      responseStream.write(
+        `data: ${JSON.stringify({
+          type: 'tool-input-delta',
+          toolCallId: (message as any).id,
+          inputTextDelta: (message as any).delta,
+        })}`,
+      );
+      break;
+    case 'tool-call':
+      responseStream.write(
+        `data: ${JSON.stringify({
+          type: 'tool-input-available',
+          toolCallId: (message as any).toolCallId,
+          toolName: (message as any).toolName,
+          input: (message as any).input,
+        })}`,
+      );
+      break;
+    case 'tool-result':
+      responseStream.write(
+        `data: ${JSON.stringify({
+          type: 'tool-output-available',
+          toolCallId: (message as any).toolCallId,
+          output: (message as any).output,
+        })}`,
+      );
+      break;
     case 'start-step':
       responseStream.write(`data: ${JSON.stringify({ type: 'start-step' })}`);
       break;
     case 'finish-step':
     case 'finish':
+    case 'tool-input-end':
       return;
     default:
       responseStream.write(`data: ${JSON.stringify(message)}`);
