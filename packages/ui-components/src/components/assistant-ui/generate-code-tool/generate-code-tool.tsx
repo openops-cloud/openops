@@ -1,6 +1,5 @@
 import { TextContentPart, ToolCallMessagePartProps } from '@assistant-ui/react';
 import { t } from 'i18next';
-import { useMemo } from 'react';
 import {
   CodeEditor,
   getLanguageExtensionForCode,
@@ -32,25 +31,6 @@ type GenerateCodeToolProps = ToolCallMessagePartProps & {
 const GenerateCodeTool = ({ result, status, theme }: GenerateCodeToolProps) => {
   const { handleInject } = useThreadExtraContext();
 
-  const parsedResult = useMemo((): CodeResult | undefined => {
-    if (!result) {
-      return;
-    }
-    if ('code' in result) {
-      if (!result.code) {
-        return;
-      }
-      return result;
-    }
-
-    return !result.isError
-      ? (tryParseJson(result.content?.[0]?.text) as CodeResult)
-      : {
-          code: t('Something went wrong'),
-          packageJson: '',
-        };
-  }, [result]);
-
   if (status.type !== 'complete') {
     return (
       <Skeleton className="w-full h-[150px]">
@@ -61,7 +41,9 @@ const GenerateCodeTool = ({ result, status, theme }: GenerateCodeToolProps) => {
     );
   }
 
-  if (!parsedResult) {
+  const parsedResult = parseResult(result);
+
+  if (!parsedResult.code) {
     return null;
   }
 
@@ -83,6 +65,19 @@ const GenerateCodeTool = ({ result, status, theme }: GenerateCodeToolProps) => {
       />
     </div>
   );
+};
+
+const parseResult = (result: GenerateCodeResult): CodeResult => {
+  if ('code' in result) {
+    return result;
+  }
+
+  return !result.isError
+    ? (tryParseJson(result.content?.[0]?.text) as CodeResult)
+    : {
+        code: t('Something went wrong'),
+        packageJson: '',
+      };
 };
 
 GenerateCodeTool.displayName = 'GenerateCodeTool';
