@@ -68,7 +68,6 @@ export async function handleUserMessage(
   } = params;
 
   const messageId = generateMessageId();
-  // serverResponse.write(buildMessageIdMessage(messageId));
 
   const { mcpClients, systemPrompt, filteredTools } = await getMCPToolsContext(
     app,
@@ -79,9 +78,6 @@ export async function handleUserMessage(
     chatContext,
     languageModel,
   );
-
-  // serverResponse.write(startStepPart);
-  // serverResponse.write(buildTextStartMessage(messageId));
 
   try {
     const newMessages = await streamLLMResponse(
@@ -99,10 +95,11 @@ export async function handleUserMessage(
       messageId,
     );
 
-    // serverResponse.write(buildTextEndMessage(messageId));
-    // serverResponse.write(finishStepPart);
-    // serverResponse.write(finishMessagePart);
-    serverResponse.write(doneMarker);
+    serverResponse.write(finishStepPart);
+    serverResponse.write('\n\n');
+
+    serverResponse.write(finishMessagePart);
+    serverResponse.write('\n\n');
 
     await saveChatHistory(chatId, userId, projectId, [
       ...chatHistory,
@@ -110,7 +107,8 @@ export async function handleUserMessage(
     ]);
   } finally {
     await closeMCPClients(mcpClients);
-
+    serverResponse.write(doneMarker);
+    serverResponse.write('\n\n');
     serverResponse.end();
   }
 }
@@ -131,6 +129,7 @@ async function streamLLMResponse(
         stepCount++;
         if (value.finishReason !== 'stop' && stepCount >= maxRecursionDepth) {
           const message = ` Maximum recursion depth (${maxRecursionDepth}) reached. Terminating recursion.`;
+          // TODO: fix this
           sendTextMessageToStream(params.serverResponse, message, messageId);
           appendErrorMessage(value.response.messages, message);
           logger.warn(message);
@@ -139,8 +138,7 @@ async function streamLLMResponse(
       onFinish: async (result): Promise<void> => {
         const messages = result.response.messages;
         newMessages.push(...messages);
-
-        if (result.finishReason === 'length') {
+        if (result.finishReason !== 'length') {
           throw new Error(
             'The message was truncated because the maximum tokens for the context window was reached.',
           );
@@ -149,7 +147,7 @@ async function streamLLMResponse(
     });
 
     for await (const message of fullStream) {
-      sendMessageToStream(params.serverResponse, message, messageId);
+      sendMessageToStream(params.serverResponse, message);
     }
   } catch (error) {
     const errorMessage = unrecoverableError(params, error);
@@ -164,8 +162,34 @@ function unrecoverableError(
   error: any,
 ): AssistantModelMessage {
   const errorMessage = error instanceof Error ? error.message : String(error);
-  streamParams.serverResponse.write(`0:"\\n\\n"\n`);
-  streamParams.serverResponse.write(buildTextMessage(errorMessage));
+
+  const messageId = generateMessageId();
+  streamParams.serverResponse.write(
+    `data: ${JSON.stringify({
+      type: 'text-start',
+      id: messageId,
+    })}`,
+  );
+
+  streamParams.serverResponse.write('\n\n');
+  streamParams.serverResponse.write(
+    `data: ${JSON.stringify({
+      type: 'text-delta',
+      id: messageId,
+      delta: errorMessage,
+    })}`,
+  );
+
+  streamParams.serverResponse.write('\n\n');
+  streamParams.serverResponse.write(
+    `data: ${JSON.stringify({
+      type: 'text-end',
+      id: messageId,
+    })}`,
+  );
+
+  streamParams.serverResponse.write('\n\n');
+
   logger.warn(errorMessage, error);
 
   sendAiChatFailureEvent({
@@ -229,43 +253,29 @@ function appendErrorMessage(
 function sendMessageToStream(
   responseStream: NodeJS.WritableStream,
   message: TextStreamPart<ToolSet>,
-  messageId: string,
 ): void {
   switch (message.type as string) {
     case 'text-delta':
-      logger.debug(`data: ${JSON.stringify(message)}\n\n`);
       responseStream.write(
         `data: ${JSON.stringify({
-          ...message,
-          // id: messageId,
+          type: 'text-delta',
+          id: (message as any).id,
           delta: (message as any).text,
-        })}\n\n`,
+        })}`,
       );
-      // sendTextMessageToStream(
-      //   responseStream,
-      //   (message as any).text,
-      //   (message as any).id,
-      // );
       break;
-    // case 'tool-result':
-    //   responseStream.write(`a:${JSON.stringify(message)}\n`);
-    //   break;
-    // case 'tool-call': {
-    //   responseStream.write(`9:${JSON.stringify(message)}\n`);
-    //   break;
-    // }
-    // case 'tool-call-streaming-start': {
-    //   responseStream.write(`b:${JSON.stringify(message)}\n`);
-    //   break;
-    // }
-    // case 'tool-call-delta': {
-    //   responseStream.write(`c:${JSON.stringify(message)}\n`);
-    //   break;
-    // }
+    case 'start-step':
+      responseStream.write(`data: ${JSON.stringify({ type: 'start-step' })}`);
+      break;
+    case 'finish-step':
+    case 'finish':
+      return;
     default:
-      responseStream.write(`data: ${JSON.stringify(message)}\n\n`);
+      responseStream.write(`data: ${JSON.stringify(message)}`);
       break;
   }
+
+  responseStream.write('\n\n');
 }
 
 function sendTextMessageToStream(

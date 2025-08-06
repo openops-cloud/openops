@@ -83,9 +83,9 @@ export function buildDoneMessage(finishReason: string): string {
 
 export const finishMessagePart = `data: ${JSON.stringify({
   type: 'finish',
-})}\n\n`;
+})}`;
 
-export const doneMarker = 'data: [DONE]\n\n';
+export const doneMarker = 'data: [DONE]';
 
 export const startStepPart = `data: ${JSON.stringify({
   type: 'start-step',
@@ -93,7 +93,7 @@ export const startStepPart = `data: ${JSON.stringify({
 
 export const finishStepPart = `data: ${JSON.stringify({
   type: 'finish-step',
-})}\n\n`;
+})}`;
 
 /**
  * Builds a message ID message (type f)
