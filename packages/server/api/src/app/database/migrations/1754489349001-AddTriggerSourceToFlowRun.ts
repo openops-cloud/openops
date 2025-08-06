@@ -1,14 +1,13 @@
 import { FlowRunTriggerSource } from '@openops/shared';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddTriggerSourceToFlowRun1754489349002
+export class AddTriggerSourceToFlowRun1754489349004
   implements MigrationInterface
 {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
       ALTER TABLE flow_run 
-      ADD COLUMN IF NOT EXISTS "triggerSource" varchar
-      DEFAULT '${FlowRunTriggerSource.TRIGGERED}';
+      ADD COLUMN IF NOT EXISTS "triggerSource" varchar;
 
       UPDATE flow_run 
       SET "triggerSource" = '${FlowRunTriggerSource.TRIGGERED}'
