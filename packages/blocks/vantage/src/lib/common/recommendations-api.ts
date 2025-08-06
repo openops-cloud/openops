@@ -1,19 +1,39 @@
 import { HttpMethod } from '@openops/blocks-common';
+import { getEnumValues } from './get-enum-values';
 import { makeRequest } from './make-request';
+
+export async function getRecommendations(
+  auth: string,
+  category: string | undefined,
+  accountId?: string,
+  limit?: number,
+): Promise<any[]> {
+  const queryParams: Record<string, string> =
+    category && category.length > 0 ? { category: category } : {};
+
+  if (limit) {
+    queryParams['limit'] = limit.toString();
+  }
+
+  if (accountId) {
+    queryParams['provider_account_id'] = accountId;
+  }
+
+  return await makeRequest({
+    endpoint: `/recommendations`,
+    method: HttpMethod.GET,
+    auth,
+    queryParams,
+  });
+}
 
 export async function getCategories(): Promise<
   { label: string; value: string }[]
 > {
-  const spec = await makeRequest({
-    endpoint: '/swagger.json',
-    auth: '',
-    method: HttpMethod.GET,
-  });
-
-  const params = spec.paths['/recommendations'].get.parameters;
-  const categoryParam = params.find((p: any) => p.name === 'category');
-  const categories: string[] = categoryParam.enum;
-
+  const categories: string[] = await getEnumValues(
+    '/recommendations',
+    'category',
+  );
   const mapped = categories.map((cat: string) => {
     const known = knownCategories.find((k) => k.value === cat);
     return {
@@ -25,28 +45,6 @@ export async function getCategories(): Promise<
   mapped.sort((a, b) => a.label.localeCompare(b.label));
 
   return mapped;
-}
-
-export async function getRecommendations(
-  auth: string,
-  category: string | undefined,
-  limit?: number,
-): Promise<any[]> {
-  const queryParams: Record<string, string> =
-    category && category.length > 0 ? { category: category } : {};
-
-  if (limit) {
-    queryParams['limit'] = limit.toString();
-  }
-
-  const response = await makeRequest({
-    endpoint: `/recommendations`,
-    method: HttpMethod.GET,
-    auth,
-    queryParams,
-  });
-
-  return response;
 }
 
 const knownCategories = [

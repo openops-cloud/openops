@@ -1,6 +1,7 @@
 import { createCustomApiCallAction } from '@openops/blocks-common';
 import { createBlock, Property } from '@openops/blocks-framework';
 import { BlockCategory } from '@openops/shared';
+import { getIntegrationsAction } from './lib/actions/get-integrations-action';
 import { getRecommendationsAction } from './lib/actions/get-recommendations-action';
 import { vantageAuth } from './lib/auth';
 import { BASE_URL } from './lib/common/make-request';
@@ -13,6 +14,7 @@ export const vantage = createBlock({
   authors: [],
   categories: [BlockCategory.FINOPS],
   actions: [
+    getIntegrationsAction,
     getRecommendationsAction,
     createCustomApiCallAction({
       baseUrl: () => BASE_URL,
