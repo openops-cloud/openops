@@ -17,8 +17,16 @@ import { generateMessageId } from './ai-id-generators';
 import { getLLMAsyncStream } from './llm-stream-handler';
 import {
   buildDoneMessage,
+  buildFinishMessage,
   buildMessageIdMessage,
+  buildTextDeltaPart,
+  buildTextEndMessage,
   buildTextMessage,
+  buildTextStartMessage,
+  doneMarker,
+  finishMessagePart,
+  finishStepPart,
+  startStepPart,
 } from './stream-message-builder';
 import { ChatProcessingContext, RequestContext } from './types';
 
@@ -59,7 +67,8 @@ export async function handleUserMessage(
     conversation: { chatContext, chatHistory },
   } = params;
 
-  serverResponse.write(buildMessageIdMessage(generateMessageId()));
+  const messageId = generateMessageId();
+  // serverResponse.write(buildMessageIdMessage(messageId));
 
   const { mcpClients, systemPrompt, filteredTools } = await getMCPToolsContext(
     app,
@@ -71,18 +80,29 @@ export async function handleUserMessage(
     languageModel,
   );
 
+  // serverResponse.write(startStepPart);
+  // serverResponse.write(buildTextStartMessage(messageId));
+
   try {
-    const newMessages = await streamLLMResponse({
-      userId,
-      chatId,
-      projectId,
-      aiConfig,
-      chatHistory,
-      systemPrompt,
-      languageModel,
-      serverResponse,
-      tools: filteredTools,
-    });
+    const newMessages = await streamLLMResponse(
+      {
+        userId,
+        chatId,
+        projectId,
+        aiConfig,
+        chatHistory,
+        systemPrompt,
+        languageModel,
+        serverResponse,
+        tools: filteredTools,
+      },
+      messageId,
+    );
+
+    // serverResponse.write(buildTextEndMessage(messageId));
+    // serverResponse.write(finishStepPart);
+    // serverResponse.write(finishMessagePart);
+    serverResponse.write(doneMarker);
 
     await saveChatHistory(chatId, userId, projectId, [
       ...chatHistory,
@@ -90,13 +110,14 @@ export async function handleUserMessage(
     ]);
   } finally {
     await closeMCPClients(mcpClients);
-    serverResponse.write(buildDoneMessage('stop'));
+
     serverResponse.end();
   }
 }
 
 async function streamLLMResponse(
   params: StreamCallSettings,
+  messageId: string,
 ): Promise<ModelMessage[]> {
   const newMessages: ModelMessage[] = [];
   let stepCount = 0;
@@ -110,7 +131,7 @@ async function streamLLMResponse(
         stepCount++;
         if (value.finishReason !== 'stop' && stepCount >= maxRecursionDepth) {
           const message = ` Maximum recursion depth (${maxRecursionDepth}) reached. Terminating recursion.`;
-          sendTextMessageToStream(params.serverResponse, message);
+          sendTextMessageToStream(params.serverResponse, message, messageId);
           appendErrorMessage(value.response.messages, message);
           logger.warn(message);
         }
@@ -128,7 +149,7 @@ async function streamLLMResponse(
     });
 
     for await (const message of fullStream) {
-      sendMessageToStream(params.serverResponse, message);
+      sendMessageToStream(params.serverResponse, message, messageId);
     }
   } catch (error) {
     const errorMessage = unrecoverableError(params, error);
@@ -208,32 +229,49 @@ function appendErrorMessage(
 function sendMessageToStream(
   responseStream: NodeJS.WritableStream,
   message: TextStreamPart<ToolSet>,
+  messageId: string,
 ): void {
   switch (message.type as string) {
     case 'text-delta':
-      sendTextMessageToStream(responseStream, (message as any).text);
+      logger.debug(`data: ${JSON.stringify(message)}\n\n`);
+      responseStream.write(
+        `data: ${JSON.stringify({
+          ...message,
+          // id: messageId,
+          delta: (message as any).text,
+        })}\n\n`,
+      );
+      // sendTextMessageToStream(
+      //   responseStream,
+      //   (message as any).text,
+      //   (message as any).id,
+      // );
       break;
-    case 'tool-result':
-      responseStream.write(`a:${JSON.stringify(message)}\n`);
+    // case 'tool-result':
+    //   responseStream.write(`a:${JSON.stringify(message)}\n`);
+    //   break;
+    // case 'tool-call': {
+    //   responseStream.write(`9:${JSON.stringify(message)}\n`);
+    //   break;
+    // }
+    // case 'tool-call-streaming-start': {
+    //   responseStream.write(`b:${JSON.stringify(message)}\n`);
+    //   break;
+    // }
+    // case 'tool-call-delta': {
+    //   responseStream.write(`c:${JSON.stringify(message)}\n`);
+    //   break;
+    // }
+    default:
+      responseStream.write(`data: ${JSON.stringify(message)}\n\n`);
       break;
-    case 'tool-call': {
-      responseStream.write(`9:${JSON.stringify(message)}\n`);
-      break;
-    }
-    case 'tool-call-streaming-start': {
-      responseStream.write(`b:${JSON.stringify(message)}\n`);
-      break;
-    }
-    case 'tool-call-delta': {
-      responseStream.write(`c:${JSON.stringify(message)}\n`);
-      break;
-    }
   }
 }
 
 function sendTextMessageToStream(
   responseStream: NodeJS.WritableStream,
   message: string,
+  messageId: string,
 ): void {
-  responseStream.write(buildTextMessage(message));
+  responseStream.write(buildTextDeltaPart(message, messageId));
 }

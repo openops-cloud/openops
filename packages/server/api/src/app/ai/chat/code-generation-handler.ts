@@ -11,11 +11,14 @@ import {
   buildDoneMessage,
   buildFinishMessage,
   buildMessageIdMessage,
+  buildTextEndMessage,
   buildTextMessage,
+  buildTextStartMessage,
   buildToolCallDeltaMessage,
   buildToolCallMessage,
   buildToolCallStreamingStartMessage,
   buildToolResultMessage,
+  startStepPart,
 } from './stream-message-builder';
 import { ChatProcessingContext, RequestContext } from './types';
 
@@ -204,7 +207,10 @@ export async function handleCodeGenerationRequest(
     conversation: { chatContext, chatHistory },
   } = params;
 
-  serverResponse.write(buildMessageIdMessage(generateMessageId()));
+  const messageId = generateMessageId();
+  serverResponse.write(buildMessageIdMessage(messageId));
+  serverResponse.write(startStepPart);
+  serverResponse.write(buildTextStartMessage(messageId));
 
   const toolCallId = generateToolId();
   initializeToolCall({
@@ -278,6 +284,7 @@ export async function handleCodeGenerationRequest(
     serverResponse.write(buildDoneMessage('tool-calls'));
 
     serverResponse.write(buildTextMessage(finalCodeResult.textAnswer));
+    serverResponse.write(buildTextEndMessage(messageId));
 
     serverResponse.write(buildFinishMessage('stop'));
     serverResponse.write(buildDoneMessage('stop'));

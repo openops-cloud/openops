@@ -132,6 +132,13 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         content: messageContent,
       };
 
+      reply.raw.setHeader('x-vercel-ai-ui-message-stream', 'v1');
+      // reply.raw.setHeader('Content-Type', 'text/event-stream');
+      reply.raw.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        Connection: 'keep-alive',
+      });
       await routeChatRequest({
         app,
         request,

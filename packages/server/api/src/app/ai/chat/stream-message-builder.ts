@@ -6,14 +6,24 @@
  * Builds a text message (type 0)
  */
 export function buildTextMessage(text: string): string {
-  return `0:${JSON.stringify(text)}\n`;
+  return `0:${JSON.stringify(text)}\n\n`;
 }
+
+export function buildTextDeltaPart(text: string, id: string): string {
+  return `data: ${JSON.stringify({
+    type: 'text-delta',
+    id,
+    delta: text,
+  })}\n\n`;
+}
+
+// data: {"type":"text-delta","id":"msg_68679a454370819ca74c8eb3d04379630dd1afb72306ca5d","delta":"Hello"}
 
 /**
  * Builds a tool call message (type 9)
  */
 export function buildToolCallMessage(toolCall: unknown): string {
-  return `9:${JSON.stringify(toolCall)}\n`;
+  return `9:${JSON.stringify(toolCall)}\n\n`;
 }
 
 /**
@@ -27,7 +37,7 @@ export function buildToolCallStreamingStartMessage(
     type: 'tool-call-streaming-start',
     toolCallId,
     toolName,
-  })}\n`;
+  })}\n\n`;
 }
 
 /**
@@ -43,14 +53,14 @@ export function buildToolCallDeltaMessage(
     toolCallId,
     toolName,
     argsTextDelta,
-  })}\n`;
+  })}\n\n`;
 }
 
 /**
  * Builds a tool result message (type a)
  */
 export function buildToolResultMessage(toolResult: unknown): string {
-  return `a:${JSON.stringify(toolResult)}\n`;
+  return `a:${JSON.stringify(toolResult)}\n\n`;
 }
 
 /**
@@ -59,7 +69,7 @@ export function buildToolResultMessage(toolResult: unknown): string {
 export function buildFinishMessage(finishReason: string): string {
   return `e:${JSON.stringify({
     finishReason,
-  })}\n`;
+  })}\n\n`;
 }
 
 /**
@@ -68,12 +78,40 @@ export function buildFinishMessage(finishReason: string): string {
 export function buildDoneMessage(finishReason: string): string {
   return `d:${JSON.stringify({
     finishReason,
-  })}\n`;
+  })}\n\n`;
 }
+
+export const finishMessagePart = `data: ${JSON.stringify({
+  type: 'finish',
+})}\n\n`;
+
+export const doneMarker = 'data: [DONE]\n\n';
+
+export const startStepPart = `data: ${JSON.stringify({
+  type: 'start-step',
+})}\n\n`;
+
+export const finishStepPart = `data: ${JSON.stringify({
+  type: 'finish-step',
+})}\n\n`;
 
 /**
  * Builds a message ID message (type f)
  */
 export function buildMessageIdMessage(messageId: string): string {
-  return `f:${JSON.stringify({ messageId })}\n`;
+  return `data: ${JSON.stringify({ type: 'start', messageId })}\n\n`;
+}
+
+export function buildTextStartMessage(messageId: string): string {
+  return `data: ${JSON.stringify({
+    type: 'text-start',
+    id: messageId,
+  })}\n\n`;
+}
+
+export function buildTextEndMessage(messageId: string): string {
+  return `data: ${JSON.stringify({
+    type: 'text-end',
+    id: messageId,
+  })}\n\n`;
 }
