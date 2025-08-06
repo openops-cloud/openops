@@ -1,7 +1,7 @@
 import { FlowRunTriggerSource } from '@openops/shared';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddTriggerSourceToFlowRun1754489349004
+export class AddTriggerSourceToFlowRun1754489349005
   implements MigrationInterface
 {
   public async up(queryRunner: QueryRunner): Promise<void> {
