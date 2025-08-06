@@ -11,7 +11,12 @@ export async function runCommand(
     PATH: process.env['PATH'] ?? '',
   };
 
-  if (credentials.accessKeyId && credentials.secretAccessKey) {
+  if (
+    typeof credentials.accessKeyId === 'string' &&
+    credentials.accessKeyId.trim() &&
+    typeof credentials.secretAccessKey === 'string' &&
+    credentials.secretAccessKey.trim()
+  ) {
     envVars.AWS_ACCESS_KEY_ID = credentials.accessKeyId;
     envVars.AWS_SECRET_ACCESS_KEY = credentials.secretAccessKey;
     if (credentials.sessionToken) {
