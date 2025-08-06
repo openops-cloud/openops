@@ -43,7 +43,7 @@ const GenerateCodeTool = ({ result, status, theme }: GenerateCodeToolProps) => {
 
   const parsedResult = parseResult(result);
 
-  if (!parsedResult.code) {
+  if (!parsedResult.code?.trim()) {
     return null;
   }
 
