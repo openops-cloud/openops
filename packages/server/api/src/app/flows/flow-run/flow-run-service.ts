@@ -46,7 +46,7 @@ import { logSerializer } from './log-serializer';
 export const flowRunRepo = repoFactory<FlowRun>(FlowRunEntity);
 
 const getFlowRunOrCreate = async (
-  params: GetOrCreateParams & { triggerSource?: FlowRunTriggerSource },
+  params: GetOrCreateParams,
 ): Promise<Partial<FlowRun>> => {
   const {
     id,
@@ -55,7 +55,7 @@ const getFlowRunOrCreate = async (
     flowVersionId,
     flowDisplayName,
     environment,
-    triggerSource = FlowRunTriggerSource.TRIGGERED,
+    triggerSource,
   } = params;
 
   if (id) {
@@ -263,6 +263,7 @@ export const flowRunService = {
       progressUpdateType,
       executionType,
       environment: RunEnvironment.PRODUCTION,
+      triggerSource: FlowRunTriggerSource.TRIGGERED,
     });
   },
   async updateStatus({
@@ -311,6 +312,7 @@ export const flowRunService = {
     synchronousHandlerId,
     progressUpdateType,
     executionCorrelationId,
+    triggerSource,
   }: StartParams): Promise<FlowRun> {
     const flowVersion = await flowVersionService.getOneOrThrow(flowVersionId);
 
@@ -326,7 +328,7 @@ export const flowRunService = {
       flowVersionId: flowVersion.id,
       environment,
       flowDisplayName: flowVersion.displayName,
-      triggerSource: FlowRunTriggerSource.TRIGGERED,
+      triggerSource,
     });
 
     flowRun.status = FlowRunStatus.SCHEDULED;
@@ -389,6 +391,7 @@ export const flowRunService = {
       synchronousHandlerId: webhookResponseWatcher.getServerId(),
       executionCorrelationId: nanoid(),
       progressUpdateType: ProgressUpdateType.TEST_FLOW,
+      triggerSource: FlowRunTriggerSource.TEST_RUN,
     });
   },
 
@@ -517,6 +520,7 @@ type GetOrCreateParams = {
   flowVersionId: FlowVersionId;
   flowDisplayName: string;
   environment: RunEnvironment;
+  triggerSource: FlowRunTriggerSource;
 };
 
 type ListParams = {
@@ -545,6 +549,7 @@ type StartParams = {
   executionCorrelationId: string;
   progressUpdateType: ProgressUpdateType;
   executionType: ExecutionType;
+  triggerSource: FlowRunTriggerSource;
 };
 
 type TestParams = {
