@@ -1,7 +1,9 @@
 import { createCustomApiCallAction } from '@openops/blocks-common';
 import { createBlock, Property } from '@openops/blocks-framework';
 import { BlockCategory } from '@openops/shared';
+import { getRecommendationsAction } from './lib/actions/get-recommendations-action';
 import { vantageAuth } from './lib/auth';
+import { BASE_URL } from './lib/common/make-request';
 
 export const vantage = createBlock({
   displayName: 'Vantage',
@@ -11,8 +13,9 @@ export const vantage = createBlock({
   authors: [],
   categories: [BlockCategory.FINOPS],
   actions: [
+    getRecommendationsAction,
     createCustomApiCallAction({
-      baseUrl: () => 'https://api.vantage.sh/',
+      baseUrl: () => BASE_URL,
       auth: vantageAuth,
       additionalProps: {
         documentation: Property.MarkDown({
