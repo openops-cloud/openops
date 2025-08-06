@@ -41,10 +41,16 @@ const GenerateCodeTool = ({ result, status, theme }: GenerateCodeToolProps) => {
     );
   }
 
+  const parsedResult = parseResult(result);
+
+  if (!parsedResult.code?.trim()) {
+    return null;
+  }
+
   return (
     <div className="relative flex flex-col px-3 w-full h-[300px] overflow-hidden">
       <CodeEditor
-        value={parseResult(result)}
+        value={parsedResult}
         readonly={true}
         showLineNumbers={false}
         className="border border-solid rounded"
@@ -53,7 +59,7 @@ const GenerateCodeTool = ({ result, status, theme }: GenerateCodeToolProps) => {
         language={getLanguageExtensionForCode('language-typescript')}
       />
       <CodeActions
-        content={parseResult(result)}
+        content={parsedResult}
         onInject={handleInject}
         injectButtonText={t('Use code')}
       />
