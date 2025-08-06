@@ -41,6 +41,8 @@ const GenerateCodeTool = ({ result, status, theme }: GenerateCodeToolProps) => {
     );
   }
 
+  if (!result) return null;
+
   const parsedResult = parseResult(result);
 
   if (!parsedResult.code?.trim()) {
