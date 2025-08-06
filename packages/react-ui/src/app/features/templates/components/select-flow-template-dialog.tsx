@@ -33,16 +33,21 @@ import {
 } from '@openops/components/ui';
 import {
   AppConnectionsWithSupportedBlocks,
+  BlockCategory,
   FlowTemplateDto,
 } from '@openops/shared';
 import { useMutation } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDebounceValue } from 'usehooks-ts';
+import { blocksHooks } from '../../blocks/lib/blocks-hook';
 import { popupFeatures } from '../../cloud/lib/popup';
 import { useCloudProfile } from '../../cloud/lib/use-cloud-profile';
 import { useUserInfoPolling } from '../../cloud/lib/use-user-info-polling';
 import { cloudTemplatesApi } from '../lib/cloud-templates-api';
 import { TemplateStepNodeWithMetadata } from './template-step-node-with-metadata';
+
+const TEMPLATE_FILTER_DEBOUNCE_DELAY = 300;
 
 type FlowTemplateFilterSidebarSkeletonLoaderProps = {
   numberOfSkeletons?: number;
@@ -84,8 +89,10 @@ const nodeTypes = {
 };
 
 type FlowTemplateFilterSidebarProps = {
+  selectedBlocks: string[];
   selectedDomains: string[];
   selectedServices: string[];
+  setSelectedBlocks: (blocks: string[]) => void;
   setSelectedDomains: (domains: string[]) => void;
   setSelectedServices: (services: string[]) => void;
   selectedCategories: string[];
@@ -93,23 +100,39 @@ type FlowTemplateFilterSidebarProps = {
 };
 
 const FlowTemplateFilterSidebarWrapper = ({
+  selectedBlocks,
   selectedDomains,
   selectedServices,
   setSelectedDomains,
   setSelectedServices,
   selectedCategories,
   setSelectedCategories,
+  setSelectedBlocks,
 }: FlowTemplateFilterSidebarProps) => {
   const useCloudTemplates = flagsHooks.useShouldFetchCloudTemplates();
 
-  const { domains, categories, isLoading, status, isError } =
-    templatesHooks.useTemplateFilters({
-      enabled: true,
-      useCloudTemplates,
-      gettingStartedTemplateFilter: 'exclude',
-    });
+  const {
+    domains,
+    categories,
+    blocks: templateBlockNames,
+    isLoading: isTemplateFiltersLoading,
+    status,
+    isError,
+  } = templatesHooks.useTemplateFilters({
+    enabled: true,
+    useCloudTemplates,
+    gettingStartedTemplateFilter: 'exclude',
+  });
 
-  if (isLoading || status === 'pending') {
+  const { blocks, isLoading: isBlocksLoading } = blocksHooks.useBlocks({
+    categories: [BlockCategory.FINOPS],
+  });
+
+  const blocksWithTemplates = blocks?.filter((block) =>
+    templateBlockNames?.includes(block.name),
+  );
+
+  if (isTemplateFiltersLoading || isBlocksLoading || status === 'pending') {
     return <FlowTemplateFilterSidebarSkeletonLoader numberOfSkeletons={12} />;
   }
 
@@ -118,21 +141,31 @@ const FlowTemplateFilterSidebarWrapper = ({
     return null;
   }
 
+  const onBlockFilterClick = (block: string) => {
+    setSelectedBlocks(selectedBlocks.includes(block) ? [] : [block]);
+    setSelectedDomains([]);
+    setSelectedServices([]);
+    setSelectedCategories([]);
+  };
+
   const onDomainFilterClick = (domain: string) => {
     setSelectedDomains(selectedDomains.includes(domain) ? [] : [domain]);
     setSelectedServices([]);
+    setSelectedBlocks([]);
   };
 
   const onServiceFilterClick = (service: string) => {
     setSelectedServices(selectedServices.includes(service) ? [] : [service]);
     setSelectedDomains([]);
     setSelectedCategories([]);
+    setSelectedBlocks([]);
   };
 
   const onCategoryFilterClick = (category: string) => {
     if (category === '') {
       setSelectedCategories([]);
       setSelectedServices([]);
+      setSelectedBlocks([]);
       return;
     }
 
@@ -141,20 +174,25 @@ const FlowTemplateFilterSidebarWrapper = ({
     );
     setSelectedDomains([]);
     setSelectedServices([]);
+    setSelectedBlocks([]);
   };
 
   const clearFilters = () => {
     setSelectedDomains([]);
     setSelectedServices([]);
     setSelectedCategories([]);
+    setSelectedBlocks([]);
   };
 
   return (
     <FlowTemplateFilterSidebar
+      blocks={blocksWithTemplates}
       domains={domains}
       categories={categories}
+      selectedBlocks={selectedBlocks}
       selectedDomains={selectedDomains}
       selectedServices={selectedServices}
+      onBlockFilterClick={onBlockFilterClick}
       onDomainFilterClick={onDomainFilterClick}
       onServiceFilterClick={onServiceFilterClick}
       onCategoryFilterClick={onCategoryFilterClick}
@@ -188,7 +226,7 @@ FlowTemplateFilterSidebar.displayName = 'FlowTemplateFilterSidebar';
 type SelectFlowTemplateDialogContentProps = {
   isExpanded: boolean;
   selectedTemplate: FlowTemplateDto | undefined;
-  searchInitialValue: string;
+  searchText: string;
   selectedTemplateMetadata: FlowTemplateMetadataWithIntegrations | undefined;
   templates: FlowTemplateMetadataWithIntegrations[] | undefined;
   isTemplateListLoading: boolean;
@@ -203,19 +241,22 @@ type SelectFlowTemplateDialogContentProps = {
   onSearchInputChange: (search: string) => void;
   selectedCategories: string[];
   setSelectedCategories: (categories: string[]) => void;
+  setSelectedBlocks: (blocks: string[]) => void;
 } & FlowTemplateFilterSidebarProps;
 
 const SelectFlowTemplateDialogContent = ({
   isExpanded,
   selectedTemplate,
   closeExpanded,
+  selectedBlocks,
   selectedDomains,
   selectedServices,
+  setSelectedBlocks,
   setSelectedDomains,
   setSelectedServices,
   selectedCategories,
   setSelectedCategories,
-  searchInitialValue,
+  searchText,
   selectedTemplateMetadata,
   isTemplatePreselected,
   closeDetails,
@@ -265,14 +306,19 @@ const SelectFlowTemplateDialogContent = ({
     );
   }
 
+  const selectionHeading =
+    selectedCategories[0] || selectedDomains[0] || selectedServices[0];
+
   return (
     <>
       {isFullCatalog && (
         <>
           <div className="w-[255px]">
             <FlowTemplateFilterSidebarWrapper
+              selectedBlocks={selectedBlocks}
               selectedDomains={selectedDomains}
               selectedServices={selectedServices}
+              setSelectedBlocks={setSelectedBlocks}
               setSelectedDomains={setSelectedDomains}
               setSelectedServices={setSelectedServices}
               selectedCategories={selectedCategories}
@@ -297,10 +343,11 @@ const SelectFlowTemplateDialogContent = ({
           />
         ) : (
           <FlowTemplateList
+            selectionHeading={selectionHeading}
             templates={templates}
             isLoading={isTemplateListLoading}
             onTemplateSelect={handleTemplateSelect}
-            searchInitialValue={searchInitialValue}
+            searchText={searchText}
             onSearchInputChange={onSearchInputChange}
             ownerLogoUrl={ownerLogoUrl}
             isFullCatalog={isFullCatalog}
@@ -326,6 +373,7 @@ const SelectFlowTemplateDialog = ({
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [selectedDomains, setSelectedDomains] = useState<string[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedBlocks, setSelectedBlocks] = useState<string[]>([]);
   const [searchText, setSearchText] = useState('');
   const { updateHomePageOperationalViewFlag } =
     userSettingsHooks.useHomePageOperationalView();
@@ -348,8 +396,13 @@ const SelectFlowTemplateDialog = ({
     setSelectedDomains([]);
     setSelectedServices([]);
     setSelectedCategories([]);
+    setSelectedBlocks([]);
     resetTemplateDialog();
-  }, [isOpen, resetTemplateDialog, searchText]);
+  }, [isOpen, resetTemplateDialog]);
+
+  useEffect(() => {
+    setSearchText('');
+  }, [selectedServices, selectedDomains, selectedCategories, selectedBlocks]);
 
   useEffect(() => {
     resetTemplateDialog();
@@ -357,10 +410,16 @@ const SelectFlowTemplateDialog = ({
 
   const useCloudTemplates = flagsHooks.useShouldFetchCloudTemplates();
 
+  const [debouncedSearchText] = useDebounceValue(
+    searchText,
+    TEMPLATE_FILTER_DEBOUNCE_DELAY,
+  );
+
   const { templatesWithIntegrations, isLoading: isTemplateListLoading } =
     templatesHooks.useTemplatesMetadataWithIntegrations({
       enabled: isOpen,
-      search: searchText,
+      search: debouncedSearchText,
+      blocks: selectedBlocks,
       domains: selectedDomains,
       services: selectedServices,
       categories: selectedCategories,
@@ -505,10 +564,12 @@ const SelectFlowTemplateDialog = ({
               templates={templatesWithIntegrations}
               isTemplateListLoading={isTemplateListLoading}
               handleTemplateSelect={handleTemplateSelect}
-              searchInitialValue={searchText}
+              searchText={searchText}
               onSearchInputChange={setSearchText}
+              selectedBlocks={selectedBlocks}
               selectedCategories={selectedCategories}
               setSelectedCategories={setSelectedCategories}
+              setSelectedBlocks={setSelectedBlocks}
             />
           </div>
         )}

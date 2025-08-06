@@ -24,11 +24,13 @@ const meta = {
         services: storyMocks.services.slice(4),
       },
     ],
+    selectedBlocks: [],
     selectedDomains: ['Allocation'],
     selectedServices: [],
     selectedCategories: [],
     onDomainFilterClick: fn(),
     onServiceFilterClick: fn(),
+    onCategoryFilterClick: fn(),
     clearFilters: fn(),
   },
   parameters: {
@@ -70,5 +72,21 @@ export const Default: Story = {
 export const WithSelectedCategory: Story = {
   args: {
     selectedCategories: ['AWS'],
+  },
+  play: async ({ canvasElement, args: { onCategoryFilterClick } }) => {
+    const canvas = selectLightOrDarkCanvas(canvasElement);
+    const awsCategory = canvas.getByText('AWS');
+    await userEvent.click(awsCategory);
+    expect(onCategoryFilterClick).toHaveBeenCalledWith('AWS');
+  },
+};
+
+/*
+ *  This story is used to test the sidebar with blocks.
+ */
+export const WithCloudProvidersCategory: Story = {
+  args: {
+    blocks: storyMocks.blocks,
+    selectedDomains: [],
   },
 };

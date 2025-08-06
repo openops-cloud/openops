@@ -1,5 +1,16 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { useState } from 'react';
 import { SearchInput } from '../../components';
+
+const SearchInputWithState = (
+  args: React.ComponentProps<typeof SearchInput>,
+) => {
+  const [searchValue, setSearchValue] = useState(args.value);
+
+  return (
+    <SearchInput {...args} value={searchValue} onChange={setSearchValue} />
+  );
+};
 
 /**
  * Displays an search input.
@@ -21,7 +32,7 @@ const meta = {
       },
     },
   },
-  render: (args) => <SearchInput {...args} />,
+  render: (args) => <SearchInputWithState {...args} />,
 } satisfies Meta<typeof SearchInput>;
 
 export default meta;
@@ -47,6 +58,6 @@ export const WithCustomPlaceholder: Story = {
  */
 export const WithInitialValue: Story = {
   args: {
-    initialValue: 'Initial value',
+    value: 'Initial value',
   },
 };
