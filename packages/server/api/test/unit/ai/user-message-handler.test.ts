@@ -104,7 +104,7 @@ describe('User Message Handler', () => {
     languageModel: mockLanguageModel,
     conversation: {
       chatContext: { chatId: 'test-chat-id' },
-      chatHistory: [...mockChatHistory],
+      chatHistory: [...mockChatHistory, mockNewMessage],
     },
     frontendTools: {},
   };

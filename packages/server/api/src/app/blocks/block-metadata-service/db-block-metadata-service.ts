@@ -1,4 +1,5 @@
 import {
+  BlockBase,
   BlockMetadataModel,
   BlockMetadataModelSummary,
 } from '@openops/blocks-framework';
@@ -17,6 +18,7 @@ import semVer from 'semver';
 import { IsNull } from 'typeorm';
 import { toBlockMetadataModelSummary } from '.';
 import { repoFactory } from '../../core/db/repo-factory';
+import { flagService } from '../../flags/flag.service';
 import { projectService } from '../../project/project-service';
 import {
   BlockMetadataEntity,
@@ -30,6 +32,19 @@ const repo = repoFactory(BlockMetadataEntity);
 
 export const FastDbBlockMetadataService = (): BlockMetadataService => {
   return {
+    async listAll(): Promise<BlockBase[]> {
+      const release = await flagService.getCurrentRelease();
+
+      return (
+        await findAllBlocksVersionsSortedByNameAscVersionDesc({
+          release,
+        })
+      ).map((b) => ({
+        name: b.name,
+        displayName: b.displayName,
+        description: b.description,
+      }));
+    },
     async list(params): Promise<BlockMetadataModelSummary[]> {
       const originalBlocks =
         await findAllBlocksVersionsSortedByNameAscVersionDesc(params);
