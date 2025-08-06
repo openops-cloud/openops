@@ -1,12 +1,6 @@
 import { HttpError, HttpMethod } from '@openops/blocks-common';
-import {
-  BlockAuth,
-  Property,
-  ShortTextProperty,
-  StaticPropsValue,
-  Validators,
-} from '@openops/blocks-framework';
-import { getUsers, sendJiraRequest } from './lib/common';
+import { BlockAuth, Property, Validators } from '@openops/blocks-framework';
+import { sendJiraRequest } from './lib/common';
 
 export const jiraCloudAuth = BlockAuth.CustomAuth({
   authProviderKey: 'Jira',

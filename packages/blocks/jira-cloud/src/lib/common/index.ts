@@ -13,7 +13,7 @@ export async function sendJiraRequest(
   request: HttpRequest & { auth: JiraAuth },
 ) {
   try {
-    return await httpClient.sendRequest({
+    const response: any = await httpClient.sendRequest({
       ...request,
       url: `${request.auth.instanceUrl}/rest/api/3/${request.url}`,
       authentication: {
@@ -22,6 +22,12 @@ export async function sendJiraRequest(
         password: request.auth.apiToken,
       },
     });
+
+    if (response?.body?.key) {
+      response.body.htmlUrl = `${request.auth.instanceUrl}/browse/${response.body.key}`;
+    }
+
+    return response;
   } catch (e) {
     if (e instanceof HttpError) {
       const errorBody = e.response?.body ?? {};
