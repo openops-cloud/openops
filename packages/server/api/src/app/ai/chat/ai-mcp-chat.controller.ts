@@ -359,9 +359,9 @@ async function getUserMessage(
 
     const lastMessage = body.messages[body.messages.length - 1];
     if (
-      !lastMessage.content ||
-      !Array.isArray(lastMessage.content) ||
-      lastMessage.content.length === 0
+      !lastMessage.parts ||
+      !Array.isArray(lastMessage.parts) ||
+      lastMessage.parts.length === 0
     ) {
       await reply.code(400).send({
         message:
@@ -370,7 +370,7 @@ async function getUserMessage(
       return null;
     }
 
-    const firstContentElement = lastMessage.content[0];
+    const firstContentElement = lastMessage.parts[0];
     if (
       !firstContentElement ||
       typeof firstContentElement !== 'object' ||

@@ -67,7 +67,7 @@ export const NewMessageRequest = Type.Object({
           Type.Literal('assistant'),
           Type.Literal('tool'),
         ]),
-        content: Type.Any(),
+        parts: Type.Any(),
       }),
     ),
   ),

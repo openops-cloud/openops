@@ -67,15 +67,15 @@ const AssistantUiChat = ({
     );
   }
 
-  if (!shouldRenderChat) {
-    return (
-      <div className="w-full flex h-full items-center justify-center bg-background">
-        <div className="text-sm text-muted-foreground">
-          {t('Initializing chat...')}
-        </div>
-      </div>
-    );
-  }
+  // if (!shouldRenderChat) {
+  //   return (
+  //     <div className="w-full flex h-full items-center justify-center bg-background">
+  //       <div className="text-sm text-muted-foreground">
+  //         {t('Initializing chat...')}
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <AssistantUiChatContainer
