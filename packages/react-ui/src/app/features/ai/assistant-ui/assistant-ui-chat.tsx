@@ -5,7 +5,7 @@ import { useAssistantChat } from '@/app/features/ai/lib/assistant-ui-chat-hook';
 import { AssistantUiChatContainer } from '@openops/components/ui';
 import { SourceCode } from '@openops/shared';
 import { t } from 'i18next';
-import { ReactNode, useCallback, useRef } from 'react';
+import { ReactNode, useCallback, useState } from 'react';
 import { useFrontendTools } from '../lib/use-frontend-tools';
 
 type AssistantUiChatProps = {
@@ -21,7 +21,7 @@ const AssistantUiChat = ({
   title,
   handleInject,
 }: AssistantUiChatProps) => {
-  const chatId = useRef<string | null>(
+  const [chatId, setChatId] = useState<string | null>(
     localStorage.getItem(AI_ASSISTANT_LS_KEY),
   );
 
@@ -32,7 +32,7 @@ const AssistantUiChat = ({
       localStorage.removeItem(AI_ASSISTANT_LS_KEY);
     }
 
-    chatId.current = id;
+    setChatId(id);
   }, []);
 
   const { toolComponents, isLoading: isLoadingTools } = useFrontendTools();
@@ -44,7 +44,7 @@ const AssistantUiChat = ({
     hasMessages,
     createNewChat,
   } = useAssistantChat({
-    chatId: chatId.current,
+    chatId,
     onChatIdChange,
   });
 

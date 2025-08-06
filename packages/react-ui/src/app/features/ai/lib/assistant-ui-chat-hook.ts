@@ -13,6 +13,7 @@ import { useQuery } from '@tanstack/react-query';
 import { t } from 'i18next';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { aiChatApi } from '../../builder/ai-chat/lib/chat-api';
+import { aiSettingsHooks } from './ai-settings-hooks';
 import { createAdditionalContext } from './enrich-context';
 
 const PLACEHOLDER_MESSAGE_INTEROP = 'satisfy-schema';
@@ -51,11 +52,29 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
   const [shouldRenderChat, setShouldRenderChat] = useState(false);
   const [pendingConversation, setPendingConversation] =
     useState<OpenChatResponse | null>(null);
+  const { hasActiveAiSettings, isLoading: isLoadingAiSettings } =
+    aiSettingsHooks.useHasActiveAiSettings();
 
   const stepDetails =
     flowVersion && selectedStep
       ? flowHelper.getStep(flowVersion, selectedStep)
       : undefined;
+
+  const isQueryEnabled = useMemo(() => {
+    if (isLoadingAiSettings) {
+      return false;
+    }
+
+    if (selectedStep) {
+      return (
+        !!getBlockName(stepDetails) &&
+        !!getActionName(stepDetails) &&
+        hasActiveAiSettings
+      );
+    }
+
+    return hasActiveAiSettings;
+  }, [selectedStep, stepDetails, hasActiveAiSettings, isLoadingAiSettings]);
 
   const queryKey = useMemo(
     () =>
@@ -91,9 +110,7 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
       onConversationRetrieved(conversation);
       return conversation;
     },
-    enabled: selectedStep
-      ? !!getBlockName(stepDetails) && !!getActionName(stepDetails)
-      : true,
+    enabled: isQueryEnabled,
   });
 
   const onConversationRetrieved = useCallback(
