@@ -4,12 +4,12 @@ import {
   ParseEventResponse,
 } from '@openops/shared';
 import { Action } from './action/action';
-import { BlockBase, BlockMetadata } from './block-metadata';
+import { BlockBaseDetails, BlockMetadata } from './block-metadata';
 import { BlockAuthProperty } from './property/authentication';
 import { Trigger } from './trigger/trigger';
 
 export class Block<BlockAuth extends BlockAuthProperty = BlockAuthProperty>
-  implements Omit<BlockBase, 'version' | 'name'>
+  implements Omit<BlockBaseDetails, 'version' | 'name'>
 {
   private readonly _actions: Record<string, Action> = {};
   private readonly _triggers: Record<string, Trigger> = {};

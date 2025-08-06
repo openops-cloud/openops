@@ -1,22 +1,27 @@
-import { AI_ASSISTANT_LS_KEY } from '@/app/constants/ai';
 import { QueryKeys } from '@/app/constants/query-keys';
 import { aiAssistantChatApi } from '@/app/features/ai/lib/ai-assistant-chat-api';
 import { getActionName, getBlockName } from '@/app/features/blocks/lib/utils';
 import { authenticationSession } from '@/app/lib/authentication-session';
 import { ThreadMessageLike } from '@assistant-ui/react';
-import { useChatRuntime } from '@assistant-ui/react-ai-sdk';
+import {
+  useChatRuntime,
+  UseChatRuntimeOptions,
+} from '@assistant-ui/react-ai-sdk';
 import { toast } from '@openops/components/ui';
 import { flowHelper, FlowVersion, OpenChatResponse } from '@openops/shared';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { t } from 'i18next';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { aiChatApi } from '../../builder/ai-chat/lib/chat-api';
+import { createAdditionalContext } from './enrich-context';
 
 const PLACEHOLDER_MESSAGE_INTEROP = 'satisfy-schema';
 
 interface UseAssistantChatProps {
   flowVersion?: FlowVersion;
   selectedStep?: string;
+  chatId: string | null;
+  onChatIdChange: (chatId: string | null) => void;
 }
 
 const buildQueryKey = (
@@ -41,10 +46,11 @@ const buildQueryKey = (
   return baseKey;
 };
 
-export const useAssistantChat = (props?: UseAssistantChatProps) => {
-  const { flowVersion, selectedStep } = props ?? {};
-  const chatId = useRef(localStorage.getItem(AI_ASSISTANT_LS_KEY));
+export const useAssistantChat = (props: UseAssistantChatProps) => {
+  const { flowVersion, selectedStep, chatId, onChatIdChange } = props;
   const [shouldRenderChat, setShouldRenderChat] = useState(false);
+  const [pendingConversation, setPendingConversation] =
+    useState<OpenChatResponse | null>(null);
 
   const stepDetails =
     flowVersion && selectedStep
@@ -56,10 +62,15 @@ export const useAssistantChat = (props?: UseAssistantChatProps) => {
       buildQueryKey(
         selectedStep,
         flowVersion?.flowId,
-        chatId.current,
+        chatId,
         stepDetails?.settings?.blockName,
       ),
-    [selectedStep, flowVersion?.flowId, stepDetails?.settings?.blockName],
+    [
+      selectedStep,
+      flowVersion?.flowId,
+      chatId,
+      stepDetails?.settings?.blockName,
+    ],
   );
 
   const { data: openChatResponse, isLoading } = useQuery({
@@ -74,7 +85,7 @@ export const useAssistantChat = (props?: UseAssistantChatProps) => {
           getActionName(stepDetails),
         );
       } else {
-        conversation = await aiAssistantChatApi.open(chatId.current);
+        conversation = await aiAssistantChatApi.open(chatId);
       }
 
       onConversationRetrieved(conversation);
@@ -85,12 +96,14 @@ export const useAssistantChat = (props?: UseAssistantChatProps) => {
       : true,
   });
 
-  const onConversationRetrieved = (conversation: OpenChatResponse) => {
-    if (conversation.chatId) {
-      localStorage.setItem(AI_ASSISTANT_LS_KEY, conversation.chatId);
-      chatId.current = conversation.chatId;
-    }
-  };
+  const onConversationRetrieved = useCallback(
+    (conversation: OpenChatResponse) => {
+      if (conversation.chatId) {
+        setPendingConversation(conversation);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     if (!isLoading && openChatResponse) {
@@ -98,47 +111,59 @@ export const useAssistantChat = (props?: UseAssistantChatProps) => {
     }
   }, [isLoading, openChatResponse]);
 
-  const runtimeConfig = useMemo(
+  const runtimeConfig: UseChatRuntimeOptions = useMemo(
     () => ({
       api: '/api/v1/ai/conversation',
       maxSteps: 5,
       body: {
         chatId: openChatResponse?.chatId,
         message: PLACEHOLDER_MESSAGE_INTEROP,
+        additionalContext: flowVersion
+          ? createAdditionalContext(flowVersion, stepDetails)
+          : undefined,
       },
-      initialMessages: openChatResponse?.messages as ThreadMessageLike[],
       headers: {
         Authorization: `Bearer ${authenticationSession.getToken()}`,
       },
     }),
-    [openChatResponse?.chatId, openChatResponse?.messages],
+    [openChatResponse?.chatId, flowVersion, stepDetails],
   );
+
   const runtime = useChatRuntime(runtimeConfig);
 
   const [hasMessages, setHasMessages] = useState(!!openChatResponse?.messages);
 
-  const queryClient = useQueryClient();
+  useEffect(() => {
+    if (pendingConversation && runtime && shouldRenderChat) {
+      if (pendingConversation.chatId !== chatId) {
+        onChatIdChange(pendingConversation.chatId);
+      }
+
+      if ((pendingConversation.messages?.length ?? 0) > 0) {
+        runtime.thread.reset(
+          (pendingConversation.messages ?? []) as ThreadMessageLike[],
+        );
+      } else {
+        runtime.threads.switchToNewThread();
+      }
+      setPendingConversation(null);
+    }
+  }, [pendingConversation, runtime, shouldRenderChat, onChatIdChange, chatId]);
 
   const createNewChat = useCallback(async () => {
-    const oldChatId = chatId.current;
-
-    chatId.current = null;
+    const oldChatId = chatId;
 
     try {
+      setPendingConversation(null);
+
       if (oldChatId) {
+        onChatIdChange(null);
         runtime.thread.cancelRun();
         runtime.thread.reset();
 
-        const invalidationKey = buildQueryKey(
-          selectedStep,
-          flowVersion?.flowId,
-          oldChatId,
-          stepDetails?.settings?.blockName,
-        );
-
-        await queryClient.invalidateQueries({
-          queryKey: invalidationKey,
-        });
+        if (selectedStep && flowVersion) {
+          await aiChatApi.delete(oldChatId);
+        }
       }
       setHasMessages(false);
     } catch (error) {
@@ -150,13 +175,7 @@ export const useAssistantChat = (props?: UseAssistantChatProps) => {
         `There was an error canceling the current run and invalidating queries while creating a new chat: ${error}`,
       );
     }
-  }, [
-    flowVersion?.flowId,
-    queryClient,
-    runtime.thread,
-    selectedStep,
-    stepDetails?.settings?.blockName,
-  ]);
+  }, [chatId, onChatIdChange, runtime.thread, selectedStep, flowVersion]);
 
   useEffect(() => {
     const unsubscribe = runtime.thread.subscribe(() => {

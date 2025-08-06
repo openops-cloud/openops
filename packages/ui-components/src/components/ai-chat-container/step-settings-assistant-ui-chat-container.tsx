@@ -1,5 +1,6 @@
 import { Theme } from '@/lib/theme';
 import { AssistantRuntime } from '@assistant-ui/react';
+import { SourceCode } from '@openops/shared';
 import { t } from 'i18next';
 import { ExpandIcon, MinimizeIcon } from 'lucide-react';
 import { useRef } from 'react';
@@ -32,7 +33,7 @@ type StepSettingsAssistantUiChatContainerProps = {
   onModelSelected: (modelName: string) => void;
   runtime: AssistantRuntime;
   theme: Theme;
-  handleInject: (code: string) => void;
+  handleInject: (code: string | SourceCode) => void;
   showFullWidth: boolean;
 };
 

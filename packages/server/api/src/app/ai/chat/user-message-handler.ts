@@ -54,15 +54,12 @@ export async function handleUserMessage(
     aiConfig,
     projectId,
     authToken,
-    newMessage,
     languageModel,
     serverResponse,
     conversation: { chatContext, chatHistory },
   } = params;
 
   serverResponse.write(buildMessageIdMessage(generateMessageId()));
-
-  chatHistory.push(newMessage);
 
   const { mcpClients, systemPrompt, filteredTools } = await getMCPToolsContext(
     app,

@@ -1,4 +1,8 @@
 import { QueryKeys } from '@/app/constants/query-keys';
+import {
+  createAdditionalContext,
+  StepDetails,
+} from '@/app/features/ai/lib/enrich-context';
 import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
 import { authenticationSession } from '@/app/lib/authentication-session';
 import {
@@ -9,14 +13,11 @@ import {
 import { BlockMetadataModel } from '@openops/blocks-framework';
 import { toast } from '@openops/components/ui';
 import {
-  Action,
   ActionType,
-  ChatFlowContext,
   CODE_BLOCK_NAME,
   flowHelper,
   FlowVersion,
   TriggerType,
-  TriggerWithOptionalId,
   unifiedCodeLLMSchema,
   UnifiedCodeLLMSchema,
 } from '@openops/shared';
@@ -25,8 +26,6 @@ import { t } from 'i18next';
 import { nanoid } from 'nanoid';
 import { useCallback, useEffect, useState } from 'react';
 import { aiChatApi } from './chat-api';
-
-type StepDetails = Action | TriggerWithOptionalId | undefined;
 
 export const useStepSettingsAiChat = (
   flowVersion: FlowVersion,
@@ -251,30 +250,6 @@ const getActionName = (stepDetails: StepDetails) => {
   }
 
   return stepDetails?.type === ActionType.CODE ? ActionType.CODE : '';
-};
-
-const createAdditionalContext = (
-  flowVersion: FlowVersion,
-  stepData?: StepDetails,
-): ChatFlowContext => {
-  const stepVariables = stepData?.settings?.input || {};
-  const variables = Object.entries(stepVariables).map(([name, value]) => ({
-    name,
-    value: String(value || ''),
-  }));
-
-  return {
-    flowId: flowVersion.flowId,
-    flowVersionId: flowVersion.id,
-    currentStepId: stepData?.id ?? '',
-    steps: [
-      {
-        id: stepData?.id ?? '',
-        stepName: stepData?.name ?? '',
-        variables: variables.length > 0 ? variables : undefined,
-      },
-    ],
-  };
 };
 
 const doesActionSupportsAI = (

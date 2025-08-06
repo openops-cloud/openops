@@ -1,6 +1,7 @@
 import { useAssistantChat } from '@/app/features/ai/lib/assistant-ui-chat-hook';
 import { FlowVersion, SourceCode } from '@openops/shared';
-import { useCallback } from 'react';
+import { nanoid } from 'nanoid';
+import { useCallback, useEffect, useState } from 'react';
 import { useBuilderStateContext } from '../../builder-hooks';
 
 export const useStepSettingsAssistantChat = (
@@ -8,6 +9,15 @@ export const useStepSettingsAssistantChat = (
   selectedStep: string,
 ) => {
   const dispatch = useBuilderStateContext((state) => state.applyMidpanelAction);
+  const [chatSessionKey, setChatSessionKey] = useState<string>(nanoid());
+
+  const onChatIdChange = useCallback((id: string | null) => {
+    setChatSessionKey(id ?? nanoid());
+  }, []);
+
+  useEffect(() => {
+    setChatSessionKey(nanoid());
+  }, [selectedStep]);
 
   const onInject = useCallback(
     (code: string | SourceCode) => {
@@ -19,6 +29,8 @@ export const useStepSettingsAssistantChat = (
   const assistantChat = useAssistantChat({
     flowVersion,
     selectedStep,
+    chatId: chatSessionKey,
+    onChatIdChange,
   });
 
   return {
