@@ -5,7 +5,6 @@ export class AddTriggerSourceToFlowRun1752758891772
   implements MigrationInterface
 {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    // Add column with default value first - this will set the default for all existing rows
     await queryRunner.query(`
       ALTER TABLE flow_run 
       ADD COLUMN IF NOT EXISTS triggerSource varchar
