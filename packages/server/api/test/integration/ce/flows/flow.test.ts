@@ -935,7 +935,7 @@ describe('Flow API', () => {
       expect(response?.json()).toEqual({
         success: false,
         message:
-          'Workflow must be published before it can be triggered manually',
+          'Something went wrong while triggering the workflow execution manually. ENTITY_NOT_FOUND',
       });
     });
 
@@ -1018,7 +1018,8 @@ describe('Flow API', () => {
       expect(response?.statusCode).toBe(StatusCodes.BAD_REQUEST);
       expect(response?.json()).toEqual({
         success: false,
-        message: 'Only polling workflows can be triggered manually',
+        message:
+          'Something went wrong while validating the trigger type. BLOCK_TRIGGER_NOT_FOUND',
       });
     });
 

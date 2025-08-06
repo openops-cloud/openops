@@ -203,8 +203,7 @@ export const flowController: FastifyPluginAsyncTypebox = async (app) => {
       ) {
         return reply.status(StatusCodes.BAD_REQUEST).send({
           success: false,
-          message:
-            'Workflow must be published before it can be triggered manually',
+          message: `Something went wrong while triggering the workflow execution manually. ${error.message}`,
         });
       }
       throw error;
@@ -277,7 +276,7 @@ async function validateTriggerType(
   if (blockTrigger.type !== TriggerType.BLOCK) {
     return {
       success: false,
-      message: 'Only polling workflows can be triggered manually',
+      message: `Trigger type is not a block: type: ${blockTrigger.type}`,
     };
   }
 
@@ -297,10 +296,9 @@ async function validateTriggerType(
   } catch (error) {
     return {
       success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : 'Only polling workflows can be triggered manually',
+      message: `Something went wrong while validating the trigger type. ${
+        error instanceof Error ? error.message : 'Unknown error'
+      }`,
     };
   }
 }
@@ -436,7 +434,7 @@ const DeleteFlowRequestOptions = {
 
 const RunFlowRequestOptions = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+    allowedPrincipals: [PrincipalType.USER],
     permission: Permission.WRITE_FLOW,
     preSerializationHook: entitiesMustBeOwnedByCurrentProject,
   },
