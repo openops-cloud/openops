@@ -13,6 +13,7 @@ import {
   FlowRun,
   FlowRunId,
   FlowRunStatus,
+  FlowRunTriggerSource,
   FlowVersionId,
   isEmpty,
   isNil,
@@ -45,10 +46,17 @@ import { logSerializer } from './log-serializer';
 export const flowRunRepo = repoFactory<FlowRun>(FlowRunEntity);
 
 const getFlowRunOrCreate = async (
-  params: GetOrCreateParams,
+  params: GetOrCreateParams & { triggerSource?: FlowRunTriggerSource },
 ): Promise<Partial<FlowRun>> => {
-  const { id, projectId, flowId, flowVersionId, flowDisplayName, environment } =
-    params;
+  const {
+    id,
+    projectId,
+    flowId,
+    flowVersionId,
+    flowDisplayName,
+    environment,
+    triggerSource = FlowRunTriggerSource.TRIGGERED,
+  } = params;
 
   if (id) {
     return flowRunService.getOneOrThrow({
@@ -65,6 +73,7 @@ const getFlowRunOrCreate = async (
     environment,
     flowDisplayName,
     startTime: new Date().toISOString(),
+    triggerSource,
   };
 };
 
@@ -317,6 +326,7 @@ export const flowRunService = {
       flowVersionId: flowVersion.id,
       environment,
       flowDisplayName: flowVersion.displayName,
+      triggerSource: FlowRunTriggerSource.TRIGGERED,
     });
 
     flowRun.status = FlowRunStatus.SCHEDULED;
@@ -350,6 +360,20 @@ export const flowRunService = {
   async test({ projectId, flowVersionId }: TestParams): Promise<FlowRun> {
     const flowVersion = await flowVersionService.getOneOrThrow(flowVersionId);
 
+    const flow = await flowService.getOneOrThrow({
+      id: flowVersion.flowId,
+      projectId,
+    });
+
+    const flowRun = await getFlowRunOrCreate({
+      projectId: flow.projectId,
+      flowId: flowVersion.flowId,
+      flowVersionId: flowVersion.id,
+      environment: RunEnvironment.TESTING,
+      flowDisplayName: flowVersion.displayName,
+      triggerSource: FlowRunTriggerSource.TEST_RUN,
+    });
+
     const payload = await flowStepTestOutputService.listDecrypted({
       flowVersionId: flowVersion.id,
       stepIds: [flowVersion.trigger.id],
@@ -358,6 +382,7 @@ export const flowRunService = {
     return this.start({
       projectId,
       flowVersionId,
+      flowRunId: flowRun.id,
       payload,
       environment: RunEnvironment.TESTING,
       executionType: ExecutionType.BEGIN,
