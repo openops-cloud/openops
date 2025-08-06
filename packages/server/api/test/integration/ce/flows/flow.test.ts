@@ -1,4 +1,9 @@
 import {
+  TriggerStrategy,
+  WebhookHandshakeStrategy,
+  WebhookRenewStrategy,
+} from '@openops/blocks-framework';
+import {
   BlockType,
   FlowOperationType,
   FlowStatus,
@@ -7,7 +12,9 @@ import {
   openOpsId,
   PackageType,
   PrincipalType,
+  RiskLevel,
   TemplateType,
+  TriggerTestStrategy,
   TriggerType,
 } from '@openops/shared';
 import { FastifyInstance } from 'fastify';
@@ -16,6 +23,7 @@ import { databaseConnection } from '../../../../src/app/database/database-connec
 import { setupServer } from '../../../../src/app/server';
 import { generateMockToken } from '../../../helpers/auth';
 import {
+  createMockBlockMetadata,
   createMockFlow,
   createMockFlowVersion,
   createMockFolder,
@@ -928,6 +936,36 @@ describe('Flow API', () => {
     });
 
     it('Returns 400 when trigger is not a polling trigger', async () => {
+      const mockBlockMetadata = createMockBlockMetadata({
+        name: 'jira',
+        blockType: BlockType.OFFICIAL,
+        packageType: PackageType.REGISTRY,
+        version: '1.0.0',
+        minimumSupportedRelease: '1.0.0',
+        maximumSupportedRelease: '2.0.0',
+        displayName: 'Jira',
+        logoUrl: 'https://example.com/logo.png',
+        authors: ['OpenOps'],
+        actions: {},
+        triggers: {
+          new_issue: {
+            name: 'new_issue',
+            displayName: 'New Issue',
+            description: 'Triggers when a new issue is created',
+            type: TriggerStrategy.POLLING,
+            props: {},
+            riskLevel: RiskLevel.LOW,
+            handshakeConfiguration: { strategy: WebhookHandshakeStrategy.NONE },
+            renewConfiguration: { strategy: WebhookRenewStrategy.NONE },
+            sampleData: {},
+            testStrategy: TriggerTestStrategy.TEST_FUNCTION,
+          },
+        },
+      });
+      await databaseConnection()
+        .getRepository('block_metadata')
+        .save(mockBlockMetadata);
+
       const mockUser = createMockUser();
       await databaseConnection().getRepository('user').save([mockUser]);
 
@@ -944,10 +982,11 @@ describe('Flow API', () => {
           type: TriggerType.BLOCK,
           name: 'webhook_trigger',
           settings: {
-            blockName: 'test-block',
+            blockName: 'webhook',
             blockVersion: '1.0.0',
             blockType: BlockType.OFFICIAL,
             packageType: PackageType.REGISTRY,
+            triggerName: 'webhook_trigger',
             input: {},
             inputUiInfo: { customizedInputs: {} },
           },
@@ -990,23 +1029,54 @@ describe('Flow API', () => {
 
       const mockFlow = createMockFlow({ projectId: mockProject.id });
       await databaseConnection().getRepository('flow').save([mockFlow]);
-
+      const mockBlockMetadata = createMockBlockMetadata({
+        name: 'jira',
+        blockType: BlockType.OFFICIAL,
+        packageType: PackageType.REGISTRY,
+        version: '1.0.0',
+        minimumSupportedRelease: '1.0.0',
+        maximumSupportedRelease: '2.0.0',
+        displayName: 'Jira',
+        logoUrl: 'https://example.com/logo.png',
+        authors: ['OpenOps'],
+        actions: {},
+        triggers: {
+          new_issue: {
+            name: 'new_issue',
+            displayName: 'New Issue',
+            description: 'Triggers when a new issue is created',
+            type: TriggerStrategy.POLLING,
+            props: {},
+            riskLevel: RiskLevel.LOW,
+            handshakeConfiguration: { strategy: WebhookHandshakeStrategy.NONE },
+            renewConfiguration: { strategy: WebhookRenewStrategy.NONE },
+            sampleData: {},
+            testStrategy: TriggerTestStrategy.TEST_FUNCTION,
+          },
+        },
+      });
+      await databaseConnection()
+        .getRepository('block_metadata')
+        .save(mockBlockMetadata);
       const mockFlowVersion = createMockFlowVersion({
         flowId: mockFlow.id,
+        valid: true,
+        state: FlowVersionState.LOCKED,
         trigger: {
           id: 'trigger',
           type: TriggerType.BLOCK,
-          name: 'polling_trigger',
+          name: 'trigger',
           settings: {
-            blockName: 'test-block',
+            blockName: 'jira',
             blockVersion: '1.0.0',
             blockType: BlockType.OFFICIAL,
             packageType: PackageType.REGISTRY,
+            triggerName: 'new_issue',
             input: {},
             inputUiInfo: { customizedInputs: {} },
           },
           valid: true,
-          displayName: 'Polling Trigger',
+          displayName: 'New Issue',
         },
       });
       await databaseConnection()

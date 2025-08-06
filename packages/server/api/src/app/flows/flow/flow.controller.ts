@@ -149,50 +149,66 @@ export const flowController: FastifyPluginAsyncTypebox = async (app) => {
   });
 
   app.post('/:id/run', RunFlowRequestOptions, async (request, reply) => {
-    const flow = await flowService.getOnePopulatedOrThrow({
-      id: request.params.id,
-      projectId: request.principal.projectId,
-    });
-
-    if (!flow.publishedVersionId) {
-      return reply.status(StatusCodes.BAD_REQUEST).send({
-        success: false,
-        message:
-          'Workflow must be published before it can be triggered manually',
+    try {
+      const flow = await flowService.getOnePopulatedOrThrow({
+        id: request.params.id,
+        projectId: request.principal.projectId,
       });
+
+      if (!flow.publishedVersionId) {
+        return await reply.status(StatusCodes.BAD_REQUEST).send({
+          success: false,
+          message:
+            'Workflow must be published before it can be triggered manually',
+        });
+      }
+
+      const publishedFlow = await flowService.getOnePopulatedOrThrow({
+        id: request.params.id,
+        projectId: request.principal.projectId,
+        versionId: flow.publishedVersionId,
+      });
+
+      const validationResult = await validateTriggerType(
+        publishedFlow,
+        request.principal.projectId,
+      );
+      if (!validationResult.success) {
+        return await reply
+          .status(StatusCodes.BAD_REQUEST)
+          .send(validationResult);
+      }
+
+      const flowRun = await flowRunService.start({
+        environment: RunEnvironment.PRODUCTION,
+        flowVersionId: publishedFlow.version.id,
+        projectId: request.principal.projectId,
+        payload: {},
+        executionType: ExecutionType.BEGIN,
+        synchronousHandlerId: undefined,
+        executionCorrelationId: openOpsId(),
+        progressUpdateType: ProgressUpdateType.NONE,
+      });
+
+      return await reply.status(StatusCodes.OK).send({
+        success: true,
+        flowRunId: flowRun.id,
+        status: flowRun.status,
+        message: 'Workflow execution started successfully',
+      });
+    } catch (error) {
+      if (
+        error instanceof ApplicationError &&
+        error.error?.code === ErrorCode.ENTITY_NOT_FOUND
+      ) {
+        return reply.status(StatusCodes.BAD_REQUEST).send({
+          success: false,
+          message:
+            'Workflow must be published before it can be triggered manually',
+        });
+      }
+      throw error;
     }
-
-    const publishedFlow = await flowService.getOnePopulatedOrThrow({
-      id: request.params.id,
-      projectId: request.principal.projectId,
-      versionId: flow.publishedVersionId,
-    });
-
-    const isValidTriggerType = await validateTriggerType(
-      publishedFlow,
-      request.principal.projectId,
-    );
-    if (!isValidTriggerType.success) {
-      return reply.status(StatusCodes.BAD_REQUEST).send(isValidTriggerType);
-    }
-
-    const flowRun = await flowRunService.start({
-      environment: RunEnvironment.PRODUCTION,
-      flowVersionId: publishedFlow.version.id,
-      projectId: request.principal.projectId,
-      payload: {},
-      executionType: ExecutionType.BEGIN,
-      synchronousHandlerId: undefined,
-      executionCorrelationId: openOpsId(),
-      progressUpdateType: ProgressUpdateType.NONE,
-    });
-
-    return reply.status(StatusCodes.OK).send({
-      success: true,
-      flowRunId: flowRun.id,
-      status: flowRun.status,
-      message: 'Workflow execution started successfully',
-    });
   });
 };
 
@@ -265,18 +281,25 @@ async function validateTriggerType(
     };
   }
 
-  const metadata = await triggerUtils.getBlockTriggerOrThrow({
-    trigger: blockTrigger,
-    projectId,
-  });
+  try {
+    const metadata = await triggerUtils.getBlockTriggerOrThrow({
+      trigger: blockTrigger,
+      projectId,
+    });
 
-  return {
-    success: metadata.type === TriggerStrategy.POLLING,
-    message:
-      metadata.type === TriggerStrategy.POLLING
-        ? 'Trigger type validation successful'
-        : 'Only polling workflows can be triggered manually',
-  };
+    return {
+      success: metadata.type === TriggerStrategy.POLLING,
+      message:
+        metadata.type === TriggerStrategy.POLLING
+          ? 'Trigger type validation successful'
+          : 'Only polling workflows can be triggered manually',
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: 'Only polling workflows can be triggered manually',
+    };
+  }
 }
 
 const CreateFlowRequestOptions = {
@@ -412,6 +435,7 @@ const RunFlowRequestOptions = {
   config: {
     allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
     permission: Permission.WRITE_FLOW,
+    preSerializationHook: entitiesMustBeOwnedByCurrentProject,
   },
   schema: {
     tags: ['flows'],
