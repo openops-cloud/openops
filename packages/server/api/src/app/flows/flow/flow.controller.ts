@@ -11,6 +11,7 @@ import {
   ErrorCode,
   ExecutionType,
   FlowOperationRequest,
+  FlowRunTriggerSource,
   FlowTemplateWithoutProjectInformation,
   FlowVersionMetadata,
   GetFlowQueryParamsRequest,
@@ -188,6 +189,7 @@ export const flowController: FastifyPluginAsyncTypebox = async (app) => {
         synchronousHandlerId: undefined,
         executionCorrelationId: openOpsId(),
         progressUpdateType: ProgressUpdateType.NONE,
+        triggerSource: FlowRunTriggerSource.MANUAL_RUN,
       });
 
       return await reply.status(StatusCodes.OK).send({
