@@ -263,7 +263,7 @@ export const flowRunService = {
       progressUpdateType,
       executionType,
       environment: RunEnvironment.PRODUCTION,
-      triggerSource: FlowRunTriggerSource.TRIGGERED,
+      triggerSource: flowRunToResume.triggerSource,
     });
   },
   async updateStatus({
@@ -362,20 +362,6 @@ export const flowRunService = {
   async test({ projectId, flowVersionId }: TestParams): Promise<FlowRun> {
     const flowVersion = await flowVersionService.getOneOrThrow(flowVersionId);
 
-    const flow = await flowService.getOneOrThrow({
-      id: flowVersion.flowId,
-      projectId,
-    });
-
-    const flowRun = await getFlowRunOrCreate({
-      projectId: flow.projectId,
-      flowId: flowVersion.flowId,
-      flowVersionId: flowVersion.id,
-      environment: RunEnvironment.TESTING,
-      flowDisplayName: flowVersion.displayName,
-      triggerSource: FlowRunTriggerSource.TEST_RUN,
-    });
-
     const payload = await flowStepTestOutputService.listDecrypted({
       flowVersionId: flowVersion.id,
       stepIds: [flowVersion.trigger.id],
@@ -384,7 +370,6 @@ export const flowRunService = {
     return this.start({
       projectId,
       flowVersionId,
-      flowRunId: flowRun.id,
       payload,
       environment: RunEnvironment.TESTING,
       executionType: ExecutionType.BEGIN,
