@@ -127,7 +127,7 @@ async function streamLLMResponse(
       onFinish: async (result): Promise<void> => {
         const messages = result.response.messages;
         newMessages.push(...messages);
-        if (result.finishReason !== 'length') {
+        if (result.finishReason === 'length') {
           throw new Error(
             'The message was truncated because the maximum tokens for the context window was reached.',
           );
