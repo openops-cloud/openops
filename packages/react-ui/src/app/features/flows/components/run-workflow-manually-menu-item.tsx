@@ -1,13 +1,10 @@
-import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
 import { RunWorkflowManuallyDialog } from '@/app/features/flows/components/run-workflow-manually-dialog';
-import { triggerEventsApi } from '@/app/features/flows/lib/trigger-events-api';
-import { TriggerStrategy } from '@openops/blocks-framework';
+import { useRunWorkflowManually } from '@/app/features/flows/lib/run-workflow-manually-hook';
 import { DropdownMenuItem, TooltipWrapper } from '@openops/components/ui';
-import { FlowVersion, TriggerType } from '@openops/shared';
-import { useMutation } from '@tanstack/react-query';
+import { FlowVersion } from '@openops/shared';
 import { t } from 'i18next';
 import { CirclePlay } from 'lucide-react';
-import React, { useMemo, useState } from 'react';
+import React from 'react';
 
 type MenuItemTriggerProps = {
   disabled?: boolean;
@@ -48,46 +45,16 @@ const RunWorkflowManuallyMenuItem = ({
   flowVersion,
   isPublished,
 }: RunWorkflowManuallyMenuItemProps) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const {
+    isOpen,
+    setIsOpen,
+    canRun,
+    isPollingType,
+    runWebhookTrigger,
+    isPending,
+  } = useRunWorkflowManually({ flowVersion, isPublished });
 
-  const { blockName, blockVersion, triggerName } = flowVersion.trigger.settings;
-
-  const isBlockTrigger = useMemo(() => {
-    return flowVersion.trigger.type === TriggerType.BLOCK;
-  }, [flowVersion?.trigger?.type]);
-
-  const { blockModel } = blocksHooks.useBlock({
-    name: blockName,
-    version: blockVersion,
-    enabled: !!blockName && isBlockTrigger,
-  });
-
-  const isWebhookType = useMemo(() => {
-    return blockModel?.triggers[triggerName].type === TriggerStrategy.WEBHOOK;
-  }, [blockModel?.triggers, triggerName]);
-
-  const isPollingType = useMemo(() => {
-    return blockModel?.triggers[triggerName].type === TriggerStrategy.POLLING;
-  }, [blockModel?.triggers, triggerName]);
-
-  const { mutate: runWebhookTrigger, isPending } = useMutation({
-    mutationFn: async (queryParams: Record<string, string>) => {
-      return await triggerEventsApi.triggerWebhook(
-        flowVersion.flowId,
-        queryParams,
-      );
-    },
-    onSuccess: () => {
-      setIsOpen(false);
-    },
-  });
-
-  if (
-    !isPublished ||
-    !flowVersion?.valid ||
-    (!isPollingType && !isWebhookType) ||
-    !isBlockTrigger
-  ) {
+  if (!canRun) {
     return (
       <TooltipWrapper
         tooltipText={t(
@@ -100,13 +67,7 @@ const RunWorkflowManuallyMenuItem = ({
   }
 
   if (isPollingType) {
-    return (
-      <MenuItemTrigger
-        onSelect={() => {
-          // Handle polling type trigger
-        }}
-      />
-    );
+    return <MenuItemTrigger onSelect={() => {}} />;
   }
 
   return (
