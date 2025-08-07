@@ -10,7 +10,9 @@ export const useFrontendTools = () => {
   useEffect(() => {
     const loadTools = async () => {
       try {
-        const { createFrontendTools } = await import(UI_KIT_PACKAGE_NAME);
+        const { createFrontendTools } = await import(
+          /* @vite-ignore */ UI_KIT_PACKAGE_NAME
+        );
         const tools = createFrontendTools();
         setToolComponents(tools);
       } catch (error) {
