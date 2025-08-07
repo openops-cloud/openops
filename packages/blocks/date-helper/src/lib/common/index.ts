@@ -451,14 +451,27 @@ export function addSubtractTime(date: Date, expression: string) {
       units.push(unit);
     }
   }
+
+  const validUnits = new Set([
+    'year',
+    'month',
+    'day',
+    'hour',
+    'minute',
+    'second',
+  ]);
+
   for (let i = 0; i < numbers.length; i++) {
     const value = numbers[i];
     const unit = units[i].toLowerCase() as dayjs.ManipulateType;
 
-    if (value > 0) {
-      dayjsDate = dayjsDate.add(value, unit);
-    } else if (value < 0) {
-      dayjsDate = dayjsDate.subtract(Math.abs(value), unit);
+    if (validUnits.has(unit)) {
+      const manipulateUnit = unit as dayjs.ManipulateType;
+      if (value > 0) {
+        dayjsDate = dayjsDate.add(value, manipulateUnit);
+      } else if (value < 0) {
+        dayjsDate = dayjsDate.subtract(Math.abs(value), manipulateUnit);
+      }
     }
   }
 
