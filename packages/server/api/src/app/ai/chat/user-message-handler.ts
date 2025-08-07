@@ -2,11 +2,11 @@
 import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { AiConfig } from '@openops/shared';
 import {
-  CoreAssistantMessage,
-  CoreMessage,
-  CoreToolMessage,
+  AssistantModelMessage,
   LanguageModel,
+  ModelMessage,
   TextStreamPart,
+  ToolModelMessage,
   ToolSet,
 } from 'ai';
 import { FastifyInstance } from 'fastify';
@@ -41,7 +41,7 @@ type StreamCallSettings = RequestContext &
   ModelConfig & {
     tools?: ToolSet;
     systemPrompt: string;
-    chatHistory: CoreMessage[];
+    chatHistory: ModelMessage[];
   };
 
 export async function handleUserMessage(
@@ -97,8 +97,8 @@ export async function handleUserMessage(
 
 async function streamLLMResponse(
   params: StreamCallSettings,
-): Promise<CoreMessage[]> {
-  const newMessages: CoreMessage[] = [];
+): Promise<ModelMessage[]> {
+  const newMessages: ModelMessage[] = [];
   let stepCount = 0;
 
   try {
@@ -141,7 +141,7 @@ async function streamLLMResponse(
 function unrecoverableError(
   streamParams: StreamCallSettings,
   error: any,
-): CoreAssistantMessage {
+): AssistantModelMessage {
   const errorMessage = error instanceof Error ? error.message : String(error);
   streamParams.serverResponse.write(`0:"\\n\\n"\n`);
   streamParams.serverResponse.write(buildTextMessage(errorMessage));
@@ -169,7 +169,7 @@ async function closeMCPClients(mcpClients: unknown[]): Promise<void> {
   }
 }
 
-function createAssistantMessage(message: string): CoreAssistantMessage {
+function createAssistantMessage(message: string): AssistantModelMessage {
   return {
     role: 'assistant',
     content: [
@@ -182,9 +182,7 @@ function createAssistantMessage(message: string): CoreAssistantMessage {
 }
 
 function appendErrorMessage(
-  responseMessages: ((CoreAssistantMessage | CoreToolMessage) & {
-    id: string;
-  })[],
+  responseMessages: (AssistantModelMessage | ToolModelMessage)[],
   message: string,
 ): void {
   const lastMessage = responseMessages.at(-1);
@@ -201,7 +199,6 @@ function appendErrorMessage(
   } else {
     responseMessages.push({
       ...createAssistantMessage(message),
-      id: generateMessageId(),
     });
   }
 }
@@ -214,7 +211,7 @@ function sendMessageToStream(
 ): void {
   switch (message.type as string) {
     case 'text-delta':
-      sendTextMessageToStream(responseStream, (message as any).textDelta);
+      sendTextMessageToStream(responseStream, (message as any).text);
       break;
     case 'tool-result':
       responseStream.write(`a:${JSON.stringify(message)}\n`);

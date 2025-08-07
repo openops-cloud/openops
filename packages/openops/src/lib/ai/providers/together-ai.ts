@@ -1,5 +1,5 @@
 import { createTogetherAI } from '@ai-sdk/togetherai';
-import { LanguageModelV1 } from 'ai';
+import { LanguageModel } from 'ai';
 import { AiProvider } from '../providers';
 
 const togetherAiModels = [
@@ -42,7 +42,7 @@ function createLanguageModel(params: {
   apiKey: string;
   model: string;
   providerSettings?: Record<string, unknown>;
-}): LanguageModelV1 {
+}): LanguageModel {
   return createTogetherAI({
     apiKey: params.apiKey,
     ...params.providerSettings,

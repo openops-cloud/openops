@@ -1,11 +1,11 @@
 import { logger } from '@openops/server-shared';
 import { AiConfig, AiProviderEnum } from '@openops/shared';
 import {
-  CoreMessage,
-  CoreUserMessage,
   generateObject,
   LanguageModel,
+  ModelMessage,
   ToolSet,
+  UserModelMessage,
 } from 'ai';
 
 import { selectRelevantTools } from '../../../src/app/ai/mcp/tools-selector';
@@ -44,8 +44,8 @@ describe('selectRelevantTools', () => {
     id: 'test-id',
   } as AiConfig;
 
-  const mockMessages: CoreMessage[] = [
-    { role: 'user', content: 'Test message' } as CoreUserMessage,
+  const mockMessages: ModelMessage[] = [
+    { role: 'user', content: 'Test message' } as UserModelMessage,
   ];
 
   beforeEach(() => {
@@ -69,12 +69,9 @@ describe('selectRelevantTools', () => {
 
     it('should handle tools with no descriptions', async () => {
       const mockTools: ToolSet = {
-        tool1: {
-          parameters: {},
-        },
+        tool1: {},
         tool2: {
           description: 'Tool 2 description',
-          parameters: {},
         },
       };
 
@@ -101,11 +98,9 @@ describe('selectRelevantTools', () => {
       const mockTools: ToolSet = {
         tool1: {
           description: 'Tool 1 description',
-          parameters: {},
         },
         tool2: {
           description: 'Tool 2 description',
-          parameters: {},
         },
       };
 
@@ -130,11 +125,9 @@ describe('selectRelevantTools', () => {
       const mockTools: ToolSet = {
         tool1: {
           description: 'Tool 1 description',
-          parameters: {},
         },
         tool2: {
           description: 'Tool 2 description',
-          parameters: {},
         },
       };
 
@@ -154,7 +147,6 @@ describe('selectRelevantTools', () => {
       expect(result).toEqual({
         tool1: {
           description: 'Tool 1 description',
-          parameters: {},
         },
       });
     });
@@ -163,11 +155,9 @@ describe('selectRelevantTools', () => {
       const mockTools: ToolSet = {
         tool1: {
           description: 'Tool 1 description',
-          parameters: {},
         },
         tool2: {
           description: 'Tool 2 description',
-          parameters: {},
         },
       };
 
@@ -191,15 +181,12 @@ describe('selectRelevantTools', () => {
       const mockTools: ToolSet = {
         tool1: {
           description: 'Tool 1 description',
-          parameters: {},
         },
         tool2: {
           description: 'Tool 2 description',
-          parameters: {},
         },
         tool3: {
           description: 'Tool 3 description',
-          parameters: {},
         },
       };
 
@@ -219,11 +206,9 @@ describe('selectRelevantTools', () => {
       expect(result).toEqual({
         tool1: {
           description: 'Tool 1 description',
-          parameters: {},
         },
         tool3: {
           description: 'Tool 3 description',
-          parameters: {},
         },
       });
     });
@@ -232,11 +217,9 @@ describe('selectRelevantTools', () => {
       const mockTools: ToolSet = {
         tool1: {
           description: 'Tool 1 description',
-          parameters: {},
         },
         tool2: {
           description: 'Tool 2 description',
-          parameters: {},
         },
       };
 
@@ -263,7 +246,6 @@ describe('selectRelevantTools', () => {
       for (let i = 1; i <= 150; i++) {
         mockTools[`tool${i}`] = {
           description: `Tool ${i} description`,
-          parameters: {},
         };
       }
 
@@ -289,15 +271,14 @@ describe('selectRelevantTools', () => {
       const mockTools: ToolSet = {
         tool1: {
           description: 'Tool 1 description',
-          parameters: {},
         },
       };
 
-      const complexMessages: CoreMessage[] = [
+      const complexMessages: ModelMessage[] = [
         { role: 'system', content: 'System message' },
-        { role: 'user', content: 'User message 1' } as CoreUserMessage,
+        { role: 'user', content: 'User message 1' } as UserModelMessage,
         { role: 'assistant', content: 'Assistant message' },
-        { role: 'user', content: 'User message 2' } as CoreUserMessage,
+        { role: 'user', content: 'User message 2' } as UserModelMessage,
       ];
 
       (generateObject as jest.Mock).mockResolvedValue({
@@ -327,7 +308,6 @@ describe('selectRelevantTools', () => {
       const mockTools: ToolSet = {
         tool1: {
           description: 'Tool 1 description',
-          parameters: {},
         },
       };
 

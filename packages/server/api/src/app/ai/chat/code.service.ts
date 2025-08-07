@@ -6,15 +6,15 @@ import {
   UnifiedCodeLLMSchema,
 } from '@openops/shared';
 import {
-  CoreMessage,
   LanguageModel,
+  ModelMessage,
   streamObject,
   StreamObjectOnFinishCallback,
   StreamObjectResult,
 } from 'ai';
 
 type StreamCodeOptions = {
-  chatHistory: CoreMessage[];
+  chatHistory: ModelMessage[];
   languageModel: LanguageModel;
   aiConfig: AiConfig;
   systemPrompt: string;
