@@ -463,7 +463,7 @@ export function addSubtractTime(date: Date, expression: string) {
 
   for (let i = 0; i < numbers.length; i++) {
     const value = numbers[i];
-    const unit = units[i].toLowerCase() as dayjs.ManipulateType;
+    const unit = units[i].toLowerCase();
 
     if (validUnits.has(unit)) {
       const manipulateUnit = unit as dayjs.ManipulateType;
