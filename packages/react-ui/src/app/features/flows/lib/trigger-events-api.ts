@@ -29,4 +29,7 @@ export const triggerEventsApi = {
       mockData,
     );
   },
+  triggerWebhook(flowId: string, queryParams: Record<string, string>) {
+    return api.get<void>(`/v1/webhooks/${flowId}`, queryParams);
+  },
 };
