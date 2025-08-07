@@ -68,8 +68,8 @@ export const generateCode = ({
   GenerateObjectResult<{
     type: 'code' | 'reply';
     textAnswer: string;
-    code?: string | undefined;
-    packageJson?: string | undefined;
+    code?: string;
+    packageJson?: string;
   }>
 > => {
   return generateObject({
