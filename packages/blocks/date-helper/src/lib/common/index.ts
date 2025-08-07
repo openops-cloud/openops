@@ -1,3 +1,5 @@
+import dayjs from 'dayjs';
+
 export interface dateInformation {
   year: number;
   month: number;
@@ -414,31 +416,8 @@ export function ChangeDateFormat(
   return newDate;
 }
 
-function addMonths(date: Date, months: number): Date {
-  const newDate = new Date(date);
-  const originalDay = newDate.getDate();
-  newDate.setMonth(newDate.getMonth() + months);
-
-  // Detects month-end rollover (e.g., when March 31st minus 1 month becomes March 3rd; it should be Feb 28th).
-  // Setting the day to 0 correctly moves the date to the last day of the intended month.
-  if (newDate.getDate() !== originalDay) {
-    newDate.setDate(0);
-  }
-  return newDate;
-}
-
-function addYears(date: Date, years: number): Date {
-  const newDate = new Date(date);
-  const isLeapDay = newDate.getMonth() === 1 && newDate.getDate() === 29;
-
-  newDate.setFullYear(newDate.getFullYear() + years);
-  if (isLeapDay && newDate.getMonth() !== 1) {
-    newDate.setDate(0);
-  }
-  return newDate;
-}
-
 export function addSubtractTime(date: Date, expression: string) {
+  let dayjsDate = dayjs(date);
   // remove all the spaces and line breaks from the expression
   expression = expression.replace(/(\r\n|\n|\r)/gm, '').replace(/ /g, '');
   const parts = expression.split(/(\+|-)/);
@@ -473,37 +452,17 @@ export function addSubtractTime(date: Date, expression: string) {
     }
   }
   for (let i = 0; i < numbers.length; i++) {
-    const val = units[i].toLowerCase() as timeParts;
-    switch (val) {
-      case timeParts.year:
-        date = addYears(date, numbers[i]);
-        break;
-      case timeParts.month:
-        date = addMonths(date, numbers[i]);
-        break;
-      case timeParts.day:
-        date.setDate(date.getDate() + numbers[i]);
-        break;
-      case timeParts.hour:
-        date.setHours(date.getHours() + numbers[i]);
-        break;
-      case timeParts.minute:
-        date.setMinutes(date.getMinutes() + numbers[i]);
-        break;
-      case timeParts.second:
-        date.setSeconds(date.getSeconds() + numbers[i]);
-        break;
-      case timeParts.dayOfWeek:
-      case timeParts.monthName:
-      case timeParts.unix_time:
-        break;
-      default: {
-        const nvr: never = val;
-        console.error(nvr, 'unhandled case was reached');
-      }
+    const value = numbers[i];
+    const unit = units[i].toLowerCase() as dayjs.ManipulateType;
+
+    if (value > 0) {
+      dayjsDate = dayjsDate.add(value, unit);
+    } else if (value < 0) {
+      dayjsDate = dayjsDate.subtract(Math.abs(value), unit);
     }
   }
-  return date;
+
+  return dayjsDate.toDate();
 }
 export const timeZoneOptions = [
   {
