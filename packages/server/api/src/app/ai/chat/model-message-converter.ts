@@ -72,7 +72,7 @@ function createImagePart(
 function createToolCallPart(part: any, tools?: ToolSet): UIMessage['parts'][0] {
   const toolName = part.toolName;
   const tool = tools?.[toolName];
-  const hasOutput = (part as any).output != null;
+  const hasOutput = part.output != null;
 
   if (tool) {
     // Static tool
@@ -85,7 +85,7 @@ function createToolCallPart(part: any, tools?: ToolSet): UIMessage['parts'][0] {
       input: part.input as Record<string, unknown>,
       ...(hasOutput
         ? {
-            output: (part as any).output.value || (part as any).output,
+            output: part.output.value || part.output,
           }
         : {}),
       providerExecuted: part.providerExecuted,
@@ -105,7 +105,7 @@ function createToolCallPart(part: any, tools?: ToolSet): UIMessage['parts'][0] {
       input: part.input as Record<string, unknown>,
       ...(hasOutput
         ? {
-            output: (part as any).output.value || (part as any).output,
+            output: part.output.value || part.output,
           }
         : {}),
       ...(part.providerOptions != null
