@@ -121,19 +121,16 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
       headers: {
         Authorization: `Bearer ${authenticationSession.getToken()}`,
       },
-      prepareSendMessagesRequest: ({ messages }) => {
-        console.error('messages:', messages);
-        return {
-          body: {
-            chatId,
-            message: PLACEHOLDER_MESSAGE_INTEROP,
-            messages,
-            additionalContext: flowVersion
-              ? createAdditionalContext(flowVersion, stepDetails)
-              : undefined,
-          },
-        };
-      },
+      prepareSendMessagesRequest: ({ messages }) => ({
+        body: {
+          chatId,
+          message: PLACEHOLDER_MESSAGE_INTEROP,
+          messages,
+          additionalContext: flowVersion
+            ? createAdditionalContext(flowVersion, stepDetails)
+            : undefined,
+        },
+      }),
     }),
   });
 
