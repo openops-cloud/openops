@@ -24,7 +24,7 @@ const MenuItemTrigger = React.forwardRef<HTMLDivElement, MenuItemTriggerProps>(
           }}
           disabled={disabled}
         >
-          <div className="flex cursor-pointer  flex-row gap-2 items-center ">
+          <div className="flex cursor-pointer flex-row gap-2 items-center">
             <CirclePlay className="h-4 w-4" />
             <span>{t('Run Workflow')}</span>
           </div>
