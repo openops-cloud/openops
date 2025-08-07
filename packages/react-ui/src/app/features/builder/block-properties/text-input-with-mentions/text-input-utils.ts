@@ -64,6 +64,8 @@ function getLabelForMention({
   }
   const displayKeys = keys.slice(1).map((key) => {
     const num = Number(key);
+
+    // Convert from 0-based to 1-based index for consistency with Data Selector
     return Number.isInteger(num) && key === num.toString()
       ? String(num + startingIndex + 1)
       : key;
