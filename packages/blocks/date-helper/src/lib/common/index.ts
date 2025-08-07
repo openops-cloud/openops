@@ -414,6 +414,28 @@ export function ChangeDateFormat(
   return newDate;
 }
 
+function addMonths(date: Date, months: number): Date {
+  const newDate = new Date(date);
+  const originalDay = newDate.getDate();
+  newDate.setMonth(newDate.getMonth() + months);
+
+  if (newDate.getDate() !== originalDay) {
+    newDate.setDate(0);
+  }
+  return newDate;
+}
+
+function addYears(date: Date, years: number): Date {
+  const newDate = new Date(date);
+  const isLeapDay = newDate.getMonth() === 1 && newDate.getDate() === 29;
+
+  newDate.setFullYear(newDate.getFullYear() + years);
+  if (isLeapDay && newDate.getMonth() !== 1) {
+    newDate.setDate(0);
+  }
+  return newDate;
+}
+
 export function addSubtractTime(date: Date, expression: string) {
   // remove all the spaces and line breaks from the expression
   expression = expression.replace(/(\r\n|\n|\r)/gm, '').replace(/ /g, '');
@@ -452,10 +474,10 @@ export function addSubtractTime(date: Date, expression: string) {
     const val = units[i].toLowerCase() as timeParts;
     switch (val) {
       case timeParts.year:
-        date.setFullYear(date.getFullYear() + numbers[i]);
+        date = addYears(date, numbers[i]);
         break;
       case timeParts.month:
-        date.setMonth(date.getMonth() + numbers[i]);
+        date = addMonths(date, numbers[i]);
         break;
       case timeParts.day:
         date.setDate(date.getDate() + numbers[i]);
