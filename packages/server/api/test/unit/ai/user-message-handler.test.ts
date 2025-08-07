@@ -106,6 +106,7 @@ describe('User Message Handler', () => {
       chatContext: { chatId: 'test-chat-id' },
       chatHistory: [...mockChatHistory, mockNewMessage],
     },
+    frontendTools: {},
   };
 
   beforeEach(() => {
