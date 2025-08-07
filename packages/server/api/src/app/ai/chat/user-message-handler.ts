@@ -11,7 +11,9 @@ import {
 } from 'ai';
 import { FastifyInstance } from 'fastify';
 import { sendAiChatFailureEvent } from '../../telemetry/event-models';
+import { addUiToolResults } from '../mcp/tool-utils';
 import { getMCPToolsContext } from '../mcp/tools-context-builder';
+import { AssistantUITools } from '../mcp/types';
 import { saveChatHistory } from './ai-chat.service';
 import { generateMessageId } from './ai-id-generators';
 import { getLLMAsyncStream } from './llm-stream-handler';
@@ -30,6 +32,8 @@ type UserMessageParams = RequestContext &
   ChatProcessingContext & {
     authToken: string;
     app: FastifyInstance;
+  } & {
+    frontendTools: AssistantUITools;
   };
 
 type ModelConfig = {
@@ -57,19 +61,21 @@ export async function handleUserMessage(
     languageModel,
     serverResponse,
     conversation: { chatContext, chatHistory },
+    frontendTools,
   } = params;
 
   serverResponse.write(buildMessageIdMessage(generateMessageId()));
 
-  const { mcpClients, systemPrompt, filteredTools } = await getMCPToolsContext(
+  const { mcpClients, systemPrompt, filteredTools } = await getMCPToolsContext({
     app,
     projectId,
     authToken,
     aiConfig,
-    chatHistory,
+    messages: chatHistory,
     chatContext,
     languageModel,
-  );
+    frontendTools,
+  });
 
   try {
     const newMessages = await streamLLMResponse({
@@ -86,7 +92,7 @@ export async function handleUserMessage(
 
     await saveChatHistory(chatId, userId, projectId, [
       ...chatHistory,
-      ...newMessages,
+      ...addUiToolResults(newMessages),
     ]);
   } finally {
     await closeMCPClients(mcpClients);
