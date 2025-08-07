@@ -26,6 +26,10 @@ export const aiSettingsHooks = {
       queryFn: () => aiSettingsApi.getActiveAiSettings(),
       staleTime: 1000,
       retry: false,
+      retryOnMount: false,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      gcTime: 5 * 60 * 1000, // 5 minutes
     });
 
     return {
@@ -39,6 +43,10 @@ export const aiSettingsHooks = {
       queryFn: () => aiSettingsApi.getActiveAiSettings(),
       staleTime: 1000,
       retry: false,
+      retryOnMount: false,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      gcTime: 5 * 60 * 1000, // 5 minutes
     });
   },
   useProviderModels: (providerName: string | null | undefined) => {

@@ -4,10 +4,16 @@ const markdown = `
 To generate a Vega Cloud API Client ID and Secret, visit the [Vega Cloud API documentation](https://docs.vegacloud.io/docs/platformguide/platform_settings/profile_settings/apiclientreg).
 `;
 
+export interface VegaCloudAuth {
+  clientId: string;
+  clientSecret: string;
+  realm: string;
+}
+
 export const vegacloudAuth = BlockAuth.CustomAuth({
   authProviderKey: 'vegacloud',
   authProviderDisplayName: 'Vega Cloud',
-  authProviderLogoUrl: 'https://static.openops.com/blocks/vegacloud.png',
+  authProviderLogoUrl: 'https://static.openops.com/blocks/vegacloud.svg',
   description: markdown,
   required: true,
   props: {
