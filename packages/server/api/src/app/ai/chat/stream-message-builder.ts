@@ -6,14 +6,6 @@ function createStreamMessage(data: Record<string, unknown>): string {
   return `data: ${JSON.stringify(data)}\n\n`;
 }
 
-export function buildTextDeltaPart(text: string, id: string): string {
-  return createStreamMessage({
-    type: 'text-delta',
-    id,
-    delta: text,
-  });
-}
-
 export function buildToolInputStartMessage(
   toolCallId: string,
   toolName: string,
@@ -74,9 +66,27 @@ export function buildTextStartMessage(messageId: string): string {
   });
 }
 
+export function buildTextDeltaPart(text: string, id: string): string {
+  return createStreamMessage({
+    type: 'text-delta',
+    id,
+    delta: text,
+  });
+}
+
 export function buildTextEndMessage(messageId: string): string {
   return createStreamMessage({
     type: 'text-end',
     id: messageId,
   });
+}
+
+export function sendTextMessageToStream(
+  responseStream: NodeJS.WritableStream,
+  message: string,
+  messageId: string,
+): void {
+  responseStream.write(buildTextStartMessage(messageId));
+  responseStream.write(buildTextDeltaPart(message, messageId));
+  responseStream.write(buildTextEndMessage(messageId));
 }

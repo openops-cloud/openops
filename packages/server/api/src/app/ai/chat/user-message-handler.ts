@@ -16,10 +16,10 @@ import { saveChatHistory } from './ai-chat.service';
 import { generateMessageId } from './ai-id-generators';
 import { getLLMAsyncStream } from './llm-stream-handler';
 import {
-  buildTextDeltaPart,
   doneMarker,
   finishMessagePart,
   finishStepPart,
+  sendTextMessageToStream,
 } from './stream-message-builder';
 import { ChatProcessingContext, RequestContext } from './types';
 
@@ -118,7 +118,6 @@ async function streamLLMResponse(
         stepCount++;
         if (value.finishReason !== 'stop' && stepCount >= maxRecursionDepth) {
           const message = ` Maximum recursion depth (${maxRecursionDepth}) reached. Terminating recursion.`;
-          // TODO: fix this
           sendTextMessageToStream(params.serverResponse, message, messageId);
           appendErrorMessage(value.response.messages, message);
           logger.warn(message);
@@ -303,12 +302,4 @@ function sendMessageToStream(
   }
 
   responseStream.write('\n\n');
-}
-
-function sendTextMessageToStream(
-  responseStream: NodeJS.WritableStream,
-  message: string,
-  messageId: string,
-): void {
-  responseStream.write(buildTextDeltaPart(message, messageId));
 }

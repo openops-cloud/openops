@@ -17,6 +17,7 @@ import {
   doneMarker,
   finishMessagePart,
   finishStepPart,
+  sendTextMessageToStream,
   startMessagePart,
   startStepPart,
 } from './stream-message-builder';
@@ -36,6 +37,7 @@ const ROLE_ASSISTANT = 'assistant';
 async function handleCodeGenerationError(
   error: unknown,
   params: {
+    messageId: string;
     chatId: string;
     userId: string;
     projectId: string;
@@ -47,8 +49,11 @@ async function handleCodeGenerationError(
   const errorMessage = error instanceof Error ? error.message : String(error);
   logger.warn(errorMessage, error);
 
-  params.serverResponse.write(`0:"\\n\\n"\n`);
-  params.serverResponse.write(`0:${JSON.stringify(errorMessage)}\n`);
+  sendTextMessageToStream(
+    params.serverResponse,
+    errorMessage,
+    params.messageId,
+  );
 
   const errorAssistantMessage: ModelMessage = {
     role: ROLE_ASSISTANT,
@@ -138,6 +143,7 @@ export async function handleCodeGenerationRequest(
     : undefined;
 
   const prompt = await getBlockSystemPrompt(chatContext, enrichedContext);
+  const newMessageId = generateMessageId();
 
   try {
     const result = await generateCode({
@@ -167,7 +173,6 @@ export async function handleCodeGenerationRequest(
 
     serverResponse.write(finishStepPart);
 
-    const newMessageId = generateMessageId();
     serverResponse.write(startStepPart);
     serverResponse.write(buildTextStartMessage(newMessageId));
     serverResponse.write(
@@ -226,6 +231,7 @@ export async function handleCodeGenerationRequest(
     ]);
   } catch (error) {
     await handleCodeGenerationError(error, {
+      messageId: newMessageId,
       chatId,
       userId,
       projectId,
