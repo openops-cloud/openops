@@ -419,6 +419,8 @@ function addMonths(date: Date, months: number): Date {
   const originalDay = newDate.getDate();
   newDate.setMonth(newDate.getMonth() + months);
 
+  // Detects month-end rollover (e.g., when March 31st minus 1 month becomes March 3rd; it should be Feb 28th).
+  // Setting the day to 0 correctly moves the date to the last day of the intended month.
   if (newDate.getDate() !== originalDay) {
     newDate.setDate(0);
   }
