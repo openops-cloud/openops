@@ -4,27 +4,23 @@ import { ModelMessage } from 'ai';
 import { sendAiChatFailureEvent } from '../../telemetry/event-models';
 import { saveChatHistory } from './ai-chat.service';
 import { generateMessageId, generateToolId } from './ai-id-generators';
-import { streamCode } from './code.service';
+import { generateCode } from './code.service';
 import { enrichContext, IncludeOptions } from './context-enrichment.service';
 import { getBlockSystemPrompt } from './prompts.service';
 import {
-  buildDoneMessage,
-  buildFinishMessage,
-  buildMessageIdMessage,
-  buildTextMessage,
-  buildToolCallDeltaMessage,
-  buildToolCallMessage,
-  buildToolCallStreamingStartMessage,
-  buildToolResultMessage,
+  buildTextDeltaPart,
+  buildTextEndMessage,
+  buildTextStartMessage,
+  buildToolInputAvailable,
+  buildToolInputStartMessage,
+  buildToolOutputAvailableMessage,
+  doneMarker,
+  finishMessagePart,
+  finishStepPart,
+  startMessagePart,
+  startStepPart,
 } from './stream-message-builder';
 import { ChatProcessingContext, RequestContext } from './types';
-
-type CodeGenerationResult = {
-  type: string;
-  code?: string;
-  packageJson?: string;
-  textAnswer: string;
-};
 
 type CodeMessageParams = RequestContext &
   ChatProcessingContext & {
@@ -33,74 +29,6 @@ type CodeMessageParams = RequestContext &
 
 const GENERATE_CODE_TOOL_NAME = 'generate_code';
 const ROLE_ASSISTANT = 'assistant';
-
-/**
- * Processes a single line of JSON data and sends progress updates if it's a code result
- */
-function processStreamLine(
-  line: string,
-  toolCallId: string,
-  serverResponse: NodeJS.WritableStream,
-): void {
-  if (!line.trim()) return;
-
-  try {
-    const data = JSON.parse(line);
-
-    if (data.type === 'code' && data.code) {
-      const partialResult = {
-        toolCallId,
-        result: {
-          code: data.code,
-          packageJson: data.packageJson || '{}',
-        },
-      };
-      serverResponse.write(`a:${JSON.stringify(partialResult)}\n`);
-    }
-  } catch (e) {
-    logger.debug('Error parsing JSON', {
-      error: e,
-      line,
-    });
-  }
-}
-
-/**
- * Streams code generation progress in real-time to the client
- */
-async function streamCodeGenerationProgress(
-  stream: Response,
-  serverResponse: NodeJS.WritableStream,
-  toolCallId: string,
-): Promise<void> {
-  const reader = stream.body?.getReader();
-  if (!reader) return;
-
-  try {
-    let done = false;
-    let buffer = '';
-
-    while (!done) {
-      const result = await reader.read();
-      done = result.done;
-
-      if (!done && result.value) {
-        const chunk = new TextDecoder().decode(result.value);
-        buffer += chunk;
-
-        // Process complete JSON objects from the buffer
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || ''; // Keep incomplete line in buffer
-
-        for (const line of lines) {
-          processStreamLine(line, toolCallId, serverResponse);
-        }
-      }
-    }
-  } finally {
-    reader.releaseLock();
-  }
-}
 
 /**
  * Handles errors in code generation by creating an assistant message and saving to history
@@ -170,20 +98,8 @@ function initializeToolCall(params: {
 }): void {
   const { toolCallId, toolName, message, serverResponse } = params;
 
-  serverResponse.write(
-    buildToolCallStreamingStartMessage(toolCallId, toolName),
-  );
-  serverResponse.write(
-    buildToolCallDeltaMessage(toolCallId, toolName, `{"message":"${message}"}`),
-  );
-  serverResponse.write(
-    buildToolCallMessage({
-      type: 'tool-call',
-      toolCallId,
-      toolName,
-      input: { message },
-    }),
-  );
+  serverResponse.write(buildToolInputStartMessage(toolCallId, toolName));
+  serverResponse.write(buildToolInputAvailable(toolCallId, toolName, message));
 }
 
 /*
@@ -204,7 +120,8 @@ export async function handleCodeGenerationRequest(
     conversation: { chatContext, chatHistory },
   } = params;
 
-  serverResponse.write(buildMessageIdMessage(generateMessageId()));
+  serverResponse.write(startMessagePart);
+  serverResponse.write(startStepPart);
 
   const toolCallId = generateToolId();
   initializeToolCall({
@@ -222,48 +139,19 @@ export async function handleCodeGenerationRequest(
 
   const prompt = await getBlockSystemPrompt(chatContext, enrichedContext);
 
-  let codeResult: CodeGenerationResult | null = null;
-
-  let resolveResult: () => void;
-  let rejectResult: (reason?: unknown) => void;
-
-  const resultPromise = new Promise<void>((resolve, reject) => {
-    resolveResult = resolve;
-    rejectResult = reject;
-  });
-
   try {
-    const result = streamCode({
+    const result = await generateCode({
       chatHistory,
       languageModel,
       aiConfig,
       systemPrompt: prompt,
-      onFinish: async (result) => {
-        if (result.object) {
-          codeResult = result.object;
-        }
-        resolveResult();
-      },
-      onError: (error) => {
-        logger.error('Failed to generate code', {
-          error,
-        });
-        rejectResult(error);
-      },
     });
 
-    // Stream the code generation in real-time
-    const stream = result.toTextStreamResponse();
-    await streamCodeGenerationProgress(stream, serverResponse, toolCallId);
-
-    await resultPromise;
-
-    if (!codeResult) {
+    if (!result) {
       throw new Error('No code generation result received');
     }
 
-    // codeResult variable assigned in async callback so TS type narrowing not working as expected
-    const finalCodeResult = codeResult as CodeGenerationResult;
+    const finalCodeResult = result.object;
 
     const toolResult = {
       toolCallId,
@@ -272,15 +160,23 @@ export async function handleCodeGenerationRequest(
         packageJson: finalCodeResult.packageJson || '{}',
       },
     };
-    serverResponse.write(buildToolResultMessage(toolResult));
 
-    serverResponse.write(buildFinishMessage('tool-calls'));
-    serverResponse.write(buildDoneMessage('tool-calls'));
+    serverResponse.write(
+      buildToolOutputAvailableMessage(toolCallId, toolResult.result),
+    );
 
-    serverResponse.write(buildTextMessage(finalCodeResult.textAnswer));
+    serverResponse.write(finishStepPart);
 
-    serverResponse.write(buildFinishMessage('stop'));
-    serverResponse.write(buildDoneMessage('stop'));
+    const newMessageId = generateMessageId();
+    serverResponse.write(startStepPart);
+    serverResponse.write(buildTextStartMessage(newMessageId));
+    serverResponse.write(
+      buildTextDeltaPart(finalCodeResult.textAnswer, newMessageId),
+    );
+    serverResponse.write(buildTextEndMessage(newMessageId));
+
+    serverResponse.write(finishStepPart);
+    serverResponse.write(finishMessagePart);
 
     const saveToolCallId = generateToolId();
 
@@ -338,7 +234,7 @@ export async function handleCodeGenerationRequest(
       aiConfig,
     });
   } finally {
-    serverResponse.write(buildDoneMessage('stop'));
+    serverResponse.write(doneMarker);
     serverResponse.end();
   }
 }

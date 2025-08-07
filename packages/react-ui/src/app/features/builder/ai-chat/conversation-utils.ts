@@ -1,4 +1,4 @@
-import { UIMessage } from '@ai-sdk/ui-utils';
+import { UIMessage } from '@ai-sdk/ui-utils'; // Fix this
 import {
   AIChatMessage,
   AIChatMessageRole,

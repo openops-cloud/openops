@@ -16,9 +16,10 @@ import { saveChatHistory } from './ai-chat.service';
 import { generateMessageId } from './ai-id-generators';
 import { getLLMAsyncStream } from './llm-stream-handler';
 import {
-  buildDoneMessage,
-  buildMessageIdMessage,
-  buildTextMessage,
+  buildTextDeltaPart,
+  doneMarker,
+  finishMessagePart,
+  finishStepPart,
 } from './stream-message-builder';
 import { ChatProcessingContext, RequestContext } from './types';
 
@@ -59,7 +60,7 @@ export async function handleUserMessage(
     conversation: { chatContext, chatHistory },
   } = params;
 
-  serverResponse.write(buildMessageIdMessage(generateMessageId()));
+  const messageId = generateMessageId();
 
   const { mcpClients, systemPrompt, filteredTools } = await getMCPToolsContext(
     app,
@@ -72,17 +73,23 @@ export async function handleUserMessage(
   );
 
   try {
-    const newMessages = await streamLLMResponse({
-      userId,
-      chatId,
-      projectId,
-      aiConfig,
-      chatHistory,
-      systemPrompt,
-      languageModel,
-      serverResponse,
-      tools: filteredTools,
-    });
+    const newMessages = await streamLLMResponse(
+      {
+        userId,
+        chatId,
+        projectId,
+        aiConfig,
+        chatHistory,
+        systemPrompt,
+        languageModel,
+        serverResponse,
+        tools: filteredTools,
+      },
+      messageId,
+    );
+
+    serverResponse.write(finishStepPart);
+    serverResponse.write(finishMessagePart);
 
     await saveChatHistory(chatId, userId, projectId, [
       ...chatHistory,
@@ -90,13 +97,14 @@ export async function handleUserMessage(
     ]);
   } finally {
     await closeMCPClients(mcpClients);
-    serverResponse.write(buildDoneMessage('stop'));
+    serverResponse.write(doneMarker);
     serverResponse.end();
   }
 }
 
 async function streamLLMResponse(
   params: StreamCallSettings,
+  messageId: string,
 ): Promise<ModelMessage[]> {
   const newMessages: ModelMessage[] = [];
   let stepCount = 0;
@@ -110,7 +118,8 @@ async function streamLLMResponse(
         stepCount++;
         if (value.finishReason !== 'stop' && stepCount >= maxRecursionDepth) {
           const message = ` Maximum recursion depth (${maxRecursionDepth}) reached. Terminating recursion.`;
-          sendTextMessageToStream(params.serverResponse, message);
+          // TODO: fix this
+          sendTextMessageToStream(params.serverResponse, message, messageId);
           appendErrorMessage(value.response.messages, message);
           logger.warn(message);
         }
@@ -118,8 +127,7 @@ async function streamLLMResponse(
       onFinish: async (result): Promise<void> => {
         const messages = result.response.messages;
         newMessages.push(...messages);
-
-        if (result.finishReason === 'length') {
+        if (result.finishReason !== 'length') {
           throw new Error(
             'The message was truncated because the maximum tokens for the context window was reached.',
           );
@@ -143,8 +151,34 @@ function unrecoverableError(
   error: any,
 ): AssistantModelMessage {
   const errorMessage = error instanceof Error ? error.message : String(error);
-  streamParams.serverResponse.write(`0:"\\n\\n"\n`);
-  streamParams.serverResponse.write(buildTextMessage(errorMessage));
+
+  const messageId = generateMessageId();
+  streamParams.serverResponse.write(
+    `data: ${JSON.stringify({
+      type: 'text-start',
+      id: messageId,
+    })}`,
+  );
+
+  streamParams.serverResponse.write('\n\n');
+  streamParams.serverResponse.write(
+    `data: ${JSON.stringify({
+      type: 'text-delta',
+      id: messageId,
+      delta: errorMessage,
+    })}`,
+  );
+
+  streamParams.serverResponse.write('\n\n');
+  streamParams.serverResponse.write(
+    `data: ${JSON.stringify({
+      type: 'text-end',
+      id: messageId,
+    })}`,
+  );
+
+  streamParams.serverResponse.write('\n\n');
+
   logger.warn(errorMessage, error);
 
   sendAiChatFailureEvent({
@@ -211,29 +245,70 @@ function sendMessageToStream(
 ): void {
   switch (message.type as string) {
     case 'text-delta':
-      sendTextMessageToStream(responseStream, (message as any).text);
+      responseStream.write(
+        `data: ${JSON.stringify({
+          type: 'text-delta',
+          id: (message as any).id,
+          delta: (message as any).text,
+        })}`,
+      );
+      break;
+    case 'tool-input-start':
+      responseStream.write(
+        `data: ${JSON.stringify({
+          type: 'tool-input-start',
+          toolCallId: (message as any).id,
+          toolName: (message as any).toolName,
+        })}`,
+      );
+      break;
+    case 'tool-input-delta':
+      responseStream.write(
+        `data: ${JSON.stringify({
+          type: 'tool-input-delta',
+          toolCallId: (message as any).id,
+          inputTextDelta: (message as any).delta,
+        })}`,
+      );
+      break;
+    case 'tool-call':
+      responseStream.write(
+        `data: ${JSON.stringify({
+          type: 'tool-input-available',
+          toolCallId: (message as any).toolCallId,
+          toolName: (message as any).toolName,
+          input: (message as any).input,
+        })}`,
+      );
       break;
     case 'tool-result':
-      responseStream.write(`a:${JSON.stringify(message)}\n`);
+      responseStream.write(
+        `data: ${JSON.stringify({
+          type: 'tool-output-available',
+          toolCallId: (message as any).toolCallId,
+          output: (message as any).output,
+        })}`,
+      );
       break;
-    case 'tool-call': {
-      responseStream.write(`9:${JSON.stringify(message)}\n`);
+    case 'start-step':
+      responseStream.write(`data: ${JSON.stringify({ type: 'start-step' })}`);
       break;
-    }
-    case 'tool-call-streaming-start': {
-      responseStream.write(`b:${JSON.stringify(message)}\n`);
+    case 'finish-step':
+    case 'finish':
+    case 'tool-input-end':
+      return;
+    default:
+      responseStream.write(`data: ${JSON.stringify(message)}`);
       break;
-    }
-    case 'tool-call-delta': {
-      responseStream.write(`c:${JSON.stringify(message)}\n`);
-      break;
-    }
   }
+
+  responseStream.write('\n\n');
 }
 
 function sendTextMessageToStream(
   responseStream: NodeJS.WritableStream,
   message: string,
+  messageId: string,
 ): void {
-  responseStream.write(buildTextMessage(message));
+  responseStream.write(buildTextDeltaPart(message, messageId));
 }
