@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ModelMessage, ToolSet, UIMessage } from 'ai';
 
 /**
