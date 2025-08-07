@@ -2,7 +2,7 @@ import { createDeepSeek } from '@ai-sdk/deepseek';
 import { LanguageModelV1 } from 'ai';
 import { AiProvider } from '../providers';
 
-const deepSeekModels = ['deepseek-chat', 'deepseek-reasoner'];
+const deepSeekModels = ['deepseek-chat'];
 
 function createLanguageModel(params: {
   apiKey: string;

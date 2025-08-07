@@ -24,8 +24,6 @@ const togetherAiModels = [
   'deepseek-ai/deepseek-llm-67b-chat',
   'deepseek-ai/DeepSeek-V3',
   'google/gemma-2b-it',
-  'Gryphe/MythoMax-L2-13b',
-  'meta-llama/Llama-2-13b-chat-hf',
   'mistralai/Mistral-7B-Instruct-v0.1',
   'mistralai/Mistral-7B-Instruct-v0.2',
   'mistralai/Mistral-7B-Instruct-v0.3',
