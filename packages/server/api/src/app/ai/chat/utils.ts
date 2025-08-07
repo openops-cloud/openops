@@ -1,29 +1,46 @@
-import { ModelMessage, ToolModelMessage, ToolResultPart } from 'ai';
-import { MessageWithMergedToolResults, ToolCallPartWithResult } from './types';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { ModelMessage, ToolResultPart, ToolSet, UIMessage } from 'ai';
 
 /**
- * Merges tool result messages into their corresponding assistant tool-call parts.
+ * Merges tool result messages into their corresponding assistant tool-call parts
+ * and converts them to UI messages in a single pass.
  * This function finds each 'tool' message, locates the matching 'tool-call' part by toolCallId,
- * and assigns the result to the 'result' property.
+ * and assigns the result to the 'output' property.
  */
 export function mergeToolResultsIntoMessages(
   messages: ModelMessage[],
-): MessageWithMergedToolResults[] {
-  const merged: MessageWithMergedToolResults[] = [];
+  options?: {
+    tools?: ToolSet;
+  },
+): Array<Omit<UIMessage, 'id'>> {
+  const uiMessages: Array<Omit<UIMessage, 'id'>> = [];
+  const toolResultsToMerge: Array<{
+    toolResult: ToolResultPart;
+    messageIndex: number;
+  }> = [];
 
-  for (const msg of messages) {
-    if (
-      isToolMessage(msg) &&
-      shouldSkipToolMessage(msg as ToolModelMessage, merged)
-    ) {
+  for (let i = 0; i < messages.length; i++) {
+    const msg = messages[i];
+
+    if (isToolMessage(msg)) {
+      const toolResult = (msg.content as any[])[0];
+      if (toolResult?.toolCallId) {
+        toolResultsToMerge.push({ toolResult, messageIndex: i });
+      }
       continue;
     }
 
-    const normalizedMsg = normalizeMessage(msg);
-    merged.push(normalizedMsg);
+    const convertedMessage = convertMessageToUI(msg, options?.tools);
+    if (convertedMessage) {
+      uiMessages.push(convertedMessage);
+    }
   }
 
-  return merged;
+  for (const { toolResult } of toolResultsToMerge) {
+    mergeToolResultIntoUIMessage(toolResult, uiMessages);
+  }
+
+  return uiMessages;
 }
 
 function isToolMessage(msg: ModelMessage): boolean {
@@ -33,87 +50,250 @@ function isToolMessage(msg: ModelMessage): boolean {
 }
 
 /**
- * Check if a tool message should be skipped (merged into assistant message)
+ * Converts a single message to UI format
  */
-function shouldSkipToolMessage(
-  msg: ToolModelMessage,
-  merged: MessageWithMergedToolResults[],
-): boolean {
-  const toolResult = msg.content[0];
-  const toolCallId = toolResult?.toolCallId;
+function convertMessageToUI(
+  message: ModelMessage,
+  tools?: ToolSet,
+): Omit<UIMessage, 'id'> | null {
+  switch (message.role) {
+    case 'system':
+      return {
+        role: 'system',
+        parts: [
+          {
+            type: 'text',
+            text: typeof message.content === 'string' ? message.content : '',
+            state: 'done',
+          },
+        ],
+      };
 
-  if (!toolCallId) {
-    return false;
+    case 'user':
+      return {
+        role: 'user',
+        parts: convertUserMessageContentToUI(
+          message.content,
+          message.providerOptions,
+        ),
+      };
+
+    case 'assistant':
+      return {
+        role: 'assistant',
+        parts: convertAssistantMessageContentToUI(
+          message.content,
+          tools,
+          message.providerOptions,
+        ),
+      };
+
+    default:
+      return null;
   }
-
-  return mergeToolResultIntoAssistant(toolResult, merged);
 }
 
 /**
- * Merge tool result into the corresponding assistant message
+ * Converts user message content to UI parts
  */
-function mergeToolResultIntoAssistant(
+function convertUserMessageContentToUI(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  content: string | any[],
+  providerOptions?: any,
+): UIMessage['parts'] {
+  const parts: UIMessage['parts'] = [];
+
+  if (typeof content === 'string') {
+    parts.push(createTextPartUI(content, providerOptions));
+  } else if (Array.isArray(content)) {
+    for (const part of content) {
+      switch (part.type) {
+        case 'text':
+          parts.push(createTextPartUI(part.text, part.providerOptions));
+          break;
+        case 'file':
+          parts.push(createFilePartUI(part, part.providerOptions));
+          break;
+        case 'image':
+          parts.push(createImagePartUI(part, part.providerOptions));
+          break;
+        default:
+          // Skip unsupported parts
+          break;
+      }
+    }
+  }
+
+  return parts;
+}
+
+/**
+ * Converts assistant message content to UI parts
+ */
+function convertAssistantMessageContentToUI(
+  content: string | any[],
+  tools?: ToolSet,
+  providerOptions?: any,
+): UIMessage['parts'] {
+  const parts: UIMessage['parts'] = [];
+
+  if (typeof content === 'string') {
+    parts.push(createTextPartUI(content, providerOptions));
+  } else if (Array.isArray(content)) {
+    for (const part of content) {
+      switch (part.type) {
+        case 'text':
+          parts.push(createTextPartUI(part.text, part.providerOptions));
+          break;
+        case 'file':
+          parts.push(createFilePartUI(part, part.providerOptions));
+          break;
+        case 'image':
+          parts.push(createImagePartUI(part, part.providerOptions));
+          break;
+        case 'reasoning':
+          parts.push({
+            type: 'reasoning',
+            text: part.text,
+            state: 'done',
+            ...(part.providerOptions != null
+              ? { providerMetadata: part.providerOptions }
+              : {}),
+          });
+          break;
+        case 'tool-call':
+          parts.push(createToolCallPartUI(part, tools));
+          break;
+        default:
+          // Skip unsupported parts
+          break;
+      }
+    }
+  }
+
+  return parts;
+}
+
+/**
+ * Creates a text part for UI
+ */
+function createTextPartUI(
+  text: string,
+  providerOptions?: any,
+): UIMessage['parts'][0] {
+  return {
+    type: 'text',
+    text,
+    state: 'done',
+    ...(providerOptions != null ? { providerMetadata: providerOptions } : {}),
+  };
+}
+
+/**
+ * Creates a file part for UI
+ */
+function createFilePartUI(
+  part: any,
+  providerOptions?: any,
+): UIMessage['parts'][0] {
+  return {
+    type: 'file',
+    mediaType: part.mediaType,
+    filename: part.filename,
+    url: typeof part.data === 'string' ? part.data : part.data.toString(),
+    ...(providerOptions != null ? { providerMetadata: providerOptions } : {}),
+  };
+}
+
+/**
+ * Creates an image part for UI
+ */
+function createImagePartUI(
+  part: any,
+  providerOptions?: any,
+): UIMessage['parts'][0] {
+  return {
+    type: 'file',
+    mediaType: part.mediaType ?? 'image/jpeg',
+    url: typeof part.image === 'string' ? part.image : part.image.toString(),
+    ...(providerOptions != null ? { providerMetadata: providerOptions } : {}),
+  };
+}
+
+/**
+ * Creates a tool call part for UI
+ */
+function createToolCallPartUI(
+  part: any,
+  tools?: ToolSet,
+): UIMessage['parts'][0] {
+  const toolName = part.toolName;
+  const tool = tools?.[toolName];
+  const hasOutput = part.output != null;
+
+  if (tool) {
+    // Static tool
+    return {
+      type: `tool-${toolName}` as any,
+      toolCallId: part.toolCallId,
+      state: hasOutput
+        ? ('output-available' as const)
+        : ('input-available' as const),
+      input: part.input as Record<string, unknown>,
+      ...(hasOutput
+        ? {
+            output: part.output.value || part.output,
+          }
+        : {}),
+      providerExecuted: part.providerExecuted,
+      ...(part.providerOptions != null
+        ? { callProviderMetadata: part.providerOptions }
+        : {}),
+    };
+  } else {
+    // Dynamic tool
+    return {
+      type: 'dynamic-tool' as const,
+      toolName,
+      toolCallId: part.toolCallId,
+      state: hasOutput
+        ? ('output-available' as const)
+        : ('input-available' as const),
+      input: part.input as Record<string, unknown>,
+      ...(hasOutput
+        ? {
+            output: part.output.value || part.output,
+          }
+        : {}),
+      ...(part.providerOptions != null
+        ? { callProviderMetadata: part.providerOptions }
+        : {}),
+    };
+  }
+}
+
+/**
+ * Merges tool result into the corresponding assistant UI message
+ */
+function mergeToolResultIntoUIMessage(
   toolResult: ToolResultPart,
-  merged: MessageWithMergedToolResults[],
+  uiMessages: Array<Omit<UIMessage, 'id'>>,
 ): boolean {
-  for (let j = merged.length - 1; j >= 0; j--) {
-    const prev = merged[j];
-    if (prev.role === 'assistant' && Array.isArray(prev.content)) {
-      const toolCallPart = prev.content.find(
+  for (let j = uiMessages.length - 1; j >= 0; j--) {
+    const prev = uiMessages[j];
+    if (prev.role === 'assistant') {
+      const toolCallPart = prev.parts.find(
         (part) =>
-          part.type === 'tool-call' &&
-          part.toolCallId === toolResult.toolCallId,
+          (part.type === 'dynamic-tool' || part.type.startsWith('tool-')) &&
+          (part as any).toolCallId === toolResult.toolCallId,
       );
       if (toolCallPart) {
-        (toolCallPart as ToolCallPartWithResult).output = toolResult.output;
+        (toolCallPart as any).state = 'output-available';
+        (toolCallPart as any).output =
+          toolResult.output.value || toolResult.output;
         return true;
       }
     }
   }
   return false;
-}
-
-/**
- * Normalize message content to consistent format
- */
-function normalizeMessage(msg: ModelMessage): MessageWithMergedToolResults {
-  const normalizedMsg = { ...msg } as MessageWithMergedToolResults;
-
-  if (msg.content == null) {
-    normalizedMsg.content = [];
-  } else if (typeof msg.content === 'string') {
-    normalizedMsg.content = [
-      {
-        type: 'text',
-        text: msg.content,
-      },
-    ];
-  } else if (Array.isArray(msg.content)) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    normalizedMsg.content = normalizeContentArray(msg.content as any[]);
-  } else if (msg.content && typeof msg.content === 'object') {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    normalizedMsg.content = [msg.content as any];
-  } else {
-    normalizedMsg.content = [];
-  }
-
-  return normalizedMsg;
-}
-
-/**
- * Normalize content array to ensure consistent structure
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function normalizeContentArray(content: any[]): any[] {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return content.map((part: any) => {
-    if (typeof part === 'string') {
-      return {
-        type: 'text',
-        text: part,
-      };
-    }
-    return part;
-  });
 }

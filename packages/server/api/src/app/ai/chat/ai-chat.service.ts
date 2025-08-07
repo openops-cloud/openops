@@ -8,7 +8,6 @@ import {
 import { AiConfig, ApplicationError, ErrorCode } from '@openops/shared';
 import { LanguageModel, ModelMessage, UIMessage, generateText } from 'ai';
 import { aiConfigService } from '../config/ai-config.service';
-import { convertToUIMessages } from './model-message-converter';
 import { loadPrompt } from './prompts.service';
 import { Conversation } from './types';
 import { mergeToolResultsIntoMessages } from './utils';
@@ -150,9 +149,7 @@ export const getChatHistoryWithMergedTools = async (
   projectId: string,
 ): Promise<Array<Omit<UIMessage, 'id'>>> => {
   const messages = await getChatHistory(chatId, userId, projectId);
-  const modelMessages = mergeToolResultsIntoMessages(messages);
-  const uiMessages = convertToUIMessages(modelMessages as ModelMessage[]);
-  return uiMessages;
+  return mergeToolResultsIntoMessages(messages);
 };
 
 export const getAllChats = async (
