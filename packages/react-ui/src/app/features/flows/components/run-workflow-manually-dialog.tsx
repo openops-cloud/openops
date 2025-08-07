@@ -57,7 +57,7 @@ const RunWorkflowManuallyDialog = ({
       <DialogContent className={'min-w-[630px] flex flex-col'}>
         <DialogHeader>
           <DialogTitle className="text-primary text-[22px] font-bold">
-            {t('Run Workflow Manually')}
+            {t('Manual Webhook Trigger')}
           </DialogTitle>
         </DialogHeader>
         <p className="mb-4 text-primary font-medium">

@@ -329,7 +329,7 @@
   "Untitled": "Untitled",
   "Run": "Run",
   "Run Workflow": "Run Workflow",
-  "Run Workflow Manually": "Run Workflow Manually",
+  "Manual Webhook Trigger": "Manual Webhook Trigger",
   "To run this workflow manually, please provide the required query parameters.": "To run this workflow manually, please provide the required query parameters.",
   "Real time workflow": "Real time workflow",
   "Workflow can't be published with empty trigger {name}": "Workflow can't be published with empty trigger {name}",
