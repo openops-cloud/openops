@@ -1,10 +1,11 @@
 import { DataTable, PaginationParams } from '@openops/components/ui';
-import { FlowRunStatus } from '@openops/shared';
+import { FlowRunStatus, FlowRunTriggerSource } from '@openops/shared';
 import { t } from 'i18next';
 import { CheckIcon } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { RunTypeContent } from '@/app/features/flow-runs/components/run-type';
 import { useRunsTableColumns } from '@/app/features/flow-runs/hooks/useRunsTableColumns';
 import { flowRunUtils } from '@/app/features/flow-runs/lib/flow-run-utils';
 import { flowRunsApi } from '@/app/features/flow-runs/lib/flow-runs-api';
@@ -14,6 +15,7 @@ import { formatUtils } from '@/app/lib/utils';
 const fetchData = async (
   params: {
     flowId: string[];
+    triggerSource: FlowRunTriggerSource[];
     status: FlowRunStatus[];
     created: string;
   },
@@ -23,6 +25,7 @@ const fetchData = async (
   return flowRunsApi.list({
     status,
     flowId: params.flowId,
+    triggerSource: params.triggerSource,
     cursor: pagination.cursor,
     limit: pagination.limit ?? 10,
     createdAfter: pagination.createdAfter,
@@ -75,6 +78,19 @@ const FlowRunsPage = () => {
         title: t('Created'),
         accessorKey: 'created',
         options: [],
+        icon: CheckIcon,
+      } as const,
+      {
+        type: 'select',
+        title: t('Type'),
+        accessorKey: 'triggerSource',
+        options: Object.entries(RunTypeContent).map(([key, value]) => {
+          return {
+            label: value.text,
+            value: key,
+            icon: value.Icon,
+          };
+        }),
         icon: CheckIcon,
       } as const,
     ],

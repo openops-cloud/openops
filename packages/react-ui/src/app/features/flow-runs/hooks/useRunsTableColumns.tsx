@@ -28,6 +28,7 @@ import {
   Permission,
 } from '@openops/shared';
 
+import { RunType } from '@/app/features/flow-runs/components/run-type';
 import { flowRunUtils } from '../lib/flow-run-utils';
 
 type Column = ColumnDef<RowDataWithActions<FlowRun>> & {
@@ -89,6 +90,17 @@ export const useRunsTableColumns = (): Column[] => {
                 />
               </div>
             );
+          },
+        },
+        {
+          accessorKey: 'triggerSource',
+          header: ({ column }) => (
+            <DataTableColumnHeader column={column} title={t('Type')} />
+          ),
+          cell: ({ row }: { row: { original: FlowRun } }) => {
+            const status = row.original.triggerSource;
+
+            return <RunType type={status}></RunType>;
           },
         },
         {
