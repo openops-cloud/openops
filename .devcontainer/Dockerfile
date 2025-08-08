@@ -78,7 +78,7 @@ RUN <<-```
     uv venv --python 3.10 .venv
     . .venv/bin/activate
     uv pip install ./src/cost-explorer-mcp-server
-    uv pip install ./src/cost-analysis-mcp-server
+    uv pip install ./src/aws-pricing-mcp-server
 ```
 
 WORKDIR /workspaces
