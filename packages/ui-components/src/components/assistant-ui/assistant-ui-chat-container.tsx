@@ -19,7 +19,6 @@ type AssistantUiChatContainerProps = {
 const AssistantUiChatContainer = ({
   onClose,
   onNewChat,
-  enableNewChat,
   runtime,
   title,
   availableModels,
@@ -39,12 +38,7 @@ const AssistantUiChatContainer = ({
 
   return (
     <div className="h-full w-full flex flex-col bg-background overflow-hidden">
-      <AssistantTopBar
-        onClose={onClose}
-        onNewChat={onNewChat}
-        enableNewChat={enableNewChat}
-        title={title}
-      >
+      <AssistantTopBar onClose={onClose} onNewChat={onNewChat} title={title}>
         {children}
       </AssistantTopBar>
       <AssistantRuntimeProvider runtime={runtime}>

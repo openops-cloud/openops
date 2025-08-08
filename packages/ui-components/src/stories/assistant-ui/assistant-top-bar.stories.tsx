@@ -25,7 +25,6 @@ const meta = {
   args: {
     onClose: action('Close clicked'),
     onNewChat: action('New chat clicked'),
-    enableNewChat: true,
     title: 'AI Assistant',
     children: null,
   },
@@ -35,10 +34,6 @@ const meta = {
     },
     onNewChat: {
       description: 'Function called when the new chat button is clicked',
-    },
-    enableNewChat: {
-      description: 'Whether the new chat button is enabled',
-      control: 'boolean',
     },
     children: {
       description: 'Optional elements to render in the header',
@@ -68,16 +63,6 @@ type Story = StoryObj<typeof meta>;
  * Users can click the new chat button to start a fresh conversation or the close button to dismiss the chat interface.
  */
 export const Default: Story = {};
-
-/**
- * AssistantTopBar with the new chat button disabled.
- * This demonstrates how the component appears when starting a new chat is not allowed.
- */
-export const NewChatDisabled: Story = {
-  args: {
-    enableNewChat: false,
-  },
-};
 
 /**
  * AssistantTopBar with additional action buttons.
@@ -133,7 +118,6 @@ export const WithSingleButton: Story = {
  */
 export const ComplexExample: Story = {
   args: {
-    enableNewChat: false,
     children: (
       <>
         <Button
