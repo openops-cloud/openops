@@ -647,7 +647,6 @@ describe('Flow API', () => {
       });
       await databaseConnection().getRepository('flow').save([mockFlow]);
 
-      // Create older version
       const mockOlderFlowVersion = createMockFlowVersion({
         flowId: mockFlow.id,
         updatedBy: mockUser.id,
@@ -655,7 +654,6 @@ describe('Flow API', () => {
         created: '2024-01-01',
       });
 
-      // Create newer version
       const mockLatestFlowVersion = createMockFlowVersion({
         flowId: mockFlow.id,
         updatedBy: mockUser.id,
@@ -706,7 +704,6 @@ describe('Flow API', () => {
       });
       await databaseConnection().getRepository('flow').save([mockFlow]);
 
-      // Create older version we want to retrieve
       const mockOlderFlowVersion = createMockFlowVersion({
         flowId: mockFlow.id,
         updatedBy: mockUser.id,
@@ -714,7 +711,6 @@ describe('Flow API', () => {
         created: '2024-01-01',
       });
 
-      // Create newer version that should be ignored
       const mockLatestFlowVersion = createMockFlowVersion({
         flowId: mockFlow.id,
         updatedBy: mockUser.id,
@@ -923,7 +919,6 @@ describe('Flow API', () => {
         projectId: mockProject.id,
       });
 
-      // Create a flow with webhook trigger
       const createFlowResponse = await app?.inject({
         method: 'POST',
         url: '/v1/flows',
@@ -954,7 +949,6 @@ describe('Flow API', () => {
       expect(createFlowResponse?.statusCode).toBe(StatusCodes.CREATED);
       const flow = createFlowResponse?.json();
 
-      // Enable and publish the flow
       await app?.inject({
         method: 'POST',
         url: `/v1/flows/${flow.id}`,
@@ -981,7 +975,6 @@ describe('Flow API', () => {
         },
       });
 
-      // Test running the flow with query parameters
       const runResponse = await app?.inject({
         method: 'POST',
         url: `/v1/flows/${flow.id}/run?param1=value1&param2=value2`,
@@ -1020,7 +1013,6 @@ describe('Flow API', () => {
         projectId: mockProject.id,
       });
 
-      // Create a flow with webhook trigger
       const createFlowResponse = await app?.inject({
         method: 'POST',
         url: '/v1/flows',
@@ -1051,7 +1043,6 @@ describe('Flow API', () => {
       expect(createFlowResponse?.statusCode).toBe(StatusCodes.CREATED);
       const flow = createFlowResponse?.json();
 
-      // Enable and publish the flow
       await app?.inject({
         method: 'POST',
         url: `/v1/flows/${flow.id}`,
@@ -1078,7 +1069,6 @@ describe('Flow API', () => {
         },
       });
 
-      // Test running the flow with body parameters
       const runResponse = await app?.inject({
         method: 'POST',
         url: `/v1/flows/${flow.id}/run`,
@@ -1130,7 +1120,6 @@ describe('Flow API', () => {
         projectId: mockProject.id,
       });
 
-      // Create a flow with webhook trigger
       const createFlowResponse = await app?.inject({
         method: 'POST',
         url: '/v1/flows',
@@ -1161,7 +1150,6 @@ describe('Flow API', () => {
       expect(createFlowResponse?.statusCode).toBe(StatusCodes.CREATED);
       const flow = createFlowResponse?.json();
 
-      // Try to run unpublished flow
       const runResponse = await app?.inject({
         method: 'POST',
         url: `/v1/flows/${flow.id}/run`,
