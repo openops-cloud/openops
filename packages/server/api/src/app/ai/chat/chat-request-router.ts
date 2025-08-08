@@ -51,6 +51,7 @@ export async function routeChatRequest(
     aiConfig,
     languageModel,
     additionalContext: request.body.additionalContext,
+    frontendTools: request.body.tools || {},
   };
 
   sendAiChatMessageSendEvent({
