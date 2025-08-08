@@ -1,11 +1,14 @@
 import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
 import { flowsApi } from '@/app/features/flows/lib/flows-api';
-import { triggerEventsApi } from '@/app/features/flows/lib/trigger-events-api';
 import { TriggerStrategy } from '@openops/blocks-framework';
-import { INTERNAL_ERROR_TOAST, toast } from '@openops/components/ui';
+import {
+  getRunWorkflowManuallySuccessToast,
+  INTERNAL_ERROR_TOAST,
+  toast,
+} from '@openops/components/ui';
 import { FlowVersion, TriggerType } from '@openops/shared';
 import { useMutation } from '@tanstack/react-query';
-import { useCallback, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 export const useRunWorkflowManually = ({
   flowVersion,
@@ -37,17 +40,15 @@ export const useRunWorkflowManually = ({
     };
   }, [blockModel?.triggers, triggerName]);
 
-  const onSuccess = useCallback(() => {
-    setIsOpen(false);
-    //todo add toast
-  }, [setIsOpen]);
-
   const { mutate: run, isPending } = useMutation({
     mutationFn: async (queryParams?: Record<string, string>) => {
       return await flowsApi.runManually(flowVersion.flowId, queryParams);
     },
-    onSuccess: () => {
-      onSuccess();
+    onSuccess: (response) => {
+      setIsOpen(false);
+      toast(
+        getRunWorkflowManuallySuccessToast(`runs/${response.flowRunId}`) as any,
+      );
     },
     onError: () => {
       toast(INTERNAL_ERROR_TOAST);

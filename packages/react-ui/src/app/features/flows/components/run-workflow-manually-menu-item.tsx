@@ -1,6 +1,10 @@
 import { RunWorkflowManuallyDialog } from '@/app/features/flows/components/run-workflow-manually-dialog';
 import { useRunWorkflowManually } from '@/app/features/flows/lib/run-workflow-manually-hook';
-import { DropdownMenuItem, TooltipWrapper } from '@openops/components/ui';
+import {
+  DropdownMenuItem,
+  LoadingSpinner,
+  TooltipWrapper,
+} from '@openops/components/ui';
 import { FlowVersion } from '@openops/shared';
 import { t } from 'i18next';
 import { CirclePlay } from 'lucide-react';
@@ -8,11 +12,12 @@ import React from 'react';
 
 type MenuItemTriggerProps = {
   disabled?: boolean;
+  isLoading?: boolean;
   onSelect?: () => void;
 };
 
 const MenuItemTrigger = React.forwardRef<HTMLDivElement, MenuItemTriggerProps>(
-  ({ disabled, onSelect }, ref) => {
+  ({ disabled, isLoading, onSelect }, ref) => {
     return (
       <div ref={ref}>
         <div className="border-t h-0 w-full my-1"></div>
@@ -22,10 +27,14 @@ const MenuItemTrigger = React.forwardRef<HTMLDivElement, MenuItemTriggerProps>(
             e.preventDefault();
             onSelect?.();
           }}
-          disabled={disabled}
+          disabled={disabled || isLoading}
         >
           <div className="flex cursor-pointer flex-row gap-2 items-center">
-            <CirclePlay className="h-4 w-4" />
+            {isLoading ? (
+              <LoadingSpinner className={'h-4 w-4 stroke-foreground'} />
+            ) : (
+              <CirclePlay className="h-4 w-4" />
+            )}
             <span>{t('Run Workflow')}</span>
           </div>
         </DropdownMenuItem>
@@ -61,7 +70,7 @@ const RunWorkflowManuallyMenuItem = ({
   }
 
   if (isPollingType) {
-    return <MenuItemTrigger onSelect={() => run({})} />;
+    return <MenuItemTrigger onSelect={() => run({})} isLoading={isPending} />;
   }
 
   return (
@@ -71,7 +80,7 @@ const RunWorkflowManuallyMenuItem = ({
       isOpen={isOpen}
       setIsOpen={setIsOpen}
     >
-      <MenuItemTrigger onSelect={() => setIsOpen(true)} />
+      <MenuItemTrigger onSelect={() => setIsOpen(true)} isLoading={isPending} />
     </RunWorkflowManuallyDialog>
   );
 };
