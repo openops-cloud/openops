@@ -4,14 +4,8 @@ import { AiProvider } from '../providers';
 
 const openAiModels = [
   'o1-2024-12-17',
-  'o3-mini',
-  'o3-mini-2025-01-31',
   'gpt-4.1',
   'gpt-4.1-2025-04-14',
-  'gpt-4.1-mini',
-  'gpt-4.1-mini-2025-04-14',
-  'gpt-4.1-nano',
-  'gpt-4.1-nano-2025-04-14',
   'gpt-4o',
   'gpt-4o-2024-05-13',
   'gpt-4o-2024-08-06',
@@ -21,8 +15,6 @@ const openAiModels = [
   'gpt-4o-audio-preview-2024-12-17',
   'gpt-4o-search-preview',
   'gpt-4o-search-preview-2025-03-11',
-  'gpt-4o-mini',
-  'gpt-4o-mini-2024-07-18',
   'gpt-4-0613',
   'gpt-4.5-preview',
   'gpt-4.5-preview-2025-02-27',
