@@ -242,40 +242,30 @@ function createToolCallPartUI(
   const hasOutput = rawOutput != null;
   const normalizedOutput =
     rawOutput != null && typeof rawOutput === 'object' && 'value' in rawOutput
-      ? (rawOutput as any).value
+      ? rawOutput.value
       : rawOutput;
 
+  const base: any = {
+    toolCallId: part.toolCallId,
+    state: hasOutput
+      ? ('output-available' as const)
+      : ('input-available' as const),
+    input: part.input as Record<string, unknown>,
+    ...(hasOutput ? { output: normalizedOutput } : {}),
+    ...(part.providerOptions != null
+      ? { callProviderMetadata: part.providerOptions }
+      : {}),
+  };
+
   if (tool) {
-    // Static tool
-    return {
-      type: `tool-${toolName}` as any,
-      toolCallId: part.toolCallId,
-      state: hasOutput
-        ? ('output-available' as const)
-        : ('input-available' as const),
-      input: part.input as Record<string, unknown>,
-      ...(hasOutput ? { output: normalizedOutput } : {}),
-      providerExecuted: part.providerExecuted,
-      ...(part.providerOptions != null
-        ? { callProviderMetadata: part.providerOptions }
-        : {}),
-    };
+    base.type = `tool-${toolName}` as any;
+    base.providerExecuted = part.providerExecuted;
   } else {
-    // Dynamic tool
-    return {
-      type: 'dynamic-tool' as const,
-      toolName,
-      toolCallId: part.toolCallId,
-      state: hasOutput
-        ? ('output-available' as const)
-        : ('input-available' as const),
-      input: part.input as Record<string, unknown>,
-      ...(hasOutput ? { output: normalizedOutput } : {}),
-      ...(part.providerOptions != null
-        ? { callProviderMetadata: part.providerOptions }
-        : {}),
-    };
+    base.type = 'dynamic-tool' as const;
+    base.toolName = toolName;
   }
+
+  return base as UIMessage['parts'][0];
 }
 
 /**
@@ -298,7 +288,7 @@ function mergeToolResultIntoUIMessage(
         const raw = (toolResult as any).output ?? (toolResult as any).result;
         const normalized =
           raw != null && typeof raw === 'object' && 'value' in raw
-            ? (raw as any).value
+            ? raw.value
             : raw;
         (toolCallPart as any).output = normalized;
         return true;
