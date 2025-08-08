@@ -3,7 +3,9 @@ import { useRunWorkflowManually } from '@/app/features/flows/lib/run-workflow-ma
 import {
   DropdownMenuItem,
   LoadingSpinner,
-  TooltipWrapper,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
 } from '@openops/components/ui';
 import { FlowVersion } from '@openops/shared';
 import { t } from 'i18next';
@@ -59,13 +61,14 @@ const RunWorkflowManuallyMenuItem = ({
 
   if (!canRun) {
     return (
-      <TooltipWrapper
-        tooltipText={t(
-          'This workflow is event-driven and cannot be triggered manually',
-        )}
-      >
-        <MenuItemTrigger disabled={true} />
-      </TooltipWrapper>
+      <Tooltip>
+        <TooltipTrigger className="inline-flex">
+          <MenuItemTrigger disabled={true} />
+        </TooltipTrigger>
+        <TooltipContent side="bottom" align="start" className="z-[51]">
+          {t('This workflow is event-driven and cannot be triggered manually')}
+        </TooltipContent>
+      </Tooltip>
     );
   }
 
