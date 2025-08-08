@@ -42,7 +42,7 @@ RUN <<-```
     python3 -m venv .venv
     . .venv/bin/activate
     pip install ./src/cost-explorer-mcp-server
-    pip install ./src/cost-analysis-mcp-server
+    pip install ./src/aws-pricing-mcp-server
 ```
 
 # Set up backend
