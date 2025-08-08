@@ -7,7 +7,8 @@ services:
       - 443:443
     volumes:
       - ./nginx.gateway.conf:/etc/nginx/conf.d/default.conf
-      - ./tls:/etc/nginx/tls:ro
+      - ./nginx.gateway.routing.conf:/etc/nginx/includes/routing.conf
+      - ./tls:/etc/nginx/tls
     depends_on:
       openops-tables:
         condition: service_healthy
