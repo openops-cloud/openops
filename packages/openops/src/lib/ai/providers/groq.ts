@@ -7,7 +7,6 @@ const groqModels = [
   'llama-3.3-70b-versatile',
   'llama3-70b-8192',
   'llama3-8b-8192',
-  'mixtral-8x7b-32768',
   'meta-llama/llama-4-scout-17b-16e-instruct',
   'mistral-saba-24b',
   'qwen-2.5-32b',

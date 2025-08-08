@@ -9,7 +9,6 @@ const mistralModels = [
   'mistral-small-latest',
   'pixtral-large-latest',
   'pixtral-12b-2409',
-  'open-mixtral-8x22b',
 ];
 
 function createLanguageModel(params: {
