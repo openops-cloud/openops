@@ -51,10 +51,15 @@ function createLanguageModel(params: {
   model: string;
   providerSettings?: Record<string, unknown>;
 }): LanguageModelV1 {
+  const isGpt5Model = params.model.startsWith('gpt-5');
+
   return createOpenAI({
     apiKey: params.apiKey,
     ...params.providerSettings,
-  })(params.model);
+  })(params.model, {
+    // Disable structured outputs for GPT-5 models to avoid strict schema validation
+    structuredOutputs: isGpt5Model ? false : undefined,
+  });
 }
 
 export const openAiProvider: AiProvider = {
