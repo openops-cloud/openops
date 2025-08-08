@@ -9,8 +9,8 @@ const RunWorkflowManuallySuccessToastContent = ({
   url,
 }: RunWorkflowManuallySuccessToastContentProps) => (
   <div className="flex items-center gap-2">
-    <CircleCheck size={18} className={'text-success'} />
-    <div className="flex flex-col">
+    <CircleCheck size={18} className={'text-success dark:text-success-300'} />
+    <div className="flex flex-col dark:text-primary">
       <p className="text-sm font-normal">
         {t('Workflow triggered successfully.')}
       </p>
