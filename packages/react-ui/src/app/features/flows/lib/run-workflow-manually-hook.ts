@@ -1,6 +1,8 @@
 import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
+import { flowsApi } from '@/app/features/flows/lib/flows-api';
 import { triggerEventsApi } from '@/app/features/flows/lib/trigger-events-api';
 import { TriggerStrategy } from '@openops/blocks-framework';
+import { INTERNAL_ERROR_TOAST, toast } from '@openops/components/ui';
 import { FlowVersion, TriggerType } from '@openops/shared';
 import { useMutation } from '@tanstack/react-query';
 import { useCallback, useMemo, useState } from 'react';
@@ -40,15 +42,15 @@ export const useRunWorkflowManually = ({
     //todo add toast
   }, [setIsOpen]);
 
-  const { mutate: runWebhookTrigger, isPending } = useMutation({
-    mutationFn: async (queryParams: Record<string, string>) => {
-      return await triggerEventsApi.triggerWebhook(
-        flowVersion.flowId,
-        queryParams,
-      );
+  const { mutate: run, isPending } = useMutation({
+    mutationFn: async (queryParams?: Record<string, string>) => {
+      return await flowsApi.runManually(flowVersion.flowId, queryParams);
     },
     onSuccess: () => {
       onSuccess();
+    },
+    onError: () => {
+      toast(INTERNAL_ERROR_TOAST);
     },
   });
 
@@ -64,6 +66,6 @@ export const useRunWorkflowManually = ({
     canRun,
     isPending,
     isPollingType,
-    runWebhookTrigger,
+    run,
   };
 };

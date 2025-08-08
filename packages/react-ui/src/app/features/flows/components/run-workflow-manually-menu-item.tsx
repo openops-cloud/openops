@@ -45,14 +45,8 @@ const RunWorkflowManuallyMenuItem = ({
   flowVersion,
   isPublished,
 }: RunWorkflowManuallyMenuItemProps) => {
-  const {
-    isOpen,
-    setIsOpen,
-    canRun,
-    isPollingType,
-    runWebhookTrigger,
-    isPending,
-  } = useRunWorkflowManually({ flowVersion, isPublished });
+  const { isOpen, setIsOpen, canRun, isPollingType, run, isPending } =
+    useRunWorkflowManually({ flowVersion, isPublished });
 
   if (!canRun) {
     return (
@@ -67,12 +61,12 @@ const RunWorkflowManuallyMenuItem = ({
   }
 
   if (isPollingType) {
-    return <MenuItemTrigger onSelect={() => {}} />;
+    return <MenuItemTrigger onSelect={() => run({})} />;
   }
 
   return (
     <RunWorkflowManuallyDialog
-      onRun={runWebhookTrigger}
+      onRun={run}
       isRunPending={isPending}
       isOpen={isOpen}
       setIsOpen={setIsOpen}
