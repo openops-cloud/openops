@@ -112,6 +112,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
   const mockReply = {
     code: jest.fn().mockReturnThis(),
     send: jest.fn().mockReturnThis(),
+    hijack: jest.fn(),
     raw: {
       write: jest.fn(),
       end: jest.fn(),

@@ -125,27 +125,28 @@ export async function handleCodeGenerationRequest(
     conversation: { chatContext, chatHistory },
   } = params;
 
-  serverResponse.write(startMessagePart);
-  serverResponse.write(startStepPart);
-
-  const toolCallId = generateToolId();
-  initializeToolCall({
-    toolCallId,
-    toolName: GENERATE_CODE_TOOL_NAME,
-    message: getMessageText(newMessage),
-    serverResponse,
-  });
-
-  const enrichedContext = additionalContext
-    ? await enrichContext(additionalContext, projectId, {
-        includeCurrentStepOutput: IncludeOptions.ALWAYS,
-      })
-    : undefined;
-
-  const prompt = await getBlockSystemPrompt(chatContext, enrichedContext);
   const newMessageId = generateMessageId();
 
   try {
+    serverResponse.write(startMessagePart);
+    serverResponse.write(startStepPart);
+
+    const toolCallId = generateToolId();
+    initializeToolCall({
+      toolCallId,
+      toolName: GENERATE_CODE_TOOL_NAME,
+      message: getMessageText(newMessage),
+      serverResponse,
+    });
+
+    const enrichedContext = additionalContext
+      ? await enrichContext(additionalContext, projectId, {
+          includeCurrentStepOutput: IncludeOptions.ALWAYS,
+        })
+      : undefined;
+
+    const prompt = await getBlockSystemPrompt(chatContext, enrichedContext);
+
     const result = await generateCode({
       chatHistory,
       languageModel,

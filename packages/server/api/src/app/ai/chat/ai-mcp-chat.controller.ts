@@ -121,32 +121,22 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
   );
 
   app.post('/', NewMessageOptions, async (request, reply) => {
-    try {
-      const messageContent = await getUserMessage(request.body, reply);
-      if (messageContent === null) {
-        return; // Error response already sent
-      }
-
-      const newMessage: ModelMessage = {
-        role: 'user',
-        content: messageContent,
-      };
-
-      reply.raw.writeHead(200, {
-        'x-vercel-ai-ui-message-stream': 'v1',
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        Connection: 'keep-alive',
-      });
-      await routeChatRequest({
-        app,
-        request,
-        newMessage,
-        serverResponse: reply.raw,
-      });
-    } catch (error) {
-      return handleError(error, reply, 'conversation');
+    const messageContent = await getUserMessage(request.body, reply);
+    if (messageContent === null) {
+      return; // Error response already sent
     }
+
+    const newMessage: ModelMessage = {
+      role: 'user',
+      content: messageContent,
+    };
+
+    await routeChatRequest({
+      app,
+      request,
+      newMessage,
+      reply,
+    });
   });
 
   app.post('/chat-name', ChatNameOptions, async (request, reply) => {
