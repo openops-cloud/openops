@@ -647,6 +647,7 @@ describe('Flow API', () => {
       });
       await databaseConnection().getRepository('flow').save([mockFlow]);
 
+      // Create older version
       const mockOlderFlowVersion = createMockFlowVersion({
         flowId: mockFlow.id,
         updatedBy: mockUser.id,
@@ -654,6 +655,7 @@ describe('Flow API', () => {
         created: '2024-01-01',
       });
 
+      // Create newer version
       const mockLatestFlowVersion = createMockFlowVersion({
         flowId: mockFlow.id,
         updatedBy: mockUser.id,
@@ -704,6 +706,7 @@ describe('Flow API', () => {
       });
       await databaseConnection().getRepository('flow').save([mockFlow]);
 
+      // Create older version we want to retrieve
       const mockOlderFlowVersion = createMockFlowVersion({
         flowId: mockFlow.id,
         updatedBy: mockUser.id,
@@ -711,6 +714,7 @@ describe('Flow API', () => {
         created: '2024-01-01',
       });
 
+      // Create newer version that should be ignored
       const mockLatestFlowVersion = createMockFlowVersion({
         flowId: mockFlow.id,
         updatedBy: mockUser.id,
