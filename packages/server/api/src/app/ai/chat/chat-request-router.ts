@@ -60,7 +60,7 @@ export async function routeChatRequest(
     provider: aiConfig.provider,
   });
 
-  void fastifyReply.hijack();
+  await fastifyReply.hijack();
 
   serverResponse.writeHead(200, {
     'x-vercel-ai-ui-message-stream': 'v1',
