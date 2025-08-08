@@ -524,5 +524,7 @@
   "Permission needed": "Permission needed",
   "Logout": "Logout",
   "OpenOps cloud": "OpenOps cloud",
-  "Signed in as ": "Signed in as "
+  "Signed in as ": "Signed in as ",
+  "Workflow triggered successfully.": "Workflow triggered successfully.",
+  "Check the Runs page for details": "Check the Runs page for details"
 }
