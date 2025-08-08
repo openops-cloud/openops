@@ -7,6 +7,7 @@ const xaiModels = [
   'grok-3-latest',
   'grok-3-fast',
   'grok-3-fast-latest',
+  'grok-3-mini-latest',
   'grok-2-vision-1212',
   'grok-2-vision',
   'grok-2-vision-latest',
