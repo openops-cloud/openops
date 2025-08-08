@@ -1,15 +1,5 @@
 import { Static, Type } from '@sinclair/typebox';
 
-export const RunFlowRequestBody = Type.Optional(
-  Type.Object({
-    headers: Type.Optional(Type.Record(Type.String(), Type.String())),
-    queryParams: Type.Optional(Type.Record(Type.String(), Type.String())),
-    body: Type.Optional(Type.Unknown()),
-  }),
-);
-
-export type RunFlowRequestBody = Static<typeof RunFlowRequestBody>;
-
 export const RunFlowResponse = Type.Object({
   success: Type.Boolean(),
   flowRunId: Type.String(),

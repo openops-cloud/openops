@@ -12,13 +12,16 @@ import {
   openOpsId,
   PackageType,
   PrincipalType,
+  Project,
   RiskLevel,
   TemplateType,
   TriggerTestStrategy,
   TriggerType,
+  User,
 } from '@openops/shared';
 import { FastifyInstance } from 'fastify';
 import { StatusCodes } from 'http-status-codes';
+import { BlockMetadataSchema } from '../../../../src/app/blocks/block-metadata-entity';
 import { databaseConnection } from '../../../../src/app/database/database-connection';
 import { setupServer } from '../../../../src/app/server';
 import { generateMockToken } from '../../../helpers/auth';
@@ -647,7 +650,6 @@ describe('Flow API', () => {
       });
       await databaseConnection().getRepository('flow').save([mockFlow]);
 
-      // Create older version
       const mockOlderFlowVersion = createMockFlowVersion({
         flowId: mockFlow.id,
         updatedBy: mockUser.id,
@@ -655,7 +657,6 @@ describe('Flow API', () => {
         created: '2024-01-01',
       });
 
-      // Create newer version
       const mockLatestFlowVersion = createMockFlowVersion({
         flowId: mockFlow.id,
         updatedBy: mockUser.id,
@@ -706,7 +707,6 @@ describe('Flow API', () => {
       });
       await databaseConnection().getRepository('flow').save([mockFlow]);
 
-      // Create older version we want to retrieve
       const mockOlderFlowVersion = createMockFlowVersion({
         flowId: mockFlow.id,
         updatedBy: mockUser.id,
@@ -714,7 +714,6 @@ describe('Flow API', () => {
         created: '2024-01-01',
       });
 
-      // Create newer version that should be ignored
       const mockLatestFlowVersion = createMockFlowVersion({
         flowId: mockFlow.id,
         updatedBy: mockUser.id,
@@ -903,206 +902,293 @@ describe('Flow API', () => {
   });
 
   describe('Run Flow endpoint', () => {
-    it('should run a webhook flow with query parameters', async () => {
-      const mockUser = createMockUser();
-      await databaseConnection().getRepository('user').save([mockUser]);
+    describe('webhook flows', () => {
+      let mockUser: User;
+      let mockProject: Project;
+      let mockToken: string;
+      let mockBlockMetadata: BlockMetadataSchema;
 
-      const mockOrganization = createMockOrganization({ ownerId: mockUser.id });
-      await databaseConnection()
-        .getRepository('organization')
-        .save(mockOrganization);
+      beforeEach(async () => {
+        // Create test user and project
+        mockUser = createMockUser();
+        await databaseConnection().getRepository('user').save([mockUser]);
 
-      const mockProject = createMockProject({
-        ownerId: mockUser.id,
-        organizationId: mockOrganization.id,
-      });
-      await databaseConnection().getRepository('project').save([mockProject]);
+        const mockOrganization = createMockOrganization({
+          ownerId: mockUser.id,
+        });
+        await databaseConnection()
+          .getRepository('organization')
+          .save(mockOrganization);
 
-      const mockToken = await generateMockToken({
-        type: PrincipalType.USER,
-        projectId: mockProject.id,
-      });
+        mockProject = createMockProject({
+          ownerId: mockUser.id,
+          organizationId: mockOrganization.id,
+        });
+        await databaseConnection().getRepository('project').save([mockProject]);
 
-      const createFlowResponse = await app?.inject({
-        method: 'POST',
-        url: '/v1/flows',
-        headers: {
-          authorization: `Bearer ${mockToken}`,
-        },
-        body: {
-          displayName: 'Test Webhook Flow',
-          trigger: {
-            name: 'trigger',
-            displayName: 'Catch Webhook',
-            type: TriggerType.BLOCK,
-            settings: {
-              blockName: '@openops/block-webhook',
-              blockVersion: '0.1.5',
-              blockType: BlockType.OFFICIAL,
-              packageType: PackageType.REGISTRY,
-              triggerName: 'catch_webhook',
-              input: {
-                authType: 'none',
-                authFields: {},
+        // Create mock block metadata for webhook trigger
+        mockBlockMetadata = createMockBlockMetadata({
+          name: '@openops/block-webhook',
+          blockType: BlockType.OFFICIAL,
+          packageType: PackageType.REGISTRY,
+          version: '0.1.5',
+          triggers: {
+            catch_webhook: {
+              name: 'catch_webhook',
+              displayName: 'Catch Webhook',
+              description: 'Webhook trigger',
+              type: TriggerStrategy.WEBHOOK,
+              props: {},
+              riskLevel: RiskLevel.LOW,
+              sampleData: {},
+              handshakeConfiguration: {
+                strategy: WebhookHandshakeStrategy.NONE,
               },
+              renewConfiguration: { strategy: WebhookRenewStrategy.NONE },
+              testStrategy: TriggerTestStrategy.TEST_FUNCTION,
             },
           },
-        },
+        });
+        await databaseConnection()
+          .getRepository('block_metadata')
+          .save(mockBlockMetadata);
+
+        mockToken = await generateMockToken({
+          type: PrincipalType.USER,
+          projectId: mockProject.id,
+        });
       });
 
-      expect(createFlowResponse?.statusCode).toBe(StatusCodes.CREATED);
-      const flow = createFlowResponse?.json();
+      it('should run with URL query parameters', async () => {
+        // Create and publish flow
+        const flow = await createAndPublishWebhookFlow(mockToken);
 
-      await app?.inject({
-        method: 'POST',
-        url: `/v1/flows/${flow.id}`,
-        headers: {
-          authorization: `Bearer ${mockToken}`,
-        },
-        body: {
-          type: FlowOperationType.CHANGE_STATUS,
-          request: {
-            status: FlowStatus.ENABLED,
+        // Test running with URL query parameters
+        const runResponse = await app?.inject({
+          method: 'POST',
+          url: `/v1/flows/${flow.id}/run?param1=value1&param2=value2`,
+          headers: {
+            authorization: `Bearer ${mockToken}`,
           },
-        },
+        });
+
+        expect(runResponse?.statusCode).toBe(StatusCodes.OK);
+        const runResult = runResponse?.json();
+        expect(runResult).toMatchObject({
+          success: true,
+          status: expect.any(String),
+          flowRunId: expect.any(String),
+          message: 'Workflow execution started successfully',
+        });
       });
 
-      await app?.inject({
-        method: 'POST',
-        url: `/v1/flows/${flow.id}`,
-        headers: {
-          authorization: `Bearer ${mockToken}`,
-        },
-        body: {
-          type: FlowOperationType.LOCK_AND_PUBLISH,
-          request: {},
-        },
-      });
+      it('should run with body parameters', async () => {
+        // Create and publish flow
+        const flow = await createAndPublishWebhookFlow(mockToken);
 
-      const runResponse = await app?.inject({
-        method: 'POST',
-        url: `/v1/flows/${flow.id}/run?param1=value1&param2=value2`,
-        headers: {
-          authorization: `Bearer ${mockToken}`,
-        },
-      });
-
-      expect(runResponse?.statusCode).toBe(StatusCodes.OK);
-      const runResult = runResponse?.json();
-      expect(runResult).toMatchObject({
-        success: true,
-        status: expect.any(String),
-        flowRunId: expect.any(String),
-        message: 'Workflow execution started successfully',
-      });
-    });
-
-    it('should run a webhook flow with body parameters', async () => {
-      const mockUser = createMockUser();
-      await databaseConnection().getRepository('user').save([mockUser]);
-
-      const mockOrganization = createMockOrganization({ ownerId: mockUser.id });
-      await databaseConnection()
-        .getRepository('organization')
-        .save(mockOrganization);
-
-      const mockProject = createMockProject({
-        ownerId: mockUser.id,
-        organizationId: mockOrganization.id,
-      });
-      await databaseConnection().getRepository('project').save([mockProject]);
-
-      const mockToken = await generateMockToken({
-        type: PrincipalType.USER,
-        projectId: mockProject.id,
-      });
-
-      const createFlowResponse = await app?.inject({
-        method: 'POST',
-        url: '/v1/flows',
-        headers: {
-          authorization: `Bearer ${mockToken}`,
-        },
-        body: {
-          displayName: 'Test Webhook Flow',
-          trigger: {
-            name: 'trigger',
-            displayName: 'Catch Webhook',
-            type: TriggerType.BLOCK,
-            settings: {
-              blockName: '@openops/block-webhook',
-              blockVersion: '0.1.5',
-              blockType: BlockType.OFFICIAL,
-              packageType: PackageType.REGISTRY,
-              triggerName: 'catch_webhook',
-              input: {
-                authType: 'none',
-                authFields: {},
-              },
-            },
-          },
-        },
-      });
-
-      expect(createFlowResponse?.statusCode).toBe(StatusCodes.CREATED);
-      const flow = createFlowResponse?.json();
-
-      await app?.inject({
-        method: 'POST',
-        url: `/v1/flows/${flow.id}`,
-        headers: {
-          authorization: `Bearer ${mockToken}`,
-        },
-        body: {
-          type: FlowOperationType.CHANGE_STATUS,
-          request: {
-            status: FlowStatus.ENABLED,
-          },
-        },
-      });
-
-      await app?.inject({
-        method: 'POST',
-        url: `/v1/flows/${flow.id}`,
-        headers: {
-          authorization: `Bearer ${mockToken}`,
-        },
-        body: {
-          type: FlowOperationType.LOCK_AND_PUBLISH,
-          request: {},
-        },
-      });
-
-      const runResponse = await app?.inject({
-        method: 'POST',
-        url: `/v1/flows/${flow.id}/run`,
-        headers: {
-          authorization: `Bearer ${mockToken}`,
-          'content-type': 'application/json',
-        },
-        body: {
-          queryParams: {
-            param1: 'value1',
-            param2: 'value2',
+        // Test running with body parameters
+        const runResponse = await app?.inject({
+          method: 'POST',
+          url: `/v1/flows/${flow.id}/run`,
+          headers: {
+            authorization: `Bearer ${mockToken}`,
+            'content-type': 'application/json',
           },
           body: {
-            data: 'test',
+            queryParams: {
+              param1: 'value1',
+              param2: 'value2',
+            },
+            body: {
+              data: 'test',
+            },
           },
+        });
+
+        expect(runResponse?.statusCode).toBe(StatusCodes.OK);
+        const runResult = runResponse?.json();
+        expect(runResult).toMatchObject({
+          success: true,
+          status: expect.any(String),
+          flowRunId: expect.any(String),
+          message: 'Workflow execution started successfully',
+        });
+      });
+
+      it('should run with custom headers', async () => {
+        // Create and publish flow
+        const flow = await createAndPublishWebhookFlow(mockToken);
+
+        // Test running with custom headers
+        const runResponse = await app?.inject({
+          method: 'POST',
+          url: `/v1/flows/${flow.id}/run`,
           headers: {
-            'x-custom-header': 'test',
+            authorization: `Bearer ${mockToken}`,
+            'content-type': 'application/json',
+            'x-custom-header': 'test-value',
+          },
+          body: {
+            headers: {
+              'x-another-header': 'another-value',
+            },
+          },
+        });
+
+        expect(runResponse?.statusCode).toBe(StatusCodes.OK);
+        const runResult = runResponse?.json();
+        expect(runResult).toMatchObject({
+          success: true,
+          status: expect.any(String),
+          flowRunId: expect.any(String),
+          message: 'Workflow execution started successfully',
+        });
+      });
+
+      it('should not include webhook payload for non-webhook flows', async () => {
+        // Create a polling flow
+        const createFlowResponse = await app?.inject({
+          method: 'POST',
+          url: '/v1/flows',
+          headers: {
+            authorization: `Bearer ${mockToken}`,
+          },
+          body: {
+            displayName: 'Test Polling Flow',
+            trigger: {
+              name: 'trigger',
+              displayName: 'Poll Something',
+              type: TriggerType.BLOCK,
+              settings: {
+                blockName: '@openops/block-polling',
+                blockVersion: '0.1.0',
+                blockType: BlockType.OFFICIAL,
+                packageType: PackageType.REGISTRY,
+                triggerName: 'poll_something',
+                input: {},
+              },
+            },
+          },
+        });
+
+        expect(createFlowResponse?.statusCode).toBe(StatusCodes.CREATED);
+        const flow = createFlowResponse?.json();
+
+        // Enable and publish the flow
+        await app?.inject({
+          method: 'POST',
+          url: `/v1/flows/${flow.id}`,
+          headers: {
+            authorization: `Bearer ${mockToken}`,
+          },
+          body: {
+            type: FlowOperationType.CHANGE_STATUS,
+            request: {
+              status: FlowStatus.ENABLED,
+            },
+          },
+        });
+
+        await app?.inject({
+          method: 'POST',
+          url: `/v1/flows/${flow.id}`,
+          headers: {
+            authorization: `Bearer ${mockToken}`,
+          },
+          body: {
+            type: FlowOperationType.LOCK_AND_PUBLISH,
+            request: {},
+          },
+        });
+
+        // Run with webhook-like parameters that should be ignored
+        const runResponse = await app?.inject({
+          method: 'POST',
+          url: `/v1/flows/${flow.id}/run?param1=value1`,
+          headers: {
+            authorization: `Bearer ${mockToken}`,
+            'content-type': 'application/json',
+            'x-custom-header': 'test-value',
+          },
+          body: {
+            headers: { 'x-another-header': 'another-value' },
+            queryParams: { param2: 'value2' },
+            body: { data: 'test' },
+          },
+        });
+
+        expect(runResponse?.statusCode).toBe(StatusCodes.OK);
+        const runResult = runResponse?.json();
+        expect(runResult).toMatchObject({
+          success: true,
+          status: expect.any(String),
+          flowRunId: expect.any(String),
+          message: 'Workflow execution started successfully',
+        });
+      });
+    });
+
+    // Helper function to create and publish a webhook flow
+    async function createAndPublishWebhookFlow(token: string) {
+      const createFlowResponse = await app?.inject({
+        method: 'POST',
+        url: '/v1/flows',
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+        body: {
+          displayName: 'Test Webhook Flow',
+          trigger: {
+            name: 'trigger',
+            displayName: 'Catch Webhook',
+            type: TriggerType.BLOCK,
+            settings: {
+              blockName: '@openops/block-webhook',
+              blockVersion: '0.1.5',
+              blockType: BlockType.OFFICIAL,
+              packageType: PackageType.REGISTRY,
+              triggerName: 'catch_webhook',
+              input: {
+                authType: 'none',
+                authFields: {},
+              },
+            },
           },
         },
       });
 
-      expect(runResponse?.statusCode).toBe(StatusCodes.OK);
-      const runResult = runResponse?.json();
-      expect(runResult).toMatchObject({
-        success: true,
-        status: expect.any(String),
-        flowRunId: expect.any(String),
-        message: 'Workflow execution started successfully',
+      expect(createFlowResponse?.statusCode).toBe(StatusCodes.CREATED);
+      const flow = createFlowResponse?.json();
+
+      // Enable and publish the flow
+      await app?.inject({
+        method: 'POST',
+        url: `/v1/flows/${flow.id}`,
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+        body: {
+          type: FlowOperationType.CHANGE_STATUS,
+          request: {
+            status: FlowStatus.ENABLED,
+          },
+        },
       });
-    });
+
+      await app?.inject({
+        method: 'POST',
+        url: `/v1/flows/${flow.id}`,
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+        body: {
+          type: FlowOperationType.LOCK_AND_PUBLISH,
+          request: {},
+        },
+      });
+
+      return flow;
+    }
 
     it('should fail to run an unpublished flow', async () => {
       const mockUser = createMockUser();

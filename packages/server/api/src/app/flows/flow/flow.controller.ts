@@ -28,7 +28,6 @@ import {
   ProgressUpdateType,
   RunEnvironment,
   RunFlowErrorResponse,
-  RunFlowRequestBody,
   RunFlowResponse,
   SeekPage,
   SERVICE_KEY_SECURITY_OPENAPI,
@@ -192,11 +191,11 @@ export const flowController: FastifyPluginAsyncTypebox = async (app) => {
         ? {
             method: request.method,
             headers: request.headers as Record<string, string>,
-            body: request.body?.body || {},
             queryParams: Object.fromEntries(
-              Object.entries(
-                request.body?.queryParams || request.query || {},
-              ).map(([key, value]) => [key, String(value)]),
+              Object.entries(request.query || {}).map(([key, value]) => [
+                key,
+                String(value),
+              ]),
             ),
           }
         : {};
@@ -475,7 +474,6 @@ const RunFlowRequestOptions = {
       id: OpenOpsId,
     }),
     querystring: Type.Record(Type.String(), Type.String()),
-    body: RunFlowRequestBody,
     response: {
       [StatusCodes.OK]: RunFlowResponse,
       [StatusCodes.BAD_REQUEST]: RunFlowErrorResponse,
