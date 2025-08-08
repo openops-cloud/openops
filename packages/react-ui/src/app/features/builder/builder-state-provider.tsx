@@ -20,10 +20,10 @@ export function BuilderStateProvider({
 
   useEffect(() => {
     if (storeRef.current && props.flow && props.flowVersion) {
-      storeRef.current.setState(() => ({
+      storeRef.current.setState({
         flow: props.flow,
         flowVersion: props.flowVersion,
-      }));
+      });
     }
   }, [props.flow, props.flowVersion]);
 

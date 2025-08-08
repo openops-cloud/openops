@@ -45,7 +45,7 @@ const FlowBuilderPage = () => {
       }
       return failureCount < 4;
     },
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: 'always',
   });
 
   if (isError && (error as AxiosError).status === 404) {
