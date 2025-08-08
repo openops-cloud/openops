@@ -13,6 +13,7 @@ import {
   FlowRun,
   FlowRunId,
   FlowRunStatus,
+  FlowRunTriggerSource,
   FlowVersionId,
   isEmpty,
   isNil,
@@ -47,8 +48,15 @@ export const flowRunRepo = repoFactory<FlowRun>(FlowRunEntity);
 const getFlowRunOrCreate = async (
   params: GetOrCreateParams,
 ): Promise<Partial<FlowRun>> => {
-  const { id, projectId, flowId, flowVersionId, flowDisplayName, environment } =
-    params;
+  const {
+    id,
+    projectId,
+    flowId,
+    flowVersionId,
+    flowDisplayName,
+    environment,
+    triggerSource,
+  } = params;
 
   if (id) {
     return flowRunService.getOneOrThrow({
@@ -65,6 +73,7 @@ const getFlowRunOrCreate = async (
     environment,
     flowDisplayName,
     startTime: new Date().toISOString(),
+    triggerSource,
   };
 };
 
@@ -254,6 +263,7 @@ export const flowRunService = {
       progressUpdateType,
       executionType,
       environment: RunEnvironment.PRODUCTION,
+      triggerSource: flowRunToResume.triggerSource,
     });
   },
   async updateStatus({
@@ -302,6 +312,7 @@ export const flowRunService = {
     synchronousHandlerId,
     progressUpdateType,
     executionCorrelationId,
+    triggerSource,
   }: StartParams): Promise<FlowRun> {
     const flowVersion = await flowVersionService.getOneOrThrow(flowVersionId);
 
@@ -317,6 +328,7 @@ export const flowRunService = {
       flowVersionId: flowVersion.id,
       environment,
       flowDisplayName: flowVersion.displayName,
+      triggerSource,
     });
 
     flowRun.status = FlowRunStatus.SCHEDULED;
@@ -364,6 +376,7 @@ export const flowRunService = {
       synchronousHandlerId: webhookResponseWatcher.getServerId(),
       executionCorrelationId: nanoid(),
       progressUpdateType: ProgressUpdateType.TEST_FLOW,
+      triggerSource: FlowRunTriggerSource.TEST_RUN,
     });
   },
 
@@ -492,6 +505,7 @@ type GetOrCreateParams = {
   flowVersionId: FlowVersionId;
   flowDisplayName: string;
   environment: RunEnvironment;
+  triggerSource: FlowRunTriggerSource;
 };
 
 type ListParams = {
@@ -520,6 +534,7 @@ type StartParams = {
   executionCorrelationId: string;
   progressUpdateType: ProgressUpdateType;
   executionType: ExecutionType;
+  triggerSource: FlowRunTriggerSource;
 };
 
 type TestParams = {

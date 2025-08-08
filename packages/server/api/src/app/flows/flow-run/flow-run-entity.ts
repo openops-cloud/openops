@@ -1,4 +1,10 @@
-import { File, Flow, FlowRun, Project } from '@openops/shared';
+import {
+  File,
+  Flow,
+  FlowRun,
+  FlowRunTriggerSource,
+  Project,
+} from '@openops/shared';
 import { EntitySchema } from 'typeorm';
 import {
   ARRAY_COLUMN_TYPE,
@@ -35,6 +41,10 @@ export const FlowRunEntity = new EntitySchema<FlowRunSchema>({
     },
     status: {
       type: String,
+    },
+    triggerSource: {
+      type: String,
+      enum: Object.values(FlowRunTriggerSource),
     },
     terminationReason: {
       type: String,

@@ -24,7 +24,6 @@ type StepSettingsAssistantUiChatContainerProps = {
   onCloseClick: () => void;
   onNewChatClick: () => void;
   containerSize: AiCliChatContainerSizeState;
-  enableNewChat: boolean;
   toggleContainerSizeState: (state: AiCliChatContainerSizeState) => void;
   className?: string;
   isModelSelectorLoading: boolean;
@@ -44,7 +43,6 @@ const StepSettingsAssistantUiChatContainer = ({
   onCloseClick,
   onNewChatClick,
   containerSize,
-  enableNewChat,
   toggleContainerSizeState,
   className,
   isModelSelectorLoading,
@@ -99,7 +97,6 @@ const StepSettingsAssistantUiChatContainer = ({
         runtime={runtime}
         onClose={onCloseClick}
         onNewChat={onNewChatClick}
-        enableNewChat={enableNewChat}
         availableModels={availableModels}
         theme={theme}
         title={t('AI Chat')}
