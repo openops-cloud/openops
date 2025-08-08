@@ -99,7 +99,6 @@ const StepSettingsAssistantUiChatContainer = ({
         runtime={runtime}
         onClose={onCloseClick}
         onNewChat={onNewChatClick}
-        enableNewChat={enableNewChat}
         availableModels={availableModels}
         theme={theme}
         title={t('AI Chat')}
