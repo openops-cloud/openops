@@ -27,6 +27,7 @@ import {
   PrincipalType,
   ProgressUpdateType,
   RunEnvironment,
+  RunFlowResponses,
   SeekPage,
   SERVICE_KEY_SECURITY_OPENAPI,
   TriggerType,
@@ -475,17 +476,6 @@ const RunFlowRequestOptions = {
       id: OpenOpsId,
     }),
     querystring: Type.Record(Type.String(), Type.String()),
-    response: {
-      [StatusCodes.OK]: Type.Object({
-        success: Type.Boolean(),
-        flowRunId: Type.String(),
-        status: Type.String(),
-        message: Type.String(),
-      }),
-      [StatusCodes.BAD_REQUEST]: Type.Object({
-        success: Type.Boolean(),
-        message: Type.String(),
-      }),
-    },
+    response: RunFlowResponses,
   },
 };
