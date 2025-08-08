@@ -302,19 +302,14 @@ async function validateTriggerType(
       projectId,
     });
 
-    if (metadata.type === TriggerStrategy.POLLING) {
+    if (
+      metadata.type === TriggerStrategy.POLLING ||
+      metadata.type == TriggerStrategy.WEBHOOK
+    ) {
       return {
         success: true,
         message: 'Trigger type validation successful',
-        triggerStrategy: TriggerStrategy.POLLING,
-      };
-    }
-
-    if (metadata.type === TriggerStrategy.WEBHOOK) {
-      return {
-        success: true,
-        message: 'Trigger type validation successful',
-        triggerStrategy: TriggerStrategy.WEBHOOK,
+        triggerStrategy: metadata.type,
       };
     }
 
