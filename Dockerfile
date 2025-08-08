@@ -37,7 +37,7 @@ WORKDIR /root/.mcp/aws-cost
 RUN <<-```
     set -ex
     git clone https://github.com/awslabs/mcp.git .
-    git checkout 2025.6.2025131704
+    git checkout 2025.08.20250807085838
     wget -qO- https://astral.sh/uv/install.sh | sh && source $HOME/.local/bin/env
     python3 -m venv .venv
     . .venv/bin/activate
