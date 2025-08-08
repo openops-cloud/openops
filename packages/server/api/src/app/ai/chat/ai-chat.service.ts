@@ -6,10 +6,10 @@ import {
   hashUtils,
 } from '@openops/server-shared';
 import { AiConfig, ApplicationError, ErrorCode } from '@openops/shared';
-import { LanguageModel, ModelMessage, generateText } from 'ai';
+import { LanguageModel, ModelMessage, UIMessage, generateText } from 'ai';
 import { aiConfigService } from '../config/ai-config.service';
 import { loadPrompt } from './prompts.service';
-import { Conversation, MessageWithMergedToolResults } from './types';
+import { Conversation } from './types';
 import { mergeToolResultsIntoMessages } from './utils';
 
 // Chat expiration time is 24 hour
@@ -147,7 +147,7 @@ export const getChatHistoryWithMergedTools = async (
   chatId: string,
   userId: string,
   projectId: string,
-): Promise<MessageWithMergedToolResults[]> => {
+): Promise<Array<Omit<UIMessage, 'id'>>> => {
   const messages = await getChatHistory(chatId, userId, projectId);
   return mergeToolResultsIntoMessages(messages);
 };

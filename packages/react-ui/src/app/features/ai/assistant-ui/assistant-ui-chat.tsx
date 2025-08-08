@@ -36,14 +36,7 @@ const AssistantUiChat = ({
   }, []);
 
   const { toolComponents, isLoading: isLoadingTools } = useFrontendTools();
-  const {
-    runtime,
-    shouldRenderChat,
-    openChatResponse,
-    isLoading,
-    hasMessages,
-    createNewChat,
-  } = useAssistantChat({
+  const { runtime, isLoading, hasMessages, createNewChat } = useAssistantChat({
     chatId,
     onChatIdChange,
   });
@@ -57,21 +50,11 @@ const AssistantUiChat = ({
     isLoading: isModelSelectorLoading,
   } = useAiModelSelector();
 
-  if (isLoading || !openChatResponse || isLoadingTools) {
+  if (isLoading || isLoadingTools) {
     return (
       <div className="w-full flex h-full items-center justify-center bg-background">
         <div className="text-sm text-muted-foreground">
           {t('Loading chat...')}
-        </div>
-      </div>
-    );
-  }
-
-  if (!shouldRenderChat) {
-    return (
-      <div className="w-full flex h-full items-center justify-center bg-background">
-        <div className="text-sm text-muted-foreground">
-          {t('Initializing chat...')}
         </div>
       </div>
     );

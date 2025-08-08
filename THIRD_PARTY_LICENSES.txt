@@ -22493,9 +22493,9 @@ SOFTWARE.
 
 The following npm packages may be included in this product:
 
- - @assistant-ui/react-ai-sdk@0.11.0
- - @assistant-ui/react-markdown@0.10.7
- - @assistant-ui/react@0.10.35
+ - @assistant-ui/react-ai-sdk@0.11.1
+ - @assistant-ui/react-markdown@0.10.8
+ - @assistant-ui/react@0.10.36
  - assistant-cloud@0.0.4
  - assistant-stream@0.2.22
 

@@ -149,7 +149,7 @@ describe('User Message Handler', () => {
       await handleUserMessage(mockParams);
 
       expect(mockServerResponse.write).toHaveBeenCalledWith(
-        expect.stringContaining('f:{"messageId":"test-message-id"}'),
+        expect.stringContaining('data: {"type":"text-delta"'),
       );
 
       expect(saveChatHistory).toHaveBeenCalledWith(
@@ -166,9 +166,7 @@ describe('User Message Handler', () => {
         ]),
       );
 
-      expect(mockServerResponse.write).toHaveBeenCalledWith(
-        'd:{"finishReason":"stop"}\n',
-      );
+      expect(mockServerResponse.write).toHaveBeenCalledWith('data: [DONE]\n\n');
       expect(mockServerResponse.end).toHaveBeenCalled();
     });
 
@@ -181,10 +179,10 @@ describe('User Message Handler', () => {
 
       expect(logger.warn).toHaveBeenCalled();
       expect(mockServerResponse.write).toHaveBeenCalledWith(
-        expect.stringContaining('0:"\\n\\n"'),
+        expect.stringContaining('data: {"type":"text-delta"'),
       );
       expect(mockServerResponse.write).toHaveBeenCalledWith(
-        expect.stringContaining('0:"Test error"'),
+        expect.stringContaining('Test error'),
       );
       expect(mockServerResponse.end).toHaveBeenCalled();
     });

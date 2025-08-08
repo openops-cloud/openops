@@ -1,4 +1,4 @@
-import { UIMessage } from '@ai-sdk/ui-utils';
+import { UIMessage } from '@ai-sdk/ui-utils'; // Fix this
 import { AIChatMessageRole, tryParseJson } from '@openops/components/ui';
 import { CodeSchema } from '@openops/shared';
 import {

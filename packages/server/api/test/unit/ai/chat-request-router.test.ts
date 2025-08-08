@@ -6,7 +6,7 @@ import {
   Principal,
 } from '@openops/shared';
 import { CoreMessage, LanguageModel } from 'ai';
-import { FastifyInstance } from 'fastify';
+import { FastifyInstance, FastifyReply } from 'fastify';
 import { ServerResponse } from 'node:http';
 import { routeChatRequest } from '../../../src/app/ai/chat/chat-request-router';
 
@@ -52,6 +52,7 @@ describe('Chat Request Router', () => {
   const mockServerResponse = {
     write: jest.fn(),
     end: jest.fn(),
+    writeHead: jest.fn(),
   } as unknown as ServerResponse;
 
   const mockApp = {} as FastifyInstance;
@@ -105,11 +106,16 @@ describe('Chat Request Router', () => {
     },
   ];
 
+  const mockReply = {
+    hijack: jest.fn(),
+    raw: mockServerResponse,
+  } as unknown as FastifyReply;
+
   const mockParams = {
     app: mockApp,
     request: mockRequest,
     newMessage: mockNewMessage,
-    serverResponse: mockServerResponse,
+    reply: mockReply,
   };
 
   beforeEach(() => {
