@@ -36,7 +36,6 @@ export * from './lib/flows/dto/count-flows-request';
 export * from './lib/flows/dto/create-flow-request';
 export * from './lib/flows/dto/flow-template-request';
 export * from './lib/flows/dto/list-flows-request';
-export * from './lib/flows/dto/run-flow-request';
 export * from './lib/flows/flow';
 export * from './lib/flows/flow-helper';
 export * from './lib/flows/flow-operations';
