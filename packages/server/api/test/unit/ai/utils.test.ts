@@ -145,6 +145,50 @@ describe('mergeToolResultsIntoMessages', () => {
   });
 
   describe('tool result merging', () => {
+    it('should handle tool result using result field (no output) without throwing', () => {
+      const messages: ModelMessage[] = [
+        {
+          role: 'assistant',
+          content: [
+            {
+              type: 'tool-call',
+              toolCallId: 'call_abc',
+              toolName: 'get_weather',
+              input: { location: 'Paris' },
+            },
+          ],
+        },
+        {
+          role: 'tool',
+          content: [
+            {
+              type: 'tool-result',
+              toolCallId: 'call_abc',
+              toolName: 'get_weather',
+              result: {
+                type: 'json',
+                value: { temperature: 20, condition: 'cloudy' },
+              },
+            } as any,
+          ],
+        },
+      ];
+
+      // Should not throw even if `output` is not provided
+      expect(() => mergeToolResultsIntoMessages(messages)).not.toThrow();
+
+      const result = mergeToolResultsIntoMessages(messages);
+      expect(result).toHaveLength(1);
+      expect(result[0].role).toBe('assistant');
+      expect(result[0].parts[0]).toEqual({
+        type: 'dynamic-tool',
+        toolName: 'get_weather',
+        toolCallId: 'call_abc',
+        state: 'output-available',
+        input: { location: 'Paris' },
+        output: { temperature: 20, condition: 'cloudy' },
+      });
+    });
     it('should merge tool result into assistant message with matching toolCallId', () => {
       const messages: ModelMessage[] = [
         {

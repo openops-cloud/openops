@@ -238,7 +238,12 @@ function createToolCallPartUI(
 ): UIMessage['parts'][0] {
   const toolName = part.toolName;
   const tool = tools?.[toolName];
-  const hasOutput = part.output != null;
+  const rawOutput = part.output ?? part.result;
+  const hasOutput = rawOutput != null;
+  const normalizedOutput =
+    rawOutput != null && typeof rawOutput === 'object' && 'value' in rawOutput
+      ? (rawOutput as any).value
+      : rawOutput;
 
   if (tool) {
     // Static tool
@@ -249,11 +254,7 @@ function createToolCallPartUI(
         ? ('output-available' as const)
         : ('input-available' as const),
       input: part.input as Record<string, unknown>,
-      ...(hasOutput
-        ? {
-            output: part.output.value || part.output,
-          }
-        : {}),
+      ...(hasOutput ? { output: normalizedOutput } : {}),
       providerExecuted: part.providerExecuted,
       ...(part.providerOptions != null
         ? { callProviderMetadata: part.providerOptions }
@@ -269,11 +270,7 @@ function createToolCallPartUI(
         ? ('output-available' as const)
         : ('input-available' as const),
       input: part.input as Record<string, unknown>,
-      ...(hasOutput
-        ? {
-            output: part.output.value || part.output,
-          }
-        : {}),
+      ...(hasOutput ? { output: normalizedOutput } : {}),
       ...(part.providerOptions != null
         ? { callProviderMetadata: part.providerOptions }
         : {}),
@@ -298,8 +295,12 @@ function mergeToolResultIntoUIMessage(
       );
       if (toolCallPart) {
         (toolCallPart as any).state = 'output-available';
-        (toolCallPart as any).output =
-          toolResult.output.value || toolResult.output;
+        const raw = (toolResult as any).output ?? (toolResult as any).result;
+        const normalized =
+          raw != null && typeof raw === 'object' && 'value' in raw
+            ? (raw as any).value
+            : raw;
+        (toolCallPart as any).output = normalized;
         return true;
       }
     }
