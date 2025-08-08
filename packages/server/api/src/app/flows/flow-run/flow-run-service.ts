@@ -119,6 +119,7 @@ export const flowRunService = {
     projectId,
     flowId,
     status,
+    triggerSource,
     cursor,
     limit,
     tags,
@@ -148,6 +149,11 @@ export const flowRunService = {
     if (status) {
       query = query.andWhere({
         status: In(status),
+      });
+    }
+    if (triggerSource) {
+      query = query.andWhere({
+        triggerSource: In(triggerSource),
       });
     }
     if (createdAfter) {
@@ -512,6 +518,7 @@ type ListParams = {
   projectId: ProjectId;
   flowId: FlowId[] | undefined;
   status: FlowRunStatus[] | undefined;
+  triggerSource: FlowRunTriggerSource[] | undefined;
   cursor: Cursor | null;
   tags?: string[];
   limit: number;
