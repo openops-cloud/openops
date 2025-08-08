@@ -41,7 +41,6 @@ const AssistantUiChat = ({
     shouldRenderChat,
     openChatResponse,
     isLoading,
-    hasMessages,
     createNewChat,
   } = useAssistantChat({
     chatId,
@@ -83,7 +82,6 @@ const AssistantUiChat = ({
       runtime={runtime}
       onNewChat={createNewChat}
       title={title}
-      enableNewChat={hasMessages}
       availableModels={availableModels}
       onModelSelected={onModelSelected}
       isModelSelectorLoading={isModelSelectorLoading}

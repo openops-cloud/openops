@@ -148,8 +148,6 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
 
   const runtime = useChatRuntime(runtimeConfig);
 
-  const [hasMessages, setHasMessages] = useState(!!openChatResponse?.messages);
-
   useEffect(() => {
     if (pendingConversation && runtime && shouldRenderChat) {
       if (pendingConversation.chatId !== chatId) {
@@ -182,7 +180,6 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
           await aiChatApi.delete(oldChatId);
         }
       }
-      setHasMessages(false);
     } catch (error) {
       toast({
         title: t('There was an error creating the new chat, please try again'),
@@ -194,20 +191,11 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
     }
   }, [chatId, onChatIdChange, runtime.thread, selectedStep, flowVersion]);
 
-  useEffect(() => {
-    const unsubscribe = runtime.thread.subscribe(() => {
-      setHasMessages(!!runtime.thread.getState().messages?.length);
-    });
-
-    return () => unsubscribe();
-  }, [runtime.thread]);
-
   return {
     runtime,
     shouldRenderChat,
     isLoading,
     openChatResponse,
-    hasMessages,
     createNewChat,
   };
 };
