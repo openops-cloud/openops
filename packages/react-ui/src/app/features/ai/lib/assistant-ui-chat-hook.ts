@@ -150,10 +150,11 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
       chat.stop();
 
       if (oldChatId) {
-        onChatIdChange(null);
-
         if (selectedStep && flowVersion) {
           await aiChatApi.delete(oldChatId);
+          chat.setMessages([]);
+        } else {
+          onChatIdChange(null);
         }
       }
     } catch (error) {
@@ -165,7 +166,7 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
         `There was an error canceling the current run and invalidating queries while creating a new chat: ${error}`,
       );
     }
-  }, [chatId, chat, onChatIdChange, selectedStep, flowVersion]);
+  }, [chatId, chat, selectedStep, flowVersion, onChatIdChange]);
 
   return {
     runtime,
