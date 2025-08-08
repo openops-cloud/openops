@@ -27,6 +27,9 @@ import {
   PrincipalType,
   ProgressUpdateType,
   RunEnvironment,
+  RunFlowErrorResponse,
+  RunFlowRequestBody,
+  RunFlowResponse,
   SeekPage,
   SERVICE_KEY_SECURITY_OPENAPI,
   TriggerType,
@@ -151,21 +154,23 @@ export const flowController: FastifyPluginAsyncTypebox = async (app) => {
 
   app.post('/:id/run', RunFlowRequestOptions, async (request, reply) => {
     try {
+      const params = request.params as { id: string };
       const flow = await flowService.getOnePopulatedOrThrow({
-        id: request.params.id,
+        id: params.id,
         projectId: request.principal.projectId,
       });
 
       if (!flow.publishedVersionId) {
-        return await reply.status(StatusCodes.BAD_REQUEST).send({
+        await reply.status(StatusCodes.BAD_REQUEST).send({
           success: false,
           message:
             'Workflow must be published before it can be triggered manually',
         });
+        return;
       }
 
       const publishedFlow = await flowService.getOnePopulatedOrThrow({
-        id: request.params.id,
+        id: params.id,
         projectId: request.principal.projectId,
         versionId: flow.publishedVersionId,
       });
@@ -175,16 +180,32 @@ export const flowController: FastifyPluginAsyncTypebox = async (app) => {
         request.principal.projectId,
       );
       if (!validationResult.success) {
-        return await reply
-          .status(StatusCodes.BAD_REQUEST)
-          .send(validationResult);
+        await reply.status(StatusCodes.BAD_REQUEST).send(validationResult);
+        return;
       }
+
+      const isWebhook =
+        publishedFlow.version.trigger?.type === TriggerType.BLOCK &&
+        publishedFlow.version.trigger.settings.triggerName === 'catch_webhook';
+
+      const payload = isWebhook
+        ? {
+            method: request.method,
+            headers: request.headers as Record<string, string>,
+            body: request.body?.body || {},
+            queryParams: Object.fromEntries(
+              Object.entries(
+                request.body?.queryParams || request.query || {},
+              ).map(([key, value]) => [key, String(value)]),
+            ),
+          }
+        : {};
 
       const flowRun = await flowRunService.start({
         environment: RunEnvironment.PRODUCTION,
         flowVersionId: publishedFlow.version.id,
         projectId: request.principal.projectId,
-        payload: {},
+        payload,
         executionType: ExecutionType.BEGIN,
         synchronousHandlerId: undefined,
         executionCorrelationId: openOpsId(),
@@ -192,21 +213,24 @@ export const flowController: FastifyPluginAsyncTypebox = async (app) => {
         triggerSource: FlowRunTriggerSource.MANUAL_RUN,
       });
 
-      return await reply.status(StatusCodes.OK).send({
+      await reply.status(StatusCodes.OK).send({
         success: true,
         flowRunId: flowRun.id,
         status: flowRun.status,
         message: 'Workflow execution started successfully',
       });
+      return;
     } catch (error) {
       if (
         error instanceof ApplicationError &&
-        error.error?.code === ErrorCode.ENTITY_NOT_FOUND
+        'code' in error &&
+        error.code === ErrorCode.FLOW_NOT_FOUND
       ) {
-        return reply.status(StatusCodes.BAD_REQUEST).send({
+        await reply.status(StatusCodes.NOT_FOUND).send({
           success: false,
-          message: `Something went wrong while triggering the workflow execution manually. ${error.message}`,
+          message: 'Flow not found',
         });
+        return;
       }
       throw error;
     }
@@ -275,7 +299,7 @@ async function validateTriggerType(
 ): Promise<{ success: boolean; message: string }> {
   const blockTrigger = flow.version.trigger;
 
-  if (blockTrigger.type !== TriggerType.BLOCK) {
+  if (blockTrigger.type !== 'TRIGGER') {
     return {
       success: false,
       message: `Trigger type is not a block: type: ${blockTrigger.type}`,
@@ -288,12 +312,14 @@ async function validateTriggerType(
       projectId,
     });
 
+    const success =
+      metadata.type === TriggerStrategy.POLLING ||
+      metadata.type === TriggerStrategy.WEBHOOK;
     return {
-      success: metadata.type === TriggerStrategy.POLLING,
-      message:
-        metadata.type === TriggerStrategy.POLLING
-          ? 'Trigger type validation successful'
-          : 'Only polling workflows can be triggered manually',
+      success,
+      message: success
+        ? 'Trigger type validation successful'
+        : 'Only polling and webhook workflows can be triggered manually',
     };
   } catch (error) {
     return {
@@ -443,22 +469,16 @@ const RunFlowRequestOptions = {
   schema: {
     tags: ['flows'],
     description:
-      'Manually trigger a workflow execution. Only works for polling-type workflows.',
+      'Manually trigger a workflow execution. Supports both polling and webhook-type workflows. For webhook flows, you can provide parameters either through query params or in the request body.',
     security: [SERVICE_KEY_SECURITY_OPENAPI],
     params: Type.Object({
       id: OpenOpsId,
     }),
+    querystring: Type.Record(Type.String(), Type.String()),
+    body: RunFlowRequestBody,
     response: {
-      [StatusCodes.OK]: Type.Object({
-        success: Type.Boolean(),
-        flowRunId: Type.String(),
-        status: Type.String(),
-        message: Type.String(),
-      }),
-      [StatusCodes.BAD_REQUEST]: Type.Object({
-        success: Type.Boolean(),
-        message: Type.String(),
-      }),
+      [StatusCodes.OK]: RunFlowResponse,
+      [StatusCodes.BAD_REQUEST]: RunFlowErrorResponse,
     },
   },
 };
