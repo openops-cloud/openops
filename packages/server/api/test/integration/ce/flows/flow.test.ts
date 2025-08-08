@@ -939,9 +939,10 @@ describe('Flow API', () => {
       });
     });
 
-    it('Returns 400 when trigger is not a polling trigger', async () => {
+    it('Successfully runs a webhook workflow and forwards query params', async () => {
       const mockBlockMetadata = createMockBlockMetadata({
         name: 'webhook',
+        version: '1.0.0',
         triggers: {
           webhook_trigger: {
             name: 'webhook_trigger',
@@ -973,6 +974,7 @@ describe('Flow API', () => {
       const mockFlow = createMockFlow({
         id: openOpsId(),
         projectId: mockProject.id,
+        status: FlowStatus.ENABLED,
       });
       await databaseConnection().getRepository('flow').save([mockFlow]);
 
@@ -1011,16 +1013,17 @@ describe('Flow API', () => {
 
       const response = await app?.inject({
         method: 'POST',
-        url: `/v1/flows/${mockFlow.id}/run`,
+        url: `/v1/flows/${mockFlow.id}/run?foo=bar&x=1`,
         headers: { authorization: `Bearer ${mockToken}` },
       });
 
-      expect(response?.statusCode).toBe(StatusCodes.BAD_REQUEST);
-      expect(response?.json()).toEqual({
-        success: false,
-        message:
-          'Something went wrong while validating the trigger type. BLOCK_TRIGGER_NOT_FOUND',
-      });
+      expect(response?.statusCode).toBe(StatusCodes.OK);
+      const responseBody = response?.json();
+      expect(responseBody.success).toBe(true);
+      expect(responseBody.flowRunId).toBeDefined();
+      expect(responseBody.message).toBe(
+        'Workflow execution started successfully',
+      );
     });
 
     it('Successfully runs a polling workflow', async () => {
