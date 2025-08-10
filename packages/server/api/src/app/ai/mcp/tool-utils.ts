@@ -1,11 +1,8 @@
-import { jsonSchema } from '@ai-sdk/ui-utils';
 import {
   AssistantContent,
-  CoreMessage,
-  CoreToolMessage,
-  TextPart,
+  jsonSchema,
+  ModelMessage,
   ToolCallPart,
-  ToolResult,
   ToolSet,
 } from 'ai';
 import { AssistantUITools } from './types';
@@ -30,43 +27,28 @@ const UI_TOOL_RESULT_MESSAGE = 'Finished running tool';
  * This ensures frontend tools have results in chat history for proper conversation flow
  * In the future, we should refactor to make the FE save the real results to the chat history
  */
-export function addUiToolResults(messages: CoreMessage[]): CoreMessage[] {
-  const newMessages: CoreMessage[] = [];
+export function addUiToolResults(messages: ModelMessage[]): ModelMessage[] {
+  const newMessages: ModelMessage[] = [];
 
   for (const msg of messages) {
     if (msg.role === 'assistant' && Array.isArray(msg.content)) {
       const uiToolCalls = msg.content.filter(isUiToolCall);
 
       if (uiToolCalls.length > 0) {
-        const assistantContent = msg.content.map((part) => {
-          if (isUiToolCall(part) && isToolCallWithResult(part)) {
-            const { result: _result, ...cleanToolCall } = part;
-            return cleanToolCall;
-          }
-          return part;
-        });
-
-        newMessages.push({
-          ...msg,
-          content: assistantContent,
-        });
+        // In AI SDK v5, tool calls don't have embedded results, so we don't need to clean them
+        newMessages.push(msg);
 
         for (const toolCall of uiToolCalls) {
-          const toolMessage: CoreToolMessage = {
+          const toolMessage: ModelMessage = {
             role: 'tool',
             content: [
               {
                 type: 'tool-result',
                 toolCallId: toolCall.toolCallId,
                 toolName: toolCall.toolName,
-                result: {
-                  content: [
-                    {
-                      type: 'text',
-                      text: UI_TOOL_RESULT_MESSAGE,
-                    },
-                  ],
-                  isError: false,
+                output: {
+                  type: 'text',
+                  value: UI_TOOL_RESULT_MESSAGE,
                 },
               },
             ],
@@ -93,10 +75,4 @@ function isToolCallPart(part: AssistantContent[number]): part is ToolCallPart {
 // opinionated type guard for UI tool calls
 function isUiToolCall(part: AssistantContent[number]): part is ToolCallPart {
   return isToolCallPart(part) && part.toolName?.startsWith(UI_TOOL_PREFIX);
-}
-
-function isToolCallWithResult(
-  part: TextPart | ToolCallPart,
-): part is ToolCallPart & { result: ToolResult<string, unknown, unknown> } {
-  return isToolCallPart(part) && 'result' in part;
 }
