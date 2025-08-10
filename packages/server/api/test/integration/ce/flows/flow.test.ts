@@ -1,11 +1,20 @@
 import {
+  TriggerStrategy,
+  WebhookHandshakeStrategy,
+  WebhookRenewStrategy,
+} from '@openops/blocks-framework';
+import {
+  BlockType,
   FlowOperationType,
   FlowStatus,
   FlowTemplateDto,
   FlowVersionState,
   openOpsId,
+  PackageType,
   PrincipalType,
+  RiskLevel,
   TemplateType,
+  TriggerTestStrategy,
   TriggerType,
 } from '@openops/shared';
 import { FastifyInstance } from 'fastify';
@@ -14,6 +23,7 @@ import { databaseConnection } from '../../../../src/app/database/database-connec
 import { setupServer } from '../../../../src/app/server';
 import { generateMockToken } from '../../../helpers/auth';
 import {
+  createMockBlockMetadata,
   createMockFlow,
   createMockFlowVersion,
   createMockFolder,
@@ -889,6 +899,222 @@ describe('Flow API', () => {
       expect(response?.statusCode).toBe(StatusCodes.NOT_FOUND);
       const responseBody = response?.json();
       expect(responseBody?.code).toBe('ENTITY_NOT_FOUND');
+    });
+  });
+
+  describe('Run Flow endpoint', () => {
+    it('Returns 400 when flow is not published', async () => {
+      const mockUser = createMockUser({ id: openOpsId() });
+      await databaseConnection().getRepository('user').save([mockUser]);
+
+      const mockProject = createMockProject({
+        id: openOpsId(),
+        ownerId: mockUser.id,
+      });
+      await databaseConnection().getRepository('project').save([mockProject]);
+
+      const mockFlow = createMockFlow({
+        id: openOpsId(),
+        projectId: mockProject.id,
+        publishedVersionId: null,
+      });
+      await databaseConnection().getRepository('flow').save([mockFlow]);
+
+      const mockToken = await generateMockToken({
+        type: PrincipalType.USER,
+        projectId: mockProject.id,
+      });
+
+      const response = await app?.inject({
+        method: 'POST',
+        url: `/v1/flows/${mockFlow.id}/run`,
+        headers: { authorization: `Bearer ${mockToken}` },
+      });
+
+      expect(response?.statusCode).toBe(StatusCodes.BAD_REQUEST);
+      expect(response?.json()).toEqual({
+        success: false,
+        message:
+          'Something went wrong while triggering the workflow execution manually. ENTITY_NOT_FOUND',
+      });
+    });
+
+    it('Successfully runs a webhook workflow and forwards query params', async () => {
+      const mockBlockMetadata = createMockBlockMetadata({
+        name: 'webhook',
+        version: '1.0.0',
+        triggers: {
+          webhook_trigger: {
+            name: 'webhook_trigger',
+            displayName: 'Webhook Trigger',
+            description: 'Webhook trigger',
+            type: TriggerStrategy.WEBHOOK,
+            props: {},
+            riskLevel: RiskLevel.LOW,
+            sampleData: {},
+            handshakeConfiguration: { strategy: WebhookHandshakeStrategy.NONE },
+            renewConfiguration: { strategy: WebhookRenewStrategy.NONE },
+            testStrategy: TriggerTestStrategy.TEST_FUNCTION,
+          },
+        },
+      });
+      await databaseConnection()
+        .getRepository('block_metadata')
+        .save(mockBlockMetadata);
+
+      const mockUser = createMockUser({ id: openOpsId() });
+      await databaseConnection().getRepository('user').save([mockUser]);
+
+      const mockProject = createMockProject({
+        id: openOpsId(),
+        ownerId: mockUser.id,
+      });
+      await databaseConnection().getRepository('project').save([mockProject]);
+
+      const mockFlow = createMockFlow({
+        id: openOpsId(),
+        projectId: mockProject.id,
+        status: FlowStatus.ENABLED,
+      });
+      await databaseConnection().getRepository('flow').save([mockFlow]);
+
+      const mockFlowVersion = createMockFlowVersion({
+        id: openOpsId(),
+        flowId: mockFlow.id,
+        trigger: {
+          id: 'trigger',
+          type: TriggerType.BLOCK,
+          name: 'webhook_trigger',
+          displayName: 'Webhook Trigger',
+          settings: {
+            blockName: 'webhook',
+            blockVersion: '1.0.0',
+            blockType: BlockType.OFFICIAL,
+            packageType: PackageType.REGISTRY,
+            triggerName: 'webhook_trigger',
+            input: {},
+            inputUiInfo: { customizedInputs: {} },
+          },
+          valid: true,
+        },
+      });
+      await databaseConnection()
+        .getRepository('flow_version')
+        .save([mockFlowVersion]);
+
+      await databaseConnection().getRepository('flow').update(mockFlow.id, {
+        publishedVersionId: mockFlowVersion.id,
+      });
+
+      const mockToken = await generateMockToken({
+        type: PrincipalType.USER,
+        projectId: mockProject.id,
+      });
+
+      const response = await app?.inject({
+        method: 'POST',
+        url: `/v1/flows/${mockFlow.id}/run?foo=bar&x=1`,
+        headers: { authorization: `Bearer ${mockToken}` },
+      });
+
+      expect(response?.statusCode).toBe(StatusCodes.OK);
+      const responseBody = response?.json();
+      expect(responseBody.success).toBe(true);
+      expect(responseBody.flowRunId).toBeDefined();
+      expect(responseBody.message).toBe(
+        'Workflow execution started successfully',
+      );
+    });
+
+    it('Successfully runs a polling workflow', async () => {
+      const mockUser = createMockUser({ id: openOpsId() });
+      await databaseConnection().getRepository('user').save([mockUser]);
+
+      const mockProject = createMockProject({
+        id: openOpsId(),
+        ownerId: mockUser.id,
+      });
+      await databaseConnection().getRepository('project').save([mockProject]);
+
+      const mockFlow = createMockFlow({
+        id: openOpsId(),
+        projectId: mockProject.id,
+        status: FlowStatus.ENABLED,
+      });
+      await databaseConnection().getRepository('flow').save([mockFlow]);
+
+      const mockBlockMetadata = createMockBlockMetadata({
+        name: 'jira',
+        blockType: BlockType.OFFICIAL,
+        packageType: PackageType.REGISTRY,
+        version: '1.0.0',
+        triggers: {
+          new_issue: {
+            name: 'new_issue',
+            displayName: 'New Issue',
+            description: 'Triggers when a new issue is created',
+            type: TriggerStrategy.POLLING,
+            props: {},
+            riskLevel: RiskLevel.LOW,
+            sampleData: {},
+            handshakeConfiguration: { strategy: WebhookHandshakeStrategy.NONE },
+            renewConfiguration: { strategy: WebhookRenewStrategy.NONE },
+            testStrategy: TriggerTestStrategy.TEST_FUNCTION,
+          },
+        },
+      });
+      await databaseConnection()
+        .getRepository('block_metadata')
+        .save(mockBlockMetadata);
+
+      const mockFlowVersion = createMockFlowVersion({
+        id: openOpsId(),
+        flowId: mockFlow.id,
+        valid: true,
+        state: FlowVersionState.LOCKED,
+        trigger: {
+          id: 'trigger',
+          type: TriggerType.BLOCK,
+          name: 'new_issue',
+          displayName: 'New Issue',
+          settings: {
+            blockName: 'jira',
+            blockVersion: '1.0.0',
+            blockType: BlockType.OFFICIAL,
+            packageType: PackageType.REGISTRY,
+            triggerName: 'new_issue',
+            input: {},
+            inputUiInfo: { customizedInputs: {} },
+          },
+          valid: true,
+        },
+      });
+      await databaseConnection()
+        .getRepository('flow_version')
+        .save([mockFlowVersion]);
+
+      await databaseConnection().getRepository('flow').update(mockFlow.id, {
+        publishedVersionId: mockFlowVersion.id,
+      });
+
+      const mockToken = await generateMockToken({
+        type: PrincipalType.USER,
+        projectId: mockProject.id,
+      });
+
+      const response = await app?.inject({
+        method: 'POST',
+        url: `/v1/flows/${mockFlow.id}/run`,
+        headers: { authorization: `Bearer ${mockToken}` },
+      });
+
+      expect(response?.statusCode).toBe(StatusCodes.OK);
+      const responseBody = response?.json();
+      expect(responseBody.success).toBe(true);
+      expect(responseBody.flowRunId).toBeDefined();
+      expect(responseBody.message).toBe(
+        'Workflow execution started successfully',
+      );
     });
   });
 });
