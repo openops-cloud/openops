@@ -6,8 +6,21 @@ import {
   getBlockSystemPrompt,
   getMcpSystemPrompt,
 } from '../chat/prompts.service';
+import { formatFrontendTools } from './tool-utils';
 import { startMCPTools } from './tools-initializer';
 import { selectRelevantTools } from './tools-selector';
+import { AssistantUITools } from './types';
+
+type MCPToolsContextParams = {
+  app: FastifyInstance;
+  projectId: string;
+  authToken: string;
+  aiConfig: AiConfig;
+  messages: ModelMessage[];
+  chatContext: MCPChatContext;
+  languageModel: LanguageModel;
+  frontendTools: AssistantUITools;
+};
 
 export type MCPToolsContext = {
   mcpClients: unknown[];
@@ -15,15 +28,16 @@ export type MCPToolsContext = {
   filteredTools?: ToolSet;
 };
 
-export async function getMCPToolsContext(
-  app: FastifyInstance,
-  projectId: string,
-  authToken: string,
-  aiConfig: AiConfig,
-  messages: ModelMessage[],
-  chatContext: MCPChatContext,
-  languageModel: LanguageModel,
-): Promise<MCPToolsContext> {
+export async function getMCPToolsContext({
+  app,
+  projectId,
+  authToken,
+  aiConfig,
+  messages,
+  chatContext,
+  languageModel,
+  frontendTools,
+}: MCPToolsContextParams): Promise<MCPToolsContext> {
   if (
     !chatContext.actionName ||
     !chatContext.blockName ||
@@ -36,15 +50,20 @@ export async function getMCPToolsContext(
       projectId,
     );
 
+    const allTools = {
+      ...tools,
+      ...formatFrontendTools(frontendTools),
+    };
+
     const filteredTools = await selectRelevantTools({
       messages,
-      tools,
+      tools: allTools,
       languageModel,
       aiConfig,
     });
 
     const isAwsCostMcpDisabled =
-      !hasToolProvider(tools, 'cost-analysis') &&
+      !hasToolProvider(tools, 'aws-pricing') &&
       !hasToolProvider(tools, 'cost-explorer');
 
     const isAnalyticsLoaded = hasToolProvider(filteredTools, 'superset');

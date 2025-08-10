@@ -36,7 +36,7 @@ const AssistantUiChat = ({
   }, []);
 
   const { toolComponents, isLoading: isLoadingTools } = useFrontendTools();
-  const { runtime, isLoading, hasMessages, createNewChat } = useAssistantChat({
+  const { runtime, isLoading, createNewChat } = useAssistantChat({
     chatId,
     onChatIdChange,
   });
@@ -66,7 +66,6 @@ const AssistantUiChat = ({
       runtime={runtime}
       onNewChat={createNewChat}
       title={title}
-      enableNewChat={hasMessages}
       availableModels={availableModels}
       onModelSelected={onModelSelected}
       isModelSelectorLoading={isModelSelectorLoading}

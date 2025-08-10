@@ -149,9 +149,8 @@ export async function getCostTools(
     initializeMcpClient(
       {
         basePath: awsCostBasePath,
-        serverDir:
-          'src/cost-analysis-mcp-server/awslabs/cost_analysis_mcp_server',
-        toolProvider: 'cost-analysis',
+        serverDir: 'src/aws-pricing-mcp-server/awslabs/aws_pricing_mcp_server',
+        toolProvider: 'aws-pricing',
       },
       credentials,
     ),

@@ -36,8 +36,10 @@ const StepSettingsAssistantUiChat = ({
     state.applyMidpanelAction,
   ]);
 
-  const { runtime, createNewChat, hasMessages, onInject } =
-    useStepSettingsAssistantChat(flowVersion, selectedStep);
+  const { runtime, createNewChat, onInject } = useStepSettingsAssistantChat(
+    flowVersion,
+    selectedStep,
+  );
 
   const onToggleContainerSizeState = useCallback(
     (size: AiCliChatContainerSizeState) => {
@@ -76,7 +78,6 @@ const StepSettingsAssistantUiChat = ({
       parentWidth={middlePanelSize.width}
       showAiChat={showAiChat}
       onCloseClick={onCloseClick}
-      enableNewChat={hasMessages}
       handleInject={onInject}
       onNewChatClick={createNewChat}
       containerSize={aiContainerSize}
