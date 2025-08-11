@@ -1,3 +1,4 @@
+import { isLLMTelemetryEnabled } from '@openops/common';
 import { AiConfig } from '@openops/shared';
 import {
   LanguageModel,
@@ -52,6 +53,7 @@ export function getLLMAsyncStream(
     stopWhen: stepCountIs(maxRecursionDepth),
     onStepFinish,
     onFinish,
+    experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
     async onError({ error }): Promise<void> {
       throw error;
     },
