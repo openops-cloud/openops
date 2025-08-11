@@ -40,8 +40,8 @@ export const awsCliAction = createAction({
 
       if (isCommandBlocked(commandToRun)) {
         throw new Error(
-          `Command blocked: '${commandToRun}' can corrupt the managed authentication system. ` +
-            `Local AWS configuration changes are not permitted to prevent faulty states that require container restarts.`,
+          'This AWS CLI command is blocked to prevent faulty configuration state. ' +
+            "Blocked commands include: 'aws configure', 'aws sso', and 'aws eks update-kubeconfig'.",
         );
       }
 
