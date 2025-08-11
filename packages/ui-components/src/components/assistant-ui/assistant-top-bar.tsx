@@ -7,7 +7,6 @@ import { Button } from '../../ui/button';
 type AssistantTopBarProps = {
   onClose: () => void;
   onNewChat: () => void;
-  enableNewChat: boolean;
   title?: string;
   children: ReactNode;
 };
@@ -15,7 +14,6 @@ type AssistantTopBarProps = {
 const AssistantTopBar = ({
   onNewChat,
   onClose,
-  enableNewChat,
   title,
   children,
 }: AssistantTopBarProps) => {
@@ -28,7 +26,6 @@ const AssistantTopBar = ({
               e.stopPropagation();
               onNewChat();
             }}
-            disabled={!enableNewChat}
             variant="secondary"
             size="icon"
             className="text-outline size-[36px]"

@@ -102,7 +102,7 @@ export const validateAiProviderConfig = async (
 
     await generateText({
       model: languageModel,
-      prompt: 'Is the connection valid?',
+      prompt: 'Hi',
       ...config.modelSettings,
     });
   } catch (error) {

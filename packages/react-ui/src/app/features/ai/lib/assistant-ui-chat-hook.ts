@@ -171,7 +171,6 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
   return {
     runtime,
     isLoading,
-    hasMessages: chat.messages.length > 0,
     createNewChat,
   };
 };

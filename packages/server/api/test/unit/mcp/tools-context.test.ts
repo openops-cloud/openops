@@ -62,15 +62,16 @@ describe('getMCPToolsContext', () => {
     });
     selectRelevantToolsMock.mockResolvedValue(undefined);
 
-    const result = await getMCPToolsContext(
-      mockApp,
-      'projectId',
-      'authToken',
-      mockAiConfig,
-      mockMessages,
-      mockChatContext,
-      mockLanguageModel,
-    );
+    const result = await getMCPToolsContext({
+      app: mockApp,
+      projectId: 'projectId',
+      authToken: 'authToken',
+      aiConfig: mockAiConfig,
+      messages: mockMessages,
+      chatContext: mockChatContext,
+      languageModel: mockLanguageModel,
+      frontendTools: {},
+    });
 
     expect(result).toStrictEqual({
       mcpClients: [],
@@ -97,15 +98,16 @@ describe('getMCPToolsContext', () => {
 
     selectRelevantToolsMock.mockResolvedValue(mockTools);
 
-    const result = await getMCPToolsContext(
-      mockApp,
-      'projectId',
-      'authToken',
-      mockAiConfig,
-      mockMessages,
-      mockChatContext,
-      mockLanguageModel,
-    );
+    const result = await getMCPToolsContext({
+      app: mockApp,
+      projectId: 'projectId',
+      authToken: 'authToken',
+      aiConfig: mockAiConfig,
+      messages: mockMessages,
+      chatContext: mockChatContext,
+      languageModel: mockLanguageModel,
+      frontendTools: {},
+    });
 
     expect(result.filteredTools).toEqual(mockTools);
     expect(getMcpSystemPromptMock).toHaveBeenCalled();
@@ -120,15 +122,16 @@ describe('getMCPToolsContext', () => {
 
     getBlockSystemPromptMock.mockResolvedValue('System prompt');
 
-    const result = await getMCPToolsContext(
-      mockApp,
-      'projectId',
-      'authToken',
-      mockAiConfig,
-      mockMessages,
-      completeChatContext,
-      mockLanguageModel,
-    );
+    const result = await getMCPToolsContext({
+      app: mockApp,
+      projectId: 'projectId',
+      authToken: 'authToken',
+      aiConfig: mockAiConfig,
+      messages: mockMessages,
+      chatContext: completeChatContext,
+      languageModel: mockLanguageModel,
+      frontendTools: {},
+    });
 
     expect(result.mcpClients).toEqual([]);
     expect(startMCPToolsMock).not.toHaveBeenCalled();
@@ -236,15 +239,16 @@ describe('getMCPToolsContext', () => {
       });
       selectRelevantToolsMock.mockResolvedValue(selectedTools);
 
-      await getMCPToolsContext(
-        mockApp,
-        'projectId',
-        'authToken',
-        mockAiConfig,
-        mockMessages,
-        mockChatContext,
-        mockLanguageModel,
-      );
+      await getMCPToolsContext({
+        app: mockApp,
+        projectId: 'projectId',
+        authToken: 'authToken',
+        aiConfig: mockAiConfig,
+        messages: mockMessages,
+        chatContext: mockChatContext,
+        languageModel: mockLanguageModel,
+        frontendTools: {},
+      });
 
       expect(getMcpSystemPromptMock).toHaveBeenCalledWith(expected);
     },
