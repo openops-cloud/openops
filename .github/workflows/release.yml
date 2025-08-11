@@ -7,15 +7,14 @@ on:
       version:
         type: string
         description: Override the version, for example if you want to increment minor or major version
-      latest:
+      github_release:
         type: boolean
-        description: Create latest tag
+        description: Create a GitHub release and update latest tag on ECR
         default: true
       deploy_to_test:
         type: boolean
         description: Deploy the release to the test environment
         default: true
-
 jobs:
   get-version:
     name: Get release version
@@ -76,6 +75,7 @@ jobs:
           fi
   create-github-release:
     name: Create GitHub release
+    if: github.repository == 'openops-cloud/openops' && inputs.github_release
     needs: [tag-images-for-release, get-version]
     runs-on: ubuntu-latest
     permissions:
@@ -147,7 +147,7 @@ jobs:
     name: Trigger docs update
     needs: [get-version, create-github-release]
     runs-on: ubuntu-latest
-    if: ${{ success() && github.repository == 'openops-cloud/openops' }}
+    if: github.repository == 'openops-cloud/openops' && inputs.github_release
     steps:
       - name: Get GitHub App token
         id: app_token
