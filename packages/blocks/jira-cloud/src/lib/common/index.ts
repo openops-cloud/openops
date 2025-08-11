@@ -77,8 +77,7 @@ export async function getProjects(auth: JiraAuth): Promise<JiraProject[]> {
   const projects: JiraProject[] = [];
   let startAt = 0;
   const maxResults = 50;
-  let total = 0;
-  do {
+  for (;;) {
     const response = await sendJiraRequest({
       url: 'project/search',
       method: HttpMethod.GET,
@@ -91,12 +90,16 @@ export async function getProjects(auth: JiraAuth): Promise<JiraProject[]> {
     const body = response.body as any;
     const values = (body?.values ?? []) as JiraProject[];
     projects.push(...values);
-    total = typeof body?.total === 'number' ? body.total : projects.length;
+
     startAt = startAt + values.length;
-    if (values.length === 0) {
+    if (
+      values.length === 0 ||
+      body?.isLast ||
+      (typeof body?.total === 'number' && startAt >= body.total)
+    ) {
       break;
     }
-  } while (startAt < total);
+  }
   return projects;
 }
 

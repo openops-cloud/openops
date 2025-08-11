@@ -359,4 +359,60 @@ describe('getProjects', () => {
     expect(result).toEqual([projectA]);
     expect(sendRequestMock).toHaveBeenCalledTimes(1);
   });
+
+  test('uses isLast to stop pagination when provided', async () => {
+    const { getProjects } = await import('../../src/lib/common/index');
+
+    const projectA = {
+      id: '1',
+      key: 'A',
+      name: 'A',
+      expand: '',
+      self: '',
+      projectTypeKey: '',
+      simplified: false,
+      style: '',
+      isPrivate: false,
+      properties: {},
+    };
+    const projectB = {
+      id: '2',
+      key: 'B',
+      name: 'B',
+      expand: '',
+      self: '',
+      projectTypeKey: '',
+      simplified: false,
+      style: '',
+      isPrivate: false,
+      properties: {},
+    };
+
+    sendRequestMock
+      .mockResolvedValueOnce({
+        status: 200,
+        body: {
+          values: [projectA],
+          startAt: 0,
+          maxResults: 1,
+          isLast: false,
+          total: 1000,
+        },
+      })
+      .mockResolvedValueOnce({
+        status: 200,
+        body: {
+          values: [projectB],
+          startAt: 1,
+          maxResults: 1,
+          isLast: true,
+          total: 1000,
+        },
+      });
+
+    const result = await getProjects(auth as any);
+
+    expect(result).toEqual([projectA, projectB]);
+    expect(sendRequestMock).toHaveBeenCalledTimes(2);
+  });
 });
