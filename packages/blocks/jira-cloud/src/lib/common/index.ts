@@ -74,31 +74,26 @@ export async function searchUserByCriteria(
 }
 
 function shouldFetchNextPage(args: {
-  valuesCount: number;
-  total?: number;
+  accumulatedCount: number;
   isLast?: boolean;
-  startAt: number;
-  maxResults: number;
+  total?: number;
+  isFullPage: boolean;
 }): boolean {
-  const hasValues = args.valuesCount > 0;
-  if (!hasValues) {
-    return false;
-  }
   if (typeof args.isLast === 'boolean') {
     return !args.isLast;
   }
   if (typeof args.total === 'number') {
-    return args.startAt < args.total;
+    return args.accumulatedCount < args.total;
   }
-  return args.valuesCount === args.maxResults;
+  return args.isFullPage;
 }
 
 export async function getProjects(auth: JiraAuth): Promise<JiraProject[]> {
   const projects: JiraProject[] = [];
   let startAt = 0;
   const maxResults = 50;
-  let hasMore = true;
-  while (hasMore) {
+  let hasMore = false;
+  do {
     const response = await sendJiraRequest({
       url: 'project/search',
       method: HttpMethod.GET,
@@ -108,22 +103,21 @@ export async function getProjects(auth: JiraAuth): Promise<JiraProject[]> {
         maxResults: String(maxResults),
       },
     });
-    const body = response.body as any;
-    const values = (body?.values ?? []) as JiraProject[];
+
+    const values = (response.body?.values ?? []) as JiraProject[];
     projects.push(...values);
 
     startAt = startAt + values.length;
-    const total = body?.total;
-    const isLast = body?.isLast;
+    const total = response.body?.total;
+    const isLast = response.body?.isLast;
 
     hasMore = shouldFetchNextPage({
-      valuesCount: values.length,
+      accumulatedCount: projects.length,
       total,
       isLast,
-      startAt,
-      maxResults,
+      isFullPage: values.length === maxResults,
     });
-  }
+  } while (hasMore);
   return projects;
 }
 
