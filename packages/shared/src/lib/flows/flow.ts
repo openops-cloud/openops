@@ -1,7 +1,7 @@
 import { Static, Type } from '@sinclair/typebox';
 import { BaseModelSchema, Nullable } from '../common/base-model';
 import { OpenOpsId } from '../common/id-generator';
-import { FlowVersion } from './flow-version';
+import { FlowVersion, FlowVersionState } from './flow-version';
 
 export type FlowId = OpenOpsId;
 
@@ -49,3 +49,23 @@ export const MinimalFlow = Type.Object({
 });
 
 export type MinimalFlow = Static<typeof MinimalFlow>;
+
+export const FlowSummary = Type.Object({
+  id: Type.String(),
+  status: Type.Enum(FlowStatus),
+  schedule: Nullable(FlowScheduleOptions),
+  publishedVersionId: Nullable(Type.String()),
+  created: Type.String(),
+  updated: Type.String(),
+  version: Type.Object({
+    id: Type.String(),
+    displayName: Type.String(),
+    description: Type.Optional(Type.String()),
+    state: Type.Enum(FlowVersionState),
+    created: Type.String(),
+    updated: Type.String(),
+    updatedBy: Nullable(Type.String()),
+  }),
+});
+
+export type FlowSummary = Static<typeof FlowSummary>;
