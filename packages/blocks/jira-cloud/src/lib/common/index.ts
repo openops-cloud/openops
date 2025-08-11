@@ -73,6 +73,26 @@ export async function searchUserByCriteria(
   return response.body.length === 0 ? [] : (response.body as JiraUser[]);
 }
 
+function shouldFetchNextPage(args: {
+  valuesCount: number;
+  total?: number;
+  isLast?: boolean;
+  startAt: number;
+  maxResults: number;
+}): boolean {
+  const hasValues = args.valuesCount > 0;
+  if (!hasValues) {
+    return false;
+  }
+  if (typeof args.isLast === 'boolean') {
+    return !args.isLast;
+  }
+  if (typeof args.total === 'number') {
+    return args.startAt < args.total;
+  }
+  return args.valuesCount === args.maxResults;
+}
+
 export async function getProjects(auth: JiraAuth): Promise<JiraProject[]> {
   const projects: JiraProject[] = [];
   let startAt = 0;
@@ -93,11 +113,16 @@ export async function getProjects(auth: JiraAuth): Promise<JiraProject[]> {
     projects.push(...values);
 
     startAt = startAt + values.length;
-    hasMore = !(
-      values.length === 0 ||
-      body?.isLast ||
-      (typeof body?.total === 'number' && startAt >= body.total)
-    );
+    const total = body?.total;
+    const isLast = body?.isLast;
+
+    hasMore = shouldFetchNextPage({
+      valuesCount: values.length,
+      total,
+      isLast,
+      startAt,
+      maxResults,
+    });
   }
   return projects;
 }
