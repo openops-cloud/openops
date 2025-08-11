@@ -10,6 +10,7 @@ import {
   ToolSet,
 } from 'ai';
 import { FastifyInstance } from 'fastify';
+import { extractErrorMessage } from '../../../lib/error-utils';
 import { sendAiChatFailureEvent } from '../../telemetry/event-models';
 import { addUiToolResults } from '../mcp/tool-utils';
 import { getMCPToolsContext } from '../mcp/tools-context-builder';
@@ -155,7 +156,7 @@ function unrecoverableError(
   streamParams: StreamCallSettings,
   error: any,
 ): AssistantModelMessage {
-  const errorMessage = error instanceof Error ? error.message : String(error);
+  const errorMessage = extractErrorMessage(error);
 
   const messageId = generateMessageId();
   sendTextMessageToStream(streamParams.serverResponse, errorMessage, messageId);
