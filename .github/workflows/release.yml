@@ -75,7 +75,7 @@ jobs:
           fi
   create-github-release:
     name: Create GitHub release
-    if: github.repository == 'openops-cloud/openops' && inputs.github_release
+    if: github.repository == 'openops-cloud/openops'
     needs: [tag-images-for-release, get-version]
     runs-on: ubuntu-latest
     permissions:
@@ -93,6 +93,7 @@ jobs:
           zip -r $RELEASE_DC_FILENAME .
       - name: Create a release
         id: create-release
+        if: inputs.github_release
         uses: softprops/action-gh-release@v2.3.2
         with:
           target_commitish: ${{ github.sha }}
@@ -101,6 +102,7 @@ jobs:
           draft: true
           files: deploy/docker-compose/${{ env.RELEASE_DC_FILENAME }}
       - name: Write summary
+        if: inputs.github_release
         run: |
           RELEASE_URL="${{ steps.create-release.outputs.url }}"
           echo "### Release $VERSION was created! 🎉" >> $GITHUB_STEP_SUMMARY
