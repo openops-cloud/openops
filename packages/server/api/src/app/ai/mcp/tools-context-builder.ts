@@ -63,7 +63,7 @@ export async function getMCPToolsContext({
     });
 
     const isAwsCostMcpDisabled =
-      !hasToolProvider(tools, 'cost-analysis') &&
+      !hasToolProvider(tools, 'aws-pricing') &&
       !hasToolProvider(tools, 'cost-explorer');
 
     const isAnalyticsLoaded = hasToolProvider(filteredTools, 'superset');
