@@ -130,7 +130,7 @@ jobs:
     name: Trigger a deployment
     needs: [get-version, create-github-release]
     runs-on: ubuntu-latest
-    if: github.repository == 'openops-cloud/openops' && inputs.deploy_to_test
+    if: ${{ github.repository == 'openops-cloud/openops' && inputs.deploy_to_test }}
     steps:
       - name: Get token from Github App
         id: app_token
@@ -149,7 +149,7 @@ jobs:
     name: Trigger docs update
     needs: [get-version, create-github-release]
     runs-on: ubuntu-latest
-    if: github.repository == 'openops-cloud/openops' && inputs.github_release
+    if: ${{ github.repository == 'openops-cloud/openops' && inputs.github_release }}
     steps:
       - name: Get GitHub App token
         id: app_token
