@@ -69,7 +69,7 @@ jobs:
           PUBLIC_REPOSITORY=public.ecr.aws/openops/${{ matrix.target.repository }}
           docker buildx imagetools create $SOURCE_IMAGE --tag $PUBLIC_REPOSITORY:$VERSION
           echo "- ✅ Successfully tagged as \`$PUBLIC_REPOSITORY:$VERSION\`" >> $GITHUB_STEP_SUMMARY
-          if ${{ inputs.latest }}; then
+          if ${{ inputs.github_release }}; then
             docker buildx imagetools create $SOURCE_IMAGE --tag $PUBLIC_REPOSITORY:latest
             echo "- ✅ Successfully tagged as \`$PUBLIC_REPOSITORY:latest\`" >> $GITHUB_STEP_SUMMARY
           fi
