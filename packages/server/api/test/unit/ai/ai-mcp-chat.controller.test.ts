@@ -112,9 +112,12 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
   const mockReply = {
     code: jest.fn().mockReturnThis(),
     send: jest.fn().mockReturnThis(),
+    hijack: jest.fn(),
     raw: {
       write: jest.fn(),
       end: jest.fn(),
+      writeHead: jest.fn(),
+      setHeader: jest.fn(),
     },
   };
 
@@ -176,15 +179,15 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           messages: [
             {
               role: 'user',
-              content: [{ type: 'text', text: 'first message' }],
+              parts: [{ type: 'text', text: 'first message' }],
             },
             {
               role: 'assistant',
-              content: [{ type: 'text', text: 'assistant response' }],
+              parts: [{ type: 'text', text: 'assistant response' }],
             },
             {
               role: 'user',
-              content: [{ type: 'text', text: 'latest message' }],
+              parts: [{ type: 'text', text: 'latest message' }],
             },
           ],
         },
@@ -214,11 +217,11 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           messages: [
             {
               role: 'user',
-              content: [{ type: 'text', text: 'user question' }],
+              parts: [{ type: 'text', text: 'user question' }],
             },
             {
               role: 'assistant',
-              content: [
+              parts: [
                 {
                   type: 'tool-call',
                   toolCallId: 'call_123',
@@ -229,7 +232,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
             },
             {
               role: 'tool',
-              content: [
+              parts: [
                 {
                   type: 'tool-result',
                   toolCallId: 'call_123',
@@ -239,7 +242,7 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
             },
             {
               role: 'user',
-              content: [{ type: 'text', text: 'latest message' }],
+              parts: [{ type: 'text', text: 'latest message' }],
             },
           ],
         },
@@ -321,9 +324,9 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
           messages: [
             {
               role: 'user',
-              content: [{ type: 'text', text: 'valid message' }],
+              parts: [{ type: 'text', text: 'valid message' }],
             },
-            { role: 'user', content: [] },
+            { role: 'user', parts: [] },
           ],
         },
       };

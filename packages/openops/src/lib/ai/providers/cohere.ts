@@ -1,5 +1,5 @@
 import { createCohere } from '@ai-sdk/cohere';
-import { LanguageModelV1 } from 'ai';
+import { LanguageModel } from 'ai';
 import { AiProvider } from '../providers';
 
 const cohereModels = [
@@ -20,7 +20,7 @@ function createLanguageModel(params: {
   apiKey: string;
   model: string;
   providerSettings?: Record<string, unknown>;
-}): LanguageModelV1 {
+}): LanguageModel {
   return createCohere({
     apiKey: params.apiKey,
     ...params.providerSettings,

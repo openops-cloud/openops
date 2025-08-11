@@ -30,7 +30,7 @@ export async function getDocsTools(): Promise<MCPTool> {
   const toolSet = {
     docsMcpClient: tool({
       description: 'Search OpenOps documentation',
-      parameters: z.object({
+      inputSchema: z.object({
         query: z.string().describe('The search query'),
       }),
       execute: async ({ query }) => {
