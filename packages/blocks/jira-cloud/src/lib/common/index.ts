@@ -76,8 +76,9 @@ export async function searchUserByCriteria(
 export async function getProjects(auth: JiraAuth): Promise<JiraProject[]> {
   let startAt = 0;
   const results: JiraProject[] = [];
-  let total = undefined as number | undefined;
-  const pageSize = 50;
+  const pageSize = 100;
+  let body: any;
+  let pageValuesLength = 0;
 
   do {
     const response = await sendJiraRequest({
@@ -90,14 +91,17 @@ export async function getProjects(auth: JiraAuth): Promise<JiraProject[]> {
       },
     });
 
-    const body: any = response.body ?? {};
+    body = response.body ?? {};
     const pageValues: JiraProject[] = body.values ?? [];
     results.push(...pageValues);
 
-    const pageSizeUsed = body.maxResults ?? pageValues.length;
-    total = body.total ?? results.length;
-    startAt += pageSizeUsed;
-  } while (startAt < (total as number));
+    pageValuesLength = pageValues.length;
+    startAt += pageValuesLength;
+  } while (
+    typeof body.total === 'number'
+      ? startAt < body.total
+      : pageValuesLength === pageSize
+  );
 
   return results;
 }
