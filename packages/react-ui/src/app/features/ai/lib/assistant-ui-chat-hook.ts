@@ -9,7 +9,7 @@ import { flowHelper, FlowVersion, OpenChatResponse } from '@openops/shared';
 import { useQuery } from '@tanstack/react-query';
 import { DefaultChatTransport, UIMessage } from 'ai';
 import { t } from 'i18next';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { aiChatApi } from '../../builder/ai-chat/lib/chat-api';
 import { aiSettingsHooks } from './ai-settings-hooks';
 import { createAdditionalContext } from './enrich-context';
@@ -114,6 +114,31 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
     }
   }, [onChatIdChange, openChatResponse?.chatId]);
 
+  const additionalContext = useMemo(
+    () =>
+      flowVersion
+        ? createAdditionalContext(flowVersion, stepDetails)
+        : undefined,
+    [flowVersion, stepDetails],
+  );
+
+  // workaround for https://github.com/vercel/ai/issues/7819#issuecomment-3172625487
+  const bodyRef = useRef({
+    chatId,
+    message: PLACEHOLDER_MESSAGE_INTEROP,
+    additionalContext,
+  });
+
+  const messagesRef = useRef<UIMessage[]>([]);
+
+  useEffect(() => {
+    bodyRef.current = {
+      chatId,
+      message: PLACEHOLDER_MESSAGE_INTEROP,
+      additionalContext,
+    };
+  }, [chatId, additionalContext]);
+
   const chat = useChat({
     id: chatId ?? undefined,
     transport: new DefaultChatTransport({
@@ -121,18 +146,16 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
       headers: {
         Authorization: `Bearer ${authenticationSession.getToken()}`,
       },
-      prepareSendMessagesRequest: ({ messages }) => ({
-        body: {
-          chatId,
-          message: PLACEHOLDER_MESSAGE_INTEROP,
-          messages,
-          additionalContext: flowVersion
-            ? createAdditionalContext(flowVersion, stepDetails)
-            : undefined,
-        },
+      body: () => ({
+        ...bodyRef.current,
+        messages: messagesRef.current,
       }),
     }),
   });
+
+  useEffect(() => {
+    messagesRef.current = chat.messages;
+  }, [chat.messages]);
 
   useEffect(() => {
     if (openChatResponse?.messages && !isLoading && chatId) {
