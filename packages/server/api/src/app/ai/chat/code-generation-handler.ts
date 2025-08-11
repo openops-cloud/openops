@@ -210,17 +210,12 @@ export async function handleCodeGenerationRequest(
           toolCallId: saveToolCallId,
           toolName: GENERATE_CODE_TOOL_NAME,
           output: {
-            // content: [
-            //   {
             type: 'json',
             value: {
               code: finalCodeResult.code || '',
               packageJson: finalCodeResult.packageJson || '{}',
             },
           },
-          // ],
-          // isError: false,
-          // },
         },
       ],
     };
