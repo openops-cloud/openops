@@ -61,8 +61,8 @@ export async function routeChatRequest(
     provider: aiConfig.provider,
   });
 
+  // AI SDKv5 uses SSE, so we need to hijack the response and send the SSE headers
   await fastifyReply.hijack();
-
   serverResponse.writeHead(200, {
     'x-vercel-ai-ui-message-stream': 'v1',
     'Content-Type': 'text/event-stream',
