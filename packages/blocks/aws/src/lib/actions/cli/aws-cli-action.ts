@@ -9,6 +9,17 @@ import {
 } from '@openops/common';
 import { runCommand } from './aws-cli';
 
+const BLOCKED_COMMANDS = [
+  /^aws\s+configure(\s|$)/i,
+  /^aws\s+sso(\s|$)/i,
+  /^aws\s+eks\s+update-kubeconfig(\s|$)/i,
+];
+
+function isCommandBlocked(command: string): boolean {
+  const normalized = command.trim().replace(/\s+/g, ' ');
+  return BLOCKED_COMMANDS.some((pattern) => pattern.test(normalized));
+}
+
 export const awsCliAction = createAction({
   auth: amazonAuth,
   name: 'aws_cli',
@@ -26,6 +37,13 @@ export const awsCliAction = createAction({
   async run(context) {
     try {
       const { account, commandToRun, dryRun } = context.propsValue;
+
+      if (isCommandBlocked(commandToRun)) {
+        throw new Error(
+          `Command blocked: '${commandToRun}' can corrupt the managed authentication system. ` +
+            `Local AWS configuration changes are not permitted to prevent faulty states that require container restarts.`,
+        );
+      }
 
       if (dryRun) {
         return `Step execution skipped, dry run flag enabled. AWS CLI command will not be executed. Command: '${commandToRun}'`;
