@@ -7,15 +7,14 @@ on:
       version:
         type: string
         description: Override the version, for example if you want to increment minor or major version
-      latest:
+      github_release:
         type: boolean
-        description: Create latest tag
+        description: Create a GitHub release and update latest tag on ECR
         default: true
       deploy_to_test:
         type: boolean
         description: Deploy the release to the test environment
         default: true
-
 jobs:
   get-version:
     name: Get release version
@@ -70,12 +69,13 @@ jobs:
           PUBLIC_REPOSITORY=public.ecr.aws/openops/${{ matrix.target.repository }}
           docker buildx imagetools create $SOURCE_IMAGE --tag $PUBLIC_REPOSITORY:$VERSION
           echo "- ✅ Successfully tagged as \`$PUBLIC_REPOSITORY:$VERSION\`" >> $GITHUB_STEP_SUMMARY
-          if ${{ inputs.latest }}; then
+          if ${{ inputs.github_release }}; then
             docker buildx imagetools create $SOURCE_IMAGE --tag $PUBLIC_REPOSITORY:latest
             echo "- ✅ Successfully tagged as \`$PUBLIC_REPOSITORY:latest\`" >> $GITHUB_STEP_SUMMARY
           fi
-  create-github-release:
-    name: Create GitHub release
+  create-release:
+    name: Create a release
+    if: github.repository == 'openops-cloud/openops'
     needs: [tag-images-for-release, get-version]
     runs-on: ubuntu-latest
     permissions:
@@ -85,14 +85,15 @@ jobs:
       RELEASE_DC_FILENAME: openops-dc-${{ needs.get-version.outputs.version }}.zip
     steps:
       - uses: actions/checkout@v4.2.2
-      - name: Update version in docker-compose
+      - name: Create a release file
         run: |
           cp THIRD_PARTY_LICENSES.txt LICENSE NOTICE deploy/docker-compose
           cd deploy/docker-compose
           sed -i "s/\${OPS_VERSION:-latest}/$VERSION/" docker-compose.yml
           zip -r $RELEASE_DC_FILENAME .
-      - name: Create a release
-        id: create-release
+      - name: Create a GitHub release
+        id: create-github-release
+        if: inputs.github_release
         uses: softprops/action-gh-release@v2.3.2
         with:
           target_commitish: ${{ github.sha }}
@@ -101,8 +102,9 @@ jobs:
           draft: true
           files: deploy/docker-compose/${{ env.RELEASE_DC_FILENAME }}
       - name: Write summary
+        if: inputs.github_release
         run: |
-          RELEASE_URL="${{ steps.create-release.outputs.url }}"
+          RELEASE_URL="${{ steps.create-github-release.outputs.url }}"
           echo "### Release $VERSION was created! 🎉" >> $GITHUB_STEP_SUMMARY
           echo "The release was created as a draft." >> $GITHUB_STEP_SUMMARY
           echo "Please [review and publish it](${RELEASE_URL/\/tags\//\/edit\/})." >> $GITHUB_STEP_SUMMARY
@@ -112,8 +114,7 @@ jobs:
           aws-access-key-id: ${{ secrets.RELEASE_S3_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.RELEASE_S3_SECRET_ACCESS_KEY }}
           aws-region: us-east-2
-      - name: Upload release to S3
-        id: upload-release
+      - name: Upload release file to S3
         run: |
           aws s3 cp deploy/docker-compose/$RELEASE_DC_FILENAME s3://openops/releases/$VERSION/$RELEASE_DC_FILENAME
           cat <<EOF >> $GITHUB_STEP_SUMMARY
@@ -126,9 +127,9 @@ jobs:
           EOF
   trigger-deployment:
     name: Trigger a deployment
-    needs: [get-version, create-github-release]
+    needs: [get-version, create-release]
     runs-on: ubuntu-latest
-    if: github.repository == 'openops-cloud/openops' && inputs.deploy_to_test
+    if: ${{ github.repository == 'openops-cloud/openops' && inputs.deploy_to_test }}
     steps:
       - name: Get token from Github App
         id: app_token
@@ -145,9 +146,9 @@ jobs:
           gh workflow run "Deploy Docker Compose Release" -R openops-cloud/devops -f release_version=${VERSION} -r main
   trigger-docs-update:
     name: Trigger docs update
-    needs: [get-version, create-github-release]
+    needs: [get-version, create-release]
     runs-on: ubuntu-latest
-    if: ${{ success() && github.repository == 'openops-cloud/openops' }}
+    if: ${{ github.repository == 'openops-cloud/openops' && inputs.github_release }}
     steps:
       - name: Get GitHub App token
         id: app_token
