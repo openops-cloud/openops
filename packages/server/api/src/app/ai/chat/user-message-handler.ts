@@ -158,31 +158,7 @@ function unrecoverableError(
   const errorMessage = error instanceof Error ? error.message : String(error);
 
   const messageId = generateMessageId();
-  streamParams.serverResponse.write(
-    `data: ${JSON.stringify({
-      type: 'text-start',
-      id: messageId,
-    })}`,
-  );
-
-  streamParams.serverResponse.write('\n\n');
-  streamParams.serverResponse.write(
-    `data: ${JSON.stringify({
-      type: 'text-delta',
-      id: messageId,
-      delta: errorMessage,
-    })}`,
-  );
-
-  streamParams.serverResponse.write('\n\n');
-  streamParams.serverResponse.write(
-    `data: ${JSON.stringify({
-      type: 'text-end',
-      id: messageId,
-    })}`,
-  );
-
-  streamParams.serverResponse.write('\n\n');
+  sendTextMessageToStream(streamParams.serverResponse, errorMessage, messageId);
 
   logger.warn(errorMessage, error);
 
