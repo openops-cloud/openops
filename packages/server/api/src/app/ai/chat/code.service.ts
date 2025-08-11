@@ -1,4 +1,4 @@
-import { isLLMTelemetryEnabled } from '@openops/common';
+import { isLLMTelemetryEnabled, providerOptions } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import {
   AiConfig,
@@ -49,6 +49,7 @@ export const streamCode = ({
     onError,
     schema: unifiedCodeLLMSchema,
     experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
+    providerOptions,
   });
 };
 
@@ -79,5 +80,6 @@ export const generateCode = ({
     ...aiConfig.modelSettings,
     schema: unifiedCodeLLMSchema,
     experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
+    providerOptions,
   });
 };
