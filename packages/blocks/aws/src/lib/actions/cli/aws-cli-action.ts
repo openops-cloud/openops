@@ -10,9 +10,9 @@ import {
 import { runCommand } from './aws-cli';
 
 const BLOCKED_COMMANDS = [
-  /^aws\s+configure(\s|$)/i,
-  /^aws\s+sso(\s|$)/i,
-  /^aws\s+eks\s+update-kubeconfig(\s|$)/i,
+  /^(aws\s+)?configure(\s|$)/i,
+  /^(aws\s+)?sso(\s|$)/i,
+  /^(aws\s+)?eks\s+update-kubeconfig(\s|$)/i,
 ];
 
 function isCommandBlocked(command: string): boolean {

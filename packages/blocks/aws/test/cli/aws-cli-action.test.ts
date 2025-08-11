@@ -263,5 +263,30 @@ describe('awsCliAction single account', () => {
       );
       expect(openOpsMock.handleCliError).not.toHaveBeenCalled();
     });
+
+    test('should block commands without aws prefix and with blocked patterns', async () => {
+      const context = {
+        ...jest.requireActual('@openops/blocks-framework'),
+        auth: auth,
+        propsValue: {
+          commandToRun: 'sso login',
+          account: { accounts: 'account' },
+        },
+      };
+
+      await awsCliAction.run(context);
+
+      expect(openOpsMock.handleCliError).toHaveBeenCalledTimes(1);
+      expect(openOpsMock.handleCliError).toHaveBeenCalledWith({
+        provider: 'AWS',
+        command: 'sso login',
+        error: expect.objectContaining({
+          message: expect.stringContaining(
+            'This AWS CLI command is blocked to prevent faulty configuration state.',
+          ),
+        }),
+      });
+      expect(awsCliMock.runCommand).not.toHaveBeenCalled();
+    });
   });
 });
