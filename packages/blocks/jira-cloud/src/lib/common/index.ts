@@ -74,36 +74,30 @@ export async function searchUserByCriteria(
 }
 
 export async function getProjects(auth: JiraAuth): Promise<JiraProject[]> {
+  const projects: JiraProject[] = [];
   let startAt = 0;
-  const results: JiraProject[] = [];
-  const pageSize = 100;
-  let body: any;
-  let pageValuesLength = 0;
-
+  const maxResults = 50;
+  let total = 0;
   do {
     const response = await sendJiraRequest({
       url: 'project/search',
       method: HttpMethod.GET,
-      auth,
+      auth: auth,
       queryParams: {
         startAt: String(startAt),
-        maxResults: String(pageSize),
+        maxResults: String(maxResults),
       },
     });
-
-    body = response.body ?? {};
-    const pageValues: JiraProject[] = body.values ?? [];
-    results.push(...pageValues);
-
-    pageValuesLength = pageValues.length;
-    startAt += pageValuesLength;
-  } while (
-    typeof body.total === 'number'
-      ? startAt < body.total
-      : pageValuesLength === pageSize
-  );
-
-  return results;
+    const body = response.body as any;
+    const values = (body?.values ?? []) as JiraProject[];
+    projects.push(...values);
+    total = typeof body?.total === 'number' ? body.total : projects.length;
+    startAt = startAt + values.length;
+    if (values.length === 0) {
+      break;
+    }
+  } while (startAt < total);
+  return projects;
 }
 
 export async function getIssueTypes({

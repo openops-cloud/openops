@@ -185,3 +185,178 @@ describe('sendJiraRequest', () => {
     });
   });
 });
+
+describe('getProjects', () => {
+  const auth = {
+    instanceUrl: 'https://example.atlassian.net',
+    email: 'email@example.com',
+    apiToken: 'secret',
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('fetches a single page of projects', async () => {
+    const { getProjects } = await import('../../src/lib/common/index');
+
+    const projectA = {
+      id: '1',
+      key: 'A',
+      name: 'A',
+      expand: '',
+      self: '',
+      projectTypeKey: '',
+      simplified: false,
+      style: '',
+      isPrivate: false,
+      properties: {},
+    };
+
+    sendRequestMock.mockResolvedValueOnce({
+      status: 200,
+      body: {
+        values: [projectA],
+        startAt: 0,
+        maxResults: 50,
+        total: 1,
+      },
+    });
+
+    const result = await getProjects(auth as any);
+
+    expect(result).toEqual([projectA]);
+    expect(sendRequestMock).toHaveBeenCalledTimes(1);
+    const firstCall = sendRequestMock.mock.calls[0][0];
+    expect(firstCall.url).toBe(`${auth.instanceUrl}/rest/api/3/project/search`);
+    expect(firstCall.method).toBe(HttpMethod.GET);
+    expect(firstCall.queryParams).toEqual({ startAt: '0', maxResults: '50' });
+    expect(firstCall.authentication).toEqual({
+      type: AuthenticationType.BASIC,
+      username: auth.email,
+      password: auth.apiToken,
+    });
+  });
+
+  test('paginates across multiple pages', async () => {
+    const { getProjects } = await import('../../src/lib/common/index');
+
+    const projectA = {
+      id: '1',
+      key: 'A',
+      name: 'A',
+      expand: '',
+      self: '',
+      projectTypeKey: '',
+      simplified: false,
+      style: '',
+      isPrivate: false,
+      properties: {},
+    };
+    const projectB = {
+      id: '2',
+      key: 'B',
+      name: 'B',
+      expand: '',
+      self: '',
+      projectTypeKey: '',
+      simplified: false,
+      style: '',
+      isPrivate: false,
+      properties: {},
+    };
+    const projectC = {
+      id: '3',
+      key: 'C',
+      name: 'C',
+      expand: '',
+      self: '',
+      projectTypeKey: '',
+      simplified: false,
+      style: '',
+      isPrivate: false,
+      properties: {},
+    };
+
+    sendRequestMock
+      .mockResolvedValueOnce({
+        status: 200,
+        body: {
+          values: [projectA, projectB],
+          startAt: 0,
+          maxResults: 50,
+          total: 3,
+        },
+      })
+      .mockResolvedValueOnce({
+        status: 200,
+        body: {
+          values: [projectC],
+          startAt: 2,
+          maxResults: 50,
+          total: 3,
+        },
+      });
+
+    const result = await getProjects(auth as any);
+
+    expect(result).toEqual([projectA, projectB, projectC]);
+    expect(sendRequestMock).toHaveBeenCalledTimes(2);
+
+    const firstCall = sendRequestMock.mock.calls[0][0];
+    expect(firstCall.queryParams).toEqual({ startAt: '0', maxResults: '50' });
+
+    const secondCall = sendRequestMock.mock.calls[1][0];
+    expect(secondCall.queryParams).toEqual({ startAt: '2', maxResults: '50' });
+  });
+
+  test('stops when no values returned', async () => {
+    const { getProjects } = await import('../../src/lib/common/index');
+
+    sendRequestMock.mockResolvedValueOnce({
+      status: 200,
+      body: {
+        values: [],
+        startAt: 0,
+        maxResults: 50,
+        total: 0,
+      },
+    });
+
+    const result = await getProjects(auth as any);
+
+    expect(result).toEqual([]);
+    expect(sendRequestMock).toHaveBeenCalledTimes(1);
+  });
+
+  test('handles missing total by falling back to accumulated length', async () => {
+    const { getProjects } = await import('../../src/lib/common/index');
+
+    const projectA = {
+      id: '1',
+      key: 'A',
+      name: 'A',
+      expand: '',
+      self: '',
+      projectTypeKey: '',
+      simplified: false,
+      style: '',
+      isPrivate: false,
+      properties: {},
+    };
+
+    sendRequestMock.mockResolvedValueOnce({
+      status: 200,
+      body: {
+        values: [projectA],
+        startAt: 0,
+        maxResults: 50,
+      },
+    });
+
+    const result = await getProjects(auth as any);
+
+    expect(result).toEqual([projectA]);
+    expect(sendRequestMock).toHaveBeenCalledTimes(1);
+  });
+});
