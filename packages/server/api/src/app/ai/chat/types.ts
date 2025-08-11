@@ -3,14 +3,8 @@ import { CoreMessage, LanguageModel, TextPart, ToolCallPart } from 'ai';
 import { ServerResponse } from 'node:http';
 import { MCPChatContext } from './ai-chat.service';
 
-export type ToolResult = {
-  toolCallId: string;
-  result: unknown;
-  type?: string;
-};
-
 export type ToolCallPartWithResult = {
-  result?: unknown;
+  output?: unknown;
 } & ToolCallPart;
 
 export type MessageWithMergedToolResults = {

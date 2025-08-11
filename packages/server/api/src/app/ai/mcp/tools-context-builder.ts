@@ -1,5 +1,5 @@
 import { AiConfig } from '@openops/shared';
-import { CoreMessage, LanguageModelV1, ToolSet } from 'ai';
+import { LanguageModel, ModelMessage, ToolSet } from 'ai';
 import { FastifyInstance } from 'fastify';
 import { MCPChatContext } from '../chat/ai-chat.service';
 import {
@@ -16,9 +16,9 @@ type MCPToolsContextParams = {
   projectId: string;
   authToken: string;
   aiConfig: AiConfig;
-  messages: CoreMessage[];
+  messages: ModelMessage[];
   chatContext: MCPChatContext;
-  languageModel: LanguageModelV1;
+  languageModel: LanguageModel;
   frontendTools: AssistantUITools;
 };
 

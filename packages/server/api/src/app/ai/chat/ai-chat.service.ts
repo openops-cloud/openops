@@ -6,10 +6,10 @@ import {
   hashUtils,
 } from '@openops/server-shared';
 import { AiConfig, ApplicationError, ErrorCode } from '@openops/shared';
-import { CoreMessage, LanguageModel, generateText } from 'ai';
+import { LanguageModel, ModelMessage, UIMessage, generateText } from 'ai';
 import { aiConfigService } from '../config/ai-config.service';
 import { loadPrompt } from './prompts.service';
-import { Conversation, MessageWithMergedToolResults } from './types';
+import { Conversation } from './types';
 import { mergeToolResultsIntoMessages } from './utils';
 
 // Chat expiration time is 24 hour
@@ -66,7 +66,7 @@ export const generateChatIdForMCP = (params: {
 };
 
 export async function generateChatName(
-  messages: CoreMessage[],
+  messages: ModelMessage[],
   projectId: string,
 ): Promise<string> {
   const { languageModel } = await getLLMConfig(projectId);
@@ -74,7 +74,7 @@ export async function generateChatName(
   if (!systemPrompt.trim()) {
     throw new Error('Failed to load prompt to generate the chat name.');
   }
-  const prompt: CoreMessage[] = [
+  const prompt: ModelMessage[] = [
     {
       role: 'system',
       content: systemPrompt,
@@ -132,8 +132,8 @@ export const getChatHistory = async (
   chatId: string,
   userId: string,
   projectId: string,
-): Promise<CoreMessage[]> => {
-  const messages = await cacheWrapper.getSerializedObject<CoreMessage[]>(
+): Promise<ModelMessage[]> => {
+  const messages = await cacheWrapper.getSerializedObject<ModelMessage[]>(
     chatHistoryKey(chatId, userId, projectId),
   );
 
@@ -147,7 +147,7 @@ export const getChatHistoryWithMergedTools = async (
   chatId: string,
   userId: string,
   projectId: string,
-): Promise<MessageWithMergedToolResults[]> => {
+): Promise<Array<Omit<UIMessage, 'id'>>> => {
   const messages = await getChatHistory(chatId, userId, projectId);
   return mergeToolResultsIntoMessages(messages);
 };
@@ -184,7 +184,7 @@ export const saveChatHistory = async (
   chatId: string,
   userId: string,
   projectId: string,
-  messages: CoreMessage[],
+  messages: ModelMessage[],
 ): Promise<void> => {
   await cacheWrapper.setSerializedObject(
     chatHistoryKey(chatId, userId, projectId),
@@ -197,7 +197,7 @@ export const appendMessagesToChatHistory = async (
   chatId: string,
   userId: string,
   projectId: string,
-  messages: CoreMessage[],
+  messages: ModelMessage[],
 ): Promise<void> => {
   const chatLock = await distributedLock.acquireLock({
     key: `lock:${chatHistoryKey(chatId, userId, projectId)}`,

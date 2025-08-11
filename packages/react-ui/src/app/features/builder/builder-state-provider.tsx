@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 
 import { useAuthorization } from '@/app/common/hooks/authorization-hooks';
 import {
@@ -17,15 +17,6 @@ export function BuilderStateProvider({
 }: BuilderStateProviderProps) {
   const storeRef = useRef<BuilderStore>();
   const { checkAccess } = useAuthorization();
-
-  useEffect(() => {
-    if (storeRef.current && props.flow && props.flowVersion) {
-      storeRef.current.setState({
-        flow: props.flow,
-        flowVersion: props.flowVersion,
-      });
-    }
-  }, [props.flow, props.flowVersion]);
 
   if (!storeRef.current) {
     storeRef.current = createBuilderStore({

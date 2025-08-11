@@ -1,7 +1,8 @@
 import { AiConfig } from '@openops/shared';
 import {
-  CoreMessage,
   LanguageModel,
+  ModelMessage,
+  stepCountIs,
   streamText,
   StreamTextOnFinishCallback,
   StreamTextOnStepFinishCallback,
@@ -14,8 +15,8 @@ type AICallSettings = {
   aiConfig: AiConfig;
   systemPrompt: string;
   maxRecursionDepth: number;
-  newMessages: CoreMessage[];
-  chatHistory: CoreMessage[];
+  newMessages: ModelMessage[];
+  chatHistory: ModelMessage[];
   languageModel: LanguageModel;
   onStepFinish?: StreamTextOnStepFinishCallback<ToolSet>;
   onFinish?: StreamTextOnFinishCallback<ToolSet>;
@@ -48,8 +49,7 @@ export function getLLMAsyncStream(
     tools,
     toolChoice,
     maxRetries: MAX_RETRIES,
-    maxSteps: maxRecursionDepth,
-    toolCallStreaming: true,
+    stopWhen: stepCountIs(maxRecursionDepth),
     onStepFinish,
     onFinish,
     async onError({ error }): Promise<void> {

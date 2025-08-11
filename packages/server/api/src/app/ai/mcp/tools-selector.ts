@@ -1,7 +1,7 @@
 import { isLLMTelemetryEnabled } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { AiConfig } from '@openops/shared';
-import { CoreMessage, generateObject, LanguageModel, ToolSet } from 'ai';
+import { generateObject, LanguageModel, ModelMessage, ToolSet } from 'ai';
 import { z } from 'zod';
 
 const MAX_SELECTED_TOOLS = 128;
@@ -12,7 +12,7 @@ export async function selectRelevantTools({
   languageModel,
   aiConfig,
 }: {
-  messages: CoreMessage[];
+  messages: ModelMessage[];
   tools: ToolSet;
   languageModel: LanguageModel;
   aiConfig: AiConfig;

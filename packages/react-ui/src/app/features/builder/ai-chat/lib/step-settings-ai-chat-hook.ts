@@ -5,11 +5,7 @@ import {
 } from '@/app/features/ai/lib/enrich-context';
 import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
 import { authenticationSession } from '@/app/lib/authentication-session';
-import {
-  Message,
-  useChat,
-  experimental_useObject as useObject,
-} from '@ai-sdk/react';
+import { experimental_useObject as useObject } from '@ai-sdk/react';
 import { BlockMetadataModel } from '@openops/blocks-framework';
 import { toast } from '@openops/components/ui';
 import {
@@ -93,7 +89,7 @@ export const useStepSettingsAiChat = (
     body: {
       chatId: openChatResponse?.chatId,
     },
-    initialMessages: openChatResponse?.messages as Message[],
+    initialMessages: openChatResponse?.messages as any[],
     experimental_prepareRequestBody: () => ({
       chatId: openChatResponse?.chatId,
       message: input,
@@ -113,7 +109,7 @@ export const useStepSettingsAiChat = (
     },
     onFinish: ({ object }: { object: UnifiedCodeLLMSchema | undefined }) => {
       if (object) {
-        const assistantMessage: Message = {
+        const assistantMessage: any = {
           id: nanoid(),
           role: 'assistant',
           content: object.textAnswer,
@@ -183,7 +179,7 @@ export const useStepSettingsAiChat = (
       event?.preventDefault?.();
       if (!input.trim()) return;
 
-      const userMessage: Message = {
+      const userMessage: any = {
         id: nanoid(),
         role: 'user',
         content: input,
@@ -280,3 +276,26 @@ const doesActionSupportsAI = (
     (prop: any) => prop?.supportsAI === true,
   );
 };
+function useChat(arg0: {
+  id: string;
+  api: string;
+  maxSteps: number;
+  body: { chatId: string | undefined };
+  initialMessages: any[];
+  experimental_prepareRequestBody: () => {
+    chatId: string | undefined;
+    message: any;
+  };
+  headers: { Authorization: string };
+}): {
+  messages: any;
+  input: any;
+  handleInputChange: any;
+  handleSubmit: any;
+  status: any;
+  setMessages: any;
+  stop: any;
+  setInput: any;
+} {
+  throw new Error('Function not implemented.');
+}

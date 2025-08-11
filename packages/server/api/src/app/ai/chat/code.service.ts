@@ -6,15 +6,17 @@ import {
   UnifiedCodeLLMSchema,
 } from '@openops/shared';
 import {
-  CoreMessage,
+  generateObject,
+  GenerateObjectResult,
   LanguageModel,
+  ModelMessage,
   streamObject,
   StreamObjectOnFinishCallback,
   StreamObjectResult,
 } from 'ai';
 
 type StreamCodeOptions = {
-  chatHistory: CoreMessage[];
+  chatHistory: ModelMessage[];
   languageModel: LanguageModel;
   aiConfig: AiConfig;
   systemPrompt: string;
@@ -45,6 +47,36 @@ export const streamCode = ({
     ...aiConfig.modelSettings,
     onFinish,
     onError,
+    schema: unifiedCodeLLMSchema,
+    experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
+  });
+};
+
+type GenerateCodeOptions = {
+  chatHistory: ModelMessage[];
+  languageModel: LanguageModel;
+  aiConfig: AiConfig;
+  systemPrompt: string;
+};
+
+export const generateCode = ({
+  chatHistory,
+  languageModel,
+  aiConfig,
+  systemPrompt,
+}: GenerateCodeOptions): Promise<
+  GenerateObjectResult<{
+    type: 'code' | 'reply';
+    textAnswer: string;
+    code?: string;
+    packageJson?: string;
+  }>
+> => {
+  return generateObject({
+    model: languageModel,
+    system: systemPrompt,
+    messages: chatHistory,
+    ...aiConfig.modelSettings,
     schema: unifiedCodeLLMSchema,
     experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
   });
