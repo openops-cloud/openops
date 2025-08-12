@@ -70,6 +70,16 @@ export const Thread = ({
 
         <ThreadPrimitive.Messages components={messageComponents} />
 
+        <ThreadPrimitive.If running>
+          <div className="w-full max-w-[var(--thread-max-width)] mb-2">
+            <div className="flex items-center text-slate-800 dark:text-slate-50">
+              <span className="select-none animate-pulse leading-none align-middle">
+                {'\u25CF'}
+              </span>
+            </div>
+          </div>
+        </ThreadPrimitive.If>
+
         <ThreadPrimitive.If empty={false}>
           <div className="min-h-8 flex-grow" />
         </ThreadPrimitive.If>
@@ -218,7 +228,7 @@ const AssistantMessage: FC<{ theme: Theme }> = ({ theme }) => {
   );
 
   return (
-    <MessagePrimitive.Root className="grid grid-cols-[auto_auto_1fr] grid-rows-[auto_1fr] relative w-full max-w-[var(--thread-max-width)] py-4">
+    <MessagePrimitive.Root className="grid grid-cols-[auto_auto_1fr] grid-rows-[auto_1fr] relative w-full max-w-[var(--thread-max-width)] py-2">
       <div className="text-foreground max-w-[calc(var(--thread-max-width)*0.8)] break-words leading-7 col-span-2 col-start-2 row-start-1 my-1.5">
         <MessagePrimitive.Content components={messageComponents} />
       </div>
