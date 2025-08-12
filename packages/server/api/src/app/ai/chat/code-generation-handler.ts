@@ -1,30 +1,27 @@
 import { logger } from '@openops/server-shared';
 import { ChatFlowContext } from '@openops/shared';
-import { CoreMessage } from 'ai';
+import { ModelMessage } from 'ai';
 import { sendAiChatFailureEvent } from '../../telemetry/event-models';
 import { saveChatHistory } from './ai-chat.service';
 import { generateMessageId, generateToolId } from './ai-id-generators';
-import { streamCode } from './code.service';
+import { generateCode } from './code.service';
 import { enrichContext, IncludeOptions } from './context-enrichment.service';
 import { getBlockSystemPrompt } from './prompts.service';
 import {
-  buildDoneMessage,
-  buildFinishMessage,
-  buildMessageIdMessage,
-  buildTextMessage,
-  buildToolCallDeltaMessage,
-  buildToolCallMessage,
-  buildToolCallStreamingStartMessage,
-  buildToolResultMessage,
+  buildTextDeltaPart,
+  buildTextEndMessage,
+  buildTextStartMessage,
+  buildToolInputAvailable,
+  buildToolInputStartMessage,
+  buildToolOutputAvailableMessage,
+  doneMarker,
+  finishMessagePart,
+  finishStepPart,
+  sendTextMessageToStream,
+  startMessagePart,
+  startStepPart,
 } from './stream-message-builder';
 import { ChatProcessingContext, RequestContext } from './types';
-
-type CodeGenerationResult = {
-  type: string;
-  code?: string;
-  packageJson?: string;
-  textAnswer: string;
-};
 
 type CodeMessageParams = RequestContext &
   ChatProcessingContext & {
@@ -35,83 +32,16 @@ const GENERATE_CODE_TOOL_NAME = 'generate_code';
 const ROLE_ASSISTANT = 'assistant';
 
 /**
- * Processes a single line of JSON data and sends progress updates if it's a code result
- */
-function processStreamLine(
-  line: string,
-  toolCallId: string,
-  serverResponse: NodeJS.WritableStream,
-): void {
-  if (!line.trim()) return;
-
-  try {
-    const data = JSON.parse(line);
-
-    if (data.type === 'code' && data.code) {
-      const partialResult = {
-        toolCallId,
-        result: {
-          code: data.code,
-          packageJson: data.packageJson || '{}',
-        },
-      };
-      serverResponse.write(`a:${JSON.stringify(partialResult)}\n`);
-    }
-  } catch (e) {
-    logger.debug('Error parsing JSON', {
-      error: e,
-      line,
-    });
-  }
-}
-
-/**
- * Streams code generation progress in real-time to the client
- */
-async function streamCodeGenerationProgress(
-  stream: Response,
-  serverResponse: NodeJS.WritableStream,
-  toolCallId: string,
-): Promise<void> {
-  const reader = stream.body?.getReader();
-  if (!reader) return;
-
-  try {
-    let done = false;
-    let buffer = '';
-
-    while (!done) {
-      const result = await reader.read();
-      done = result.done;
-
-      if (!done && result.value) {
-        const chunk = new TextDecoder().decode(result.value);
-        buffer += chunk;
-
-        // Process complete JSON objects from the buffer
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || ''; // Keep incomplete line in buffer
-
-        for (const line of lines) {
-          processStreamLine(line, toolCallId, serverResponse);
-        }
-      }
-    }
-  } finally {
-    reader.releaseLock();
-  }
-}
-
-/**
  * Handles errors in code generation by creating an assistant message and saving to history
  */
 async function handleCodeGenerationError(
   error: unknown,
   params: {
+    messageId: string;
     chatId: string;
     userId: string;
     projectId: string;
-    chatHistory: CoreMessage[];
+    chatHistory: ModelMessage[];
     serverResponse: NodeJS.WritableStream;
     aiConfig: { provider: string; model: string };
   },
@@ -119,10 +49,13 @@ async function handleCodeGenerationError(
   const errorMessage = error instanceof Error ? error.message : String(error);
   logger.warn(errorMessage, error);
 
-  params.serverResponse.write(`0:"\\n\\n"\n`);
-  params.serverResponse.write(`0:${JSON.stringify(errorMessage)}\n`);
+  sendTextMessageToStream(
+    params.serverResponse,
+    errorMessage,
+    params.messageId,
+  );
 
-  const errorAssistantMessage: CoreMessage = {
+  const errorAssistantMessage: ModelMessage = {
     role: ROLE_ASSISTANT,
     content: [
       {
@@ -150,7 +83,7 @@ async function handleCodeGenerationError(
 /**
  * Extracts string content from a CoreMessage - in our context, content is always a string
  */
-function getMessageText(message: CoreMessage): string {
+function getMessageText(message: ModelMessage): string {
   if (typeof message.content !== 'string') {
     throw new Error(
       'Expected message content to be a string in code generation context',
@@ -170,20 +103,8 @@ function initializeToolCall(params: {
 }): void {
   const { toolCallId, toolName, message, serverResponse } = params;
 
-  serverResponse.write(
-    buildToolCallStreamingStartMessage(toolCallId, toolName),
-  );
-  serverResponse.write(
-    buildToolCallDeltaMessage(toolCallId, toolName, `{"message":"${message}"}`),
-  );
-  serverResponse.write(
-    buildToolCallMessage({
-      type: 'tool-call',
-      toolCallId,
-      toolName,
-      args: { message },
-    }),
-  );
+  serverResponse.write(buildToolInputStartMessage(toolCallId, toolName));
+  serverResponse.write(buildToolInputAvailable(toolCallId, toolName, message));
 }
 
 /*
@@ -204,66 +125,40 @@ export async function handleCodeGenerationRequest(
     conversation: { chatContext, chatHistory },
   } = params;
 
-  serverResponse.write(buildMessageIdMessage(generateMessageId()));
-
-  const toolCallId = generateToolId();
-  initializeToolCall({
-    toolCallId,
-    toolName: GENERATE_CODE_TOOL_NAME,
-    message: getMessageText(newMessage),
-    serverResponse,
-  });
-
-  const enrichedContext = additionalContext
-    ? await enrichContext(additionalContext, projectId, {
-        includeCurrentStepOutput: IncludeOptions.ALWAYS,
-      })
-    : undefined;
-
-  const prompt = await getBlockSystemPrompt(chatContext, enrichedContext);
-
-  let codeResult: CodeGenerationResult | null = null;
-
-  let resolveResult: () => void;
-  let rejectResult: (reason?: unknown) => void;
-
-  const resultPromise = new Promise<void>((resolve, reject) => {
-    resolveResult = resolve;
-    rejectResult = reject;
-  });
+  const newMessageId = generateMessageId();
 
   try {
-    const result = streamCode({
+    serverResponse.write(startMessagePart);
+    serverResponse.write(startStepPart);
+
+    const toolCallId = generateToolId();
+    initializeToolCall({
+      toolCallId,
+      toolName: GENERATE_CODE_TOOL_NAME,
+      message: getMessageText(newMessage),
+      serverResponse,
+    });
+
+    const enrichedContext = additionalContext
+      ? await enrichContext(additionalContext, projectId, {
+          includeCurrentStepOutput: IncludeOptions.ALWAYS,
+        })
+      : undefined;
+
+    const prompt = await getBlockSystemPrompt(chatContext, enrichedContext);
+
+    const result = await generateCode({
       chatHistory,
       languageModel,
       aiConfig,
       systemPrompt: prompt,
-      onFinish: async (result) => {
-        if (result.object) {
-          codeResult = result.object;
-        }
-        resolveResult();
-      },
-      onError: (error) => {
-        logger.error('Failed to generate code', {
-          error,
-        });
-        rejectResult(error);
-      },
     });
 
-    // Stream the code generation in real-time
-    const stream = result.toTextStreamResponse();
-    await streamCodeGenerationProgress(stream, serverResponse, toolCallId);
-
-    await resultPromise;
-
-    if (!codeResult) {
+    if (!result) {
       throw new Error('No code generation result received');
     }
 
-    // codeResult variable assigned in async callback so TS type narrowing not working as expected
-    const finalCodeResult = codeResult as CodeGenerationResult;
+    const finalCodeResult = result.object;
 
     const toolResult = {
       toolCallId,
@@ -272,26 +167,33 @@ export async function handleCodeGenerationRequest(
         packageJson: finalCodeResult.packageJson || '{}',
       },
     };
-    serverResponse.write(buildToolResultMessage(toolResult));
 
-    serverResponse.write(buildFinishMessage('tool-calls'));
-    serverResponse.write(buildDoneMessage('tool-calls'));
+    serverResponse.write(
+      buildToolOutputAvailableMessage(toolCallId, toolResult.result),
+    );
 
-    serverResponse.write(buildTextMessage(finalCodeResult.textAnswer));
+    serverResponse.write(finishStepPart);
 
-    serverResponse.write(buildFinishMessage('stop'));
-    serverResponse.write(buildDoneMessage('stop'));
+    serverResponse.write(startStepPart);
+    serverResponse.write(buildTextStartMessage(newMessageId));
+    serverResponse.write(
+      buildTextDeltaPart(finalCodeResult.textAnswer, newMessageId),
+    );
+    serverResponse.write(buildTextEndMessage(newMessageId));
+
+    serverResponse.write(finishStepPart);
+    serverResponse.write(finishMessagePart);
 
     const saveToolCallId = generateToolId();
 
-    const assistantMessage: CoreMessage = {
+    const assistantMessage: ModelMessage = {
       role: ROLE_ASSISTANT,
       content: [
         {
           type: 'tool-call',
           toolCallId: saveToolCallId,
           toolName: GENERATE_CODE_TOOL_NAME,
-          args: { message: newMessage.content },
+          input: { message: newMessage.content },
         },
         {
           type: 'text',
@@ -300,24 +202,19 @@ export async function handleCodeGenerationRequest(
       ],
     };
 
-    const toolResultMessage: CoreMessage = {
+    const toolResultMessage: ModelMessage = {
       role: 'tool',
       content: [
         {
           type: 'tool-result',
           toolCallId: saveToolCallId,
           toolName: GENERATE_CODE_TOOL_NAME,
-          result: {
-            content: [
-              {
-                type: 'text',
-                text: JSON.stringify({
-                  code: finalCodeResult.code || '',
-                  packageJson: finalCodeResult.packageJson || '{}',
-                }),
-              },
-            ],
-            isError: false,
+          output: {
+            type: 'json',
+            value: {
+              code: finalCodeResult.code || '',
+              packageJson: finalCodeResult.packageJson || '{}',
+            },
           },
         },
       ],
@@ -330,6 +227,7 @@ export async function handleCodeGenerationRequest(
     ]);
   } catch (error) {
     await handleCodeGenerationError(error, {
+      messageId: newMessageId,
       chatId,
       userId,
       projectId,
@@ -338,7 +236,7 @@ export async function handleCodeGenerationRequest(
       aiConfig,
     });
   } finally {
-    serverResponse.write(buildDoneMessage('stop'));
+    serverResponse.write(doneMarker);
     serverResponse.end();
   }
 }

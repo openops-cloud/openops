@@ -2,14 +2,15 @@
 import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { AiConfig } from '@openops/shared';
 import {
-  CoreAssistantMessage,
-  CoreMessage,
-  CoreToolMessage,
+  AssistantModelMessage,
   LanguageModel,
+  ModelMessage,
   TextStreamPart,
+  ToolModelMessage,
   ToolSet,
 } from 'ai';
 import { FastifyInstance } from 'fastify';
+import { extractErrorMessage } from '../../../lib/error-utils';
 import { sendAiChatFailureEvent } from '../../telemetry/event-models';
 import { addUiToolResults } from '../mcp/tool-utils';
 import { getMCPToolsContext } from '../mcp/tools-context-builder';
@@ -18,9 +19,10 @@ import { saveChatHistory } from './ai-chat.service';
 import { generateMessageId } from './ai-id-generators';
 import { getLLMAsyncStream } from './llm-stream-handler';
 import {
-  buildDoneMessage,
-  buildMessageIdMessage,
-  buildTextMessage,
+  doneMarker,
+  finishMessagePart,
+  finishStepPart,
+  sendTextMessageToStream,
 } from './stream-message-builder';
 import { ChatProcessingContext, RequestContext } from './types';
 
@@ -45,7 +47,7 @@ type StreamCallSettings = RequestContext &
   ModelConfig & {
     tools?: ToolSet;
     systemPrompt: string;
-    chatHistory: CoreMessage[];
+    chatHistory: ModelMessage[];
   };
 
 export async function handleUserMessage(
@@ -64,7 +66,7 @@ export async function handleUserMessage(
     frontendTools,
   } = params;
 
-  serverResponse.write(buildMessageIdMessage(generateMessageId()));
+  const messageId = generateMessageId();
 
   const { mcpClients, systemPrompt, filteredTools } = await getMCPToolsContext({
     app,
@@ -78,17 +80,23 @@ export async function handleUserMessage(
   });
 
   try {
-    const newMessages = await streamLLMResponse({
-      userId,
-      chatId,
-      projectId,
-      aiConfig,
-      chatHistory,
-      systemPrompt,
-      languageModel,
-      serverResponse,
-      tools: filteredTools,
-    });
+    const newMessages = await streamLLMResponse(
+      {
+        userId,
+        chatId,
+        projectId,
+        aiConfig,
+        chatHistory,
+        systemPrompt,
+        languageModel,
+        serverResponse,
+        tools: filteredTools,
+      },
+      messageId,
+    );
+
+    serverResponse.write(finishStepPart);
+    serverResponse.write(finishMessagePart);
 
     await saveChatHistory(chatId, userId, projectId, [
       ...chatHistory,
@@ -96,15 +104,16 @@ export async function handleUserMessage(
     ]);
   } finally {
     await closeMCPClients(mcpClients);
-    serverResponse.write(buildDoneMessage('stop'));
+    serverResponse.write(doneMarker);
     serverResponse.end();
   }
 }
 
 async function streamLLMResponse(
   params: StreamCallSettings,
-): Promise<CoreMessage[]> {
-  const newMessages: CoreMessage[] = [];
+  messageId: string,
+): Promise<ModelMessage[]> {
+  const newMessages: ModelMessage[] = [];
   let stepCount = 0;
 
   try {
@@ -116,7 +125,7 @@ async function streamLLMResponse(
         stepCount++;
         if (value.finishReason !== 'stop' && stepCount >= maxRecursionDepth) {
           const message = ` Maximum recursion depth (${maxRecursionDepth}) reached. Terminating recursion.`;
-          sendTextMessageToStream(params.serverResponse, message);
+          sendTextMessageToStream(params.serverResponse, message, messageId);
           appendErrorMessage(value.response.messages, message);
           logger.warn(message);
         }
@@ -124,7 +133,6 @@ async function streamLLMResponse(
       onFinish: async (result): Promise<void> => {
         const messages = result.response.messages;
         newMessages.push(...messages);
-
         if (result.finishReason === 'length') {
           throw new Error(
             'The message was truncated because the maximum tokens for the context window was reached.',
@@ -147,10 +155,12 @@ async function streamLLMResponse(
 function unrecoverableError(
   streamParams: StreamCallSettings,
   error: any,
-): CoreAssistantMessage {
-  const errorMessage = error instanceof Error ? error.message : String(error);
-  streamParams.serverResponse.write(`0:"\\n\\n"\n`);
-  streamParams.serverResponse.write(buildTextMessage(errorMessage));
+): AssistantModelMessage {
+  const errorMessage = extractErrorMessage(error);
+
+  const messageId = generateMessageId();
+  sendTextMessageToStream(streamParams.serverResponse, errorMessage, messageId);
+
   logger.warn(errorMessage, error);
 
   sendAiChatFailureEvent({
@@ -175,7 +185,7 @@ async function closeMCPClients(mcpClients: unknown[]): Promise<void> {
   }
 }
 
-function createAssistantMessage(message: string): CoreAssistantMessage {
+function createAssistantMessage(message: string): AssistantModelMessage {
   return {
     role: 'assistant',
     content: [
@@ -188,9 +198,7 @@ function createAssistantMessage(message: string): CoreAssistantMessage {
 }
 
 function appendErrorMessage(
-  responseMessages: ((CoreAssistantMessage | CoreToolMessage) & {
-    id: string;
-  })[],
+  responseMessages: (AssistantModelMessage | ToolModelMessage)[],
   message: string,
 ): void {
   const lastMessage = responseMessages.at(-1);
@@ -207,7 +215,6 @@ function appendErrorMessage(
   } else {
     responseMessages.push({
       ...createAssistantMessage(message),
-      id: generateMessageId(),
     });
   }
 }
@@ -220,29 +227,62 @@ function sendMessageToStream(
 ): void {
   switch (message.type as string) {
     case 'text-delta':
-      sendTextMessageToStream(responseStream, (message as any).textDelta);
+      responseStream.write(
+        `data: ${JSON.stringify({
+          type: 'text-delta',
+          id: (message as any).id,
+          delta: (message as any).text,
+        })}`,
+      );
+      break;
+    case 'tool-input-start':
+      responseStream.write(
+        `data: ${JSON.stringify({
+          type: 'tool-input-start',
+          toolCallId: (message as any).id,
+          toolName: (message as any).toolName,
+        })}`,
+      );
+      break;
+    case 'tool-input-delta':
+      responseStream.write(
+        `data: ${JSON.stringify({
+          type: 'tool-input-delta',
+          toolCallId: (message as any).id,
+          inputTextDelta: (message as any).delta,
+        })}`,
+      );
+      break;
+    case 'tool-call':
+      responseStream.write(
+        `data: ${JSON.stringify({
+          type: 'tool-input-available',
+          toolCallId: (message as any).toolCallId,
+          toolName: (message as any).toolName,
+          input: (message as any).input,
+        })}`,
+      );
       break;
     case 'tool-result':
-      responseStream.write(`a:${JSON.stringify(message)}\n`);
+      responseStream.write(
+        `data: ${JSON.stringify({
+          type: 'tool-output-available',
+          toolCallId: (message as any).toolCallId,
+          output: (message as any).output,
+        })}`,
+      );
       break;
-    case 'tool-call': {
-      responseStream.write(`9:${JSON.stringify(message)}\n`);
+    case 'start-step':
+      responseStream.write(`data: ${JSON.stringify({ type: 'start-step' })}`);
       break;
-    }
-    case 'tool-call-streaming-start': {
-      responseStream.write(`b:${JSON.stringify(message)}\n`);
+    case 'finish-step':
+    case 'finish':
+    case 'tool-input-end':
+      return;
+    default:
+      responseStream.write(`data: ${JSON.stringify(message)}`);
       break;
-    }
-    case 'tool-call-delta': {
-      responseStream.write(`c:${JSON.stringify(message)}\n`);
-      break;
-    }
   }
-}
 
-function sendTextMessageToStream(
-  responseStream: NodeJS.WritableStream,
-  message: string,
-): void {
-  responseStream.write(buildTextMessage(message));
+  responseStream.write('\n\n');
 }

@@ -1,8 +1,7 @@
 import { logger } from '@openops/server-shared';
 import { CODE_BLOCK_NAME, NewMessageRequest, Principal } from '@openops/shared';
 import { CoreMessage } from 'ai';
-import { FastifyInstance } from 'fastify';
-import { ServerResponse } from 'http';
+import { FastifyInstance, FastifyReply } from 'fastify';
 import { sendAiChatMessageSendEvent } from '../../telemetry/event-models';
 import { getConversation, getLLMConfig } from './ai-chat.service';
 import { handleCodeGenerationRequest } from './code-generation-handler';
@@ -16,15 +15,16 @@ export type ChatRequestContext = {
       authorization?: string;
     };
   };
+  reply: FastifyReply;
   app: FastifyInstance;
   newMessage: CoreMessage;
-  serverResponse: ServerResponse;
 };
 
 export async function routeChatRequest(
   params: ChatRequestContext,
 ): Promise<void> {
-  const { app, request, newMessage, serverResponse } = params;
+  const { app, request, newMessage, reply: fastifyReply } = params;
+  const serverResponse = fastifyReply.raw;
 
   const chatId = request.body.chatId;
   const userId = request.principal.id;
@@ -59,6 +59,15 @@ export async function routeChatRequest(
     userId,
     chatId,
     provider: aiConfig.provider,
+  });
+
+  // AI SDKv5 uses SSE, so we need to hijack the response and send the SSE headers
+  await fastifyReply.hijack();
+  serverResponse.writeHead(200, {
+    'x-vercel-ai-ui-message-stream': 'v1',
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    Connection: 'keep-alive',
   });
 
   if (isCodeGenerationRequest) {

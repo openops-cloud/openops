@@ -1,5 +1,5 @@
 import { createMistral } from '@ai-sdk/mistral';
-import { LanguageModelV1 } from 'ai';
+import { LanguageModel } from 'ai';
 import { AiProvider } from '../providers';
 
 const mistralModels = [
@@ -15,7 +15,7 @@ function createLanguageModel(params: {
   apiKey: string;
   model: string;
   providerSettings?: Record<string, unknown>;
-}): LanguageModelV1 {
+}): LanguageModel {
   return createMistral({
     apiKey: params.apiKey,
     ...params.providerSettings,

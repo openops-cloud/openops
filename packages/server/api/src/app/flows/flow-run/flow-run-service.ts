@@ -139,7 +139,6 @@ export const flowRunService = {
 
     let query = flowRunRepo().createQueryBuilder('flow_run').where({
       projectId,
-      environment: RunEnvironment.PRODUCTION,
     });
     if (flowId) {
       query = query.andWhere({
