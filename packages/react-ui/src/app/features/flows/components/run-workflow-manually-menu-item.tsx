@@ -66,7 +66,11 @@ const RunWorkflowManuallyMenuItem = ({
           <MenuItemTrigger disabled={true} />
         </TooltipTrigger>
         <TooltipContent side="bottom" align="start" className="z-[51]">
-          {t('This workflow is event-driven and cannot be triggered manually')}
+          {!isPublished
+            ? t('The workflow must be published before it can be run')
+            : t(
+                'This workflow is event-driven and cannot be triggered manually',
+              )}
         </TooltipContent>
       </Tooltip>
     );
