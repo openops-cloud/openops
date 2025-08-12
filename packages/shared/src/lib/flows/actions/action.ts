@@ -19,11 +19,34 @@ export enum RiskLevel {
 }
 
 const commonActionProps = {
-  id: Type.String({}),
-  name: Type.String({}),
-  valid: Type.Boolean({}),
-  displayName: Type.String({}),
+  id: Type.String({
+    description: 'Unique identifier for the step (action)',
+  }),
+  name: Type.String({
+    description:
+      'Name of the step (action), used for reference in code or configurations. Usually the name is in the format step_index',
+  }),
+  valid: Type.Boolean({
+    description:
+      'Indicates whether the action is currently valid and can be executed',
+  }),
+  displayName: Type.String({
+    description: 'Human-readable name for the action, intended for UI display',
+  }),
 };
+
+export const InputsSchema = Type.Object(
+  {},
+  {
+    additionalProperties: true,
+    description:
+      'All block-specific properties must be contained within the `input` object, not at the root level. ' +
+      'The `input` object is a mapping of property keys to their chosen values (`props: { propertyKey → propertyValue }`). ' +
+      'Keys must exactly match the action property keys returned by the details endpoint, and values must follow the expected types and constraints. ' +
+      'The `input` object may be empty. For optional properties, omit the key if the value is unknown. ' +
+      'For required properties, include the key with a `null` value if the value is unknown.',
+  },
+);
 
 export const ActionErrorHandlingOptions = Type.Optional(
   Type.Object({
@@ -44,15 +67,21 @@ export type ActionErrorHandlingOptions = Static<
 >;
 
 export const SourceCode = Type.Object({
-  packageJson: Type.String({}),
-  code: Type.String({}),
+  packageJson: Type.String({
+    description:
+      'JSON string for a minimal package.json snippet focused on runtime dependencies. It must be a JSON object with an optional `dependencies` field mapping package names to version ranges. Example: { "dependencies": { "stylus": "0.64.0" } }. Use \'{}\' when there are no dependencies.',
+  }),
+  code: Type.String({
+    description:
+      'JavaScript/TypeScript source for this step. To use data from previous steps, pass them as key–value pairs and access them via `inputs.key` in your code. The entry point must be an exported function named `code`. If it is removed or renamed, the step will fail.\n\nExample:\n```ts\nexport const code = async (inputs) => {\n  // use inputs.someKey\n  return true;\n};\n```',
+  }),
 });
 
 export type SourceCode = Static<typeof SourceCode>;
 
 export const CodeActionSettings = Type.Object({
   sourceCode: SourceCode,
-  input: Type.Record(Type.String({}), Type.Any()),
+  input: InputsSchema,
   inputUiInfo: Type.Optional(SampleDataSettingsObject),
   errorHandlingOptions: ActionErrorHandlingOptions,
 });
@@ -67,10 +96,13 @@ export const CodeActionSchema = Type.Object({
 export const BlockActionSettings = Type.Object({
   packageType: Type.Enum(PackageType),
   blockType: Type.Enum(BlockType),
-  blockName: Type.String({}),
+  blockName: Type.String({
+    description:
+      "The complete package identifier, formatted as 'packageScope/packageName'. This must exactly match the block name as registered (e.g., '@org/one-block').",
+  }),
   blockVersion: VersionType,
   actionName: Type.Optional(Type.String({})),
-  input: Type.Record(Type.String({}), Type.Unknown()),
+  input: InputsSchema,
   inputUiInfo: SampleDataSettingsObject,
   errorHandlingOptions: ActionErrorHandlingOptions,
 });
