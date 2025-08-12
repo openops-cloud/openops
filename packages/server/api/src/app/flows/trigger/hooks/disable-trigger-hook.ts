@@ -89,6 +89,7 @@ async function sideeffect(
       break;
     }
     case TriggerStrategy.POLLING:
+    case TriggerStrategy.SCHEDULED:
       await flowQueue.removeRepeatingJob({
         flowVersionId: flowVersion.id,
       });
