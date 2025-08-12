@@ -16,11 +16,6 @@ const openAiModels = [
   'gpt-4o-2024-05-13',
   'gpt-4o-2024-08-06',
   'gpt-4o-2024-11-20',
-  'gpt-4o-audio-preview',
-  'gpt-4o-audio-preview-2024-10-01',
-  'gpt-4o-audio-preview-2024-12-17',
-  'gpt-4o-search-preview',
-  'gpt-4o-search-preview-2025-03-11',
   'gpt-4-0613',
   'chatgpt-4o-latest',
 ];
