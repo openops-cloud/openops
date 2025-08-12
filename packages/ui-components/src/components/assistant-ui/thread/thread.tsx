@@ -71,7 +71,7 @@ export const Thread = ({
         <ThreadPrimitive.Messages components={messageComponents} />
 
         <ThreadPrimitive.If running>
-          <div className="w-full max-w-[var(--thread-max-width)] mb-2">
+          <div className="w-full mb-2">
             <div className="flex items-center text-slate-800 dark:text-slate-50">
               <span className="select-none animate-pulse leading-none align-middle">
                 {'\u25CF'}
@@ -84,7 +84,7 @@ export const Thread = ({
           <div className="min-h-8 flex-grow" />
         </ThreadPrimitive.If>
 
-        <div className="sticky bottom-0 mt-3 flex w-full max-w-[var(--thread-max-width)] flex-col items-center justify-end rounded-t-lg bg-inherit pb-4 z-20">
+        <div className="sticky bottom-0 mt-3 flex w-full flex-col items-center justify-end rounded-t-lg bg-inherit pb-4 z-20">
           <ThreadScrollToBottom />
           <Composer
             availableModels={availableModels}
@@ -117,7 +117,7 @@ const ThreadWelcome: FC = () => {
 
   return (
     <ThreadPrimitive.Empty>
-      <div className="flex w-full max-w-[var(--thread-max-width)] flex-grow flex-col">
+      <div className="flex w-full flex-grow flex-col">
         <div className="flex w-full h-full flex-grow flex-col items-center justify-center">
           <p className="mt-4 font-medium">{greeting}</p>
         </div>
@@ -186,8 +186,8 @@ const ComposerAction: FC = () => {
 
 const UserMessage: FC = () => {
   return (
-    <MessagePrimitive.Root className="grid auto-rows-auto grid-cols-[minmax(72px,1fr)_auto] gap-y-2 [&:where(>*)]:col-start-2 w-full max-w-[var(--thread-max-width)] py-4">
-      <div className="bg-muted text-foreground max-w-[calc(var(--thread-max-width)*0.8)] break-words rounded-3xl px-5 py-2.5 col-start-2 row-start-2">
+    <MessagePrimitive.Root className="grid auto-rows-auto grid-cols-[minmax(72px,1fr)_auto] gap-y-2 [&:where(>*)]:col-start-2 w-full  py-4">
+      <div className="bg-muted text-foreground break-words rounded-3xl px-5 py-2.5 col-start-2 row-start-2">
         <MessagePrimitive.Content />
       </div>
     </MessagePrimitive.Root>
@@ -196,7 +196,7 @@ const UserMessage: FC = () => {
 
 const EditComposer: FC = () => {
   return (
-    <ComposerPrimitive.Root className="bg-muted my-4 flex w-full max-w-[var(--thread-max-width)] flex-col gap-2 rounded-xl">
+    <ComposerPrimitive.Root className="bg-muted my-4 flex w-full flex-col gap-2 rounded-xl">
       <ComposerPrimitive.Input className="text-foreground flex h-8 w-full resize-none bg-transparent p-4 pb-0 outline-none" />
 
       <div className="mx-3 mb-3 flex items-center justify-center gap-2 self-end">
@@ -228,8 +228,8 @@ const AssistantMessage: FC<{ theme: Theme }> = ({ theme }) => {
   );
 
   return (
-    <MessagePrimitive.Root className="grid grid-cols-[auto_auto_1fr] grid-rows-[auto_1fr] relative w-full max-w-[var(--thread-max-width)] py-2">
-      <div className="text-foreground max-w-[calc(var(--thread-max-width)*0.8)] break-words leading-7 col-span-2 col-start-2 row-start-1 my-1.5">
+    <MessagePrimitive.Root className="grid grid-cols-[auto_auto_1fr] grid-rows-[auto_1fr] relative w-full  py-2">
+      <div className="text-foreground break-words leading-7 col-span-2 col-start-2 row-start-1 my-1.5">
         <MessagePrimitive.Content components={messageComponents} />
       </div>
 
