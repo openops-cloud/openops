@@ -52,20 +52,35 @@ export type MinimalFlow = Static<typeof MinimalFlow>;
 
 export const FlowSummary = Type.Object({
   id: Type.String(),
-  status: Type.Enum(FlowStatus),
+  status: Type.Enum(FlowStatus, {
+    description:
+      'Runtime status of the flow. ENABLED: active and will execute based on the trigger. DISABLED: the flow can only be executed in manual test mode.',
+  }),
   schedule: Nullable(FlowScheduleOptions),
   publishedVersionId: Nullable(Type.String()),
   created: Type.String(),
   updated: Type.String(),
-  version: Type.Object({
-    id: Type.String(),
-    displayName: Type.String(),
-    description: Type.Optional(Type.String()),
-    state: Type.Enum(FlowVersionState),
-    created: Type.String(),
-    updated: Type.String(),
-    updatedBy: Nullable(Type.String()),
-  }),
+  version: Type.Object(
+    {
+      id: Type.String(),
+      displayName: Type.String(),
+      description: Type.Optional(
+        Type.String({
+          description: 'An optional human readable description of the flow.',
+        }),
+      ),
+      state: Type.Enum(FlowVersionState, {
+        description:
+          'Version state. LOCKED: published/immutable this version is used to run the flow if the flow is ENABLED. DRAFT: editable working copy, not published.',
+      }),
+      created: Type.String(),
+      updated: Type.String(),
+      updatedBy: Nullable(Type.String()),
+    },
+    {
+      description: 'Latest version of the flow.',
+    },
+  ),
 });
 
 export type FlowSummary = Static<typeof FlowSummary>;
