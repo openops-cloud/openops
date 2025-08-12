@@ -22,8 +22,6 @@ const openAiModels = [
   'gpt-4o-search-preview',
   'gpt-4o-search-preview-2025-03-11',
   'gpt-4-0613',
-  'gpt-4.5-preview',
-  'gpt-4.5-preview-2025-02-27',
   'chatgpt-4o-latest',
 ];
 
