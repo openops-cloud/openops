@@ -31,12 +31,12 @@ export const useRunWorkflowManually = ({
     enabled: !!blockName && isBlockTrigger,
   });
 
-  const { isPollingType, isWebhookType } = useMemo(() => {
+  const { isScheduled, isWebhookType } = useMemo(() => {
     return {
       isWebhookType:
         blockModel?.triggers[triggerName].type === TriggerStrategy.WEBHOOK,
-      isPollingType:
-        blockModel?.triggers[triggerName].type === TriggerStrategy.POLLING,
+      isScheduled:
+        blockModel?.triggers[triggerName].type === TriggerStrategy.SCHEDULED,
     };
   }, [blockModel?.triggers, triggerName]);
 
@@ -58,7 +58,7 @@ export const useRunWorkflowManually = ({
   const canRun =
     isPublished &&
     flowVersion?.valid &&
-    (isPollingType || isWebhookType) &&
+    (isScheduled || isWebhookType) &&
     isBlockTrigger;
 
   return {
