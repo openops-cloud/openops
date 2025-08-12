@@ -81,7 +81,7 @@ export function createMarkdownComponents({
     ol: ({ node, ...props }: any) => (
       <ol
         className={cn(
-          'my-6 list-decimal [&>li]:mt-2 [&>li]:ml-6 [&>li:nth-child(n+10)]:ml-8 [&>li:nth-child(n+100)]:ml-10 [&>li:nth-child(n+1000)]:ml-12',
+          'my-6 list-decimal [&>li]:mt-2 ol-responsive-margins',
           listClassName,
         )}
         {...props}
