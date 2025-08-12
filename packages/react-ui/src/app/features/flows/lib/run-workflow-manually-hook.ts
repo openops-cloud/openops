@@ -66,7 +66,7 @@ export const useRunWorkflowManually = ({
     setIsOpen,
     canRun,
     isPending,
-    isPollingType,
+    isScheduled,
     run,
   };
 };

@@ -56,7 +56,7 @@ const RunWorkflowManuallyMenuItem = ({
   flowVersion,
   isPublished,
 }: RunWorkflowManuallyMenuItemProps) => {
-  const { isOpen, setIsOpen, canRun, isPollingType, run, isPending } =
+  const { isOpen, setIsOpen, canRun, isScheduled, run, isPending } =
     useRunWorkflowManually({ flowVersion, isPublished });
 
   if (!canRun) {
@@ -76,7 +76,7 @@ const RunWorkflowManuallyMenuItem = ({
     );
   }
 
-  if (isPollingType) {
+  if (isScheduled) {
     return <MenuItemTrigger onSelect={() => run({})} isLoading={isPending} />;
   }
 
