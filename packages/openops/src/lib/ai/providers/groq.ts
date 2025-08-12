@@ -5,11 +5,14 @@ import { AiProvider } from '../providers';
 const groqModels = [
   'gemma2-9b-it',
   'llama-3.3-70b-versatile',
+  'llama-3.1-8b-instant',
   'llama3-70b-8192',
   'llama3-8b-8192',
   'meta-llama/llama-4-scout-17b-16e-instruct',
   'mistral-saba-24b',
   'qwen-2.5-32b',
+  'deepseek-r1-distill-qwen-32b',
+  'deepseek-r1-distill-llama-70b',
 ];
 
 function createLanguageModel(params: {
