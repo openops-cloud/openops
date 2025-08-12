@@ -113,4 +113,66 @@ describe('awsCliAction single account', () => {
 
     expect(awsCliMock.runCommand).not.toHaveBeenCalled();
   });
+
+  describe('blocked commands', () => {
+    test.each([
+      'aws configure',
+      'aws sso login',
+      'aws eks update-kubeconfig --name my-cluster',
+      'aws configure set region us-east-1',
+      'eks    update-kubeconfig    --name my-cluster',
+      '      sso',
+      'aws configure\tlist',
+    ])(
+      'should call handleCliError for blocked commands with various regex patterns',
+      async (command) => {
+        const context = {
+          ...jest.requireActual('@openops/blocks-framework'),
+          auth: auth,
+          propsValue: {
+            commandToRun: command,
+            account: { accounts: 'account' },
+          },
+        };
+
+        await awsCliAction.run(context);
+
+        expect(openOpsMock.handleCliError).toHaveBeenCalledTimes(1);
+        expect(openOpsMock.handleCliError).toHaveBeenCalledWith({
+          provider: 'AWS',
+          command: command,
+          error: expect.objectContaining({
+            message:
+              'This AWS CLI command is blocked to prevent faulty configuration state. ' +
+              "Blocked commands include: 'aws configure', 'aws sso', and 'aws eks update-kubeconfig'.",
+          }),
+        });
+        expect(awsCliMock.runCommand).not.toHaveBeenCalled();
+        expect(openOpsMock.getCredentialsForAccount).not.toHaveBeenCalled();
+      },
+    );
+
+    test('should allow commands that contain blocked words but are not blocked patterns', async () => {
+      awsCliMock.runCommand.mockResolvedValue('success');
+
+      const context = {
+        ...jest.requireActual('@openops/blocks-framework'),
+        auth: auth,
+        propsValue: {
+          commandToRun: 'aws iam get-user --user-name configure-user',
+          account: { accounts: 'account' },
+        },
+      };
+
+      const result = await awsCliAction.run(context);
+
+      expect(result).toEqual('success');
+      expect(awsCliMock.runCommand).toHaveBeenCalledWith(
+        'aws iam get-user --user-name configure-user',
+        auth.defaultRegion,
+        auth,
+      );
+      expect(openOpsMock.handleCliError).not.toHaveBeenCalled();
+    });
+  });
 });

@@ -6,10 +6,7 @@ This is a docker compose deployment of the OpenOps platform.
 
 # Installation
 
-1. Install [docker](https://docs.docker.com/engine/install/)
-2. Copy the docker-compose folder to your machine
-3. Copy the `.env.defaults` file to `.env` and edit it to set the correct values for the environment variables. Make sure to change the default passwords.
-4. Run `docker-compose up -d`
+See the [getting started guide](https://docs.openops.com/getting-started/deployment/local) for local deployment in our documentation.
 
 
 # Connections

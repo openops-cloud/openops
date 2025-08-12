@@ -6,7 +6,7 @@ import {
   GetProvidersResponse,
   SaveAiConfigRequest,
 } from '@openops/shared';
-import { AISDKError, generateText, LanguageModelV1 } from 'ai';
+import { AISDKError, generateText, LanguageModel } from 'ai';
 import { anthropicProvider } from './providers/anthropic';
 import { azureProvider } from './providers/azure-openai';
 import { cerebrasProvider } from './providers/cerebras';
@@ -28,7 +28,7 @@ export interface AiProvider {
     apiKey: string;
     model: string;
     providerSettings?: Record<string, unknown>;
-  }): LanguageModelV1;
+  }): LanguageModel;
 }
 
 const PROVIDER_MAP: Record<AiProviderEnum, AiProvider> = {
@@ -73,7 +73,7 @@ export const getAiProviderLanguageModel = async (aiConfig: {
   apiKey: string;
   model: string;
   providerSettings?: Record<string, unknown> | null;
-}): Promise<LanguageModelV1> => {
+}): Promise<LanguageModel> => {
   const aiProvider = getAiProvider(aiConfig.provider);
   const sanitizedSettings = sanitizeProviderSettings(aiConfig.providerSettings);
 
@@ -165,3 +165,9 @@ function sanitizeProviderSettings(
 
   return sanitized;
 }
+
+export const providerOptions = {
+  openai: {
+    structuredOutputs: false,
+  },
+};

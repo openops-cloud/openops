@@ -1,5 +1,5 @@
 import { AiConfig, AiProviderEnum } from '@openops/shared';
-import { CoreMessage, CoreUserMessage, LanguageModel, ToolSet } from 'ai';
+import { LanguageModel, ModelMessage, ToolSet, UserModelMessage } from 'ai';
 import { FastifyInstance } from 'fastify';
 
 const startMCPToolsMock = jest.fn();
@@ -46,8 +46,8 @@ describe('getMCPToolsContext', () => {
     actionName: 'action-name',
   };
 
-  const mockMessages: CoreMessage[] = [
-    { role: 'user', content: 'Test message' } as CoreUserMessage,
+  const mockMessages: ModelMessage[] = [
+    { role: 'user', content: 'Test message' } as UserModelMessage,
   ];
 
   beforeEach(() => {
@@ -85,12 +85,9 @@ describe('getMCPToolsContext', () => {
 
   it('should handle tools with no descriptions', async () => {
     const mockTools: ToolSet = {
-      tool1: {
-        parameters: {},
-      },
+      tool1: {},
       tool2: {
         description: 'Tool 2 description',
-        parameters: {},
       },
     };
 

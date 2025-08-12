@@ -11,7 +11,7 @@ import {
   openOpsId,
   PrincipalType,
 } from '@openops/shared';
-import { CoreMessage } from 'ai';
+import { ModelMessage } from 'ai';
 import { FastifyReply } from 'fastify';
 import { StatusCodes } from 'http-status-codes';
 import {
@@ -121,26 +121,22 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
   );
 
   app.post('/', NewMessageOptions, async (request, reply) => {
-    try {
-      const messageContent = await getUserMessage(request.body, reply);
-      if (messageContent === null) {
-        return; // Error response already sent
-      }
-
-      const newMessage: CoreMessage = {
-        role: 'user',
-        content: messageContent,
-      };
-
-      await routeChatRequest({
-        app,
-        request,
-        newMessage,
-        serverResponse: reply.raw,
-      });
-    } catch (error) {
-      return handleError(error, reply, 'conversation');
+    const messageContent = await getUserMessage(request.body, reply);
+    if (messageContent === null) {
+      return; // Error response already sent
     }
+
+    const newMessage: ModelMessage = {
+      role: 'user',
+      content: messageContent,
+    };
+
+    await routeChatRequest({
+      app,
+      request,
+      newMessage,
+      reply,
+    });
   });
 
   app.post('/chat-name', ChatNameOptions, async (request, reply) => {
@@ -201,7 +197,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         aiConfig,
         systemPrompt: prompt,
         onFinish: async (result) => {
-          const assistantMessage: CoreMessage = {
+          const assistantMessage: ModelMessage = {
             role: 'assistant',
             content: JSON.stringify(result.object),
           };
@@ -359,9 +355,9 @@ async function getUserMessage(
 
     const lastMessage = body.messages[body.messages.length - 1];
     if (
-      !lastMessage.content ||
-      !Array.isArray(lastMessage.content) ||
-      lastMessage.content.length === 0
+      !lastMessage.parts ||
+      !Array.isArray(lastMessage.parts) ||
+      lastMessage.parts.length === 0
     ) {
       await reply.code(400).send({
         message:
@@ -370,7 +366,7 @@ async function getUserMessage(
       return null;
     }
 
-    const firstContentElement = lastMessage.content[0];
+    const firstContentElement = lastMessage.parts[0];
     if (
       !firstContentElement ||
       typeof firstContentElement !== 'object' ||
