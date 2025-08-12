@@ -75,7 +75,8 @@ export const ActionBase = Type.Object({
   riskLevel: Type.Optional(Type.Enum(RiskLevel)),
   props: BlockPropertyMap,
   requireAuth: Type.Boolean({
-    description: '',
+    description:
+      'True if the action requires authentication. Defaults to false.',
   }),
   errorHandlingOptions: Type.Optional(ErrorHandlingOptionsParam),
 });
