@@ -3,6 +3,7 @@ import {
   Type,
 } from '@fastify/type-provider-typebox';
 import { TriggerStrategy } from '@openops/blocks-framework';
+import { logger } from '@openops/server-shared';
 import {
   ApplicationError,
   CountFlowsRequest,
@@ -290,6 +291,9 @@ async function validateTriggerType(
   const blockTrigger = flow.version.trigger;
 
   if (blockTrigger.type !== TriggerType.BLOCK) {
+    logger.warn(
+      `Blocktype is not of type ${TriggerType.BLOCK}. This should never happen. `,
+    );
     return {
       success: false,
       message: `Trigger type is not a block: type: ${blockTrigger.type}`,
