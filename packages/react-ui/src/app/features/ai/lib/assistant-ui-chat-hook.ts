@@ -11,6 +11,7 @@ import { DefaultChatTransport, UIMessage } from 'ai';
 import { t } from 'i18next';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { aiChatApi } from '../../builder/ai-chat/lib/chat-api';
+import { createErrorToast } from './ai-error-parser';
 import { aiSettingsHooks } from './ai-settings-hooks';
 import { createAdditionalContext } from './enrich-context';
 
@@ -151,6 +152,11 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
         messages: messagesRef.current,
       }),
     }),
+    onError: (error) => {
+      console.error('chat error', JSON.stringify(error));
+      const errorToast = createErrorToast(error);
+      toast(errorToast);
+    },
   });
 
   useEffect(() => {
