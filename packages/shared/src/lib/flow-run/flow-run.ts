@@ -20,6 +20,12 @@ export type FlowRetryPayload = {
   strategy: FlowRetryStrategy;
 };
 
+export enum FlowRunTriggerSource {
+  TRIGGERED = 'TRIGGERED',
+  TEST_RUN = 'TEST_RUN',
+  MANUAL_RUN = 'MANUAL_RUN',
+}
+
 export const FlowRun = Type.Object({
   ...BaseModelSchema,
   projectId: Type.String(),
@@ -32,6 +38,7 @@ export const FlowRun = Type.Object({
   logsFileId: Nullable(Type.String()),
   tasks: Type.Optional(Type.Number()),
   status: Type.Enum(FlowRunStatus),
+  triggerSource: Type.Enum(FlowRunTriggerSource),
   duration: Type.Optional(Type.Number()),
   startTime: Type.String(),
   finishTime: Type.Optional(Type.String()),

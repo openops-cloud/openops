@@ -1,3 +1,5 @@
+import dayjs from 'dayjs';
+
 export interface dateInformation {
   year: number;
   month: number;
@@ -25,6 +27,7 @@ export enum timeFormat {
   format13 = 'DD/MM/YY',
   format14 = 'X',
   format15 = 'YYYY-MM-DDTHH:mm:ss.SSSZ',
+  format16 = 'YYYYMMDD',
 }
 
 export enum timeFormatLabel {
@@ -44,6 +47,7 @@ export enum timeFormatLabel {
   format13 = 'DD/MM/YY (17/09/23)',
   format14 = 'X (1694949838)',
   format15 = 'YYYY-MM-DDTHH:mm:ss.SSSZ (2023-09-17T11:23:58.000Z)',
+  format16 = 'YYYYMMDD (20230917)',
 }
 
 export enum timeParts {
@@ -88,6 +92,7 @@ export const optionalTimeFormats = [
   { label: timeFormatLabel.format11, value: timeFormat.format11 },
   { label: timeFormatLabel.format12, value: timeFormat.format12 },
   { label: timeFormatLabel.format13, value: timeFormat.format13 },
+  { label: timeFormatLabel.format16, value: timeFormat.format16 },
   { label: timeFormatLabel.format14, value: timeFormat.format14 },
 ];
 
@@ -415,6 +420,7 @@ export function ChangeDateFormat(
 }
 
 export function addSubtractTime(date: Date, expression: string) {
+  let dayjsDate = dayjs(date);
   // remove all the spaces and line breaks from the expression
   expression = expression.replace(/(\r\n|\n|\r)/gm, '').replace(/ /g, '');
   const parts = expression.split(/(\+|-)/);
@@ -448,38 +454,31 @@ export function addSubtractTime(date: Date, expression: string) {
       units.push(unit);
     }
   }
+
+  const validUnits = new Set([
+    'year',
+    'month',
+    'day',
+    'hour',
+    'minute',
+    'second',
+  ]);
+
   for (let i = 0; i < numbers.length; i++) {
-    const val = units[i].toLowerCase() as timeParts;
-    switch (val) {
-      case timeParts.year:
-        date.setFullYear(date.getFullYear() + numbers[i]);
-        break;
-      case timeParts.month:
-        date.setMonth(date.getMonth() + numbers[i]);
-        break;
-      case timeParts.day:
-        date.setDate(date.getDate() + numbers[i]);
-        break;
-      case timeParts.hour:
-        date.setHours(date.getHours() + numbers[i]);
-        break;
-      case timeParts.minute:
-        date.setMinutes(date.getMinutes() + numbers[i]);
-        break;
-      case timeParts.second:
-        date.setSeconds(date.getSeconds() + numbers[i]);
-        break;
-      case timeParts.dayOfWeek:
-      case timeParts.monthName:
-      case timeParts.unix_time:
-        break;
-      default: {
-        const nvr: never = val;
-        console.error(nvr, 'unhandled case was reached');
+    const value = numbers[i];
+    const unit = units[i].toLowerCase();
+
+    if (validUnits.has(unit)) {
+      const manipulateUnit = unit as dayjs.ManipulateType;
+      if (value > 0) {
+        dayjsDate = dayjsDate.add(value, manipulateUnit);
+      } else if (value < 0) {
+        dayjsDate = dayjsDate.subtract(Math.abs(value), manipulateUnit);
       }
     }
   }
-  return date;
+
+  return dayjsDate.toDate();
 }
 export const timeZoneOptions = [
   {

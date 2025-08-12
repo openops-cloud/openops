@@ -6,13 +6,14 @@ import {
   PropertyType,
 } from '@openops/blocks-framework';
 import {
-  CodeMirrorEditor,
+  CodeEditor,
   FormControl,
   FormField,
   Input,
   Markdown,
   MarkdownCodeVariations,
   Switch,
+  Theme,
   tryParseJson,
 } from '@openops/components/ui';
 import { isNil } from '@openops/shared';
@@ -94,7 +95,7 @@ type selectFormComponentForPropertyParams = {
   markdownVariables: Record<string, string>;
   useMentionTextInput: boolean;
   disabled: boolean;
-  theme?: string;
+  theme: Theme;
 };
 
 const selectFormComponentForProperty = ({
@@ -172,6 +173,7 @@ const selectFormComponentForProperty = ({
           markdown={property.description}
           variables={markdownVariables}
           codeVariation={MarkdownCodeVariations.WithCopyMultiline}
+          theme={theme}
         />
       );
     case PropertyType.STATIC_DROPDOWN:
@@ -217,14 +219,16 @@ const selectFormComponentForProperty = ({
               disabled={disabled}
             ></BuilderJsonEditorWrapper>
           ) : (
-            <CodeMirrorEditor
-              value={field.value}
-              readonly={disabled}
-              theme={theme}
-              onChange={(value) => {
-                field.onChange(tryParseJson(value));
-              }}
-            ></CodeMirrorEditor>
+            <div className="h-48">
+              <CodeEditor
+                value={field.value}
+                readonly={disabled}
+                theme={theme}
+                onChange={(value) => {
+                  field.onChange(tryParseJson(value));
+                }}
+              ></CodeEditor>
+            </div>
           )}
         </AutoFormFieldWrapper>
       );

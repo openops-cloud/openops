@@ -124,6 +124,14 @@ export const createBuilderStore = (initialState: BuilderInitialState) =>
         selectStepByName: (stepName: string, openRightSideBar = true) => {
           set(
             (state) => {
+              const triggerMidpanelState = {
+                showDataSelector: state.midpanelState.showDataSelector,
+                dataSelectorSize: state.midpanelState.dataSelectorSize,
+                aiContainerSize: state.midpanelState.aiContainerSize,
+                showAiChat: false,
+                aiChatProperty: undefined,
+              };
+
               if (
                 stepName === 'trigger' &&
                 state.flowVersion.trigger.type === TriggerType.EMPTY
@@ -132,6 +140,7 @@ export const createBuilderStore = (initialState: BuilderInitialState) =>
                   selectedStep: stepName,
                   rightSidebar: RightSideBarType.NONE,
                   leftSidebar: getLeftSidebarOnSelectStep(state),
+                  midpanelState: triggerMidpanelState,
                 };
               } else if (
                 stepName === 'trigger' &&
@@ -141,6 +150,7 @@ export const createBuilderStore = (initialState: BuilderInitialState) =>
                   selectedStep: stepName,
                   rightSidebar: RightSideBarType.BLOCK_SETTINGS,
                   leftSidebar: getLeftSidebarOnSelectStep(state),
+                  midpanelState: triggerMidpanelState,
                 };
               }
 
@@ -220,7 +230,6 @@ export const createBuilderStore = (initialState: BuilderInitialState) =>
                 run,
                 flowVersion,
                 leftSidebar: LeftSideBarType.RUN_DETAILS,
-                rightSidebar: RightSideBarType.BLOCK_SETTINGS,
                 selectedStep: run.steps
                   ? flowRunUtils.findFailedStep(run)?.stepName ??
                     state.selectedStep ??

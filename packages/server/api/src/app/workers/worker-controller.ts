@@ -15,6 +15,7 @@ import {
 } from '@openops/server-shared';
 import {
   ExecutionType,
+  FlowRunTriggerSource,
   openOpsId,
   PrincipalType,
   ProgressUpdateType,
@@ -162,6 +163,7 @@ export const flowWorkerController: FastifyPluginAsyncTypebox = async (app) => {
           executionCorrelationId,
           executionType: ExecutionType.BEGIN,
           progressUpdateType,
+          triggerSource: FlowRunTriggerSource.TRIGGERED,
         }),
       );
       return Promise.all(createFlowRuns);
@@ -194,6 +196,7 @@ export const flowWorkerController: FastifyPluginAsyncTypebox = async (app) => {
         executionCorrelationId: data.executionCorrelationId,
         environment: RunEnvironment.PRODUCTION,
         progressUpdateType: data.progressUpdateType ?? ProgressUpdateType.NONE,
+        triggerSource: FlowRunTriggerSource.TRIGGERED,
       });
     },
   );

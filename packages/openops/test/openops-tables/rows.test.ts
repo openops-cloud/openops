@@ -4,12 +4,28 @@ const makeOpenOpsTablesPostMock = jest.fn();
 const makeOpenOpsTablesDeleteMock = jest.fn();
 const createAxiosHeadersMock = jest.fn();
 
+const actualRequestsHelpers = jest.requireActual(
+  '../../src/lib/openops-tables/requests-helpers',
+);
+
 jest.mock('../../src/lib/openops-tables/requests-helpers', () => ({
+  ...actualRequestsHelpers,
   makeOpenOpsTablesGet: makeOpenOpsTablesGetMock,
   makeOpenOpsTablesPatch: makeOpenOpsTablesPatchMock,
   makeOpenOpsTablesPost: makeOpenOpsTablesPostMock,
   makeOpenOpsTablesDelete: makeOpenOpsTablesDeleteMock,
   createAxiosHeaders: createAxiosHeadersMock,
+}));
+
+jest.mock('@openops/server-shared', () => ({
+  ...jest.requireActual('@openops/server-shared'),
+  logger: {
+    ...jest.requireActual('@openops/server-shared').logger,
+    debug: jest.fn(),
+    warn: jest.fn(),
+    info: jest.fn(),
+    error: jest.fn(),
+  },
 }));
 
 const acquireMock = jest.fn(async () => [null, releaseMock]);
@@ -24,10 +40,14 @@ jest.mock('async-mutex', () => {
   };
 });
 
+import { logger } from '@openops/server-shared';
+import { AxiosError } from 'axios';
+import { StatusCodes } from 'http-status-codes';
 import {
   FilterType,
   ViewFilterTypesEnum,
 } from '../../src/lib/openops-tables/filters';
+import { axiosTablesRetryConfig } from '../../src/lib/openops-tables/requests-helpers';
 import {
   addRow,
   deleteRow,
@@ -36,6 +56,12 @@ import {
   OpenOpsRow,
   updateRow,
 } from '../../src/lib/openops-tables/rows';
+
+const expectRetryConfig = expect.objectContaining({
+  retries: 3,
+  retryDelay: expect.any(Function),
+  retryCondition: expect.any(Function),
+});
 
 describe('getRows', () => {
   beforeEach(() => {
@@ -364,4 +390,105 @@ describe('getRowByPrimaryKeyValue', () => {
       expect(createAxiosHeadersMock).toHaveBeenCalledWith('token');
     },
   );
+});
+
+describe('axiosTablesRetryConfig', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test('Should have correct retry configuration', () => {
+    expect(axiosTablesRetryConfig.retries).toBe(3);
+    expect(typeof axiosTablesRetryConfig.retryDelay).toBe('function');
+    expect(typeof axiosTablesRetryConfig.retryCondition).toBe('function');
+  });
+
+  for (const { code, description } of [
+    { code: StatusCodes.BAD_GATEWAY, description: 'Bad Gateway' },
+    { code: StatusCodes.CONFLICT, description: 'Conflict' },
+  ]) {
+    test(`Should retry on status ${description}`, () => {
+      const retryCondition = axiosTablesRetryConfig.retryCondition!;
+      const mockAxiosError = {
+        response: { status: code },
+      } as AxiosError;
+
+      expect(retryCondition(mockAxiosError)).toBe(true);
+    });
+  }
+
+  test('Should not retry on other status codes', () => {
+    const retryCondition = axiosTablesRetryConfig.retryCondition!;
+    const mockAxiosError = {
+      response: { status: StatusCodes.INTERNAL_SERVER_ERROR },
+    } as AxiosError;
+
+    expect(retryCondition(mockAxiosError)).toBe(false);
+  });
+
+  test('Should not retry when no response status', () => {
+    const retryCondition = axiosTablesRetryConfig.retryCondition!;
+    const mockAxiosError = {
+      response: undefined,
+    } as AxiosError;
+
+    expect(retryCondition(mockAxiosError)).toBe(false);
+  });
+
+  test('Should log debug message with correct status text when retryDelay is called', () => {
+    const retryDelay = axiosTablesRetryConfig.retryDelay!;
+    const mockAxiosError = {
+      response: { status: StatusCodes.BAD_GATEWAY },
+    } as AxiosError;
+    const retryCount = 2;
+
+    retryDelay(retryCount, mockAxiosError);
+
+    expect(logger.debug).toHaveBeenCalledWith(
+      'The request failed with status 502 Bad Gateway. Request count: 2',
+    );
+  });
+
+  test('Should log debug message with unknown status when no response status', () => {
+    const retryDelay = axiosTablesRetryConfig.retryDelay!;
+    const mockAxiosError = {
+      response: undefined,
+    } as AxiosError;
+    const retryCount = 1;
+
+    retryDelay(retryCount, mockAxiosError);
+
+    expect(logger.debug).toHaveBeenCalledWith(
+      'The request failed with status unknown status. Request count: 1',
+    );
+  });
+
+  test('Should log debug message with correct status text for different status codes', () => {
+    const retryDelay = axiosTablesRetryConfig.retryDelay!;
+    const testCases = [
+      { status: StatusCodes.CONFLICT, expected: '409 Conflict' },
+      { status: StatusCodes.NOT_FOUND, expected: '404 Not Found' },
+      {
+        status: StatusCodes.INTERNAL_SERVER_ERROR,
+        expected: '500 Internal Server Error',
+      },
+    ];
+
+    testCases.forEach(({ status, expected }) => {
+      const mockAxiosError = {
+        response: { status },
+      } as AxiosError;
+      const retryCount = 1;
+
+      retryDelay(retryCount, mockAxiosError);
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        `The request failed with status ${expected}. Request count: 1`,
+      );
+    });
+  });
 });

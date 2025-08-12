@@ -2,7 +2,7 @@ import { action } from '@storybook/addon-actions';
 import { expect } from '@storybook/jest';
 import type { Meta, StoryObj } from '@storybook/react';
 import { fn } from '@storybook/test';
-import { fireEvent } from '@storybook/testing-library';
+import { fireEvent, waitFor } from '@storybook/testing-library';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Markdown, MarkdownCodeVariations } from '../components';
 import { selectLightOrDarkCanvas } from '../test-utils/select-themed-canvas.util';
@@ -216,19 +216,20 @@ aws ec2 describe-instances
 `,
   },
   play: async ({ canvasElement, args }) => {
-    const textarea =
-      selectLightOrDarkCanvas(canvasElement).getByRole('textbox');
+    const canvas = selectLightOrDarkCanvas(canvasElement);
+    const monacoTextarea = await canvas.findByRole('textbox');
 
-    expect(textarea).toHaveTextContent('aws ec2 describe-instances');
-    expect(textarea).toHaveAttribute('contenteditable', 'false');
-    expect(textarea).toHaveClass('bg-input');
+    expect(monacoTextarea).toBeInTheDocument();
+    expect(monacoTextarea).toHaveClass('inputarea', 'monaco-mouse-cursor-text');
+
+    await waitFor(() => {
+      const viewLines = canvas.getByText('aws ec2 describe-instances');
+      expect(viewLines).toBeInTheDocument();
+    });
 
     expect(args.handleInject).not.toHaveBeenCalled();
 
-    const injectButton = selectLightOrDarkCanvas(canvasElement).getByRole(
-      'button',
-      { name: 'Inject command' },
-    );
+    const injectButton = canvas.getByRole('button', { name: 'Inject command' });
 
     fireEvent.click(injectButton);
 
@@ -249,14 +250,23 @@ aws s3 sync\n  --exclude "*"\n  --include "*.jpg"\n  <local-dir> s3://<bucket-na
 `,
   },
   play: async ({ canvasElement }) => {
-    const textarea =
-      selectLightOrDarkCanvas(canvasElement).getByRole('textbox');
+    const canvas = selectLightOrDarkCanvas(canvasElement);
+    const monacoTextarea = await canvas.findByRole('textbox');
 
-    expect(textarea).toHaveTextContent(
-      'aws s3 sync --exclude "*" --include "*.jpg" <local-dir> s3://<bucket-name>',
-    );
-    expect(textarea).toHaveAttribute('contenteditable', 'false');
-    expect(textarea).toHaveClass('bg-input');
+    expect(monacoTextarea).toBeInTheDocument();
+    expect(monacoTextarea).toHaveClass('inputarea', 'monaco-mouse-cursor-text');
+
+    await waitFor(() => {
+      expect(canvas.getByText(/aws s3 sync/i)).toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      expect(canvas.getByText(/--exclude/)).toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      expect(canvas.getByText(/--include/)).toBeInTheDocument();
+    });
   },
 };
 

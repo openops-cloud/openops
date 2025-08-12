@@ -62,4 +62,29 @@ export const storeEntryService = {
       key,
     });
   },
+
+  async list({
+    projectId,
+    prefix,
+    filterRegex,
+  }: {
+    projectId: ProjectId;
+    prefix: string;
+    filterRegex?: string;
+  }): Promise<Array<{ key: string; value: unknown }>> {
+    const query = storeEntryRepo()
+      .createQueryBuilder('storeEntry')
+      .where('storeEntry.projectId = :projectId', { projectId });
+
+    const escapedPrefix = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    query.andWhere('storeEntry.key LIKE :prefix', { prefix: `${prefix}%` });
+
+    if (filterRegex) {
+      const keyExpression = `REGEXP_REPLACE(REGEXP_REPLACE(storeEntry.key, '^${escapedPrefix}', '', 'g'), '^run_[^/]+/', '', 'g')`;
+      query.andWhere(`${keyExpression} ~ :filterRegex`, { filterRegex });
+    }
+
+    const entries = await query.getMany();
+    return entries.map(({ key, value }) => ({ key, value }));
+  },
 };

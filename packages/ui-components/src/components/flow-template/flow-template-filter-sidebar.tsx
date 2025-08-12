@@ -1,3 +1,4 @@
+import { BlockMetadataModelSummary } from '@openops/blocks-framework';
 import { t } from 'i18next';
 import { ChevronRight } from 'lucide-react';
 import { cn } from '../../lib/cn';
@@ -17,6 +18,7 @@ type FlowTemplateFilterItemProps = {
   displayName: string;
   onClick: (id: string) => void;
   isActive: boolean;
+  logoUrl?: string;
 };
 
 const FlowTemplateFilterItem = ({
@@ -24,12 +26,13 @@ const FlowTemplateFilterItem = ({
   displayName,
   isActive,
   onClick,
+  logoUrl,
 }: FlowTemplateFilterItemProps) => (
   <div
     aria-selected={isActive}
     role="option"
     className={cn(
-      'w-full px-3 py-3 justify-start items-start gap-2.5 inline-flex overflow-hidden cursor-pointer hover:bg-muted',
+      'w-full px-3 py-[10px] justify-start gap-2.5 inline-flex items-center overflow-hidden cursor-pointer hover:bg-muted',
       {
         'bg-muted': isActive,
       },
@@ -37,6 +40,7 @@ const FlowTemplateFilterItem = ({
     onClick={() => onClick(value)}
   >
     <TooltipProvider>
+      {logoUrl && <img src={logoUrl} alt={displayName} className="w-6 h-6" />}
       <OverflowTooltip
         text={displayName}
         className="w-full font-normal text-slate-600 dark:text-primary text-base leading-snug truncate select-none"
@@ -54,7 +58,7 @@ const FlowTemplateFilterHeader = ({
   title: string;
   className?: string;
 }) => (
-  <div className="h-16 px-3 py-3 justify-start items-end gap-2.5 inline-flex overflow-hidden">
+  <div className="px-3 py-[10px] justify-start items-end gap-2.5 inline-flex overflow-hidden">
     <span
       className={cn(
         'text-slate-600 dark:text-primary text-base font-bold leading-snug truncate',
@@ -71,9 +75,12 @@ FlowTemplateFilterHeader.displayName = 'FlowTemplateFilterHeader';
 type FlowTemplateFilterSidebarProps = {
   domains: string[];
   categories: TemplateSidebarCategory[];
+  blocks?: BlockMetadataModelSummary[];
+  selectedBlocks: string[];
   selectedDomains: string[];
   selectedServices: string[];
   selectedCategories: string[];
+  onBlockFilterClick: (block: string) => void;
   onDomainFilterClick: (domain: string) => void;
   onServiceFilterClick: (service: string) => void;
   onCategoryFilterClick: (category: string) => void;
@@ -81,40 +88,32 @@ type FlowTemplateFilterSidebarProps = {
 };
 
 const FlowTemplateFilterSidebar = ({
+  blocks,
   domains,
   categories,
+  selectedBlocks,
   selectedDomains,
   selectedServices,
   selectedCategories,
   onDomainFilterClick,
   onServiceFilterClick,
+  onBlockFilterClick,
   onCategoryFilterClick,
   clearFilters,
 }: FlowTemplateFilterSidebarProps) => {
   return (
     <div className="rounded-2xl flex-col justify-start items-start inline-flex h-full w-full px-4 pt-[25px] pb-8 bg-background">
-      <FlowTemplateFilterItem
-        value={''}
-        displayName={t('All Templates')}
-        onClick={clearFilters}
-        isActive={selectedDomains.length === 0 && selectedServices.length === 0}
-      />
-      <FlowTemplateFilterHeader title={t('FinOps capabilities')} />
-      <ScrollArea className="max-h-[40%] w-full">
-        <div className="flex flex-col w-full">
-          {domains.map((domain) => (
-            <FlowTemplateFilterItem
-              key={domain}
-              value={domain}
-              displayName={domain}
-              onClick={onDomainFilterClick}
-              isActive={selectedDomains.includes(domain)}
-            />
-          ))}
-        </div>
-      </ScrollArea>
-      <FlowTemplateFilterHeader title={t('Cloud providers')} />
-      <ScrollArea className="max-h-[50%] w-full">
+      <ScrollArea className="h-full w-full flex-1">
+        <FlowTemplateFilterItem
+          value={''}
+          displayName={t('All Templates')}
+          onClick={clearFilters}
+          isActive={
+            selectedDomains.length === 0 && selectedServices.length === 0
+          }
+        />
+
+        <FlowTemplateFilterHeader title={t('Cloud providers')} />
         <div className="flex flex-col w-full">
           {categories?.map((category) => (
             <Collapsible
@@ -125,14 +124,14 @@ const FlowTemplateFilterSidebar = ({
             >
               <CollapsibleTrigger
                 className={cn(
-                  'flex items-center cursor-pointer px-3 py-2 hover:bg-muted rounded w-full',
+                  'flex items-center cursor-pointer px-3 py-2 hover:bg-muted rounded w-full group',
                   {
                     'bg-muted': selectedCategories.includes(category.name),
                   },
                 )}
               >
                 <ChevronRight
-                  className="size-4 flex-shrink-0 mr-2 transition-transform data-[state=open]:rotate-90 dark:text-primary"
+                  className="size-4 flex-shrink-0 mr-2 transition-transform group-data-[state=open]:rotate-90 dark:text-primary"
                   aria-hidden="true"
                 />
                 <span className="font-normal text-slate-600 dark:text-primary text-base">
@@ -153,6 +152,37 @@ const FlowTemplateFilterSidebar = ({
                 </div>
               </CollapsibleContent>
             </Collapsible>
+          ))}
+        </div>
+
+        {blocks && blocks.length > 0 && (
+          <>
+            <FlowTemplateFilterHeader title={t('FinOps platforms')} />
+            <div className="flex flex-col w-full">
+              {blocks.map((block) => (
+                <FlowTemplateFilterItem
+                  key={block.name}
+                  value={block.name}
+                  displayName={block.displayName}
+                  onClick={onBlockFilterClick}
+                  isActive={selectedBlocks.includes(block.name)}
+                  logoUrl={block.logoUrl}
+                />
+              ))}
+            </div>
+          </>
+        )}
+
+        <FlowTemplateFilterHeader title={t('FinOps capabilities')} />
+        <div className="flex flex-col w-full">
+          {domains.map((domain) => (
+            <FlowTemplateFilterItem
+              key={domain}
+              value={domain}
+              displayName={domain}
+              onClick={onDomainFilterClick}
+              isActive={selectedDomains.includes(domain)}
+            />
           ))}
         </div>
       </ScrollArea>

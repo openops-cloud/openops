@@ -95,7 +95,12 @@ describe('dataSelectorUtils', () => {
     it('returns test node if stepsTestOutput for step.id is missing', () => {
       const step = mockStep();
       const result = dataSelectorUtils.getAllStepsMentions([step], {
-        otherStep: { output: {}, lastTestDate: '2024-01-01' },
+        otherStep: {
+          input: {},
+          output: {},
+          lastTestDate: '2024-01-01',
+          success: null,
+        },
       });
       expect(result[0].children?.[0].data.isTestStepNode).toBe(true);
     });
@@ -108,7 +113,12 @@ describe('dataSelectorUtils', () => {
       (_desc, lastTestDate) => {
         const step = mockStep();
         const result = dataSelectorUtils.getAllStepsMentions([step], {
-          step1: { output: {}, lastTestDate: lastTestDate as any },
+          step1: {
+            input: {},
+            output: {},
+            lastTestDate: lastTestDate as any,
+            success: null,
+          },
         });
         expect(result[0].children?.[0].data.isTestStepNode).toBe(true);
       },
@@ -118,9 +128,10 @@ describe('dataSelectorUtils', () => {
       const step = mockStep();
       const output = { foo: 'bar' };
       const result = dataSelectorUtils.getAllStepsMentions([step], {
-        step1: { output, lastTestDate: '2024-01-01' },
+        step1: { input: {}, output, lastTestDate: '2024-01-01', success: true },
       });
       expect(result[0].data.displayName).toBe('1. Step 1');
+      expect(result[0].data.success).toBe(true);
       expect(result[0].children?.[0].data.displayName).toBe('foo');
       expect(result[0].children?.[0].data.value).toBe('bar');
     });
@@ -130,14 +141,26 @@ describe('dataSelectorUtils', () => {
       const output1 = { foo: 'bar' };
       const output2 = { baz: 'qux' };
       const stepsTestOutput = {
-        step1: { output: output1, lastTestDate: '2024-01-01' },
-        step2: { output: output2, lastTestDate: '2024-01-01' },
+        step1: {
+          input: {},
+          output: output1,
+          lastTestDate: '2024-01-01',
+          success: true,
+        },
+        step2: {
+          input: {},
+          output: output2,
+          lastTestDate: '2024-01-01',
+          success: false,
+        },
       };
       const result = dataSelectorUtils.getAllStepsMentions(
         steps,
         stepsTestOutput,
       );
       expect(result.length).toBe(2);
+      expect(result[0].data.success).toBe(true);
+      expect(result[1].data.success).toBe(false);
       expect(result[0].children?.[0].data.value).toBe('bar');
       expect(result[1].children?.[0].data.value).toBe('qux');
     });
@@ -155,8 +178,18 @@ describe('dataSelectorUtils', () => {
       });
       const steps = [stepNeedingTest, stepWithOutput];
       const stepsTestOutput = {
-        step1: { output: undefined, lastTestDate: undefined as any },
-        step2: { output: { foo: 'bar' }, lastTestDate: '2024-01-01' },
+        step1: {
+          input: {},
+          output: undefined,
+          lastTestDate: undefined as any,
+          success: null,
+        },
+        step2: {
+          input: {},
+          output: { foo: 'bar' },
+          lastTestDate: '2024-01-01',
+          success: true,
+        },
       };
       const result = dataSelectorUtils.getAllStepsMentions(
         steps,
@@ -164,8 +197,10 @@ describe('dataSelectorUtils', () => {
       );
       expect(result[0].children?.[0].data.isTestStepNode).toBe(true);
       expect(result[1].data.displayName).toBe('2. Step 2');
+      expect(result[1].data.success).toBe(true);
       expect(result[1].children?.[0].data.displayName).toBe('foo');
       expect(result[1].children?.[0].data.value).toBe('bar');
+      expect(result[1].children?.[0].data.success).toBe(null);
     });
   });
 
@@ -222,6 +257,7 @@ describe('dataSelectorUtils', () => {
       expect(node.key).toBe('actionStep');
       expect(node.data.displayName).toBe(displayName);
       expect(node.data.propertyPath).toBe('actionStep');
+      expect(node.data.success).toBe(true);
       expect(node.children).toHaveLength(1);
       expect(node.children?.[0].key).toBe("actionStep['foo']");
       expect(node.children?.[0].data.propertyPath).toBe("actionStep['foo']");
@@ -326,6 +362,7 @@ describe('dataSelectorUtils', () => {
             propertyPath: 'path1',
             displayName: 'Node 1',
             value: 'value1',
+            success: true,
           },
         },
         {
@@ -334,6 +371,7 @@ describe('dataSelectorUtils', () => {
             propertyPath: 'path2',
             displayName: 'Node 2',
             value: 'value2',
+            success: false,
           },
         },
       ];
@@ -352,6 +390,7 @@ describe('dataSelectorUtils', () => {
               propertyPath: 'path1',
               displayName: 'Node 1',
               value: 'value1',
+              success: true,
             },
           },
           {
@@ -360,6 +399,7 @@ describe('dataSelectorUtils', () => {
               propertyPath: 'path2',
               displayName: 'Different Name',
               value: 'value2',
+              success: false,
             },
           },
         ],
@@ -375,6 +415,7 @@ describe('dataSelectorUtils', () => {
               propertyPath: 'path1',
               displayName: 'Node 1',
               value: 'some value',
+              success: true,
             },
           },
           {
@@ -383,6 +424,7 @@ describe('dataSelectorUtils', () => {
               propertyPath: 'path2',
               displayName: 'Node 2',
               value: 'other content',
+              success: false,
             },
           },
         ],
@@ -402,6 +444,7 @@ describe('dataSelectorUtils', () => {
             propertyPath: 'parent',
             displayName: 'Parent',
             value: 'parent value',
+            success: true,
           },
           children: [
             {
@@ -410,6 +453,7 @@ describe('dataSelectorUtils', () => {
                 propertyPath: 'child',
                 displayName: 'Child',
                 value: 'match this',
+                success: null,
               },
             },
           ],
@@ -420,6 +464,7 @@ describe('dataSelectorUtils', () => {
             propertyPath: 'parent2',
             displayName: 'Parent 2',
             value: 'parent value 2',
+            success: false,
           },
           children: [
             {
@@ -428,6 +473,7 @@ describe('dataSelectorUtils', () => {
                 propertyPath: 'child2',
                 displayName: 'Child 2',
                 value: 'different value',
+                success: null,
               },
             },
           ],
@@ -449,6 +495,7 @@ describe('dataSelectorUtils', () => {
             propertyPath: 'path1',
             displayName: 'Node 1',
             value: 'value1',
+            success: true,
           },
           children: [
             {
@@ -458,6 +505,7 @@ describe('dataSelectorUtils', () => {
                 displayName: 'Node 1',
                 isTestStepNode: true,
                 value: 'match this',
+                success: null,
               },
             },
           ],

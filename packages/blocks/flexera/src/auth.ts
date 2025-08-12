@@ -4,10 +4,10 @@ const markdown = `
 Authenticate with your Flexera API Token to access Flexera services.
 `;
 
-export const flexeraAuth = BlockAuth.SecretAuth({
+export const flexeraSpotAuth = BlockAuth.SecretAuth({
   authProviderKey: 'Flexera',
-  authProviderDisplayName: 'Flexera',
-  authProviderLogoUrl: `https://static.openops.com/blocks/flexera.png`,
+  authProviderDisplayName: 'Flexera Spot',
+  authProviderLogoUrl: `https://static.openops.com/blocks/flexera-spot.png`,
   description: markdown,
   displayName: 'API Key',
   required: true,

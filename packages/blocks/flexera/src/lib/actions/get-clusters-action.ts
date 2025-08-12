@@ -1,9 +1,9 @@
 import { httpClient, HttpMethod } from '@openops/blocks-common';
 import { createAction, Property } from '@openops/blocks-framework';
-import { flexeraAuth } from '../../auth';
+import { flexeraSpotAuth } from '../../auth';
 
 export const getClustersAction = createAction({
-  auth: flexeraAuth,
+  auth: flexeraSpotAuth,
   name: 'flexera_get_clusters',
   description: 'Get Clusters',
   displayName: 'Get Clusters',

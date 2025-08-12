@@ -3,6 +3,7 @@ import { action } from '@storybook/addon-actions';
 import { useArgs, useRef } from '@storybook/preview-api';
 import type { Meta, StoryObj } from '@storybook/react';
 import { fn } from '@storybook/test';
+import { ThemeAwareContainer } from '../../../.storybook/decorators';
 import {
   AI_CHAT_CONTAINER_SIZES,
   AiCliChatContainerSizeState,
@@ -160,7 +161,8 @@ export const Populated: Story = {
           lastAssistantMessageRef={lastAssistantMessageRef}
           messages={sampleAIChatMessages}
         >
-          <AIChatMessages
+          <ThemeAwareContainer
+            component={AIChatMessages}
             messages={sampleAIChatMessages}
             onInject={action('Inject command')}
             codeVariation={MarkdownCodeVariations.WithCopyAndInject}

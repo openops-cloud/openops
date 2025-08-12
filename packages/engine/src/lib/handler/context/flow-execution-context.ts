@@ -15,7 +15,7 @@ import {
   StopResponse,
 } from '@openops/shared';
 import { nanoid } from 'nanoid';
-import { loggingUtils } from '../../helper/logging-utils';
+import { validateExecutionSize } from '../../helper/size-validation';
 import { StepExecutionPath } from './step-execution-path';
 
 export enum ExecutionVerdict {
@@ -158,18 +158,50 @@ export class FlowExecutorContext {
     const targetMap = getStateAtPath({ currentPath: this.currentPath, steps });
     targetMap[stepName] = stepOutput;
 
+    const sizeValidation = validateExecutionSize(steps);
+    if (!sizeValidation.isValid) {
+      return this.createSizeValidationFailureContext(
+        stepName,
+        stepOutput,
+        steps,
+        targetMap,
+        sizeValidation.errorMessage,
+      );
+    }
+
     const error =
       stepOutput.status === StepOutputStatus.FAILED
-        ? {
-            stepName,
-            message: stepOutput.errorMessage,
-          }
+        ? { stepName, message: stepOutput.errorMessage }
         : this.error;
 
     return new FlowExecutorContext({
       ...this,
       tasks: this.tasks,
       ...spreadIfDefined('error', error),
+      steps,
+    });
+  }
+
+  private createSizeValidationFailureContext(
+    stepName: string,
+    stepOutput: StepOutput,
+    steps: Record<string, StepOutput>,
+    targetMap: Record<string, StepOutput>,
+    errorMessage: string,
+  ): FlowExecutorContext {
+    const failedStepOutput = stepOutput
+      .setStatus(StepOutputStatus.FAILED)
+      .setErrorMessage(errorMessage);
+
+    failedStepOutput.output = undefined;
+    targetMap[stepName] = failedStepOutput;
+
+    return new FlowExecutorContext({
+      ...this,
+      tasks: this.tasks,
+      verdict: ExecutionVerdict.FAILED,
+      verdictResponse: undefined,
+      error: { stepName, message: errorMessage },
       steps,
     });
   }
@@ -244,7 +276,7 @@ export class FlowExecutorContext {
       duration: this.duration,
       tasks: this.tasks,
       tags: [...this.tags],
-      steps: await loggingUtils.trimExecution(this.steps),
+      steps: this.steps,
     };
     switch (this.verdict) {
       case ExecutionVerdict.FAILED: {

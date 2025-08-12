@@ -86,6 +86,7 @@ export const Property = {
       ...request,
       valueSchema: undefined,
       type: PropertyType.CHECKBOX,
+      defaultValidators: [Validators.boolean],
     } as unknown as R extends true
       ? CheckboxProperty<true>
       : CheckboxProperty<false>;

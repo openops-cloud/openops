@@ -13,7 +13,7 @@ export async function sendJiraRequest(
   request: HttpRequest & { auth: JiraAuth },
 ) {
   try {
-    return await httpClient.sendRequest({
+    const response: any = await httpClient.sendRequest({
       ...request,
       url: `${request.auth.instanceUrl}/rest/api/3/${request.url}`,
       authentication: {
@@ -22,6 +22,12 @@ export async function sendJiraRequest(
         password: request.auth.apiToken,
       },
     });
+
+    if (response?.body?.key) {
+      response.body.htmlUrl = `${request.auth.instanceUrl}/browse/${response.body.key}`;
+    }
+
+    return response;
   } catch (e) {
     if (e instanceof HttpError) {
       const errorBody = e.response?.body ?? {};
@@ -67,14 +73,52 @@ export async function searchUserByCriteria(
   return response.body.length === 0 ? [] : (response.body as JiraUser[]);
 }
 
-export async function getProjects(auth: JiraAuth): Promise<JiraProject[]> {
-  const response = await sendJiraRequest({
-    url: 'project/search',
-    method: HttpMethod.GET,
-    auth: auth,
-  });
+function shouldFetchNextPage(args: {
+  accumulatedCount: number;
+  isLast?: boolean;
+  total?: number;
+  isFullPage: boolean;
+}): boolean {
+  if (typeof args.isLast === 'boolean') {
+    return !args.isLast;
+  }
+  if (typeof args.total === 'number') {
+    return args.accumulatedCount < args.total;
+  }
+  return args.isFullPage;
+}
 
-  return (response.body as any).values as JiraProject[];
+export async function getProjects(auth: JiraAuth): Promise<JiraProject[]> {
+  const projects: JiraProject[] = [];
+  let startAt = 0;
+  const maxResults = 50;
+  let hasMore = false;
+  do {
+    const response = await sendJiraRequest({
+      url: 'project/search',
+      method: HttpMethod.GET,
+      auth: auth,
+      queryParams: {
+        startAt: String(startAt),
+        maxResults: String(maxResults),
+      },
+    });
+
+    const values = (response.body?.values ?? []) as JiraProject[];
+    projects.push(...values);
+
+    startAt = startAt + values.length;
+    const total = response.body?.total;
+    const isLast = response.body?.isLast;
+
+    hasMore = shouldFetchNextPage({
+      accumulatedCount: projects.length,
+      total,
+      isLast,
+      isFullPage: values.length === maxResults,
+    });
+  } while (hasMore);
+  return projects;
 }
 
 export async function getIssueTypes({

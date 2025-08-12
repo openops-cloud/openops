@@ -25,6 +25,10 @@ export const FlowStepTestOutputEntity =
         type: BLOB_COLUMN_TYPE,
         nullable: false,
       },
+      success: {
+        type: Boolean,
+        default: true,
+      },
     },
     indices: [
       {

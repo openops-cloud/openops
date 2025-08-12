@@ -50,9 +50,9 @@ const FlowRunDetails = React.memo(() => {
     ];
   });
 
-  const selectedStepOutput = useMemo(() => {
+  const selectedStepTestData = useMemo(() => {
     return run && selectedStep && run.steps
-      ? flowRunUtils.extractStepOutput(
+      ? flowRunUtils.extractLoopItemStepOutput(
           selectedStep,
           loopsIndexes,
           run.steps,
@@ -122,12 +122,12 @@ const FlowRunDetails = React.memo(() => {
           )}
         </CardList>
       </ResizablePanel>
-      {selectedStepOutput && (
+      {selectedStepTestData && (
         <>
           <ResizableHandle withHandle={true} />
           <ResizablePanel defaultValue={25}>
             <FlowStepInputOutput
-              stepDetails={selectedStepOutput}
+              stepDetails={selectedStepTestData}
             ></FlowStepInputOutput>
           </ResizablePanel>
         </>

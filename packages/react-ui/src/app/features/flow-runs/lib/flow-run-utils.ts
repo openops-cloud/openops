@@ -27,6 +27,7 @@ export const flowRunUtils = {
   findFailedStep,
   findLoopsState,
   extractStepOutput,
+  extractLoopItemStepOutput,
   hasRunFinished,
   getStatusIconForStep(stepOutput: StepOutputStatus): {
     variant: 'default' | 'success' | 'error';
@@ -316,4 +317,36 @@ function extractStepOutput(
     return getLoopChildStepOutput(parents, loopIndexes, stepName, output);
   }
   return undefined;
+}
+
+function extractLoopItemStepOutput(
+  stepName: string,
+  loopIndexes: Record<string, number>,
+  output: Record<string, StepOutput>,
+  trigger: Trigger,
+): StepOutput | null | undefined {
+  const testData = stepName
+    ? extractStepOutput(stepName, loopIndexes, output, trigger)
+    : null;
+
+  if (
+    !testData ||
+    testData.type !== ActionType.LOOP_ON_ITEMS ||
+    !testData.output?.index ||
+    !testData.input
+  ) {
+    return testData;
+  }
+
+  try {
+    return {
+      ...testData,
+      output: {
+        item: (testData.input as { items: any }).items?.[loopIndexes[stepName]],
+        index: loopIndexes[stepName] + 1,
+      },
+    } as StepOutput;
+  } catch {
+    return testData;
+  }
 }

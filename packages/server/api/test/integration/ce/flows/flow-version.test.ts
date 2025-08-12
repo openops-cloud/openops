@@ -337,6 +337,7 @@ describe('POST to update test-output', () => {
         stepId: openOpsId(),
         output: 'expected test output',
         input: {},
+        success: true,
       },
     });
 
@@ -362,6 +363,7 @@ describe('POST to update test-output', () => {
         stepId: openOpsId(),
         output: 'expected test output',
         input: {},
+        success: true,
       },
     });
 

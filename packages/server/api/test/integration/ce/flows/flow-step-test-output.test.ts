@@ -54,6 +54,7 @@ describe('Flow Step Test output', () => {
       flowVersionId: versionId,
       output,
       input,
+      success: true,
     });
 
   it('Should save step test output', async () => {

@@ -28,6 +28,17 @@ const keyExists = async (key: string): Promise<boolean> => {
   return cache.has(key);
 };
 
+const scanKeys = async (pattern: string): Promise<string[]> => {
+  const keys: string[] = [];
+  const regex = new RegExp(pattern.replace(/\*/g, '.*'));
+  for (const key of cache.keys()) {
+    if (regex.test(key)) {
+      keys.push(key);
+    }
+  }
+  return keys;
+};
+
 async function setSerializedObject<T>(
   key: string,
   obj: T,
@@ -58,4 +69,5 @@ export const memoryWrapper = {
   keyExists,
   setSerializedObject,
   getSerializedObject,
+  scanKeys,
 };

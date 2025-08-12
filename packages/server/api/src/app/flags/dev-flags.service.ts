@@ -1,3 +1,4 @@
+import { AppSystemProp, system } from '@openops/server-shared';
 import { Flag, FlagId } from '@openops/shared';
 
 let flags: Flag[];
@@ -19,8 +20,8 @@ async function getAll(): Promise<Flag[]> {
 
   flags = [
     {
-      id: FlagId.CODE_WITH_AI,
-      value: false,
+      id: FlagId.ASSISTANT_UI_ENABLED,
+      value: system.getBoolean(AppSystemProp.ASSISTANT_UI_ENABLED),
       created,
       updated,
     },

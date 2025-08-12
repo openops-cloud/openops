@@ -1,21 +1,21 @@
 import { createCustomApiCallAction } from '@openops/blocks-common';
 import { createBlock, Property } from '@openops/blocks-framework';
 import { BlockCategory } from '@openops/shared';
-import { flexeraAuth } from './auth';
+import { flexeraSpotAuth } from './auth';
 import { getClustersAction } from './lib/actions/get-clusters-action';
 
 export const flexera = createBlock({
-  displayName: 'Flexera',
-  auth: flexeraAuth,
+  displayName: 'Flexera Spot',
+  auth: flexeraSpotAuth,
   minimumSupportedRelease: '0.20.0',
-  logoUrl: 'https://static.openops.com/blocks/flexera.png',
+  logoUrl: 'https://static.openops.com/blocks/flexera-spot.png',
   authors: [],
   categories: [BlockCategory.FINOPS],
   actions: [
     getClustersAction,
     createCustomApiCallAction({
       baseUrl: () => 'https://api.spotinst.io',
-      auth: flexeraAuth,
+      auth: flexeraSpotAuth,
       additionalProps: {
         documentation: Property.MarkDown({
           value:

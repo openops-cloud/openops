@@ -1,13 +1,21 @@
 import { QueryKeys } from '@/app/constants/query-keys';
+import {
+  createAdditionalContext,
+  StepDetails,
+} from '@/app/features/ai/lib/enrich-context';
+import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
 import { authenticationSession } from '@/app/lib/authentication-session';
-import { Message, useChat } from '@ai-sdk/react';
+import { experimental_useObject as useObject } from '@ai-sdk/react';
+import { BlockMetadataModel } from '@openops/blocks-framework';
 import { toast } from '@openops/components/ui';
 import {
-  Action,
   ActionType,
+  CODE_BLOCK_NAME,
   flowHelper,
   FlowVersion,
-  TriggerWithOptionalId,
+  TriggerType,
+  unifiedCodeLLMSchema,
+  UnifiedCodeLLMSchema,
 } from '@openops/shared';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { t } from 'i18next';
@@ -24,10 +32,20 @@ export const useStepSettingsAiChat = (
   const [enableNewChat, setEnableNewChat] = useState(true);
 
   const stepDetails = flowHelper.getStep(flowVersion, selectedStep);
+  const isCodeBlock = getBlockName(stepDetails) === CODE_BLOCK_NAME;
+
+  const { blockModel } = blocksHooks.useBlock({
+    name: getBlockName(stepDetails) || '',
+    version: stepDetails?.settings?.blockVersion,
+    enabled: !!getBlockName(stepDetails) && !isCodeBlock,
+  });
 
   useEffect(() => {
     setChatSessionKey(nanoid());
   }, [selectedStep]);
+
+  const supportsAI =
+    isCodeBlock || doesActionSupportsAI(stepDetails, blockModel);
 
   const { isPending: isOpenAiChatPending, data: openChatResponse } = useQuery({
     queryKey: [
@@ -44,11 +62,15 @@ export const useStepSettingsAiChat = (
       return aiChatApi.open(
         flowVersion.flowId,
         getBlockName(stepDetails),
-        selectedStep,
+        stepDetails?.id ?? '',
         getActionName(stepDetails),
       );
     },
-    enabled: !!getBlockName(stepDetails) && !!getActionName(stepDetails),
+    enabled:
+      !!getBlockName(stepDetails) &&
+      !!getActionName(stepDetails) &&
+      supportsAI &&
+      !!stepDetails?.id,
   });
 
   const {
@@ -59,6 +81,7 @@ export const useStepSettingsAiChat = (
     status,
     setMessages,
     stop: stopChat,
+    setInput,
   } = useChat({
     id: chatSessionKey,
     api: 'api/v1/ai/conversation',
@@ -66,13 +89,44 @@ export const useStepSettingsAiChat = (
     body: {
       chatId: openChatResponse?.chatId,
     },
-    initialMessages: openChatResponse?.messages as Message[],
+    initialMessages: openChatResponse?.messages as any[],
     experimental_prepareRequestBody: () => ({
       chatId: openChatResponse?.chatId,
       message: input,
     }),
     headers: {
       Authorization: `Bearer ${authenticationSession.getToken()}`,
+    },
+  });
+
+  const { submit: submitCodeRequest, isLoading: isCodeGenerating } = useObject({
+    id: `code-${chatSessionKey}`,
+    api: 'api/v1/ai/conversation/code',
+    schema: unifiedCodeLLMSchema,
+    headers: {
+      Authorization: `Bearer ${authenticationSession.getToken()}`,
+      'Content-Type': 'application/json',
+    },
+    onFinish: ({ object }: { object: UnifiedCodeLLMSchema | undefined }) => {
+      if (object) {
+        const assistantMessage: any = {
+          id: nanoid(),
+          role: 'assistant',
+          content: object.textAnswer,
+          createdAt: new Date(),
+          annotations: [object],
+        };
+
+        setMessages((prev) => [...prev, assistantMessage]);
+      }
+    },
+    onError: (error) => {
+      toast({
+        title: t('Code generation failed'),
+        description: error.message || 'An unexpected error occurred',
+        duration: 5000,
+      });
+      console.error(error);
     },
   });
 
@@ -120,12 +174,57 @@ export const useStepSettingsAiChat = (
     stopChat,
   ]);
 
+  const handleCodeSubmit = useCallback(
+    (event?: { preventDefault?: () => void }) => {
+      event?.preventDefault?.();
+      if (!input.trim()) return;
+
+      const userMessage: any = {
+        id: nanoid(),
+        role: 'user',
+        content: input,
+        createdAt: new Date(),
+      };
+
+      setMessages((prev) => [...prev, userMessage]);
+
+      const additionalContext =
+        stepDetails && flowVersion.id
+          ? createAdditionalContext(flowVersion, stepDetails)
+          : undefined;
+
+      submitCodeRequest({
+        chatId: openChatResponse?.chatId,
+        message: input,
+        additionalContext,
+      });
+
+      setInput('');
+    },
+    [
+      input,
+      openChatResponse?.chatId,
+      stepDetails,
+      flowVersion,
+      setMessages,
+      submitCodeRequest,
+      setInput,
+    ],
+  );
+
+  const getStatus = useCallback(() => {
+    if (isCodeBlock) {
+      return isCodeGenerating ? 'streaming' : 'ready';
+    }
+    return status;
+  }, [isCodeBlock, isCodeGenerating, status]);
+
   return {
     messages,
     input,
     handleInputChange,
-    handleSubmit,
-    status,
+    handleSubmit: isCodeBlock ? handleCodeSubmit : handleSubmit,
+    status: getStatus(),
     onNewChatClick,
     enableNewChat,
     isOpenAiChatPending,
@@ -133,12 +232,7 @@ export const useStepSettingsAiChat = (
   };
 };
 
-const CODE_BLOCK_NAME = '@openops/code';
-const CODE_ACTION_NAME = 'code';
-
-const getBlockName = (
-  stepDetails: Action | TriggerWithOptionalId | undefined,
-) => {
+const getBlockName = (stepDetails: StepDetails) => {
   if (stepDetails?.settings?.blockName) {
     return stepDetails?.settings?.blockName;
   }
@@ -146,12 +240,62 @@ const getBlockName = (
   return stepDetails?.type === ActionType.CODE ? CODE_BLOCK_NAME : '';
 };
 
-const getActionName = (
-  stepDetails: Action | TriggerWithOptionalId | undefined,
-) => {
+const getActionName = (stepDetails: StepDetails) => {
   if (stepDetails?.settings?.actionName) {
     return stepDetails?.settings?.actionName;
   }
 
-  return stepDetails?.type === ActionType.CODE ? CODE_ACTION_NAME : '';
+  return stepDetails?.type === ActionType.CODE ? ActionType.CODE : '';
 };
+
+const doesActionSupportsAI = (
+  stepDetails: StepDetails,
+  blockModel: BlockMetadataModel | undefined,
+): boolean => {
+  if (!stepDetails || !blockModel) {
+    return false;
+  }
+
+  const actionName = getActionName(stepDetails);
+  if (!actionName) {
+    return false;
+  }
+
+  let actionOrTrigger = null;
+  if (stepDetails.type === ActionType.BLOCK) {
+    actionOrTrigger = blockModel.actions?.[actionName];
+  } else if (stepDetails.type === TriggerType.BLOCK) {
+    actionOrTrigger = blockModel.triggers?.[actionName];
+  }
+
+  if (!actionOrTrigger?.props) {
+    return false;
+  }
+
+  return Object.values(actionOrTrigger.props).some(
+    (prop: any) => prop?.supportsAI === true,
+  );
+};
+function useChat(arg0: {
+  id: string;
+  api: string;
+  maxSteps: number;
+  body: { chatId: string | undefined };
+  initialMessages: any[];
+  experimental_prepareRequestBody: () => {
+    chatId: string | undefined;
+    message: any;
+  };
+  headers: { Authorization: string };
+}): {
+  messages: any;
+  input: any;
+  handleInputChange: any;
+  handleSubmit: any;
+  status: any;
+  setMessages: any;
+  stop: any;
+  setInput: any;
+} {
+  throw new Error('Function not implemented.');
+}

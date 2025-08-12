@@ -8,6 +8,7 @@ import {
   FlowImportTemplate,
   FlowRun,
   FlowRunStatus,
+  FlowRunTriggerSource,
   FlowStatus,
   FlowVersion,
   FlowVersionState,
@@ -202,6 +203,7 @@ export const createMockFlowRun = (flowRun?: Partial<FlowRun>): FlowRun => {
     finishTime: flowRun?.finishTime ?? faker.date.recent().toISOString(),
     environment:
       flowRun?.environment ?? faker.helpers.enumValue(RunEnvironment),
+    triggerSource: flowRun?.triggerSource ?? FlowRunTriggerSource.TEST_RUN,
   };
 };
 

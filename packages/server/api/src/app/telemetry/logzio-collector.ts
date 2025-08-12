@@ -1,6 +1,7 @@
 import { logger, SharedSystemProp, system } from '@openops/server-shared';
 import { Mutex } from 'async-mutex';
-import { pushTimeseries, Timeseries } from 'prometheus-remote-write';
+import { Timeseries } from 'prometheus-remote-write';
+import { pushTimeseriesWithRetry } from './utils/push-timeseries-with-retry';
 
 const logzioMetricToken = system.getOrThrow<string>(
   SharedSystemProp.LOGZIO_METRICS_TOKEN,
@@ -21,7 +22,7 @@ async function sendMetrics(): Promise<void> {
 
       const metricsToSend = [...metrics];
 
-      await pushTimeseries(metricsToSend, {
+      await pushTimeseriesWithRetry(metricsToSend, {
         url: 'https://listener.logz.io:8053',
         headers: {
           Authorization: `Bearer ${logzioMetricToken}`,

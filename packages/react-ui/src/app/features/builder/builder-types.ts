@@ -5,6 +5,7 @@ import {
   FlowOperationRequest,
   FlowRun,
   FlowVersion,
+  SourceCode,
 } from '@openops/shared';
 import { DataSelectorSizeState } from './data-selector/data-selector-size-togglers';
 
@@ -32,7 +33,7 @@ export type MidpanelState = {
   aiChatProperty?: BlockProperty & {
     inputName: `settings.input.${string}` | `settings.${string}`;
   };
-  codeToInject?: string;
+  codeToInject?: string | SourceCode;
 };
 
 export type MidpanelAction =
@@ -51,7 +52,7 @@ export type MidpanelAction =
         inputName: `settings.input.${string}` | `settings.${string}`;
       };
     }
-  | { type: 'ADD_CODE_TO_INJECT'; code: string }
+  | { type: 'ADD_CODE_TO_INJECT'; code: string | SourceCode }
   | { type: 'CLEAN_CODE_TO_INJECT' };
 
 export type BuilderState = {

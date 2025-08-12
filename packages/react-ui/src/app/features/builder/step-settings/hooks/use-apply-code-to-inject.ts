@@ -1,4 +1,4 @@
-import { Action, Trigger } from '@openops/shared';
+import { Action, SourceCode, Trigger } from '@openops/shared';
 import { useEffect } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { MidpanelAction, MidpanelState } from '../../builder-types';
@@ -22,13 +22,18 @@ export const useApplyCodeToInject = ({
       return;
     }
 
-    if (midpanelState.aiChatProperty.inputName === 'settings.sourceCode') {
+    if (
+      midpanelState.aiChatProperty.inputName === 'settings.sourceCode' &&
+      typeof midpanelState.codeToInject === 'object' &&
+      'code' in midpanelState.codeToInject &&
+      'packageJson' in midpanelState.codeToInject
+    ) {
       form.setValue(
         midpanelState.aiChatProperty.inputName,
         {
-          code: midpanelState.codeToInject,
-          packageJson: '{}',
-        },
+          code: midpanelState.codeToInject.code,
+          packageJson: midpanelState.codeToInject.packageJson,
+        } as SourceCode,
         { shouldValidate: true },
       );
     } else {

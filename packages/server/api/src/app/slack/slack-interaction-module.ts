@@ -9,6 +9,7 @@ import { Static, Type } from '@sinclair/typebox';
 import axios from 'axios';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { sendEphemeralMessage } from './ephemeral-message';
+import { getUserSelection } from './get-user-selection';
 import { verifySignature } from './slack-token-verifier';
 
 export const CreateSlackInteractionRequest = Type.Object({
@@ -109,14 +110,6 @@ async function evaluateUserInteraction(payload: any, reply: FastifyReply) {
     return reply.code(200).send({ text: 'Message interactions are disabled' });
   }
 
-  const buttonClicked = isInteractionWithAButton(payload.actions);
-
-  if (!buttonClicked) {
-    logger.debug('Ignoring a Slack interaction: not a button', { payload });
-
-    return reply.code(200).send({ text: 'Received interaction' });
-  }
-
   if (payload.message.metadata.event_payload.isTest) {
     logger.debug('Ignoring a Slack interaction: test message', { payload });
 
@@ -129,11 +122,27 @@ async function evaluateUserInteraction(payload: any, reply: FastifyReply) {
     return reply.code(200).send({ text: 'Finished sending ephemeral' });
   }
 
+  const userSelection = getUserSelection(payload.actions);
+
+  if (!userSelection) {
+    logger.debug('Ignoring a Slack interaction: unsupported action type', {
+      actions: payload.actions,
+    });
+
+    const userId = payload.user.id;
+    const responseUrl = payload.response_url;
+    const ephemeralText = `⚠️ Warning: Unsupported action type: ${payload.actions[0].type}. Please change the workflow to use supported action types: button, select, datepicker, timepicker, or radio buttons.`;
+    await sendEphemeralMessage({ responseUrl, ephemeralText, userId });
+
+    return reply.code(200).send({ text: 'Finished sending ephemeral' });
+  }
+
   const resumeUrl: string = payload.message.metadata.event_payload.resumeUrl;
 
   if (resumeUrl) {
     const url = new URL(resumeUrl);
-    url.searchParams.set('actionClicked', buttonClicked.text.text);
+    url.searchParams.set('actionClicked', JSON.stringify(userSelection));
+    url.searchParams.set('actionType', payload.actions[0].type);
     url.searchParams.set('userName', payload.user.name);
     logger.debug(`Before calling webhook to resume the workflow: ${url}`, {
       url,
@@ -149,9 +158,4 @@ async function evaluateUserInteraction(payload: any, reply: FastifyReply) {
   return reply
     .code(200)
     .send({ text: 'Interaction with the message has ended.' });
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-function-return-type
-function isInteractionWithAButton(actions: any[]) {
-  return actions.find((action: { type: string }) => action.type === 'button');
 }

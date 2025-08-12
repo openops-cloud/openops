@@ -1,8 +1,11 @@
 import { createOpenAI } from '@ai-sdk/openai';
-import { LanguageModelV1 } from 'ai';
+import { LanguageModel } from 'ai';
 import { AiProvider } from '../providers';
 
 const openAiModels = [
+  'gpt-5',
+  'gpt-5-mini',
+  'gpt-5-nano',
   'o1',
   'o1-2024-12-17',
   'o1-mini',
@@ -47,7 +50,7 @@ function createLanguageModel(params: {
   apiKey: string;
   model: string;
   providerSettings?: Record<string, unknown>;
-}): LanguageModelV1 {
+}): LanguageModel {
   return createOpenAI({
     apiKey: params.apiKey,
     ...params.providerSettings,

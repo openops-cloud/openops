@@ -5,7 +5,7 @@ import {
 import { AppSystemProp, system } from '@openops/server-shared';
 import { experimental_createMCPClient as createMCPClient, ToolSet } from 'ai';
 import { openopsTables } from '../../openops-tables';
-import { MCPTool } from './mcp-tools';
+import { MCPTool } from './tools-initializer';
 
 export async function getTablesTools(): Promise<MCPTool> {
   const { token } = await authenticateDefaultUserInOpenOpsTables();

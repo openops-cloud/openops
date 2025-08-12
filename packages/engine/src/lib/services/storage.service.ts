@@ -107,6 +107,38 @@ export const createStorageService = ({
         });
       }
     },
+
+    async list(
+      prefix: string,
+      filterRegex?: string,
+    ): Promise<Array<{ key: string; value: unknown }>> {
+      const url = new URL(`${apiUrl}v1/store-entries/list`);
+      url.searchParams.set('prefix', prefix);
+
+      if (filterRegex) {
+        url.searchParams.set('filterRegex', filterRegex);
+      }
+
+      try {
+        const response = await fetch(url, {
+          headers: {
+            Authorization: `Bearer ${engineToken}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to list keys: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        return result.entries || [];
+      } catch (e) {
+        return handleFetchError({
+          url,
+          cause: e,
+        });
+      }
+    },
   };
 };
 
@@ -148,6 +180,29 @@ export function createContextStore({
         return null;
       }
       return storeEntry.value as T;
+    },
+    async list(
+      scope: StoreScope,
+      keyPrefix: string,
+      filterRegex?: string,
+    ): Promise<Array<{ key: string; value: unknown }>> {
+      const scopePrefix = createKey(
+        prefix,
+        scope,
+        flowId,
+        flowRunId,
+        keyPrefix,
+      );
+
+      const keyValuePairs = await createStorageService({
+        apiUrl,
+        engineToken,
+      }).list(scopePrefix, filterRegex);
+
+      return keyValuePairs.map((entry) => ({
+        key: entry.key.replace(scopePrefix, ''),
+        value: entry.value,
+      }));
     },
   };
 }
@@ -209,6 +264,10 @@ type StorageService = {
   get(key: string): Promise<StoreEntry | null>;
   put(request: PutStoreEntryRequest): Promise<StoreEntry | null>;
   delete(request: DeleteStoreEntryRequest): Promise<null>;
+  list(
+    prefix: string,
+    filterRegex?: string,
+  ): Promise<Array<{ key: string; value: unknown }>>;
 };
 
 type HandleResponseErrorParams = {

@@ -5,13 +5,13 @@ export const aiChatApi = {
   open(
     workflowId: string,
     blockName: string,
-    stepName: string,
+    stepId: string,
     actionName: string,
   ) {
     return api.post<OpenChatResponse>('/v1/ai/conversation/open', {
       workflowId,
       blockName,
-      stepName,
+      stepId,
       actionName,
     });
   },

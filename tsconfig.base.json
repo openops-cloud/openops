@@ -62,6 +62,7 @@
       "@openops/block-cloudability": [
         "packages/blocks/cloudability/src/index.ts"
       ],
+      "@openops/block-cloudfix": ["packages/blocks/cloudfix/src/index.ts"],
       "@openops/block-cloudformation": [
         "packages/blocks/cloudformation/src/index.ts"
       ],
@@ -108,6 +109,9 @@
       ],
       "@openops/block-finout": ["packages/blocks/finout/src/index.ts"],
       "@openops/block-flexera": ["packages/blocks/flexera/src/index.ts"],
+      "@openops/block-flexera-one": [
+        "packages/blocks/flexera-one/src/index.ts"
+      ],
       "@openops/block-fliqr-ai": ["packages/blocks/fliqr-ai/src/index.ts"],
       "@openops/block-flowise": ["packages/blocks/flowise/src/index.ts"],
       "@openops/block-flowlu": ["packages/blocks/flowlu/src/index.ts"],
@@ -178,6 +182,7 @@
       "@openops/block-jotform": ["packages/blocks/jotform/src/index.ts"],
       "@openops/block-json": ["packages/blocks/json/src/index.ts"],
       "@openops/block-kimai": ["packages/blocks/kimai/src/index.ts"],
+      "@openops/block-kion": ["packages/blocks/kion/src/index.ts"],
       "@openops/block-kizeo-forms": [
         "packages/blocks/kizeo-forms/src/index.ts"
       ],
@@ -269,6 +274,7 @@
       "@openops/block-sendgrid": ["packages/blocks/sendgrid/src/index.ts"],
       "@openops/block-sendinblue": ["packages/blocks/sendinblue/src/index.ts"],
       "@openops/block-sendy": ["packages/blocks/sendy/src/index.ts"],
+      "@openops/block-servicenow": ["packages/blocks/servicenow/src/index.ts"],
       "@openops/block-sessions-us": [
         "packages/blocks/sessions-us/src/index.ts"
       ],
@@ -313,6 +319,7 @@
       "@openops/block-twilio": ["packages/blocks/twilio/src/index.ts"],
       "@openops/block-twitter": ["packages/blocks/twitter/src/index.ts"],
       "@openops/block-typeform": ["packages/blocks/typeform/src/index.ts"],
+      "@openops/block-vantage": ["packages/blocks/vantage/src/index.ts"],
       "@openops/block-vbout": ["packages/blocks/vbout/src/index.ts"],
       "@openops/block-vegacloud": ["packages/blocks/vegacloud/src/index.ts"],
       "@openops/block-vtex": ["packages/blocks/vtex/src/index.ts"],

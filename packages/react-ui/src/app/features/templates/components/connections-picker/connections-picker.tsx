@@ -1,5 +1,5 @@
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
-import { Theme, useTheme } from '@/app/common/providers/theme-provider';
+import { useTheme } from '@/app/common/providers/theme-provider';
 import { DynamicFormValidationProvider } from '@/app/features/builder/dynamic-form-validation/dynamic-form-validation-context';
 import { CreateEditConnectionDialogContent } from '@/app/features/connections/components/create-edit-connection-dialog-content';
 import { appConnectionsHooks } from '@/app/features/connections/lib/app-connections-hooks';
@@ -10,6 +10,7 @@ import {
   DataTable,
   DialogFooter,
   OverflowTooltip,
+  Theme,
 } from '@openops/components/ui';
 import {
   AppConnectionsWithSupportedBlocks,

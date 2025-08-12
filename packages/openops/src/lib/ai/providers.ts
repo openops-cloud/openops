@@ -1,3 +1,4 @@
+import { SharedSystemProp, system } from '@openops/server-shared';
 import {
   AiProviderEnum,
   ApplicationError,
@@ -5,7 +6,7 @@ import {
   GetProvidersResponse,
   SaveAiConfigRequest,
 } from '@openops/shared';
-import { AISDKError, generateText, LanguageModelV1 } from 'ai';
+import { AISDKError, generateText, LanguageModel } from 'ai';
 import { anthropicProvider } from './providers/anthropic';
 import { azureProvider } from './providers/azure-openai';
 import { cerebrasProvider } from './providers/cerebras';
@@ -27,7 +28,7 @@ export interface AiProvider {
     apiKey: string;
     model: string;
     providerSettings?: Record<string, unknown>;
-  }): LanguageModelV1;
+  }): LanguageModel;
 }
 
 const PROVIDER_MAP: Record<AiProviderEnum, AiProvider> = {
@@ -72,7 +73,7 @@ export const getAiProviderLanguageModel = async (aiConfig: {
   apiKey: string;
   model: string;
   providerSettings?: Record<string, unknown> | null;
-}): Promise<LanguageModelV1> => {
+}): Promise<LanguageModel> => {
   const aiProvider = getAiProvider(aiConfig.provider);
   const sanitizedSettings = sanitizeProviderSettings(aiConfig.providerSettings);
 
@@ -81,7 +82,6 @@ export const getAiProviderLanguageModel = async (aiConfig: {
     model: aiConfig.model,
     providerSettings: {
       ...sanitizedSettings,
-      experimental_telemetry: { enabled: false },
     },
   });
 };
@@ -102,7 +102,7 @@ export const validateAiProviderConfig = async (
 
     await generateText({
       model: languageModel,
-      prompt: 'Is the connection valid?',
+      prompt: 'Hi',
       ...config.modelSettings,
     });
   } catch (error) {
@@ -128,6 +128,10 @@ export const validateAiProviderConfig = async (
 
   return { valid: true };
 };
+
+export const isLLMTelemetryEnabled = () =>
+  !!system.get(SharedSystemProp.LANGFUSE_SECRET_KEY) &&
+  !!system.get(SharedSystemProp.LANGFUSE_PUBLIC_KEY);
 
 const invalidConfigError = (
   errorName: string,
@@ -161,3 +165,9 @@ function sanitizeProviderSettings(
 
   return sanitized;
 }
+
+export const providerOptions = {
+  openai: {
+    structuredOutputs: false,
+  },
+};

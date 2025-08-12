@@ -76,7 +76,7 @@ const MultiSelectBlockProperty = ({
 
   const onSelectOrClearChanged = (changeType: SelectOrClearChange) => {
     if (changeType === 'selectAll') {
-      onChange(options.map((o) => String(o.value)));
+      onChange(options.map((o) => o.value));
     } else {
       onChange([]);
     }

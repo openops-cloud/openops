@@ -63,6 +63,7 @@ export const triggerEventService = {
         flowVersionId: flow.version.id,
         output: triggerEventToSave.payload,
         input,
+        success: true,
       });
     }
 

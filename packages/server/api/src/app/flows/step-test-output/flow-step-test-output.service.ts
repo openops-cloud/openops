@@ -20,6 +20,7 @@ export const flowStepTestOutputService = {
     flowVersionId,
     input,
     output,
+    success,
   }: SaveParams): Promise<FlowStepTestOutput> {
     let compressedInput = Buffer.alloc(0);
     let compressedOutput = Buffer.alloc(0);
@@ -46,6 +47,7 @@ export const flowStepTestOutputService = {
       flowVersionId,
       input: compressedInput,
       output: compressedOutput,
+      success,
     };
 
     return flowStepTestOutputRepo().save(stepOutput);
@@ -124,4 +126,5 @@ type SaveParams = {
   flowVersionId: FlowVersionId;
   input: unknown;
   output: unknown;
+  success: boolean;
 };

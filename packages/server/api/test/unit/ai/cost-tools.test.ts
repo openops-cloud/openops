@@ -234,8 +234,8 @@ describe('getCostTools', () => {
       costAnalysis: {
         client: mockClient,
         toolSet: {
-          tool1: { ...mockTools.tool1, toolProvider: 'cost-analysis' },
-          tool2: { ...mockTools.tool2, toolProvider: 'cost-analysis' },
+          tool1: { ...mockTools.tool1, toolProvider: 'aws-pricing' },
+          tool2: { ...mockTools.tool2, toolProvider: 'aws-pricing' },
         },
       },
     });

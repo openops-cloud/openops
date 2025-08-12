@@ -1,5 +1,6 @@
 import React, { ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
+import { Theme } from '../../lib/theme';
 import { FileButton } from './file-button';
 import { HeaderButtons } from './header-buttons';
 import { JsonContent } from './json-content';
@@ -11,7 +12,7 @@ type JsonViewerProps = {
   title?: string;
   readonly?: boolean;
   onChange?: (json: any) => void;
-  theme?: string;
+  theme: Theme;
   editorClassName?: string;
   isEditModeEnabled?: boolean;
   onEditModeChange?: (isEditModeEnabled: boolean) => void;
@@ -68,7 +69,7 @@ const JsonViewer = React.memo(
     }
 
     return (
-      <div className="max-h-full w-full flex flex-col rounded-lg border border-solid overflow-hidden">
+      <div className="h-full max-h-full w-full flex flex-col rounded-lg border border-solid overflow-hidden">
         <div className="px-4 py-3 flex items-center gap-2 h-[61px]">
           <div className="flex-grow justify-center items-center">
             {children ?? <span className="text-base font-medium">{title}</span>}

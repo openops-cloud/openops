@@ -12,18 +12,42 @@ export function createAxiosHeaders(token: string): AxiosHeaders {
   });
 }
 
-export const axiosTablesSeedRetryConfig: IAxiosRetryConfig = {
+const RETRY_DELAY_MS = 1000;
+
+const getStatusText = (statusCode: number): string => {
+  const statusEntry = Object.entries(StatusCodes).find(
+    ([_, value]) => value === statusCode,
+  );
+  if (!statusEntry) {
+    return `${statusCode}`;
+  }
+
+  const statusKey = statusEntry[0];
+  const statusText = statusKey
+    .split('_')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+
+  return `${statusCode} ${statusText}`;
+};
+
+export const axiosTablesRetryConfig: IAxiosRetryConfig = {
   retries: 3,
-  retryDelay: (retryCount: number) => {
+  retryDelay: (retryCount: number, error: AxiosError) => {
+    const statusText = error?.response?.status
+      ? getStatusText(error.response.status)
+      : 'unknown status';
     logger.debug(
-      `The request failed due to a conflict. Request count: ${retryCount}`,
+      `The request failed with status ${statusText}. Request count: ${retryCount}`,
     );
-    return retryCount * 1000;
+    return retryCount * RETRY_DELAY_MS;
   },
   retryCondition: (error: AxiosError) => {
     return (
       (error?.response?.status &&
-        error?.response?.status === StatusCodes.CONFLICT) ||
+        [StatusCodes.BAD_GATEWAY, StatusCodes.CONFLICT].includes(
+          error.response.status,
+        )) ||
       false
     );
   },
@@ -133,7 +157,7 @@ export async function makeOpenOpsTablesRequest<T>(
   body?: any,
   headers?: AxiosHeaders,
   url?: string,
-  retryConfigs?: IAxiosRetryConfig,
+  retryConfigs = axiosTablesRetryConfig,
 ): Promise<T> {
   const baseUrl = system.get(AppSystemProp.OPENOPS_TABLES_API_URL);
 

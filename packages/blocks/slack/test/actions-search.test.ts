@@ -1,15 +1,29 @@
-import { getMessageButtons } from '../src/lib/common/actions-search';
+import { getMessageInteractiveElements } from '../src/lib/common/actions-search';
 
-describe('getMessageButtons', () => {
-  test('should return empty when there are no buttons in the message', () => {
-    const blocks: any[] = [];
+describe('getMessageInteractiveElements', () => {
+  test.each([
+    [[] as any[]],
+    [
+      [
+        {
+          type: 'section',
+          text: {
+            type: 'plain_text',
+            text: 'This is a plain text section block.',
+            emoji: true,
+          },
+        },
+      ],
+    ],
+  ])(
+    'should return empty when there are no interactive elements in the message %p',
+    (blocks: any[]) => {
+      const result = getMessageInteractiveElements(blocks);
+      expect(result).toEqual([]);
+    },
+  );
 
-    const result = getMessageButtons(blocks);
-
-    expect(result).toEqual([]);
-  });
-
-  test('should return list of buttons found', () => {
+  test('should return list of interactive elements found', () => {
     const blocks = [
       {
         type: 'section',
@@ -45,7 +59,7 @@ describe('getMessageButtons', () => {
       },
     ];
 
-    const result = getMessageButtons(blocks);
+    const result = getMessageInteractiveElements(blocks);
 
     expect(result.length).toEqual(2);
     expect(result[0]).toStrictEqual({

@@ -16,6 +16,7 @@ export type MentionTreeNode = {
     propertyPath: string;
     displayName: string;
     value?: string | unknown;
+    success?: boolean | null;
     isSlice?: boolean;
     isTestStepNode?: boolean;
   };
@@ -24,21 +25,33 @@ export type MentionTreeNode = {
 
 type HandleStepOutputProps = {
   stepOutput: unknown;
+  success: boolean | null;
   propertyPath: string;
   displayName: string;
 };
 
 function traverseStepOutputAndReturnMentionTree({
   stepOutput,
+  success,
   propertyPath,
   displayName,
 }: HandleStepOutputProps): MentionTreeNode {
   if (Array.isArray(stepOutput)) {
-    return handlingArrayStepOutput(stepOutput, propertyPath, displayName);
+    return handlingArrayStepOutput(
+      stepOutput,
+      success,
+      propertyPath,
+      displayName,
+    );
   }
   const isObject = stepOutput && typeof stepOutput === 'object';
   if (isObject) {
-    return handleObjectStepOutput(propertyPath, displayName, stepOutput);
+    return handleObjectStepOutput(
+      propertyPath,
+      success,
+      displayName,
+      stepOutput,
+    );
   }
   return {
     key: propertyPath,
@@ -46,6 +59,7 @@ function traverseStepOutputAndReturnMentionTree({
       propertyPath,
       displayName,
       value: formatUtils.formatStepInputOrOutput(stepOutput),
+      success,
     },
     children: undefined,
   };
@@ -53,6 +67,7 @@ function traverseStepOutputAndReturnMentionTree({
 
 function handlingArrayStepOutput(
   stepOutput: unknown[],
+  success: boolean | null,
   path: string,
   parentDisplayName: string,
   startingIndex = 0,
@@ -65,6 +80,7 @@ function handlingArrayStepOutput(
       children: stepOutput.map((ouput, idx) =>
         traverseStepOutputAndReturnMentionTree({
           stepOutput: ouput,
+          success: null,
           propertyPath: `${path}[${idx + startingIndex}]`,
           displayName: `${parentDisplayName} [${idx + startingIndex + 1}]`,
         }),
@@ -73,6 +89,7 @@ function handlingArrayStepOutput(
         propertyPath: path,
         displayName: parentDisplayName,
         value: isEmptyList ? 'Empty List' : undefined,
+        success,
       },
     };
   }
@@ -87,6 +104,7 @@ function handlingArrayStepOutput(
     const displayName = `${parentDisplayName} ${startingIndex}-${endingIndex}`;
     const sliceOutput = handlingArrayStepOutput(
       stepOutput.slice(startingIndex, endingIndex),
+      success,
       path,
       parentDisplayName,
       startingIndex,
@@ -116,6 +134,7 @@ function handlingArrayStepOutput(
 
 function handleObjectStepOutput(
   propertyPath: string,
+  success: boolean | null,
   displayName: string,
   stepOutput: object,
 ): MentionTreeNode {
@@ -126,6 +145,7 @@ function handleObjectStepOutput(
       propertyPath: propertyPath,
       displayName: displayName,
       value: isEmptyList ? 'Empty List' : undefined,
+      success,
     },
     children: Object.keys(stepOutput).map((childPropertyKey) => {
       const escapedKey = childPropertyKey.replaceAll(
@@ -134,6 +154,7 @@ function handleObjectStepOutput(
       );
       return traverseStepOutputAndReturnMentionTree({
         stepOutput: (stepOutput as Record<string, unknown>)[childPropertyKey],
+        success: null,
         propertyPath: `${propertyPath}['${escapedKey}']`,
         displayName: childPropertyKey,
       });
@@ -163,6 +184,7 @@ const getAllStepsMentions = (
     }
     return traverseStepOutputAndReturnMentionTree({
       stepOutput: stepsTestOutput[step.id].output,
+      success: stepsTestOutput[step.id].success,
       propertyPath: step.name,
       displayName: displayName,
     });
@@ -186,6 +208,7 @@ const createTestNode = (
       stepOutput: step.settings.inputUiInfo.sampleData,
       propertyPath: step.name,
       displayName: displayName,
+      success: true,
     });
   }
 

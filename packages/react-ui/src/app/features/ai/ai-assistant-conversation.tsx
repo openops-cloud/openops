@@ -1,3 +1,4 @@
+import { useTheme } from '@/app/common/providers/theme-provider';
 import { MessageType } from '@/app/features/ai/lib/types';
 import { UseChatHelpers } from '@ai-sdk/react';
 import {
@@ -24,6 +25,7 @@ const AiAssistantConversation = ({
   lastUserMessageRef,
   lastAssistantMessageRef,
 }: AiAssistantConversationnProps) => {
+  const { theme } = useTheme();
   const containerRef = useRef<HTMLDivElement>(null);
 
   const uiMessages: AIChatMessage[] = useMemo(() => {
@@ -50,10 +52,11 @@ const AiAssistantConversation = ({
         codeVariation={MarkdownCodeVariations.WithCopyMultiline}
         lastUserMessageRef={lastUserMessageRef}
         lastAssistantMessageRef={lastAssistantMessageRef}
+        theme={theme}
       />
-      {[ChatStatus.STREAMING, ChatStatus.SUBMITTED].includes(status) && (
-        <LoadingSpinner />
-      )}
+      {[ChatStatus.STREAMING, ChatStatus.SUBMITTED].includes(
+        status as ChatStatus,
+      ) && <LoadingSpinner />}
     </div>
   );
 };

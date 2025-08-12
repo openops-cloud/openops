@@ -1,16 +1,16 @@
+import {
+  AI_ASSISTANT_LS_KEY,
+  AI_ASSISTANT_SESSION_ID,
+} from '@/app/constants/ai';
 import { QueryKeys } from '@/app/constants/query-keys';
 import { aiAssistantChatApi } from '@/app/features/ai/lib/ai-assistant-chat-api';
 import { authenticationSession } from '@/app/lib/authentication-session';
 import { useAppStore } from '@/app/store/app-store';
-import { Message, useChat } from '@ai-sdk/react';
 import { toast } from '@openops/components/ui';
 import { OpenChatResponse } from '@openops/shared';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { t } from 'i18next';
 import { useCallback, useEffect, useRef } from 'react';
-
-const AI_ASSISTANT_LS_KEY = 'ai_assistant_chat_id';
-const AI_ASSISTANT_SESSION_ID = 'ai_assistant_session_id';
 
 export const useAiAssistantChat = () => {
   const chatId = useRef(localStorage.getItem(AI_ASSISTANT_LS_KEY));
@@ -42,11 +42,11 @@ export const useAiAssistantChat = () => {
   } = useChat({
     id: AI_ASSISTANT_SESSION_ID,
     api: '/api/v1/ai/conversation',
-    maxSteps: 5,
+    maxSteps: 1,
     body: {
       chatId: openChatResponse?.chatId,
     },
-    initialMessages: openChatResponse?.messages as Message[],
+    initialMessages: openChatResponse?.messages as any[],
     initialInput: aiChatInput,
     experimental_prepareRequestBody: () => ({
       chatId: openChatResponse?.chatId,
@@ -127,3 +127,26 @@ export const useAiAssistantChat = () => {
     isOpenAiChatPending,
   };
 };
+function useChat(arg0: {
+  id: string;
+  api: string;
+  maxSteps: number;
+  body: { chatId: string | undefined };
+  initialMessages: any[];
+  initialInput: string;
+  experimental_prepareRequestBody: () => {
+    chatId: string | undefined;
+    message: any;
+  };
+  headers: { Authorization: string };
+}): {
+  messages: any;
+  input: any;
+  handleInputChange: any;
+  handleSubmit: any;
+  status: any;
+  setMessages: any;
+  stop: any;
+} {
+  throw new Error('Function not implemented.');
+}

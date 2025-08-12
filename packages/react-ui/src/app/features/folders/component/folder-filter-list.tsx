@@ -10,11 +10,13 @@ import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useCallback, useState } from 'react';
 
 import { flowsHooks } from '@/app/features/flows/lib/flows-hooks';
+import { useDebounceCallback } from 'usehooks-ts';
 import { useUpdateSearchParams } from '../hooks/update-search-params';
 import { AddNewFolderDialog } from './add-new-folder-dialog';
 import { FlowsTreeView } from './flows-tree-view';
 
 const PAGINATION_LIMIT = 100;
+const FOLDER_FILTER_DEBOUNCE_DELAY = 300;
 
 const FolderFilterList = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -22,11 +24,19 @@ const FolderFilterList = () => {
   const { searchState, setSearchTerm } =
     flowsHooks.useFlowSearch(PAGINATION_LIMIT);
 
+  const debouncedSetSearchTerm = useDebounceCallback(
+    setSearchTerm,
+    FOLDER_FILTER_DEBOUNCE_DELAY,
+  );
+
+  const [searchValue, setSearchValue] = useState('');
+
   const onSearchInputChange = useCallback(
     (value: string) => {
-      setSearchTerm(value ? value : '');
+      setSearchValue(value);
+      debouncedSetSearchTerm(value);
     },
-    [setSearchTerm],
+    [debouncedSetSearchTerm],
   );
 
   const updateSearchParams = useUpdateSearchParams();
@@ -64,11 +74,7 @@ const FolderFilterList = () => {
 
           <CollapsibleContent className="flex flex-col w-full max-h-max overflow-hidden data-[state=open]:animate-slideDown data-[state=closed]:animate-slideUp">
             <div className="py-1 px-6">
-              <SearchInput
-                initialValue={''}
-                onChange={onSearchInputChange}
-                debounceDelay={300}
-              />
+              <SearchInput value={searchValue} onChange={onSearchInputChange} />
             </div>
             <div className="flex w-full h-full flex-col space-y-1">
               <div className="flex flex-col w-full max-h-max">

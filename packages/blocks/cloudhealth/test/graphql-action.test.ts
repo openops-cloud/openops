@@ -1,4 +1,4 @@
-import { graphqlAction } from '../src/lib/graphql-action';
+import { graphqlAction } from '../src/lib/actions/graphql-action';
 
 describe('GraphQL Action', () => {
   const mockApiKey = 'test-api-key';
@@ -104,7 +104,7 @@ describe('GraphQL Action', () => {
       );
 
     await expect(graphqlAction.run(mockContext)).rejects.toThrow(
-      'GraphQL Error: Cannot query field "nonExistentField" on type "Query". | GraphQL request failed: Bad Request',
+      'GraphQL Error: Cannot query field "nonExistentField" on type "Query".\n | GraphQL request failed.\nRequest: {"query":"{ test { id } }","variables":{"id":"123"}}.\nResponse: Bad Request',
     );
   });
 
@@ -128,7 +128,7 @@ describe('GraphQL Action', () => {
       );
 
     await expect(graphqlAction.run(mockContext)).rejects.toThrow(
-      'GraphQL request failed: Unauthorized',
+      'GraphQL request failed.\nRequest: {"query":"{ test { id } }","variables":{"id":"123"}}.\nResponse: Unauthorized',
     );
   });
 
@@ -161,7 +161,7 @@ describe('GraphQL Action', () => {
       );
 
     await expect(graphqlAction.run(mockContext)).rejects.toThrow(
-      'GraphQL Error: Cannot query field "nonExistentField" on type "Query". | Cannot query field "accounts" on type "Query". Did you mean "awsAccounts"?',
+      'GraphQL Error: Cannot query field "nonExistentField" on type "Query".\n | Cannot query field "accounts" on type "Query". Did you mean "awsAccounts"?\n',
     );
   });
 

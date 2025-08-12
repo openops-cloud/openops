@@ -3,12 +3,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import * as RippleHook from 'use-ripple-hook';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
-
-export enum Theme {
-  DARK = 'dark',
-  LIGHT = 'light',
-  SYSTEM = 'system',
-}
+import { Theme } from '@openops/components/ui';
 
 type ThemeProviderProps = {
   children: React.ReactNode;

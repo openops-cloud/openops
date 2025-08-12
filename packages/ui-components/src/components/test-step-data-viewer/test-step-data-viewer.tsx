@@ -1,5 +1,6 @@
 import { t } from 'i18next';
 import { useMemo, useState } from 'react';
+import { Theme } from '../../lib/theme';
 import { JsonViewer } from '../json-viewer/json-viewer';
 import { ToggleSwitch } from '../toggle-switch/toggle-switch';
 
@@ -8,7 +9,7 @@ type TestStepDataViewerProps = {
   outputJson: any;
   readonly?: boolean;
   onChange?: (json: any) => void;
-  theme?: string;
+  theme: Theme;
   editorClassName?: string;
 };
 

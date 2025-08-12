@@ -4,7 +4,7 @@ import {
   Property,
 } from '@openops/blocks-framework';
 import { ExecutionType } from '@openops/shared';
-import { getMessageButtons } from '../common/actions-search';
+import { getMessageInteractiveElements } from '../common/actions-search';
 import { slackAuth } from '../common/authentication';
 import {
   getMessageObj,
@@ -43,7 +43,9 @@ export const waitForAction = createAction({
           };
         }
 
-        const options = getMessageButtons(message.response_body.message.blocks);
+        const options = getMessageInteractiveElements(
+          message.response_body.message.blocks,
+        );
 
         return {
           disabled: false,

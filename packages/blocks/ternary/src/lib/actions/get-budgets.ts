@@ -1,12 +1,13 @@
 import { HttpMethod } from '@openops/blocks-common';
 import { createAction } from '@openops/blocks-framework';
-import { sendTernaryRequest } from '../common';
+import { logger } from '@openops/server-shared';
 import { ternaryCloudAuth } from '../common/auth';
+import { sendTernaryRequest } from '../common/send-ternary-request';
 
 export const getBudgets = createAction({
   name: 'get_budgets',
-  displayName: 'Get budgets',
-  description: 'Fetch budgets from Ternary.',
+  displayName: 'Get Budgets',
+  description: 'Get Budgets',
   auth: ternaryCloudAuth,
   props: {},
   run: async ({ auth }) => {
@@ -20,10 +21,9 @@ export const getBudgets = createAction({
         },
       });
       return response.body as any[];
-    } catch (e) {
-      console.error('Error getting budgets!');
-      console.error(e);
-      return e;
+    } catch (error) {
+      logger.error('Error getting budgets.', error);
+      throw error;
     }
   },
 });

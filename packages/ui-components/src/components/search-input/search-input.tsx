@@ -1,30 +1,27 @@
 import { t } from 'i18next';
 import { Search } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { useDebounce } from 'use-debounce';
+import { useCallback } from 'react';
 import { Input } from '../../ui/input';
 
 interface SearchInputProps {
-  initialValue?: string;
+  value?: string;
   onChange: (value: string) => void;
   placeholder?: string;
-  debounceDelay?: number;
   className?: string;
 }
 
 const SearchInput = ({
-  initialValue,
+  value,
   onChange,
-  debounceDelay = 300,
   className = '',
   placeholder = 'Search...',
 }: SearchInputProps) => {
-  const [inputValue, setInputValue] = useState(initialValue || '');
-  const [debouncedValue] = useDebounce(inputValue, debounceDelay);
-
-  useEffect(() => {
-    onChange(debouncedValue);
-  }, [debouncedValue, onChange]);
+  const handleChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      onChange(event.target.value);
+    },
+    [onChange],
+  );
 
   return (
     <div className={`relative w-full ${className}`}>
@@ -33,8 +30,8 @@ const SearchInput = ({
         type="search"
         placeholder={t(placeholder)}
         className="pl-9 pr-4 bg-muted border-none"
-        value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
+        value={value}
+        onChange={handleChange}
       />
     </div>
   );

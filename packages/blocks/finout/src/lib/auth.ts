@@ -5,6 +5,11 @@ Authenticate with your Finout API Token to access Finout services.
 You can generate an API token by following the instructions in the [Finout API documentation](https://docs.finout.io/configuration/finout-api/generate-an-api-token).
 `;
 
+export interface FinOutAuth {
+  clientId: string;
+  secretKey: string;
+}
+
 export const finoutAuth = BlockAuth.CustomAuth({
   authProviderKey: 'finout',
   authProviderDisplayName: 'Finout',

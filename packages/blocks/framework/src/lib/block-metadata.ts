@@ -20,25 +20,34 @@ export const BlockBase = Type.Object({
   id: Type.Optional(Type.String()),
   name: Type.String(),
   displayName: Type.String(),
-  logoUrl: Type.String(),
   description: Type.String(),
-  projectId: Type.Optional(Type.String()),
-  authors: Type.Array(Type.String()),
-  organizationId: Type.Optional(Type.String()),
-  directoryPath: Type.Optional(Type.String()),
-  auth: Type.Optional(BlockAuthProperty),
-  version: Type.String(),
-  categories: Type.Optional(Type.Array(Type.Enum(BlockCategory))),
-  minimumSupportedRelease: Type.Optional(Type.String()),
-  maximumSupportedRelease: Type.Optional(Type.String()),
 });
 
 export type BlockBase = {
   id?: string;
   name: string;
   displayName: string;
-  logoUrl: string;
   description: string;
+};
+
+export const BlockBaseDetails = Type.Composite([
+  BlockBase,
+  Type.Object({
+    logoUrl: Type.String(),
+    projectId: Type.Optional(Type.String()),
+    authors: Type.Array(Type.String()),
+    organizationId: Type.Optional(Type.String()),
+    directoryPath: Type.Optional(Type.String()),
+    auth: Type.Optional(BlockAuthProperty),
+    version: Type.String(),
+    categories: Type.Optional(Type.Array(Type.Enum(BlockCategory))),
+    minimumSupportedRelease: Type.Optional(Type.String()),
+    maximumSupportedRelease: Type.Optional(Type.String()),
+  }),
+]);
+
+export type BlockBaseDetails = BlockBase & {
+  logoUrl: string;
   projectId?: ProjectId;
   organizationId?: string;
   authors: string[];
@@ -89,14 +98,14 @@ export type TriggerBase = Omit<ActionBase, 'requireAuth'> & {
 };
 
 export const BlockMetadata = Type.Composite([
-  BlockBase,
+  BlockBaseDetails,
   Type.Object({
     actions: Type.Record(Type.String(), ActionBase),
     triggers: Type.Record(Type.String(), TriggerBase),
   }),
 ]);
 
-export type BlockMetadata = BlockBase & {
+export type BlockMetadata = BlockBaseDetails & {
   actions: Record<string, ActionBase>;
   triggers: Record<string, TriggerBase>;
 };
