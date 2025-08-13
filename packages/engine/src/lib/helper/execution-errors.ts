@@ -61,20 +61,20 @@ export class ConnectionExpiredError extends ExecutionError {
 }
 
 export class StorageLimitError extends ExecutionError {
-  public maxStorageSizeInBytes: number;
+  public maxStorageSizeInMB: number;
 
-  constructor(key: string, maxStorageSizeInBytes: number, cause?: unknown) {
+  constructor(key: string, maxStorageSizeInMB: number, cause?: unknown) {
     super(
       'StorageLimitError',
       formatMessage(
         `Failed to read/write key "${key}", the storage value is larger than ${Math.floor(
-          maxStorageSizeInBytes,
+          maxStorageSizeInMB,
         )} MB`,
       ),
       ExecutionErrorType.USER,
       cause,
     );
-    this.maxStorageSizeInBytes = maxStorageSizeInBytes;
+    this.maxStorageSizeInMB = maxStorageSizeInMB;
   }
 }
 

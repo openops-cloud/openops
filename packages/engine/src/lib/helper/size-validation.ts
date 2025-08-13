@@ -1,10 +1,11 @@
-import { AppSystemProp, system } from '@openops/server-shared';
+import {
+  getMaximumRequestBodySizeWithBufferInMegabytes,
+  ONE_MB_IN_BYTES,
+} from '@openops/server-shared';
 import { FlowVersion, OpenOpsId, StepOutput } from '@openops/shared';
 import sizeof from 'object-sizeof';
 
-const ONE_MB_IN_BYTES = 1024 * 1024;
-const MAX_RUN_SIZE_IN_MB =
-  system.getNumberOrThrow(AppSystemProp.REQUEST_BODY_LIMIT) - 0.5;
+const MAX_RUN_SIZE_IN_MB = getMaximumRequestBodySizeWithBufferInMegabytes();
 
 const BASE_MESSAGE = 'Workflow output size exceeds maximum allowed size.';
 

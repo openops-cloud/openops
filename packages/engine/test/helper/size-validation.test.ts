@@ -1,13 +1,10 @@
 import { FlowVersion, GenericStepOutput, OpenOpsId, StepOutput, StepOutputStatus, TriggerType } from '@openops/shared';
 
 const MAX_RUN_SIZE = 10
+const ONE_MB_IN_BYTES = 1024 * 1024
 jest.mock('@openops/server-shared', () => ({
-  AppSystemProp: {
-    REQUEST_BODY_LIMIT: 'REQUEST_BODY_LIMIT',
-  },
-  system: {
-    getNumberOrThrow: jest.fn().mockReturnValue(MAX_RUN_SIZE),
-  },
+  getMaximumRequestBodySizeWithBufferInMegabytes: jest.fn().mockReturnValue(MAX_RUN_SIZE),
+  ONE_MB_IN_BYTES: ONE_MB_IN_BYTES,
 }))
 
 const sizeofMock = jest.fn();
@@ -33,7 +30,6 @@ describe('isSizeValidationError', () => {
 })
 
 describe('validateExecutionSize', () => {
-  const ONE_MB_IN_BYTES = 1024 * 1024
 
   beforeEach(() => {
     jest.clearAllMocks();
