@@ -12,3 +12,12 @@ body {
   background-color: #e2e8f0 !important;
   opacity: 0.9 !important;
 }
+
+/* Hide scrollbars in Chromatic to prevent diff issues */
+.monaco-editor .scrollbar {
+  display: none !important;
+}
+
+.monaco-editor .monaco-scrollable-element > .scrollbar {
+  display: none !important;
+}
