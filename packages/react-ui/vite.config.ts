@@ -5,7 +5,6 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import checker from 'vite-plugin-checker';
 import circleDependency from 'vite-plugin-circular-dependency';
-import commonjs from 'vite-plugin-commonjs';
 
 export default defineConfig({
   root: __dirname,
@@ -52,7 +51,6 @@ export default defineConfig({
   },
   plugins: [
     react(),
-    commonjs(),
     nxViteTsPaths(),
     checker({
       typescript: true,
@@ -70,7 +68,6 @@ export default defineConfig({
       transformMixedEsModules: true,
     },
     rollupOptions: {
-      external: ['@openops/ui-kit'],
       onLog(level, log, handler) {
         if (
           log.cause &&

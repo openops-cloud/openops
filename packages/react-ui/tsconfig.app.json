@@ -14,7 +14,8 @@
       "@/*": ["./src/*"],
       "@openops/shared": ["../../packages/shared/src"],
       "@openops/blocks-framework": ["../../packages/blocks/framework/src"],
-      "@openops/components/ui": ["../../packages/ui-components/src"]
+      "@openops/components/ui": ["../../packages/ui-components/src"],
+      "@openops/ui-kit": ["../../packages/ee/ui-kit/src"]
     }
   },
   "exclude": [

@@ -4,6 +4,7 @@ import { useAiModelSelector } from '@/app/features/ai/lib/ai-model-selector-hook
 import { useAssistantChat } from '@/app/features/ai/lib/assistant-ui-chat-hook';
 import { AssistantUiChatContainer } from '@openops/components/ui';
 import { SourceCode } from '@openops/shared';
+import { createFrontendTools } from '@openops/ui-kit';
 import { t } from 'i18next';
 import { ReactNode, useCallback, useMemo, useState } from 'react';
 
@@ -21,14 +22,7 @@ const AssistantUiChat = ({
   handleInject,
 }: AssistantUiChatProps) => {
   const toolComponents = useMemo(() => {
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { createFrontendTools } = require('@openops/ui-kit');
-      return createFrontendTools?.() ?? {};
-    } catch (error) {
-      console.error('Error creating frontend tools', error);
-      return {};
-    }
+    return createFrontendTools();
   }, []);
 
   const [chatId, setChatId] = useState<string | null>(
