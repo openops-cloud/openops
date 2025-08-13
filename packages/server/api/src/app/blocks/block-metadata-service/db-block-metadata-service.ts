@@ -41,6 +41,7 @@ export const FastDbBlockMetadataService = (): BlockMetadataService => {
         })
       ).map((b) => ({
         name: b.name,
+        version: b.version,
         displayName: b.displayName,
         description: b.description,
       }));
