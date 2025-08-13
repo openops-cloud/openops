@@ -42,7 +42,7 @@ export const InputsSchema = Type.Object(
     description:
       'All block-specific properties must be contained within the `input` object, not at the root level. ' +
       'The `input` object is a mapping of property keys to their chosen values (`input: { propertyKey → propertyValue }`). ' +
-      'Keys must exactly match the action property keys returned by the details endpoint, and values must follow the expected types and constraints. ' +
+      'Keys must exactly match the action property keys returned by the action details tool, and values must follow the expected types and constraints. ' +
       'The `input` object may be empty. For optional properties, omit the key if the value is unknown. ' +
       'For required properties, include the key with a `null` value if the value is unknown.',
   },
@@ -68,12 +68,33 @@ export type ActionErrorHandlingOptions = Static<
 
 export const SourceCode = Type.Object({
   packageJson: Type.String({
-    description:
-      'JSON string for a minimal package.json snippet focused on runtime dependencies. It must be a JSON object with an optional `dependencies` field mapping package names to version ranges. Example: { "dependencies": { "stylus": "0.64.0" } }. Use \'{}\' when there are no dependencies.',
+    description: `JSON string for a minimal package.json snippet focused on runtime dependencies. It must be a JSON object with an optional 'dependencies' field mapping package names to version ranges.
+
+Example:
+
+\`\`\`json
+{
+  "dependencies": {
+    "stylus": "0.64.0"
+  }
+}
+\`\`\`
+
+Use '{}' when there are no dependencies.`,
   }),
   code: Type.String({
-    description:
-      'JavaScript/TypeScript source for this step. To use data from previous steps, pass them as key–value pairs and access them via `inputs.key` in your code. The entry point must be an exported function named `code`. If it is removed or renamed, the step will fail.\n\nExample:\n```ts\nexport const code = async (inputs) => {\n  // use inputs.someKey\n  return true;\n};\n```',
+    description: `JavaScript/TypeScript source for this step. To use data from previous steps, pass them as key–value pairs and access them via 'inputs.key' in your code. The entry point must be an exported function named 'code'. If it is removed or renamed, the step will fail.
+
+code MUST follow this exact interface:
+
+\`\`\`javascript
+export const code = async (inputs) => {
+  // Your transformation logic here
+  // Process the inputs object
+  // Return the result
+  return result;
+};
+\`\`\``,
   }),
 });
 
