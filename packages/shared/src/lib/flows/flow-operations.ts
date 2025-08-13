@@ -122,7 +122,7 @@ export const AddActionRequest = Type.Object({
   branchNodeId: Type.Optional(
     Type.String({
       description:
-        'The unique identifier of the branch node this step belongs to, if applicable',
+        'The unique identifier of the branch node this step belongs to for placing the step inside a Split branch. Each branch in a Split node has a unique branchNodeId',
     }),
   ),
   action: UpdateActionRequest,
