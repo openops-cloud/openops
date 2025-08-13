@@ -106,6 +106,7 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
       return conversation;
     },
     enabled: isQueryEnabled,
+    refetchOnWindowFocus: false,
   });
 
   useEffect(() => {
@@ -167,6 +168,7 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
 
   useEffect(() => {
     messagesRef.current = chat.messages;
+    console.log('chat.messages', chat.messages);
   }, [chat.messages]);
 
   useEffect(() => {
