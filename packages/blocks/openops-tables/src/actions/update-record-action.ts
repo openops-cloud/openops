@@ -20,6 +20,13 @@ export const updateRecordAction = createAction({
   displayName: 'Add or Update Record',
   props: {
     tableName: openopsTablesDropdownProperty(),
+    roundToFieldPrecision: Property.Checkbox({
+      displayName: 'Round Numeric Values',
+      description:
+        'When ON, numeric inputs are rounded to the number of decimals specified by the destination field in the table. When OFF, inserts fail if inputs have more decimals than the field allows.',
+      required: false,
+      defaultValue: true,
+    }),
     rowPrimaryKey: Property.DynamicProperties({
       displayName: 'Row Primary Key',
       description:
@@ -111,6 +118,8 @@ export const updateRecordAction = createAction({
   async run(context) {
     const { rowPrimaryKey, fieldsProperties } = context.propsValue;
     const tableName = context.propsValue.tableName as unknown as string;
+    const roundToFieldPrecision =
+      (context.propsValue.roundToFieldPrecision as boolean) ?? true;
 
     const tableCacheKey = `${context.run.id}-table-${tableName}`;
     const tableId = await cacheWrapper.getOrAdd(
@@ -131,6 +140,7 @@ export const updateRecordAction = createAction({
       tableName,
       tableFields,
       fieldsProperties,
+      { roundToFieldPrecision },
     );
 
     const primaryKeyField = getPrimaryKeyFieldFromFields(tableFields);
@@ -158,27 +168,75 @@ function getPrimaryKey(rowPrimaryKey: any): string | undefined {
   return isEmpty(primaryKeyValue) ? undefined : primaryKeyValue;
 }
 
+function getFieldScale(field: OpenOpsField): number | undefined {
+  const f = field as any;
+  const s = f.number_decimal_places;
+
+  return typeof s === 'number' ? s : undefined;
+}
+
+function roundToScale(value: any, scale: number): string | number {
+  const n = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(n)) return value;
+  const s = n.toFixed(scale);
+  return scale === 0 ? Number(s) : s;
+}
+
+function hasMoreDecimalsThan(value: any, scale: number): boolean {
+  const n = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(n)) return false;
+  const factor = Math.pow(10, scale);
+  return Math.abs(n - Math.round(n * factor) / factor) > 1e-9;
+}
+
 function mapFieldsToObject(
   tableName: string,
   validColumns: OpenOpsField[],
   fieldsProperties: any,
+  options: { roundToFieldPrecision: boolean },
 ): Record<string, any> {
-  const validColumnsNames = new Set(validColumns.map((field) => field.name));
-  const updateFieldsProperty =
+  const byName = new Map(validColumns.map((field) => [field.name, field]));
+  const updateFields =
     (fieldsProperties['fieldsProperties'] as unknown as {
       fieldName: string;
       newFieldValue: any;
     }[]) ?? [];
 
   const fieldsToUpdate: Record<string, any> = {};
-  for (const { fieldName, newFieldValue } of updateFieldsProperty) {
-    if (!validColumnsNames.has(fieldName)) {
+
+  for (const { fieldName, newFieldValue } of updateFields) {
+    const field = byName.get(fieldName);
+    if (!field) {
       throw new Error(
         `Column ${fieldName} does not exist in table ${tableName}.`,
       );
     }
 
-    fieldsToUpdate[fieldName] = newFieldValue['newFieldValue'];
+    const value = newFieldValue['newFieldValue'];
+
+    const scale = getFieldScale(field);
+
+    if (scale === undefined) {
+      fieldsToUpdate[fieldName] = value;
+      continue;
+    }
+
+    if (value == null || (typeof value === 'string' && value.trim() === '')) {
+      fieldsToUpdate[fieldName] = value;
+      continue;
+    }
+
+    if (options.roundToFieldPrecision) {
+      fieldsToUpdate[fieldName] = roundToScale(value, scale);
+    } else {
+      if (hasMoreDecimalsThan(value, scale)) {
+        throw new Error(
+          `Field "${fieldName}" allows ${scale} decimal place(s); received ${value}. ` +
+            `Enable "Round numeric values (to field precision)" or provide a value with at most ${scale} decimals.`,
+        );
+      }
+      fieldsToUpdate[fieldName] = value;
+    }
   }
 
   return fieldsToUpdate;

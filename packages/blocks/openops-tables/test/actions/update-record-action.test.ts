@@ -37,11 +37,16 @@ describe('updateRowAction', () => {
   });
 
   test('should create action with correct properties', () => {
-    expect(Object.keys(updateRecordAction.props).length).toBe(3);
+    expect(Object.keys(updateRecordAction.props).length).toBe(4);
     expect(updateRecordAction.props).toMatchObject({
       tableName: {
         required: true,
         type: 'DROPDOWN',
+      },
+      roundToFieldPrecision: {
+        type: 'CHECKBOX',
+        required: false,
+        defaultValue: true,
       },
       rowPrimaryKey: {
         required: true,
