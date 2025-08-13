@@ -67,9 +67,7 @@ export class StorageLimitError extends ExecutionError {
     super(
       'StorageLimitError',
       formatMessage(
-        `Failed to read/write key "${key}", the storage value is larger than ${Math.floor(
-          maxStorageSizeInMB,
-        )} MB`,
+        `Failed to read/write key "${key}", the storage value is larger than ${maxStorageSizeInMB} MB`,
       ),
       ExecutionErrorType.USER,
       cause,
