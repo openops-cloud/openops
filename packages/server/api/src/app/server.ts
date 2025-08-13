@@ -39,7 +39,7 @@ async function setupBaseApp(): Promise<FastifyInstance> {
     trustProxy: true,
     ajv: {
       customOptions: {
-        removeAdditional: 'all',
+        removeAdditional: false,
         useDefaults: true,
         coerceTypes: 'array',
         formats: {},
