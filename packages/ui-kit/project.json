@@ -1,7 +1,7 @@
 {
   "name": "ui-kit",
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/ee/ui-kit/src",
+  "sourceRoot": "packages/ui-kit/src",
   "projectType": "library",
   "release": {
     "version": {
@@ -18,7 +18,7 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "packages/ee/ui-kit/jest.config.ts"
+        "jestConfig": "packages/ui-kit/jest.config.ts"
       }
     },
     "nx-release-publish": {

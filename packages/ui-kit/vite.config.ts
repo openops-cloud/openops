@@ -7,7 +7,7 @@ import dts from 'vite-plugin-dts';
 
 export default defineConfig({
   root: __dirname,
-  cacheDir: '../../../node_modules/.vite/packages/ee/ui-kit',
+  cacheDir: '../../../node_modules/.vite/packages/ui-kit',
 
   plugins: [
     react(),
@@ -22,7 +22,7 @@ export default defineConfig({
   // Configuration for building your library.
   // See: https://vitejs.dev/guide/build.html#library-mode
   build: {
-    outDir: '../../../dist/packages/ee/ui-kit',
+    outDir: '../../dist/packages/ui-kit',
     emptyOutDir: true,
     reportCompressedSize: true,
     commonjsOptions: {
