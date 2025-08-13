@@ -17,7 +17,7 @@ To obtain your API key, follow these steps:
 2. Click on the Security & access section in the left pane.
 3. In Personal API keys section, click on the New API key to create a key.
 
-⚠️ For a Linear event **Trigger**, you need an API key with admin permissions.`;
+⚠️ For a Linear event **Trigger**, you need an API key with workspace admin permissions (i.e., the API key must be created by a user with workspace admin rights).`;
 
 export const linearAuth = BlockAuth.SecretAuth({
   authProviderKey: 'Linear',
