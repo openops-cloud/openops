@@ -26,7 +26,7 @@ export const cronExpressionTrigger = createTrigger({
       defaultValue: 'UTC',
     }),
   },
-  type: TriggerStrategy.POLLING,
+  type: TriggerStrategy.SCHEDULED,
   sampleData: {},
   onEnable: async (ctx) => {
     ctx.setSchedule({

@@ -307,7 +307,7 @@ async function validateTriggerType(
     });
 
     if (
-      metadata.type === TriggerStrategy.POLLING ||
+      metadata.type === TriggerStrategy.SCHEDULED ||
       metadata.type == TriggerStrategy.WEBHOOK
     ) {
       return {
