@@ -9,7 +9,7 @@
  */
 export function extractErrorMessage(
   error: unknown,
-  fallback = 'An unknown error occurred',
+  fallback = 'An unknown error occurred. Please start a new chat.',
 ): string {
   if (error instanceof Error && error.message) {
     return error.message;
