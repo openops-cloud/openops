@@ -70,6 +70,7 @@ export default defineConfig({
       transformMixedEsModules: true,
     },
     rollupOptions: {
+      external: ['@openops/ui-kit'],
       onLog(level, log, handler) {
         if (
           log.cause &&
