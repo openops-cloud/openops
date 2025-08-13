@@ -154,7 +154,14 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
     }),
     onError: (error) => {
       console.error('chat error', JSON.stringify(error));
-      const errorToast = createErrorToast(error);
+      const errorToast = {
+        title: t('AI Chat Error'),
+        description: t(
+          'There was an error while processing your request, please try again or open a new chat',
+        ),
+        variant: 'destructive' as const,
+        duration: 10000,
+      };
       toast(errorToast);
     },
   });
