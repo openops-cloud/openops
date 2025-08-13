@@ -1,6 +1,6 @@
 import { Store, StoreScope } from '@openops/blocks-framework';
 import {
-  getMaximumRequestBodySizeWithBufferInMegabytes,
+  MAX_REQUEST_BODY_WITH_BUFFER_MB,
   ONE_MB_IN_BYTES,
 } from '@openops/server-shared';
 import {
@@ -56,8 +56,7 @@ export const createStorageService = ({
 
       try {
         const sizeOfValue = sizeof(request.value);
-        const maxStorageSizeMB =
-          getMaximumRequestBodySizeWithBufferInMegabytes();
+        const maxStorageSizeMB = MAX_REQUEST_BODY_WITH_BUFFER_MB;
         const maxStorageSizeBytes = maxStorageSizeMB * ONE_MB_IN_BYTES;
 
         if (sizeOfValue > maxStorageSizeBytes) {
@@ -250,8 +249,7 @@ const handleResponseError = async ({
   }
 
   if (response.status === StatusCodes.REQUEST_TOO_LONG) {
-    const maxStorageSize = getMaximumRequestBodySizeWithBufferInMegabytes();
-    throw new StorageLimitError(key, maxStorageSize);
+    throw new StorageLimitError(key, MAX_REQUEST_BODY_WITH_BUFFER_MB);
   }
   const cause = await response.text();
   throw new StorageError(key, cause);

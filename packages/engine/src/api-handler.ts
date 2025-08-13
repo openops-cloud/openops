@@ -1,8 +1,8 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import {
   blocksBuilder,
-  getMaximumRequestBodySizeInBytes,
   logger,
+  MAX_REQUEST_BODY_BYTES,
   runWithLogContext,
   setStopHandlers,
 } from '@openops/server-shared';
@@ -12,7 +12,7 @@ import { StatusCodes } from 'http-status-codes';
 import { executeEngine } from './engine-executor';
 import { EngineRequest } from './main';
 
-const app = fastify({ bodyLimit: getMaximumRequestBodySizeInBytes() });
+const app = fastify({ bodyLimit: MAX_REQUEST_BODY_BYTES });
 
 const engineController: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.post(
