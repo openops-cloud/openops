@@ -1,4 +1,3 @@
-/// <reference types='vitest' />
 import path from 'path';
 
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
@@ -6,6 +5,7 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import checker from 'vite-plugin-checker';
 import circleDependency from 'vite-plugin-circular-dependency';
+import commonjs from 'vite-plugin-commonjs';
 
 export default defineConfig({
   root: __dirname,
@@ -44,10 +44,15 @@ export default defineConfig({
         __dirname,
         '../../packages/blocks/framework/src',
       ),
+      '@openops/ui-kit': path.resolve(
+        __dirname,
+        '../../packages/ee/ui-kit/src',
+      ),
     },
   },
   plugins: [
     react(),
+    commonjs(),
     nxViteTsPaths(),
     checker({
       typescript: true,
