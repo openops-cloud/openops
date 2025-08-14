@@ -7,7 +7,6 @@ jest.mock('@/app/lib/utils', () => ({
   },
 }));
 
-
 describe('dataSelectorUtils', () => {
   describe('getAllStepsMentions', () => {
     const baseStep = {
