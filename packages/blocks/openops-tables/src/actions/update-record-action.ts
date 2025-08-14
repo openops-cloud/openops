@@ -171,28 +171,29 @@ function getPrimaryKey(rowPrimaryKey: any): string | undefined {
 }
 
 function getFieldDecimalPlaces(field: OpenOpsField): number | undefined {
-  const f = field as any;
-  const s = f.number_decimal_places;
+  const fieldObj = field as any;
+  const decimalPlaces = fieldObj.number_decimal_places;
 
-  return typeof s === 'number' ? s : undefined;
+  return typeof decimalPlaces === 'number' ? decimalPlaces : undefined;
 }
 
 function formatDecimalPlaces(
   value: any,
   decimalPlaces: number,
 ): string | number {
-  const n = typeof value === 'number' ? value : Number(value);
-  if (!Number.isFinite(n)) return value;
-  const s = n.toFixed(decimalPlaces);
-  return decimalPlaces === 0 ? Number(s) : s;
+  const numericValue = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(numericValue)) return value;
+  const roundedValue = numericValue.toFixed(decimalPlaces);
+  return decimalPlaces === 0 ? Number(roundedValue) : roundedValue;
 }
 
 function hasMoreDecimalsThan(value: any, decimalPlaces: number): boolean {
-  const n = typeof value === 'number' ? value : Number(value);
-  if (!Number.isFinite(n)) return false;
+  const numericValue = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(numericValue)) return false;
   const factor = Math.pow(10, decimalPlaces);
   return (
-    Math.abs(n - Math.round(n * factor) / factor) > FLOAT_COMPARISON_EPSILON
+    Math.abs(numericValue - Math.round(numericValue * factor) / factor) >
+    FLOAT_COMPARISON_EPSILON
   );
 }
 
