@@ -22,6 +22,7 @@ const GetFileRequest = {
     allowedPrincipals: [PrincipalType.USER],
   },
   schema: {
+    operationId: 'Get File',
     params: Type.Object({
       fileId: Type.String(),
     }),

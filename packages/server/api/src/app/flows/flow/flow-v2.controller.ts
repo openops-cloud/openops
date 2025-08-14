@@ -87,6 +87,7 @@ const AddStepRequestOptions = {
     permission: Permission.UPDATE_FLOW_STATUS,
   },
   schema: {
+    operationId: 'Add Workflow Step',
     tags: ['flows-v2'],
     description:
       'Add a new step to a workflow. This endpoint allows you to add actions, triggers, or other step types to an existing workflow. The step will be added at the specified location relative to the parent step. Note: The parentStep parameter should be the name of the step (e.g., "step_1", "step_3", "trigger"), not the step ID.',
