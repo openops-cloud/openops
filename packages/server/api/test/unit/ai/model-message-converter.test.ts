@@ -1,5 +1,5 @@
 import { ModelMessage } from 'ai';
-import { convertToUIMessages } from './model-message-converter';
+import { convertToUIMessages } from '../../../src/app/ai/chat/model-message-converter';
 
 describe('ModelMessageConverter', () => {
   describe('convertToUIMessages', () => {
