@@ -184,7 +184,7 @@ const ListBlocksRequest = {
     allowedPrincipals: ALL_PRINCIPAL_TYPES,
   },
   schema: {
-    operationId: 'List Blocks Run',
+    operationId: 'List Blocks',
     querystring: ListBlocksRequestQuery,
     description:
       'List all available blocks with advanced filtering and sorting capabilities. This endpoint retrieves a comprehensive list of blocks that can be used in workflows, including both official and custom blocks. Supports filtering by package version, tags, categories, block type, and search queries. Results can be sorted by name, update date, creation date, or popularity.',
@@ -196,7 +196,7 @@ const GetBlockParamsRequest = {
     allowedPrincipals: ALL_PRINCIPAL_TYPES,
   },
   schema: {
-    operationId: 'Get Block Run',
+    operationId: 'Get Block Info',
     description:
       'Retrieve detailed information about a specific block by its name. This endpoint returns the complete block metadata including its configuration, actions, triggers, properties, and authentication requirements. Optionally specify a package version to get historical block data or check compatibility. The response includes all necessary information for integrating the block into workflows.',
     params: GetBlockRequestParams,
@@ -209,7 +209,7 @@ const GetBlockParamsWithScopeRequest = {
     allowedPrincipals: ALL_PRINCIPAL_TYPES,
   },
   schema: {
-    operationId: 'Get Scoped Block Run',
+    operationId: 'Get Scoped Block',
     description:
       'Retrieve detailed information about a scoped block (e.g., custom blocks or organization-specific blocks). This endpoint returns the complete block metadata for blocks that belong to a specific scope or namespace. Includes all configuration details, actions, triggers, and authentication requirements. Useful for accessing custom blocks or blocks from specific organizations.',
     params: GetBlockRequestWithScopeParams,
