@@ -20,13 +20,6 @@ export const updateRecordAction = createAction({
   displayName: 'Add or Update Record',
   props: {
     tableName: openopsTablesDropdownProperty(),
-    roundToFieldPrecision: Property.Checkbox({
-      displayName: 'Round Numeric Values',
-      description:
-        'When ON, numeric inputs are rounded to the number of decimals specified by the destination field in the table. When OFF, inserts fail if inputs have more decimals than the field allows.',
-      required: false,
-      defaultValue: true,
-    }),
     rowPrimaryKey: Property.DynamicProperties({
       displayName: 'Row Primary Key',
       description:
@@ -113,6 +106,13 @@ export const updateRecordAction = createAction({
         });
         return properties;
       },
+    }),
+    roundToFieldPrecision: Property.Checkbox({
+      displayName: 'Round Numeric Values',
+      description:
+        'When ON, numeric inputs are rounded to the number of decimals specified by the destination field in the table. When OFF, inserts fail if inputs have more decimals than the field allows.',
+      required: false,
+      defaultValue: true,
     }),
   },
   async run(context) {
