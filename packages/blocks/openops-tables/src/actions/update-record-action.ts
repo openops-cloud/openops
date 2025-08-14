@@ -13,7 +13,6 @@ import {
 import { cacheWrapper } from '@openops/server-shared';
 import { convertToStringWithValidation, isEmpty } from '@openops/shared';
 
-// Used to determine if a number has more decimals than allowed.
 const FLOAT_COMPARISON_EPSILON = 1e-9;
 
 export const updateRecordAction = createAction({
@@ -171,29 +170,27 @@ function getPrimaryKey(rowPrimaryKey: any): string | undefined {
   return isEmpty(primaryKeyValue) ? undefined : primaryKeyValue;
 }
 
-// Returns the allowed number of decimal places for a numeric field in the destination table.
-function getFieldScale(field: OpenOpsField): number | undefined {
+function getFieldDecimalPlaces(field: OpenOpsField): number | undefined {
   const f = field as any;
   const s = f.number_decimal_places;
 
   return typeof s === 'number' ? s : undefined;
 }
 
-/**
- * Rounds a numeric value to the specified number of decimal places.
- * Returns a string if scale > 0, or a number if scale is 0.
- */
-function roundToScale(value: any, scale: number): string | number {
+function formatDecimalPlaces(
+  value: any,
+  decimalPlaces: number,
+): string | number {
   const n = typeof value === 'number' ? value : Number(value);
   if (!Number.isFinite(n)) return value;
-  const s = n.toFixed(scale);
-  return scale === 0 ? Number(s) : s;
+  const s = n.toFixed(decimalPlaces);
+  return decimalPlaces === 0 ? Number(s) : s;
 }
 
-function hasMoreDecimalsThan(value: any, scale: number): boolean {
+function hasMoreDecimalsThan(value: any, decimalPlaces: number): boolean {
   const n = typeof value === 'number' ? value : Number(value);
   if (!Number.isFinite(n)) return false;
-  const factor = Math.pow(10, scale);
+  const factor = Math.pow(10, decimalPlaces);
   return (
     Math.abs(n - Math.round(n * factor) / factor) > FLOAT_COMPARISON_EPSILON
   );
@@ -205,7 +202,9 @@ function mapFieldsToObject(
   fieldsProperties: any,
   options: { roundToFieldPrecision: boolean },
 ): Record<string, any> {
-  const byName = new Map(validColumns.map((field) => [field.name, field]));
+  const availableColumns: Record<string, OpenOpsField> = Object.fromEntries(
+    validColumns.map((field) => [field.name, field]),
+  );
   const updateFields =
     (fieldsProperties['fieldsProperties'] as unknown as {
       fieldName: string;
@@ -215,7 +214,7 @@ function mapFieldsToObject(
   const fieldsToUpdate: Record<string, any> = {};
 
   for (const { fieldName, newFieldValue } of updateFields) {
-    const field = byName.get(fieldName);
+    const field = availableColumns[fieldName];
     if (!field) {
       throw new Error(
         `Column ${fieldName} does not exist in table ${tableName}.`,
@@ -224,9 +223,9 @@ function mapFieldsToObject(
 
     const value = newFieldValue['newFieldValue'];
 
-    const scale = getFieldScale(field);
+    const decimalPlaces = getFieldDecimalPlaces(field);
 
-    if (scale === undefined) {
+    if (decimalPlaces === undefined) {
       fieldsToUpdate[fieldName] = value;
       continue;
     }
@@ -237,12 +236,12 @@ function mapFieldsToObject(
     }
 
     if (options.roundToFieldPrecision) {
-      fieldsToUpdate[fieldName] = roundToScale(value, scale);
+      fieldsToUpdate[fieldName] = formatDecimalPlaces(value, decimalPlaces);
     } else {
-      if (hasMoreDecimalsThan(value, scale)) {
+      if (hasMoreDecimalsThan(value, decimalPlaces)) {
         throw new Error(
-          `Field "${fieldName}" allows ${scale} decimal place(s); received ${value}. ` +
-            `Enable "Round numeric values (to field precision)" or provide a value with at most ${scale} decimals.`,
+          `Field "${fieldName}" allows ${decimalPlaces} decimal place(s); received ${value}. ` +
+            `Enable "Round Numeric Values" or provide a value with at most ${decimalPlaces} decimals.`,
         );
       }
       fieldsToUpdate[fieldName] = value;

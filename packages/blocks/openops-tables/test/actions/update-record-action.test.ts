@@ -326,7 +326,7 @@ describe('updateRowAction', () => {
     context.propsValue.roundToFieldPrecision = false;
 
     await expect(updateRecordAction.run(context)).rejects.toThrow(
-      'Field "amount" allows 2 decimal place(s); received 3.14159. Enable "Round numeric values (to field precision)" or provide a value with at most 2 decimals.',
+      'Field "amount" allows 2 decimal place(s); received 3.14159. Enable "Round Numeric Values" or provide a value with at most 2 decimals.',
     );
   });
 });
