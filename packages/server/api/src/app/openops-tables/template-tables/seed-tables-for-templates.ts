@@ -56,7 +56,7 @@ export const seedTemplateTablesService = {
     logger.info('[Seeding Known cost types by application table] Done');
   },
 
-  async createAutoInstancesShutdownTable() {
+  async createAutoInstancesShutdownTable(): Promise<void> {
     const { token } = await authenticateDefaultUserInOpenOpsTables();
     const databaseId = await getDefaultDatabaseId(token);
 
