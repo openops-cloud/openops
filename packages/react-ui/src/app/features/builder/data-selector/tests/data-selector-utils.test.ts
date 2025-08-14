@@ -1,5 +1,4 @@
 import { ActionType, StepWithIndex, TriggerType } from '@openops/shared';
-import { BuilderState } from '../../builder-types';
 import { dataSelectorUtils, MentionTreeNode } from '../data-selector-utils';
 
 jest.mock('@/app/lib/utils', () => ({
@@ -8,46 +7,6 @@ jest.mock('@/app/lib/utils', () => ({
   },
 }));
 
-const createTestTrigger = (name = 'trigger'): any => ({
-  name,
-  displayName: 'Test Trigger',
-  type: TriggerType.BLOCK,
-  settings: {},
-  valid: true,
-  nextAction: null,
-});
-
-const createTestAction = (
-  name: string,
-  displayName: string,
-  nextAction = null,
-): any => ({
-  id: name,
-  name,
-  displayName,
-  type: ActionType.BLOCK,
-  settings: {},
-  valid: true,
-  nextAction,
-});
-
-const createTestFlow = () => {
-  const step3 = createTestAction('step3', 'Step 3');
-  const step2 = createTestAction('step2', 'Step 2', step3);
-  const step1 = createTestAction('step1', 'Step 1', step2);
-  const trigger = createTestTrigger();
-  trigger.nextAction = step1;
-  return trigger;
-};
-
-const createBuilderState = (overrides = {}): BuilderState => {
-  const defaultState: any = {
-    flow: { id: 'flow1', name: 'Test Flow' },
-    flowVersion: { id: 'version1' },
-  };
-
-  return { ...defaultState, ...overrides };
-};
 
 describe('dataSelectorUtils', () => {
   describe('getAllStepsMentions', () => {
