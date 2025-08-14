@@ -2,12 +2,12 @@ import {
   FastifyPluginAsyncTypebox,
   Type,
 } from '@fastify/type-provider-typebox';
+import { MAX_REQUEST_BODY_BYTES } from '@openops/server-shared';
 import {
   DeleteStoreEntryRequest,
   GetStoreEntryRequest,
   PrincipalType,
   PutStoreEntryRequest,
-  STORE_VALUE_MAX_SIZE,
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
 import sizeof from 'object-sizeof';
@@ -18,7 +18,7 @@ export const storeEntryController: FastifyPluginAsyncTypebox = async (
 ) => {
   fastify.post('/', CreateRequest, async (request, reply) => {
     const sizeOfValue = sizeof(request.body.value);
-    if (sizeOfValue > STORE_VALUE_MAX_SIZE) {
+    if (sizeOfValue > MAX_REQUEST_BODY_BYTES) {
       await reply.status(StatusCodes.REQUEST_TOO_LONG).send({});
       return;
     }
