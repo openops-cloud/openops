@@ -1,4 +1,3 @@
-export * from './ai-chat-input';
 export * from './ai-model-selector';
 export * from './ai-scope-selector';
 export * from './assistant-ui-chat-container';

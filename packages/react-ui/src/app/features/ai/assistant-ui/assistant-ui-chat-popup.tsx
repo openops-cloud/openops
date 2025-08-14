@@ -105,7 +105,6 @@ const AssistantUiChatPopup = ({
       maxSize={sizes.max}
       showAiChat={isAiChatOpened}
       className={cn('left-4 bottom-[17px]', className)}
-      toggleAiChatState={onToggleAiChatState}
       minWidth={CHAT_MIN_WIDTH}
       aiChatSize={aiChatSize}
     >
