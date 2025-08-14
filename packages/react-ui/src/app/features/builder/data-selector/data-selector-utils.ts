@@ -272,26 +272,10 @@ function filterBy(arr: MentionTreeNode[], query: string): MentionTreeNode[] {
   }, [] as MentionTreeNode[]);
 }
 
-/**
- * Selector that computes the path to the target step using flowHelper.findPathToStep
- */
-const getPathToTargetStep = (state: BuilderState) => {
-  const { selectedStep, flowVersion } = state;
-  if (!selectedStep || !flowVersion?.trigger) {
-    return [];
-  }
-  const pathToTargetStep = flowHelper.findPathToStep({
-    targetStepName: selectedStep,
-    trigger: flowVersion.trigger,
-  });
-  return pathToTargetStep;
-};
-
 export const dataSelectorUtils = {
   traverseStepOutputAndReturnMentionTree,
   getAllStepsMentions,
   createTestNode,
   filterBy,
-  getPathToTargetStep,
   hasStepSampleData,
 };
