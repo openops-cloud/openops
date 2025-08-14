@@ -1,5 +1,4 @@
 import { ToolCallMessagePartProps } from '@assistant-ui/react';
-import { t } from 'i18next';
 import {
   ChevronDownIcon,
   ChevronUpIcon,
@@ -30,9 +29,8 @@ const BaseToolWrapper = ({
     <div className="mb-4 flex w-full flex-col gap-3 rounded-lg border border-border bg-background py-3">
       <div className="flex items-center gap-2 px-4">
         {isComplete && <CircleCheck className="size-4 text-success" />}
-        {isIncomplete && <XCircle className="size-4 text-foreground" />}
+        {isIncomplete && <XCircle className="size-4 text-destructive" />}
         <p className="text-foreground">
-          {isIncomplete && t('Incomplete tool call: ')}
           <b className="text-foreground">{toolName}</b>
         </p>
         <div className="flex-grow" />
