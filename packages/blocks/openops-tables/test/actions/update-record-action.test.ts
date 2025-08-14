@@ -46,7 +46,7 @@ describe('updateRowAction', () => {
       roundToFieldPrecision: {
         type: 'CHECKBOX',
         required: false,
-        defaultValue: true,
+        defaultValue: false,
       },
       rowPrimaryKey: {
         required: true,

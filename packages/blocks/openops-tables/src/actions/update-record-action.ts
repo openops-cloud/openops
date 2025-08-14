@@ -114,14 +114,14 @@ export const updateRecordAction = createAction({
       description:
         'When ON, numeric inputs are rounded to the number of decimals specified by the destination field in the table. When OFF, inserts fail if inputs have more decimals than the field allows.',
       required: false,
-      defaultValue: true,
+      defaultValue: false,
     }),
   },
   async run(context) {
     const { rowPrimaryKey, fieldsProperties } = context.propsValue;
     const tableName = context.propsValue.tableName as unknown as string;
     const roundToFieldPrecision =
-      (context.propsValue.roundToFieldPrecision as boolean) ?? true;
+      (context.propsValue.roundToFieldPrecision as boolean) ?? false;
 
     const tableCacheKey = `${context.run.id}-table-${tableName}`;
     const tableId = await cacheWrapper.getOrAdd(
