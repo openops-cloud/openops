@@ -6,7 +6,7 @@ export function extractMessage(
     return error.message;
   }
 
-  const messageProperty = findFirstMessageProperty(error);
+  const messageProperty = findFirstMessageProperty(error, new Set<unknown>());
   if (messageProperty) {
     return messageProperty;
   }
@@ -18,14 +18,27 @@ export function extractMessage(
   return fallback;
 }
 
-function findFirstMessageProperty(obj: unknown): string | undefined {
+function findFirstMessageProperty(
+  obj: unknown,
+  visited: Set<unknown>,
+): string | undefined {
   if (obj && typeof obj === 'object') {
+    if (visited.has(obj)) {
+      return undefined;
+    }
+
+    visited.add(obj);
     for (const [key, value] of Object.entries(obj)) {
       if (key === 'message' && typeof value === 'string') {
-        return value;
+        const trimmed = value.trim();
+        if (trimmed) {
+          return trimmed;
+        }
+
+        continue;
       }
 
-      const deeper = findFirstMessageProperty(value);
+      const deeper = findFirstMessageProperty(value, visited);
       if (deeper) {
         return deeper;
       }

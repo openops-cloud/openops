@@ -3,6 +3,11 @@ import { extractMessage } from '../../../src/app/ai/chat/message-extractor';
 
 describe('Extract message from object', () => {
   const defaultFallback = 'An unknown error occurred. Please start a new chat.';
+  const circularObj = {
+    property: 1,
+    obj: {},
+  };
+  circularObj.obj = circularObj;
 
   test.each([
     [undefined, defaultFallback],
@@ -22,6 +27,7 @@ describe('Extract message from object', () => {
     [undefined as any, defaultFallback],
     [true as any, defaultFallback],
     [Symbol('x') as any, defaultFallback],
+    [circularObj, defaultFallback],
     [
       {
         message: { text: 'not-a-string' },
