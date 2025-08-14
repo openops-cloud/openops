@@ -1,11 +1,9 @@
-import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { useResizablePanelGroup } from '@/app/common/hooks/use-resizable-panel-group';
 import { RESIZABLE_PANEL_IDS } from '@/app/constants/layout';
 import AssistantUiChat from '@/app/features/ai/assistant-ui/assistant-ui-chat';
 import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
 import { useAppStore } from '@/app/store/app-store';
 import { cn, ResizableHandle, ResizablePanel } from '@openops/components/ui';
-import { FlagId } from '@openops/shared';
 import { t } from 'i18next';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ImperativePanelHandle } from 'react-resizable-panels';
@@ -27,18 +25,10 @@ const AiChatResizablePanelContent = ({
 };
 
 type AiChatResizablePanelProps = {
-  isDraggingHandle: boolean;
   onDragging: (onDragging: boolean) => void;
 };
 
-const AiChatResizablePanel = ({
-  isDraggingHandle,
-  onDragging,
-}: AiChatResizablePanelProps) => {
-  const showChatInResizablePanel = flagsHooks.useFlag<boolean>(
-    FlagId.ASSISTANT_UI_ENABLED,
-  ).data;
-
+const AiChatResizablePanel = ({ onDragging }: AiChatResizablePanelProps) => {
   const { isAiChatOpened, setIsAiChatOpened } = useAppStore((s) => ({
     isAiChatOpened: s.isAiChatOpened,
     setIsAiChatOpened: s.setIsAiChatOpened,
@@ -54,18 +44,8 @@ const AiChatResizablePanel = ({
   const { getPanelSize } = useResizablePanelGroup();
 
   const showChat = useMemo(() => {
-    return (
-      !!showChatInResizablePanel &&
-      !!hasActiveAiSettings &&
-      !!isAiChatOpened &&
-      !isLoading
-    );
-  }, [
-    hasActiveAiSettings,
-    isAiChatOpened,
-    isLoading,
-    showChatInResizablePanel,
-  ]);
+    return !!hasActiveAiSettings && !!isAiChatOpened && !isLoading;
+  }, [hasActiveAiSettings, isAiChatOpened, isLoading]);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {

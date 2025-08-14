@@ -1,7 +1,5 @@
-import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { FLOW_CANVAS_Y_OFFESET } from '@/app/constants/flow-canvas';
 import { AiAssistantButton } from '@/app/features/ai/ai-assistant-button';
-import { AiAssistantChat } from '@/app/features/ai/ai-assistant-chat';
 import { AiConfigurationPrompt } from '@/app/features/ai/ai-configuration-prompt';
 import { useAppStore } from '@/app/store/app-store';
 import {
@@ -13,15 +11,13 @@ import {
 import {
   Action,
   ActionType,
-  FlagId,
   flowHelper,
   FlowVersion,
   isNil,
   StepLocationRelativeToParent,
 } from '@openops/shared';
-import React, { MutableRefObject, useCallback, useEffect, useRef } from 'react';
+import { MutableRefObject, useCallback, useEffect, useRef } from 'react';
 import { useDebounceCallback } from 'usehooks-ts';
-import { StepSettingsAiChat } from './ai-chat/step-settings-ai-chat';
 import { StepSettingsAssistantUiChat } from './ai-chat/step-settings-assistant-ui-chat';
 import { textMentionUtils } from './block-properties/text-input-with-mentions/text-input-utils';
 import { BuilderHeader } from './builder-header/builder-header';
@@ -55,7 +51,6 @@ const InteractiveBuilder = ({
   middlePanelSize,
   flowVersion,
   lefSideBarContainerWidth,
-  showAiChat,
 }: {
   selectedStep: string | null;
   clearSelectedStep: () => void;
@@ -66,7 +61,6 @@ const InteractiveBuilder = ({
   };
   lefSideBarContainerWidth: number;
   flowVersion: FlowVersion;
-  showAiChat: boolean;
 }) => {
   const { onPaste } = usePaste();
 
@@ -152,10 +146,6 @@ const InteractiveBuilder = ({
     }
   };
 
-  const assistantUiEnabled = flagsHooks.useFlag<boolean>(
-    FlagId.ASSISTANT_UI_ENABLED,
-  ).data;
-
   return (
     <InteractiveContextProvider
       selectedStep={selectedStep}
@@ -166,12 +156,6 @@ const InteractiveBuilder = ({
     >
       <div ref={middlePanelRef} className="relative h-full w-full">
         <BuilderHeader />
-        {showAiChat && (
-          <AiAssistantChat
-            middlePanelSize={middlePanelSize}
-            className={'left-4 bottom-[70px]'}
-          />
-        )}
         <AiConfigurationPrompt className={'left-4 bottom-[70px]'} />
         <CanvasControls
           topOffset={FLOW_CANVAS_Y_OFFESET}
@@ -186,20 +170,13 @@ const InteractiveBuilder = ({
           className="flex flex-col absolute bottom-0 right-0"
           ref={containerRef}
         >
-          {selectedStep &&
-            (assistantUiEnabled ? (
-              <StepSettingsAssistantUiChat
-                middlePanelSize={middlePanelSize}
-                selectedStep={selectedStep}
-                flowVersion={flowVersion}
-              />
-            ) : (
-              <StepSettingsAiChat
-                middlePanelSize={middlePanelSize}
-                selectedStep={selectedStep}
-                flowVersion={flowVersion}
-              />
-            ))}
+          {selectedStep && (
+            <StepSettingsAssistantUiChat
+              middlePanelSize={middlePanelSize}
+              selectedStep={selectedStep}
+              flowVersion={flowVersion}
+            />
+          )}
           <DataSelector
             parentHeight={middlePanelSize.height}
             parentWidth={middlePanelSize.width}
