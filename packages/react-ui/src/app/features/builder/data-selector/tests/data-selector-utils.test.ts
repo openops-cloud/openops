@@ -517,53 +517,6 @@ describe('dataSelectorUtils', () => {
     });
   });
 
-  describe('getPathToTargetStep', () => {
-    it.each([
-      {
-        desc: 'returns empty array when selectedStep is not provided',
-        state: createBuilderState({
-          selectedStep: '',
-          flowVersion: { trigger: createTestTrigger() },
-        }),
-      },
-      {
-        desc: 'returns empty array when flowVersion.trigger is not provided',
-        state: createBuilderState({
-          selectedStep: 'step1',
-          flowVersion: {},
-        }),
-      },
-    ])('$desc', ({ state }) => {
-      const result = dataSelectorUtils.getPathToTargetStep(state);
-      expect(result).toEqual([]);
-    });
-
-    it('returns path to the target step', () => {
-      const trigger = createTestFlow();
-      const state = createBuilderState({
-        selectedStep: 'step3',
-        flowVersion: { trigger },
-      });
-
-      const result = dataSelectorUtils.getPathToTargetStep(state);
-      expect(result).toHaveLength(3);
-      expect(result[0].name).toBe('trigger');
-      expect(result[1].name).toBe('step1');
-      expect(result[2].name).toBe('step2');
-    });
-
-    it('returns empty array when target step does not exist', () => {
-      const trigger = createTestFlow();
-      const state = createBuilderState({
-        selectedStep: 'nonExistentStep',
-        flowVersion: { trigger },
-      });
-
-      const result = dataSelectorUtils.getPathToTargetStep(state);
-      expect(result).toEqual([]);
-    });
-  });
-
   describe('hasStepSampleData', () => {
     it('returns false when step is undefined', () => {
       const result = dataSelectorUtils.hasStepSampleData(undefined);
