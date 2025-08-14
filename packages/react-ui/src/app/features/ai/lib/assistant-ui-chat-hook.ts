@@ -106,6 +106,7 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
       return conversation;
     },
     enabled: isQueryEnabled,
+    refetchOnWindowFocus: false,
   });
 
   useEffect(() => {
