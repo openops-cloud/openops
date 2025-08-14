@@ -13,6 +13,9 @@ import {
 import { cacheWrapper } from '@openops/server-shared';
 import { convertToStringWithValidation, isEmpty } from '@openops/shared';
 
+// Used to determine if a number has more decimals than allowed.
+const FLOAT_COMPARISON_EPSILON = 1e-9;
+
 export const updateRecordAction = createAction({
   auth: BlockAuth.None(),
   name: 'update_record',
@@ -168,6 +171,7 @@ function getPrimaryKey(rowPrimaryKey: any): string | undefined {
   return isEmpty(primaryKeyValue) ? undefined : primaryKeyValue;
 }
 
+// Returns the allowed number of decimal places for a numeric field in the destination table.
 function getFieldScale(field: OpenOpsField): number | undefined {
   const f = field as any;
   const s = f.number_decimal_places;
@@ -175,6 +179,10 @@ function getFieldScale(field: OpenOpsField): number | undefined {
   return typeof s === 'number' ? s : undefined;
 }
 
+/**
+ * Rounds a numeric value to the specified number of decimal places.
+ * Returns a string if scale > 0, or a number if scale is 0.
+ */
 function roundToScale(value: any, scale: number): string | number {
   const n = typeof value === 'number' ? value : Number(value);
   if (!Number.isFinite(n)) return value;
@@ -186,7 +194,9 @@ function hasMoreDecimalsThan(value: any, scale: number): boolean {
   const n = typeof value === 'number' ? value : Number(value);
   if (!Number.isFinite(n)) return false;
   const factor = Math.pow(10, scale);
-  return Math.abs(n - Math.round(n * factor) / factor) > 1e-9;
+  return (
+    Math.abs(n - Math.round(n * factor) / factor) > FLOAT_COMPARISON_EPSILON
+  );
 }
 
 function mapFieldsToObject(
