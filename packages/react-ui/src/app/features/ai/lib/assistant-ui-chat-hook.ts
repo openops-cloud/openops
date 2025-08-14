@@ -3,11 +3,13 @@ import { aiAssistantChatApi } from '@/app/features/ai/lib/ai-assistant-chat-api'
 import { getActionName, getBlockName } from '@/app/features/blocks/lib/utils';
 import { authenticationSession } from '@/app/lib/authentication-session';
 import { useChat } from '@ai-sdk/react';
+import { AssistantRuntime } from '@assistant-ui/react';
 import { useAISDKRuntime } from '@assistant-ui/react-ai-sdk';
 import { toast } from '@openops/components/ui';
 import { flowHelper, FlowVersion, OpenChatResponse } from '@openops/shared';
+import { getFrontendToolDefinitions } from '@openops/ui-kit';
 import { useQuery } from '@tanstack/react-query';
-import { DefaultChatTransport, UIMessage } from 'ai';
+import { DefaultChatTransport, ToolSet, UIMessage } from 'ai';
 import { t } from 'i18next';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { aiChatApi } from '../../builder/ai-chat/lib/chat-api';
@@ -46,6 +48,11 @@ const buildQueryKey = (
 };
 
 export const useAssistantChat = (props: UseAssistantChatProps) => {
+  const runtimeRef = useRef<AssistantRuntime | null>(null);
+  const frontendTools = useMemo(
+    () => getFrontendToolDefinitions() as ToolSet,
+    [],
+  );
   const { flowVersion, selectedStep, chatId, onChatIdChange } = props;
 
   const { hasActiveAiSettings, isLoading: isLoadingAiSettings } =
@@ -150,6 +157,7 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
       body: () => ({
         ...bodyRef.current,
         messages: messagesRef.current,
+        tools: runtimeRef.current?.thread?.getModelContext()?.tools ?? {},
       }),
     }),
     onError: (error) => {
@@ -163,6 +171,22 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
         duration: 10000,
       };
       toast(errorToast);
+    },
+    // https://github.com/assistant-ui/assistant-ui/issues/2327
+    // handle frontend tool calls manually until this is fixed
+    onToolCall: async ({ toolCall }: { toolCall: any }) => {
+      if (toolCall.toolName?.startsWith('ui-')) {
+        try {
+          const tool =
+            frontendTools[toolCall.toolName as keyof typeof frontendTools];
+
+          if (tool && tool.execute) {
+            await tool.execute(toolCall.input || toolCall.args, {} as any);
+          }
+        } catch (error) {
+          console.error('Error executing frontend tool:', error);
+        }
+      }
     },
   });
 
