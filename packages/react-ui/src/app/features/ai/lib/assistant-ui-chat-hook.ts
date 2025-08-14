@@ -106,6 +106,7 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
       return conversation;
     },
     enabled: isQueryEnabled,
+    refetchOnWindowFocus: false,
   });
 
   useEffect(() => {
@@ -151,6 +152,18 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
         messages: messagesRef.current,
       }),
     }),
+    onError: (error) => {
+      console.error('chat error', error);
+      const errorToast = {
+        title: t('AI Chat Error'),
+        description: t(
+          'There was an error while processing your request, please try again or open a new chat',
+        ),
+        variant: 'destructive' as const,
+        duration: 10000,
+      };
+      toast(errorToast);
+    },
   });
 
   useEffect(() => {
