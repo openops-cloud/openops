@@ -14,7 +14,7 @@ export const SEED_OPENOPS_AUTO_INSTANCES_SHUTDOWN_TABLE_NAME =
 export async function createAutoInstancesShutdownTable(
   token: string,
   databaseId: number,
-) {
+): Promise<void> {
   logger.debug(
     `[Seeding ${SEED_OPENOPS_AUTO_INSTANCES_SHUTDOWN_TABLE_NAME} table] Start`,
   );
