@@ -3,6 +3,7 @@ import {
   ToolCallContentPartComponent,
   ToolCallMessagePartStatus,
 } from '@assistant-ui/react';
+import { TOOL_STATUS_TYPES } from '../tool-status';
 import { BaseToolWrapper } from './base-tool-wrapper';
 
 export const ToolFallback: ToolCallContentPartComponent = ({
@@ -49,7 +50,7 @@ const extractResultStatus = (
     result.isError
   ) {
     const errorStatus: MessagePartStatus = {
-      type: 'incomplete',
+      type: TOOL_STATUS_TYPES.INCOMPLETE,
       reason: 'error',
     };
     return errorStatus;
