@@ -157,7 +157,7 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
       body: () => ({
         ...bodyRef.current,
         messages: messagesRef.current,
-        tools: runtimeRef.current?.thread.getModelContext().tools ?? {},
+        tools: runtimeRef.current?.thread?.getModelContext()?.tools ?? {},
       }),
     }),
     onError: (error) => {
