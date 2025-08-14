@@ -5,6 +5,7 @@ import {
 import { logger } from '@openops/server-shared';
 import { createAggregatedCostsTable } from './create-aggregated-costs-table';
 import { createAutoEc2InstancesShutdownTable } from './create-auto-ec2-instances-shutdown-table';
+import { createAutoInstancesShutdownTable } from './create-auto-instances-shutdown-table';
 import { createBusinessUnitsTable } from './create-business-units-table';
 import { createIdleEbsVolumesToDeleteTable } from './create-idle-ebs-volumes-to-delete-table';
 import { createKnownCostTypesByApplicationTable } from './create-known-cost-types-by-application-table';
@@ -53,5 +54,14 @@ export const seedTemplateTablesService = {
     await createKnownCostTypesByApplicationTable(token, databaseId);
 
     logger.info('[Seeding Known cost types by application table] Done');
+  },
+
+  async createAutoInstancesShutdownTable(): Promise<void> {
+    const { token } = await authenticateDefaultUserInOpenOpsTables();
+    const databaseId = await getDefaultDatabaseId(token);
+
+    await createAutoInstancesShutdownTable(token, databaseId);
+
+    logger.info('[Seeding Auto Instances Shutdown table] Done');
   },
 };
