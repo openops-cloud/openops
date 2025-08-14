@@ -10,7 +10,6 @@ import {
   ToolSet,
 } from 'ai';
 import { FastifyInstance } from 'fastify';
-import { extractMessage } from './message-extractor';
 import { sendAiChatFailureEvent } from '../../telemetry/event-models';
 import { addUiToolResults } from '../mcp/tool-utils';
 import { getMCPToolsContext } from '../mcp/tools-context-builder';
@@ -18,6 +17,7 @@ import { AssistantUITools } from '../mcp/types';
 import { saveChatHistory } from './ai-chat.service';
 import { generateMessageId } from './ai-id-generators';
 import { getLLMAsyncStream } from './llm-stream-handler';
+import { extractMessage } from './message-extractor';
 import {
   doneMarker,
   finishMessagePart,

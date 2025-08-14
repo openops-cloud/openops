@@ -1,12 +1,12 @@
 import { logger } from '@openops/server-shared';
 import { ChatFlowContext } from '@openops/shared';
 import { ModelMessage } from 'ai';
-import { extractMessage } from './message-extractor';
 import { sendAiChatFailureEvent } from '../../telemetry/event-models';
 import { saveChatHistory } from './ai-chat.service';
 import { generateMessageId, generateToolId } from './ai-id-generators';
 import { generateCode } from './code.service';
 import { enrichContext, IncludeOptions } from './context-enrichment.service';
+import { extractMessage } from './message-extractor';
 import { getBlockSystemPrompt } from './prompts.service';
 import {
   buildTextDeltaPart,
