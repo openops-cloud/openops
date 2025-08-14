@@ -9,6 +9,7 @@ import { Theme } from '../../../lib/theme';
 import { Skeleton } from '../../../ui/skeleton';
 import { CodeActions } from '../../code-actions';
 import { useThreadExtraContext } from '../thread-extra-context';
+import { toolStatusUtils } from '../tool-status';
 
 type CodeResult = {
   code: string;
@@ -31,7 +32,7 @@ type GenerateCodeToolProps = ToolCallMessagePartProps & {
 const GenerateCodeTool = ({ result, status, theme }: GenerateCodeToolProps) => {
   const { handleInject } = useThreadExtraContext();
 
-  if (status.type !== 'complete') {
+  if (!toolStatusUtils.isComplete(status)) {
     return (
       <Skeleton className="w-full h-[150px]">
         <div className="flex items-center justify-center h-full">

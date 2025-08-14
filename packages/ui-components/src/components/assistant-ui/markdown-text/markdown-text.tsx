@@ -13,6 +13,7 @@ import { CodeVariations, MarkdownCodeVariations } from '../../custom/types';
 
 import { cn } from '../../../lib/cn';
 import { MarkdownCodeViewer } from '../../custom/markdown-code-viewer';
+import { toolStatusUtils } from '../tool-status';
 import { TooltipCopyButton } from '../tooltip-copy-button';
 
 const CodeComponent = ({
@@ -33,7 +34,7 @@ const CodeComponent = ({
   [key: string]: any;
 }) => {
   const isCodeBlock = useIsMarkdownCodeBlock();
-  const isStreaming = status?.type === 'running';
+  const isStreaming = toolStatusUtils.isRunning(status);
 
   if (!isCodeBlock) {
     return (
