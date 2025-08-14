@@ -175,6 +175,7 @@ const PatchAppConnectionRequest = {
     permission: Permission.WRITE_APP_CONNECTION,
   },
   schema: {
+    operationId: 'Update App Connection',
     tags: ['app-connections'],
     security: [SERVICE_KEY_SECURITY_OPENAPI],
     description:
@@ -192,6 +193,7 @@ const ListAppConnectionsRequest = {
     permission: Permission.READ_APP_CONNECTION,
   },
   schema: {
+    operationId: 'Get App Connections',
     tags: ['app-connections'],
     security: [SERVICE_KEY_SECURITY_OPENAPI],
     querystring: ListAppConnectionsRequestQuery,
@@ -228,6 +230,7 @@ const GetAppConnectionRequest = {
     permission: Permission.READ_APP_CONNECTION,
   },
   schema: {
+    operationId: 'Get App Connection Info',
     tags: ['app-connections'],
     description:
       'Get detailed information about a specific app connection by its ID. This endpoint retrieves the complete connection configuration, settings, and current status. All sensitive data such as authentication tokens, secrets, and credentials is automatically redacted in the response for security. Returns a 404 error if the connection is not found.',
@@ -254,6 +257,7 @@ const GetConnectionMetadataRequest = {
     permission: Permission.READ_APP_CONNECTION,
   },
   schema: {
+    operationId: 'Get Connection Metadata',
     tags: ['app-connections'],
     security: [SERVICE_KEY_SECURITY_OPENAPI],
     description:
