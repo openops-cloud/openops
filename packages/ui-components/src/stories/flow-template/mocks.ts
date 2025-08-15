@@ -14,11 +14,17 @@ const services = [
 
 const domains = [
   'Allocation',
-  'Anomaly management',
-  'Workload optimization',
-  'Rate optimization',
+  'Anomaly Management',
+  'Workload Optimization',
+  'Rate Optimization',
   'FinOps education & enablement',
 ];
+
+const categoryLogos = {
+  AWS: 'https://static.openops.com/blocks/aws.png',
+  Azure: 'https://static.openops.com/blocks/azure.svg',
+  GCP: 'https://static.openops.com/blocks/google-cloud.svg',
+};
 
 const baseTemplate: FlowTemplateMetadataWithIntegrations = {
   id: '0Gk00B4HVNRqSzCkFjZh0',
@@ -957,4 +963,5 @@ export const mocks = {
   domains,
   baseTemplate,
   blocks,
+  categoryLogos,
 };
