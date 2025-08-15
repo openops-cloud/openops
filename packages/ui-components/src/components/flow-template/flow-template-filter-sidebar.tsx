@@ -44,7 +44,7 @@ const FlowTemplateFilterItem = ({
   >
     <TooltipProvider>
       {Icon ? (
-        <Icon className="size=5" />
+        <Icon className="size=5 text-slate-600 dark:text-primary" />
       ) : (
         logoUrl && <img src={logoUrl} alt={displayName} className="w-6 h-6" />
       )}
