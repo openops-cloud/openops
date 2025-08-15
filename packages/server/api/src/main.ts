@@ -13,6 +13,7 @@ import { databaseConnection } from './app/database/database-connection';
 import { seedAutoInstancesShutdownTable } from './app/database/seeds/auto-instances-shutdown-table-seed';
 import { createOpenOpsTablesMcpEndpoint } from './app/database/seeds/create-open-ops-tables-mcp-endpoint';
 import { seedDevData } from './app/database/seeds/dev-seeds';
+import { migrateAutoEc2InstancesShutdownTable } from './app/database/seeds/migrate-auto-ec2-instances-shutdown-table';
 import { seedFocusDataAggregationTemplateTable } from './app/database/seeds/openops-aggregated-costs-seed';
 import * as analytics from './app/database/seeds/openops-analytics-seed';
 import { deleteOldOpportunitiesTable } from './app/database/seeds/openops-delete-old-opportunities-table';
@@ -97,6 +98,7 @@ const main = async (): Promise<void> => {
     await seedFocusDataAggregationTemplateTable();
     await seedKnownCostTypesByApplicationTable();
     await seedAutoInstancesShutdownTable();
+    await migrateAutoEc2InstancesShutdownTable();
     await analytics.seedAnalytics();
 
     initializeLock();
