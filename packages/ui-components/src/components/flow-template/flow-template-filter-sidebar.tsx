@@ -44,7 +44,7 @@ const FlowTemplateFilterItem = ({
   >
     <TooltipProvider>
       {Icon ? (
-        <Icon className="size=5 text-slate-600 dark:text-primary" />
+        <Icon className="size-5 text-slate-600 dark:text-primary" />
       ) : (
         logoUrl && <img src={logoUrl} alt={displayName} className="w-6 h-6" />
       )}
@@ -146,7 +146,7 @@ const FlowTemplateFilterSidebar = ({
                   <img
                     src={categoryLogos[category.name]}
                     alt={category.name}
-                    className="w-6 h-inherit mr-[10px]"
+                    className="w-6 mr-[10px]"
                   />
                 )}
                 <span className="font-normal text-slate-600 dark:text-primary text-base">
