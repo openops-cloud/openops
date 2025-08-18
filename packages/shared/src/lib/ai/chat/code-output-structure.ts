@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 const codeDescription = 'The code to be executed';
 const packageJsonDescription =
-  'The package.json to be executed. If no dependecies required return "{}"';
+  'The package.json to be executed. If no dependencies required return "{}"';
 const textAnswerDescription =
   'Mandatory text to the user. If code was generated, provide a short description of the code. If you need input or clarification, ask the user. If no code was generated, explain why.';
 
