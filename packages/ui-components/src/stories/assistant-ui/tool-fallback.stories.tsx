@@ -4,6 +4,7 @@ import { userEvent, waitFor } from '@storybook/testing-library';
 import { FC } from 'react';
 
 import { ToolFallback } from '../../components/assistant-ui/tool-fallback';
+import { TOOL_STATUS_TYPES } from '../../components/assistant-ui/tool-status';
 import { selectLightOrDarkCanvas } from '../../test-utils/select-themed-canvas.util';
 
 const ToolFallbackWrapper: FC<{
@@ -11,7 +12,12 @@ const ToolFallbackWrapper: FC<{
   argsText: string;
   result?: any;
   status?: any;
-}> = ({ toolName, argsText, result, status = { type: 'complete' } }) => {
+}> = ({
+  toolName,
+  argsText,
+  result,
+  status = { type: TOOL_STATUS_TYPES.COMPLETE },
+}) => {
   const mockToolCall = {
     type: 'tool-call' as const,
     toolCallId: 'mock-tool-call-id',
@@ -71,7 +77,7 @@ export const ToolCallInProgress: Story = {
     toolName: 'get_weather',
     argsText: '{"location": "New York", "unit": "celsius"}',
     result: undefined,
-    status: { type: 'running' },
+    status: { type: TOOL_STATUS_TYPES.RUNNING },
   },
   parameters: {
     chromatic: { disable: true },
@@ -86,7 +92,7 @@ export const ToolCallIncomplete: Story = {
     toolName: 'get_weather',
     argsText: '{"location": "New York", "unit": "celsius"}',
     result: 'The tool execution was not completed.',
-    status: { type: 'incomplete' },
+    status: { type: TOOL_STATUS_TYPES.INCOMPLETE },
   },
 };
 
