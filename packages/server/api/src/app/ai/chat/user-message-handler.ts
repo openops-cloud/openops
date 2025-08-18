@@ -124,7 +124,7 @@ async function streamLLMResponse(
       onStepFinish: async (value): Promise<void> => {
         stepCount++;
         if (value.finishReason !== 'stop' && stepCount >= maxRecursionDepth) {
-          const message = ` Maximum recursion depth (${maxRecursionDepth}) reached. Terminating recursion.`;
+          const message = `We automatically stop the conversation after ${maxRecursionDepth} steps. Ask a new question to continue the conversation.`;
           sendTextMessageToStream(params.serverResponse, message, messageId);
           appendErrorMessage(value.response.messages, message);
           logger.warn(message);
