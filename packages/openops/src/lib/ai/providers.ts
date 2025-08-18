@@ -167,7 +167,5 @@ function sanitizeProviderSettings(
 }
 
 export const providerOptions = {
-  openai: {
-    structuredOutputs: false,
-  },
+  openai: {},
 };
