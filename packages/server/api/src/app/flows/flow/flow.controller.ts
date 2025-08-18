@@ -374,7 +374,7 @@ const ListFlowsRequestOptions = {
     permission: Permission.READ_FLOW,
   },
   schema: {
-    operationId: 'Get Workflows',
+    operationId: 'List Workflows',
     tags: ['flows'],
     description:
       'Retrieve a paginated list of workflows for the current project. Supports filtering by folder, status, name, and version state. Results are returned in a seek-based pagination format.',

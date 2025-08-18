@@ -196,7 +196,7 @@ const GetBlockParamsRequest = {
     allowedPrincipals: ALL_PRINCIPAL_TYPES,
   },
   schema: {
-    operationId: 'Get Block Info',
+    operationId: 'Get Block Details',
     description:
       'Retrieve detailed information about a specific block by its name. This endpoint returns the complete block metadata including its configuration, actions, triggers, properties, and authentication requirements. Optionally specify a package version to get historical block data or check compatibility. The response includes all necessary information for integrating the block into workflows.',
     params: GetBlockRequestParams,
@@ -222,7 +222,7 @@ const ListCategoriesRequest = {
     allowedPrincipals: ALL_PRINCIPAL_TYPES,
   },
   schema: {
-    operationId: 'Get Block Categories',
+    operationId: 'List Block Categories',
     description:
       'Retrieve all available block categories with their metadata. This endpoint returns a comprehensive list of predefined categories (e.g., FINOPS, CLOUD, WORKFLOW, COLLABORATION) that can be used to organize and filter blocks in the system. Each category includes its display name, description, and associated metadata. Useful for building category-based navigation and filtering interfaces.',
     querystring: ListBlocksRequestQuery,

@@ -246,7 +246,7 @@ const GetLatestVersionsByConnectionRequestOptions = {
     permission: Permission.READ_FLOW,
   },
   schema: {
-    operationId: 'Get Flow Versions',
+    operationId: 'List Flows By Connection',
     description:
       'Retrieves all workflows that contain a specific connection. This endpoint returns the latest version of each workflow that uses the specified connection, including minimal workflow information such as ID, name, and version details. Useful for tracking which workflows depend on a particular connection.',
     tags: ['flow-version'],

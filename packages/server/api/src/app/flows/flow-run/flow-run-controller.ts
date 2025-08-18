@@ -108,7 +108,7 @@ const ListRequest = {
     allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
   },
   schema: {
-    operationId: 'Get Flow Runs',
+    operationId: 'List Flow Runs',
     tags: ['workflow-runs'],
     description:
       'List workflow runs with advanced filtering and pagination capabilities. This endpoint retrieves a paginated list of workflow executions, supporting filtering by workflow ID, tags, status, and date range. Results include execution metadata, duration, status, and associated tags. Useful for monitoring and analyzing workflow execution history.',
@@ -125,7 +125,7 @@ const GetRequest = {
     allowedPrincipals: [PrincipalType.SERVICE, PrincipalType.USER],
   },
   schema: {
-    operationId: 'Get Flow Run Info',
+    operationId: 'Get Flow Run Details',
     tags: ['workflow-runs'],
     description:
       'Get detailed information about a specific flow run. This endpoint returns the complete execution data including status, duration, steps, error messages, and any associated metadata. Includes step-by-step execution details and their outputs. Essential for debugging and monitoring individual workflow executions.',
