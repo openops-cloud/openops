@@ -31,7 +31,7 @@ const BaseToolWrapper = ({
       <div className="flex flex-wrap items-center justify-center gap-2 px-4">
         {isComplete && <CircleCheck className="size-4 text-success" />}
         {isIncomplete && <XCircle className="size-4 text-destructive" />}
-        <p className="text-foreground">
+        <p className="text-foreground overflow-hidden text-ellipsis whitespace-nowrap">
           <b className="text-foreground">{toolName}</b>
         </p>
         <div className="flex-grow" />
@@ -47,7 +47,7 @@ const BaseToolWrapper = ({
           {isCollapsed ? <ChevronDownIcon /> : <ChevronUpIcon />}
         </Button>
       </div>
-      {!isCollapsed && children}
+      {!isCollapsed && <div className="overflow-hidden">{children}</div>}
     </div>
   );
 };
