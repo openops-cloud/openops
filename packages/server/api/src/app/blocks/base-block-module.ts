@@ -231,7 +231,7 @@ const ListCategoriesRequest = {
 
 const OptionsBlockRequest = {
   schema: {
-    operationId: 'Get Block Options',
+    operationId: 'Execute Block Properties',
     description:
       'Execute a block option or property to retrieve dynamic configuration options. This endpoint is used to fetch dynamic values, validate inputs, or get suggestions based on the current block configuration and flow context. Essential for building dynamic block configurations.',
     body: BlockOptionRequest,
