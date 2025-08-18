@@ -1,6 +1,7 @@
 import { logger } from '@openops/server-shared';
 import { ChatFlowContext } from '@openops/shared';
 import { ModelMessage } from 'ai';
+import { extractErrorMessage } from '../../../lib/error-utils';
 import { sendAiChatFailureEvent } from '../../telemetry/event-models';
 import { saveChatHistory } from './ai-chat.service';
 import { generateMessageId, generateToolId } from './ai-id-generators';
@@ -46,8 +47,12 @@ async function handleCodeGenerationError(
     aiConfig: { provider: string; model: string };
   },
 ): Promise<void> {
-  const errorMessage = error instanceof Error ? error.message : String(error);
-  logger.warn(errorMessage, error);
+  const errorMessage = extractErrorMessage(error);
+
+  logger.warn(
+    `An unrecoverable error occurred in the conversation. Message: ${errorMessage}`,
+    error,
+  );
 
   sendTextMessageToStream(
     params.serverResponse,
