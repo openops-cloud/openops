@@ -33,17 +33,24 @@ async function upsertAdminEmail(user: User, email: string) {
 const DEFAULT_ORGANIZATION_NAME = 'organization';
 
 async function createAdmin(email: string, password: string) {
-  const user = await userService.create({
-    email,
-    password,
-    organizationRole: OrganizationRole.ADMIN,
+  let user = await userService.getByOrganizationAndEmail({
     organizationId: null,
-    verified: true,
-    firstName: 'OpenOps',
-    lastName: 'Admin',
-    trackEvents: false,
-    newsLetter: false,
+    email,
   });
+
+  if (!user) {
+    user = await userService.create({
+      email,
+      password,
+      organizationRole: OrganizationRole.ADMIN,
+      organizationId: null,
+      verified: true,
+      firstName: 'OpenOps',
+      lastName: 'Admin',
+      trackEvents: false,
+      newsLetter: false,
+    });
+  }
 
   const { token } = await authenticateDefaultUserInOpenOpsTables();
 
@@ -71,26 +78,30 @@ export const upsertAdminUser = async (): Promise<void> => {
   try {
     await signIn(email, password);
   } catch (e) {
+    logger.debug(`Failed to sign in as admin [${email}]`, e);
+
     const user = await userService.getByOrganizationAndEmail({
       organizationId: null,
       email,
     });
 
-    if (user) {
+    logger.debug(`Found user with email [${email}]:`, user);
+
+    if (user && user.organizationId !== null) {
       await upsertAdminPassword(user, password);
-      await signIn(email, password);
+      await upsertAdminUser()
       return;
     }
 
     const adminUser = await userService.getDefaultAdmin();
-    if (adminUser) {
+    if (adminUser && adminUser.organizationId !== null) {
       await upsertAdminEmail(adminUser, email);
       await upsertAdminPassword(adminUser, password);
-      await signIn(email, password);
+      await upsertAdminUser()
       return;
     }
 
-    logger.info(`Admin user does not exist, creating it`);
+    logger.info(`Admin user does not exist or malformed, creating it`);
     await createAdmin(email, password);
     logger.info(`Successfully created admin [${email}]`, email);
   }
