@@ -4,7 +4,7 @@ const codeDescription = 'The code to be executed';
 const packageJsonDescription =
   'The package.json to be executed. If no dependecies required return "{}"';
 const textAnswerDescription =
-  'The text answer to the user, if you need to clarify something, or the short description of the code if any code is generated';
+  'The text answer to the user. If code was generated, provide a short description of the code. If needed, ask for clarification or additional input from the user. If no code was generated and you have no questions for the user, explain why no code was generated.';
 
 export const codeLLMSchema = z.object({
   code: z.string().describe(codeDescription),
