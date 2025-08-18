@@ -110,11 +110,21 @@ export const MoveActionRequest = Type.Object({
 export type MoveActionRequest = Static<typeof MoveActionRequest>;
 
 export const AddActionRequest = Type.Object({
-  parentStep: Type.String(),
+  parentStep: Type.String({
+    description: 'The name of the parent step in the workflow',
+  }),
   stepLocationRelativeToParent: Type.Optional(
-    Type.Enum(StepLocationRelativeToParent),
+    Type.Enum(StepLocationRelativeToParent, {
+      description:
+        'Indicates the relative position of this step compared to its parent (e.g., before, after, inside)',
+    }),
   ),
-  branchNodeId: Type.Optional(Type.String({})), // used to identify node location relative to parent (example in Split)
+  branchNodeId: Type.Optional(
+    Type.String({
+      description:
+        'The unique identifier of the branch node this step belongs to for placing the step inside a Split branch. Each branch in a Split node has a unique branchNodeId',
+    }),
+  ),
   action: UpdateActionRequest,
 });
 export type AddActionRequest = Static<typeof AddActionRequest>;

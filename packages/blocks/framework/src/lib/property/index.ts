@@ -46,10 +46,19 @@ export {
   SecretTextProperty,
   ShortTextProperty,
 } from './input/text-property';
+
 export const BlockProperty = Type.Union([InputProperty, BlockAuthProperty]);
 export type BlockProperty = InputProperty | BlockAuthProperty;
 
-export const BlockPropertyMap = Type.Record(Type.String(), BlockProperty);
+export const BlockPropertyMap = Type.Record(
+  Type.String({
+    description: 'Unique property name within the block.',
+  }),
+  BlockProperty,
+  {
+    description: 'A mapping of property keys to their definitions.',
+  },
+);
 export interface BlockPropertyMap {
   [name: string]: BlockProperty;
 }

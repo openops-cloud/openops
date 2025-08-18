@@ -4,9 +4,9 @@ import { useAiModelSelector } from '@/app/features/ai/lib/ai-model-selector-hook
 import { useAssistantChat } from '@/app/features/ai/lib/assistant-ui-chat-hook';
 import { AssistantUiChatContainer } from '@openops/components/ui';
 import { SourceCode } from '@openops/shared';
+import { createFrontendTools } from '@openops/ui-kit';
 import { t } from 'i18next';
-import { ReactNode, useCallback, useState } from 'react';
-import { useFrontendTools } from '../lib/use-frontend-tools';
+import { ReactNode, useCallback, useMemo, useState } from 'react';
 
 type AssistantUiChatProps = {
   onClose: () => void;
@@ -21,6 +21,10 @@ const AssistantUiChat = ({
   title,
   handleInject,
 }: AssistantUiChatProps) => {
+  const toolComponents = useMemo(() => {
+    return createFrontendTools();
+  }, []);
+
   const [chatId, setChatId] = useState<string | null>(
     localStorage.getItem(AI_ASSISTANT_LS_KEY),
   );
@@ -35,7 +39,6 @@ const AssistantUiChat = ({
     setChatId(id);
   }, []);
 
-  const { toolComponents, isLoading: isLoadingTools } = useFrontendTools();
   const { runtime, isLoading, createNewChat } = useAssistantChat({
     chatId,
     onChatIdChange,
@@ -50,7 +53,7 @@ const AssistantUiChat = ({
     isLoading: isModelSelectorLoading,
   } = useAiModelSelector();
 
-  if (isLoading || isLoadingTools) {
+  if (isLoading) {
     return (
       <div className="w-full flex h-full items-center justify-center bg-background">
         <div className="text-sm text-muted-foreground">

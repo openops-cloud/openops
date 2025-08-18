@@ -1510,7 +1510,8 @@ describe('getImportOperations', () => {
       [mockConnection],
     ) as OperationsResponse;
 
-    expect(result[0].request.action.settings.input['auth']).toEqual(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect((result[0].request.action.settings.input as any)['auth']).toEqual(
       "{{connections['prefilled-slack-connection']}}",
     );
   });
@@ -1627,7 +1628,8 @@ describe('getImportOperations', () => {
       [mockConnection],
     ) as OperationsResponse;
 
-    expect(result[3].request.action.settings.input['auth']).toEqual(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect((result[3].request.action.settings.input as any)['auth']).toEqual(
       "{{connections['prefilled-slack-connection']}}",
     );
   });
@@ -1656,7 +1658,10 @@ describe('getImportOperations', () => {
       ],
     ) as OperationsResponse;
 
-    expect(result[0].request.action.settings.input['auth']).toBe(undefined);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect((result[0].request.action.settings.input as any)['auth']).toBe(
+      undefined,
+    );
   });
 
   it('should not change connection when connections are not provided', () => {
@@ -1665,7 +1670,10 @@ describe('getImportOperations', () => {
       nextAction: mockSlackAction,
     }) as OperationsResponse;
 
-    expect(result[0].request.action.settings.input['auth']).toStrictEqual({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect(
+      (result[0].request.action.settings.input as any)['auth'],
+    ).toStrictEqual({
       authProviderKey: 'Slack',
     });
   });
@@ -1685,7 +1693,8 @@ describe('getImportOperations', () => {
       [mockConnection, secondConnection],
     ) as OperationsResponse;
 
-    expect(result[0].request.action.settings.input['auth']).toEqual(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect((result[0].request.action.settings.input as any)['auth']).toEqual(
       "{{connections['prefilled-slack-connection']}}",
     );
   });

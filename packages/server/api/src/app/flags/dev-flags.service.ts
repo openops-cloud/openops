@@ -1,4 +1,3 @@
-import { AppSystemProp, system } from '@openops/server-shared';
 import { Flag, FlagId } from '@openops/shared';
 
 let flags: Flag[];
@@ -14,18 +13,7 @@ async function getAll(): Promise<Flag[]> {
     return flags;
   }
 
-  const now = new Date().toISOString();
-  const created = now;
-  const updated = now;
-
-  flags = [
-    {
-      id: FlagId.ASSISTANT_UI_ENABLED,
-      value: system.getBoolean(AppSystemProp.ASSISTANT_UI_ENABLED),
-      created,
-      updated,
-    },
-  ];
+  flags = [];
 
   return flags;
 }

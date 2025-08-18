@@ -32,8 +32,6 @@ const BaseToolWrapper = ({
         {isComplete && <CircleCheck className="size-4 text-success" />}
         {isIncomplete && <XCircle className="size-4 text-foreground" />}
         <p className="text-foreground">
-          {isComplete && t('Used tool: ')}
-          {isRunning && t('Using tool: ')}
           {isIncomplete && t('Incomplete tool call: ')}
           <b className="text-foreground">{toolName}</b>
         </p>
@@ -54,5 +52,6 @@ const BaseToolWrapper = ({
     </div>
   );
 };
+
 BaseToolWrapper.displayName = 'BaseToolWrapper';
 export { BaseToolWrapper };

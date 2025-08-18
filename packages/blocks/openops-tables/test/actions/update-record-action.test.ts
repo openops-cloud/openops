@@ -37,11 +37,16 @@ describe('updateRowAction', () => {
   });
 
   test('should create action with correct properties', () => {
-    expect(Object.keys(updateRecordAction.props).length).toBe(3);
+    expect(Object.keys(updateRecordAction.props).length).toBe(4);
     expect(updateRecordAction.props).toMatchObject({
       tableName: {
         required: true,
         type: 'DROPDOWN',
+      },
+      roundToFieldPrecision: {
+        type: 'CHECKBOX',
+        required: false,
+        defaultValue: false,
       },
       rowPrimaryKey: {
         required: true,
@@ -237,6 +242,92 @@ describe('updateRowAction', () => {
         value: '3',
       },
     ]);
+  });
+
+  test('should round numeric values when roundToFieldPrecision is true', async () => {
+    openopsCommonMock.getPrimaryKeyFieldFromFields.mockReturnValue({
+      name: 'id',
+      type: 'number',
+    });
+    cacheWrapperMock.getOrAdd.mockReturnValueOnce(1).mockReturnValue([
+      {
+        id: 1,
+        primary: true,
+        name: 'id',
+        type: 'number',
+        number_decimal_places: 2,
+      },
+      {
+        id: 2,
+        primary: false,
+        name: 'amount',
+        type: 'number',
+        number_decimal_places: 2,
+      },
+    ]);
+    openopsCommonMock.upsertRow.mockResolvedValue('mock result');
+
+    const context = createContext({
+      tableName: 'Opportunity',
+      rowPrimaryKey: { rowPrimaryKey: '1' },
+      fieldsProperties: [
+        {
+          fieldName: 'amount',
+          newFieldValue: { newFieldValue: 3.14159 },
+        },
+      ],
+    });
+    context.propsValue.roundToFieldPrecision = true;
+
+    await updateRecordAction.run(context);
+
+    expect(openopsCommonMock.upsertRow).toHaveBeenCalledWith(
+      expect.objectContaining({
+        fields: expect.objectContaining({
+          amount: '3.14',
+        }),
+      }),
+    );
+  });
+
+  test('should throw error for excess decimals when roundToFieldPrecision is false', async () => {
+    openopsCommonMock.getPrimaryKeyFieldFromFields.mockReturnValue({
+      name: 'id',
+      type: 'number',
+    });
+    cacheWrapperMock.getOrAdd.mockReturnValueOnce(1).mockReturnValue([
+      {
+        id: 1,
+        primary: true,
+        name: 'id',
+        type: 'number',
+        number_decimal_places: 2,
+      },
+      {
+        id: 2,
+        primary: false,
+        name: 'amount',
+        type: 'number',
+        number_decimal_places: 2,
+      },
+    ]);
+    openopsCommonMock.upsertRow.mockResolvedValue('mock result');
+
+    const context = createContext({
+      tableName: 'Opportunity',
+      rowPrimaryKey: { rowPrimaryKey: '1' },
+      fieldsProperties: [
+        {
+          fieldName: 'amount',
+          newFieldValue: { newFieldValue: 3.14159 },
+        },
+      ],
+    });
+    context.propsValue.roundToFieldPrecision = false;
+
+    await expect(updateRecordAction.run(context)).rejects.toThrow(
+      'Field "amount" allows 2 decimal place(s); received 3.14159. Enable "Round Numeric Values" or provide a value with at most 2 decimals.',
+    );
   });
 });
 

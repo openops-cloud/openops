@@ -9,7 +9,7 @@ import { t } from 'i18next';
 import { SearchXIcon } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { StepOutputWithData } from '@openops/shared';
+import { flowHelper, StepOutputWithData } from '@openops/shared';
 
 import { useBuilderStateContext } from '../builder-hooks';
 
@@ -48,11 +48,27 @@ const DataSelector = ({
       midpanelState: state.midpanelState,
     }));
 
-  const pathToTargetStep = useBuilderStateContext(
-    dataSelectorUtils.getPathToTargetStep,
-  );
+  const { selectedStep, flowVersion } = useBuilderStateContext((state) => {
+    return {
+      selectedStep: state.selectedStep,
+      flowVersion: state.flowVersion,
+    };
+  });
 
-  const stepIds: string[] = pathToTargetStep.map((p) => p.id);
+  const pathToTargetStep = useMemo(() => {
+    if (!selectedStep || !flowVersion?.trigger) {
+      return [];
+    }
+    const pathToTargetStep = flowHelper.findPathToStep({
+      targetStepName: selectedStep,
+      trigger: flowVersion.trigger,
+    });
+    return pathToTargetStep;
+  }, [selectedStep, flowVersion]);
+
+  const stepIds = useMemo(() => {
+    return pathToTargetStep.map((p) => p.id);
+  }, [pathToTargetStep]);
 
   const [forceRender, setForceRerender] = useState(0); // for cache updates
   const [initialLoad, setInitialLoad] = useState(true);
@@ -79,6 +95,7 @@ const DataSelector = ({
           ...cached,
           output: hasStepSampleData ? sampleData : cached.output,
           success: hasStepSampleData ? true : cached.success,
+          input: null,
         };
       }
     });
@@ -89,8 +106,10 @@ const DataSelector = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathToTargetStep, stepIds, forceRender, initialLoad]);
 
-  const getExpanded = (nodeKey: string) =>
-    stepTestOutputCache.getExpanded(nodeKey);
+  const getExpanded = useCallback(
+    (nodeKey: string) => stepTestOutputCache.getExpanded(nodeKey),
+    [],
+  );
   const setExpanded = (nodeKey: string, expanded: boolean) => {
     stepTestOutputCache.setExpanded(nodeKey, expanded);
     setForceRerender((v) => v + 1);

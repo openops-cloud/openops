@@ -15,7 +15,7 @@ export const everyMonthTrigger = createTrigger({
   name: 'every_month',
   displayName: 'Every Month',
   description: 'Triggers the current flow every month',
-  type: TriggerStrategy.POLLING,
+  type: TriggerStrategy.SCHEDULED,
   sampleData: {},
   props: {
     day_of_the_month: Property.StaticDropdown({

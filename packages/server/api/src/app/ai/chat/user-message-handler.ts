@@ -157,11 +157,13 @@ function unrecoverableError(
   error: any,
 ): AssistantModelMessage {
   const errorMessage = extractErrorMessage(error);
+  logger.warn(
+    `An unrecoverable error occurred in the conversation. Message: ${errorMessage}`,
+    error,
+  );
 
   const messageId = generateMessageId();
   sendTextMessageToStream(streamParams.serverResponse, errorMessage, messageId);
-
-  logger.warn(errorMessage, error);
 
   sendAiChatFailureEvent({
     projectId: streamParams.projectId,

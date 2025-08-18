@@ -1,4 +1,3 @@
-/// <reference types='vitest' />
 import path from 'path';
 
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
@@ -44,6 +43,7 @@ export default defineConfig({
         __dirname,
         '../../packages/blocks/framework/src',
       ),
+      '@openops/ui-kit': path.resolve(__dirname, '../../packages/ui-kit/src'),
     },
   },
   plugins: [

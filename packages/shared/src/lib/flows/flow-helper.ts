@@ -765,7 +765,8 @@ const prefillConnection = (
     'auth' in action.settings.input &&
     'authProviderKey' in action.settings.input
   ) {
-    authProviderKey = action.settings.input['auth'].authProviderKey;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    authProviderKey = (action.settings.input as any).auth.authProviderKey;
   }
 
   const connection = connections.find(
@@ -775,9 +776,13 @@ const prefillConnection = (
   );
 
   if (connection && 'input' in action.settings) {
-    action.settings.input['auth'] = addConnectionBrackets(connection.name);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (action.settings.input as any).auth = addConnectionBrackets(
+      connection.name,
+    );
   } else if ('input' in action.settings) {
-    action.settings.input['auth'] = undefined;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (action.settings.input as any).auth = undefined;
   }
 
   return action;

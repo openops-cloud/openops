@@ -125,7 +125,8 @@ export const enableBlockTrigger = async (
       }
       break;
     }
-    case TriggerStrategy.POLLING: {
+    case TriggerStrategy.POLLING:
+    case TriggerStrategy.SCHEDULED: {
       if (isNil(engineHelperResponse.result.scheduleOptions)) {
         engineHelperResponse.result.scheduleOptions = {
           cronExpression: POLLING_FREQUENCY_CRON_EXPRESSON,

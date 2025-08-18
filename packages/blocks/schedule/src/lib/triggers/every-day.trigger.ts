@@ -9,7 +9,7 @@ export const everyDayTrigger = createTrigger({
   name: 'every_day',
   displayName: 'Every Day',
   description: 'Triggers the current flow every day',
-  type: TriggerStrategy.POLLING,
+  type: TriggerStrategy.SCHEDULED,
   sampleData: {},
   props: {
     hour_of_the_day: Property.StaticDropdown({

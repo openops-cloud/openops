@@ -19,6 +19,7 @@ import {
   ListFlowsRequest,
   MinimalFlow,
   PopulatedFlow,
+  RunFlowSuccessResponse,
   SeekPage,
   StepOutputWithData,
   StepRunResponse,
@@ -122,6 +123,13 @@ export const flowsApi = {
   },
   count() {
     return api.get<number>('/v1/flows/count');
+  },
+  runManually(flowVersionId: string, queryParams?: Record<string, string>) {
+    return api.post<RunFlowSuccessResponse>(
+      `/v1/flows/${flowVersionId}/run`,
+      {},
+      queryParams,
+    );
   },
   getStepTestOutput(flowVersionId: string, stepId: string) {
     return api

@@ -8,7 +8,7 @@ export const everyXMinutesTrigger = createTrigger({
   name: 'every_x_minutes',
   displayName: 'Every X Minutes',
   description: 'Triggers the current flow every X minutes',
-  type: TriggerStrategy.POLLING,
+  type: TriggerStrategy.SCHEDULED,
   sampleData: {},
   props: {
     minutes: Property.StaticDropdown({

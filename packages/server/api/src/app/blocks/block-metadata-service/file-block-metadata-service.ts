@@ -33,6 +33,7 @@ export const FileBlockMetadataService = (): BlockMetadataService => {
       return (await loadBlocksMetadata()).map((p) => {
         return {
           name: p.name,
+          version: p.version,
           displayName: p.displayName,
           description: p.description,
         };

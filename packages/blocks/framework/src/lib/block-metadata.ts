@@ -19,6 +19,7 @@ import {
 export const BlockBase = Type.Object({
   id: Type.Optional(Type.String()),
   name: Type.String(),
+  version: Type.String(),
   displayName: Type.String(),
   description: Type.String(),
 });
@@ -26,6 +27,7 @@ export const BlockBase = Type.Object({
 export type BlockBase = {
   id?: string;
   name: string;
+  version: string;
   displayName: string;
   description: string;
 };
@@ -39,7 +41,6 @@ export const BlockBaseDetails = Type.Composite([
     organizationId: Type.Optional(Type.String()),
     directoryPath: Type.Optional(Type.String()),
     auth: Type.Optional(BlockAuthProperty),
-    version: Type.String(),
     categories: Type.Optional(Type.Array(Type.Enum(BlockCategory))),
     minimumSupportedRelease: Type.Optional(Type.String()),
     maximumSupportedRelease: Type.Optional(Type.String()),
@@ -53,19 +54,30 @@ export type BlockBaseDetails = BlockBase & {
   authors: string[];
   directoryPath?: string;
   auth?: BlockAuthProperty;
-  version: string;
   categories?: BlockCategory[];
   minimumSupportedRelease?: string;
   maximumSupportedRelease?: string;
 };
 
 export const ActionBase = Type.Object({
-  name: Type.String(),
-  displayName: Type.String(),
-  description: Type.String(),
+  name: Type.String({
+    description:
+      'The programmatic name of the item (e.g., action or trigger). Typically used for internal referencing.',
+  }),
+  displayName: Type.String({
+    description:
+      'A user-friendly name for the block, shown in UIs. Not guaranteed to be unique.',
+  }),
+  description: Type.String({
+    description:
+      'A concise explanation of the block’s purpose, capabilities, and core functionality.',
+  }),
   riskLevel: Type.Optional(Type.Enum(RiskLevel)),
   props: BlockPropertyMap,
-  requireAuth: Type.Boolean(),
+  requireAuth: Type.Boolean({
+    description:
+      'True if the action requires authentication. Defaults to false.',
+  }),
   errorHandlingOptions: Type.Optional(ErrorHandlingOptionsParam),
 });
 

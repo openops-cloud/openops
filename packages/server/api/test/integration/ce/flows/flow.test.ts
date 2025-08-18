@@ -1026,7 +1026,7 @@ describe('Flow API', () => {
       );
     });
 
-    it('Successfully runs a polling workflow', async () => {
+    it('Successfully runs a scheduled workflow', async () => {
       const mockUser = createMockUser({ id: openOpsId() });
       await databaseConnection().getRepository('user').save([mockUser]);
 
@@ -1053,7 +1053,7 @@ describe('Flow API', () => {
             name: 'new_issue',
             displayName: 'New Issue',
             description: 'Triggers when a new issue is created',
-            type: TriggerStrategy.POLLING,
+            type: TriggerStrategy.SCHEDULED,
             props: {},
             riskLevel: RiskLevel.LOW,
             sampleData: {},
