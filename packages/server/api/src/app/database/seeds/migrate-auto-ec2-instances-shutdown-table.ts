@@ -94,16 +94,15 @@ export async function migrateAutoEc2InstancesShutdownTable(): Promise<void> {
     })) as OldEc2Row[];
 
     for (const row of rows) {
-      const arn = row.Arn ?? (row['Arn'] as string | undefined);
-      const shutdownTime =
-        (row['Shutdown time'] as string | null | undefined) ?? null;
+      const arn = row.Arn ?? row['Arn'];
+      const shutdownTime = row['Shutdown time'] ?? null;
 
       const fields: Record<string, unknown> = {
         'Resource ID': arn,
         'Shutdown time': shutdownTime,
         'Cloud provider': 'AWS',
-        Workflow: '',
-        Status: '',
+        Workflow: 'Dev EC2 instances outside business hours',
+        Status: 'Scheduled',
       };
 
       await addRow({ tableId: newTable.id, token, fields });
