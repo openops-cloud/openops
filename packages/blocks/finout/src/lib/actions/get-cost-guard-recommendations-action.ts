@@ -4,8 +4,8 @@ import { getScanRecommendations, getScans } from '../common/cost-guard';
 
 export const getCostGuardRecommendationsAction = createAction({
   name: 'finout_get_cost_guard_recommendations',
-  displayName: 'Get Cost Guard Recommendations',
-  description: 'Retrieve Cost Guard Recommendations',
+  displayName: 'Get CostGuard Recommendations',
+  description: 'Get CostGuard Recommendations',
   auth: finoutAuth,
   props: {
     scanId: Property.Dropdown({
