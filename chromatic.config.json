@@ -8,5 +8,7 @@
     "packages/ui-components/src/tailwind.css",
     "packages/ui-components/tailwind.base.config.cjs"
   ],
-  "onlyChanged": true
+  "onlyChanged": true,
+  "autoAcceptChanges": "main",
+  "diffThreshold": 0.2
 }
