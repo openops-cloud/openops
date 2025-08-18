@@ -233,10 +233,6 @@ export const Expanded: Story = {
   },
 };
 
-/**
- * Tool call with very small container width (100px) to test text overflow in the tool name.
- * The long tool name should be truncated with ellipsis.
- */
 export const VerySmallWidthTextOverflow: Story = {
   args: {
     toolName: 'very_long_tool_name_that_should_overflow_in_small_container',
@@ -245,10 +241,7 @@ export const VerySmallWidthTextOverflow: Story = {
   },
   decorators: [
     (Story) => (
-      <div
-        style={{ width: '200px' }}
-        className="border border-dashed border-gray-300"
-      >
+      <div style={{ width: '200px' }}>
         <Story />
       </div>
     ),
