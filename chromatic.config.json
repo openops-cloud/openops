@@ -9,6 +9,5 @@
     "packages/ui-components/tailwind.base.config.cjs"
   ],
   "onlyChanged": true,
-  "autoAcceptChanges": "main",
-  "diffThreshold": 0.2
+  "autoAcceptChanges": "main"
 }
