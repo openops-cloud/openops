@@ -202,6 +202,7 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
   }, [chatId, isLoading, openChatResponse?.messages]);
 
   const runtime = useAISDKRuntime(chat);
+  runtimeRef.current = runtime;
 
   const createNewChat = useCallback(async () => {
     const oldChatId = chatId;

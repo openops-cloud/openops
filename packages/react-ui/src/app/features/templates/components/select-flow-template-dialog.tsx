@@ -27,6 +27,7 @@ import {
   StepPlaceHolder,
   TemplateDetails,
   TemplateEdge,
+  TemplateSidebarCategory,
   Theme,
   toast,
   VerticalDivider,
@@ -37,7 +38,7 @@ import {
   FlowTemplateDto,
 } from '@openops/shared';
 import { useMutation } from '@tanstack/react-query';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDebounceValue } from 'usehooks-ts';
 import { blocksHooks } from '../../blocks/lib/blocks-hook';
@@ -128,6 +129,29 @@ const FlowTemplateFilterSidebarWrapper = ({
     categories: [BlockCategory.FINOPS],
   });
 
+  const { blocks: cloudBlocks } = blocksHooks.useBlocks({
+    categories: [BlockCategory.CLOUD],
+  });
+
+  const categoryLogos = useMemo(() => {
+    if (!categories || !cloudBlocks) return {} as Record<string, string>;
+
+    return categories.reduce((acc, category: TemplateSidebarCategory) => {
+      const block = cloudBlocks.find((block) => {
+        const normalizedName = category.name.toLowerCase();
+
+        return (
+          block.name.includes(normalizedName) ||
+          block.displayName.toLowerCase().includes(normalizedName)
+        );
+      });
+      if (block) {
+        acc[category.name] = block.logoUrl;
+      }
+      return acc;
+    }, {} as Record<string, string>);
+  }, [cloudBlocks, categories]);
+
   const blocksWithTemplates = blocks?.filter((block) =>
     templateBlockNames?.includes(block.name),
   );
@@ -198,6 +222,7 @@ const FlowTemplateFilterSidebarWrapper = ({
       onCategoryFilterClick={onCategoryFilterClick}
       clearFilters={clearFilters}
       selectedCategories={selectedCategories}
+      categoryLogos={categoryLogos}
     />
   );
 };

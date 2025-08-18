@@ -10,7 +10,6 @@ import {
   ToolSet,
 } from 'ai';
 import { FastifyInstance } from 'fastify';
-import { extractErrorMessage } from '../../../lib/error-utils';
 import { sendAiChatFailureEvent } from '../../telemetry/event-models';
 import { addUiToolResults } from '../mcp/tool-utils';
 import { getMCPToolsContext } from '../mcp/tools-context-builder';
@@ -18,6 +17,7 @@ import { AssistantUITools } from '../mcp/types';
 import { saveChatHistory } from './ai-chat.service';
 import { generateMessageId } from './ai-id-generators';
 import { getLLMAsyncStream } from './llm-stream-handler';
+import { extractMessage } from './message-extractor';
 import {
   doneMarker,
   finishMessagePart,
@@ -124,7 +124,7 @@ async function streamLLMResponse(
       onStepFinish: async (value): Promise<void> => {
         stepCount++;
         if (value.finishReason !== 'stop' && stepCount >= maxRecursionDepth) {
-          const message = ` Maximum recursion depth (${maxRecursionDepth}) reached. Terminating recursion.`;
+          const message = `We automatically stop the conversation after ${maxRecursionDepth} steps. Ask a new question to continue the conversation.`;
           sendTextMessageToStream(params.serverResponse, message, messageId);
           appendErrorMessage(value.response.messages, message);
           logger.warn(message);
@@ -156,7 +156,7 @@ function unrecoverableError(
   streamParams: StreamCallSettings,
   error: any,
 ): AssistantModelMessage {
-  const errorMessage = extractErrorMessage(error);
+  const errorMessage = extractMessage(error);
   logger.warn(
     `An unrecoverable error occurred in the conversation. Message: ${errorMessage}`,
     error,
@@ -280,6 +280,7 @@ function sendMessageToStream(
     case 'finish-step':
     case 'finish':
     case 'tool-input-end':
+    case 'error':
       return;
     default:
       responseStream.write(`data: ${JSON.stringify(message)}`);

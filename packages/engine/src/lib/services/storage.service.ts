@@ -1,10 +1,13 @@
 import { Store, StoreScope } from '@openops/blocks-framework';
 import {
+  MAX_REQUEST_BODY_WITH_BUFFER_MB,
+  ONE_MB_IN_BYTES,
+} from '@openops/server-shared';
+import {
   DeleteStoreEntryRequest,
   FlowId,
   FlowRunId,
   PutStoreEntryRequest,
-  STORE_VALUE_MAX_SIZE,
   StoreEntry,
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
@@ -53,8 +56,11 @@ export const createStorageService = ({
 
       try {
         const sizeOfValue = sizeof(request.value);
-        if (sizeOfValue > STORE_VALUE_MAX_SIZE) {
-          throw new StorageLimitError(request.key, STORE_VALUE_MAX_SIZE);
+        const maxStorageSizeMB = MAX_REQUEST_BODY_WITH_BUFFER_MB;
+        const maxStorageSizeBytes = maxStorageSizeMB * ONE_MB_IN_BYTES;
+
+        if (sizeOfValue > maxStorageSizeBytes) {
+          throw new StorageLimitError(request.key, maxStorageSizeMB);
         }
         const response = await fetch(url, {
           method: 'POST',
@@ -241,8 +247,9 @@ const handleResponseError = async ({
   if (response.status === StatusCodes.NOT_FOUND.valueOf()) {
     return null;
   }
+
   if (response.status === StatusCodes.REQUEST_TOO_LONG) {
-    throw new StorageLimitError(key, STORE_VALUE_MAX_SIZE);
+    throw new StorageLimitError(key, MAX_REQUEST_BODY_WITH_BUFFER_MB);
   }
   const cause = await response.text();
   throw new StorageError(key, cause);
