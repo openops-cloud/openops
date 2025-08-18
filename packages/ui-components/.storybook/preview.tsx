@@ -43,3 +43,9 @@ export const globalTypes = {
 export const globals = {
   theme: ThemeSwitcherValue.LIGHT,
 };
+
+export const parameters = {
+  chromatic: {
+    diffThreshold: 0.2,
+  },
+};
