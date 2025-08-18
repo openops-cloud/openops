@@ -1,6 +1,6 @@
 import { BlockMetadataModelSummary } from '@openops/blocks-framework';
 import { t } from 'i18next';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Layers, LucideIcon } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import {
   Collapsible,
@@ -10,6 +10,7 @@ import {
 import { ScrollArea } from '../../ui/scroll-area';
 import { TooltipProvider } from '../../ui/tooltip';
 import { OverflowTooltip } from '../overflow-tooltip';
+import { DOMAIN_ICON_SUGGESTIONS } from './domain-icons';
 import { replaceServicePrefix } from './template-utils';
 import { TemplateSidebarCategory } from './types';
 
@@ -19,6 +20,7 @@ type FlowTemplateFilterItemProps = {
   onClick: (id: string) => void;
   isActive: boolean;
   logoUrl?: string;
+  Icon?: LucideIcon;
 };
 
 const FlowTemplateFilterItem = ({
@@ -27,6 +29,7 @@ const FlowTemplateFilterItem = ({
   isActive,
   onClick,
   logoUrl,
+  Icon,
 }: FlowTemplateFilterItemProps) => (
   <div
     aria-selected={isActive}
@@ -40,7 +43,11 @@ const FlowTemplateFilterItem = ({
     onClick={() => onClick(value)}
   >
     <TooltipProvider>
-      {logoUrl && <img src={logoUrl} alt={displayName} className="w-6 h-6" />}
+      {Icon ? (
+        <Icon className="size-5 text-slate-600 dark:text-primary" />
+      ) : (
+        logoUrl && <img src={logoUrl} alt={displayName} className="w-6 h-6" />
+      )}
       <OverflowTooltip
         text={displayName}
         className="w-full font-normal text-slate-600 dark:text-primary text-base leading-snug truncate select-none"
@@ -85,6 +92,7 @@ type FlowTemplateFilterSidebarProps = {
   onServiceFilterClick: (service: string) => void;
   onCategoryFilterClick: (category: string) => void;
   clearFilters: () => void;
+  categoryLogos?: Record<string, string>;
 };
 
 const FlowTemplateFilterSidebar = ({
@@ -100,6 +108,7 @@ const FlowTemplateFilterSidebar = ({
   onBlockFilterClick,
   onCategoryFilterClick,
   clearFilters,
+  categoryLogos,
 }: FlowTemplateFilterSidebarProps) => {
   return (
     <div className="rounded-2xl flex-col justify-start items-start inline-flex h-full w-full px-4 pt-[25px] pb-8 bg-background">
@@ -112,7 +121,6 @@ const FlowTemplateFilterSidebar = ({
             selectedDomains.length === 0 && selectedServices.length === 0
           }
         />
-
         <FlowTemplateFilterHeader title={t('Cloud providers')} />
         <div className="flex flex-col w-full">
           {categories?.map((category) => (
@@ -134,6 +142,13 @@ const FlowTemplateFilterSidebar = ({
                   className="size-4 flex-shrink-0 mr-2 transition-transform group-data-[state=open]:rotate-90 dark:text-primary"
                   aria-hidden="true"
                 />
+                {categoryLogos?.[category.name] && (
+                  <img
+                    src={categoryLogos[category.name]}
+                    alt={category.name}
+                    className="w-6 mr-[10px]"
+                  />
+                )}
                 <span className="font-normal text-slate-600 dark:text-primary text-base">
                   {category.name}
                 </span>
@@ -155,6 +170,20 @@ const FlowTemplateFilterSidebar = ({
           ))}
         </div>
 
+        <FlowTemplateFilterHeader title={t('FinOps capabilities')} />
+        <div className="flex flex-col w-full">
+          {domains.map((domain) => (
+            <FlowTemplateFilterItem
+              key={domain}
+              value={domain}
+              displayName={domain}
+              onClick={onDomainFilterClick}
+              isActive={selectedDomains.includes(domain)}
+              Icon={DOMAIN_ICON_SUGGESTIONS[domain] ?? Layers}
+            />
+          ))}
+        </div>
+
         {blocks && blocks.length > 0 && (
           <>
             <FlowTemplateFilterHeader title={t('FinOps platforms')} />
@@ -172,19 +201,6 @@ const FlowTemplateFilterSidebar = ({
             </div>
           </>
         )}
-
-        <FlowTemplateFilterHeader title={t('FinOps capabilities')} />
-        <div className="flex flex-col w-full">
-          {domains.map((domain) => (
-            <FlowTemplateFilterItem
-              key={domain}
-              value={domain}
-              displayName={domain}
-              onClick={onDomainFilterClick}
-              isActive={selectedDomains.includes(domain)}
-            />
-          ))}
-        </div>
       </ScrollArea>
     </div>
   );

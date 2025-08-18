@@ -943,6 +943,8 @@ describe('Flow API', () => {
       const mockBlockMetadata = createMockBlockMetadata({
         name: 'webhook',
         version: '1.0.0',
+        blockType: BlockType.OFFICIAL,
+        packageType: PackageType.REGISTRY,
         triggers: {
           webhook_trigger: {
             name: 'webhook_trigger',
