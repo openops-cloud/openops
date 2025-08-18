@@ -36,7 +36,13 @@ export async function selectRelevantTools({
       messages,
       ...aiConfig.modelSettings,
       experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
-      providerOptions,
+      providerOptions: {
+        ...providerOptions,
+        openai: {
+          ...providerOptions.openai,
+          structuredOutputs: true,
+        },
+      },
     });
 
     let selectedToolNames = toolSelectionResult.tool_names;
