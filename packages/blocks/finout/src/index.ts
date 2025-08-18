@@ -2,6 +2,7 @@ import { createCustomApiCallAction } from '@openops/blocks-common';
 import { createBlock, Property } from '@openops/blocks-framework';
 import { BlockCategory } from '@openops/shared';
 import { addVirtualTagFilterValueAction } from './lib/actions/add-virtual-tag-filter-value-action';
+import { getCostGuardRecommendationsAction } from './lib/actions/get-cost-guard-recommendations-action';
 import { getViewDataAction } from './lib/actions/get-view-data-action';
 import { getVirtualTagValuesAction } from './lib/actions/get-virtual-tags-action';
 import { finoutAuth } from './lib/auth';
@@ -18,6 +19,7 @@ export const finout = createBlock({
     getViewDataAction,
     getVirtualTagValuesAction,
     addVirtualTagFilterValueAction,
+    getCostGuardRecommendationsAction,
     createCustomApiCallAction({
       baseUrl: () => BASE_URL,
       auth: finoutAuth,
