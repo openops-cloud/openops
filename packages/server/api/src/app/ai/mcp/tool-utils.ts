@@ -14,7 +14,7 @@ export const formatFrontendTools = (tools: AssistantUITools): ToolSet =>
       name,
       {
         ...(tool.description ? { description: tool.description } : undefined),
-        parameters: jsonSchema(tool.parameters),
+        inputSchema: jsonSchema(tool.parameters),
       },
     ]),
   );
