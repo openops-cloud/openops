@@ -80,6 +80,12 @@ export const generateCode = ({
     ...aiConfig.modelSettings,
     schema: unifiedCodeLLMSchema,
     experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
-    providerOptions,
+    providerOptions: {
+      ...providerOptions,
+      openai: {
+        ...providerOptions.openai,
+        structuredOutputs: true,
+      },
+    },
   });
 };
