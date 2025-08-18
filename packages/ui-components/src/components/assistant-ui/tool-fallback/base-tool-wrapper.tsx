@@ -28,7 +28,7 @@ const BaseToolWrapper = ({
 
   return (
     <div className="mb-4 flex w-full flex-col gap-3 rounded-lg border border-border bg-background py-3">
-      <div className="flex items-center gap-2 px-4">
+      <div className="flex flex-wrap items-center justify-center gap-2 px-4">
         {isComplete && <CircleCheck className="size-4 text-success" />}
         {isIncomplete && <XCircle className="size-4 text-destructive" />}
         <p className="text-foreground">
@@ -40,8 +40,8 @@ const BaseToolWrapper = ({
           aria-expanded={!isCollapsed}
           aria-controls="collapsible-content"
           size="icon"
-          variant="default"
-          className={'size-8 p-2 text-white'}
+          variant="ghost"
+          className={'size-8 p-2'}
           loading={isRunning}
         >
           {isCollapsed ? <ChevronDownIcon /> : <ChevronUpIcon />}
