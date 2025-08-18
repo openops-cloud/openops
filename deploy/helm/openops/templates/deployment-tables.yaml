@@ -25,7 +25,7 @@ spec:
               name: openops-secrets
               key: tablesPublicUrl
         - name: BASEROW_PRIVATE_URL
-          value: "{{ .Values.tables.env.privateUrl }}"
+          value: "{{ .Values.tables.env.privateUrl | default (include "openops.tablesServiceUrl" .) }}"
         - name: BASEROW_EXTRA_ALLOWED_HOSTS
           value: "{{ .Values.tables.env.extraAllowedHosts }}"
         - name: SECRET_KEY
@@ -64,6 +64,10 @@ spec:
           value: "{{ .Values.tables.env.migrateOnStartup }}"
         - name: DISABLE_VOLUME_CHECK
           value: "{{ .Values.tables.env.disableVolumeCheck }}"
+        - name: GUNICORN_BIND
+          value: "0.0.0.0:8000"
+        - name: BASEROW_CADDY_ADDRESSES
+          value: ":80"
         - name: DATABASE_NAME
           valueFrom:
             secretKeyRef:
@@ -90,7 +94,7 @@ spec:
               name: openops-secrets
               key: postgresPassword
         - name: REDIS_URL
-          value: "{{ .Values.tables.env.redisUrl }}"
+          value: "{{ .Values.tables.env.redisUrl | default (include "openops.redisUrl" .) }}"
         resources:
           requests:
             memory: "512Mi"

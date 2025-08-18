@@ -27,7 +27,7 @@ spec:
         - name: OPS_COMPONENT
           value: "{{ .Values.engine.env.component }}"
         - name: OPS_SERVER_API_URL
-          value: "{{ .Values.engine.env.serverApiUrl }}"
+          value: "{{ .Values.engine.env.serverApiUrl | default (printf "%s/api/" (include "openops.appServiceUrl" .)) }}"
         - name: OPS_CACHE_PATH
           value: "{{ .Values.engine.env.cachePath }}"
         - name: OPS_CONFIG_PATH
@@ -55,15 +55,15 @@ spec:
         - name: OPS_QUEUE_MODE
           value: "{{ .Values.engine.env.queueMode }}"
         - name: OPS_REDIS_HOST
-          value: "{{ .Values.engine.env.redisHost }}"
+          value: "{{ include "openops.redisHost" . }}"
         - name: OPS_REDIS_PORT
-          value: "{{ .Values.engine.env.redisPort }}"
+          value: "{{ include "openops.redisPort" . }}"
         - name: OPS_DB_TYPE
           value: "{{ .Values.engine.env.dbType }}"
         - name: OPS_SLACK_ENABLE_INTERACTIONS
           value: "{{ .Values.engine.env.slackEnableInteractions }}"
         - name: OPS_ENGINE_URL
-          value: "{{ .Values.engine.env.engineUrl }}"
+          value: "{{ .Values.engine.env.engineUrl | default (printf "%s/execute" (include "openops.engineServiceUrl" .)) }}"
         - name: OPS_EXECUTION_MODE
           value: "{{ .Values.engine.env.executionMode }}"
         - name: OPS_LOG_LEVEL
@@ -82,6 +82,15 @@ spec:
           value: "{{ .Values.engine.env.hostAzureConfigDir }}"
         - name: HOST_CLOUDSDK_CONFIG
           value: "{{ .Values.engine.env.hostCloudsdkConfig }}"
+        ports:
+        - containerPort: 3005
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
         envFrom:
         - secretRef:
             name: openops-secrets

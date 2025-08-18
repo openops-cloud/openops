@@ -61,9 +61,9 @@ spec:
         - name: OPS_QUEUE_MODE
           value: "{{ .Values.app.env.queueMode }}"
         - name: OPS_REDIS_HOST
-          value: "{{ .Values.app.env.redisHost }}"
+          value: "{{ include "openops.redisHost" . }}"
         - name: OPS_REDIS_PORT
-          value: "{{ .Values.app.env.redisPort }}"
+          value: "{{ include "openops.redisPort" . }}"
         - name: OPS_DB_TYPE
           value: "{{ .Values.app.env.dbType }}"
         - name: OPS_SLACK_APP_SIGNING_SECRET
@@ -74,38 +74,23 @@ spec:
         - name: OPS_SLACK_ENABLE_INTERACTIONS
           value: "{{ .Values.app.env.slackEnableInteractions }}"
         - name: OPS_OPENOPS_TABLES_API_URL
-          value: "{{ .Values.app.env.tablesApiUrl }}"
+          value: "{{ .Values.app.env.tablesApiUrl | default (include "openops.tablesServiceUrl" .) }}"
         - name: OPS_MAX_CONCURRENT_TABLES_REQUESTS
           value: "{{ .Values.app.env.maxConcurrentTablesRequests }}"
         - name: OPS_ANALYTICS_PUBLIC_URL
           value: "{{ .Values.app.env.analyticsPublicUrl }}"
         - name: OPS_ANALYTICS_PRIVATE_URL
-          value: "{{ .Values.app.env.analyticsPrivateUrl }}"
+          value: "{{ .Values.app.env.analyticsPrivateUrl | default (include "openops.analyticsServiceUrl" .) }}"
         - name: OPS_ENGINE_URL
-          value: "{{ .Values.app.env.engineUrl }}"
+          value: "{{ .Values.app.env.engineUrl | default (printf "%s/execute" (include "openops.engineServiceUrl" .)) }}"
         - name: OPS_EXECUTION_MODE
           value: "{{ .Values.app.env.executionMode }}"
-        - name: OPS_LOGZIO_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: openops-secrets
-              key: logzioToken
-        - name: OPS_LOGZIO_METRICS_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: openops-secrets
-              key: logzioMetricsToken
         - name: OPS_LOG_LEVEL
           value: "{{ .Values.app.env.logLevel }}"
         - name: OPS_LOG_PRETTY
           value: "{{ .Values.app.env.logPretty }}"
         - name: OPS_TELEMETRY_COLLECTOR_URL
           value: "{{ .Values.app.env.telemetryCollectorUrl }}"
-        - name: CHROMATIC_PROJECT_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: openops-secrets
-              key: chromaticProjectToken
         - name: OPS_DARK_THEME_ENABLED
           value: "{{ .Values.app.env.darkThemeEnabled }}"
         - name: OPS_CODE_BLOCK_MEMORY_LIMIT_IN_MB
@@ -201,16 +186,23 @@ spec:
         - name: POSTGRES_MAX_CONNECTIONS
           value: "{{ .Values.postgres.env.maxConnections }}"
         ports:
-        - containerPort: 8080
+        - containerPort: 3000
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
         readinessProbe:
           httpGet:
             path: /health
-            port: 8080
+            port: 3000
           initialDelaySeconds: 30
           periodSeconds: 10
         livenessProbe:
           httpGet:
             path: /health
-            port: 8080
+            port: 3000
           initialDelaySeconds: 60
           periodSeconds: 30

@@ -36,9 +36,9 @@ spec:
         - name: DATABASE_DB
           value: "{{ .Values.analytics.env.databaseDb }}"
         - name: DATABASE_HOST
-          value: "{{ .Values.analytics.env.databaseHost }}"
+          value: "{{ .Values.analytics.env.databaseHost | default (include "openops.postgresHost" .) }}"
         - name: DATABASE_PORT
-          value: "{{ .Values.analytics.env.databasePort }}"
+          value: "{{ .Values.analytics.env.databasePort | default (include "openops.postgresPort" .) }}"
         - name: DATABASE_USER
           valueFrom:
             secretKeyRef:
@@ -63,6 +63,13 @@ spec:
           value: "{{ .Values.analytics.env.featureAllowAdhocSubquery }}"
         ports:
         - containerPort: 8088
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
         livenessProbe:
           httpGet:
             path: /health

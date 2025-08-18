@@ -4,3 +4,4 @@ description: A Helm chart for OpenOps application
 type: application
 version: 0.1.0
 appVersion: "latest"
+icon: https://openops.com/favicon.ico

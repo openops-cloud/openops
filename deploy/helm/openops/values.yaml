@@ -1,6 +1,6 @@
 global:
   version: "latest"
-  
+
 image:
   repository: public.ecr.aws/openops
   pullPolicy: IfNotPresent
@@ -26,17 +26,17 @@ app:
     enableHostSession: "false"
     execFileMaxBufferSizeMb: ""
     queueMode: "REDIS"
-    redisHost: "redis"
-    redisPort: "6379"
+    redisHost: ""  # Auto-configured from redis service
+    redisPort: ""  # Auto-configured from redis service
     dbType: "POSTGRES"
     slackEnableInteractions: "true"
-    tablesApiUrl: "http://openops-tables"
+    tablesApiUrl: ""  # Auto-configured from tables service
     maxConcurrentTablesRequests: "100"
     analyticsPublicUrl: "http://localhost"
-    analyticsPrivateUrl: "http://openops-analytics:8088"
-    engineUrl: "http://openops-engine:3005/execute"
+    analyticsPrivateUrl: ""  # Auto-configured from analytics service
+    engineUrl: ""  # Auto-configured from engine service
     executionMode: "SANDBOX_CODE_ONLY"
-    logLevel: "info"
+    logLevel: "debug"
     logPretty: "false"
     telemetryCollectorUrl: "https://telemetry.openops.com/save"
     darkThemeEnabled: "false"
@@ -52,7 +52,7 @@ engine:
   env:
     component: engine
     baseCodeDirectory: /tmp/codes
-    serverApiUrl: http://openops-app/api/
+    serverApiUrl: ""  # Auto-configured from app service
     cachePath: "./cache"
     configPath: "./config"
     environment: "prod"
@@ -66,13 +66,13 @@ engine:
     enableHostSession: "false"
     execFileMaxBufferSizeMb: ""
     queueMode: "REDIS"
-    redisHost: "redis"
-    redisPort: "6379"
+    redisHost: ""  # Auto-configured from redis service
+    redisPort: ""  # Auto-configured from redis service
     dbType: "POSTGRES"
     slackEnableInteractions: "true"
-    engineUrl: "http://openops-engine:3005/execute"
+    engineUrl: ""  # Auto-configured from engine service
     executionMode: "SANDBOX_CODE_ONLY"
-    logLevel: "info"
+    logLevel: "debug"
     logPretty: "false"
     telemetryCollectorUrl: "https://telemetry.openops.com/save"
     darkThemeEnabled: "false"
@@ -87,12 +87,12 @@ tables:
   tag: "0.2.6"
   replicas: 1
   env:
-    privateUrl: http://openops-tables
+    privateUrl: ""  # Auto-configured from tables service
     extraAllowedHosts: "*"
     syncTemplatesOnStartup: "false"
     migrateOnStartup: "true"
     disableVolumeCheck: "yes"
-    redisUrl: redis://redis:6379/0
+    redisUrl: ""  # Auto-configured from redis service
   storage:
     size: 10Gi
     storageClass: ""
@@ -106,8 +106,8 @@ analytics:
     gunicornLogLevel: "debug"
     databaseDialect: "postgresql"
     databaseDb: "analytics"
-    databaseHost: "postgres"
-    databasePort: "5432"
+    databaseHost: ""  # Auto-configured from postgres service
+    databasePort: ""  # Auto-configured from postgres service
     featureAllowAdhocSubquery: "true"
 
 postgres:
@@ -162,9 +162,6 @@ secrets:
   postgresPort: "5432"
   apiKey: ""
   slackAppSigningSecret: "placeholder"
-  logzioToken: "placeholder"
-  logzioMetricsToken: "placeholder"
-  chromaticProjectToken: "placeholder"
 
 volumes:
   azureConfigDir: ""
