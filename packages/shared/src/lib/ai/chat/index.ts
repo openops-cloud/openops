@@ -4,7 +4,7 @@ export const BlockContext = Type.Object({
   chatId: Type.Optional(Type.String()),
   workflowId: Type.Optional(Type.String()),
   blockName: Type.Optional(Type.String()),
-  stepName: Type.Optional(Type.String()),
+  stepId: Type.Optional(Type.String()),
   actionName: Type.Optional(Type.String()),
 });
 
@@ -17,7 +17,7 @@ export const OpenChatResponse = Type.Object({
     Type.Array(
       Type.Object({
         role: Type.String(),
-        content: Type.Union([
+        parts: Type.Union([
           Type.String(),
           Type.Array(
             Type.Object({
@@ -67,14 +67,31 @@ export const NewMessageRequest = Type.Object({
           Type.Literal('assistant'),
           Type.Literal('tool'),
         ]),
-        content: Type.Any(),
+        parts: Type.Any(),
       }),
     ),
   ),
   additionalContext: Type.Optional(ChatFlowContext),
+  tools: Type.Optional(Type.Record(Type.String(), Type.Any())),
 });
 
 export type NewMessageRequest = Static<typeof NewMessageRequest>;
+
+export const ChatNameRequest = Type.Object({
+  chatId: Type.String(),
+});
+export type ChatNameRequest = Static<typeof ChatNameRequest>;
+
+export const ChatsSummary = Type.Object({
+  chatId: Type.String(),
+  chatName: Type.String(),
+});
+
+export const ListChatsResponse = Type.Object({
+  chats: Type.Array(ChatsSummary),
+});
+
+export type ListChatsResponse = Static<typeof ListChatsResponse>;
 
 export const DeleteChatHistoryRequest = Type.Object({
   chatId: Type.String(),

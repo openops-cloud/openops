@@ -2,7 +2,7 @@ import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { experimental_createMCPClient as createMCPClient, tool } from 'ai';
 import { Experimental_StdioMCPTransport as StdioMCPTransport } from 'ai/mcp-stdio';
 import { z } from 'zod';
-import { MCPTool } from './mcp-tools';
+import { MCPTool } from './tools-initializer';
 
 export async function getDocsTools(): Promise<MCPTool> {
   const mcpServerPath = system.get<string>(AppSystemProp.DOCS_MCP_SERVER_PATH);
@@ -30,7 +30,7 @@ export async function getDocsTools(): Promise<MCPTool> {
   const toolSet = {
     docsMcpClient: tool({
       description: 'Search OpenOps documentation',
-      parameters: z.object({
+      inputSchema: z.object({
         query: z.string().describe('The search query'),
       }),
       execute: async ({ query }) => {

@@ -274,6 +274,7 @@
       "@openops/block-sendgrid": ["packages/blocks/sendgrid/src/index.ts"],
       "@openops/block-sendinblue": ["packages/blocks/sendinblue/src/index.ts"],
       "@openops/block-sendy": ["packages/blocks/sendy/src/index.ts"],
+      "@openops/block-servicenow": ["packages/blocks/servicenow/src/index.ts"],
       "@openops/block-sessions-us": [
         "packages/blocks/sessions-us/src/index.ts"
       ],
@@ -318,6 +319,7 @@
       "@openops/block-twilio": ["packages/blocks/twilio/src/index.ts"],
       "@openops/block-twitter": ["packages/blocks/twitter/src/index.ts"],
       "@openops/block-typeform": ["packages/blocks/typeform/src/index.ts"],
+      "@openops/block-vantage": ["packages/blocks/vantage/src/index.ts"],
       "@openops/block-vbout": ["packages/blocks/vbout/src/index.ts"],
       "@openops/block-vegacloud": ["packages/blocks/vegacloud/src/index.ts"],
       "@openops/block-vtex": ["packages/blocks/vtex/src/index.ts"],
@@ -351,7 +353,8 @@
       "@openops/server-shared": ["packages/server/shared/src/index.ts"],
       "@openops/shared": ["packages/shared/src/index.ts"],
       "Aminos": ["packages/blocks/Aminos/src/index.ts"],
-      "server-worker": ["packages/server/worker/src/index.ts"]
+      "server-worker": ["packages/server/worker/src/index.ts"],
+      "@openops/ui-kit": ["packages/ui-kit/src/index.ts"]
     },
     "resolveJsonModule": true
   },

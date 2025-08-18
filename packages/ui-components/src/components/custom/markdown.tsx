@@ -9,37 +9,10 @@ import { Theme } from '../../lib/theme';
 import { Alert, AlertDescription } from '../../ui/alert';
 import { Button } from '../../ui/button';
 import { CodeActions } from '../code-actions';
-import { CodeMirrorEditor } from '../json-editor';
-import { getLanguageExtensionForCode } from '../json-editor/code-mirror-utils';
+import { MarkdownCodeViewer } from './markdown-code-viewer';
 import { createMarkdownComponents } from './markdown-components';
 import { CodeVariations, MarkdownCodeVariations } from './types';
-
-function extractLanguageFromClassName(className?: string): string | undefined {
-  if (!className || typeof className !== 'string') {
-    return undefined;
-  }
-
-  const languagePrefix = 'language-';
-  const languageIndex = className.indexOf(languagePrefix);
-
-  if (languageIndex === -1) {
-    return undefined;
-  }
-
-  const startIndex = languageIndex + languagePrefix.length;
-  const remainingString = className.substring(startIndex);
-
-  const language = remainingString.split(/\s/)[0];
-  return language.length > 0 ? language : undefined;
-}
-
-function applyVariables(markdown: string, variables: Record<string, string>) {
-  return markdown
-    .replaceAll('<br>', '\n')
-    .replaceAll(/\{\{(.*?)\}\}/g, (_, variableName) => {
-      return variables[variableName] ?? '';
-    });
-}
+import { applyVariables } from './utils';
 
 type MarkdownProps = {
   markdown: string | undefined;
@@ -72,31 +45,6 @@ const Container = ({
     children
   );
 
-const CodeViewer = ({
-  content,
-  theme,
-  className,
-}: {
-  content: string;
-  theme: Theme;
-  className?: string;
-}) => {
-  return (
-    <CodeMirrorEditor
-      value={content}
-      readonly={true}
-      showLineNumbers={false}
-      height="auto"
-      className="border border-solid rounded"
-      containerClassName="h-auto"
-      theme={theme}
-      languageExtensions={getLanguageExtensionForCode(className)}
-      showTabs={typeof content !== 'string' && 'packageJson' in content}
-      editorLanguage={extractLanguageFromClassName(className)}
-    />
-  );
-};
-
 const LanguageUrl = ({ content, theme }: { content: string; theme: Theme }) => {
   if (
     validator.isURL(content, {
@@ -119,7 +67,7 @@ const LanguageUrl = ({ content, theme }: { content: string; theme: Theme }) => {
     );
   }
 
-  return <CodeViewer content={content} theme={theme} />;
+  return <MarkdownCodeViewer content={content} theme={theme} />;
 };
 
 /*
@@ -177,11 +125,11 @@ const Markdown = React.memo(
               const codeContent = String(props.children).trim();
 
               return (
-                <div className="relative py-2 w-full">
+                <div className="relative py-2">
                   {isLanguageUrl ? (
                     <LanguageUrl content={codeContent} theme={theme} />
                   ) : (
-                    <CodeViewer
+                    <MarkdownCodeViewer
                       content={codeContent}
                       theme={theme}
                       className={props.className}

@@ -24,10 +24,12 @@ import {
   FlagId,
   FlowRetryStrategy,
   FlowRun,
+  FlowRunTriggerSource,
   isFailedState,
   Permission,
 } from '@openops/shared';
 
+import { RunType } from '@/app/features/flow-runs/components/run-type';
 import { flowRunUtils } from '../lib/flow-run-utils';
 
 type Column = ColumnDef<RowDataWithActions<FlowRun>> & {
@@ -92,6 +94,17 @@ export const useRunsTableColumns = (): Column[] => {
           },
         },
         {
+          accessorKey: 'triggerSource',
+          header: ({ column }) => (
+            <DataTableColumnHeader column={column} title={t('Type')} />
+          ),
+          cell: ({ row }: { row: { original: FlowRun } }) => {
+            const status = row.original.triggerSource;
+
+            return <RunType type={status}></RunType>;
+          },
+        },
+        {
           accessorKey: 'created',
           header: ({ column }) => (
             <DataTableColumnHeader column={column} title={t('Start Time')} />
@@ -122,6 +135,15 @@ export const useRunsTableColumns = (): Column[] => {
           accessorKey: 'actions',
           header: () => null,
           cell: ({ row }) => {
+            const isFailed = isFailedState(row.original.status);
+
+            if (
+              !isFailed ||
+              row.original.triggerSource === FlowRunTriggerSource.TEST_RUN
+            ) {
+              return <div className="h-10"></div>;
+            }
+
             return (
               <div
                 className="flex items-end justify-end"
@@ -154,26 +176,24 @@ export const useRunsTableColumns = (): Column[] => {
                       </DropdownMenuItem>
                     </PermissionNeededTooltip>
 
-                    {isFailedState(row.original.status) && (
-                      <PermissionNeededTooltip
-                        hasPermission={userHasPermissionToRetryRun}
+                    <PermissionNeededTooltip
+                      hasPermission={userHasPermissionToRetryRun}
+                    >
+                      <DropdownMenuItem
+                        disabled={!userHasPermissionToRetryRun}
+                        onClick={() =>
+                          mutate({
+                            row: row.original,
+                            strategy: FlowRetryStrategy.FROM_FAILED_STEP,
+                          })
+                        }
                       >
-                        <DropdownMenuItem
-                          disabled={!userHasPermissionToRetryRun}
-                          onClick={() =>
-                            mutate({
-                              row: row.original,
-                              strategy: FlowRetryStrategy.FROM_FAILED_STEP,
-                            })
-                          }
-                        >
-                          <div className="flex flex-row gap-2 items-center">
-                            <RotateCcw className="h-4 w-4" />
-                            <span>{t('Retry from failed step')}</span>
-                          </div>
-                        </DropdownMenuItem>
-                      </PermissionNeededTooltip>
-                    )}
+                        <div className="flex flex-row gap-2 items-center">
+                          <RotateCcw className="h-4 w-4" />
+                          <span>{t('Retry from failed step')}</span>
+                        </div>
+                      </DropdownMenuItem>
+                    </PermissionNeededTooltip>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>

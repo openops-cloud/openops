@@ -1,7 +1,5 @@
-const decryptStringMock = jest.fn().mockReturnValue('test-encrypt');
-
 import { AiProviderEnum, PrincipalType } from '@openops/shared';
-import { LanguageModel, pipeDataStreamToResponse, streamText } from 'ai';
+import { LanguageModel } from 'ai';
 import {
   FastifyInstance,
   FastifyPluginOptions,
@@ -9,16 +7,17 @@ import {
   FastifyRequest,
 } from 'fastify';
 import {
+  generateChatName,
+  getAllChats,
   getConversation,
   getLLMConfig,
+  updateChatName,
 } from '../../../src/app/ai/chat/ai-chat.service';
-import { aiMCPChatController } from '../../../src/app/ai/chat/ai-mcp-chat.controller';
-import {
-  getBlockSystemPrompt,
-  getMcpSystemPrompt,
-} from '../../../src/app/ai/chat/prompts.service';
-import { selectRelevantTools } from '../../../src/app/ai/chat/tools.service';
-import { getMCPTools } from '../../../src/app/ai/mcp/mcp-tools';
+
+const routeChatRequestMock = jest.fn();
+jest.mock('../../../src/app/ai/chat/chat-request-router', () => ({
+  routeChatRequest: routeChatRequestMock,
+}));
 
 jest.mock('@openops/server-shared', () => ({
   logger: {
@@ -39,6 +38,9 @@ jest.mock('@openops/server-shared', () => ({
       }
       return 'mock-value';
     }),
+    getNumberOrThrow: jest.fn((prop) => {
+      return 10;
+    }),
   },
   AppSystemProp: {
     DB_TYPE: 'DB_TYPE',
@@ -52,17 +54,8 @@ jest.mock('@openops/server-shared', () => ({
     SQLITE3: 'SQLITE3',
   },
   encryptUtils: {
-    decryptString: decryptStringMock,
+    decryptString: jest.fn().mockReturnValue('test-encrypt'),
   },
-}));
-
-jest.mock('@openops/common', () => ({
-  getAiProviderLanguageModel: jest.fn(),
-  isLLMTelemetryEnabled: jest.fn().mockReturnValue(false),
-}));
-
-jest.mock('../../../src/app/ai/mcp/mcp-tools', () => ({
-  getMCPTools: jest.fn(),
 }));
 
 jest.mock('../../../src/app/ai/chat/context-enrichment.service', () => ({
@@ -71,6 +64,11 @@ jest.mock('../../../src/app/ai/chat/context-enrichment.service', () => ({
 
 jest.mock('../../../src/app/ai/chat/code.service', () => ({
   streamCode: jest.fn(),
+}));
+
+jest.mock('../../../src/app/telemetry/event-models', () => ({
+  sendAiChatFailureEvent: jest.fn(),
+  sendAiChatMessageSendEvent: jest.fn(),
 }));
 
 jest.mock('../../../src/app/ai/chat/ai-chat.service', () => ({
@@ -82,43 +80,12 @@ jest.mock('../../../src/app/ai/chat/ai-chat.service', () => ({
   createChatContext: jest.fn(),
   getConversation: jest.fn(),
   getLLMConfig: jest.fn(),
+  generateChatName: jest.fn(),
+  updateChatName: jest.fn(),
+  getAllChats: jest.fn(),
 }));
 
-jest.mock('../../../src/app/ai/chat/prompts.service', () => ({
-  getMcpSystemPrompt: jest.fn(),
-  getBlockSystemPrompt: jest.fn(),
-}));
-
-jest.mock('../../../src/app/ai/chat/tools.service', () => ({
-  selectRelevantTools: jest.fn(),
-}));
-
-type MockDataStreamWriter = {
-  write: jest.Mock;
-  end: jest.Mock;
-};
-
-jest.mock('ai', () => {
-  const mockStreamText = jest.fn().mockReturnValue({
-    mergeIntoDataStream: jest.fn(),
-  });
-
-  return {
-    pipeDataStreamToResponse: jest.fn((_, options) => {
-      if (options?.execute) {
-        const mockWriter: MockDataStreamWriter = {
-          write: jest.fn(),
-          end: jest.fn(),
-        };
-        options.execute(mockWriter);
-      }
-      return { pipe: jest.fn() };
-    }),
-    streamText: mockStreamText,
-    DataStreamWriter: jest.fn(),
-    LanguageModel: jest.fn(),
-  };
-});
+import { aiMCPChatController } from '../../../src/app/ai/chat/ai-mcp-chat.controller';
 
 describe('AI MCP Chat Controller - Tool Service Interactions', () => {
   type RouteHandler = (
@@ -136,14 +103,21 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
       handlers[path] = handler;
       return mockApp;
     }),
+    get: jest.fn((path: string, _: unknown, handler: RouteHandler) => {
+      handlers[path] = handler;
+      return mockApp;
+    }),
   } as unknown as FastifyInstance;
 
   const mockReply = {
     code: jest.fn().mockReturnThis(),
     send: jest.fn().mockReturnThis(),
+    hijack: jest.fn(),
     raw: {
       write: jest.fn(),
       end: jest.fn(),
+      writeHead: jest.fn(),
+      setHeader: jest.fn(),
     },
   };
 
@@ -164,8 +138,6 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
   };
 
   describe('POST / (new message endpoint)', () => {
-    const systemPrompt = 'system prompt';
-    const emptyToolsSystemPrompt = `${systemPrompt}\n\nMCP tools are not available in this chat. Do not claim access or simulate responses from them under any circumstance.`;
     const mockChatContext = { chatId: 'test-chat-id' };
     const mockMessages = [{ role: 'user', content: 'previous message' }];
     const mockAiConfig = {
@@ -182,14 +154,6 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
     };
     const mockLanguageModel = {} as LanguageModel;
 
-    const mockAllTools = {
-      mcpClients: [],
-      tools: {
-        tool1: { description: 'Tool 1', parameters: {} },
-        tool2: { description: 'Tool 2', parameters: {} },
-      },
-    };
-
     beforeEach(async () => {
       jest.clearAllMocks();
 
@@ -204,543 +168,490 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
         languageModel: mockLanguageModel,
       });
 
-      (getMcpSystemPrompt as jest.Mock).mockResolvedValue(systemPrompt);
-
       await aiMCPChatController(mockApp, {} as FastifyPluginOptions);
     });
 
-    describe('messages handling', () => {
-      it('should extract message content from messages array when provided', async () => {
-        (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);
-
-        const requestWithMessages = {
-          ...mockRequest,
-          body: {
-            chatId: 'test-chat-id',
-            messages: [
-              {
-                role: 'user',
-                content: [{ type: 'text', text: 'first message' }],
-              },
-              {
-                role: 'assistant',
-                content: [{ type: 'text', text: 'assistant response' }],
-              },
-              {
-                role: 'user',
-                content: [{ type: 'text', text: 'latest message' }],
-              },
-            ],
-          },
-        };
-
-        const postHandler = handlers['/'];
-        await postHandler(
-          requestWithMessages as FastifyRequest,
-          mockReply as unknown as FastifyReply,
-        );
-
-        expect(selectRelevantTools).toHaveBeenCalledWith({
+    it('should extract message content from messages array when provided', async () => {
+      const requestWithMessages = {
+        ...mockRequest,
+        body: {
+          chatId: 'test-chat-id',
           messages: [
-            ...mockMessages,
-            { role: 'user', content: 'latest message' },
+            {
+              role: 'user',
+              parts: [{ type: 'text', text: 'first message' }],
+            },
+            {
+              role: 'assistant',
+              parts: [{ type: 'text', text: 'assistant response' }],
+            },
+            {
+              role: 'user',
+              parts: [{ type: 'text', text: 'latest message' }],
+            },
           ],
-          tools: mockAllTools.tools,
-          languageModel: mockLanguageModel,
-          aiConfig: mockAiConfig,
-        });
-      });
+        },
+      };
 
-      it('should handle messages with tool role in request body', async () => {
-        (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);
+      const postHandler = handlers['/'];
+      await postHandler(
+        requestWithMessages as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
 
-        const requestWithToolMessages = {
-          ...mockRequest,
-          body: {
-            chatId: 'test-chat-id',
-            messages: [
-              {
-                role: 'user',
-                content: [{ type: 'text', text: 'user question' }],
-              },
-              {
-                role: 'assistant',
-                content: [
-                  {
-                    type: 'tool-call',
-                    toolCallId: 'call_123',
-                    name: 'get_weather',
-                    args: {},
-                  },
-                ],
-              },
-              {
-                role: 'tool',
-                content: [
-                  {
-                    type: 'tool-result',
-                    toolCallId: 'call_123',
-                    result: { temperature: 72 },
-                  },
-                ],
-              },
-              {
-                role: 'user',
-                content: [{ type: 'text', text: 'latest message' }],
-              },
-            ],
+      expect(routeChatRequestMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          newMessage: {
+            role: 'user',
+            content: 'latest message',
           },
-        };
+        }),
+      );
+    });
 
-        const postHandler = handlers['/'];
-        await postHandler(
-          requestWithToolMessages as FastifyRequest,
-          mockReply as unknown as FastifyReply,
-        );
-
-        expect(selectRelevantTools).toHaveBeenCalledWith({
+    it('should handle messages with tool role in request body', async () => {
+      const requestWithToolMessages = {
+        ...mockRequest,
+        body: {
+          chatId: 'test-chat-id',
           messages: [
-            ...mockMessages,
-            { role: 'user', content: 'latest message' },
+            {
+              role: 'user',
+              parts: [{ type: 'text', text: 'user question' }],
+            },
+            {
+              role: 'assistant',
+              parts: [
+                {
+                  type: 'tool-call',
+                  toolCallId: 'call_123',
+                  name: 'get_weather',
+                  args: {},
+                },
+              ],
+            },
+            {
+              role: 'tool',
+              parts: [
+                {
+                  type: 'tool-result',
+                  toolCallId: 'call_123',
+                  result: { temperature: 72 },
+                },
+              ],
+            },
+            {
+              role: 'user',
+              parts: [{ type: 'text', text: 'latest message' }],
+            },
           ],
-          tools: mockAllTools.tools,
-          languageModel: mockLanguageModel,
-          aiConfig: mockAiConfig,
-        });
-      });
+        },
+      };
 
-      it('should fall back to message field when messages array is not provided', async () => {
-        (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);
+      const postHandler = handlers['/'];
+      await postHandler(
+        requestWithToolMessages as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
 
-        const requestWithMessageOnly = {
-          ...mockRequest,
-          body: {
-            chatId: 'test-chat-id',
-            message: 'fallback message',
-          },
-        };
+      expect(routeChatRequestMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          newMessage: { role: 'user', content: 'latest message' },
+        }),
+      );
+    });
 
-        const postHandler = handlers['/'];
-        await postHandler(
-          requestWithMessageOnly as FastifyRequest,
-          mockReply as unknown as FastifyReply,
-        );
+    it('should fall back to message field when messages array is not provided', async () => {
+      const requestWithMessageOnly = {
+        ...mockRequest,
+        body: {
+          chatId: 'test-chat-id',
+          message: 'fallback message',
+        },
+      };
 
-        expect(selectRelevantTools).toHaveBeenCalledWith({
-          messages: [
-            ...mockMessages,
-            { role: 'user', content: 'fallback message' },
-          ],
-          tools: mockAllTools.tools,
-          languageModel: mockLanguageModel,
-          aiConfig: mockAiConfig,
-        });
-      });
+      const postHandler = handlers['/'];
+      await postHandler(
+        requestWithMessageOnly as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
 
-      it('should handle empty messages array gracefully', async () => {
-        (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);
+      expect(routeChatRequestMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          newMessage: { role: 'user', content: 'fallback message' },
+        }),
+      );
+    });
 
-        const requestWithEmptyMessages = {
-          ...mockRequest,
-          body: {
-            chatId: 'test-chat-id',
-            messages: [],
-          },
-        };
+    it('should handle empty messages array gracefully', async () => {
+      const requestWithEmptyMessages = {
+        ...mockRequest,
+        body: {
+          chatId: 'test-chat-id',
+          messages: [],
+        },
+      };
 
-        const postHandler = handlers['/'];
+      const postHandler = handlers['/'];
 
-        await postHandler(
-          requestWithEmptyMessages as FastifyRequest,
-          mockReply as unknown as FastifyReply,
-        );
+      await postHandler(
+        requestWithEmptyMessages as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
 
-        if ((selectRelevantTools as jest.Mock).mock.calls.length === 0) {
-          expect(mockReply.code).toHaveBeenCalledWith(400);
-          expect(mockReply.send).toHaveBeenCalledWith(
-            expect.objectContaining({
-              message:
-                'Messages array cannot be empty. Please provide at least one message or use the message field instead.',
-            }),
-          );
-        } else {
-          expect(selectRelevantTools).toHaveBeenCalledWith({
-            messages: [
-              ...mockMessages,
-              { role: 'user', content: 'test message' },
-            ],
-            tools: mockAllTools.tools,
-            languageModel: mockLanguageModel,
-            aiConfig: mockAiConfig,
-          });
-        }
-      });
-
-      it('should handle invalid content structure in last message', async () => {
-        (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);
-
-        const requestWithInvalidContent = {
-          ...mockRequest,
-          body: {
-            chatId: 'test-chat-id',
-            messages: [
-              {
-                role: 'user',
-                content: [{ type: 'text', text: 'valid message' }],
-              },
-              { role: 'user', content: [] },
-            ],
-          },
-        };
-
-        const postHandler = handlers['/'];
-
-        await postHandler(
-          requestWithInvalidContent as FastifyRequest,
-          mockReply as unknown as FastifyReply,
-        );
-
+      if (routeChatRequestMock.mock.calls.length === 0) {
         expect(mockReply.code).toHaveBeenCalledWith(400);
         expect(mockReply.send).toHaveBeenCalledWith(
           expect.objectContaining({
             message:
-              'Last message must have valid content array with at least one element.',
+              'Messages array cannot be empty. Please provide at least one message or use the message field instead.',
           }),
         );
-      });
-
-      it('should handle messages with complex content structure', async () => {
-        (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);
-
-        const requestWithComplexContent = {
-          ...mockRequest,
-          body: {
-            chatId: 'test-chat-id',
-            messages: [
-              { role: 'user', content: 'simple string content' },
-              {
-                role: 'assistant',
-                content: [{ type: 'text', text: 'assistant response' }],
-              },
-              {
-                role: 'user',
-                content: [
-                  { type: 'text', text: 'complex message' },
-                  { type: 'text', text: ' with multiple parts' },
-                ],
-              },
-            ],
-          },
-        };
-
-        const postHandler = handlers['/'];
-        await postHandler(
-          requestWithComplexContent as FastifyRequest,
-          mockReply as unknown as FastifyReply,
-        );
-
-        expect(selectRelevantTools).toHaveBeenCalledWith({
-          messages: [
-            ...mockMessages,
-            { role: 'user', content: 'complex message' },
-          ],
-          tools: mockAllTools.tools,
-          languageModel: mockLanguageModel,
-          aiConfig: mockAiConfig,
-        });
-      });
-    });
-
-    it('should call selectRelevantTools with the correct parameters', async () => {
-      (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);
-
-      const postHandler = handlers['/'];
-      expect(postHandler).toBeDefined();
-
-      await postHandler(
-        mockRequest as FastifyRequest,
-        mockReply as unknown as FastifyReply,
-      );
-
-      expect(selectRelevantTools).toHaveBeenCalledWith({
-        messages: [...mockMessages, { role: 'user', content: 'test message' }],
-        tools: mockAllTools.tools,
-        languageModel: mockLanguageModel,
-        aiConfig: mockAiConfig,
-      });
-    });
-
-    it('should not call tools and load only promt', async () => {
-      (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);
-      (getConversation as jest.Mock).mockResolvedValue({
-        chatContext: {
-          ...mockChatContext,
-          workflowId: 'workflowId',
-          blockName: 'blockName',
-          stepName: 'stepName',
-          actionName: 'actionName',
-        },
-        messages: [...mockMessages],
-      });
-      const postHandler = handlers['/'];
-      expect(postHandler).toBeDefined();
-
-      await postHandler(
-        mockRequest as FastifyRequest,
-        mockReply as unknown as FastifyReply,
-      );
-
-      expect(getBlockSystemPrompt).toHaveBeenCalled();
-      expect(getMCPTools).not.toHaveBeenCalled();
-    });
-
-    it.each([
-      {
-        selectedTools: {
-          tool1: { description: 'Tool 1', parameters: {} },
-          mcp_analytics_superset: {
-            description: 'Analytics tool',
-            parameters: {},
-            toolProvider: 'superset',
-          },
-          mcp_table_tool: {
-            description: 'Table tool',
-            parameters: {},
-            toolProvider: 'tables',
-          },
-          openops_mcp_tool: {
-            description: 'Table tool',
-            parameters: {},
-            toolProvider: 'openops',
-          },
-        },
-        expected: {
-          isAnalyticsLoaded: true,
-          isTablesLoaded: true,
-          isOpenOpsMCPEnabled: true,
-          isAwsCostMcpDisabled: true,
-        },
-      },
-      {
-        selectedTools: {
-          tool1: { description: 'Tool 1', parameters: {} },
-          openops_mcp_tool: {
-            description: 'Table tool',
-            parameters: {},
-            toolProvider: 'openops',
-          },
-        },
-        expected: {
-          isAnalyticsLoaded: false,
-          isTablesLoaded: false,
-          isOpenOpsMCPEnabled: true,
-          isAwsCostMcpDisabled: true,
-        },
-      },
-      {
-        selectedTools: {
-          tool1: { description: 'Tool 1', parameters: {} },
-          tool2: { description: 'Tool 2', parameters: {} },
-        },
-        expected: {
-          isAnalyticsLoaded: false,
-          isTablesLoaded: false,
-          isOpenOpsMCPEnabled: false,
-          isAwsCostMcpDisabled: true,
-        },
-      },
-      {
-        selectedTools: {
-          tool1: { description: 'Tool 1', parameters: {} },
-          mcp_analytics_superset: {
-            description: 'Analytics tool',
-            parameters: {},
-            toolProvider: 'superset',
-          },
-        },
-        expected: {
-          isAnalyticsLoaded: true,
-          isTablesLoaded: false,
-          isOpenOpsMCPEnabled: false,
-          isAwsCostMcpDisabled: true,
-        },
-      },
-      {
-        selectedTools: {
-          tool1: { description: 'Tool 1', parameters: {} },
-          mcp_table_tool: {
-            description: 'Table tool',
-            parameters: {},
-            toolProvider: 'tables',
-          },
-        },
-        expected: {
-          isAnalyticsLoaded: false,
-          isTablesLoaded: true,
-          isOpenOpsMCPEnabled: false,
-          isAwsCostMcpDisabled: true,
-        },
-      },
-    ])(
-      'should handle analytics/tables/openops flags when tools are $expected.isAnalyticsLoaded/$expected.isTablesLoaded/$expected.isOpenOpsMCPEnabled',
-      async ({ selectedTools, expected }) => {
-        (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);
-        (selectRelevantTools as jest.Mock).mockResolvedValue(selectedTools);
-
-        const postHandler = handlers['/'];
-        await postHandler(
-          mockRequest as FastifyRequest,
-          mockReply as unknown as FastifyReply,
-        );
-
-        expect(getMcpSystemPrompt).toHaveBeenCalledWith(expected);
-      },
-    );
-
-    it.each([
-      {
-        selectedTools: undefined,
-        expected: {
-          isAnalyticsLoaded: false,
-          isTablesLoaded: false,
-          isOpenOpsMCPEnabled: false,
-          isAwsCostMcpDisabled: true,
-          expectedSystemPrompt: emptyToolsSystemPrompt,
-        },
-      },
-      {
-        selectedTools: {},
-        expected: {
-          isAnalyticsLoaded: false,
-          isTablesLoaded: false,
-          isOpenOpsMCPEnabled: false,
-          isAwsCostMcpDisabled: true,
-          expectedSystemPrompt: emptyToolsSystemPrompt,
-        },
-      },
-      {
-        selectedTools: null,
-        expected: {
-          isAnalyticsLoaded: false,
-          isTablesLoaded: false,
-          isOpenOpsMCPEnabled: false,
-          isAwsCostMcpDisabled: true,
-          expectedSystemPrompt: emptyToolsSystemPrompt,
-        },
-      },
-      {
-        selectedTools: {
-          tool1: { description: 'Tool 1', parameters: {} },
-        },
-        expected: {
-          isAnalyticsLoaded: false,
-          isTablesLoaded: false,
-          isOpenOpsMCPEnabled: false,
-          isAwsCostMcpDisabled: true,
-          expectedSystemPrompt: systemPrompt,
-        },
-      },
-    ])(
-      'should pass filtered tools to streamText via pipeDataStreamToResponse with $selectedTools',
-      async ({ selectedTools, expected }) => {
-        (getMCPTools as jest.Mock).mockResolvedValue(mockAllTools);
-        (selectRelevantTools as jest.Mock).mockResolvedValue(selectedTools);
-
-        const postHandler = handlers['/'];
-        await postHandler(
-          mockRequest as FastifyRequest,
-          mockReply as unknown as FastifyReply,
-        );
-
-        expect(getMcpSystemPrompt).toHaveBeenCalledWith({
-          isAnalyticsLoaded: expected.isAnalyticsLoaded,
-          isTablesLoaded: expected.isTablesLoaded,
-          isOpenOpsMCPEnabled: expected.isOpenOpsMCPEnabled,
-          isAwsCostMcpDisabled: expected.isAwsCostMcpDisabled,
-        });
-        expect(pipeDataStreamToResponse).toHaveBeenCalled();
-        expect(streamText).toHaveBeenCalledWith(
+      } else {
+        expect(routeChatRequestMock).toHaveBeenCalledWith(
           expect.objectContaining({
-            tools: selectedTools ?? {},
-            system: expected.expectedSystemPrompt,
+            newMessage: { role: 'user', content: 'latest message' },
           }),
         );
-      },
-    );
-  });
-
-  it('should include all openops tools from the full tool set when a relevant openops tool is present in selectedTools', async () => {
-    const openopsTools = {
-      openops_tool1: {
-        description: 'OpenOps Tool 1',
-        parameters: {},
-        toolProvider: 'openops',
-      },
-      openops_tool2: {
-        description: 'OpenOps Tool 2',
-        parameters: {},
-        toolProvider: 'openops',
-      },
-      unrelated_tool: {
-        description: 'Other Tool',
-        parameters: {},
-        toolProvider: 'tables',
-      },
-    };
-    (getMCPTools as jest.Mock).mockResolvedValue({
-      mcpClients: [],
-      tools: openopsTools,
+      }
     });
 
-    const selectedTools = {
-      openops_tool1: {
-        description: 'OpenOps Tool 1',
-        parameters: {},
-        toolProvider: 'openops',
-      },
-    };
-    (selectRelevantTools as jest.Mock).mockResolvedValue(selectedTools);
-
-    const postHandler = handlers['/'];
-    await postHandler(
-      mockRequest as FastifyRequest,
-      mockReply as unknown as FastifyReply,
-    );
-
-    expect(streamText).toHaveBeenCalledWith(
-      expect.objectContaining({
-        tools: {
-          openops_tool1: openopsTools.openops_tool1,
-          openops_tool2: openopsTools.openops_tool2,
+    it('should handle invalid content structure in last message', async () => {
+      const requestWithInvalidContent = {
+        ...mockRequest,
+        body: {
+          chatId: 'test-chat-id',
+          messages: [
+            {
+              role: 'user',
+              parts: [{ type: 'text', text: 'valid message' }],
+            },
+            { role: 'user', parts: [] },
+          ],
         },
-      }),
-    );
-  });
+      };
 
-  it('should include AWS cost MCP configuration hint when MCP is not available', async () => {
-    const mockToolsWithoutCost = {
-      mcpClients: [],
-      tools: {
-        tool1: { description: 'Tool 1', parameters: {} },
-      },
-    };
+      const postHandler = handlers['/'];
 
-    (getMCPTools as jest.Mock).mockResolvedValue(mockToolsWithoutCost);
-    (selectRelevantTools as jest.Mock).mockResolvedValue({
-      tool1: { description: 'Tool 1', parameters: {} },
+      await postHandler(
+        requestWithInvalidContent as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(mockReply.code).toHaveBeenCalledWith(400);
+      expect(mockReply.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message:
+            'Last message must have valid content array with at least one element.',
+        }),
+      );
     });
 
-    const postHandler = handlers['/'];
-    await postHandler(
-      mockRequest as FastifyRequest,
-      mockReply as unknown as FastifyReply,
-    );
+    it('should call handleUserMessage with the correct parameters', async () => {
+      const postHandler = handlers['/'];
+      expect(postHandler).toBeDefined();
 
-    expect(getMcpSystemPrompt).toHaveBeenCalledWith({
-      isAnalyticsLoaded: false,
-      isTablesLoaded: false,
-      isOpenOpsMCPEnabled: false,
-      isAwsCostMcpDisabled: true,
+      await postHandler(
+        mockRequest as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(routeChatRequestMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          newMessage: { role: 'user', content: 'test message' },
+        }),
+      );
+    });
+  });
+
+  describe('POST /chat-name (chat name generation)', () => {
+    let postHandler: RouteHandler;
+
+    beforeEach(async () => {
+      jest.clearAllMocks();
+      handlers = {};
+      await aiMCPChatController(mockApp, {} as FastifyPluginOptions);
+      postHandler = handlers['/chat-name'];
+    });
+
+    it('should return generated chat name for valid messages', async () => {
+      (getConversation as jest.Mock).mockResolvedValue({
+        chatHistory: [
+          { role: 'user', content: 'How do I optimize AWS costs?' },
+          { role: 'assistant', content: 'You can use AWS Cost Explorer...' },
+        ],
+      });
+      (generateChatName as jest.Mock).mockResolvedValue(
+        'AWS Cost Optimization',
+      );
+
+      await postHandler(
+        { ...mockRequest, body: { chatId: 'test-chat-id' } } as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(mockReply.code).toHaveBeenCalledWith(200);
+      expect(mockReply.send).toHaveBeenCalledWith({
+        chatName: 'AWS Cost Optimization',
+      });
+    });
+
+    it('should return "New Chat" for empty messages', async () => {
+      (getConversation as jest.Mock).mockResolvedValue({ chatHistory: [] });
+
+      await postHandler(
+        { ...mockRequest, body: { chatId: 'test-chat-id' } } as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(mockReply.code).toHaveBeenCalledWith(200);
+      expect(mockReply.send).toHaveBeenCalledWith({ chatName: 'New Chat' });
+    });
+
+    it('should return "New Chat" if LLM returns empty', async () => {
+      (getConversation as jest.Mock).mockResolvedValue({
+        chatHistory: [
+          { role: 'user', content: 'Hello?' },
+          { role: 'assistant', content: 'Hi!' },
+        ],
+      });
+      (generateChatName as jest.Mock).mockResolvedValue('   ');
+
+      await postHandler(
+        { ...mockRequest, body: { chatId: 'test-chat-id' } } as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(mockReply.code).toHaveBeenCalledWith(200);
+      expect(mockReply.send).toHaveBeenCalledWith({ chatName: 'New Chat' });
+    });
+
+    it('should persist chatName in chat context', async () => {
+      (getConversation as jest.Mock).mockResolvedValue({
+        chatHistory: [
+          { role: 'user', content: 'What is OpenOps?' },
+          { role: 'assistant', content: 'OpenOps is a platform...' },
+        ],
+      });
+      (generateChatName as jest.Mock).mockResolvedValue(
+        'OpenOps Platform Overview',
+      );
+      const postHandler = handlers['/chat-name'];
+      await postHandler(
+        { ...mockRequest, body: { chatId: 'test-chat-id' } } as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+      expect(updateChatName).toHaveBeenCalledWith(
+        'test-chat-id',
+        'test-user-id',
+        'test-project-id',
+        'OpenOps Platform Overview',
+      );
+    });
+
+    it('should handle errors gracefully', async () => {
+      (getConversation as jest.Mock).mockRejectedValue(new Error('DB error'));
+
+      await postHandler(
+        { ...mockRequest, body: { chatId: 'test-chat-id' } } as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(mockReply.code).toHaveBeenCalledWith(500);
+      expect(mockReply.send).toHaveBeenCalledWith(
+        expect.objectContaining({ message: 'Internal server error' }),
+      );
+    });
+  });
+
+  describe('GET /all-chats (list all chats)', () => {
+    let getHandler: RouteHandler;
+
+    beforeEach(async () => {
+      jest.clearAllMocks();
+      handlers = {};
+      await aiMCPChatController(mockApp, {} as FastifyPluginOptions);
+      getHandler = handlers['/all-chats'];
+    });
+
+    it('should return list of chats with chatId and chatName', async () => {
+      const mockChats = [
+        { chatId: 'chat-1', chatName: 'AWS Cost Optimization' },
+        { chatId: 'chat-2', chatName: 'Docker Container Setup' },
+        { chatId: 'chat-3', chatName: 'API Design Discussion' },
+      ];
+
+      (getAllChats as jest.Mock).mockResolvedValue(mockChats);
+
+      await getHandler(
+        mockRequest as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(getAllChats).toHaveBeenCalledWith(
+        'test-user-id',
+        'test-project-id',
+      );
+      expect(mockReply.code).toHaveBeenCalledWith(200);
+      expect(mockReply.send).toHaveBeenCalledWith({
+        chats: mockChats,
+      });
+    });
+
+    it('should return empty array when no chats exist', async () => {
+      (getAllChats as jest.Mock).mockResolvedValue([]);
+
+      await getHandler(
+        mockRequest as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(getAllChats).toHaveBeenCalledWith(
+        'test-user-id',
+        'test-project-id',
+      );
+      expect(mockReply.code).toHaveBeenCalledWith(200);
+      expect(mockReply.send).toHaveBeenCalledWith({
+        chats: [],
+      });
+    });
+
+    it('should handle large number of chats', async () => {
+      const mockChats = Array.from({ length: 50 }, (_, i) => ({
+        chatId: `chat-${i + 1}`,
+        chatName: `Chat Session ${i + 1}`,
+      }));
+
+      (getAllChats as jest.Mock).mockResolvedValue(mockChats);
+
+      await getHandler(
+        mockRequest as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(getAllChats).toHaveBeenCalledWith(
+        'test-user-id',
+        'test-project-id',
+      );
+      expect(mockReply.code).toHaveBeenCalledWith(200);
+      expect(mockReply.send).toHaveBeenCalledWith({
+        chats: mockChats,
+      });
+      expect(mockChats).toHaveLength(50);
+    });
+
+    it('should handle chats with special characters in names', async () => {
+      const mockChats = [
+        { chatId: 'chat-1', chatName: 'AWS S3 & CloudFront Setup' },
+        { chatId: 'chat-2', chatName: 'Node.js + Express.js Tutorial' },
+        { chatId: 'chat-3', chatName: 'React/TypeScript Best Practices' },
+        {
+          chatId: 'chat-4',
+          chatName: 'Database Migration (PostgreSQL → MongoDB)',
+        },
+      ];
+
+      (getAllChats as jest.Mock).mockResolvedValue(mockChats);
+
+      await getHandler(
+        mockRequest as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(getAllChats).toHaveBeenCalledWith(
+        'test-user-id',
+        'test-project-id',
+      );
+      expect(mockReply.code).toHaveBeenCalledWith(200);
+      expect(mockReply.send).toHaveBeenCalledWith({
+        chats: mockChats,
+      });
+    });
+
+    it('should handle service errors gracefully', async () => {
+      (getAllChats as jest.Mock).mockRejectedValue(
+        new Error('Cache service unavailable'),
+      );
+
+      await getHandler(
+        mockRequest as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(getAllChats).toHaveBeenCalledWith(
+        'test-user-id',
+        'test-project-id',
+      );
+      expect(mockReply.code).toHaveBeenCalledWith(500);
+      expect(mockReply.send).toHaveBeenCalledWith({
+        message: 'Internal server error',
+      });
+    });
+
+    it('should handle cache timeout errors', async () => {
+      (getAllChats as jest.Mock).mockRejectedValue(
+        new Error('Operation timed out'),
+      );
+
+      await getHandler(
+        mockRequest as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(getAllChats).toHaveBeenCalledWith(
+        'test-user-id',
+        'test-project-id',
+      );
+      expect(mockReply.code).toHaveBeenCalledWith(500);
+      expect(mockReply.send).toHaveBeenCalledWith({
+        message: 'Internal server error',
+      });
+    });
+
+    it('should call getAllChats with correct user and project parameters', async () => {
+      const customRequest = {
+        ...mockRequest,
+        principal: {
+          id: 'different-user-id',
+          projectId: 'different-project-id',
+          type: PrincipalType.USER,
+        },
+      };
+
+      (getAllChats as jest.Mock).mockResolvedValue([]);
+
+      await getHandler(
+        customRequest as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(getAllChats).toHaveBeenCalledWith(
+        'different-user-id',
+        'different-project-id',
+      );
+      expect(mockReply.code).toHaveBeenCalledWith(200);
+    });
+
+    it('should maintain proper response structure', async () => {
+      const mockChats = [{ chatId: 'test-id', chatName: 'Test Chat' }];
+
+      (getAllChats as jest.Mock).mockResolvedValue(mockChats);
+
+      await getHandler(
+        mockRequest as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(mockReply.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          chats: expect.arrayContaining([
+            expect.objectContaining({
+              chatId: expect.any(String),
+              chatName: expect.any(String),
+            }),
+          ]),
+        }),
+      );
     });
   });
 });

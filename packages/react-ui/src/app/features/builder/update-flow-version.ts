@@ -1,3 +1,4 @@
+import { aiChatApi } from '@/app/features/builder/ai-chat/lib/chat-api';
 import { PromiseQueue } from '@/app/lib/promise-queue';
 import {
   flowHelper,
@@ -6,7 +7,6 @@ import {
   FlowVersion,
 } from '@openops/shared';
 import { flowsApi } from '../flows/lib/flows-api';
-import { aiChatApi } from './ai-chat/lib/chat-api';
 import { BuilderState, RightSideBarType } from './builder-types';
 import { stepTestOutputCache } from './data-selector/data-selector-cache';
 
@@ -85,14 +85,14 @@ async function deleteChatRequest(flowVersion: FlowVersion, stepName: string) {
     const blockName = stepDetails?.settings?.blockName;
     const actionName = stepDetails?.settings?.actionName;
 
-    if (!blockName || !actionName) {
+    if (!stepDetails?.id) {
       return;
     }
 
     const chat = await aiChatApi.open(
       flowVersion.flowId,
       blockName,
-      stepName,
+      stepDetails.id,
       actionName,
     );
     await aiChatApi.delete(chat.chatId);

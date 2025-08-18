@@ -12,30 +12,34 @@ describe('block declaration tests', () => {
   });
 
   test('should return block with correct number of actions', () => {
-    expect(Object.keys(ternary.actions()).length).toBe(7);
+    expect(Object.keys(ternary.actions()).length).toBe(8);
     expect(ternary.actions()).toMatchObject({
-      get_data_integrations: {
-        name: 'get_data_integrations',
-        requireAuth: true,
-      },
       get_budgets: {
         name: 'get_budgets',
-        requireAuth: true,
-      },
-      get_cases: {
-        name: 'get_cases',
         requireAuth: true,
       },
       get_cost_alerts: {
         name: 'get_cost_alerts',
         requireAuth: true,
       },
-      get_users: {
-        name: 'get_users',
-        requireAuth: true,
-      },
       get_usage_recommendations: {
         name: 'get_usage_recommendations',
+        requireAuth: true,
+      },
+      get_data_integrations: {
+        name: 'get_data_integrations',
+        requireAuth: true,
+      },
+      create_case: {
+        name: 'create_case',
+        requireAuth: true,
+      },
+      get_cases: {
+        name: 'get_cases',
+        requireAuth: true,
+      },
+      get_users: {
+        name: 'get_users',
         requireAuth: true,
       },
       custom_api_call: {

@@ -11,6 +11,7 @@ export enum TriggerStrategy {
   POLLING = 'POLLING',
   WEBHOOK = 'WEBHOOK',
   APP_WEBHOOK = 'APP_WEBHOOK',
+  SCHEDULED = 'SCHEDULED',
 }
 
 export enum WebhookHandshakeStrategy {
@@ -177,6 +178,24 @@ export const createTrigger = <
           : TriggerTestStrategy.SIMULATION,
       );
     case TriggerStrategy.POLLING:
+      return new ITrigger(
+        params.name,
+        params.displayName,
+        params.description,
+        params.props,
+        params.type,
+        { strategy: WebhookHandshakeStrategy.NONE },
+        async () => ({ status: 200 }),
+        { strategy: WebhookRenewStrategy.NONE },
+        async () => Promise.resolve(),
+        params.onEnable,
+        params.onDisable,
+        params.run,
+        params.test ?? (() => Promise.resolve([params.sampleData])),
+        params.sampleData,
+        TriggerTestStrategy.TEST_FUNCTION,
+      );
+    case TriggerStrategy.SCHEDULED:
       return new ITrigger(
         params.name,
         params.displayName,

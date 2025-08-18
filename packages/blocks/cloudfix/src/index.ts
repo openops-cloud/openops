@@ -1,6 +1,11 @@
 import { createCustomApiCallAction } from '@openops/blocks-common';
 import { createBlock } from '@openops/blocks-framework';
 import { BlockCategory } from '@openops/shared';
+import { createChangeRequestsAction } from './lib/actions/create-change-requests-action';
+import { getRecommendationsAction } from './lib/actions/get-recommendations-action';
+import { getRecommendationsSummaryAction } from './lib/actions/get-recommendations-summary-action';
+import { getReportAction } from './lib/actions/get-report-action';
+import { postponeRecommendationsAction } from './lib/actions/postpone-recommendations-action';
 import { cloudfixAuth } from './lib/common/auth';
 
 export const cloudfix = createBlock({
@@ -11,11 +16,16 @@ export const cloudfix = createBlock({
   authors: [],
   categories: [BlockCategory.FINOPS],
   actions: [
+    getReportAction,
+    getRecommendationsAction,
+    getRecommendationsSummaryAction,
+    postponeRecommendationsAction,
+    createChangeRequestsAction,
     createCustomApiCallAction({
       baseUrl: (auth: any) => auth.apiUrl,
       auth: cloudfixAuth,
       authMapping: async (context) => ({
-        Bearer: (context.auth as any).apiKey,
+        Authorization: 'Bearer ' + (context.auth as any).apiKey,
       }),
     }),
   ],

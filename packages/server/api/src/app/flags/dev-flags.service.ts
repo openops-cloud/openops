@@ -13,24 +13,7 @@ async function getAll(): Promise<Flag[]> {
     return flags;
   }
 
-  const now = new Date().toISOString();
-  const created = now;
-  const updated = now;
-
-  flags = [
-    {
-      id: FlagId.CODE_WITH_AI,
-      value: true,
-      created,
-      updated,
-    },
-    {
-      id: FlagId.ASSISTANT_UI_ENABLED,
-      value: false,
-      created,
-      updated,
-    },
-  ];
+  flags = [];
 
   return flags;
 }

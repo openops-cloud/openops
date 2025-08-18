@@ -15,7 +15,7 @@ export const everyWeekTrigger = createTrigger({
   name: 'every_week',
   displayName: 'Every Week',
   description: 'Triggers the current flow every week',
-  type: TriggerStrategy.POLLING,
+  type: TriggerStrategy.SCHEDULED,
   sampleData: {},
   props: {
     day_of_the_week: Property.StaticDropdown({

@@ -95,7 +95,7 @@ const TestStepContainer = React.memo(
           value={TabListEnum.SAMPLE_STEP_OUTPUT}
           className="w-full h-full overflow-hidden"
         >
-          <div className="max-h-full flex">
+          <div className="h-full flex">
             <TestStepDataViewer
               outputJson={selectedStep?.settings?.inputUiInfo?.sampleData ?? ''}
               onChange={useSaveSelectedStepSampleData}

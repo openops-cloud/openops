@@ -3,6 +3,7 @@ import { BlockCategory } from '@openops/shared';
 import { storageAddtoList } from './lib/actions/store-add-to-list';
 import { storageAppendAction } from './lib/actions/store-append-action';
 import { storageGetAction } from './lib/actions/store-get-action';
+import { storageListAction } from './lib/actions/store-list-action';
 import { storagePutAction } from './lib/actions/store-put-action';
 import { storageRemoveFromList } from './lib/actions/store-remove-from-list';
 import { storageRemoveValue } from './lib/actions/store-remove-value';
@@ -31,6 +32,7 @@ export const storage = createBlock({
     storageRemoveValue,
     storageAddtoList,
     storageRemoveFromList,
+    storageListAction,
   ],
   triggers: [],
 });

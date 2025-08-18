@@ -10,9 +10,10 @@ import { NoTemplatesPlaceholder } from './no-templates-placeholder';
 import { FlowTemplateMetadataWithIntegrations } from './types';
 
 type FlowTemplateListProps = {
+  selectionHeading?: string;
   templates: FlowTemplateMetadataWithIntegrations[] | undefined;
   isLoading: boolean;
-  searchInitialValue: string;
+  searchText: string;
   onTemplateSelect: (template: FlowTemplateMetadataWithIntegrations) => void;
   onSearchInputChange: (filter: string) => void;
   ownerLogoUrl: string;
@@ -21,9 +22,10 @@ type FlowTemplateListProps = {
 };
 
 const FlowTemplateList = ({
+  selectionHeading,
   templates,
   isLoading,
-  searchInitialValue,
+  searchText,
   onTemplateSelect,
   onSearchInputChange,
   ownerLogoUrl,
@@ -46,16 +48,15 @@ const FlowTemplateList = ({
         {isFullCatalog && (
           <SearchInput
             placeholder={t('Search for template')}
-            initialValue={searchInitialValue}
+            value={searchText}
             onChange={onSearchInputChange}
-            debounceDelay={300}
             className="max-w-[327px] mr-8"
           />
         )}
       </div>
       {isFullCatalog && (
         <DialogDescription className="text-2xl font-medium text-primary-300 dark:text-primary">
-          {t('All templates')}
+          {selectionHeading || t('All templates')}
         </DialogDescription>
       )}
 

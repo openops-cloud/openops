@@ -27,6 +27,7 @@ import { ConfirmationDeleteDialog } from '@/app/common/components/delete-dialog'
 import { userSettingsHooks } from '@/app/common/hooks/user-settings-hooks';
 import { SEARCH_PARAMS } from '@/app/constants/search-params';
 import { ImportFlowDialog } from '@/app/features/flows/components/import-flow-dialog/import-flow-dialog';
+import { RunWorkflowManuallyMenuItem } from '@/app/features/flows/components/run-workflow-manually-menu-item';
 import { useRefetchFolderTree } from '@/app/features/folders/hooks/refetch-folder-tree';
 import { flowsApi } from '../lib/flows-api';
 import { flowsUtils } from '../lib/flows-utils';
@@ -232,6 +233,13 @@ const FlowActionMenu: React.FC<FlowActionMenuProps> = ({
               </div>
             </DropdownMenuItem>
           </ConfirmationDeleteDialog>
+        )}
+
+        {!insideBuilder && (
+          <RunWorkflowManuallyMenuItem
+            flowVersion={flowVersion}
+            isPublished={!!flow.publishedVersionId}
+          />
         )}
       </DropdownMenuContent>
     </DropdownMenu>

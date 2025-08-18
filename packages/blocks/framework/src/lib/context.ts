@@ -53,6 +53,13 @@ type PollingTriggerHookContext<
   setSchedule(schedule: { cronExpression: string; timezone?: string }): void;
 };
 
+type ScheduledTriggerHookContext<
+  BlockAuth extends BlockAuthProperty,
+  TriggerProps extends InputPropertyMap,
+> = BaseContext<BlockAuth, TriggerProps> & {
+  setSchedule(schedule: { cronExpression: string; timezone?: string }): void;
+};
+
 type WebhookTriggerHookContext<
   BlockAuth extends BlockAuthProperty,
   TriggerProps extends InputPropertyMap,
@@ -69,6 +76,8 @@ export type TriggerHookContext<
   ? AppWebhookTriggerHookContext<BlockAuth, TriggerProps>
   : S extends TriggerStrategy.POLLING
   ? PollingTriggerHookContext<BlockAuth, TriggerProps>
+  : S extends TriggerStrategy.SCHEDULED
+  ? ScheduledTriggerHookContext<BlockAuth, TriggerProps>
   : S extends TriggerStrategy.WEBHOOK
   ? WebhookTriggerHookContext<BlockAuth, TriggerProps>
   : never;
@@ -188,6 +197,11 @@ export interface Store {
   put<T>(key: string, value: T, scope?: StoreScope): Promise<T>;
   get<T>(key: string, scope?: StoreScope): Promise<T | null>;
   delete(key: string, scope?: StoreScope): Promise<void>;
+  list(
+    scope: StoreScope,
+    keyPrefix: string,
+    filterRegex?: string,
+  ): Promise<Array<{ key: string; value: unknown }>>;
 }
 
 export enum StoreScope {

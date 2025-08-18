@@ -66,7 +66,7 @@ const generateTextMock = jest.fn();
 jest.mock('ai', () => ({
   AISDKError: { isInstance: isInstanceMock },
   generateText: generateTextMock,
-  LanguageModelV1: jest.fn(),
+  LanguageModel: jest.fn(),
 }));
 
 import { AiProviderEnum } from '@openops/shared';

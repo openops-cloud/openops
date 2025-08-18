@@ -1,5 +1,5 @@
 import { createDeepSeek } from '@ai-sdk/deepseek';
-import { LanguageModelV1 } from 'ai';
+import { LanguageModel } from 'ai';
 import { AiProvider } from '../providers';
 
 const deepSeekModels = ['deepseek-chat', 'deepseek-reasoner'];
@@ -8,7 +8,7 @@ function createLanguageModel(params: {
   apiKey: string;
   model: string;
   providerSettings?: Record<string, unknown>;
-}): LanguageModelV1 {
+}): LanguageModel {
   return createDeepSeek({
     apiKey: params.apiKey,
     ...params.providerSettings,

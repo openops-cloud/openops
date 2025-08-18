@@ -16,7 +16,11 @@ export const codeLLMSchema = z.object({
 export type CodeSchema = z.infer<typeof codeLLMSchema>;
 
 export const unifiedCodeLLMSchema = z.object({
-  type: z.enum(['code', 'reply']),
+  type: z
+    .enum(['code', 'reply'])
+    .describe(
+      'The type of the response. Always return "code" if you are generating code, and "reply" if you are answering the user question or asking for clarifications.',
+    ),
   code: z.string().optional().describe(codeDescription),
   packageJson: z.string().optional().describe(packageJsonDescription),
   textAnswer: z.string().describe(textAnswerDescription),

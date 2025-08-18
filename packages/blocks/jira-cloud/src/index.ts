@@ -1,6 +1,5 @@
-import { createBlock } from '@openops/blocks-framework';
-
 import { createCustomApiCallAction } from '@openops/blocks-common';
+import { createBlock } from '@openops/blocks-framework';
 import { BlockCategory } from '@openops/shared';
 import { JiraAuth, jiraCloudAuth } from './auth';
 import { addAttachmentToIssueAction } from './lib/actions/add-attachment-to-issue';
