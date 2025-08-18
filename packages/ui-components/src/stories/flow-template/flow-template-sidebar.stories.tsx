@@ -24,6 +24,7 @@ const meta = {
         services: storyMocks.services.slice(4),
       },
     ],
+    categoryLogos: storyMocks.categoryLogos,
     selectedBlocks: [],
     selectedDomains: ['Allocation'],
     selectedServices: [],
