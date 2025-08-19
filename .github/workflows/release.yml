@@ -15,6 +15,10 @@ on:
         type: boolean
         description: Deploy the release to the test environment
         default: true
+      label_linear_issues:
+        type: boolean
+        description: Label Linear issues with the release version
+        default: true
 jobs:
   get-version:
     name: Get release version
@@ -22,13 +26,13 @@ jobs:
     outputs:
       version: ${{ inputs.version || steps.semver.outputs.nextVersion }}
     steps:
-    - name: Get next version
-      if: inputs.version == ''
-      id: semver
-      uses: flatherskevin/semver-action@fc3c4e67353e3c45b8164521ddd17c9e38d6d4d8
-      with:
-        incrementLevel: patch
-        source: tags
+      - name: Get next version
+        if: inputs.version == ''
+        id: semver
+        uses: flatherskevin/semver-action@fc3c4e67353e3c45b8164521ddd17c9e38d6d4d8
+        with:
+          incrementLevel: patch
+          source: tags
   tag-images-for-release:
     needs: get-version
     strategy:
@@ -73,6 +77,26 @@ jobs:
             docker buildx imagetools create $SOURCE_IMAGE --tag $PUBLIC_REPOSITORY:latest
             echo "- ✅ Successfully tagged as \`$PUBLIC_REPOSITORY:latest\`" >> $GITHUB_STEP_SUMMARY
           fi
+  label-linear-issues:
+    name: Label Linear issues for ${{ needs.get-version.outputs.version }}
+    needs: [get-version, tag-images-for-release]
+    if: ${{ inputs.label_linear_issues }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+      issues: read
+    steps:
+      - name: Add release label to Linear issues
+        uses: rayonapp/linear-sync@main
+        continue-on-error: true
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          linearApiKey: ${{ secrets.LINEAR_API_KEY }}
+          ticketPrefix: OPS
+          baseBranch: main
+          maxPrLength: '200'
+          releaseLabel: v${{ needs.get-version.outputs.version }}
   create-release:
     name: Create a release
     if: github.repository == 'openops-cloud/openops'
