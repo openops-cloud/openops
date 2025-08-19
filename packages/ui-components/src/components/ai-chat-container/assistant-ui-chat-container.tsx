@@ -33,6 +33,9 @@ const AssistantUiResizableContainer = ({
         },
         className,
       )}
+      style={{
+        minWidth: `${minWidth}px`,
+      }}
     >
       <ResizableArea
         dimensions={dimensions}

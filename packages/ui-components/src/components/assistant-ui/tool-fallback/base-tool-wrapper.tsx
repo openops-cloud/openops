@@ -27,7 +27,7 @@ const BaseToolWrapper = ({
   const isComplete = toolStatusUtils.isComplete(status);
 
   return (
-    <div className="mb-4 flex w-full flex-col rounded-lg border border-border bg-background py-1">
+    <div className="mb-4 flex w-full flex-col rounded-lg border border-border bg-background">
       <div className="flex items-center gap-2 px-4">
         {isComplete && (
           <CircleCheck className="size-4 text-success flex-shrink-0" />
