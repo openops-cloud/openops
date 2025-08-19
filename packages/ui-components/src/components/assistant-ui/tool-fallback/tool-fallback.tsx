@@ -32,18 +32,15 @@ export const ToolFallback = ({
 
   return (
     <BaseToolWrapper toolName={toolName} status={resultStatus}>
-      <div className="flex flex-col gap-4 pt-2">
-        <div className="px-4">
-          <div className="h-72">
-            <TestStepDataViewer
-              inputJson={formattedArgs}
-              outputJson={formattedResult}
-              readonly={true}
-              theme={theme}
-              editorClassName="h-full"
-            />
-          </div>
-        </div>
+      <div className="flex flex-col gap-4 h-72">
+        <TestStepDataViewer
+          inputJson={formattedArgs}
+          outputJson={formattedResult}
+          readonly={true}
+          theme={theme}
+          editorClassName="h-full"
+          containerClassName="border-none"
+        />
       </div>
     </BaseToolWrapper>
   );

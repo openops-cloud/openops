@@ -11,6 +11,7 @@ type TestStepDataViewerProps = {
   onChange?: (json: any) => void;
   theme: Theme;
   editorClassName?: string;
+  containerClassName?: string;
 };
 
 const JsonViewType = {
@@ -38,6 +39,7 @@ const TestStepDataViewer = ({
   onChange,
   theme,
   editorClassName,
+  containerClassName,
 }: TestStepDataViewerProps) => {
   const [selectedViewType, setSelectedViewType] = useState<string>(
     JsonViewType.Output,
@@ -58,6 +60,7 @@ const TestStepDataViewer = ({
       theme={theme}
       editorClassName={editorClassName}
       onEditModeChange={setIsEditModeEnabled}
+      className={containerClassName}
     >
       {inputJson ? (
         <ToggleSwitch
