@@ -10,6 +10,7 @@ import {
   FlowRunStatus,
   FlowRunTriggerSource,
   FlowStatus,
+  FlowType,
   FlowVersion,
   FlowVersionState,
   Folder,
@@ -217,6 +218,7 @@ export const createMockFlow = (flow?: Partial<Flow>): Flow => {
     folderId: flow?.folderId ?? null,
     schedule: flow?.schedule ?? null,
     publishedVersionId: flow?.publishedVersionId ?? null,
+    type: flow?.type ?? FlowType.FLOW,
   };
 };
 
@@ -243,6 +245,7 @@ export const createMockFlowVersion = (
     state: flowVersion?.state ?? faker.helpers.enumValue(FlowVersionState),
     updatedBy: flowVersion?.updatedBy,
     valid: flowVersion?.valid ?? faker.datatype.boolean(),
+    type: flowVersion?.type ?? FlowType.FLOW,
   };
 };
 
