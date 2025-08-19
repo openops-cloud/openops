@@ -1,14 +1,21 @@
 import { Static, Type } from '@sinclair/typebox';
+import { Value } from '@sinclair/typebox/value';
 import { FastifyPluginAsync } from 'fastify';
 import fp from 'fastify-plugin';
 import { cacheWrapper } from './cache/cache-wrapper';
 import { logger } from './logger';
 
-export const BodyAccessKeyRequest = Type.Object({
-  bodyAccessKey: Type.String(),
-});
+export const BodyAccessKeyRequest = Type.Object(
+  {
+    bodyAccessKey: Type.String(),
+  },
+  { additionalProperties: false },
+);
 
 export type BodyAccessKeyRequest = Static<typeof BodyAccessKeyRequest>;
+
+const isBodyAccessKeyRequest = (body: unknown): body is BodyAccessKeyRequest =>
+  Value.Check(BodyAccessKeyRequest, body);
 
 export async function saveRequestBody(
   requestId: string,
@@ -35,16 +42,14 @@ export async function getRequestBody<T>(bodyAccessKey: string): Promise<T> {
 
 const bodyConverterModuleBase: FastifyPluginAsync = async (app) => {
   app.addHook('preValidation', async (request, reply) => {
-    if (
-      request.body &&
-      typeof request.body === 'object' &&
-      'bodyAccessKey' in request.body
-    ) {
-      const resourceKey = (request.body as { bodyAccessKey: string })
-        .bodyAccessKey;
-
-      request.body = await getRequestBody(resourceKey);
+    if (!isBodyAccessKeyRequest(request.body)) {
+      return;
     }
+
+    const resourceKey = (request.body as { bodyAccessKey: string })
+      .bodyAccessKey;
+
+    request.body = await getRequestBody(resourceKey);
   });
 };
 
