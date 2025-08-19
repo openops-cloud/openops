@@ -2,7 +2,7 @@ import { resolveVariable } from '../src/lib/resolve-variable';
 import { EngineConstants } from '../src/lib/handler/context/engine-constants';
 import { testExecutionContext } from '../src/lib/handler/context/test-execution-context';
 import { FlowExecutorContext } from '../src/lib/handler/context/flow-execution-context';
-import { ResolveVariableOperation, TriggerType, FlowVersionState } from '@openops/shared';
+import { ResolveVariableOperation, TriggerType, FlowVersionState, FlowType } from '@openops/shared';
 
 jest.mock('../src/lib/handler/context/engine-constants');
 jest.mock('../src/lib/handler/context/test-execution-context');
@@ -21,6 +21,7 @@ describe('resolveVariable', () => {
       flowId: 'flow-id',
       displayName: 'Test Flow Version',
       valid: true,
+      type: FlowType.FLOW,
       trigger: {
         id: 'trigger-id',
         name: 'trigger',
