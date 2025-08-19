@@ -1,7 +1,13 @@
-import { logger, runWithLogContext, sendLogs } from '@openops/server-shared';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import {
+  BodyAccessKeyRequest,
+  getRequestBody,
+  logger,
+  runWithLogContext,
+  sendLogs,
+} from '@openops/server-shared';
 import { EngineResponseStatus } from '@openops/shared';
 import { APIGatewayEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
-import { nanoid } from 'nanoid';
 import { executeEngine } from './engine-executor';
 import { EngineRequest } from './main';
 
@@ -19,41 +25,55 @@ export async function lambdaHandler(
     };
   }
 
-  const data = await parseJson<EngineRequest>(event.body);
+  const data = await parseJson<BodyAccessKeyRequest>(event.body);
+
+  let requestBody: EngineRequest;
+  try {
+    requestBody = await getRequestBody<EngineRequest>(data.bodyAccessKey);
+  } catch (error) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({
+        status: EngineResponseStatus.ERROR,
+        message: (error as Error).message,
+      }),
+    };
+  }
 
   return runWithLogContext<APIGatewayProxyResult | undefined>(
     {
-      requestId: event.headers.requestId ?? nanoid(),
+      deadlineTimestamp: requestBody.deadlineTimestamp.toString(),
+      operationType: requestBody.operationType,
       awsRequestId: context.awsRequestId,
-      operationType: data.operationType,
+      requestId: requestBody.requestId,
     },
-    () => handleEvent(data),
+    () => handleEvent(requestBody),
   );
 }
 
 async function handleEvent(
-  data: EngineRequest,
+  requestBody: EngineRequest,
 ): Promise<APIGatewayProxyResult | undefined> {
   try {
-    logger.info('Request received in the engine.');
+    const { requestId, engineInput, operationType } = requestBody;
 
-    if (!data.engineInput) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({
-          status: EngineResponseStatus.ERROR,
-          message: 'The received input is not valid.',
-        }),
-      };
-    }
+    logger.info(`Received request for operation [${operationType}]`, {
+      operationType,
+    });
 
-    const result = await executeEngine(data.engineInput, data.operationType);
+    const responseKey = await executeEngine(
+      requestId,
+      engineInput,
+      operationType,
+    );
 
     await sendLogs();
 
     return {
       statusCode: 200,
-      body: JSON.stringify(result),
+      body: JSON.stringify({
+        responseKey,
+      }),
     };
   } catch (error) {
     logger.error('Engine execution failed.', { error });

@@ -8,6 +8,7 @@ import { BlockMetadata } from '@openops/blocks-framework';
 import { isLLMTelemetryEnabled } from '@openops/common';
 import {
   AppSystemProp,
+  bodyConverterModule,
   getRedisConnection,
   logger,
   QueueMode,
@@ -258,6 +259,8 @@ export const setupApp = async (
 
   await app.register(projectModule);
   await app.register(communityBlocksModule);
+
+  await app.register(bodyConverterModule);
 
   app.addHook('onClose', async () => {
     logger.info('Shutting down');

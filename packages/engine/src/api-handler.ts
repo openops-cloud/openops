@@ -1,6 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import {
   blocksBuilder,
+  BodyAccessKeyRequest,
+  bodyConverterModule,
   logger,
   MAX_REQUEST_BODY_BYTES,
   runWithLogContext,
@@ -25,35 +28,38 @@ const engineController: FastifyPluginAsyncTypebox = async (fastify) => {
       },
     },
     async (request, reply) => {
-      const requestIdHeaders = request.headers;
-      const requestId = Array.isArray(requestIdHeaders)
-        ? requestIdHeaders[0]
-        : requestIdHeaders;
-
+      const requestBody = request.body;
       await runWithLogContext(
         {
           deadlineTimestamp: request.body.deadlineTimestamp.toString(),
-          requestId: requestId ?? request.id,
-          operationType: request.body.operationType,
+          operationType: requestBody.operationType,
+          requestId: requestBody.requestId,
         },
-        () => handleRequest(request, reply),
+        () => handleRequest(reply, requestBody),
       );
     },
   );
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function handleRequest(request: any, reply: any): Promise<void> {
+async function handleRequest(
+  reply: any,
+  requestBody: EngineRequest,
+): Promise<void> {
   try {
-    const { engineInput, operationType } = request.body as EngineRequest;
-
+    const { engineInput, operationType } = requestBody;
     logger.info(`Received request for operation [${operationType}]`, {
       operationType,
     });
 
-    const result = await executeEngine(engineInput, operationType);
+    const bodyAccessKey = await executeEngine(
+      requestBody.requestId,
+      engineInput,
+      operationType,
+    );
 
-    await reply.status(StatusCodes.OK).send(result);
+    await reply.status(StatusCodes.OK).send({
+      bodyAccessKey,
+    } as BodyAccessKeyRequest);
   } catch (error) {
     logger.error('Engine execution failed.', { error });
 
@@ -73,6 +79,9 @@ export const start = async (): Promise<void> => {
     setStopHandlers(app);
 
     await blocksBuilder();
+
+    await app.register(bodyConverterModule);
+
     await app.register(engineController);
 
     await app.listen({
