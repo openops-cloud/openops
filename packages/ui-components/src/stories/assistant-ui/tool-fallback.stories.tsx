@@ -232,3 +232,18 @@ export const Expanded: Story = {
     expect(resultPre).toHaveTextContent('Mar');
   },
 };
+
+export const VerySmallWidthTextOverflow: Story = {
+  args: {
+    toolName: 'very_long_tool_name_that_should_overflow_in_small_container',
+    argsText: '{"param": "value"}',
+    result: 'Success',
+  },
+  decorators: [
+    (Story) => (
+      <div style={{ width: '200px' }}>
+        <Story />
+      </div>
+    ),
+  ],
+};
