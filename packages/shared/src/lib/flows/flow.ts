@@ -1,7 +1,7 @@
 import { Static, Type } from '@sinclair/typebox';
 import { BaseModelSchema, Nullable } from '../common/base-model';
 import { OpenOpsId } from '../common/id-generator';
-import { FlowVersion, FlowVersionState } from './flow-version';
+import { FlowType, FlowVersion, FlowVersionState } from './flow-version';
 
 export type FlowId = OpenOpsId;
 
@@ -30,6 +30,7 @@ export const Flow = Type.Object({
   status: Type.Enum(FlowStatus),
   schedule: Nullable(FlowScheduleOptions),
   publishedVersionId: Nullable(Type.String()),
+  type: Type.Enum(FlowType),
 });
 
 export type Flow = Static<typeof Flow>;

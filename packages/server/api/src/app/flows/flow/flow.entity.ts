@@ -2,6 +2,7 @@ import {
   Flow,
   FlowRun,
   FlowStatus,
+  FlowType,
   FlowVersion,
   Folder,
   Project,
@@ -49,6 +50,12 @@ export const FlowEntity = new EntitySchema<FlowSchema>({
       ...OpenOpsIdSchema,
       nullable: true,
       unique: true,
+    },
+    type: {
+      type: String,
+      enum: FlowType,
+      nullable: false,
+      default: FlowType.FLOW,
     },
   },
   indices: [

@@ -12,6 +12,7 @@ import {
   FlowOperationType,
   FlowStatus,
   FlowTemplateWithoutProjectInformation,
+  FlowType,
   FlowVersion,
   FlowVersionId,
   FlowVersionState,
@@ -74,6 +75,7 @@ export const flowService = {
       projectId,
       request: {
         displayName,
+        type: FlowType.TEMPLATE,
       },
     });
 
@@ -487,6 +489,7 @@ async function create({
     status: FlowStatus.DISABLED,
     publishedVersionId: null,
     schedule: null,
+    type: request.type ?? FlowType.FLOW,
   };
 
   const savedFlow = await flowRepo().save(newFlow);
@@ -496,6 +499,7 @@ async function create({
     {
       displayName: request.displayName,
       description: '',
+      type: request.type ?? FlowType.FLOW,
     },
   );
 
@@ -552,6 +556,7 @@ async function update({
         lastVersion = await flowVersionService.createEmptyVersion(id, {
           displayName: lastVersionWithArtifacts.displayName,
           description: lastVersionWithArtifacts.description ?? '',
+          type: lastVersionWithArtifacts.type,
         });
 
         // Duplicate the artifacts from the previous version, otherwise they will be deleted during update operation

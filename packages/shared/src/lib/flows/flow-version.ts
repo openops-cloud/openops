@@ -11,6 +11,11 @@ export enum FlowVersionState {
   DRAFT = 'DRAFT',
 }
 
+export enum FlowType {
+  FLOW = 'FLOW',
+  TEMPLATE = 'TEMPLATE',
+}
+
 export const FlowVersion = Type.Object({
   ...BaseModelSchema,
   flowId: Type.String(),
@@ -20,6 +25,7 @@ export const FlowVersion = Type.Object({
   updatedBy: Nullable(Type.String()),
   valid: Type.Boolean(),
   state: Type.Enum(FlowVersionState),
+  type: Type.Enum(FlowType),
 });
 
 export type FlowVersion = Static<typeof FlowVersion>;
@@ -33,6 +39,7 @@ export const FlowVersionMetadata = Type.Object({
   state: Type.Enum(FlowVersionState),
   updatedBy: Nullable(Type.String()),
   updatedByUser: Nullable(User),
+  type: Type.Enum(FlowType),
 });
 
 export type FlowVersionMetadata = Static<typeof FlowVersionMetadata>;

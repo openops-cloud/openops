@@ -1,9 +1,11 @@
 import { Static, Type } from '@sinclair/typebox';
+import { FlowType } from '../flow-version';
 import { Trigger } from '../triggers/trigger';
 
 export const CreateEmptyFlowRequest = Type.Object({
   displayName: Type.String({}),
   folderId: Type.Optional(Type.String({})),
+  type: Type.Optional(Type.Enum(FlowType)),
 });
 
 export type CreateEmptyFlowRequest = Static<typeof CreateEmptyFlowRequest>;
