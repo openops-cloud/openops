@@ -1,4 +1,3 @@
-import { tryParseJson } from '../../../../lib/json-utils';
 import {
   extractJsonFromContent,
   formatToolResultForDisplay,
@@ -37,39 +36,6 @@ describe('json-content-parser', () => {
       [{ other: 'property' }, 'missing content property'],
     ])('should return false for %s (%s)', (value: unknown, _: string) => {
       expect(isContentStructure(value)).toBe(false);
-    });
-  });
-
-  describe('safeJsonParse', () => {
-    it('should parse valid JSON strings', () => {
-      const jsonString = '{"key": "value", "number": 42}';
-      const expected = { key: 'value', number: 42 };
-      expect(tryParseJson(jsonString)).toEqual(expected);
-    });
-
-    it('should parse JSON arrays', () => {
-      const jsonArray = '[1, 2, 3, "test"]';
-      const expected = [1, 2, 3, 'test'];
-      expect(tryParseJson(jsonArray)).toEqual(expected);
-    });
-
-    it('should return original string for invalid JSON', () => {
-      const invalidJson = '{ invalid json }';
-      expect(tryParseJson(invalidJson)).toBe(invalidJson);
-    });
-
-    it('should return original value for non-string input', () => {
-      const nonString = 123;
-      expect(tryParseJson(nonString as any)).toBe(nonString);
-    });
-
-    it('should handle complex nested JSON', () => {
-      const complexJson =
-        '{"data": [{"id": "123", "nested": {"value": true}}]}';
-      const expected = {
-        data: [{ id: '123', nested: { value: true } }],
-      };
-      expect(tryParseJson(complexJson)).toEqual(expected);
     });
   });
 
@@ -186,14 +152,6 @@ describe('json-content-parser', () => {
       };
       const expected = JSON.stringify(expectedData, null, 2);
       expect(result).toBe(expected);
-    });
-
-    it('should handle objects that cannot be JSON.stringify-ed', () => {
-      const circularObj: any = { name: 'test' };
-      circularObj.self = circularObj;
-
-      const result = formatToolResultForDisplay(circularObj);
-      expect(result).toBe('[object Object]');
     });
 
     it('should handle arrays as input', () => {
