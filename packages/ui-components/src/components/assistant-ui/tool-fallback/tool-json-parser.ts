@@ -63,32 +63,6 @@ export function extractJsonFromContent(content: TextContentPart[]): string {
 }
 
 /**
- * Calculates the optimal height for Monaco editor based on content lines
- * @param content - The text content to display
- * @param minHeight - Minimum height in pixels (default: 80)
- * @param maxHeight - Maximum height in pixels (default: 400)
- * @param lineHeight - Height per line in pixels (default: 19)
- * @param padding - Additional padding in pixels (default: 24)
- * @returns Height in pixels
- */
-export function calculateEditorHeight(
-  content: string,
-  minHeight = 80,
-  maxHeight = 400,
-  lineHeight = 16,
-  padding = 24,
-): number {
-  if (!content) {
-    return minHeight;
-  }
-
-  const lines = content.split('\n').length;
-  const calculatedHeight = lines * lineHeight + padding;
-
-  return Math.max(minHeight, Math.min(maxHeight, calculatedHeight));
-}
-
-/**
  * Main function to format result data for display in CodeEditor
  * Handles various data structures and attempts to provide the best display format
  */

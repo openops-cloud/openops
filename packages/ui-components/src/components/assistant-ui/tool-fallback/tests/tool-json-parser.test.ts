@@ -1,6 +1,5 @@
 import { tryParseJson } from '../../../../lib/json-utils';
 import {
-  calculateEditorHeight,
   extractJsonFromContent,
   formatToolResultForDisplay,
   isContentStructure,
@@ -203,53 +202,5 @@ describe('json-content-parser', () => {
       const expected = JSON.stringify(arrayInput, null, 2);
       expect(result).toBe(expected);
     });
-  });
-
-  describe('calculateEditorHeight', () => {
-    it('should return minimum height for empty content', () => {
-      expect(calculateEditorHeight('')).toBe(80);
-      expect(calculateEditorHeight('', 100)).toBe(100);
-    });
-
-    it('should calculate height based on number of lines', () => {
-      const singleLine = 'Hello world';
-      expect(calculateEditorHeight(singleLine)).toBe(80); // 1 line * 19 + 24 = 43, but min is 80
-
-      const multiLine = 'Line 1\nLine 2\nLine 3';
-      expect(calculateEditorHeight(multiLine)).toBe(81); // 3 lines * 19 + 24 padding
-    });
-
-    it('should respect minimum height constraint', () => {
-      const shortContent = 'Single line';
-      expect(calculateEditorHeight(shortContent, 100)).toBe(100);
-    });
-
-    it('should respect maximum height constraint', () => {
-      const longContent = Array(100).fill('Line').join('\n');
-      expect(calculateEditorHeight(longContent, 80, 200)).toBe(200);
-    });
-
-    it('should use custom line height and padding', () => {
-      const twoLines = 'Line 1\nLine 2';
-      const result = calculateEditorHeight(twoLines, 50, 400, 25, 30);
-      expect(result).toBe(80); // 2 lines * 25 + 30 padding
-    });
-
-    it('should handle JSON formatted content', () => {
-      const jsonContent = '{\n  "key": "value",\n  "number": 42\n}';
-      // 4 lines * 19 + 24 = 100
-      expect(calculateEditorHeight(jsonContent)).toBe(100);
-    });
-
-    it.each([
-      ['Single line', 1, 80], // 1 * 19 + 24 = 43, but min is 80
-      ['Line 1\nLine 2', 2, 80], // 2 * 19 + 24 = 62, but min is 80
-      ['Line 1\nLine 2\nLine 3\nLine 4\nLine 5', 5, 119], // 5 * 19 + 24 = 119
-    ])(
-      'should calculate correct height for "%s" (%d lines)',
-      (content, lines, expected) => {
-        expect(calculateEditorHeight(content)).toBe(expected);
-      },
-    );
   });
 });
