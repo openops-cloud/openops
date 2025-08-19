@@ -3,6 +3,7 @@ import {
   ToolCallMessagePartProps,
   ToolCallMessagePartStatus,
 } from '@assistant-ui/react';
+import { useMemo } from 'react';
 import { tryParseJson } from '../../../lib/json-utils';
 import { Theme } from '../../../lib/theme';
 import { TestStepDataViewer } from '../../test-step-data-viewer/test-step-data-viewer';
@@ -23,8 +24,11 @@ export const ToolFallback = ({
 }: ToolFallbackProps) => {
   const resultStatus = extractResultStatus(result, status);
 
-  const formattedArgs = tryParseJson(argsText);
-  const formattedResult = formatToolResultForDisplay(result);
+  const formattedArgs = useMemo(() => tryParseJson(argsText), [argsText]);
+  const formattedResult = useMemo(
+    () => formatToolResultForDisplay(result),
+    [result],
+  );
 
   return (
     <BaseToolWrapper toolName={toolName} status={resultStatus}>
