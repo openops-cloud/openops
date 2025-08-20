@@ -9,7 +9,7 @@ jest.mock('../src/lib/cache/cache-wrapper', () => {
   return {
     cacheWrapper: {
       setSerializedObject: jest.fn(),
-      getSerializedObject: jest.fn(),
+      getAndDeleteSerializedObject: jest.fn(),
     },
   };
 });
@@ -39,21 +39,27 @@ describe('request-oversize-body-handler', () => {
       const key = await saveRequestBody('abc123', { hello: 'world' });
 
       expect(key).toBe('request:abc123');
-      expect(setSpy).toHaveBeenCalledWith('request:abc123', { hello: 'world' });
+      expect(setSpy).toHaveBeenCalledWith(
+        'request:abc123',
+        { hello: 'world' },
+        300,
+      );
     });
   });
 
   describe('getRequestBody', () => {
     it('should return body from cache when present', async () => {
       const body = { a: 1 };
-      jest.spyOn(cacheWrapper, 'getSerializedObject').mockResolvedValue(body);
+      jest
+        .spyOn(cacheWrapper, 'getAndDeleteSerializedObject')
+        .mockResolvedValue(body);
       const result = await getRequestBody<typeof body>('request:abc');
       expect(result).toEqual(body);
     });
 
     it('should log error and throw when body not found', async () => {
       jest
-        .spyOn(cacheWrapper, 'getSerializedObject')
+        .spyOn(cacheWrapper, 'getAndDeleteSerializedObject')
         .mockResolvedValue(null as never);
 
       await expect(getRequestBody('request:missing')).rejects.toThrow(
@@ -69,7 +75,9 @@ describe('request-oversize-body-handler', () => {
   describe('bodyConverterModule', () => {
     it('should replace request.body when bodyAccessKey is provided', async () => {
       const cached = { foo: 'bar', nested: { x: 1 } };
-      jest.spyOn(cacheWrapper, 'getSerializedObject').mockResolvedValue(cached);
+      jest
+        .spyOn(cacheWrapper, 'getAndDeleteSerializedObject')
+        .mockResolvedValue(cached);
 
       const app = fastify();
       await app.register(bodyConverterModule);
