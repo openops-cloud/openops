@@ -1,28 +1,55 @@
 import { makeHttpRequest } from '@openops/common';
 import {
   BodyAccessKeyRequest,
-  hashUtils,
   logger,
   saveRequestBody,
 } from '@openops/server-shared';
-import { UpdateRunProgressRequest } from '@openops/shared';
-import { Mutex } from 'async-mutex';
+import { openOpsId, UpdateRunProgressRequest } from '@openops/shared';
 import { AxiosHeaders } from 'axios';
+import { debounce, DebouncedFunc } from 'lodash-es';
 import { EngineConstants } from '../handler/context/engine-constants';
 import { FlowExecutorContext } from '../handler/context/flow-execution-context';
 import { throwIfExecutionTimeExceeded } from '../timeout-validator';
 
 const MAX_RETRIES = 3;
+const PROGRESS_DEBOUNCE_MS = 800;
 
-let lastRequestHash: string | undefined = undefined;
-const lock = new Mutex();
+const runDebouncers = new Map<
+  string,
+  DebouncedFunc<(p: UpdateStepProgressParams) => Promise<void>>
+>();
+
+function getRunDebouncer(
+  runId: string,
+): DebouncedFunc<(p: UpdateStepProgressParams) => Promise<void>> {
+  let debouncedFunc = runDebouncers.get(runId);
+
+  if (!debouncedFunc) {
+    debouncedFunc = debounce(
+      async (latestParams: UpdateStepProgressParams) => {
+        try {
+          await sendUpdateRunRequest(latestParams);
+        } finally {
+          runDebouncers.delete(runId);
+        }
+      },
+      PROGRESS_DEBOUNCE_MS,
+      { leading: false, trailing: true, maxWait: PROGRESS_DEBOUNCE_MS * 3 },
+    );
+    runDebouncers.set(runId, debouncedFunc);
+  }
+
+  return debouncedFunc;
+}
 
 export const progressService = {
-  sendUpdate: async (params: UpdateStepProgressParams): Promise<void> => {
+  sendUpdate: (params: UpdateStepProgressParams): void => {
     throwIfExecutionTimeExceeded();
-    return lock.runExclusive(async () => {
-      await sendUpdateRunRequest(params);
-    });
+
+    void getRunDebouncer(params.engineConstants.flowRunId)(params);
+  },
+  flushProgressUpdate: async (runId: string): Promise<void> => {
+    await runDebouncers.get(runId)?.flush();
   },
 };
 
@@ -45,20 +72,8 @@ const sendUpdateRunRequest = async (
     `Sending progress update for ${request.runId} ${request.runDetails.status}`,
   );
 
-  // Request deduplication using hash comparison
-  const requestHash = hashUtils.hashObject(request, (key, value) => {
-    if (key === 'duration') return undefined;
-    return value;
-  });
-
-  if (requestHash === lastRequestHash) {
-    return;
-  }
-
-  lastRequestHash = requestHash;
-
   try {
-    const resourceKey = await saveRequestBody(request.runId, request);
+    const bodyAccessKey = await saveRequestBody(openOpsId(), request);
 
     await makeHttpRequest(
       'POST',
@@ -68,13 +83,11 @@ const sendUpdateRunRequest = async (
         Authorization: `Bearer ${engineConstants.engineToken}`,
       }),
       {
-        bodyAccessKey: resourceKey,
+        bodyAccessKey,
       } as BodyAccessKeyRequest,
       {
         retries: MAX_RETRIES,
-        retryDelay: (retryCount: number) => {
-          return (retryCount + 1) * 200; // 200ms, 400ms, 600ms
-        },
+        retryDelay: (retryCount: number) => (retryCount + 1) * 200, // 200ms, 400ms, 600ms
       },
     );
   } catch (error) {
