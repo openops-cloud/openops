@@ -1,11 +1,10 @@
-import { BaseModel } from '../common/base-model';
+import { BaseModel } from '../common';
 import { OpenOpsId } from '../common/id-generator';
-import { ProjectId } from '../project/project';
+import { ProjectId } from '../project';
 
 export type StoreEntryId = OpenOpsId;
 
 export const STORE_KEY_MAX_LENGTH = 128;
-export const STORE_VALUE_MAX_SIZE = 512 * 1024;
 
 export type StoreEntry = {
   key: string;

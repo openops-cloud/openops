@@ -160,7 +160,7 @@ const ArrayBlockProperty = ({
                       prefixValue={fieldInput}
                       props={arrayProperty.properties!}
                       useMentionTextInput={useMentionTextInput}
-                      allowDynamicValues={false}
+                      allowDynamicValues={true}
                       disabled={disabled}
                     ></AutoPropertiesFormComponent>
                   </ArrayFieldContextProvider>

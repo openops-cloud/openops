@@ -1,6 +1,6 @@
 import { logger } from '@openops/server-shared';
 import { AiConfig, AiProviderEnum } from '@openops/shared';
-import { CoreMessage, LanguageModel, TextStreamPart, ToolSet } from 'ai';
+import { LanguageModel, ModelMessage, TextStreamPart, ToolSet } from 'ai';
 import { FastifyInstance } from 'fastify';
 import { ServerResponse } from 'node:http';
 import { handleUserMessage } from '../../../src/app/ai/chat/user-message-handler';
@@ -80,14 +80,14 @@ describe('User Message Handler', () => {
 
   const mockLanguageModel = {} as LanguageModel;
 
-  const mockChatHistory: CoreMessage[] = [
+  const mockChatHistory: ModelMessage[] = [
     {
       role: 'user',
       content: 'Hello',
     },
   ];
 
-  const mockNewMessage: CoreMessage = {
+  const mockNewMessage: ModelMessage = {
     role: 'user',
     content: 'How are you?',
   };
@@ -106,6 +106,7 @@ describe('User Message Handler', () => {
       chatContext: { chatId: 'test-chat-id' },
       chatHistory: [...mockChatHistory, mockNewMessage],
     },
+    frontendTools: {},
   };
 
   beforeEach(() => {
@@ -137,7 +138,7 @@ describe('User Message Handler', () => {
         return (async function* () {
           yield {
             type: 'text-delta',
-            textDelta: 'I am an AI assistant.',
+            text: 'I am an AI assistant.',
           } as TextStreamPart<ToolSet>;
         })();
       },
@@ -149,7 +150,7 @@ describe('User Message Handler', () => {
       await handleUserMessage(mockParams);
 
       expect(mockServerResponse.write).toHaveBeenCalledWith(
-        expect.stringContaining('f:{"messageId":"test-message-id"}'),
+        expect.stringContaining('data: {"type":"text-delta"'),
       );
 
       expect(saveChatHistory).toHaveBeenCalledWith(
@@ -166,9 +167,7 @@ describe('User Message Handler', () => {
         ]),
       );
 
-      expect(mockServerResponse.write).toHaveBeenCalledWith(
-        'd:{"finishReason":"stop"}\n',
-      );
+      expect(mockServerResponse.write).toHaveBeenCalledWith('data: [DONE]\n\n');
       expect(mockServerResponse.end).toHaveBeenCalled();
     });
 
@@ -181,10 +180,10 @@ describe('User Message Handler', () => {
 
       expect(logger.warn).toHaveBeenCalled();
       expect(mockServerResponse.write).toHaveBeenCalledWith(
-        expect.stringContaining('0:"\\n\\n"'),
+        expect.stringContaining('data: {"type":"text-delta"'),
       );
       expect(mockServerResponse.write).toHaveBeenCalledWith(
-        expect.stringContaining('0:"Test error"'),
+        expect.stringContaining('Test error'),
       );
       expect(mockServerResponse.end).toHaveBeenCalled();
     });

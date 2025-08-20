@@ -6,21 +6,27 @@ export async function runCommand(
   region: string,
   credentials: any,
 ): Promise<string> {
+  const envVars: any = {
+    AWS_DEFAULT_REGION: region,
+    PATH: process.env['PATH'] ?? '',
+  };
+
   if (
-    !credentials.accessKeyId &&
-    !system.getBoolean(SharedSystemProp.AWS_ENABLE_IMPLICIT_ROLE)
+    typeof credentials.accessKeyId === 'string' &&
+    credentials.accessKeyId.trim() &&
+    typeof credentials.secretAccessKey === 'string' &&
+    credentials.secretAccessKey.trim()
   ) {
+    envVars.AWS_ACCESS_KEY_ID = credentials.accessKeyId;
+    envVars.AWS_SECRET_ACCESS_KEY = credentials.secretAccessKey;
+    if (credentials.sessionToken) {
+      envVars.AWS_SESSION_TOKEN = credentials.sessionToken;
+    }
+  } else if (!system.getBoolean(SharedSystemProp.AWS_ENABLE_IMPLICIT_ROLE)) {
     throw new Error(
       'AWS credentials are required, please provide accessKeyId and secretAccessKey',
     );
   }
-  const envVars = {
-    AWS_ACCESS_KEY_ID: credentials.accessKeyId,
-    AWS_SECRET_ACCESS_KEY: credentials.secretAccessKey,
-    AWS_SESSION_TOKEN: credentials.sessionToken,
-    AWS_DEFAULT_REGION: region,
-    PATH: process.env['PATH'] ?? '',
-  };
 
   return await runCliCommand(command, 'aws', envVars);
 }

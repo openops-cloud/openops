@@ -17,7 +17,7 @@ export const OpenChatResponse = Type.Object({
     Type.Array(
       Type.Object({
         role: Type.String(),
-        content: Type.Union([
+        parts: Type.Union([
           Type.String(),
           Type.Array(
             Type.Object({
@@ -67,11 +67,12 @@ export const NewMessageRequest = Type.Object({
           Type.Literal('assistant'),
           Type.Literal('tool'),
         ]),
-        content: Type.Any(),
+        parts: Type.Any(),
       }),
     ),
   ),
   additionalContext: Type.Optional(ChatFlowContext),
+  tools: Type.Optional(Type.Record(Type.String(), Type.Any())),
 });
 
 export type NewMessageRequest = Static<typeof NewMessageRequest>;

@@ -2,17 +2,18 @@ import { QueryKeys } from '@/app/constants/query-keys';
 import { aiAssistantChatApi } from '@/app/features/ai/lib/ai-assistant-chat-api';
 import { getActionName, getBlockName } from '@/app/features/blocks/lib/utils';
 import { authenticationSession } from '@/app/lib/authentication-session';
-import { ThreadMessageLike } from '@assistant-ui/react';
-import {
-  useChatRuntime,
-  UseChatRuntimeOptions,
-} from '@assistant-ui/react-ai-sdk';
+import { useChat } from '@ai-sdk/react';
+import { AssistantRuntime } from '@assistant-ui/react';
+import { useAISDKRuntime } from '@assistant-ui/react-ai-sdk';
 import { toast } from '@openops/components/ui';
 import { flowHelper, FlowVersion, OpenChatResponse } from '@openops/shared';
+import { getFrontendToolDefinitions } from '@openops/ui-kit';
 import { useQuery } from '@tanstack/react-query';
+import { DefaultChatTransport, ToolSet, UIMessage } from 'ai';
 import { t } from 'i18next';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { aiChatApi } from '../../builder/ai-chat/lib/chat-api';
+import { aiSettingsHooks } from './ai-settings-hooks';
 import { createAdditionalContext } from './enrich-context';
 
 const PLACEHOLDER_MESSAGE_INTEROP = 'satisfy-schema';
@@ -47,15 +48,36 @@ const buildQueryKey = (
 };
 
 export const useAssistantChat = (props: UseAssistantChatProps) => {
+  const runtimeRef = useRef<AssistantRuntime | null>(null);
+  const frontendTools = useMemo(
+    () => getFrontendToolDefinitions() as ToolSet,
+    [],
+  );
   const { flowVersion, selectedStep, chatId, onChatIdChange } = props;
-  const [shouldRenderChat, setShouldRenderChat] = useState(false);
-  const [pendingConversation, setPendingConversation] =
-    useState<OpenChatResponse | null>(null);
+
+  const { hasActiveAiSettings, isLoading: isLoadingAiSettings } =
+    aiSettingsHooks.useHasActiveAiSettings();
 
   const stepDetails =
     flowVersion && selectedStep
       ? flowHelper.getStep(flowVersion, selectedStep)
       : undefined;
+
+  const isQueryEnabled = useMemo(() => {
+    if (isLoadingAiSettings) {
+      return false;
+    }
+
+    if (selectedStep) {
+      return (
+        !!getBlockName(stepDetails) &&
+        !!getActionName(stepDetails) &&
+        hasActiveAiSettings
+      );
+    }
+
+    return hasActiveAiSettings;
+  }, [selectedStep, stepDetails, hasActiveAiSettings, isLoadingAiSettings]);
 
   const queryKey = useMemo(
     () =>
@@ -88,84 +110,114 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
         conversation = await aiAssistantChatApi.open(chatId);
       }
 
-      onConversationRetrieved(conversation);
       return conversation;
     },
-    enabled: selectedStep
-      ? !!getBlockName(stepDetails) && !!getActionName(stepDetails)
-      : true,
+    enabled: isQueryEnabled,
+    refetchOnWindowFocus: false,
   });
 
-  const onConversationRetrieved = useCallback(
-    (conversation: OpenChatResponse) => {
-      if (conversation.chatId) {
-        setPendingConversation(conversation);
-      }
-    },
-    [],
+  useEffect(() => {
+    if (openChatResponse?.chatId) {
+      onChatIdChange(openChatResponse.chatId);
+    }
+  }, [onChatIdChange, openChatResponse?.chatId]);
+
+  const additionalContext = useMemo(
+    () =>
+      flowVersion
+        ? createAdditionalContext(flowVersion, stepDetails)
+        : undefined,
+    [flowVersion, stepDetails],
   );
 
-  useEffect(() => {
-    if (!isLoading && openChatResponse) {
-      setShouldRenderChat(true);
-    }
-  }, [isLoading, openChatResponse]);
+  // workaround for https://github.com/vercel/ai/issues/7819#issuecomment-3172625487
+  const bodyRef = useRef({
+    chatId,
+    message: PLACEHOLDER_MESSAGE_INTEROP,
+    additionalContext,
+  });
 
-  const runtimeConfig: UseChatRuntimeOptions = useMemo(
-    () => ({
+  const messagesRef = useRef<UIMessage[]>([]);
+
+  useEffect(() => {
+    bodyRef.current = {
+      chatId,
+      message: PLACEHOLDER_MESSAGE_INTEROP,
+      additionalContext,
+    };
+  }, [chatId, additionalContext]);
+
+  const chat = useChat({
+    id: chatId ?? undefined,
+    transport: new DefaultChatTransport({
       api: '/api/v1/ai/conversation',
-      maxSteps: 5,
-      body: {
-        chatId: openChatResponse?.chatId,
-        message: PLACEHOLDER_MESSAGE_INTEROP,
-        additionalContext: flowVersion
-          ? createAdditionalContext(flowVersion, stepDetails)
-          : undefined,
-      },
       headers: {
         Authorization: `Bearer ${authenticationSession.getToken()}`,
       },
+      body: () => ({
+        ...bodyRef.current,
+        messages: messagesRef.current,
+        tools: runtimeRef.current?.thread?.getModelContext()?.tools ?? {},
+      }),
     }),
-    [openChatResponse?.chatId, flowVersion, stepDetails],
-  );
+    onError: (error) => {
+      console.error('chat error', error);
+      const errorToast = {
+        title: t('AI Chat Error'),
+        description: t(
+          'There was an error while processing your request, please try again or open a new chat',
+        ),
+        variant: 'destructive' as const,
+        duration: 10000,
+      };
+      toast(errorToast);
+    },
+    // https://github.com/assistant-ui/assistant-ui/issues/2327
+    // handle frontend tool calls manually until this is fixed
+    onToolCall: async ({ toolCall }: { toolCall: any }) => {
+      if (toolCall.toolName?.startsWith('ui-')) {
+        try {
+          const tool =
+            frontendTools[toolCall.toolName as keyof typeof frontendTools];
 
-  const runtime = useChatRuntime(runtimeConfig);
-
-  const [hasMessages, setHasMessages] = useState(!!openChatResponse?.messages);
+          if (tool && tool.execute) {
+            await tool.execute(toolCall.input || toolCall.args, {} as any);
+          }
+        } catch (error) {
+          console.error('Error executing frontend tool:', error);
+        }
+      }
+    },
+  });
 
   useEffect(() => {
-    if (pendingConversation && runtime && shouldRenderChat) {
-      if (pendingConversation.chatId !== chatId) {
-        onChatIdChange(pendingConversation.chatId);
-      }
+    messagesRef.current = chat.messages;
+  }, [chat.messages]);
 
-      if ((pendingConversation.messages?.length ?? 0) > 0) {
-        runtime.thread.reset(
-          (pendingConversation.messages ?? []) as ThreadMessageLike[],
-        );
-      } else {
-        runtime.threads.switchToNewThread();
-      }
-      setPendingConversation(null);
+  useEffect(() => {
+    if (openChatResponse?.messages && !isLoading && chatId) {
+      chat.setMessages(openChatResponse.messages as UIMessage[]);
     }
-  }, [pendingConversation, runtime, shouldRenderChat, onChatIdChange, chatId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chatId, isLoading, openChatResponse?.messages]);
+
+  const runtime = useAISDKRuntime(chat);
+  runtimeRef.current = runtime;
 
   const createNewChat = useCallback(async () => {
     const oldChatId = chatId;
 
     try {
-      setPendingConversation(null);
+      chat.stop();
 
       if (oldChatId) {
-        onChatIdChange(null);
-        runtime.thread.cancelRun();
-        runtime.thread.reset();
-
         if (selectedStep && flowVersion) {
           await aiChatApi.delete(oldChatId);
+          chat.setMessages([]);
+        } else {
+          onChatIdChange(null);
         }
       }
-      setHasMessages(false);
     } catch (error) {
       toast({
         title: t('There was an error creating the new chat, please try again'),
@@ -175,22 +227,11 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
         `There was an error canceling the current run and invalidating queries while creating a new chat: ${error}`,
       );
     }
-  }, [chatId, onChatIdChange, runtime.thread, selectedStep, flowVersion]);
-
-  useEffect(() => {
-    const unsubscribe = runtime.thread.subscribe(() => {
-      setHasMessages(!!runtime.thread.getState().messages?.length);
-    });
-
-    return () => unsubscribe();
-  }, [runtime.thread]);
+  }, [chatId, chat, selectedStep, flowVersion, onChatIdChange]);
 
   return {
     runtime,
-    shouldRenderChat,
     isLoading,
-    openChatResponse,
-    hasMessages,
     createNewChat,
   };
 };

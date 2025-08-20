@@ -1,5 +1,5 @@
 import { AiConfig, AiProviderEnum } from '@openops/shared';
-import { CoreMessage, CoreUserMessage, LanguageModel, ToolSet } from 'ai';
+import { LanguageModel, ModelMessage, ToolSet, UserModelMessage } from 'ai';
 import { FastifyInstance } from 'fastify';
 
 const startMCPToolsMock = jest.fn();
@@ -46,8 +46,8 @@ describe('getMCPToolsContext', () => {
     actionName: 'action-name',
   };
 
-  const mockMessages: CoreMessage[] = [
-    { role: 'user', content: 'Test message' } as CoreUserMessage,
+  const mockMessages: ModelMessage[] = [
+    { role: 'user', content: 'Test message' } as UserModelMessage,
   ];
 
   beforeEach(() => {
@@ -62,15 +62,16 @@ describe('getMCPToolsContext', () => {
     });
     selectRelevantToolsMock.mockResolvedValue(undefined);
 
-    const result = await getMCPToolsContext(
-      mockApp,
-      'projectId',
-      'authToken',
-      mockAiConfig,
-      mockMessages,
-      mockChatContext,
-      mockLanguageModel,
-    );
+    const result = await getMCPToolsContext({
+      app: mockApp,
+      projectId: 'projectId',
+      authToken: 'authToken',
+      aiConfig: mockAiConfig,
+      messages: mockMessages,
+      chatContext: mockChatContext,
+      languageModel: mockLanguageModel,
+      frontendTools: {},
+    });
 
     expect(result).toStrictEqual({
       mcpClients: [],
@@ -84,12 +85,9 @@ describe('getMCPToolsContext', () => {
 
   it('should handle tools with no descriptions', async () => {
     const mockTools: ToolSet = {
-      tool1: {
-        parameters: {},
-      },
+      tool1: {},
       tool2: {
         description: 'Tool 2 description',
-        parameters: {},
       },
     };
 
@@ -100,15 +98,16 @@ describe('getMCPToolsContext', () => {
 
     selectRelevantToolsMock.mockResolvedValue(mockTools);
 
-    const result = await getMCPToolsContext(
-      mockApp,
-      'projectId',
-      'authToken',
-      mockAiConfig,
-      mockMessages,
-      mockChatContext,
-      mockLanguageModel,
-    );
+    const result = await getMCPToolsContext({
+      app: mockApp,
+      projectId: 'projectId',
+      authToken: 'authToken',
+      aiConfig: mockAiConfig,
+      messages: mockMessages,
+      chatContext: mockChatContext,
+      languageModel: mockLanguageModel,
+      frontendTools: {},
+    });
 
     expect(result.filteredTools).toEqual(mockTools);
     expect(getMcpSystemPromptMock).toHaveBeenCalled();
@@ -123,15 +122,16 @@ describe('getMCPToolsContext', () => {
 
     getBlockSystemPromptMock.mockResolvedValue('System prompt');
 
-    const result = await getMCPToolsContext(
-      mockApp,
-      'projectId',
-      'authToken',
-      mockAiConfig,
-      mockMessages,
-      completeChatContext,
-      mockLanguageModel,
-    );
+    const result = await getMCPToolsContext({
+      app: mockApp,
+      projectId: 'projectId',
+      authToken: 'authToken',
+      aiConfig: mockAiConfig,
+      messages: mockMessages,
+      chatContext: completeChatContext,
+      languageModel: mockLanguageModel,
+      frontendTools: {},
+    });
 
     expect(result.mcpClients).toEqual([]);
     expect(startMCPToolsMock).not.toHaveBeenCalled();
@@ -239,15 +239,16 @@ describe('getMCPToolsContext', () => {
       });
       selectRelevantToolsMock.mockResolvedValue(selectedTools);
 
-      await getMCPToolsContext(
-        mockApp,
-        'projectId',
-        'authToken',
-        mockAiConfig,
-        mockMessages,
-        mockChatContext,
-        mockLanguageModel,
-      );
+      await getMCPToolsContext({
+        app: mockApp,
+        projectId: 'projectId',
+        authToken: 'authToken',
+        aiConfig: mockAiConfig,
+        messages: mockMessages,
+        chatContext: mockChatContext,
+        languageModel: mockLanguageModel,
+        frontendTools: {},
+      });
 
       expect(getMcpSystemPromptMock).toHaveBeenCalledWith(expected);
     },

@@ -1,10 +1,6 @@
 import formBody from '@fastify/formbody';
 import fastifyMultipart from '@fastify/multipart';
-import {
-  getFastifyBodyLimitOrThrow,
-  logger,
-  system,
-} from '@openops/server-shared';
+import { logger, MAX_REQUEST_BODY_BYTES, system } from '@openops/server-shared';
 import { openOpsId } from '@openops/shared';
 import fastify, { FastifyBaseLogger, FastifyInstance } from 'fastify';
 import fastifyFavicon from 'fastify-favicon';
@@ -32,14 +28,14 @@ async function setupBaseApp(): Promise<FastifyInstance> {
   const app = fastify({
     loggerInstance: logger as FastifyBaseLogger,
     pluginTimeout: 30000,
-    bodyLimit: getFastifyBodyLimitOrThrow(),
+    bodyLimit: MAX_REQUEST_BODY_BYTES,
     genReqId: () => {
       return `req_${openOpsId()}`;
     },
     trustProxy: true,
     ajv: {
       customOptions: {
-        removeAdditional: 'all',
+        removeAdditional: false,
         useDefaults: true,
         coerceTypes: 'array',
         formats: {},

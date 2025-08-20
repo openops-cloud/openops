@@ -37,6 +37,7 @@ export const flowRunController: FastifyPluginCallbackTypebox = (
       flowId: request.query.flowId,
       tags: request.query.tags,
       status: request.query.status,
+      triggerSource: request.query.triggerSource,
       cursor: request.query.cursor ?? null,
       limit: Number(request.query.limit ?? DEFAULT_PAGING_LIMIT),
       createdAfter: request.query.createdAfter,
@@ -107,6 +108,7 @@ const ListRequest = {
     allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
   },
   schema: {
+    operationId: 'List Flow Runs',
     tags: ['workflow-runs'],
     description:
       'List workflow runs with advanced filtering and pagination capabilities. This endpoint retrieves a paginated list of workflow executions, supporting filtering by workflow ID, tags, status, and date range. Results include execution metadata, duration, status, and associated tags. Useful for monitoring and analyzing workflow execution history.',
@@ -123,6 +125,7 @@ const GetRequest = {
     allowedPrincipals: [PrincipalType.SERVICE, PrincipalType.USER],
   },
   schema: {
+    operationId: 'Get Flow Run Details',
     tags: ['workflow-runs'],
     description:
       'Get detailed information about a specific flow run. This endpoint returns the complete execution data including status, duration, steps, error messages, and any associated metadata. Includes step-by-step execution details and their outputs. Essential for debugging and monitoring individual workflow executions.',
@@ -155,6 +158,7 @@ const RetryFlowRequest = {
     permission: Permission.RETRY_RUN,
   },
   schema: {
+    operationId: 'Retry Flow Run',
     description:
       'Retry a failed workflow run from either the failed step or the beginning. This endpoint allows users to re-execute a workflow run that has encountered errors, with options to specify the retry strategy (e.g., from the last failed step or from the start). Useful for recovering from transient errors or fixing issues in workflow logic.',
     params: Type.Object({

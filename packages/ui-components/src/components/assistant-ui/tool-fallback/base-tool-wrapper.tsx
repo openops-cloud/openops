@@ -1,5 +1,4 @@
 import { ToolCallMessagePartProps } from '@assistant-ui/react';
-import { t } from 'i18next';
 import {
   ChevronDownIcon,
   ChevronUpIcon,
@@ -8,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '../../../ui/button';
+import { toolStatusUtils } from '../tool-status';
 
 type BaseToolWrapperProps = {
   collapsedByDefault?: boolean;
@@ -22,37 +22,38 @@ const BaseToolWrapper = ({
 }: BaseToolWrapperProps) => {
   const [isCollapsed, setIsCollapsed] = useState(collapsedByDefault);
 
-  const isRunning = status?.type === 'running';
-  const isIncomplete = status?.type === 'incomplete';
-  const isComplete = status?.type === 'complete';
+  const isRunning = toolStatusUtils.isRunning(status);
+  const isIncomplete = toolStatusUtils.isIncomplete(status);
+  const isComplete = toolStatusUtils.isComplete(status);
 
   return (
-    <div className="mb-4 flex w-full flex-col gap-3 rounded-lg border border-border bg-background py-3">
+    <div className="mb-4 flex w-full flex-col rounded-lg border border-border bg-background">
       <div className="flex items-center gap-2 px-4">
-        {isComplete && <CircleCheck className="size-4 text-success" />}
-        {isIncomplete && <XCircle className="size-4 text-foreground" />}
-        <p className="text-foreground">
-          {isComplete && t('Used tool: ')}
-          {isRunning && t('Using tool: ')}
-          {isIncomplete && t('Incomplete tool call: ')}
+        {isComplete && (
+          <CircleCheck className="size-4 text-success flex-shrink-0" />
+        )}
+        {isIncomplete && (
+          <XCircle className="size-4 text-destructive flex-shrink-0" />
+        )}
+        <p className="text-foreground overflow-hidden text-ellipsis whitespace-nowrap flex-grow min-w-0">
           <b className="text-foreground">{toolName}</b>
         </p>
-        <div className="flex-grow" />
         <Button
           onClick={() => setIsCollapsed(!isCollapsed)}
           aria-expanded={!isCollapsed}
           aria-controls="collapsible-content"
           size="icon"
-          variant="default"
-          className={'size-8 p-2 text-white'}
+          variant="ghost"
+          className="size-8 p-2 flex-shrink-0 my-1"
           loading={isRunning}
         >
           {isCollapsed ? <ChevronDownIcon /> : <ChevronUpIcon />}
         </Button>
       </div>
-      {!isCollapsed && children}
+      {!isCollapsed && <div className="overflow-hidden">{children}</div>}
     </div>
   );
 };
+
 BaseToolWrapper.displayName = 'BaseToolWrapper';
 export { BaseToolWrapper };

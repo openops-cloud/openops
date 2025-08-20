@@ -4,14 +4,24 @@ import { userEvent, waitFor } from '@storybook/testing-library';
 import { FC } from 'react';
 
 import { ToolFallback } from '../../components/assistant-ui/tool-fallback';
+import { TOOL_STATUS_TYPES } from '../../components/assistant-ui/tool-status';
+import { Theme } from '../../lib/theme';
 import { selectLightOrDarkCanvas } from '../../test-utils/select-themed-canvas.util';
+import { TooltipProvider } from '../../ui/tooltip';
 
 const ToolFallbackWrapper: FC<{
   toolName: string;
   argsText: string;
   result?: any;
   status?: any;
-}> = ({ toolName, argsText, result, status = { type: 'complete' } }) => {
+  theme?: Theme;
+}> = ({
+  toolName,
+  argsText,
+  result,
+  status = { type: TOOL_STATUS_TYPES.COMPLETE },
+  theme = Theme.LIGHT,
+}) => {
   const mockToolCall = {
     type: 'tool-call' as const,
     toolCallId: 'mock-tool-call-id',
@@ -25,7 +35,7 @@ const ToolFallbackWrapper: FC<{
     addResult: () => {},
   };
 
-  return <ToolFallback {...mockToolCall} />;
+  return <ToolFallback {...mockToolCall} theme={theme} />;
 };
 
 /**
@@ -41,9 +51,11 @@ const meta = {
   },
   decorators: [
     (Story) => (
-      <div className="max-w-2xl mx-auto">
-        <Story />
-      </div>
+      <TooltipProvider>
+        <div className="max-w-2xl mx-auto">
+          <Story />
+        </div>
+      </TooltipProvider>
     ),
   ],
 } satisfies Meta<typeof ToolFallbackWrapper>;
@@ -71,7 +83,7 @@ export const ToolCallInProgress: Story = {
     toolName: 'get_weather',
     argsText: '{"location": "New York", "unit": "celsius"}',
     result: undefined,
-    status: { type: 'running' },
+    status: { type: TOOL_STATUS_TYPES.RUNNING },
   },
   parameters: {
     chromatic: { disable: true },
@@ -86,7 +98,7 @@ export const ToolCallIncomplete: Story = {
     toolName: 'get_weather',
     argsText: '{"location": "New York", "unit": "celsius"}',
     result: 'The tool execution was not completed.',
-    status: { type: 'incomplete' },
+    status: { type: TOOL_STATUS_TYPES.INCOMPLETE },
   },
 };
 
@@ -148,81 +160,42 @@ export const Expanded: Story = {
   play: async ({ canvasElement }) => {
     const canvas = selectLightOrDarkCanvas(canvasElement);
 
-    // Find the expand/collapse button (chevron)
     const expandButton = await canvas.findByRole('button');
     expect(expandButton).toBeInTheDocument();
 
-    // Initially, the content should be collapsed (not visible)
-    // Use a more specific selector to avoid multiple matches
-    const argsContent = canvas.queryByText((content, element) => {
-      return !!(
-        element?.textContent?.includes('dataset') &&
-        element?.textContent?.includes('sales_data_2024') &&
-        element?.tagName === 'PRE'
-      );
-    });
-    expect(argsContent).not.toBeInTheDocument();
+    expect(canvas.queryByText('Input')).not.toBeInTheDocument();
+    expect(canvas.queryByText('Output')).not.toBeInTheDocument();
 
     // Click the expand button
     await userEvent.click(expandButton);
 
-    // Wait for the animation to complete and content to be visible
-    await waitFor(
-      () => {
-        expect(
-          canvas.getByText((content, element) => {
-            return !!(
-              element?.textContent?.includes('dataset') &&
-              element?.textContent?.includes('sales_data_2024') &&
-              element?.tagName === 'PRE'
-            );
-          }),
-        ).toBeInTheDocument();
-      },
-      { timeout: 1000 },
-    );
-
-    // Verify that the arguments are displayed using flexible text matching
-    // Target specific pre elements to avoid multiple matches
-    const argsPre = canvas.getByText((content, element) => {
-      return !!(
-        element?.textContent?.includes('filters') &&
-        element?.textContent?.includes('date_range') &&
-        element?.tagName === 'PRE'
-      );
+    await waitFor(() => {
+      expect(canvas.getByText('Input')).toBeInTheDocument();
+      // eslint-disable-next-line testing-library/no-wait-for-multiple-assertions
+      expect(canvas.getByText('Output')).toBeInTheDocument();
     });
-    expect(argsPre).toBeInTheDocument();
 
-    // Verify specific content within the args pre element
-    expect(argsPre).toHaveTextContent('categories');
-    expect(argsPre).toHaveTextContent('electronics');
-    expect(argsPre).toHaveTextContent('metrics');
-    expect(argsPre).toHaveTextContent('revenue');
+    // Verify that we can click the Input toggle to see the arguments
+    const inputToggle = canvas.getByText('Input');
+    await userEvent.click(inputToggle);
 
-    // Verify that the result section is displayed
-    expect(canvas.getByText('Result:')).toBeInTheDocument();
-
-    // Find the result pre element
-    const resultPre = canvas.getByText((content, element) => {
-      return !!(
-        element?.textContent?.includes('total_revenue') &&
-        element?.textContent?.includes('1250000') &&
-        element?.tagName === 'PRE'
-      );
+    await waitFor(() => {
+      expect(inputToggle).toHaveAttribute('aria-checked', 'true');
     });
-    expect(resultPre).toBeInTheDocument();
-
-    // Verify specific content within the result pre element
-    expect(resultPre).toHaveTextContent('total_units');
-    expect(resultPre).toHaveTextContent('45000');
-    expect(resultPre).toHaveTextContent('avg_profit_margin');
-    expect(resultPre).toHaveTextContent('0.23');
-    expect(resultPre).toHaveTextContent('electronics');
-    expect(resultPre).toHaveTextContent('clothing');
-    expect(resultPre).toHaveTextContent('books');
-    expect(resultPre).toHaveTextContent('trends');
-    expect(resultPre).toHaveTextContent('Jan');
-    expect(resultPre).toHaveTextContent('Feb');
-    expect(resultPre).toHaveTextContent('Mar');
   },
+};
+
+export const VerySmallWidthTextOverflow: Story = {
+  args: {
+    toolName: 'very_long_tool_name_that_should_overflow_in_small_container',
+    argsText: '{"param": "value"}',
+    result: 'Success',
+  },
+  decorators: [
+    (Story) => (
+      <div style={{ width: '200px' }}>
+        <Story />
+      </div>
+    ),
+  ],
 };

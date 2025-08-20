@@ -4,9 +4,9 @@ import { useAiModelSelector } from '@/app/features/ai/lib/ai-model-selector-hook
 import { useAssistantChat } from '@/app/features/ai/lib/assistant-ui-chat-hook';
 import { AssistantUiChatContainer } from '@openops/components/ui';
 import { SourceCode } from '@openops/shared';
+import { createFrontendTools } from '@openops/ui-kit';
 import { t } from 'i18next';
-import { ReactNode, useCallback, useRef } from 'react';
-import { useFrontendTools } from '../lib/use-frontend-tools';
+import { ReactNode, useCallback, useMemo, useState } from 'react';
 
 type AssistantUiChatProps = {
   onClose: () => void;
@@ -21,7 +21,11 @@ const AssistantUiChat = ({
   title,
   handleInject,
 }: AssistantUiChatProps) => {
-  const chatId = useRef<string | null>(
+  const toolComponents = useMemo(() => {
+    return createFrontendTools();
+  }, []);
+
+  const [chatId, setChatId] = useState<string | null>(
     localStorage.getItem(AI_ASSISTANT_LS_KEY),
   );
 
@@ -32,19 +36,11 @@ const AssistantUiChat = ({
       localStorage.removeItem(AI_ASSISTANT_LS_KEY);
     }
 
-    chatId.current = id;
+    setChatId(id);
   }, []);
 
-  const { toolComponents, isLoading: isLoadingTools } = useFrontendTools();
-  const {
-    runtime,
-    shouldRenderChat,
-    openChatResponse,
-    isLoading,
-    hasMessages,
-    createNewChat,
-  } = useAssistantChat({
-    chatId: chatId.current,
+  const { runtime, isLoading, createNewChat } = useAssistantChat({
+    chatId,
     onChatIdChange,
   });
 
@@ -57,21 +53,11 @@ const AssistantUiChat = ({
     isLoading: isModelSelectorLoading,
   } = useAiModelSelector();
 
-  if (isLoading || !openChatResponse || isLoadingTools) {
+  if (isLoading) {
     return (
       <div className="w-full flex h-full items-center justify-center bg-background">
         <div className="text-sm text-muted-foreground">
           {t('Loading chat...')}
-        </div>
-      </div>
-    );
-  }
-
-  if (!shouldRenderChat) {
-    return (
-      <div className="w-full flex h-full items-center justify-center bg-background">
-        <div className="text-sm text-muted-foreground">
-          {t('Initializing chat...')}
         </div>
       </div>
     );
@@ -83,7 +69,6 @@ const AssistantUiChat = ({
       runtime={runtime}
       onNewChat={createNewChat}
       title={title}
-      enableNewChat={hasMessages}
       availableModels={availableModels}
       onModelSelected={onModelSelected}
       isModelSelectorLoading={isModelSelectorLoading}

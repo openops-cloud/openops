@@ -13,6 +13,8 @@ import {
 import { cacheWrapper } from '@openops/server-shared';
 import { convertToStringWithValidation, isEmpty } from '@openops/shared';
 
+const FLOAT_COMPARISON_EPSILON = 1e-9;
+
 export const updateRecordAction = createAction({
   auth: BlockAuth.None(),
   name: 'update_record',
@@ -107,10 +109,19 @@ export const updateRecordAction = createAction({
         return properties;
       },
     }),
+    roundToFieldPrecision: Property.Checkbox({
+      displayName: 'Round Numeric Values',
+      description:
+        'When ON, numeric inputs are rounded to the number of decimals specified by the destination field in the table. When OFF, inserts fail if inputs have more decimals than the field allows.',
+      required: false,
+      defaultValue: false,
+    }),
   },
   async run(context) {
     const { rowPrimaryKey, fieldsProperties } = context.propsValue;
     const tableName = context.propsValue.tableName as unknown as string;
+    const roundToFieldPrecision =
+      (context.propsValue.roundToFieldPrecision as boolean) ?? false;
 
     const tableCacheKey = `${context.run.id}-table-${tableName}`;
     const tableId = await cacheWrapper.getOrAdd(
@@ -131,6 +142,7 @@ export const updateRecordAction = createAction({
       tableName,
       tableFields,
       fieldsProperties,
+      { roundToFieldPrecision },
     );
 
     const primaryKeyField = getPrimaryKeyFieldFromFields(tableFields);
@@ -158,27 +170,83 @@ function getPrimaryKey(rowPrimaryKey: any): string | undefined {
   return isEmpty(primaryKeyValue) ? undefined : primaryKeyValue;
 }
 
+function getFieldDecimalPlaces(field: OpenOpsField): number | undefined {
+  const fieldObj = field as any;
+  const decimalPlaces = fieldObj.number_decimal_places;
+
+  return typeof decimalPlaces === 'number' ? decimalPlaces : undefined;
+}
+
+function formatDecimalPlaces(
+  value: any,
+  decimalPlaces: number,
+): string | number {
+  const numericValue = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(numericValue)) return value;
+  const roundedValue = numericValue.toFixed(decimalPlaces);
+  return decimalPlaces === 0 ? Number(roundedValue) : roundedValue;
+}
+
+function hasMoreDecimalsThan(value: any, decimalPlaces: number): boolean {
+  const numericValue = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(numericValue)) return false;
+  const factor = Math.pow(10, decimalPlaces);
+  return (
+    Math.abs(numericValue - Math.round(numericValue * factor) / factor) >
+    FLOAT_COMPARISON_EPSILON
+  );
+}
+
 function mapFieldsToObject(
   tableName: string,
   validColumns: OpenOpsField[],
   fieldsProperties: any,
+  options: { roundToFieldPrecision: boolean },
 ): Record<string, any> {
-  const validColumnsNames = new Set(validColumns.map((field) => field.name));
-  const updateFieldsProperty =
+  const availableColumns: Record<string, OpenOpsField> = Object.fromEntries(
+    validColumns.map((field) => [field.name, field]),
+  );
+  const updateFields =
     (fieldsProperties['fieldsProperties'] as unknown as {
       fieldName: string;
       newFieldValue: any;
     }[]) ?? [];
 
   const fieldsToUpdate: Record<string, any> = {};
-  for (const { fieldName, newFieldValue } of updateFieldsProperty) {
-    if (!validColumnsNames.has(fieldName)) {
+
+  for (const { fieldName, newFieldValue } of updateFields) {
+    const field = availableColumns[fieldName];
+    if (!field) {
       throw new Error(
         `Column ${fieldName} does not exist in table ${tableName}.`,
       );
     }
 
-    fieldsToUpdate[fieldName] = newFieldValue['newFieldValue'];
+    const value = newFieldValue['newFieldValue'];
+
+    const decimalPlaces = getFieldDecimalPlaces(field);
+
+    if (decimalPlaces === undefined) {
+      fieldsToUpdate[fieldName] = value;
+      continue;
+    }
+
+    if (value == null || (typeof value === 'string' && value.trim() === '')) {
+      fieldsToUpdate[fieldName] = value;
+      continue;
+    }
+
+    if (options.roundToFieldPrecision) {
+      fieldsToUpdate[fieldName] = formatDecimalPlaces(value, decimalPlaces);
+    } else {
+      if (hasMoreDecimalsThan(value, decimalPlaces)) {
+        throw new Error(
+          `Field "${fieldName}" allows ${decimalPlaces} decimal place(s); received ${value}. ` +
+            `Enable "Round Numeric Values" or provide a value with at most ${decimalPlaces} decimals.`,
+        );
+      }
+      fieldsToUpdate[fieldName] = value;
+    }
   }
 
   return fieldsToUpdate;

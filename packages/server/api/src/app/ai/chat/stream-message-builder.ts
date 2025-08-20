@@ -2,78 +2,91 @@
  * Utility functions to build streaming messages for the AI SDK protocol
  */
 
-/**
- * Builds a text message (type 0)
- */
-export function buildTextMessage(text: string): string {
-  return `0:${JSON.stringify(text)}\n`;
+function createStreamMessage(data: Record<string, unknown>): string {
+  return `data: ${JSON.stringify(data)}\n\n`;
 }
 
-/**
- * Builds a tool call message (type 9)
- */
-export function buildToolCallMessage(toolCall: unknown): string {
-  return `9:${JSON.stringify(toolCall)}\n`;
-}
-
-/**
- * Builds a tool call streaming start message (type b)
- */
-export function buildToolCallStreamingStartMessage(
+export function buildToolInputStartMessage(
   toolCallId: string,
   toolName: string,
 ): string {
-  return `b:${JSON.stringify({
-    type: 'tool-call-streaming-start',
+  return createStreamMessage({
+    type: 'tool-input-start',
     toolCallId,
     toolName,
-  })}\n`;
+  });
 }
 
-/**
- * Builds a tool call delta message (type c)
- */
-export function buildToolCallDeltaMessage(
+export function buildToolInputAvailable(
   toolCallId: string,
   toolName: string,
-  argsTextDelta: string,
+  input: string,
 ): string {
-  return `c:${JSON.stringify({
-    type: 'tool-call-delta',
-    toolCallId,
+  return createStreamMessage({
+    type: 'tool-input-available',
     toolName,
-    argsTextDelta,
-  })}\n`;
+    toolCallId,
+    input,
+  });
 }
 
-/**
- * Builds a tool result message (type a)
- */
-export function buildToolResultMessage(toolResult: unknown): string {
-  return `a:${JSON.stringify(toolResult)}\n`;
+export function buildToolOutputAvailableMessage(
+  toolCallId: string,
+  output: unknown,
+): string {
+  return createStreamMessage({
+    type: 'tool-output-available',
+    toolCallId,
+    output,
+  });
 }
 
-/**
- * Builds a finish message (type e)
- */
-export function buildFinishMessage(finishReason: string): string {
-  return `e:${JSON.stringify({
-    finishReason,
-  })}\n`;
+export const finishMessagePart = createStreamMessage({
+  type: 'finish',
+});
+
+export const doneMarker = 'data: [DONE]\n\n';
+
+export const startStepPart = createStreamMessage({
+  type: 'start-step',
+});
+
+export const finishStepPart = createStreamMessage({
+  type: 'finish-step',
+});
+
+export const startMessagePart = createStreamMessage({
+  type: 'start',
+});
+
+export function buildTextStartMessage(messageId: string): string {
+  return createStreamMessage({
+    type: 'text-start',
+    id: messageId,
+  });
 }
 
-/**
- * Builds a done message (type d)
- */
-export function buildDoneMessage(finishReason: string): string {
-  return `d:${JSON.stringify({
-    finishReason,
-  })}\n`;
+export function buildTextDeltaPart(text: string, id: string): string {
+  return createStreamMessage({
+    type: 'text-delta',
+    id,
+    delta: text,
+  });
 }
 
-/**
- * Builds a message ID message (type f)
- */
-export function buildMessageIdMessage(messageId: string): string {
-  return `f:${JSON.stringify({ messageId })}\n`;
+export function buildTextEndMessage(messageId: string): string {
+  return createStreamMessage({
+    type: 'text-end',
+    id: messageId,
+  });
+}
+
+export function sendTextMessageToStream(
+  responseStream: NodeJS.WritableStream,
+  message: string,
+  messageId: string,
+): void {
+  responseStream.write(buildTextStartMessage(messageId));
+  responseStream.write(buildTextDeltaPart(message, messageId));
+  responseStream.write(buildTextEndMessage(messageId));
 }

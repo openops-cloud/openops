@@ -49,18 +49,28 @@ type ParseMentionNodeFromText = {
   stepDisplayName: string;
   stepLogoUrl: string;
   stepDfsIndex: number;
+  startingIndex?: number;
 };
 function getLabelForMention({
   stepDisplayName,
   stepLogoUrl,
   stepDfsIndex,
   path,
+  startingIndex = 0,
 }: ParseMentionNodeFromText) {
   const keys = keysWithinPath(removeIntroplationBrackets(path));
   if (keys.length === 0) {
     return 'Custom Code';
   }
-  const mentionText = [stepDisplayName, ...keys.slice(1)].join(' ');
+  const displayKeys = keys.slice(1).map((key) => {
+    const num = Number(key);
+
+    // Convert from 0-based to 1-based index for consistency with Data Selector
+    return Number.isInteger(num) && key === num.toString()
+      ? String(num + startingIndex + 1)
+      : key;
+  });
+  const mentionText = [stepDisplayName, ...displayKeys].join(' ');
   return JSON.stringify({
     logoUrl: stepLogoUrl,
     displayText: `${stepDfsIndex}. ${mentionText}`,

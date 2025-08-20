@@ -1,6 +1,5 @@
 import {
   ActionBarPrimitive,
-  BranchPickerPrimitive,
   ComposerPrimitive,
   MessagePrimitive,
   ThreadPrimitive,
@@ -8,16 +7,11 @@ import {
 import {
   ArrowDownIcon,
   CheckIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
   CircleStopIcon,
   CopyIcon,
-  PencilIcon,
-  RefreshCwIcon,
   SendHorizontalIcon,
 } from 'lucide-react';
 import { FC, memo, useMemo } from 'react';
-import { cn } from '../../../lib/cn';
 import { Button } from '../../../ui/button';
 import {
   AiModelSelector,
@@ -76,11 +70,21 @@ export const Thread = ({
 
         <ThreadPrimitive.Messages components={messageComponents} />
 
+        <ThreadPrimitive.If running>
+          <div className="w-full mb-2">
+            <div className="flex items-center text-slate-800 dark:text-slate-50">
+              <span className="select-none animate-pulse leading-none align-middle">
+                {'\u25CF'}
+              </span>
+            </div>
+          </div>
+        </ThreadPrimitive.If>
+
         <ThreadPrimitive.If empty={false}>
           <div className="min-h-8 flex-grow" />
         </ThreadPrimitive.If>
 
-        <div className="sticky bottom-0 mt-3 flex w-full max-w-[var(--thread-max-width)] flex-col items-center justify-end rounded-t-lg bg-inherit pb-4 z-20">
+        <div className="sticky bottom-0 mt-3 flex w-full flex-col items-center justify-end rounded-t-lg bg-inherit pb-4 z-20">
           <ThreadScrollToBottom />
           <Composer
             availableModels={availableModels}
@@ -113,7 +117,7 @@ const ThreadWelcome: FC = () => {
 
   return (
     <ThreadPrimitive.Empty>
-      <div className="flex w-full max-w-[var(--thread-max-width)] flex-grow flex-col">
+      <div className="flex w-full flex-grow flex-col">
         <div className="flex w-full h-full flex-grow flex-col items-center justify-center">
           <p className="mt-4 font-medium">{greeting}</p>
         </div>
@@ -182,37 +186,17 @@ const ComposerAction: FC = () => {
 
 const UserMessage: FC = () => {
   return (
-    <MessagePrimitive.Root className="grid auto-rows-auto grid-cols-[minmax(72px,1fr)_auto] gap-y-2 [&:where(>*)]:col-start-2 w-full max-w-[var(--thread-max-width)] py-4">
-      <UserActionBar />
-
-      <div className="bg-muted text-foreground max-w-[calc(var(--thread-max-width)*0.8)] break-words rounded-3xl px-5 py-2.5 col-start-2 row-start-2">
+    <MessagePrimitive.Root className="grid auto-rows-auto grid-cols-[minmax(72px,1fr)_auto] gap-y-2 [&:where(>*)]:col-start-2 w-full  py-4">
+      <div className="bg-muted text-foreground break-words rounded-3xl px-5 py-2.5 col-start-2 row-start-2">
         <MessagePrimitive.Content />
       </div>
-
-      <BranchPicker className="col-span-full col-start-1 row-start-3 -mr-1 justify-end" />
     </MessagePrimitive.Root>
-  );
-};
-
-const UserActionBar: FC = () => {
-  return (
-    <ActionBarPrimitive.Root
-      hideWhenRunning
-      autohide="not-last"
-      className="flex flex-col items-end col-start-1 row-start-2 mr-3 mt-2.5"
-    >
-      <ActionBarPrimitive.Edit asChild>
-        <TooltipIconButton tooltip={t('Edit')}>
-          <PencilIcon />
-        </TooltipIconButton>
-      </ActionBarPrimitive.Edit>
-    </ActionBarPrimitive.Root>
   );
 };
 
 const EditComposer: FC = () => {
   return (
-    <ComposerPrimitive.Root className="bg-muted my-4 flex w-full max-w-[var(--thread-max-width)] flex-col gap-2 rounded-xl">
+    <ComposerPrimitive.Root className="bg-muted my-4 flex w-full flex-col gap-2 rounded-xl">
       <ComposerPrimitive.Input className="text-foreground flex h-8 w-full resize-none bg-transparent p-4 pb-0 outline-none" />
 
       <div className="mx-3 mb-3 flex items-center justify-center gap-2 self-end">
@@ -232,7 +216,7 @@ const AssistantMessage: FC<{ theme: Theme }> = ({ theme }) => {
     () => ({
       Text: (props: any) => <MarkdownTextWrapper {...props} theme={theme} />,
       tools: {
-        Fallback: ToolFallback,
+        Fallback: (props: any) => <ToolFallback {...props} theme={theme} />,
         by_name: {
           generate_code: (props: any) => (
             <GenerateCodeTool {...props} theme={theme} />
@@ -244,14 +228,12 @@ const AssistantMessage: FC<{ theme: Theme }> = ({ theme }) => {
   );
 
   return (
-    <MessagePrimitive.Root className="grid grid-cols-[auto_auto_1fr] grid-rows-[auto_1fr] relative w-full max-w-[var(--thread-max-width)] py-4">
-      <div className="text-foreground max-w-[calc(var(--thread-max-width)*0.8)] break-words leading-7 col-span-2 col-start-2 row-start-1 my-1.5">
+    <MessagePrimitive.Root className="grid grid-cols-[auto_auto_1fr] grid-rows-[auto_1fr] relative w-full  py-2">
+      <div className="text-foreground break-words leading-7 col-span-2 col-start-2 row-start-1 my-1.5">
         <MessagePrimitive.Content components={messageComponents} />
       </div>
 
       <AssistantActionBar />
-
-      <BranchPicker className="col-start-2 row-start-2 -ml-2 mr-2" />
     </MessagePrimitive.Root>
   );
 };
@@ -274,41 +256,6 @@ const AssistantActionBar: FC = () => {
           </MessagePrimitive.If>
         </TooltipIconButton>
       </ActionBarPrimitive.Copy>
-      <ActionBarPrimitive.Reload asChild>
-        <TooltipIconButton tooltip={t('Refresh')}>
-          <RefreshCwIcon />
-        </TooltipIconButton>
-      </ActionBarPrimitive.Reload>
     </ActionBarPrimitive.Root>
-  );
-};
-
-const BranchPicker: FC<BranchPickerPrimitive.Root.Props> = ({
-  className,
-  ...rest
-}) => {
-  return (
-    <BranchPickerPrimitive.Root
-      hideWhenSingleBranch
-      className={cn(
-        'text-muted-foreground inline-flex items-center text-xs',
-        className,
-      )}
-      {...rest}
-    >
-      <BranchPickerPrimitive.Previous asChild>
-        <TooltipIconButton tooltip="Previous">
-          <ChevronLeftIcon />
-        </TooltipIconButton>
-      </BranchPickerPrimitive.Previous>
-      <span className="font-medium">
-        <BranchPickerPrimitive.Number /> / <BranchPickerPrimitive.Count />
-      </span>
-      <BranchPickerPrimitive.Next asChild>
-        <TooltipIconButton tooltip={t('Next')}>
-          <ChevronRightIcon />
-        </TooltipIconButton>
-      </BranchPickerPrimitive.Next>
-    </BranchPickerPrimitive.Root>
   );
 };
