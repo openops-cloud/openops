@@ -197,13 +197,6 @@ async function triggerLoopIterations(
       .setVerdict(ExecutionVerdict.RUNNING)
       .setCurrentPath(loopExecutionState.currentPath.removeLast())
       .setPauseId(originalPauseId);
-
-    if (
-      loopIterations[i].verdict === ExecutionVerdict.FAILED &&
-      isSizeValidationError(loopIterations[i].error?.message)
-    ) {
-      break;
-    }
   }
 
   loopExecutionContext.executionState = loopExecutionState;
