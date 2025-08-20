@@ -1,9 +1,9 @@
 import { createAction } from '@openops/blocks-framework';
 
-export const endFlowAction = createAction({
-  name: 'end_workflow',
-  displayName: 'End Workflow',
-  description: 'End the current workflow',
+export const stopFlowAction = createAction({
+  name: 'stop_workflow',
+  displayName: 'Stop Execution',
+  description: 'Stop the current scope execution (workflow or loop iteration)',
   props: {},
   errorHandlingOptions: {
     continueOnFailure: {
