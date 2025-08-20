@@ -330,4 +330,4 @@ describe('resolveVariable', () => {
       expect(result.censoredValue).toBe(censoredValue);
     });
   });
-}); 
+});
