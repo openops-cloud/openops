@@ -12,7 +12,6 @@ import {
 } from '@openops/shared';
 import cloneDeep from 'lodash.clonedeep';
 import { nanoid } from 'nanoid';
-import { isSizeValidationError } from '../helper/size-validation';
 import { createContextStore } from '../services/storage.service';
 import { BaseExecutor } from './base-executor';
 import { EngineConstants } from './context/engine-constants';
