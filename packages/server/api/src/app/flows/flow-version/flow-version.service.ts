@@ -14,7 +14,6 @@ import {
   FlowId,
   FlowOperationRequest,
   FlowOperationType,
-  FlowType,
   FlowVersion,
   FlowVersionId,
   FlowVersionState,
@@ -292,7 +291,6 @@ export const flowVersionService = {
     request: {
       displayName: string;
       description: string;
-      type?: FlowType;
     },
   ): Promise<FlowVersion> {
     const flowVersion: NewFlowVersion = {
@@ -310,7 +308,6 @@ export const flowVersionService = {
       },
       valid: false,
       state: FlowVersionState.DRAFT,
-      type: request.type ?? FlowType.FLOW,
     };
     return flowVersionRepo().save(flowVersion);
   },

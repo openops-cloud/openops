@@ -499,7 +499,6 @@ async function create({
     {
       displayName: request.displayName,
       description: '',
-      type: request.type ?? FlowType.FLOW,
     },
   );
 
@@ -556,7 +555,6 @@ async function update({
         lastVersion = await flowVersionService.createEmptyVersion(id, {
           displayName: lastVersionWithArtifacts.displayName,
           description: lastVersionWithArtifacts.description ?? '',
-          type: lastVersionWithArtifacts.type,
         });
 
         // Duplicate the artifacts from the previous version, otherwise they will be deleted during update operation

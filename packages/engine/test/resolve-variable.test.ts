@@ -21,7 +21,6 @@ describe('resolveVariable', () => {
       flowId: 'flow-id',
       displayName: 'Test Flow Version',
       valid: true,
-      type: FlowType.FLOW,
       trigger: {
         id: 'trigger-id',
         name: 'trigger',

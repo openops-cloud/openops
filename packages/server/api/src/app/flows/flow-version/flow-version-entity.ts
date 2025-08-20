@@ -1,4 +1,4 @@
-import { Flow, FlowType, FlowVersion, User } from '@openops/shared';
+import { Flow, FlowVersion, User } from '@openops/shared';
 import { EntitySchema } from 'typeorm';
 import {
   BaseColumnSchemaPart,
@@ -33,11 +33,6 @@ export const FlowVersionEntity = new EntitySchema<FlowVersionSchema>({
     },
     state: {
       type: String,
-    },
-    type: {
-      type: String,
-      enum: FlowType,
-      nullable: false,
     },
   },
   indices: [
