@@ -23,13 +23,15 @@ export async function saveRequestBody(
 ): Promise<string> {
   const bodyAccessKey = `request:${requestId}`;
 
-  await cacheWrapper.setSerializedObject(bodyAccessKey, requestBody);
+  await cacheWrapper.setSerializedObject(bodyAccessKey, requestBody, 300);
 
   return bodyAccessKey;
 }
 
 export async function getRequestBody<T>(bodyAccessKey: string): Promise<T> {
-  const request = await cacheWrapper.getSerializedObject<T>(bodyAccessKey);
+  const request = await cacheWrapper.getAndDeleteSerializedObject<T>(
+    bodyAccessKey,
+  );
 
   if (!request) {
     const message = `Failed to fetch request body from cache for key ${bodyAccessKey}`;
