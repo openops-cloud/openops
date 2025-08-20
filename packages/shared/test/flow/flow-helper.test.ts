@@ -13,7 +13,6 @@ import {
   flowHelper,
   FlowOperationRequest,
   FlowOperationType,
-  FlowType,
   FlowVersion,
   FlowVersionState,
   PackageType,
@@ -30,7 +29,6 @@ const flowVersionWithBranching: FlowVersion = {
   flowId: 'lod6JEdKyPlvrnErdnrGa',
   updatedBy: '',
   displayName: 'Standup Reminder',
-
   trigger: {
     id: 'trigger_id',
     name: 'trigger',
@@ -226,7 +224,6 @@ const emptyScheduleFlowVersion: FlowVersion = {
   flowId: 'lod6JEdKyPlvrnErdnrGa',
   displayName: 'Standup Reminder',
   updatedBy: '',
-
   trigger: {
     id: 'trigger',
     name: 'trigger',
@@ -276,7 +273,6 @@ describe('Flow Helper', () => {
       updated: '2023-05-24T00:16:41.353Z',
       flowId: 'lod6JEdKyPlvrnErdnrGa',
       displayName: 'Standup Reminder',
-
       trigger: {
         id: 'trigger_id',
         name: 'trigger',
@@ -677,7 +673,6 @@ describe('Flow Helper', () => {
       updated: '2023-05-24T00:16:41.353Z',
       flowId: 'lod6JEdKyPlvrnErdnrGa',
       displayName: 'Standup Reminder',
-
       trigger: {
         id: 'trigger',
         name: 'trigger',
@@ -838,7 +833,6 @@ it('Duplicate Flow With Branch', () => {
     flowId: 'lod6JEdKyPlvrnErdnrGa',
     updatedBy: '',
     displayName: 'Standup Reminder',
-
     trigger: {
       id: 'trigger',
       name: 'trigger',
@@ -1067,7 +1061,6 @@ it('Duplicate Flow With Loops using Import', () => {
     flowId: 'YGPIPQDfLcPdJ0aJ9AKGb',
     updatedBy: '',
     displayName: 'Flow 1',
-
     trigger: {
       id: 'trigger',
       name: 'trigger',
@@ -1223,7 +1216,6 @@ it('Should remove connections', () => {
     flowId: 'CObU2KHVPozC24dbvtRUY',
     description: '',
     displayName: 'Untitled',
-
     trigger: {
       id: 'trigger',
       name: 'trigger',
@@ -1716,7 +1708,6 @@ describe('Split', () => {
     flowId: 'YGPIPQDfLcPdJ0aJ9AKGb',
     updatedBy: '',
     displayName: 'Flow 1',
-
     trigger: {
       id: 'trigger',
       name: 'trigger',
@@ -1788,7 +1779,6 @@ describe('Split', () => {
       flowId: 'YGPIPQDfLcPdJ0aJ9AKGb',
       updatedBy: '',
       displayName: 'Flow 1',
-
       trigger: {
         id: 'trigger',
         name: 'trigger',
@@ -1845,7 +1835,6 @@ describe('Split', () => {
       flowId: 'YGPIPQDfLcPdJ0aJ9AKGb',
       updatedBy: '',
       displayName: 'Flow 1',
-
       trigger: {
         id: 'trigger',
         name: 'trigger',
@@ -1964,7 +1953,6 @@ describe('Split', () => {
       flowId: 'lod6JEdKyPlvrnErdnrGa',
       displayName: 'Standup Reminder',
       updatedBy: '',
-
       trigger: {
         id: 'trigger',
         name: 'trigger',
@@ -2454,7 +2442,6 @@ describe('Split', () => {
         flowId: 'YGPIPQDfLcPdJ0aJ9AKGb',
         updatedBy: '',
         displayName: 'Flow 1',
-
         trigger: {
           id: 'trigger',
           name: 'trigger',
@@ -2670,7 +2657,6 @@ describe('Split', () => {
         updated: '2024-10-02T06:24:56.604Z',
         flowId: 'AUQ1poMROcB8JEhEtBFMl',
         displayName: 'Untitled',
-
         trigger: {
           id: 'trigger',
           displayName: 'Select Trigger',
@@ -2767,7 +2753,6 @@ describe('bulkAddActions', () => {
     flowId: 'uRntBYGwAAf0Sy9eFdFmO',
     description: '',
     displayName: 'Untitled',
-
     trigger: {
       id: 'trigger',
       name: 'trigger',
@@ -3336,7 +3321,6 @@ describe('duplicateStep', () => {
     updatedBy: '',
     valid: true,
     state: FlowVersionState.DRAFT,
-
     trigger: {
       id: 'trigger',
       name: 'trigger',

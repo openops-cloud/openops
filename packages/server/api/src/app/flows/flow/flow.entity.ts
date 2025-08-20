@@ -55,6 +55,7 @@ export const FlowEntity = new EntitySchema<FlowSchema>({
       type: String,
       enum: FlowType,
       nullable: false,
+      default: FlowType.FLOW,
     },
   },
   indices: [

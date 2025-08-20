@@ -19,8 +19,7 @@ export class AddTypeColumnToFlow1755607336738 implements MigrationInterface {
 
     await queryRunner.query(`
         ALTER TABLE "flow"
-        ALTER COLUMN "type" SET NOT NULL,
-        ALTER COLUMN "type" SET DEFAULT '${FlowType.FLOW}'
+        ALTER COLUMN "type" SET NOT NULL'
       `);
 
     logger.info('AddTypeColumnToFlowAndFlowVersion1755607336738: finished');
