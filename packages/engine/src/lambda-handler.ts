@@ -61,7 +61,7 @@ async function handleEvent(
       operationType,
     });
 
-    const responseKey = await executeEngine(
+    const bodyAccessKey = await executeEngine(
       requestId,
       engineInput,
       operationType,
@@ -72,8 +72,8 @@ async function handleEvent(
     return {
       statusCode: 200,
       body: JSON.stringify({
-        responseKey,
-      }),
+        bodyAccessKey,
+      } as BodyAccessKeyRequest),
     };
   } catch (error) {
     logger.error('Engine execution failed.', { error });
