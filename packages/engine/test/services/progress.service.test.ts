@@ -1,9 +1,10 @@
+const saveRequestBodyMock = jest.fn();
 import { progressService } from '../../src/lib/services/progress.service';
-import { logger } from '@openops/server-shared';
 import { throwIfExecutionTimeExceeded } from '../../src/lib/timeout-validator';
 
 jest.mock('@openops/server-shared', () => ({
   ...jest.requireActual('@openops/server-shared'),
+  saveRequestBody: saveRequestBodyMock,
   logger: {
     debug: jest.fn(),
     error: jest.fn(),
@@ -44,12 +45,12 @@ describe('Progress Service', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     // Reset the timeout mock to not throw by default
     mockThrowIfExecutionTimeExceeded.mockReset();
-    
+
     mockMakeHttpRequest.mockResolvedValue({});
-    
+
     // Reset the global lastRequestHash by calling with unique params
     // This ensures no deduplication issues between tests
     jest.clearAllMocks();
@@ -69,7 +70,15 @@ describe('Progress Service', () => {
         },
       };
 
+      saveRequestBodyMock.mockResolvedValue('request:test-run-id');
       await progressService.sendUpdate(successParams);
+
+      expect(saveRequestBodyMock).toHaveBeenCalledWith('test-run-id', expect.objectContaining({
+        executionCorrelationId: 'test-correlation-id-success',
+        runId: 'test-run-id',
+        workerHandlerId: 'test-handler-id',
+        progressUpdateType: 'WEBHOOK_RESPONSE',
+      }));
 
       expect(successParams.flowExecutorContext.toResponse).toHaveBeenCalled();
       expect(mockMakeHttpRequest).toHaveBeenCalledWith(
@@ -77,10 +86,7 @@ describe('Progress Service', () => {
         'http://localhost:3000/v1/engine/update-run',
         expect.any(Object),
         expect.objectContaining({
-          executionCorrelationId: 'test-correlation-id-success',
-          runId: 'test-run-id',
-          workerHandlerId: 'test-handler-id',
-          progressUpdateType: 'WEBHOOK_RESPONSE',
+          bodyAccessKey: 'request:test-run-id',
         }),
         expect.objectContaining({
           retries: 3,
@@ -98,7 +104,21 @@ describe('Progress Service', () => {
         },
       };
 
+      saveRequestBodyMock.mockResolvedValue('request:test-run-id');
       await progressService.sendUpdate(uniqueParams);
+
+      expect(saveRequestBodyMock).toHaveBeenCalledWith('test-run-id', expect.objectContaining({
+        executionCorrelationId: 'test-correlation-id-payload',
+        runId: 'test-run-id',
+        workerHandlerId: 'test-handler-id',
+        progressUpdateType: 'WEBHOOK_RESPONSE',
+        runDetails: expect.objectContaining({
+          steps: {},
+          status: 'RUNNING',
+          duration: 1000,
+          tasks: 1,
+        }),
+      }));
 
       expect(mockMakeHttpRequest).toHaveBeenCalledTimes(1);
       const call = mockMakeHttpRequest.mock.calls[0];
@@ -108,16 +128,7 @@ describe('Progress Service', () => {
       expect(url).toBe('http://localhost:3000/v1/engine/update-run');
       expect(requestBody).toEqual(
         expect.objectContaining({
-          executionCorrelationId: 'test-correlation-id-payload',
-          runId: 'test-run-id',
-          workerHandlerId: 'test-handler-id',
-          progressUpdateType: 'WEBHOOK_RESPONSE',
-          runDetails: expect.objectContaining({
-            steps: {},
-            status: 'RUNNING',
-            duration: 1000,
-            tasks: 1,
-          }),
+          bodyAccessKey: 'request:test-run-id',
         })
       );
     });
@@ -132,13 +143,30 @@ describe('Progress Service', () => {
         },
       };
 
+      saveRequestBodyMock.mockResolvedValue('request:test-run-id');
       await progressService.sendUpdate(paramsWithoutHandlerId);
+
+      expect(saveRequestBodyMock).toHaveBeenCalledWith('test-run-id', expect.objectContaining({
+        executionCorrelationId: 'test-correlation-id-null-handler',
+        runId: 'test-run-id',
+        workerHandlerId: null,
+        progressUpdateType: 'WEBHOOK_RESPONSE',
+        runDetails: expect.objectContaining({
+          steps: {},
+          status: 'RUNNING',
+          duration: 1000,
+          tasks: 1,
+        }),
+      }));
 
       expect(mockMakeHttpRequest).toHaveBeenCalledTimes(1);
       const call = mockMakeHttpRequest.mock.calls[0];
       const [_, __, ___, requestBody] = call;
-      
-      expect(requestBody.workerHandlerId).toBe(null);
+
+      expect(requestBody).toEqual({
+          bodyAccessKey: 'request:test-run-id',
+        }
+      );
     });
 
     it('should deduplicate identical requests based on hash', async () => {
@@ -327,10 +355,10 @@ describe('Progress Service', () => {
       // Test the retry delay function
       const call = mockMakeHttpRequest.mock.calls[0];
       const [_, __, ___, ____, options] = call;
-      
+
       expect(options.retryDelay(0)).toBe(200); // 1st retry: 200ms
       expect(options.retryDelay(1)).toBe(400); // 2nd retry: 400ms
       expect(options.retryDelay(2)).toBe(600); // 3rd retry: 600ms
     });
   });
-}); 
+});
