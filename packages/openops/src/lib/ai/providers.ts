@@ -165,7 +165,3 @@ function sanitizeProviderSettings(
 
   return sanitized;
 }
-
-export const providerOptions = {
-  openai: {},
-};
