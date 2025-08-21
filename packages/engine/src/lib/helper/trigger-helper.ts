@@ -125,10 +125,9 @@ export const triggerHelper = {
         await trigger.onEnable(context);
         return {
           listeners: appListeners,
-          scheduleOptions:
-            trigger.type === TriggerStrategy.POLLING
-              ? scheduleOptions
-              : undefined,
+          scheduleOptions: isSchedulable(trigger.type)
+            ? scheduleOptions
+            : undefined,
         };
       case TriggerHookType.RENEW:
         assertEqual(
@@ -246,6 +245,10 @@ export const triggerHelper = {
     }
   },
 };
+
+function isSchedulable(type: TriggerStrategy): boolean {
+  return type === TriggerStrategy.POLLING || type === TriggerStrategy.SCHEDULED;
+}
 
 type ExecuteTriggerParams = {
   params: ExecuteTriggerOperation<TriggerHookType>;
