@@ -37,7 +37,7 @@ export const BlockTriggerSettings = Type.Object({
   packageType: Type.Enum(PackageType),
   triggerName: Type.Optional(
     Type.String({
-      description: 'The name of the trigger will be trigger.',
+      description: 'The name of the trigger should always be "trigger".',
     }),
   ),
   input: Type.Record(Type.String({}), Type.Any(), {
