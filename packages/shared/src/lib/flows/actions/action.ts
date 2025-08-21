@@ -24,7 +24,7 @@ const commonActionProps = {
   }),
   name: Type.String({
     description:
-      'Name of the step (action), used for reference in other step configurations. The name should always be in the format: "step_{autoincrement}", example: "step_1", "step_2", etc.',
+      'Name of the step (action), used for reference in other step configurations.',
   }),
   valid: Type.Boolean({
     description:
@@ -45,7 +45,7 @@ export const InputsSchema = Type.Object(
       'Keys must exactly match the action property keys returned by the action details tool, and values must follow the expected types and constraints. ' +
       'The `input` object may be empty. For optional properties, omit the key if the value is unknown. ' +
       'For required properties, include the key with a `null` value if the value is unknown. ' +
-      'Output values from other steps can be referenced as {{step_1}}, or access inner properties as {{step_1.property}}',
+      'Output values from other steps can be referenced. Example: {{step_1}}, or access inner properties as {{step_1.property}}',
   },
 );
 
