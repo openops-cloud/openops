@@ -17,6 +17,7 @@ import {
   OpsEdition,
   ProjectId,
   RunEnvironment,
+  ScheduleOptions,
   TriggerHookType,
   TriggerType,
 } from '@openops/shared';
@@ -133,43 +134,24 @@ export const enableBlockTrigger = async (
           failureCount: 0,
         };
       }
-      await flowQueue.add({
-        executionCorrelationId: flowVersion.id,
-        type: JobType.REPEATING,
-        data: {
-          schemaVersion: LATEST_JOB_DATA_SCHEMA_VERSION,
-          projectId,
-          environment: RunEnvironment.PRODUCTION,
-          flowVersionId: flowVersion.id,
-          flowId: flowVersion.flowId,
-          triggerType: TriggerType.BLOCK,
-          jobType: RepeatableJobType.EXECUTE_TRIGGER,
-        },
-        scheduleOptions: engineHelperResponse.result.scheduleOptions,
-      });
+
+      const scheduleOptions = engineHelperResponse.result.scheduleOptions;
+
+      await addBlockTriggerToQueue(projectId, flowVersion, scheduleOptions);
+
       break;
     }
     case TriggerStrategy.SCHEDULED: {
-      if (isNil(engineHelperResponse.result.scheduleOptions)) {
+      const scheduleOptions = engineHelperResponse.result.scheduleOptions;
+
+      if (isNil(scheduleOptions)) {
         throw new Error(
           'No schedule options set for trigger of Schedule type.',
         );
       }
 
-      await flowQueue.add({
-        executionCorrelationId: flowVersion.id,
-        type: JobType.REPEATING,
-        data: {
-          schemaVersion: LATEST_JOB_DATA_SCHEMA_VERSION,
-          projectId,
-          environment: RunEnvironment.PRODUCTION,
-          flowVersionId: flowVersion.id,
-          flowId: flowVersion.flowId,
-          triggerType: TriggerType.BLOCK,
-          jobType: RepeatableJobType.EXECUTE_TRIGGER,
-        },
-        scheduleOptions: engineHelperResponse.result.scheduleOptions,
-      });
+      await addBlockTriggerToQueue(projectId, flowVersion, scheduleOptions);
+
       break;
     }
   }
@@ -182,3 +164,24 @@ type EnableParams = {
   flowVersion: FlowVersion;
   simulate: boolean;
 };
+
+async function addBlockTriggerToQueue(
+  projectId: string,
+  flowVersion: FlowVersion,
+  scheduleOptions: ScheduleOptions,
+): Promise<void> {
+  await flowQueue.add({
+    executionCorrelationId: flowVersion.id,
+    type: JobType.REPEATING,
+    data: {
+      schemaVersion: LATEST_JOB_DATA_SCHEMA_VERSION,
+      projectId,
+      environment: RunEnvironment.PRODUCTION,
+      flowVersionId: flowVersion.id,
+      flowId: flowVersion.flowId,
+      triggerType: TriggerType.BLOCK,
+      jobType: RepeatableJobType.EXECUTE_TRIGGER,
+    },
+    scheduleOptions,
+  });
+}
