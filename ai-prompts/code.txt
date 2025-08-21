@@ -65,6 +65,8 @@ if (!data.propertyName) { // ❌ May cause TS2339 errors
 - **NO** file system operations
 - **NO** network requests, meaning we can't use libraries that rely on HTTP requests like `aws-sdk`
 - **NO** environment variables access
+- **NO** comments in the code (do not add inline, block, or documentation comments)
+- **NO** logging statements in the code (do not use console.log, logger, log, or any logging/debugging functions)
 
 ### ✅ ALLOWED:
 - ES6 import statements for npm packages
@@ -152,7 +154,7 @@ Avoid:
 ## Code Quality Requirements
 
 - **Robust**: Handle edge cases and potential null/undefined values
-- **Readable**: Use clear variable names and add comments for complex logic
+- **Readable**: Use clear variable names
 - **Efficient**: Avoid unnecessary operations or loops
 - **Secure**: No eval() or similar dynamic code execution
 
