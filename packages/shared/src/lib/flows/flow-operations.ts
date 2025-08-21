@@ -111,7 +111,8 @@ export type MoveActionRequest = Static<typeof MoveActionRequest>;
 
 export const AddActionRequest = Type.Object({
   parentStep: Type.String({
-    description: 'The name of the parent step in the workflow',
+    description:
+      'The stepName of the parent step in the workflow (example: step_1, trigger)',
   }),
   stepLocationRelativeToParent: Type.Optional(
     Type.Enum(StepLocationRelativeToParent, {
@@ -128,6 +129,17 @@ export const AddActionRequest = Type.Object({
   action: UpdateActionRequest,
 });
 export type AddActionRequest = Static<typeof AddActionRequest>;
+
+export const AddActionRequestWithoutId = Type.Composite([
+  AddActionRequest,
+  Type.Object({
+    action: Type.Omit(UpdateActionRequest, ['id']),
+  }),
+]);
+
+export type AddActionRequestWithoutId = Static<
+  typeof AddActionRequestWithoutId
+>;
 
 export const UpdateFlowStatusRequest = Type.Object({
   status: Type.Enum(FlowStatus),
