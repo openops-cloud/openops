@@ -9,13 +9,13 @@ export const getMcpSystemPrompt = async ({
   isTablesLoaded,
   isOpenOpsMCPEnabled,
   isAwsCostMcpDisabled,
-  flowContext,
+  uiContext,
 }: {
   isAnalyticsLoaded: boolean;
   isTablesLoaded: boolean;
   isOpenOpsMCPEnabled: boolean;
   isAwsCostMcpDisabled: boolean;
-  flowContext?: ChatFlowContext;
+  uiContext?: ChatFlowContext;
 }): Promise<string> => {
   const prompts = [loadPrompt('mcp.txt')];
 
@@ -39,8 +39,8 @@ export const getMcpSystemPrompt = async ({
   let systemPrompt = allPrompts.join('\n\n');
 
   // Add flow context if available
-  if (flowContext) {
-    const contextSection = buildFlowContextSection(flowContext);
+  if (uiContext) {
+    const contextSection = buildFlowContextSection(uiContext);
     if (contextSection) {
       systemPrompt += `\n\n${contextSection}`;
     }

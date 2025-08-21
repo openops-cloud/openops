@@ -77,7 +77,7 @@ export async function getMCPToolsContext({
       isTablesLoaded,
       isOpenOpsMCPEnabled,
       isAwsCostMcpDisabled,
-      flowContext: additionalContext,
+      uiContext: additionalContext,
     });
 
     if (!filteredTools || Object.keys(filteredTools).length === 0) {
