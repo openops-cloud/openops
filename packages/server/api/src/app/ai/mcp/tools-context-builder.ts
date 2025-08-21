@@ -1,4 +1,4 @@
-import { AiConfig } from '@openops/shared';
+import { AiConfig, ChatFlowContext } from '@openops/shared';
 import { LanguageModel, ModelMessage, ToolSet } from 'ai';
 import { FastifyInstance } from 'fastify';
 import { MCPChatContext } from '../chat/ai-chat.service';
@@ -20,6 +20,7 @@ type MCPToolsContextParams = {
   chatContext: MCPChatContext;
   languageModel: LanguageModel;
   frontendTools: AssistantUITools;
+  additionalContext?: ChatFlowContext;
 };
 
 export type MCPToolsContext = {
@@ -37,6 +38,7 @@ export async function getMCPToolsContext({
   chatContext,
   languageModel,
   frontendTools,
+  additionalContext,
 }: MCPToolsContextParams): Promise<MCPToolsContext> {
   if (
     !chatContext.actionName ||
@@ -75,6 +77,7 @@ export async function getMCPToolsContext({
       isTablesLoaded,
       isOpenOpsMCPEnabled,
       isAwsCostMcpDisabled,
+      flowContext: additionalContext,
     });
 
     if (!filteredTools || Object.keys(filteredTools).length === 0) {

@@ -16,6 +16,7 @@ import { aiChatApi } from '../../builder/ai-chat/lib/chat-api';
 import { aiSettingsHooks } from './ai-settings-hooks';
 import { createAdditionalContext } from './enrich-context';
 
+// todo - update assistant-ui package
 const PLACEHOLDER_MESSAGE_INTEROP = 'satisfy-schema';
 
 interface UseAssistantChatProps {
@@ -23,6 +24,7 @@ interface UseAssistantChatProps {
   selectedStep?: string;
   chatId: string | null;
   onChatIdChange: (chatId: string | null) => void;
+  runId?: string;
 }
 
 const buildQueryKey = (
@@ -53,7 +55,7 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
     () => getFrontendToolDefinitions() as ToolSet,
     [],
   );
-  const { flowVersion, selectedStep, chatId, onChatIdChange } = props;
+  const { flowVersion, selectedStep, chatId, onChatIdChange, runId } = props;
 
   const { hasActiveAiSettings, isLoading: isLoadingAiSettings } =
     aiSettingsHooks.useHasActiveAiSettings();
@@ -122,12 +124,14 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
     }
   }, [onChatIdChange, openChatResponse?.chatId]);
 
+  console.log('flowVersion', flowVersion);
+
   const additionalContext = useMemo(
     () =>
       flowVersion
-        ? createAdditionalContext(flowVersion, stepDetails)
+        ? createAdditionalContext(flowVersion, stepDetails, runId)
         : undefined,
-    [flowVersion, stepDetails],
+    [flowVersion, stepDetails, runId],
   );
 
   // workaround for https://github.com/vercel/ai/issues/7819#issuecomment-3172625487

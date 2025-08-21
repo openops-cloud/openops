@@ -2,6 +2,7 @@ import { useTheme } from '@/app/common/providers/theme-provider';
 import { AI_ASSISTANT_LS_KEY } from '@/app/constants/ai';
 import { useAiModelSelector } from '@/app/features/ai/lib/ai-model-selector-hook';
 import { useAssistantChat } from '@/app/features/ai/lib/assistant-ui-chat-hook';
+import { useSafeBuilderStateContext } from '@/app/features/builder/builder-hooks';
 import { AssistantUiChatContainer } from '@openops/components/ui';
 import { SourceCode } from '@openops/shared';
 import { createFrontendTools } from '@openops/ui-kit';
@@ -25,6 +26,12 @@ const AssistantUiChat = ({
     return createFrontendTools();
   }, []);
 
+  const builderContext = useSafeBuilderStateContext((state) => ({
+    flowVersion: state.flowVersion,
+    selectedStep: state.selectedStep,
+    run: state.run,
+  }));
+
   const [chatId, setChatId] = useState<string | null>(
     localStorage.getItem(AI_ASSISTANT_LS_KEY),
   );
@@ -42,6 +49,9 @@ const AssistantUiChat = ({
   const { runtime, isLoading, createNewChat } = useAssistantChat({
     chatId,
     onChatIdChange,
+    flowVersion: builderContext?.flowVersion,
+    selectedStep: builderContext?.selectedStep || undefined,
+    runId: builderContext?.run?.id || undefined,
   });
 
   const { theme } = useTheme();

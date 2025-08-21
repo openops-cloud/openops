@@ -9,11 +9,13 @@ export const getMcpSystemPrompt = async ({
   isTablesLoaded,
   isOpenOpsMCPEnabled,
   isAwsCostMcpDisabled,
+  flowContext,
 }: {
   isAnalyticsLoaded: boolean;
   isTablesLoaded: boolean;
   isOpenOpsMCPEnabled: boolean;
   isAwsCostMcpDisabled: boolean;
+  flowContext?: ChatFlowContext;
 }): Promise<string> => {
   const prompts = [loadPrompt('mcp.txt')];
 
@@ -34,7 +36,17 @@ export const getMcpSystemPrompt = async ({
   }
 
   const allPrompts = await Promise.all(prompts);
-  return allPrompts.join('\n\n');
+  let systemPrompt = allPrompts.join('\n\n');
+
+  // Add flow context if available
+  if (flowContext) {
+    const contextSection = buildFlowContextSection(flowContext);
+    if (contextSection) {
+      systemPrompt += `\n\n${contextSection}`;
+    }
+  }
+
+  return systemPrompt;
 };
 
 export const getBlockSystemPrompt = async (
@@ -89,6 +101,42 @@ export const getBlockSystemPrompt = async (
       return '';
   }
 };
+
+function buildFlowContextSection(flowContext: ChatFlowContext): string | null {
+  const contextParts: string[] = [];
+
+  if (!flowContext.flowId || !flowContext.flowVersionId || !flowContext.runId) {
+    return null;
+  }
+
+  if (flowContext.flowId) {
+    contextParts.push(`flow ${flowContext.flowId}`);
+  }
+
+  if (flowContext.flowVersionId) {
+    contextParts.push(`flowVersion ${flowContext.flowVersionId}`);
+  }
+
+  if (flowContext.runId) {
+    contextParts.push(`run ${flowContext.runId}`);
+  }
+
+  if (flowContext.currentStepId) {
+    contextParts.push(`step id ${flowContext.currentStepId}`);
+  }
+
+  if (flowContext.currentStepName) {
+    contextParts.push(`step name "${flowContext.currentStepName}"`);
+  }
+
+  if (contextParts.length === 0) {
+    return null;
+  }
+
+  return `## Current user context\nThe user is currently looking at ${contextParts.join(
+    ' with ',
+  )}.`;
+}
 
 export async function loadPrompt(filename: string): Promise<string> {
   const promptsLocation = system.get<string>(AppSystemProp.AI_PROMPTS_LOCATION);
