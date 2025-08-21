@@ -125,8 +125,7 @@ export const enableBlockTrigger = async (
       }
       break;
     }
-    case TriggerStrategy.POLLING:
-    case TriggerStrategy.SCHEDULED: {
+    case TriggerStrategy.POLLING: {
       if (isNil(engineHelperResponse.result.scheduleOptions)) {
         engineHelperResponse.result.scheduleOptions = {
           cronExpression: POLLING_FREQUENCY_CRON_EXPRESSON,
@@ -134,6 +133,29 @@ export const enableBlockTrigger = async (
           failureCount: 0,
         };
       }
+      await flowQueue.add({
+        executionCorrelationId: flowVersion.id,
+        type: JobType.REPEATING,
+        data: {
+          schemaVersion: LATEST_JOB_DATA_SCHEMA_VERSION,
+          projectId,
+          environment: RunEnvironment.PRODUCTION,
+          flowVersionId: flowVersion.id,
+          flowId: flowVersion.flowId,
+          triggerType: TriggerType.BLOCK,
+          jobType: RepeatableJobType.EXECUTE_TRIGGER,
+        },
+        scheduleOptions: engineHelperResponse.result.scheduleOptions,
+      });
+      break;
+    }
+    case TriggerStrategy.SCHEDULED: {
+      if (isNil(engineHelperResponse.result.scheduleOptions)) {
+        throw new Error(
+          'No schedule options set for trigger of Schedule type.',
+        );
+      }
+
       await flowQueue.add({
         executionCorrelationId: flowVersion.id,
         type: JobType.REPEATING,
