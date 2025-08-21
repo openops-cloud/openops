@@ -44,7 +44,7 @@ export const InputsSchema = Type.Object(
       'The `input` object is a mapping of property keys to their chosen values (`input: { propertyKey → propertyValue }`). ' +
       'Keys must exactly match the action property keys returned by the action details tool, and values must follow the expected types and constraints. ' +
       'The `input` object may be empty. For optional properties, omit the key if the value is unknown. ' +
-      'For required properties, include the key with a `null` value if the value is unknown.' +
+      'For required properties, include the key with a `null` value if the value is unknown. ' +
       'Output values from other steps can be referenced as {{step_1}}, or access inner properties as {{step_1.property}}',
   },
 );
