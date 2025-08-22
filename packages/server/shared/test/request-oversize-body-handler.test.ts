@@ -1,4 +1,5 @@
 import fastify from 'fastify';
+import { pack, unpack } from 'msgpackr';
 import {
   bodyConverterModule,
   getRequestBody,
@@ -8,8 +9,8 @@ import {
 jest.mock('../src/lib/cache/cache-wrapper', () => {
   return {
     cacheWrapper: {
-      setSerializedObject: jest.fn(),
-      getAndDeleteSerializedObject: jest.fn(),
+      setBuffer: jest.fn(),
+      getBufferAndDelete: jest.fn(),
     },
   };
 });
@@ -18,6 +19,7 @@ jest.mock('../src/lib/logger', () => {
   return {
     logger: {
       error: jest.fn(),
+      debug: jest.fn(),
     },
   };
 });
@@ -31,43 +33,74 @@ describe('request-oversize-body-handler', () => {
   });
 
   describe('saveRequestBody', () => {
-    it('should save body into cache and return the key', async () => {
-      const setSpy = jest
-        .spyOn(cacheWrapper, 'setSerializedObject')
-        .mockResolvedValue();
+    it('should save body into cache and return the key (no compression for small payload)', async () => {
+      const setSpy = jest.spyOn(cacheWrapper, 'setBuffer').mockResolvedValue();
 
-      const key = await saveRequestBody('abc123', { hello: 'world' });
+      const body = { hello: 'world' };
+      const key = await saveRequestBody('abc123', body);
 
-      expect(key).toBe('request:abc123');
-      expect(setSpy).toHaveBeenCalledWith(
-        'request:abc123',
-        { hello: 'world' },
-        300,
-      );
+      expect(key).toBe('req:abc123');
+      expect(setSpy).toHaveBeenCalledTimes(1);
+      const firstCall = setSpy.mock.calls[0];
+      const calledKey = firstCall[0] as string;
+      const calledBuffer = firstCall[1] as Buffer;
+      const ttl = firstCall[2] as number;
+      expect(calledKey).toBe('req:abc123');
+      expect(Buffer.isBuffer(calledBuffer)).toBe(true);
+      expect(unpack(calledBuffer)).toEqual(body);
+      expect(ttl).toBe(300);
+    });
+
+    it('should compress and store with br: prefix when payload is large and compressible', async () => {
+      const setSpy = jest.spyOn(cacheWrapper, 'setBuffer').mockResolvedValue();
+      const bigStr = 'a'.repeat(50_000);
+      const body = { data: bigStr };
+
+      const key = await saveRequestBody('big1', body);
+      expect(key).toBe('req:big1');
+
+      const firstCall2 = setSpy.mock.calls[0];
+      const calledBuffer = firstCall2[1] as Buffer;
+      const prefix = Buffer.from('br:');
+      expect(calledBuffer.subarray(0, prefix.length).equals(prefix)).toBe(true);
     });
   });
 
   describe('getRequestBody', () => {
-    it('should return body from cache when present', async () => {
+    it('should return body from cache when present (raw packed buffer)', async () => {
       const body = { a: 1 };
-      jest
-        .spyOn(cacheWrapper, 'getAndDeleteSerializedObject')
-        .mockResolvedValue(body);
-      const result = await getRequestBody<typeof body>('request:abc');
+      const buf = pack(body);
+      jest.spyOn(cacheWrapper, 'getBufferAndDelete').mockResolvedValue(buf);
+      const result = await getRequestBody<typeof body>('req:abc');
+      expect(result).toEqual(body);
+    });
+
+    it('should return body from cache when present (brotli-compressed buffer)', async () => {
+      const body = { a: 2 };
+      const packed = pack(body);
+      const zlib = await import('node:zlib');
+      const { promisify } = await import('node:util');
+      const brCompress = promisify(zlib.brotliCompress);
+      const compressed = await brCompress(packed, {
+        params: { [zlib.constants.BROTLI_PARAM_QUALITY]: 4 },
+      });
+      const buf = Buffer.concat([Buffer.from('br:'), compressed]);
+      jest.spyOn(cacheWrapper, 'getBufferAndDelete').mockResolvedValue(buf);
+      const result = await getRequestBody<typeof body>('req:def');
       expect(result).toEqual(body);
     });
 
     it('should log error and throw when body not found', async () => {
       jest
-        .spyOn(cacheWrapper, 'getAndDeleteSerializedObject')
+        .spyOn(cacheWrapper, 'getBufferAndDelete')
         .mockResolvedValue(null as never);
 
-      await expect(getRequestBody('request:missing')).rejects.toThrow(
-        'Failed to fetch request body from cache for key request:missing',
+      await expect(getRequestBody('req:missing')).rejects.toThrow(
+        'Failed to fetch request body from cache for key req:missing',
       );
 
       expect(logger.error).toHaveBeenCalledWith(
-        'Failed to fetch request body from cache for key request:missing',
+        'Failed to fetch request body from cache for key req:missing',
       );
     });
   });
@@ -75,9 +108,8 @@ describe('request-oversize-body-handler', () => {
   describe('bodyConverterModule', () => {
     it('should replace request.body when bodyAccessKey is provided', async () => {
       const cached = { foo: 'bar', nested: { x: 1 } };
-      jest
-        .spyOn(cacheWrapper, 'getAndDeleteSerializedObject')
-        .mockResolvedValue(cached);
+      const buf = pack(cached);
+      jest.spyOn(cacheWrapper, 'getBufferAndDelete').mockResolvedValue(buf);
 
       const app = fastify();
       await app.register(bodyConverterModule);
@@ -88,7 +120,7 @@ describe('request-oversize-body-handler', () => {
       const res = await app.inject({
         method: 'POST',
         url: '/echo',
-        payload: { bodyAccessKey: 'request:key-1' },
+        payload: { bodyAccessKey: 'req:key-1' },
       });
 
       expect(res.statusCode).toBe(200);
