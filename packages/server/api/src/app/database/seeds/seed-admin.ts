@@ -66,7 +66,7 @@ async function ensureUserExists(
     return user;
   }
 
-  logger.info(`User does not exist or malformed, creating it`);
+  logger.info(`Admin user does not exist, creating new admin user [${email}]`, email);
   return createAdminUser(email, password);
 }
 
