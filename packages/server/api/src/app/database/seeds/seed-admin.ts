@@ -20,7 +20,8 @@ export const upsertAdminUser = async (): Promise<void> => {
     logger.debug(`Failed to sign in as admin [${email}]`, e);
 
     const user = await ensureUserExists(email, password);
-    const { workspaceId, databaseId } = await ensureOpenOpsTablesWorkspaceAndDatabaseExist(user);
+    const { workspaceId, databaseId } =
+      await ensureOpenOpsTablesWorkspaceAndDatabaseExist(user);
     await ensureOrganizationExists(user, workspaceId);
     await ensureProjectExists(user, databaseId);
   }
@@ -36,31 +37,42 @@ async function signIn(email: string, password: string) {
   logger.info(`Successfully signed in as admin [${email}]`, email);
 }
 
-async function ensureUserExists(email: string, password: string): Promise<User> {
+async function ensureUserExists(
+  email: string,
+  password: string,
+): Promise<User> {
   let user = await userService.getByOrganizationAndEmail({
     organizationId: null,
     email,
   });
 
   if (user) {
-    logger.info(`Admin user already exists [${email}], updating their password`, email);
+    logger.info(
+      `Admin user already exists [${email}], updating their password`,
+      email,
+    );
     await upsertAdminPassword(user, password);
     return user;
   }
 
   user = await userService.getDefaultAdmin();
   if (user) {
-    logger.info(`Default admin user exists but with different email, updating email to [${email}] and their password`, email);
+    logger.info(
+      `Default admin user exists but with different email, updating email to [${email}] and their password`,
+      email,
+    );
     await upsertAdminEmail(user, email);
     await upsertAdminPassword(user, password);
     return user;
   }
 
   logger.info(`User does not exist or malformed, creating it`);
-  return await createAdminUser(email, password);
+  return createAdminUser(email, password);
 }
 
-async function ensureOpenOpsTablesWorkspaceAndDatabaseExist(user: User) : Promise<{ workspaceId: number; databaseId: number }> {
+async function ensureOpenOpsTablesWorkspaceAndDatabaseExist(
+  user: User,
+): Promise<{ workspaceId: number; databaseId: number }> {
   const { token } = await authenticateDefaultUserInOpenOpsTables();
 
   const { workspaceId, databaseId } =
@@ -80,19 +92,25 @@ async function ensureOpenOpsTablesWorkspaceAndDatabaseExist(user: User) : Promis
 
 async function ensureOrganizationExists(user: User, tablesWorkspaceId: number) {
   if (user.organizationId) {
-    const existingOrganization = await organizationService.getOne(user.organizationId);
+    const existingOrganization = await organizationService.getOne(
+      user.organizationId,
+    );
     if (!existingOrganization) {
-      throw new Error('User has organizationId but organization does not exist');
+      throw new Error(
+        'User has organizationId but organization does not exist',
+      );
     }
     if (existingOrganization.tablesWorkspaceId !== tablesWorkspaceId) {
-      throw new Error('User organization exists but with different tablesWorkspaceId');
+      throw new Error(
+        'User organization exists but with different tablesWorkspaceId',
+      );
     }
     return existingOrganization;
   }
   const organization = await organizationService.create({
     ownerId: user.id,
     name: DEFAULT_ORGANIZATION_NAME,
-    tablesWorkspaceId: tablesWorkspaceId,
+    tablesWorkspaceId,
   });
   user.organizationId = organization.id;
   return organization;
@@ -102,12 +120,14 @@ async function ensureProjectExists(user: User, databaseId: number) {
   const project = await projectService.getOneForUser(user);
   if (project) {
     if (project.tablesDatabaseId !== databaseId) {
-      throw new Error('User project exists but with different tablesDatabaseId');
+      throw new Error(
+        'User project exists but with different tablesDatabaseId',
+      );
     }
     return project;
   }
 
-  return await projectService.create({
+  return projectService.create({
     displayName: `${user.firstName}'s Project`,
     ownerId: user.id,
     organizationId: user.organizationId!,
