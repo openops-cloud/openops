@@ -104,10 +104,7 @@ const setBuffer = async (
 
 const getBufferAndDelete = async (key: string): Promise<Buffer | null> => {
   const redis = getRedisClient();
-
-  const result = await redis.getdel(key);
-
-  return result ? Buffer.from(result) : null;
+  return redis.getdelBuffer(key);
 };
 
 const getRedisClient = (): Redis => {
