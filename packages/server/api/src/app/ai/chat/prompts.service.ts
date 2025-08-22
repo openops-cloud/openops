@@ -102,7 +102,9 @@ export const getBlockSystemPrompt = async (
   }
 };
 
-function buildFlowContextSection(flowContext: ChatFlowContext): string | null {
+export const buildFlowContextSection = (
+  flowContext: ChatFlowContext,
+): string | null => {
   const contextParts: string[] = [];
 
   if (!flowContext.flowId && !flowContext.flowVersionId && !flowContext.runId) {
@@ -133,8 +135,11 @@ function buildFlowContextSection(flowContext: ChatFlowContext): string | null {
     return null;
   }
 
-  return `## We are currently looking at ${contextParts.join(' with ')}.`;
-}
+  return (
+    `## Current selected data: \n${contextParts.join(' with ')}. \n\n` +
+    'If the user is asking about anything related to this data, always use it query tools like Get latest flow version by id or run details tool in order to help him.'
+  );
+};
 
 export async function loadPrompt(filename: string): Promise<string> {
   const promptsLocation = system.get<string>(AppSystemProp.AI_PROMPTS_LOCATION);

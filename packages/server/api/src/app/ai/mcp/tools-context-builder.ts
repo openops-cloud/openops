@@ -62,6 +62,7 @@ export async function getMCPToolsContext({
       tools: allTools,
       languageModel,
       aiConfig,
+      uiContext: additionalContext,
     });
 
     const isAwsCostMcpDisabled =
