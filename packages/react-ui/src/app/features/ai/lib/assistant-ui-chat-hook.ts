@@ -7,9 +7,8 @@ import { AssistantRuntime } from '@assistant-ui/react';
 import { useAISDKRuntime } from '@assistant-ui/react-ai-sdk';
 import { toast } from '@openops/components/ui';
 import { flowHelper, OpenChatResponse } from '@openops/shared';
-import { getFrontendToolDefinitions } from '@openops/ui-kit';
 import { useQuery } from '@tanstack/react-query';
-import { DefaultChatTransport, ToolSet, UIMessage } from 'ai';
+import { DefaultChatTransport, UIMessage } from 'ai';
 import { t } from 'i18next';
 import { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
 import { aiChatApi } from '../../builder/ai-chat/lib/chat-api';
@@ -61,11 +60,6 @@ export const useAssistantChat = ({
   chatMode,
 }: UseAssistantChatProps) => {
   const runtimeRef = useRef<AssistantRuntime | null>(null);
-
-  const frontendTools = useMemo(
-    () => getFrontendToolDefinitions() as ToolSet,
-    [],
-  );
 
   const selectedStep = useSafeBuilderStateContext(
     (state) => state.selectedStep,
@@ -224,22 +218,6 @@ export const useAssistantChat = ({
         duration: 10000,
       };
       toast(errorToast);
-    },
-    // https://github.com/assistant-ui/assistant-ui/issues/2327
-    // handle frontend tool calls manually until this is fixed
-    onToolCall: async ({ toolCall }: { toolCall: any }) => {
-      if (toolCall.toolName?.startsWith('ui-')) {
-        try {
-          const tool =
-            frontendTools[toolCall.toolName as keyof typeof frontendTools];
-
-          if (tool && tool.execute) {
-            await tool.execute(toolCall.input || toolCall.args, {} as any);
-          }
-        } catch (error) {
-          console.error('Error executing frontend tool:', error);
-        }
-      }
     },
   });
 
