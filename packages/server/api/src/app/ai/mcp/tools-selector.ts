@@ -3,7 +3,7 @@ import { logger } from '@openops/server-shared';
 import { AiConfig, ChatFlowContext } from '@openops/shared';
 import { generateObject, LanguageModel, ModelMessage, ToolSet } from 'ai';
 import { z } from 'zod';
-import { buildFlowContextSection } from '../chat/prompts.service';
+import { buildUIContextSection } from '../chat/prompts.service';
 
 const MAX_SELECTED_TOOLS = 128;
 
@@ -73,6 +73,6 @@ const getSystemPrompt = (
     .map((t) => `- ${t.name}: ${t.description}`)
     .join('\n');
   return `Given the following conversation history and the list of available tools, select the tools that are most relevant to answer the user's request. Return an array of tool names.\n\n
-  ${uiContext ? `${buildFlowContextSection(uiContext)}\n` : ''}
+  ${uiContext ? `${buildUIContextSection(uiContext)}\n` : ''}
   Tools:\n${toolsMessage}.`;
 };

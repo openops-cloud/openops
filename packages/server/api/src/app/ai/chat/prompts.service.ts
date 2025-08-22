@@ -38,9 +38,8 @@ export const getMcpSystemPrompt = async ({
   const allPrompts = await Promise.all(prompts);
   let systemPrompt = allPrompts.join('\n\n');
 
-  // Add flow context if available
   if (uiContext) {
-    const contextSection = buildFlowContextSection(uiContext);
+    const contextSection = buildUIContextSection(uiContext);
     if (contextSection) {
       systemPrompt += `\n\n${contextSection}`;
     }
@@ -102,7 +101,7 @@ export const getBlockSystemPrompt = async (
   }
 };
 
-export const buildFlowContextSection = (
+export const buildUIContextSection = (
   flowContext: ChatFlowContext,
 ): string | null => {
   const contextParts: string[] = [];

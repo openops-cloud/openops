@@ -20,8 +20,11 @@ jest.mock('@openops/server-shared', () => ({
   },
 }));
 
-import { CODE_BLOCK_NAME } from '@openops/shared';
-import { getBlockSystemPrompt } from '../../../src/app/ai/chat/prompts.service';
+import { CODE_BLOCK_NAME, ChatFlowContext } from '@openops/shared';
+import {
+  buildUIContextSection,
+  getBlockSystemPrompt,
+} from '../../../src/app/ai/chat/prompts.service';
 
 describe('getSystemPrompt', () => {
   beforeEach(() => {
@@ -428,3 +431,214 @@ function mockResponse(body: string, ok = true, statusText = 'OK'): Response {
     bodyUsed: false,
   } as unknown as Response;
 }
+
+describe('buildUIContextSection', () => {
+  const TEST_IDS = {
+    flowId: 'test-flow-123',
+    flowVersionId: 'version-456',
+    runId: 'run-789',
+    currentStepId: 'step-abc',
+    currentStepName: 'Data Processing Step',
+  };
+
+  const EXPECTED_STRINGS = {
+    header: '## Current selected data: \n',
+    footer: '. \n\n',
+    helpText:
+      'If the user is asking about anything related to this data, always use it query tools like Get latest flow version by id or run details tool in order to help him.',
+  };
+
+  const buildExpectedResult = (contextParts: string): string => {
+    return (
+      EXPECTED_STRINGS.header +
+      contextParts +
+      EXPECTED_STRINGS.footer +
+      EXPECTED_STRINGS.helpText
+    );
+  };
+
+  const createBaseContext = (
+    overrides: Partial<ChatFlowContext> = {},
+  ): ChatFlowContext => ({
+    flowId: '',
+    flowVersionId: '',
+    steps: [],
+    ...overrides,
+  });
+
+  describe('returns null when no valid context provided', () => {
+    it.each([
+      ['all required fields are missing', {}],
+      [
+        'all required fields are undefined',
+        {
+          flowId: undefined,
+          flowVersionId: undefined,
+          runId: undefined,
+        },
+      ],
+      [
+        'all required fields are empty strings',
+        {
+          flowId: '',
+          flowVersionId: '',
+          runId: '',
+        },
+      ],
+    ])(
+      'should return null when %s',
+      (_description: string, flowContext: Partial<ChatFlowContext>) => {
+        const result = buildUIContextSection(flowContext as ChatFlowContext);
+        expect(result).toBeNull();
+      },
+    );
+  });
+
+  describe('builds context section with single field', () => {
+    it.each([
+      ['flowId', { flowId: TEST_IDS.flowId }, `flow ${TEST_IDS.flowId}`],
+      [
+        'flowVersionId',
+        { flowVersionId: TEST_IDS.flowVersionId },
+        `flowVersion ${TEST_IDS.flowVersionId}`,
+      ],
+      ['runId', { runId: TEST_IDS.runId }, `run ${TEST_IDS.runId}`],
+    ])(
+      'should build context with only %s',
+      (
+        _fieldName: string,
+        contextOverrides: Partial<ChatFlowContext>,
+        expectedContextPart: string,
+      ) => {
+        const flowContext = createBaseContext(contextOverrides);
+        const result = buildUIContextSection(flowContext);
+        expect(result).toBe(buildExpectedResult(expectedContextPart));
+      },
+    );
+  });
+
+  describe('builds context section with multiple fields', () => {
+    it.each([
+      [
+        'flowId and flowVersionId',
+        { flowId: TEST_IDS.flowId, flowVersionId: TEST_IDS.flowVersionId },
+        `flow ${TEST_IDS.flowId} with flowVersion ${TEST_IDS.flowVersionId}`,
+      ],
+      [
+        'all basic fields',
+        {
+          flowId: TEST_IDS.flowId,
+          flowVersionId: TEST_IDS.flowVersionId,
+          runId: TEST_IDS.runId,
+        },
+        `flow ${TEST_IDS.flowId} with flowVersion ${TEST_IDS.flowVersionId} with run ${TEST_IDS.runId}`,
+      ],
+      [
+        'basic fields with currentStepId',
+        {
+          flowId: TEST_IDS.flowId,
+          flowVersionId: TEST_IDS.flowVersionId,
+          currentStepId: TEST_IDS.currentStepId,
+        },
+        `flow ${TEST_IDS.flowId} with flowVersion ${TEST_IDS.flowVersionId} with step id ${TEST_IDS.currentStepId}`,
+      ],
+      [
+        'basic fields with currentStepName',
+        {
+          flowId: TEST_IDS.flowId,
+          flowVersionId: TEST_IDS.flowVersionId,
+          currentStepName: TEST_IDS.currentStepName,
+        },
+        `flow ${TEST_IDS.flowId} with flowVersion ${TEST_IDS.flowVersionId} with step name "${TEST_IDS.currentStepName}"`,
+      ],
+      [
+        'all fields including step info',
+        {
+          flowId: TEST_IDS.flowId,
+          flowVersionId: TEST_IDS.flowVersionId,
+          runId: TEST_IDS.runId,
+          currentStepId: TEST_IDS.currentStepId,
+          currentStepName: TEST_IDS.currentStepName,
+        },
+        `flow ${TEST_IDS.flowId} with flowVersion ${TEST_IDS.flowVersionId} with run ${TEST_IDS.runId} with step id ${TEST_IDS.currentStepId} with step name "${TEST_IDS.currentStepName}"`,
+      ],
+    ])(
+      'should build context with %s',
+      (
+        _description: string,
+        contextOverrides: Partial<ChatFlowContext>,
+        expectedContextPart: string,
+      ) => {
+        const flowContext = createBaseContext(contextOverrides);
+        const result = buildUIContextSection(flowContext);
+        expect(result).toBe(buildExpectedResult(expectedContextPart));
+      },
+    );
+  });
+
+  describe('handles edge cases', () => {
+    it.each([
+      [
+        'mixed empty and valid context fields',
+        {
+          flowId: TEST_IDS.flowId,
+          flowVersionId: '',
+          runId: TEST_IDS.runId,
+          currentStepId: '',
+          currentStepName: TEST_IDS.currentStepName,
+        },
+        `flow ${TEST_IDS.flowId} with run ${TEST_IDS.runId} with step name "${TEST_IDS.currentStepName}"`,
+      ],
+      [
+        'undefined optional fields gracefully',
+        {
+          flowId: TEST_IDS.flowId,
+          flowVersionId: TEST_IDS.flowVersionId,
+          runId: undefined,
+          currentStepId: undefined,
+          currentStepName: undefined,
+        },
+        `flow ${TEST_IDS.flowId} with flowVersion ${TEST_IDS.flowVersionId}`,
+      ],
+      [
+        'steps array (does not affect context building)',
+        {
+          flowId: TEST_IDS.flowId,
+          flowVersionId: TEST_IDS.flowVersionId,
+          steps: [
+            {
+              id: 'step1',
+              stepName: 'Step One',
+              variables: [{ name: 'var1', value: 'value1' }],
+            },
+            {
+              id: 'step2',
+              stepName: 'Step Two',
+            },
+          ],
+        },
+        `flow ${TEST_IDS.flowId} with flowVersion ${TEST_IDS.flowVersionId}`,
+      ],
+      [
+        'currentStepData field (does not affect context building)',
+        {
+          flowId: TEST_IDS.flowId,
+          flowVersionId: TEST_IDS.flowVersionId,
+          currentStepData: { result: 'some data', status: 'success' },
+        },
+        `flow ${TEST_IDS.flowId} with flowVersion ${TEST_IDS.flowVersionId}`,
+      ],
+    ])(
+      'should handle %s',
+      (
+        _description: string,
+        contextOverrides: Partial<ChatFlowContext>,
+        expectedContextPart: string,
+      ) => {
+        const flowContext = createBaseContext(contextOverrides);
+        const result = buildUIContextSection(flowContext);
+        expect(result).toBe(buildExpectedResult(expectedContextPart));
+      },
+    );
+  });
+});
