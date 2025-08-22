@@ -6,13 +6,14 @@ import { useChat } from '@ai-sdk/react';
 import { AssistantRuntime } from '@assistant-ui/react';
 import { useAISDKRuntime } from '@assistant-ui/react-ai-sdk';
 import { toast } from '@openops/components/ui';
-import { flowHelper, FlowVersion, OpenChatResponse } from '@openops/shared';
+import { flowHelper, OpenChatResponse } from '@openops/shared';
 import { getFrontendToolDefinitions } from '@openops/ui-kit';
 import { useQuery } from '@tanstack/react-query';
 import { DefaultChatTransport, ToolSet, UIMessage } from 'ai';
 import { t } from 'i18next';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
 import { aiChatApi } from '../../builder/ai-chat/lib/chat-api';
+import { BuilderStateContext } from '../../builder/builder-hooks';
 import { aiSettingsHooks } from './ai-settings-hooks';
 import { createAdditionalContext } from './enrich-context';
 
@@ -20,11 +21,8 @@ import { createAdditionalContext } from './enrich-context';
 const PLACEHOLDER_MESSAGE_INTEROP = 'satisfy-schema';
 
 interface UseAssistantChatProps {
-  flowVersion?: FlowVersion;
-  selectedStep?: string;
   chatId: string | null;
   onChatIdChange: (chatId: string | null) => void;
-  runId?: string;
 }
 
 const buildQueryKey = (
@@ -49,28 +47,44 @@ const buildQueryKey = (
   return baseKey;
 };
 
-export const useAssistantChat = (props: UseAssistantChatProps) => {
+export const useAssistantChat = ({
+  chatId,
+  onChatIdChange,
+}: UseAssistantChatProps) => {
   const runtimeRef = useRef<AssistantRuntime | null>(null);
+
   const frontendTools = useMemo(
     () => getFrontendToolDefinitions() as ToolSet,
     [],
   );
-  const { flowVersion, selectedStep, chatId, onChatIdChange, runId } = props;
+
+  const builderStore = useContext(BuilderStateContext);
+
+  // Helper function to get current builder state without causing reactive dependencies
+  const getBuilderState = useCallback(() => {
+    if (!builderStore) return null;
+    const state = builderStore.getState();
+    return {
+      flowVersion: state.flowVersion,
+      selectedStep: state.selectedStep,
+      run: state.run,
+    };
+  }, [builderStore]);
 
   const { hasActiveAiSettings, isLoading: isLoadingAiSettings } =
     aiSettingsHooks.useHasActiveAiSettings();
-
-  const stepDetails =
-    flowVersion && selectedStep
-      ? flowHelper.getStep(flowVersion, selectedStep)
-      : undefined;
 
   const isQueryEnabled = useMemo(() => {
     if (isLoadingAiSettings) {
       return false;
     }
 
-    if (selectedStep) {
+    const context = getBuilderState();
+    if (context?.selectedStep && context?.flowVersion) {
+      const stepDetails = flowHelper.getStep(
+        context.flowVersion,
+        context.selectedStep,
+      );
       return (
         !!getBlockName(stepDetails) &&
         !!getActionName(stepDetails) &&
@@ -79,33 +93,38 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
     }
 
     return hasActiveAiSettings;
-  }, [selectedStep, stepDetails, hasActiveAiSettings, isLoadingAiSettings]);
+  }, [hasActiveAiSettings, isLoadingAiSettings, getBuilderState]);
 
-  const queryKey = useMemo(
-    () =>
-      buildQueryKey(
-        selectedStep,
-        flowVersion?.flowId,
-        chatId,
-        stepDetails?.settings?.blockName,
-      ),
-    [
-      selectedStep,
-      flowVersion?.flowId,
+  const queryKey = useMemo(() => {
+    const context = getBuilderState();
+    const stepDetails =
+      context?.flowVersion && context?.selectedStep
+        ? flowHelper.getStep(context.flowVersion, context.selectedStep)
+        : undefined;
+    return buildQueryKey(
+      context?.selectedStep ?? undefined,
+      context?.flowVersion?.flowId,
       chatId,
       stepDetails?.settings?.blockName,
-    ],
-  );
+    );
+  }, [chatId, getBuilderState]);
+
+  console.log('queryKey', queryKey);
 
   const { data: openChatResponse, isLoading } = useQuery({
     queryKey,
     queryFn: async () => {
       let conversation: OpenChatResponse;
-      if (selectedStep && flowVersion && stepDetails) {
+      const context = getBuilderState();
+      const stepDetails =
+        context?.flowVersion && context?.selectedStep
+          ? flowHelper.getStep(context.flowVersion, context.selectedStep)
+          : undefined;
+      if (context?.selectedStep && context?.flowVersion && stepDetails) {
         conversation = await aiChatApi.open(
-          flowVersion.flowId,
+          context.flowVersion.flowId,
           getBlockName(stepDetails),
-          selectedStep,
+          context.selectedStep,
           getActionName(stepDetails),
         );
       } else {
@@ -124,15 +143,20 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
     }
   }, [onChatIdChange, openChatResponse?.chatId]);
 
-  console.log('flowVersion', flowVersion);
-
-  const additionalContext = useMemo(
-    () =>
-      flowVersion
-        ? createAdditionalContext(flowVersion, stepDetails, runId)
-        : undefined,
-    [flowVersion, stepDetails, runId],
-  );
+  const additionalContext = useMemo(() => {
+    const context = getBuilderState();
+    const stepDetails =
+      context?.flowVersion && context?.selectedStep
+        ? flowHelper.getStep(context.flowVersion, context.selectedStep)
+        : undefined;
+    return context?.flowVersion
+      ? createAdditionalContext(
+          context.flowVersion,
+          stepDetails,
+          context.run?.id,
+        )
+      : undefined;
+  }, [getBuilderState]);
 
   // workaround for https://github.com/vercel/ai/issues/7819#issuecomment-3172625487
   const bodyRef = useRef({
@@ -158,11 +182,29 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
       headers: {
         Authorization: `Bearer ${authenticationSession.getToken()}`,
       },
-      body: () => ({
-        ...bodyRef.current,
-        messages: messagesRef.current,
-        tools: runtimeRef.current?.thread?.getModelContext()?.tools ?? {},
-      }),
+      body: () => {
+        const context = getBuilderState();
+        const stepDetails =
+          context?.flowVersion && context?.selectedStep
+            ? flowHelper.getStep(context.flowVersion, context.selectedStep)
+            : undefined;
+
+        let additionalContext = undefined;
+        if (context?.flowVersion) {
+          additionalContext = createAdditionalContext(
+            context?.flowVersion,
+            stepDetails ?? undefined,
+            context?.run?.id ?? undefined,
+          );
+        }
+
+        return {
+          ...bodyRef.current,
+          messages: messagesRef.current,
+          additionalContext,
+          tools: runtimeRef.current?.thread?.getModelContext()?.tools ?? {},
+        };
+      },
     }),
     onError: (error) => {
       console.error('chat error', error);
@@ -215,7 +257,8 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
       chat.stop();
 
       if (oldChatId) {
-        if (selectedStep && flowVersion) {
+        const context = getBuilderState();
+        if (context?.selectedStep && context?.flowVersion) {
           await aiChatApi.delete(oldChatId);
           chat.setMessages([]);
         } else {
@@ -231,7 +274,7 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
         `There was an error canceling the current run and invalidating queries while creating a new chat: ${error}`,
       );
     }
-  }, [chatId, chat, selectedStep, flowVersion, onChatIdChange]);
+  }, [chatId, chat, onChatIdChange, getBuilderState]);
 
   return {
     runtime,

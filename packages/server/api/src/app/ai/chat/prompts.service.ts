@@ -105,7 +105,7 @@ export const getBlockSystemPrompt = async (
 function buildFlowContextSection(flowContext: ChatFlowContext): string | null {
   const contextParts: string[] = [];
 
-  if (!flowContext.flowId || !flowContext.flowVersionId || !flowContext.runId) {
+  if (!flowContext.flowId && !flowContext.flowVersionId && !flowContext.runId) {
     return null;
   }
 
@@ -133,9 +133,7 @@ function buildFlowContextSection(flowContext: ChatFlowContext): string | null {
     return null;
   }
 
-  return `## Current user context\nThe user is currently looking at ${contextParts.join(
-    ' with ',
-  )}.`;
+  return `## We are currently looking at ${contextParts.join(' with ')}.`;
 }
 
 export async function loadPrompt(filename: string): Promise<string> {

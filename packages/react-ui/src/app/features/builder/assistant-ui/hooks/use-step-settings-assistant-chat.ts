@@ -27,8 +27,6 @@ export const useStepSettingsAssistantChat = (
   );
 
   const assistantChat = useAssistantChat({
-    flowVersion,
-    selectedStep,
     chatId: chatSessionKey,
     onChatIdChange,
   });
@@ -37,6 +35,5 @@ export const useStepSettingsAssistantChat = (
     ...assistantChat,
     onInject,
     flowVersion,
-    selectedStep,
   };
 };
