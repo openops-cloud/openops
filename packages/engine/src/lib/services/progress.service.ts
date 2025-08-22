@@ -5,11 +5,15 @@ import {
   saveRequestBody,
 } from '@openops/server-shared';
 import { openOpsId, UpdateRunProgressRequest } from '@openops/shared';
-import { AxiosHeaders } from 'axios';
+import { AxiosError, AxiosHeaders } from 'axios';
+import { isRetryableError } from 'axios-retry';
 import { debounce, DebouncedFunc } from 'lodash-es';
 import { EngineConstants } from '../handler/context/engine-constants';
 import { FlowExecutorContext } from '../handler/context/flow-execution-context';
-import { throwIfExecutionTimeExceeded } from '../timeout-validator';
+import {
+  EngineTimeoutError,
+  throwIfExecutionTimeExceeded,
+} from '../timeout-validator';
 
 const MAX_RETRIES = 3;
 const PROGRESS_DEBOUNCE_MS = 800;
@@ -56,6 +60,8 @@ export const progressService = {
 const sendUpdateRunRequest = async (
   params: UpdateStepProgressParams,
 ): Promise<void> => {
+  const startTime = performance.now();
+
   const { flowExecutorContext, engineConstants } = params;
   const url = new URL(`${engineConstants.internalApiUrl}v1/engine/update-run`);
 
@@ -75,6 +81,7 @@ const sendUpdateRunRequest = async (
   try {
     const bodyAccessKey = await saveRequestBody(openOpsId(), request);
 
+    throwIfExecutionTimeExceeded();
     await makeHttpRequest(
       'POST',
       url.toString(),
@@ -87,15 +94,28 @@ const sendUpdateRunRequest = async (
       } as BodyAccessKeyRequest,
       {
         retries: MAX_RETRIES,
+        retryCondition: (error: AxiosError) => {
+          throwIfExecutionTimeExceeded();
+          return isRetryableError(error);
+        },
         retryDelay: (retryCount: number) => (retryCount + 1) * 200, // 200ms, 400ms, 600ms
       },
     );
   } catch (error) {
-    logger.error(
-      `Progress update failed after ${MAX_RETRIES} retries for status ${request.runDetails.status} on run ${request.runId}`,
-      { error },
-    );
+    if (!(error instanceof EngineTimeoutError)) {
+      logger.error(
+        `Progress update failed after ${MAX_RETRIES} retries for status ${request.runDetails.status} on run ${request.runId}`,
+        { error },
+      );
+    }
+
+    return;
   }
+
+  const duration = Math.floor(performance.now() - startTime);
+  logger.debug(
+    `Progress update request for ${request.runId} took ${duration}ms`,
+  );
 };
 
 type UpdateStepProgressParams = {
