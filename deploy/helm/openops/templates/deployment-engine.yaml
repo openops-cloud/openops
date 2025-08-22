@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: {{ .Values.engine.name }}
-        image: {{ .Values.image.repository }}/{{ .Values.engine.image }}:{{ .Values.global.version }}
+        image: 535002847982.dkr.ecr.eu-central-1.amazonaws.com/openops/openops-engine:ecea427c
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         command: ["/bin/sh", "-c", "cp -r /var/tmp-base/. /tmp/ && node main.js"]
         env:

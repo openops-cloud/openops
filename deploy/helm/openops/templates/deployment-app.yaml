@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: {{ .Values.app.name }}
-        image: 535002847982.dkr.ecr.eu-central-1.amazonaws.com/openops/openops-app:625763e9
+        image: 535002847982.dkr.ecr.eu-central-1.amazonaws.com/openops/openops-app:ecea427c
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
         - name: NODE_OPTIONS
