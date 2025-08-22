@@ -111,7 +111,8 @@ export type MoveActionRequest = Static<typeof MoveActionRequest>;
 
 export const AddActionRequest = Type.Object({
   parentStep: Type.String({
-    description: 'The name of the parent step in the workflow',
+    description:
+      'The stepName of the parent step in the workflow (example: step_1, trigger)',
   }),
   stepLocationRelativeToParent: Type.Optional(
     Type.Enum(StepLocationRelativeToParent, {
