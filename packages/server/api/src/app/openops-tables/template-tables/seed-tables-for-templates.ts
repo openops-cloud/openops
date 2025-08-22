@@ -4,7 +4,6 @@ import {
 } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { createAggregatedCostsTable } from './create-aggregated-costs-table';
-import { createAutoEc2InstancesShutdownTable } from './create-auto-ec2-instances-shutdown-table';
 import { createAutoInstancesShutdownTable } from './create-auto-instances-shutdown-table';
 import { createBusinessUnitsTable } from './create-business-units-table';
 import { createIdleEbsVolumesToDeleteTable } from './create-idle-ebs-volumes-to-delete-table';
@@ -21,7 +20,6 @@ export const seedTemplateTablesService = {
     const buTable = await createBusinessUnitsTable(databaseId, token);
     await createTagOwnerMappingTable(databaseId, token, buTable.tableId);
     await createIdleEbsVolumesToDeleteTable(databaseId, token);
-    await createAutoEc2InstancesShutdownTable(databaseId, token);
     await createResourceBuTagAssignmentTable(
       databaseId,
       token,

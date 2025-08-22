@@ -216,7 +216,7 @@ const AssistantMessage: FC<{ theme: Theme }> = ({ theme }) => {
     () => ({
       Text: (props: any) => <MarkdownTextWrapper {...props} theme={theme} />,
       tools: {
-        Fallback: ToolFallback,
+        Fallback: (props: any) => <ToolFallback {...props} theme={theme} />,
         by_name: {
           generate_code: (props: any) => (
             <GenerateCodeTool {...props} theme={theme} />

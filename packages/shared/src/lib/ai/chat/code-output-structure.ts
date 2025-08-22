@@ -2,9 +2,9 @@ import { z } from 'zod';
 
 const codeDescription = 'The code to be executed';
 const packageJsonDescription =
-  'The package.json to be executed. If no dependecies required return "{}"';
+  'The package.json to be executed. If no dependencies required return "{}"';
 const textAnswerDescription =
-  'The text answer to the user, if you need to clarify something, or the short description of the code if any code is generated';
+  'Mandatory text to the user. If code is generated, output text with a short code description; otherwise, if clarification is needed, ask the user; otherwise, output text explaining why no code was generated.';
 
 export const codeLLMSchema = z.object({
   code: z.string().describe(codeDescription),

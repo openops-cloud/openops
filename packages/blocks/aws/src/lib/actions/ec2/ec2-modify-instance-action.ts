@@ -56,7 +56,7 @@ export const ec2ModifyInstanceAction = createAction({
                 attributeName,
               }): Promise<{ [key: string]: any }> => {
                 if (!attributeName) {
-                  return {};
+                  return { attributeValue: {} };
                 }
                 const attributeNameProp = attributeName as unknown as string;
 

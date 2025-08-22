@@ -36,7 +36,7 @@ const BuilderJsonEditorWrapper = ({
                   endLineNumber: position.lineNumber,
                   endColumn: position.column,
                 },
-                text: `"{{${propertyPath}}}"`,
+                text: `{{${propertyPath}}}`,
               },
             ]);
           }
