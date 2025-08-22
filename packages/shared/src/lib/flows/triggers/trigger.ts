@@ -11,9 +11,14 @@ export enum TriggerType {
 
 const commonProps = {
   id: Type.String(),
-  name: Type.String({}),
+  name: Type.String({
+    description:
+      'The internal name of the trigger. Should always be the string: "trigger"',
+  }),
   valid: Type.Boolean({}),
-  displayName: Type.String({}),
+  displayName: Type.String({
+    description: 'User friendly name for the trigger',
+  }),
   nextAction: Type.Optional(Type.Any()),
 };
 
@@ -30,8 +35,19 @@ export const BlockTriggerSettings = Type.Object({
   blockVersion: VersionType,
   blockType: Type.Enum(BlockType),
   packageType: Type.Enum(PackageType),
-  triggerName: Type.Optional(Type.String({})),
-  input: Type.Record(Type.String({}), Type.Any()),
+  triggerName: Type.Optional(
+    Type.String({
+      description: 'The name of the trigger should always be "trigger".',
+    }),
+  ),
+  input: Type.Record(Type.String({}), Type.Any(), {
+    description:
+      'All trigger specific properties must be contained within the `input` object, not at the root level. ' +
+      'IMPORTANT: If the trigger is a block, the input must be a record of string keys to any values.' +
+      'For required properties, include the key with a `null` value if the value is unknown.' +
+      'Example: { "timezone": "UTC", "day_of_the_week": 1, "hour_of_the_day": 9 }' +
+      'Example for webhook: { "authType": "none", "authFields": {} }',
+  }),
   inputUiInfo: SampleDataSettingsObject,
 });
 
