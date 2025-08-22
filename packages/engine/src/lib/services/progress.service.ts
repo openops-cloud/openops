@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { makeHttpRequest } from '@openops/common';
 import {
   BodyAccessKeyRequest,
@@ -7,7 +8,7 @@ import {
 import { openOpsId, UpdateRunProgressRequest } from '@openops/shared';
 import { AxiosError, AxiosHeaders } from 'axios';
 import { isRetryableError } from 'axios-retry';
-import { debounce, DebouncedFunc } from 'lodash-es';
+import debounce from 'lodash.debounce';
 import { EngineConstants } from '../handler/context/engine-constants';
 import { FlowExecutorContext } from '../handler/context/flow-execution-context';
 import {
@@ -17,15 +18,9 @@ import {
 
 const MAX_RETRIES = 3;
 const PROGRESS_DEBOUNCE_MS = 800;
+const runDebouncers = new Map<string, any>();
 
-const runDebouncers = new Map<
-  string,
-  DebouncedFunc<(p: UpdateStepProgressParams) => Promise<void>>
->();
-
-function getRunDebouncer(
-  runId: string,
-): DebouncedFunc<(p: UpdateStepProgressParams) => Promise<void>> {
+function getRunDebouncer(runId: string): any {
   let debouncedFunc = runDebouncers.get(runId);
 
   if (!debouncedFunc) {
