@@ -7,6 +7,7 @@ import { SourceCode } from '@openops/shared';
 import { createFrontendTools } from '@openops/ui-kit';
 import { t } from 'i18next';
 import { ReactNode, useCallback, useMemo, useState } from 'react';
+import { ChatMode } from '../lib/types';
 
 type AssistantUiChatProps = {
   onClose: () => void;
@@ -25,12 +26,6 @@ const AssistantUiChat = ({
     return createFrontendTools();
   }, []);
 
-  // const builderContext = useSafeBuilderStateContext((state) => ({
-  //   flowVersion: state.flowVersion,
-  //   selectedStep: state.selectedStep,
-  //   run: state.run,
-  // }));
-
   const [chatId, setChatId] = useState<string | null>(
     localStorage.getItem(AI_ASSISTANT_LS_KEY),
   );
@@ -48,6 +43,7 @@ const AssistantUiChat = ({
   const { runtime, isLoading, createNewChat } = useAssistantChat({
     chatId,
     onChatIdChange,
+    chatMode: ChatMode.Agent,
   });
 
   const { theme } = useTheme();

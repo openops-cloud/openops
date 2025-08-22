@@ -13,9 +13,13 @@ import { DefaultChatTransport, ToolSet, UIMessage } from 'ai';
 import { t } from 'i18next';
 import { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
 import { aiChatApi } from '../../builder/ai-chat/lib/chat-api';
-import { BuilderStateContext } from '../../builder/builder-hooks';
+import {
+  BuilderStateContext,
+  useSafeBuilderStateContext,
+} from '../../builder/builder-hooks';
 import { aiSettingsHooks } from './ai-settings-hooks';
 import { createAdditionalContext } from './enrich-context';
+import { ChatMode } from './types';
 
 // todo - update assistant-ui package
 const PLACEHOLDER_MESSAGE_INTEROP = 'satisfy-schema';
@@ -23,6 +27,7 @@ const PLACEHOLDER_MESSAGE_INTEROP = 'satisfy-schema';
 interface UseAssistantChatProps {
   chatId: string | null;
   onChatIdChange: (chatId: string | null) => void;
+  chatMode: ChatMode;
 }
 
 const buildQueryKey = (
@@ -30,17 +35,20 @@ const buildQueryKey = (
   flowVersionId: string | undefined,
   chatId: string | null,
   blockName: string | undefined,
+  chatMode: ChatMode,
 ) => {
   const baseKey = [
-    selectedStep ? QueryKeys.openChat : QueryKeys.openAiAssistantChat,
-    selectedStep ? flowVersionId : chatId,
+    chatMode === ChatMode.StepSettings
+      ? QueryKeys.openChat
+      : QueryKeys.openAiAssistantChat,
+    chatMode === ChatMode.StepSettings ? flowVersionId : chatId,
   ];
 
-  if (selectedStep && blockName) {
+  if (selectedStep && blockName && chatMode === ChatMode.StepSettings) {
     baseKey.push(blockName);
   }
 
-  if (selectedStep) {
+  if (selectedStep && chatMode === ChatMode.StepSettings) {
     baseKey.push(selectedStep);
   }
 
@@ -50,6 +58,7 @@ const buildQueryKey = (
 export const useAssistantChat = ({
   chatId,
   onChatIdChange,
+  chatMode,
 }: UseAssistantChatProps) => {
   const runtimeRef = useRef<AssistantRuntime | null>(null);
 
@@ -58,9 +67,16 @@ export const useAssistantChat = ({
     [],
   );
 
+  const selectedStep = useSafeBuilderStateContext(
+    (state) => state.selectedStep,
+  );
+  const flowVersionId = useSafeBuilderStateContext(
+    (state) => state.flowVersion?.id,
+  );
+  const runId = useSafeBuilderStateContext((state) => state.run?.id);
+
   const builderStore = useContext(BuilderStateContext);
 
-  // Helper function to get current builder state without causing reactive dependencies
   const getBuilderState = useCallback(() => {
     if (!builderStore) return null;
     const state = builderStore.getState();
@@ -74,17 +90,19 @@ export const useAssistantChat = ({
   const { hasActiveAiSettings, isLoading: isLoadingAiSettings } =
     aiSettingsHooks.useHasActiveAiSettings();
 
+  const stepDetails = useMemo(() => {
+    const context = getBuilderState();
+    return context?.flowVersion && context.selectedStep
+      ? flowHelper.getStep(context.flowVersion, context.selectedStep)
+      : undefined;
+  }, [selectedStep, flowVersionId, getBuilderState]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const isQueryEnabled = useMemo(() => {
     if (isLoadingAiSettings) {
       return false;
     }
 
-    const context = getBuilderState();
-    if (context?.selectedStep && context?.flowVersion) {
-      const stepDetails = flowHelper.getStep(
-        context.flowVersion,
-        context.selectedStep,
-      );
+    if (selectedStep && flowVersionId && stepDetails) {
       return (
         !!getBlockName(stepDetails) &&
         !!getActionName(stepDetails) &&
@@ -93,23 +111,29 @@ export const useAssistantChat = ({
     }
 
     return hasActiveAiSettings;
-  }, [hasActiveAiSettings, isLoadingAiSettings, getBuilderState]);
+  }, [
+    hasActiveAiSettings,
+    isLoadingAiSettings,
+    selectedStep,
+    flowVersionId,
+    stepDetails,
+  ]);
 
   const queryKey = useMemo(() => {
-    const context = getBuilderState();
-    const stepDetails =
-      context?.flowVersion && context?.selectedStep
-        ? flowHelper.getStep(context.flowVersion, context.selectedStep)
-        : undefined;
     return buildQueryKey(
-      context?.selectedStep ?? undefined,
-      context?.flowVersion?.flowId,
+      selectedStep ?? undefined,
+      flowVersionId,
       chatId,
       stepDetails?.settings?.blockName,
+      chatMode,
     );
-  }, [chatId, getBuilderState]);
-
-  console.log('queryKey', queryKey);
+  }, [
+    selectedStep,
+    flowVersionId,
+    chatId,
+    stepDetails?.settings?.blockName,
+    chatMode,
+  ]);
 
   const { data: openChatResponse, isLoading } = useQuery({
     queryKey,
@@ -120,7 +144,12 @@ export const useAssistantChat = ({
         context?.flowVersion && context?.selectedStep
           ? flowHelper.getStep(context.flowVersion, context.selectedStep)
           : undefined;
-      if (context?.selectedStep && context?.flowVersion && stepDetails) {
+      if (
+        context?.selectedStep &&
+        context?.flowVersion &&
+        stepDetails &&
+        chatMode === ChatMode.StepSettings
+      ) {
         conversation = await aiChatApi.open(
           context.flowVersion.flowId,
           getBlockName(stepDetails),
@@ -145,10 +174,6 @@ export const useAssistantChat = ({
 
   const additionalContext = useMemo(() => {
     const context = getBuilderState();
-    const stepDetails =
-      context?.flowVersion && context?.selectedStep
-        ? flowHelper.getStep(context.flowVersion, context.selectedStep)
-        : undefined;
     return context?.flowVersion
       ? createAdditionalContext(
           context.flowVersion,
@@ -156,7 +181,7 @@ export const useAssistantChat = ({
           context.run?.id,
         )
       : undefined;
-  }, [getBuilderState]);
+  }, [flowVersionId, stepDetails, runId, getBuilderState]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // workaround for https://github.com/vercel/ai/issues/7819#issuecomment-3172625487
   const bodyRef = useRef({
@@ -182,29 +207,11 @@ export const useAssistantChat = ({
       headers: {
         Authorization: `Bearer ${authenticationSession.getToken()}`,
       },
-      body: () => {
-        const context = getBuilderState();
-        const stepDetails =
-          context?.flowVersion && context?.selectedStep
-            ? flowHelper.getStep(context.flowVersion, context.selectedStep)
-            : undefined;
-
-        let additionalContext = undefined;
-        if (context?.flowVersion) {
-          additionalContext = createAdditionalContext(
-            context?.flowVersion,
-            stepDetails ?? undefined,
-            context?.run?.id ?? undefined,
-          );
-        }
-
-        return {
-          ...bodyRef.current,
-          messages: messagesRef.current,
-          additionalContext,
-          tools: runtimeRef.current?.thread?.getModelContext()?.tools ?? {},
-        };
-      },
+      body: () => ({
+        ...bodyRef.current,
+        messages: messagesRef.current,
+        tools: runtimeRef.current?.thread?.getModelContext()?.tools ?? {},
+      }),
     }),
     onError: (error) => {
       console.error('chat error', error);
