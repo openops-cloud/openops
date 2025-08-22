@@ -45,11 +45,13 @@ export async function saveRequestBody(
 
   const bodyAccessKey = `req:${requestId}`;
   const packed = pack(requestBody);
+  const packedBuf = Buffer.isBuffer(packed) ? packed : Buffer.from(packed);
 
-  if (packed.length >= COMPRESS_THRESHOLD) {
-    const compressed = await brCompress(packed, BROTLI_OPTS);
+  if (packedBuf.length >= COMPRESS_THRESHOLD) {
+    const compressed = await brCompress(packedBuf, BROTLI_OPTS);
 
-    if (compressed.length < packed.length) {
+
+    if (compressed.length < packedBuf.length) {
       await cacheWrapper.setBuffer(
         bodyAccessKey,
         Buffer.concat([COMPRESS_PREFIX, compressed]),
@@ -62,7 +64,7 @@ export async function saveRequestBody(
     }
   }
 
-  await cacheWrapper.setBuffer(bodyAccessKey, packed, DEFAULT_EXPIRE_TIME);
+  await cacheWrapper.setBuffer(bodyAccessKey, packedBuf, DEFAULT_EXPIRE_TIME);
 
   const duration = Math.floor(performance.now() - startTime);
   logger.debug(`Request body saved in ${duration}ms. No compression used.`);
@@ -84,11 +86,11 @@ export async function getRequestBody<T>(bodyAccessKey: string): Promise<T> {
     return unpack(body) as T;
   }
 
-  const result = unpack(request) as T;
+  const result = unpack(request);
 
   const duration = Math.floor(performance.now() - startTime);
   logger.debug(`Request body retrieved in ${duration}ms`);
-  return result;
+  return result as T;
 }
 
 const bodyConverterModuleBase: FastifyPluginAsync = async (app) => {
