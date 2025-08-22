@@ -170,30 +170,6 @@ export class FlowExecutorContext {
     });
   }
 
-  private createSizeValidationFailureContext(
-    stepName: string,
-    stepOutput: StepOutput,
-    steps: Record<string, StepOutput>,
-    targetMap: Record<string, StepOutput>,
-    errorMessage: string,
-  ): FlowExecutorContext {
-    const failedStepOutput = stepOutput
-      .setStatus(StepOutputStatus.FAILED)
-      .setErrorMessage(errorMessage);
-
-    failedStepOutput.output = undefined;
-    targetMap[stepName] = failedStepOutput;
-
-    return new FlowExecutorContext({
-      ...this,
-      tasks: this.tasks,
-      verdict: ExecutionVerdict.FAILED,
-      verdictResponse: undefined,
-      error: { stepName, message: errorMessage },
-      steps,
-    });
-  }
-
   public getStepOutput(stepName: string): StepOutput | undefined {
     const stateAtPath = getStateAtPath({
       currentPath: this.currentPath,
