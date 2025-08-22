@@ -38,7 +38,7 @@ const StepSettingsAssistantUiChat = ({
 
   const { runtime, createNewChat, onInject } = useStepSettingsAssistantChat(
     flowVersion,
-    // selectedStep,
+    selectedStep,
   );
 
   const onToggleContainerSizeState = useCallback(

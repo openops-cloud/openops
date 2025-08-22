@@ -20,7 +20,6 @@ import { aiSettingsHooks } from './ai-settings-hooks';
 import { createAdditionalContext } from './enrich-context';
 import { ChatMode } from './types';
 
-// todo - update assistant-ui package
 const PLACEHOLDER_MESSAGE_INTEROP = 'satisfy-schema';
 
 interface UseAssistantChatProps {
