@@ -50,7 +50,6 @@ export async function saveRequestBody(
   if (packedBuf.length >= COMPRESS_THRESHOLD) {
     const compressed = await brCompress(packedBuf, BROTLI_OPTS);
 
-
     if (compressed.length < packedBuf.length) {
       await cacheWrapper.setBuffer(
         bodyAccessKey,
