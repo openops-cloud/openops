@@ -2,6 +2,11 @@ import { SeekPage } from '@openops/shared';
 import dayjs from 'dayjs';
 import { CursorResult } from './paginator';
 
+const ARRAY_OPEN_BRACKET = '[';
+const ARRAY_CLOSE_BRACKET = ']';
+const PATH_SEPARATOR = '.';
+const PARSE_INT_RADIX = 10;
+
 export function atob(value: string): string {
   return Buffer.from(value, 'base64').toString();
 }
@@ -54,7 +59,7 @@ export function decodeByType(
     case 'timestamp with time zone':
     case 'datetime':
     case 'date': {
-      const timestamp = parseInt(value, 10);
+      const timestamp = parseInt(value, PARSE_INT_RADIX);
       if (Number.isNaN(timestamp)) {
         throw new Error('date column in cursor should be a valid timestamp');
       }
@@ -79,6 +84,38 @@ export function decodeByType(
       throw new Error(`unknown type in cursor: [${type}]${value}`);
     }
   }
+}
+
+/**
+ * Gets a value from an object using a dot-notation path with array support.
+ * Supports paths like "versions[0].updated" or "nested.property".
+ */
+export function getValueByPath(entity: unknown, path: string): unknown {
+  const pathParts = path.split(PATH_SEPARATOR);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let current: any = entity;
+
+  for (const part of pathParts) {
+    if (
+      part.includes(ARRAY_OPEN_BRACKET) &&
+      part.includes(ARRAY_CLOSE_BRACKET)
+    ) {
+      const [arrayName, indexStr] = part.split(ARRAY_OPEN_BRACKET);
+      const index = parseInt(
+        indexStr.replace(ARRAY_CLOSE_BRACKET, ''),
+        PARSE_INT_RADIX,
+      );
+      current = current?.[arrayName]?.[index];
+    } else {
+      current = current?.[part];
+    }
+
+    if (current === undefined || current === null) {
+      return null;
+    }
+  }
+
+  return current;
 }
 
 const decode = (str: string): string =>

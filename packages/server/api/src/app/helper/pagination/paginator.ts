@@ -6,7 +6,13 @@ import {
   SelectQueryBuilder,
   WhereExpressionBuilder,
 } from 'typeorm';
-import { atob, btoa, decodeByType, encodeByType } from './pagination-utils';
+import {
+  atob,
+  btoa,
+  decodeByType,
+  encodeByType,
+  getValueByPath,
+} from './pagination-utils';
 
 export enum Order {
   ASC = 'ASC',
@@ -26,6 +32,8 @@ export type PagingResult<Entity> = {
 };
 
 const PAGINATION_KEY = 'created';
+const CUSTOM_PAGINATION_KEY = 'custom_pagination';
+const DEFAULT_TIMESTAMP_TYPE = 'timestamp with time zone';
 
 export default class Paginator<Entity extends ObjectLiteral> {
   private afterCursor: string | null = null;
@@ -42,7 +50,23 @@ export default class Paginator<Entity extends ObjectLiteral> {
 
   private order: Order = Order.DESC;
 
+  private paginationColumnPath: string | null = null;
+
+  private paginationColumnName: string | null = null;
+
+  private paginationColumnType: string | null = null;
+
   public constructor(private readonly entity: EntitySchema) {}
+
+  public setPaginationColumn(
+    columnPath: string,
+    columnName: string,
+    columnType = DEFAULT_TIMESTAMP_TYPE,
+  ): void {
+    this.paginationColumnPath = columnPath;
+    this.paginationColumnName = columnName;
+    this.paginationColumnType = columnType;
+  }
 
   public setAlias(alias: string): void {
     this.alias = alias;
@@ -83,11 +107,13 @@ export default class Paginator<Entity extends ObjectLiteral> {
     }
 
     if (this.hasBeforeCursor() || hasMore) {
-      this.nextAfterCursor = this.encode(entities[entities.length - 1]);
+      this.nextAfterCursor = this.encodeByCustomColumn(
+        entities[entities.length - 1],
+      );
     }
 
     if (this.hasAfterCursor() || (hasMore && this.hasBeforeCursor())) {
-      this.nextBeforeCursor = this.encode(entities[0]);
+      this.nextBeforeCursor = this.encodeByCustomColumn(entities[0]);
     }
 
     return this.toPagingResult(entities);
@@ -133,10 +159,17 @@ export default class Paginator<Entity extends ObjectLiteral> {
     const operator = this.getOperator();
     let queryString: string;
 
+    const isCustomColumn =
+      this.paginationColumnName && cursors[CUSTOM_PAGINATION_KEY];
+    const columnName = isCustomColumn
+      ? this.paginationColumnName
+      : `${this.alias}.${PAGINATION_KEY}`;
+    const paramName = isCustomColumn ? CUSTOM_PAGINATION_KEY : PAGINATION_KEY;
+
     if (dbType === DatabaseType.SQLITE3) {
-      queryString = `strftime('%s', ${this.alias}.${PAGINATION_KEY}) ${operator} strftime('%s', :${PAGINATION_KEY})`;
+      queryString = `strftime('%s', ${columnName}) ${operator} strftime('%s', :${paramName})`;
     } else if (dbType === DatabaseType.POSTGRES) {
-      queryString = `DATE_TRUNC('second', ${this.alias}.${PAGINATION_KEY}) ${operator} DATE_TRUNC('second', :${PAGINATION_KEY}::timestamp)`;
+      queryString = `${columnName} ${operator} :${paramName}::timestamp`;
     } else {
       throw new Error('Unsupported database type');
     }
@@ -164,6 +197,11 @@ export default class Paginator<Entity extends ObjectLiteral> {
     }
 
     const orderByCondition: Record<string, Order> = {};
+
+    if (this.paginationColumnName) {
+      orderByCondition[this.paginationColumnName] = order;
+    }
+
     orderByCondition[`${this.alias}.${PAGINATION_KEY}`] = order;
 
     return orderByCondition;
@@ -185,6 +223,27 @@ export default class Paginator<Entity extends ObjectLiteral> {
     return btoa(payload);
   }
 
+  private encodeByCustomColumn(entity: Entity): string {
+    if (!this.paginationColumnPath || !this.paginationColumnName) {
+      return this.encode(entity);
+    }
+
+    const value = getValueByPath(entity, this.paginationColumnPath);
+    if (!value) {
+      throw new Error(
+        `Pagination column not found at path: ${this.paginationColumnPath}`,
+      );
+    }
+
+    const encodedValue = encodeByType(
+      this.paginationColumnType || DEFAULT_TIMESTAMP_TYPE,
+      value,
+    );
+    const payload = `${CUSTOM_PAGINATION_KEY}:${encodedValue}`;
+
+    return btoa(payload);
+  }
+
   private decode(cursor: string): CursorParam {
     const cursors: CursorParam = {};
     const columns = atob(cursor).split(',');
@@ -199,6 +258,10 @@ export default class Paginator<Entity extends ObjectLiteral> {
   }
 
   private getEntityPropertyType(key: string): string {
+    if (key === CUSTOM_PAGINATION_KEY) {
+      return this.paginationColumnType || DEFAULT_TIMESTAMP_TYPE;
+    }
+
     const col = this.entity.options.columns[key];
     if (col === undefined) {
       throw new Error('entity property not found ' + key);
