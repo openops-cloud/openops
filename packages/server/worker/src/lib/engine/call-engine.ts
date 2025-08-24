@@ -1,12 +1,15 @@
 import { requestContext } from '@fastify/request-context';
 import {
   AppSystemProp,
+  BodyAccessKeyRequest,
   cacheWrapper,
   getContext,
   getEngineTimeout,
+  getRequestBody,
   hashUtils,
   logger,
   memoryLock,
+  saveRequestBody,
   SharedSystemProp,
   system,
 } from '@openops/server-shared';
@@ -77,21 +80,25 @@ export async function callEngineLambda<Result extends EngineHelperResult>(
       timeoutSeconds: timeout,
     });
 
+    const bodyAccessKey = await saveRequestBody(requestId, {
+      operationType: operation,
+      engineInput: input,
+      deadlineTimestamp,
+      requestId,
+    });
     const requestResponse = await axios.post(
       `${ENGINE_URL}`,
       {
-        ...requestInput,
-        deadlineTimestamp,
-      },
+        bodyAccessKey,
+      } as BodyAccessKeyRequest,
       {
-        headers: {
-          requestId,
-        },
         timeout: timeout * 1000,
       },
     );
 
-    const responseData = requestResponse.data.body || requestResponse.data;
+    const response = (requestResponse.data.body ||
+      requestResponse.data) as BodyAccessKeyRequest;
+    const responseData = await getRequestBody(response.bodyAccessKey);
 
     logger.debug('Engine response received.', { response: responseData });
 

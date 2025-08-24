@@ -1,5 +1,10 @@
 import { makeHttpRequest } from '@openops/common';
-import { hashUtils, logger } from '@openops/server-shared';
+import {
+  BodyAccessKeyRequest,
+  hashUtils,
+  logger,
+  saveRequestBody,
+} from '@openops/server-shared';
 import { UpdateRunProgressRequest } from '@openops/shared';
 import { Mutex } from 'async-mutex';
 import { AxiosHeaders } from 'axios';
@@ -53,6 +58,8 @@ const sendUpdateRunRequest = async (
   lastRequestHash = requestHash;
 
   try {
+    const resourceKey = await saveRequestBody(request.runId, request);
+
     await makeHttpRequest(
       'POST',
       url.toString(),
@@ -60,7 +67,9 @@ const sendUpdateRunRequest = async (
         'Content-Type': 'application/json',
         Authorization: `Bearer ${engineConstants.engineToken}`,
       }),
-      request,
+      {
+        bodyAccessKey: resourceKey,
+      } as BodyAccessKeyRequest,
       {
         retries: MAX_RETRIES,
         retryDelay: (retryCount: number) => {
