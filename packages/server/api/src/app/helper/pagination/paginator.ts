@@ -169,7 +169,11 @@ export default class Paginator<Entity extends ObjectLiteral> {
     if (dbType === DatabaseType.SQLITE3) {
       queryString = `strftime('%s', ${columnName}) ${operator} strftime('%s', :${paramName})`;
     } else if (dbType === DatabaseType.POSTGRES) {
-      queryString = `DATE_TRUNC('second', ${columnName}) ${operator} DATE_TRUNC('second', :${paramName}::timestamp)`;
+      if (this.hasBeforeCursor() && !this.hasAfterCursor()) {
+        queryString = `${columnName} ${operator} (:${paramName}::timestamp + INTERVAL '1 millisecond')`;
+      } else {
+        queryString = `${columnName} ${operator} :${paramName}::timestamp`;
+      }
     } else {
       throw new Error('Unsupported database type');
     }
