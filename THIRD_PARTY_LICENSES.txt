@@ -23929,6 +23929,7 @@ The following npm packages may be included in this product:
  - @bull-board/api@5.9.1
  - @bull-board/fastify@5.9.1
  - @bull-board/ui@5.9.1
+ - @esbuild/linux-x64@0.21.5
  - @frontegg/js@7.79.0
  - @frontegg/redux-store@7.79.0
  - @frontegg/rest-api@7.79.0
