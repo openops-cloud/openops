@@ -163,8 +163,7 @@ export const flowService = {
             .limit(1)
             .getQuery() +
           ')',
-      )
-      .addOrderBy('fv.updated', 'DESC');
+      );
 
     if (name) {
       query = query.andWhere('fv.displayName ILIKE :namePattern', {
