@@ -98,7 +98,6 @@ type FlowTemplateFilterSidebarProps = {
   setSelectedServices: (services: string[]) => void;
   selectedCategories: string[];
   setSelectedCategories: (categories: string[]) => void;
-  showDomains?: boolean;
 };
 
 const FlowTemplateFilterSidebarWrapper = ({
@@ -111,7 +110,7 @@ const FlowTemplateFilterSidebarWrapper = ({
   setSelectedCategories,
   setSelectedBlocks,
   showDomains = true,
-}: FlowTemplateFilterSidebarProps) => {
+}: FlowTemplateFilterSidebarProps & { showDomains?: boolean }) => {
   const useCloudTemplates = flagsHooks.useShouldFetchCloudTemplates();
 
   const {
