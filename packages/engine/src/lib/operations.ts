@@ -1,8 +1,5 @@
+import { appendToContext, logger } from '@openops/server-shared';
 import {
-  appendToContext,
-  compressAndEncrypt,
-  logger,
-} from '@openops/server-shared';
   Action,
   ActionType,
   EngineOperation,
