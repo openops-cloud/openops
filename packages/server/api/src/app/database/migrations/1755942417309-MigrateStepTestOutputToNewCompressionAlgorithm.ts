@@ -7,11 +7,13 @@ import {
 import { FileCompression } from '@openops/shared';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class MigrateStepTestOutputToNewAlgorithm1755942417309
+export class MigrateStepTestOutputToNewCompressionAlgorithm1755942417309
   implements MigrationInterface
 {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    logger.info('MigrateStepTestOutputToNewAlgorithm1755942417309: starting');
+    logger.info(
+      'MigrateStepTestOutputToNewCompressionAlgorithm1755942417309: starting',
+    );
 
     const stepTestOutput = await queryRunner.query(
       'SELECT "id", "input", "output" FROM "flow_step_test_output"',
@@ -39,7 +41,9 @@ export class MigrateStepTestOutputToNewAlgorithm1755942417309
         ALTER COLUMN "output" SET DEFAULT '{}'::jsonb
     `);
 
-    logger.info('MigrateStepTestOutputToNewAlgorithm1755942417309: completed');
+    logger.info(
+      'MigrateStepTestOutputToNewCompressionAlgorithm1755942417309: completed',
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
