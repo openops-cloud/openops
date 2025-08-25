@@ -103,13 +103,14 @@ const FlowTemplateFilterSidebar = ({
   selectedDomains,
   selectedServices,
   selectedCategories,
+  showDomains = true,
   onDomainFilterClick,
   onServiceFilterClick,
   onBlockFilterClick,
   onCategoryFilterClick,
   clearFilters,
   categoryLogos,
-}: FlowTemplateFilterSidebarProps) => {
+}: FlowTemplateFilterSidebarProps & { showDomains?: boolean }) => {
   return (
     <div className="rounded-2xl flex-col justify-start items-start inline-flex h-full w-full px-4 pt-[25px] pb-8 bg-background">
       <ScrollArea className="h-full w-full flex-1">
@@ -169,20 +170,23 @@ const FlowTemplateFilterSidebar = ({
             </Collapsible>
           ))}
         </div>
-
-        <FlowTemplateFilterHeader title={t('FinOps capabilities')} />
-        <div className="flex flex-col w-full">
-          {domains.map((domain) => (
-            <FlowTemplateFilterItem
-              key={domain}
-              value={domain}
-              displayName={domain}
-              onClick={onDomainFilterClick}
-              isActive={selectedDomains.includes(domain)}
-              Icon={DOMAIN_ICON_SUGGESTIONS[domain] ?? Layers}
-            />
-          ))}
-        </div>
+        {showDomains && (
+          <>
+            <FlowTemplateFilterHeader title={t('FinOps capabilities')} />
+            <div className="flex flex-col w-full">
+              {domains.map((domain) => (
+                <FlowTemplateFilterItem
+                  key={domain}
+                  value={domain}
+                  displayName={domain}
+                  onClick={onDomainFilterClick}
+                  isActive={selectedDomains.includes(domain)}
+                  Icon={DOMAIN_ICON_SUGGESTIONS[domain] ?? Layers}
+                />
+              ))}
+            </div>
+          </>
+        )}
 
         {blocks && blocks.length > 0 && (
           <>

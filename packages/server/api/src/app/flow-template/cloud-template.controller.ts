@@ -84,6 +84,7 @@ export const cloudTemplateController: FastifyPluginAsyncTypebox = async (
           cloudTemplates: true,
           isSample: true,
           version: request.query.version,
+          categories: request.query.categories,
         });
       }
 
