@@ -36,29 +36,22 @@ const FlowTemplateList = ({
     <div
       className={cn(
         'h-full flex-1 flex flex-col gap-[14px] pl-7 pt-[34px] pr-[15px]',
-        {
-          'px-[48px]': !isFullCatalog,
-        },
       )}
     >
       <div className="flex items-center justify-between">
         <DialogTitle className="text-[32px] font-bold text-primary-300 dark:text-primary">
           {t('Templates catalog')}
         </DialogTitle>
-        {isFullCatalog && (
-          <SearchInput
-            placeholder={t('Search for template')}
-            value={searchText}
-            onChange={onSearchInputChange}
-            className="max-w-[327px] mr-8"
-          />
-        )}
+        <SearchInput
+          placeholder={t('Search for template')}
+          value={searchText}
+          onChange={onSearchInputChange}
+          className="max-w-[327px] mr-8"
+        />
       </div>
-      {isFullCatalog && (
-        <DialogDescription className="text-2xl font-medium text-primary-300 dark:text-primary">
-          {selectionHeading || t('All templates')}
-        </DialogDescription>
-      )}
+      <DialogDescription className="text-2xl font-medium text-primary-300 dark:text-primary">
+        {selectionHeading || t('All templates')}
+      </DialogDescription>
 
       {isLoading ? (
         <div className="flex-1 flex justify-center items-center w-full">
@@ -83,7 +76,10 @@ const FlowTemplateList = ({
               })}
               {!isFullCatalog && (
                 <div className="w-full mb-6">
-                  <ExploreTemplates onExploreMoreClick={onExploreMoreClick} />
+                  <ExploreTemplates
+                    onExploreMoreClick={onExploreMoreClick}
+                    className="max-w-full"
+                  />
                 </div>
               )}
             </div>

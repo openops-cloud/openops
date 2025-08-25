@@ -336,23 +336,20 @@ const SelectFlowTemplateDialogContent = ({
 
   return (
     <>
-      {isFullCatalog && (
-        <>
-          <div className="w-[255px]">
-            <FlowTemplateFilterSidebarWrapper
-              selectedBlocks={selectedBlocks}
-              selectedDomains={selectedDomains}
-              selectedServices={selectedServices}
-              setSelectedBlocks={setSelectedBlocks}
-              setSelectedDomains={setSelectedDomains}
-              setSelectedServices={setSelectedServices}
-              selectedCategories={selectedCategories}
-              setSelectedCategories={setSelectedCategories}
-            />
-          </div>
-          <VerticalDivider className="h-full" />
-        </>
-      )}
+      <div className="w-[255px]">
+        <FlowTemplateFilterSidebarWrapper
+          selectedBlocks={selectedBlocks}
+          selectedDomains={selectedDomains}
+          selectedServices={selectedServices}
+          setSelectedBlocks={setSelectedBlocks}
+          setSelectedDomains={setSelectedDomains}
+          setSelectedServices={setSelectedServices}
+          selectedCategories={selectedCategories}
+          setSelectedCategories={setSelectedCategories}
+        />
+      </div>
+      <VerticalDivider className="h-full" />
+
       <div className="flex-1 overflow-hidden">
         {selectedTemplateMetadata ? (
           <TemplateDetails
@@ -440,17 +437,20 @@ const SelectFlowTemplateDialog = ({
     TEMPLATE_FILTER_DEBOUNCE_DELAY,
   );
 
-  const { templatesWithIntegrations, isLoading: isTemplateListLoading } =
-    templatesHooks.useTemplatesMetadataWithIntegrations({
-      enabled: isOpen,
-      search: debouncedSearchText,
-      blocks: selectedBlocks,
-      domains: selectedDomains,
-      services: selectedServices,
-      categories: selectedCategories,
-      useCloudTemplates,
-      gettingStartedTemplateFilter: 'exclude',
-    });
+  const {
+    templatesWithIntegrations,
+    isLoading: isTemplateListLoading,
+    refetch: refetchTemplatesWithIntegrations,
+  } = templatesHooks.useTemplatesMetadataWithIntegrations({
+    enabled: isOpen,
+    search: debouncedSearchText,
+    blocks: selectedBlocks,
+    domains: selectedDomains,
+    services: selectedServices,
+    categories: selectedCategories,
+    useCloudTemplates,
+    gettingStartedTemplateFilter: 'exclude',
+  });
 
   const { mutate: getSelectedTemplate } = useMutation({
     mutationFn: async ({
@@ -538,16 +538,16 @@ const SelectFlowTemplateDialog = ({
 
   const { isConnectedToCloudTemplates } = useCloudProfile();
 
+  useEffect(() => {
+    refetchTemplatesWithIntegrations();
+  }, [isConnectedToCloudTemplates, refetchTemplatesWithIntegrations]);
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent
         className={cn(
           'flex flex-col p-0 transition-none max-w-[1360px] max-2xl:max-w-[1010px]',
           {
-            'max-w-[1157px] max-2xl:max-w-[1157px]':
-              useCloudTemplates &&
-              !isConnectedToCloudTemplates &&
-              !isConnectionsPickerOpen,
             'max-w-[846px] max-h-[70vh] overflow-y-auto':
               isConnectionsPickerOpen,
             'h-[90vh]': !isConnectionsPickerOpen,
