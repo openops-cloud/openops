@@ -167,7 +167,7 @@ export default class Paginator<Entity extends ObjectLiteral> {
     const paramName = isCustomColumn ? CUSTOM_PAGINATION_KEY : PAGINATION_KEY;
 
     if (dbType === DatabaseType.SQLITE3) {
-      queryString = `strftime('%s', ${columnName}) ${operator} strftime('%s', :${paramName})`;
+      queryString = `${columnName} ${operator} :${paramName}`;
     } else if (dbType === DatabaseType.POSTGRES) {
       if (this.hasBeforeCursor() && !this.hasAfterCursor()) {
         queryString = `${columnName} ${operator} (:${paramName}::timestamp + INTERVAL '1 millisecond')`;

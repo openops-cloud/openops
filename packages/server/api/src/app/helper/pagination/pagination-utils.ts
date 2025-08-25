@@ -63,7 +63,7 @@ export function decodeByType(
       if (Number.isNaN(timestamp)) {
         throw new Error('date column in cursor should be a valid timestamp');
       }
-      return new Date(timestamp).toISOString();
+      return new Date(timestamp);
     }
 
     case 'number': {
