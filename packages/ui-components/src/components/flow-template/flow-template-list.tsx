@@ -75,7 +75,7 @@ const FlowTemplateList = ({
                 );
               })}
               {!isFullCatalog && (
-                <div className="w-full mb-6">
+                <div className="w-full mb-6 mr-8">
                   <ExploreTemplates
                     onExploreMoreClick={onExploreMoreClick}
                     className="max-w-full"
