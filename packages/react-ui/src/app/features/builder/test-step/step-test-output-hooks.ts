@@ -17,6 +17,7 @@ export const stepTestOutputHooks = {
         const stepTestOutput = await flowsApi.getStepTestOutput(
           flowVersionId,
           stepId,
+          { signal },
         );
 
         if (!signal?.aborted) {
