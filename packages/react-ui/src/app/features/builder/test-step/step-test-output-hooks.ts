@@ -13,13 +13,16 @@ export const stepTestOutputHooks = {
   useStepTestOutput(flowVersionId: string, stepId: string) {
     return useQuery({
       queryKey: [QueryKeys.stepTestOutput, flowVersionId, stepId],
-      queryFn: async () => {
+      queryFn: async ({ signal }) => {
         const stepTestOutput = await flowsApi.getStepTestOutput(
           flowVersionId,
           stepId,
+          { signal },
         );
 
-        stepTestOutputCache.setStepData(stepId, stepTestOutput);
+        if (!signal?.aborted) {
+          stepTestOutputCache.setStepData(stepId, stepTestOutput);
+        }
 
         return stepTestOutput;
       },

@@ -31,10 +31,12 @@ describe('StepTestOutputCache', () => {
     cache.setStepData('step1', {
       output: { foo: 'bar' },
       lastTestDate: '2024-01-01T00:00:00Z',
+      success: true,
     });
     expect(cache.getStepData('step1')).toEqual({
       output: { foo: 'bar' },
       lastTestDate: '2024-01-01T00:00:00Z',
+      success: true,
     });
   });
 
@@ -42,6 +44,7 @@ describe('StepTestOutputCache', () => {
     cache.setStepData('step1', {
       output: { foo: 'bar' },
       lastTestDate: '2024-01-01T00:00:00Z',
+      success: true,
     });
     cache.setExpanded('step1', true);
     cache.clearStep('step1');
@@ -70,6 +73,7 @@ describe('StepTestOutputCache', () => {
     cache.setStepData('step1', {
       output: { foo: 'bar' },
       lastTestDate: '2024-01-01T00:00:00Z',
+      success: true,
     });
     cache.setExpanded('node1', true);
     cache.clearAll();
@@ -93,33 +97,42 @@ describe('setStepOutputCache', () => {
     jest.clearAllMocks();
   });
 
-  it('should set data in both cache and query client', () => {
+  it('should set data in both cache and query client', async () => {
     const stepId = 'test-step-id';
     const flowVersionId = 'test-flow-version-id';
     const output = { result: 'success' };
     const input = { param: 'value' };
 
-    setStepOutputCache({
+    queryClient.cancelQueries = jest.fn().mockResolvedValue(undefined);
+
+    await setStepOutputCache({
       stepId,
       flowVersionId,
       output,
       input,
       queryClient,
+      success: true,
     });
 
     expect(stepTestOutputCache.getStepData(stepId)).toEqual({
       output: output,
       lastTestDate: '2024-01-01T00:00:00Z',
+      success: true,
     });
 
     expect(formatUtils.formatStepInputOrOutput).toHaveBeenCalledWith(output);
     expect(formatUtils.formatStepInputOrOutput).toHaveBeenCalledWith(input);
+
+    expect(queryClient.cancelQueries).toHaveBeenCalledWith({
+      queryKey: [QueryKeys.stepTestOutput, flowVersionId, stepId],
+    });
 
     expect(queryClient.setQueryData).toHaveBeenCalledWith(
       [QueryKeys.stepTestOutput, flowVersionId, stepId],
       {
         output: output,
         lastTestDate: '2024-01-01T00:00:00Z',
+        success: true,
         input: input,
       },
     );

@@ -79,7 +79,7 @@ export const stepTestOutputCache = new StepTestOutputCache();
 /**
  * Utility to set step test output in both the cache and react-query client.
  */
-export function setStepOutputCache({
+export async function setStepOutputCache({
   stepId,
   flowVersionId,
   output,
@@ -99,8 +99,12 @@ export function setStepOutputCache({
     lastTestDate: dayjs().toISOString(),
     success,
   };
+
   stepTestOutputCache.setStepData(stepId, stepTestOutput);
-  queryClient.setQueryData([QueryKeys.stepTestOutput, flowVersionId, stepId], {
+
+  const queryKey = [QueryKeys.stepTestOutput, flowVersionId, stepId];
+  await queryClient.cancelQueries({ queryKey });
+  queryClient.setQueryData(queryKey, {
     ...stepTestOutput,
     input: formatUtils.formatStepInputOrOutput(input),
   });
