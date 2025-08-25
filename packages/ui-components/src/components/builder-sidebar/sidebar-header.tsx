@@ -17,7 +17,10 @@ const SidebarHeader = ({
 }: SidebarHeaderProps) => {
   return (
     <div
-      className={cn('flex p-4 w-full justify-between items-center', className)}
+      className={cn(
+        'flex pl-8 pt-8 pb-4 w-full justify-between items-center',
+        className,
+      )}
     >
       <div className="font-semibold flex-grow text-base">{children}</div>
       <Button

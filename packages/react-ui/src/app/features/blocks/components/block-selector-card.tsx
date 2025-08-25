@@ -22,26 +22,26 @@ const BlockCardInfo: React.FC<BlockCardInfoProps> = ({
   <div
     onClick={onClick}
     className={cn(
-      'flex items-center justify-center gap-4 rounded border border-solid p-3.5',
+      'flex items-center justify-center gap-3 rounded border border-solid px-4 py-2',
       {
         'cursor-pointer hover:bg-accent hover:text-accent-foreground':
           interactive,
       },
     )}
   >
-    <div className="flex h-full min-w-[48px] items-center justify-center">
+    <div className="flex h-full min-w-[24px] items-center justify-center">
       <BlockIcon
         logoUrl={stepMetadata.logoUrl}
         displayName={stepMetadata.displayName}
         showTooltip
         border={false}
-        size={'xl'}
+        size={'sm'}
       ></BlockIcon>
     </div>
 
-    <div className="flex h-full grow flex-col justify-center gap-1 text-start">
-      <div className="text-base flex">{stepTemplateMetadata.displayName}</div>
-      <div className="overflow-hidden text-ellipsis text-sm text-muted-foreground">
+    <div className="flex h-full grow flex-col justify-center text-start">
+      <div className="text-sm flex">{stepTemplateMetadata.displayName}</div>
+      <div className="overflow-hidden text-ellipsis text-xs text-muted-foreground">
         {stepTemplateMetadata.description}
       </div>
     </div>
