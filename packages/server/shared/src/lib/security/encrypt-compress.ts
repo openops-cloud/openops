@@ -1,31 +1,35 @@
 import { FileCompression } from '@openops/shared';
 import { fileCompressor } from '../file-compressor';
-import { encryptUtils } from './encryption';
+import { EncryptedObject, encryptUtils } from './encryption';
 
 /**
- * Encrypt and compress an object
+ * Compress and encrypt an object
  * @param obj object to encrypt and compress
  */
-export async function encryptAndCompress(obj: unknown): Promise<Buffer> {
-  const encryptObject = encryptUtils.encryptObject(obj);
-  const binaryObject = Buffer.from(JSON.stringify(encryptObject));
-
-  return fileCompressor.compress({
-    data: binaryObject,
-    compression: FileCompression.GZIP,
+export async function compressAndEncrypt(
+  obj: unknown,
+): Promise<EncryptedObject> {
+  const compressed = await fileCompressor.compress({
+    data: Buffer.from(JSON.stringify(obj)),
+    compression: FileCompression.PACK_BROTLI,
   });
+
+  return encryptUtils.encryptBuffer(compressed);
 }
 
 /**
  * Restores the buffer to its original format
- * @param buffer compressed and encrypted buffer
+ * @param obj compressed and encrypted object
  */
-export async function decompressAndDecrypt(buffer: Buffer): Promise<unknown> {
-  const decompressed = await fileCompressor.decompress({
-    data: buffer,
-    compression: FileCompression.GZIP,
+export async function decryptAndDecompress(
+  obj: EncryptedObject,
+): Promise<unknown> {
+  const compressedBuffer = encryptUtils.decryptBuffer(obj);
+
+  const originalBuffer = await fileCompressor.decompress({
+    data: compressedBuffer,
+    compression: FileCompression.PACK_BROTLI,
   });
 
-  const parsedEncryptedObject = JSON.parse(decompressed.toString());
-  return encryptUtils.decryptObject(parsedEncryptedObject);
+  return JSON.parse(originalBuffer.toString());
 }

@@ -1,8 +1,9 @@
 import { logger, safeStringifyAndTruncate } from '@openops/server-shared';
 import {
   ChatFlowContext,
-  encodeStepOutputs,
+  EncryptedStepOutput,
   flowHelper,
+  groupStepOutputsById,
   OpenOpsId,
   PopulatedFlow,
   StepContext,
@@ -16,7 +17,7 @@ import { flowStepTestOutputService } from '../../../app/flows/step-test-output/f
 type FlowData = {
   flow: PopulatedFlow;
   engineToken: string;
-  stepTestOutputs: Record<OpenOpsId, string>;
+  stepTestOutputs: Record<OpenOpsId, EncryptedStepOutput>;
 };
 
 export enum IncludeOptions {
@@ -153,7 +154,7 @@ async function getEngineToken(projectId: string): Promise<string> {
 async function getStepTestOutputs(
   flowVersionId: string,
   flow: PopulatedFlow,
-): Promise<Record<OpenOpsId, string>> {
+): Promise<Record<OpenOpsId, EncryptedStepOutput>> {
   try {
     const stepIds = flowHelper.getAllStepIds(flow.version.trigger);
     const outputs = await flowStepTestOutputService.listEncrypted({
@@ -161,7 +162,7 @@ async function getStepTestOutputs(
       stepIds,
     });
 
-    return encodeStepOutputs(outputs);
+    return groupStepOutputsById(outputs);
   } catch (error) {
     logger.error('Failed to get step test outputs', { error });
     throw error;

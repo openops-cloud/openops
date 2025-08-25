@@ -2,6 +2,11 @@ import { Static, Type } from '@sinclair/typebox';
 import { BaseModelSchema } from '../common';
 import { OpenOpsId } from '../common/id-generator';
 
+export type EncryptedStepOutput = {
+  iv: string;
+  data: string;
+};
+
 export const FlowStepTestOutput = Type.Object({
   ...BaseModelSchema,
   stepId: Type.String(),
@@ -20,17 +25,13 @@ export type StepOutputWithData = {
   success: boolean | null;
 };
 
-export function encodeStepOutputs(
+export function groupStepOutputsById(
   stepTestOutputs: FlowStepTestOutput[],
-): Record<OpenOpsId, string> {
+): Record<OpenOpsId, EncryptedStepOutput> {
   return Object.fromEntries(
     stepTestOutputs.map((testOutput) => [
       testOutput.stepId as OpenOpsId,
-      (testOutput.output as Buffer).toString('base64'),
+      testOutput.output as EncryptedStepOutput,
     ]),
   );
-}
-
-export function decodeStepOutput(output: string): Buffer {
-  return Buffer.from(output, 'base64');
 }

@@ -8,6 +8,7 @@ import {
   ResumePayload,
 } from '../flow-run/execution/execution-output';
 import { FlowRunId, RunEnvironment } from '../flow-run/flow-run';
+import { EncryptedStepOutput } from '../flows/flow-step-test-output';
 import { FlowVersion } from '../flows/flow-version';
 import { ProjectId } from '../project/project';
 import { ProgressUpdateType } from './types';
@@ -56,7 +57,7 @@ export type ResolveVariableOperation = BaseEngineOperation & {
   variableExpression: string;
   flowVersion: FlowVersion;
   stepName: string;
-  stepTestOutputs?: Record<OpenOpsId, string>;
+  stepTestOutputs?: Record<OpenOpsId, EncryptedStepOutput>;
 };
 
 export type ExecuteExtractBlockMetadata = BlockPackage;
@@ -64,7 +65,7 @@ export type ExecuteExtractBlockMetadata = BlockPackage;
 export type ExecuteStepOperation = BaseEngineOperation & {
   stepName: string;
   flowVersion: FlowVersion;
-  stepTestOutputs?: Record<OpenOpsId, string>;
+  stepTestOutputs?: Record<OpenOpsId, EncryptedStepOutput>;
 };
 
 export type ExecutePropsOptions = BaseEngineOperation & {
@@ -74,7 +75,7 @@ export type ExecutePropsOptions = BaseEngineOperation & {
   flowVersion: FlowVersion;
   input: Record<string, unknown>;
   searchValue?: string;
-  stepTestOutputs?: Record<OpenOpsId, string>;
+  stepTestOutputs?: Record<OpenOpsId, EncryptedStepOutput>;
 };
 
 type BaseExecuteFlowOperation<T extends ExecutionType> = BaseEngineOperation & {

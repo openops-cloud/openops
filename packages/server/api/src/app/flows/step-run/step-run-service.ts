@@ -2,10 +2,10 @@ import {
   Action,
   ActionType,
   ApplicationError,
-  encodeStepOutputs,
   ErrorCode,
   flowHelper,
   FlowVersionId,
+  groupStepOutputsById,
   isNil,
   ProjectId,
   StepRunResponse,
@@ -45,10 +45,10 @@ export const stepRunService = {
 
     const outputs = await flowStepTestOutputService.listEncrypted({
       flowVersionId: flowVersion.id,
-      stepIds,
+      stepIds: stepIds.filter((item) => item !== step.id),
     });
 
-    const stepTestOutputs = encodeStepOutputs(outputs);
+    const stepTestOutputs = groupStepOutputsById(outputs);
 
     const engineToken = await accessTokenManager.generateEngineToken({
       projectId,
