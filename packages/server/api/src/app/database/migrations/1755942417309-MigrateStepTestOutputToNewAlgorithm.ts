@@ -60,7 +60,7 @@ async function updateRecords(
     const originalInput = await decompressAndDecrypt(record.input);
 
     const outputBuffer = record.output as Buffer;
-    let originalOutput: unknown = undefined;
+    let originalOutput: unknown = Buffer.alloc(0);
     if (outputBuffer.length !== 0) {
       originalOutput = await decompressAndDecrypt(outputBuffer);
     }
