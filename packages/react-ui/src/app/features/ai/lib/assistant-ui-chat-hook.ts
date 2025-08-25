@@ -1,4 +1,3 @@
-import { QueryKeys } from '@/app/constants/query-keys';
 import { aiAssistantChatApi } from '@/app/features/ai/lib/ai-assistant-chat-api';
 import { getActionName, getBlockName } from '@/app/features/blocks/lib/utils';
 import { authenticationSession } from '@/app/lib/authentication-session';
@@ -18,6 +17,7 @@ import {
   useSafeBuilderStateContext,
 } from '../../builder/builder-hooks';
 import { aiSettingsHooks } from './ai-settings-hooks';
+import { buildQueryKey } from './chat-utils';
 import { createAdditionalContext } from './enrich-context';
 import { ChatMode } from './types';
 
@@ -28,31 +28,6 @@ interface UseAssistantChatProps {
   onChatIdChange: (chatId: string | null) => void;
   chatMode: ChatMode;
 }
-
-const buildQueryKey = (
-  selectedStep: string | undefined,
-  flowVersionId: string | undefined,
-  chatId: string | null,
-  blockName: string | undefined,
-  chatMode: ChatMode,
-) => {
-  const baseKey = [
-    chatMode === ChatMode.StepSettings
-      ? QueryKeys.openChat
-      : QueryKeys.openAiAssistantChat,
-    chatMode === ChatMode.StepSettings ? flowVersionId : chatId,
-  ];
-
-  if (selectedStep && blockName && chatMode === ChatMode.StepSettings) {
-    baseKey.push(blockName);
-  }
-
-  if (selectedStep && chatMode === ChatMode.StepSettings) {
-    baseKey.push(selectedStep);
-  }
-
-  return baseKey;
-};
 
 export const useAssistantChat = ({
   chatId,
@@ -72,6 +47,10 @@ export const useAssistantChat = ({
     (state) => state.flowVersion?.id,
   );
   const runId = useSafeBuilderStateContext((state) => state.run?.id);
+
+  const showSettingsAIChat = useSafeBuilderStateContext(
+    (state) => state?.midpanelState?.showAiChat ?? false,
+  );
 
   const builderStore = useContext(BuilderStateContext);
 
@@ -93,14 +72,24 @@ export const useAssistantChat = ({
     return context?.flowVersion && context.selectedStep
       ? flowHelper.getStep(context.flowVersion, context.selectedStep)
       : undefined;
-  }, [selectedStep, flowVersionId, getBuilderState]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [getBuilderState, selectedStep, getBuilderState()?.flowVersion]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const isQueryEnabled = useMemo(() => {
     if (isLoadingAiSettings) {
       return false;
     }
 
-    if (selectedStep && flowVersionId && stepDetails) {
+    if (chatMode === ChatMode.Agent) {
+      return hasActiveAiSettings;
+    }
+
+    if (
+      selectedStep &&
+      flowVersionId &&
+      stepDetails &&
+      showSettingsAIChat &&
+      chatMode === ChatMode.StepSettings
+    ) {
       return (
         !!getBlockName(stepDetails) &&
         !!getActionName(stepDetails) &&
@@ -108,13 +97,16 @@ export const useAssistantChat = ({
       );
     }
 
-    return hasActiveAiSettings;
+    return false;
   }, [
     hasActiveAiSettings,
     isLoadingAiSettings,
     selectedStep,
     flowVersionId,
     stepDetails,
+    chatMode,
+    showSettingsAIChat,
+    getBuilderState()?.flowVersion, // eslint-disable-line react-hooks/exhaustive-deps
   ]);
 
   const queryKey = useMemo(() => {
@@ -131,6 +123,7 @@ export const useAssistantChat = ({
     chatId,
     stepDetails?.settings?.blockName,
     chatMode,
+    getBuilderState()?.flowVersion, // eslint-disable-line react-hooks/exhaustive-deps
   ]);
 
   const { data: openChatResponse, isLoading } = useQuery({
@@ -138,27 +131,21 @@ export const useAssistantChat = ({
     queryFn: async () => {
       let conversation: OpenChatResponse;
       const context = getBuilderState();
-      const stepDetails =
-        context?.flowVersion && context?.selectedStep
-          ? flowHelper.getStep(context.flowVersion, context.selectedStep)
-          : undefined;
-      if (
-        context?.selectedStep &&
-        context?.flowVersion &&
-        stepDetails &&
-        chatMode === ChatMode.StepSettings
-      ) {
-        conversation = await aiChatApi.open(
-          context.flowVersion.flowId,
-          getBlockName(stepDetails),
-          context.selectedStep,
-          getActionName(stepDetails),
-        );
-      } else {
-        conversation = await aiAssistantChatApi.open(chatId);
+
+      if (chatMode === ChatMode.StepSettings) {
+        if (context?.selectedStep && context?.flowVersion && stepDetails) {
+          return await aiChatApi.open(
+            context.flowVersion.flowId,
+            getBlockName(stepDetails),
+            context.selectedStep,
+            getActionName(stepDetails),
+          );
+        }
+      } else if (chatMode === ChatMode.Agent && chatId) {
+        return await aiAssistantChatApi.open(chatId);
       }
 
-      return conversation;
+      return null;
     },
     enabled: isQueryEnabled,
     refetchOnWindowFocus: false,
