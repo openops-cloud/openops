@@ -22,17 +22,20 @@ export class MigrateStepTestOutputToNewAlgorithm1755942417309
     await queryRunner.query(`
       ALTER TABLE "flow_step_test_output"
         ALTER COLUMN "input" DROP DEFAULT,
+        ALTER COLUMN "output" DROP DEFAULT,
+
         ALTER COLUMN "input" TYPE jsonb
           USING CASE
                   WHEN "input" = ''::bytea THEN '{}'::jsonb
                   ELSE convert_from("input",'UTF8')::jsonb
                 END,
-        ALTER COLUMN "input" SET DEFAULT '{}'::jsonb,
         ALTER COLUMN "output" TYPE jsonb
           USING CASE
                   WHEN "output" = ''::bytea THEN '{}'::jsonb
                   ELSE convert_from("output",'UTF8')::jsonb
                 END,
+
+        ALTER COLUMN "input"  SET DEFAULT '{}'::jsonb,
         ALTER COLUMN "output" SET DEFAULT '{}'::jsonb
     `);
 
@@ -55,7 +58,12 @@ async function updateRecords(
     }
 
     const originalInput = await decompressAndDecrypt(record.input);
-    const originalOutput = await decompressAndDecrypt(record.output);
+
+    const outputBuffer = record.output as Buffer;
+    let originalOutput: unknown = undefined;
+    if (outputBuffer.length !== 0) {
+      originalOutput = await decompressAndDecrypt(outputBuffer);
+    }
 
     const newInputFormat = await compressAndEncrypt(originalInput);
     const newOutputFormat = await compressAndEncrypt(originalOutput);

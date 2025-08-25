@@ -114,7 +114,6 @@ async function getStepOutput(
   }
 
   if (stepId && stepTestOutputs?.[stepId]) {
-    // const decodedTestOutput = decodeStepOutput(stepTestOutputs?.[stepId]);
     return decryptAndDecompress(stepTestOutputs[stepId] as EncryptedStepOutput);
   }
 
