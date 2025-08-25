@@ -43,18 +43,18 @@ const TestStepContainer = React.memo(
     return (
       <Tabs
         defaultValue={TabListEnum.STEP_OUTPUT}
-        className="h-full px-4 pt-1 pb-2 flex flex-col items-start justify-start"
+        className="w-full flex flex-col items-start justify-start gap-4 pb-6"
       >
-        <TabsList className="w-fit flex items-start gap-0 mb-5 bg-transparent border-none rounded-none">
+        <TabsList className="grid grid-cols-2 bg-transparent border-none rounded-none w-full">
           <TabsTrigger
             value={TabListEnum.STEP_OUTPUT}
-            className="font-normal data-[state=active]:font-bold text-primary-300 text-base pl-0 pr-2 dark:text-white rounded-none  border-b-2 data-[state=active]:bg-background data-[state=active]:text-primary-300 data-[state=active]:dark:text-white data-[state=active]:shadow-none data-[state=active]:border-blueAccent-300"
+            className="justify-start text-left font-normal data-[state=active]:font-bold text-primary-300 text-base pl-0 pr-2 dark:text-white rounded-none  border-b-2 data-[state=active]:bg-background data-[state=active]:text-primary-300 data-[state=active]:dark:text-white data-[state=active]:shadow-none data-[state=active]:border-blueAccent-300"
           >
             {t('Step output')}
           </TabsTrigger>
           <TabsTrigger
             value={TabListEnum.SAMPLE_STEP_OUTPUT}
-            className="font-normal data-[state=active]:font-bold text-primary-300 text-base pr-0 pl-2 dark:text-white rounded-none border-b-2 data-[state=active]:bg-background data-[state=active]:text-primary-300 data-[state=active]:dark:text-white data-[state=active]:shadow-none data-[state=active]:border-blueAccent-300 gap-1"
+            className="justify-start text-left font-normal data-[state=active]:font-bold text-primary-300 text-base pr-0 pl-2 dark:text-white rounded-none border-b-2 data-[state=active]:bg-background data-[state=active]:text-primary-300 data-[state=active]:dark:text-white data-[state=active]:shadow-none data-[state=active]:border-blueAccent-300 gap-1"
           >
             {t('Sample output data')}
             <Tooltip>
@@ -93,7 +93,7 @@ const TestStepContainer = React.memo(
         </TabsContent>
         <TabsContent
           value={TabListEnum.SAMPLE_STEP_OUTPUT}
-          className="w-full h-full overflow-hidden"
+          className="w-full overflow-hidden"
         >
           <div className="h-full flex">
             <TestStepDataViewer
