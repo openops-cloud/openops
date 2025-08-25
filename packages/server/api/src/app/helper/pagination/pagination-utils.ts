@@ -110,7 +110,7 @@ export function getValueByPath(entity: unknown, path: string): unknown {
       current = current?.[part];
     }
 
-    if (current === undefined || current === null) {
+    if (!current) {
       return null;
     }
   }
