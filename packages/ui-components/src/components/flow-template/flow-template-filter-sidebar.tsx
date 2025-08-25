@@ -87,7 +87,6 @@ type FlowTemplateFilterSidebarProps = {
   selectedDomains: string[];
   selectedServices: string[];
   selectedCategories: string[];
-  showDomains?: boolean;
   onBlockFilterClick: (block: string) => void;
   onDomainFilterClick: (domain: string) => void;
   onServiceFilterClick: (service: string) => void;
