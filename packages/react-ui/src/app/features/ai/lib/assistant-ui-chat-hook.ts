@@ -5,7 +5,7 @@ import { useChat } from '@ai-sdk/react';
 import { AssistantRuntime } from '@assistant-ui/react';
 import { useAISDKRuntime } from '@assistant-ui/react-ai-sdk';
 import { toast } from '@openops/components/ui';
-import { flowHelper, OpenChatResponse } from '@openops/shared';
+import { flowHelper } from '@openops/shared';
 import { getFrontendToolDefinitions } from '@openops/ui-kit';
 import { useQuery } from '@tanstack/react-query';
 import { DefaultChatTransport, ToolSet, UIMessage } from 'ai';
@@ -129,7 +129,6 @@ export const useAssistantChat = ({
   const { data: openChatResponse, isLoading } = useQuery({
     queryKey,
     queryFn: async () => {
-      let conversation: OpenChatResponse;
       const context = getBuilderState();
 
       if (chatMode === ChatMode.StepSettings) {
@@ -141,7 +140,7 @@ export const useAssistantChat = ({
             getActionName(stepDetails),
           );
         }
-      } else if (chatMode === ChatMode.Agent && chatId) {
+      } else if (chatMode === ChatMode.Agent) {
         return await aiAssistantChatApi.open(chatId);
       }
 
