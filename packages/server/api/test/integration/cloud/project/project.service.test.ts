@@ -50,4 +50,93 @@ describe('Project Service', () => {
       expect(savedProject.organizationId).toBe(mockOrganization.id);
     });
   });
+
+  describe('getProjectIdsByOrganizationId', () => {
+    it('should return project IDs for a given organization', async () => {
+      const { mockOrganization, mockOwner } = createMockOrganizationWithOwner({
+        organization: {
+          id: openOpsId(),
+          name: 'Test Org',
+        },
+      });
+      await databaseConnection().getRepository('user').save(mockOwner);
+      await databaseConnection()
+        .getRepository('organization')
+        .save(mockOrganization);
+
+      const mockProject1 = createMockProject({
+        ownerId: mockOwner.id,
+        organizationId: mockOrganization.id,
+      });
+      const mockProject2 = createMockProject({
+        ownerId: mockOwner.id,
+        organizationId: mockOrganization.id,
+      });
+
+      await projectService.create({
+        ...mockProject1,
+        tablesDatabaseId: 123,
+      });
+      await projectService.create({
+        ...mockProject2,
+        tablesDatabaseId: 124,
+      });
+
+      const projectIds = await projectService.getProjectIdsByOrganizationId(
+        mockOrganization.id,
+      );
+
+      expect(projectIds).toHaveLength(2);
+      expect(projectIds).toContain(mockProject1.id);
+      expect(projectIds).toContain(mockProject2.id);
+    });
+
+    it('should return empty array when organization has no projects', async () => {
+      const { mockOrganization, mockOwner } = createMockOrganizationWithOwner({
+        organization: {
+          id: openOpsId(),
+          name: 'Empty Org',
+        },
+      });
+      await databaseConnection().getRepository('user').save(mockOwner);
+      await databaseConnection()
+        .getRepository('organization')
+        .save(mockOrganization);
+
+      const projectIds = await projectService.getProjectIdsByOrganizationId(
+        mockOrganization.id,
+      );
+
+      expect(projectIds).toHaveLength(0);
+      expect(projectIds).toEqual([]);
+    });
+
+    it('should not return deleted projects', async () => {
+      const { mockOrganization, mockOwner } = createMockOrganizationWithOwner({
+        organization: {
+          id: openOpsId(),
+          name: 'Test Org',
+        },
+      });
+      await databaseConnection().getRepository('user').save(mockOwner);
+      await databaseConnection()
+        .getRepository('organization')
+        .save(mockOrganization);
+
+      const mockProject = createMockProject({
+        ownerId: mockOwner.id,
+        organizationId: mockOrganization.id,
+        deleted: new Date().toISOString(),
+      });
+
+      await databaseConnection().getRepository('project').save(mockProject);
+
+      const projectIds = await projectService.getProjectIdsByOrganizationId(
+        mockOrganization.id,
+      );
+
+      expect(projectIds).toHaveLength(0);
+      expect(projectIds).not.toContain(mockProject.id);
+    });
+  });
 });
