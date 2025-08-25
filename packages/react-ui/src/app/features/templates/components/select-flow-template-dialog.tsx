@@ -437,20 +437,20 @@ const SelectFlowTemplateDialog = ({
     TEMPLATE_FILTER_DEBOUNCE_DELAY,
   );
 
-  const {
-    templatesWithIntegrations,
-    isLoading: isTemplateListLoading,
-    refetch: refetchTemplatesWithIntegrations,
-  } = templatesHooks.useTemplatesMetadataWithIntegrations({
-    enabled: isOpen,
-    search: debouncedSearchText,
-    blocks: selectedBlocks,
-    domains: selectedDomains,
-    services: selectedServices,
-    categories: selectedCategories,
-    useCloudTemplates,
-    gettingStartedTemplateFilter: 'exclude',
-  });
+  const { isConnectedToCloudTemplates } = useCloudProfile();
+
+  const { templatesWithIntegrations, isLoading: isTemplateListLoading } =
+    templatesHooks.useTemplatesMetadataWithIntegrations({
+      enabled: isOpen,
+      search: debouncedSearchText,
+      blocks: selectedBlocks,
+      domains: selectedDomains,
+      services: selectedServices,
+      categories: selectedCategories,
+      useCloudTemplates,
+      gettingStartedTemplateFilter: 'exclude',
+      isConnectedToCloudTemplates,
+    });
 
   const { mutate: getSelectedTemplate } = useMutation({
     mutationFn: async ({
@@ -535,12 +535,6 @@ const SelectFlowTemplateDialog = ({
       useCloudTemplates,
     });
   };
-
-  const { isConnectedToCloudTemplates } = useCloudProfile();
-
-  useEffect(() => {
-    refetchTemplatesWithIntegrations();
-  }, [isConnectedToCloudTemplates, refetchTemplatesWithIntegrations]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>

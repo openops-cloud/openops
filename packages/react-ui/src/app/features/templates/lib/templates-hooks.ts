@@ -34,6 +34,7 @@ type GettingStartedTemplateFilter = 'only' | 'include' | 'exclude';
 
 type TemplateBaseParams = TemplateStrategyParams & {
   gettingStartedTemplateFilter: GettingStartedTemplateFilter;
+  isConnectedToCloudTemplates?: boolean;
 };
 
 type UseTemplatesParams = GetTemplatesParams & TemplateBaseParams;
@@ -77,6 +78,7 @@ export const templatesHooks = {
     blocks = [],
     tags = [],
     gettingStartedTemplateFilter: gettingStarted = 'include',
+    isConnectedToCloudTemplates = false,
   }: UseTemplatesParams) => {
     const version = flagsHooks.useFlag<string>(FlagId.CURRENT_VERSION).data;
     const templatesApiToUse = useCloudTemplates
@@ -93,6 +95,7 @@ export const templatesHooks = {
         ...blocks,
         ...tags,
         gettingStarted,
+        isConnectedToCloudTemplates,
       ],
       retry: (failureCount, error) => {
         const axiosError = error as AxiosError;
@@ -201,6 +204,7 @@ export const templatesHooks = {
     blocks = [],
     tags = [],
     gettingStartedTemplateFilter,
+    isConnectedToCloudTemplates = false,
   }: UseTemplatesParams & {
     gettingStartedTemplateFilter: GettingStartedTemplateFilter;
   }) => {
@@ -218,6 +222,7 @@ export const templatesHooks = {
       blocks,
       tags,
       gettingStartedTemplateFilter,
+      isConnectedToCloudTemplates,
     });
     const { blocksLookup, isLoading: isBlocksLoading } =
       templatesHooks.useBlocksLookup();
