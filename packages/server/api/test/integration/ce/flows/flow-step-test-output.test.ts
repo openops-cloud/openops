@@ -73,7 +73,12 @@ describe('Flow Step Test output', () => {
       .getRepository('flow_step_test_output')
       .findOneByOrFail({ id: savedData.id });
 
-    expect(Buffer.isBuffer(savedRaw.output)).toBe(true);
+    expect(savedRaw.output).toEqual(
+      expect.objectContaining({
+        iv: expect.any(String),
+        data: expect.any(String),
+      }),
+    );
   });
 
   it('Should list step test outputs for given step IDs', async () => {

@@ -1,32 +1,16 @@
+import { FileCompression } from '@openops/shared';
 import { Static, Type } from '@sinclair/typebox';
 import { Value } from '@sinclair/typebox/value';
 import { FastifyPluginAsync } from 'fastify';
 import fp from 'fastify-plugin';
-import { pack, unpack } from 'msgpackr';
-import { promisify } from 'node:util';
-import { brotliCompress, brotliDecompress, constants as zc } from 'node:zlib';
 import { cacheWrapper } from './cache/cache-wrapper';
+import { fileCompressor } from './file-compressor';
 import { logger } from './logger';
 
-const brCompress = promisify(brotliCompress);
-const brDecompress = promisify(brotliDecompress);
-
 const DEFAULT_EXPIRE_TIME = 300;
-const COMPRESS_THRESHOLD = 8 * 1024; // 8 KiB
-const COMPRESS_PREFIX = Buffer.from('br:');
-
-const BROTLI_OPTS = {
-  params: {
-    [zc.BROTLI_PARAM_QUALITY]: 4, // Compression level from 0…11
-  },
-};
 
 const isBodyAccessKeyRequest = (body: unknown): body is BodyAccessKeyRequest =>
   Value.Check(BodyAccessKeyRequest, body);
-
-const isBrPrefixed = (buf: Buffer) =>
-  buf.length >= COMPRESS_PREFIX.length &&
-  buf.subarray(0, COMPRESS_PREFIX.length).equals(COMPRESS_PREFIX);
 
 export const BodyAccessKeyRequest = Type.Object(
   {
@@ -44,29 +28,20 @@ export async function saveRequestBody(
   const startTime = performance.now();
 
   const bodyAccessKey = `req:${requestId}`;
-  const packed = pack(requestBody);
-  const packedBuf = Buffer.isBuffer(packed) ? packed : Buffer.from(packed);
 
-  if (packedBuf.length >= COMPRESS_THRESHOLD) {
-    const compressed = await brCompress(packedBuf, BROTLI_OPTS);
+  const compressedBuffer = await fileCompressor.compress({
+    data: Buffer.from(JSON.stringify(requestBody)),
+    compression: FileCompression.PACK_BROTLI,
+  });
 
-    if (compressed.length < packedBuf.length) {
-      await cacheWrapper.setBuffer(
-        bodyAccessKey,
-        Buffer.concat([COMPRESS_PREFIX, compressed]),
-        DEFAULT_EXPIRE_TIME,
-      );
-
-      const duration = Math.floor(performance.now() - startTime);
-      logger.debug(`Request body saved in ${duration}ms. Compression used.`);
-      return bodyAccessKey;
-    }
-  }
-
-  await cacheWrapper.setBuffer(bodyAccessKey, packedBuf, DEFAULT_EXPIRE_TIME);
+  await cacheWrapper.setBuffer(
+    bodyAccessKey,
+    compressedBuffer,
+    DEFAULT_EXPIRE_TIME,
+  );
 
   const duration = Math.floor(performance.now() - startTime);
-  logger.debug(`Request body saved in ${duration}ms. No compression used.`);
+  logger.debug(`Request body saved in ${duration}ms.`);
   return bodyAccessKey;
 }
 
@@ -80,16 +55,15 @@ export async function getRequestBody<T>(bodyAccessKey: string): Promise<T> {
     throw new Error(message);
   }
 
-  if (isBrPrefixed(request)) {
-    const body = await brDecompress(request.subarray(COMPRESS_PREFIX.length));
-    return unpack(body) as T;
-  }
-
-  const result = unpack(request);
+  const decompressBuffer = await fileCompressor.decompress({
+    data: Buffer.from(JSON.stringify(request)),
+    compression: FileCompression.PACK_BROTLI,
+  });
 
   const duration = Math.floor(performance.now() - startTime);
   logger.debug(`Request body retrieved in ${duration}ms`);
-  return result as T;
+
+  return JSON.parse(decompressBuffer.toString());
 }
 
 const bodyConverterModuleBase: FastifyPluginAsync = async (app) => {
