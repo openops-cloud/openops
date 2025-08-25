@@ -1,5 +1,4 @@
 import fastify from 'fastify';
-import { pack, unpack } from 'msgpackr';
 import {
   bodyConverterModule,
   getRequestBody,
@@ -24,7 +23,17 @@ jest.mock('../src/lib/logger', () => {
   };
 });
 
+jest.mock('../src/lib/file-compressor', () => {
+  return {
+    fileCompressor: {
+      compress: jest.fn(),
+      decompress: jest.fn(),
+    },
+  };
+});
+
 import { cacheWrapper } from '../src/lib/cache/cache-wrapper';
+import { fileCompressor } from '../src/lib/file-compressor';
 import { logger } from '../src/lib/logger';
 
 describe('request-oversize-body-handler', () => {
@@ -33,8 +42,10 @@ describe('request-oversize-body-handler', () => {
   });
 
   describe('saveRequestBody', () => {
-    it('should save body into cache and return the key (no compression for small payload)', async () => {
+    it('should save body into cache using compressor and return the key', async () => {
       const setSpy = jest.spyOn(cacheWrapper, 'setBuffer').mockResolvedValue();
+      const fakeCompressed = Buffer.from('COMPRESSED:abc123');
+      (fileCompressor.compress as jest.Mock).mockResolvedValue(fakeCompressed);
 
       const body = { hello: 'world' };
       const key = await saveRequestBody('abc123', body);
@@ -46,48 +57,38 @@ describe('request-oversize-body-handler', () => {
       const calledBuffer = firstCall[1] as Buffer;
       const ttl = firstCall[2] as number;
       expect(calledKey).toBe('req:abc123');
-      expect(Buffer.isBuffer(calledBuffer)).toBe(true);
-      expect(unpack(calledBuffer)).toEqual(body);
+      expect(calledBuffer).toBe(fakeCompressed);
       expect(ttl).toBe(300);
     });
 
-    it('should compress and store with br: prefix when payload is large and compressible', async () => {
+    it('should invoke compressor for large payloads and store the result', async () => {
       const setSpy = jest.spyOn(cacheWrapper, 'setBuffer').mockResolvedValue();
+      const fakeCompressed = Buffer.from('COMPRESSED:big');
+      (fileCompressor.compress as jest.Mock).mockResolvedValue(fakeCompressed);
       const bigStr = 'a'.repeat(50_000);
       const body = { data: bigStr };
 
       const key = await saveRequestBody('big1', body);
       expect(key).toBe('req:big1');
 
-      const firstCall2 = setSpy.mock.calls[0];
-      const calledBuffer = firstCall2[1] as Buffer;
-      const prefix = Buffer.from('br:');
-      expect(calledBuffer.subarray(0, prefix.length).equals(prefix)).toBe(true);
+      expect(setSpy).toHaveBeenCalledTimes(1);
+      expect(setSpy.mock.calls[0][1]).toBe(fakeCompressed);
     });
   });
 
   describe('getRequestBody', () => {
-    it('should return body from cache when present (raw packed buffer)', async () => {
+    it('should return body from cache when present (using compressor)', async () => {
       const body = { a: 1 };
-      const buf = pack(body);
-      jest.spyOn(cacheWrapper, 'getBufferAndDelete').mockResolvedValue(buf);
+      const cachedBuf = Buffer.from('CACHED:abc');
+      jest
+        .spyOn(cacheWrapper, 'getBufferAndDelete')
+        .mockResolvedValue(cachedBuf);
+      (fileCompressor.decompress as jest.Mock).mockResolvedValue(
+        Buffer.from(JSON.stringify(body)),
+      );
       const result = await getRequestBody<typeof body>('req:abc');
       expect(result).toEqual(body);
-    });
-
-    it('should return body from cache when present (brotli-compressed buffer)', async () => {
-      const body = { a: 2 };
-      const packed = pack(body);
-      const zlib = await import('node:zlib');
-      const { promisify } = await import('node:util');
-      const brCompress = promisify(zlib.brotliCompress);
-      const compressed = await brCompress(packed, {
-        params: { [zlib.constants.BROTLI_PARAM_QUALITY]: 4 },
-      });
-      const buf = Buffer.concat([Buffer.from('br:'), compressed]);
-      jest.spyOn(cacheWrapper, 'getBufferAndDelete').mockResolvedValue(buf);
-      const result = await getRequestBody<typeof body>('req:def');
-      expect(result).toEqual(body);
+      expect(fileCompressor.decompress).toHaveBeenCalled();
     });
 
     it('should log error and throw when body not found', async () => {
@@ -108,8 +109,13 @@ describe('request-oversize-body-handler', () => {
   describe('bodyConverterModule', () => {
     it('should replace request.body when bodyAccessKey is provided', async () => {
       const cached = { foo: 'bar', nested: { x: 1 } };
-      const buf = pack(cached);
-      jest.spyOn(cacheWrapper, 'getBufferAndDelete').mockResolvedValue(buf);
+      const fakeCache = Buffer.from('CACHED:body');
+      jest
+        .spyOn(cacheWrapper, 'getBufferAndDelete')
+        .mockResolvedValue(fakeCache);
+      (fileCompressor.decompress as jest.Mock).mockResolvedValue(
+        Buffer.from(JSON.stringify(cached)),
+      );
 
       const app = fastify();
       await app.register(bodyConverterModule);
