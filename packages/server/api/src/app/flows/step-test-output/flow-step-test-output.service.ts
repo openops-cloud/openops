@@ -1,6 +1,7 @@
 import {
-  decompressAndDecrypt,
-  encryptAndCompress,
+  compressAndEncrypt,
+  decryptAndDecompress,
+  EncryptedObject,
 } from '@openops/server-shared';
 import {
   FlowStepTestOutput,
@@ -8,6 +9,7 @@ import {
   OpenOpsId,
   openOpsId,
 } from '@openops/shared';
+import { isEmptyObject } from '@tiptap/react';
 import { In } from 'typeorm';
 import { repoFactory } from '../../core/db/repo-factory';
 import { FlowStepTestOutputEntity } from './flow-step-test-output-entity';
@@ -22,13 +24,14 @@ export const flowStepTestOutputService = {
     output,
     success,
   }: SaveParams): Promise<FlowStepTestOutput> {
-    let compressedInput = Buffer.alloc(0);
-    let compressedOutput = Buffer.alloc(0);
+    let compressedInput = {};
+    let compressedOutput = {};
     if (output !== undefined) {
-      compressedOutput = await encryptAndCompress(output);
+      compressedOutput = await compressAndEncrypt(output);
     }
+
     if (input !== undefined) {
-      compressedInput = await encryptAndCompress(input);
+      compressedInput = await compressAndEncrypt(input);
     }
 
     const existing = await flowStepTestOutputRepo().findOneBy({
@@ -97,16 +100,16 @@ export const flowStepTestOutputService = {
 async function decompressOutput(
   record: FlowStepTestOutput,
 ): Promise<FlowStepTestOutput> {
-  const inputBuffer = record.input as Buffer;
+  const inputObj = record.input as EncryptedObject;
   let decryptedInput = undefined;
-  if (inputBuffer.length !== 0) {
-    decryptedInput = await decompressAndDecrypt(inputBuffer);
+  if (!isEmptyObject(inputObj)) {
+    decryptedInput = await decryptAndDecompress(inputObj);
   }
 
-  const outputBuffer = record.output as Buffer;
+  const outputObj = record.output as EncryptedObject;
   let decryptedOutput = undefined;
-  if (outputBuffer.length !== 0) {
-    decryptedOutput = await decompressAndDecrypt(outputBuffer);
+  if (!isEmptyObject(outputObj)) {
+    decryptedOutput = await decryptAndDecompress(outputObj);
   }
 
   return {

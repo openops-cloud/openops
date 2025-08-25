@@ -1,8 +1,8 @@
-import { decompressAndDecrypt } from '@openops/server-shared';
+import { decryptAndDecompress } from '@openops/server-shared';
 import {
   ActionType,
   BranchStepOutput,
-  decodeStepOutput,
+  EncryptedStepOutput,
   flowHelper,
   FlowVersion,
   GenericStepOutput,
@@ -28,7 +28,7 @@ export const testExecutionContext = {
     projectId: string;
     apiUrl: string;
     engineToken: string;
-    stepTestOutputs?: Record<OpenOpsId, string>;
+    stepTestOutputs?: Record<OpenOpsId, EncryptedStepOutput>;
   }): Promise<FlowExecutorContext> {
     const flowSteps = flowHelper.getAllSteps(flowVersion.trigger);
     let flowExecutionContext = FlowExecutorContext.empty();
@@ -104,7 +104,7 @@ export const testExecutionContext = {
 async function getStepOutput(
   stepId?: string,
   inputUiInfo?: any,
-  stepTestOutputs?: Record<OpenOpsId, string>,
+  stepTestOutputs?: Record<OpenOpsId, EncryptedStepOutput>,
 ): Promise<any> {
   const shouldUseSampleData =
     inputUiInfo?.sampleData != null && inputUiInfo?.sampleData !== '';
@@ -114,8 +114,8 @@ async function getStepOutput(
   }
 
   if (stepId && stepTestOutputs?.[stepId]) {
-    const decodedTestOutput = decodeStepOutput(stepTestOutputs?.[stepId]);
-    return decompressAndDecrypt(decodedTestOutput);
+    // const decodedTestOutput = decodeStepOutput(stepTestOutputs?.[stepId]);
+    return decryptAndDecompress(stepTestOutputs[stepId] as EncryptedStepOutput);
   }
 
   return undefined;
