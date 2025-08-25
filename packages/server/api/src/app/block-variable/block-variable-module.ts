@@ -3,7 +3,7 @@ import {
   Type,
 } from '@fastify/type-provider-typebox';
 import {
-  convertStepOutputs,
+  groupStepOutputsById,
   EndpointScope,
   flowHelper,
   PrincipalType,
@@ -38,7 +38,7 @@ const blockVariableController: FastifyPluginAsyncTypebox = async (app) => {
       stepIds,
     });
 
-    const stepTestOutputs = convertStepOutputs(outputs);
+    const stepTestOutputs = groupStepOutputsById(outputs);
 
     const { result } = await engineRunner.executeVariable(engineToken, {
       variableExpression: request.variableExpression,

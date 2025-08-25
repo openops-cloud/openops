@@ -2,7 +2,7 @@ import {
   Action,
   ActionType,
   ApplicationError,
-  convertStepOutputs,
+  groupStepOutputsById,
   ErrorCode,
   flowHelper,
   FlowVersionId,
@@ -48,7 +48,7 @@ export const stepRunService = {
       stepIds: stepIds.filter((item) => item !== step.id),
     });
 
-    const stepTestOutputs = convertStepOutputs(outputs);
+    const stepTestOutputs = groupStepOutputsById(outputs);
 
     const engineToken = await accessTokenManager.generateEngineToken({
       projectId,

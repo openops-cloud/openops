@@ -1,7 +1,7 @@
 import { logger, safeStringifyAndTruncate } from '@openops/server-shared';
 import {
   ChatFlowContext,
-  convertStepOutputs,
+  groupStepOutputsById,
   EncryptedStepOutput,
   flowHelper,
   OpenOpsId,
@@ -162,7 +162,7 @@ async function getStepTestOutputs(
       stepIds,
     });
 
-    return convertStepOutputs(outputs);
+    return groupStepOutputsById(outputs);
   } catch (error) {
     logger.error('Failed to get step test outputs', { error });
     throw error;
