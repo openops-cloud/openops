@@ -111,7 +111,7 @@ const FlowTemplateFilterSidebar = ({
   onCategoryFilterClick,
   clearFilters,
   categoryLogos,
-}: FlowTemplateFilterSidebarProps) => {
+}: FlowTemplateFilterSidebarProps & { showDomains?: boolean }) => {
   return (
     <div className="rounded-2xl flex-col justify-start items-start inline-flex h-full w-full px-4 pt-[25px] pb-8 bg-background">
       <ScrollArea className="h-full w-full flex-1">
