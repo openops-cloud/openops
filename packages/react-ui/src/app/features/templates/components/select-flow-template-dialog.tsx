@@ -109,7 +109,8 @@ const FlowTemplateFilterSidebarWrapper = ({
   selectedCategories,
   setSelectedCategories,
   setSelectedBlocks,
-}: FlowTemplateFilterSidebarProps) => {
+  showDomains = true,
+}: FlowTemplateFilterSidebarProps & { showDomains?: boolean }) => {
   const useCloudTemplates = flagsHooks.useShouldFetchCloudTemplates();
 
   const {
@@ -119,6 +120,7 @@ const FlowTemplateFilterSidebarWrapper = ({
     isLoading: isTemplateFiltersLoading,
     status,
     isError,
+    refetch: refetchTemplateFilters,
   } = templatesHooks.useTemplateFilters({
     enabled: true,
     useCloudTemplates,
@@ -132,6 +134,12 @@ const FlowTemplateFilterSidebarWrapper = ({
   const { blocks: cloudBlocks } = blocksHooks.useBlocks({
     categories: [BlockCategory.CLOUD],
   });
+
+  useEffect(() => {
+    if (showDomains) {
+      refetchTemplateFilters();
+    }
+  }, [refetchTemplateFilters, showDomains]);
 
   const categoryLogos = useMemo(() => {
     if (!categories || !cloudBlocks) return {} as Record<string, string>;
@@ -223,6 +231,7 @@ const FlowTemplateFilterSidebarWrapper = ({
       clearFilters={clearFilters}
       selectedCategories={selectedCategories}
       categoryLogos={categoryLogos}
+      showDomains={showDomains}
     />
   );
 };
@@ -336,23 +345,21 @@ const SelectFlowTemplateDialogContent = ({
 
   return (
     <>
-      {isFullCatalog && (
-        <>
-          <div className="w-[255px]">
-            <FlowTemplateFilterSidebarWrapper
-              selectedBlocks={selectedBlocks}
-              selectedDomains={selectedDomains}
-              selectedServices={selectedServices}
-              setSelectedBlocks={setSelectedBlocks}
-              setSelectedDomains={setSelectedDomains}
-              setSelectedServices={setSelectedServices}
-              selectedCategories={selectedCategories}
-              setSelectedCategories={setSelectedCategories}
-            />
-          </div>
-          <VerticalDivider className="h-full" />
-        </>
-      )}
+      <div className="w-[255px]">
+        <FlowTemplateFilterSidebarWrapper
+          selectedBlocks={selectedBlocks}
+          selectedDomains={selectedDomains}
+          selectedServices={selectedServices}
+          setSelectedBlocks={setSelectedBlocks}
+          setSelectedDomains={setSelectedDomains}
+          setSelectedServices={setSelectedServices}
+          selectedCategories={selectedCategories}
+          setSelectedCategories={setSelectedCategories}
+          showDomains={isFullCatalog}
+        />
+      </div>
+      <VerticalDivider className="h-full" />
+
       <div className="flex-1 overflow-hidden">
         {selectedTemplateMetadata ? (
           <TemplateDetails
@@ -440,6 +447,8 @@ const SelectFlowTemplateDialog = ({
     TEMPLATE_FILTER_DEBOUNCE_DELAY,
   );
 
+  const { isConnectedToCloudTemplates } = useCloudProfile();
+
   const { templatesWithIntegrations, isLoading: isTemplateListLoading } =
     templatesHooks.useTemplatesMetadataWithIntegrations({
       enabled: isOpen,
@@ -450,6 +459,7 @@ const SelectFlowTemplateDialog = ({
       categories: selectedCategories,
       useCloudTemplates,
       gettingStartedTemplateFilter: 'exclude',
+      isConnectedToCloudTemplates,
     });
 
   const { mutate: getSelectedTemplate } = useMutation({
@@ -536,18 +546,12 @@ const SelectFlowTemplateDialog = ({
     });
   };
 
-  const { isConnectedToCloudTemplates } = useCloudProfile();
-
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent
         className={cn(
           'flex flex-col p-0 transition-none max-w-[1360px] max-2xl:max-w-[1010px]',
           {
-            'max-w-[1157px] max-2xl:max-w-[1157px]':
-              useCloudTemplates &&
-              !isConnectedToCloudTemplates &&
-              !isConnectionsPickerOpen,
             'max-w-[846px] max-h-[70vh] overflow-y-auto':
               isConnectionsPickerOpen,
             'h-[90vh]': !isConnectionsPickerOpen,
