@@ -10,6 +10,7 @@ export type StepDetails = Action | TriggerWithOptionalId | undefined;
 export const createAdditionalContext = (
   flowVersion: FlowVersion,
   stepData?: StepDetails,
+  runId?: string,
 ): ChatFlowContext => {
   const stepVariables = stepData?.settings?.input || {};
   const variables = Object.entries(stepVariables).map(([name, value]) => ({
@@ -20,7 +21,9 @@ export const createAdditionalContext = (
   return {
     flowId: flowVersion.flowId,
     flowVersionId: flowVersion.id,
+    runId,
     currentStepId: stepData?.id ?? '',
+    currentStepName: stepData?.name ?? '',
     steps: [
       {
         id: stepData?.id ?? '',

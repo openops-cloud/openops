@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { AppSystemProp, logger, system } from '@openops/server-shared';
-import { AiConfig } from '@openops/shared';
+import { AiConfig, ChatFlowContext } from '@openops/shared';
 import {
   AssistantModelMessage,
   LanguageModel,
@@ -36,6 +36,7 @@ type UserMessageParams = RequestContext &
     app: FastifyInstance;
   } & {
     frontendTools: AssistantUITools;
+    additionalContext?: ChatFlowContext;
   };
 
 type ModelConfig = {
@@ -64,6 +65,7 @@ export async function handleUserMessage(
     serverResponse,
     conversation: { chatContext, chatHistory },
     frontendTools,
+    additionalContext,
   } = params;
 
   const messageId = generateMessageId();
@@ -77,6 +79,7 @@ export async function handleUserMessage(
     chatContext,
     languageModel,
     frontendTools,
+    additionalContext,
   });
 
   try {

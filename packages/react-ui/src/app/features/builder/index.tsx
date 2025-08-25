@@ -285,10 +285,7 @@ const BuilderPage = () => {
               disabled={leftSidebar === LeftSideBarType.NONE}
               onDragging={setIsDraggingHandle}
             />
-            <AiChatResizablePanel
-              isDraggingHandle={isDraggingHandle}
-              onDragging={setIsDraggingHandle}
-            />
+            <AiChatResizablePanel onDragging={setIsDraggingHandle} />
 
             <ResizablePanel order={3} id={RESIZABLE_PANEL_IDS.MAIN}>
               {readonly ? (
