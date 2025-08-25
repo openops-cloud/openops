@@ -25,7 +25,7 @@ export type StepOutputWithData = {
   success: boolean | null;
 };
 
-export function convertStepOutputs(
+export function groupStepOutputsById(
   stepTestOutputs: FlowStepTestOutput[],
 ): Record<OpenOpsId, EncryptedStepOutput> {
   return Object.fromEntries(

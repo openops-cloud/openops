@@ -56,7 +56,7 @@ export async function getRequestBody<T>(bodyAccessKey: string): Promise<T> {
   }
 
   const decompressBuffer = await fileCompressor.decompress({
-    data: Buffer.from(JSON.stringify(request)),
+    data: Buffer.from(JSON.parse(request.toString())),
     compression: FileCompression.PACK_BROTLI,
   });
 
