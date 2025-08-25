@@ -1,7 +1,7 @@
 import { jest } from '@jest/globals';
 import {
   ChatFlowContext,
-  encodeStepOutputs,
+  convertStepOutputs,
   EngineResponseStatus,
   flowHelper,
   PopulatedFlow,
@@ -57,7 +57,7 @@ jest.mock('@openops/shared', () => ({
   flowHelper: {
     getAllStepIds: jest.fn(),
   },
-  encodeStepOutputs: jest.fn(),
+  convertStepOutputs: jest.fn(),
 }));
 
 const mockAccessTokenManager = accessTokenManager as jest.Mocked<
@@ -69,8 +69,8 @@ const mockFlowStepTestOutputService = flowStepTestOutputService as jest.Mocked<
 >;
 const mockEngineRunner = engineRunner as jest.Mocked<typeof engineRunner>;
 const mockFlowHelper = flowHelper as jest.Mocked<typeof flowHelper>;
-const mockEncodeStepOutputs = encodeStepOutputs as jest.MockedFunction<
-  typeof encodeStepOutputs
+const mockConvertStepOutputs = convertStepOutputs as jest.MockedFunction<
+  typeof convertStepOutputs
 >;
 
 describe('ContextEnrichmentService', () => {
@@ -97,7 +97,7 @@ describe('ContextEnrichmentService', () => {
       );
       mockFlowHelper.getAllStepIds.mockReturnValue(['step-1']);
       mockFlowStepTestOutputService.listEncrypted.mockResolvedValue([]);
-      mockEncodeStepOutputs.mockReturnValue({});
+      mockConvertStepOutputs.mockReturnValue({});
 
       return mockFlow;
     };
@@ -204,7 +204,7 @@ describe('ContextEnrichmentService', () => {
       );
       mockFlowHelper.getAllStepIds.mockReturnValue(['step-1']);
       mockFlowStepTestOutputService.listEncrypted.mockResolvedValue([]);
-      mockEncodeStepOutputs.mockReturnValue({});
+      mockConvertStepOutputs.mockReturnValue({});
 
       const result = await enrichContext(mockInputContext, mockProjectId);
 
@@ -255,7 +255,7 @@ describe('ContextEnrichmentService', () => {
       );
       mockFlowHelper.getAllStepIds.mockReturnValue(['step-1']);
       mockFlowStepTestOutputService.listEncrypted.mockResolvedValue([]);
-      mockEncodeStepOutputs.mockReturnValue({});
+      mockConvertStepOutputs.mockReturnValue({});
 
       mockEngineRunner.executeVariable.mockResolvedValue({
         status: 'OK' as EngineResponseStatus,
@@ -319,7 +319,7 @@ describe('ContextEnrichmentService', () => {
       );
       mockFlowHelper.getAllStepIds.mockReturnValue(['step-1']);
       mockFlowStepTestOutputService.listEncrypted.mockResolvedValue([]);
-      mockEncodeStepOutputs.mockReturnValue({});
+      mockConvertStepOutputs.mockReturnValue({});
 
       mockEngineRunner.executeVariable.mockRejectedValue(
         new Error('Engine error'),
