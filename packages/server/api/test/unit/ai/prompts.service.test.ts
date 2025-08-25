@@ -487,9 +487,11 @@ describe('buildUIContextSection', () => {
       ],
     ])(
       'should return null when %s',
-      (_description: string, flowContext: Partial<ChatFlowContext>) => {
-        const result = buildUIContextSection(flowContext as ChatFlowContext);
-        expect(result).toBeNull();
+      async (_description: string, flowContext: Partial<ChatFlowContext>) => {
+        const result = await buildUIContextSection(
+          flowContext as ChatFlowContext,
+        );
+        expect(result).toBe('');
       },
     );
   });
@@ -505,13 +507,13 @@ describe('buildUIContextSection', () => {
       ['runId', { runId: TEST_IDS.runId }, `run ${TEST_IDS.runId}`],
     ])(
       'should build context with only %s',
-      (
+      async (
         _fieldName: string,
         contextOverrides: Partial<ChatFlowContext>,
         expectedContextPart: string,
       ) => {
         const flowContext = createBaseContext(contextOverrides);
-        const result = buildUIContextSection(flowContext);
+        const result = await buildUIContextSection(flowContext);
         expect(result).toBe(buildExpectedResult(expectedContextPart));
       },
     );
@@ -564,13 +566,13 @@ describe('buildUIContextSection', () => {
       ],
     ])(
       'should build context with %s',
-      (
+      async (
         _description: string,
         contextOverrides: Partial<ChatFlowContext>,
         expectedContextPart: string,
       ) => {
         const flowContext = createBaseContext(contextOverrides);
-        const result = buildUIContextSection(flowContext);
+        const result = await buildUIContextSection(flowContext);
         expect(result).toBe(buildExpectedResult(expectedContextPart));
       },
     );
@@ -630,13 +632,13 @@ describe('buildUIContextSection', () => {
       ],
     ])(
       'should handle %s',
-      (
+      async (
         _description: string,
         contextOverrides: Partial<ChatFlowContext>,
         expectedContextPart: string,
       ) => {
         const flowContext = createBaseContext(contextOverrides);
-        const result = buildUIContextSection(flowContext);
+        const result = await buildUIContextSection(flowContext);
         expect(result).toBe(buildExpectedResult(expectedContextPart));
       },
     );

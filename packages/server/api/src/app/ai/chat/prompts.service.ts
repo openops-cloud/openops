@@ -35,17 +35,13 @@ export const getMcpSystemPrompt = async ({
     prompts.push(loadPrompt('mcp-aws-cost-unavailable.txt'));
   }
 
-  const allPrompts = await Promise.all(prompts);
-  let systemPrompt = allPrompts.join('\n\n');
-
   if (uiContext) {
-    const contextSection = buildUIContextSection(uiContext);
-    if (contextSection) {
-      systemPrompt += `\n\n${contextSection}`;
-    }
+    prompts.push(buildUIContextSection(uiContext));
   }
 
-  return systemPrompt;
+  const allPrompts = await Promise.all(prompts);
+
+  return allPrompts.join('\n\n');
 };
 
 export const getBlockSystemPrompt = async (
@@ -101,13 +97,13 @@ export const getBlockSystemPrompt = async (
   }
 };
 
-export const buildUIContextSection = (
+export const buildUIContextSection = async (
   flowContext: ChatFlowContext,
-): string | null => {
+): Promise<string> => {
   const contextParts: string[] = [];
 
   if (!flowContext.flowId && !flowContext.flowVersionId && !flowContext.runId) {
-    return null;
+    return '';
   }
 
   if (flowContext.flowId) {
@@ -131,7 +127,7 @@ export const buildUIContextSection = (
   }
 
   if (contextParts.length === 0) {
-    return null;
+    return '';
   }
 
   return (
