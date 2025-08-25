@@ -1,6 +1,6 @@
 import {
   appendToContext,
-  encryptAndCompress,
+  compressAndEncrypt,
   logger,
 } from '@openops/server-shared';
 import {
@@ -322,9 +322,7 @@ async function validateResultSize(
   }
 
   // Simulate the full size
-  const currentStepTestOutput = (await encryptAndCompress(stepResult)).toString(
-    'base64',
-  );
+  const currentStepTestOutput = await compressAndEncrypt(stepResult);
   return validateExecutionSize({
     flowVersion: input.flowVersion,
     stepTestOutputs: {

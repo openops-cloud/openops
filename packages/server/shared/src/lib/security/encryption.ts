@@ -55,6 +55,19 @@ function encryptObject(object: unknown): EncryptedObject {
   return encryptString(objectString);
 }
 
+function encryptBuffer(inputBuffer: Buffer): EncryptedObject {
+  const iv = crypto.randomBytes(ivLength);
+  assertNotNullOrUndefined(secret, 'secret');
+  const key = Buffer.from(secret, 'binary');
+  const cipher = crypto.createCipheriv(algorithm, key, iv);
+  let encrypted = cipher.update(inputBuffer).toString('hex');
+  encrypted += cipher.final('hex');
+  return {
+    iv: iv.toString('hex'),
+    data: encrypted,
+  };
+}
+
 function decryptObject<T>(encryptedObject: EncryptedObject): T {
   const iv = Buffer.from(encryptedObject.iv, 'hex');
   assertNotNullOrUndefined(secret, 'secret');
@@ -64,6 +77,18 @@ function decryptObject<T>(encryptedObject: EncryptedObject): T {
   decrypted += decipher.final('utf8');
   return JSON.parse(decrypted);
 }
+
+function decryptBuffer(encryptedObject: EncryptedObject): Buffer {
+  const iv = Buffer.from(encryptedObject.iv, 'hex');
+  assertNotNullOrUndefined(secret, 'secret');
+  const key = Buffer.from(secret, 'binary');
+  const decipher = crypto.createDecipheriv(algorithm, key, iv);
+  return Buffer.concat([
+    decipher.update(encryptedObject.data, 'hex'),
+    decipher.final(),
+  ]);
+}
+
 function decryptString(encryptedObject: EncryptedObject): string {
   const iv = Buffer.from(encryptedObject.iv, 'hex');
   assertNotNullOrUndefined(secret, 'secret');
@@ -82,6 +107,8 @@ function get16ByteKey(): string {
 export const encryptUtils = {
   decryptString,
   decryptObject,
+  decryptBuffer,
+  encryptBuffer,
   encryptObject,
   encryptString,
   get16ByteKey,

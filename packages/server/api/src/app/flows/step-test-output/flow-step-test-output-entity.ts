@@ -2,7 +2,7 @@ import { FlowStepTestOutput, FlowVersion } from '@openops/shared';
 import { EntitySchema } from 'typeorm';
 import {
   BaseColumnSchemaPart,
-  BLOB_COLUMN_TYPE,
+  JSONB_COLUMN_TYPE,
   OpenOpsIdSchema,
 } from '../../database/database-common';
 
@@ -18,11 +18,11 @@ export const FlowStepTestOutputEntity =
       stepId: OpenOpsIdSchema,
       flowVersionId: OpenOpsIdSchema,
       input: {
-        type: BLOB_COLUMN_TYPE,
+        type: JSONB_COLUMN_TYPE,
         nullable: false,
       },
       output: {
-        type: BLOB_COLUMN_TYPE,
+        type: JSONB_COLUMN_TYPE,
         nullable: false,
       },
       success: {
