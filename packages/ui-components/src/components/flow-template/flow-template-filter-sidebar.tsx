@@ -87,6 +87,7 @@ type FlowTemplateFilterSidebarProps = {
   selectedDomains: string[];
   selectedServices: string[];
   selectedCategories: string[];
+  showDomains?: boolean;
   onBlockFilterClick: (block: string) => void;
   onDomainFilterClick: (domain: string) => void;
   onServiceFilterClick: (service: string) => void;
@@ -103,6 +104,7 @@ const FlowTemplateFilterSidebar = ({
   selectedDomains,
   selectedServices,
   selectedCategories,
+  showDomains = true,
   onDomainFilterClick,
   onServiceFilterClick,
   onBlockFilterClick,
@@ -169,20 +171,23 @@ const FlowTemplateFilterSidebar = ({
             </Collapsible>
           ))}
         </div>
-
-        <FlowTemplateFilterHeader title={t('FinOps capabilities')} />
-        <div className="flex flex-col w-full">
-          {domains.map((domain) => (
-            <FlowTemplateFilterItem
-              key={domain}
-              value={domain}
-              displayName={domain}
-              onClick={onDomainFilterClick}
-              isActive={selectedDomains.includes(domain)}
-              Icon={DOMAIN_ICON_SUGGESTIONS[domain] ?? Layers}
-            />
-          ))}
-        </div>
+        {showDomains && (
+          <>
+            <FlowTemplateFilterHeader title={t('FinOps capabilities')} />
+            <div className="flex flex-col w-full">
+              {domains.map((domain) => (
+                <FlowTemplateFilterItem
+                  key={domain}
+                  value={domain}
+                  displayName={domain}
+                  onClick={onDomainFilterClick}
+                  isActive={selectedDomains.includes(domain)}
+                  Icon={DOMAIN_ICON_SUGGESTIONS[domain] ?? Layers}
+                />
+              ))}
+            </div>
+          </>
+        )}
 
         {blocks && blocks.length > 0 && (
           <>

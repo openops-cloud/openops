@@ -98,6 +98,7 @@ type FlowTemplateFilterSidebarProps = {
   setSelectedServices: (services: string[]) => void;
   selectedCategories: string[];
   setSelectedCategories: (categories: string[]) => void;
+  showDomains?: boolean;
 };
 
 const FlowTemplateFilterSidebarWrapper = ({
@@ -109,6 +110,7 @@ const FlowTemplateFilterSidebarWrapper = ({
   selectedCategories,
   setSelectedCategories,
   setSelectedBlocks,
+  showDomains = true,
 }: FlowTemplateFilterSidebarProps) => {
   const useCloudTemplates = flagsHooks.useShouldFetchCloudTemplates();
 
@@ -119,6 +121,7 @@ const FlowTemplateFilterSidebarWrapper = ({
     isLoading: isTemplateFiltersLoading,
     status,
     isError,
+    refetch: refetchTemplateFilters,
   } = templatesHooks.useTemplateFilters({
     enabled: true,
     useCloudTemplates,
@@ -132,6 +135,12 @@ const FlowTemplateFilterSidebarWrapper = ({
   const { blocks: cloudBlocks } = blocksHooks.useBlocks({
     categories: [BlockCategory.CLOUD],
   });
+
+  useEffect(() => {
+    if (showDomains) {
+      refetchTemplateFilters();
+    }
+  }, [refetchTemplateFilters, showDomains]);
 
   const categoryLogos = useMemo(() => {
     if (!categories || !cloudBlocks) return {} as Record<string, string>;
@@ -223,6 +232,7 @@ const FlowTemplateFilterSidebarWrapper = ({
       clearFilters={clearFilters}
       selectedCategories={selectedCategories}
       categoryLogos={categoryLogos}
+      showDomains={showDomains}
     />
   );
 };
@@ -346,6 +356,7 @@ const SelectFlowTemplateDialogContent = ({
           setSelectedServices={setSelectedServices}
           selectedCategories={selectedCategories}
           setSelectedCategories={setSelectedCategories}
+          showDomains={isFullCatalog}
         />
       </div>
       <VerticalDivider className="h-full" />

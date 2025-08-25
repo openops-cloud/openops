@@ -140,6 +140,7 @@ export const templatesHooks = {
       isLoading,
       status,
       isError,
+      refetch,
     } = templatesHooks.useTemplates({
       enabled,
       useCloudTemplates,
@@ -170,6 +171,7 @@ export const templatesHooks = {
       isLoading,
       status,
       isError,
+      refetch,
     };
   },
 
