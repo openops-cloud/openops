@@ -17,7 +17,7 @@ import {
 } from '../timeout-validator';
 
 const MAX_RETRIES = 3;
-const PROGRESS_DEBOUNCE_MS = 800;
+const PROGRESS_DEBOUNCE_MS = 700;
 const runDebouncers = new Map<string, any>();
 
 function getRunDebouncer(runId: string): any {
