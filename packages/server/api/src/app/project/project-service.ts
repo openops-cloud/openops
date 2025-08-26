@@ -76,15 +76,12 @@ export const projectService = {
   async getProjectIdsByOrganizationId(
     organizationId: string,
   ): Promise<ProjectId[]> {
-    const results = await projectRepo()
-      .createQueryBuilder('project')
-      .select('"id"')
-      .where({
-        organizationId,
-        deleted: IsNull(),
-      })
-      .getRawMany();
-    return results.map((result) => result.id);
+    const projects = await projectRepo().find({
+      select: ['id'],
+      where: { organizationId, deleted: IsNull() },
+    });
+
+    return projects.map((project) => project.id);
   },
 
   async getOneOrThrow(projectId: ProjectId): Promise<Project> {
