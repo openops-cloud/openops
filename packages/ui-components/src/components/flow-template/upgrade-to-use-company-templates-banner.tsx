@@ -20,7 +20,7 @@ const UpgradeToUseCompanyTemplatesBanner = ({
           )}
         </p>
       </div>
-      <a href={link} target="_blank" rel="noreferrer" className="mt-4">
+      <a href={link} target="_blank" rel="noopener noreferrer" className="mt-4">
         <Button variant="default">{t('Schedule a call to upgrade')}</Button>
       </a>
     </div>
