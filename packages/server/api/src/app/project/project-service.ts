@@ -72,6 +72,18 @@ export const projectService = {
     );
     return organizationId;
   },
+
+  async getProjectIdsByOrganizationId(
+    organizationId: string,
+  ): Promise<ProjectId[]> {
+    const projects = await projectRepo().find({
+      select: ['id'],
+      where: { organizationId, deleted: IsNull() },
+    });
+
+    return projects.map((project) => project.id);
+  },
+
   async getOneOrThrow(projectId: ProjectId): Promise<Project> {
     const project = await this.getOne(projectId);
 

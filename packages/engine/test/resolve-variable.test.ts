@@ -37,7 +37,10 @@ describe('resolveVariable', () => {
     stepName: 'test-step',
     variableExpression: '{{user.name}}',
     stepTestOutputs: {
-      'step-id': 'test-output',
+      'step-id': {
+        iv: 'iv',
+        data: 'test-output',
+      },
     },
   };
 
@@ -123,7 +126,7 @@ describe('resolveVariable', () => {
     it('should call all dependencies correctly', async () => {
       const mockResolvedValue = 'test-value';
       const mockCensoredValue = 'test-value';
-      
+
       mockVariableService.resolve.mockResolvedValue({
         resolvedInput: mockResolvedValue,
         censoredInput: mockCensoredValue,
@@ -154,7 +157,7 @@ describe('resolveVariable', () => {
     it('should work without stepTestOutputs', async () => {
       const mockResolvedValue = 'test-value';
       const mockCensoredValue = 'test-value';
-      
+
       mockVariableService.resolve.mockResolvedValue({
         resolvedInput: mockResolvedValue,
         censoredInput: mockCensoredValue,
@@ -170,7 +173,7 @@ describe('resolveVariable', () => {
       expect(result.success).toBe(true);
       expect(result.resolvedValue).toBe(mockResolvedValue);
       expect(result.censoredValue).toBe(mockCensoredValue);
-      
+
       expect(mockEngineConstants.fromExecuteStepInput).toHaveBeenCalledWith({
         projectId: mockInput.projectId,
         engineToken: mockInput.engineToken,
@@ -330,4 +333,4 @@ describe('resolveVariable', () => {
       expect(result.censoredValue).toBe(censoredValue);
     });
   });
-}); 
+});

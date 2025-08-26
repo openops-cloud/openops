@@ -7,19 +7,19 @@ jest.mock('../src/lib/file-compressor', () => ({
   },
 }));
 
-const encryptObjectMock = jest.fn();
-const decryptObjectMock = jest.fn();
+const encryptBufferMock = jest.fn();
+const decryptBufferMock = jest.fn();
 jest.mock('../src/lib/security/encryption', () => ({
   encryptUtils: {
-    encryptObject: encryptObjectMock,
-    decryptObject: decryptObjectMock,
+    encryptBuffer: encryptBufferMock,
+    decryptBuffer: decryptBufferMock,
   },
 }));
 
 import { FileCompression } from '@openops/shared';
 import {
-  decompressAndDecrypt,
-  encryptAndCompress,
+  compressAndEncrypt,
+  decryptAndDecompress,
 } from '../src/lib/security/encrypt-compress';
 
 describe('Object Transformer', () => {
@@ -27,79 +27,84 @@ describe('Object Transformer', () => {
     jest.clearAllMocks();
   });
 
-  it('should encrypt and compress the object', async () => {
+  it('should compress and encrypt the object', async () => {
     const testObject = { test: 'data' };
+    const compressedBuffer = Buffer.from('compressed-data');
     const encryptedObject = { iv: 'test-iv', data: 'encrypted-data' };
-    const compressedObject = Buffer.from('compressed-data');
 
-    encryptObjectMock.mockReturnValue(encryptedObject);
-    compressMock.mockResolvedValue(compressedObject);
+    compressMock.mockResolvedValue(compressedBuffer);
+    encryptBufferMock.mockReturnValue(encryptedObject);
 
-    const result = await encryptAndCompress(testObject);
+    const result = await compressAndEncrypt(testObject);
 
-    expect(encryptObjectMock).toHaveBeenCalledWith(testObject);
+    expect(encryptBufferMock).toHaveBeenCalledWith(compressedBuffer);
     expect(compressMock).toHaveBeenCalledWith({
-      data: Buffer.from(JSON.stringify(encryptedObject)),
-      compression: FileCompression.GZIP,
+      data: Buffer.from(JSON.stringify(testObject)),
+      compression: FileCompression.PACK_BROTLI,
     });
-    expect(result).toBe(compressedObject);
+    expect(result).toBe(encryptedObject);
   });
 
-  it('should decompress and decrypt the object', async () => {
-    const compressedObject = Buffer.from('compressed-data');
-    const decompressedObject = Buffer.from(
-      JSON.stringify({ iv: 'test-iv', data: 'encrypted-data' }),
-    );
-    const decryptedObject = { test: 'data' };
+  it('should decrypt and decompress the object', async () => {
+    const decryptedBuffer = Buffer.from(JSON.stringify('compressed-buffer'));
+    const encryptedObject = { iv: 'test-iv', data: 'encrypted-data' };
 
-    decompressMock.mockResolvedValue(decompressedObject);
-    decryptObjectMock.mockReturnValue(decryptedObject);
+    const originalObject = { test: 'data' };
+    const originalBuffer = Buffer.from(JSON.stringify(originalObject));
 
-    const result = await decompressAndDecrypt(compressedObject);
+    decryptBufferMock.mockReturnValue(decryptedBuffer);
+    decompressMock.mockResolvedValue(originalBuffer);
+
+    const result = await decryptAndDecompress(encryptedObject);
+
+    expect(decryptBufferMock).toHaveBeenCalledWith(encryptedObject);
 
     expect(decompressMock).toHaveBeenCalledWith({
-      data: compressedObject,
-      compression: FileCompression.GZIP,
+      data: decryptedBuffer,
+      compression: FileCompression.PACK_BROTLI,
     });
-    expect(decryptObjectMock).toHaveBeenCalledWith(
-      JSON.parse(decompressedObject.toString()),
-    );
-    expect(result).toBe(decryptedObject);
+
+    expect(result).toStrictEqual(originalObject);
   });
 
   it('should handle empty objects', async () => {
     const emptyObject = {};
+    const originalBuffer = Buffer.from(JSON.stringify(emptyObject));
+
+    const compressedBuffer = Buffer.from('compressed-empty');
     const encryptedEmpty = { iv: 'test-iv', data: 'encrypted-empty' };
-    const compressedEmpty = Buffer.from('compressed-empty');
-    const decompressedEmpty = Buffer.from(JSON.stringify(encryptedEmpty));
 
-    encryptObjectMock.mockReturnValue(encryptedEmpty);
-    compressMock.mockResolvedValue(compressedEmpty);
-    decompressMock.mockResolvedValue(decompressedEmpty);
-    decryptObjectMock.mockReturnValue(emptyObject);
+    compressMock.mockResolvedValue(compressedBuffer);
+    encryptBufferMock.mockReturnValue(encryptedEmpty);
 
-    const compressed = await encryptAndCompress(emptyObject);
-    const decompressed = await decompressAndDecrypt(compressed);
+    decryptBufferMock.mockReturnValue(compressedBuffer);
+    decompressMock.mockResolvedValue(originalBuffer);
 
-    expect(compressed).toBe(compressedEmpty);
-    expect(decompressed).toBe(emptyObject);
+    const compressed = await compressAndEncrypt(emptyObject);
+
+    const decompressed = await decryptAndDecompress(compressed);
+
+    expect(compressed).toBe(encryptedEmpty);
+    expect(decompressed).toStrictEqual(emptyObject);
   });
 
   it('should handle null values', async () => {
     const nullValue = null;
+    const originalBuffer = Buffer.from(JSON.stringify(nullValue));
+
+    const compressedBuffer = Buffer.from('compressed-null');
     const encryptedNull = { iv: 'test-iv', data: 'encrypted-null' };
-    const compressedNull = Buffer.from('compressed-null');
-    const decompressedNull = Buffer.from(JSON.stringify(encryptedNull));
 
-    encryptObjectMock.mockReturnValue(encryptedNull);
-    compressMock.mockResolvedValue(compressedNull);
-    decompressMock.mockResolvedValue(decompressedNull);
-    decryptObjectMock.mockReturnValue(nullValue);
+    compressMock.mockResolvedValue(compressedBuffer);
+    encryptBufferMock.mockReturnValue(encryptedNull);
 
-    const compressed = await encryptAndCompress(nullValue);
-    const decompressed = await decompressAndDecrypt(compressed);
+    decryptBufferMock.mockReturnValue(compressedBuffer);
+    decompressMock.mockResolvedValue(originalBuffer);
 
-    expect(compressed).toBe(compressedNull);
-    expect(decompressed).toBe(nullValue);
+    const compressed = await compressAndEncrypt(nullValue);
+    const decompressed = await decryptAndDecompress(compressed);
+
+    expect(compressed).toBe(encryptedNull);
+    expect(decompressed).toStrictEqual(nullValue);
   });
 });
