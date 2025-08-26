@@ -131,10 +131,16 @@ export const flowsApi = {
       queryParams,
     );
   },
-  getStepTestOutput(flowVersionId: string, stepId: string) {
+  getStepTestOutput(
+    flowVersionId: string,
+    stepId: string,
+    config?: AxiosRequestConfig,
+  ) {
     return api
       .get<Record<string, StepOutputWithData>>(
         `/v1/flow-versions/${flowVersionId}/test-output?stepIds=${stepId}`,
+        undefined,
+        config,
       )
       .then((response) => response[stepId] ?? {});
   },
