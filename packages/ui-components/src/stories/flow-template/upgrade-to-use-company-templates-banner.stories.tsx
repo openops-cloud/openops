@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { ThemeAwareDecorator } from '../../../.storybook/decorators';
-import { UpgradeToUseCompanyTemplatesBanner } from '../../components/flow-template/upgarde-to-use-company-templates-banner';
+import { UpgradeToUseCompanyTemplatesBanner } from '../../components/flow-template/upgrade-to-use-company-templates-banner';
 
 /**
  * Banner prompting users to upgrade to enable custom templates.
