@@ -1,5 +1,9 @@
 import { BlockCategory, FlagId, FlowTemplateMetadata } from '@openops/shared';
-import { useQuery } from '@tanstack/react-query';
+import {
+  QueryObserverResult,
+  RefetchOptions,
+  useQuery,
+} from '@tanstack/react-query';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { DEFAULT_LOCALE } from '@/app/constants/locale';
@@ -134,6 +138,7 @@ export const templatesHooks = {
     isLoading: boolean;
     status: 'error' | 'success' | 'pending';
     isError: boolean;
+    refetch: (options?: RefetchOptions) => Promise<QueryObserverResult>;
   } => {
     const {
       data: templates,
