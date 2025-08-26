@@ -23,10 +23,10 @@ export class MigrateStepTestOutputToNewCompressionAlgorithm1755942417309
 
     await queryRunner.query(`
       ALTER TABLE "flow_step_test_output"
-        ALTER COLUMN "input"  DROP DEFAULT,
+        ALTER COLUMN "input" DROP DEFAULT,
         ALTER COLUMN "output" DROP DEFAULT,
 
-        ALTER COLUMN "input"  TYPE jsonb
+        ALTER COLUMN "input" TYPE jsonb
           USING CASE
                   WHEN "input" IS NULL OR "input"  = ''::bytea THEN '{}'::jsonb
                   ELSE convert_from("input",'UTF8')::jsonb
