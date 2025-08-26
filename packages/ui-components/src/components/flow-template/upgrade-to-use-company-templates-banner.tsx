@@ -1,4 +1,5 @@
 import { t } from 'i18next';
+import { Link } from 'react-router-dom';
 import { Button } from '../../ui/button';
 
 type UpgradeToUseCompanyTemplatesBannerProps = {
@@ -20,9 +21,9 @@ const UpgradeToUseCompanyTemplatesBanner = ({
           )}
         </p>
       </div>
-      <a href={link} target="_blank" rel="noopener noreferrer" className="mt-4">
+      <Link to={link} target="_blank" rel="noopener noreferrer">
         <Button variant="default">{t('Schedule a call to upgrade')}</Button>
-      </a>
+      </Link>
     </div>
   );
 };
