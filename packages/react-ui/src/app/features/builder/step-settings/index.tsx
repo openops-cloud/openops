@@ -257,9 +257,19 @@ const StepSettingsContainer = React.memo(() => {
                 ></BlockCardInfo>
               )}
               <Tabs defaultValue="configure" className="w-full">
-                <TabsList className="grid grid-cols-2 w-full">
-                  <TabsTrigger value="configure">Configure</TabsTrigger>
-                  <TabsTrigger value="test">Test</TabsTrigger>
+                <TabsList className="grid grid-cols-2 w-full h-10 rounded-sm">
+                  <TabsTrigger
+                    value="configure"
+                    className="text-base justify-start text-left py-1 rounded-xs"
+                  >
+                    Configure
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="test"
+                    className="text-base justify-start text-left py-1 rounded-xs"
+                  >
+                    Test
+                  </TabsTrigger>
                 </TabsList>
                 <TabsContent value="configure" className="mt-4">
                   <div className="flex flex-col gap-4">
