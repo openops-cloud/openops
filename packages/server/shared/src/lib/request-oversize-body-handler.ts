@@ -34,11 +34,16 @@ export async function saveRequestBody(
     compression: FileCompression.PACK_BROTLI,
   });
 
-  await cacheWrapper.setBuffer(
-    bodyAccessKey,
-    compressedBuffer,
-    DEFAULT_EXPIRE_TIME,
-  );
+  try {
+    await cacheWrapper.setBuffer(
+      bodyAccessKey,
+      compressedBuffer,
+      DEFAULT_EXPIRE_TIME,
+    );
+  } catch (error) {
+    logRedisError(error);
+    throw error;
+  }
 
   const duration = Math.floor(performance.now() - startTime);
   logger.debug(`Request body saved in ${duration}ms.`);
@@ -56,7 +61,7 @@ export async function getRequestBody<T>(bodyAccessKey: string): Promise<T> {
   }
 
   const decompressBuffer = await fileCompressor.decompress({
-    data: Buffer.from(JSON.parse(request.toString())),
+    data: request,
     compression: FileCompression.PACK_BROTLI,
   });
 
@@ -64,6 +69,23 @@ export async function getRequestBody<T>(bodyAccessKey: string): Promise<T> {
   logger.debug(`Request body retrieved in ${duration}ms`);
 
   return JSON.parse(decompressBuffer.toString());
+}
+
+function logRedisError(error: unknown): void {
+  if (
+    error instanceof Error &&
+    error.message.includes('OOM command not allowed when used memory')
+  ) {
+    logger.error(
+      'Redis maximum memory reached while saving request body to cache.',
+      {
+        errorMessage: error.message,
+      },
+    );
+    return;
+  }
+
+  logger.error('Error saving request body to cache.', error);
 }
 
 const bodyConverterModuleBase: FastifyPluginAsync = async (app) => {
