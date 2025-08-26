@@ -40,6 +40,7 @@ export * from './flow-template/template-details';
 export * from './flow-template/template-edge';
 export * from './flow-template/template-step-node';
 export * from './flow-template/types';
+export * from './flow-template/upgrade-to-use-company-templates-banner';
 export * from './flows/new-flow-button';
 export * from './folder-breadcrumbs/folder-breadcrumbs';
 export * from './folder-tree';
