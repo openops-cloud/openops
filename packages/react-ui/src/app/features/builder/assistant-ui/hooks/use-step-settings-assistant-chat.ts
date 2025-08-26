@@ -1,4 +1,5 @@
 import { useAssistantChat } from '@/app/features/ai/lib/assistant-ui-chat-hook';
+import { ChatMode } from '@/app/features/ai/lib/types';
 import { FlowVersion, SourceCode } from '@openops/shared';
 import { nanoid } from 'nanoid';
 import { useCallback, useEffect, useState } from 'react';
@@ -27,16 +28,14 @@ export const useStepSettingsAssistantChat = (
   );
 
   const assistantChat = useAssistantChat({
-    flowVersion,
-    selectedStep,
     chatId: chatSessionKey,
     onChatIdChange,
+    chatMode: ChatMode.StepSettings,
   });
 
   return {
     ...assistantChat,
     onInject,
     flowVersion,
-    selectedStep,
   };
 };
