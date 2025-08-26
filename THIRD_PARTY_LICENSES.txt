@@ -20128,6 +20128,7 @@ The following npm packages may be included in this product:
 
  - lodash.assign@4.2.0
  - lodash.camelcase@4.3.0
+ - lodash.clonedeep@4.5.0
  - lodash.debounce@4.0.8
  - lodash.defaults@4.2.0
  - lodash.isarguments@3.1.0
