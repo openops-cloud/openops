@@ -59,7 +59,7 @@ export const flowExecutor = {
 
     sendProgress(newContext, constants);
 
-    await progressService.flushProgressUpdate(constants.flowVersionId);
+    await progressService.flushProgressUpdate(constants.flowRunId);
 
     return newContext.toResponse();
   },

@@ -102,7 +102,7 @@ const sendUpdateRunRequest = async (
     if (!(error instanceof EngineTimeoutError)) {
       logger.error(
         `Progress update failed after ${MAX_RETRIES} retries for status ${request.runDetails.status} on run ${request.runId}`,
-        { error },
+        error,
       );
     }
 
