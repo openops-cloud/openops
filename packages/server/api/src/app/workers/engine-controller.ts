@@ -23,6 +23,7 @@ import {
   FlowRunStatus,
   GetFlowVersionForWorkerRequest,
   GetFlowVersionForWorkerRequestType,
+  isFlowStateTerminal,
   isNil,
   PopulatedFlow,
   PrincipalType,
@@ -161,10 +162,7 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
       .to(populatedRun.projectId)
       .emit(WebsocketClientEvent.FLOW_RUN_PROGRESS, runId);
 
-    if (
-      runDetails.status !== FlowRunStatus.RUNNING &&
-      runDetails.status !== FlowRunStatus.PAUSED
-    ) {
+    if (isFlowStateTerminal(runDetails.status)) {
       await trackExecution(
         request.principal.projectId,
         runId,
