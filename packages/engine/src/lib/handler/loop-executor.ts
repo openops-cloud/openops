@@ -10,7 +10,6 @@ import {
   LoopStepOutput,
   LoopStepResult,
 } from '@openops/shared';
-import cloneDeep from 'lodash.clonedeep';
 import { nanoid } from 'nanoid';
 import { createContextStore } from '../services/storage.service';
 import { BaseExecutor } from './base-executor';
@@ -25,9 +24,17 @@ type LoopOnActionResolvedSettings = {
   items: readonly unknown[];
 };
 
+type IterationContext = {
+  index: number;
+  item: unknown;
+  isPaused: boolean;
+  currentPath: string;
+  verdict: ExecutionVerdict;
+};
+
 type LoopExecutionContext = {
   executionState: FlowExecutorContext;
-  iterations: FlowExecutorContext[];
+  iterations: IterationContext[];
 };
 
 export const loopExecutor: BaseExecutor<LoopOnItemsAction> = {
@@ -114,11 +121,7 @@ export const loopExecutor: BaseExecutor<LoopOnItemsAction> = {
         return executionState.upsertStep(action.name, stepOutput);
       }
 
-      return waitForIterationsToFinishOrPause(
-        loopExecutionContext,
-        action.name,
-        store,
-      );
+      return saveIterationResults(loopExecutionContext, store);
     }
 
     executionState = await resumePausedIteration(
@@ -191,7 +194,20 @@ async function triggerLoopIterations(
       constants,
     });
 
-    loopIterations[i] = cloneDeep(loopExecutionState);
+    const isPaused =
+      loopExecutionState.verdict === ExecutionVerdict.PAUSED &&
+      loopExecutionState.verdictResponse?.reason === FlowRunStatus.PAUSED;
+
+    const iterationOutput = loopExecutionState.currentState()[
+      action.name
+    ] as LoopStepResult;
+    loopIterations[i] = {
+      isPaused,
+      index: iterationOutput.index,
+      item: iterationOutput.item,
+      verdict: loopExecutionState.verdict,
+      currentPath: loopExecutionState.currentPath.toString(),
+    };
 
     loopExecutionState = loopExecutionState
       .setVerdict(ExecutionVerdict.RUNNING)
@@ -202,37 +218,30 @@ async function triggerLoopIterations(
   loopExecutionContext.executionState = loopExecutionState;
 }
 
-async function waitForIterationsToFinishOrPause(
+async function saveIterationResults(
   loopExecutionContext: LoopExecutionContext,
-  actionName: string,
   store: Store,
 ): Promise<FlowExecutorContext> {
-  const iterationResults: {
-    iterationContext: FlowExecutorContext;
-    isPaused: boolean;
-  }[] = [];
   let noPausedIterations = true;
   let executionFailed = false;
 
-  for (const iterationContext of loopExecutionContext.iterations) {
-    const { verdict, verdictResponse } = iterationContext;
+  for (let i = 0; i < loopExecutionContext.iterations.length; ++i) {
+    const { index, item, verdict, currentPath, isPaused } =
+      loopExecutionContext.iterations[i];
 
     if (verdict === ExecutionVerdict.FAILED) {
       executionFailed = true;
     }
 
-    const isPaused =
-      verdict === ExecutionVerdict.PAUSED &&
-      verdictResponse?.reason === FlowRunStatus.PAUSED;
-
     if (isPaused) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await store.put(currentPath, i);
       noPausedIterations = false;
     }
 
-    iterationResults.push({ iterationContext, isPaused });
+    await storeIterationResult(`${i}`, isPaused, index, item, store);
   }
 
-  await saveIterationResults(store, actionName, iterationResults);
   if (executionFailed) {
     return loopExecutionContext.executionState.setVerdict(
       ExecutionVerdict.FAILED,
@@ -244,35 +253,6 @@ async function waitForIterationsToFinishOrPause(
   }
 
   return pauseLoop(loopExecutionContext.executionState);
-}
-
-async function saveIterationResults(
-  store: Store,
-  actionName: string,
-  iterationResults: {
-    iterationContext: FlowExecutorContext;
-    isPaused: boolean;
-  }[],
-): Promise<void> {
-  for (let i = 0; i < iterationResults.length; ++i) {
-    const { iterationContext, isPaused } = iterationResults[i];
-
-    const iterationOutput = iterationContext.currentState()[
-      actionName
-    ] as LoopStepResult;
-    if (isPaused) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await store.put(iterationContext.currentPath.toString(), i);
-    }
-
-    await storeIterationResult(
-      `${i}`,
-      isPaused,
-      iterationOutput.index,
-      iterationOutput.item,
-      store,
-    );
-  }
 }
 
 async function resumePausedIteration(
