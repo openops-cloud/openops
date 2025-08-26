@@ -17,7 +17,7 @@ import {
 } from '../timeout-validator';
 
 const MAX_RETRIES = 3;
-const PROGRESS_DEBOUNCE_MS = 700;
+const PROGRESS_DEBOUNCE_MS = 800;
 const runDebouncers = new Map<string, any>();
 
 function getRunDebouncer(runId: string): any {
@@ -29,7 +29,9 @@ function getRunDebouncer(runId: string): any {
         try {
           await sendUpdateRunRequest(latestParams);
         } finally {
-          runDebouncers.delete(runId);
+          if (runDebouncers.get(runId) === debouncedFunc) {
+            runDebouncers.delete(runId);
+          }
         }
       },
       PROGRESS_DEBOUNCE_MS,
