@@ -71,7 +71,7 @@ export type FlowRunResponse = Static<typeof FlowRunResponse>;
 export const isFlowStateTerminal = (status: FlowRunStatus): boolean => {
   return (
     status === FlowRunStatus.SUCCEEDED ||
-    status == FlowRunStatus.STOPPED ||
+    status === FlowRunStatus.STOPPED ||
     status === FlowRunStatus.TIMEOUT ||
     status === FlowRunStatus.FAILED ||
     status === FlowRunStatus.INTERNAL_ERROR
