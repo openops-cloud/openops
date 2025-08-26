@@ -23,22 +23,22 @@ export class MigrateStepTestOutputToNewCompressionAlgorithm1755942417309
 
     await queryRunner.query(`
       ALTER TABLE "flow_step_test_output"
-        ALTER COLUMN "input" DROP DEFAULT,
+        ALTER COLUMN "input"  DROP DEFAULT,
         ALTER COLUMN "output" DROP DEFAULT,
 
-        ALTER COLUMN "input" TYPE jsonb
+        ALTER COLUMN "input"  TYPE jsonb
           USING CASE
-                  WHEN "input" = ''::bytea THEN '{}'::jsonb
+                  WHEN "input" IS NULL OR "input"  = ''::bytea THEN '{}'::jsonb
                   ELSE convert_from("input",'UTF8')::jsonb
                 END,
         ALTER COLUMN "output" TYPE jsonb
           USING CASE
-                  WHEN "output" = ''::bytea THEN '{}'::jsonb
+                  WHEN "output" IS NULL OR "output" = ''::bytea THEN '{}'::jsonb
                   ELSE convert_from("output",'UTF8')::jsonb
                 END,
 
         ALTER COLUMN "input"  SET DEFAULT '{}'::jsonb,
-        ALTER COLUMN "output" SET DEFAULT '{}'::jsonb
+        ALTER COLUMN "output" SET DEFAULT '{}'::jsonb;
     `);
 
     logger.info(
@@ -57,11 +57,15 @@ async function updateRecords(
   tableName: string,
 ): Promise<void> {
   for (const record of records) {
-    if (await alreadyMigrated(record.input)) {
+    if (await alreadyMigrated(record.output)) {
       continue;
     }
 
-    const originalInput = await decompressAndDecrypt(record.input);
+    const inputBuffer = record.input;
+    let originalInput: unknown = Buffer.alloc(0);
+    if (inputBuffer.length !== 0) {
+      originalInput = await decompressAndDecrypt(inputBuffer);
+    }
 
     const outputBuffer = record.output;
     let originalOutput: unknown = Buffer.alloc(0);
@@ -74,7 +78,11 @@ async function updateRecords(
 
     await queryRunner.query(
       `UPDATE "${tableName}" SET "input" = $1, "output" = $2 WHERE "id" = $3;`,
-      [newInputFormat, newOutputFormat, record.id],
+      [
+        Buffer.from(JSON.stringify(newInputFormat), 'utf8'),
+        Buffer.from(JSON.stringify(newOutputFormat), 'utf8'),
+        record.id,
+      ],
     );
   }
 }
