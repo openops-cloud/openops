@@ -44,7 +44,7 @@ describe('json-content-parser', () => {
       expect(extractJsonFromContent([])).toBe('');
     });
 
-    it('should parse and format JSON from single text content', () => {
+    it('should parse and return JSON object from single text content', () => {
       const content = [
         {
           type: 'text' as const,
@@ -52,21 +52,58 @@ describe('json-content-parser', () => {
         },
       ];
       const result = extractJsonFromContent(content);
-      const expected = JSON.stringify(
-        { data: [{ id: '123', name: 'test' }] },
-        null,
-        2,
-      );
-      expect(result).toBe(expected);
+      const expected = { data: [{ id: '123', name: 'test' }] };
+      expect(result).toEqual(expected);
     });
 
     it('should return original text if JSON parsing fails for single content', () => {
       const content = [{ type: 'text' as const, text: 'Not JSON content' }];
       expect(extractJsonFromContent(content)).toBe('Not JSON content');
     });
+
+    // Fail-safe tests
+    it('should handle null/undefined content arrays', () => {
+      expect(extractJsonFromContent(null as any)).toBe('');
+      expect(extractJsonFromContent(undefined as any)).toBe('');
+    });
+
+    it('should handle non-array content', () => {
+      expect(extractJsonFromContent('not an array' as any)).toBe('');
+      expect(extractJsonFromContent(123 as any)).toBe('');
+      expect(extractJsonFromContent({} as any)).toBe('');
+    });
+
+    it('should handle content with invalid structure', () => {
+      const invalidContent = [
+        { type: 'image', url: 'test.jpg' }, // wrong type
+      ] as any;
+      expect(extractJsonFromContent(invalidContent)).toEqual(invalidContent);
+    });
+
+    it('should handle content with missing text property', () => {
+      const invalidContent = [
+        { type: 'text' }, // missing text property
+      ] as any;
+      expect(extractJsonFromContent(invalidContent)).toEqual(invalidContent);
+    });
+
+    it('should handle content with non-string text property', () => {
+      const invalidContent = [
+        { type: 'text', text: 123 }, // text is not a string
+      ] as any;
+      expect(extractJsonFromContent(invalidContent)).toEqual(invalidContent);
+    });
+
+    it('should handle multiple content items and return them as-is', () => {
+      const multipleContent = [
+        { type: 'text' as const, text: 'First text' },
+        { type: 'text' as const, text: 'Second text' },
+      ];
+      expect(extractJsonFromContent(multipleContent)).toEqual(multipleContent);
+    });
   });
 
-  describe('formatResultForDisplay', () => {
+  describe('formatToolResultForDisplay', () => {
     it.each([
       [null, 'null'],
       [undefined, 'undefined'],
@@ -75,16 +112,16 @@ describe('json-content-parser', () => {
     });
 
     it('should handle primitive values', () => {
-      expect(formatToolResultForDisplay(42)).toBe('42');
-      expect(formatToolResultForDisplay(true)).toBe('true');
+      expect(formatToolResultForDisplay(42)).toBe(42);
+      expect(formatToolResultForDisplay(true)).toBe(true);
       expect(formatToolResultForDisplay('simple string')).toBe('simple string');
     });
 
-    it('should parse and format JSON strings', () => {
+    it('should parse and return JSON objects from strings', () => {
       const jsonString = '{"key": "value", "number": 42}';
       const result = formatToolResultForDisplay(jsonString);
-      const expected = JSON.stringify({ key: 'value', number: 42 }, null, 2);
-      expect(result).toBe(expected);
+      const expected = { key: 'value', number: 42 };
+      expect(result).toEqual(expected);
     });
 
     it('should return original string if not valid JSON', () => {
@@ -92,7 +129,7 @@ describe('json-content-parser', () => {
       expect(formatToolResultForDisplay(nonJsonString)).toBe(nonJsonString);
     });
 
-    it('should handle content structure and extract JSON', () => {
+    it('should handle content structure and extract JSON objects', () => {
       const contentStructure = {
         content: [
           {
@@ -102,14 +139,10 @@ describe('json-content-parser', () => {
         ],
       };
       const result = formatToolResultForDisplay(contentStructure);
-      const expected = JSON.stringify(
-        {
-          data: [{ id: 'aK3T27MRliBIxYKfHSxSF', status: 'active' }],
-        },
-        null,
-        2,
-      );
-      expect(result).toBe(expected);
+      const expected = {
+        data: [{ id: 'aK3T27MRliBIxYKfHSxSF', status: 'active' }],
+      };
+      expect(result).toEqual(expected);
     });
 
     it('should handle content structure with non-JSON text', () => {
@@ -121,11 +154,10 @@ describe('json-content-parser', () => {
       );
     });
 
-    it('should handle regular objects', () => {
+    it('should handle regular objects and return them as-is', () => {
       const regularObject = { key: 'value', nested: { data: [1, 2, 3] } };
       const result = formatToolResultForDisplay(regularObject);
-      const expected = JSON.stringify(regularObject, null, 2);
-      expect(result).toBe(expected);
+      expect(result).toEqual(regularObject);
     });
 
     it('should handle complex content structure from user example', () => {
@@ -150,15 +182,134 @@ describe('json-content-parser', () => {
           },
         ],
       };
-      const expected = JSON.stringify(expectedData, null, 2);
-      expect(result).toBe(expected);
+      expect(result).toEqual(expectedData);
     });
 
-    it('should handle arrays as input', () => {
+    it('should handle arrays as input and return them as-is', () => {
       const arrayInput = [{ id: 1 }, { id: 2 }];
       const result = formatToolResultForDisplay(arrayInput);
-      const expected = JSON.stringify(arrayInput, null, 2);
-      expect(result).toBe(expected);
+      expect(result).toEqual(arrayInput);
+    });
+
+    // Fail-safe tests
+    it('should handle objects that throw errors when accessed', () => {
+      const problematicObject = {
+        get data() {
+          throw new Error('Access error');
+        },
+      };
+      const result = formatToolResultForDisplay(problematicObject);
+      // Should fall back to string representation when object access fails
+      expect(typeof result).toBe('string');
+    });
+
+    it('should handle circular references in objects', () => {
+      const circularObject: any = { name: 'test' };
+      circularObject.self = circularObject;
+      const result = formatToolResultForDisplay(circularObject);
+      // Should fall back to string representation when circular references are detected
+      expect(typeof result).toBe('string');
+    });
+
+    it('should handle invalid JSON strings gracefully', () => {
+      const invalidJson = '{"key": value}';
+      expect(formatToolResultForDisplay(invalidJson)).toBe(invalidJson);
+    });
+
+    it('should handle content structure with invalid nested data', () => {
+      const invalidContentStructure = {
+        content: [
+          {
+            type: 'text',
+            text: null, // invalid text
+          },
+        ],
+      } as any;
+      // When content structure is invalid, it should not be recognized as ContentStructure
+      // and should return the object as-is
+      expect(formatToolResultForDisplay(invalidContentStructure)).toEqual(
+        invalidContentStructure,
+      );
+    });
+
+    it('should handle content structure with malformed JSON', () => {
+      const contentWithMalformedJson = {
+        content: [
+          {
+            type: 'text',
+            text: '{"key": }', // malformed JSON
+          },
+        ],
+      };
+      expect(formatToolResultForDisplay(contentWithMalformedJson)).toBe(
+        '{"key": }',
+      );
+    });
+
+    it('should handle non-serializable objects', () => {
+      const nonSerializable = {
+        func: () => 'test',
+        symbol: Symbol('test'),
+        bigint: BigInt(123),
+      };
+      const result = formatToolResultForDisplay(nonSerializable);
+      // Non-serializable objects should fall back to string representation
+      // because JSON.stringify will fail on functions, symbols, and bigints
+      expect(typeof result).toBe('string');
+    });
+
+    it('should handle deeply nested objects', () => {
+      const deepObject = {
+        level1: {
+          level2: {
+            level3: {
+              data: 'test',
+            },
+          },
+        },
+      };
+      const result = formatToolResultForDisplay(deepObject);
+      expect(result).toEqual(deepObject);
+    });
+  });
+
+  describe('isContentStructure fail-safe tests', () => {
+    it('should handle objects that throw errors during property access', () => {
+      const problematicObject = {
+        get content() {
+          throw new Error('Access error');
+        },
+      };
+      // Should return false when property access throws an error
+      expect(isContentStructure(problematicObject)).toBe(false);
+    });
+
+    it('should handle arrays with circular references', () => {
+      const circularArray: any = [{ type: 'text', text: 'test' }];
+      circularArray.push(circularArray);
+      const objectWithCircularContent = { content: circularArray };
+      expect(isContentStructure(objectWithCircularContent)).toBe(false);
+    });
+
+    it('should handle content arrays with objects that throw during iteration', () => {
+      const problematicContent = {
+        content: [
+          {
+            get type() {
+              throw new Error('Type access error');
+            },
+            text: 'test',
+          },
+        ],
+      };
+      expect(isContentStructure(problematicContent)).toBe(false);
+    });
+
+    it('should handle extremely large content arrays', () => {
+      const largeContent = {
+        content: Array(10000).fill({ type: 'text', text: 'test' }),
+      };
+      expect(isContentStructure(largeContent)).toBe(true);
     });
   });
 });
