@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { cn } from '../../lib/cn';
 import { Theme } from '../../lib/theme';
@@ -44,6 +44,11 @@ const JsonViewer = React.memo(
       },
       mode: 'onChange',
     });
+
+    const [showSearchBar, setShowSearchBar] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const handleSearch = () => setShowSearchBar((prev) => !prev);
 
     const {
       handleCopy,
@@ -93,14 +98,27 @@ const JsonViewer = React.memo(
             apply={() => {
               apply(form.getValues('jsonContent'));
             }}
+            handleSearch={handleSearch}
           />
         </div>
+        {showSearchBar && (
+          <div className="px-4 pb-2">
+            <input
+              type="text"
+              placeholder="Search..."
+              className="w-full border rounded px-2 py-1 text-sm"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+        )}
         <JsonContent
           isEditMode={isEditMode}
           json={json}
           form={form}
           theme={theme}
           editorClassName={editorClassName}
+          searchQuery={searchQuery}
         />
       </div>
     );

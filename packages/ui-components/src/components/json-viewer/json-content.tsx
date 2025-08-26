@@ -23,6 +23,7 @@ type JsonContentProps = {
   theme: Theme;
   validateJson?: (value: string) => { valid: boolean; message?: string };
   editorClassName?: string;
+  searchQuery?: string;
 };
 
 export const JsonContent = ({
@@ -31,6 +32,7 @@ export const JsonContent = ({
   form,
   theme,
   editorClassName,
+  searchQuery,
 }: JsonContentProps) => {
   const isEmptyString = useMemo(() => {
     return typeof json === 'string' && json.trim() === '';
@@ -93,6 +95,7 @@ export const JsonContent = ({
           readonly={true}
           theme={theme}
           containerClassName={editorClassName}
+          searchQuery={searchQuery}
         />
       )}
     </div>

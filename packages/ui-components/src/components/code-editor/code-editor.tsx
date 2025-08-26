@@ -27,6 +27,7 @@ type CodeEditorProps = {
   showLineNumbers?: boolean;
   language?: MonacoLanguage;
   showTabs?: boolean;
+  searchQuery?: string;
 };
 
 export interface CodeEditorRef {
@@ -48,6 +49,7 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
       showLineNumbers = true,
       language = 'json',
       showTabs = false,
+      searchQuery,
     }: CodeEditorProps,
     ref: React.Ref<CodeEditorRef>,
   ) => {
@@ -185,6 +187,53 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
         onChange(stringValue);
       }
     };
+
+    useEffect(() => {
+      if (!editorRef.current || !searchQuery) {
+        // Remove decorations if no query
+        editorRef.current?.deltaDecorations(
+          editorRef.current
+            .getModel()
+            ?.getAllDecorations()
+            .map((d) => d.id) || [],
+          [],
+        );
+        return;
+      }
+
+      const model = editorRef.current.getModel();
+      if (!model) return;
+
+      // Find all matches
+      const matches = model.findMatches(
+        searchQuery,
+        false, // search only in editable range
+        false, // match case
+        false, // word match
+        null, // search scope
+        true, // capture matches
+      );
+
+      // Create decorations for matches
+      const decorations = matches.map((match) => ({
+        range: match.range,
+        options: {
+          inlineClassName: 'monaco-search-highlight',
+        },
+      }));
+
+      // Apply decorations
+      const decorationIds = editorRef.current.deltaDecorations([], decorations);
+
+      if (matches.length > 0) {
+        editorRef.current.revealRangeInCenter(matches[0].range);
+      }
+
+      // Cleanup on unmount or query change
+      return () => {
+        editorRef.current?.deltaDecorations(decorationIds, []);
+      };
+    }, [searchQuery, isEditorReady, currentValue]);
 
     const handlePlaceholderClick = () => {
       setShowPlaceholder(false);
