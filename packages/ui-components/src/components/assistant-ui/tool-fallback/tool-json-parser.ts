@@ -74,12 +74,7 @@ export function extractJsonFromContent(
     }
   }
 
-  // Fail-safe: for multiple content items, safely stringify
-  try {
-    return content;
-  } catch {
-    return 'Unable to process content';
-  }
+  return content;
 }
 
 /**

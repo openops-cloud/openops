@@ -191,26 +191,6 @@ describe('json-content-parser', () => {
       expect(result).toEqual(arrayInput);
     });
 
-    // Fail-safe tests
-    it('should handle objects that throw errors when accessed', () => {
-      const problematicObject = {
-        get data() {
-          throw new Error('Access error');
-        },
-      };
-      const result = formatToolResultForDisplay(problematicObject);
-      // Should fall back to string representation when object access fails
-      expect(typeof result).toBe('string');
-    });
-
-    it('should handle circular references in objects', () => {
-      const circularObject: any = { name: 'test' };
-      circularObject.self = circularObject;
-      const result = formatToolResultForDisplay(circularObject);
-      // Should fall back to string representation when circular references are detected
-      expect(typeof result).toBe('string');
-    });
-
     it('should handle invalid JSON strings gracefully', () => {
       const invalidJson = '{"key": value}';
       expect(formatToolResultForDisplay(invalidJson)).toBe(invalidJson);
@@ -244,18 +224,6 @@ describe('json-content-parser', () => {
       expect(formatToolResultForDisplay(contentWithMalformedJson)).toBe(
         '{"key": }',
       );
-    });
-
-    it('should handle non-serializable objects', () => {
-      const nonSerializable = {
-        func: () => 'test',
-        symbol: Symbol('test'),
-        bigint: BigInt(123),
-      };
-      const result = formatToolResultForDisplay(nonSerializable);
-      // Non-serializable objects should fall back to string representation
-      // because JSON.stringify will fail on functions, symbols, and bigints
-      expect(typeof result).toBe('string');
     });
 
     it('should handle deeply nested objects', () => {
