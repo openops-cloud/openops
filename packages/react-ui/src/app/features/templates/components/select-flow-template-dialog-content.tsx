@@ -5,13 +5,14 @@ import { ExpandedTemplate } from '@/app/features/templates/components/expanded-t
 import { authenticationSession } from '@/app/lib/authentication-session';
 import {
   BranchLabelNode,
-  FlowTemplateList,
+  FlowTemplateGallery,
   FlowTemplateMetadataWithIntegrations,
   LoopStepPlaceHolder,
   ReturnLoopedgeButton,
   StepPlaceHolder,
   TemplateDetails,
   TemplateEdge,
+  TemplatesTabs,
   VerticalDivider,
 } from '@openops/components/ui';
 import { FlowTemplateDto } from '@openops/shared';
@@ -91,6 +92,10 @@ const SelectFlowTemplateDialogContent = ({
     !isTemplatePreselected &&
     (isConnectedToCloudTemplates || !useCloudTemplates);
 
+  const [activeTab, setActiveTab] = React.useState<TemplatesTabs>(
+    TemplatesTabs.Public,
+  );
+
   const onExploreMoreClick = () => {
     const currentUser = authenticationSession.getCurrentUser();
     const popup = window.open(
@@ -155,17 +160,20 @@ const SelectFlowTemplateDialogContent = ({
             theme={theme}
           />
         ) : (
-          <FlowTemplateList
+          <FlowTemplateGallery
             selectionHeading={selectionHeading}
-            templates={templates}
-            isLoading={isTemplateListLoading}
+            publicTemplates={templates}
+            privateTemplates={templates}
+            isPublicTemplatesLoading={isTemplateListLoading}
+            isPrivateTemplatesLoading={isTemplateListLoading}
             onTemplateSelect={handleTemplateSelect}
             searchText={searchText}
             onSearchInputChange={onSearchInputChange}
-            ownerLogoUrl={ownerLogoUrl}
-            isFullCatalog={isFullCatalog}
+            isConnectedToCloud={isFullCatalog}
             onExploreMoreClick={onExploreMoreClick}
-          ></FlowTemplateList>
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+          />
         )}
       </div>
     </>
