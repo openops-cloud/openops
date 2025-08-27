@@ -42,12 +42,10 @@ export const streamCode = ({
     systemPrompt,
   });
 
-  const messages = transformMessagesForCodeGeneration(chatHistory);
-
   return streamObject({
     model: languageModel,
     system: systemPrompt,
-    messages,
+    messages: transformMessagesForCodeGeneration(chatHistory),
     ...aiConfig.modelSettings,
     onFinish,
     onError,
@@ -76,12 +74,10 @@ export const generateCode = ({
     packageJson?: string;
   }>
 > => {
-  const messages = transformMessagesForCodeGeneration(chatHistory);
-
   return generateObject({
     model: languageModel,
     system: systemPrompt,
-    messages,
+    messages: transformMessagesForCodeGeneration(chatHistory),
     ...aiConfig.modelSettings,
     schema: unifiedCodeLLMSchema,
     experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
