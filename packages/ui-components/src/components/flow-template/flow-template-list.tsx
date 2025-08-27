@@ -32,7 +32,7 @@ const FlowTemplateList = ({
   if (templates?.length === 0) return <NoTemplatesPlaceholder />;
 
   return (
-    <ScrollArea type="auto">
+    <ScrollArea type="auto" className="h-full">
       <div className={cn('flex flex-wrap gap-6 box-border pb-6')}>
         {templates?.map((template) => {
           return (

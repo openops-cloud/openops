@@ -12,6 +12,7 @@ import { UpgradeToUseCompanyTemplatesBanner } from './upgrade-to-use-company-tem
 
 type FlowTemplateGalleryProps = {
   isConnectedToCloud: boolean;
+  showPrivateTemplates?: boolean;
   publicTemplates: FlowTemplateMetadataWithIntegrations[] | undefined;
   privateTemplates: FlowTemplateMetadataWithIntegrations[] | undefined;
   isPublicTemplatesLoading: boolean;
@@ -32,6 +33,7 @@ export const enum TemplatesTabs {
 }
 const FlowTemplateGallery = ({
   isConnectedToCloud,
+  showPrivateTemplates,
   publicTemplates,
   privateTemplates,
   isPublicTemplatesLoading,
@@ -47,21 +49,17 @@ const FlowTemplateGallery = ({
 }: FlowTemplateGalleryProps) => {
   return (
     <Tabs
-      {...(activeTab !== undefined
-        ? {
-            value: activeTab,
-            onValueChange: (v: string) => onTabChange?.(v as TemplatesTabs),
-          }
-        : { defaultValue: TemplatesTabs.Public })}
+      value={activeTab}
+      onValueChange={(tab) => onTabChange(tab as TemplatesTabs)}
       className={cn(
-        'h-full flex-1 flex flex-col gap-[14px] pl-7 pt-[34px] pr-[15px] overflow-y-hidden',
+        'h-full flex-1 flex flex-col gap-[14px] pt-[34px]  overflow-y-hidden',
         className,
       )}
     >
-      <TabsList className="w-full flex items-center justify-start gap-0 mb-5 bg-transparent border-none rounded-none">
+      <TabsList className="w-full flex items-center justify-start gap-0 mb-5 pr-[15px] pl-7 bg-transparent border-b rounded-none">
         <TabsTrigger
           value={TemplatesTabs.Public}
-          className="min-w-[265px] font-normal data-[state=active]:font-bold text-primary-300 text-base pl-0 pr-2 dark:text-white rounded-none  border-b-2 data-[state=active]:bg-background data-[state=active]:text-primary-300 data-[state=active]:dark:text-white data-[state=active]:shadow-none data-[state=active]:border-blueAccent-300"
+          className="min-w-[265px] mt-0 font-normal data-[state=active]:font-bold text-primary-300 text-base pl-0 pr-2 dark:text-white rounded-none border-b-none data-[state=active]:border-b-2 data-[state=active]:bg-background data-[state=active]:text-primary-300 data-[state=active]:dark:text-white data-[state=active]:shadow-none data-[state=active]:border-blueAccent-300"
         >
           <span className="mx-[14px] text-[24px]">
             {t('OpenOps Templates')}
@@ -69,7 +67,7 @@ const FlowTemplateGallery = ({
         </TabsTrigger>
         <TabsTrigger
           value={TemplatesTabs.Private}
-          className="!text-[24px] font-normal data-[state=active]:font-bold text-primary-300 text-base pr-0 pl-2 dark:text-white rounded-none border-b-2 data-[state=active]:bg-background data-[state=active]:text-primary-300 data-[state=active]:dark:text-white data-[state=active]:shadow-none data-[state=active]:border-blueAccent-300"
+          className="mt-0 !text-[24px] font-normal data-[state=active]:font-bold text-primary-300 text-base pr-0 pl-2 dark:text-white rounded-none border-b-none data-[state=active]:border-b-2 data-[state=active]:bg-background data-[state=active]:text-primary-300 data-[state=active]:dark:text-white data-[state=active]:shadow-none data-[state=active]:border-blueAccent-300"
         >
           <div className="flex items-center justify-center gap-2 mx-[14px]">
             <span className="text-[24px]">{t('My Templates')}</span>
@@ -92,46 +90,56 @@ const FlowTemplateGallery = ({
           </div>
         </TabsTrigger>
       </TabsList>
-      <div className="flex items-center justify-between">
-        <DialogTitle className="text-[22px] font-medium text-primary-300 dark:text-primary">
-          {selectionHeading || t('All templates')}
-        </DialogTitle>
-        <SearchInput
-          placeholder={t('Search for template')}
-          value={searchText}
-          onChange={onSearchInputChange}
-          className="max-w-[327px] mr-8"
-        />
-      </div>
+      {(activeTab === TemplatesTabs.Public || showPrivateTemplates) && (
+        <div className="flex items-center justify-between pr-[15px] pl-7">
+          <DialogTitle className="text-[22px] font-medium text-primary-300 dark:text-primary">
+            {selectionHeading || t('All templates')}
+          </DialogTitle>
+          <SearchInput
+            placeholder={t('Search for template')}
+            value={searchText}
+            onChange={onSearchInputChange}
+            className="max-w-[327px] mr-8"
+          />
+        </div>
+      )}
 
       <TabsContent
         value={TemplatesTabs.Public}
-        className="flex overflow-y-hidden"
+        className="data-[state=active]:flex-grow flex data-[state=inactive]:hidden overflow-hidden pr-[15px] pl-7"
       >
-        <div className="flex-1 overflow-hidden">
-          <FlowTemplateList
-            templates={publicTemplates}
-            isLoading={isPublicTemplatesLoading}
-            onTemplateSelect={onTemplateSelect}
-          >
-            {!isConnectedToCloud && (
-              <div className="w-full mb-6 mr-8">
-                <ExploreTemplates
-                  onExploreMoreClick={onExploreMoreClick}
-                  className="max-w-full"
-                />
-              </div>
-            )}
-          </FlowTemplateList>
-        </div>
+        <FlowTemplateList
+          templates={publicTemplates}
+          isLoading={isPublicTemplatesLoading}
+          onTemplateSelect={onTemplateSelect}
+        >
+          {!isConnectedToCloud && (
+            <div className="w-full mb-6 mr-8">
+              <ExploreTemplates
+                onExploreMoreClick={onExploreMoreClick}
+                className="max-w-full"
+              />
+            </div>
+          )}
+        </FlowTemplateList>
       </TabsContent>
       <TabsContent
         value={TemplatesTabs.Private}
-        className="flex items-center justify-center flex-1"
+        className="data-[state=active]:flex-grow flex data-[state=inactive]:hidden overflow-hidden pr-[15px] pl-7"
       >
-        <UpgradeToUseCompanyTemplatesBanner
-          link={'https://openops.com/contact'}
-        />
+        {showPrivateTemplates ? (
+          <FlowTemplateList
+            templates={privateTemplates}
+            isLoading={isPrivateTemplatesLoading}
+            onTemplateSelect={onTemplateSelect}
+          />
+        ) : (
+          <div className="h-full w-full flex items-center justify-center">
+            <UpgradeToUseCompanyTemplatesBanner
+              link={'https://openops.com/contact'}
+            />
+          </div>
+        )}
       </TabsContent>
     </Tabs>
   );
