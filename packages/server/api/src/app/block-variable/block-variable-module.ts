@@ -3,9 +3,9 @@ import {
   Type,
 } from '@fastify/type-provider-typebox';
 import {
-  encodeStepOutputs,
   EndpointScope,
   flowHelper,
+  groupStepOutputsById,
   PrincipalType,
 } from '@openops/shared';
 import { engineRunner } from 'server-worker';
@@ -38,7 +38,7 @@ const blockVariableController: FastifyPluginAsyncTypebox = async (app) => {
       stepIds,
     });
 
-    const stepTestOutputs = encodeStepOutputs(outputs);
+    const stepTestOutputs = groupStepOutputsById(outputs);
 
     const { result } = await engineRunner.executeVariable(engineToken, {
       variableExpression: request.variableExpression,

@@ -17,7 +17,6 @@ import {
   FlowVersionId,
   isEmpty,
   isNil,
-  MAX_LOG_SIZE,
   openOpsId,
   PauseMetadata,
   ProgressUpdateType,
@@ -469,13 +468,6 @@ async function updateLogs({
     executionState,
   });
 
-  if (serializedLogs.byteLength > MAX_LOG_SIZE) {
-    const errors = new Error(
-      'Execution Output is too large, maximum size is ' + MAX_LOG_SIZE,
-    );
-    exceptionHandler.handle(errors);
-    throw errors;
-  }
   const fileId = flowRun.logsFileId ?? openOpsId();
   await fileService.save({
     fileId,

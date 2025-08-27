@@ -8,6 +8,7 @@ import React, {
   useCallback,
   useEffect,
   useImperativeHandle,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -67,9 +68,14 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
     const [currentLanguage, setCurrentLanguage] =
       useState<MonacoLanguage>(language);
 
-    const { code, packageJson } = isStringValue
-      ? { code: value, packageJson: undefined }
-      : sourceCodeObject || { code: convertToString(value), packageJson: '{}' };
+    const { code, packageJson } = useMemo(() => {
+      return isStringValue
+        ? { code: value, packageJson: undefined }
+        : sourceCodeObject || {
+            code: convertToString(value),
+            packageJson: '{}',
+          };
+    }, [value, sourceCodeObject, isStringValue]);
 
     const formatValue = (value: unknown): string => {
       if (typeof value === 'string') {

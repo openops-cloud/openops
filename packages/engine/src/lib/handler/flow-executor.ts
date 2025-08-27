@@ -57,7 +57,9 @@ export const flowExecutor = {
         ? output.setVerdict(ExecutionVerdict.SUCCEEDED, output.verdictResponse)
         : output;
 
-    await sendProgress(newContext, constants);
+    sendProgress(newContext, constants);
+
+    await progressService.flushProgressUpdate(constants.flowRunId);
 
     return newContext.toResponse();
   },
@@ -103,7 +105,7 @@ export const flowExecutor = {
         duration: stepEndTime - stepStartTime,
       });
 
-      await sendProgress(flowExecutionContext, constants);
+      sendProgress(flowExecutionContext, constants);
 
       if (flowExecutionContext.verdict !== ExecutionVerdict.RUNNING) {
         break;
@@ -121,9 +123,9 @@ export const flowExecutor = {
 function sendProgress(
   flowExecutionContext: FlowExecutorContext,
   constants: EngineConstants,
-): Promise<void> {
+): void {
   if (isNil(constants.executionCorrelationId)) {
-    return Promise.resolve();
+    return;
   }
   return progressService.sendUpdate({
     engineConstants: constants,

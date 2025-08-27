@@ -129,6 +129,11 @@ export const flowService = {
         afterCursor: decodedCursor.nextCursor,
         beforeCursor: decodedCursor.previousCursor,
       },
+      customPaginationColumn: {
+        columnPath: 'versions[0].updated',
+        columnName: 'fv.updated',
+        columnType: 'timestamp with time zone',
+      },
     });
 
     const queryWhere: Record<string, unknown> = { projectId };
@@ -158,8 +163,7 @@ export const flowService = {
             .limit(1)
             .getQuery() +
           ')',
-      )
-      .orderBy('fv.updated', 'DESC');
+      );
 
     if (name) {
       query = query.andWhere('fv.displayName ILIKE :namePattern', {
