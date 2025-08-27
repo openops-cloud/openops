@@ -71,21 +71,10 @@ describe('Progress Service', () => {
       };
 
       saveRequestBodyMock.mockResolvedValue('request:test-run-id');
-<<<<<<< HEAD
       progressService.sendUpdate(successParams);
       await progressService.flushProgressUpdate(successParams.engineConstants.flowRunId);
 
       expect(saveRequestBodyMock).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({
-        executionCorrelationId: 'test-correlation-id-success',
-        runId: 'test-run-id',
-        workerHandlerId: 'test-handler-id',
-        progressUpdateType: 'WEBHOOK_RESPONSE',
-      }));
-=======
-      await progressService.sendUpdate(successParams);
->>>>>>> main
-
-      expect(saveRequestBodyMock).toHaveBeenCalledWith('test-run-id', expect.objectContaining({
         executionCorrelationId: 'test-correlation-id-success',
         runId: 'test-run-id',
         workerHandlerId: 'test-handler-id',
@@ -117,27 +106,10 @@ describe('Progress Service', () => {
       };
 
       saveRequestBodyMock.mockResolvedValue('request:test-run-id');
-<<<<<<< HEAD
       progressService.sendUpdate(uniqueParams);
       await progressService.flushProgressUpdate(uniqueParams.engineConstants.flowRunId);
 
       expect(saveRequestBodyMock).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({
-        executionCorrelationId: 'test-correlation-id-payload',
-        runId: 'test-run-id',
-        workerHandlerId: 'test-handler-id',
-        progressUpdateType: 'WEBHOOK_RESPONSE',
-        runDetails: expect.objectContaining({
-          steps: {},
-          status: 'RUNNING',
-          duration: 1000,
-          tasks: 1,
-        }),
-      }));
-=======
-      await progressService.sendUpdate(uniqueParams);
->>>>>>> main
-
-      expect(saveRequestBodyMock).toHaveBeenCalledWith('test-run-id', expect.objectContaining({
         executionCorrelationId: 'test-correlation-id-payload',
         runId: 'test-run-id',
         workerHandlerId: 'test-handler-id',
@@ -174,27 +146,10 @@ describe('Progress Service', () => {
       };
 
       saveRequestBodyMock.mockResolvedValue('request:test-run-id');
-<<<<<<< HEAD
       progressService.sendUpdate(paramsWithoutHandlerId);
       await progressService.flushProgressUpdate(paramsWithoutHandlerId.engineConstants.flowRunId);
 
       expect(saveRequestBodyMock).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({
-        executionCorrelationId: 'test-correlation-id-null-handler',
-        runId: 'test-run-id',
-        workerHandlerId: null,
-        progressUpdateType: 'WEBHOOK_RESPONSE',
-        runDetails: expect.objectContaining({
-          steps: {},
-          status: 'RUNNING',
-          duration: 1000,
-          tasks: 1,
-        }),
-      }));
-=======
-      await progressService.sendUpdate(paramsWithoutHandlerId);
->>>>>>> main
-
-      expect(saveRequestBodyMock).toHaveBeenCalledWith('test-run-id', expect.objectContaining({
         executionCorrelationId: 'test-correlation-id-null-handler',
         runId: 'test-run-id',
         workerHandlerId: null,
