@@ -1,7 +1,3 @@
-/**
- * Utility functions for parsing and enhancing JSON content display in tool fallback components
- */
-
 import { TextContentPart } from '@assistant-ui/react';
 import { tryParseJson } from '../../../lib/json-utils';
 
@@ -11,6 +7,7 @@ type ContentStructure = {
 
 /**
  * Checks if a value has the structure: { content: [{ type: "text", text: "..." }] }
+ * Used to identify content structures that can be parsed for JSON extraction.
  */
 export function isContentStructure(value: unknown): value is ContentStructure {
   if (!value || typeof value !== 'object') {
@@ -19,77 +16,99 @@ export function isContentStructure(value: unknown): value is ContentStructure {
 
   const obj = value as Record<string, unknown>;
 
-  if (!('content' in obj) || !Array.isArray(obj.content)) {
+  try {
+    if (!('content' in obj) || !Array.isArray(obj.content)) {
+      return false;
+    }
+
+    return obj.content.every(
+      (item) =>
+        item &&
+        typeof item === 'object' &&
+        'type' in item &&
+        item.type === 'text' &&
+        'text' in item &&
+        typeof item.text === 'string',
+    );
+  } catch {
     return false;
   }
-
-  // Check if all items in content array have the expected structure
-  return obj.content.every(
-    (item) =>
-      item &&
-      typeof item === 'object' &&
-      'type' in item &&
-      item.type === 'text' &&
-      'text' in item &&
-      typeof item.text === 'string',
-  );
 }
 
 /**
- * Extracts and parses JSON from content structure if possible
- * Returns a properly formatted JSON string for display
+ * Extracts and returns object content from TextContentPart array.
+ * Returns parsed objects when possible, otherwise returns the original content.
+ *
+ * @param content - Array of TextContentPart objects to extract from
+ * @returns Parsed object if JSON is found, otherwise original text or formatted content
  */
-export function extractJsonFromContent(content: TextContentPart[]): string {
-  if (content.length === 0) {
+export function extractJsonFromContent(
+  content: TextContentPart[],
+): string | object {
+  if (!Array.isArray(content) || content.length === 0) {
     return '';
   }
 
-  // If there's only one text content, try to parse it as JSON
   if (content.length === 1) {
-    const text = content[0].text;
-    const parsed = tryParseJson(text);
+    try {
+      const item = content[0];
+      if (
+        !item ||
+        typeof item !== 'object' ||
+        !('text' in item) ||
+        typeof item.text !== 'string'
+      ) {
+        return content;
+      }
 
-    // If parsing succeeded and it's an object, return formatted JSON
-    if (parsed !== text && typeof parsed === 'object') {
-      return JSON.stringify(parsed, null, 2);
+      const text = item.text;
+      const parsed = tryParseJson(text);
+
+      if (parsed !== text && typeof parsed === 'object' && parsed !== null) {
+        return parsed;
+      }
+
+      return text;
+    } catch {
+      return content;
     }
-
-    // Otherwise return the original text
-    return text;
   }
 
-  // If parsing failed, return a formatted representation of the content array
-  return JSON.stringify(content, null, 2);
+  return content;
 }
 
 /**
- * Main function to format result data for display in CodeEditor
- * Handles various data structures and attempts to provide the best display format
+ * Main function to format result data for display in CodeEditor.
+ * Returns parsed objects when possible, maintaining object structure for better display.
+ * Handles various data structures and provides fail-safe fallbacks.
+ *
+ * @param result - The data to format for display
+ * @returns Parsed object if possible, otherwise formatted string or original data
  */
-export function formatToolResultForDisplay(result: unknown): string {
+export function formatToolResultForDisplay(result: unknown): string | object {
   if (result === null || result === undefined) {
     return String(result);
   }
 
   if (typeof result === 'string') {
-    const parsed = tryParseJson(result);
-    if (parsed !== result && typeof parsed === 'object') {
-      return JSON.stringify(parsed, null, 2);
+    try {
+      const parsed = tryParseJson(result);
+      if (parsed !== result && typeof parsed === 'object' && parsed !== null) {
+        return parsed;
+      }
+      return result;
+    } catch {
+      return result;
     }
-    return result;
   }
 
   if (typeof result !== 'object') {
-    return String(result);
+    return result;
   }
 
   if (isContentStructure(result)) {
     return extractJsonFromContent(result.content);
   }
 
-  try {
-    return JSON.stringify(result, null, 2);
-  } catch {
-    return String(result);
-  }
+  return result;
 }
