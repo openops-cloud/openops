@@ -92,9 +92,9 @@ const FlowTemplateGallery = ({
       </TabsList>
       {(activeTab === TemplatesTabs.Public || showPrivateTemplates) && (
         <div className="flex items-center justify-between pr-[15px] pl-7">
-          <DialogTitle className="text-[22px] font-medium text-primary-300 dark:text-primary">
+          <h2 className="text-[22px] font-medium text-primary-300 dark:text-primary">
             {selectionHeading || t('All templates')}
-          </DialogTitle>
+          </h2>
           <SearchInput
             placeholder={t('Search for template')}
             value={searchText}
