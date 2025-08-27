@@ -12,6 +12,11 @@ export type PaginationOptions<Entity> = {
   entity: EntitySchema<Entity>;
   alias?: string;
   query?: PagingQuery;
+  customPaginationColumn?: {
+    columnPath: string;
+    columnName: string;
+    columnType?: string;
+  };
 };
 
 export function buildPaginator<Entity extends ObjectLiteral>(
@@ -26,6 +31,14 @@ export function buildPaginator<Entity extends ObjectLiteral>(
   const paginator = new Paginator<Entity>(entity);
 
   paginator.setAlias(alias);
+
+  if (options.customPaginationColumn) {
+    paginator.setPaginationColumn(
+      options.customPaginationColumn.columnPath,
+      options.customPaginationColumn.columnName,
+      options.customPaginationColumn.columnType,
+    );
+  }
 
   if (query.afterCursor) {
     paginator.setAfterCursor(query.afterCursor);

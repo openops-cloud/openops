@@ -49,7 +49,9 @@ export type StepContext = Static<typeof StepContext>;
 export const ChatFlowContext = Type.Object({
   flowId: Type.String(),
   flowVersionId: Type.String(),
+  runId: Type.Optional(Type.String()),
   currentStepId: Type.Optional(Type.String()),
+  currentStepName: Type.Optional(Type.String()),
   currentStepData: Type.Optional(Type.Any()),
   steps: Type.Array(StepContext),
 });
