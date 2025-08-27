@@ -299,6 +299,84 @@ function mergeToolResultIntoUIMessage(
 }
 
 /**
+ * Extracts tool result value from a tool message
+ */
+function extractToolResult(message: ModelMessage): any {
+  const toolContent = Array.isArray(message.content)
+    ? message.content[0]
+    : message.content;
+
+  return (
+    toolContent as unknown as {
+      type?: string;
+      output?: { value?: { code?: string; packageJson?: string } };
+    }
+  )?.output?.value;
+}
+
+/**
+ * Formats tool result as readable text
+ */
+function formatToolResultAsText(toolResult: any): string {
+  if (typeof toolResult === 'object') {
+    return `\n\nPrevious code generation result:\n\`\`\`typescript\n${
+      toolResult.code || 'No code generated'
+    }\n\`\`\`\n\nPackage dependencies: ${toolResult.packageJson || '{}'}`;
+  }
+
+  return `\n\nTool result: ${JSON.stringify(toolResult)}`;
+}
+
+/**
+ * Extracts existing text from message content
+ */
+function extractExistingText(content: string | any[]): string {
+  if (typeof content === 'string') {
+    return content;
+  }
+
+  if (Array.isArray(content)) {
+    return content
+      .filter((part) => 'text' in part && typeof part.text === 'string')
+      .map((part) => (part as { text: string }).text)
+      .join(' ');
+  }
+
+  return '';
+}
+
+/**
+ * Merges tool result into the preceding assistant message
+ */
+function mergeToolResultIntoAssistant(
+  transformedMessages: ModelMessage[],
+  toolMessage: ModelMessage,
+): boolean {
+  const lastAssistantIndex = transformedMessages.length - 1;
+  const lastMessage = transformedMessages[lastAssistantIndex];
+
+  if (!lastMessage || lastMessage.role !== 'assistant') {
+    return false;
+  }
+
+  const toolResult = extractToolResult(toolMessage);
+  if (!toolResult) {
+    return false;
+  }
+
+  const resultText = formatToolResultAsText(toolResult);
+  const existingText = extractExistingText(lastMessage.content);
+  const combinedText = existingText + resultText;
+
+  transformedMessages[lastAssistantIndex] = {
+    ...lastMessage,
+    content: combinedText,
+  };
+
+  return true;
+}
+
+/**
  * Transforms messages for code generation by embedding tool results as plain text within assistant messages.
  * This approach avoids formal tool blocks and their strict validation requirements
  * while preserving all context for AI models during iterative code generation.
@@ -311,56 +389,9 @@ export function transformMessagesForCodeGeneration(
 ): ModelMessage[] {
   const transformedMessages: ModelMessage[] = [];
 
-  for (let i = 0; i < messages.length; i++) {
-    const message = messages[i];
-
+  for (const message of messages) {
     if (message.role === 'tool') {
-      const lastAssistantIndex = transformedMessages.length - 1;
-      const lastMessage = transformedMessages[lastAssistantIndex];
-
-      if (lastMessage && lastMessage.role === 'assistant') {
-        const toolContent = Array.isArray(message.content)
-          ? message.content[0]
-          : message.content;
-
-        const toolResult = (
-          toolContent as unknown as {
-            type?: string;
-            output?: { value?: { code?: string; packageJson?: string } };
-          }
-        )?.output?.value;
-
-        if (toolResult) {
-          const resultText =
-            typeof toolResult === 'object'
-              ? `\n\nPrevious code generation result:\n\`\`\`typescript\n${
-                  toolResult.code || 'No code generated'
-                }\n\`\`\`\n\nPackage dependencies: ${
-                  toolResult.packageJson || '{}'
-                }`
-              : `\n\nTool result: ${JSON.stringify(toolResult)}`;
-
-          const existingText =
-            typeof lastMessage.content === 'string'
-              ? lastMessage.content
-              : Array.isArray(lastMessage.content)
-              ? lastMessage.content
-                  .filter(
-                    (part) => 'text' in part && typeof part.text === 'string',
-                  )
-                  .map((part) => (part as { text: string }).text)
-                  .join(' ')
-              : '';
-
-          const combinedText = existingText + resultText;
-
-          transformedMessages[lastAssistantIndex] = {
-            ...lastMessage,
-            content: combinedText,
-          };
-        }
-      }
-
+      mergeToolResultIntoAssistant(transformedMessages, message);
       continue;
     }
 
