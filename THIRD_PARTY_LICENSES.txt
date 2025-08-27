@@ -27260,7 +27260,7 @@ SOFTWARE.
 The following npm packages may be included in this product:
 
  - msgpackr-extract@3.0.2
- - msgpackr@1.10.1
+ - msgpackr@1.11.5
 
 These packages each contain the following license:
 
