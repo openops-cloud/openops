@@ -20,6 +20,7 @@ import {
   FlowExecutorContext,
 } from './context/flow-execution-context';
 import { flowExecutor } from './flow-executor';
+import { resumePausedIterationOldStrategy } from './loop-executor-old-resume';
 
 type LoopOnActionResolvedSettings = {
   items: readonly unknown[];
@@ -135,14 +136,31 @@ export const loopExecutor: BaseExecutor<LoopOnItemsAction> = {
       );
     }
 
-    return resumePausedIteration(
+    const iterationsMapping = await getLoopIterationsMapping(
       store,
+      constants.flowRunId,
+    );
+    if (iterationsMapping) {
+      return resumePausedIteration({
+        loopExecutionState: executionState,
+        actionName: action.name,
+        iterationsMapping,
+        firstLoopAction,
+        resolvedInput,
+        constants,
+        payload,
+        store,
+      });
+    }
+
+    return resumePausedIterationOldStrategy(
       payload,
-      resolvedInput,
       executionState,
+      resolvedInput.items.length,
       constants,
       firstLoopAction,
       action.name,
+      store,
     );
   },
 };
@@ -270,18 +288,16 @@ function setExecutionVerdict(
   return pauseLoop(executionState);
 }
 
-async function resumePausedIteration(
-  store: Store,
-  payload: { executionCorrelationId: string; path: string },
-  resolvedInput: LoopOnActionResolvedSettings,
-  loopExecutionState: FlowExecutorContext,
-  constants: EngineConstants,
-  firstLoopAction: Action,
-  actionName: string,
-): Promise<FlowExecutorContext> {
-  const flowRunId = constants.flowRunId;
-  const iterationsMapping = await getLoopIterationsMapping(store, flowRunId);
-
+async function resumePausedIteration({
+  loopExecutionState,
+  iterationsMapping,
+  firstLoopAction,
+  resolvedInput,
+  actionName,
+  constants,
+  payload,
+  store,
+}: ResumeParameters): Promise<FlowExecutorContext> {
   const path = buildPathKeyFromPayload(payload.path, actionName);
   const previousIterationResult = iterationsMapping[path];
 
@@ -308,7 +324,12 @@ async function resumePausedIteration(
     index: previousIterationResult.index,
   };
 
-  await storeLoopIterationsMapping(store, flowRunId, iterationsMapping);
+  await storeLoopIterationsMapping(
+    store,
+    constants.flowRunId,
+    iterationsMapping,
+  );
+
   newExecutionContext = newExecutionContext.setCurrentPath(
     newExecutionContext.currentPath.removeLast(),
   );
@@ -343,11 +364,11 @@ async function storeLoopIterationsMapping(
 async function getLoopIterationsMapping(
   store: Store,
   key: string,
-): Promise<Record<string, IterationResult>> {
+): Promise<Record<string, IterationResult> | null> {
   const mapping = await store.get(key);
 
   if (!mapping) {
-    throw new Error(`No iterations mapping found for run: ${key}`);
+    return null;
   }
 
   return mapping as Record<string, IterationResult>;
@@ -412,4 +433,15 @@ type IterationResult = {
   index: number;
   // Iteration state
   isPaused: boolean;
+};
+
+type ResumeParameters = {
+  payload: { executionCorrelationId: string; path: string };
+  iterationsMapping: Record<string, IterationResult>;
+  resolvedInput: LoopOnActionResolvedSettings;
+  loopExecutionState: FlowExecutorContext;
+  constants: EngineConstants;
+  firstLoopAction: Action;
+  actionName: string;
+  store: Store;
 };
