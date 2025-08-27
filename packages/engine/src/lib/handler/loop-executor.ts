@@ -232,23 +232,22 @@ async function saveIterationResults(
   let executionFailed = false;
 
   const iterationsMapping: Record<string, IterationResult> = {};
-  for (let i = 0; i < loopExecutionContext.iterations.length; ++i) {
-    const { index, verdict, currentPath, isPaused } =
-      loopExecutionContext.iterations[i];
 
+  for (const {
+    index,
+    verdict,
+    currentPath,
+    isPaused,
+  } of loopExecutionContext.iterations) {
     if (verdict === ExecutionVerdict.FAILED) {
       executionFailed = true;
     }
 
     if (isPaused) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       noPausedIterations = false;
     }
 
-    iterationsMapping[currentPath] = {
-      isPaused,
-      index,
-    };
+    iterationsMapping[currentPath] = { isPaused, index };
   }
 
   await storeLoopIterationsMapping(flowRunId, store, iterationsMapping);
