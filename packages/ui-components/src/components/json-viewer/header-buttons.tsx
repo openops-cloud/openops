@@ -1,5 +1,5 @@
 import { t } from 'i18next';
-import { Check, Copy, Download, Pencil, Trash } from 'lucide-react';
+import { Check, Copy, Download, Pencil, Search, Trash } from 'lucide-react';
 import React from 'react';
 import { Button } from '../../ui/button';
 
@@ -12,6 +12,7 @@ type HeaderButtonsProps = {
   handleEdit: () => void;
   handleDelete: () => void;
   apply?: () => void;
+  handleSearch?: () => void;
 };
 
 export const HeaderButtons = ({
@@ -22,6 +23,7 @@ export const HeaderButtons = ({
   handleDownload,
   handleEdit,
   handleDelete,
+  handleSearch,
   apply,
 }: HeaderButtonsProps) => {
   return (
@@ -54,6 +56,14 @@ export const HeaderButtons = ({
               </Button>
             </>
           )}
+          <Button
+            variant={'ghost'}
+            className="p-2 h-8"
+            onClick={handleSearch}
+            aria-label={t('Search')}
+          >
+            <Search className="w-4 h-4" />
+          </Button>
           <Button
             variant={'ghost'}
             className="p-2 h-8"
