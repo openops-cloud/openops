@@ -1,8 +1,4 @@
-import {
-  appendToContext,
-  compressAndEncrypt,
-  logger,
-} from '@openops/server-shared';
+import { appendToContext, logger } from '@openops/server-shared';
 import {
   Action,
   ActionType,
@@ -36,10 +32,6 @@ import {
 import { testExecutionContext } from './handler/context/test-execution-context';
 import { flowExecutor } from './handler/flow-executor';
 import { blockHelper } from './helper/block-helper';
-import {
-  SizeValidationResult,
-  validateExecutionSize,
-} from './helper/size-validation';
 import { triggerHelper } from './helper/trigger-helper';
 import { resolveVariable } from './resolve-variable';
 import { utils } from './utils';
@@ -55,7 +47,6 @@ const executeFlow = async (
     executionState: context,
     constants,
   });
-
   return {
     status: EngineResponseStatus.OK,
     response: {
@@ -96,15 +87,6 @@ async function executeStep(
   });
 
   const stepResult = output.steps[step.name];
-
-  const sizeValidation = await validateResultSize(input, stepResult, step.name);
-  if (!sizeValidation.isValid) {
-    return {
-      success: false,
-      output: sizeValidation.errorMessage,
-      input: stepResult.input,
-    };
-  }
 
   return {
     success: output.verdict !== ExecutionVerdict.FAILED,
@@ -305,29 +287,4 @@ export async function execute(
       },
     };
   }
-}
-
-async function validateResultSize(
-  input: ExecuteStepOperation,
-  stepResult: StepOutput,
-  stepName: string,
-): Promise<SizeValidationResult> {
-  let steps: Record<string, unknown> = {};
-  if (input.stepTestOutputs) {
-    steps = Object.fromEntries(
-      flowHelper
-        .getAllSteps(input.flowVersion.trigger)
-        .map((item) => [item.name, input.stepTestOutputs?.[item.id!] ?? null]),
-    );
-  }
-
-  // Simulate the full size
-  const currentStepTestOutput = await compressAndEncrypt(stepResult);
-  return validateExecutionSize({
-    flowVersion: input.flowVersion,
-    stepTestOutputs: {
-      ...steps,
-      [stepName]: currentStepTestOutput,
-    },
-  });
 }
