@@ -297,3 +297,75 @@ function mergeToolResultIntoUIMessage(
   }
   return false;
 }
+
+/**
+ * Transforms messages for code generation by embedding tool results as plain text within assistant messages.
+ * This approach avoids formal tool blocks and their strict validation requirements
+ * while preserving all context for AI models during iterative code generation.
+ *
+ * @param messages - Array of ModelMessage objects to transform
+ * @returns Transformed array with code generation tool results embedded as text
+ */
+export function transformMessagesForCodeGeneration(
+  messages: ModelMessage[],
+): ModelMessage[] {
+  const transformedMessages: ModelMessage[] = [];
+
+  for (let i = 0; i < messages.length; i++) {
+    const message = messages[i];
+
+    if (message.role === 'tool') {
+      const lastAssistantIndex = transformedMessages.length - 1;
+      const lastMessage = transformedMessages[lastAssistantIndex];
+
+      if (lastMessage && lastMessage.role === 'assistant') {
+        const toolContent = Array.isArray(message.content)
+          ? message.content[0]
+          : message.content;
+
+        const toolResult = (
+          toolContent as unknown as {
+            type?: string;
+            output?: { value?: { code?: string; packageJson?: string } };
+          }
+        )?.output?.value;
+
+        if (toolResult) {
+          const resultText =
+            typeof toolResult === 'object'
+              ? `\n\nPrevious code generation result:\n\`\`\`typescript\n${
+                  toolResult.code || 'No code generated'
+                }\n\`\`\`\n\nPackage dependencies: ${
+                  toolResult.packageJson || '{}'
+                }`
+              : `\n\nTool result: ${JSON.stringify(toolResult)}`;
+
+          const existingText =
+            typeof lastMessage.content === 'string'
+              ? lastMessage.content
+              : Array.isArray(lastMessage.content)
+              ? lastMessage.content
+                  .filter(
+                    (part) => 'text' in part && typeof part.text === 'string',
+                  )
+                  .map((part) => (part as { text: string }).text)
+                  .join(' ')
+              : '';
+
+          const combinedText = existingText + resultText;
+
+          transformedMessages[lastAssistantIndex] = {
+            ...lastMessage,
+            content: combinedText,
+          };
+        }
+      }
+
+      continue;
+    }
+
+    transformedMessages.push(message);
+  }
+
+  return transformedMessages;
+}

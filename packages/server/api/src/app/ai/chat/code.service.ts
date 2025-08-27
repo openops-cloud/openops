@@ -14,6 +14,7 @@ import {
   StreamObjectOnFinishCallback,
   StreamObjectResult,
 } from 'ai';
+import { transformMessagesForCodeGeneration } from './utils';
 
 type StreamCodeOptions = {
   chatHistory: ModelMessage[];
@@ -40,10 +41,13 @@ export const streamCode = ({
     chatHistory,
     systemPrompt,
   });
+
+  const messages = transformMessagesForCodeGeneration(chatHistory);
+
   return streamObject({
     model: languageModel,
     system: systemPrompt,
-    messages: chatHistory,
+    messages,
     ...aiConfig.modelSettings,
     onFinish,
     onError,
@@ -72,10 +76,12 @@ export const generateCode = ({
     packageJson?: string;
   }>
 > => {
+  const messages = transformMessagesForCodeGeneration(chatHistory);
+
   return generateObject({
     model: languageModel,
     system: systemPrompt,
-    messages: chatHistory,
+    messages,
     ...aiConfig.modelSettings,
     schema: unifiedCodeLLMSchema,
     experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
