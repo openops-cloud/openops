@@ -86,7 +86,7 @@ describe('Flow API', () => {
       expect(response?.statusCode).toBe(StatusCodes.CREATED);
       const responseBody = response?.json();
 
-      expect(Object.keys(responseBody)).toHaveLength(9);
+      expect(Object.keys(responseBody)).toHaveLength(10);
       expect(responseBody?.id).toHaveLength(21);
       expect(responseBody?.created).toBeDefined();
       expect(responseBody?.updated).toBeDefined();
@@ -162,7 +162,7 @@ describe('Flow API', () => {
       expect(response?.statusCode).toBe(StatusCodes.CREATED);
       const responseBody = response?.json();
 
-      expect(Object.keys(responseBody)).toHaveLength(9);
+      expect(Object.keys(responseBody)).toHaveLength(10);
       expect(responseBody?.id).toHaveLength(21);
 
       expect(responseBody?.created).toBeDefined();
@@ -236,7 +236,7 @@ describe('Flow API', () => {
       expect(response?.statusCode).toBe(StatusCodes.CREATED);
       const responseBody = response?.json();
 
-      expect(Object.keys(responseBody)).toHaveLength(9);
+      expect(Object.keys(responseBody)).toHaveLength(10);
       expect(responseBody?.id).toHaveLength(21);
       expect(responseBody?.created).toBeDefined();
       expect(responseBody?.updated).toBeDefined();
@@ -322,7 +322,7 @@ describe('Flow API', () => {
       expect(response?.statusCode).toBe(StatusCodes.OK);
       const responseBody = response?.json();
 
-      expect(Object.keys(responseBody)).toHaveLength(9);
+      expect(Object.keys(responseBody)).toHaveLength(10);
       expect(responseBody?.id).toBe(mockFlow.id);
       expect(responseBody?.created).toBeDefined();
       expect(responseBody?.updated).toBeDefined();
@@ -392,7 +392,7 @@ describe('Flow API', () => {
       expect(response?.statusCode).toBe(StatusCodes.OK);
       const responseBody = response?.json();
 
-      expect(Object.keys(responseBody)).toHaveLength(9);
+      expect(Object.keys(responseBody)).toHaveLength(10);
       expect(responseBody?.id).toBe(mockFlow.id);
       expect(responseBody?.created).toBeDefined();
       expect(responseBody?.updated).toBeDefined();
@@ -458,7 +458,7 @@ describe('Flow API', () => {
       expect(response?.statusCode).toBe(StatusCodes.OK);
       const responseBody = response?.json();
 
-      expect(Object.keys(responseBody)).toHaveLength(9);
+      expect(Object.keys(responseBody)).toHaveLength(10);
       expect(responseBody?.id).toBe(mockFlow.id);
       expect(responseBody?.created).toBeDefined();
       expect(responseBody?.updated).toBeDefined();
