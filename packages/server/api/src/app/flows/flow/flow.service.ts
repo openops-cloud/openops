@@ -352,6 +352,13 @@ export const flowService = {
   }: UpdatePublishedVersionIdParams): Promise<PopulatedFlow> {
     const flowToUpdate = await this.getOneOrThrow({ id, projectId });
 
+    if (!flowToUpdate.isWorkflow) {
+      throw new ApplicationError({
+        code: ErrorCode.FLOW_OPERATION_INVALID,
+        params: {},
+      });
+    }
+
     const flowVersionToPublish = await flowVersionService.getFlowVersionOrThrow(
       {
         flowId: id,
