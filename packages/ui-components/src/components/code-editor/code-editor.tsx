@@ -83,7 +83,6 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
       }
 
       if (['json', 'javascript', 'typescript'].includes(currentLanguage)) {
-        console.log('formatValue', value);
         return convertToString(value);
       }
 
