@@ -282,7 +282,9 @@ async function resumePausedIteration(
   const flowRunId = constants.flowRunId;
   const iterationsMapping = await getLoopIterationsMapping(store, flowRunId);
 
-  const previousIterationResult = iterationsMapping[payload.path];
+  const path = buildPathKeyFromPayload(payload.path, actionName);
+  const previousIterationResult = iterationsMapping[path];
+
   const newCurrentPath = loopExecutionState.currentPath.loopIteration({
     loopName: actionName,
     iteration: previousIterationResult.index - 1,
@@ -301,7 +303,7 @@ async function resumePausedIteration(
 
   const isPaused = newExecutionContext.verdict === ExecutionVerdict.PAUSED;
 
-  iterationsMapping[payload.path] = {
+  iterationsMapping[path] = {
     isPaused,
     index: previousIterationResult.index,
   };
@@ -378,6 +380,22 @@ function getLoopStepResult(
   });
 
   return loopStepResult;
+}
+
+function buildPathKeyFromPayload(input: string, target: string): string {
+  const parts = input.split(',');
+  const filteredParts = [];
+
+  for (let i = 0; i < parts.length; i += 2) {
+    filteredParts.push(`${parts[i]},${parts[i + 1]}`);
+
+    if (parts[i] === target) {
+      break;
+    }
+  }
+
+  // "step_name,iteration.step_name,iteration"
+  return filteredParts.join('.');
 }
 
 function pathContainsAction(actionName: string, path: string): boolean {
