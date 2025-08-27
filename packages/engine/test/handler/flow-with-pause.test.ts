@@ -23,14 +23,18 @@ jest.mock('../../src/lib/services/storage.service', () => ({
     createContextStore: jest.fn().mockImplementation(() => ({
         get: jest.fn()
             .mockReturnValueOnce({
+              'loop,0': {
                 index: 1,
                 isPaused: true,
                 steps: runnedSteps,
+              },
             })
             .mockResolvedValue({
+              'loop,0': {
                 index: 1,
                 isPaused: false,
                 steps: runnedSteps,
+              },
             }),
         put: jest.fn(),
     })),
