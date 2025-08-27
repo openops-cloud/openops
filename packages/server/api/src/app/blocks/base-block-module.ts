@@ -11,11 +11,11 @@ import {
   ALL_PRINCIPAL_TYPES,
   BlockCategory,
   BlockOptionRequest,
-  encodeStepOutputs,
   flowHelper,
   GetBlockRequestParams,
   GetBlockRequestQuery,
   GetBlockRequestWithScopeParams,
+  groupStepOutputsById,
   ListBlocksRequestQuery,
   ListVersionRequestQuery,
   ListVersionsResponse,
@@ -155,7 +155,7 @@ const baseBlocksController: FastifyPluginAsyncTypebox = async (app) => {
       stepIds,
     });
 
-    const stepTestOutputs = encodeStepOutputs(outputs);
+    const stepTestOutputs = groupStepOutputsById(outputs);
 
     const { result } = await engineRunner.executeProp(engineToken, {
       block: await getBlockPackage(projectId, request),
