@@ -1,7 +1,6 @@
 import { t } from 'i18next';
 import { CircleArrowUp } from 'lucide-react';
 import { cn } from '../../lib/cn';
-import { DialogTitle } from '../../ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip';
 import { ExploreTemplates } from '../explore-templates';
