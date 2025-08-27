@@ -71,7 +71,10 @@ const FlowTemplateGallery = ({
           <div className="flex items-center justify-center gap-2 mx-[14px]">
             <span className="text-[24px]">{t('My Templates')}</span>
             <Tooltip>
-              <TooltipTrigger asChild aria-label={t('Sample output info')}>
+              <TooltipTrigger
+                asChild
+                aria-label={t('Upgrade to unlock this feature')}
+              >
                 <CircleArrowUp
                   className="text-black dark:text-white"
                   size={21}
