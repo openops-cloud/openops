@@ -60,16 +60,14 @@ const FlowTemplateGallery = ({
           value={TemplatesTabs.Public}
           className="min-w-[265px] mt-0 font-normal data-[state=active]:font-bold text-primary-300 text-base pl-0 pr-2 dark:text-white rounded-none border-b-none data-[state=active]:border-b-2 data-[state=active]:bg-background data-[state=active]:text-primary-300 data-[state=active]:dark:text-white data-[state=active]:shadow-none data-[state=active]:border-blueAccent-300"
         >
-          <span className="mx-[14px] text-[24px]">
-            {t('OpenOps Templates')}
-          </span>
+          <span className="mx-[14px] text-xl">{t('OpenOps Templates')}</span>
         </TabsTrigger>
         <TabsTrigger
           value={TemplatesTabs.Private}
-          className="mt-0 !text-[24px] font-normal data-[state=active]:font-bold text-primary-300 text-base pr-0 pl-2 dark:text-white rounded-none border-b-none data-[state=active]:border-b-2 data-[state=active]:bg-background data-[state=active]:text-primary-300 data-[state=active]:dark:text-white data-[state=active]:shadow-none data-[state=active]:border-blueAccent-300"
+          className="mt-0 font-normal data-[state=active]:font-bold text-primary-300 text-base pr-0 pl-2 dark:text-white rounded-none border-b-none data-[state=active]:border-b-2 data-[state=active]:bg-background data-[state=active]:text-primary-300 data-[state=active]:dark:text-white data-[state=active]:shadow-none data-[state=active]:border-blueAccent-300"
         >
           <div className="flex items-center justify-center gap-2 mx-[14px]">
-            <span className="text-[24px]">{t('My Templates')}</span>
+            <span className="text-xl">{t('My Templates')}</span>
             <Tooltip>
               <TooltipTrigger
                 asChild
@@ -136,7 +134,7 @@ const FlowTemplateGallery = ({
             onTemplateSelect={onTemplateSelect}
           />
         ) : (
-          <div className="h-full w-full flex items-center justify-center">
+          <div className="h-full w-full flex items-center justify-center pb-[20%]">
             <UpgradeToUseCompanyTemplatesBanner
               link={'https://openops.com/contact'}
             />
