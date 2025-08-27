@@ -30,6 +30,7 @@ import { AddInputToTriggerEventTable1751282188913 } from './migrations/175128218
 import { AddSuccessToFlowStepTestOutputTable1752487641303 } from './migrations/1752487641303-AddSuccessToFlowStepTestOutputTable';
 import { UpdateUmbrellaRecommendationTypesAcrossFlowVersions1752758891771 } from './migrations/1752758891771-UpdateUmbrellaRecommendationTypesAcrossFlowVersions';
 import { AddTriggerSourceToFlowRun1754489349007 } from './migrations/1754489349007-AddTriggerSourceToFlowRun';
+import { AddIsWorkflowToFlowTable1756298583000 } from './migrations/1756298583000-AddIsWorkflowToFlowTable';
 
 const getSslConfig = (): boolean | TlsOptions => {
   const useSsl = system.get(AppSystemProp.POSTGRES_USE_SSL);
@@ -68,6 +69,7 @@ const getMigrations = (): (new () => MigrationInterface)[] => {
     AddSuccessToFlowStepTestOutputTable1752487641303,
     UpdateUmbrellaRecommendationTypesAcrossFlowVersions1752758891771,
     AddTriggerSourceToFlowRun1754489349007,
+    AddIsWorkflowToFlowTable1756298583000,
   ];
 };
 
