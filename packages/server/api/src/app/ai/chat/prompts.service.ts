@@ -9,11 +9,13 @@ export const getMcpSystemPrompt = async ({
   isTablesLoaded,
   isOpenOpsMCPEnabled,
   isAwsCostMcpDisabled,
+  uiContext,
 }: {
   isAnalyticsLoaded: boolean;
   isTablesLoaded: boolean;
   isOpenOpsMCPEnabled: boolean;
   isAwsCostMcpDisabled: boolean;
+  uiContext?: ChatFlowContext;
 }): Promise<string> => {
   const prompts = [loadPrompt('mcp.txt')];
 
@@ -33,7 +35,12 @@ export const getMcpSystemPrompt = async ({
     prompts.push(loadPrompt('mcp-aws-cost-unavailable.txt'));
   }
 
+  if (uiContext) {
+    prompts.push(buildUIContextSection(uiContext));
+  }
+
   const allPrompts = await Promise.all(prompts);
+
   return allPrompts.join('\n\n');
 };
 
@@ -88,6 +95,45 @@ export const getBlockSystemPrompt = async (
     default:
       return '';
   }
+};
+
+export const buildUIContextSection = async (
+  flowContext: ChatFlowContext,
+): Promise<string> => {
+  const contextParts: string[] = [];
+
+  if (!flowContext.flowId && !flowContext.flowVersionId && !flowContext.runId) {
+    return '';
+  }
+
+  if (flowContext.flowId) {
+    contextParts.push(`flow ${flowContext.flowId}`);
+  }
+
+  if (flowContext.flowVersionId) {
+    contextParts.push(`flowVersion ${flowContext.flowVersionId}`);
+  }
+
+  if (flowContext.runId) {
+    contextParts.push(`run ${flowContext.runId}`);
+  }
+
+  if (flowContext.currentStepId) {
+    contextParts.push(`step id ${flowContext.currentStepId}`);
+  }
+
+  if (flowContext.currentStepName) {
+    contextParts.push(`step name "${flowContext.currentStepName}"`);
+  }
+
+  if (contextParts.length === 0) {
+    return '';
+  }
+
+  return (
+    `## Current selected data: \n${contextParts.join(' with ')}. \n\n` +
+    'If the user is asking about anything related to this data, always use it query tools like Get latest flow version by id or run details tool in order to help him.'
+  );
 };
 
 export async function loadPrompt(filename: string): Promise<string> {

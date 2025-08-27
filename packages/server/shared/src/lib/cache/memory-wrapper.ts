@@ -71,12 +71,26 @@ async function getOrAdd<T, Args extends unknown[]>(
   throw new Error('Not implemented');
 }
 
+const setBuffer = async (
+  key: string,
+  value: Buffer,
+  expireInSeconds: number = DEFAULT_EXPIRE_TIME,
+): Promise<void> => {
+  throw new Error('Not implemented');
+};
+
+const getBufferAndDelete = async (key: string): Promise<Buffer | null> => {
+  throw new Error('Not implemented');
+};
+
 export const memoryWrapper = {
   setKey,
   getKey,
   getOrAdd,
   deleteKey,
   keyExists,
+  setBuffer,
+  getBufferAndDelete,
   setSerializedObject,
   getSerializedObject,
   getAndDeleteSerializedObject,

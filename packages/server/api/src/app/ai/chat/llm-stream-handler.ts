@@ -1,4 +1,4 @@
-import { isLLMTelemetryEnabled, providerOptions } from '@openops/common';
+import { isLLMTelemetryEnabled } from '@openops/common';
 import { AiConfig } from '@openops/shared';
 import {
   LanguageModel,
@@ -57,7 +57,6 @@ export function getLLMAsyncStream(
     async onError({ error }): Promise<void> {
       throw error;
     },
-    providerOptions,
   });
 
   return fullStream;

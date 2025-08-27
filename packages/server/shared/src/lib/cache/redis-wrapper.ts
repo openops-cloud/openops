@@ -23,11 +23,6 @@ const getKey = async (key: string): Promise<string | null> => {
   return redis.get(key);
 };
 
-const getAndDeleteKey = async (key: string): Promise<string | null> => {
-  const redis = getRedisClient();
-  return redis.getdel(key);
-};
-
 const deleteKey = async (key: string): Promise<void> => {
   const redis = getRedisClient();
   await redis.del(key);
@@ -98,10 +93,19 @@ async function getSerializedObject<T>(key: string): Promise<T | null> {
   return result ? (JSON.parse(result) as T) : null;
 }
 
-async function getAndDeleteSerializedObject<T>(key: string): Promise<T | null> {
-  const result = await getAndDeleteKey(key);
-  return result ? (JSON.parse(result) as T) : null;
-}
+const setBuffer = async (
+  key: string,
+  value: Buffer,
+  expireInSeconds: number = DEFAULT_EXPIRE_TIME,
+): Promise<void> => {
+  const redis = getRedisClient();
+  await redis.set(key, value, 'EX', expireInSeconds);
+};
+
+const getBufferAndDelete = async (key: string): Promise<Buffer | null> => {
+  const redis = getRedisClient();
+  return redis.getdelBuffer(key);
+};
 
 const getRedisClient = (): Redis => {
   if (!client) {
@@ -125,8 +129,9 @@ export const redisWrapper = {
   getOrAdd,
   deleteKey,
   keyExists,
+  setBuffer,
+  getBufferAndDelete,
   setSerializedObject,
   getSerializedObject,
-  getAndDeleteSerializedObject,
   scanKeys,
 };
