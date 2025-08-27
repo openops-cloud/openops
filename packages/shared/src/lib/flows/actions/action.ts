@@ -84,7 +84,7 @@ Example:
 Use '{}' when there are no dependencies.`,
   }),
   code: Type.String({
-    description: `JavaScript/TypeScript source for this step. To use data from previous steps, pass them as key–value pairs and access them via 'inputs.key' in your code. The entry point must be an exported function named 'code'. If it is removed or renamed, the step will fail.
+    description: `TypeScript source for this step. Executes in an isolated-vm environment (secure and isolated JavaScript runtime). To use data from previous steps, pass them as key–value pairs and access them via 'inputs.key' in your code. The entry point must be an exported function named 'code'. If it is removed or renamed, the step will fail.
 
 code MUST follow this exact interface:
 
@@ -95,7 +95,16 @@ export const code = async (inputs) => {
   // Return the result
   return result;
 };
-\`\`\``,
+\`\`\`
+
+CRITICAL CONSTRAINTS:
+- Only use ES6 imports if critically needed, otherwise don't use external dependencies 
+- NO require() statements
+- NO access to Node.js native modules (fs, process, http, crypto, path, os, etc.)
+- NO file system operations or network requests
+- Use bracket notation for dynamic properties (data['propertyName'])
+- AVOID Direct property access on inferred object types (example: if (!data.propertyName) { // ❌ May cause TS2339 errors)
+`,
   }),
 });
 
