@@ -52,16 +52,6 @@ async function getSerializedObject<T>(key: string): Promise<T | null> {
   return result ? (JSON.parse(result) as T) : null;
 }
 
-async function getAndDeleteSerializedObject<T>(key: string): Promise<T | null> {
-  const result = await getKey(key);
-  if (result) {
-    await deleteKey(key);
-    return JSON.parse(result) as T;
-  }
-
-  return null;
-}
-
 async function getOrAdd<T, Args extends unknown[]>(
   key: string,
   createCallback: (...args: Args) => Promise<T>,
@@ -93,6 +83,5 @@ export const memoryWrapper = {
   getBufferAndDelete,
   setSerializedObject,
   getSerializedObject,
-  getAndDeleteSerializedObject,
   scanKeys,
 };
