@@ -170,9 +170,9 @@ const SelectFlowTemplateDialogContent = ({
             selectionHeading={selectionHeading}
             showPrivateTemplates={EDITION !== OpsEdition.COMMUNITY}
             publicTemplates={templates}
-            privateTemplates={templates}
+            privateTemplates={[]}
             isPublicTemplatesLoading={isTemplateListLoading}
-            isPrivateTemplatesLoading={isTemplateListLoading}
+            isPrivateTemplatesLoading={false}
             onTemplateSelect={handleTemplateSelect}
             searchText={searchText}
             onSearchInputChange={onSearchInputChange}
