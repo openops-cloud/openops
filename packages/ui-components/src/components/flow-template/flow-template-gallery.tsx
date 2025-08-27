@@ -51,7 +51,7 @@ const FlowTemplateGallery = ({
       value={activeTab}
       onValueChange={(tab) => onTabChange(tab as TemplatesTabs)}
       className={cn(
-        'h-full flex-1 flex flex-col gap-[14px] pt-[34px]  overflow-y-hidden',
+        'h-full flex-1 flex flex-col gap-[14px] pt-[34px] overflow-y-hidden',
         className,
       )}
     >
