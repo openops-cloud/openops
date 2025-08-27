@@ -250,7 +250,7 @@ async function saveIterationResults(
     iterationsMapping[currentPath] = { isPaused, index };
   }
 
-  await storeLoopIterationsMapping(flowRunId, store, iterationsMapping);
+  await storeLoopIterationsMapping(store, flowRunId, iterationsMapping);
   return { executionFailed, noPausedIterations };
 }
 
@@ -308,7 +308,7 @@ async function resumePausedIteration(
     index: previousIterationResult.index,
   };
 
-  await storeLoopIterationsMapping(flowRunId, store, iterationsMapping);
+  await storeLoopIterationsMapping(store, flowRunId, iterationsMapping);
   newExecutionContext = newExecutionContext.setCurrentPath(
     newExecutionContext.currentPath.removeLast(),
   );
@@ -333,8 +333,8 @@ function areAllStepsInLoopFinished(
 }
 
 async function storeLoopIterationsMapping(
-  key: string,
   store: Store,
+  key: string,
   iterationsMapping: Record<string, IterationResult>,
 ): Promise<void> {
   await store.put(key, iterationsMapping);
