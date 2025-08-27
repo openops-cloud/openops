@@ -1,0 +1,127 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.tables.name }}
+  labels:
+    app: {{ .Values.tables.name }}
+spec:
+  replicas: {{ .Values.tables.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.tables.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.tables.name }}
+    spec:
+      containers:
+      - name: {{ .Values.tables.name }}
+        image: {{ .Values.image.repository }}/{{ .Values.tables.image }}:{{ .Values.tables.tag }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+        - name: BASEROW_PUBLIC_URL
+          valueFrom:
+            secretKeyRef:
+              name: openops-secrets
+              key: tablesPublicUrl
+        - name: BASEROW_PRIVATE_URL
+          value: "{{ .Values.tables.env.privateUrl | default (include "openops.tablesServiceUrl" .) }}"
+        - name: BASEROW_EXTRA_ALLOWED_HOSTS
+          value: "{{ .Values.tables.env.extraAllowedHosts }}"
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: openops-secrets
+              key: encryptionKey
+        - name: BASEROW_JWT_SIGNING_KEY
+          valueFrom:
+            secretKeyRef:
+              name: openops-secrets
+              key: jwtSecret
+        - name: BASEROW_ADMIN_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: openops-secrets
+              key: adminEmail
+        - name: BASEROW_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: openops-secrets
+              key: adminPassword
+        - name: BASEROW_REFRESH_TOKEN_LIFETIME_HOURS
+          valueFrom:
+            secretKeyRef:
+              name: openops-secrets
+              key: jwtTokenLifetimeHours
+        - name: BASEROW_ACCESS_TOKEN_LIFETIME_MINUTES
+          valueFrom:
+            secretKeyRef:
+              name: openops-secrets
+              key: tablesTokenLifetimeMinutes
+        - name: SYNC_TEMPLATES_ON_STARTUP
+          value: "{{ .Values.tables.env.syncTemplatesOnStartup }}"
+        - name: MIGRATE_ON_STARTUP
+          value: "{{ .Values.tables.env.migrateOnStartup }}"
+        - name: DISABLE_VOLUME_CHECK
+          value: "{{ .Values.tables.env.disableVolumeCheck }}"
+        - name: GUNICORN_BIND
+          value: "0.0.0.0:8000"
+        - name: BASEROW_CADDY_ADDRESSES
+          value: ":80"
+        - name: DATABASE_NAME
+          valueFrom:
+            secretKeyRef:
+              name: openops-secrets
+              key: tablesDatabaseName
+        - name: DATABASE_HOST
+          valueFrom:
+            secretKeyRef:
+              name: openops-secrets
+              key: postgresHost
+        - name: DATABASE_PORT
+          valueFrom:
+            secretKeyRef:
+              name: openops-secrets
+              key: postgresPort
+        - name: DATABASE_USER
+          valueFrom:
+            secretKeyRef:
+              name: openops-secrets
+              key: postgresUsername
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: openops-secrets
+              key: postgresPassword
+        - name: REDIS_URL
+          value: "{{ .Values.tables.env.redisUrl | default (include "openops.redisUrl" .) }}"
+        resources:
+          requests:
+            memory: "512Mi"
+        volumeMounts:
+        - name: tables-data
+          mountPath: /baserow/data
+        livenessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - /baserow/backend/docker/docker-entrypoint.sh backend-healthcheck
+          initialDelaySeconds: 60
+          periodSeconds: 20
+          timeoutSeconds: 8
+          failureThreshold: 10
+        readinessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - /baserow/backend/docker/docker-entrypoint.sh backend-healthcheck
+          initialDelaySeconds: 30
+          periodSeconds: 20
+          timeoutSeconds: 8
+          failureThreshold: 10
+      volumes:
+      - name: tables-data
+        persistentVolumeClaim:
+          claimName: tables-data-pvc

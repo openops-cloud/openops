@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.app.name }}
+  labels:
+    app: {{ .Values.app.name }}
+spec:
+  replicas: {{ .Values.app.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.app.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.app.name }}
+    spec:
+      containers:
+        - name: {{ .Values.app.name }}
+          image: "{{ .Values.image.repository }}/{{ .Values.app.image }}:{{ .Values.global.version }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: NODE_OPTIONS
+              value: "--no-node-snapshot"
+            - name: OPS_COMPONENT
+              value: "{{ .Values.app.env.component }}"
+            {{- range $k, $v := .Values.openopsEnvironmentVariables }}
+            - name: {{ $k }}
+              value: {{ tpl $v $ | quote }}
+            {{- end }}
+            {{- range $name, $ref := .Values.openopsSecretEnvironmentVariables }}
+            - name: {{ $name }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $ref.secret }}
+                  key: {{ $ref.key }}
+            {{- end }}
+            - name: OPS_VERSION
+              value: "{{ .Values.global.version }}"
+            - name: OPS_OPENOPS_TABLES_VERSION
+              value: "{{ .Values.app.env.tablesVersion }}"
+            - name: OPS_ANALYTICS_VERSION
+              value: "{{ .Values.app.env.analyticsVersion }}"
+            - name: OPS_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openops-secrets
+                  key: apiKey
+            - name: OPS_REDIS_HOST
+              value: "{{ include "openops.redisHost" . }}"
+            - name: OPS_REDIS_PORT
+              value: "{{ include "openops.redisPort" . }}"
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "500m"
+            limits:
+              memory: "2Gi"
+              cpu: "1000m"
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 80
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 80
+            initialDelaySeconds: 60
+            periodSeconds: 30

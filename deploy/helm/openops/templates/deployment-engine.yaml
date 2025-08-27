@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.engine.name }}
+  labels:
+    app: {{ .Values.engine.name }}
+spec:
+  replicas: {{ .Values.engine.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.engine.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.engine.name }}
+    spec:
+      containers:
+        - name: {{ .Values.engine.name }}
+          image: "{{ .Values.image.repository }}/{{ .Values.engine.image }}:{{ .Values.global.version }}"
+          imagePullPolicy: { { .Values.image.pullPolicy } }
+          command: [ "/bin/sh", "-c", "cp -r /var/tmp-base/. /tmp/ && node main.js" ]
+          env:
+            - name: OPS_COMPONENT
+              value: engine
+            - name: NODE_OPTIONS
+              value: "--no-node-snapshot"
+            - name: OPS_BASE_CODE_DIRECTORY
+              value: "{{ .Values.engine.env.baseCodeDirectory }}"
+              {{- range $k, $v := .Values.openopsEnvironmentVariables }}
+            - name: {{ $k }}
+              value: {{ tpl $v $ | quote }}
+              {{- end }}
+              {{- range $name, $ref := .Values.openopsSecretEnvironmentVariables }}
+            - name: {{ $name }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $ref.secret }}
+                  key: {{ $ref.key }}
+              {{- end }}
+            - name: OPS_SERVER_API_URL
+              value: "{{ .Values.engine.env.serverApiUrl | default (printf "%s/api/" (include "openops.appServiceUrl" .)) }}"
+            - name: OPS_CACHE_PATH
+              value: "{{ .Values.engine.env.cachePath }}"
+            - name: OPS_CONFIG_PATH
+              value: "{{ .Values.engine.env.configPath }}"
+            - name: OPS_FRONTEND_URL
+              value: "{{ .Values.openopsEnvironmentVariables.OPS_PUBLIC_URL }}"
+          ports:
+            - containerPort: 3005
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          envFrom:
+            - secretRef:
+                name: openops-secrets
+          volumeMounts:
+            - name: azure-config
+              mountPath: /tmp/azure
+            - name: gcloud-config
+              mountPath: /tmp/gcloud
+      volumes:
+        - name: azure-config
+          persistentVolumeClaim:
+            claimName: azure-config-pvc
+        - name: gcloud-config
+          persistentVolumeClaim:
+            claimName: gcloud-config-pvc

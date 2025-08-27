@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.analytics.name }}
+  labels:
+    app: {{ .Values.analytics.name }}
+spec:
+  replicas: {{ .Values.analytics.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.analytics.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.analytics.name }}
+    spec:
+      containers:
+      - name: {{ .Values.analytics.name }}
+        image: {{ .Values.image.repository }}/{{ .Values.analytics.image }}:{{ .Values.analytics.tag }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+        - name: ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: openops-secrets
+              key: analyticsAdminPassword
+        - name: POWERUSER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: openops-secrets
+              key: analyticsPoweruserPassword
+        - name: GUNICORN_LOGLEVEL
+          value: "{{ .Values.analytics.env.gunicornLogLevel }}"
+        - name: DATABASE_DIALECT
+          value: "{{ .Values.analytics.env.databaseDialect }}"
+        - name: DATABASE_DB
+          value: "{{ .Values.analytics.env.databaseDb }}"
+        - name: DATABASE_HOST
+          value: "{{ .Values.analytics.env.databaseHost | default (include "openops.postgresHost" .) }}"
+        - name: DATABASE_PORT
+          value: "{{ .Values.analytics.env.databasePort | default (include "openops.postgresPort" .) }}"
+        - name: DATABASE_USER
+          valueFrom:
+            secretKeyRef:
+              name: openops-secrets
+              key: postgresUsername
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: openops-secrets
+              key: postgresPassword
+        - name: DATABASE_HOST_ALT
+          valueFrom:
+            secretKeyRef:
+              name: openops-secrets
+              key: tablesDbHost
+        - name: SUPERSET_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: openops-secrets
+              key: encryptionKey
+        - name: SUPERSET_FEATURE_ALLOW_ADHOC_SUBQUERY
+          value: "{{ .Values.analytics.env.featureAllowAdhocSubquery }}"
+        ports:
+        - containerPort: 8088
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8088
+          initialDelaySeconds: 60
+          periodSeconds: 20
+          timeoutSeconds: 8
+          failureThreshold: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8088
+          initialDelaySeconds: 30
+          periodSeconds: 20
+          timeoutSeconds: 8
+          failureThreshold: 10
