@@ -1,8 +1,9 @@
 import { isLLMTelemetryEnabled } from '@openops/common';
 import { logger } from '@openops/server-shared';
-import { AiConfig } from '@openops/shared';
+import { AiConfig, ChatFlowContext } from '@openops/shared';
 import { generateObject, LanguageModel, ModelMessage, ToolSet } from 'ai';
 import { z } from 'zod';
+import { buildUIContextSection } from '../chat/prompts.service';
 
 const MAX_SELECTED_TOOLS = 128;
 
@@ -11,11 +12,13 @@ export async function selectRelevantTools({
   tools,
   languageModel,
   aiConfig,
+  uiContext,
 }: {
   messages: ModelMessage[];
   tools: ToolSet;
   languageModel: LanguageModel;
   aiConfig: AiConfig;
+  uiContext?: ChatFlowContext;
 }): Promise<ToolSet | undefined> {
   if (!tools || Object.keys(tools).length === 0) {
     return undefined;
@@ -32,7 +35,7 @@ export async function selectRelevantTools({
       schema: z.object({
         tool_names: z.array(z.string()),
       }),
-      system: getSystemPrompt(toolList),
+      system: getSystemPrompt(toolList, uiContext),
       messages,
       ...aiConfig.modelSettings,
       experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
@@ -64,9 +67,12 @@ export async function selectRelevantTools({
 
 const getSystemPrompt = (
   toolList: Array<{ name: string; description: string }>,
+  uiContext?: ChatFlowContext,
 ): string => {
   const toolsMessage = toolList
     .map((t) => `- ${t.name}: ${t.description}`)
     .join('\n');
-  return `Given the following conversation history and the list of available tools, select the tools that are most relevant to answer the user's request. Return an array of tool names.\n\nTools:\n${toolsMessage}.`;
+  return `Given the following conversation history and the list of available tools, select the tools that are most relevant to answer the user's request. Return an array of tool names.\n\n
+  ${uiContext ? `${buildUIContextSection(uiContext)}\n` : ''}
+  Tools:\n${toolsMessage}.`;
 };

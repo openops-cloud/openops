@@ -1,6 +1,7 @@
 import {
-  decompressAndDecrypt,
-  encryptAndCompress,
+  compressAndEncrypt,
+  decryptAndDecompress,
+  EncryptedObject,
 } from '@openops/server-shared';
 import {
   FlowStepTestOutput,
@@ -22,14 +23,16 @@ export const flowStepTestOutputService = {
     output,
     success,
   }: SaveParams): Promise<FlowStepTestOutput> {
-    let compressedInput = Buffer.alloc(0);
-    let compressedOutput = Buffer.alloc(0);
-    if (output !== undefined) {
-      compressedOutput = await encryptAndCompress(output);
+    if (input === undefined) {
+      input = Buffer.alloc(0);
     }
-    if (input !== undefined) {
-      compressedInput = await encryptAndCompress(input);
+
+    if (output === undefined) {
+      output = Buffer.alloc(0);
     }
+
+    const compressedInput = await compressAndEncrypt(input);
+    const compressedOutput = await compressAndEncrypt(output);
 
     const existing = await flowStepTestOutputRepo().findOneBy({
       stepId,
@@ -97,16 +100,18 @@ export const flowStepTestOutputService = {
 async function decompressOutput(
   record: FlowStepTestOutput,
 ): Promise<FlowStepTestOutput> {
-  const inputBuffer = record.input as Buffer;
-  let decryptedInput = undefined;
-  if (inputBuffer.length !== 0) {
-    decryptedInput = await decompressAndDecrypt(inputBuffer);
+  const inputObj = record.input as EncryptedObject;
+  let decryptedInput = await decryptAndDecompress(inputObj);
+
+  if (isEmptyBuffer(decryptedInput)) {
+    decryptedInput = undefined;
   }
 
-  const outputBuffer = record.output as Buffer;
-  let decryptedOutput = undefined;
-  if (outputBuffer.length !== 0) {
-    decryptedOutput = await decompressAndDecrypt(outputBuffer);
+  const outputObj = record.output as EncryptedObject;
+  let decryptedOutput = await decryptAndDecompress(outputObj);
+
+  if (isEmptyBuffer(decryptedOutput)) {
+    decryptedOutput = undefined;
   }
 
   return {
@@ -114,6 +119,19 @@ async function decompressOutput(
     input: decryptedInput,
     output: decryptedOutput,
   };
+}
+
+function isEmptyBuffer(val: unknown): boolean {
+  return (
+    typeof val === 'object' &&
+    val !== null &&
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (val as any).type === 'Buffer' &&
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Array.isArray((val as any).data) &&
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (val as any).data.length === 0
+  );
 }
 
 type ListParams = {
