@@ -217,7 +217,7 @@ export const createMockFlow = (flow?: Partial<Flow>): Flow => {
     folderId: flow?.folderId ?? null,
     schedule: flow?.schedule ?? null,
     publishedVersionId: flow?.publishedVersionId ?? null,
-    isWorkflow: flow?.isWorkflow ?? true,
+    isInternal: flow?.isInternal ?? false,
   };
 };
 
