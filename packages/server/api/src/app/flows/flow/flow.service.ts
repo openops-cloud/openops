@@ -478,6 +478,7 @@ export const flowService = {
 async function create({
   projectId,
   request,
+  isWorkflow = true,
 }: CreateParams): Promise<PopulatedFlow> {
   const folderId =
     isNil(request.folderId) || request.folderId === UNCATEGORIZED_FOLDER_ID
@@ -491,6 +492,7 @@ async function create({
     status: FlowStatus.DISABLED,
     publishedVersionId: null,
     schedule: null,
+    isWorkflow,
   };
 
   const savedFlow = await flowRepo().save(newFlow);
@@ -664,6 +666,7 @@ type CreateParams = {
   userId: UserId;
   projectId: ProjectId;
   request: CreateEmptyFlowRequest;
+  isWorkflow?: boolean;
 };
 
 type CreateFromTemplateParams = {

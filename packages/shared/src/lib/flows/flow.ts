@@ -30,6 +30,7 @@ export const Flow = Type.Object({
   status: Type.Enum(FlowStatus),
   schedule: Nullable(FlowScheduleOptions),
   publishedVersionId: Nullable(Type.String()),
+  isWorkflow: Type.Boolean({ default: true }),
 });
 
 export type Flow = Static<typeof Flow>;
