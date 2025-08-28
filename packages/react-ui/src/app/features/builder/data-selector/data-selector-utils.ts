@@ -28,9 +28,6 @@ type HandleStepOutputProps = {
   displayName: string;
 };
 
-const MAX_SLICE_LENGTH = 10;
-const MAX_SLICES_AMOUNT = 10;
-
 function traverseStepOutputAndReturnMentionTree({
   stepOutput,
   success,
@@ -73,8 +70,9 @@ function handlingArrayStepOutput(
   parentDisplayName: string,
   startingIndex = 0,
 ): MentionTreeNode {
+  const maxSliceLength = 100;
   const isEmptyList = Object.keys(stepOutput).length === 0;
-  if (stepOutput.length <= MAX_SLICE_LENGTH) {
+  if (stepOutput.length <= maxSliceLength) {
     return {
       key: parentDisplayName,
       children: stepOutput.map((ouput, idx) =>
@@ -94,15 +92,13 @@ function handlingArrayStepOutput(
     };
   }
 
-  const slicesAmount = Math.ceil(stepOutput.length / MAX_SLICE_LENGTH);
-
   const numberOfSlices = new Array(
-    Math.min(slicesAmount, MAX_SLICES_AMOUNT),
+    Math.ceil(stepOutput.length / maxSliceLength),
   ).fill(0);
   const children: MentionTreeNode[] = numberOfSlices.map((_, idx) => {
-    const startingIndex = idx * MAX_SLICE_LENGTH;
+    const startingIndex = idx * maxSliceLength;
     const endingIndex =
-      Math.min((idx + 1) * MAX_SLICE_LENGTH, stepOutput.length) - 1;
+      Math.min((idx + 1) * maxSliceLength, stepOutput.length) - 1;
     const displayName = `${parentDisplayName} ${startingIndex}-${endingIndex}`;
     const sliceOutput = handlingArrayStepOutput(
       stepOutput.slice(startingIndex, endingIndex),
