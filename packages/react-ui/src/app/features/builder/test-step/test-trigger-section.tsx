@@ -77,7 +77,7 @@ const TestTriggerSection = React.memo(
       blockModel?.triggers?.[formValues.settings.triggerName]?.testStrategy ===
       TriggerTestStrategy.SIMULATION;
     const mockData =
-      blockModel?.triggers?.[formValues.settings.triggerName].sampleData;
+      blockModel?.triggers?.[formValues.settings.triggerName]?.sampleData;
     useEffect(() => {
       setIsValid(form.formState.isValid);
     }, [form.formState.isValid]);
