@@ -352,6 +352,13 @@ export const flowService = {
   }: UpdatePublishedVersionIdParams): Promise<PopulatedFlow> {
     const flowToUpdate = await this.getOneOrThrow({ id, projectId });
 
+    if (flowToUpdate.isInternal) {
+      throw new ApplicationError({
+        code: ErrorCode.FLOW_OPERATION_INVALID,
+        params: {},
+      });
+    }
+
     const flowVersionToPublish = await flowVersionService.getFlowVersionOrThrow(
       {
         flowId: id,
@@ -478,7 +485,7 @@ export const flowService = {
 async function create({
   projectId,
   request,
-  isWorkflow = true,
+  isInternal = false,
 }: CreateParams): Promise<PopulatedFlow> {
   const folderId =
     isNil(request.folderId) || request.folderId === UNCATEGORIZED_FOLDER_ID
@@ -492,7 +499,7 @@ async function create({
     status: FlowStatus.DISABLED,
     publishedVersionId: null,
     schedule: null,
-    isWorkflow,
+    isInternal,
   };
 
   const savedFlow = await flowRepo().save(newFlow);
@@ -666,7 +673,7 @@ type CreateParams = {
   userId: UserId;
   projectId: ProjectId;
   request: CreateEmptyFlowRequest;
-  isWorkflow?: boolean;
+  isInternal?: boolean;
 };
 
 type CreateFromTemplateParams = {
