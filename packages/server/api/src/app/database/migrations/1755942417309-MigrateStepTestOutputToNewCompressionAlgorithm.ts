@@ -60,21 +60,13 @@ async function updateRecords(
     const inputBuffer = record.input;
     let originalInput: unknown = Buffer.alloc(0);
     if (inputBuffer.length !== 0) {
-      if (await alreadyMigrated(record.input)) {
-        originalInput = record.input;
-      } else {
-        originalInput = await decompressAndDecrypt(inputBuffer);
-      }
+      originalInput = await decompressAndDecrypt(inputBuffer);
     }
 
     const outputBuffer = record.output;
     let originalOutput: unknown = Buffer.alloc(0);
     if (outputBuffer.length !== 0) {
-      if (await alreadyMigrated(record.output)) {
-        originalOutput = record.output;
-      } else {
-        originalInput = await decompressAndDecrypt(outputBuffer);
-      }
+      originalInput = await decompressAndDecrypt(outputBuffer);
     }
 
     const newInputFormat = await compressAndEncrypt(originalInput);
