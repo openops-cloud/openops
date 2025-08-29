@@ -24,7 +24,6 @@ import {
   RunEnvironment,
   SeekPage,
   spreadIfDefined,
-  TERMINAL_STATUSES,
 } from '@openops/shared';
 import { nanoid } from 'nanoid';
 import { In, LessThan } from 'typeorm';
@@ -279,46 +278,25 @@ export const flowRunService = {
     projectId,
     tags,
     duration,
-  }: FinishParams): Promise<FlowRun | undefined> {
+  }: FinishParams): Promise<FlowRun> {
     const logFileId = await updateLogs({
       flowRunId,
       projectId,
       executionState,
     });
 
-    const result = await flowRunRepo()
-      .createQueryBuilder()
-      .update()
-      .set({
-        status,
-        tasks,
-        ...spreadIfDefined(
-          'duration',
-          duration ? Math.floor(Number(duration)) : undefined,
-        ),
-        ...spreadIfDefined('logsFileId', logFileId),
-        terminationReason: undefined,
-        tags,
-        finishTime: new Date().toISOString(),
-      })
-      .where('id = :id', { id: flowRunId })
-      .andWhere('status NOT IN (:...terminalStatuses)', {
-        terminalStatuses: TERMINAL_STATUSES,
-      })
-      .execute();
-
-    const skipped = result.affected === 0;
-    if (skipped) {
-      logger.debug(
-        `Update for workflow run (${flowRunId}) skipped. The workflow run already in a final state.`,
-        {
-          flowRunId,
-          newStatus: status,
-        },
-      );
-
-      return undefined;
-    }
+    await flowRunRepo().update(flowRunId, {
+      status,
+      tasks,
+      ...spreadIfDefined(
+        'duration',
+        duration ? Math.floor(Number(duration)) : undefined,
+      ),
+      ...spreadIfDefined('logsFileId', logFileId),
+      terminationReason: undefined,
+      tags,
+      finishTime: new Date().toISOString(),
+    });
 
     const flowRun = await this.getOnePopulatedOrThrow({
       id: flowRunId,

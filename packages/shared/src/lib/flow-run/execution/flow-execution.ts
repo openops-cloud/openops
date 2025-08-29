@@ -68,16 +68,15 @@ export const FlowRunResponse = Type.Union([
 ]);
 export type FlowRunResponse = Static<typeof FlowRunResponse>;
 
-export const TERMINAL_STATUSES = Object.freeze<FlowRunStatus[]>([
-  FlowRunStatus.SUCCEEDED,
-  FlowRunStatus.STOPPED,
-  FlowRunStatus.TIMEOUT,
-  FlowRunStatus.FAILED,
-  FlowRunStatus.INTERNAL_ERROR,
-]);
-
-export const isFlowStateTerminal = (s: FlowRunStatus): boolean =>
-  TERMINAL_STATUSES.includes(s);
+export const isFlowStateTerminal = (status: FlowRunStatus): boolean => {
+  return (
+    status === FlowRunStatus.SUCCEEDED ||
+    status === FlowRunStatus.STOPPED ||
+    status === FlowRunStatus.TIMEOUT ||
+    status === FlowRunStatus.FAILED ||
+    status === FlowRunStatus.INTERNAL_ERROR
+  );
+};
 
 export const isFailedState = (status: FlowRunStatus): boolean => {
   return (

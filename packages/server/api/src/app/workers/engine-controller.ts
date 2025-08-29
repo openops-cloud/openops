@@ -144,10 +144,6 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
       tags: runDetails.tags ?? [],
     });
 
-    if (!populatedRun) {
-      return;
-    }
-
     if (runDetails.status === FlowRunStatus.PAUSED) {
       await flowRunService.pause({
         flowRunId: runId,
