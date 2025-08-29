@@ -31,6 +31,9 @@ export const memoryLock = {
     await lock.acquire();
     return lock;
   },
+  delete: (key: string): void => {
+    memoryLocks.delete(key);
+  },
   isTimeoutError: (e: unknown): boolean => {
     return e === E_TIMEOUT;
   },
