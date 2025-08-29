@@ -57,6 +57,7 @@ const FlowTemplateFilterItem = ({
 );
 
 FlowTemplateFilterItem.displayName = 'FlowTemplateFilterItem';
+export { FlowTemplateFilterItem };
 
 const FlowTemplateFilterHeader = ({
   title,

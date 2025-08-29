@@ -12,6 +12,7 @@ import {
   cn,
   Dialog,
   DialogContent,
+  DialogTitle,
   FlowTemplateMetadataWithIntegrations,
   INTERNAL_ERROR_TOAST,
   toast,
@@ -182,6 +183,8 @@ const SelectFlowTemplateDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogTitle className="hidden">OpenOps templates Catalog</DialogTitle>
+
       <DialogContent
         className={cn(
           'flex flex-col p-0 transition-none max-w-[1360px] max-2xl:max-w-[1010px]',
