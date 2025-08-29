@@ -53,7 +53,7 @@ export const rdsDeleteInstanceAction = createAction({
       waitForTimeInSecondsProperty['waitForTimeInSeconds'];
     const credentials = await getCredentialsForAccount(context.auth, accountId);
 
-    let finalSnapshotIdentifier: string | undefined = undefined;
+    let finalSnapshotIdentifier: string | undefined;
     if (takeSnapshot) {
       if (snapshotIdentifier && snapshotIdentifier.trim().length > 0) {
         finalSnapshotIdentifier = snapshotIdentifier.trim();
