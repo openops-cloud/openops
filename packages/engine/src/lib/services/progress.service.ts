@@ -26,13 +26,7 @@ function getRunDebouncer(runId: string): any {
   if (!debouncedFunc) {
     debouncedFunc = debounce(
       async (latestParams: UpdateStepProgressParams) => {
-        try {
-          await sendUpdateRunRequest(latestParams);
-        } finally {
-          if (runDebouncers.get(runId) === debouncedFunc) {
-            runDebouncers.delete(runId);
-          }
-        }
+        await sendUpdateRunRequest(latestParams);
       },
       PROGRESS_DEBOUNCE_MS,
       { leading: false, trailing: true, maxWait: PROGRESS_DEBOUNCE_MS * 3 },
@@ -47,10 +41,14 @@ export const progressService = {
   sendUpdate: (params: UpdateStepProgressParams): void => {
     throwIfExecutionTimeExceeded();
 
-    void getRunDebouncer(params.engineConstants.flowRunId)(params);
+    getRunDebouncer(params.engineConstants.flowRunId)(params);
   },
   flushProgressUpdate: async (runId: string): Promise<void> => {
-    await runDebouncers.get(runId)?.flush();
+    try {
+      await runDebouncers.get(runId)?.flush();
+    } finally {
+      runDebouncers.delete(runId);
+    }
   },
 };
 
