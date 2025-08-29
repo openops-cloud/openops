@@ -367,10 +367,12 @@ async function getUserMessage(
     }
 
     const firstContentElement = lastMessage.parts[0];
+    const lastContentElement = lastMessage.parts[lastMessage.parts.length - 1];
     if (
       !firstContentElement ||
       typeof firstContentElement !== 'object' ||
-      !('text' in firstContentElement)
+      (!('text' in firstContentElement) &&
+        !lastContentElement?.type.includes('tool-ui'))
     ) {
       await reply.code(400).send({
         message:
@@ -379,7 +381,7 @@ async function getUserMessage(
       return null;
     }
 
-    return String(firstContentElement.text);
+    return String(firstContentElement.text ?? 'continue');
   } else {
     return body.message;
   }
