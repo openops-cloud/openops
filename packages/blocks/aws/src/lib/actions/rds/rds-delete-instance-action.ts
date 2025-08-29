@@ -29,7 +29,7 @@ export const rdsDeleteInstanceAction = createAction({
     }),
     snapshotIdentifier: Property.ShortText({
       displayName: 'Snapshot Identifier',
-      description: 'Name for the final snapshot before deletion.',
+      description: 'Unique name for the final snapshot before deletion',
       required: false,
     }),
     ...waitForProperties(),
