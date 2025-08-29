@@ -9,7 +9,11 @@ import { Theme } from '../../../lib/theme';
 import { TestStepDataViewer } from '../../test-step-data-viewer/test-step-data-viewer';
 import { TOOL_STATUS_TYPES } from '../tool-status';
 import { BaseToolWrapper } from './base-tool-wrapper';
-import { formatToolResultForDisplay } from './tool-json-parser';
+import {
+  formatToolResultForDisplay,
+  hasContentError,
+  hasDirectError,
+} from './tool-json-parser';
 
 type ToolFallbackProps = ToolCallMessagePartProps & {
   theme: Theme;
@@ -54,17 +58,13 @@ const extractResultStatus = (
     return status;
   }
 
-  if (
-    result &&
-    typeof result === 'object' &&
-    'isError' in result &&
-    result.isError
-  ) {
-    const errorStatus: MessagePartStatus = {
-      type: TOOL_STATUS_TYPES.INCOMPLETE,
-      reason: 'error',
-    };
-    return errorStatus;
+  if (result && typeof result === 'object') {
+    if (hasDirectError(result) || hasContentError(result)) {
+      return {
+        type: TOOL_STATUS_TYPES.INCOMPLETE,
+        reason: 'error',
+      };
+    }
   }
 
   return status;
