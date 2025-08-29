@@ -27,12 +27,35 @@ export const rdsDeleteInstanceAction = createAction({
       required: false,
       defaultValue: false,
     }),
+    snapshotIdentifierProperty: Property.DynamicProperties({
+      displayName: '',
+      required: false,
+      refreshers: ['takeSnapshot'],
+      props: async ({ takeSnapshot }) => {
+        if (!takeSnapshot) {
+          return {};
+        }
+        const result: any = {
+          snapshotIdentifier: Property.ShortText({
+            displayName: 'Snapshot Identifier',
+            description: 'Unique name for the final snapshot',
+            required: true,
+          }),
+        };
+        return result;
+      },
+    }),
     ...waitForProperties(),
     dryRun: dryRunCheckBox(),
   },
   async run(context) {
-    const { arn, takeSnapshot, waitForTimeInSecondsProperty, dryRun } =
-      context.propsValue;
+    const {
+      arn,
+      takeSnapshot,
+      waitForTimeInSecondsProperty,
+      dryRun,
+      snapshotIdentifierProperty,
+    } = context.propsValue;
 
     if (dryRun) {
       return 'Step execution skipped, dry run flag enabled';
@@ -42,12 +65,17 @@ export const rdsDeleteInstanceAction = createAction({
     const waitForInSeconds =
       waitForTimeInSecondsProperty['waitForTimeInSeconds'];
     const credentials = await getCredentialsForAccount(context.auth, accountId);
+
+    const snapshotIdentifier = snapshotIdentifierProperty?.snapshotIdentifier;
+    const finalSnapshotIdentifier = snapshotIdentifier?.trim();
+
     const result = await initiateRdsInstanceDeletion(
       credentials,
       region,
       resourceId,
       takeSnapshot,
       waitForInSeconds,
+      finalSnapshotIdentifier,
     );
 
     return result;

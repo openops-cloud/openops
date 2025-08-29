@@ -10,13 +10,20 @@ export async function initiateRdsInstanceDeletion(
   instanceId: string,
   createSnapshot: boolean,
   waitForInSeconds?: number,
+  finalSnapshotIdentifier?: string,
 ) {
   const client = getAwsClient(RDS.RDS, credentials, region) as RDS.RDS;
   try {
-    const command = new RDS.DeleteDBInstanceCommand({
+    const commandInput: RDS.DeleteDBInstanceCommandInput = {
       DBInstanceIdentifier: instanceId,
       SkipFinalSnapshot: !createSnapshot,
-    });
+    };
+
+    if (createSnapshot && finalSnapshotIdentifier) {
+      commandInput.FinalDBSnapshotIdentifier = finalSnapshotIdentifier;
+    }
+
+    const command = new RDS.DeleteDBInstanceCommand(commandInput);
 
     const initiateDeletion = await client.send(command);
 
