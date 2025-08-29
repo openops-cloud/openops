@@ -311,7 +311,7 @@ describe('Progress Service', () => {
       });
 
       progressService.sendUpdate(request1);
-      await new Promise(res => setTimeout(res, 801));
+      await new Promise(res => setTimeout(res, 1000));
       progressService.sendUpdate(request2);
       await progressService.flushProgressUpdate(flowRunId);
 
