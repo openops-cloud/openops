@@ -57,8 +57,6 @@ export const rdsDeleteInstanceAction = createAction({
       snapshotIdentifierProperty,
     } = context.propsValue;
 
-    const snapshotIdentifier = snapshotIdentifierProperty?.snapshotIdentifier;
-
     if (dryRun) {
       return 'Step execution skipped, dry run flag enabled';
     }
@@ -68,12 +66,8 @@ export const rdsDeleteInstanceAction = createAction({
       waitForTimeInSecondsProperty['waitForTimeInSeconds'];
     const credentials = await getCredentialsForAccount(context.auth, accountId);
 
-    let finalSnapshotIdentifier: string | undefined;
-    if (takeSnapshot) {
-      if (snapshotIdentifier && snapshotIdentifier.trim().length > 0) {
-        finalSnapshotIdentifier = snapshotIdentifier.trim();
-      }
-    }
+    const snapshotIdentifier = snapshotIdentifierProperty?.snapshotIdentifier;
+    const finalSnapshotIdentifier = snapshotIdentifier?.trim();
 
     const result = await initiateRdsInstanceDeletion(
       credentials,
