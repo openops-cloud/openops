@@ -2,6 +2,7 @@ import {
   FastifyPluginCallbackTypebox,
   Type,
 } from '@fastify/type-provider-typebox';
+import { requestWorkflowCancellation } from '@openops/server-shared';
 import {
   ALL_PRINCIPAL_TYPES,
   ApplicationError,
@@ -9,6 +10,7 @@ import {
   ErrorCode,
   ExecutionType,
   FlowRun,
+  isFlowStateTerminal,
   isNil,
   ListFlowRunsRequestQuery,
   OpenOpsId,
@@ -90,6 +92,27 @@ export const flowRunController: FastifyPluginCallbackTypebox = (
     return flowRun;
   });
 
+  app.post('/:id/abort', AbortFlowRequest, async (req) => {
+    const flowRunId = req.params.id;
+    const flowRun = await flowRunService.getOneOrThrow({
+      projectId: 'tvR1qZ9VUeCmok1bQWfMJ', //req.principal.projectId,
+      id: flowRunId,
+    });
+
+    // if (isFlowStateTerminal(flowRun.status)) {
+    //   throw new ApplicationError({
+    //     code: ErrorCode.FLOW,
+    //     params: {
+    //       id: flowRunId,
+    //     },
+    //   });
+    // }
+
+    await requestWorkflowCancellation(flowRunId);
+
+    return flowRun;
+  });
+
   done();
 };
 
@@ -165,5 +188,19 @@ const RetryFlowRequest = {
       id: OpenOpsId,
     }),
     body: RetryFlowRequestBody,
+  },
+};
+
+const AbortFlowRequest = {
+  config: {
+    allowedPrincipals: ALL_PRINCIPAL_TYPES,
+    // allowedPrincipals: [PrincipalType.USER],
+  },
+  schema: {
+    operationId: 'Abort Flow Run',
+    description: '',
+    params: Type.Object({
+      id: OpenOpsId,
+    }),
   },
 };

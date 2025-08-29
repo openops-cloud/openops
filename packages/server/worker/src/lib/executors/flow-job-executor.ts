@@ -110,11 +110,16 @@ async function executeFlow(
 
     if (
       status !== EngineResponseStatus.OK ||
-      result.status === FlowRunStatus.INTERNAL_ERROR
+      result.status === FlowRunStatus.INTERNAL_ERROR ||
+      result.status === FlowRunStatus.STOPPED
     ) {
       const isTimeoutError = status === EngineResponseStatus.TIMEOUT;
+      const isAbortedError = result.status === FlowRunStatus.STOPPED;
+
       if (isTimeoutError) {
-        await handleTimeoutError(jobData, engineToken);
+        await handleTimeoutError(jobData, engineToken, FlowRunStatus.TIMEOUT);
+      } else if (isAbortedError) {
+        await handleTimeoutError(jobData, engineToken, FlowRunStatus.STOPPED);
       } else {
         const errorMessage = result.error?.message ?? 'internal error';
         await handleInternalError(
@@ -137,7 +142,7 @@ async function executeFlow(
       e instanceof ApplicationError &&
       e.error.code === ErrorCode.EXECUTION_TIMEOUT;
     if (isTimeoutError) {
-      await handleTimeoutError(jobData, engineToken);
+      await handleTimeoutError(jobData, engineToken, FlowRunStatus.TIMEOUT);
     } else {
       await handleInternalError(jobData, engineToken, e as Error);
       jobStatus = JobStatus.FAILED;
@@ -172,12 +177,13 @@ async function setFirstRunningState(
 async function handleTimeoutError(
   jobData: OneTimeJobData,
   engineToken: string,
+  status: FlowRunStatus.TIMEOUT | FlowRunStatus.STOPPED,
 ): Promise<void> {
   await engineApiService(engineToken).updateRunStatus({
     runDetails: {
       steps: {},
       duration: 0,
-      status: FlowRunStatus.TIMEOUT,
+      status, //FlowRunStatus.TIMEOUT,
       tasks: 0,
       tags: [],
     },

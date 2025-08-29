@@ -24,6 +24,7 @@ import {
   StepOutputStatus,
   TriggerHookType,
 } from '@openops/shared';
+import { CancellationRequestedError } from './cancellation-request-validator';
 import { EngineConstants } from './handler/context/engine-constants';
 import {
   ExecutionVerdict,
@@ -34,7 +35,9 @@ import { flowExecutor } from './handler/flow-executor';
 import { blockHelper } from './helper/block-helper';
 import { triggerHelper } from './helper/trigger-helper';
 import { resolveVariable } from './resolve-variable';
+import { EngineTimeoutError } from './timeout-validator';
 import { utils } from './utils';
+import { progressService } from './services/progress.service';
 
 const executeFlow = async (
   input: ExecuteFlowOperation,
@@ -276,6 +279,22 @@ export async function execute(
       }
     }
   } catch (error) {
+    if (error instanceof CancellationRequestedError) {
+      const input = operation as ExecuteFlowOperation;
+
+      await progressService.flushProgressUpdate(input.flowRunId);
+
+      return {
+        status: EngineResponseStatus.OK,
+        response: {
+          status: FlowRunStatus.STOPPED,
+          // error: {
+          //   message: utils.tryParseJson((error as Error).message),
+          // },
+        },
+      };
+    }
+
     logger.warn('Engine operation failed.', error);
     return {
       status: EngineResponseStatus.ERROR,
