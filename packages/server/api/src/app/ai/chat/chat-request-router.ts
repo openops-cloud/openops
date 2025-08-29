@@ -2,6 +2,7 @@ import { logger } from '@openops/server-shared';
 import { CODE_BLOCK_NAME, NewMessageRequest, Principal } from '@openops/shared';
 import { ModelMessage } from 'ai';
 import { FastifyInstance, FastifyReply } from 'fastify';
+import { ServerResponse } from 'node:http';
 import { sendAiChatMessageSendEvent } from '../../telemetry/event-models';
 import { getConversation, getLLMConfig } from './ai-chat.service';
 import { handleCodeGenerationRequest } from './code-generation-handler';
@@ -70,11 +71,40 @@ export async function routeChatRequest(
     Connection: 'keep-alive',
   });
 
-  if (isCodeGenerationRequest) {
-    logger.debug('Using code generation flow');
-    await handleCodeGenerationRequest(generationRequestParams);
-  } else {
-    logger.debug('Using normal conversation flow');
-    await handleUserMessage(generationRequestParams);
+  const heartbeat = startSSEHeartbeat(serverResponse);
+
+  try {
+    if (isCodeGenerationRequest) {
+      logger.debug('Using code generation flow');
+      await handleCodeGenerationRequest(generationRequestParams);
+    } else {
+      logger.debug('Using normal conversation flow');
+      await handleUserMessage(generationRequestParams);
+    }
+  } finally {
+    clearInterval(heartbeat);
   }
+}
+
+function isResponseOpen(res: ServerResponse): boolean {
+  return !res.writableEnded && !res.writableFinished && !res.destroyed;
+}
+
+function startSSEHeartbeat(
+  res: ServerResponse,
+  intervalMs = 15000,
+): NodeJS.Timeout {
+  const heartbeat = setInterval(() => {
+    if (isResponseOpen(res)) {
+      try {
+        res.write(`: heartbeat\n\n`);
+      } catch {
+        clearInterval(heartbeat);
+      }
+    } else {
+      clearInterval(heartbeat);
+    }
+  }, intervalMs);
+
+  return heartbeat;
 }
