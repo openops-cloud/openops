@@ -42,10 +42,6 @@ describe('rdsDeleteInstanceAction', () => {
         type: 'CHECKBOX',
         required: false,
       },
-      snapshotIdentifier: {
-        type: 'SHORT_TEXT',
-        required: false,
-      },
       dryRun: {
         type: 'CHECKBOX',
         required: false,
@@ -109,7 +105,9 @@ describe('rdsDeleteInstanceAction', () => {
         shouldWaitForCreation: true,
         waitForTimeInSecondsProperty: { waitForTimeInSeconds: 10 },
         takeSnapshot: true,
-        snapshotIdentifier: 'custom-snapshot-name',
+        snapshotIdentifierProperty: {
+          snapshotIdentifier: 'custom-snapshot-name',
+        },
         dryRun: false,
       },
     };

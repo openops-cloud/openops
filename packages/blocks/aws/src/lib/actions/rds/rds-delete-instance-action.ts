@@ -27,11 +27,23 @@ export const rdsDeleteInstanceAction = createAction({
       required: false,
       defaultValue: false,
     }),
-    snapshotIdentifier: Property.ShortText({
-      displayName: 'Snapshot Identifier',
-      description:
-        'Unique name for the final snapshot (Required if taking a snapshot)',
+    snapshotIdentifierProperty: Property.DynamicProperties({
+      displayName: '',
       required: false,
+      refreshers: ['takeSnapshot'],
+      props: async ({ takeSnapshot }) => {
+        if (!takeSnapshot) {
+          return {};
+        }
+        const result: any = {
+          snapshotIdentifier: Property.ShortText({
+            displayName: 'Snapshot Identifier',
+            description: 'Unique name for the final snapshot',
+            required: true,
+          }),
+        };
+        return result;
+      },
     }),
     ...waitForProperties(),
     dryRun: dryRunCheckBox(),
@@ -42,8 +54,10 @@ export const rdsDeleteInstanceAction = createAction({
       takeSnapshot,
       waitForTimeInSecondsProperty,
       dryRun,
-      snapshotIdentifier,
+      snapshotIdentifierProperty,
     } = context.propsValue;
+
+    const snapshotIdentifier = snapshotIdentifierProperty?.snapshotIdentifier;
 
     if (dryRun) {
       return 'Step execution skipped, dry run flag enabled';
