@@ -10,6 +10,7 @@ type FlowTemplateListProps = {
   templates: FlowTemplateMetadataWithIntegrations[] | undefined;
   isLoading: boolean;
   onTemplateSelect: (template: FlowTemplateMetadataWithIntegrations) => void;
+  showAuthor?: boolean;
   ownerLogoUrl?: string;
   children?: ReactNode;
 };
@@ -18,6 +19,7 @@ const FlowTemplateList = ({
   templates,
   isLoading,
   onTemplateSelect,
+  showAuthor = true,
   ownerLogoUrl,
   children,
 }: FlowTemplateListProps) => {
@@ -38,6 +40,7 @@ const FlowTemplateList = ({
           return (
             <FlowTemplateCard
               key={template.id}
+              showAuthor={showAuthor}
               templateMetadata={template}
               ownerLogoUrl={ownerLogoUrl}
               onClick={() => {
