@@ -43,7 +43,7 @@ export const FlowTemplateFilterSidebarSkeletonLoader: React.FC<{
 FlowTemplateFilterSidebarSkeletonLoader.displayName =
   'FlowTemplateFilterSidebarSkeletonLoader';
 
-const FlowTemplateFilterSidebarWrapper = ({
+const PublicFlowTemplateFilterSidebarWrapper = ({
   selectedBlocks,
   selectedDomains,
   selectedServices,
@@ -179,7 +179,7 @@ const FlowTemplateFilterSidebarWrapper = ({
   );
 };
 
-FlowTemplateFilterSidebarWrapper.displayName =
-  'FlowTemplateFilterSidebarWrapper';
+PublicFlowTemplateFilterSidebarWrapper.displayName =
+  'PublicFlowTemplateFilterSidebarWrapper';
 
-export { FlowTemplateFilterSidebarWrapper };
+export { PublicFlowTemplateFilterSidebarWrapper };
