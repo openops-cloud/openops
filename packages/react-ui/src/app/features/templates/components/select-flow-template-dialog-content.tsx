@@ -42,11 +42,14 @@ const nodeTypes = {
 
 export type SelectFlowTemplateDialogContentProps = {
   isExpanded: boolean;
+  isPrivateCatalogCreated: boolean;
   selectedTemplate: FlowTemplateDto | undefined;
   searchText: string;
   selectedTemplateMetadata: FlowTemplateMetadataWithIntegrations | undefined;
-  templates: FlowTemplateMetadataWithIntegrations[] | undefined;
-  isTemplateListLoading: boolean;
+  publicTemplates: FlowTemplateMetadataWithIntegrations[] | undefined;
+  isPublicTemplatesLoading: boolean;
+  privateTemplates: FlowTemplateMetadataWithIntegrations[] | undefined;
+  isPrivateTemplatesLoading: boolean;
   handleTemplateSelect: (
     templateMetadata: FlowTemplateMetadataWithIntegrations,
   ) => void;
@@ -63,6 +66,7 @@ export type SelectFlowTemplateDialogContentProps = {
 
 const SelectFlowTemplateDialogContent = ({
   isExpanded,
+  isPrivateCatalogCreated,
   selectedTemplate,
   closeExpanded,
   selectedBlocks,
@@ -79,8 +83,10 @@ const SelectFlowTemplateDialogContent = ({
   closeDetails,
   useTemplate,
   expandPreview,
-  templates,
-  isTemplateListLoading,
+  publicTemplates,
+  privateTemplates,
+  isPublicTemplatesLoading,
+  isPrivateTemplatesLoading,
   handleTemplateSelect,
   onSearchInputChange,
 }: SelectFlowTemplateDialogContentProps) => {
@@ -169,10 +175,11 @@ const SelectFlowTemplateDialogContent = ({
           <FlowTemplateGallery
             selectionHeading={selectionHeading}
             showPrivateTemplates={EDITION !== OpsEdition.COMMUNITY}
-            publicTemplates={templates}
-            privateTemplates={[]}
-            isPublicTemplatesLoading={isTemplateListLoading}
-            isPrivateTemplatesLoading={false}
+            isPrivateCatalogCreated={isPrivateCatalogCreated}
+            publicTemplates={publicTemplates}
+            privateTemplates={privateTemplates}
+            isPublicTemplatesLoading={isPublicTemplatesLoading}
+            isPrivateTemplatesLoading={isPrivateTemplatesLoading}
             onTemplateSelect={handleTemplateSelect}
             searchText={searchText}
             onSearchInputChange={onSearchInputChange}
