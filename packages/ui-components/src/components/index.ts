@@ -32,6 +32,7 @@ export * from './flow-canvas/widgets/below-flow-widget';
 export * from './flow-template/explore-templates-carousel/explore-templates-carousel';
 export * from './flow-template/flow-template-card';
 export * from './flow-template/flow-template-filter-sidebar';
+export * from './flow-template/flow-template-gallery';
 export * from './flow-template/flow-template-list';
 export * from './flow-template/sample-template-card';
 export * from './flow-template/template-canvas';

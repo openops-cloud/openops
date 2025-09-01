@@ -218,12 +218,31 @@ export const useAssistantChat = ({
             frontendTools[toolCall.toolName as keyof typeof frontendTools];
 
           if (tool && tool.execute) {
-            await tool.execute(toolCall.input || toolCall.args, {} as any);
+            const result = await tool.execute(
+              toolCall.input || toolCall.args,
+              {} as any,
+            );
+            chat.addToolResult({
+              tool: toolCall.toolName,
+              toolCallId: toolCall.toolCallId,
+              output: result,
+            });
           }
         } catch (error) {
           console.error('Error executing frontend tool:', error);
         }
       }
+    },
+    // send message automatically when there's a frontend tool call
+    sendAutomaticallyWhen: ({ messages }) => {
+      const lastMessage = messages[messages.length - 1];
+      const lastMessagePart =
+        lastMessage?.parts?.[lastMessage.parts.length - 1];
+      return (
+        lastMessagePart?.type?.includes('tool-ui') &&
+        'output' in lastMessagePart &&
+        !!lastMessagePart.output
+      );
     },
   });
 
