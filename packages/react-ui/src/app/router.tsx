@@ -20,6 +20,7 @@ import { t } from 'i18next';
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { FlowsPageHeader } from '@/app/features/flows/components/flows-page-header';
 import { HomeHelpDropdown } from '@/app/features/home/components/home-help-dropdown';
+import { createInternalRouter } from '@/app/internal-router';
 import { AiSettingsPage } from '@/app/routes/settings/ai';
 import { FlagId } from '@openops/shared';
 import { lazy, Suspense } from 'react';
@@ -397,7 +398,10 @@ const createRoutes = () => {
 };
 
 const ApplicationRouter = () => {
-  const router = createBrowserRouter(createRoutes());
+  const router = createBrowserRouter([
+    ...createRoutes(),
+    ...createInternalRouter(),
+  ]);
   return <RouterProvider router={router}></RouterProvider>;
 };
 
