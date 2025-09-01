@@ -10,12 +10,16 @@ import {
   WorkflowStepUpdatedPayload,
 } from '@openops/shared';
 import { useParams } from 'react-router-dom';
+import { useBuilderStateContext } from '../builder-hooks';
 import { stepTestOutputCache } from '../data-selector/data-selector-cache';
 
 export const useFlowUpdates = () => {
   const { flowId } = useParams();
   const socket = useSocket();
   const queryClient = useQueryClient();
+  const refreshSettings = useBuilderStateContext(
+    (state) => state.refreshSettings,
+  );
 
   useEffect(() => {
     if (!flowId) {
@@ -55,5 +59,22 @@ export const useFlowUpdates = () => {
       socket.removeAllListeners(WebsocketClientEvent.WORKFLOW_STEP_UPDATED);
       socket.removeAllListeners(WebsocketClientEvent.WORKFLOW_STEP_TESTED);
     };
-  }, [socket, queryClient, flowId]);
+  }, [socket, queryClient, flowId, refreshSettings]);
+
+  useEffect(() => {
+    // update step settings after the flow query
+    const unsubscribe = queryClient.getQueryCache().subscribe((event) => {
+      if (
+        event?.query.state.status === 'success' &&
+        event?.query.queryKey[0] === QueryKeys.flow &&
+        event?.query.queryKey[1] === flowId
+      ) {
+        requestAnimationFrame(() => {
+          refreshSettings();
+        });
+      }
+    });
+
+    return unsubscribe;
+  }, [flowId, queryClient, refreshSettings]);
 };
