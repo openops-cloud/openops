@@ -132,10 +132,12 @@ export const BlockActionSettings = Type.Object({
       "The complete package identifier, formatted as 'packageScope/packageName'. This must exactly match the block name as registered (e.g., '@org/one-block').",
   }),
   blockVersion: VersionType,
-  actionName: Type.String({
-    description:
-      'The name of the action to be executed. This must exactly match the action name as registered in block action names.',
-  }),
+  actionName: Type.Optional(
+    Type.String({
+      description:
+        'Mandatory name of the action to be executed. This must exactly match the response from Get actions by scope and name.',
+    }),
+  ),
   input: InputsSchema,
   inputUiInfo: SampleDataSettingsObject,
   errorHandlingOptions: ActionErrorHandlingOptions,
