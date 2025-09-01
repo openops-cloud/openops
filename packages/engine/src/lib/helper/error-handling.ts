@@ -1,5 +1,5 @@
 import { SharedSystemProp, system } from '@openops/server-shared';
-import { BlockAction, CodeAction, FlowRunStatus } from '@openops/shared';
+import { BlockAction, CodeAction } from '@openops/shared';
 import { ExecutionMode } from '../core/code/execution-mode';
 import { EngineConstants } from '../handler/context/engine-constants';
 import {

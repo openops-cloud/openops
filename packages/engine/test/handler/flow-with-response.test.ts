@@ -1,7 +1,6 @@
 import { ExecutionVerdict, FlowExecutorContext, VerdictReason } from '../../src/lib/handler/context/flow-execution-context'
 import { flowExecutor } from '../../src/lib/handler/flow-executor'
 import { buildBlockAction, generateMockEngineConstants } from './test-helper'
-import { FlowRunStatus } from '@openops/shared'
 
 jest.mock('../../src/lib/services/progress.service', () => ({
     progressService: {

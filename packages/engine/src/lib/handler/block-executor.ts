@@ -15,7 +15,6 @@ import {
   AUTHENTICATION_PROPERTY_NAME,
   BlockAction,
   ExecutionType,
-  FlowRunStatus,
   GenericStepOutput,
   isNil,
   StepOutputStatus,
