@@ -47,7 +47,8 @@ export const BlockTriggerSettings = Type.Object({
       'IMPORTANT: If the trigger is a block, the input must be a record of string keys to any values.' +
       'For required properties, include the key with a `null` value if the value is unknown.' +
       'Example: { "timezone": "UTC", "day_of_the_week": 1, "hour_of_the_day": 9 }' +
-      'Example for webhook: { "authType": "none", "authFields": {} }',
+      'Example for webhook: { "authType": "none", "authFields": {} }' +
+      'IMPORTANT: For webhook, always use GET method, unless the user explicitly requests otherwise.',
   }),
   inputUiInfo: SampleDataSettingsObject,
 });
