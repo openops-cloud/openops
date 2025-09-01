@@ -294,7 +294,7 @@ async function getFlowResponse(
         body: {},
         headers: {},
       };
-    case FlowRunStatus.STOPPED:
+    case FlowRunStatus.ABORTED:
       return {
         status: result.stopResponse?.status ?? StatusCodes.OK,
         body: result.stopResponse?.body,

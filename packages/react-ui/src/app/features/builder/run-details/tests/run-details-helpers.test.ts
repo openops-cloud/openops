@@ -33,7 +33,7 @@ describe('getRunMessage', () => {
       ['TIMEOUT', FlowRunStatus.TIMEOUT],
       ['SUCCEEDED', FlowRunStatus.SUCCEEDED],
       ['FAILED', FlowRunStatus.FAILED],
-      ['STOPPED', FlowRunStatus.STOPPED],
+      ['ABORTED', FlowRunStatus.ABORTED],
       ['PAUSED', FlowRunStatus.PAUSED],
     ])('when run has %s status with logsFileId', (_, status) => {
       const run = { status, logsFileId: 'some-log-file-id' } as FlowRun;
@@ -86,7 +86,7 @@ describe('getRunMessage', () => {
 describe('getStatusText', () => {
   describe('should return success messages', () => {
     it.each([
-      ['STOPPED', FlowRunStatus.STOPPED],
+      ['ABORTED', FlowRunStatus.ABORTED],
       ['SUCCEEDED', FlowRunStatus.SUCCEEDED],
     ])('when status is %s', (_, status) => {
       const result = getStatusText(status, 60);
