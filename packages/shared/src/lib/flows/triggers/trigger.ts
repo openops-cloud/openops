@@ -37,7 +37,8 @@ export const BlockTriggerSettings = Type.Object({
   packageType: Type.Enum(PackageType),
   triggerName: Type.Optional(
     Type.String({
-      description: 'The name of the trigger',
+      description:
+        'Mandatory name of the trigger to be executed. This must exactly match the response from Get triggers by scope and name.',
     }),
   ),
   input: Type.Record(Type.String({}), Type.Any(), {
