@@ -2,7 +2,6 @@ import { Store } from '@openops/blocks-framework';
 import {
   Action,
   ActionType,
-  FlowRunStatus,
   isEmpty,
   isNil,
   isString,
@@ -18,6 +17,7 @@ import { EngineConstants } from './context/engine-constants';
 import {
   ExecutionVerdict,
   FlowExecutorContext,
+  VerdictReason,
 } from './context/flow-execution-context';
 import { flowExecutor } from './flow-executor';
 
@@ -223,7 +223,7 @@ async function waitForIterationsToFinishOrPause(
 
     const isPaused =
       verdict === ExecutionVerdict.PAUSED &&
-      verdictResponse?.reason === FlowRunStatus.PAUSED;
+      verdictResponse?.reason === VerdictReason.PAUSED;
 
     if (isPaused) {
       noPausedIterations = false;
@@ -366,7 +366,7 @@ async function generateNextFlowContext(
 
 function pauseLoop(executionState: FlowExecutorContext): FlowExecutorContext {
   return executionState.setVerdict(ExecutionVerdict.PAUSED, {
-    reason: FlowRunStatus.PAUSED,
+    reason: VerdictReason.PAUSED,
     pauseMetadata: {
       executionCorrelationId: executionState.pauseId,
     },

@@ -35,6 +35,7 @@ import { EngineConstants } from './context/engine-constants';
 import {
   ExecutionVerdict,
   FlowExecutorContext,
+  VerdictReason,
 } from './context/flow-execution-context';
 
 type HookResponse = {
@@ -204,7 +205,7 @@ const executeAction: ActionHandler<BlockAction> = async ({
           stepOutput.setOutput(output).setStatus(StepOutputStatus.STOPPED),
         )
         .setVerdict(ExecutionVerdict.SUCCEEDED, {
-          reason: FlowRunStatus.STOPPED,
+          reason: VerdictReason.STOPPED,
           stopResponse: hookResponse.stopResponse.response,
         })
         .increaseTask();
@@ -217,7 +218,7 @@ const executeAction: ActionHandler<BlockAction> = async ({
           stepOutput.setOutput(output).setStatus(StepOutputStatus.PAUSED),
         )
         .setVerdict(ExecutionVerdict.PAUSED, {
-          reason: FlowRunStatus.PAUSED,
+          reason: VerdictReason.PAUSED,
           pauseMetadata: hookResponse.pauseResponse.pauseMetadata,
         });
     }

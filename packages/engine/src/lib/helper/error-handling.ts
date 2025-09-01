@@ -5,6 +5,7 @@ import { EngineConstants } from '../handler/context/engine-constants';
 import {
   ExecutionVerdict,
   FlowExecutorContext,
+  VerdictReason,
   VerdictResponse,
 } from '../handler/context/flow-execution-context';
 import { ExecutionError, ExecutionErrorType } from './execution-errors';
@@ -93,7 +94,7 @@ export const handleExecutionError = (
     message,
     verdictResponse: isEngineError
       ? {
-          reason: FlowRunStatus.INTERNAL_ERROR,
+          reason: VerdictReason.INTERNAL_ERROR,
         }
       : undefined,
   };
