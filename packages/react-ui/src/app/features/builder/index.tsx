@@ -61,6 +61,7 @@ import { FlowBuilderCanvas } from './flow-canvas/flow-builder-canvas';
 import { FLOW_CANVAS_CONTAINER_ID } from './flow-version-undo-redo/constants';
 import { UndoRedo } from './flow-version-undo-redo/undo-redo';
 import { FlowVersionsList } from './flow-versions';
+import { useFlowUpdates } from './hooks/use-flow-updates';
 import { InteractiveBuilder } from './interactive-builder';
 import { FlowRunDetails } from './run-details';
 import { FlowRecentRunsList } from './run-list';
@@ -199,6 +200,8 @@ const BuilderPage = () => {
   useRefreshBlock({
     refetchBlock,
   });
+
+  useFlowUpdates();
 
   useEffect(() => {
     const viewOnlyParam = searchParams.get(SEARCH_PARAMS.viewOnly) === 'true';
