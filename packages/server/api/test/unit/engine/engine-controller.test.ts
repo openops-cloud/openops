@@ -128,7 +128,7 @@ describe('Engine Controller - update-run endpoint', () => {
       });
     });
 
-    it('should handle STOPPED status and convert to SUCCEEDED', async () => {
+    it('should handle STOPPED status', async () => {
       const request = {
         ...baseRequest,
         body: {
@@ -148,7 +148,7 @@ describe('Engine Controller - update-run endpoint', () => {
 
       expect(flowRunService.updateStatus).toHaveBeenCalledWith(
         expect.objectContaining({
-          status: FlowRunStatus.SUCCEEDED, // STOPPED gets converted to SUCCEEDED
+          status: FlowRunStatus.STOPPED,
         }),
       );
     });
