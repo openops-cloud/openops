@@ -7,6 +7,7 @@ import { templatesHooks } from '@/app/features/templates/lib/templates-hooks';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { userSettingsHooks } from '@/app/common/hooks/user-settings-hooks';
+import { usePrivateTemplates } from '@/app/features/templates/lib/private-templates-hook';
 import { BlockMetadataModelSummary } from '@openops/blocks-framework';
 import {
   cn,
@@ -96,6 +97,12 @@ const SelectFlowTemplateDialog = ({
       gettingStartedTemplateFilter: 'exclude',
       isConnectedToCloudTemplates,
     });
+
+  const {
+    privateTemplates,
+    isPrivateTemplatesLoading,
+    isPrivateCatalogCreated,
+  } = usePrivateTemplates();
 
   const { mutate: getSelectedTemplate } = useMutation({
     mutationFn: async ({
@@ -227,8 +234,11 @@ const SelectFlowTemplateDialog = ({
               }
               useTemplate={() => setIsConnectionsPickerOpen(true)}
               expandPreview={expandPreview}
-              templates={templatesWithIntegrations}
-              isTemplateListLoading={isTemplateListLoading}
+              isPrivateCatalogCreated={isPrivateCatalogCreated}
+              publicTemplates={templatesWithIntegrations}
+              isPublicTemplatesLoading={isTemplateListLoading}
+              privateTemplates={privateTemplates}
+              isPrivateTemplatesLoading={isPrivateTemplatesLoading}
               handleTemplateSelect={handleTemplateSelect}
               searchText={searchText}
               onSearchInputChange={setSearchText}
