@@ -159,6 +159,25 @@ describe('getRecommendationsAction', () => {
     );
   });
 
+  test('should handle single account object as input', async () => {
+    getAnodotRecommendationsMock.mockResolvedValue('mockResult');
+
+    const context = createContext({
+      accounts: {
+        accountKey: 'key1',
+        divisionId: 'div1',
+        accountName: 'account1',
+      },
+      recommendationTypes: ['aws-backup-outdated-snapshot'],
+      openedRecommendations: { from: '2021-01-01', to: '2021-12-31' },
+    });
+
+    const result = await getRecommendationsAction.run(context);
+
+    expect(result).toEqual({ account1: 'mockResult' });
+    expect(getAnodotRecommendationsMock).toHaveBeenCalledTimes(1);
+  });
+
   function createContext(props: unknown) {
     return {
       ...jest.requireActual('@openops/blocks-framework'),

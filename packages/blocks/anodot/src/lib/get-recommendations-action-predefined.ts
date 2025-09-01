@@ -36,7 +36,11 @@ export const getRecommendationsAction = createAction({
     try {
       const { authUrl, apiUrl, username, password } = context.auth;
 
-      const accounts = context.propsValue.accounts as any[];
+      let accounts = context.propsValue.accounts as any[];
+      if (!Array.isArray(accounts)) {
+        accounts = [accounts];
+      }
+
       const recommendationTypes = context.propsValue.recommendationTypes as
         | string[]
         | undefined;

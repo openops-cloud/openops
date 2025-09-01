@@ -302,6 +302,36 @@ describe('getRecommendationsCustomAction', () => {
     );
   });
 
+  test('should handle single account object input', async () => {
+    getAnodotRecommendationsMock.mockResolvedValue('mockResult');
+    const context = createContext({
+      accounts: {
+        accountId: 2,
+        accountName: 'account1',
+        accountKey: 2,
+        divisionId: 7,
+      },
+      statusFilter: 'status',
+      customStatus: {},
+      openedRecommendations: { from: '1', to: '2' },
+      closedAndDoneRecommendationsProperty: {},
+    });
+
+    const result = await getRecommendationsCustomAction.run(context);
+
+    expect(result).toEqual({ account1: 'mockResult' });
+    expect(getAnodotRecommendationsMock).toHaveBeenCalledTimes(1);
+    expect(getAnodotRecommendationsMock).toHaveBeenCalledWith(
+      'some api url',
+      'a bearer token',
+      'an account:2:7',
+      {
+        open_recs_creation_date: { from: '1', to: '2' },
+        status_filter: 'status',
+      },
+    );
+  });
+
   function createContext(props: unknown) {
     return {
       ...jest.requireActual('@openops/blocks-framework'),
