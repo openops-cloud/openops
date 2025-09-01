@@ -84,18 +84,14 @@ describe('getRunMessage', () => {
 });
 
 describe('getStatusText', () => {
-  describe('should return success messages', () => {
-    it.each([
-      ['ABORTED', FlowRunStatus.ABORTED],
-      ['SUCCEEDED', FlowRunStatus.SUCCEEDED],
-    ])('when status is %s', (_, status) => {
-      const result = getStatusText(status, 60);
-      expect(result).toBe('Run Succeeded');
-    });
+  test('should return success message', () => {
+    const result = getStatusText(FlowRunStatus.SUCCEEDED, 60);
+    expect(result).toBe('Run Succeeded');
   });
 
   describe('should return specific status messages', () => {
     it.each([
+      ['ABORTED', FlowRunStatus.ABORTED, 'Workflow Run was aborted'],
       ['FAILED', FlowRunStatus.FAILED, 'Run Failed'],
       ['PAUSED', FlowRunStatus.PAUSED, 'Workflow Run is paused'],
       ['RUNNING', FlowRunStatus.RUNNING, 'Running'],
