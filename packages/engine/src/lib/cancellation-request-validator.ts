@@ -3,8 +3,6 @@ import {
   wasWorkflowCancellationRequested,
 } from '@openops/server-shared';
 import { FlowRunId } from '@openops/shared';
-import { progressService } from './services/progress.service';
-import { ExecutionVerdict } from './handler/context/flow-execution-context';
 
 const defaultMessage = 'Workflow execution has been aborted.';
 

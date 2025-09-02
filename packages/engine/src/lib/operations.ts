@@ -37,31 +37,26 @@ import { triggerHelper } from './helper/trigger-helper';
 import { resolveVariable } from './resolve-variable';
 import { EngineTimeoutError } from './timeout-validator';
 import { utils } from './utils';
-import { progressService } from './services/progress.service';
 
 const executeFlow = async (
   input: ExecuteFlowOperation,
   context: FlowExecutorContext,
 ): Promise<EngineResponse<Pick<FlowRunResponse, 'status' | 'error'>>> => {
-  try {
-    const constants = EngineConstants.fromExecuteFlowInput(input);
+  const constants = EngineConstants.fromExecuteFlowInput(input);
 
-    const response = await flowExecutor.triggerFlowExecutor({
-      trigger: input.flowVersion.trigger,
-      executionState: context,
-      constants,
-    });
+  const response = await flowExecutor.triggerFlowExecutor({
+    trigger: input.flowVersion.trigger,
+    executionState: context,
+    constants,
+  });
 
-    return {
-      status: EngineResponseStatus.OK,
-      response: {
-        status: response.status,
-        error: response.error,
-      },
-    };
-  } finally {
-    await progressService.flushProgressUpdate(input.flowRunId);
-  }
+  return {
+    status: EngineResponseStatus.OK,
+    response: {
+      status: response.status,
+      error: response.error,
+    },
+  };
 };
 
 async function executeStep(

@@ -111,7 +111,6 @@ export const flowRunController: FastifyPluginCallbackTypebox = (
     }
 
     if (flowRun.status === FlowRunStatus.PAUSED) {
-      // flowRun.status = FlowRunStatus.ABORTED;
       await flowRunRepo().update(flowRunId, {
         status: FlowRunStatus.ABORTED,
         finishTime: new Date().toISOString(),
