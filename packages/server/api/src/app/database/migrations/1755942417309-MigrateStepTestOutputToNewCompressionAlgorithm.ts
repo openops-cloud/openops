@@ -57,10 +57,6 @@ async function updateRecords(
   tableName: string,
 ): Promise<void> {
   for (const record of records) {
-    if (await alreadyMigrated(record.output)) {
-      continue;
-    }
-
     const inputBuffer = record.input;
     let originalInput: unknown = Buffer.alloc(0);
     if (inputBuffer.length !== 0) {
@@ -84,15 +80,6 @@ async function updateRecords(
         record.id,
       ],
     );
-  }
-}
-
-async function alreadyMigrated(buffer: Buffer): Promise<unknown> {
-  try {
-    await decompressAndDecrypt(buffer);
-    return false;
-  } catch (error) {
-    return true;
   }
 }
 

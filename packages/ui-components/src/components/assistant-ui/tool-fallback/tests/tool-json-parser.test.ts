@@ -1,6 +1,8 @@
 import {
   extractJsonFromContent,
   formatToolResultForDisplay,
+  hasContentError,
+  hasDirectError,
   isContentStructure,
 } from '../tool-json-parser';
 
@@ -278,6 +280,112 @@ describe('json-content-parser', () => {
         content: Array(10000).fill({ type: 'text', text: 'test' }),
       };
       expect(isContentStructure(largeContent)).toBe(true);
+    });
+  });
+
+  describe('hasDirectError', () => {
+    it.each([
+      ['isError is true', true],
+      ['isError has error message', 'error message'],
+      ['isError is a number', 1],
+      ['isError is an array', []],
+    ])('should return true when %s', (description, value) => {
+      const result = { isError: value };
+      expect(hasDirectError(result)).toBe(true);
+    });
+
+    it.each([
+      ['isError is false', false],
+      ['isError is null', null],
+      ['isError is undefined', undefined],
+      ['isError is zero', 0],
+      ['isError is empty string', ''],
+    ])('should return false when %s', (description, value) => {
+      const result = { isError: value };
+      expect(hasDirectError(result)).toBe(false);
+    });
+
+    it('should return false when isError property is missing', () => {
+      const result = { someOther: 'property' };
+      expect(hasDirectError(result)).toBe(false);
+    });
+  });
+
+  describe('hasContentError', () => {
+    it('should return true when content has failure type', () => {
+      const result = {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              type: 'failure',
+              response: 'error message',
+            }),
+          },
+        ],
+      };
+      expect(hasContentError(result)).toBe(true);
+    });
+
+    it.each([
+      [
+        'content has success type',
+        {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify({ type: 'success', response: 'all good' }),
+            },
+          ],
+        },
+      ],
+      [
+        'content is not valid JSON',
+        {
+          content: [
+            {
+              type: 'text',
+              text: 'not valid json',
+            },
+          ],
+        },
+      ],
+      ['content structure is invalid', { content: 'not an array' }],
+      [
+        'extracted content is not an object',
+        {
+          content: [
+            {
+              type: 'text',
+              text: '"just a string"',
+            },
+          ],
+        },
+      ],
+      [
+        'extracted object has no type property',
+        {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify({ response: 'no type field' }),
+            },
+          ],
+        },
+      ],
+      [
+        'extracted object is null',
+        {
+          content: [
+            {
+              type: 'text',
+              text: 'null',
+            },
+          ],
+        },
+      ],
+    ])('should return false when %s', (description, result) => {
+      expect(hasContentError(result)).toBe(false);
     });
   });
 });

@@ -112,3 +112,38 @@ export function formatToolResultForDisplay(result: unknown): string | object {
 
   return result;
 }
+
+/**
+ * Checks if a result object has a direct error flag set to true.
+ * Used to identify objects that explicitly indicate an error state.
+ *
+ * @param result - The result to check for error flag
+ * @returns true if the result has isError property set to a truthy value
+ */
+export function hasDirectError(result: unknown): boolean {
+  return (
+    !!result &&
+    typeof result === 'object' &&
+    'isError' in result &&
+    !!(result as { isError?: unknown }).isError
+  );
+}
+
+/**
+ * Checks if a result contains error information within its content structure.
+ * Parses content array and looks for objects with type: 'failure'.
+ *
+ * @param result - The result to check for content-based errors
+ * @returns true if the content structure contains a failure type
+ */
+export function hasContentError(result: unknown): boolean {
+  if (!isContentStructure(result)) return false;
+
+  const extracted = extractJsonFromContent(result.content);
+  return (
+    typeof extracted === 'object' &&
+    extracted &&
+    'type' in extracted &&
+    extracted.type === 'failure'
+  );
+}

@@ -32,7 +32,6 @@ import { buildPaginator } from '../../helper/pagination/build-paginator';
 import { paginationHelper } from '../../helper/pagination/pagination-utils';
 import {
   sendWorkflowCreatedEvent,
-  sendWorkflowCreatedFromTemplateEvent,
   sendWorkflowDeletedEvent,
   sendWorkflowExportedEvent,
   sendWorkflowUpdatedEvent,
@@ -59,16 +58,14 @@ export const flowService = {
     return result;
   },
 
-  async createFromTemplate({
+  async createFromTrigger({
     projectId,
     userId,
     displayName,
     description,
     trigger,
-    templateId,
     connectionIds,
-    isSample,
-  }: CreateFromTemplateParams): Promise<PopulatedFlow> {
+  }: CreateFromTriggerParams): Promise<PopulatedFlow> {
     const newFlow = await create({
       userId,
       projectId,
@@ -97,15 +94,6 @@ export const flowService = {
         },
       },
     });
-
-    sendWorkflowCreatedFromTemplateEvent(
-      userId,
-      updatedFlow.id,
-      updatedFlow.projectId,
-      templateId,
-      displayName,
-      isSample,
-    );
 
     return updatedFlow;
   },
@@ -676,15 +664,13 @@ type CreateParams = {
   isInternal?: boolean;
 };
 
-type CreateFromTemplateParams = {
-  templateId: string;
+type CreateFromTriggerParams = {
   projectId: ProjectId;
   userId: UserId;
   displayName: string;
   description: string | undefined;
   trigger: TriggerWithOptionalId;
   connectionIds: string[];
-  isSample: boolean;
 };
 
 type ListParams = {
