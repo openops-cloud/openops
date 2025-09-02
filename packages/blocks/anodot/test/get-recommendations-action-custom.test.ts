@@ -303,24 +303,20 @@ describe('getRecommendationsCustomAction', () => {
   });
 
   test.each([
-    // Array of accounts
     [
       [{ accountId: 2, accountName: 'account1', accountKey: 2, divisionId: 7 }],
       'account1',
     ],
-    // Stringified array
     [
       JSON.stringify([
         { accountId: 2, accountName: 'account1', accountKey: 2, divisionId: 7 },
       ]),
       'account1',
     ],
-    // Single account object
     [
       { accountId: 2, accountName: 'account1', accountKey: 2, divisionId: 7 },
       'account1',
     ],
-    // Stringified account object
     [
       JSON.stringify({
         accountId: 2,
