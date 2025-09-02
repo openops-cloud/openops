@@ -8,7 +8,7 @@ export enum FlowRunStatus {
   INTERNAL_ERROR = 'INTERNAL_ERROR',
   PAUSED = 'PAUSED',
   RUNNING = 'RUNNING',
-  ABORTED = 'ABORTED',
+  STOPPED = 'STOPPED',
   SUCCEEDED = 'SUCCEEDED',
   TIMEOUT = 'TIMEOUT',
 }
@@ -62,7 +62,7 @@ export const FlowRunResponse = Type.Union([
       Type.Literal(FlowRunStatus.RUNNING),
       Type.Literal(FlowRunStatus.TIMEOUT),
       Type.Literal(FlowRunStatus.INTERNAL_ERROR),
-      Type.Literal(FlowRunStatus.ABORTED),
+      Type.Literal(FlowRunStatus.STOPPED),
     ]),
   }),
 ]);
@@ -71,7 +71,7 @@ export type FlowRunResponse = Static<typeof FlowRunResponse>;
 export const isFlowStateTerminal = (status: FlowRunStatus): boolean => {
   return (
     status === FlowRunStatus.SUCCEEDED ||
-    status === FlowRunStatus.ABORTED ||
+    status === FlowRunStatus.STOPPED ||
     status === FlowRunStatus.TIMEOUT ||
     status === FlowRunStatus.FAILED ||
     status === FlowRunStatus.INTERNAL_ERROR
