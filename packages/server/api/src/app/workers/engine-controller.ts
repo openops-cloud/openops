@@ -130,13 +130,11 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
       );
     }
 
-    logger.debug(
-      `Updating run ${runId} to ${getTerminalStatus(runDetails.status)}`,
-    );
+    logger.debug(`Updating run ${runId} to ${runDetails.status}`);
 
     const populatedRun = await flowRunService.updateStatus({
       flowRunId: runId,
-      status: getTerminalStatus(runDetails.status),
+      status: runDetails.status,
       tasks: runDetails.tasks,
       duration: runDetails.duration,
       executionState: getExecutionState(runDetails),
@@ -278,10 +276,6 @@ function getExecutionState(
     steps: flowRunResponse.steps as Record<string, StepOutput>,
   };
 }
-
-const getTerminalStatus = (status: FlowRunStatus): FlowRunStatus => {
-  return status == FlowRunStatus.STOPPED ? FlowRunStatus.SUCCEEDED : status;
-};
 
 async function getFlowResponse(
   result: FlowRunResponse,
