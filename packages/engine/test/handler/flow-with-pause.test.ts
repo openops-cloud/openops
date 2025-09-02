@@ -1,4 +1,3 @@
-jest.mock('lodash.clonedeep', () => jest.fn((value) => value));
 import { ExecutionVerdict, FlowExecutorContext } from '../../src/lib/handler/context/flow-execution-context'
 import { StepExecutionPath } from '../../src/lib/handler/context/step-execution-path'
 import { flowExecutor } from '../../src/lib/handler/flow-executor'
@@ -24,16 +23,18 @@ jest.mock('../../src/lib/services/storage.service', () => ({
     createContextStore: jest.fn().mockImplementation(() => ({
         get: jest.fn()
             .mockReturnValueOnce({
-                item: 1,
+              'loop,0': {
                 index: 1,
                 isPaused: true,
                 steps: runnedSteps,
+              },
             })
             .mockResolvedValue({
-                item: 1,
+              'loop,0': {
                 index: 1,
                 isPaused: false,
                 steps: runnedSteps,
+              },
             }),
         put: jest.fn(),
     })),
