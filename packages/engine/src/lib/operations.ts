@@ -43,20 +43,25 @@ const executeFlow = async (
   input: ExecuteFlowOperation,
   context: FlowExecutorContext,
 ): Promise<EngineResponse<Pick<FlowRunResponse, 'status' | 'error'>>> => {
-  const constants = EngineConstants.fromExecuteFlowInput(input);
+  try {
+    const constants = EngineConstants.fromExecuteFlowInput(input);
 
-  const response = await flowExecutor.triggerFlowExecutor({
-    trigger: input.flowVersion.trigger,
-    executionState: context,
-    constants,
-  });
-  return {
-    status: EngineResponseStatus.OK,
-    response: {
-      status: response.status,
-      error: response.error,
-    },
-  };
+    const response = await flowExecutor.triggerFlowExecutor({
+      trigger: input.flowVersion.trigger,
+      executionState: context,
+      constants,
+    });
+
+    return {
+      status: EngineResponseStatus.OK,
+      response: {
+        status: response.status,
+        error: response.error,
+      },
+    };
+  } finally {
+    await progressService.flushProgressUpdate(input.flowRunId);
+  }
 };
 
 async function executeStep(
@@ -279,29 +284,26 @@ export async function execute(
       }
     }
   } catch (error) {
+    logger.warn('Engine operation failed.', error);
+
+    let status = FlowRunStatus.INTERNAL_ERROR;
+    let message = utils.tryParseJson((error as Error).message);
     if (error instanceof CancellationRequestedError) {
-      const input = operation as ExecuteFlowOperation;
-
-      await progressService.flushProgressUpdate(input.flowRunId);
-
-      return {
-        status: EngineResponseStatus.OK,
-        response: {
-          status: FlowRunStatus.STOPPED,
-          // error: {
-          //   message: utils.tryParseJson((error as Error).message),
-          // },
-        },
-      };
+      status = FlowRunStatus.ABORTED;
+      message = error.message;
     }
 
-    logger.warn('Engine operation failed.', error);
+    if (error instanceof EngineTimeoutError) {
+      status = FlowRunStatus.TIMEOUT;
+      message = error.message;
+    }
+
     return {
       status: EngineResponseStatus.ERROR,
       response: {
-        status: FlowRunStatus.INTERNAL_ERROR,
+        status,
         error: {
-          message: utils.tryParseJson((error as Error).message),
+          message,
         },
       },
     };

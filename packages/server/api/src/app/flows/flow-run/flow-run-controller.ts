@@ -10,7 +10,6 @@ import {
   ErrorCode,
   ExecutionType,
   FlowRun,
-  isFlowStateTerminal,
   isNil,
   ListFlowRunsRequestQuery,
   OpenOpsId,
@@ -95,7 +94,7 @@ export const flowRunController: FastifyPluginCallbackTypebox = (
   app.post('/:id/abort', AbortFlowRequest, async (req) => {
     const flowRunId = req.params.id;
     const flowRun = await flowRunService.getOneOrThrow({
-      projectId: 'tvR1qZ9VUeCmok1bQWfMJ', //req.principal.projectId,
+      projectId: '73zI3Lzedpc9HqjZzq5NY', //req.principal.projectId,
       id: flowRunId,
     });
 
@@ -105,6 +104,14 @@ export const flowRunController: FastifyPluginCallbackTypebox = (
     //     params: {
     //       id: flowRunId,
     //     },
+    //   });
+    // }
+
+    // if (flowRun.status === FlowRunStatus.PAUSED) {
+    //   flowRun.status = FlowRunStatus.ABORTED;
+    //   await flowRunRepo().update(flowRunId, {
+    //     status: FlowRunStatus.ABORTED,
+    //     finishTime: new Date().toISOString(),
     //   });
     // }
 

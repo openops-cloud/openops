@@ -10,9 +10,9 @@ export class EngineTimeoutError extends Error {
 }
 
 export function throwIfExecutionTimeExceeded(): void {
-  const deadlineTimestamp = getContext()['deadlineTimestamp'];
-  if (deadlineTimestamp && Date.now() > Number(deadlineTimestamp)) {
+  // const deadlineTimestamp = getContext()['deadlineTimestamp'];
+  // if (deadlineTimestamp && Date.now() > Number(deadlineTimestamp)) {
     logger.error(defaultMessage);
     throw new EngineTimeoutError();
-  }
+  // }
 }

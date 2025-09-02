@@ -79,7 +79,7 @@ export const flowExecutor = {
 
     while (!isNil(currentAction)) {
       throwIfExecutionTimeExceeded();
-      await throwIfCancellationRequested(constants.flowRunId, flowExecutionContext);
+      await throwIfCancellationRequested(constants.flowRunId);
 
       const handler = this.getExecutorForAction(currentAction.type);
 
