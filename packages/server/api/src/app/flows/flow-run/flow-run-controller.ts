@@ -213,7 +213,8 @@ const AbortFlowRequest = {
   },
   schema: {
     operationId: 'Abort Flow Run',
-    description: '',
+    description:
+      'Abort an in-progress workflow run. This endpoint allows users to terminate a running workflow execution before it completes.',
     params: Type.Object({
       id: OpenOpsId,
     }),
