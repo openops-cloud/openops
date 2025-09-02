@@ -16,6 +16,7 @@ import {
   FlowRunTriggerSource,
   FlowVersionId,
   isEmpty,
+  isFlowStateTerminal,
   isNil,
   openOpsId,
   PauseMetadata,
@@ -253,6 +254,18 @@ export const flowRunService = {
         },
       });
     }
+
+    if (isFlowStateTerminal(flowRunToResume.status)) {
+      logger.info('Attempt to resume a workflow that is in a final state.');
+
+      throw new ApplicationError({
+        code: ErrorCode.FLOW_RUN_ENDED,
+        params: {
+          id: flowRunId,
+        },
+      });
+    }
+
     const pauseMetadata = flowRunToResume.pauseMetadata;
     return flowRunService.start({
       payload,

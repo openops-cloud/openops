@@ -52,7 +52,10 @@ async function prepareInput(
         runId: jobData.runId,
       });
 
-      if (flowRun.status === FlowRunStatus.SUCCEEDED) {
+      if (
+        flowRun.status === FlowRunStatus.SUCCEEDED ||
+        flowRun.status === FlowRunStatus.ABORTED
+      ) {
         return undefined;
       }
 

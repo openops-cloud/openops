@@ -10,6 +10,8 @@ import {
   ErrorCode,
   ExecutionType,
   FlowRun,
+  FlowRunStatus,
+  isFlowStateTerminal,
   isNil,
   ListFlowRunsRequestQuery,
   OpenOpsId,
@@ -19,9 +21,10 @@ import {
   RetryFlowRequestBody,
   SeekPage,
   SERVICE_KEY_SECURITY_OPENAPI,
+  WebsocketClientEvent,
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
-import { flowRunService } from './flow-run-service';
+import { flowRunRepo, flowRunService } from './flow-run-service';
 
 const DEFAULT_PAGING_LIMIT = 10;
 
@@ -94,30 +97,37 @@ export const flowRunController: FastifyPluginCallbackTypebox = (
   app.post('/:id/abort', AbortFlowRequest, async (req) => {
     const flowRunId = req.params.id;
     const flowRun = await flowRunService.getOneOrThrow({
-      projectId: '73zI3Lzedpc9HqjZzq5NY', //req.principal.projectId,
+      projectId: req.principal.projectId,
       id: flowRunId,
     });
 
-    // if (isFlowStateTerminal(flowRun.status)) {
-    //   throw new ApplicationError({
-    //     code: ErrorCode.FLOW,
-    //     params: {
-    //       id: flowRunId,
-    //     },
-    //   });
-    // }
+    if (isFlowStateTerminal(flowRun.status)) {
+      throw new ApplicationError({
+        code: ErrorCode.FLOW_RUN_ENDED,
+        params: {
+          id: flowRunId,
+        },
+      });
+    }
 
-    // if (flowRun.status === FlowRunStatus.PAUSED) {
-    //   flowRun.status = FlowRunStatus.ABORTED;
-    //   await flowRunRepo().update(flowRunId, {
-    //     status: FlowRunStatus.ABORTED,
-    //     finishTime: new Date().toISOString(),
-    //   });
-    // }
+    if (flowRun.status === FlowRunStatus.PAUSED) {
+      // flowRun.status = FlowRunStatus.ABORTED;
+      await flowRunRepo().update(flowRunId, {
+        status: FlowRunStatus.ABORTED,
+        finishTime: new Date().toISOString(),
+      });
+
+      app.io
+        .to(flowRun.projectId)
+        .emit(WebsocketClientEvent.FLOW_RUN_PROGRESS, flowRunId);
+    }
 
     await requestWorkflowCancellation(flowRunId);
 
-    return flowRun;
+    return {
+      success: true,
+      flowRunId,
+    };
   });
 
   done();
@@ -200,8 +210,7 @@ const RetryFlowRequest = {
 
 const AbortFlowRequest = {
   config: {
-    allowedPrincipals: ALL_PRINCIPAL_TYPES,
-    // allowedPrincipals: [PrincipalType.USER],
+    allowedPrincipals: [PrincipalType.USER],
   },
   schema: {
     operationId: 'Abort Flow Run',
@@ -209,5 +218,11 @@ const AbortFlowRequest = {
     params: Type.Object({
       id: OpenOpsId,
     }),
+    response: {
+      [StatusCodes.OK]: Type.Object({
+        success: Type.Boolean(),
+        flowRunId: OpenOpsId,
+      }),
+    },
   },
 };
