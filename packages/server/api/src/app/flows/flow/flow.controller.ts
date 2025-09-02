@@ -38,6 +38,7 @@ import dayjs from 'dayjs';
 import { StatusCodes } from 'http-status-codes';
 import { entitiesMustBeOwnedByCurrentProject } from '../../authentication/authorization';
 import { projectService } from '../../project/project-service';
+import { sendWorkflowCreatedFromTemplateEvent } from '../../telemetry/event-models';
 import { flowRunService } from '../flow-run/flow-run-service';
 import { flowVersionService } from '../flow-version/flow-version.service';
 import { triggerUtils } from '../trigger/hooks/trigger-utils';
@@ -236,16 +237,25 @@ async function createFromTemplate(
   },
   connectionIds: string[],
 ) {
-  return flowService.createFromTemplate({
+  const updatedFlow = await flowService.createFromTrigger({
     projectId,
     userId,
     displayName: template.displayName,
     description: template.description,
     trigger: template.trigger,
-    templateId: template.id,
     connectionIds,
-    isSample: template.isSample,
   });
+
+  sendWorkflowCreatedFromTemplateEvent(
+    userId,
+    updatedFlow.id,
+    updatedFlow.projectId,
+    template.id,
+    template.displayName,
+    template.isSample,
+  );
+
+  return updatedFlow;
 }
 
 async function assertThatFlowIsNotBeingUsed(
