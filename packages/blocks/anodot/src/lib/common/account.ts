@@ -2,6 +2,12 @@ import { buildUserAccountApiKey } from './anodot-requests-helpers';
 import { AnodotTokens } from './auth';
 import { getAnodotUsers } from './users';
 
+export type SelectedAccount = {
+  accountKey: number;
+  divisionId: number;
+  accountName: string;
+};
+
 export async function getAccountApiKey(
   accountId: string,
   apiUrl: string,
