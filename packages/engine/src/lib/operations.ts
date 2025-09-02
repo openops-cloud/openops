@@ -308,7 +308,7 @@ function evaluateError(error: Error): {
   }
 
   if (error instanceof CancellationRequestedError) {
-    status = FlowRunStatus.ABORTED;
+    status = FlowRunStatus.STOPPED;
     message = error.message;
   }
 

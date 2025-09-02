@@ -54,7 +54,7 @@ async function prepareInput(
 
       if (
         flowRun.status === FlowRunStatus.SUCCEEDED ||
-        flowRun.status === FlowRunStatus.ABORTED
+        flowRun.status === FlowRunStatus.STOPPED
       ) {
         return undefined;
       }

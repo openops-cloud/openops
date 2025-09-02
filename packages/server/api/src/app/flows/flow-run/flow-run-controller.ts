@@ -94,7 +94,7 @@ export const flowRunController: FastifyPluginCallbackTypebox = (
     return flowRun;
   });
 
-  app.post('/:id/abort', AbortFlowRequest, async (req) => {
+  app.post('/:id/stop', StopFlowRequest, async (req) => {
     const flowRunId = req.params.id;
     const flowRun = await flowRunService.getOneOrThrow({
       projectId: req.principal.projectId,
@@ -112,7 +112,7 @@ export const flowRunController: FastifyPluginCallbackTypebox = (
 
     if (flowRun.status === FlowRunStatus.PAUSED) {
       await flowRunRepo().update(flowRunId, {
-        status: FlowRunStatus.ABORTED,
+        status: FlowRunStatus.STOPPED,
         finishTime: new Date().toISOString(),
       });
 
@@ -207,14 +207,14 @@ const RetryFlowRequest = {
   },
 };
 
-const AbortFlowRequest = {
+const StopFlowRequest = {
   config: {
     allowedPrincipals: [PrincipalType.USER],
   },
   schema: {
-    operationId: 'Abort Flow Run',
+    operationId: 'Stop Flow Run',
     description:
-      'Abort an in-progress workflow run. This endpoint allows users to terminate a running workflow execution before it completes.',
+      'Stop an in-progress workflow run. This endpoint allows users to terminate a running workflow execution before it completes.',
     security: [SERVICE_KEY_SECURITY_OPENAPI],
     params: Type.Object({
       id: OpenOpsId,

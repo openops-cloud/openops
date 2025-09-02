@@ -4,7 +4,7 @@ import {
 } from '@openops/server-shared';
 import { FlowRunId } from '@openops/shared';
 
-const defaultMessage = 'Workflow execution has been aborted.';
+const defaultMessage = 'Workflow execution has been stopped.';
 
 export class CancellationRequestedError extends Error {
   constructor(message = defaultMessage) {

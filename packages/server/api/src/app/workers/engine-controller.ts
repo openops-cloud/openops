@@ -269,7 +269,7 @@ function getExecutionState(
     [
       FlowRunStatus.TIMEOUT,
       FlowRunStatus.INTERNAL_ERROR,
-      FlowRunStatus.ABORTED,
+      FlowRunStatus.STOPPED,
     ].includes(flowRunResponse.status)
   ) {
     return null;
