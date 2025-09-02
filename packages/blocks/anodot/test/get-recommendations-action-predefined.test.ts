@@ -159,24 +159,53 @@ describe('getRecommendationsAction', () => {
     );
   });
 
-  test('should handle single account object as input', async () => {
-    getAnodotRecommendationsMock.mockResolvedValue('mockResult');
-
-    const context = createContext({
-      accounts: {
-        accountKey: 'key1',
-        divisionId: 'div1',
+  test.each([
+    // Array of account objects
+    [[{ accountKey: 1, divisionId: 7, accountName: 'account1' }], 'account1'],
+    // Stringified array
+    [
+      JSON.stringify([
+        { accountKey: 1, divisionId: 7, accountName: 'account1' },
+      ]),
+      'account1',
+    ],
+    // Single account object
+    [{ accountKey: 1, divisionId: 7, accountName: 'account1' }, 'account1'],
+    // Stringified account object
+    [
+      JSON.stringify({
+        accountKey: 1,
+        divisionId: 7,
         accountName: 'account1',
-      },
-      recommendationTypes: ['aws-backup-outdated-snapshot'],
-      openedRecommendations: { from: '2021-01-01', to: '2021-12-31' },
-    });
+      }),
+      'account1',
+    ],
+  ])(
+    'should normalize accounts input: %p',
+    async (accountsInput, expectedAccountName) => {
+      getAnodotRecommendationsMock.mockResolvedValue('mockResult');
+      const context = createContext({
+        accounts: accountsInput,
+        recommendationTypes: ['aws-backup-outdated-snapshot'],
+        openedRecommendations: { from: '2021-01-01', to: '2021-12-31' },
+      });
 
-    const result = await getRecommendationsAction.run(context);
+      const result = await getRecommendationsAction.run(context);
 
-    expect(result).toEqual({ account1: 'mockResult' });
-    expect(getAnodotRecommendationsMock).toHaveBeenCalledTimes(1);
-  });
+      expect(result).toEqual({ [expectedAccountName]: 'mockResult' });
+      expect(getAnodotRecommendationsMock).toHaveBeenCalledTimes(1);
+      expect(getAnodotRecommendationsMock).toHaveBeenCalledWith(
+        'some api url',
+        'a bearer token',
+        'an account:1:7',
+        {
+          open_recs_creation_date: { from: '2021-01-01', to: '2021-12-31' },
+          status_filter: 'potential_savings',
+          type_id: { eq: ['aws-backup-outdated-snapshot'], negate: false },
+        },
+      );
+    },
+  );
 
   function createContext(props: unknown) {
     return {

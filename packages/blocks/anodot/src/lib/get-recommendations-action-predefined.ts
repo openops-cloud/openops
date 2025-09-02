@@ -1,10 +1,12 @@
 import { createAction } from '@openops/blocks-framework';
+import { tryParseJson } from '@openops/common';
 import { accountProperty } from './account-property';
 import { anadotAuth } from './anodot-auth-property';
 import { closedAndDoneRecommendationsProperty } from './api-filters/closed-and-done-recommendations-property';
 import { customStatusProperty } from './api-filters/custom-status-property';
 import { getPredefinedRecommendationsDropdownProperty } from './api-filters/get-predefined-recommendation-property';
 import { openedRecommendationsProperty } from './api-filters/opened-recommendations-property';
+import type { SelectedAccount } from './common/account';
 import { buildUserAccountApiKey } from './common/anodot-requests-helpers';
 import { authenticateUserWithAnodot } from './common/auth';
 import {
@@ -36,10 +38,14 @@ export const getRecommendationsAction = createAction({
     try {
       const { authUrl, apiUrl, username, password } = context.auth;
 
-      let accounts = context.propsValue.accounts as any[];
-      if (!Array.isArray(accounts)) {
-        accounts = [accounts];
+      const rawAccounts = context.propsValue.accounts as unknown;
+      let parsedAccounts = rawAccounts as unknown;
+      if (typeof rawAccounts === 'string') {
+        parsedAccounts = tryParseJson(rawAccounts);
       }
+      const accounts: SelectedAccount[] = Array.isArray(parsedAccounts)
+        ? (parsedAccounts as SelectedAccount[])
+        : ([parsedAccounts] as SelectedAccount[]);
 
       const recommendationTypes = context.propsValue.recommendationTypes as
         | string[]
@@ -73,8 +79,8 @@ export const getRecommendationsAction = createAction({
       for (const selectedAccount of accounts) {
         const accountApiKey = buildUserAccountApiKey(
           anodotTokens.apikey,
-          selectedAccount.accountKey,
-          selectedAccount.divisionId,
+          String(selectedAccount.accountKey),
+          String(selectedAccount.divisionId),
         );
 
         result[selectedAccount.accountName] = await getAnodotRecommendations(

@@ -1,4 +1,5 @@
 import { createAction } from '@openops/blocks-framework';
+import { tryParseJson } from '@openops/common';
 import { isEmpty } from '@openops/shared';
 import { accountProperty } from './account-property';
 import { anadotAuth } from './anodot-auth-property';
@@ -11,6 +12,7 @@ import { openedRecommendationsProperty } from './api-filters/opened-recommendati
 import { statusProperty } from './api-filters/status-property';
 import { tagsProperty } from './api-filters/tags-property';
 import { virtualTagsProperty } from './api-filters/virtual-tags-property';
+import type { SelectedAccount } from './common/account';
 import { buildUserAccountApiKey } from './common/anodot-requests-helpers';
 import { authenticateUserWithAnodot } from './common/auth';
 import {
@@ -106,10 +108,14 @@ export const getRecommendationsCustomAction = createAction({
     try {
       const { authUrl, apiUrl, username, password } = context.auth;
 
-      let accounts = context.propsValue.accounts as any[];
-      if (!Array.isArray(accounts)) {
-        accounts = [accounts];
+      const rawAccounts = context.propsValue.accounts as unknown;
+      let parsedAccounts = rawAccounts as unknown;
+      if (typeof rawAccounts === 'string') {
+        parsedAccounts = tryParseJson(rawAccounts);
       }
+      const accounts: SelectedAccount[] = Array.isArray(parsedAccounts)
+        ? (parsedAccounts as SelectedAccount[])
+        : ([parsedAccounts] as SelectedAccount[]);
 
       const filters = buildRecommendationsFilters(context.propsValue);
 
@@ -123,8 +129,8 @@ export const getRecommendationsCustomAction = createAction({
       for (const selectedAccount of accounts) {
         const accountApiKey = buildUserAccountApiKey(
           anodotTokens.apikey,
-          selectedAccount.accountKey,
-          selectedAccount.divisionId,
+          String(selectedAccount.accountKey),
+          String(selectedAccount.divisionId),
         );
 
         result[selectedAccount.accountName] = await getAnodotRecommendations(
