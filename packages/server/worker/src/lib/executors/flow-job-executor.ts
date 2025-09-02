@@ -183,7 +183,7 @@ async function updateRunWithError(
   engineToken: string,
   status:
     | FlowRunStatus.TIMEOUT
-    | FlowRunStatus.ABORTED
+    | FlowRunStatus.STOPPED
     | FlowRunStatus.INTERNAL_ERROR,
 ): Promise<void> {
   await engineApiService(engineToken).updateRunStatus({
@@ -219,7 +219,7 @@ type EvaluateEngineStatusResult =
       engineSucceeded: false;
       failedRunStatus:
         | FlowRunStatus.TIMEOUT
-        | FlowRunStatus.ABORTED
+        | FlowRunStatus.STOPPED
         | FlowRunStatus.INTERNAL_ERROR;
     };
 
@@ -229,7 +229,7 @@ function evaluateEngineStatus(
 ): EvaluateEngineStatusResult {
   const failureStatuses = [
     FlowRunStatus.TIMEOUT,
-    FlowRunStatus.ABORTED,
+    FlowRunStatus.STOPPED,
     FlowRunStatus.INTERNAL_ERROR,
   ];
 
@@ -247,8 +247,8 @@ function evaluateEngineStatus(
     return { engineSucceeded: false, failedRunStatus: FlowRunStatus.TIMEOUT };
   }
 
-  if (flowRunStatus === FlowRunStatus.ABORTED) {
-    return { engineSucceeded: false, failedRunStatus: FlowRunStatus.ABORTED };
+  if (flowRunStatus === FlowRunStatus.STOPPED) {
+    return { engineSucceeded: false, failedRunStatus: FlowRunStatus.STOPPED };
   }
 
   return {
