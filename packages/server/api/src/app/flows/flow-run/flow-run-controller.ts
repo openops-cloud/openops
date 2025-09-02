@@ -215,6 +215,7 @@ const AbortFlowRequest = {
     operationId: 'Abort Flow Run',
     description:
       'Abort an in-progress workflow run. This endpoint allows users to terminate a running workflow execution before it completes.',
+    security: [SERVICE_KEY_SECURITY_OPENAPI],
     params: Type.Object({
       id: OpenOpsId,
     }),
