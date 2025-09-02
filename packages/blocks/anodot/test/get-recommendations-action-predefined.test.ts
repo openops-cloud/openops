@@ -207,6 +207,30 @@ describe('getRecommendationsAction', () => {
     },
   );
 
+  test('should handle regular string as accounts input', async () => {
+    getAnodotRecommendationsMock.mockResolvedValue('mockResult');
+    const context = createContext({
+      accounts: 'just-a-string',
+      recommendationTypes: ['aws-backup-outdated-snapshot'],
+      openedRecommendations: { from: '2021-01-01', to: '2021-12-31' },
+    });
+
+    const result = await getRecommendationsAction.run(context);
+
+    expect(result).toEqual({ undefined: 'mockResult' });
+    expect(getAnodotRecommendationsMock).toHaveBeenCalledTimes(1);
+    expect(getAnodotRecommendationsMock).toHaveBeenCalledWith(
+      'some api url',
+      'a bearer token',
+      'an account:undefined:undefined',
+      {
+        open_recs_creation_date: { from: '2021-01-01', to: '2021-12-31' },
+        status_filter: 'potential_savings',
+        type_id: { eq: ['aws-backup-outdated-snapshot'], negate: false },
+      },
+    );
+  });
+
   function createContext(props: unknown) {
     return {
       ...jest.requireActual('@openops/blocks-framework'),

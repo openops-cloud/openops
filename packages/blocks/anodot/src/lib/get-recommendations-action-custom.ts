@@ -109,7 +109,7 @@ export const getRecommendationsCustomAction = createAction({
       const { authUrl, apiUrl, username, password } = context.auth;
 
       const rawAccounts = context.propsValue.accounts as unknown;
-      let parsedAccounts = rawAccounts as unknown;
+      let parsedAccounts = rawAccounts;
       if (typeof rawAccounts === 'string') {
         parsedAccounts = tryParseJson(rawAccounts);
       }

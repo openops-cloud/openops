@@ -358,6 +358,31 @@ describe('getRecommendationsCustomAction', () => {
     },
   );
 
+  test('should handle regular string as accounts input', async () => {
+    getAnodotRecommendationsMock.mockResolvedValue('mockResult');
+    const context = createContext({
+      accounts: 'just-a-string',
+      statusFilter: 'status',
+      customStatus: {},
+      openedRecommendations: { from: '1', to: '2' },
+      closedAndDoneRecommendationsProperty: {},
+    });
+
+    const result = await getRecommendationsCustomAction.run(context);
+
+    expect(result).toEqual({ undefined: 'mockResult' });
+    expect(getAnodotRecommendationsMock).toHaveBeenCalledTimes(1);
+    expect(getAnodotRecommendationsMock).toHaveBeenCalledWith(
+      'some api url',
+      'a bearer token',
+      'an account:undefined:undefined',
+      {
+        open_recs_creation_date: { from: '1', to: '2' },
+        status_filter: 'status',
+      },
+    );
+  });
+
   function createContext(props: unknown) {
     return {
       ...jest.requireActual('@openops/blocks-framework'),
