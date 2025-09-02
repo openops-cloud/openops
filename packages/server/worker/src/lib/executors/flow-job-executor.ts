@@ -227,11 +227,15 @@ function evaluateEngineStatus(
   engineResponseStatus: EngineResponseStatus,
   flowRunStatus: FlowRunStatus,
 ): EvaluateEngineStatusResult {
+  const failureStatuses = [
+    FlowRunStatus.TIMEOUT,
+    FlowRunStatus.ABORTED,
+    FlowRunStatus.INTERNAL_ERROR,
+  ];
+
   if (
     engineResponseStatus === EngineResponseStatus.OK &&
-    flowRunStatus !== FlowRunStatus.TIMEOUT &&
-    flowRunStatus !== FlowRunStatus.ABORTED &&
-    flowRunStatus !== FlowRunStatus.INTERNAL_ERROR
+    !failureStatuses.includes(flowRunStatus)
   ) {
     return { engineSucceeded: true, failedRunStatus: undefined };
   }
