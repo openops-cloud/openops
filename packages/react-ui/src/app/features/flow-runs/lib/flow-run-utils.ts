@@ -76,7 +76,7 @@ export const flowRunUtils = {
           variant: 'success',
           Icon: Check,
         };
-      case FlowRunStatus.ABORTED:
+      case FlowRunStatus.STOPPED:
         return {
           variant: 'success',
           Icon: Check,

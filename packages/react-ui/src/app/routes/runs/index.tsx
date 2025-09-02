@@ -63,7 +63,7 @@ const FlowRunsPage = () => {
         title: t('Status'),
         accessorKey: 'status',
         options: Object.values(FlowRunStatus)
-          .filter((status) => status !== FlowRunStatus.ABORTED)
+          .filter((status) => status !== FlowRunStatus.STOPPED)
           .map((status) => {
             return {
               label: formatUtils.convertEnumToHumanReadable(status),

@@ -169,7 +169,7 @@ describe('Execute workflow', () => {
     });
   });
 
-  test('should update the workflow status to ABORTED and the job to completed', async () => {
+  test('should update the workflow status to STOPPED and the job to completed', async () => {
     const job = buildJob();
     const api = engineApiService('t') as any;
     asMock(engineApiService).mockReturnValue(api);
@@ -178,14 +178,14 @@ describe('Execute workflow', () => {
 
     asMock(engineRunner.executeFlow).mockResolvedValue({
       status: EngineResponseStatus.ERROR,
-      result: { status: FlowRunStatus.ABORTED },
+      result: { status: FlowRunStatus.STOPPED },
     });
 
     await flowJobExecutor.executeFlow(job as OneTimeJobData, 't');
 
     expect(api.updateRunStatus).toHaveBeenCalledWith(
       expect.objectContaining({
-        runDetails: expect.objectContaining({ status: FlowRunStatus.ABORTED }),
+        runDetails: expect.objectContaining({ status: FlowRunStatus.STOPPED }),
       }),
     );
     expect(api.updateJobStatus).toHaveBeenCalledWith({
