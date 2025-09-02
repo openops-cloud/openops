@@ -1,7 +1,6 @@
 const saveRequestBodyMock = jest.fn();
 import { progressService } from '../../src/lib/services/progress.service';
 import { throwIfExecutionTimeExceeded } from '../../src/lib/timeout-validator';
-import { FlagId } from '@openops/shared';
 
 jest.mock('@openops/server-shared', () => ({
   ...jest.requireActual('@openops/server-shared'),
