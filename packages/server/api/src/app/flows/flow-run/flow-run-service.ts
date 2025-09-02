@@ -259,7 +259,7 @@ export const flowRunService = {
       });
     }
 
-    ensureFlowResumable({
+    verifyResumeEligibility({
       flowRunId,
       executionType,
       flowRetryStrategy,
@@ -492,7 +492,7 @@ async function updateLogs({
   return fileId;
 }
 
-function ensureFlowResumable({
+function verifyResumeEligibility({
   flowRunId,
   flowRunStatus,
   executionType,
