@@ -5,12 +5,14 @@ import { FlowTemplateMetadataWithIntegrations } from './types';
 
 type FlowTemplateCardProps = {
   templateMetadata: FlowTemplateMetadataWithIntegrations;
+  showAuthor: boolean;
   ownerLogoUrl?: string;
   onClick: () => void;
 };
 
 const FlowTemplateCard = ({
   templateMetadata,
+  showAuthor,
   //Will be removed
   ownerLogoUrl = 'https://static.openops.com/logos/logo.icon.positive.svg',
   onClick,
@@ -28,14 +30,18 @@ const FlowTemplateCard = ({
       />
       <TemplateCardText templateMetadata={templateMetadata} />
       <div className="flex items-center gap-[6px] !mt-auto">
-        <BlockIcon
-          showTooltip={false}
-          logoUrl={ownerLogoUrl}
-          circle={true}
-          size={'sm'}
-          className="p-1 bg-blue-50"
-        ></BlockIcon>
-        <span>By OpenOps</span>
+        {showAuthor && (
+          <>
+            <BlockIcon
+              showTooltip={false}
+              logoUrl={ownerLogoUrl}
+              circle={true}
+              size={'sm'}
+              className="p-1 bg-blue-50"
+            ></BlockIcon>
+            <span>By OpenOps</span>
+          </>
+        )}
       </div>
     </div>
   );
