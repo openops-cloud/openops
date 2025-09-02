@@ -286,17 +286,7 @@ export async function execute(
   } catch (error) {
     logger.warn('Engine operation failed.', error);
 
-    let status = FlowRunStatus.INTERNAL_ERROR;
-    let message = utils.tryParseJson((error as Error).message);
-    if (error instanceof CancellationRequestedError) {
-      status = FlowRunStatus.ABORTED;
-      message = error.message;
-    }
-
-    if (error instanceof EngineTimeoutError) {
-      status = FlowRunStatus.TIMEOUT;
-      message = error.message;
-    }
+    const { status, message } = evaluateError(error as Error);
 
     return {
       status: EngineResponseStatus.ERROR,
@@ -308,4 +298,27 @@ export async function execute(
       },
     };
   }
+}
+
+function evaluateError(error: Error): {
+  status: FlowRunStatus;
+  message: unknown;
+} {
+  let status = FlowRunStatus.INTERNAL_ERROR;
+  let message = utils.tryParseJson(error.message);
+
+  if (error instanceof EngineTimeoutError) {
+    status = FlowRunStatus.TIMEOUT;
+    message = error.message;
+  }
+
+  if (error instanceof CancellationRequestedError) {
+    status = FlowRunStatus.ABORTED;
+    message = error.message;
+  }
+
+  return {
+    status,
+    message,
+  };
 }
