@@ -128,14 +128,14 @@ describe('Engine Controller - update-run endpoint', () => {
       });
     });
 
-    it('should handle STOPPED status and convert to SUCCEEDED', async () => {
+    it('should handle ABORTED status', async () => {
       const request = {
         ...baseRequest,
         body: {
           ...baseRequest.body,
           runDetails: {
             ...baseRequest.body.runDetails,
-            status: FlowRunStatus.STOPPED,
+            status: FlowRunStatus.ABORTED,
           },
         },
       };
@@ -148,7 +148,7 @@ describe('Engine Controller - update-run endpoint', () => {
 
       expect(flowRunService.updateStatus).toHaveBeenCalledWith(
         expect.objectContaining({
-          status: FlowRunStatus.SUCCEEDED, // STOPPED gets converted to SUCCEEDED
+          status: FlowRunStatus.ABORTED,
         }),
       );
     });
@@ -489,7 +489,7 @@ describe('Engine Controller - update-run endpoint', () => {
           },
         },
         {
-          status: FlowRunStatus.STOPPED,
+          status: FlowRunStatus.ABORTED,
           stopResponse: {
             status: StatusCodes.ACCEPTED,
             body: { message: 'stopped' },
@@ -502,7 +502,7 @@ describe('Engine Controller - update-run endpoint', () => {
           },
         },
         {
-          status: FlowRunStatus.STOPPED,
+          status: FlowRunStatus.ABORTED,
           stopResponse: null,
           expected: {
             status: StatusCodes.OK,
