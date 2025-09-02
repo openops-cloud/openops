@@ -105,6 +105,9 @@ describe('rdsDeleteInstanceAction', () => {
         shouldWaitForCreation: true,
         waitForTimeInSecondsProperty: { waitForTimeInSeconds: 10 },
         takeSnapshot: true,
+        snapshotIdentifierProperty: {
+          snapshotIdentifier: 'custom-snapshot-name',
+        },
         dryRun: false,
       },
     };
@@ -121,6 +124,7 @@ describe('rdsDeleteInstanceAction', () => {
       'mysql-db-instance1',
       true,
       10,
+      'custom-snapshot-name',
     );
   });
 

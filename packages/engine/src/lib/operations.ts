@@ -35,6 +35,7 @@ import { blockHelper } from './helper/block-helper';
 import { triggerHelper } from './helper/trigger-helper';
 import { resolveVariable } from './resolve-variable';
 import { progressService } from './services/progress.service';
+import { EngineTimeoutError } from './timeout-validator';
 import { utils } from './utils';
 
 const executeFlow = async (
@@ -284,14 +285,34 @@ export async function execute(
   } catch (error) {
     logger.warn('Engine operation failed.', error);
 
+    const { status, message } = evaluateError(error as Error);
+
     return {
       status: EngineResponseStatus.ERROR,
       response: {
-        status: FlowRunStatus.INTERNAL_ERROR,
+        status,
         error: {
-          message: utils.tryParseJson((error as Error).message),
+          message,
         },
       },
     };
   }
+}
+
+function evaluateError(error: Error): {
+  status: FlowRunStatus;
+  message: unknown;
+} {
+  let status = FlowRunStatus.INTERNAL_ERROR;
+  let message = utils.tryParseJson(error.message);
+
+  if (error instanceof EngineTimeoutError) {
+    status = FlowRunStatus.TIMEOUT;
+    message = error.message;
+  }
+
+  return {
+    status,
+    message,
+  };
 }

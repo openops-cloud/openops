@@ -2,27 +2,29 @@ import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { useTheme } from '@/app/common/providers/theme-provider';
 import { OPENOPS_CONNECT_TEMPLATES_URL } from '@/app/constants/cloud';
 import { ExpandedTemplate } from '@/app/features/templates/components/expanded-template';
+import { PrivateFlowTemplateFilterSidebarWrapper } from '@/app/features/templates/components/private-flow-template-filter-sidebar-wrapper';
 import { authenticationSession } from '@/app/lib/authentication-session';
 import {
   BranchLabelNode,
-  FlowTemplateList,
+  FlowTemplateGallery,
   FlowTemplateMetadataWithIntegrations,
   LoopStepPlaceHolder,
   ReturnLoopedgeButton,
   StepPlaceHolder,
   TemplateDetails,
   TemplateEdge,
+  TemplatesTabs,
   VerticalDivider,
 } from '@openops/components/ui';
-import { FlowTemplateDto } from '@openops/shared';
+import { FlowTemplateDto, OpsEdition } from '@openops/shared';
 import React from 'react';
 import { popupFeatures } from '../../cloud/lib/popup';
 import { useCloudProfile } from '../../cloud/lib/use-cloud-profile';
 import { useUserInfoPolling } from '../../cloud/lib/use-user-info-polling';
 import {
   FlowTemplateFilterSidebarProps,
-  FlowTemplateFilterSidebarWrapper,
-} from './flow-template-filter-sidebar-wrapper';
+  PublicFlowTemplateFilterSidebarWrapper,
+} from './public-flow-template-filter-sidebar-wrapper';
 import { TemplateStepNodeWithMetadata } from './template-step-node-with-metadata';
 import { useOwnerLogoUrl } from './use-owner-logo-url';
 
@@ -40,11 +42,14 @@ const nodeTypes = {
 
 export type SelectFlowTemplateDialogContentProps = {
   isExpanded: boolean;
+  isPrivateCatalogCreated: boolean;
   selectedTemplate: FlowTemplateDto | undefined;
   searchText: string;
   selectedTemplateMetadata: FlowTemplateMetadataWithIntegrations | undefined;
-  templates: FlowTemplateMetadataWithIntegrations[] | undefined;
-  isTemplateListLoading: boolean;
+  publicTemplates: FlowTemplateMetadataWithIntegrations[] | undefined;
+  isPublicTemplatesLoading: boolean;
+  privateTemplates: FlowTemplateMetadataWithIntegrations[] | undefined;
+  isPrivateTemplatesLoading: boolean;
   handleTemplateSelect: (
     templateMetadata: FlowTemplateMetadataWithIntegrations,
   ) => void;
@@ -61,6 +66,7 @@ export type SelectFlowTemplateDialogContentProps = {
 
 const SelectFlowTemplateDialogContent = ({
   isExpanded,
+  isPrivateCatalogCreated,
   selectedTemplate,
   closeExpanded,
   selectedBlocks,
@@ -77,8 +83,10 @@ const SelectFlowTemplateDialogContent = ({
   closeDetails,
   useTemplate,
   expandPreview,
-  templates,
-  isTemplateListLoading,
+  publicTemplates,
+  privateTemplates,
+  isPublicTemplatesLoading,
+  isPrivateTemplatesLoading,
   handleTemplateSelect,
   onSearchInputChange,
 }: SelectFlowTemplateDialogContentProps) => {
@@ -87,9 +95,14 @@ const SelectFlowTemplateDialogContent = ({
   const { isConnectedToCloudTemplates } = useCloudProfile();
   const { createPollingInterval } = useUserInfoPolling();
   const useCloudTemplates = flagsHooks.useShouldFetchCloudTemplates();
+  const { EDITION } = flagsHooks.useFlags().data;
   const isFullCatalog =
     !isTemplatePreselected &&
     (isConnectedToCloudTemplates || !useCloudTemplates);
+
+  const [activeTab, setActiveTab] = React.useState<TemplatesTabs>(
+    TemplatesTabs.Public,
+  );
 
   const onExploreMoreClick = () => {
     const currentUser = authenticationSession.getCurrentUser();
@@ -127,17 +140,21 @@ const SelectFlowTemplateDialogContent = ({
   return (
     <>
       <div className="w-[255px]">
-        <FlowTemplateFilterSidebarWrapper
-          selectedBlocks={selectedBlocks}
-          selectedDomains={selectedDomains}
-          selectedServices={selectedServices}
-          setSelectedBlocks={setSelectedBlocks}
-          setSelectedDomains={setSelectedDomains}
-          setSelectedServices={setSelectedServices}
-          selectedCategories={selectedCategories}
-          setSelectedCategories={setSelectedCategories}
-          showDomains={isFullCatalog}
-        />
+        {activeTab === TemplatesTabs.Public ? (
+          <PublicFlowTemplateFilterSidebarWrapper
+            selectedBlocks={selectedBlocks}
+            selectedDomains={selectedDomains}
+            selectedServices={selectedServices}
+            setSelectedBlocks={setSelectedBlocks}
+            setSelectedDomains={setSelectedDomains}
+            setSelectedServices={setSelectedServices}
+            selectedCategories={selectedCategories}
+            setSelectedCategories={setSelectedCategories}
+            showDomains={isFullCatalog}
+          />
+        ) : (
+          <PrivateFlowTemplateFilterSidebarWrapper />
+        )}
       </div>
       <VerticalDivider className="h-full" />
 
@@ -155,17 +172,22 @@ const SelectFlowTemplateDialogContent = ({
             theme={theme}
           />
         ) : (
-          <FlowTemplateList
+          <FlowTemplateGallery
             selectionHeading={selectionHeading}
-            templates={templates}
-            isLoading={isTemplateListLoading}
+            showPrivateTemplates={EDITION !== OpsEdition.COMMUNITY}
+            isPrivateCatalogCreated={isPrivateCatalogCreated}
+            publicTemplates={publicTemplates}
+            privateTemplates={privateTemplates}
+            isPublicTemplatesLoading={isPublicTemplatesLoading}
+            isPrivateTemplatesLoading={isPrivateTemplatesLoading}
             onTemplateSelect={handleTemplateSelect}
             searchText={searchText}
             onSearchInputChange={onSearchInputChange}
-            ownerLogoUrl={ownerLogoUrl}
-            isFullCatalog={isFullCatalog}
+            isConnectedToCloud={isFullCatalog}
             onExploreMoreClick={onExploreMoreClick}
-          ></FlowTemplateList>
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+          />
         )}
       </div>
     </>
