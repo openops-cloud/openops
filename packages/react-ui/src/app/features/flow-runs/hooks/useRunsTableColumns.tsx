@@ -1,4 +1,5 @@
 import {
+  ConfirmationDialog,
   DataTableColumnHeader,
   DropdownMenu,
   DropdownMenuContent,
@@ -13,8 +14,13 @@ import {
 import { useMutation } from '@tanstack/react-query';
 import { ColumnDef } from '@tanstack/react-table';
 import { t } from 'i18next';
-import { EllipsisVertical, RefreshCw, RotateCcw } from 'lucide-react';
-import { useMemo } from 'react';
+import {
+  CircleStop,
+  EllipsisVertical,
+  RefreshCw,
+  RotateCcw,
+} from 'lucide-react';
+import { useMemo, useState } from 'react';
 
 import { useAuthorization } from '@/app/common/hooks/authorization-hooks';
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
@@ -24,8 +30,10 @@ import {
   FlagId,
   FlowRetryStrategy,
   FlowRun,
+  FlowRunStatus,
   FlowRunTriggerSource,
   isFailedState,
+  isRunningState,
   Permission,
 } from '@openops/shared';
 
@@ -37,12 +45,10 @@ type Column = ColumnDef<RowDataWithActions<FlowRun>> & {
 };
 
 export const useRunsTableColumns = (): Column[] => {
-  const { checkAccess } = useAuthorization();
   const durationEnabled = flagsHooks.useFlag<boolean>(
     FlagId.SHOW_DURATION,
   ).data;
 
-  const userHasPermissionToRetryRun = checkAccess(Permission.RETRY_RUN);
   const { mutate } = useMutation<
     FlowRun,
     Error,
@@ -58,6 +64,22 @@ export const useRunsTableColumns = (): Column[] => {
       toast(INTERNAL_ERROR_TOAST);
     },
   });
+
+  const { mutate: stopRun } = useMutation<
+    void,
+    Error,
+    { row: RowDataWithActions<FlowRun> }
+  >({
+    mutationFn: (data) => flowRunsApi.abort(data.row.id),
+    onSuccess: (_, { row }) => {
+      row.update({ ...row, status: FlowRunStatus.STOPPED });
+    },
+    onError: (error) => {
+      console.error(error);
+      toast(INTERNAL_ERROR_TOAST);
+    },
+  });
+
   return useMemo(
     () =>
       [
@@ -136,10 +158,16 @@ export const useRunsTableColumns = (): Column[] => {
           header: () => null,
           cell: ({ row }) => {
             const isFailed = isFailedState(row.original.status);
+            const isRunning = isRunningState(row.original.status);
+            const isStopped = row.original.status === FlowRunStatus.STOPPED;
+
+            // eslint-disable-next-line react-hooks/rules-of-hooks
+            const [isStopDialogOpen, setIsStopDialogOpen] = useState(false);
 
             if (
-              !isFailed ||
-              row.original.triggerSource === FlowRunTriggerSource.TEST_RUN
+              (isFailed &&
+                row.original.triggerSource === FlowRunTriggerSource.TEST_RUN) ||
+              (!isFailed && !isRunning)
             ) {
               return <div className="h-10"></div>;
             }
@@ -157,11 +185,8 @@ export const useRunsTableColumns = (): Column[] => {
                     <EllipsisVertical className="h-10 w-10" />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    <PermissionNeededTooltip
-                      hasPermission={userHasPermissionToRetryRun}
-                    >
+                    {(isFailed || isStopped) && (
                       <DropdownMenuItem
-                        disabled={!userHasPermissionToRetryRun}
                         onClick={() =>
                           mutate({
                             row: row.original,
@@ -174,13 +199,9 @@ export const useRunsTableColumns = (): Column[] => {
                           <span>{t('Retry on latest version')}</span>
                         </div>
                       </DropdownMenuItem>
-                    </PermissionNeededTooltip>
-
-                    <PermissionNeededTooltip
-                      hasPermission={userHasPermissionToRetryRun}
-                    >
+                    )}
+                    {isFailed && (
                       <DropdownMenuItem
-                        disabled={!userHasPermissionToRetryRun}
                         onClick={() =>
                           mutate({
                             row: row.original,
@@ -193,9 +214,36 @@ export const useRunsTableColumns = (): Column[] => {
                           <span>{t('Retry from failed step')}</span>
                         </div>
                       </DropdownMenuItem>
-                    </PermissionNeededTooltip>
+                    )}
+                    {isRunning && (
+                      <DropdownMenuItem
+                        onClick={() => setIsStopDialogOpen(true)}
+                      >
+                        <div className="flex flex-row gap-2 items-center">
+                          <CircleStop className="h-4 w-4" />
+                          <span>{t('Stop Run')}</span>
+                        </div>
+                      </DropdownMenuItem>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
+
+                <ConfirmationDialog
+                  isOpen={isStopDialogOpen}
+                  onOpenChange={setIsStopDialogOpen}
+                  title={t('Are you sure you want to stop this run?')}
+                  description={t(
+                    'Stopping this workflow may leave some steps unfinished. Consider whether stopping the execution is necessary.',
+                  )}
+                  confirmButtonText={t('Stop Run')}
+                  onConfirm={() => {
+                    stopRun({ row: row.original });
+                    setIsStopDialogOpen(false);
+                  }}
+                  onCancel={() => setIsStopDialogOpen(false)}
+                  titleClassName="text-primary text-[22px]"
+                  descriptionClassName="text-primary text-[16px]"
+                />
               </div>
             );
           },
@@ -203,6 +251,6 @@ export const useRunsTableColumns = (): Column[] => {
       ].filter(
         (column) => durationEnabled || column.accessorKey !== 'duration',
       ),
-    [mutate, userHasPermissionToRetryRun],
+    [mutate, stopRun],
   );
 };
