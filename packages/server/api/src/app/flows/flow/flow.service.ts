@@ -65,12 +65,14 @@ export const flowService = {
     description,
     trigger,
     connectionIds,
+    folderId,
   }: CreateFromTriggerParams): Promise<PopulatedFlow> {
     const newFlow = await create({
       userId,
       projectId,
       request: {
         displayName,
+        folderId,
       },
     });
 
@@ -671,6 +673,7 @@ type CreateFromTriggerParams = {
   description: string | undefined;
   trigger: TriggerWithOptionalId;
   connectionIds: string[];
+  folderId?: string;
 };
 
 type ListParams = {
