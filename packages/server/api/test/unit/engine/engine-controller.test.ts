@@ -128,7 +128,7 @@ describe('Engine Controller - update-run endpoint', () => {
       });
     });
 
-    it('should handle ABORTED status and convert to SUCCEEDED', async () => {
+    it('should handle ABORTED status', async () => {
       const request = {
         ...baseRequest,
         body: {

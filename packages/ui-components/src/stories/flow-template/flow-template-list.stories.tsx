@@ -19,6 +19,9 @@ const meta = {
   title: 'Components/FlowTemplateList',
   component: FlowTemplateList,
   tags: ['autodocs'],
+  args: {
+    showAuthor: true,
+  },
   parameters: {
     layout: 'centered',
     docs: {
@@ -97,3 +100,13 @@ export const NotConnectedToCloud: Story = {
     </TooltipProvider>
   ),
 };
+
+/**
+ * Grid without author section
+ */
+export const WithoutAuthor: Story = {
+  args: {
+    ...ConnectedToCloud.args,
+    showAuthor: false,
+  },
+} as Story;

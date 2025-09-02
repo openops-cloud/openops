@@ -34,6 +34,7 @@ const FlowTemplateGalleryPrivateTab = ({
 
   return (
     <FlowTemplateList
+      showAuthor={false}
       templates={privateTemplates}
       isLoading={isPrivateTemplatesLoading}
       onTemplateSelect={onTemplateSelect}
