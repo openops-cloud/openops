@@ -280,12 +280,13 @@ async function assertThatFlowIsNotBeingUsed(
   }
 }
 
-export async function extractUserIdFromPrincipal(
+async function extractUserIdFromPrincipal(
   principal: Principal,
 ): Promise<string> {
   if (principal.type === PrincipalType.USER) {
     return principal.id;
   }
+  // TODO currently it's same as api service, but it's better to get it from api key service, in case we introduced more admin users
   const project = await projectService.getOneOrThrow(principal.projectId);
   return project.ownerId;
 }
