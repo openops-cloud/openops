@@ -33,7 +33,7 @@ describe('getRunMessage', () => {
       ['TIMEOUT', FlowRunStatus.TIMEOUT],
       ['SUCCEEDED', FlowRunStatus.SUCCEEDED],
       ['FAILED', FlowRunStatus.FAILED],
-      ['ABORTED', FlowRunStatus.ABORTED],
+      ['STOPPED', FlowRunStatus.STOPPED],
       ['PAUSED', FlowRunStatus.PAUSED],
     ])('when run has %s status with logsFileId', (_, status) => {
       const run = { status, logsFileId: 'some-log-file-id' } as FlowRun;
@@ -91,7 +91,7 @@ describe('getStatusText', () => {
 
   describe('should return specific status messages', () => {
     it.each([
-      ['ABORTED', FlowRunStatus.ABORTED, 'Workflow Run was aborted'],
+      ['STOPPED', FlowRunStatus.STOPPED, 'Workflow Run was stopped'],
       ['FAILED', FlowRunStatus.FAILED, 'Run Failed'],
       ['PAUSED', FlowRunStatus.PAUSED, 'Workflow Run is paused'],
       ['RUNNING', FlowRunStatus.RUNNING, 'Running'],
