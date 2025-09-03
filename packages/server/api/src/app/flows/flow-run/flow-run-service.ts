@@ -16,6 +16,7 @@ import {
   FlowRunTriggerSource,
   FlowVersionId,
   isEmpty,
+  isFlowStateTerminal,
   isNil,
   openOpsId,
   PauseMetadata,
@@ -213,6 +214,7 @@ export const flowRunService = {
           flowRunId,
           executionType: ExecutionType.RESUME,
           progressUpdateType: ProgressUpdateType.NONE,
+          flowRetryStrategy: strategy,
         });
       case FlowRetryStrategy.ON_LATEST_VERSION: {
         const payload =
@@ -223,6 +225,7 @@ export const flowRunService = {
           flowRunId,
           executionType: ExecutionType.BEGIN,
           progressUpdateType: ProgressUpdateType.NONE,
+          flowRetryStrategy: strategy,
         });
       }
     }
@@ -233,12 +236,14 @@ export const flowRunService = {
     executionCorrelationId,
     progressUpdateType,
     executionType,
+    flowRetryStrategy,
   }: {
     flowRunId: FlowRunId;
     executionCorrelationId: string;
     progressUpdateType: ProgressUpdateType;
     payload?: unknown;
     executionType: ExecutionType;
+    flowRetryStrategy?: FlowRetryStrategy;
   }): Promise<FlowRun | null> {
     logger.info(`[FlowRunService#resume] flowRunId=${flowRunId}`);
 
@@ -254,6 +259,14 @@ export const flowRunService = {
         },
       });
     }
+
+    verifyResumeEligibility({
+      flowRunId,
+      executionType,
+      flowRetryStrategy,
+      flowRunStatus: flowRunToResume.status,
+    });
+
     const pauseMetadata = flowRunToResume.pauseMetadata;
     return flowRunService.start({
       payload,
@@ -500,6 +513,33 @@ async function updateLogs({
     compression: FileCompression.GZIP,
   });
   return fileId;
+}
+
+function verifyResumeEligibility({
+  flowRunId,
+  flowRunStatus,
+  executionType,
+  flowRetryStrategy,
+}: {
+  flowRunId: FlowRunId;
+  flowRunStatus: FlowRunStatus;
+  executionType: ExecutionType;
+  flowRetryStrategy?: FlowRetryStrategy;
+}): void {
+  if (
+    !flowRetryStrategy &&
+    executionType === ExecutionType.RESUME &&
+    isFlowStateTerminal(flowRunStatus)
+  ) {
+    logger.info('Attempt to resume a workflow that is in a final state.');
+
+    throw new ApplicationError({
+      code: ErrorCode.FLOW_RUN_ENDED,
+      params: {
+        id: flowRunId,
+      },
+    });
+  }
 }
 
 type UpdateLogs = {

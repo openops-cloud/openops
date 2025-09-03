@@ -28,6 +28,7 @@ export type ApplicationErrorParams =
   | FlowIsLockedErrorParams
   | FlowOperationErrorParams
   | FlowRunNotFoundErrorParams
+  | FlowRunEndedErrorParams
   | InvalidUserEmailErrorParams
   | InvalidUserPasswordErrorParams
   | InvalidNameForUserErrorParams
@@ -139,6 +140,13 @@ export type FlowNotFoundErrorParams = BaseErrorParams<
 
 export type FlowRunNotFoundErrorParams = BaseErrorParams<
   ErrorCode.FLOW_RUN_NOT_FOUND,
+  {
+    id: FlowRunId;
+  }
+>;
+
+export type FlowRunEndedErrorParams = BaseErrorParams<
+  ErrorCode.FLOW_RUN_ENDED,
   {
     id: FlowRunId;
   }
@@ -451,6 +459,7 @@ export enum ErrorCode {
   FLOW_OPERATION_INVALID = 'FLOW_OPERATION_INVALID',
   FLOW_IN_USE = 'FLOW_IN_USE',
   FLOW_RUN_NOT_FOUND = 'FLOW_RUN_NOT_FOUND',
+  FLOW_RUN_ENDED = 'FLOW_RUN_ENDED',
   INVALID_API_KEY = 'INVALID_API_KEY',
   INVALID_USER_EMAIL = 'INVALID_USER_EMAIL',
   INVALID_USER_PASSWORD = 'INVALID_USER_PASSWORD',

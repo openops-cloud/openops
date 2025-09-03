@@ -24,6 +24,7 @@ import {
   StepOutputStatus,
   TriggerHookType,
 } from '@openops/shared';
+import { CancellationRequestedError } from './cancellation-request-validator';
 import { EngineConstants } from './handler/context/engine-constants';
 import {
   ExecutionVerdict,
@@ -308,6 +309,11 @@ function evaluateError(error: Error): {
 
   if (error instanceof EngineTimeoutError) {
     status = FlowRunStatus.TIMEOUT;
+    message = error.message;
+  }
+
+  if (error instanceof CancellationRequestedError) {
+    status = FlowRunStatus.STOPPED;
     message = error.message;
   }
 
