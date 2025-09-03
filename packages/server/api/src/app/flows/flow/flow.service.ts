@@ -1,4 +1,9 @@
-import { AppSystemProp, distributedLock, system } from '@openops/server-shared';
+import {
+  AppSystemProp,
+  distributedLock,
+  logger,
+  system,
+} from '@openops/server-shared';
 import {
   AppConnectionsWithSupportedBlocks,
   ApplicationError,
@@ -128,7 +133,10 @@ export const flowService = {
       },
     });
 
-    const queryWhere: Record<string, unknown> = { projectId };
+    const queryWhere: Record<string, unknown> = {
+      projectId,
+      isInternal: false,
+    };
 
     if (folderId !== undefined) {
       queryWhere.folderId =
@@ -396,7 +404,15 @@ export const flowService = {
         id,
         projectId,
       });
-
+      if (flowToDelete.isInternal) {
+        logger.warn('Flow is internal, cannot be deleted', {
+          flowId: id,
+        });
+        throw new ApplicationError({
+          code: ErrorCode.FLOW_OPERATION_INVALID,
+          params: {},
+        });
+      }
       await flowSideEffects.preDelete({
         flowToDelete,
       });
@@ -451,16 +467,21 @@ export const flowService = {
 
   async count({ projectId, folderId }: CountParams): Promise<number> {
     if (folderId === undefined) {
-      return flowRepo().countBy({ projectId });
+      return flowRepo().countBy({ projectId, isInternal: false });
     }
 
     return flowRepo().countBy({
       folderId: folderId !== UNCATEGORIZED_FOLDER_ID ? folderId : IsNull(),
       projectId,
+      isInternal: false,
     });
   },
   async countEnabled({ projectId }: { projectId: ProjectId }): Promise<number> {
-    return flowRepo().countBy({ projectId, status: FlowStatus.ENABLED });
+    return flowRepo().countBy({
+      projectId,
+      status: FlowStatus.ENABLED,
+      isInternal: false,
+    });
   },
   async existsByProjectAndStatus(
     params: ExistsByProjectAndStatusParams,
@@ -470,6 +491,7 @@ export const flowService = {
     return flowRepo(entityManager).existsBy({
       projectId,
       status,
+      isInternal: false,
     });
   },
 };
