@@ -227,11 +227,10 @@ const ConnectionsPicker = ({
             )}
           </div>
           <p className="text-base font-normal text-primary-400 whitespace-pre-line">
-            {description
-              ? description
-              : t(
-                  'Your new workflow requires the following connections. We recommend setting them up now.',
-                )}
+            {description ??
+              t(
+                'Your new workflow requires the following connections. We recommend setting them up now.',
+              )}
           </p>
           <div>
             <DataTable
@@ -274,7 +273,7 @@ const ConnectionsPicker = ({
               size="lg"
               className="ml-auto h-12 px-4 text-base font-medium"
             >
-              {buttonText ? buttonText : t('Create workflow')}
+              {buttonText ?? t('Create workflow')}
             </Button>
           </DialogFooter>
         </>
