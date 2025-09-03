@@ -35,6 +35,7 @@ import { flowExecutor } from './handler/flow-executor';
 import { blockHelper } from './helper/block-helper';
 import { triggerHelper } from './helper/trigger-helper';
 import { resolveVariable } from './resolve-variable';
+import { progressService } from './services/progress.service';
 import { EngineTimeoutError } from './timeout-validator';
 import { utils } from './utils';
 
@@ -42,21 +43,25 @@ const executeFlow = async (
   input: ExecuteFlowOperation,
   context: FlowExecutorContext,
 ): Promise<EngineResponse<Pick<FlowRunResponse, 'status' | 'error'>>> => {
-  const constants = EngineConstants.fromExecuteFlowInput(input);
+  try {
+    const constants = EngineConstants.fromExecuteFlowInput(input);
 
-  const response = await flowExecutor.triggerFlowExecutor({
-    trigger: input.flowVersion.trigger,
-    executionState: context,
-    constants,
-  });
+    const response = await flowExecutor.triggerFlowExecutor({
+      trigger: input.flowVersion.trigger,
+      executionState: context,
+      constants,
+    });
 
-  return {
-    status: EngineResponseStatus.OK,
-    response: {
-      status: response.status,
-      error: response.error,
-    },
-  };
+    return {
+      status: EngineResponseStatus.OK,
+      response: {
+        status: response.status,
+        error: response.error,
+      },
+    };
+  } finally {
+    await progressService.flushProgressUpdate(input.flowRunId);
+  }
 };
 
 async function executeStep(
