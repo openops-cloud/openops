@@ -6,6 +6,7 @@ import {
   handleCliError,
   tryParseJson,
 } from '@openops/common';
+import { RiskLevel } from '@openops/shared';
 import { runCommand } from '../azure-cli';
 import { subDropdown } from '../common-properties';
 
@@ -24,6 +25,7 @@ export const azureCliAction = createAction({
     }),
     dryRun: dryRunCheckBox(),
   },
+  riskLevel: RiskLevel.HIGH,
   async run(context) {
     try {
       const { commandToRun, dryRun } = context.propsValue;
