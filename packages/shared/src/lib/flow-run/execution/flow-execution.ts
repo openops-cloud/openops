@@ -86,3 +86,11 @@ export const isFailedState = (status: FlowRunStatus): boolean => {
     status === FlowRunStatus.TIMEOUT
   );
 };
+
+export const isRunningState = (status: FlowRunStatus): boolean => {
+  return (
+    status === FlowRunStatus.RUNNING ||
+    status === FlowRunStatus.PAUSED ||
+    status === FlowRunStatus.SCHEDULED
+  );
+};
