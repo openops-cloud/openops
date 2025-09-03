@@ -19,6 +19,6 @@ export const flowRunsApi = {
     return api.post<FlowRun>(`/v1/flow-runs/${flowRunId}/retry`, request);
   },
   abort(flowRunId: string): Promise<void> {
-    return api.post<void>(`/v1/flow-runs/${flowRunId}/abort`);
+    return api.post<void>(`/v1/flow-runs/${flowRunId}/stop`);
   },
 };

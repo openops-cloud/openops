@@ -1,16 +1,26 @@
+import { flagsHooks } from '@/app/common/hooks/flags-hooks';
+import { flowRunsApi } from '@/app/features/flow-runs/lib/flow-runs-api';
+import { formatUtils } from '@/app/lib/utils';
 import {
-  ConfirmationDialog,
   DataTableColumnHeader,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
   INTERNAL_ERROR_TOAST,
-  PermissionNeededTooltip,
   RowDataWithActions,
   StatusIconWithText,
   toast,
 } from '@openops/components/ui';
+import {
+  FlagId,
+  FlowRetryStrategy,
+  FlowRun,
+  FlowRunStatus,
+  FlowRunTriggerSource,
+  isFailedState,
+  isRunningState,
+} from '@openops/shared';
 import { useMutation } from '@tanstack/react-query';
 import { ColumnDef } from '@tanstack/react-table';
 import { t } from 'i18next';
@@ -22,22 +32,8 @@ import {
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
-import { useAuthorization } from '@/app/common/hooks/authorization-hooks';
-import { flagsHooks } from '@/app/common/hooks/flags-hooks';
-import { flowRunsApi } from '@/app/features/flow-runs/lib/flow-runs-api';
-import { formatUtils } from '@/app/lib/utils';
-import {
-  FlagId,
-  FlowRetryStrategy,
-  FlowRun,
-  FlowRunStatus,
-  FlowRunTriggerSource,
-  isFailedState,
-  isRunningState,
-  Permission,
-} from '@openops/shared';
-
 import { RunType } from '@/app/features/flow-runs/components/run-type';
+import { StopRunDialog } from '@/app/features/flow-runs/components/stop-run-dialog';
 import { flowRunUtils } from '../lib/flow-run-utils';
 
 type Column = ColumnDef<RowDataWithActions<FlowRun>> & {
@@ -216,34 +212,24 @@ export const useRunsTableColumns = (): Column[] => {
                       </DropdownMenuItem>
                     )}
                     {isRunning && (
-                      <DropdownMenuItem
-                        onClick={() => setIsStopDialogOpen(true)}
+                      <StopRunDialog
+                        isStopDialogOpen={isStopDialogOpen}
+                        setIsStopDialogOpen={setIsStopDialogOpen}
+                        stopRun={() => {
+                          stopRun({ row: row.original });
+                          setIsStopDialogOpen(false);
+                        }}
                       >
-                        <div className="flex flex-row gap-2 items-center">
-                          <CircleStop className="h-4 w-4" />
-                          <span>{t('Stop Run')}</span>
-                        </div>
-                      </DropdownMenuItem>
+                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                          <div className="flex flex-row gap-2 items-center">
+                            <CircleStop className="h-4 w-4" />
+                            <span>{t('Stop Run')}</span>
+                          </div>
+                        </DropdownMenuItem>
+                      </StopRunDialog>
                     )}
                   </DropdownMenuContent>
                 </DropdownMenu>
-
-                <ConfirmationDialog
-                  isOpen={isStopDialogOpen}
-                  onOpenChange={setIsStopDialogOpen}
-                  title={t('Are you sure you want to stop this run?')}
-                  description={t(
-                    'Stopping this workflow may leave some steps unfinished. Consider whether stopping the execution is necessary.',
-                  )}
-                  confirmButtonText={t('Stop Run')}
-                  onConfirm={() => {
-                    stopRun({ row: row.original });
-                    setIsStopDialogOpen(false);
-                  }}
-                  onCancel={() => setIsStopDialogOpen(false)}
-                  titleClassName="text-primary text-[22px]"
-                  descriptionClassName="text-primary text-[16px]"
-                />
               </div>
             );
           },

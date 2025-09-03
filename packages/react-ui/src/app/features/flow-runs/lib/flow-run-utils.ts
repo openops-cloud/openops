@@ -1,6 +1,7 @@
 import {
   Check,
   CircleCheck,
+  CircleStop,
   CircleX,
   PauseCircleIcon,
   PauseIcon,
@@ -79,7 +80,7 @@ export const flowRunUtils = {
       case FlowRunStatus.STOPPED:
         return {
           variant: 'success',
-          Icon: Check,
+          Icon: CircleStop,
         };
       case FlowRunStatus.FAILED:
         return {
