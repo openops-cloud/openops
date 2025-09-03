@@ -111,6 +111,7 @@ const FlowRunsPage = () => {
           fetchData={fetchData}
           filters={filters}
           refresh={refresh}
+          getRowHref={(row) => `/runs/${row.id}`}
           onRowClick={(row, e) => {
             if (e.ctrlKey) {
               window.open(`/runs/${row.id}`, '_blank');
