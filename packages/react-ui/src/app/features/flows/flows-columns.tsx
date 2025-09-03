@@ -12,11 +12,11 @@ import { FlowActionMenu } from '@/app/features/flows/components/flow-actions-men
 import { FlowStatusToggle } from '@/app/features/flows/components/flow-status-toggle';
 import { FolderBadge } from '@/app/features/folders/component/folder-badge';
 import { formatUtils } from '@/app/lib/utils';
-import { flowHelper } from '@openops/shared';
+import { flowHelper, PopulatedFlow } from '@openops/shared';
 
 const FLOWS_CELL_TEXT_CLASS = 'text-left font-normal min-w-[150px]';
 
-export type FlowColumnDef<TData = RowDataWithActions<any>> =
+export type FlowColumnDef<TData = RowDataWithActions<PopulatedFlow>> =
   ColumnDef<TData> & {
     accessorKey: string;
   };
