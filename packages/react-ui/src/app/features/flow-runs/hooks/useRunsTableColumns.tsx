@@ -163,7 +163,7 @@ export const useRunsTableColumns = (): Column[] => {
             if (
               (isFailed &&
                 row.original.triggerSource === FlowRunTriggerSource.TEST_RUN) ||
-              (!isFailed && !isRunning)
+              (!isFailed && !isRunning && !isStopped)
             ) {
               return <div className="h-10"></div>;
             }

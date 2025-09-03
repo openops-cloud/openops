@@ -79,7 +79,7 @@ export const flowRunUtils = {
         };
       case FlowRunStatus.STOPPED:
         return {
-          variant: 'success',
+          variant: 'default',
           Icon: CircleStop,
         };
       case FlowRunStatus.FAILED:
