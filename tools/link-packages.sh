@@ -2,13 +2,13 @@
 
 if [ -f /.dockerenv ] || grep -q -i docker /proc/1/cgroup 2>/dev/null; then
     echo "🐳 Docker environment: Link all packages with npm link"
-    find dist -name package.json -not -path '*/node_modules/*' -not -path '*/ui/*' -exec dirname {} + | xargs npm link --no-audit --no-fund
+    find dist -name package.json -not -path '*/node_modules/*' -not -path '*/ui/*' | while read path; do dirname "$path"; done | xargs npm link --no-audit --no-fund
     exit 0
 fi
 
 if [ "${NODE_ENV}" = "production" ] || [ -n "${DOCKER_ENV:-}" ]; then
     echo "🏭 Production mode: Link all packages with npm link"
-    find dist -name package.json -not -path '*/node_modules/*' -not -path '*/ui/*' -exec dirname {} + | xargs npm link --no-audit --no-fund
+    find dist -name package.json -not -path '*/node_modules/*' -not -path '*/ui/*' | while read path; do dirname "$path"; done | xargs npm link --no-audit --no-fund
     exit 0
 fi
 
