@@ -2,6 +2,7 @@ import {
   FastifyPluginCallbackTypebox,
   Type,
 } from '@fastify/type-provider-typebox';
+import { requestWorkflowCancellation } from '@openops/server-shared';
 import {
   ALL_PRINCIPAL_TYPES,
   ApplicationError,
@@ -9,6 +10,8 @@ import {
   ErrorCode,
   ExecutionType,
   FlowRun,
+  FlowRunStatus,
+  isFlowStateTerminal,
   isNil,
   ListFlowRunsRequestQuery,
   OpenOpsId,
@@ -18,9 +21,10 @@ import {
   RetryFlowRequestBody,
   SeekPage,
   SERVICE_KEY_SECURITY_OPENAPI,
+  WebsocketClientEvent,
 } from '@openops/shared';
 import { StatusCodes } from 'http-status-codes';
-import { flowRunService } from './flow-run-service';
+import { flowRunRepo, flowRunService } from './flow-run-service';
 
 const DEFAULT_PAGING_LIMIT = 10;
 
@@ -88,6 +92,41 @@ export const flowRunController: FastifyPluginCallbackTypebox = (
       });
     }
     return flowRun;
+  });
+
+  app.post('/:id/stop', StopFlowRequest, async (req) => {
+    const flowRunId = req.params.id;
+    const flowRun = await flowRunService.getOneOrThrow({
+      projectId: req.principal.projectId,
+      id: flowRunId,
+    });
+
+    if (isFlowStateTerminal(flowRun.status)) {
+      throw new ApplicationError({
+        code: ErrorCode.FLOW_RUN_ENDED,
+        params: {
+          id: flowRunId,
+        },
+      });
+    }
+
+    if (flowRun.status === FlowRunStatus.PAUSED) {
+      await flowRunRepo().update(flowRunId, {
+        status: FlowRunStatus.STOPPED,
+        finishTime: new Date().toISOString(),
+      });
+
+      app.io
+        .to(flowRun.projectId)
+        .emit(WebsocketClientEvent.FLOW_RUN_PROGRESS, flowRunId);
+    }
+
+    await requestWorkflowCancellation(flowRunId);
+
+    return {
+      success: true,
+      flowRunId,
+    };
   });
 
   done();
@@ -165,5 +204,26 @@ const RetryFlowRequest = {
       id: OpenOpsId,
     }),
     body: RetryFlowRequestBody,
+  },
+};
+
+const StopFlowRequest = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
+  },
+  schema: {
+    operationId: 'Stop Flow Run',
+    description:
+      'Stop an in-progress workflow run. This endpoint allows users to terminate a running workflow execution before it completes.',
+    security: [SERVICE_KEY_SECURITY_OPENAPI],
+    params: Type.Object({
+      id: OpenOpsId,
+    }),
+    response: {
+      [StatusCodes.OK]: Type.Object({
+        success: Type.Boolean(),
+        flowRunId: OpenOpsId,
+      }),
+    },
   },
 };

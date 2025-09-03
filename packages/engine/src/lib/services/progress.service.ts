@@ -3,9 +3,14 @@ import { makeHttpRequest } from '@openops/common';
 import {
   BodyAccessKeyRequest,
   logger,
+  memoryLock,
   saveRequestBody,
 } from '@openops/server-shared';
-import { openOpsId, UpdateRunProgressRequest } from '@openops/shared';
+import {
+  FlowRunId,
+  openOpsId,
+  UpdateRunProgressRequest,
+} from '@openops/shared';
 import { AxiosError, AxiosHeaders } from 'axios';
 import { isRetryableError } from 'axios-retry';
 import debounce from 'lodash.debounce';
@@ -17,21 +22,22 @@ import {
 } from '../timeout-validator';
 
 const MAX_RETRIES = 3;
-const PROGRESS_DEBOUNCE_MS = 800;
+const PROGRESS_DEBOUNCE_MS = 1000;
+
 const runDebouncers = new Map<string, any>();
+const updateParameters = new Map<string, UpdateStepProgressParams>();
 
 function getRunDebouncer(runId: string): any {
   let debouncedFunc = runDebouncers.get(runId);
 
   if (!debouncedFunc) {
     debouncedFunc = debounce(
-      async (latestParams: UpdateStepProgressParams) => {
+      async () => {
+        const lock = await memoryLock.acquire(runId);
         try {
-          await sendUpdateRunRequest(latestParams);
+          await sendUpdateRunRequest(runId);
         } finally {
-          if (runDebouncers.get(runId) === debouncedFunc) {
-            runDebouncers.delete(runId);
-          }
+          await lock.release();
         }
       },
       PROGRESS_DEBOUNCE_MS,
@@ -44,20 +50,34 @@ function getRunDebouncer(runId: string): any {
 }
 
 export const progressService = {
-  sendUpdate: (params: UpdateStepProgressParams): void => {
+  sendUpdate: async (params: UpdateStepProgressParams): Promise<void> => {
     throwIfExecutionTimeExceeded();
 
-    void getRunDebouncer(params.engineConstants.flowRunId)(params);
+    const lock = await memoryLock.acquire(params.engineConstants.flowRunId);
+    updateParameters.set(params.engineConstants.flowRunId, params);
+    await lock.release();
+
+    getRunDebouncer(params.engineConstants.flowRunId)();
   },
   flushProgressUpdate: async (runId: string): Promise<void> => {
-    await runDebouncers.get(runId)?.flush();
+    try {
+      await runDebouncers.get(runId)?.flush();
+    } finally {
+      runDebouncers.delete(runId);
+      memoryLock.delete(runId);
+    }
   },
 };
 
-const sendUpdateRunRequest = async (
-  params: UpdateStepProgressParams,
-): Promise<void> => {
+const sendUpdateRunRequest = async (flowRunId: FlowRunId): Promise<void> => {
   const startTime = performance.now();
+
+  const params = updateParameters.get(flowRunId);
+  if (params) {
+    updateParameters.delete(flowRunId);
+  } else {
+    return;
+  }
 
   const { flowExecutorContext, engineConstants } = params;
   const url = new URL(`${engineConstants.internalApiUrl}v1/engine/update-run`);
@@ -101,7 +121,7 @@ const sendUpdateRunRequest = async (
   } catch (error) {
     if (!(error instanceof EngineTimeoutError)) {
       logger.error(
-        `Progress update failed after ${MAX_RETRIES} retries for status ${request.runDetails.status} on run ${request.runId}`,
+        `Progress update failed after ${MAX_RETRIES} retries for status ${request.runDetails.status} on run ${flowRunId}`,
         error,
       );
     }
@@ -110,9 +130,7 @@ const sendUpdateRunRequest = async (
   }
 
   const duration = Math.floor(performance.now() - startTime);
-  logger.debug(
-    `Progress update request for ${request.runId} took ${duration}ms`,
-  );
+  logger.debug(`Progress update request for ${flowRunId} took ${duration}ms`);
 };
 
 type UpdateStepProgressParams = {

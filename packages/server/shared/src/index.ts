@@ -30,3 +30,4 @@ export * from './lib/stop-handlers';
 export * from './lib/system';
 export * from './lib/truncation-utils';
 export * from './lib/webhook-secrets-util';
+export * from './lib/workflow-cancellation-manager';
