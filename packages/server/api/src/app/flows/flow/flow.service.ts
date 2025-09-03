@@ -65,13 +65,17 @@ export const flowService = {
     description,
     trigger,
     connectionIds,
+    folderId,
+    isInternal = false,
   }: CreateFromTriggerParams): Promise<PopulatedFlow> {
     const newFlow = await create({
       userId,
       projectId,
       request: {
         displayName,
+        folderId,
       },
+      isInternal,
     });
 
     const connectionsList = await getConnections(
@@ -671,6 +675,8 @@ type CreateFromTriggerParams = {
   description: string | undefined;
   trigger: TriggerWithOptionalId;
   connectionIds: string[];
+  folderId?: string;
+  isInternal?: boolean;
 };
 
 type ListParams = {
