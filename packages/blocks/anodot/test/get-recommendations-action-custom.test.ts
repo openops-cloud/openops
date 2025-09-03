@@ -302,6 +302,83 @@ describe('getRecommendationsCustomAction', () => {
     );
   });
 
+  test.each([
+    [
+      [{ accountId: 2, accountName: 'account1', accountKey: 2, divisionId: 7 }],
+      'account1',
+    ],
+    [
+      JSON.stringify([
+        { accountId: 2, accountName: 'account1', accountKey: 2, divisionId: 7 },
+      ]),
+      'account1',
+    ],
+    [
+      { accountId: 2, accountName: 'account1', accountKey: 2, divisionId: 7 },
+      'account1',
+    ],
+    [
+      JSON.stringify({
+        accountId: 2,
+        accountName: 'account1',
+        accountKey: 2,
+        divisionId: 7,
+      }),
+      'account1',
+    ],
+  ])(
+    'should normalize accounts input: %p',
+    async (accountsInput, expectedAccountName) => {
+      getAnodotRecommendationsMock.mockResolvedValue('mockResult');
+      const context = createContext({
+        accounts: accountsInput,
+        statusFilter: 'status',
+        customStatus: {},
+        openedRecommendations: { from: '1', to: '2' },
+        closedAndDoneRecommendationsProperty: {},
+      });
+
+      const result = await getRecommendationsCustomAction.run(context);
+
+      expect(result).toEqual({ [expectedAccountName]: 'mockResult' });
+      expect(getAnodotRecommendationsMock).toHaveBeenCalledTimes(1);
+      expect(getAnodotRecommendationsMock).toHaveBeenCalledWith(
+        'some api url',
+        'a bearer token',
+        'an account:2:7',
+        {
+          open_recs_creation_date: { from: '1', to: '2' },
+          status_filter: 'status',
+        },
+      );
+    },
+  );
+
+  test('should handle regular string as accounts input', async () => {
+    getAnodotRecommendationsMock.mockResolvedValue('mockResult');
+    const context = createContext({
+      accounts: 'just-a-string',
+      statusFilter: 'status',
+      customStatus: {},
+      openedRecommendations: { from: '1', to: '2' },
+      closedAndDoneRecommendationsProperty: {},
+    });
+
+    const result = await getRecommendationsCustomAction.run(context);
+
+    expect(result).toEqual({ undefined: 'mockResult' });
+    expect(getAnodotRecommendationsMock).toHaveBeenCalledTimes(1);
+    expect(getAnodotRecommendationsMock).toHaveBeenCalledWith(
+      'some api url',
+      'a bearer token',
+      'an account:undefined:undefined',
+      {
+        open_recs_creation_date: { from: '1', to: '2' },
+        status_filter: 'status',
+      },
+    );
+  });
+
   function createContext(props: unknown) {
     return {
       ...jest.requireActual('@openops/blocks-framework'),

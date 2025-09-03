@@ -25,8 +25,8 @@ export function getRunMessage(
 
 export function getStatusText(status: FlowRunStatus, timeout: number): string {
   switch (status) {
-    case FlowRunStatus.ABORTED:
-      return t('Workflow Run was aborted');
+    case FlowRunStatus.STOPPED:
+      return t('Workflow Run was stopped');
     case FlowRunStatus.SUCCEEDED:
       return t('Run Succeeded');
     case FlowRunStatus.FAILED:
