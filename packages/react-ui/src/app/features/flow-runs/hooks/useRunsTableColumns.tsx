@@ -161,7 +161,7 @@ export const useRunsTableColumns = (): Column[] => {
             const [isStopDialogOpen, setIsStopDialogOpen] = useState(false);
 
             if (
-              (isFailed &&
+              ((isFailed || isStopped) &&
                 row.original.triggerSource === FlowRunTriggerSource.TEST_RUN) ||
               (!isFailed && !isRunning && !isStopped)
             ) {
