@@ -209,6 +209,7 @@ const ArrayBlockProperty = ({
                   )}
                   {!arrayProperty.properties && (
                     <FormField
+                      key={`${field.id}.${index}`}
                       control={form.control}
                       name={`${inputName}.${index}`}
                       render={({ field }) => (
