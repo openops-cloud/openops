@@ -131,6 +131,12 @@ const FlowsPage = () => {
             filters={filters}
             columnVisibility={columnVisibility}
             refresh={tableRefresh}
+            getRowHref={(row) =>
+              `/flows/${row.id}?${qs.stringify({
+                folderId: searchParams.get(FOLDER_ID_PARAM_NAME),
+                viewOnly: true,
+              })}`
+            }
             onRowClick={(row, e) => {
               const route = `/flows/${row.id}?${qs.stringify({
                 folderId: searchParams.get(FOLDER_ID_PARAM_NAME),
