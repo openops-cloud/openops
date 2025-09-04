@@ -397,15 +397,9 @@ export const flowService = {
         id,
         projectId,
       });
-      if (flowToDelete.isInternal) {
-        logger.warn('Flow is internal, cannot be deleted', {
-          flowId: id,
-        });
-        throw new ApplicationError({
-          code: ErrorCode.FLOW_INTERNAL_FORBIDDEN,
-          params: {},
-        });
-      }
+
+      await assertThatFlowIsNotInternal(flowToDelete);
+
       await flowSideEffects.preDelete({
         flowToDelete,
       });
@@ -676,6 +670,21 @@ const getConnections = async (
   });
 };
 
+export async function assertThatFlowIsNotInternal(flow: Flow): Promise<void> {
+  if (flow.isInternal) {
+    const message =
+      'Flow is internal, cannot be manipulated through the flow API.';
+    logger.warn(message, {
+      flowId: flow.id,
+    });
+    throw new ApplicationError({
+      code: ErrorCode.FLOW_INTERNAL_FORBIDDEN,
+      params: {
+        message,
+      },
+    });
+  }
+}
 type CreateParams = {
   userId: UserId;
   projectId: ProjectId;

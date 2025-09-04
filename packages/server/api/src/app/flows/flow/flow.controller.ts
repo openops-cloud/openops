@@ -42,7 +42,7 @@ import { sendWorkflowCreatedFromTemplateEvent } from '../../telemetry/event-mode
 import { flowRunService } from '../flow-run/flow-run-service';
 import { flowVersionService } from '../flow-version/flow-version.service';
 import { triggerUtils } from '../trigger/hooks/trigger-utils';
-import { flowService } from './flow.service';
+import { assertThatFlowIsNotInternal, flowService } from './flow.service';
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -261,7 +261,7 @@ async function createFromTemplate(
   return updatedFlow;
 }
 
-async function assertThatFlowIsNotBeingUsed(
+export async function assertThatFlowIsNotBeingUsed(
   flow: PopulatedFlow,
   userId: string,
 ): Promise<void> {
@@ -277,18 +277,6 @@ async function assertThatFlowIsNotBeingUsed(
         flowVersionId: flow.version.id,
         message:
           'Flow is being used by another user in the last minute. Please try again later.',
-      },
-    });
-  }
-}
-
-async function assertThatFlowIsNotInternal(flow: PopulatedFlow): Promise<void> {
-  if (flow.isInternal) {
-    throw new ApplicationError({
-      code: ErrorCode.FLOW_INTERNAL_FORBIDDEN,
-      params: {
-        message:
-          'Flow is internal, cannot be manipulated through the flow API.',
       },
     });
   }
@@ -373,7 +361,7 @@ const CreateFlowRequestOptions = {
   },
 };
 
-const UpdateFlowRequestOptions = {
+export const UpdateFlowRequestOptions = {
   config: {
     permission: Permission.UPDATE_FLOW_STATUS,
   },
