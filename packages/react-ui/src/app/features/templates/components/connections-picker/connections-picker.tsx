@@ -7,6 +7,7 @@ import { BlockMetadataModelSummary } from '@openops/blocks-framework';
 import {
   BlockIcon,
   Button,
+  cn,
   DataTable,
   DialogFooter,
   OverflowTooltip,
@@ -21,7 +22,7 @@ import {
 } from '@openops/shared';
 import { t } from 'i18next';
 import { ArrowLeft, TriangleAlert } from 'lucide-react';
-import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ConnectionPickerTableActions,
   connectionsPickerTableColumns,
@@ -37,8 +38,10 @@ type ConnectionsPickerProps = {
   onUseConnections: (connections: AppConnectionsWithSupportedBlocks[]) => void;
   description?: string;
   buttonText?: string;
-  hideWarning?: boolean;
-  children?: ReactNode;
+  buttonClassName?: string;
+  showWarning?: boolean;
+  showBackButton?: boolean;
+  showAuthor?: boolean;
 };
 
 const ConnectionsPicker = ({
@@ -50,8 +53,10 @@ const ConnectionsPicker = ({
   onUseConnections,
   description,
   buttonText,
-  hideWarning = false,
-  children,
+  buttonClassName,
+  showWarning = true,
+  showBackButton = true,
+  showAuthor = true,
 }: ConnectionsPickerProps) => {
   const [selectedBlockMetadata, setSelectedBlockMetadata] =
     useState<BlockMetadataModelSummary | null>(null);
@@ -203,17 +208,20 @@ const ConnectionsPicker = ({
       ) : (
         <>
           <div className="w-full flex items-center gap-5">
-            <ArrowLeft
-              role="button"
-              scale={1}
-              onClick={close}
-              className="w-6 h-6"
-            ></ArrowLeft>
+            {showBackButton && (
+              <ArrowLeft
+                role="button"
+                scale={1}
+                onClick={close}
+                className="w-6 h-6"
+              ></ArrowLeft>
+            )}
+
             <OverflowTooltip
               className="flex-1 text-[32px] font-bold text-primary-300 dark:text-primary"
               text={name}
             ></OverflowTooltip>
-            {children ?? (
+            {showAuthor && (
               <div className="flex items-center gap-[6px]">
                 <BlockIcon
                   showTooltip={false}
@@ -254,7 +262,7 @@ const ConnectionsPicker = ({
           </div>
 
           <DialogFooter className="w-full mt-3 flex flex-row justify-between sm:justify-between">
-            {!isAllConnectionsSelected && !hideWarning && (
+            {!isAllConnectionsSelected && showWarning && (
               <div className="flex items-center gap-1 text-sm">
                 <TriangleAlert
                   width={24}
@@ -271,7 +279,10 @@ const ConnectionsPicker = ({
               onClick={onUseTemplateClick}
               loading={isLoading}
               size="lg"
-              className="ml-auto h-12 px-4 text-base font-medium"
+              className={cn(
+                'ml-auto h-12 px-4 text-base font-medium',
+                buttonClassName,
+              )}
             >
               {buttonText ?? t('Create workflow')}
             </Button>
