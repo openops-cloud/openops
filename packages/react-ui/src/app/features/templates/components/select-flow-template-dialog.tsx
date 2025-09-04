@@ -208,14 +208,14 @@ const SelectFlowTemplateDialog = ({
         {selectedTemplateMetadata && isConnectionsPickerOpen ? (
           <ConnectionsPicker
             close={() => setIsConnectionsPickerOpen(false)}
-            templateName={selectedTemplate?.name ?? ''}
+            name={selectedTemplate?.name ?? ''}
             integrations={
               selectedTemplateMetadata.integrations.filter(
                 (integration) => !!integration.auth,
               ) as BlockMetadataModelSummary[]
             }
-            onUseTemplate={useTemplate}
-            isUseTemplateLoading={isUseTemplatePending}
+            onUseConnections={useTemplate}
+            isLoading={isUseTemplatePending}
           ></ConnectionsPicker>
         ) : (
           <div className="h-full w-full flex bg-background rounded-2xl">
