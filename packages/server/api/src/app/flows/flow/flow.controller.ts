@@ -81,6 +81,7 @@ export const flowController: FastifyPluginAsyncTypebox = async (app) => {
       id: request.params.id,
       projectId: request.principal.projectId,
     });
+    await assertThatFlowIsNotInternal(flow);
     await assertThatFlowIsNotBeingUsed(flow, userId);
 
     const updatedFlow = await flowService.update({
@@ -158,6 +159,8 @@ export const flowController: FastifyPluginAsyncTypebox = async (app) => {
         id: request.params.id,
         projectId: request.principal.projectId,
       });
+
+      await assertThatFlowIsNotInternal(flow);
 
       if (!flow.publishedVersionId) {
         return await reply.status(StatusCodes.BAD_REQUEST).send({
@@ -274,6 +277,18 @@ async function assertThatFlowIsNotBeingUsed(
         flowVersionId: flow.version.id,
         message:
           'Flow is being used by another user in the last minute. Please try again later.',
+      },
+    });
+  }
+}
+
+async function assertThatFlowIsNotInternal(flow: PopulatedFlow): Promise<void> {
+  if (flow.isInternal) {
+    throw new ApplicationError({
+      code: ErrorCode.FLOW_INTERNAL_FORBIDDEN,
+      params: {
+        message:
+          'Flow is internal, cannot be manipulated through the flow API.',
       },
     });
   }

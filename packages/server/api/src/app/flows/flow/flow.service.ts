@@ -352,13 +352,6 @@ export const flowService = {
   }: UpdatePublishedVersionIdParams): Promise<PopulatedFlow> {
     const flowToUpdate = await this.getOneOrThrow({ id, projectId });
 
-    if (flowToUpdate.isInternal) {
-      throw new ApplicationError({
-        code: ErrorCode.FLOW_OPERATION_INVALID,
-        params: {},
-      });
-    }
-
     const flowVersionToPublish = await flowVersionService.getFlowVersionOrThrow(
       {
         flowId: id,
@@ -409,7 +402,7 @@ export const flowService = {
           flowId: id,
         });
         throw new ApplicationError({
-          code: ErrorCode.FLOW_OPERATION_INVALID,
+          code: ErrorCode.FLOW_INTERNAL_FORBIDDEN,
           params: {},
         });
       }
