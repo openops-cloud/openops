@@ -1,11 +1,8 @@
 import {
   DataTable,
   FOLDER_ID_PARAM_NAME,
-  FolderBreadcrumbs,
   PaginationParams,
 } from '@openops/components/ui';
-import { t } from 'i18next';
-import { CheckIcon } from 'lucide-react';
 import qs from 'qs';
 import { useCallback, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -16,67 +13,9 @@ import {
   createColumns,
 } from '@/app/features/flows/flows-columns';
 import { flowsApi } from '@/app/features/flows/lib/flows-api';
-import {
-  ALL_SELECTED,
-  foldersHooks,
-} from '@/app/features/folders/lib/folders-hooks';
-import { formatUtils } from '@/app/lib/utils';
+import { FlowsFolderBreadcrumbsManager } from '@/app/features/folders/component/folder-breadcrumbs-manager';
+import { FLOWS_TABLE_FILTERS } from '@/app/features/folders/lib/flows-table-filters';
 import { FlowStatus, FlowVersionState } from '@openops/shared';
-
-const filters = [
-  {
-    type: 'input',
-    title: t('Workflow name'),
-    accessorKey: 'name',
-    options: [],
-    icon: CheckIcon,
-  } as const,
-  {
-    type: 'select',
-    title: t('Status'),
-    accessorKey: 'status',
-    options: Object.values(FlowStatus).map((status) => {
-      return {
-        label: formatUtils.convertEnumToHumanReadable(status),
-        value: status,
-      };
-    }),
-    icon: CheckIcon,
-  } as const,
-  {
-    type: 'select',
-    title: t('Version'),
-    accessorKey: 'versionState',
-    options: Object.values(FlowVersionState)
-      .sort()
-      .map((version) => {
-        return {
-          label: version === FlowVersionState.DRAFT ? t('Draft') : t('Locked'),
-          value: version,
-        };
-      }),
-    icon: CheckIcon,
-  } as const,
-];
-
-const useSelectedFolderId = () => {
-  const [searchParams] = useSearchParams();
-
-  return searchParams.get(FOLDER_ID_PARAM_NAME) || ALL_SELECTED;
-};
-
-const FolderBreadcrumbsManager = () => {
-  const selectedFolderId = useSelectedFolderId();
-
-  const { folderItems } = foldersHooks.useFolderItems();
-
-  return (
-    <FolderBreadcrumbs
-      selectedFolderId={selectedFolderId}
-      folderItems={folderItems}
-    />
-  );
-};
 
 const FlowsPage = () => {
   useDefaultSidebarState('expanded');
@@ -121,14 +60,14 @@ const FlowsPage = () => {
   return (
     <div className="flex flex-col w-full">
       <div className="px-7">
-        <FolderBreadcrumbsManager />
+        <FlowsFolderBreadcrumbsManager />
       </div>
       <div className="flex flex-row gap-4 px-7">
         <div className="w-full">
           <DataTable
             columns={columns}
             fetchData={fetchData}
-            filters={filters}
+            filters={FLOWS_TABLE_FILTERS}
             columnVisibility={columnVisibility}
             refresh={tableRefresh}
             onRowClick={(row, e) => {
