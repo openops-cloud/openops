@@ -342,7 +342,7 @@ const CreateFlowRequestOptions = {
   },
 };
 
-export const UpdateFlowRequestOptions = {
+const UpdateFlowRequestOptions = {
   config: {
     permission: Permission.UPDATE_FLOW_STATUS,
   },
