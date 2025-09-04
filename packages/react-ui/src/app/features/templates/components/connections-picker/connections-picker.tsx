@@ -7,6 +7,7 @@ import { BlockMetadataModelSummary } from '@openops/blocks-framework';
 import {
   BlockIcon,
   Button,
+  cn,
   DataTable,
   DialogFooter,
   OverflowTooltip,
@@ -29,21 +30,33 @@ import {
 } from './connections-picker-table-columns';
 
 type ConnectionsPickerProps = {
-  templateName: string;
-  templateTrigger?: Trigger;
+  name: string;
+  trigger?: Trigger;
   integrations: BlockMetadataModelSummary[];
-  isUseTemplateLoading: boolean;
+  isLoading: boolean;
   close: () => void;
-  onUseTemplate: (connections: AppConnectionsWithSupportedBlocks[]) => void;
+  onUseConnections: (connections: AppConnectionsWithSupportedBlocks[]) => void;
+  description?: string;
+  buttonText?: string;
+  buttonClassName?: string;
+  showWarning?: boolean;
+  showBackButton?: boolean;
+  showAuthor?: boolean;
 };
 
 const ConnectionsPicker = ({
-  templateName,
-  templateTrigger,
+  name,
+  trigger,
   integrations,
-  isUseTemplateLoading,
+  isLoading,
   close,
-  onUseTemplate,
+  onUseConnections,
+  description,
+  buttonText,
+  buttonClassName,
+  showWarning = true,
+  showBackButton = true,
+  showAuthor = true,
 }: ConnectionsPickerProps) => {
   const [selectedBlockMetadata, setSelectedBlockMetadata] =
     useState<BlockMetadataModelSummary | null>(null);
@@ -68,7 +81,7 @@ const ConnectionsPicker = ({
 
   const {
     data: groupedConnections,
-    isLoading,
+    isLoading: isGroupedConnectionsLoading,
     refetch,
   } = appConnectionsHooks.useGroupedConnections({
     authProviders: integrations.flatMap((integration) =>
@@ -86,8 +99,9 @@ const ConnectionsPicker = ({
       groupedConnections
     ) {
       isConnectionListPreselected.current = true;
-      const usedConnectionNames: { [key: string]: string | undefined } =
-        templateTrigger ? flowHelper.getUsedConnections(templateTrigger) : {};
+      const usedConnectionNames: { [key: string]: string | undefined } = trigger
+        ? flowHelper.getUsedConnections(trigger)
+        : {};
 
       const connections: Record<
         string,
@@ -110,12 +124,7 @@ const ConnectionsPicker = ({
 
       setSelectedConnections(connections);
     }
-  }, [
-    integrations,
-    groupedConnections,
-    setSelectedConnections,
-    templateTrigger,
-  ]);
+  }, [integrations, groupedConnections, setSelectedConnections, trigger]);
 
   const tableData: TemplateConnectionTableData[] = useMemo(() => {
     return integrations.map((integration, index) => ({
@@ -172,7 +181,7 @@ const ConnectionsPicker = ({
           supportedBlocks: [blockName],
         }));
 
-    onUseTemplate(connectionsWithSupportedBlocks);
+    onUseConnections(connectionsWithSupportedBlocks);
   };
 
   return (
@@ -199,37 +208,43 @@ const ConnectionsPicker = ({
       ) : (
         <>
           <div className="w-full flex items-center gap-5">
-            <ArrowLeft
-              role="button"
-              scale={1}
-              onClick={close}
-              className="w-6 h-6"
-            ></ArrowLeft>
+            {showBackButton && (
+              <ArrowLeft
+                role="button"
+                scale={1}
+                onClick={close}
+                className="w-6 h-6"
+              ></ArrowLeft>
+            )}
+
             <OverflowTooltip
               className="flex-1 text-[32px] font-bold text-primary-300 dark:text-primary"
-              text={templateName}
+              text={name}
             ></OverflowTooltip>
-            <div className="flex items-center gap-[6px]">
-              <BlockIcon
-                showTooltip={false}
-                logoUrl={ownerLogoUrl}
-                circle={true}
-                size={'sm'}
-                className="p-1 bg-blue-50"
-              ></BlockIcon>
-              <span>{t('By OpenOps')}</span>
-            </div>
+            {showAuthor && (
+              <div className="flex items-center gap-[6px]">
+                <BlockIcon
+                  showTooltip={false}
+                  logoUrl={ownerLogoUrl}
+                  circle={true}
+                  size={'sm'}
+                  className="p-1 bg-blue-50"
+                ></BlockIcon>
+                <span>{t('By OpenOps')}</span>
+              </div>
+            )}
           </div>
           <p className="text-base font-normal text-primary-400 whitespace-pre-line">
-            {t(
-              'Your new workflow requires the following connections. We recommend setting them up now.',
-            )}
+            {description ??
+              t(
+                'Your new workflow requires the following connections. We recommend setting them up now.',
+              )}
           </p>
           <div>
             <DataTable
               columns={connectionsPickerTableColumns}
               data={tableData}
-              loading={isLoading}
+              loading={isGroupedConnectionsLoading}
               actions={[
                 (row) => {
                   return (
@@ -247,7 +262,7 @@ const ConnectionsPicker = ({
           </div>
 
           <DialogFooter className="w-full mt-3 flex flex-row justify-between sm:justify-between">
-            {!isAllConnectionsSelected && (
+            {!isAllConnectionsSelected && showWarning && (
               <div className="flex items-center gap-1 text-sm">
                 <TriangleAlert
                   width={24}
@@ -262,11 +277,14 @@ const ConnectionsPicker = ({
 
             <Button
               onClick={onUseTemplateClick}
-              loading={isUseTemplateLoading}
+              loading={isLoading}
               size="lg"
-              className="ml-auto h-12 px-4 text-base font-medium"
+              className={cn(
+                'ml-auto h-12 px-4 text-base font-medium',
+                buttonClassName,
+              )}
             >
-              {t('Create workflow')}
+              {buttonText ?? t('Create workflow')}
             </Button>
           </DialogFooter>
         </>

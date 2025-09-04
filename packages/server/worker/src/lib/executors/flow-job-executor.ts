@@ -52,7 +52,10 @@ async function prepareInput(
         runId: jobData.runId,
       });
 
-      if (flowRun.status === FlowRunStatus.SUCCEEDED) {
+      if (
+        flowRun.status === FlowRunStatus.SUCCEEDED ||
+        flowRun.status === FlowRunStatus.STOPPED
+      ) {
         return undefined;
       }
 
@@ -72,6 +75,7 @@ async function prepareInput(
     }
   }
 }
+
 async function executeFlow(
   jobData: OneTimeJobData,
   engineToken: string,

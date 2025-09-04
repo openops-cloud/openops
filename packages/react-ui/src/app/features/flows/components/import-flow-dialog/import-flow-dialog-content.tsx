@@ -55,11 +55,11 @@ const ImportFlowDialogContent = ({
     return (
       <ConnectionsPicker
         close={onResetClick}
-        templateName={templateWithIntegrations?.name ?? ''}
-        templateTrigger={templateTrigger}
+        name={templateWithIntegrations?.name ?? ''}
+        trigger={templateTrigger}
         integrations={integrations}
-        onUseTemplate={onUseTemplate}
-        isUseTemplateLoading={isUseTemplateLoading}
+        onUseConnections={onUseTemplate}
+        isLoading={isUseTemplateLoading}
       ></ConnectionsPicker>
     );
   }
