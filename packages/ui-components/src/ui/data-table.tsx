@@ -9,7 +9,7 @@ import {
 } from '@tanstack/react-table';
 import { t } from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useDeepCompareEffect } from 'react-use';
 
 import { SeekPage } from '@openops/shared';
@@ -362,8 +362,8 @@ export function DataTable<
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
                         {rowHref && cell.column.id !== 'actions' ? (
-                          <a
-                            href={rowHref}
+                          <Link
+                            to={rowHref}
                             target="_self"
                             rel="noopener noreferrer"
                           >
@@ -371,7 +371,7 @@ export function DataTable<
                               cell.column.columnDef.cell,
                               cell.getContext(),
                             )}
-                          </a>
+                          </Link>
                         ) : (
                           flexRender(
                             cell.column.columnDef.cell,
