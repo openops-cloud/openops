@@ -16,6 +16,7 @@ import {
   DialogTitle,
   FlowTemplateMetadataWithIntegrations,
   INTERNAL_ERROR_TOAST,
+  TemplatesTabs,
   toast,
 } from '@openops/components/ui';
 import { AppConnectionsWithSupportedBlocks } from '@openops/shared';
@@ -45,6 +46,9 @@ const SelectFlowTemplateDialog = ({
   const [searchText, setSearchText] = useState('');
   const { updateHomePageOperationalViewFlag } =
     userSettingsHooks.useHomePageOperationalView();
+  const [activeTab, setActiveTab] = React.useState<TemplatesTabs>(
+    TemplatesTabs.Public,
+  );
 
   const {
     isConnectionsPickerOpen,
@@ -246,6 +250,8 @@ const SelectFlowTemplateDialog = ({
               selectedCategories={selectedCategories}
               setSelectedCategories={setSelectedCategories}
               setSelectedBlocks={setSelectedBlocks}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
             />
           </div>
         )}
