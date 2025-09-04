@@ -21,6 +21,7 @@ jest.mock('ai', () => ({
 
 jest.mock('@openops/common', () => ({
   isLLMTelemetryEnabled: jest.fn().mockReturnValue(false),
+  getTableNames: jest.fn().mockResolvedValue(['table1', 'table2', 'table3']),
 }));
 
 jest.mock('@openops/server-shared', () => ({
