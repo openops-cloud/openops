@@ -8,8 +8,8 @@ import {
 } from '../chat/prompts.service';
 import { formatFrontendTools } from './tool-utils';
 import { startMCPTools } from './tools-initializer';
-import { selectRelevantTools } from './tools-selector';
-import { AssistantUITools } from './types';
+import { selectToolsAndClasifyQuery } from './tools-selector';
+import { AssistantUITools, QueryClassification } from './types';
 
 type MCPToolsContextParams = {
   app: FastifyInstance;
@@ -52,32 +52,19 @@ export async function getMCPToolsContext({
       projectId,
     );
 
-    const allTools = {
-      ...tools,
-      ...formatFrontendTools(frontendTools),
-    };
-
-    const filteredTools = await selectRelevantTools({
-      messages,
-      tools: allTools,
-      languageModel,
-      aiConfig,
-      uiContext: additionalContext,
-    });
-
-    const isAwsCostMcpDisabled =
-      !hasToolProvider(tools, 'aws-pricing') &&
-      !hasToolProvider(tools, 'cost-explorer');
-
-    const isAnalyticsLoaded = hasToolProvider(filteredTools, 'superset');
-    const isTablesLoaded = hasToolProvider(filteredTools, 'tables');
-    const isOpenOpsMCPEnabled = hasToolProvider(filteredTools, 'openops');
+    const { tools: filteredTools, queryClassification } =
+      await selectToolsAndClasifyQuery({
+        messages,
+        tools,
+        languageModel,
+        aiConfig,
+        uiContext: additionalContext,
+      });
 
     let systemPrompt = await getMcpSystemPrompt({
-      isAnalyticsLoaded,
-      isTablesLoaded,
-      isOpenOpsMCPEnabled,
-      isAwsCostMcpDisabled,
+      queryClassification,
+      selectedTools: filteredTools,
+      allTools: tools,
       uiContext: additionalContext,
     });
 
@@ -90,9 +77,10 @@ export async function getMCPToolsContext({
       systemPrompt,
       filteredTools: {
         ...filteredTools,
-        ...(isOpenOpsMCPEnabled
-          ? collectToolsByProvider(tools, 'openops')
+        ...(queryClassification.includes(QueryClassification.openops)
+          ? collectToolsByProvider(tools, QueryClassification.openops)
           : {}),
+        ...formatFrontendTools(frontendTools),
       },
     };
   }
@@ -101,15 +89,6 @@ export async function getMCPToolsContext({
     mcpClients: [],
     systemPrompt: await getBlockSystemPrompt(chatContext),
   };
-}
-
-function hasToolProvider(
-  tools: ToolSet | undefined,
-  provider: string,
-): boolean {
-  return Object.values(tools ?? {}).some(
-    (tool) => (tool as { toolProvider?: string }).toolProvider === provider,
-  );
 }
 
 function collectToolsByProvider(
