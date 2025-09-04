@@ -362,11 +362,7 @@ export function DataTable<
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
                         {rowHref && cell.column.id !== 'actions' ? (
-                          <Link
-                            to={rowHref}
-                            target="_self"
-                            rel="noopener noreferrer"
-                          >
+                          <Link to={rowHref} rel="noopener noreferrer">
                             {flexRender(
                               cell.column.columnDef.cell,
                               cell.getContext(),
