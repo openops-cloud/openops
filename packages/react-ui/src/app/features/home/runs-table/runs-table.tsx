@@ -30,9 +30,10 @@ const HomeRunsTable = ({ data, loading }: Props) => {
         stickyHeader
         border={false}
         emptyStateComponent={<EmptyTableState />}
+        getRowHref={(row) => `/runs/${row.id}`}
         onRowClick={(row, e) => {
-          if (e.ctrlKey) {
-            window.open(`/runs/${row.id}`, '_blank');
+          if (e.ctrlKey || e.metaKey || e.button === 1) {
+            return;
           } else {
             navigate(`/runs/${row.id}`);
           }

@@ -53,9 +53,10 @@ const HomeFlowsTable = ({
           loading={loading}
           stickyHeader
           border={false}
+          getRowHref={(row) => `/flows/${row.id}`}
           onRowClick={(row, e) => {
-            if (e.ctrlKey) {
-              window.open(`/flows/${row.id}`, '_blank');
+            if (e.ctrlKey || e.metaKey || e.button === 1) {
+              return;
             } else {
               navigate(`/flows/${row.id}`);
             }
