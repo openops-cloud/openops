@@ -142,9 +142,8 @@ const FlowsPage = () => {
                 folderId: searchParams.get(FOLDER_ID_PARAM_NAME),
                 viewOnly: true,
               })}`;
-
-              if (e.ctrlKey) {
-                window.open(route, '_blank');
+              if (e.ctrlKey || e.metaKey || e.button === 1) {
+                return;
               } else {
                 navigate(route);
               }

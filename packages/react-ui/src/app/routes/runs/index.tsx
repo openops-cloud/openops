@@ -113,8 +113,8 @@ const FlowRunsPage = () => {
           refresh={refresh}
           getRowHref={(row) => `/runs/${row.id}`}
           onRowClick={(row, e) => {
-            if (e.ctrlKey) {
-              window.open(`/runs/${row.id}`, '_blank');
+            if (e.ctrlKey || e.metaKey || e.button === 1) {
+              return;
             } else {
               navigate(`/runs/${row.id}`);
             }
