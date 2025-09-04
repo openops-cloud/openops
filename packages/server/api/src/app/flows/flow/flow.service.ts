@@ -47,6 +47,7 @@ import {
 } from '../flow-version/flow-version.service';
 import { flowStepTestOutputService } from '../step-test-output/flow-step-test-output.service';
 import { flowSideEffects } from './flow-service-side-effects';
+import { assertThatFlowIsNotInternal } from './flow-validations';
 import { FlowEntity } from './flow.entity';
 import { flowRepo } from './flow.repo';
 
@@ -670,21 +671,6 @@ const getConnections = async (
   });
 };
 
-export async function assertThatFlowIsNotInternal(flow: Flow): Promise<void> {
-  if (flow.isInternal) {
-    const message =
-      'Flow is internal, cannot be manipulated through the flow API.';
-    logger.warn(message, {
-      flowId: flow.id,
-    });
-    throw new ApplicationError({
-      code: ErrorCode.FLOW_INTERNAL_FORBIDDEN,
-      params: {
-        message,
-      },
-    });
-  }
-}
 type CreateParams = {
   userId: UserId;
   projectId: ProjectId;
