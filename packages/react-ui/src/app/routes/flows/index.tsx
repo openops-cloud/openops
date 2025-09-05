@@ -17,7 +17,6 @@ import { flowsApi } from '@/app/features/flows/lib/flows-api';
 import { FlowsFolderBreadcrumbsManager } from '@/app/features/folders/component/folder-breadcrumbs-manager';
 import { FLOWS_TABLE_FILTERS } from '@/app/features/folders/lib/flows-table-filters';
 import { FlowStatus, FlowVersionState } from '@openops/shared';
-import is from 'zod/v4/locales/is.cjs';
 
 const FlowsPage = () => {
   useDefaultSidebarState('expanded');

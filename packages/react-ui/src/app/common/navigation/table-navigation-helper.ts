@@ -1,4 +1,4 @@
-export const MiddleMouseButtonClickEvent = 1;
+const MiddleMouseButtonClickEvent = 1;
 
 export function isModifierOrMiddleClick(
   e: Pick<React.MouseEvent, 'ctrlKey' | 'metaKey' | 'button'>,
