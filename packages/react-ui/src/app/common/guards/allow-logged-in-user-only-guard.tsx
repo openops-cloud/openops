@@ -1,7 +1,7 @@
 import { LoadingSpinner } from '@openops/components/ui';
 import dayjs from 'dayjs';
 import { jwtDecode } from 'jwt-decode';
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
@@ -41,18 +41,23 @@ export const AllowOnlyLoggedInUserOnlyGuard = ({
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  if (!authenticationSession.isLoggedIn()) {
-    navigationUtil.save(location.pathname + location.search);
-    return <Navigate to="/sign-in" replace />;
-  }
-
   const token = authenticationSession.getToken();
-  if (!token || isJwtExpired(token)) {
-    navigationUtil.save(location.pathname + location.search);
-    authenticationSession.logOut({
-      userInitiated: false,
-      navigate,
-    });
+  const isLoggedIn = authenticationSession.isLoggedIn();
+  const expired = !token || isJwtExpired(token);
+
+  useEffect(() => {
+    if (!isLoggedIn || expired) {
+      navigationUtil.save(location.pathname + location.search);
+      (async () => {
+        await authenticationSession.logOut({
+          userInitiated: false,
+          navigate,
+        });
+      })();
+    }
+  }, [isLoggedIn, expired, location.pathname, location.search, navigate]);
+
+  if (!isLoggedIn || expired) {
     return <Navigate to="/sign-in" replace />;
   }
 
