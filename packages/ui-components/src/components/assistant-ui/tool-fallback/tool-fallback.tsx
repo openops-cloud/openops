@@ -4,6 +4,7 @@ import {
   ToolCallMessagePartStatus,
 } from '@assistant-ui/react';
 import { useMemo } from 'react';
+import { z } from 'zod';
 import { tryParseJson } from '../../../lib/json-utils';
 import { Theme } from '../../../lib/theme';
 import { TestStepDataViewer } from '../../test-step-data-viewer/test-step-data-viewer';
@@ -59,6 +60,22 @@ const extractResultStatus = (
   }
 
   if (result && typeof result === 'object') {
+    const cancelledResult = z
+      .object({
+        type: z.literal('json'),
+        value: z.object({
+          cancelled: z.literal(true),
+        }),
+      })
+      .safeParse(result);
+
+    if (cancelledResult.success) {
+      return {
+        type: TOOL_STATUS_TYPES.REQUIRES_ACTION,
+        reason: 'tool-calls',
+      };
+    }
+
     if (hasDirectError(result) || hasContentError(result)) {
       return {
         type: TOOL_STATUS_TYPES.INCOMPLETE,
