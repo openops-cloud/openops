@@ -53,6 +53,7 @@ export * from './no-workflows-placeholder/no-workflows-placeholder';
 export * from './overflow-tooltip';
 export * from './overview-card/overview-card';
 export * from './page-primitives';
+export * from './rename-dialog/rename-dialog';
 export * from './resizable-area';
 export * from './run-workflow-manually-success-toast/run-workflow-manually-success-toast';
 export * from './search-input/search-input';
