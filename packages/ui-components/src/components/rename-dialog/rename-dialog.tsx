@@ -25,7 +25,7 @@ export type RenameSchema = Static<typeof RenameSchema>;
 export type RenameDialogProps = {
   children: React.ReactNode;
   currentName: string;
-  onSubmit: (newName: string) => Promise<unknown> | unknown;
+  onSubmit: (newName: string) => Promise<void> | void;
   dialogTitle?: string;
   nameLabel?: string;
   placeholder?: string;

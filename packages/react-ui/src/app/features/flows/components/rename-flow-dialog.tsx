@@ -35,27 +35,26 @@ const RenameFlowDialog: React.FC<RenameFlowDialogProps> = ({
 }) => {
   const refetchFolderTree = useRefetchFolderTree();
 
-  const { mutate } = useMutation<
-    PopulatedFlow | unknown,
-    Error,
-    { displayName: string }
-  >({
-    mutationFn: ({ displayName }: { displayName: string }) => {
-      return flowsApi.update(flowId, {
-        type: FlowOperationType.CHANGE_NAME,
-        request: { displayName },
-      });
+  const { mutate } = useMutation<PopulatedFlow, Error, { displayName: string }>(
+    {
+      mutationFn: ({ displayName }: { displayName: string }) => {
+        return flowsApi.update(flowId, {
+          type: FlowOperationType.CHANGE_NAME,
+          request: { displayName },
+        });
+      },
+      onSuccess: (_, { displayName }) => {
+        refetchFolderTree();
+        onRename(displayName);
+        toast({
+          title: t('Success'),
+          description:
+            successToastDescription ?? t('Workflow has been renamed.'),
+          duration: 3000,
+        });
+      },
     },
-    onSuccess: (_, { displayName }) => {
-      refetchFolderTree();
-      onRename(displayName);
-      toast({
-        title: t('Success'),
-        description: successToastDescription ?? t('Workflow has been renamed.'),
-        duration: 3000,
-      });
-    },
-  });
+  );
 
   return (
     <RenameDialog
