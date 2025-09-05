@@ -13,6 +13,7 @@ import {
   GetTemplatesParams,
   templatesApi,
 } from '@/app/features/templates/lib/templates-api';
+import { addIntegrationsToTemplates } from '@/app/features/templates/lib/templates-utils';
 import { BlockMetadataModelSummary } from '@openops/blocks-framework';
 import {
   FlowTemplateMetadataWithIntegrations,
@@ -236,12 +237,7 @@ export const templatesHooks = {
 
     const templatesWithIntegrations = useMemo(() => {
       if (!templates) return [];
-      return templates.map((template) => ({
-        ...template,
-        integrations: (template.blocks ?? [])
-          .map((blockName) => blocksLookup[blockName])
-          .filter(Boolean),
-      }));
+      return addIntegrationsToTemplates(templates, blocksLookup);
     }, [templates, blocksLookup]);
 
     return {

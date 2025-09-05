@@ -9,7 +9,7 @@ import {
 } from '@tanstack/react-table';
 import { t } from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useDeepCompareEffect } from 'react-use';
 
 import { SeekPage } from '@openops/shared';
@@ -100,6 +100,7 @@ interface DataTableProps<
   stickyHeader?: boolean;
   border?: boolean;
   emptyStateComponent?: React.ReactNode;
+  getRowHref?: (row: RowDataWithActions<TData>) => string | undefined;
 }
 
 export function DataTable<
@@ -121,6 +122,7 @@ export function DataTable<
   stickyHeader = false,
   border = true,
   emptyStateComponent,
+  getRowHref,
 }: DataTableProps<TData, TValue, Keys, F>) {
   const columns = columnsInitial.concat([
     {
@@ -347,24 +349,40 @@ export function DataTable<
                 </TableCell>
               </TableRow>
             ) : table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  data-testid="data-table-row"
-                  onClick={(e) => onRowClick?.(row.original, e)}
-                  key={row.id}
-                  className={onRowClick ? 'cursor-pointer' : ''}
-                  data-state={row.getIsSelected() && 'selected'}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
+              table.getRowModel().rows.map((row) => {
+                const rowHref = getRowHref?.(row.original);
+                return (
+                  <TableRow
+                    data-testid="data-table-row"
+                    onClick={(e) => onRowClick?.(row.original, e)}
+                    key={row.id}
+                    className={onRowClick ? 'cursor-pointer' : ''}
+                    data-state={row.getIsSelected() && 'selected'}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {rowHref && cell.column.id !== 'actions' ? (
+                          <Link
+                            to={rowHref}
+                            onClick={(e) => e.stopPropagation()}
+                            rel="noopener noreferrer"
+                          >
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext(),
+                            )}
+                          </Link>
+                        ) : (
+                          flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                );
+              })
             ) : (
               <EmptyState
                 columnsLength={columns.length}
