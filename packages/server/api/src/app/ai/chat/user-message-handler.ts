@@ -80,6 +80,9 @@ export async function handleUserMessage(
     languageModel,
     frontendTools,
     additionalContext,
+    userId,
+    chatId,
+    stream: serverResponse,
   });
 
   try {
