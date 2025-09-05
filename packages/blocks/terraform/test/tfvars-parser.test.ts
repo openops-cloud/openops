@@ -46,7 +46,7 @@ describe('Parse file content', () => {
 
     expect(res.success).toBe(false);
     expect(res.message).toBe(
-      'The provided file is not a valid Terraform variables file (.tfvars).',
+      'The provided file is not a valid Terraform variables file (tfvars).',
     );
     expect(res.content).toMatchObject({});
   });
@@ -89,7 +89,7 @@ describe('Parse file content', () => {
 
     expect(res.success).toBe(false);
     expect(res.message).toBe(
-      'The provided file is not a valid Terraform variables file (.tfvars).',
+      'The provided file is not a valid Terraform variables file (tfvars).',
     );
     expect(res.content).toMatchObject({});
   });
