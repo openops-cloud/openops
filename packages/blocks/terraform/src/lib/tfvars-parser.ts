@@ -4,7 +4,7 @@ import { logger } from '@openops/server-shared';
 import { listBlocksCommand } from './hcledit-cli';
 
 const messageInvalidFile =
-  'The provided file is not a valid Terraform variables file.';
+  'The provided file is not a valid Terraform variables file (.tfvars).';
 
 export type TerraformVariable = {
   name: string;
