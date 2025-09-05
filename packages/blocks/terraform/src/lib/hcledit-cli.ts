@@ -86,7 +86,7 @@ export async function updateVariablesFile(
   template: string,
   modifications: { variableName: string; variableValue: unknown }[],
 ): Promise<string> {
-  const providedTemplate = template.trim() as string;
+  const providedTemplate = template.trim();
 
   return await useTempFile(providedTemplate, async (filePath) => {
     const updates = [];

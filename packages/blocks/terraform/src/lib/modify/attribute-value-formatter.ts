@@ -58,5 +58,5 @@ function convertToAttributeValue(value: unknown): string {
     return `{\n${body}\n}`;
   }
 
-  return JSON.stringify(String(value));
+  return JSON.stringify(value);
 }
