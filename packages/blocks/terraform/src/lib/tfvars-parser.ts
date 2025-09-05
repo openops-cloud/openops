@@ -6,10 +6,17 @@ import { listBlocksCommand } from './hcledit-cli';
 const messageInvalidFile =
   'The provided file is not a valid Terraform variables file (.tfvars).';
 
+type TerraformVariableType =
+  | 'string'
+  | 'number'
+  | 'boolean'
+  | 'array'
+  | 'object';
+
 export type TerraformVariable = {
   name: string;
   value: unknown;
-  type: 'string' | 'number' | 'boolean' | 'array' | 'object';
+  type: TerraformVariableType;
 };
 
 export async function parseFileContent(fileContent: string): Promise<{
@@ -52,43 +59,38 @@ export async function parseFileContent(fileContent: string): Promise<{
 }
 
 export async function getVariables(
-  fileContent: Record<string, any>,
+  fileContent: Record<string, unknown>,
 ): Promise<Record<string, TerraformVariable>> {
   const vars: Record<string, TerraformVariable> = {};
-  for (const [name, value] of Object.entries<unknown>(fileContent ?? {})) {
-    let type: 'string' | 'number' | 'boolean' | 'array' | 'object';
 
-    if (Array.isArray(value)) {
-      type = 'array';
-    } else if (value === null) {
-      type = 'string'; // or handle null separately if you prefer
-    } else {
-      switch (typeof value) {
-        case 'string':
-          type = 'string';
-          break;
-        case 'number':
-          type = 'number';
-          break;
-        case 'boolean':
-          type = 'boolean';
-          break;
-        case 'object':
-          type = 'object';
-          break;
-        default:
-          type = 'string';
-      }
-    }
-
-    vars[name] = {
-      name,
-      type,
-      value,
-    };
+  for (const [name, value] of Object.entries(fileContent ?? {})) {
+    vars[name] = { name, value, type: inferVarType(value) };
   }
 
   return vars;
+}
+
+function inferVarType(value: unknown): TerraformVariableType {
+  if (Array.isArray(value)) {
+    return 'array';
+  }
+
+  if (value === null) {
+    return 'string';
+  }
+
+  switch (typeof value) {
+    case 'string':
+      return 'string';
+    case 'number':
+      return 'number';
+    case 'boolean':
+      return 'boolean';
+    case 'object':
+      return 'object';
+    default:
+      return 'string';
+  }
 }
 
 function tryParseFileAsJson(fileContent: string): Record<string, any> | null {
