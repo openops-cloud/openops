@@ -46,15 +46,26 @@ export const AllowOnlyLoggedInUserOnlyGuard = ({
   const expired = !token || isJwtExpired(token);
 
   useEffect(() => {
-    if (!isLoggedIn || expired) {
-      navigationUtil.save(location.pathname + location.search);
-      (async () => {
+    let isMounted = true;
+    async function doLogout() {
+      try {
         await authenticationSession.logOut({
           userInitiated: false,
           navigate,
         });
-      })();
+      } catch (e) {
+        if (isMounted) {
+          console.error('Logout failed:', e);
+        }
+      }
     }
+    if (!isLoggedIn || expired) {
+      navigationUtil.save(location.pathname + location.search);
+      doLogout();
+    }
+    return () => {
+      isMounted = false;
+    };
   }, [isLoggedIn, expired, location.pathname, location.search, navigate]);
 
   if (!isLoggedIn || expired) {
