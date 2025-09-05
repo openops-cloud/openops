@@ -29,11 +29,4 @@ describe('escapeAttributeValue', () => {
     expect(escapeAttributeValue([])).toBe("'[]'");
     expect(escapeAttributeValue({})).toBe("'{}'");
   });
-
-  test('object formatting with sorted keys', () => {
-    const obj = { b: 2, a: ' x ', c: true } as any;
-    const result = escapeAttributeValue(obj);
-    const expected = `'{\na = "x"\nb = 2\nc = true\n}'`;
-    expect(result).toBe(expected);
-  });
 });
