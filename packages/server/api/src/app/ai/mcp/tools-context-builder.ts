@@ -6,9 +6,9 @@ import {
   getBlockSystemPrompt,
   getMcpSystemPrompt,
 } from '../chat/prompts.service';
+import { routeQuery } from './llm-query-router';
 import { formatFrontendTools } from './tool-utils';
 import { startMCPTools } from './tools-initializer';
-import { selectToolsAndClasifyQuery } from './tools-selector';
 import { AssistantUITools, QueryClassification } from './types';
 
 type MCPToolsContextParams = {
@@ -52,14 +52,13 @@ export async function getMCPToolsContext({
       projectId,
     );
 
-    const { tools: filteredTools, queryClassification } =
-      await selectToolsAndClasifyQuery({
-        messages,
-        tools,
-        languageModel,
-        aiConfig,
-        uiContext: additionalContext,
-      });
+    const { tools: filteredTools, queryClassification } = await routeQuery({
+      messages,
+      tools,
+      languageModel,
+      aiConfig,
+      uiContext: additionalContext,
+    });
 
     let systemPrompt = await getMcpSystemPrompt({
       queryClassification,

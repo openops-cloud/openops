@@ -8,7 +8,7 @@ import {
   UserModelMessage,
 } from 'ai';
 
-import { selectToolsAndClasifyQuery } from '../../../src/app/ai/mcp/tools-selector';
+import { routeQuery } from '../../../src/app/ai/mcp/llm-query-router';
 
 type MockTool = {
   description?: string;
@@ -62,7 +62,7 @@ describe('selectToolsAndQuery', () => {
     it('should return general classification when no tools are provided', async () => {
       const emptyTools: ToolSet = {};
 
-      const result = await selectToolsAndClasifyQuery({
+      const result = await routeQuery({
         messages: mockMessages,
         tools: emptyTools,
         languageModel: mockLanguageModel,
@@ -91,7 +91,7 @@ describe('selectToolsAndQuery', () => {
         },
       });
 
-      const result = await selectToolsAndClasifyQuery({
+      const result = await routeQuery({
         messages: mockMessages,
         tools: mockTools,
         languageModel: mockLanguageModel,
@@ -124,7 +124,7 @@ describe('selectToolsAndQuery', () => {
         },
       });
 
-      const result = await selectToolsAndClasifyQuery({
+      const result = await routeQuery({
         messages: mockMessages,
         tools: mockTools,
         languageModel: mockLanguageModel,
@@ -152,7 +152,7 @@ describe('selectToolsAndQuery', () => {
         },
       });
 
-      const result = await selectToolsAndClasifyQuery({
+      const result = await routeQuery({
         messages: mockMessages,
         tools: mockTools,
         languageModel: mockLanguageModel,
@@ -186,7 +186,7 @@ describe('selectToolsAndQuery', () => {
         },
       });
 
-      const result = await selectToolsAndClasifyQuery({
+      const result = await routeQuery({
         messages: mockMessages,
         tools: mockTools,
         languageModel: mockLanguageModel,
@@ -216,7 +216,7 @@ describe('selectToolsAndQuery', () => {
         },
       });
 
-      const result = await selectToolsAndClasifyQuery({
+      const result = await routeQuery({
         messages: mockMessages,
         tools: mockTools,
         languageModel: mockLanguageModel,
@@ -249,7 +249,7 @@ describe('selectToolsAndQuery', () => {
       const mockError = new Error('LLM error');
       (generateObject as jest.Mock).mockRejectedValue(mockError);
 
-      const result = await selectToolsAndClasifyQuery({
+      const result = await routeQuery({
         messages: mockMessages,
         tools: mockTools,
         languageModel: mockLanguageModel,
@@ -285,7 +285,7 @@ describe('selectToolsAndQuery', () => {
         },
       });
 
-      const result = await selectToolsAndClasifyQuery({
+      const result = await routeQuery({
         messages: mockMessages,
         tools: mockTools,
         languageModel: mockLanguageModel,
@@ -318,7 +318,7 @@ describe('selectToolsAndQuery', () => {
         },
       });
 
-      const result = await selectToolsAndClasifyQuery({
+      const result = await routeQuery({
         messages: complexMessages,
         tools: mockTools,
         languageModel: mockLanguageModel,
@@ -360,7 +360,7 @@ describe('selectToolsAndQuery', () => {
         },
       });
 
-      await selectToolsAndClasifyQuery({
+      await routeQuery({
         messages: mockMessages,
         tools: mockTools,
         languageModel: mockLanguageModel,
@@ -392,7 +392,7 @@ describe('selectToolsAndQuery', () => {
         },
       });
 
-      const result = await selectToolsAndClasifyQuery({
+      const result = await routeQuery({
         messages: mockMessages,
         tools: mockTools as ToolSet,
         languageModel: mockLanguageModel,
@@ -418,7 +418,7 @@ describe('selectToolsAndQuery', () => {
         },
       });
 
-      const result = await selectToolsAndClasifyQuery({
+      const result = await routeQuery({
         messages: mockMessages,
         tools: mockTools as ToolSet,
         languageModel: mockLanguageModel,
@@ -444,7 +444,7 @@ describe('selectToolsAndQuery', () => {
         },
       });
 
-      const result = await selectToolsAndClasifyQuery({
+      const result = await routeQuery({
         messages: mockMessages,
         tools: mockTools as ToolSet,
         languageModel: mockLanguageModel,
@@ -469,7 +469,7 @@ describe('selectToolsAndQuery', () => {
         },
       });
 
-      const result = await selectToolsAndClasifyQuery({
+      const result = await routeQuery({
         messages: mockMessages,
         tools: mockTools,
         languageModel: mockLanguageModel,
@@ -494,7 +494,7 @@ describe('selectToolsAndQuery', () => {
         },
       });
 
-      const result = await selectToolsAndClasifyQuery({
+      const result = await routeQuery({
         messages: mockMessages,
         tools: mockTools,
         languageModel: mockLanguageModel,

@@ -13,7 +13,7 @@ export type ToolsAndQueryResult = {
   queryClassification: QueryTypes[];
 };
 
-export async function selectToolsAndClasifyQuery({
+export async function routeQuery({
   messages,
   tools,
   languageModel,
