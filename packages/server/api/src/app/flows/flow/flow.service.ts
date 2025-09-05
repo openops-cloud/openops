@@ -1,8 +1,4 @@
-import {
-  AppSystemProp,
-  distributedLock,
-  system,
-} from '@openops/server-shared';
+import { AppSystemProp, distributedLock, system } from '@openops/server-shared';
 import {
   AppConnectionsWithSupportedBlocks,
   ApplicationError,
