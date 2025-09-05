@@ -14,16 +14,12 @@ describe('Variable Updates Dynamic Properties', () => {
     jest.clearAllMocks();
   });
 
-  test('should return markdown when no file provided', async () => {
+  test('should return empty when no file provided', async () => {
     const prop = getVariableUpdatesProperty();
     const result = await prop.props({}, context);
 
     expect(prop.type).toBe('DYNAMIC');
-    expect(result).toMatchObject({
-      errorMessage: {
-        type: 'MARKDOWN',
-      },
-    });
+    expect(result).toMatchObject({});
   });
 
   test('should return markdown on parse error with message', async () => {
@@ -41,11 +37,16 @@ describe('Variable Updates Dynamic Properties', () => {
     expect(parserMock.parseFileContent).toHaveBeenCalledWith('bad');
     expect(result).toMatchObject(
       expect.objectContaining({
-        errorMessage: {
-          description: 'err',
-          displayName: 'Markdown',
-          required: false,
-          type: 'MARKDOWN',
+        updates: {
+          displayName: 'Intended modifications',
+          options: {
+            options: [],
+            error: 'err',
+            disabled: true,
+            placeholder: 'No options available.',
+          },
+          required: true,
+          type: 'STATIC_DROPDOWN',
           valueSchema: undefined,
         },
       }),
@@ -95,13 +96,12 @@ describe('Variable Updates Dynamic Properties', () => {
 
   test('should return empty dynamic when no variableName provided', async () => {
     const prop = getVariableUpdatesProperty();
-    const result = await ((result) => result)(
+    await ((result) => result)(
       (await prop.props(
         { fileContent: '' } as DynamicPropsValue,
         context,
       )) as any,
     );
-    expect(result.errorMessage.type).toBe('MARKDOWN');
 
     parserMock.parseFileContent.mockResolvedValue({
       success: true,
