@@ -9,10 +9,12 @@
         "packages/server/api/src/app/ai/mcp/tool-approval-wrapper"
       ],
       "server-worker": ["packages/server/worker/src/index"],
-      "@openops/server-shared": ["packages/server/shared/src/index"],
-      "@openops/shared": ["packages/shared/src/index"],
+      "@openops/block-slack": ["packages/blocks/slack/src/index"],
+      "@openops/blocks-common": ["packages/blocks/common/src/index"],
+      "@openops/blocks-framework": ["packages/blocks/framework/src/index"],
       "@openops/common": ["packages/openops/src/index"],
-      "@openops/blocks-framework": ["packages/blocks/framework/src/index"]
+      "@openops/server-shared": ["packages/server/shared/src/index"],
+      "@openops/shared": ["packages/shared/src/index"]
     }
   },
   "exclude": ["jest.config.ts", "src/**/*.spec.ts", "src/**/*.test.ts"],
