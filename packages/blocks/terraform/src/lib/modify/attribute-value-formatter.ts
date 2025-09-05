@@ -34,7 +34,10 @@ function convertToAttributeValue(value: unknown): string {
   }
 
   if (Array.isArray(value)) {
-    if (value.length === 0) return '[]';
+    if (value.length === 0) {
+      return '[]';
+    }
+
     const items = value.map((v) => `${convertToAttributeValue(v)}`).join(',\n');
 
     return `[\n${items}\n]`;
@@ -42,8 +45,12 @@ function convertToAttributeValue(value: unknown): string {
 
   if (typeof value === 'object') {
     const obj = value as Record<string, unknown>;
-    const keys = Object.keys(obj).sort();
-    if (keys.length === 0) return '{}';
+    const keys = Object.keys(obj);
+
+    if (keys.length === 0) {
+      return '{}';
+    }
+
     const body = keys
       .map((k) => `${k} = ${convertToAttributeValue(obj[k])}`)
       .join('\n');
