@@ -7,9 +7,9 @@ jest.mock('../../../src/app/ai/mcp/tools-initializer', () => ({
   startMCPTools: startMCPToolsMock,
 }));
 
-const selectToolsAndClasifyQueryMock = jest.fn();
-jest.mock('../../../src/app/ai/mcp/tools-selector', () => ({
-  selectToolsAndClasifyQuery: selectToolsAndClasifyQueryMock,
+const routeQueryMock = jest.fn();
+jest.mock('../../../src/app/ai/mcp/llm-query-router', () => ({
+  routeQuery: routeQueryMock,
 }));
 
 const getMcpSystemPromptMock = jest.fn();
@@ -60,7 +60,7 @@ describe('getMCPToolsContext', () => {
       mcpClients: [],
       tools: {},
     });
-    selectToolsAndClasifyQueryMock.mockResolvedValue({
+    routeQueryMock.mockResolvedValue({
       tools: undefined,
       queryClassification: ['general'],
     });
@@ -104,7 +104,7 @@ describe('getMCPToolsContext', () => {
       tools: mockTools,
     });
 
-    selectToolsAndClasifyQueryMock.mockResolvedValue({
+    routeQueryMock.mockResolvedValue({
       tools: mockTools,
       queryClassification: ['general'],
     });
