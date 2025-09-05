@@ -1,7 +1,6 @@
 import {
   AppSystemProp,
   distributedLock,
-  logger,
   system,
 } from '@openops/server-shared';
 import {
