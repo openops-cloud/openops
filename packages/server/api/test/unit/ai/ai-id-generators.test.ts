@@ -1,4 +1,5 @@
 import {
+  generateApprovalId,
   generateMessageId,
   generateToolId,
 } from '../../../src/app/ai/chat/ai-id-generators';
@@ -7,6 +8,7 @@ describe('AI ID Generators', () => {
   describe.each([
     { name: 'message', generator: generateMessageId, prefix: 'msg' },
     { name: 'tool', generator: generateToolId, prefix: 'tool' },
+    { name: 'approval', generator: generateApprovalId, prefix: 'approval' },
   ])('Generate $name id', ({ generator, prefix }) => {
     it('should have the correct total length', () => {
       const id = generator();

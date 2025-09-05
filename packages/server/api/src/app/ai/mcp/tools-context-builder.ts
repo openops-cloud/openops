@@ -1,3 +1,4 @@
+import { wrapToolsWithApproval } from '@/mcp/tool-approval-wrapper';
 import { AiConfig, ChatFlowContext } from '@openops/shared';
 import { LanguageModel, ModelMessage, ToolSet } from 'ai';
 import { FastifyInstance } from 'fastify';
@@ -21,6 +22,9 @@ type MCPToolsContextParams = {
   languageModel: LanguageModel;
   frontendTools: AssistantUITools;
   additionalContext?: ChatFlowContext;
+  userId?: string;
+  chatId?: string;
+  stream?: NodeJS.WritableStream;
 };
 
 export type MCPToolsContext = {
@@ -39,6 +43,9 @@ export async function getMCPToolsContext({
   languageModel,
   frontendTools,
   additionalContext,
+  userId,
+  chatId,
+  stream,
 }: MCPToolsContextParams): Promise<MCPToolsContext> {
   if (
     !chatContext.actionName ||
@@ -85,15 +92,29 @@ export async function getMCPToolsContext({
       systemPrompt += `\n\nMCP tools are not available in this chat. Do not claim access or simulate responses from them under any circumstance.`;
     }
 
+    const openOpsTools = isOpenOpsMCPEnabled
+      ? collectToolsByProvider(tools, 'openops')
+      : {};
+
+    const combinedTools = {
+      ...filteredTools,
+      ...openOpsTools,
+    };
+
+    const finalTools =
+      userId && chatId && stream
+        ? wrapToolsWithApproval(combinedTools, (_toolName: string) => ({
+            userId,
+            projectId,
+            chatId,
+            stream,
+          }))
+        : combinedTools;
+
     return {
       mcpClients,
       systemPrompt,
-      filteredTools: {
-        ...filteredTools,
-        ...(isOpenOpsMCPEnabled
-          ? collectToolsByProvider(tools, 'openops')
-          : {}),
-      },
+      filteredTools: finalTools,
     };
   }
 
