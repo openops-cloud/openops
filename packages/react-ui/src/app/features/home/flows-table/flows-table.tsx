@@ -9,6 +9,7 @@ import {
 import { flowsHooks } from '@/app/features/flows/lib/flows-hooks';
 import { PopulatedFlow } from '@openops/shared';
 
+import { isModifierOrMiddleClick } from '@/app/common/navigation/table-navigation-helper';
 import { useMemo } from 'react';
 import { HomeTableWrapper } from '../components/home-table-wrapper';
 
@@ -55,7 +56,7 @@ const HomeFlowsTable = ({
           border={false}
           getRowHref={(row) => `/flows/${row.id}`}
           onRowClick={(row, e) => {
-            if (e.ctrlKey || e.metaKey || e.button === 1) {
+            if (isModifierOrMiddleClick(e)) {
               return;
             } else {
               navigate(`/flows/${row.id}`);

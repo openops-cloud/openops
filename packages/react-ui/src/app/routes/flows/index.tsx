@@ -8,6 +8,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import { useDefaultSidebarState } from '@/app/common/hooks/use-default-sidebar-state';
+import { isModifierOrMiddleClick } from '@/app/common/navigation/table-navigation-helper';
 import {
   columnVisibility,
   createColumns,
@@ -16,6 +17,7 @@ import { flowsApi } from '@/app/features/flows/lib/flows-api';
 import { FlowsFolderBreadcrumbsManager } from '@/app/features/folders/component/folder-breadcrumbs-manager';
 import { FLOWS_TABLE_FILTERS } from '@/app/features/folders/lib/flows-table-filters';
 import { FlowStatus, FlowVersionState } from '@openops/shared';
+import is from 'zod/v4/locales/is.cjs';
 
 const FlowsPage = () => {
   useDefaultSidebarState('expanded');
@@ -81,7 +83,7 @@ const FlowsPage = () => {
                 folderId: searchParams.get(FOLDER_ID_PARAM_NAME),
                 viewOnly: true,
               })}`;
-              if (e.ctrlKey || e.metaKey || e.button === 1) {
+              if (isModifierOrMiddleClick(e)) {
                 return;
               } else {
                 navigate(route);
