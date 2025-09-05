@@ -25,6 +25,7 @@ const BaseToolWrapper = ({
   const isRunning = toolStatusUtils.isRunning(status);
   const isIncomplete = toolStatusUtils.isIncomplete(status);
   const isComplete = toolStatusUtils.isComplete(status);
+  const isCancelled = toolStatusUtils.isCancelled(status);
 
   return (
     <div className="mb-4 flex w-full flex-col rounded-lg border border-border bg-background">
@@ -32,7 +33,7 @@ const BaseToolWrapper = ({
         {isComplete && (
           <CircleCheck className="size-4 text-success flex-shrink-0" />
         )}
-        {isIncomplete && (
+        {(isIncomplete || isCancelled) && (
           <XCircle className="size-4 text-destructive flex-shrink-0" />
         )}
         <p className="text-foreground overflow-hidden text-ellipsis whitespace-nowrap flex-grow min-w-0">
