@@ -18,6 +18,7 @@ import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
 import { useAppStore } from '@/app/store/app-store';
 import { PropertyType } from '@openops/blocks-framework';
 import { useSafeBuilderStateContext } from '../../builder-hooks';
+import { ExpandableContent } from '../expandable-markdown';
 import { CodeEditior } from './code-editior';
 
 const markdown = `
@@ -70,7 +71,15 @@ const CodeSettings = React.memo(({ readonly }: CodeSettingsProps) => {
         render={({ field }) => (
           <FormItem>
             <div className="pb-4">
-              <Markdown markdown={markdown} theme={theme} />
+              <ExpandableContent fullContent={markdown}>
+                {(content) => (
+                  <Markdown
+                    markdown={content}
+                    theme={theme}
+                    withBorder={false}
+                  />
+                )}
+              </ExpandableContent>
             </div>
 
             <div className="flex items-center justify-between">
