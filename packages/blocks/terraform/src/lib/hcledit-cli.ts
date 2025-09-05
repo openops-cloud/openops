@@ -1,5 +1,6 @@
 import { CommandResult, executeCommand, useTempFile } from '@openops/common';
 import { logger } from '@openops/server-shared';
+import { escapeAttributeValue } from './modify/attribute-value-formatter';
 
 export interface TerraformResource {
   name: string;
@@ -81,6 +82,26 @@ export async function updateResourceProperties(
   return result;
 }
 
+export async function updateVariablesFile(
+  template: string,
+  modifications: { variableName: string; variableValue: unknown }[],
+): Promise<string> {
+  const providedTemplate = template.trim() as string;
+
+  return await useTempFile(providedTemplate, async (filePath) => {
+    const updates = [];
+
+    for (const modification of modifications) {
+      const propertyName = modification.variableName;
+      const propertyValue = escapeAttributeValue(modification.variableValue);
+
+      updates.push(`attribute set ${propertyName} ${propertyValue}`);
+    }
+
+    return await updateTemplateCommand(filePath, updates);
+  });
+}
+
 export async function deleteResource(
   template: string,
   resourceType: string,
@@ -104,6 +125,14 @@ export async function deleteResource(
   }
 
   return commandResult.stdOut;
+}
+
+export async function listBlocksCommand(
+  template: string,
+): Promise<CommandResult> {
+  return await useTempFile(template, async (filePath) => {
+    return await executeHclEditCommand(`-f ${filePath} block list`);
+  });
 }
 
 async function getAttributeCommand(
