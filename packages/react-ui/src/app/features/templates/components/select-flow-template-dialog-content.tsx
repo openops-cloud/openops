@@ -62,6 +62,8 @@ export type SelectFlowTemplateDialogContentProps = {
   selectedCategories: string[];
   setSelectedCategories: (categories: string[]) => void;
   setSelectedBlocks: (blocks: string[]) => void;
+  activeTab: TemplatesTabs;
+  onTabChange: (tab: TemplatesTabs) => void;
 } & FlowTemplateFilterSidebarProps;
 
 const SelectFlowTemplateDialogContent = ({
@@ -89,6 +91,8 @@ const SelectFlowTemplateDialogContent = ({
   isPrivateTemplatesLoading,
   handleTemplateSelect,
   onSearchInputChange,
+  activeTab,
+  onTabChange,
 }: SelectFlowTemplateDialogContentProps) => {
   const { theme } = useTheme();
   const ownerLogoUrl = useOwnerLogoUrl();
@@ -99,10 +103,6 @@ const SelectFlowTemplateDialogContent = ({
   const isFullCatalog =
     !isTemplatePreselected &&
     (isConnectedToCloudTemplates || !useCloudTemplates);
-
-  const [activeTab, setActiveTab] = React.useState<TemplatesTabs>(
-    TemplatesTabs.Public,
-  );
 
   const onExploreMoreClick = () => {
     const currentUser = authenticationSession.getCurrentUser();
@@ -186,7 +186,7 @@ const SelectFlowTemplateDialogContent = ({
             isConnectedToCloud={isFullCatalog}
             onExploreMoreClick={onExploreMoreClick}
             activeTab={activeTab}
-            onTabChange={setActiveTab}
+            onTabChange={onTabChange}
           />
         )}
       </div>
