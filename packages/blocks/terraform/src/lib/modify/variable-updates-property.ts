@@ -12,7 +12,7 @@ export function getVariableUpdatesProperty() {
     refreshers: ['fileContent'],
     props: async ({ fileContent }): Promise<{ [key: string]: any }> => {
       if (!fileContent) {
-        return getMarkdownProperty();
+        return {};
       }
 
       const fileParsed = await parseFileContent(
@@ -20,7 +20,9 @@ export function getVariableUpdatesProperty() {
       );
 
       if (!fileParsed.success) {
-        return getMarkdownProperty(fileParsed.message);
+        return {
+          updates: getErrorMessageProperty(fileParsed.message),
+        };
       }
 
       const terraformVariables: Record<string, TerraformVariable> =
@@ -33,12 +35,17 @@ export function getVariableUpdatesProperty() {
   });
 }
 
-function getMarkdownProperty(message?: string) {
-  return {
-    errorMessage: Property.MarkDown({
-      value: message || 'Please provide a file to see the update options.',
-    }),
-  };
+function getErrorMessageProperty(message?: string) {
+  return Property.StaticDropdown({
+    displayName: 'Intended modifications',
+    required: true,
+    options: {
+      disabled: true,
+      options: [],
+      error: message || 'Please provide a file to see the update options.',
+      placeholder: 'No options available.',
+    },
+  });
 }
 
 function getUpdatesProperty(
