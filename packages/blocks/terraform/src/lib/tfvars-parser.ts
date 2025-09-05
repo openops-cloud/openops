@@ -93,7 +93,9 @@ function inferVarType(value: unknown): TerraformVariableType {
   }
 }
 
-export function tryParseFileAsJson(fileContent: string): Record<string, any> | null {
+export function tryParseFileAsJson(
+  fileContent: string,
+): Record<string, any> | null {
   const isRecord = (x: unknown): x is Record<string, unknown> =>
     typeof x === 'object' && x !== null && !Array.isArray(x);
 
