@@ -51,6 +51,13 @@ export const ToolFallback = ({
   );
 };
 
+const CancelledResultSchema = z.object({
+  type: z.literal('json'),
+  value: z.object({
+    cancelled: z.literal(true),
+  }),
+});
+
 const extractResultStatus = (
   result: unknown,
   status: MessagePartStatus | ToolCallMessagePartStatus,
@@ -60,15 +67,7 @@ const extractResultStatus = (
   }
 
   if (result && typeof result === 'object') {
-    const cancelledResult = z
-      .object({
-        type: z.literal('json'),
-        value: z.object({
-          cancelled: z.literal(true),
-        }),
-      })
-      .safeParse(result);
-
+    const cancelledResult = CancelledResultSchema.safeParse(result);
     if (cancelledResult.success) {
       return {
         type: TOOL_STATUS_TYPES.REQUIRES_ACTION,
