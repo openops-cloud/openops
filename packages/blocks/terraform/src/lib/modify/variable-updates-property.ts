@@ -70,11 +70,11 @@ function getUpdatesProperty(
           if (!variableName) {
             return { variableValue: {} };
           }
-          const variableNameeProp = variableName as unknown as string;
+          const variableNameProp = variableName as unknown as string;
 
           return {
             variableValue: getVariableValueOptions(
-              terraformVariables[variableNameeProp],
+              terraformVariables[variableNameProp],
             ) as any,
           };
         },

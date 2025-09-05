@@ -9,7 +9,10 @@ import { DynamicPropsValue } from '@openops/blocks-framework';
 import { getVariableUpdatesProperty } from '../../src/lib/modify/variable-updates-property';
 
 describe('Variable Updates Dynamic Properties', () => {
-  const context = createContext();
+  const context = {
+    ...jest.requireActual('@openops/blocks-framework'),
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -124,9 +127,3 @@ describe('Variable Updates Dynamic Properties', () => {
     expect(empty).toEqual({ variableValue: {} });
   });
 });
-
-function createContext() {
-  return {
-    ...jest.requireActual('@openops/blocks-framework'),
-  };
-}
