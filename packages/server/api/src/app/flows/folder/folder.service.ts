@@ -16,10 +16,10 @@ import {
   UpdateFolderRequest,
 } from '@openops/shared';
 import { repoFactory } from '../../core/db/repo-factory';
-import { flowRepo } from '../flow/flow.repo';
 import { flowService } from '../flow/flow.service';
 import { buildFolderTree, FolderWithFlows } from './folder-tree.utils';
 import { FolderEntity, FolderSchema } from './folder.entity';
+import { getUncategorizedFlows } from './uncategorized-flows';
 
 export const folderRepo = repoFactory(FolderEntity);
 
@@ -180,32 +180,15 @@ export const flowFolderService = {
   },
   async getUncategorizedFolder({
     projectId,
+    contentType = ContentType.WORKFLOW,
   }: {
     projectId: string;
+    contentType?: ContentType;
   }): Promise<FolderDto> {
-    const uncategorizedFlowsQuery = flowRepo()
-      .createQueryBuilder('flow')
-      .select(['flow.id', 'flow.projectId'])
-      .leftJoinAndMapOne(
-        'flow.version',
-        'flow_version',
-        'version',
-        `version.flowId = flow.id
-       AND version.id IN (
-          SELECT fv.id
-          FROM flow_version fv
-          WHERE fv."flowId" = flow.id
-          ORDER BY fv.created DESC
-          LIMIT 1
-      )`,
-      )
-      .addSelect(['version.displayName'])
-      .where('flow.folderId IS NULL')
-      .andWhere('flow.isInternal = :isInternal', { isInternal: false })
-      .andWhere('flow.projectId = :projectId', { projectId })
-      .orderBy('flow.updated', 'DESC');
-
-    const uncategorizedFlows = await uncategorizedFlowsQuery.getMany();
+    const uncategorizedFlows = await getUncategorizedFlows(
+      projectId,
+      contentType,
+    );
 
     const uncategorizedFolderDto: FolderDto = {
       projectId,
