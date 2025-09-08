@@ -2,13 +2,13 @@ import { Store } from '@openops/blocks-framework';
 import {
   Action,
   ActionType,
-  FlowRunStatus,
   LoopStepResult,
 } from '@openops/shared';
 import { EngineConstants } from './context/engine-constants';
 import {
   ExecutionVerdict,
   FlowExecutorContext,
+  VerdictReason,
 } from './context/flow-execution-context';
 import { flowExecutor } from './flow-executor';
 
@@ -110,7 +110,7 @@ async function generateNextFlowContext(
 
 function pauseLoop(executionState: FlowExecutorContext): FlowExecutorContext {
   return executionState.setVerdict(ExecutionVerdict.PAUSED, {
-    reason: FlowRunStatus.PAUSED,
+    reason: VerdictReason.PAUSED,
     pauseMetadata: {
       executionCorrelationId: executionState.pauseId,
     },
