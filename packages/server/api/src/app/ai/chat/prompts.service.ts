@@ -3,6 +3,7 @@ import { ChatFlowContext, CODE_BLOCK_NAME, isNil } from '@openops/shared';
 import { ToolSet } from 'ai';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
+import { hasToolProvider } from '../mcp/tool-utils';
 import { QueryClassification, QueryTypes } from '../mcp/types';
 import { MCPChatContext } from './ai-chat.service';
 
@@ -58,15 +59,6 @@ export const getMcpSystemPrompt = async ({
 
   return allPrompts.join('\n\n');
 };
-
-function hasToolProvider(
-  tools: ToolSet | undefined,
-  provider: string,
-): boolean {
-  return Object.values(tools ?? {}).some(
-    (tool) => (tool as { toolProvider?: string }).toolProvider === provider,
-  );
-}
 
 export const getBlockSystemPrompt = async (
   context: MCPChatContext,
