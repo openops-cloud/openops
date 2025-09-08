@@ -130,7 +130,11 @@ export const flowFolderService = {
     return folder;
   },
   async listFolderFlows(params: ListFolderFlowsParams): Promise<FolderDto[]> {
-    const { projectId, includeUncategorizedFolder, contentType } = params;
+    const {
+      projectId,
+      includeUncategorizedFolder,
+      contentType = ContentType.WORKFLOW,
+    } = params;
     const query = folderRepo()
       .createQueryBuilder('folder')
       .loadRelationCountAndMap('folder.numberOfFlows', 'folder.flows')
