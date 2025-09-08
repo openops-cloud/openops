@@ -16,21 +16,19 @@ import {
   CornerUpLeft,
   Download,
   Import,
-  Pencil,
   TextCursorInput,
   Trash2,
 } from 'lucide-react';
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 
 import { ConfirmationDeleteDialog } from '@/app/common/components/delete-dialog';
 import { userSettingsHooks } from '@/app/common/hooks/user-settings-hooks';
-import { SEARCH_PARAMS } from '@/app/constants/search-params';
 import { ImportFlowDialog } from '@/app/features/flows/components/import-flow-dialog/import-flow-dialog';
 import { RunWorkflowManuallyMenuItem } from '@/app/features/flows/components/run-workflow-manually-menu-item';
 import { useRefetchFolderTree } from '@/app/features/folders/hooks/refetch-folder-tree';
 import { flowsApi } from '../lib/flows-api';
 import { flowsUtils } from '../lib/flows-utils';
+import { EditFlowMenuItem } from './edit-flow-menu-item';
 import { MoveFlowDialog } from './move-flow-dialog';
 import { RenameFlowDialog } from './rename-flow-dialog';
 
@@ -109,22 +107,7 @@ const FlowActionMenu: React.FC<FlowActionMenuProps> = ({
         {children}
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        {!insideBuilder && (
-          <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-            <Link
-              type="button"
-              to={{
-                pathname: `/flows/${flow.id}`,
-                search: `?folderId=${flow.folderId}&${SEARCH_PARAMS.viewOnly}=false`,
-              }}
-            >
-              <div className="flex cursor-pointer flex-row gap-2 items-center">
-                <Pencil className="h-4 w-4" />
-                <span>{t('Edit')}</span>
-              </div>
-            </Link>
-          </DropdownMenuItem>
-        )}
+        {!insideBuilder && <EditFlowMenuItem flow={flow} baseRoute="/flows" />}
 
         {!readonly && (
           <RenameFlowDialog
