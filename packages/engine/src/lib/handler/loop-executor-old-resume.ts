@@ -1,9 +1,5 @@
 import { Store } from '@openops/blocks-framework';
-import {
-  Action,
-  ActionType,
-  LoopStepResult,
-} from '@openops/shared';
+import { Action, ActionType, LoopStepResult } from '@openops/shared';
 import { EngineConstants } from './context/engine-constants';
 import {
   ExecutionVerdict,
