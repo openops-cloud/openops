@@ -472,6 +472,66 @@ describe('Flow API', () => {
       expect(responseBody?.version?.id).toBe(mockFlowVersion.id);
       expect(responseBody?.version?.state).toBe('LOCKED');
     });
+
+    it('Fails to publish an internal flow', async () => {
+      const mockUser = createMockUser();
+      await databaseConnection().getRepository('user').save([mockUser]);
+
+      const mockOrganization = createMockOrganization({ ownerId: mockUser.id });
+      await databaseConnection()
+        .getRepository('organization')
+        .save(mockOrganization);
+
+      const mockProject = createMockProject({
+        ownerId: mockUser.id,
+        organizationId: mockOrganization.id,
+      });
+      await databaseConnection().getRepository('project').save([mockProject]);
+
+      const mockInternalFlow = createMockFlow({
+        projectId: mockProject.id,
+        status: FlowStatus.DISABLED,
+        isInternal: true,
+      });
+      await databaseConnection().getRepository('flow').save([mockInternalFlow]);
+
+      const mockFlowVersion = createMockFlowVersion({
+        flowId: mockInternalFlow.id,
+        updatedBy: mockUser.id,
+        state: FlowVersionState.DRAFT,
+      });
+      await databaseConnection()
+        .getRepository('flow_version')
+        .save([mockFlowVersion]);
+
+      const mockToken = await generateMockToken({
+        id: mockUser.id,
+        type: PrincipalType.USER,
+        projectId: mockProject.id,
+      });
+
+      const response = await app?.inject({
+        method: 'POST',
+        url: `/v1/flows/${mockInternalFlow.id}`,
+        body: {
+          type: FlowOperationType.LOCK_AND_PUBLISH,
+          request: {},
+        },
+        headers: {
+          authorization: `Bearer ${mockToken}`,
+        },
+      });
+
+      expect(response?.statusCode).toBe(StatusCodes.FORBIDDEN);
+      const responseBody = response?.json();
+      expect(responseBody?.code).toBe('FLOW_INTERNAL_FORBIDDEN');
+
+      const flowStillDisabled = await databaseConnection()
+        .getRepository('flow')
+        .findOneBy({ id: mockInternalFlow.id });
+      expect(flowStillDisabled?.status).toBe(FlowStatus.DISABLED);
+      expect(flowStillDisabled?.publishedVersionId).toBeNull();
+    });
   });
 
   describe('List Flows endpoint', () => {
@@ -1179,6 +1239,54 @@ describe('Flow API', () => {
         'Workflow execution started successfully',
       );
     });
+
+    it('Fails to run an internal flow', async () => {
+      const mockUser = createMockUser({ id: openOpsId() });
+      await databaseConnection().getRepository('user').save([mockUser]);
+
+      const mockProject = createMockProject({
+        id: openOpsId(),
+        ownerId: mockUser.id,
+      });
+      await databaseConnection().getRepository('project').save([mockProject]);
+
+      const mockInternalFlow = createMockFlow({
+        id: openOpsId(),
+        projectId: mockProject.id,
+        status: FlowStatus.ENABLED,
+        isInternal: true,
+      });
+      await databaseConnection().getRepository('flow').save([mockInternalFlow]);
+
+      const mockFlowVersion = createMockFlowVersion({
+        id: openOpsId(),
+        flowId: mockInternalFlow.id,
+      });
+      await databaseConnection()
+        .getRepository('flow_version')
+        .save([mockFlowVersion]);
+
+      await databaseConnection()
+        .getRepository('flow')
+        .update(mockInternalFlow.id, {
+          publishedVersionId: mockFlowVersion.id,
+        });
+
+      const mockToken = await generateMockToken({
+        type: PrincipalType.USER,
+        projectId: mockProject.id,
+      });
+
+      const response = await app?.inject({
+        method: 'POST',
+        url: `/v1/flows/${mockInternalFlow.id}/run`,
+        headers: { authorization: `Bearer ${mockToken}` },
+      });
+
+      expect(response?.statusCode).toBe(StatusCodes.FORBIDDEN);
+      const responseBody = response?.json();
+      expect(responseBody?.code).toBe('FLOW_INTERNAL_FORBIDDEN');
+    });
   });
 
   describe('Delete Flow endpoint', () => {
@@ -1278,9 +1386,9 @@ describe('Flow API', () => {
         },
       });
 
-      expect(response?.statusCode).toBe(StatusCodes.BAD_REQUEST);
+      expect(response?.statusCode).toBe(StatusCodes.FORBIDDEN);
       const responseBody = response?.json();
-      expect(responseBody?.code).toBe('FLOW_OPERATION_INVALID');
+      expect(responseBody?.code).toBe('FLOW_INTERNAL_FORBIDDEN');
 
       const flowStillExists = await databaseConnection()
         .getRepository('flow')

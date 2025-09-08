@@ -15,3 +15,7 @@ export function generateMessageId(): string {
 export function generateToolId(): string {
   return generateId('tool');
 }
+
+export function generateApprovalId(): string {
+  return generateId('approval');
+}

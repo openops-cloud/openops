@@ -17,7 +17,6 @@ import {
   FlowVersionMetadata,
   GetFlowQueryParamsRequest,
   GetFlowTemplateRequestQuery,
-  isNil,
   ListFlowsRequest,
   ListFlowVersionRequest,
   OpenOpsId,
@@ -34,7 +33,6 @@ import {
   TriggerType,
   TriggerWithOptionalId,
 } from '@openops/shared';
-import dayjs from 'dayjs';
 import { StatusCodes } from 'http-status-codes';
 import { entitiesMustBeOwnedByCurrentProject } from '../../authentication/authorization';
 import { projectService } from '../../project/project-service';
@@ -42,6 +40,10 @@ import { sendWorkflowCreatedFromTemplateEvent } from '../../telemetry/event-mode
 import { flowRunService } from '../flow-run/flow-run-service';
 import { flowVersionService } from '../flow-version/flow-version.service';
 import { triggerUtils } from '../trigger/hooks/trigger-utils';
+import {
+  assertThatFlowIsNotBeingUsed,
+  assertThatFlowIsNotInternal,
+} from './flow-validations';
 import { flowService } from './flow.service';
 
 const DEFAULT_PAGE_SIZE = 10;
@@ -81,6 +83,7 @@ export const flowController: FastifyPluginAsyncTypebox = async (app) => {
       id: request.params.id,
       projectId: request.principal.projectId,
     });
+    await assertThatFlowIsNotInternal(flow);
     await assertThatFlowIsNotBeingUsed(flow, userId);
 
     const updatedFlow = await flowService.update({
@@ -158,6 +161,8 @@ export const flowController: FastifyPluginAsyncTypebox = async (app) => {
         id: request.params.id,
         projectId: request.principal.projectId,
       });
+
+      await assertThatFlowIsNotInternal(flow);
 
       if (!flow.publishedVersionId) {
         return await reply.status(StatusCodes.BAD_REQUEST).send({
@@ -256,27 +261,6 @@ async function createFromTemplate(
   );
 
   return updatedFlow;
-}
-
-async function assertThatFlowIsNotBeingUsed(
-  flow: PopulatedFlow,
-  userId: string,
-): Promise<void> {
-  const currentTime = dayjs();
-  if (
-    !isNil(flow.version.updatedBy) &&
-    flow.version.updatedBy !== userId &&
-    currentTime.diff(dayjs(flow.version.updated), 'minute') <= 1
-  ) {
-    throw new ApplicationError({
-      code: ErrorCode.FLOW_IN_USE,
-      params: {
-        flowVersionId: flow.version.id,
-        message:
-          'Flow is being used by another user in the last minute. Please try again later.',
-      },
-    });
-  }
 }
 
 async function extractUserIdFromPrincipal(

@@ -8,6 +8,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import { useDefaultSidebarState } from '@/app/common/hooks/use-default-sidebar-state';
+import { isModifierOrMiddleClick } from '@/app/common/navigation/table-navigation-helper';
 import {
   columnVisibility,
   createColumns,
@@ -70,14 +71,19 @@ const FlowsPage = () => {
             filters={FLOWS_TABLE_FILTERS}
             columnVisibility={columnVisibility}
             refresh={tableRefresh}
+            getRowHref={(row) =>
+              `/flows/${row.id}?${qs.stringify({
+                folderId: searchParams.get(FOLDER_ID_PARAM_NAME),
+                viewOnly: true,
+              })}`
+            }
             onRowClick={(row, e) => {
               const route = `/flows/${row.id}?${qs.stringify({
                 folderId: searchParams.get(FOLDER_ID_PARAM_NAME),
                 viewOnly: true,
               })}`;
-
-              if (e.ctrlKey) {
-                window.open(route, '_blank');
+              if (isModifierOrMiddleClick(e)) {
+                return;
               } else {
                 navigate(route);
               }

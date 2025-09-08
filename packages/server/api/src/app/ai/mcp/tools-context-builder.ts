@@ -1,3 +1,4 @@
+import { wrapToolsWithApproval } from '@/mcp/tool-approval-wrapper';
 import { AiConfig, ChatFlowContext } from '@openops/shared';
 import { LanguageModel, ModelMessage, ToolSet } from 'ai';
 import { FastifyInstance } from 'fastify';
@@ -7,7 +8,11 @@ import {
   getMcpSystemPrompt,
 } from '../chat/prompts.service';
 import { routeQuery } from './llm-query-router';
-import { formatFrontendTools } from './tool-utils';
+import {
+  collectToolsByProvider,
+  formatFrontendTools,
+  hasToolProvider,
+} from './tool-utils';
 import { startMCPTools } from './tools-initializer';
 import { AssistantUITools, QueryClassification } from './types';
 
@@ -21,6 +26,9 @@ type MCPToolsContextParams = {
   languageModel: LanguageModel;
   frontendTools: AssistantUITools;
   additionalContext?: ChatFlowContext;
+  userId?: string;
+  chatId?: string;
+  stream?: NodeJS.WritableStream;
 };
 
 export type MCPToolsContext = {
@@ -39,6 +47,9 @@ export async function getMCPToolsContext({
   languageModel,
   frontendTools,
   additionalContext,
+  userId,
+  chatId,
+  stream,
 }: MCPToolsContextParams): Promise<MCPToolsContext> {
   if (
     !chatContext.actionName ||
@@ -71,14 +82,32 @@ export async function getMCPToolsContext({
       systemPrompt += `\n\nMCP tools are not available in this chat. Do not claim access or simulate responses from them under any circumstance.`;
     }
 
+    const openOpsTools =
+      hasToolProvider(tools, 'openops') &&
+      queryClassification.includes(QueryClassification.openops)
+        ? collectToolsByProvider(tools, 'openops')
+        : {};
+
+    const combinedTools = {
+      ...filteredTools,
+      ...openOpsTools,
+    };
+
+    const finalTools =
+      userId && chatId && stream
+        ? wrapToolsWithApproval(combinedTools, (_toolName: string) => ({
+            userId,
+            projectId,
+            chatId,
+            stream,
+          }))
+        : combinedTools;
+
     return {
       mcpClients,
       systemPrompt,
       filteredTools: {
-        ...filteredTools,
-        ...(queryClassification.includes(QueryClassification.openops)
-          ? collectToolsByProvider(tools, QueryClassification.openops)
-          : {}),
+        ...finalTools,
         ...formatFrontendTools(frontendTools),
       },
     };
@@ -88,17 +117,4 @@ export async function getMCPToolsContext({
     mcpClients: [],
     systemPrompt: await getBlockSystemPrompt(chatContext),
   };
-}
-
-function collectToolsByProvider(
-  tools: ToolSet | undefined,
-  provider: string,
-): ToolSet {
-  const result: ToolSet = {};
-  for (const [key, tool] of Object.entries(tools ?? {})) {
-    if ((tool as { toolProvider?: string }).toolProvider === provider) {
-      result[key] = tool;
-    }
-  }
-  return result;
 }

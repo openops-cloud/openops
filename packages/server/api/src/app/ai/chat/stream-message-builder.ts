@@ -2,7 +2,7 @@
  * Utility functions to build streaming messages for the AI SDK protocol
  */
 
-function createStreamMessage(data: Record<string, unknown>): string {
+export function createStreamMessage(data: Record<string, unknown>): string {
   return `data: ${JSON.stringify(data)}\n\n`;
 }
 

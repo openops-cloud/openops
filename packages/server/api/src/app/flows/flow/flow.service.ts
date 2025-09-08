@@ -1,9 +1,4 @@
-import {
-  AppSystemProp,
-  distributedLock,
-  logger,
-  system,
-} from '@openops/server-shared';
+import { AppSystemProp, distributedLock, system } from '@openops/server-shared';
 import {
   AppConnectionsWithSupportedBlocks,
   ApplicationError,
@@ -47,6 +42,7 @@ import {
 } from '../flow-version/flow-version.service';
 import { flowStepTestOutputService } from '../step-test-output/flow-step-test-output.service';
 import { flowSideEffects } from './flow-service-side-effects';
+import { assertThatFlowIsNotInternal } from './flow-validations';
 import { FlowEntity } from './flow.entity';
 import { flowRepo } from './flow.repo';
 
@@ -352,13 +348,6 @@ export const flowService = {
   }: UpdatePublishedVersionIdParams): Promise<PopulatedFlow> {
     const flowToUpdate = await this.getOneOrThrow({ id, projectId });
 
-    if (flowToUpdate.isInternal) {
-      throw new ApplicationError({
-        code: ErrorCode.FLOW_OPERATION_INVALID,
-        params: {},
-      });
-    }
-
     const flowVersionToPublish = await flowVersionService.getFlowVersionOrThrow(
       {
         flowId: id,
@@ -404,15 +393,9 @@ export const flowService = {
         id,
         projectId,
       });
-      if (flowToDelete.isInternal) {
-        logger.warn('Flow is internal, cannot be deleted', {
-          flowId: id,
-        });
-        throw new ApplicationError({
-          code: ErrorCode.FLOW_OPERATION_INVALID,
-          params: {},
-        });
-      }
+
+      await assertThatFlowIsNotInternal(flowToDelete);
+
       await flowSideEffects.preDelete({
         flowToDelete,
       });
