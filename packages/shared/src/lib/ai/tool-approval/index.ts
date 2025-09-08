@@ -3,3 +3,5 @@ export type ToolStepContext = {
   actionDescription?: string;
   actionName?: string;
 };
+
+export type ToolApprovalType = 'DefaultToolApproval' | 'RiskyStepToolApproval';
