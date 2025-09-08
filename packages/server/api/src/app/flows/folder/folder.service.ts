@@ -87,7 +87,7 @@ export const flowFolderService = {
         projectId,
         parentFolder,
         displayName: request.displayName,
-        contentType: request.contentType || ContentType.WORKFLOW,
+        contentType: request.contentType ?? ContentType.WORKFLOW,
       },
       ['projectId', 'displayName'],
     );
