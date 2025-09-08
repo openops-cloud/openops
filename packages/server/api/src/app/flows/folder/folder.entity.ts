@@ -21,8 +21,9 @@ export const FolderEntity = new EntitySchema<FolderSchema>({
     },
     projectId: OpenOpsIdSchema,
     contentType: {
-      type: 'enum',
+      type: String,
       enum: ContentType,
+      nullable: false,
       default: ContentType.WORKFLOW,
     },
   },
