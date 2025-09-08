@@ -484,6 +484,32 @@ export const flowService = {
       isInternal: false,
     });
   },
+
+  async getUncategorizedWorkflows(projectId: string) {
+    const uncategorizedFlowsQuery = flowRepo()
+      .createQueryBuilder('flow')
+      .select(['flow.id', 'flow.projectId'])
+      .leftJoinAndMapOne(
+        'flow.version',
+        'flow_version',
+        'version',
+        `version.flowId = flow.id
+           AND version.id IN (
+              SELECT fv.id
+              FROM flow_version fv
+              WHERE fv."flowId" = flow.id
+              ORDER BY fv.created DESC
+              LIMIT 1
+          )`,
+      )
+      .addSelect(['version.displayName'])
+      .where('flow.folderId IS NULL')
+      .andWhere('flow.isInternal = :isInternal', { isInternal: false })
+      .andWhere('flow.projectId = :projectId', { projectId })
+      .orderBy('flow.updated', 'DESC');
+
+    return uncategorizedFlowsQuery.getMany();
+  },
 };
 
 async function create({
