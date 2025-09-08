@@ -37,7 +37,8 @@ export const BlockTriggerSettings = Type.Object({
   packageType: Type.Enum(PackageType),
   triggerName: Type.Optional(
     Type.String({
-      description: 'The name of the trigger',
+      description:
+        'Mandatory name of the trigger to be executed. This must exactly match the response from Get triggers by scope and name.',
     }),
   ),
   input: Type.Record(Type.String({}), Type.Any(), {
@@ -46,7 +47,7 @@ export const BlockTriggerSettings = Type.Object({
       'IMPORTANT: If the trigger is a block, the input must be a record of string keys to any values.' +
       'For required properties, include the key with a `null` value if the value is unknown.' +
       'Example: { "timezone": "UTC", "day_of_the_week": 1, "hour_of_the_day": 9 }' +
-      'Example for webhook: { "authType": "none", "authFields": {} }',
+      ' IMPORTANT: For webhook, always use GET method, unless the user explicitly requests otherwise.',
   }),
   inputUiInfo: SampleDataSettingsObject,
 });

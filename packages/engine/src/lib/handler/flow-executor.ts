@@ -7,6 +7,7 @@ import {
   Trigger,
 } from '@openops/shared';
 import { performance } from 'node:perf_hooks';
+import { throwIfCancellationRequested } from '../cancellation-request-validator';
 import { progressService } from '../services/progress.service';
 import { throwIfExecutionTimeExceeded } from '../timeout-validator';
 import { BaseExecutor } from './base-executor';
@@ -57,9 +58,7 @@ export const flowExecutor = {
         ? output.setVerdict(ExecutionVerdict.SUCCEEDED, output.verdictResponse)
         : output;
 
-    sendProgress(newContext, constants);
-
-    await progressService.flushProgressUpdate(constants.flowRunId);
+    await sendProgress(newContext, constants);
 
     return newContext.toResponse();
   },
@@ -78,6 +77,7 @@ export const flowExecutor = {
 
     while (!isNil(currentAction)) {
       throwIfExecutionTimeExceeded();
+      await throwIfCancellationRequested(constants.flowRunId);
 
       const handler = this.getExecutorForAction(currentAction.type);
 
@@ -105,7 +105,7 @@ export const flowExecutor = {
         duration: stepEndTime - stepStartTime,
       });
 
-      sendProgress(flowExecutionContext, constants);
+      await sendProgress(flowExecutionContext, constants);
 
       if (flowExecutionContext.verdict !== ExecutionVerdict.RUNNING) {
         break;
@@ -120,12 +120,12 @@ export const flowExecutor = {
   },
 };
 
-function sendProgress(
+async function sendProgress(
   flowExecutionContext: FlowExecutorContext,
   constants: EngineConstants,
-): void {
+): Promise<void> {
   if (isNil(constants.executionCorrelationId)) {
-    return;
+    return Promise.resolve();
   }
   return progressService.sendUpdate({
     engineConstants: constants,

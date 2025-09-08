@@ -130,19 +130,21 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
       );
     }
 
-    logger.debug(
-      `Updating run ${runId} to ${getTerminalStatus(runDetails.status)}`,
-    );
+    logger.debug(`Updating run ${runId} to ${runDetails.status}`);
 
     const populatedRun = await flowRunService.updateStatus({
       flowRunId: runId,
-      status: getTerminalStatus(runDetails.status),
+      status: runDetails.status,
       tasks: runDetails.tasks,
       duration: runDetails.duration,
       executionState: getExecutionState(runDetails),
       projectId: request.principal.projectId,
       tags: runDetails.tags ?? [],
     });
+
+    if (!populatedRun) {
+      return;
+    }
 
     if (runDetails.status === FlowRunStatus.PAUSED) {
       await flowRunService.pause({
@@ -268,9 +270,11 @@ function getExecutionState(
   flowRunResponse: FlowRunResponse,
 ): ExecutionState | null {
   if (
-    [FlowRunStatus.TIMEOUT, FlowRunStatus.INTERNAL_ERROR].includes(
-      flowRunResponse.status,
-    )
+    [
+      FlowRunStatus.TIMEOUT,
+      FlowRunStatus.INTERNAL_ERROR,
+      FlowRunStatus.STOPPED,
+    ].includes(flowRunResponse.status)
   ) {
     return null;
   }
@@ -278,10 +282,6 @@ function getExecutionState(
     steps: flowRunResponse.steps as Record<string, StepOutput>,
   };
 }
-
-const getTerminalStatus = (status: FlowRunStatus): FlowRunStatus => {
-  return status == FlowRunStatus.STOPPED ? FlowRunStatus.SUCCEEDED : status;
-};
 
 async function getFlowResponse(
   result: FlowRunResponse,

@@ -7,13 +7,16 @@ import { templatesHooks } from '@/app/features/templates/lib/templates-hooks';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { userSettingsHooks } from '@/app/common/hooks/user-settings-hooks';
+import { usePrivateTemplates } from '@/app/features/templates/lib/private-templates-hook';
 import { BlockMetadataModelSummary } from '@openops/blocks-framework';
 import {
   cn,
   Dialog,
   DialogContent,
+  DialogTitle,
   FlowTemplateMetadataWithIntegrations,
   INTERNAL_ERROR_TOAST,
+  TemplatesTabs,
   toast,
 } from '@openops/components/ui';
 import { AppConnectionsWithSupportedBlocks } from '@openops/shared';
@@ -43,6 +46,9 @@ const SelectFlowTemplateDialog = ({
   const [searchText, setSearchText] = useState('');
   const { updateHomePageOperationalViewFlag } =
     userSettingsHooks.useHomePageOperationalView();
+  const [activeTab, setActiveTab] = React.useState<TemplatesTabs>(
+    TemplatesTabs.Public,
+  );
 
   const {
     isConnectionsPickerOpen,
@@ -95,6 +101,12 @@ const SelectFlowTemplateDialog = ({
       gettingStartedTemplateFilter: 'exclude',
       isConnectedToCloudTemplates,
     });
+
+  const {
+    privateTemplates,
+    isPrivateTemplatesLoading,
+    isPrivateCatalogCreated,
+  } = usePrivateTemplates();
 
   const { mutate: getSelectedTemplate } = useMutation({
     mutationFn: async ({
@@ -182,6 +194,8 @@ const SelectFlowTemplateDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogTitle className="hidden">OpenOps templates Catalog</DialogTitle>
+
       <DialogContent
         className={cn(
           'flex flex-col p-0 transition-none max-w-[1360px] max-2xl:max-w-[1010px]',
@@ -198,14 +212,14 @@ const SelectFlowTemplateDialog = ({
         {selectedTemplateMetadata && isConnectionsPickerOpen ? (
           <ConnectionsPicker
             close={() => setIsConnectionsPickerOpen(false)}
-            templateName={selectedTemplate?.name ?? ''}
+            name={selectedTemplate?.name ?? ''}
             integrations={
               selectedTemplateMetadata.integrations.filter(
                 (integration) => !!integration.auth,
               ) as BlockMetadataModelSummary[]
             }
-            onUseTemplate={useTemplate}
-            isUseTemplateLoading={isUseTemplatePending}
+            onUseConnections={useTemplate}
+            isLoading={isUseTemplatePending}
           ></ConnectionsPicker>
         ) : (
           <div className="h-full w-full flex bg-background rounded-2xl">
@@ -224,8 +238,11 @@ const SelectFlowTemplateDialog = ({
               }
               useTemplate={() => setIsConnectionsPickerOpen(true)}
               expandPreview={expandPreview}
-              templates={templatesWithIntegrations}
-              isTemplateListLoading={isTemplateListLoading}
+              isPrivateCatalogCreated={isPrivateCatalogCreated}
+              publicTemplates={templatesWithIntegrations}
+              isPublicTemplatesLoading={isTemplateListLoading}
+              privateTemplates={privateTemplates}
+              isPrivateTemplatesLoading={isPrivateTemplatesLoading}
               handleTemplateSelect={handleTemplateSelect}
               searchText={searchText}
               onSearchInputChange={setSearchText}
@@ -233,6 +250,8 @@ const SelectFlowTemplateDialog = ({
               selectedCategories={selectedCategories}
               setSelectedCategories={setSelectedCategories}
               setSelectedBlocks={setSelectedBlocks}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
             />
           </div>
         )}

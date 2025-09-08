@@ -6,6 +6,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
   SidebarHeader,
+  StatusIconWithText,
 } from '@openops/components/ui';
 import { t } from 'i18next';
 import { ChevronLeft, Info } from 'lucide-react';
@@ -16,6 +17,7 @@ import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
 import { FlagId, isNil, RunEnvironment } from '@openops/shared';
 import { LeftSideBarType } from '../builder-types';
 
+import { formatUtils } from '@/app/lib/utils';
 import { useEffectOnce } from 'react-use';
 import { flowRunUtils } from '../../flow-runs/lib/flow-run-utils';
 import { RUN_DETAILS_STEP_CARD_ID_PREFIX } from './constants';
@@ -63,6 +65,15 @@ const FlowRunDetails = React.memo(() => {
 
   const message = getRunMessage(run, rententionDays);
 
+  const runStatus = useMemo(() => {
+    if (!run) return null;
+    const { variant, Icon } = flowRunUtils.getStatusIcon(run.status);
+    const statusText = formatUtils.convertEnumToHumanReadable(run.status);
+    const explanation = flowRunUtils.getStatusExplanation(run.status);
+
+    return { variant, Icon, statusText, explanation };
+  }, [run]);
+
   useEffectOnce(() => {
     if (!run?.steps) return;
     const failedStepInfo = flowRunUtils.findFailedStep(run);
@@ -101,6 +112,17 @@ const FlowRunDetails = React.memo(() => {
             </Button>
           )}
           <span>{t('Run Details')}</span>
+
+          {runStatus && (
+            <div className="text-left">
+              <StatusIconWithText
+                icon={runStatus.Icon}
+                text={runStatus.statusText ?? ''}
+                variant={runStatus.variant}
+                explanation={runStatus.explanation}
+              />
+            </div>
+          )}
         </div>
       </SidebarHeader>
       <ResizablePanel className="h-full">

@@ -32,7 +32,6 @@ import { buildPaginator } from '../../helper/pagination/build-paginator';
 import { paginationHelper } from '../../helper/pagination/pagination-utils';
 import {
   sendWorkflowCreatedEvent,
-  sendWorkflowCreatedFromTemplateEvent,
   sendWorkflowDeletedEvent,
   sendWorkflowExportedEvent,
   sendWorkflowUpdatedEvent,
@@ -43,6 +42,7 @@ import {
 } from '../flow-version/flow-version.service';
 import { flowStepTestOutputService } from '../step-test-output/flow-step-test-output.service';
 import { flowSideEffects } from './flow-service-side-effects';
+import { assertThatFlowIsNotInternal } from './flow-validations';
 import { FlowEntity } from './flow.entity';
 import { flowRepo } from './flow.repo';
 
@@ -59,22 +59,24 @@ export const flowService = {
     return result;
   },
 
-  async createFromTemplate({
+  async createFromTrigger({
     projectId,
     userId,
     displayName,
     description,
     trigger,
-    templateId,
     connectionIds,
-    isSample,
-  }: CreateFromTemplateParams): Promise<PopulatedFlow> {
+    folderId,
+    isInternal = false,
+  }: CreateFromTriggerParams): Promise<PopulatedFlow> {
     const newFlow = await create({
       userId,
       projectId,
       request: {
         displayName,
+        folderId,
       },
+      isInternal,
     });
 
     const connectionsList = await getConnections(
@@ -97,15 +99,6 @@ export const flowService = {
         },
       },
     });
-
-    sendWorkflowCreatedFromTemplateEvent(
-      userId,
-      updatedFlow.id,
-      updatedFlow.projectId,
-      templateId,
-      displayName,
-      isSample,
-    );
 
     return updatedFlow;
   },
@@ -136,7 +129,10 @@ export const flowService = {
       },
     });
 
-    const queryWhere: Record<string, unknown> = { projectId };
+    const queryWhere: Record<string, unknown> = {
+      projectId,
+      isInternal: false,
+    };
 
     if (folderId !== undefined) {
       queryWhere.folderId =
@@ -352,13 +348,6 @@ export const flowService = {
   }: UpdatePublishedVersionIdParams): Promise<PopulatedFlow> {
     const flowToUpdate = await this.getOneOrThrow({ id, projectId });
 
-    if (flowToUpdate.isInternal) {
-      throw new ApplicationError({
-        code: ErrorCode.FLOW_OPERATION_INVALID,
-        params: {},
-      });
-    }
-
     const flowVersionToPublish = await flowVersionService.getFlowVersionOrThrow(
       {
         flowId: id,
@@ -404,6 +393,8 @@ export const flowService = {
         id,
         projectId,
       });
+
+      await assertThatFlowIsNotInternal(flowToDelete);
 
       await flowSideEffects.preDelete({
         flowToDelete,
@@ -459,16 +450,21 @@ export const flowService = {
 
   async count({ projectId, folderId }: CountParams): Promise<number> {
     if (folderId === undefined) {
-      return flowRepo().countBy({ projectId });
+      return flowRepo().countBy({ projectId, isInternal: false });
     }
 
     return flowRepo().countBy({
       folderId: folderId !== UNCATEGORIZED_FOLDER_ID ? folderId : IsNull(),
       projectId,
+      isInternal: false,
     });
   },
   async countEnabled({ projectId }: { projectId: ProjectId }): Promise<number> {
-    return flowRepo().countBy({ projectId, status: FlowStatus.ENABLED });
+    return flowRepo().countBy({
+      projectId,
+      status: FlowStatus.ENABLED,
+      isInternal: false,
+    });
   },
   async existsByProjectAndStatus(
     params: ExistsByProjectAndStatusParams,
@@ -478,6 +474,7 @@ export const flowService = {
     return flowRepo(entityManager).existsBy({
       projectId,
       status,
+      isInternal: false,
     });
   },
 };
@@ -676,15 +673,15 @@ type CreateParams = {
   isInternal?: boolean;
 };
 
-type CreateFromTemplateParams = {
-  templateId: string;
+type CreateFromTriggerParams = {
   projectId: ProjectId;
   userId: UserId;
   displayName: string;
   description: string | undefined;
   trigger: TriggerWithOptionalId;
   connectionIds: string[];
-  isSample: boolean;
+  folderId?: string;
+  isInternal?: boolean;
 };
 
 type ListParams = {

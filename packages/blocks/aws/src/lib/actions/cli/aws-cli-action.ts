@@ -7,6 +7,7 @@ import {
   handleCliError,
   tryParseJson,
 } from '@openops/common';
+import { RiskLevel } from '@openops/shared';
 import { runCommand } from './aws-cli';
 
 const BLOCKED_COMMANDS = [
@@ -34,6 +35,7 @@ export const awsCliAction = createAction({
     }),
     dryRun: dryRunCheckBox(),
   },
+  riskLevel: RiskLevel.HIGH,
   async run(context) {
     try {
       const { account, commandToRun, dryRun } = context.propsValue;

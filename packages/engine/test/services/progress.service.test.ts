@@ -71,7 +71,7 @@ describe('Progress Service', () => {
       };
 
       saveRequestBodyMock.mockResolvedValue('request:test-run-id');
-      progressService.sendUpdate(successParams);
+      await progressService.sendUpdate(successParams);
       await progressService.flushProgressUpdate(successParams.engineConstants.flowRunId);
 
       expect(saveRequestBodyMock).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({
@@ -106,7 +106,7 @@ describe('Progress Service', () => {
       };
 
       saveRequestBodyMock.mockResolvedValue('request:test-run-id');
-      progressService.sendUpdate(uniqueParams);
+      await progressService.sendUpdate(uniqueParams);
       await progressService.flushProgressUpdate(uniqueParams.engineConstants.flowRunId);
 
       expect(saveRequestBodyMock).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({
@@ -146,7 +146,7 @@ describe('Progress Service', () => {
       };
 
       saveRequestBodyMock.mockResolvedValue('request:test-run-id');
-      progressService.sendUpdate(paramsWithoutHandlerId);
+      await progressService.sendUpdate(paramsWithoutHandlerId);
       await progressService.flushProgressUpdate(paramsWithoutHandlerId.engineConstants.flowRunId);
 
       expect(saveRequestBodyMock).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({
@@ -205,8 +205,8 @@ describe('Progress Service', () => {
         },
       };
 
-      progressService.sendUpdate(request1);
-      progressService.sendUpdate(request2);
+      await progressService.sendUpdate(request1);
+      await progressService.sendUpdate(request2);
 
       await progressService.flushProgressUpdate(flowRunId);
 
@@ -244,8 +244,8 @@ describe('Progress Service', () => {
         },
       };
 
-      progressService.sendUpdate(request1);
-      progressService.sendUpdate(request2);
+      await progressService.sendUpdate(request1);
+      await progressService.sendUpdate(request2);
 
       await progressService.flushProgressUpdate('test-run-id-1');
       await progressService.flushProgressUpdate('test-run-id-2');
@@ -263,9 +263,9 @@ describe('Progress Service', () => {
         },
       };
 
-      progressService.sendUpdate(request);
-      await new Promise(res => setTimeout(res, 801));
-      progressService.sendUpdate(request);
+      await progressService.sendUpdate(request);
+      await new Promise(res => setTimeout(res, 1500));
+      await progressService.sendUpdate(request);
 
       await progressService.flushProgressUpdate(flowRunId);
 
@@ -306,13 +306,13 @@ describe('Progress Service', () => {
       };
 
       mockMakeHttpRequest.mockImplementation(async () => {
-        await new Promise((r) => setTimeout(r, 2000));
+        await new Promise((r) => setTimeout(r, 1500));
         return { data: 'ok' };
       });
 
-      progressService.sendUpdate(request1);
-      await new Promise(res => setTimeout(res, 1000));
-      progressService.sendUpdate(request2);
+      await progressService.sendUpdate(request1);
+      await new Promise(res => setTimeout(res, 1001));
+      await progressService.sendUpdate(request2);
       await progressService.flushProgressUpdate(flowRunId);
 
       expect(mockMakeHttpRequest).toHaveBeenCalledTimes(2);
@@ -354,7 +354,7 @@ describe('Progress Service', () => {
         },
       };
 
-      progressService.sendUpdate(paramsWithDifferentUrl);
+      await progressService.sendUpdate(paramsWithDifferentUrl);
       await progressService.flushProgressUpdate(paramsWithDifferentUrl.engineConstants.flowRunId);
 
       expect(mockMakeHttpRequest).toHaveBeenCalledWith(
@@ -380,7 +380,7 @@ describe('Progress Service', () => {
         throw timeoutError;
       });
 
-      expect(() => progressService.sendUpdate(timeoutParams))
+      await expect(progressService.sendUpdate(timeoutParams)).rejects
         .toThrow('Execution time exceeded');
       expect(mockThrowIfExecutionTimeExceeded).toHaveBeenCalledTimes(1);
       expect(mockMakeHttpRequest).not.toHaveBeenCalled();
@@ -396,7 +396,7 @@ describe('Progress Service', () => {
         },
       };
 
-      progressService.sendUpdate(retryParams);
+      await progressService.sendUpdate(retryParams);
       await progressService.flushProgressUpdate(retryParams.engineConstants.flowRunId);
 
       expect(mockMakeHttpRequest).toHaveBeenCalledWith(

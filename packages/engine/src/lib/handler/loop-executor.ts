@@ -18,6 +18,7 @@ import { EngineConstants } from './context/engine-constants';
 import {
   ExecutionVerdict,
   FlowExecutorContext,
+  VerdictReason,
 } from './context/flow-execution-context';
 import { flowExecutor } from './flow-executor';
 import { resumePausedIterationOldStrategy } from './loop-executor-old-resume';
@@ -376,7 +377,7 @@ async function getLoopIterationsMapping(
 
 function pauseLoop(executionState: FlowExecutorContext): FlowExecutorContext {
   return executionState.setVerdict(ExecutionVerdict.PAUSED, {
-    reason: FlowRunStatus.PAUSED,
+    reason: VerdictReason.PAUSED,
     pauseMetadata: {
       executionCorrelationId: executionState.pauseId,
     },

@@ -24,6 +24,7 @@ import {
   StepOutputStatus,
   TriggerHookType,
 } from '@openops/shared';
+import { CancellationRequestedError } from './cancellation-request-validator';
 import { EngineConstants } from './handler/context/engine-constants';
 import {
   ExecutionVerdict,
@@ -34,26 +35,33 @@ import { flowExecutor } from './handler/flow-executor';
 import { blockHelper } from './helper/block-helper';
 import { triggerHelper } from './helper/trigger-helper';
 import { resolveVariable } from './resolve-variable';
+import { progressService } from './services/progress.service';
+import { EngineTimeoutError } from './timeout-validator';
 import { utils } from './utils';
 
 const executeFlow = async (
   input: ExecuteFlowOperation,
   context: FlowExecutorContext,
 ): Promise<EngineResponse<Pick<FlowRunResponse, 'status' | 'error'>>> => {
-  const constants = EngineConstants.fromExecuteFlowInput(input);
+  try {
+    const constants = EngineConstants.fromExecuteFlowInput(input);
 
-  const response = await flowExecutor.triggerFlowExecutor({
-    trigger: input.flowVersion.trigger,
-    executionState: context,
-    constants,
-  });
-  return {
-    status: EngineResponseStatus.OK,
-    response: {
-      status: response.status,
-      error: response.error,
-    },
-  };
+    const response = await flowExecutor.triggerFlowExecutor({
+      trigger: input.flowVersion.trigger,
+      executionState: context,
+      constants,
+    });
+
+    return {
+      status: EngineResponseStatus.OK,
+      response: {
+        status: response.status,
+        error: response.error,
+      },
+    };
+  } finally {
+    await progressService.flushProgressUpdate(input.flowRunId);
+  }
 };
 
 async function executeStep(
@@ -277,14 +285,40 @@ export async function execute(
     }
   } catch (error) {
     logger.warn('Engine operation failed.', error);
+
+    const { status, message } = evaluateError(error as Error);
+
     return {
       status: EngineResponseStatus.ERROR,
       response: {
-        status: FlowRunStatus.INTERNAL_ERROR,
+        status,
         error: {
-          message: utils.tryParseJson((error as Error).message),
+          message,
         },
       },
     };
   }
+}
+
+function evaluateError(error: Error): {
+  status: FlowRunStatus;
+  message: unknown;
+} {
+  let status = FlowRunStatus.INTERNAL_ERROR;
+  let message = utils.tryParseJson(error.message);
+
+  if (error instanceof EngineTimeoutError) {
+    status = FlowRunStatus.TIMEOUT;
+    message = error.message;
+  }
+
+  if (error instanceof CancellationRequestedError) {
+    status = FlowRunStatus.STOPPED;
+    message = error.message;
+  }
+
+  return {
+    status,
+    message,
+  };
 }
