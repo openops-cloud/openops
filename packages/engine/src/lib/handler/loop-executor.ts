@@ -3,7 +3,6 @@ import {
   Action,
   ActionType,
   FlowRunId,
-  FlowRunStatus,
   isEmpty,
   isNil,
   isString,
@@ -224,7 +223,7 @@ async function triggerLoopIterations(
 
     const isPaused =
       loopExecutionState.verdict === ExecutionVerdict.PAUSED &&
-      loopExecutionState.verdictResponse?.reason === FlowRunStatus.PAUSED;
+      loopExecutionState.verdictResponse?.reason === VerdictReason.PAUSED;
 
     loopIterations[i] = {
       isPaused,
