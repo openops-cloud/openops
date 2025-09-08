@@ -7,10 +7,14 @@ import {
   getBlockSystemPrompt,
   getMcpSystemPrompt,
 } from '../chat/prompts.service';
-import { formatFrontendTools } from './tool-utils';
+import { routeQuery } from './llm-query-router';
+import {
+  collectToolsByProvider,
+  formatFrontendTools,
+  hasToolProvider,
+} from './tool-utils';
 import { startMCPTools } from './tools-initializer';
-import { selectRelevantTools } from './tools-selector';
-import { AssistantUITools } from './types';
+import { AssistantUITools, QueryClassification } from './types';
 
 type MCPToolsContextParams = {
   app: FastifyInstance;
@@ -59,32 +63,18 @@ export async function getMCPToolsContext({
       projectId,
     );
 
-    const allTools = {
-      ...tools,
-      ...formatFrontendTools(frontendTools),
-    };
-
-    const filteredTools = await selectRelevantTools({
+    const { tools: filteredTools, queryClassification } = await routeQuery({
       messages,
-      tools: allTools,
+      tools,
       languageModel,
       aiConfig,
       uiContext: additionalContext,
     });
 
-    const isAwsCostMcpDisabled =
-      !hasToolProvider(tools, 'aws-pricing') &&
-      !hasToolProvider(tools, 'cost-explorer');
-
-    const isAnalyticsLoaded = hasToolProvider(filteredTools, 'superset');
-    const isTablesLoaded = hasToolProvider(filteredTools, 'tables');
-    const isOpenOpsMCPEnabled = hasToolProvider(filteredTools, 'openops');
-
     let systemPrompt = await getMcpSystemPrompt({
-      isAnalyticsLoaded,
-      isTablesLoaded,
-      isOpenOpsMCPEnabled,
-      isAwsCostMcpDisabled,
+      queryClassification,
+      selectedTools: filteredTools,
+      allTools: tools,
       uiContext: additionalContext,
     });
 
@@ -92,9 +82,11 @@ export async function getMCPToolsContext({
       systemPrompt += `\n\nMCP tools are not available in this chat. Do not claim access or simulate responses from them under any circumstance.`;
     }
 
-    const openOpsTools = isOpenOpsMCPEnabled
-      ? collectToolsByProvider(tools, 'openops')
-      : {};
+    const openOpsTools =
+      hasToolProvider(tools, 'openops') &&
+      queryClassification.includes(QueryClassification.openops)
+        ? collectToolsByProvider(tools, 'openops')
+        : {};
 
     const combinedTools = {
       ...filteredTools,
@@ -114,7 +106,10 @@ export async function getMCPToolsContext({
     return {
       mcpClients,
       systemPrompt,
-      filteredTools: finalTools,
+      filteredTools: {
+        ...finalTools,
+        ...formatFrontendTools(frontendTools),
+      },
     };
   }
 
@@ -122,26 +117,4 @@ export async function getMCPToolsContext({
     mcpClients: [],
     systemPrompt: await getBlockSystemPrompt(chatContext),
   };
-}
-
-function hasToolProvider(
-  tools: ToolSet | undefined,
-  provider: string,
-): boolean {
-  return Object.values(tools ?? {}).some(
-    (tool) => (tool as { toolProvider?: string }).toolProvider === provider,
-  );
-}
-
-function collectToolsByProvider(
-  tools: ToolSet | undefined,
-  provider: string,
-): ToolSet {
-  const result: ToolSet = {};
-  for (const [key, tool] of Object.entries(tools ?? {})) {
-    if ((tool as { toolProvider?: string }).toolProvider === provider) {
-      result[key] = tool;
-    }
-  }
-  return result;
 }
