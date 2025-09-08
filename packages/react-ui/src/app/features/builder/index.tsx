@@ -31,8 +31,8 @@ import { useRunProgress } from '@/app/features/builder/hooks/use-run-progress';
 import { useResizablePanelGroup } from '@/app/common/hooks/use-resizable-panel-group';
 import { useSocket } from '@/app/common/providers/socket-provider';
 import { FLOW_CANVAS_Y_OFFESET } from '@/app/constants/flow-canvas';
+import { RESIZABLE_PANEL_IDS } from '@/app/constants/layout';
 import { SEARCH_PARAMS } from '@/app/constants/search-params';
-import { AiAssistantButton } from '@/app/features/ai/ai-assistant-button';
 import {
   Action,
   ActionType,
@@ -44,16 +44,12 @@ import {
   WebsocketClientEvent,
 } from '@openops/shared';
 
-import { AiChatResizablePanel } from '@/app/features/builder/ai-chat/ai-chat-resizable-panel';
-import { RESIZABLE_PANEL_IDS } from '../../constants/layout';
 import {
   LEFT_SIDEBAR_MIN_EFFECTIVE_WIDTH,
   LEFT_SIDEBAR_MIN_SIZE,
 } from '../../constants/sidebar';
-import { AiConfigurationPrompt } from '../ai/ai-configuration-prompt';
 import { blocksHooks } from '../blocks/lib/blocks-hook';
 import { RunDetailsBar } from '../flow-runs/components/run-details-bar';
-import { FlowSideMenu } from '../navigation/side-menu/flow/flow-side-menu';
 import LeftSidebarResizablePanel from '../navigation/side-menu/left-sidebar';
 import { BuilderHeader } from './builder-header/builder-header';
 import { LeftSideBarType, RightSideBarType } from './builder-types';
@@ -177,6 +173,7 @@ const BuilderPage = () => {
   const [leftSidePanelRef, leftSidePanelSize] = useMeasure<HTMLDivElement>();
   const [isDraggingHandle, setIsDraggingHandle] = useState(false);
   const rightHandleRef = useAnimateSidebar(rightSidebar);
+  const leftHandleRef = useAnimateSidebar(leftSidebar);
   const {
     blockModel,
     isLoading: isBlockLoading,
@@ -208,7 +205,7 @@ const BuilderPage = () => {
 
     if (!run && readonly !== viewOnlyParam) {
       if (!readonly && viewOnlyParam) {
-        setLeftSidebar(LeftSideBarType.MENU);
+        setLeftSidebar(LeftSideBarType.NONE);
       }
       setReadOnly(viewOnlyParam);
     }
@@ -235,14 +232,14 @@ const BuilderPage = () => {
     (size: number[]) => {
       setPanelsSize({
         [RESIZABLE_PANEL_IDS.LEFT_SIDEBAR]: size[0],
-        [RESIZABLE_PANEL_IDS.AI_CHAT]: size[1],
+        [RESIZABLE_PANEL_IDS.RIGHT_SIDEBAR]: size[2],
       });
     },
     [setPanelsSize],
   );
 
   return (
-    <div className="flex h-screen w-screen flex-col relative">
+    <div className="flex h-full w-full flex-col relative">
       {run && (
         <RunDetailsBar
           canExitRun={canExitRun}
@@ -259,10 +256,11 @@ const BuilderPage = () => {
         <BuilderTreeViewProvider selectedId={selectedStep || undefined}>
           <ResizablePanelGroup
             direction="horizontal"
-            className="absolute left-0 top-0"
+            className="h-full"
             onLayout={onResize}
           >
             <LeftSidebarResizablePanel
+              ref={leftHandleRef}
               minSize={LEFT_SIDEBAR_MIN_SIZE}
               className={cn('min-w-0 w-0 bg-background z-[25] shadow-sidebar', {
                 [LEFT_SIDEBAR_MIN_EFFECTIVE_WIDTH]:
@@ -279,36 +277,26 @@ const BuilderPage = () => {
                 {leftSidebar === LeftSideBarType.VERSIONS && (
                   <FlowVersionsList />
                 )}
-                {leftSidebar === LeftSideBarType.MENU && <FlowSideMenu />}
                 {leftSidebar === LeftSideBarType.TREE_VIEW && <TreeView />}
               </div>
             </LeftSidebarResizablePanel>
+
             <ResizableHandle
               className="w-0"
               disabled={leftSidebar === LeftSideBarType.NONE}
               onDragging={setIsDraggingHandle}
             />
-            <AiChatResizablePanel onDragging={setIsDraggingHandle} />
 
-            <ResizablePanel order={3} id={RESIZABLE_PANEL_IDS.MAIN}>
+            <ResizablePanel order={2} id={RESIZABLE_PANEL_IDS.MAIN}>
               {readonly ? (
                 <ReadonlyCanvasProvider>
                   <div ref={middlePanelRef} className="relative h-full w-full">
                     <BuilderHeader />
-                    <AiConfigurationPrompt className={'left-4 bottom-[70px]'} />
-                    {leftSidebar === LeftSideBarType.NONE && (
-                      <AiAssistantButton className="size-[42px] absolute left-4 bottom-[10px] z-50" />
-                    )}
                     <CanvasControls
                       topOffset={FLOW_CANVAS_Y_OFFESET}
-                      className={cn({
-                        'left-[74px]': leftSidebar === LeftSideBarType.NONE,
-                      })}
                     ></CanvasControls>
                     <div
-                      className={cn('h-screen w-full flex-1 z-10', {
-                        'bg-background': !isDraggingHandle,
-                      })}
+                      className="h-full w-full flex-1 z-10 bg-background"
                       id={FLOW_CANVAS_CONTAINER_ID}
                     >
                       <FlowBuilderCanvas />
@@ -329,38 +317,36 @@ const BuilderPage = () => {
               )}
             </ResizablePanel>
 
-            <>
-              <ResizableHandle
-                disabled={!isRightSidebarVisible}
-                withHandle={false}
-                onDragging={setIsDraggingHandle}
-                className="z-50 w-0"
-              />
+            <ResizableHandle
+              disabled={!isRightSidebarVisible}
+              withHandle={false}
+              onDragging={setIsDraggingHandle}
+              className="z-50 w-0"
+            />
 
-              <ResizablePanel
-                ref={rightHandleRef}
-                id={RESIZABLE_PANEL_IDS.RIGHT_SIDEBAR}
-                defaultSize={0}
-                minSize={0}
-                maxSize={60}
-                order={4}
-                className={cn('min-w-0 bg-background z-30 shadow-sidebar', {
-                  [minWidthOfSidebar]: isRightSidebarVisible,
-                })}
-              >
-                {isRightSidebarVisible && (
-                  <StepSettingsProvider
-                    blockModel={blockModel}
-                    selectedStep={memorizedSelectedStep as Action | Trigger}
-                    key={containerKey}
-                  >
-                    <DynamicFormValidationProvider>
-                      <StepSettingsContainer />
-                    </DynamicFormValidationProvider>
-                  </StepSettingsProvider>
-                )}
-              </ResizablePanel>
-            </>
+            <ResizablePanel
+              ref={rightHandleRef}
+              id={RESIZABLE_PANEL_IDS.RIGHT_SIDEBAR}
+              defaultSize={0}
+              minSize={0}
+              maxSize={60}
+              order={3}
+              className={cn('min-w-0 bg-background z-30 shadow-sidebar', {
+                [minWidthOfSidebar]: isRightSidebarVisible,
+              })}
+            >
+              {isRightSidebarVisible && (
+                <StepSettingsProvider
+                  blockModel={blockModel}
+                  selectedStep={memorizedSelectedStep as Action | Trigger}
+                  key={containerKey}
+                >
+                  <DynamicFormValidationProvider>
+                    <StepSettingsContainer />
+                  </DynamicFormValidationProvider>
+                </StepSettingsProvider>
+              )}
+            </ResizablePanel>
           </ResizablePanelGroup>
         </BuilderTreeViewProvider>
         <UndoRedo />
