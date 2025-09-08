@@ -1,4 +1,8 @@
-import { Action, StepLocationRelativeToParent } from '@openops/shared';
+import {
+  Action,
+  ActionType,
+  StepLocationRelativeToParent,
+} from '@openops/shared';
 import {
   Background,
   EdgeTypes,
@@ -60,6 +64,7 @@ const FlowCanvas = React.memo(
     );
     const { actionToPaste } = useCanvasContext();
     useResizeCanvas(containerRef);
+    const { toggleCollapsedStep } = useCanvasContext();
 
     const onInit = useCallback(
       (reactFlow: ReactFlowInstance<WorkflowNode, Edge>) => {
@@ -149,6 +154,23 @@ const FlowCanvas = React.memo(
       const { setNodes, nodes } = storeApi.getState();
       setNodes(nodes.map((node) => ({ ...node, selected: false })));
     }, [storeApi]);
+    const onNodeDoubleClick = useCallback(
+      (_ev: React.MouseEvent, node: WorkflowNode) => {
+        const t = node.data.step?.type as ActionType | undefined;
+        if (
+          t &&
+          [
+            ActionType.LOOP_ON_ITEMS,
+            ActionType.BRANCH,
+            ActionType.SPLIT,
+          ].includes(t)
+        ) {
+          // node.id === step.name per buildGraph
+          toggleCollapsedStep(node.id);
+        }
+      },
+      [toggleCollapsedStep],
+    );
 
     return (
       <div className="size-full bg-editorBackground" ref={containerRef}>
@@ -191,6 +213,7 @@ const FlowCanvas = React.memo(
               onSelectionChange={readonly ? undefined : onSelectionChange}
               onSelectionEnd={readonly ? undefined : onSelectionEnd}
               onPaneClick={onClickOutsideSelection}
+              onNodeDoubleClick={onNodeDoubleClick}
             >
               <Background color="lightgray" />
               {children}

@@ -67,8 +67,15 @@ export const OPS_NODE_SIZE: Record<
 
 export const flowCanvasUtils = {
   isPlaceHolder,
-  convertFlowVersionToGraph(version: FlowVersion): Graph {
-    return traverseFlow(version.trigger);
+  convertFlowVersionToGraph(
+    version: FlowVersion,
+    opts?: { collapsedSteps?: Set<string> },
+  ): Graph {
+    return traverseFlow(
+      version.trigger,
+      undefined,
+      opts?.collapsedSteps ?? new Set(),
+    );
   },
   traverseFlow,
 };
@@ -76,6 +83,7 @@ export const flowCanvasUtils = {
 function traverseFlow(
   step: Action | Trigger | undefined,
   branchNodeId?: string,
+  collapsedSteps: Set<string> = new Set(),
 ): Graph {
   if (isNil(step)) {
     return buildGraph(WorkflowNodeType.PLACEHOLDER, undefined, branchNodeId);
@@ -85,13 +93,44 @@ function traverseFlow(
     step,
     branchNodeId,
   );
+  const collapsible =
+    !isNil(step) &&
+    [ActionType.LOOP_ON_ITEMS, ActionType.BRANCH, ActionType.SPLIT].includes(
+      step.type as ActionType,
+    );
+  const collapsed = !!step?.name && collapsedSteps.has(step.name);
+  const buildCollapsedAfterGraph = (nextAction?: Action | Trigger) => {
+    const commonPartGraph = offsetGraph(
+      isNil(nextAction)
+        ? buildGraph(WorkflowNodeType.PLACEHOLDER)
+        : traverseFlow(nextAction, undefined, collapsedSteps),
+      { x: 0, y: VERTICAL_OFFSET },
+    );
+    const stepName = graph.nodes[0].data.step?.name;
+    assertNotNullOrUndefined(
+      stepName,
+      'stepName for first node in graph should be defined',
+    );
+    const edge = addEdge(
+      graph.nodes[0],
+      commonPartGraph.nodes[0],
+      StepLocationRelativeToParent.AFTER,
+      stepName,
+    );
+    edge.data.addButton = false;
+    graph.edges.push(edge);
+    return mergeGraph(graph, commonPartGraph);
+  };
   switch (step.type) {
     case ActionType.LOOP_ON_ITEMS: {
+      if (collapsible && collapsed) {
+        return buildCollapsedAfterGraph(step.nextAction);
+      }
       const { firstLoopAction, nextAction } = step;
       const isEmpty = isNil(firstLoopAction);
       const firstLoopGraph = isEmpty
         ? buildBigButton(step.name, StepLocationRelativeToParent.INSIDE_LOOP)
-        : traverseFlow(firstLoopAction);
+        : traverseFlow(firstLoopAction, undefined, collapsedSteps);
       const childrenGraphs = [
         buildGraph(WorkflowNodeType.LOOP_PLACEHOLDER),
         offsetGraph(firstLoopGraph, { x: 0, y: BIG_BUTTON_SIZE }),
@@ -107,9 +146,13 @@ function traverseFlow(
         graph,
         step.name,
         isEmpty ? 0 : VERTICAL_OFFSET_CORRECTION,
+        collapsedSteps,
       );
     }
     case ActionType.BRANCH: {
+      if (collapsible && collapsed) {
+        return buildCollapsedAfterGraph(step.nextAction);
+      }
       const { nextAction, onSuccessAction, onFailureAction } = step;
 
       const isEmpty = isNil(onSuccessAction) && isNil(onFailureAction);
@@ -129,7 +172,7 @@ function traverseFlow(
                   y: 20,
                 },
               )
-            : offsetGraph(traverseFlow(childGraph), {
+            : offsetGraph(traverseFlow(childGraph, undefined, collapsedSteps), {
                 x: 0,
                 y: 20,
               });
@@ -146,9 +189,13 @@ function traverseFlow(
         graph,
         step.name,
         isEmpty ? 0 : VERTICAL_OFFSET_CORRECTION,
+        collapsedSteps,
       );
     }
     case ActionType.SPLIT: {
+      if (collapsible && collapsed) {
+        return buildCollapsedAfterGraph(step.nextAction);
+      }
       const { nextAction, branches, settings } = step;
 
       const mergedBranchesWithSettings = settings.options.map((option) => {
@@ -168,7 +215,7 @@ function traverseFlow(
       const childrenGraphs = mergedBranchesWithSettings.map(
         ({ optionId, action }) => {
           if (action) {
-            return offsetGraph(traverseFlow(action, optionId), {
+            return offsetGraph(traverseFlow(action, optionId, collapsedSteps), {
               x: 0,
               y: 20,
             });
@@ -194,14 +241,18 @@ function traverseFlow(
         graph,
         step.name,
         isEmpty ? 0 : VERTICAL_OFFSET_CORRECTION,
+        collapsedSteps,
       );
     }
     default: {
       const { nextAction } = step;
-      const childGraph = offsetGraph(traverseFlow(nextAction), {
-        x: 0,
-        y: VERTICAL_OFFSET,
-      });
+      const childGraph = offsetGraph(
+        traverseFlow(nextAction, undefined, collapsedSteps),
+        {
+          x: 0,
+          y: VERTICAL_OFFSET,
+        },
+      );
       const stepName = graph.nodes[0].data.step?.name;
       assertNotNullOrUndefined(
         stepName,
@@ -227,6 +278,7 @@ function buildChildrenGraph(
   graph: Graph,
   parentStep: string,
   verticalOffsetCorrection = 0,
+  collapsedSteps: Set<string>,
 ): Graph {
   const totalWidth =
     (childrenGraphs.length - 1) * HORIZONTAL_SPACE_BETWEEN_NODES +
@@ -245,7 +297,7 @@ function buildChildrenGraph(
   const commonPartGraph = offsetGraph(
     isNil(nextAction)
       ? buildGraph(WorkflowNodeType.PLACEHOLDER)
-      : traverseFlow(nextAction),
+      : traverseFlow(nextAction, undefined, collapsedSteps),
     {
       x: 0,
       y: maximumHeight,
