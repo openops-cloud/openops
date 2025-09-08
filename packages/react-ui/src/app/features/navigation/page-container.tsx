@@ -57,8 +57,10 @@ export function PageContainer() {
 
   const { setPanelsSize } = useResizablePanelGroup();
 
-  const isUnauthenticatedRoute = UNAUTHENTHICATED_ROUTES.some((route) =>
-    location.pathname.startsWith(route),
+  const isUnauthenticatedRoute = UNAUTHENTHICATED_ROUTES.some(
+    (route) =>
+      location.pathname.startsWith(route) &&
+      !location.pathname.startsWith('/connections'),
   );
 
   useEffect(() => {

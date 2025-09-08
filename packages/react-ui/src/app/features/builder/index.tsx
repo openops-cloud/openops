@@ -50,7 +50,6 @@ import {
 } from '../../constants/sidebar';
 import { blocksHooks } from '../blocks/lib/blocks-hook';
 import { RunDetailsBar } from '../flow-runs/components/run-details-bar';
-import LeftSidebarResizablePanel from '../navigation/side-menu/left-sidebar';
 import { BuilderHeader } from './builder-header/builder-header';
 import { LeftSideBarType, RightSideBarType } from './builder-types';
 import { FlowBuilderCanvas } from './flow-canvas/flow-builder-canvas';
@@ -71,8 +70,10 @@ const MIDDLE_PANEL_TOP_OFFSET = 60;
 
 const useAnimateSidebar = (
   sidebarValue: LeftSideBarType | RightSideBarType,
+  panelId: string,
 ) => {
   const handleRef = useRef<ImperativePanelHandle>(null);
+  const { getPanelSize } = useResizablePanelGroup();
 
   const sidebarbarClosed = [
     LeftSideBarType.NONE,
@@ -80,19 +81,25 @@ const useAnimateSidebar = (
   ].includes(sidebarValue);
 
   useEffect(() => {
-    requestAnimationFrame(() => {
-      try {
-        const size = handleRef.current?.getSize?.() ?? 0;
-        if (sidebarbarClosed) {
-          handleRef.current?.resize?.(0);
-        } else if (size === 0) {
-          handleRef.current?.resize?.(25);
+    const timeoutId = setTimeout(() => {
+      requestAnimationFrame(() => {
+        try {
+          const currentSize = handleRef.current?.getSize?.() ?? 0;
+          if (sidebarbarClosed) {
+            handleRef.current?.resize?.(0);
+          } else if (currentSize === 0) {
+            const storedSize = getPanelSize(panelId);
+            const targetSize = storedSize || 25;
+            handleRef.current?.resize?.(targetSize);
+          }
+        } catch (err) {
+          console.warn('Sidebar update skipped', err);
         }
-      } catch (err) {
-        console.warn('Sidebar update skipped', err);
-      }
-    });
-  }, [sidebarValue, sidebarbarClosed]);
+      });
+    }, 10);
+
+    return () => clearTimeout(timeoutId);
+  }, [sidebarValue, sidebarbarClosed, panelId, getPanelSize]);
 
   return handleRef;
 };
@@ -172,8 +179,14 @@ const BuilderPage = () => {
   const [middlePanelRef, rawMiddlePanelSize] = useMeasure<HTMLDivElement>();
   const [leftSidePanelRef, leftSidePanelSize] = useMeasure<HTMLDivElement>();
   const [isDraggingHandle, setIsDraggingHandle] = useState(false);
-  const rightHandleRef = useAnimateSidebar(rightSidebar);
-  const leftHandleRef = useAnimateSidebar(leftSidebar);
+  const rightHandleRef = useAnimateSidebar(
+    rightSidebar,
+    RESIZABLE_PANEL_IDS.BUILDER_RIGHT_SIDEBAR,
+  );
+  const leftHandleRef = useAnimateSidebar(
+    leftSidebar,
+    RESIZABLE_PANEL_IDS.BUILDER_LEFT_SIDEBAR,
+  );
   const {
     blockModel,
     isLoading: isBlockLoading,
@@ -231,8 +244,8 @@ const BuilderPage = () => {
   const onResize = useCallback(
     (size: number[]) => {
       setPanelsSize({
-        [RESIZABLE_PANEL_IDS.LEFT_SIDEBAR]: size[0],
-        [RESIZABLE_PANEL_IDS.RIGHT_SIDEBAR]: size[2],
+        [RESIZABLE_PANEL_IDS.BUILDER_LEFT_SIDEBAR]: size[0],
+        [RESIZABLE_PANEL_IDS.BUILDER_RIGHT_SIDEBAR]: size[2],
       });
     },
     [setPanelsSize],
@@ -257,17 +270,21 @@ const BuilderPage = () => {
           <ResizablePanelGroup
             direction="horizontal"
             className="h-full"
+            id="builder-panel-group"
             onLayout={onResize}
           >
-            <LeftSidebarResizablePanel
+            <ResizablePanel
               ref={leftHandleRef}
+              id={RESIZABLE_PANEL_IDS.BUILDER_LEFT_SIDEBAR}
               minSize={LEFT_SIDEBAR_MIN_SIZE}
+              defaultSize={0}
+              order={1}
               className={cn('min-w-0 w-0 bg-background z-[25] shadow-sidebar', {
                 [LEFT_SIDEBAR_MIN_EFFECTIVE_WIDTH]:
                   leftSidebar !== LeftSideBarType.NONE,
                 'max-w-0': leftSidebar === LeftSideBarType.NONE,
+                'transition-none': isDraggingHandle,
               })}
-              isDragging={isDraggingHandle}
             >
               <div className="h-full w-full" ref={leftSidePanelRef}>
                 {leftSidebar === LeftSideBarType.RUNS && <FlowRecentRunsList />}
@@ -279,7 +296,7 @@ const BuilderPage = () => {
                 )}
                 {leftSidebar === LeftSideBarType.TREE_VIEW && <TreeView />}
               </div>
-            </LeftSidebarResizablePanel>
+            </ResizablePanel>
 
             <ResizableHandle
               className="w-0"
@@ -326,7 +343,7 @@ const BuilderPage = () => {
 
             <ResizablePanel
               ref={rightHandleRef}
-              id={RESIZABLE_PANEL_IDS.RIGHT_SIDEBAR}
+              id={RESIZABLE_PANEL_IDS.BUILDER_RIGHT_SIDEBAR}
               defaultSize={0}
               minSize={0}
               maxSize={60}

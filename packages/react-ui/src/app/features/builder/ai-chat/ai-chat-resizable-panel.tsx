@@ -52,13 +52,12 @@ const AiChatResizablePanel = ({ onDragging }: AiChatResizablePanelProps) => {
         ref={resizablePanelRef}
         order={2}
         id={RESIZABLE_PANEL_IDS.AI_CHAT}
-        className={cn(
-          'duration-0 min-w-0 shadow-sidebar border-r border-outline',
-          {
-            'min-w-[300px] max-w-[400px]': showChat,
-          },
-        )}
-        minSize={15}
+        className={cn('duration-0 min-w-0 shadow-sidebar', {
+          'min-w-[300px] max-w-[400px] border-r border-outline': showChat,
+        })}
+        // todo constant
+        minSize={isAiChatOpened ? undefined : 15}
+        maxSize={isAiChatOpened ? undefined : 0}
         collapsible={true}
         defaultSize={getDefaultPanelSize()}
       >
@@ -69,11 +68,9 @@ const AiChatResizablePanel = ({ onDragging }: AiChatResizablePanelProps) => {
           />
         </div>
       </ResizablePanel>
-      <ResizableHandle
-        className={cn('w-0')}
-        onDragging={onDragging}
-        disabled={!showChat}
-      />
+      {showChat && (
+        <ResizableHandle className={cn('w-0')} onDragging={onDragging} />
+      )}
     </>
   );
 };
