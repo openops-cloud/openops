@@ -2,6 +2,7 @@ import { AppSystemProp, distributedLock, system } from '@openops/server-shared';
 import {
   AppConnectionsWithSupportedBlocks,
   ApplicationError,
+  ContentType,
   CreateEmptyFlowRequest,
   Cursor,
   ErrorCode,
@@ -40,9 +41,13 @@ import {
   flowVersionRepo,
   flowVersionService,
 } from '../flow-version/flow-version.service';
+import { flowFolderService } from '../folder/folder.service';
 import { flowStepTestOutputService } from '../step-test-output/flow-step-test-output.service';
 import { flowSideEffects } from './flow-service-side-effects';
-import { assertThatFlowIsNotInternal } from './flow-validations';
+import {
+  assertThatFlowIsInCorrectFolderContentType,
+  assertThatFlowIsNotInternal,
+} from './flow-validations';
 import { FlowEntity } from './flow.entity';
 import { flowRepo } from './flow.repo';
 
@@ -348,6 +353,8 @@ export const flowService = {
   }: UpdatePublishedVersionIdParams): Promise<PopulatedFlow> {
     const flowToUpdate = await this.getOneOrThrow({ id, projectId });
 
+    await assertThatFlowIsNotInternal(flowToUpdate);
+
     const flowVersionToPublish = await flowVersionService.getFlowVersionOrThrow(
       {
         flowId: id,
@@ -488,6 +495,17 @@ async function create({
     isNil(request.folderId) || request.folderId === UNCATEGORIZED_FOLDER_ID
       ? null
       : request.folderId;
+
+  if (folderId) {
+    const folder = await flowFolderService.getOneOrThrow({
+      projectId,
+      folderId,
+    });
+    await assertThatFlowIsInCorrectFolderContentType(
+      ContentType.WORKFLOW,
+      folder.contentType,
+    );
+  }
 
   const newFlow: NewFlow = {
     id: openOpsId(),

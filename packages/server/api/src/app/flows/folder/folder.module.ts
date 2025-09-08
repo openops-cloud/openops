@@ -65,7 +65,7 @@ const folderController: FastifyPluginAsyncTypebox = async (fastify) => {
 
 const CreateFolderParams = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+    allowedPrincipals: [PrincipalType.USER],
     permission: Permission.WRITE_FLOW,
   },
   schema: {
@@ -79,7 +79,7 @@ const CreateFolderParams = {
 
 const UpdateFolderParams = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+    allowedPrincipals: [PrincipalType.USER],
     permission: Permission.WRITE_FLOW,
   },
   schema: {
@@ -96,7 +96,7 @@ const UpdateFolderParams = {
 
 const GetFolderParams = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+    allowedPrincipals: [PrincipalType.USER],
     permission: Permission.READ_FLOW,
   },
   schema: {
@@ -112,7 +112,7 @@ const GetFolderParams = {
 
 const ListFoldersFlowsParams = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+    allowedPrincipals: [PrincipalType.USER],
     permission: Permission.READ_FLOW,
   },
   schema: {
@@ -126,7 +126,7 @@ const ListFoldersFlowsParams = {
 
 const DeleteFolderParams = {
   config: {
-    allowedPrincipals: [PrincipalType.USER, PrincipalType.SERVICE],
+    allowedPrincipals: [PrincipalType.USER],
     permission: Permission.WRITE_FLOW,
   },
   schema: {

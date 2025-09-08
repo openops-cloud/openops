@@ -1,8 +1,10 @@
 import { Static, Type } from '@sinclair/typebox';
+import { ContentType } from './content-type';
 
 export const CreateFolderRequest = Type.Object({
   displayName: Type.String(),
   parentFolderId: Type.Optional(Type.String()),
+  contentType: Type.Enum(ContentType),
 });
 
 export type CreateFolderRequest = Static<typeof CreateFolderRequest>;

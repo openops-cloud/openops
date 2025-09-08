@@ -1,4 +1,4 @@
-import { Flow, Folder, Project } from '@openops/shared';
+import { ContentType, Flow, Folder, Project } from '@openops/shared';
 import { EntitySchema } from 'typeorm';
 import {
   BaseColumnSchemaPart,
@@ -20,6 +20,11 @@ export const FolderEntity = new EntitySchema<FolderSchema>({
       type: String,
     },
     projectId: OpenOpsIdSchema,
+    contentType: {
+      type: 'enum',
+      enum: ContentType,
+      default: ContentType.WORKFLOW,
+    },
   },
   indices: [
     {

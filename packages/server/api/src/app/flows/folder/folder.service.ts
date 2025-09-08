@@ -1,5 +1,6 @@
 import {
   ApplicationError,
+  ContentType,
   CreateFolderRequest,
   Cursor,
   ErrorCode,
@@ -86,6 +87,7 @@ export const flowFolderService = {
         projectId,
         parentFolder,
         displayName: request.displayName,
+        contentType: request.contentType || ContentType.WORKFLOW,
       },
       ['projectId', 'displayName'],
     );
@@ -128,7 +130,7 @@ export const flowFolderService = {
     return folder;
   },
   async listFolderFlows(params: ListFolderFlowsParams): Promise<FolderDto[]> {
-    const { projectId, includeUncategorizedFolder } = params;
+    const { projectId, includeUncategorizedFolder, contentType } = params;
     const query = folderRepo()
       .createQueryBuilder('folder')
       .loadRelationCountAndMap('folder.numberOfFlows', 'folder.flows')
@@ -160,6 +162,7 @@ export const flowFolderService = {
         )`,
       )
       .where('folder.projectId = :projectId', { projectId })
+      .andWhere('folder.contentType = :contentType', { contentType })
       .orderBy('folder."displayName"', 'ASC');
 
     const folders = (await query.getMany()) as FolderWithFlows[];
@@ -194,6 +197,7 @@ export const flowFolderService = {
       )
       .addSelect(['version.displayName'])
       .where('flow.folderId IS NULL')
+      .andWhere('flow.isInternal = :isInternal', { isInternal: false })
       .andWhere('flow.projectId = :projectId', { projectId })
       .orderBy('flow.updated', 'DESC');
 
@@ -212,6 +216,7 @@ export const flowFolderService = {
       })),
       subfolders: [],
       parentFolderId: undefined,
+      contentType: ContentType.WORKFLOW,
     };
 
     return uncategorizedFolderDto;
@@ -275,6 +280,7 @@ type ListParams = {
 type ListFolderFlowsParams = {
   projectId: ProjectId;
   includeUncategorizedFolder: boolean;
+  contentType?: ContentType;
 };
 
 type GetOneByDisplayNameParams = {
