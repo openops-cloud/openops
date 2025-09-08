@@ -353,8 +353,6 @@ export const flowService = {
   }: UpdatePublishedVersionIdParams): Promise<PopulatedFlow> {
     const flowToUpdate = await this.getOneOrThrow({ id, projectId });
 
-    await assertThatFlowIsNotInternal(flowToUpdate);
-
     const flowVersionToPublish = await flowVersionService.getFlowVersionOrThrow(
       {
         flowId: id,
@@ -565,6 +563,7 @@ async function update({
   projectId,
   operation,
   lock = true,
+  contentType = ContentType.WORKFLOW,
 }: UpdateParams): Promise<PopulatedFlow> {
   const flowLock = lock
     ? await distributedLock.acquireLock({
@@ -587,6 +586,14 @@ async function update({
         newStatus: operation.request.status,
       });
     } else if (operation.type === FlowOperationType.CHANGE_FOLDER) {
+      const folder = await flowFolderService.getOneOrThrow({
+        projectId,
+        folderId: operation.request.folderId ?? '',
+      });
+      await assertThatFlowIsInCorrectFolderContentType(
+        contentType,
+        folder.contentType,
+      );
       await flowRepo().update(id, {
         folderId: operation.request.folderId,
       });
@@ -768,6 +775,7 @@ type UpdateParams = {
   projectId: ProjectId;
   operation: FlowOperationRequest;
   lock?: boolean;
+  contentType?: ContentType;
 };
 
 type UpdateStatusParams = {
