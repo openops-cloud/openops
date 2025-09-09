@@ -237,6 +237,10 @@ const WorkflowStepNode = React.memo(
                         <Button
                           variant="ghost"
                           size="xs"
+                          aria-label={
+                            isCollapsed ? 'Expand node' : 'Collapse node'
+                          }
+                          aria-expanded={!isCollapsed}
                           onMouseDown={preventDragAndSelect}
                           onClick={(e) => {
                             preventDragAndSelect(e);
