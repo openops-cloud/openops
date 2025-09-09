@@ -80,6 +80,36 @@ export const flowCanvasUtils = {
   traverseFlow,
 };
 
+function buildCollapsedAfterGraph(
+  currentGraph: Graph,
+  nextAction: Action | Trigger | undefined,
+  collapsedSteps: Set<string>,
+): Graph {
+  const commonPartGraph = offsetGraph(
+    isNil(nextAction)
+      ? buildGraph(WorkflowNodeType.PLACEHOLDER)
+      : traverseFlow(nextAction, undefined, collapsedSteps),
+    { x: 0, y: VERTICAL_OFFSET },
+  );
+
+  const stepName = currentGraph.nodes[0].data.step?.name;
+  assertNotNullOrUndefined(
+    stepName,
+    'stepName for first node in graph should be defined',
+  );
+
+  const edge = addEdge(
+    currentGraph.nodes[0],
+    commonPartGraph.nodes[0],
+    StepLocationRelativeToParent.AFTER,
+    stepName,
+  );
+  edge.data.addButton = false;
+  currentGraph.edges.push(edge);
+
+  return mergeGraph(currentGraph, commonPartGraph);
+}
+
 function traverseFlow(
   step: Action | Trigger | undefined,
   branchNodeId?: string,
@@ -93,39 +123,23 @@ function traverseFlow(
     step,
     branchNodeId,
   );
-  const collapsible =
-    !isNil(step) &&
-    [ActionType.LOOP_ON_ITEMS, ActionType.BRANCH, ActionType.SPLIT].includes(
-      step.type as ActionType,
-    );
+  const collapsible = [
+    ActionType.LOOP_ON_ITEMS,
+    ActionType.BRANCH,
+    ActionType.SPLIT,
+  ].includes(step.type as ActionType);
   const collapsed = !!step?.name && collapsedSteps.has(step.name);
-  const buildCollapsedAfterGraph = (nextAction?: Action | Trigger) => {
-    const commonPartGraph = offsetGraph(
-      isNil(nextAction)
-        ? buildGraph(WorkflowNodeType.PLACEHOLDER)
-        : traverseFlow(nextAction, undefined, collapsedSteps),
-      { x: 0, y: VERTICAL_OFFSET },
+
+  if (collapsible && collapsed) {
+    return buildCollapsedAfterGraph(
+      graph,
+      (step as Action).nextAction,
+      collapsedSteps,
     );
-    const stepName = graph.nodes[0].data.step?.name;
-    assertNotNullOrUndefined(
-      stepName,
-      'stepName for first node in graph should be defined',
-    );
-    const edge = addEdge(
-      graph.nodes[0],
-      commonPartGraph.nodes[0],
-      StepLocationRelativeToParent.AFTER,
-      stepName,
-    );
-    edge.data.addButton = false;
-    graph.edges.push(edge);
-    return mergeGraph(graph, commonPartGraph);
-  };
+  }
+
   switch (step.type) {
     case ActionType.LOOP_ON_ITEMS: {
-      if (collapsible && collapsed) {
-        return buildCollapsedAfterGraph(step.nextAction);
-      }
       const { firstLoopAction, nextAction } = step;
       const isEmpty = isNil(firstLoopAction);
       const firstLoopGraph = isEmpty
@@ -150,9 +164,6 @@ function traverseFlow(
       );
     }
     case ActionType.BRANCH: {
-      if (collapsible && collapsed) {
-        return buildCollapsedAfterGraph(step.nextAction);
-      }
       const { nextAction, onSuccessAction, onFailureAction } = step;
 
       const isEmpty = isNil(onSuccessAction) && isNil(onFailureAction);
@@ -193,9 +204,6 @@ function traverseFlow(
       );
     }
     case ActionType.SPLIT: {
-      if (collapsible && collapsed) {
-        return buildCollapsedAfterGraph(step.nextAction);
-      }
       const { nextAction, branches, settings } = step;
 
       const mergedBranchesWithSettings = settings.options.map((option) => {
