@@ -17,6 +17,7 @@ import {
 } from '@openops/shared';
 import { repoFactory } from '../../core/db/repo-factory';
 import { flowService } from '../flow/flow.service';
+import { getFolderFlows } from './folder-flows';
 import { buildFolderTree, FolderWithFlows } from './folder-tree.utils';
 import { FolderEntity, FolderSchema } from './folder.entity';
 import { getUncategorizedFlows } from './uncategorized-flows';
@@ -52,6 +53,15 @@ export const flowFolderService = {
       projectId,
       request.parentFolderId,
     );
+
+    if (parentFolder && parentFolder.contentType !== folder.contentType) {
+      throw new ApplicationError({
+        code: ErrorCode.VALIDATION,
+        params: {
+          message: 'Parent folder has different content type than the request',
+        },
+      });
+    }
 
     await folderRepo().update(folder.id, {
       displayName: request.displayName,
@@ -139,42 +149,34 @@ export const flowFolderService = {
       .createQueryBuilder('folder')
       .loadRelationCountAndMap('folder.numberOfFlows', 'folder.flows')
       .leftJoinAndSelect('folder.parentFolder', 'parentFolder')
-      .leftJoinAndSelect(
-        'folder.flows',
-        'flows',
-        `flows.id IN (
-          SELECT f.id
-          FROM flow f
-          WHERE f."folderId" = folder.id
-          ORDER BY f.updated DESC
-          LIMIT 100
-        )`,
-      )
-      .leftJoinAndMapOne(
-        'flows.version',
-        'flow_version',
-        'flowVersion',
-        `flowVersion.id IN (
-          SELECT fv.id
-          FROM (
-            SELECT "id", "flowId", "created", "displayName"
-            FROM flow_version
-            WHERE "flowId" = flows.id
-            ORDER BY created DESC
-            LIMIT 1
-          ) fv
-        )`,
-      )
       .where('folder.projectId = :projectId', { projectId })
       .andWhere('folder.contentType = :contentType', { contentType })
       .orderBy('folder."displayName"', 'ASC');
 
-    const folders = (await query.getMany()) as FolderWithFlows[];
+    const foldersRaw = await query.getMany();
+
+    const folders = (await Promise.all(
+      foldersRaw.map(async (folder): Promise<FolderWithFlows> => {
+        const flows = await getFolderFlows(
+          projectId,
+          contentType,
+          folder.id,
+          100,
+        );
+        return {
+          ...(folder as FolderWithFlows),
+          flows: flows as unknown as FolderWithFlows['flows'],
+        };
+      }),
+    )) as FolderWithFlows[];
 
     return buildFolderTree(
       folders,
       includeUncategorizedFolder
-        ? await flowFolderService.getUncategorizedFolder({ projectId })
+        ? await flowFolderService.getUncategorizedFolder({
+            projectId,
+            contentType,
+          })
         : undefined,
     );
   },

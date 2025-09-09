@@ -485,7 +485,49 @@ export const flowService = {
     });
   },
 
-  async getUncategorizedWorkflows(projectId: string) {
+  async getWorkflowsByFolder({
+    projectId,
+    folderId,
+    limit,
+  }: {
+    projectId: string;
+    folderId: string | null;
+    limit: number;
+  }) {
+    const qb = flowRepo()
+      .createQueryBuilder('flow')
+      .select(['flow.id', 'flow.projectId'])
+      .leftJoinAndMapOne(
+        'flow.version',
+        'flow_version',
+        'version',
+        `version.flowId = flow.id
+           AND version.id IN (
+              SELECT fv.id
+              FROM flow_version fv
+              WHERE fv."flowId" = flow.id
+              ORDER BY fv.created DESC
+              LIMIT 1
+          )`,
+      )
+      .addSelect(['version.displayName'])
+      .where('flow.projectId = :projectId', { projectId })
+      .andWhere(
+        folderId === null
+          ? 'flow.folderId IS NULL'
+          : 'flow.folderId = :folderId',
+        {
+          folderId: folderId ?? undefined,
+        },
+      )
+      .andWhere('flow.isInternal = :isInternal', { isInternal: false })
+      .orderBy('flow.updated', 'DESC')
+      .limit(limit);
+
+    return qb.getMany();
+  },
+
+  async getUncategoriedFolderWorklows(projectId: string) {
     const uncategorizedFlowsQuery = flowRepo()
       .createQueryBuilder('flow')
       .select(['flow.id', 'flow.projectId'])

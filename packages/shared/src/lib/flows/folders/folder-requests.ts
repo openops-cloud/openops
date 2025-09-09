@@ -24,6 +24,7 @@ export type DeleteFlowRequest = Static<typeof DeleteFolderRequest>;
 
 export const ListFolderFlowsRequest = Type.Object({
   excludeUncategorizedFolder: Type.Optional(Type.Boolean()),
+  contentType: Type.Optional(Type.Enum(ContentType)),
 });
 
 export type ListFolderFlowsRequest = Static<typeof ListFolderFlowsRequest>;
