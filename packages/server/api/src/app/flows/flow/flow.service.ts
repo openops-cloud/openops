@@ -73,6 +73,7 @@ export const flowService = {
     connectionIds,
     folderId,
     isInternal = false,
+    contentType = ContentType.WORKFLOW,
   }: CreateFromTriggerParams): Promise<PopulatedFlow> {
     const newFlow = await create({
       userId,
@@ -82,6 +83,7 @@ export const flowService = {
         folderId,
       },
       isInternal,
+      contentType,
     });
 
     const connectionsList = await getConnections(
@@ -514,6 +516,7 @@ async function create({
   projectId,
   request,
   isInternal = false,
+  contentType = ContentType.WORKFLOW,
 }: CreateParams): Promise<PopulatedFlow> {
   const folderId =
     isNil(request.folderId) || request.folderId === UNCATEGORIZED_FOLDER_ID
@@ -526,7 +529,7 @@ async function create({
       folderId,
     });
     await assertThatFlowIsInCorrectFolderContentType(
-      ContentType.WORKFLOW,
+      contentType,
       folder.contentType,
     );
   }
@@ -729,6 +732,7 @@ type CreateParams = {
   projectId: ProjectId;
   request: CreateEmptyFlowRequest;
   isInternal?: boolean;
+  contentType?: ContentType;
 };
 
 type CreateFromTriggerParams = {
@@ -740,6 +744,7 @@ type CreateFromTriggerParams = {
   connectionIds: string[];
   folderId?: string;
   isInternal?: boolean;
+  contentType?: ContentType;
 };
 
 type ListParams = {
