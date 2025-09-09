@@ -4,7 +4,6 @@ import {
   ContentType,
   ErrorCode,
   Flow,
-  Folder,
   isNil,
   PopulatedFlow,
 } from '@openops/shared';
