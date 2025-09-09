@@ -586,14 +586,21 @@ async function update({
         newStatus: operation.request.status,
       });
     } else if (operation.type === FlowOperationType.CHANGE_FOLDER) {
-      const folder = await flowFolderService.getOneOrThrow({
-        projectId,
-        folderId: operation.request.folderId ?? '',
-      });
-      await assertThatFlowIsInCorrectFolderContentType(
-        contentType,
-        folder.contentType,
-      );
+      const folderId =
+        isNil(operation.request.folderId) ||
+        operation.request.folderId === UNCATEGORIZED_FOLDER_ID
+          ? null
+          : operation.request.folderId;
+      if (folderId) {
+        const folder = await flowFolderService.getOneOrThrow({
+          projectId,
+          folderId,
+        });
+        await assertThatFlowIsInCorrectFolderContentType(
+          contentType,
+          folder.contentType,
+        );
+      }
       await flowRepo().update(id, {
         folderId: operation.request.folderId,
       });
