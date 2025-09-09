@@ -50,7 +50,7 @@ async function handleCodeGenerationError(
   const errorMessage = extractMessage(error);
 
   logger.warn(
-    `An unrecoverable error occurred in the conversation. Message: ${errorMessage}`,
+    `An unrecoverable exception occurred in the conversation. Message: ${errorMessage}`,
     error,
   );
 
