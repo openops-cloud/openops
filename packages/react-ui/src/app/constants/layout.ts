@@ -6,4 +6,5 @@ export const RESIZABLE_PANEL_IDS = {
   LEFT_SIDEBAR: 'left-sidebar-container',
   BUILDER_LEFT_SIDEBAR: 'builder-left-sidebar-container',
   BUILDER_RIGHT_SIDEBAR: 'builder-right-sidebar-container',
+  BUILDER_MAIN: 'builder-main-container',
 };

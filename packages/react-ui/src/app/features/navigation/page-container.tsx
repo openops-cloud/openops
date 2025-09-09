@@ -127,6 +127,9 @@ export function PageContainer() {
               {
                 'min-w-[70px] max-w-[70px]': isMinimized,
               },
+              {
+                'max-w-[300px]': !isMinimized,
+              },
             )}
           >
             <DashboardSideMenu />
@@ -147,6 +150,9 @@ export function PageContainer() {
             id={RESIZABLE_PANEL_IDS.MAIN}
             order={3}
             className="flex-1 h-full overflow-hidden"
+            // todo constants
+            defaultSize={70}
+            minSize={50}
             style={{
               minWidth: '900px',
             }}

@@ -43,11 +43,8 @@ import {
   TriggerType,
   WebsocketClientEvent,
 } from '@openops/shared';
-
-import {
-  LEFT_SIDEBAR_MIN_EFFECTIVE_WIDTH,
-  LEFT_SIDEBAR_MIN_SIZE,
-} from '../../constants/sidebar';
+// LEFT_SIDEBAR_MIN_SIZE,
+import { LEFT_SIDEBAR_MIN_EFFECTIVE_WIDTH } from '../../constants/sidebar';
 import { blocksHooks } from '../blocks/lib/blocks-hook';
 import { RunDetailsBar } from '../flow-runs/components/run-details-bar';
 import { BuilderHeader } from './builder-header/builder-header';
@@ -84,13 +81,14 @@ const useAnimateSidebar = (
     const timeoutId = setTimeout(() => {
       requestAnimationFrame(() => {
         try {
-          const currentSize = handleRef.current?.getSize?.() ?? 0;
+          if (!handleRef.current) return;
+
           if (sidebarbarClosed) {
-            handleRef.current?.resize?.(0);
-          } else if (currentSize === 0) {
+            handleRef.current.collapse();
+          } else {
             const storedSize = getPanelSize(panelId);
             const targetSize = storedSize || 25;
-            handleRef.current?.resize?.(targetSize);
+            handleRef.current.expand(targetSize);
           }
         } catch (err) {
           console.warn('Sidebar update skipped', err);
@@ -179,14 +177,7 @@ const BuilderPage = () => {
   const [middlePanelRef, rawMiddlePanelSize] = useMeasure<HTMLDivElement>();
   const [leftSidePanelRef, leftSidePanelSize] = useMeasure<HTMLDivElement>();
   const [isDraggingHandle, setIsDraggingHandle] = useState(false);
-  const rightHandleRef = useAnimateSidebar(
-    rightSidebar,
-    RESIZABLE_PANEL_IDS.BUILDER_RIGHT_SIDEBAR,
-  );
-  const leftHandleRef = useAnimateSidebar(
-    leftSidebar,
-    RESIZABLE_PANEL_IDS.BUILDER_LEFT_SIDEBAR,
-  );
+
   const {
     blockModel,
     isLoading: isBlockLoading,
@@ -198,6 +189,18 @@ const BuilderPage = () => {
       memorizedSelectedStep?.type === ActionType.BLOCK ||
       memorizedSelectedStep?.type === TriggerType.BLOCK,
   });
+
+  const isRightSidebarVisible =
+    rightSidebar === RightSideBarType.BLOCK_SETTINGS &&
+    !!memorizedSelectedStep &&
+    memorizedSelectedStep.type !== TriggerType.EMPTY &&
+    !isBlockLoading;
+
+  const rightHandleRef = useRef<ImperativePanelHandle>(null);
+  const leftHandleRef = useAnimateSidebar(
+    leftSidebar,
+    RESIZABLE_PANEL_IDS.BUILDER_LEFT_SIDEBAR,
+  );
 
   const socket = useSocket();
 
@@ -226,13 +229,24 @@ const BuilderPage = () => {
 
   const { switchToDraft, isSwitchingToDraftPending } = useSwitchToDraft();
 
-  const { setPanelsSize } = useResizablePanelGroup();
+  const { setPanelsSize, getPanelSize } = useResizablePanelGroup();
 
-  const isRightSidebarVisible =
-    rightSidebar === RightSideBarType.BLOCK_SETTINGS &&
-    !!memorizedSelectedStep &&
-    memorizedSelectedStep.type !== TriggerType.EMPTY &&
-    !isBlockLoading;
+  // Handle right sidebar visibility with direct panel control
+  useEffect(() => {
+    if (!rightHandleRef.current) {
+      return;
+    }
+
+    if (isRightSidebarVisible) {
+      const storedSize = getPanelSize(
+        RESIZABLE_PANEL_IDS.BUILDER_RIGHT_SIDEBAR,
+      );
+      const targetSize = storedSize || 25;
+      rightHandleRef.current.expand(targetSize);
+    } else {
+      rightHandleRef.current.collapse();
+    }
+  }, [isRightSidebarVisible, getPanelSize]);
 
   const middlePanelSize = useMemo(() => {
     return {
@@ -245,6 +259,7 @@ const BuilderPage = () => {
     (size: number[]) => {
       setPanelsSize({
         [RESIZABLE_PANEL_IDS.BUILDER_LEFT_SIDEBAR]: size[0],
+        [RESIZABLE_PANEL_IDS.BUILDER_MAIN]: size[1],
         [RESIZABLE_PANEL_IDS.BUILDER_RIGHT_SIDEBAR]: size[2],
       });
     },
@@ -276,9 +291,11 @@ const BuilderPage = () => {
             <ResizablePanel
               ref={leftHandleRef}
               id={RESIZABLE_PANEL_IDS.BUILDER_LEFT_SIDEBAR}
-              minSize={LEFT_SIDEBAR_MIN_SIZE}
+              minSize={0}
               defaultSize={0}
               order={1}
+              collapsible={true}
+              collapsedSize={0}
               className={cn('min-w-0 w-0 bg-background z-[25] shadow-sidebar', {
                 [LEFT_SIDEBAR_MIN_EFFECTIVE_WIDTH]:
                   leftSidebar !== LeftSideBarType.NONE,
@@ -304,7 +321,7 @@ const BuilderPage = () => {
               onDragging={setIsDraggingHandle}
             />
 
-            <ResizablePanel order={2} id={RESIZABLE_PANEL_IDS.MAIN}>
+            <ResizablePanel order={2} id={RESIZABLE_PANEL_IDS.BUILDER_MAIN}>
               {readonly ? (
                 <ReadonlyCanvasProvider>
                   <div ref={middlePanelRef} className="relative h-full w-full">
@@ -334,12 +351,13 @@ const BuilderPage = () => {
               )}
             </ResizablePanel>
 
-            <ResizableHandle
-              disabled={!isRightSidebarVisible}
-              withHandle={false}
-              onDragging={setIsDraggingHandle}
-              className="z-50 w-0"
-            />
+            {isRightSidebarVisible && (
+              <ResizableHandle
+                withHandle={false}
+                onDragging={setIsDraggingHandle}
+                className="z-50 w-0"
+              />
+            )}
 
             <ResizablePanel
               ref={rightHandleRef}
@@ -348,9 +366,16 @@ const BuilderPage = () => {
               minSize={0}
               maxSize={60}
               order={3}
+              collapsible={true}
+              collapsedSize={0}
               className={cn('min-w-0 bg-background z-30 shadow-sidebar', {
                 [minWidthOfSidebar]: isRightSidebarVisible,
+                hidden: !isRightSidebarVisible,
+                'max-w-[600px]': isRightSidebarVisible,
               })}
+              style={{
+                display: isRightSidebarVisible ? 'flex' : 'none',
+              }}
             >
               {isRightSidebarVisible && (
                 <StepSettingsProvider
