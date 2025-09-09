@@ -82,7 +82,7 @@ export const flowCanvasUtils = {
 
 function buildCollapsedAfterGraph(
   currentGraph: Graph,
-  nextAction: Action | Trigger | undefined,
+  nextAction: OptionalStep,
   collapsedSteps: Set<string>,
 ): Graph {
   const commonPartGraph = offsetGraph(
@@ -111,7 +111,7 @@ function buildCollapsedAfterGraph(
 }
 
 function traverseFlow(
-  step: Action | Trigger | undefined,
+  step: OptionalStep,
   branchNodeId?: string,
   collapsedSteps: Set<string> = new Set(),
 ): Graph {
@@ -282,7 +282,7 @@ function traverseFlow(
 function buildChildrenGraph(
   childrenGraphs: Graph[],
   locations: StepLocationRelativeToParent[],
-  nextAction: Action | Trigger | undefined,
+  nextAction: OptionalStep,
   graph: Graph,
   parentStep: string,
   collapsedSteps: Set<string>,
@@ -693,6 +693,7 @@ export const getLengthMultiplier = ({
 };
 
 type Step = Action | Trigger;
+type OptionalStep = Step | undefined;
 
 type BoundingBox = {
   width: number;
