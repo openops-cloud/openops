@@ -104,7 +104,7 @@ function buildCollapsedAfterGraph(
     StepLocationRelativeToParent.AFTER,
     stepName,
   );
-  edge.data.addButton = false;
+  edge.data.addButton = true;
   currentGraph.edges.push(edge);
 
   return mergeGraph(currentGraph, commonPartGraph);
