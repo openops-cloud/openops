@@ -203,7 +203,7 @@ export const flowFolderService = {
       })),
       subfolders: [],
       parentFolderId: undefined,
-      contentType: ContentType.WORKFLOW,
+      contentType,
     };
 
     return uncategorizedFolderDto;
