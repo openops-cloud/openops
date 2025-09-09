@@ -1,4 +1,4 @@
-import { ContentType } from '@openops/shared';
+import { ApplicationError, ContentType, ErrorCode } from '@openops/shared';
 import { flowService } from '../flow/flow.service';
 
 export const getFolderFlows = async (
@@ -11,5 +11,8 @@ export const getFolderFlows = async (
     return flowService.getWorkflowsByFolder({ projectId, folderId, limit });
   }
 
-  return [];
+  throw new ApplicationError({
+    code: ErrorCode.VALIDATION,
+    params: { message: 'Invalid content type' },
+  });
 };

@@ -29,8 +29,8 @@ export const FolderEntity = new EntitySchema<FolderSchema>({
   },
   indices: [
     {
-      name: 'idx_folder_project_id_display_name',
-      columns: ['projectId', 'displayName'],
+      name: 'idx_folder_project_id_content_type_display_name',
+      columns: ['projectId', 'contentType', 'displayName'],
       unique: true,
     },
   ],

@@ -493,7 +493,7 @@ export const flowService = {
     projectId: string;
     folderId: string | null;
     limit: number;
-  }) {
+  }): Promise<Flow[]> {
     const qb = flowRepo()
       .createQueryBuilder('flow')
       .select(['flow.id', 'flow.projectId'])
@@ -527,7 +527,7 @@ export const flowService = {
     return qb.getMany();
   },
 
-  async getUncategoriedFolderWorklows(projectId: string) {
+  async getUncategorizedFolderWorkflows(projectId: string): Promise<Flow[]> {
     const uncategorizedFlowsQuery = flowRepo()
       .createQueryBuilder('flow')
       .select(['flow.id', 'flow.projectId'])
@@ -631,15 +631,10 @@ async function update({
         newStatus: operation.request.status,
       });
     } else if (operation.type === FlowOperationType.CHANGE_FOLDER) {
-      const folderId =
-        isNil(operation.request.folderId) ||
-        operation.request.folderId === UNCATEGORIZED_FOLDER_ID
-          ? null
-          : operation.request.folderId;
-      if (folderId) {
+      if (operation.request.folderId) {
         const folder = await flowFolderService.getOneOrThrow({
           projectId,
-          folderId,
+          folderId: operation.request.folderId,
         });
         await assertThatFlowIsInCorrectFolderContentType(
           contentType,

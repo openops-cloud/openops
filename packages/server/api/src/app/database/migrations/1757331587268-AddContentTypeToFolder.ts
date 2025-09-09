@@ -21,10 +21,19 @@ export class AddContentTypeToFolder1757331587268 implements MigrationInterface {
       ALTER COLUMN "contentType" SET NOT NULL;
     `);
 
+    await queryRunner.query(`
+      DROP INDEX IF EXISTS idx_folder_project_id_display_name;
+    `);
+
+    await queryRunner.query(`
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_folder_project_id_content_type_display_name
+      ON folder ("projectId", "contentType", "displayName");
+    `);
+
     logger.info('AddContentTypeToFolder1757331587268: completed');
   }
 
-  public async down(queryRunner: QueryRunner): Promise<void> {
+  public async down(_queryRunner: QueryRunner): Promise<void> {
     throw new Error('Rollback not implemented');
   }
 }

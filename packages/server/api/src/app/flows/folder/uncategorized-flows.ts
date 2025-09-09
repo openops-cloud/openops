@@ -6,7 +6,7 @@ export const getUncategorizedFlows = async (
   contentType: ContentType,
 ) => {
   if (contentType === ContentType.WORKFLOW) {
-    return flowService.getUncategoriedFolderWorklows(projectId);
+    return flowService.getUncategorizedFolderWorkflows(projectId);
   }
   throw new ApplicationError({
     code: ErrorCode.VALIDATION,

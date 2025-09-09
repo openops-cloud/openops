@@ -40,6 +40,7 @@ export const flowFolderService = {
       {
         projectId,
         displayName: request.displayName,
+        contentType: folder.contentType,
       },
     );
     if (folderWithDisplayName && folderWithDisplayName.id !== folderId) {
@@ -72,10 +73,12 @@ export const flowFolderService = {
   },
   async create(params: UpsertParams): Promise<FolderDto> {
     const { projectId, request } = params;
+    const requestContentType = request.contentType ?? ContentType.WORKFLOW;
     const folderWithDisplayName = await this.getOneByDisplayNameCaseInsensitive(
       {
         projectId,
         displayName: request.displayName,
+        contentType: requestContentType,
       },
     );
     if (!isNil(folderWithDisplayName)) {
@@ -97,9 +100,9 @@ export const flowFolderService = {
         projectId,
         parentFolder,
         displayName: request.displayName,
-        contentType: request.contentType ?? ContentType.WORKFLOW,
+        contentType: requestContentType,
       },
-      ['projectId', 'displayName'],
+      ['projectId', 'contentType', 'displayName'],
     );
 
     const folder = await folderRepo().findOneByOrFail({
@@ -213,13 +216,14 @@ export const flowFolderService = {
   async getOneByDisplayNameCaseInsensitive(
     params: GetOneByDisplayNameParams,
   ): Promise<Folder | null> {
-    const { projectId, displayName } = params;
+    const { projectId, displayName, contentType } = params;
     return folderRepo()
       .createQueryBuilder('folder')
       .where('folder.projectId = :projectId', { projectId })
       .andWhere('LOWER(folder.displayName) = LOWER(:displayName)', {
         displayName,
       })
+      .andWhere('folder.contentType = :contentType', { contentType })
       .getOne();
   },
   async getOneOrThrow(params: GetOneOrThrowParams): Promise<FolderDto> {
@@ -275,6 +279,7 @@ type ListFolderFlowsParams = {
 type GetOneByDisplayNameParams = {
   projectId: ProjectId;
   displayName: string;
+  contentType: ContentType;
 };
 
 type GetOneOrThrowParams = {
