@@ -265,6 +265,8 @@ export function DataTable<
         const newParams = new URLSearchParams(prev);
         if (currentCursor) {
           newParams.set('cursor', currentCursor);
+        } else {
+          newParams.delete('cursor');
         }
         newParams.set('limit', `${table.getState().pagination.pageSize}`);
         return newParams;
@@ -297,12 +299,13 @@ export function DataTable<
       <DataTableToolbar>
         {filters &&
           filters.map((filter) => (
-            <DataTableFacetedFilter
+            <DataTableFacetedFilter<RowDataWithActions<TData>, unknown>
               key={filter.accessorKey}
               type={filter.type}
               column={table.getColumn(filter.accessorKey)}
               title={filter.title}
               options={filter.options}
+              onFilterChange={() => setCurrentCursor(undefined)}
             />
           ))}
       </DataTableToolbar>
@@ -399,6 +402,15 @@ export function DataTable<
             value={`${table.getState().pagination.pageSize}`}
             onValueChange={(value) => {
               table.setPageSize(Number(value));
+              setCurrentCursor(undefined);
+              setSearchParams(
+                (prev) => {
+                  const newParams = new URLSearchParams(prev);
+                  newParams.delete('cursor');
+                  return newParams;
+                },
+                { replace: true },
+              );
             }}
           >
             <SelectTrigger className="h-9 min-w-[70px] w-auto">

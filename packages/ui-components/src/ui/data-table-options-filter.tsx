@@ -16,6 +16,9 @@ interface DataTableFacetedFilterProps<TData, TValue> {
     value: string;
     icon?: React.ComponentType<{ className?: string }>;
   }[];
+  onFilterChange: (
+    filterValue: string | string[] | DateRange | undefined,
+  ) => void;
 }
 
 export function DataTableFacetedFilter<TData, TValue>({
@@ -23,6 +26,7 @@ export function DataTableFacetedFilter<TData, TValue>({
   column,
   title,
   options,
+  onFilterChange,
 }: DataTableFacetedFilterProps<TData, TValue>) {
   const facets = column?.getFacetedUniqueValues();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -75,8 +79,10 @@ export function DataTableFacetedFilter<TData, TValue>({
       } else {
         column?.setFilterValue(filterValue ? filterValue : undefined);
       }
+
+      onFilterChange(filterValue);
     },
-    [column, setSearchParams],
+    [column, setSearchParams, onFilterChange],
   );
 
   switch (type) {
