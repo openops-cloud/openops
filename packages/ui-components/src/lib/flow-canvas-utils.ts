@@ -145,8 +145,8 @@ function traverseFlow(
         nextAction,
         graph,
         step.name,
-        isEmpty ? 0 : VERTICAL_OFFSET_CORRECTION,
         collapsedSteps,
+        isEmpty ? 0 : VERTICAL_OFFSET_CORRECTION,
       );
     }
     case ActionType.BRANCH: {
@@ -188,8 +188,8 @@ function traverseFlow(
         nextAction,
         graph,
         step.name,
-        isEmpty ? 0 : VERTICAL_OFFSET_CORRECTION,
         collapsedSteps,
+        isEmpty ? 0 : VERTICAL_OFFSET_CORRECTION,
       );
     }
     case ActionType.SPLIT: {
@@ -240,8 +240,8 @@ function traverseFlow(
         nextAction,
         graph,
         step.name,
-        isEmpty ? 0 : VERTICAL_OFFSET_CORRECTION,
         collapsedSteps,
+        isEmpty ? 0 : VERTICAL_OFFSET_CORRECTION,
       );
     }
     default: {
@@ -277,8 +277,8 @@ function buildChildrenGraph(
   nextAction: Action | Trigger | undefined,
   graph: Graph,
   parentStep: string,
-  verticalOffsetCorrection = 0,
   collapsedSteps: Set<string>,
+  verticalOffsetCorrection = 0,
 ): Graph {
   const totalWidth =
     (childrenGraphs.length - 1) * HORIZONTAL_SPACE_BETWEEN_NODES +
