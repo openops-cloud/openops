@@ -403,14 +403,6 @@ export function DataTable<
             onValueChange={(value) => {
               table.setPageSize(Number(value));
               setCurrentCursor(undefined);
-              setSearchParams(
-                (prev) => {
-                  const newParams = new URLSearchParams(prev);
-                  newParams.delete('cursor');
-                  return newParams;
-                },
-                { replace: true },
-              );
             }}
           >
             <SelectTrigger className="h-9 min-w-[70px] w-auto">
