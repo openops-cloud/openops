@@ -8,9 +8,11 @@ import { QueryKeys } from '@/app/constants/query-keys';
 import { SEARCH_PARAMS } from '@/app/constants/search-params';
 import { BuilderPage } from '@/app/features/builder';
 import { BuilderHeader } from '@/app/features/builder/builder-header/builder-header';
+import { BuilderPublishButton } from '@/app/features/builder/builder-header/builder-publish-button';
 import { BuilderStateProvider } from '@/app/features/builder/builder-state-provider';
 import { flowsApi } from '@/app/features/flows/lib/flows-api';
 import { AxiosError } from 'axios';
+import { FlowDetailsPanel } from '@/app/features/flows/components/flow-details-panel';
 
 const FlowBuilderPage = () => {
   const { flowId } = useParams();
@@ -73,7 +75,10 @@ const FlowBuilderPage = () => {
       run={null}
     >
       <BuilderPage>
-        <BuilderHeader />
+        <BuilderHeader
+          PublishButton={BuilderPublishButton}
+          DetailsPanel={FlowDetailsPanel}
+        />
       </BuilderPage>
     </BuilderStateProvider>
   );
