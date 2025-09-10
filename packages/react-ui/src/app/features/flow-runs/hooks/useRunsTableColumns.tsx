@@ -28,7 +28,6 @@ import {
   CircleStop,
   EllipsisVertical,
   RefreshCw,
-  RotateCcw,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
