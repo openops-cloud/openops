@@ -185,7 +185,7 @@ export const flowFolderService = {
       numberOfFlows: uncategorizedFlows.length,
       flows: uncategorizedFlows.slice(0, 100).map((f) => ({
         id: f.id,
-        displayName: (f as unknown as PopulatedFlow).version.displayName,
+        displayName: f.version.displayName,
       })),
       subfolders: [],
       parentFolderId: undefined,

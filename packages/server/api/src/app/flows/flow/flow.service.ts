@@ -485,74 +485,12 @@ export const flowService = {
     });
   },
 
-  async getWorkflowsByFolder({ projectId }: { projectId: string }) {
-    const qb = folderRepo()
-      .createQueryBuilder('folder')
-      .loadRelationCountAndMap('folder.numberOfFlows', 'folder.flows')
-      .leftJoinAndSelect('folder.parentFolder', 'parentFolder')
-      .leftJoinAndSelect(
-        'folder.flows',
-        'flows',
-        `
-        flows.id IN (
-          SELECT f.id
-          FROM flow f
-          WHERE f."folderId" = folder.id
-          ORDER BY f.updated DESC
-          LIMIT 100
-        )
-        AND COALESCE(flows."isInternal", false) = :isInternal
-      `,
-        { isInternal: false },
-      )
-      .leftJoinAndMapOne(
-        'flows.version',
-        'flow_version',
-        'flowVersion',
-        `flowVersion.id IN (
-        SELECT fv.id
-        FROM (
-          SELECT "id", "flowId", "created", "displayName"
-          FROM flow_version
-          WHERE "flowId" = flows.id
-          ORDER BY created DESC
-          LIMIT 1
-        ) fv
-      )`,
-      )
-      .where('folder."projectId" = :projectId', { projectId })
-      .andWhere('folder."contentType" = :contentType', {
-        contentType: ContentType.WORKFLOW,
-      })
-      .orderBy('folder."displayName"', 'ASC');
+  async getFilterCondition() {
+    const flowFilterCondition =
+      'COALESCE(flows."isInternal", false) = :isInternal';
+    const flowFilterParams = { isInternal: false };
 
-    return qb.getMany();
-  },
-
-  async getUncategorizedFolderWorkflows(projectId: string): Promise<Flow[]> {
-    const uncategorizedFlowsQuery = flowRepo()
-      .createQueryBuilder('flow')
-      .select(['flow.id', 'flow.projectId'])
-      .leftJoinAndMapOne(
-        'flow.version',
-        'flow_version',
-        'version',
-        `version.flowId = flow.id
-           AND version.id IN (
-              SELECT fv.id
-              FROM flow_version fv
-              WHERE fv."flowId" = flow.id
-              ORDER BY fv.created DESC
-              LIMIT 1
-          )`,
-      )
-      .addSelect(['version.displayName'])
-      .where('flow.folderId IS NULL')
-      .andWhere('flow.isInternal = :isInternal', { isInternal: false })
-      .andWhere('flow.projectId = :projectId', { projectId })
-      .orderBy('flow.updated', 'DESC');
-
-    return uncategorizedFlowsQuery.getMany();
+    return { flowFilterCondition, flowFilterParams };
   },
 };
 
