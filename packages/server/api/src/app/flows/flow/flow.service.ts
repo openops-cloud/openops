@@ -485,49 +485,48 @@ export const flowService = {
     });
   },
 
-  async getWorkflowsByFolder({
-    projectId,
-  }: {
-    projectId: string;
-  }): Promise<unknown[]> {
-    const query = folderRepo()
+  async getWorkflowsByFolder({ projectId }: { projectId: string }) {
+    const qb = folderRepo()
       .createQueryBuilder('folder')
       .loadRelationCountAndMap('folder.numberOfFlows', 'folder.flows')
       .leftJoinAndSelect('folder.parentFolder', 'parentFolder')
       .leftJoinAndSelect(
         'folder.flows',
         'flows',
-        `flows.id IN (
-      SELECT f.id
-      FROM flow f
-      WHERE f."folderId" = folder.id
-      ORDER BY f.updated DESC
-      LIMIT 100
-    )`,
+        `
+        flows.id IN (
+          SELECT f.id
+          FROM flow f
+          WHERE f."folderId" = folder.id
+          ORDER BY f.updated DESC
+          LIMIT 100
+        )
+        AND COALESCE(flows."isInternal", false) = :isInternal
+      `,
+        { isInternal: false },
       )
       .leftJoinAndMapOne(
         'flows.version',
         'flow_version',
         'flowVersion',
         `flowVersion.id IN (
-      SELECT fv.id
-      FROM (
-        SELECT "id", "flowId", "created", "displayName"
-        FROM flow_version
-        WHERE "flowId" = flows.id
-        ORDER BY created DESC
-        LIMIT 1
-      ) fv
-    )`,
+        SELECT fv.id
+        FROM (
+          SELECT "id", "flowId", "created", "displayName"
+          FROM flow_version
+          WHERE "flowId" = flows.id
+          ORDER BY created DESC
+          LIMIT 1
+        ) fv
+      )`,
       )
-      .where('folder.projectId = :projectId', { projectId })
-      .andWhere('folder.contentType = :contentType', {
+      .where('folder."projectId" = :projectId', { projectId })
+      .andWhere('folder."contentType" = :contentType', {
         contentType: ContentType.WORKFLOW,
       })
-      .andWhere('flows.isInternal = :isInternal', { isInternal: false })
       .orderBy('folder."displayName"', 'ASC');
 
-    return query.getMany();
+    return qb.getMany();
   },
 
   async getUncategorizedFolderWorkflows(projectId: string): Promise<Flow[]> {
