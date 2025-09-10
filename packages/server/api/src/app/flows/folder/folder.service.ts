@@ -148,29 +148,10 @@ export const flowFolderService = {
       includeUncategorizedFolder,
       contentType = ContentType.WORKFLOW,
     } = params;
-    const query = folderRepo()
-      .createQueryBuilder('folder')
-      .loadRelationCountAndMap('folder.numberOfFlows', 'folder.flows')
-      .leftJoinAndSelect('folder.parentFolder', 'parentFolder')
-      .where('folder.projectId = :projectId', { projectId })
-      .andWhere('folder.contentType = :contentType', { contentType })
-      .orderBy('folder."displayName"', 'ASC');
 
-    const foldersRaw = await query.getMany();
-
-    const folders = (await Promise.all(
-      foldersRaw.map(async (folder): Promise<FolderWithFlows> => {
-        const flows = await getFolderFlows(
-          projectId,
-          contentType,
-          folder.id,
-          100,
-        );
-        return {
-          ...(folder as FolderWithFlows),
-          flows: flows as unknown as FolderWithFlows['flows'],
-        };
-      }),
+    const folders = (await getFolderFlows(
+      projectId,
+      contentType,
     )) as FolderWithFlows[];
 
     return buildFolderTree(

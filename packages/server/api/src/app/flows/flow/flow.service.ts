@@ -41,7 +41,7 @@ import {
   flowVersionRepo,
   flowVersionService,
 } from '../flow-version/flow-version.service';
-import { flowFolderService } from '../folder/folder.service';
+import { flowFolderService, folderRepo } from '../folder/folder.service';
 import { flowStepTestOutputService } from '../step-test-output/flow-step-test-output.service';
 import { flowSideEffects } from './flow-service-side-effects';
 import {
@@ -485,46 +485,45 @@ export const flowService = {
     });
   },
 
-  async getWorkflowsByFolder({
-    projectId,
-    folderId,
-    limit,
-  }: {
-    projectId: string;
-    folderId: string | null;
-    limit: number;
-  }): Promise<Flow[]> {
-    const qb = flowRepo()
-      .createQueryBuilder('flow')
-      .select(['flow.id', 'flow.projectId'])
+  async getWorkflowsByFolder({ projectId }: { projectId: string }) {
+    const query = folderRepo()
+      .createQueryBuilder('folder')
+      .loadRelationCountAndMap('folder.numberOfFlows', 'folder.flows')
+      .leftJoinAndSelect('folder.parentFolder', 'parentFolder')
+      .leftJoinAndSelect(
+        'folder.flows',
+        'flows',
+        `flows.id IN (
+      SELECT f.id
+      FROM flow f
+      WHERE f."folderId" = folder.id
+      ORDER BY f.updated DESC
+      LIMIT 100
+    )`,
+      )
       .leftJoinAndMapOne(
-        'flow.version',
+        'flows.version',
         'flow_version',
-        'version',
-        `version.flowId = flow.id
-           AND version.id IN (
-              SELECT fv.id
-              FROM flow_version fv
-              WHERE fv."flowId" = flow.id
-              ORDER BY fv.created DESC
-              LIMIT 1
-          )`,
+        'flowVersion',
+        `flowVersion.id IN (
+      SELECT fv.id
+      FROM (
+        SELECT "id", "flowId", "created", "displayName"
+        FROM flow_version
+        WHERE "flowId" = flows.id
+        ORDER BY created DESC
+        LIMIT 1
+      ) fv
+    )`,
       )
-      .addSelect(['version.displayName'])
-      .where('flow.projectId = :projectId', { projectId })
-      .andWhere(
-        folderId === null
-          ? 'flow.folderId IS NULL'
-          : 'flow.folderId = :folderId',
-        {
-          folderId: folderId ?? undefined,
-        },
-      )
-      .andWhere('flow.isInternal = :isInternal', { isInternal: false })
-      .orderBy('flow.updated', 'DESC')
-      .limit(limit);
+      .andWhere('folder.isInternal = :isInternal', { isInternal: false })
+      .where('folder.projectId = :projectId', { projectId })
+      .where('folder.contentType = :contentType', {
+        contentType: ContentType.WORKFLOW,
+      })
+      .orderBy('folder."displayName"', 'ASC');
 
-    return qb.getMany();
+    return query.getMany();
   },
 
   async getUncategorizedFolderWorkflows(projectId: string): Promise<Flow[]> {
