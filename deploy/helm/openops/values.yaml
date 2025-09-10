@@ -55,6 +55,7 @@ openopsEnv:
   OPS_TABLES_TOKEN_LIFETIME_MINUTES: "60"
   OPS_JWT_TOKEN_LIFETIME_HOURS: "168"
   OPS_MAX_CONCURRENT_TABLES_REQUESTS: "100"
+  OPS_OPENOPS_TABLES_DB_HOST: '{{ include "openops.postgresHost" . }}'
 
   # Analytics
   OPS_ANALYTICS_PUBLIC_URL: "{{ .Values.openopsEnv.OPS_PUBLIC_URL }}"
