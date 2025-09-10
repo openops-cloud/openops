@@ -17,6 +17,7 @@ export const useSocket = () => React.useContext(SocketContext);
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   useEffectOnce(() => {
     socket.on('connect_error', (err) => {
+      // eslint-disable-next-line no-console
       console.error('Connection failed:', err.message);
     });
 
