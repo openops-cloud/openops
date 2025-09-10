@@ -65,7 +65,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          stale_total=$(echo "${STALE_LIST:-[]}"  | jq 'length')
+          stale_total=$(echo "${STALE_LIST:-[]}" | jq 'length')
           closed_total=$(echo "${CLOSED_LIST:-[]}" | jq 'length')
 
           if [ "$stale_total" -eq 0 ] && [ "$closed_total" -eq 0 ]; then
@@ -108,14 +108,19 @@ jobs:
 
           python - <<'PY' > payload.json
           import json, os
+          body_text = os.environ.get("BODY", "")
           payload = {
             "blocks": [
-              {"type": "section", "text": {"type": "mrkdwn", "text": os.environ["BODY"]}}
+              {"type": "section", "text": {"type": "mrkdwn", "text": body_text}}
             ]
           }
           print(json.dumps(payload))
           PY
 
-          curl -X POST -H 'Content-type: application/json' \
+          if curl --fail --silent --show-error -X POST -H 'Content-type: application/json' \
                --data @payload.json \
-               "$SLACK_WEBHOOK_URL"
+               "$SLACK_WEBHOOK_URL"; then
+            echo "Notification sent successfully."
+          else
+            echo "Failed to send notification."
+          fi
