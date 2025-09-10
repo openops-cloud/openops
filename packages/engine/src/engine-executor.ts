@@ -27,13 +27,10 @@ export async function executeEngine(
 
   const key = await saveRequestBody(requestId, result);
 
-  logger.info(
-    `Finished operation [${operationType}] with status [${result.status}] in ${duration}ms`,
-    {
-      engineStatus: result.status,
-      durationMs: duration,
-    },
-  );
+  logger.info(`Finished operation [${operationType}] in ${duration}ms`, {
+    engineStatus: result.status,
+    durationMs: duration,
+  });
 
   return key;
 }

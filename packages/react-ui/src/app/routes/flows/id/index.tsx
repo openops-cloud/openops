@@ -7,6 +7,7 @@ import { Navigate, useParams, useSearchParams } from 'react-router-dom';
 import { QueryKeys } from '@/app/constants/query-keys';
 import { SEARCH_PARAMS } from '@/app/constants/search-params';
 import { BuilderPage } from '@/app/features/builder';
+import { BuilderHeader } from '@/app/features/builder/builder-header/builder-header';
 import { BuilderStateProvider } from '@/app/features/builder/builder-state-provider';
 import { flowsApi } from '@/app/features/flows/lib/flows-api';
 import { AxiosError } from 'axios';
@@ -71,7 +72,9 @@ const FlowBuilderPage = () => {
       readonly={searchParams.get(SEARCH_PARAMS.viewOnly) === 'true'}
       run={null}
     >
-      <BuilderPage />
+      <BuilderPage>
+        <BuilderHeader />
+      </BuilderPage>
     </BuilderStateProvider>
   );
 };
