@@ -231,7 +231,6 @@ const BuilderPage = ({ children }: { children?: ReactNode }) => {
 
   const { setPanelsSize, getPanelSize } = useResizablePanelGroup();
 
-  // Handle right sidebar visibility with direct panel control
   useEffect(() => {
     if (!rightHandleRef.current) {
       return;
@@ -296,6 +295,8 @@ const BuilderPage = ({ children }: { children?: ReactNode }) => {
               order={1}
               collapsible={true}
               collapsedSize={0}
+              // todo constant
+              maxSize={30}
               className={cn('min-w-0 w-0 bg-background z-[25] shadow-sidebar', {
                 [LEFT_SIDEBAR_MIN_EFFECTIVE_WIDTH]:
                   leftSidebar !== LeftSideBarType.NONE,
