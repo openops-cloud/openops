@@ -23,7 +23,7 @@ jobs:
       - id: stale
         uses: actions/stale@v10
         with:
-          debug-only: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs['dry-run'] == 'true' || 'false' }}
+          debug-only: ${{ (github.event_name == 'workflow_dispatch' && github.event.inputs['dry-run'] == 'true') || 'false' }}
 
           days-before-issue-stale: 60
           days-before-issue-close: 5
