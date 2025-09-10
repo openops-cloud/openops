@@ -485,7 +485,11 @@ export const flowService = {
     });
   },
 
-  async getWorkflowsByFolder({ projectId }: { projectId: string }) {
+  async getWorkflowsByFolder({
+    projectId,
+  }: {
+    projectId: string;
+  }): Promise<unknown[]> {
     const query = folderRepo()
       .createQueryBuilder('folder')
       .loadRelationCountAndMap('folder.numberOfFlows', 'folder.flows')
@@ -564,16 +568,11 @@ async function create({
       ? null
       : request.folderId;
 
-  if (folderId) {
-    const folder = await flowFolderService.getOneOrThrow({
-      projectId,
-      folderId,
-    });
-    await assertThatFlowIsInCorrectFolderContentType(
-      contentType,
-      folder.contentType,
-    );
-  }
+  await ensureFolderContentTypeMatches({
+    projectId,
+    folderId,
+    contentType,
+  });
 
   const newFlow: NewFlow = {
     id: openOpsId(),
@@ -599,6 +598,30 @@ async function create({
     ...savedFlow,
     version: savedFlowVersion,
   };
+}
+
+async function ensureFolderContentTypeMatches({
+  projectId,
+  folderId,
+  contentType,
+}: {
+  projectId: string;
+  folderId: string | null | undefined;
+  contentType: ContentType;
+}): Promise<void> {
+  if (!folderId) {
+    return;
+  }
+
+  const folder = await flowFolderService.getOneOrThrow({
+    projectId,
+    folderId,
+  });
+
+  await assertThatFlowIsInCorrectFolderContentType(
+    contentType,
+    folder.contentType,
+  );
 }
 
 async function update({
@@ -630,16 +653,11 @@ async function update({
         newStatus: operation.request.status,
       });
     } else if (operation.type === FlowOperationType.CHANGE_FOLDER) {
-      if (operation.request.folderId) {
-        const folder = await flowFolderService.getOneOrThrow({
-          projectId,
-          folderId: operation.request.folderId,
-        });
-        await assertThatFlowIsInCorrectFolderContentType(
-          contentType,
-          folder.contentType,
-        );
-      }
+      await ensureFolderContentTypeMatches({
+        projectId,
+        folderId: operation.request.folderId,
+        contentType,
+      });
       await flowRepo().update(id, {
         folderId: operation.request.folderId,
       });

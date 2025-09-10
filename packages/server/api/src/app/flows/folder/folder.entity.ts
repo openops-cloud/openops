@@ -24,7 +24,6 @@ export const FolderEntity = new EntitySchema<FolderSchema>({
       type: String,
       enum: ContentType,
       nullable: false,
-      default: ContentType.WORKFLOW,
     },
   },
   indices: [
