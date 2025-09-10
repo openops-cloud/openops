@@ -24,11 +24,7 @@ import {
 import { useMutation } from '@tanstack/react-query';
 import { ColumnDef } from '@tanstack/react-table';
 import { t } from 'i18next';
-import {
-  CircleStop,
-  EllipsisVertical,
-  RefreshCw,
-} from 'lucide-react';
+import { CircleStop, EllipsisVertical, RefreshCw } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 import { RunType } from '@/app/features/flow-runs/components/run-type';
