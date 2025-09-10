@@ -337,7 +337,6 @@
       "@openops/block-xero": ["packages/blocks/xero/src/index.ts"],
       "@openops/block-xml": ["packages/blocks/xml/src/index.ts"],
       "@openops/block-youtube": ["packages/blocks/youtube/src/index.ts"],
-      "@openops/block-zendesk": ["packages/blocks/zendesk/src/index.ts"],
       "@openops/block-zerobounce": ["packages/blocks/zerobounce/src/index.ts"],
       "@openops/block-zoho-books": ["packages/blocks/zoho-books/src/index.ts"],
       "@openops/block-zoho-crm": ["packages/blocks/zoho-crm/src/index.ts"],
