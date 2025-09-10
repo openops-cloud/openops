@@ -32,6 +32,7 @@ export function sendWorkflowCreatedEvent(
   userId: string,
   flowId: string,
   projectId: string,
+  isInternal: boolean,
 ): void {
   telemetry.trackEvent({
     name: WorkflowEventName.CREATED_WORKFLOW,
@@ -39,6 +40,7 @@ export function sendWorkflowCreatedEvent(
       userId,
       flowId,
       projectId,
+      isInternal: isInternal.toString(),
     },
   });
 }
@@ -84,6 +86,7 @@ export function sendWorkflowExportedEvent(eventParams: {
   flowId: string;
   projectId: string;
   flowVersionId: string;
+  isInternal: boolean;
 }): void {
   telemetry.trackEvent({
     name: WorkflowEventName.WORKFLOW_EXPORTED,
@@ -92,6 +95,7 @@ export function sendWorkflowExportedEvent(eventParams: {
       flowId: eventParams.flowId,
       projectId: eventParams.projectId,
       flowVersionId: eventParams.flowVersionId,
+      isInternal: eventParams.isInternal.toString(),
     },
   });
 }
@@ -102,6 +106,7 @@ export function sendWorkflowUpdatedEvent(eventParams: {
   projectId: ProjectId;
   flowVersionId: string;
   operation: FlowOperationRequest;
+  isInternal: boolean;
 }): void {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const request = eventParams.operation.request as any;
@@ -179,6 +184,7 @@ export function sendWorkflowTestFailureEvent(eventParams: {
   flowVersionId: string;
   flowId: string;
   flowRunId: string;
+  isInternal: boolean;
 }): void {
   telemetry.trackEvent({
     name: WorkflowEventName.WORKFLOW_TEST_FAILURE,
@@ -188,6 +194,7 @@ export function sendWorkflowTestFailureEvent(eventParams: {
       projectId: eventParams.projectId,
       flowId: eventParams.flowId,
       flowRunId: eventParams.flowRunId,
+      isInternal: eventParams.isInternal.toString(),
     },
   });
 }
@@ -198,6 +205,7 @@ export function sendWorkflowTestRunTriggeredEvent(eventParams: {
   flowId: string;
   flowRunId: string;
   flowVersionId: string;
+  isInternal: boolean;
 }): void {
   telemetry.trackEvent({
     name: WorkflowEventName.WORKFLOW_TEST_RUN_TRIGGERED,
@@ -207,6 +215,7 @@ export function sendWorkflowTestRunTriggeredEvent(eventParams: {
       projectId: eventParams.projectId,
       flowRunId: eventParams.flowRunId,
       flowVersionId: eventParams.flowVersionId,
+      isInternal: eventParams.isInternal.toString(),
     },
   });
 }
@@ -220,6 +229,7 @@ function getUpdateEventLabels(
     projectId: ProjectId;
     flowVersionId: string;
     operation: FlowOperationRequest;
+    isInternal: boolean;
   },
 ) {
   return {
@@ -227,6 +237,7 @@ function getUpdateEventLabels(
     flowId: eventParams.id,
     projectId: eventParams.projectId,
     flowVersionId: eventParams.flowVersionId,
+    isInternal: eventParams.isInternal.toString(),
     updateType: eventParams.operation.type,
     newStatus: request?.status || '',
     triggerType: request?.type || '',
