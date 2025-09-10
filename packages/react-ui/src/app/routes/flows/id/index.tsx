@@ -1,3 +1,4 @@
+import { FlowDetailsPanel } from '@/app/features/flows/components/flow-details-panel';
 import { LoadingSpinner } from '@openops/components/ui';
 import { PopulatedFlow } from '@openops/shared';
 import { useQuery } from '@tanstack/react-query';
@@ -12,7 +13,6 @@ import { BuilderPublishButton } from '@/app/features/builder/builder-header/buil
 import { BuilderStateProvider } from '@/app/features/builder/builder-state-provider';
 import { flowsApi } from '@/app/features/flows/lib/flows-api';
 import { AxiosError } from 'axios';
-import { FlowDetailsPanel } from '@/app/features/flows/components/flow-details-panel';
 
 const FlowBuilderPage = () => {
   const { flowId } = useParams();
