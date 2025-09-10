@@ -8,7 +8,7 @@ data:
   nginx.gateway.conf: |
     server {
         listen 80;
-        server_name localhost;
+        server_name openops;
 
         client_max_body_size 10m;
         client_body_buffer_size 1K;
@@ -20,7 +20,7 @@ data:
         server_tokens off;
 
         location / {
-            proxy_pass http://openops-app:8080;
+            proxy_pass {{ include "openops.appServiceUrl" . }};
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -32,7 +32,7 @@ data:
         }
 
         location /api/socket.io {
-            proxy_pass http://openops-app:8080/socket.io;
+            proxy_pass {{ include "openops.appServiceUrl" . }}/socket.io;
             proxy_http_version 1.1;
             proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection "Upgrade";
@@ -42,14 +42,14 @@ data:
         }
 
         location /openops-analytics {
-            proxy_pass http://openops-analytics:8088;
+            proxy_pass {{ include "openops.analyticsServiceUrl" . }};
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         }
 
         location /openops-tables/ws/core {
-            proxy_pass http://openops-tables:80/openops-tables/ws/core;
+            proxy_pass {{ include "openops.tablesServiceUrl" . }}/openops-tables/ws/core;
             proxy_http_version 1.1;
             proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection "Upgrade";
@@ -60,7 +60,7 @@ data:
 
         location /openops-tables {
             client_max_body_size 512m;
-            proxy_pass http://openops-tables:80;
+            proxy_pass {{ include "openops.tablesServiceUrl" . }};
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
