@@ -19,6 +19,7 @@ import {
   isNil,
   ResumeExecuteFlowOperation,
   ResumePayload,
+  StepOutputStatus,
 } from '@openops/shared';
 import { engineApiService } from '../api/server-api.service';
 import { engineRunner } from '../engine';
@@ -88,10 +89,6 @@ async function executeFlow(
   let jobStatus: JobStatus | undefined;
   let jobFinalMessage: string | undefined;
   try {
-    if (jobData.executionType === ExecutionType.BEGIN) {
-      await setFirstRunningState(jobData, engineToken);
-    }
-
     const flow = await engineApiService(engineToken).getFlowWithExactBlocks({
       versionId: jobData.flowVersionId,
       type: GetFlowVersionForWorkerRequestType.EXACT,
@@ -99,6 +96,15 @@ async function executeFlow(
 
     if (isNil(flow)) {
       return;
+    }
+
+    if (jobData.executionType === ExecutionType.BEGIN) {
+      await setFirstRunningState(
+        jobData,
+        engineToken,
+        flow.version.trigger.name,
+        flow.version.trigger.type,
+      );
     }
 
     const input = await prepareInput(flow.version, jobData, engineToken);
@@ -163,10 +169,19 @@ async function executeFlow(
 async function setFirstRunningState(
   jobData: OneTimeJobData,
   engineToken: string,
+  triggerName: string,
+  triggerType: string,
 ): Promise<void> {
   await engineApiService(engineToken).updateRunStatus({
     runDetails: {
-      steps: {},
+      steps: {
+        [triggerName]: {
+          status: StepOutputStatus.SUCCEEDED,
+          output: jobData.payload,
+          type: triggerType,
+          input: {},
+        },
+      },
       duration: 0,
       status: FlowRunStatus.RUNNING,
       tasks: 0,
