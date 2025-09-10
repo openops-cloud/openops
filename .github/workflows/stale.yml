@@ -56,7 +56,7 @@ jobs:
 
       - name: Notify Slack (only if items changed)
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_ENGINEERING_WEBHOOK_URL }}
           STALE_LIST: ${{ steps.stale.outputs.staled-issues-prs }}
           CLOSED_LIST: ${{ steps.stale.outputs.closed-issues-prs }}
           REPO: ${{ github.repository }}
