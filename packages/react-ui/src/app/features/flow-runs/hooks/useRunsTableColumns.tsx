@@ -196,21 +196,6 @@ export const useRunsTableColumns = (): Column[] => {
                         </div>
                       </DropdownMenuItem>
                     )}
-                    {isFailed && (
-                      <DropdownMenuItem
-                        onClick={() =>
-                          mutate({
-                            row: row.original,
-                            strategy: FlowRetryStrategy.FROM_FAILED_STEP,
-                          })
-                        }
-                      >
-                        <div className="flex flex-row gap-2 items-center">
-                          <RotateCcw className="h-4 w-4" />
-                          <span>{t('Retry from failed step')}</span>
-                        </div>
-                      </DropdownMenuItem>
-                    )}
                     {isRunning && (
                       <StopRunDialog
                         isStopDialogOpen={isStopDialogOpen}
