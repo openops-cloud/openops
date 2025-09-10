@@ -251,7 +251,7 @@ export function DataTable<
         column.setFilterValue(values);
       }
     });
-  }, []);
+  }, [filters, searchParams, table]);
 
   useDeepCompareEffect(() => {
     onSelectedRowsChange?.(
