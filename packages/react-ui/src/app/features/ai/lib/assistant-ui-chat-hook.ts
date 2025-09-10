@@ -10,12 +10,12 @@ import { getFrontendToolDefinitions } from '@openops/ui-kit';
 import { useQuery } from '@tanstack/react-query';
 import { DefaultChatTransport, ToolSet, UIMessage } from 'ai';
 import { t } from 'i18next';
-import { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { aiChatApi } from '../../builder/ai-chat/lib/chat-api';
 import {
-  BuilderStateContext,
-  useSafeBuilderStateContext,
-} from '../../builder/builder-hooks';
+  getBuilderStore,
+  useBuilderStoreOutsideProvider,
+} from '../../builder/builder-state-provider';
 import { aiSettingsHooks } from './ai-settings-hooks';
 import { buildQueryKey } from './chat-utils';
 import { createAdditionalContext } from './enrich-context';
@@ -40,29 +40,31 @@ export const useAssistantChat = ({
     [],
   );
 
-  const selectedStep = useSafeBuilderStateContext(
+  const selectedStep = useBuilderStoreOutsideProvider(
     (state) => state.selectedStep,
   );
-  const flowVersionId = useSafeBuilderStateContext(
+
+  const flowVersionId = useBuilderStoreOutsideProvider(
     (state) => state.flowVersion?.id,
   );
-  const runId = useSafeBuilderStateContext((state) => state.run?.id);
+  const runId = useBuilderStoreOutsideProvider((state) => state.run?.id);
 
-  const showSettingsAIChat = useSafeBuilderStateContext(
+  const showSettingsAIChat = useBuilderStoreOutsideProvider(
     (state) => state?.midpanelState?.showAiChat ?? false,
   );
 
-  const builderStore = useContext(BuilderStateContext);
-
   const getBuilderState = useCallback(() => {
-    if (!builderStore) return null;
-    const state = builderStore.getState();
+    const context = getBuilderStore();
+    const state = context?.getState();
+
+    if (!state) return null;
+
     return {
       flowVersion: state.flowVersion,
       selectedStep: state.selectedStep,
       run: state.run,
     };
-  }, [builderStore]);
+  }, []);
 
   const { hasActiveAiSettings, isLoading: isLoadingAiSettings } =
     aiSettingsHooks.useHasActiveAiSettings();
