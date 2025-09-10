@@ -16,12 +16,18 @@ This Helm chart deploys the OpenOps application stack to a Kubernetes cluster.
 
 ## Installation
 
-1. Edit the values.yaml file. Make sure to replace all passwords, encryption key, api key and JWT secret.
+1. Add a values.overrides.yaml file (see `values.overrides-example.yaml` for reference).
 2. Install the chart:
 
 ```bash
 helm install openops ./deploy/helm/openops -n openops --create-namespace
 ```
+3. Get the external IP of the nginx service to access the application:
+
+```bash
+kubectl get services/nginx -n openops
+```
+
 
 ## Storage
 
