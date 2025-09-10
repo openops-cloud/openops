@@ -10,6 +10,7 @@ import {
 import { ReactFlowProvider } from '@xyflow/react';
 import {
   MutableRefObject,
+  ReactNode,
   useCallback,
   useEffect,
   useMemo,
@@ -47,7 +48,6 @@ import {
 import { LEFT_SIDEBAR_MIN_EFFECTIVE_WIDTH } from '../../constants/sidebar';
 import { blocksHooks } from '../blocks/lib/blocks-hook';
 import { RunDetailsBar } from '../flow-runs/components/run-details-bar';
-import { BuilderHeader } from './builder-header/builder-header';
 import { LeftSideBarType, RightSideBarType } from './builder-types';
 import { FlowBuilderCanvas } from './flow-canvas/flow-builder-canvas';
 import { FLOW_CANVAS_CONTAINER_ID } from './flow-version-undo-redo/constants';
@@ -111,7 +111,7 @@ const constructContainerKey = (
   return flowVersionId + stepName + stepType + (triggerOrActionName ?? '');
 };
 
-const BuilderPage = () => {
+const BuilderPage = ({ children }: { children?: ReactNode }) => {
   const [searchParams] = useSearchParams();
 
   const [
@@ -325,7 +325,7 @@ const BuilderPage = () => {
               {readonly ? (
                 <ReadonlyCanvasProvider>
                   <div ref={middlePanelRef} className="relative h-full w-full">
-                    <BuilderHeader />
+                    {children}
                     <CanvasControls
                       topOffset={FLOW_CANVAS_Y_OFFESET}
                     ></CanvasControls>
@@ -347,7 +347,9 @@ const BuilderPage = () => {
                   middlePanelSize={middlePanelSize}
                   flowVersion={flowVersion}
                   lefSideBarContainerWidth={leftSidePanelSize?.width || 0}
-                />
+                >
+                  {children}
+                </InteractiveBuilder>
               )}
             </ResizablePanel>
 

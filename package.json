@@ -64,6 +64,7 @@
     "@babel/runtime": "7.22.11",
     "@bull-board/api": "5.9.1",
     "@bull-board/fastify": "5.9.1",
+    "@cdktf/hcl2json": "0.21.0",
     "@codemirror/lang-javascript": "6.2.2",
     "@codemirror/lang-json": "6.0.1",
     "@codemirror/legacy-modes": "6.5.1",
