@@ -5,6 +5,7 @@ import { LeftSideBarType } from '../builder-types';
 
 import { ExpandSideMenu } from '@/app/features/builder/builder-header/expand-side-menu';
 import { WorkflowOverview } from '@/app/features/builder/builder-header/workflow-overview/workflow-overview';
+import { FlowDetailsPanel } from '@/app/features/flows/components/flow-details-panel';
 import { useAppStore } from '@/app/store/app-store';
 import { BuilderPublishButton } from './builder-publish-button';
 import BuilderViewOnlyWidget from './builder-view-only-widget';
@@ -42,7 +43,9 @@ export const BuilderHeader = () => {
             handleSidebarButtonClick(LeftSideBarType.MENU);
           }}
         />
-        <SideMenuCollapsed />
+        <SideMenuCollapsed>
+          <FlowDetailsPanel />
+        </SideMenuCollapsed>
         {(!readonly || flowVersion.description) && <WorkflowOverview />}
         <BuilderHeaderActionBar
           leftSidebar={leftSidebar}
