@@ -520,11 +520,11 @@ export const flowService = {
       ) fv
     )`,
       )
-      .andWhere('folder.isInternal = :isInternal', { isInternal: false })
       .where('folder.projectId = :projectId', { projectId })
-      .where('folder.contentType = :contentType', {
+      .andWhere('folder.contentType = :contentType', {
         contentType: ContentType.WORKFLOW,
       })
+      .andWhere('flows.isInternal = :isInternal', { isInternal: false })
       .orderBy('folder."displayName"', 'ASC');
 
     return query.getMany();
