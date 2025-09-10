@@ -15,7 +15,6 @@ import { DictionaryProperty } from '../../block-properties/dictionary-property';
 
 import { useTheme } from '@/app/common/providers/theme-provider';
 import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
-import { useAppStore } from '@/app/store/app-store';
 import { PropertyType } from '@openops/blocks-framework';
 import { useSafeBuilderStateContext } from '../../builder-hooks';
 import { CodeEditior } from './code-editior';
@@ -32,10 +31,6 @@ type CodeSettingsProps = {
 const CodeSettings = React.memo(({ readonly }: CodeSettingsProps) => {
   const { theme } = useTheme();
   const form = useFormContext<CodeAction>();
-
-  const { setIsAiChatOpened } = useAppStore((s) => ({
-    setIsAiChatOpened: s.setIsAiChatOpened,
-  }));
 
   const isAiChatVisible = useSafeBuilderStateContext(
     (s) => s?.midpanelState?.showAiChat,
@@ -59,8 +54,7 @@ const CodeSettings = React.memo(({ readonly }: CodeSettingsProps) => {
         required: false,
       },
     });
-    setIsAiChatOpened(false);
-  }, [dispatch, setIsAiChatOpened]);
+  }, [dispatch]);
 
   return (
     <div className="flex flex-col gap-4">

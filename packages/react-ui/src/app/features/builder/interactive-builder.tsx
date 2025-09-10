@@ -1,6 +1,5 @@
 import { FLOW_CANVAS_Y_OFFESET } from '@/app/constants/flow-canvas';
 import { AiConfigurationPrompt } from '@/app/features/ai/ai-configuration-prompt';
-import { useAppStore } from '@/app/store/app-store';
 import {
   AI_CHAT_CONTAINER_SIZES,
   CanvasControls,
@@ -105,10 +104,6 @@ const InteractiveBuilder = ({
     state.applyMidpanelAction,
   ]);
 
-  const { setIsAiChatOpened } = useAppStore((s) => ({
-    setIsAiChatOpened: s.setIsAiChatOpened,
-  }));
-
   const checkFocus = useCallback(() => {
     const isTextMentionInputFocused = doesHaveInputThatUsesMentionClass(
       document.activeElement,
@@ -116,7 +111,7 @@ const InteractiveBuilder = ({
 
     if (isTextMentionInputFocused) {
       dispatch({ type: 'FOCUS_INPUT_WITH_MENTIONS' });
-      setIsAiChatOpened(false);
+      // setIsAiChatOpened(false);
       return;
     }
 
@@ -127,7 +122,7 @@ const InteractiveBuilder = ({
     if (isClickAway) {
       dispatch({ type: 'PANEL_CLICK_AWAY' });
     }
-  }, [dispatch, setIsAiChatOpened]);
+  }, [dispatch]);
 
   const debouncedCheckFocus = useDebounceCallback(checkFocus, 100);
   const containerRef = useRef<HTMLDivElement>(null);
