@@ -27,12 +27,11 @@ const SIDEBAR_MINIMIZED_WIDTH = 10;
 
 const MINIMIZED_NAVIGATION_ROUTES = [
   '/flows/',
-  '/runs/',
+  '/templates/',
   '/tables',
   '/analytics',
 ];
 
-// todo - move constants
 const UNAUTHENTHICATED_ROUTES = [
   '/sign-in',
   '/sign-up',
@@ -79,8 +78,6 @@ export function GlobalLayout() {
 
     if (shouldMinimize && !wasPreviouslyMinimizedRoute) {
       setIsSidebarMinimized(true);
-    } else if (!shouldMinimize && wasPreviouslyMinimizedRoute) {
-      setIsSidebarMinimized(false);
     }
 
     setPreviousPathname(location.pathname);
