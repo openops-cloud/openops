@@ -44,3 +44,8 @@ input[type='search']::-webkit-search-cancel-button {
   background-color: #e2e8f0 !important;
   opacity: 0.9 !important;
 }
+
+.monaco-search-highlight {
+  background-color: #fde68a;
+  border-radius: 2px;
+}
