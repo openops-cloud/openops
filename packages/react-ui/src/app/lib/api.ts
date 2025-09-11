@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@openops/ui-kit';
 import axios, {
   AxiosError,
   AxiosRequestConfig,
@@ -6,7 +7,6 @@ import axios, {
 } from 'axios';
 import qs from 'qs';
 
-export const API_BASE_URL = import.meta.env.VITE_OPS_BACKEND_URL || '';
 export const API_URL = `${API_BASE_URL}/api`;
 
 export function isUrlRelative(url: string) {
