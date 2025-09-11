@@ -24,12 +24,7 @@ import {
 import { useMutation } from '@tanstack/react-query';
 import { ColumnDef } from '@tanstack/react-table';
 import { t } from 'i18next';
-import {
-  CircleStop,
-  EllipsisVertical,
-  RefreshCw,
-  RotateCcw,
-} from 'lucide-react';
+import { CircleStop, EllipsisVertical, RefreshCw } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 import { RunType } from '@/app/features/flow-runs/components/run-type';
@@ -193,21 +188,6 @@ export const useRunsTableColumns = (): Column[] => {
                         <div className="flex flex-row gap-2 items-center">
                           <RefreshCw className="h-4 w-4" />
                           <span>{t('Retry on latest version')}</span>
-                        </div>
-                      </DropdownMenuItem>
-                    )}
-                    {isFailed && (
-                      <DropdownMenuItem
-                        onClick={() =>
-                          mutate({
-                            row: row.original,
-                            strategy: FlowRetryStrategy.FROM_FAILED_STEP,
-                          })
-                        }
-                      >
-                        <div className="flex flex-row gap-2 items-center">
-                          <RotateCcw className="h-4 w-4" />
-                          <span>{t('Retry from failed step')}</span>
                         </div>
                       </DropdownMenuItem>
                     )}
