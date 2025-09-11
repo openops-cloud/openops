@@ -30,6 +30,7 @@ export const buildFolderTree = (
         })) || [],
       subfolders: [],
       parentFolderId: folder.parentFolder?.id,
+      contentType: folder.contentType,
     };
     folderMap.set(folder.id, folderDto);
   });
