@@ -11,7 +11,7 @@ export function RouteWrapper({
   children,
   pageHeader,
   useEntireInnerViewport,
-}: RouteWrapperProps) {
+}: Readonly<RouteWrapperProps>) {
   return (
     <div className={cn('flex flex-col flex-1 p-0 h-screen')}>
       {pageHeader}
