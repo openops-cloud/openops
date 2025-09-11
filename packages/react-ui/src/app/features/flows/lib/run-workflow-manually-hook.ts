@@ -34,9 +34,9 @@ export const useRunWorkflowManually = ({
   const { isScheduled, isWebhookType } = useMemo(() => {
     return {
       isWebhookType:
-        blockModel?.triggers[triggerName].type === TriggerStrategy.WEBHOOK,
+        blockModel?.triggers[triggerName]?.type === TriggerStrategy.WEBHOOK,
       isScheduled:
-        blockModel?.triggers[triggerName].type === TriggerStrategy.SCHEDULED,
+        blockModel?.triggers[triggerName]?.type === TriggerStrategy.SCHEDULED,
     };
   }, [blockModel?.triggers, triggerName]);
 
