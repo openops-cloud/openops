@@ -34,16 +34,23 @@ const AiChatResizablePanel = ({ onDragging }: AiChatResizablePanelProps) => {
     return getPanelSize(RESIZABLE_PANEL_IDS.AI_CHAT) ?? 20;
   }, [getPanelSize, showChat]);
 
+  const prevShowChatRef = useRef(showChat);
+
   useEffect(() => {
     if (!resizablePanelRef.current) {
       return;
     }
-    if (showChat) {
-      resizablePanelRef.current?.expand(getDefaultPanelSize());
-    } else {
-      resizablePanelRef.current?.collapse();
+
+    if (prevShowChatRef.current !== showChat) {
+      if (showChat) {
+        const savedSize = getPanelSize(RESIZABLE_PANEL_IDS.AI_CHAT) ?? 20;
+        resizablePanelRef.current?.expand(savedSize);
+      } else {
+        resizablePanelRef.current?.collapse();
+      }
+      prevShowChatRef.current = showChat;
     }
-  }, [getDefaultPanelSize, showChat]);
+  }, [showChat, getPanelSize]);
 
   return (
     <>
@@ -52,10 +59,9 @@ const AiChatResizablePanel = ({ onDragging }: AiChatResizablePanelProps) => {
         order={2}
         id={RESIZABLE_PANEL_IDS.AI_CHAT}
         className={cn('duration-0 min-w-0 shadow-sidebar', {
-          'min-w-[300px] max-w-[400px] z-[11]': showChat,
+          'min-w-[300px] max-w-[500px] z-[11]': showChat,
         })}
-        // todo constant
-        minSize={isAiChatOpened ? undefined : 15}
+        minSize={isAiChatOpened ? undefined : 0}
         maxSize={isAiChatOpened ? undefined : 0}
         collapsible={true}
         defaultSize={getDefaultPanelSize()}

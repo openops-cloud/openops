@@ -44,7 +44,6 @@ import {
   TriggerType,
   WebsocketClientEvent,
 } from '@openops/shared';
-// LEFT_SIDEBAR_MIN_SIZE,
 import { LEFT_SIDEBAR_MIN_EFFECTIVE_WIDTH } from '../../constants/sidebar';
 import { blocksHooks } from '../blocks/lib/blocks-hook';
 import { RunDetailsBar } from '../flow-runs/components/run-details-bar';
@@ -240,6 +239,7 @@ const BuilderPage = ({ children }: { children?: ReactNode }) => {
       const storedSize = getPanelSize(
         RESIZABLE_PANEL_IDS.BUILDER_RIGHT_SIDEBAR,
       );
+      // todo constant
       const targetSize = storedSize || 25;
       rightHandleRef.current.expand(targetSize);
     } else {

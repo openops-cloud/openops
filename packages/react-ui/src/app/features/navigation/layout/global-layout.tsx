@@ -126,7 +126,7 @@ export function GlobalLayout() {
                 'min-w-[70px] max-w-[70px]': isMinimized,
               },
               {
-                'max-w-[300px]': !isMinimized,
+                'max-w-[400px]': !isMinimized,
               },
             )}
           >
