@@ -20,7 +20,7 @@ This Helm chart deploys the OpenOps application stack to a Kubernetes cluster.
 2. Install the chart:
 
 ```bash
-helm install openops ./deploy/helm/openops -n openops --create-namespace
+helm install openops ./deploy/helm/openops -n openops --create-namespace -f values.overrides.yaml
 ```
 3. Get the external IP of the nginx service to access the application:
 
