@@ -258,7 +258,7 @@ const StepSettingsContainer = React.memo(() => {
               )}
               <div className="border rounded-md pt-0">
                 <Tabs defaultValue="configure" className="w-full">
-                  <TabsList className="grid grid-cols-2 w-full h-10 rounded-sm">
+                  <TabsList className="grid grid-cols-2 w-full h-10 rounded-sm bg-gray-200">
                     <TabsTrigger
                       value="configure"
                       className="text-base justify-start text-left py-1 rounded-xs"
