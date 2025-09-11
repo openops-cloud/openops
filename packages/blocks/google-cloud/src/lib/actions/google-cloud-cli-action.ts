@@ -6,7 +6,6 @@ import {
   handleCliError,
   tryParseJson,
 } from '@openops/common';
-import { RiskLevel } from '@openops/shared';
 import { projectCliDropdown } from '../common-properties';
 import { runCommand } from '../google-cloud-cli';
 
@@ -28,7 +27,6 @@ export const googleCloudCliAction = createAction({
     }),
     dryRun: dryRunCheckBox(),
   },
-  riskLevel: RiskLevel.HIGH,
   async run(context) {
     try {
       const { commandToRun, dryRun } = context.propsValue;

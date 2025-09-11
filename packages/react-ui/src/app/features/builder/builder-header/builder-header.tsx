@@ -6,11 +6,19 @@ import { LeftSideBarType } from '../builder-types';
 import { ExpandSideMenu } from '@/app/features/builder/builder-header/expand-side-menu';
 import { WorkflowOverview } from '@/app/features/builder/builder-header/workflow-overview/workflow-overview';
 import { useAppStore } from '@/app/store/app-store';
-import { BuilderPublishButton } from './builder-publish-button';
+import { FC } from 'react';
 import BuilderViewOnlyWidget from './builder-view-only-widget';
 import { UndoRedoActionBar } from './undo-redo-action-bar';
 
-export const BuilderHeader = () => {
+type BuilderHeaderProps = {
+  DetailsPanel: FC;
+  PublishButton: FC;
+};
+
+export const BuilderHeader = ({
+  DetailsPanel,
+  PublishButton,
+}: BuilderHeaderProps) => {
   const [leftSidebar, setLeftSidebar, readonly, flowVersion] =
     useBuilderStateContext((state) => [
       state.leftSidebar,
@@ -42,7 +50,9 @@ export const BuilderHeader = () => {
             handleSidebarButtonClick(LeftSideBarType.MENU);
           }}
         />
-        <SideMenuCollapsed />
+        <SideMenuCollapsed>
+          <DetailsPanel />
+        </SideMenuCollapsed>
         {(!readonly || flowVersion.description) && <WorkflowOverview />}
         <BuilderHeaderActionBar
           leftSidebar={leftSidebar}
@@ -52,7 +62,7 @@ export const BuilderHeader = () => {
       <div className="flex items-center gap-2">
         {readonly && <BuilderViewOnlyWidget></BuilderViewOnlyWidget>}
         {!readonly && <UndoRedoActionBar />}
-        <BuilderPublishButton></BuilderPublishButton>
+        <PublishButton />
       </div>
     </div>
   );
