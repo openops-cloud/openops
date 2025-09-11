@@ -29,8 +29,8 @@ import {
 } from './common/error-boundaries/ops-error-boundary';
 import { ConnectionsHeader } from './features/connections/components/connection-table';
 import { ConnectionsProvider } from './features/connections/components/connections-context';
-import { PageContainer } from './features/navigation/page-container';
-import { RouteWrapper } from './features/navigation/route-wrapper';
+import { GlobalLayout } from './features/navigation/layout/global-layout';
+import { RouteWrapper } from './features/navigation/layout/route-wrapper';
 import NotFoundPage from './routes/404-page';
 import { ChangePasswordPage } from './routes/change-password';
 import AppConnectionsPage from './routes/connections';
@@ -392,7 +392,7 @@ const ApplicationRouter = () => {
   const router = createBrowserRouter([
     {
       path: '/',
-      element: <PageContainer />,
+      element: <GlobalLayout />,
       children: createRoutes(),
     },
   ]);

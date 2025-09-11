@@ -1,6 +1,6 @@
 import { useResizablePanelGroup } from '@/app/common/hooks/use-resizable-panel-group';
 import { RESIZABLE_PANEL_IDS } from '@/app/constants/layout';
-import AssistantUiChat from '@/app/features/ai/assistant-ui/assistant-ui-chat';
+import AssistantUiChat from '@/app/features/ai/assistant/assistant-ui-chat';
 import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
 import { useAppStore } from '@/app/store/app-store';
 import { cn, ResizableHandle, ResizablePanel } from '@openops/components/ui';
@@ -12,7 +12,6 @@ type AiChatResizablePanelProps = {
   onDragging: (onDragging: boolean) => void;
 };
 
-// todo - move to ai feature folder
 const AiChatResizablePanel = ({ onDragging }: AiChatResizablePanelProps) => {
   const { isAiChatOpened, setIsAiChatOpened } = useAppStore((s) => ({
     isAiChatOpened: s.isAiChatOpened,

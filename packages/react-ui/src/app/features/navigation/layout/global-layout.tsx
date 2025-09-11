@@ -16,11 +16,12 @@ import {
   LEFT_SIDEBAR_MIN_SIZE,
 } from '@/app/constants/sidebar';
 import { AiConfigurationPrompt } from '@/app/features/ai/ai-configuration-prompt';
-import { AiChatResizablePanel } from '@/app/features/builder/ai-chat/ai-chat-resizable-panel';
+import { AiChatResizablePanel } from '@/app/features/ai/assistant/ai-chat-resizable-panel';
 import { useAppStore } from '@/app/store/app-store';
-import { DashboardSideMenu } from './side-menu/dashboard/dashboard-side-menu';
-import LeftSidebarResizablePanel from './side-menu/left-sidebar';
+import { DashboardSideMenu } from '../side-menu/dashboard/dashboard-side-menu';
+import LeftSidebarResizablePanel from '../side-menu/left-sidebar';
 
+// todo -> move to constants
 const SIDEBAR_MIN_SIZE = 18;
 const SIDEBAR_MINIMIZED_WIDTH = 10;
 
@@ -45,7 +46,7 @@ const UNAUTHENTHICATED_ROUTES = [
   '/oauth/logout',
 ];
 
-export function PageContainer() {
+export function GlobalLayout() {
   const location = useLocation();
   const [isDragging, setIsDragging] = useState(false);
   const [previousPathname, setPreviousPathname] = useState(location.pathname);
