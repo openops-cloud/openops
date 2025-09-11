@@ -10,6 +10,7 @@ import {
 import { ReactFlowProvider } from '@xyflow/react';
 import {
   MutableRefObject,
+  ReactNode,
   useCallback,
   useEffect,
   useMemo,
@@ -55,12 +56,12 @@ import { blocksHooks } from '../blocks/lib/blocks-hook';
 import { RunDetailsBar } from '../flow-runs/components/run-details-bar';
 import { FlowSideMenu } from '../navigation/side-menu/flow/flow-side-menu';
 import LeftSidebarResizablePanel from '../navigation/side-menu/left-sidebar';
-import { BuilderHeader } from './builder-header/builder-header';
 import { LeftSideBarType, RightSideBarType } from './builder-types';
 import { FlowBuilderCanvas } from './flow-canvas/flow-builder-canvas';
 import { FLOW_CANVAS_CONTAINER_ID } from './flow-version-undo-redo/constants';
 import { UndoRedo } from './flow-version-undo-redo/undo-redo';
 import { FlowVersionsList } from './flow-versions';
+import { useFlowUpdates } from './hooks/use-flow-updates';
 import { InteractiveBuilder } from './interactive-builder';
 import { FlowRunDetails } from './run-details';
 import { FlowRecentRunsList } from './run-list';
@@ -109,7 +110,7 @@ const constructContainerKey = (
   return flowVersionId + stepName + stepType + (triggerOrActionName ?? '');
 };
 
-const BuilderPage = () => {
+const BuilderPage = ({ children }: { children?: ReactNode }) => {
   const [searchParams] = useSearchParams();
 
   const [
@@ -199,6 +200,8 @@ const BuilderPage = () => {
   useRefreshBlock({
     refetchBlock,
   });
+
+  useFlowUpdates();
 
   useEffect(() => {
     const viewOnlyParam = searchParams.get(SEARCH_PARAMS.viewOnly) === 'true';
@@ -291,7 +294,7 @@ const BuilderPage = () => {
               {readonly ? (
                 <ReadonlyCanvasProvider>
                   <div ref={middlePanelRef} className="relative h-full w-full">
-                    <BuilderHeader />
+                    {children}
                     <AiConfigurationPrompt className={'left-4 bottom-[70px]'} />
                     {leftSidebar === LeftSideBarType.NONE && (
                       <AiAssistantButton className="size-[42px] absolute left-4 bottom-[10px] z-50" />
@@ -322,7 +325,9 @@ const BuilderPage = () => {
                   middlePanelSize={middlePanelSize}
                   flowVersion={flowVersion}
                   lefSideBarContainerWidth={leftSidePanelSize?.width || 0}
-                />
+                >
+                  {children}
+                </InteractiveBuilder>
               )}
             </ResizablePanel>
 

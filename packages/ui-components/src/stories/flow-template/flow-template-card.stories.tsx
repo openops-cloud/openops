@@ -34,6 +34,7 @@ const meta = {
   tags: ['autodocs'],
   args: {
     templateMetadata: templateMetadataDefault,
+    showAuthor: true,
   },
   parameters: {
     layout: 'centered',
@@ -129,5 +130,15 @@ const templateWithMarkdown: FlowTemplateMetadata = {
 export const withMarkdown: Story = {
   args: {
     templateMetadata: templateWithMarkdown,
+  },
+};
+
+/**
+ * Card without author section
+ */
+export const WithoutAuthor: Story = {
+  args: {
+    ...Default.args,
+    showAuthor: false,
   },
 };

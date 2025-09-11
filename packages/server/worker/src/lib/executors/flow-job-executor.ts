@@ -52,7 +52,10 @@ async function prepareInput(
         runId: jobData.runId,
       });
 
-      if (flowRun.status === FlowRunStatus.SUCCEEDED) {
+      if (
+        flowRun.status === FlowRunStatus.SUCCEEDED ||
+        flowRun.status === FlowRunStatus.STOPPED
+      ) {
         return undefined;
       }
 
@@ -72,6 +75,7 @@ async function prepareInput(
     }
   }
 }
+
 async function executeFlow(
   jobData: OneTimeJobData,
   engineToken: string,
@@ -108,38 +112,43 @@ async function executeFlow(
       input,
     );
 
-    if (
-      status !== EngineResponseStatus.OK ||
-      result.status === FlowRunStatus.INTERNAL_ERROR
-    ) {
-      const isTimeoutError = status === EngineResponseStatus.TIMEOUT;
-      if (isTimeoutError) {
-        await handleTimeoutError(jobData, engineToken);
-      } else {
-        const errorMessage = result.error?.message ?? 'internal error';
-        await handleInternalError(
-          jobData,
-          engineToken,
-          new ApplicationError({
-            code: ErrorCode.ENGINE_OPERATION_FAILURE,
-            params: {
-              message: errorMessage,
-            },
-          }),
-        );
+    const { engineSucceeded, failedRunStatus } = evaluateEngineStatus(
+      status,
+      result.status,
+    );
 
-        jobStatus = JobStatus.FAILED;
-        jobFinalMessage = `Internal error reported by engine. Error message: ${errorMessage}`;
-      }
+    if (engineSucceeded) {
+      return;
+    }
+
+    await updateRunWithError(jobData, engineToken, failedRunStatus);
+
+    if (failedRunStatus === FlowRunStatus.INTERNAL_ERROR) {
+      const errorMessage = result.error?.message ?? 'internal error';
+
+      exceptionHandler.handle(
+        new ApplicationError({
+          code: ErrorCode.ENGINE_OPERATION_FAILURE,
+          params: { message: errorMessage },
+        }),
+      );
+
+      jobStatus = JobStatus.FAILED;
+      jobFinalMessage = `Internal error reported by engine. Error message: ${errorMessage}`;
     }
   } catch (e) {
     const isTimeoutError =
       e instanceof ApplicationError &&
       e.error.code === ErrorCode.EXECUTION_TIMEOUT;
-    if (isTimeoutError) {
-      await handleTimeoutError(jobData, engineToken);
-    } else {
-      await handleInternalError(jobData, engineToken, e as Error);
+
+    const failedRunStatus = isTimeoutError
+      ? FlowRunStatus.TIMEOUT
+      : FlowRunStatus.INTERNAL_ERROR;
+
+    await updateRunWithError(jobData, engineToken, failedRunStatus);
+
+    if (failedRunStatus === FlowRunStatus.INTERNAL_ERROR) {
+      exceptionHandler.handle(e as Error);
       jobStatus = JobStatus.FAILED;
       jobFinalMessage = `Internal error reported by engine. Error message: ${
         (e as Error).message
@@ -169,15 +178,19 @@ async function setFirstRunningState(
   });
 }
 
-async function handleTimeoutError(
+async function updateRunWithError(
   jobData: OneTimeJobData,
   engineToken: string,
+  status:
+    | FlowRunStatus.TIMEOUT
+    | FlowRunStatus.STOPPED
+    | FlowRunStatus.INTERNAL_ERROR,
 ): Promise<void> {
   await engineApiService(engineToken).updateRunStatus({
     runDetails: {
       steps: {},
       duration: 0,
-      status: FlowRunStatus.TIMEOUT,
+      status,
       tasks: 0,
       tags: [],
     },
@@ -186,27 +199,6 @@ async function handleTimeoutError(
     workerHandlerId: jobData.synchronousHandlerId,
     runId: jobData.runId,
   });
-}
-
-async function handleInternalError(
-  jobData: OneTimeJobData,
-  engineToken: string,
-  e: Error,
-): Promise<void> {
-  await engineApiService(engineToken).updateRunStatus({
-    runDetails: {
-      steps: {},
-      duration: 0,
-      status: FlowRunStatus.INTERNAL_ERROR,
-      tasks: 0,
-      tags: [],
-    },
-    executionCorrelationId: jobData.executionCorrelationId,
-    progressUpdateType: jobData.progressUpdateType,
-    workerHandlerId: jobData.synchronousHandlerId,
-    runId: jobData.runId,
-  });
-  exceptionHandler.handle(e);
 }
 
 async function updateJobStatus(
@@ -219,6 +211,50 @@ async function updateJobStatus(
     message,
     queueName: QueueName.ONE_TIME,
   });
+}
+
+type EvaluateEngineStatusResult =
+  | { engineSucceeded: true; failedRunStatus: undefined }
+  | {
+      engineSucceeded: false;
+      failedRunStatus:
+        | FlowRunStatus.TIMEOUT
+        | FlowRunStatus.STOPPED
+        | FlowRunStatus.INTERNAL_ERROR;
+    };
+
+function evaluateEngineStatus(
+  engineResponseStatus: EngineResponseStatus,
+  flowRunStatus: FlowRunStatus,
+): EvaluateEngineStatusResult {
+  const failureStatuses = [
+    FlowRunStatus.TIMEOUT,
+    FlowRunStatus.STOPPED,
+    FlowRunStatus.INTERNAL_ERROR,
+  ];
+
+  if (
+    engineResponseStatus === EngineResponseStatus.OK &&
+    !failureStatuses.includes(flowRunStatus)
+  ) {
+    return { engineSucceeded: true, failedRunStatus: undefined };
+  }
+
+  if (
+    engineResponseStatus === EngineResponseStatus.TIMEOUT ||
+    flowRunStatus === FlowRunStatus.TIMEOUT
+  ) {
+    return { engineSucceeded: false, failedRunStatus: FlowRunStatus.TIMEOUT };
+  }
+
+  if (flowRunStatus === FlowRunStatus.STOPPED) {
+    return { engineSucceeded: false, failedRunStatus: FlowRunStatus.STOPPED };
+  }
+
+  return {
+    engineSucceeded: false,
+    failedRunStatus: FlowRunStatus.INTERNAL_ERROR,
+  };
 }
 
 export const flowJobExecutor = {

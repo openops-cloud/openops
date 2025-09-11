@@ -7,6 +7,7 @@ import {
   Trigger,
 } from '@openops/shared';
 import { performance } from 'node:perf_hooks';
+import { throwIfCancellationRequested } from '../cancellation-request-validator';
 import { progressService } from '../services/progress.service';
 import { throwIfExecutionTimeExceeded } from '../timeout-validator';
 import { BaseExecutor } from './base-executor';
@@ -76,6 +77,7 @@ export const flowExecutor = {
 
     while (!isNil(currentAction)) {
       throwIfExecutionTimeExceeded();
+      await throwIfCancellationRequested(constants.flowRunId);
 
       const handler = this.getExecutorForAction(currentAction.type);
 
@@ -118,7 +120,7 @@ export const flowExecutor = {
   },
 };
 
-function sendProgress(
+async function sendProgress(
   flowExecutionContext: FlowExecutorContext,
   constants: EngineConstants,
 ): Promise<void> {

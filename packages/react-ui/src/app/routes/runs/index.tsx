@@ -5,6 +5,7 @@ import { CheckIcon } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { isModifierOrMiddleClick } from '@/app/common/navigation/table-navigation-helper';
 import { RunTypeContent } from '@/app/features/flow-runs/components/run-type';
 import { useRunsTableColumns } from '@/app/features/flow-runs/hooks/useRunsTableColumns';
 import { flowRunUtils } from '@/app/features/flow-runs/lib/flow-run-utils';
@@ -111,9 +112,10 @@ const FlowRunsPage = () => {
           fetchData={fetchData}
           filters={filters}
           refresh={refresh}
+          getRowHref={(row) => `/runs/${row.id}`}
           onRowClick={(row, e) => {
-            if (e.ctrlKey) {
-              window.open(`/runs/${row.id}`, '_blank');
+            if (isModifierOrMiddleClick(e)) {
+              return;
             } else {
               navigate(`/runs/${row.id}`);
             }

@@ -2,7 +2,6 @@ import { Store } from '@openops/blocks-framework';
 import {
   Action,
   ActionType,
-  FlowRunStatus,
   isEmpty,
   isNil,
   isString,
@@ -12,13 +11,13 @@ import {
 } from '@openops/shared';
 import cloneDeep from 'lodash.clonedeep';
 import { nanoid } from 'nanoid';
-import { isSizeValidationError } from '../helper/size-validation';
 import { createContextStore } from '../services/storage.service';
 import { BaseExecutor } from './base-executor';
 import { EngineConstants } from './context/engine-constants';
 import {
   ExecutionVerdict,
   FlowExecutorContext,
+  VerdictReason,
 } from './context/flow-execution-context';
 import { flowExecutor } from './flow-executor';
 
@@ -198,13 +197,6 @@ async function triggerLoopIterations(
       .setVerdict(ExecutionVerdict.RUNNING)
       .setCurrentPath(loopExecutionState.currentPath.removeLast())
       .setPauseId(originalPauseId);
-
-    if (
-      loopIterations[i].verdict === ExecutionVerdict.FAILED &&
-      isSizeValidationError(loopIterations[i].error?.message)
-    ) {
-      break;
-    }
   }
 
   loopExecutionContext.executionState = loopExecutionState;
@@ -231,7 +223,7 @@ async function waitForIterationsToFinishOrPause(
 
     const isPaused =
       verdict === ExecutionVerdict.PAUSED &&
-      verdictResponse?.reason === FlowRunStatus.PAUSED;
+      verdictResponse?.reason === VerdictReason.PAUSED;
 
     if (isPaused) {
       noPausedIterations = false;
@@ -374,7 +366,7 @@ async function generateNextFlowContext(
 
 function pauseLoop(executionState: FlowExecutorContext): FlowExecutorContext {
   return executionState.setVerdict(ExecutionVerdict.PAUSED, {
-    reason: FlowRunStatus.PAUSED,
+    reason: VerdictReason.PAUSED,
     pauseMetadata: {
       executionCorrelationId: executionState.pauseId,
     },

@@ -15,7 +15,6 @@ import {
   StopResponse,
 } from '@openops/shared';
 import { nanoid } from 'nanoid';
-import { validateExecutionSize } from '../../helper/size-validation';
 import { StepExecutionPath } from './step-execution-path';
 
 export enum ExecutionVerdict {
@@ -25,17 +24,23 @@ export enum ExecutionVerdict {
   FAILED = 'FAILED',
 }
 
+export enum VerdictReason {
+  STOPPED = 'STOPPED',
+  PAUSED = 'PAUSED',
+  INTERNAL_ERROR = 'INTERNAL_ERROR',
+}
+
 export type VerdictResponse =
   | {
-      reason: FlowRunStatus.PAUSED;
+      reason: VerdictReason.PAUSED;
       pauseMetadata: PauseMetadata;
     }
   | {
-      reason: FlowRunStatus.STOPPED;
+      reason: VerdictReason.STOPPED;
       stopResponse: StopResponse;
     }
   | {
-      reason: FlowRunStatus.INTERNAL_ERROR;
+      reason: VerdictReason.INTERNAL_ERROR;
     };
 
 export class FlowExecutorContext {
@@ -158,17 +163,6 @@ export class FlowExecutorContext {
     const targetMap = getStateAtPath({ currentPath: this.currentPath, steps });
     targetMap[stepName] = stepOutput;
 
-    const sizeValidation = validateExecutionSize(steps);
-    if (!sizeValidation.isValid) {
-      return this.createSizeValidationFailureContext(
-        stepName,
-        stepOutput,
-        steps,
-        targetMap,
-        sizeValidation.errorMessage,
-      );
-    }
-
     const error =
       stepOutput.status === StepOutputStatus.FAILED
         ? { stepName, message: stepOutput.errorMessage }
@@ -178,30 +172,6 @@ export class FlowExecutorContext {
       ...this,
       tasks: this.tasks,
       ...spreadIfDefined('error', error),
-      steps,
-    });
-  }
-
-  private createSizeValidationFailureContext(
-    stepName: string,
-    stepOutput: StepOutput,
-    steps: Record<string, StepOutput>,
-    targetMap: Record<string, StepOutput>,
-    errorMessage: string,
-  ): FlowExecutorContext {
-    const failedStepOutput = stepOutput
-      .setStatus(StepOutputStatus.FAILED)
-      .setErrorMessage(errorMessage);
-
-    failedStepOutput.output = undefined;
-    targetMap[stepName] = failedStepOutput;
-
-    return new FlowExecutorContext({
-      ...this,
-      tasks: this.tasks,
-      verdict: ExecutionVerdict.FAILED,
-      verdictResponse: undefined,
-      error: { stepName, message: errorMessage },
       steps,
     });
   }
@@ -281,7 +251,7 @@ export class FlowExecutorContext {
     switch (this.verdict) {
       case ExecutionVerdict.FAILED: {
         const verdictResponse = this.verdictResponse;
-        if (verdictResponse?.reason === FlowRunStatus.INTERNAL_ERROR) {
+        if (verdictResponse?.reason === VerdictReason.INTERNAL_ERROR) {
           return {
             ...baseExecutionOutput,
             error: this.error,
@@ -296,7 +266,7 @@ export class FlowExecutorContext {
       }
       case ExecutionVerdict.PAUSED: {
         const verdictResponse = this.verdictResponse;
-        if (verdictResponse?.reason !== FlowRunStatus.PAUSED) {
+        if (verdictResponse?.reason !== VerdictReason.PAUSED) {
           throw new Error(
             'Verdict Response should have pause metadata response',
           );
@@ -315,7 +285,7 @@ export class FlowExecutorContext {
       }
       case ExecutionVerdict.SUCCEEDED: {
         const verdictResponse = this.verdictResponse;
-        if (verdictResponse?.reason === FlowRunStatus.STOPPED) {
+        if (verdictResponse?.reason === VerdictReason.STOPPED) {
           return {
             ...baseExecutionOutput,
             status: FlowRunStatus.SUCCEEDED,

@@ -62,6 +62,8 @@ const statusCodeMap: Partial<Record<ErrorCode, StatusCodes>> = {
   [ErrorCode.EXISTING_USER]: StatusCodes.CONFLICT,
   [ErrorCode.EXISTING_ALERT_CHANNEL]: StatusCodes.CONFLICT,
   [ErrorCode.FLOW_IN_USE]: StatusCodes.CONFLICT,
+  [ErrorCode.FLOW_INTERNAL_FORBIDDEN]: StatusCodes.FORBIDDEN,
+  [ErrorCode.FLOW_OPERATION_INVALID]: StatusCodes.BAD_REQUEST,
   [ErrorCode.AUTHORIZATION]: StatusCodes.FORBIDDEN,
   [ErrorCode.SIGN_UP_DISABLED]: StatusCodes.FORBIDDEN,
   [ErrorCode.INVALID_CREDENTIALS]: StatusCodes.UNAUTHORIZED,

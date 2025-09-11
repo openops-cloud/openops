@@ -86,7 +86,7 @@ describe('Flow API', () => {
       expect(response?.statusCode).toBe(StatusCodes.CREATED);
       const responseBody = response?.json();
 
-      expect(Object.keys(responseBody)).toHaveLength(9);
+      expect(Object.keys(responseBody)).toHaveLength(10);
       expect(responseBody?.id).toHaveLength(21);
       expect(responseBody?.created).toBeDefined();
       expect(responseBody?.updated).toBeDefined();
@@ -162,7 +162,7 @@ describe('Flow API', () => {
       expect(response?.statusCode).toBe(StatusCodes.CREATED);
       const responseBody = response?.json();
 
-      expect(Object.keys(responseBody)).toHaveLength(9);
+      expect(Object.keys(responseBody)).toHaveLength(10);
       expect(responseBody?.id).toHaveLength(21);
 
       expect(responseBody?.created).toBeDefined();
@@ -236,7 +236,7 @@ describe('Flow API', () => {
       expect(response?.statusCode).toBe(StatusCodes.CREATED);
       const responseBody = response?.json();
 
-      expect(Object.keys(responseBody)).toHaveLength(9);
+      expect(Object.keys(responseBody)).toHaveLength(10);
       expect(responseBody?.id).toHaveLength(21);
       expect(responseBody?.created).toBeDefined();
       expect(responseBody?.updated).toBeDefined();
@@ -322,7 +322,7 @@ describe('Flow API', () => {
       expect(response?.statusCode).toBe(StatusCodes.OK);
       const responseBody = response?.json();
 
-      expect(Object.keys(responseBody)).toHaveLength(9);
+      expect(Object.keys(responseBody)).toHaveLength(10);
       expect(responseBody?.id).toBe(mockFlow.id);
       expect(responseBody?.created).toBeDefined();
       expect(responseBody?.updated).toBeDefined();
@@ -392,7 +392,7 @@ describe('Flow API', () => {
       expect(response?.statusCode).toBe(StatusCodes.OK);
       const responseBody = response?.json();
 
-      expect(Object.keys(responseBody)).toHaveLength(9);
+      expect(Object.keys(responseBody)).toHaveLength(10);
       expect(responseBody?.id).toBe(mockFlow.id);
       expect(responseBody?.created).toBeDefined();
       expect(responseBody?.updated).toBeDefined();
@@ -458,7 +458,7 @@ describe('Flow API', () => {
       expect(response?.statusCode).toBe(StatusCodes.OK);
       const responseBody = response?.json();
 
-      expect(Object.keys(responseBody)).toHaveLength(9);
+      expect(Object.keys(responseBody)).toHaveLength(10);
       expect(responseBody?.id).toBe(mockFlow.id);
       expect(responseBody?.created).toBeDefined();
       expect(responseBody?.updated).toBeDefined();
@@ -471,6 +471,66 @@ describe('Flow API', () => {
       expect(Object.keys(responseBody?.version)).toHaveLength(10);
       expect(responseBody?.version?.id).toBe(mockFlowVersion.id);
       expect(responseBody?.version?.state).toBe('LOCKED');
+    });
+
+    it('Fails to publish an internal flow', async () => {
+      const mockUser = createMockUser();
+      await databaseConnection().getRepository('user').save([mockUser]);
+
+      const mockOrganization = createMockOrganization({ ownerId: mockUser.id });
+      await databaseConnection()
+        .getRepository('organization')
+        .save(mockOrganization);
+
+      const mockProject = createMockProject({
+        ownerId: mockUser.id,
+        organizationId: mockOrganization.id,
+      });
+      await databaseConnection().getRepository('project').save([mockProject]);
+
+      const mockInternalFlow = createMockFlow({
+        projectId: mockProject.id,
+        status: FlowStatus.DISABLED,
+        isInternal: true,
+      });
+      await databaseConnection().getRepository('flow').save([mockInternalFlow]);
+
+      const mockFlowVersion = createMockFlowVersion({
+        flowId: mockInternalFlow.id,
+        updatedBy: mockUser.id,
+        state: FlowVersionState.DRAFT,
+      });
+      await databaseConnection()
+        .getRepository('flow_version')
+        .save([mockFlowVersion]);
+
+      const mockToken = await generateMockToken({
+        id: mockUser.id,
+        type: PrincipalType.USER,
+        projectId: mockProject.id,
+      });
+
+      const response = await app?.inject({
+        method: 'POST',
+        url: `/v1/flows/${mockInternalFlow.id}`,
+        body: {
+          type: FlowOperationType.LOCK_AND_PUBLISH,
+          request: {},
+        },
+        headers: {
+          authorization: `Bearer ${mockToken}`,
+        },
+      });
+
+      expect(response?.statusCode).toBe(StatusCodes.FORBIDDEN);
+      const responseBody = response?.json();
+      expect(responseBody?.code).toBe('FLOW_INTERNAL_FORBIDDEN');
+
+      const flowStillDisabled = await databaseConnection()
+        .getRepository('flow')
+        .findOneBy({ id: mockInternalFlow.id });
+      expect(flowStillDisabled?.status).toBe(FlowStatus.DISABLED);
+      expect(flowStillDisabled?.publishedVersionId).toBeNull();
     });
   });
 
@@ -581,6 +641,67 @@ describe('Flow API', () => {
       expect(responseBody?.data).toHaveLength(1);
       expect(responseBody?.data?.[0]?.id).toBe(mockFlow.id);
       expect(responseBody?.data?.[0]?.version?.id).toBe(mockFlowVersion.id);
+    });
+
+    it('Excludes internal flows from list', async () => {
+      const mockUser = createMockUser();
+      await databaseConnection().getRepository('user').save([mockUser]);
+
+      const mockOrganization = createMockOrganization({ ownerId: mockUser.id });
+      await databaseConnection()
+        .getRepository('organization')
+        .save(mockOrganization);
+
+      const mockProject = createMockProject({
+        organizationId: mockOrganization.id,
+        ownerId: mockUser.id,
+      });
+      await databaseConnection().getRepository('project').save([mockProject]);
+
+      const mockExternalFlow = createMockFlow({
+        projectId: mockProject.id,
+        isInternal: false,
+      });
+      const mockInternalFlow = createMockFlow({
+        projectId: mockProject.id,
+        isInternal: true,
+      });
+      await databaseConnection()
+        .getRepository('flow')
+        .save([mockExternalFlow, mockInternalFlow]);
+
+      const mockExternalFlowVersion = createMockFlowVersion({
+        flowId: mockExternalFlow.id,
+      });
+      const mockInternalFlowVersion = createMockFlowVersion({
+        flowId: mockInternalFlow.id,
+      });
+      await databaseConnection()
+        .getRepository('flow_version')
+        .save([mockExternalFlowVersion, mockInternalFlowVersion]);
+
+      const mockToken = await generateMockToken({
+        type: PrincipalType.USER,
+        projectId: mockProject.id,
+      });
+
+      const response = await app?.inject({
+        method: 'GET',
+        url: '/v1/flows',
+        query: {
+          projectId: mockProject.id,
+        },
+        headers: {
+          authorization: `Bearer ${mockToken}`,
+        },
+      });
+
+      expect(response?.statusCode).toBe(StatusCodes.OK);
+      const responseBody = response?.json();
+
+      expect(responseBody.data).toHaveLength(1);
+      expect(responseBody.data[0].id).toBe(mockExternalFlow.id);
+      expect(responseBody.data[0].isInternal).toBe(false);
     });
 
     it('Fails if a flow with no version exists', async () => {
@@ -1117,6 +1238,162 @@ describe('Flow API', () => {
       expect(responseBody.message).toBe(
         'Workflow execution started successfully',
       );
+    });
+
+    it('Fails to run an internal flow', async () => {
+      const mockUser = createMockUser({ id: openOpsId() });
+      await databaseConnection().getRepository('user').save([mockUser]);
+
+      const mockProject = createMockProject({
+        id: openOpsId(),
+        ownerId: mockUser.id,
+      });
+      await databaseConnection().getRepository('project').save([mockProject]);
+
+      const mockInternalFlow = createMockFlow({
+        id: openOpsId(),
+        projectId: mockProject.id,
+        status: FlowStatus.ENABLED,
+        isInternal: true,
+      });
+      await databaseConnection().getRepository('flow').save([mockInternalFlow]);
+
+      const mockFlowVersion = createMockFlowVersion({
+        id: openOpsId(),
+        flowId: mockInternalFlow.id,
+      });
+      await databaseConnection()
+        .getRepository('flow_version')
+        .save([mockFlowVersion]);
+
+      await databaseConnection()
+        .getRepository('flow')
+        .update(mockInternalFlow.id, {
+          publishedVersionId: mockFlowVersion.id,
+        });
+
+      const mockToken = await generateMockToken({
+        type: PrincipalType.USER,
+        projectId: mockProject.id,
+      });
+
+      const response = await app?.inject({
+        method: 'POST',
+        url: `/v1/flows/${mockInternalFlow.id}/run`,
+        headers: { authorization: `Bearer ${mockToken}` },
+      });
+
+      expect(response?.statusCode).toBe(StatusCodes.FORBIDDEN);
+      const responseBody = response?.json();
+      expect(responseBody?.code).toBe('FLOW_INTERNAL_FORBIDDEN');
+    });
+  });
+
+  describe('Delete Flow endpoint', () => {
+    it('Successfully deletes a non-internal flow', async () => {
+      const mockUser = createMockUser();
+      await databaseConnection().getRepository('user').save([mockUser]);
+
+      const mockOrganization = createMockOrganization({ ownerId: mockUser.id });
+      await databaseConnection()
+        .getRepository('organization')
+        .save(mockOrganization);
+
+      const mockProject = createMockProject({
+        ownerId: mockUser.id,
+        organizationId: mockOrganization.id,
+      });
+      await databaseConnection().getRepository('project').save([mockProject]);
+
+      const mockFlow = createMockFlow({
+        projectId: mockProject.id,
+        isInternal: false,
+      });
+      await databaseConnection().getRepository('flow').save([mockFlow]);
+
+      const mockFlowVersion = createMockFlowVersion({
+        flowId: mockFlow.id,
+      });
+      await databaseConnection()
+        .getRepository('flow_version')
+        .save([mockFlowVersion]);
+
+      const mockToken = await generateMockToken({
+        type: PrincipalType.USER,
+        projectId: mockProject.id,
+      });
+
+      const response = await app?.inject({
+        method: 'DELETE',
+        url: `/v1/flows/${mockFlow.id}`,
+        query: {
+          projectId: mockProject.id,
+        },
+        headers: {
+          authorization: `Bearer ${mockToken}`,
+        },
+      });
+
+      expect(response?.statusCode).toBe(StatusCodes.NO_CONTENT);
+
+      const deletedFlow = await databaseConnection()
+        .getRepository('flow')
+        .findOneBy({ id: mockFlow.id });
+      expect(deletedFlow).toBeNull();
+    });
+
+    it('Fails to delete an internal flow', async () => {
+      const mockUser = createMockUser();
+      await databaseConnection().getRepository('user').save([mockUser]);
+
+      const mockOrganization = createMockOrganization({ ownerId: mockUser.id });
+      await databaseConnection()
+        .getRepository('organization')
+        .save(mockOrganization);
+
+      const mockProject = createMockProject({
+        ownerId: mockUser.id,
+        organizationId: mockOrganization.id,
+      });
+      await databaseConnection().getRepository('project').save([mockProject]);
+
+      const mockInternalFlow = createMockFlow({
+        projectId: mockProject.id,
+        isInternal: true,
+      });
+      await databaseConnection().getRepository('flow').save([mockInternalFlow]);
+
+      const mockFlowVersion = createMockFlowVersion({
+        flowId: mockInternalFlow.id,
+      });
+      await databaseConnection()
+        .getRepository('flow_version')
+        .save([mockFlowVersion]);
+
+      const mockToken = await generateMockToken({
+        type: PrincipalType.USER,
+        projectId: mockProject.id,
+      });
+
+      const response = await app?.inject({
+        method: 'DELETE',
+        url: `/v1/flows/${mockInternalFlow.id}`,
+        query: {
+          projectId: mockProject.id,
+        },
+        headers: {
+          authorization: `Bearer ${mockToken}`,
+        },
+      });
+
+      expect(response?.statusCode).toBe(StatusCodes.FORBIDDEN);
+      const responseBody = response?.json();
+      expect(responseBody?.code).toBe('FLOW_INTERNAL_FORBIDDEN');
+
+      const flowStillExists = await databaseConnection()
+        .getRepository('flow')
+        .findOneBy({ id: mockInternalFlow.id });
+      expect(flowStillExists).toBeTruthy();
     });
   });
 });

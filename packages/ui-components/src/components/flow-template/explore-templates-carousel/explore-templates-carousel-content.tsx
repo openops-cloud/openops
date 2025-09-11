@@ -22,6 +22,7 @@ const ExploreTemplatesCarouselContent = ({
   return templates.map((template) => (
     <CarouselItem key={template.id} className="w-[327px] flex-none">
       <FlowTemplateCard
+        showAuthor={true}
         templateMetadata={template}
         onClick={() => onTemplateClick(template)}
       />

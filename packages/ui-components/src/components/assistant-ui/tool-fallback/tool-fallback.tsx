@@ -4,12 +4,17 @@ import {
   ToolCallMessagePartStatus,
 } from '@assistant-ui/react';
 import { useMemo } from 'react';
+import { z } from 'zod';
 import { tryParseJson } from '../../../lib/json-utils';
 import { Theme } from '../../../lib/theme';
 import { TestStepDataViewer } from '../../test-step-data-viewer/test-step-data-viewer';
 import { TOOL_STATUS_TYPES } from '../tool-status';
 import { BaseToolWrapper } from './base-tool-wrapper';
-import { formatToolResultForDisplay } from './tool-json-parser';
+import {
+  formatToolResultForDisplay,
+  hasContentError,
+  hasDirectError,
+} from './tool-json-parser';
 
 type ToolFallbackProps = ToolCallMessagePartProps & {
   theme: Theme;
@@ -46,6 +51,13 @@ export const ToolFallback = ({
   );
 };
 
+const CancelledResultSchema = z.object({
+  type: z.literal('json'),
+  value: z.object({
+    cancelled: z.literal(true),
+  }),
+});
+
 const extractResultStatus = (
   result: unknown,
   status: MessagePartStatus | ToolCallMessagePartStatus,
@@ -54,17 +66,21 @@ const extractResultStatus = (
     return status;
   }
 
-  if (
-    result &&
-    typeof result === 'object' &&
-    'isError' in result &&
-    result.isError
-  ) {
-    const errorStatus: MessagePartStatus = {
-      type: TOOL_STATUS_TYPES.INCOMPLETE,
-      reason: 'error',
-    };
-    return errorStatus;
+  if (result && typeof result === 'object') {
+    const cancelledResult = CancelledResultSchema.safeParse(result);
+    if (cancelledResult.success) {
+      return {
+        type: TOOL_STATUS_TYPES.REQUIRES_ACTION,
+        reason: 'tool-calls',
+      };
+    }
+
+    if (hasDirectError(result) || hasContentError(result)) {
+      return {
+        type: TOOL_STATUS_TYPES.INCOMPLETE,
+        reason: 'error',
+      };
+    }
   }
 
   return status;

@@ -1,7 +1,8 @@
-import { exceptionHandler, logger } from '@openops/server-shared';
+import { logger } from '@openops/server-shared';
 import {
   ApplicationError,
   Cursor,
+  EngineResponseStatus,
   ErrorCode,
   ExecutionState,
   ExecutionType,
@@ -16,8 +17,8 @@ import {
   FlowRunTriggerSource,
   FlowVersionId,
   isEmpty,
+  isFlowStateTerminal,
   isNil,
-  MAX_LOG_SIZE,
   openOpsId,
   PauseMetadata,
   ProgressUpdateType,
@@ -25,6 +26,7 @@ import {
   RunEnvironment,
   SeekPage,
   spreadIfDefined,
+  TERMINAL_STATUSES,
 } from '@openops/shared';
 import { nanoid } from 'nanoid';
 import { In, LessThan } from 'typeorm';
@@ -206,26 +208,26 @@ export const flowRunService = {
     return query.getCount();
   },
   async retry({ flowRunId, strategy }: RetryParams): Promise<FlowRun | null> {
-    switch (strategy) {
-      case FlowRetryStrategy.FROM_FAILED_STEP:
-        return flowRunService.addToQueue({
-          executionCorrelationId: nanoid(),
-          flowRunId,
-          executionType: ExecutionType.RESUME,
-          progressUpdateType: ProgressUpdateType.NONE,
-        });
-      case FlowRetryStrategy.ON_LATEST_VERSION: {
-        const payload =
-          await updateFlowRunToLatestFlowVersionIdAndReturnPayload(flowRunId);
-        return flowRunService.addToQueue({
-          executionCorrelationId: nanoid(),
-          payload,
-          flowRunId,
-          executionType: ExecutionType.BEGIN,
-          progressUpdateType: ProgressUpdateType.NONE,
-        });
-      }
+    if (strategy !== FlowRetryStrategy.ON_LATEST_VERSION) {
+      logger.warn(`The provided strategy (${strategy}) is not valid.`, {
+        flowRunId,
+        strategy,
+      });
+      return null;
     }
+
+    const payload = await updateFlowRunToLatestFlowVersionIdAndReturnPayload(
+      flowRunId,
+    );
+
+    return flowRunService.addToQueue({
+      executionCorrelationId: nanoid(),
+      payload,
+      flowRunId,
+      executionType: ExecutionType.BEGIN,
+      progressUpdateType: ProgressUpdateType.NONE,
+      flowRetryStrategy: strategy,
+    });
   },
   async addToQueue({
     flowRunId,
@@ -233,12 +235,14 @@ export const flowRunService = {
     executionCorrelationId,
     progressUpdateType,
     executionType,
+    flowRetryStrategy,
   }: {
     flowRunId: FlowRunId;
     executionCorrelationId: string;
     progressUpdateType: ProgressUpdateType;
     payload?: unknown;
     executionType: ExecutionType;
+    flowRetryStrategy?: FlowRetryStrategy;
   }): Promise<FlowRun | null> {
     logger.info(`[FlowRunService#resume] flowRunId=${flowRunId}`);
 
@@ -254,6 +258,14 @@ export const flowRunService = {
         },
       });
     }
+
+    verifyResumeEligibility({
+      flowRunId,
+      executionType,
+      flowRetryStrategy,
+      flowRunStatus: flowRunToResume.status,
+    });
+
     const pauseMetadata = flowRunToResume.pauseMetadata;
     return flowRunService.start({
       payload,
@@ -279,25 +291,47 @@ export const flowRunService = {
     projectId,
     tags,
     duration,
-  }: FinishParams): Promise<FlowRun> {
+  }: FinishParams): Promise<FlowRun | undefined> {
     const logFileId = await updateLogs({
       flowRunId,
       projectId,
       executionState,
     });
 
-    await flowRunRepo().update(flowRunId, {
-      status,
-      tasks,
-      ...spreadIfDefined(
-        'duration',
-        duration ? Math.floor(Number(duration)) : undefined,
-      ),
-      ...spreadIfDefined('logsFileId', logFileId),
-      terminationReason: undefined,
-      tags,
-      finishTime: new Date().toISOString(),
-    });
+    const result = await flowRunRepo()
+      .createQueryBuilder()
+      .update()
+      .set({
+        status,
+        tasks,
+        ...spreadIfDefined(
+          'duration',
+          duration ? Math.floor(Number(duration)) : undefined,
+        ),
+        ...spreadIfDefined('logsFileId', logFileId),
+        terminationReason: undefined,
+        tags,
+        finishTime: new Date().toISOString(),
+      })
+      .where('id = :id', { id: flowRunId })
+      .andWhere('status NOT IN (:...terminalStatuses)', {
+        terminalStatuses: TERMINAL_STATUSES,
+      })
+      .execute();
+
+    const skipped = result.affected === 0;
+    if (skipped) {
+      logger.debug(
+        `Update for workflow run (${flowRunId}) skipped. The workflow run already in a final state.`,
+        {
+          flowRunId,
+          newStatus: status,
+        },
+      );
+
+      return undefined;
+    }
+
     const flowRun = await this.getOnePopulatedOrThrow({
       id: flowRunId,
       projectId: undefined,
@@ -469,13 +503,6 @@ async function updateLogs({
     executionState,
   });
 
-  if (serializedLogs.byteLength > MAX_LOG_SIZE) {
-    const errors = new Error(
-      'Execution Output is too large, maximum size is ' + MAX_LOG_SIZE,
-    );
-    exceptionHandler.handle(errors);
-    throw errors;
-  }
   const fileId = flowRun.logsFileId ?? openOpsId();
   await fileService.save({
     fileId,
@@ -485,6 +512,33 @@ async function updateLogs({
     compression: FileCompression.GZIP,
   });
   return fileId;
+}
+
+function verifyResumeEligibility({
+  flowRunId,
+  flowRunStatus,
+  executionType,
+  flowRetryStrategy,
+}: {
+  flowRunId: FlowRunId;
+  flowRunStatus: FlowRunStatus;
+  executionType: ExecutionType;
+  flowRetryStrategy?: FlowRetryStrategy;
+}): void {
+  if (
+    !flowRetryStrategy &&
+    executionType === ExecutionType.RESUME &&
+    isFlowStateTerminal(flowRunStatus)
+  ) {
+    logger.info('Attempt to resume a workflow that is in a final state.');
+
+    throw new ApplicationError({
+      code: ErrorCode.FLOW_RUN_ENDED,
+      params: {
+        id: flowRunId,
+      },
+    });
+  }
 }
 
 type UpdateLogs = {

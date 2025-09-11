@@ -159,6 +159,74 @@ describe('getRecommendationsAction', () => {
     );
   });
 
+  test.each([
+    [[{ accountKey: 1, divisionId: 7, accountName: 'account1' }], 'account1'],
+    [
+      JSON.stringify([
+        { accountKey: 1, divisionId: 7, accountName: 'account1' },
+      ]),
+      'account1',
+    ],
+    [{ accountKey: 1, divisionId: 7, accountName: 'account1' }, 'account1'],
+    [
+      JSON.stringify({
+        accountKey: 1,
+        divisionId: 7,
+        accountName: 'account1',
+      }),
+      'account1',
+    ],
+  ])(
+    'should normalize accounts input: %p',
+    async (accountsInput, expectedAccountName) => {
+      getAnodotRecommendationsMock.mockResolvedValue('mockResult');
+      const context = createContext({
+        accounts: accountsInput,
+        recommendationTypes: ['aws-backup-outdated-snapshot'],
+        openedRecommendations: { from: '2021-01-01', to: '2021-12-31' },
+      });
+
+      const result = await getRecommendationsAction.run(context);
+
+      expect(result).toEqual({ [expectedAccountName]: 'mockResult' });
+      expect(getAnodotRecommendationsMock).toHaveBeenCalledTimes(1);
+      expect(getAnodotRecommendationsMock).toHaveBeenCalledWith(
+        'some api url',
+        'a bearer token',
+        'an account:1:7',
+        {
+          open_recs_creation_date: { from: '2021-01-01', to: '2021-12-31' },
+          status_filter: 'potential_savings',
+          type_id: { eq: ['aws-backup-outdated-snapshot'], negate: false },
+        },
+      );
+    },
+  );
+
+  test('should handle regular string as accounts input', async () => {
+    getAnodotRecommendationsMock.mockResolvedValue('mockResult');
+    const context = createContext({
+      accounts: 'just-a-string',
+      recommendationTypes: ['aws-backup-outdated-snapshot'],
+      openedRecommendations: { from: '2021-01-01', to: '2021-12-31' },
+    });
+
+    const result = await getRecommendationsAction.run(context);
+
+    expect(result).toEqual({ undefined: 'mockResult' });
+    expect(getAnodotRecommendationsMock).toHaveBeenCalledTimes(1);
+    expect(getAnodotRecommendationsMock).toHaveBeenCalledWith(
+      'some api url',
+      'a bearer token',
+      'an account:undefined:undefined',
+      {
+        open_recs_creation_date: { from: '2021-01-01', to: '2021-12-31' },
+        status_filter: 'potential_savings',
+        type_id: { eq: ['aws-backup-outdated-snapshot'], negate: false },
+      },
+    );
+  });
+
   function createContext(props: unknown) {
     return {
       ...jest.requireActual('@openops/blocks-framework'),

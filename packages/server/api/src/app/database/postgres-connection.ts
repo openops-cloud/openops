@@ -31,6 +31,8 @@ import { AddSuccessToFlowStepTestOutputTable1752487641303 } from './migrations/1
 import { UpdateUmbrellaRecommendationTypesAcrossFlowVersions1752758891771 } from './migrations/1752758891771-UpdateUmbrellaRecommendationTypesAcrossFlowVersions';
 import { AddTriggerSourceToFlowRun1754489349007 } from './migrations/1754489349007-AddTriggerSourceToFlowRun';
 import { MigrateStepTestOutputToNewCompressionAlgorithm1755942417309 } from './migrations/1755942417309-MigrateStepTestOutputToNewCompressionAlgorithm';
+import { AddIsWorkflowToFlowTable1756298583000 } from './migrations/1756298583000-AddIsWorkflowToFlowTable';
+import { RenameIsWorkflowToIsInternal1756377588949 } from './migrations/1756377588949-RenameIsWorkflowToIsInternal';
 
 const getSslConfig = (): boolean | TlsOptions => {
   const useSsl = system.get(AppSystemProp.POSTGRES_USE_SSL);
@@ -70,6 +72,8 @@ const getMigrations = (): (new () => MigrationInterface)[] => {
     UpdateUmbrellaRecommendationTypesAcrossFlowVersions1752758891771,
     AddTriggerSourceToFlowRun1754489349007,
     MigrateStepTestOutputToNewCompressionAlgorithm1755942417309,
+    AddIsWorkflowToFlowTable1756298583000,
+    RenameIsWorkflowToIsInternal1756377588949,
   ];
 };
 
