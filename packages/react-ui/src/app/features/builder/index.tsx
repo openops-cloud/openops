@@ -297,7 +297,7 @@ const BuilderPage = ({ children }: { children?: ReactNode }) => {
               collapsedSize={0}
               // todo constant
               maxSize={30}
-              className={cn('min-w-0 w-0 bg-background z-[25] shadow-sidebar', {
+              className={cn('min-w-0 w-0 bg-background z-10 shadow-sidebar', {
                 [LEFT_SIDEBAR_MIN_EFFECTIVE_WIDTH]:
                   leftSidebar !== LeftSideBarType.NONE,
                 'max-w-0': leftSidebar === LeftSideBarType.NONE,
