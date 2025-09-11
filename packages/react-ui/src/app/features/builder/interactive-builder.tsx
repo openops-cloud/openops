@@ -16,11 +16,16 @@ import {
   isNil,
   StepLocationRelativeToParent,
 } from '@openops/shared';
-import { MutableRefObject, useCallback, useEffect, useRef } from 'react';
+import {
+  MutableRefObject,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+} from 'react';
 import { useDebounceCallback } from 'usehooks-ts';
 import { StepSettingsAssistantUiChat } from './ai-chat/step-settings-assistant-ui-chat';
 import { textMentionUtils } from './block-properties/text-input-with-mentions/text-input-utils';
-import { BuilderHeader } from './builder-header/builder-header';
 import { useBuilderStateContext } from './builder-hooks';
 import { DataSelector } from './data-selector';
 import { DataSelectorSizeState } from './data-selector/data-selector-size-togglers';
@@ -51,6 +56,7 @@ const InteractiveBuilder = ({
   middlePanelSize,
   flowVersion,
   lefSideBarContainerWidth,
+  children,
 }: {
   selectedStep: string | null;
   clearSelectedStep: () => void;
@@ -61,6 +67,7 @@ const InteractiveBuilder = ({
   };
   lefSideBarContainerWidth: number;
   flowVersion: FlowVersion;
+  children?: ReactNode;
 }) => {
   const { onPaste } = usePaste();
 
@@ -155,7 +162,7 @@ const InteractiveBuilder = ({
       flowCanvasContainerId="flow-canvas-container"
     >
       <div ref={middlePanelRef} className="relative h-full w-full">
-        <BuilderHeader />
+        {children}
         <AiConfigurationPrompt className={'left-4 bottom-[70px]'} />
         <CanvasControls
           topOffset={FLOW_CANVAS_Y_OFFESET}

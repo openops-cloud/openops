@@ -19,7 +19,9 @@ jest.mock('@openops/common', () => commonMock);
 import {
   deleteResource,
   getResources,
+  listBlocksCommand,
   updateResourceProperties,
+  updateVariablesFile,
 } from '../src/lib/hcledit-cli';
 
 describe('Get Resources', () => {
@@ -215,6 +217,77 @@ describe('Delete Resource', () => {
       deleteResource(testTemplate, 'aws_instance', 'example'),
     ).rejects.toThrow(
       'Failed to modify the template. {"exitCode":1,"stdOut":"","stdError":"Error"}',
+    );
+  });
+});
+
+describe('Update Variables File', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('should update variables file successfully', async () => {
+    mockExecuteCommand.mockResolvedValue({
+      exitCode: 0,
+      stdOut: 'ok',
+      stdError: '',
+    });
+
+    const result = await updateVariablesFile(`a = 1`, [
+      { variableName: 'a', variableValue: 2 },
+      { variableName: 'b', variableValue: 'str' },
+      { variableName: 'c', variableValue: true },
+    ]);
+
+    expect(result).toContain('ok');
+    expect(mockWriteFile).toHaveBeenCalled();
+    expect(mockExecuteCommand).toHaveBeenCalledTimes(1);
+    expect(mockExecuteCommand).toHaveBeenCalledWith(
+      '/bin/bash',
+      expect.arrayContaining([
+        '-c',
+        expect.stringContaining(
+          "attribute set a '2' | hcledit attribute set b '\"str\"' | hcledit attribute set c 'true'",
+        ),
+      ]),
+    );
+  });
+
+  test('should throw an error if variables update fails', async () => {
+    mockExecuteCommand.mockResolvedValue({
+      exitCode: 1,
+      stdOut: '',
+      stdError: 'err',
+    });
+
+    await expect(
+      updateVariablesFile('a=1', [{ variableName: 'a', variableValue: 3 }]),
+    ).rejects.toThrow(
+      'Failed to modify the template. {"exitCode":1,"stdOut":"","stdError":"err"}',
+    );
+  });
+});
+
+describe('List Blocks Command', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('should list blocks successfully', async () => {
+    mockExecuteCommand.mockResolvedValue({
+      exitCode: 0,
+      stdOut: 'block.aws_instance.example',
+      stdError: '',
+    });
+
+    const result = await listBlocksCommand(testTemplate);
+
+    expect(result.exitCode).toBe(0);
+    expect(result.stdOut).toContain('block.aws_instance.example');
+    expect(mockExecuteCommand).toHaveBeenCalledTimes(1);
+    expect(mockExecuteCommand).toHaveBeenCalledWith(
+      '/bin/bash',
+      expect.arrayContaining([expect.stringContaining('block list')]),
     );
   });
 });
