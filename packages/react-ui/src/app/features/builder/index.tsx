@@ -44,7 +44,13 @@ import {
   TriggerType,
   WebsocketClientEvent,
 } from '@openops/shared';
-import { LEFT_SIDEBAR_MIN_EFFECTIVE_WIDTH } from '../../constants/sidebar';
+import {
+  BUILDER_LEFT_SIDEBAR_MAX_SIZE,
+  BUILDER_MIDDLE_PANEL_TOP_OFFSET,
+  BUILDER_RIGHT_SIDEBAR_MAX_SIZE,
+  DEFAULT_SIDEBAR_PANEL_SIZE,
+  LEFT_SIDEBAR_MIN_EFFECTIVE_WIDTH,
+} from '../../constants/sidebar';
 import { blocksHooks } from '../blocks/lib/blocks-hook';
 import { RunDetailsBar } from '../flow-runs/components/run-details-bar';
 import { LeftSideBarType, RightSideBarType } from './builder-types';
@@ -61,8 +67,6 @@ import { StepSettingsProvider } from './step-settings/step-settings-context';
 import { TreeView } from './tree-view';
 
 const minWidthOfSidebar = 'min-w-[max(20vw,400px)]';
-
-const MIDDLE_PANEL_TOP_OFFSET = 60;
 
 const useAnimateSidebar = (
   sidebarValue: LeftSideBarType | RightSideBarType,
@@ -85,7 +89,7 @@ const useAnimateSidebar = (
           handleRef.current.collapse();
         } else {
           const storedSize = getPanelSize(panelId);
-          const targetSize = storedSize || 25;
+          const targetSize = storedSize ?? DEFAULT_SIDEBAR_PANEL_SIZE;
           handleRef.current.expand(targetSize);
         }
       } catch (err) {
@@ -235,8 +239,7 @@ const BuilderPage = ({ children }: { children?: ReactNode }) => {
       const storedSize = getPanelSize(
         RESIZABLE_PANEL_IDS.BUILDER_RIGHT_SIDEBAR,
       );
-      // todo constant
-      const targetSize = storedSize || 25;
+      const targetSize = storedSize ?? DEFAULT_SIDEBAR_PANEL_SIZE;
       rightHandleRef.current.expand(targetSize);
     } else {
       rightHandleRef.current.collapse();
@@ -246,7 +249,7 @@ const BuilderPage = ({ children }: { children?: ReactNode }) => {
   const middlePanelSize = useMemo(() => {
     return {
       width: rawMiddlePanelSize.width,
-      height: rawMiddlePanelSize.height - MIDDLE_PANEL_TOP_OFFSET,
+      height: rawMiddlePanelSize.height - BUILDER_MIDDLE_PANEL_TOP_OFFSET,
     };
   }, [rawMiddlePanelSize.height, rawMiddlePanelSize.width]);
 
@@ -291,8 +294,7 @@ const BuilderPage = ({ children }: { children?: ReactNode }) => {
               order={1}
               collapsible={true}
               collapsedSize={0}
-              // todo constant
-              maxSize={30}
+              maxSize={BUILDER_LEFT_SIDEBAR_MAX_SIZE}
               className={cn('min-w-0 w-0 bg-background z-10', {
                 [LEFT_SIDEBAR_MIN_EFFECTIVE_WIDTH]:
                   leftSidebar !== LeftSideBarType.NONE,
@@ -364,7 +366,7 @@ const BuilderPage = ({ children }: { children?: ReactNode }) => {
               id={RESIZABLE_PANEL_IDS.BUILDER_RIGHT_SIDEBAR}
               defaultSize={0}
               minSize={0}
-              maxSize={60}
+              maxSize={BUILDER_RIGHT_SIDEBAR_MAX_SIZE}
               order={3}
               collapsible={true}
               collapsedSize={0}

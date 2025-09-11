@@ -11,6 +11,10 @@ import { AllowOnlyLoggedInUserOnlyGuard } from '@/app/common/guards/allow-logged
 import { useResizablePanelGroup } from '@/app/common/hooks/use-resizable-panel-group';
 import { RESIZABLE_PANEL_IDS } from '@/app/constants/layout';
 import {
+  GLOBAL_MAIN_PANEL_DEFAULT_SIZE,
+  GLOBAL_MAIN_PANEL_MIN_SIZE,
+  GLOBAL_SIDEBAR_MIN_SIZE,
+  GLOBAL_SIDEBAR_MINIMIZED_WIDTH,
   LEFT_SIDEBAR_MAX_SIZE,
   LEFT_SIDEBAR_MIN_EFFECTIVE_WIDTH,
   LEFT_SIDEBAR_MIN_SIZE,
@@ -20,10 +24,6 @@ import { AiChatResizablePanel } from '@/app/features/ai/assistant/ai-chat-resiza
 import { useAppStore } from '@/app/store/app-store';
 import { DashboardSideMenu } from '../side-menu/dashboard/dashboard-side-menu';
 import LeftSidebarResizablePanel from '../side-menu/left-sidebar';
-
-// todo -> move to constants
-const SIDEBAR_MIN_SIZE = 18;
-const SIDEBAR_MINIMIZED_WIDTH = 10;
 
 const MINIMIZED_NAVIGATION_ROUTES = [
   '/flows/',
@@ -111,12 +111,20 @@ export function GlobalLayout() {
           className="h-full"
         >
           <LeftSidebarResizablePanel
-            minSize={isMinimized ? SIDEBAR_MINIMIZED_WIDTH : SIDEBAR_MIN_SIZE}
+            minSize={
+              isMinimized
+                ? GLOBAL_SIDEBAR_MINIMIZED_WIDTH
+                : GLOBAL_SIDEBAR_MIN_SIZE
+            }
             maxSize={
-              isMinimized ? SIDEBAR_MINIMIZED_WIDTH : LEFT_SIDEBAR_MAX_SIZE
+              isMinimized
+                ? GLOBAL_SIDEBAR_MINIMIZED_WIDTH
+                : LEFT_SIDEBAR_MAX_SIZE
             }
             collapsedSize={
-              isMinimized ? SIDEBAR_MINIMIZED_WIDTH : LEFT_SIDEBAR_MIN_SIZE
+              isMinimized
+                ? GLOBAL_SIDEBAR_MINIMIZED_WIDTH
+                : LEFT_SIDEBAR_MIN_SIZE
             }
             isDragging={isDragging}
             className={cn(
@@ -147,13 +155,9 @@ export function GlobalLayout() {
           <ResizablePanel
             id={RESIZABLE_PANEL_IDS.MAIN}
             order={3}
-            className="flex-1 h-full overflow-hidden"
-            // todo constants
-            defaultSize={70}
-            minSize={50}
-            style={{
-              minWidth: '900px',
-            }}
+            className="flex-1 h-full overflow-hidden min-w-[900px]"
+            defaultSize={GLOBAL_MAIN_PANEL_DEFAULT_SIZE}
+            minSize={GLOBAL_MAIN_PANEL_MIN_SIZE}
           >
             <div className="relative h-full w-full">
               <AiConfigurationPrompt
