@@ -1,7 +1,6 @@
 import { useDraggable } from '@dnd-kit/core';
 import {
   BlockIcon,
-  Button,
   cn,
   DRAGGED_STEP_TAG,
   InvalidStepIcon,
@@ -34,9 +33,9 @@ import {
   isNil,
   TriggerType,
 } from '@openops/shared';
-import { ChevronDown, ChevronUp } from 'lucide-react';
 
 import { CanvasContextMenu } from '../context-menu/canvas-context-menu';
+import { CollapsibleButton } from './collapsible-button';
 
 function getStepStatus(
   stepName: string | undefined,
@@ -101,11 +100,6 @@ const WorkflowStepNode = React.memo(
       stepType === ActionType.BRANCH ||
       stepType === ActionType.SPLIT;
     const isCollapsed = isCollapsible && collapsedSteps.has(data.step!.name);
-    const preventDragAndSelect = (e: React.SyntheticEvent) => {
-      e.stopPropagation();
-      if (e.nativeEvent?.stopImmediatePropagation)
-        e.nativeEvent.stopImmediatePropagation();
-    };
 
     const isEmptyTriggerSelected =
       selectedStep === 'trigger' && data.step?.type === TriggerType.EMPTY;
@@ -169,6 +163,20 @@ const WorkflowStepNode = React.memo(
           {...listeners}
           {...{ [`data-${STEP_CONTEXT_MENU_ATTRIBUTE}`]: data.step!.name }}
         >
+          {!readonly && isCollapsible && (
+            <CollapsibleButton
+              isCollapsed={isCollapsed}
+              isSelected={isSelected}
+              onToggle={() => {
+                const name = data.step!.name;
+                selectStepByName(name);
+                toggleCollapsedStep(name);
+              }}
+              className="absolute left-0 -translate-x-full -ml-2 top-1/2 -translate-y-1/2 z-20
+             pointer-events-auto group-hover:bg-primary-200"
+            />
+          )}
+
           <div
             className="absolute text-accent-foreground text-sm opacity-0 transition-all duration-300 group-hover:opacity-100 "
             style={{
@@ -232,39 +240,15 @@ const WorkflowStepNode = React.memo(
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1">
-                      {!readonly && isCollapsible && (
-                        <Button
-                          variant="ghost"
-                          size="xs"
-                          aria-label={
-                            isCollapsed ? 'Expand node' : 'Collapse node'
-                          }
-                          aria-expanded={!isCollapsed}
-                          onMouseDown={preventDragAndSelect}
-                          onClick={(e) => {
-                            preventDragAndSelect(e);
-                            if (!readonly) toggleCollapsedStep(data.step!.name);
-                          }}
-                          className="h-6 w-6 p-0"
-                        >
-                          {isCollapsed ? (
-                            <ChevronUp size={16} strokeWidth={2} />
-                          ) : (
-                            <ChevronDown size={16} strokeWidth={2} />
-                          )}
-                        </Button>
-                      )}
-                      {!readonly && (
-                        <CanvasContextMenu
-                          data={data}
-                          isAction={isAction}
-                          openStepActionsMenu={openStepActionsMenu}
-                          setOpenStepActionsMenu={setOpenStepActionsMenu}
-                          setOpenBlockSelector={setOpenBlockSelector}
-                        />
-                      )}
-                    </div>
+                    {!readonly && (
+                      <CanvasContextMenu
+                        data={data}
+                        isAction={isAction}
+                        openStepActionsMenu={openStepActionsMenu}
+                        setOpenStepActionsMenu={setOpenStepActionsMenu}
+                        setOpenBlockSelector={setOpenBlockSelector}
+                      />
+                    )}
                   </div>
 
                   <div className="flex justify-between gap-[6px] w-full items-center">
