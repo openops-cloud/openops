@@ -41,7 +41,7 @@ import {
   flowVersionRepo,
   flowVersionService,
 } from '../flow-version/flow-version.service';
-import { flowFolderService, folderRepo } from '../folder/folder.service';
+import { flowFolderService } from '../folder/folder.service';
 import { flowStepTestOutputService } from '../step-test-output/flow-step-test-output.service';
 import { flowSideEffects } from './flow-service-side-effects';
 import {
@@ -485,7 +485,7 @@ export const flowService = {
     });
   },
 
-  async getFilterCondition() {
+  async filterVisibleFlows() {
     const flowFilterCondition =
       'COALESCE(flows."isInternal", false) = :isInternal';
     const flowFilterParams = { isInternal: false };

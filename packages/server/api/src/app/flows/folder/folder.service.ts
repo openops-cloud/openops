@@ -9,7 +9,6 @@ import {
   FolderId,
   isNil,
   openOpsId,
-  PopulatedFlow,
   ProjectId,
   UNCATEGORIZED_FOLDER_DISPLAY_NAME,
   UNCATEGORIZED_FOLDER_ID,

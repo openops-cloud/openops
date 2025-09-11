@@ -15,7 +15,7 @@ export const getUncategorizedFlows = async (
   let flowFilterParams: Record<string, unknown>;
 
   if (contentType === ContentType.WORKFLOW) {
-    const result = await flowService.getFilterCondition();
+    const result = await flowService.filterVisibleFlows();
     flowFilterCondition = result.flowFilterCondition;
     flowFilterParams = result.flowFilterParams;
   } else {
