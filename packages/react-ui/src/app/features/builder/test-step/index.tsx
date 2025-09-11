@@ -43,7 +43,7 @@ const TestStepContainer = React.memo(
     return (
       <Tabs
         defaultValue={TabListEnum.STEP_OUTPUT}
-        className="w-full flex flex-col items-start justify-start gap-4 pb-6"
+        className="w-full flex flex-col items-start justify-start gap-4 pb-2"
       >
         <TabsList className="grid grid-cols-2 bg-transparent border-none rounded-none w-full">
           <TabsTrigger

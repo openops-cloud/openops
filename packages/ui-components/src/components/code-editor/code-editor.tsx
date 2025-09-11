@@ -256,7 +256,7 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
             })}
           >
             <Editor
-              className="min-h-96"
+              className="min-h-[250px]"
               value={formatValue(currentValue)}
               language={currentLanguage}
               theme={editorTheme}

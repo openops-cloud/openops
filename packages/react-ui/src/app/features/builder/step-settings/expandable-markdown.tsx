@@ -27,7 +27,6 @@ export const ExpandableContent = ({
   const truncated = truncatedContent || truncateAtFirstSentence(fullContent);
   const shouldShowToggle = truncated.length < fullContent.length;
 
-  // Default alert styles
   const defaultAlertClass =
     'relative w-full border pl-4 pb-2 pr-4 flex flex-col gap-2 bg-background text-foreground rounded-[5px] text-xs font-normal';
 

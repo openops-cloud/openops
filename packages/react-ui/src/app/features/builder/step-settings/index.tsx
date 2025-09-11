@@ -248,7 +248,7 @@ const StepSettingsContainer = React.memo(() => {
         </div>
         <div className="w-full flex-1 min-h-0">
           <ScrollArea className="h-full">
-            <div className="flex flex-col gap-4 pl-8 pr-8 pb-6">
+            <div className="flex flex-col gap-4 pl-6 pr-6 pb-6">
               {!!stepMetadata && (
                 <BlockCardInfo
                   stepMetadata={stepMetadata}
@@ -256,82 +256,85 @@ const StepSettingsContainer = React.memo(() => {
                   stepTemplateMetadata={stepTemplateMetadata}
                 ></BlockCardInfo>
               )}
-              <Tabs defaultValue="configure" className="w-full">
-                <TabsList className="grid grid-cols-2 w-full h-10 rounded-sm">
-                  <TabsTrigger
-                    value="configure"
-                    className="text-base justify-start text-left py-1 rounded-xs"
-                  >
-                    Configure
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="test"
-                    className="text-base justify-start text-left py-1 rounded-xs"
-                  >
-                    Test
-                  </TabsTrigger>
-                </TabsList>
-                <TabsContent value="configure" className="mt-4">
-                  <div className="flex flex-col gap-4">
-                    {modifiedStep.type === ActionType.LOOP_ON_ITEMS && (
-                      <LoopsSettings readonly={readonly}></LoopsSettings>
-                    )}
-                    {modifiedStep.type === ActionType.CODE && (
-                      <CodeSettings readonly={readonly}></CodeSettings>
-                    )}
-                    {modifiedStep.type === ActionType.BRANCH && (
-                      <BranchSettings readonly={readonly}></BranchSettings>
-                    )}
-                    {modifiedStep.type === ActionType.SPLIT && (
-                      <SplitSettings readonly={readonly}></SplitSettings>
-                    )}
-                    {modifiedStep.type === ActionType.BLOCK && modifiedStep && (
-                      <BlockSettings
-                        step={modifiedStep}
-                        flowId={flowVersion.flowId}
-                        readonly={readonly}
-                      ></BlockSettings>
-                    )}
-                    {modifiedStep.type === TriggerType.BLOCK &&
-                      modifiedStep && (
-                        <BlockSettings
-                          step={modifiedStep}
-                          flowId={flowVersion.flowId}
-                          readonly={readonly}
-                        ></BlockSettings>
+              <div className="border rounded-md pt-0">
+                <Tabs defaultValue="configure" className="w-full">
+                  <TabsList className="grid grid-cols-2 w-full h-10 rounded-sm">
+                    <TabsTrigger
+                      value="configure"
+                      className="text-base justify-start text-left py-1 rounded-xs"
+                    >
+                      Configure
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="test"
+                      className="text-base justify-start text-left py-1 rounded-xs"
+                    >
+                      Test
+                    </TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="configure" className="mt-4">
+                    <div className="flex flex-col gap-4 pl-2 pr-2 pb-4">
+                      {modifiedStep.type === ActionType.LOOP_ON_ITEMS && (
+                        <LoopsSettings readonly={readonly}></LoopsSettings>
                       )}
-                    {[ActionType.CODE, ActionType.BLOCK].includes(
-                      modifiedStep.type as ActionType,
-                    ) && (
-                      <ActionErrorHandlingForm
-                        hideContinueOnFailure={
-                          modifiedStep.settings.errorHandlingOptions
-                            ?.continueOnFailure?.hide
-                        }
-                        disabled={readonly}
-                        hideRetryOnFailure={
-                          modifiedStep.settings.errorHandlingOptions
-                            ?.retryOnFailure?.hide
-                        }
-                      ></ActionErrorHandlingForm>
-                    )}
-                  </div>
-                </TabsContent>
-                <TabsContent value="test">
-                  {!readonly && (
-                    <div className="flex flex-col gap-4">
-                      {modifiedStep.type && (
-                        <TestStepContainer
-                          type={modifiedStep.type}
-                          flowId={flowVersion.flowId}
-                          flowVersionId={flowVersion.id}
-                          isSaving={saving}
-                        ></TestStepContainer>
+                      {modifiedStep.type === ActionType.CODE && (
+                        <CodeSettings readonly={readonly}></CodeSettings>
+                      )}
+                      {modifiedStep.type === ActionType.BRANCH && (
+                        <BranchSettings readonly={readonly}></BranchSettings>
+                      )}
+                      {modifiedStep.type === ActionType.SPLIT && (
+                        <SplitSettings readonly={readonly}></SplitSettings>
+                      )}
+                      {modifiedStep.type === ActionType.BLOCK &&
+                        modifiedStep && (
+                          <BlockSettings
+                            step={modifiedStep}
+                            flowId={flowVersion.flowId}
+                            readonly={readonly}
+                          ></BlockSettings>
+                        )}
+                      {modifiedStep.type === TriggerType.BLOCK &&
+                        modifiedStep && (
+                          <BlockSettings
+                            step={modifiedStep}
+                            flowId={flowVersion.flowId}
+                            readonly={readonly}
+                          ></BlockSettings>
+                        )}
+                      {[ActionType.CODE, ActionType.BLOCK].includes(
+                        modifiedStep.type as ActionType,
+                      ) && (
+                        <ActionErrorHandlingForm
+                          hideContinueOnFailure={
+                            modifiedStep.settings.errorHandlingOptions
+                              ?.continueOnFailure?.hide
+                          }
+                          disabled={readonly}
+                          hideRetryOnFailure={
+                            modifiedStep.settings.errorHandlingOptions
+                              ?.retryOnFailure?.hide
+                          }
+                        ></ActionErrorHandlingForm>
                       )}
                     </div>
-                  )}
-                </TabsContent>
-              </Tabs>
+                  </TabsContent>
+                  <TabsContent value="test">
+                    {!readonly && (
+                      <div className="flex flex-col gap-4 pl-2 pr-2">
+                        {modifiedStep.type && (
+                          <TestStepContainer
+                            type={modifiedStep.type}
+                            flowId={flowVersion.flowId}
+                            flowVersionId={flowVersion.id}
+                            isSaving={saving}
+                          ></TestStepContainer>
+                        )}
+                      </div>
+                    )}
+                  </TabsContent>
+                </Tabs>
+              </div>
             </div>
           </ScrollArea>
         </div>
