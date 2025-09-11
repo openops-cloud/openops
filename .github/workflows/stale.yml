@@ -1,0 +1,60 @@
+name: Close stale issues and PRs
+
+on:
+  schedule:
+    - cron: '30 16 * * 1'
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: 'Run in dry-run mode (no issues or PRs will be labelled or closed)'
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  issues: write
+  pull-requests: write
+  contents: read
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - id: stale
+        uses: actions/stale@v10
+        with:
+          debug-only: ${{ (github.event_name == 'workflow_dispatch' && github.event.inputs['dry-run'] == 'true') || 'false' }}
+
+          days-before-issue-stale: 60
+          days-before-issue-close: 5
+
+          days-before-pr-stale: 30
+          days-before-pr-close: 5
+
+          stale-issue-label: 'stale'
+          stale-issue-message: >
+            This issue has been automatically marked as stale because it has not had
+            activity in the last 60 days. It will be closed in 5 days if no further activity occurs. 
+            Please feel free to leave a comment if you believe the issue is still relevant.
+            Thank you for your contributions!
+
+          stale-pr-label: 'stale'
+          stale-pr-message: >
+            This pull request has been automatically marked as stale because it has not had
+            activity in the last 30 days. It will be closed in 5 days if no further activity occurs. 
+            Please feel free to give a status update by leaving a comment. 
+            Thank you for your contributions!
+
+          close-issue-message: >
+            This issue has been automatically closed because it has not had any further
+            activity in the last 5 days. Thank you for your contributions!
+          close-pr-message: >
+            This pull request has been automatically closed because it has not had any further
+            activity in the last 5 days. Thank you for your contributions!
+
+          operations-per-run: 50
+
+      - name: Show outputs
+        run: |
+          echo "Staled: ${{ steps.stale.outputs.staled-issues-prs }}"
+          echo "Closed: ${{ steps.stale.outputs.closed-issues-prs }}"
