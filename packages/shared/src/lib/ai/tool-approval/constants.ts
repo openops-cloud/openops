@@ -1,1 +1,0 @@
-export const DEFAULT_APPROVAL_TIMEOUT = 1 * 60 * 1000;
