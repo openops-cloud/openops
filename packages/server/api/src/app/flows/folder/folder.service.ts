@@ -17,7 +17,7 @@ import {
 import { repoFactory } from '../../core/db/repo-factory';
 import { flowService } from '../flow/flow.service';
 import { getFolderFlows } from './folder-flows';
-import { buildFolderTree, FolderWithFlows } from './folder-tree.utils';
+import { buildFolderTree } from './folder-tree.utils';
 import { FolderEntity, FolderSchema } from './folder.entity';
 import { getUncategorizedFlows } from './uncategorized-flows';
 
@@ -148,10 +148,7 @@ export const flowFolderService = {
       contentType = ContentType.WORKFLOW,
     } = params;
 
-    const folders = (await getFolderFlows(
-      projectId,
-      contentType,
-    )) as FolderWithFlows[];
+    const folders = await getFolderFlows(projectId, contentType);
 
     return buildFolderTree(
       folders,
