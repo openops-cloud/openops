@@ -297,11 +297,12 @@ const BuilderPage = ({ children }: { children?: ReactNode }) => {
               collapsedSize={0}
               // todo constant
               maxSize={30}
-              className={cn('min-w-0 w-0 bg-background z-10 shadow-sidebar', {
+              className={cn('min-w-0 w-0 bg-background z-10', {
                 [LEFT_SIDEBAR_MIN_EFFECTIVE_WIDTH]:
                   leftSidebar !== LeftSideBarType.NONE,
                 'max-w-0': leftSidebar === LeftSideBarType.NONE,
                 'transition-none': isDraggingHandle,
+                'shadow-sidebar': leftSidebar !== LeftSideBarType.NONE,
               })}
             >
               <div className="h-full w-full" ref={leftSidePanelRef}>
@@ -371,10 +372,11 @@ const BuilderPage = ({ children }: { children?: ReactNode }) => {
               order={3}
               collapsible={true}
               collapsedSize={0}
-              className={cn('min-w-0 bg-background z-30 shadow-sidebar', {
+              className={cn('min-w-0 bg-background z-30', {
                 [minWidthOfSidebar]: isRightSidebarVisible,
                 hidden: !isRightSidebarVisible,
                 'max-w-[600px]': isRightSidebarVisible,
+                'shadow-panel-left': isRightSidebarVisible,
               })}
               style={{
                 display: isRightSidebarVisible ? 'flex' : 'none',

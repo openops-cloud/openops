@@ -121,7 +121,7 @@ export function GlobalLayout() {
             isDragging={isDragging}
             className={cn(
               LEFT_SIDEBAR_MIN_EFFECTIVE_WIDTH,
-              'shadow-sidebar z-[11]',
+              'shadow-sidebar z-[12]',
               {
                 'min-w-[70px] max-w-[70px]': isMinimized,
               },

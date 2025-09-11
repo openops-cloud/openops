@@ -52,7 +52,7 @@ const AiChatResizablePanel = ({ onDragging }: AiChatResizablePanelProps) => {
         order={2}
         id={RESIZABLE_PANEL_IDS.AI_CHAT}
         className={cn('duration-0 min-w-0 shadow-sidebar', {
-          'min-w-[300px] max-w-[400px] border-r border-outline': showChat,
+          'min-w-[300px] max-w-[400px] z-[11]': showChat,
         })}
         // todo constant
         minSize={isAiChatOpened ? undefined : 15}
@@ -60,7 +60,7 @@ const AiChatResizablePanel = ({ onDragging }: AiChatResizablePanelProps) => {
         collapsible={true}
         defaultSize={getDefaultPanelSize()}
       >
-        <div className="w-full h-full flex bg-secondary overflow-hidden">
+        <div className="w-full h-full flex bg-secondary overflow-hidden border-r">
           <AssistantUiChat
             title={t('AI Assistant')}
             onClose={() => setIsAiChatOpened(false)}
