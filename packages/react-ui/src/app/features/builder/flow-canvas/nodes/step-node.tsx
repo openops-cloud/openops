@@ -173,7 +173,7 @@ const WorkflowStepNode = React.memo(
                 toggleCollapsedStep(name);
               }}
               className="absolute left-0 -translate-x-full -ml-2 top-1/2 -translate-y-1/2 z-20
-             pointer-events-auto group-hover:bg-primary-200"
+             pointer-events-auto"
             />
           )}
 

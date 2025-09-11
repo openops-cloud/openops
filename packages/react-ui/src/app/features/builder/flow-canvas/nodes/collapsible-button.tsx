@@ -1,8 +1,8 @@
 'use client';
 
-import { cn, Tooltip, TooltipContent } from '@openops/components/ui';
+import { Button, cn, Tooltip, TooltipContent } from '@openops/components/ui';
 import { TooltipTrigger } from '@radix-ui/react-tooltip';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronsDownUp, ChevronsUpDown } from 'lucide-react';
 
 type CollapsibleButtonProps = {
   isCollapsed: boolean;
@@ -28,18 +28,20 @@ export function CollapsibleButton({
 
   const isExpanded = !isCollapsed;
   const label = isCollapsed ? 'Expand node' : 'Collapse node';
+  const Icon = isCollapsed ? ChevronsDownUp : ChevronsUpDown;
 
   const colorClasses = cn(
-    'text-white bg-[#6B7280]',
-    'hover:bg-primary-200 group-hover:bg-primary-200',
-    (isSelected || isExpanded) && 'bg-primary-200 text-primary-foreground',
+    'text-white bg-muted-foreground',
+    'hover:bg-primary-200 group-hover:bg-primary-200 !text-white',
+    isSelected && 'bg-primary-200 text-primary-foreground',
   );
 
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="icon"
           onMouseDown={stopEventPropagation}
           onClick={(e) => {
             stopEventPropagation(e);
@@ -51,28 +53,13 @@ export function CollapsibleButton({
           title={label}
           className={cn(
             'inline-flex h-6 w-6 items-center justify-center rounded-full shadow-sm',
-            'focus:outline-none focus:ring-2 focus:ring-black/20',
             'disabled:opacity-50 disabled:cursor-not-allowed',
             colorClasses,
             className,
           )}
         >
-          <span className="flex flex-col items-center justify-center leading-none">
-            <ChevronUp
-              size={12}
-              strokeWidth={2.5}
-              className={cn(
-                '-mb-0.5 transition-transform',
-                isExpanded && 'rotate-180',
-              )}
-            />
-            <ChevronDown
-              size={12}
-              strokeWidth={2.5}
-              className={cn('transition-transform', isExpanded && 'rotate-180')}
-            />
-          </span>
-        </button>
+          <Icon size={16} strokeWidth={2.5} />
+        </Button>
       </TooltipTrigger>
       <TooltipContent side="left" className="text-xs">
         {isCollapsed ? 'Expand' : 'Collapse'}
