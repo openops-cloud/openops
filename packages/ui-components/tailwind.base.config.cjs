@@ -175,6 +175,7 @@ module.exports = {
         'step-container': '0px 0px 22px hsl(var(--border))',
         'add-button': 'var(--add-button-shadow)',
         sidebar: '0px 0px 10px 0px rgba(var(--sidebar-shadow-color))',
+        'sidbar-left': '0px 0px 10px 0px rgba(var(--sidebar-shadow-color))',
       },
       contain: {
         layout: 'layout',

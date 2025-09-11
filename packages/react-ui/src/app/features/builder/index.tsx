@@ -77,25 +77,21 @@ const useAnimateSidebar = (
   ].includes(sidebarValue);
 
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      requestAnimationFrame(() => {
-        try {
-          if (!handleRef.current) return;
+    requestAnimationFrame(() => {
+      try {
+        if (!handleRef.current) return;
 
-          if (sidebarbarClosed) {
-            handleRef.current.collapse();
-          } else {
-            const storedSize = getPanelSize(panelId);
-            const targetSize = storedSize || 25;
-            handleRef.current.expand(targetSize);
-          }
-        } catch (err) {
-          console.warn('Sidebar update skipped', err);
+        if (sidebarbarClosed) {
+          handleRef.current.collapse();
+        } else {
+          const storedSize = getPanelSize(panelId);
+          const targetSize = storedSize || 25;
+          handleRef.current.expand(targetSize);
         }
-      });
-    }, 10);
-
-    return () => clearTimeout(timeoutId);
+      } catch (err) {
+        console.warn('Sidebar update skipped', err);
+      }
+    });
   }, [sidebarValue, sidebarbarClosed, panelId, getPanelSize]);
 
   return handleRef;
@@ -376,11 +372,9 @@ const BuilderPage = ({ children }: { children?: ReactNode }) => {
                 [minWidthOfSidebar]: isRightSidebarVisible,
                 hidden: !isRightSidebarVisible,
                 'max-w-[600px]': isRightSidebarVisible,
-                'shadow-panel-left': isRightSidebarVisible,
+                'border-l': isRightSidebarVisible,
+                'shadow-sidebar': isRightSidebarVisible,
               })}
-              style={{
-                display: isRightSidebarVisible ? 'flex' : 'none',
-              }}
             >
               {isRightSidebarVisible && (
                 <StepSettingsProvider
