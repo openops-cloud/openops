@@ -1,5 +1,6 @@
 import {
   ApplicationError,
+  ContentType,
   CreateFolderRequest,
   Cursor,
   ErrorCode,
@@ -8,17 +9,17 @@ import {
   FolderId,
   isNil,
   openOpsId,
-  PopulatedFlow,
   ProjectId,
   UNCATEGORIZED_FOLDER_DISPLAY_NAME,
   UNCATEGORIZED_FOLDER_ID,
   UpdateFolderRequest,
 } from '@openops/shared';
 import { repoFactory } from '../../core/db/repo-factory';
-import { flowRepo } from '../flow/flow.repo';
 import { flowService } from '../flow/flow.service';
-import { buildFolderTree, FolderWithFlows } from './folder-tree.utils';
+import { getFolderFlows } from './folder-flows';
+import { buildFolderTree } from './folder-tree.utils';
 import { FolderEntity, FolderSchema } from './folder.entity';
+import { getUncategorizedFlows } from './uncategorized-flows';
 
 export const folderRepo = repoFactory(FolderEntity);
 
@@ -38,6 +39,7 @@ export const flowFolderService = {
       {
         projectId,
         displayName: request.displayName,
+        contentType: folder.contentType,
       },
     );
     if (folderWithDisplayName && folderWithDisplayName.id !== folderId) {
@@ -52,6 +54,15 @@ export const flowFolderService = {
       request.parentFolderId,
     );
 
+    if (parentFolder && parentFolder.contentType !== folder.contentType) {
+      throw new ApplicationError({
+        code: ErrorCode.VALIDATION,
+        params: {
+          message: 'Parent folder has different content type than the request',
+        },
+      });
+    }
+
     await folderRepo().update(folder.id, {
       displayName: request.displayName,
       parentFolder,
@@ -61,10 +72,12 @@ export const flowFolderService = {
   },
   async create(params: UpsertParams): Promise<FolderDto> {
     const { projectId, request } = params;
+    const requestContentType = request.contentType ?? ContentType.WORKFLOW;
     const folderWithDisplayName = await this.getOneByDisplayNameCaseInsensitive(
       {
         projectId,
         displayName: request.displayName,
+        contentType: requestContentType,
       },
     );
     if (!isNil(folderWithDisplayName)) {
@@ -86,8 +99,9 @@ export const flowFolderService = {
         projectId,
         parentFolder,
         displayName: request.displayName,
+        contentType: requestContentType,
       },
-      ['projectId', 'displayName'],
+      ['projectId', 'contentType', 'displayName'],
     );
 
     const folder = await folderRepo().findOneByOrFail({
@@ -128,76 +142,35 @@ export const flowFolderService = {
     return folder;
   },
   async listFolderFlows(params: ListFolderFlowsParams): Promise<FolderDto[]> {
-    const { projectId, includeUncategorizedFolder } = params;
-    const query = folderRepo()
-      .createQueryBuilder('folder')
-      .loadRelationCountAndMap('folder.numberOfFlows', 'folder.flows')
-      .leftJoinAndSelect('folder.parentFolder', 'parentFolder')
-      .leftJoinAndSelect(
-        'folder.flows',
-        'flows',
-        `flows.id IN (
-          SELECT f.id
-          FROM flow f
-          WHERE f."folderId" = folder.id
-          ORDER BY f.updated DESC
-          LIMIT 100
-        )`,
-      )
-      .leftJoinAndMapOne(
-        'flows.version',
-        'flow_version',
-        'flowVersion',
-        `flowVersion.id IN (
-          SELECT fv.id
-          FROM (
-            SELECT "id", "flowId", "created", "displayName"
-            FROM flow_version
-            WHERE "flowId" = flows.id
-            ORDER BY created DESC
-            LIMIT 1
-          ) fv
-        )`,
-      )
-      .where('folder.projectId = :projectId', { projectId })
-      .orderBy('folder."displayName"', 'ASC');
+    const {
+      projectId,
+      includeUncategorizedFolder,
+      contentType = ContentType.WORKFLOW,
+    } = params;
 
-    const folders = (await query.getMany()) as FolderWithFlows[];
+    const folders = await getFolderFlows(projectId, contentType);
 
     return buildFolderTree(
       folders,
       includeUncategorizedFolder
-        ? await flowFolderService.getUncategorizedFolder({ projectId })
+        ? await flowFolderService.getUncategorizedFolder({
+            projectId,
+            contentType,
+          })
         : undefined,
     );
   },
   async getUncategorizedFolder({
     projectId,
+    contentType = ContentType.WORKFLOW,
   }: {
     projectId: string;
+    contentType?: ContentType;
   }): Promise<FolderDto> {
-    const uncategorizedFlowsQuery = flowRepo()
-      .createQueryBuilder('flow')
-      .select(['flow.id', 'flow.projectId'])
-      .leftJoinAndMapOne(
-        'flow.version',
-        'flow_version',
-        'version',
-        `version.flowId = flow.id
-       AND version.id IN (
-          SELECT fv.id
-          FROM flow_version fv
-          WHERE fv."flowId" = flow.id
-          ORDER BY fv.created DESC
-          LIMIT 1
-      )`,
-      )
-      .addSelect(['version.displayName'])
-      .where('flow.folderId IS NULL')
-      .andWhere('flow.projectId = :projectId', { projectId })
-      .orderBy('flow.updated', 'DESC');
-
-    const uncategorizedFlows = await uncategorizedFlowsQuery.getMany();
+    const uncategorizedFlows = await getUncategorizedFlows(
+      projectId,
+      contentType,
+    );
 
     const uncategorizedFolderDto: FolderDto = {
       projectId,
@@ -208,10 +181,11 @@ export const flowFolderService = {
       numberOfFlows: uncategorizedFlows.length,
       flows: uncategorizedFlows.slice(0, 100).map((f) => ({
         id: f.id,
-        displayName: (f as unknown as PopulatedFlow).version.displayName,
+        displayName: f.version.displayName,
       })),
       subfolders: [],
       parentFolderId: undefined,
+      contentType,
     };
 
     return uncategorizedFolderDto;
@@ -219,13 +193,14 @@ export const flowFolderService = {
   async getOneByDisplayNameCaseInsensitive(
     params: GetOneByDisplayNameParams,
   ): Promise<Folder | null> {
-    const { projectId, displayName } = params;
+    const { projectId, displayName, contentType } = params;
     return folderRepo()
       .createQueryBuilder('folder')
       .where('folder.projectId = :projectId', { projectId })
       .andWhere('LOWER(folder.displayName) = LOWER(:displayName)', {
         displayName,
       })
+      .andWhere('folder.contentType = :contentType', { contentType })
       .getOne();
   },
   async getOneOrThrow(params: GetOneOrThrowParams): Promise<FolderDto> {
@@ -275,11 +250,13 @@ type ListParams = {
 type ListFolderFlowsParams = {
   projectId: ProjectId;
   includeUncategorizedFolder: boolean;
+  contentType?: ContentType;
 };
 
 type GetOneByDisplayNameParams = {
   projectId: ProjectId;
   displayName: string;
+  contentType: ContentType;
 };
 
 type GetOneOrThrowParams = {

@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+  labels:
+    app: {{ .Values.nginx.name }}
+data:
+  nginx.gateway.conf: |
+    server {
+        listen 80;
+        server_name openops;
+
+        client_max_body_size 10m;
+        client_body_buffer_size 1K;
+        client_header_buffer_size 1k;
+        large_client_header_buffers 4 16k;
+        add_header X-XSS-Protection "1; mode=block";
+        add_header Referrer-Policy "no-referrer-when-downgrade";
+        ssi off;
+        server_tokens off;
+
+        location / {
+            proxy_pass {{ include "openops.appServiceUrl" . }};
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+            # --- AI Streaming-specific settings ---
+            proxy_buffering off;
+            proxy_cache off;
+            chunked_transfer_encoding on;
+        }
+
+        location /api/socket.io {
+            proxy_pass {{ include "openops.appServiceUrl" . }}/socket.io;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "Upgrade";
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        }
+
+        location /openops-analytics {
+            proxy_pass {{ include "openops.analyticsServiceUrl" . }};
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        }
+
+        location /openops-tables/ws/core {
+            proxy_pass {{ include "openops.tablesServiceUrl" . }}/openops-tables/ws/core;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "Upgrade";
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        }
+
+        location /openops-tables {
+            client_max_body_size 512m;
+            proxy_pass {{ include "openops.tablesServiceUrl" . }};
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        }
+    }
