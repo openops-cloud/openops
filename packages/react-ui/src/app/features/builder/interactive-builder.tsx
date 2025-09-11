@@ -111,7 +111,6 @@ const InteractiveBuilder = ({
 
     if (isTextMentionInputFocused) {
       dispatch({ type: 'FOCUS_INPUT_WITH_MENTIONS' });
-      // setIsAiChatOpened(false);
       return;
     }
 

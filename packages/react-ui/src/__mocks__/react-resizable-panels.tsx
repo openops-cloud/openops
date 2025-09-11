@@ -47,7 +47,6 @@ export const PanelResizeHandle = React.forwardRef<
   </div>
 ));
 
-// Set display names for better debugging
 PanelGroup.displayName = 'PanelGroup';
 Panel.displayName = 'Panel';
 PanelResizeHandle.displayName = 'PanelResizeHandle';
