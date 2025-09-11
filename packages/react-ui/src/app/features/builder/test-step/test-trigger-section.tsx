@@ -224,6 +224,7 @@ const TestTriggerSection = React.memo(
     if (isBlockLoading) {
       return null;
     }
+
     const testTriggerNote =
       formValues.settings.triggerName === CATCH_WEBHOOK
         ? t('Please click on Test URL to generate sample data')
