@@ -189,11 +189,14 @@ const BuilderPage = ({ children }: { children?: ReactNode }) => {
       memorizedSelectedStep?.type === TriggerType.BLOCK,
   });
 
-  const isRightSidebarVisible =
-    rightSidebar === RightSideBarType.BLOCK_SETTINGS &&
-    !!memorizedSelectedStep &&
-    memorizedSelectedStep.type !== TriggerType.EMPTY &&
-    !isBlockLoading;
+  const isRightSidebarVisible = useMemo(() => {
+    return (
+      rightSidebar === RightSideBarType.BLOCK_SETTINGS &&
+      !!memorizedSelectedStep &&
+      memorizedSelectedStep.type !== TriggerType.EMPTY &&
+      !isBlockLoading
+    );
+  }, [rightSidebar, memorizedSelectedStep, isBlockLoading]);
 
   const rightHandleRef = useRef<ImperativePanelHandle>(null);
   const leftHandleRef = useAnimateSidebar(
