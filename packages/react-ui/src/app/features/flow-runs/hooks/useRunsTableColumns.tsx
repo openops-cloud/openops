@@ -35,8 +35,6 @@ type Column = ColumnDef<RowDataWithActions<FlowRun>> & {
   accessorKey: string;
 };
 
-
-
 export const useRunsTableColumns = (): Column[] => {
   const durationEnabled = flagsHooks.useFlag<boolean>(
     FlagId.SHOW_DURATION,
