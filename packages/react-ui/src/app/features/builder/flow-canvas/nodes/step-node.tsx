@@ -139,7 +139,48 @@ const WorkflowStepNode = React.memo(
       !!data.step?.settings.inputUiInfo?.sampleData && !readonly;
 
     return (
-      <>
+      <div className="relative group">
+        {isCollapsible && (
+          <>
+            <div
+              className={cn(
+                'absolute rounded-sm border border-solid border-border-300 transition-all group-hover:border-primary-200 pointer-events-none',
+                {
+                  'border-primary-200': isSelected,
+                  'bg-background': !isDragging,
+                  'border-none': isDragging,
+                  'shadow-none': isDragging,
+                },
+              )}
+              style={{
+                height: `${OPS_NODE_SIZE.stepNode.height}px`,
+                width: `${OPS_NODE_SIZE.stepNode.width - 16}px`,
+                top: '-8px',
+                left: '8px',
+                zIndex: 1,
+              }}
+            />
+
+            <div
+              className={cn(
+                'absolute rounded-sm border border-solid border-border-300 transition-all group-hover:border-primary-200 pointer-events-none',
+                {
+                  'border-primary-200': isSelected,
+                  'bg-background': !isDragging,
+                  'border-none': isDragging,
+                  'shadow-none': isDragging,
+                },
+              )}
+              style={{
+                height: `${OPS_NODE_SIZE.stepNode.height}px`,
+                width: `${OPS_NODE_SIZE.stepNode.width - 8}px`,
+                top: '-4px',
+                left: '4px',
+                zIndex: 2,
+              }}
+            />
+          </>
+        )}
         <div
           id={data.step!.name}
           style={{
@@ -304,7 +345,7 @@ const WorkflowStepNode = React.memo(
         </div>
 
         {hasSampleData && !isDragging && <SampleDataLabel />}
-      </>
+      </div>
     );
   },
 );
