@@ -12,7 +12,6 @@ import {
   FlowRun,
   FlowRunStatus,
   isFlowStateTerminal,
-  isNil,
   ListFlowRunsRequestQuery,
   OpenOpsId,
   Permission,
@@ -78,20 +77,10 @@ export const flowRunController: FastifyPluginCallbackTypebox = (
   );
 
   app.post('/:id/retry', RetryFlowRequest, async (req) => {
-    const flowRun = await flowRunService.retry({
+    return flowRunService.retry({
       flowRunId: req.params.id,
       strategy: req.body.strategy,
     });
-
-    if (isNil(flowRun)) {
-      throw new ApplicationError({
-        code: ErrorCode.FLOW_RUN_NOT_FOUND,
-        params: {
-          id: req.params.id,
-        },
-      });
-    }
-    return flowRun;
   });
 
   app.post('/:id/stop', StopFlowRequest, async (req) => {

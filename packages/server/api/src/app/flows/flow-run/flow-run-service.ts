@@ -2,7 +2,6 @@ import { logger } from '@openops/server-shared';
 import {
   ApplicationError,
   Cursor,
-  EngineResponseStatus,
   ErrorCode,
   ExecutionState,
   ExecutionType,
@@ -19,6 +18,7 @@ import {
   isEmpty,
   isFlowStateTerminal,
   isNil,
+  OpenOpsId,
   openOpsId,
   PauseMetadata,
   ProgressUpdateType,
@@ -79,9 +79,12 @@ const getFlowRunOrCreate = async (
   };
 };
 
-async function updateFlowRunToLatestFlowVersionIdAndReturnPayload(
+async function duplicateFlowRunWithUpdatedVersion(
   flowRunId: FlowRunId,
-): Promise<unknown> {
+): Promise<{
+  newFlowRunId: OpenOpsId;
+  payload: unknown;
+}> {
   const flowRun = await flowRunService.getOnePopulatedOrThrow({
     id: flowRunId,
     projectId: undefined,
@@ -89,12 +92,19 @@ async function updateFlowRunToLatestFlowVersionIdAndReturnPayload(
   const flowVersion = await flowVersionService.getLatestLockedVersionOrThrow(
     flowRun.flowId,
   );
-  await flowRunRepo().update(flowRunId, {
+
+  const savedFlowRun = await flowRunRepo().save({
+    ...flowRun,
     flowVersionId: flowVersion.id,
+    id: openOpsId(),
   });
-  return flowRun.steps
-    ? flowRun.steps[flowVersion.trigger.name]?.output
-    : undefined;
+
+  return {
+    newFlowRunId: savedFlowRun.id,
+    payload: flowRun.steps
+      ? flowRun.steps[flowVersion.trigger.name]?.output
+      : undefined,
+  };
 }
 
 function returnHandlerId(
@@ -216,14 +226,14 @@ export const flowRunService = {
       return null;
     }
 
-    const payload = await updateFlowRunToLatestFlowVersionIdAndReturnPayload(
+    const { newFlowRunId, payload } = await duplicateFlowRunWithUpdatedVersion(
       flowRunId,
     );
 
     return flowRunService.addToQueue({
       executionCorrelationId: nanoid(),
       payload,
-      flowRunId,
+      flowRunId: newFlowRunId,
       executionType: ExecutionType.BEGIN,
       progressUpdateType: ProgressUpdateType.NONE,
       flowRetryStrategy: strategy,
