@@ -52,6 +52,8 @@ const AiChatResizablePanel = ({ onDragging }: AiChatResizablePanelProps) => {
     }
   }, [showChat, getPanelSize]);
 
+  const size = getSize(hasActiveAiSettings, isAiChatOpened);
+
   return (
     <>
       <ResizablePanel
@@ -61,9 +63,10 @@ const AiChatResizablePanel = ({ onDragging }: AiChatResizablePanelProps) => {
         className={cn('duration-0 min-w-0 shadow-sidebar', {
           'min-w-[300px] max-w-[500px] z-[11]': showChat,
         })}
-        minSize={isAiChatOpened ? undefined : 0}
-        maxSize={isAiChatOpened ? undefined : 0}
+        minSize={size}
+        maxSize={size}
         collapsible={true}
+        collapsedSize={0}
         defaultSize={getDefaultPanelSize()}
       >
         <div className="w-full h-full flex bg-secondary overflow-hidden border-r">
@@ -78,6 +81,13 @@ const AiChatResizablePanel = ({ onDragging }: AiChatResizablePanelProps) => {
       )}
     </>
   );
+};
+
+const getSize = (hasActiveAiSettings: boolean, isAiChatOpened: boolean) => {
+  if (!hasActiveAiSettings) return 0;
+  // defaults to min-max pixes sizes defined on the container
+  if (isAiChatOpened) return undefined;
+  return 0;
 };
 
 AiChatResizablePanel.displayName = 'AiChatResizablePanel';
