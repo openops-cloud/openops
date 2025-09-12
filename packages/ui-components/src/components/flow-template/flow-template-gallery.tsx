@@ -69,7 +69,11 @@ const FlowTemplateGallery = ({
           className="mt-0 font-normal data-[state=active]:font-bold text-primary-300 text-base pr-0 pl-2 dark:text-white rounded-none border-b-none data-[state=active]:border-b-2 data-[state=active]:bg-background data-[state=active]:text-primary-300 data-[state=active]:dark:text-white data-[state=active]:shadow-none data-[state=active]:border-blueAccent-300"
         >
           <div className="flex items-center justify-center gap-2 mx-[14px]">
-            <span className="text-xl">{t('My Templates')}</span>
+            <span className="text-xl">
+              {showPrivateTemplates
+                ? t('Company templates')
+                : t('My organization templates')}
+            </span>
             {!showPrivateTemplates && (
               <Tooltip>
                 <TooltipTrigger

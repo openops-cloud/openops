@@ -16,7 +16,7 @@ import {
   TemplatesTabs,
   VerticalDivider,
 } from '@openops/components/ui';
-import { FlowTemplateDto, OpsEdition } from '@openops/shared';
+import { FlowTemplateDto } from '@openops/shared';
 import React from 'react';
 import { popupFeatures } from '../../cloud/lib/popup';
 import { useCloudProfile } from '../../cloud/lib/use-cloud-profile';
@@ -99,7 +99,6 @@ const SelectFlowTemplateDialogContent = ({
   const { isConnectedToCloudTemplates } = useCloudProfile();
   const { createPollingInterval } = useUserInfoPolling();
   const useCloudTemplates = flagsHooks.useShouldFetchCloudTemplates();
-  const { EDITION } = flagsHooks.useFlags().data;
   const isFullCatalog =
     !isTemplatePreselected &&
     (isConnectedToCloudTemplates || !useCloudTemplates);
@@ -174,7 +173,7 @@ const SelectFlowTemplateDialogContent = ({
         ) : (
           <FlowTemplateGallery
             selectionHeading={selectionHeading}
-            showPrivateTemplates={EDITION !== OpsEdition.COMMUNITY}
+            showPrivateTemplates={false}
             isPrivateCatalogCreated={isPrivateCatalogCreated}
             publicTemplates={publicTemplates}
             privateTemplates={privateTemplates}

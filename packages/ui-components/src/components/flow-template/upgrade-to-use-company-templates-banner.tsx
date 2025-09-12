@@ -17,7 +17,7 @@ const UpgradeToUseCompanyTemplatesBanner = ({
         </h2>
         <p className="text-base font-normal text-center">
           {t(
-            'Streamline your workflows by building and sharing custom best practices across your organization.',
+            'Curate best practices across your organization and publish them internally',
           )}
         </p>
       </div>
