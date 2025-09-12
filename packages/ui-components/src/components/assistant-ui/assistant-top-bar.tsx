@@ -18,7 +18,7 @@ const AssistantTopBar = ({
   children,
 }: AssistantTopBarProps) => {
   return (
-    <div className="flex justify-between items-center px-4 py-2 gap-2 text-md dark:text-primary font-bold border-b border-gray-200">
+    <div className="flex justify-between items-center px-4 py-2 gap-2 h-[61px] flex-shrink-0 text-md dark:text-primary font-bold border-b border-gray-200">
       <div className="flex items-center gap-2">
         <TooltipWrapper tooltipText={t('New chat')}>
           <Button

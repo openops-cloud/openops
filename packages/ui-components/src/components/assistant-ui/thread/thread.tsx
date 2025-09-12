@@ -84,7 +84,7 @@ export const Thread = ({
           <div className="min-h-8 flex-grow" />
         </ThreadPrimitive.If>
 
-        <div className="sticky bottom-0 mt-3 flex w-full flex-col items-center justify-end rounded-t-lg bg-inherit pb-4 z-20">
+        <div className="sticky bottom-0 mt-3 flex w-full flex-col items-center justify-end rounded-t-lg bg-inherit pb-4 z-10">
           <ThreadScrollToBottom />
           <Composer
             availableModels={availableModels}

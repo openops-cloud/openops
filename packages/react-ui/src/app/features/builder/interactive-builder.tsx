@@ -1,7 +1,5 @@
 import { FLOW_CANVAS_Y_OFFESET } from '@/app/constants/flow-canvas';
-import { AiAssistantButton } from '@/app/features/ai/ai-assistant-button';
 import { AiConfigurationPrompt } from '@/app/features/ai/ai-configuration-prompt';
-import { useAppStore } from '@/app/store/app-store';
 import {
   AI_CHAT_CONTAINER_SIZES,
   CanvasControls,
@@ -106,10 +104,6 @@ const InteractiveBuilder = ({
     state.applyMidpanelAction,
   ]);
 
-  const { setIsAiChatOpened } = useAppStore((s) => ({
-    setIsAiChatOpened: s.setIsAiChatOpened,
-  }));
-
   const checkFocus = useCallback(() => {
     const isTextMentionInputFocused = doesHaveInputThatUsesMentionClass(
       document.activeElement,
@@ -117,7 +111,6 @@ const InteractiveBuilder = ({
 
     if (isTextMentionInputFocused) {
       dispatch({ type: 'FOCUS_INPUT_WITH_MENTIONS' });
-      setIsAiChatOpened(false);
       return;
     }
 
@@ -128,7 +121,7 @@ const InteractiveBuilder = ({
     if (isClickAway) {
       dispatch({ type: 'PANEL_CLICK_AWAY' });
     }
-  }, [dispatch, setIsAiChatOpened]);
+  }, [dispatch]);
 
   const debouncedCheckFocus = useDebounceCallback(checkFocus, 100);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -164,15 +157,7 @@ const InteractiveBuilder = ({
       <div ref={middlePanelRef} className="relative h-full w-full">
         {children}
         <AiConfigurationPrompt className={'left-4 bottom-[70px]'} />
-        <CanvasControls
-          topOffset={FLOW_CANVAS_Y_OFFESET}
-          className={cn({
-            'left-[74px]': !lefSideBarContainerWidth,
-          })}
-        ></CanvasControls>
-        {!lefSideBarContainerWidth && (
-          <AiAssistantButton className="size-[42px] absolute left-4 bottom-[10px] z-50" />
-        )}
+        <CanvasControls topOffset={FLOW_CANVAS_Y_OFFESET}></CanvasControls>
         <div
           className="flex flex-col absolute bottom-0 right-0"
           ref={containerRef}
@@ -200,7 +185,7 @@ const InteractiveBuilder = ({
         </div>
 
         <div
-          className="h-screen w-full flex-1 z-10"
+          className="h-full w-full flex-1 z-10"
           id={FLOW_CANVAS_CONTAINER_ID}
         >
           <FlowBuilderCanvas
