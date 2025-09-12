@@ -5,3 +5,5 @@ export type ToolStepContext = {
 };
 
 export type ToolApprovalType = 'DefaultToolApproval' | 'RiskyStepToolApproval';
+
+export const APPROVAL_TOOL_NAME = 'backend_tool_approval';
