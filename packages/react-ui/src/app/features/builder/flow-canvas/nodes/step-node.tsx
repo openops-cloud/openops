@@ -11,6 +11,7 @@ import {
   STEP_CONTEXT_MENU_ATTRIBUTE,
   Tooltip,
   TooltipContent,
+  useCanvasContext,
   WorkflowNode,
 } from '@openops/components/ui';
 import { TooltipTrigger } from '@radix-ui/react-tooltip';
@@ -23,6 +24,7 @@ import { BlockSelector } from '@/app/features/builder/blocks-selector';
 import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
 import { flowRunUtils } from '@/app/features/flow-runs/lib/flow-run-utils';
 import {
+  ActionType,
   flowHelper,
   FlowOperationType,
   FlowRun,
@@ -33,6 +35,7 @@ import {
 } from '@openops/shared';
 
 import { CanvasContextMenu } from '../context-menu/canvas-context-menu';
+import { CollapsibleButton } from './collapsible-button';
 
 function getStepStatus(
   stepName: string | undefined,
@@ -90,6 +93,14 @@ const WorkflowStepNode = React.memo(
 
     const isTrigger = flowHelper.isTrigger(data.step!.type);
     const isAction = flowHelper.isAction(data.step!.type);
+    const { collapsedSteps, toggleCollapsedStep } = useCanvasContext();
+    const stepType = data.step?.type as ActionType | undefined;
+    const isCollapsible =
+      stepType === ActionType.LOOP_ON_ITEMS ||
+      stepType === ActionType.BRANCH ||
+      stepType === ActionType.SPLIT;
+    const isCollapsed = isCollapsible && collapsedSteps.has(data.step!.name);
+
     const isEmptyTriggerSelected =
       selectedStep === 'trigger' && data.step?.type === TriggerType.EMPTY;
 
@@ -128,7 +139,48 @@ const WorkflowStepNode = React.memo(
       !!data.step?.settings.inputUiInfo?.sampleData && !readonly;
 
     return (
-      <>
+      <div className="relative group">
+        {isCollapsible && (
+          <>
+            <div
+              className={cn(
+                'absolute rounded-sm border border-solid border-border-300 transition-all group-hover:border-primary-200 pointer-events-none',
+                {
+                  'border-primary-200': isSelected,
+                  'bg-background': !isDragging,
+                  'border-none': isDragging,
+                  'shadow-none': isDragging,
+                },
+              )}
+              style={{
+                height: `${OPS_NODE_SIZE.stepNode.height}px`,
+                width: `${OPS_NODE_SIZE.stepNode.width - 16}px`,
+                top: '-8px',
+                left: '8px',
+                zIndex: 1,
+              }}
+            />
+
+            <div
+              className={cn(
+                'absolute rounded-sm border border-solid border-border-300 transition-all group-hover:border-primary-200 pointer-events-none',
+                {
+                  'border-primary-200': isSelected,
+                  'bg-background': !isDragging,
+                  'border-none': isDragging,
+                  'shadow-none': isDragging,
+                },
+              )}
+              style={{
+                height: `${OPS_NODE_SIZE.stepNode.height}px`,
+                width: `${OPS_NODE_SIZE.stepNode.width - 8}px`,
+                top: '-4px',
+                left: '4px',
+                zIndex: 2,
+              }}
+            />
+          </>
+        )}
         <div
           id={data.step!.name}
           style={{
@@ -152,6 +204,19 @@ const WorkflowStepNode = React.memo(
           {...listeners}
           {...{ [`data-${STEP_CONTEXT_MENU_ATTRIBUTE}`]: data.step!.name }}
         >
+          {!readonly && isCollapsible && (
+            <CollapsibleButton
+              isCollapsed={isCollapsed}
+              isSelected={isSelected}
+              onToggle={() => {
+                const name = data.step!.name;
+                toggleCollapsedStep(name);
+              }}
+              className="absolute left-0 -translate-x-full -ml-2 top-1/2 -translate-y-1/2 z-20
+             pointer-events-auto"
+            />
+          )}
+
           <div
             className="absolute text-accent-foreground text-sm opacity-0 transition-all duration-300 group-hover:opacity-100 "
             style={{
@@ -280,7 +345,7 @@ const WorkflowStepNode = React.memo(
         </div>
 
         {hasSampleData && !isDragging && <SampleDataLabel />}
-      </>
+      </div>
     );
   },
 );

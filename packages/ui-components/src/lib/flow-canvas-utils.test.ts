@@ -635,4 +635,97 @@ describe('flowCanvasUtils', () => {
       });
     });
   });
+  describe('convertFlowVersionToGraph (collapsed mode)', () => {
+    it('collapsing a BRANCH node draws only one AFTER edge', () => {
+      const collapsed = new Set<string>(['step_1']);
+      const result = flowCanvasUtils.convertFlowVersionToGraph(
+        mockFlowVersionWithBranch,
+        { collapsedSteps: collapsed },
+      );
+
+      const edgesFromStep1 = result.edges
+        .filter((e) => e.source === 'step_1')
+        .map((e) => e.data);
+
+      expect(edgesFromStep1).toHaveLength(1);
+      expect(edgesFromStep1[0].stepLocationRelativeToParent).toBe('AFTER');
+
+      expect(
+        result.edges.some(
+          (e) =>
+            e.source === 'step_1' &&
+            (e.data.stepLocationRelativeToParent === 'INSIDE_TRUE_BRANCH' ||
+              e.data.stepLocationRelativeToParent === 'INSIDE_FALSE_BRANCH'),
+        ),
+      ).toBe(false);
+
+      expect(
+        result.nodes.some((n) => n.type === WorkflowNodeType.BRANCH_LABEL),
+      ).toBe(false);
+
+      expect(
+        result.nodes.some(
+          (n) =>
+            n.type === WorkflowNodeType.BIG_BUTTON &&
+            n.data?.parentStep === 'step_1',
+        ),
+      ).toBe(false);
+    });
+
+    it('collapsing a SPLIT node draws only one AFTER edge', () => {
+      const collapsed = new Set<string>(['step_1']); // collapse the split node
+      const result = flowCanvasUtils.convertFlowVersionToGraph(
+        mockFlowVersionWithSplit,
+        { collapsedSteps: collapsed },
+      );
+
+      const edgesFromStep1 = result.edges
+        .filter((e) => e.source === 'step_1')
+        .map((e) => e.data);
+
+      expect(edgesFromStep1).toHaveLength(1);
+      expect(edgesFromStep1[0].stepLocationRelativeToParent).toBe('AFTER');
+
+      expect(
+        result.edges.some(
+          (e) =>
+            e.source === 'step_1' &&
+            e.data.stepLocationRelativeToParent === 'INSIDE_SPLIT',
+        ),
+      ).toBe(false);
+
+      expect(
+        result.nodes.some((n) => n.type === WorkflowNodeType.BRANCH_LABEL),
+      ).toBe(false);
+      expect(
+        result.nodes.some(
+          (n) =>
+            n.type === WorkflowNodeType.BIG_BUTTON &&
+            n.data?.parentStep === 'step_1',
+        ),
+      ).toBe(false);
+    });
+
+    it('collapsing a LOOP node draws only one AFTER edge', () => {
+      const collapsed = new Set<string>(['step_1']);
+      const result = flowCanvasUtils.convertFlowVersionToGraph(
+        mockFlowVersionWithLoop,
+        { collapsedSteps: collapsed },
+      );
+
+      const edgesFromStep1 = result.edges
+        .filter((e) => e.source === 'step_1')
+        .map((e) => e.data);
+
+      expect(edgesFromStep1).toHaveLength(1);
+      expect(edgesFromStep1[0].stepLocationRelativeToParent).toBe('AFTER');
+
+      expect(
+        result.edges.some(
+          (e) =>
+            e.source === 'step_1' && e.data.targetType === 'loopPlaceholder',
+        ),
+      ).toBe(false);
+    });
+  });
 });
