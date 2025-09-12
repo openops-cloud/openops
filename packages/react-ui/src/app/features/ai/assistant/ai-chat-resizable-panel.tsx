@@ -77,7 +77,7 @@ const AiChatResizablePanel = ({ onDragging }: AiChatResizablePanelProps) => {
         </div>
       </ResizablePanel>
       {showChat && (
-        <ResizableHandle className={cn('w-0')} onDragging={onDragging} />
+        <ResizableHandle className="w-0" onDragging={onDragging} />
       )}
     </>
   );
