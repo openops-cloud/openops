@@ -2,6 +2,7 @@ import { Store } from '@openops/blocks-framework';
 import {
   Action,
   ActionType,
+  FlowRunId,
   isEmpty,
   isNil,
   isString,
@@ -9,7 +10,6 @@ import {
   LoopStepOutput,
   LoopStepResult,
 } from '@openops/shared';
-import cloneDeep from 'lodash.clonedeep';
 import { nanoid } from 'nanoid';
 import { createContextStore } from '../services/storage.service';
 import { BaseExecutor } from './base-executor';
@@ -20,14 +20,22 @@ import {
   VerdictReason,
 } from './context/flow-execution-context';
 import { flowExecutor } from './flow-executor';
+import { resumePausedIterationOldStrategy } from './loop-executor-old-resume';
 
 type LoopOnActionResolvedSettings = {
   items: readonly unknown[];
 };
 
+type IterationContext = {
+  index: number;
+  isPaused: boolean;
+  currentPath: string;
+  verdict: ExecutionVerdict;
+};
+
 type LoopExecutionContext = {
   executionState: FlowExecutorContext;
-  iterations: FlowExecutorContext[];
+  iterations: IterationContext[];
 };
 
 export const loopExecutor: BaseExecutor<LoopOnItemsAction> = {
@@ -114,25 +122,46 @@ export const loopExecutor: BaseExecutor<LoopOnItemsAction> = {
         return executionState.upsertStep(action.name, stepOutput);
       }
 
-      return waitForIterationsToFinishOrPause(
-        loopExecutionContext,
-        action.name,
-        store,
+      const { executionFailed, noPausedIterations } =
+        await saveIterationResults(
+          loopExecutionContext,
+          constants.flowRunId,
+          store,
+        );
+
+      return setExecutionVerdict(
+        loopExecutionContext.executionState,
+        noPausedIterations,
+        executionFailed,
       );
     }
 
-    executionState = await resumePausedIteration(
+    const iterationsMapping = await getLoopIterationsMapping(
       store,
+      constants.flowRunId,
+    );
+    if (iterationsMapping) {
+      return resumePausedIteration({
+        loopExecutionState: executionState,
+        actionName: action.name,
+        iterationsMapping,
+        firstLoopAction,
+        resolvedInput,
+        constants,
+        payload,
+        store,
+      });
+    }
+
+    return resumePausedIterationOldStrategy(
       payload,
       executionState,
+      resolvedInput.items.length,
       constants,
       firstLoopAction,
       action.name,
+      store,
     );
-
-    const numberOfIterations = resolvedInput.items.length;
-
-    return generateNextFlowContext(store, executionState, numberOfIterations);
   },
 };
 
@@ -169,8 +198,9 @@ async function triggerLoopIterations(
       loopName: action.name,
       iteration: i,
     });
+    const loopIndex = i + 1;
     stepOutput = stepOutput.setItemAndIndex({
-      index: i + 1,
+      index: loopIndex,
       item: resolvedInput.items[i],
     });
 
@@ -191,7 +221,16 @@ async function triggerLoopIterations(
       constants,
     });
 
-    loopIterations[i] = cloneDeep(loopExecutionState);
+    const isPaused =
+      loopExecutionState.verdict === ExecutionVerdict.PAUSED &&
+      loopExecutionState.verdictResponse?.reason === VerdictReason.PAUSED;
+
+    loopIterations[i] = {
+      isPaused,
+      index: loopIndex,
+      verdict: loopExecutionState.verdict,
+      currentPath: loopExecutionState.currentPath.toString(),
+    };
 
     loopExecutionState = loopExecutionState
       .setVerdict(ExecutionVerdict.RUNNING)
@@ -202,93 +241,65 @@ async function triggerLoopIterations(
   loopExecutionContext.executionState = loopExecutionState;
 }
 
-async function waitForIterationsToFinishOrPause(
+async function saveIterationResults(
   loopExecutionContext: LoopExecutionContext,
-  actionName: string,
+  flowRunId: FlowRunId,
   store: Store,
-): Promise<FlowExecutorContext> {
-  const iterationResults: {
-    iterationContext: FlowExecutorContext;
-    isPaused: boolean;
-  }[] = [];
+): Promise<{ executionFailed: boolean; noPausedIterations: boolean }> {
   let noPausedIterations = true;
   let executionFailed = false;
 
-  for (const iterationContext of loopExecutionContext.iterations) {
-    const { verdict, verdictResponse } = iterationContext;
+  const iterationsMapping: Record<string, IterationResult> = {};
 
+  for (const {
+    index,
+    verdict,
+    currentPath,
+    isPaused,
+  } of loopExecutionContext.iterations) {
     if (verdict === ExecutionVerdict.FAILED) {
       executionFailed = true;
     }
-
-    const isPaused =
-      verdict === ExecutionVerdict.PAUSED &&
-      verdictResponse?.reason === VerdictReason.PAUSED;
 
     if (isPaused) {
       noPausedIterations = false;
     }
 
-    iterationResults.push({ iterationContext, isPaused });
+    iterationsMapping[currentPath] = { isPaused, index };
   }
 
-  await saveIterationResults(store, actionName, iterationResults);
+  await storeLoopIterationsMapping(store, flowRunId, iterationsMapping);
+  return { executionFailed, noPausedIterations };
+}
+
+function setExecutionVerdict(
+  executionState: FlowExecutorContext,
+  noPausedIterations: boolean,
+  executionFailed: boolean,
+): FlowExecutorContext {
   if (executionFailed) {
-    return loopExecutionContext.executionState.setVerdict(
-      ExecutionVerdict.FAILED,
-    );
+    return executionState.setVerdict(ExecutionVerdict.FAILED);
   }
 
   if (noPausedIterations) {
-    return loopExecutionContext.executionState;
+    return executionState;
   }
 
-  return pauseLoop(loopExecutionContext.executionState);
+  return pauseLoop(executionState);
 }
 
-async function saveIterationResults(
-  store: Store,
-  actionName: string,
-  iterationResults: {
-    iterationContext: FlowExecutorContext;
-    isPaused: boolean;
-  }[],
-): Promise<void> {
-  for (let i = 0; i < iterationResults.length; ++i) {
-    const { iterationContext, isPaused } = iterationResults[i];
-
-    const iterationOutput = iterationContext.currentState()[
-      actionName
-    ] as LoopStepResult;
-    if (isPaused) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await store.put(iterationContext.currentPath.toString(), i);
-    }
-
-    await storeIterationResult(
-      `${i}`,
-      isPaused,
-      iterationOutput.index,
-      iterationOutput.item,
-      store,
-    );
-  }
-}
-
-async function resumePausedIteration(
-  store: Store,
-  payload: { executionCorrelationId: string; path: string },
-  loopExecutionState: FlowExecutorContext,
-  constants: EngineConstants,
-  firstLoopAction: Action,
-  actionName: string,
-): Promise<FlowExecutorContext> {
-  // Get which iteration is being resumed
-  const iterationKey = await getIterationKey(store, actionName, payload.path);
-
-  const previousIterationResult = (await store.get(
-    iterationKey,
-  )) as IterationResult;
+async function resumePausedIteration({
+  loopExecutionState,
+  iterationsMapping,
+  firstLoopAction,
+  resolvedInput,
+  actionName,
+  constants,
+  payload,
+  store,
+}: ResumeParameters): Promise<FlowExecutorContext> {
+  const path = buildPathKeyFromPayload(payload.path, actionName);
+  const previousIterationResult = iterationsMapping[path];
 
   const newCurrentPath = loopExecutionState.currentPath.loopIteration({
     loopName: actionName,
@@ -298,7 +309,7 @@ async function resumePausedIteration(
 
   const loopStepResult = getLoopStepResult(newExecutionContext);
   loopStepResult.index = Number(previousIterationResult.index);
-  loopStepResult.item = previousIterationResult.item;
+  loopStepResult.item = resolvedInput.items[previousIterationResult.index - 1];
 
   newExecutionContext = await flowExecutor.executeFromAction({
     executionState: newExecutionContext,
@@ -308,60 +319,59 @@ async function resumePausedIteration(
 
   const isPaused = newExecutionContext.verdict === ExecutionVerdict.PAUSED;
 
-  await storeIterationResult(
-    iterationKey,
+  iterationsMapping[path] = {
     isPaused,
-    previousIterationResult.index,
-    previousIterationResult.item,
-    store,
-  );
-
-  return newExecutionContext.setCurrentPath(
-    newExecutionContext.currentPath.removeLast(),
-  );
-}
-
-async function storeIterationResult(
-  key: string,
-  isPaused: boolean,
-  iterationIndex: number,
-  iterationItem: unknown,
-  store: Store,
-): Promise<void> {
-  const iterationResult: IterationResult = {
-    isPaused,
-    index: iterationIndex,
-    item: iterationItem,
+    index: previousIterationResult.index,
   };
 
-  await store.put(key, iterationResult);
+  await storeLoopIterationsMapping(
+    store,
+    constants.flowRunId,
+    iterationsMapping,
+  );
+
+  newExecutionContext = newExecutionContext.setCurrentPath(
+    newExecutionContext.currentPath.removeLast(),
+  );
+
+  return areAllStepsInLoopFinished(iterationsMapping)
+    ? newExecutionContext
+    : pauseLoop(newExecutionContext);
 }
 
-async function generateNextFlowContext(
-  store: Store,
-  loopExecutionState: FlowExecutorContext,
-  numberOfIterations: number,
-): Promise<FlowExecutorContext> {
+function areAllStepsInLoopFinished(
+  iterationsMapping: Record<string, IterationResult>,
+): boolean {
   let areAllStepsInLoopFinished = true;
-
-  for (
-    let iterationIndex = 0;
-    iterationIndex < numberOfIterations;
-    ++iterationIndex
-  ) {
-    const iterationResult: IterationResult | null = await store.get(
-      `${iterationIndex}`,
-    );
-
-    if (!iterationResult || iterationResult.isPaused) {
+  for (const [_key, value] of Object.entries(iterationsMapping)) {
+    if (!value || value.isPaused) {
       areAllStepsInLoopFinished = false;
       break;
     }
   }
 
-  return areAllStepsInLoopFinished
-    ? loopExecutionState
-    : pauseLoop(loopExecutionState);
+  return areAllStepsInLoopFinished;
+}
+
+async function storeLoopIterationsMapping(
+  store: Store,
+  key: string,
+  iterationsMapping: Record<string, IterationResult>,
+): Promise<void> {
+  await store.put(key, iterationsMapping);
+}
+
+async function getLoopIterationsMapping(
+  store: Store,
+  key: string,
+): Promise<Record<string, IterationResult> | null> {
+  const mapping = await store.get(key);
+
+  if (!mapping) {
+    return null;
+  }
+
+  return mapping as Record<string, IterationResult>;
 }
 
 function pauseLoop(executionState: FlowExecutorContext): FlowExecutorContext {
@@ -409,20 +419,6 @@ function buildPathKeyFromPayload(input: string, target: string): string {
   return filteredParts.join('.');
 }
 
-async function getIterationKey(
-  store: Store,
-  actionName: string,
-  payloadPath: string,
-): Promise<string> {
-  let iterationKey = (await store.get(payloadPath)) as string;
-
-  if (!iterationKey) {
-    const path = buildPathKeyFromPayload(payloadPath, actionName);
-    iterationKey = (await store.get(path)) as string;
-  }
-  return iterationKey;
-}
-
 function pathContainsAction(actionName: string, path: string): boolean {
   if (!path) {
     return false;
@@ -433,10 +429,19 @@ function pathContainsAction(actionName: string, path: string): boolean {
 }
 
 type IterationResult = {
-  // Iteration input
-  item: unknown;
   // Iteration index, starts at 1
   index: number;
   // Iteration state
   isPaused: boolean;
+};
+
+type ResumeParameters = {
+  payload: { executionCorrelationId: string; path: string };
+  iterationsMapping: Record<string, IterationResult>;
+  resolvedInput: LoopOnActionResolvedSettings;
+  loopExecutionState: FlowExecutorContext;
+  constants: EngineConstants;
+  firstLoopAction: Action;
+  actionName: string;
+  store: Store;
 };
