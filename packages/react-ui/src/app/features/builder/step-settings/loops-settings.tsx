@@ -11,6 +11,7 @@ import { useFormContext } from 'react-hook-form';
 
 import { useTheme } from '@/app/common/providers/theme-provider';
 import { TextInputWithMentions } from '../block-properties/text-input-with-mentions';
+import { ExpandableContent } from './expandable-markdown';
 
 const markdown = t(
   'Select the items to iterate over from the previous step by clicking on the **Items** input, which should be a **list** of items.\n\nThe loop will iterate over each item in the list and execute the next step for every item.',
@@ -30,7 +31,11 @@ const LoopsSettings = React.memo(({ readonly }: LoopsSettingsProps) => {
       name="settings.items"
       render={({ field }) => (
         <FormItem className="flex flex-col gap-2">
-          <Markdown markdown={markdown} theme={theme} />
+          <ExpandableContent fullContent={markdown}>
+            {(content) => (
+              <Markdown markdown={content} theme={theme} withBorder={false} />
+            )}
+          </ExpandableContent>
           <FormLabel>{t('Items')}</FormLabel>
           <TextInputWithMentions
             disabled={readonly}
