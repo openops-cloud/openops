@@ -29,11 +29,13 @@ import { useMemo, useState } from 'react';
 
 import { RunType } from '@/app/features/flow-runs/components/run-type';
 import { StopRunDialog } from '@/app/features/flow-runs/components/stop-run-dialog';
-import { flowRunUtils } from '../lib/flow-run-utils';
+import { flowRunUtils, shouldHideRunActions } from '../lib/flow-run-utils';
 
 type Column = ColumnDef<RowDataWithActions<FlowRun>> & {
   accessorKey: string;
 };
+
+
 
 export const useRunsTableColumns = (): Column[] => {
   const durationEnabled = flagsHooks.useFlag<boolean>(
@@ -153,15 +155,24 @@ export const useRunsTableColumns = (): Column[] => {
             const isSuccessfulRun =
               row.original.status === FlowRunStatus.SUCCEEDED;
             const isStopped = row.original.status === FlowRunStatus.STOPPED;
+            const isTestRun =
+              row.original.triggerSource === FlowRunTriggerSource.TEST_RUN;
 
             // eslint-disable-next-line react-hooks/rules-of-hooks
             const [isStopDialogOpen, setIsStopDialogOpen] = useState(false);
 
-            if (
-              ((isFailed || isStopped) &&
-                row.original.triggerSource === FlowRunTriggerSource.TEST_RUN) ||
-              (!isFailed && !isRunning && !isStopped && !isSuccessfulRun)
-            ) {
+            // eslint-disable-next-line react-hooks/rules-of-hooks
+            const hideRunActions = useMemo(() => {
+              return shouldHideRunActions({
+                isFailed,
+                isRunning,
+                isSuccessfulRun,
+                isStopped,
+                isTestRun,
+              });
+            }, [isFailed, isRunning, isSuccessfulRun, isStopped, isTestRun]);
+
+            if (hideRunActions) {
               return <div className="h-10"></div>;
             }
 
