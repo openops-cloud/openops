@@ -310,6 +310,7 @@
   "Type": "Type",
   "Start Time": "Start Time",
   "Retry on latest version": "Retry on latest version",
+  "Rerun on latest version": "Rerun on latest version",
   "Previous scheduled run is still in progress": "Previous scheduled run is still in progress",
   "Executing this workflow may modify resources in your  environment.": "Executing this workflow may modify resources in your  environment.",
   "Please review the upcoming actions and confirm if you wish to proceed: ": "Please review the upcoming actions and confirm if you wish to proceed: ",

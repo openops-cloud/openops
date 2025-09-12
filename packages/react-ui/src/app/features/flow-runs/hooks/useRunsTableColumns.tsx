@@ -150,6 +150,8 @@ export const useRunsTableColumns = (): Column[] => {
           cell: ({ row }) => {
             const isFailed = isFailedState(row.original.status);
             const isRunning = isRunningState(row.original.status);
+            const isSuccessfulRun =
+              row.original.status === FlowRunStatus.SUCCEEDED;
             const isStopped = row.original.status === FlowRunStatus.STOPPED;
 
             // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -158,7 +160,7 @@ export const useRunsTableColumns = (): Column[] => {
             if (
               ((isFailed || isStopped) &&
                 row.original.triggerSource === FlowRunTriggerSource.TEST_RUN) ||
-              (!isFailed && !isRunning && !isStopped)
+              (!isFailed && !isRunning && !isStopped && !isSuccessfulRun)
             ) {
               return <div className="h-10"></div>;
             }
@@ -176,7 +178,7 @@ export const useRunsTableColumns = (): Column[] => {
                     <EllipsisVertical className="h-10 w-10" />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    {(isFailed || isStopped) && (
+                    {(isFailed || isStopped || isSuccessfulRun) && (
                       <DropdownMenuItem
                         onClick={() =>
                           mutate({
@@ -187,7 +189,11 @@ export const useRunsTableColumns = (): Column[] => {
                       >
                         <div className="flex flex-row gap-2 items-center">
                           <RefreshCw className="h-4 w-4" />
-                          <span>{t('Retry on latest version')}</span>
+                          <span>
+                            {isSuccessfulRun
+                              ? t('Rerun on latest version')
+                              : t('Retry on latest version')}
+                          </span>
                         </div>
                       </DropdownMenuItem>
                     )}
