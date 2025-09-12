@@ -1,15 +1,20 @@
 'use client';
 
-import { Button, cn, Tooltip, TooltipContent } from '@openops/components/ui';
-import { TooltipTrigger } from '@radix-ui/react-tooltip';
+import {
+  Button,
+  cn,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@openops/components/ui';
 import { ChevronsDownUp, ChevronsUpDown } from 'lucide-react';
 
 type CollapsibleButtonProps = {
-  isCollapsed: boolean;
-  isSelected?: boolean;
-  onToggle: () => void;
-  className?: string;
-  disabled?: boolean;
+  readonly isCollapsed: boolean;
+  readonly isSelected?: boolean;
+  readonly onToggle: () => void;
+  readonly className?: string;
+  readonly disabled?: boolean;
 };
 
 export function CollapsibleButton({
@@ -28,9 +33,9 @@ export function CollapsibleButton({
 
   const isExpanded = !isCollapsed;
   const label = isCollapsed ? 'Expand node' : 'Collapse node';
-  const Icon = isCollapsed ? ChevronsDownUp : ChevronsUpDown;
+  const Icon = isCollapsed ? ChevronsUpDown : ChevronsDownUp;
 
-  const colorClasses = cn(
+  const buttonClasses = cn(
     'text-white bg-muted-foreground',
     'hover:bg-primary-200 group-hover:bg-primary-200 !text-white',
     isSelected && 'bg-primary-200 text-primary-foreground',
@@ -50,15 +55,21 @@ export function CollapsibleButton({
           disabled={disabled}
           aria-label={label}
           aria-expanded={isExpanded}
-          title={label}
           className={cn(
-            'inline-flex h-6 w-6 items-center justify-center rounded-full shadow-sm',
+            'inline-flex h-6 w-6 items-center justify-center rounded-full',
             'disabled:opacity-50 disabled:cursor-not-allowed',
-            colorClasses,
+            buttonClasses,
             className,
           )}
         >
-          <Icon size={16} strokeWidth={2.5} />
+          <span
+            className={cn(
+              'transition-transform duration-200 ease-in-out',
+              isCollapsed ? 'rotate-0' : 'rotate-180',
+            )}
+          >
+            <Icon size={16} strokeWidth={2.5} />
+          </span>
         </Button>
       </TooltipTrigger>
       <TooltipContent side="left" className="text-xs">
