@@ -146,7 +146,7 @@
     "ajv": "8.12.0",
     "async-mutex": "0.4.0",
     "aws-lambda": "1.0.7",
-    "axios": "1.8.2",
+    "axios": "1.12.1",
     "axios-retry": "4.4.1",
     "bcrypt": "5.1.1",
     "bullmq": "5.8.3",
