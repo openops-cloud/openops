@@ -179,7 +179,7 @@ const WorkflowStepNode = React.memo(
           {...listeners}
           {...{ [`data-${STEP_CONTEXT_MENU_ATTRIBUTE}`]: data.step!.name }}
         >
-          {!readonly && isCollapsible && (
+          {!readonly && isCollapsible && !isDragging && (
             <CollapsibleButton
               isCollapsed={isCollapsed}
               isSelected={isSelected}
