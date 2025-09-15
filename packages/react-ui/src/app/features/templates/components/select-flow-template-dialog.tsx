@@ -34,7 +34,7 @@ const SelectFlowTemplateDialog = ({
   isOpen,
   onOpenChange,
   preselectedSelectedTemplateMetadata,
-  preselectedTab,
+  preselectedTab = TemplatesTabs.Public,
 }: {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
@@ -48,9 +48,8 @@ const SelectFlowTemplateDialog = ({
   const [searchText, setSearchText] = useState('');
   const { updateHomePageOperationalViewFlag } =
     userSettingsHooks.useHomePageOperationalView();
-  const [activeTab, setActiveTab] = React.useState<TemplatesTabs>(
-    TemplatesTabs.Public,
-  );
+  const [activeTab, setActiveTab] =
+    React.useState<TemplatesTabs>(preselectedTab);
 
   const {
     isConnectionsPickerOpen,
