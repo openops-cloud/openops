@@ -146,9 +146,9 @@ const WorkflowStepNode = React.memo(
             {[
               { widthOffset: 16, top: '-8px', left: '8px', zIndex: 1 },
               { widthOffset: 8, top: '-4px', left: '4px', zIndex: 2 },
-            ].map((props, idx) => (
+            ].map((props) => (
               <StackedNodeLayer
-                key={idx}
+                key={`${props.widthOffset}-${props.zIndex}`}
                 {...props}
                 isSelected={isSelected}
                 isDragging={isDragging}
