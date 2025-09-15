@@ -41,6 +41,7 @@ type CreateActionParams<
   test?: ActionRunner<BlockAuth, ActionProps>;
   requireAuth?: boolean;
   errorHandlingOptions?: ErrorHandlingOptionsParam;
+  requireToolApproval?: boolean;
 };
 
 export class IAction<
@@ -58,6 +59,7 @@ export class IAction<
     public readonly test: ActionRunner<BlockAuth, ActionProps>,
     public readonly requireAuth: boolean,
     public readonly errorHandlingOptions: ErrorHandlingOptionsParam,
+    public readonly requireToolApproval: boolean,
   ) {}
 }
 
@@ -89,5 +91,6 @@ export const createAction = <
         defaultValue: false,
       },
     },
+    params.requireToolApproval ?? false,
   );
 };
