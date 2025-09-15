@@ -5,8 +5,11 @@ import {
 } from '@openops/components/ui';
 import { UserSettingsDefinition } from '@openops/shared';
 import { create } from 'zustand';
+import {
+  AI_CHAT_OPENED_KEY,
+  SIDEBAR_MINIMIZED_KEY,
+} from '../constants/sidebar';
 import { UserInfo } from '../features/cloud/lib/cloud-user-api';
-const SIDEBAR_MINIMIZED_KEY = 'dashboard-sidebar-minimized';
 
 type AppState = {
   isSidebarMinimized: boolean;
@@ -28,13 +31,13 @@ type AppState = {
   clearAiChatInput: () => void;
 };
 
-const getInitialSidebarState = (): boolean => {
-  const stored = localStorage.getItem(SIDEBAR_MINIMIZED_KEY);
-  return stored ? JSON.parse(stored) : false;
+const getInitialSidebarState = (key: string, defaultValue = false): boolean => {
+  const stored = localStorage.getItem(key);
+  return stored ? JSON.parse(stored) : defaultValue;
 };
 
 export const useAppStore = create<AppState>((set) => ({
-  isSidebarMinimized: getInitialSidebarState(),
+  isSidebarMinimized: getInitialSidebarState(SIDEBAR_MINIMIZED_KEY),
   setIsSidebarMinimized: (isMinimized) => {
     localStorage.setItem(SIDEBAR_MINIMIZED_KEY, JSON.stringify(isMinimized));
     set({ isSidebarMinimized: isMinimized });
@@ -45,8 +48,11 @@ export const useAppStore = create<AppState>((set) => ({
   setCloudUser: (user) => set({ cloudUser: user }),
   userSettings: {},
   setUserSettings: (userSettings) => set({ userSettings: userSettings }),
-  isAiChatOpened: false,
-  setIsAiChatOpened: (isAiChatOpened: boolean) => set({ isAiChatOpened }),
+  isAiChatOpened: getInitialSidebarState(AI_CHAT_OPENED_KEY),
+  setIsAiChatOpened: (isAiChatOpened: boolean) => {
+    localStorage.setItem(AI_CHAT_OPENED_KEY, JSON.stringify(isAiChatOpened));
+    set({ isAiChatOpened });
+  },
   aiChatSize: AI_CHAT_CONTAINER_SIZES.DOCKED,
   setAiChatSize: (size: AiAssistantChatSizeState) =>
     set({ aiChatSize: size, aiChatDimensions: null }),
