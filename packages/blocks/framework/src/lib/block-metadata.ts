@@ -79,10 +79,12 @@ export const ActionBase = Type.Object({
       'True if the action requires authentication. Defaults to false.',
   }),
   errorHandlingOptions: Type.Optional(ErrorHandlingOptionsParam),
-  requireToolApproval: Type.Boolean({
-    description:
-      'True if the action requires tool approval. Defaults to false.',
-  }),
+  requireToolApproval: Type.Optional(
+    Type.Boolean({
+      description:
+        'True if the action requires tool approval. Defaults to false.',
+    }),
+  ),
 });
 
 export type ActionBase = {
@@ -93,7 +95,7 @@ export type ActionBase = {
   riskLevel?: RiskLevel;
   requireAuth: boolean;
   errorHandlingOptions?: ErrorHandlingOptionsParam;
-  requireToolApproval: boolean;
+  requireToolApproval?: boolean;
 };
 
 export const TriggerBase = Type.Composite([
