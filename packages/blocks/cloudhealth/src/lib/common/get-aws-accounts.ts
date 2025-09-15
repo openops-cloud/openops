@@ -8,7 +8,7 @@ export async function getAwsAccounts(apiKey: string): Promise<unknown[]> {
   const perPage = 100;
 
   while (paginate) {
-    const response = await makeGetRequest(apiKey, `/api/aws_account`, {
+    const response = await makeGetRequest(apiKey, `/v1/aws_accounts`, {
       page: page.toString(),
       per_page: perPage.toString(),
     });
