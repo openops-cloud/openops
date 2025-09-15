@@ -7,7 +7,7 @@ export const getFolderFlows = async (
   contentType: ContentType,
 ): Promise<FolderWithFlows[]> => {
   const { condition: flowFilterCondition, params: flowFilterParams } =
-    await getFlowFilter(projectId, contentType);
+    await getFlowFilter(contentType);
 
   const qb = folderRepo()
     .createQueryBuilder('folder')

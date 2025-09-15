@@ -26,14 +26,12 @@ import { flowService } from '../../flow/flow.service';
 import { getFlowFilter } from '../flow-filter-util';
 
 describe('getFlowFilter', () => {
-  const projectId = 'project-1';
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   test('uses flowService.filterVisibleFlows for WORKFLOW', async () => {
-    const result = await getFlowFilter(projectId, ContentType.WORKFLOW);
+    const result = await getFlowFilter(ContentType.WORKFLOW);
 
     expect(flowService.filterVisibleFlows).toHaveBeenCalledTimes(1);
     expect(result).toEqual({

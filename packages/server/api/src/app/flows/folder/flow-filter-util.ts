@@ -7,7 +7,6 @@ export type FlowFilterResult = {
 };
 
 export async function getFlowFilter(
-  projectId: string,
   contentType: ContentType,
 ): Promise<FlowFilterResult> {
   if (contentType === ContentType.WORKFLOW) {

@@ -7,7 +7,7 @@ export const getUncategorizedFlows = async (
   contentType: ContentType,
 ): Promise<PopulatedFlow[]> => {
   const { condition: flowFilterCondition, params: flowFilterParams } =
-    await getFlowFilter(projectId, contentType);
+    await getFlowFilter(contentType);
 
   const qb = flowRepo()
     .createQueryBuilder('flows')
