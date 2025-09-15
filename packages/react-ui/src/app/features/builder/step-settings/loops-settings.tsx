@@ -33,7 +33,12 @@ const LoopsSettings = React.memo(({ readonly }: LoopsSettingsProps) => {
         <FormItem className="flex flex-col gap-2">
           <ExpandableContent fullContent={markdown}>
             {(content) => (
-              <Markdown markdown={content} theme={theme} withBorder={false} />
+              <Markdown
+                markdown={content}
+                theme={theme}
+                withBorder={false}
+                textClassName="leading-relaxed"
+              />
             )}
           </ExpandableContent>
           <FormLabel>{t('Items')}</FormLabel>

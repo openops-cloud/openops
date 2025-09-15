@@ -77,6 +77,7 @@ const CodeSettings = React.memo(({ readonly }: CodeSettingsProps) => {
                     markdown={content}
                     theme={theme}
                     withBorder={false}
+                    textClassName="leading-relaxed"
                   />
                 )}
               </ExpandableContent>
