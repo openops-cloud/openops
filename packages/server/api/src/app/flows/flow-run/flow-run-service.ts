@@ -2,7 +2,6 @@ import { logger } from '@openops/server-shared';
 import {
   ApplicationError,
   Cursor,
-  EngineResponseStatus,
   ErrorCode,
   ExecutionState,
   ExecutionType,
@@ -142,6 +141,9 @@ export const flowRunService = {
     let query = flowRunRepo().createQueryBuilder('flow_run').where({
       projectId,
     });
+    query = query
+      .innerJoin('flow_run.flow', 'flow')
+      .andWhere('flow.isInternal = :isInternal', { isInternal: false });
     if (flowId) {
       query = query.andWhere({
         flowId: In(flowId),
