@@ -262,22 +262,14 @@ const StepSettingsContainer = React.memo(() => {
                     <TabsTrigger
                       value="configure"
                       className="
-                      text-base justify-start text-primary-800 text-left font-normal
-                      rounded-t-sm rounded-tr-none rounded-b-none
-                      data-[state=active]:bg-gray-200 data-[state=active]:font-medium
-                      transition-colors duration-200
-                      border-b"
+                      text-base justify-start text-primary-800 text-left font-normal rounded-t-sm rounded-tr-none rounded-b-none data-[state=active]:bg-gray-200 data-[state=active]:font-medium transition-colors duration-200 border-b"
                     >
                       Configure
                     </TabsTrigger>
                     <TabsTrigger
                       value="test"
                       className="
-                      text-base justify-start text-primary-800 text-left font-normal
-                      rounded-t-sm rounded-tl-none rounded-b-none
-                      data-[state=active]:bg-gray-200 data-[state=active]:font-medium
-                      transition-colors duration-200
-                      border-b"
+                      text-base justify-start text-primary-800 text-left font-normal rounded-t-sm rounded-tl-none rounded-b-none data-[state=active]:bg-gray-200 data-[state=active]:font-medium transition-colors duration-200 border-b"
                     >
                       Test
                     </TabsTrigger>
