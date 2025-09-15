@@ -32,7 +32,7 @@ const MINIMIZED_NAVIGATION_ROUTES = [
   '/analytics',
 ];
 
-const UNAUTHENTHICATED_ROUTES = [
+const UNAUTHENTICATED_ROUTES = [
   '/sign-in',
   '/sign-up',
   '/forget-password',
@@ -57,7 +57,7 @@ export function GlobalLayout() {
 
   const { setPanelsSize } = useResizablePanelGroup();
 
-  const isUnauthenticatedRoute = UNAUTHENTHICATED_ROUTES.some(
+  const isUnauthenticatedRoute = UNAUTHENTICATED_ROUTES.some(
     (route) =>
       location.pathname.startsWith(route) &&
       !location.pathname.startsWith('/connections'),
