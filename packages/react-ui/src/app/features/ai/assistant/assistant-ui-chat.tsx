@@ -27,14 +27,14 @@ const AssistantUiChat = ({
   }, []);
 
   const [chatId, setChatId] = useState<string | null>(
-    localStorage.getItem(AI_ASSISTANT_LS_KEY),
+    sessionStorage.getItem(AI_ASSISTANT_LS_KEY),
   );
 
   const onChatIdChange = useCallback((id: string | null) => {
     if (id) {
-      localStorage.setItem(AI_ASSISTANT_LS_KEY, id);
+      sessionStorage.setItem(AI_ASSISTANT_LS_KEY, id);
     } else {
-      localStorage.removeItem(AI_ASSISTANT_LS_KEY);
+      sessionStorage.removeItem(AI_ASSISTANT_LS_KEY);
     }
 
     setChatId(id);
