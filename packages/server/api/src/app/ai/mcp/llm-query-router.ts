@@ -104,6 +104,14 @@ export async function routeQuery({
   }
 }
 
+const OUTPUT_REQUIREMENTS = `
+Return both the selected tool names and the array of query classifications.
+OUTPUT REQUIREMENTS (STRICT)
+- Output EXACTLY ONE valid JSON object (RFC 8259).
+- No prose, no markdown, no code fences, no extra objects, no trailing characters.
+- If uncertain, pick a single best set; DO NOT emit multiple alternatives.
+`;
+
 const getSystemPrompt = (
   toolList: Array<{ name: string; description: string }>,
   openopsTablesNames: string[],
@@ -114,14 +122,14 @@ const getSystemPrompt = (
     .join('\n');
   return (
     "Given the following conversation history and the list of available tools, select the tools that are most relevant to answer the user's request. " +
-    `Default tables in the system: "Business units", "Tag-Owner mapping", "Idle EBS Volumes to delete", "Auto EC2 instances shutdown", "Resource BU tag assignment", "Opportunities", "Aggregated Costs", "Known cost types by application", "Auto instances shutdown" ` +
+    'Default tables in the system: "Business units", "Tag-Owner mapping", "Idle EBS Volumes to delete", "Auto EC2 instances shutdown", "Resource BU tag assignment", "Opportunities", "Aggregated Costs", "Known cost types by application", "Auto instances shutdown". ' +
     `IMPORTANT: Tables tools should always be included in the output if the user asks a question involving those table names: ${openopsTablesNames.join(
       ', ',
     )}. ` +
     "Additionally, classify the user's query into one or more of the provided categories. A single query can qualify for multiple categories. " +
     'Include ALL relevant categories that apply to the query. ' +
-    `${uiContext ? `${buildUIContextSection(uiContext)}\n` : ''}
-    "Tools: ${toolsMessage}` +
-    'Return both the selected tool names and the array of query classifications.'
+    `${uiContext ? `${buildUIContextSection(uiContext)}\n` : ''}` +
+    `Tools: ${toolsMessage}.\n` +
+    OUTPUT_REQUIREMENTS
   );
 };
