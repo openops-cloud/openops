@@ -34,10 +34,12 @@ const SelectFlowTemplateDialog = ({
   isOpen,
   onOpenChange,
   preselectedSelectedTemplateMetadata,
+  preselectedTab,
 }: {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   preselectedSelectedTemplateMetadata?: FlowTemplateMetadataWithIntegrations;
+  preselectedTab?: TemplatesTabs;
 }) => {
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [selectedDomains, setSelectedDomains] = useState<string[]>([]);
@@ -79,6 +81,12 @@ const SelectFlowTemplateDialog = ({
   useEffect(() => {
     resetTemplateDialog();
   }, [selectedServices, selectedDomains, resetTemplateDialog]);
+
+  useEffect(() => {
+    if (preselectedTab) {
+      setActiveTab(preselectedTab);
+    }
+  }, [preselectedTab]);
 
   const useCloudTemplates = flagsHooks.useShouldFetchCloudTemplates();
 
