@@ -107,7 +107,7 @@ const BuilderTreeView = memo(
       <>
         <SidebarHeader
           onClose={onClose}
-          className="p-2 border-b text-primary-300 dark:text-primary"
+          className="p-2 border-b text-primary-300 dark:text-primary h-[61px] flex-shrink-0"
         >
           <div className="flex items-center justify-between w-full">
             <div className="flex gap-2 items-center">

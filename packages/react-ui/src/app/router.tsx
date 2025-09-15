@@ -27,10 +27,10 @@ import {
   OpsErrorBoundary,
   RouteErrorBoundary,
 } from './common/error-boundaries/ops-error-boundary';
-import { AllowOnlyLoggedInUserOnlyGuard } from './common/guards/allow-logged-in-user-only-guard';
 import { ConnectionsHeader } from './features/connections/components/connection-table';
 import { ConnectionsProvider } from './features/connections/components/connections-context';
-import { DashboardContainer } from './features/navigation/dashboard-container';
+import { GlobalLayout } from './features/navigation/layout/global-layout';
+import { RouteWrapper } from './features/navigation/layout/route-wrapper';
 import NotFoundPage from './routes/404-page';
 import { ChangePasswordPage } from './routes/change-password';
 import AppConnectionsPage from './routes/connections';
@@ -67,89 +67,81 @@ const createRoutes = () => {
 
   const routes = [
     {
-      path: '/flows',
+      path: 'flows',
       element: (
-        <DashboardContainer
-          pageHeader={<FlowsPageHeader title={t('Workflows')} />}
-        >
+        <RouteWrapper pageHeader={<FlowsPageHeader title={t('Workflows')} />}>
           <OpsErrorBoundary>
             <PageTitle title="Workflows">
               <FlowsPage />
             </PageTitle>
           </OpsErrorBoundary>
-        </DashboardContainer>
+        </RouteWrapper>
       ),
       errorElement: <RouteErrorBoundary />,
     },
     {
-      path: '/flows/:flowId',
+      path: 'flows/:flowId',
       element: (
-        <AllowOnlyLoggedInUserOnlyGuard>
-          <OpsErrorBoundary>
-            <PageTitle title="Builder">
-              <FlowBuilderPage />
-            </PageTitle>
-          </OpsErrorBoundary>
-        </AllowOnlyLoggedInUserOnlyGuard>
+        <OpsErrorBoundary>
+          <PageTitle title="Builder">
+            <FlowBuilderPage />
+          </PageTitle>
+        </OpsErrorBoundary>
       ),
       errorElement: <RouteErrorBoundary />,
     },
     {
-      path: '/runs/:runId',
+      path: 'runs/:runId',
       element: (
-        <AllowOnlyLoggedInUserOnlyGuard>
-          <OpsErrorBoundary>
-            <PageTitle title="Workflow Run">
-              <FlowRunPage />
-            </PageTitle>
-          </OpsErrorBoundary>
-        </AllowOnlyLoggedInUserOnlyGuard>
+        <OpsErrorBoundary>
+          <PageTitle title="Workflow Run">
+            <FlowRunPage />
+          </PageTitle>
+        </OpsErrorBoundary>
       ),
       errorElement: <RouteErrorBoundary />,
     },
     {
-      path: '/runs',
+      path: 'runs',
       element: (
-        <DashboardContainer
-          pageHeader={<PageHeader title={t('Workflow Runs')} />}
-        >
+        <RouteWrapper pageHeader={<PageHeader title={t('Workflow Runs')} />}>
           <OpsErrorBoundary>
             <PageTitle title="Runs">
               <FlowRunsPage />
             </PageTitle>
           </OpsErrorBoundary>
-        </DashboardContainer>
+        </RouteWrapper>
       ),
       errorElement: <RouteErrorBoundary />,
     },
     {
-      path: '/connections',
+      path: 'connections',
       element: (
         <ConnectionsProvider>
-          <DashboardContainer pageHeader={<ConnectionsHeader />}>
+          <RouteWrapper pageHeader={<ConnectionsHeader />}>
             <OpsErrorBoundary>
               <PageTitle title="Connections">
                 <AppConnectionsPage />
               </PageTitle>
             </OpsErrorBoundary>
-          </DashboardContainer>
+          </RouteWrapper>
         </ConnectionsProvider>
       ),
       errorElement: <RouteErrorBoundary />,
     },
     {
-      path: '/settings',
+      path: 'settings',
       element: (
-        <DashboardContainer pageHeader={<PageHeader title={t('Settings')} />}>
+        <RouteWrapper pageHeader={<PageHeader title={t('Settings')} />}>
           <OpsErrorBoundary>
             <SettingsRerouter />
           </OpsErrorBoundary>
-        </DashboardContainer>
+        </RouteWrapper>
       ),
       errorElement: <RouteErrorBoundary />,
     },
     {
-      path: '/forget-password',
+      path: 'forget-password',
       element: (
         <OpsErrorBoundary>
           <PageTitle title="Forget Password">
@@ -160,7 +152,7 @@ const createRoutes = () => {
       errorElement: <RouteErrorBoundary />,
     },
     {
-      path: '/reset-password',
+      path: 'reset-password',
       element: (
         <OpsErrorBoundary>
           <PageTitle title="Reset Password">
@@ -171,7 +163,7 @@ const createRoutes = () => {
       errorElement: <RouteErrorBoundary />,
     },
     {
-      path: '/sign-in',
+      path: 'sign-in',
       element: (
         <OpsErrorBoundary>
           <PageTitle title="Sign In">
@@ -182,7 +174,7 @@ const createRoutes = () => {
       errorElement: <RouteErrorBoundary />,
     },
     {
-      path: '/verify-email',
+      path: 'verify-email',
       element: (
         <OpsErrorBoundary>
           <PageTitle title="Verify Email">
@@ -193,7 +185,7 @@ const createRoutes = () => {
       errorElement: <RouteErrorBoundary />,
     },
     {
-      path: '/sign-up',
+      path: 'sign-up',
       element: (
         <OpsErrorBoundary>
           <PageTitle title="Sign Up">
@@ -204,9 +196,9 @@ const createRoutes = () => {
       errorElement: <RouteErrorBoundary />,
     },
     {
-      path: '/settings/appearance',
+      path: 'settings/appearance',
       element: (
-        <DashboardContainer pageHeader={<PageHeader title={t('Settings')} />}>
+        <RouteWrapper pageHeader={<PageHeader title={t('Settings')} />}>
           <ProjectSettingsLayout>
             <OpsErrorBoundary>
               <PageTitle title="Appearance">
@@ -214,14 +206,14 @@ const createRoutes = () => {
               </PageTitle>
             </OpsErrorBoundary>
           </ProjectSettingsLayout>
-        </DashboardContainer>
+        </RouteWrapper>
       ),
       errorElement: <RouteErrorBoundary />,
     },
     {
-      path: '/settings/general',
+      path: 'settings/general',
       element: (
-        <DashboardContainer pageHeader={<PageHeader title={t('Settings')} />}>
+        <RouteWrapper pageHeader={<PageHeader title={t('Settings')} />}>
           <ProjectSettingsLayout>
             <OpsErrorBoundary>
               <PageTitle title="General">
@@ -229,14 +221,14 @@ const createRoutes = () => {
               </PageTitle>
             </OpsErrorBoundary>
           </ProjectSettingsLayout>
-        </DashboardContainer>
+        </RouteWrapper>
       ),
       errorElement: <RouteErrorBoundary />,
     },
     {
-      path: '/settings/blocks',
+      path: 'settings/blocks',
       element: (
-        <DashboardContainer pageHeader={<PageHeader title={t('Settings')} />}>
+        <RouteWrapper pageHeader={<PageHeader title={t('Settings')} />}>
           <ProjectSettingsLayout>
             <OpsErrorBoundary>
               <PageTitle title="Blocks">
@@ -244,39 +236,39 @@ const createRoutes = () => {
               </PageTitle>
             </OpsErrorBoundary>
           </ProjectSettingsLayout>
-        </DashboardContainer>
+        </RouteWrapper>
       ),
       errorElement: <RouteErrorBoundary />,
     },
     {
-      path: '/tables',
+      path: 'tables',
       element: (
-        <DashboardContainer
+        <RouteWrapper
           useEntireInnerViewport
           pageHeader={<PageHeader title={t('Tables')} />}
         >
           <PageTitle title="Tables">
             <OpenOpsTablesPage />
           </PageTitle>
-        </DashboardContainer>
+        </RouteWrapper>
       ),
       errorElement: <RouteErrorBoundary />,
     },
     {
-      path: '/analytics',
+      path: 'analytics',
       element: (
-        <DashboardContainer useEntireInnerViewport>
+        <RouteWrapper useEntireInnerViewport>
           <OpsErrorBoundary>
             <PageTitle title="Analytics">
               <OpenOpsAnalyticsPage />
             </PageTitle>
           </OpsErrorBoundary>
-        </DashboardContainer>
+        </RouteWrapper>
       ),
       errorElement: <RouteErrorBoundary />,
     },
     {
-      path: '/404',
+      path: '404',
       element: (
         <OpsErrorBoundary>
           <PageTitle title="Not Found">
@@ -287,12 +279,12 @@ const createRoutes = () => {
       errorElement: <RouteErrorBoundary />,
     },
     {
-      path: '/redirect',
+      path: 'redirect',
       element: <RedirectPage></RedirectPage>,
       errorElement: <RouteErrorBoundary />,
     },
     {
-      path: '/*',
+      path: '*',
       element: (
         <OpsErrorBoundary>
           <PageTitle title="Redirect">
@@ -313,7 +305,7 @@ const createRoutes = () => {
     );
 
     routes.push({
-      path: '/connect',
+      path: 'connect',
       element: (
         <Suspense>
           <CloudConnectionPage />
@@ -322,7 +314,7 @@ const createRoutes = () => {
       errorElement: <RouteErrorBoundary />,
     });
     routes.push({
-      path: '/oauth/callback',
+      path: 'oauth/callback',
       element: (
         <Suspense>
           <CloudConnectionPage />
@@ -331,7 +323,7 @@ const createRoutes = () => {
       errorElement: <RouteErrorBoundary />,
     });
     routes.push({
-      path: '/oauth/logout',
+      path: 'oauth/logout',
       element: (
         <Suspense>
           <CloudLogoutPage />
@@ -343,9 +335,9 @@ const createRoutes = () => {
 
   if (!isDemoHomePage) {
     routes.push({
-      path: '/',
+      path: '',
       element: (
-        <DashboardContainer
+        <RouteWrapper
           pageHeader={
             <FlowsPageHeader title={t('Overview')}>
               <HomeHelpDropdown />
@@ -357,30 +349,30 @@ const createRoutes = () => {
               <HomePage />
             </PageTitle>
           </OpsErrorBoundary>
-        </DashboardContainer>
+        </RouteWrapper>
       ),
       errorElement: <RouteErrorBoundary />,
     });
   } else {
     routes.push({
-      path: '/',
+      path: '',
       element: (
-        <DashboardContainer pageHeader={<HomeDemoPageHeader />}>
+        <RouteWrapper pageHeader={<HomeDemoPageHeader />}>
           <OpsErrorBoundary>
             <PageTitle title="Home">
               <HomeDemoPage />
             </PageTitle>
           </OpsErrorBoundary>
-        </DashboardContainer>
+        </RouteWrapper>
       ),
       errorElement: <RouteErrorBoundary />,
     });
   }
 
   routes.push({
-    path: '/settings/ai',
+    path: 'settings/ai',
     element: (
-      <DashboardContainer pageHeader={<PageHeader title={t('Settings')} />}>
+      <RouteWrapper pageHeader={<PageHeader title={t('Settings')} />}>
         <ProjectSettingsLayout>
           <OpsErrorBoundary>
             <PageTitle title="AI providers">
@@ -388,7 +380,7 @@ const createRoutes = () => {
             </PageTitle>
           </OpsErrorBoundary>
         </ProjectSettingsLayout>
-      </DashboardContainer>
+      </RouteWrapper>
     ),
     errorElement: <RouteErrorBoundary />,
   });
@@ -397,7 +389,13 @@ const createRoutes = () => {
 };
 
 const ApplicationRouter = () => {
-  const router = createBrowserRouter(createRoutes());
+  const router = createBrowserRouter([
+    {
+      path: '/',
+      element: <GlobalLayout />,
+      children: createRoutes(),
+    },
+  ]);
   return <RouterProvider router={router}></RouterProvider>;
 };
 

@@ -45,6 +45,15 @@ export const AllowOnlyLoggedInUserOnlyGuard = ({
   const isLoggedIn = authenticationSession.isLoggedIn();
   const expired = !token || isJwtExpired(token);
 
+  projectHooks.prefetchProject();
+  platformHooks.prefetchPlatform();
+  platformHooks.prefetchNewerVersionInfo(queryClient);
+
+  flagsHooks.useFlags();
+  userSettingsHooks.useUserSettings();
+  userHooks.useUserMeta();
+  appConnectionsHooks.useConnectionsMetadata();
+
   useEffect(() => {
     let isMounted = true;
     async function doLogout() {
@@ -71,15 +80,6 @@ export const AllowOnlyLoggedInUserOnlyGuard = ({
   if (!isLoggedIn || expired) {
     return <Navigate to="/sign-in" replace />;
   }
-
-  projectHooks.prefetchProject();
-  platformHooks.prefetchPlatform();
-  platformHooks.prefetchNewerVersionInfo(queryClient);
-
-  flagsHooks.useFlags();
-  userSettingsHooks.useUserSettings();
-  userHooks.useUserMeta();
-  appConnectionsHooks.useConnectionsMetadata();
 
   return (
     <Suspense

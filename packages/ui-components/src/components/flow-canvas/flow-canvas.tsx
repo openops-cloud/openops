@@ -10,6 +10,7 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import React, { ReactNode, useCallback, useRef, useState } from 'react';
+import { cn } from '../../lib/cn';
 import { Edge, Graph, WorkflowNode } from '../../lib/flow-canvas-utils';
 import { useCanvasContext } from './canvas-context';
 import {
@@ -28,6 +29,7 @@ import { ContextMenuType } from './types';
 import { useResizeCanvas } from './use-resize-canvas';
 
 type FlowCanvasProps = {
+  className?: string;
   edgeTypes?: EdgeTypes;
   nodeTypes?: NodeTypes;
   graph?: Graph;
@@ -44,6 +46,7 @@ type FlowCanvasProps = {
 
 const FlowCanvas = React.memo(
   ({
+    className,
     edgeTypes,
     nodeTypes,
     graph,
@@ -151,7 +154,10 @@ const FlowCanvas = React.memo(
     }, [storeApi]);
 
     return (
-      <div className="size-full bg-editorBackground" ref={containerRef}>
+      <div
+        className={cn('size-full bg-editorBackground', className)}
+        ref={containerRef}
+      >
         {!!graph && (
           <ContextMenu
             contextMenuType={contextMenuType}

@@ -24124,7 +24124,7 @@ The following npm packages may be included in this product:
  - pgpass@1.0.5
  - product-fruits@1.0.23
  - react-remove-scroll-bar@2.3.8
- - react-resizable-panels@2.0.20
+ - react-resizable-panels@3.0.5
  - react-ripples@2.2.1
  - redis-info@3.1.0
  - regenerator-runtime@0.11.1

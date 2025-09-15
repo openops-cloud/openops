@@ -231,7 +231,8 @@ const TestTriggerSection = React.memo(
         : t('Please go to {blockName} and trigger {triggerName}.', {
             blockName: blockModel?.displayName,
             triggerName:
-              blockModel?.triggers[formValues.settings.triggerName].displayName,
+              blockModel?.triggers[formValues.settings.triggerName]
+                ?.displayName,
           });
 
     return (

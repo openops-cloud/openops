@@ -2,6 +2,7 @@ import { logger } from '@openops/server-shared';
 import {
   ApplicationError,
   Cursor,
+  EngineResponseStatus,
   ErrorCode,
   ExecutionState,
   ExecutionType,
@@ -207,28 +208,26 @@ export const flowRunService = {
     return query.getCount();
   },
   async retry({ flowRunId, strategy }: RetryParams): Promise<FlowRun | null> {
-    switch (strategy) {
-      case FlowRetryStrategy.FROM_FAILED_STEP:
-        return flowRunService.addToQueue({
-          executionCorrelationId: nanoid(),
-          flowRunId,
-          executionType: ExecutionType.RESUME,
-          progressUpdateType: ProgressUpdateType.NONE,
-          flowRetryStrategy: strategy,
-        });
-      case FlowRetryStrategy.ON_LATEST_VERSION: {
-        const payload =
-          await updateFlowRunToLatestFlowVersionIdAndReturnPayload(flowRunId);
-        return flowRunService.addToQueue({
-          executionCorrelationId: nanoid(),
-          payload,
-          flowRunId,
-          executionType: ExecutionType.BEGIN,
-          progressUpdateType: ProgressUpdateType.NONE,
-          flowRetryStrategy: strategy,
-        });
-      }
+    if (strategy !== FlowRetryStrategy.ON_LATEST_VERSION) {
+      logger.warn(`The provided strategy (${strategy}) is not valid.`, {
+        flowRunId,
+        strategy,
+      });
+      return null;
     }
+
+    const payload = await updateFlowRunToLatestFlowVersionIdAndReturnPayload(
+      flowRunId,
+    );
+
+    return flowRunService.addToQueue({
+      executionCorrelationId: nanoid(),
+      payload,
+      flowRunId,
+      executionType: ExecutionType.BEGIN,
+      progressUpdateType: ProgressUpdateType.NONE,
+      flowRetryStrategy: strategy,
+    });
   },
   async addToQueue({
     flowRunId,

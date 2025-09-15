@@ -1,8 +1,10 @@
 import { ToolSet } from 'ai';
+import { Server as SocketIOServer } from 'socket.io';
 
 export function wrapToolsWithApproval(
   tools: ToolSet,
-  _: (toolName: string) => void,
+  _: () => void,
+  _io?: SocketIOServer,
 ): ToolSet {
   return tools;
 }

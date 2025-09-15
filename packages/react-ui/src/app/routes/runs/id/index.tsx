@@ -4,8 +4,11 @@ import { useParams } from 'react-router-dom';
 
 import { QueryKeys } from '@/app/constants/query-keys';
 import { BuilderPage } from '@/app/features/builder';
+import { BuilderHeader } from '@/app/features/builder/builder-header/builder-header';
+import { BuilderPublishButton } from '@/app/features/builder/builder-header/builder-publish-button';
 import { BuilderStateProvider } from '@/app/features/builder/builder-state-provider';
 import { flowRunsApi } from '@/app/features/flow-runs/lib/flow-runs-api';
+import { FlowDetailsPanel } from '@/app/features/flows/components/flow-details-panel';
 import { flowsApi } from '@/app/features/flows/lib/flows-api';
 import { FlowRun, PopulatedFlow } from '@openops/shared';
 
@@ -51,7 +54,12 @@ const FlowRunPage = () => {
         canExitRun={false}
         run={data.run}
       >
-        <BuilderPage />
+        <BuilderPage>
+          <BuilderHeader
+            PublishButton={BuilderPublishButton}
+            DetailsPanel={FlowDetailsPanel}
+          />
+        </BuilderPage>
       </BuilderStateProvider>
     )
   );

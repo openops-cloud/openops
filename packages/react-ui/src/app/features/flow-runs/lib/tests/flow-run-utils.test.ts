@@ -1,5 +1,5 @@
 import { ActionType, StepOutput } from '@openops/shared';
-import { flowRunUtils } from '../flow-run-utils';
+import { flowRunUtils, shouldHideRunActions } from '../flow-run-utils';
 
 describe('flowRunUtils.extractStepOutput', () => {
   const trigger = {
@@ -653,5 +653,72 @@ describe('flowRunUtils.extractLoopItemStepOutput', () => {
       input: { items: 123 },
       output: { index: 6 },
     });
+  });
+});
+
+const params = (
+  overrides: Partial<Parameters<typeof shouldHideRunActions>[0]> = {},
+) => ({
+  isFailed: false,
+  isRunning: false,
+  isSuccessfulRun: false,
+  isStopped: false,
+  isTestRun: false,
+  ...overrides,
+});
+
+describe('shouldHideRunActions', () => {
+  it('hides actions for failed test runs', () => {
+    expect(
+      shouldHideRunActions(params({ isFailed: true, isTestRun: true })),
+    ).toBe(true);
+  });
+
+  it('hides actions for stopped test runs', () => {
+    expect(
+      shouldHideRunActions(params({ isStopped: true, isTestRun: true })),
+    ).toBe(true);
+  });
+
+  it('shows actions for failed non-test runs (allow retry)', () => {
+    expect(
+      shouldHideRunActions(params({ isFailed: true, isTestRun: false })),
+    ).toBe(false);
+  });
+
+  it('shows actions for stopped non-test runs (allow retry)', () => {
+    expect(
+      shouldHideRunActions(params({ isStopped: true, isTestRun: false })),
+    ).toBe(false);
+  });
+
+  it('shows actions for running test runs (allow stop)', () => {
+    expect(
+      shouldHideRunActions(params({ isRunning: true, isTestRun: true })),
+    ).toBe(false);
+  });
+
+  it('shows actions for successful runs (allow rerun), regardless of test flag', () => {
+    expect(
+      shouldHideRunActions(params({ isSuccessfulRun: true, isTestRun: false })),
+    ).toBe(false);
+
+    expect(
+      shouldHideRunActions(params({ isSuccessfulRun: true, isTestRun: true })),
+    ).toBe(false);
+  });
+
+  it('hides actions when no known state flags are set (e.g., pending/queued)', () => {
+    expect(
+      shouldHideRunActions(
+        params({
+          isFailed: false,
+          isRunning: false,
+          isSuccessfulRun: false,
+          isStopped: false,
+          isTestRun: false,
+        }),
+      ),
+    ).toBe(true);
   });
 });

@@ -1,7 +1,6 @@
 import { createCustomApiCallAction } from '@openops/blocks-common';
 import { BlockAuth, Property, createBlock } from '@openops/blocks-framework';
 import { BlockCategory } from '@openops/shared';
-import { newTicketInView } from './lib/trigger/new-ticket-in-view';
 
 const markdownProperty = `
 **Organization**: The organization name can be found in the URL (e.g https://ORGANIZATION_NAME.zendesk.com).
@@ -71,5 +70,5 @@ export const zendesk = createBlock({
       },
     }),
   ],
-  triggers: [newTicketInView],
+  triggers: [],
 });

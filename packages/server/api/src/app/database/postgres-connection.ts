@@ -33,6 +33,7 @@ import { AddTriggerSourceToFlowRun1754489349007 } from './migrations/17544893490
 import { MigrateStepTestOutputToNewCompressionAlgorithm1755942417309 } from './migrations/1755942417309-MigrateStepTestOutputToNewCompressionAlgorithm';
 import { AddIsWorkflowToFlowTable1756298583000 } from './migrations/1756298583000-AddIsWorkflowToFlowTable';
 import { RenameIsWorkflowToIsInternal1756377588949 } from './migrations/1756377588949-RenameIsWorkflowToIsInternal';
+import { AddContentTypeToFolder1757331587268 } from './migrations/1757331587268-AddContentTypeToFolder';
 
 const getSslConfig = (): boolean | TlsOptions => {
   const useSsl = system.get(AppSystemProp.POSTGRES_USE_SSL);
@@ -74,6 +75,7 @@ const getMigrations = (): (new () => MigrationInterface)[] => {
     MigrateStepTestOutputToNewCompressionAlgorithm1755942417309,
     AddIsWorkflowToFlowTable1756298583000,
     RenameIsWorkflowToIsInternal1756377588949,
+    AddContentTypeToFolder1757331587268,
   ];
 };
 
