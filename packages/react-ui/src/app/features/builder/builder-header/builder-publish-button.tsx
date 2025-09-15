@@ -96,12 +96,18 @@ const BuilderPublishButton = React.memo(() => {
                   {t('Publish')}
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="bottom">
+              <TooltipContent
+                side="bottom"
+                sideOffset={30}
+                align="end"
+                alignOffset={-70}
+                className="max-w-[280px] text-wrap"
+              >
                 {isPublishedVersion
                   ? t('Latest version is published')
                   : !isValid
                   ? t('Your workflow has incomplete steps')
-                  : t('Publish')}
+                  : t('Create & activate new workflow version, run on trigger')}
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
