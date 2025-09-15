@@ -36,6 +36,7 @@ import {
 
 import { CanvasContextMenu } from '../context-menu/canvas-context-menu';
 import { CollapsibleButton } from './collapsible-button';
+import { StackedNodeLayer } from './stacked-node-layer';
 
 function getStepStatus(
   stepName: string | undefined,
@@ -140,45 +141,19 @@ const WorkflowStepNode = React.memo(
 
     return (
       <div className="relative group">
-        {isCollapsible && (
+        {isCollapsible && isCollapsed && (
           <>
-            <div
-              className={cn(
-                'absolute rounded-sm border border-solid border-border-300 transition-all group-hover:border-primary-200 pointer-events-none',
-                {
-                  'border-primary-200': isSelected,
-                  'bg-background': !isDragging,
-                  'border-none': isDragging,
-                  'shadow-none': isDragging,
-                },
-              )}
-              style={{
-                height: `${OPS_NODE_SIZE.stepNode.height}px`,
-                width: `${OPS_NODE_SIZE.stepNode.width - 16}px`,
-                top: '-8px',
-                left: '8px',
-                zIndex: 1,
-              }}
-            />
-
-            <div
-              className={cn(
-                'absolute rounded-sm border border-solid border-border-300 transition-all group-hover:border-primary-200 pointer-events-none',
-                {
-                  'border-primary-200': isSelected,
-                  'bg-background': !isDragging,
-                  'border-none': isDragging,
-                  'shadow-none': isDragging,
-                },
-              )}
-              style={{
-                height: `${OPS_NODE_SIZE.stepNode.height}px`,
-                width: `${OPS_NODE_SIZE.stepNode.width - 8}px`,
-                top: '-4px',
-                left: '4px',
-                zIndex: 2,
-              }}
-            />
+            {[
+              { widthOffset: 16, top: '-8px', left: '8px', zIndex: 1 },
+              { widthOffset: 8, top: '-4px', left: '4px', zIndex: 2 },
+            ].map((props, idx) => (
+              <StackedNodeLayer
+                key={idx}
+                {...props}
+                isSelected={isSelected}
+                isDragging={isDragging}
+              />
+            ))}
           </>
         )}
         <div
