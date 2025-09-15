@@ -256,18 +256,28 @@ const StepSettingsContainer = React.memo(() => {
                   stepTemplateMetadata={stepTemplateMetadata}
                 ></BlockCardInfo>
               )}
-              <div className="border rounded-md pt-0">
+              <div className="border rounded-sm pt-0">
                 <Tabs defaultValue="configure" className="w-full">
-                  <TabsList className="grid grid-cols-2 w-full h-10 rounded-sm bg-gray-200">
+                  <TabsList className="grid grid-cols-2 w-full h-auto rounded-t-sm rounded-b-none bg-background p-0">
                     <TabsTrigger
                       value="configure"
-                      className="text-base justify-start text-left py-1 rounded-xs"
+                      className="
+                      text-base justify-start text-primary-800 text-left font-normal
+                      rounded-t-sm rounded-tr-none rounded-b-none
+                      data-[state=active]:bg-gray-200 data-[state=active]:font-medium
+                      transition-colors duration-200
+                      border-b"
                     >
                       Configure
                     </TabsTrigger>
                     <TabsTrigger
                       value="test"
-                      className="text-base justify-start text-left py-1 rounded-xs"
+                      className="
+                      text-base justify-start text-primary-800 text-left font-normal
+                      rounded-t-sm rounded-tl-none rounded-b-none
+                      data-[state=active]:bg-gray-200 data-[state=active]:font-medium
+                      transition-colors duration-200
+                      border-b"
                     >
                       Test
                     </TabsTrigger>

@@ -22,7 +22,7 @@ const BlockCardInfo: React.FC<BlockCardInfoProps> = ({
   <div
     onClick={onClick}
     className={cn(
-      'flex items-center justify-center gap-3 rounded border border-solid px-4 py-2',
+      'flex items-center justify-center gap-3 rounded-sm border border-solid px-4 py-2',
       {
         'cursor-pointer hover:bg-accent hover:text-accent-foreground':
           interactive,
