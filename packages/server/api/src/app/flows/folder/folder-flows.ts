@@ -1,24 +1,13 @@
-import { ApplicationError, ContentType, ErrorCode } from '@openops/shared';
-import { flowService } from '../flow/flow.service';
+import { ContentType } from '@openops/shared';
+import { getFlowFilter } from './flow-filter-util';
 import { FolderWithFlows } from './folder-tree.utils';
 import { folderRepo } from './folder.service';
 export const getFolderFlows = async (
   projectId: string,
   contentType: ContentType,
 ): Promise<FolderWithFlows[]> => {
-  let flowFilterCondition: string;
-  let flowFilterParams: Record<string, unknown>;
-
-  if (contentType === ContentType.WORKFLOW) {
-    const result = await flowService.filterVisibleFlows();
-    flowFilterCondition = result.flowFilterCondition;
-    flowFilterParams = result.flowFilterParams;
-  } else {
-    throw new ApplicationError({
-      code: ErrorCode.VALIDATION,
-      params: { message: 'Invalid content type' },
-    });
-  }
+  const { condition: flowFilterCondition, params: flowFilterParams } =
+    await getFlowFilter(projectId, contentType);
 
   const qb = folderRepo()
     .createQueryBuilder('folder')
