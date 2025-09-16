@@ -26,11 +26,16 @@ const queryClassificationDescriptions: Record<QueryClassification, string> = {
     "general queries that don't fit the above categories",
 };
 
-const queryClassificationUnionSchema = z.union([
-  ...Object.entries(queryClassificationDescriptions).map(([key, description]) =>
-    z.literal(key as QueryClassification).describe(description),
-  ),
-] as const);
+const createQueryClassificationSchema = (): z.ZodUnion<
+  z.ZodLiteral<QueryClassification>[]
+> => {
+  const schemas = Object.values(QueryClassification).map((value) =>
+    z.literal(value).describe(queryClassificationDescriptions[value]),
+  );
+  return z.union(schemas);
+};
+
+const queryClassificationUnionSchema = createQueryClassificationSchema();
 
 const coreSchema = z.object({
   tool_names: z.array(z.string()),
