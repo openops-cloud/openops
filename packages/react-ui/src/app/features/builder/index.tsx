@@ -198,6 +198,8 @@ const BuilderPage = ({ children }: { children?: ReactNode }) => {
     );
   }, [rightSidebar, memorizedSelectedStep, isBlockLoading]);
 
+  const isLeftSidebarVisible = leftSidebar !== LeftSideBarType.NONE;
+
   const rightHandleRef = useRef<ImperativePanelHandle>(null);
   const leftHandleRef = useAnimateSidebar(
     leftSidebar,
@@ -285,7 +287,7 @@ const BuilderPage = ({ children }: { children?: ReactNode }) => {
         <BuilderTreeViewProvider selectedId={selectedStep || undefined}>
           <ResizablePanelGroup
             direction="horizontal"
-            className="h-full"
+            className="h-full @container"
             id="builder-panel-group"
             onLayout={onResize}
           >
@@ -293,17 +295,17 @@ const BuilderPage = ({ children }: { children?: ReactNode }) => {
               ref={leftHandleRef}
               id={RESIZABLE_PANEL_IDS.BUILDER_LEFT_SIDEBAR}
               minSize={0}
+              maxSize={BUILDER_LEFT_SIDEBAR_MAX_SIZE}
               defaultSize={0}
               order={1}
               collapsible={true}
               collapsedSize={0}
-              maxSize={BUILDER_LEFT_SIDEBAR_MAX_SIZE}
               className={cn('min-w-0 w-0 bg-background z-10', {
-                [LEFT_SIDEBAR_MIN_EFFECTIVE_WIDTH]:
-                  leftSidebar !== LeftSideBarType.NONE,
-                'max-w-0': leftSidebar === LeftSideBarType.NONE,
+                [LEFT_SIDEBAR_MIN_EFFECTIVE_WIDTH]: isLeftSidebarVisible,
+                'max-w-0': !isLeftSidebarVisible,
                 'transition-none': isDraggingHandle,
-                'shadow-sidebar': leftSidebar !== LeftSideBarType.NONE,
+                'shadow-sidebar': isLeftSidebarVisible,
+                'max-w-[45%]': isLeftSidebarVisible,
               })}
             >
               <div className="h-full w-full" ref={leftSidePanelRef}>
@@ -320,7 +322,7 @@ const BuilderPage = ({ children }: { children?: ReactNode }) => {
 
             <ResizableHandle
               className="w-0"
-              disabled={leftSidebar === LeftSideBarType.NONE}
+              disabled={!isLeftSidebarVisible}
               onDragging={setIsDraggingHandle}
             />
 
@@ -376,9 +378,9 @@ const BuilderPage = ({ children }: { children?: ReactNode }) => {
               className={cn('min-w-0 bg-background z-30', {
                 [minWidthOfSidebar]: isRightSidebarVisible,
                 hidden: !isRightSidebarVisible,
-                'max-w-[600px]': isRightSidebarVisible,
                 'border-l': isRightSidebarVisible,
                 'shadow-sidebar': isRightSidebarVisible,
+                'max-w-[45%]': isRightSidebarVisible,
               })}
             >
               {isRightSidebarVisible && (
