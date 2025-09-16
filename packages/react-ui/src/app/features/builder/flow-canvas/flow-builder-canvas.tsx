@@ -10,6 +10,7 @@ import {
   LoopStepPlaceHolder,
   ReturnLoopedgeButton,
   StepPlaceHolder,
+  useCanvasContext,
 } from '@openops/components/ui';
 import { useBuilderStateContext } from '../builder-hooks';
 import { RightSideBarType } from '../builder-types';
@@ -40,11 +41,14 @@ const FlowBuilderCanvas = React.memo(
         state.selectStepByName,
         state.rightSidebar,
       ]);
+    const { collapsedSteps } = useCanvasContext();
 
     // Memoize graph so it only recalculates when flowVersion changes
     const graph = useMemo(() => {
-      const convertedGraph =
-        flowCanvasUtils.convertFlowVersionToGraph(flowVersion);
+      const convertedGraph = flowCanvasUtils.convertFlowVersionToGraph(
+        flowVersion,
+        { collapsedSteps },
+      );
       const previousNodes = getNodes();
 
       convertedGraph.nodes = convertedGraph.nodes.map((node) => {
@@ -54,7 +58,7 @@ const FlowBuilderCanvas = React.memo(
       });
 
       return convertedGraph;
-    }, [flowVersion, getNodes]);
+    }, [flowVersion, getNodes, collapsedSteps]);
 
     const graphHeight = useMemo(
       () => getNodesBounds(graph.nodes),

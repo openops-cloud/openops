@@ -34,10 +34,12 @@ const SelectFlowTemplateDialog = ({
   isOpen,
   onOpenChange,
   preselectedSelectedTemplateMetadata,
+  preselectedTab = TemplatesTabs.Public,
 }: {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   preselectedSelectedTemplateMetadata?: FlowTemplateMetadataWithIntegrations;
+  preselectedTab?: TemplatesTabs;
 }) => {
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [selectedDomains, setSelectedDomains] = useState<string[]>([]);
@@ -46,9 +48,8 @@ const SelectFlowTemplateDialog = ({
   const [searchText, setSearchText] = useState('');
   const { updateHomePageOperationalViewFlag } =
     userSettingsHooks.useHomePageOperationalView();
-  const [activeTab, setActiveTab] = React.useState<TemplatesTabs>(
-    TemplatesTabs.Public,
-  );
+  const [activeTab, setActiveTab] =
+    React.useState<TemplatesTabs>(preselectedTab);
 
   const {
     isConnectionsPickerOpen,
@@ -79,6 +80,12 @@ const SelectFlowTemplateDialog = ({
   useEffect(() => {
     resetTemplateDialog();
   }, [selectedServices, selectedDomains, resetTemplateDialog]);
+
+  useEffect(() => {
+    if (preselectedTab) {
+      setActiveTab(preselectedTab);
+    }
+  }, [preselectedTab]);
 
   const useCloudTemplates = flagsHooks.useShouldFetchCloudTemplates();
 

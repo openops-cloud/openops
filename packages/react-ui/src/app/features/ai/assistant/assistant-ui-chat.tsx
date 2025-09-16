@@ -1,5 +1,5 @@
 import { useTheme } from '@/app/common/providers/theme-provider';
-import { AI_ASSISTANT_LS_KEY } from '@/app/constants/ai';
+import { AI_ASSISTANT_SS_KEY } from '@/app/constants/ai';
 import { useAiModelSelector } from '@/app/features/ai/lib/ai-model-selector-hook';
 import { useAssistantChat } from '@/app/features/ai/lib/assistant-ui-chat-hook';
 import { AssistantUiChatContainer } from '@openops/components/ui';
@@ -27,14 +27,14 @@ const AssistantUiChat = ({
   }, []);
 
   const [chatId, setChatId] = useState<string | null>(
-    localStorage.getItem(AI_ASSISTANT_LS_KEY),
+    sessionStorage.getItem(AI_ASSISTANT_SS_KEY),
   );
 
   const onChatIdChange = useCallback((id: string | null) => {
     if (id) {
-      localStorage.setItem(AI_ASSISTANT_LS_KEY, id);
+      sessionStorage.setItem(AI_ASSISTANT_SS_KEY, id);
     } else {
-      localStorage.removeItem(AI_ASSISTANT_LS_KEY);
+      sessionStorage.removeItem(AI_ASSISTANT_SS_KEY);
     }
 
     setChatId(id);

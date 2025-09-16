@@ -12,6 +12,10 @@ export const LEFT_SIDEBAR_MIN_EFFECTIVE_WIDTH =
 
 // Builder panel sizes
 export const DEFAULT_SIDEBAR_PANEL_SIZE = 25;
-export const BUILDER_LEFT_SIDEBAR_MAX_SIZE = 30;
-export const BUILDER_RIGHT_SIDEBAR_MAX_SIZE = 60;
+export const BUILDER_LEFT_SIDEBAR_MAX_SIZE = 45;
+export const BUILDER_RIGHT_SIDEBAR_MAX_SIZE = 45;
 export const BUILDER_MIDDLE_PANEL_TOP_OFFSET = 60;
+
+// Sidebar keys
+export const SIDEBAR_MINIMIZED_KEY = 'dashboard-sidebar-minimized';
+export const AI_CHAT_OPENED_KEY = 'ai-chat-opened';
