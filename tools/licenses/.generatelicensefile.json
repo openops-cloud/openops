@@ -10,6 +10,7 @@
     "through": "https://raw.githubusercontent.com/dominictarr/through/refs/heads/master/LICENSE.MIT",
     "jsonlint-mod": "https://raw.githubusercontent.com/circlecell/jsonlint/refs/heads/main/license.txt",
     "rc@1.2.8": "https://raw.githubusercontent.com/dominictarr/rc/refs/heads/master/LICENSE.MIT",
+    "import-in-the-middle": "https://raw.githubusercontent.com/DataDog/import-in-the-middle/refs/heads/main/license"
   },
   "exclude": [],
   "omitVersion": false
