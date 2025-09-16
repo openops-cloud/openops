@@ -4,7 +4,7 @@ export async function getAssetFields(
   apiKey: string,
   assetType: string,
 ): Promise<{ name: string; type: string }[]> {
-  const response: any = await makeGetRequest(apiKey, `/api/${assetType}`);
+  const response = await makeGetRequest(apiKey, `/api/${assetType}`);
 
-  return response.attributes;
+  return response.body.attributes;
 }
