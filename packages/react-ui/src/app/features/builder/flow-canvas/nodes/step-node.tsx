@@ -24,6 +24,7 @@ import { BlockSelector } from '@/app/features/builder/blocks-selector';
 import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
 import { flowRunUtils } from '@/app/features/flow-runs/lib/flow-run-utils';
 import {
+  Action,
   ActionType,
   flowHelper,
   FlowOperationType,
@@ -37,6 +38,7 @@ import {
 import { CanvasContextMenu } from '../context-menu/canvas-context-menu';
 import { CollapsibleButton } from './collapsible-button';
 import { StackedNodeLayers } from './stacked-node-layer';
+import { hasInnerChildren } from './step-children-utils';
 
 function getStepStatus(
   stepName: string | undefined,
@@ -96,10 +98,13 @@ const WorkflowStepNode = React.memo(
     const isAction = flowHelper.isAction(data.step!.type);
     const { collapsedSteps, toggleCollapsedStep } = useCanvasContext();
     const stepType = data.step?.type as ActionType | undefined;
-    const isCollapsible =
+    const isCollapsibleType =
       stepType === ActionType.LOOP_ON_ITEMS ||
       stepType === ActionType.BRANCH ||
       stepType === ActionType.SPLIT;
+
+    const isCollapsible =
+      isCollapsibleType && hasInnerChildren(data.step as Action);
     const isCollapsed = isCollapsible && collapsedSteps.has(data.step!.name);
 
     const isEmptyTriggerSelected =
