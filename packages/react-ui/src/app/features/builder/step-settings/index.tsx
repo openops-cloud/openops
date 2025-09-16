@@ -248,7 +248,7 @@ const StepSettingsContainer = React.memo(() => {
         </div>
         <div className="w-full flex-1 min-h-0">
           <ScrollArea className="h-full">
-            <div className="flex flex-col gap-4 pl-6 pr-6 pb-6">
+            <div className="flex flex-col gap-2 pl-6 pr-6 pb-6">
               {!!stepMetadata && (
                 <BlockCardInfo
                   stepMetadata={stepMetadata}
@@ -261,19 +261,21 @@ const StepSettingsContainer = React.memo(() => {
                   <TabsList className="grid grid-cols-2 w-full h-auto rounded-t-sm rounded-b-none bg-background p-0">
                     <TabsTrigger
                       value="configure"
+                      disabled={readonly}
                       className="text-base justify-start text-primary-800 text-left font-normal rounded-t-sm rounded-tr-none rounded-b-none data-[state=active]:bg-gray-200 data-[state=active]:font-medium transition-colors duration-200 border-b"
                     >
                       Configure
                     </TabsTrigger>
                     <TabsTrigger
                       value="test"
+                      disabled={readonly}
                       className="text-base justify-start text-primary-800 text-left font-normal rounded-t-sm rounded-tl-none rounded-b-none data-[state=active]:bg-gray-200 data-[state=active]:font-medium transition-colors duration-200 border-b"
                     >
                       Test
                     </TabsTrigger>
                   </TabsList>
-                  <TabsContent value="configure" className="mt-4">
-                    <div className="flex flex-col gap-4 pl-2 pr-2 pb-4">
+                  <TabsContent value="configure" className="mt-2">
+                    <div className="flex flex-col gap-2 pl-2 pr-2 pb-4">
                       {modifiedStep.type === ActionType.LOOP_ON_ITEMS && (
                         <LoopsSettings readonly={readonly}></LoopsSettings>
                       )}
@@ -319,19 +321,17 @@ const StepSettingsContainer = React.memo(() => {
                       )}
                     </div>
                   </TabsContent>
-                  <TabsContent value="test">
-                    {!readonly && (
-                      <div className="flex flex-col gap-4 pl-2 pr-2">
-                        {modifiedStep.type && (
-                          <TestStepContainer
-                            type={modifiedStep.type}
-                            flowId={flowVersion.flowId}
-                            flowVersionId={flowVersion.id}
-                            isSaving={saving}
-                          ></TestStepContainer>
-                        )}
-                      </div>
-                    )}
+                  <TabsContent value="test" className="mt-0">
+                    <div className="flex flex-col gap-2 pl-2 pr-2">
+                      {modifiedStep.type && (
+                        <TestStepContainer
+                          type={modifiedStep.type}
+                          flowId={flowVersion.flowId}
+                          flowVersionId={flowVersion.id}
+                          isSaving={saving}
+                        ></TestStepContainer>
+                      )}
+                    </div>
                   </TabsContent>
                 </Tabs>
               </div>

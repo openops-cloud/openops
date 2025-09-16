@@ -64,7 +64,7 @@ const CodeSettings = React.memo(({ readonly }: CodeSettingsProps) => {
         name="settings.input"
         render={({ field }) => (
           <FormItem>
-            <div className="pb-4">
+            <div className="pb-2">
               <ExpandableContent fullContent={markdown}>
                 {(content) => (
                   <Markdown
