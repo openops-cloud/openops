@@ -23,7 +23,7 @@ const queryClassificationDescriptions: Record<QueryClassification, string> = {
   [QueryClassification.aws_cost]:
     'involves AWS cost analysis, pricing information, or cost optimization',
   [QueryClassification.general]:
-    "general queries that don't fit the above categories",
+    "general queries that don't fit the other categories",
 };
 
 const createQueryClassificationSchema = (): z.ZodUnion<
