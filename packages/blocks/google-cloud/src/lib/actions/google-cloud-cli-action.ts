@@ -14,6 +14,7 @@ export const googleCloudCliAction = createAction({
   name: 'google_cloud_cli',
   description: 'Execute a Google Cloud CLI command',
   displayName: 'Google Cloud CLI',
+  requireToolApproval: true,
   props: {
     useHostSession: getUseHostSessionProperty(
       'Google Cloud',

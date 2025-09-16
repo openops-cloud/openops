@@ -7,7 +7,7 @@ export async function getAssetTypes(apiKey: string): Promise<string[]> {
   let assets = await cacheWrapper.getSerializedObject<string[]>(cacheKey);
 
   if (!assets) {
-    assets = await makeGetRequest<string>(apiKey, `/api`);
+    assets = (await makeGetRequest(apiKey, `/api`)).body as string[];
 
     await cacheWrapper.setSerializedObject(cacheKey, assets);
   }

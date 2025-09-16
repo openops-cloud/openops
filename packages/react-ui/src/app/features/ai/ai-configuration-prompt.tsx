@@ -7,14 +7,15 @@ type AiConfigurationPromptProps = {
 };
 
 const AiConfigurationPrompt = ({ className }: AiConfigurationPromptProps) => {
-  const { hasActiveAiSettings } = aiSettingsHooks.useHasActiveAiSettings();
+  const { hasActiveAiSettings, isLoading } =
+    aiSettingsHooks.useHasActiveAiSettings();
 
   const { isAiChatOpened, setIsAiChatOpened } = useAppStore((s) => ({
     isAiChatOpened: s.isAiChatOpened,
     setIsAiChatOpened: s.setIsAiChatOpened,
   }));
 
-  if (hasActiveAiSettings || !isAiChatOpened) return null;
+  if (isLoading || hasActiveAiSettings || !isAiChatOpened) return null;
 
   return (
     <NoAiEnabledPopover

@@ -1,4 +1,3 @@
-import { useSafeBuilderStateContext } from '@/app/features/builder/builder-hooks';
 import { useAppStore } from '@/app/store/app-store';
 import { Button, cn, TooltipWrapper } from '@openops/components/ui';
 import { t } from 'i18next';
@@ -11,17 +10,9 @@ const AiAssistantButton = ({ className }: { className?: string }) => {
     setIsAiChatOpened: s.setIsAiChatOpened,
   }));
 
-  const applyMidpanelAction = useSafeBuilderStateContext(
-    (state) => state.applyMidpanelAction,
-  );
-
   const onToggleAiChat = useCallback(() => {
-    if (applyMidpanelAction) {
-      applyMidpanelAction({ type: 'AICHAT_CLOSE_CLICK' });
-    }
-
     setIsAiChatOpened(!isAiChatOpened);
-  }, [applyMidpanelAction, isAiChatOpened, setIsAiChatOpened]);
+  }, [isAiChatOpened, setIsAiChatOpened]);
 
   return (
     <TooltipWrapper tooltipText={t('AI Assistant')} tooltipPlacement="right">

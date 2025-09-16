@@ -17,7 +17,6 @@ import { CUSTOMIZED_INPUT_KEY, isDynamicViewToggled } from './utils';
 
 import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
 import { ArrayFieldContext } from '@/app/features/builder/block-properties/dynamic-array/array-field-context';
-import { useAppStore } from '@/app/store/app-store';
 import { useSafeBuilderStateContext } from '../builder-hooks';
 
 type inputNameLiteral = `settings.input.${string}`;
@@ -144,10 +143,6 @@ const AutoFormFieldWrapper = ({
   const form = useFormContext<Action | Trigger>();
   const fieldState = form.getFieldState(inputName);
 
-  const { setIsAiChatOpened } = useAppStore((s) => ({
-    setIsAiChatOpened: s.setIsAiChatOpened,
-  }));
-
   const arrayFieldContext = useContext(ArrayFieldContext);
 
   const dynamicViewToggled: boolean = isDynamicViewToggled(
@@ -239,8 +234,7 @@ const AutoFormFieldWrapper = ({
         inputName,
       },
     });
-    setIsAiChatOpened(false);
-  }, [dispatch, property, inputName, setIsAiChatOpened]);
+  }, [dispatch, property, inputName]);
 
   return (
     <FormItem className="flex flex-col gap-1">

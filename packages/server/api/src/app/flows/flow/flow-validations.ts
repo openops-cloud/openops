@@ -1,6 +1,7 @@
 import { logger } from '@openops/server-shared';
 import {
   ApplicationError,
+  ContentType,
   ErrorCode,
   Flow,
   isNil,
@@ -40,6 +41,20 @@ export async function assertThatFlowIsNotBeingUsed(
         flowVersionId: flow.version.id,
         message:
           'Flow is being used by another user in the last minute. Please try again later.',
+      },
+    });
+  }
+}
+
+export async function assertThatFlowIsInCorrectFolderContentType(
+  expectedContentType: ContentType,
+  contentType: ContentType,
+): Promise<void> {
+  if (contentType !== expectedContentType) {
+    throw new ApplicationError({
+      code: ErrorCode.VALIDATION,
+      params: {
+        message: 'Incorrect folder content type for request',
       },
     });
   }
