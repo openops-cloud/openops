@@ -241,7 +241,7 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
               type="button"
               className={cn(
                 'absolute inset-0 z-10 flex items-center px-3 text-muted-foreground cursor-text',
-                'bg-background border border-input rounded-md',
+                'bg-background',
                 'text-left',
               )}
               onClick={handlePlaceholderClick}
@@ -256,7 +256,7 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
             })}
           >
             <Editor
-              className="min-h-10"
+              className="min-h-[250px]"
               value={formatValue(currentValue)}
               language={currentLanguage}
               theme={editorTheme}
