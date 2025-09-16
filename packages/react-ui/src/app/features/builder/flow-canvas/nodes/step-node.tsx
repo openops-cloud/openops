@@ -36,7 +36,7 @@ import {
 
 import { CanvasContextMenu } from '../context-menu/canvas-context-menu';
 import { CollapsibleButton } from './collapsible-button';
-import { StackedNodeLayer } from './stacked-node-layer';
+import { StackedNodeLayers } from './stacked-node-layer';
 
 function getStepStatus(
   stepName: string | undefined,
@@ -142,19 +142,7 @@ const WorkflowStepNode = React.memo(
     return (
       <div className="relative group">
         {isCollapsible && isCollapsed && (
-          <>
-            {[
-              { widthOffset: 16, top: '-8px', left: '8px', zIndex: 1 },
-              { widthOffset: 8, top: '-4px', left: '4px', zIndex: 2 },
-            ].map((props) => (
-              <StackedNodeLayer
-                key={`${props.widthOffset}-${props.zIndex}`}
-                {...props}
-                isSelected={isSelected}
-                isDragging={isDragging}
-              />
-            ))}
-          </>
+          <StackedNodeLayers isSelected={isSelected} isDragging={isDragging} />
         )}
         <div
           id={data.step!.name}
