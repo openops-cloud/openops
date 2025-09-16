@@ -86,8 +86,10 @@ describe('selectToolsAndQuery', () => {
 
       (generateObject as jest.Mock).mockResolvedValue({
         object: {
-          tool_names: ['tool1', 'tool2'],
-          query_classification: ['general'],
+          actualResult: {
+            tool_names: ['tool1', 'tool2'],
+            query_classification: ['general'],
+          },
         },
       });
 
@@ -119,8 +121,10 @@ describe('selectToolsAndQuery', () => {
 
       (generateObject as jest.Mock).mockResolvedValue({
         object: {
-          tool_names: [],
-          query_classification: ['general'],
+          actualResult: {
+            tool_names: [],
+            query_classification: ['general'],
+          },
         },
       });
 
@@ -147,8 +151,10 @@ describe('selectToolsAndQuery', () => {
 
       (generateObject as jest.Mock).mockResolvedValue({
         object: {
-          tool_names: ['tool1', 'nonexistent_tool'],
-          query_classification: ['general'],
+          actualResult: {
+            tool_names: ['tool1', 'nonexistent_tool'],
+            query_classification: ['general'],
+          },
         },
       });
 
@@ -181,8 +187,10 @@ describe('selectToolsAndQuery', () => {
 
       (generateObject as jest.Mock).mockResolvedValue({
         object: {
-          tool_names: ['invalid1', 'invalid2'],
-          query_classification: ['general'],
+          actualResult: {
+            tool_names: ['invalid1', 'invalid2'],
+            query_classification: ['general'],
+          },
         },
       });
 
@@ -211,8 +219,10 @@ describe('selectToolsAndQuery', () => {
 
       (generateObject as jest.Mock).mockResolvedValue({
         object: {
-          tool_names: ['tool1', 'invalid_tool', 'tool3'],
-          query_classification: ['general'],
+          actualResult: {
+            tool_names: ['tool1', 'invalid_tool', 'tool3'],
+            query_classification: ['general'],
+          },
         },
       });
 
@@ -280,8 +290,10 @@ describe('selectToolsAndQuery', () => {
 
       (generateObject as jest.Mock).mockResolvedValue({
         object: {
-          tool_names: Object.keys(mockTools),
-          query_classification: ['general'],
+          actualResult: {
+            tool_names: Object.keys(mockTools),
+            query_classification: ['general'],
+          },
         },
       });
 
@@ -313,8 +325,10 @@ describe('selectToolsAndQuery', () => {
 
       (generateObject as jest.Mock).mockResolvedValue({
         object: {
-          tool_names: ['tool1'],
-          query_classification: ['general'],
+          actualResult: {
+            tool_names: ['tool1'],
+            query_classification: ['general'],
+          },
         },
       });
 
@@ -355,8 +369,10 @@ describe('selectToolsAndQuery', () => {
 
       (generateObject as jest.Mock).mockResolvedValue({
         object: {
-          tool_names: ['tool1'],
-          query_classification: ['general'],
+          actualResult: {
+            tool_names: ['tool1'],
+            query_classification: ['general'],
+          },
         },
       });
 
@@ -387,8 +403,10 @@ describe('selectToolsAndQuery', () => {
 
       (generateObject as jest.Mock).mockResolvedValue({
         object: {
-          tool_names: ['analytics_tool'],
-          query_classification: ['analytics'],
+          actualResult: {
+            tool_names: ['analytics_tool'],
+            query_classification: ['analytics'],
+          },
         },
       });
 
@@ -413,8 +431,10 @@ describe('selectToolsAndQuery', () => {
 
       (generateObject as jest.Mock).mockResolvedValue({
         object: {
-          tool_names: ['table_tool'],
-          query_classification: ['tables'],
+          actualResult: {
+            tool_names: ['table_tool'],
+            query_classification: ['tables'],
+          },
         },
       });
 
@@ -439,8 +459,10 @@ describe('selectToolsAndQuery', () => {
 
       (generateObject as jest.Mock).mockResolvedValue({
         object: {
-          tool_names: ['openops_tool'],
-          query_classification: ['openops'],
+          actualResult: {
+            tool_names: ['openops_tool'],
+            query_classification: ['openops'],
+          },
         },
       });
 
@@ -464,8 +486,10 @@ describe('selectToolsAndQuery', () => {
 
       (generateObject as jest.Mock).mockResolvedValue({
         object: {
-          tool_names: ['other_tool'],
-          query_classification: ['aws_cost'],
+          actualResult: {
+            tool_names: ['other_tool'],
+            query_classification: ['aws_cost'],
+          },
         },
       });
 
@@ -489,8 +513,10 @@ describe('selectToolsAndQuery', () => {
 
       (generateObject as jest.Mock).mockResolvedValue({
         object: {
-          tool_names: ['general_tool'],
-          query_classification: ['general'],
+          actualResult: {
+            tool_names: ['general_tool'],
+            query_classification: ['general'],
+          },
         },
       });
 
