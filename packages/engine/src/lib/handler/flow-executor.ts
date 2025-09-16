@@ -18,6 +18,7 @@ import { EngineConstants } from './context/engine-constants';
 import {
   ExecutionVerdict,
   FlowExecutorContext,
+  VerdictReason,
 } from './context/flow-execution-context';
 import { loopExecutor } from './loop-executor';
 import { splitExecutor } from './split-executor';
@@ -107,7 +108,10 @@ export const flowExecutor = {
 
       await sendProgress(flowExecutionContext, constants);
 
-      if (flowExecutionContext.verdict !== ExecutionVerdict.RUNNING) {
+      if (
+        flowExecutionContext.verdict !== ExecutionVerdict.RUNNING ||
+        flowExecutionContext.verdictResponse?.reason === VerdictReason.STOPPED
+      ) {
         break;
       }
 
