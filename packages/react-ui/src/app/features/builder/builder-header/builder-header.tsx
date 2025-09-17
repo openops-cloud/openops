@@ -53,7 +53,7 @@ export const BuilderHeader = ({
           handleSidebarButtonClick={handleSidebarButtonClick}
         />
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 contain-layout">
         {readonly && <BuilderViewOnlyWidget></BuilderViewOnlyWidget>}
         {!readonly && <UndoRedoActionBar />}
         <PublishButton />
