@@ -13,6 +13,44 @@ export type ToolsAndQueryResult = {
   queryClassification: QueryTypes[];
 };
 
+const queryClassificationDescriptions: Record<QueryClassification, string> = {
+  [QueryClassification.analytics]:
+    'requires data visualization, charts, dashboards, or Superset-related functionality',
+  [QueryClassification.tables]:
+    'requires database access, schema information, or table operations',
+  [QueryClassification.openops]:
+    'requires OpenOps-specific functionality like flows, runs, connections',
+  [QueryClassification.aws_cost]:
+    'involves AWS cost analysis, pricing information, or cost optimization',
+  [QueryClassification.general]:
+    "general queries that don't fit the other categories",
+};
+
+const createQueryClassificationSchema = (): z.ZodUnion<
+  z.ZodLiteral<QueryClassification>[]
+> => {
+  const schemas = Object.values(QueryClassification).map((value) =>
+    z.literal(value).describe(queryClassificationDescriptions[value]),
+  );
+  return z.union(schemas);
+};
+
+const queryClassificationUnionSchema = createQueryClassificationSchema();
+
+const coreSchema = z.object({
+  tool_names: z.array(z.string()),
+  query_classification: z.array(queryClassificationUnionSchema),
+});
+
+const coreWithReasoningSchema = z.object({
+  reasoning: z
+    .string()
+    .describe(
+      'The reasoning for the tool selection and classification. Fill this field first',
+    ),
+  actualResult: coreSchema,
+});
+
 export async function routeQuery({
   messages,
   tools,
@@ -41,30 +79,11 @@ export async function routeQuery({
   try {
     const openopsTablesNames = await getTableNames();
 
-    const { object: selectionResult } = await generateObject({
+    const {
+      object: { actualResult: selectionResult },
+    } = await generateObject({
       model: languageModel,
-      schema: z.object({
-        tool_names: z.array(z.string()),
-        query_classification: z
-          .array(
-            z.enum([
-              QueryClassification.analytics,
-              QueryClassification.tables,
-              QueryClassification.openops,
-              QueryClassification.aws_cost,
-              QueryClassification.general,
-            ]),
-          )
-          .describe(
-            'Array of classifications for the user query (a query can qualify for multiple categories): ' +
-              `${QueryClassification.analytics} - requires data visualization, charts, dashboards, or Superset-related functionality; ` +
-              `${QueryClassification.tables} - requires database access, schema information, or table operations; ` +
-              `${QueryClassification.openops} - requires OpenOps-specific functionality like flows, runs, connections; ` +
-              `${QueryClassification.aws_cost} - involves AWS cost analysis, pricing information, or cost optimization; ` +
-              `${QueryClassification.general} - general queries that don't fit the above categories. ` +
-              'Include all relevant categories that apply to the query.',
-          ),
-      }),
+      schema: coreWithReasoningSchema,
       system: getSystemPrompt(toolList, openopsTablesNames, uiContext),
       messages,
       ...aiConfig.modelSettings,
