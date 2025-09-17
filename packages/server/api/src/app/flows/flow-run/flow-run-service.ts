@@ -295,8 +295,8 @@ export const flowRunService = {
     duration,
   }: FinishParams): Promise<FlowRun | undefined> {
     let flowRun = await flowRunRepo().findOneByOrFail({ id: flowRunId });
-    if (TERMINAL_STATUSES.includes(flowRun.status)) {
-      logger.debug(
+    if (isFlowStateTerminal(flowRun.status)) {
+      logger.error(
         `Update for workflow run (${flowRunId}) skipped. The workflow run already in a final state.`,
         {
           flowRunId,
