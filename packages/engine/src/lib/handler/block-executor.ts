@@ -203,7 +203,7 @@ const executeAction: ActionHandler<BlockAction> = async ({
           action.name,
           stepOutput.setOutput(output).setStatus(StepOutputStatus.STOPPED),
         )
-        .setVerdict(ExecutionVerdict.SUCCEEDED, {
+        .setVerdict(ExecutionVerdict.RUNNING, {
           reason: VerdictReason.STOPPED,
           stopResponse: hookResponse.stopResponse.response,
         })
