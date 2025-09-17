@@ -32,6 +32,7 @@ export function sendWorkflowCreatedEvent(
   userId: string,
   flowId: string,
   projectId: string,
+  isInternal: boolean,
 ): void {
   telemetry.trackEvent({
     name: WorkflowEventName.CREATED_WORKFLOW,
@@ -39,6 +40,7 @@ export function sendWorkflowCreatedEvent(
       userId,
       flowId,
       projectId,
+      isInternal: isInternal.toString(),
     },
   });
 }

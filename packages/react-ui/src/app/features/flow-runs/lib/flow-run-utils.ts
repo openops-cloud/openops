@@ -351,3 +351,17 @@ function extractLoopItemStepOutput(
     return testData;
   }
 }
+
+export const shouldHideRunActions = (params: {
+  isFailed: boolean;
+  isRunning: boolean;
+  isSuccessfulRun: boolean;
+  isStopped: boolean;
+  isTestRun: boolean;
+}): boolean => {
+  const { isFailed, isRunning, isSuccessfulRun, isStopped, isTestRun } = params;
+  return (
+    ((isFailed || isStopped) && isTestRun) ||
+    (!isFailed && !isRunning && !isStopped && !isSuccessfulRun)
+  );
+};

@@ -59,7 +59,12 @@ export const flowService = {
   async create(params: CreateParams): Promise<PopulatedFlow> {
     const result = await create(params);
 
-    sendWorkflowCreatedEvent(params.userId, result.id, result.projectId);
+    sendWorkflowCreatedEvent(
+      params.userId,
+      result.id,
+      result.projectId,
+      result.isInternal,
+    );
 
     return result;
   },

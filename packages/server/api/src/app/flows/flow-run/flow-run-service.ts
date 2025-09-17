@@ -2,7 +2,6 @@ import { logger } from '@openops/server-shared';
 import {
   ApplicationError,
   Cursor,
-  EngineResponseStatus,
   ErrorCode,
   ExecutionState,
   ExecutionType,
@@ -142,6 +141,9 @@ export const flowRunService = {
     let query = flowRunRepo().createQueryBuilder('flow_run').where({
       projectId,
     });
+    query = query
+      .innerJoin('flow_run.flow', 'flow')
+      .andWhere('flow.isInternal = :isInternal', { isInternal: false });
     if (flowId) {
       query = query.andWhere({
         flowId: In(flowId),
@@ -292,13 +294,26 @@ export const flowRunService = {
     tags,
     duration,
   }: FinishParams): Promise<FlowRun | undefined> {
+    let flowRun = await flowRunRepo().findOneByOrFail({ id: flowRunId });
+    if (isFlowStateTerminal(flowRun.status)) {
+      logger.error(
+        `Update for workflow run (${flowRunId}) skipped. The workflow run already in a final state.`,
+        {
+          flowRunId,
+          newStatus: status,
+        },
+      );
+
+      return undefined;
+    }
+
     const logFileId = await updateLogs({
-      flowRunId,
+      logsFileId: flowRun.logsFileId || null,
       projectId,
       executionState,
     });
 
-    const result = await flowRunRepo()
+    await flowRunRepo()
       .createQueryBuilder()
       .update()
       .set({
@@ -319,20 +334,7 @@ export const flowRunService = {
       })
       .execute();
 
-    const skipped = result.affected === 0;
-    if (skipped) {
-      logger.debug(
-        `Update for workflow run (${flowRunId}) skipped. The workflow run already in a final state.`,
-        {
-          flowRunId,
-          newStatus: status,
-        },
-      );
-
-      return undefined;
-    }
-
-    const flowRun = await this.getOnePopulatedOrThrow({
+    flowRun = await this.getOnePopulatedOrThrow({
       id: flowRunId,
       projectId: undefined,
     });
@@ -491,19 +493,19 @@ export const flowRunService = {
 };
 
 async function updateLogs({
-  flowRunId,
+  logsFileId,
   projectId,
   executionState,
-}: UpdateLogs): Promise<undefined | string> {
+}: UpdateLogs): Promise<string | undefined> {
   if (isNil(executionState)) {
     return undefined;
   }
-  const flowRun = await flowRunRepo().findOneByOrFail({ id: flowRunId });
+
   const serializedLogs = await logSerializer.serialize({
     executionState,
   });
 
-  const fileId = flowRun.logsFileId ?? openOpsId();
+  const fileId = logsFileId ?? openOpsId();
   await fileService.save({
     fileId,
     projectId,
@@ -511,6 +513,7 @@ async function updateLogs({
     type: FileType.FLOW_RUN_LOG,
     compression: FileCompression.GZIP,
   });
+
   return fileId;
 }
 
@@ -542,7 +545,7 @@ function verifyResumeEligibility({
 }
 
 type UpdateLogs = {
-  flowRunId: string;
+  logsFileId: string | null;
   projectId: ProjectId;
   executionState: ExecutionState | null;
 };

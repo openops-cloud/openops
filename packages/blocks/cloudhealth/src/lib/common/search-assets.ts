@@ -13,11 +13,7 @@ export async function searchAssets(
     api_version: '2',
   };
 
-  const response: any = await makeGetRequest(
-    apiKey,
-    `/api/search`,
-    queryParams,
-  );
+  const response = await makeGetRequest(apiKey, `/api/search`, queryParams);
 
-  return response;
+  return response.body;
 }

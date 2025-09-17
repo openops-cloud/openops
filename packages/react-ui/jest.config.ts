@@ -13,5 +13,7 @@ export default {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@assistant-ui/(.*)$': '<rootDir>/src/__mocks__/assistant-ui/$1',
     '^remark-gfm$': '<rootDir>/src/__mocks__/remark-gfm.ts',
+    '^react-resizable-panels$':
+      '<rootDir>/src/__mocks__/react-resizable-panels.tsx',
   },
 };

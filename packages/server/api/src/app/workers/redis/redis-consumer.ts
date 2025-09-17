@@ -1,6 +1,7 @@
 import {
   createRedisClient,
   exceptionHandler,
+  flowTimeoutSandbox,
   JobStatus,
   logger,
   memoryLock,
@@ -97,7 +98,7 @@ async function ensureWorkerExists(queueName: QueueName): Promise<Worker> {
   consumer[queueName] = new Worker(queueName, null, {
     connection: createRedisClient(),
     lockDuration,
-    maxStalledCount: 5,
+    maxStalledCount: 0,
     drainDelay: 5,
     stalledInterval: 30000,
   });
@@ -112,7 +113,7 @@ function getLockDurationInMs(queueName: QueueName): number {
     case QueueName.WEBHOOK:
       return (60 + 60 * 3) * 1000;
     case QueueName.ONE_TIME:
-      return (600 + 60 * 3) * 1000;
+      return (flowTimeoutSandbox + 60 * 3) * 1000;
     case QueueName.SCHEDULED:
       return (60 + 60 * 3) * 1000;
   }
