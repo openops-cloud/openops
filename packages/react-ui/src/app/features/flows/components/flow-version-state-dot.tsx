@@ -30,7 +30,7 @@ const FlowVersionStateDot = React.memo(
             )}
           </div>
         </TooltipTrigger>
-        <TooltipContent>
+        <TooltipContent side="bottom" sideOffset={20}>
           {state === FlowVersionState.DRAFT
             ? t('Draft Version')
             : t('Locked Version')}
