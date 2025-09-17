@@ -150,7 +150,6 @@ const StepSettingsContainer = React.memo(() => {
     form.setValue('valid', form.formState.isValid);
   }, [form.formState.isValid]);
 
-  // Watch changes in form execluding actionName or triggerName from watching //
   const inputChanges = useWatch({
     name: 'settings.input',
     control: form.control,
@@ -243,21 +242,25 @@ const StepSettingsContainer = React.memo(() => {
               readonly={readonly}
               value={modifiedStep.displayName}
               tooltipContent={t('Edit Step Name')}
-            ></EditableText>
+            />
           </SidebarHeader>
         </div>
         <div className="w-full flex-1 min-h-0">
-          <ScrollArea className="h-full">
-            <div className="flex flex-col gap-2 pl-6 pr-6 pb-6">
-              {!!stepMetadata && (
-                <BlockCardInfo
-                  stepMetadata={stepMetadata}
-                  interactive={false}
-                  stepTemplateMetadata={stepTemplateMetadata}
-                ></BlockCardInfo>
-              )}
-              <div className="border rounded-sm pt-0">
-                <Tabs defaultValue="configure" className="w-full">
+          <div className="flex flex-col gap-2 pl-4 pr-4 pb-6 h-full min-h-0">
+            {!!stepMetadata && (
+              <BlockCardInfo
+                stepMetadata={stepMetadata}
+                interactive={false}
+                stepTemplateMetadata={stepTemplateMetadata}
+              />
+            )}
+
+            <div className="border rounded-sm overflow-hidden pt-0 flex flex-col flex-1 min-h-0">
+              <Tabs
+                defaultValue="configure"
+                className="w-full flex-1 min-h-0 flex flex-col"
+              >
+                <div className="sticky top-0 z-[21] bg-background border-b rounded-t-sm">
                   <TabsList className="grid grid-cols-2 w-full h-auto rounded-t-sm rounded-b-none bg-background p-0">
                     <TabsTrigger
                       value="configure"
@@ -269,24 +272,27 @@ const StepSettingsContainer = React.memo(() => {
                     <TabsTrigger
                       value="test"
                       disabled={readonly}
-                      className="text-base justify-start text-primary-800 text-left font-normal rounded-t-sm rounded-tl-none rounded-b-none data-[state=active]:bg-gray-200 data-[state=active]:font-medium transition-colors duration-200 border-b"
+                      className="text-base justify-start text-primary-800 text-left font-normal rounded-t-sm rounded-tr-none rounded-b-none data-[state=active]:bg-gray-200 data-[state=active]:font-medium transition-colors duration-200 border-b"
                     >
                       Test
                     </TabsTrigger>
                   </TabsList>
-                  <TabsContent value="configure" className="mt-2">
-                    <div className="flex flex-col gap-2 pl-2 pr-2 pb-4">
+                </div>
+
+                <TabsContent value="configure" className="mt-2 flex-1 min-h-0">
+                  <ScrollArea className="h-full">
+                    <div className="flex flex-col gap-2 pl-2 pr-4 pb-4">
                       {modifiedStep.type === ActionType.LOOP_ON_ITEMS && (
-                        <LoopsSettings readonly={readonly}></LoopsSettings>
+                        <LoopsSettings readonly={readonly} />
                       )}
                       {modifiedStep.type === ActionType.CODE && (
-                        <CodeSettings readonly={readonly}></CodeSettings>
+                        <CodeSettings readonly={readonly} />
                       )}
                       {modifiedStep.type === ActionType.BRANCH && (
-                        <BranchSettings readonly={readonly}></BranchSettings>
+                        <BranchSettings readonly={readonly} />
                       )}
                       {modifiedStep.type === ActionType.SPLIT && (
-                        <SplitSettings readonly={readonly}></SplitSettings>
+                        <SplitSettings readonly={readonly} />
                       )}
                       {modifiedStep.type === ActionType.BLOCK &&
                         modifiedStep && (
@@ -294,7 +300,7 @@ const StepSettingsContainer = React.memo(() => {
                             step={modifiedStep}
                             flowId={flowVersion.flowId}
                             readonly={readonly}
-                          ></BlockSettings>
+                          />
                         )}
                       {modifiedStep.type === TriggerType.BLOCK &&
                         modifiedStep && (
@@ -302,7 +308,7 @@ const StepSettingsContainer = React.memo(() => {
                             step={modifiedStep}
                             flowId={flowVersion.flowId}
                             readonly={readonly}
-                          ></BlockSettings>
+                          />
                         )}
                       {[ActionType.CODE, ActionType.BLOCK].includes(
                         modifiedStep.type as ActionType,
@@ -317,11 +323,14 @@ const StepSettingsContainer = React.memo(() => {
                             modifiedStep.settings.errorHandlingOptions
                               ?.retryOnFailure?.hide
                           }
-                        ></ActionErrorHandlingForm>
+                        />
                       )}
                     </div>
-                  </TabsContent>
-                  <TabsContent value="test" className="mt-0">
+                  </ScrollArea>
+                </TabsContent>
+
+                <TabsContent value="test" className="mt-0 flex-1 min-h-0">
+                  <ScrollArea className="h-full">
                     <div className="flex flex-col gap-2 pl-2 pr-2">
                       {modifiedStep.type && (
                         <TestStepContainer
@@ -329,14 +338,14 @@ const StepSettingsContainer = React.memo(() => {
                           flowId={flowVersion.flowId}
                           flowVersionId={flowVersion.id}
                           isSaving={saving}
-                        ></TestStepContainer>
+                        />
                       )}
                     </div>
-                  </TabsContent>
-                </Tabs>
-              </div>
+                  </ScrollArea>
+                </TabsContent>
+              </Tabs>
             </div>
-          </ScrollArea>
+          </div>
         </div>
       </form>
     </Form>
