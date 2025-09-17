@@ -9,6 +9,7 @@ import {
   StopHookParams,
   TagsManager,
 } from '@openops/blocks-framework';
+import { logger } from '@openops/server-shared';
 import {
   ActionType,
   assertNotNullOrUndefined,
@@ -55,16 +56,36 @@ export const blockExecutor: BaseExecutor<BlockAction> = {
     executionState: FlowExecutorContext;
     constants: EngineConstants;
   }) {
-    if (executionState.isCompleted({ stepName: action.name })) {
-      return executionState;
+    const startTime = performance.now();
+    let status = 'UNKNOWN';
+
+    try {
+      if (executionState.isCompleted({ stepName: action.name })) {
+        return executionState;
+      }
+
+      const resultExecution = await runWithExponentialBackoff(
+        executionState,
+        action,
+        constants,
+        executeAction,
+      );
+
+      status = resultExecution.steps[action.name]?.status;
+      return await continueIfFailureHandler(resultExecution, action, constants);
+    } finally {
+      const duration = Math.floor(performance.now() - startTime);
+      logger.info(
+        `The execution of block ${action.settings.blockName} took ${duration}ms`,
+        {
+          status,
+          blockName: action.settings.blockName,
+          actionName: action.settings.actionName,
+          continueOnFailure:
+            action.settings.errorHandlingOptions?.continueOnFailure?.value,
+        },
+      );
     }
-    const resultExecution = await runWithExponentialBackoff(
-      executionState,
-      action,
-      constants,
-      executeAction,
-    );
-    return continueIfFailureHandler(resultExecution, action, constants);
   },
 };
 
