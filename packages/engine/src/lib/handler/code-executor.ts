@@ -51,9 +51,13 @@ export const codeExecutor: BaseExecutor<CodeAction> = {
     } finally {
       const duration = Math.floor(performance.now() - startTime);
 
-      logger.info(`The execution of code block took ${duration}ms`, {
+      logger.info(`Executed code from step [${action.name}] in ${duration}ms`, {
         stepStatus,
+        stepId: action.id,
         durationMs: duration,
+        stepName: action.name,
+        continueOnFailure:
+          action.settings.errorHandlingOptions?.continueOnFailure?.value,
       });
     }
   },

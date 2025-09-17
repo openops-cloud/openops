@@ -76,10 +76,12 @@ export const blockExecutor: BaseExecutor<BlockAction> = {
     } finally {
       const duration = Math.floor(performance.now() - startTime);
       logger.info(
-        `The execution of block ${action.settings.blockName} took ${duration}ms`,
+        `Executed step [${action.name}] action [${action.settings.actionName}] in ${duration}ms`,
         {
           stepStatus,
+          stepId: action.id,
           durationMs: duration,
+          stepName: action.name,
           blockName: action.settings.blockName,
           actionName: action.settings.actionName,
           continueOnFailure:
