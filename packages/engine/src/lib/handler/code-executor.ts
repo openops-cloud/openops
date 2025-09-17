@@ -1,3 +1,4 @@
+import { logger } from '@openops/server-shared';
 import {
   ActionType,
   CodeAction,
@@ -31,17 +32,29 @@ export const codeExecutor: BaseExecutor<CodeAction> = {
     executionState: FlowExecutorContext;
     constants: EngineConstants;
   }) {
-    if (executionState.isCompleted({ stepName: action.name })) {
-      return executionState;
+    const startTime = performance.now();
+    let status = 'UNKNOWN';
+
+    try {
+      if (executionState.isCompleted({ stepName: action.name })) {
+        return executionState;
+      }
+
+      const resultExecution = await getExecutionResult(
+        action,
+        executionState,
+        constants,
+      );
+
+      status = resultExecution.steps[action.name]?.status;
+      return await continueIfFailureHandler(resultExecution, action, constants);
+    } finally {
+      const duration = Math.floor(performance.now() - startTime);
+
+      logger.info(`The execution of code block took ${duration}ms`, {
+        status,
+      });
     }
-
-    const resultExecution = await getExecutionResult(
-      action,
-      executionState,
-      constants,
-    );
-
-    return continueIfFailureHandler(resultExecution, action, constants);
   },
 };
 
