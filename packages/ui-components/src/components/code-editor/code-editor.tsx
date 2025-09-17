@@ -251,12 +251,13 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
             </button>
           )}
           <div
-            className={cn('w-full h-full', {
+            className={cn('w-full', {
               'opacity-0': showPlaceholder,
             })}
+            style={{ height: 'calc(100vh - 360px)' }}
           >
             <Editor
-              className="min-h-[250px]"
+              className="h-full"
               value={formatValue(currentValue)}
               language={currentLanguage}
               theme={editorTheme}
