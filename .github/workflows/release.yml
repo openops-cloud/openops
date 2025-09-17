@@ -13,7 +13,7 @@ on:
         default: true
       deploy_to_test:
         type: boolean
-        description: Deploy the release to the test environment
+        description: Deploy the release to the release test environment
         default: true
 jobs:
   get-version:
@@ -144,7 +144,7 @@ jobs:
           VERSION: ${{ needs.get-version.outputs.version }}
         run: |
           gh workflow run deploy-release.yml -R openops-cloud/devops -r main \
-            -f release_version=${VERSION}
+            -f release_version=${VERSION} \
             -f environment=release-test
   trigger-docs-update:
     name: Trigger docs update
