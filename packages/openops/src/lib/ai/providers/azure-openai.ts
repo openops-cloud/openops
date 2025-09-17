@@ -1,5 +1,4 @@
 import { createAzure } from '@ai-sdk/azure';
-import { logger } from '@openops/server-shared';
 import { LanguageModel } from 'ai';
 import { AiProvider } from '../providers';
 
