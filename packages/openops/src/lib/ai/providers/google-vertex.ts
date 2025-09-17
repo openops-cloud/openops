@@ -9,7 +9,6 @@ const googleVertexGeminiModels = [
   'gemini-2.5-flash-lite',
   'gemini-2.0-flash-001',
   'gemini-2.0-flash-lite-001',
-  'gemini-embedding-001',
 ];
 
 const googleVertexClaudeModels = [
