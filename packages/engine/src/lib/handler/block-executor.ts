@@ -57,7 +57,7 @@ export const blockExecutor: BaseExecutor<BlockAction> = {
     constants: EngineConstants;
   }) {
     const startTime = performance.now();
-    let outputStatus: string | undefined;
+    let stepStatus: string | undefined;
 
     try {
       if (executionState.isCompleted({ stepName: action.name })) {
@@ -71,15 +71,15 @@ export const blockExecutor: BaseExecutor<BlockAction> = {
         executeAction,
       );
 
-      outputStatus = resultExecution.getStepOutput(action.name)?.status;
+      stepStatus = resultExecution.getStepOutput(action.name)?.status;
       return await continueIfFailureHandler(resultExecution, action, constants);
     } finally {
       const duration = Math.floor(performance.now() - startTime);
       logger.info(
         `The execution of block ${action.settings.blockName} took ${duration}ms`,
         {
-          outputStatus,
-          durationInMS: duration,
+          stepStatus,
+          durationMs: duration,
           blockName: action.settings.blockName,
           actionName: action.settings.actionName,
           continueOnFailure:
