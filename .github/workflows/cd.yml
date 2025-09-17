@@ -25,4 +25,7 @@ jobs:
           GITHUB_TOKEN: ${{ steps.app_token.outputs.token }}
           SHA: ${{ github.sha }}
         run: |
-          gh workflow run deploy -f revision=${SHA::8} -f environment=dev -r main -R openops-cloud/devops
+          gh workflow run deploy -r main -R openops-cloud/devops \
+            -f repository=openops-cloud/openops \
+            -f revision=${SHA::8} \
+            -f environment=dev-oss
