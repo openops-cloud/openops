@@ -51,6 +51,8 @@ export const slackSendMessage = async ({
         event_type: 'slack-message',
         event_payload: eventPayload,
       },
+      unfurl_links: false,
+      unfurl_media: false,
     };
 
     if (username) body['username'] = username;
@@ -398,8 +400,6 @@ export function createMessageBlocks(
       text: {
         type: 'mrkdwn',
         text: `${messageText}`,
-        unfurl_links: false,
-        unfurl_media: false,
       },
     },
   ];
