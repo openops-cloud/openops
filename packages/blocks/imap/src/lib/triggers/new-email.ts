@@ -1,19 +1,7 @@
-import {
-  createTrigger,
-  FilesService,
-  Property,
-  TriggerStrategy,
-} from '@openops/blocks-framework';
-import { ImapFlow } from 'imapflow';
-import { ParsedMail } from 'mailparser';
-import { imapAuth } from '../..';
-import { convertAttachment, imapCommon } from '../common';
-
-const filterInstructions = `
-**Filter Emails:**
-
-You can add Branch Piece to filter emails based on the subject, to, from, cc or other fields.
-`;
+import { createTrigger, TriggerStrategy } from '@openops/blocks-framework';
+import { fetchEmails } from '../common/fetch-emails';
+import { imapAuth } from '../common/imap-auth';
+import { mailbox } from '../common/mailbox';
 
 export const newEmail = createTrigger({
   auth: imapAuth,
@@ -21,43 +9,7 @@ export const newEmail = createTrigger({
   displayName: 'New Email',
   description: 'Trigger when a new email is received.',
   props: {
-    mailbox: Property.Dropdown({
-      displayName: 'Mailbox',
-      description: 'Select the mailbox to search',
-      required: true,
-      refreshers: ['auth'],
-      options: async ({ auth }: any) => {
-        console.log('THIS IS OPTIONS', auth);
-        console.log('THIS IS OPTIONS B', auth);
-        const imapConfig = imapCommon.constructConfig(
-          auth as {
-            host: string;
-            username: string;
-            password: string;
-            port: number;
-            tls: boolean;
-          },
-        );
-        let options: { label: string; value: string }[] = [];
-        const imapClient = new ImapFlow({ ...imapConfig, logger: console });
-        try {
-          await imapClient.connect();
-          const mailBoxList = await imapClient.list();
-          options = mailBoxList.map((mailbox) => {
-            return {
-              label: mailbox.name,
-              value: mailbox.path,
-            };
-          });
-        } finally {
-          await imapClient.logout();
-        }
-        return {
-          disabled: false,
-          options: options,
-        };
-      },
-    }),
+    mailbox,
   },
   type: TriggerStrategy.POLLING,
   onEnable: async (context) => {
@@ -68,14 +20,13 @@ export const newEmail = createTrigger({
     return;
   },
   run: async (context) => {
-    const { auth, store, propsValue, files } = context;
+    const { auth, store, propsValue } = context;
     const mailbox = propsValue.mailbox;
     const lastEpochMilliSeconds = (await store.get<number>('lastPoll')) ?? 0;
-    const items = await imapCommon.fetchEmails({
+    const items = await fetchEmails({
       auth,
       lastEpochMilliSeconds,
       mailbox,
-      files,
     });
     const newLastEpochMilliSeconds = items.reduce(
       (acc, item) => Math.max(acc, item.epochMilliSeconds),
@@ -88,14 +39,13 @@ export const newEmail = createTrigger({
     return filteredEmail;
   },
   test: async (context) => {
-    const { auth, propsValue, files } = context;
+    const { auth, propsValue } = context;
     const mailbox = propsValue.mailbox;
     const lastEpochMilliSeconds = 0;
-    const items = await imapCommon.fetchEmails({
+    const items = await fetchEmails({
       auth,
       lastEpochMilliSeconds,
       mailbox,
-      files,
     });
     const filteredEmails = getFirstFiveOrAll(items);
     return filteredEmails;
