@@ -31,6 +31,10 @@ jest.mock('../../src/lib/ai/providers/google', () => ({
   googleProvider: { models: ['googleModel'] },
 }));
 
+jest.mock('../../src/lib/ai/providers/google-vertex', () => ({
+  googleVertexProvider: { models: ['googleVertexModel'] },
+}));
+
 jest.mock('../../src/lib/ai/providers/groq', () => ({
   groqProvider: { models: ['groqModel'] },
 }));
@@ -124,6 +128,10 @@ describe('getAvailableProvidersWithModels', () => {
         models: ['googleModel'],
       },
       {
+        provider: AiProviderEnum.GOOGLE_VERTEX,
+        models: ['googleVertexModel'],
+      },
+      {
         provider: AiProviderEnum.GROQ,
         models: ['groqModel'],
       },
@@ -153,7 +161,7 @@ describe('getAvailableProvidersWithModels', () => {
       },
     ];
 
-    expect(result).toHaveLength(14);
+    expect(result).toHaveLength(15);
     expect(result).toEqual(expected);
   });
 });
