@@ -239,6 +239,7 @@
   "Please fix inputs first": "Please fix inputs first",
   "Some error occurred...": "Some error occurred...",
   "There is no sample data available found for this trigger.": "There is no sample data available found for this trigger.",
+  "Failed to cancel trigger simulation. Please try again.": "Failed to cancel trigger simulation. Please try again.",
   "Failed to run test step, please ensure settings are correct.": "Failed to run test step, please ensure settings are correct.",
   "Please click on Test URL to generate sample data": "Please click on Test URL to generate sample data",
   "Please go to {blockName} and trigger {triggerName}.": "Please go to {blockName} and trigger {triggerName}.",
