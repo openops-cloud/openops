@@ -260,7 +260,7 @@ const StepSettingsContainer = React.memo(() => {
                 defaultValue="configure"
                 className="w-full flex-1 min-h-0 flex flex-col"
               >
-                <div className="sticky top-0 z-[21] bg-background border-b rounded-t-sm">
+                <div className="sticky top-0 bg-background border-b rounded-t-sm">
                   <TabsList className="grid grid-cols-2 w-full h-auto rounded-t-sm rounded-b-none bg-background p-0">
                     <TabsTrigger
                       value="configure"
