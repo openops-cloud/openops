@@ -13,13 +13,6 @@ const message = `**Live URL:**
 triggers the flow and **does NOT** generate sample data.
 <br>
 <br>
-**Test URL:**
-\`\`\`url
-{{webhookUrl}}/test
-\`\`\`
-generates sample data and **does NOT** trigger the flow.
-<br>
-<br>
 **Synchronous Requests:**
 
 If you expect a response from this webhook, add /sync to the end of the URL.
