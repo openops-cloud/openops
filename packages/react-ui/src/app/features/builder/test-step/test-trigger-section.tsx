@@ -104,7 +104,7 @@ const TestTriggerSection = React.memo(
     const {
       mutate: simulateTrigger,
       isPending: isSimulating,
-      reset: resetSimulation,
+      reset: resetTriggerSimulation,
     } = useMutation<TriggerEvent[], Error, void>({
       mutationFn: async () => {
         setErrorMessage(undefined);
@@ -142,6 +142,26 @@ const TestTriggerSection = React.memo(
         setErrorMessage(
           testStepUtils.formatErrorMessage(
             t('There is no sample data available found for this trigger.'),
+          ),
+        );
+      },
+    });
+
+    const {
+      mutate: cancelTriggerSimulation,
+      isPending: isCancellingTriggerSimulation,
+    } = useMutation<void, Error, void>({
+      mutationFn: async () => {
+        await triggerEventsApi.deleteWebhookSimulation(flowId);
+      },
+      onSuccess: () => {
+        resetTriggerSimulation();
+      },
+      onError: (error) => {
+        console.error(error);
+        setErrorMessage(
+          testStepUtils.formatErrorMessage(
+            t('Failed to cancel trigger simulation. Please try again.'),
           ),
         );
       },
@@ -306,8 +326,9 @@ const TestTriggerSection = React.memo(
               <Button
                 variant="outline"
                 size="sm"
+                loading={isCancellingTriggerSimulation}
                 onClick={() => {
-                  resetSimulation();
+                  cancelTriggerSimulation();
                 }}
               >
                 {' '}
