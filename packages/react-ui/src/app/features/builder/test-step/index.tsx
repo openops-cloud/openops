@@ -43,7 +43,7 @@ const TestStepContainer = React.memo(
     return (
       <Tabs
         defaultValue={TabListEnum.STEP_OUTPUT}
-        className="w-full flex flex-col items-start justify-start gap-2 pb-2"
+        className="w-full h-full min-h-0 flex flex-col items-start justify-start gap-2 pb-2"
       >
         <TabsList className="grid grid-cols-2 bg-transparent border-none rounded-none w-full">
           <TabsTrigger
@@ -76,7 +76,7 @@ const TestStepContainer = React.memo(
         </TabsList>
         <TabsContent
           value={TabListEnum.STEP_OUTPUT}
-          className="w-full h-full overflow-hidden"
+          className="w-full flex-1 min-h-0 overflow-hidden"
         >
           {type === TriggerType.BLOCK ? (
             <TestTriggerSection
@@ -93,14 +93,15 @@ const TestStepContainer = React.memo(
         </TabsContent>
         <TabsContent
           value={TabListEnum.SAMPLE_STEP_OUTPUT}
-          className="w-full overflow-hidden"
+          className="w-full flex-1 min-h-0 overflow-hidden"
         >
-          <div className="h-full flex">
+          <div className="h-full flex min-h-0">
             <TestStepDataViewer
               outputJson={selectedStep?.settings?.inputUiInfo?.sampleData ?? ''}
               onChange={useSaveSelectedStepSampleData}
               readonly={false}
               theme={theme}
+              containerClassName="h-full"
             />
           </div>
         </TabsContent>

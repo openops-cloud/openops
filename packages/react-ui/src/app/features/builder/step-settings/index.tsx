@@ -331,14 +331,16 @@ const StepSettingsContainer = React.memo(() => {
 
                 <TabsContent value="test" className="mt-0 flex-1 min-h-0">
                   <ScrollArea className="h-full">
-                    <div className="flex flex-col gap-2 pl-2 pr-2">
+                    <div className="flex flex-col gap-2 pl-2 pr-2 h-full min-h-0">
                       {modifiedStep.type && (
-                        <TestStepContainer
-                          type={modifiedStep.type}
-                          flowId={flowVersion.flowId}
-                          flowVersionId={flowVersion.id}
-                          isSaving={saving}
-                        />
+                        <div className="flex-1 min-h-0 h-full">
+                          <TestStepContainer
+                            type={modifiedStep.type}
+                            flowId={flowVersion.flowId}
+                            flowVersionId={flowVersion.id}
+                            isSaving={saving}
+                          />
+                        </div>
                       )}
                     </div>
                   </ScrollArea>
