@@ -54,7 +54,7 @@ describe('googleVertexProvider', () => {
 
     test('should include all Claude models', () => {
       const claudeModels = [
-        'claude-3-haiku@20240307 ',
+        'claude-3-haiku@20240307',
         'claude-3-5-haiku@20241022',
         'claude-3-7-sonnet@20250219',
         'claude-sonnet-4@20250514',
