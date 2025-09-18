@@ -1,7 +1,28 @@
-import { createTrigger, TriggerStrategy } from '@openops/blocks-framework';
+import { DedupeStrategy, Polling, pollingHelper } from '@openops/blocks-common';
+import {
+  BlockPropValueSchema,
+  createTrigger,
+  TriggerStrategy,
+} from '@openops/blocks-framework';
 import { fetchEmails } from '../common/fetch-emails';
 import { imapAuth } from '../common/imap-auth';
 import { mailbox } from '../common/mailbox';
+
+interface NewEmailProps {
+  mailbox: string;
+}
+
+const polling: Polling<BlockPropValueSchema<typeof imapAuth>, NewEmailProps> = {
+  strategy: DedupeStrategy.TIMEBASED,
+  items: async ({ auth, lastFetchEpochMS, propsValue }) => {
+    const items = await fetchEmails({
+      auth,
+      lastEpochMilliSeconds: lastFetchEpochMS,
+      mailbox: propsValue.mailbox,
+    });
+    return items;
+  },
+};
 
 export const newEmail = createTrigger({
   auth: imapAuth,
@@ -12,83 +33,45 @@ export const newEmail = createTrigger({
     mailbox,
   },
   type: TriggerStrategy.POLLING,
-  onEnable: async (context) => {
-    await context.store.put('lastPoll', Date.now());
+  async onEnable(context) {
+    await pollingHelper.onEnable(polling, context);
   },
-  onDisable: async (context) => {
-    await context.store.delete('lastPoll');
-    return;
+  async onDisable(context) {
+    await pollingHelper.onDisable(polling, context);
   },
-  run: async (context) => {
-    const { auth, store, propsValue } = context;
-    const mailbox = propsValue.mailbox;
-    const lastEpochMilliSeconds = (await store.get<number>('lastPoll')) ?? 0;
-    const items = await fetchEmails({
-      auth,
-      lastEpochMilliSeconds,
-      mailbox,
-    });
-    const newLastEpochMilliSeconds = items.reduce(
-      (acc, item) => Math.max(acc, item.epochMilliSeconds),
-      lastEpochMilliSeconds,
-    );
-    await store.put('lastPoll', newLastEpochMilliSeconds);
-    const filteredEmail = items.filter(
-      (f) => f.epochMilliSeconds > lastEpochMilliSeconds,
-    );
-    return filteredEmail;
+  async run(context) {
+    return await pollingHelper.poll(polling, context);
   },
-  test: async (context) => {
-    const { auth, propsValue } = context;
-    const mailbox = propsValue.mailbox;
-    const lastEpochMilliSeconds = 0;
-    const items = await fetchEmails({
-      auth,
-      lastEpochMilliSeconds,
-      mailbox,
-    });
-    const filteredEmails = getFirstFiveOrAll(items);
-    return filteredEmails;
+  async test(context) {
+    return await pollingHelper.test(polling, context);
   },
   sampleData: {
-    html: 'My email body',
-    text: 'My email body',
-    textAsHtml: '<p>My email body</p>',
-    subject: 'Email Subject',
-    date: '2023-06-18T11:30:09.000Z',
-    to: {
-      value: [
-        {
-          address: 'email@address.com',
-          name: 'Name',
-        },
-      ],
+    receivedDateTime: '2025-09-18T09:58:26Z',
+    sentDateTime: '2025-09-18T09:58:23Z',
+    hasAttachments: false,
+    subject: '',
+    bodyPreview: 'Sample preview',
+    importance: 'normal',
+    isRead: true,
+    body: {
+      contentType: 'html',
+      content: '<html><body>Sample</body></html>',
     },
     from: {
-      value: [
-        {
-          address: 'email@address.com',
-          name: 'Name',
-        },
-      ],
+      emailAddress: {
+        name: 'Sender Name',
+        address: 'sender@example.com',
+      },
     },
-    cc: {
-      value: [
-        {
-          address: 'email@address.com',
-          name: 'Name',
+    toRecipients: [
+      {
+        emailAddress: {
+          name: 'Recipient Name',
+          address: 'recipient@example.com',
         },
-      ],
-    },
-    messageId:
-      '<CxE49ifJT5YZN9OE2O6j6Ef+BYgkKWq7X-deg483GkM1ui1xj3g@mail.gmail.com>',
+      },
+    ],
+    ccRecipients: [],
+    bccRecipients: [],
   },
 });
-
-function getFirstFiveOrAll<T>(array: T[]) {
-  if (array.length <= 5) {
-    return array;
-  } else {
-    return array.slice(0, 5);
-  }
-}
