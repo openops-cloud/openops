@@ -399,8 +399,8 @@ export function createMessageBlocks(
         type: 'mrkdwn',
         text: `${messageText}`,
       },
-      "unfurl_links": false,
-      "unfurl_media": false
+      unfurl_links: false,
+      unfurl_media: false,
     },
   ];
 }
