@@ -33,7 +33,7 @@ export const codeExecutor: BaseExecutor<CodeAction> = {
     constants: EngineConstants;
   }) {
     const startTime = performance.now();
-    let status: string | undefined;
+    let stepStatus: string | undefined;
 
     try {
       if (executionState.isCompleted({ stepName: action.name })) {
@@ -46,13 +46,18 @@ export const codeExecutor: BaseExecutor<CodeAction> = {
         constants,
       );
 
-      status = resultExecution.getStepOutput(action.name)?.status;
+      stepStatus = resultExecution.getStepOutput(action.name)?.status;
       return await continueIfFailureHandler(resultExecution, action, constants);
     } finally {
       const duration = Math.floor(performance.now() - startTime);
 
-      logger.info(`The execution of code block took ${duration}ms`, {
-        status,
+      logger.info(`Executed code from step [${action.name}] in ${duration}ms`, {
+        stepStatus,
+        stepId: action.id,
+        durationMs: duration,
+        stepName: action.name,
+        continueOnFailure:
+          action.settings.errorHandlingOptions?.continueOnFailure?.value,
       });
     }
   },
