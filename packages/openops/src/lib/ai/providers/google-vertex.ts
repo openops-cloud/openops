@@ -50,28 +50,26 @@ function createLanguageModel(params: {
   const project = settings['project'] as string | undefined;
 
   let credentials: Record<string, unknown> | null = null;
-  if (params.apiKey && params.apiKey.trim() !== '') {
-    const parsed = parseServiceAccountJson(params.apiKey);
-    if (!parsed) {
+  const apiKey = params.apiKey?.trim();
+  if (apiKey) {
+    credentials = parseServiceAccountJson(params.apiKey);
+    if (!credentials) {
       throw new Error(
         'Invalid Google Vertex service account JSON provided in apiKey',
       );
     }
-    credentials = parsed;
   }
+
+  const providerConfig = {
+    location,
+    project,
+    ...(credentials ? { googleAuthOptions: { credentials } } : {}),
+  };
 
   const isClaude = params.model.toLowerCase().startsWith('claude');
   const provider = isClaude
-    ? createVertexAnthropic({
-        location,
-        project,
-        ...(credentials ? { googleAuthOptions: { credentials } } : {}),
-      })
-    : createVertex({
-        location,
-        project,
-        ...(credentials ? { googleAuthOptions: { credentials } } : {}),
-      });
+    ? createVertexAnthropic(providerConfig)
+    : createVertex(providerConfig);
 
   return provider(params.model);
 }
