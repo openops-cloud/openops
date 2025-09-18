@@ -132,6 +132,7 @@ async function sendRunningProgress(
   constants: EngineConstants,
 ): Promise<FlowExecutorContext> {
   const keepVerdict = flowExecutionContext.verdict;
+  const keepVerdictResponse = flowExecutionContext.verdictResponse;
 
   flowExecutionContext = flowExecutionContext.setVerdict(
     ExecutionVerdict.RUNNING,
@@ -139,7 +140,7 @@ async function sendRunningProgress(
 
   await sendProgress(flowExecutionContext, constants);
 
-  return flowExecutionContext.setVerdict(keepVerdict);
+  return flowExecutionContext.setVerdict(keepVerdict, keepVerdictResponse);
 }
 
 async function sendProgress(
