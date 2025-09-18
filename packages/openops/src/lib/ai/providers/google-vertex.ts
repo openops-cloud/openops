@@ -12,7 +12,7 @@ const googleVertexGeminiModels = [
 ];
 
 const googleVertexClaudeModels = [
-  'claude-3-haiku@20240307 ',
+  'claude-3-haiku@20240307',
   'claude-3-5-haiku@20241022',
   'claude-3-7-sonnet@20250219',
   'claude-sonnet-4@20250514',
@@ -51,7 +51,7 @@ function createLanguageModel(params: {
   let credentials: Record<string, unknown> | null = null;
   const apiKey = params.apiKey?.trim();
   if (apiKey) {
-    credentials = parseServiceAccountJson(params.apiKey);
+    credentials = parseServiceAccountJson(apiKey);
     if (!credentials) {
       throw new Error(
         'Invalid Google Vertex service account JSON provided in apiKey',
