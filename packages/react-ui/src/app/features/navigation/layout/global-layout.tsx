@@ -155,7 +155,7 @@ export function GlobalLayout() {
           <ResizablePanel
             id={RESIZABLE_PANEL_IDS.MAIN}
             order={3}
-            className="flex-1 h-full overflow-hidden min-w-[900px]"
+            className="flex-1 h-full overflow-hidden min-w-[900px] contain-layout"
             defaultSize={GLOBAL_MAIN_PANEL_DEFAULT_SIZE}
             minSize={GLOBAL_MAIN_PANEL_MIN_SIZE}
           >
