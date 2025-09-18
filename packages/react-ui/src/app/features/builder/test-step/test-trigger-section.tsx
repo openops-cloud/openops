@@ -153,7 +153,17 @@ const TestTriggerSection = React.memo(
     } = useMutation<void, Error, void>({
       mutationFn: async () => {
         await triggerEventsApi.deleteWebhookSimulation(flowId);
+      },
+      onSuccess: () => {
         resetTriggerSimulation();
+      },
+      onError: (error) => {
+        console.error(error);
+        setErrorMessage(
+          testStepUtils.formatErrorMessage(
+            t('Failed to cancel trigger simulation. Please try again.'),
+          ),
+        );
       },
     });
 
