@@ -18,7 +18,7 @@ const SidebarHeader = ({
   return (
     <div
       className={cn(
-        'flex px-6 pt-6 pb-2 w-full justify-between items-center',
+        'flex px-4 pt-6 pb-2 w-full justify-between items-center',
         className,
       )}
     >

@@ -9,7 +9,7 @@
     "type-fest": "https://raw.githubusercontent.com/sindresorhus/type-fest/refs/heads/main/license-mit",
     "through": "https://raw.githubusercontent.com/dominictarr/through/refs/heads/master/LICENSE.MIT",
     "jsonlint-mod": "https://raw.githubusercontent.com/circlecell/jsonlint/refs/heads/main/license.txt",
-    "rc@1.2.8": "https://raw.githubusercontent.com/dominictarr/rc/refs/heads/master/LICENSE.MIT",
+    "rc@1.2.8": "https://raw.githubusercontent.com/dominictarr/rc/refs/heads/master/LICENSE.MIT"
   },
   "exclude": [],
   "omitVersion": false
