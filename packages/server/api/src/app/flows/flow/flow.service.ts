@@ -37,6 +37,7 @@ import {
   sendWorkflowExportedEvent,
   sendWorkflowUpdatedEvent,
 } from '../../telemetry/event-models';
+import { webhookSimulationService } from '../../webhooks/webhook-simulation/webhook-simulation-service';
 import {
   flowVersionRepo,
   flowVersionService,
@@ -610,6 +611,11 @@ async function update({
       });
 
       if (lastVersion.state === FlowVersionState.LOCKED) {
+        await webhookSimulationService.delete({
+          flowId: id,
+          projectId,
+        });
+
         const lastVersionWithArtifacts =
           await flowVersionService.getFlowVersionOrThrow({
             flowId: id,

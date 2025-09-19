@@ -291,7 +291,8 @@
     "xml2js": "0.6.2",
     "yaml": "2.4.1",
     "zod": "4.0.14",
-    "zustand": "4.5.4"
+    "zustand": "4.5.4",
+    "@ai-sdk/google-vertex": "^3.0.0"
   },
   "devDependencies": {
     "@faker-js/faker": "8.2.0",
