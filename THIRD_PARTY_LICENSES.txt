@@ -438,6 +438,7 @@ The following npm packages may be included in this product:
  - gcp-metadata@5.3.0
  - gcp-metadata@6.1.1
  - google-auth-library@8.9.0
+ - google-auth-library@9.15.1
  - google-logging-utils@0.0.2
  - long@5.2.3
  - spdx-correct@3.2.0
@@ -15927,6 +15928,7 @@ The following npm packages may be included in this product:
 
  - jwa@1.4.1
  - jwa@2.0.0
+ - jwa@2.0.1
  - jws@3.2.2
  - jws@4.0.0
 
@@ -19859,6 +19861,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 The following npm packages may be included in this product:
 
+ - @ai-sdk/anthropic@2.0.17
  - @ai-sdk/anthropic@2.0.3
  - @ai-sdk/azure@2.0.12
  - @ai-sdk/cerebras@1.0.7
@@ -19867,6 +19870,8 @@ The following npm packages may be included in this product:
  - @ai-sdk/deepseek@1.0.7
  - @ai-sdk/gateway@1.0.11
  - @ai-sdk/gateway@1.0.5
+ - @ai-sdk/google-vertex@3.0.27
+ - @ai-sdk/google@2.0.14
  - @ai-sdk/google@2.0.6
  - @ai-sdk/groq@2.0.7
  - @ai-sdk/mistral@2.0.4
@@ -19876,6 +19881,7 @@ The following npm packages may be included in this product:
  - @ai-sdk/provider-utils@3.0.2
  - @ai-sdk/provider-utils@3.0.3
  - @ai-sdk/provider-utils@3.0.5
+ - @ai-sdk/provider-utils@3.0.9
  - @ai-sdk/provider@2.0.0
  - @ai-sdk/react@2.0.22
  - @ai-sdk/togetherai@1.0.7
@@ -20129,7 +20135,6 @@ The following npm packages may be included in this product:
 
  - lodash.assign@4.2.0
  - lodash.camelcase@4.3.0
- - lodash.clonedeep@4.5.0
  - lodash.debounce@4.0.8
  - lodash.defaults@4.2.0
  - lodash.isarguments@3.1.0
@@ -24125,7 +24130,7 @@ The following npm packages may be included in this product:
  - pgpass@1.0.5
  - product-fruits@1.0.23
  - react-remove-scroll-bar@2.3.8
- - react-resizable-panels@2.0.20
+ - react-resizable-panels@3.0.5
  - react-ripples@2.2.1
  - redis-info@3.1.0
  - regenerator-runtime@0.11.1
@@ -29169,7 +29174,7 @@ SOFTWARE.
 
 The following npm package may be included in this product:
 
- - eventsource-parser@3.0.3
+ - eventsource-parser@3.0.6
 
 This package contains the following license:
 
@@ -33150,11 +33155,12 @@ SOFTWARE.
 
 -----------
 
-The following npm package may be included in this product:
+The following npm packages may be included in this product:
 
  - gtoken@6.1.2
+ - gtoken@7.1.0
 
-This package contains the following license:
+These packages each contain the following license:
 
 The MIT License (MIT)
 

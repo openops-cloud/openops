@@ -11,6 +11,7 @@ import {
   STEP_CONTEXT_MENU_ATTRIBUTE,
   Tooltip,
   TooltipContent,
+  useCanvasContext,
   WorkflowNode,
 } from '@openops/components/ui';
 import { TooltipTrigger } from '@radix-ui/react-tooltip';
@@ -23,6 +24,8 @@ import { BlockSelector } from '@/app/features/builder/blocks-selector';
 import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
 import { flowRunUtils } from '@/app/features/flow-runs/lib/flow-run-utils';
 import {
+  Action,
+  ActionType,
   flowHelper,
   FlowOperationType,
   FlowRun,
@@ -33,6 +36,9 @@ import {
 } from '@openops/shared';
 
 import { CanvasContextMenu } from '../context-menu/canvas-context-menu';
+import { CollapsibleButton } from './collapsible-button';
+import { StackedNodeLayers } from './stacked-node-layer';
+import { hasInnerChildren } from './step-children-utils';
 
 function getStepStatus(
   stepName: string | undefined,
@@ -90,6 +96,17 @@ const WorkflowStepNode = React.memo(
 
     const isTrigger = flowHelper.isTrigger(data.step!.type);
     const isAction = flowHelper.isAction(data.step!.type);
+    const { collapsedSteps, toggleCollapsedStep } = useCanvasContext();
+    const stepType = data.step?.type as ActionType | undefined;
+    const isCollapsibleType =
+      stepType === ActionType.LOOP_ON_ITEMS ||
+      stepType === ActionType.BRANCH ||
+      stepType === ActionType.SPLIT;
+
+    const isCollapsible =
+      isCollapsibleType && hasInnerChildren(data.step as Action);
+    const isCollapsed = isCollapsible && collapsedSteps.has(data.step!.name);
+
     const isEmptyTriggerSelected =
       selectedStep === 'trigger' && data.step?.type === TriggerType.EMPTY;
 
@@ -128,7 +145,10 @@ const WorkflowStepNode = React.memo(
       !!data.step?.settings.inputUiInfo?.sampleData && !readonly;
 
     return (
-      <>
+      <div className="relative group">
+        {isCollapsible && isCollapsed && (
+          <StackedNodeLayers isSelected={isSelected} isDragging={isDragging} />
+        )}
         <div
           id={data.step!.name}
           style={{
@@ -152,6 +172,18 @@ const WorkflowStepNode = React.memo(
           {...listeners}
           {...{ [`data-${STEP_CONTEXT_MENU_ATTRIBUTE}`]: data.step!.name }}
         >
+          {!readonly && isCollapsible && !isDragging && (
+            <CollapsibleButton
+              isCollapsed={isCollapsed}
+              isSelected={isSelected}
+              onToggle={() => {
+                const name = data.step!.name;
+                toggleCollapsedStep(name);
+              }}
+              className="absolute left-0 -translate-x-full -ml-2 top-1/2 -translate-y-1/2 z-20 pointer-events-auto"
+            />
+          )}
+
           <div
             className="absolute text-accent-foreground text-sm opacity-0 transition-all duration-300 group-hover:opacity-100 "
             style={{
@@ -280,7 +312,7 @@ const WorkflowStepNode = React.memo(
         </div>
 
         {hasSampleData && !isDragging && <SampleDataLabel />}
-      </>
+      </div>
     );
   },
 );

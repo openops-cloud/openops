@@ -32,8 +32,8 @@ import { useRunProgress } from '@/app/features/builder/hooks/use-run-progress';
 import { useResizablePanelGroup } from '@/app/common/hooks/use-resizable-panel-group';
 import { useSocket } from '@/app/common/providers/socket-provider';
 import { FLOW_CANVAS_Y_OFFESET } from '@/app/constants/flow-canvas';
+import { RESIZABLE_PANEL_IDS } from '@/app/constants/layout';
 import { SEARCH_PARAMS } from '@/app/constants/search-params';
-import { AiAssistantButton } from '@/app/features/ai/ai-assistant-button';
 import {
   Action,
   ActionType,
@@ -44,18 +44,15 @@ import {
   TriggerType,
   WebsocketClientEvent,
 } from '@openops/shared';
-
-import { AiChatResizablePanel } from '@/app/features/builder/ai-chat/ai-chat-resizable-panel';
-import { RESIZABLE_PANEL_IDS } from '../../constants/layout';
 import {
+  BUILDER_LEFT_SIDEBAR_MAX_SIZE,
+  BUILDER_MIDDLE_PANEL_TOP_OFFSET,
+  BUILDER_RIGHT_SIDEBAR_MAX_SIZE,
+  DEFAULT_SIDEBAR_PANEL_SIZE,
   LEFT_SIDEBAR_MIN_EFFECTIVE_WIDTH,
-  LEFT_SIDEBAR_MIN_SIZE,
 } from '../../constants/sidebar';
-import { AiConfigurationPrompt } from '../ai/ai-configuration-prompt';
 import { blocksHooks } from '../blocks/lib/blocks-hook';
 import { RunDetailsBar } from '../flow-runs/components/run-details-bar';
-import { FlowSideMenu } from '../navigation/side-menu/flow/flow-side-menu';
-import LeftSidebarResizablePanel from '../navigation/side-menu/left-sidebar';
 import { LeftSideBarType, RightSideBarType } from './builder-types';
 import { FlowBuilderCanvas } from './flow-canvas/flow-builder-canvas';
 import { FLOW_CANVAS_CONTAINER_ID } from './flow-version-undo-redo/constants';
@@ -71,12 +68,12 @@ import { TreeView } from './tree-view';
 
 const minWidthOfSidebar = 'min-w-[max(20vw,400px)]';
 
-const MIDDLE_PANEL_TOP_OFFSET = 60;
-
 const useAnimateSidebar = (
   sidebarValue: LeftSideBarType | RightSideBarType,
+  panelId: string,
 ) => {
   const handleRef = useRef<ImperativePanelHandle>(null);
+  const { getPanelSize } = useResizablePanelGroup();
 
   const sidebarbarClosed = [
     LeftSideBarType.NONE,
@@ -86,17 +83,20 @@ const useAnimateSidebar = (
   useEffect(() => {
     requestAnimationFrame(() => {
       try {
-        const size = handleRef.current?.getSize?.() ?? 0;
+        if (!handleRef.current) return;
+
         if (sidebarbarClosed) {
-          handleRef.current?.resize?.(0);
-        } else if (size === 0) {
-          handleRef.current?.resize?.(25);
+          handleRef.current.collapse();
+        } else {
+          const storedSize = getPanelSize(panelId);
+          const targetSize = storedSize ?? DEFAULT_SIDEBAR_PANEL_SIZE;
+          handleRef.current.expand(targetSize);
         }
       } catch (err) {
         console.warn('Sidebar update skipped', err);
       }
     });
-  }, [sidebarValue, sidebarbarClosed]);
+  }, [sidebarValue, sidebarbarClosed, panelId, getPanelSize]);
 
   return handleRef;
 };
@@ -176,7 +176,7 @@ const BuilderPage = ({ children }: { children?: ReactNode }) => {
   const [middlePanelRef, rawMiddlePanelSize] = useMeasure<HTMLDivElement>();
   const [leftSidePanelRef, leftSidePanelSize] = useMeasure<HTMLDivElement>();
   const [isDraggingHandle, setIsDraggingHandle] = useState(false);
-  const rightHandleRef = useAnimateSidebar(rightSidebar);
+
   const {
     blockModel,
     isLoading: isBlockLoading,
@@ -188,6 +188,23 @@ const BuilderPage = ({ children }: { children?: ReactNode }) => {
       memorizedSelectedStep?.type === ActionType.BLOCK ||
       memorizedSelectedStep?.type === TriggerType.BLOCK,
   });
+
+  const isRightSidebarVisible = useMemo(() => {
+    return (
+      rightSidebar === RightSideBarType.BLOCK_SETTINGS &&
+      !!memorizedSelectedStep &&
+      memorizedSelectedStep.type !== TriggerType.EMPTY &&
+      !isBlockLoading
+    );
+  }, [rightSidebar, memorizedSelectedStep, isBlockLoading]);
+
+  const isLeftSidebarVisible = leftSidebar !== LeftSideBarType.NONE;
+
+  const rightHandleRef = useRef<ImperativePanelHandle>(null);
+  const leftHandleRef = useAnimateSidebar(
+    leftSidebar,
+    RESIZABLE_PANEL_IDS.BUILDER_LEFT_SIDEBAR,
+  );
 
   const socket = useSocket();
 
@@ -208,7 +225,7 @@ const BuilderPage = ({ children }: { children?: ReactNode }) => {
 
     if (!run && readonly !== viewOnlyParam) {
       if (!readonly && viewOnlyParam) {
-        setLeftSidebar(LeftSideBarType.MENU);
+        setLeftSidebar(LeftSideBarType.NONE);
       }
       setReadOnly(viewOnlyParam);
     }
@@ -216,33 +233,44 @@ const BuilderPage = ({ children }: { children?: ReactNode }) => {
 
   const { switchToDraft, isSwitchingToDraftPending } = useSwitchToDraft();
 
-  const { setPanelsSize } = useResizablePanelGroup();
+  const { setPanelsSize, getPanelSize } = useResizablePanelGroup();
 
-  const isRightSidebarVisible =
-    rightSidebar === RightSideBarType.BLOCK_SETTINGS &&
-    !!memorizedSelectedStep &&
-    memorizedSelectedStep.type !== TriggerType.EMPTY &&
-    !isBlockLoading;
+  useEffect(() => {
+    if (!rightHandleRef.current) {
+      return;
+    }
+
+    if (isRightSidebarVisible) {
+      const storedSize = getPanelSize(
+        RESIZABLE_PANEL_IDS.BUILDER_RIGHT_SIDEBAR,
+      );
+      const targetSize = storedSize ?? DEFAULT_SIDEBAR_PANEL_SIZE;
+      rightHandleRef.current.expand(targetSize);
+    } else {
+      rightHandleRef.current.collapse();
+    }
+  }, [isRightSidebarVisible, getPanelSize]);
 
   const middlePanelSize = useMemo(() => {
     return {
       width: rawMiddlePanelSize.width,
-      height: rawMiddlePanelSize.height - MIDDLE_PANEL_TOP_OFFSET,
+      height: rawMiddlePanelSize.height - BUILDER_MIDDLE_PANEL_TOP_OFFSET,
     };
   }, [rawMiddlePanelSize.height, rawMiddlePanelSize.width]);
 
   const onResize = useCallback(
     (size: number[]) => {
       setPanelsSize({
-        [RESIZABLE_PANEL_IDS.LEFT_SIDEBAR]: size[0],
-        [RESIZABLE_PANEL_IDS.AI_CHAT]: size[1],
+        [RESIZABLE_PANEL_IDS.BUILDER_LEFT_SIDEBAR]: size[0],
+        [RESIZABLE_PANEL_IDS.BUILDER_MAIN]: size[1],
+        [RESIZABLE_PANEL_IDS.BUILDER_RIGHT_SIDEBAR]: size[2],
       });
     },
     [setPanelsSize],
   );
 
   return (
-    <div className="flex h-screen w-screen flex-col relative">
+    <div className="flex h-full w-full flex-col relative">
       {run && (
         <RunDetailsBar
           canExitRun={canExitRun}
@@ -259,17 +287,26 @@ const BuilderPage = ({ children }: { children?: ReactNode }) => {
         <BuilderTreeViewProvider selectedId={selectedStep || undefined}>
           <ResizablePanelGroup
             direction="horizontal"
-            className="absolute left-0 top-0"
+            className="h-full @container"
+            id="builder-panel-group"
             onLayout={onResize}
           >
-            <LeftSidebarResizablePanel
-              minSize={LEFT_SIDEBAR_MIN_SIZE}
-              className={cn('min-w-0 w-0 bg-background z-[25] shadow-sidebar', {
-                [LEFT_SIDEBAR_MIN_EFFECTIVE_WIDTH]:
-                  leftSidebar !== LeftSideBarType.NONE,
-                'max-w-0': leftSidebar === LeftSideBarType.NONE,
+            <ResizablePanel
+              ref={leftHandleRef}
+              id={RESIZABLE_PANEL_IDS.BUILDER_LEFT_SIDEBAR}
+              minSize={0}
+              maxSize={BUILDER_LEFT_SIDEBAR_MAX_SIZE}
+              defaultSize={0}
+              order={1}
+              collapsible={true}
+              collapsedSize={0}
+              className={cn('min-w-0 w-0 bg-background z-10', {
+                [LEFT_SIDEBAR_MIN_EFFECTIVE_WIDTH]: isLeftSidebarVisible,
+                'max-w-0': !isLeftSidebarVisible,
+                'transition-none': isDraggingHandle,
+                'shadow-sidebar': isLeftSidebarVisible,
+                'max-w-[45%]': isLeftSidebarVisible,
               })}
-              isDragging={isDraggingHandle}
             >
               <div className="h-full w-full" ref={leftSidePanelRef}>
                 {leftSidebar === LeftSideBarType.RUNS && <FlowRecentRunsList />}
@@ -279,36 +316,26 @@ const BuilderPage = ({ children }: { children?: ReactNode }) => {
                 {leftSidebar === LeftSideBarType.VERSIONS && (
                   <FlowVersionsList />
                 )}
-                {leftSidebar === LeftSideBarType.MENU && <FlowSideMenu />}
                 {leftSidebar === LeftSideBarType.TREE_VIEW && <TreeView />}
               </div>
-            </LeftSidebarResizablePanel>
+            </ResizablePanel>
+
             <ResizableHandle
               className="w-0"
-              disabled={leftSidebar === LeftSideBarType.NONE}
+              disabled={!isLeftSidebarVisible}
               onDragging={setIsDraggingHandle}
             />
-            <AiChatResizablePanel onDragging={setIsDraggingHandle} />
 
-            <ResizablePanel order={3} id={RESIZABLE_PANEL_IDS.MAIN}>
+            <ResizablePanel order={2} id={RESIZABLE_PANEL_IDS.BUILDER_MAIN}>
               {readonly ? (
                 <ReadonlyCanvasProvider>
                   <div ref={middlePanelRef} className="relative h-full w-full">
                     {children}
-                    <AiConfigurationPrompt className={'left-4 bottom-[70px]'} />
-                    {leftSidebar === LeftSideBarType.NONE && (
-                      <AiAssistantButton className="size-[42px] absolute left-4 bottom-[10px] z-50" />
-                    )}
                     <CanvasControls
                       topOffset={FLOW_CANVAS_Y_OFFESET}
-                      className={cn({
-                        'left-[74px]': leftSidebar === LeftSideBarType.NONE,
-                      })}
                     ></CanvasControls>
                     <div
-                      className={cn('h-screen w-full flex-1 z-10', {
-                        'bg-background': !isDraggingHandle,
-                      })}
+                      className="h-full w-full flex-1 z-10 bg-background"
                       id={FLOW_CANVAS_CONTAINER_ID}
                     >
                       <FlowBuilderCanvas />
@@ -331,38 +358,43 @@ const BuilderPage = ({ children }: { children?: ReactNode }) => {
               )}
             </ResizablePanel>
 
-            <>
+            {isRightSidebarVisible && (
               <ResizableHandle
-                disabled={!isRightSidebarVisible}
                 withHandle={false}
                 onDragging={setIsDraggingHandle}
                 className="z-50 w-0"
               />
+            )}
 
-              <ResizablePanel
-                ref={rightHandleRef}
-                id={RESIZABLE_PANEL_IDS.RIGHT_SIDEBAR}
-                defaultSize={0}
-                minSize={0}
-                maxSize={60}
-                order={4}
-                className={cn('min-w-0 bg-background z-30 shadow-sidebar', {
-                  [minWidthOfSidebar]: isRightSidebarVisible,
-                })}
-              >
-                {isRightSidebarVisible && (
-                  <StepSettingsProvider
-                    blockModel={blockModel}
-                    selectedStep={memorizedSelectedStep as Action | Trigger}
-                    key={containerKey}
-                  >
-                    <DynamicFormValidationProvider>
-                      <StepSettingsContainer />
-                    </DynamicFormValidationProvider>
-                  </StepSettingsProvider>
-                )}
-              </ResizablePanel>
-            </>
+            <ResizablePanel
+              ref={rightHandleRef}
+              id={RESIZABLE_PANEL_IDS.BUILDER_RIGHT_SIDEBAR}
+              defaultSize={0}
+              minSize={0}
+              maxSize={BUILDER_RIGHT_SIDEBAR_MAX_SIZE}
+              order={3}
+              collapsible={true}
+              collapsedSize={0}
+              className={cn('min-w-0 bg-background z-30', {
+                [minWidthOfSidebar]: isRightSidebarVisible,
+                hidden: !isRightSidebarVisible,
+                'border-l': isRightSidebarVisible,
+                'shadow-sidebar': isRightSidebarVisible,
+                'max-w-[45%]': isRightSidebarVisible,
+              })}
+            >
+              {isRightSidebarVisible && (
+                <StepSettingsProvider
+                  blockModel={blockModel}
+                  selectedStep={memorizedSelectedStep as Action | Trigger}
+                  key={containerKey}
+                >
+                  <DynamicFormValidationProvider>
+                    <StepSettingsContainer />
+                  </DynamicFormValidationProvider>
+                </StepSettingsProvider>
+              )}
+            </ResizablePanel>
           </ResizablePanelGroup>
         </BuilderTreeViewProvider>
         <UndoRedo />

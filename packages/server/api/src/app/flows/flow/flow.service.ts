@@ -2,6 +2,7 @@ import { AppSystemProp, distributedLock, system } from '@openops/server-shared';
 import {
   AppConnectionsWithSupportedBlocks,
   ApplicationError,
+  ContentType,
   CreateEmptyFlowRequest,
   Cursor,
   ErrorCode,
@@ -36,13 +37,18 @@ import {
   sendWorkflowExportedEvent,
   sendWorkflowUpdatedEvent,
 } from '../../telemetry/event-models';
+import { webhookSimulationService } from '../../webhooks/webhook-simulation/webhook-simulation-service';
 import {
   flowVersionRepo,
   flowVersionService,
 } from '../flow-version/flow-version.service';
+import { flowFolderService } from '../folder/folder.service';
 import { flowStepTestOutputService } from '../step-test-output/flow-step-test-output.service';
 import { flowSideEffects } from './flow-service-side-effects';
-import { assertThatFlowIsNotInternal } from './flow-validations';
+import {
+  assertThatFlowIsInCorrectFolderContentType,
+  assertThatFlowIsNotInternal,
+} from './flow-validations';
 import { FlowEntity } from './flow.entity';
 import { flowRepo } from './flow.repo';
 
@@ -54,7 +60,12 @@ export const flowService = {
   async create(params: CreateParams): Promise<PopulatedFlow> {
     const result = await create(params);
 
-    sendWorkflowCreatedEvent(params.userId, result.id, result.projectId);
+    sendWorkflowCreatedEvent(
+      params.userId,
+      result.id,
+      result.projectId,
+      result.isInternal,
+    );
 
     return result;
   },
@@ -68,6 +79,7 @@ export const flowService = {
     connectionIds,
     folderId,
     isInternal = false,
+    contentType = ContentType.WORKFLOW,
   }: CreateFromTriggerParams): Promise<PopulatedFlow> {
     const newFlow = await create({
       userId,
@@ -77,6 +89,7 @@ export const flowService = {
         folderId,
       },
       isInternal,
+      contentType,
     });
 
     const connectionsList = await getConnections(
@@ -477,17 +490,32 @@ export const flowService = {
       isInternal: false,
     });
   },
+
+  async filterVisibleFlows() {
+    const flowFilterCondition =
+      'COALESCE(flows."isInternal", false) = :isInternal';
+    const flowFilterParams = { isInternal: false };
+
+    return { flowFilterCondition, flowFilterParams };
+  },
 };
 
 async function create({
   projectId,
   request,
   isInternal = false,
+  contentType = ContentType.WORKFLOW,
 }: CreateParams): Promise<PopulatedFlow> {
   const folderId =
     isNil(request.folderId) || request.folderId === UNCATEGORIZED_FOLDER_ID
       ? null
       : request.folderId;
+
+  await ensureFolderContentTypeMatches({
+    projectId,
+    folderId,
+    contentType,
+  });
 
   const newFlow: NewFlow = {
     id: openOpsId(),
@@ -515,12 +543,37 @@ async function create({
   };
 }
 
+async function ensureFolderContentTypeMatches({
+  projectId,
+  folderId,
+  contentType,
+}: {
+  projectId: string;
+  folderId: string | null | undefined;
+  contentType: ContentType;
+}): Promise<void> {
+  if (!folderId) {
+    return;
+  }
+
+  const folder = await flowFolderService.getOneOrThrow({
+    projectId,
+    folderId,
+  });
+
+  await assertThatFlowIsInCorrectFolderContentType(
+    contentType,
+    folder.contentType,
+  );
+}
+
 async function update({
   id,
   userId,
   projectId,
   operation,
   lock = true,
+  contentType = ContentType.WORKFLOW,
 }: UpdateParams): Promise<PopulatedFlow> {
   const flowLock = lock
     ? await distributedLock.acquireLock({
@@ -543,6 +596,11 @@ async function update({
         newStatus: operation.request.status,
       });
     } else if (operation.type === FlowOperationType.CHANGE_FOLDER) {
+      await ensureFolderContentTypeMatches({
+        projectId,
+        folderId: operation.request.folderId,
+        contentType,
+      });
       await flowRepo().update(id, {
         folderId: operation.request.folderId,
       });
@@ -553,6 +611,11 @@ async function update({
       });
 
       if (lastVersion.state === FlowVersionState.LOCKED) {
+        await webhookSimulationService.delete({
+          flowId: id,
+          projectId,
+        });
+
         const lastVersionWithArtifacts =
           await flowVersionService.getFlowVersionOrThrow({
             flowId: id,
@@ -671,6 +734,7 @@ type CreateParams = {
   projectId: ProjectId;
   request: CreateEmptyFlowRequest;
   isInternal?: boolean;
+  contentType?: ContentType;
 };
 
 type CreateFromTriggerParams = {
@@ -682,6 +746,7 @@ type CreateFromTriggerParams = {
   connectionIds: string[];
   folderId?: string;
   isInternal?: boolean;
+  contentType?: ContentType;
 };
 
 type ListParams = {
@@ -724,6 +789,7 @@ type UpdateParams = {
   projectId: ProjectId;
   operation: FlowOperationRequest;
   lock?: boolean;
+  contentType?: ContentType;
 };
 
 type UpdateStatusParams = {

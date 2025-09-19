@@ -79,6 +79,12 @@ export const ActionBase = Type.Object({
       'True if the action requires authentication. Defaults to false.',
   }),
   errorHandlingOptions: Type.Optional(ErrorHandlingOptionsParam),
+  requireToolApproval: Type.Optional(
+    Type.Boolean({
+      description:
+        'True if the action requires tool approval. Defaults to false.',
+    }),
+  ),
 });
 
 export type ActionBase = {
@@ -89,10 +95,11 @@ export type ActionBase = {
   riskLevel?: RiskLevel;
   requireAuth: boolean;
   errorHandlingOptions?: ErrorHandlingOptionsParam;
+  requireToolApproval?: boolean;
 };
 
 export const TriggerBase = Type.Composite([
-  Type.Omit(ActionBase, ['requireAuth']),
+  Type.Omit(ActionBase, ['requireAuth', 'requireToolApproval']),
   Type.Object({
     type: Type.Enum(TriggerStrategy),
     sampleData: Type.Unknown(),
@@ -101,7 +108,10 @@ export const TriggerBase = Type.Composite([
     testStrategy: Type.Enum(TriggerTestStrategy),
   }),
 ]);
-export type TriggerBase = Omit<ActionBase, 'requireAuth'> & {
+export type TriggerBase = Omit<
+  ActionBase,
+  'requireAuth' | 'requireToolApproval'
+> & {
   type: TriggerStrategy;
   sampleData: unknown;
   handshakeConfiguration?: WebhookHandshakeConfiguration;

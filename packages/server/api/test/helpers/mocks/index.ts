@@ -1,6 +1,7 @@
 import { faker } from '@faker-js/faker';
 import {
   BlockType,
+  ContentType,
   File,
   FileCompression,
   FileType,
@@ -114,6 +115,7 @@ export const createMockFolder = (projectId: string): Folder => {
     updated: faker.date.recent().toISOString(),
     displayName: faker.lorem.word(),
     projectId,
+    contentType: ContentType.WORKFLOW,
   };
 };
 

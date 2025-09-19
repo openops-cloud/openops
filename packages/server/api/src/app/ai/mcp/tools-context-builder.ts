@@ -29,6 +29,7 @@ type MCPToolsContextParams = {
   userId?: string;
   chatId?: string;
   stream?: NodeJS.WritableStream;
+  abortSignal?: AbortSignal;
 };
 
 export type MCPToolsContext = {
@@ -50,6 +51,7 @@ export async function getMCPToolsContext({
   userId,
   chatId,
   stream,
+  abortSignal,
 }: MCPToolsContextParams): Promise<MCPToolsContext> {
   if (
     !chatContext.actionName ||
@@ -69,6 +71,7 @@ export async function getMCPToolsContext({
       languageModel,
       aiConfig,
       uiContext: additionalContext,
+      abortSignal,
     });
 
     let systemPrompt = await getMcpSystemPrompt({
@@ -95,12 +98,16 @@ export async function getMCPToolsContext({
 
     const finalTools =
       userId && chatId && stream
-        ? wrapToolsWithApproval(combinedTools, (_toolName: string) => ({
-            userId,
-            projectId,
-            chatId,
-            stream,
-          }))
+        ? wrapToolsWithApproval(
+            combinedTools,
+            () => ({
+              userId,
+              projectId,
+              chatId,
+              stream,
+            }),
+            app.io,
+          )
         : combinedTools;
 
     return {

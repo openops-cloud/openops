@@ -1,7 +1,6 @@
 export * from './lib/ai/chat';
 export * from './lib/ai/config';
 export * from './lib/ai/providers';
-export * from './lib/ai/tool-approval';
 export * from './lib/analytics';
 export * from './lib/app-connection/app-connection';
 export * from './lib/app-connection/connections-utils';
@@ -42,6 +41,7 @@ export * from './lib/flows/flow-helper';
 export * from './lib/flows/flow-operations';
 export * from './lib/flows/flow-step-test-output';
 export * from './lib/flows/flow-version';
+export * from './lib/flows/folders/content-type';
 export * from './lib/flows/folders/folder';
 export * from './lib/flows/folders/folder-requests';
 export * from './lib/flows/sample-data';

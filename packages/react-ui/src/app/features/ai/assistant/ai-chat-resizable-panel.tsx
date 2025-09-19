@@ -1,28 +1,12 @@
 import { useResizablePanelGroup } from '@/app/common/hooks/use-resizable-panel-group';
 import { RESIZABLE_PANEL_IDS } from '@/app/constants/layout';
-import AssistantUiChat from '@/app/features/ai/assistant-ui/assistant-ui-chat';
+import AssistantUiChat from '@/app/features/ai/assistant/assistant-ui-chat';
 import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
 import { useAppStore } from '@/app/store/app-store';
 import { cn, ResizableHandle, ResizablePanel } from '@openops/components/ui';
 import { t } from 'i18next';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { ImperativePanelHandle } from 'react-resizable-panels';
-
-const AiChatResizablePanelContent = ({
-  showChat,
-  onCloseButtonClick,
-}: {
-  showChat: boolean;
-  onCloseButtonClick: () => void;
-}) => {
-  if (!showChat) return null;
-
-  return (
-    <div className="w-full h-full flex bg-secondary">
-      <AssistantUiChat onClose={onCloseButtonClick} title={t('AI Assistant')} />
-    </div>
-  );
-};
 
 type AiChatResizablePanelProps = {
   onDragging: (onDragging: boolean) => void;
@@ -39,36 +23,36 @@ const AiChatResizablePanel = ({ onDragging }: AiChatResizablePanelProps) => {
 
   const resizablePanelRef = useRef<ImperativePanelHandle | null>(null);
 
-  const [showChatDelayed, setShowChatDelayed] = useState(false);
-
   const { getPanelSize } = useResizablePanelGroup();
 
   const showChat = useMemo(() => {
     return !!hasActiveAiSettings && !!isAiChatOpened && !isLoading;
   }, [hasActiveAiSettings, isAiChatOpened, isLoading]);
 
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      setShowChatDelayed(showChat);
-    }, 300);
-    return () => clearTimeout(timeoutId);
-  }, [showChat]);
-
   const getDefaultPanelSize = useCallback(() => {
     if (!showChat) return 0;
     return getPanelSize(RESIZABLE_PANEL_IDS.AI_CHAT) ?? 20;
   }, [getPanelSize, showChat]);
 
+  const prevShowChatRef = useRef(showChat);
+
   useEffect(() => {
     if (!resizablePanelRef.current) {
       return;
     }
-    if (showChat) {
-      resizablePanelRef.current?.expand(getDefaultPanelSize());
-    } else {
-      resizablePanelRef.current?.collapse();
+
+    if (prevShowChatRef.current !== showChat) {
+      if (showChat) {
+        const savedSize = getPanelSize(RESIZABLE_PANEL_IDS.AI_CHAT) ?? 20;
+        resizablePanelRef.current?.expand(savedSize);
+      } else {
+        resizablePanelRef.current?.collapse();
+      }
+      prevShowChatRef.current = showChat;
     }
-  }, [getDefaultPanelSize, showChat]);
+  }, [showChat, getPanelSize]);
+
+  const size = getSize(hasActiveAiSettings, isAiChatOpened);
 
   return (
     <>
@@ -76,25 +60,32 @@ const AiChatResizablePanel = ({ onDragging }: AiChatResizablePanelProps) => {
         ref={resizablePanelRef}
         order={2}
         id={RESIZABLE_PANEL_IDS.AI_CHAT}
-        className={cn('duration-0 min-w-0 shadow-sidebar z-20', {
-          'min-w-[300px]': showChat && showChatDelayed,
+        className={cn('duration-0 min-w-0 shadow-sidebar', {
+          'min-w-[300px] max-w-[500px] z-[11]': showChat,
         })}
-        minSize={15}
+        minSize={size}
+        maxSize={size}
         collapsible={true}
+        collapsedSize={0}
         defaultSize={getDefaultPanelSize()}
       >
-        <AiChatResizablePanelContent
-          showChat={showChat}
-          onCloseButtonClick={() => setIsAiChatOpened(false)}
-        />
+        <div className="w-full h-full flex bg-secondary overflow-hidden border-r">
+          <AssistantUiChat
+            title={t('AI Assistant')}
+            onClose={() => setIsAiChatOpened(false)}
+          />
+        </div>
       </ResizablePanel>
-      <ResizableHandle
-        className={cn('w-0')}
-        onDragging={onDragging}
-        disabled={!showChat}
-      />
+      {showChat && <ResizableHandle className="w-0" onDragging={onDragging} />}
     </>
   );
+};
+
+const getSize = (hasActiveAiSettings: boolean, isAiChatOpened: boolean) => {
+  if (!hasActiveAiSettings) return 0;
+  // defaults to min-max pixel sizes defined on the container
+  if (isAiChatOpened) return undefined;
+  return 0;
 };
 
 AiChatResizablePanel.displayName = 'AiChatResizablePanel';

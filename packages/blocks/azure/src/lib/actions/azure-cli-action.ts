@@ -14,6 +14,7 @@ export const azureCliAction = createAction({
   name: 'azure_cli',
   description: 'Execute Azure CLI command',
   displayName: 'Azure CLI',
+  requireToolApproval: true,
   props: {
     useHostSession: getUseHostSessionProperty('Azure', 'az login'),
     subscriptions: subDropdown,

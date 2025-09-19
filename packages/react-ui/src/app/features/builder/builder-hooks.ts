@@ -400,7 +400,7 @@ const getLeftSidebarOnSelectStep = (state: BuilderState): LeftSideBarType => {
 
 const getLeftSidebarInitialState = (run: FlowRun | null, readonly: boolean) => {
   if (readonly) {
-    return run ? LeftSideBarType.RUN_DETAILS : LeftSideBarType.MENU;
+    return run ? LeftSideBarType.RUN_DETAILS : LeftSideBarType.NONE;
   }
   return LeftSideBarType.NONE;
 };
