@@ -65,7 +65,7 @@ export const CatchWebhookTestInfo: React.FC<WebhookTestInfoProps> = ({
       </div>
 
       <p className="text-sm mt-2">
-        {t('Generates sample data and does NOT trigger the flow.')}
+        {t('This URL generates sample data and does NOT trigger the flow.')}
       </p>
     </div>
   );
