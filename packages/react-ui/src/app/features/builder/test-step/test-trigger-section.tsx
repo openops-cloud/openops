@@ -267,11 +267,6 @@ const TestTriggerSection = React.memo(
 
     return (
       <div className="flex flex-col h-full">
-        {isCatchWebhookTrigger && webhookUrl && (
-          <div className="mb-3">
-            <CatchWebhookTestInfo webhookUrl={webhookUrl} />
-          </div>
-        )}
         {outputDataSelected && !isSimulating && !isSavingMockdata && (
           <>
             {pollResults?.data && !isTesting && (
@@ -334,6 +329,11 @@ const TestTriggerSection = React.memo(
 
         {isSimulation && isSimulating && (
           <div className="flex flex-col gap-4 w-full">
+            {isCatchWebhookTrigger && webhookUrl && (
+              <div className="mb-3">
+                <CatchWebhookTestInfo webhookUrl={webhookUrl} />
+              </div>
+            )}
             <div className="flex gap-2 items-center justify-center w-full">
               <LoadingSpinner className="w-4 h-4"></LoadingSpinner>
               <div>{t('Testing Trigger')}</div>
