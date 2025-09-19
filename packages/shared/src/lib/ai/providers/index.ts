@@ -15,6 +15,7 @@ export enum AiProviderEnum {
   DEEPINFRA = 'Deep Infra',
   DEEPSEEK = 'Deep Seek',
   GOOGLE = 'Google Generative AI',
+  GOOGLE_VERTEX = 'Google Vertex AI',
   GROQ = 'Groq',
   MISTRAL = 'Mistral',
   OPENAI = 'OpenAI',

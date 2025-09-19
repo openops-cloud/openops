@@ -18,6 +18,7 @@ import { EngineConstants } from './context/engine-constants';
 import {
   ExecutionVerdict,
   FlowExecutorContext,
+  VerdictReason,
 } from './context/flow-execution-context';
 import { loopExecutor } from './loop-executor';
 import { splitExecutor } from './split-executor';
@@ -105,9 +106,15 @@ export const flowExecutor = {
         duration: stepEndTime - stepStartTime,
       });
 
-      await sendProgress(flowExecutionContext, constants);
+      flowExecutionContext = await sendRunningProgress(
+        flowExecutionContext,
+        constants,
+      );
 
-      if (flowExecutionContext.verdict !== ExecutionVerdict.RUNNING) {
+      if (
+        flowExecutionContext.verdict !== ExecutionVerdict.RUNNING ||
+        flowExecutionContext.verdictResponse?.reason === VerdictReason.STOPPED
+      ) {
         break;
       }
 
@@ -120,6 +127,22 @@ export const flowExecutor = {
   },
 };
 
+async function sendRunningProgress(
+  flowExecutionContext: FlowExecutorContext,
+  constants: EngineConstants,
+): Promise<FlowExecutorContext> {
+  const keepVerdict = flowExecutionContext.verdict;
+  const keepVerdictResponse = flowExecutionContext.verdictResponse;
+
+  flowExecutionContext = flowExecutionContext.setVerdict(
+    ExecutionVerdict.RUNNING,
+  );
+
+  await sendProgress(flowExecutionContext, constants);
+
+  return flowExecutionContext.setVerdict(keepVerdict, keepVerdictResponse);
+}
+
 async function sendProgress(
   flowExecutionContext: FlowExecutorContext,
   constants: EngineConstants,
@@ -127,6 +150,7 @@ async function sendProgress(
   if (isNil(constants.executionCorrelationId)) {
     return Promise.resolve();
   }
+
   return progressService.sendUpdate({
     engineConstants: constants,
     flowExecutorContext: flowExecutionContext,

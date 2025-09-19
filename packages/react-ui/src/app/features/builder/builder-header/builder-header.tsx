@@ -4,6 +4,7 @@ import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
 import { LeftSideBarType } from '../builder-types';
 
 import { WorkflowOverview } from '@/app/features/builder/builder-header/workflow-overview/workflow-overview';
+import { cn } from '@openops/components/ui';
 import { FC } from 'react';
 import BuilderViewOnlyWidget from './builder-view-only-widget';
 import { UndoRedoActionBar } from './undo-redo-action-bar';
@@ -11,11 +12,13 @@ import { UndoRedoActionBar } from './undo-redo-action-bar';
 type BuilderHeaderProps = {
   DetailsPanel: FC;
   PublishButton: FC;
+  className?: string;
 };
 
 export const BuilderHeader = ({
   DetailsPanel,
   PublishButton,
+  className,
 }: BuilderHeaderProps) => {
   const [leftSidebar, setLeftSidebar, readonly, flowVersion] =
     useBuilderStateContext((state) => [
@@ -34,7 +37,12 @@ export const BuilderHeader = ({
   };
 
   return (
-    <div className="w-full absolute z-10 top-[25px] px-4 flex gap-6 justify-between @container">
+    <div
+      className={cn(
+        'w-full absolute z-10 top-[25px] px-4 flex gap-6 justify-between @container',
+        className,
+      )}
+    >
       <div className="flex items-center gap-2 contain-layout">
         <SideMenuCollapsed>
           <DetailsPanel />
@@ -45,7 +53,7 @@ export const BuilderHeader = ({
           handleSidebarButtonClick={handleSidebarButtonClick}
         />
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 contain-layout">
         {readonly && <BuilderViewOnlyWidget></BuilderViewOnlyWidget>}
         {!readonly && <UndoRedoActionBar />}
         <PublishButton />

@@ -27,6 +27,7 @@ import {
 } from './constants';
 import { copyPasteToast } from './copy-paste-toast';
 
+export type CollapsedState = Set<string>;
 export type PanningMode = 'grab' | 'pan';
 export type PlusButtonPostion = {
   parentStep: string;
@@ -47,6 +48,8 @@ type CanvasContextState = {
   setPastePlusButton: React.Dispatch<
     React.SetStateAction<PlusButtonPostion | null>
   >;
+  collapsedSteps: CollapsedState;
+  toggleCollapsedStep: (stepName: string) => void;
 };
 
 const CanvasContext = createContext<CanvasContextState | undefined>(undefined);
@@ -67,6 +70,8 @@ export const ReadonlyCanvasProvider = ({
       readonly: true,
       pastePlusButton: null,
       setPastePlusButton: () => {},
+      collapsedSteps: new Set<string>(),
+      toggleCollapsedStep: () => {},
       actionToPaste: null,
     }),
     [],
@@ -104,6 +109,14 @@ export const InteractiveContextProvider = ({
   const state = useStoreApi().getState();
   const [actionToPaste, setActionToPaste] = useState<Action | null>(null);
   const canvasRef = useRef<HTMLElement | null>(null);
+  const [collapsedSteps, setCollapsedSteps] = useState<Set<string>>(new Set());
+  const toggleCollapsedStep = useCallback((stepName: string) => {
+    setCollapsedSteps((prev) => {
+      const next = new Set(prev);
+      next.has(stepName) ? next.delete(stepName) : next.add(stepName);
+      return next;
+    });
+  }, []);
 
   const spacePressed = useKeyPress(SPACE_KEY);
   const shiftPressed = useKeyPress(SHIFT_KEY);
@@ -402,6 +415,8 @@ export const InteractiveContextProvider = ({
       setPastePlusButton,
       readonly: false,
       actionToPaste,
+      collapsedSteps,
+      toggleCollapsedStep,
     }),
     [
       effectivePanningMode,
@@ -411,6 +426,8 @@ export const InteractiveContextProvider = ({
       copyAction,
       pastePlusButton,
       actionToPaste,
+      collapsedSteps,
+      toggleCollapsedStep,
     ],
   );
   return (

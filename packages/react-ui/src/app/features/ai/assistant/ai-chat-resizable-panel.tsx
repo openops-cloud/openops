@@ -83,7 +83,7 @@ const AiChatResizablePanel = ({ onDragging }: AiChatResizablePanelProps) => {
 
 const getSize = (hasActiveAiSettings: boolean, isAiChatOpened: boolean) => {
   if (!hasActiveAiSettings) return 0;
-  // defaults to min-max pixes sizes defined on the container
+  // defaults to min-max pixel sizes defined on the container
   if (isAiChatOpened) return undefined;
   return 0;
 };

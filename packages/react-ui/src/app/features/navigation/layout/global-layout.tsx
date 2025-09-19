@@ -32,7 +32,7 @@ const MINIMIZED_NAVIGATION_ROUTES = [
   '/analytics',
 ];
 
-const UNAUTHENTHICATED_ROUTES = [
+const UNAUTHENTICATED_ROUTES = [
   '/sign-in',
   '/sign-up',
   '/forget-password',
@@ -57,7 +57,7 @@ export function GlobalLayout() {
 
   const { setPanelsSize } = useResizablePanelGroup();
 
-  const isUnauthenticatedRoute = UNAUTHENTHICATED_ROUTES.some(
+  const isUnauthenticatedRoute = UNAUTHENTICATED_ROUTES.some(
     (route) =>
       location.pathname.startsWith(route) &&
       !location.pathname.startsWith('/connections'),
@@ -155,7 +155,7 @@ export function GlobalLayout() {
           <ResizablePanel
             id={RESIZABLE_PANEL_IDS.MAIN}
             order={3}
-            className="flex-1 h-full overflow-hidden min-w-[900px]"
+            className="flex-1 h-full overflow-hidden min-w-[900px] contain-layout"
             defaultSize={GLOBAL_MAIN_PANEL_DEFAULT_SIZE}
             minSize={GLOBAL_MAIN_PANEL_MIN_SIZE}
           >

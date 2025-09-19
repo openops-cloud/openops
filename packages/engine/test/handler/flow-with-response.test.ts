@@ -41,7 +41,7 @@ describe('flow with response', () => {
             }), executionState: FlowExecutorContext.empty(), constants: generateMockEngineConstants(),
         })
 
-        expect(result.verdict).toBe(ExecutionVerdict.SUCCEEDED)
+        expect(result.verdict).toBe(ExecutionVerdict.RUNNING)
         expect(result.verdictResponse).toEqual({
             reason: VerdictReason.STOPPED,
             stopResponse: response,

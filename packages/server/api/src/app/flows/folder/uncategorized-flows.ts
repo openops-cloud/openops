@@ -1,29 +1,13 @@
-import {
-  ApplicationError,
-  ContentType,
-  ErrorCode,
-  PopulatedFlow,
-} from '@openops/shared';
+import { ContentType, PopulatedFlow } from '@openops/shared';
 import { flowRepo } from '../flow/flow.repo';
-import { flowService } from '../flow/flow.service';
+import { getFlowFilter } from './flow-filter-util';
 
 export const getUncategorizedFlows = async (
   projectId: string,
   contentType: ContentType,
 ): Promise<PopulatedFlow[]> => {
-  let flowFilterCondition: string;
-  let flowFilterParams: Record<string, unknown>;
-
-  if (contentType === ContentType.WORKFLOW) {
-    const result = await flowService.filterVisibleFlows();
-    flowFilterCondition = result.flowFilterCondition;
-    flowFilterParams = result.flowFilterParams;
-  } else {
-    throw new ApplicationError({
-      code: ErrorCode.VALIDATION,
-      params: { message: 'Invalid content type' },
-    });
-  }
+  const { condition: flowFilterCondition, params: flowFilterParams } =
+    await getFlowFilter(contentType);
 
   const qb = flowRepo()
     .createQueryBuilder('flows')

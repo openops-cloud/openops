@@ -1,3 +1,4 @@
+import isChromatic from 'chromatic/isChromatic';
 import React, { Suspense } from 'react';
 import { I18nextProvider } from 'react-i18next';
 import '../src/styles/global.css';
@@ -49,3 +50,29 @@ export const parameters = {
     diffThreshold: 0.2,
   },
 };
+
+const fontWeights = [100, 200, 300, 400, 500, 700, 900];
+const fontStyles = ['', 'italic'];
+const fontSize = '16px';
+const fontFamily = 'Satoshi';
+
+const satoshiVariants = fontWeights.flatMap((weight) =>
+  fontStyles.map((style) => {
+    const parts = [weight.toString(), style, fontSize, fontFamily].filter(
+      Boolean,
+    );
+    return parts.join(' ');
+  }),
+);
+
+const fontLoader = async () => {
+  await Promise.all(
+    satoshiVariants.map((variant) => document.fonts.load(variant)),
+  );
+  return { fonts: true };
+};
+
+export const loaders =
+  isChromatic() && typeof document !== 'undefined' && document.fonts
+    ? [fontLoader]
+    : [];
