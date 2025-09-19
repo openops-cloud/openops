@@ -15769,12 +15769,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 -----------
 
-The following npm packages may be included in this product:
+The following npm package may be included in this product:
 
- - form-data@4.0.0
  - form-data@4.0.4
 
-These packages each contain the following license:
+This package contains the following license:
 
 Copyright (c) 2012 Felix Geisendörfer (felix@debuggable.com) and contributors
 
