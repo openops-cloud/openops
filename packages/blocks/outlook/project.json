@@ -1,0 +1,36 @@
+{
+  "name": "outlook",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/blocks/outlook/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/blocks/outlook",
+        "tsConfig": "packages/blocks/outlook/tsconfig.lib.json",
+        "packageJson": "packages/blocks/outlook/package.json",
+        "main": "packages/blocks/outlook/src/index.ts",
+        "assets": ["packages/blocks/outlook/*.md"],
+        "buildableProjectDepsInPackageJsonType": "dependencies",
+        "updateBuildableProjectDepsInPackageJson": true
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/blocks/outlook/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "packages/blocks/outlook/jest.config.ts"
+      }
+    }
+  },
+  "tags": []
+}
