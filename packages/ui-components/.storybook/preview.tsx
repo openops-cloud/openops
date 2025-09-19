@@ -51,21 +51,24 @@ export const parameters = {
   },
 };
 
-const fontLoader = async () => {
-  const satoshiVariants = [
-    '300 16px Satoshi',
-    '300 italic 16px Satoshi',
-    '400 16px Satoshi',
-    '400 italic 16px Satoshi',
-    '500 16px Satoshi',
-    '500 italic 16px Satoshi',
-    '700 16px Satoshi',
-    '700 italic 16px Satoshi',
-    '900 16px Satoshi',
-    '900 italic 16px Satoshi',
-  ];
+const fontWeights = [100, 200, 300, 400, 500, 700, 900];
+const fontStyles = ['', 'italic'];
+const fontSize = '16px';
+const fontFamily = 'Satoshi';
 
-  await Promise.all(satoshiVariants.map((v) => document.fonts.load(v)));
+const satoshiVariants = fontWeights.flatMap((weight) =>
+  fontStyles.map((style) => {
+    const parts = [weight.toString(), style, fontSize, fontFamily].filter(
+      Boolean,
+    );
+    return parts.join(' ');
+  }),
+);
+
+const fontLoader = async () => {
+  await Promise.all(
+    satoshiVariants.map((variant) => document.fonts.load(variant)),
+  );
   return { fonts: true };
 };
 
