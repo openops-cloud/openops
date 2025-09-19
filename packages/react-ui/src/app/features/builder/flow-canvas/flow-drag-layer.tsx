@@ -23,15 +23,10 @@ import { useApplyOperationAndPushToHistory } from '../flow-version-undo-redo/hoo
 
 type FlowDragLayerProps = {
   children: React.ReactNode;
-  lefSideBarContainerWidth: number;
   cursorPosition: { x: number; y: number };
 };
 
-const FlowDragLayer = ({
-  children,
-  lefSideBarContainerWidth,
-  cursorPosition,
-}: FlowDragLayerProps) => {
+const FlowDragLayer = ({ children, cursorPosition }: FlowDragLayerProps) => {
   const { toast } = useToast();
   const viewport = useViewport();
   const [previousViewPort, setPreviousViewPort] = useState(viewport);
@@ -149,7 +144,6 @@ const FlowDragLayer = ({
       {draggedStep && (
         <StepDragOverlay
           step={draggedStep}
-          lefSideBarContainerWidth={lefSideBarContainerWidth}
           cursorPosition={cursorPosition}
         ></StepDragOverlay>
       )}

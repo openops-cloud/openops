@@ -174,7 +174,7 @@ const BuilderPage = ({ children }: { children?: ReactNode }) => {
   );
 
   const [middlePanelRef, rawMiddlePanelSize] = useMeasure<HTMLDivElement>();
-  const [leftSidePanelRef, leftSidePanelSize] = useMeasure<HTMLDivElement>();
+  const [leftSidePanelRef] = useMeasure<HTMLDivElement>();
   const [isDraggingHandle, setIsDraggingHandle] = useState(false);
 
   const {
@@ -351,7 +351,6 @@ const BuilderPage = ({ children }: { children?: ReactNode }) => {
                   }
                   middlePanelSize={middlePanelSize}
                   flowVersion={flowVersion}
-                  lefSideBarContainerWidth={leftSidePanelSize?.width || 0}
                 >
                   {children}
                 </InteractiveBuilder>
