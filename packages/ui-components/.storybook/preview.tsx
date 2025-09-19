@@ -51,7 +51,7 @@ export const parameters = {
   },
 };
 
-const fontWeights = [200, 300, 400, 500, 700, 900];
+const fontWeights = [100, 200, 300, 400, 500, 700, 900];
 const fontStyles = ['', 'italic'];
 const fontSize = '16px';
 const fontFamily = 'Satoshi';
