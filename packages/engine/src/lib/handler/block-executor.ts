@@ -9,13 +9,13 @@ import {
   StopHookParams,
   TagsManager,
 } from '@openops/blocks-framework';
+import { logger } from '@openops/server-shared';
 import {
   ActionType,
   assertNotNullOrUndefined,
   AUTHENTICATION_PROPERTY_NAME,
   BlockAction,
   ExecutionType,
-  FlowRunStatus,
   GenericStepOutput,
   isNil,
   StepOutputStatus,
@@ -35,6 +35,7 @@ import { EngineConstants } from './context/engine-constants';
 import {
   ExecutionVerdict,
   FlowExecutorContext,
+  VerdictReason,
 } from './context/flow-execution-context';
 
 type HookResponse = {
@@ -55,16 +56,39 @@ export const blockExecutor: BaseExecutor<BlockAction> = {
     executionState: FlowExecutorContext;
     constants: EngineConstants;
   }) {
-    if (executionState.isCompleted({ stepName: action.name })) {
-      return executionState;
+    const startTime = performance.now();
+    let stepStatus: string | undefined;
+
+    try {
+      if (executionState.isCompleted({ stepName: action.name })) {
+        return executionState;
+      }
+
+      const resultExecution = await runWithExponentialBackoff(
+        executionState,
+        action,
+        constants,
+        executeAction,
+      );
+
+      stepStatus = resultExecution.getStepOutput(action.name)?.status;
+      return await continueIfFailureHandler(resultExecution, action, constants);
+    } finally {
+      const duration = Math.floor(performance.now() - startTime);
+      logger.info(
+        `Executed step [${action.name}] action [${action.settings.actionName}] in ${duration}ms`,
+        {
+          stepStatus,
+          stepId: action.id,
+          durationMs: duration,
+          stepName: action.name,
+          blockName: action.settings.blockName,
+          actionName: action.settings.actionName,
+          continueOnFailure:
+            action.settings.errorHandlingOptions?.continueOnFailure?.value,
+        },
+      );
     }
-    const resultExecution = await runWithExponentialBackoff(
-      executionState,
-      action,
-      constants,
-      executeAction,
-    );
-    return continueIfFailureHandler(resultExecution, action, constants);
   },
 };
 
@@ -203,8 +227,8 @@ const executeAction: ActionHandler<BlockAction> = async ({
           action.name,
           stepOutput.setOutput(output).setStatus(StepOutputStatus.STOPPED),
         )
-        .setVerdict(ExecutionVerdict.SUCCEEDED, {
-          reason: FlowRunStatus.STOPPED,
+        .setVerdict(ExecutionVerdict.RUNNING, {
+          reason: VerdictReason.STOPPED,
           stopResponse: hookResponse.stopResponse.response,
         })
         .increaseTask();
@@ -217,7 +241,7 @@ const executeAction: ActionHandler<BlockAction> = async ({
           stepOutput.setOutput(output).setStatus(StepOutputStatus.PAUSED),
         )
         .setVerdict(ExecutionVerdict.PAUSED, {
-          reason: FlowRunStatus.PAUSED,
+          reason: VerdictReason.PAUSED,
           pauseMetadata: hookResponse.pauseResponse.pauseMetadata,
         });
     }

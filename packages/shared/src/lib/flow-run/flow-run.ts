@@ -13,7 +13,6 @@ export enum RunEnvironment {
 
 export enum FlowRetryStrategy {
   ON_LATEST_VERSION = 'ON_LATEST_VERSION',
-  FROM_FAILED_STEP = 'FROM_FAILED_STEP',
 }
 
 export type FlowRetryPayload = {

@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.engine.name }}
+  labels:
+    app: {{ .Values.engine.name }}
+spec:
+  replicas: {{ .Values.engine.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.engine.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.engine.name }}
+    spec:
+      containers:
+        - name: {{ .Values.engine.name }}
+          image: "{{ .Values.image.repository }}/{{ .Values.engine.image }}:{{ .Values.global.version }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: [ "/bin/sh", "-c", "cp -r /var/tmp-base/. /tmp/ && node main.js" ]
+          env:
+            - name: NODE_OPTIONS
+              value: "--no-node-snapshot"
+            - name: OPS_COMPONENT
+              value: engine
+              {{- range $k, $v := .Values.openopsEnv }}
+            - name: {{ $k }}
+              value: {{ tpl (tpl $v $) $ | quote }}
+              {{- end }}
+              {{- range $k, $v := .Values.engine.env }}
+            - name: {{ $k }}
+              value: {{ tpl (tpl $v $) $ | quote }}
+              {{- end }}
+          ports:
+            - containerPort: 3005
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"

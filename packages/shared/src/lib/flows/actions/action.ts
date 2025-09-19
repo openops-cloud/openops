@@ -24,7 +24,7 @@ const commonActionProps = {
   }),
   name: Type.String({
     description:
-      'Name of the step (action), used for reference in code or configurations. Usually the name is in the format step_index',
+      'Name of the step (action), used for reference in other step configurations.',
   }),
   valid: Type.Boolean({
     description:
@@ -40,11 +40,12 @@ export const InputsSchema = Type.Object(
   {
     additionalProperties: true,
     description:
-      'All block-specific properties must be contained within the `input` object, not at the root level. ' +
+      'All action-specific properties must be contained within the `input` object, not at the root level. ' +
       'The `input` object is a mapping of property keys to their chosen values (`input: { propertyKey → propertyValue }`). ' +
       'Keys must exactly match the action property keys returned by the action details tool, and values must follow the expected types and constraints. ' +
       'The `input` object may be empty. For optional properties, omit the key if the value is unknown. ' +
-      'For required properties, include the key with a `null` value if the value is unknown.',
+      'For required properties, include the key with a `null` value if the value is unknown. ' +
+      'Output values from other steps can be referenced. Example: {{step_1}}, or access inner properties as {{step_1.property}}',
   },
 );
 
@@ -83,7 +84,7 @@ Example:
 Use '{}' when there are no dependencies.`,
   }),
   code: Type.String({
-    description: `JavaScript/TypeScript source for this step. To use data from previous steps, pass them as key–value pairs and access them via 'inputs.key' in your code. The entry point must be an exported function named 'code'. If it is removed or renamed, the step will fail.
+    description: `TypeScript source for this step. Executes in an isolated-vm environment (secure and isolated JavaScript runtime). To use data from previous steps, pass them as key–value pairs and access them via 'inputs.key' in your code. The entry point must be an exported function named 'code'. If it is removed or renamed, the step will fail.
 
 code MUST follow this exact interface:
 
@@ -94,7 +95,16 @@ export const code = async (inputs) => {
   // Return the result
   return result;
 };
-\`\`\``,
+\`\`\`
+
+CRITICAL CONSTRAINTS:
+- Only use ES6 imports if critically needed, otherwise don't use external dependencies 
+- NO require() statements
+- NO access to Node.js native modules (fs, process, http, crypto, path, os, etc.)
+- NO file system operations or network requests
+- Use bracket notation for dynamic properties (data['propertyName'])
+- AVOID Direct property access on inferred object types (example: if (!data.propertyName) { // ❌ May cause TS2339 errors)
+`,
   }),
 });
 
@@ -122,7 +132,12 @@ export const BlockActionSettings = Type.Object({
       "The complete package identifier, formatted as 'packageScope/packageName'. This must exactly match the block name as registered (e.g., '@org/one-block').",
   }),
   blockVersion: VersionType,
-  actionName: Type.Optional(Type.String({})),
+  actionName: Type.Optional(
+    Type.String({
+      description:
+        'Mandatory name of the action to be executed. This must exactly match the response from Get actions by scope and name.',
+    }),
+  ),
   input: InputsSchema,
   inputUiInfo: SampleDataSettingsObject,
   errorHandlingOptions: ActionErrorHandlingOptions,

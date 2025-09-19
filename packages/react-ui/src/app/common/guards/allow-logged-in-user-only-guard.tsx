@@ -1,7 +1,7 @@
 import { LoadingSpinner } from '@openops/components/ui';
 import dayjs from 'dayjs';
 import { jwtDecode } from 'jwt-decode';
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
@@ -41,20 +41,9 @@ export const AllowOnlyLoggedInUserOnlyGuard = ({
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  if (!authenticationSession.isLoggedIn()) {
-    navigationUtil.save(location.pathname + location.search);
-    return <Navigate to="/sign-in" replace />;
-  }
-
   const token = authenticationSession.getToken();
-  if (!token || isJwtExpired(token)) {
-    navigationUtil.save(location.pathname + location.search);
-    authenticationSession.logOut({
-      userInitiated: false,
-      navigate,
-    });
-    return <Navigate to="/sign-in" replace />;
-  }
+  const isLoggedIn = authenticationSession.isLoggedIn();
+  const expired = !token || isJwtExpired(token);
 
   projectHooks.prefetchProject();
   platformHooks.prefetchPlatform();
@@ -64,6 +53,33 @@ export const AllowOnlyLoggedInUserOnlyGuard = ({
   userSettingsHooks.useUserSettings();
   userHooks.useUserMeta();
   appConnectionsHooks.useConnectionsMetadata();
+
+  useEffect(() => {
+    let isMounted = true;
+    async function doLogout() {
+      try {
+        await authenticationSession.logOut({
+          userInitiated: false,
+          navigate,
+        });
+      } catch (e) {
+        if (isMounted) {
+          console.error('Logout failed:', e);
+        }
+      }
+    }
+    if (!isLoggedIn || expired) {
+      navigationUtil.save(location.pathname + location.search);
+      doLogout();
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [isLoggedIn, expired, location.pathname, location.search, navigate]);
+
+  if (!isLoggedIn || expired) {
+    return <Navigate to="/sign-in" replace />;
+  }
 
   return (
     <Suspense

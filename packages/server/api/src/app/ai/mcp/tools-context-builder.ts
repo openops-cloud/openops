@@ -1,4 +1,5 @@
-import { AiConfig } from '@openops/shared';
+import { wrapToolsWithApproval } from '@/mcp/tool-approval-wrapper';
+import { AiConfig, ChatFlowContext } from '@openops/shared';
 import { LanguageModel, ModelMessage, ToolSet } from 'ai';
 import { FastifyInstance } from 'fastify';
 import { MCPChatContext } from '../chat/ai-chat.service';
@@ -6,10 +7,14 @@ import {
   getBlockSystemPrompt,
   getMcpSystemPrompt,
 } from '../chat/prompts.service';
-import { formatFrontendTools } from './tool-utils';
+import { routeQuery } from './llm-query-router';
+import {
+  collectToolsByProvider,
+  formatFrontendTools,
+  hasToolProvider,
+} from './tool-utils';
 import { startMCPTools } from './tools-initializer';
-import { selectRelevantTools } from './tools-selector';
-import { AssistantUITools } from './types';
+import { AssistantUITools, QueryClassification } from './types';
 
 type MCPToolsContextParams = {
   app: FastifyInstance;
@@ -20,6 +25,11 @@ type MCPToolsContextParams = {
   chatContext: MCPChatContext;
   languageModel: LanguageModel;
   frontendTools: AssistantUITools;
+  additionalContext?: ChatFlowContext;
+  userId?: string;
+  chatId?: string;
+  stream?: NodeJS.WritableStream;
+  abortSignal?: AbortSignal;
 };
 
 export type MCPToolsContext = {
@@ -37,6 +47,11 @@ export async function getMCPToolsContext({
   chatContext,
   languageModel,
   frontendTools,
+  additionalContext,
+  userId,
+  chatId,
+  stream,
+  abortSignal,
 }: MCPToolsContextParams): Promise<MCPToolsContext> {
   if (
     !chatContext.actionName ||
@@ -50,45 +65,57 @@ export async function getMCPToolsContext({
       projectId,
     );
 
-    const allTools = {
-      ...tools,
-      ...formatFrontendTools(frontendTools),
-    };
-
-    const filteredTools = await selectRelevantTools({
+    const { tools: filteredTools, queryClassification } = await routeQuery({
       messages,
-      tools: allTools,
+      tools,
       languageModel,
       aiConfig,
+      uiContext: additionalContext,
+      abortSignal,
     });
 
-    const isAwsCostMcpDisabled =
-      !hasToolProvider(tools, 'aws-pricing') &&
-      !hasToolProvider(tools, 'cost-explorer');
-
-    const isAnalyticsLoaded = hasToolProvider(filteredTools, 'superset');
-    const isTablesLoaded = hasToolProvider(filteredTools, 'tables');
-    const isOpenOpsMCPEnabled = hasToolProvider(filteredTools, 'openops');
-
     let systemPrompt = await getMcpSystemPrompt({
-      isAnalyticsLoaded,
-      isTablesLoaded,
-      isOpenOpsMCPEnabled,
-      isAwsCostMcpDisabled,
+      queryClassification,
+      selectedTools: filteredTools,
+      allTools: tools,
+      uiContext: additionalContext,
     });
 
     if (!filteredTools || Object.keys(filteredTools).length === 0) {
       systemPrompt += `\n\nMCP tools are not available in this chat. Do not claim access or simulate responses from them under any circumstance.`;
     }
 
+    const openOpsTools =
+      hasToolProvider(tools, 'openops') &&
+      queryClassification.includes(QueryClassification.openops)
+        ? collectToolsByProvider(tools, 'openops')
+        : {};
+
+    const combinedTools = {
+      ...filteredTools,
+      ...openOpsTools,
+    };
+
+    const finalTools =
+      userId && chatId && stream
+        ? wrapToolsWithApproval(
+            combinedTools,
+            () => ({
+              userId,
+              projectId,
+              chatId,
+              stream,
+            }),
+            app.io,
+          )
+        : combinedTools;
+
     return {
       mcpClients,
       systemPrompt,
       filteredTools: {
-        ...filteredTools,
-        ...(isOpenOpsMCPEnabled
-          ? collectToolsByProvider(tools, 'openops')
-          : {}),
+        ...finalTools,
+        ...formatFrontendTools(frontendTools),
       },
     };
   }
@@ -97,26 +124,4 @@ export async function getMCPToolsContext({
     mcpClients: [],
     systemPrompt: await getBlockSystemPrompt(chatContext),
   };
-}
-
-function hasToolProvider(
-  tools: ToolSet | undefined,
-  provider: string,
-): boolean {
-  return Object.values(tools ?? {}).some(
-    (tool) => (tool as { toolProvider?: string }).toolProvider === provider,
-  );
-}
-
-function collectToolsByProvider(
-  tools: ToolSet | undefined,
-  provider: string,
-): ToolSet {
-  const result: ToolSet = {};
-  for (const [key, tool] of Object.entries(tools ?? {})) {
-    if ((tool as { toolProvider?: string }).toolProvider === provider) {
-      result[key] = tool;
-    }
-  }
-  return result;
 }

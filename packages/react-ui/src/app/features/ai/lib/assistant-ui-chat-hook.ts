@@ -1,4 +1,3 @@
-import { QueryKeys } from '@/app/constants/query-keys';
 import { aiAssistantChatApi } from '@/app/features/ai/lib/ai-assistant-chat-api';
 import { getActionName, getBlockName } from '@/app/features/blocks/lib/utils';
 import { authenticationSession } from '@/app/lib/authentication-session';
@@ -6,69 +5,93 @@ import { useChat } from '@ai-sdk/react';
 import { AssistantRuntime } from '@assistant-ui/react';
 import { useAISDKRuntime } from '@assistant-ui/react-ai-sdk';
 import { toast } from '@openops/components/ui';
-import { flowHelper, FlowVersion, OpenChatResponse } from '@openops/shared';
+import { flowHelper } from '@openops/shared';
 import { getFrontendToolDefinitions } from '@openops/ui-kit';
 import { useQuery } from '@tanstack/react-query';
 import { DefaultChatTransport, ToolSet, UIMessage } from 'ai';
 import { t } from 'i18next';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { aiChatApi } from '../../builder/ai-chat/lib/chat-api';
+import {
+  getBuilderStore,
+  useBuilderStoreOutsideProvider,
+} from '../../builder/builder-state-provider';
 import { aiSettingsHooks } from './ai-settings-hooks';
+import { buildQueryKey } from './chat-utils';
 import { createAdditionalContext } from './enrich-context';
+import { ChatMode } from './types';
 
 const PLACEHOLDER_MESSAGE_INTEROP = 'satisfy-schema';
 
 interface UseAssistantChatProps {
-  flowVersion?: FlowVersion;
-  selectedStep?: string;
   chatId: string | null;
   onChatIdChange: (chatId: string | null) => void;
+  chatMode: ChatMode;
 }
 
-const buildQueryKey = (
-  selectedStep: string | undefined,
-  flowVersionId: string | undefined,
-  chatId: string | null,
-  blockName: string | undefined,
-) => {
-  const baseKey = [
-    selectedStep ? QueryKeys.openChat : QueryKeys.openAiAssistantChat,
-    selectedStep ? flowVersionId : chatId,
-  ];
-
-  if (selectedStep && blockName) {
-    baseKey.push(blockName);
-  }
-
-  if (selectedStep) {
-    baseKey.push(selectedStep);
-  }
-
-  return baseKey;
-};
-
-export const useAssistantChat = (props: UseAssistantChatProps) => {
+export const useAssistantChat = ({
+  chatId,
+  onChatIdChange,
+  chatMode,
+}: UseAssistantChatProps) => {
   const runtimeRef = useRef<AssistantRuntime | null>(null);
   const frontendTools = useMemo(
     () => getFrontendToolDefinitions() as ToolSet,
     [],
   );
-  const { flowVersion, selectedStep, chatId, onChatIdChange } = props;
+
+  const selectedStep = useBuilderStoreOutsideProvider(
+    (state) => state.selectedStep,
+  );
+
+  const flowVersionId = useBuilderStoreOutsideProvider(
+    (state) => state.flowVersion?.id,
+  );
+  const runId = useBuilderStoreOutsideProvider((state) => state.run?.id);
+
+  const showSettingsAIChat = useBuilderStoreOutsideProvider(
+    (state) => state?.midpanelState?.showAiChat ?? false,
+  );
+
+  const getBuilderState = useCallback(() => {
+    const context = getBuilderStore();
+    const state = context?.getState();
+
+    if (!state) return null;
+
+    return {
+      flowVersion: state.flowVersion,
+      selectedStep: state.selectedStep,
+      run: state.run,
+    };
+  }, []);
 
   const { hasActiveAiSettings, isLoading: isLoadingAiSettings } =
     aiSettingsHooks.useHasActiveAiSettings();
 
-  const stepDetails =
-    flowVersion && selectedStep
-      ? flowHelper.getStep(flowVersion, selectedStep)
+  const stepDetails = useMemo(() => {
+    const context = getBuilderState();
+    return context?.flowVersion && context.selectedStep
+      ? flowHelper.getStep(context.flowVersion, context.selectedStep)
       : undefined;
+  }, [getBuilderState, selectedStep, getBuilderState()?.flowVersion]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const isQueryEnabled = useMemo(() => {
     if (isLoadingAiSettings) {
       return false;
     }
 
-    if (selectedStep) {
+    if (chatMode === ChatMode.Agent) {
+      return hasActiveAiSettings;
+    }
+
+    if (
+      selectedStep &&
+      flowVersionId &&
+      stepDetails &&
+      showSettingsAIChat &&
+      chatMode === ChatMode.StepSettings
+    ) {
       return (
         !!getBlockName(stepDetails) &&
         !!getActionName(stepDetails) &&
@@ -76,41 +99,54 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
       );
     }
 
-    return hasActiveAiSettings;
-  }, [selectedStep, stepDetails, hasActiveAiSettings, isLoadingAiSettings]);
+    return false;
+  }, [
+    hasActiveAiSettings,
+    isLoadingAiSettings,
+    selectedStep,
+    flowVersionId,
+    stepDetails,
+    chatMode,
+    showSettingsAIChat,
+    getBuilderState()?.flowVersion, // eslint-disable-line react-hooks/exhaustive-deps
+  ]);
 
-  const queryKey = useMemo(
-    () =>
-      buildQueryKey(
-        selectedStep,
-        flowVersion?.flowId,
-        chatId,
-        stepDetails?.settings?.blockName,
-      ),
-    [
-      selectedStep,
-      flowVersion?.flowId,
+  const queryKey = useMemo(() => {
+    return buildQueryKey(
+      selectedStep ?? undefined,
+      flowVersionId,
       chatId,
       stepDetails?.settings?.blockName,
-    ],
-  );
+      chatMode,
+    );
+  }, [
+    selectedStep,
+    flowVersionId,
+    chatId,
+    stepDetails?.settings?.blockName,
+    chatMode,
+    getBuilderState()?.flowVersion, // eslint-disable-line react-hooks/exhaustive-deps
+  ]);
 
   const { data: openChatResponse, isLoading } = useQuery({
     queryKey,
     queryFn: async () => {
-      let conversation: OpenChatResponse;
-      if (selectedStep && flowVersion && stepDetails) {
-        conversation = await aiChatApi.open(
-          flowVersion.flowId,
-          getBlockName(stepDetails),
-          selectedStep,
-          getActionName(stepDetails),
-        );
-      } else {
-        conversation = await aiAssistantChatApi.open(chatId);
+      const context = getBuilderState();
+
+      if (chatMode === ChatMode.StepSettings) {
+        if (context?.selectedStep && context?.flowVersion && stepDetails) {
+          return await aiChatApi.open(
+            context.flowVersion.flowId,
+            getBlockName(stepDetails),
+            context.selectedStep,
+            getActionName(stepDetails),
+          );
+        }
+      } else if (chatMode === ChatMode.Agent) {
+        return await aiAssistantChatApi.open(chatId);
       }
 
-      return conversation;
+      return null;
     },
     enabled: isQueryEnabled,
     refetchOnWindowFocus: false,
@@ -122,13 +158,16 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
     }
   }, [onChatIdChange, openChatResponse?.chatId]);
 
-  const additionalContext = useMemo(
-    () =>
-      flowVersion
-        ? createAdditionalContext(flowVersion, stepDetails)
-        : undefined,
-    [flowVersion, stepDetails],
-  );
+  const additionalContext = useMemo(() => {
+    const context = getBuilderState();
+    return context?.flowVersion
+      ? createAdditionalContext(
+          context.flowVersion,
+          stepDetails,
+          context.run?.id,
+        )
+      : undefined;
+  }, [flowVersionId, stepDetails, runId, getBuilderState]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // workaround for https://github.com/vercel/ai/issues/7819#issuecomment-3172625487
   const bodyRef = useRef({
@@ -181,12 +220,31 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
             frontendTools[toolCall.toolName as keyof typeof frontendTools];
 
           if (tool && tool.execute) {
-            await tool.execute(toolCall.input || toolCall.args, {} as any);
+            const result = await tool.execute(
+              toolCall.input || toolCall.args,
+              {} as any,
+            );
+            chat.addToolResult({
+              tool: toolCall.toolName,
+              toolCallId: toolCall.toolCallId,
+              output: result,
+            });
           }
         } catch (error) {
           console.error('Error executing frontend tool:', error);
         }
       }
+    },
+    // send message automatically when there's a frontend tool call
+    sendAutomaticallyWhen: ({ messages }) => {
+      const lastMessage = messages[messages.length - 1];
+      const lastMessagePart =
+        lastMessage?.parts?.[lastMessage.parts.length - 1];
+      return (
+        lastMessagePart?.type?.includes('tool-ui') &&
+        'output' in lastMessagePart &&
+        !!lastMessagePart.output
+      );
     },
   });
 
@@ -211,7 +269,8 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
       chat.stop();
 
       if (oldChatId) {
-        if (selectedStep && flowVersion) {
+        const context = getBuilderState();
+        if (context?.selectedStep && context?.flowVersion) {
           await aiChatApi.delete(oldChatId);
           chat.setMessages([]);
         } else {
@@ -227,7 +286,7 @@ export const useAssistantChat = (props: UseAssistantChatProps) => {
         `There was an error canceling the current run and invalidating queries while creating a new chat: ${error}`,
       );
     }
-  }, [chatId, chat, selectedStep, flowVersion, onChatIdChange]);
+  }, [chatId, chat, onChatIdChange, getBuilderState]);
 
   return {
     runtime,

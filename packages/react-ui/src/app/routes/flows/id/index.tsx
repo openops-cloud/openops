@@ -1,3 +1,4 @@
+import { FlowDetailsPanel } from '@/app/features/flows/components/flow-details-panel';
 import { LoadingSpinner } from '@openops/components/ui';
 import { PopulatedFlow } from '@openops/shared';
 import { useQuery } from '@tanstack/react-query';
@@ -7,6 +8,8 @@ import { Navigate, useParams, useSearchParams } from 'react-router-dom';
 import { QueryKeys } from '@/app/constants/query-keys';
 import { SEARCH_PARAMS } from '@/app/constants/search-params';
 import { BuilderPage } from '@/app/features/builder';
+import { BuilderHeader } from '@/app/features/builder/builder-header/builder-header';
+import { BuilderPublishButton } from '@/app/features/builder/builder-header/builder-publish-button';
 import { BuilderStateProvider } from '@/app/features/builder/builder-state-provider';
 import { flowsApi } from '@/app/features/flows/lib/flows-api';
 import { AxiosError } from 'axios';
@@ -71,7 +74,12 @@ const FlowBuilderPage = () => {
       readonly={searchParams.get(SEARCH_PARAMS.viewOnly) === 'true'}
       run={null}
     >
-      <BuilderPage />
+      <BuilderPage>
+        <BuilderHeader
+          PublishButton={BuilderPublishButton}
+          DetailsPanel={FlowDetailsPanel}
+        />
+      </BuilderPage>
     </BuilderStateProvider>
   );
 };

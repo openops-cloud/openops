@@ -71,9 +71,9 @@ function buildInputSchemaForStep(
       ) {
         return formUtils.buildSchema(
           addAuthToBlockProps(
-            block.actions[actionNameOrTriggerName].props,
+            block.actions[actionNameOrTriggerName]?.props,
             block.auth,
-            block.actions[actionNameOrTriggerName].requireAuth,
+            block.actions[actionNameOrTriggerName]?.requireAuth,
           ),
         );
       }
@@ -87,7 +87,7 @@ function buildInputSchemaForStep(
       ) {
         return formUtils.buildSchema(
           addAuthToBlockProps(
-            block.triggers[actionNameOrTriggerName].props,
+            block.triggers[actionNameOrTriggerName]?.props,
             block.auth,
             !!block.auth,
           ),

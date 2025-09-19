@@ -15,9 +15,9 @@ import { DictionaryProperty } from '../../block-properties/dictionary-property';
 
 import { useTheme } from '@/app/common/providers/theme-provider';
 import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
-import { useAppStore } from '@/app/store/app-store';
 import { PropertyType } from '@openops/blocks-framework';
 import { useSafeBuilderStateContext } from '../../builder-hooks';
+import { ExpandableContent } from '../expandable-markdown';
 import { CodeEditior } from './code-editior';
 
 const markdown = `
@@ -32,10 +32,6 @@ type CodeSettingsProps = {
 const CodeSettings = React.memo(({ readonly }: CodeSettingsProps) => {
   const { theme } = useTheme();
   const form = useFormContext<CodeAction>();
-
-  const { setIsAiChatOpened } = useAppStore((s) => ({
-    setIsAiChatOpened: s.setIsAiChatOpened,
-  }));
 
   const isAiChatVisible = useSafeBuilderStateContext(
     (s) => s?.midpanelState?.showAiChat,
@@ -59,8 +55,7 @@ const CodeSettings = React.memo(({ readonly }: CodeSettingsProps) => {
         required: false,
       },
     });
-    setIsAiChatOpened(false);
-  }, [dispatch, setIsAiChatOpened]);
+  }, [dispatch]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -69,8 +64,17 @@ const CodeSettings = React.memo(({ readonly }: CodeSettingsProps) => {
         name="settings.input"
         render={({ field }) => (
           <FormItem>
-            <div className="pb-4">
-              <Markdown markdown={markdown} theme={theme} />
+            <div className="pb-2">
+              <ExpandableContent fullContent={markdown}>
+                {(content) => (
+                  <Markdown
+                    markdown={content}
+                    theme={theme}
+                    withBorder={false}
+                    textClassName="leading-relaxed"
+                  />
+                )}
+              </ExpandableContent>
             </div>
 
             <div className="flex items-center justify-between">

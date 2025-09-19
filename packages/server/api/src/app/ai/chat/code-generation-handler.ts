@@ -27,6 +27,7 @@ import { ChatProcessingContext, RequestContext } from './types';
 type CodeMessageParams = RequestContext &
   ChatProcessingContext & {
     additionalContext?: ChatFlowContext;
+    abortSignal: AbortSignal;
   };
 
 const GENERATE_CODE_TOOL_NAME = 'generate_code';
@@ -50,7 +51,7 @@ async function handleCodeGenerationError(
   const errorMessage = extractMessage(error);
 
   logger.warn(
-    `An unrecoverable error occurred in the conversation. Message: ${errorMessage}`,
+    `An unrecoverable exception occurred in the conversation. Message: ${errorMessage}`,
     error,
   );
 
@@ -127,6 +128,7 @@ export async function handleCodeGenerationRequest(
     serverResponse,
     aiConfig,
     languageModel,
+    abortSignal,
     conversation: { chatContext, chatHistory },
   } = params;
 
@@ -157,6 +159,7 @@ export async function handleCodeGenerationRequest(
       languageModel,
       aiConfig,
       systemPrompt: prompt,
+      abortSignal,
     });
 
     if (!result) {
@@ -200,11 +203,12 @@ export async function handleCodeGenerationRequest(
           toolName: GENERATE_CODE_TOOL_NAME,
           input: { message: newMessage.content },
         },
-        {
-          type: 'text',
-          text: finalCodeResult.textAnswer || '',
-        },
       ],
+    };
+
+    const assistantToolResultMessage: ModelMessage = {
+      role: ROLE_ASSISTANT,
+      content: finalCodeResult.textAnswer || '',
     };
 
     const toolResultMessage: ModelMessage = {
@@ -229,6 +233,7 @@ export async function handleCodeGenerationRequest(
       ...chatHistory,
       assistantMessage,
       toolResultMessage,
+      assistantToolResultMessage,
     ]);
   } catch (error) {
     await handleCodeGenerationError(error, {

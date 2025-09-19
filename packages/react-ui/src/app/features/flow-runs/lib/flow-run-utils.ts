@@ -1,6 +1,7 @@
 import {
   Check,
   CircleCheck,
+  CircleStop,
   CircleX,
   PauseCircleIcon,
   PauseIcon,
@@ -78,8 +79,8 @@ export const flowRunUtils = {
         };
       case FlowRunStatus.STOPPED:
         return {
-          variant: 'success',
-          Icon: Check,
+          variant: 'default',
+          Icon: CircleStop,
         };
       case FlowRunStatus.FAILED:
         return {
@@ -350,3 +351,17 @@ function extractLoopItemStepOutput(
     return testData;
   }
 }
+
+export const shouldHideRunActions = (params: {
+  isFailed: boolean;
+  isRunning: boolean;
+  isSuccessfulRun: boolean;
+  isStopped: boolean;
+  isTestRun: boolean;
+}): boolean => {
+  const { isFailed, isRunning, isSuccessfulRun, isStopped, isTestRun } = params;
+  return (
+    ((isFailed || isStopped) && isTestRun) ||
+    (!isFailed && !isRunning && !isStopped && !isSuccessfulRun)
+  );
+};

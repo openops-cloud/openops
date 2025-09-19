@@ -2,6 +2,7 @@ export const TOOL_STATUS_TYPES = {
   RUNNING: 'running',
   COMPLETE: 'complete',
   INCOMPLETE: 'incomplete',
+  REQUIRES_ACTION: 'requires-action',
 } as const;
 
 export type ToolStatusType =
@@ -14,4 +15,7 @@ export const toolStatusUtils = {
     status?.type === TOOL_STATUS_TYPES.COMPLETE,
   isIncomplete: (status?: { type: string }) =>
     status?.type === TOOL_STATUS_TYPES.INCOMPLETE,
+  isCancelled: (status?: { type: string; reason?: string }) =>
+    status?.type === TOOL_STATUS_TYPES.REQUIRES_ACTION &&
+    status?.reason === 'tool-calls',
 };

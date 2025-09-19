@@ -1,5 +1,9 @@
 import { BlockCategory, FlagId, FlowTemplateMetadata } from '@openops/shared';
-import { useQuery } from '@tanstack/react-query';
+import {
+  QueryObserverResult,
+  RefetchOptions,
+  useQuery,
+} from '@tanstack/react-query';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { DEFAULT_LOCALE } from '@/app/constants/locale';
@@ -9,6 +13,7 @@ import {
   GetTemplatesParams,
   templatesApi,
 } from '@/app/features/templates/lib/templates-api';
+import { addIntegrationsToTemplates } from '@/app/features/templates/lib/templates-utils';
 import { BlockMetadataModelSummary } from '@openops/blocks-framework';
 import {
   FlowTemplateMetadataWithIntegrations,
@@ -34,6 +39,7 @@ type GettingStartedTemplateFilter = 'only' | 'include' | 'exclude';
 
 type TemplateBaseParams = TemplateStrategyParams & {
   gettingStartedTemplateFilter: GettingStartedTemplateFilter;
+  isConnectedToCloudTemplates?: boolean;
 };
 
 type UseTemplatesParams = GetTemplatesParams & TemplateBaseParams;
@@ -77,6 +83,7 @@ export const templatesHooks = {
     blocks = [],
     tags = [],
     gettingStartedTemplateFilter: gettingStarted = 'include',
+    isConnectedToCloudTemplates = false,
   }: UseTemplatesParams) => {
     const version = flagsHooks.useFlag<string>(FlagId.CURRENT_VERSION).data;
     const templatesApiToUse = useCloudTemplates
@@ -93,6 +100,7 @@ export const templatesHooks = {
         ...blocks,
         ...tags,
         gettingStarted,
+        isConnectedToCloudTemplates,
       ],
       retry: (failureCount, error) => {
         const axiosError = error as AxiosError;
@@ -131,12 +139,14 @@ export const templatesHooks = {
     isLoading: boolean;
     status: 'error' | 'success' | 'pending';
     isError: boolean;
+    refetch: (options?: RefetchOptions) => Promise<QueryObserverResult>;
   } => {
     const {
       data: templates,
       isLoading,
       status,
       isError,
+      refetch,
     } = templatesHooks.useTemplates({
       enabled,
       useCloudTemplates,
@@ -167,6 +177,7 @@ export const templatesHooks = {
       isLoading,
       status,
       isError,
+      refetch,
     };
   },
 
@@ -201,6 +212,7 @@ export const templatesHooks = {
     blocks = [],
     tags = [],
     gettingStartedTemplateFilter,
+    isConnectedToCloudTemplates = false,
   }: UseTemplatesParams & {
     gettingStartedTemplateFilter: GettingStartedTemplateFilter;
   }) => {
@@ -218,18 +230,14 @@ export const templatesHooks = {
       blocks,
       tags,
       gettingStartedTemplateFilter,
+      isConnectedToCloudTemplates,
     });
     const { blocksLookup, isLoading: isBlocksLoading } =
       templatesHooks.useBlocksLookup();
 
     const templatesWithIntegrations = useMemo(() => {
       if (!templates) return [];
-      return templates.map((template) => ({
-        ...template,
-        integrations: (template.blocks ?? [])
-          .map((blockName) => blocksLookup[blockName])
-          .filter(Boolean),
-      }));
+      return addIntegrationsToTemplates(templates, blocksLookup);
     }, [templates, blocksLookup]);
 
     return {

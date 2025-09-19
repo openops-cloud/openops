@@ -51,6 +51,7 @@ const folderController: FastifyPluginAsyncTypebox = async (fastify) => {
       includeUncategorizedFolder: Boolean(
         !request.query.excludeUncategorizedFolder,
       ),
+      contentType: request.query.contentType,
     });
   });
 

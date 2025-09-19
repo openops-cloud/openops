@@ -1,9 +1,10 @@
+const saveRequestBodyMock = jest.fn();
 import { progressService } from '../../src/lib/services/progress.service';
-import { logger } from '@openops/server-shared';
 import { throwIfExecutionTimeExceeded } from '../../src/lib/timeout-validator';
 
 jest.mock('@openops/server-shared', () => ({
   ...jest.requireActual('@openops/server-shared'),
+  saveRequestBody: saveRequestBodyMock,
   logger: {
     debug: jest.fn(),
     error: jest.fn(),
@@ -44,12 +45,12 @@ describe('Progress Service', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     // Reset the timeout mock to not throw by default
     mockThrowIfExecutionTimeExceeded.mockReset();
-    
+
     mockMakeHttpRequest.mockResolvedValue({});
-    
+
     // Reset the global lastRequestHash by calling with unique params
     // This ensures no deduplication issues between tests
     jest.clearAllMocks();
@@ -69,7 +70,16 @@ describe('Progress Service', () => {
         },
       };
 
+      saveRequestBodyMock.mockResolvedValue('request:test-run-id');
       await progressService.sendUpdate(successParams);
+      await progressService.flushProgressUpdate(successParams.engineConstants.flowRunId);
+
+      expect(saveRequestBodyMock).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({
+        executionCorrelationId: 'test-correlation-id-success',
+        runId: 'test-run-id',
+        workerHandlerId: 'test-handler-id',
+        progressUpdateType: 'WEBHOOK_RESPONSE',
+      }));
 
       expect(successParams.flowExecutorContext.toResponse).toHaveBeenCalled();
       expect(mockMakeHttpRequest).toHaveBeenCalledWith(
@@ -77,10 +87,7 @@ describe('Progress Service', () => {
         'http://localhost:3000/v1/engine/update-run',
         expect.any(Object),
         expect.objectContaining({
-          executionCorrelationId: 'test-correlation-id-success',
-          runId: 'test-run-id',
-          workerHandlerId: 'test-handler-id',
-          progressUpdateType: 'WEBHOOK_RESPONSE',
+          bodyAccessKey: 'request:test-run-id',
         }),
         expect.objectContaining({
           retries: 3,
@@ -98,7 +105,22 @@ describe('Progress Service', () => {
         },
       };
 
+      saveRequestBodyMock.mockResolvedValue('request:test-run-id');
       await progressService.sendUpdate(uniqueParams);
+      await progressService.flushProgressUpdate(uniqueParams.engineConstants.flowRunId);
+
+      expect(saveRequestBodyMock).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({
+        executionCorrelationId: 'test-correlation-id-payload',
+        runId: 'test-run-id',
+        workerHandlerId: 'test-handler-id',
+        progressUpdateType: 'WEBHOOK_RESPONSE',
+        runDetails: expect.objectContaining({
+          steps: {},
+          status: 'RUNNING',
+          duration: 1000,
+          tasks: 1,
+        }),
+      }));
 
       expect(mockMakeHttpRequest).toHaveBeenCalledTimes(1);
       const call = mockMakeHttpRequest.mock.calls[0];
@@ -108,16 +130,7 @@ describe('Progress Service', () => {
       expect(url).toBe('http://localhost:3000/v1/engine/update-run');
       expect(requestBody).toEqual(
         expect.objectContaining({
-          executionCorrelationId: 'test-correlation-id-payload',
-          runId: 'test-run-id',
-          workerHandlerId: 'test-handler-id',
-          progressUpdateType: 'WEBHOOK_RESPONSE',
-          runDetails: expect.objectContaining({
-            steps: {},
-            status: 'RUNNING',
-            duration: 1000,
-            tasks: 1,
-          }),
+          bodyAccessKey: 'request:test-run-id',
         })
       );
     });
@@ -132,17 +145,117 @@ describe('Progress Service', () => {
         },
       };
 
+      saveRequestBodyMock.mockResolvedValue('request:test-run-id');
       await progressService.sendUpdate(paramsWithoutHandlerId);
+      await progressService.flushProgressUpdate(paramsWithoutHandlerId.engineConstants.flowRunId);
+
+      expect(saveRequestBodyMock).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({
+        executionCorrelationId: 'test-correlation-id-null-handler',
+        runId: 'test-run-id',
+        workerHandlerId: null,
+        progressUpdateType: 'WEBHOOK_RESPONSE',
+        runDetails: expect.objectContaining({
+          steps: {},
+          status: 'RUNNING',
+          duration: 1000,
+          tasks: 1,
+        }),
+      }));
 
       expect(mockMakeHttpRequest).toHaveBeenCalledTimes(1);
       const call = mockMakeHttpRequest.mock.calls[0];
       const [_, __, ___, requestBody] = call;
-      
-      expect(requestBody.workerHandlerId).toBe(null);
+
+      expect(requestBody).toEqual({
+          bodyAccessKey: 'request:test-run-id',
+        }
+      );
     });
 
-    it('should deduplicate identical requests based on hash', async () => {
-      const duplicateParams = {
+    it('should only make the last request if they are very close.', async () => {
+      const flowRunId = mockParams.engineConstants.flowRunId;
+      const request1 = {
+        ...mockParams,
+        flowExecutorContext: {
+          toResponse: jest.fn().mockResolvedValue({
+            steps: {},
+            status: 'RUNNING',
+            duration: 500,
+            tasks: 1,
+          }),
+        },
+        engineConstants: {
+          ...mockParams.engineConstants,
+          executionCorrelationId: 'test-correlation-id-duplicate',
+        },
+      };
+      const request2 = {
+        ...mockParams,
+        flowExecutorContext: {
+          toResponse: jest.fn().mockResolvedValue({
+            steps: {},
+            status: 'SUCCESS',
+            duration: 1000,
+            tasks: 2,
+          }),
+        },
+        engineConstants: {
+          ...mockParams.engineConstants,
+          executionCorrelationId: 'test-correlation-id-duplicate',
+        },
+      };
+
+      await progressService.sendUpdate(request1);
+      await progressService.sendUpdate(request2);
+
+      await progressService.flushProgressUpdate(flowRunId);
+
+      expect(mockMakeHttpRequest).toHaveBeenCalledTimes(1);
+
+      expect(saveRequestBodyMock).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({
+        executionCorrelationId: 'test-correlation-id-duplicate',
+        runId: 'test-run-id',
+        workerHandlerId: 'test-handler-id',
+        progressUpdateType: 'WEBHOOK_RESPONSE',
+        runDetails: expect.objectContaining({
+          steps: {},
+          status: 'SUCCESS',
+          duration: 1000,
+          tasks: 2,
+        }),
+      }));
+    });
+
+    it('should make multiple requests if they have different runIDs', async () => {
+      const request1 = {
+        ...mockParams,
+        engineConstants: {
+          ...mockParams.engineConstants,
+          flowRunId: 'test-run-id-1',
+          executionCorrelationId: 'test-correlation-id-duplicate',
+        },
+      };
+      const request2 = {
+        ...mockParams,
+        engineConstants: {
+          ...mockParams.engineConstants,
+          flowRunId: 'test-run-id-2',
+          executionCorrelationId: 'test-correlation-id-duplicate',
+        },
+      };
+
+      await progressService.sendUpdate(request1);
+      await progressService.sendUpdate(request2);
+
+      await progressService.flushProgressUpdate('test-run-id-1');
+      await progressService.flushProgressUpdate('test-run-id-2');
+
+      expect(mockMakeHttpRequest).toHaveBeenCalledTimes(2);
+    });
+
+    it('should make multiple requests if they are spaced out in time.', async () => {
+      const flowRunId = mockParams.engineConstants.flowRunId;
+      const request = {
         ...mockParams,
         engineConstants: {
           ...mockParams.engineConstants,
@@ -150,115 +263,85 @@ describe('Progress Service', () => {
         },
       };
 
-      await progressService.sendUpdate(duplicateParams);
-      await progressService.sendUpdate(duplicateParams);
+      await progressService.sendUpdate(request);
+      await new Promise(res => setTimeout(res, 1500));
+      await progressService.sendUpdate(request);
 
-      expect(mockMakeHttpRequest).toHaveBeenCalledTimes(1);
-    });
-
-    it('should send different requests when content changes', async () => {
-      const params1 = {
-        ...mockParams,
-        engineConstants: {
-          ...mockParams.engineConstants,
-          executionCorrelationId: 'test-correlation-id-different-1',
-        },
-      };
-      const params2 = {
-        ...mockParams,
-        engineConstants: {
-          ...mockParams.engineConstants,
-          executionCorrelationId: 'test-correlation-id-different-2',
-          flowRunId: 'different-run-id',
-        },
-      };
-
-      await progressService.sendUpdate(params1);
-      await progressService.sendUpdate(params2);
+      await progressService.flushProgressUpdate(flowRunId);
 
       expect(mockMakeHttpRequest).toHaveBeenCalledTimes(2);
     });
 
-    it('should deduplicate requests with different durations but same content', async () => {
-      const baseParams = {
+    it('should make multiple requests if they are spaced out in time even if the previous call did not end.', async () => {
+      const flowRunId = mockParams.engineConstants.flowRunId;
+      const request1 = {
         ...mockParams,
+        flowExecutorContext: {
+          toResponse: jest.fn().mockResolvedValue({
+            steps: {},
+            status: 'RUNNING',
+            duration: 500,
+            tasks: 1,
+          }),
+        },
         engineConstants: {
           ...mockParams.engineConstants,
-          executionCorrelationId: 'test-correlation-id-duration',
+          executionCorrelationId: 'test-correlation-id-duplicate',
         },
       };
-
-      const params1 = {
-        ...baseParams,
-        flowExecutorContext: {
-          toResponse: jest.fn().mockResolvedValue({
-            steps: {},
-            status: 'RUNNING',
-            duration: 1000,
-            tasks: 1,
-          }),
-        },
-      };
-
-      const params2 = {
-        ...baseParams,
-        flowExecutorContext: {
-          toResponse: jest.fn().mockResolvedValue({
-            steps: {},
-            status: 'RUNNING',
-            duration: 2500, // different duration
-            tasks: 1,
-          }),
-        },
-      };
-
-      await progressService.sendUpdate(params1);
-      await progressService.sendUpdate(params2);
-
-      expect(mockMakeHttpRequest).toHaveBeenCalledTimes(1);
-      expect(params1.flowExecutorContext.toResponse).toHaveBeenCalledTimes(1);
-      expect(params2.flowExecutorContext.toResponse).toHaveBeenCalledTimes(1);
-    });
-
-    it('should send separate requests when non-duration fields change', async () => {
-      const baseParams = {
+      const request2 = {
         ...mockParams,
+        flowExecutorContext: {
+          toResponse: jest.fn().mockResolvedValue({
+            steps: {},
+            status: 'SUCCESS',
+            duration: 1000,
+            tasks: 2,
+          }),
+        },
         engineConstants: {
           ...mockParams.engineConstants,
-          executionCorrelationId: 'test-correlation-id-non-duration',
+          executionCorrelationId: 'test-correlation-id-duplicate',
         },
       };
 
-      const params1 = {
-        ...baseParams,
-        flowExecutorContext: {
-          toResponse: jest.fn().mockResolvedValue({
-            steps: {},
-            status: 'RUNNING',
-            duration: 1000,
-            tasks: 1,
-          }),
-        },
-      };
+      mockMakeHttpRequest.mockImplementation(async () => {
+        await new Promise((r) => setTimeout(r, 1500));
+        return { data: 'ok' };
+      });
 
-      const params2 = {
-        ...baseParams,
-        flowExecutorContext: {
-          toResponse: jest.fn().mockResolvedValue({
-            steps: {},
-            status: 'COMPLETED',
-            duration: 1000,
-            tasks: 1,
-          }),
-        },
-      };
-
-      await progressService.sendUpdate(params1);
-      await progressService.sendUpdate(params2);
+      await progressService.sendUpdate(request1);
+      await new Promise(res => setTimeout(res, 1001));
+      await progressService.sendUpdate(request2);
+      await progressService.flushProgressUpdate(flowRunId);
 
       expect(mockMakeHttpRequest).toHaveBeenCalledTimes(2);
-      expect(params1.flowExecutorContext.toResponse).toHaveBeenCalledTimes(1);
-      expect(params2.flowExecutorContext.toResponse).toHaveBeenCalledTimes(1);
+
+      expect(saveRequestBodyMock).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({
+        executionCorrelationId: 'test-correlation-id-duplicate',
+        runId: 'test-run-id',
+        workerHandlerId: 'test-handler-id',
+        progressUpdateType: 'WEBHOOK_RESPONSE',
+        runDetails: expect.objectContaining({
+          steps: {},
+          status: 'RUNNING',
+          duration: 500,
+          tasks: 1,
+        }),
+      }));
+
+      expect(saveRequestBodyMock).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({
+        executionCorrelationId: 'test-correlation-id-duplicate',
+        runId: 'test-run-id',
+        workerHandlerId: 'test-handler-id',
+        progressUpdateType: 'WEBHOOK_RESPONSE',
+        runDetails: expect.objectContaining({
+          steps: {},
+          status: 'SUCCESS',
+          duration: 1000,
+          tasks: 2,
+        }),
+      }));
     });
 
     it('should construct correct URL', async () => {
@@ -272,6 +355,7 @@ describe('Progress Service', () => {
       };
 
       await progressService.sendUpdate(paramsWithDifferentUrl);
+      await progressService.flushProgressUpdate(paramsWithDifferentUrl.engineConstants.flowRunId);
 
       expect(mockMakeHttpRequest).toHaveBeenCalledWith(
         'POST',
@@ -296,7 +380,8 @@ describe('Progress Service', () => {
         throw timeoutError;
       });
 
-      await expect(progressService.sendUpdate(timeoutParams)).rejects.toThrow('Execution time exceeded');
+      await expect(progressService.sendUpdate(timeoutParams)).rejects
+        .toThrow('Execution time exceeded');
       expect(mockThrowIfExecutionTimeExceeded).toHaveBeenCalledTimes(1);
       expect(mockMakeHttpRequest).not.toHaveBeenCalled();
       expect(timeoutParams.flowExecutorContext.toResponse).not.toHaveBeenCalled();
@@ -312,6 +397,7 @@ describe('Progress Service', () => {
       };
 
       await progressService.sendUpdate(retryParams);
+      await progressService.flushProgressUpdate(retryParams.engineConstants.flowRunId);
 
       expect(mockMakeHttpRequest).toHaveBeenCalledWith(
         'POST',
@@ -327,10 +413,10 @@ describe('Progress Service', () => {
       // Test the retry delay function
       const call = mockMakeHttpRequest.mock.calls[0];
       const [_, __, ___, ____, options] = call;
-      
+
       expect(options.retryDelay(0)).toBe(200); // 1st retry: 200ms
       expect(options.retryDelay(1)).toBe(400); // 2nd retry: 400ms
       expect(options.retryDelay(2)).toBe(600); // 3rd retry: 600ms
     });
   });
-}); 
+});

@@ -18,10 +18,12 @@ import {
   EnvironmentType,
   ErrorCode,
   ExecutionState,
+  FlowRunId,
   FlowRunResponse,
   FlowRunStatus,
   GetFlowVersionForWorkerRequest,
   GetFlowVersionForWorkerRequestType,
+  isFlowStateTerminal,
   isNil,
   PopulatedFlow,
   PrincipalType,
@@ -38,6 +40,8 @@ import { flowRunService } from '../flows/flow-run/flow-run-service';
 import { flowVersionService } from '../flows/flow-version/flow-version.service';
 import { flowService } from '../flows/flow/flow.service';
 import { triggerHooks } from '../flows/trigger';
+import { projectService } from '../project/project-service';
+import { sendWorkflowExecutedEvent } from '../telemetry/event-models';
 import { flowConsumer } from './consumer';
 import { webhookResponseWatcher } from './helper/webhook-response-watcher';
 import { flowQueue } from './queue';
@@ -126,19 +130,21 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
       );
     }
 
-    logger.debug(
-      `Updating run ${runId} to ${getTerminalStatus(runDetails.status)}`,
-    );
+    logger.debug(`Updating run ${runId} to ${runDetails.status}`);
 
     const populatedRun = await flowRunService.updateStatus({
       flowRunId: runId,
-      status: getTerminalStatus(runDetails.status),
+      status: runDetails.status,
       tasks: runDetails.tasks,
       duration: runDetails.duration,
       executionState: getExecutionState(runDetails),
       projectId: request.principal.projectId,
       tags: runDetails.tags ?? [],
     });
+
+    if (!populatedRun) {
+      return;
+    }
 
     if (runDetails.status === FlowRunStatus.PAUSED) {
       await flowRunService.pause({
@@ -157,6 +163,14 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
     app.io
       .to(populatedRun.projectId)
       .emit(WebsocketClientEvent.FLOW_RUN_PROGRESS, runId);
+
+    if (isFlowStateTerminal(runDetails.status)) {
+      await trackExecution(
+        request.principal.projectId,
+        runId,
+        runDetails.status,
+      );
+    }
   });
 
   app.get('/flows', GetLockedVersionRequest, async (request) => {
@@ -256,9 +270,11 @@ function getExecutionState(
   flowRunResponse: FlowRunResponse,
 ): ExecutionState | null {
   if (
-    [FlowRunStatus.TIMEOUT, FlowRunStatus.INTERNAL_ERROR].includes(
-      flowRunResponse.status,
-    )
+    [
+      FlowRunStatus.TIMEOUT,
+      FlowRunStatus.INTERNAL_ERROR,
+      FlowRunStatus.STOPPED,
+    ].includes(flowRunResponse.status)
   ) {
     return null;
   }
@@ -266,10 +282,6 @@ function getExecutionState(
     steps: flowRunResponse.steps as Record<string, StepOutput>,
   };
 }
-
-const getTerminalStatus = (status: FlowRunStatus): FlowRunStatus => {
-  return status == FlowRunStatus.STOPPED ? FlowRunStatus.SUCCEEDED : status;
-};
 
 async function getFlowResponse(
   result: FlowRunResponse,
@@ -325,6 +337,32 @@ async function getFlowResponse(
         body: {},
         headers: {},
       };
+  }
+}
+
+async function trackExecution(
+  projectId: string,
+  runId: FlowRunId,
+  runStatus: FlowRunStatus,
+): Promise<void> {
+  try {
+    const project = await projectService.getOneOrThrow(projectId);
+    const flowRun = await flowRunService.getOneOrThrow({
+      id: runId,
+      projectId,
+    });
+
+    sendWorkflowExecutedEvent({
+      flowVersionId: flowRun.flowVersionId,
+      triggerSource: flowRun.triggerSource,
+      flowId: flowRun.flowId,
+      userId: project.ownerId,
+      projectId,
+      runStatus,
+      runId,
+    });
+  } catch (error) {
+    logger.warn('Failed to send workflow execution event.', error);
   }
 }
 

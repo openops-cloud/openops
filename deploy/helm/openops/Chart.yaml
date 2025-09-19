@@ -1,0 +1,7 @@
+apiVersion: v2
+name: openops
+description: A Helm chart for the OpenOps platform
+type: application
+version: 0.1.0
+appVersion: "latest"
+icon: https://openops.com/favicon.ico

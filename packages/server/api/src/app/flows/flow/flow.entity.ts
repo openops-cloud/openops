@@ -50,6 +50,11 @@ export const FlowEntity = new EntitySchema<FlowSchema>({
       nullable: true,
       unique: true,
     },
+    isInternal: {
+      type: Boolean,
+      nullable: false,
+      default: false,
+    },
   },
   indices: [
     {

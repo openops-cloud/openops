@@ -3,7 +3,9 @@ import {
   Action,
   FlowId,
   FlowOperationRequest,
+  FlowRunId,
   FlowRunStatus,
+  FlowRunTriggerSource,
   ProjectId,
   Trigger,
 } from '@openops/shared';
@@ -18,6 +20,7 @@ export enum WorkflowEventName {
   CREATED_WORKFLOW = 'workflow_created',
   DELETED_WORKFLOW = 'workflow_deleted',
   WORKFLOW_UPDATED = 'workflow_updated',
+  WORKFLOW_EXECUTED = 'workflow_executed',
   WORKFLOW_EXPORTED = 'workflow_exported',
   WORKFLOW_TEST_BLOCK = 'workflow_test_block',
   CREATED_WORKFLOW_FROM_TEMPLATE = 'workflow_created_from_template',
@@ -29,6 +32,7 @@ export function sendWorkflowCreatedEvent(
   userId: string,
   flowId: string,
   projectId: string,
+  isInternal: boolean,
 ): void {
   telemetry.trackEvent({
     name: WorkflowEventName.CREATED_WORKFLOW,
@@ -36,6 +40,7 @@ export function sendWorkflowCreatedEvent(
       userId,
       flowId,
       projectId,
+      isInternal: isInternal.toString(),
     },
   });
 }
@@ -119,6 +124,29 @@ export function sendWorkflowUpdatedEvent(eventParams: {
   telemetry.trackEvent({
     name: WorkflowEventName.WORKFLOW_UPDATED,
     labels,
+  });
+}
+
+export function sendWorkflowExecutedEvent(eventParams: {
+  userId: string;
+  flowId: FlowId;
+  runId: FlowRunId;
+  projectId: ProjectId;
+  flowVersionId: string;
+  runStatus: FlowRunStatus;
+  triggerSource: FlowRunTriggerSource;
+}): void {
+  telemetry.trackEvent({
+    name: WorkflowEventName.WORKFLOW_EXECUTED,
+    labels: {
+      runId: eventParams.runId,
+      userId: eventParams.userId,
+      flowId: eventParams.flowId,
+      projectId: eventParams.projectId,
+      runStatus: eventParams.runStatus,
+      flowVersionId: eventParams.flowVersionId,
+      triggerSource: eventParams.triggerSource,
+    },
   });
 }
 

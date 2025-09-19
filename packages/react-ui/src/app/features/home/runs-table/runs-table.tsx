@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { useRunsTableColumns } from '@/app/features/flow-runs/hooks/useRunsTableColumns';
 
+import { isModifierOrMiddleClick } from '@/app/common/navigation/table-navigation-helper';
 import { HomeTableWrapper } from '../components/home-table-wrapper';
 
 type Props = {
@@ -30,9 +31,10 @@ const HomeRunsTable = ({ data, loading }: Props) => {
         stickyHeader
         border={false}
         emptyStateComponent={<EmptyTableState />}
+        getRowHref={(row) => `/runs/${row.id}`}
         onRowClick={(row, e) => {
-          if (e.ctrlKey) {
-            window.open(`/runs/${row.id}`, '_blank');
+          if (isModifierOrMiddleClick(e)) {
+            return;
           } else {
             navigate(`/runs/${row.id}`);
           }

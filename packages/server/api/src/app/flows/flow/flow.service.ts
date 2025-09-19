@@ -2,6 +2,7 @@ import { AppSystemProp, distributedLock, system } from '@openops/server-shared';
 import {
   AppConnectionsWithSupportedBlocks,
   ApplicationError,
+  ContentType,
   CreateEmptyFlowRequest,
   Cursor,
   ErrorCode,
@@ -32,17 +33,22 @@ import { buildPaginator } from '../../helper/pagination/build-paginator';
 import { paginationHelper } from '../../helper/pagination/pagination-utils';
 import {
   sendWorkflowCreatedEvent,
-  sendWorkflowCreatedFromTemplateEvent,
   sendWorkflowDeletedEvent,
   sendWorkflowExportedEvent,
   sendWorkflowUpdatedEvent,
 } from '../../telemetry/event-models';
+import { webhookSimulationService } from '../../webhooks/webhook-simulation/webhook-simulation-service';
 import {
   flowVersionRepo,
   flowVersionService,
 } from '../flow-version/flow-version.service';
+import { flowFolderService } from '../folder/folder.service';
 import { flowStepTestOutputService } from '../step-test-output/flow-step-test-output.service';
 import { flowSideEffects } from './flow-service-side-effects';
+import {
+  assertThatFlowIsInCorrectFolderContentType,
+  assertThatFlowIsNotInternal,
+} from './flow-validations';
 import { FlowEntity } from './flow.entity';
 import { flowRepo } from './flow.repo';
 
@@ -54,27 +60,36 @@ export const flowService = {
   async create(params: CreateParams): Promise<PopulatedFlow> {
     const result = await create(params);
 
-    sendWorkflowCreatedEvent(params.userId, result.id, result.projectId);
+    sendWorkflowCreatedEvent(
+      params.userId,
+      result.id,
+      result.projectId,
+      result.isInternal,
+    );
 
     return result;
   },
 
-  async createFromTemplate({
+  async createFromTrigger({
     projectId,
     userId,
     displayName,
     description,
     trigger,
-    templateId,
     connectionIds,
-    isSample,
-  }: CreateFromTemplateParams): Promise<PopulatedFlow> {
+    folderId,
+    isInternal = false,
+    contentType = ContentType.WORKFLOW,
+  }: CreateFromTriggerParams): Promise<PopulatedFlow> {
     const newFlow = await create({
       userId,
       projectId,
       request: {
         displayName,
+        folderId,
       },
+      isInternal,
+      contentType,
     });
 
     const connectionsList = await getConnections(
@@ -98,15 +113,6 @@ export const flowService = {
       },
     });
 
-    sendWorkflowCreatedFromTemplateEvent(
-      userId,
-      updatedFlow.id,
-      updatedFlow.projectId,
-      templateId,
-      displayName,
-      isSample,
-    );
-
     return updatedFlow;
   },
 
@@ -129,9 +135,17 @@ export const flowService = {
         afterCursor: decodedCursor.nextCursor,
         beforeCursor: decodedCursor.previousCursor,
       },
+      customPaginationColumn: {
+        columnPath: 'versions[0].updated',
+        columnName: 'fv.updated',
+        columnType: 'timestamp with time zone',
+      },
     });
 
-    const queryWhere: Record<string, unknown> = { projectId };
+    const queryWhere: Record<string, unknown> = {
+      projectId,
+      isInternal: false,
+    };
 
     if (folderId !== undefined) {
       queryWhere.folderId =
@@ -158,8 +172,7 @@ export const flowService = {
             .limit(1)
             .getQuery() +
           ')',
-      )
-      .orderBy('fv.updated', 'DESC');
+      );
 
     if (name) {
       query = query.andWhere('fv.displayName ILIKE :namePattern', {
@@ -394,6 +407,8 @@ export const flowService = {
         projectId,
       });
 
+      await assertThatFlowIsNotInternal(flowToDelete);
+
       await flowSideEffects.preDelete({
         flowToDelete,
       });
@@ -448,16 +463,21 @@ export const flowService = {
 
   async count({ projectId, folderId }: CountParams): Promise<number> {
     if (folderId === undefined) {
-      return flowRepo().countBy({ projectId });
+      return flowRepo().countBy({ projectId, isInternal: false });
     }
 
     return flowRepo().countBy({
       folderId: folderId !== UNCATEGORIZED_FOLDER_ID ? folderId : IsNull(),
       projectId,
+      isInternal: false,
     });
   },
   async countEnabled({ projectId }: { projectId: ProjectId }): Promise<number> {
-    return flowRepo().countBy({ projectId, status: FlowStatus.ENABLED });
+    return flowRepo().countBy({
+      projectId,
+      status: FlowStatus.ENABLED,
+      isInternal: false,
+    });
   },
   async existsByProjectAndStatus(
     params: ExistsByProjectAndStatusParams,
@@ -467,18 +487,35 @@ export const flowService = {
     return flowRepo(entityManager).existsBy({
       projectId,
       status,
+      isInternal: false,
     });
+  },
+
+  async filterVisibleFlows() {
+    const flowFilterCondition =
+      'COALESCE(flows."isInternal", false) = :isInternal';
+    const flowFilterParams = { isInternal: false };
+
+    return { flowFilterCondition, flowFilterParams };
   },
 };
 
 async function create({
   projectId,
   request,
+  isInternal = false,
+  contentType = ContentType.WORKFLOW,
 }: CreateParams): Promise<PopulatedFlow> {
   const folderId =
     isNil(request.folderId) || request.folderId === UNCATEGORIZED_FOLDER_ID
       ? null
       : request.folderId;
+
+  await ensureFolderContentTypeMatches({
+    projectId,
+    folderId,
+    contentType,
+  });
 
   const newFlow: NewFlow = {
     id: openOpsId(),
@@ -487,6 +524,7 @@ async function create({
     status: FlowStatus.DISABLED,
     publishedVersionId: null,
     schedule: null,
+    isInternal,
   };
 
   const savedFlow = await flowRepo().save(newFlow);
@@ -505,12 +543,37 @@ async function create({
   };
 }
 
+async function ensureFolderContentTypeMatches({
+  projectId,
+  folderId,
+  contentType,
+}: {
+  projectId: string;
+  folderId: string | null | undefined;
+  contentType: ContentType;
+}): Promise<void> {
+  if (!folderId) {
+    return;
+  }
+
+  const folder = await flowFolderService.getOneOrThrow({
+    projectId,
+    folderId,
+  });
+
+  await assertThatFlowIsInCorrectFolderContentType(
+    contentType,
+    folder.contentType,
+  );
+}
+
 async function update({
   id,
   userId,
   projectId,
   operation,
   lock = true,
+  contentType = ContentType.WORKFLOW,
 }: UpdateParams): Promise<PopulatedFlow> {
   const flowLock = lock
     ? await distributedLock.acquireLock({
@@ -533,6 +596,11 @@ async function update({
         newStatus: operation.request.status,
       });
     } else if (operation.type === FlowOperationType.CHANGE_FOLDER) {
+      await ensureFolderContentTypeMatches({
+        projectId,
+        folderId: operation.request.folderId,
+        contentType,
+      });
       await flowRepo().update(id, {
         folderId: operation.request.folderId,
       });
@@ -543,6 +611,11 @@ async function update({
       });
 
       if (lastVersion.state === FlowVersionState.LOCKED) {
+        await webhookSimulationService.delete({
+          flowId: id,
+          projectId,
+        });
+
         const lastVersionWithArtifacts =
           await flowVersionService.getFlowVersionOrThrow({
             flowId: id,
@@ -660,17 +733,20 @@ type CreateParams = {
   userId: UserId;
   projectId: ProjectId;
   request: CreateEmptyFlowRequest;
+  isInternal?: boolean;
+  contentType?: ContentType;
 };
 
-type CreateFromTemplateParams = {
-  templateId: string;
+type CreateFromTriggerParams = {
   projectId: ProjectId;
   userId: UserId;
   displayName: string;
   description: string | undefined;
   trigger: TriggerWithOptionalId;
   connectionIds: string[];
-  isSample: boolean;
+  folderId?: string;
+  isInternal?: boolean;
+  contentType?: ContentType;
 };
 
 type ListParams = {
@@ -713,6 +789,7 @@ type UpdateParams = {
   projectId: ProjectId;
   operation: FlowOperationRequest;
   lock?: boolean;
+  contentType?: ContentType;
 };
 
 type UpdateStatusParams = {

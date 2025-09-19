@@ -76,3 +76,25 @@ function isToolCallPart(part: AssistantContent[number]): part is ToolCallPart {
 function isUiToolCall(part: AssistantContent[number]): part is ToolCallPart {
   return isToolCallPart(part) && part.toolName?.startsWith(UI_TOOL_PREFIX);
 }
+
+export function collectToolsByProvider(
+  tools: ToolSet | undefined,
+  provider: string,
+): ToolSet {
+  const result: ToolSet = {};
+  for (const [key, tool] of Object.entries(tools ?? {})) {
+    if ((tool as { toolProvider?: string }).toolProvider === provider) {
+      result[key] = tool;
+    }
+  }
+  return result;
+}
+
+export function hasToolProvider(
+  tools: ToolSet | undefined,
+  provider: string,
+): boolean {
+  return Object.values(tools ?? {}).some(
+    (tool) => (tool as { toolProvider?: string }).toolProvider === provider,
+  );
+}

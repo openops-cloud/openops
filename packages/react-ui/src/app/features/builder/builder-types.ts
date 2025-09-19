@@ -13,7 +13,6 @@ export enum LeftSideBarType {
   RUNS = 'runs',
   VERSIONS = 'versions',
   RUN_DETAILS = 'run-details',
-  MENU = 'menu',
   TREE_VIEW = 'tree-view',
   NONE = 'none',
 }

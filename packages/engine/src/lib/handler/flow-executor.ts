@@ -7,6 +7,7 @@ import {
   Trigger,
 } from '@openops/shared';
 import { performance } from 'node:perf_hooks';
+import { throwIfCancellationRequested } from '../cancellation-request-validator';
 import { progressService } from '../services/progress.service';
 import { throwIfExecutionTimeExceeded } from '../timeout-validator';
 import { BaseExecutor } from './base-executor';
@@ -17,6 +18,7 @@ import { EngineConstants } from './context/engine-constants';
 import {
   ExecutionVerdict,
   FlowExecutorContext,
+  VerdictReason,
 } from './context/flow-execution-context';
 import { loopExecutor } from './loop-executor';
 import { splitExecutor } from './split-executor';
@@ -76,6 +78,7 @@ export const flowExecutor = {
 
     while (!isNil(currentAction)) {
       throwIfExecutionTimeExceeded();
+      await throwIfCancellationRequested(constants.flowRunId);
 
       const handler = this.getExecutorForAction(currentAction.type);
 
@@ -103,9 +106,15 @@ export const flowExecutor = {
         duration: stepEndTime - stepStartTime,
       });
 
-      await sendProgress(flowExecutionContext, constants);
+      flowExecutionContext = await sendRunningProgress(
+        flowExecutionContext,
+        constants,
+      );
 
-      if (flowExecutionContext.verdict !== ExecutionVerdict.RUNNING) {
+      if (
+        flowExecutionContext.verdict !== ExecutionVerdict.RUNNING ||
+        flowExecutionContext.verdictResponse?.reason === VerdictReason.STOPPED
+      ) {
         break;
       }
 
@@ -118,13 +127,30 @@ export const flowExecutor = {
   },
 };
 
-function sendProgress(
+async function sendRunningProgress(
+  flowExecutionContext: FlowExecutorContext,
+  constants: EngineConstants,
+): Promise<FlowExecutorContext> {
+  const keepVerdict = flowExecutionContext.verdict;
+  const keepVerdictResponse = flowExecutionContext.verdictResponse;
+
+  flowExecutionContext = flowExecutionContext.setVerdict(
+    ExecutionVerdict.RUNNING,
+  );
+
+  await sendProgress(flowExecutionContext, constants);
+
+  return flowExecutionContext.setVerdict(keepVerdict, keepVerdictResponse);
+}
+
+async function sendProgress(
   flowExecutionContext: FlowExecutorContext,
   constants: EngineConstants,
 ): Promise<void> {
   if (isNil(constants.executionCorrelationId)) {
     return Promise.resolve();
   }
+
   return progressService.sendUpdate({
     engineConstants: constants,
     flowExecutorContext: flowExecutionContext,

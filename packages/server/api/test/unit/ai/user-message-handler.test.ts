@@ -107,6 +107,7 @@ describe('User Message Handler', () => {
       chatHistory: [...mockChatHistory, mockNewMessage],
     },
     frontendTools: {},
+    abortSignal: new AbortController().signal,
   };
 
   beforeEach(() => {

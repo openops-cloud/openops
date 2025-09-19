@@ -1,12 +1,12 @@
-import { httpClient, HttpMethod } from '@openops/blocks-common';
+import { httpClient, HttpMethod, HttpResponse } from '@openops/blocks-common';
 import { BASE_CH_URL } from './base-url';
 
-export async function makeGetRequest<T = unknown>(
+export async function makeGetRequest(
   apiKey: string,
   path: string,
   queryParams?: Record<string, string>,
-): Promise<T[]> {
-  const response = await httpClient.sendRequest<T[]>({
+): Promise<HttpResponse> {
+  const response = await httpClient.sendRequest({
     method: HttpMethod.GET,
     url: `${BASE_CH_URL}${path}`,
     headers: {
@@ -15,7 +15,7 @@ export async function makeGetRequest<T = unknown>(
     },
     queryParams,
   });
-  return response.body;
+  return response;
 }
 
 export async function makePostRequest<T = unknown>(

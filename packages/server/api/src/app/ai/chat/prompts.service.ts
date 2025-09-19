@@ -1,39 +1,62 @@
 import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { ChatFlowContext, CODE_BLOCK_NAME, isNil } from '@openops/shared';
+import { ToolSet } from 'ai';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
+import { hasToolProvider } from '../mcp/tool-utils';
+import { QueryClassification, QueryTypes } from '../mcp/types';
 import { MCPChatContext } from './ai-chat.service';
 
 export const getMcpSystemPrompt = async ({
-  isAnalyticsLoaded,
-  isTablesLoaded,
-  isOpenOpsMCPEnabled,
-  isAwsCostMcpDisabled,
+  queryClassification,
+  selectedTools,
+  allTools,
+  uiContext,
 }: {
-  isAnalyticsLoaded: boolean;
-  isTablesLoaded: boolean;
-  isOpenOpsMCPEnabled: boolean;
-  isAwsCostMcpDisabled: boolean;
+  queryClassification: QueryTypes[];
+  selectedTools: ToolSet | undefined;
+  allTools: ToolSet;
+  uiContext?: ChatFlowContext;
 }): Promise<string> => {
-  const prompts = [loadPrompt('mcp.txt')];
+  const promptsToLoad = ['mcp.txt'];
 
-  if (isTablesLoaded) {
-    prompts.push(loadPrompt('mcp-tables.txt'));
+  if (
+    queryClassification.includes(QueryClassification.tables) &&
+    hasToolProvider(selectedTools, 'tables')
+  ) {
+    promptsToLoad.push('mcp-tables.txt');
   }
 
-  if (isAnalyticsLoaded) {
-    prompts.push(loadPrompt('mcp-analytics.txt'));
+  if (
+    queryClassification.includes(QueryClassification.analytics) &&
+    hasToolProvider(selectedTools, 'superset')
+  ) {
+    promptsToLoad.push('mcp-analytics.txt');
   }
 
-  if (isOpenOpsMCPEnabled) {
-    prompts.push(loadPrompt('mcp-openops.txt'));
+  if (
+    queryClassification.includes(QueryClassification.openops) &&
+    hasToolProvider(selectedTools, 'openops')
+  ) {
+    promptsToLoad.push('mcp-openops.txt');
   }
 
-  if (isAwsCostMcpDisabled) {
-    prompts.push(loadPrompt('mcp-aws-cost-unavailable.txt'));
+  if (
+    queryClassification.includes(QueryClassification.aws_cost) &&
+    !hasToolProvider(allTools, 'aws-pricing') &&
+    !hasToolProvider(allTools, 'cost-explorer')
+  ) {
+    promptsToLoad.push('mcp-aws-cost-unavailable.txt');
   }
 
-  const allPrompts = await Promise.all(prompts);
+  const promptPromises = promptsToLoad.map(loadPrompt);
+
+  if (uiContext) {
+    promptPromises.push(buildUIContextSection(uiContext));
+  }
+
+  const allPrompts = await Promise.all(promptPromises);
+
   return allPrompts.join('\n\n');
 };
 
@@ -88,6 +111,45 @@ export const getBlockSystemPrompt = async (
     default:
       return '';
   }
+};
+
+export const buildUIContextSection = async (
+  flowContext: ChatFlowContext,
+): Promise<string> => {
+  const contextParts: string[] = [];
+
+  if (!flowContext.flowId && !flowContext.flowVersionId && !flowContext.runId) {
+    return '';
+  }
+
+  if (flowContext.flowId) {
+    contextParts.push(`flow ${flowContext.flowId}`);
+  }
+
+  if (flowContext.flowVersionId) {
+    contextParts.push(`flowVersion ${flowContext.flowVersionId}`);
+  }
+
+  if (flowContext.runId) {
+    contextParts.push(`run ${flowContext.runId}`);
+  }
+
+  if (flowContext.currentStepId) {
+    contextParts.push(`step id ${flowContext.currentStepId}`);
+  }
+
+  if (flowContext.currentStepName) {
+    contextParts.push(`step name "${flowContext.currentStepName}"`);
+  }
+
+  if (contextParts.length === 0) {
+    return '';
+  }
+
+  return (
+    `## Current selected data: \n${contextParts.join(' with ')}. \n\n` +
+    'If the user is asking about anything related to this data, always use it query tools like Get latest flow version by id or run details tool in order to help him.'
+  );
 };
 
 export async function loadPrompt(filename: string): Promise<string> {

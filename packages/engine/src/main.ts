@@ -9,9 +9,10 @@ import { lambdaHandler } from './lambda-handler';
 import { EngineConstants } from './lib/handler/context/engine-constants';
 
 export const EngineRequest = Type.Object({
-  operationType: Type.Enum(EngineOperationType),
-  engineInput: Type.Object({}),
+  requestId: Type.String(),
+  engineInput: Type.Unknown(),
   deadlineTimestamp: Type.Number(),
+  operationType: Type.Enum(EngineOperationType),
 });
 
 export type EngineRequest = Static<typeof EngineRequest>;

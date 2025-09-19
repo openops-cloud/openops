@@ -2,15 +2,17 @@ import {
   encryptionKeyInitializer,
   logger,
   networkUtls,
+  saveRequestBody,
 } from '@openops/server-shared';
-import { EngineOperationType, EngineResponse } from '@openops/shared';
+import { EngineOperationType } from '@openops/shared';
 import { execute } from './lib/operations';
 
 export async function executeEngine(
+  requestId: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   engineInput: any,
   operationType: EngineOperationType,
-): Promise<EngineResponse<unknown>> {
+): Promise<string> {
   const startTime = performance.now();
 
   await encryptionKeyInitializer();
@@ -23,13 +25,12 @@ export async function executeEngine(
 
   const duration = Math.floor(performance.now() - startTime);
 
-  logger.info(
-    `Finished operation [${operationType}] with status [${result.status}] in ${duration}ms`,
-    {
-      engineStatus: result.status,
-      durationMs: duration,
-    },
-  );
+  const key = await saveRequestBody(requestId, result);
 
-  return result;
+  logger.info(`Finished operation [${operationType}] in ${duration}ms`, {
+    engineStatus: result.status,
+    durationMs: duration,
+  });
+
+  return key;
 }

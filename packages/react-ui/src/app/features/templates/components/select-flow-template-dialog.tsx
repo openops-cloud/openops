@@ -1,399 +1,45 @@
-import { useTheme } from '@/app/common/providers/theme-provider';
 import { SEARCH_PARAMS } from '@/app/constants/search-params';
 import { flowsApi } from '@/app/features/flows/lib/flows-api';
 import { ConnectionsPicker } from '@/app/features/templates/components/connections-picker/connections-picker';
-import { ExpandedTemplate } from '@/app/features/templates/components/expanded-template';
 import { useSelectFlowTemplateDialog } from '@/app/features/templates/lib/select-flow-template-dialog-hook';
 import { templatesApi } from '@/app/features/templates/lib/templates-api';
 import { templatesHooks } from '@/app/features/templates/lib/templates-hooks';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { userSettingsHooks } from '@/app/common/hooks/user-settings-hooks';
-import { OPENOPS_CONNECT_TEMPLATES_URL } from '@/app/constants/cloud';
-import { authenticationSession } from '@/app/lib/authentication-session';
+import { usePrivateTemplates } from '@/app/features/templates/lib/private-templates-hook';
 import { BlockMetadataModelSummary } from '@openops/blocks-framework';
 import {
-  BranchLabelNode,
   cn,
   Dialog,
   DialogContent,
-  FlowTemplateFilterSidebar,
-  FlowTemplateList,
+  DialogTitle,
   FlowTemplateMetadataWithIntegrations,
   INTERNAL_ERROR_TOAST,
-  LoopStepPlaceHolder,
-  ReturnLoopedgeButton,
-  Skeleton,
-  StepPlaceHolder,
-  TemplateDetails,
-  TemplateEdge,
-  TemplateSidebarCategory,
-  Theme,
+  TemplatesTabs,
   toast,
-  VerticalDivider,
 } from '@openops/components/ui';
-import {
-  AppConnectionsWithSupportedBlocks,
-  BlockCategory,
-  FlowTemplateDto,
-} from '@openops/shared';
+import { AppConnectionsWithSupportedBlocks } from '@openops/shared';
 import { useMutation } from '@tanstack/react-query';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDebounceValue } from 'usehooks-ts';
-import { blocksHooks } from '../../blocks/lib/blocks-hook';
-import { popupFeatures } from '../../cloud/lib/popup';
 import { useCloudProfile } from '../../cloud/lib/use-cloud-profile';
-import { useUserInfoPolling } from '../../cloud/lib/use-user-info-polling';
 import { cloudTemplatesApi } from '../lib/cloud-templates-api';
-import { TemplateStepNodeWithMetadata } from './template-step-node-with-metadata';
+import { SelectFlowTemplateDialogContent } from './select-flow-template-dialog-content';
 
 const TEMPLATE_FILTER_DEBOUNCE_DELAY = 300;
-
-type FlowTemplateFilterSidebarSkeletonLoaderProps = {
-  numberOfSkeletons?: number;
-};
-const FlowTemplateFilterSidebarSkeletonLoader: React.FC<FlowTemplateFilterSidebarSkeletonLoaderProps> =
-  React.memo(
-    ({
-      numberOfSkeletons = 3,
-    }: FlowTemplateFilterSidebarSkeletonLoaderProps) => {
-      return (
-        <div className="gap-2 h-full w-full p-4">
-          <div className="flex flex-col h-full gap-2 overflow-y-hidden">
-            {[...Array(numberOfSkeletons)].map((_, index) => (
-              <div key={index} className="flex flex-col items-center w-full">
-                <div className="w-full">
-                  <Skeleton className="h-16 w-full" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      );
-    },
-  );
-
-FlowTemplateFilterSidebarSkeletonLoader.displayName =
-  'FlowTemplateFilterSidebarSkeletonLoader';
-
-const edgeTypes = {
-  apEdge: TemplateEdge,
-  apReturnEdge: ReturnLoopedgeButton,
-};
-const nodeTypes = {
-  stepNode: TemplateStepNodeWithMetadata,
-  placeholder: StepPlaceHolder,
-  bigButton: StepPlaceHolder,
-  loopPlaceholder: LoopStepPlaceHolder,
-  branchLabel: BranchLabelNode,
-};
-
-type FlowTemplateFilterSidebarProps = {
-  selectedBlocks: string[];
-  selectedDomains: string[];
-  selectedServices: string[];
-  setSelectedBlocks: (blocks: string[]) => void;
-  setSelectedDomains: (domains: string[]) => void;
-  setSelectedServices: (services: string[]) => void;
-  selectedCategories: string[];
-  setSelectedCategories: (categories: string[]) => void;
-};
-
-const FlowTemplateFilterSidebarWrapper = ({
-  selectedBlocks,
-  selectedDomains,
-  selectedServices,
-  setSelectedDomains,
-  setSelectedServices,
-  selectedCategories,
-  setSelectedCategories,
-  setSelectedBlocks,
-}: FlowTemplateFilterSidebarProps) => {
-  const useCloudTemplates = flagsHooks.useShouldFetchCloudTemplates();
-
-  const {
-    domains,
-    categories,
-    blocks: templateBlockNames,
-    isLoading: isTemplateFiltersLoading,
-    status,
-    isError,
-  } = templatesHooks.useTemplateFilters({
-    enabled: true,
-    useCloudTemplates,
-    gettingStartedTemplateFilter: 'exclude',
-  });
-
-  const { blocks, isLoading: isBlocksLoading } = blocksHooks.useBlocks({
-    categories: [BlockCategory.FINOPS],
-  });
-
-  const { blocks: cloudBlocks } = blocksHooks.useBlocks({
-    categories: [BlockCategory.CLOUD],
-  });
-
-  const categoryLogos = useMemo(() => {
-    if (!categories || !cloudBlocks) return {} as Record<string, string>;
-
-    return categories.reduce((acc, category: TemplateSidebarCategory) => {
-      const block = cloudBlocks.find((block) => {
-        const normalizedName = category.name.toLowerCase();
-
-        return (
-          block.name.includes(normalizedName) ||
-          block.displayName.toLowerCase().includes(normalizedName)
-        );
-      });
-      if (block) {
-        acc[category.name] = block.logoUrl;
-      }
-      return acc;
-    }, {} as Record<string, string>);
-  }, [cloudBlocks, categories]);
-
-  const blocksWithTemplates = blocks?.filter((block) =>
-    templateBlockNames?.includes(block.name),
-  );
-
-  if (isTemplateFiltersLoading || isBlocksLoading || status === 'pending') {
-    return <FlowTemplateFilterSidebarSkeletonLoader numberOfSkeletons={12} />;
-  }
-
-  if (isError) {
-    toast(INTERNAL_ERROR_TOAST);
-    return null;
-  }
-
-  const onBlockFilterClick = (block: string) => {
-    setSelectedBlocks(selectedBlocks.includes(block) ? [] : [block]);
-    setSelectedDomains([]);
-    setSelectedServices([]);
-    setSelectedCategories([]);
-  };
-
-  const onDomainFilterClick = (domain: string) => {
-    setSelectedDomains(selectedDomains.includes(domain) ? [] : [domain]);
-    setSelectedServices([]);
-    setSelectedBlocks([]);
-  };
-
-  const onServiceFilterClick = (service: string) => {
-    setSelectedServices(selectedServices.includes(service) ? [] : [service]);
-    setSelectedDomains([]);
-    setSelectedCategories([]);
-    setSelectedBlocks([]);
-  };
-
-  const onCategoryFilterClick = (category: string) => {
-    if (category === '') {
-      setSelectedCategories([]);
-      setSelectedServices([]);
-      setSelectedBlocks([]);
-      return;
-    }
-
-    setSelectedCategories(
-      selectedCategories.includes(category) ? [] : [category],
-    );
-    setSelectedDomains([]);
-    setSelectedServices([]);
-    setSelectedBlocks([]);
-  };
-
-  const clearFilters = () => {
-    setSelectedDomains([]);
-    setSelectedServices([]);
-    setSelectedCategories([]);
-    setSelectedBlocks([]);
-  };
-
-  return (
-    <FlowTemplateFilterSidebar
-      blocks={blocksWithTemplates}
-      domains={domains}
-      categories={categories}
-      selectedBlocks={selectedBlocks}
-      selectedDomains={selectedDomains}
-      selectedServices={selectedServices}
-      onBlockFilterClick={onBlockFilterClick}
-      onDomainFilterClick={onDomainFilterClick}
-      onServiceFilterClick={onServiceFilterClick}
-      onCategoryFilterClick={onCategoryFilterClick}
-      clearFilters={clearFilters}
-      selectedCategories={selectedCategories}
-      categoryLogos={categoryLogos}
-    />
-  );
-};
-
-const useOwnerLogoUrl = () => {
-  const { theme } = useTheme();
-  const branding = flagsHooks.useWebsiteBranding();
-
-  const [ownerLogoUrl, setOwnerLogoUrl] = useState(
-    branding.logos.logoIconPositiveUrl,
-  );
-
-  useEffect(() => {
-    setOwnerLogoUrl(() => {
-      return theme === Theme.LIGHT
-        ? branding.logos.logoIconPositiveUrl
-        : branding.logos.logoIconUrl;
-    });
-  }, [branding, theme]);
-
-  return ownerLogoUrl;
-};
-
-FlowTemplateFilterSidebar.displayName = 'FlowTemplateFilterSidebar';
-
-type SelectFlowTemplateDialogContentProps = {
-  isExpanded: boolean;
-  selectedTemplate: FlowTemplateDto | undefined;
-  searchText: string;
-  selectedTemplateMetadata: FlowTemplateMetadataWithIntegrations | undefined;
-  templates: FlowTemplateMetadataWithIntegrations[] | undefined;
-  isTemplateListLoading: boolean;
-  handleTemplateSelect: (
-    templateMetadata: FlowTemplateMetadataWithIntegrations,
-  ) => void;
-  isTemplatePreselected: boolean;
-  closeDetails?: () => void;
-  useTemplate: () => void;
-  expandPreview: () => void;
-  closeExpanded: () => void;
-  onSearchInputChange: (search: string) => void;
-  selectedCategories: string[];
-  setSelectedCategories: (categories: string[]) => void;
-  setSelectedBlocks: (blocks: string[]) => void;
-} & FlowTemplateFilterSidebarProps;
-
-const SelectFlowTemplateDialogContent = ({
-  isExpanded,
-  selectedTemplate,
-  closeExpanded,
-  selectedBlocks,
-  selectedDomains,
-  selectedServices,
-  setSelectedBlocks,
-  setSelectedDomains,
-  setSelectedServices,
-  selectedCategories,
-  setSelectedCategories,
-  searchText,
-  selectedTemplateMetadata,
-  isTemplatePreselected,
-  closeDetails,
-  useTemplate,
-  expandPreview,
-  templates,
-  isTemplateListLoading,
-  handleTemplateSelect,
-  onSearchInputChange,
-}: SelectFlowTemplateDialogContentProps) => {
-  const { theme } = useTheme();
-  const ownerLogoUrl = useOwnerLogoUrl();
-  const { isConnectedToCloudTemplates } = useCloudProfile();
-  const { createPollingInterval } = useUserInfoPolling();
-  const useCloudTemplates = flagsHooks.useShouldFetchCloudTemplates();
-  const isFullCatalog =
-    !isTemplatePreselected &&
-    (isConnectedToCloudTemplates || !useCloudTemplates);
-
-  const onExploreMoreClick = () => {
-    const currentUser = authenticationSession.getCurrentUser();
-    const popup = window.open(
-      `${OPENOPS_CONNECT_TEMPLATES_URL}?projectId=${currentUser?.projectId}&userId=${currentUser?.id}`,
-      'ConnectTemplates',
-      popupFeatures,
-    );
-
-    if (!popup) {
-      console.error(
-        'Popup blocked! Could not load ' + OPENOPS_CONNECT_TEMPLATES_URL,
-      );
-    }
-
-    createPollingInterval();
-  };
-
-  if (isExpanded && selectedTemplate) {
-    return (
-      <ExpandedTemplate
-        templateName={selectedTemplate.name}
-        edgeTypes={edgeTypes}
-        nodeTypes={nodeTypes}
-        template={selectedTemplate.template}
-        close={closeExpanded}
-        useTemplate={useTemplate}
-      />
-    );
-  }
-
-  const selectionHeading =
-    selectedCategories[0] || selectedDomains[0] || selectedServices[0];
-
-  return (
-    <>
-      {isFullCatalog && (
-        <>
-          <div className="w-[255px]">
-            <FlowTemplateFilterSidebarWrapper
-              selectedBlocks={selectedBlocks}
-              selectedDomains={selectedDomains}
-              selectedServices={selectedServices}
-              setSelectedBlocks={setSelectedBlocks}
-              setSelectedDomains={setSelectedDomains}
-              setSelectedServices={setSelectedServices}
-              selectedCategories={selectedCategories}
-              setSelectedCategories={setSelectedCategories}
-            />
-          </div>
-          <VerticalDivider className="h-full" />
-        </>
-      )}
-      <div className="flex-1 overflow-hidden">
-        {selectedTemplateMetadata ? (
-          <TemplateDetails
-            templateMetadata={selectedTemplateMetadata}
-            template={selectedTemplate?.template}
-            edgeTypes={edgeTypes}
-            nodeTypes={nodeTypes}
-            close={closeDetails}
-            useTemplate={useTemplate}
-            expandPreview={expandPreview}
-            ownerLogoUrl={ownerLogoUrl}
-            theme={theme}
-          />
-        ) : (
-          <FlowTemplateList
-            selectionHeading={selectionHeading}
-            templates={templates}
-            isLoading={isTemplateListLoading}
-            onTemplateSelect={handleTemplateSelect}
-            searchText={searchText}
-            onSearchInputChange={onSearchInputChange}
-            ownerLogoUrl={ownerLogoUrl}
-            isFullCatalog={isFullCatalog}
-            onExploreMoreClick={onExploreMoreClick}
-          ></FlowTemplateList>
-        )}
-      </div>
-    </>
-  );
-};
-
-SelectFlowTemplateDialogContent.displayName = 'SelectFlowTemplateDialogContent';
 
 const SelectFlowTemplateDialog = ({
   isOpen,
   onOpenChange,
   preselectedSelectedTemplateMetadata,
+  preselectedTab = TemplatesTabs.Public,
 }: {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   preselectedSelectedTemplateMetadata?: FlowTemplateMetadataWithIntegrations;
+  preselectedTab?: TemplatesTabs;
 }) => {
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [selectedDomains, setSelectedDomains] = useState<string[]>([]);
@@ -402,6 +48,8 @@ const SelectFlowTemplateDialog = ({
   const [searchText, setSearchText] = useState('');
   const { updateHomePageOperationalViewFlag } =
     userSettingsHooks.useHomePageOperationalView();
+  const [activeTab, setActiveTab] =
+    React.useState<TemplatesTabs>(preselectedTab);
 
   const {
     isConnectionsPickerOpen,
@@ -433,12 +81,20 @@ const SelectFlowTemplateDialog = ({
     resetTemplateDialog();
   }, [selectedServices, selectedDomains, resetTemplateDialog]);
 
+  useEffect(() => {
+    if (preselectedTab) {
+      setActiveTab(preselectedTab);
+    }
+  }, [preselectedTab]);
+
   const useCloudTemplates = flagsHooks.useShouldFetchCloudTemplates();
 
   const [debouncedSearchText] = useDebounceValue(
     searchText,
     TEMPLATE_FILTER_DEBOUNCE_DELAY,
   );
+
+  const { isConnectedToCloudTemplates } = useCloudProfile();
 
   const { templatesWithIntegrations, isLoading: isTemplateListLoading } =
     templatesHooks.useTemplatesMetadataWithIntegrations({
@@ -450,7 +106,14 @@ const SelectFlowTemplateDialog = ({
       categories: selectedCategories,
       useCloudTemplates,
       gettingStartedTemplateFilter: 'exclude',
+      isConnectedToCloudTemplates,
     });
+
+  const {
+    privateTemplates,
+    isPrivateTemplatesLoading,
+    isPrivateCatalogCreated,
+  } = usePrivateTemplates();
 
   const { mutate: getSelectedTemplate } = useMutation({
     mutationFn: async ({
@@ -536,18 +199,14 @@ const SelectFlowTemplateDialog = ({
     });
   };
 
-  const { isConnectedToCloudTemplates } = useCloudProfile();
-
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogTitle className="hidden">OpenOps templates Catalog</DialogTitle>
+
       <DialogContent
         className={cn(
           'flex flex-col p-0 transition-none max-w-[1360px] max-2xl:max-w-[1010px]',
           {
-            'max-w-[1157px] max-2xl:max-w-[1157px]':
-              useCloudTemplates &&
-              !isConnectedToCloudTemplates &&
-              !isConnectionsPickerOpen,
             'max-w-[846px] max-h-[70vh] overflow-y-auto':
               isConnectionsPickerOpen,
             'h-[90vh]': !isConnectionsPickerOpen,
@@ -560,14 +219,14 @@ const SelectFlowTemplateDialog = ({
         {selectedTemplateMetadata && isConnectionsPickerOpen ? (
           <ConnectionsPicker
             close={() => setIsConnectionsPickerOpen(false)}
-            templateName={selectedTemplate?.name ?? ''}
+            name={selectedTemplate?.name ?? ''}
             integrations={
               selectedTemplateMetadata.integrations.filter(
                 (integration) => !!integration.auth,
               ) as BlockMetadataModelSummary[]
             }
-            onUseTemplate={useTemplate}
-            isUseTemplateLoading={isUseTemplatePending}
+            onUseConnections={useTemplate}
+            isLoading={isUseTemplatePending}
           ></ConnectionsPicker>
         ) : (
           <div className="h-full w-full flex bg-background rounded-2xl">
@@ -586,8 +245,11 @@ const SelectFlowTemplateDialog = ({
               }
               useTemplate={() => setIsConnectionsPickerOpen(true)}
               expandPreview={expandPreview}
-              templates={templatesWithIntegrations}
-              isTemplateListLoading={isTemplateListLoading}
+              isPrivateCatalogCreated={isPrivateCatalogCreated}
+              publicTemplates={templatesWithIntegrations}
+              isPublicTemplatesLoading={isTemplateListLoading}
+              privateTemplates={privateTemplates}
+              isPrivateTemplatesLoading={isPrivateTemplatesLoading}
               handleTemplateSelect={handleTemplateSelect}
               searchText={searchText}
               onSearchInputChange={setSearchText}
@@ -595,6 +257,8 @@ const SelectFlowTemplateDialog = ({
               selectedCategories={selectedCategories}
               setSelectedCategories={setSelectedCategories}
               setSelectedBlocks={setSelectedBlocks}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
             />
           </div>
         )}

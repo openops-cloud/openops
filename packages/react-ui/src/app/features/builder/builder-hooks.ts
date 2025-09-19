@@ -47,15 +47,17 @@ const noopStore = {
   getState: () => ({}),
   setState: () => {},
   subscribe: () => () => {},
-};
+  getInitialState: () => ({}),
+  destroy: () => {},
+} as any;
 
 export function useSafeBuilderStateContext<T>(
   selector: (state: BuilderState) => T,
 ): T | undefined {
-  const store = useContext(BuilderStateContext) ?? noopStore;
-  const result = useStore(store, selector);
+  const store = useContext(BuilderStateContext);
+  const result = useStore(store ?? noopStore, selector as any) as T;
 
-  if (store === noopStore) return undefined;
+  if (!store) return undefined;
   return result;
 }
 
@@ -398,7 +400,7 @@ const getLeftSidebarOnSelectStep = (state: BuilderState): LeftSideBarType => {
 
 const getLeftSidebarInitialState = (run: FlowRun | null, readonly: boolean) => {
   if (readonly) {
-    return run ? LeftSideBarType.RUN_DETAILS : LeftSideBarType.MENU;
+    return run ? LeftSideBarType.RUN_DETAILS : LeftSideBarType.NONE;
   }
   return LeftSideBarType.NONE;
 };

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { AppSystemProp, logger, system } from '@openops/server-shared';
-import { AiConfig } from '@openops/shared';
+import { AiConfig, ChatFlowContext } from '@openops/shared';
 import {
   AssistantModelMessage,
   LanguageModel,
@@ -10,7 +10,10 @@ import {
   ToolSet,
 } from 'ai';
 import { FastifyInstance } from 'fastify';
-import { sendAiChatFailureEvent } from '../../telemetry/event-models';
+import {
+  sendAiChatAbortedEvent,
+  sendAiChatFailureEvent,
+} from '../../telemetry/event-models';
 import { addUiToolResults } from '../mcp/tool-utils';
 import { getMCPToolsContext } from '../mcp/tools-context-builder';
 import { AssistantUITools } from '../mcp/types';
@@ -34,8 +37,10 @@ type UserMessageParams = RequestContext &
   ChatProcessingContext & {
     authToken: string;
     app: FastifyInstance;
+    abortSignal: AbortSignal;
   } & {
     frontendTools: AssistantUITools;
+    additionalContext?: ChatFlowContext;
   };
 
 type ModelConfig = {
@@ -48,6 +53,7 @@ type StreamCallSettings = RequestContext &
     tools?: ToolSet;
     systemPrompt: string;
     chatHistory: ModelMessage[];
+    abortSignal: AbortSignal;
   };
 
 export async function handleUserMessage(
@@ -64,6 +70,8 @@ export async function handleUserMessage(
     serverResponse,
     conversation: { chatContext, chatHistory },
     frontendTools,
+    additionalContext,
+    abortSignal,
   } = params;
 
   const messageId = generateMessageId();
@@ -77,6 +85,11 @@ export async function handleUserMessage(
     chatContext,
     languageModel,
     frontendTools,
+    additionalContext,
+    userId,
+    chatId,
+    stream: serverResponse,
+    abortSignal,
   });
 
   try {
@@ -91,6 +104,7 @@ export async function handleUserMessage(
         languageModel,
         serverResponse,
         tools: filteredTools,
+        abortSignal,
       },
       messageId,
     );
@@ -139,6 +153,15 @@ async function streamLLMResponse(
           );
         }
       },
+      onAbort: async () => {
+        sendAiChatAbortedEvent({
+          projectId: params.projectId,
+          userId: params.userId,
+          chatId: params.chatId,
+          provider: params.aiConfig.provider,
+        });
+      },
+      abortSignal: params.abortSignal,
     });
 
     for await (const message of fullStream) {
@@ -158,7 +181,7 @@ function unrecoverableError(
 ): AssistantModelMessage {
   const errorMessage = extractMessage(error);
   logger.warn(
-    `An unrecoverable error occurred in the conversation. Message: ${errorMessage}`,
+    `An unrecoverable exception occurred in the conversation. Message: ${errorMessage}`,
     error,
   );
 
