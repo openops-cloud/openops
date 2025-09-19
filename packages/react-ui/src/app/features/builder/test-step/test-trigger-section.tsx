@@ -25,6 +25,7 @@ import { triggerEventsApi } from '@/app/features/flows/lib/trigger-events-api';
 import { formatUtils } from '@/app/lib/utils';
 import {
   CATCH_WEBHOOK,
+  FlagId,
   isNil,
   SeekPage,
   Trigger,
@@ -32,10 +33,12 @@ import {
   TriggerTestStrategy,
 } from '@openops/shared';
 
+import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import {
   setStepOutputCache,
   stepTestOutputCache,
 } from '../data-selector/data-selector-cache';
+import { CatchWebhookTestInfo } from './catch-webhook-test-info';
 import { stepTestOutputHooks } from './step-test-output-hooks';
 import { TestSampleDataViewer } from './test-sample-data-viewer';
 import { TestButtonTooltip } from './test-step-tooltip';
@@ -85,6 +88,15 @@ const TestTriggerSection = React.memo(
     const [errorMessage, setErrorMessage] = useState<string | undefined>(
       undefined,
     );
+
+    const { data: webhookPrefixUrl } = flagsHooks.useFlag<string>(
+      FlagId.WEBHOOK_URL_PREFIX,
+    );
+    const webhookUrl = webhookPrefixUrl
+      ? `${webhookPrefixUrl}/${flowId}`
+      : undefined;
+    const isCatchWebhookTrigger =
+      formValues.settings?.triggerName === CATCH_WEBHOOK;
 
     const { data: stepData, isLoading: isLoadingStepData } =
       stepTestOutputHooks.useStepTestOutputFormData(flowVersionId, form);
@@ -245,18 +257,21 @@ const TestTriggerSection = React.memo(
       return null;
     }
 
-    const testTriggerNote =
-      formValues.settings.triggerName === CATCH_WEBHOOK
-        ? t('Please click on Test URL to generate sample data')
-        : t('Please go to {blockName} and trigger {triggerName}.', {
-            blockName: blockModel?.displayName,
-            triggerName:
-              blockModel?.triggers[formValues.settings.triggerName]
-                ?.displayName,
-          });
+    const testTriggerNote = isCatchWebhookTrigger
+      ? t('Please click on Test URL to generate sample data')
+      : t('Please go to {blockName} and trigger {triggerName}.', {
+          blockName: blockModel?.displayName,
+          triggerName:
+            blockModel?.triggers[formValues.settings.triggerName]?.displayName,
+        });
 
     return (
       <div className="flex flex-col h-full">
+        {isCatchWebhookTrigger && webhookUrl && (
+          <div className="mb-3">
+            <CatchWebhookTestInfo webhookUrl={webhookUrl} />
+          </div>
+        )}
         {outputDataSelected && !isSimulating && !isSavingMockdata && (
           <>
             {pollResults?.data && !isTesting && (

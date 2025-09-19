@@ -1,4 +1,3 @@
-import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { useTheme } from '@/app/common/providers/theme-provider';
 import { useStepSettingsContext } from '@/app/features/builder/step-settings/step-settings-context';
 import { stepTestOutputHooks } from '@/app/features/builder/test-step/step-test-output-hooks';
@@ -12,19 +11,11 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@openops/components/ui';
-import {
-  Action,
-  ActionType,
-  CATCH_WEBHOOK,
-  FlagId,
-  Trigger,
-  TriggerType,
-} from '@openops/shared';
+import { Action, ActionType, Trigger, TriggerType } from '@openops/shared';
 import { t } from 'i18next';
 import { Info } from 'lucide-react';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
-import { CatchWebhookTestInfo } from './catch-webhook-test-info';
 import { TestActionSection } from './test-action-section';
 import { TestTriggerSection } from './test-trigger-section';
 
@@ -48,15 +39,6 @@ const TestStepContainer = React.memo(
       stepTestOutputHooks.useSaveSelectedStepSampleData(form);
 
     const { selectedStep } = useStepSettingsContext();
-    const { data: webhookPrefixUrl } = flagsHooks.useFlag<string>(
-      FlagId.WEBHOOK_URL_PREFIX,
-    );
-    const webhookUrl = webhookPrefixUrl
-      ? `${webhookPrefixUrl}/${flowId}`
-      : undefined;
-    const isCatchWebhookTrigger =
-      type === TriggerType.BLOCK &&
-      (selectedStep?.settings as any)?.triggerName === CATCH_WEBHOOK;
 
     return (
       <Tabs
@@ -96,11 +78,6 @@ const TestStepContainer = React.memo(
           value={TabListEnum.STEP_OUTPUT}
           className="w-full flex-1 min-h-0 overflow-hidden"
         >
-          {isCatchWebhookTrigger && webhookUrl && (
-            <div className="mb-3">
-              <CatchWebhookTestInfo webhookUrl={webhookUrl} />
-            </div>
-          )}
           {type === TriggerType.BLOCK ? (
             <TestTriggerSection
               flowId={flowId}
