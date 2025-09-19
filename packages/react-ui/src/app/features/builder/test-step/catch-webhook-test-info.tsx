@@ -33,8 +33,8 @@ export const CatchWebhookTestInfo: React.FC<WebhookTestInfoProps> = ({
       <div className="text-sm font-bold mb-2">{t('Test URL')}</div>
 
       <div className="rounded-xs border bg-background">
-        <div className="flex items-center justify-between gap-2 px-2 text-sm font-mono">
-          <div className="min-w-0 overflow-x-auto">
+        <div className="flex items-center justify-between gap-2 text-sm font-mono">
+          <div className="min-w-0 truncate pl-2">
             <a
               href={testUrl}
               target="_blank"
@@ -45,20 +45,22 @@ export const CatchWebhookTestInfo: React.FC<WebhookTestInfoProps> = ({
             </a>
           </div>
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                aria-label={t('Copy URL')}
-                onClick={handleCopy}
-              >
-                <Copy className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>{t('Copy')}</TooltipContent>
-          </Tooltip>
+          <div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  aria-label={t('Copy URL')}
+                  onClick={handleCopy}
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{t('Copy')}</TooltipContent>
+            </Tooltip>
+          </div>
         </div>
       </div>
 
