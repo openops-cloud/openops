@@ -10,7 +10,10 @@ import {
   ToolSet,
 } from 'ai';
 import { FastifyInstance } from 'fastify';
-import { sendAiChatFailureEvent } from '../../telemetry/event-models';
+import {
+  sendAiChatAbortedEvent,
+  sendAiChatFailureEvent,
+} from '../../telemetry/event-models';
 import { addUiToolResults } from '../mcp/tool-utils';
 import { getMCPToolsContext } from '../mcp/tools-context-builder';
 import { AssistantUITools } from '../mcp/types';
@@ -34,6 +37,7 @@ type UserMessageParams = RequestContext &
   ChatProcessingContext & {
     authToken: string;
     app: FastifyInstance;
+    abortSignal: AbortSignal;
   } & {
     frontendTools: AssistantUITools;
     additionalContext?: ChatFlowContext;
@@ -49,6 +53,7 @@ type StreamCallSettings = RequestContext &
     tools?: ToolSet;
     systemPrompt: string;
     chatHistory: ModelMessage[];
+    abortSignal: AbortSignal;
   };
 
 export async function handleUserMessage(
@@ -66,6 +71,7 @@ export async function handleUserMessage(
     conversation: { chatContext, chatHistory },
     frontendTools,
     additionalContext,
+    abortSignal,
   } = params;
 
   const messageId = generateMessageId();
@@ -83,6 +89,7 @@ export async function handleUserMessage(
     userId,
     chatId,
     stream: serverResponse,
+    abortSignal,
   });
 
   try {
@@ -97,6 +104,7 @@ export async function handleUserMessage(
         languageModel,
         serverResponse,
         tools: filteredTools,
+        abortSignal,
       },
       messageId,
     );
@@ -145,6 +153,15 @@ async function streamLLMResponse(
           );
         }
       },
+      onAbort: async () => {
+        sendAiChatAbortedEvent({
+          projectId: params.projectId,
+          userId: params.userId,
+          chatId: params.chatId,
+          provider: params.aiConfig.provider,
+        });
+      },
+      abortSignal: params.abortSignal,
     });
 
     for await (const message of fullStream) {

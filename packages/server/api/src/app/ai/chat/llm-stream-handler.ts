@@ -4,12 +4,17 @@ import {
   LanguageModel,
   ModelMessage,
   stepCountIs,
+  StepResult,
   streamText,
   StreamTextOnFinishCallback,
   StreamTextOnStepFinishCallback,
   TextStreamPart,
   ToolSet,
 } from 'ai';
+
+type StreamTextOnAbortCallback<TOOLS extends ToolSet> = (event: {
+  readonly steps: StepResult<TOOLS>[];
+}) => PromiseLike<void> | void;
 
 type AICallSettings = {
   tools?: ToolSet;
@@ -21,6 +26,8 @@ type AICallSettings = {
   languageModel: LanguageModel;
   onStepFinish?: StreamTextOnStepFinishCallback<ToolSet>;
   onFinish?: StreamTextOnFinishCallback<ToolSet>;
+  onAbort?: StreamTextOnAbortCallback<ToolSet>;
+  abortSignal: AbortSignal;
 };
 
 const MAX_RETRIES = 1;
@@ -37,6 +44,8 @@ export function getLLMAsyncStream(
     tools,
     onStepFinish,
     onFinish,
+    onAbort,
+    abortSignal,
   } = params;
 
   const hasTools = tools && Object.keys(tools).length !== 0;
@@ -53,6 +62,8 @@ export function getLLMAsyncStream(
     stopWhen: stepCountIs(maxRecursionDepth),
     onStepFinish,
     onFinish,
+    onAbort,
+    abortSignal,
     experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
     async onError({ error }): Promise<void> {
       throw error;

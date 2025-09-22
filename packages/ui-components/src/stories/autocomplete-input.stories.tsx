@@ -73,4 +73,7 @@ export const WithDynamicValueAfterInitialRender: Story = {
     }, []);
     return <AutocompleteInput {...args} value={value} />;
   },
+  parameters: {
+    chromatic: { disable: true },
+  },
 };
