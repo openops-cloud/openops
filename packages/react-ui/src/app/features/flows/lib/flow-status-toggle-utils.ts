@@ -1,6 +1,7 @@
 import type { StepMetadata } from '@openops/components/ui';
 import { Flow, Trigger, TriggerType } from '@openops/shared';
 import cronstrue from 'cronstrue/i18n';
+import { t } from 'i18next';
 
 export function getShortTriggerExplanation(
   trigger: Trigger,
@@ -8,7 +9,7 @@ export function getShortTriggerExplanation(
   flow: Flow,
 ): string {
   if (trigger.type === TriggerType.EMPTY) {
-    return 'it runs when started manually';
+    return t('Workflow is on, it runs when started manually');
   }
   if (trigger.type === TriggerType.BLOCK) {
     const blockName = triggerMetadata?.displayName?.trim();
@@ -18,17 +19,25 @@ export function getShortTriggerExplanation(
       const scheduleDescription = cronstrue
         .toString(cronExpression, { locale: 'en' })
         .toLowerCase();
-      return `it runs on a schedule (${scheduleDescription})`;
+      return t(`Workflow is on, it runs on a schedule ({schedule})`, {
+        schedule: scheduleDescription,
+      });
     }
 
     if (blockName === 'Webhook') {
-      return 'it runs when the webhook is triggered';
+      return t('Workflow is on, it runs when the webhook is triggered');
     }
 
     const display = trigger.displayName?.trim();
     if (display && blockName) {
-      return `it runs on ${display} from ${blockName}`;
+      return t(
+        `Workflow is on, it runs on "{display}" trigger from {blockName}`,
+        {
+          display: display,
+          blockName: blockName,
+        },
+      );
     }
   }
-  return 'it runs when its trigger condition is met';
+  return t('Workflow is on, it runs when its trigger condition is met');
 }

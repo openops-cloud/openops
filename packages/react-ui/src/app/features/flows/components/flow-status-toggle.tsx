@@ -131,13 +131,11 @@ const FlowStatusToggle = ({
             ? isNil(flow.publishedVersionId)
               ? t('Please publish workflow first')
               : isFlowPublished
-              ? t('Workflow is on, {toggleDescription}', {
-                  toggleDescription: getShortTriggerExplanation(
-                    flowVersion.trigger,
-                    triggerMetadata,
-                    flow,
-                  ),
-                })
+              ? getShortTriggerExplanation(
+                  flowVersion.trigger,
+                  triggerMetadata,
+                  flow,
+                )
               : t('Workflow is off. It only runs if manually triggered.')
             : t('Permission Needed')}
         </TooltipContent>
