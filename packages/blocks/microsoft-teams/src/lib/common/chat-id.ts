@@ -5,8 +5,8 @@ import {
   DropdownOption,
   Property,
 } from '@openops/blocks-framework';
+import { getMicrosoftGraphClient } from '@openops/common';
 import { PRIVATE_CHAT_KIND } from './get-all-chat-options';
-import { getMicrosoftGraphClient } from './get-microsoft-graph-client';
 import { microsoftTeamsAuth } from './microsoft-teams-auth';
 import { parseMsPaginatedData } from './parse-ms-paginated-data';
 
