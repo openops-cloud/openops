@@ -56,7 +56,7 @@ const TestStepContainer = React.memo(
             value={TabListEnum.SAMPLE_STEP_OUTPUT}
             className="justify-start text-left font-normal data-[state=active]:font-bold text-primary-300 text-base pr-0 pl-2 dark:text-white rounded-none border-b-2 data-[state=active]:bg-background data-[state=active]:text-primary-300 data-[state=active]:dark:text-white data-[state=active]:shadow-none data-[state=active]:border-blueAccent-300 gap-1"
           >
-            {t('Sample output data')}
+            {t('Sample output')}
             <Tooltip>
               <TooltipTrigger asChild aria-label={t('Sample output info')}>
                 <Info className="w-4 h-4 text-black" />
