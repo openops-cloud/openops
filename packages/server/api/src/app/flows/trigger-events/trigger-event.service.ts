@@ -110,7 +110,7 @@ export const triggerEventService = {
           });
         }
 
-        if (testResult.output?.length === 0) {
+        if (!testResult.output?.length) {
           await triggerEventService.saveEvent({
             projectId,
             flowId: flow.id,
