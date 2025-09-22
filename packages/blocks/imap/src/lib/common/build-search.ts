@@ -9,6 +9,25 @@ export type SearchFilters = {
   subject?: string;
 };
 
+function normalizeList(list?: string[]): string[] {
+  return (list || []).map((s) => s.toLowerCase().trim());
+}
+
+function expandClauses(
+  clauses: SearchObject[],
+  key: 'to' | 'cc' | 'from',
+  values: string[],
+): SearchObject[] {
+  if (values.length === 0) return clauses;
+  const next: SearchObject[] = [];
+  for (const base of clauses) {
+    for (const val of values) {
+      next.push({ ...base, [key]: val });
+    }
+  }
+  return next;
+}
+
 export function buildImapSearch({
   lastEpochMilliSeconds,
   recipients,
@@ -21,43 +40,16 @@ export function buildImapSearch({
       ? ''
       : dayjs(lastEpochMilliSeconds).toISOString();
 
-  const recipientList = (recipients || []).map((s) => s.toLowerCase().trim());
-  const ccList = (cc || []).map((s) => s.toLowerCase().trim());
-  const senderList = (senders || []).map((s) => s.toLowerCase().trim());
+  const recipientList = normalizeList(recipients);
+  const ccList = normalizeList(cc);
+  const senderList = normalizeList(senders);
 
   const search: SearchObject = { since: sinceISO };
 
   let clauses: SearchObject[] = [{}];
-
-  if (recipientList.length > 0) {
-    const next: SearchObject[] = [];
-    for (const base of clauses) {
-      for (const toAddr of recipientList) {
-        next.push({ ...base, to: toAddr });
-      }
-    }
-    clauses = next;
-  }
-
-  if (ccList.length > 0) {
-    const next: SearchObject[] = [];
-    for (const base of clauses) {
-      for (const ccAddr of ccList) {
-        next.push({ ...base, cc: ccAddr });
-      }
-    }
-    clauses = next;
-  }
-
-  if (senderList.length > 0) {
-    const next: SearchObject[] = [];
-    for (const base of clauses) {
-      for (const fromAddr of senderList) {
-        next.push({ ...base, from: fromAddr });
-      }
-    }
-    clauses = next;
-  }
+  clauses = expandClauses(clauses, 'to', recipientList);
+  clauses = expandClauses(clauses, 'cc', ccList);
+  clauses = expandClauses(clauses, 'from', senderList);
 
   const trimmedSubject = subject?.trim();
   if (trimmedSubject) {
