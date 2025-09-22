@@ -79,7 +79,7 @@ const FlowStatusToggle = ({
   });
 
   const { stepMetadata: triggerMetadata } = blocksHooks.useStepMetadata({
-    step: flowVersion.trigger as any,
+    step: flowVersion.trigger,
   });
 
   const {

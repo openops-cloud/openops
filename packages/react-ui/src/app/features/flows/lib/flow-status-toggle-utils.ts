@@ -1,10 +1,11 @@
-import { TriggerType } from '@openops/shared';
+import type { StepMetadata } from '@openops/components/ui';
+import { Flow, Trigger, TriggerType } from '@openops/shared';
 import cronstrue from 'cronstrue/i18n';
 
 export function getShortTriggerExplanation(
-  trigger: any,
-  triggerMetadata: any,
-  flow: any,
+  trigger: Trigger,
+  triggerMetadata: StepMetadata | undefined,
+  flow: Flow,
 ): string {
   if (trigger.type === TriggerType.EMPTY) {
     return 'it runs when started manually';
