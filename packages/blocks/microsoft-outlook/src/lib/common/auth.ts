@@ -6,7 +6,6 @@ export const microsoftOutlookAuth = BlockAuth.OAuth2({
   authProviderDisplayName: 'Microsoft Outlook',
   authProviderLogoUrl:
     'https://static.openops.com/blocks/microsoft-outlook.png',
-  description: '⚠️ You can only use school or work accounts.',
   required: true,
   scope: ['Mail.ReadWrite', 'Mail.Send', 'offline_access', 'User.Read'],
   authUrl: 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize',
