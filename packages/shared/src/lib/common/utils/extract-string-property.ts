@@ -1,3 +1,5 @@
+const DEFAULT_MAX_DEPTH = 50;
+
 /**
  * Extract a string from an unknown value by searching
  * for the first matching property name, or falling back to a
@@ -33,9 +35,8 @@ function findFirstStringProperty(
   keySet: Set<string>,
   visited: WeakSet<object>,
   depth: number,
-  maxDepth = 50,
 ): string | undefined {
-  if (depth > maxDepth) {
+  if (depth > DEFAULT_MAX_DEPTH) {
     return undefined;
   }
 
@@ -46,13 +47,12 @@ function findFirstStringProperty(
 
     visited.add(value);
     if (Array.isArray(value)) {
-      for (const v of value) {
+      for (const objValue of value) {
         const deeper = findFirstStringProperty(
-          v,
+          objValue,
           keySet,
           visited,
           depth + 1,
-          maxDepth,
         );
 
         if (deeper) {
@@ -78,7 +78,6 @@ function findFirstStringProperty(
         keySet,
         visited,
         depth + 1,
-        maxDepth,
       );
 
       if (deeper) {
