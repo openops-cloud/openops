@@ -25,7 +25,6 @@ import { triggerEventsApi } from '@/app/features/flows/lib/trigger-events-api';
 import { formatUtils } from '@/app/lib/utils';
 import {
   CATCH_WEBHOOK,
-  FlagId,
   isNil,
   SeekPage,
   Trigger,
@@ -33,7 +32,6 @@ import {
   TriggerTestStrategy,
 } from '@openops/shared';
 
-import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import {
   setStepOutputCache,
   stepTestOutputCache,
@@ -89,12 +87,6 @@ const TestTriggerSection = React.memo(
       undefined,
     );
 
-    const { data: webhookPrefixUrl } = flagsHooks.useFlag<string>(
-      FlagId.WEBHOOK_URL_PREFIX,
-    );
-    const webhookUrl = webhookPrefixUrl
-      ? `${webhookPrefixUrl}/${flowId}`
-      : undefined;
     const isCatchWebhookTrigger =
       formValues.settings?.triggerName === CATCH_WEBHOOK;
 
@@ -329,9 +321,9 @@ const TestTriggerSection = React.memo(
 
         {isSimulation && isSimulating && (
           <div className="flex flex-col gap-4 w-full">
-            {isCatchWebhookTrigger && webhookUrl && (
+            {isCatchWebhookTrigger && (
               <div className="mb-3">
-                <CatchWebhookTestInfo webhookUrl={webhookUrl} />
+                <CatchWebhookTestInfo flowId={flowId} />
               </div>
             )}
             <div className="flex gap-2 items-center justify-center w-full">

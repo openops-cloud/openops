@@ -1,3 +1,4 @@
+import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import {
   Button,
   Tooltip,
@@ -5,17 +6,25 @@ import {
   TooltipTrigger,
   useToast,
 } from '@openops/components/ui';
+import { FlagId } from '@openops/shared';
 import { t } from 'i18next';
 import { Copy } from 'lucide-react';
 import React from 'react';
 
 type WebhookTestInfoProps = {
-  webhookUrl: string;
+  flowId: string;
 };
 
 export const CatchWebhookTestInfo: React.FC<WebhookTestInfoProps> = ({
-  webhookUrl,
+  flowId,
 }) => {
+  const { data: webhookPrefixUrl } = flagsHooks.useFlag<string>(
+    FlagId.WEBHOOK_URL_PREFIX,
+  );
+  const webhookUrl = webhookPrefixUrl
+    ? `${webhookPrefixUrl}/${flowId}`
+    : undefined;
+
   const testUrl = `${webhookUrl}/test`;
   const { toast } = useToast();
 
@@ -27,6 +36,8 @@ export const CatchWebhookTestInfo: React.FC<WebhookTestInfoProps> = ({
       toast({ title: t('Failed to copy to clipboard') });
     }
   };
+
+  if (!webhookUrl) return null;
 
   return (
     <div className="w-full rounded-sm border p-2 bg-background">
