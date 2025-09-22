@@ -54,32 +54,19 @@ function findFirstStringProperty(
     }
 
     visited.add(value);
+
     if (Array.isArray(value)) {
-      for (let i = value.length - 1; i >= 0; i--) {
-        const el = value[i];
-        if (isObjectLike(el)) {
-          stack.push({ value: el, depth: depth + 1 });
-        }
-      }
+      processArray(stack, value, depth);
       continue;
     }
 
-    const entries = Object.entries(value);
-    for (const [objKey, objValue] of entries) {
-      if (typeof objValue === 'string' && keySet.has(objKey.toLowerCase())) {
-        const s = objValue.trim();
-        if (s.length > 0) {
-          return s;
-        }
-      }
+    const valuesRecord = value as Record<string, unknown>;
+    const match = checkMatchingStringProps(valuesRecord, keySet);
+    if (match) {
+      return match;
     }
 
-    for (let i = entries.length - 1; i >= 0; i--) {
-      const child = entries[i][1];
-      if (isObjectLike(child)) {
-        stack.push({ value: child, depth: depth + 1 });
-      }
-    }
+    processObjectChildren(stack, valuesRecord, depth);
   }
 
   return undefined;
@@ -87,4 +74,47 @@ function findFirstStringProperty(
 
 function isObjectLike(x: unknown): x is object {
   return (typeof x === 'object' && x !== null) || typeof x === 'function';
+}
+
+function processArray(
+  stack: { value: unknown; depth: number }[],
+  arr: unknown[],
+  depth: number,
+): void {
+  for (let i = arr.length - 1; i >= 0; i--) {
+    const el = arr[i];
+    if (isObjectLike(el)) {
+      stack.push({ value: el, depth: depth + 1 });
+    }
+  }
+}
+
+function checkMatchingStringProps(
+  obj: Record<string, unknown>,
+  keySet: Set<string>,
+): string | undefined {
+  for (const [objKey, objValue] of Object.entries(obj)) {
+    if (typeof objValue === 'string' && keySet.has(objKey.toLowerCase())) {
+      const s = objValue.trim();
+      if (s.length > 0) {
+        return s;
+      }
+    }
+  }
+
+  return undefined;
+}
+
+function processObjectChildren(
+  stack: { value: unknown; depth: number }[],
+  obj: Record<string, unknown>,
+  depth: number,
+): void {
+  const entries = Object.entries(obj);
+  for (let i = entries.length - 1; i >= 0; i--) {
+    const child = entries[i][1];
+    if (isObjectLike(child)) {
+      stack.push({ value: child, depth: depth + 1 });
+    }
+  }
 }
