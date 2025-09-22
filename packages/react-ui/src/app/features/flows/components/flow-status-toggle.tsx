@@ -18,7 +18,6 @@ import {
   TriggerType,
 } from '@openops/shared';
 import { useMutation } from '@tanstack/react-query';
-import { t } from 'i18next';
 import { useEffect, useState } from 'react';
 
 import { flowsApi } from '../lib/flows-api';
@@ -98,7 +97,7 @@ const FlowStatusToggle = ({
   const getShortTriggerExplanation = (): string => {
     const trigger = flowVersion?.trigger;
     if (!trigger) {
-      return `It runs when its trigger condition is met`;
+      return `It runs on trigger`;
     }
 
     if (trigger.type === TriggerType.EMPTY) {
