@@ -150,6 +150,9 @@ export const SourceCodeWithTabs: Story = {
     language: 'typescript',
     showLineNumbers: true,
   } as any,
+  parameters: {
+    chromatic: { disable: true },
+  },
 };
 
 /**

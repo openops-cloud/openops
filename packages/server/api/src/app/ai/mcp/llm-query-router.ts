@@ -57,12 +57,14 @@ export async function routeQuery({
   languageModel,
   aiConfig,
   uiContext,
+  abortSignal,
 }: {
   messages: ModelMessage[];
   tools: ToolSet;
   languageModel: LanguageModel;
   aiConfig: AiConfig;
   uiContext?: ChatFlowContext;
+  abortSignal?: AbortSignal;
 }): Promise<ToolsAndQueryResult> {
   if (!tools || Object.keys(tools).length === 0) {
     return {
@@ -88,6 +90,7 @@ export async function routeQuery({
       messages,
       ...aiConfig.modelSettings,
       experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
+      abortSignal,
     });
 
     let selectedToolNames = selectionResult.tool_names;
@@ -115,7 +118,10 @@ export async function routeQuery({
       tools: selectedTools,
     };
   } catch (error) {
-    logger.error('Error selecting tools and query classification', { error });
+    const isAbortError = error instanceof Error && error.name === 'AbortError';
+    if (!isAbortError) {
+      logger.error('Error selecting tools and query classification', { error });
+    }
     return {
       tools: undefined,
       queryClassification: [QueryClassification.general],
