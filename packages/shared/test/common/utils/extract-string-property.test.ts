@@ -76,7 +76,8 @@ describe('extractPropertyString', () => {
     },
     {
       name: 'does not exceed max depth and returns null when match is too deep',
-      obj: () => {
+      obj: (): unknown => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const obj: any = {};
         let cursor = obj;
         for (let i = 0; i < 60; i++) {
