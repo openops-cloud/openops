@@ -36,7 +36,9 @@ describe('buildImapSearch', () => {
       cc: 'bob@example.com',
       from: 'carol@example.com',
     });
-    expect(dayjs(res.since).toISOString()).toBe(dayjs().subtract(7, 'days').toISOString());
+    expect(dayjs(res.since).toISOString()).toBe(
+      dayjs().subtract(7, 'days').toISOString(),
+    );
     expect(res.or).toBeUndefined();
   });
 
