@@ -110,13 +110,22 @@ export const triggerEventService = {
           });
         }
 
-        for (const output of testResult.output) {
+        if (testResult.output?.length === 0) {
           await triggerEventService.saveEvent({
             projectId,
             flowId: flow.id,
-            payload: output,
+            payload: null,
             input: testResult.input,
           });
+        } else {
+          for (const output of testResult.output) {
+            await triggerEventService.saveEvent({
+              projectId,
+              flowId: flow.id,
+              payload: output,
+              input: testResult.input,
+            });
+          }
         }
 
         return triggerEventService.list({
