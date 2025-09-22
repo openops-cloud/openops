@@ -12,7 +12,7 @@ export const microsoftOutlook = createBlock({
   displayName: 'Microsoft Outlook 1',
   auth: microsoftOutlookAuth,
   minimumSupportedRelease: '0.20.0',
-  logoUrl: '',
+  logoUrl: 'https://static.openops.com/blocks/microsoft-outlook.png',
   categories: [BlockCategory.COLLABORATION],
   authors: [],
   actions: [
