@@ -2,9 +2,19 @@ import dayjs from 'dayjs';
 import { buildImapSearch } from '../src/lib/common/build-search';
 
 describe('buildImapSearch', () => {
-  test('sets since to empty string when lastEpochMilliSeconds is 0', () => {
+  const FIXED_NOW_ISO = '2025-09-22T11:57:00.000Z';
+
+  beforeAll(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date(FIXED_NOW_ISO));
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+  test('sets since to 7 days before now when lastEpochMilliSeconds is 0', () => {
     const res = buildImapSearch({ lastEpochMilliSeconds: 0 });
-    expect(res).toEqual({ since: '' });
+    expect(res.since).toBe(dayjs().subtract(7, 'days').toISOString());
   });
 
   test('sets since to ISO string when lastEpochMilliSeconds is non-zero', () => {
@@ -22,11 +32,11 @@ describe('buildImapSearch', () => {
     });
 
     expect(res).toMatchObject({
-      since: '',
       to: 'alice@example.com',
       cc: 'bob@example.com',
       from: 'carol@example.com',
     });
+    expect(dayjs(res.since).toISOString()).toBe(dayjs().subtract(7, 'days').toISOString());
     expect(res.or).toBeUndefined();
   });
 
