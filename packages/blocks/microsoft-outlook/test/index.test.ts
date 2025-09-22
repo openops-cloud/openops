@@ -5,20 +5,20 @@ describe('block declaration tests', () => {
     expect(microsoftOutlook.auth).toMatchObject({
       type: 'OAUTH2',
       required: true,
-      authProviderKey: 'microsoft-outlook',
-      authProviderDisplayName: 'Microsoft-outlook',
+      authProviderKey: 'Microsoft_Outlook',
+      authProviderDisplayName: 'Microsoft Outlook',
       authProviderLogoUrl:
         'https://static.openops.com/blocks/microsoft-outlook.png',
     });
   });
 
   test('should return block with correct number of actions', () => {
-    expect(Object.keys(microsoftOutlook.actions()).length).toBe(1);
-    expect(microsoftOutlook.actions()).toMatchObject({
-      custom_api_call: {
-        name: 'custom_api_call',
-        requireAuth: true,
-      },
+    expect(Object.keys(microsoftOutlook.actions()).length).toBe(6);
+    expect(microsoftOutlook.actions()).toHaveProperty('custom_api_call');
+
+    const actions = microsoftOutlook.actions();
+    Object.values(actions).forEach((action) => {
+      expect(action).toHaveProperty('requireAuth', true);
     });
   });
 });

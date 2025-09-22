@@ -1,6 +1,8 @@
-import { Client, PageCollection } from '@microsoft/microsoft-graph-client';
+import { PageCollection } from '@microsoft/microsoft-graph-client';
 import { MailFolder, Message } from '@microsoft/microsoft-graph-types';
-import { OAuth2PropertyValue, Property } from '@openops/blocks-framework';
+import { BlockPropValueSchema, Property } from '@openops/blocks-framework';
+import { getMicrosoftGraphClient } from '@openops/common';
+import { microsoftOutlookAuth } from './auth';
 
 type DropdownParams = {
   displayName: string;
@@ -13,7 +15,7 @@ export const messageIdDropdown = (params: DropdownParams) =>
     displayName: params.displayName,
     description: params.description,
     required: params.required,
-    refreshers: [],
+    refreshers: ['auth'],
     options: async ({ auth }) => {
       if (!auth) {
         return {
@@ -23,12 +25,10 @@ export const messageIdDropdown = (params: DropdownParams) =>
         };
       }
 
-      const client = Client.initWithMiddleware({
-        authProvider: {
-          getAccessToken: () =>
-            Promise.resolve((auth as OAuth2PropertyValue).access_token),
-        },
-      });
+      const authValue = auth as BlockPropValueSchema<
+        typeof microsoftOutlookAuth
+      >;
+      const client = getMicrosoftGraphClient(authValue.access_token);
 
       try {
         const response: PageCollection = await client
@@ -59,7 +59,7 @@ export const draftMessageIdDropdown = (params: DropdownParams) =>
     displayName: params.displayName,
     description: params.description,
     required: params.required,
-    refreshers: [],
+    refreshers: ['auth'],
     options: async ({ auth }) => {
       if (!auth) {
         return {
@@ -69,12 +69,10 @@ export const draftMessageIdDropdown = (params: DropdownParams) =>
         };
       }
 
-      const client = Client.initWithMiddleware({
-        authProvider: {
-          getAccessToken: () =>
-            Promise.resolve((auth as OAuth2PropertyValue).access_token),
-        },
-      });
+      const authValue = auth as BlockPropValueSchema<
+        typeof microsoftOutlookAuth
+      >;
+      const client = getMicrosoftGraphClient(authValue.access_token);
 
       try {
         const response: PageCollection = await client
@@ -107,7 +105,7 @@ export const mailFolderIdDropdown = (params: DropdownParams) =>
     displayName: params.displayName,
     description: params.description,
     required: params.required,
-    refreshers: [],
+    refreshers: ['auth'],
     options: async ({ auth }) => {
       if (!auth) {
         return {
@@ -117,12 +115,10 @@ export const mailFolderIdDropdown = (params: DropdownParams) =>
         };
       }
 
-      const client = Client.initWithMiddleware({
-        authProvider: {
-          getAccessToken: () =>
-            Promise.resolve((auth as OAuth2PropertyValue).access_token),
-        },
-      });
+      const authValue = auth as BlockPropValueSchema<
+        typeof microsoftOutlookAuth
+      >;
+      const client = getMicrosoftGraphClient(authValue.access_token);
 
       try {
         const response: PageCollection = await client

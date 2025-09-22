@@ -4,7 +4,8 @@ import { getMicrosoftGraphClient } from '@openops/common';
 export const microsoftOutlookAuth = BlockAuth.OAuth2({
   authProviderKey: 'Microsoft_Outlook',
   authProviderDisplayName: 'Microsoft Outlook',
-  authProviderLogoUrl: ``,
+  authProviderLogoUrl:
+    'https://static.openops.com/blocks/microsoft-outlook.png',
   description: '⚠️ You can only use school or work accounts.',
   required: true,
   scope: ['Mail.ReadWrite', 'Mail.Send', 'offline_access', 'User.Read'],

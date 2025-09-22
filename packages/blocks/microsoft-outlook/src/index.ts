@@ -1,12 +1,12 @@
 import { createCustomApiCallAction } from '@openops/blocks-common';
 import { createBlock, OAuth2PropertyValue } from '@openops/blocks-framework';
 import { BlockCategory } from '@openops/shared';
-import { findEmailAction } from '../../microsoft-outlook/src/lib/actions/find-email';
-import { forwardEmailAction } from '../../microsoft-outlook/src/lib/actions/forward-email';
-import { moveEmailToFolderAction } from '../../microsoft-outlook/src/lib/actions/move-email-to-folder';
-import { replyEmailAction } from '../../microsoft-outlook/src/lib/actions/reply-email';
-import { sendEmailAction } from '../../microsoft-outlook/src/lib/actions/send-email';
-import { microsoftOutlookAuth } from '../../microsoft-outlook/src/lib/common/auth';
+import { findEmailAction } from './lib/actions/find-email';
+import { forwardEmailAction } from './lib/actions/forward-email';
+import { moveEmailToFolderAction } from './lib/actions/move-email-to-folder';
+import { replyEmailAction } from './lib/actions/reply-email';
+import { sendEmailAction } from './lib/actions/send-email';
+import { microsoftOutlookAuth } from './lib/common/auth';
 
 export const microsoftOutlook = createBlock({
   displayName: 'Microsoft Outlook 1',
