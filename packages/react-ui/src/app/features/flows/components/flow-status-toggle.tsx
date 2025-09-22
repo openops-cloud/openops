@@ -15,7 +15,6 @@ import {
   isNil,
   Permission,
   PopulatedFlow,
-  TriggerType,
 } from '@openops/shared';
 import { useMutation } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
@@ -30,6 +29,9 @@ import {
 } from './execute-risky-flow-dialog/execute-risky-flow-dialog';
 
 import { useAuthorization } from '@/app/common/hooks/authorization-hooks';
+import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
+import { t } from 'i18next';
+import { getShortTriggerExplanation } from '../lib/flow-status-toggle-utils';
 
 type FlowStatusToggleProps = {
   flow: Flow;
@@ -76,6 +78,10 @@ const FlowStatusToggle = ({
     },
   });
 
+  const { stepMetadata: triggerMetadata } = blocksHooks.useStepMetadata({
+    step: flowVersion.trigger as any,
+  });
+
   const {
     isDialogOpen,
     riskyStepNames,
@@ -92,39 +98,6 @@ const FlowStatusToggle = ({
     } else {
       mutate();
     }
-  };
-
-  const getShortTriggerExplanation = (): string => {
-    const trigger = flowVersion?.trigger;
-    if (!trigger) {
-      return `It runs on trigger`;
-    }
-
-    if (trigger.type === TriggerType.EMPTY) {
-      return `It runs when started manually`;
-    }
-
-    if (trigger.type === TriggerType.BLOCK) {
-      const display = trigger.displayName?.trim();
-      const blockName = trigger.settings?.blockName?.trim();
-      const triggerName = trigger.settings?.triggerName?.trim();
-
-      if (display && triggerName) {
-        return `It runs on "${display}"`;
-      }
-      if (display) {
-        return `It runs "${display}"`;
-      }
-      if (blockName && triggerName) {
-        return `It runs when ${blockName} -> "${triggerName}" fires`;
-      }
-      if (blockName) {
-        return `It runs when ${blockName} trigger fires`;
-      }
-      return `It runs when the trigger block fires`;
-    }
-
-    return `It runs when its trigger condition is met`;
   };
 
   return (
@@ -156,11 +129,17 @@ const FlowStatusToggle = ({
         <TooltipContent side="bottom">
           {userHasPermissionToToggleFlowStatus
             ? isNil(flow.publishedVersionId)
-              ? 'Please publish workflow first'
+              ? t('Please publish workflow first')
               : isFlowPublished
-              ? `Workflow is on, ${getShortTriggerExplanation()}`
-              : 'Workflow is off. It only runs if manually triggered.'
-            : 'Permission Needed'}
+              ? t('Workflow is on, {toggleDescription}', {
+                  toggleDescription: getShortTriggerExplanation(
+                    flowVersion.trigger,
+                    triggerMetadata,
+                    flow,
+                  ),
+                })
+              : t('Workflow is off. It only runs if manually triggered.')
+            : t('Permission Needed')}
         </TooltipContent>
       </Tooltip>
       {isLoading ? (
