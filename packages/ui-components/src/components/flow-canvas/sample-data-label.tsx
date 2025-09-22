@@ -12,7 +12,7 @@ const SampleDataLabel = () => {
         'bg-background-800',
       )}
     >
-      {t('Sample output data')}
+      {t('Sample output')}
     </div>
   );
 };

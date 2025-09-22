@@ -221,7 +221,7 @@
   "Add new": "Add new",
   "Where": "Where",
   "Step output": "Step output",
-  "Sample output data": "Sample output data",
+  "Sample output": "Sample output",
   "Sample output info": "Sample output info",
   "Sample data is for building and testing only - scheduled runs and test workflow are using the real step output.": "Sample data is for building and testing only - scheduled runs and test workflow are using the real step output.",
   "Sample data is too large. The maximum allowed size is {maxKb} KB.": "Sample data is too large. The maximum allowed size is {maxKb} KB.",
