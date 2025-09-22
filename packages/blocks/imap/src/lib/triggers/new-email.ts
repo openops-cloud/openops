@@ -48,33 +48,5 @@ export const newEmail = createTrigger({
   async test(context) {
     return await pollingHelper.test(newEmailPolling, context as any);
   },
-  sampleData: {
-    receivedDateTime: '2025-09-18T09:58:26Z',
-    sentDateTime: '2025-09-18T09:58:23Z',
-    hasAttachments: false,
-    subject: '',
-    bodyPreview: 'Sample preview',
-    importance: 'normal',
-    isRead: true,
-    body: {
-      contentType: 'html',
-      content: '<html><body>Sample</body></html>',
-    },
-    from: {
-      emailAddress: {
-        name: 'Sender Name',
-        address: 'sender@example.com',
-      },
-    },
-    toRecipients: [
-      {
-        emailAddress: {
-          name: 'Recipient Name',
-          address: 'recipient@example.com',
-        },
-      },
-    ],
-    ccRecipients: [],
-    bccRecipients: [],
-  },
+  sampleData: {},
 });
