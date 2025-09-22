@@ -7,8 +7,9 @@ import {
   getARNsProperty,
   getCredentialsForAccount,
   groupARNsByAccount,
+  tryParseJson,
 } from '@openops/common';
-import { RiskLevel } from '@openops/shared';
+import { isObject, RiskLevel } from '@openops/shared';
 
 export const addTagsAction = createAction({
   auth: amazonAuth,
@@ -61,12 +62,19 @@ export const addTagsAction = createAction({
   },
 });
 
-function convertToRecordString(
-  input: Record<string, unknown>,
-): Record<string, string> {
+function convertToRecordString(input: unknown): Record<string, string> {
   const output: Record<string, string> = {};
 
-  const entries = Object.entries(input);
+  let tags = input;
+  if (typeof input === 'string') {
+    tags = tryParseJson(input);
+  }
+
+  if (!isObject(tags)) {
+    throw new Error('The provided tags must be in key-value format');
+  }
+
+  const entries = Object.entries(tags);
   if (!entries.length) {
     throw new Error('Record with tags should not be empty');
   }
