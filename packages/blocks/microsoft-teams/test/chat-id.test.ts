@@ -9,7 +9,8 @@ const mockExpand = jest.fn(() => ({
   get: mockGet,
 }));
 
-jest.mock('../src/lib/common/get-microsoft-graph-client', () => ({
+jest.mock('@openops/common', () => ({
+  ...jest.requireActual('@openops/common'),
   getMicrosoftGraphClient: jest.fn(() => ({
     api: jest.fn(() => ({
       expand: mockExpand,
