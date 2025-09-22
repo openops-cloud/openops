@@ -1,28 +1,12 @@
-import { DedupeStrategy, Polling, pollingHelper } from '@openops/blocks-common';
+import { pollingHelper } from '@openops/blocks-common';
 import {
-  BlockPropValueSchema,
   createTrigger,
+  Property,
   TriggerStrategy,
 } from '@openops/blocks-framework';
-import { fetchEmails } from '../common/fetch-emails';
 import { imapAuth } from '../common/imap-auth';
 import { mailbox } from '../common/mailbox';
-
-interface NewEmailProps {
-  mailbox: string;
-}
-
-const polling: Polling<BlockPropValueSchema<typeof imapAuth>, NewEmailProps> = {
-  strategy: DedupeStrategy.TIMEBASED,
-  items: async ({ auth, lastFetchEpochMS, propsValue }) => {
-    const items = await fetchEmails({
-      auth,
-      lastEpochMilliSeconds: lastFetchEpochMS,
-      mailbox: propsValue.mailbox,
-    });
-    return items;
-  },
-};
+import { newEmailPolling } from '../common/new-email-polling';
 
 export const newEmail = createTrigger({
   auth: imapAuth,
@@ -31,19 +15,38 @@ export const newEmail = createTrigger({
   description: 'Trigger when a new email is received.',
   props: {
     mailbox,
+    senders: Property.Array({
+      displayName: 'Sender (From)',
+      description: 'Matches at least one sender.',
+      required: false,
+    }),
+    recipients: Property.Array({
+      displayName: 'Recipients (To)',
+      description: 'Matches at least one recipient (To).',
+      required: false,
+    }),
+    cc: Property.Array({
+      displayName: 'CC',
+      description: 'Matches at least one CC address.',
+      required: false,
+    }),
+    subject: Property.ShortText({
+      displayName: 'Subject text contains',
+      required: false,
+    }),
   },
   type: TriggerStrategy.POLLING,
   async onEnable(context) {
-    await pollingHelper.onEnable(polling, context);
+    await pollingHelper.onEnable(newEmailPolling, context as any);
   },
   async onDisable(context) {
-    await pollingHelper.onDisable(polling, context);
+    await pollingHelper.onDisable(newEmailPolling, context as any);
   },
   async run(context) {
-    return await pollingHelper.poll(polling, context);
+    return await pollingHelper.poll(newEmailPolling, context as any);
   },
   async test(context) {
-    return await pollingHelper.test(polling, context);
+    return await pollingHelper.test(newEmailPolling, context as any);
   },
   sampleData: {
     receivedDateTime: '2025-09-18T09:58:26Z',
