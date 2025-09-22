@@ -18,7 +18,7 @@
       }
     },
     "publish": {
-      "command": "node tools/scripts/publish.mjs blocks-jira-cloud {args.ver} {args.tag}",
+      "command": "node tools/scripts/publish.mjs blocks-imap {args.ver} {args.tag}",
       "dependsOn": ["build"]
     },
     "test": {
