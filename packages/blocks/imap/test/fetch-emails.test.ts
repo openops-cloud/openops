@@ -26,6 +26,22 @@ jest.mock('../src/lib/common/parse-mail', () => ({
   parseMailFromBuffer: jest.fn((buf) => mockParseMailFromBuffer(buf)),
 }));
 
+function makeAsyncIterable<T>(items: T[]): AsyncIterable<T> {
+  return {
+    [Symbol.asyncIterator]() {
+      let i = 0;
+      return {
+        next: async () => {
+          if (i < items.length) {
+            return { value: items[i++], done: false } as IteratorResult<T>;
+          }
+          return { value: undefined, done: true } as IteratorResult<T>;
+        },
+      } as AsyncIterator<T>;
+    },
+  } as AsyncIterable<T>;
+}
+
 describe('fetchEmails', () => {
   const auth = {
     host: 'imap.example.com',
@@ -39,22 +55,6 @@ describe('fetchEmails', () => {
     jest.clearAllMocks();
     mockGetMailboxLock.mockResolvedValue(mockLock);
   });
-
-  function makeAsyncIterable<T>(items: T[]): AsyncIterable<T> {
-    return {
-      [Symbol.asyncIterator]() {
-        let i = 0;
-        return {
-          next: async () => {
-            if (i < items.length) {
-              return { value: items[i++], done: false } as IteratorResult<T>;
-            }
-            return { value: undefined, done: true } as IteratorResult<T>;
-          },
-        } as AsyncIterator<T>;
-      },
-    } as AsyncIterable<T>;
-  }
 
   test('fetches, parses, and returns messages with epochMilliSeconds; skips without source', async () => {
     const date1 = new Date('2023-01-01T00:00:00.000Z');
