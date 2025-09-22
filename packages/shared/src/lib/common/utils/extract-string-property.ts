@@ -16,7 +16,7 @@ export function extractPropertyString(
   const keySet = new Set(keys.map((k) => k.toLowerCase()));
   const visited = new WeakSet<object>();
 
-  const found = findFirstStringProperty(obj, keySet, visited, 0);
+  const found = findFirstStringProperty(obj, keySet, visited);
 
   if (found) {
     return found;
@@ -31,57 +31,53 @@ export function extractPropertyString(
 }
 
 function findFirstStringProperty(
-  value: unknown,
+  root: unknown,
   keySet: Set<string>,
   visited: WeakSet<object>,
-  depth: number,
 ): string | undefined {
-  if (depth > DEFAULT_MAX_DEPTH) {
-    return undefined;
-  }
+  type Frame = { value: unknown; depth: number };
+  const stack: Frame[] = [{ value: root, depth: 0 }];
 
-  if (isObjectLike(value)) {
+  for (let frame = stack.pop(); frame; frame = stack.pop()) {
+    const { value, depth } = frame;
+
+    if (depth > DEFAULT_MAX_DEPTH) {
+      continue;
+    }
+
+    if (!isObjectLike(value)) {
+      continue;
+    }
+
     if (visited.has(value)) {
-      return undefined;
+      continue;
     }
 
     visited.add(value);
     if (Array.isArray(value)) {
-      for (const objValue of value) {
-        const deeper = findFirstStringProperty(
-          objValue,
-          keySet,
-          visited,
-          depth + 1,
-        );
-
-        if (deeper) {
-          return deeper;
+      for (let i = value.length - 1; i >= 0; i--) {
+        const el = value[i];
+        if (isObjectLike(el)) {
+          stack.push({ value: el, depth: depth + 1 });
         }
       }
-
-      return undefined;
+      continue;
     }
 
-    for (const [objKey, objValue] of Object.entries(value)) {
-      const key = objKey.toLowerCase();
-
-      if (keySet.has(key) && typeof objValue === 'string') {
+    const entries = Object.entries(value);
+    for (const [objKey, objValue] of entries) {
+      if (typeof objValue === 'string' && keySet.has(objKey.toLowerCase())) {
         const s = objValue.trim();
         if (s.length > 0) {
           return s;
         }
       }
+    }
 
-      const deeper = findFirstStringProperty(
-        objValue,
-        keySet,
-        visited,
-        depth + 1,
-      );
-
-      if (deeper) {
-        return deeper;
+    for (let i = entries.length - 1; i >= 0; i--) {
+      const child = entries[i][1];
+      if (isObjectLike(child)) {
+        stack.push({ value: child, depth: depth + 1 });
       }
     }
   }

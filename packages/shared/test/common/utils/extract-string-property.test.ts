@@ -60,6 +60,7 @@ describe('extractPropertyString', () => {
     {
       name: 'handles cyclic references',
       obj: () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const a: any = {};
         a.self = a;
         a.other = { message: 'ok' };
