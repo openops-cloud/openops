@@ -1,5 +1,10 @@
 import { getAiProviderLanguageModel } from '@openops/common';
-import { cacheWrapper, encryptUtils, hashUtils } from '@openops/server-shared';
+import {
+  cacheWrapper,
+  encryptUtils,
+  hashUtils,
+  logger,
+} from '@openops/server-shared';
 import { AiConfig, ApplicationError, ErrorCode } from '@openops/shared';
 import { LanguageModel, ModelMessage, UIMessage, generateText } from 'ai';
 import { aiConfigService } from '../config/ai-config.service';
@@ -122,16 +127,24 @@ export const getChatContext = async (
   );
 };
 
+type ChatHistory = {
+  messages: ModelMessage[];
+  activeStreamId?: string | null;
+};
+
 export const getChatHistory = async (
   chatId: string,
   userId: string,
   projectId: string,
-): Promise<ModelMessage[]> => {
-  const messages = await cacheWrapper.getSerializedObject<ModelMessage[]>(
+): Promise<ChatHistory> => {
+  const chatHistory = await cacheWrapper.getSerializedObject<ChatHistory>(
     chatHistoryKey(chatId, userId, projectId),
   );
 
-  return messages ?? [];
+  return {
+    messages: chatHistory?.messages ?? [],
+    activeStreamId: chatHistory?.activeStreamId ?? null,
+  };
 };
 
 /**
@@ -142,7 +155,7 @@ export const getChatHistoryWithMergedTools = async (
   userId: string,
   projectId: string,
 ): Promise<Array<Omit<UIMessage, 'id'>>> => {
-  const messages = await getChatHistory(chatId, userId, projectId);
+  const { messages } = await getChatHistory(chatId, userId, projectId);
   return mergeToolResultsIntoMessages(messages);
 };
 
@@ -174,15 +187,20 @@ export const getAllChats = async (
   return chats;
 };
 
-export const saveChatHistory = async (
-  chatId: string,
-  userId: string,
-  projectId: string,
-  messages: ModelMessage[],
-): Promise<void> => {
+export const saveChatHistory = async ({
+  chatId,
+  userId,
+  projectId,
+  chatHistory,
+}: {
+  chatId: string;
+  userId: string;
+  projectId: string;
+  chatHistory: ChatHistory;
+}): Promise<void> => {
   await cacheWrapper.setSerializedObject(
     chatHistoryKey(chatId, userId, projectId),
-    messages,
+    chatHistory,
     DEFAULT_EXPIRE_TIME,
   );
 };

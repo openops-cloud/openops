@@ -5,11 +5,13 @@ import {
   ModelMessage,
   stepCountIs,
   streamText,
+  StreamTextOnErrorCallback,
   StreamTextOnFinishCallback,
   StreamTextOnStepFinishCallback,
-  TextStreamPart,
+  StreamTextResult,
   ToolSet,
 } from 'ai';
+import { ChatHistory } from './types';
 
 type AICallSettings = {
   tools?: ToolSet;
@@ -17,17 +19,18 @@ type AICallSettings = {
   systemPrompt: string;
   maxRecursionDepth: number;
   newMessages: ModelMessage[];
-  chatHistory: ModelMessage[];
+  chatHistory: ChatHistory;
   languageModel: LanguageModel;
   onStepFinish?: StreamTextOnStepFinishCallback<ToolSet>;
   onFinish?: StreamTextOnFinishCallback<ToolSet>;
+  onError?: StreamTextOnErrorCallback;
 };
 
 const MAX_RETRIES = 1;
 
 export function getLLMAsyncStream(
   params: AICallSettings,
-): AsyncIterable<TextStreamPart<ToolSet>> {
+): StreamTextResult<ToolSet, never> {
   const {
     maxRecursionDepth,
     languageModel,
@@ -37,15 +40,16 @@ export function getLLMAsyncStream(
     tools,
     onStepFinish,
     onFinish,
+    onError,
   } = params;
 
   const hasTools = tools && Object.keys(tools).length !== 0;
   const toolChoice = hasTools ? 'auto' : 'none';
 
-  const { fullStream } = streamText({
+  return streamText({
     model: languageModel,
     system: systemPrompt,
-    messages: chatHistory,
+    messages: chatHistory.messages,
     ...aiConfig.modelSettings,
     tools,
     toolChoice,
@@ -53,11 +57,7 @@ export function getLLMAsyncStream(
     stopWhen: stepCountIs(maxRecursionDepth),
     onStepFinish,
     onFinish,
+    onError,
     experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
-    async onError({ error }): Promise<void> {
-      throw error;
-    },
   });
-
-  return fullStream;
 }

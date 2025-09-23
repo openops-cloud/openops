@@ -27,7 +27,10 @@
       "@openops/blocks-framework": ["packages/blocks/framework/src/index"],
       "@openops/common": ["packages/openops/src/index"],
       "@openops/server-shared": ["packages/server/shared/src/index"],
-      "@openops/shared": ["packages/shared/src/index"]
+      "@openops/shared": ["packages/shared/src/index"],
+      "resumable-stream/ioredis": [
+        "./node_modules/resumable-stream/dist/ioredis.d.ts"
+      ]
     }
   }
 }

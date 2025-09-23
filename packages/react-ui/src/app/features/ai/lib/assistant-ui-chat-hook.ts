@@ -188,6 +188,7 @@ export const useAssistantChat = ({
 
   const chat = useChat({
     id: chatId ?? undefined,
+    resume: true,
     transport: new DefaultChatTransport({
       api: '/api/v1/ai/conversation',
       headers: {

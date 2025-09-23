@@ -1,30 +1,33 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { AppSystemProp, logger, system } from '@openops/server-shared';
+import {
+  AppSystemProp,
+  getRedisConnection,
+  logger,
+  system,
+} from '@openops/server-shared';
 import { AiConfig, ChatFlowContext } from '@openops/shared';
 import {
   AssistantModelMessage,
+  convertToModelMessages,
+  generateId,
   LanguageModel,
   ModelMessage,
-  TextStreamPart,
+  StreamTextResult,
   ToolModelMessage,
   ToolSet,
 } from 'ai';
 import { FastifyInstance } from 'fastify';
+import { createResumableStreamContext } from 'resumable-stream/ioredis';
 import { sendAiChatFailureEvent } from '../../telemetry/event-models';
 import { addUiToolResults } from '../mcp/tool-utils';
 import { getMCPToolsContext } from '../mcp/tools-context-builder';
 import { AssistantUITools } from '../mcp/types';
 import { saveChatHistory } from './ai-chat.service';
-import { generateMessageId } from './ai-id-generators';
 import { getLLMAsyncStream } from './llm-stream-handler';
 import { extractMessage } from './message-extractor';
-import {
-  doneMarker,
-  finishMessagePart,
-  finishStepPart,
-  sendTextMessageToStream,
-} from './stream-message-builder';
-import { ChatProcessingContext, RequestContext } from './types';
+import { convertToUIMessages } from './model-message-converter';
+import { ChatHistory, ChatProcessingContext, RequestContext } from './types';
+import { createHeartbeatResponseWrapper } from './utils';
 
 const maxRecursionDepth = system.getNumberOrThrow(
   AppSystemProp.MAX_LLM_CALLS_WITHOUT_INTERACTION,
@@ -37,6 +40,7 @@ type UserMessageParams = RequestContext &
   } & {
     frontendTools: AssistantUITools;
     additionalContext?: ChatFlowContext;
+    waitUntil: (p: Promise<unknown>) => void;
   };
 
 type ModelConfig = {
@@ -48,12 +52,13 @@ type StreamCallSettings = RequestContext &
   ModelConfig & {
     tools?: ToolSet;
     systemPrompt: string;
-    chatHistory: ModelMessage[];
+    chatHistory: ChatHistory;
+    mcpClients: unknown[];
   };
 
 export async function handleUserMessage(
   params: UserMessageParams,
-): Promise<void> {
+): Promise<Response> {
   const {
     app,
     chatId,
@@ -66,16 +71,15 @@ export async function handleUserMessage(
     conversation: { chatContext, chatHistory },
     frontendTools,
     additionalContext,
+    waitUntil,
   } = params;
-
-  const messageId = generateMessageId();
 
   const { mcpClients, systemPrompt, filteredTools } = await getMCPToolsContext({
     app,
     projectId,
     authToken,
     aiConfig,
-    messages: chatHistory,
+    messages: chatHistory.messages,
     chatContext,
     languageModel,
     frontendTools,
@@ -85,77 +89,130 @@ export async function handleUserMessage(
     stream: serverResponse,
   });
 
-  try {
-    const newMessages = await streamLLMResponse(
-      {
-        userId,
-        chatId,
-        projectId,
-        aiConfig,
-        chatHistory,
-        systemPrompt,
-        languageModel,
-        serverResponse,
-        tools: filteredTools,
-      },
-      messageId,
-    );
-
-    serverResponse.write(finishStepPart);
-    serverResponse.write(finishMessagePart);
-
-    await saveChatHistory(chatId, userId, projectId, [
+  // Clear any previous active stream and save the user message
+  await saveChatHistory({
+    chatId,
+    userId,
+    projectId,
+    chatHistory: {
       ...chatHistory,
-      ...addUiToolResults(newMessages),
-    ]);
-  } finally {
-    await closeMCPClients(mcpClients);
-    serverResponse.write(doneMarker);
-    serverResponse.end();
-  }
+      activeStreamId: null,
+    },
+  });
+
+  const streamTextResult = streamLLMResponse({
+    userId,
+    chatId,
+    projectId,
+    aiConfig,
+    chatHistory,
+    systemPrompt,
+    languageModel,
+    serverResponse,
+    tools: filteredTools,
+    mcpClients,
+  });
+
+  const heartbeatWrapper = createHeartbeatResponseWrapper();
+
+  const response = streamTextResult.toUIMessageStreamResponse({
+    originalMessages: convertToUIMessages(chatHistory.messages),
+    generateMessageId: generateId,
+    onFinish: ({ messages }) => {
+      // Clear the active stream when finished
+      return saveChatHistory({
+        chatId,
+        userId,
+        projectId,
+        chatHistory: {
+          messages: convertToModelMessages(messages),
+          activeStreamId: null,
+        },
+      });
+    },
+    async consumeSseStream({ stream }) {
+      const streamId = generateId();
+
+      // Create a resumable stream from the SSE stream using separate Redis connections
+      const redisConnection = getRedisConnection();
+      const subscriberConnection = redisConnection.duplicate();
+      const publisherConnection = redisConnection.duplicate();
+      const streamContext = createResumableStreamContext({
+        waitUntil,
+        subscriber: subscriberConnection,
+        publisher: publisherConnection,
+      });
+
+      await streamContext.createNewResumableStream(streamId, () => stream);
+
+      // Update the chat with the active stream ID
+      await saveChatHistory({
+        chatId,
+        userId,
+        projectId,
+        chatHistory: {
+          ...chatHistory,
+          activeStreamId: streamId,
+          messages: [],
+        },
+      });
+    },
+  });
+
+  return heartbeatWrapper(response);
 }
 
-async function streamLLMResponse(
+function streamLLMResponse(
   params: StreamCallSettings,
-  messageId: string,
-): Promise<ModelMessage[]> {
+): StreamTextResult<ToolSet, never> {
   const newMessages: ModelMessage[] = [];
   let stepCount = 0;
 
-  try {
-    const fullStream = getLLMAsyncStream({
-      ...params,
-      newMessages,
-      maxRecursionDepth,
-      onStepFinish: async (value): Promise<void> => {
-        stepCount++;
-        if (value.finishReason !== 'stop' && stepCount >= maxRecursionDepth) {
-          const message = `We automatically stop the conversation after ${maxRecursionDepth} steps. Ask a new question to continue the conversation.`;
-          sendTextMessageToStream(params.serverResponse, message, messageId);
-          appendErrorMessage(value.response.messages, message);
-          logger.warn(message);
-        }
-      },
-      onFinish: async (result): Promise<void> => {
-        const messages = result.response.messages;
-        newMessages.push(...messages);
-        if (result.finishReason === 'length') {
-          throw new Error(
-            'The message was truncated because the maximum tokens for the context window was reached.',
-          );
-        }
-      },
-    });
+  const streamTextResult = getLLMAsyncStream({
+    ...params,
+    newMessages,
+    maxRecursionDepth,
+    onStepFinish: async (value): Promise<void> => {
+      stepCount++;
+      if (value.finishReason !== 'stop' && stepCount >= maxRecursionDepth) {
+        const message = `We automatically stop the conversation after ${maxRecursionDepth} steps. Ask a new question to continue the conversation.`;
+        // sendTextMessageToStream(params.serverResponse, message, messageId); //TODO: probably not needed anymore
+        appendErrorMessage(value.response.messages, message);
+        logger.warn(message);
+      }
+    },
+    onFinish: async (result): Promise<void> => {
+      const messages = result.response.messages;
+      newMessages.push(...messages);
+      if (result.finishReason === 'length') {
+        appendErrorMessage(
+          messages,
+          'The message was truncated because the maximum tokens for the context window was reached.',
+        );
+      }
 
-    for await (const message of fullStream) {
-      sendMessageToStream(params.serverResponse, message);
-    }
-  } catch (error) {
-    const errorMessage = unrecoverableError(params, error);
-    newMessages.push(errorMessage);
-  }
+      await saveChatHistory({
+        chatId: params.chatId,
+        userId: params.userId,
+        projectId: params.projectId,
+        chatHistory: {
+          ...params.chatHistory,
+          messages: [
+            ...params.chatHistory.messages,
+            ...addUiToolResults(newMessages),
+          ],
+          activeStreamId: null,
+        },
+      });
+      return closeMCPClients(params.mcpClients);
+    },
+    onError: (error) => {
+      const errorMessage = unrecoverableError(params, error);
+      newMessages.push(errorMessage);
+    },
+  });
 
-  return newMessages;
+  return streamTextResult;
 }
 
 function unrecoverableError(
@@ -168,8 +225,7 @@ function unrecoverableError(
     error,
   );
 
-  const messageId = generateMessageId();
-  sendTextMessageToStream(streamParams.serverResponse, errorMessage, messageId);
+  // sendTextMessageToStream(streamParams.serverResponse, errorMessage, messageId); //TODO: probably not needed anymore
 
   sendAiChatFailureEvent({
     projectId: streamParams.projectId,
@@ -225,73 +281,4 @@ function appendErrorMessage(
       ...createAssistantMessage(message),
     });
   }
-}
-
-// This is based on the ai-sdk streaming codes
-// https://ai-sdk.dev/docs/ai-sdk-ui/stream-protocol#error-part
-function sendMessageToStream(
-  responseStream: NodeJS.WritableStream,
-  message: TextStreamPart<ToolSet>,
-): void {
-  switch (message.type as string) {
-    case 'text-delta':
-      responseStream.write(
-        `data: ${JSON.stringify({
-          type: 'text-delta',
-          id: (message as any).id,
-          delta: (message as any).text,
-        })}`,
-      );
-      break;
-    case 'tool-input-start':
-      responseStream.write(
-        `data: ${JSON.stringify({
-          type: 'tool-input-start',
-          toolCallId: (message as any).id,
-          toolName: (message as any).toolName,
-        })}`,
-      );
-      break;
-    case 'tool-input-delta':
-      responseStream.write(
-        `data: ${JSON.stringify({
-          type: 'tool-input-delta',
-          toolCallId: (message as any).id,
-          inputTextDelta: (message as any).delta,
-        })}`,
-      );
-      break;
-    case 'tool-call':
-      responseStream.write(
-        `data: ${JSON.stringify({
-          type: 'tool-input-available',
-          toolCallId: (message as any).toolCallId,
-          toolName: (message as any).toolName,
-          input: (message as any).input,
-        })}`,
-      );
-      break;
-    case 'tool-result':
-      responseStream.write(
-        `data: ${JSON.stringify({
-          type: 'tool-output-available',
-          toolCallId: (message as any).toolCallId,
-          output: (message as any).output,
-        })}`,
-      );
-      break;
-    case 'start-step':
-      responseStream.write(`data: ${JSON.stringify({ type: 'start-step' })}`);
-      break;
-    case 'finish-step':
-    case 'finish':
-    case 'tool-input-end':
-    case 'error':
-      return;
-    default:
-      responseStream.write(`data: ${JSON.stringify(message)}`);
-      break;
-  }
-
-  responseStream.write('\n\n');
 }

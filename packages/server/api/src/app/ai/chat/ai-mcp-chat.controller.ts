@@ -1,5 +1,8 @@
-import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { logger } from '@openops/server-shared';
+import {
+  FastifyPluginAsyncTypebox,
+  Type,
+} from '@fastify/type-provider-typebox';
+import { getRedisConnection, logger } from '@openops/server-shared';
 import {
   ApplicationError,
   ChatNameRequest,
@@ -11,9 +14,10 @@ import {
   openOpsId,
   PrincipalType,
 } from '@openops/shared';
-import { ModelMessage } from 'ai';
+import { ModelMessage, UI_MESSAGE_STREAM_HEADERS } from 'ai';
 import { FastifyReply } from 'fastify';
 import { StatusCodes } from 'http-status-codes';
+import { createResumableStreamContext } from 'resumable-stream/ioredis';
 import {
   createChatContext,
   deleteChatHistory,
@@ -22,6 +26,7 @@ import {
   generateChatName,
   getAllChats,
   getChatContext,
+  getChatHistory,
   getChatHistoryWithMergedTools,
   getConversation,
   getLLMConfig,
@@ -33,6 +38,8 @@ import { routeChatRequest } from './chat-request-router';
 import { streamCode } from './code.service';
 import { enrichContext, IncludeOptions } from './context-enrichment.service';
 import { getBlockSystemPrompt } from './prompts.service';
+import { ChatHistory } from './types';
+import { makeWaitUntil } from './utils';
 
 const DEFAULT_CHAT_NAME = 'New Chat';
 
@@ -131,12 +138,46 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       content: messageContent,
     };
 
-    await routeChatRequest({
+    return routeChatRequest({
       app,
       request,
       newMessage,
       reply,
     });
+  });
+
+  app.get('/:id/stream', GetChatOptions, async (request, reply) => {
+    const chatId = request.params.id;
+    const userId = request.principal.id;
+    const projectId = request.principal.projectId;
+    let chatHistory: ChatHistory | undefined;
+
+    try {
+      chatHistory = await getChatHistory(chatId, userId, projectId);
+    } catch (error) {
+      return handleError(error, reply, 'get chat history');
+    }
+
+    if (chatHistory?.activeStreamId == null) {
+      // no content response when there is no active stream
+      return reply.code(204).send();
+    }
+
+    const waitUntil = makeWaitUntil(reply);
+
+    const redisConnection = getRedisConnection();
+    const subscriberConnection = redisConnection.duplicate();
+    const publisherConnection = redisConnection.duplicate();
+    const streamContext = createResumableStreamContext({
+      waitUntil,
+      subscriber: subscriberConnection,
+      publisher: publisherConnection,
+    });
+
+    const stream = await streamContext.resumeExistingStream(
+      chatHistory.activeStreamId,
+    );
+    return reply.code(200).headers(UI_MESSAGE_STREAM_HEADERS).send(stream);
   });
 
   app.post('/chat-name', ChatNameOptions, async (request, reply) => {
@@ -147,11 +188,14 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
     try {
       const { chatHistory } = await getConversation(chatId, userId, projectId);
 
-      if (chatHistory.length === 0) {
+      if (chatHistory.messages.length === 0) {
         return await reply.code(200).send({ chatName: DEFAULT_CHAT_NAME });
       }
 
-      const rawChatName = await generateChatName(chatHistory, projectId);
+      const rawChatName = await generateChatName(
+        chatHistory.messages,
+        projectId,
+      );
       const chatName = rawChatName.trim() || DEFAULT_CHAT_NAME;
 
       await updateChatName(chatId, userId, projectId, chatName);
@@ -175,7 +219,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       );
       const llmConfigResult = await getLLMConfig(projectId);
 
-      conversationResult.chatHistory.push({
+      conversationResult.chatHistory.messages.push({
         role: 'user',
         content: request.body.message,
       });
@@ -205,10 +249,15 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
             result,
           });
 
-          await saveChatHistory(chatId, userId, projectId, [
-            ...chatHistory,
-            assistantMessage,
-          ]);
+          await saveChatHistory({
+            chatId,
+            userId,
+            projectId,
+            chatHistory: {
+              ...chatHistory,
+              messages: [...chatHistory.messages, assistantMessage],
+            },
+          });
         },
         onError: (error) => {
           logger.error('Failed to generate code', {
@@ -282,6 +331,19 @@ const ChatNameOptions = {
     tags: ['ai', 'ai-chat-mcp'],
     description: 'Generate a chat name using LLM based on chat history.',
     body: ChatNameRequest,
+  },
+};
+
+const GetChatOptions = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
+  },
+  schema: {
+    tags: ['ai', 'ai-chat-mcp'],
+    description: 'Get a chat stream by chat ID.',
+    params: Type.Object({
+      id: Type.String(),
+    }),
   },
 };
 

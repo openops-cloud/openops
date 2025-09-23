@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { logger } from '@openops/server-shared';
 import { ModelMessage, ToolResultPart, ToolSet, UIMessage } from 'ai';
+import { FastifyReply } from 'fastify';
 
 /**
  * Merges tool result messages into their corresponding assistant tool-call parts
@@ -296,4 +298,145 @@ function mergeToolResultIntoUIMessage(
     }
   }
   return false;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-invalid-void-type
+type Task = () => void | Promise<unknown>;
+
+/**
+ * Creates a Fastify-compatible equivalent of Next.js `after()`.
+ *
+ * This utility lets you queue asynchronous tasks to run **after**
+ * the HTTP response has been sent to the client.
+ */
+export function makeAfter(reply: FastifyReply) {
+  const tasks: Task[] = [];
+  let ran = false;
+
+  const run = (): void => {
+    if (ran) return;
+    ran = true;
+    for (const fn of tasks) {
+      // start after response lifecycle without blocking the response
+      queueMicrotask(() => {
+        Promise.resolve()
+          .then(fn)
+          .catch((err) => logger.error(err));
+      });
+    }
+  };
+
+  // Fire when the response is fully flushed…
+  reply.raw.once('finish', run);
+  // …optionally also when the connection closes early (drop this if undesired)
+  reply.raw.once('close', run);
+
+  // Return the Next.js-like sink
+  return (fn: Task): void => {
+    if (ran) {
+      // If called after finish/close, run immediately (Next.js `after` behaves similarly)
+      Promise.resolve()
+        .then(fn)
+        .catch((err) => logger.error(err));
+    } else {
+      tasks.push(fn);
+    }
+  };
+}
+
+/**
+ * Creates a waitUntil function compatible with resumable-stream.
+ * This function adapts Next.js `after()` behavior to work with resumable-stream.
+ * It takes a promise and schedules it to run after the response has been sent.
+ */
+export function makeWaitUntil(
+  reply: FastifyReply,
+): (promise: Promise<unknown>) => void {
+  const after = makeAfter(reply);
+
+  return (promise: Promise<unknown>) => {
+    after(() => promise);
+  };
+}
+
+/**
+ * Creates a Response wrapper that adds heartbeat to SSE streams.
+ * This works by intercepting the Response body and adding heartbeat comments.
+ */
+export function createHeartbeatResponseWrapper(
+  intervalMs = 15000,
+): (response: Response) => Response {
+  return (response: Response): Response => {
+    if (!response.body) {
+      return response;
+    }
+
+    let heartbeatInterval: NodeJS.Timeout | null = null;
+    let isStreamActive = true;
+
+    const originalStream = response.body;
+    const heartbeatStream = new ReadableStream({
+      start(controller): void {
+        // Start heartbeat
+        heartbeatInterval = setInterval(() => {
+          if (isStreamActive) {
+            try {
+              // Send SSE heartbeat comment
+              const encoder = new TextEncoder();
+              controller.enqueue(encoder.encode(': heartbeat\n\n'));
+            } catch (error) {
+              // Stream is closed, stop heartbeat
+              if (heartbeatInterval) {
+                clearInterval(heartbeatInterval);
+                heartbeatInterval = null;
+              }
+            }
+          }
+        }, intervalMs);
+
+        // Forward the original stream
+        const reader = originalStream.getReader();
+
+        function pump(): Promise<void> {
+          return reader.read().then(({ done, value }) => {
+            if (done) {
+              isStreamActive = false;
+              if (heartbeatInterval) {
+                clearInterval(heartbeatInterval);
+                heartbeatInterval = null;
+              }
+              controller.close();
+              return;
+            }
+
+            controller.enqueue(value);
+            return pump();
+          });
+        }
+
+        void pump().catch((error) => {
+          isStreamActive = false;
+          if (heartbeatInterval) {
+            clearInterval(heartbeatInterval);
+            heartbeatInterval = null;
+          }
+          controller.error(error);
+        });
+      },
+      cancel(): void {
+        isStreamActive = false;
+        if (heartbeatInterval) {
+          clearInterval(heartbeatInterval);
+          heartbeatInterval = null;
+        }
+        originalStream.cancel();
+      },
+    });
+
+    return new Response(heartbeatStream, {
+      status: response.status,
+      statusText: response.statusText,
+      headers: response.headers,
+    });
+  };
 }

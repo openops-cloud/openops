@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ModelMessage, ToolSet, UIMessage } from 'ai';
+import { generateId, ModelMessage, ToolSet, UIMessage } from 'ai';
 
 /**
  * Converts a system message to UI message format
@@ -311,13 +311,16 @@ export function convertToUIMessages(
   options?: {
     tools?: ToolSet;
   },
-): Array<Omit<UIMessage, 'id'>> {
-  const uiMessages: Array<Omit<UIMessage, 'id'>> = [];
+): Array<UIMessage> {
+  const uiMessages: Array<UIMessage> = [];
 
   for (const message of messages) {
     const convertedMessage = convertMessage(message, options?.tools);
     if (convertedMessage) {
-      uiMessages.push(convertedMessage);
+      uiMessages.push({
+        ...convertedMessage,
+        id: generateId(),
+      });
     }
   }
 
