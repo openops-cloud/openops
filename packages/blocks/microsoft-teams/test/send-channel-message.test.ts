@@ -3,7 +3,6 @@ import { sendChannelMessageAction } from '../src/lib/actions/send-channel-messag
 const mockPost = jest.fn();
 
 jest.mock('@openops/common', () => ({
-  ...jest.requireActual('@openops/common'),
   getMicrosoftGraphClient: jest.fn(() => ({
     api: jest.fn(() => ({
       post: mockPost,

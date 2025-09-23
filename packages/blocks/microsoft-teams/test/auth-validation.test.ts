@@ -3,7 +3,6 @@ import { microsoftTeamsAuth } from '../src/lib/common/microsoft-teams-auth';
 const mockGet = jest.fn();
 
 jest.mock('@openops/common', () => ({
-  ...jest.requireActual('@openops/common'),
   getMicrosoftGraphClient: jest.fn(() => ({
     api: jest.fn(() => ({
       get: mockGet,
