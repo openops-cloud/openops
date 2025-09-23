@@ -27,7 +27,6 @@ import { ChatProcessingContext, RequestContext } from './types';
 type CodeMessageParams = RequestContext &
   ChatProcessingContext & {
     additionalContext?: ChatFlowContext;
-    abortSignal: AbortSignal;
   };
 
 const GENERATE_CODE_TOOL_NAME = 'generate_code';
@@ -128,7 +127,6 @@ export async function handleCodeGenerationRequest(
     serverResponse,
     aiConfig,
     languageModel,
-    abortSignal,
     conversation: { chatContext, chatHistory },
   } = params;
 
@@ -159,7 +157,6 @@ export async function handleCodeGenerationRequest(
       languageModel,
       aiConfig,
       systemPrompt: prompt,
-      abortSignal,
     });
 
     if (!result) {

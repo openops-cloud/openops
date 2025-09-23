@@ -153,27 +153,4 @@ describe('getMCPToolsContext', () => {
     expect(startMCPToolsMock).not.toHaveBeenCalled();
     expect(result.systemPrompt).toEqual('System prompt');
   });
-
-  describe('Abort signal', () => {
-    it('should abort the LLM call when the abort signal is triggered', async () => {
-      const abortSignal = new AbortController().signal;
-      await getMCPToolsContext({
-        app: mockApp,
-        projectId: 'projectId',
-        authToken: 'authToken',
-        aiConfig: mockAiConfig,
-        messages: mockMessages,
-        chatContext: mockChatContext,
-        languageModel: mockLanguageModel,
-        frontendTools: {},
-        abortSignal,
-      });
-
-      expect(routeQueryMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          abortSignal,
-        }),
-      );
-    });
-  });
 });

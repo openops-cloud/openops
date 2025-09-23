@@ -57,7 +57,6 @@ type GenerateCodeOptions = {
   languageModel: LanguageModel;
   aiConfig: AiConfig;
   systemPrompt: string;
-  abortSignal?: AbortSignal;
 };
 
 export const generateCode = ({
@@ -65,7 +64,6 @@ export const generateCode = ({
   languageModel,
   aiConfig,
   systemPrompt,
-  abortSignal,
 }: GenerateCodeOptions): Promise<
   GenerateObjectResult<{
     type: 'code' | 'reply';
@@ -81,6 +79,5 @@ export const generateCode = ({
     ...aiConfig.modelSettings,
     schema: unifiedCodeLLMSchema,
     experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
-    abortSignal,
   });
 };

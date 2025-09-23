@@ -17,7 +17,6 @@ export enum AiEventName {
   AI_CONFIG_SAVED = 'ai_config_saved',
   AI_CONFIG_DELETED = 'ai_config_deleted',
   AI_CHAT_FAILURE = 'ai_chat_failure',
-  AI_CHAT_ABORTED = 'ai_chat_aborted',
   AI_CHAT_SEND_MESSAGE = 'ai_chat_send_message',
   MCP_CONFIG_SAVED = 'mcp_config_saved',
   MCP_CONFIG_DELETED = 'mcp_config_deleted',
@@ -88,15 +87,6 @@ export function sendAiChatMessageSendEvent(
       chatId: params.chatId,
       provider: params.provider,
     },
-  });
-}
-
-export function sendAiChatAbortedEvent(
-  params: AiChatBase & { provider: string },
-): void {
-  telemetry.trackEvent({
-    name: AiEventName.AI_CHAT_ABORTED,
-    labels: params,
   });
 }
 
