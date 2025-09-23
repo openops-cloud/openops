@@ -8,6 +8,14 @@ export const mailbox = Property.Dropdown({
   required: true,
   refreshers: ['auth'],
   options: async ({ auth }) => {
+    if (!auth) {
+      return {
+        disabled: true,
+        placeholder: 'Please select IMAP connection',
+        options: [],
+      };
+    }
+
     const authValue = auth as BlockPropValueSchema<typeof imapAuth>;
 
     const imapClient = buildClient(authValue);

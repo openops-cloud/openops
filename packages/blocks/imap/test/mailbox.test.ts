@@ -32,6 +32,20 @@ describe('mailbox.options', () => {
     resetMocks();
   });
 
+  test('returns disabled with placeholder when no auth provided', async () => {
+    const res = await mailbox.options({}, {} as PropertyContext);
+
+    expect(res).toEqual({
+      disabled: true,
+      placeholder: 'Please select IMAP connection',
+      options: [],
+    });
+
+    expect(mockImapClient.connect).not.toHaveBeenCalled();
+    expect(mockImapClient.list).not.toHaveBeenCalled();
+    expect(mockImapClient.logout).not.toHaveBeenCalled();
+  });
+
   test('returns mapped options from mailbox list and disabled=false', async () => {
     mockImapClient.list.mockResolvedValueOnce([
       { name: 'INBOX', path: 'INBOX' },
