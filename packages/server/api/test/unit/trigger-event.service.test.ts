@@ -1,4 +1,12 @@
-import { PopulatedFlow, TriggerType } from '@openops/shared';
+import {
+  PopulatedFlow,
+  SeekPage,
+  TriggerEvent,
+  TriggerType,
+} from '@openops/shared';
+import { engineRunner, webhookUtils } from 'server-worker';
+import { accessTokenManager } from '../../src/app/authentication/lib/access-token-manager';
+import { triggerEventService } from '../../src/app/flows/trigger-events/trigger-event.service';
 
 const mockRepo = {
   delete: jest.fn().mockResolvedValue(undefined),
@@ -20,14 +28,14 @@ jest.mock('../../src/app/authentication/lib/access-token-manager', () => ({
   accessTokenManager: { generateEngineToken: jest.fn() },
 }));
 
-const emptyPage = { items: [], cursor: null };
+const emptyPage: SeekPage<TriggerEvent> = {
+  data: [],
+  next: null,
+  previous: null,
+};
 jest.mock('../../src/app/helper/pagination/pagination-utils', () => ({
   paginationHelper: { createPage: jest.fn(() => emptyPage) },
 }));
-
-import { engineRunner, webhookUtils } from 'server-worker';
-import { accessTokenManager } from '../../src/app/authentication/lib/access-token-manager';
-import { triggerEventService } from '../../src/app/flows/trigger-events/trigger-event.service';
 
 describe('triggerEventService.test', () => {
   const projectId = 'proj_123';
@@ -68,12 +76,34 @@ describe('triggerEventService.test', () => {
       },
     });
 
-    const listSpy = jest
-      .spyOn(triggerEventService, 'list')
-      .mockResolvedValue({ items: ['x'], cursor: 'CUR' } as any);
+    const listSpy = jest.spyOn(triggerEventService, 'list').mockResolvedValue({
+      data: [
+        {
+          id: 'te_1',
+          created: new Date().toISOString(),
+          updated: new Date().toISOString(),
+          projectId,
+          flowId: flow.id,
+          sourceName: 'test-source',
+          payload: { a: 1 },
+          input: { foo: 'bar' },
+        },
+      ],
+      next: 'CUR',
+      previous: null,
+    });
     const saveEventSpy = jest
       .spyOn(triggerEventService, 'saveEvent')
-      .mockResolvedValue({} as any);
+      .mockResolvedValue({
+        id: 'te_saved',
+        created: new Date().toISOString(),
+        updated: new Date().toISOString(),
+        projectId,
+        flowId: flow.id,
+        sourceName: 'test-source',
+        payload: {},
+        input: {},
+      });
 
     const page = await triggerEventService.test({ projectId, flow });
 
@@ -111,7 +141,22 @@ describe('triggerEventService.test', () => {
       cursor: null,
       limit: outputs.length,
     });
-    expect(page).toEqual({ items: ['x'], cursor: 'CUR' });
+    expect(page).toEqual({
+      data: [
+        {
+          id: 'te_1',
+          created: expect.any(String),
+          updated: expect.any(String),
+          projectId,
+          flowId: flow.id,
+          sourceName: 'test-source',
+          payload: { a: 1 },
+          input: { foo: 'bar' },
+        },
+      ],
+      next: 'CUR',
+      previous: null,
+    });
   });
 
   it('when BLOCK trigger test has no outputs, saves a single null-payload event and returns list with limit 0', async () => {
@@ -147,10 +192,19 @@ describe('triggerEventService.test', () => {
 
     const listSpy = jest
       .spyOn(triggerEventService, 'list')
-      .mockResolvedValue({ items: [], cursor: 'NEXT' } as any);
+      .mockResolvedValue({ data: [], next: 'NEXT', previous: null });
     const saveEventSpy = jest
       .spyOn(triggerEventService, 'saveEvent')
-      .mockResolvedValue({} as any);
+      .mockResolvedValue({
+        id: 'te_saved2',
+        created: new Date().toISOString(),
+        updated: new Date().toISOString(),
+        projectId,
+        flowId: flow.id,
+        sourceName: 'test-source',
+        payload: null,
+        input: { baz: 42 },
+      });
 
     const page = await triggerEventService.test({ projectId, flow });
 
@@ -173,7 +227,7 @@ describe('triggerEventService.test', () => {
       cursor: null,
       limit: 0,
     });
-    expect(page).toEqual({ items: [], cursor: 'NEXT' });
+    expect(page).toEqual({ data: [], next: 'NEXT', previous: null });
   });
 
   it('throws ApplicationError when BLOCK trigger test fails', async () => {
