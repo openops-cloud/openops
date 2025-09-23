@@ -2,7 +2,7 @@ import { logger } from '@openops/server-shared';
 import { CODE_BLOCK_NAME, NewMessageRequest, Principal } from '@openops/shared';
 import { ModelMessage } from 'ai';
 import { FastifyInstance, FastifyReply } from 'fastify';
-import { ServerResponse } from 'node:http';
+import { IncomingMessage, ServerResponse } from 'node:http';
 import { sendAiChatMessageSendEvent } from '../../telemetry/event-models';
 import { getConversation, getLLMConfig } from './ai-chat.service';
 import { handleCodeGenerationRequest } from './code-generation-handler';
@@ -15,6 +15,7 @@ export type ChatRequestContext = {
     headers: {
       authorization?: string;
     };
+    raw: IncomingMessage;
   };
   reply: FastifyReply;
   app: FastifyInstance;
@@ -26,6 +27,13 @@ export async function routeChatRequest(
 ): Promise<void> {
   const { app, request, newMessage, reply: fastifyReply } = params;
   const serverResponse = fastifyReply.raw;
+
+  const controller = new AbortController();
+  const abortSignal = controller.signal;
+
+  serverResponse.on('close', () => {
+    controller.abort();
+  });
 
   const chatId = request.body.chatId;
   const userId = request.principal.id;
@@ -53,6 +61,7 @@ export async function routeChatRequest(
     languageModel,
     additionalContext: request.body.additionalContext,
     frontendTools: request.body.tools || {},
+    abortSignal,
   };
 
   sendAiChatMessageSendEvent({
@@ -70,6 +79,7 @@ export async function routeChatRequest(
     'Cache-Control': 'no-cache',
     Connection: 'keep-alive',
   });
+  serverResponse.write(': connection established\n\n');
 
   const heartbeat = startSSEHeartbeat(serverResponse);
 

@@ -22,6 +22,7 @@ type CodeEditorProps = {
   onChange?: (value: string | SourceCode) => void;
   className?: string;
   containerClassName?: string;
+  nativeEditorClassName?: string;
   theme: Theme;
   placeholder?: string;
   showLineNumbers?: boolean;
@@ -43,6 +44,7 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
       onChange,
       className,
       containerClassName,
+      nativeEditorClassName,
       theme,
       placeholder,
       showLineNumbers = true,
@@ -256,7 +258,7 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
             })}
           >
             <Editor
-              className="min-h-[250px]"
+              className={cn('min-h-[250px]', nativeEditorClassName)}
               value={formatValue(currentValue)}
               language={currentLanguage}
               theme={editorTheme}
