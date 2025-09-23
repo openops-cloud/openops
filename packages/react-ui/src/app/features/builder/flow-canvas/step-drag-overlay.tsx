@@ -1,27 +1,42 @@
 import { t } from 'i18next';
+import { useMemo } from 'react';
 
+import { RESIZABLE_PANEL_IDS } from '@/app/constants/layout';
 import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
 import { Action, Trigger } from '@openops/shared';
 
 type StepDragTemplateProps = {
   step: Action | Trigger;
   cursorPosition: { x: number; y: number };
-  lefSideBarContainerWidth: number;
 };
 
 const STEP_DRAG_OVERLAY_SIZE = 100;
 
-const StepDragOverlay = ({
-  step,
-  lefSideBarContainerWidth,
-  cursorPosition,
-}: StepDragTemplateProps) => {
+const StepDragOverlay = ({ step, cursorPosition }: StepDragTemplateProps) => {
   const { stepMetadata } = blocksHooks.useStepMetadata({
-    step: step!,
+    step,
   });
 
+  const totalLeftPanelsWidth = useMemo(() => {
+    const leftSidebarElement = document.getElementById(
+      RESIZABLE_PANEL_IDS.LEFT_SIDEBAR,
+    );
+    const aiChatElement = document.getElementById(RESIZABLE_PANEL_IDS.AI_CHAT);
+    const builderLeftSidebarElement = document.getElementById(
+      RESIZABLE_PANEL_IDS.BUILDER_LEFT_SIDEBAR,
+    );
+
+    const leftSidebarWidth =
+      leftSidebarElement?.getBoundingClientRect().width || 0;
+    const aiChatWidth = aiChatElement?.getBoundingClientRect().width || 0;
+    const builderLeftSidebarWidth =
+      builderLeftSidebarElement?.getBoundingClientRect().width || 0;
+
+    return leftSidebarWidth + aiChatWidth + builderLeftSidebarWidth;
+  }, []);
+
   const left = `${
-    cursorPosition.x - STEP_DRAG_OVERLAY_SIZE / 2 - lefSideBarContainerWidth
+    cursorPosition.x - STEP_DRAG_OVERLAY_SIZE / 2 - totalLeftPanelsWidth
   }px`;
   const top = `${cursorPosition.y - STEP_DRAG_OVERLAY_SIZE / 2}px`;
 

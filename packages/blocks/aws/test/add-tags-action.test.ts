@@ -73,31 +73,66 @@ describe('applyRemediationAction', () => {
     },
   );
 
-  test('should call the addTagsToResources function to add the tags', async () => {
-    common.getCredentialsForAccount.mockResolvedValue('credentials');
-    const expectedResult = { succeeded: [], failed: {} };
-    const resourceARN = 'arn:aws:iam::1:service/resource1';
-    const tags = { test: 'test' };
-
-    common.addTagsToResources.mockResolvedValue(expectedResult);
-
+  test.each([
+    {
+      resourceARNs: 'arn:aws:iam::1:service/resource1',
+      tags: ['test', 'test'],
+    },
+    {
+      resourceARNs: 'arn:aws:iam::1:service/resource1',
+      tags: 'test',
+    },
+  ])('should throw if tags are in a wrong format', async (input: any) => {
     const context = {
       ...jest.requireActual('@openops/blocks-framework'),
       auth: auth,
       propsValue: {
-        resourceARNs: resourceARN,
-        tags,
+        resourceARNs: input.resourceARNs,
+        tags: input.tags,
       },
     };
 
-    const result = await addTagsAction.run(context);
-    expect(result).toEqual([expectedResult]);
-    expect(common.addTagsToResources).toHaveBeenCalledWith(
-      [resourceARN],
-      tags,
-      'credentials',
+    await expect(addTagsAction.run(context)).rejects.toThrow(
+      'An error occurred while adding tags to the resources:',
     );
   });
+
+  test.each([
+    {
+      resourceARNs: 'arn:aws:iam::1:service/resource1',
+      tags: '{"test":"test"}',
+      expectedTags: { test: 'test' },
+    },
+    {
+      resourceARNs: 'arn:aws:iam::1:service/resource1',
+      tags: { test: 'test' },
+      expectedTags: { test: 'test' },
+    },
+  ])(
+    'should call the addTagsToResources function to add the tags',
+    async (input: any) => {
+      common.getCredentialsForAccount.mockResolvedValue('credentials');
+      const expectedResult = { succeeded: [], failed: {} };
+      common.addTagsToResources.mockResolvedValue(expectedResult);
+
+      const context = {
+        ...jest.requireActual('@openops/blocks-framework'),
+        auth: auth,
+        propsValue: {
+          resourceARNs: input.resourceARNs,
+          tags: input.tags,
+        },
+      };
+
+      const result = await addTagsAction.run(context);
+      expect(result).toEqual([expectedResult]);
+      expect(common.addTagsToResources).toHaveBeenCalledWith(
+        [input.resourceARNs],
+        input.expectedTags,
+        'credentials',
+      );
+    },
+  );
 
   test('should go over all accounts', async () => {
     common.getCredentialsForAccount

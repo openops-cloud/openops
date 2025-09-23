@@ -36,6 +36,7 @@ import {
   setStepOutputCache,
   stepTestOutputCache,
 } from '../data-selector/data-selector-cache';
+import { CatchWebhookTestInfo } from './catch-webhook-test-info';
 import { stepTestOutputHooks } from './step-test-output-hooks';
 import { TestSampleDataViewer } from './test-sample-data-viewer';
 import { TestButtonTooltip } from './test-step-tooltip';
@@ -85,6 +86,9 @@ const TestTriggerSection = React.memo(
     const [errorMessage, setErrorMessage] = useState<string | undefined>(
       undefined,
     );
+
+    const isCatchWebhookTrigger =
+      formValues.settings?.triggerName === CATCH_WEBHOOK;
 
     const { data: stepData, isLoading: isLoadingStepData } =
       stepTestOutputHooks.useStepTestOutputFormData(flowVersionId, form);
@@ -245,80 +249,88 @@ const TestTriggerSection = React.memo(
       return null;
     }
 
-    const testTriggerNote =
-      formValues.settings.triggerName === CATCH_WEBHOOK
-        ? t('Please click on Test URL to generate sample data')
-        : t('Please go to {blockName} and trigger {triggerName}.', {
-            blockName: blockModel?.displayName,
-            triggerName:
-              blockModel?.triggers[formValues.settings.triggerName]
-                ?.displayName,
-          });
+    const testTriggerNote = isCatchWebhookTrigger
+      ? t('Please click on Test URL to generate sample data')
+      : t('Please go to {blockName} and trigger {triggerName}.', {
+          blockName: blockModel?.displayName,
+          triggerName:
+            blockModel?.triggers[formValues.settings.triggerName]?.displayName,
+        });
 
     return (
       <div className="flex flex-col h-full">
-        {outputDataSelected && !isSimulating && !isSavingMockdata && (
-          <>
-            {pollResults?.data && !isTesting && (
-              <div className="mb-3">
-                <Select
-                  value={currentSelectedId}
-                  onValueChange={(value) => {
-                    const triggerEvent = pollResults?.data.find(
-                      (triggerEvent) => triggerEvent.id === value,
-                    );
-                    if (triggerEvent) {
-                      updateSelectedData(triggerEvent);
-                      setCurrentSelectedId(value);
-                    }
-                  }}
-                >
-                  <SelectTrigger
-                    className="w-full"
-                    disabled={pollResults && pollResults.data.length === 0}
+        {stepData &&
+          'output' in stepData &&
+          !isSimulating &&
+          !isSavingMockdata && (
+            <>
+              {pollResults?.data && !isTesting && (
+                <div className="mb-3">
+                  <Select
+                    value={currentSelectedId}
+                    onValueChange={(value) => {
+                      const triggerEvent = pollResults?.data.find(
+                        (triggerEvent) => triggerEvent.id === value,
+                      );
+                      if (triggerEvent) {
+                        updateSelectedData(triggerEvent);
+                        setCurrentSelectedId(value);
+                      }
+                    }}
                   >
-                    {pollResults && pollResults.data.length > 0 ? (
-                      <SelectValue
-                        placeholder={t('No sample data available')}
-                      ></SelectValue>
-                    ) : (
-                      t('Old results were removed, retest for new sample data')
-                    )}
-                  </SelectTrigger>
-                  <SelectContent>
-                    {pollResults &&
-                      pollResults.data.map((triggerEvent, index) => (
-                        <SelectItem
-                          key={triggerEvent.id}
-                          value={triggerEvent.id}
-                        >
-                          {t('Result #') + (index + 1)}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-                <span className="text-sm mt-2 text-muted-foreground">
-                  {t('The sample data can be used in the next steps.')}
-                </span>
+                    <SelectTrigger
+                      className="w-full"
+                      disabled={pollResults && pollResults.data.length === 0}
+                    >
+                      {pollResults && pollResults.data.length > 0 ? (
+                        <SelectValue
+                          placeholder={t('No sample data available')}
+                        ></SelectValue>
+                      ) : (
+                        t(
+                          'Old results were removed, retest for new sample data',
+                        )
+                      )}
+                    </SelectTrigger>
+                    <SelectContent>
+                      {pollResults &&
+                        pollResults.data.map((triggerEvent, index) => (
+                          <SelectItem
+                            key={triggerEvent.id}
+                            value={triggerEvent.id}
+                          >
+                            {t('Result #') + (index + 1)}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                  <span className="text-sm mt-2 text-muted-foreground">
+                    {t('The sample data can be used in the next steps.')}
+                  </span>
+                </div>
+              )}
+              <div className="flex-1 overflow-hidden">
+                <TestSampleDataViewer
+                  onRetest={isSimulation ? simulateTrigger : pollTrigger}
+                  isValid={isValid}
+                  isSaving={isSaving}
+                  isTesting={isTesting}
+                  outputData={currentTestOutput}
+                  inputData={currentTestInput}
+                  errorMessage={errorMessage}
+                  lastTestDate={stepData?.lastTestDate}
+                />
               </div>
-            )}
-            <div className="flex-1 overflow-hidden">
-              <TestSampleDataViewer
-                onRetest={isSimulation ? simulateTrigger : pollTrigger}
-                isValid={isValid}
-                isSaving={isSaving}
-                isTesting={isTesting}
-                outputData={currentTestOutput}
-                inputData={currentTestInput}
-                errorMessage={errorMessage}
-                lastTestDate={stepData?.lastTestDate}
-              />
-            </div>
-          </>
-        )}
+            </>
+          )}
 
         {isSimulation && isSimulating && (
           <div className="flex flex-col gap-4 w-full">
+            {isCatchWebhookTrigger && (
+              <div className="mb-3">
+                <CatchWebhookTestInfo flowId={flowId} />
+              </div>
+            )}
             <div className="flex gap-2 items-center justify-center w-full">
               <LoadingSpinner className="w-4 h-4"></LoadingSpinner>
               <div>{t('Testing Trigger')}</div>
