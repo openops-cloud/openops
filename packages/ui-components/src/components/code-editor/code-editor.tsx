@@ -33,6 +33,7 @@ type CodeEditorProps = {
 export interface CodeEditorRef {
   layout: () => void;
   focus: () => void;
+  openSearch: () => void;
 }
 
 const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
@@ -163,6 +164,12 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
       focus: () => {
         if (editorRef.current) {
           editorRef.current.focus();
+        }
+      },
+      openSearch: () => {
+        if (editorRef.current) {
+          editorRef.current.focus();
+          editorRef.current.getAction('actions.find')?.run();
         }
       },
     }));
