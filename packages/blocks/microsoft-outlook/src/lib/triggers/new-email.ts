@@ -3,24 +3,106 @@ import { Message } from '@microsoft/microsoft-graph-types';
 import { DedupeStrategy, Polling, pollingHelper } from '@openops/blocks-common';
 import {
   BlockPropValueSchema,
+  createTrigger,
   Property,
   TriggerStrategy,
-  createTrigger,
 } from '@openops/blocks-framework';
 import dayjs from 'dayjs';
 import { microsoftOutlookAuth } from '../common/auth';
+import { mailFolderIdDropdown } from '../common/props';
 
-interface FilterProps {
-  senderEmail?: string;
-  recipientEmail?: string;
-  ccEmail?: string;
-  subjectContains?: string;
-  subjectIs?: string;
-}
+type NewEmailTriggerProps = {
+  folderId?: string;
+  senders?: unknown[];
+  recipients?: unknown[];
+  cc?: unknown[];
+  subject?: string;
+};
+
+const extractEmail = (value: unknown): string | undefined => {
+  if (typeof value === 'string') {
+    const v = value.trim();
+    return v.length > 0 ? v : undefined;
+  }
+  if (value && typeof value === 'object') {
+    const obj = value as Record<string, unknown>;
+    const candidates = [
+      obj['email'],
+      obj['value'],
+      obj['address'],
+      (obj['emailAddress'] as { address?: string } | undefined)?.address,
+    ];
+    for (const c of candidates) {
+      if (typeof c === 'string' && c.trim().length > 0) {
+        return c.trim();
+      }
+    }
+  }
+  return undefined;
+};
+
+const sanitizeList = (arr?: unknown[]): string[] =>
+  Array.isArray(arr)
+    ? Array.from(
+        new Set(
+          arr
+            .map((v) => extractEmail(v))
+            .filter((v): v is string => typeof v === 'string' && v.length > 0),
+        ),
+      )
+    : [];
+
+const maybeQuoteValue = (v: string): string => (/\s/.test(v) ? `"${v}"` : v);
+
+const groupOr = (
+  field: 'from' | 'to' | 'cc' | 'subject',
+  values: string[],
+): string | undefined => {
+  if (!values.length) return undefined;
+  const terms =
+    field === 'subject'
+      ? values.map((v) => `subject:${maybeQuoteValue(v)}`)
+      : values.map((v) => `${field}:${v}`);
+  return terms.length === 1 ? terms[0] : `(${terms.join(' OR ')})`;
+};
+
+const buildSearchParam = (
+  froms: string[],
+  tos: string[],
+  ccs: string[],
+  subjectText?: string,
+): string | undefined => {
+  const parts: string[] = [];
+
+  const gFrom = groupOr('from', froms);
+  if (gFrom) parts.push(gFrom);
+
+  const gTo = groupOr('to', tos);
+  if (gTo) parts.push(gTo);
+
+  const gCc = groupOr('cc', ccs);
+  if (gCc) parts.push(gCc);
+
+  if (subjectText && subjectText.trim().length > 0) {
+    const groupedSubject = groupOr('subject', [subjectText.trim()]);
+    if (groupedSubject) {
+      parts.push(groupedSubject);
+    }
+  }
+
+  if (!parts.length) return undefined;
+
+  const expr =
+    parts.length === 1
+      ? parts[0]
+      : parts.map((p) => (p.startsWith('(') ? p : `(${p})`)).join(' AND ');
+
+  return `"${expr}"`;
+};
 
 const polling: Polling<
   BlockPropValueSchema<typeof microsoftOutlookAuth>,
-  FilterProps
+  NewEmailTriggerProps
 > = {
   strategy: DedupeStrategy.TIMEBASED,
   items: async ({ auth, lastFetchEpochMS, propsValue }) => {
@@ -30,107 +112,66 @@ const polling: Polling<
       },
     });
 
-    const messages = [];
+    const { folderId, senders, recipients, cc, subject } = propsValue ?? {};
 
-    const timeFilter =
-      lastFetchEpochMS === 0
-        ? ''
-        : `receivedDateTime gt ${dayjs(lastFetchEpochMS).toISOString()}`;
+    const baseUrl = folderId
+      ? `/me/mailFolders/${folderId}/messages`
+      : '/me/mailFolders/inbox/messages';
 
-    const filterParam = timeFilter ? `$filter=${timeFilter}` : '';
-    const topParam = '$top=50';
+    const fromEmails = sanitizeList(senders);
+    const toEmails = sanitizeList(recipients);
+    const ccEmails = sanitizeList(cc);
 
-    const queryParams = [filterParam, topParam].filter(Boolean).join('&');
-    const url = `/me/mailFolders/inbox/messages${
-      queryParams ? `?${queryParams}` : ''
-    }`;
+    const searchParam = buildSearchParam(
+      fromEmails,
+      toEmails,
+      ccEmails,
+      subject,
+    );
 
-    let response: PageCollection;
-    try {
-      response = await client.api(url).orderby('receivedDateTime desc').get();
-    } catch (error) {
-      response = await client
-        .api('/me/mailFolders/inbox/messages?$top=50')
-        .orderby('receivedDateTime desc')
-        .get();
-    }
+    let request = client
+      .api(baseUrl)
+      .select(
+        'id,subject,receivedDateTime,from,toRecipients,ccRecipients,conversationId,webLink',
+      )
+      .top(25);
 
-    if (lastFetchEpochMS === 0) {
-      for (const message of response.value as Message[]) {
-        messages.push(message);
-      }
+    if (searchParam) {
+      request = request
+        .header('ConsistencyLevel', 'eventual')
+        .search(searchParam);
     } else {
-      while (response.value.length > 0) {
-        for (const message of response.value as Message[]) {
-          messages.push(message);
-        }
-
-        if (response['@odata.nextLink']) {
-          response = await client.api(response['@odata.nextLink']).get();
-        } else {
-          break;
-        }
+      request = request.orderby('receivedDateTime desc');
+      if (lastFetchEpochMS) {
+        const since = dayjs(lastFetchEpochMS)
+          .subtract(5, 'minute')
+          .toISOString();
+        request = request.filter(`receivedDateTime ge ${since}`);
       }
     }
 
-    const filteredMessages = messages.filter((message: Message) => {
-      if (propsValue?.senderEmail) {
-        const senderAddress =
-          message.from?.emailAddress?.address?.toLowerCase();
-        if (
-          !senderAddress ||
-          !senderAddress.includes(propsValue.senderEmail.toLowerCase())
-        ) {
-          return false;
-        }
-      }
+    const response: PageCollection = await request.get();
+    const messages: Message[] = Array.isArray(response.value)
+      ? (response.value as Message[])
+      : [];
 
-      if (propsValue?.recipientEmail) {
-        const recipientAddresses =
-          message.toRecipients?.map((r) =>
-            r.emailAddress?.address?.toLowerCase(),
-          ) || [];
-        if (
-          !recipientAddresses.some((addr) =>
-            addr?.includes(propsValue.recipientEmail?.toLowerCase() || ''),
-          )
-        ) {
-          return false;
-        }
-      }
+    let filtered = messages;
+    if (searchParam && lastFetchEpochMS) {
+      const cutoff = dayjs(lastFetchEpochMS).subtract(5, 'minute').valueOf();
+      filtered = messages.filter(
+        (m) => dayjs(m.receivedDateTime).valueOf() >= cutoff,
+      );
+    }
 
-      if (propsValue?.ccEmail) {
-        const ccAddresses =
-          message.ccRecipients?.map((c) =>
-            c.emailAddress?.address?.toLowerCase(),
-          ) || [];
-        if (
-          !ccAddresses.some((addr) =>
-            addr?.includes(propsValue.ccEmail?.toLowerCase() || ''),
-          )
-        ) {
-          return false;
-        }
-      }
+    if (searchParam) {
+      filtered = filtered.sort(
+        (a, b) =>
+          dayjs(b.receivedDateTime).valueOf() -
+          dayjs(a.receivedDateTime).valueOf(),
+      );
+    }
 
-      if (propsValue?.subjectIs) {
-        const subject = message.subject?.toLowerCase() || '';
-        if (subject !== propsValue.subjectIs.toLowerCase()) {
-          return false;
-        }
-      }
-
-      if (propsValue?.subjectContains) {
-        const subject = message.subject?.toLowerCase() || '';
-        if (!subject.includes(propsValue.subjectContains.toLowerCase())) {
-          return false;
-        }
-      }
-
-      return true;
-    });
-
-    return filteredMessages.map((message) => ({
+    return filtered.map((message) => ({
       epochMilliSeconds: dayjs(message.receivedDateTime).valueOf(),
       data: message,
     }));
@@ -143,52 +184,32 @@ export const newEmailTrigger = createTrigger({
   displayName: 'New Email',
   description: 'Triggers when a new email is received in the inbox.',
   props: {
-    senderEmail: Property.ShortText({
-      displayName: 'Sender Email',
-      description: 'Filter emails from a specific sender email address',
+    folderId: mailFolderIdDropdown({
+      displayName: 'Folder',
+      description: 'Watch for new emails in a specific folder.',
       required: false,
     }),
-    recipientEmail: Property.ShortText({
-      displayName: 'Recipient Email',
-      description: 'Filter emails sent to a specific recipient email address',
+    senders: Property.Array({
+      displayName: 'Sender (From)',
+      description: 'Matches at least one sender.',
       required: false,
     }),
-    ccEmail: Property.ShortText({
-      displayName: 'CC Email',
-      description: 'Filter emails where a specific email address is in CC',
+    recipients: Property.Array({
+      displayName: 'Recipients (To)',
+      description: 'Matches at least one recipient (To).',
       required: false,
     }),
-    subjectIs: Property.ShortText({
-      displayName: 'Subject Equals',
-      description: 'Filter emails where subject exactly matches this text',
+    cc: Property.Array({
+      displayName: 'CC',
+      description: 'Matches at least one CC address.',
       required: false,
     }),
-    subjectContains: Property.ShortText({
-      displayName: 'Subject Contains',
-      description: 'Filter emails where subject contains specific text',
+    subject: Property.ShortText({
+      displayName: 'Subject text contains',
       required: false,
     }),
   },
-  sampleData: {
-    id: 'sample-email-id',
-    subject: 'Sample Email Subject',
-    from: {
-      emailAddress: {
-        name: 'John Doe',
-        address: 'john.doe@example.com',
-      },
-    },
-    toRecipients: [
-      {
-        emailAddress: {
-          name: 'Jane Smith',
-          address: 'jane.smith@example.com',
-        },
-      },
-    ],
-    receivedDateTime: '2024-01-15T10:30:00Z',
-    bodyPreview: 'This is a sample email preview...',
-  },
+  sampleData: {},
   type: TriggerStrategy.POLLING,
   async onEnable(context) {
     await pollingHelper.onEnable(polling, {
