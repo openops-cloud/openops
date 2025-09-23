@@ -110,14 +110,7 @@ export const triggerEventService = {
           });
         }
 
-        if (!testResult.output?.length) {
-          await triggerEventService.saveEvent({
-            projectId,
-            flowId: flow.id,
-            payload: null,
-            input: testResult.input,
-          });
-        } else {
+        if (testResult.output?.length) {
           for (const output of testResult.output) {
             await triggerEventService.saveEvent({
               projectId,
@@ -126,6 +119,13 @@ export const triggerEventService = {
               input: testResult.input,
             });
           }
+        } else {
+          await triggerEventService.saveEvent({
+            projectId,
+            flowId: flow.id,
+            payload: null,
+            input: testResult.input,
+          });
         }
 
         return triggerEventService.list({
