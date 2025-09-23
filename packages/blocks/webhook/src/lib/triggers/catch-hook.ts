@@ -10,14 +10,7 @@ const message = `**Live URL:**
 \`\`\`url
 {{webhookUrl}}
 \`\`\`
-triggers the flow and **does NOT** generate sample data.
-<br>
-<br>
-**Test URL:**
-\`\`\`url
-{{webhookUrl}}/test
-\`\`\`
-generates sample data and **does NOT** trigger the flow.
+This URL triggers the flow and **does NOT** generate sample data.
 <br>
 <br>
 **Synchronous Requests:**
