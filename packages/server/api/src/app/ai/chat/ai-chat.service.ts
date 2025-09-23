@@ -1,10 +1,5 @@
 import { getAiProviderLanguageModel } from '@openops/common';
-import {
-  cacheWrapper,
-  distributedLock,
-  encryptUtils,
-  hashUtils,
-} from '@openops/server-shared';
+import { cacheWrapper, encryptUtils, hashUtils } from '@openops/server-shared';
 import { AiConfig, ApplicationError, ErrorCode } from '@openops/shared';
 import { LanguageModel, ModelMessage, UIMessage, generateText } from 'ai';
 import { aiConfigService } from '../config/ai-config.service';
@@ -14,7 +9,6 @@ import { mergeToolResultsIntoMessages } from './utils';
 
 // Chat expiration time is 24 hour
 const DEFAULT_EXPIRE_TIME = 86400;
-const LOCK_EXPIRE_TIME = 30000;
 
 const chatContextKey = (
   chatId: string,
@@ -191,28 +185,6 @@ export const saveChatHistory = async (
     messages,
     DEFAULT_EXPIRE_TIME,
   );
-};
-
-export const appendMessagesToChatHistory = async (
-  chatId: string,
-  userId: string,
-  projectId: string,
-  messages: ModelMessage[],
-): Promise<void> => {
-  const chatLock = await distributedLock.acquireLock({
-    key: `lock:${chatHistoryKey(chatId, userId, projectId)}`,
-    timeout: LOCK_EXPIRE_TIME,
-  });
-
-  try {
-    const existingMessages = await getChatHistory(chatId, userId, projectId);
-
-    existingMessages.push(...messages);
-
-    await saveChatHistory(chatId, userId, projectId, existingMessages);
-  } finally {
-    await chatLock.release();
-  }
 };
 
 export const deleteChatHistory = async (
