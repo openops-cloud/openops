@@ -5,8 +5,8 @@ import {
   OAuth2PropertyValue,
   OAuth2Props,
 } from '@openops/blocks-framework';
+import { getMicrosoftGraphClient } from '@openops/common';
 import { ChannelOption, ChatTypes } from './chat-types';
-import { getMicrosoftGraphClient } from './get-microsoft-graph-client';
 import { parseMsPaginatedData } from './parse-ms-paginated-data';
 
 export async function getAllChannelOptionsByTeam(

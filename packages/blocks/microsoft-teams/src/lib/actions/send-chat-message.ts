@@ -1,6 +1,6 @@
 import { createAction, Property } from '@openops/blocks-framework';
+import { getMicrosoftGraphClient } from '@openops/common';
 import { chatId } from '../common/chat-id';
-import { getMicrosoftGraphClient } from '../common/get-microsoft-graph-client';
 import { microsoftTeamsAuth } from '../common/microsoft-teams-auth';
 
 export const sendChatMessageAction = createAction({

@@ -8,7 +8,7 @@ const mockGet = jest.fn(() => ({
   ],
 }));
 
-jest.mock('../src/lib/common/get-microsoft-graph-client', () => ({
+jest.mock('@openops/common', () => ({
   getMicrosoftGraphClient: jest.fn(() => ({
     api: jest.fn(() => ({
       get: mockGet,
