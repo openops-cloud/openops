@@ -28,9 +28,9 @@ export const messageIdDropdown = (params: DropdownParams) =>
       const authValue = auth as BlockPropValueSchema<
         typeof microsoftOutlookAuth
       >;
-      const client = getMicrosoftGraphClient(authValue.access_token);
 
       try {
+        const client = getMicrosoftGraphClient(authValue.access_token);
         const response: PageCollection = await client
           .api('/me/messages?$top=50&$select=id,subject,from,receivedDateTime')
           .orderby('receivedDateTime desc')
@@ -49,52 +49,8 @@ export const messageIdDropdown = (params: DropdownParams) =>
         return {
           disabled: true,
           options: [],
-        };
-      }
-    },
-  });
-
-export const draftMessageIdDropdown = (params: DropdownParams) =>
-  Property.Dropdown({
-    displayName: params.displayName,
-    description: params.description,
-    required: params.required,
-    refreshers: ['auth'],
-    options: async ({ auth }) => {
-      if (!auth) {
-        return {
-          placeholder: 'Please connect your account first.',
-          disabled: true,
-          options: [],
-        };
-      }
-
-      const authValue = auth as BlockPropValueSchema<
-        typeof microsoftOutlookAuth
-      >;
-      const client = getMicrosoftGraphClient(authValue.access_token);
-
-      try {
-        const response: PageCollection = await client
-          .api(
-            '/me/mailFolders/drafts/messages?$top=50&$select=id,subject,from,receivedDateTime',
-          )
-          .orderby('receivedDateTime desc')
-          .get();
-
-        const messages = response.value as Message[];
-
-        return {
-          disabled: false,
-          options: messages.map((message) => ({
-            label: `${message.subject || 'No Subject'}`,
-            value: message.id,
-          })),
-        };
-      } catch (error) {
-        return {
-          disabled: true,
-          options: [],
+          placeholder: 'Error loading messages. Please try refreshing.',
+          error: error instanceof Error ? error.message : String(error),
         };
       }
     },
@@ -118,9 +74,9 @@ export const mailFolderIdDropdown = (params: DropdownParams) =>
       const authValue = auth as BlockPropValueSchema<
         typeof microsoftOutlookAuth
       >;
-      const client = getMicrosoftGraphClient(authValue.access_token);
 
       try {
+        const client = getMicrosoftGraphClient(authValue.access_token);
         const response: PageCollection = await client
           .api('/me/mailFolders')
           .get();
@@ -138,6 +94,8 @@ export const mailFolderIdDropdown = (params: DropdownParams) =>
         return {
           disabled: true,
           options: [],
+          placeholder: 'Error loading mail folders. Please try refreshing.',
+          error: error instanceof Error ? error.message : String(error),
         };
       }
     },
