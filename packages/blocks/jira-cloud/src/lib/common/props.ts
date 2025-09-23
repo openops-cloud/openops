@@ -46,19 +46,19 @@ export function getIssueIdDropdown(data?: DropdownParams) {
           options: [],
         };
       }
-      let total = 0,
-        startAt = 0;
+      let nextPageToken: null | string = null;
+      let isLastPage = false;
       const options: DropdownOption<string>[] = [];
       do {
         const response = await sendJiraRequest({
           method: HttpMethod.POST,
-          url: 'search',
+          url: 'search/jql',
           auth: auth as BlockPropValueSchema<typeof jiraCloudAuth>,
           body: {
             fields: ['summary'],
             jql: `project=${projectId}`,
-            startAt: startAt,
-            maxResults: 1,
+            maxResults: 50,
+            nextPageToken,
           },
         });
         const issueList = response.body as SearchIssuesResponse;
@@ -70,9 +70,9 @@ export function getIssueIdDropdown(data?: DropdownParams) {
             };
           }),
         );
-        startAt = issueList.startAt + issueList.maxResults;
-        total = issueList.total;
-      } while (startAt < total);
+        nextPageToken = issueList.nextPageToken;
+        isLastPage = issueList.isLast;
+      } while (!isLastPage);
 
       return {
         disabled: false,
@@ -183,9 +183,8 @@ export interface DropdownParams {
 }
 
 export interface SearchIssuesResponse {
-  startAt: number;
-  maxResults: number;
-  total: number;
+  isLast: boolean;
+  nextPageToken: string;
   issues: Array<{
     id: string;
     key: string;
