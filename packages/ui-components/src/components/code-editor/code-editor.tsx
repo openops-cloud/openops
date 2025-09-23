@@ -167,9 +167,11 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
         }
       },
       openSearch: () => {
-        if (editorRef.current) {
-          editorRef.current.focus();
-          editorRef.current.getAction('actions.find')?.run();
+        const editor = editorRef.current;
+        if (editor) {
+          editor.focus();
+          editor.getAction('actions.find')?.run();
+          editor.setScrollTop(0);
         }
       },
     }));
@@ -303,6 +305,7 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
                 find: {
                   autoFindInSelection: 'never',
                   seedSearchStringFromSelection: 'never',
+                  cursorMoveOnType: true,
                 },
                 fixedOverflowWidgets: true,
               }}
