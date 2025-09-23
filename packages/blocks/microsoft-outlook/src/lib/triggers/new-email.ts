@@ -37,52 +37,23 @@ const polling: Polling<
         ? ''
         : `receivedDateTime gt ${dayjs(lastFetchEpochMS).toISOString()}`;
 
-    const contentFilters: string[] = [];
-
-    if (propsValue?.senderEmail) {
-      contentFilters.push(
-        `from/emailAddress/address eq '${propsValue.senderEmail}'`,
-      );
-    }
-
-    if (propsValue?.recipientEmail) {
-      contentFilters.push(
-        `toRecipients/any(r:r/emailAddress/address eq '${propsValue.recipientEmail}')`,
-      );
-    }
-
-    if (propsValue?.ccEmail) {
-      contentFilters.push(
-        `ccRecipients/any(c:c/emailAddress/address eq '${propsValue.ccEmail}')`,
-      );
-    }
-
-    if (propsValue?.subjectIs) {
-      contentFilters.push(
-        `subject eq '${propsValue.subjectIs.replace(/'/g, "''")}'`,
-      );
-    }
-
-    if (propsValue?.subjectContains) {
-      contentFilters.push(
-        `contains(subject,'${propsValue.subjectContains.replace(/'/g, "''")}')`,
-      );
-    }
-
-    const allFilters = [timeFilter, ...contentFilters].filter(Boolean);
-    const filterParam =
-      allFilters.length > 0 ? `$filter=${allFilters.join(' and ')}` : '';
-    const topParam = lastFetchEpochMS === 0 ? '$top=10' : '';
+    const filterParam = timeFilter ? `$filter=${timeFilter}` : '';
+    const topParam = '$top=50';
 
     const queryParams = [filterParam, topParam].filter(Boolean).join('&');
     const url = `/me/mailFolders/inbox/messages${
       queryParams ? `?${queryParams}` : ''
     }`;
 
-    let response: PageCollection = await client
-      .api(url)
-      .orderby('receivedDateTime desc')
-      .get();
+    let response: PageCollection;
+    try {
+      response = await client.api(url).orderby('receivedDateTime desc').get();
+    } catch (error) {
+      response = await client
+        .api('/me/mailFolders/inbox/messages?$top=50')
+        .orderby('receivedDateTime desc')
+        .get();
+    }
 
     if (lastFetchEpochMS === 0) {
       for (const message of response.value as Message[]) {
@@ -102,7 +73,64 @@ const polling: Polling<
       }
     }
 
-    return messages.map((message) => ({
+    const filteredMessages = messages.filter((message: Message) => {
+      if (propsValue?.senderEmail) {
+        const senderAddress =
+          message.from?.emailAddress?.address?.toLowerCase();
+        if (
+          !senderAddress ||
+          !senderAddress.includes(propsValue.senderEmail.toLowerCase())
+        ) {
+          return false;
+        }
+      }
+
+      if (propsValue?.recipientEmail) {
+        const recipientAddresses =
+          message.toRecipients?.map((r) =>
+            r.emailAddress?.address?.toLowerCase(),
+          ) || [];
+        if (
+          !recipientAddresses.some((addr) =>
+            addr?.includes(propsValue.recipientEmail?.toLowerCase() || ''),
+          )
+        ) {
+          return false;
+        }
+      }
+
+      if (propsValue?.ccEmail) {
+        const ccAddresses =
+          message.ccRecipients?.map((c) =>
+            c.emailAddress?.address?.toLowerCase(),
+          ) || [];
+        if (
+          !ccAddresses.some((addr) =>
+            addr?.includes(propsValue.ccEmail?.toLowerCase() || ''),
+          )
+        ) {
+          return false;
+        }
+      }
+
+      if (propsValue?.subjectIs) {
+        const subject = message.subject?.toLowerCase() || '';
+        if (subject !== propsValue.subjectIs.toLowerCase()) {
+          return false;
+        }
+      }
+
+      if (propsValue?.subjectContains) {
+        const subject = message.subject?.toLowerCase() || '';
+        if (!subject.includes(propsValue.subjectContains.toLowerCase())) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+
+    return filteredMessages.map((message) => ({
       epochMilliSeconds: dayjs(message.receivedDateTime).valueOf(),
       data: message,
     }));
@@ -141,7 +169,26 @@ export const newEmailTrigger = createTrigger({
       required: false,
     }),
   },
-  sampleData: {},
+  sampleData: {
+    id: 'sample-email-id',
+    subject: 'Sample Email Subject',
+    from: {
+      emailAddress: {
+        name: 'John Doe',
+        address: 'john.doe@example.com',
+      },
+    },
+    toRecipients: [
+      {
+        emailAddress: {
+          name: 'Jane Smith',
+          address: 'jane.smith@example.com',
+        },
+      },
+    ],
+    receivedDateTime: '2024-01-15T10:30:00Z',
+    bodyPreview: 'This is a sample email preview...',
+  },
   type: TriggerStrategy.POLLING,
   async onEnable(context) {
     await pollingHelper.onEnable(polling, {
