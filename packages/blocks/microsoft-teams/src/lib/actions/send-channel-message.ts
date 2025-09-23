@@ -1,6 +1,6 @@
 import { createAction, Property } from '@openops/blocks-framework';
+import { getMicrosoftGraphClient } from '@openops/common';
 import { channelId } from '../common/channel-id';
-import { getMicrosoftGraphClient } from '../common/get-microsoft-graph-client';
 import { microsoftTeamsAuth } from '../common/microsoft-teams-auth';
 import { teamId } from '../common/team-id';
 

@@ -5,7 +5,7 @@ import {
   DropdownOption,
   Property,
 } from '@openops/blocks-framework';
-import { getMicrosoftGraphClient } from './get-microsoft-graph-client';
+import { getMicrosoftGraphClient } from '@openops/common';
 import { microsoftTeamsAuth } from './microsoft-teams-auth';
 import { parseMsPaginatedData } from './parse-ms-paginated-data';
 
