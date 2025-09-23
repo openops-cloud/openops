@@ -15,5 +15,3 @@ export const QueryClassification = {
 
 export type QueryClassification =
   (typeof QueryClassification)[keyof typeof QueryClassification];
-
-export type QueryTypes = QueryClassification;
