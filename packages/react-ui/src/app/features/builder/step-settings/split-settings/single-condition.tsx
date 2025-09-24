@@ -1,4 +1,10 @@
-import { cn, FormField, FormItem, FormMessage } from '@openops/components/ui';
+import {
+  cn,
+  FormField,
+  FormItem,
+  FormMessage,
+  TooltipWrapper,
+} from '@openops/components/ui';
 import { t } from 'i18next';
 import { useFormContext } from 'react-hook-form';
 
@@ -73,16 +79,20 @@ const SingleCondition = ({
           name={`${groupName}.${conditionIndex}.${0}.operator`}
           control={form.control}
           render={({ field }) => (
-            <FormItem>
-              <SearchableSelect
-                disabled={readonly}
-                value={field.value}
-                options={operationOptions}
-                placeholder={''}
-                onChange={(e) => field.onChange(e)}
-              />
-              <FormMessage />
-            </FormItem>
+            <TooltipWrapper
+              tooltipText={field.value && textToBranchOperation[field.value]}
+            >
+              <FormItem>
+                <SearchableSelect
+                  disabled={readonly}
+                  value={field.value}
+                  options={operationOptions}
+                  placeholder={''}
+                  onChange={(e) => field.onChange(e)}
+                />
+                <FormMessage />
+              </FormItem>
+            </TooltipWrapper>
           )}
         />
         {!isSingleValueCondition && (
