@@ -51,7 +51,7 @@ export const triggerHelper = {
       );
     }
 
-    const { resolvedInput } = await variableService({
+    const { resolvedInput, censoredInput } = await variableService({
       apiUrl: constants.internalApiUrl,
       projectId: params.projectId,
       engineToken: params.engineToken,
@@ -160,7 +160,7 @@ export const triggerHelper = {
         try {
           return {
             success: true,
-            input: resolvedInput,
+            input: censoredInput,
             output: await trigger.test({
               ...context,
               files: createFilesService({
@@ -179,7 +179,7 @@ export const triggerHelper = {
             success: false,
             message: JSON.stringify(e),
             output: [],
-            input: resolvedInput,
+            input: censoredInput,
           };
         }
       case TriggerHookType.RUN: {
