@@ -1,7 +1,7 @@
 import type { StepMetadata } from '@openops/components/ui';
 import { Flow, Trigger, TriggerType } from '@openops/shared';
 import cronstrue from 'cronstrue/i18n';
-import { t } from 'i18next';
+import i18n, { t } from 'i18next';
 
 export function getShortTriggerExplanation(
   trigger: Trigger,
@@ -17,7 +17,7 @@ export function getShortTriggerExplanation(
 
     if (blockName === 'Schedule' && cronExpression) {
       const scheduleDescription = cronstrue
-        .toString(cronExpression, { locale: 'en' })
+        .toString(cronExpression, { locale: i18n.language })
         .toLowerCase();
       return t(`Workflow is on, it runs on a schedule ({schedule})`, {
         schedule: scheduleDescription,
