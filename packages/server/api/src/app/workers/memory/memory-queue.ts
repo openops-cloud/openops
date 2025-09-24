@@ -152,7 +152,6 @@ async function renewEnabledRepeating(): Promise<void> {
           flowVersionId: flow.publishedVersionId!,
           flowId: flow.id,
           triggerType: TriggerType.BLOCK,
-          triggerStrategy: TriggerStrategy.SCHEDULED,
           jobType: RepeatableJobType.EXECUTE_TRIGGER,
         },
         scheduleOptions: {

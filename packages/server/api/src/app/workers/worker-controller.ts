@@ -153,19 +153,27 @@ export const flowWorkerController: FastifyPluginAsyncTypebox = async (app) => {
         flowVersionId,
         payloads,
       );
-      const createFlowRuns = filterPayloads.map((payload) =>
-        flowRunService.start({
+
+      const createFlowRuns = filterPayloads.map((payload) => {
+        // If multiple payloads are submitted, we need to create a new executionCorrelationId for each one.
+        let correlationId = executionCorrelationId;
+        if (filterPayloads.length > 0) {
+          correlationId = openOpsId();
+        }
+
+        return flowRunService.start({
           environment: RunEnvironment.PRODUCTION,
           flowVersionId,
           payload,
           synchronousHandlerId,
           projectId,
-          executionCorrelationId,
+          executionCorrelationId: correlationId,
           executionType: ExecutionType.BEGIN,
           progressUpdateType,
           triggerSource: FlowRunTriggerSource.TRIGGERED,
-        }),
-      );
+        });
+      });
+
       return Promise.all(createFlowRuns);
     },
   );

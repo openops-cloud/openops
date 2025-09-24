@@ -137,12 +137,7 @@ export const enableBlockTrigger = async (
 
       const scheduleOptions = engineHelperResponse.result.scheduleOptions;
 
-      await addBlockTriggerToQueue(
-        projectId,
-        flowVersion,
-        scheduleOptions,
-        TriggerStrategy.POLLING,
-      );
+      await addBlockTriggerToQueue(projectId, flowVersion, scheduleOptions);
 
       break;
     }
@@ -155,12 +150,7 @@ export const enableBlockTrigger = async (
         );
       }
 
-      await addBlockTriggerToQueue(
-        projectId,
-        flowVersion,
-        scheduleOptions,
-        TriggerStrategy.SCHEDULED,
-      );
+      await addBlockTriggerToQueue(projectId, flowVersion, scheduleOptions);
 
       break;
     }
@@ -179,7 +169,6 @@ async function addBlockTriggerToQueue(
   projectId: string,
   flowVersion: FlowVersion,
   scheduleOptions: ScheduleOptions,
-  triggerStrategy: TriggerStrategy,
 ): Promise<void> {
   await flowQueue.add({
     executionCorrelationId: flowVersion.id,
@@ -191,7 +180,6 @@ async function addBlockTriggerToQueue(
       flowVersionId: flowVersion.id,
       flowId: flowVersion.flowId,
       triggerType: TriggerType.BLOCK,
-      triggerStrategy,
       jobType: RepeatableJobType.EXECUTE_TRIGGER,
     },
     scheduleOptions,

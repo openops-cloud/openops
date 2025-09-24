@@ -114,13 +114,18 @@ const consumeBlockTrigger = async (
     },
   );
 
-  let executionCorrelationId = flowVersion.id;
-  if (data.triggerStrategy !== TriggerStrategy.SCHEDULED) {
-    executionCorrelationId = openOpsId();
-  }
+  // let executionCorrelationId = flowVersion.id;
+  // if (data.triggerStrategy !== TriggerStrategy.SCHEDULED) {
+  //   executionCorrelationId = openOpsId();
+  // }
+
+  logger.error('TEST:', {
+    payload: payloads.length,
+    data,
+  });
 
   await workerApiService(workerToken).startRuns({
-    executionCorrelationId,
+    executionCorrelationId: flowVersion.id,
     flowVersionId: data.flowVersionId,
     progressUpdateType: ProgressUpdateType.NONE,
     projectId: data.projectId,
