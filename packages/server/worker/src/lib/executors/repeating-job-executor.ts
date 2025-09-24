@@ -111,6 +111,7 @@ const consumeBlockTrigger = async (
       simulate: false,
     },
   );
+
   await workerApiService(workerToken).startRuns({
     executionCorrelationId: flowVersion.id,
     flowVersionId: data.flowVersionId,
