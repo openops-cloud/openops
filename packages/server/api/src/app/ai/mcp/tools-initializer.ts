@@ -6,6 +6,7 @@ import { getDocsTools } from './docs-tools';
 import { getOpenOpsTools } from './openops-tools';
 import { getSupersetTools } from './superset-tools';
 import { getTablesTools } from './tables-tools';
+import { safeGetTools } from './load-tools-guard';
 
 export type MCPTool = {
   client: unknown;
@@ -70,21 +71,3 @@ export const startMCPTools = async (
     tools: toolSet,
   };
 };
-
-async function safeGetTools(
-  name: string,
-  loader: () => Promise<MCPTool>,
-): Promise<Partial<MCPTool>> {
-  try {
-    const mcpTool = await loader();
-
-    logger.debug(`Loaded tools for ${name}:`, {
-      keys: Object.keys(mcpTool.toolSet),
-    });
-
-    return mcpTool;
-  } catch (error) {
-    logger.error(`Error loading tools for ${name}:`, { error });
-    return {};
-  }
-}
