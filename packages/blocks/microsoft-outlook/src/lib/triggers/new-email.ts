@@ -12,18 +12,19 @@ import dayjs from 'dayjs';
 import { microsoftOutlookAuth } from '../common/auth';
 import { mailFolderIdDropdown } from '../common/props';
 
-function normalizeList(list?: string[]): string[] {
-  return (list || []).map((s) => s.toLowerCase().trim());
+function normalizeList(list?: unknown[]): string[] {
+  return (list || [])
+    .map((s) => String(s).toLowerCase().trim())
+    .filter((s) => s.length > 0);
 }
 
 const polling: Polling<
   BlockPropValueSchema<typeof microsoftOutlookAuth>,
   {
-    receiver?: string[];
     folderId?: string;
-    recipients?: string[];
-    senders?: string[];
-    cc?: string[];
+    recipients?: unknown[];
+    senders?: unknown[];
+    cc?: unknown[];
     subject?: string;
   }
 > = {
@@ -49,7 +50,7 @@ const polling: Polling<
       `/me/mailFolders/${folderId || 'inbox'}/messages?${filter}`,
     );
 
-    if (recipients) {
+    if (recipients.length > 0) {
       request.header('ConsistencyLevel', 'eventual').query({
         $search: `"to:${recipients}"&$select=subject,toRecipients,receivedDateTime`,
       });
