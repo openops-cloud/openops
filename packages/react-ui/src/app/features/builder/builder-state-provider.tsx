@@ -36,9 +36,15 @@ export function BuilderStateProvider({
         flow: props.flow,
         flowVersion: props.flowVersion,
       });
-
-      currentBuilderStore = storeRef.current;
     }
+
+    currentBuilderStore = storeRef.current || null;
+    notifyStoreChange();
+
+    return () => {
+      currentBuilderStore = null;
+      notifyStoreChange();
+    };
   }, [props.flow, props.flowVersion]);
 
   if (!storeRef.current) {
@@ -47,16 +53,6 @@ export function BuilderStateProvider({
       readonly: !checkAccess(Permission.WRITE_FLOW) || props.readonly,
     });
   }
-
-  useEffect(() => {
-    currentBuilderStore = storeRef.current || null;
-    notifyStoreChange();
-
-    return () => {
-      currentBuilderStore = null;
-      notifyStoreChange();
-    };
-  });
 
   return (
     <BuilderStateContext.Provider value={storeRef.current}>
