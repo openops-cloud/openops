@@ -294,6 +294,7 @@ export async function handleCodeGenerationRequest(
     stream,
   });
 
-  const heartbeatWrapper = createHeartbeatResponseWrapper();
-  return heartbeatWrapper(response);
+  return response;
+  // const heartbeatWrapper = createHeartbeatResponseWrapper();
+  // return heartbeatWrapper(response);
 }

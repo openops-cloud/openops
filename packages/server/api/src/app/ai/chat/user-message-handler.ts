@@ -113,7 +113,7 @@ export async function handleUserMessage(
     mcpClients,
   });
 
-  const heartbeatWrapper = createHeartbeatResponseWrapper();
+  // const heartbeatWrapper = createHeartbeatResponseWrapper();
 
   const response = streamTextResult.toUIMessageStreamResponse({
     originalMessages: convertToUIMessages(chatHistory.messages),
@@ -153,13 +153,13 @@ export async function handleUserMessage(
         chatHistory: {
           ...chatHistory,
           activeStreamId: streamId,
-          messages: [],
+          // messages: [],
         },
       });
     },
   });
 
-  return heartbeatWrapper(response);
+  return response;
 }
 
 function streamLLMResponse(
