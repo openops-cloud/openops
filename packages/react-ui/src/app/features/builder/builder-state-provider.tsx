@@ -18,7 +18,9 @@ let currentBuilderStore: BuilderStore | null = null;
 const storeChangeListeners = new Set<() => void>();
 
 function notifyStoreChange() {
-  storeChangeListeners.forEach((listener) => listener());
+  for (const listener of storeChangeListeners) {
+    listener();
+  }
 }
 
 export function BuilderStateProvider({
