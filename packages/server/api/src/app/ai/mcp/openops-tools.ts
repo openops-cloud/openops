@@ -11,7 +11,7 @@ import fs from 'fs/promises';
 import { OpenAPI } from 'openapi-types';
 import os from 'os';
 import path from 'path';
-import { MCPTool } from './tools-initializer';
+import { MCPTool } from './types';
 
 const INCLUDED_PATHS: Record<string, string[]> = {
   '/v1/files/{fileId}': ['get'],
