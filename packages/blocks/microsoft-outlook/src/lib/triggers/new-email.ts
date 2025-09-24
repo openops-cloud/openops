@@ -12,16 +12,30 @@ import dayjs from 'dayjs';
 import { microsoftOutlookAuth } from '../common/auth';
 import { mailFolderIdDropdown } from '../common/props';
 
+function normalizeList(list?: string[]): string[] {
+  return (list || []).map((s) => s.toLowerCase().trim());
+}
+
 const polling: Polling<
   BlockPropValueSchema<typeof microsoftOutlookAuth>,
-  { receiver?: string; folderId?: string }
+  {
+    receiver?: string[];
+    folderId?: string;
+    recipients?: string[];
+    senders?: string[];
+    cc?: string[];
+    subject?: string;
+  }
 > = {
   strategy: DedupeStrategy.TIMEBASED,
   items: async ({ auth, lastFetchEpochMS, propsValue }) => {
     const client = getMicrosoftGraphClient(auth.access_token);
 
     const messages: Message[] = [];
-    const receiver = propsValue?.receiver?.trim();
+    const recipients = normalizeList(propsValue?.recipients);
+    const senders = normalizeList(propsValue?.senders);
+    const cc = normalizeList(propsValue?.cc);
+    const subject = propsValue?.subject?.trim();
     const folderId = propsValue?.folderId?.trim();
 
     const filter =
@@ -35,9 +49,9 @@ const polling: Polling<
       `/me/mailFolders/${folderId || 'inbox'}/messages?${filter}`,
     );
 
-    if (receiver) {
+    if (recipients) {
       request.header('ConsistencyLevel', 'eventual').query({
-        $search: `"to:${receiver}"&$select=subject,toRecipients,receivedDateTime`,
+        $search: `"to:${recipients}"&$select=subject,toRecipients,receivedDateTime`,
       });
     } else {
       request.orderby('receivedDateTime desc');
@@ -80,10 +94,23 @@ export const newEmailTrigger = createTrigger({
       description: 'Read emails from a specific folder. Leave empty for Inbox.',
       required: false,
     }),
-    receiver: Property.ShortText({
-      displayName: 'Receiver',
-      description:
-        'Filter emails where the receiver (To) matches this email address. Uses $search with "to:<address>".',
+    senders: Property.Array({
+      displayName: 'Sender (From)',
+      description: 'Matches at least one sender.',
+      required: false,
+    }),
+    recipients: Property.Array({
+      displayName: 'Recipients (To)',
+      description: 'Matches at least one recipient (To).',
+      required: false,
+    }),
+    cc: Property.Array({
+      displayName: 'CC',
+      description: 'Matches at least one CC address.',
+      required: false,
+    }),
+    subject: Property.ShortText({
+      displayName: 'Subject text contains',
       required: false,
     }),
   },
