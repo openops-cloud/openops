@@ -1,12 +1,12 @@
-import { AppSystemProp, logger, system } from '@openops/server-shared';
+import { AppSystemProp, system } from '@openops/server-shared';
 import { ToolSet } from 'ai';
 import { FastifyInstance } from 'fastify';
 import { getCostTools } from './cost-tools';
 import { getDocsTools } from './docs-tools';
+import { safeGetTools } from './load-tools-guard';
 import { getOpenOpsTools } from './openops-tools';
 import { getSupersetTools } from './superset-tools';
 import { getTablesTools } from './tables-tools';
-import { safeGetTools } from './load-tools-guard';
 
 export type MCPTool = {
   client: unknown;
