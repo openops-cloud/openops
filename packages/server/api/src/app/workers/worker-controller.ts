@@ -157,7 +157,7 @@ export const flowWorkerController: FastifyPluginAsyncTypebox = async (app) => {
       const createFlowRuns = filterPayloads.map((payload) => {
         // If multiple payloads are submitted, we need to create a new executionCorrelationId for each one.
         let correlationId = executionCorrelationId;
-        if (filterPayloads.length > 0) {
+        if (filterPayloads.length > 1) {
           correlationId = openOpsId();
         }
 
