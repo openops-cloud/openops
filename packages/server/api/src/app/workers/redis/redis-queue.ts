@@ -192,10 +192,10 @@ async function addJobWithPriority(
   } finally {
     try {
       await jobLock.release();
-    } catch (releaseErr) {
+    } catch (error) {
       logger.error('Failed to release job lock', {
         executionCorrelationId,
-        error: releaseErr,
+        error,
       });
     }
   }
