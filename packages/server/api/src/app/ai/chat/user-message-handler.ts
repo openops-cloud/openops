@@ -19,15 +19,12 @@ import {
 import { FastifyInstance } from 'fastify';
 import { createResumableStreamContext } from 'resumable-stream/ioredis';
 import { sendAiChatFailureEvent } from '../../telemetry/event-models';
-import { addUiToolResults } from '../mcp/tool-utils';
 import { getMCPToolsContext } from '../mcp/tools-context-builder';
 import { AssistantUITools } from '../mcp/types';
 import { saveChatHistory } from './ai-chat.service';
 import { getLLMAsyncStream } from './llm-stream-handler';
 import { extractMessage } from './message-extractor';
-import { convertToUIMessages } from './model-message-converter';
 import { ChatHistory, ChatProcessingContext, RequestContext } from './types';
-import { createHeartbeatResponseWrapper } from './utils';
 
 const maxRecursionDepth = system.getNumberOrThrow(
   AppSystemProp.MAX_LLM_CALLS_WITHOUT_INTERACTION,
@@ -79,7 +76,7 @@ export async function handleUserMessage(
     projectId,
     authToken,
     aiConfig,
-    messages: chatHistory.messages,
+    messages: convertToModelMessages(chatHistory.messages),
     chatContext,
     languageModel,
     frontendTools,
@@ -116,7 +113,7 @@ export async function handleUserMessage(
   // const heartbeatWrapper = createHeartbeatResponseWrapper();
 
   const response = streamTextResult.toUIMessageStreamResponse({
-    originalMessages: convertToUIMessages(chatHistory.messages),
+    originalMessages: chatHistory.messages,
     generateMessageId: generateId,
     onFinish: ({ messages }) => {
       // Clear the active stream when finished
@@ -125,7 +122,7 @@ export async function handleUserMessage(
         userId,
         projectId,
         chatHistory: {
-          messages: convertToModelMessages(messages),
+          messages,
           activeStreamId: null,
         },
       });
@@ -197,10 +194,7 @@ function streamLLMResponse(
         projectId: params.projectId,
         chatHistory: {
           ...params.chatHistory,
-          messages: [
-            ...params.chatHistory.messages,
-            ...addUiToolResults(newMessages),
-          ],
+          messages: [...params.chatHistory.messages],
           activeStreamId: null,
         },
       });

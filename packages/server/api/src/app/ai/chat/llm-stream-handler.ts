@@ -1,6 +1,7 @@
 import { isLLMTelemetryEnabled } from '@openops/common';
 import { AiConfig } from '@openops/shared';
 import {
+  convertToModelMessages,
   LanguageModel,
   ModelMessage,
   stepCountIs,
@@ -49,7 +50,7 @@ export function getLLMAsyncStream(
   return streamText({
     model: languageModel,
     system: systemPrompt,
-    messages: chatHistory.messages,
+    messages: convertToModelMessages(chatHistory.messages),
     ...aiConfig.modelSettings,
     tools,
     toolChoice,

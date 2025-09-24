@@ -14,7 +14,12 @@ import {
   openOpsId,
   PrincipalType,
 } from '@openops/shared';
-import { ModelMessage, UI_MESSAGE_STREAM_HEADERS } from 'ai';
+import {
+  convertToModelMessages,
+  ModelMessage,
+  UI_MESSAGE_STREAM_HEADERS,
+  UIMessage,
+} from 'ai';
 import { FastifyReply } from 'fastify';
 import { StatusCodes } from 'http-status-codes';
 import { createResumableStreamContext } from 'resumable-stream/ioredis';
@@ -27,17 +32,11 @@ import {
   getAllChats,
   getChatContext,
   getChatHistory,
-  getChatHistoryWithMergedTools,
   getConversation,
-  getLLMConfig,
   MCPChatContext,
-  saveChatHistory,
   updateChatName,
 } from './ai-chat.service';
 import { routeChatRequest } from './chat-request-router';
-import { streamCode } from './code.service';
-import { enrichContext, IncludeOptions } from './context-enrichment.service';
-import { getBlockSystemPrompt } from './prompts.service';
 import { ChatHistory } from './types';
 import { makeWaitUntil } from './utils';
 
@@ -59,7 +58,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         );
 
         if (existingContext) {
-          const messages = await getChatHistoryWithMergedTools(
+          const { messages } = await getChatHistory(
             inputChatId,
             userId,
             projectId,
@@ -87,11 +86,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
           userId,
         });
 
-        const messages = await getChatHistoryWithMergedTools(
-          chatId,
-          userId,
-          projectId,
-        );
+        const { messages } = await getChatHistory(chatId, userId, projectId);
 
         if (messages.length === 0) {
           await createChatContext(chatId, userId, projectId, context);
@@ -114,11 +109,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       };
 
       await createChatContext(chatId, userId, projectId, chatContext);
-      const messages = await getChatHistoryWithMergedTools(
-        chatId,
-        userId,
-        projectId,
-      );
+      const { messages } = await getChatHistory(chatId, userId, projectId);
 
       return reply.code(200).send({
         chatId,
@@ -128,15 +119,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
   );
 
   app.post('/', NewMessageOptions, async (request, reply) => {
-    const messageContent = await getUserMessage(request.body, reply);
-    if (messageContent === null) {
-      return; // Error response already sent
-    }
-
-    const newMessage: ModelMessage = {
-      role: 'user',
-      content: messageContent,
-    };
+    const newMessage = request.body.message as UIMessage;
 
     return routeChatRequest({
       app,
@@ -193,7 +176,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       }
 
       const rawChatName = await generateChatName(
-        chatHistory.messages,
+        convertToModelMessages(chatHistory.messages),
         projectId,
       );
       const chatName = rawChatName.trim() || DEFAULT_CHAT_NAME;
@@ -203,73 +186,6 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       return await reply.code(200).send({ chatName });
     } catch (error) {
       return handleError(error, reply, 'generate chat name');
-    }
-  });
-
-  app.post('/code', CodeGenerationOptions, async (request, reply) => {
-    const chatId = request.body.chatId;
-    const projectId = request.principal.projectId;
-    const userId = request.principal.id;
-
-    try {
-      const conversationResult = await getConversation(
-        chatId,
-        userId,
-        projectId,
-      );
-      const llmConfigResult = await getLLMConfig(projectId);
-
-      conversationResult.chatHistory.messages.push({
-        role: 'user',
-        content: request.body.message,
-      });
-
-      const { chatContext, chatHistory } = conversationResult;
-      const { aiConfig, languageModel } = llmConfigResult;
-
-      const enrichedContext = request.body.additionalContext
-        ? await enrichContext(request.body.additionalContext, projectId, {
-            includeCurrentStepOutput: IncludeOptions.ALWAYS,
-          })
-        : undefined;
-
-      const prompt = await getBlockSystemPrompt(chatContext, enrichedContext);
-
-      const result = streamCode({
-        chatHistory,
-        languageModel,
-        aiConfig,
-        systemPrompt: prompt,
-        onFinish: async (result) => {
-          const assistantMessage: ModelMessage = {
-            role: 'assistant',
-            content: JSON.stringify(result.object),
-          };
-          logger.debug('streamCode finished', {
-            result,
-          });
-
-          await saveChatHistory({
-            chatId,
-            userId,
-            projectId,
-            chatHistory: {
-              ...chatHistory,
-              messages: [...chatHistory.messages, assistantMessage],
-            },
-          });
-        },
-        onError: (error) => {
-          logger.error('Failed to generate code', {
-            error,
-          });
-          throw error;
-        },
-      });
-
-      return result.toTextStreamResponse();
-    } catch (error) {
-      return handleError(error, reply, 'code generation');
     }
   });
 
@@ -347,18 +263,6 @@ const GetChatOptions = {
   },
 };
 
-const CodeGenerationOptions = {
-  config: {
-    allowedPrincipals: [PrincipalType.USER],
-  },
-  schema: {
-    tags: ['ai', 'ai-chat'],
-    description:
-      "Generate code based on the user's request. This endpoint processes the user message and generates a code response using the configured language model.",
-    body: NewMessageRequest,
-  },
-};
-
 const DeleteChatOptions = {
   config: {
     allowedPrincipals: [PrincipalType.USER],
@@ -396,55 +300,4 @@ function handleError(
 
   logger.error(`Failed to process ${context || 'request'} with error: `, error);
   return reply.code(500).send({ message: 'Internal server error' });
-}
-
-/**
- * Extracts the user message content from the request body.
- * Returns the message content as string, or null if validation fails (error response sent).
- */
-async function getUserMessage(
-  body: NewMessageRequest,
-  reply: FastifyReply,
-): Promise<string | null> {
-  if (body.messages) {
-    if (body.messages.length === 0) {
-      await reply.code(400).send({
-        message:
-          'Messages array cannot be empty. Please provide at least one message or use the message field instead.',
-      });
-      return null;
-    }
-
-    const lastMessage = body.messages[body.messages.length - 1];
-    if (
-      !lastMessage.parts ||
-      !Array.isArray(lastMessage.parts) ||
-      lastMessage.parts.length === 0
-    ) {
-      await reply.code(400).send({
-        message:
-          'Last message must have valid content array with at least one element.',
-      });
-      return null;
-    }
-
-    const firstContentElement = lastMessage.parts[0];
-    const lastContentElement = lastMessage.parts[lastMessage.parts.length - 1];
-    if (
-      !firstContentElement ||
-      typeof firstContentElement !== 'object' ||
-      (!('text' in firstContentElement) &&
-        !lastContentElement?.type.includes('tool-ui'))
-    ) {
-      await reply.code(400).send({
-        message:
-          'Last message must have a text content element as the first element.',
-      });
-      return null;
-    }
-
-    return String(firstContentElement.text ?? 'continue');
-  } else {
-    return body.message;
-  }
 }

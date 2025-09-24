@@ -4,6 +4,7 @@ import {
   createUIMessageStream,
   createUIMessageStreamResponse,
   ModelMessage,
+  TextUIPart,
   UIDataTypes,
   UIMessage,
   UIMessageStreamWriter,
@@ -17,7 +18,6 @@ import { enrichContext, IncludeOptions } from './context-enrichment.service';
 import { extractMessage } from './message-extractor';
 import { getBlockSystemPrompt } from './prompts.service';
 import { ChatHistory, ChatProcessingContext, RequestContext } from './types';
-import { createHeartbeatResponseWrapper } from './utils';
 
 type CodeMessageParams = RequestContext &
   ChatProcessingContext & {
@@ -65,25 +65,26 @@ async function handleCodeGenerationError(
     id: params.messageId,
   });
 
-  const errorAssistantMessage: ModelMessage = {
-    role: ROLE_ASSISTANT,
-    content: [
-      {
-        type: 'text',
-        text: errorMessage,
-      },
-    ],
-  };
+  //TODO: Probably not needed anymore
+  // const errorAssistantMessage: ModelMessage = {
+  //   role: ROLE_ASSISTANT,
+  //   content: [
+  //     {
+  //       type: 'text',
+  //       text: errorMessage,
+  //     },
+  //   ],
+  // };
 
-  await saveChatHistory({
-    chatId: params.chatId,
-    userId: params.userId,
-    projectId: params.projectId,
-    chatHistory: {
-      ...params.chatHistory,
-      messages: [...params.chatHistory.messages, errorAssistantMessage],
-    },
-  });
+  // await saveChatHistory({
+  //   chatId: params.chatId,
+  //   userId: params.userId,
+  //   projectId: params.projectId,
+  //   chatHistory: {
+  //     ...params.chatHistory,
+  //     messages: [...params.chatHistory.messages, errorAssistantMessage],
+  //   },
+  // });
 
   sendAiChatFailureEvent({
     projectId: params.projectId,
@@ -95,18 +96,22 @@ async function handleCodeGenerationError(
   });
 }
 
-/**
- * Extracts string content from a CoreMessage - in our context, content is always a string
- */
-function getMessageText(message: ModelMessage): string {
-  if (typeof message.content !== 'string') {
-    throw new Error(
-      'Expected message content to be a string in code generation context',
-    );
+export function getMessageTextStrict<
+  M = unknown,
+  D extends UIDataTypes = UIDataTypes,
+  T extends UITools = UITools,
+>(message: UIMessage<M, D, T>): string {
+  if (message.parts.length !== 1) {
+    throw new Error(`Expected exactly one part, got ${message.parts.length}`);
   }
-  return message.content;
-}
 
+  const part = message.parts[0];
+  if (part.type !== 'text') {
+    throw new Error(`Expected part of type "text", got "${part.type}"`);
+  }
+
+  return (part as TextUIPart).text;
+}
 /**
  * Initializes a tool call by writing the necessary streaming messages to the server response
  */
@@ -167,7 +172,7 @@ export async function handleCodeGenerationRequest(
       initializeToolCall({
         toolCallId,
         toolName: GENERATE_CODE_TOOL_NAME,
-        message: getMessageText(newMessage),
+        message: getMessageTextStrict(newMessage),
         writer,
       });
 
@@ -225,57 +230,57 @@ export async function handleCodeGenerationRequest(
         });
 
         writer.write({ type: 'finish' });
-        const saveToolCallId = generateToolId();
+        // const saveToolCallId = generateToolId();
 
-        const assistantMessage: ModelMessage = {
-          role: ROLE_ASSISTANT,
-          content: [
-            {
-              type: 'tool-call',
-              toolCallId: saveToolCallId,
-              toolName: GENERATE_CODE_TOOL_NAME,
-              input: { message: newMessage.content },
-            },
-          ],
-        };
+        // const assistantMessage: ModelMessage = {
+        //   role: ROLE_ASSISTANT,
+        //   content: [
+        //     {
+        //       type: 'tool-call',
+        //       toolCallId: saveToolCallId,
+        //       toolName: GENERATE_CODE_TOOL_NAME,
+        //       input: { message: newMessage.content },
+        //     },
+        //   ],
+        // };
 
-        const assistantToolResultMessage: ModelMessage = {
-          role: ROLE_ASSISTANT,
-          content: finalCodeResult.textAnswer || '',
-        };
+        // const assistantToolResultMessage: ModelMessage = {
+        //   role: ROLE_ASSISTANT,
+        //   content: finalCodeResult.textAnswer || '',
+        // };
 
-        const toolResultMessage: ModelMessage = {
-          role: 'tool',
-          content: [
-            {
-              type: 'tool-result',
-              toolCallId: saveToolCallId,
-              toolName: GENERATE_CODE_TOOL_NAME,
-              output: {
-                type: 'json',
-                value: {
-                  code: finalCodeResult.code || '',
-                  packageJson: finalCodeResult.packageJson || '{}',
-                },
-              },
-            },
-          ],
-        };
+        // const toolResultMessage: ModelMessage = {
+        //   role: 'tool',
+        //   content: [
+        //     {
+        //       type: 'tool-result',
+        //       toolCallId: saveToolCallId,
+        //       toolName: GENERATE_CODE_TOOL_NAME,
+        //       output: {
+        //         type: 'json',
+        //         value: {
+        //           code: finalCodeResult.code || '',
+        //           packageJson: finalCodeResult.packageJson || '{}',
+        //         },
+        //       },
+        //     },
+        //   ],
+        // };
 
-        await saveChatHistory({
-          chatId,
-          userId,
-          projectId,
-          chatHistory: {
-            ...chatHistory,
-            messages: [
-              ...chatHistory.messages,
-              assistantMessage,
-              toolResultMessage,
-              assistantToolResultMessage,
-            ],
-          },
-        });
+        // await saveChatHistory({
+        //   chatId,
+        //   userId,
+        //   projectId,
+        //   chatHistory: {
+        //     ...chatHistory,
+        //     messages: [
+        //       ...chatHistory.messages,
+        //       assistantMessage,
+        //       toolResultMessage,
+        //       assistantToolResultMessage,
+        //     ],
+        //   },
+        // });
       } catch (error) {
         await handleCodeGenerationError(error, {
           messageId: newMessageId,
@@ -288,6 +293,15 @@ export async function handleCodeGenerationRequest(
         });
       }
     },
+    onFinish: ({ messages }) => {
+      return saveChatHistory({
+        chatId,
+        userId,
+        projectId,
+        chatHistory: { ...chatHistory, messages },
+      });
+    },
+    originalMessages: chatHistory.messages,
   });
 
   const response = createUIMessageStreamResponse({

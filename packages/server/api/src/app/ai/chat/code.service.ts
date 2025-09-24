@@ -6,6 +6,7 @@ import {
   UnifiedCodeLLMSchema,
 } from '@openops/shared';
 import {
+  convertToModelMessages,
   generateObject,
   GenerateObjectResult,
   LanguageModel,
@@ -44,7 +45,7 @@ export const streamCode = ({
   return streamObject({
     model: languageModel,
     system: systemPrompt,
-    messages: chatHistory.messages,
+    messages: convertToModelMessages(chatHistory.messages),
     ...aiConfig.modelSettings,
     onFinish,
     onError,
@@ -76,7 +77,7 @@ export const generateCode = ({
   return generateObject({
     model: languageModel,
     system: systemPrompt,
-    messages: chatHistory.messages,
+    messages: convertToModelMessages(chatHistory.messages),
     ...aiConfig.modelSettings,
     schema: unifiedCodeLLMSchema,
     experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },

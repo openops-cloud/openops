@@ -21,8 +21,6 @@ import { buildQueryKey } from './chat-utils';
 import { createAdditionalContext } from './enrich-context';
 import { ChatMode } from './types';
 
-const PLACEHOLDER_MESSAGE_INTEROP = 'satisfy-schema';
-
 interface UseAssistantChatProps {
   chatId: string | null;
   onChatIdChange: (chatId: string | null) => void;
@@ -172,7 +170,6 @@ export const useAssistantChat = ({
   // workaround for https://github.com/vercel/ai/issues/7819#issuecomment-3172625487
   const bodyRef = useRef({
     chatId,
-    message: PLACEHOLDER_MESSAGE_INTEROP,
     additionalContext,
   });
 
@@ -181,7 +178,6 @@ export const useAssistantChat = ({
   useEffect(() => {
     bodyRef.current = {
       chatId,
-      message: PLACEHOLDER_MESSAGE_INTEROP,
       additionalContext,
     };
   }, [chatId, additionalContext]);
@@ -194,11 +190,16 @@ export const useAssistantChat = ({
       headers: {
         Authorization: `Bearer ${authenticationSession.getToken()}`,
       },
-      body: () => ({
-        ...bodyRef.current,
-        messages: messagesRef.current,
-        tools: runtimeRef.current?.thread?.getModelContext()?.tools ?? {},
-      }),
+      prepareSendMessagesRequest({ messages, id }) {
+        return {
+          body: {
+            id,
+            message: messages[messages.length - 1],
+            tools: runtimeRef.current?.thread?.getModelContext()?.tools ?? {},
+            ...bodyRef.current,
+          },
+        };
+      },
     }),
     onError: (error) => {
       console.error('chat error', error);

@@ -5,6 +5,7 @@ import {
   ModelMessage,
   TextPart,
   ToolCallPart,
+  UIMessage,
 } from 'ai';
 import { ServerResponse } from 'node:http';
 import { MCPChatContext } from './ai-chat.service';
@@ -27,13 +28,13 @@ export type RequestContext = {
 
 export type ChatProcessingContext = {
   aiConfig: AiConfig;
-  newMessage: CoreMessage;
+  newMessage: UIMessage;
   conversation: Conversation;
   languageModel: LanguageModel;
 };
 
 export type ChatHistory = {
-  messages: ModelMessage[];
+  messages: UIMessage[];
   activeStreamId?: string | null;
 };
 

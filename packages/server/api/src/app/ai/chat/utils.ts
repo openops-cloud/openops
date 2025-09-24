@@ -3,57 +3,6 @@ import { logger } from '@openops/server-shared';
 import { ModelMessage, ToolResultPart, ToolSet, UIMessage } from 'ai';
 import { FastifyReply } from 'fastify';
 
-/**
- * Merges tool result messages into their corresponding assistant tool-call parts
- * and converts them to UI messages in a single pass.
- * This function finds each 'tool' message, locates the matching 'tool-call' part by toolCallId,
- * and assigns the result to the 'output' property.
- */
-export function mergeToolResultsIntoMessages(
-  messages: ModelMessage[],
-  options?: {
-    tools?: ToolSet;
-  },
-): Array<Omit<UIMessage, 'id'>> {
-  const uiMessages: Array<Omit<UIMessage, 'id'>> = [];
-  const toolResultsToMerge: Array<{
-    toolResult: ToolResultPart;
-    messageIndex: number;
-  }> = [];
-
-  for (let i = 0; i < messages.length; i++) {
-    const msg = messages[i];
-
-    if (isToolMessage(msg)) {
-      if (Array.isArray(msg.content) && msg.content.length > 0) {
-        const toolResult = msg.content[0];
-        if (
-          toolResult &&
-          typeof toolResult === 'object' &&
-          'toolCallId' in toolResult
-        ) {
-          toolResultsToMerge.push({
-            toolResult: toolResult as ToolResultPart,
-            messageIndex: i,
-          });
-        }
-      }
-      continue;
-    }
-
-    const convertedMessage = convertMessageToUI(msg, options?.tools);
-    if (convertedMessage) {
-      uiMessages.push(convertedMessage);
-    }
-  }
-
-  for (const { toolResult } of toolResultsToMerge) {
-    mergeToolResultIntoUIMessage(toolResult, uiMessages);
-  }
-
-  return uiMessages;
-}
-
 function isToolMessage(msg: ModelMessage): boolean {
   return (
     msg.role === 'tool' && Array.isArray(msg.content) && msg.content.length > 0

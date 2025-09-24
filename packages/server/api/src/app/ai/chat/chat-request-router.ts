@@ -1,6 +1,6 @@
 import { logger } from '@openops/server-shared';
 import { CODE_BLOCK_NAME, NewMessageRequest, Principal } from '@openops/shared';
-import { ModelMessage } from 'ai';
+import { UIMessage } from 'ai';
 import { FastifyInstance, FastifyReply } from 'fastify';
 import { sendAiChatMessageSendEvent } from '../../telemetry/event-models';
 import { getConversation, getLLMConfig } from './ai-chat.service';
@@ -18,7 +18,7 @@ export type ChatRequestContext = {
   };
   reply: FastifyReply;
   app: FastifyInstance;
-  newMessage: ModelMessage;
+  newMessage: UIMessage;
 };
 
 export async function routeChatRequest(
