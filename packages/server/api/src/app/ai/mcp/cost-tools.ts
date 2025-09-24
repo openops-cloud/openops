@@ -10,7 +10,7 @@ import { Experimental_StdioMCPTransport } from 'ai/mcp-stdio';
 import path from 'path';
 import { appConnectionService } from '../../app-connection/app-connection-service/app-connection-service';
 import { mcpConfigService } from '../../mcp/config/mcp-config.service';
-import { MCPTool } from './tools-initializer';
+import { MCPTool } from './types';
 
 type AwsCredentials = {
   accessKeyId: string;
