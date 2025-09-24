@@ -1,7 +1,4 @@
-import {
-  TriggerStrategy,
-  WebhookRenewStrategy,
-} from '@openops/blocks-framework';
+import { WebhookRenewStrategy } from '@openops/blocks-framework';
 import {
   JobType,
   LATEST_JOB_DATA_SCHEMA_VERSION,

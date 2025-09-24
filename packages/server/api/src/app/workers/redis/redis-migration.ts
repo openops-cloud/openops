@@ -13,8 +13,6 @@ import {
   ScheduleType,
 } from '@openops/shared';
 import { Job } from 'bullmq';
-import { blockMetadataService } from '../../blocks/block-metadata-service';
-import { flowVersionService } from '../../flows/flow-version/flow-version.service';
 import { flowRepo } from '../../flows/flow/flow.repo';
 import { bullMqGroups } from './redis-queue';
 
@@ -33,7 +31,7 @@ export const redisMigrations = {
         {
           count: scheduledJobs.length,
         },
-        'migration of scheduled jobs started',
+        'migiration of scheduled jobs started',
       );
       for (const job of scheduledJobs) {
         if (job) {
