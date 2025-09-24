@@ -259,8 +259,7 @@ const TestTriggerSection = React.memo(
 
     return (
       <div className="flex flex-col h-full">
-        {stepData &&
-          'output' in stepData &&
+        {((stepData && 'output' in stepData) || !!errorMessage) &&
           !isSimulating &&
           !isSavingMockdata && (
             <>
