@@ -1,3 +1,4 @@
+import { TriggerStrategy } from '@openops/blocks-framework';
 import {
   ExecutionType,
   ProgressUpdateType,
@@ -6,7 +7,7 @@ import {
 } from '@openops/shared';
 import { Static, Type } from '@sinclair/typebox';
 
-export const LATEST_JOB_DATA_SCHEMA_VERSION = 4;
+export const LATEST_JOB_DATA_SCHEMA_VERSION = 5;
 
 export enum RepeatableJobType {
   RENEW_WEBHOOK = 'RENEW_WEBHOOK',
@@ -32,6 +33,7 @@ export const RepeatingJobData = Type.Object({
   flowVersionId: Type.String(),
   flowId: Type.String(),
   triggerType: Type.Enum(TriggerType),
+  triggerStrategy: Type.Enum(TriggerStrategy),
   jobType: Type.Literal(RepeatableJobType.EXECUTE_TRIGGER),
 });
 export type RepeatingJobData = Static<typeof RepeatingJobData>;

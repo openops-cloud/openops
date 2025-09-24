@@ -1,3 +1,4 @@
+import { TriggerStrategy } from '@openops/blocks-framework';
 import {
   DelayedJobData,
   logger,
@@ -12,6 +13,7 @@ import {
   FlowVersion,
   GetFlowVersionForWorkerRequestType,
   isNil,
+  openOpsId,
   PopulatedFlow,
   ProgressUpdateType,
   RunEnvironment,
@@ -111,8 +113,14 @@ const consumeBlockTrigger = async (
       simulate: false,
     },
   );
+
+  let executionCorrelationId = flowVersion.id;
+  if (data.triggerStrategy !== TriggerStrategy.SCHEDULED) {
+    executionCorrelationId = openOpsId();
+  }
+
   await workerApiService(workerToken).startRuns({
-    executionCorrelationId: flowVersion.id,
+    executionCorrelationId,
     flowVersionId: data.flowVersionId,
     progressUpdateType: ProgressUpdateType.NONE,
     projectId: data.projectId,
