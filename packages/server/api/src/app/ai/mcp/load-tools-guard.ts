@@ -1,5 +1,5 @@
 import { logger } from '@openops/server-shared';
-import { MCPTool } from './tools-initializer';
+import { MCPTool } from './types';
 
 export async function safeGetTools(
   name: string,

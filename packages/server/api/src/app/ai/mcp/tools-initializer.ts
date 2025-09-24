@@ -7,11 +7,7 @@ import { safeGetTools } from './load-tools-guard';
 import { getOpenOpsTools } from './openops-tools';
 import { getSupersetTools } from './superset-tools';
 import { getTablesTools } from './tables-tools';
-
-export type MCPTool = {
-  client: unknown;
-  toolSet: ToolSet;
-};
+import { MCPTool } from './types';
 
 export const startMCPTools = async (
   app: FastifyInstance,
