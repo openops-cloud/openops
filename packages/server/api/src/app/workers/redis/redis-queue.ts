@@ -1,5 +1,6 @@
 import {
   createRedisClient,
+  distributedLock,
   exceptionHandler,
   JobType,
   logger,
@@ -170,19 +171,34 @@ async function addJobWithPriority(
 ): Promise<boolean> {
   const { data, priority, executionCorrelationId } = params;
 
-  const existingJob = await queue.getJob(executionCorrelationId);
-  if (existingJob) {
-    logger.info(
-      'The job was not added because it already exists in the queue.',
-      data,
-    );
-    return false;
-  }
-
-  await queue.add(executionCorrelationId, data, {
-    jobId: executionCorrelationId,
-    priority: JOB_PRIORITY[priority],
+  const jobLock = await distributedLock.acquireLock({
+    key: `addJobLock:${executionCorrelationId}`,
   });
+
+  try {
+    const existingJob = await queue.getJob(executionCorrelationId);
+    if (existingJob) {
+      logger.info(
+        'The job was not added because it already exists in the queue.',
+        data,
+      );
+      return false;
+    }
+
+    await queue.add(executionCorrelationId, data, {
+      jobId: executionCorrelationId,
+      priority: JOB_PRIORITY[priority],
+    });
+  } finally {
+    try {
+      await jobLock.release();
+    } catch (error) {
+      logger.error('Failed to release job lock', {
+        executionCorrelationId,
+        error,
+      });
+    }
+  }
 
   return true;
 }
