@@ -1,0 +1,102 @@
+import { PageCollection } from '@microsoft/microsoft-graph-client';
+import { MailFolder, Message } from '@microsoft/microsoft-graph-types';
+import { BlockPropValueSchema, Property } from '@openops/blocks-framework';
+import { getMicrosoftGraphClient } from '@openops/common';
+import { microsoftOutlookAuth } from './auth';
+
+type DropdownParams = {
+  displayName: string;
+  description: string;
+  required: boolean;
+};
+
+export const messageIdDropdown = (params: DropdownParams) =>
+  Property.Dropdown({
+    displayName: params.displayName,
+    description: params.description,
+    required: params.required,
+    refreshers: ['auth'],
+    options: async ({ auth }) => {
+      if (!auth) {
+        return {
+          placeholder: 'Please connect your account first.',
+          disabled: true,
+          options: [],
+        };
+      }
+
+      const authValue = auth as BlockPropValueSchema<
+        typeof microsoftOutlookAuth
+      >;
+
+      try {
+        const client = getMicrosoftGraphClient(authValue.access_token);
+        const response: PageCollection = await client
+          .api('/me/messages?$top=50&$select=id,subject,from,receivedDateTime')
+          .orderby('receivedDateTime desc')
+          .get();
+
+        const messages = response.value as Message[];
+
+        return {
+          disabled: false,
+          options: messages.map((message) => ({
+            label: `${message.subject || 'No Subject'}`,
+            value: message.id,
+          })),
+        };
+      } catch (error) {
+        return {
+          disabled: true,
+          options: [],
+          placeholder: 'Error loading messages. Please try refreshing.',
+          error: error instanceof Error ? error.message : String(error),
+        };
+      }
+    },
+  });
+
+export const mailFolderIdDropdown = (params: DropdownParams) =>
+  Property.Dropdown({
+    displayName: params.displayName,
+    description: params.description,
+    required: params.required,
+    refreshers: ['auth'],
+    options: async ({ auth }) => {
+      if (!auth) {
+        return {
+          placeholder: 'Please connect your account first.',
+          disabled: true,
+          options: [],
+        };
+      }
+
+      const authValue = auth as BlockPropValueSchema<
+        typeof microsoftOutlookAuth
+      >;
+
+      try {
+        const client = getMicrosoftGraphClient(authValue.access_token);
+        const response: PageCollection = await client
+          .api('/me/mailFolders')
+          .get();
+
+        const folders = response.value as MailFolder[];
+
+        return {
+          disabled: false,
+          options: folders.map((folder) => ({
+            label: folder.displayName || folder.id || 'Unknown',
+            value: folder.id || '',
+          })),
+        };
+      } catch (error) {
+        return {
+          disabled: true,
+          options: [],
+          placeholder: 'Error loading mail folders. Please try refreshing.',
+          error: error instanceof Error ? error.message : String(error),
+        };
+      }
+    },
+  });

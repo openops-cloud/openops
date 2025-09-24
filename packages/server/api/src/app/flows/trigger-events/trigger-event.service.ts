@@ -110,11 +110,20 @@ export const triggerEventService = {
           });
         }
 
-        for (const output of testResult.output) {
+        if (testResult.output?.length) {
+          for (const output of testResult.output) {
+            await triggerEventService.saveEvent({
+              projectId,
+              flowId: flow.id,
+              payload: output,
+              input: testResult.input,
+            });
+          }
+        } else {
           await triggerEventService.saveEvent({
             projectId,
             flowId: flow.id,
-            payload: output,
+            payload: null,
             input: testResult.input,
           });
         }
