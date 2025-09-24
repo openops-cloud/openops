@@ -217,6 +217,9 @@
       "@openops/block-microsoft-onedrive": [
         "packages/blocks/microsoft-onedrive/src/index.ts"
       ],
+      "@openops/block-microsoft-outlook": [
+        "packages/blocks/microsoft-outlook/src/index.ts"
+      ],
       "@openops/block-microsoft-teams": [
         "packages/blocks/microsoft-teams/src/index.ts"
       ],

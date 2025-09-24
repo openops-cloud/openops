@@ -3,6 +3,7 @@ import { sendChatMessageAction } from '../src/lib/actions/send-chat-message';
 const mockPost = jest.fn();
 
 jest.mock('@openops/common', () => ({
+  ...jest.requireActual('@openops/common'),
   getMicrosoftGraphClient: jest.fn(() => ({
     api: jest.fn(() => ({
       post: mockPost,
