@@ -5,6 +5,7 @@ import {
   FormMessage,
   Label,
   Switch,
+  TooltipWrapper,
   cn,
 } from '@openops/components/ui';
 import {
@@ -107,16 +108,20 @@ const BranchSingleCondition = ({
           name={`settings.conditions.${groupIndex}.${conditionIndex}.operator`}
           control={form.control}
           render={({ field }) => (
-            <FormItem>
-              <SearchableSelect
-                disabled={readonly}
-                value={field.value}
-                options={operationOptions}
-                placeholder={''}
-                onChange={field.onChange}
-              />
-              <FormMessage />
-            </FormItem>
+            <TooltipWrapper
+              tooltipText={field.value && textToBranchOperation[field.value]}
+            >
+              <FormItem>
+                <SearchableSelect
+                  disabled={readonly}
+                  value={field.value}
+                  options={operationOptions}
+                  placeholder={''}
+                  onChange={field.onChange}
+                />
+                <FormMessage />
+              </FormItem>
+            </TooltipWrapper>
           )}
         />
         {!isSingleValueCondition && (

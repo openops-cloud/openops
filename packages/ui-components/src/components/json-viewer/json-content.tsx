@@ -10,7 +10,7 @@ import {
   FormItem,
   FormMessage,
 } from '../../ui/form';
-import { CodeEditor } from '../code-editor';
+import { CodeEditor, CodeEditorRef } from '../code-editor';
 
 type JsonFormValues = {
   jsonContent: string;
@@ -23,6 +23,7 @@ type JsonContentProps = {
   theme: Theme;
   validateJson?: (value: string) => { valid: boolean; message?: string };
   editorClassName?: string;
+  editorRef?: React.RefObject<CodeEditorRef>;
 };
 
 export const JsonContent = ({
@@ -31,6 +32,7 @@ export const JsonContent = ({
   form,
   theme,
   editorClassName,
+  editorRef,
 }: JsonContentProps) => {
   const isEmptyString = useMemo(() => {
     return typeof json === 'string' && json.trim() === '';
@@ -47,6 +49,7 @@ export const JsonContent = ({
               <FormItem className="h-full">
                 <FormControl className="h-full">
                   <CodeEditor
+                    ref={editorRef}
                     value={field.value}
                     placeholder={t('Paste sample data here')}
                     readonly={false}
@@ -89,6 +92,7 @@ export const JsonContent = ({
       {(typeof json === 'object' ||
         (typeof json === 'string' && !isEmptyString)) && (
         <CodeEditor
+          ref={editorRef}
           value={json}
           readonly={true}
           theme={theme}
