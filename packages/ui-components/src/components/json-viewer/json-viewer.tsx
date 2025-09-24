@@ -1,7 +1,8 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { cn } from '../../lib/cn';
 import { Theme } from '../../lib/theme';
+import type { CodeEditorRef } from '../code-editor';
 import { FileButton } from './file-button';
 import { HeaderButtons } from './header-buttons';
 import { JsonContent } from './json-content';
@@ -65,6 +66,11 @@ const JsonViewer = React.memo(
       onEditModeChange,
     });
 
+    const editorRef = useRef<CodeEditorRef>(null);
+    const handleSearch = () => {
+      editorRef.current?.openSearch();
+    };
+
     if (isFileUrl) {
       return (
         <FileButton fileUrl={json} handleDownloadFile={handleDownloadFile} />
@@ -93,6 +99,7 @@ const JsonViewer = React.memo(
             apply={() => {
               apply(form.getValues('jsonContent'));
             }}
+            handleSearch={handleSearch}
           />
         </div>
         <JsonContent
@@ -101,6 +108,7 @@ const JsonViewer = React.memo(
           form={form}
           theme={theme}
           editorClassName={editorClassName}
+          editorRef={editorRef}
         />
       </div>
     );

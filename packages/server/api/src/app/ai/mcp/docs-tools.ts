@@ -2,7 +2,7 @@ import { AppSystemProp, logger, system } from '@openops/server-shared';
 import { experimental_createMCPClient as createMCPClient, tool } from 'ai';
 import { Experimental_StdioMCPTransport as StdioMCPTransport } from 'ai/mcp-stdio';
 import { z } from 'zod';
-import { MCPTool } from './tools-initializer';
+import { MCPTool } from './types';
 
 export async function getDocsTools(): Promise<MCPTool> {
   const mcpServerPath = system.get<string>(AppSystemProp.DOCS_MCP_SERVER_PATH);

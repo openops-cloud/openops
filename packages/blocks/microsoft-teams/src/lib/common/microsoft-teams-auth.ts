@@ -1,5 +1,5 @@
 import { BlockAuth, BlockPropValueSchema } from '@openops/blocks-framework';
-import { getMicrosoftGraphClient } from './get-microsoft-graph-client';
+import { getMicrosoftGraphClient } from '@openops/common';
 
 export const microsoftTeamsAuth = BlockAuth.OAuth2({
   authProviderKey: 'Microsoft_Teams',

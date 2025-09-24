@@ -1,7 +1,7 @@
 import { PageCollection } from '@microsoft/microsoft-graph-client';
 import { Team } from '@microsoft/microsoft-graph-types';
 import { OAuth2PropertyValue, OAuth2Props } from '@openops/blocks-framework';
-import { getMicrosoftGraphClient } from './get-microsoft-graph-client';
+import { getMicrosoftGraphClient } from '@openops/common';
 import { parseMsPaginatedData } from './parse-ms-paginated-data';
 
 export async function getAllTeams(
