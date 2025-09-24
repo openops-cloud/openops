@@ -4,13 +4,13 @@ import { AiConfig, ChatFlowContext } from '@openops/shared';
 import { generateObject, LanguageModel, ModelMessage, ToolSet } from 'ai';
 import { z } from 'zod';
 import { buildUIContextSection } from '../chat/prompts.service';
-import { QueryClassification, QueryTypes } from './types';
+import { QueryClassification } from './types';
 
 const MAX_SELECTED_TOOLS = 128;
 
 export type ToolsAndQueryResult = {
   tools?: ToolSet;
-  queryClassification: QueryTypes[];
+  queryClassification: QueryClassification[];
 };
 
 const queryClassificationDescriptions: Record<QueryClassification, string> = {

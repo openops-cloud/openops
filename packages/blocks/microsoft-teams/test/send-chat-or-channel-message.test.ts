@@ -1,3 +1,4 @@
+import { getMicrosoftGraphClient } from '@openops/common';
 import {
   ChannelOption,
   ChatOption,
@@ -7,10 +8,9 @@ import {
   generateMessageWithButtons,
   TeamsMessageButton,
 } from '../src/lib/common/generate-message-with-buttons';
-import { getMicrosoftGraphClient } from '../src/lib/common/get-microsoft-graph-client';
 import { sendChatOrChannelMessage } from '../src/lib/common/send-chat-or-channel-message';
 
-jest.mock('../src/lib/common/get-microsoft-graph-client');
+jest.mock('@openops/common');
 jest.mock('../src/lib/common/generate-message-with-buttons');
 
 const mockAccessToken = 'mock-access-token';

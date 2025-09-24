@@ -4,7 +4,7 @@ import { ToolSet } from 'ai';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 import { hasToolProvider } from '../mcp/tool-utils';
-import { QueryClassification, QueryTypes } from '../mcp/types';
+import { QueryClassification } from '../mcp/types';
 import { MCPChatContext } from './ai-chat.service';
 
 export const getMcpSystemPrompt = async ({
@@ -13,7 +13,7 @@ export const getMcpSystemPrompt = async ({
   allTools,
   uiContext,
 }: {
-  queryClassification: QueryTypes[];
+  queryClassification: QueryClassification[];
   selectedTools: ToolSet | undefined;
   allTools: ToolSet;
   uiContext?: ChatFlowContext;

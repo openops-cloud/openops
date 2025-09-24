@@ -57,6 +57,7 @@ const GenerateCodeTool = ({ result, status, theme }: GenerateCodeToolProps) => {
         readonly={true}
         showLineNumbers={false}
         className="border border-solid rounded"
+        nativeEditorClassName="min-h-10"
         theme={theme}
         showTabs={true}
         language={getLanguageExtensionForCode('language-typescript')}

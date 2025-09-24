@@ -1,9 +1,9 @@
+import { getMicrosoftGraphClient } from '@openops/common';
 import { ChannelOption, ChatOption, ChatTypes } from './chat-types';
 import {
   generateMessageWithButtons,
   TeamsMessageButton,
 } from './generate-message-with-buttons';
-import { getMicrosoftGraphClient } from './get-microsoft-graph-client';
 
 export const sendChatOrChannelMessage = async ({
   accessToken,
