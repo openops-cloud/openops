@@ -2,7 +2,7 @@ import { AppSystemProp, system } from '@openops/server-shared';
 import { experimental_createMCPClient } from 'ai';
 import { Experimental_StdioMCPTransport } from 'ai/mcp-stdio';
 import path from 'path';
-import { MCPTool } from './tools-initializer';
+import { MCPTool } from './types';
 
 export async function getSupersetTools(): Promise<MCPTool> {
   const basePath = system.get<string>(AppSystemProp.SUPERSET_MCP_SERVER_PATH);
