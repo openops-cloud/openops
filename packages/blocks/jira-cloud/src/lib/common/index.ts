@@ -218,11 +218,12 @@ export async function searchIssuesByJql({
   return (
     (await executeJql({
       auth,
-      url: 'search',
+      url: 'search/jql',
       method: HttpMethod.POST,
       jql,
       body: {
         maxResults,
+        fields: ['*all'],
       },
       sanitizeJql,
     })) as { issues: any[] }

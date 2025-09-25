@@ -1,4 +1,10 @@
+import { ToolSet } from 'ai';
 import type { JSONSchema7 } from 'json-schema';
+
+export type MCPTool = {
+  client: unknown;
+  toolSet: ToolSet;
+};
 
 export type AssistantUITools = Record<
   string,
