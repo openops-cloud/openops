@@ -112,7 +112,7 @@ export type ResumeRunRequest = Static<typeof ResumeRunRequest>;
 export const flowTimeoutSandbox =
   system.getNumber(SharedSystemProp.FLOW_TIMEOUT_SECONDS) ?? 600;
 export const triggerTimeoutSandbox =
-  system.getNumber(SharedSystemProp.TRIGGER_TIMEOUT_SECONDS) ?? 60;
+  system.getNumber(SharedSystemProp.TRIGGER_TIMEOUT_SECONDS) ?? 120;
 
 export function getEngineTimeout(operationType: EngineOperationType): number {
   switch (operationType) {

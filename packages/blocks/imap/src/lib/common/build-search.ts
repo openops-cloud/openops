@@ -37,7 +37,7 @@ export function buildImapSearch({
 }: SearchFilters): SearchObject {
   const sinceISO =
     lastEpochMilliSeconds === 0
-      ? dayjs().subtract(3, 'month').toISOString()
+      ? dayjs().subtract(14, 'days').toISOString()
       : dayjs(lastEpochMilliSeconds).toISOString();
 
   const recipientList = normalizeList(recipients);

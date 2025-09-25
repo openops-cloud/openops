@@ -63,7 +63,7 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [SharedSystemProp.BLOCKS_SOURCE]: BlocksSource.FILE,
   [AppSystemProp.QUEUE_MODE]: QueueMode.REDIS,
   [SharedSystemProp.FLOW_TIMEOUT_SECONDS]: '600',
-  [SharedSystemProp.TRIGGER_TIMEOUT_SECONDS]: '60',
+  [SharedSystemProp.TRIGGER_TIMEOUT_SECONDS]: '120',
   [AppSystemProp.TEMPLATES_SOURCE_URL]: '/api/v1/flow-templates',
   [AppSystemProp.TRIGGER_DEFAULT_POLL_INTERVAL]: '5',
   [AppSystemProp.MAX_CONCURRENT_JOBS_PER_PROJECT]: '100',
