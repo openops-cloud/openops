@@ -36,7 +36,7 @@ export const mailbox = Property.Dropdown({
       });
       return {
         disabled: true,
-        placeholder: 'The connection failed. Please try again later.',
+        placeholder: 'Failed to connect to IMAP',
         options: [],
       };
     } finally {

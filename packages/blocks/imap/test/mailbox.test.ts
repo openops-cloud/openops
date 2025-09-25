@@ -88,7 +88,7 @@ describe('mailbox.options', () => {
     expect(res).toEqual({
       disabled: true,
       options: [],
-      placeholder: 'The connection failed. Please try again later.',
+      placeholder: 'Failed to connect to IMAP',
     });
 
     expect(mockImapClient.connect).toHaveBeenCalledTimes(1);
