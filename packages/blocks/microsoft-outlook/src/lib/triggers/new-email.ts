@@ -74,7 +74,11 @@ function applyClientSideFilters(
     }
   }
 
-  if (propsValue['subject'] && String(propsValue['subject']).trim()) {
+  if (
+    propsValue['subject'] &&
+    typeof propsValue['subject'] === 'string' &&
+    propsValue['subject'].trim()
+  ) {
     const subjectToMatch = normalizeString(propsValue['subject']);
     const messageSubject = normalizeString(message.subject || '');
 
