@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ModelMessage, ToolSet, UIMessage } from 'ai';
+import { generateId, ModelMessage, ToolSet, UIMessage } from 'ai';
 
 /**
  * Converts a system message to UI message format
@@ -295,47 +295,4 @@ function convertMessage(
     default:
       throw new Error(`Unsupported role: ${(message as any).role}`);
   }
-}
-
-/**
- * Converts an array of ModelMessages to an array of UIMessages that can be used
- * with the UI components (e.g. `useChat`).
- *
- * This is the reverse operation of `convertToModelMessages`.
- *
- * @param messages - The ModelMessages to convert.
- * @param options.tools - The tools to use for tool call conversion.
- */
-export function convertToUIMessages(
-  messages: ModelMessage[],
-  options?: {
-    tools?: ToolSet;
-  },
-): Array<Omit<UIMessage, 'id'>> {
-  const uiMessages: Array<Omit<UIMessage, 'id'>> = [];
-
-  for (const message of messages) {
-    const convertedMessage = convertMessage(message, options?.tools);
-    if (convertedMessage) {
-      uiMessages.push(convertedMessage);
-    }
-  }
-
-  return uiMessages;
-}
-
-/**
- * Converts a single ModelMessage to a UIMessage.
- *
- * @param message - The ModelMessage to convert.
- * @param options.tools - The tools to use for tool call conversion.
- */
-export function convertToUIMessage(
-  message: ModelMessage,
-  options?: {
-    tools?: ToolSet;
-  },
-): Omit<UIMessage, 'id'> {
-  const messages = convertToUIMessages([message], options);
-  return messages[0];
 }

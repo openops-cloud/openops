@@ -392,30 +392,6 @@ describe('selectToolsAndQuery', () => {
     });
   });
 
-  describe('Abort signal', () => {
-    it('should abort the LLM call when the abort signal is triggered', async () => {
-      const abortSignal = new AbortController().signal;
-      const mockTools: ToolSet = {
-        tool1: {
-          description: 'Tool 1 description',
-        },
-      };
-      await routeQuery({
-        messages: mockMessages,
-        tools: mockTools,
-        languageModel: mockLanguageModel,
-        aiConfig: mockAiConfig,
-        abortSignal,
-      });
-
-      expect(generateObject).toHaveBeenCalledWith(
-        expect.objectContaining({
-          abortSignal,
-        }),
-      );
-    });
-  });
-
   describe('Query classification', () => {
     it('should return analytics classification when LLM classifies query as analytics', async () => {
       const mockTools: Record<string, MockTool> = {

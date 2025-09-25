@@ -1,5 +1,8 @@
-import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { logger } from '@openops/server-shared';
+import {
+  FastifyPluginAsyncTypebox,
+  Type,
+} from '@fastify/type-provider-typebox';
+import { getRedisConnection, logger } from '@openops/server-shared';
 import {
   ApplicationError,
   ChatNameRequest,
@@ -11,9 +14,15 @@ import {
   openOpsId,
   PrincipalType,
 } from '@openops/shared';
-import { ModelMessage } from 'ai';
+import {
+  convertToModelMessages,
+  ModelMessage,
+  UI_MESSAGE_STREAM_HEADERS,
+  UIMessage,
+} from 'ai';
 import { FastifyReply } from 'fastify';
 import { StatusCodes } from 'http-status-codes';
+import { createResumableStreamContext } from 'resumable-stream/ioredis';
 import {
   createChatContext,
   deleteChatHistory,
@@ -22,17 +31,14 @@ import {
   generateChatName,
   getAllChats,
   getChatContext,
-  getChatHistoryWithMergedTools,
+  getChatHistory,
   getConversation,
-  getLLMConfig,
   MCPChatContext,
-  saveChatHistory,
   updateChatName,
 } from './ai-chat.service';
 import { routeChatRequest } from './chat-request-router';
-import { streamCode } from './code.service';
-import { enrichContext, IncludeOptions } from './context-enrichment.service';
-import { getBlockSystemPrompt } from './prompts.service';
+import { ChatHistory } from './types';
+import { makeWaitUntil } from './utils';
 
 const DEFAULT_CHAT_NAME = 'New Chat';
 
@@ -52,7 +58,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         );
 
         if (existingContext) {
-          const messages = await getChatHistoryWithMergedTools(
+          const { messages } = await getChatHistory(
             inputChatId,
             userId,
             projectId,
@@ -80,11 +86,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
           userId,
         });
 
-        const messages = await getChatHistoryWithMergedTools(
-          chatId,
-          userId,
-          projectId,
-        );
+        const { messages } = await getChatHistory(chatId, userId, projectId);
 
         if (messages.length === 0) {
           await createChatContext(chatId, userId, projectId, context);
@@ -107,11 +109,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       };
 
       await createChatContext(chatId, userId, projectId, chatContext);
-      const messages = await getChatHistoryWithMergedTools(
-        chatId,
-        userId,
-        projectId,
-      );
+      const { messages } = await getChatHistory(chatId, userId, projectId);
 
       return reply.code(200).send({
         chatId,
@@ -121,22 +119,48 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
   );
 
   app.post('/', NewMessageOptions, async (request, reply) => {
-    const messageContent = await getUserMessage(request.body, reply);
-    if (messageContent === null) {
-      return; // Error response already sent
-    }
+    const newMessage = request.body.message as UIMessage;
 
-    const newMessage: ModelMessage = {
-      role: 'user',
-      content: messageContent,
-    };
-
-    await routeChatRequest({
+    return routeChatRequest({
       app,
       request,
       newMessage,
       reply,
     });
+  });
+
+  app.get('/:id/stream', GetChatOptions, async (request, reply) => {
+    const chatId = request.params.id;
+    const userId = request.principal.id;
+    const projectId = request.principal.projectId;
+    let chatHistory: ChatHistory | undefined;
+
+    try {
+      chatHistory = await getChatHistory(chatId, userId, projectId);
+    } catch (error) {
+      return handleError(error, reply, 'get chat history');
+    }
+
+    if (chatHistory?.activeStreamId == null) {
+      // no content response when there is no active stream
+      return reply.code(204).send();
+    }
+
+    const waitUntil = makeWaitUntil(reply);
+
+    const redisConnection = getRedisConnection();
+    const subscriberConnection = redisConnection.duplicate();
+    const publisherConnection = redisConnection.duplicate();
+    const streamContext = createResumableStreamContext({
+      waitUntil,
+      subscriber: subscriberConnection,
+      publisher: publisherConnection,
+    });
+
+    const stream = await streamContext.resumeExistingStream(
+      chatHistory.activeStreamId,
+    );
+    return reply.code(200).headers(UI_MESSAGE_STREAM_HEADERS).send(stream);
   });
 
   app.post('/chat-name', ChatNameOptions, async (request, reply) => {
@@ -147,11 +171,14 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
     try {
       const { chatHistory } = await getConversation(chatId, userId, projectId);
 
-      if (chatHistory.length === 0) {
+      if (chatHistory.messages.length === 0) {
         return await reply.code(200).send({ chatName: DEFAULT_CHAT_NAME });
       }
 
-      const rawChatName = await generateChatName(chatHistory, projectId);
+      const rawChatName = await generateChatName(
+        convertToModelMessages(chatHistory.messages),
+        projectId,
+      );
       const chatName = rawChatName.trim() || DEFAULT_CHAT_NAME;
 
       await updateChatName(chatId, userId, projectId, chatName);
@@ -159,68 +186,6 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       return await reply.code(200).send({ chatName });
     } catch (error) {
       return handleError(error, reply, 'generate chat name');
-    }
-  });
-
-  app.post('/code', CodeGenerationOptions, async (request, reply) => {
-    const chatId = request.body.chatId;
-    const projectId = request.principal.projectId;
-    const userId = request.principal.id;
-
-    try {
-      const conversationResult = await getConversation(
-        chatId,
-        userId,
-        projectId,
-      );
-      const llmConfigResult = await getLLMConfig(projectId);
-
-      conversationResult.chatHistory.push({
-        role: 'user',
-        content: request.body.message,
-      });
-
-      const { chatContext, chatHistory } = conversationResult;
-      const { aiConfig, languageModel } = llmConfigResult;
-
-      const enrichedContext = request.body.additionalContext
-        ? await enrichContext(request.body.additionalContext, projectId, {
-            includeCurrentStepOutput: IncludeOptions.ALWAYS,
-          })
-        : undefined;
-
-      const prompt = await getBlockSystemPrompt(chatContext, enrichedContext);
-
-      const result = streamCode({
-        chatHistory,
-        languageModel,
-        aiConfig,
-        systemPrompt: prompt,
-        onFinish: async (result) => {
-          const assistantMessage: ModelMessage = {
-            role: 'assistant',
-            content: JSON.stringify(result.object),
-          };
-          logger.debug('streamCode finished', {
-            result,
-          });
-
-          await saveChatHistory(chatId, userId, projectId, [
-            ...chatHistory,
-            assistantMessage,
-          ]);
-        },
-        onError: (error) => {
-          logger.error('Failed to generate code', {
-            error,
-          });
-          throw error;
-        },
-      });
-
-      return result.toTextStreamResponse();
-    } catch (error) {
-      return handleError(error, reply, 'code generation');
     }
   });
 
@@ -285,15 +250,16 @@ const ChatNameOptions = {
   },
 };
 
-const CodeGenerationOptions = {
+const GetChatOptions = {
   config: {
     allowedPrincipals: [PrincipalType.USER],
   },
   schema: {
-    tags: ['ai', 'ai-chat'],
-    description:
-      "Generate code based on the user's request. This endpoint processes the user message and generates a code response using the configured language model.",
-    body: NewMessageRequest,
+    tags: ['ai', 'ai-chat-mcp'],
+    description: 'Get a chat stream by chat ID.',
+    params: Type.Object({
+      id: Type.String(),
+    }),
   },
 };
 
@@ -334,55 +300,4 @@ function handleError(
 
   logger.error(`Failed to process ${context || 'request'} with error: `, error);
   return reply.code(500).send({ message: 'Internal server error' });
-}
-
-/**
- * Extracts the user message content from the request body.
- * Returns the message content as string, or null if validation fails (error response sent).
- */
-async function getUserMessage(
-  body: NewMessageRequest,
-  reply: FastifyReply,
-): Promise<string | null> {
-  if (body.messages) {
-    if (body.messages.length === 0) {
-      await reply.code(400).send({
-        message:
-          'Messages array cannot be empty. Please provide at least one message or use the message field instead.',
-      });
-      return null;
-    }
-
-    const lastMessage = body.messages[body.messages.length - 1];
-    if (
-      !lastMessage.parts ||
-      !Array.isArray(lastMessage.parts) ||
-      lastMessage.parts.length === 0
-    ) {
-      await reply.code(400).send({
-        message:
-          'Last message must have valid content array with at least one element.',
-      });
-      return null;
-    }
-
-    const firstContentElement = lastMessage.parts[0];
-    const lastContentElement = lastMessage.parts[lastMessage.parts.length - 1];
-    if (
-      !firstContentElement ||
-      typeof firstContentElement !== 'object' ||
-      (!('text' in firstContentElement) &&
-        !lastContentElement?.type.includes('tool-ui'))
-    ) {
-      await reply.code(400).send({
-        message:
-          'Last message must have a text content element as the first element.',
-      });
-      return null;
-    }
-
-    return String(firstContentElement.text ?? 'continue');
-  } else {
-    return body.message;
-  }
 }

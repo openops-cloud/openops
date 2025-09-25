@@ -5,7 +5,6 @@ import { LanguageModel, ModelMessage, UIMessage, generateText } from 'ai';
 import { aiConfigService } from '../config/ai-config.service';
 import { loadPrompt } from './prompts.service';
 import { Conversation } from './types';
-import { mergeToolResultsIntoMessages } from './utils';
 
 // Chat expiration time is 24 hour
 const DEFAULT_EXPIRE_TIME = 86400;
@@ -122,28 +121,24 @@ export const getChatContext = async (
   );
 };
 
+type ChatHistory = {
+  messages: UIMessage[];
+  activeStreamId?: string | null;
+};
+
 export const getChatHistory = async (
   chatId: string,
   userId: string,
   projectId: string,
-): Promise<ModelMessage[]> => {
-  const messages = await cacheWrapper.getSerializedObject<ModelMessage[]>(
+): Promise<ChatHistory> => {
+  const chatHistory = await cacheWrapper.getSerializedObject<ChatHistory>(
     chatHistoryKey(chatId, userId, projectId),
   );
 
-  return messages ?? [];
-};
-
-/**
- * Get chat history with tool results merged into assistant messages.
- */
-export const getChatHistoryWithMergedTools = async (
-  chatId: string,
-  userId: string,
-  projectId: string,
-): Promise<Array<Omit<UIMessage, 'id'>>> => {
-  const messages = await getChatHistory(chatId, userId, projectId);
-  return mergeToolResultsIntoMessages(messages);
+  return {
+    messages: chatHistory?.messages ?? [],
+    activeStreamId: chatHistory?.activeStreamId ?? null,
+  };
 };
 
 export const getAllChats = async (
@@ -174,15 +169,20 @@ export const getAllChats = async (
   return chats;
 };
 
-export const saveChatHistory = async (
-  chatId: string,
-  userId: string,
-  projectId: string,
-  messages: ModelMessage[],
-): Promise<void> => {
+export const saveChatHistory = async ({
+  chatId,
+  userId,
+  projectId,
+  chatHistory,
+}: {
+  chatId: string;
+  userId: string;
+  projectId: string;
+  chatHistory: ChatHistory;
+}): Promise<void> => {
   await cacheWrapper.setSerializedObject(
     chatHistoryKey(chatId, userId, projectId),
-    messages,
+    chatHistory,
     DEFAULT_EXPIRE_TIME,
   );
 };

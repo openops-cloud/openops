@@ -7,7 +7,7 @@ import {
 } from '@openops/shared';
 import { CoreMessage, LanguageModel } from 'ai';
 import { FastifyInstance, FastifyReply } from 'fastify';
-import { IncomingMessage, ServerResponse } from 'node:http';
+import { ServerResponse } from 'node:http';
 import { routeChatRequest } from '../../../src/app/ai/chat/chat-request-router';
 
 jest.mock('@openops/server-shared', () => ({
@@ -53,7 +53,6 @@ describe('Chat Request Router', () => {
     write: jest.fn(),
     end: jest.fn(),
     writeHead: jest.fn(),
-    on: jest.fn(),
   } as unknown as ServerResponse;
 
   const mockApp = {} as FastifyInstance;
@@ -88,10 +87,6 @@ describe('Chat Request Router', () => {
     content: 'How are you?',
   };
 
-  const mockRaw = {
-    aborted: false,
-  } as unknown as IncomingMessage;
-
   const mockRequest = {
     body: {
       chatId: 'test-chat-id',
@@ -102,7 +97,6 @@ describe('Chat Request Router', () => {
     headers: {
       authorization: 'Bearer test-auth-token',
     },
-    raw: mockRaw,
   };
 
   const mockChatHistory: CoreMessage[] = [
@@ -164,7 +158,6 @@ describe('Chat Request Router', () => {
           aiConfig: mockAiConfig,
           languageModel: mockLanguageModel,
           additionalContext: undefined,
-          abortSignal: expect.any(AbortSignal),
         }),
       );
     });
@@ -206,7 +199,6 @@ describe('Chat Request Router', () => {
           aiConfig: mockAiConfig,
           languageModel: mockLanguageModel,
           additionalContext: undefined,
-          abortSignal: expect.any(AbortSignal),
         }),
       );
     });

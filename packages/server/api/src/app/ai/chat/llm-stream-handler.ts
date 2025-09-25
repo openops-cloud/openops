@@ -1,20 +1,18 @@
 import { isLLMTelemetryEnabled } from '@openops/common';
 import { AiConfig } from '@openops/shared';
 import {
+  convertToModelMessages,
   LanguageModel,
   ModelMessage,
   stepCountIs,
-  StepResult,
   streamText,
+  StreamTextOnErrorCallback,
   StreamTextOnFinishCallback,
   StreamTextOnStepFinishCallback,
-  TextStreamPart,
+  StreamTextResult,
   ToolSet,
 } from 'ai';
-
-type StreamTextOnAbortCallback<TOOLS extends ToolSet> = (event: {
-  readonly steps: StepResult<TOOLS>[];
-}) => PromiseLike<void> | void;
+import { ChatHistory } from './types';
 
 type AICallSettings = {
   tools?: ToolSet;
@@ -22,19 +20,18 @@ type AICallSettings = {
   systemPrompt: string;
   maxRecursionDepth: number;
   newMessages: ModelMessage[];
-  chatHistory: ModelMessage[];
+  chatHistory: ChatHistory;
   languageModel: LanguageModel;
   onStepFinish?: StreamTextOnStepFinishCallback<ToolSet>;
   onFinish?: StreamTextOnFinishCallback<ToolSet>;
-  onAbort?: StreamTextOnAbortCallback<ToolSet>;
-  abortSignal: AbortSignal;
+  onError?: StreamTextOnErrorCallback;
 };
 
 const MAX_RETRIES = 1;
 
 export function getLLMAsyncStream(
   params: AICallSettings,
-): AsyncIterable<TextStreamPart<ToolSet>> {
+): StreamTextResult<ToolSet, never> {
   const {
     maxRecursionDepth,
     languageModel,
@@ -44,17 +41,16 @@ export function getLLMAsyncStream(
     tools,
     onStepFinish,
     onFinish,
-    onAbort,
-    abortSignal,
+    onError,
   } = params;
 
   const hasTools = tools && Object.keys(tools).length !== 0;
   const toolChoice = hasTools ? 'auto' : 'none';
 
-  const { fullStream } = streamText({
+  return streamText({
     model: languageModel,
     system: systemPrompt,
-    messages: chatHistory,
+    messages: convertToModelMessages(chatHistory.messages),
     ...aiConfig.modelSettings,
     tools,
     toolChoice,
@@ -62,13 +58,7 @@ export function getLLMAsyncStream(
     stopWhen: stepCountIs(maxRecursionDepth),
     onStepFinish,
     onFinish,
-    onAbort,
-    abortSignal,
+    onError,
     experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
-    async onError({ error }): Promise<void> {
-      throw error;
-    },
   });
-
-  return fullStream;
 }

@@ -6,6 +6,7 @@ import {
   UnifiedCodeLLMSchema,
 } from '@openops/shared';
 import {
+  convertToModelMessages,
   generateObject,
   GenerateObjectResult,
   LanguageModel,
@@ -14,9 +15,10 @@ import {
   StreamObjectOnFinishCallback,
   StreamObjectResult,
 } from 'ai';
+import { ChatHistory } from './types';
 
 type StreamCodeOptions = {
-  chatHistory: ModelMessage[];
+  chatHistory: ChatHistory;
   languageModel: LanguageModel;
   aiConfig: AiConfig;
   systemPrompt: string;
@@ -43,7 +45,7 @@ export const streamCode = ({
   return streamObject({
     model: languageModel,
     system: systemPrompt,
-    messages: chatHistory,
+    messages: convertToModelMessages(chatHistory.messages),
     ...aiConfig.modelSettings,
     onFinish,
     onError,
@@ -53,11 +55,10 @@ export const streamCode = ({
 };
 
 type GenerateCodeOptions = {
-  chatHistory: ModelMessage[];
+  chatHistory: ChatHistory;
   languageModel: LanguageModel;
   aiConfig: AiConfig;
   systemPrompt: string;
-  abortSignal?: AbortSignal;
 };
 
 export const generateCode = ({
@@ -65,7 +66,6 @@ export const generateCode = ({
   languageModel,
   aiConfig,
   systemPrompt,
-  abortSignal,
 }: GenerateCodeOptions): Promise<
   GenerateObjectResult<{
     type: 'code' | 'reply';
@@ -77,10 +77,9 @@ export const generateCode = ({
   return generateObject({
     model: languageModel,
     system: systemPrompt,
-    messages: chatHistory,
+    messages: convertToModelMessages(chatHistory.messages),
     ...aiConfig.modelSettings,
     schema: unifiedCodeLLMSchema,
     experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
-    abortSignal,
   });
 };
