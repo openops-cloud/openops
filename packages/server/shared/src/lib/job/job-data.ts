@@ -7,7 +7,7 @@ import {
 } from '@openops/shared';
 import { Static, Type } from '@sinclair/typebox';
 
-export const LATEST_JOB_DATA_SCHEMA_VERSION = 4;
+export const LATEST_JOB_DATA_SCHEMA_VERSION = 5;
 
 export enum RepeatableJobType {
   RENEW_WEBHOOK = 'RENEW_WEBHOOK',
