@@ -7,22 +7,41 @@ import {
   TriggerStrategy,
   createTrigger,
 } from '@openops/blocks-framework';
+import { isEmpty, isString } from '@openops/shared';
 import dayjs from 'dayjs';
 import { microsoftOutlookAuth } from '../common/auth';
 import { mailFolderIdDropdown } from '../common/props';
 
-function normalizeString(value: unknown): string {
-  return String(value).toLowerCase().trim();
+function normalizeString(value: string): string {
+  return value.toLowerCase().trim();
 }
 
-function isValidFilterArray(value: unknown): value is unknown[] {
-  return Array.isArray(value) && value.length > 0;
+function parseArrayProperty(value: unknown): unknown[] | null {
+  if (Array.isArray(value)) {
+    return value;
+  }
+
+  if (typeof value === 'string' && value.trim()) {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : null;
+    } catch {
+      return null;
+    }
+  }
+
+  return null;
 }
 
 function normalizeFilterArray(array: unknown[]): string[] {
   return array
     .filter(Boolean)
-    .map(normalizeString)
+    .map((value) => {
+      if (!isString(value)) {
+        throw new TypeError(`Expected string, got ${typeof value}`);
+      }
+      return normalizeString(value);
+    })
     .filter((str) => str.length > 0);
 }
 
@@ -30,9 +49,11 @@ function extractEmailAddresses(
   recipients: Recipient[] | null | undefined,
 ): string[] {
   if (!recipients) return [];
-  return recipients.map((recipient) =>
-    normalizeString(recipient.emailAddress?.address || ''),
-  );
+  return recipients
+    .map((recipient) => recipient.emailAddress?.address)
+    .filter(isString)
+    .map(normalizeString)
+    .filter((str) => !isEmpty(str));
 }
 
 function matchesAnyFilter(targets: string[], filters: string[]): boolean {
@@ -46,11 +67,12 @@ function applyArrayFilter(
   propsValue: Record<string, unknown>,
   messageTargets: string[],
 ): boolean {
-  if (!isValidFilterArray(propsValue[filterKey])) {
+  const parsedArray = parseArrayProperty(propsValue[filterKey]);
+  if (!parsedArray || parsedArray.length === 0) {
     return true;
   }
 
-  const filtersToMatch = normalizeFilterArray(propsValue[filterKey]);
+  const filtersToMatch = normalizeFilterArray(parsedArray);
   if (filtersToMatch.length === 0) {
     return true;
   }
@@ -62,15 +84,14 @@ function applyClientSideFilters(
   message: Message,
   propsValue: Record<string, unknown>,
 ): boolean {
-  const messageSender = normalizeString(
-    message.from?.emailAddress?.address || '',
-  );
-  const messageSenderName = normalizeString(
-    message.from?.emailAddress?.name || '',
-  );
-  if (
-    !applyArrayFilter('senders', propsValue, [messageSender, messageSenderName])
-  ) {
+  const senderTargets = [
+    message.from?.emailAddress?.address,
+    message.from?.emailAddress?.name,
+  ]
+    .filter(isString)
+    .map(normalizeString)
+    .filter((str) => !isEmpty(str));
+  if (!applyArrayFilter('senders', propsValue, senderTargets)) {
     return false;
   }
 
@@ -84,15 +105,15 @@ function applyClientSideFilters(
     return false;
   }
 
-  if (
-    propsValue['subject'] &&
-    typeof propsValue['subject'] === 'string' &&
-    propsValue['subject'].trim()
-  ) {
+  if (isString(propsValue['subject']) && !isEmpty(propsValue['subject'])) {
     const subjectToMatch = normalizeString(propsValue['subject']);
-    const messageSubject = normalizeString(message.subject || '');
+    const messageSubject = message.subject;
 
-    if (!messageSubject.includes(subjectToMatch)) {
+    if (!isString(messageSubject) || isEmpty(messageSubject)) {
+      return false;
+    }
+
+    if (!normalizeString(messageSubject).includes(subjectToMatch)) {
       return false;
     }
   }
