@@ -9,16 +9,20 @@ export const navigationUtil = {
       '/reset-password',
       '/verify-email',
     ];
-    if (!authPages.includes(path)) {
-      localStorage.setItem(LAST_VISITED_KEY, path);
+    if (
+      !authPages.includes(path) &&
+      sessionStorage.getItem('logout_flag') !== 'true'
+    ) {
+      sessionStorage.setItem(LAST_VISITED_KEY, path);
     }
   },
 
   get: () => {
-    return localStorage.getItem(LAST_VISITED_KEY) ?? '/';
+    return sessionStorage.getItem(LAST_VISITED_KEY) ?? '/';
   },
 
   clear: () => {
-    localStorage.removeItem(LAST_VISITED_KEY);
+    sessionStorage.removeItem(LAST_VISITED_KEY);
+    sessionStorage.removeItem('logout_flag');
   },
 };

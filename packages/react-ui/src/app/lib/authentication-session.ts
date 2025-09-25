@@ -88,6 +88,7 @@ export const authenticationSession = {
     // we don't want to redirect to the same page after explicit logout
     if (userInitiated) {
       navigationUtil.clear();
+      localStorage.setItem('logout_event', Date.now().toString());
     }
 
     if (
