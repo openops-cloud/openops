@@ -115,14 +115,14 @@ export async function handleUserMessage(
   const response = streamTextResult.toUIMessageStreamResponse({
     originalMessages: chatHistory.messages,
     generateMessageId: generateId,
-    onFinish: ({ messages }) => {
+    onFinish: ({ messages, responseMessage }) => {
       // Clear the active stream when finished
       return saveChatHistory({
         chatId,
         userId,
         projectId,
         chatHistory: {
-          messages,
+          messages: [...messages, responseMessage],
           activeStreamId: null,
         },
       });
