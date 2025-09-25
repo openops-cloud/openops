@@ -17,7 +17,6 @@ import {
   PopulatedFlow,
 } from '@openops/shared';
 import { useMutation } from '@tanstack/react-query';
-import { t } from 'i18next';
 import { useEffect, useState } from 'react';
 
 import { flowsApi } from '../lib/flows-api';
@@ -30,6 +29,9 @@ import {
 } from './execute-risky-flow-dialog/execute-risky-flow-dialog';
 
 import { useAuthorization } from '@/app/common/hooks/authorization-hooks';
+import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
+import { t } from 'i18next';
+import { getShortTriggerExplanation } from '../lib/flow-status-toggle-utils';
 
 type FlowStatusToggleProps = {
   flow: Flow;
@@ -74,6 +76,10 @@ const FlowStatusToggle = ({
     onError: () => {
       toast(INTERNAL_ERROR_TOAST);
     },
+  });
+
+  const { stepMetadata: triggerMetadata } = blocksHooks.useStepMetadata({
+    step: flowVersion.trigger,
   });
 
   const {
@@ -125,8 +131,12 @@ const FlowStatusToggle = ({
             ? isNil(flow.publishedVersionId)
               ? t('Please publish workflow first')
               : isFlowPublished
-              ? t('Workflow is on')
-              : t('Workflow is off')
+              ? getShortTriggerExplanation(
+                  flowVersion.trigger,
+                  triggerMetadata,
+                  flow,
+                )
+              : t('Workflow is off. It only runs if manually triggered.')
             : t('Permission Needed')}
         </TooltipContent>
       </Tooltip>
