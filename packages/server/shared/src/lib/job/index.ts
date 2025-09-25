@@ -79,16 +79,27 @@ export const SavePayloadRequest = Type.Object({
 });
 export type SavePayloadRequest = Static<typeof SavePayloadRequest>;
 
-export const SubmitPayloadsRequest = Type.Object({
+const SubmitPayloadBase = {
   flowVersionId: Type.String(),
   projectId: Type.String(),
   progressUpdateType: Type.Enum(ProgressUpdateType),
   synchronousHandlerId: Type.Optional(Type.String()),
-  executionCorrelationId: Type.String(),
+};
+
+export const SubmitPayloadsRequest = Type.Object({
+  ...SubmitPayloadBase,
   payloads: Type.Array(Type.Unknown()),
 });
 
 export type SubmitPayloadsRequest = Static<typeof SubmitPayloadsRequest>;
+
+export const SubmitPayloadRequest = Type.Object({
+  ...SubmitPayloadBase,
+  executionCorrelationId: Type.String(),
+  payload: Type.Unknown(),
+});
+
+export type SubmitPayloadRequest = Static<typeof SubmitPayloadRequest>;
 
 export const GetRunForWorkerRequest = Type.Object({
   runId: Type.String(),

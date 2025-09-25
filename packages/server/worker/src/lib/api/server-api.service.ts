@@ -9,6 +9,7 @@ import {
   ResumeRunRequest,
   SavePayloadRequest,
   SendWebhookUpdateRequest,
+  SubmitPayloadRequest,
   SubmitPayloadsRequest,
   UpdateFailureCountRequest,
   UpdateJobRequest,
@@ -66,6 +67,9 @@ export const workerApiService = (workerToken: string) => {
     },
     async startRuns(request: SubmitPayloadsRequest): Promise<FlowRun[]> {
       return client.post<FlowRun[]>('/v1/workers/submit-payloads', request);
+    },
+    async startRun(request: SubmitPayloadRequest): Promise<FlowRun> {
+      return client.post<FlowRun>('/v1/workers/submit-payload', request);
     },
     async sendWebhookUpdate(request: SendWebhookUpdateRequest): Promise<void> {
       await client.post('/v1/workers/send-webhook-update', request);

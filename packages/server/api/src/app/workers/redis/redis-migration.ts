@@ -13,6 +13,8 @@ import {
   ScheduleType,
 } from '@openops/shared';
 import { Job } from 'bullmq';
+import { blockMetadataService } from '../../blocks/block-metadata-service';
+import { flowVersionService } from '../../flows/flow-version/flow-version.service';
 import { flowRepo } from '../../flows/flow/flow.repo';
 import { bullMqGroups } from './redis-queue';
 
@@ -91,6 +93,16 @@ async function migrateJob(job: Job<ScheduledJobData>): Promise<void> {
     modifiedJobData.executionType = undefined;
     await job.updateData(modifiedJobData);
   }
+
+  if (modifiedJobData.schemaVersion === 4) {
+    modifiedJobData.schemaVersion = 5;
+
+    modifiedJobData = await addTriggerStrategyForRepeatableJobType(
+      modifiedJobData,
+    );
+
+    await job.updateData(modifiedJobData);
+  }
 }
 
 async function updateCronExpressionOfRedisToPostgresTable(
@@ -114,4 +126,30 @@ async function updateCronExpressionOfRedisToPostgresTable(
       cronExpression: pattern,
     },
   });
+}
+
+async function addTriggerStrategyForRepeatableJobType(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  modifiedJobData: any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): Promise<any> {
+  if (modifiedJobData.jobType === RepeatableJobType.EXECUTE_TRIGGER) {
+    const flowVersion = await flowVersionService.getFlowVersionOrThrow({
+      flowId: modifiedJobData.flowId,
+      versionId: modifiedJobData.flowVersionId,
+    });
+
+    const blockMetadata = await blockMetadataService.getOrThrow({
+      name: flowVersion.trigger.settings.blockName,
+      version: flowVersion.trigger.settings.blockVersion,
+      projectId: undefined,
+    });
+
+    const action =
+      blockMetadata.triggers[flowVersion.trigger.settings.triggerName];
+
+    modifiedJobData.triggerStrategy = action.type;
+  }
+
+  return modifiedJobData;
 }

@@ -1,3 +1,4 @@
+import { TriggerStrategy } from '@openops/blocks-framework';
 import {
   ExecutionType,
   ProgressUpdateType,
@@ -32,6 +33,7 @@ export const RepeatingJobData = Type.Object({
   flowVersionId: Type.String(),
   flowId: Type.String(),
   triggerType: Type.Enum(TriggerType),
+  triggerStrategy: Type.Enum(TriggerStrategy),
   jobType: Type.Literal(RepeatableJobType.EXECUTE_TRIGGER),
 });
 export type RepeatingJobData = Static<typeof RepeatingJobData>;
