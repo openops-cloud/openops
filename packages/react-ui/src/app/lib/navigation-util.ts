@@ -1,4 +1,6 @@
-const LAST_VISITED_KEY = 'last_visited_page';
+import { LOGOUT_FLAG_KEY } from './navigation-events';
+
+export const LAST_VISITED_KEY = 'last_visited_page';
 
 export const navigationUtil = {
   save: (path: string) => {
@@ -11,7 +13,7 @@ export const navigationUtil = {
     ];
     if (
       !authPages.includes(path) &&
-      sessionStorage.getItem('logout_flag') !== 'true'
+      sessionStorage.getItem(LOGOUT_FLAG_KEY) !== 'true'
     ) {
       sessionStorage.setItem(LAST_VISITED_KEY, path);
     }
@@ -23,6 +25,6 @@ export const navigationUtil = {
 
   clear: () => {
     sessionStorage.removeItem(LAST_VISITED_KEY);
-    sessionStorage.removeItem('logout_flag');
+    sessionStorage.removeItem(LOGOUT_FLAG_KEY);
   },
 };

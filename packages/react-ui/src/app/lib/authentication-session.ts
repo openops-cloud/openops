@@ -4,6 +4,7 @@ import { jwtDecode } from 'jwt-decode';
 import { authenticationApi } from '@/app/lib/authentication-api';
 import { AuthenticationResponse, isNil } from '@openops/shared';
 import { NavigateFunction } from 'react-router-dom';
+import { LOGOUT_EVENT_KEY } from './navigation-events';
 import { navigationUtil } from './navigation-util';
 import { projectAuth } from './project-auth';
 
@@ -88,7 +89,7 @@ export const authenticationSession = {
     // we don't want to redirect to the same page after explicit logout
     if (userInitiated) {
       navigationUtil.clear();
-      localStorage.setItem('logout_event', Date.now().toString());
+      localStorage.setItem(LOGOUT_EVENT_KEY, Date.now().toString());
     }
 
     if (
