@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
-import { LAST_VISITED_KEY } from './navigation-util';
-
-export const LOGOUT_EVENT_KEY = 'logout_event';
-export const LOGOUT_FLAG_KEY = 'logout_flag';
+import {
+  LAST_VISITED_KEY,
+  LOGOUT_EVENT_KEY,
+  LOGOUT_FLAG_KEY,
+} from './navigation-constants';
 
 export function useLogoutEventListener() {
   useEffect(() => {

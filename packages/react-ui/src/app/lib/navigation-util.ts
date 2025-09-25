@@ -1,6 +1,4 @@
-import { LOGOUT_FLAG_KEY } from './navigation-events';
-
-export const LAST_VISITED_KEY = 'last_visited_page';
+import { LAST_VISITED_KEY, LOGOUT_FLAG_KEY } from './navigation-constants';
 
 export const navigationUtil = {
   save: (path: string) => {
