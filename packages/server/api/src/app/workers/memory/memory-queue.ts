@@ -1,4 +1,7 @@
-import { WebhookRenewStrategy } from '@openops/blocks-framework';
+import {
+  TriggerStrategy,
+  WebhookRenewStrategy,
+} from '@openops/blocks-framework';
 import {
   JobType,
   LATEST_JOB_DATA_SCHEMA_VERSION,
@@ -149,6 +152,7 @@ async function renewEnabledRepeating(): Promise<void> {
           flowVersionId: flow.publishedVersionId!,
           flowId: flow.id,
           triggerType: TriggerType.BLOCK,
+          triggerStrategy: TriggerStrategy.SCHEDULED,
           jobType: RepeatableJobType.EXECUTE_TRIGGER,
         },
         scheduleOptions: {

@@ -79,16 +79,27 @@ export const SavePayloadRequest = Type.Object({
 });
 export type SavePayloadRequest = Static<typeof SavePayloadRequest>;
 
-export const SubmitPayloadsRequest = Type.Object({
+const SubmitPayloadBase = {
   flowVersionId: Type.String(),
   projectId: Type.String(),
   progressUpdateType: Type.Enum(ProgressUpdateType),
   synchronousHandlerId: Type.Optional(Type.String()),
-  executionCorrelationId: Type.String(),
+};
+
+export const SubmitPayloadsRequest = Type.Object({
+  ...SubmitPayloadBase,
   payloads: Type.Array(Type.Unknown()),
 });
 
 export type SubmitPayloadsRequest = Static<typeof SubmitPayloadsRequest>;
+
+export const SubmitPayloadRequest = Type.Object({
+  ...SubmitPayloadBase,
+  executionCorrelationId: Type.String(),
+  payload: Type.Unknown(),
+});
+
+export type SubmitPayloadRequest = Static<typeof SubmitPayloadRequest>;
 
 export const GetRunForWorkerRequest = Type.Object({
   runId: Type.String(),
@@ -101,7 +112,7 @@ export type ResumeRunRequest = Static<typeof ResumeRunRequest>;
 export const flowTimeoutSandbox =
   system.getNumber(SharedSystemProp.FLOW_TIMEOUT_SECONDS) ?? 600;
 export const triggerTimeoutSandbox =
-  system.getNumber(SharedSystemProp.TRIGGER_TIMEOUT_SECONDS) ?? 60;
+  system.getNumber(SharedSystemProp.TRIGGER_TIMEOUT_SECONDS) ?? 120;
 
 export function getEngineTimeout(operationType: EngineOperationType): number {
   switch (operationType) {

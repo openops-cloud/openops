@@ -83,7 +83,6 @@ export const webhookExecutor = {
         ? ProgressUpdateType.WEBHOOK_RESPONSE
         : ProgressUpdateType.NONE,
       synchronousHandlerId: data.synchronousHandlerId ?? undefined,
-      executionCorrelationId: data.executionCorrelationId,
       payloads: filteredPayloads,
     });
     if (isNil(runs) || runs.length === 0 || isNil(runs[0])) {

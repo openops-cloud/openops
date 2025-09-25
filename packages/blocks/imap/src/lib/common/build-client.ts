@@ -10,5 +10,8 @@ export function buildClient(auth: BlockPropValueSchema<typeof imapAuth>) {
     auth: { user: auth.username, pass: auth.password },
     tls: { rejectUnauthorized: false },
     logger: false,
+    connectionTimeout: 10000,
+    greetingTimeout: 7000,
+    socketTimeout: 60000,
   });
 }

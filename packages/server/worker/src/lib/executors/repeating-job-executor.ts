@@ -1,3 +1,4 @@
+import { TriggerStrategy } from '@openops/blocks-framework';
 import {
   DelayedJobData,
   logger,
@@ -112,14 +113,32 @@ const consumeBlockTrigger = async (
     },
   );
 
+  if (shouldUseFlowVersionId(data.triggerStrategy, payloads)) {
+    await workerApiService(workerToken).startRun({
+      executionCorrelationId: flowVersion.id,
+      flowVersionId: data.flowVersionId,
+      progressUpdateType: ProgressUpdateType.NONE,
+      projectId: data.projectId,
+      payload: payloads[0],
+    });
+
+    return;
+  }
+
   await workerApiService(workerToken).startRuns({
-    executionCorrelationId: flowVersion.id,
     flowVersionId: data.flowVersionId,
     progressUpdateType: ProgressUpdateType.NONE,
     projectId: data.projectId,
     payloads,
   });
 };
+
+function shouldUseFlowVersionId(
+  triggerStrategy: TriggerStrategy,
+  payloads: unknown[],
+): boolean {
+  return triggerStrategy === TriggerStrategy.SCHEDULED && payloads.length === 1;
+}
 
 const consumeRenewWebhookJob = async (
   data: RenewWebhookJobData,
