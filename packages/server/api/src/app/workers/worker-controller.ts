@@ -10,6 +10,7 @@ import {
   SavePayloadRequest,
   ScheduledJobData,
   SendWebhookUpdateRequest,
+  SubmitPayloadRequest,
   SubmitPayloadsRequest,
   WebhookJobData,
 } from '@openops/server-shared';
@@ -128,6 +129,42 @@ export const flowWorkerController: FastifyPluginAsyncTypebox = async (app) => {
   );
 
   app.post(
+    '/submit-payload',
+    {
+      config: {
+        allowedPrincipals: [PrincipalType.WORKER],
+      },
+      schema: {
+        description:
+          'Submit payload to start new flow run. This endpoint creates a new flow execution for the provided payload.',
+        body: SubmitPayloadRequest,
+      },
+    },
+    async (request) => {
+      const {
+        flowVersionId,
+        projectId,
+        payload,
+        executionCorrelationId,
+        synchronousHandlerId,
+        progressUpdateType,
+      } = request.body;
+
+      return flowRunService.start({
+        environment: RunEnvironment.PRODUCTION,
+        flowVersionId,
+        payload,
+        synchronousHandlerId,
+        projectId,
+        executionCorrelationId,
+        executionType: ExecutionType.BEGIN,
+        progressUpdateType,
+        triggerSource: FlowRunTriggerSource.TRIGGERED,
+      });
+    },
+  );
+
+  app.post(
     '/submit-payloads',
     {
       config: {
@@ -144,7 +181,6 @@ export const flowWorkerController: FastifyPluginAsyncTypebox = async (app) => {
         flowVersionId,
         projectId,
         payloads,
-        executionCorrelationId,
         synchronousHandlerId,
         progressUpdateType,
       } = request.body;
@@ -155,19 +191,13 @@ export const flowWorkerController: FastifyPluginAsyncTypebox = async (app) => {
       );
 
       const createFlowRuns = filterPayloads.map((payload) => {
-        // If multiple payloads are submitted, we need to create a new executionCorrelationId for each one.
-        let correlationId = executionCorrelationId;
-        if (filterPayloads.length > 1) {
-          correlationId = openOpsId();
-        }
-
         return flowRunService.start({
           environment: RunEnvironment.PRODUCTION,
           flowVersionId,
           payload,
           synchronousHandlerId,
           projectId,
-          executionCorrelationId: correlationId,
+          executionCorrelationId: openOpsId(),
           executionType: ExecutionType.BEGIN,
           progressUpdateType,
           triggerSource: FlowRunTriggerSource.TRIGGERED,

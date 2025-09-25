@@ -7,6 +7,7 @@ import { moveEmailToFolderAction } from './lib/actions/move-email-to-folder';
 import { replyEmailAction } from './lib/actions/reply-email';
 import { sendEmailAction } from './lib/actions/send-email';
 import { microsoftOutlookAuth } from './lib/common/auth';
+import { newEmailTrigger } from './lib/triggers/new-email';
 
 export const microsoftOutlook = createBlock({
   displayName: 'Microsoft Outlook',
@@ -31,5 +32,5 @@ export const microsoftOutlook = createBlock({
       }),
     }),
   ],
-  triggers: [],
+  triggers: [newEmailTrigger],
 });
