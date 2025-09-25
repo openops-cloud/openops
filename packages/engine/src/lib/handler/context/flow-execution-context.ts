@@ -130,7 +130,7 @@ export class FlowExecutorContext {
     return stepOutput.status === StepOutputStatus.PAUSED;
   }
 
-  public incrementDuration(duration: number): FlowExecutorContext {
+  public updateDuration(duration: number): FlowExecutorContext {
     const newDuration = duration + this.duration;
     return new FlowExecutorContext({
       ...this,
