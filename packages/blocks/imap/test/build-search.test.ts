@@ -12,9 +12,9 @@ describe('buildImapSearch', () => {
   afterAll(() => {
     jest.useRealTimers();
   });
-  test('sets since to 3 months before now when lastEpochMilliSeconds is 0', () => {
+  test('sets since to 14 days before now when lastEpochMilliSeconds is 0', () => {
     const res = buildImapSearch({ lastEpochMilliSeconds: 0 });
-    expect(res.since).toBe(dayjs().subtract(3, 'month').toISOString());
+    expect(res.since).toBe(dayjs().subtract(14, 'days').toISOString());
   });
 
   test('sets since to ISO string when lastEpochMilliSeconds is non-zero', () => {
@@ -37,7 +37,7 @@ describe('buildImapSearch', () => {
       from: 'carol@example.com',
     });
     expect(dayjs(res.since).toISOString()).toBe(
-      dayjs().subtract(3, 'month').toISOString(),
+      dayjs().subtract(14, 'days').toISOString(),
     );
     expect(res.or).toBeUndefined();
   });
