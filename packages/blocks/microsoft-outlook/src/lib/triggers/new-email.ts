@@ -16,23 +16,6 @@ function normalizeString(value: string): string {
   return value.toLowerCase().trim();
 }
 
-function parseArrayProperty(value: unknown): unknown[] | null {
-  if (Array.isArray(value)) {
-    return value;
-  }
-
-  if (typeof value === 'string' && value.trim()) {
-    try {
-      const parsed = JSON.parse(value);
-      return Array.isArray(parsed) ? parsed : null;
-    } catch {
-      return null;
-    }
-  }
-
-  return null;
-}
-
 function normalizeFilterArray(array: unknown[]): string[] {
   return array
     .filter(Boolean)
@@ -67,12 +50,9 @@ function applyArrayFilter(
   propsValue: Record<string, unknown>,
   messageTargets: string[],
 ): boolean {
-  const parsedArray = parseArrayProperty(propsValue[filterKey]);
-  if (!parsedArray || parsedArray.length === 0) {
-    return true;
-  }
-
-  const filtersToMatch = normalizeFilterArray(parsedArray);
+  const filtersToMatch = normalizeFilterArray(
+    propsValue[filterKey] as unknown[],
+  );
   if (filtersToMatch.length === 0) {
     return true;
   }
