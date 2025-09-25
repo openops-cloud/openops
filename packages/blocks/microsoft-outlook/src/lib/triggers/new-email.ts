@@ -20,7 +20,10 @@ function isValidFilterArray(value: unknown): value is unknown[] {
 }
 
 function normalizeFilterArray(array: unknown[]): string[] {
-  return array.filter(Boolean).map(normalizeString);
+  return array
+    .filter(Boolean)
+    .map(normalizeString)
+    .filter((str) => str.length > 0);
 }
 
 function extractEmailAddresses(
@@ -38,40 +41,47 @@ function matchesAnyFilter(targets: string[], filters: string[]): boolean {
   );
 }
 
+function applyArrayFilter(
+  filterKey: string,
+  propsValue: Record<string, unknown>,
+  messageTargets: string[],
+): boolean {
+  if (!isValidFilterArray(propsValue[filterKey])) {
+    return true;
+  }
+
+  const filtersToMatch = normalizeFilterArray(propsValue[filterKey]);
+  if (filtersToMatch.length === 0) {
+    return true;
+  }
+
+  return matchesAnyFilter(messageTargets, filtersToMatch);
+}
+
 function applyClientSideFilters(
   message: Message,
   propsValue: Record<string, unknown>,
 ): boolean {
-  if (isValidFilterArray(propsValue['senders'])) {
-    const sendersToMatch = normalizeFilterArray(propsValue['senders']);
-    const messageSender = normalizeString(
-      message.from?.emailAddress?.address || '',
-    );
-    const messageSenderName = normalizeString(
-      message.from?.emailAddress?.name || '',
-    );
-
-    if (!matchesAnyFilter([messageSender, messageSenderName], sendersToMatch)) {
-      return false;
-    }
+  const messageSender = normalizeString(
+    message.from?.emailAddress?.address || '',
+  );
+  const messageSenderName = normalizeString(
+    message.from?.emailAddress?.name || '',
+  );
+  if (
+    !applyArrayFilter('senders', propsValue, [messageSender, messageSenderName])
+  ) {
+    return false;
   }
 
-  if (isValidFilterArray(propsValue['recipients'])) {
-    const recipientsToMatch = normalizeFilterArray(propsValue['recipients']);
-    const messageRecipients = extractEmailAddresses(message.toRecipients);
-
-    if (!matchesAnyFilter(messageRecipients, recipientsToMatch)) {
-      return false;
-    }
+  const messageRecipients = extractEmailAddresses(message.toRecipients);
+  if (!applyArrayFilter('recipients', propsValue, messageRecipients)) {
+    return false;
   }
 
-  if (isValidFilterArray(propsValue['cc'])) {
-    const ccToMatch = normalizeFilterArray(propsValue['cc']);
-    const messageCcRecipients = extractEmailAddresses(message.ccRecipients);
-
-    if (!matchesAnyFilter(messageCcRecipients, ccToMatch)) {
-      return false;
-    }
+  const messageCcRecipients = extractEmailAddresses(message.ccRecipients);
+  if (!applyArrayFilter('cc', propsValue, messageCcRecipients)) {
+    return false;
   }
 
   if (
