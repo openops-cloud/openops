@@ -48,16 +48,21 @@ export const flowExecutor = {
     executionState: FlowExecutorContext;
     constants: EngineConstants;
   }): Promise<FlowRunResponse> {
+    const flowStartTime = performance.now();
+
     const output = await flowExecutor.executeFromAction({
       action: trigger.nextAction,
       executionState,
       constants,
     });
 
-    const newContext =
+    let newContext =
       output.verdict === ExecutionVerdict.RUNNING
         ? output.setVerdict(ExecutionVerdict.SUCCEEDED, output.verdictResponse)
         : output;
+
+    const flowEndTime = performance.now();
+    newContext = newContext.incrementDuration(flowEndTime - flowStartTime);
 
     await sendProgress(newContext, constants);
 
@@ -123,7 +128,7 @@ export const flowExecutor = {
 
     const flowEndTime = performance.now();
 
-    return flowExecutionContext.setDuration(flowEndTime - flowStartTime);
+    return flowExecutionContext.incrementDuration(flowEndTime - flowStartTime);
   },
 };
 

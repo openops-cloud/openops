@@ -63,7 +63,7 @@ export class FlowExecutorContext {
     this.tags = copyFrom?.tags ?? [];
     this.steps = copyFrom?.steps ?? {};
     this.pauseId = copyFrom?.pauseId ?? nanoid();
-    this.duration = copyFrom?.duration ?? -1;
+    this.duration = copyFrom?.duration ?? 0;
     this.verdict = copyFrom?.verdict ?? ExecutionVerdict.RUNNING;
     this.verdictResponse = copyFrom?.verdictResponse ?? undefined;
     this.error = copyFrom?.error ?? undefined;
@@ -130,10 +130,11 @@ export class FlowExecutorContext {
     return stepOutput.status === StepOutputStatus.PAUSED;
   }
 
-  public setDuration(duration: number): FlowExecutorContext {
+  public incrementDuration(duration: number): FlowExecutorContext {
+    const newDuration = duration + this.duration;
     return new FlowExecutorContext({
       ...this,
-      duration,
+      duration: newDuration,
     });
   }
 
