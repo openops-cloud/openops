@@ -1,5 +1,5 @@
-import { PageCollection } from '@microsoft/microsoft-graph-client';
-import { Message } from '@microsoft/microsoft-graph-types';
+import { Client, PageCollection } from '@microsoft/microsoft-graph-client';
+import { Message, Recipient } from '@microsoft/microsoft-graph-types';
 import { DedupeStrategy, Polling, pollingHelper } from '@openops/blocks-common';
 import {
   BlockPropValueSchema,
@@ -7,77 +7,155 @@ import {
   TriggerStrategy,
   createTrigger,
 } from '@openops/blocks-framework';
-import { getMicrosoftGraphClient } from '@openops/common';
 import dayjs from 'dayjs';
 import { microsoftOutlookAuth } from '../common/auth';
 import { mailFolderIdDropdown } from '../common/props';
 
-function normalizeList(list?: unknown[]): string[] {
-  return (list || [])
-    .map((s) => String(s).toLowerCase().trim())
-    .filter((s) => s.length > 0);
+function normalizeString(value: unknown): string {
+  return String(value).toLowerCase().trim();
+}
+
+function isValidFilterArray(value: unknown): value is unknown[] {
+  return Array.isArray(value) && value.length > 0;
+}
+
+function normalizeFilterArray(array: unknown[]): string[] {
+  return array.filter(Boolean).map(normalizeString);
+}
+
+function extractEmailAddresses(
+  recipients: Recipient[] | null | undefined,
+): string[] {
+  if (!recipients) return [];
+  return recipients.map((recipient) =>
+    normalizeString(recipient.emailAddress?.address || ''),
+  );
+}
+
+function matchesAnyFilter(targets: string[], filters: string[]): boolean {
+  return filters.some((filter) =>
+    targets.some((target) => target.includes(filter)),
+  );
+}
+
+function applyClientSideFilters(
+  message: Message,
+  propsValue: Record<string, unknown>,
+): boolean {
+  if (isValidFilterArray(propsValue['senders'])) {
+    const sendersToMatch = normalizeFilterArray(propsValue['senders']);
+    const messageSender = normalizeString(
+      message.from?.emailAddress?.address || '',
+    );
+    const messageSenderName = normalizeString(
+      message.from?.emailAddress?.name || '',
+    );
+
+    if (!matchesAnyFilter([messageSender, messageSenderName], sendersToMatch)) {
+      return false;
+    }
+  }
+
+  if (isValidFilterArray(propsValue['recipients'])) {
+    const recipientsToMatch = normalizeFilterArray(propsValue['recipients']);
+    const messageRecipients = extractEmailAddresses(message.toRecipients);
+
+    if (!matchesAnyFilter(messageRecipients, recipientsToMatch)) {
+      return false;
+    }
+  }
+
+  if (isValidFilterArray(propsValue['cc'])) {
+    const ccToMatch = normalizeFilterArray(propsValue['cc']);
+    const messageCcRecipients = extractEmailAddresses(message.ccRecipients);
+
+    if (!matchesAnyFilter(messageCcRecipients, ccToMatch)) {
+      return false;
+    }
+  }
+
+  if (propsValue['subject'] && String(propsValue['subject']).trim()) {
+    const subjectToMatch = normalizeString(propsValue['subject']);
+    const messageSubject = normalizeString(message.subject || '');
+
+    if (!messageSubject.includes(subjectToMatch)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+const SELECT_FIELDS = [
+  'id',
+  'subject',
+  'from',
+  'toRecipients',
+  'ccRecipients',
+  'receivedDateTime',
+  'bodyPreview',
+].join(',');
+
+async function createGraphClient(accessToken: string): Promise<Client> {
+  return Client.initWithMiddleware({
+    authProvider: {
+      getAccessToken: () => Promise.resolve(accessToken),
+    },
+  });
+}
+
+async function fetchMessages(
+  client: Client,
+  folderId: string,
+  lastFetchEpochMS: number,
+): Promise<Message[]> {
+  const messages: Message[] = [];
+  const baseUrl = `/me/mailFolders/${folderId || 'inbox'}/messages`;
+
+  const filter =
+    lastFetchEpochMS === 0
+      ? '$top=10'
+      : `$filter=receivedDateTime gt ${dayjs(lastFetchEpochMS).toISOString()}`;
+
+  let response: PageCollection = await client
+    .api(`${baseUrl}?${filter}&$select=${SELECT_FIELDS}`)
+    .orderby('receivedDateTime desc')
+    .get();
+
+  const shouldFetchAll = lastFetchEpochMS !== 0;
+
+  do {
+    messages.push(...(response.value as Message[]));
+
+    if (!shouldFetchAll || !response['@odata.nextLink']) {
+      break;
+    }
+
+    response = await client.api(response['@odata.nextLink']).get();
+  } while (response.value.length > 0);
+
+  return messages;
 }
 
 const polling: Polling<
   BlockPropValueSchema<typeof microsoftOutlookAuth>,
-  {
-    folderId?: string;
-    recipients?: unknown[];
-    senders?: unknown[];
-    cc?: unknown[];
-    subject?: string;
-  }
+  Record<string, unknown>
 > = {
   strategy: DedupeStrategy.TIMEBASED,
   items: async ({ auth, lastFetchEpochMS, propsValue }) => {
-    const client = getMicrosoftGraphClient(auth.access_token);
+    const client = await createGraphClient(auth.access_token);
 
-    const messages: Message[] = [];
-    const recipients = normalizeList(propsValue?.recipients);
-    const senders = normalizeList(propsValue?.senders);
-    const cc = normalizeList(propsValue?.cc);
-    const subject = propsValue?.subject?.trim();
-    const folderId = propsValue?.folderId?.trim();
-
-    const filter =
-      lastFetchEpochMS === 0
-        ? '$top=10'
-        : `$filter=receivedDateTime gt ${dayjs(
-            lastFetchEpochMS,
-          ).toISOString()}`;
-
-    const request = client.api(
-      `/me/mailFolders/${folderId || 'inbox'}/messages?${filter}`,
+    const messages = await fetchMessages(
+      client,
+      propsValue['mailBox'] as string,
+      lastFetchEpochMS,
     );
 
-    if (recipients.length > 0) {
-      request.header('ConsistencyLevel', 'eventual').query({
-        $search: `"to:${recipients}"&$select=subject,toRecipients,receivedDateTime`,
-      });
-    } else {
-      request.orderby('receivedDateTime desc');
-    }
+    const filteredMessages = messages.filter((message) =>
+      applyClientSideFilters(message, propsValue),
+    );
 
-    let response: PageCollection = await request.get();
-    if (lastFetchEpochMS === 0) {
-      for (const message of response.value as Message[]) {
-        messages.push(message);
-      }
-    } else {
-      while (response.value.length > 0) {
-        for (const message of response.value as Message[]) {
-          messages.push(message);
-        }
-
-        if (response['@odata.nextLink']) {
-          response = await client.api(response['@odata.nextLink']).get();
-        } else {
-          break;
-        }
-      }
-    }
-
-    return messages.map((message) => ({
+    return filteredMessages.map((message) => ({
       epochMilliSeconds: dayjs(message.receivedDateTime).valueOf(),
       data: message,
     }));
@@ -90,9 +168,9 @@ export const newEmailTrigger = createTrigger({
   displayName: 'New Email',
   description: 'Triggers when a new email is received in the inbox.',
   props: {
-    folderId: mailFolderIdDropdown({
-      displayName: 'Folder',
-      description: 'Read emails from a specific folder. Leave empty for Inbox.',
+    mailBox: mailFolderIdDropdown({
+      displayName: 'Mail Folder',
+      description: 'The folder to monitor for new emails.',
       required: false,
     }),
     senders: Property.Array({
