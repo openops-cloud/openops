@@ -43,7 +43,7 @@ export const imapAuth = BlockAuth.CustomAuth({
       });
       return {
         valid: false,
-        error: JSON.stringify(error),
+        error: 'Failed to validate IMAP connection',
       };
     } finally {
       await imapClient.logout();
