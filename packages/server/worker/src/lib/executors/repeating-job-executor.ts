@@ -137,7 +137,7 @@ function shouldUseFlowVersionId(
   triggerStrategy: TriggerStrategy,
   payloads: unknown[],
 ): boolean {
-  return triggerStrategy === TriggerStrategy.SCHEDULED && payloads.length === 0;
+  return triggerStrategy === TriggerStrategy.SCHEDULED && payloads.length === 1;
 }
 
 const consumeRenewWebhookJob = async (
