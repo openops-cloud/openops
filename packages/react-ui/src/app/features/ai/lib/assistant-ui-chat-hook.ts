@@ -14,7 +14,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { aiChatApi } from '../../builder/ai-chat/lib/chat-api';
 import {
   getBuilderStore,
-  useBuilderStoreOutsideProvider,
+  useBuilderStoreOutsideProviderWithSubscription,
 } from '../../builder/builder-state-provider';
 import { aiSettingsHooks } from './ai-settings-hooks';
 import { buildQueryKey } from './chat-utils';
@@ -40,18 +40,14 @@ export const useAssistantChat = ({
     [],
   );
 
-  const selectedStep = useBuilderStoreOutsideProvider(
-    (state) => state.selectedStep,
-  );
-
-  const flowVersionId = useBuilderStoreOutsideProvider(
-    (state) => state.flowVersion?.id,
-  );
-  const runId = useBuilderStoreOutsideProvider((state) => state.run?.id);
-
-  const showSettingsAIChat = useBuilderStoreOutsideProvider(
-    (state) => state?.midpanelState?.showAiChat ?? false,
-  );
+  const { flowId, flowVersionId, runId, selectedStep, showSettingsAIChat } =
+    useBuilderStoreOutsideProviderWithSubscription((state) => ({
+      flowId: state.flow?.id,
+      flowVersionId: state.flowVersion?.id,
+      runId: state.run?.id,
+      selectedStep: state.selectedStep,
+      showSettingsAIChat: state?.midpanelState?.showAiChat ?? false,
+    })) ?? {};
 
   const getBuilderState = useCallback(() => {
     const context = getBuilderStore();
@@ -134,9 +130,14 @@ export const useAssistantChat = ({
       const context = getBuilderState();
 
       if (chatMode === ChatMode.StepSettings) {
-        if (context?.selectedStep && context?.flowVersion && stepDetails) {
+        if (
+          context?.selectedStep &&
+          context?.flowVersion &&
+          stepDetails &&
+          flowId
+        ) {
           return await aiChatApi.open(
-            context.flowVersion.flowId,
+            flowId,
             getBlockName(stepDetails),
             context.selectedStep,
             getActionName(stepDetails),

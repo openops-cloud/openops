@@ -126,7 +126,11 @@ const FlowStatusToggle = ({
             />
           </div>
         </TooltipTrigger>
-        <TooltipContent side="bottom">
+        <TooltipContent
+          side="bottom"
+          sideOffset={10}
+          className="max-w-[300px] whitespace-normal"
+        >
           {userHasPermissionToToggleFlowStatus
             ? isNil(flow.publishedVersionId)
               ? t('Please publish workflow first')
