@@ -1,4 +1,5 @@
 import { BlockPropValueSchema, Property } from '@openops/blocks-framework';
+import { logger } from '@openops/server-shared';
 import { buildClient } from './build-client';
 import { imapAuth } from './imap-auth';
 
@@ -29,6 +30,15 @@ export const mailbox = Property.Dropdown({
           value: mailbox.path,
         };
       });
+    } catch (error) {
+      logger.warn(`Failed to connect to IMAP`, {
+        error,
+      });
+      return {
+        disabled: true,
+        placeholder: 'The connection failed. Please try again later.',
+        options: [],
+      };
     } finally {
       await imapClient.logout();
     }

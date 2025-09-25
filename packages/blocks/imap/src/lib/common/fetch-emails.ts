@@ -1,5 +1,6 @@
 import { BlockPropValueSchema } from '@openops/blocks-framework';
 import dayjs from 'dayjs';
+import { MailboxLockObject } from 'imapflow';
 import { ParsedMail } from 'mailparser';
 import { buildClient } from './build-client';
 import { buildImapSearch } from './build-search';
@@ -29,9 +30,10 @@ export async function fetchEmails({
   }[]
 > {
   const imapClient = buildClient(auth);
-  await imapClient.connect();
-  const lock = await imapClient.getMailboxLock(mailbox);
+  let lock: MailboxLockObject | undefined = undefined;
   try {
+    await imapClient.connect();
+    lock = await imapClient.getMailboxLock(mailbox);
     const search = buildImapSearch({
       lastEpochMilliSeconds,
       recipients,
@@ -54,7 +56,9 @@ export async function fetchEmails({
     }
     return messages;
   } finally {
-    lock.release();
+    if (lock) {
+      lock.release();
+    }
     await imapClient.logout();
   }
 }

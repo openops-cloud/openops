@@ -1,4 +1,5 @@
 import { BlockAuth, Property } from '@openops/blocks-framework';
+import { logger } from '@openops/server-shared';
 import { buildClient } from './build-client';
 
 export const imapAuth = BlockAuth.CustomAuth({
@@ -36,10 +37,13 @@ export const imapAuth = BlockAuth.CustomAuth({
       await imapClient.connect();
       await imapClient.noop();
       return { valid: true };
-    } catch (e) {
+    } catch (error) {
+      logger.warn(`Failed to connect to IMAP`, {
+        error,
+      });
       return {
         valid: false,
-        error: JSON.stringify(e),
+        error: JSON.stringify(error),
       };
     } finally {
       await imapClient.logout();
