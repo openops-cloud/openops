@@ -151,7 +151,7 @@ async function addTriggerStrategyForRepeatableJobType(
 
       modifiedJobData.triggerStrategy = action.type;
     } catch (error) {
-      logger.warn('Something went wrong while adding trigger strategy', {
+      logger.warn('Failed to apply a trigger strategy', {
         error,
         modifiedJobData,
         flowId: modifiedJobData.flowId,
