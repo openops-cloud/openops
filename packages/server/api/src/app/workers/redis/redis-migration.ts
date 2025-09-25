@@ -33,7 +33,7 @@ export const redisMigrations = {
         {
           count: scheduledJobs.length,
         },
-        'migiration of scheduled jobs started',
+        'migration of scheduled jobs started',
       );
       for (const job of scheduledJobs) {
         if (job) {
@@ -134,21 +134,30 @@ async function addTriggerStrategyForRepeatableJobType(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any> {
   if (modifiedJobData.jobType === RepeatableJobType.EXECUTE_TRIGGER) {
-    const flowVersion = await flowVersionService.getFlowVersionOrThrow({
-      flowId: modifiedJobData.flowId,
-      versionId: modifiedJobData.flowVersionId,
-    });
+    try {
+      const flowVersion = await flowVersionService.getFlowVersionOrThrow({
+        flowId: modifiedJobData.flowId,
+        versionId: modifiedJobData.flowVersionId,
+      });
 
-    const blockMetadata = await blockMetadataService.getOrThrow({
-      name: flowVersion.trigger.settings.blockName,
-      version: flowVersion.trigger.settings.blockVersion,
-      projectId: undefined,
-    });
+      const blockMetadata = await blockMetadataService.getOrThrow({
+        name: flowVersion.trigger.settings.blockName,
+        version: flowVersion.trigger.settings.blockVersion,
+        projectId: undefined,
+      });
 
-    const action =
-      blockMetadata.triggers[flowVersion.trigger.settings.triggerName];
+      const action =
+        blockMetadata.triggers[flowVersion.trigger.settings.triggerName];
 
-    modifiedJobData.triggerStrategy = action.type;
+      modifiedJobData.triggerStrategy = action.type;
+    } catch (error) {
+      logger.warn('Failed to apply a trigger strategy', {
+        error,
+        modifiedJobData,
+        flowId: modifiedJobData.flowId,
+        flowVersionId: modifiedJobData.flowVersionId,
+      });
+    }
   }
 
   return modifiedJobData;
