@@ -153,19 +153,13 @@ async function streamLLMResponse(
           );
         }
       },
-      onAbort: ({ steps }) => {
+      onAbort: async () => {
         sendAiChatAbortedEvent({
           projectId: params.projectId,
           userId: params.userId,
           chatId: params.chatId,
           provider: params.aiConfig.provider,
         });
-        return saveChatHistory(
-          params.chatId,
-          params.userId,
-          params.projectId,
-          steps.flatMap((step) => step.response.messages),
-        );
       },
       abortSignal: params.abortSignal,
     });
