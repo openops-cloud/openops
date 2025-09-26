@@ -43,6 +43,8 @@ import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
 import { useDynamicFormValidationContext } from '@/app/features/builder/dynamic-form-validation/dynamic-form-validation-context';
 import { TestStepContainerRef } from './utils';
 
+const KEY_TO_TRIGGER_TEST = 'KeyG';
+
 const StepSettingsContainer = React.memo(() => {
   const { selectedStep, blockModel, selectedStepTemplateModel } =
     useStepSettingsContext();
@@ -232,7 +234,7 @@ const StepSettingsContainer = React.memo(() => {
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (readonly) return;
-      if ((e.metaKey || e.ctrlKey) && e.code === 'KeyG') {
+      if ((e.metaKey || e.ctrlKey) && e.code === KEY_TO_TRIGGER_TEST) {
         e.preventDefault();
         setActiveTab('test');
         requestAnimationFrame(() => {
