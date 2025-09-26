@@ -72,6 +72,7 @@ async function prepareInput(
         executionCorrelationId: jobData.executionCorrelationId,
         resumePayload: jobData.payload as ResumePayload,
         progressUpdateType: jobData.progressUpdateType,
+        previousDuration: flowRun.duration,
       };
     }
   }

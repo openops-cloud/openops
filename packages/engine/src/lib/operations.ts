@@ -127,7 +127,10 @@ function getFlowExecutionState(
         }).setOutput(input.triggerPayload),
       );
     case ExecutionType.RESUME: {
-      let flowContext = FlowExecutorContext.empty().increaseTask(input.tasks);
+      let flowContext = FlowExecutorContext.empty()
+        .increaseTask(input.tasks)
+        .updateDuration(input.previousDuration || 0);
+
       for (const [step, output] of Object.entries(input.steps)) {
         flowContext = flowContext.upsertStep(step, output);
       }
