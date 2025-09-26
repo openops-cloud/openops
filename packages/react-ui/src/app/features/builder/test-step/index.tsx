@@ -16,6 +16,7 @@ import { t } from 'i18next';
 import { Info } from 'lucide-react';
 import React, { forwardRef, useImperativeHandle, useRef } from 'react';
 import { useFormContext } from 'react-hook-form';
+import { TestStepContainerRef } from '../step-settings/utils';
 import { TestActionSection } from './test-action-section';
 import { TestTriggerSection } from './test-trigger-section';
 
@@ -25,10 +26,6 @@ type TestStepContainerProps = {
   flowId: string;
   type: ActionType | TriggerType;
 };
-
-export interface TestStepContainerRef {
-  triggerTest: () => void;
-}
 
 enum TabListEnum {
   STEP_OUTPUT = 'STEP_OUTPUT',

@@ -41,15 +41,12 @@ import {
   setStepOutputCache,
   stepTestOutputCache,
 } from '../data-selector/data-selector-cache';
+import { TestStepContainerRef } from '../step-settings/utils';
 import { CatchWebhookTestInfo } from './catch-webhook-test-info';
 import { stepTestOutputHooks } from './step-test-output-hooks';
 import { TestSampleDataViewer } from './test-sample-data-viewer';
 import { TestButtonTooltip } from './test-step-tooltip';
 import { testStepUtils } from './test-step-utils';
-
-export interface TestTriggerSectionRef {
-  triggerTest: () => void;
-}
 
 const waitFor2Seconds = () =>
   new Promise((resolve) => setTimeout(resolve, 2000));
@@ -72,7 +69,7 @@ function getSelectedId(testOutput: unknown, pollResults: TriggerEvent[]) {
 }
 
 const TestTriggerSection = React.memo(
-  forwardRef<TestTriggerSectionRef, TestTriggerSectionProps>(
+  forwardRef<TestStepContainerRef, TestTriggerSectionProps>(
     ({ isSaving, flowVersionId, flowId }, ref) => {
       useImperativeHandle(ref, () => ({
         triggerTest: () => {

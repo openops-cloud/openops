@@ -34,13 +34,10 @@ import {
   setStepOutputCache,
   stepTestOutputCache,
 } from '../data-selector/data-selector-cache';
+import { TestStepContainerRef } from '../step-settings/utils';
 import { stepTestOutputHooks } from './step-test-output-hooks';
 import { TestSampleDataViewer } from './test-sample-data-viewer';
 import { TestButtonTooltip } from './test-step-tooltip';
-
-export interface TestActionSectionRef {
-  triggerTest: () => void;
-}
 
 type TestActionComponentProps = {
   isSaving: boolean;
@@ -48,7 +45,7 @@ type TestActionComponentProps = {
 };
 
 const TestActionSection = React.memo(
-  forwardRef<TestActionSectionRef, TestActionComponentProps>(
+  forwardRef<TestStepContainerRef, TestActionComponentProps>(
     ({ isSaving, flowVersionId }, ref) => {
       useImperativeHandle(ref, () => ({
         triggerTest: () => {

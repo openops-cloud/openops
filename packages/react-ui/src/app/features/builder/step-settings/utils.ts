@@ -17,3 +17,7 @@ export const getStepTemplateModel = (
   }
   return undefined;
 };
+
+export interface TestStepContainerRef {
+  triggerTest: () => void;
+}

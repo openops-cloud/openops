@@ -41,6 +41,7 @@ import { useStepSettingsContext } from './step-settings-context';
 import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
 import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
 import { useDynamicFormValidationContext } from '@/app/features/builder/dynamic-form-validation/dynamic-form-validation-context';
+import { TestStepContainerRef } from './utils';
 
 const StepSettingsContainer = React.memo(() => {
   const { selectedStep, blockModel, selectedStepTemplateModel } =
@@ -226,7 +227,7 @@ const StepSettingsContainer = React.memo(() => {
   const modifiedStep = form.getValues();
 
   const [activeTab, setActiveTab] = useState('configure');
-  const testStepContainerRef = useRef<{ triggerTest: () => void } | null>(null);
+  const testStepContainerRef = useRef<TestStepContainerRef | null>(null);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
