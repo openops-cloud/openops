@@ -21,13 +21,7 @@ import {
 } from '@openops/shared';
 import deepEqual from 'fast-deep-equal';
 import { t } from 'i18next';
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { useUpdateEffect } from 'react-use';
 
@@ -234,29 +228,20 @@ const StepSettingsContainer = React.memo(() => {
   const [activeTab, setActiveTab] = useState('configure');
   const testStepContainerRef = useRef<{ triggerTest: () => void } | null>(null);
 
-  const handleGlobalKeyboardShortcut = useCallback(() => {
-    if (activeTab === 'configure') {
-      setActiveTab('test');
-      setTimeout(() => {
-        testStepContainerRef.current?.triggerTest();
-      }, 100);
-    } else {
-      testStepContainerRef.current?.triggerTest();
-    }
-  }, [activeTab]);
-
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
+    const onKeyDown = (e: KeyboardEvent) => {
       if (readonly) return;
-      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'g') {
-        event.preventDefault();
-        handleGlobalKeyboardShortcut();
+      if ((e.metaKey || e.ctrlKey) && e.code === 'KeyG') {
+        e.preventDefault();
+        setActiveTab('test');
+        requestAnimationFrame(() => {
+          testStepContainerRef.current?.triggerTest();
+        });
       }
     };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [readonly, handleGlobalKeyboardShortcut]);
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [readonly]);
 
   return (
     <Form {...form}>
