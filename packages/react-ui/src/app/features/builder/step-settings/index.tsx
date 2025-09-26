@@ -21,7 +21,13 @@ import {
 } from '@openops/shared';
 import deepEqual from 'fast-deep-equal';
 import { t } from 'i18next';
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { useUpdateEffect } from 'react-use';
 
@@ -225,6 +231,33 @@ const StepSettingsContainer = React.memo(() => {
   const sidebarHeaderContainerRef = useRef<HTMLDivElement>(null);
   const modifiedStep = form.getValues();
 
+  const [activeTab, setActiveTab] = useState('configure');
+  const testStepContainerRef = useRef<{ triggerTest: () => void } | null>(null);
+
+  const handleGlobalKeyboardShortcut = useCallback(() => {
+    if (activeTab === 'configure') {
+      setActiveTab('test');
+      setTimeout(() => {
+        testStepContainerRef.current?.triggerTest();
+      }, 100);
+    } else {
+      testStepContainerRef.current?.triggerTest();
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (readonly) return;
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'g') {
+        event.preventDefault();
+        handleGlobalKeyboardShortcut();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [readonly, handleGlobalKeyboardShortcut]);
+
   return (
     <Form {...form}>
       <form
@@ -257,7 +290,8 @@ const StepSettingsContainer = React.memo(() => {
 
             <div className="border rounded-sm overflow-hidden pt-0 flex flex-col flex-1 min-h-0">
               <Tabs
-                defaultValue="configure"
+                value={activeTab}
+                onValueChange={setActiveTab}
                 className="w-full flex-1 min-h-0 flex flex-col"
               >
                 <div className="sticky top-0 bg-background border-b rounded-t-sm">
@@ -335,6 +369,7 @@ const StepSettingsContainer = React.memo(() => {
                       {modifiedStep.type && (
                         <div className="flex-1 min-h-0 h-full">
                           <TestStepContainer
+                            ref={testStepContainerRef}
                             type={modifiedStep.type}
                             flowId={flowVersion.flowId}
                             flowVersionId={flowVersion.id}

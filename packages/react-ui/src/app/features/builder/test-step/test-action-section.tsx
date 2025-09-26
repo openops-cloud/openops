@@ -6,7 +6,12 @@ import {
 } from '@openops/components/ui';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { t } from 'i18next';
-import React, { useEffect, useState } from 'react';
+import React, {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useState,
+} from 'react';
 import { useFormContext } from 'react-hook-form';
 
 import { useSocket } from '@/app/common/providers/socket-provider';
@@ -33,140 +38,154 @@ import { stepTestOutputHooks } from './step-test-output-hooks';
 import { TestSampleDataViewer } from './test-sample-data-viewer';
 import { TestButtonTooltip } from './test-step-tooltip';
 
+export interface TestActionSectionRef {
+  triggerTest: () => void;
+}
+
 type TestActionComponentProps = {
   isSaving: boolean;
   flowVersionId: string;
 };
 
 const TestActionSection = React.memo(
-  ({ isSaving, flowVersionId }: TestActionComponentProps) => {
-    const { toast } = useToast();
-    const [errorMessage, setErrorMessage] = useState<string | undefined>(
-      undefined,
-    );
-    const form = useFormContext<Action>();
-    const formValues = form.getValues();
-    const queryClient = useQueryClient();
+  forwardRef<TestActionSectionRef, TestActionComponentProps>(
+    ({ isSaving, flowVersionId }, ref) => {
+      useImperativeHandle(ref, () => ({
+        triggerTest: () => {
+          handleTest();
+        },
+      }));
+      const { toast } = useToast();
+      const [errorMessage, setErrorMessage] = useState<string | undefined>(
+        undefined,
+      );
+      const form = useFormContext<Action>();
+      const formValues = form.getValues();
+      const queryClient = useQueryClient();
 
-    const [isValid, setIsValid] = useState(false);
+      const [isValid, setIsValid] = useState(false);
 
-    const [riskyStepConfirmationMessage, setRiskyStepConfirmationMessage] =
-      useState<RiskyStepConfirmationMessages | null>(null);
+      const [riskyStepConfirmationMessage, setRiskyStepConfirmationMessage] =
+        useState<RiskyStepConfirmationMessages | null>(null);
 
-    const { selectedStep, selectedStepTemplateModel } =
-      useStepSettingsContext();
+      const { selectedStep, selectedStepTemplateModel } =
+        useStepSettingsContext();
 
-    useEffect(() => {
-      setIsValid(form.formState.isValid);
-    }, [form.formState.isValid]);
+      useEffect(() => {
+        setIsValid(form.formState.isValid);
+      }, [form.formState.isValid]);
 
-    const { data: stepData, isLoading: isLoadingStepData } =
-      stepTestOutputHooks.useStepTestOutputFormData(flowVersionId, form);
+      const { data: stepData, isLoading: isLoadingStepData } =
+        stepTestOutputHooks.useStepTestOutputFormData(flowVersionId, form);
 
-    const sampleDataExists =
-      !isNil(stepData?.lastTestDate) || !isNil(errorMessage);
+      const sampleDataExists =
+        !isNil(stepData?.lastTestDate) || !isNil(errorMessage);
 
-    const socket = useSocket();
+      const socket = useSocket();
 
-    useEffect(() => {
-      if (stepData?.success === false) {
-        setErrorMessage(formatUtils.formatStepInputOrOutput(stepData.output));
-      } else {
-        setErrorMessage(undefined);
-      }
-    }, [stepData]);
+      useEffect(() => {
+        if (stepData?.success === false) {
+          setErrorMessage(formatUtils.formatStepInputOrOutput(stepData.output));
+        } else {
+          setErrorMessage(undefined);
+        }
+      }, [stepData]);
 
-    const { mutate, isPending } = useMutation<StepRunResponse, Error, void>({
-      mutationFn: async () => {
-        const response = await flowsApi.testStep(socket, {
-          flowVersionId,
-          stepName: formValues.name,
-        });
-        return response;
-      },
-      onSuccess: (stepResponse) => {
-        setStepOutputCache({
-          stepId: formValues.id,
-          flowVersionId,
-          output: stepResponse.output,
-          input: stepResponse.input,
-          queryClient,
-          success: stepResponse.success,
-        });
-      },
-      onError: (error) => {
-        console.error(error);
-        toast(INTERNAL_ERROR_TOAST);
-      },
-    });
+      const { mutate, isPending } = useMutation<StepRunResponse, Error, void>({
+        mutationFn: async () => {
+          const response = await flowsApi.testStep(socket, {
+            flowVersionId,
+            stepName: formValues.name,
+          });
+          return response;
+        },
+        onSuccess: (stepResponse) => {
+          setStepOutputCache({
+            stepId: formValues.id,
+            flowVersionId,
+            output: stepResponse.output,
+            input: stepResponse.input,
+            queryClient,
+            success: stepResponse.success,
+          });
+        },
+        onError: (error) => {
+          console.error(error);
+          toast(INTERNAL_ERROR_TOAST);
+        },
+      });
 
-    const isTesting = isPending ?? isLoadingStepData;
+      const isTesting = isPending ?? isLoadingStepData;
 
-    const handleTest = () => {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      stepTestOutputCache.resetExpandedForStep(formValues.id);
-      if (
-        selectedStep.type === ActionType.BLOCK &&
-        selectedStepTemplateModel?.riskLevel === RiskLevel.HIGH
-      ) {
-        setRiskyStepConfirmationMessage(
-          getRiskyStepConfirmationMessagesForAction(selectedStep),
-        );
-      } else {
+      const handleTest = () => {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        stepTestOutputCache.resetExpandedForStep(formValues.id);
+        if (
+          selectedStep.type === ActionType.BLOCK &&
+          selectedStepTemplateModel?.riskLevel === RiskLevel.HIGH
+        ) {
+          setRiskyStepConfirmationMessage(
+            getRiskyStepConfirmationMessagesForAction(selectedStep),
+          );
+        } else {
+          mutate();
+        }
+      };
+
+      const confirmRiskyStep = () => {
+        setRiskyStepConfirmationMessage(null);
+        stepTestOutputCache.resetExpandedForStep(formValues.id);
         mutate();
+      };
+
+      if (riskyStepConfirmationMessage) {
+        return (
+          <TestRiskyStepConfirmation
+            onConfirm={confirmRiskyStep}
+            onCancel={() => setRiskyStepConfirmationMessage(null)}
+            confirmationMessage={riskyStepConfirmationMessage}
+          />
+        );
       }
-    };
 
-    const confirmRiskyStep = () => {
-      setRiskyStepConfirmationMessage(null);
-      stepTestOutputCache.resetExpandedForStep(formValues.id);
-      mutate();
-    };
+      if (!sampleDataExists) {
+        return (
+          <div className="flex justify-center items-start w-full h-full">
+            <TestButtonTooltip
+              disabled={!isValid}
+              aria-label="Test Step Button"
+            >
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleTest}
+                keyboardShortcut="G"
+                onKeyboardShortcut={mutate}
+                loading={isTesting}
+                disabled={!isValid}
+              >
+                <Dot animation={true} variant={'primary'} />
+                {t('Test Step')}
+              </Button>
+            </TestButtonTooltip>
+          </div>
+        );
+      }
 
-    if (riskyStepConfirmationMessage) {
       return (
-        <TestRiskyStepConfirmation
-          onConfirm={confirmRiskyStep}
-          onCancel={() => setRiskyStepConfirmationMessage(null)}
-          confirmationMessage={riskyStepConfirmationMessage}
+        <TestSampleDataViewer
+          onRetest={handleTest}
+          isValid={isValid}
+          isSaving={isSaving}
+          isTesting={isTesting}
+          outputData={stepData?.output}
+          inputData={stepData?.input}
+          errorMessage={errorMessage}
+          lastTestDate={stepData?.lastTestDate}
         />
       );
-    }
-
-    if (!sampleDataExists) {
-      return (
-        <div className="flex justify-center items-start w-full h-full">
-          <TestButtonTooltip disabled={!isValid} aria-label="Test Step Button">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleTest}
-              keyboardShortcut="G"
-              onKeyboardShortcut={mutate}
-              loading={isTesting}
-              disabled={!isValid}
-            >
-              <Dot animation={true} variant={'primary'} />
-              {t('Test Step')}
-            </Button>
-          </TestButtonTooltip>
-        </div>
-      );
-    }
-
-    return (
-      <TestSampleDataViewer
-        onRetest={handleTest}
-        isValid={isValid}
-        isSaving={isSaving}
-        isTesting={isTesting}
-        outputData={stepData?.output}
-        inputData={stepData?.input}
-        errorMessage={errorMessage}
-        lastTestDate={stepData?.lastTestDate}
-      />
-    );
-  },
+    },
+  ),
 );
 TestActionSection.displayName = 'TestActionSection';
 
