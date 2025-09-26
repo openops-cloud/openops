@@ -21,7 +21,7 @@ import {
 } from '@openops/shared';
 import deepEqual from 'fast-deep-equal';
 import { t } from 'i18next';
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { useUpdateEffect } from 'react-use';
 
@@ -41,6 +41,9 @@ import { useStepSettingsContext } from './step-settings-context';
 import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
 import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
 import { useDynamicFormValidationContext } from '@/app/features/builder/dynamic-form-validation/dynamic-form-validation-context';
+import { TestStepContainerRef } from './utils';
+
+const KEY_TO_TRIGGER_TEST = 'KeyG';
 
 const StepSettingsContainer = React.memo(() => {
   const { selectedStep, blockModel, selectedStepTemplateModel } =
@@ -225,6 +228,24 @@ const StepSettingsContainer = React.memo(() => {
   const sidebarHeaderContainerRef = useRef<HTMLDivElement>(null);
   const modifiedStep = form.getValues();
 
+  const [activeTab, setActiveTab] = useState('configure');
+  const testStepContainerRef = useRef<TestStepContainerRef | null>(null);
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (readonly) return;
+      if ((e.metaKey || e.ctrlKey) && e.code === KEY_TO_TRIGGER_TEST) {
+        e.preventDefault();
+        setActiveTab('test');
+        requestAnimationFrame(() => {
+          testStepContainerRef.current?.triggerTest();
+        });
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [readonly]);
+
   return (
     <Form {...form}>
       <form
@@ -257,7 +278,8 @@ const StepSettingsContainer = React.memo(() => {
 
             <div className="border rounded-sm overflow-hidden pt-0 flex flex-col flex-1 min-h-0">
               <Tabs
-                defaultValue="configure"
+                value={activeTab}
+                onValueChange={setActiveTab}
                 className="w-full flex-1 min-h-0 flex flex-col"
               >
                 <div className="sticky top-0 bg-background border-b rounded-t-sm">
@@ -335,6 +357,7 @@ const StepSettingsContainer = React.memo(() => {
                       {modifiedStep.type && (
                         <div className="flex-1 min-h-0 h-full">
                           <TestStepContainer
+                            ref={testStepContainerRef}
                             type={modifiedStep.type}
                             flowId={flowVersion.flowId}
                             flowVersionId={flowVersion.id}
