@@ -1,0 +1,41 @@
+{
+  "name": "blocks-analyze-with-ai",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/blocks/analyze-with-ai/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "options": {
+        "outputPath": "dist/packages/blocks/analyze-with-ai",
+        "tsConfig": "packages/blocks/analyze-with-ai/tsconfig.lib.json",
+        "packageJson": "packages/blocks/analyze-with-ai/package.json",
+        "main": "packages/blocks/analyze-with-ai/src/index.ts",
+        "assets": [
+          "packages/blocks/analyze-with-ai/*.md"
+        ],
+        "buildableProjectDepsInPackageJsonType": "dependencies",
+        "updateBuildableProjectDepsInPackageJson": true
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
+      "options": {
+        "jestConfig": "packages/blocks/analyze-with-ai/jest.config.ts"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": [
+        "{options.outputFile}"
+      ]
+    }
+  }
+}
