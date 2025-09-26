@@ -62,7 +62,7 @@ export const flowExecutor = {
         : output;
 
     const flowEndTime = performance.now();
-    
+
     newContext = newContext.updateDuration(flowEndTime - flowStartTime);
 
     await sendProgress(newContext, constants);

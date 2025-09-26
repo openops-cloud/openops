@@ -174,8 +174,6 @@ export async function execute(
           flowVersionId: input.flowVersion.id,
         });
 
-        // TODO HERE
-
         const flowExecutorContext = getFlowExecutionState(input);
         const output = await executeFlow(input, flowExecutorContext);
         return output;
