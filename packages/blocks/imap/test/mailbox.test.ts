@@ -80,12 +80,16 @@ describe('mailbox.options', () => {
     expect(mockImapClient.logout).toHaveBeenCalledTimes(1);
   });
 
-  test('always logs out even if list throws', async () => {
+  test('returns disabled with placeholder and still logs out when list fails', async () => {
     mockImapClient.list.mockRejectedValueOnce(new Error('IMAP list failed'));
 
-    await expect(
-      mailbox.options({ auth }, {} as PropertyContext),
-    ).rejects.toThrow('IMAP list failed');
+    const res = await mailbox.options({ auth }, {} as PropertyContext);
+
+    expect(res).toEqual({
+      disabled: true,
+      options: [],
+      placeholder: 'Failed to connect to IMAP',
+    });
 
     expect(mockImapClient.connect).toHaveBeenCalledTimes(1);
     expect(mockImapClient.list).toHaveBeenCalledTimes(1);
