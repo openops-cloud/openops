@@ -1,36 +1,29 @@
-import { SearchableSelect } from '@/app/common/components/searchable-select';
 import {
   aiFormSchemaResolver,
   AiSettingsFormSchema,
-  parseJsonOrNull,
 } from '@/app/features/ai/lib/ai-form-utils';
+import { ConnectionSelect } from '@/app/features/builder/step-settings/block-settings/connection-select';
 import {
-  AutocompleteInput,
+  BlockMetadataModel,
+  BlockMetadataModelSummary,
+} from '@openops/blocks-framework';
+import {
   Button,
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
   Form,
   FormField,
   FormItem,
-  Input,
   Label,
   Switch,
-  Textarea,
 } from '@openops/components/ui';
 import { AiConfig } from '@openops/shared';
 import equal from 'fast-deep-equal';
 import { t } from 'i18next';
-import { ChevronDown, ChevronRight, CircleCheck } from 'lucide-react';
+import { CircleCheck } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 type AiSettingsFormProps = {
-  aiProviders?: {
-    provider: string;
-    models: string[];
-  }[];
-  isAiProvidersLoading: boolean;
+  block: BlockMetadataModelSummary | BlockMetadataModel;
   savedSettings?: AiConfig;
   onSave: (settings: AiSettingsFormSchema) => void;
   isSaving: boolean;
@@ -38,17 +31,11 @@ type AiSettingsFormProps = {
 
 export const EMPTY_FORM_VALUE: AiSettingsFormSchema = {
   enabled: false,
-  provider: '',
-  apiKey: '',
-  baseURL: '',
-  modelSettings: '{}',
-  providerSettings: '{}',
-  model: '',
+  connection: '',
 };
 
 const AiSettingsForm = ({
-  aiProviders,
-  isAiProvidersLoading,
+  block,
   savedSettings,
   onSave,
   isSaving,
@@ -60,50 +47,17 @@ const AiSettingsForm = ({
   });
   const [initialFormValue, setInitialFormValue] =
     useState<AiSettingsFormSchema>(EMPTY_FORM_VALUE);
-  const [enableAdvancedSettings, setEnableAdvancedSettings] = useState(false);
 
   useEffect(() => {
-    if (!savedSettings) {
-      setInitialFormValue(EMPTY_FORM_VALUE);
-      form.reset(EMPTY_FORM_VALUE);
-      return;
-    }
-
-    const formValue = {
-      ...savedSettings,
-      baseURL: (savedSettings.providerSettings?.baseURL as string) ?? '',
-      providerSettings: savedSettings.providerSettings
-        ? JSON.stringify({
-            ...savedSettings.providerSettings,
-            baseURL: undefined,
-          })
-        : '{}',
-      modelSettings: savedSettings.modelSettings
-        ? JSON.stringify(savedSettings.modelSettings)
-        : '{}',
-    } as AiSettingsFormSchema;
-
+    const formValue: AiSettingsFormSchema = {
+      enabled: savedSettings?.enabled ?? false,
+      connection: '',
+    };
     setInitialFormValue(formValue);
     form.reset(formValue);
   }, [savedSettings, form]);
 
   const currentFormValue = form.watch();
-
-  const providerOptions = useMemo(
-    () =>
-      aiProviders?.map((p) => ({
-        label: p.provider,
-        value: p.provider,
-      })) ?? [],
-    [aiProviders],
-  );
-
-  const modelOptions = useMemo(() => {
-    const selected = aiProviders?.find(
-      (p) => p.provider === currentFormValue.provider,
-    );
-    return selected?.models.map((m) => ({ label: m, value: m })) || [];
-  }, [currentFormValue.provider, aiProviders]);
 
   const isFormUnchanged = useMemo(() => {
     return equal(currentFormValue, initialFormValue);
@@ -122,25 +76,9 @@ const AiSettingsForm = ({
     form.reset();
   };
 
-  const resetModel = () => {
-    form.setValue('model', '');
-    form.trigger('model');
-  };
-
   const onSaveClick = () => {
     const formValue = form.getValues();
-
-    const providerSettings = parseJsonOrNull(formValue.providerSettings);
-
-    const parsedValue = {
-      ...formValue,
-      providerSettings: providerSettings
-        ? { ...providerSettings, baseURL: formValue.baseURL }
-        : { baseURL: formValue.baseURL },
-      modelSettings: parseJsonOrNull(formValue.modelSettings),
-    };
-
-    onSave(parsedValue);
+    onSave(formValue);
   };
 
   return (
@@ -160,132 +98,13 @@ const AiSettingsForm = ({
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="provider"
-          render={({ field }) => (
-            <FormItem className="flex flex-col gap-2">
-              <Label htmlFor="provider">
-                {t('Choose your AI provider')}
-                <span className="text-destructive">*</span>
-              </Label>
-              <SearchableSelect
-                loading={isAiProvidersLoading}
-                options={providerOptions}
-                onChange={(v) => {
-                  field.onChange(v);
-                  resetModel();
-                }}
-                disabled={!currentFormValue.enabled}
-                value={field.value}
-                placeholder={t('Select an option')}
-              ></SearchableSelect>
-            </FormItem>
-          )}
+        <ConnectionSelect
+          disabled={!currentFormValue.enabled}
+          allowDynamicValues={false}
+          block={block}
+          providerKey={'Microsoft_Teams'}
+          name={'connection'}
         />
-        <FormField
-          control={form.control}
-          name="model"
-          render={({ field }) => (
-            <FormItem className="flex flex-col gap-2">
-              <Label htmlFor="model">
-                {t('Model')} <span className="text-destructive">*</span>
-              </Label>
-              <AutocompleteInput
-                options={modelOptions}
-                disabled={
-                  !currentFormValue.provider || !currentFormValue.enabled
-                }
-                onChange={field.onChange}
-                value={field.value}
-                className="w-full"
-              ></AutocompleteInput>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="apiKey"
-          render={({ field }) => (
-            <FormItem className="flex flex-col gap-2">
-              <Label htmlFor="apiKey">
-                {t('API key')} <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                onChange={field.onChange}
-                disabled={!currentFormValue.enabled}
-                value={field.value}
-                type="password"
-                required={true}
-                autoComplete="new-password"
-              ></Input>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="baseURL"
-          render={({ field }) => (
-            <FormItem className="flex flex-col gap-2">
-              <Label htmlFor="baseURL">{t('Base URL')}</Label>
-              <Input
-                onChange={field.onChange}
-                value={field.value}
-                disabled={!currentFormValue.enabled}
-              ></Input>
-            </FormItem>
-          )}
-        />
-        <Collapsible
-          open={enableAdvancedSettings}
-          onOpenChange={setEnableAdvancedSettings}
-          className="w-full"
-        >
-          <CollapsibleTrigger className="flex gap-1 items-center mb-4">
-            {enableAdvancedSettings ? (
-              <ChevronDown size={24} />
-            ) : (
-              <ChevronRight size={24} />
-            )}
-            <span className="font-bold text-lg text-primary-300">
-              {t('Advanced settings')}
-            </span>
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <div className="flex flex-col gap-4">
-              <FormField
-                control={form.control}
-                name="providerSettings"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col gap-2">
-                    <Label htmlFor="providerSettings">
-                      {t('Provider Settings')}
-                    </Label>
-                    <Textarea
-                      value={field.value ?? ''}
-                      onChange={field.onChange}
-                      disabled={!currentFormValue.enabled}
-                    ></Textarea>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="modelSettings"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col gap-2">
-                    <Label htmlFor="modelSettings">{t('Model Settings')}</Label>
-                    <Textarea
-                      value={field.value ?? ''}
-                      onChange={field.onChange}
-                      disabled={!currentFormValue.enabled}
-                    ></Textarea>
-                  </FormItem>
-                )}
-              />
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
 
         <div className="flex items-center justify-between ">
           <div className="flex gap-2">
