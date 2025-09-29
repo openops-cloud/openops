@@ -11,16 +11,23 @@ import {
   ALL_PRINCIPAL_TYPES,
   BlockCategory,
   BlockOptionRequest,
-  flowHelper,
+  BlockType,
+  FlowVersion,
+  FlowVersionState,
   GetBlockRequestParams,
   GetBlockRequestQuery,
   GetBlockRequestWithScopeParams,
-  groupStepOutputsById,
   ListBlocksRequestQuery,
   ListVersionRequestQuery,
   ListVersionsResponse,
   OpsEdition,
+  PackageType,
   PrincipalType,
+  TriggerType,
+  VersionType,
+  flowHelper,
+  groupStepOutputsById,
+  openOpsId,
 } from '@openops/shared';
 import { engineRunner } from 'server-worker';
 import { accessTokenManager } from '../authentication/lib/access-token-manager';
@@ -171,6 +178,51 @@ const baseBlocksController: FastifyPluginAsyncTypebox = async (app) => {
     return result;
   });
 
+  app.post(
+    '/options/standalone',
+    StandaloneOptionsBlockRequest,
+    async (req) => {
+      const request = req.body;
+      const { projectId } = req.principal;
+      const engineToken = await accessTokenManager.generateEngineToken({
+        projectId,
+      });
+
+      const now = new Date().toISOString();
+      const flowVersion: FlowVersion = {
+        id: openOpsId(),
+        created: now,
+        updated: now,
+        flowId: openOpsId(),
+        displayName: 'Standalone',
+        description: '',
+        trigger: {
+          id: openOpsId(),
+          type: TriggerType.EMPTY as TriggerType.EMPTY,
+          name: 'trigger',
+          settings: {},
+          valid: true,
+          displayName: 'Standalone Trigger',
+        },
+        updatedBy: null,
+        valid: true,
+        state: FlowVersionState.DRAFT,
+      };
+
+      const { result } = await engineRunner.executeProp(engineToken, {
+        block: await getBlockPackage(projectId, request),
+        flowVersion,
+        propertyName: request.propertyName,
+        actionOrTriggerName: request.actionOrTriggerName,
+        input: request.input,
+        projectId,
+        searchValue: request.searchValue,
+      });
+
+      return result;
+    },
+  );
+
   app.delete('/:id', DeleteBlockRequest, async (req): Promise<void> => {
     return blockMetadataService.delete({
       projectId: req.principal.projectId,
@@ -235,6 +287,29 @@ const OptionsBlockRequest = {
     description:
       'Execute a block option or property to retrieve dynamic configuration options. This endpoint is used to fetch dynamic values, validate inputs, or get suggestions based on the current block configuration and flow context. Essential for building dynamic block configurations.',
     body: BlockOptionRequest,
+  },
+};
+
+const StandaloneBlockOptionRequestBody = Type.Object({
+  packageType: Type.Enum(PackageType),
+  blockType: Type.Enum(BlockType),
+  blockName: Type.String({}),
+  blockVersion: VersionType,
+  actionOrTriggerName: Type.String({}),
+  propertyName: Type.String({}),
+  input: Type.Any({}),
+  searchValue: Type.Optional(Type.String()),
+});
+
+const StandaloneOptionsBlockRequest = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
+  },
+  schema: {
+    operationId: 'Execute Block Properties Standalone',
+    description:
+      'Execute a block property for dynamic options without flow context. Intended for connection setup where no previous step inputs exist.',
+    body: StandaloneBlockOptionRequestBody,
   },
 };
 
