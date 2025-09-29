@@ -23,7 +23,7 @@ export async function writeToJsonFile(
 export function tryParseJson(value: string): unknown {
   try {
     return JSON.parse(value);
-  } catch (e) {
+  } catch (_e) {
     return value;
   }
 }
