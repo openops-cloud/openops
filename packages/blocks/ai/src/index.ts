@@ -1,8 +1,8 @@
 import { createBlock } from '@openops/blocks-framework';
 import { aiAuth } from '@openops/common';
 
-export const analyzeWithAi = createBlock({
-  displayName: 'Analyze-with-ai',
+export const ai = createBlock({
+  displayName: 'Analyze with AI',
   auth: aiAuth,
   minimumSupportedRelease: '0.7.1',
   logoUrl: 'https://static.openops.com/blocks/ai-logo.png',
