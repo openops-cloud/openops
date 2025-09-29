@@ -65,4 +65,5 @@ export * from './lib/promise-pool';
 
 export * from './lib/ai/providers';
 
+export * from './json-utils';
 export * from './lib/microsoft/get-microsoft-graph-client';
