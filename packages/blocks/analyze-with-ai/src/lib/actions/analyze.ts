@@ -16,8 +16,8 @@ export const analyze = createAction({
       required: false,
     }),
   },
-  run: async (ctx) => {
-    const auth = ctx.auth as unknown as Record<string, unknown>;
+  run: async (context) => {
+    const auth = context.auth as unknown as Record<string, unknown>;
     const {
       provider,
       model,
@@ -37,9 +37,9 @@ export const analyze = createAction({
       },
     });
 
-    const composedPrompt = ctx.propsValue.source
-      ? `${ctx.propsValue.prompt}\n\nSource:\n${ctx.propsValue.source}`
-      : ctx.propsValue.prompt;
+    const composedPrompt = context.propsValue.source
+      ? `${context.propsValue.prompt}\n\nSource:\n${context.propsValue.source}`
+      : context.propsValue.prompt;
 
     const result = await generateText({
       model: languageModel,
