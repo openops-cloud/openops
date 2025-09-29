@@ -41,7 +41,6 @@ import { useStepSettingsContext } from './step-settings-context';
 import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
 import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
 import { useDynamicFormValidationContext } from '@/app/features/builder/dynamic-form-validation/dynamic-form-validation-context';
-import { TestStepContainerRef } from './utils';
 
 const KEY_TO_TRIGGER_TEST = 'KeyG';
 
@@ -229,7 +228,13 @@ const StepSettingsContainer = React.memo(() => {
   const modifiedStep = form.getValues();
 
   const [activeTab, setActiveTab] = useState('configure');
-  const testStepContainerRef = useRef<TestStepContainerRef | null>(null);
+  const [shouldTriggerTest, setShouldTriggerTest] = useState(false);
+
+  useEffect(() => {
+    if (shouldTriggerTest) {
+      setShouldTriggerTest(false);
+    }
+  }, [shouldTriggerTest]);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -237,9 +242,9 @@ const StepSettingsContainer = React.memo(() => {
       if ((e.metaKey || e.ctrlKey) && e.code === KEY_TO_TRIGGER_TEST) {
         e.preventDefault();
         setActiveTab('test');
-        requestAnimationFrame(() => {
-          testStepContainerRef.current?.triggerTest();
-        });
+        setTimeout(() => {
+          setShouldTriggerTest(true);
+        }, 100);
       }
     };
     document.addEventListener('keydown', onKeyDown);
@@ -357,11 +362,12 @@ const StepSettingsContainer = React.memo(() => {
                       {modifiedStep.type && (
                         <div className="flex-1 min-h-0 h-full">
                           <TestStepContainer
-                            ref={testStepContainerRef}
                             type={modifiedStep.type}
                             flowId={flowVersion.flowId}
                             flowVersionId={flowVersion.id}
                             isSaving={saving}
+                            shouldTriggerTest={shouldTriggerTest}
+                            onTestTriggered={() => setShouldTriggerTest(false)}
                           />
                         </div>
                       )}

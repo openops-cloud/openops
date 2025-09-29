@@ -14,9 +14,8 @@ import {
 import { Action, ActionType, Trigger, TriggerType } from '@openops/shared';
 import { t } from 'i18next';
 import { Info } from 'lucide-react';
-import React, { forwardRef, useImperativeHandle, useRef } from 'react';
+import React from 'react';
 import { useFormContext } from 'react-hook-form';
-import { TestStepContainerRef } from '../step-settings/utils';
 import { TestActionSection } from './test-action-section';
 import { TestTriggerSection } from './test-trigger-section';
 
@@ -25,6 +24,8 @@ type TestStepContainerProps = {
   isSaving: boolean;
   flowId: string;
   type: ActionType | TriggerType;
+  shouldTriggerTest: boolean;
+  onTestTriggered: () => void;
 };
 
 enum TabListEnum {
@@ -33,100 +34,93 @@ enum TabListEnum {
 }
 
 const TestStepContainer = React.memo(
-  forwardRef<TestStepContainerRef, TestStepContainerProps>(
-    ({ flowVersionId, isSaving, type, flowId }, ref) => {
-      const testTriggerRef = useRef<{ triggerTest: () => void } | null>(null);
-      const testActionRef = useRef<{ triggerTest: () => void } | null>(null);
+  ({
+    flowVersionId,
+    isSaving,
+    type,
+    flowId,
+    shouldTriggerTest,
+    onTestTriggered,
+  }: TestStepContainerProps) => {
+    const { theme } = useTheme();
+    const form = useFormContext<Action | Trigger>();
+    const useSaveSelectedStepSampleData =
+      stepTestOutputHooks.useSaveSelectedStepSampleData(form);
 
-      useImperativeHandle(ref, () => ({
-        triggerTest: () => {
-          if (type === TriggerType.BLOCK) {
-            testTriggerRef.current?.triggerTest();
-          } else {
-            testActionRef.current?.triggerTest();
-          }
-        },
-      }));
-      const { theme } = useTheme();
-      const form = useFormContext<Action | Trigger>();
-      const useSaveSelectedStepSampleData =
-        stepTestOutputHooks.useSaveSelectedStepSampleData(form);
+    const { selectedStep } = useStepSettingsContext();
 
-      const { selectedStep } = useStepSettingsContext();
-
-      return (
-        <Tabs
-          defaultValue={TabListEnum.STEP_OUTPUT}
-          className="w-full h-full min-h-0 flex flex-col items-start justify-start gap-2 pb-2"
-        >
-          <TabsList className="grid grid-cols-2 bg-transparent border-none rounded-none w-full">
-            <TabsTrigger
-              value={TabListEnum.STEP_OUTPUT}
-              className="justify-start text-left font-normal data-[state=active]:font-bold text-primary-300 text-base pl-0 pr-2 dark:text-white rounded-none  border-b-2 data-[state=active]:bg-background data-[state=active]:text-primary-300 data-[state=active]:dark:text-white data-[state=active]:shadow-none data-[state=active]:border-blueAccent-300"
-            >
-              {t('Step output')}
-            </TabsTrigger>
-            <TabsTrigger
-              value={TabListEnum.SAMPLE_STEP_OUTPUT}
-              className="justify-start text-left font-normal data-[state=active]:font-bold text-primary-300 text-base pr-0 pl-2 dark:text-white rounded-none border-b-2 data-[state=active]:bg-background data-[state=active]:text-primary-300 data-[state=active]:dark:text-white data-[state=active]:shadow-none data-[state=active]:border-blueAccent-300 gap-1"
-            >
-              {t('Sample output')}
-              <Tooltip>
-                <TooltipTrigger asChild aria-label={t('Sample output info')}>
-                  <Info className="w-4 h-4 text-black" />
-                </TooltipTrigger>
-                <TooltipContent
-                  avoidCollisions
-                  hideWhenDetached
-                  side="bottom"
-                  className="font-medium text-left text-black max-w-[418px] text-wrap"
-                >
-                  {t(
-                    'Sample data is for building and testing only - scheduled runs and test workflow are using the real step output.',
-                  )}
-                </TooltipContent>
-              </Tooltip>
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent
+    return (
+      <Tabs
+        defaultValue={TabListEnum.STEP_OUTPUT}
+        className="w-full h-full min-h-0 flex flex-col items-start justify-start gap-2 pb-2"
+      >
+        <TabsList className="grid grid-cols-2 bg-transparent border-none rounded-none w-full">
+          <TabsTrigger
             value={TabListEnum.STEP_OUTPUT}
-            className="w-full flex-1 min-h-0 overflow-hidden"
+            className="justify-start text-left font-normal data-[state=active]:font-bold text-primary-300 text-base pl-0 pr-2 dark:text-white rounded-none  border-b-2 data-[state=active]:bg-background data-[state=active]:text-primary-300 data-[state=active]:dark:text-white data-[state=active]:shadow-none data-[state=active]:border-blueAccent-300"
           >
-            {type === TriggerType.BLOCK ? (
-              <TestTriggerSection
-                ref={testTriggerRef}
-                flowId={flowId}
-                isSaving={isSaving}
-                flowVersionId={flowVersionId}
-              ></TestTriggerSection>
-            ) : (
-              <TestActionSection
-                ref={testActionRef}
-                flowVersionId={flowVersionId}
-                isSaving={isSaving}
-              ></TestActionSection>
-            )}
-          </TabsContent>
-          <TabsContent
+            {t('Step output')}
+          </TabsTrigger>
+          <TabsTrigger
             value={TabListEnum.SAMPLE_STEP_OUTPUT}
-            className="w-full flex-1 min-h-0 overflow-hidden"
+            className="justify-start text-left font-normal data-[state=active]:font-bold text-primary-300 text-base pr-0 pl-2 dark:text-white rounded-none border-b-2 data-[state=active]:bg-background data-[state=active]:text-primary-300 data-[state=active]:dark:text-white data-[state=active]:shadow-none data-[state=active]:border-blueAccent-300 gap-1"
           >
-            <div className="h-full flex min-h-0">
-              <TestStepDataViewer
-                outputJson={
-                  selectedStep?.settings?.inputUiInfo?.sampleData ?? ''
-                }
-                onChange={useSaveSelectedStepSampleData}
-                readonly={false}
-                theme={theme}
-                containerClassName="h-full"
-              />
-            </div>
-          </TabsContent>
-        </Tabs>
-      );
-    },
-  ),
+            {t('Sample output')}
+            <Tooltip>
+              <TooltipTrigger asChild aria-label={t('Sample output info')}>
+                <Info className="w-4 h-4 text-black" />
+              </TooltipTrigger>
+              <TooltipContent
+                avoidCollisions
+                hideWhenDetached
+                side="bottom"
+                className="font-medium text-left text-black max-w-[418px] text-wrap"
+              >
+                {t(
+                  'Sample data is for building and testing only - scheduled runs and test workflow are using the real step output.',
+                )}
+              </TooltipContent>
+            </Tooltip>
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent
+          value={TabListEnum.STEP_OUTPUT}
+          className="w-full flex-1 min-h-0 overflow-hidden"
+        >
+          {type === TriggerType.BLOCK ? (
+            <TestTriggerSection
+              flowId={flowId}
+              isSaving={isSaving}
+              flowVersionId={flowVersionId}
+              shouldTriggerTest={shouldTriggerTest}
+              onTestTriggered={onTestTriggered}
+            ></TestTriggerSection>
+          ) : (
+            <TestActionSection
+              flowVersionId={flowVersionId}
+              isSaving={isSaving}
+              shouldTriggerTest={shouldTriggerTest}
+              onTestTriggered={onTestTriggered}
+            ></TestActionSection>
+          )}
+        </TabsContent>
+        <TabsContent
+          value={TabListEnum.SAMPLE_STEP_OUTPUT}
+          className="w-full flex-1 min-h-0 overflow-hidden"
+        >
+          <div className="h-full flex min-h-0">
+            <TestStepDataViewer
+              outputJson={selectedStep?.settings?.inputUiInfo?.sampleData ?? ''}
+              onChange={useSaveSelectedStepSampleData}
+              readonly={false}
+              theme={theme}
+              containerClassName="h-full"
+            />
+          </div>
+        </TabsContent>
+      </Tabs>
+    );
+  },
 );
 TestStepContainer.displayName = 'TestStepContainer';
 
