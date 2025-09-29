@@ -36,10 +36,11 @@ export const analyze = createAction({
         ...(baseURL ? { baseURL } : {}),
       },
     });
-
-    const composedPrompt = context.propsValue.sources
-      ? `${context.propsValue.prompt}\n\nSource:\n${context.propsValue.sources}`
-      : context.propsValue.prompt;
+    const sources = context.propsValue.sources ?? [];
+    const composedPrompt =
+      sources?.length > 0
+        ? `${context.propsValue.prompt}\n\nSources:\n${sources}`
+        : context.propsValue.prompt;
 
     const result = await generateText({
       model: languageModel,

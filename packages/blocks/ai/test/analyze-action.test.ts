@@ -95,7 +95,7 @@ describe('analyze action', () => {
     expect(generateText).toHaveBeenCalledWith(
       expect.objectContaining({
         model: 'languageModel',
-        prompt: 'Analyze this\n\nSource:\ns1,s2',
+        prompt: 'Analyze this\n\nSources:\ns1,s2',
         temperature: 0.3,
       }),
     );
