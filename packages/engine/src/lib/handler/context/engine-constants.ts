@@ -12,7 +12,10 @@ import {
   ResumePayload,
   TriggerHookType,
 } from '@openops/shared';
-import { VariableService } from '../../variables/variable-service';
+import {
+  createPropsResolver,
+  PropsResolver,
+} from '../../variables/props-resolver';
 
 type RetryConstants = {
   maxAttempts: number;
@@ -56,7 +59,7 @@ export class EngineConstants {
     public readonly retryConstants: RetryConstants,
     public readonly engineToken: string,
     public readonly projectId: ProjectId,
-    public readonly variableService: VariableService,
+    public readonly propsResolver: PropsResolver,
     public readonly testSingleStepMode: boolean,
     public readonly filesServiceType: 'local' | 'db',
     public readonly progressUpdateType: ProgressUpdateType,
@@ -79,7 +82,7 @@ export class EngineConstants {
       DEFAULT_RETRY_CONSTANTS,
       input.engineToken,
       input.projectId,
-      new VariableService({
+      createPropsResolver({
         projectId: input.projectId,
         engineToken: input.engineToken,
         apiUrl: input.internalApiUrl,
@@ -109,7 +112,7 @@ export class EngineConstants {
       DEFAULT_RETRY_CONSTANTS,
       input.engineToken,
       input.projectId,
-      new VariableService({
+      createPropsResolver({
         projectId: input.projectId,
         engineToken: input.engineToken,
         apiUrl: addTrailingSlashIfMissing(input.internalApiUrl),
@@ -136,7 +139,7 @@ export class EngineConstants {
       DEFAULT_RETRY_CONSTANTS,
       input.engineToken,
       input.projectId,
-      new VariableService({
+      createPropsResolver({
         projectId: input.projectId,
         engineToken: input.engineToken,
         apiUrl: addTrailingSlashIfMissing(input.internalApiUrl),
@@ -163,7 +166,7 @@ export class EngineConstants {
       DEFAULT_RETRY_CONSTANTS,
       input.engineToken,
       input.projectId,
-      new VariableService({
+      createPropsResolver({
         projectId: input.projectId,
         engineToken: input.engineToken,
         apiUrl: addTrailingSlashIfMissing(input.internalApiUrl),

@@ -60,7 +60,7 @@ export const loopExecutor: BaseExecutor<LoopOnItemsAction> = {
       resolvedInput: LoopOnActionResolvedSettings;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       censoredInput: any;
-    } = await constants.variableService.resolve<LoopOnActionResolvedSettings>({
+    } = await constants.propsResolver.resolve<LoopOnActionResolvedSettings>({
       unresolvedInput: {
         items: action.settings.items,
       },

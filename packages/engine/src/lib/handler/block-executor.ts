@@ -30,6 +30,7 @@ import {
 import { createConnectionService } from '../services/connections.service';
 import { createFilesService } from '../services/files.service';
 import { createContextStore } from '../services/storage.service';
+import { propsProcessor } from '../variables/props-processor';
 import { ActionHandler, BaseExecutor } from './base-executor';
 import { EngineConstants } from './context/engine-constants';
 import {
@@ -37,6 +38,7 @@ import {
   FlowExecutorContext,
   VerdictReason,
 } from './context/flow-execution-context';
+import { tryParseJson } from '@openops/common';
 
 type HookResponse = {
   stopResponse: StopHookParams | undefined;
@@ -113,20 +115,21 @@ const executeAction: ActionHandler<BlockAction> = async ({
     });
 
     const { resolvedInput, censoredInput } =
-      await constants.variableService.resolve<
-        StaticPropsValue<BlockPropertyMap>
-      >({
-        unresolvedInput: action.settings.input,
-        executionState,
-      });
+      await constants.propsResolver.resolve<StaticPropsValue<BlockPropertyMap>>(
+        {
+          unresolvedInput: action.settings.input,
+          executionState,
+        },
+      );
 
     stepOutput.input = censoredInput;
 
     const { processedInput, errors } =
-      await constants.variableService.applyProcessorsAndValidators(
+      await propsProcessor.applyProcessorsAndValidators(
         resolvedInput,
         blockAction.props,
         block.auth,
+        blockAction.requireAuth,
       );
     if (Object.keys(errors).length > 0) {
       throw new Error(JSON.stringify(errors));
@@ -255,7 +258,7 @@ const executeAction: ActionHandler<BlockAction> = async ({
 
     const failedStepOutput = stepOutput
       .setStatus(StepOutputStatus.FAILED)
-      .setErrorMessage(handledError.message);
+      .setErrorMessage(tryParseJson(handledError.message));
 
     return executionState
       .upsertStep(action.name, failedStepOutput)
