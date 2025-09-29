@@ -10,7 +10,10 @@ function issuesToRecord(err: ZodError, rootKey = '$'): Record<string, string> {
   const out: Record<string, string> = {};
   for (const issue of err.issues) {
     const key = issue.path.length ? issue.path.join('.') : rootKey;
-    if (!out[key]) out[key] = issue.message;
+
+    if (!out[key]) {
+      out[key] = issue.message;
+    }
   }
   return out;
 }
