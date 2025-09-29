@@ -12,6 +12,7 @@ import { OpsErrorBoundary } from './common/error-boundaries/ops-error-boundary';
 import { InitialDataGuard } from './common/guards/intial-data-guard';
 import { Extensions } from './features/extensions';
 import './interceptors';
+import { useLogoutEventListener } from './lib/navigation-events';
 import { ApplicationRouter } from './router';
 
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ if (!typesFormatsAdded) {
 }
 
 export function App() {
+  useLogoutEventListener();
   return (
     <HelmetProvider>
       <OpsErrorBoundary>

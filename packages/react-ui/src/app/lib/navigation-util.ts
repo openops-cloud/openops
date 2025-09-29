@@ -1,4 +1,4 @@
-const LAST_VISITED_KEY = 'last_visited_page';
+import { LAST_VISITED_KEY, LOGOUT_FLAG_KEY } from './navigation-constants';
 
 export const navigationUtil = {
   save: (path: string) => {
@@ -9,16 +9,20 @@ export const navigationUtil = {
       '/reset-password',
       '/verify-email',
     ];
-    if (!authPages.includes(path)) {
-      localStorage.setItem(LAST_VISITED_KEY, path);
+    if (
+      !authPages.includes(path) &&
+      sessionStorage.getItem(LOGOUT_FLAG_KEY) !== 'true'
+    ) {
+      sessionStorage.setItem(LAST_VISITED_KEY, path);
     }
   },
 
   get: () => {
-    return localStorage.getItem(LAST_VISITED_KEY) ?? '/';
+    return sessionStorage.getItem(LAST_VISITED_KEY) ?? '/';
   },
 
   clear: () => {
-    localStorage.removeItem(LAST_VISITED_KEY);
+    sessionStorage.removeItem(LAST_VISITED_KEY);
+    sessionStorage.removeItem(LOGOUT_FLAG_KEY);
   },
 };
