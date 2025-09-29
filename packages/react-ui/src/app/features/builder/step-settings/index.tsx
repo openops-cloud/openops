@@ -246,7 +246,7 @@ const StepSettingsContainer = React.memo(() => {
       if (readonly) return;
       if ((e.metaKey || e.ctrlKey) && e.code === KEY_TO_TRIGGER_TEST) {
         e.preventDefault();
-        setActiveTab('test');
+        setActiveTab(TAB_TEST);
         setShouldTriggerTest(true);
       }
     };
