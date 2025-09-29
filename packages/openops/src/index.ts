@@ -66,3 +66,5 @@ export * from './lib/promise-pool';
 export * from './lib/ai/providers';
 
 export * from './lib/microsoft/get-microsoft-graph-client';
+
+export * from './lib/oracle-cloud/auth';
