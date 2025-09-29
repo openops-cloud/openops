@@ -66,8 +66,8 @@ export const aiAuth = BlockAuth.CustomAuth({
     };
 
     const payload: SaveAiConfigRequest = {
-      provider: provider as AiProviderEnum,
-      model: model as string,
+      provider: provider,
+      model: model,
       apiKey: authObject['apiKey'] as string,
       providerSettings:
         Object.keys(providerSettings).length > 0 ? providerSettings : undefined,
