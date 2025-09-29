@@ -48,6 +48,8 @@ import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
 import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
 import { useDynamicFormValidationContext } from '@/app/features/builder/dynamic-form-validation/dynamic-form-validation-context';
 
+const TAB_CONFIGURE = 'configure';
+const TAB_TEST = 'test';
 const KEY_TO_TRIGGER_TEST = 'KeyG';
 
 const StepSettingsContainer = React.memo(() => {
@@ -233,7 +235,7 @@ const StepSettingsContainer = React.memo(() => {
   const sidebarHeaderContainerRef = useRef<HTMLDivElement>(null);
   const modifiedStep = form.getValues();
 
-  const [activeTab, setActiveTab] = useState('configure');
+  const [activeTab, setActiveTab] = useState(TAB_CONFIGURE);
   const [shouldTriggerTest, setShouldTriggerTest] = useState(false);
   const handleTestTriggered = useCallback(() => {
     setShouldTriggerTest(false);
@@ -291,14 +293,14 @@ const StepSettingsContainer = React.memo(() => {
                 <div className="sticky top-0 bg-background border-b rounded-t-sm">
                   <TabsList className="grid grid-cols-2 w-full h-auto rounded-t-sm rounded-b-none bg-background p-0">
                     <TabsTrigger
-                      value="configure"
+                      value={TAB_CONFIGURE}
                       disabled={readonly}
                       className="text-base justify-start text-primary-800 text-left font-normal rounded-t-sm rounded-tr-none rounded-b-none data-[state=active]:bg-gray-200 data-[state=active]:font-medium transition-colors duration-200"
                     >
                       {t('Configure')}
                     </TabsTrigger>
                     <TabsTrigger
-                      value="test"
+                      value={TAB_TEST}
                       disabled={readonly}
                       className="text-base justify-start text-primary-800 text-left font-normal rounded-t-sm rounded-tl-none rounded-b-none data-[state=active]:bg-gray-200 data-[state=active]:font-medium transition-colors duration-200"
                     >
@@ -307,7 +309,10 @@ const StepSettingsContainer = React.memo(() => {
                   </TabsList>
                 </div>
 
-                <TabsContent value="configure" className="mt-2 flex-1 min-h-0">
+                <TabsContent
+                  value={TAB_CONFIGURE}
+                  className="mt-2 flex-1 min-h-0"
+                >
                   <ScrollArea className="h-full">
                     <div className="flex flex-col gap-2 pl-2 pr-4 pb-4">
                       {modifiedStep.type === ActionType.LOOP_ON_ITEMS && (
@@ -357,7 +362,7 @@ const StepSettingsContainer = React.memo(() => {
                   </ScrollArea>
                 </TabsContent>
 
-                <TabsContent value="test" className="mt-0 flex-1 min-h-0">
+                <TabsContent value={TAB_TEST} className="mt-0 flex-1 min-h-0">
                   <ScrollArea className="h-full">
                     <div className="flex flex-col gap-2 pl-2 pr-2 h-full min-h-0">
                       {modifiedStep.type && (
