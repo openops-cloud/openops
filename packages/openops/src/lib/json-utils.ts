@@ -20,7 +20,10 @@ export async function writeToJsonFile(
   await writeFile(filePath, serializedObj, 'utf-8');
 }
 
-export function tryParseJson(value: string): unknown {
+export function tryParseJson(value: any): unknown {
+  if (typeof value !== 'string') {
+    return value;
+  }
   try {
     return JSON.parse(value);
   } catch (_e) {
