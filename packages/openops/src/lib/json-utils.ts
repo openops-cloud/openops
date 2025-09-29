@@ -1,12 +1,8 @@
 import { readFile, writeFile } from 'node:fs/promises';
 
 export async function parseJsonFile<T>(filePath: string): Promise<T> {
-  try {
-    const file = await readFile(filePath, 'utf-8');
-    return JSON.parse(file);
-  } catch (e) {
-    throw Error((e as Error).message);
-  }
+  const file = await readFile(filePath, 'utf-8');
+  return JSON.parse(file);
 }
 
 export async function writeToJsonFile(
