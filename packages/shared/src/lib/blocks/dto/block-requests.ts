@@ -94,6 +94,21 @@ export const BlockOptionRequest = Type.Object({
 
 export type BlockOptionRequest = Static<typeof BlockOptionRequest>;
 
+export const StandaloneBlockOptionRequestBody = Type.Object({
+  packageType: Type.Enum(PackageType),
+  blockType: Type.Enum(BlockType),
+  blockName: Type.String({}),
+  blockVersion: VersionType,
+  actionOrTriggerName: Type.String({}),
+  propertyName: Type.String({}),
+  input: Type.Any({}),
+  searchValue: Type.Optional(Type.String()),
+});
+
+export type StandaloneBlockOptionRequestBody = Static<
+  typeof StandaloneBlockOptionRequestBody
+>;
+
 export enum BlockScope {
   PROJECT = 'PROJECT',
   PLATFORM = 'PLATFORM',

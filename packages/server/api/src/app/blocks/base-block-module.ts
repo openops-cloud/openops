@@ -11,7 +11,6 @@ import {
   ALL_PRINCIPAL_TYPES,
   BlockCategory,
   BlockOptionRequest,
-  BlockType,
   FlowVersion,
   FlowVersionState,
   GetBlockRequestParams,
@@ -21,10 +20,9 @@ import {
   ListVersionRequestQuery,
   ListVersionsResponse,
   OpsEdition,
-  PackageType,
   PrincipalType,
+  StandaloneBlockOptionRequestBody,
   TriggerType,
-  VersionType,
   flowHelper,
   groupStepOutputsById,
   openOpsId,
@@ -289,17 +287,6 @@ const OptionsBlockRequest = {
     body: BlockOptionRequest,
   },
 };
-
-const StandaloneBlockOptionRequestBody = Type.Object({
-  packageType: Type.Enum(PackageType),
-  blockType: Type.Enum(BlockType),
-  blockName: Type.String({}),
-  blockVersion: VersionType,
-  actionOrTriggerName: Type.String({}),
-  propertyName: Type.String({}),
-  input: Type.Any({}),
-  searchValue: Type.Optional(Type.String()),
-});
 
 const StandaloneOptionsBlockRequest = {
   config: {
