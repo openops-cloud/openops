@@ -1,6 +1,5 @@
 import {
   ArrayProperty,
-  BlockAuthProperty,
   BlockMetadata,
   BlockPropertyMap,
   DropdownProperty,
@@ -146,7 +145,12 @@ export const blockHelper = {
   async executeValidateAuth(
     params: ExecuteValidateAuthOperation,
   ): Promise<ExecuteValidateAuthResponse> {
-    const authProperty = params.authProperty as BlockAuthProperty | undefined;
+    const block = await blockLoader.loadBlockOrThrow({
+      blockName: params.blockName,
+      blockVersion: params.blockVersion,
+      blocksSource: EngineConstants.BLOCK_SOURCES,
+    });
+    const authProperty = block.auth;
 
     if (authProperty?.validate === undefined) {
       return {

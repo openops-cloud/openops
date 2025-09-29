@@ -9,7 +9,8 @@ import {
 } from '@openops/shared';
 import { engineRunner } from 'server-worker';
 import { accessTokenManager } from '../../authentication/lib/access-token-manager';
-import { getAuthProviderMetadata } from '../connection-providers-resolver';
+import { blockMetadataService } from '../../blocks/block-metadata-service';
+import { flagService } from '../../flags/flag.service';
 
 export const engineValidateAuth = async (
   params: EngineValidateAuthParams,
@@ -24,14 +25,23 @@ export const engineValidateAuth = async (
     projectId,
   });
 
-  const authProperty = await getAuthProviderMetadata(
-    authProviderKey,
+  const blocks = await blockMetadataService.list({
+    includeHidden: false,
     projectId,
+    release: await flagService.getCurrentRelease(),
+    edition: system.getEdition(),
+  });
+  const blockToValidate = blocks.find(
+    (block) => block.auth?.authProviderKey === authProviderKey,
   );
+
+  const blockName = blockToValidate?.name ?? '';
+  const blockVersion = blockToValidate?.version ?? '';
   const engineResponse = await engineRunner.executeValidateAuth(engineToken, {
     auth,
     projectId,
-    authProperty,
+    blockName,
+    blockVersion,
   });
 
   if (engineResponse.status !== EngineResponseStatus.OK) {
