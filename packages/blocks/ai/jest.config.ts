@@ -1,5 +1,5 @@
 export default {
-  displayName: 'blocks-analyze-with-ai',
+  displayName: 'blocks-ai',
   preset: '../../../jest.preset.js',
   setupFiles: ['../../../jest.env.js'],
   testEnvironment: 'node',
@@ -7,5 +7,5 @@ export default {
     '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }],
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
-  coverageDirectory: '../../../coverage/packages/blocks/analyze-with-ai',
+  coverageDirectory: '../../../coverage/packages/blocks/ai',
 };
