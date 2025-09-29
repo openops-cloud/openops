@@ -36,7 +36,6 @@ import {
   setStepOutputCache,
   stepTestOutputCache,
 } from '../data-selector/data-selector-cache';
-import { TestStepContainerRef } from '../step-settings/utils';
 import { CatchWebhookTestInfo } from './catch-webhook-test-info';
 import { stepTestOutputHooks } from './step-test-output-hooks';
 import { TestSampleDataViewer } from './test-sample-data-viewer';

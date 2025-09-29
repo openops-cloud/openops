@@ -21,7 +21,13 @@ import {
 } from '@openops/shared';
 import deepEqual from 'fast-deep-equal';
 import { t } from 'i18next';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { useUpdateEffect } from 'react-use';
 
@@ -229,12 +235,9 @@ const StepSettingsContainer = React.memo(() => {
 
   const [activeTab, setActiveTab] = useState('configure');
   const [shouldTriggerTest, setShouldTriggerTest] = useState(false);
-
-  useEffect(() => {
-    if (shouldTriggerTest) {
-      setShouldTriggerTest(false);
-    }
-  }, [shouldTriggerTest]);
+  const handleTestTriggered = useCallback(() => {
+    setShouldTriggerTest(false);
+  }, []);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -242,9 +245,7 @@ const StepSettingsContainer = React.memo(() => {
       if ((e.metaKey || e.ctrlKey) && e.code === KEY_TO_TRIGGER_TEST) {
         e.preventDefault();
         setActiveTab('test');
-        setTimeout(() => {
-          setShouldTriggerTest(true);
-        }, 100);
+        setShouldTriggerTest(true);
       }
     };
     document.addEventListener('keydown', onKeyDown);
@@ -367,7 +368,7 @@ const StepSettingsContainer = React.memo(() => {
                             flowVersionId={flowVersion.id}
                             isSaving={saving}
                             shouldTriggerTest={shouldTriggerTest}
-                            onTestTriggered={() => setShouldTriggerTest(false)}
+                            onTestTriggered={handleTestTriggered}
                           />
                         </div>
                       )}
