@@ -26,7 +26,7 @@ export function tryParseJson(value: any): unknown {
   }
   try {
     return JSON.parse(value);
-  } catch (_e) {
+  } catch (error_) {
     return value;
   }
 }
