@@ -173,7 +173,7 @@ jobs:
           command: |
             set -euo pipefail
             if [[ "${{ matrix.type }}" == "list" ]]; then
-              npx nx run-many --target test --projects "${{ matrix.projects }}" --parallel=1 --quiet
+              npx nx run-many --target test --projects "${{ matrix.projects }}" --parallel=1 --skipNxCache --quiet
             else
               npx nx run-many --target test \
                 --projects "${{ matrix.include || '' }}" \
