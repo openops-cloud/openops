@@ -102,7 +102,7 @@ const AiSettingsForm = ({
           disabled={!currentFormValue.enabled}
           allowDynamicValues={false}
           block={block}
-          providerKey={'Microsoft_Teams'}
+          providerKey={'AI'}
           name={'connection'}
         />
 

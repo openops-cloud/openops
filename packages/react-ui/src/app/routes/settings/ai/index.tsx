@@ -24,9 +24,6 @@ import { t } from 'i18next';
 import { Trash } from 'lucide-react';
 
 const AiSettingsPage = () => {
-  const { data: aiProviders, isPending: isAiProvidersLoading } =
-    aiSettingsHooks.useAiSettingsProviders();
-
   const { data: aiSettings, refetch: refetchAiSettings } =
     aiSettingsHooks.useAiSettings();
 
