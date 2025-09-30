@@ -4,9 +4,11 @@ import {
   Property,
 } from '@openops/blocks-framework';
 import { AiProviderEnum, SaveAiConfigRequest } from '@openops/shared';
+import {
+  CUSTOM_MODEL_OPTION,
+  getAiModelFromConnection,
+} from './get-ai-model-from-connection';
 import { getAiProvider, validateAiProviderConfig } from './providers';
-
-const CUSTOM_MODEL_OPTION = { label: 'Custom', value: 'custom' };
 
 const PROVIDER_MODEL_OPTIONS = Object.values(AiProviderEnum).flatMap(
   (provider) => {
@@ -85,10 +87,10 @@ export const aiAuth = BlockAuth.CustomAuth({
   validate: async ({ auth }) => {
     const authObject = auth as BlockPropValueSchema<typeof aiAuth>;
 
-    const model =
-      authObject.model !== CUSTOM_MODEL_OPTION.value
-        ? authObject.model
-        : authObject.customModel;
+    const model = getAiModelFromConnection(
+      authObject.model,
+      authObject.customModel,
+    );
 
     if (!model) {
       return { valid: false, error: 'You need to difene model' };
