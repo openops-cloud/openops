@@ -51,7 +51,7 @@ const AiSettingsForm = ({
   useEffect(() => {
     const formValue: AiSettingsFormSchema = {
       enabled: savedSettings?.enabled ?? false,
-      connection: '',
+      connection: savedSettings?.connection ?? '',
     };
     setInitialFormValue(formValue);
     form.reset(formValue);
