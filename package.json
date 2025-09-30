@@ -38,6 +38,7 @@
     "@ai-sdk/deepinfra": "1.0.7",
     "@ai-sdk/deepseek": "1.0.7",
     "@ai-sdk/google": "2.0.6",
+    "@ai-sdk/google-vertex": "^3.0.0",
     "@ai-sdk/groq": "2.0.7",
     "@ai-sdk/mistral": "2.0.4",
     "@ai-sdk/openai": "2.0.12",
@@ -294,8 +295,7 @@
     "xml2js": "0.6.2",
     "yaml": "2.4.1",
     "zod": "4.0.14",
-    "zustand": "4.5.4",
-    "@ai-sdk/google-vertex": "^3.0.0"
+    "zustand": "4.5.4"
   },
   "devDependencies": {
     "@faker-js/faker": "8.2.0",
@@ -323,6 +323,7 @@
     "@swc/cli": "~0.5.1",
     "@swc/core": "1.5.7",
     "@swc/helpers": "0.5.11",
+    "@swc/jest": "0.2.39",
     "@tailwindcss/container-queries": "0.1.1",
     "@testing-library/react": "16.1.0",
     "@trumbitta/nx-plugin-unused-deps": "1.12.1",

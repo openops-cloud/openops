@@ -4,7 +4,7 @@ export default {
   testEnvironment: 'node',
   transform: {
     '^.+\\.(ts|tsx)$': [
-      'ts-jest',
+      '@swc/jest',
       { tsconfig: '<rootDir>/tsconfig.spec.json' },
     ],
   },

@@ -10,7 +10,6 @@ export default {
     ],
   },
   transformIgnorePatterns: ['/node_modules/', '^.+\\.js$'],
-  transformIgnorePatterns: ['/node_modules/', '^.+\\.js$'],
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/packages/openops/',
 };
