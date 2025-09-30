@@ -90,7 +90,7 @@ export const aiAuth = BlockAuth.CustomAuth({
     );
 
     if (!model) {
-      return { valid: false, error: 'You need to difene model' };
+      return { valid: false, error: 'You need to define model' };
     }
 
     const baseURL = authObject['baseURL'] as string | undefined;
