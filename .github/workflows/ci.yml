@@ -145,8 +145,6 @@ jobs:
     name: Test ${{ matrix.name }}
     needs: prepare-test-matrix
     runs-on: ubuntu-latest
-    env:
-      NX_DAEMON: true
     steps:
       - uses: actions/checkout@v5.0.0
       - name: Restore node_modules cache
@@ -177,7 +175,7 @@ jobs:
           command: |
             set -euo pipefail
             if [[ "${{ matrix.type }}" == "list" ]]; then
-              npx nx run-many --target test --projects "${{ matrix.projects }}" --parallel --quiet
+              npx nx run-many --target test --projects "${{ matrix.projects }}" --skipNxCache --quiet -- --maxWorkers=2
             else
               npx nx run-many --target test \
                 --projects "${{ matrix.include || '' }}" \
