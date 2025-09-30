@@ -5,6 +5,9 @@ import { ArrayProperty } from '../input/array-property';
 import { CheckboxProperty } from '../input/checkbox-property';
 import { TPropertyValue } from '../input/common';
 import { StaticDropdownProperty } from '../input/dropdown/static-dropdown';
+import { DynamicProperties } from '../input/dynamic-prop';
+import { JsonProperty } from '../input/json-property';
+import { MarkDownProperty } from '../input/markdown-property';
 import { NumberProperty } from '../input/number-property';
 import { PropertyType } from '../input/property-type';
 import {
@@ -23,6 +26,7 @@ const CustomAuthProps = Type.Record(
     NumberProperty,
     CheckboxProperty,
     StaticDropdownProperty,
+    DynamicProperties,
     ArrayProperty,
   ]),
 );
@@ -34,8 +38,11 @@ export type CustomAuthProps = Record<
   | SecretTextProperty<boolean>
   | NumberProperty<boolean>
   | StaticDropdownProperty<unknown, boolean>
+  | DynamicProperties<boolean>
   | CheckboxProperty<boolean>
   | ArrayProperty<boolean>
+  | MarkDownProperty
+  | JsonProperty<boolean>
 >;
 
 export const CustomAuthProperty = Type.Composite([

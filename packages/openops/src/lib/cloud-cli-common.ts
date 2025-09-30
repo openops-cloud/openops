@@ -1,14 +1,6 @@
 import { Property } from '@openops/blocks-framework';
 import { logger, SharedSystemProp, system } from '@openops/server-shared';
 
-export function tryParseJson(result: string): any {
-  try {
-    return JSON.parse(result);
-  } catch {
-    return result;
-  }
-}
-
 export function handleCliError({
   provider,
   command,
