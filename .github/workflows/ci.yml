@@ -98,7 +98,7 @@ jobs:
                 include: blocks-f*,blocks-g*,blocks-m*,
               - name: Blocks Shard 3
                 include: blocks-*
-                exclude: locks-a*,blocks-c*,blocks-d*,blocks-f*,blocks-g*,blocks-m*,
+                exclude: blocks-a*,blocks-c*,blocks-d*,blocks-f*,blocks-g*,blocks-m*,
               - name: Server API
                 key: server-api
                 include: server-api
