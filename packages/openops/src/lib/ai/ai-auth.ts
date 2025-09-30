@@ -10,19 +10,16 @@ import {
 } from './get-ai-model-from-connection';
 import { getAiProvider, validateAiProviderConfig } from './providers';
 
-const PROVIDER_MODEL_OPTIONS = Object.values(AiProviderEnum).flatMap(
-  (provider) => {
+const PROVIDER_MODEL_OPTIONS = [
+  ...Object.values(AiProviderEnum).flatMap((provider) => {
     const models = getAiProvider(provider).models;
-    const providerModelOptions = models.map((model) => ({
+    return models.map((model) => ({
       label: `${provider} - ${model}`,
       value: model,
     }));
-
-    providerModelOptions.push(CUSTOM_MODEL_OPTION);
-
-    return providerModelOptions;
-  },
-);
+  }),
+  CUSTOM_MODEL_OPTION,
+];
 
 const PROVIDER_OPTIONS = Object.values(AiProviderEnum).map((provider) => ({
   label: provider,

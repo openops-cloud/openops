@@ -64,6 +64,7 @@ export * from './lib/google-cloud/bq-column-types';
 export * from './lib/promise-pool';
 
 export * from './lib/ai/ai-auth';
+export * from './lib/ai/get-ai-model-from-connection';
 export * from './lib/ai/providers';
 
 export * from './lib/microsoft/get-microsoft-graph-client';
