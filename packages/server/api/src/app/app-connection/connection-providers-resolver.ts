@@ -96,7 +96,7 @@ export async function getAuthProviderMetadata(
 export async function findBlockByAuthProviderKey(
   authProviderKey: string,
   projectId: string,
-): Promise<{ name: string; version: string } | undefined> {
+): Promise<{ name: string; version: string }> {
   const release = await flagService.getCurrentRelease();
   const edition = system.getEdition();
 
@@ -111,6 +111,10 @@ export async function findBlockByAuthProviderKey(
     (block) => block.auth?.authProviderKey === authProviderKey,
   );
 
-  if (!block) return undefined;
+  if (!block) {
+    throw new Error(
+      `Block with authProviderKey "${authProviderKey}" not found for project "${projectId}".`,
+    );
+  }
   return { name: block.name, version: block.version };
 }

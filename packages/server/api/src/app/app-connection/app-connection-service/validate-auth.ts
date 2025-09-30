@@ -29,8 +29,8 @@ export const engineValidateAuth = async (
     projectId,
   );
 
-  const blockName = blockToValidate?.name ?? '';
-  const blockVersion = blockToValidate?.version ?? '';
+  const blockName = blockToValidate.name;
+  const blockVersion = blockToValidate.version;
   const engineResponse = await engineRunner.executeValidateAuth(engineToken, {
     auth,
     projectId,
