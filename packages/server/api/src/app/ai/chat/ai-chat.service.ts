@@ -4,7 +4,13 @@ import {
   getAiProviderLanguageModel,
 } from '@openops/common';
 import { cacheWrapper, hashUtils } from '@openops/server-shared';
-import { AiConfigParsed, ApplicationError, ErrorCode } from '@openops/shared';
+import {
+  AiConfigParsed,
+  ApplicationError,
+  CustomAuthConnectionValue,
+  ErrorCode,
+  removeConnectionBrackets,
+} from '@openops/shared';
 import { LanguageModel, ModelMessage, UIMessage, generateText } from 'ai';
 import { appConnectionService } from '../../app-connection/app-connection-service/app-connection-service';
 import { aiConfigService } from '../config/ai-config.service';
@@ -204,7 +210,8 @@ export async function getLLMConfig(
   projectId: string,
 ): Promise<{ aiConfig: AiConfigParsed; languageModel: LanguageModel }> {
   const aiConfig = await aiConfigService.getActiveConfig(projectId);
-  if (!aiConfig) {
+  const connectionName = removeConnectionBrackets(aiConfig?.connection);
+  if (!aiConfig || !connectionName) {
     throw new ApplicationError({
       code: ErrorCode.ENTITY_NOT_FOUND,
       params: {
@@ -214,27 +221,35 @@ export async function getLLMConfig(
       },
     });
   }
-  const connection = (await appConnectionService.getOne({
-    projectId,
-    name: aiConfig.connection,
-  })) as unknown as AiAuth;
+
+  const connection = (
+    await appConnectionService.getOne({
+      projectId,
+      name: connectionName,
+    })
+  )?.value as CustomAuthConnectionValue;
+
+  const connectionProps = connection.props as AiAuth;
 
   const model =
-    getAiModelFromConnection(connection.model, connection.customModel) ?? '';
+    getAiModelFromConnection(
+      connectionProps.model,
+      connectionProps.customModel,
+    ) ?? '';
 
   const languageModel = await getAiProviderLanguageModel({
     model,
-    apiKey: connection?.apiKey,
-    provider: connection.provider,
-    providerSettings: connection?.providerSettings,
+    apiKey: connectionProps?.apiKey,
+    provider: connectionProps.provider,
+    providerSettings: connectionProps?.providerSettings,
   });
 
   const aiConfigParsed: AiConfigParsed = {
     model,
-    provider: connection.provider,
-    apiKey: connection?.apiKey,
-    providerSettings: connection?.providerSettings,
-    modelSettings: connection?.providerSettings,
+    provider: connectionProps.provider,
+    apiKey: connectionProps?.apiKey,
+    providerSettings: connectionProps?.providerSettings,
+    modelSettings: connectionProps?.providerSettings,
   };
 
   return { aiConfig: aiConfigParsed, languageModel };
