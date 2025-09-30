@@ -1,3 +1,4 @@
+import { tryParseJson } from '@openops/common';
 import { appendToContext, logger } from '@openops/server-shared';
 import {
   Action,
@@ -37,7 +38,6 @@ import { triggerHelper } from './helper/trigger-helper';
 import { resolveVariable } from './resolve-variable';
 import { progressService } from './services/progress.service';
 import { EngineTimeoutError } from './timeout-validator';
-import { utils } from './utils';
 
 const executeFlow = async (
   input: ExecuteFlowOperation,
@@ -308,7 +308,7 @@ function evaluateError(error: Error): {
   message: unknown;
 } {
   let status = FlowRunStatus.INTERNAL_ERROR;
-  let message = utils.tryParseJson(error.message);
+  let message = tryParseJson(error.message);
 
   if (error instanceof EngineTimeoutError) {
     status = FlowRunStatus.TIMEOUT;
