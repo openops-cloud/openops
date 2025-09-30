@@ -86,64 +86,22 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@778341af668090896ca464160c2def5d1d1a3eb0
         with:
           commit_message: Update THIRD_PARTY_LICENSES.txt
-  prepare-test-matrix:
-    name: Prepare Test Matrix
-    needs: install
-    runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.compute.outputs.matrix }}
-    steps:
-      - uses: actions/checkout@v5.0.0
-
-      - name: Restore node_modules cache
-        id: node-modules-cache
-        uses: actions/cache/restore@v4.2.4
-        with:
-          path: node_modules
-          key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
-          fail-on-cache-miss: true
-
-      - name: Compute test matrix
-        id: compute
-        shell: bash
-        run: |
-          set -euo pipefail
-          matrix='[
-            {"name":"UI","type":"pattern","include":"ui-*,*-ui"},
-            {"name":"Server API","type":"pattern","key":"server-api","include":"server-api"},
-            {"name":"Engine and Libraries","type":"pattern","key":"others","exclude":"ui-*,*-ui,blocks-*,server-api"}
-          ]'
-
-          CHUNK_SIZE=10
-          mapfile -t blocks < <(npx nx show projects --json | jq -r '.[]' | grep -E '^blocks-' || true)
-          if [[ ${#blocks[@]} -gt 0 ]]; then
-            total=${#blocks[@]}
-            chunks=$(( (total + CHUNK_SIZE - 1) / CHUNK_SIZE ))
-
-            for ((i=0;i<chunks;i++)); do
-              start=$((i*CHUNK_SIZE))
-              group=( "${blocks[@]:start:CHUNK_SIZE}" )
-              joined="$(IFS=,; echo "${group[*]}")"
-
-              shard=$(jq -n \
-                --arg name "Blocks shard $((i+1))" \
-                --arg key "blocks-$((i+1))" \
-                --arg projects "$joined" \
-                '{name:$name,type:"list",key:$key,projects:$projects}')
-
-              matrix=$(jq -c --argjson shard "$shard" '. + [$shard]' <<< "$matrix")
-            done
-          fi
-
-          echo "$matrix" | jq .
-
-          printf 'matrix=%s\n' "$matrix" >> "$GITHUB_OUTPUT"
   test:
     strategy:
       matrix:
-        include: ${{ fromJSON(needs.prepare-test-matrix.outputs.matrix) }}
-    name: Test ${{ matrix.name }}
-    needs: prepare-test-matrix
+        test-suits:
+          - name: UI
+            include: ui-*,*-ui
+          - name: Blocks
+            include: blocks-*
+          - name: Server API
+            key: server-api
+            include: server-api
+          - name: Engine and Libraries
+            key: others
+            exclude: ui-*,*-ui,blocks-*,server-api
+    name: Test ${{ matrix.test-suits.name }}
+    needs: install
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5.0.0
@@ -159,8 +117,8 @@ jobs:
         uses: actions/cache@v4.2.4
         with:
           path: .nx/cache
-          key: nx-test-${{ matrix.key || matrix.name }}-${{ github.sha }}
-          restore-keys: nx-test-${{ matrix.key || matrix.name }}-
+          key: nx-test-${{ matrix.test-suits.key || matrix.test-suits.name }}-${{ github.sha }}
+          restore-keys: nx-test-${{ matrix.test-suits.key || matrix.test-suits.name }}-
           save-always: true
       - name: Start Nx daemon
         run: npx nx daemon --start
@@ -172,16 +130,7 @@ jobs:
           timeout_minutes: 10
           max_attempts: 3
           retry_on: error
-          command: |
-            set -euo pipefail
-            if [[ "${{ matrix.type }}" == "list" ]]; then
-              npx nx run-many --target test --projects "${{ matrix.projects }}" --skipNxCache --quiet -- --maxWorkers=2
-            else
-              npx nx run-many --target test \
-                --projects "${{ matrix.include || '' }}" \
-                --exclude "${{ matrix.exclude || '' }}" \
-                --quiet
-            fi
+          command: npx nx run-many --target test --projects "${{ matrix.test-suits.include }}" --exclude "${{ matrix.test-suits.exclude }}" --quiet -- --maxWorkers=2
         env:
           NX_REJECT_UNKNOWN_LOCAL_CACHE: 0
       - name: Truncate NX cache
