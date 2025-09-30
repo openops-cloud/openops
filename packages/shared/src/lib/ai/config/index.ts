@@ -12,7 +12,6 @@ export const AiConfig = Type.Object({
 export type AiConfig = Static<typeof AiConfig>;
 
 export const AiConfigParsed = Type.Object({
-  projectId: Type.String(),
   provider: Type.Enum(AiProviderEnum),
   model: Type.String(),
   apiKey: Type.String(),

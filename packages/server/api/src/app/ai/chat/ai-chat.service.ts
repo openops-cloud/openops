@@ -1,11 +1,10 @@
-import { getAiProviderLanguageModel } from '@openops/common';
-import { cacheWrapper, hashUtils } from '@openops/server-shared';
 import {
-  AiConfigParsed,
-  AiProviderEnum,
-  ApplicationError,
-  ErrorCode,
-} from '@openops/shared';
+  AiAuth,
+  getAiModelFromConnection,
+  getAiProviderLanguageModel,
+} from '@openops/common';
+import { cacheWrapper, hashUtils } from '@openops/server-shared';
+import { AiConfigParsed, ApplicationError, ErrorCode } from '@openops/shared';
 import { LanguageModel, ModelMessage, UIMessage, generateText } from 'ai';
 import { appConnectionService } from '../../app-connection/app-connection-service/app-connection-service';
 import { aiConfigService } from '../config/ai-config.service';
@@ -218,29 +217,21 @@ export async function getLLMConfig(
   const connection = (await appConnectionService.getOne({
     projectId,
     name: aiConfig.connection,
-  })) as unknown as {
-    apiKey: string;
-    providerSettings: Record<string, unknown>;
-    modelSettings: Record<string, unknown>;
-    providerModel: string;
-  };
+  })) as unknown as AiAuth;
 
-  const { provider, model } = connection['providerModel'] as unknown as {
-    provider: AiProviderEnum;
-    model: string;
-  };
+  const model =
+    getAiModelFromConnection(connection.model, connection.customModel) ?? '';
 
   const languageModel = await getAiProviderLanguageModel({
-    apiKey: connection?.apiKey,
     model,
-    provider,
+    apiKey: connection?.apiKey,
+    provider: connection.provider,
     providerSettings: connection?.providerSettings,
   });
 
   const aiConfigParsed: AiConfigParsed = {
-    projectId: aiConfig.projectId,
-    provider,
     model,
+    provider: connection.provider,
     apiKey: connection?.apiKey,
     providerSettings: connection?.providerSettings,
     modelSettings: connection?.providerSettings,
