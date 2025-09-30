@@ -22,7 +22,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { t } from 'i18next';
 import { Trash } from 'lucide-react';
-import { useEffect } from 'react';
 
 const AiSettingsPage = () => {
   const { data: aiProviders, isPending: isAiProvidersLoading } =
@@ -37,7 +36,7 @@ const AiSettingsPage = () => {
   const queryClient = useQueryClient();
 
   const { blockModel } = blocksHooks.useBlock({
-    name: '@openops/block-microsoft-teams',
+    name: '@openops/block-ai',
   });
 
   const { mutate: onSaveAiSettings, isPending: isSaving } = useMutation({
