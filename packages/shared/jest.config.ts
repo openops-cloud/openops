@@ -5,13 +5,12 @@ export default {
   globals: {},
   testEnvironment: 'node',
   transform: {
-    '^.+\\.[tj]s$': [
+    '^.+\\.(ts|tsx)$': [
       'ts-jest',
-      {
-        tsconfig: '<rootDir>/tsconfig.spec.json',
-      },
+      { tsconfig: '<rootDir>/tsconfig.spec.json' },
     ],
   },
+  transformIgnorePatterns: ['/node_modules/', '^.+\\.js$'],
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/packages/shared',
 };

@@ -8,6 +8,7 @@ export default {
       { tsconfig: '<rootDir>/tsconfig.spec.json' },
     ],
   },
+  transformIgnorePatterns: ['/node_modules/', '^.+\\.js$'],
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../../coverage/packages/blocks/databricks',
 };
