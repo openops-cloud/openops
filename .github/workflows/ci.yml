@@ -87,6 +87,7 @@ jobs:
         with:
           commit_message: Update THIRD_PARTY_LICENSES.txt
   prepare-test-matrix:
+    name: Prepare Test Matrix
     needs: install
     runs-on: ubuntu-latest
     outputs:
