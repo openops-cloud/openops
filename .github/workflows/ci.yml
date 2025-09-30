@@ -130,7 +130,7 @@ jobs:
           timeout_minutes: 10
           max_attempts: 3
           retry_on: error
-          command: npx nx run-many --target test --projects "${{ matrix.test-suits.include }}" --exclude "${{ matrix.test-suits.exclude }}" --quiet -- --maxWorkers=2
+          command: npx nx run-many --target test --projects "${{ matrix.test-suits.include }}" --exclude "${{ matrix.test-suits.exclude }}" --skipNxCache --quiet -- --maxWorkers=2
         env:
           NX_REJECT_UNKNOWN_LOCAL_CACHE: 0
       - name: Truncate NX cache
