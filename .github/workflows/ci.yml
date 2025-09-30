@@ -145,6 +145,8 @@ jobs:
     name: Test ${{ matrix.name }}
     needs: prepare-test-matrix
     runs-on: ubuntu-latest
+    env:
+      NX_DAEMON: true
     steps:
       - uses: actions/checkout@v5.0.0
       - name: Restore node_modules cache
@@ -162,6 +164,8 @@ jobs:
           key: nx-test-${{ matrix.key || matrix.name }}-${{ github.sha }}
           restore-keys: nx-test-${{ matrix.key || matrix.name }}-
           save-always: true
+      - name: Start Nx daemon
+        run: npx nx daemon --start
       - name: Test
         if: steps.nx-test-cache.outputs.cache-hit != 'true'
         continue-on-error: false
@@ -173,7 +177,7 @@ jobs:
           command: |
             set -euo pipefail
             if [[ "${{ matrix.type }}" == "list" ]]; then
-              npx nx run-many --target test --projects "${{ matrix.projects }}" --parallel=1 --skipNxCache --quiet
+              npx nx run-many --target test --projects "${{ matrix.projects }}" --parallel --quiet
             else
               npx nx run-many --target test \
                 --projects "${{ matrix.include || '' }}" \
