@@ -1,7 +1,13 @@
 import { getAiProviderLanguageModel } from '@openops/common';
-import { cacheWrapper, encryptUtils, hashUtils } from '@openops/server-shared';
-import { AiConfig, ApplicationError, ErrorCode } from '@openops/shared';
+import { cacheWrapper, hashUtils } from '@openops/server-shared';
+import {
+  AiConfigParsed,
+  AiProviderEnum,
+  ApplicationError,
+  ErrorCode,
+} from '@openops/shared';
 import { LanguageModel, ModelMessage, UIMessage, generateText } from 'ai';
+import { appConnectionService } from '../../app-connection/app-connection-service/app-connection-service';
 import { aiConfigService } from '../config/ai-config.service';
 import { loadPrompt } from './prompts.service';
 import { Conversation } from './types';
@@ -197,8 +203,8 @@ export const deleteChatHistory = async (
 
 export async function getLLMConfig(
   projectId: string,
-): Promise<{ aiConfig: AiConfig; languageModel: LanguageModel }> {
-  const aiConfig = await aiConfigService.getActiveConfigWithApiKey(projectId);
+): Promise<{ aiConfig: AiConfigParsed; languageModel: LanguageModel }> {
+  const aiConfig = await aiConfigService.getActiveConfig(projectId);
   if (!aiConfig) {
     throw new ApplicationError({
       code: ErrorCode.ENTITY_NOT_FOUND,
@@ -209,16 +215,38 @@ export async function getLLMConfig(
       },
     });
   }
+  const connection = (await appConnectionService.getOne({
+    projectId,
+    name: aiConfig.connection,
+  })) as unknown as {
+    apiKey: string;
+    providerSettings: Record<string, unknown>;
+    modelSettings: Record<string, unknown>;
+    providerModel: string;
+  };
 
-  const apiKey = encryptUtils.decryptString(JSON.parse(aiConfig.apiKey));
+  const { provider, model } = connection['providerModel'] as unknown as {
+    provider: AiProviderEnum;
+    model: string;
+  };
+
   const languageModel = await getAiProviderLanguageModel({
-    apiKey,
-    model: aiConfig.model,
-    provider: aiConfig.provider,
-    providerSettings: aiConfig.providerSettings,
+    apiKey: connection?.apiKey,
+    model,
+    provider,
+    providerSettings: connection?.providerSettings,
   });
 
-  return { aiConfig, languageModel };
+  const aiConfigParsed: AiConfigParsed = {
+    projectId: aiConfig.projectId,
+    provider,
+    model,
+    apiKey: connection?.apiKey,
+    providerSettings: connection?.providerSettings,
+    modelSettings: connection?.providerSettings,
+  };
+
+  return { aiConfig: aiConfigParsed, languageModel };
 }
 
 export async function getConversation(

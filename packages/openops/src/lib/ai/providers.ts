@@ -1,12 +1,6 @@
 import { SharedSystemProp, system } from '@openops/server-shared';
-import {
-  AiProviderEnum,
-  ApplicationError,
-  ApplicationErrorParams,
-  GetProvidersResponse,
-  SaveAiConfigRequest,
-} from '@openops/shared';
-import { AISDKError, generateText, LanguageModel } from 'ai';
+import { AiProviderEnum, GetProvidersResponse } from '@openops/shared';
+import { LanguageModel } from 'ai';
 import { anthropicProvider } from './providers/anthropic';
 import { azureProvider } from './providers/azure-openai';
 import { cerebrasProvider } from './providers/cerebras';
@@ -88,65 +82,9 @@ export const getAiProviderLanguageModel = async (aiConfig: {
   });
 };
 
-export const validateAiProviderConfig = async (
-  config: SaveAiConfigRequest,
-): Promise<{
-  valid: boolean;
-  error?: { errorMessage: string; errorName: string } | ApplicationErrorParams;
-}> => {
-  try {
-    const languageModel = await getAiProviderLanguageModel({
-      apiKey: config.apiKey,
-      model: config.model,
-      provider: config.provider,
-      providerSettings: config.providerSettings,
-    });
-
-    await generateText({
-      model: languageModel,
-      prompt: 'Hi',
-      ...config.modelSettings,
-    });
-  } catch (error) {
-    if (AISDKError.isInstance(error)) {
-      return invalidConfigError(
-        error.name,
-        error.message.replace(config.apiKey, '**REDACTED**'),
-      );
-    }
-
-    if (error instanceof ApplicationError) {
-      return {
-        valid: false,
-        error: error.error,
-      };
-    }
-
-    return invalidConfigError(
-      error instanceof Error ? error.name : 'UnknownError',
-      error instanceof Error ? error.message : 'Unknown error occurred',
-    );
-  }
-
-  return { valid: true };
-};
-
 export const isLLMTelemetryEnabled = () =>
   !!system.get(SharedSystemProp.LANGFUSE_SECRET_KEY) &&
   !!system.get(SharedSystemProp.LANGFUSE_PUBLIC_KEY);
-
-const invalidConfigError = (
-  errorName: string,
-  errorMessage: string,
-): {
-  valid: boolean;
-  error: { errorMessage: string; errorName: string };
-} => {
-  return {
-    valid: false,
-    error: { errorName, errorMessage },
-  };
-};
 
 function sanitizeProviderSettings(
   settings: Record<string, unknown> | null | undefined,

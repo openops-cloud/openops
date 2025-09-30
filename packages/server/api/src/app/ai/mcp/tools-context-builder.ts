@@ -1,5 +1,5 @@
 import { wrapToolsWithApproval } from '@/mcp/tool-approval-wrapper';
-import { AiConfig, ChatFlowContext } from '@openops/shared';
+import { AiConfigParsed, ChatFlowContext } from '@openops/shared';
 import { LanguageModel, ModelMessage, ToolSet } from 'ai';
 import { FastifyInstance } from 'fastify';
 import { MCPChatContext } from '../chat/ai-chat.service';
@@ -20,7 +20,7 @@ type MCPToolsContextParams = {
   app: FastifyInstance;
   projectId: string;
   authToken: string;
-  aiConfig: AiConfig;
+  aiConfig: AiConfigParsed;
   messages: ModelMessage[];
   chatContext: MCPChatContext;
   languageModel: LanguageModel;

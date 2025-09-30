@@ -1,6 +1,6 @@
 import { getTableNames, isLLMTelemetryEnabled } from '@openops/common';
 import { logger } from '@openops/server-shared';
-import { AiConfig, ChatFlowContext } from '@openops/shared';
+import { AiConfigParsed, ChatFlowContext } from '@openops/shared';
 import { generateObject, LanguageModel, ModelMessage, ToolSet } from 'ai';
 import { z } from 'zod';
 import { buildUIContextSection } from '../chat/prompts.service';
@@ -62,7 +62,7 @@ export async function routeQuery({
   messages: ModelMessage[];
   tools: ToolSet;
   languageModel: LanguageModel;
-  aiConfig: AiConfig;
+  aiConfig: AiConfigParsed;
   uiContext?: ChatFlowContext;
   abortSignal?: AbortSignal;
 }): Promise<ToolsAndQueryResult> {
