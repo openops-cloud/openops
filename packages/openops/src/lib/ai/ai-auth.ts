@@ -45,7 +45,7 @@ export const aiAuth = BlockAuth.CustomAuth({
       },
     }),
     model: Property.StaticDropdown({
-      displayName: 'Provider with model',
+      displayName: 'Model',
       description: 'Select model',
       required: true,
       options: {
