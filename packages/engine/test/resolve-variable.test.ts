@@ -46,12 +46,12 @@ describe('resolveVariable', () => {
 
   const mockExecutionState = FlowExecutorContext.empty();
 
-  const mockVariableService = {
+  const mockPropsResolver = {
     resolve: jest.fn(),
   };
 
   const mockConstants = {
-    variableService: mockVariableService,
+    propsResolver: mockPropsResolver,
   };
 
   beforeEach(() => {
@@ -99,7 +99,7 @@ describe('resolveVariable', () => {
         censoredValue: ['*', '*', '*', '*'],
       },
     ])('should resolve variable successfully with $description', async ({ expression, resolvedValue, censoredValue }) => {
-      mockVariableService.resolve.mockResolvedValue({
+      mockPropsResolver.resolve.mockResolvedValue({
         resolvedInput: resolvedValue,
         censoredInput: censoredValue,
       });
@@ -117,7 +117,7 @@ describe('resolveVariable', () => {
         censoredValue,
       });
 
-      expect(mockVariableService.resolve).toHaveBeenCalledWith({
+      expect(mockPropsResolver.resolve).toHaveBeenCalledWith({
         unresolvedInput: expression,
         executionState: mockExecutionState,
       });
@@ -127,7 +127,7 @@ describe('resolveVariable', () => {
       const mockResolvedValue = 'test-value';
       const mockCensoredValue = 'test-value';
 
-      mockVariableService.resolve.mockResolvedValue({
+      mockPropsResolver.resolve.mockResolvedValue({
         resolvedInput: mockResolvedValue,
         censoredInput: mockCensoredValue,
       });
@@ -158,7 +158,7 @@ describe('resolveVariable', () => {
       const mockResolvedValue = 'test-value';
       const mockCensoredValue = 'test-value';
 
-      mockVariableService.resolve.mockResolvedValue({
+      mockPropsResolver.resolve.mockResolvedValue({
         resolvedInput: mockResolvedValue,
         censoredInput: mockCensoredValue,
       });
@@ -198,7 +198,7 @@ describe('resolveVariable', () => {
         expectedError: 'Failed to create engine constants',
         expectationsAfterError: () => {
           expect(mockTestExecutionContext.stateFromFlowVersion).not.toHaveBeenCalled();
-          expect(mockVariableService.resolve).not.toHaveBeenCalled();
+          expect(mockPropsResolver.resolve).not.toHaveBeenCalled();
         },
       },
       {
@@ -209,13 +209,13 @@ describe('resolveVariable', () => {
         expectedError: 'Failed to create execution state',
         expectationsAfterError: () => {
           expect(mockEngineConstants.fromExecuteStepInput).toHaveBeenCalled();
-          expect(mockVariableService.resolve).not.toHaveBeenCalled();
+          expect(mockPropsResolver.resolve).not.toHaveBeenCalled();
         },
       },
       {
         description: 'variableService.resolve failure',
         setupError: () => {
-          mockVariableService.resolve.mockRejectedValue(new Error('Variable resolution failed'));
+          mockPropsResolver.resolve.mockRejectedValue(new Error('Variable resolution failed'));
         },
         expectedError: 'Variable resolution failed',
         expectationsAfterError: () => {
@@ -270,7 +270,7 @@ describe('resolveVariable', () => {
         expectedError: 'undefined',
       },
     ])('should handle non-Error thrown values: $description', async ({ thrownError, expectedError }) => {
-      mockVariableService.resolve.mockRejectedValue(thrownError);
+      mockPropsResolver.resolve.mockRejectedValue(thrownError);
 
       const result = await resolveVariable(mockInput);
 
@@ -316,7 +316,7 @@ describe('resolveVariable', () => {
         censoredValue: 'U*** N***',
       },
     ])('should handle $description', async ({ expression, resolvedValue, censoredValue }) => {
-      mockVariableService.resolve.mockResolvedValue({
+      mockPropsResolver.resolve.mockResolvedValue({
         resolvedInput: resolvedValue,
         censoredInput: censoredValue,
       });

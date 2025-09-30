@@ -24,8 +24,8 @@ import {
 } from '@openops/shared';
 import { EngineConstants } from '../handler/context/engine-constants';
 import { FlowExecutorContext } from '../handler/context/flow-execution-context';
-import { blockLoader } from './block-loader';
 import { createPropsResolver } from '../variables/props-resolver';
+import { blockLoader } from './block-loader';
 
 async function evaluateProp(
   ctx: PropertyContext,
