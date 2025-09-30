@@ -87,7 +87,7 @@ jobs:
         with:
           commit_message: Update THIRD_PARTY_LICENSES.txt
   prepare-test-matrix:
-    name: Prepare Test
+    name: Prepare Test Matrix
     needs: install
     runs-on: ubuntu-latest
     outputs:
@@ -139,8 +139,9 @@ jobs:
 
           printf 'matrix=%s\n' "$matrix" >> "$GITHUB_OUTPUT"
   test:
-    matrix:
-      include: ${{ fromJSON(needs.prepare-test-matrix.outputs.matrix) }}
+    strategy:
+      matrix:
+        include: ${{ fromJSON(needs.prepare-test-matrix.outputs.matrix) }}
     name: Test ${{ matrix.name }}
     needs: prepare-test-matrix
     runs-on: ubuntu-latest
