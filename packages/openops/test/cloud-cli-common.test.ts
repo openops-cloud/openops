@@ -18,26 +18,7 @@ jest.mock('@openops/server-shared', () => ({
 import {
   getUseHostSessionProperty,
   handleCliError,
-  tryParseJson,
 } from '../src/lib/cloud-cli-common';
-
-describe('tryParseJson', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  test('returns parsed JSON when input is valid JSON', () => {
-    const input = '{"someKey":"some value"}';
-    const result = tryParseJson(input);
-    expect(result).toEqual({ someKey: 'some value' });
-  });
-
-  test('returns original string when input is not valid JSON', () => {
-    const input = 'not a json string';
-    const result = tryParseJson(input);
-    expect(result).toBe(input);
-  });
-});
 
 describe('handleCliError', () => {
   beforeEach(() => {
