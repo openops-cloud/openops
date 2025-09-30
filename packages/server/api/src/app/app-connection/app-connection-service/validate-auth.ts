@@ -9,7 +9,7 @@ import {
 } from '@openops/shared';
 import { engineRunner } from 'server-worker';
 import { accessTokenManager } from '../../authentication/lib/access-token-manager';
-import { findBlockByAuthProviderKey } from './validate-auth-utils';
+import { findBlockByAuthProviderKey } from '../connection-providers-resolver';
 
 export const engineValidateAuth = async (
   params: EngineValidateAuthParams,
