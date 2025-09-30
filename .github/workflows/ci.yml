@@ -93,12 +93,12 @@ jobs:
               - name: UI
                 include: ui-*,*-ui
               - name: Blocks Shard 1
-                include: blocks-aws-compute-optimizer,blocks-microsoft-outlook,blocks-list-operations,blocks-microsoft-teams,blocks-cloudformation,blocks-openops-tables,blocks-cloudability,blocks-google-cloud,blocks-cloudhealth,blocks-date-helper
+                include: blocks-a*,blocks-c*,blocks-d*,
               - name: Blocks Shard 2
-                include: blocks-file-helper,blocks-flexera-one,blocks-math-helper,blocks-text-helper,blocks-aws-athena,blocks-databricks,blocks-jira-cloud,blocks-servicenow,blocks-cloudzero,blocks-framework
+                include: blocks-f*,blocks-g*,blocks-m*,
               - name: Blocks Shard 3
                 include: blocks-*
-                exclude: blocks-aws-compute-optimizer,blocks-microsoft-outlook,blocks-list-operations,blocks-microsoft-teams,blocks-cloudformation,blocks-openops-tables,blocks-cloudability,blocks-google-cloud,blocks-cloudhealth,blocks-date-helper,blocks-file-helper,blocks-flexera-one,blocks-math-helper,blocks-text-helper,blocks-aws-athena,blocks-databricks,blocks-jira-cloud,blocks-servicenow,blocks-cloudzero,blocks-framework
+                exclude: locks-a*,blocks-c*,blocks-d*,blocks-f*,blocks-g*,blocks-m*,
               - name: Server API
                 key: server-api
                 include: server-api
