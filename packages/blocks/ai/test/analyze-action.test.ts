@@ -1,5 +1,8 @@
 jest.mock('@openops/common', () => ({
   getAiProviderLanguageModel: jest.fn(),
+  getAiModelFromConnection: jest.fn(
+    (model: string, customModel?: string) => customModel || model,
+  ),
 }));
 
 jest.mock('ai', () => ({
@@ -38,7 +41,8 @@ describe('analyze action', () => {
     (generateText as jest.Mock).mockResolvedValue({ text: 'answer' });
 
     const auth = {
-      providerModel: { provider: AiProviderEnum.OPENAI, model: 'gpt-test' },
+      provider: AiProviderEnum.OPENAI,
+      model: 'gpt-test',
       apiKey: 'k',
       providerSettings: { someProviderSetting: true },
       modelSettings: { maxRetries: 2 },
@@ -71,7 +75,8 @@ describe('analyze action', () => {
     (generateText as jest.Mock).mockResolvedValue({ text: 'final' });
 
     const auth = {
-      providerModel: { provider: AiProviderEnum.OPENAI, model: 'gpt-4' },
+      provider: AiProviderEnum.OPENAI,
+      model: 'gpt-4',
       apiKey: 'secret',
       baseURL: 'http://llm.local',
       providerSettings: { region: 'us' },
@@ -101,6 +106,37 @@ describe('analyze action', () => {
     );
 
     expect(result).toBe('final');
+  });
+  test('should use customModel when provided', async () => {
+    (getAiProviderLanguageModel as jest.Mock).mockResolvedValue('lm');
+    (generateText as jest.Mock).mockResolvedValue({ text: 'ok' });
+
+    const auth = {
+      provider: AiProviderEnum.OPENAI,
+      model: 'CUSTOM',
+      customModel: 'gpt-4o-mini',
+      apiKey: 'sk',
+      providerSettings: {},
+      modelSettings: {},
+    };
+
+    const context = createContext(auth, { prompt: 'Hi' });
+
+    const result = await analyze.run(context);
+
+    expect(getAiProviderLanguageModel).toHaveBeenCalledWith({
+      provider: AiProviderEnum.OPENAI,
+      apiKey: 'sk',
+      model: 'gpt-4o-mini',
+      providerSettings: {},
+    });
+
+    expect(generateText).toHaveBeenCalledWith({
+      model: 'lm',
+      prompt: 'Hi',
+    });
+
+    expect(result).toBe('ok');
   });
 });
 
