@@ -31,12 +31,12 @@ export const dropdownProcessor = (
     const expectedType = typeof property.options.options[0].value;
 
     const parsedValue = tryParseJson(value);
-    if (typeof parsedValue !== expectedType) {
+    if (typeof parsedValue === expectedType) {
+      processedInput[key] = parsedValue;
+    } else {
       errors[property.displayName] = [
         `Expected an ${expectedType}, received: ${value}`,
       ];
-    } else {
-      processedInput[key] = parsedValue;
     }
   }
 
@@ -46,10 +46,10 @@ export const dropdownProcessor = (
     typeof value === 'string'
   ) {
     const parsedValue = tryParseJson(value);
-    if (!Array.isArray(parsedValue)) {
-      errors[property.displayName] = [`Expected an array, received: ${value}`];
-    } else {
+    if (Array.isArray(parsedValue)) {
       processedInput[key] = parsedValue;
+    } else {
+      errors[property.displayName] = [`Expected an array, received: ${value}`];
     }
   }
 };

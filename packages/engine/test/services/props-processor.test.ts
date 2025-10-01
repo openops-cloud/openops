@@ -162,14 +162,14 @@ describe('Props Processor', () => {
       },
     }), true);
     expect(processedInput).toEqual({
-      price: NaN,
-      emptyStringNumber: NaN,
+      price: Number.NaN,
+      emptyStringNumber: Number.NaN,
       nullNumber: null,
       undefinedNumber: undefined,
       optionalNullNumber: null,
       optionalUndefinedNumber: undefined,
       auth: {
-        age: NaN,
+        age: Number.NaN,
       },
     });
     expect(errors).toEqual({
