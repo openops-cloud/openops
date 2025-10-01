@@ -16,7 +16,7 @@ export const deleteRecordAction = createAction({
   name: 'delete_record',
   description: 'Delete a record in an OpenOps table.',
   displayName: 'Delete Record',
-  requireToolApproval: false,
+  requireToolApproval: true,
   props: {
     tableName: openopsTablesDropdownProperty(),
     rowPrimaryKey: Property.LongText({
