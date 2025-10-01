@@ -1,4 +1,4 @@
-import { schemaValidation } from '@openops/blocks-common';
+import { addValidationIssue, schemaValidation } from '@openops/blocks-common';
 import { createAction } from '@openops/blocks-framework';
 import {
   amazonAuth,
@@ -6,17 +6,9 @@ import {
   getAwsAccountsMultiSelectDropdown,
   getCredentialsForAccount,
   parseArn,
+  tryParseJson,
 } from '@openops/common';
 import { z } from 'zod';
-
-export const AccountsSchema = z.object({
-  accounts: z
-    .union([z.string(), z.array(z.string())])
-    .transform((v) => (typeof v === 'string' ? [v] : v))
-    .refine(() => false, {
-      message: 'Accounts must be a string or an array of strings',
-    }),
-});
 
 export const getAccountIdAction = createAction({
   auth: amazonAuth,
@@ -57,3 +49,28 @@ export const getAccountIdAction = createAction({
     return [{ accountId: accountId }];
   },
 });
+
+const AccountsSchema = z
+  .object({
+    accounts: z.union([z.string(), z.array(z.string())]),
+  })
+  .superRefine((obj, ctx) => {
+    const accounts = obj.accounts;
+    const parsedValue =
+      typeof accounts === 'string' ? tryParseJson(accounts) : accounts;
+
+    const isArrayOfStrings =
+      Array.isArray(parsedValue) &&
+      parsedValue.every((s) => typeof s === 'string');
+
+    if (!isArrayOfStrings) {
+      addValidationIssue(
+        ctx,
+        'Accounts',
+        'Accounts must be a string or an array of strings',
+      );
+      return;
+    }
+
+    (obj as any).accounts = parsedValue;
+  });
