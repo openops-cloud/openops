@@ -237,19 +237,28 @@ export async function getLLMConfig(
       connectionProps.customModel,
     ) ?? '';
 
+  const initialProviderSettings = connectionProps?.providerSettings
+    ? connectionProps?.providerSettings
+    : {};
+
+  const providerSettings = {
+    ...initialProviderSettings,
+    baseURL: connectionProps?.baseURL,
+  };
+
   const languageModel = await getAiProviderLanguageModel({
     model,
     apiKey: connectionProps?.apiKey,
     provider: connectionProps.provider,
-    providerSettings: connectionProps?.providerSettings,
+    providerSettings,
   });
 
   const aiConfigParsed: AiConfigParsed = {
     model,
     provider: connectionProps.provider,
     apiKey: connectionProps?.apiKey,
-    providerSettings: connectionProps?.providerSettings,
-    modelSettings: connectionProps?.providerSettings,
+    providerSettings,
+    modelSettings: connectionProps?.modelSettings,
   };
 
   return { aiConfig: aiConfigParsed, languageModel };
