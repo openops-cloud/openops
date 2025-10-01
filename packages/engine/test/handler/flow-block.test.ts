@@ -11,6 +11,7 @@ describe('blockExecutor', () => {
               blockName: '@openops/block-aws',
               actionName: 'build_arn',
               input: {
+                  auth: {},
                   service: 's3',
                   region: 'us-east-1',
                   accountId: '123456789012',

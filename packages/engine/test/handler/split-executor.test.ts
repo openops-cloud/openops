@@ -230,7 +230,7 @@ describe('split-executor', () => {
 function mockVariableService(resolvedInput: unknown) {
     return {
         ...jest.requireActual('packages/engine/src/lib/handler/context/engine-constants'),
-        variableService: {
+        propsResolver: {
             resolve: jest.fn().mockResolvedValue({
                 censoredInput: {},
                 resolvedInput,
