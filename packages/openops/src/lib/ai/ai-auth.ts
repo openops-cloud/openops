@@ -1,16 +1,30 @@
-import { BlockAuth, Property } from '@openops/blocks-framework';
+import {
+  BlockAuth,
+  BlockPropValueSchema,
+  Property,
+} from '@openops/blocks-framework';
 import { AiProviderEnum, SaveAiConfigRequest } from '@openops/shared';
+import {
+  CUSTOM_MODEL_OPTION,
+  getAiModelFromConnection,
+} from './get-ai-model-from-connection';
 import { getAiProvider, validateAiProviderConfig } from './providers';
 
-const PROVIDER_MODEL_OPTIONS = Object.values(AiProviderEnum).flatMap(
-  (provider) => {
+const PROVIDER_MODEL_OPTIONS = [
+  ...Object.values(AiProviderEnum).flatMap((provider) => {
     const models = getAiProvider(provider).models;
     return models.map((model) => ({
       label: `${provider} - ${model}`,
-      value: { provider, model },
+      value: model,
     }));
-  },
-);
+  }),
+  CUSTOM_MODEL_OPTION,
+];
+
+const PROVIDER_OPTIONS = Object.values(AiProviderEnum).map((provider) => ({
+  label: provider,
+  value: provider,
+}));
 
 export const aiAuth = BlockAuth.CustomAuth({
   authProviderKey: 'AI',
@@ -20,14 +34,28 @@ export const aiAuth = BlockAuth.CustomAuth({
     'Configure your AI provider credentials. Supports OpenAI, Anthropic, Google, and more.',
   required: true,
   props: {
-    providerModel: Property.StaticDropdown({
-      displayName: 'Provider with model',
-      description: 'Select provider and model',
+    provider: Property.StaticDropdown({
+      displayName: 'Provider',
+      description: 'Select provider',
+      required: true,
+      options: {
+        disabled: PROVIDER_OPTIONS.length === 0,
+        options: PROVIDER_OPTIONS,
+      },
+    }),
+    model: Property.StaticDropdown({
+      displayName: 'Model',
+      description: 'Select model',
       required: true,
       options: {
         disabled: PROVIDER_MODEL_OPTIONS.length === 0,
         options: PROVIDER_MODEL_OPTIONS,
       },
+    }),
+    customModel: Property.SecretText({
+      displayName: 'Custom model',
+      description: "Define custom model if it's not in the list",
+      required: false,
     }),
     apiKey: Property.SecretText({
       displayName: 'API Key',
@@ -54,11 +82,17 @@ export const aiAuth = BlockAuth.CustomAuth({
     }),
   },
   validate: async ({ auth }) => {
-    const authObject = auth as Record<string, unknown>;
-    const { provider, model } = authObject['providerModel'] as {
-      provider: AiProviderEnum;
-      model: string;
-    };
+    const authObject = auth as BlockPropValueSchema<typeof aiAuth>;
+
+    const model = getAiModelFromConnection(
+      authObject.model,
+      authObject.customModel,
+    );
+
+    if (!model) {
+      return { valid: false, error: 'You need to difene model' };
+    }
+
     const baseURL = authObject['baseURL'] as string | undefined;
     const providerSettings = {
       ...(authObject['providerSettings'] || {}),
@@ -66,7 +100,7 @@ export const aiAuth = BlockAuth.CustomAuth({
     };
 
     const payload: SaveAiConfigRequest = {
-      provider: provider,
+      provider: authObject.provider,
       model: model,
       apiKey: authObject['apiKey'] as string,
       providerSettings:
