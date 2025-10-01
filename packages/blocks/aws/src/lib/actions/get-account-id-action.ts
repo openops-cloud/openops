@@ -72,5 +72,5 @@ const AccountsSchema = z
       return;
     }
 
-    (obj as any).accounts = parsedValue;
+    obj.accounts = parsedValue;
   });
