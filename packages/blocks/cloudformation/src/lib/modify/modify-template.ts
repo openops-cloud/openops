@@ -9,6 +9,7 @@ export const modifyTemplate = createAction({
   displayName: 'Update resource properties',
   description:
     'Update properties of a resource in a given CloudFormation template',
+  requireToolApproval: true,
   props: {
     template: Property.LongText({
       displayName: 'CloudFormation template',

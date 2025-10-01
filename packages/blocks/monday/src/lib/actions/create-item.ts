@@ -15,6 +15,7 @@ export const createItemAction = createAction({
   name: 'monday_create_item',
   displayName: 'Create Item',
   description: 'Creates a new item inside a board.',
+  requireToolApproval: true,
   props: {
     workspace_id: mondayCommon.workspace_id(true),
     board_id: mondayCommon.board_id(true),

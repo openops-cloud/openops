@@ -9,6 +9,7 @@ export const linearUpdateProject = createAction({
   name: 'linear_update_project',
   displayName: 'Update Project',
   description: 'Update a existing project in Linear workspace',
+  requireToolApproval: true,
   props: {
     team_id: props.team_id(),
     project_id: props.project_id(),
