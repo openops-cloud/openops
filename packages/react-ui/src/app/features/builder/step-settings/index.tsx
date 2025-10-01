@@ -246,13 +246,14 @@ const StepSettingsContainer = React.memo(() => {
       if (readonly || !form.formState.isValid) return;
       if ((e.metaKey || e.ctrlKey) && e.code === KEY_TO_TRIGGER_TEST) {
         e.preventDefault();
+        if (activeTab === TAB_TEST) return;
         setActiveTab(TAB_TEST);
         setShouldTriggerTest(true);
       }
     };
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
-  }, [readonly, form.formState.isValid]);
+  }, [readonly, form.formState.isValid, activeTab]);
 
   return (
     <Form {...form}>
