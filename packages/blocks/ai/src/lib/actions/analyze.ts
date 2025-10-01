@@ -1,7 +1,7 @@
 import { createAction, Property } from '@openops/blocks-framework';
 import { getAiProviderLanguageModel } from '@openops/common';
-import { AiProviderEnum } from '@openops/shared';
-import { generateText } from 'ai';
+import { AiProviderEnum, analysisLLMSchema } from '@openops/shared';
+import { generateObject } from 'ai';
 
 export const analyze = createAction({
   displayName: 'Analyze with AI',
@@ -42,12 +42,12 @@ export const analyze = createAction({
         ? `${context.propsValue.prompt}\n\nSources:\n${sources}`
         : context.propsValue.prompt;
 
-    const result = await generateText({
+    const result = await generateObject({
       model: languageModel,
       prompt: composedPrompt,
+      schema: analysisLLMSchema,
       ...((modelSettings as Record<string, unknown>) ?? {}),
     });
-
-    return result.text;
+    return result.object;
   },
 });

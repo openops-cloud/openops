@@ -3,12 +3,11 @@ jest.mock('@openops/common', () => ({
 }));
 
 jest.mock('ai', () => ({
-  generateText: jest.fn(),
+  generateObject: jest.fn(),
 }));
 
-import { getAiProviderLanguageModel } from '@openops/common';
-import { AiProviderEnum } from '@openops/shared';
-import { generateText } from 'ai';
+import { AiProviderEnum, analysisLLMSchema } from '@openops/shared';
+import { generateObject } from 'ai';
 import { analyze } from '../src/lib/actions/analyze';
 
 describe('analyze action', () => {
@@ -31,11 +30,14 @@ describe('analyze action', () => {
     });
   });
 
-  test('should call LLM with prompt only when sources are not provided', async () => {
-    (getAiProviderLanguageModel as jest.Mock).mockResolvedValue(
-      'languageModel',
-    );
-    (generateText as jest.Mock).mockResolvedValue({ text: 'answer' });
+  test('should call generateObject with prompt only when sources are not provided', async () => {
+    const { getAiProviderLanguageModel } = jest.requireMock(
+      '@openops/common',
+    ) as { getAiProviderLanguageModel: jest.Mock };
+    getAiProviderLanguageModel.mockResolvedValue('languageModel');
+    (generateObject as jest.Mock).mockResolvedValue({
+      object: { textAnswer: 'answer', classifications: [] },
+    });
 
     const auth = {
       providerModel: { provider: AiProviderEnum.OPENAI, model: 'gpt-test' },
@@ -46,29 +48,29 @@ describe('analyze action', () => {
 
     const context = createContext(auth, { prompt: 'Hello' });
 
-    const result = await analyze.run(context);
+    const result = await analyze.run(context as any);
 
-    expect(getAiProviderLanguageModel).toHaveBeenCalledWith({
-      provider: AiProviderEnum.OPENAI,
-      apiKey: 'k',
-      model: 'gpt-test',
-      providerSettings: { someProviderSetting: true },
-    });
-
-    expect(generateText).toHaveBeenCalledWith({
+    expect(generateObject).toHaveBeenCalledWith({
       model: 'languageModel',
       prompt: 'Hello',
+      schema: analysisLLMSchema,
       maxRetries: 2,
     });
 
-    expect(result).toBe('answer');
+    expect(result).toEqual({ textAnswer: 'answer', classifications: [] });
   });
 
   test('should include sources in composed prompt and pass baseURL in providerSettings', async () => {
-    (getAiProviderLanguageModel as jest.Mock).mockResolvedValue(
-      'languageModel',
-    );
-    (generateText as jest.Mock).mockResolvedValue({ text: 'final' });
+    const { getAiProviderLanguageModel } = jest.requireMock(
+      '@openops/common',
+    ) as { getAiProviderLanguageModel: jest.Mock };
+    getAiProviderLanguageModel.mockResolvedValue('languageModel');
+    (generateObject as jest.Mock).mockResolvedValue({
+      object: {
+        textAnswer: 'final',
+        classifications: [{ name: 'x', reason: 'y' }],
+      },
+    });
 
     const auth = {
       providerModel: { provider: AiProviderEnum.OPENAI, model: 'gpt-4' },
@@ -83,31 +85,28 @@ describe('analyze action', () => {
       sources: ['s1', 's2'],
     });
 
-    const result = await analyze.run(context);
+    const result = await analyze.run(context as any);
 
-    expect(getAiProviderLanguageModel).toHaveBeenCalledWith({
-      provider: AiProviderEnum.OPENAI,
-      apiKey: 'secret',
-      model: 'gpt-4',
-      providerSettings: { region: 'us', baseURL: 'http://llm.local' },
-    });
-
-    expect(generateText).toHaveBeenCalledWith(
+    expect(generateObject).toHaveBeenCalledWith(
       expect.objectContaining({
         model: 'languageModel',
         prompt: 'Analyze this\n\nSources:\ns1,s2',
+        schema: analysisLLMSchema,
         temperature: 0.3,
       }),
     );
 
-    expect(result).toBe('final');
+    expect(result).toEqual({
+      textAnswer: 'final',
+      classifications: [{ name: 'x', reason: 'y' }],
+    });
   });
 });
 
-function createContext(auth?: unknown, props?: unknown) {
+function createContext(auth?: unknown, props?: unknown): unknown {
   return {
     ...jest.requireActual('@openops/blocks-framework'),
     auth: auth,
     propsValue: props,
-  } as any;
+  };
 }
