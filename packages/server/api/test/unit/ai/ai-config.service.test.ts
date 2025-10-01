@@ -49,17 +49,13 @@ jest.mock('../../../src/app/telemetry/event-models/ai', () => ({
   sendAiConfigDeletedEvent: jest.fn(),
 }));
 
-import { AiProviderEnum, SaveAiConfigRequest } from '@openops/shared';
-import { AiApiKeyRedactionMessage } from '../../../src/app/ai/config/ai-config.entity';
+import { SaveAiConfigRequest } from '@openops/shared';
 import { aiConfigService } from '../../../src/app/ai/config/ai-config.service';
 
 describe('aiConfigService.save', () => {
   const baseRequest: SaveAiConfigRequest = {
-    provider: AiProviderEnum.OPENAI,
-    apiKey: 'test-key',
-    model: 'gpt-4',
-    modelSettings: { temperature: 0.7 },
-    providerSettings: { baseUrl: 'url' },
+    connection: 'app-connection-id',
+    enabled: true,
   };
 
   const projectId = 'test-project';
@@ -74,7 +70,8 @@ describe('aiConfigService.save', () => {
       ...baseRequest,
       id: 'mocked-id',
       projectId,
-      apiKey: 'test-encrypt',
+      created: '2025-04-22T12:00:00Z',
+      updated: '2025-04-22T12:00:00Z',
     });
 
     const result = await aiConfigService.save({
@@ -88,16 +85,13 @@ describe('aiConfigService.save', () => {
       ...baseRequest,
       id: 'mocked-id',
       projectId,
-      apiKey: JSON.stringify('test-encrypt'),
       created: expect.any(String),
       updated: expect.any(String),
     });
-    expect(encryptStringMock).toHaveBeenCalledWith(baseRequest.apiKey);
     expect(result).toMatchObject({
       ...baseRequest,
       id: 'mocked-id',
       projectId,
-      apiKey: '**REDACTED**',
     });
   });
 
@@ -111,7 +105,8 @@ describe('aiConfigService.save', () => {
       ...baseRequest,
       id: existingId,
       projectId,
-      apiKey: 'test-encrypt',
+      created: '2025-04-22T12:00:00Z',
+      updated: '2025-04-23T10:00:00Z',
     });
 
     const result = await aiConfigService.save({
@@ -127,60 +122,14 @@ describe('aiConfigService.save', () => {
       projectId,
       created: '2025-04-22T12:00:00Z',
       updated: expect.any(String),
-      apiKey: JSON.stringify('test-encrypt'),
     });
     expect(result).toMatchObject({
       ...baseRequest,
       id: existingId,
       projectId,
-      apiKey: '**REDACTED**',
     });
   });
 
-  test('should not overwrite apiKey if redacted message is received', async () => {
-    const existingId = 'existing-id';
-    const existingApiKey = 'already-encrypted-key';
-    findOneByMock.mockResolvedValue({
-      id: existingId,
-      apiKey: existingApiKey,
-      created: '2025-04-22T12:00:00Z',
-    });
-    saveMock.mockResolvedValue({
-      ...baseRequest,
-      id: existingId,
-      projectId,
-      apiKey: existingApiKey,
-    });
-
-    const redactedRequest = {
-      ...baseRequest,
-      id: existingId,
-      apiKey: AiApiKeyRedactionMessage,
-    };
-
-    const result = await aiConfigService.save({
-      projectId,
-      request: redactedRequest,
-      userId: 'user-id',
-    });
-
-    expect(encryptStringMock).not.toHaveBeenCalled();
-    expect(saveMock).toHaveBeenCalledWith({
-      ...baseRequest,
-      id: existingId,
-      projectId,
-      created: '2025-04-22T12:00:00Z',
-      updated: expect.any(String),
-      apiKey: existingApiKey,
-    });
-
-    expect(result).toMatchObject({
-      ...baseRequest,
-      apiKey: '**REDACTED**',
-      id: existingId,
-      projectId,
-    });
-  });
 });
 
 describe('aiConfigService.list', () => {
@@ -190,27 +139,21 @@ describe('aiConfigService.list', () => {
     jest.clearAllMocks();
   });
 
-  test('should return redacted apiKeys for all configs in the list', async () => {
+  test('should return all configs for the project', async () => {
     const configs = [
       {
         id: 'id1',
         projectId,
-        provider: AiProviderEnum.OPENAI,
-        apiKey: 'encrypted-key-1',
-        model: 'gpt-4',
-        modelSettings: {},
-        providerSettings: {},
+        connection: 'conn-1',
+        enabled: true,
         created: '2025-04-22T12:00:00Z',
         updated: '2025-04-22T12:00:00Z',
       },
       {
         id: 'id2',
         projectId,
-        provider: AiProviderEnum.ANTHROPIC,
-        apiKey: 'encrypted-key-2',
-        model: 'claude',
-        modelSettings: {},
-        providerSettings: {},
+        connection: 'conn-2',
+        enabled: false,
         created: '2025-04-22T12:00:00Z',
         updated: '2025-04-22T12:00:00Z',
       },
@@ -222,14 +165,8 @@ describe('aiConfigService.list', () => {
 
     expect(findByMock).toHaveBeenCalledWith({ projectId });
     expect(result).toHaveLength(2);
-    expect(result[0]).toEqual({
-      ...configs[0],
-      apiKey: AiApiKeyRedactionMessage,
-    });
-    expect(result[1]).toEqual({
-      ...configs[1],
-      apiKey: AiApiKeyRedactionMessage,
-    });
+    expect(result[0]).toEqual(configs[0]);
+    expect(result[1]).toEqual(configs[1]);
   });
 });
 
@@ -240,11 +177,8 @@ describe('aiConfigService.get', () => {
   const config = {
     id: configId,
     projectId,
-    provider: AiProviderEnum.OPENAI,
-    apiKey: 'encrypted-key',
-    model: 'gpt-4',
-    modelSettings: {},
-    providerSettings: {},
+    connection: 'conn-1',
+    enabled: true,
     created: '2025-04-22T12:00:00Z',
     updated: '2025-04-22T12:00:00Z',
   };
@@ -253,29 +187,10 @@ describe('aiConfigService.get', () => {
     jest.clearAllMocks();
   });
 
-  test('should return get config with redacted apiKey', async () => {
+  test('should return config by id and project', async () => {
     findOneByMock.mockResolvedValue({ ...config });
 
     const result = await aiConfigService.get({ projectId, id: configId });
-
-    expect(findOneByMock).toHaveBeenCalledWith({
-      id: configId,
-      projectId,
-    });
-
-    expect(result).toEqual({
-      ...config,
-      apiKey: AiApiKeyRedactionMessage,
-    });
-  });
-
-  test('should return getWithApiKey config with original apiKey', async () => {
-    findOneByMock.mockResolvedValue({ ...config });
-
-    const result = await aiConfigService.getWithApiKey({
-      projectId,
-      id: configId,
-    });
 
     expect(findOneByMock).toHaveBeenCalledWith({
       id: configId,
@@ -308,36 +223,16 @@ describe('aiConfigService.getActiveConfig', () => {
   const activeConfig = {
     id: 'active-id',
     projectId,
-    provider: AiProviderEnum.OPENAI,
-    apiKey: 'encrypted-key',
-    model: 'gpt-4',
-    modelSettings: { temperature: 0.9 },
-    providerSettings: { baseUrl: 'https://api.openai.com' },
+    connection: 'conn-active',
     created: '2025-04-01T10:00:00Z',
     updated: '2025-04-21T14:00:00Z',
     enabled: true,
   };
 
-  test('should return the enabled AI config with redacted API in getActiveConfig', async () => {
+  test('should return the enabled AI config', async () => {
     findOneByMock.mockResolvedValue(activeConfig);
 
     const result = await aiConfigService.getActiveConfig(projectId);
-
-    expect(findOneByMock).toHaveBeenCalledWith({
-      projectId,
-      enabled: true,
-    });
-
-    expect(result).toEqual({
-      ...activeConfig,
-      apiKey: AiApiKeyRedactionMessage,
-    });
-  });
-
-  test('should return the enabled AI config with original API key in getActiveConfigWithApiKey', async () => {
-    findOneByMock.mockResolvedValue(activeConfig);
-
-    const result = await aiConfigService.getActiveConfigWithApiKey(projectId);
 
     expect(findOneByMock).toHaveBeenCalledWith({
       projectId,
@@ -367,11 +262,7 @@ describe('aiConfigService.delete', () => {
   const config = {
     id: configId,
     projectId,
-    provider: AiProviderEnum.OPENAI,
-    apiKey: 'encrypted-key',
-    model: 'gpt-4',
-    modelSettings: {},
-    providerSettings: {},
+    connection: 'conn-1',
     created: '2025-04-22T12:00:00Z',
     updated: '2025-04-22T12:00:00Z',
   };

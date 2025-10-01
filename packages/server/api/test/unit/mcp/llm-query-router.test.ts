@@ -1,5 +1,5 @@
 import { logger } from '@openops/server-shared';
-import { AiConfig, AiProviderEnum } from '@openops/shared';
+import { AiConfigParsed, AiProviderEnum } from '@openops/shared';
 import {
   generateObject,
   LanguageModel,
@@ -38,17 +38,13 @@ jest.mock('@openops/server-shared', () => ({
 describe('selectToolsAndQuery', () => {
   const mockLanguageModel = {} as LanguageModel;
   const mockAiConfig = {
-    projectId: 'test-project',
     provider: AiProviderEnum.ANTHROPIC,
     model: 'claude-3-sonnet',
     apiKey: 'test-api-key',
     enabled: true,
     providerSettings: {},
     modelSettings: {},
-    created: '2023-01-01',
-    updated: '2023-01-01',
-    id: 'test-id',
-  } as AiConfig;
+  } as AiConfigParsed;
 
   const mockMessages: ModelMessage[] = [
     { role: 'user', content: 'Test message' } as UserModelMessage,
