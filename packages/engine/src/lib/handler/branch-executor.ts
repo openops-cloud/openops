@@ -27,7 +27,7 @@ export const branchExecutor: BaseExecutor<BranchAction> = {
     constants: EngineConstants;
   }) {
     const { censoredInput, resolvedInput } =
-      await constants.variableService.resolve<BranchActionSettings>({
+      await constants.propsResolver.resolve<BranchActionSettings>({
         unresolvedInput: action.settings,
         executionState,
       });

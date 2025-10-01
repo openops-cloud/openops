@@ -3,6 +3,7 @@ export * from './block';
 export * from './block-metadata';
 export * from './context';
 export * from './property';
+export * from './property/input';
 export * from './trigger/trigger';
 export * from './validators/index';
 export * from './validators/types';
