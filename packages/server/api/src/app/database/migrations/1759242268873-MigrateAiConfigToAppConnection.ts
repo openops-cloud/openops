@@ -41,6 +41,7 @@ export class MigrateAiConfigToAppConnection1759242268873
       let name = baseName;
       let suffix = 1;
 
+      // eslint-disable-next-line no-constant-condition
       while (true) {
         const conflict = await queryRunner.query(
           `SELECT 1 FROM "app_connection" WHERE "projectId" = $1 AND name = $2 LIMIT 1`,
@@ -51,6 +52,8 @@ export class MigrateAiConfigToAppConnection1759242268873
         name = `${baseName}-${suffix}`;
       }
 
+      const baseURL = row.providerSettings?.baseURL ?? null;
+
       const value = {
         type: 'CUSTOM_AUTH',
         props: {
@@ -58,7 +61,7 @@ export class MigrateAiConfigToAppConnection1759242268873
           model: row.model ?? null,
           customModel: null,
           apiKey: row.apiKey ?? null,
-          baseURL: null,
+          baseURL,
           providerSettings: row.providerSettings ?? null,
           modelSettings: row.modelSettings ?? null,
         },
