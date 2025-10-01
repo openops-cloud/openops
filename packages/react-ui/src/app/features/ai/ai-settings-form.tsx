@@ -78,7 +78,10 @@ const AiSettingsForm = ({
 
   const onSaveClick = () => {
     const formValue = form.getValues();
-    onSave(formValue);
+    onSave({
+      ...savedSettings,
+      ...formValue,
+    });
   };
 
   return (
