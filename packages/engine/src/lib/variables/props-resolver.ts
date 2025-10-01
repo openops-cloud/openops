@@ -100,6 +100,7 @@ const mergeFlattenedKeysArraysIntoOneArray = async (
 };
 
 export type PropsResolver = ReturnType<typeof createPropsResolver>;
+
 /**
  * input: `Hello {{firstName}} {{lastName}}`
  * tokenThatNeedResolving: [`{{firstName}}`, `{{lastName}}`]
@@ -173,13 +174,16 @@ async function handleConnection(
 ): Promise<unknown> {
   const { variableName, engineToken, projectId, apiUrl, censoredInput } =
     params;
+
+  if (censoredInput) {
+    return '**REDACTED**';
+  }
+
   const connectionName = parseConnectionNameOnly(variableName);
   if (isNil(connectionName)) {
     return '';
   }
-  if (censoredInput) {
-    return '**REDACTED**';
-  }
+
   const connection = await createConnectionService({
     engineToken,
     projectId,
@@ -221,13 +225,9 @@ function parseConnectionNameOnly(variableName: string): string | null {
 }
 
 function parseSquareBracketConnectionPath(variableName: string): string | null {
-  // Find the connection name inside {{connections['connectionName'].path}}
   const matches = variableName.match(/\['([^']+)'\]/g);
   if (matches && matches.length >= 1) {
-    // Remove the square brackets and quotes from the connection name
-
-    const secondPath = matches[0].replace(/\['|'\]/g, '');
-    return secondPath;
+    return matches[0].replace(/\['|'\]/g, '');
   }
   return null;
 }

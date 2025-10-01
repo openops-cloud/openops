@@ -79,13 +79,11 @@ export async function applyFunctionToValues<T>(
   } else if (isString(obj)) {
     return (await apply(obj)) as T;
   } else if (Array.isArray(obj)) {
-    // Create a new array and map over it with Promise.all
     const newArray = await Promise.all(
       obj.map((item) => applyFunctionToValues(item, apply)),
     );
     return newArray as unknown as T;
   } else if (isObject(obj)) {
-    // Use Object.fromEntries and map entries asynchronously
     const newEntries = await Promise.all(
       Object.entries(obj).map(async ([key, value]) => [
         key,
@@ -100,8 +98,3 @@ export async function applyFunctionToValues<T>(
 export const isObject = (obj: unknown): obj is Record<string, unknown> => {
   return typeof obj === 'object' && obj !== null && !Array.isArray(obj);
 };
-
-export type MakeKeyNonNullableAndRequired<
-  T extends object,
-  K extends keyof T,
-> = T & { [P in K]-?: NonNullable<T[P]> };

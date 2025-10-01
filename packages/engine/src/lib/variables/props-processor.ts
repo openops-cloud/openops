@@ -102,7 +102,6 @@ export const propsProcessor = {
         continue;
       }
 
-      // If the value is required, we don't allow it to be undefined or null
       if (isNil(value) && property.required) {
         errors[property.displayName] = [
           formatErrorMessage(ErrorMessages.REQUIRED, { userInput: value }),
@@ -112,11 +111,7 @@ export const propsProcessor = {
 
     for (const [key, value] of Object.entries(processedInput)) {
       const property = props[key];
-      if (isNil(property)) {
-        continue;
-      }
-
-      if (isNil(value) && !property.required) {
+      if (isNil(property) || (isNil(value) && !property.required)) {
         continue;
       }
 
