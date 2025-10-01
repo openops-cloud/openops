@@ -7,7 +7,7 @@ import { BASE_NOPS_URL } from './lib/common/base-url';
 
 export const nops = createBlock({
   displayName: 'nOps',
-  description: 'Cloud cost optimization and FinOps platform',
+  description: 'Multi-cloud cost optimization and FinOps platform',
   auth: nopsAuth,
   minimumSupportedRelease: '0.20.0',
   logoUrl: 'https://static.openops.com/blocks/nops.png',
