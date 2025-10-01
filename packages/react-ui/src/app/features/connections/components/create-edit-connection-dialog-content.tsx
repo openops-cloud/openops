@@ -181,7 +181,10 @@ const CreateEditConnectionDialogContent = ({
         } else if (apError.code === ErrorCode.INVALID_APP_CONNECTION) {
           setErrorMessage(
             t('Connection failed with error {msg}', {
-              msg: apError.params.error,
+              msg:
+                typeof apError.params.error === 'string'
+                  ? apError.params.error
+                  : JSON.stringify(apError.params.error),
             }),
           );
         }
