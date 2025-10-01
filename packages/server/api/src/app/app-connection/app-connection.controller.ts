@@ -87,6 +87,39 @@ export const appConnectionController: FastifyPluginCallbackTypebox = (
     },
   );
   app.get(
+    '/by-name/:name',
+    GetAppConnectionByNameRequest,
+    async (request, reply): Promise<any> => {
+      const projectId = request.principal.projectId;
+      const connection = await appConnectionService.getOne({
+        name: request.params.name,
+        projectId,
+      });
+
+      if (!connection) {
+        return reply.status(StatusCodes.NOT_FOUND).send();
+      }
+
+      const authProperty = await getAuthProviderMetadata(
+        connection.authProviderKey,
+        projectId,
+      );
+
+      if (!authProperty) {
+        return reply.status(StatusCodes.BAD_REQUEST).send();
+      }
+
+      const redactedValue = redactSecrets(authProperty, connection.value);
+
+      return redactedValue
+        ? {
+            ...connection,
+            value: redactedValue,
+          }
+        : removeSensitiveData(connection);
+    },
+  );
+  app.get(
     '/:id',
     GetAppConnectionRequest,
     async (request, reply): Promise<any> => {
@@ -220,6 +253,33 @@ const DeleteAppConnectionRequest = {
     }),
     response: {
       [StatusCodes.NO_CONTENT]: Type.Never(),
+    },
+  },
+};
+
+const GetAppConnectionByNameRequest = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
+    permission: Permission.READ_APP_CONNECTION,
+  },
+  schema: {
+    operationId: 'Get Connection Details By Name',
+    tags: ['app-connections'],
+    description:
+      'Get detailed information about a specific app connection by its unique name within the project. Sensitive fields are redacted. Returns 404 if not found.',
+    params: Type.Object({
+      name: Type.String({ minLength: 1 }),
+    }),
+    response: {
+      [StatusCodes.OK]: Type.Intersect([
+        AppConnectionWithoutSensitiveData,
+        Type.Object(
+          {
+            value: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
+          },
+          { additionalProperties: true },
+        ),
+      ]),
     },
   },
 };
