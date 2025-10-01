@@ -23,6 +23,7 @@ export const executeSqlQueryAction = createAction({
   name: 'google_execute_sql_query',
   displayName: 'Run BigQuery SQL Query',
   description: 'Run a SQL query on BigQuery and return the results.',
+  requireToolApproval: false,
   props: {
     useHostSession: getUseHostSessionProperty(
       'Google Cloud',

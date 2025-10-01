@@ -7,6 +7,7 @@ export const getRecommendedPlan = createAction({
   name: 'archera_get_recommended_plan',
   description: 'Get recommended Archera commitment plan for a given provider',
   displayName: 'Get Recommended Plan',
+  requireToolApproval: false,
   props: {
     provider: Property.StaticDropdown({
       displayName: 'Provider',

@@ -20,6 +20,7 @@ export const updateRecordAction = createAction({
   name: 'update_record',
   description: 'Add or update a record in an OpenOps table.',
   displayName: 'Add or Update Record',
+  requireToolApproval: false,
   props: {
     tableName: openopsTablesDropdownProperty(),
     rowPrimaryKey: Property.DynamicProperties({

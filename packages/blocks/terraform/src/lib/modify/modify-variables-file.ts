@@ -9,6 +9,7 @@ export const modifyVariablesFile = createAction({
   displayName: 'Update variables file',
   description:
     'Updates variables of a given Terraform variables file (tfvars).',
+  requireToolApproval: false,
   props: {
     fileContent: Property.LongText({
       displayName: 'Terraform variables file (tfvars)',

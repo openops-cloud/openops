@@ -9,6 +9,7 @@ export const listIssueCommentsAction = createAction({
   name: 'list_issue_comments',
   displayName: 'List Issue Comments',
   description: 'Returns all comments for an issue.',
+  requireToolApproval: false,
   props: {
     projectId: getProjectIdDropdown(),
     issueId: getIssueIdDropdown({ refreshers: ['projectId'] }),

@@ -37,6 +37,7 @@ export const graphqlAction = createAction({
   displayName: 'Execute GraphQL Query',
   description: 'Execute a GraphQL query',
   auth: cloudhealthAuth,
+  requireToolApproval: false,
   props: {
     documentation: Property.MarkDown({
       value: documentation,

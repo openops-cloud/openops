@@ -7,6 +7,7 @@ export const deleteResourceFromTemplate = createAction({
   name: 'delete_resource',
   displayName: 'Delete resource',
   description: 'Delete a resource from a given CloudFormation template',
+  requireToolApproval: false,
   props: {
     template: Property.LongText({
       displayName: 'CloudFormation template',

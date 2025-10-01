@@ -20,6 +20,7 @@ export const rdsGetSnapshotsAction = createAction({
   name: 'rds_describe_snapshots',
   description: 'Get RDS snapshots that match the given criteria',
   displayName: 'RDS Get Snapshots',
+  requireToolApproval: false,
   props: {
     accounts: getAwsAccountsMultiSelectDropdown().accounts,
     ...filterByArnsOrRegionsProperties(

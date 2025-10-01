@@ -14,6 +14,7 @@ export const ebsDeleteVolumeAction = createAction({
   description: 'Delete the given EBS Volume',
   displayName: 'EBS Delete Volume',
   riskLevel: RiskLevel.HIGH,
+  requireToolApproval: false,
   props: {
     arn: Property.ShortText({
       displayName: 'ARN',

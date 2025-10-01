@@ -9,6 +9,7 @@ export const modifyTemplate = createAction({
   name: 'update_terraform_file',
   displayName: 'Update resource properties',
   description: 'Update properties of a resource in a given Terraform template',
+  requireToolApproval: false,
   props: {
     template: Property.LongText({
       displayName: 'Terraform template',

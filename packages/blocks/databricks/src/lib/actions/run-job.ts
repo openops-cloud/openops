@@ -12,6 +12,7 @@ export const runJob = createAction({
   displayName: 'Run Databricks Job',
   description:
     'Triggers an existing job in the specified Databricks workspace.',
+  requireToolApproval: false,
   props: {
     workspaceDeploymentName: workspaceDeploymentName,
     jobId: jobId,

@@ -8,6 +8,7 @@ export const deleteResourceFromTemplate = createAction({
   name: 'delete_terraform_resource',
   displayName: 'Delete resource',
   description: 'Delete a resource from a given Terraform template',
+  requireToolApproval: false,
   props: {
     template: Property.LongText({
       displayName: 'Terraform template',
