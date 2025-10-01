@@ -130,11 +130,23 @@ const TestActionSection = React.memo(
     ]);
 
     useEffect(() => {
-      if (shouldTriggerTest) {
+      if (
+        shouldTriggerTest &&
+        isValid &&
+        !isTesting &&
+        !riskyStepConfirmationMessage
+      ) {
         handleTest();
         onTestTriggered();
       }
-    }, [shouldTriggerTest, handleTest, onTestTriggered]);
+    }, [
+      shouldTriggerTest,
+      isValid,
+      isTesting,
+      riskyStepConfirmationMessage,
+      handleTest,
+      onTestTriggered,
+    ]);
 
     const confirmRiskyStep = () => {
       setRiskyStepConfirmationMessage(null);
@@ -161,7 +173,7 @@ const TestActionSection = React.memo(
               size="sm"
               onClick={handleTest}
               keyboardShortcut="G"
-              onKeyboardShortcut={mutate}
+              onKeyboardShortcut={handleTest}
               loading={isTesting}
               disabled={!isValid}
             >

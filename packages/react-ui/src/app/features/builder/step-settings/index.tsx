@@ -243,7 +243,7 @@ const StepSettingsContainer = React.memo(() => {
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (readonly) return;
+      if (readonly || !form.formState.isValid) return;
       if ((e.metaKey || e.ctrlKey) && e.code === KEY_TO_TRIGGER_TEST) {
         e.preventDefault();
         setActiveTab(TAB_TEST);
@@ -252,7 +252,7 @@ const StepSettingsContainer = React.memo(() => {
     };
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
-  }, [readonly]);
+  }, [readonly, form.formState.isValid]);
 
   return (
     <Form {...form}>

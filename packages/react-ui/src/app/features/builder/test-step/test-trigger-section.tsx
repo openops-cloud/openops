@@ -254,7 +254,7 @@ const TestTriggerSection = React.memo(
     }, [currentTestOutput]);
 
     useEffect(() => {
-      if (shouldTriggerTest) {
+      if (shouldTriggerTest && isValid && !isTesting) {
         if (isSimulation) {
           simulateTrigger();
         } else {
@@ -264,6 +264,8 @@ const TestTriggerSection = React.memo(
       }
     }, [
       shouldTriggerTest,
+      isValid,
+      isTesting,
       isSimulation,
       simulateTrigger,
       pollTrigger,
