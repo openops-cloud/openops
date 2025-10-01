@@ -4,12 +4,14 @@ import {
   ApplicationError,
   ChatNameRequest,
   DeleteChatHistoryRequest,
+  ErrorCode,
   ListChatsResponse,
   NewMessageRequest,
   OpenChatMCPRequest,
   OpenChatResponse,
   openOpsId,
   PrincipalType,
+  UpdateChatModelRequest,
 } from '@openops/shared';
 import { ModelMessage } from 'ai';
 import { FastifyReply } from 'fastify';
@@ -44,6 +46,8 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       const { chatId: inputChatId } = request.body;
       const { id: userId, projectId } = request.principal;
 
+      const { aiConfig } = await getLLMConfig(projectId);
+
       if (inputChatId) {
         const existingContext = await getChatContext(
           inputChatId,
@@ -57,8 +61,24 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
             userId,
             projectId,
           );
+          const provider = existingContext.provider;
+          const model = existingContext.model;
+
+          if (
+            !existingContext.provider ||
+            !existingContext.model ||
+            existingContext.provider !== aiConfig.provider
+          ) {
+            await createChatContext(inputChatId, userId, projectId, {
+              ...existingContext,
+              provider,
+              model,
+            });
+          }
           return reply.code(200).send({
             chatId: inputChatId,
+            provider,
+            model,
             messages,
           });
         }
@@ -86,12 +106,40 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
           projectId,
         );
 
+        let provider = aiConfig.provider;
+        let model = aiConfig.model;
+
         if (messages.length === 0) {
+          context.provider = provider;
+          context.model = model;
           await createChatContext(chatId, userId, projectId, context);
+        } else {
+          const existingContext = await getChatContext(
+            chatId,
+            userId,
+            projectId,
+          );
+
+          if (
+            !existingContext?.provider ||
+            !existingContext?.model ||
+            existingContext?.provider !== aiConfig.provider
+          ) {
+            await createChatContext(chatId, userId, projectId, {
+              ...existingContext,
+              provider,
+              model,
+            });
+          } else {
+            provider = existingContext.provider;
+            model = existingContext.model;
+          }
         }
 
         return reply.code(200).send({
           chatId,
+          provider,
+          model,
           messages,
         });
       }
@@ -106,7 +154,11 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         chatId: newChatId,
       };
 
-      await createChatContext(chatId, userId, projectId, chatContext);
+      await createChatContext(chatId, userId, projectId, {
+        ...chatContext,
+        provider: aiConfig.provider,
+        model: aiConfig.model,
+      });
       const messages = await getChatHistoryWithMergedTools(
         chatId,
         userId,
@@ -115,6 +167,8 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
 
       return reply.code(200).send({
         chatId,
+        provider: aiConfig.provider,
+        model: aiConfig.model,
         messages,
       });
     },
@@ -173,7 +227,16 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         userId,
         projectId,
       );
-      const llmConfigResult = await getLLMConfig(projectId);
+      const { aiConfig, languageModel } = await getLLMConfig(projectId);
+
+      const ctx = conversationResult.chatContext;
+      if (!ctx.provider || !ctx.model || ctx.provider !== aiConfig.provider) {
+        await createChatContext(chatId, userId, projectId, {
+          ...ctx,
+          provider: aiConfig.provider,
+          model: aiConfig.model,
+        });
+      }
 
       conversationResult.chatHistory.push({
         role: 'user',
@@ -181,7 +244,6 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       });
 
       const { chatContext, chatHistory } = conversationResult;
-      const { aiConfig, languageModel } = llmConfigResult;
 
       const enrichedContext = request.body.additionalContext
         ? await enrichContext(request.body.additionalContext, projectId, {
@@ -233,6 +295,42 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       return await reply.code(StatusCodes.OK).send({ chats });
     } catch (error) {
       return handleError(error, reply, 'list chats');
+    }
+  });
+
+  app.post('/model', UpdateChatModelOptions, async (request, reply) => {
+    const userId = request.principal.id;
+    const projectId = request.principal.projectId;
+    const { chatId, model } = request.body;
+
+    try {
+      const context = await getChatContext(chatId, userId, projectId);
+      if (!context) {
+        throw new ApplicationError({
+          code: ErrorCode.ENTITY_NOT_FOUND,
+          params: {
+            message: 'No chat session found for the provided chat ID.',
+            entityType: 'Chat Session',
+            entityId: chatId,
+          },
+        });
+      }
+
+      let provider = context.provider;
+      if (!provider) {
+        const { aiConfig } = await getLLMConfig(projectId);
+        provider = aiConfig.provider;
+      }
+
+      await createChatContext(chatId, userId, projectId, {
+        ...context,
+        provider,
+        model,
+      });
+
+      return await reply.code(StatusCodes.OK).send({ chatId, provider, model });
+    } catch (error) {
+      return handleError(error, reply, 'update chat model');
     }
   });
 
@@ -320,6 +418,18 @@ const ListChatsOptions = {
     response: {
       200: ListChatsResponse,
     },
+  },
+};
+
+const UpdateChatModelOptions = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
+  },
+  schema: {
+    tags: ['ai', 'ai-chat-mcp'],
+    description:
+      'Update the language model used for a specific chat context. Returns the updated provider and model.',
+    body: UpdateChatModelRequest,
   },
 };
 

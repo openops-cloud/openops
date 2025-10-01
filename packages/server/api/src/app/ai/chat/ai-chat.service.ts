@@ -44,6 +44,8 @@ export type MCPChatContext = {
   stepId?: string;
   actionName?: string;
   chatName?: string;
+  provider?: string;
+  model?: string;
 };
 
 export const generateChatId = (

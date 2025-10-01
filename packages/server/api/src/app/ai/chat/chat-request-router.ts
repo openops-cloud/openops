@@ -4,7 +4,11 @@ import { ModelMessage } from 'ai';
 import { FastifyInstance, FastifyReply } from 'fastify';
 import { IncomingMessage, ServerResponse } from 'node:http';
 import { sendAiChatMessageSendEvent } from '../../telemetry/event-models';
-import { getConversation, getLLMConfig } from './ai-chat.service';
+import {
+  createChatContext,
+  getConversation,
+  getLLMConfig,
+} from './ai-chat.service';
 import { handleCodeGenerationRequest } from './code-generation-handler';
 import { handleUserMessage } from './user-message-handler';
 
@@ -46,6 +50,28 @@ export async function routeChatRequest(
 
   const { aiConfig, languageModel } = await getLLMConfig(projectId);
 
+  const currentCtx = conversation.chatContext;
+
+  let currentModel = currentCtx.model ?? aiConfig.model;
+
+  if (
+    !currentCtx.provider ||
+    !currentCtx.model ||
+    currentCtx.provider !== aiConfig.provider
+  ) {
+    currentModel = aiConfig.model;
+    await createChatContext(chatId, userId, projectId, {
+      ...currentCtx,
+      provider: aiConfig.provider,
+      model: aiConfig.model,
+    });
+  }
+
+  const updatedConfig = {
+    ...aiConfig,
+    model: currentModel,
+  };
+
   conversation.chatHistory.push(newMessage);
 
   const generationRequestParams = {
@@ -57,7 +83,7 @@ export async function routeChatRequest(
     newMessage,
     serverResponse,
     conversation,
-    aiConfig,
+    aiConfig: updatedConfig,
     languageModel,
     additionalContext: request.body.additionalContext,
     frontendTools: request.body.tools || {},
