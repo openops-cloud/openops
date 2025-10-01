@@ -7,6 +7,7 @@ export function getAccountAlias() {
     name: 'account_get_alias',
     description: 'Get account alias from the AWS connection',
     displayName: 'Get Account Alias',
+    requireToolApproval: false,
     props: {
       accountId: Property.ShortText({
         displayName: 'Account ID',
