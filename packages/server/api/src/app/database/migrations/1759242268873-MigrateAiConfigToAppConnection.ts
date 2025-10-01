@@ -54,7 +54,19 @@ export class MigrateAiConfigToAppConnection1759242268873
         name = `${baseName}-${suffix}`;
       }
 
-      const baseURL = row.providerSettings?.baseURL ?? null;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const baseURL = (row.providerSettings as any)?.baseURL ?? null;
+      let providerSettings: Record<string, unknown> | null =
+        row.providerSettings ?? null;
+      if (providerSettings) {
+        const { baseURL: _removed, ...rest } = providerSettings as Record<
+          string,
+          unknown
+        > & {
+          baseURL?: unknown;
+        };
+        providerSettings = rest;
+      }
 
       let decryptedApiKey: string | null = null;
       if (row.apiKey) {
@@ -76,7 +88,7 @@ export class MigrateAiConfigToAppConnection1759242268873
           customModel: null,
           apiKey: decryptedApiKey,
           baseURL,
-          providerSettings: row.providerSettings ?? null,
+          providerSettings,
           modelSettings: row.modelSettings ?? null,
         },
       } as const;
