@@ -5,7 +5,6 @@ import {
   ApplicationError,
   ApplicationErrorParams,
   GetProvidersResponse,
-  SaveAiConfigRequest,
 } from '@openops/shared';
 import { AISDKError, generateText, LanguageModel } from 'ai';
 import { anthropicProvider } from './providers/anthropic';
