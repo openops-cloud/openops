@@ -17,7 +17,7 @@ export const ec2TerminateInstancesAction = createAction({
   description: 'Terminate the provided EC2 instances',
   displayName: 'EC2 Terminate Instances',
   riskLevel: RiskLevel.HIGH,
-  requireToolApproval: false,
+  requireToolApproval: true,
   props: {
     instanceARNs: Property.Array({
       displayName: 'Instance ARNs',
