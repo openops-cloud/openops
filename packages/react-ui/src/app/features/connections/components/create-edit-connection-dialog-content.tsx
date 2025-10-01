@@ -184,6 +184,10 @@ const CreateEditConnectionDialogContent = ({
               msg:
                 typeof apError.params.error === 'string'
                   ? apError.params.error
+                  : apError.params.error &&
+                    typeof apError.params.error === 'object' &&
+                    'message' in apError.params.error
+                  ? apError.params.error.message
                   : JSON.stringify(apError.params.error),
             }),
           );

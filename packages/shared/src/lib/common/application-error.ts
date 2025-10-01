@@ -368,7 +368,7 @@ export type EngineOperationFailureParams = BaseErrorParams<
 export type InvalidAppConnectionParams = BaseErrorParams<
   ErrorCode.INVALID_APP_CONNECTION,
   {
-    error: string;
+    error: string | { message?: string };
   }
 >;
 
