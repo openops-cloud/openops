@@ -69,3 +69,4 @@ export * from './lib/ai/providers';
 
 export * from './lib/json-utils';
 export * from './lib/microsoft/get-microsoft-graph-client';
+export * from './lib/validation/zod-schema-validation';

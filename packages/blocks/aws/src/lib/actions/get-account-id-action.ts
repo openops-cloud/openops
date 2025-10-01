@@ -1,11 +1,12 @@
-import { addValidationIssue, schemaValidation } from '@openops/blocks-common';
 import { createAction } from '@openops/blocks-framework';
 import {
+  addValidationIssue,
   amazonAuth,
   getAccountId,
   getAwsAccountsMultiSelectDropdown,
   getCredentialsForAccount,
   parseArn,
+  schemaValidation,
   tryParseJson,
 } from '@openops/common';
 import { z } from 'zod';

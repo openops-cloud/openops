@@ -1,5 +1,5 @@
-import { tryParseJson } from '@openops/common';
 import { z, ZodError, ZodObject } from 'zod';
+import { tryParseJson } from '../json-utils';
 
 type ValidationSuccess<T> = {
   success: true;
