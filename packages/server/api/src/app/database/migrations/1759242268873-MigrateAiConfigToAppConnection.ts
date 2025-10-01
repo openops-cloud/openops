@@ -34,7 +34,9 @@ export class MigrateAiConfigToAppConnection1759242268873
         );
       if (existingConn?.[0]?.connection) continue;
 
-      const providerSanitized = row.provider ? row.provider.trim().replace(/\s+/g, '-') : null;
+      const providerSanitized = row.provider
+        ? row.provider.trim().replace(/\s+/g, '-')
+        : null;
       const baseName = providerSanitized ? `AI-${providerSanitized}` : 'AI';
       let name = baseName;
       let suffix = 1;
