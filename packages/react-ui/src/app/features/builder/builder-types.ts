@@ -48,7 +48,7 @@ export type MidpanelAction =
   | {
       type: 'GENERATE_WITH_AI_CLICK';
       property?: BlockProperty & {
-        inputName: `settings.input.${string}` | `settings.${string}`;
+        inputName: `settings.input.${string}` | `settings.${string}` | string;
       };
     }
   | { type: 'ADD_CODE_TO_INJECT'; code: string | SourceCode }

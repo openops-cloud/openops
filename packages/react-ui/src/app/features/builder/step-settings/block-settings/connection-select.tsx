@@ -15,8 +15,6 @@ import {
 } from '@openops/components/ui';
 import {
   addConnectionBrackets,
-  BlockAction,
-  BlockTrigger,
   removeConnectionBrackets,
 } from '@openops/shared';
 import { t } from 'i18next';
@@ -32,13 +30,14 @@ import {
   appConnectionsHooks,
   FETCH_ALL_CONNECTIONS_LIMIT,
 } from '@/app/features/connections/lib/app-connections-hooks';
-import { useBuilderStateContext } from '../../builder-hooks';
+import { useSafeBuilderStateContext } from '../../builder-hooks';
 
 type ConnectionSelectProps = {
   disabled: boolean;
   block: BlockMetadataModelSummary | BlockMetadataModel;
-  isTrigger: boolean;
+  allowDynamicValues: boolean;
   providerKey: string;
+  name: string;
 };
 
 const ConnectionSelect = memo((params: ConnectionSelectProps) => {
@@ -48,7 +47,7 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
     string | null
   >(null);
 
-  const form = useFormContext<BlockAction | BlockTrigger>();
+  const form = useFormContext();
   const {
     data: connectionsPage,
     isLoading,
@@ -64,16 +63,16 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
       id: reconnectConnectionId,
     });
 
-  const [refreshDynamicProperties] = useBuilderStateContext((state) => [
-    state.refreshDynamicPropertiesForAuth,
-  ]);
+  const refreshDynamicProperties = useSafeBuilderStateContext(
+    (state) => state?.refreshDynamicPropertiesForAuth,
+  );
 
   const handleReconnectClick = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault();
       e.stopPropagation();
-      const connectionName = removeConnectionBrackets(
-        form.getValues().settings.input.auth ?? '',
-      );
+      const currentValue = form.getValues(params.name);
+      const connectionName = removeConnectionBrackets(currentValue ?? '');
 
       const matchedConnectionId =
         connectionsPage?.data?.find((c) => c.name === connectionName)?.id ??
@@ -83,13 +82,13 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
       setSelectConnectionOpen(false);
       setConnectionDialogOpen(true);
     },
-    [connectionsPage?.data, form],
+    [connectionsPage?.data, form, params.name],
   );
 
   return (
     <FormField
       control={form.control}
-      name={'settings.input.auth'}
+      name={params.name}
       render={({ field }) => (
         <>
           {isLoading && (
@@ -106,8 +105,8 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
               field={field as unknown as ControllerRenderProps}
               disabled={params.disabled}
               hideDescription={true}
-              inputName="settings.input.auth"
-              allowDynamicValues={!params.isTrigger}
+              inputName={params.name}
+              allowDynamicValues={params.allowDynamicValues}
             >
               {connectionDialogOpen && !isLoadingConnection && (
                 <DynamicFormValidationProvider>
@@ -119,7 +118,7 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
                     onConnectionSaved={async (connectionName) => {
                       await refetch();
                       field.onChange(addConnectionBrackets(connectionName));
-                      refreshDynamicProperties();
+                      refreshDynamicProperties?.();
                     }}
                     open={connectionDialogOpen}
                     setOpen={setConnectionDialogOpen}
@@ -142,6 +141,7 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
                 <div className="relative">
                   {field.value && !field.disabled && (
                     <Button
+                      type="button"
                       variant="ghost"
                       size="xs"
                       className="z-50 absolute right-8 top-2 "
@@ -166,6 +166,7 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
                     {/* Hidden Button to take same space as shown button */}
                     {field.value && (
                       <Button
+                        type="button"
                         variant="ghost"
                         size="xs"
                         className="z-50 opacity-0 pointer-events-none"

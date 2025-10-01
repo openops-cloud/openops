@@ -7,7 +7,7 @@ import {
   ToggleSwitch,
   ToggleSwitchOption,
 } from '@openops/components/ui';
-import { Action, isNil, Trigger } from '@openops/shared';
+import { isNil } from '@openops/shared';
 import { t } from 'i18next';
 import { useCallback, useContext, useEffect } from 'react';
 import { ControllerRenderProps, useFormContext } from 'react-hook-form';
@@ -35,7 +35,7 @@ type AutoFormFieldWrapperProps = {
   placeBeforeLabelText?: boolean;
   disabled: boolean;
   field: ControllerRenderProps;
-  inputName: `settings.input.${string}`;
+  inputName: string;
 };
 
 const getInitialFieldValue = (
@@ -140,7 +140,7 @@ const AutoFormFieldWrapper = ({
   disabled,
   field,
 }: AutoFormFieldWrapperProps) => {
-  const form = useFormContext<Action | Trigger>();
+  const form = useFormContext();
   const fieldState = form.getFieldState(inputName);
 
   const arrayFieldContext = useContext(ArrayFieldContext);
