@@ -6,23 +6,28 @@ describe('block declaration tests', () => {
       type: 'SECRET_TEXT',
       required: true,
       authProviderKey: 'nops',
-      authProviderDisplayName: 'Nops',
+      authProviderDisplayName: 'nOps',
       authProviderLogoUrl: 'https://static.openops.com/blocks/nops.png',
     });
   });
 
   test('should return block with correct number of actions', () => {
-    expect(Object.keys(nops.actions()).length).toBe(1);
+    expect(Object.keys(nops.actions()).length).toBe(2);
     expect(nops.actions()).toMatchObject({
-      custom_api_call: {
-        name: 'custom_api_call',
+      nops_get_cost_summary: {
+        name: 'nops_get_cost_summary',
+        requireAuth: true,
+      },
+      custom_rest_api_call: {
+        name: 'custom_rest_api_call',
         requireAuth: true,
       },
     });
   });
 
-  test('should have authMapping configured', () => {
+  test('should have cost summary action configured', () => {
     const actions = nops.actions();
-    expect(actions.custom_api_call).toBeDefined();
+    expect(actions.nops_get_cost_summary).toBeDefined();
+    expect(actions.nops_get_cost_summary.displayName).toBe('Get Cost Summary');
   });
 });

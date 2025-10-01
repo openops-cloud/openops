@@ -1,7 +1,9 @@
 import { createCustomApiCallAction } from '@openops/blocks-common';
 import { createBlock, Property } from '@openops/blocks-framework';
 import { BlockCategory } from '@openops/shared';
+import { getCostSummaryAction } from './lib/actions/get-cost-summary-action';
 import { nopsAuth } from './lib/auth';
+import { BASE_NOPS_URL } from './lib/common/base-url';
 
 export const nops = createBlock({
   displayName: 'nOps',
@@ -12,8 +14,9 @@ export const nops = createBlock({
   authors: ['nOps'],
   categories: [BlockCategory.FINOPS],
   actions: [
+    getCostSummaryAction,
     createCustomApiCallAction({
-      baseUrl: () => 'https://app.nops.io',
+      baseUrl: () => BASE_NOPS_URL,
       auth: nopsAuth,
       authMapping: async ({ auth }) => {
         if (!auth || typeof auth !== 'string') {
