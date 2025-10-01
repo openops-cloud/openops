@@ -34,7 +34,8 @@ export class MigrateAiConfigToAppConnection1759242268873
         );
       if (existingConn?.[0]?.connection) continue;
 
-      const baseName = row.provider ? `AI-${row.provider}` : 'AI';
+      const providerSanitized = row.provider ? row.provider.trim().replace(/\s+/g, '-') : null;
+      const baseName = providerSanitized ? `AI-${providerSanitized}` : 'AI';
       let name = baseName;
       let suffix = 1;
 
@@ -83,7 +84,7 @@ export class MigrateAiConfigToAppConnection1759242268873
         ],
       );
 
-      const connectionTemplate = `{{connection['${name}']}}`;
+      const connectionTemplate = `{{connections['${name}']}}`;
       await queryRunner.query(
         `UPDATE "ai_config" SET connection = $1 WHERE id = $2`,
         [connectionTemplate, row.id],
