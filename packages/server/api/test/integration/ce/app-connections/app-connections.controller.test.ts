@@ -1,3 +1,4 @@
+import { PropertyType } from '@openops/blocks-framework';
 import { encryptUtils, QueueMode } from '@openops/server-shared';
 import {
   AppConnectionStatus,
@@ -7,10 +8,12 @@ import {
 } from '@openops/shared';
 import { FastifyInstance } from 'fastify';
 import { StatusCodes } from 'http-status-codes';
+import { BlockMetadataSchema } from '../../../../src/app/blocks/block-metadata-entity';
 import { databaseConnection } from '../../../../src/app/database/database-connection';
 import { setupServer } from '../../../../src/app/server';
 import { generateMockToken } from '../../../helpers/auth';
 import {
+  createMockBlockMetadata,
   createMockOrganization,
   createMockProject,
   createMockUser,
@@ -47,6 +50,18 @@ describe('App Connections API', () => {
       await databaseConnection().getRepository('project').save([mockProject]);
 
       const authProviderKey = 'basic-auth-test-provider';
+
+      const blockMetadata = createMockBlockMetadata({
+        projectId: mockProject.id,
+        auth: {
+          authProviderKey,
+          type: PropertyType.BASIC_AUTH,
+        },
+      } as BlockMetadataSchema);
+
+      await databaseConnection()
+        .getRepository('block_metadata')
+        .save(blockMetadata);
 
       const connectionId = openOpsId();
       const connectionName = 'my-test-connection';
