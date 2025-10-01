@@ -37,7 +37,9 @@ export class MigrateAiConfigToAppConnection1759242268873
       const providerSanitized = row.provider
         ? row.provider.trim().replace(/\s+/g, '-')
         : null;
-      const baseName = providerSanitized ? `AI-${providerSanitized}` : 'AI';
+      const baseName = providerSanitized
+        ? `AI-${providerSanitized}`
+        : `AI-${row.id.slice(0, 6)}`;
       let name = baseName;
       let suffix = 1;
 
@@ -94,6 +96,38 @@ export class MigrateAiConfigToAppConnection1759242268873
         `UPDATE "ai_config" SET connection = $1 WHERE id = $2`,
         [connectionTemplate, row.id],
       );
+    }
+
+    await queryRunner.query(`
+      DO $$
+      BEGIN
+        IF EXISTS (
+          SELECT 1 FROM pg_indexes WHERE indexname = 'UQ_ai_config_projectId_provider'
+        ) THEN
+          EXECUTE 'DROP INDEX "UQ_ai_config_projectId_provider"';
+        END IF;
+      END$$;
+    `);
+
+    const columns = [
+      'provider',
+      'model',
+      'apiKey',
+      'providerSettings',
+      'modelSettings',
+    ];
+    for (const col of columns) {
+      await queryRunner.query(`
+        DO $$
+        BEGIN
+          IF EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_name = 'ai_config' AND column_name = '${col}'
+          ) THEN
+            EXECUTE 'ALTER TABLE "ai_config" DROP COLUMN "${col}"';
+          END IF;
+        END$$;
+      `);
     }
 
     logger.info('MigrateAiConfigToAppConnection1759242268873: completed');
