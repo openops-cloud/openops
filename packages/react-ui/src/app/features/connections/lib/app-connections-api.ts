@@ -20,6 +20,9 @@ export const appConnectionsApi = {
   get(id: string): Promise<AppConnection> {
     return api.get<AppConnection>(`/v1/app-connections/${id}`);
   },
+  getByName(name: string): Promise<AppConnection> {
+    return api.get<AppConnection>(`/v1/app-connections/by-name/${name}`);
+  },
   getMetadata(): Promise<Record<string, any>> {
     return api.get<Record<string, any>>('/v1/app-connections/metadata');
   },
