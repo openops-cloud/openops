@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { AppSystemProp, logger, system } from '@openops/server-shared';
-import { AiConfig, ChatFlowContext } from '@openops/shared';
+import { AiConfigParsed, ChatFlowContext } from '@openops/shared';
 import {
   AssistantModelMessage,
   LanguageModel,
@@ -44,7 +44,7 @@ type UserMessageParams = RequestContext &
   };
 
 type ModelConfig = {
-  aiConfig: AiConfig;
+  aiConfig: AiConfigParsed;
   languageModel: LanguageModel;
 };
 

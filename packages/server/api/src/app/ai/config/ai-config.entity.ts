@@ -3,7 +3,6 @@ import { AiConfig, Project } from '@openops/shared';
 import { EntitySchema } from 'typeorm';
 import {
   BaseColumnSchemaPart,
-  JSONB_COLUMN_TYPE,
   OpenOpsIdSchema,
 } from '../../database/database-common';
 
@@ -17,24 +16,10 @@ export const AiConfigEntity = new EntitySchema<AiConfigSchema>({
   name: 'ai_config',
   columns: {
     ...BaseColumnSchemaPart,
-    provider: {
+    connection: {
       type: String,
     },
     projectId: OpenOpsIdSchema,
-    model: {
-      type: String,
-    },
-    apiKey: {
-      type: String,
-    },
-    modelSettings: {
-      type: JSONB_COLUMN_TYPE,
-      nullable: true,
-    },
-    providerSettings: {
-      type: JSONB_COLUMN_TYPE,
-      nullable: true,
-    },
     enabled: {
       type: Boolean,
       default: true,

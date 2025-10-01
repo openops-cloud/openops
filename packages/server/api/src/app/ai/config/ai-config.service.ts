@@ -1,4 +1,3 @@
-import { encryptUtils } from '@openops/server-shared';
 import {
   AiConfig,
   isNil,
@@ -10,37 +9,21 @@ import {
   sendAiConfigDeletedEvent,
   sendAiConfigSavedEvent,
 } from '../../telemetry/event-models/ai';
-import { AiApiKeyRedactionMessage, AiConfigEntity } from './ai-config.entity';
+import { AiConfigEntity } from './ai-config.entity';
 
 const repo = repoFactory(AiConfigEntity);
-
-type AiConfigRedacted = Omit<AiConfig, 'apiKey'> & {
-  apiKey: typeof AiApiKeyRedactionMessage;
-};
-
-function redactApiKey(config: AiConfig): AiConfigRedacted {
-  return {
-    ...config,
-    apiKey: AiApiKeyRedactionMessage,
-  };
-}
 
 export const aiConfigService = {
   async save(params: {
     userId: string;
     projectId: string;
     request: SaveAiConfigRequest;
-  }): Promise<AiConfigRedacted> {
+  }): Promise<AiConfig> {
     const { projectId, request } = params;
 
     const existing = request.id
       ? await repo().findOneBy({ id: request.id, projectId })
       : null;
-
-    const encryptedApiKey =
-      request.apiKey !== AiApiKeyRedactionMessage
-        ? JSON.stringify(encryptUtils.encryptString(request.apiKey))
-        : existing?.apiKey;
 
     const aiConfig: Partial<AiConfig> = {
       ...request,
@@ -48,7 +31,6 @@ export const aiConfigService = {
       projectId,
       created: existing?.created ?? new Date().toISOString(),
       updated: new Date().toISOString(),
-      apiKey: encryptedApiKey,
     };
 
     const config = await repo().save(aiConfig);
@@ -57,46 +39,27 @@ export const aiConfigService = {
       id: config.id,
       userId: params.userId,
       projectId: params.projectId,
-      provider: config.provider,
       enabled: config.enabled ?? false,
     });
 
-    return redactApiKey(config);
+    return config;
   },
 
-  async list(projectId: string): Promise<AiConfigRedacted[]> {
-    const configs = await repo().findBy({ projectId });
-    return configs.map(redactApiKey);
+  async list(projectId: string): Promise<AiConfig[]> {
+    return repo().findBy({ projectId });
   },
 
   async get(params: {
     projectId: string;
     id: string;
-  }): Promise<AiConfigRedacted | undefined> {
-    const config = await getOneBy({
+  }): Promise<AiConfig | undefined> {
+    return getOneBy({
       id: params.id,
       projectId: params.projectId,
     });
-    return config ? redactApiKey(config) : undefined;
   },
 
-  async getWithApiKey(params: {
-    projectId: string;
-    id: string;
-  }): Promise<AiConfig | undefined> {
-    return getOneBy({ id: params.id, projectId: params.projectId });
-  },
-
-  async getActiveConfig(
-    projectId: string,
-  ): Promise<AiConfigRedacted | undefined> {
-    const config = await getOneBy({ projectId, enabled: true });
-    return config ? redactApiKey(config) : undefined;
-  },
-
-  async getActiveConfigWithApiKey(
-    projectId: string,
-  ): Promise<AiConfig | undefined> {
+  async getActiveConfig(projectId: string): Promise<AiConfig | undefined> {
     return getOneBy({ projectId, enabled: true });
   },
 
@@ -124,7 +87,7 @@ export const aiConfigService = {
 
 async function getOneBy(
   where: Partial<Pick<AiConfig, 'id' | 'projectId' | 'enabled'>>,
-): Promise<AiConfig | AiConfigRedacted | undefined> {
+): Promise<AiConfig | undefined> {
   const config = await repo().findOneBy(where);
 
   if (isNil(config)) {
