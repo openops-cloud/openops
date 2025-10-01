@@ -2,7 +2,7 @@ const openopsCommonMock = {
   tryParseJson: jest.fn(),
 };
 
-jest.mock('@openops/common', () => openopsCommonMock);
+jest.mock('../../src/lib/json-utils', () => openopsCommonMock);
 
 import { z } from 'zod';
 import {
