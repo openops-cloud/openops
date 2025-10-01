@@ -129,7 +129,6 @@ describe('aiConfigService.save', () => {
       projectId,
     });
   });
-
 });
 
 describe('aiConfigService.list', () => {
