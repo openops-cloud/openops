@@ -12,10 +12,7 @@ import { DefaultChatTransport, ToolSet, UIMessage } from 'ai';
 import { t } from 'i18next';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { aiChatApi } from '../../builder/ai-chat/lib/chat-api';
-import {
-  getBuilderStore,
-  useBuilderStoreOutsideProviderWithSubscription,
-} from '../../builder/builder-state-provider';
+import { getBuilderStore } from '../../builder/builder-state-provider';
 import { aiSettingsHooks } from './ai-settings-hooks';
 import { buildQueryKey } from './chat-utils';
 import { createAdditionalContext } from './enrich-context';
@@ -23,16 +20,26 @@ import { ChatMode } from './types';
 
 const PLACEHOLDER_MESSAGE_INTEROP = 'satisfy-schema';
 
+type UseAssistantChatContext = {
+  flowId: string;
+  flowVersionId: string;
+  runId: string | undefined;
+  selectedStep: string | null;
+  showSettingsAIChat: boolean;
+};
+
 interface UseAssistantChatProps {
   chatId: string | null;
   onChatIdChange: (chatId: string | null) => void;
   chatMode: ChatMode;
+  context: UseAssistantChatContext | undefined;
 }
 
 export const useAssistantChat = ({
   chatId,
   onChatIdChange,
   chatMode,
+  context,
 }: UseAssistantChatProps) => {
   const runtimeRef = useRef<AssistantRuntime | null>(null);
   const frontendTools = useMemo(
@@ -44,13 +51,7 @@ export const useAssistantChat = ({
   const [model, setModel] = useState<string | undefined>();
 
   const { flowId, flowVersionId, runId, selectedStep, showSettingsAIChat } =
-    useBuilderStoreOutsideProviderWithSubscription((state) => ({
-      flowId: state.flow?.id,
-      flowVersionId: state.flowVersion?.id,
-      runId: state.run?.id,
-      selectedStep: state.selectedStep,
-      showSettingsAIChat: state?.midpanelState?.showAiChat ?? false,
-    })) ?? {};
+    context ?? {};
 
   const getBuilderState = useCallback(() => {
     const context = getBuilderStore();

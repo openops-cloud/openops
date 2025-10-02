@@ -49,8 +49,9 @@ export type BaseEngineOperation = {
 };
 
 export type ExecuteValidateAuthOperation = BaseEngineOperation & {
-  authProperty: unknown;
   auth: AppConnectionValue;
+  blockName: string;
+  blockVersion: string;
 };
 
 export type ResolveVariableOperation = BaseEngineOperation & {
