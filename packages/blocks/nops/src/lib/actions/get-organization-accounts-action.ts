@@ -24,9 +24,9 @@ export const getOrganizationAccountsAction = createAction({
       endpoint,
     });
 
-    const providedSignature = context.propsValue.signature as string | undefined;
+    const providedSignature = context.propsValue.signature;
     const response = await makeGetRequest(
-      context.auth as string,
+      context.auth,
       endpoint,
       undefined,
       providedSignature ? { 'x-nops-signature': String(providedSignature) } : undefined,

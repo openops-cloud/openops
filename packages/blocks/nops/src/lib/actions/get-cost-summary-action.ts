@@ -153,7 +153,7 @@ export const getCostSummaryAction = createAction({
     addJsonParam('exclude_tag', excludeTags as unknown);
 
     const response = await makeGetRequest(
-      context.auth as string,
+      context.auth,
       '/c/cost_page/cost_summary/',
       queryParams,
       context.propsValue.signature
