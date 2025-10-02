@@ -1,3 +1,5 @@
+import { openOpsId } from '@openops/shared';
+import DOMPurify from 'dompurify';
 import { Maximize2 } from 'lucide-react';
 import mermaid from 'mermaid';
 import { memo, useEffect, useRef, useState } from 'react';
@@ -21,11 +23,10 @@ const MermaidRendererImpl = ({
   const [error, setError] = useState<string>('');
 
   useEffect(() => {
-    // Initialize mermaid with configuration
     mermaid.initialize({
       startOnLoad: false,
       theme: theme === Theme.LIGHT ? 'default' : 'dark',
-      securityLevel: 'loose',
+      securityLevel: 'strict',
       fontFamily: 'inherit',
     });
   }, [theme]);
@@ -38,16 +39,17 @@ const MermaidRendererImpl = ({
 
       try {
         setError('');
-        // Generate a unique ID for each diagram
-        const id = `mermaid-${Math.random().toString(36).substring(2, 9)}`;
+        const id = openOpsId();
 
-        // Render the diagram
         const { svg: renderedSvg } = await mermaid.render(id, chart);
-        setSvg(renderedSvg);
+
+        // Sanitize the SVG content to prevent XSS attacks
+        const sanitizedSvg = sanitizeSvg(renderedSvg);
+        setSvg(sanitizedSvg);
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : 'Failed to render diagram',
-        );
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to render diagram';
+        setError(errorMessage);
       }
     };
 
@@ -89,7 +91,7 @@ const MermaidRendererImpl = ({
         ref={containerRef}
         className={cn(
           'border border-solid rounded bg-background p-4',
-          'flex items-center justify-center overflow-auto',
+          'flex items-center justify-center overflow-auto h-[120px]',
           className,
         )}
         dangerouslySetInnerHTML={{ __html: svg }}
@@ -122,6 +124,65 @@ const MermaidRendererImpl = ({
       </Dialog>
     </div>
   );
+};
+
+const sanitizeSvg = (svgContent: string): string => {
+  return DOMPurify.sanitize(svgContent, {
+    USE_PROFILES: { svg: true, svgFilters: true },
+    ADD_TAGS: [
+      'foreignObject',
+      'g',
+      'path',
+      'rect',
+      'circle',
+      'ellipse',
+      'line',
+      'polyline',
+      'polygon',
+      'text',
+      'tspan',
+      'marker',
+      'defs',
+      'clipPath',
+      'mask',
+    ], // Allow common SVG elements used by mermaid
+    ADD_ATTR: [
+      'xmlns',
+      'viewBox',
+      'width',
+      'height',
+      'x',
+      'y',
+      'rx',
+      'ry',
+      'cx',
+      'cy',
+      'r',
+      'fill',
+      'stroke',
+      'stroke-width',
+      'stroke-dasharray',
+      'transform',
+      'class',
+      'id',
+      'd',
+      'points',
+      'x1',
+      'y1',
+      'x2',
+      'y2',
+      'text-anchor',
+      'dominant-baseline',
+      'font-size',
+      'font-family',
+      'font-weight',
+      'opacity',
+      'marker-end',
+      'marker-start',
+      'clip-path',
+      'mask',
+    ],
+  });
 };
 
 export const MermaidRenderer = memo(MermaidRendererImpl);
