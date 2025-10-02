@@ -10,7 +10,7 @@ import { getFrontendToolDefinitions } from '@openops/ui-kit';
 import { useQuery } from '@tanstack/react-query';
 import { DefaultChatTransport, ToolSet, UIMessage } from 'ai';
 import { t } from 'i18next';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { aiChatApi } from '../../builder/ai-chat/lib/chat-api';
 import {
   getBuilderStore,
@@ -39,6 +39,9 @@ export const useAssistantChat = ({
     () => getFrontendToolDefinitions() as ToolSet,
     [],
   );
+
+  const [provider, setProvider] = useState<string | undefined>();
+  const [model, setModel] = useState<string | undefined>();
 
   const { flowId, flowVersionId, runId, selectedStep, showSettingsAIChat } =
     useBuilderStoreOutsideProviderWithSubscription((state) => ({
@@ -158,6 +161,13 @@ export const useAssistantChat = ({
       onChatIdChange(openChatResponse.chatId);
     }
   }, [onChatIdChange, openChatResponse?.chatId]);
+
+  useEffect(() => {
+    if (openChatResponse?.provider && openChatResponse?.model) {
+      setProvider(openChatResponse.provider);
+      setModel(openChatResponse.model);
+    }
+  }, [openChatResponse?.provider, openChatResponse?.model]);
 
   const additionalContext = useMemo(() => {
     const context = getBuilderState();
@@ -293,5 +303,8 @@ export const useAssistantChat = ({
     runtime,
     isLoading,
     createNewChat,
+    provider,
+    model,
+    chatId,
   };
 };

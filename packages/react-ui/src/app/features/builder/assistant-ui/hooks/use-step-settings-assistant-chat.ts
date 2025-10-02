@@ -35,6 +35,7 @@ export const useStepSettingsAssistantChat = (
 
   return {
     ...assistantChat,
+    chatId: chatSessionKey,
     onInject,
     flowVersion,
   };

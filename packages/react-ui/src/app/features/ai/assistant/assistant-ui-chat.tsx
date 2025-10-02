@@ -40,11 +40,12 @@ const AssistantUiChat = ({
     setChatId(id);
   }, []);
 
-  const { runtime, isLoading, createNewChat } = useAssistantChat({
-    chatId,
-    onChatIdChange,
-    chatMode: ChatMode.Agent,
-  });
+  const { runtime, isLoading, createNewChat, provider, model } =
+    useAssistantChat({
+      chatId,
+      onChatIdChange,
+      chatMode: ChatMode.Agent,
+    });
 
   const { theme } = useTheme();
 
@@ -53,7 +54,7 @@ const AssistantUiChat = ({
     availableModels,
     onModelSelected,
     isLoading: isModelSelectorLoading,
-  } = useAiModelSelector();
+  } = useAiModelSelector({ chatId, provider, model });
 
   if (isLoading) {
     return (
