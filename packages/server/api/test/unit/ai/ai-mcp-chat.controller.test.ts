@@ -17,10 +17,14 @@ import {
 } from '../../../src/app/ai/chat/ai-chat.service';
 import { aiMCPChatController } from '../../../src/app/ai/chat/ai-mcp-chat.controller';
 
-const routeChatRequestMock = jest.fn();
 jest.mock('../../../src/app/ai/chat/chat-request-router', () => ({
-  routeChatRequest: routeChatRequestMock,
+  routeChatRequest: jest.fn(),
 }));
+const { routeChatRequest: routeChatRequestMock } = jest.requireMock(
+  '../../../src/app/ai/chat/chat-request-router',
+) as {
+  routeChatRequest: jest.Mock;
+};
 
 jest.mock('@openops/server-shared', () => ({
   logger: {
@@ -88,10 +92,14 @@ jest.mock('../../../src/app/ai/chat/ai-chat.service', () => ({
   getAllChats: jest.fn(),
 }));
 
-const validateAiProviderConfigMock = jest.fn();
 jest.mock('@openops/common', () => ({
-  validateAiProviderConfig: validateAiProviderConfigMock,
+  validateAiProviderConfig: jest.fn(),
 }));
+
+const { validateAiProviderConfig: validateAiProviderConfigMock } =
+  jest.requireMock('@openops/common') as {
+    validateAiProviderConfig: jest.Mock;
+  };
 
 describe('AI MCP Chat Controller - Tool Service Interactions', () => {
   type RouteHandler = (
