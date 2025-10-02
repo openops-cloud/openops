@@ -46,7 +46,7 @@ const AssistantUiChat = ({
     flowVersionId: state.flowVersion.id,
     runId: state.run?.id,
     selectedStep: state.selectedStep,
-    showSettingsAIChat: state?.midpanelState?.showAiChat ?? false,
+    showSettingsAIChat: state.midpanelState.showAiChat,
   }));
 
   const { runtime, isLoading, createNewChat } = useAssistantChat({
