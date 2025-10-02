@@ -9,9 +9,10 @@ jest.mock('ai', () => ({
   generateObject: jest.fn(),
 }));
 
+import { getAiProviderLanguageModel } from '@openops/common';
 import { AiProviderEnum, analysisLLMSchema } from '@openops/shared';
 import { generateObject } from 'ai';
-import { analyze } from '../src/lib/actions/analyze';
+import { askAi } from '../src/lib/actions/askAi';
 
 describe('analyze action', () => {
   beforeEach(() => {
@@ -19,25 +20,24 @@ describe('analyze action', () => {
   });
 
   test('should expose correct props', () => {
-    expect(analyze.props).toMatchObject({
+    expect(askAi.props).toMatchObject({
       prompt: {
         type: 'LONG_TEXT',
         displayName: 'Prompt',
         required: true,
       },
-      sources: {
+      additionalInput: {
         type: 'ARRAY',
-        displayName: 'Sources',
+        displayName: 'Additional input',
         required: false,
       },
     });
   });
 
-  test('should call generateObject with prompt only when sources are not provided', async () => {
-    const { getAiProviderLanguageModel } = jest.requireMock(
-      '@openops/common',
-    ) as { getAiProviderLanguageModel: jest.Mock };
-    getAiProviderLanguageModel.mockResolvedValue('languageModel');
+  test('should call generateObject with prompt only when additionalInput is not provided', async () => {
+    (getAiProviderLanguageModel as jest.Mock).mockResolvedValue(
+      'languageModel',
+    );
     (generateObject as jest.Mock).mockResolvedValue({
       object: { textAnswer: 'answer', classifications: [] },
     });
@@ -52,7 +52,7 @@ describe('analyze action', () => {
 
     const context = createContext(auth, { prompt: 'Hello' });
 
-    const result = await analyze.run(context as any);
+    const result = await askAi.run(context as any);
 
     expect(generateObject).toHaveBeenCalledWith({
       model: 'languageModel',
@@ -87,15 +87,15 @@ describe('analyze action', () => {
 
     const context = createContext(auth, {
       prompt: 'Analyze this',
-      sources: ['s1', 's2'],
+      additionalInput: ['s1', 's2'],
     });
 
-    const result = await analyze.run(context as any);
+    const result = await askAi.run(context as any);
 
     expect(generateObject).toHaveBeenCalledWith(
       expect.objectContaining({
         model: 'languageModel',
-        prompt: 'Analyze this\n\nSources:\ns1,s2',
+        prompt: 'Analyze this\n\nAdditional Input:\ns1,s2',
         schema: analysisLLMSchema,
         temperature: 0.3,
       }),
@@ -108,7 +108,7 @@ describe('analyze action', () => {
   });
   test('should use customModel when provided', async () => {
     (getAiProviderLanguageModel as jest.Mock).mockResolvedValue('lm');
-    (generateText as jest.Mock).mockResolvedValue({ text: 'ok' });
+    (generateObject as jest.Mock).mockResolvedValue({ text: 'ok' });
 
     const auth = {
       provider: AiProviderEnum.OPENAI,
@@ -121,7 +121,7 @@ describe('analyze action', () => {
 
     const context = createContext(auth, { prompt: 'Hi' });
 
-    const result = await analyze.run(context);
+    const result = await askAi.run(context as any);
 
     expect(getAiProviderLanguageModel).toHaveBeenCalledWith({
       provider: AiProviderEnum.OPENAI,
@@ -130,7 +130,7 @@ describe('analyze action', () => {
       providerSettings: {},
     });
 
-    expect(generateText).toHaveBeenCalledWith({
+    expect(generateObject).toHaveBeenCalledWith({
       model: 'lm',
       prompt: 'Hi',
     });

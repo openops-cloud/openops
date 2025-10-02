@@ -11,19 +11,20 @@ import {
 import { AiProviderEnum, analysisLLMSchema } from '@openops/shared';
 import { generateObject } from 'ai';
 
-export const analyze = createAction({
-  displayName: 'Analyze with AI',
-  description: 'Analyze or transform input using an LLM based on a prompt',
+export const askAi = createAction({
+  displayName: 'Ask AI',
+  description:
+    'Ask AI a question or transform input using an LLM based on a prompt',
   name: 'analyze',
   props: {
-    sources: Property.Array({
-      displayName: 'Sources',
-      description: 'Array of sources to use for the analysis',
-      required: false,
-    }),
     prompt: Property.LongText({
       displayName: 'Prompt',
       required: true,
+    }),
+    additionalInput: Property.Array({
+      displayName: 'Additional input',
+      description: 'Array of inputs to use for analysis or transformation',
+      required: false,
     }),
   },
   run: async (context) => {
@@ -41,10 +42,11 @@ export const analyze = createAction({
         ...(baseURL ? { baseURL } : {}),
       },
     });
-    const sources = context.propsValue.sources ?? [];
+
+    const additionalInput = context.propsValue.additionalInput ?? [];
     const composedPrompt =
-      sources?.length > 0
-        ? `${context.propsValue.prompt}\n\nSources:\n${sources}`
+      additionalInput?.length > 0
+        ? `${context.propsValue.prompt}\nAdditional Input:\n${additionalInput}`
         : context.propsValue.prompt;
 
     const result = await generateObject({
