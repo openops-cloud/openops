@@ -63,7 +63,6 @@ const CodeComponent = ({
     codeVariation === MarkdownCodeVariations.WithCopyAndInject ||
     codeVariation === MarkdownCodeVariations.WithCopyMultiline;
 
-  // Check if this is a mermaid diagram
   const language = className?.match(/language-(\w+)/)?.[1];
   const isMermaid = language === 'mermaid';
 
