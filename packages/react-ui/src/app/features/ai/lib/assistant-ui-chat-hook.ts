@@ -68,6 +68,8 @@ export const useAssistantChat = ({
   const { hasActiveAiSettings, isLoading: isLoadingAiSettings } =
     aiSettingsHooks.useHasActiveAiSettings();
 
+  const { data: activeAiSettings } = aiSettingsHooks.useActiveAiSettings();
+
   const stepDetails = useMemo(() => {
     const context = getBuilderState();
     return context?.flowVersion && context.selectedStep
@@ -127,7 +129,11 @@ export const useAssistantChat = ({
     getBuilderState()?.flowVersion, // eslint-disable-line react-hooks/exhaustive-deps
   ]);
 
-  const { data: openChatResponse, isLoading } = useQuery({
+  const {
+    data: openChatResponse,
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey,
     queryFn: async () => {
       const context = getBuilderState();
@@ -272,6 +278,26 @@ export const useAssistantChat = ({
 
   const runtime = useAISDKRuntime(chat);
   runtimeRef.current = runtime;
+
+  const lastConnectionRef = useRef<string | undefined>(undefined);
+
+  useEffect(() => {
+    const currentConnection = activeAiSettings?.connection;
+
+    if (lastConnectionRef.current === undefined) {
+      lastConnectionRef.current = currentConnection;
+      return;
+    }
+
+    if (
+      chatId &&
+      currentConnection &&
+      lastConnectionRef.current !== currentConnection
+    ) {
+      lastConnectionRef.current = currentConnection;
+      refetch();
+    }
+  }, [activeAiSettings?.connection, chatId, chatMode, refetch]);
 
   const createNewChat = useCallback(async () => {
     const oldChatId = chatId;
