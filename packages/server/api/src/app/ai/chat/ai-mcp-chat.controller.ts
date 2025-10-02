@@ -332,10 +332,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       }
       const { aiConfig } = await getLLMConfig(projectId);
 
-      let provider = context.provider;
-      if (!provider) {
-        provider = aiConfig.provider;
-      }
+      const provider = context.provider ?? aiConfig.provider;
 
       const result = await validateAiProviderConfig({ ...aiConfig, model });
 
