@@ -10,7 +10,7 @@ import { getFrontendToolDefinitions } from '@openops/ui-kit';
 import { useQuery } from '@tanstack/react-query';
 import { DefaultChatTransport, ToolSet, UIMessage } from 'ai';
 import { t } from 'i18next';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { aiChatApi } from '../../builder/ai-chat/lib/chat-api';
 import { getBuilderStore } from '../../builder/builder-state-provider';
 import { aiSettingsHooks } from './ai-settings-hooks';
@@ -47,6 +47,9 @@ export const useAssistantChat = ({
     [],
   );
 
+  const [provider, setProvider] = useState<string | undefined>();
+  const [model, setModel] = useState<string | undefined>();
+
   const { flowId, flowVersionId, runId, selectedStep, showSettingsAIChat } =
     context ?? {};
 
@@ -65,6 +68,8 @@ export const useAssistantChat = ({
 
   const { hasActiveAiSettings, isLoading: isLoadingAiSettings } =
     aiSettingsHooks.useHasActiveAiSettings();
+
+  const { data: activeAiSettings } = aiSettingsHooks.useActiveAiSettings();
 
   const stepDetails = useMemo(() => {
     const context = getBuilderState();
@@ -125,7 +130,11 @@ export const useAssistantChat = ({
     getBuilderState()?.flowVersion, // eslint-disable-line react-hooks/exhaustive-deps
   ]);
 
-  const { data: openChatResponse, isLoading } = useQuery({
+  const {
+    data: openChatResponse,
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey,
     queryFn: async () => {
       const context = getBuilderState();
@@ -159,6 +168,13 @@ export const useAssistantChat = ({
       onChatIdChange(openChatResponse.chatId);
     }
   }, [onChatIdChange, openChatResponse?.chatId]);
+
+  useEffect(() => {
+    if (openChatResponse?.provider && openChatResponse?.model) {
+      setProvider(openChatResponse.provider);
+      setModel(openChatResponse.model);
+    }
+  }, [openChatResponse?.provider, openChatResponse?.model]);
 
   const additionalContext = useMemo(() => {
     const context = getBuilderState();
@@ -264,6 +280,26 @@ export const useAssistantChat = ({
   const runtime = useAISDKRuntime(chat);
   runtimeRef.current = runtime;
 
+  const lastConnectionRef = useRef<string | undefined>(undefined);
+
+  useEffect(() => {
+    const currentConnection = activeAiSettings?.connection;
+
+    if (lastConnectionRef.current === undefined) {
+      lastConnectionRef.current = currentConnection;
+      return;
+    }
+
+    if (
+      chatId &&
+      currentConnection &&
+      lastConnectionRef.current !== currentConnection
+    ) {
+      lastConnectionRef.current = currentConnection;
+      refetch();
+    }
+  }, [activeAiSettings?.connection, chatId, chatMode, refetch]);
+
   const createNewChat = useCallback(async () => {
     const oldChatId = chatId;
 
@@ -294,5 +330,8 @@ export const useAssistantChat = ({
     runtime,
     isLoading,
     createNewChat,
+    provider,
+    model,
+    chatId,
   };
 };
