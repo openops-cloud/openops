@@ -2,6 +2,7 @@ import { useTheme } from '@/app/common/providers/theme-provider';
 import { AI_ASSISTANT_SS_KEY } from '@/app/constants/ai';
 import { useAiModelSelector } from '@/app/features/ai/lib/ai-model-selector-hook';
 import { useAssistantChat } from '@/app/features/ai/lib/assistant-ui-chat-hook';
+import { useBuilderStoreOutsideProviderWithSubscription } from '@/app/features/builder/builder-state-provider';
 import { AssistantUiChatContainer } from '@openops/components/ui';
 import { SourceCode } from '@openops/shared';
 import { createFrontendTools } from '@openops/ui-kit';
@@ -40,10 +41,19 @@ const AssistantUiChat = ({
     setChatId(id);
   }, []);
 
+  const context = useBuilderStoreOutsideProviderWithSubscription((state) => ({
+    flowId: state.flow.id,
+    flowVersionId: state.flowVersion.id,
+    runId: state.run?.id,
+    selectedStep: state.selectedStep,
+    showSettingsAIChat: state.midpanelState.showAiChat,
+  }));
+
   const { runtime, isLoading, createNewChat } = useAssistantChat({
     chatId,
     onChatIdChange,
     chatMode: ChatMode.Agent,
+    context,
   });
 
   const { theme } = useTheme();
