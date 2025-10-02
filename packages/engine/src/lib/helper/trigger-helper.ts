@@ -19,7 +19,8 @@ import { EngineConstants } from '../handler/context/engine-constants';
 import { FlowExecutorContext } from '../handler/context/flow-execution-context';
 import { createFilesService } from '../services/files.service';
 import { createContextStore } from '../services/storage.service';
-import { variableService } from '../variables/variable-service';
+import { propsProcessor } from '../variables/props-processor';
+import { createPropsResolver } from '../variables/props-resolver';
 import { blockLoader } from './block-loader';
 
 type Listener = {
@@ -51,7 +52,7 @@ export const triggerHelper = {
       );
     }
 
-    const { resolvedInput, censoredInput } = await variableService({
+    const { resolvedInput, censoredInput } = await createPropsResolver({
       apiUrl: constants.internalApiUrl,
       projectId: params.projectId,
       engineToken: params.engineToken,
@@ -60,11 +61,13 @@ export const triggerHelper = {
       executionState: FlowExecutorContext.empty(),
     });
 
-    const { processedInput, errors } = await variableService({
-      apiUrl: constants.internalApiUrl,
-      projectId: params.projectId,
-      engineToken: params.engineToken,
-    }).applyProcessorsAndValidators(resolvedInput, trigger.props, block.auth);
+    const { processedInput, errors } =
+      await propsProcessor.applyProcessorsAndValidators(
+        resolvedInput,
+        trigger.props,
+        block.auth,
+        trigger.requireAuth,
+      );
 
     if (Object.keys(errors).length > 0) {
       throw new Error(JSON.stringify(errors));

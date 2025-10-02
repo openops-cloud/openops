@@ -17,6 +17,7 @@ export const getRecordsAction = createAction({
   name: 'get_records',
   description: 'Get all records matching the provided filters.',
   displayName: 'Get Records',
+  requireToolApproval: false,
   props: {
     tableName: openopsTablesDropdownProperty(),
     filterType: Property.StaticDropdown({

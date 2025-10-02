@@ -9,6 +9,7 @@ export const getUsageRecommendations = createAction({
   displayName: 'Get Usage Recommendations',
   description: 'Get Usage Recommendations',
   auth: ternaryCloudAuth,
+  requireToolApproval: false,
   props: {},
   run: async ({ auth }) => {
     try {

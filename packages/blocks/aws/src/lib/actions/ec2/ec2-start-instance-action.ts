@@ -15,6 +15,7 @@ export const ec2StartInstanceAction = createAction({
   description: 'EC2 start a given instance',
   displayName: 'EC2 Start Instance',
   riskLevel: RiskLevel.HIGH,
+  requireToolApproval: true,
   props: {
     arn: Property.ShortText({
       displayName: 'ARN',

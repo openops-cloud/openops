@@ -12,6 +12,7 @@ export const sendEmailAction = createAction({
   name: 'send-email',
   displayName: 'Send Email',
   description: 'Sends an email using Microsoft Outlook.',
+  requireToolApproval: true,
   props: {
     recipients: Property.Array({
       displayName: 'To Email(s)',

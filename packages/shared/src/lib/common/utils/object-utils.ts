@@ -47,56 +47,54 @@ export function sanitizeObjectForPostgresql<T>(input: T): T {
     return str;
   });
 }
-
 export function applyFunctionToValuesSync<T>(
   obj: unknown,
-  apply: (str: unknown) => unknown,
+  apply: (str: string) => unknown,
 ): T {
   if (isNil(obj)) {
     return obj as T;
   } else if (isString(obj)) {
     return apply(obj) as T;
   } else if (Array.isArray(obj)) {
-    for (let i = 0; i < obj.length; ++i) {
-      obj[i] = applyFunctionToValuesSync(obj[i], apply);
-    }
+    return obj.map((item) =>
+      applyFunctionToValuesSync(item, apply),
+    ) as unknown as T;
   } else if (isObject(obj)) {
-    const entries = Object.entries(obj);
-    for (const entry of entries) {
-      const [key, value] = entry;
-      obj[key] = applyFunctionToValuesSync(value, apply);
-    }
+    return Object.fromEntries(
+      Object.entries(obj).map(([key, value]) => [
+        key,
+        applyFunctionToValuesSync(value, apply),
+      ]),
+    ) as T;
   }
-  return apply(obj) as T;
+  return obj as T;
 }
 
 export async function applyFunctionToValues<T>(
   obj: unknown,
-  apply: (str: unknown) => Promise<unknown>,
+  apply: (str: string) => Promise<unknown>,
 ): Promise<T> {
   if (isNil(obj)) {
     return obj as T;
   } else if (isString(obj)) {
     return (await apply(obj)) as T;
   } else if (Array.isArray(obj)) {
-    for (let i = 0; i < obj.length; ++i) {
-      obj[i] = await applyFunctionToValues(obj[i], apply);
-    }
+    const newArray = await Promise.all(
+      obj.map((item) => applyFunctionToValues(item, apply)),
+    );
+    return newArray as unknown as T;
   } else if (isObject(obj)) {
-    const entries = Object.entries(obj);
-    for (const entry of entries) {
-      const [key, value] = entry;
-      obj[key] = await applyFunctionToValues(value, apply);
-    }
+    const newEntries = await Promise.all(
+      Object.entries(obj).map(async ([key, value]) => [
+        key,
+        await applyFunctionToValues(value, apply),
+      ]),
+    );
+    return Object.fromEntries(newEntries) as T;
   }
-  return (await apply(obj)) as T;
+  return obj as T;
 }
 
 export const isObject = (obj: unknown): obj is Record<string, unknown> => {
   return typeof obj === 'object' && obj !== null && !Array.isArray(obj);
 };
-
-export type MakeKeyNonNullableAndRequired<
-  T extends object,
-  K extends keyof T,
-> = T & { [P in K]-?: NonNullable<T[P]> };

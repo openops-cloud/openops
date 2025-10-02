@@ -6,6 +6,7 @@ export const parseArnAction = createAction({
   name: 'parse_arn',
   description: 'Parse information from a given ARN (Amazon Resource Name) ',
   displayName: 'Parse ARN',
+  requireToolApproval: false,
   props: {
     arn: Property.ShortText({
       displayName: 'ARN',

@@ -13,6 +13,7 @@ export const storageAppendAction = createAction({
       hide: true,
     },
   },
+  requireToolApproval: false,
   props: {
     key: Property.ShortText({
       displayName: 'Key',

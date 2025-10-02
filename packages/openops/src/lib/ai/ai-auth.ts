@@ -52,7 +52,7 @@ export const aiAuth = BlockAuth.CustomAuth({
         options: PROVIDER_MODEL_OPTIONS,
       },
     }),
-    customModel: Property.SecretText({
+    customModel: Property.ShortText({
       displayName: 'Custom model',
       description: "Define custom model if it's not in the list",
       required: false,

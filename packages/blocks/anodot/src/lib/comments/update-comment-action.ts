@@ -10,6 +10,7 @@ export const updateCommentAction = createAction({
   name: 'anodot_update_comment',
   description: 'Update a comment of a recommendation',
   displayName: 'Update Comment',
+  requireToolApproval: true,
   props: {
     accountId: Property.ShortText({
       displayName: 'Account ID',

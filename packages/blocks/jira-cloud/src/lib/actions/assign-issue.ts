@@ -13,6 +13,7 @@ export const assignIssueAction = createAction({
   name: 'assign_issue',
   displayName: 'Assign Issue',
   description: 'Assigns an issue to a user.',
+  requireToolApproval: true,
   props: {
     projectId: getProjectIdDropdown(),
     issueId: getIssueIdDropdown({ refreshers: ['projectId'] }),
