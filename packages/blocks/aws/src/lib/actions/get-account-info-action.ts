@@ -13,6 +13,7 @@ export const getAccountInfoAction = createAction({
   name: 'get_account_info',
   description: 'Gets the account information for the given account id',
   displayName: 'Get Account Information',
+  requireToolApproval: false,
   props: {
     accounts: getAwsAccountsMultiSelectDropdown().accounts,
   },

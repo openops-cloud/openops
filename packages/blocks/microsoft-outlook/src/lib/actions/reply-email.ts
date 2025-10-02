@@ -14,12 +14,13 @@ export const replyEmailAction = createAction({
   name: 'reply-email',
   displayName: 'Reply to Email',
   description: 'Reply to an outlook email.',
+  requireToolApproval: true,
   props: {
     messageId: Property.Dropdown({
       displayName: 'Email',
       description: 'Select the email message to reply to.',
       required: true,
-      refreshers: [],
+      refreshers: ['auth'],
       options: async ({ auth }) => {
         if (!auth) {
           return {

@@ -14,6 +14,7 @@ export const sum = createAction({
       hide: true,
     },
   },
+  requireToolApproval: false,
   props: {
     numbers: Property.Array({
       displayName: 'Numbers',

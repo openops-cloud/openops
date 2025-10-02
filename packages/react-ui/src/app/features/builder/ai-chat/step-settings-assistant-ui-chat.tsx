@@ -36,10 +36,8 @@ const StepSettingsAssistantUiChat = ({
     state.applyMidpanelAction,
   ]);
 
-  const { runtime, createNewChat, onInject } = useStepSettingsAssistantChat(
-    flowVersion,
-    selectedStep,
-  );
+  const { runtime, createNewChat, onInject, chatId, provider, model } =
+    useStepSettingsAssistantChat(flowVersion, selectedStep);
 
   const onToggleContainerSizeState = useCallback(
     (size: AiCliChatContainerSizeState) => {
@@ -67,7 +65,7 @@ const StepSettingsAssistantUiChat = ({
     availableModels,
     onModelSelected,
     isLoading: isModelSelectorLoading,
-  } = useAiModelSelector();
+  } = useAiModelSelector({ chatId, provider, model });
 
   const showFullWidth =
     showDataSelector && dataSelectorSize === DataSelectorSizeState.EXPANDED;

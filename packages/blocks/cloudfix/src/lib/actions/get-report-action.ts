@@ -8,6 +8,7 @@ export const getReportAction = createAction({
   displayName: 'Get Report',
   description: 'Get a report for a specific recommendation',
   auth: cloudfixAuth,
+  requireToolApproval: false,
   props: {
     recommendationId: Property.ShortText({
       displayName: 'Recommendation ID',

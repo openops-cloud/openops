@@ -10,6 +10,7 @@ export const getUserAccountsAction = createAction({
   description:
     'Get Umbrella user accounts associated with the authenticated user',
   displayName: 'Get User Accounts',
+  requireToolApproval: false,
   props: {},
   async run(context) {
     try {

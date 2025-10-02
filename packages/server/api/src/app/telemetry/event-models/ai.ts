@@ -25,7 +25,6 @@ export enum AiEventName {
 
 export function sendAiConfigSavedEvent(
   params: AiConfigBase & {
-    provider: string;
     enabled: boolean;
   },
 ): void {
@@ -35,7 +34,6 @@ export function sendAiConfigSavedEvent(
       userId: params.userId,
       projectId: params.projectId,
       id: params.id,
-      provider: params.provider,
       enabled: params.enabled.toString(),
     },
   });

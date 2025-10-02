@@ -11,6 +11,7 @@ export const unsnoozeRecommendationAction = createAction({
   displayName: `Unsnooze Recommendations`,
   description: `Unsnooze Recommendations`,
   auth: cloudabilityAuth,
+  requireToolApproval: true,
   props: {
     ...getVendorsProperty(),
     ...getRecommendationTypesProperty(),

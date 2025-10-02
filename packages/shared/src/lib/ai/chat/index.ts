@@ -13,6 +13,8 @@ export type OpenChatMCPRequest = Static<typeof OpenChatMCPRequest>;
 
 export const OpenChatResponse = Type.Object({
   chatId: Type.String(),
+  provider: Type.Optional(Type.String()),
+  model: Type.Optional(Type.String()),
   messages: Type.Optional(
     Type.Array(
       Type.Object({
@@ -100,5 +102,20 @@ export const DeleteChatHistoryRequest = Type.Object({
 });
 
 export type DeleteChatHistoryRequest = Static<typeof DeleteChatHistoryRequest>;
+
+export const UpdateChatModelRequest = Type.Object({
+  chatId: Type.String(),
+  model: Type.String(),
+});
+
+export type UpdateChatModelRequest = Static<typeof UpdateChatModelRequest>;
+
+export const UpdateChatModelResponse = Type.Object({
+  chatId: Type.String(),
+  model: Type.String(),
+  provider: Type.String(),
+});
+
+export type UpdateChatModelResponse = Static<typeof UpdateChatModelResponse>;
 
 export * from './code-output-structure';

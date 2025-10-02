@@ -1,4 +1,4 @@
-import { AiConfig, AiProviderEnum } from '@openops/shared';
+import { AiConfigParsed, AiProviderEnum } from '@openops/shared';
 import { LanguageModel, ModelMessage, ToolSet, UserModelMessage } from 'ai';
 import { FastifyInstance } from 'fastify';
 
@@ -24,17 +24,13 @@ import { getMCPToolsContext } from '../../../src/app/ai/mcp/tools-context-builde
 describe('getMCPToolsContext', () => {
   const mockLanguageModel = {} as LanguageModel;
   const mockAiConfig = {
-    projectId: 'test-project',
     provider: AiProviderEnum.ANTHROPIC,
     model: 'claude-3-sonnet',
     apiKey: 'test-api-key',
     enabled: true,
     providerSettings: {},
     modelSettings: {},
-    created: '2023-01-01',
-    updated: '2023-01-01',
-    id: 'test-id',
-  } as AiConfig;
+  } as AiConfigParsed;
 
   const mockApp = {
     swagger: jest.fn(),

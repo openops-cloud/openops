@@ -1,7 +1,18 @@
-import { getAiProviderLanguageModel } from '@openops/common';
-import { cacheWrapper, encryptUtils, hashUtils } from '@openops/server-shared';
-import { AiConfig, ApplicationError, ErrorCode } from '@openops/shared';
+import {
+  AiAuth,
+  getAiModelFromConnection,
+  getAiProviderLanguageModel,
+} from '@openops/common';
+import { cacheWrapper, hashUtils } from '@openops/server-shared';
+import {
+  AiConfigParsed,
+  ApplicationError,
+  CustomAuthConnectionValue,
+  ErrorCode,
+  removeConnectionBrackets,
+} from '@openops/shared';
 import { LanguageModel, ModelMessage, UIMessage, generateText } from 'ai';
+import { appConnectionService } from '../../app-connection/app-connection-service/app-connection-service';
 import { aiConfigService } from '../config/ai-config.service';
 import { loadPrompt } from './prompts.service';
 import { Conversation } from './types';
@@ -33,6 +44,8 @@ export type MCPChatContext = {
   stepId?: string;
   actionName?: string;
   chatName?: string;
+  provider?: string;
+  model?: string;
 };
 
 export const generateChatId = (
@@ -197,9 +210,11 @@ export const deleteChatHistory = async (
 
 export async function getLLMConfig(
   projectId: string,
-): Promise<{ aiConfig: AiConfig; languageModel: LanguageModel }> {
-  const aiConfig = await aiConfigService.getActiveConfigWithApiKey(projectId);
-  if (!aiConfig) {
+  contextModel?: string,
+): Promise<{ aiConfig: AiConfigParsed; languageModel: LanguageModel }> {
+  const aiConfig = await aiConfigService.getActiveConfig(projectId);
+  const connectionName = removeConnectionBrackets(aiConfig?.connection);
+  if (!aiConfig || !connectionName) {
     throw new ApplicationError({
       code: ErrorCode.ENTITY_NOT_FOUND,
       params: {
@@ -210,15 +225,46 @@ export async function getLLMConfig(
     });
   }
 
-  const apiKey = encryptUtils.decryptString(JSON.parse(aiConfig.apiKey));
+  const connection = (
+    await appConnectionService.getOne({
+      projectId,
+      name: connectionName,
+    })
+  )?.value as CustomAuthConnectionValue;
+
+  const connectionProps = connection.props as AiAuth;
+
+  const model =
+    getAiModelFromConnection(
+      connectionProps.model,
+      connectionProps.customModel,
+    ) ?? '';
+
+  const initialProviderSettings = connectionProps?.providerSettings
+    ? connectionProps?.providerSettings
+    : {};
+
+  const providerSettings = {
+    ...initialProviderSettings,
+    baseURL: connectionProps?.baseURL,
+  };
+
   const languageModel = await getAiProviderLanguageModel({
-    apiKey,
-    model: aiConfig.model,
-    provider: aiConfig.provider,
-    providerSettings: aiConfig.providerSettings,
+    model: contextModel ?? model,
+    apiKey: connectionProps?.apiKey,
+    provider: connectionProps.provider,
+    providerSettings,
   });
 
-  return { aiConfig, languageModel };
+  const aiConfigParsed: AiConfigParsed = {
+    model: contextModel ?? model,
+    provider: connectionProps.provider,
+    apiKey: connectionProps?.apiKey,
+    providerSettings,
+    modelSettings: connectionProps?.modelSettings,
+  };
+
+  return { aiConfig: aiConfigParsed, languageModel };
 }
 
 export async function getConversation(

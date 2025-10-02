@@ -7,6 +7,7 @@ export const getAwsAccountsAction = createAction({
   displayName: 'Get AWS Accounts',
   description: 'Retrieve a list of AWS accounts',
   auth: cloudhealthAuth,
+  requireToolApproval: false,
   props: {},
   async run(context) {
     return await getAwsAccounts(context.auth);

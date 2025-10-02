@@ -14,6 +14,7 @@ export const slackSendMessageAction = createAction({
   name: 'send_slack_message',
   displayName: 'Send Message',
   description: 'Send a message to a user or a channel',
+  requireToolApproval: true,
   props: {
     conversationId: usersAndChannels,
     threadTs: Property.ShortText({
