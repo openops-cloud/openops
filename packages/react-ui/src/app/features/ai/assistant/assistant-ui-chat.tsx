@@ -49,12 +49,13 @@ const AssistantUiChat = ({
     showSettingsAIChat: state.midpanelState.showAiChat,
   }));
 
-  const { runtime, isLoading, createNewChat, provider, model } = useAssistantChat({
-    chatId,
-    onChatIdChange,
-    chatMode: ChatMode.Agent,
-    context,
-  });
+  const { runtime, isLoading, createNewChat, provider, model } =
+    useAssistantChat({
+      chatId,
+      onChatIdChange,
+      chatMode: ChatMode.Agent,
+      context,
+    });
 
   const { theme } = useTheme();
 
