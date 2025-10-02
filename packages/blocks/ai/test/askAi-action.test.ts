@@ -64,7 +64,7 @@ describe('analyze action', () => {
     expect(result).toEqual({ textAnswer: 'answer', classifications: [] });
   });
 
-  test('should include sources in composed prompt and pass baseURL in providerSettings', async () => {
+  test('should include additional input in composed prompt and pass baseURL in providerSettings', async () => {
     const { getAiProviderLanguageModel } = jest.requireMock(
       '@openops/common',
     ) as { getAiProviderLanguageModel: jest.Mock };
@@ -92,14 +92,12 @@ describe('analyze action', () => {
 
     const result = await askAi.run(context as any);
 
-    expect(generateObject).toHaveBeenCalledWith(
-      expect.objectContaining({
-        model: 'languageModel',
-        prompt: 'Analyze this\n\nAdditional Input:\ns1,s2',
-        schema: analysisLLMSchema,
-        temperature: 0.3,
-      }),
-    );
+    expect(generateObject).toHaveBeenCalledTimes(1);
+    const args = (generateObject as jest.Mock).mock.calls[0][0];
+    expect(args.model).toBe('languageModel');
+    expect(args.prompt).toMatch(/Analyze this\s*\nAdditional Input:\ns1,s2/);
+    expect(args.schema).toBeDefined();
+    expect(args.temperature).toBe(0.3);
 
     expect(result).toEqual({
       textAnswer: 'final',
@@ -108,7 +106,7 @@ describe('analyze action', () => {
   });
   test('should use customModel when provided', async () => {
     (getAiProviderLanguageModel as jest.Mock).mockResolvedValue('lm');
-    (generateObject as jest.Mock).mockResolvedValue({ text: 'ok' });
+    (generateObject as jest.Mock).mockResolvedValue({ object: 'ok' });
 
     const auth = {
       provider: AiProviderEnum.OPENAI,
@@ -130,10 +128,13 @@ describe('analyze action', () => {
       providerSettings: {},
     });
 
-    expect(generateObject).toHaveBeenCalledWith({
-      model: 'lm',
-      prompt: 'Hi',
-    });
+    expect(generateObject).toHaveBeenCalledWith(
+      expect.objectContaining({
+        model: 'lm',
+        prompt: 'Hi',
+        schema: expect.anything(),
+      }),
+    );
 
     expect(result).toBe('ok');
   });

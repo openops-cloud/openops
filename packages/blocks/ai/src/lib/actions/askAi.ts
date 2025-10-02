@@ -46,9 +46,10 @@ export const askAi = createAction({
 
     const additionalInput = context.propsValue.additionalInput ?? [];
     const composedPrompt =
-      additionalInput?.length > 0
-        ? `${context.propsValue.prompt}\nAdditional Input:\n${additionalInput}`
-        : context.propsValue.prompt;
+      context.propsValue.prompt +
+      (additionalInput?.length > 0
+        ? `\n\nAdditional Input:\n${additionalInput.join(',')}`
+        : '');
 
     const result = await generateObject({
       model: languageModel,
