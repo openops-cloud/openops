@@ -38,6 +38,7 @@
     "@ai-sdk/deepinfra": "1.0.7",
     "@ai-sdk/deepseek": "1.0.7",
     "@ai-sdk/google": "2.0.6",
+    "@ai-sdk/google-vertex": "^3.0.0",
     "@ai-sdk/groq": "2.0.7",
     "@ai-sdk/mistral": "2.0.4",
     "@ai-sdk/openai": "2.0.12",
@@ -232,6 +233,8 @@
     "npm": "10.8.2",
     "nx-cloud": "19.1.0",
     "object-sizeof": "2.6.3",
+    "oci-common": "2.118.0",
+    "oci-identity": "2.118.0",
     "pdf-parse": "1.1.1",
     "pg": "8.11.3",
     "pickleparser": "0.1.0",
@@ -294,8 +297,7 @@
     "xml2js": "0.6.2",
     "yaml": "2.4.1",
     "zod": "4.0.14",
-    "zustand": "4.5.4",
-    "@ai-sdk/google-vertex": "^3.0.0"
+    "zustand": "4.5.4"
   },
   "devDependencies": {
     "@faker-js/faker": "8.2.0",
