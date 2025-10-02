@@ -32,7 +32,9 @@ export class MigrateAiConfigToAppConnection1759242268873
           `SELECT connection FROM "ai_config" WHERE id = $1`,
           [row.id],
         );
-      if (existingConn?.[0]?.connection) continue;
+      if (existingConn?.[0]?.connection) {
+        continue;
+      }
 
       const providerSanitized = row.provider
         ? row.provider.trim().replace(/\s+/g, '-')
@@ -54,7 +56,36 @@ export class MigrateAiConfigToAppConnection1759242268873
         name = `${baseName}-${suffix}`;
       }
 
-      const baseURL = row.providerSettings?.baseURL ?? null;
+      const baseURL =
+        (row.providerSettings &&
+        typeof (row.providerSettings as Record<string, unknown>)['baseURL'] ===
+          'string'
+          ? ((row.providerSettings as Record<string, unknown>)[
+              'baseURL'
+            ] as string)
+          : null) ?? null;
+
+      let providerSettings: Record<string, unknown> | null =
+        row.providerSettings ?? null;
+      if (providerSettings) {
+        const { baseURL: _removed, ...rest } = providerSettings as Record<
+          string,
+          unknown
+        > & {
+          baseURL?: unknown;
+        };
+        providerSettings = rest;
+      }
+
+      let decryptedApiKey: string | null = null;
+      if (row.apiKey) {
+        try {
+          const parsed = JSON.parse(row.apiKey as unknown as string);
+          decryptedApiKey = encryptUtils.decryptString(parsed);
+        } catch (_e) {
+          decryptedApiKey = row.apiKey as unknown as string;
+        }
+      }
 
       const value = {
         type: 'CUSTOM_AUTH',
@@ -62,9 +93,9 @@ export class MigrateAiConfigToAppConnection1759242268873
           provider: row.provider ?? null,
           model: row.model ?? null,
           customModel: null,
-          apiKey: row.apiKey ?? null,
+          apiKey: decryptedApiKey,
           baseURL,
-          providerSettings: row.providerSettings ?? null,
+          providerSettings,
           modelSettings: row.modelSettings ?? null,
         },
       } as const;
@@ -77,7 +108,7 @@ export class MigrateAiConfigToAppConnection1759242268873
         VALUES (
           substr(replace(cast(gen_random_uuid() as text), '-', ''), 1, 21),
           now(), now(),
-          $1, $2, $3, $4, $5, $6
+          $1, $2, $3, $4, $5::jsonb, $6
         )
         RETURNING id
       `,
