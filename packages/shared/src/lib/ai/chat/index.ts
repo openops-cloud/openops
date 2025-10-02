@@ -107,6 +107,15 @@ export const UpdateChatModelRequest = Type.Object({
   chatId: Type.String(),
   model: Type.String(),
 });
+
 export type UpdateChatModelRequest = Static<typeof UpdateChatModelRequest>;
+
+export const UpdateChatModelResponse = Type.Object({
+  chatId: Type.String(),
+  model: Type.String(),
+  provider: Type.String(),
+});
+
+export type UpdateChatModelResponse = Static<typeof UpdateChatModelResponse>;
 
 export * from './code-output-structure';

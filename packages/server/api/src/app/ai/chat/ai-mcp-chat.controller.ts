@@ -12,6 +12,7 @@ import {
   openOpsId,
   PrincipalType,
   UpdateChatModelRequest,
+  UpdateChatModelResponse,
 } from '@openops/shared';
 import { ModelMessage } from 'ai';
 import { FastifyReply } from 'fastify';
@@ -61,14 +62,16 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
             userId,
             projectId,
           );
-          const provider = existingContext.provider;
-          const model = existingContext.model;
+          let provider = existingContext.provider;
+          let model = existingContext.model;
 
           if (
             !existingContext.provider ||
             !existingContext.model ||
             existingContext.provider !== aiConfig.provider
           ) {
+            provider = aiConfig.provider;
+            model = aiConfig.model;
             await createChatContext(inputChatId, userId, projectId, {
               ...existingContext,
               provider,
@@ -110,9 +113,11 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         let model = aiConfig.model;
 
         if (messages.length === 0) {
-          context.provider = provider;
-          context.model = model;
-          await createChatContext(chatId, userId, projectId, context);
+          await createChatContext(chatId, userId, projectId, {
+            ...context,
+            provider,
+            model,
+          });
         } else {
           const existingContext = await getChatContext(
             chatId,
@@ -430,6 +435,9 @@ const UpdateChatModelOptions = {
     description:
       'Update the language model used for a specific chat context. Returns the updated provider and model.',
     body: UpdateChatModelRequest,
+    response: {
+      200: UpdateChatModelResponse,
+    },
   },
 };
 
