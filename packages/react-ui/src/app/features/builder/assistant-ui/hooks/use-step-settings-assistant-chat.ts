@@ -9,7 +9,16 @@ export const useStepSettingsAssistantChat = (
   flowVersion: FlowVersion,
   selectedStep: string,
 ) => {
-  const dispatch = useBuilderStateContext((state) => state.applyMidpanelAction);
+  const { dispatch, builderState } = useBuilderStateContext((state) => ({
+    dispatch: state.applyMidpanelAction,
+    builderState: {
+      flowId: state.flow?.id,
+      flowVersionId: state.flowVersion?.id,
+      runId: state.run?.id,
+      selectedStep: state.selectedStep,
+      showSettingsAIChat: state.midpanelState.showAiChat,
+    },
+  }));
   const [chatSessionKey, setChatSessionKey] = useState<string>(nanoid());
 
   const onChatIdChange = useCallback((id: string | null) => {
@@ -31,6 +40,7 @@ export const useStepSettingsAssistantChat = (
     chatId: chatSessionKey,
     onChatIdChange,
     chatMode: ChatMode.StepSettings,
+    context: builderState,
   });
 
   return {
