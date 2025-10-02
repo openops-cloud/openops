@@ -52,12 +52,12 @@ export async function routeChatRequest(
 
   const currentCtx = conversation.chatContext;
 
-  let currentModel = currentCtx.model ?? aiConfig.model;
+  let currentModel = currentCtx?.model ?? aiConfig.model;
 
   if (
-    !currentCtx.provider ||
-    !currentCtx.model ||
-    currentCtx.provider !== aiConfig.provider
+    !currentCtx?.provider ||
+    !currentCtx?.model ||
+    currentCtx?.provider !== aiConfig.provider
   ) {
     currentModel = aiConfig.model;
     await createChatContext(chatId, userId, projectId, {
