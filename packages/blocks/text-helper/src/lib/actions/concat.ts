@@ -12,6 +12,7 @@ export const concat = createAction({
       hide: true,
     },
   },
+  requireToolApproval: false,
   props: {
     texts: Property.Array({
       displayName: 'Texts',

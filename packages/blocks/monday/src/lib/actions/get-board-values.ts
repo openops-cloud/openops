@@ -8,6 +8,7 @@ export const getBoardItemValuesAction = createAction({
   name: 'monday_get_board_values',
   displayName: 'Get Board Values',
   description: "Gets a list of board's items.",
+  requireToolApproval: false,
   props: {
     workspace_id: mondayCommon.workspace_id(true),
     board_id: mondayCommon.board_id(true),

@@ -17,6 +17,7 @@ export const ebsModifyVolumeAction = createAction({
   description: 'Modify the given EBS volume',
   displayName: 'EBS Modify Volume',
   riskLevel: RiskLevel.HIGH,
+  requireToolApproval: true,
   props: {
     arn: Property.ShortText({
       displayName: 'ARN',

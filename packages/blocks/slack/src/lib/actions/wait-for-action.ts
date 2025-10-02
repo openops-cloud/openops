@@ -22,6 +22,7 @@ export const waitForAction = createAction({
   name: 'wait_for_action',
   displayName: 'Wait For User Action',
   description: 'Wait for user action on the message.',
+  requireToolApproval: false,
   props: {
     message: Property.LongText({
       displayName: 'Message',

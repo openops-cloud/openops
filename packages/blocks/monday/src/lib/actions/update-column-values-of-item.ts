@@ -11,6 +11,7 @@ export const updateColumnValuesOfItemAction = createAction({
   name: 'monday_update_column_values_of_item',
   displayName: 'Update Column Values of Specific Item',
   description: 'Updates multiple columns values of specific item.',
+  requireToolApproval: true,
   props: {
     workspace_id: mondayCommon.workspace_id(true),
     board_id: mondayCommon.board_id(true),

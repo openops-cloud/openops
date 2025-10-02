@@ -21,6 +21,7 @@ export const httpSendRequestAction = createAction({
   name: 'send_request',
   displayName: 'Send HTTP request',
   description: 'Send HTTP request',
+  requireToolApproval: true,
   props: {
     method: httpMethodDropdown,
     url: Property.ShortText({

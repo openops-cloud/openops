@@ -12,6 +12,7 @@ export const getTableUrlAction = createAction({
   name: 'get_table_url',
   description: 'Get a shareable URL for the provided table.',
   displayName: 'Get Table URL',
+  requireToolApproval: false,
   props: {
     tableName: openopsTablesDropdownProperty(),
   },

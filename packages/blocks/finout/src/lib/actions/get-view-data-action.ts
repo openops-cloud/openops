@@ -7,6 +7,7 @@ export const getViewDataAction = createAction({
   displayName: 'Get View Data',
   description: 'Retrieve view data',
   auth: finoutAuth,
+  requireToolApproval: false,
   props: {
     viewId: Property.Dropdown({
       displayName: 'View',

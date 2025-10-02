@@ -8,6 +8,7 @@ export const createColumnAction = createAction({
   name: 'monday_create_column',
   displayName: 'Create Column',
   description: 'Creates a new column in board.',
+  requireToolApproval: true,
   props: {
     workspace_id: mondayCommon.workspace_id(true),
     board_id: mondayCommon.board_id(true),
