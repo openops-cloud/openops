@@ -25,6 +25,7 @@ jest.mock('../../../src/app/blocks/block-metadata-service', () => ({
 
 import { logger } from '@openops/server-shared';
 import {
+  findBlockByAuthProviderKey,
   getAuthProviderMetadata,
   getProviderMetadataForAllBlocks,
   resolveProvidersForBlocks,
@@ -367,5 +368,87 @@ describe('getAuthProviderMetadata', () => {
     const result = await getAuthProviderMetadata(authProviderKey, projectId);
 
     expect(result).toBeUndefined();
+  });
+});
+
+describe('findBlockByAuthProviderKey', () => {
+  const projectId = 'project-123';
+  const release = 'release-1.0';
+  const edition = 'community';
+  const authProviderKey = 'Linear';
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    getCurrentReleaseMock.mockResolvedValue(release);
+    getEditionMock.mockReturnValue(edition);
+  });
+
+  test('should return block name and version for matching authProviderKey', async () => {
+    const blocks = [
+      {
+        name: 'block1',
+        version: '1.0.0',
+        auth: {
+          authProviderKey: 'GitHub',
+        },
+      },
+      {
+        name: 'block2',
+        version: '2.1.0',
+        auth: {
+          authProviderKey: 'Linear',
+        },
+      },
+    ];
+
+    listBlocksMock.mockResolvedValue(blocks);
+
+    const result = await findBlockByAuthProviderKey(authProviderKey, projectId);
+    expect(result).toEqual({ name: 'block2', version: '2.1.0' });
+  });
+
+  test('should throw error if no block matches the authProviderKey', async () => {
+    const blocks = [
+      {
+        name: 'block1',
+        version: '1.0.0',
+        auth: {
+          authProviderKey: 'AWS',
+        },
+      },
+    ];
+
+    listBlocksMock.mockResolvedValue(blocks);
+
+    await expect(
+      findBlockByAuthProviderKey(authProviderKey, projectId),
+    ).rejects.toThrow(
+      `Block with authProviderKey "Linear" not found for project "project-123".`,
+    );
+  });
+
+  test('should throw error if blocks list is empty', async () => {
+    listBlocksMock.mockResolvedValue([]);
+
+    await expect(
+      findBlockByAuthProviderKey(authProviderKey, projectId),
+    ).rejects.toThrow(
+      `Block with authProviderKey "Linear" not found for project "project-123".`,
+    );
+  });
+
+  test('should throw error if blocks have no auth property', async () => {
+    const blocks = [
+      { name: 'block1', version: '1.0.0', auth: null },
+      { name: 'block2', version: '2.0.0', auth: {} },
+    ];
+
+    listBlocksMock.mockResolvedValue(blocks);
+
+    await expect(
+      findBlockByAuthProviderKey(authProviderKey, projectId),
+    ).rejects.toThrow(
+      `Block with authProviderKey "Linear" not found for project "project-123".`,
+    );
   });
 });

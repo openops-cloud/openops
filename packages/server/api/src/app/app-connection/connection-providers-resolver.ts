@@ -92,3 +92,29 @@ export async function getAuthProviderMetadata(
   return blocks.find((block) => block.auth?.authProviderKey === authProviderKey)
     ?.auth;
 }
+
+export async function findBlockByAuthProviderKey(
+  authProviderKey: string,
+  projectId: string,
+): Promise<{ name: string; version: string }> {
+  const release = await flagService.getCurrentRelease();
+  const edition = system.getEdition();
+
+  const blocks = await blockMetadataService.list({
+    includeHidden: false,
+    projectId,
+    release,
+    edition,
+  });
+
+  const block = blocks.find(
+    (block) => block.auth?.authProviderKey === authProviderKey,
+  );
+
+  if (!block) {
+    throw new Error(
+      `Block with authProviderKey "${authProviderKey}" not found for project "${projectId}".`,
+    );
+  }
+  return { name: block.name, version: block.version };
+}
