@@ -1,4 +1,5 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
+import { validateAiProviderConfig } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import {
   ApplicationError,
@@ -320,11 +321,23 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
           },
         });
       }
+      const { aiConfig } = await getLLMConfig(projectId);
 
       let provider = context.provider;
       if (!provider) {
-        const { aiConfig } = await getLLMConfig(projectId);
         provider = aiConfig.provider;
+      }
+
+      const result = await validateAiProviderConfig({ ...aiConfig, model });
+
+      if (!result.valid) {
+        const err: unknown = (result as unknown as { error?: unknown })?.error;
+        const message =
+          (err as { errorMessage?: string })?.errorMessage ||
+          (err as { message?: string })?.message ||
+          'Invalid AI configuration';
+
+        return await handleError(err, reply, message);
       }
 
       await createChatContext(chatId, userId, projectId, {
