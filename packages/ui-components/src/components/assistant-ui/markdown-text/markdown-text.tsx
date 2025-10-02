@@ -68,7 +68,7 @@ const CodeComponent = ({
 
   return (
     <div className="relative py-2 w-full flex flex-col">
-      {isStreaming && !isMermaid ? (
+      {isStreaming ? (
         // During streaming: Use simple pre-formatted text to avoid CodeMirror re-renders
         <pre
           className={cn(
