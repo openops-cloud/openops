@@ -49,6 +49,7 @@ import { appConnectionsHooks } from '../lib/app-connections-hooks';
 import {
   buildConnectionSchema,
   createDefaultValues,
+  formatErrorObjectToString,
 } from '../lib/connections-utils';
 import { BasicAuthConnectionSettings } from './basic-secret-connection-settings';
 import { CustomAuthConnectionSettings } from './custom-auth-connection-settings';
@@ -181,7 +182,7 @@ const CreateEditConnectionDialogContent = ({
         } else if (apError.code === ErrorCode.INVALID_APP_CONNECTION) {
           setErrorMessage(
             t('Connection failed with error {msg}', {
-              msg: apError.params.error,
+              msg: formatErrorObjectToString(apError.params.error),
             }),
           );
         }
