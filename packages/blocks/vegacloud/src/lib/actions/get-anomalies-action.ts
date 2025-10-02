@@ -9,6 +9,7 @@ export const getAnomaliesAction = createAction({
   displayName: `Get Anomalies`,
   description: `Get Anomalies`,
   auth: vegacloudAuth,
+  requireToolApproval: false,
   props: {
     fromDate: Property.ShortText({
       displayName: 'From date',

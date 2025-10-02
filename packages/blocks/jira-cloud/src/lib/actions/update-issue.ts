@@ -15,6 +15,7 @@ export const updateIssueAction = createAction({
   displayName: 'Update Issue',
   description: 'Updates a existing issue in a project.',
   auth: jiraCloudAuth,
+  requireToolApproval: true,
   props: {
     projectId: getProjectIdDropdown(),
     issueId: getIssueIdDropdown({ refreshers: ['projectId'] }),

@@ -77,9 +77,10 @@ const BlockSettings = React.memo((props: BlockSettingsProps) => {
           {blockModel.auth &&
             (selectedAction?.requireAuth || selectedTrigger) && (
               <ConnectionSelect
-                isTrigger={!isNil(selectedTrigger)}
+                allowDynamicValues={isNil(selectedTrigger)}
                 block={blockModel}
                 disabled={props.readonly}
+                name={'settings.input.auth'}
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 providerKey={providerKey!}
               ></ConnectionSelect>

@@ -3,7 +3,7 @@ import {
   BlockPropValueSchema,
   Property,
 } from '@openops/blocks-framework';
-import { AiProviderEnum, SaveAiConfigRequest } from '@openops/shared';
+import { AiConfigParsed, AiProviderEnum } from '@openops/shared';
 import {
   CUSTOM_MODEL_OPTION,
   getAiModelFromConnection,
@@ -52,7 +52,7 @@ export const aiAuth = BlockAuth.CustomAuth({
         options: PROVIDER_MODEL_OPTIONS,
       },
     }),
-    customModel: Property.SecretText({
+    customModel: Property.ShortText({
       displayName: 'Custom model',
       description: "Define custom model if it's not in the list",
       required: false,
@@ -90,7 +90,7 @@ export const aiAuth = BlockAuth.CustomAuth({
     );
 
     if (!model) {
-      return { valid: false, error: 'You need to difene model' };
+      return { valid: false, error: 'You need to define model' };
     }
 
     const baseURL = authObject['baseURL'] as string | undefined;
@@ -99,7 +99,7 @@ export const aiAuth = BlockAuth.CustomAuth({
       ...(baseURL ? { baseURL } : {}),
     };
 
-    const payload: SaveAiConfigRequest = {
+    const payload: AiConfigParsed = {
       provider: authObject.provider,
       model: model,
       apiKey: authObject['apiKey'] as string,
@@ -121,3 +121,5 @@ export const aiAuth = BlockAuth.CustomAuth({
     return { valid: false, error: message };
   },
 });
+
+export type AiAuth = BlockPropValueSchema<typeof aiAuth>;

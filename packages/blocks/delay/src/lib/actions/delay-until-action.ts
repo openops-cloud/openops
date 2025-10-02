@@ -15,6 +15,7 @@ export const delayUntilAction = createAction({
       hide: true,
     },
   },
+  requireToolApproval: false,
   props: {
     delayUntilTimestamp: Property.DateTime({
       displayName: 'Date and Time',

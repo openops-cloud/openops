@@ -12,6 +12,7 @@ export const getAccountIdAction = createAction({
   name: 'get_account_id',
   description: 'Gets the account id for the given credentials',
   displayName: 'Get Account ID',
+  requireToolApproval: false,
   props: {
     accounts: getAwsAccountsMultiSelectDropdown().accounts,
   },

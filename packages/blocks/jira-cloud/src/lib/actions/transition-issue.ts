@@ -9,6 +9,7 @@ export const transitionIssueAction = createAction({
   name: 'transition_issue',
   displayName: 'Change Issue Status',
   description: 'Change the status of a given issue',
+  requireToolApproval: true,
   props: {
     projectId: getProjectIdDropdown(),
     issueId: getIssueIdDropdown({ refreshers: ['projectId'] }),

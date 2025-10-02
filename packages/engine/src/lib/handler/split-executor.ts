@@ -25,7 +25,7 @@ export const splitExecutor: BaseExecutor<SplitAction> = {
     constants: EngineConstants;
   }) {
     const { censoredInput, resolvedInput } =
-      await constants.variableService.resolve<SplitActionSettings>({
+      await constants.propsResolver.resolve<SplitActionSettings>({
         unresolvedInput: action.settings,
         executionState,
       });

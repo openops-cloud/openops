@@ -1,10 +1,10 @@
 import { SharedSystemProp, system } from '@openops/server-shared';
 import {
+  AiConfigParsed,
   AiProviderEnum,
   ApplicationError,
   ApplicationErrorParams,
   GetProvidersResponse,
-  SaveAiConfigRequest,
 } from '@openops/shared';
 import { AISDKError, generateText, LanguageModel } from 'ai';
 import { anthropicProvider } from './providers/anthropic';
@@ -89,7 +89,7 @@ export const getAiProviderLanguageModel = async (aiConfig: {
 };
 
 export const validateAiProviderConfig = async (
-  config: SaveAiConfigRequest,
+  config: AiConfigParsed,
 ): Promise<{
   valid: boolean;
   error?: { errorMessage: string; errorName: string } | ApplicationErrorParams;

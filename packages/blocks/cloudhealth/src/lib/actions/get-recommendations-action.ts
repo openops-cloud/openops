@@ -11,6 +11,7 @@ export const getRecommendationsAction = createAction({
   displayName: 'Get Recommendations',
   description: 'Get Recommendations',
   auth: cloudhealthAuth,
+  requireToolApproval: false,
   props: {
     recommendationType: Property.StaticDropdown({
       displayName: 'Recommendation Type',

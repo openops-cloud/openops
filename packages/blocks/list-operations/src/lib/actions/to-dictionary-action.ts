@@ -6,6 +6,7 @@ export const toMapAction = createAction({
   name: 'to_map_action',
   description: 'Map items by a given key',
   displayName: 'Map list items',
+  requireToolApproval: false,
   props: {
     listItems: Property.LongText({
       displayName: 'Items',
