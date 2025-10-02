@@ -38,6 +38,7 @@
     "@ai-sdk/deepinfra": "1.0.7",
     "@ai-sdk/deepseek": "1.0.7",
     "@ai-sdk/google": "2.0.6",
+    "@ai-sdk/google-vertex": "^3.0.0",
     "@ai-sdk/groq": "2.0.7",
     "@ai-sdk/mistral": "2.0.4",
     "@ai-sdk/openai": "2.0.12",
@@ -221,6 +222,7 @@
     "mailparser": "3.6.7",
     "markdown-to-text": "0.1.1",
     "marked": "4.3.0",
+    "mermaid": "11.12.0",
     "mime": "4.0.1",
     "mime-types": "2.1.35",
     "monaco-editor": "0.44.0",
@@ -294,8 +296,7 @@
     "xml2js": "0.6.2",
     "yaml": "2.4.1",
     "zod": "4.0.14",
-    "zustand": "4.5.4",
-    "@ai-sdk/google-vertex": "^3.0.0"
+    "zustand": "4.5.4"
   },
   "devDependencies": {
     "@faker-js/faker": "8.2.0",

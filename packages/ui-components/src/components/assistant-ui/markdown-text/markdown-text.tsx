@@ -4,7 +4,7 @@ import {
   useIsMarkdownCodeBlock,
 } from '@assistant-ui/react-markdown';
 import { t } from 'i18next';
-import { memo, useCallback } from 'react';
+import { lazy, memo, Suspense, useCallback } from 'react';
 import remarkGfm from 'remark-gfm';
 import { Theme } from '../../../lib/theme';
 import { CodeActions } from '../../code-actions';
@@ -15,6 +15,13 @@ import { cn } from '../../../lib/cn';
 import { MarkdownCodeViewer } from '../../custom/markdown-code-viewer';
 import { toolStatusUtils } from '../tool-status';
 import { TooltipCopyButton } from '../tooltip-copy-button';
+
+// Lazy load MermaidRenderer to reduce initial bundle size
+const MermaidRenderer = lazy(() =>
+  import('../mermaid-renderer').then((module) => ({
+    default: module.MermaidRenderer,
+  })),
+);
 
 const CodeComponent = ({
   className,
@@ -56,9 +63,13 @@ const CodeComponent = ({
     codeVariation === MarkdownCodeVariations.WithCopyAndInject ||
     codeVariation === MarkdownCodeVariations.WithCopyMultiline;
 
+  // Check if this is a mermaid diagram
+  const language = className?.match(/language-(\w+)/)?.[1];
+  const isMermaid = language === 'mermaid';
+
   return (
     <div className="relative py-2 w-full flex flex-col">
-      {isStreaming ? (
+      {isStreaming && !isMermaid ? (
         // During streaming: Use simple pre-formatted text to avoid CodeMirror re-renders
         <pre
           className={cn(
@@ -69,6 +80,22 @@ const CodeComponent = ({
         >
           <code className={className}>{codeContent}</code>
         </pre>
+      ) : isMermaid ? (
+        <Suspense
+          fallback={
+            <div
+              className={cn(
+                'border border-solid rounded bg-background p-4',
+                'text-muted-foreground text-sm animate-pulse',
+                'min-h-[120px] flex items-center justify-center',
+              )}
+            >
+              {t('Loading diagram...')}
+            </div>
+          }
+        >
+          <MermaidRenderer chart={codeContent} theme={theme} />
+        </Suspense>
       ) : (
         <MarkdownCodeViewer
           content={codeContent}
@@ -76,14 +103,16 @@ const CodeComponent = ({
           className={className}
         />
       )}
-      {!isStreaming && codeVariation === MarkdownCodeVariations.WithCopy && (
-        <TooltipCopyButton
-          content={codeContent}
-          tooltip={t('Copy')}
-          className="self-end"
-        />
-      )}
-      {!isStreaming && multilineVariation && (
+      {!isStreaming &&
+        !isMermaid &&
+        codeVariation === MarkdownCodeVariations.WithCopy && (
+          <TooltipCopyButton
+            content={codeContent}
+            tooltip={t('Copy')}
+            className="self-end"
+          />
+        )}
+      {!isStreaming && !isMermaid && multilineVariation && (
         <CodeActions
           content={codeContent}
           onInject={
