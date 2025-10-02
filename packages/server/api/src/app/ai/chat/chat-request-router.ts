@@ -48,9 +48,12 @@ export async function routeChatRequest(
   const isCodeGenerationRequest =
     conversation.chatContext?.blockName === CODE_BLOCK_NAME;
 
-  const { aiConfig, languageModel } = await getLLMConfig(projectId);
-
   const currentCtx = conversation.chatContext;
+
+  const { aiConfig, languageModel } = await getLLMConfig(
+    projectId,
+    currentCtx?.model,
+  );
 
   let currentModel = currentCtx?.model ?? aiConfig.model;
 

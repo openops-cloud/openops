@@ -233,7 +233,10 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         userId,
         projectId,
       );
-      const { aiConfig, languageModel } = await getLLMConfig(projectId);
+      const { aiConfig, languageModel } = await getLLMConfig(
+        projectId,
+        conversationResult?.chatContext?.model,
+      );
 
       const ctx = conversationResult.chatContext;
       if (!ctx.provider || !ctx.model || ctx.provider !== aiConfig.provider) {
