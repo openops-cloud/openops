@@ -12,6 +12,7 @@ export const createCaseAction = createAction({
   displayName: 'Create a Case',
   description: 'Create a Case',
   auth: ternaryCloudAuth,
+  requireToolApproval: false,
   props: {
     resourceID: Property.ShortText({
       displayName: 'Resource ID',

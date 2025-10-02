@@ -21,6 +21,7 @@ export const dateDifferenceAction = createAction({
       hide: true,
     },
   },
+  requireToolApproval: false,
   props: {
     startDate: Property.ShortText({
       displayName: 'Starting Date',

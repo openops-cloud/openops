@@ -199,3 +199,18 @@ export const aggregateBlocksByProvider = (
     }, {} as Record<string, BlockMetadataModelSummary>) ?? {},
   );
 };
+
+export function formatErrorObjectToString(error: unknown): string {
+  if (error === undefined || error === null) {
+    return 'Unknown error';
+  }
+  if (typeof error === 'string') {
+    return error;
+  }
+  if (error && typeof error === 'object' && 'message' in error) {
+    return typeof error.message === 'string'
+      ? error.message
+      : JSON.stringify(error);
+  }
+  return JSON.stringify(error);
+}

@@ -1,5 +1,5 @@
 import { isLLMTelemetryEnabled } from '@openops/common';
-import { AiConfig } from '@openops/shared';
+import { AiConfigParsed } from '@openops/shared';
 import {
   LanguageModel,
   ModelMessage,
@@ -18,7 +18,7 @@ type StreamTextOnAbortCallback<TOOLS extends ToolSet> = (event: {
 
 type AICallSettings = {
   tools?: ToolSet;
-  aiConfig: AiConfig;
+  aiConfig: AiConfigParsed;
   systemPrompt: string;
   maxRecursionDepth: number;
   newMessages: ModelMessage[];

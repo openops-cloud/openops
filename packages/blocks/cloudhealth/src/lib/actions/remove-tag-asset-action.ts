@@ -9,6 +9,7 @@ export const removeTagAssetAction = createAction({
   displayName: 'Remove Asset Tags',
   description: 'Remove Asset Tags',
   auth: cloudhealthAuth,
+  requireToolApproval: true,
   props: {
     assetType: Property.Dropdown({
       displayName: 'Asset Type',

@@ -6,18 +6,7 @@ import { Resolver } from 'react-hook-form';
 
 export const AI_SETTINGS_FORM_SCHEMA = Type.Object({
   enabled: Type.Boolean(),
-  provider: Type.String({
-    minLength: 1,
-  }),
-  model: Type.String({
-    minLength: 1,
-  }),
-  apiKey: Type.String({
-    minLength: 1,
-  }),
-  baseURL: Type.String(),
-  providerSettings: Type.String(),
-  modelSettings: Type.String(),
+  connection: Type.String({ minLength: 1 }),
 });
 
 export type AiSettingsFormSchema = Static<typeof AI_SETTINGS_FORM_SCHEMA>;
@@ -60,28 +49,12 @@ export const aiFormSchemaResolver: Resolver<AiSettingsFormSchema> = async (
   context,
   options,
 ) => {
-  const errors: Record<string, any> = {};
-
-  const validateJsonField = (field: keyof AiSettingsFormSchema) => {
-    try {
-      JSON.parse((data[field] as string) ?? '{}');
-    } catch {
-      errors[field] = { message: 'InvalidJSON' };
-    }
-  };
-
-  validateJsonField('providerSettings');
-  validateJsonField('modelSettings');
-
   const typeboxValidation = await typeboxResolver(AI_SETTINGS_FORM_SCHEMA)(
     data,
     context,
     options,
   );
-  return {
-    ...typeboxValidation,
-    errors: { ...typeboxValidation.errors, ...errors },
-  };
+  return typeboxValidation;
 };
 
 export const parseJsonOrNull = (value: string | null | undefined) => {

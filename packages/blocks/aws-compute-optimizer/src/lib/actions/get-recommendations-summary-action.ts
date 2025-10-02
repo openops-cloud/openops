@@ -13,6 +13,7 @@ export const getRecommendationsSummaryAction = createAction({
   name: 'get_recommendations_summary',
   description: 'Get account recommendations summary',
   displayName: 'Get Recommendations Summary',
+  requireToolApproval: false,
   props: {
     accounts: getAwsAccountsMultiSelectDropdown().accounts,
     regions: regionsStaticMultiSelectDropdown(true).regions,

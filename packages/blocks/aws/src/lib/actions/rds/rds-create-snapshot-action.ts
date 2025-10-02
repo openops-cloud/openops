@@ -13,6 +13,7 @@ export const rdsCreateSnapshotAction = createAction({
   name: 'rds_create_snapshot',
   description: 'Create a snapshot of the provided RDS instance',
   displayName: 'RDS Create Snapshot',
+  requireToolApproval: true,
   props: {
     arn: Property.ShortText({
       displayName: 'ARN',

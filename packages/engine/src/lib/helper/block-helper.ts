@@ -23,7 +23,7 @@ import {
 } from '@openops/shared';
 import { EngineConstants } from '../handler/context/engine-constants';
 import { FlowExecutorContext } from '../handler/context/flow-execution-context';
-import { variableService } from '../variables/variable-service';
+import { createPropsResolver } from '../variables/props-resolver';
 import { blockLoader } from './block-loader';
 
 async function evaluateProp(
@@ -102,7 +102,7 @@ export const blockHelper = {
     });
 
     try {
-      const { resolvedInput } = await variableService({
+      const { resolvedInput } = await createPropsResolver({
         apiUrl: constants.internalApiUrl,
         projectId: params.projectId,
         engineToken: params.engineToken,

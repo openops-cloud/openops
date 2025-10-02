@@ -1,4 +1,4 @@
-import { AiConfig } from '@openops/shared';
+import { AiConfigParsed } from '@openops/shared';
 import { CoreMessage, LanguageModel, TextPart, ToolCallPart } from 'ai';
 import { ServerResponse } from 'node:http';
 import { MCPChatContext } from './ai-chat.service';
@@ -20,7 +20,7 @@ export type RequestContext = {
 };
 
 export type ChatProcessingContext = {
-  aiConfig: AiConfig;
+  aiConfig: AiConfigParsed;
   newMessage: CoreMessage;
   conversation: Conversation;
   languageModel: LanguageModel;
