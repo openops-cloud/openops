@@ -1,6 +1,6 @@
 import { logger } from '@openops/server-shared';
 import { Principal, WebsocketServerEvent } from '@openops/shared';
-import cookie from 'cookie';
+import * as cookie from 'cookie';
 import { Socket } from 'socket.io';
 import { accessTokenManager } from '../authentication/lib/access-token-manager';
 
@@ -39,9 +39,11 @@ export async function getPrincipalFromWebsocket(
 
   try {
     const parsedCookies = cookie.parse(rawCookies);
-    principal = await accessTokenManager.extractPrincipal(
-      parsedCookies['token'],
-    );
+    const token = parsedCookies['token'];
+    if (!token) {
+      throw new Error('Authentication token not found in cookies.');
+    }
+    principal = await accessTokenManager.extractPrincipal(token);
   } catch (e) {
     logger.debug('Failed to extract principal from the socket.', {
       handshake: socket.handshake,

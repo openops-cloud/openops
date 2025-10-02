@@ -12,7 +12,7 @@ To get your nOps API key:
 
 > ⚠️ **Important**: The API key will only be displayed once. Make sure to copy and store it securely.
 
-For more information, visit the [nOps Developer API documentation](https://help.nops.io/docs/nops/getting-started).
+For more information, visit the [nOps Developer API documentation](https://help.nops.io/docs/nops/developer-intro).
 `;
 
 export const nopsAuth = BlockAuth.SecretAuth({

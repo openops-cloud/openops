@@ -5,6 +5,7 @@ export async function makeGetRequest(
   apiKey: string,
   path: string,
   queryParams?: Record<string, any>,
+  extraHeaders?: Record<string, string>,
 ): Promise<HttpResponse> {
   const response = await httpClient.sendRequest({
     method: HttpMethod.GET,
@@ -12,6 +13,7 @@ export async function makeGetRequest(
     headers: {
       'X-Nops-Api-Key': apiKey,
       'Content-Type': 'application/json',
+      ...(extraHeaders || {}),
     },
     queryParams,
   });
@@ -22,6 +24,7 @@ export async function makePostRequest<T = unknown>(
   apiKey: string,
   path: string,
   body: unknown,
+  extraHeaders?: Record<string, string>,
 ): Promise<T> {
   const response = await httpClient.sendRequest<T>({
     method: HttpMethod.POST,
@@ -29,6 +32,7 @@ export async function makePostRequest<T = unknown>(
     headers: {
       'X-Nops-Api-Key': apiKey,
       'Content-Type': 'application/json',
+      ...(extraHeaders || {}),
     },
     body: body,
   });

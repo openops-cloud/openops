@@ -1,4 +1,5 @@
 import { createAction, Property } from '@openops/blocks-framework';
+import { getRegionsDropdownState, regionsStaticMultiSelectDropdown } from '@openops/common';
 import { nopsAuth } from '../auth';
 import { makeGetRequest } from '../common/http-client';
 
@@ -8,6 +9,12 @@ export const getCostSummaryAction = createAction({
   description: 'Retrieve cost summary data with optional filters',
   auth: nopsAuth,
   props: {
+    signature: Property.SecretText({
+      displayName: 'Signature (optional)',
+      description:
+        'If your API key requires signatures, paste the generated base64 signature here. It will be sent as x-nops-signature.',
+      required: false,
+    }),
     dateStart: Property.ShortText({
       displayName: 'Start Date',
       description: 'Start date for cost data. Format: YYYY-MM-DD',
@@ -56,11 +63,7 @@ export const getCostSummaryAction = createAction({
       description: 'Filter by account IDs (supports multiple values)',
       required: false,
     }),
-    regions: Property.Array({
-      displayName: 'Regions',
-      description: 'Filter by regions (supports multiple values)',
-      required: false,
-    }),
+    regions: regionsStaticMultiSelectDropdown(false).regions,
     products: Property.Array({
       displayName: 'Products',
       description: 'Filter by products (supports multiple values)',
@@ -77,10 +80,11 @@ export const getCostSummaryAction = createAction({
       description: 'Exclude specific account IDs (supports multiple values)',
       required: false,
     }),
-    excludeRegions: Property.Array({
+    excludeRegions: Property.StaticMultiSelectDropdown({
       displayName: 'Exclude Regions',
-      description: 'Exclude specific regions (supports multiple values)',
+      description: 'Exclude specific AWS regions (supports multiple values)',
       required: false,
+      options: getRegionsDropdownState(),
     }),
     excludeProducts: Property.Array({
       displayName: 'Exclude Products',
@@ -163,9 +167,12 @@ export const getCostSummaryAction = createAction({
     }
 
     const response = await makeGetRequest(
-      context.auth,
+      context.auth as string,
       '/c/cost_page/cost_summary/',
       queryParams,
+      context.propsValue.signature
+        ? { 'x-nops-signature': String(context.propsValue.signature) }
+        : undefined,
     );
 
     return response.body;

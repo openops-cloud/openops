@@ -12,10 +12,14 @@ describe('block declaration tests', () => {
   });
 
   test('should return block with correct number of actions', () => {
-    expect(Object.keys(nops.actions()).length).toBe(2);
+    expect(Object.keys(nops.actions()).length).toBe(3);
     expect(nops.actions()).toMatchObject({
       nops_get_cost_summary: {
         name: 'nops_get_cost_summary',
+        requireAuth: true,
+      },
+      nops_get_organization_accounts: {
+        name: 'nops_get_organization_accounts',
         requireAuth: true,
       },
       custom_rest_api_call: {
@@ -29,5 +33,11 @@ describe('block declaration tests', () => {
     const actions = nops.actions();
     expect(actions.nops_get_cost_summary).toBeDefined();
     expect(actions.nops_get_cost_summary.displayName).toBe('Get Cost Summary');
+  });
+
+  test('should have organization accounts action configured', () => {
+    const actions = nops.actions();
+    expect(actions.nops_get_organization_accounts).toBeDefined();
+    expect(actions.nops_get_organization_accounts.displayName).toBe('Get Organization Accounts');
   });
 });
