@@ -23,6 +23,61 @@ const MermaidRenderer = lazy(() =>
   })),
 );
 
+const StreamingCodeBlock = memo(
+  ({ className, codeContent }: { className?: string; codeContent: string }) => (
+    <pre
+      className={cn(
+        'border border-solid rounded bg-background p-3 text-sm overflow-x-auto',
+        'font-mono whitespace-pre-wrap break-words',
+        'min-h-[120px]', // Reserve minimum space to prevent layout shift
+      )}
+    >
+      <code className={className}>{codeContent}</code>
+    </pre>
+  ),
+);
+StreamingCodeBlock.displayName = 'StreamingCodeBlock';
+
+const MermaidDiagram = memo(
+  ({ codeContent, theme }: { codeContent: string; theme: Theme }) => (
+    <Suspense
+      fallback={
+        <div
+          className={cn(
+            'border border-solid rounded bg-background p-4',
+            'text-muted-foreground text-sm animate-pulse',
+            'w-full min-h-[120px] flex items-center justify-center',
+          )}
+        >
+          {t('Loading diagram...')}
+        </div>
+      }
+    >
+      <MermaidRenderer chart={codeContent} theme={theme} />
+    </Suspense>
+  ),
+);
+MermaidDiagram.displayName = 'MermaidDiagram';
+
+const CodeViewer = memo(
+  ({
+    codeContent,
+    theme,
+    className,
+  }: {
+    codeContent: string;
+    theme: Theme;
+    className?: string;
+  }) => (
+    <MarkdownCodeViewer
+      content={codeContent}
+      theme={theme}
+      className={className}
+    />
+  ),
+);
+CodeViewer.displayName = 'CodeViewer';
+
 const CodeComponent = ({
   className,
   children,
@@ -66,56 +121,19 @@ const CodeComponent = ({
   const language = className?.match(/language-(\w+)/)?.[1];
   const isMermaid = language === 'mermaid';
 
-  const StreamingCodeBlock = () => (
-    <pre
-      className={cn(
-        'border border-solid rounded bg-background p-3 text-sm overflow-x-auto',
-        'font-mono whitespace-pre-wrap break-words',
-        'min-h-[120px]', // Reserve minimum space to prevent layout shift
-      )}
-    >
-      <code className={className}>{codeContent}</code>
-    </pre>
-  );
-
-  const MermaidDiagram = () => (
-    <Suspense
-      fallback={
-        <div
-          className={cn(
-            'border border-solid rounded bg-background p-4',
-            'text-muted-foreground text-sm animate-pulse',
-            'w-full min-h-[120px] flex items-center justify-center',
-          )}
-        >
-          {t('Loading diagram...')}
-        </div>
-      }
-    >
-      <MermaidRenderer chart={codeContent} theme={theme} />
-    </Suspense>
-  );
-
-  const CodeViewer = () => (
-    <MarkdownCodeViewer
-      content={codeContent}
-      theme={theme}
-      className={className}
-    />
-  );
-
-  let CodeBlock;
-  if (isStreaming) {
-    CodeBlock = StreamingCodeBlock;
-  } else if (isMermaid) {
-    CodeBlock = MermaidDiagram;
-  } else {
-    CodeBlock = CodeViewer;
-  }
-
   return (
     <div className="relative py-2 w-full flex flex-col">
-      <CodeBlock />
+      {isStreaming ? (
+        <StreamingCodeBlock className={className} codeContent={codeContent} />
+      ) : isMermaid ? (
+        <MermaidDiagram codeContent={codeContent} theme={theme} />
+      ) : (
+        <CodeViewer
+          codeContent={codeContent}
+          theme={theme}
+          className={className}
+        />
+      )}
       {!isStreaming &&
         !isMermaid &&
         codeVariation === MarkdownCodeVariations.WithCopy && (
