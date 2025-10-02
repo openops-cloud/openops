@@ -1,6 +1,6 @@
 import { logger } from '@openops/server-shared';
 import {
-  AiConfig,
+  AiConfigParsed,
   AiProviderEnum,
   CODE_BLOCK_NAME,
   Principal,
@@ -58,17 +58,13 @@ describe('Chat Request Router', () => {
 
   const mockApp = {} as FastifyInstance;
 
-  const mockAiConfig: AiConfig = {
-    projectId: 'test-project-id',
+  const mockAiConfig: AiConfigParsed = {
     provider: AiProviderEnum.ANTHROPIC,
     model: 'claude-3-sonnet',
     apiKey: 'test-api-key',
     enabled: true,
     providerSettings: {},
     modelSettings: {},
-    created: '2023-01-01',
-    updated: '2023-01-01',
-    id: 'test-id',
   };
 
   const mockLanguageModel = {} as LanguageModel;

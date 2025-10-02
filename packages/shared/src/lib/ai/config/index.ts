@@ -5,6 +5,13 @@ import { AiProviderEnum } from '../providers/index';
 export const AiConfig = Type.Object({
   ...BaseModelSchema,
   projectId: Type.String(),
+  connection: Type.String(),
+  enabled: Type.Optional(Type.Boolean()),
+});
+
+export type AiConfig = Static<typeof AiConfig>;
+
+export const AiConfigParsed = Type.Object({
   provider: Type.Enum(AiProviderEnum),
   model: Type.String(),
   apiKey: Type.String(),
@@ -17,19 +24,11 @@ export const AiConfig = Type.Object({
   enabled: Type.Optional(Type.Boolean()),
 });
 
-export type AiConfig = Static<typeof AiConfig>;
+export type AiConfigParsed = Static<typeof AiConfigParsed>;
 
 export const SaveAiConfigRequest = Type.Object({
   id: Type.Optional(Type.String()),
-  provider: Type.Enum(AiProviderEnum),
-  model: Type.String(),
-  apiKey: Type.String(),
-  providerSettings: Type.Optional(
-    Type.Union([Type.Record(Type.String(), Type.Unknown()), Type.Null()]),
-  ),
-  modelSettings: Type.Optional(
-    Type.Union([Type.Record(Type.String(), Type.Unknown()), Type.Null()]),
-  ),
+  connection: Type.String(),
   enabled: Type.Optional(Type.Boolean()),
 });
 
