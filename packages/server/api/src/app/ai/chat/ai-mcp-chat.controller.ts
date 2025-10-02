@@ -331,13 +331,12 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       const result = await validateAiProviderConfig({ ...aiConfig, model });
 
       if (!result.valid) {
-        const err: unknown = (result as unknown as { error?: unknown })?.error;
-        const message =
-          (err as { errorMessage?: string })?.errorMessage ||
-          (err as { message?: string })?.message ||
-          'Invalid AI configuration';
-
-        return await handleError(err, reply, message);
+        throw new ApplicationError({
+          code: ErrorCode.VALIDATION,
+          params: {
+            message: 'The model is not supported',
+          },
+        });
       }
 
       await createChatContext(chatId, userId, projectId, {
@@ -348,7 +347,7 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
 
       return await reply.code(StatusCodes.OK).send({ chatId, provider, model });
     } catch (error) {
-      return handleError(error, reply, 'update chat model');
+      return handleError(error, reply, 'The model is not supported');
     }
   });
 
