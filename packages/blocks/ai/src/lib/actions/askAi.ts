@@ -16,6 +16,7 @@ export const askAi = createAction({
   description:
     'Ask AI a question or transform input using an LLM based on a prompt',
   name: 'analyze',
+  requireToolApproval: false,
   props: {
     prompt: Property.LongText({
       displayName: 'Prompt',
