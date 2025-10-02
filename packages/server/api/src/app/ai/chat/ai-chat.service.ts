@@ -44,6 +44,8 @@ export type MCPChatContext = {
   stepId?: string;
   actionName?: string;
   chatName?: string;
+  provider?: string;
+  model?: string;
 };
 
 export const generateChatId = (
@@ -208,6 +210,7 @@ export const deleteChatHistory = async (
 
 export async function getLLMConfig(
   projectId: string,
+  contextModel?: string,
 ): Promise<{ aiConfig: AiConfigParsed; languageModel: LanguageModel }> {
   const aiConfig = await aiConfigService.getActiveConfig(projectId);
   const connectionName = removeConnectionBrackets(aiConfig?.connection);
@@ -247,14 +250,14 @@ export async function getLLMConfig(
   };
 
   const languageModel = await getAiProviderLanguageModel({
-    model,
+    model: contextModel ?? model,
     apiKey: connectionProps?.apiKey,
     provider: connectionProps.provider,
     providerSettings,
   });
 
   const aiConfigParsed: AiConfigParsed = {
-    model,
+    model: contextModel ?? model,
     provider: connectionProps.provider,
     apiKey: connectionProps?.apiKey,
     providerSettings,
