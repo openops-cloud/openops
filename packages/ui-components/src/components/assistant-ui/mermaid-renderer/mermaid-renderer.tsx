@@ -5,6 +5,7 @@ import mermaid from 'mermaid';
 import { memo, useEffect, useRef, useState } from 'react';
 import { cn } from '../../../lib/cn';
 import { Theme } from '../../../lib/theme';
+import { Button } from '../../../ui/button';
 import { Dialog, DialogContent, DialogTrigger } from '../../../ui/dialog';
 
 type MermaidRendererProps = {
@@ -39,7 +40,7 @@ const MermaidRendererImpl = ({
 
       try {
         setError('');
-        const id = openOpsId();
+        const id = `mermaid-${openOpsId()}`;
 
         const { svg: renderedSvg } = await mermaid.render(id, chart);
 
@@ -91,27 +92,28 @@ const MermaidRendererImpl = ({
         ref={containerRef}
         className={cn(
           'border border-solid rounded bg-background p-4',
-          'flex items-center justify-center overflow-auto h-[120px]',
+          'flex items-center justify-center overflow-auto',
+          'min-h-[120px] max-h-[200px]',
           className,
         )}
         dangerouslySetInnerHTML={{ __html: svg }}
       />
       <Dialog>
         <DialogTrigger asChild>
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             className={cn(
-              'absolute top-2 right-2',
-              'p-2 rounded-md',
+              'absolute top-2 right-4',
+              'size-8',
               'bg-background/80 hover:bg-background',
-              'border border-solid border-border',
+              'border',
               'opacity-70 hover:opacity-100',
-              'transition-opacity',
-              'cursor-pointer',
             )}
             aria-label="Expand to fullscreen"
           >
             <Maximize2 className="size-4" />
-          </button>
+          </Button>
         </DialogTrigger>
         <DialogContent
           className={cn('max-w-[90vw] w-full h-[90vh]', 'p-6 overflow-auto')}

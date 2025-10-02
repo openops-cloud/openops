@@ -86,7 +86,7 @@ const CodeComponent = ({
               className={cn(
                 'border border-solid rounded bg-background p-4',
                 'text-muted-foreground text-sm animate-pulse',
-                'min-h-[120px] flex items-center justify-center',
+                'w-full min-h-[120px] flex items-center justify-center',
               )}
             >
               {t('Loading diagram...')}
