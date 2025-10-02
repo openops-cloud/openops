@@ -69,8 +69,6 @@ export async function routeChatRequest(
 
   const { languageModel } = await getLLMConfig(projectId, currentModel);
 
-  console.log('THE LANGUAGE MODEL IS', languageModel);
-
   const updatedConfig = {
     ...aiConfig,
     model: currentModel,
