@@ -12,8 +12,8 @@ export const useStepSettingsAssistantChat = (
   const { dispatch, builderState } = useBuilderStateContext((state) => ({
     dispatch: state.applyMidpanelAction,
     builderState: {
-      flowId: state.flow?.id,
-      flowVersionId: state.flowVersion?.id,
+      flowId: state.flow.id,
+      flowVersionId: state.flowVersion.id,
       runId: state.run?.id,
       selectedStep: state.selectedStep,
       showSettingsAIChat: state.midpanelState.showAiChat,

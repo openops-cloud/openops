@@ -42,8 +42,8 @@ const AssistantUiChat = ({
   }, []);
 
   const context = useBuilderStoreOutsideProviderWithSubscription((state) => ({
-    flowId: state.flow?.id,
-    flowVersionId: state.flowVersion?.id,
+    flowId: state.flow.id,
+    flowVersionId: state.flowVersion.id,
     runId: state.run?.id,
     selectedStep: state.selectedStep,
     showSettingsAIChat: state?.midpanelState?.showAiChat ?? false,
