@@ -9,7 +9,6 @@ jest.mock('ai', () => ({
   generateObject: jest.fn(),
 }));
 
-import { getAiProviderLanguageModel } from '@openops/common';
 import { AiProviderEnum, analysisLLMSchema } from '@openops/shared';
 import { generateObject } from 'ai';
 import { askAi } from '../src/lib/actions/askAi';
@@ -21,6 +20,11 @@ describe('analyze action', () => {
 
   test('should expose correct props', () => {
     expect(askAi.props).toMatchObject({
+      model: {
+        type: 'DROPDOWN',
+        displayName: 'Model',
+        required: false,
+      },
       prompt: {
         type: 'LONG_TEXT',
         displayName: 'Prompt',
@@ -35,9 +39,10 @@ describe('analyze action', () => {
   });
 
   test('should call generateObject with prompt only when additionalInput is not provided', async () => {
-    (getAiProviderLanguageModel as jest.Mock).mockResolvedValue(
-      'languageModel',
-    );
+    const { getAiProviderLanguageModel } = jest.requireMock(
+      '@openops/common',
+    ) as { getAiProviderLanguageModel: jest.Mock };
+    getAiProviderLanguageModel.mockResolvedValue('languageModel');
     (generateObject as jest.Mock).mockResolvedValue({
       object: { textAnswer: 'answer', classifications: [] },
     });
@@ -95,9 +100,7 @@ describe('analyze action', () => {
     expect(generateObject).toHaveBeenCalledTimes(1);
     const args = (generateObject as jest.Mock).mock.calls[0][0];
     expect(args.model).toBe('languageModel');
-    expect(args.prompt).toMatch(
-      /Analyze this\s*\nAdditional Input:\n"s1", "s2"/,
-    );
+    expect(args.prompt).toMatch(/Analyze this\s*\nAdditional Input:\ns1,s2/);
     expect(args.schema).toBeDefined();
     expect(args.temperature).toBe(0.3);
 
@@ -107,7 +110,10 @@ describe('analyze action', () => {
     });
   });
   test('should use customModel when provided', async () => {
-    (getAiProviderLanguageModel as jest.Mock).mockResolvedValue('lm');
+    const { getAiProviderLanguageModel } = jest.requireMock(
+      '@openops/common',
+    ) as { getAiProviderLanguageModel: jest.Mock };
+    getAiProviderLanguageModel.mockResolvedValue('lm');
     (generateObject as jest.Mock).mockResolvedValue({ object: 'ok' });
 
     const auth = {
@@ -127,6 +133,46 @@ describe('analyze action', () => {
       provider: AiProviderEnum.OPENAI,
       apiKey: 'sk',
       model: 'gpt-4o-mini',
+      providerSettings: {},
+    });
+
+    expect(generateObject).toHaveBeenCalledWith(
+      expect.objectContaining({
+        model: 'lm',
+        prompt: 'Hi',
+        schema: expect.anything(),
+      }),
+    );
+
+    expect(result).toBe('ok');
+  });
+
+  test('should prefer model prop over connection model', async () => {
+    const { getAiProviderLanguageModel } = jest.requireMock(
+      '@openops/common',
+    ) as { getAiProviderLanguageModel: jest.Mock };
+    getAiProviderLanguageModel.mockResolvedValue('lm');
+    (generateObject as jest.Mock).mockResolvedValue({ object: 'ok' });
+
+    const auth = {
+      provider: AiProviderEnum.OPENAI,
+      model: 'gpt-from-auth',
+      apiKey: 'sk',
+      providerSettings: {},
+      modelSettings: {},
+    };
+
+    const context = createContext(auth, {
+      prompt: 'Hi',
+      model: 'gpt-from-props',
+    });
+
+    const result = await askAi.run(context as any);
+
+    expect(getAiProviderLanguageModel).toHaveBeenCalledWith({
+      provider: AiProviderEnum.OPENAI,
+      apiKey: 'sk',
+      model: 'gpt-from-props',
       providerSettings: {},
     });
 
