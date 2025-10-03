@@ -37,6 +37,8 @@ import {
 } from './table';
 import { INTERNAL_ERROR_TOAST, toast } from './use-toast';
 
+const INTERACTIVE_COLUMN_KEYS = ['actions', 'status'];
+
 export type DataWithId = {
   id?: string;
 };
@@ -364,7 +366,8 @@ export function DataTable<
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
-                        {rowHref && cell.column.id !== 'actions' ? (
+                        {rowHref &&
+                        !INTERACTIVE_COLUMN_KEYS.includes(cell.column.id) ? (
                           <Link
                             to={rowHref}
                             onClick={(e) => e.stopPropagation()}
