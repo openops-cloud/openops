@@ -7,17 +7,24 @@ import {
   FastifyRequest,
 } from 'fastify';
 import {
+  createChatContext,
   generateChatName,
   getAllChats,
+  getChatContext,
   getConversation,
   getLLMConfig,
   updateChatName,
 } from '../../../src/app/ai/chat/ai-chat.service';
+import { aiMCPChatController } from '../../../src/app/ai/chat/ai-mcp-chat.controller';
 
-const routeChatRequestMock = jest.fn();
 jest.mock('../../../src/app/ai/chat/chat-request-router', () => ({
-  routeChatRequest: routeChatRequestMock,
+  routeChatRequest: jest.fn(),
 }));
+const { routeChatRequest: routeChatRequestMock } = jest.requireMock(
+  '../../../src/app/ai/chat/chat-request-router',
+) as {
+  routeChatRequest: jest.Mock;
+};
 
 jest.mock('@openops/server-shared', () => ({
   logger: {
@@ -85,7 +92,14 @@ jest.mock('../../../src/app/ai/chat/ai-chat.service', () => ({
   getAllChats: jest.fn(),
 }));
 
-import { aiMCPChatController } from '../../../src/app/ai/chat/ai-mcp-chat.controller';
+jest.mock('@openops/common', () => ({
+  validateAiProviderConfig: jest.fn(),
+}));
+
+const { validateAiProviderConfig: validateAiProviderConfigMock } =
+  jest.requireMock('@openops/common') as {
+    validateAiProviderConfig: jest.Mock;
+  };
 
 describe('AI MCP Chat Controller - Tool Service Interactions', () => {
   type RouteHandler = (
@@ -651,6 +665,218 @@ describe('AI MCP Chat Controller - Tool Service Interactions', () => {
             }),
           ]),
         }),
+      );
+    });
+  });
+
+  describe('POST /model (update chat model)', () => {
+    let postHandler: RouteHandler;
+
+    const mockChatContext = {
+      chatId: 'test-chat-id',
+      provider: AiProviderEnum.ANTHROPIC,
+      model: 'claude-3-sonnet',
+    };
+
+    const mockAiConfig = {
+      projectId: 'test-project-id',
+      provider: AiProviderEnum.ANTHROPIC,
+      model: 'claude-3-sonnet',
+      apiKey: 'encrypted-api-key',
+      enabled: true,
+      providerSettings: {},
+      modelSettings: {},
+      created: '2023-01-01',
+      updated: '2023-01-01',
+      id: 'test-id',
+    };
+
+    beforeEach(async () => {
+      jest.clearAllMocks();
+      handlers = {};
+      await aiMCPChatController(mockApp, {} as FastifyPluginOptions);
+      postHandler = handlers['/model'];
+    });
+
+    it('should successfully update model when validation passes', async () => {
+      (getChatContext as jest.Mock).mockResolvedValue(mockChatContext);
+      (getLLMConfig as jest.Mock).mockResolvedValue({
+        aiConfig: mockAiConfig,
+      });
+      validateAiProviderConfigMock.mockResolvedValue({ valid: true });
+
+      const requestBody = {
+        chatId: 'test-chat-id',
+        model: 'claude-3-opus',
+      };
+
+      await postHandler(
+        {
+          ...mockRequest,
+          body: requestBody,
+        } as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(validateAiProviderConfigMock).toHaveBeenCalledWith({
+        ...mockAiConfig,
+        model: 'claude-3-opus',
+      });
+      expect(createChatContext).toHaveBeenCalledWith(
+        'test-chat-id',
+        'test-user-id',
+        'test-project-id',
+        {
+          ...mockChatContext,
+          provider: AiProviderEnum.ANTHROPIC,
+          model: 'claude-3-opus',
+        },
+      );
+      expect(mockReply.code).toHaveBeenCalledWith(200);
+      expect(mockReply.send).toHaveBeenCalledWith({
+        chatId: 'test-chat-id',
+        provider: AiProviderEnum.ANTHROPIC,
+        model: 'claude-3-opus',
+      });
+    });
+
+    it('should return validation error when model is not supported', async () => {
+      (getChatContext as jest.Mock).mockResolvedValue(mockChatContext);
+      (getLLMConfig as jest.Mock).mockResolvedValue({
+        aiConfig: mockAiConfig,
+      });
+      validateAiProviderConfigMock.mockResolvedValue({
+        valid: false,
+        error: {
+          errorName: 'ValidationError',
+          errorMessage: 'Model not supported',
+        },
+      });
+
+      const requestBody = {
+        chatId: 'test-chat-id',
+        model: 'invalid-model',
+      };
+
+      await postHandler(
+        {
+          ...mockRequest,
+          body: requestBody,
+        } as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(validateAiProviderConfigMock).toHaveBeenCalledWith({
+        ...mockAiConfig,
+        model: 'invalid-model',
+      });
+      expect(createChatContext).not.toHaveBeenCalled();
+      expect(mockReply.code).toHaveBeenCalledWith(400);
+      expect(mockReply.send).toHaveBeenCalledWith(
+        expect.objectContaining({ message: 'VALIDATION' }),
+      );
+    });
+
+    it('should return error when chat session is not found', async () => {
+      (getChatContext as jest.Mock).mockResolvedValue(null);
+
+      const requestBody = {
+        chatId: 'non-existent-chat-id',
+        model: 'claude-3-opus',
+      };
+
+      await postHandler(
+        {
+          ...mockRequest,
+          body: requestBody,
+        } as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(validateAiProviderConfigMock).not.toHaveBeenCalled();
+      expect(createChatContext).not.toHaveBeenCalled();
+      expect(mockReply.code).toHaveBeenCalledWith(400);
+      expect(mockReply.send).toHaveBeenCalledWith(
+        expect.objectContaining({ message: 'ENTITY_NOT_FOUND' }),
+      );
+    });
+
+    it('should use provider from context if available', async () => {
+      const contextWithProvider = {
+        ...mockChatContext,
+        provider: AiProviderEnum.OPENAI,
+      };
+
+      (getChatContext as jest.Mock).mockResolvedValue(contextWithProvider);
+      (getLLMConfig as jest.Mock).mockResolvedValue({
+        aiConfig: mockAiConfig,
+      });
+      validateAiProviderConfigMock.mockResolvedValue({ valid: true });
+
+      const requestBody = {
+        chatId: 'test-chat-id',
+        model: 'gpt-4',
+      };
+
+      await postHandler(
+        {
+          ...mockRequest,
+          body: requestBody,
+        } as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(createChatContext).toHaveBeenCalledWith(
+        'test-chat-id',
+        'test-user-id',
+        'test-project-id',
+        {
+          ...contextWithProvider,
+          provider: AiProviderEnum.OPENAI,
+          model: 'gpt-4',
+        },
+      );
+      expect(mockReply.send).toHaveBeenCalledWith({
+        chatId: 'test-chat-id',
+        provider: AiProviderEnum.OPENAI,
+        model: 'gpt-4',
+      });
+    });
+
+    it('should use provider from aiConfig when not in context', async () => {
+      const contextWithoutProvider = {
+        chatId: 'test-chat-id',
+        model: 'claude-3-sonnet',
+      };
+
+      (getChatContext as jest.Mock).mockResolvedValue(contextWithoutProvider);
+      (getLLMConfig as jest.Mock).mockResolvedValue({
+        aiConfig: mockAiConfig,
+      });
+      validateAiProviderConfigMock.mockResolvedValue({ valid: true });
+
+      const requestBody = {
+        chatId: 'test-chat-id',
+        model: 'claude-3-opus',
+      };
+
+      await postHandler(
+        {
+          ...mockRequest,
+          body: requestBody,
+        } as FastifyRequest,
+        mockReply as unknown as FastifyReply,
+      );
+
+      expect(createChatContext).toHaveBeenCalledWith(
+        'test-chat-id',
+        'test-user-id',
+        'test-project-id',
+        {
+          ...contextWithoutProvider,
+          provider: AiProviderEnum.ANTHROPIC,
+          model: 'claude-3-opus',
+        },
       );
     });
   });

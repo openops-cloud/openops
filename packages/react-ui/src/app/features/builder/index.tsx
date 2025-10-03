@@ -102,12 +102,12 @@ const useAnimateSidebar = (
 };
 
 const constructContainerKey = (
-  flowVersionId: string,
+  flowId: string,
   stepName: string,
   stepType: string,
   triggerOrActionName?: string,
 ) => {
-  return flowVersionId + stepName + stepType + (triggerOrActionName ?? '');
+  return flowId + stepName + stepType + (triggerOrActionName ?? '');
 };
 
 const BuilderPage = ({ children }: { children?: ReactNode }) => {
@@ -164,7 +164,7 @@ const BuilderPage = ({ children }: { children?: ReactNode }) => {
       return {
         memorizedSelectedStep: step,
         containerKey: constructContainerKey(
-          flowVersion.id,
+          flowVersion.flowId,
           state.selectedStep,
           step?.type || '',
           triggerOrActionName,
