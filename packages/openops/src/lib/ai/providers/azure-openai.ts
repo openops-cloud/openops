@@ -19,7 +19,7 @@ function createLanguageModel(params: {
         'Ocp-Apim-Subscription-Key': params.apiKey,
       },
       useDeploymentBasedUrls: true,
-      apiVersion: '2024-02-01',
+      apiVersion: '2024-10-21',
       ...params.providerSettings,
     })(params.model);
   }
