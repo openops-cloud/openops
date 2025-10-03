@@ -30,12 +30,6 @@ export type UnifiedCodeLLMSchema = z.infer<typeof unifiedCodeLLMSchema>;
 
 export const analysisLLMSchema = z.object({
   textAnswer: z.string(),
-  classifications: z.array(
-    z.object({
-      name: z.string(),
-      reason: z.string(),
-    }),
-  ),
 });
 
 export type AnalysisLLMSchema = z.infer<typeof analysisLLMSchema>;

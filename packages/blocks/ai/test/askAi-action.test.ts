@@ -96,7 +96,7 @@ describe('analyze action', () => {
     const args = (generateObject as jest.Mock).mock.calls[0][0];
     expect(args.model).toBe('languageModel');
     expect(args.prompt).toMatch(
-      /Analyze this\s*\nAdditional Input:\n"s1","s2"/,
+      /Analyze this\s*\nAdditional Input:\n"s1", "s2"/,
     );
     expect(args.schema).toBeDefined();
     expect(args.temperature).toBe(0.3);
