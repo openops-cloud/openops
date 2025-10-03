@@ -48,6 +48,8 @@ type TestTriggerSectionProps = {
   isSaving: boolean;
   flowVersionId: string;
   flowId: string;
+  shouldTriggerTest: boolean;
+  onTestTriggered: () => void;
 };
 
 function getSelectedId(testOutput: unknown, pollResults: TriggerEvent[]) {
@@ -63,7 +65,13 @@ function getSelectedId(testOutput: unknown, pollResults: TriggerEvent[]) {
 }
 
 const TestTriggerSection = React.memo(
-  ({ isSaving, flowVersionId, flowId }: TestTriggerSectionProps) => {
+  ({
+    isSaving,
+    flowVersionId,
+    flowId,
+    shouldTriggerTest,
+    onTestTriggered,
+  }: TestTriggerSectionProps) => {
     const form = useFormContext<Trigger>();
     const formValues = form.getValues();
     const [isValid, setIsValid] = useState(false);
@@ -244,6 +252,25 @@ const TestTriggerSection = React.memo(
     useEffect(() => {
       setErrorMessage(undefined);
     }, [currentTestOutput]);
+
+    useEffect(() => {
+      if (shouldTriggerTest && isValid && !isTesting) {
+        if (isSimulation) {
+          simulateTrigger();
+        } else {
+          pollTrigger();
+        }
+        onTestTriggered();
+      }
+    }, [
+      shouldTriggerTest,
+      isValid,
+      isTesting,
+      isSimulation,
+      simulateTrigger,
+      pollTrigger,
+      onTestTriggered,
+    ]);
 
     if (isBlockLoading) {
       return null;
