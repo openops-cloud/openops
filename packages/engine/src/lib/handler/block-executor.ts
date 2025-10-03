@@ -9,7 +9,6 @@ import {
   StopHookParams,
   TagsManager,
 } from '@openops/blocks-framework';
-import { tryParseJson } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import {
   ActionType,
@@ -258,7 +257,7 @@ const executeAction: ActionHandler<BlockAction> = async ({
 
     const failedStepOutput = stepOutput
       .setStatus(StepOutputStatus.FAILED)
-      .setErrorMessage(tryParseJson(handledError.message));
+      .setErrorMessage(handledError.message);
 
     return executionState
       .upsertStep(action.name, failedStepOutput)
