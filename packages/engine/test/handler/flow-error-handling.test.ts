@@ -71,6 +71,6 @@ describe('block with error handling', () => {
 
         expect(result.verdict).toBe(ExecutionVerdict.RUNNING)
         expect(result.steps.send_http.status).toBe('FAILED')
-        expect(result.steps.send_http.errorMessage).toStrictEqual(expectedError)
+        expect(result.steps.send_http.errorMessage).toStrictEqual(expectedError.toString())
     }, 10000)
 })
