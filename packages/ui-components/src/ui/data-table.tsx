@@ -37,8 +37,6 @@ import {
 } from './table';
 import { INTERNAL_ERROR_TOAST, toast } from './use-toast';
 
-const INTERACTIVE_COLUMN_KEYS = new Set(['actions', 'status']);
-
 export type DataWithId = {
   id?: string;
 };
@@ -103,6 +101,7 @@ interface DataTableProps<
   border?: boolean;
   emptyStateComponent?: React.ReactNode;
   getRowHref?: (row: RowDataWithActions<TData>) => string | undefined;
+  nonInteractiveColumns?: string[];
 }
 
 export function DataTable<
@@ -125,6 +124,7 @@ export function DataTable<
   border = true,
   emptyStateComponent,
   getRowHref,
+  nonInteractiveColumns,
 }: DataTableProps<TData, TValue, Keys, F>) {
   const columns = columnsInitial.concat([
     {
@@ -367,7 +367,7 @@ export function DataTable<
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
                         {rowHref &&
-                        !INTERACTIVE_COLUMN_KEYS.has(cell.column.id) ? (
+                        !nonInteractiveColumns?.includes(cell.column.id) ? (
                           <Link
                             to={rowHref}
                             onClick={(e) => e.stopPropagation()}

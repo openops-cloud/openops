@@ -53,6 +53,7 @@ const HomeFlowsTable = ({
           columnVisibility={columnVisibility}
           loading={loading}
           stickyHeader
+          nonInteractiveColumns={['actions', 'status']}
           border={false}
           getRowHref={(row) => `/flows/${row.id}`}
           onRowClick={(row, e) => {
