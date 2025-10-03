@@ -218,7 +218,7 @@ const BuilderPage = ({ children }: { children?: ReactNode }) => {
     refetchBlock,
   });
 
-  useFlowUpdates();
+  useFlowUpdates(flowVersion.flowId);
 
   useEffect(() => {
     const viewOnlyParam = searchParams.get(SEARCH_PARAMS.viewOnly) === 'true';
