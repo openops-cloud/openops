@@ -1,5 +1,6 @@
 import { openOpsId } from '@openops/shared';
 import DOMPurify from 'dompurify';
+import { t } from 'i18next';
 import { Maximize2 } from 'lucide-react';
 import mermaid from 'mermaid';
 import { memo, useEffect, useRef, useState } from 'react';
@@ -29,6 +30,7 @@ const MermaidRendererImpl = ({
       theme: theme === Theme.LIGHT ? 'default' : 'dark',
       securityLevel: 'strict',
       fontFamily: 'inherit',
+      suppressErrorRendering: true,
     });
   }, [theme]);
 
@@ -58,18 +60,7 @@ const MermaidRendererImpl = ({
   }, [chart, theme]);
 
   if (error) {
-    return (
-      <div
-        className={cn(
-          'border border-destructive rounded bg-destructive/10 p-4',
-          'text-destructive text-sm',
-          className,
-        )}
-      >
-        <div className="font-semibold mb-2">Mermaid Error:</div>
-        <div className="font-mono text-xs">{error}</div>
-      </div>
-    );
+    return null;
   }
 
   if (!svg) {
@@ -81,7 +72,7 @@ const MermaidRendererImpl = ({
           className,
         )}
       >
-        Rendering diagram...
+        {t('Rendering diagram...')}
       </div>
     );
   }
@@ -132,7 +123,6 @@ const sanitizeSvg = (svgContent: string): string => {
   return DOMPurify.sanitize(svgContent, {
     USE_PROFILES: { svg: true, svgFilters: true },
     ADD_TAGS: [
-      'foreignObject',
       'g',
       'path',
       'rect',
