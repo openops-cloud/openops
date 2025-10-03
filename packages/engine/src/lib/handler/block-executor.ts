@@ -258,7 +258,7 @@ const executeAction: ActionHandler<BlockAction> = async ({
 
     const failedStepOutput = stepOutput
       .setStatus(StepOutputStatus.FAILED)
-      .setErrorMessage(tryParseJson(handledError.message));
+      .setErrorMessage(handledError.message);
 
     return executionState
       .upsertStep(action.name, failedStepOutput)
