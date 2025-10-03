@@ -110,7 +110,7 @@ const FlowRunsPage = () => {
         <DataTable
           columns={columns}
           fetchData={fetchData}
-          nonInteractiveColumns={['actions']}
+          navigationExcludedColumns={['actions']}
           filters={filters}
           refresh={refresh}
           getRowHref={(row) => `/runs/${row.id}`}

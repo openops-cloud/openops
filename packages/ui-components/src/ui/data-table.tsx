@@ -101,7 +101,7 @@ interface DataTableProps<
   border?: boolean;
   emptyStateComponent?: React.ReactNode;
   getRowHref?: (row: RowDataWithActions<TData>) => string | undefined;
-  nonInteractiveColumns?: string[];
+  navigationExcludedColumns?: string[];
 }
 
 export function DataTable<
@@ -124,7 +124,7 @@ export function DataTable<
   border = true,
   emptyStateComponent,
   getRowHref,
-  nonInteractiveColumns,
+  navigationExcludedColumns,
 }: DataTableProps<TData, TValue, Keys, F>) {
   const columns = columnsInitial.concat([
     {
@@ -367,7 +367,7 @@ export function DataTable<
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
                         {rowHref &&
-                        !nonInteractiveColumns?.includes(cell.column.id) ? (
+                        !navigationExcludedColumns?.includes(cell.column.id) ? (
                           <Link
                             to={rowHref}
                             onClick={(e) => e.stopPropagation()}

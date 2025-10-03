@@ -70,7 +70,7 @@ const FlowsPage = () => {
             fetchData={fetchData}
             filters={FLOWS_TABLE_FILTERS}
             columnVisibility={columnVisibility}
-            nonInteractiveColumns={['status', 'actions']}
+            navigationExcludedColumns={['status', 'actions']}
             refresh={tableRefresh}
             getRowHref={(row) =>
               `/flows/${row.id}?${qs.stringify({

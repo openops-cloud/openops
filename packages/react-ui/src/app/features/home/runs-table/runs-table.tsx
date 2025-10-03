@@ -30,7 +30,7 @@ const HomeRunsTable = ({ data, loading }: Props) => {
         loading={loading}
         stickyHeader
         border={false}
-        nonInteractiveColumns={['actions']}
+        navigationExcludedColumns={['actions']}
         emptyStateComponent={<EmptyTableState />}
         getRowHref={(row) => `/runs/${row.id}`}
         onRowClick={(row, e) => {
