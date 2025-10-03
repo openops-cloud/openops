@@ -31,7 +31,7 @@ export const askAi = createAction({
         const authValue = auth as {
           provider: AiProviderEnum;
         };
-        const provider = authValue.provider as AiProviderEnum;
+        const provider = authValue.provider;
         const aiProvider = getAiProvider(provider);
         return {
           disabled: false,
@@ -62,13 +62,12 @@ export const askAi = createAction({
     const { provider, apiKey, baseURL, providerSettings, modelSettings } = auth;
 
     const overrideModel = context.propsValue.model as string | undefined;
-    const model = overrideModel
-      ? overrideModel
-      : getAiModelFromConnection(auth.model, auth.customModel);
+    const model =
+      overrideModel || getAiModelFromConnection(auth.model, auth.customModel);
 
     const languageModel = await getAiProviderLanguageModel({
-      provider: provider as AiProviderEnum,
-      apiKey: apiKey as string,
+      provider: provider,
+      apiKey: apiKey,
       model: model as string,
       providerSettings: {
         ...((providerSettings as Record<string, unknown>) ?? {}),
