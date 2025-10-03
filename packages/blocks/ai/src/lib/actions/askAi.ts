@@ -18,6 +18,28 @@ export const askAi = createAction({
   name: 'analyze',
   requireToolApproval: false,
   props: {
+    model: Property.Dropdown<string, false>({
+      displayName: 'Model',
+      required: false,
+      refreshers: ['auth'],
+      options: async ({ auth }) => {
+        if (!auth) {
+          return {
+            disabled: true,
+            options: [],
+            placeholder: 'Connect your AI provider to choose a model',
+          };
+        }
+        const authValue = auth as BlockPropValueSchema<typeof aiAuth>;
+        const provider = authValue.provider as AiProviderEnum;
+        const { getAiProvider } = await import('@openops/common');
+        const aiProvider = getAiProvider(provider);
+        return {
+          disabled: false,
+          options: aiProvider.models.map((m) => ({ label: m, value: m })),
+        };
+      },
+    }),
     prompt: Property.LongText({
       displayName: 'Prompt',
       required: true,
@@ -32,7 +54,10 @@ export const askAi = createAction({
     const auth = context.auth as BlockPropValueSchema<typeof aiAuth>;
     const { provider, apiKey, baseURL, providerSettings, modelSettings } = auth;
 
-    const model = getAiModelFromConnection(auth.model, auth.customModel);
+    const overrideModel = context.propsValue.model as string | undefined;
+    const model = overrideModel
+      ? overrideModel
+      : getAiModelFromConnection(auth.model, auth.customModel);
 
     const languageModel = await getAiProviderLanguageModel({
       provider: provider as AiProviderEnum,
@@ -44,14 +69,11 @@ export const askAi = createAction({
       },
     });
 
-    const additionalInput =
-      context.propsValue.additionalInput?.map((inputItem) =>
-        JSON.stringify(inputItem),
-      ) ?? [];
+    const additionalInput = context.propsValue.additionalInput ?? [];
     const composedPrompt =
       context.propsValue.prompt +
       (additionalInput?.length > 0
-        ? `\n\nAdditional Input:\n${additionalInput.join(', ')}`
+        ? `\n\nAdditional Input:\n${additionalInput.join(',')}`
         : '');
 
     const result = await generateObject({
