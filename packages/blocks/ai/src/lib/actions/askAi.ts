@@ -1,4 +1,10 @@
 import { createAction, Property } from '@openops/blocks-framework';
+import {
+  aiAuth,
+  getAiModelFromConnection,
+  getAiProvider,
+  getAiProviderLanguageModel,
+} from '@openops/common';
 import { AiProviderEnum, analysisLLMSchema } from '@openops/shared';
 import { generateObject } from 'ai';
 
@@ -7,6 +13,7 @@ export const askAi = createAction({
   description:
     'Ask AI a question or transform input using an LLM based on a prompt',
   name: 'analyze',
+  auth: aiAuth,
   requireToolApproval: false,
   props: {
     model: Property.Dropdown<string, false>({
@@ -25,7 +32,6 @@ export const askAi = createAction({
           provider: AiProviderEnum;
         };
         const provider = authValue.provider as AiProviderEnum;
-        const { getAiProvider } = await import('@openops/common');
         const aiProvider = getAiProvider(provider);
         return {
           disabled: false,
@@ -54,9 +60,6 @@ export const askAi = createAction({
       customModel?: string;
     };
     const { provider, apiKey, baseURL, providerSettings, modelSettings } = auth;
-
-    const { getAiModelFromConnection, getAiProviderLanguageModel } =
-      await import('@openops/common');
 
     const overrideModel = context.propsValue.model as string | undefined;
     const model = overrideModel
