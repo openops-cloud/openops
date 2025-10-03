@@ -1,13 +1,4 @@
-import {
-  BlockPropValueSchema,
-  createAction,
-  Property,
-} from '@openops/blocks-framework';
-import {
-  aiAuth,
-  getAiModelFromConnection,
-  getAiProviderLanguageModel,
-} from '@openops/common';
+import { createAction, Property } from '@openops/blocks-framework';
 import { AiProviderEnum, analysisLLMSchema } from '@openops/shared';
 import { generateObject } from 'ai';
 
@@ -30,7 +21,9 @@ export const askAi = createAction({
             placeholder: 'Connect your AI provider to choose a model',
           };
         }
-        const authValue = auth as BlockPropValueSchema<typeof aiAuth>;
+        const authValue = auth as {
+          provider: AiProviderEnum;
+        };
         const provider = authValue.provider as AiProviderEnum;
         const { getAiProvider } = await import('@openops/common');
         const aiProvider = getAiProvider(provider);
@@ -51,8 +44,19 @@ export const askAi = createAction({
     }),
   },
   run: async (context) => {
-    const auth = context.auth as BlockPropValueSchema<typeof aiAuth>;
+    const auth = context.auth as {
+      provider: AiProviderEnum;
+      apiKey: string;
+      baseURL?: string;
+      providerSettings?: Record<string, unknown>;
+      modelSettings?: Record<string, unknown>;
+      model: string;
+      customModel?: string;
+    };
     const { provider, apiKey, baseURL, providerSettings, modelSettings } = auth;
+
+    const { getAiModelFromConnection, getAiProviderLanguageModel } =
+      await import('@openops/common');
 
     const overrideModel = context.propsValue.model as string | undefined;
     const model = overrideModel
