@@ -21,6 +21,7 @@ jest.mock('@openops/server-shared', () => ({
 jest.mock('../../../src/app/ai/chat/ai-chat.service', () => ({
   getConversation: jest.fn(),
   getLLMConfig: jest.fn(),
+  createChatContext: jest.fn(),
 }));
 
 jest.mock('../../../src/app/ai/chat/code-generation-handler', () => ({

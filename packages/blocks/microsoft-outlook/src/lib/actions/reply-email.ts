@@ -20,7 +20,7 @@ export const replyEmailAction = createAction({
       displayName: 'Email',
       description: 'Select the email message to reply to.',
       required: true,
-      refreshers: [],
+      refreshers: ['auth'],
       options: async ({ auth }) => {
         if (!auth) {
           return {
