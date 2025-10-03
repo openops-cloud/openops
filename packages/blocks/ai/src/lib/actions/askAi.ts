@@ -44,11 +44,14 @@ export const askAi = createAction({
       },
     });
 
-    const additionalInput = context.propsValue.additionalInput ?? [];
+    const additionalInput =
+      context.propsValue.additionalInput?.map((inputItem) =>
+        JSON.stringify(inputItem),
+      ) ?? [];
     const composedPrompt =
       context.propsValue.prompt +
       (additionalInput?.length > 0
-        ? `\n\nAdditional Input:\n${additionalInput.join(',')}`
+        ? `\n\nAdditional Input:\n${additionalInput.join(', ')}`
         : '');
 
     const result = await generateObject({
