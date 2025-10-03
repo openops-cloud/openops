@@ -9,7 +9,6 @@ import {
   StopHookParams,
   TagsManager,
 } from '@openops/blocks-framework';
-import { tryParseJson } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import {
   ActionType,
