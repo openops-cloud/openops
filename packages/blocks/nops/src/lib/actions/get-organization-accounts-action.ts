@@ -1,41 +1,19 @@
-import { createAction, Property } from '@openops/blocks-framework';
+import { createAction } from '@openops/blocks-framework';
 import { nopsAuth } from '../auth';
 import { makeGetRequest } from '../common/http-client';
 
 export const getOrganizationAccountsAction = createAction({
   name: 'nops_get_organization_accounts',
   displayName: 'Get Organization Accounts',
-  description: 'Retrieve AWS/Azure organization accounts (projects) configured in nOps',
+  description:
+    'Retrieve AWS/Azure organization accounts (projects) configured in nOps',
   auth: nopsAuth,
-  props: {
-    signature: Property.SecretText({
-      displayName: 'Signature (optional)',
-      description:
-        'If your API key requires signatures, paste the generated base64 signature here. It will be sent as x-nops-signature.',
-      required: false,
-    }),
-  },
+  requireToolApproval: false,
+  props: {},
   async run(context) {
     const endpoint = '/c/admin/projectaws/organization_accounts/';
-    
-    console.log('[nOps] Making request to:', endpoint);
-    console.log('[nOps] Request details:', {
-      method: 'GET',
-      endpoint,
-    });
 
-    const providedSignature = context.propsValue.signature;
-    const response = await makeGetRequest(
-      context.auth,
-      endpoint,
-      undefined,
-      providedSignature ? { 'x-nops-signature': String(providedSignature) } : undefined,
-    );
-
-    console.log('[nOps] Response received:', {
-      status: response.status,
-      body: response.body,
-    });
+    const response = await makeGetRequest(context.auth, endpoint, undefined);
 
     return {
       _debug: {
@@ -51,4 +29,3 @@ export const getOrganizationAccountsAction = createAction({
     };
   },
 });
-

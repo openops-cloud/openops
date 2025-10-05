@@ -20,31 +20,27 @@ export const nops = createBlock({
     createCustomApiCallAction({
       baseUrl: () => BASE_NOPS_URL,
       auth: nopsAuth,
-      authMapping: async ({ auth, propsValue }: any) => {
-        if (!auth || typeof auth !== 'string') {
+      authMapping: async ({ auth }: any) => {
+        const { apiKey, signature } = auth || {};
+
+        if (!apiKey) {
           throw new Error(
             'nOps API Key is required. Please configure your nOps connection with a valid API key.',
           );
         }
+
         const headers: Record<string, string> = {
-          'X-Nops-Api-Key': auth,
+          'X-Nops-Api-Key': apiKey,
           'Content-Type': 'application/json',
         };
 
-        const providedSignature = propsValue?.signature as string | undefined;
-        if (providedSignature) {
-          headers['x-nops-signature'] = String(providedSignature);
+        if (signature) {
+          headers['x-nops-signature'] = signature;
         }
 
         return headers;
       },
       additionalProps: {
-        signature: Property.SecretText({
-          displayName: 'Signature (optional)',
-          description:
-            'If your API key requires signatures, paste the generated base64 signature here. It will be sent as x-nops-signature.',
-          required: false,
-        }),
         documentation: Property.MarkDown({
           value:
             'For more information, visit the [nOps Developer API documentation](https://help.nops.io/docs/nops/developer-intro).',

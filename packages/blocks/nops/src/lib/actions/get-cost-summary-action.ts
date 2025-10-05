@@ -1,5 +1,8 @@
 import { createAction, Property } from '@openops/blocks-framework';
-import { getRegionsDropdownState, regionsStaticMultiSelectDropdown } from '@openops/common';
+import {
+  getRegionsDropdownState,
+  regionsStaticMultiSelectDropdown,
+} from '@openops/common';
 import { nopsAuth } from '../auth';
 import { makeGetRequest } from '../common/http-client';
 
@@ -8,13 +11,8 @@ export const getCostSummaryAction = createAction({
   displayName: 'Get Cost Summary',
   description: 'Retrieve cost summary data with optional filters',
   auth: nopsAuth,
+  requireToolApproval: false,
   props: {
-    signature: Property.SecretText({
-      displayName: 'Signature (optional)',
-      description:
-        'If your API key requires signatures, paste the generated base64 signature here. It will be sent as x-nops-signature.',
-      required: false,
-    }),
     dateStart: Property.ShortText({
       displayName: 'Start Date',
       description: 'Start date for cost data. Format: YYYY-MM-DD',
@@ -147,7 +145,10 @@ export const getCostSummaryAction = createAction({
     addJsonParam('tag', tags as unknown);
 
     // Exclude filters
-    addArrayParam('exclude_account_id', excludeAccountIds as string[] | undefined);
+    addArrayParam(
+      'exclude_account_id',
+      excludeAccountIds as string[] | undefined,
+    );
     addArrayParam('exclude_region', excludeRegions as string[] | undefined);
     addArrayParam('exclude_product', excludeProducts as string[] | undefined);
     addJsonParam('exclude_tag', excludeTags as unknown);
@@ -156,12 +157,8 @@ export const getCostSummaryAction = createAction({
       context.auth,
       '/c/cost_page/cost_summary/',
       queryParams,
-      context.propsValue.signature
-        ? { 'x-nops-signature': String(context.propsValue.signature) }
-        : undefined,
     );
 
     return response.body;
   },
 });
-

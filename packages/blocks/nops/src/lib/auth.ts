@@ -1,4 +1,4 @@
-import { BlockAuth } from '@openops/blocks-framework';
+import { BlockAuth, Property } from '@openops/blocks-framework';
 
 const markdown = `
 To get your nOps API key:
@@ -15,11 +15,28 @@ To get your nOps API key:
 For more information, visit the [nOps Developer API documentation](https://help.nops.io/docs/nops/developer-intro).
 `;
 
-export const nopsAuth = BlockAuth.SecretAuth({
-  displayName: 'API Key',
-  required: true,
+export interface nOpsAuth {
+  apiKey: string;
+  signature?: string;
+}
+
+export const nopsAuth = BlockAuth.CustomAuth({
   authProviderKey: 'nops',
   authProviderDisplayName: 'nOps',
   authProviderLogoUrl: 'https://static.openops.com/blocks/nops.png',
   description: markdown,
+  required: true,
+  props: {
+    apiKey: Property.SecretText({
+      displayName: 'API Key',
+      description: 'Your nOps API key',
+      required: true,
+    }),
+    signature: Property.SecretText({
+      displayName: 'Signature (optional)',
+      description:
+        'If your API key requires signatures, paste the generated base64 signature here. It will be sent as x-nops-signature.',
+      required: false,
+    }),
+  },
 });
