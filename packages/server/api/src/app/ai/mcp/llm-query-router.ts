@@ -134,7 +134,7 @@ const getOpenOpsTablesNames = async (): Promise<string[]> => {
     return await getTableNames();
   } catch (error) {
     logger.error(
-      'Error getting openops tables names for the LLM query router',
+      'Error getting OpenOps table names for the LLM query router',
       { error },
     );
     return [];
