@@ -131,8 +131,7 @@ export async function routeQuery({
 
 const getOpenOpsTablesNames = async (): Promise<string[]> => {
   try {
-    const tables = await getTableNames();
-    return tables;
+    return await getTableNames();
   } catch (error) {
     logger.error(
       'Error getting openops tables names for the LLM query router',
