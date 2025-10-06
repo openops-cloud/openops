@@ -59,10 +59,6 @@ describe('block declaration tests', () => {
         name: 'get_account_id',
         requireAuth: true,
       },
-      get_account_info: {
-        name: 'get_account_info',
-        requireAuth: true,
-      },
       ebs_create_snapshot_action: {
         name: 'ebs_create_snapshot_action',
         requireAuth: true,

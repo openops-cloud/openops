@@ -17,7 +17,6 @@ import { ec2StartInstanceAction } from './lib/actions/ec2/ec2-start-instance-act
 import { ec2StopInstanceAction } from './lib/actions/ec2/ec2-stop-instance-action';
 import { ec2TerminateInstancesAction } from './lib/actions/ec2/ec2-terminate-instances-action';
 import { getAccountIdAction } from './lib/actions/get-account-id-action';
-import { getAccountInfoAction } from './lib/actions/get-account-info-action';
 import { getPriceAction } from './lib/actions/get-price-action';
 import { rdsCreateSnapshotAction } from './lib/actions/rds/rds-create-snapshot-action';
 import { rdsDeleteInstanceAction } from './lib/actions/rds/rds-delete-instance-action';
@@ -38,7 +37,6 @@ export const aws = createBlock({
     getPriceAction,
     getAccountIdAction,
     getAccountAlias(),
-    getAccountInfoAction,
     ebsGetVolumesAction,
     ebsModifyVolumeAction,
     ebsDeleteVolumeAction,
