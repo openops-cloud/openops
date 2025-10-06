@@ -79,7 +79,7 @@ export async function routeQuery({
   }));
 
   try {
-    const openopsTablesNames = await getTableNames();
+    const openopsTablesNames = await getOpenOpsTablesNames();
 
     const {
       object: { actualResult: selectionResult },
@@ -128,6 +128,19 @@ export async function routeQuery({
     };
   }
 }
+
+const getOpenOpsTablesNames = async (): Promise<string[]> => {
+  try {
+    const tables = await getTableNames();
+    return tables;
+  } catch (error) {
+    logger.error(
+      'Error getting openops tables names for the LLM query router',
+      { error },
+    );
+    return [];
+  }
+};
 
 const getSystemPrompt = (
   toolList: Array<{ name: string; description: string }>,
