@@ -3,6 +3,7 @@ import { SideMenuCollapsed } from '@/app/features/builder/builder-header/side-me
 import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
 import { LeftSideBarType } from '../builder-types';
 
+import { BuilderExitEditModeButton } from '@/app/features/builder/builder-header/builder-exit-edit-mode-button';
 import { WorkflowOverview } from '@/app/features/builder/builder-header/workflow-overview/workflow-overview';
 import { cn } from '@openops/components/ui';
 import { FC } from 'react';
@@ -57,6 +58,7 @@ export const BuilderHeader = ({
         {readonly && <BuilderViewOnlyWidget></BuilderViewOnlyWidget>}
         {!readonly && <UndoRedoActionBar />}
         <PublishButton />
+        {!readonly && <BuilderExitEditModeButton />}
       </div>
     </div>
   );
