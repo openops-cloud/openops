@@ -1,6 +1,5 @@
 import {
   ArrayProperty,
-  BlockAuthProperty,
   BlockMetadata,
   BlockPropertyMap,
   DropdownProperty,
@@ -24,7 +23,7 @@ import {
 } from '@openops/shared';
 import { EngineConstants } from '../handler/context/engine-constants';
 import { FlowExecutorContext } from '../handler/context/flow-execution-context';
-import { variableService } from '../variables/variable-service';
+import { createPropsResolver } from '../variables/props-resolver';
 import { blockLoader } from './block-loader';
 
 async function evaluateProp(
@@ -103,7 +102,7 @@ export const blockHelper = {
     });
 
     try {
-      const { resolvedInput } = await variableService({
+      const { resolvedInput } = await createPropsResolver({
         apiUrl: constants.internalApiUrl,
         projectId: params.projectId,
         engineToken: params.engineToken,
@@ -146,7 +145,12 @@ export const blockHelper = {
   async executeValidateAuth(
     params: ExecuteValidateAuthOperation,
   ): Promise<ExecuteValidateAuthResponse> {
-    const authProperty = params.authProperty as BlockAuthProperty | undefined;
+    const block = await blockLoader.loadBlockOrThrow({
+      blockName: params.blockName,
+      blockVersion: params.blockVersion,
+      blocksSource: EngineConstants.BLOCK_SOURCES,
+    });
+    const authProperty = block.auth;
 
     if (authProperty?.validate === undefined) {
       return {

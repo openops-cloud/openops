@@ -15,6 +15,7 @@ export const ec2StopInstanceAction = createAction({
   description: 'EC2 stop a given instance',
   displayName: 'EC2 Stop Instance',
   riskLevel: RiskLevel.HIGH,
+  requireToolApproval: true,
   props: {
     arn: Property.ShortText({
       displayName: 'ARN',

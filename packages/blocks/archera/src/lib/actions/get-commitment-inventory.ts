@@ -7,6 +7,7 @@ export const getCommitmentsInventoryAction = createAction({
   name: 'archera_get_commitments_inventory',
   description: 'Get commitment inventory for a provider within a date range',
   displayName: 'Get Commitments Inventory',
+  requireToolApproval: false,
   props: {
     provider: Property.StaticDropdown({
       displayName: 'Provider',

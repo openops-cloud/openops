@@ -31,7 +31,7 @@
   },
   "private": true,
   "dependencies": {
-    "@ai-sdk/anthropic": "2.0.3",
+    "@ai-sdk/anthropic": "2.0.22",
     "@ai-sdk/azure": "2.0.12",
     "@ai-sdk/cerebras": "1.0.7",
     "@ai-sdk/cohere": "2.0.3",
@@ -295,7 +295,7 @@
     "yaml": "2.4.1",
     "zod": "4.0.14",
     "zustand": "4.5.4",
-    "@ai-sdk/google-vertex": "^3.0.0"
+    "@ai-sdk/google-vertex": "^3.0.33"
   },
   "devDependencies": {
     "@faker-js/faker": "8.2.0",

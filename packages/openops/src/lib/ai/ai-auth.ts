@@ -3,7 +3,7 @@ import {
   BlockPropValueSchema,
   Property,
 } from '@openops/blocks-framework';
-import { AiProviderEnum, SaveAiConfigRequest } from '@openops/shared';
+import { AiConfigParsed, AiProviderEnum } from '@openops/shared';
 import {
   CUSTOM_MODEL_OPTION,
   getAiModelFromConnection,
@@ -52,8 +52,8 @@ export const aiAuth = BlockAuth.CustomAuth({
         options: PROVIDER_MODEL_OPTIONS,
       },
     }),
-    customModel: Property.SecretText({
-      displayName: 'Custom model',
+    customModel: Property.ShortText({
+      displayName: 'Custom model (optional)',
       description: "Define custom model if it's not in the list",
       required: false,
     }),
@@ -67,17 +67,12 @@ export const aiAuth = BlockAuth.CustomAuth({
       description: 'Only for OpenAI-compatible providers',
       required: false,
     }),
-    additional: Property.MarkDown({
-      value: 'Additional Settings',
-    }),
     providerSettings: Property.Json({
-      displayName: 'Provider settings',
-      description: 'Provider settings',
+      displayName: 'Provider settings (optional)',
       required: false,
     }),
     modelSettings: Property.Json({
-      displayName: 'Model settings',
-      description: 'Model settings',
+      displayName: 'Model settings (optional)',
       required: false,
     }),
   },
@@ -93,13 +88,24 @@ export const aiAuth = BlockAuth.CustomAuth({
       return { valid: false, error: 'You need to define model' };
     }
 
+    const selectedModel = authObject.model as string;
+    if (selectedModel !== CUSTOM_MODEL_OPTION.value) {
+      const allowed = getAiProvider(authObject.provider).models;
+      if (!allowed.includes(selectedModel)) {
+        return {
+          valid: false,
+          error: 'selected model does not belong to provider',
+        };
+      }
+    }
+
     const baseURL = authObject['baseURL'] as string | undefined;
     const providerSettings = {
       ...(authObject['providerSettings'] || {}),
       ...(baseURL ? { baseURL } : {}),
     };
 
-    const payload: SaveAiConfigRequest = {
+    const payload: AiConfigParsed = {
       provider: authObject.provider,
       model: model,
       apiKey: authObject['apiKey'] as string,
@@ -121,3 +127,5 @@ export const aiAuth = BlockAuth.CustomAuth({
     return { valid: false, error: message };
   },
 });
+
+export type AiAuth = BlockPropValueSchema<typeof aiAuth>;

@@ -29,7 +29,7 @@ export async function resolveVariable(
     });
 
     const { resolvedInput, censoredInput } =
-      await constants.variableService.resolve({
+      await constants.propsResolver.resolve({
         unresolvedInput: input.variableExpression,
         executionState,
       });

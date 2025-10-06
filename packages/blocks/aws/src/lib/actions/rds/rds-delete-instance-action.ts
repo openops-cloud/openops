@@ -15,6 +15,7 @@ export const rdsDeleteInstanceAction = createAction({
   description: 'Delete the provided RDS Instance',
   displayName: 'RDS Delete Instance',
   riskLevel: RiskLevel.HIGH,
+  requireToolApproval: true,
   props: {
     arn: Property.ShortText({
       displayName: 'ARN',

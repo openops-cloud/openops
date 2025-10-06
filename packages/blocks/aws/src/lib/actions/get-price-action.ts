@@ -15,6 +15,7 @@ export const getPriceAction = createAction({
   name: 'get_price',
   description: 'Query AWS Pricing API to get the price of a service',
   displayName: 'Get Price from Price Catalog',
+  requireToolApproval: false,
   props: {
     service: Property.Dropdown({
       displayName: 'Service Code',

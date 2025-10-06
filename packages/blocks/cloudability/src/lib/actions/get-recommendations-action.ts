@@ -16,6 +16,7 @@ export const getRecommendationsAction = createAction({
   displayName: `Get Recommendations`,
   description: `Get Recommendations`,
   auth: cloudabilityAuth,
+  requireToolApproval: false,
   props: {
     ...getVendorsProperty(),
     ...getRecommendationTypesProperty(),
