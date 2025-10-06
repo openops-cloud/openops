@@ -23,7 +23,7 @@ describe('analyze action', () => {
       model: {
         type: 'DROPDOWN',
         displayName: 'Model',
-        required: false,
+        required: true,
       },
       prompt: {
         type: 'LONG_TEXT',
@@ -100,7 +100,9 @@ describe('analyze action', () => {
     expect(generateObject).toHaveBeenCalledTimes(1);
     const args = (generateObject as jest.Mock).mock.calls[0][0];
     expect(args.model).toBe('languageModel');
-    expect(args.prompt).toMatch(/Analyze this\s*\nAdditional Input:\ns1,s2/);
+    expect(args.prompt).toMatch(
+      /Analyze this\s*\n\nAdditional Input:\n"s1",\s*"s2"/,
+    );
     expect(args.schema).toBeDefined();
     expect(args.temperature).toBe(0.3);
 

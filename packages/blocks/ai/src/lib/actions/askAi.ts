@@ -16,9 +16,9 @@ export const askAi = createAction({
   auth: aiAuth,
   requireToolApproval: false,
   props: {
-    model: Property.Dropdown<string, false>({
+    model: Property.Dropdown<string>({
       displayName: 'Model',
-      required: false,
+      required: true,
       refreshers: ['auth'],
       options: async ({ auth }) => {
         if (!auth) {
@@ -30,12 +30,19 @@ export const askAi = createAction({
         }
         const authValue = auth as {
           provider: AiProviderEnum;
+          model: string;
+          customModel?: string;
         };
         const provider = authValue.provider;
         const aiProvider = getAiProvider(provider);
+        const model = getAiModelFromConnection(
+          authValue.model,
+          authValue.customModel,
+        );
         return {
           disabled: false,
           options: aiProvider.models.map((m) => ({ label: m, value: m })),
+          default: model,
         };
       },
     }),
@@ -61,9 +68,9 @@ export const askAi = createAction({
     };
     const { provider, apiKey, baseURL, providerSettings, modelSettings } = auth;
 
-    const overrideModel = context.propsValue.model as string | undefined;
+    const overridenModel = context.propsValue.model as string | undefined;
     const model =
-      overrideModel || getAiModelFromConnection(auth.model, auth.customModel);
+      overridenModel || getAiModelFromConnection(auth.model, auth.customModel);
 
     const languageModel = await getAiProviderLanguageModel({
       provider: provider,
@@ -75,7 +82,11 @@ export const askAi = createAction({
       },
     });
 
-    const additionalInput = context.propsValue.additionalInput ?? [];
+    const additionalInput =
+      context.propsValue.additionalInput?.map((inputItem) =>
+        JSON.stringify(inputItem),
+      ) ?? [];
+
     const composedPrompt =
       context.propsValue.prompt +
       (additionalInput?.length > 0
