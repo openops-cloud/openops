@@ -1,5 +1,5 @@
 import { createBlock } from '@openops/blocks-framework';
-import { amazonAuth, getAccountAlias } from '@openops/common';
+import { amazonAuth } from '@openops/common';
 import { BlockCategory } from '@openops/shared';
 import { addTagsAction } from './lib/actions/add-tags-action';
 import { buildArnAction } from './lib/actions/arn/build-arn-action';
@@ -36,7 +36,6 @@ export const aws = createBlock({
     parseArnAction,
     getPriceAction,
     getAccountIdAction,
-    getAccountAlias(),
     ebsGetVolumesAction,
     ebsModifyVolumeAction,
     ebsDeleteVolumeAction,
