@@ -21,7 +21,7 @@ describe('analyze action', () => {
   test('should expose correct props', () => {
     expect(askAi.props).toMatchObject({
       model: {
-        type: 'DROPDOWN',
+        type: 'DYNAMIC',
         displayName: 'Model',
         required: false,
       },
@@ -166,7 +166,7 @@ describe('analyze action', () => {
 
     const context = createContext(auth, {
       prompt: 'Hi',
-      model: 'gpt-from-props',
+      model: { model: 'gpt-from-props' },
     });
 
     const result = await askAi.run(context as any);

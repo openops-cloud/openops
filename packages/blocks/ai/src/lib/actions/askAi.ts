@@ -1,4 +1,8 @@
-import { createAction, Property } from '@openops/blocks-framework';
+import {
+  createAction,
+  DynamicPropsValue,
+  Property,
+} from '@openops/blocks-framework';
 import {
   aiAuth,
   getAiModelFromConnection,
@@ -16,17 +20,14 @@ export const askAi = createAction({
   auth: aiAuth,
   requireToolApproval: false,
   props: {
-    model: Property.Dropdown<string>({
+    model: Property.DynamicProperties({
       displayName: 'Model',
       required: false,
       refreshers: ['auth'],
-      options: async ({ auth }) => {
+      props: async ({ auth }) => {
+        const fields: DynamicPropsValue = {};
         if (!auth) {
-          return {
-            disabled: true,
-            options: [],
-            placeholder: 'Connect your AI provider to choose a model',
-          };
+          return fields;
         }
         const authValue = auth as {
           provider: AiProviderEnum;
@@ -35,10 +36,26 @@ export const askAi = createAction({
         };
         const provider = authValue.provider;
         const aiProvider = getAiProvider(provider);
-        return {
-          disabled: false,
-          options: aiProvider.models.map((m) => ({ label: m, value: m })),
-        };
+
+        if (!aiProvider.models || aiProvider.models.length === 0) {
+          fields['model'] = Property.ShortText({
+            displayName: 'Model',
+            required: true,
+            defaultValue: authValue.customModel || authValue.model,
+          });
+          return fields;
+        }
+
+        fields['model'] = Property.StaticDropdown<string>({
+          displayName: 'Model',
+          required: true,
+          options: {
+            disabled: false,
+            options: aiProvider.models.map((m) => ({ label: m, value: m })),
+          },
+          defaultValue: authValue.model,
+        });
+        return fields;
       },
     }),
     prompt: Property.LongText({
@@ -63,7 +80,9 @@ export const askAi = createAction({
     };
     const { provider, apiKey, baseURL, providerSettings, modelSettings } = auth;
 
-    const overridenModel = context.propsValue.model as string | undefined;
+    const overridenModel = (
+      context.propsValue.model as { model?: string } | undefined
+    )?.model as string | undefined;
     const model =
       overridenModel || getAiModelFromConnection(auth.model, auth.customModel);
 
