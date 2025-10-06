@@ -23,7 +23,7 @@ describe('analyze action', () => {
       model: {
         type: 'DROPDOWN',
         displayName: 'Model',
-        required: true,
+        required: false,
       },
       prompt: {
         type: 'LONG_TEXT',

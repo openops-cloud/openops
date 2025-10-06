@@ -18,7 +18,7 @@ export const askAi = createAction({
   props: {
     model: Property.Dropdown<string>({
       displayName: 'Model',
-      required: true,
+      required: false,
       refreshers: ['auth'],
       options: async ({ auth }) => {
         if (!auth) {
@@ -35,14 +35,9 @@ export const askAi = createAction({
         };
         const provider = authValue.provider;
         const aiProvider = getAiProvider(provider);
-        const model = getAiModelFromConnection(
-          authValue.model,
-          authValue.customModel,
-        );
         return {
           disabled: false,
           options: aiProvider.models.map((m) => ({ label: m, value: m })),
-          default: model,
         };
       },
     }),
