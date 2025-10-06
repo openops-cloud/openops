@@ -21,7 +21,7 @@ describe('block declaration tests', () => {
   });
 
   test('should return block with correct number of actions', () => {
-    expect(Object.keys(aws.actions()).length).toBe(24);
+    expect(Object.keys(aws.actions()).length).toBe(23);
     expect(aws.actions()).toMatchObject({
       ebs_get_volumes: {
         name: 'ebs_get_volumes',
