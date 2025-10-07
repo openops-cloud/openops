@@ -31,14 +31,14 @@ describe('block declaration tests', () => {
 
   test('should have cost summary action configured', () => {
     const actions = nops.actions();
-    expect(actions.nops_get_cost_summary).toBeDefined();
-    expect(actions.nops_get_cost_summary.displayName).toBe('Get Cost Summary');
+    expect(actions['nops_get_cost_summary']).toBeDefined();
+    expect(actions['nops_get_cost_summary'].displayName).toBe('Get Cost Summary');
   });
 
   test('should have organization accounts action configured', () => {
     const actions = nops.actions();
-    expect(actions.nops_get_organization_accounts).toBeDefined();
-    expect(actions.nops_get_organization_accounts.displayName).toBe(
+    expect(actions['nops_get_organization_accounts']).toBeDefined();
+    expect(actions['nops_get_organization_accounts'].displayName).toBe(
       'Get Organization Accounts',
     );
   });
