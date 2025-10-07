@@ -5,12 +5,15 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CommunityBadge,
   LoadingSpinner,
   TooltipProvider,
   TooltipWrapper,
 } from '@openops/components/ui';
 
+import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { platformHooks } from '@/app/common/hooks/platform-hooks';
+import { FlagId } from '@openops/shared';
 import { t } from 'i18next';
 import { Link } from 'react-router-dom';
 
@@ -19,6 +22,9 @@ export default function GeneralPage() {
     queryResult: { data, isLoading, error },
     hasNewerVersionAvailable,
   } = platformHooks.useNewerAvailableVersion();
+
+  const showCommunity = flagsHooks.useFlag(FlagId.SHOW_COMMUNITY)
+    .data as boolean;
 
   return (
     <Card className="w-full">
@@ -29,9 +35,19 @@ export default function GeneralPage() {
       <CardContent className="grid gap-1 mt-4">
         <div className="flex justify-between items-center">
           <div className="flex flex-col gap-2">
-            <span className="text-primary-300 text-base font-medium">
-              {t('Running version')}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-primary-300 text-base font-medium">
+                {t('Running version')}
+              </span>
+
+              {showCommunity && (
+                <CommunityBadge
+                  showUpgrade={true}
+                  link={'https://www.openops.com/pricing/'}
+                />
+              )}
+            </div>
+
             {isLoading && <LoadingSpinner className="w-4 h-4" />}
             {error && <span>{t('Error loading version')}</span>}
             {data && (
@@ -47,7 +63,7 @@ export default function GeneralPage() {
               </div>
             )}
           </div>
-          {hasNewerVersionAvailable && (
+          {hasNewerVersionAvailable && showCommunity && (
             <TooltipProvider>
               <TooltipWrapper
                 tooltipText={t('Learn how to update on the latest version')}
@@ -58,9 +74,7 @@ export default function GeneralPage() {
                   rel="noopener noreferrer"
                   className="self-end"
                 >
-                  <Button disabled={!hasNewerVersionAvailable}>
-                    {t('Learn how to update')}
-                  </Button>
+                  <Button>{t('Learn how to update')}</Button>
                 </Link>
               </TooltipWrapper>
             </TooltipProvider>
