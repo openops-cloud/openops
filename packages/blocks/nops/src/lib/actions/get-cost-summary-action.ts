@@ -156,7 +156,7 @@ export const getCostSummaryAction = createAction({
     const response = await makeGetRequest(
       context.auth,
       '/c/cost_page/cost_summary/',
-      queryParams
+      queryParams,
     );
 
     return response.body;

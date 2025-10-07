@@ -38,6 +38,8 @@ describe('block declaration tests', () => {
   test('should have organization accounts action configured', () => {
     const actions = nops.actions();
     expect(actions.nops_get_organization_accounts).toBeDefined();
-    expect(actions.nops_get_organization_accounts.displayName).toBe('Get Organization Accounts');
+    expect(actions.nops_get_organization_accounts.displayName).toBe(
+      'Get Organization Accounts',
+    );
   });
 });
