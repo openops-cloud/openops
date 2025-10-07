@@ -1,4 +1,5 @@
 import { createCustomApiCallAction } from '@openops/blocks-common';
+import { Property } from '@openops/blocks-framework';
 import { getUseHostSessionProperty, googleCloudAuth } from '@openops/common';
 import { projectCliDropdown } from '../common-properties';
 import { runCommands } from '../google-cloud-cli';
@@ -25,13 +26,14 @@ async function getAccessToken(
 export const customGoogleCloudApiCallAction = createCustomApiCallAction({
   auth: googleCloudAuth,
   name: 'google_custom_api_call',
-  description: [
-    'Make a custom REST API call to Google Cloud.',
-    'Docs: https://cloud.google.com/apis/docs/reference/rest',
-  ].join(' '),
+  description: 'Make a custom REST API call to Google Cloud.',
   displayName: 'Custom Google Cloud API Call',
   baseUrl: () => 'https://www.googleapis.com',
   additionalProps: {
+    documentation: Property.MarkDown({
+      value:
+        'For more information, visit the [Google Cloud API documentation](https://cloud.google.com/apis/docs/reference/rest).',
+    }),
     useHostSession: getUseHostSessionProperty(
       'Google Cloud',
       'gcloud auth login',

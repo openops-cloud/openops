@@ -1,4 +1,5 @@
 import { createCustomApiCallAction } from '@openops/blocks-common';
+import { Property } from '@openops/blocks-framework';
 import {
   authenticateUserWithAzure,
   azureAuth,
@@ -28,13 +29,14 @@ const getHostAccessToken = async (
 export const customAzureApiCallAction = createCustomApiCallAction({
   auth: azureAuth,
   name: 'custom_azure_api_call',
-  description: [
-    'Make a custom REST API call to Azure.',
-    'Docs: https://learn.microsoft.com/rest/api/azure/',
-  ].join(' '),
+  description: 'Make a custom REST API call to Azure.',
   displayName: 'Custom Azure API Call',
   baseUrl: () => 'https://management.azure.com?api-version=2024-10-21',
   additionalProps: {
+    documentation: Property.MarkDown({
+      value:
+        'For more information, visit the [Azure API documentation](https://learn.microsoft.com/rest/api/azure/).',
+    }),
     useHostSession: getUseHostSessionProperty('Azure', 'az login'),
     subscriptions: subDropdown,
   },
