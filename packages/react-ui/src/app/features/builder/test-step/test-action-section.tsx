@@ -6,7 +6,7 @@ import {
 } from '@openops/components/ui';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { t } from 'i18next';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 
 import { useSocket } from '@/app/common/providers/socket-provider';
@@ -36,10 +36,17 @@ import { TestButtonTooltip } from './test-step-tooltip';
 type TestActionComponentProps = {
   isSaving: boolean;
   flowVersionId: string;
+  shouldTriggerTest: boolean;
+  onTestTriggered: () => void;
 };
 
 const TestActionSection = React.memo(
-  ({ isSaving, flowVersionId }: TestActionComponentProps) => {
+  ({
+    isSaving,
+    flowVersionId,
+    shouldTriggerTest,
+    onTestTriggered,
+  }: TestActionComponentProps) => {
     const { toast } = useToast();
     const [errorMessage, setErrorMessage] = useState<string | undefined>(
       undefined,
@@ -102,7 +109,7 @@ const TestActionSection = React.memo(
 
     const isTesting = isPending ?? isLoadingStepData;
 
-    const handleTest = () => {
+    const handleTest = useCallback(() => {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       stepTestOutputCache.resetExpandedForStep(formValues.id);
       if (
@@ -115,7 +122,31 @@ const TestActionSection = React.memo(
       } else {
         mutate();
       }
-    };
+    }, [
+      mutate,
+      formValues.id,
+      selectedStep,
+      selectedStepTemplateModel?.riskLevel,
+    ]);
+
+    useEffect(() => {
+      if (
+        shouldTriggerTest &&
+        isValid &&
+        !isTesting &&
+        !riskyStepConfirmationMessage
+      ) {
+        handleTest();
+        onTestTriggered();
+      }
+    }, [
+      shouldTriggerTest,
+      isValid,
+      isTesting,
+      riskyStepConfirmationMessage,
+      handleTest,
+      onTestTriggered,
+    ]);
 
     const confirmRiskyStep = () => {
       setRiskyStepConfirmationMessage(null);
@@ -142,7 +173,7 @@ const TestActionSection = React.memo(
               size="sm"
               onClick={handleTest}
               keyboardShortcut="G"
-              onKeyboardShortcut={mutate}
+              onKeyboardShortcut={handleTest}
               loading={isTesting}
               disabled={!isValid}
             >

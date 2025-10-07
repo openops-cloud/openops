@@ -21,7 +21,13 @@ import {
 } from '@openops/shared';
 import deepEqual from 'fast-deep-equal';
 import { t } from 'i18next';
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { useUpdateEffect } from 'react-use';
 
@@ -41,6 +47,10 @@ import { useStepSettingsContext } from './step-settings-context';
 import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
 import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
 import { useDynamicFormValidationContext } from '@/app/features/builder/dynamic-form-validation/dynamic-form-validation-context';
+
+const TAB_CONFIGURE = 'configure';
+const TAB_TEST = 'test';
+const KEY_TO_TRIGGER_TEST = 'KeyG';
 
 const StepSettingsContainer = React.memo(() => {
   const { selectedStep, blockModel, selectedStepTemplateModel } =
@@ -225,6 +235,26 @@ const StepSettingsContainer = React.memo(() => {
   const sidebarHeaderContainerRef = useRef<HTMLDivElement>(null);
   const modifiedStep = form.getValues();
 
+  const [activeTab, setActiveTab] = useState(TAB_CONFIGURE);
+  const [shouldTriggerTest, setShouldTriggerTest] = useState(false);
+  const handleTestTriggered = useCallback(() => {
+    setShouldTriggerTest(false);
+  }, []);
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (readonly || !form.formState.isValid) return;
+      if ((e.metaKey || e.ctrlKey) && e.code === KEY_TO_TRIGGER_TEST) {
+        e.preventDefault();
+        if (activeTab === TAB_TEST) return;
+        setActiveTab(TAB_TEST);
+        setShouldTriggerTest(true);
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [readonly, form.formState.isValid, activeTab]);
+
   return (
     <Form {...form}>
       <form
@@ -257,20 +287,21 @@ const StepSettingsContainer = React.memo(() => {
 
             <div className="border rounded-sm overflow-hidden pt-0 flex flex-col flex-1 min-h-0">
               <Tabs
-                defaultValue="configure"
+                value={activeTab}
+                onValueChange={setActiveTab}
                 className="w-full flex-1 min-h-0 flex flex-col"
               >
                 <div className="sticky top-0 bg-background border-b rounded-t-sm">
                   <TabsList className="grid grid-cols-2 w-full h-auto rounded-t-sm rounded-b-none bg-background p-0">
                     <TabsTrigger
-                      value="configure"
+                      value={TAB_CONFIGURE}
                       disabled={readonly}
                       className="text-base justify-start text-primary-800 text-left font-normal rounded-t-sm rounded-tr-none rounded-b-none data-[state=active]:bg-gray-200 data-[state=active]:font-medium transition-colors duration-200"
                     >
                       {t('Configure')}
                     </TabsTrigger>
                     <TabsTrigger
-                      value="test"
+                      value={TAB_TEST}
                       disabled={readonly}
                       className="text-base justify-start text-primary-800 text-left font-normal rounded-t-sm rounded-tl-none rounded-b-none data-[state=active]:bg-gray-200 data-[state=active]:font-medium transition-colors duration-200"
                     >
@@ -279,7 +310,10 @@ const StepSettingsContainer = React.memo(() => {
                   </TabsList>
                 </div>
 
-                <TabsContent value="configure" className="mt-2 flex-1 min-h-0">
+                <TabsContent
+                  value={TAB_CONFIGURE}
+                  className="mt-2 flex-1 min-h-0"
+                >
                   <ScrollArea className="h-full">
                     <div className="flex flex-col gap-2 pl-2 pr-4 pb-4">
                       {modifiedStep.type === ActionType.LOOP_ON_ITEMS && (
@@ -329,7 +363,7 @@ const StepSettingsContainer = React.memo(() => {
                   </ScrollArea>
                 </TabsContent>
 
-                <TabsContent value="test" className="mt-0 flex-1 min-h-0">
+                <TabsContent value={TAB_TEST} className="mt-0 flex-1 min-h-0">
                   <ScrollArea className="h-full">
                     <div className="flex flex-col gap-2 pl-2 pr-2 h-full min-h-0">
                       {modifiedStep.type && (
@@ -339,6 +373,8 @@ const StepSettingsContainer = React.memo(() => {
                             flowId={flowVersion.flowId}
                             flowVersionId={flowVersion.id}
                             isSaving={saving}
+                            shouldTriggerTest={shouldTriggerTest}
+                            onTestTriggered={handleTestTriggered}
                           />
                         </div>
                       )}
