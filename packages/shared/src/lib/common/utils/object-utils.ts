@@ -38,7 +38,7 @@ export function deleteProps<
 }
 
 export function sanitizeObjectForPostgresql<T>(input: T): T {
-  return applyFunctionToValuesSync<T>(input, (str) => {
+  return applyFunctionToKeysAndValuesSync<T>(input, (str) => {
     if (isString(str)) {
       // eslint-disable-next-line no-control-regex
       const controlCharsRegex = /\u0000/g;
@@ -47,7 +47,7 @@ export function sanitizeObjectForPostgresql<T>(input: T): T {
     return str;
   });
 }
-export function applyFunctionToValuesSync<T>(
+export function applyFunctionToKeysAndValuesSync<T>(
   obj: unknown,
   apply: (str: string) => unknown,
 ): T {
@@ -57,20 +57,20 @@ export function applyFunctionToValuesSync<T>(
     return apply(obj) as T;
   } else if (Array.isArray(obj)) {
     return obj.map((item) =>
-      applyFunctionToValuesSync(item, apply),
+      applyFunctionToKeysAndValuesSync(item, apply),
     ) as unknown as T;
   } else if (isObject(obj)) {
     return Object.fromEntries(
       Object.entries(obj).map(([key, value]) => [
-        key,
-        applyFunctionToValuesSync(value, apply),
+        apply(key),
+        applyFunctionToKeysAndValuesSync(value, apply),
       ]),
     ) as T;
   }
   return obj as T;
 }
 
-export async function applyFunctionToValues<T>(
+export async function applyFunctionToKeysAndValues<T>(
   obj: unknown,
   apply: (str: string) => Promise<unknown>,
 ): Promise<T> {
@@ -80,14 +80,14 @@ export async function applyFunctionToValues<T>(
     return (await apply(obj)) as T;
   } else if (Array.isArray(obj)) {
     const newArray = await Promise.all(
-      obj.map((item) => applyFunctionToValues(item, apply)),
+      obj.map((item) => applyFunctionToKeysAndValues(item, apply)),
     );
     return newArray as unknown as T;
   } else if (isObject(obj)) {
     const newEntries = await Promise.all(
       Object.entries(obj).map(async ([key, value]) => [
-        key,
-        await applyFunctionToValues(value, apply),
+        await apply(key),
+        await applyFunctionToKeysAndValues(value, apply),
       ]),
     );
     return Object.fromEntries(newEntries) as T;
