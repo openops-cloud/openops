@@ -30,21 +30,9 @@ export const nops = createBlock({
           'X-Nops-Api-Key': auth,
           'Content-Type': 'application/json',
         };
-
-        const providedSignature = propsValue?.signature as string | undefined;
-        if (providedSignature) {
-          headers['x-nops-signature'] = String(providedSignature);
-        }
-
         return headers;
       },
       additionalProps: {
-        signature: Property.SecretText({
-          displayName: 'Signature (optional)',
-          description:
-            'If your API key requires signatures, paste the generated base64 signature here. It will be sent as x-nops-signature.',
-          required: false,
-        }),
         documentation: Property.MarkDown({
           value:
             'For more information, visit the [nOps Developer API documentation](https://help.nops.io/docs/nops/developer-intro).',

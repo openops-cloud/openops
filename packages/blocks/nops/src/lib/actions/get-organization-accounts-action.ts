@@ -7,13 +7,8 @@ export const getOrganizationAccountsAction = createAction({
   displayName: 'Get Organization Accounts',
   description: 'Retrieve AWS/Azure organization accounts (projects) configured in nOps',
   auth: nopsAuth,
+  requireToolApproval: false,
   props: {
-    signature: Property.SecretText({
-      displayName: 'Signature (optional)',
-      description:
-        'If your API key requires signatures, paste the generated base64 signature here. It will be sent as x-nops-signature.',
-      required: false,
-    }),
   },
   async run(context) {
     const endpoint = '/c/admin/projectaws/organization_accounts/';
@@ -24,13 +19,7 @@ export const getOrganizationAccountsAction = createAction({
       endpoint,
     });
 
-    const providedSignature = context.propsValue.signature;
-    const response = await makeGetRequest(
-      context.auth,
-      endpoint,
-      undefined,
-      providedSignature ? { 'x-nops-signature': String(providedSignature) } : undefined,
-    );
+    const response = await makeGetRequest(context.auth, endpoint, undefined, undefined);
 
     console.log('[nOps] Response received:', {
       status: response.status,

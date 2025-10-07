@@ -13,7 +13,7 @@ export async function makeGetRequest(
     headers: {
       'X-Nops-Api-Key': apiKey,
       'Content-Type': 'application/json',
-      ...(extraHeaders),
+      ...(extraHeaders ?? {}),
     },
     queryParams,
   });
@@ -32,7 +32,7 @@ export async function makePostRequest<T = unknown>(
     headers: {
       'X-Nops-Api-Key': apiKey,
       'Content-Type': 'application/json',
-      ...(extraHeaders),
+      ...(extraHeaders ?? {}),
     },
     body: body,
   });
