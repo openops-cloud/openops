@@ -1,25 +1,20 @@
 import { httpClient, HttpMethod, HttpResponse } from '@openops/blocks-common';
-import { nOpsAuth } from '../auth';
 import { BASE_NOPS_URL } from './base-url';
 
 export async function makeGetRequest(
-  auth: nOpsAuth,
+  apiKey: string,
   path: string,
   queryParams?: Record<string, any>,
+  extraHeaders?: Record<string, string>,
 ): Promise<HttpResponse> {
-  const headers: Record<string, string> = {};
-
-  if (auth.signature) {
-    headers['X-Nops-Signature'] = String(auth.signature);
-  }
-
   const response = await httpClient.sendRequest({
     method: HttpMethod.GET,
     url: `${BASE_NOPS_URL}${path}`,
     headers: {
-      'X-Nops-Api-Key': auth.apiKey,
+      'X-Nops-Api-Key': apiKey,
       'Content-Type': 'application/json',
-      ...headers,
+      Accept: 'application/json',
+      ...(extraHeaders ?? {}),
     },
     queryParams,
   });
@@ -28,23 +23,19 @@ export async function makeGetRequest(
 }
 
 export async function makePostRequest<T = unknown>(
-  auth: nOpsAuth,
+  apiKey: string,
   path: string,
   body: unknown,
+  extraHeaders?: Record<string, string>,
 ): Promise<T> {
-  const headers: Record<string, string> = {};
-
-  if (auth.signature) {
-    headers['X-Nops-Signature'] = String(auth.signature);
-  }
-
   const response = await httpClient.sendRequest<T>({
     method: HttpMethod.POST,
     url: `${BASE_NOPS_URL}${path}`,
     headers: {
-      'X-Nops-Api-Key': auth.apiKey,
+      'X-Nops-Api-Key': apiKey,
       'Content-Type': 'application/json',
-      ...headers,
+      Accept: 'application/json',
+      ...(extraHeaders ?? {}),
     },
     body: body,
   });

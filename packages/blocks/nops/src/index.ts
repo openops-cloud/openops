@@ -33,11 +33,6 @@ export const nops = createBlock({
           'X-Nops-Api-Key': apiKey,
           'Content-Type': 'application/json',
         };
-
-        if (signature) {
-          headers['x-nops-signature'] = signature;
-        }
-
         return headers;
       },
       additionalProps: {
