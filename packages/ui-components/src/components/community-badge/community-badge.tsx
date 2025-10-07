@@ -1,8 +1,8 @@
-import { Badge } from '@/ui/badge';
-import { Button } from '@/ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/ui/tooltip';
 import { t } from 'i18next';
 import { Link } from 'react-router-dom';
+import { Badge } from '../../ui/badge';
+import { Button } from '../../ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip';
 
 type CommunityBadgeProps = {
   link?: string;
