@@ -26,7 +26,7 @@ const CommunityBadge = ({ link = '', showUpgrade }: CommunityBadgeProps) => {
               <Link
                 to={link}
                 target="_blank"
-                rel="noopener norefer"
+                rel="noopener noreferrer"
                 className="text-primary-200 text-[12px] font-base"
               >
                 {t('Upgrade')}
