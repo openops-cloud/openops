@@ -21,7 +21,7 @@ export const nops = createBlock({
       baseUrl: () => BASE_NOPS_URL,
       auth: nopsAuth,
       authMapping: async ({ auth }: any) => {
-        const { apiKey, signature } = auth || {};
+        const { apiKey } = auth || {};
 
         if (!apiKey) {
           throw new Error(

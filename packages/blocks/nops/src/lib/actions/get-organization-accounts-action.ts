@@ -13,7 +13,7 @@ export const getOrganizationAccountsAction = createAction({
   async run(context) {
     const endpoint = '/c/admin/projectaws/organization_accounts/';
 
-    const response = await makeGetRequest(context.auth, endpoint, undefined);
+    const response = await makeGetRequest(context.auth, endpoint);
 
     return {
       _debug: {
