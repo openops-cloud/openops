@@ -13,7 +13,10 @@ const CommunityBadge = ({ link = '', showUpgrade }: CommunityBadgeProps) => {
   return (
     <Tooltip delayDuration={200}>
       <TooltipTrigger>
-        <Badge variant="outline" className="h-6 flex items-center gap-1 py-0">
+        <Badge
+          variant="outline"
+          className="h-6 flex items-center gap-1 py-0 bg-editorBackground"
+        >
           <span className="text-primary text-[11px] font-normal">
             {t('Community')}
           </span>
