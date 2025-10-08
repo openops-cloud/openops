@@ -47,27 +47,24 @@ export default function GeneralPage() {
               </div>
             )}
           </div>
-
-          <TooltipProvider>
-            <TooltipWrapper
-              tooltipText={
-                !hasNewerVersionAvailable
-                  ? t('You are on the latest version')
-                  : null
-              }
-            >
-              <Link
-                to="https://docs.openops.com/getting-started/updating-openops"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="self-end"
+          {hasNewerVersionAvailable && (
+            <TooltipProvider>
+              <TooltipWrapper
+                tooltipText={t('Learn how to update on the latest version')}
               >
-                <Button disabled={!hasNewerVersionAvailable}>
-                  {t('Learn how to update')}
-                </Button>
-              </Link>
-            </TooltipWrapper>
-          </TooltipProvider>
+                <Link
+                  to="https://docs.openops.com/getting-started/updating-openops"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="self-end"
+                >
+                  <Button disabled={!hasNewerVersionAvailable}>
+                    {t('Learn how to update')}
+                  </Button>
+                </Link>
+              </TooltipWrapper>
+            </TooltipProvider>
+          )}
         </div>
       </CardContent>
     </Card>

@@ -55,6 +55,7 @@ export const platformHooks = {
 
     if (
       !data?.currentVersion ||
+      data.currentVersion.includes('-') ||
       !validate(data.currentVersion) ||
       !data.latestVersion ||
       !validate(data.latestVersion)

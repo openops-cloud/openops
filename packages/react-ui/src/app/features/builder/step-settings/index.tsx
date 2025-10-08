@@ -279,7 +279,11 @@ const StepSettingsContainer = React.memo(() => {
                   </TabsList>
                 </div>
 
-                <TabsContent value="configure" className="mt-2 flex-1 min-h-0">
+                <TabsContent
+                  value="configure"
+                  className="mt-2 flex-1 min-h-0 data-[state=inactive]:hidden"
+                  forceMount
+                >
                   <ScrollArea className="h-full">
                     <div className="flex flex-col gap-2 pl-2 pr-4 pb-4">
                       {modifiedStep.type === ActionType.LOOP_ON_ITEMS && (
@@ -329,7 +333,11 @@ const StepSettingsContainer = React.memo(() => {
                   </ScrollArea>
                 </TabsContent>
 
-                <TabsContent value="test" className="mt-0 flex-1 min-h-0">
+                <TabsContent
+                  value="test"
+                  className="mt-0 flex-1 min-h-0 data-[state=inactive]:hidden"
+                  forceMount
+                >
                   <ScrollArea className="h-full">
                     <div className="flex flex-col gap-2 pl-2 pr-2 h-full min-h-0">
                       {modifiedStep.type && (

@@ -123,6 +123,7 @@ const sanitizeSvg = (svgContent: string): string => {
   return DOMPurify.sanitize(svgContent, {
     USE_PROFILES: { svg: true, svgFilters: true },
     ADD_TAGS: [
+      'foreignObject',
       'g',
       'path',
       'rect',
