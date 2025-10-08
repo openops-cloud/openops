@@ -6,11 +6,11 @@ import {
   getUseHostSessionProperty,
 } from '@openops/common';
 import { runCommand } from '../azure-cli';
-import { subDropdown } from '../common-properties';
+import { getSubscriptionsDropdownForHostSession } from '../common-properties';
 
 const getHostAccessToken = async (
   auth: unknown,
-  subscription?: string,
+  subscription: string,
 ): Promise<string> => {
   const output = await runCommand(
     'account get-access-token --resource https://management.azure.com --output json',
@@ -31,24 +31,55 @@ export const customAzureApiCallAction = createCustomApiCallAction({
   name: 'custom_azure_api_call',
   description: 'Make a custom REST API call to Azure.',
   displayName: 'Custom Azure API Call',
-  baseUrl: () => 'https://management.azure.com?api-version=2024-10-21',
+  baseUrl: () => 'https://management.azure.com/?api-version=2025-04-01',
   additionalProps: {
     documentation: Property.MarkDown({
       value:
         'For more information, visit the [Azure API documentation](https://learn.microsoft.com/rest/api/azure/).',
     }),
     useHostSession: getUseHostSessionProperty('Azure', 'az login'),
-    subscriptions: subDropdown,
+    subscriptions: Property.DynamicProperties({
+      displayName: '',
+      required: false,
+      refreshers: [
+        'auth',
+        'useHostSession',
+        'useHostSession.useHostSessionCheckbox',
+      ],
+      props: async ({
+        auth,
+        useHostSession,
+      }): Promise<{ [key: string]: any }> => {
+        try {
+          if (useHostSession?.['useHostSessionCheckbox'] as boolean) {
+            return {
+              subDropdown: await getSubscriptionsDropdownForHostSession(auth),
+            } as any;
+          }
+        } catch (error) {
+          return {
+            subDropdown: Property.StaticDropdown({
+              displayName: 'Subscriptions',
+              description: 'Select a single subscription from the list',
+              required: true,
+              options: {
+                disabled: true,
+                options: [],
+                placeholder: `Something went wrong fetching subscriptions`,
+                error: `${error}`,
+              },
+            }),
+          } as any;
+        }
+        return {};
+      },
+    }),
   },
   authMapping: async (context: any) => {
-    const useHostSession = context.propsValue['useHostSession'] as
-      | Record<string, unknown>
-      | undefined;
-    const selectedSubscription = context.propsValue?.subscriptions?.[
-      'subDropdown'
-    ] as string | undefined;
     const shouldUseHostCredentials =
-      (useHostSession?.['useHostSessionCheckbox'] as boolean) === true;
+      context.propsValue.useHostSession?.['useHostSessionCheckbox'];
+    const selectedSubscription =
+      context.propsValue?.subscriptions?.['subDropdown'];
 
     const token = shouldUseHostCredentials
       ? await getHostAccessToken(context.auth, selectedSubscription)

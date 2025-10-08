@@ -54,7 +54,7 @@ export const subDropdown = Property.DynamicProperties({
   },
 });
 
-async function getSubscriptionsDropdownForHostSession(auth: any) {
+export async function getSubscriptionsDropdownForHostSession(auth: any) {
   const result = await runCommand(
     'account list --only-show-errors',
     auth,

@@ -54,3 +54,29 @@ export const projectCliDropdown = Property.Dropdown<string>({
     }
   },
 });
+
+export async function getProjectsStaticDropdown(
+  auth: any,
+  shouldUseHostCredentials: boolean,
+) {
+  const rawProjects = await runCommand(
+    'gcloud projects list --format=json',
+    auth,
+    shouldUseHostCredentials,
+  );
+
+  const projects: Project[] = JSON.parse(rawProjects) ?? [];
+
+  return Property.StaticDropdown({
+    displayName: 'Default Project',
+    description: 'Select a default project to run the command in',
+    required: true,
+    options: {
+      disabled: false,
+      options: projects.map(({ name, projectId }) => ({
+        label: name,
+        value: projectId,
+      })),
+    },
+  });
+}
