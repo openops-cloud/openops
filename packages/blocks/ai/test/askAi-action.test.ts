@@ -3,10 +3,29 @@ jest.mock('@openops/common', () => ({
   getAiModelFromConnection: jest.fn(
     (model: string, customModel?: string) => customModel || model,
   ),
+  isLLMTelemetryEnabled: jest.fn(() => false),
+  getLLMTelemetryConfig: jest.fn(() => ({})),
 }));
 
 jest.mock('ai', () => ({
   generateObject: jest.fn(),
+}));
+
+jest.mock('langfuse-vercel', () => ({
+  LangfuseExporter: jest.fn(),
+}));
+
+jest.mock('@opentelemetry/auto-instrumentations-node', () => ({
+  getNodeAutoInstrumentations: jest.fn(() => ({})),
+}));
+
+jest.mock('@opentelemetry/sdk-node', () => ({
+  NodeSDK: class {
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    async start() {}
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    async shutdown() {}
+  },
 }));
 
 import { AiProviderEnum, analysisLLMSchema } from '@openops/shared';
@@ -59,12 +78,15 @@ describe('analyze action', () => {
 
     const result = await askAi.run(context as any);
 
-    expect(generateObject).toHaveBeenCalledWith({
-      model: 'languageModel',
-      prompt: 'Hello',
-      schema: analysisLLMSchema,
-      maxRetries: 2,
-    });
+    expect(generateObject).toHaveBeenCalledWith(
+      expect.objectContaining({
+        model: 'languageModel',
+        prompt: 'Hello',
+        schema: analysisLLMSchema,
+        maxRetries: 2,
+        experimental_telemetry: { isEnabled: false },
+      }),
+    );
 
     expect(result).toEqual({ textAnswer: 'answer', classifications: [] });
   });
