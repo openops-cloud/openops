@@ -50,25 +50,9 @@ export const customAzureApiCallAction = createCustomApiCallAction({
         auth,
         useHostSession,
       }): Promise<{ [key: string]: any }> => {
-        try {
-          if (useHostSession?.['useHostSessionCheckbox'] as boolean) {
-            return {
-              subDropdown: await getSubscriptionsDropdownForHostSession(auth),
-            } as any;
-          }
-        } catch (error) {
+        if (useHostSession?.['useHostSessionCheckbox'] as boolean) {
           return {
-            subDropdown: Property.StaticDropdown({
-              displayName: 'Subscriptions',
-              description: 'Select a single subscription from the list',
-              required: true,
-              options: {
-                disabled: true,
-                options: [],
-                placeholder: `Something went wrong fetching subscriptions`,
-                error: `${error}`,
-              },
-            }),
+            subDropdown: await getSubscriptionsDropdownForHostSession(auth),
           } as any;
         }
         return {};

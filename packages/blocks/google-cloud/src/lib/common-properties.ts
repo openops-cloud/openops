@@ -59,24 +59,38 @@ export async function getProjectsStaticDropdown(
   auth: any,
   shouldUseHostCredentials: boolean,
 ) {
-  const rawProjects = await runCommand(
-    'gcloud projects list --format=json',
-    auth,
-    shouldUseHostCredentials,
-  );
+  try {
+    const rawProjects = await runCommand(
+      'gcloud projects list --format=json',
+      auth,
+      shouldUseHostCredentials,
+    );
 
-  const projects: Project[] = JSON.parse(rawProjects) ?? [];
+    const projects: Project[] = JSON.parse(rawProjects) ?? [];
 
-  return Property.StaticDropdown({
-    displayName: 'Default Project',
-    description: 'Select a default project to run the command in',
-    required: true,
-    options: {
-      disabled: false,
-      options: projects.map(({ name, projectId }) => ({
-        label: name,
-        value: projectId,
-      })),
-    },
-  });
+    return Property.StaticDropdown({
+      displayName: 'Default Project',
+      description: 'Select a default project to run the command in',
+      required: true,
+      options: {
+        disabled: false,
+        options: projects.map(({ name, projectId }) => ({
+          label: name,
+          value: projectId,
+        })),
+      },
+    });
+  } catch (error) {
+    return Property.StaticDropdown({
+      displayName: 'Default Project',
+      description: 'Select a default project to run the command in',
+      required: true,
+      options: {
+        disabled: true,
+        options: [],
+        placeholder: 'Please run gcloud auth login locally',
+        error: `${error}`,
+      },
+    });
+  }
 }

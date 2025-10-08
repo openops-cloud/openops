@@ -51,25 +51,9 @@ export const customGoogleCloudApiCallAction = createCustomApiCallAction({
         useHostSession,
       }): Promise<{ [key: string]: any }> => {
         if (useHostSession?.['useHostSessionCheckbox'] as boolean) {
-          try {
-            return {
-              projectDropdown: await getProjectsStaticDropdown(auth, true),
-            } as any;
-          } catch (error) {
-            return {
-              projectDropdown: Property.StaticDropdown({
-                displayName: 'Default Project',
-                description: 'Select a default project to run the command in',
-                required: true,
-                options: {
-                  disabled: true,
-                  options: [],
-                  placeholder: 'Please run gcloud auth login locally',
-                  error: `${error}`,
-                },
-              }),
-            } as any;
-          }
+          return {
+            projectDropdown: await getProjectsStaticDropdown(auth, true),
+          } as any;
         }
         return {};
       },
