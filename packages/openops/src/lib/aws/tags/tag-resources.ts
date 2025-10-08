@@ -3,6 +3,7 @@ import {
   TagResourcesCommand,
   TagResourcesCommandOutput,
 } from '@aws-sdk/client-resource-groups-tagging-api';
+import { json } from 'zod';
 import { AwsCredentials } from '../auth';
 import { getAwsClient } from '../get-client';
 import { groupARNsByRegion } from '../regions';
@@ -52,6 +53,12 @@ export async function addTagsToResources(
     } catch (error) {
       throw new Error('An error occurred while tagging resources: ' + error);
     }
+  }
+
+  if (result.failed && Object.keys(result.failed).length > 0) {
+    throw new Error(
+      'An error occurred while tagging resources: ' + JSON.stringify(result),
+    );
   }
 
   return result;
