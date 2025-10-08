@@ -5,10 +5,9 @@ const providerOptionsWithCache = {
 };
 
 /**
- * Adds cache control to messages following a three-breakpoint strategy:
- * 1. Always cache system prompt (breakpoint 1)
- * 2. Always cache all tools by setting cache on last tool (breakpoint 2)
- * 3. Always cache last user message (breakpoint 3)
+ * Adds cache control to messages with the following breakpoint strategy:
+ * - Always cache system prompt (breakpoint 1)
+ * - Always cache last user message (breakpoint 3)
  *
  * @param messages - Array of messages in the conversation
  * @param systemPrompt - System prompt to prepend as a cached message
