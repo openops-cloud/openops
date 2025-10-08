@@ -8,7 +8,7 @@ jest.mock('@openops/common', () => common);
 
 import { addTagsAction } from '../src/lib/actions/add-tags-action';
 
-describe('applyRemediationAction', () => {
+describe('addTagsAction', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -184,6 +184,37 @@ describe('applyRemediationAction', () => {
       ['arn:aws:iam::3:service/resource3', 'arn:aws:iam::3:service/resource5'],
       tags,
       'credentials3',
+    );
+  });
+
+  it('should throw if some resources failed to be tagged', async () => {
+    common.getCredentialsForAccount.mockResolvedValue('credentials');
+    common.addTagsToResources.mockRejectedValue('some error');
+
+    const tags = { test: 'test' };
+
+    const context = {
+      ...jest.requireActual('@openops/blocks-framework'),
+      auth: auth,
+      propsValue: {
+        resourceARNs: [
+          'arn:aws:iam::1:service/resource1',
+          'arn:aws:iam::1:service/resource2',
+        ],
+        tags,
+      },
+    };
+
+    await expect(addTagsAction.run(context)).rejects.toThrow(
+      'An error occurred while adding tags to the resources: some error',
+    );
+
+    expect(common.addTagsToResources).toHaveBeenCalledTimes(1);
+    expect(common.addTagsToResources).toHaveBeenNthCalledWith(
+      1,
+      ['arn:aws:iam::1:service/resource1', 'arn:aws:iam::1:service/resource2'],
+      tags,
+      'credentials',
     );
   });
 });
