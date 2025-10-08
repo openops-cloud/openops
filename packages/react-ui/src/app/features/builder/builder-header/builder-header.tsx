@@ -10,7 +10,7 @@ import { WorkflowOverview } from '@/app/features/builder/builder-header/workflow
 import { RunDetailsBar } from '@/app/features/flow-runs/components/run-details-bar';
 import { cn } from '@openops/components/ui';
 import { WebsocketClientEvent } from '@openops/shared';
-import { useSocket } from '@openops/ui-kit';
+import { useSocket } from '@/app/common/providers/socket-provider';
 import { FC } from 'react';
 import BuilderViewOnlyWidget from './builder-view-only-widget';
 import { UndoRedoActionBar } from './undo-redo-action-bar';
