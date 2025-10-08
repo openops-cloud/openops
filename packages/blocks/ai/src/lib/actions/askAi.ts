@@ -8,10 +8,15 @@ import {
   getAiModelFromConnection,
   getAiProvider,
   getAiProviderLanguageModel,
+  getLLMTelemetryConfig,
   isLLMTelemetryEnabled,
 } from '@openops/common';
 import { AiProviderEnum, analysisLLMSchema } from '@openops/shared';
+import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { NodeSDK } from '@opentelemetry/sdk-node';
+import { SpanExporter } from '@opentelemetry/sdk-trace-base';
 import { generateObject } from 'ai';
+import { LangfuseExporter } from 'langfuse-vercel';
 
 export const askAi = createAction({
   displayName: 'Ask AI',
@@ -70,6 +75,17 @@ export const askAi = createAction({
     }),
   },
   run: async (context) => {
+    let telemetrySDK: NodeSDK | undefined;
+    if (isLLMTelemetryEnabled()) {
+      telemetrySDK = new NodeSDK({
+        traceExporter: new LangfuseExporter({
+          ...getLLMTelemetryConfig(),
+        }) as unknown as SpanExporter,
+        instrumentations: [getNodeAutoInstrumentations()],
+      });
+      await telemetrySDK.start();
+    }
+
     const auth = context.auth as {
       provider: AiProviderEnum;
       apiKey: string;
@@ -115,6 +131,8 @@ export const askAi = createAction({
       ...((modelSettings as Record<string, unknown>) ?? {}),
       experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
     });
+    telemetrySDK?.shutdown();
+
     return result.object;
   },
 });
