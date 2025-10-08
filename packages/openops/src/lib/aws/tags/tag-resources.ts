@@ -3,7 +3,6 @@ import {
   TagResourcesCommand,
   TagResourcesCommandOutput,
 } from '@aws-sdk/client-resource-groups-tagging-api';
-import { json } from 'zod';
 import { AwsCredentials } from '../auth';
 import { getAwsClient } from '../get-client';
 import { groupARNsByRegion } from '../regions';
