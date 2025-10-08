@@ -108,7 +108,7 @@ const SELECT_FIELDS = [
   'toRecipients',
   'ccRecipients',
   'receivedDateTime',
-  'bodyPreview',
+  'body',
 ].join(',');
 
 async function createGraphClient(accessToken: string): Promise<Client> {
@@ -132,9 +132,15 @@ async function fetchMessages(
       ? '$top=10'
       : `$filter=receivedDateTime gt ${dayjs(lastFetchEpochMS).toISOString()}`;
 
+  const headers: Record<string, string> = {
+    ConsistencyLevel: 'eventual',
+    Prefer: 'outlook.body-content-type="html"',
+  };
+
   let response: PageCollection = await client
     .api(`${baseUrl}?${filter}&$select=${SELECT_FIELDS}`)
     .orderby('receivedDateTime desc')
+    .headers(headers)
     .get();
 
   const shouldFetchAll = lastFetchEpochMS !== 0;
