@@ -1,17 +1,16 @@
+import { useSocket } from '@/app/common/providers/socket-provider';
 import { BuilderHeaderActionBar } from '@/app/features/builder/builder-header/builder-header-action-bar';
 import { SideMenuCollapsed } from '@/app/features/builder/builder-header/side-menu-collapsed';
+import { WorkflowOverview } from '@/app/features/builder/builder-header/workflow-overview/workflow-overview';
 import {
   useBuilderStateContext,
   useSwitchToDraft,
 } from '@/app/features/builder/builder-hooks';
-import { LeftSideBarType } from '../builder-types';
-
-import { WorkflowOverview } from '@/app/features/builder/builder-header/workflow-overview/workflow-overview';
 import { RunDetailsBar } from '@/app/features/flow-runs/components/run-details-bar';
 import { cn } from '@openops/components/ui';
 import { WebsocketClientEvent } from '@openops/shared';
-import { useSocket } from '@/app/common/providers/socket-provider';
 import { FC } from 'react';
+import { LeftSideBarType } from '../builder-types';
 import BuilderViewOnlyWidget from './builder-view-only-widget';
 import { UndoRedoActionBar } from './undo-redo-action-bar';
 
