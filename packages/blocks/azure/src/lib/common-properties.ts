@@ -54,26 +54,42 @@ export const subDropdown = Property.DynamicProperties({
   },
 });
 
-async function getSubscriptionsDropdownForHostSession(auth: any) {
-  const result = await runCommand(
-    'account list --only-show-errors',
-    auth,
-    true,
-    undefined,
-  );
+export async function getSubscriptionsDropdownForHostSession(auth: any) {
+  try {
+    const result = await runCommand(
+      'account list --only-show-errors',
+      auth,
+      true,
+      undefined,
+    );
 
-  const parsedSubscriptions = JSON.parse(result);
+    const parsedSubscriptions = JSON.parse(result);
 
-  return Property.StaticDropdown({
-    displayName: 'Subscriptions',
-    description: 'Select a single subscription from the list',
-    required: true,
-    options: {
-      disabled: false,
-      options: parsedSubscriptions.map((obj: { id: string; name: string }) => ({
-        label: obj.name,
-        value: obj.id,
-      })),
-    },
-  });
+    return Property.StaticDropdown({
+      displayName: 'Subscriptions',
+      description: 'Select a single subscription from the list',
+      required: true,
+      options: {
+        disabled: false,
+        options: parsedSubscriptions.map(
+          (obj: { id: string; name: string }) => ({
+            label: obj.name,
+            value: obj.id,
+          }),
+        ),
+      },
+    });
+  } catch (error) {
+    return Property.StaticDropdown({
+      displayName: 'Subscriptions',
+      description: 'Select a single subscription from the list',
+      required: true,
+      options: {
+        disabled: true,
+        options: [],
+        placeholder: `Something went wrong fetching subscriptions`,
+        error: `${error}`,
+      },
+    });
+  }
 }
