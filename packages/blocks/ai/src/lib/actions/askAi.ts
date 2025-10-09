@@ -8,15 +8,10 @@ import {
   getAiModelFromConnection,
   getAiProvider,
   getAiProviderLanguageModel,
-  getLLMTelemetryConfig,
   isLLMTelemetryEnabled,
 } from '@openops/common';
 import { AiProviderEnum, analysisLLMSchema } from '@openops/shared';
-import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
-import { NodeSDK } from '@opentelemetry/sdk-node';
-import { SpanExporter } from '@opentelemetry/sdk-trace-base';
 import { generateObject } from 'ai';
-import { LangfuseExporter } from 'langfuse-vercel';
 
 export const askAi = createAction({
   displayName: 'Ask AI',

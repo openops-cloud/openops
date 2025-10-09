@@ -135,15 +135,6 @@ export const isLLMTelemetryEnabled = () =>
   !!system.get(SharedSystemProp.LANGFUSE_SECRET_KEY) &&
   !!system.get(SharedSystemProp.LANGFUSE_PUBLIC_KEY);
 
-export const getLLMTelemetryConfig = () => {
-  return {
-    secretKey: system.get(SharedSystemProp.LANGFUSE_SECRET_KEY),
-    publicKey: system.get(SharedSystemProp.LANGFUSE_PUBLIC_KEY),
-    baseUrl: system.get(SharedSystemProp.LANGFUSE_HOST),
-    environment: system.get(SharedSystemProp.ENVIRONMENT_NAME),
-  };
-};
-
 const invalidConfigError = (
   errorName: string,
   errorMessage: string,
