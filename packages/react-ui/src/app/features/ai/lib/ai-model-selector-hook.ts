@@ -31,7 +31,6 @@ export const useAiModelSelector = ({
     mutationFn: ({ chatId, newModel }: { chatId: string; newModel: string }) =>
       aiAssistantChatApi.updateModel({ chatId, model: newModel }),
     onSuccess: (data) => {
-      toast(AI_SETTINGS_SAVED_SUCCESSFULLY_TOAST);
       setSelectedModel(data.model);
     },
     onError: (error: AxiosError) => {
