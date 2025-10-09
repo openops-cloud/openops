@@ -4,28 +4,10 @@ jest.mock('@openops/common', () => ({
     (model: string, customModel?: string) => customModel || model,
   ),
   isLLMTelemetryEnabled: jest.fn(() => false),
-  getLLMTelemetryConfig: jest.fn(() => ({})),
 }));
 
 jest.mock('ai', () => ({
   generateObject: jest.fn(),
-}));
-
-jest.mock('langfuse-vercel', () => ({
-  LangfuseExporter: jest.fn(),
-}));
-
-jest.mock('@opentelemetry/auto-instrumentations-node', () => ({
-  getNodeAutoInstrumentations: jest.fn(() => ({})),
-}));
-
-jest.mock('@opentelemetry/sdk-node', () => ({
-  NodeSDK: class {
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    async start() {}
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    async shutdown() {}
-  },
 }));
 
 import { AiProviderEnum, analysisLLMSchema } from '@openops/shared';
