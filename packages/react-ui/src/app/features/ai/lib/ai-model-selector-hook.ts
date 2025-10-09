@@ -1,5 +1,4 @@
 import { aiAssistantChatApi } from '@/app/features/ai/lib/ai-assistant-chat-api';
-import { AI_SETTINGS_SAVED_SUCCESSFULLY_TOAST } from '@/app/features/ai/lib/ai-form-utils';
 import { toast } from '@openops/components/ui';
 import { useMutation } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
