@@ -115,7 +115,6 @@ export const askAi = createAction({
       ...((modelSettings as Record<string, unknown>) ?? {}),
       experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
     });
-
     return result.object;
   },
 });
