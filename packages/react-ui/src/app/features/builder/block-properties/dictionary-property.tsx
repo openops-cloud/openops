@@ -92,13 +92,26 @@ export const DictionaryProperty = ({
     <div className="flex w-full flex-col gap-4">
       {valuesArray.current.map(({ key, value, id }, index) => (
         <div key={'dictionary-input-' + id} className="flex gap-3 items-center">
-          <Input
-            value={key}
-            disabled={disabled}
-            className="basis-[50%] h-full max-w-[50%]"
-            onChange={(e) => onChangeValue(index, undefined, e.target.value)}
-            placeholder={keyPlaceholder}
-          />
+          <div className="basis-[50%] max-w-[50%]">
+            {useMentionTextInput ? (
+              <TextInputWithMentions
+                initialValue={key}
+                disabled={disabled}
+                onChange={(e) => onChangeValue(index, undefined, e)}
+                placeholder={keyPlaceholder}
+              ></TextInputWithMentions>
+            ) : (
+              <Input
+                value={key}
+                disabled={disabled}
+                className="basis-[50%] h-full max-w-[50%]"
+                onChange={(e) =>
+                  onChangeValue(index, undefined, e.target.value)
+                }
+                placeholder={keyPlaceholder}
+              />
+            )}
+          </div>
           <div className="basis-[50%] max-w-[50%]">
             {useMentionTextInput ? (
               <TextInputWithMentions
