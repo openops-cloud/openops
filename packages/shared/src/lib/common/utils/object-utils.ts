@@ -59,6 +59,8 @@ export function applyFunctionToValuesSync<T>(
     return obj.map((item) =>
       applyFunctionToValuesSync(item, apply),
     ) as unknown as T;
+  } else if (obj instanceof Date) {
+    return obj as T;
   } else if (isObject(obj)) {
     return Object.fromEntries(
       Object.entries(obj).map(([key, value]) => [
@@ -83,6 +85,8 @@ export async function applyFunctionToValues<T>(
       obj.map((item) => applyFunctionToValues(item, apply)),
     );
     return newArray as unknown as T;
+  } else if (obj instanceof Date) {
+    return obj as T;
   } else if (isObject(obj)) {
     const newEntries = await Promise.all(
       Object.entries(obj).map(async ([key, value]) => [
