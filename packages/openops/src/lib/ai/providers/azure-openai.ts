@@ -15,7 +15,8 @@ function createLanguageModel(params: {
   if (isApimMode) {
     if (!params.providerSettings?.['apiVersion']) {
       throw new Error(
-        'apiVersion is required for Azure OpenAI API Management. Please pass it in the provider settings.',
+        'apiVersion is required for Azure OpenAI API Management. Please pass it in the provider settings as {"apiVersion": "yyyy-mm-dd"}. ' +
+          'For more information on how to do that, please refer to the documentation: https://learn.microsoft.com/en-us/azure/ai-foundry/openai/api-version-lifecycle?tabs=python.',
       );
     }
 
