@@ -8,6 +8,7 @@ import {
   getAiModelFromConnection,
   getAiProvider,
   getAiProviderLanguageModel,
+  isLLMTelemetryEnabled,
 } from '@openops/common';
 import { AiProviderEnum, analysisLLMSchema } from '@openops/shared';
 import { generateObject } from 'ai';
@@ -112,6 +113,7 @@ export const askAi = createAction({
       prompt: composedPrompt,
       schema: analysisLLMSchema,
       ...((modelSettings as Record<string, unknown>) ?? {}),
+      experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
     });
     return result.object;
   },

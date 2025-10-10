@@ -3,6 +3,7 @@ jest.mock('@openops/common', () => ({
   getAiModelFromConnection: jest.fn(
     (model: string, customModel?: string) => customModel || model,
   ),
+  isLLMTelemetryEnabled: jest.fn(() => false),
 }));
 
 jest.mock('ai', () => ({
@@ -59,12 +60,15 @@ describe('analyze action', () => {
 
     const result = await askAi.run(context as any);
 
-    expect(generateObject).toHaveBeenCalledWith({
-      model: 'languageModel',
-      prompt: 'Hello',
-      schema: analysisLLMSchema,
-      maxRetries: 2,
-    });
+    expect(generateObject).toHaveBeenCalledWith(
+      expect.objectContaining({
+        model: 'languageModel',
+        prompt: 'Hello',
+        schema: analysisLLMSchema,
+        maxRetries: 2,
+        experimental_telemetry: { isEnabled: false },
+      }),
+    );
 
     expect(result).toEqual({ textAnswer: 'answer', classifications: [] });
   });
