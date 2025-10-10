@@ -13,13 +13,18 @@ function createLanguageModel(params: {
 }): LanguageModel {
   const isApimMode = isApimUrl(params.providerSettings?.['baseURL'] as string);
   if (isApimMode) {
+    if (!params.providerSettings?.['apiVersion']) {
+      throw new Error(
+        'apiVersion is required for Azure OpenAI API Management. Please pass it in the provider settings.',
+      );
+    }
+
     return createAzure({
       apiKey: '',
       headers: {
         'Ocp-Apim-Subscription-Key': params.apiKey,
       },
       useDeploymentBasedUrls: true,
-      apiVersion: '2024-02-01',
       ...params.providerSettings,
     })(params.model);
   }
