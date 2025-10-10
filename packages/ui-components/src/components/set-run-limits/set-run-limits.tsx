@@ -166,7 +166,7 @@ export function SetRunLimits({
                       }
                       onCheckedChange={(v) => toggleSelectAll(!!v)}
                       disabled={!isEnabled || limits.length === 0}
-                      aria-label="Select all"
+                      aria-label={t('Select all')}
                       className="flex items-center justify-center rounded-xs data-[state=checked]:!bg-primary-200 data-[state=indeterminate]:!bg-primary-200 data-[state=checked]:!border-primary-200 data-[state=indeterminate]:!border-primary-200"
                     />
 
@@ -196,7 +196,13 @@ export function SetRunLimits({
                                         field.onChange(!!v)
                                       }
                                       disabled={!isEnabled}
-                                      aria-label={`Toggle ${item.blockName} ${item.actionName}`}
+                                      aria-label={t(
+                                        'Toggle {{block}} {{action}}',
+                                        {
+                                          block: item.blockName,
+                                          action: item.actionName,
+                                        },
+                                      )}
                                       className="flex items-center justify-center rounded-xs data-[state=checked]:!bg-primary-200 data-[state=indeterminate]:!bg-primary-200 data-[state=checked]:!border-primary-200 data-[state=indeterminate]:!border-primary-200"
                                     />
                                   </FormControl>
