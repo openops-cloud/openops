@@ -96,15 +96,14 @@ const TestTriggerSection = React.memo(
     const [currentSelectedId, setCurrentSelectedId] = useState<
       string | undefined
     >(undefined);
-    const { mutate: saveMockAsSampleData, isPending: isSavingMockdata } =
-      useMutation({
-        mutationFn: () => {
-          return triggerEventsApi.saveTriggerMockdata(flowId, mockData);
-        },
-        onSuccess: async (result) => {
-          updateSelectedData(result);
-        },
-      });
+    const { mutate: saveTestData, isPending: isSavingTestData } = useMutation({
+      mutationFn: (data: unknown) => {
+        return triggerEventsApi.saveTriggerMockdata(flowId, data);
+      },
+      onSuccess: async (result) => {
+        updateSelectedData(result);
+      },
+    });
     const {
       mutate: simulateTrigger,
       isPending: isSimulating,
@@ -261,7 +260,7 @@ const TestTriggerSection = React.memo(
       <div className="flex flex-col h-full">
         {((stepData && 'output' in stepData) || !!errorMessage) &&
           !isSimulating &&
-          !isSavingMockdata && (
+          !isSavingTestData && (
             <>
               {pollResults?.data && !isTesting && (
                 <div className="mb-3">
@@ -274,6 +273,7 @@ const TestTriggerSection = React.memo(
                       if (triggerEvent) {
                         updateSelectedData(triggerEvent);
                         setCurrentSelectedId(value);
+                        saveTestData(triggerEvent.payload);
                       }
                     }}
                   >
@@ -380,8 +380,8 @@ const TestTriggerSection = React.memo(
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => saveMockAsSampleData()}
-                    loading={isSavingMockdata}
+                    onClick={() => saveTestData(mockData)}
+                    loading={isSavingTestData}
                   >
                     {t('Use Mock Data')}
                   </Button>
