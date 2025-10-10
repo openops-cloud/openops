@@ -4,12 +4,14 @@ import {
   AlertTitle,
   Button,
   Dot,
+  INTERNAL_ERROR_TOAST,
   LoadingSpinner,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
+  toast,
 } from '@openops/components/ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
@@ -99,6 +101,9 @@ const TestTriggerSection = React.memo(
     const { mutate: saveTestData, isPending: isSavingTestData } = useMutation({
       mutationFn: (data: unknown) => {
         return triggerEventsApi.saveTriggerMockdata(flowId, data);
+      },
+      onError: () => {
+        toast(INTERNAL_ERROR_TOAST);
       },
       onSuccess: async (result) => {
         updateSelectedData(result);
