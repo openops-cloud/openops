@@ -1,5 +1,4 @@
 import { aiAssistantChatApi } from '@/app/features/ai/lib/ai-assistant-chat-api';
-import { AI_SETTINGS_SAVED_SUCCESSFULLY_TOAST } from '@/app/features/ai/lib/ai-form-utils';
 import { toast } from '@openops/components/ui';
 import { useMutation } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
@@ -31,7 +30,6 @@ export const useAiModelSelector = ({
     mutationFn: ({ chatId, newModel }: { chatId: string; newModel: string }) =>
       aiAssistantChatApi.updateModel({ chatId, model: newModel }),
     onSuccess: (data) => {
-      toast(AI_SETTINGS_SAVED_SUCCESSFULLY_TOAST);
       setSelectedModel(data.model);
     },
     onError: (error: AxiosError) => {

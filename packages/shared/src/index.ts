@@ -29,6 +29,7 @@ export * from './lib/flow-run/execution/flow-execution';
 export * from './lib/flow-run/execution/step-output';
 export * from './lib/flow-run/flow-run';
 export * from './lib/flow-run/test-flow-run-request';
+export * from './lib/flow-run/test-run-settings';
 export * from './lib/flows';
 export * from './lib/flows/actions/action';
 export * from './lib/flows/actions/frontend-blocks';
