@@ -1,3 +1,4 @@
+import { TestRunLimitSettings } from '@openops/shared';
 import { t } from 'i18next';
 import React, { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
@@ -10,37 +11,64 @@ import { ScrollArea } from '../../ui/scroll-area';
 import { Switch } from '../../ui/switch';
 import { BlockIcon } from '../block-icon/block-icon';
 
-export type RunLimitItem = {
-  blockName: string;
-  actionName: string;
-  blockDisplayName?: string;
-  actionDisplayName?: string;
-  logoUrl?: string;
-  isEnabled: boolean;
-  limit: number;
-};
-
-export type SetRunLimitsValue = {
-  enabled: boolean;
-  limits: RunLimitItem[];
-};
-
+/**
+ * Props for the SetRunLimits component.
+ *
+ * This component renders a form to configure per-action execution limits
+ * for a test run. It supports enabling/disabling limits globally and
+ * fine‑tuning individual block/action limits.
+ */
 export type SetRunLimitsProps = {
-  value: SetRunLimitsValue;
-  onSave: (value: SetRunLimitsValue) => void;
+  /**
+   * Current settings to display in the form.
+   * - isEnabled: whether the run limits feature is enabled globally for the test run
+   * - limits: list of per action limits with shape { blockName, actionName, isEnabled, limit }
+   */
+  value: TestRunLimitSettings;
+  /**
+   * Callback fired when the user submits the form.
+   * Receives the full TestRunLimitSettings value as the argument.
+   */
+  onSave: (value: TestRunLimitSettings) => void;
+  /**
+   * Mapping of block internal names (e.g., "slack", "aws") to display names (e.g., "Slack", "AWS").
+   * Used to render human‑friendly provider/app names in the list.
+   * Note: property name keeps historical "Diplay" spelling for backward compatibility.
+   */
+  blockDiplayNames: Record<string, string>;
+  /**
+   * Mapping of action internal names (e.g., "send_message") to display names (e.g., "Send Message").
+   * Used to render human‑friendly action labels in the list.
+   * Note: property name keeps historical "Diplay" spelling for backward compatibility.
+   */
+  actionDiplayNames: Record<string, string>;
+  /**
+   * Mapping of block internal names to logo image URLs used for visual context in the list.
+   * Example: { slack: 'https://static.openops.com/blocks/slack.png' }
+   */
+  blockLogoUrls: Record<string, string>;
+  /**
+   * When true, shows a loading skeleton/disabled state for the form to indicate data is being fetched or saved.
+   */
   isLoading?: boolean;
+  /**
+   * Optional className to customize the outer container styling.
+   */
   className?: string;
 };
 
 export function SetRunLimits({
   value,
   onSave,
+  blockDiplayNames,
+  actionDiplayNames,
+  blockLogoUrls,
   isLoading,
   className,
 }: SetRunLimitsProps) {
-  const form = useForm<SetRunLimitsValue>({
+  const form = useForm<TestRunLimitSettings>({
     defaultValues: {
-      enabled: value?.enabled ?? false,
+      isEnabled: value?.isEnabled ?? false,
       limits: value?.limits ?? [],
     },
     mode: 'onChange',
@@ -48,12 +76,12 @@ export function SetRunLimits({
 
   useEffect(() => {
     form.reset({
-      enabled: value?.enabled ?? false,
+      isEnabled: value?.isEnabled ?? false,
       limits: value?.limits ?? [],
     });
   }, [value, form]);
 
-  const enabled = !!form.watch('enabled');
+  const isEnabled = !!form.watch('isEnabled');
   const limits = form.watch('limits');
   const formValues = form.watch();
 
@@ -76,7 +104,7 @@ export function SetRunLimits({
     form.setValue('limits', updated, { shouldDirty: true, shouldTouch: true });
   };
 
-  const onSubmit = (data: SetRunLimitsValue) => {
+  const onSubmit = (data: TestRunLimitSettings) => {
     onSave(data);
   };
 
@@ -101,12 +129,12 @@ export function SetRunLimits({
           <form
             onSubmit={form.handleSubmit(onSubmit)}
             className={cn({
-              'text-muted-foreground dark:text-muted-foreground': !enabled,
+              'text-muted-foreground dark:text-muted-foreground': !isEnabled,
             })}
           >
             <FormField
               control={form.control}
-              name={'enabled'}
+              name={'isEnabled'}
               render={({ field }) => (
                 <FormItem>
                   <div className="flex items-center justify-start gap-6">
@@ -137,7 +165,7 @@ export function SetRunLimits({
                           : false
                       }
                       onCheckedChange={(v) => toggleSelectAll(!!v)}
-                      disabled={!enabled || limits.length === 0}
+                      disabled={!isEnabled || limits.length === 0}
                       aria-label="Select all"
                       className="flex items-center justify-center rounded-xs data-[state=checked]:!bg-primary-200 data-[state=indeterminate]:!bg-primary-200 data-[state=checked]:!border-primary-200 data-[state=indeterminate]:!border-primary-200"
                     />
@@ -154,7 +182,7 @@ export function SetRunLimits({
                           <div
                             key={`${item.blockName}__${item.actionName}`}
                             className="contents"
-                            aria-disabled={!enabled}
+                            aria-disabled={!isEnabled}
                           >
                             <FormField
                               control={form.control}
@@ -167,7 +195,7 @@ export function SetRunLimits({
                                       onCheckedChange={(v) =>
                                         field.onChange(!!v)
                                       }
-                                      disabled={!enabled}
+                                      disabled={!isEnabled}
                                       aria-label={`Toggle ${item.blockName} ${item.actionName}`}
                                       className="flex items-center justify-center rounded-xs data-[state=checked]:!bg-primary-200 data-[state=indeterminate]:!bg-primary-200 data-[state=checked]:!border-primary-200 data-[state=indeterminate]:!border-primary-200"
                                     />
@@ -176,7 +204,7 @@ export function SetRunLimits({
                               )}
                             />
                             <BlockIcon
-                              logoUrl={item.logoUrl}
+                              logoUrl={blockLogoUrls[item.blockName]}
                               showTooltip={false}
                               size={'sm'}
                               circle={true}
@@ -184,13 +212,13 @@ export function SetRunLimits({
                               className={cn('p-0', 'opacity-70')}
                             ></BlockIcon>
                             <span className="text-sm font-medium">
-                              {item.blockDisplayName ?? item.blockName}
+                              {blockDiplayNames[item.blockName]}
                             </span>
 
                             <div className="h-[18px] w-4 border-r"></div>
 
                             <span className="text-sm font-medium">
-                              {item.actionDisplayName ?? item.actionName}
+                              {actionDiplayNames[item.actionName]}
                             </span>
 
                             <FormField
@@ -216,7 +244,7 @@ export function SetRunLimits({
                                             : 0,
                                         );
                                       }}
-                                      disabled={!enabled}
+                                      disabled={!isEnabled}
                                       className="h-8 w-[64px]"
                                     />
                                   </FormControl>

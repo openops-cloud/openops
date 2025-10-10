@@ -1,83 +1,92 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { ThemeAwareDecorator } from '../../../.storybook/decorators';
-import {
-  RunLimitItem,
-  SetRunLimits,
-  SetRunLimitsValue,
-} from '../../components/set-run-limits/set-run-limits';
+import { SetRunLimits } from '../../components/set-run-limits/set-run-limits';
 import { TooltipProvider } from '../../ui/tooltip';
 
-const sampleLimits: RunLimitItem[] = [
+const sampleLimits = [
   {
-    blockName: 'Slack',
+    blockName: 'slack',
     actionName: 'send_message',
-    blockDisplayName: 'Slack',
-    actionDisplayName: 'Send Message',
-    logoUrl: 'https://static.openops.com/blocks/slack.png',
     isEnabled: true,
     limit: 10,
   },
   {
-    blockName: 'AWS',
-    actionName: 'Tag Resource',
-    logoUrl: 'https://static.openops.com/blocks/aws.png',
+    blockName: 'aws',
+    actionName: 'tag_resource',
     isEnabled: false,
     limit: 10,
   },
   {
-    blockName: 'Azure',
-    actionName: 'CLI',
-    logoUrl: 'https://static.openops.com/blocks/azure.svg',
+    blockName: 'azure',
+    actionName: 'cli',
     isEnabled: true,
     limit: 10,
   },
   {
-    blockName: 'Slack',
-    actionName: 'Send Message2',
-    logoUrl: 'https://static.openops.com/blocks/slack.png',
+    blockName: 'slack',
+    actionName: 'send_message_2',
     isEnabled: true,
     limit: 10,
   },
   {
-    blockName: 'AWS',
-    actionName: 'Tag Resource2',
-    logoUrl: 'https://static.openops.com/blocks/aws.png',
+    blockName: 'aws',
+    actionName: 'tag_resource_2',
     isEnabled: false,
     limit: 10,
   },
   {
-    blockName: 'Azure',
-    actionName: 'CLI2',
-    logoUrl: 'https://static.openops.com/blocks/azure.svg',
+    blockName: 'azure',
+    actionName: 'cli_2',
     isEnabled: true,
     limit: 10,
   },
   {
-    blockName: 'Slack',
-    actionName: 'Send Message3',
-    logoUrl: 'https://static.openops.com/blocks/slack.png',
+    blockName: 'slack',
+    actionName: 'send_message_3',
     isEnabled: true,
     limit: 10,
   },
   {
-    blockName: 'AWS',
-    actionName: 'Tag Resource3',
-    logoUrl: 'https://static.openops.com/blocks/aws.png',
+    blockName: 'aws',
+    actionName: 'tag_resource_3',
     isEnabled: false,
     limit: 10,
   },
   {
-    blockName: 'Azure',
-    actionName: 'CLI3',
-    logoUrl: 'https://static.openops.com/blocks/azure.svg',
+    blockName: 'azure',
+    actionName: 'cli_3',
     isEnabled: true,
     limit: 10,
   },
 ];
 
-const defaultValue: SetRunLimitsValue = {
-  enabled: true,
+const blockDiplayNames: Record<string, string> = {
+  slack: 'Slack',
+  aws: 'AWS',
+  azure: 'Azure',
+};
+
+const actionDiplayNames: Record<string, string> = {
+  send_message: 'Send Message',
+  tag_resource: 'Tag Resource',
+  cli: 'CLI',
+  send_message_2: 'Send Message 2',
+  tag_resource_2: 'Tag Resource 2',
+  cli_2: 'CLI 2',
+  send_message_3: 'Send Message 3',
+  tag_resource_3: 'Tag Resource 3',
+  cli_3: 'CLI 3',
+};
+
+const blockLogoUrls: Record<string, string> = {
+  slack: 'https://static.openops.com/blocks/slack.png',
+  aws: 'https://static.openops.com/blocks/aws.png',
+  azure: 'https://static.openops.com/blocks/azure.svg',
+};
+
+const defaultValue = {
+  isEnabled: true,
   limits: sampleLimits.slice(0, 3),
 };
 
@@ -86,13 +95,15 @@ const meta: Meta<typeof SetRunLimits> = {
   component: SetRunLimits,
   args: {
     value: defaultValue,
+    blockDiplayNames,
+    actionDiplayNames,
+    blockLogoUrls,
     isLoading: false,
     className: 'max-w-2xl',
   },
   decorators: [ThemeAwareDecorator],
   argTypes: {
     onSave: { action: 'onSave' },
-    onChange: { action: 'onChange' },
   },
   parameters: {
     layout: 'padded',
@@ -123,7 +134,7 @@ export const LongList: Story = {
   args: {
     isLoading: false,
     value: {
-      enabled: true,
+      isEnabled: true,
       limits: sampleLimits,
     },
   },
@@ -133,7 +144,7 @@ export const Empty: Story = {
   args: {
     isLoading: false,
     value: {
-      enabled: true,
+      isEnabled: true,
       limits: [],
     },
   },
