@@ -7,11 +7,11 @@ export const TestRunLimit = Type.Object({
   limit: Type.Number(),
 });
 
-export type RunLimit = Static<typeof TestRunLimit>;
+export type TestRunLimit = Static<typeof TestRunLimit>;
 
 export const TestRunLimitSettings = Type.Object({
   isEnabled: Type.Boolean(),
   limits: Type.Array(TestRunLimit),
 });
 
-export type RunLimitSettings = Static<typeof TestRunLimitSettings>;
+export type TestRunLimitSettings = Static<typeof TestRunLimitSettings>;
