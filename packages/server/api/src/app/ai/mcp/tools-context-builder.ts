@@ -98,12 +98,16 @@ export async function getMCPToolsContext({
 
     const finalTools =
       userId && chatId && stream
-        ? wrapToolsWithApproval(combinedTools, () => ({
-            userId,
-            projectId,
-            chatId,
-            stream,
-          }))
+        ? wrapToolsWithApproval(
+            combinedTools,
+            () => ({
+              userId,
+              projectId,
+              chatId,
+              stream,
+            }),
+            app.io,
+          )
         : combinedTools;
 
     return {
