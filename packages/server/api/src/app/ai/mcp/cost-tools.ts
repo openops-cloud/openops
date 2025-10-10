@@ -121,14 +121,17 @@ async function initializeMcpClient(
   };
 }
 
-export async function getCostTools(
-  projectId: string,
-): Promise<{ costExplorer: MCPTool; costAnalysis: MCPTool }> {
+export async function getCostTools(projectId: string): Promise<{
+  costExplorer: MCPTool;
+  costAnalysis: MCPTool;
+  billingAndCostManagement: MCPTool;
+}> {
   const credentials = await getAwsCredentials(projectId);
   if (!credentials) {
     return {
       costExplorer: { client: undefined, toolSet: {} },
       costAnalysis: { client: undefined, toolSet: {} },
+      billingAndCostManagement: { client: undefined, toolSet: {} },
     };
   }
 
@@ -136,25 +139,36 @@ export async function getCostTools(
     AppSystemProp.AWS_MCP_COST_PATH,
   );
 
-  const [costExplorer, costAnalysis] = await Promise.all([
-    initializeMcpClient(
-      {
-        basePath: awsCostBasePath,
-        serverDir:
-          'src/cost-explorer-mcp-server/awslabs/cost_explorer_mcp_server',
-        toolProvider: 'cost-explorer',
-      },
-      credentials,
-    ),
-    initializeMcpClient(
-      {
-        basePath: awsCostBasePath,
-        serverDir: 'src/aws-pricing-mcp-server/awslabs/aws_pricing_mcp_server',
-        toolProvider: 'aws-pricing',
-      },
-      credentials,
-    ),
-  ]);
+  const [costExplorer, costAnalysis, billingAndCostManagement] =
+    await Promise.all([
+      initializeMcpClient(
+        {
+          basePath: awsCostBasePath,
+          serverDir:
+            'src/cost-explorer-mcp-server/awslabs/cost_explorer_mcp_server',
+          toolProvider: 'cost-explorer',
+        },
+        credentials,
+      ),
+      initializeMcpClient(
+        {
+          basePath: awsCostBasePath,
+          serverDir:
+            'src/aws-pricing-mcp-server/awslabs/aws_pricing_mcp_server',
+          toolProvider: 'aws-pricing',
+        },
+        credentials,
+      ),
+      initializeMcpClient(
+        {
+          basePath: awsCostBasePath,
+          serverDir:
+            'src/billing-cost-management-mcp-server/awslabs/billing_cost_management_mcp_server',
+          toolProvider: 'billing-cost-management',
+        },
+        credentials,
+      ),
+    ]);
 
-  return { costExplorer, costAnalysis };
+  return { costExplorer, costAnalysis, billingAndCostManagement };
 }

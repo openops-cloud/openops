@@ -44,7 +44,8 @@ export const getMcpSystemPrompt = async ({
   if (
     queryClassification.includes(QueryClassification.aws_cost) &&
     !hasToolProvider(allTools, 'aws-pricing') &&
-    !hasToolProvider(allTools, 'cost-explorer')
+    !hasToolProvider(allTools, 'cost-explorer') &&
+    !hasToolProvider(allTools, 'billing-cost-management')
   ) {
     promptsToLoad.push('mcp-aws-cost-unavailable.txt');
   }
