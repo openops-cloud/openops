@@ -176,7 +176,7 @@ function SetRunLimits({
                   </div>
 
                   <div className="max-h-[274px] overflow-y-hidden flex">
-                    <ScrollArea className="w-full ">
+                    <ScrollArea className="w-full">
                       <div className="grid auto-rows-[36px] grid-cols-[max-content_max-content_max-content_max-content_max-content_max-content] items-center gap-x-6 gap-y-1">
                         {limits.map((item, index) => (
                           <div
