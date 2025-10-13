@@ -12,13 +12,13 @@ import { Switch } from '../../ui/switch';
 import { BlockIcon } from '../block-icon/block-icon';
 
 /**
- * Props for the SetRunLimits component.
+ * Props for the TestRunLimitsForm component.
  *
  * This component renders a form to configure per-action execution limits
  * for a test run. It supports enabling/disabling limits globally and
  * fine‑tuning individual block/action limits.
  */
-type SetRunLimitsProps = {
+type TestRunLimitsFormProps = {
   /**
    * Current settings to display in the form.
    * - isEnabled: whether the run limits feature is enabled globally for the test run
@@ -55,7 +55,7 @@ type SetRunLimitsProps = {
   className?: string;
 };
 
-function SetRunLimits({
+function TestRunLimitsForm({
   value,
   onSave,
   blockDisplayNames,
@@ -63,7 +63,7 @@ function SetRunLimits({
   blockLogoUrls,
   isLoading,
   className,
-}: SetRunLimitsProps) {
+}: TestRunLimitsFormProps) {
   const form = useForm<TestRunLimitSettings>({
     defaultValues: {
       isEnabled: value?.isEnabled ?? false,
@@ -291,4 +291,4 @@ function SetRunLimits({
   );
 }
 
-export { SetRunLimits, SetRunLimitsProps };
+export { TestRunLimitsForm, TestRunLimitsFormProps };

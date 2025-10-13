@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { ThemeAwareDecorator } from '../../../.storybook/decorators';
-import { SetRunLimits } from '../../components/set-run-limits/set-run-limits';
+import { TestRunLimitsForm } from '../../components/test-run-limits-form/test-run-limits-form';
 import { TooltipProvider } from '../../ui/tooltip';
 
 const sampleLimits = [
@@ -90,9 +90,9 @@ const defaultValue = {
   limits: sampleLimits.slice(0, 3),
 };
 
-const meta: Meta<typeof SetRunLimits> = {
-  title: 'Components/SetRunLimits',
-  component: SetRunLimits,
+const meta: Meta<typeof TestRunLimitsForm> = {
+  title: 'Components/TestRunLimitsForm',
+  component: TestRunLimitsForm,
   args: {
     value: defaultValue,
     blockDisplayNames,
@@ -111,7 +111,7 @@ const meta: Meta<typeof SetRunLimits> = {
   render: (args) => (
     <TooltipProvider>
       <div className="w-[610px]">
-        <SetRunLimits {...args} />
+        <TestRunLimitsForm {...args} />
       </div>
     </TooltipProvider>
   ),
@@ -120,7 +120,7 @@ const meta: Meta<typeof SetRunLimits> = {
 
 export default meta;
 
-type Story = StoryObj<typeof SetRunLimits>;
+export type Story = StoryObj<typeof TestRunLimitsForm>;
 
 export const Default: Story = {};
 
