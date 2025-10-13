@@ -18,7 +18,7 @@ import { BlockIcon } from '../block-icon/block-icon';
  * for a test run. It supports enabling/disabling limits globally and
  * fine‑tuning individual block/action limits.
  */
-export type SetRunLimitsProps = {
+type SetRunLimitsProps = {
   /**
    * Current settings to display in the form.
    * - isEnabled: whether the run limits feature is enabled globally for the test run
@@ -57,7 +57,7 @@ export type SetRunLimitsProps = {
   className?: string;
 };
 
-export function SetRunLimits({
+function SetRunLimits({
   value,
   onSave,
   blockDiplayNames,
@@ -217,7 +217,9 @@ export function SetRunLimits({
                               size={'sm'}
                               circle={true}
                               border={false}
-                              className={cn('p-0', 'opacity-70')}
+                              className={cn('p-0', {
+                                'opacity-70': !isEnabled,
+                              })}
                             ></BlockIcon>
                             <span className="text-sm font-medium">
                               {blockDiplayNames[item.blockName]}
@@ -291,4 +293,4 @@ export function SetRunLimits({
   );
 }
 
-export default SetRunLimits;
+export { SetRunLimits, SetRunLimitsProps };
