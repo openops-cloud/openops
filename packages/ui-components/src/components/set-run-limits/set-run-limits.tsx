@@ -33,13 +33,11 @@ type SetRunLimitsProps = {
   /**
    * Mapping of block internal names (e.g., "slack", "aws") to display names (e.g., "Slack", "AWS").
    * Used to render human‑friendly provider/app names in the list.
-   * Note: property name keeps historical "Diplay" spelling for backward compatibility.
    */
   blockDisplayNames: Record<string, string>;
   /**
    * Mapping of action internal names (e.g., "send_message") to display names (e.g., "Send Message").
    * Used to render human‑friendly action labels in the list.
-   * Note: property name keeps historical "Diplay" spelling for backward compatibility.
    */
   actionDisplayNames: Record<string, string>;
   /**
