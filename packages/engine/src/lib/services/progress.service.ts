@@ -96,7 +96,7 @@ const sendUpdateRunRequest = async (flowRunId: FlowRunId): Promise<void> => {
   );
 
   try {
-    const bodyAccessKey = await saveRequestBody(openOpsId(), request);
+    const bodyAccessKey = await saveRequestBody(request);
 
     throwIfExecutionTimeExceeded();
     await makeHttpRequest(
