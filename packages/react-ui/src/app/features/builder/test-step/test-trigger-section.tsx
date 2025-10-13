@@ -117,8 +117,8 @@ const TestTriggerSection = React.memo(
       reset: resetTriggerSimulation,
     } = useMutation<TriggerEvent[], Error, void>({
       mutationFn: async () => {
-        setErrorMessage(undefined);
         onTestCallback();
+        setErrorMessage(undefined);
         const ids = (
           await triggerEventsApi.list({ flowId, cursor: undefined, limit: 5 })
         ).data.map((triggerEvent) => triggerEvent.id);
@@ -184,8 +184,8 @@ const TestTriggerSection = React.memo(
       void
     >({
       mutationFn: async () => {
-        setErrorMessage(undefined);
         onTestCallback();
+        setErrorMessage(undefined);
         return triggerEventsApi.pollTrigger({
           flowId,
         });
