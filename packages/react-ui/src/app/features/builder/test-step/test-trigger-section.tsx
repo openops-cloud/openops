@@ -48,6 +48,7 @@ type TestTriggerSectionProps = {
   isSaving: boolean;
   flowVersionId: string;
   flowId: string;
+  onTestCallback: () => void;
 };
 
 function getSelectedId(testOutput: unknown, pollResults: TriggerEvent[]) {
@@ -63,7 +64,12 @@ function getSelectedId(testOutput: unknown, pollResults: TriggerEvent[]) {
 }
 
 const TestTriggerSection = React.memo(
-  ({ isSaving, flowVersionId, flowId }: TestTriggerSectionProps) => {
+  ({
+    isSaving,
+    flowVersionId,
+    flowId,
+    onTestCallback,
+  }: TestTriggerSectionProps) => {
     const form = useFormContext<Trigger>();
     const formValues = form.getValues();
     const [isValid, setIsValid] = useState(false);
@@ -112,6 +118,7 @@ const TestTriggerSection = React.memo(
     } = useMutation<TriggerEvent[], Error, void>({
       mutationFn: async () => {
         setErrorMessage(undefined);
+        onTestCallback();
         const ids = (
           await triggerEventsApi.list({ flowId, cursor: undefined, limit: 5 })
         ).data.map((triggerEvent) => triggerEvent.id);
@@ -178,6 +185,7 @@ const TestTriggerSection = React.memo(
     >({
       mutationFn: async () => {
         setErrorMessage(undefined);
+        onTestCallback();
         return triggerEventsApi.pollTrigger({
           flowId,
         });

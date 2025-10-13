@@ -24,6 +24,7 @@ type TestStepContainerProps = {
   isSaving: boolean;
   flowId: string;
   type: ActionType | TriggerType;
+  onTestCallback: () => void;
 };
 
 enum TabListEnum {
@@ -32,7 +33,13 @@ enum TabListEnum {
 }
 
 const TestStepContainer = React.memo(
-  ({ flowVersionId, isSaving, type, flowId }: TestStepContainerProps) => {
+  ({
+    flowVersionId,
+    isSaving,
+    type,
+    flowId,
+    onTestCallback,
+  }: TestStepContainerProps) => {
     const { theme } = useTheme();
     const form = useFormContext<Action | Trigger>();
     const useSaveSelectedStepSampleData =
@@ -84,11 +91,13 @@ const TestStepContainer = React.memo(
               flowId={flowId}
               isSaving={isSaving}
               flowVersionId={flowVersionId}
+              onTestCallback={onTestCallback}
             ></TestTriggerSection>
           ) : (
             <TestActionSection
               flowVersionId={flowVersionId}
               isSaving={isSaving}
+              onTestCallback={onTestCallback}
             ></TestActionSection>
           )}
         </TabsContent>
