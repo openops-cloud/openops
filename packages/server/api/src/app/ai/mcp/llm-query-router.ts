@@ -1,6 +1,6 @@
 import { getTableNames, isLLMTelemetryEnabled } from '@openops/common';
 import { logger } from '@openops/server-shared';
-import { AiConfig, ChatFlowContext } from '@openops/shared';
+import { AiConfigParsed, ChatFlowContext } from '@openops/shared';
 import { generateObject, LanguageModel, ModelMessage, ToolSet } from 'ai';
 import { z } from 'zod';
 import { buildUIContextSection } from '../chat/prompts.service';
@@ -37,18 +37,16 @@ const createQueryClassificationSchema = (): z.ZodUnion<
 
 const queryClassificationUnionSchema = createQueryClassificationSchema();
 
-const coreSchema = z.object({
-  tool_names: z.array(z.string()),
-  query_classification: z.array(queryClassificationUnionSchema),
-});
-
 const coreWithReasoningSchema = z.object({
   reasoning: z
     .string()
     .describe(
       'The reasoning for the tool selection and classification. Fill this field first',
     ),
-  actualResult: coreSchema,
+  tool_names: z.array(z.string()).describe('Array of selected tool names'),
+  query_classification: z
+    .array(queryClassificationUnionSchema)
+    .describe('Array of query classification categories'),
 });
 
 export async function routeQuery({
@@ -62,7 +60,7 @@ export async function routeQuery({
   messages: ModelMessage[];
   tools: ToolSet;
   languageModel: LanguageModel;
-  aiConfig: AiConfig;
+  aiConfig: AiConfigParsed;
   uiContext?: ChatFlowContext;
   abortSignal?: AbortSignal;
 }): Promise<ToolsAndQueryResult> {
@@ -79,11 +77,9 @@ export async function routeQuery({
   }));
 
   try {
-    const openopsTablesNames = await getTableNames();
+    const openopsTablesNames = await getOpenOpsTablesNames();
 
-    const {
-      object: { actualResult: selectionResult },
-    } = await generateObject({
+    const { object: selectionResult } = await generateObject({
       model: languageModel,
       schema: coreWithReasoningSchema,
       system: getSystemPrompt(toolList, openopsTablesNames, uiContext),
@@ -128,6 +124,17 @@ export async function routeQuery({
     };
   }
 }
+
+const getOpenOpsTablesNames = async (): Promise<string[]> => {
+  try {
+    return await getTableNames();
+  } catch (error) {
+    logger.error('Error getting OpenOps table names for the LLM query router', {
+      error,
+    });
+    return [];
+  }
+};
 
 const getSystemPrompt = (
   toolList: Array<{ name: string; description: string }>,

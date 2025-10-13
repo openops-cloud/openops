@@ -58,10 +58,13 @@ const BlockSettings = React.memo((props: BlockSettingsProps) => {
   );
 
   const { data: frontendUrl } = flagsHooks.useFlag<string>(FlagId.FRONTEND_URL);
-  const markdownVariables = {
-    webhookUrl: `${webhookPrefixUrl}/${props.flowId}`,
-    formUrl: `${frontendUrl}/forms/${props.flowId}`,
-  };
+  const markdownVariables = React.useMemo(
+    () => ({
+      webhookUrl: `${webhookPrefixUrl}/${props.flowId}`,
+      formUrl: `${frontendUrl}/forms/${props.flowId}`,
+    }),
+    [webhookPrefixUrl, frontendUrl, props.flowId],
+  );
 
   return (
     <div className="flex flex-col gap-4 w-full">
@@ -77,9 +80,10 @@ const BlockSettings = React.memo((props: BlockSettingsProps) => {
           {blockModel.auth &&
             (selectedAction?.requireAuth || selectedTrigger) && (
               <ConnectionSelect
-                isTrigger={!isNil(selectedTrigger)}
+                allowDynamicValues={isNil(selectedTrigger)}
                 block={blockModel}
                 disabled={props.readonly}
+                name={'settings.input.auth'}
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 providerKey={providerKey!}
               ></ConnectionSelect>

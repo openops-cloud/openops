@@ -1,5 +1,5 @@
 import { logger } from '@openops/server-shared';
-import { AiConfig, AiProviderEnum } from '@openops/shared';
+import { AiConfigParsed, AiProviderEnum } from '@openops/shared';
 import { LanguageModel, ModelMessage, TextStreamPart, ToolSet } from 'ai';
 import { FastifyInstance } from 'fastify';
 import { ServerResponse } from 'node:http';
@@ -42,7 +42,7 @@ jest.mock('../../../src/app/ai/chat/llm-stream-handler', () => ({
 }));
 
 jest.mock('../../../src/app/telemetry/event-models', () => ({
-  sendAiChatMessageSendEvent: jest.fn(),
+  sendAiChatAbortedEvent: jest.fn(),
   sendAiChatFailureEvent: jest.fn(),
 }));
 
@@ -65,17 +65,13 @@ describe('User Message Handler', () => {
 
   const mockApp = {} as FastifyInstance;
 
-  const mockAiConfig: AiConfig = {
-    projectId: 'test-project-id',
+  const mockAiConfig: AiConfigParsed = {
     provider: AiProviderEnum.ANTHROPIC,
     model: 'claude-3-sonnet',
     apiKey: 'test-api-key',
     enabled: true,
     providerSettings: {},
     modelSettings: {},
-    created: '2023-01-01',
-    updated: '2023-01-01',
-    id: 'test-id',
   };
 
   const mockLanguageModel = {} as LanguageModel;

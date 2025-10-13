@@ -20,6 +20,7 @@ export const nextDayofWeek = createAction({
       hide: true,
     },
   },
+  requireToolApproval: false,
   props: {
     weekday: Property.StaticDropdown({
       displayName: 'Weekday',

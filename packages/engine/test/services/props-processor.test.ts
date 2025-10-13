@@ -1,245 +1,7 @@
-import { FlowExecutorContext } from '../../src/lib/handler/context/flow-execution-context';
-import { VariableService } from '../../src/lib/variables/variable-service';
 import { BlockAuth, Property, Validators, WorkflowFile } from '@openops/blocks-framework';
-import {
-  ActionType,
-  GenericStepOutput,
-  StepOutputStatus,
-  TriggerType,
-} from '@openops/shared';
+import { propsProcessor } from '../../src/lib/variables/props-processor';
 
-const variableService = new VariableService({
-  projectId: 'PROJECT_ID',
-  engineToken: 'WORKER_TOKEN',
-  apiUrl: 'http://127.0.0.1:3000',
-});
-
-const executionState = FlowExecutorContext.empty()
-  .upsertStep(
-    'trigger',
-    GenericStepOutput.create({
-      type: TriggerType.BLOCK,
-      status: StepOutputStatus.SUCCEEDED,
-      input: {},
-      output: {
-        items: [5, 'a'],
-        name: 'John',
-        price: 6.4,
-      },
-    }),
-  )
-  .upsertStep('step_1',
-    GenericStepOutput.create({
-
-      type: ActionType.BLOCK,
-      status: StepOutputStatus.SUCCEEDED,
-      input: {},
-      output: {
-        success: true,
-      },
-    }))
-  .upsertStep('step_2', GenericStepOutput.create({
-    type: ActionType.BLOCK,
-    status: StepOutputStatus.SUCCEEDED,
-    input: {},
-    output: 'memory://{"fileName":"hello.png","data":"iVBORw0KGgoAAAANSUhEUgAAAiAAAAC4CAYAAADaI1cbAAA0h0lEQVR4AezdA5AlPx7A8Zxt27Z9r5PB2SidWTqbr26S9Hr/tm3btu3723eDJD3r15ec17vzXr+Z"}',
-  }));
-
-
-describe('Variable Service', () => {
-  test('Test resolve text with no variables', async () => {
-    const { resolvedInput } = await variableService.resolve({ unresolvedInput: 'Hello world!', executionState });
-    expect(resolvedInput).toEqual(
-      'Hello world!',
-    );
-  });
-
-  test('Test resolve text with double variables', async () => {
-    const { resolvedInput } = await variableService.resolve({
-      unresolvedInput: 'Price is {{ trigger.price }}',
-      executionState,
-    });
-    expect(resolvedInput,
-    ).toEqual('Price is 6.4');
-  });
-
-  test('Test resolve object steps variables', async () => {
-    const { resolvedInput } = await variableService.resolve({ unresolvedInput: '{{trigger}}', executionState });
-    expect(resolvedInput).toEqual(
-      {
-        items: [5, 'a'],
-        name: 'John',
-        price: 6.4,
-      },
-    );
-  });
-
-  test('Test resolve steps variables', async () => {
-    const { resolvedInput } = await variableService.resolve({ unresolvedInput: '{{trigger.name}}', executionState });
-    expect(resolvedInput).toEqual(
-      'John',
-    );
-  });
-
-  test('Test resolve multiple variables', async () => {
-    const { resolvedInput } = await variableService.resolve({
-      unresolvedInput: '{{trigger.name}} {{trigger.name}}',
-      executionState,
-    });
-    expect(
-      resolvedInput,
-    ).toEqual('John John');
-  });
-
-  test('Test resolve variable array items', async () => {
-    const { resolvedInput } = await variableService.resolve({
-      unresolvedInput:
-        '{{trigger.items[0]}} {{trigger.items[1]}}',
-      executionState,
-    });
-    expect(
-      resolvedInput,
-    ).toEqual('5 a');
-  });
-
-  test('Test resolve array variable', async () => {
-    const { resolvedInput } = await variableService.resolve({ unresolvedInput: '{{trigger.items}}', executionState });
-    expect(resolvedInput).toEqual(
-      [5, 'a'],
-    );
-  });
-
-  test('Test resolve integer from variables', async () => {
-    const { resolvedInput } = await variableService.resolve({ unresolvedInput: '{{trigger.items[0]}}', executionState });
-    expect(
-      resolvedInput,
-    ).toEqual(5);
-  });
-
-  test('Test resolve text with undefined variables', async () => {
-    const { resolvedInput } = await variableService.resolve({
-      unresolvedInput:
-        'test {{configs.bar}} {{trigger.items[4]}}',
-      executionState,
-    });
-    expect(
-      resolvedInput,
-    ).toEqual('test  ');
-  });
-
-  test('Test resolve empty text', async () => {
-    const { resolvedInput } = await variableService.resolve({ unresolvedInput: '', executionState });
-    expect(resolvedInput).toEqual('');
-  });
-
-
-  test('Test resolve empty variable operator', async () => {
-    const { resolvedInput } = await variableService.resolve({ unresolvedInput: '{{}}', executionState });
-    expect(resolvedInput).toEqual('');
-  });
-
-  test('Test resolve object', async () => {
-    const { resolvedInput } = await variableService.resolve({
-      unresolvedInput:
-        {
-          input: {
-            foo: 'bar',
-            nums: [1, 2, '{{trigger.items[0]}}'],
-            var: '{{trigger.price}}',
-          },
-        },
-      executionState,
-    });
-    expect(
-      resolvedInput,
-    ).toEqual({ input: { foo: 'bar', nums: [1, 2, 5], var: 6.4 } });
-  });
-
-  test('Test resolve boolean from variables', async () => {
-    const { resolvedInput } = await variableService.resolve({ unresolvedInput: '{{step_1.success}}', executionState });
-    expect(resolvedInput).toEqual(
-      true,
-    );
-  });
-
-  test('Test resolve addition from variables', async () => {
-    const { resolvedInput } = await variableService.resolve({
-      unresolvedInput: '{{trigger.price + 2 - 3}}',
-      executionState,
-    });
-    expect(resolvedInput).toEqual(
-      6.4 + 2 - 3,
-    );
-  });
-
-  test('Test resolve text with array variable', async () => {
-    const { resolvedInput } = await variableService.resolve({
-      unresolvedInput: 'items are {{trigger.items}}',
-      executionState,
-    });
-    expect(
-      resolvedInput,
-    ).toEqual('items are [5,"a"]');
-  });
-
-  test('Test resolve text with object variable', async () => {
-    const { resolvedInput } = await variableService.resolve({
-      unresolvedInput:
-        'values from trigger step: {{trigger}}',
-      executionState,
-    });
-    expect(
-      resolvedInput,
-    ).toEqual('values from trigger step: {"items":[5,"a"],"name":"John","price":6.4}');
-  });
-
-  test('Test use built-in Math Min function', async () => {
-    const { resolvedInput } = await variableService.resolve({
-      unresolvedInput: '{{Math.min(trigger.price + 2 - 3, 2)}}',
-      executionState,
-    });
-    expect(resolvedInput).toEqual(
-      2,
-    );
-  });
-
-  test('Test use built-in Math Max function', async () => {
-    const { resolvedInput } = await variableService.resolve({
-      unresolvedInput: '{{Math.max(trigger.price + 2, 2)}}',
-      executionState,
-    });
-    expect(resolvedInput).toEqual(
-      8.4,
-    );
-  });
-
-  it('should not compress memory file in native value in non-logs mode', async () => {
-    const input = {
-      base64: 'memory://{"fileName":"hello.png","data":"iVBORw0KGgoAAAANSUhEUgAAAiAAAAC4CAYAAADaI1cbAAA0h0lEQVR4AezdA5AlPx7A8Zxt27Z9r5PB2SidWTqbr26S9Hr/tm3btu3723eDJD3r15ec17vzXr+Z"}',
-    };
-    const { resolvedInput } = await variableService.resolve({
-      unresolvedInput: input,
-      executionState,
-    });
-    expect(resolvedInput).toEqual({
-      base64: 'memory://{"fileName":"hello.png","data":"iVBORw0KGgoAAAANSUhEUgAAAiAAAAC4CAYAAADaI1cbAAA0h0lEQVR4AezdA5AlPx7A8Zxt27Z9r5PB2SidWTqbr26S9Hr/tm3btu3723eDJD3r15ec17vzXr+Z"}',
-    });
-  });
-
-  it('should not compress memory file in referenced value in non-logs mode', async () => {
-    const input = {
-      base64: '{{step_2}}',
-    };
-    const { resolvedInput } = await variableService.resolve({
-      unresolvedInput: input,
-      executionState,
-    });
-    expect(resolvedInput).toEqual({
-      base64: 'memory://{"fileName":"hello.png","data":"iVBORw0KGgoAAAANSUhEUgAAAiAAAAC4CAYAAADaI1cbAAA0h0lEQVR4AezdA5AlPx7A8Zxt27Z9r5PB2SidWTqbr26S9Hr/tm3btu3723eDJD3r15ec17vzXr+Z"}',
-    });
-  });
-
-
+describe('Props Processor', () => {
   it('should return base64 from base64 with mime only', async () => {
     const input = {
       base64WithMime: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAiAAAAC4CAYAAADaI1cbAAA0h0lEQVR4AezdA5AlPx7A8Zxt27Z9r5PB2SidWTqbr26S9Hr/tm3btu3723eDJD3r15ec17vzXr+Z',
@@ -258,14 +20,14 @@ describe('Variable Service', () => {
     const {
       processedInput,
       errors,
-    } = await variableService.applyProcessorsAndValidators(input, props, BlockAuth.None());
+    } = await propsProcessor.applyProcessorsAndValidators(input, props, BlockAuth.None(), false);
     expect(processedInput).toEqual({
       base64: null,
       base64WithMime: new WorkflowFile('unknown.png', Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAiAAAAC4CAYAAADaI1cbAAA0h0lEQVR4AezdA5AlPx7A8Zxt27Z9r5PB2SidWTqbr26S9Hr/tm3btu3723eDJD3r15ec17vzXr+Z', 'base64'), 'png'),
     });
     expect(errors).toEqual({
-      'base64': [
-        'Expected file url or base64 with mimeType, but found value: iVBORw0KGgoAAAANSUhEUgAAAiAAAAC4CAYAAADaI1cbAAA0h0lEQVR4AezdA5AlPx7A8Zxt27Z9r5PB2SidWTqbr26S9Hr/tm3btu3723eDJD3r15ec17vzXr+Z',
+      'Base64': [
+        'Expected a file url or base64 with mimeType, received: iVBORw0KGgoAAAANSUhEUgAAAiAAAAC4CAYAAADaI1cbAAA0h0lEQVR4AezdA5AlPx7A8Zxt27Z9r5PB2SidWTqbr26S9Hr/tm3btu3723eDJD3r15ec17vzXr+Z',
       ],
     });
   });
@@ -294,15 +56,15 @@ describe('Variable Service', () => {
     const {
       processedInput,
       errors,
-    } = await variableService.applyProcessorsAndValidators(input, props, BlockAuth.None());
+    } = await propsProcessor.applyProcessorsAndValidators(input, props, BlockAuth.None(), false);
     expect(processedInput.file).toBeDefined();
     expect(processedInput.file.extension).toBe('html');
     expect(processedInput.file.filename).toBe('unknown.html');
     expect(processedInput.nullFile).toBeNull();
     expect(processedInput.nullOptionalFile).toBeNull();
     expect(errors).toEqual({
-      'nullFile': [
-        'Expected value, but found value: null',
+      'File': [
+        'Expected a file url or base64 with mimeType, received: null',
       ],
     });
   });
@@ -324,7 +86,7 @@ describe('Variable Service', () => {
     const {
       processedInput,
       errors,
-    } = await variableService.applyProcessorsAndValidators(input, props, BlockAuth.CustomAuth({
+    } = await propsProcessor.applyProcessorsAndValidators(input, props, BlockAuth.CustomAuth({
       authProviderKey: 'SMTP',
       authProviderDisplayName: 'SMTP',
       authProviderLogoUrl: `https://static.openops.com/blocks/smtp.png`,
@@ -335,7 +97,7 @@ describe('Variable Service', () => {
           required: true,
         }),
       },
-    }));
+    }), true);
 
     expect(processedInput).toEqual({
       auth: {
@@ -387,7 +149,7 @@ describe('Variable Service', () => {
     const {
       processedInput,
       errors,
-    } = await variableService.applyProcessorsAndValidators(input, props, BlockAuth.CustomAuth({
+    } = await propsProcessor.applyProcessorsAndValidators(input, props, BlockAuth.CustomAuth({
       authProviderKey: 'SMTP',
       authProviderDisplayName: 'SMTP',
       authProviderLogoUrl: `https://static.openops.com/blocks/smtp.png`,
@@ -398,28 +160,28 @@ describe('Variable Service', () => {
           required: true,
         }),
       },
-    }));
+    }), true);
     expect(processedInput).toEqual({
-      price: NaN,
-      emptyStringNumber: NaN,
+      price: Number.NaN,
+      emptyStringNumber: Number.NaN,
       nullNumber: null,
       undefinedNumber: undefined,
       optionalNullNumber: null,
       optionalUndefinedNumber: undefined,
       auth: {
-        age: NaN,
+        age: Number.NaN,
       },
     });
     expect(errors).toEqual({
-      price: ['Expected number, but found value: wrong text'],
-      emptyStringNumber: ['Expected number, but found value: '],
-      nullNumber: ['Expected value, but found value: null'],
-      undefinedNumber: [
-        'Expected value, but found value: undefined',
-      ],
+      Price: ['Expected a number, received: wrong text'],
+      'Empty String Number': ['Expected a number, received: '],
+      'Null Number': ['Expected a number, received: null'],
       auth: {
-        age: ['Expected number, but found value: wrong text'],
+        age: ['Expected a number, received: wrong text'],
       },
+      'Number': [
+        'Expected a number, received: undefined',
+      ],
     });
   });
 
@@ -486,7 +248,7 @@ describe('Variable Service', () => {
     const {
       processedInput,
       errors,
-    } = await variableService.applyProcessorsAndValidators(input, props, BlockAuth.None());
+    } = await propsProcessor.applyProcessorsAndValidators(input, props, BlockAuth.None(), false);
     expect(processedInput).toEqual({
       Asana1: '2012-02-22T02:06:58.147Z',
       Asana2: '2012-02-22T00:00:00.000Z',
@@ -536,7 +298,7 @@ describe('Variable Service', () => {
     const {
       processedInput,
       errors,
-    } = await variableService.applyProcessorsAndValidators(input, props, BlockAuth.None());
+    } = await propsProcessor.applyProcessorsAndValidators(input, props, BlockAuth.None(), false);
 
     expect(processedInput).toEqual({
       invalidDateString: undefined,
@@ -546,12 +308,23 @@ describe('Variable Service', () => {
       nullDate: undefined,
     });
     expect(errors).toEqual({
-      emptyDateString: ['Expected ISO string, but found value: '],
-      invalidDateString: ['Expected ISO string, but found value: wrong text'],
-      nullDate: ['Expected value, but found value: null'],
-      undefinedDate: ['Expected value, but found value: undefined'],
-      wrongDateString: ['Expected ISO string, but found value: 2023-023-331'],
+      "Undefined Date string": [
+        "Invalid datetime format. Expected ISO format (e.g. 2024-03-14T12:00:00.000Z), received: undefined"
+      ],
+      "Null Number": [
+        "Invalid datetime format. Expected ISO format (e.g. 2024-03-14T12:00:00.000Z), received: null"
+      ],
+      "Invalid Date String": [
+        "Invalid datetime format. Expected ISO format (e.g. 2024-03-14T12:00:00.000Z), received: wrong text"
+      ],
+      "Wrong Date String": [
+        "Invalid datetime format. Expected ISO format (e.g. 2024-03-14T12:00:00.000Z), received: 2023-023-331"
+      ],
+      "Empty Date string": [
+        "Invalid datetime format. Expected ISO format (e.g. 2024-03-14T12:00:00.000Z), received: "
+      ]
     });
+
   });
 
   it('Test email validator', async () => {
@@ -568,7 +341,7 @@ describe('Variable Service', () => {
         validators: [Validators.email],
       }),
     };
-    const { errors } = await variableService.applyProcessorsAndValidators(input, props, BlockAuth.CustomAuth({
+    const { errors } = await propsProcessor.applyProcessorsAndValidators(input, props, BlockAuth.CustomAuth({
       authProviderKey: 'SMTP',
       authProviderDisplayName: 'SMTP',
       authProviderLogoUrl: `https://static.openops.com/blocks/smtp.png`,
@@ -580,12 +353,12 @@ describe('Variable Service', () => {
           validators: [Validators.email],
         }),
       },
-    }));
+    }), true);
     expect(errors).toEqual({
-      email: ['Invalid Email format: ap@dev&com'],
       auth: {
         email: ['Invalid Email format: ap@dev&com'],
       },
+      Email: ['Invalid Email format: ap@dev&com'],
     });
   });
 
@@ -600,9 +373,9 @@ describe('Variable Service', () => {
         validators: [Validators.url, Validators.oneOf(['openops.com', 'www.openops.com'])],
       }),
     };
-    const { errors } = await variableService.applyProcessorsAndValidators(input, props, BlockAuth.None());
+    const { errors } = await propsProcessor.applyProcessorsAndValidators(input, props, BlockAuth.None(), false);
     expect(errors).toEqual({
-      text: [
+      Text: [
         'The value: openopscom. is not a valid URL',
         'The openopscom. is not a valid value, valid choices are: openops.com,www.openops.com',
       ],
@@ -622,20 +395,20 @@ describe('Variable Service', () => {
         validators: [Validators.minLength(2)],
       }),
       text1: Property.LongText({
-        displayName: 'Text',
+        displayName: 'Text 1',
         required: true,
         validators: [Validators.minLength(10)],
       }),
       text2: Property.LongText({
-        displayName: 'Text',
+        displayName: 'Text 2',
         required: true,
         validators: [Validators.maxLength(10)],
       }),
     };
-    const { errors } = await variableService.applyProcessorsAndValidators(input, props, BlockAuth.None());
+    const { errors } = await propsProcessor.applyProcessorsAndValidators(input, props, BlockAuth.None(), false);
     expect(errors).toEqual({
-      text1: ['The value: short must be at least 10 characters'],
-      text2: ['The value: short1234678923145678 may not be greater than 10 characters'],
+      'Text 1': ['The value: short must be at least 10 characters'],
+      'Text 2': ['The value: short1234678923145678 may not be greater than 10 characters'],
     });
   });
 
@@ -651,26 +424,26 @@ describe('Variable Service', () => {
     };
     const props = {
       value1: Property.Number({
-        displayName: 'Age',
+        displayName: 'Age 1',
         required: true,
         validators: [Validators.maxValue(2), Validators.oneOf(Object.values(choices))],
       }),
       value2: Property.Number({
-        displayName: 'Age',
+        displayName: 'Age 2',
         required: true,
         validators: [Validators.inRange(5, 10)],
       }),
       value3: Property.Number({
-        displayName: 'Age',
+        displayName: 'Age 3',
         required: true,
         validators: [Validators.minValue(10)],
       }),
     };
-    const { errors } = await variableService.applyProcessorsAndValidators(input, props, BlockAuth.None());
+    const { errors } = await propsProcessor.applyProcessorsAndValidators(input, props, BlockAuth.None(), false);
     expect(errors).toEqual({
-      value1: ['The value: 40 must be 2 or less', 'The 40 is not a valid value, valid choices are: 1,2'],
-      value2: ['The value: 4 must be at least 5 and less than or equal 10'],
-      value3: ['The value: 4 must be 10 or more'],
+      'Age 1': ['The value: 40 must be 2 or less', 'The 40 is not a valid value, valid choices are: 1,2'],
+      'Age 2': ['The value: 4 must be at least 5 and less than or equal 10'],
+      'Age 3': ['The value: 4 must be 10 or more'],
     });
   });
 

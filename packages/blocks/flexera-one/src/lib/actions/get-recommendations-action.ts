@@ -8,6 +8,7 @@ export const getActiveRecommendationsAction = createAction({
   name: 'flexera_get_active_recommendations',
   description: 'Get Active Recommendations',
   displayName: 'Get Active Recommendations',
+  requireToolApproval: false,
   props: {
     policySet: Property.Dropdown({
       displayName: 'Policy Set',

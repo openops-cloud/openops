@@ -1,5 +1,5 @@
 import { createBlock } from '@openops/blocks-framework';
-import { amazonAuth, getAccountAlias } from '@openops/common';
+import { amazonAuth } from '@openops/common';
 import { BlockCategory } from '@openops/shared';
 import { ebsGetRecommendationsAction } from './lib/actions/ebs-get-recommendations-action';
 import { ec2GetRecommendationsAction } from './lib/actions/ec2-get-recommendations-action';
@@ -17,7 +17,6 @@ export const computeOptimizer = createBlock({
     getRecommendationsSummaryAction,
     ebsGetRecommendationsAction,
     ec2GetRecommendationsAction,
-    getAccountAlias(),
   ],
   triggers: [],
 });

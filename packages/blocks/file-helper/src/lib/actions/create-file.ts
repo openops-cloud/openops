@@ -4,6 +4,7 @@ export const createFile = createAction({
   name: 'createFile',
   displayName: 'Create file',
   description: 'Create file from UTF-8 content',
+  requireToolApproval: false,
   props: {
     content: Property.LongText({ displayName: 'Content', required: true }),
     fileName: Property.ShortText({ displayName: 'File name', required: true }),

@@ -27,3 +27,9 @@ export const unifiedCodeLLMSchema = z.object({
 });
 
 export type UnifiedCodeLLMSchema = z.infer<typeof unifiedCodeLLMSchema>;
+
+export const analysisLLMSchema = z.object({
+  textAnswer: z.string(),
+});
+
+export type AnalysisLLMSchema = z.infer<typeof analysisLLMSchema>;

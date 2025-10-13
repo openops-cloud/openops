@@ -17,6 +17,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@openops/block-ai": ["packages/blocks/ai/src/index.ts"],
       "@openops/block-amazon-s3": ["packages/blocks/amazon-s3/src/index.ts"],
       "@openops/block-amazon-sqs": ["packages/blocks/amazon-sqs/src/index.ts"],
       "@openops/block-aminos": ["packages/blocks/aminos/src/index.ts"],
@@ -230,6 +231,7 @@
       "@openops/block-mysql": ["packages/blocks/mysql/src/index.ts"],
       "@openops/block-nifty": ["packages/blocks/nifty/src/index.ts"],
       "@openops/block-nocodb": ["packages/blocks/nocodb/src/index.ts"],
+      "@openops/block-nops": ["packages/blocks/nops/src/index.ts"],
       "@openops/block-notion": ["packages/blocks/notion/src/index.ts"],
       "@openops/block-ntfy": ["packages/blocks/ntfy/src/index.ts"],
       "@openops/block-odoo": ["packages/blocks/odoo/src/index.ts"],

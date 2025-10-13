@@ -9,12 +9,10 @@ import {
   WorkflowStepTestedPayload,
   WorkflowStepUpdatedPayload,
 } from '@openops/shared';
-import { useParams } from 'react-router-dom';
 import { useBuilderStateContext } from '../builder-hooks';
 import { stepTestOutputCache } from '../data-selector/data-selector-cache';
 
-export const useFlowUpdates = () => {
-  const { flowId } = useParams();
+export const useFlowUpdates = (flowId: string) => {
   const socket = useSocket();
   const queryClient = useQueryClient();
   const refreshSettings = useBuilderStateContext(

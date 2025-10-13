@@ -1,7 +1,7 @@
 import { isLLMTelemetryEnabled } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import {
-  AiConfig,
+  AiConfigParsed,
   unifiedCodeLLMSchema,
   UnifiedCodeLLMSchema,
 } from '@openops/shared';
@@ -18,7 +18,7 @@ import {
 type StreamCodeOptions = {
   chatHistory: ModelMessage[];
   languageModel: LanguageModel;
-  aiConfig: AiConfig;
+  aiConfig: AiConfigParsed;
   systemPrompt: string;
   onFinish: StreamObjectOnFinishCallback<UnifiedCodeLLMSchema> | undefined;
   onError: (error: unknown) => void;
@@ -55,7 +55,7 @@ export const streamCode = ({
 type GenerateCodeOptions = {
   chatHistory: ModelMessage[];
   languageModel: LanguageModel;
-  aiConfig: AiConfig;
+  aiConfig: AiConfigParsed;
   systemPrompt: string;
   abortSignal?: AbortSignal;
 };

@@ -1,5 +1,5 @@
 import { isLLMTelemetryEnabled } from '@openops/common';
-import { AiConfig } from '@openops/shared';
+import { AiConfigParsed } from '@openops/shared';
 import {
   LanguageModel,
   ModelMessage,
@@ -11,6 +11,10 @@ import {
   TextStreamPart,
   ToolSet,
 } from 'ai';
+import {
+  addCacheControlToMessages,
+  addCacheControlToTools,
+} from './context-cache.helper';
 
 type StreamTextOnAbortCallback<TOOLS extends ToolSet> = (event: {
   readonly steps: StepResult<TOOLS>[];
@@ -18,7 +22,7 @@ type StreamTextOnAbortCallback<TOOLS extends ToolSet> = (event: {
 
 type AICallSettings = {
   tools?: ToolSet;
-  aiConfig: AiConfig;
+  aiConfig: AiConfigParsed;
   systemPrompt: string;
   maxRecursionDepth: number;
   newMessages: ModelMessage[];
@@ -56,13 +60,18 @@ export function getLLMAsyncStream(
     system: systemPrompt,
     messages: chatHistory,
     ...aiConfig.modelSettings,
-    tools,
+    tools: addCacheControlToTools(tools),
     toolChoice,
     maxRetries: MAX_RETRIES,
     stopWhen: stepCountIs(maxRecursionDepth),
     onStepFinish,
     onFinish,
     onAbort,
+    prepareStep: async ({ messages }) => {
+      return {
+        messages: addCacheControlToMessages(messages),
+      };
+    },
     abortSignal,
     experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
     async onError({ error }): Promise<void> {

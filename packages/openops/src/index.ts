@@ -15,7 +15,6 @@ export * from './lib/aws/ec2/ec2-get-instances';
 export * from './lib/aws/ec2/ec2-instance-state-manager';
 export * from './lib/aws/ec2/ec2-modify-instance-attribute';
 export * from './lib/aws/ec2/ec2-terminate-instances';
-export * from './lib/aws/get-account-alias-action';
 export * from './lib/aws/get-client';
 export * from './lib/aws/organizations-common';
 export * from './lib/aws/rds/rds-create-snapshot';
@@ -63,8 +62,11 @@ export * from './lib/google-cloud/auth';
 export * from './lib/google-cloud/bq-column-types';
 export * from './lib/promise-pool';
 
+export * from './lib/ai/ai-auth';
+export * from './lib/ai/get-ai-model-from-connection';
 export * from './lib/ai/providers';
 
+export * from './lib/json-utils';
 export * from './lib/microsoft/get-microsoft-graph-client';
 
 export * from './lib/oracle-cloud/auth';

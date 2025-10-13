@@ -1,5 +1,9 @@
 import { BlockMetadataModelSummary } from '@openops/blocks-framework';
-import { aggregateBlocksByProvider, filterBlocks } from '../connections-utils';
+import {
+  aggregateBlocksByProvider,
+  filterBlocks,
+  formatErrorObjectToString,
+} from '../connections-utils';
 
 describe('filterBlocks', () => {
   const blocks: BlockMetadataModelSummary[] = [
@@ -130,5 +134,38 @@ describe('aggregateBlocksByProvider', () => {
     expect(
       result[0].auth && (result[0].auth as any).authProviderKey,
     ).toBeNull();
+  });
+});
+
+describe('formatErrorObjectToString', () => {
+  it('returns the string if error is a string', () => {
+    expect(formatErrorObjectToString('Simple error')).toBe('Simple error');
+  });
+
+  it('returns the message if error is an object with a string message', () => {
+    expect(formatErrorObjectToString({ message: 'Object error message' })).toBe(
+      'Object error message',
+    );
+  });
+
+  it('returns JSON string if error is an object with a non-string message', () => {
+    expect(formatErrorObjectToString({ message: 123 })).toBe('{"message":123}');
+    expect(formatErrorObjectToString({ message: null })).toBe(
+      '{"message":null}',
+    );
+    expect(formatErrorObjectToString({ message: undefined })).toBe('{}');
+  });
+
+  it('returns JSON string if error is an object without message', () => {
+    expect(formatErrorObjectToString({ code: 401 })).toBe('{"code":401}');
+  });
+
+  it('returns JSON string if error is an array', () => {
+    expect(formatErrorObjectToString([1, 2, 3])).toBe('[1,2,3]');
+  });
+
+  it('returns "Unknown error" if error is undefined or null', () => {
+    expect(formatErrorObjectToString(undefined as any)).toBe('Unknown error');
+    expect(formatErrorObjectToString(null as any)).toBe('Unknown error');
   });
 });

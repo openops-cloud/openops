@@ -76,7 +76,8 @@ const TestStepContainer = React.memo(
         </TabsList>
         <TabsContent
           value={TabListEnum.STEP_OUTPUT}
-          className="w-full flex-1 min-h-0 overflow-hidden"
+          className="w-full flex-1 min-h-0 overflow-hidden data-[state=inactive]:hidden"
+          forceMount
         >
           {type === TriggerType.BLOCK ? (
             <TestTriggerSection
@@ -93,7 +94,8 @@ const TestStepContainer = React.memo(
         </TabsContent>
         <TabsContent
           value={TabListEnum.SAMPLE_STEP_OUTPUT}
-          className="w-full flex-1 min-h-0 overflow-hidden"
+          className="w-full flex-1 min-h-0 overflow-hidden data-[state=inactive]:hidden"
+          forceMount
         >
           <div className="h-full flex min-h-0">
             <TestStepDataViewer

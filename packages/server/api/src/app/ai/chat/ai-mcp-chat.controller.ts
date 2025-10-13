@@ -1,15 +1,19 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
+import { validateAiProviderConfig } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import {
   ApplicationError,
   ChatNameRequest,
   DeleteChatHistoryRequest,
+  ErrorCode,
   ListChatsResponse,
   NewMessageRequest,
   OpenChatMCPRequest,
   OpenChatResponse,
   openOpsId,
   PrincipalType,
+  UpdateChatModelRequest,
+  UpdateChatModelResponse,
 } from '@openops/shared';
 import { ModelMessage } from 'ai';
 import { FastifyReply } from 'fastify';
@@ -44,6 +48,8 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       const { chatId: inputChatId } = request.body;
       const { id: userId, projectId } = request.principal;
 
+      const { aiConfig } = await getLLMConfig(projectId);
+
       if (inputChatId) {
         const existingContext = await getChatContext(
           inputChatId,
@@ -57,8 +63,26 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
             userId,
             projectId,
           );
+          let provider = existingContext.provider;
+          let model = existingContext.model;
+
+          if (
+            !existingContext.provider ||
+            !existingContext.model ||
+            existingContext.provider !== aiConfig.provider
+          ) {
+            provider = aiConfig.provider;
+            model = aiConfig.model;
+            await createChatContext(inputChatId, userId, projectId, {
+              ...existingContext,
+              provider,
+              model,
+            });
+          }
           return reply.code(200).send({
             chatId: inputChatId,
+            provider,
+            model,
             messages,
           });
         }
@@ -86,12 +110,42 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
           projectId,
         );
 
+        let provider = aiConfig.provider;
+        let model = aiConfig.model;
+
         if (messages.length === 0) {
-          await createChatContext(chatId, userId, projectId, context);
+          await createChatContext(chatId, userId, projectId, {
+            ...context,
+            provider,
+            model,
+          });
+        } else {
+          const existingContext = await getChatContext(
+            chatId,
+            userId,
+            projectId,
+          );
+
+          if (
+            !existingContext?.provider ||
+            !existingContext?.model ||
+            existingContext?.provider !== aiConfig.provider
+          ) {
+            await createChatContext(chatId, userId, projectId, {
+              ...existingContext,
+              provider,
+              model,
+            });
+          } else {
+            provider = existingContext.provider;
+            model = existingContext.model;
+          }
         }
 
         return reply.code(200).send({
           chatId,
+          provider,
+          model,
           messages,
         });
       }
@@ -106,7 +160,11 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         chatId: newChatId,
       };
 
-      await createChatContext(chatId, userId, projectId, chatContext);
+      await createChatContext(chatId, userId, projectId, {
+        ...chatContext,
+        provider: aiConfig.provider,
+        model: aiConfig.model,
+      });
       const messages = await getChatHistoryWithMergedTools(
         chatId,
         userId,
@@ -115,6 +173,8 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
 
       return reply.code(200).send({
         chatId,
+        provider: aiConfig.provider,
+        model: aiConfig.model,
         messages,
       });
     },
@@ -173,7 +233,25 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
         userId,
         projectId,
       );
-      const llmConfigResult = await getLLMConfig(projectId);
+      const ctx = conversationResult.chatContext;
+      let contextModel = ctx.model;
+
+      const { aiConfig } = await getLLMConfig(projectId);
+
+      if (
+        !ctx.provider ||
+        !contextModel ||
+        ctx.provider !== aiConfig.provider
+      ) {
+        contextModel = aiConfig.model;
+        await createChatContext(chatId, userId, projectId, {
+          ...ctx,
+          provider: aiConfig.provider,
+          model: contextModel,
+        });
+      }
+
+      const { languageModel } = await getLLMConfig(projectId, contextModel);
 
       conversationResult.chatHistory.push({
         role: 'user',
@@ -181,7 +259,6 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       });
 
       const { chatContext, chatHistory } = conversationResult;
-      const { aiConfig, languageModel } = llmConfigResult;
 
       const enrichedContext = request.body.additionalContext
         ? await enrichContext(request.body.additionalContext, projectId, {
@@ -233,6 +310,50 @@ export const aiMCPChatController: FastifyPluginAsyncTypebox = async (app) => {
       return await reply.code(StatusCodes.OK).send({ chats });
     } catch (error) {
       return handleError(error, reply, 'list chats');
+    }
+  });
+
+  app.post('/model', UpdateChatModelOptions, async (request, reply) => {
+    const userId = request.principal.id;
+    const projectId = request.principal.projectId;
+    const { chatId, model } = request.body;
+
+    try {
+      const context = await getChatContext(chatId, userId, projectId);
+      if (!context) {
+        throw new ApplicationError({
+          code: ErrorCode.ENTITY_NOT_FOUND,
+          params: {
+            message: 'No chat session found for the provided chat ID.',
+            entityType: 'Chat Session',
+            entityId: chatId,
+          },
+        });
+      }
+      const { aiConfig } = await getLLMConfig(projectId);
+
+      const provider = context.provider ?? aiConfig.provider;
+
+      const result = await validateAiProviderConfig({ ...aiConfig, model });
+
+      if (!result.valid) {
+        throw new ApplicationError({
+          code: ErrorCode.VALIDATION,
+          params: {
+            message: 'The model is not supported',
+          },
+        });
+      }
+
+      await createChatContext(chatId, userId, projectId, {
+        ...context,
+        provider,
+        model,
+      });
+
+      return await reply.code(StatusCodes.OK).send({ chatId, provider, model });
+    } catch (error) {
+      return handleError(error, reply, 'The model is not supported');
     }
   });
 
@@ -319,6 +440,21 @@ const ListChatsOptions = {
       'This endpoint returns an array of all available chat sessions with chatId and chatName.',
     response: {
       200: ListChatsResponse,
+    },
+  },
+};
+
+const UpdateChatModelOptions = {
+  config: {
+    allowedPrincipals: [PrincipalType.USER],
+  },
+  schema: {
+    tags: ['ai', 'ai-chat-mcp'],
+    description:
+      'Update the language model used for a specific chat context. Returns the updated provider and model.',
+    body: UpdateChatModelRequest,
+    response: {
+      200: UpdateChatModelResponse,
     },
   },
 };

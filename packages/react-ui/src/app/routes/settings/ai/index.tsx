@@ -11,6 +11,7 @@ import { aiSettingsApi } from '@/app/features/ai/lib/ai-settings-api';
 import { aiSettingsHooks } from '@/app/features/ai/lib/ai-settings-hooks';
 import { mcpSettingsHooks } from '@/app/features/ai/lib/mcp-settings-hooks';
 import { McpSettingsForm } from '@/app/features/ai/mcp-settings-form';
+import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
 import {
   INTERNAL_ERROR_TOAST,
   toast,
@@ -23,9 +24,6 @@ import { t } from 'i18next';
 import { Trash } from 'lucide-react';
 
 const AiSettingsPage = () => {
-  const { data: aiProviders, isPending: isAiProvidersLoading } =
-    aiSettingsHooks.useAiSettingsProviders();
-
   const { data: aiSettings, refetch: refetchAiSettings } =
     aiSettingsHooks.useAiSettings();
 
@@ -33,6 +31,10 @@ const AiSettingsPage = () => {
     mcpSettingsHooks.useMcpSettings();
 
   const queryClient = useQueryClient();
+
+  const { blockModel } = blocksHooks.useBlock({
+    name: '@openops/block-ai',
+  });
 
   const { mutate: onSaveAiSettings, isPending: isSaving } = useMutation({
     mutationFn: async (aiSettings: AiSettingsFormSchema) => {
@@ -107,26 +109,28 @@ const AiSettingsPage = () => {
     <div className="flex w-full flex-col items-center justify-center gap-4">
       <div className="mx-auto w-full flex-col">
         <h1 className="text-2xl font-bold">{t('AI providers')}</h1>
-        <div className="flex justify-between mt-[35px] p-6 border rounded-[11px]">
-          <AiSettingsForm
-            aiProviders={aiProviders}
-            isAiProvidersLoading={isAiProvidersLoading}
-            savedSettings={aiSettings?.[0]}
-            onSave={onSaveAiSettings}
-            isSaving={isSaving}
-          />
-          {aiSettings?.[0]?.id && (
-            <TooltipWrapper tooltipText={t('Delete')}>
-              <Trash
-                size={24}
-                role="button"
-                className="text-destructive"
-                aria-label="Delete"
-                onClick={() => onDelete(aiSettings?.[0].id)}
-              />
-            </TooltipWrapper>
-          )}
-        </div>
+        {blockModel && (
+          <div className="flex justify-between mt-[35px] p-6 border rounded-[11px]">
+            <AiSettingsForm
+              block={blockModel}
+              savedSettings={aiSettings?.[0]}
+              onSave={onSaveAiSettings}
+              isSaving={isSaving}
+            />
+            {aiSettings?.[0]?.id && (
+              <TooltipWrapper tooltipText={t('Delete')}>
+                <Trash
+                  size={24}
+                  role="button"
+                  className="text-destructive"
+                  aria-label="Delete"
+                  onClick={() => onDelete(aiSettings?.[0].id)}
+                />
+              </TooltipWrapper>
+            )}
+          </div>
+        )}
+
         <div className="flex justify-between mt-[12px] mb-[22px] p-6 border rounded-[11px]">
           <McpSettingsForm
             onSave={onSaveMcpSettings}

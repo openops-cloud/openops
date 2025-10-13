@@ -20,6 +20,7 @@ export const addSubtractDateAction = createAction({
       hide: true,
     },
   },
+  requireToolApproval: false,
   props: {
     inputDate: Property.ShortText({
       displayName: 'Input Date',
