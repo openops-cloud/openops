@@ -61,13 +61,13 @@ const sampleLimits = [
   },
 ];
 
-const blockDiplayNames: Record<string, string> = {
+const blockDisplayNames: Record<string, string> = {
   slack: 'Slack',
   aws: 'AWS',
   azure: 'Azure',
 };
 
-const actionDiplayNames: Record<string, string> = {
+const actionDisplayNames: Record<string, string> = {
   send_message: 'Send Message',
   tag_resource: 'Tag Resource',
   cli: 'CLI',
@@ -95,8 +95,8 @@ const meta: Meta<typeof SetRunLimits> = {
   component: SetRunLimits,
   args: {
     value: defaultValue,
-    blockDiplayNames,
-    actionDiplayNames,
+    blockDisplayNames,
+    actionDisplayNames,
     blockLogoUrls,
     isLoading: false,
     className: 'max-w-2xl',

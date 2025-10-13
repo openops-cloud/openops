@@ -35,13 +35,13 @@ type SetRunLimitsProps = {
    * Used to render human‑friendly provider/app names in the list.
    * Note: property name keeps historical "Diplay" spelling for backward compatibility.
    */
-  blockDiplayNames: Record<string, string>;
+  blockDisplayNames: Record<string, string>;
   /**
    * Mapping of action internal names (e.g., "send_message") to display names (e.g., "Send Message").
    * Used to render human‑friendly action labels in the list.
    * Note: property name keeps historical "Diplay" spelling for backward compatibility.
    */
-  actionDiplayNames: Record<string, string>;
+  actionDisplayNames: Record<string, string>;
   /**
    * Mapping of block internal names to logo image URLs used for visual context in the list.
    * Example: { slack: 'https://static.openops.com/blocks/slack.png' }
@@ -60,8 +60,8 @@ type SetRunLimitsProps = {
 function SetRunLimits({
   value,
   onSave,
-  blockDiplayNames,
-  actionDiplayNames,
+  blockDisplayNames,
+  actionDisplayNames,
   blockLogoUrls,
   isLoading,
   className,
@@ -222,13 +222,13 @@ function SetRunLimits({
                               })}
                             ></BlockIcon>
                             <span className="text-sm font-medium">
-                              {blockDiplayNames[item.blockName]}
+                              {blockDisplayNames[item.blockName]}
                             </span>
 
                             <div className="h-[18px] w-4 border-r"></div>
 
                             <span className="text-sm font-medium">
-                              {actionDiplayNames[item.actionName]}
+                              {actionDisplayNames[item.actionName]}
                             </span>
 
                             <FormField
