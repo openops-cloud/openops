@@ -135,7 +135,6 @@ export const createBuilderStore = (initialState: BuilderInitialState) =>
                 aiChatProperty: undefined,
               };
 
-              // Mark that user manually selected a step during a run
               const userManuallySelectedStep = !isNil(state.run);
 
               if (
@@ -231,7 +230,6 @@ export const createBuilderStore = (initialState: BuilderInitialState) =>
         setRun: async (run: FlowRun, flowVersion: FlowVersion) =>
           set(
             (state) => {
-              // Determine if this is a progress update (same run) or a new run
               const isProgressUpdate = state.run?.id === run.id;
 
               let selectedStep: string;
@@ -240,10 +238,9 @@ export const createBuilderStore = (initialState: BuilderInitialState) =>
                 state.userManuallySelectedStep &&
                 !isNil(state.selectedStep)
               ) {
-                // For progress updates, preserve the selected step only if user manually selected it
+                // For progress update, preserve the selected step only if user manually selected it
                 selectedStep = state.selectedStep;
               } else if (run.steps) {
-                // Auto-select failed step or use defaults for new runs or if user hasn't manually selected
                 selectedStep =
                   flowRunUtils.findFailedStep(run)?.stepName ??
                   state.selectedStep ??
@@ -252,8 +249,6 @@ export const createBuilderStore = (initialState: BuilderInitialState) =>
                 selectedStep = 'trigger';
               }
 
-              // If user manually selected a step during a progress update, preserve loop indexes
-              // by not calling findLoopsState which might override with failed step iteration
               let loopsIndexes: Record<string, number>;
               if (isProgressUpdate && state.userManuallySelectedStep) {
                 loopsIndexes = state.loopsIndexes;
@@ -272,7 +267,6 @@ export const createBuilderStore = (initialState: BuilderInitialState) =>
                 leftSidebar: LeftSideBarType.RUN_DETAILS,
                 selectedStep,
                 readonly: true,
-                // Keep the flag true once set, reset only for new runs
                 userManuallySelectedStep: isProgressUpdate
                   ? state.userManuallySelectedStep
                   : false,
@@ -292,7 +286,6 @@ export const createBuilderStore = (initialState: BuilderInitialState) =>
                   ...state.loopsIndexes,
                   [stepName]: index,
                 },
-                // Mark that user manually selected a loop iteration during a run
                 userManuallySelectedStep: hasRun
                   ? true
                   : state.userManuallySelectedStep,
