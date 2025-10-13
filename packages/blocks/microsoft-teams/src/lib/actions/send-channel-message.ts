@@ -9,7 +9,7 @@ export const sendChannelMessageAction = createAction({
   name: 'microsoft_teams_send_channel_message',
   displayName: 'Send Channel Message',
   description: "Sends a message to a teams's channel.",
-  requireToolApproval: true,
+  IsWriteAction: true,
   props: {
     teamId: teamId,
     channelId: channelId,

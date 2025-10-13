@@ -22,7 +22,7 @@ export const extractDateParts = createAction({
       hide: true,
     },
   },
-  requireToolApproval: false,
+  IsWriteAction: false,
   props: {
     inputDate: Property.ShortText({
       displayName: 'Input Date',

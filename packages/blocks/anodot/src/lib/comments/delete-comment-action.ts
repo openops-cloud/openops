@@ -10,7 +10,7 @@ export const deleteCommentAction = createAction({
   name: 'anodot_delete_comment',
   description: 'Delete a comment from a recommendation',
   displayName: 'Delete Comment',
-  requireToolApproval: true,
+  IsWriteAction: true,
   props: {
     accountId: Property.ShortText({
       displayName: 'Account ID',

@@ -12,7 +12,7 @@ export const searchMessages = createAction({
   displayName: 'Search messages',
   description: 'Searches for messages matching a query',
   auth: slackAuth,
-  requireToolApproval: false,
+  IsWriteAction: false,
   props: {
     query: Property.ShortText({
       displayName: 'Search query',

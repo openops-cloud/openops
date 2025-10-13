@@ -8,7 +8,7 @@ export const getUsers = createAction({
   displayName: 'Get Users',
   description: 'Get Users',
   auth: ternaryCloudAuth,
-  requireToolApproval: false,
+  IsWriteAction: false,
   props: {
     includeSettings: Property.Checkbox({
       displayName: 'Include settings',

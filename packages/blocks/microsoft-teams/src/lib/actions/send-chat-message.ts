@@ -8,7 +8,7 @@ export const sendChatMessageAction = createAction({
   name: 'microsoft_teams_send_chat_message',
   displayName: 'Send Chat Message',
   description: 'Sends a message in an existing chat.',
-  requireToolApproval: true,
+  IsWriteAction: true,
   props: {
     chatId: chatId,
     contentType: Property.StaticDropdown({

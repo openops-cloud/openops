@@ -15,7 +15,7 @@ export const rdsDeleteSnapshotAction = createAction({
   description: 'Delete the provided RDS Snapshot',
   displayName: 'RDS Delete Snapshot',
   riskLevel: RiskLevel.HIGH,
-  requireToolApproval: true,
+  IsWriteAction: true,
   props: {
     arn: Property.ShortText({
       displayName: 'ARN',

@@ -17,7 +17,7 @@ export const readFileAction = createAction({
       hide: true,
     },
   },
-  requireToolApproval: false,
+  IsWriteAction: false,
   props: {
     file: Property.File({
       displayName: 'File',

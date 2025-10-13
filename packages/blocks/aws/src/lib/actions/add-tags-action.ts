@@ -17,7 +17,7 @@ export const addTagsAction = createAction({
   description: 'Add tags to the given resources',
   displayName: 'Tag Resources',
   riskLevel: RiskLevel.HIGH,
-  requireToolApproval: true,
+  IsWriteAction: true,
   props: {
     resourceARNs: getARNsProperty(),
     tags: Property.Object({

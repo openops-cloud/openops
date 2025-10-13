@@ -7,7 +7,7 @@ export const getClustersAction = createAction({
   name: 'flexera_get_clusters',
   description: 'Get Clusters',
   displayName: 'Get Clusters',
-  requireToolApproval: false,
+  IsWriteAction: false,
   props: {
     accountId: Property.Dropdown({
       displayName: 'Account',

@@ -7,7 +7,7 @@ export const getVirtualTagValuesAction = createAction({
   displayName: 'Get Virtual Tag Values',
   description: 'Retrieve virtual tags and their values',
   auth: finoutAuth,
-  requireToolApproval: false,
+  IsWriteAction: false,
   props: {
     virtualTagIds: Property.MultiSelectDropdown({
       displayName: 'Virtual Tags',

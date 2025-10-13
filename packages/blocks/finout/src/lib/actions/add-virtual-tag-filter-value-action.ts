@@ -11,7 +11,7 @@ export const addVirtualTagFilterValueAction = createAction({
   displayName: 'Add Value to Virtual Tag Filter',
   description: 'Add a value to an existing virtual tag filter',
   auth: finoutAuth,
-  requireToolApproval: true,
+  IsWriteAction: true,
   props: {
     tagId: Property.Dropdown({
       displayName: 'Virtual Tag',

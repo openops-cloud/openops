@@ -5,7 +5,7 @@ export const storageRemoveValue = createAction({
   name: 'remove_value',
   displayName: 'Remove',
   description: 'Remove a value from storage',
-  requireToolApproval: false,
+  IsWriteAction: false,
   errorHandlingOptions: {
     continueOnFailure: {
       hide: true,

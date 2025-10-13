@@ -8,7 +8,7 @@ export const postponeRecommendationsAction = createAction({
   displayName: 'Postpone Recommendations',
   description: 'Postpone recommendations until a specified date',
   auth: cloudfixAuth,
-  requireToolApproval: true,
+  IsWriteAction: true,
   props: {
     recommendationIds: Property.Array({
       displayName: 'Recommendation IDs',

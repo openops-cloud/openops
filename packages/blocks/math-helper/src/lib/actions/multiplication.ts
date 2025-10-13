@@ -14,7 +14,7 @@ export const multiplication = createAction({
       hide: true,
     },
   },
-  requireToolApproval: false,
+  IsWriteAction: false,
   props: {
     first_number: Property.Number({
       displayName: 'First Number',

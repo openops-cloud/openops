@@ -15,7 +15,7 @@ export const ebsDeleteSnapshotAction = createAction({
   description: 'Delete the provided EBS Snapshot',
   displayName: 'EBS Delete Snapshot',
   riskLevel: RiskLevel.HIGH,
-  requireToolApproval: true,
+  IsWriteAction: true,
   props: {
     arn: Property.ShortText({
       displayName: 'ARN',

@@ -28,7 +28,7 @@ export const requestActionMessageAction = createAction({
   displayName: 'Request Action',
   description:
     'Send a message to a user or a channel and wait until an action is selected',
-  requireToolApproval: true,
+  IsWriteAction: true,
   props: {
     conversationId: usersAndChannels,
     headerText,

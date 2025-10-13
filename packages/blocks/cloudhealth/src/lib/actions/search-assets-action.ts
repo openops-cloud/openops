@@ -10,7 +10,7 @@ export const searchAssetsAction = createAction({
   displayName: 'Search Assets',
   description: 'Retrieve assets that match specific criteria',
   auth: cloudhealthAuth,
-  requireToolApproval: false,
+  IsWriteAction: false,
   props: {
     assetType: Property.Dropdown({
       displayName: 'Asset Type',

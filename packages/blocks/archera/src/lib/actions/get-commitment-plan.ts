@@ -7,7 +7,7 @@ export const getCommitmentPlanAction = createAction({
   name: 'archera_get_commitment_plan',
   description: 'Get a specific commitment plan by ID',
   displayName: 'Get Commitment Plan',
-  requireToolApproval: false,
+  IsWriteAction: false,
   props: {
     planId: Property.ShortText({
       displayName: 'Plan ID',

@@ -14,7 +14,7 @@ export const storageListAction = createAction({
       hide: true,
     },
   },
-  requireToolApproval: false,
+  IsWriteAction: false,
   props: {
     keyFilter: Property.ShortText({
       displayName: 'Key filter',

@@ -13,7 +13,7 @@ export const getAccountIdAction = createAction({
   description:
     'Gets the account ids for the accounts under the selected connection',
   displayName: 'Get Account IDs',
-  requireToolApproval: false,
+  IsWriteAction: false,
   props: {
     accounts: getAwsAccountsMultiSelectDropdown().accounts,
   },

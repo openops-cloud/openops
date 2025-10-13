@@ -9,7 +9,7 @@ export const forwardEmailAction = createAction({
   name: 'forwardEmail',
   displayName: 'Forward Email',
   description: 'Forwards an email message.',
-  requireToolApproval: true,
+  IsWriteAction: true,
   props: {
     messageId: messageIdDropdown({
       displayName: 'Email',

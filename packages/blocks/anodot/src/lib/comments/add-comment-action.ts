@@ -10,7 +10,7 @@ export const addCommentAction = createAction({
   name: 'anodot_add_comment',
   description: 'Add a comment to a recommendation',
   displayName: 'Add Comment',
-  requireToolApproval: true,
+  IsWriteAction: true,
   props: {
     accountId: Property.ShortText({
       displayName: 'Account ID',

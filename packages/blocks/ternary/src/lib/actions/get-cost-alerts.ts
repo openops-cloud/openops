@@ -9,7 +9,7 @@ export const getCostAlertsAction = createAction({
   displayName: 'Get Anomalies',
   description: 'Get Anomalies',
   auth: ternaryCloudAuth,
-  requireToolApproval: false,
+  IsWriteAction: false,
   props: {
     statusFilter: Property.StaticMultiSelectDropdown({
       displayName: 'Status',

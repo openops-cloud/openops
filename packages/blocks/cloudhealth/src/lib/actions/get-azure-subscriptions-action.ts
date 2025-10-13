@@ -7,7 +7,7 @@ export const getAzureSubscriptionsAction = createAction({
   displayName: 'Get Azure Subscriptions',
   description: 'Retrieve a list of Azure subscriptions',
   auth: cloudhealthAuth,
-  requireToolApproval: false,
+  IsWriteAction: false,
   props: {},
   async run(context) {
     return await getAzureSubscriptions(context.auth);

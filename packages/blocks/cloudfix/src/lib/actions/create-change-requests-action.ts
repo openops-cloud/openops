@@ -10,7 +10,7 @@ export const createChangeRequestsAction = createAction({
   description: 'Create change requests from recommendations',
   auth: cloudfixAuth,
   riskLevel: RiskLevel.HIGH,
-  requireToolApproval: true,
+  IsWriteAction: true,
   props: {
     recommendationIds: Property.Array({
       displayName: 'Recommendation IDs',

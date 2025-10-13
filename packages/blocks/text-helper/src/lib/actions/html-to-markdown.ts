@@ -14,7 +14,7 @@ export const htmlToMarkdown = createAction({
       hide: true,
     },
   },
-  requireToolApproval: false,
+  IsWriteAction: false,
   props: {
     html: Property.LongText({
       displayName: 'HTML Content',

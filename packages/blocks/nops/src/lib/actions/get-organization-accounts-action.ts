@@ -8,7 +8,7 @@ export const getOrganizationAccountsAction = createAction({
   description:
     'Retrieve AWS/Azure organization accounts (projects) configured in nOps',
   auth: nopsAuth,
-  requireToolApproval: false,
+  IsWriteAction: false,
   props: {},
   async run(context) {
     const endpoint = '/c/admin/projectaws/organization_accounts/';

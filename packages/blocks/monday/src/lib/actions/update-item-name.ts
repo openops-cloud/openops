@@ -7,7 +7,7 @@ export const updateItemNameAction = createAction({
   name: 'monday_update_item_name',
   displayName: 'Update Item Name',
   description: 'Updates an item name.',
-  requireToolApproval: true,
+  IsWriteAction: true,
   props: {
     workspace_id: mondayCommon.workspace_id(true),
     board_id: mondayCommon.board_id(true),

@@ -14,7 +14,7 @@ export const replyEmailAction = createAction({
   name: 'reply-email',
   displayName: 'Reply to Email',
   description: 'Reply to an outlook email.',
-  requireToolApproval: true,
+  IsWriteAction: true,
   props: {
     messageId: Property.Dropdown({
       displayName: 'Email',

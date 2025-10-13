@@ -10,7 +10,7 @@ export const addAttachmentToIssueAction = createAction({
   name: 'add_issue_attachment',
   displayName: 'Add Attachment to Issue',
   description: 'Adds an attachment to an issue.',
-  requireToolApproval: true,
+  IsWriteAction: true,
   props: {
     projectId: getProjectIdDropdown(),
     issueId: getIssueIdDropdown({ refreshers: ['projectId'] }),

@@ -13,7 +13,7 @@ export const replace = createAction({
       hide: true,
     },
   },
-  requireToolApproval: false,
+  IsWriteAction: false,
   props: {
     text: Property.ShortText({
       displayName: 'Text',

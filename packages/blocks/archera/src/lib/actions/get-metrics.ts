@@ -7,7 +7,7 @@ export const getMetricsAction = createAction({
   name: 'archera_get_metrics',
   description: 'Get savings and utilization metrics for a provider',
   displayName: 'Get Metrics',
-  requireToolApproval: false,
+  IsWriteAction: false,
   props: {
     provider: Property.StaticDropdown({
       displayName: 'Provider',

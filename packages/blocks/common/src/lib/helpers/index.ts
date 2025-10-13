@@ -54,7 +54,7 @@ export function createCustomApiCallAction({
       : 'Make a custom API call to a specific endpoint',
     auth: auth ? auth : undefined,
     requireAuth: auth ? true : false,
-    requireToolApproval: true,
+    IsWriteAction: true,
     props: {
       ...(additionalProps || {}),
       url: Property.DynamicProperties({

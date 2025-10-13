@@ -7,7 +7,7 @@ export const createFile = createAction({
   name: 'create_file',
   displayName: 'Create File from Text',
   description: 'Create a new file in the given path',
-  requireToolApproval: true,
+  IsWriteAction: true,
   props: {
     fileName: Property.ShortText({
       displayName: 'File Path',

@@ -9,7 +9,7 @@ export const advisorAction = createAction({
   name: 'advisor',
   description: 'Get Azure Advisor Cost Recommendations',
   displayName: 'Get Advisor Cost Recommendations',
-  requireToolApproval: false,
+  IsWriteAction: false,
   props: {
     useHostSession: getUseHostSessionProperty('Azure', 'az login'),
     subscriptions: subDropdown,

@@ -20,7 +20,7 @@ export const getCurrentDate = createAction({
       hide: true,
     },
   },
-  requireToolApproval: false,
+  IsWriteAction: false,
   props: {
     timeFormat: Property.StaticDropdown({
       displayName: 'To Time Format',

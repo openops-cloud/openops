@@ -10,7 +10,7 @@ export const httpReturnResponse = createAction({
   name: 'return_response',
   displayName: 'Return Response',
   description: 'return a response',
-  requireToolApproval: false,
+  IsWriteAction: false,
   props: {
     status: Property.Number({
       displayName: 'Status',

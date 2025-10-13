@@ -20,7 +20,7 @@ export const nextDayofYear = createAction({
       hide: true,
     },
   },
-  requireToolApproval: false,
+  IsWriteAction: false,
   props: {
     month: Property.StaticDropdown({
       displayName: 'Month',

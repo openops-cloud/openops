@@ -28,7 +28,7 @@ export const ec2GetInstancesAction = createAction({
   name: 'ec2_get_instances',
   description: 'EC2 Get Instances that match the given criteria',
   displayName: 'EC2 Get Instances',
-  requireToolApproval: false,
+  IsWriteAction: false,
   props: {
     accounts: getAwsAccountsMultiSelectDropdown().accounts,
     ...filterByArnsOrRegionsProperties(
