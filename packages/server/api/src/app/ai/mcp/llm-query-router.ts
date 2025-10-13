@@ -37,18 +37,16 @@ const createQueryClassificationSchema = (): z.ZodUnion<
 
 const queryClassificationUnionSchema = createQueryClassificationSchema();
 
-const coreSchema = z.object({
-  tool_names: z.array(z.string()),
-  query_classification: z.array(queryClassificationUnionSchema),
-});
-
 const coreWithReasoningSchema = z.object({
   reasoning: z
     .string()
     .describe(
       'The reasoning for the tool selection and classification. Fill this field first',
     ),
-  actualResult: coreSchema,
+  tool_names: z.array(z.string()).describe('Array of selected tool names'),
+  query_classification: z
+    .array(queryClassificationUnionSchema)
+    .describe('Array of query classification categories'),
 });
 
 export async function routeQuery({
@@ -81,9 +79,7 @@ export async function routeQuery({
   try {
     const openopsTablesNames = await getOpenOpsTablesNames();
 
-    const {
-      object: { actualResult: selectionResult },
-    } = await generateObject({
+    const { object: selectionResult } = await generateObject({
       model: languageModel,
       schema: coreWithReasoningSchema,
       system: getSystemPrompt(toolList, openopsTablesNames, uiContext),

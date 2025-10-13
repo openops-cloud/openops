@@ -13,7 +13,7 @@ export const storagePutAction = createAction({
       hide: true,
     },
   },
-  requireToolApproval: false,
+  isWriteAction: false,
   props: {
     key: Property.ShortText({
       displayName: 'Key',

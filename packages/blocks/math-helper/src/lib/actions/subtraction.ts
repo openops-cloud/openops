@@ -14,7 +14,7 @@ export const subtraction = createAction({
       hide: true,
     },
   },
-  requireToolApproval: false,
+  isWriteAction: false,
   props: {
     first_number: Property.Number({
       displayName: 'First Number',

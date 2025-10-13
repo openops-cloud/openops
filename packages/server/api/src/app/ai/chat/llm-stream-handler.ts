@@ -11,6 +11,10 @@ import {
   TextStreamPart,
   ToolSet,
 } from 'ai';
+import {
+  addCacheControlToMessages,
+  addCacheControlToTools,
+} from './context-cache.helper';
 
 type StreamTextOnAbortCallback<TOOLS extends ToolSet> = (event: {
   readonly steps: StepResult<TOOLS>[];
@@ -56,13 +60,18 @@ export function getLLMAsyncStream(
     system: systemPrompt,
     messages: chatHistory,
     ...aiConfig.modelSettings,
-    tools,
+    tools: addCacheControlToTools(tools),
     toolChoice,
     maxRetries: MAX_RETRIES,
     stopWhen: stepCountIs(maxRecursionDepth),
     onStepFinish,
     onFinish,
     onAbort,
+    prepareStep: async ({ messages }) => {
+      return {
+        messages: addCacheControlToMessages(messages),
+      };
+    },
     abortSignal,
     experimental_telemetry: { isEnabled: isLLMTelemetryEnabled() },
     async onError({ error }): Promise<void> {

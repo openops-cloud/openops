@@ -13,7 +13,7 @@ export const getStack = createAction({
   displayName: 'Get CloudFormation template',
   description:
     'Get the CloudFormation stack template that matches the given arn.',
-  requireToolApproval: false,
+  isWriteAction: false,
   props: {
     arn: Property.ShortText({
       displayName: 'ARN',

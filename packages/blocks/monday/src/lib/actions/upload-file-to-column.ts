@@ -10,7 +10,7 @@ export const uploadFileToColumnAction = createAction({
   name: 'monday_upload_file_to_column',
   displayName: 'Upload File to Column',
   description: 'Upload a file to a column in Monday.',
-  requireToolApproval: true,
+  isWriteAction: true,
   props: {
     workspace_id: mondayCommon.workspace_id(true),
     board_id: mondayCommon.board_id(true),

@@ -8,7 +8,7 @@ export const moveEmailToFolderAction = createAction({
   name: 'moveEmailToFolder',
   displayName: 'Move Email to Folder',
   description: 'Moves an email message to a specific folder.',
-  requireToolApproval: true,
+  isWriteAction: true,
   props: {
     messageId: messageIdDropdown({
       displayName: 'Email',
