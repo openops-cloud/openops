@@ -117,7 +117,7 @@ function SetRunLimits({
   return (
     <div
       className={cn(
-        'flex flex-col gap-3  text-primary-700 dark:text-white',
+        'flex flex-col gap-3 text-primary-700 dark:text-white',
         className,
       )}
     >
