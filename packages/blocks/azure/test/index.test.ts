@@ -12,7 +12,7 @@ import { azure } from '../src/index';
 
 describe('block declaration tests', () => {
   test('should return block with correct actions', () => {
-    expect(Object.keys(azure.actions()).length).toBe(2);
+    expect(Object.keys(azure.actions()).length).toBe(3);
     expect(azure.actions()).toMatchObject({
       azure_cli: {
         name: 'azure_cli',
@@ -20,6 +20,10 @@ describe('block declaration tests', () => {
       },
       advisor: {
         name: 'advisor',
+        requireAuth: true,
+      },
+      custom_azure_api_call: {
+        name: 'custom_azure_api_call',
         requireAuth: true,
       },
     });

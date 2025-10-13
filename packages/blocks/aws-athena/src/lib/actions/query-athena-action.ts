@@ -12,7 +12,7 @@ export const runAthenaQueryAction = createAction({
   name: 'athena_query',
   description: 'Query Athena database',
   displayName: 'Query Athena database',
-  requireToolApproval: false,
+  isWriteAction: false,
   props: {
     query: Property.LongText({
       displayName: 'Query',

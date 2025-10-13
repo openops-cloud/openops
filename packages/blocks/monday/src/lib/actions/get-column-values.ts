@@ -8,7 +8,7 @@ export const getItemsColumnValuesAction = createAction({
   name: 'monday_get_item_column_values',
   displayName: "Get an Item's Column Values",
   description: 'Gets column values of an item.',
-  requireToolApproval: false,
+  isWriteAction: false,
   props: {
     workspace_id: mondayCommon.workspace_id(true),
     board_id: mondayCommon.board_id(true),

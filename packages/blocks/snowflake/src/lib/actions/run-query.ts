@@ -40,7 +40,7 @@ export const runQuery = createAction({
   displayName: 'Run Query',
   description: 'Run Query',
   auth: customAuth,
-  requireToolApproval: true,
+  isWriteAction: true,
   props,
   async run(context) {
     const {

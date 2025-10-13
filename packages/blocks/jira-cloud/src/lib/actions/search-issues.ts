@@ -7,7 +7,7 @@ export const searchIssues = createAction({
   displayName: 'Search Issues',
   description: 'Search for issues with JQL',
   auth: jiraCloudAuth,
-  requireToolApproval: false,
+  isWriteAction: false,
   props: {
     jql: Property.LongText({
       displayName: 'JQL',

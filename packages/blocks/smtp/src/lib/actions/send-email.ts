@@ -9,7 +9,7 @@ export const sendEmail = createAction({
   name: 'send-email',
   displayName: 'Send Email',
   description: 'Send an email using a custom SMTP server.',
-  requireToolApproval: true,
+  isWriteAction: true,
   props: {
     from: Property.ShortText({
       displayName: 'From Email',

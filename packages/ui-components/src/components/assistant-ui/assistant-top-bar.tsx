@@ -1,5 +1,5 @@
 import { t } from 'i18next';
-import { SquarePen, X as XIcon } from 'lucide-react';
+import { SquareArrowOutDownLeft, SquarePen } from 'lucide-react';
 import { ReactNode } from 'react';
 import { TooltipWrapper } from '../../components/tooltip-wrapper';
 import { Button } from '../../ui/button';
@@ -47,7 +47,7 @@ const AssistantTopBar = ({
             }}
             className="text-outline size-[36px]"
           >
-            <XIcon size={20} />
+            <SquareArrowOutDownLeft size={20} />
           </Button>
         </TooltipWrapper>
       </div>

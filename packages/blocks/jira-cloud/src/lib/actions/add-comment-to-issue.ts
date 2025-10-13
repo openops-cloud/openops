@@ -9,7 +9,7 @@ export const addCommentToIssueAction = createAction({
   name: 'add_issue_comment',
   displayName: 'Add Issue Comment',
   description: 'Adds a comment to an issue.',
-  requireToolApproval: true,
+  isWriteAction: true,
   props: {
     projectId: getProjectIdDropdown(),
     issueId: getIssueIdDropdown({ refreshers: ['projectId'] }),

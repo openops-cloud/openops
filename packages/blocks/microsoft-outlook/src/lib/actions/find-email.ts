@@ -11,7 +11,7 @@ export const findEmailAction = createAction({
   name: 'findEmail',
   displayName: 'Find Email',
   description: 'Searches for emails using full-text search.',
-  requireToolApproval: false,
+  isWriteAction: false,
   props: {
     searchQuery: Property.ShortText({
       displayName: 'Search Query',

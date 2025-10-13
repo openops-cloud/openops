@@ -5,6 +5,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
+  TooltipWrapper,
 } from '@openops/components/ui';
 import { FlowVersionState } from '@openops/shared';
 import { t } from 'i18next';
@@ -120,33 +121,35 @@ const BuilderPublishButton = React.memo(() => {
         </>
       )}
       {readonly && (
-        <Button
-          size={'lg'}
-          variant={'greenRounded'}
-          loading={isSwitchingToDraftPending || isSaving}
-          onClick={() => {
-            if (location.pathname.includes('/runs')) {
-              navigate(
-                `/flows/${flow.id}?folderId=${flow.folderId ?? ''}&${
-                  SEARCH_PARAMS.viewOnly
-                }=false`,
-              );
-            } else {
-              switchToDraft();
-              setLeftSidebar(LeftSideBarType.NONE);
-              setSearchParams(
-                (params) => {
-                  params.set(SEARCH_PARAMS.viewOnly, 'false');
-                  return params;
-                },
-                { replace: true },
-              );
-            }
-          }}
-          className="h-[42px] shadow-editor text-sm"
-        >
-          {t('Edit')}
-        </Button>
+        <TooltipWrapper tooltipText={t('Switch to edit mode')}>
+          <Button
+            size={'lg'}
+            variant={'default'}
+            loading={isSwitchingToDraftPending || isSaving}
+            onClick={() => {
+              if (location.pathname.includes('/runs')) {
+                navigate(
+                  `/flows/${flow.id}?folderId=${flow.folderId ?? ''}&${
+                    SEARCH_PARAMS.viewOnly
+                  }=false`,
+                );
+              } else {
+                switchToDraft();
+                setLeftSidebar(LeftSideBarType.NONE);
+                setSearchParams(
+                  (params) => {
+                    params.set(SEARCH_PARAMS.viewOnly, 'false');
+                    return params;
+                  },
+                  { replace: true },
+                );
+              }
+            }}
+            className="h-[42px] rounded-lg text-base font-bold shadow-editor"
+          >
+            {t('Edit')}
+          </Button>
+        </TooltipWrapper>
       )}
     </div>
   );
