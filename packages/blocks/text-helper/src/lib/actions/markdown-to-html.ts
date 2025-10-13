@@ -13,7 +13,7 @@ export const markdownToHTML = createAction({
       hide: true,
     },
   },
-  IsWriteAction: false,
+  isWriteAction: false,
   props: {
     markdown: Property.LongText({
       displayName: 'Markdown Content',

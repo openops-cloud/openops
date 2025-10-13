@@ -7,7 +7,7 @@ export const createUpdateAction = createAction({
   name: 'monday_create_update',
   displayName: 'Create Update',
   description: 'Creates a new update.',
-  IsWriteAction: true,
+  isWriteAction: true,
   props: {
     item_id: Property.ShortText({
       displayName: 'Item ID',

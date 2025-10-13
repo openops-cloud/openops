@@ -8,7 +8,7 @@ export const getCasesAction = createAction({
   displayName: 'Get Cases',
   description: 'Get Cases',
   auth: ternaryCloudAuth,
-  IsWriteAction: false,
+  isWriteAction: false,
   props: {},
   run: async ({ auth }) => {
     try {

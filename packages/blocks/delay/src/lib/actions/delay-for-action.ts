@@ -19,7 +19,7 @@ export const delayForAction = createAction({
       hide: true,
     },
   },
-  IsWriteAction: false,
+  isWriteAction: false,
   props: {
     unit: Property.StaticDropdown({
       displayName: 'Unit',

@@ -21,7 +21,7 @@ export const httpSendRequestAction = createAction({
   name: 'send_request',
   displayName: 'Send HTTP request',
   description: 'Send HTTP request',
-  IsWriteAction: true,
+  isWriteAction: true,
   props: {
     method: httpMethodDropdown,
     url: Property.ShortText({

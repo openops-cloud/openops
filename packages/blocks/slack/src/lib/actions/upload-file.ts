@@ -12,7 +12,7 @@ export const uploadFile = createAction({
   name: 'uploadFile',
   displayName: 'Upload file',
   description: 'Upload file without sharing it to a channel or user',
-  IsWriteAction: true,
+  isWriteAction: true,
   props: {
     file: Property.File({
       displayName: 'Attachment',

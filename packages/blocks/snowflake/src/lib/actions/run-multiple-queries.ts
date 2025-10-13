@@ -54,7 +54,7 @@ export const runMultipleQueries = createAction({
   displayName: 'Run Multiple Queries',
   description: 'Run Multiple Queries',
   auth: customAuth,
-  IsWriteAction: true,
+  isWriteAction: true,
   props,
   async run(context) {
     const {

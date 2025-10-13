@@ -9,7 +9,7 @@ export const transitionIssueAction = createAction({
   name: 'transition_issue',
   displayName: 'Change Issue Status',
   description: 'Change the status of a given issue',
-  IsWriteAction: true,
+  isWriteAction: true,
   props: {
     projectId: getProjectIdDropdown(),
     issueId: getIssueIdDropdown({ refreshers: ['projectId'] }),

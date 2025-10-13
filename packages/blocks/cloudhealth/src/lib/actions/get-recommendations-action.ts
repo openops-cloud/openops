@@ -11,7 +11,7 @@ export const getRecommendationsAction = createAction({
   displayName: 'Get Recommendations',
   description: 'Get Recommendations',
   auth: cloudhealthAuth,
-  IsWriteAction: false,
+  isWriteAction: false,
   props: {
     recommendationType: Property.StaticDropdown({
       displayName: 'Recommendation Type',

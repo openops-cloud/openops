@@ -19,7 +19,7 @@ export const createPullRequestAction = createAction({
   description: 'Create a new pull request',
   displayName: 'Create pull request',
   requireAuth: true,
-  IsWriteAction: true,
+  isWriteAction: true,
   props: {
     repository: getRepositoryProperty(),
     baseBranch: getBranchProperty(),

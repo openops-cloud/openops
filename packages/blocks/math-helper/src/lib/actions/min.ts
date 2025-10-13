@@ -14,7 +14,7 @@ export const min = createAction({
       hide: true,
     },
   },
-  IsWriteAction: false,
+  isWriteAction: false,
   props: {
     numbers: Property.Array({
       displayName: 'Numbers',

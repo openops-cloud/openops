@@ -9,7 +9,7 @@ export const getBudgets = createAction({
   displayName: 'Get Budgets',
   description: 'Get Budgets',
   auth: ternaryCloudAuth,
-  IsWriteAction: false,
+  isWriteAction: false,
   props: {},
   run: async ({ auth }) => {
     try {

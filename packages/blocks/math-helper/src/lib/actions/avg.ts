@@ -14,7 +14,7 @@ export const avg = createAction({
       hide: true,
     },
   },
-  IsWriteAction: false,
+  isWriteAction: false,
   props: {
     numbers: Property.Array({
       displayName: 'Numbers',

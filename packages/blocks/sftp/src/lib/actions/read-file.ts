@@ -7,7 +7,7 @@ export const readFileContent = createAction({
   name: 'read_file_content',
   displayName: 'Read File Content',
   description: 'Read the content of a file',
-  IsWriteAction: false,
+  isWriteAction: false,
   props: {
     filePath: Property.ShortText({
       displayName: 'File Path',

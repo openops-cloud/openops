@@ -5,7 +5,7 @@ export const stripHtmlContent = createAction({
   name: 'stripHtml',
   displayName: 'Remove HTML Tags',
   description: 'Removes every HTML tag and returns plain text',
-  IsWriteAction: false,
+  isWriteAction: false,
   props: {
     html: Property.LongText({
       displayName: 'HTML content',

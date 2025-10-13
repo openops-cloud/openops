@@ -21,7 +21,7 @@ export const ebsGetSnapshotsAction = createAction({
   name: 'ebs_get_snapshots',
   description: 'Get EBS snapshots that match the given criteria',
   displayName: 'EBS Get Snapshots',
-  IsWriteAction: false,
+  isWriteAction: false,
   props: {
     accounts: getAwsAccountsMultiSelectDropdown().accounts,
     ...filterByArnsOrRegionsProperties(

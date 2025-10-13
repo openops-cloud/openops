@@ -9,7 +9,7 @@ export const linearCreateProject = createAction({
   name: 'linear_create_project',
   displayName: 'Create Project',
   description: 'Create a new project in Linear workspace',
-  IsWriteAction: true,
+  isWriteAction: true,
   props: {
     team_id: props.team_id(),
     name: Property.ShortText({

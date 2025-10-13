@@ -13,7 +13,7 @@ export const ebsCreateSnapshotAction = createAction({
   name: 'ebs_create_snapshot_action',
   description: 'Create a snapshot of the provided EBS Volume',
   displayName: 'EBS Create Snapshot',
-  IsWriteAction: true,
+  isWriteAction: true,
   props: {
     arn: Property.ShortText({
       displayName: 'ARN',

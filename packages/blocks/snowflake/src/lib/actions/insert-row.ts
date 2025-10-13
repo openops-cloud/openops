@@ -18,7 +18,7 @@ export const insertRow = createAction({
   displayName: 'Insert Row',
   description: 'Insert a row into a table.',
   auth: customAuth,
-  IsWriteAction: true,
+  isWriteAction: true,
   props,
   async run(context) {
     const tableName = context.propsValue.table;

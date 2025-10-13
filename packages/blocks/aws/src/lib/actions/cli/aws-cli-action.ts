@@ -25,7 +25,7 @@ export const awsCliAction = createAction({
   name: 'aws_cli',
   description: 'Execute AWS CLI command',
   displayName: 'AWS CLI',
-  IsWriteAction: true,
+  isWriteAction: true,
   props: {
     account: getAwsAccountsSingleSelectDropdown().accounts,
     commandToRun: Property.LongText({

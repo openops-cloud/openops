@@ -19,7 +19,7 @@ export const division = createAction({
       hide: true,
     },
   },
-  IsWriteAction: false,
+  isWriteAction: false,
   props: {
     first_number: Property.Number({
       displayName: 'First Number',

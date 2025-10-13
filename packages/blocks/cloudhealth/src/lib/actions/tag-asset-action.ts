@@ -9,7 +9,7 @@ export const tagAssetAction = createAction({
   displayName: 'Add or Update Asset Tags',
   description: 'Add or Update Asset Tags',
   auth: cloudhealthAuth,
-  IsWriteAction: true,
+  isWriteAction: true,
   props: {
     assetType: Property.Dropdown({
       displayName: 'Asset Type',

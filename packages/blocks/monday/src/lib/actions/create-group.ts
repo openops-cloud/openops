@@ -7,7 +7,7 @@ export const createGroupAction = createAction({
   name: 'monday_create_group',
   displayName: 'Create Group',
   description: 'Creates a new group in board.',
-  IsWriteAction: true,
+  isWriteAction: true,
   props: {
     workspace_id: mondayCommon.workspace_id(true),
     board_id: mondayCommon.board_id(true),

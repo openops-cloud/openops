@@ -26,7 +26,7 @@ export const ebsGetVolumesAction = createAction({
   name: 'ebs_get_volumes',
   description: 'Get EBS volumes that match the given criteria',
   displayName: 'EBS Get Volumes',
-  IsWriteAction: false,
+  isWriteAction: false,
   props: {
     accounts: getAwsAccountsMultiSelectDropdown().accounts,
     ...filterByArnsOrRegionsProperties(

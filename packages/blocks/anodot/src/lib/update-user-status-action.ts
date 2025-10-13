@@ -11,7 +11,7 @@ export const updateUserStatusAction = createAction({
   name: 'update_user_status',
   description: 'Set the user status of the given recommendation',
   displayName: 'Update User Status',
-  IsWriteAction: true,
+  isWriteAction: true,
   props: {
     accountId: Property.ShortText({
       displayName: 'Account ID',

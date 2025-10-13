@@ -19,7 +19,7 @@ export const formatDateAction = createAction({
       hide: true,
     },
   },
-  IsWriteAction: false,
+  isWriteAction: false,
   props: {
     inputDate: Property.ShortText({
       displayName: 'Input Date',

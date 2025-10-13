@@ -5,7 +5,7 @@ export const waitForApprovalLink = createAction({
   name: 'wait_for_approval',
   displayName: 'Wait for Approval',
   description: 'Pauses the flow and wait for the approval from the user',
-  IsWriteAction: false,
+  isWriteAction: false,
   props: {},
   errorHandlingOptions: {
     continueOnFailure: {

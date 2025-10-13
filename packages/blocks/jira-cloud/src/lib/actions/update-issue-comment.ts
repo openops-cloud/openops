@@ -13,7 +13,7 @@ export const updateIssueCommentAction = createAction({
   name: 'update_issue_comment',
   displayName: 'Update Issue Comment',
   description: 'Updates a comment to a specific issue.',
-  IsWriteAction: true,
+  isWriteAction: true,
   props: {
     projectId: getProjectIdDropdown(),
     issueId: getIssueIdDropdown({ refreshers: ['projectId'] }),

@@ -20,7 +20,7 @@ export const rdsGetInstancesAction = createAction({
   name: 'rds_describe_instances',
   description: 'Get RDS instances that match the given criteria',
   displayName: 'RDS Get Instances',
-  IsWriteAction: false,
+  isWriteAction: false,
   props: {
     accounts: getAwsAccountsMultiSelectDropdown().accounts,
     ...filterByArnsOrRegionsProperties(

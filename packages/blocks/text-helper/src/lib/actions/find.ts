@@ -12,7 +12,7 @@ export const find = createAction({
       hide: true,
     },
   },
-  IsWriteAction: false,
+  isWriteAction: false,
   props: {
     text: Property.ShortText({
       displayName: 'text',

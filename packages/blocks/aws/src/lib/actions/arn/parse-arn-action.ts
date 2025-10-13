@@ -6,7 +6,7 @@ export const parseArnAction = createAction({
   name: 'parse_arn',
   description: 'Parse information from a given ARN (Amazon Resource Name) ',
   displayName: 'Parse ARN',
-  IsWriteAction: false,
+  isWriteAction: false,
   props: {
     arn: Property.ShortText({
       displayName: 'ARN',

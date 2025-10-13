@@ -13,7 +13,7 @@ export const truncate = createAction({
       hide: true,
     },
   },
-  IsWriteAction: false,
+  isWriteAction: false,
   props: {
     number: Property.Number({
       displayName: 'Number to truncate',

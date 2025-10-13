@@ -25,7 +25,7 @@ export const ec2GetRecommendationsAction = createAction({
   name: 'ec2_get_recommendations',
   description: 'Get EC2 instance recommendations',
   displayName: 'EC2 Get Recommendations',
-  IsWriteAction: false,
+  isWriteAction: false,
   props: {
     accounts: getAwsAccountsMultiSelectDropdown().accounts,
     recommendationType: Property.StaticDropdown({

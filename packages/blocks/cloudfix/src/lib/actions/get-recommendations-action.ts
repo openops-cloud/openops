@@ -8,7 +8,7 @@ export const getRecommendationsAction = createAction({
   displayName: 'Get Recommendations',
   description: 'Get recommendations with filtering',
   auth: cloudfixAuth,
-  IsWriteAction: false,
+  isWriteAction: false,
   props: {
     status: Property.StaticMultiSelectDropdown({
       displayName: 'Status filter',

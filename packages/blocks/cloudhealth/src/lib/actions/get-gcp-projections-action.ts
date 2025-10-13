@@ -7,7 +7,7 @@ export const getGcpProjectsAction = createAction({
   displayName: 'Get GCP Projects',
   description: 'Retrieve a list of GCP projects',
   auth: cloudhealthAuth,
-  IsWriteAction: false,
+  isWriteAction: false,
   props: {},
   async run(context) {
     return await getGcpProjects(context.auth);

@@ -6,7 +6,7 @@ export const createApprovalLink = createAction({
   displayName: 'Create Approval Links',
   description:
     'Create links only without pausing the flow, use wait for approval to pause',
-  IsWriteAction: false,
+  isWriteAction: false,
   props: {},
   errorHandlingOptions: {
     continueOnFailure: {

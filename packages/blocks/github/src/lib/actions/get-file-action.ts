@@ -10,7 +10,7 @@ export const getFileAction = createAction({
   displayName: 'Get file content',
   description: 'Get file content from a repository',
   requireAuth: true,
-  IsWriteAction: false,
+  isWriteAction: false,
   props: {
     repository: getRepositoryProperty(),
     branch: getBranchProperty(),

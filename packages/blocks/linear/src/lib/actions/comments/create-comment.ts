@@ -9,7 +9,7 @@ export const linearCreateComment = createAction({
   name: 'linear_create_comment',
   displayName: 'Create Comment',
   description: 'Create a new comment on an issue in Linear workspace',
-  IsWriteAction: true,
+  isWriteAction: true,
   props: {
     team_id: props.team_id(),
     issue_id: props.issue_id(),

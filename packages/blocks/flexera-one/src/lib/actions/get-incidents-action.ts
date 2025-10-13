@@ -7,7 +7,7 @@ export const getIncidentAction = createAction({
   name: 'flexera_get_incident',
   description: 'Get Incident',
   displayName: 'Get Incident',
-  IsWriteAction: false,
+  isWriteAction: false,
   props: {
     incidentId: Property.ShortText({
       displayName: 'Incident ID',

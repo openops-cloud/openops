@@ -12,7 +12,7 @@ export const concat = createAction({
       hide: true,
     },
   },
-  IsWriteAction: false,
+  isWriteAction: false,
   props: {
     texts: Property.Array({
       displayName: 'Texts',

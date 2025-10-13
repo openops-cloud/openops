@@ -8,7 +8,7 @@ export const updateMessageAction = createAction({
   displayName: 'Update message',
   description: 'Update an existing message',
   auth: slackAuth,
-  IsWriteAction: true,
+  isWriteAction: true,
   props: {
     channel: slackChannel,
     ts: Property.ShortText({

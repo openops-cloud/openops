@@ -7,7 +7,7 @@ export const linearRawGraphqlQuery = createAction({
   displayName: 'Raw GraphQL query',
   description: 'Perform a raw GraphQL query',
   auth: linearAuth,
-  IsWriteAction: true,
+  isWriteAction: true,
   props: {
     query: Property.LongText({ displayName: 'Query', required: true }),
     variables: Property.Object({ displayName: 'Parameters', required: false }),

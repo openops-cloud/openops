@@ -30,7 +30,7 @@ export const getRecommendationsCustomAction = createAction({
   name: 'get_recommendations',
   description: 'Get custom Umbrella recommendations',
   displayName: 'Get Recommendations (custom settings)',
-  IsWriteAction: false,
+  isWriteAction: false,
   props: {
     accounts: accountProperty(),
 

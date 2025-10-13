@@ -15,7 +15,7 @@ export const delayUntilAction = createAction({
       hide: true,
     },
   },
-  IsWriteAction: false,
+  isWriteAction: false,
   props: {
     delayUntilTimestamp: Property.DateTime({
       displayName: 'Date and Time',

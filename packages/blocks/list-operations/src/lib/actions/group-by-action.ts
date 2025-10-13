@@ -6,7 +6,7 @@ export const groupByAction = createAction({
   name: 'group_by_action',
   description: 'Group items by a given key',
   displayName: 'Group By',
-  IsWriteAction: false,
+  isWriteAction: false,
   props: {
     listItems: Property.LongText({
       displayName: 'Items',

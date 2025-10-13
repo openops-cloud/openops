@@ -9,7 +9,7 @@ export const linearCreateIssue = createAction({
   name: 'linear_create_issue',
   displayName: 'Create Issue',
   description: 'Create a new issue in Linear workspace',
-  IsWriteAction: true,
+  isWriteAction: true,
   props: {
     team_id: props.team_id(),
     title: Property.ShortText({

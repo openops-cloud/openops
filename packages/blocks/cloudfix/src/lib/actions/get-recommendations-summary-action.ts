@@ -8,7 +8,7 @@ export const getRecommendationsSummaryAction = createAction({
   displayName: 'Get Recommendations Summary',
   description: 'Get a summary of recommendations',
   auth: cloudfixAuth,
-  IsWriteAction: false,
+  isWriteAction: false,
   props: {},
   async run(context) {
     const response = await makeRequest({

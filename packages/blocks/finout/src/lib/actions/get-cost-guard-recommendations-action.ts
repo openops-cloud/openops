@@ -7,7 +7,7 @@ export const getCostGuardRecommendationsAction = createAction({
   displayName: 'Get CostGuard Recommendations',
   description: 'Get CostGuard Recommendations',
   auth: finoutAuth,
-  IsWriteAction: false,
+  isWriteAction: false,
   props: {
     scanId: Property.Dropdown({
       displayName: 'Scan',
