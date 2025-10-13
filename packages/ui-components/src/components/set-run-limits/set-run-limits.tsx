@@ -97,7 +97,11 @@ export function SetRunLimits({
   );
 
   const selectAllChecked: boolean | 'indeterminate' = useMemo(() => {
-    return allChecked ? true : someChecked ? 'indeterminate' : false;
+    if (allChecked) {
+      return true;
+    }
+
+    return someChecked ? 'indeterminate' : false;
   }, [allChecked, someChecked]);
 
   const toggleSelectAll = (checked: boolean) => {
