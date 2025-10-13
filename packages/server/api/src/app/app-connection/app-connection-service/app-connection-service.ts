@@ -250,13 +250,17 @@ export const appConnectionService = {
     if (!isNil(connectionsIds)) {
       querySelector.id = In(connectionsIds);
     }
-    if (!isNil(authProviders) && authProviders.length > 0) {
-      querySelector.authProviderKey = In(authProviders);
-    }
 
     const queryBuilder = repo()
       .createQueryBuilder('app_connection')
       .where(querySelector);
+
+    if (!isNil(authProviders) && authProviders.length > 0) {
+      queryBuilder.andWhere(
+        'LOWER(app_connection.authProviderKey) IN (:...authProviders)',
+        { authProviders: authProviders.map((p) => p.toLowerCase()) },
+      );
+    }
     const { data, cursor } = await paginator.paginate(queryBuilder);
     const promises: Promise<AppConnection>[] = [];
 
