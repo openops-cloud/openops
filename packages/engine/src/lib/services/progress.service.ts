@@ -6,11 +6,7 @@ import {
   memoryLock,
   saveRequestBody,
 } from '@openops/server-shared';
-import {
-  FlowRunId,
-  openOpsId,
-  UpdateRunProgressRequest,
-} from '@openops/shared';
+import { FlowRunId, UpdateRunProgressRequest } from '@openops/shared';
 import { AxiosError, AxiosHeaders } from 'axios';
 import { isRetryableError } from 'axios-retry';
 import debounce from 'lodash.debounce';
