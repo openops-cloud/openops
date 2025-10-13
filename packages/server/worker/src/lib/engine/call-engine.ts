@@ -101,7 +101,7 @@ export async function callEngineLambda<Result extends EngineHelperResult>(
       requestResponse.data) as BodyAccessKeyRequest;
     const responseData = await getRequestBody(response.bodyAccessKey);
 
-    logger.info('Received engine response', {
+    logger.debug('Received engine response', {
       status: extractPropertyString(responseData, ['status']),
       operation,
       requestId,
