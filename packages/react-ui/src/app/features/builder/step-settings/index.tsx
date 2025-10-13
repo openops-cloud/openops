@@ -233,8 +233,9 @@ const StepSettingsContainer = React.memo(() => {
 
   const [activeTab, setActiveTab] = useState('configure');
   const onTestCallback = useCallback(() => {
+    if (readonly) return;
     setActiveTab('test');
-  }, []);
+  }, [readonly]);
 
   return (
     <Form {...form}>
@@ -360,6 +361,7 @@ const StepSettingsContainer = React.memo(() => {
                             flowVersionId={flowVersion.id}
                             isSaving={saving}
                             onTestCallback={onTestCallback}
+                            readOnly={readonly}
                           />
                         </div>
                       )}

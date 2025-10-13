@@ -37,10 +37,16 @@ type TestActionComponentProps = {
   isSaving: boolean;
   flowVersionId: string;
   onTestCallback: () => void;
+  readOnly: boolean;
 };
 
 const TestActionSection = React.memo(
-  ({ isSaving, flowVersionId, onTestCallback }: TestActionComponentProps) => {
+  ({
+    isSaving,
+    flowVersionId,
+    onTestCallback,
+    readOnly,
+  }: TestActionComponentProps) => {
     const { toast } = useToast();
     const [errorMessage, setErrorMessage] = useState<string | undefined>(
       undefined,
@@ -144,9 +150,9 @@ const TestActionSection = React.memo(
               size="sm"
               onClick={handleTest}
               keyboardShortcut="G"
-              onKeyboardShortcut={mutate}
+              onKeyboardShortcut={readOnly ? undefined : mutate}
               loading={isTesting}
-              disabled={!isValid}
+              disabled={!isValid || readOnly}
             >
               <Dot animation={true} variant={'primary'} />
               {t('Test Step')}
@@ -166,6 +172,7 @@ const TestActionSection = React.memo(
         inputData={stepData?.input}
         errorMessage={errorMessage}
         lastTestDate={stepData?.lastTestDate}
+        readOnly={readOnly}
       />
     );
   },

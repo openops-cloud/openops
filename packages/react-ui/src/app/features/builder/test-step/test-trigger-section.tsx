@@ -49,6 +49,7 @@ type TestTriggerSectionProps = {
   flowVersionId: string;
   flowId: string;
   onTestCallback: () => void;
+  readOnly: boolean;
 };
 
 function getSelectedId(testOutput: unknown, pollResults: TriggerEvent[]) {
@@ -69,6 +70,7 @@ const TestTriggerSection = React.memo(
     flowVersionId,
     flowId,
     onTestCallback,
+    readOnly,
   }: TestTriggerSectionProps) => {
     const form = useFormContext<Trigger>();
     const formValues = form.getValues();
@@ -326,6 +328,7 @@ const TestTriggerSection = React.memo(
                   inputData={currentTestInput}
                   errorMessage={errorMessage}
                   lastTestDate={stepData?.lastTestDate}
+                  readOnly={readOnly}
                 />
               </div>
             </>
@@ -374,8 +377,8 @@ const TestTriggerSection = React.memo(
                   size="sm"
                   onClick={() => simulateTrigger()}
                   keyboardShortcut="G"
-                  onKeyboardShortcut={simulateTrigger}
-                  disabled={!isValid}
+                  onKeyboardShortcut={readOnly ? undefined : simulateTrigger}
+                  disabled={!isValid || readOnly}
                 >
                   <Dot animation={true} variant={'primary'}></Dot>
                   {t('Test Trigger')}
@@ -405,9 +408,9 @@ const TestTriggerSection = React.memo(
                 size="sm"
                 onClick={() => pollTrigger()}
                 keyboardShortcut="G"
-                onKeyboardShortcut={pollTrigger}
+                onKeyboardShortcut={readOnly ? undefined : pollTrigger}
                 loading={isTesting}
-                disabled={!isValid}
+                disabled={!isValid || readOnly}
               >
                 <Dot animation={true} variant={'primary'}></Dot>
                 {t('Load Data')}
