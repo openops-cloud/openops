@@ -238,7 +238,6 @@ export const createBuilderStore = (initialState: BuilderInitialState) =>
                 state.userManuallySelectedStep &&
                 !isNil(state.selectedStep)
               ) {
-                // For progress update, preserve the selected step only if user manually selected it
                 selectedStep = state.selectedStep;
               } else if (run.steps) {
                 selectedStep =
