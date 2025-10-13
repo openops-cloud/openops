@@ -11,7 +11,7 @@ export const getCostSummaryAction = createAction({
   displayName: 'Get Cost Summary',
   description: 'Retrieve cost summary data with optional filters',
   auth: nopsAuth,
-  requireToolApproval: false,
+  isWriteAction: false,
   props: {
     dateStart: Property.ShortText({
       displayName: 'Start Date',

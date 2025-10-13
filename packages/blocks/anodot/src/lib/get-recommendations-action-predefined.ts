@@ -23,7 +23,7 @@ export const getRecommendationsAction = createAction({
   name: 'get_recommendations_predefined',
   description: 'Get Umbrella recommendations',
   displayName: 'Get Recommendations',
-  requireToolApproval: false,
+  isWriteAction: false,
   props: {
     accounts: accountProperty(),
 
