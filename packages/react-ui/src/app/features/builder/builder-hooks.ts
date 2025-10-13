@@ -255,7 +255,7 @@ export const createBuilderStore = (initialState: BuilderInitialState) =>
                 loopsIndexes = flowRunUtils.findLoopsState(
                   flowVersion,
                   run,
-                  {},
+                  state.loopsIndexes,
                 );
               }
 
