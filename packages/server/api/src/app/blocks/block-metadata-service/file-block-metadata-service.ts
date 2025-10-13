@@ -82,7 +82,9 @@ export const FileBlockMetadataService = (): BlockMetadataService => {
     },
     async get({ name, projectId }): Promise<BlockMetadataModel | undefined> {
       const blocksMetadata = await loadBlocksMetadata();
-      const blockMetadata = blocksMetadata.find((p) => p.name === name);
+      const blockMetadata = blocksMetadata.find(
+        (p) => p.name.toLowerCase() === name.toLowerCase(),
+      );
 
       if (isNil(blockMetadata)) {
         return undefined;
