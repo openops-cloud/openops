@@ -96,6 +96,10 @@ export function SetRunLimits({
     [formValues, allChecked],
   );
 
+  const selectAllChecked: boolean | 'indeterminate' = useMemo(() => {
+    return allChecked ? true : someChecked ? 'indeterminate' : false;
+  }, [allChecked, someChecked]);
+
   const toggleSelectAll = (checked: boolean) => {
     const updated = (formValues.limits || []).map((i) => ({
       ...i,
@@ -157,13 +161,7 @@ export function SetRunLimits({
                 <div className="flex flex-col gap-4">
                   <div className="flex items-center justify-start gap-6">
                     <Checkbox
-                      checked={
-                        allChecked
-                          ? true
-                          : someChecked
-                          ? 'indeterminate'
-                          : false
-                      }
+                      checked={selectAllChecked}
                       onCheckedChange={(v) => toggleSelectAll(!!v)}
                       disabled={!isEnabled || limits.length === 0}
                       aria-label={t('Select all')}
@@ -237,7 +235,7 @@ export function SetRunLimits({
                                       type="number"
                                       min={0}
                                       value={
-                                        Number.isFinite(field.value as any)
+                                        Number.isFinite(field.value)
                                           ? field.value
                                           : 0
                                       }
