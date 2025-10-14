@@ -9,7 +9,7 @@ export const linearUpdateIssue = createAction({
   name: 'linear_update_issue',
   displayName: 'Update Issue',
   description: 'Update a issue in Linear Workspace',
-  requireToolApproval: true,
+  isWriteAction: true,
   props: {
     team_id: props.team_id(),
     issue_id: props.issue_id(),

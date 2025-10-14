@@ -10,7 +10,7 @@ export const getAssetPerspectivesAction = createAction({
   displayName: 'Get Asset Perspectives',
   description: 'Retrieve perspectives for a specific asset',
   auth: cloudhealthAuth,
-  requireToolApproval: false,
+  isWriteAction: false,
   props: {
     assetType: Property.Dropdown({
       displayName: 'Asset Type',

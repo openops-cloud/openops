@@ -72,13 +72,14 @@ WORKDIR /root/.mcp/aws-cost
 RUN <<-```
     set -ex
     git clone https://github.com/awslabs/mcp.git .
-    git checkout 2025.08.20250807085838
+    git checkout 2025.10.20251006150229
     wget -qO- https://astral.sh/uv/install.sh | sh && source $HOME/.local/bin/env
     uv python install 3.10
     uv venv --python 3.10 .venv
     . .venv/bin/activate
     uv pip install ./src/cost-explorer-mcp-server
     uv pip install ./src/aws-pricing-mcp-server
+    uv pip install ./src/billing-cost-management-mcp-server
 ```
 
 WORKDIR /workspaces

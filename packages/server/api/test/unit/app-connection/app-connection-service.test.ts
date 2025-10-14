@@ -25,12 +25,32 @@ jest.mock('../../../src/app/app-connection/app-connection-utils', () => ({
 
 const updateMock = jest.fn();
 const findOneByMock = jest.fn();
+const whereMock = jest.fn().mockReturnThis();
+const andWhereMock = jest.fn().mockReturnThis();
+const paginateMock = jest.fn().mockResolvedValue({ data: [], cursor: null });
+
 jest.mock('../../../src/app/core/db/repo-factory', () => ({
   ...jest.requireActual('../../../src/app/core/db/repo-factory'),
   repoFactory: () => () => ({
     update: updateMock,
     findOneBy: findOneByMock,
+    createQueryBuilder: () => ({
+      where: whereMock,
+      andWhere: andWhereMock,
+    }),
   }),
+}));
+
+jest.mock('../../../src/app/helper/pagination/build-paginator', () => ({
+  buildPaginator: jest.fn(() => ({ paginate: paginateMock })),
+}));
+
+jest.mock('../../../src/app/helper/pagination/pagination-utils', () => ({
+  ...jest.requireActual('../../../src/app/helper/pagination/pagination-utils'),
+  paginationHelper: {
+    decodeCursor: jest.fn(() => ({ nextCursor: null, previousCursor: null })),
+    createPage: jest.fn((data, cursor) => ({ data, cursor })),
+  },
 }));
 
 import { BlockMetadataModel } from '@openops/blocks-framework';
@@ -89,6 +109,9 @@ describe('appConnectionService.update', () => {
 
     findOneByMock.mockResolvedValue(existingConnection);
     updateMock.mockResolvedValue(undefined);
+    whereMock.mockClear();
+    andWhereMock.mockClear();
+    paginateMock.mockClear();
   });
 
   test('should update connection with merged value and return decrypted result', async () => {
@@ -151,6 +174,36 @@ describe('appConnectionService.update', () => {
           entityId: request.id,
         },
       }),
+    );
+  });
+});
+
+describe('appConnectionService.list', () => {
+  const projectId = 'project-123';
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    whereMock.mockClear();
+    andWhereMock.mockClear();
+    paginateMock.mockClear();
+  });
+
+  test('should filter by authProviders case-insensitively', async () => {
+    const authProviders = ['GiThUb', 'SlAcK'];
+
+    await appConnectionService.list({
+      projectId,
+      cursorRequest: null,
+      name: undefined,
+      status: undefined,
+      limit: 10,
+      connectionsIds: undefined,
+      authProviders,
+    });
+
+    expect(andWhereMock).toHaveBeenCalledWith(
+      'LOWER(app_connection.authProviderKey) IN (:...authProviders)',
+      { authProviders: ['github', 'slack'] },
     );
   });
 });
