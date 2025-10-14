@@ -4,6 +4,7 @@ import {
   flowHelper,
   FlowOperationRequest,
   FlowOperationType,
+  TestRunLimit,
   TestRunLimitSettings,
   Trigger,
 } from '@openops/shared';
@@ -86,7 +87,7 @@ export async function calculateTestRunActionLimits(
   const writeActionsMap = await buildWriteActionsMap();
   const steps = flowHelper.getAllSteps(trigger);
   const uniquePairs = new Set<string>();
-  const limits: TestRunLimitSettings['limits'] = [];
+  const limits: TestRunLimit[] = [];
 
   for (const step of steps) {
     if (step?.type !== ActionType.BLOCK) {
@@ -135,7 +136,7 @@ async function buildWriteActionsMap(): Promise<Map<string, Set<string>>> {
     }
 
     for (const [actionName, action] of Object.entries(block.actions)) {
-      if ((action as { isWriteAction?: boolean }).isWriteAction) {
+      if (action.isWriteAction) {
         if (!writeActionsMap.has(block.name)) {
           writeActionsMap.set(block.name, new Set());
         }
