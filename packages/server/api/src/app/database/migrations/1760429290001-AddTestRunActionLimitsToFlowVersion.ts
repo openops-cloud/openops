@@ -11,7 +11,7 @@ export class AddTestRunActionLimitsToFlowVersion1760429290001
 
     await queryRunner.query(`
       ALTER TABLE "flow_version"
-      ADD COLUMN IF NOT EXISTS "testRunActionLimits" jsonb NOT NULL
+      ADD COLUMN IF NOT EXISTS "testRunActionLimits" jsonb
     `);
 
     const records: Array<{ id: string; trigger: Trigger | null }> =
@@ -27,6 +27,11 @@ export class AddTestRunActionLimitsToFlowVersion1760429290001
         [JSON.stringify(testRunActionLimits), record.id],
       );
     }
+
+    await queryRunner.query(`
+      ALTER TABLE "flow_version"
+      ALTER COLUMN "testRunActionLimits" SET NOT NULL
+    `);
 
     logger.info('AddTestRunActionLimitsToFlowVersion1760429290001: completed');
   }
