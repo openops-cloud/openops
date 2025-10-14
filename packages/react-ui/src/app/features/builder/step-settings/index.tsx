@@ -277,14 +277,12 @@ const StepSettingsContainer = React.memo(() => {
                   <TabsList className="grid grid-cols-2 w-full h-auto rounded-t-sm rounded-b-none bg-background p-0">
                     <TabsTrigger
                       value="configure"
-                      disabled={readonly}
                       className="text-base justify-start text-primary-800 text-left font-normal rounded-t-sm rounded-tr-none rounded-b-none data-[state=active]:bg-gray-200 data-[state=active]:font-medium transition-colors duration-200"
                     >
                       {t('Configure')}
                     </TabsTrigger>
                     <TabsTrigger
                       value="test"
-                      disabled={readonly}
                       className="text-base justify-start text-primary-800 text-left font-normal rounded-t-sm rounded-tl-none rounded-b-none data-[state=active]:bg-gray-200 data-[state=active]:font-medium transition-colors duration-200"
                     >
                       {t('Test')}

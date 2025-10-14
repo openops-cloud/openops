@@ -57,14 +57,12 @@ const TestStepContainer = React.memo(
         <TabsList className="grid grid-cols-2 bg-transparent border-none rounded-none w-full">
           <TabsTrigger
             value={TabListEnum.STEP_OUTPUT}
-            disabled={readOnly}
             className="justify-start text-left font-normal data-[state=active]:font-bold text-primary-300 text-base pl-0 pr-2 dark:text-white rounded-none  border-b-2 data-[state=active]:bg-background data-[state=active]:text-primary-300 data-[state=active]:dark:text-white data-[state=active]:shadow-none data-[state=active]:border-blueAccent-300"
           >
             {t('Step output')}
           </TabsTrigger>
           <TabsTrigger
             value={TabListEnum.SAMPLE_STEP_OUTPUT}
-            disabled={readOnly}
             className="justify-start text-left font-normal data-[state=active]:font-bold text-primary-300 text-base pr-0 pl-2 dark:text-white rounded-none border-b-2 data-[state=active]:bg-background data-[state=active]:text-primary-300 data-[state=active]:dark:text-white data-[state=active]:shadow-none data-[state=active]:border-blueAccent-300 gap-1"
           >
             {t('Sample output')}
