@@ -12,6 +12,49 @@ import { Switch } from '../../ui/switch';
 import { BlockIcon } from '../block-icon/block-icon';
 
 /**
+ * BlockActionLimitMetadata
+ *
+ * A consolidated metadata map used by TestRunLimitsForm to render human‑friendly
+ * block (integration) information and per‑action display names.
+ *
+ * Structure:
+ * {
+ *   [blockName: string]: {
+ *     displayName: string; // Human‑readable block name (e.g., "Slack")
+ *     logoUrl: string;     // Public URL to the block logo image
+ *     actions: {
+ *       [actionName: string]: string; // Human‑readable action label (e.g., "Send Message")
+ *     };
+ *   };
+ * }
+ *
+ * Notes:
+ * - The top‑level keys are block internal names (e.g., "slack", "aws").
+ * - The actions map keys are action internal names (e.g., "send_message").
+ * - Values should be display‑ready (localized if your app supports i18n).
+ * - This replaces the older trio of props: blockDisplayNames, actionDisplayNames, blockLogoUrls.
+ *
+ * Example:
+ * const meta: BlockActionLimitMetadata = {
+ *   slack: {
+ *     displayName: 'Slack',
+ *     logoUrl: 'https://static.openops.com/blocks/slack.png',
+ *     actions: {
+ *       send_message: 'Send Message',
+ *     },
+ *   },
+ * };
+ */
+type BlockActionLimitMetadata = Record<
+  string,
+  {
+    displayName: string;
+    logoUrl: string;
+    actions: Record<string, string>;
+  }
+>;
+
+/**
  * Props for the TestRunLimitsForm component.
  *
  * This component renders a form to configure per-action execution limits
@@ -24,27 +67,17 @@ type TestRunLimitsFormProps = {
    * - isEnabled: whether the run limits feature is enabled globally for the test run
    * - limits: list of per action limits with shape { blockName, actionName, isEnabled, limit }
    */
-  value: TestRunLimitSettings;
+  value?: TestRunLimitSettings;
   /**
    * Callback fired when the user submits the form.
    * Receives the full TestRunLimitSettings value as the argument.
    */
   onSave: (value: TestRunLimitSettings) => void;
   /**
-   * Mapping of block internal names (e.g., "slack", "aws") to display names (e.g., "Slack", "AWS").
-   * Used to render human‑friendly provider/app names in the list.
+   * Consolidated metadata per block including display name, logo and action display names.
+   * Keys are block names; actions map keys are action names.
    */
-  blockDisplayNames: Record<string, string>;
-  /**
-   * Mapping of action internal names (e.g., "send_message") to display names (e.g., "Send Message").
-   * Used to render human‑friendly action labels in the list.
-   */
-  actionDisplayNames: Record<string, string>;
-  /**
-   * Mapping of block internal names to logo image URLs used for visual context in the list.
-   * Example: { slack: 'https://static.openops.com/blocks/slack.png' }
-   */
-  blockLogoUrls: Record<string, string>;
+  blockActionMetaMap: BlockActionLimitMetadata;
   /**
    * When true, shows a loading skeleton/disabled state for the form to indicate data is being fetched or saved.
    */
@@ -58,9 +91,7 @@ type TestRunLimitsFormProps = {
 function TestRunLimitsForm({
   value,
   onSave,
-  blockDisplayNames,
-  actionDisplayNames,
-  blockLogoUrls,
+  blockActionMetaMap,
   isLoading,
   className,
 }: TestRunLimitsFormProps) {
@@ -210,7 +241,9 @@ function TestRunLimitsForm({
                               )}
                             />
                             <BlockIcon
-                              logoUrl={blockLogoUrls[item.blockName]}
+                              logoUrl={
+                                blockActionMetaMap[item.blockName]?.logoUrl
+                              }
                               showTooltip={false}
                               size={'sm'}
                               circle={true}
@@ -220,13 +253,17 @@ function TestRunLimitsForm({
                               })}
                             ></BlockIcon>
                             <span className="text-sm font-medium">
-                              {blockDisplayNames[item.blockName]}
+                              {blockActionMetaMap[item.blockName]?.displayName}
                             </span>
 
                             <div className="h-[18px] w-4 border-r"></div>
 
                             <span className="text-sm font-medium">
-                              {actionDisplayNames[item.actionName]}
+                              {
+                                blockActionMetaMap[item.blockName]?.actions?.[
+                                  item.actionName
+                                ]
+                              }
                             </span>
 
                             <FormField
@@ -291,4 +328,4 @@ function TestRunLimitsForm({
   );
 }
 
-export { TestRunLimitsForm, TestRunLimitsFormProps };
+export { BlockActionLimitMetadata, TestRunLimitsForm, TestRunLimitsFormProps };

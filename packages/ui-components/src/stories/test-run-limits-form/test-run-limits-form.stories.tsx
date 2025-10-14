@@ -61,29 +61,35 @@ const sampleLimits = [
   },
 ];
 
-const blockDisplayNames: Record<string, string> = {
-  slack: 'Slack',
-  aws: 'AWS',
-  azure: 'Azure',
-};
-
-const actionDisplayNames: Record<string, string> = {
-  send_message: 'Send Message',
-  tag_resource: 'Tag Resource',
-  cli: 'CLI',
-  send_message_2: 'Send Message 2',
-  tag_resource_2: 'Tag Resource 2',
-  cli_2: 'CLI 2',
-  send_message_3: 'Send Message 3',
-  tag_resource_3: 'Tag Resource 3',
-  cli_3: 'CLI 3',
-};
-
-const blockLogoUrls: Record<string, string> = {
-  slack: 'https://static.openops.com/blocks/slack.png',
-  aws: 'https://static.openops.com/blocks/aws.png',
-  azure: 'https://static.openops.com/blocks/azure.svg',
-};
+const blockActionMetaMap = {
+  slack: {
+    displayName: 'Slack',
+    logoUrl: 'https://static.openops.com/blocks/slack.png',
+    actions: {
+      send_message: 'Send Message',
+      send_message_2: 'Send Message 2',
+      send_message_3: 'Send Message 3',
+    },
+  },
+  aws: {
+    displayName: 'AWS',
+    logoUrl: 'https://static.openops.com/blocks/aws.png',
+    actions: {
+      tag_resource: 'Tag Resource',
+      tag_resource_2: 'Tag Resource 2',
+      tag_resource_3: 'Tag Resource 3',
+    },
+  },
+  azure: {
+    displayName: 'Azure',
+    logoUrl: 'https://static.openops.com/blocks/azure.svg',
+    actions: {
+      cli: 'CLI',
+      cli_2: 'CLI 2',
+      cli_3: 'CLI 3',
+    },
+  },
+} as const;
 
 const defaultValue = {
   isEnabled: true,
@@ -95,9 +101,7 @@ const meta: Meta<typeof TestRunLimitsForm> = {
   component: TestRunLimitsForm,
   args: {
     value: defaultValue,
-    blockDisplayNames,
-    actionDisplayNames,
-    blockLogoUrls,
+    blockActionMetaMap,
     isLoading: false,
     className: 'max-w-2xl',
   },
