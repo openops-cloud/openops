@@ -124,6 +124,11 @@ const Markdown = React.memo(
 
               const codeContent = String(props.children).trim();
 
+              const meta = (props as any).node?.data?.meta || '';
+              const fullClassName = meta
+                ? `${props.className} ${meta}`
+                : props.className;
+
               return (
                 <div className="relative py-2">
                   {isLanguageUrl ? (
@@ -132,7 +137,7 @@ const Markdown = React.memo(
                     <MarkdownCodeViewer
                       content={codeContent}
                       theme={theme}
-                      className={props.className}
+                      className={fullClassName}
                     />
                   )}
                   {codeVariation === MarkdownCodeVariations.WithCopy && (
