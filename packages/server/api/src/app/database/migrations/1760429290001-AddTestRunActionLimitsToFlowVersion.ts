@@ -11,7 +11,7 @@ export class AddTestRunActionLimitsToFlowVersion1760429290001
 
     await queryRunner.query(`
       ALTER TABLE "flow_version"
-      ADD COLUMN IF NOT EXISTS "testRunActionLimits" jsonb NOT NULL DEFAULT '{"isEnabled": true, "limits": []}'::jsonb
+      ADD COLUMN IF NOT EXISTS "testRunActionLimits" jsonb NOT NULL
     `);
 
     const records: Array<{ id: string; trigger: Trigger | null }> =
