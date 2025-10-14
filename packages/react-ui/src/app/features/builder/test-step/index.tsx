@@ -114,7 +114,7 @@ const TestStepContainer = React.memo(
             <TestStepDataViewer
               outputJson={selectedStep?.settings?.inputUiInfo?.sampleData ?? ''}
               onChange={useSaveSelectedStepSampleData}
-              readonly={false}
+              readonly={readOnly}
               theme={theme}
               containerClassName="h-full"
             />
