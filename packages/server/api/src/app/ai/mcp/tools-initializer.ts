@@ -23,7 +23,8 @@ export const startMCPTools = async (
     getOpenOpsTools(app, authToken),
   );
 
-  const { costExplorer, costAnalysis } = await getCostTools(projectId);
+  const { costExplorer, costAnalysis, billingAndCostManagement } =
+    await getCostTools(projectId);
   const costExplorerTools = {
     client: costExplorer.client,
     toolSet: costExplorer.toolSet,
@@ -31,6 +32,10 @@ export const startMCPTools = async (
   const costAnalysisTools = {
     client: costAnalysis.client,
     toolSet: costAnalysis.toolSet,
+  };
+  const billingAndCostManagementTools = {
+    client: billingAndCostManagement.client,
+    toolSet: billingAndCostManagement.toolSet,
   };
 
   const loadExperimentalTools = system.getBoolean(
@@ -53,6 +58,7 @@ export const startMCPTools = async (
     ...openopsTools.toolSet,
     ...costExplorerTools.toolSet,
     ...costAnalysisTools.toolSet,
+    ...billingAndCostManagementTools.toolSet,
   } as ToolSet;
 
   return {
@@ -63,6 +69,7 @@ export const startMCPTools = async (
       openopsTools.client,
       costExplorerTools.client,
       costAnalysisTools.client,
+      billingAndCostManagementTools.client,
     ],
     tools: toolSet,
   };
