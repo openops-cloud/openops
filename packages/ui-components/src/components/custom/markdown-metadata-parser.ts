@@ -29,8 +29,7 @@ export const parseCodeBlockMetadata = (
 
   const metadata: CodeBlockMetadata = {};
 
-  // Extract h-XXX pattern (e.g., h-150, h-200)
-  const heightMatch = className.match(/\bh-(\d+)\b/);
+  const heightMatch = /\bh-(\d+)\b/.exec(className);
   if (heightMatch) {
     const heightValue = heightMatch[1];
     metadata.height = `${heightValue}px`;
