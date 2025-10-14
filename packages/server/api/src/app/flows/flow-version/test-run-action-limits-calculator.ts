@@ -69,7 +69,7 @@ async function buildWriteActionsMap(): Promise<Map<string, Set<string>>> {
     }
 
     for (const [actionName, action] of Object.entries(block.actions)) {
-      if ((action as { isWriteAction?: boolean }).isWriteAction) {
+      if (action.isWriteAction) {
         if (!writeActionsMap.has(block.name)) {
           writeActionsMap.set(block.name, new Set());
         }

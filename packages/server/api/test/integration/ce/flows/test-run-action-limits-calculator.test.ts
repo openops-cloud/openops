@@ -1,6 +1,6 @@
 import { fileBlocksUtils } from '@openops/server-shared';
 import { ActionType, Trigger, TriggerType } from '@openops/shared';
-import { calculateTestRunActionLimits } from '../test-run-action-limits-calculator';
+import { calculateTestRunActionLimits } from '../../../../src/app/flows/flow-version/test-run-action-limits-calculator';
 
 jest.mock('@openops/server-shared', () => ({
   fileBlocksUtils: {
