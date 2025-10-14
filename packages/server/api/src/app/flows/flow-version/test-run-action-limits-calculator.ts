@@ -2,9 +2,76 @@ import { fileBlocksUtils } from '@openops/server-shared';
 import {
   ActionType,
   flowHelper,
+  FlowOperationRequest,
+  FlowOperationType,
   TestRunLimitSettings,
   Trigger,
 } from '@openops/shared';
+
+export function shouldRecalculateTestRunActionLimits(
+  operation: FlowOperationRequest,
+): boolean {
+  if (
+    operation.type === FlowOperationType.ADD_ACTION ||
+    operation.type === FlowOperationType.DELETE_ACTION ||
+    operation.type === FlowOperationType.UPDATE_ACTION ||
+    operation.type === FlowOperationType.DUPLICATE_ACTION ||
+    operation.type === FlowOperationType.PASTE_ACTIONS ||
+    operation.type === FlowOperationType.IMPORT_FLOW ||
+    operation.type === FlowOperationType.USE_AS_DRAFT
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+export async function tryIncrementalUpdateForAddAction(
+  currentLimits: TestRunLimitSettings,
+  operation: FlowOperationRequest,
+): Promise<TestRunLimitSettings | null> {
+  if (operation.type !== FlowOperationType.ADD_ACTION) {
+    return null;
+  }
+
+  const { action } = operation.request;
+  if (action.type !== ActionType.BLOCK) {
+    return currentLimits;
+  }
+
+  const blockName = action.settings?.blockName as string | undefined;
+  const actionName = action.settings?.actionName as string | undefined;
+
+  if (!blockName || !actionName) {
+    return currentLimits;
+  }
+
+  const existingLimit = currentLimits.limits.find(
+    (limit) => limit.blockName === blockName && limit.actionName === actionName,
+  );
+
+  if (existingLimit) {
+    return currentLimits;
+  }
+
+  const isWriteAction = await checkIfWriteAction(blockName, actionName);
+  if (!isWriteAction) {
+    return currentLimits;
+  }
+
+  return {
+    ...currentLimits,
+    limits: [
+      ...currentLimits.limits,
+      {
+        blockName,
+        actionName,
+        isEnabled: true,
+        limit: 10,
+      },
+    ],
+  };
+}
 
 export async function calculateTestRunActionLimits(
   trigger: Trigger | null,
@@ -63,11 +130,12 @@ async function buildWriteActionsMap(): Promise<Map<string, Set<string>>> {
   const allBlocks = await fileBlocksUtils.findAllBlocks();
 
   for (const block of allBlocks) {
-    const actions =
-      (block as { actions?: Record<string, unknown> }).actions || {};
+    if (!block.actions) {
+      continue;
+    }
 
-    for (const [actionName, action] of Object.entries(actions)) {
-      if ((action as Record<string, unknown>)?.isWriteAction) {
+    for (const [actionName, action] of Object.entries(block.actions)) {
+      if ((action as { isWriteAction?: boolean }).isWriteAction) {
         if (!writeActionsMap.has(block.name)) {
           writeActionsMap.set(block.name, new Set());
         }
@@ -77,4 +145,22 @@ async function buildWriteActionsMap(): Promise<Map<string, Set<string>>> {
   }
 
   return writeActionsMap;
+}
+
+async function checkIfWriteAction(
+  blockName: string,
+  actionName: string,
+): Promise<boolean> {
+  const allBlocks = await fileBlocksUtils.findAllBlocks();
+  const block = allBlocks.find((b) => b.name === blockName);
+
+  if (!block) {
+    return false;
+  }
+
+  const actions =
+    (block as { actions?: Record<string, unknown> }).actions || {};
+  const action = actions[actionName] as { isWriteAction?: boolean } | undefined;
+
+  return action?.isWriteAction === true;
 }
