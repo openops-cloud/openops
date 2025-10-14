@@ -18,8 +18,7 @@ export class AddTestRunActionLimitsToFlowVersion1760429290001
     const records: Array<{ id: string; trigger: Trigger | null }> =
       await queryRunner.query('SELECT "id", "trigger" FROM "flow_version"');
 
-    for (let i = 0; i < records.length; i++) {
-      const record = records[i];
+    for (const record of records) {
       const limits = this.calculateLimitsForTrigger(
         record.trigger,
         writeActionsMap,
