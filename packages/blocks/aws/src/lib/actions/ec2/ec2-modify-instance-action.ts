@@ -15,7 +15,7 @@ export const ec2ModifyInstanceAction = createAction({
   description: 'Modify the given EC2 instance',
   displayName: 'EC2 Modify Instance',
   riskLevel: RiskLevel.HIGH,
-  requireToolApproval: true,
+  isWriteAction: true,
   props: {
     arn: Property.ShortText({
       displayName: 'ARN',

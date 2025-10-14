@@ -12,7 +12,7 @@ export const getRecommendationsAction = createAction({
   name: 'google_get_recommendations_cli',
   description: 'Fetch the recommendations for the selected recommenders',
   displayName: 'Get Recommendations',
-  requireToolApproval: false,
+  isWriteAction: false,
   props: {
     useHostSession: getUseHostSessionProperty(
       'Google Cloud',

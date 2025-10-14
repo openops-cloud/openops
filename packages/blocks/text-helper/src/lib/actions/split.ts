@@ -12,7 +12,7 @@ export const split = createAction({
       hide: true,
     },
   },
-  requireToolApproval: false,
+  isWriteAction: false,
   props: {
     text: Property.ShortText({
       displayName: 'Text',

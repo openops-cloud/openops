@@ -4,7 +4,7 @@ export const stopFlowAction = createAction({
   name: 'end_workflow',
   displayName: 'Stop Execution',
   description: 'Stop the current scope execution (flow or loop iteration)',
-  requireToolApproval: false,
+  isWriteAction: false,
   props: {},
   errorHandlingOptions: {
     continueOnFailure: {

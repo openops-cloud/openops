@@ -16,7 +16,7 @@ export const updateStack = createAction({
   displayName: 'Apply CloudFormation template',
   description: 'Update the CloudFormation template that matches the given ARN.',
   riskLevel: RiskLevel.HIGH,
-  requireToolApproval: true,
+  isWriteAction: true,
   props: {
     arn: Property.ShortText({
       displayName: 'ARN',
