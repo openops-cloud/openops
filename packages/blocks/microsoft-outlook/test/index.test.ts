@@ -13,7 +13,7 @@ describe('block declaration tests', () => {
   });
 
   test('should return block with correct number of actions', () => {
-    expect(Object.keys(microsoftOutlook.actions()).length).toBe(6);
+    expect(Object.keys(microsoftOutlook.actions()).length).toBe(7);
     expect(microsoftOutlook.actions()).toHaveProperty('custom_api_call');
 
     const actions = microsoftOutlook.actions();
