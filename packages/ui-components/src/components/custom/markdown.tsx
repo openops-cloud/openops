@@ -124,7 +124,7 @@ const Markdown = React.memo(
 
               const codeContent = String(props.children).trim();
 
-              const meta = (props as any).node?.data?.meta || '';
+              const meta = props.node?.data?.meta || '';
               const fullClassName = meta
                 ? `${props.className} ${meta}`
                 : props.className;
