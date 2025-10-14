@@ -3,11 +3,11 @@ import { Trigger } from '@openops/shared';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 import { calculateTestRunActionLimits } from '../../flows/flow-version/test-run-action-limits-calculator';
 
-export class AddTestRunActionLimitsToFlowVersion1760429290005
+export class AddTestRunActionLimitsToFlowVersion1760429290001
   implements MigrationInterface
 {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    logger.info('AddTestRunActionLimitsToFlowVersion1760429290005: starting');
+    logger.info('AddTestRunActionLimitsToFlowVersion1760429290001: starting');
 
     await queryRunner.query(`
       ALTER TABLE "flow_version"
@@ -28,7 +28,7 @@ export class AddTestRunActionLimitsToFlowVersion1760429290005
       );
     }
 
-    logger.info('AddTestRunActionLimitsToFlowVersion1760429290005: completed');
+    logger.info('AddTestRunActionLimitsToFlowVersion1760429290001: completed');
   }
 
   public async down(): Promise<void> {
