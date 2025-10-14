@@ -20,14 +20,23 @@ export const upsertAdminUser = async (): Promise<void> => {
     logger.debug(`Failed to sign in as admin [${email}]`, e);
 
     const user = await ensureUserExists(email, password);
+
+    const organizationAlreadyCreated = await hasExistingOrganization(user);
+    const projectAlreadyCreated = await hasExistingProject(user);
+    if (organizationAlreadyCreated && projectAlreadyCreated) {
+      return;
+    }
+
     const { workspaceId, databaseId } =
-      await ensureOpenOpsTablesWorkspaceAndDatabaseExist(user);
-    await ensureOrganizationExists(user, workspaceId);
-    await ensureProjectExists(user, databaseId);
+      await createOpenOpsTablesWorkspaceAndDatabase();
+
+    await createOrganization(user, workspaceId);
+
+    await createProject(user, databaseId);
   }
 };
 
-async function signIn(email: string, password: string) {
+async function signIn(email: string, password: string): Promise<void> {
   await authenticationService.signIn({
     email,
     password,
@@ -73,9 +82,10 @@ async function ensureUserExists(
   return createAdminUser(email, password);
 }
 
-async function ensureOpenOpsTablesWorkspaceAndDatabaseExist(
-  user: User,
-): Promise<{ workspaceId: number; databaseId: number }> {
+async function createOpenOpsTablesWorkspaceAndDatabase(): Promise<{
+  workspaceId: number;
+  databaseId: number;
+}> {
   const { token } = await authenticateDefaultUserInOpenOpsTables();
 
   const { workspaceId, databaseId } =
@@ -93,57 +103,62 @@ async function ensureOpenOpsTablesWorkspaceAndDatabaseExist(
   return { workspaceId, databaseId };
 }
 
-async function ensureOrganizationExists(user: User, tablesWorkspaceId: number) {
-  if (user.organizationId) {
-    const existingOrganization = await organizationService.getOne(
-      user.organizationId,
-    );
-    if (!existingOrganization) {
-      throw new Error(
-        'User has organizationId but organization does not exist',
-      );
-    }
-    if (existingOrganization.tablesWorkspaceId !== tablesWorkspaceId) {
-      throw new Error(
-        'User organization exists but with different tablesWorkspaceId',
-      );
-    }
-    return existingOrganization;
+async function hasExistingOrganization(user: User): Promise<boolean> {
+  const { organizationId } = user;
+
+  if (!organizationId) {
+    return false;
   }
+
+  const organization = await organizationService.getOne(organizationId);
+  if (!organization) {
+    throw new Error('User has organizationId but organization does not exist');
+  }
+
+  return true;
+}
+
+async function createOrganization(
+  user: User,
+  tablesWorkspaceId: number,
+): Promise<void> {
   const organization = await organizationService.create({
     ownerId: user.id,
     name: DEFAULT_ORGANIZATION_NAME,
     tablesWorkspaceId,
   });
+
   user.organizationId = organization.id;
-  return organization;
 }
 
-async function ensureProjectExists(user: User, databaseId: number) {
-  const project = await projectService.getOneForUser(user);
-  if (project) {
-    if (project.tablesDatabaseId !== databaseId) {
-      throw new Error(
-        'User project exists but with different tablesDatabaseId',
-      );
-    }
-    return project;
+async function hasExistingProject(user: User): Promise<boolean> {
+  if (user.organizationId) {
+    const project = await projectService.getOneForUser(user);
+    return project !== null && project !== undefined;
   }
 
-  return projectService.create({
+  return false;
+}
+
+async function createProject(user: User, databaseId: number): Promise<void> {
+  await projectService.create({
     displayName: `${user.firstName}'s Project`,
     ownerId: user.id,
     organizationId: user.organizationId!,
     tablesDatabaseId: databaseId,
   });
 }
-async function upsertAdminPassword(user: User, newPassword: string) {
+
+async function upsertAdminPassword(
+  user: User,
+  newPassword: string,
+): Promise<void> {
   const email = user.email;
   logger.info(`Updating password for admin [${email}]`, email);
   await userService.updatePassword({ id: user.id, newPassword });
 }
 
-async function upsertAdminEmail(user: User, email: string) {
+async function upsertAdminEmail(user: User, email: string): Promise<void> {
   logger.info(`Updating admin email from [${user.email}] to [${email}]`, email);
   await userService.updateEmail({ id: user.id, newEmail: email });
   user.email = email;
