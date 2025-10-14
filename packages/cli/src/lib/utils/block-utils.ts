@@ -11,7 +11,10 @@ export async function findBlockSourceDirectory(
   blockName: string,
 ): Promise<string | null> {
   const blocksPath = await findAllBlocks();
-  const blockPath = blocksPath.find((p) => p.includes(blockName));
+  const blockPath = blocksPath.find((p) => {
+    const folderName = p.split('/').pop();
+    return folderName === blockName;
+  });
   return blockPath ?? null;
 }
 
