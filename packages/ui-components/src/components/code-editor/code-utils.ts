@@ -19,6 +19,7 @@ export const getLanguageExtensionForCode = (
     return 'typescript';
   if (className.includes('language-jsx')) return 'javascript';
   if (className.includes('language-tsx')) return 'typescript';
+  if (className.includes('language-graphql')) return 'graphql';
 };
 
 export const convertToString = (value: unknown): string => {
