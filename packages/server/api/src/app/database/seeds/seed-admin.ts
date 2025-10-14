@@ -134,17 +134,21 @@ async function createOrganization(
 async function hasExistingProject(user: User): Promise<boolean> {
   if (user.organizationId) {
     const project = await projectService.getOneForUser(user);
-    return project !== null && project !== undefined;
+    return !!project;
   }
 
   return false;
 }
 
 async function createProject(user: User, databaseId: number): Promise<void> {
+  if (!user.organizationId) {
+    throw new Error('Organization id is not defined.');
+  }
+
   await projectService.create({
     displayName: `${user.firstName}'s Project`,
     ownerId: user.id,
-    organizationId: user.organizationId!,
+    organizationId: user.organizationId,
     tablesDatabaseId: databaseId,
   });
 }
