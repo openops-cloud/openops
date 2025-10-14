@@ -44,12 +44,10 @@ export class AddTestRunActionLimitsToFlowVersion1760429290001
 
     for (const block of allBlocks) {
       const actions =
-        (block as unknown as { actions?: Record<string, unknown> }).actions ||
-        {};
+        (block as { actions?: Record<string, unknown> }).actions || {};
 
       for (const [actionName, action] of Object.entries(actions)) {
-        const isWrite = (action as { isWriteAction?: boolean })?.isWriteAction;
-        if (isWrite === true) {
+        if ((action as Record<string, unknown>)?.isWriteAction) {
           if (!writeActionsMap.has(block.name)) {
             writeActionsMap.set(block.name, new Set());
           }
