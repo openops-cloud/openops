@@ -9,7 +9,7 @@ type AccumulatedUsage = {
 };
 
 export class TokenUsageReporter {
-  private accumulatedUsage: AccumulatedUsage = {
+  private readonly accumulatedUsage: AccumulatedUsage = {
     inputTokens: 0,
     outputTokens: 0,
     totalTokens: 0,
