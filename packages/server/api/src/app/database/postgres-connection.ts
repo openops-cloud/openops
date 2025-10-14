@@ -35,7 +35,7 @@ import { AddIsWorkflowToFlowTable1756298583000 } from './migrations/175629858300
 import { RenameIsWorkflowToIsInternal1756377588949 } from './migrations/1756377588949-RenameIsWorkflowToIsInternal';
 import { AddContentTypeToFolder1757331587268 } from './migrations/1757331587268-AddContentTypeToFolder';
 import { MigrateAiConfigToAppConnection1759242268873 } from './migrations/1759242268873-MigrateAiConfigToAppConnection';
-import { AddTestRunActionLimitsToFlowVersion1760429290001 } from './migrations/1760429290001-AddTestRunActionLimitsToFlowVersion';
+import { AddTestRunActionLimitsToFlowVersion1760429290005 } from './migrations/1760429290001-AddTestRunActionLimitsToFlowVersion';
 
 const getSslConfig = (): boolean | TlsOptions => {
   const useSsl = system.get(AppSystemProp.POSTGRES_USE_SSL);
@@ -79,7 +79,7 @@ const getMigrations = (): (new () => MigrationInterface)[] => {
     RenameIsWorkflowToIsInternal1756377588949,
     AddContentTypeToFolder1757331587268,
     MigrateAiConfigToAppConnection1759242268873,
-    AddTestRunActionLimitsToFlowVersion1760429290001,
+    AddTestRunActionLimitsToFlowVersion1760429290005,
   ];
 };
 
