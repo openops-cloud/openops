@@ -22,8 +22,8 @@ export const ${camelCase} = createAction({
   name: '${camelCase}',
   displayName: '${displayName}',
   description: '${description}',
-  props: {},
   isWriteAction: ${isWriteAction},
+  props: {},
   async run() {
     // Action logic here
   },
