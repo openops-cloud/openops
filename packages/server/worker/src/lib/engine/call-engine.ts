@@ -17,6 +17,7 @@ import {
   EngineOperationType,
   EngineResponse,
   EngineResponseStatus,
+  extractPropertyString,
 } from '@openops/shared';
 import axios, { AxiosError } from 'axios';
 import { nanoid } from 'nanoid';
@@ -59,6 +60,10 @@ export async function callEngineLambda<Result extends EngineHelperResult>(
   }
 
   const deadlineTimestamp = Date.now() + timeout * 1000;
+  const requestId =
+    getContext()['executionCorrelationId'] ??
+    requestContext.get('requestId' as never) ??
+    nanoid();
   try {
     if (shouldUseCache(operation) && requestKey) {
       engineResult = await cacheWrapper.getSerializedObject<unknown>(
@@ -70,17 +75,13 @@ export async function callEngineLambda<Result extends EngineHelperResult>(
       }
     }
 
-    const requestId =
-      getContext()['executionCorrelationId'] ??
-      requestContext.get('requestId' as never) ??
-      nanoid();
-
     logger.debug(`Requesting the engine to run [${operation}]`, {
+      requestId,
       operation,
       timeoutSeconds: timeout,
     });
 
-    const bodyAccessKey = await saveRequestBody(requestId, {
+    const bodyAccessKey = await saveRequestBody({
       operationType: operation,
       engineInput: input,
       deadlineTimestamp,
@@ -100,7 +101,11 @@ export async function callEngineLambda<Result extends EngineHelperResult>(
       requestResponse.data) as BodyAccessKeyRequest;
     const responseData = await getRequestBody(response.bodyAccessKey);
 
-    logger.debug('Engine response received.', { response: responseData });
+    logger.debug('Received engine response', {
+      status: extractPropertyString(responseData, ['status']),
+      operation,
+      requestId,
+    });
 
     if (shouldUseCache(operation) && requestKey) {
       await cacheWrapper.setSerializedObject(requestKey, responseData, 600);
@@ -108,7 +113,11 @@ export async function callEngineLambda<Result extends EngineHelperResult>(
 
     return parseEngineResponse(responseData);
   } catch (error) {
-    const { status, errorMessage } = logEngineError(deadlineTimestamp, error);
+    const { status, errorMessage } = logEngineError(
+      deadlineTimestamp,
+      requestId,
+      error,
+    );
 
     return {
       status,
@@ -159,6 +168,7 @@ function replaceVolatileValues(key: string, value: unknown): unknown {
 
 function logEngineError(
   deadlineTimestamp: number,
+  requestId: string,
   error: unknown,
 ): { status: EngineResponseStatus; errorMessage: string } {
   const errorTimestamp = Date.now();
@@ -175,11 +185,17 @@ function logEngineError(
 
     logger.debug(errorMessage, {
       error,
+      requestId,
       errorTimestamp,
       deadlineTimestamp,
     });
   } else {
-    logger.error(errorMessage, { error, errorTimestamp, deadlineTimestamp });
+    logger.error(errorMessage, {
+      error,
+      requestId,
+      errorTimestamp,
+      deadlineTimestamp,
+    });
   }
 
   return {
