@@ -1,5 +1,5 @@
 import { PageCollection } from '@microsoft/microsoft-graph-client';
-import { BodyType, Message } from '@microsoft/microsoft-graph-types';
+import { Message } from '@microsoft/microsoft-graph-types';
 import {
   createAction,
   OAuth2PropertyValue,
@@ -116,11 +116,15 @@ export const replyEmailAction = createAction({
       file: WorkflowFile;
       fileName: string;
     }>;
+
+    const formattedReplyBody =
+      bodyFormat === 'text'
+        ? `<pre style="font-family: inherit; white-space: pre-wrap;">${replyBody
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')}</pre>`
+        : replyBody;
+
     const mailPayload: Message = {
-      body: {
-        content: replyBody,
-        contentType: bodyFormat as BodyType,
-      },
       ccRecipients: ccRecipients.map((mail) => ({
         emailAddress: {
           address: mail,
@@ -143,9 +147,11 @@ export const replyEmailAction = createAction({
       const response: Message = await client
         .api(`/me/messages/${messageId}/createReply`)
         .post({
+          comment: formattedReplyBody,
           message: mailPayload,
         });
       const draftId = response.id;
+
       if (!draft) {
         await client.api(`/me/messages/${draftId}/send`).post({});
         return {
