@@ -3,7 +3,10 @@ import { useCallback, useEffect, useRef } from 'react';
 
 import { useSocket } from '@/app/common/providers/socket-provider';
 import { flowRunsApi } from '@/app/features/flow-runs/lib/flow-runs-api';
+import { api } from '@/app/lib/api';
 import {
+  ApplicationErrorParams,
+  ErrorCode,
   FlowRun,
   FlowRunStatus,
   FlowVersion,
@@ -105,6 +108,17 @@ export const useRunProgress = ({
               setRun(updatedRun, flowVersion);
 
               if (!shouldPollForUpdates(updatedRun.status)) {
+                clearPollingInterval();
+              }
+            }
+          },
+          onError: (err) => {
+            if (api.isError(err)) {
+              const apError = err.response?.data as ApplicationErrorParams;
+              if (
+                apError.code === ErrorCode.FLOW_RUN_NOT_FOUND ||
+                apError.code === ErrorCode.FLOW_RUN_ENDED
+              ) {
                 clearPollingInterval();
               }
             }
