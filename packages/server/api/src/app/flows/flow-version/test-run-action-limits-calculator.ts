@@ -150,7 +150,11 @@ async function updateLimitForAction(
   if (!oldInfo || !newInfo) {
     return null;
   }
-  if (oldInfo === newInfo) {
+
+  if (
+    oldInfo.actionName === newInfo.actionName &&
+    oldInfo.blockName === newInfo.blockName
+  ) {
     return limits;
   }
 
