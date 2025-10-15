@@ -7,5 +7,5 @@ export async function listWorkspaces(token: string): Promise<Workspace[]> {
     createAxiosHeaders(token),
   );
 
-  return getTablesResult.flatMap((item) => item);
+  return getTablesResult.flat();
 }

@@ -13,7 +13,5 @@ export async function listDatabases(
     createAxiosHeaders(token),
   );
 
-  return applications
-    .flatMap((item) => item)
-    .filter((a) => a.type === 'database');
+  return applications.flat().filter((a) => a.type === 'database');
 }

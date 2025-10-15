@@ -36,7 +36,7 @@ describe('listWorkspaces', () => {
       },
     ];
 
-    openopsCommonMock.makeOpenOpsTablesGet.mockResolvedValue(mockWorkspaces);
+    openopsCommonMock.makeOpenOpsTablesGet.mockResolvedValue([mockWorkspaces]);
 
     const result = await listWorkspaces(token);
 

@@ -43,7 +43,9 @@ describe('listDatabases', () => {
       },
     ];
 
-    openopsCommonMock.makeOpenOpsTablesGet.mockResolvedValue(mockApplications);
+    openopsCommonMock.makeOpenOpsTablesGet.mockResolvedValue([
+      mockApplications,
+    ]);
 
     const result = await listDatabases(workspaceId, token);
 
