@@ -40,7 +40,7 @@ export const customGoogleCloudApiCallAction = createCustomApiCallAction({
     ),
     project: Property.DynamicProperties({
       displayName: '',
-      required: false,
+      required: true,
       refreshers: [
         'auth',
         'useHostSession',
