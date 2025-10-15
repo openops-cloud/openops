@@ -95,6 +95,57 @@ export const blockExecutor: BaseExecutor<BlockAction> = {
   },
 };
 
+const checkExecutionLimit = (
+  blockName: string,
+  actionName: string,
+  executionState: FlowExecutorContext,
+  constants: EngineConstants,
+): void => {
+  if (!constants.testRunActionLimits.isEnabled) {
+    return;
+  }
+
+  const limit = findTestRunLimit(
+    constants.testRunActionLimits.limits,
+    blockName,
+    actionName,
+  );
+
+  if (limit?.isEnabled) {
+    const currentCount = executionState.getActionExecutionCount(
+      blockName,
+      actionName,
+    );
+
+    if (currentCount >= limit.limit) {
+      throw new ExecutionLimitReachedError(blockName, actionName, limit.limit);
+    }
+  }
+};
+
+const incrementActionCountIfNeeded = (
+  blockName: string,
+  actionName: string,
+  executionState: FlowExecutorContext,
+  constants: EngineConstants,
+): FlowExecutorContext => {
+  if (!constants.testRunActionLimits.isEnabled) {
+    return executionState;
+  }
+
+  const limit = findTestRunLimit(
+    constants.testRunActionLimits.limits,
+    blockName,
+    actionName,
+  );
+
+  if (limit?.isEnabled) {
+    return executionState.incrementActionExecutionCount(blockName, actionName);
+  }
+
+  return executionState;
+};
+
 const executeAction: ActionHandler<BlockAction> = async ({
   action,
   executionState,
@@ -109,28 +160,12 @@ const executeAction: ActionHandler<BlockAction> = async ({
   try {
     assertNotNullOrUndefined(action.settings.actionName, 'actionName');
 
-    if (constants.testRunActionLimits.isEnabled) {
-      const limit = findTestRunLimit(
-        constants.testRunActionLimits.limits,
-        action.settings.blockName,
-        action.settings.actionName,
-      );
-
-      if (limit && limit.isEnabled) {
-        const currentCount = executionState.getActionExecutionCount(
-          action.settings.blockName,
-          action.settings.actionName,
-        );
-
-        if (currentCount >= limit.limit) {
-          throw new ExecutionLimitReachedError(
-            action.settings.blockName,
-            action.settings.actionName,
-            limit.limit,
-          );
-        }
-      }
-    }
+    checkExecutionLimit(
+      action.settings.blockName,
+      action.settings.actionName,
+      executionState,
+      constants,
+    );
 
     const { blockAction, block } = await blockLoader.getBlockAndActionOrThrow({
       blockName: action.settings.blockName,
@@ -248,20 +283,12 @@ const executeAction: ActionHandler<BlockAction> = async ({
     const output = await runMethodToExecute(context);
     let newExecutionContext = executionState.addTags(hookResponse.tags);
 
-    if (constants.testRunActionLimits.isEnabled) {
-      const limit = findTestRunLimit(
-        constants.testRunActionLimits.limits,
-        action.settings.blockName,
-        action.settings.actionName,
-      );
-
-      if (limit && limit.isEnabled) {
-        newExecutionContext = newExecutionContext.incrementActionExecutionCount(
-          action.settings.blockName,
-          action.settings.actionName,
-        );
-      }
-    }
+    newExecutionContext = incrementActionCountIfNeeded(
+      action.settings.blockName,
+      action.settings.actionName,
+      newExecutionContext,
+      constants,
+    );
 
     if (hookResponse.stopped) {
       assertNotNullOrUndefined(hookResponse.stopResponse, 'stopResponse');
