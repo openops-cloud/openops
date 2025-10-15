@@ -64,6 +64,7 @@ export type BuilderState = {
   leftSidebar: LeftSideBarType;
   rightSidebar: RightSideBarType;
   selectedStep: string | null;
+  userManuallySelectedStep: boolean;
   canExitRun: boolean;
   activeDraggingStep: string | null;
   saving: boolean;

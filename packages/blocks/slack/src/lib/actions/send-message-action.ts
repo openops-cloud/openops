@@ -46,7 +46,7 @@ export const slackSendMessageAction = createAction({
     assertNotNullOrUndefined(conversationId, 'conversationId');
     if (!isBlock) {
       text = context.propsValue['text']['text'];
-      const headerText = context.propsValue['headerText']['headerText'];
+      const headerText = context.propsValue?.['headerText']?.['headerText'];
       assertNotNullOrUndefined(text, 'text');
       blocks = createMessageBlocks(headerText, text);
     } else {
