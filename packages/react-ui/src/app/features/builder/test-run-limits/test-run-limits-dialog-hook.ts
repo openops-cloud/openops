@@ -29,8 +29,8 @@ export const useTestRunLimitsDialog = () => {
   const blockActionMetaMap: BlockActionLimitMetadata = useMemo(() => {
     const map: BlockActionLimitMetadata = {};
 
-    const limits = testRunActionLimits?.limits;
-    if (!limits.length) return map;
+    const limits = testRunActionLimits.limits;
+    if (!limits?.length) return map;
 
     for (const limit of limits) {
       const blockName = limit.blockName;
@@ -41,7 +41,7 @@ export const useTestRunLimitsDialog = () => {
           metadata.type === ActionType.BLOCK &&
           'blockName' in metadata &&
           metadata.blockName === blockName,
-      ) as BlockStepMetadataWithSuggestions;
+      ) as BlockStepMetadataWithSuggestions | undefined;
 
       if (!map[blockName]) {
         map[blockName] = {
