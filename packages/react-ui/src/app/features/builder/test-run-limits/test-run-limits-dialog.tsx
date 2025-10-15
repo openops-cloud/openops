@@ -25,9 +25,7 @@ const TestRunLimitsDialog = ({ children }: TestRunLimitsDialogProps) => {
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="min-w-fit">
         <DialogHeader>
-          <DialogTitle className="text-primary text-[22px] font-bold">
-            {t('Test run limits')}
-          </DialogTitle>
+          <DialogTitle className="hidden">{t('Test run limits')}</DialogTitle>
         </DialogHeader>
         <TestRunLimitsForm
           value={testRunActionLimits}
