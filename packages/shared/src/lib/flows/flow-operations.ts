@@ -1,6 +1,7 @@
 import { Static, Type } from '@sinclair/typebox';
 import { AppConnectionWithoutSensitiveData } from '../app-connection/app-connection';
 import { Nullable } from '../common';
+import { TestRunLimitSettings } from '../flow-run/test-run-settings';
 import {
   BlockActionSchema,
   BranchActionSchema,
@@ -28,6 +29,7 @@ export enum FlowOperationType {
   CHANGE_DESCRIPTION = 'CHANGE_DESCRIPTION',
   REMOVE_CONNECTIONS = 'REMOVE_CONNECTIONS',
   PASTE_ACTIONS = 'PASTE_ACTIONS',
+  UPDATE_TEST_RUN_ACTION_LIMITS = 'UPDATE_TEST_RUN_ACTION_LIMITS',
 }
 
 export enum StepLocationRelativeToParent {
@@ -154,6 +156,14 @@ export const PasteActionsRequest = Type.Object({
 });
 
 export type PasteActionsRequest = Static<typeof PasteActionsRequest>;
+
+export const UpdateTestRunActionLimitsRequest = Type.Object({
+  testRunActionLimits: TestRunLimitSettings,
+});
+
+export type UpdateTestRunActionLimitsRequest = Static<
+  typeof UpdateTestRunActionLimitsRequest
+>;
 
 export const FlowOperationRequest = Type.Union([
   Type.Object(
@@ -298,6 +308,15 @@ export const FlowOperationRequest = Type.Union([
     },
     {
       title: 'Paste Actions',
+    },
+  ),
+  Type.Object(
+    {
+      type: Type.Literal(FlowOperationType.UPDATE_TEST_RUN_ACTION_LIMITS),
+      request: UpdateTestRunActionLimitsRequest,
+    },
+    {
+      title: 'Update Test Run Action Limits',
     },
   ),
 ]);
