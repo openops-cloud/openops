@@ -15,13 +15,13 @@ type TestRunLimitsDialogProps = {
 };
 
 const TestRunLimitsDialog = ({ children }: TestRunLimitsDialogProps) => {
-  const [isOpen, setOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const { testRunActionLimits, blockActionMetaMap, isLoading, onSave } =
     useTestRunLimitsDialog();
 
   return (
-    <Dialog open={isOpen} onOpenChange={setOpen}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="min-w-fit">
         <DialogHeader>
@@ -32,7 +32,7 @@ const TestRunLimitsDialog = ({ children }: TestRunLimitsDialogProps) => {
         <TestRunLimitsForm
           value={testRunActionLimits}
           onSave={(v) => {
-            setOpen(false);
+            setIsOpen(false);
             onSave(v);
           }}
           blockActionMetaMap={blockActionMetaMap}
