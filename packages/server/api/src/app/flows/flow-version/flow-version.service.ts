@@ -43,7 +43,7 @@ import { flowVersionSideEffects } from './flow-version-side-effects';
 import {
   calculateTestRunActionLimits,
   shouldRecalculateTestRunActionLimits,
-  tryIncrementalUpdateForAddAction,
+  tryIncrementalUpdate,
 } from './test-run-action-limits-calculator';
 
 const branchSettingsValidator = TypeCompiler.Compile(
@@ -155,7 +155,7 @@ export const flowVersionService = {
     }
 
     if (shouldRecalculateTestRunActionLimits(userOperation)) {
-      const incrementalUpdate = await tryIncrementalUpdateForAddAction(
+      const incrementalUpdate = await tryIncrementalUpdate(
         mutatedFlowVersion.testRunActionLimits,
         userOperation,
       );

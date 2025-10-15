@@ -10,8 +10,6 @@ import {
   Trigger,
 } from '@openops/shared';
 
-let writeActionsMapCache: Map<string, Set<string>> | null = null;
-
 export const DEFAULT_TEST_RUN_LIMIT = 10;
 
 export function shouldRecalculateTestRunActionLimits(
@@ -32,28 +30,46 @@ export async function tryIncrementalUpdate(
   operation: FlowOperationRequest,
   oldAction?: Action,
 ): Promise<TestRunLimitSettings | null> {
+  let updatedLimits: TestRunLimit[] | null = null;
+
   switch (operation.type) {
     case FlowOperationType.ADD_ACTION: {
-      const action = operation.request.action as Action;
-      return addLimitForActionIfNeeded(currentLimits, action);
+      updatedLimits = await addLimitForActionIfNeeded(
+        currentLimits.limits,
+        operation.request.action as Action,
+      );
+      break;
     }
     case FlowOperationType.DELETE_ACTION: {
-      return removeLimitForAction(currentLimits, oldAction);
+      updatedLimits = removeLimitForAction(currentLimits.limits, oldAction);
+      break;
     }
     case FlowOperationType.UPDATE_ACTION: {
-      return updateLimitForAction(
-        currentLimits,
+      updatedLimits = await updateLimitForAction(
+        currentLimits.limits,
         operation.request as Action,
         oldAction,
       );
+      break;
     }
     case FlowOperationType.DUPLICATE_ACTION: {
-      return addLimitForActionIfNeeded(currentLimits, oldAction);
+      updatedLimits = await addLimitForActionIfNeeded(
+        currentLimits.limits,
+        oldAction,
+      );
+      break;
     }
     default: {
       return null;
     }
   }
+
+  return updatedLimits === null
+    ? null
+    : {
+        ...currentLimits,
+        limits: updatedLimits,
+      };
 }
 
 function extractBlockInfo(
@@ -63,8 +79,8 @@ function extractBlockInfo(
     return null;
   }
 
-  const blockName = action.settings?.blockName as string | undefined;
-  const actionName = action.settings?.actionName as string | undefined;
+  const blockName = action.settings?.blockName;
+  const actionName = action.settings?.actionName;
 
   if (!blockName || !actionName) {
     return null;
@@ -74,10 +90,10 @@ function extractBlockInfo(
 }
 
 function removeLimitByKey(
-  limits: TestRunLimitSettings['limits'],
+  limits: TestRunLimit[],
   blockName: string,
   actionName: string,
-): TestRunLimitSettings['limits'] {
+): TestRunLimit[] {
   return limits.filter(
     (limit) =>
       !(limit.blockName === blockName && limit.actionName === actionName),
@@ -85,108 +101,90 @@ function removeLimitByKey(
 }
 
 async function addLimitForActionIfNeeded(
-  currentLimits: TestRunLimitSettings,
+  limits: TestRunLimit[],
   action?: Action,
-): Promise<TestRunLimitSettings> {
+): Promise<TestRunLimit[]> {
   const blockInfo = extractBlockInfo(action);
   if (!blockInfo) {
-    return currentLimits;
+    return limits;
   }
 
-  const { blockName, actionName } = blockInfo;
-
   if (
-    currentLimits.limits.some(
+    limits.some(
       (limit) =>
-        limit.blockName === blockName && limit.actionName === actionName,
+        limit.blockName === blockInfo.blockName &&
+        limit.actionName === blockInfo.actionName,
     )
   ) {
-    return currentLimits;
+    return limits;
   }
 
   const writeActionsMap = await buildWriteActionsMap();
-  if (!writeActionsMap.get(blockName)?.has(actionName)) {
-    return currentLimits;
+  if (!writeActionsMap.get(blockInfo.blockName)?.has(blockInfo.actionName)) {
+    return limits;
   }
 
-  return {
-    ...currentLimits,
-    limits: [
-      ...currentLimits.limits,
-      { blockName, actionName, isEnabled: true, limit: DEFAULT_TEST_RUN_LIMIT },
-    ],
-  };
+  return [
+    ...limits,
+    {
+      blockName: blockInfo.blockName,
+      actionName: blockInfo.actionName,
+      isEnabled: true,
+      limit: DEFAULT_TEST_RUN_LIMIT,
+    },
+  ];
 }
 
 function removeLimitForAction(
-  currentLimits: TestRunLimitSettings,
+  limits: TestRunLimit[],
   action?: Action,
-): TestRunLimitSettings {
+): TestRunLimit[] {
   const blockInfo = extractBlockInfo(action);
   if (!blockInfo) {
-    return currentLimits;
+    return limits;
   }
 
-  return {
-    ...currentLimits,
-    limits: removeLimitByKey(
-      currentLimits.limits,
-      blockInfo.blockName,
-      blockInfo.actionName,
-    ),
-  };
+  return removeLimitByKey(limits, blockInfo.blockName, blockInfo.actionName);
 }
 
 async function updateLimitForAction(
-  currentLimits: TestRunLimitSettings,
+  limits: TestRunLimit[],
   newAction: Action,
   oldAction?: Action,
-): Promise<TestRunLimitSettings | null> {
+): Promise<TestRunLimit[] | null> {
   const oldInfo = extractBlockInfo(oldAction);
   const newInfo = extractBlockInfo(newAction);
   if (!oldInfo || !newInfo) {
     return null;
   }
-  if (
-    oldInfo.blockName === newInfo.blockName &&
-    oldInfo.actionName === newInfo.actionName
-  ) {
-    return currentLimits;
+  if (oldInfo === newInfo) {
+    return limits;
   }
 
   const withoutOld = removeLimitByKey(
-    currentLimits.limits,
+    limits,
     oldInfo.blockName,
     oldInfo.actionName,
   );
 
-  const hasNewLimit = withoutOld.some(
-    (l) =>
-      l.blockName === newInfo.blockName && l.actionName === newInfo.actionName,
-  );
+  const hasNewLimit = withoutOld.some((l) => l === newInfo);
 
   if (!hasNewLimit) {
     const writeActionsMap = await buildWriteActionsMap();
     if (writeActionsMap.get(newInfo.blockName)?.has(newInfo.actionName)) {
-      return {
-        ...currentLimits,
-        limits: [
-          ...withoutOld,
-          {
-            blockName: newInfo.blockName,
-            actionName: newInfo.actionName,
-            isEnabled: true,
-            limit: DEFAULT_TEST_RUN_LIMIT,
-          },
-        ],
-      };
+      return [
+        ...withoutOld,
+        {
+          blockName: newInfo.blockName,
+          actionName: newInfo.actionName,
+          isEnabled: true,
+          limit: DEFAULT_TEST_RUN_LIMIT,
+        },
+      ];
     }
   }
 
-  return {
-    ...currentLimits,
-    limits: withoutOld,
-  };
+  return withoutOld;
 }
 
 export async function calculateTestRunActionLimits(
@@ -201,7 +199,7 @@ export async function calculateTestRunActionLimits(
 
   const writeActionsMap = await buildWriteActionsMap();
   const steps = flowHelper.getAllSteps(trigger);
-  const seen = new Set<string>();
+  const uniquePairs = new Set<string>();
   const limits: TestRunLimit[] = [];
 
   for (const step of steps) {
@@ -218,18 +216,19 @@ export async function calculateTestRunActionLimits(
     }
 
     const key = `${blockName}|${actionName}`;
-    if (seen.has(key)) {
+    if (uniquePairs.has(key)) {
       continue;
     }
 
-    seen.add(key);
+    uniquePairs.add(key);
 
-    if (writeActionsMap.get(blockName)?.has(actionName)) {
+    const writeActions = writeActionsMap.get(blockName);
+    if (writeActions?.has(actionName)) {
       limits.push({
         blockName,
         actionName,
         isEnabled: true,
-        limit: DEFAULT_TEST_RUN_LIMIT,
+        limit: 10,
       });
     }
   }
@@ -241,10 +240,6 @@ export async function calculateTestRunActionLimits(
 }
 
 async function buildWriteActionsMap(): Promise<Map<string, Set<string>>> {
-  if (writeActionsMapCache) {
-    return writeActionsMapCache;
-  }
-
   const writeActionsMap = new Map<string, Set<string>>();
   const allBlocks = await fileBlocksUtils.findAllBlocks();
 
@@ -263,6 +258,5 @@ async function buildWriteActionsMap(): Promise<Map<string, Set<string>>> {
     }
   }
 
-  writeActionsMapCache = writeActionsMap;
   return writeActionsMap;
 }
