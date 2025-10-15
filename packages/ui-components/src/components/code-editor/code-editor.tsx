@@ -23,6 +23,7 @@ type CodeEditorProps = {
   className?: string;
   containerClassName?: string;
   nativeEditorClassName?: string;
+  height?: string;
   theme: Theme;
   placeholder?: string;
   showLineNumbers?: boolean;
@@ -46,6 +47,7 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
       className,
       containerClassName,
       nativeEditorClassName,
+      height,
       theme,
       placeholder,
       showLineNumbers = true,
@@ -272,7 +274,7 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
               language={currentLanguage}
               theme={editorTheme}
               width="100%"
-              height="100%"
+              height={height || '100%'}
               onChange={handleChange}
               onMount={handleEditorDidMount}
               options={{

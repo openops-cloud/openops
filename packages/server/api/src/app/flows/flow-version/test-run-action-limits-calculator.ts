@@ -2,6 +2,7 @@ import { fileBlocksUtils } from '@openops/server-shared';
 import {
   ActionType,
   flowHelper,
+  TestRunLimit,
   TestRunLimitSettings,
   Trigger,
 } from '@openops/shared';
@@ -19,7 +20,7 @@ export async function calculateTestRunActionLimits(
   const writeActionsMap = await buildWriteActionsMap();
   const steps = flowHelper.getAllSteps(trigger);
   const uniquePairs = new Set<string>();
-  const limits: TestRunLimitSettings['limits'] = [];
+  const limits: TestRunLimit[] = [];
 
   for (const step of steps) {
     if (step?.type !== ActionType.BLOCK) {
@@ -27,8 +28,8 @@ export async function calculateTestRunActionLimits(
     }
 
     const settings = step.settings ?? {};
-    const blockName = settings.blockName as string | undefined;
-    const actionName = settings.actionName as string | undefined;
+    const blockName = settings.blockName;
+    const actionName = settings.actionName;
 
     if (!blockName || !actionName) {
       continue;
@@ -63,11 +64,12 @@ async function buildWriteActionsMap(): Promise<Map<string, Set<string>>> {
   const allBlocks = await fileBlocksUtils.findAllBlocks();
 
   for (const block of allBlocks) {
-    const actions =
-      (block as { actions?: Record<string, unknown> }).actions || {};
+    if (!block.actions) {
+      continue;
+    }
 
-    for (const [actionName, action] of Object.entries(actions)) {
-      if ((action as Record<string, unknown>)?.isWriteAction) {
+    for (const [actionName, action] of Object.entries(block.actions)) {
+      if (action.isWriteAction) {
         if (!writeActionsMap.has(block.name)) {
           writeActionsMap.set(block.name, new Set());
         }
