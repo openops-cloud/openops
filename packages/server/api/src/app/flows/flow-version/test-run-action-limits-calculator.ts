@@ -34,7 +34,7 @@ export async function tryIncrementalUpdate(
 
   switch (operation.type) {
     case FlowOperationType.ADD_ACTION: {
-      updatedLimits = await addLimitForActionIfNeeded(
+      updatedLimits = await tryAddLimitForAction(
         currentLimits.limits,
         operation.request.action as Action,
       );
@@ -48,13 +48,6 @@ export async function tryIncrementalUpdate(
       updatedLimits = await updateLimitForAction(
         currentLimits.limits,
         operation.request as Action,
-        oldAction,
-      );
-      break;
-    }
-    case FlowOperationType.DUPLICATE_ACTION: {
-      updatedLimits = await addLimitForActionIfNeeded(
-        currentLimits.limits,
         oldAction,
       );
       break;
@@ -100,7 +93,7 @@ function removeLimitByKey(
   );
 }
 
-async function addLimitForActionIfNeeded(
+async function tryAddLimitForAction(
   limits: TestRunLimit[],
   action?: Action,
 ): Promise<TestRunLimit[]> {
