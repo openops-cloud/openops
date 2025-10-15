@@ -2,6 +2,7 @@ import { fileBlocksUtils } from '@openops/server-shared';
 import {
   Action,
   ActionType,
+  findTestRunLimit,
   flowHelper,
   FlowOperationRequest,
   FlowOperationType,
@@ -69,13 +70,7 @@ async function tryAddLimitForAction(
     return limits;
   }
 
-  if (
-    limits.some(
-      (limit) =>
-        limit.blockName === blockInfo.blockName &&
-        limit.actionName === blockInfo.actionName,
-    )
-  ) {
+  if (findTestRunLimit(limits, blockInfo.blockName, blockInfo.actionName)) {
     return limits;
   }
 

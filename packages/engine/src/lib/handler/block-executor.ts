@@ -16,6 +16,7 @@ import {
   AUTHENTICATION_PROPERTY_NAME,
   BlockAction,
   ExecutionType,
+  findTestRunLimit,
   GenericStepOutput,
   isNil,
   StepOutputStatus,
@@ -27,6 +28,7 @@ import {
   handleExecutionError,
   runWithExponentialBackoff,
 } from '../helper/error-handling';
+import { ExecutionLimitReachedError } from '../helper/execution-errors';
 import { createConnectionService } from '../services/connections.service';
 import { createFilesService } from '../services/files.service';
 import { createContextStore } from '../services/storage.service';
@@ -106,6 +108,30 @@ const executeAction: ActionHandler<BlockAction> = async ({
 
   try {
     assertNotNullOrUndefined(action.settings.actionName, 'actionName');
+
+    if (constants.testRunActionLimits.isEnabled) {
+      const limit = findTestRunLimit(
+        constants.testRunActionLimits.limits,
+        action.settings.blockName,
+        action.settings.actionName,
+      );
+
+      if (limit && limit.isEnabled) {
+        const currentCount = executionState.getActionExecutionCount(
+          action.settings.blockName,
+          action.settings.actionName,
+        );
+
+        if (currentCount >= limit.limit) {
+          throw new ExecutionLimitReachedError(
+            action.settings.blockName,
+            action.settings.actionName,
+            limit.limit,
+          );
+        }
+      }
+    }
+
     const { blockAction, block } = await blockLoader.getBlockAndActionOrThrow({
       blockName: action.settings.blockName,
       blockVersion: action.settings.blockVersion,
@@ -220,7 +246,22 @@ const executeAction: ActionHandler<BlockAction> = async ({
         ? blockAction.test
         : blockAction.run;
     const output = await runMethodToExecute(context);
-    const newExecutionContext = executionState.addTags(hookResponse.tags);
+    let newExecutionContext = executionState.addTags(hookResponse.tags);
+
+    if (constants.testRunActionLimits.isEnabled) {
+      const limit = findTestRunLimit(
+        constants.testRunActionLimits.limits,
+        action.settings.blockName,
+        action.settings.actionName,
+      );
+
+      if (limit && limit.isEnabled) {
+        newExecutionContext = newExecutionContext.incrementActionExecutionCount(
+          action.settings.blockName,
+          action.settings.actionName,
+        );
+      }
+    }
 
     if (hookResponse.stopped) {
       assertNotNullOrUndefined(hookResponse.stopResponse, 'stopResponse');
