@@ -27,6 +27,7 @@ import {
   finishStepPart,
   sendTextMessageToStream,
 } from './stream-message-builder';
+import { TokenUsageReporter } from './token-usage-reporter';
 import { ChatProcessingContext, RequestContext } from './types';
 
 const maxRecursionDepth = system.getNumberOrThrow(
@@ -129,6 +130,7 @@ async function streamLLMResponse(
 ): Promise<ModelMessage[]> {
   const newMessages: ModelMessage[] = [];
   let stepCount = 0;
+  const tokenUsageReporter = new TokenUsageReporter();
 
   try {
     const fullStream = getLLMAsyncStream({
@@ -137,6 +139,8 @@ async function streamLLMResponse(
       maxRecursionDepth,
       onStepFinish: async (value): Promise<void> => {
         stepCount++;
+        tokenUsageReporter.accumulateFromStep(value);
+
         if (value.finishReason !== 'stop' && stepCount >= maxRecursionDepth) {
           const message = `We automatically stop the conversation after ${maxRecursionDepth} steps. Ask a new question to continue the conversation.`;
           sendTextMessageToStream(params.serverResponse, message, messageId);
@@ -147,6 +151,8 @@ async function streamLLMResponse(
       onFinish: async (result): Promise<void> => {
         const messages = result.response.messages;
         newMessages.push(...messages);
+        tokenUsageReporter.logUsage();
+
         if (result.finishReason === 'length') {
           throw new Error(
             'The message was truncated because the maximum tokens for the context window was reached.',

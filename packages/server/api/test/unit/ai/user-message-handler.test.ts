@@ -8,6 +8,7 @@ import { handleUserMessage } from '../../../src/app/ai/chat/user-message-handler
 jest.mock('@openops/server-shared', () => ({
   logger: {
     debug: jest.fn(),
+    info: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
   },
@@ -116,7 +117,13 @@ describe('User Message Handler', () => {
     });
 
     getLLMAsyncStream.mockImplementation(
-      ({ onFinish }: { onFinish: (result: unknown) => void }) => {
+      ({
+        onFinish,
+        onStepFinish,
+      }: {
+        onFinish: (result: unknown) => void;
+        onStepFinish: (result: unknown) => void;
+      }) => {
         const mockMessages = [
           {
             role: 'assistant',
@@ -125,6 +132,19 @@ describe('User Message Handler', () => {
           },
         ];
 
+        if (onStepFinish) {
+          void onStepFinish({
+            finishReason: 'stop',
+            response: { messages: mockMessages },
+            usage: {
+              inputTokens: 100,
+              outputTokens: 50,
+              totalTokens: 150,
+              cachedInputTokens: 20,
+            },
+          });
+        }
+
         if (onFinish) {
           void onFinish({
             finishReason: 'stop',
@@ -132,7 +152,11 @@ describe('User Message Handler', () => {
           });
         }
 
-        return (async function* () {
+        return (async function* (): AsyncGenerator<
+          TextStreamPart<ToolSet>,
+          void,
+          unknown
+        > {
           yield {
             type: 'text-delta',
             text: 'I am an AI assistant.',
