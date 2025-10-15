@@ -160,7 +160,10 @@ async function updateLimitForAction(
     oldInfo.actionName,
   );
 
-  const hasNewLimit = withoutOld.some((l) => l === newInfo);
+  const hasNewLimit = withoutOld.some(
+    (l) =>
+      l.blockName === newInfo.blockName && l.actionName === newInfo.actionName,
+  );
 
   if (!hasNewLimit) {
     const writeActionsMap = await buildWriteActionsMap();
