@@ -33,32 +33,30 @@ export const useTestRunLimitsDialog = () => {
     if (!limits.length) return map;
 
     for (const limit of limits) {
-      {
-        const blockName = limit.blockName;
-        const actionName = limit.actionName;
+      const blockName = limit.blockName;
+      const actionName = limit.actionName;
 
-        const blockMeta = metadata?.find(
-          (metadata) =>
-            metadata.type === ActionType.BLOCK &&
-            'blockName' in metadata &&
-            metadata.blockName === blockName,
-        ) as BlockStepMetadataWithSuggestions;
+      const blockMeta = metadata?.find(
+        (metadata) =>
+          metadata.type === ActionType.BLOCK &&
+          'blockName' in metadata &&
+          metadata.blockName === blockName,
+      ) as BlockStepMetadataWithSuggestions;
 
-        if (!map[blockName]) {
-          map[blockName] = {
-            displayName: blockMeta?.displayName ?? blockName,
-            logoUrl: blockMeta?.logoUrl ?? '',
-            actions: {},
-          };
-        }
-
-        const actionMeta = (blockMeta?.suggestedActions || []).find(
-          (a) => a?.name === actionName,
-        );
-
-        map[blockName].actions[actionName] =
-          actionMeta?.displayName ?? actionName;
+      if (!map[blockName]) {
+        map[blockName] = {
+          displayName: blockMeta?.displayName ?? blockName,
+          logoUrl: blockMeta?.logoUrl ?? '',
+          actions: {},
+        };
       }
+
+      const actionMeta = (blockMeta?.suggestedActions || []).find(
+        (a) => a?.name === actionName,
+      );
+
+      map[blockName].actions[actionName] =
+        actionMeta?.displayName ?? actionName;
     }
 
     return map;
