@@ -1,13 +1,10 @@
-import { isLLMTelemetryEnabled } from '@openops/common';
-import { logger, SharedSystemProp, system } from '@openops/server-shared';
+import { getAiTelemetrySDK } from '@openops/common';
+import { logger } from '@openops/server-shared';
 import { EngineOperationType } from '@openops/shared';
-import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import { NodeSDK } from '@opentelemetry/sdk-node';
-import { SpanExporter } from '@opentelemetry/sdk-trace-base';
 import { Static, Type } from '@sinclair/typebox';
 import { execSync } from 'child_process';
 import { existsSync, mkdirSync } from 'fs';
-import { LangfuseExporter } from 'langfuse-vercel';
 import * as process from 'node:process';
 import { start } from './api-handler';
 import { lambdaHandler } from './lambda-handler';
@@ -37,17 +34,7 @@ function installCodeBlockDependencies(): void {
 let telemetrySDK: NodeSDK | undefined;
 
 function initTelemetry(): void {
-  telemetrySDK = isLLMTelemetryEnabled()
-    ? new NodeSDK({
-        traceExporter: new LangfuseExporter({
-          secretKey: system.get(SharedSystemProp.LANGFUSE_SECRET_KEY),
-          publicKey: system.get(SharedSystemProp.LANGFUSE_PUBLIC_KEY),
-          baseUrl: system.get(SharedSystemProp.LANGFUSE_HOST),
-          environment: system.get(SharedSystemProp.ENVIRONMENT_NAME),
-        }) as unknown as SpanExporter,
-        instrumentations: [getNodeAutoInstrumentations()],
-      })
-    : undefined;
+  telemetrySDK = getAiTelemetrySDK();
   telemetrySDK?.start();
 }
 
