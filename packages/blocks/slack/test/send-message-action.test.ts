@@ -73,6 +73,31 @@ describe('send message', () => {
     expect(mockContext.store.put).not.toHaveBeenCalled();
   });
 
+  test('should send a message successfully when headerText is not available', async () => {
+    slackSendMessageMock.mockResolvedValue({ response_body: { ok: true } });
+
+    const contextWithoutHeader = {
+      ...mockContext,
+      propsValue: {
+        ...mockContext.propsValue,
+        headerText: undefined,
+      },
+    };
+
+    const response = await slackSendMessageAction.run(contextWithoutHeader);
+
+    expect(slackSendMessageMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        token: 'fake_token',
+        text: 'Hello, world!',
+        username: 'TestUser',
+        conversationId: 'C123456',
+      }),
+    );
+
+    expect(response).toEqual({ response_body: { ok: true } });
+  });
+
   test('should create action with correct properties', () => {
     const props = slackSendMessageAction.props;
     expect(Object.keys(props).length).toBe(8);
