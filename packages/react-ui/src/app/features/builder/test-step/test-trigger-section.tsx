@@ -4,12 +4,14 @@ import {
   AlertTitle,
   Button,
   Dot,
+  INTERNAL_ERROR_TOAST,
   LoadingSpinner,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
+  toast,
 } from '@openops/components/ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
@@ -48,6 +50,8 @@ type TestTriggerSectionProps = {
   isSaving: boolean;
   flowVersionId: string;
   flowId: string;
+  onTestCallback: () => void;
+  readOnly: boolean;
 };
 
 function getSelectedId(testOutput: unknown, pollResults: TriggerEvent[]) {
@@ -63,7 +67,13 @@ function getSelectedId(testOutput: unknown, pollResults: TriggerEvent[]) {
 }
 
 const TestTriggerSection = React.memo(
-  ({ isSaving, flowVersionId, flowId }: TestTriggerSectionProps) => {
+  ({
+    isSaving,
+    flowVersionId,
+    flowId,
+    onTestCallback,
+    readOnly,
+  }: TestTriggerSectionProps) => {
     const form = useFormContext<Trigger>();
     const formValues = form.getValues();
     const [isValid, setIsValid] = useState(false);
@@ -96,21 +106,24 @@ const TestTriggerSection = React.memo(
     const [currentSelectedId, setCurrentSelectedId] = useState<
       string | undefined
     >(undefined);
-    const { mutate: saveMockAsSampleData, isPending: isSavingMockdata } =
-      useMutation({
-        mutationFn: () => {
-          return triggerEventsApi.saveTriggerMockdata(flowId, mockData);
-        },
-        onSuccess: async (result) => {
-          updateSelectedData(result);
-        },
-      });
+    const { mutate: saveTestData, isPending: isSavingTestData } = useMutation({
+      mutationFn: (data: unknown) => {
+        return triggerEventsApi.saveTriggerMockdata(flowId, data);
+      },
+      onError: () => {
+        toast(INTERNAL_ERROR_TOAST);
+      },
+      onSuccess: async (result) => {
+        updateSelectedData(result);
+      },
+    });
     const {
       mutate: simulateTrigger,
       isPending: isSimulating,
       reset: resetTriggerSimulation,
     } = useMutation<TriggerEvent[], Error, void>({
       mutationFn: async () => {
+        onTestCallback();
         setErrorMessage(undefined);
         const ids = (
           await triggerEventsApi.list({ flowId, cursor: undefined, limit: 5 })
@@ -177,6 +190,7 @@ const TestTriggerSection = React.memo(
       void
     >({
       mutationFn: async () => {
+        onTestCallback();
         setErrorMessage(undefined);
         return triggerEventsApi.pollTrigger({
           flowId,
@@ -261,7 +275,7 @@ const TestTriggerSection = React.memo(
       <div className="flex flex-col h-full">
         {((stepData && 'output' in stepData) || !!errorMessage) &&
           !isSimulating &&
-          !isSavingMockdata && (
+          !isSavingTestData && (
             <>
               {pollResults?.data && !isTesting && (
                 <div className="mb-3">
@@ -274,6 +288,7 @@ const TestTriggerSection = React.memo(
                       if (triggerEvent) {
                         updateSelectedData(triggerEvent);
                         setCurrentSelectedId(value);
+                        saveTestData(triggerEvent.payload);
                       }
                     }}
                   >
@@ -318,6 +333,7 @@ const TestTriggerSection = React.memo(
                   inputData={currentTestInput}
                   errorMessage={errorMessage}
                   lastTestDate={stepData?.lastTestDate}
+                  readOnly={readOnly}
                 />
               </div>
             </>
@@ -366,8 +382,8 @@ const TestTriggerSection = React.memo(
                   size="sm"
                   onClick={() => simulateTrigger()}
                   keyboardShortcut="G"
-                  onKeyboardShortcut={simulateTrigger}
-                  disabled={!isValid}
+                  onKeyboardShortcut={readOnly ? undefined : simulateTrigger}
+                  disabled={!isValid || readOnly}
                 >
                   <Dot animation={true} variant={'primary'}></Dot>
                   {t('Test Trigger')}
@@ -380,8 +396,8 @@ const TestTriggerSection = React.memo(
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => saveMockAsSampleData()}
-                    loading={isSavingMockdata}
+                    onClick={() => saveTestData(mockData)}
+                    loading={isSavingTestData}
                   >
                     {t('Use Mock Data')}
                   </Button>
@@ -397,9 +413,9 @@ const TestTriggerSection = React.memo(
                 size="sm"
                 onClick={() => pollTrigger()}
                 keyboardShortcut="G"
-                onKeyboardShortcut={pollTrigger}
+                onKeyboardShortcut={readOnly ? undefined : pollTrigger}
                 loading={isTesting}
-                disabled={!isValid}
+                disabled={!isValid || readOnly}
               >
                 <Dot animation={true} variant={'primary'}></Dot>
                 {t('Load Data')}

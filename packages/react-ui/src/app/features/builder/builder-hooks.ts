@@ -85,6 +85,7 @@ export const createBuilderStore = (initialState: BuilderInitialState) =>
         selectedStep: initialState.run
           ? initialState.flowVersion.trigger.name
           : null,
+        userManuallySelectedStep: false,
         canExitRun: initialState.canExitRun,
         activeDraggingStep: null,
         rightSidebar: initialState.run
@@ -134,12 +135,15 @@ export const createBuilderStore = (initialState: BuilderInitialState) =>
                 aiChatProperty: undefined,
               };
 
+              const userManuallySelectedStep = !isNil(state.run);
+
               if (
                 stepName === 'trigger' &&
                 state.flowVersion.trigger.type === TriggerType.EMPTY
               ) {
                 return {
                   selectedStep: stepName,
+                  userManuallySelectedStep,
                   rightSidebar: RightSideBarType.NONE,
                   leftSidebar: getLeftSidebarOnSelectStep(state),
                   midpanelState: triggerMidpanelState,
@@ -150,6 +154,7 @@ export const createBuilderStore = (initialState: BuilderInitialState) =>
               ) {
                 return {
                   selectedStep: stepName,
+                  userManuallySelectedStep,
                   rightSidebar: RightSideBarType.BLOCK_SETTINGS,
                   leftSidebar: getLeftSidebarOnSelectStep(state),
                   midpanelState: triggerMidpanelState,
@@ -158,6 +163,7 @@ export const createBuilderStore = (initialState: BuilderInitialState) =>
 
               return {
                 selectedStep: stepName,
+                userManuallySelectedStep,
                 rightSidebar: openRightSideBar
                   ? RightSideBarType.BLOCK_SETTINGS
                   : RightSideBarType.NONE,
@@ -195,6 +201,7 @@ export const createBuilderStore = (initialState: BuilderInitialState) =>
               readonly: false,
               loopsIndexes: {},
               leftSidebar: LeftSideBarType.NONE,
+              userManuallySelectedStep: false,
             },
             false,
             'exitRun',
@@ -223,21 +230,45 @@ export const createBuilderStore = (initialState: BuilderInitialState) =>
         setRun: async (run: FlowRun, flowVersion: FlowVersion) =>
           set(
             (state) => {
-              return {
-                loopsIndexes: flowRunUtils.findLoopsState(
+              const isProgressUpdate = state.run?.id === run.id;
+
+              let selectedStep: string;
+              if (
+                isProgressUpdate &&
+                state.userManuallySelectedStep &&
+                !isNil(state.selectedStep)
+              ) {
+                selectedStep = state.selectedStep;
+              } else if (run.steps) {
+                selectedStep =
+                  flowRunUtils.findFailedStep(run)?.stepName ??
+                  state.selectedStep ??
+                  'trigger';
+              } else {
+                selectedStep = 'trigger';
+              }
+
+              let loopsIndexes: Record<string, number>;
+              if (isProgressUpdate && state.userManuallySelectedStep) {
+                loopsIndexes = state.loopsIndexes;
+              } else {
+                loopsIndexes = flowRunUtils.findLoopsState(
                   flowVersion,
                   run,
                   state.loopsIndexes,
-                ),
+                );
+              }
+
+              return {
+                loopsIndexes,
                 run,
                 flowVersion,
                 leftSidebar: LeftSideBarType.RUN_DETAILS,
-                selectedStep: run.steps
-                  ? flowRunUtils.findFailedStep(run)?.stepName ??
-                    state.selectedStep ??
-                    'trigger'
-                  : 'trigger',
+                selectedStep,
                 readonly: true,
+                userManuallySelectedStep: isProgressUpdate
+                  ? state.userManuallySelectedStep
+                  : false,
               };
             },
             false,
@@ -247,11 +278,16 @@ export const createBuilderStore = (initialState: BuilderInitialState) =>
         setLoopIndex: (stepName: string, index: number) => {
           set(
             (state) => {
+              const hasRun = !isNil(state.run);
+
               return {
                 loopsIndexes: {
                   ...state.loopsIndexes,
                   [stepName]: index,
                 },
+                userManuallySelectedStep: hasRun
+                  ? true
+                  : state.userManuallySelectedStep,
               };
             },
             false,
