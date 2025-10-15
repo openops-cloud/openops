@@ -9,7 +9,7 @@ export const getDataIntegrations = createAction({
   displayName: 'Get Data Integrations',
   description: 'Get Data Integrations',
   auth: ternaryCloudAuth,
-  requireToolApproval: false,
+  isWriteAction: false,
   props: {},
   run: async ({ auth }) => {
     try {

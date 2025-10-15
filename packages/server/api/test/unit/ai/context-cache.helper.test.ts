@@ -6,8 +6,6 @@ import {
 
 describe('context-cache-helper', () => {
   describe('addCacheControlToMessages', () => {
-    const systemPrompt = 'You are a helpful assistant.';
-
     const createUserMessage = (content: string): ModelMessage => ({
       role: 'user',
       content,
@@ -18,20 +16,6 @@ describe('context-cache-helper', () => {
       content,
     });
 
-    it('should add cache control to system prompt', () => {
-      const messages: ModelMessage[] = [createUserMessage('Hello')];
-
-      const result = addCacheControlToMessages(messages, systemPrompt);
-
-      expect(result[0]).toEqual({
-        role: 'system',
-        content: systemPrompt,
-        providerOptions: {
-          anthropic: { cacheControl: { type: 'ephemeral' } },
-        },
-      });
-    });
-
     it('should add cache control to last user message', () => {
       const messages: ModelMessage[] = [
         createUserMessage('Message 1'),
@@ -39,9 +23,8 @@ describe('context-cache-helper', () => {
         createUserMessage('Message 2'),
       ];
 
-      const result = addCacheControlToMessages(messages, systemPrompt);
+      const result = addCacheControlToMessages(messages);
 
-      // System message is at index 0, original messages start at 1
       const lastUserMessage = result[result.length - 1];
       expect(lastUserMessage.role).toBe('user');
       expect(lastUserMessage.content).toBe('Message 2');
@@ -50,7 +33,7 @@ describe('context-cache-helper', () => {
       });
     });
 
-    it('should only cache system prompt and last user message', () => {
+    it('should only cache last user message', () => {
       const messages: ModelMessage[] = [
         createUserMessage('Message 1'),
         createAssistantMessage('Response 1'),
@@ -61,27 +44,25 @@ describe('context-cache-helper', () => {
         createUserMessage('Message 4'),
       ];
 
-      const result = addCacheControlToMessages(messages, systemPrompt);
+      const result = addCacheControlToMessages(messages);
 
       const cachedMessages = result.filter(
         (msg) => msg.providerOptions?.anthropic?.cacheControl,
       );
 
-      // Should have exactly 2: system prompt + last user message
-      expect(cachedMessages.length).toBe(2);
-      expect(cachedMessages[0].role).toBe('system');
-      expect(cachedMessages[1].role).toBe('user');
-      expect(cachedMessages[1].content).toBe('Message 4');
+      // Should have exactly 1: only the last user message
+      expect(cachedMessages.length).toBe(1);
+      expect(cachedMessages[0].role).toBe('user');
+      expect(cachedMessages[0].content).toBe('Message 4');
     });
 
     it('should handle empty messages array', () => {
       const messages: ModelMessage[] = [];
 
-      const result = addCacheControlToMessages(messages, systemPrompt);
+      const result = addCacheControlToMessages(messages);
 
-      // Should only have system message
-      expect(result.length).toBe(1);
-      expect(result[0].role).toBe('system');
+      // Should return empty array
+      expect(result.length).toBe(0);
     });
 
     it('should handle messages with no user messages', () => {
@@ -91,15 +72,15 @@ describe('context-cache-helper', () => {
         createAssistantMessage('Response 3'),
       ];
 
-      const result = addCacheControlToMessages(messages, systemPrompt);
+      const result = addCacheControlToMessages(messages);
 
       const cachedMessages = result.filter(
         (msg) => msg.providerOptions?.anthropic?.cacheControl,
       );
 
-      // Should only have system message cached, no user messages
-      expect(cachedMessages.length).toBe(1);
-      expect(result[0].role).toBe('system');
+      // Should have no cached messages since there are no user messages
+      expect(cachedMessages.length).toBe(0);
+      expect(result.length).toBe(3);
     });
 
     it('should handle messages with complex content types', () => {
@@ -113,10 +94,13 @@ describe('context-cache-helper', () => {
         },
       ];
 
-      const result = addCacheControlToMessages(messages, systemPrompt);
+      const result = addCacheControlToMessages(messages);
 
-      expect(result.length).toBeGreaterThan(0);
-      expect(result[0].role).toBe('system');
+      expect(result.length).toBe(1);
+      expect(result[0].role).toBe('user');
+      expect(result[0].providerOptions).toEqual({
+        anthropic: { cacheControl: { type: 'ephemeral' } },
+      });
     });
 
     it('should preserve original message content', () => {
@@ -126,14 +110,15 @@ describe('context-cache-helper', () => {
         createUserMessage('Message 2'),
       ];
 
-      const result = addCacheControlToMessages(messages, systemPrompt);
+      const result = addCacheControlToMessages(messages);
 
-      // First message should be system
-      expect(result[0].role).toBe('system');
-      expect(result[0].content).toBe(systemPrompt);
+      // Should have same length as original messages
+      expect(result.length).toBe(messages.length);
 
-      // Should have original message count + 1
-      expect(result.length).toBe(messages.length + 1);
+      // Check that content is preserved
+      expect(result[0].content).toBe('Message 1');
+      expect(result[1].content).toBe('Response 1');
+      expect(result[2].content).toBe('Message 2');
     });
 
     it('should cache only the last user message when multiple exist', () => {
@@ -145,7 +130,7 @@ describe('context-cache-helper', () => {
         createUserMessage('Message 3'),
       ];
 
-      const result = addCacheControlToMessages(messages, systemPrompt);
+      const result = addCacheControlToMessages(messages);
 
       // Find all user messages with cache control
       const cachedUserMessages = result.filter(

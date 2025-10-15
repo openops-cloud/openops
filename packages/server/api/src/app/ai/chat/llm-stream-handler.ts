@@ -69,7 +69,7 @@ export function getLLMAsyncStream(
     onAbort,
     prepareStep: async ({ messages }) => {
       return {
-        messages: addCacheControlToMessages(messages, systemPrompt),
+        messages: addCacheControlToMessages(messages),
       };
     },
     abortSignal,

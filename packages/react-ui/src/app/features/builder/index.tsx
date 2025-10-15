@@ -21,16 +21,12 @@ import { ImperativePanelHandle } from 'react-resizable-panels';
 import { useSearchParams } from 'react-router-dom';
 import { useMeasure } from 'react-use';
 
-import {
-  useBuilderStateContext,
-  useSwitchToDraft,
-} from '@/app/features/builder/builder-hooks';
+import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
 import { DynamicFormValidationProvider } from '@/app/features/builder/dynamic-form-validation/dynamic-form-validation-context';
 import { useRefreshBlock } from '@/app/features/builder/hooks/use-refresh-block';
 import { useRunProgress } from '@/app/features/builder/hooks/use-run-progress';
 
 import { useResizablePanelGroup } from '@/app/common/hooks/use-resizable-panel-group';
-import { useSocket } from '@/app/common/providers/socket-provider';
 import { FLOW_CANVAS_Y_OFFESET } from '@/app/constants/flow-canvas';
 import { RESIZABLE_PANEL_IDS } from '@/app/constants/layout';
 import { SEARCH_PARAMS } from '@/app/constants/search-params';
@@ -42,7 +38,6 @@ import {
   isNil,
   Trigger,
   TriggerType,
-  WebsocketClientEvent,
 } from '@openops/shared';
 import {
   BUILDER_LEFT_SIDEBAR_MAX_SIZE,
@@ -52,7 +47,6 @@ import {
   LEFT_SIDEBAR_MIN_EFFECTIVE_WIDTH,
 } from '../../constants/sidebar';
 import { blocksHooks } from '../blocks/lib/blocks-hook';
-import { RunDetailsBar } from '../flow-runs/components/run-details-bar';
 import { LeftSideBarType, RightSideBarType } from './builder-types';
 import { FlowBuilderCanvas } from './flow-canvas/flow-builder-canvas';
 import { FLOW_CANVAS_CONTAINER_ID } from './flow-version-undo-redo/constants';
@@ -119,7 +113,6 @@ const BuilderPage = ({ children }: { children?: ReactNode }) => {
     setLeftSidebar,
     rightSidebar,
     run,
-    canExitRun,
     readonly,
     setReadOnly,
     exitStepSettings,
@@ -131,7 +124,6 @@ const BuilderPage = ({ children }: { children?: ReactNode }) => {
     state.setLeftSidebar,
     state.rightSidebar,
     state.run,
-    state.canExitRun,
     state.readonly,
     state.setReadOnly,
     state.exitStepSettings,
@@ -206,8 +198,6 @@ const BuilderPage = ({ children }: { children?: ReactNode }) => {
     RESIZABLE_PANEL_IDS.BUILDER_LEFT_SIDEBAR,
   );
 
-  const socket = useSocket();
-
   useRunProgress({
     run,
     setRun,
@@ -230,8 +220,6 @@ const BuilderPage = ({ children }: { children?: ReactNode }) => {
       setReadOnly(viewOnlyParam);
     }
   }, [readonly, run, searchParams, setLeftSidebar, setReadOnly]);
-
-  const { switchToDraft, isSwitchingToDraftPending } = useSwitchToDraft();
 
   const { setPanelsSize, getPanelSize } = useResizablePanelGroup();
 
@@ -271,18 +259,6 @@ const BuilderPage = ({ children }: { children?: ReactNode }) => {
 
   return (
     <div className="flex h-full w-full flex-col relative">
-      {run && (
-        <RunDetailsBar
-          canExitRun={canExitRun}
-          run={run}
-          isLoading={isSwitchingToDraftPending}
-          exitRun={() => {
-            socket.removeAllListeners(WebsocketClientEvent.FLOW_RUN_PROGRESS);
-            switchToDraft();
-          }}
-        />
-      )}
-
       <ReactFlowProvider>
         <BuilderTreeViewProvider selectedId={selectedStep || undefined}>
           <ResizablePanelGroup

@@ -20,7 +20,7 @@ export const createIssue = createAction({
   displayName: 'Create Issue',
   description: 'Create a new issue in a project',
   auth: jiraCloudAuth,
-  requireToolApproval: true,
+  isWriteAction: true,
   props: {
     projectId: getProjectIdDropdown(),
     issueTypeId: getIssueTypeIdDropdown({ refreshers: ['projectId'] }),

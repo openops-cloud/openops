@@ -1,4 +1,4 @@
-import { FileCompression } from '@openops/shared';
+import { FileCompression, openOpsId } from '@openops/shared';
 import { Static, Type } from '@sinclair/typebox';
 import { Value } from '@sinclair/typebox/value';
 import { FastifyPluginAsync } from 'fastify';
@@ -21,13 +21,10 @@ export const BodyAccessKeyRequest = Type.Object(
 
 export type BodyAccessKeyRequest = Static<typeof BodyAccessKeyRequest>;
 
-export async function saveRequestBody(
-  requestId: string,
-  requestBody: unknown,
-): Promise<string> {
+export async function saveRequestBody(requestBody: unknown): Promise<string> {
   const startTime = performance.now();
 
-  const bodyAccessKey = `req:${requestId}`;
+  const bodyAccessKey = `req:${openOpsId()}`;
 
   const compressedBuffer = await fileCompressor.compress({
     data: Buffer.from(JSON.stringify(requestBody)),

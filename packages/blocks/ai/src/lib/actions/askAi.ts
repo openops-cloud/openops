@@ -19,7 +19,7 @@ export const askAi = createAction({
     'Ask AI a question or transform input using an LLM based on a prompt',
   name: 'analyze',
   auth: aiAuth,
-  requireToolApproval: false,
+  isWriteAction: false,
   props: {
     model: Property.DynamicProperties({
       displayName: 'Model',

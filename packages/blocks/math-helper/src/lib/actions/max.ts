@@ -14,7 +14,7 @@ export const max = createAction({
       hide: true,
     },
   },
-  requireToolApproval: false,
+  isWriteAction: false,
   props: {
     numbers: Property.Array({
       displayName: 'Numbers',

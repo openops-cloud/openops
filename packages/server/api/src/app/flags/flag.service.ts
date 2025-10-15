@@ -157,7 +157,7 @@ export const flagService = {
       },
       {
         id: FlagId.SHOW_COMMUNITY,
-        value: false,
+        value: true,
         created,
         updated,
       },

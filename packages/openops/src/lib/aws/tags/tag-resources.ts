@@ -54,6 +54,12 @@ export async function addTagsToResources(
     }
   }
 
+  if (result.failed && Object.keys(result.failed).length > 0) {
+    throw new Error(
+      'An error occurred while tagging resources: ' + JSON.stringify(result),
+    );
+  }
+
   return result;
 }
 

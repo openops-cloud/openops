@@ -14,7 +14,7 @@ export const slackSendMessageAction = createAction({
   name: 'send_slack_message',
   displayName: 'Send Message',
   description: 'Send a message to a user or a channel',
-  requireToolApproval: true,
+  isWriteAction: true,
   props: {
     conversationId: usersAndChannels,
     threadTs: Property.ShortText({
@@ -46,7 +46,7 @@ export const slackSendMessageAction = createAction({
     assertNotNullOrUndefined(conversationId, 'conversationId');
     if (!isBlock) {
       text = context.propsValue['text']['text'];
-      const headerText = context.propsValue['headerText']['headerText'];
+      const headerText = context.propsValue?.['headerText']?.['headerText'];
       assertNotNullOrUndefined(text, 'text');
       blocks = createMessageBlocks(headerText, text);
     } else {

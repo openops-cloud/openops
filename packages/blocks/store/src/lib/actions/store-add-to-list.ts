@@ -6,7 +6,7 @@ export const storageAddtoList = createAction({
   name: 'add_to_list',
   displayName: 'Add To List',
   description: 'Add Item to a list',
-  requireToolApproval: false,
+  isWriteAction: false,
   errorHandlingOptions: {
     continueOnFailure: {
       hide: true,

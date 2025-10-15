@@ -246,6 +246,10 @@ export const createMockFlowVersion = (
     state: flowVersion?.state ?? faker.helpers.enumValue(FlowVersionState),
     updatedBy: flowVersion?.updatedBy,
     valid: flowVersion?.valid ?? faker.datatype.boolean(),
+    testRunActionLimits: flowVersion?.testRunActionLimits ?? {
+      isEnabled: true,
+      limits: [],
+    },
   };
 };
 
