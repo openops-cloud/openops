@@ -34,6 +34,10 @@ export const FlowVersionEntity = new EntitySchema<FlowVersionSchema>({
     state: {
       type: String,
     },
+    testRunActionLimits: {
+      type: JSONB_COLUMN_TYPE,
+      nullable: false,
+    },
   },
   indices: [
     {
