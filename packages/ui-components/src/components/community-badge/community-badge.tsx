@@ -37,10 +37,10 @@ const CommunityBadge = ({ link = '', showUpgrade }: CommunityBadgeProps) => {
       </TooltipTrigger>
       <TooltipContent side="bottom" className="p-0">
         <div className="flex flex-col gap-1 p-4 pt-[21px]">
-          <div className="px-0 mx-0 text-sm font-bold">
+          <div className="text-sm font-bold">
             {t('We’re glad to give back!')}
           </div>
-          <div className="px-0 mx-0 text-sm font-normal whitespace-pre-line">
+          <div className="text-sm font-normal whitespace-pre-line">
             {t(
               'This open-source version is free to use.\n Want more power? Explore our paid plans.',
             )}
