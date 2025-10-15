@@ -10,7 +10,11 @@ import {
 } from '../utils/block-utils';
 import { checkIfFileExists, makeFolderRecursive } from '../utils/files';
 
-function createActionTemplate(displayName: string, description: string) {
+function createActionTemplate(
+  displayName: string,
+  description: string,
+  isWriteAction: boolean,
+) {
   const camelCase = displayNameToCamelCase(displayName);
   const actionTemplate = `import { createAction, Property } from '@openops/blocks-framework';
 
@@ -19,6 +23,7 @@ export const ${camelCase} = createAction({
   displayName: '${displayName}',
   description: '${description}',
   props: {},
+  isWriteAction: ${isWriteAction},
   async run() {
     // Action logic here
   },
@@ -45,10 +50,12 @@ const createAction = async (
   blockName: string,
   displayActionName: string,
   actionDescription: string,
+  isWriteAction: boolean,
 ) => {
   const actionTemplate = createActionTemplate(
     displayActionName,
     actionDescription,
+    isWriteAction,
   );
   const actionName = displayNameToKebabCase(displayActionName);
   const path = await findBlockSourceDirectory(blockName);
@@ -84,6 +91,12 @@ export const createActionCommand = new Command('create')
         name: 'actionDescription',
         message: 'Enter the action description',
       },
+      {
+        type: 'confirm',
+        name: 'isWriteAction',
+        message:
+          'Does this action modify data or state (e.g., create, update, delete)?',
+      },
     ];
 
     const answers = await inquirer.prompt(questions);
@@ -91,5 +104,6 @@ export const createActionCommand = new Command('create')
       answers.blockName,
       answers.actionName,
       answers.actionDescription,
+      answers.isWriteAction,
     );
   });
