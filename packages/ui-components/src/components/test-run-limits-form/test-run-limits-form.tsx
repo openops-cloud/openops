@@ -145,6 +145,8 @@ function TestRunLimitsForm({
     onSave(data);
   };
 
+  const hasAvailableActions = !!limits?.length;
+
   return (
     <div
       className={cn(
@@ -153,177 +155,185 @@ function TestRunLimitsForm({
       )}
     >
       <div className="flex flex-col gap-6">
-        <h2 className="text-[22px] font-bold">{t('Set Action Limits')}</h2>
+        <h2 className="text-[22px] font-bold">
+          {hasAvailableActions
+            ? t('Set Action Limits')
+            : t('No Actions to Limit')}
+        </h2>
         <p className="font-medium">
-          {t(
-            'Workflows with loops may trigger the same action repeatedly. To prevent unintended activity during testing, we recommend setting execution limits per action.',
-          )}
+          {hasAvailableActions
+            ? t(
+                'Workflows with loops may trigger the same action repeatedly. To prevent unintended activity during testing, we recommend setting execution limits per action.',
+              )
+            : t(
+                'This workflow doesn’t include any actions that require execution limits. If loops or repeated steps are added later, you’ll be able to set limits here to prevent unintended behavior during testing.',
+              )}
         </p>
       </div>
 
-      {!!limits?.length && (
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className={cn({
-              'text-muted-foreground dark:text-muted-foreground': !isEnabled,
-            })}
-          >
-            <FormField
-              control={form.control}
-              name={'isEnabled'}
-              render={({ field }) => (
-                <FormItem>
-                  <div className="flex items-center justify-start gap-6">
-                    <FormControl>
-                      <Switch
-                        checked={!!field.value}
-                        onCheckedChange={(v) => field.onChange(!!v)}
+      {hasAvailableActions && (
+        <>
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className={cn({
+                'text-muted-foreground dark:text-muted-foreground': !isEnabled,
+              })}
+            >
+              <FormField
+                control={form.control}
+                name={'isEnabled'}
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="flex items-center justify-start gap-6">
+                      <FormControl>
+                        <Switch
+                          checked={!!field.value}
+                          onCheckedChange={(v) => field.onChange(!!v)}
+                        />
+                      </FormControl>
+                      <span className="text-sm font-medium">
+                        {t('Enable run limits')}
+                      </span>
+                    </div>
+                  </FormItem>
+                )}
+              />
+
+              <div className="mt-4">
+                <div className="">
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center justify-start gap-6">
+                      <Checkbox
+                        checked={selectAllChecked}
+                        onCheckedChange={(v) => toggleSelectAll(!!v)}
+                        disabled={!isEnabled || limits.length === 0}
+                        aria-label={t('Select all')}
+                        className="flex items-center justify-center rounded-xs data-[state=checked]:!bg-primary-200 data-[state=indeterminate]:!bg-primary-200 data-[state=checked]:!border-primary-200 data-[state=indeterminate]:!border-primary-200"
                       />
-                    </FormControl>
-                    <span className="text-sm font-medium">
-                      {t('Enable run limits')}
-                    </span>
-                  </div>
-                </FormItem>
-              )}
-            />
 
-            <div className="mt-4">
-              <div className="">
-                <div className="flex flex-col gap-4">
-                  <div className="flex items-center justify-start gap-6">
-                    <Checkbox
-                      checked={selectAllChecked}
-                      onCheckedChange={(v) => toggleSelectAll(!!v)}
-                      disabled={!isEnabled || limits.length === 0}
-                      aria-label={t('Select all')}
-                      className="flex items-center justify-center rounded-xs data-[state=checked]:!bg-primary-200 data-[state=indeterminate]:!bg-primary-200 data-[state=checked]:!border-primary-200 data-[state=indeterminate]:!border-primary-200"
-                    />
+                      <span className="text-sm font-medium">
+                        {t('All actions')}
+                      </span>
+                    </div>
 
-                    <span className="text-sm font-medium">
-                      {t('All actions')}
-                    </span>
-                  </div>
+                    <div className="max-h-[274px] overflow-y-hidden flex">
+                      <ScrollArea className="w-full">
+                        <div className="grid auto-rows-[36px] grid-cols-[max-content_max-content_max-content_max-content_max-content_max-content] items-center gap-x-6 gap-y-1">
+                          {limits.map((item, index) => (
+                            <div
+                              key={`${item.blockName}__${item.actionName}`}
+                              className="contents"
+                              aria-disabled={!isEnabled}
+                            >
+                              <FormField
+                                control={form.control}
+                                name={`limits.${index}.isEnabled` as const}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormControl>
+                                      <Checkbox
+                                        checked={!!field.value}
+                                        onCheckedChange={(v) =>
+                                          field.onChange(!!v)
+                                        }
+                                        disabled={!isEnabled}
+                                        aria-label={t(
+                                          'Toggle {{block}} {{action}}',
+                                          {
+                                            block: item.blockName,
+                                            action: item.actionName,
+                                          },
+                                        )}
+                                        className="flex items-center justify-center rounded-xs data-[state=checked]:!bg-primary-200 data-[state=indeterminate]:!bg-primary-200 data-[state=checked]:!border-primary-200 data-[state=indeterminate]:!border-primary-200"
+                                      />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
+                              <BlockIcon
+                                logoUrl={
+                                  blockActionMetaMap[item.blockName]?.logoUrl
+                                }
+                                showTooltip={false}
+                                size={'sm'}
+                                circle={true}
+                                border={false}
+                                className={cn('p-0', {
+                                  'opacity-70': !isEnabled,
+                                })}
+                              ></BlockIcon>
+                              <span className="text-sm font-medium">
+                                {
+                                  blockActionMetaMap[item.blockName]
+                                    ?.displayName
+                                }
+                              </span>
 
-                  <div className="max-h-[274px] overflow-y-hidden flex">
-                    <ScrollArea className="w-full">
-                      <div className="grid auto-rows-[36px] grid-cols-[max-content_max-content_max-content_max-content_max-content_max-content] items-center gap-x-6 gap-y-1">
-                        {limits.map((item, index) => (
-                          <div
-                            key={`${item.blockName}__${item.actionName}`}
-                            className="contents"
-                            aria-disabled={!isEnabled}
-                          >
-                            <FormField
-                              control={form.control}
-                              name={`limits.${index}.isEnabled` as const}
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormControl>
-                                    <Checkbox
-                                      checked={!!field.value}
-                                      onCheckedChange={(v) =>
-                                        field.onChange(!!v)
-                                      }
-                                      disabled={!isEnabled}
-                                      aria-label={t(
-                                        'Toggle {{block}} {{action}}',
-                                        {
-                                          block: item.blockName,
-                                          action: item.actionName,
-                                        },
-                                      )}
-                                      className="flex items-center justify-center rounded-xs data-[state=checked]:!bg-primary-200 data-[state=indeterminate]:!bg-primary-200 data-[state=checked]:!border-primary-200 data-[state=indeterminate]:!border-primary-200"
-                                    />
-                                  </FormControl>
-                                </FormItem>
-                              )}
-                            />
-                            <BlockIcon
-                              logoUrl={
-                                blockActionMetaMap[item.blockName]?.logoUrl
-                              }
-                              showTooltip={false}
-                              size={'sm'}
-                              circle={true}
-                              border={false}
-                              className={cn('p-0', {
-                                'opacity-70': !isEnabled,
-                              })}
-                            ></BlockIcon>
-                            <span className="text-sm font-medium">
-                              {blockActionMetaMap[item.blockName]?.displayName}
-                            </span>
+                              <div className="h-[18px] w-4 border-r"></div>
 
-                            <div className="h-[18px] w-4 border-r"></div>
+                              <span className="text-sm font-medium">
+                                {
+                                  blockActionMetaMap[item.blockName]?.actions?.[
+                                    item.actionName
+                                  ]
+                                }
+                              </span>
 
-                            <span className="text-sm font-medium">
-                              {
-                                blockActionMetaMap[item.blockName]?.actions?.[
-                                  item.actionName
-                                ]
-                              }
-                            </span>
-
-                            <FormField
-                              control={form.control}
-                              name={`limits.${index}.limit` as const}
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormControl>
-                                    <Input
-                                      type="number"
-                                      min={0}
-                                      value={
-                                        Number.isFinite(field.value)
-                                          ? field.value
-                                          : 0
-                                      }
-                                      onChange={(e) => {
-                                        const raw = e.target.value;
-                                        const parsed = Number(raw);
-                                        field.onChange(
-                                          Number.isFinite(parsed) && parsed >= 0
-                                            ? parsed
-                                            : 0,
-                                        );
-                                      }}
-                                      disabled={!isEnabled}
-                                      className="h-8 w-[64px]"
-                                    />
-                                  </FormControl>
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </ScrollArea>
+                              <FormField
+                                control={form.control}
+                                name={`limits.${index}.limit` as const}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormControl>
+                                      <Input
+                                        type="number"
+                                        min={0}
+                                        value={
+                                          Number.isFinite(field.value)
+                                            ? field.value
+                                            : 0
+                                        }
+                                        onChange={(e) => {
+                                          const raw = e.target.value;
+                                          const parsed = Number(raw);
+                                          field.onChange(
+                                            Number.isFinite(parsed) &&
+                                              parsed >= 0
+                                              ? parsed
+                                              : 0,
+                                          );
+                                        }}
+                                        disabled={!isEnabled}
+                                        className="h-8 w-[64px]"
+                                      />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </form>
-        </Form>
-      )}
+            </form>
+          </Form>
 
-      {!limits.length && (
-        <div className="px-3 py-6 text-sm text-muted-foreground col-span-5">
-          {t('No actions available.')}
-        </div>
+          <div className="mt-4 flex justify-end">
+            <Button
+              size={'lg'}
+              loading={!!isLoading}
+              disabled={!limits.length}
+              onClick={() => onSave(form.getValues())}
+            >
+              {t('Save')}
+            </Button>
+          </div>
+        </>
       )}
-
-      <div className="mt-4 flex justify-end">
-        <Button
-          size={'lg'}
-          loading={!!isLoading}
-          disabled={!limits.length}
-          onClick={() => onSave(form.getValues())}
-        >
-          {t('Save')}
-        </Button>
-      </div>
     </div>
   );
 }
