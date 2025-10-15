@@ -28,8 +28,8 @@ export async function calculateTestRunActionLimits(
     }
 
     const settings = step.settings ?? {};
-    const blockName = settings.blockName as string | undefined;
-    const actionName = settings.actionName as string | undefined;
+    const blockName = settings.blockName;
+    const actionName = settings.actionName;
 
     if (!blockName || !actionName) {
       continue;
