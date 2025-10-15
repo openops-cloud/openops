@@ -17,7 +17,7 @@ type TestRunLimitsDialogProps = {
 const TestRunLimitsDialog = ({ children }: TestRunLimitsDialogProps) => {
   const [isOpen, setOpen] = useState(false);
 
-  const { testRunLimitSettings, blockActionMetaMap, isLoading } =
+  const { testRunActionLimits, blockActionMetaMap, isLoading, onSave } =
     useTestRunLimitsDialog();
 
   return (
@@ -30,10 +30,10 @@ const TestRunLimitsDialog = ({ children }: TestRunLimitsDialogProps) => {
           </DialogTitle>
         </DialogHeader>
         <TestRunLimitsForm
-          value={testRunLimitSettings}
+          value={testRunActionLimits}
           onSave={(v) => {
-            console.log('THE VALUE IS ', v);
             setOpen(false);
+            onSave(v);
           }}
           blockActionMetaMap={blockActionMetaMap}
           isLoading={isLoading}

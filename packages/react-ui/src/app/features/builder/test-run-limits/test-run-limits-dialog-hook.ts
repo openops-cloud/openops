@@ -1,46 +1,22 @@
 import {
   BlockActionLimitMetadata,
   BlockStepMetadataWithSuggestions,
+  toast,
+  UNSAVED_CHANGES_TOAST,
 } from '@openops/components/ui';
-import { ActionType } from '@openops/shared';
-import { useMemo } from 'react';
+import {
+  ActionType,
+  FlowOperationType,
+  TestRunLimitSettings,
+} from '@openops/shared';
+import { useCallback, useMemo } from 'react';
 import { blocksHooks } from '../../blocks/lib/blocks-hook';
 import { useBuilderStateContext } from '../builder-hooks';
 
-const DIALOG_TEST_SETTINGS = {
-  isEnabled: true,
-  limits: [
-    {
-      limit: 10,
-      blockName: '@openops/block-archera',
-      isEnabled: true,
-      actionName: 'archera_apply_commitment_plan',
-    },
-    {
-      limit: 10,
-      blockName: '@openops/block-microsoft-outlook',
-      isEnabled: true,
-      actionName: 'send-email',
-    },
-    {
-      limit: 10,
-      blockName: '@openops/block-vantage',
-      isEnabled: true,
-      actionName: 'custom_api_call',
-    },
-    {
-      limit: 10,
-      blockName: '@openops/block-github',
-      isEnabled: true,
-      actionName: 'create_pull_request_action',
-    },
-  ],
-};
-
 export const useTestRunLimitsDialog = () => {
-  const [testRunLimitSettings, applyOperation, saving] = useBuilderStateContext(
+  const [testRunActionLimits, applyOperation, saving] = useBuilderStateContext(
     (state) => [
-      state.flowVersion.testRunLimitSettings,
+      state.flowVersion.testRunActionLimits,
       state.applyOperation,
       state.saving,
     ],
@@ -53,7 +29,7 @@ export const useTestRunLimitsDialog = () => {
   const blockActionMetaMap: BlockActionLimitMetadata = useMemo(() => {
     const map: BlockActionLimitMetadata = {};
 
-    const limits = testRunLimitSettings?.limits ?? DIALOG_TEST_SETTINGS.limits;
+    const limits = testRunActionLimits?.limits;
     if (!limits.length) return map;
 
     limits.forEach((limit) => {
@@ -84,11 +60,25 @@ export const useTestRunLimitsDialog = () => {
     });
 
     return map;
-  }, [testRunLimitSettings, metadata]);
+  }, [testRunActionLimits, metadata]);
+
+  const onSave = useCallback(
+    (testRunActionLimits: TestRunLimitSettings) => {
+      applyOperation(
+        {
+          type: FlowOperationType.UPDATE_TEST_RUN_ACTION_LIMITS,
+          request: { testRunActionLimits },
+        },
+        () => toast(UNSAVED_CHANGES_TOAST),
+      );
+    },
+    [applyOperation],
+  );
 
   return {
-    testRunLimitSettings: testRunLimitSettings ?? DIALOG_TEST_SETTINGS,
+    testRunActionLimits,
     blockActionMetaMap,
+    onSave,
     isLoading: saving,
   };
 };
