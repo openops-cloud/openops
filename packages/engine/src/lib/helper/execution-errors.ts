@@ -17,7 +17,7 @@ export class ExecutionError extends Error {
   }
 }
 
-function formatMessage(message: string) {
+function formatMessage(message: string): string {
   return JSON.stringify(
     {
       message,
@@ -96,6 +96,16 @@ export class FetchError extends ExecutionError {
       formatMessage(`Failed to fetch from ${url}`),
       ExecutionErrorType.ENGINE,
       cause,
+    );
+  }
+}
+
+export class ExecutionLimitReachedError extends ExecutionError {
+  constructor(blockName: string, actionName: string, limit: number) {
+    super(
+      'ExecutionLimitReached',
+      formatMessage(`Action limit reached: ${limit} runs`),
+      ExecutionErrorType.USER,
     );
   }
 }

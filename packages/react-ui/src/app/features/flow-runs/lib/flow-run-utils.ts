@@ -56,6 +56,7 @@ export const flowRunUtils = {
           Icon: CircleCheck,
         };
       case StepOutputStatus.FAILED:
+      case StepOutputStatus.TEST_RUN_LIMIT_REACHED:
         return {
           variant: 'error',
           Icon: CircleX,
@@ -112,6 +113,11 @@ export const flowRunUtils = {
           variant: 'error',
           Icon: X,
         };
+      case FlowRunStatus.TEST_RUN_LIMIT_REACHED:
+        return {
+          variant: 'error',
+          Icon: X,
+        };
     }
   },
   getStatusExplanation(status: FlowRunStatus): string | undefined {
@@ -136,7 +142,10 @@ const findFailedStepInLoop: (
     const newLoopIndexes = { ...currentLoopIndexes, [loopName]: i };
 
     for (const [stepName, step] of Object.entries(iteration)) {
-      if (step.status === StepOutputStatus.FAILED) {
+      if (
+        step.status === StepOutputStatus.FAILED ||
+        step.status === StepOutputStatus.TEST_RUN_LIMIT_REACHED
+      ) {
         return { stepName, loopIndexes: newLoopIndexes };
       }
       if (step.type === ActionType.LOOP_ON_ITEMS && step.output) {
@@ -192,7 +201,10 @@ function findLoopsState(
 
 function findFailedStep(run: FlowRun): FailedStepInfo | null {
   for (const [stepName, step] of Object.entries(run.steps)) {
-    if (step.status === StepOutputStatus.FAILED) {
+    if (
+      step.status === StepOutputStatus.FAILED ||
+      step.status === StepOutputStatus.TEST_RUN_LIMIT_REACHED
+    ) {
       return { stepName, loopIndexes: {} };
     }
     if (step.type === ActionType.LOOP_ON_ITEMS && step.output) {

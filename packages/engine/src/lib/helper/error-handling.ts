@@ -63,6 +63,14 @@ export async function continueIfFailureHandler(
 
   if (
     executionState.verdict === ExecutionVerdict.FAILED &&
+    executionState.verdictResponse?.reason ===
+      VerdictReason.EXECUTION_LIMIT_REACHED
+  ) {
+    return executionState;
+  }
+
+  if (
+    executionState.verdict === ExecutionVerdict.FAILED &&
     continueOnFailure &&
     !constants.testSingleStepMode
   ) {
@@ -87,6 +95,17 @@ export const handleExecutionError = (
     message +=
       '\n\nNote: This code is executing within an "isolated-vm" environment, meaning it ' +
       'has no access to any native Node.js modules, such as "fs", "process", "http", "crypto", etc.';
+  }
+  if (
+    error instanceof ExecutionError &&
+    error.name === 'ExecutionLimitReached'
+  ) {
+    return {
+      message,
+      verdictResponse: {
+        reason: VerdictReason.EXECUTION_LIMIT_REACHED,
+      },
+    };
   }
   const isEngineError =
     error instanceof ExecutionError && error.type === ExecutionErrorType.ENGINE;

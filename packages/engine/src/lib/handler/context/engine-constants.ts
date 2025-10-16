@@ -10,6 +10,7 @@ import {
   Project,
   ProjectId,
   ResumePayload,
+  TestRunLimitSettings,
   TriggerHookType,
 } from '@openops/shared';
 import {
@@ -64,6 +65,7 @@ export class EngineConstants {
     public readonly filesServiceType: 'local' | 'db',
     public readonly progressUpdateType: ProgressUpdateType,
     public readonly serverHandlerId: string | null,
+    public readonly testRunActionLimits: TestRunLimitSettings,
     public readonly resumePayload?: ResumePayload,
   ) {}
 
@@ -91,6 +93,7 @@ export class EngineConstants {
       'local',
       input.progressUpdateType,
       input.serverHandlerId ?? null,
+      input.flowVersion.testRunActionLimits,
       input.executionType === ExecutionType.RESUME
         ? input.resumePayload
         : undefined,
@@ -121,6 +124,7 @@ export class EngineConstants {
       'db',
       ProgressUpdateType.NONE,
       null,
+      input.flowVersion.testRunActionLimits,
     );
   }
 
@@ -148,6 +152,7 @@ export class EngineConstants {
       'db',
       ProgressUpdateType.NONE,
       null,
+      input.flowVersion.testRunActionLimits,
     );
   }
 
@@ -175,6 +180,7 @@ export class EngineConstants {
       'db',
       ProgressUpdateType.NONE,
       null,
+      input.flowVersion.testRunActionLimits,
     );
   }
 

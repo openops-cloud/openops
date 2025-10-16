@@ -16,9 +16,11 @@ import {
   AUTHENTICATION_PROPERTY_NAME,
   BlockAction,
   ExecutionType,
+  findTestRunLimit,
   GenericStepOutput,
   isNil,
   StepOutputStatus,
+  TestRunLimit,
 } from '@openops/shared';
 import { URL } from 'url';
 import { blockLoader } from '../helper/block-loader';
@@ -27,6 +29,7 @@ import {
   handleExecutionError,
   runWithExponentialBackoff,
 } from '../helper/error-handling';
+import { ExecutionLimitReachedError } from '../helper/execution-errors';
 import { createConnectionService } from '../services/connections.service';
 import { createFilesService } from '../services/files.service';
 import { createContextStore } from '../services/storage.service';
@@ -93,6 +96,59 @@ export const blockExecutor: BaseExecutor<BlockAction> = {
   },
 };
 
+const getEnabledLimit = (
+  blockName: string,
+  actionName: string,
+  constants: EngineConstants,
+): TestRunLimit | undefined => {
+  if (!constants.testRunActionLimits.isEnabled) {
+    return undefined;
+  }
+
+  const limit = findTestRunLimit(
+    constants.testRunActionLimits.limits,
+    blockName,
+    actionName,
+  );
+
+  return limit?.isEnabled ? limit : undefined;
+};
+
+const checkExecutionLimit = (
+  blockName: string,
+  actionName: string,
+  executionState: FlowExecutorContext,
+  constants: EngineConstants,
+): void => {
+  const limit = getEnabledLimit(blockName, actionName, constants);
+
+  if (limit) {
+    const currentCount = executionState.getActionExecutionCount(
+      blockName,
+      actionName,
+    );
+
+    if (currentCount >= limit.limit) {
+      throw new ExecutionLimitReachedError(blockName, actionName, limit.limit);
+    }
+  }
+};
+
+const incrementActionCountIfNeeded = (
+  blockName: string,
+  actionName: string,
+  executionState: FlowExecutorContext,
+  constants: EngineConstants,
+): FlowExecutorContext => {
+  const limit = getEnabledLimit(blockName, actionName, constants);
+
+  if (limit) {
+    return executionState.incrementActionExecutionCount(blockName, actionName);
+  }
+
+  return executionState;
+};
+
 const executeAction: ActionHandler<BlockAction> = async ({
   action,
   executionState,
@@ -106,6 +162,14 @@ const executeAction: ActionHandler<BlockAction> = async ({
 
   try {
     assertNotNullOrUndefined(action.settings.actionName, 'actionName');
+
+    checkExecutionLimit(
+      action.settings.blockName,
+      action.settings.actionName,
+      executionState,
+      constants,
+    );
+
     const { blockAction, block } = await blockLoader.getBlockAndActionOrThrow({
       blockName: action.settings.blockName,
       blockVersion: action.settings.blockVersion,
@@ -220,7 +284,14 @@ const executeAction: ActionHandler<BlockAction> = async ({
         ? blockAction.test
         : blockAction.run;
     const output = await runMethodToExecute(context);
-    const newExecutionContext = executionState.addTags(hookResponse.tags);
+    let newExecutionContext = executionState.addTags(hookResponse.tags);
+
+    newExecutionContext = incrementActionCountIfNeeded(
+      action.settings.blockName,
+      action.settings.actionName,
+      newExecutionContext,
+      constants,
+    );
 
     if (hookResponse.stopped) {
       assertNotNullOrUndefined(hookResponse.stopResponse, 'stopResponse');
@@ -255,8 +326,14 @@ const executeAction: ActionHandler<BlockAction> = async ({
   } catch (e) {
     const handledError = handleExecutionError(e);
 
+    const stepStatus =
+      handledError.verdictResponse?.reason ===
+      VerdictReason.EXECUTION_LIMIT_REACHED
+        ? StepOutputStatus.TEST_RUN_LIMIT_REACHED
+        : StepOutputStatus.FAILED;
+
     const failedStepOutput = stepOutput
-      .setStatus(StepOutputStatus.FAILED)
+      .setStatus(stepStatus)
       .setErrorMessage(handledError.message);
 
     return executionState

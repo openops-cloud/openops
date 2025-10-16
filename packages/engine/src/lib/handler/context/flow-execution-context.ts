@@ -28,6 +28,7 @@ export enum VerdictReason {
   STOPPED = 'STOPPED',
   PAUSED = 'PAUSED',
   INTERNAL_ERROR = 'INTERNAL_ERROR',
+  EXECUTION_LIMIT_REACHED = 'EXECUTION_LIMIT_REACHED',
 }
 
 export type VerdictResponse =
@@ -41,6 +42,9 @@ export type VerdictResponse =
     }
   | {
       reason: VerdictReason.INTERNAL_ERROR;
+    }
+  | {
+      reason: VerdictReason.EXECUTION_LIMIT_REACHED;
     };
 
 export class FlowExecutorContext {
@@ -52,6 +56,7 @@ export class FlowExecutorContext {
   verdictResponse: VerdictResponse | undefined;
   currentPath: StepExecutionPath;
   error?: FlowError;
+  actionExecutionCounts: Readonly<Record<string, number>>;
 
   /**
    * Execution time in milliseconds
@@ -68,6 +73,7 @@ export class FlowExecutorContext {
     this.verdictResponse = copyFrom?.verdictResponse ?? undefined;
     this.error = copyFrom?.error ?? undefined;
     this.currentPath = copyFrom?.currentPath ?? StepExecutionPath.empty();
+    this.actionExecutionCounts = copyFrom?.actionExecutionCounts ?? {};
   }
 
   static empty(): FlowExecutorContext {
@@ -242,6 +248,33 @@ export class FlowExecutorContext {
     });
   }
 
+  private static getActionKey(blockName: string, actionName: string): string {
+    return `${blockName}|${actionName}`;
+  }
+
+  public incrementActionExecutionCount(
+    blockName: string,
+    actionName: string,
+  ): FlowExecutorContext {
+    const key = FlowExecutorContext.getActionKey(blockName, actionName);
+    const currentCount = this.actionExecutionCounts[key] ?? 0;
+    return new FlowExecutorContext({
+      ...this,
+      actionExecutionCounts: {
+        ...this.actionExecutionCounts,
+        [key]: currentCount + 1,
+      },
+    });
+  }
+
+  public getActionExecutionCount(
+    blockName: string,
+    actionName: string,
+  ): number {
+    const key = FlowExecutorContext.getActionKey(blockName, actionName);
+    return this.actionExecutionCounts[key] ?? 0;
+  }
+
   public async toResponse(): Promise<FlowRunResponse> {
     const baseExecutionOutput = {
       duration: this.duration,
@@ -257,6 +290,13 @@ export class FlowExecutorContext {
             ...baseExecutionOutput,
             error: this.error,
             status: FlowRunStatus.INTERNAL_ERROR,
+          };
+        }
+        if (verdictResponse?.reason === VerdictReason.EXECUTION_LIMIT_REACHED) {
+          return {
+            ...baseExecutionOutput,
+            error: this.error,
+            status: FlowRunStatus.TEST_RUN_LIMIT_REACHED,
           };
         }
         return {
