@@ -145,7 +145,7 @@ const BuilderPublishButton = React.memo(() => {
                 );
               }
             }}
-            className="h-[42px] rounded-lg text-base font-bold shadow-editor"
+            className="h-[42px] rounded-lg font-bold shadow-editor text-sm"
           >
             {t('Edit')}
           </Button>

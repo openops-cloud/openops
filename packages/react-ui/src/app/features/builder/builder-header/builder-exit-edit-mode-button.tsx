@@ -22,7 +22,7 @@ const BuilderExitEditModeButton = () => {
       <Button
         variant="default"
         size="lg"
-        className="h-[42px] rounded-lg text-base font-bold shadow-editor"
+        className="h-[42px] rounded-lg font-bold shadow-editor text-sm"
         onClick={onExitEditMode}
       >
         {t('Exit')}
