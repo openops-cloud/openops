@@ -12,11 +12,23 @@ describe('block declaration tests', () => {
   });
 
   test('should return block with correct number of actions', () => {
-    expect(Object.keys(servicenow.actions()).length).toBe(3);
+    expect(Object.keys(servicenow.actions()).length).toBe(6);
     const actions = servicenow.actions();
     expect(actions).toMatchObject({
+      list_records: {
+        name: 'list_records',
+        requireAuth: true,
+      },
       get_record: {
         name: 'get_record',
+        requireAuth: true,
+      },
+      create_record: {
+        name: 'create_record',
+        requireAuth: true,
+      },
+      update_record: {
+        name: 'update_record',
         requireAuth: true,
       },
       delete_record: {
