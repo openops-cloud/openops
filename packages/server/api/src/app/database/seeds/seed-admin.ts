@@ -21,18 +21,12 @@ export const upsertAdminUser = async (): Promise<void> => {
 
     const user = await ensureUserExists(email, password);
 
-    const organizationAlreadyCreated = await hasExistingOrganization(user);
-    const projectAlreadyCreated = await hasExistingProject(user);
-    if (organizationAlreadyCreated && projectAlreadyCreated) {
-      return;
-    }
-
     const { workspaceId, databaseId } =
-      await createOpenOpsTablesWorkspaceAndDatabase();
+      await ensureOpenOpsTablesWorkspaceAndDatabaseExist();
 
-    await createOrganization(user, workspaceId);
+    await ensureOrganizationExists(user, workspaceId);
 
-    await createProject(user, databaseId);
+    await ensureProjectExists(user, databaseId);
   }
 };
 
@@ -79,10 +73,11 @@ async function ensureUserExists(
     `Admin user does not exist, creating new admin user [${email}]`,
     email,
   );
+
   return createAdminUser(email, password);
 }
 
-async function createOpenOpsTablesWorkspaceAndDatabase(): Promise<{
+async function ensureOpenOpsTablesWorkspaceAndDatabaseExist(): Promise<{
   workspaceId: number;
   databaseId: number;
 }> {
@@ -103,25 +98,30 @@ async function createOpenOpsTablesWorkspaceAndDatabase(): Promise<{
   return { workspaceId, databaseId };
 }
 
-async function hasExistingOrganization(user: User): Promise<boolean> {
-  const { organizationId } = user;
-
-  if (!organizationId) {
-    return false;
-  }
-
-  const organization = await organizationService.getOne(organizationId);
-  if (!organization) {
-    throw new Error('User has organizationId but organization does not exist');
-  }
-
-  return true;
-}
-
-async function createOrganization(
+async function ensureOrganizationExists(
   user: User,
   tablesWorkspaceId: number,
 ): Promise<void> {
+  if (user.organizationId) {
+    const existingOrganization = await organizationService.getOne(
+      user.organizationId,
+    );
+
+    if (!existingOrganization) {
+      throw new Error(
+        'User has organizationId but organization does not exist',
+      );
+    }
+
+    if (existingOrganization.tablesWorkspaceId !== tablesWorkspaceId) {
+      throw new Error(
+        'User organization exists but with different tablesWorkspaceId',
+      );
+    }
+
+    return;
+  }
+
   const organization = await organizationService.create({
     ownerId: user.id,
     name: DEFAULT_ORGANIZATION_NAME,
@@ -131,24 +131,25 @@ async function createOrganization(
   user.organizationId = organization.id;
 }
 
-async function hasExistingProject(user: User): Promise<boolean> {
-  if (user.organizationId) {
-    const project = await projectService.getOneForUser(user);
-    return !!project;
-  }
+async function ensureProjectExists(
+  user: User,
+  databaseId: number,
+): Promise<void> {
+  const project = await projectService.getOneForUser(user);
+  if (project) {
+    if (project.tablesDatabaseId !== databaseId) {
+      throw new Error(
+        'User project exists but with different tablesDatabaseId',
+      );
+    }
 
-  return false;
-}
-
-async function createProject(user: User, databaseId: number): Promise<void> {
-  if (!user.organizationId) {
-    throw new Error('Organization id is not defined.');
+    return;
   }
 
   await projectService.create({
     displayName: `${user.firstName}'s Project`,
     ownerId: user.id,
-    organizationId: user.organizationId,
+    organizationId: user.organizationId!,
     tablesDatabaseId: databaseId,
   });
 }
