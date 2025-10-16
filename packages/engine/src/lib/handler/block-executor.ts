@@ -20,6 +20,7 @@ import {
   GenericStepOutput,
   isNil,
   StepOutputStatus,
+  TestRunLimit,
 } from '@openops/shared';
 import { URL } from 'url';
 import { blockLoader } from '../helper/block-loader';
@@ -95,14 +96,13 @@ export const blockExecutor: BaseExecutor<BlockAction> = {
   },
 };
 
-const checkExecutionLimit = (
+const getEnabledLimit = (
   blockName: string,
   actionName: string,
-  executionState: FlowExecutorContext,
   constants: EngineConstants,
-): void => {
+): TestRunLimit | undefined => {
   if (!constants.testRunActionLimits.isEnabled) {
-    return;
+    return undefined;
   }
 
   const limit = findTestRunLimit(
@@ -111,7 +111,18 @@ const checkExecutionLimit = (
     actionName,
   );
 
-  if (limit?.isEnabled) {
+  return limit?.isEnabled ? limit : undefined;
+};
+
+const checkExecutionLimit = (
+  blockName: string,
+  actionName: string,
+  executionState: FlowExecutorContext,
+  constants: EngineConstants,
+): void => {
+  const limit = getEnabledLimit(blockName, actionName, constants);
+
+  if (limit) {
     const currentCount = executionState.getActionExecutionCount(
       blockName,
       actionName,
@@ -129,17 +140,9 @@ const incrementActionCountIfNeeded = (
   executionState: FlowExecutorContext,
   constants: EngineConstants,
 ): FlowExecutorContext => {
-  if (!constants.testRunActionLimits.isEnabled) {
-    return executionState;
-  }
+  const limit = getEnabledLimit(blockName, actionName, constants);
 
-  const limit = findTestRunLimit(
-    constants.testRunActionLimits.limits,
-    blockName,
-    actionName,
-  );
-
-  if (limit?.isEnabled) {
+  if (limit) {
     return executionState.incrementActionExecutionCount(blockName, actionName);
   }
 

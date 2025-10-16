@@ -248,11 +248,15 @@ export class FlowExecutorContext {
     });
   }
 
+  private static getActionKey(blockName: string, actionName: string): string {
+    return `${blockName}|${actionName}`;
+  }
+
   public incrementActionExecutionCount(
     blockName: string,
     actionName: string,
   ): FlowExecutorContext {
-    const key = `${blockName}|${actionName}`;
+    const key = FlowExecutorContext.getActionKey(blockName, actionName);
     const currentCount = this.actionExecutionCounts[key] ?? 0;
     return new FlowExecutorContext({
       ...this,
@@ -267,7 +271,7 @@ export class FlowExecutorContext {
     blockName: string,
     actionName: string,
   ): number {
-    const key = `${blockName}|${actionName}`;
+    const key = FlowExecutorContext.getActionKey(blockName, actionName);
     return this.actionExecutionCounts[key] ?? 0;
   }
 
