@@ -10,7 +10,6 @@ import {
   TestRunLimitSettings,
   Trigger,
 } from '@openops/shared';
-
 export const DEFAULT_TEST_RUN_LIMIT = 10;
 
 export function shouldRecalculateTestRunActionLimits(
