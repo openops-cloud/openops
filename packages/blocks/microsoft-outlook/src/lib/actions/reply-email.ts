@@ -62,18 +62,6 @@ export const replyEmailAction = createAction({
         }
       },
     }),
-    bodyFormat: Property.StaticDropdown({
-      displayName: 'Body Format',
-      required: true,
-      defaultValue: 'text',
-      options: {
-        disabled: false,
-        options: [
-          { label: 'HTML', value: 'html' },
-          { label: 'Text', value: 'text' },
-        ],
-      },
-    }),
     replyBody: Property.LongText({
       displayName: 'Reply Body',
       required: true,
@@ -109,21 +97,13 @@ export const replyEmailAction = createAction({
     }),
   },
   async run(context) {
-    const { replyBody, bodyFormat, messageId, draft } = context.propsValue;
+    const { replyBody, messageId, draft } = context.propsValue;
     const ccRecipients = context.propsValue.ccRecipients as string[];
     const bccRecipients = context.propsValue.bccRecipients as string[];
     const attachments = context.propsValue.attachments as Array<{
       file: WorkflowFile;
       fileName: string;
     }>;
-
-    const formattedReplyBody =
-      bodyFormat === 'text'
-        ? `<pre style="font-family: inherit; white-space: pre-wrap;">${replyBody
-            .replaceAll('&', '&amp;')
-            .replaceAll('<', '&lt;')
-            .replaceAll('>', '&gt;')}</pre>`
-        : replyBody;
 
     const mailPayload: Message = {
       ccRecipients: ccRecipients.map((mail) => ({
@@ -148,7 +128,7 @@ export const replyEmailAction = createAction({
       const response: Message = await client
         .api(`/me/messages/${messageId}/createReply`)
         .post({
-          comment: formattedReplyBody,
+          comment: replyBody,
           message: mailPayload,
         });
       const draftId = response.id;
