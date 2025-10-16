@@ -120,9 +120,9 @@ export const replyEmailAction = createAction({
     const formattedReplyBody =
       bodyFormat === 'text'
         ? `<pre style="font-family: inherit; white-space: pre-wrap;">${replyBody
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')}</pre>`
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')}</pre>`
         : replyBody;
 
     const mailPayload: Message = {
