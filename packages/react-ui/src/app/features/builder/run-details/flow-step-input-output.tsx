@@ -6,6 +6,7 @@ import React from 'react';
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { useTheme } from '@/app/common/providers/theme-provider';
 import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
+import { TestRunActionLimitReachedPlate } from '@/app/features/builder/run-details/test-run-action-limit-reached-plate';
 import { StepStatusIcon } from '@/app/features/flow-runs/components/step-status-icon';
 import { formatUtils } from '@/app/lib/utils';
 import { FlagId, flowHelper, StepOutput } from '@openops/shared';
@@ -50,6 +51,9 @@ const FlowStepInputOutput = React.memo(
             </>
           )}
         </div>
+        <TestRunActionLimitReachedPlate
+          error={'Action limit reached: N runs'}
+        />
         <TestStepDataViewer
           inputJson={stepDetails.input}
           outputJson={stepOutput}
