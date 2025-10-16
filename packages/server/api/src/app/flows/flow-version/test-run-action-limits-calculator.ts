@@ -2,6 +2,7 @@ import { fileBlocksUtils } from '@openops/server-shared';
 import {
   Action,
   ActionType,
+  findTestRunLimit,
   flowHelper,
   FlowOperationRequest,
   FlowOperationType,
@@ -9,7 +10,6 @@ import {
   TestRunLimitSettings,
   Trigger,
 } from '@openops/shared';
-
 export const DEFAULT_TEST_RUN_LIMIT = 10;
 
 export function shouldRecalculateTestRunActionLimits(
@@ -69,13 +69,7 @@ async function tryAddLimitForAction(
     return limits;
   }
 
-  if (
-    limits.some(
-      (limit) =>
-        limit.blockName === blockInfo.blockName &&
-        limit.actionName === blockInfo.actionName,
-    )
-  ) {
+  if (findTestRunLimit(limits, blockInfo.blockName, blockInfo.actionName)) {
     return limits;
   }
 
