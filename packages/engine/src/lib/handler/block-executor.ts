@@ -326,8 +326,14 @@ const executeAction: ActionHandler<BlockAction> = async ({
   } catch (e) {
     const handledError = handleExecutionError(e);
 
+    const stepStatus =
+      handledError.verdictResponse?.reason ===
+      VerdictReason.EXECUTION_LIMIT_REACHED
+        ? StepOutputStatus.TEST_RUN_LIMIT_REACHED
+        : StepOutputStatus.FAILED;
+
     const failedStepOutput = stepOutput
-      .setStatus(StepOutputStatus.FAILED)
+      .setStatus(stepStatus)
       .setErrorMessage(handledError.message);
 
     return executionState
