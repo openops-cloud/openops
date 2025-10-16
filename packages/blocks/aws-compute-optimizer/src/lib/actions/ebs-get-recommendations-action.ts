@@ -25,7 +25,7 @@ export const ebsGetRecommendationsAction = createAction({
   name: 'ebs_get_recommendations',
   description: 'Get EBS volume recommendations',
   displayName: 'EBS Get Recommendations',
-  requireToolApproval: false,
+  isWriteAction: false,
   props: {
     accounts: getAwsAccountsMultiSelectDropdown().accounts,
     recommendationType: Property.StaticDropdown({

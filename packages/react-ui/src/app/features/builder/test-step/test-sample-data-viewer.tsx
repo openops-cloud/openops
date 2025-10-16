@@ -18,6 +18,7 @@ type TestSampleDataViewerProps = {
   outputData: unknown;
   errorMessage: string | undefined;
   lastTestDate: string | undefined;
+  readOnly: boolean;
 };
 
 const TestSampleDataViewer = React.memo(
@@ -30,6 +31,7 @@ const TestSampleDataViewer = React.memo(
     outputData,
     errorMessage,
     lastTestDate,
+    readOnly,
   }: TestSampleDataViewerProps) => {
     const formattedInputData = useMemo(
       () => formatUtils.formatStepInputOrOutput(inputData),
@@ -76,9 +78,9 @@ const TestSampleDataViewer = React.memo(
             <Button
               variant="outline"
               size="sm"
-              disabled={!isValid || isSaving}
+              disabled={!isValid || isSaving || readOnly}
               keyboardShortcut="G"
-              onKeyboardShortcut={onRetest}
+              onKeyboardShortcut={readOnly ? undefined : onRetest}
               onClick={onRetest}
               loading={isTesting}
             >

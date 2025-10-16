@@ -1,5 +1,5 @@
 import { PageCollection } from '@microsoft/microsoft-graph-client';
-import { BodyType, Message } from '@microsoft/microsoft-graph-types';
+import { Message } from '@microsoft/microsoft-graph-types';
 import {
   createAction,
   OAuth2PropertyValue,
@@ -14,7 +14,7 @@ export const replyEmailAction = createAction({
   name: 'reply-email',
   displayName: 'Reply to Email',
   description: 'Reply to an outlook email.',
-  requireToolApproval: true,
+  isWriteAction: true,
   props: {
     messageId: Property.Dropdown({
       displayName: 'Email',
@@ -62,18 +62,6 @@ export const replyEmailAction = createAction({
         }
       },
     }),
-    bodyFormat: Property.StaticDropdown({
-      displayName: 'Body Format',
-      required: true,
-      defaultValue: 'text',
-      options: {
-        disabled: false,
-        options: [
-          { label: 'HTML', value: 'html' },
-          { label: 'Text', value: 'text' },
-        ],
-      },
-    }),
     replyBody: Property.LongText({
       displayName: 'Reply Body',
       required: true,
@@ -109,18 +97,15 @@ export const replyEmailAction = createAction({
     }),
   },
   async run(context) {
-    const { replyBody, bodyFormat, messageId, draft } = context.propsValue;
+    const { replyBody, messageId, draft } = context.propsValue;
     const ccRecipients = context.propsValue.ccRecipients as string[];
     const bccRecipients = context.propsValue.bccRecipients as string[];
     const attachments = context.propsValue.attachments as Array<{
       file: WorkflowFile;
       fileName: string;
     }>;
+
     const mailPayload: Message = {
-      body: {
-        content: replyBody,
-        contentType: bodyFormat as BodyType,
-      },
       ccRecipients: ccRecipients.map((mail) => ({
         emailAddress: {
           address: mail,
@@ -143,9 +128,11 @@ export const replyEmailAction = createAction({
       const response: Message = await client
         .api(`/me/messages/${messageId}/createReply`)
         .post({
+          comment: replyBody,
           message: mailPayload,
         });
       const draftId = response.id;
+
       if (!draft) {
         await client.api(`/me/messages/${draftId}/send`).post({});
         return {

@@ -8,7 +8,7 @@ export const getDefaultCommitmentPlansAction = createAction({
   description:
     'Retrieve the default Archera commitment plans for a given provider',
   displayName: 'Get Default Commitment Plans',
-  requireToolApproval: false,
+  isWriteAction: false,
   props: {
     provider: Property.StaticDropdown({
       displayName: 'Provider',

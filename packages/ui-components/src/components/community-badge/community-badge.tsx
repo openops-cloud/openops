@@ -15,7 +15,7 @@ const CommunityBadge = ({ link = '', showUpgrade }: CommunityBadgeProps) => {
       <TooltipTrigger>
         <Badge
           variant="outline"
-          className="h-6 flex items-center gap-1 py-0 bg-editorBackground"
+          className="h-6 flex items-center gap-1 py-0 px-[5px] bg-editorBackground"
         >
           <span className="text-primary text-[11px] font-normal">
             {t('Community')}
@@ -35,8 +35,8 @@ const CommunityBadge = ({ link = '', showUpgrade }: CommunityBadgeProps) => {
           )}
         </Badge>
       </TooltipTrigger>
-      <TooltipContent side="bottom">
-        <div className="flex flex-col gap-1">
+      <TooltipContent side="bottom" className="p-0">
+        <div className="flex flex-col gap-1 p-4 pt-[21px]">
           <div className="text-sm font-bold">
             {t('We’re glad to give back!')}
           </div>
@@ -52,7 +52,9 @@ const CommunityBadge = ({ link = '', showUpgrade }: CommunityBadgeProps) => {
               rel="noopener noreferrer"
               className="self-center mt-3"
             >
-              <Button size="sm">{t('See plans')}</Button>
+              <Button size="sm" className="h-[29px] text-sm font-bold">
+                {t('See plans')}
+              </Button>
             </Link>
           )}
         </div>

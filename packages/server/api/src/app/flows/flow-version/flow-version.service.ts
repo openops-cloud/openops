@@ -40,6 +40,11 @@ import { buildPaginator } from '../../helper/pagination/build-paginator';
 import { paginationHelper } from '../../helper/pagination/pagination-utils';
 import { FlowVersionEntity } from './flow-version-entity';
 import { flowVersionSideEffects } from './flow-version-side-effects';
+import {
+  calculateTestRunActionLimits,
+  shouldRecalculateTestRunActionLimits,
+  tryIncrementalUpdate,
+} from './test-run-action-limits-calculator';
 
 const branchSettingsValidator = TypeCompiler.Compile(
   BranchActionSettingsWithValidation,
@@ -147,6 +152,20 @@ export const flowVersionService = {
         mutatedFlowVersion,
         operation,
       );
+    }
+
+    if (shouldRecalculateTestRunActionLimits(userOperation)) {
+      const incrementalUpdate = await tryIncrementalUpdate(
+        mutatedFlowVersion.testRunActionLimits,
+        userOperation,
+      );
+
+      if (incrementalUpdate) {
+        mutatedFlowVersion.testRunActionLimits = incrementalUpdate;
+      } else {
+        mutatedFlowVersion.testRunActionLimits =
+          await calculateTestRunActionLimits(mutatedFlowVersion.trigger);
+      }
     }
 
     mutatedFlowVersion.updated = dayjs().toISOString();
@@ -308,6 +327,10 @@ export const flowVersionService = {
       },
       valid: false,
       state: FlowVersionState.DRAFT,
+      testRunActionLimits: {
+        isEnabled: true,
+        limits: [],
+      },
     };
     return flowVersionRepo().save(flowVersion);
   },

@@ -13,7 +13,7 @@ export const deleteIssueCommentAction = createAction({
   name: 'delete_issue_comment',
   displayName: 'Delete Issue Comment',
   description: 'Deletes a comment on a specific issue.',
-  requireToolApproval: true,
+  isWriteAction: true,
   props: {
     projectId: getProjectIdDropdown(),
     issueId: getIssueIdDropdown({ refreshers: ['projectId'] }),

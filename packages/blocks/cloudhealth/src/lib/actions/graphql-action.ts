@@ -12,7 +12,7 @@ const documentation = `
   2. Optionally provide variables in JSON format
 
   **Example Query:**
-  \`\`\`graphql
+  \`\`\`graphql h-130
   query Budget($cloud: CloudType) {
     budgets(cloud: $cloud) {
       id
@@ -37,7 +37,7 @@ export const graphqlAction = createAction({
   displayName: 'Execute GraphQL Query',
   description: 'Execute a GraphQL query',
   auth: cloudhealthAuth,
-  requireToolApproval: true,
+  isWriteAction: true,
   props: {
     documentation: Property.MarkDown({
       value: documentation,

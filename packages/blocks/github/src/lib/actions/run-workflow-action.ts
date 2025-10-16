@@ -21,7 +21,7 @@ export const runWorkflowAction = createAction({
   description: 'Trigger a GitHub Actions workflow run',
   displayName: 'Trigger Workflow',
   requireAuth: true,
-  requireToolApproval: true,
+  isWriteAction: true,
   props: {
     repository: getRepositoryProperty(),
     workflow: Property.Dropdown<{ id: string; path: string }>({

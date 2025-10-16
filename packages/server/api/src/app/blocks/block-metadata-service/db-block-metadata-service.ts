@@ -105,7 +105,9 @@ export const FastDbBlockMetadataService = (): BlockMetadataService => {
           (semVer.compare(block.version, versionToSearch.nextExcludedVersion) <
             0 &&
             semVer.compare(block.version, versionToSearch.baseVersion) >= 0);
-        return block.name === name && strictlyLessThan;
+        return (
+          block.name.toLowerCase() === name.toLowerCase() && strictlyLessThan
+        );
       });
       return block;
     },

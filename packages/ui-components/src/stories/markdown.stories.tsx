@@ -351,3 +351,61 @@ aws iam create-role --role-name very-long-role-name-that-might-overflow --assume
     },
   },
 };
+
+/**
+ * Demonstrates the custom height metadata feature.
+ * You can specify height for code blocks using h-XXX syntax.
+ */
+export const CustomHeight: Story = {
+  args: {
+    codeVariation: 'with-copy',
+    markdown: `
+## Custom Height Examples
+
+### Small GraphQL Query (h-150)
+This code block has a height of 150px:
+\`\`\`graphql h-150
+query GetUser($id: ID!) {
+  user(id: $id) {
+    id
+    name
+    email
+  }
+}
+\`\`\`
+
+### Medium JSON Response (h-250)
+This code block has a height of 250px:
+\`\`\`json h-250
+{
+  "status": "success",
+  "data": {
+    "id": "123",
+    "name": "John Doe"
+  }
+}
+\`\`\`
+
+### Large TypeScript Code (h-400)
+This code block has a height of 400px for more complex code:
+\`\`\`typescript h-400
+interface User {
+  id: string;
+  name: string;
+  email: string;
+}
+
+function getUserById(id: string): Promise<User> {
+  return fetch(\`/api/users/\${id}\`)
+    .then(response => response.json());
+}
+\`\`\`
+
+### Default Height (No Metadata)
+This code block uses the default height:
+\`\`\`javascript
+console.log('Hello World');
+\`\`\`
+`,
+  },
+};

@@ -6,7 +6,7 @@ export const buildArnAction = createAction({
   name: 'build_arn',
   description: 'Build ARN (Amazon Resource Name) from the given parameters',
   displayName: 'Build ARN',
-  requireToolApproval: false,
+  isWriteAction: false,
   props: {
     service: Property.ShortText({
       displayName: 'Service',
