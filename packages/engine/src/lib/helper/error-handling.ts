@@ -86,6 +86,7 @@ export const handleExecutionError = (
   error: unknown,
   isCodeBlock = false,
 ): ErrorHandlingResponse => {
+  console.log('[DEBUG] handleExecutionError called with error:', error);
   let message = extractErrorMessage(error);
   if (
     isCodeBlock &&
@@ -98,7 +99,9 @@ export const handleExecutionError = (
   }
 
   if (error instanceof ExecutionError) {
+    console.log('[DEBUG] handleExecutionError - error.name:', error.name, 'error.type:', error.type);
     if (error.name === 'ExecutionLimitReached') {
+      console.log('[DEBUG] Returning EXECUTION_LIMIT_REACHED verdict');
       return {
         message,
         verdictResponse: {

@@ -112,6 +112,11 @@ export const flowRunUtils = {
           variant: 'error',
           Icon: X,
         };
+      case FlowRunStatus.TEST_RUN_LIMIT_REACHED:
+        return {
+          variant: 'error',
+          Icon: X,
+        };
     }
   },
   getStatusExplanation(status: FlowRunStatus): string | undefined {

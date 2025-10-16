@@ -17,7 +17,7 @@ export class ExecutionError extends Error {
   }
 }
 
-function formatMessage(message: string) {
+function formatMessage(message: string): string {
   return JSON.stringify(
     {
       message,
@@ -104,7 +104,7 @@ export class ExecutionLimitReachedError extends ExecutionError {
   constructor(blockName: string, actionName: string, limit: number) {
     super(
       'ExecutionLimitReached',
-      `Test run action limit reached for ${blockName}:${actionName}. Limit: ${limit}`,
+      formatMessage(`Action limit reached: ${limit} runs`),
       ExecutionErrorType.USER,
     );
   }

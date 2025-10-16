@@ -292,6 +292,13 @@ export class FlowExecutorContext {
             status: FlowRunStatus.INTERNAL_ERROR,
           };
         }
+        if (verdictResponse?.reason === VerdictReason.EXECUTION_LIMIT_REACHED) {
+          return {
+            ...baseExecutionOutput,
+            error: this.error,
+            status: FlowRunStatus.TEST_RUN_LIMIT_REACHED,
+          };
+        }
         return {
           ...baseExecutionOutput,
           error: this.error,
