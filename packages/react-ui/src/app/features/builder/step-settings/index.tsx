@@ -21,7 +21,13 @@ import {
 } from '@openops/shared';
 import deepEqual from 'fast-deep-equal';
 import { t } from 'i18next';
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { useUpdateEffect } from 'react-use';
 
@@ -41,6 +47,11 @@ import { useStepSettingsContext } from './step-settings-context';
 import { blocksHooks } from '@/app/features/blocks/lib/blocks-hook';
 import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
 import { useDynamicFormValidationContext } from '@/app/features/builder/dynamic-form-validation/dynamic-form-validation-context';
+
+enum StepSettingsTab {
+  CONFIGURE = 'configure',
+  TEST = 'test',
+}
 
 const StepSettingsContainer = React.memo(() => {
   const { selectedStep, blockModel, selectedStepTemplateModel } =
@@ -225,6 +236,14 @@ const StepSettingsContainer = React.memo(() => {
   const sidebarHeaderContainerRef = useRef<HTMLDivElement>(null);
   const modifiedStep = form.getValues();
 
+  const [activeTab, setActiveTab] = useState<StepSettingsTab>(
+    StepSettingsTab.CONFIGURE,
+  );
+  const onTestCallback = useCallback(() => {
+    if (readonly) return;
+    setActiveTab(StepSettingsTab.TEST);
+  }, [readonly]);
+
   return (
     <Form {...form}>
       <form
@@ -257,21 +276,22 @@ const StepSettingsContainer = React.memo(() => {
 
             <div className="border rounded-sm overflow-hidden pt-0 flex flex-col flex-1 min-h-0">
               <Tabs
-                defaultValue="configure"
+                value={activeTab}
+                onValueChange={(value) =>
+                  setActiveTab(value as StepSettingsTab)
+                }
                 className="w-full flex-1 min-h-0 flex flex-col"
               >
                 <div className="sticky top-0 bg-background border-b rounded-t-sm">
                   <TabsList className="grid grid-cols-2 w-full h-auto rounded-t-sm rounded-b-none bg-background p-0">
                     <TabsTrigger
-                      value="configure"
-                      disabled={readonly}
+                      value={StepSettingsTab.CONFIGURE}
                       className="text-base justify-start text-primary-800 text-left font-normal rounded-t-sm rounded-tr-none rounded-b-none data-[state=active]:bg-gray-200 data-[state=active]:font-medium transition-colors duration-200"
                     >
                       {t('Configure')}
                     </TabsTrigger>
                     <TabsTrigger
-                      value="test"
-                      disabled={readonly}
+                      value={StepSettingsTab.TEST}
                       className="text-base justify-start text-primary-800 text-left font-normal rounded-t-sm rounded-tl-none rounded-b-none data-[state=active]:bg-gray-200 data-[state=active]:font-medium transition-colors duration-200"
                     >
                       {t('Test')}
@@ -280,7 +300,7 @@ const StepSettingsContainer = React.memo(() => {
                 </div>
 
                 <TabsContent
-                  value="configure"
+                  value={StepSettingsTab.CONFIGURE}
                   className="mt-2 flex-1 min-h-0 data-[state=inactive]:hidden"
                   forceMount
                 >
@@ -334,7 +354,7 @@ const StepSettingsContainer = React.memo(() => {
                 </TabsContent>
 
                 <TabsContent
-                  value="test"
+                  value={StepSettingsTab.TEST}
                   className="mt-0 flex-1 min-h-0 data-[state=inactive]:hidden"
                   forceMount
                 >
@@ -347,6 +367,8 @@ const StepSettingsContainer = React.memo(() => {
                             flowId={flowVersion.flowId}
                             flowVersionId={flowVersion.id}
                             isSaving={saving}
+                            onTestCallback={onTestCallback}
+                            readOnly={readonly}
                           />
                         </div>
                       )}

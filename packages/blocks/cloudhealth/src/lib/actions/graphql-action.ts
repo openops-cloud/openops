@@ -12,7 +12,7 @@ const documentation = `
   2. Optionally provide variables in JSON format
 
   **Example Query:**
-  \`\`\`graphql
+  \`\`\`graphql h-130
   query Budget($cloud: CloudType) {
     budgets(cloud: $cloud) {
       id

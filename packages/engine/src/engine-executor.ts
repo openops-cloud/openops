@@ -25,7 +25,7 @@ export async function executeEngine(
 
   const duration = Math.floor(performance.now() - startTime);
 
-  const key = await saveRequestBody(requestId, result);
+  const key = await saveRequestBody(result);
 
   logger.info(`Finished operation [${operationType}] in ${duration}ms`, {
     engineStatus: result.status,

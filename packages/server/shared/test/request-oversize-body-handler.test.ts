@@ -48,15 +48,14 @@ describe('request-oversize-body-handler', () => {
       (fileCompressor.compress as jest.Mock).mockResolvedValue(fakeCompressed);
 
       const body = { hello: 'world' };
-      const key = await saveRequestBody('abc123', body);
+      const key = await saveRequestBody(body);
 
-      expect(key).toBe('req:abc123');
       expect(setSpy).toHaveBeenCalledTimes(1);
       const firstCall = setSpy.mock.calls[0];
       const calledKey = firstCall[0] as string;
       const calledBuffer = firstCall[1] as Buffer;
       const ttl = firstCall[2] as number;
-      expect(calledKey).toBe('req:abc123');
+      expect(calledKey).toBe(key);
       expect(calledBuffer).toBe(fakeCompressed);
       expect(ttl).toBe(300);
     });
@@ -68,8 +67,7 @@ describe('request-oversize-body-handler', () => {
       const bigStr = 'a'.repeat(50_000);
       const body = { data: bigStr };
 
-      const key = await saveRequestBody('big1', body);
-      expect(key).toBe('req:big1');
+      await saveRequestBody(body);
 
       expect(setSpy).toHaveBeenCalledTimes(1);
       expect(setSpy.mock.calls[0][1]).toBe(fakeCompressed);

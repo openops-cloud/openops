@@ -33,6 +33,10 @@ describe('resolveVariable', () => {
       created: '2023-01-01T00:00:00Z',
       updated: '2023-01-01T00:00:00Z',
       state: FlowVersionState.DRAFT,
+      testRunActionLimits: {
+        isEnabled: true,
+        limits: [],
+      },
     },
     stepName: 'test-step',
     variableExpression: '{{user.name}}',

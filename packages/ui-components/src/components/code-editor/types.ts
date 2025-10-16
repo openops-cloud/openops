@@ -26,4 +26,5 @@ export type MonacoLanguage =
   | 'powershell'
   | 'bat'
   | 'ini'
+  | 'graphql'
   | 'plaintext';
