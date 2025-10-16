@@ -90,7 +90,7 @@ const main = async (): Promise<void> => {
     await createOpenOpsTablesMcpEndpoint();
     await updateOpenopsTablesDatabase();
     await deleteOldOpportunitiesTable();
-    // await seedDevData();
+    await seedDevData();
 
     await seedTemplateTables();
     await seedOpportunitesTemplateTable();
