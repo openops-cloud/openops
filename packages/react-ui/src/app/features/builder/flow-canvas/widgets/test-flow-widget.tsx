@@ -1,5 +1,6 @@
 import {
   Button,
+  cn,
   INTERNAL_ERROR_TOAST,
   isMacUserAgent,
   toast,
@@ -95,12 +96,12 @@ const TestFlowWidget = ({ flowVersion, setRun }: TestFlowWidgetProps) => {
   return (
     flowVersion.valid && (
       <>
-        <div className="h-8 flex rounded-full text-base font-medium border-collapse">
+        <div className="h-8 flex rounded-full text-base font-medium">
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 variant="ghost"
-                className="h-8 !bg-primary-200/20 dark:!bg-primary-200 text-primary-300 disabled:pointer-events-auto enabled:hover:!border-primary-200 enabled:hover:!text-primary-300 border-primary-200/50 border-[2px] border-r-[1px] rounded-l-full animate-fade z-10"
+                className="h-8 !bg-primary-200/20 dark:!bg-primary-200 text-primary-300 disabled:pointer-events-auto enabled:hover:!border-primary-200 enabled:hover:!text-primary-300 border-primary-200/70 border-r-primary-200/35 border-[1px] rounded-l-full animate-fade z-10"
                 disabled={!triggerHasSampleData}
                 loading={isPending || isLoading}
                 onClick={() => handleExecuting()}
@@ -126,7 +127,12 @@ const TestFlowWidget = ({ flowVersion, setRun }: TestFlowWidgetProps) => {
             <TestRunLimitsDialog>
               <Button
                 variant="ghost"
-                className="h-8 pl-2 pr-[11px] !bg-primary-200/30 dark:!bg-primary-200 text-primary-300 hover:!border-primary-200 hover:!text-primary-300 border-[2px] border-l-[1px] border-primary-200/50 rounded-r-full animate-fade -ml-[1px]"
+                className={cn(
+                  'h-8 pl-2 pr-[11px] !bg-primary-200/30 dark:!bg-primary-200 text-primary-300 hover:!border-primary-200 hover:!text-primary-300 border-[1px] border-primary-200/70 rounded-r-full animate-fade -ml-[1px]',
+                  {
+                    'border-l-primary-200/35': !triggerHasSampleData,
+                  },
+                )}
               >
                 <Settings size={16} />
               </Button>
