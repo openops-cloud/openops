@@ -33,6 +33,7 @@ export async function getWorkflowsStats({
         FlowRunStatus.FAILED,
         FlowRunStatus.INTERNAL_ERROR,
         FlowRunStatus.TIMEOUT,
+        FlowRunStatus.TEST_RUN_LIMIT_REACHED,
       ],
       createdAfter,
       createdBefore,
