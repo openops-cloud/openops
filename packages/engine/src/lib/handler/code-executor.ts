@@ -20,7 +20,6 @@ import { EngineConstants } from './context/engine-constants';
 import {
   ExecutionVerdict,
   FlowExecutorContext,
-  VerdictReason,
 } from './context/flow-execution-context';
 
 export const codeExecutor: BaseExecutor<CodeAction> = {
@@ -97,16 +96,10 @@ const executeAction: ActionHandler<CodeAction> = async ({
       .upsertStep(action.name, stepOutput.setOutput(output))
       .increaseTask();
   } catch (e) {
-    const handledError = handleExecutionError(e, true);
-
-    const stepStatus =
-      handledError.verdictResponse?.reason ===
-      VerdictReason.EXECUTION_LIMIT_REACHED
-        ? StepOutputStatus.TEST_RUN_LIMIT_REACHED
-        : StepOutputStatus.FAILED;
+    const handledError = handleExecutionError(e);
 
     const failedStepOutput = stepOutput
-      .setStatus(stepStatus)
+      .setStatus(StepOutputStatus.FAILED)
       .setErrorMessage(handledError.message);
 
     return executionState
@@ -130,7 +123,7 @@ async function getExecutionResult(
       },
     ] as CodeArtifact[]);
   } catch (error: unknown) {
-    const handledError = handleExecutionError(error, true);
+    const handledError = handleExecutionError(error);
 
     const stepOutput = GenericStepOutput.create({
       input: {},
