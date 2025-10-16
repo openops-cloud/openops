@@ -123,7 +123,7 @@ async function getExecutionResult(
       },
     ] as CodeArtifact[]);
   } catch (error: unknown) {
-    const handledError = handleExecutionError(error);
+    const handledError = handleExecutionError(error, true);
 
     const stepOutput = GenericStepOutput.create({
       input: {},

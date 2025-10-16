@@ -1,4 +1,6 @@
+import { SharedSystemProp, system } from '@openops/server-shared';
 import { BlockAction, CodeAction } from '@openops/shared';
+import { ExecutionMode } from '../core/code/execution-mode';
 import { EngineConstants } from '../handler/context/engine-constants';
 import {
   ExecutionVerdict,
@@ -7,6 +9,10 @@ import {
   VerdictResponse,
 } from '../handler/context/flow-execution-context';
 import { ExecutionError, ExecutionErrorType } from './execution-errors';
+
+const executionMode = system.get<ExecutionMode>(
+  SharedSystemProp.EXECUTION_MODE,
+);
 
 export async function runWithExponentialBackoff<
   T extends CodeAction | BlockAction,
@@ -76,8 +82,20 @@ export async function continueIfFailureHandler(
   return executionState;
 }
 
-export const handleExecutionError = (error: unknown): ErrorHandlingResponse => {
-  const message = extractErrorMessage(error);
+export const handleExecutionError = (
+  error: unknown,
+  isCodeBlock = false,
+): ErrorHandlingResponse => {
+  let message = extractErrorMessage(error);
+  if (
+    isCodeBlock &&
+    executionMode == ExecutionMode.SANDBOX_CODE_ONLY &&
+    message
+  ) {
+    message +=
+      '\n\nNote: This code is executing within an "isolated-vm" environment, meaning it ' +
+      'has no access to any native Node.js modules, such as "fs", "process", "http", "crypto", etc.';
+  }
 
   if (error instanceof ExecutionError) {
     if (error.name === 'ExecutionLimitReached') {
