@@ -1,5 +1,5 @@
 import { readdir, stat } from 'node:fs/promises';
-import { join, resolve } from 'node:path';
+import { basename, join, resolve } from 'node:path';
 import { cwd } from 'node:process';
 
 export async function findAllBlocks(path?: string): Promise<string[]> {
@@ -11,7 +11,10 @@ export async function findBlockSourceDirectory(
   blockName: string,
 ): Promise<string | null> {
   const blocksPath = await findAllBlocks();
-  const blockPath = blocksPath.find((p) => p.includes(blockName));
+  const blockPath = blocksPath.find((path) => {
+    const folderName = basename(path);
+    return folderName === blockName;
+  });
   return blockPath ?? null;
 }
 
