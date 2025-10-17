@@ -41,8 +41,6 @@ export function getStatusText(status: FlowRunStatus, timeout: number): string {
       });
     case FlowRunStatus.INTERNAL_ERROR:
       return t('Run failed for an unknown reason, contact support.');
-    case FlowRunStatus.TEST_RUN_LIMIT_REACHED:
-      return t('Test run action limit reached');
     default:
       return t('Unknown status');
   }

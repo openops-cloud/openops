@@ -296,7 +296,7 @@ export class FlowExecutorContext {
           return {
             ...baseExecutionOutput,
             error: this.error,
-            status: FlowRunStatus.TEST_RUN_LIMIT_REACHED,
+            status: FlowRunStatus.STOPPED,
           };
         }
         return {

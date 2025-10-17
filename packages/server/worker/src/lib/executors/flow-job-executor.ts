@@ -200,8 +200,7 @@ async function updateRunWithError(
   status:
     | FlowRunStatus.TIMEOUT
     | FlowRunStatus.STOPPED
-    | FlowRunStatus.INTERNAL_ERROR
-    | FlowRunStatus.TEST_RUN_LIMIT_REACHED,
+    | FlowRunStatus.INTERNAL_ERROR,
 ): Promise<void> {
   await engineApiService(engineToken).updateRunStatus({
     runDetails: {
@@ -237,8 +236,7 @@ type EvaluateEngineStatusResult =
       failedRunStatus:
         | FlowRunStatus.TIMEOUT
         | FlowRunStatus.STOPPED
-        | FlowRunStatus.INTERNAL_ERROR
-        | FlowRunStatus.TEST_RUN_LIMIT_REACHED;
+        | FlowRunStatus.INTERNAL_ERROR;
     };
 
 function evaluateEngineStatus(
@@ -249,7 +247,6 @@ function evaluateEngineStatus(
     FlowRunStatus.TIMEOUT,
     FlowRunStatus.STOPPED,
     FlowRunStatus.INTERNAL_ERROR,
-    FlowRunStatus.TEST_RUN_LIMIT_REACHED,
   ];
 
   if (
@@ -268,13 +265,6 @@ function evaluateEngineStatus(
 
   if (flowRunStatus === FlowRunStatus.STOPPED) {
     return { engineSucceeded: false, failedRunStatus: FlowRunStatus.STOPPED };
-  }
-
-  if (flowRunStatus === FlowRunStatus.TEST_RUN_LIMIT_REACHED) {
-    return {
-      engineSucceeded: false,
-      failedRunStatus: FlowRunStatus.TEST_RUN_LIMIT_REACHED,
-    };
   }
 
   return {
