@@ -77,7 +77,10 @@ const TestActionSection = React.memo(
 
     useEffect(() => {
       if (stepData?.success === false) {
-        setErrorMessage(formatUtils.formatStepInputOrOutput(stepData.output));
+        setErrorMessage(
+          formatUtils.formatStepInputOrOutput(stepData.output) ??
+            t('Unknow Error'),
+        );
       } else {
         setErrorMessage(undefined);
       }
