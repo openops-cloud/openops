@@ -13,6 +13,7 @@ import {
   EngineResponseStatus,
   ErrorCode,
   ExecutionType,
+  extractPropertyString,
   FlowRunStatus,
   FlowVersion,
   GetFlowVersionForWorkerRequestType,
@@ -128,7 +129,12 @@ async function executeFlow(
       return;
     }
 
-    await updateRunWithError(jobData, engineToken, failedRunStatus);
+    await updateRunWithError(
+      jobData,
+      engineToken,
+      failedRunStatus,
+      extractPropertyString(result, ['message']),
+    );
 
     if (failedRunStatus === FlowRunStatus.INTERNAL_ERROR) {
       const errorMessage = result.error?.message ?? 'internal error';
@@ -152,7 +158,16 @@ async function executeFlow(
       ? FlowRunStatus.TIMEOUT
       : FlowRunStatus.INTERNAL_ERROR;
 
-    await updateRunWithError(jobData, engineToken, failedRunStatus);
+    const terminationReason = isTimeoutError
+      ? 'Engine execution timed out.'
+      : 'Flow execution encountered an internal error';
+
+    await updateRunWithError(
+      jobData,
+      engineToken,
+      failedRunStatus,
+      terminationReason,
+    );
 
     if (failedRunStatus === FlowRunStatus.INTERNAL_ERROR) {
       exceptionHandler.handle(e as Error);
@@ -201,6 +216,7 @@ async function updateRunWithError(
     | FlowRunStatus.TIMEOUT
     | FlowRunStatus.STOPPED
     | FlowRunStatus.INTERNAL_ERROR,
+  terminationReason: string | null,
 ): Promise<void> {
   await engineApiService(engineToken).updateRunStatus({
     runDetails: {
@@ -209,7 +225,7 @@ async function updateRunWithError(
       status,
       tasks: 0,
       tags: [],
-      terminationReason: undefined,
+      terminationReason: terminationReason || undefined,
     },
     executionCorrelationId: jobData.executionCorrelationId,
     progressUpdateType: jobData.progressUpdateType,
