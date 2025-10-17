@@ -101,7 +101,7 @@ const getExecutionLimit = (
   actionName: string,
   constants: EngineConstants,
 ): TestRunLimit | undefined => {
-  if (!constants.testRunActionLimits.isEnabled) {
+  if (!constants.isTestRun || !constants.testRunActionLimits.isEnabled) {
     return undefined;
   }
 
