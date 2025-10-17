@@ -315,6 +315,7 @@ function sendMessageToStream(
     case 'finish-step':
     case 'finish':
     case 'tool-input-end':
+    case 'tool-error':
     case 'error':
       return;
     default:
