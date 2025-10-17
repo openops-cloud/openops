@@ -202,6 +202,16 @@ async function updateRunWithError(
     | FlowRunStatus.STOPPED
     | FlowRunStatus.INTERNAL_ERROR,
 ): Promise<void> {
+  let terminationReason: string | undefined;
+
+  if (status === FlowRunStatus.TIMEOUT) {
+    terminationReason = 'Flow execution timed out';
+  } else if (status === FlowRunStatus.STOPPED) {
+    terminationReason = 'Flow execution was stopped';
+  } else if (status === FlowRunStatus.INTERNAL_ERROR) {
+    terminationReason = 'Flow execution encountered an internal error';
+  }
+
   await engineApiService(engineToken).updateRunStatus({
     runDetails: {
       steps: {},
@@ -209,6 +219,7 @@ async function updateRunWithError(
       status,
       tasks: 0,
       tags: [],
+      terminationReason,
     },
     executionCorrelationId: jobData.executionCorrelationId,
     progressUpdateType: jobData.progressUpdateType,
