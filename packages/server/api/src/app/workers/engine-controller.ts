@@ -140,6 +140,7 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
       executionState: getExecutionState(runDetails),
       projectId: request.principal.projectId,
       tags: runDetails.tags ?? [],
+      terminationReason: runDetails.terminationReason,
     });
 
     if (!populatedRun) {

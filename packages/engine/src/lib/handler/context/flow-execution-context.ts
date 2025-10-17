@@ -165,7 +165,8 @@ export class FlowExecutorContext {
     targetMap[stepName] = stepOutput;
 
     const error =
-      stepOutput.status === StepOutputStatus.FAILED
+      stepOutput.status === StepOutputStatus.FAILED ||
+      stepOutput.status === StepOutputStatus.TEST_RUN_LIMIT_REACHED
         ? { stepName, message: stepOutput.errorMessage }
         : this.error;
 
@@ -257,12 +258,14 @@ export class FlowExecutorContext {
             ...baseExecutionOutput,
             error: this.error,
             status: FlowRunStatus.INTERNAL_ERROR,
+            terminationReason: 'Flow execution encountered an internal error',
           };
         }
         return {
           ...baseExecutionOutput,
           error: this.error,
           status: FlowRunStatus.FAILED,
+          terminationReason: 'Flow execution failed',
         };
       }
       case ExecutionVerdict.PAUSED: {

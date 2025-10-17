@@ -46,6 +46,7 @@ const BaseExecutionResponse = {
   tags: Type.Optional(Type.Array(Type.String())),
   error: Type.Optional(FlowError),
   stopResponse: Type.Optional(StopResponse),
+  terminationReason: Type.Optional(Type.String()),
 };
 
 export const FlowRunResponse = Type.Union([

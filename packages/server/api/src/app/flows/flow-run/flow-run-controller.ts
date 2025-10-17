@@ -132,12 +132,8 @@ export const flowRunController: FastifyPluginCallbackTypebox = (
   done();
 };
 
-const FlowRunFiltered = Type.Omit(FlowRun, [
-  'terminationReason',
-  'pauseMetadata',
-]);
+const FlowRunFiltered = Type.Omit(FlowRun, ['pauseMetadata']);
 const FlowRunFilteredWithNoSteps = Type.Omit(FlowRun, [
-  'terminationReason',
   'pauseMetadata',
   'steps',
 ]);

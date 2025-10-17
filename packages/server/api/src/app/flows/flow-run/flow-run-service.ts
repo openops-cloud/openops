@@ -293,6 +293,7 @@ export const flowRunService = {
     projectId,
     tags,
     duration,
+    terminationReason,
   }: FinishParams): Promise<FlowRun | undefined> {
     let flowRun = await flowRunRepo().findOneByOrFail({ id: flowRunId });
     if (isFlowStateTerminal(flowRun.status)) {
@@ -324,7 +325,7 @@ export const flowRunService = {
           duration ? Math.floor(Number(duration)) : undefined,
         ),
         ...spreadIfDefined('logsFileId', logFileId),
-        terminationReason: undefined,
+        ...spreadIfDefined('terminationReason', terminationReason),
         tags,
         finishTime: new Date().toISOString(),
       })
@@ -558,6 +559,7 @@ type FinishParams = {
   duration: number | undefined;
   executionState: ExecutionState | null;
   tags: string[];
+  terminationReason: string | undefined;
 };
 
 type GetOrCreateParams = {
