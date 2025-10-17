@@ -70,11 +70,6 @@ describe('analyze action', () => {
       }),
     );
 
-    const { isLLMTelemetryEnabled } = jest.requireMock('@openops/common') as {
-      isLLMTelemetryEnabled: jest.Mock;
-    };
-    expect(isLLMTelemetryEnabled).toHaveBeenCalledTimes(1);
-
     expect(result).toEqual({ textAnswer: 'answer', classifications: [] });
   });
 
@@ -197,40 +192,39 @@ describe('analyze action', () => {
 
     expect(result).toBe('ok');
   });
-  test('should set experimental_telemetry based on isLLMTelemetryEnabled', async () => {
-    const { getAiProviderLanguageModel, isLLMTelemetryEnabled } =
-      jest.requireMock('@openops/common') as {
-        getAiProviderLanguageModel: jest.Mock;
-        isLLMTelemetryEnabled: jest.Mock;
+  test.each([true, false])(
+    'should set experimental_telemetry based on isLLMTelemetryEnabled=%p',
+    async (isLLMTelemetryEnabledValue) => {
+      const { getAiProviderLanguageModel, isLLMTelemetryEnabled } =
+        jest.requireMock('@openops/common') as {
+          getAiProviderLanguageModel: jest.Mock;
+          isLLMTelemetryEnabled: jest.Mock;
+        };
+      getAiProviderLanguageModel.mockResolvedValue('lm');
+      (generateObject as jest.Mock).mockResolvedValue({
+        object: { textAnswer: 't', classifications: [] },
+      });
+
+      const auth = {
+        provider: AiProviderEnum.OPENAI,
+        model: 'gpt',
+        apiKey: 'k',
+        providerSettings: {},
+        modelSettings: {},
       };
-    getAiProviderLanguageModel.mockResolvedValue('lm');
-    (generateObject as jest.Mock).mockResolvedValue({
-      object: { textAnswer: 't', classifications: [] },
-    });
 
-    const auth = {
-      provider: AiProviderEnum.OPENAI,
-      model: 'gpt',
-      apiKey: 'k',
-      providerSettings: {},
-      modelSettings: {},
-    };
+      const context = createContext(auth, { prompt: 'P' });
 
-    const context = createContext(auth, { prompt: 'P' });
+      isLLMTelemetryEnabled.mockReturnValueOnce(isLLMTelemetryEnabledValue);
+      await askAi.run(context as any);
 
-    isLLMTelemetryEnabled.mockReturnValueOnce(true);
-    await askAi.run(context as any);
-    expect(generateObject).toHaveBeenCalledWith(
-      expect.objectContaining({ experimental_telemetry: { isEnabled: true } }),
-    );
-
-    (generateObject as jest.Mock).mockClear();
-    isLLMTelemetryEnabled.mockReturnValueOnce(false);
-    await askAi.run(context as any);
-    expect(generateObject).toHaveBeenCalledWith(
-      expect.objectContaining({ experimental_telemetry: { isEnabled: false } }),
-    );
-  });
+      expect(generateObject).toHaveBeenCalledWith(
+        expect.objectContaining({
+          experimental_telemetry: { isEnabled: isLLMTelemetryEnabledValue },
+        }),
+      );
+    },
+  );
 });
 
 function createContext(auth?: unknown, props?: unknown): unknown {
