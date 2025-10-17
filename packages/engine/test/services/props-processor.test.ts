@@ -447,4 +447,39 @@ describe('Props Processor', () => {
     });
   });
 
+  it('should allow empty auth if not required', async () => {
+    const input = {
+      auth: null,
+      emptyStringNumber: '',
+    };
+    const props = {
+      emptyStringNumber: Property.Number({
+        displayName: 'Empty String Number',
+        required: true,
+      }),
+    };
+    const {
+      processedInput,
+      errors,
+    } = await propsProcessor.applyProcessorsAndValidators(input, props, BlockAuth.CustomAuth({
+      authProviderKey: 'SMTP',
+      authProviderDisplayName: 'SMTP',
+      authProviderLogoUrl: `https://static.openops.com/blocks/smtp.png`,
+      required: false,
+      props: {
+        age: Property.Number({
+          displayName: 'age',
+          required: true,
+        }),
+      },
+    }), true);
+
+    expect(processedInput).toEqual({
+      emptyStringNumber: Number.NaN,
+      auth: {},
+    });
+    expect(errors).toEqual({
+      'Empty String Number': ['Expected a number, received: '],
+    });
+  });
 });
