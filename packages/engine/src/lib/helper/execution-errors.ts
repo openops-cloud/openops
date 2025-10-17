@@ -99,3 +99,13 @@ export class FetchError extends ExecutionError {
     );
   }
 }
+
+export class ExecutionLimitReachedError extends ExecutionError {
+  constructor(blockName: string, actionName: string, limit: number) {
+    super(
+      'ExecutionLimitReached',
+      formatMessage(`Action limit reached: ${limit} runs`),
+      ExecutionErrorType.USER,
+    );
+  }
+}
