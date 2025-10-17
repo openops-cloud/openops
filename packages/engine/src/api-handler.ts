@@ -72,11 +72,15 @@ async function handleRequest(
   }
 }
 
-export const start = async (): Promise<void> => {
+export const start = async ({
+  cleanup,
+}: {
+  cleanup?: () => Promise<void>;
+}): Promise<void> => {
   try {
     logger.info('Starting Engine API...');
 
-    setStopHandlers(app);
+    setStopHandlers(app, cleanup);
 
     await blocksBuilder();
 
