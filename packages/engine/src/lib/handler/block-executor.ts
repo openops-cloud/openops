@@ -336,10 +336,16 @@ const executeAction: ActionHandler<BlockAction> = async ({
       .setStatus(stepStatus)
       .setErrorMessage(handledError.message);
 
-    return executionState
+    executionState = executionState
       .upsertStep(action.name, failedStepOutput)
       .setVerdict(ExecutionVerdict.FAILED, handledError.verdictResponse)
       .increaseTask();
+
+    if (e instanceof ExecutionLimitReachedError) {
+      throw e;
+    }
+
+    return executionState;
   }
 };
 
