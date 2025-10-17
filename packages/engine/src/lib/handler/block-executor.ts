@@ -96,7 +96,7 @@ export const blockExecutor: BaseExecutor<BlockAction> = {
   },
 };
 
-const getEnabledLimit = (
+const getExecutionLimit = (
   blockName: string,
   actionName: string,
   constants: EngineConstants,
@@ -114,13 +114,13 @@ const getEnabledLimit = (
   return limit?.isEnabled ? limit : undefined;
 };
 
-const checkExecutionLimit = (
+const throwIfExceededExecutionLimit = (
   blockName: string,
   actionName: string,
   executionState: FlowExecutorContext,
   constants: EngineConstants,
 ): void => {
-  const limit = getEnabledLimit(blockName, actionName, constants);
+  const limit = getExecutionLimit(blockName, actionName, constants);
 
   if (limit) {
     const currentCount = executionState.getActionExecutionCount(
@@ -140,7 +140,7 @@ const incrementActionCountIfNeeded = (
   executionState: FlowExecutorContext,
   constants: EngineConstants,
 ): FlowExecutorContext => {
-  const limit = getEnabledLimit(blockName, actionName, constants);
+  const limit = getExecutionLimit(blockName, actionName, constants);
 
   if (limit) {
     return executionState.incrementActionExecutionCount(blockName, actionName);
@@ -163,7 +163,7 @@ const executeAction: ActionHandler<BlockAction> = async ({
   try {
     assertNotNullOrUndefined(action.settings.actionName, 'actionName');
 
-    checkExecutionLimit(
+    throwIfExceededExecutionLimit(
       action.settings.blockName,
       action.settings.actionName,
       executionState,

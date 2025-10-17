@@ -276,6 +276,21 @@ export class FlowExecutorContext {
     return this.actionExecutionCounts[key] ?? 0;
   }
 
+  private parseErrorMessage(
+    errorMessage: string | undefined,
+    fallback?: string,
+  ): string | undefined {
+    if (!errorMessage) {
+      return fallback;
+    }
+    try {
+      const parsed = JSON.parse(errorMessage);
+      return parsed.message || errorMessage;
+    } catch {
+      return errorMessage;
+    }
+  }
+
   public async toResponse(): Promise<FlowRunResponse> {
     const baseExecutionOutput = {
       duration: this.duration,
@@ -295,36 +310,21 @@ export class FlowExecutorContext {
           };
         }
         if (verdictResponse?.reason === VerdictReason.EXECUTION_LIMIT_REACHED) {
-          let terminationReason = 'Test run execution limit reached';
-          if (this.error?.message) {
-            try {
-              const parsed = JSON.parse(this.error.message);
-              terminationReason = parsed.message || this.error.message;
-            } catch {
-              terminationReason = this.error.message;
-            }
-          }
           return {
             ...baseExecutionOutput,
             error: this.error,
             status: FlowRunStatus.STOPPED,
-            terminationReason,
+            terminationReason: this.parseErrorMessage(
+              this.error?.message,
+              'Test run execution limit reached',
+            ),
           };
-        }
-        let terminationReason: string | undefined;
-        if (this.error?.message) {
-          try {
-            const parsed = JSON.parse(this.error.message);
-            terminationReason = parsed.message || this.error.message;
-          } catch {
-            terminationReason = this.error.message;
-          }
         }
         return {
           ...baseExecutionOutput,
           error: this.error,
           status: FlowRunStatus.FAILED,
-          terminationReason,
+          terminationReason: this.parseErrorMessage(this.error?.message),
         };
       }
       case ExecutionVerdict.PAUSED: {
