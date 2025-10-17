@@ -464,7 +464,7 @@ describe('Props Processor', () => {
     } = await propsProcessor.applyProcessorsAndValidators(input, props, BlockAuth.CustomAuth({
       authProviderKey: 'SMTP',
       authProviderDisplayName: 'SMTP',
-      authProviderLogoUrl: `https://static.openops.com/blocks/smtp.png`,
+      authProviderLogoUrl: 'https://static.openops.com/blocks/smtp.png',
       required: false,
       props: {
         age: Property.Number({
