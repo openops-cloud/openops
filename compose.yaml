@@ -64,6 +64,7 @@ services:
     image: 'redis:7.4.0'
     container_name: redis
     ports: ['6379:6379']
+    command: ['redis-server', '--notify-keyspace-events', 'Ex']
     healthcheck:
       test: ['CMD', 'redis-cli', 'ping']
       interval: 5s
