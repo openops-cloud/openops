@@ -1,17 +1,20 @@
 import {
   Button,
+  cn,
   INTERNAL_ERROR_TOAST,
   isMacUserAgent,
   toast,
   Tooltip,
   TooltipContent,
   TooltipTrigger,
+  TooltipWrapper,
 } from '@openops/components/ui';
 import { useMutation } from '@tanstack/react-query';
 import { t } from 'i18next';
 import { useEffect } from 'react';
 
 import { useSocket } from '@/app/common/providers/socket-provider';
+import { TestRunLimitsDialog } from '@/app/features/builder/test-run-limits/test-run-limits-dialog';
 import { ExecuteRiskyFlowConfirmationMessages } from '@/app/features/flows/components/execute-risky-flow-dialog/execute-risky-flow-confirmation-message';
 import {
   ExecuteRiskyFlowDialog,
@@ -19,6 +22,7 @@ import {
 } from '@/app/features/flows/components/execute-risky-flow-dialog/execute-risky-flow-dialog';
 import { flowsApi } from '@/app/features/flows/lib/flows-api';
 import { FlowRun, FlowVersion, isNil, TriggerType } from '@openops/shared';
+import { Settings } from 'lucide-react';
 import { stepTestOutputHooks } from '../../test-step/step-test-output-hooks';
 
 type TestFlowWidgetProps = {
@@ -92,29 +96,49 @@ const TestFlowWidget = ({ flowVersion, setRun }: TestFlowWidgetProps) => {
   return (
     flowVersion.valid && (
       <>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              className="h-8 !bg-primary-200/20 dark:!bg-primary-200 text-primary-300 disabled:pointer-events-auto hover:!border-primary-200 hover:!text-primary-300 border-primary-200/50 border border-solid rounded-full animate-fade"
-              disabled={!triggerHasSampleData}
-              loading={isPending || isLoading}
-              onClick={() => handleExecuting()}
-            >
-              <div className="flex justify-center items-center gap-2">
-                {t('Test Workflow')}
-                <span className="text-[10px] tracking-widest whitespace-nowrap">
-                  {isMac ? '⌘ + D' : 'Ctrl + D'}
-                </span>
-              </div>
-            </Button>
-          </TooltipTrigger>
-          {!triggerHasSampleData && (
-            <TooltipContent side="bottom">
-              {t('Please test the trigger first')}
-            </TooltipContent>
-          )}
-        </Tooltip>
+        <div className="h-8 flex rounded-full text-base font-medium">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                className="h-8 !bg-primary-200/20 dark:!bg-primary-200 text-primary-300 disabled:pointer-events-auto enabled:hover:!border-primary-200 enabled:hover:!text-primary-300 border-primary-200/70 border-r-primary-200/35 border-[1px] rounded-l-full animate-fade z-10"
+                disabled={!triggerHasSampleData}
+                loading={isPending || isLoading}
+                onClick={() => handleExecuting()}
+              >
+                <div className="flex justify-center items-center gap-1">
+                  {t('Test Workflow')}
+                  <span className="tracking-widest whitespace-nowrap">
+                    {isMac ? '⌘+D' : 'Ctrl+D'}
+                  </span>
+                </div>
+              </Button>
+            </TooltipTrigger>
+            {!triggerHasSampleData && (
+              <TooltipContent side="bottom">
+                {t('Please test the trigger first')}
+              </TooltipContent>
+            )}
+          </Tooltip>
+          <TooltipWrapper
+            tooltipText={t('Test run limits')}
+            tooltipPlacement="bottom"
+          >
+            <TestRunLimitsDialog>
+              <Button
+                variant="ghost"
+                className={cn(
+                  'h-8 pl-2 pr-[11px] !bg-primary-200/30 dark:!bg-primary-200 text-primary-300 hover:!border-primary-200 hover:!text-primary-300 border-[1px] border-primary-200/70 rounded-r-full animate-fade -ml-[1px]',
+                  {
+                    'border-l-primary-200/35': !triggerHasSampleData,
+                  },
+                )}
+              >
+                <Settings size={16} />
+              </Button>
+            </TestRunLimitsDialog>
+          </TooltipWrapper>
+        </div>
 
         <ExecuteRiskyFlowDialog
           isOpen={isDialogOpen}

@@ -96,5 +96,10 @@ export async function applyFunctionToKeysAndValues<T>(
 }
 
 export const isObject = (obj: unknown): obj is Record<string, unknown> => {
-  return typeof obj === 'object' && obj !== null && !Array.isArray(obj);
+  if (typeof obj !== 'object' || obj === null || Array.isArray(obj)) {
+    return false;
+  }
+
+  const prototype = Object.getPrototypeOf(obj);
+  return prototype === Object.prototype || prototype === null;
 };

@@ -15,3 +15,13 @@ export const TestRunLimitSettings = Type.Object({
 });
 
 export type TestRunLimitSettings = Static<typeof TestRunLimitSettings>;
+
+export function findTestRunLimit(
+  limits: TestRunLimit[],
+  blockName: string,
+  actionName: string,
+): TestRunLimit | undefined {
+  return limits.find(
+    (limit) => limit.blockName === blockName && limit.actionName === actionName,
+  );
+}

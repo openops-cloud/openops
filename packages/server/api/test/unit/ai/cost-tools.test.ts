@@ -143,6 +143,7 @@ describe('getCostTools', () => {
     expect(result).toEqual({
       costExplorer: { client: undefined, toolSet: {} },
       costAnalysis: { client: undefined, toolSet: {} },
+      billingAndCostManagement: { client: undefined, toolSet: {} },
     });
     expect(logger.debug).toHaveBeenCalledWith(
       'AWS Cost is not enabled in MCP config, skipping AWS cost tools',
@@ -158,6 +159,7 @@ describe('getCostTools', () => {
     expect(result).toEqual({
       costExplorer: { client: undefined, toolSet: {} },
       costAnalysis: { client: undefined, toolSet: {} },
+      billingAndCostManagement: { client: undefined, toolSet: {} },
     });
     expect(logger.debug).toHaveBeenCalledWith(
       'AWS connection not found, skipping AWS cost tools',
@@ -183,13 +185,14 @@ describe('getCostTools', () => {
     expect(result).toEqual({
       costExplorer: { client: undefined, toolSet: {} },
       costAnalysis: { client: undefined, toolSet: {} },
+      billingAndCostManagement: { client: undefined, toolSet: {} },
     });
     expect(logger.debug).toHaveBeenCalledWith(
       'AWS credentials not found in connection, skipping AWS tools',
     );
   });
 
-  it('should initialize both cost explorer and cost analysis clients with AWS credentials', async () => {
+  it('should initialize all clients with AWS credentials', async () => {
     const mockClient = {
       tools: jest.fn().mockResolvedValue(mockTools),
     };
@@ -238,9 +241,22 @@ describe('getCostTools', () => {
           tool2: { ...mockTools.tool2, toolProvider: 'aws-pricing' },
         },
       },
+      billingAndCostManagement: {
+        client: mockClient,
+        toolSet: {
+          tool1: {
+            ...mockTools.tool1,
+            toolProvider: 'billing-cost-management',
+          },
+          tool2: {
+            ...mockTools.tool2,
+            toolProvider: 'billing-cost-management',
+          },
+        },
+      },
     });
 
-    expect(experimental_createMCPClient).toHaveBeenCalledTimes(2);
+    expect(experimental_createMCPClient).toHaveBeenCalledTimes(3);
     expect(experimental_createMCPClient).toHaveBeenCalledWith({
       transport: expect.any(Object),
     });
@@ -249,6 +265,7 @@ describe('getCostTools', () => {
       .calls;
     expect(transportCalls[0][0].transport).toBeDefined();
     expect(transportCalls[1][0].transport).toBeDefined();
+    expect(transportCalls[2][0].transport).toBeDefined();
 
     const envVars = transportCalls[0][0].transport.env;
     expect(envVars).toEqual({

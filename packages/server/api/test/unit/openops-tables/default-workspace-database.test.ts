@@ -20,6 +20,16 @@ jest.mock('../../../src/app/openops-tables/create-workspace', () => {
   return { createWorkspace: createWorkspaceMock };
 });
 
+const listWorkspacesMock = jest.fn();
+jest.mock('../../../src/app/openops-tables/list-workspaces', () => {
+  return { listWorkspaces: listWorkspacesMock };
+});
+
+const listDatabasesMock = jest.fn();
+jest.mock('../../../src/app/openops-tables/list-databases', () => {
+  return { listDatabases: listDatabasesMock };
+});
+
 import { OPENOPS_DEFAULT_DATABASE_NAME } from '@openops/common';
 import { createDefaultWorkspaceAndDatabase } from '../../../src/app/openops-tables/default-workspace-database';
 
@@ -31,6 +41,8 @@ describe('createAdminInOpenOpsTables', () => {
   const token = 'some token';
 
   it('should successfully create new table Opportunities', async () => {
+    listDatabasesMock.mockResolvedValue([]);
+    listWorkspacesMock.mockResolvedValue([]);
     createWorkspaceMock.mockResolvedValue({ id: 1 });
     createDbMock.mockResolvedValue({ id: 2 });
     createTableMock.mockResolvedValue({ id: 3 });
@@ -51,6 +63,7 @@ describe('createAdminInOpenOpsTables', () => {
   });
 
   it('should throw if something fails', async () => {
+    listWorkspacesMock.mockResolvedValue([]);
     createWorkspaceMock.mockRejectedValue(new Error('some error'));
 
     await expect(createDefaultWorkspaceAndDatabase(token)).rejects.toThrow(

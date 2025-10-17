@@ -1220,6 +1220,10 @@ export const flowHelper = {
           removeConnection(step),
         );
         break;
+      case FlowOperationType.UPDATE_TEST_RUN_ACTION_LIMITS:
+        clonedVersion.testRunActionLimits =
+          operation.request.testRunActionLimits;
+        break;
       default:
         break;
     }
