@@ -61,10 +61,15 @@ export function applyFunctionToKeysAndValuesSync<T>(
     ) as unknown as T;
   } else if (isObject(obj)) {
     return Object.fromEntries(
-      Object.entries(obj).map(([key, value]) => [
-        apply(key),
-        applyFunctionToKeysAndValuesSync(value, apply),
-      ]),
+      Object.entries(obj).map(([key, value]) => {
+        const appliedKey = apply(key);
+        if (isObject(appliedKey) || Array.isArray(appliedKey)) {
+          throw new Error(
+            'Invalid key type: keys must be strings, numbers, or a boolean.',
+          );
+        }
+        return [appliedKey, applyFunctionToKeysAndValuesSync(value, apply)];
+      }),
     ) as T;
   }
   return obj as T;
@@ -85,10 +90,15 @@ export async function applyFunctionToKeysAndValues<T>(
     return newArray as unknown as T;
   } else if (isObject(obj)) {
     const newEntries = await Promise.all(
-      Object.entries(obj).map(async ([key, value]) => [
-        await apply(key),
-        await applyFunctionToKeysAndValues(value, apply),
-      ]),
+      Object.entries(obj).map(async ([key, value]) => {
+        const appliedKey = await apply(key);
+        if (isObject(appliedKey) || Array.isArray(appliedKey)) {
+          throw new Error(
+            'Invalid key type: keys must be strings, numbers, or a boolean.',
+          );
+        }
+        return [appliedKey, await applyFunctionToKeysAndValues(value, apply)];
+      }),
     );
     return Object.fromEntries(newEntries) as T;
   }

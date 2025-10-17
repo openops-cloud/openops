@@ -250,45 +250,66 @@ describe('Props Resolver', () => {
   });
 });
 
-test('Test resolve variables in both key and value', async () => {
-  const { resolvedInput } = await propsResolver.resolve({
-    unresolvedInput: {
-      '{{trigger.name}}': '{{trigger.price}}',
-    },
-    executionState,
-  });
-  expect(resolvedInput).toEqual({
-    John: 6.4,
-  });
-});
-
-test('Test resolve variable in nested object key', async () => {
-  const { resolvedInput } = await propsResolver.resolve({
-    unresolvedInput: {
-      outer: {
-        '{{trigger.name}}': '{{trigger.items[1]}}',
+  test('Test resolve variables in both key and value', async () => {
+    const { resolvedInput } = await propsResolver.resolve({
+      unresolvedInput: {
+        '{{trigger.name}}': '{{trigger.price}}',
       },
-    },
-    executionState,
+      executionState,
+    });
+    expect(resolvedInput).toEqual({
+      John: 6.4,
+    });
   });
-  expect(resolvedInput).toEqual({
-    outer: {
-      John: 'a',
-    },
-  });
-});
 
-test('Test resolve variable in array of objects with dynamic keys', async () => {
-  const { resolvedInput } = await propsResolver.resolve({
-    unresolvedInput: [
-      { '{{trigger.name}}': '{{trigger.items[0]}}' },
-      { '{{trigger.price}}': '{{trigger.items[1]}}' },
-    ],
-    executionState,
+  test('Test resolve variable in nested object key', async () => {
+    const { resolvedInput } = await propsResolver.resolve({
+      unresolvedInput: {
+        outer: {
+          '{{trigger.name}}': '{{trigger.items[1]}}',
+        },
+      },
+      executionState,
+    });
+    expect(resolvedInput).toEqual({
+      outer: {
+        John: 'a',
+      },
+    });
   });
-  expect(resolvedInput).toEqual([
-    { John: 5 },
-    { 6.4: 'a' },
-  ]);
-});
+
+  test('Test resolve variable in array of objects with dynamic keys', async () => {
+    const { resolvedInput } = await propsResolver.resolve({
+      unresolvedInput: [
+        { '{{trigger.name}}': '{{trigger.items[0]}}' },
+        { '{{trigger.price}}': '{{trigger.items[1]}}' },
+      ],
+      executionState,
+    });
+    expect(resolvedInput).toEqual([
+      { John: 5 },
+      { 6.4: 'a' },
+    ]);
+  });
+  test('should throw error if resolved key is an array', async () => {
+    await expect(
+      propsResolver.resolve({
+        unresolvedInput: {
+          '{{trigger.items}}': 'value',
+        },
+        executionState,
+      })
+    ).rejects.toThrow('Invalid key type: keys must be strings, numbers, or a boolean.');
+  });
+
+  test('should throw error if resolved key is an object', async () => {
+    await expect(
+      propsResolver.resolve({
+        unresolvedInput: {
+          '{{trigger}}': 'value',
+        },
+        executionState,
+      })
+    ).rejects.toThrow('Invalid key type: keys must be strings, numbers, or a boolean.');
+  });
 });
