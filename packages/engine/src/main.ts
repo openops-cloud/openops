@@ -40,12 +40,16 @@ function initTelemetry(): void {
 
 initTelemetry();
 
+async function cleanup(): Promise<void> {
+  return telemetrySDK?.shutdown();
+}
+
 if (process.env.AWS_LAMBDA_FUNCTION_NAME) {
   logger.info('Running in a lambda environment, calling lambdaHandler...');
   exports.handler = lambdaHandler;
 } else {
   installCodeBlockDependencies();
-  start().catch((err) => {
+  start({ cleanup }).catch((err) => {
     // eslint-disable-next-line no-console
     console.log(`Failed to start the engine ${err}`, err);
     process.exit(1);
