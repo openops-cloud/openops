@@ -40,7 +40,7 @@ export const updateUserStatusAction = createAction({
     actionParams: Property.DynamicProperties({
       displayName: 'Action Parameters',
       description: 'Additional parameters based on the selected user status.',
-      required: false,
+      required: true,
       refreshers: ['userStatus'],
       props: async (props): Promise<{ [key: string]: any }> => {
         switch (props['userStatus'] as unknown as string) {

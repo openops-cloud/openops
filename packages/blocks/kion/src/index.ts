@@ -20,7 +20,7 @@ export const kion = createBlock({
         documentation: Property.DynamicProperties({
           displayName: '',
           refreshers: ['auth'],
-          required: false,
+          required: true,
           props: async ({ auth }) => {
             return {
               docs: Property.MarkDown({

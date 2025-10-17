@@ -219,7 +219,7 @@ export function dynamicBlockKitProperties(): any {
   return {
     headerText: Property.DynamicProperties({
       displayName: '',
-      required: false,
+      required: true,
       refreshers: ['blockKitEnabled'],
       props: async ({ blockKitEnabled }) => {
         if (!blockKitEnabled) {
@@ -237,7 +237,7 @@ export function dynamicBlockKitProperties(): any {
     }),
     text: Property.DynamicProperties({
       displayName: '',
-      required: false,
+      required: true,
       refreshers: ['blockKitEnabled'],
       props: async ({ blockKitEnabled }) => {
         if (!blockKitEnabled) {
@@ -255,7 +255,7 @@ export function dynamicBlockKitProperties(): any {
     }),
     blocks: Property.DynamicProperties({
       displayName: '',
-      required: false,
+      required: true,
       refreshers: ['blockKitEnabled'],
       props: async ({ blockKitEnabled }) => {
         if (!blockKitEnabled) {

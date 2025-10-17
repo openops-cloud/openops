@@ -58,7 +58,7 @@ export const runWorkflowAction = createAction({
     inputs: Property.DynamicProperties({
       displayName: 'Inputs',
       description: 'Input keys and values configured in the workflow file.',
-      required: false,
+      required: true,
       refreshers: ['workflow'],
       props: async ({ auth, repository, workflow }) => {
         if (!workflow) {

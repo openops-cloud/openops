@@ -16,7 +16,7 @@ export function tagsProperty(
     [propertyName]: Property.DynamicProperties({
       displayName: displayName,
       description: description,
-      required: false,
+      required: true,
       refreshers: [toggleName],
       props: async (props): Promise<{ [key: string]: any }> => {
         if (!props[toggleName]) {
