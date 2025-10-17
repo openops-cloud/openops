@@ -6,6 +6,7 @@ import { forwardEmailAction } from './lib/actions/forward-email';
 import { moveEmailToFolderAction } from './lib/actions/move-email-to-folder';
 import { replyEmailAction } from './lib/actions/reply-email';
 import { sendEmailAction } from './lib/actions/send-email';
+import { requestActionEmailAction } from './lib/actions/request-action-email';
 import { microsoftOutlookAuth } from './lib/common/auth';
 import { newEmailTrigger } from './lib/triggers/new-email';
 
@@ -22,6 +23,7 @@ export const microsoftOutlook = createBlock({
     moveEmailToFolderAction,
     forwardEmailAction,
     findEmailAction,
+    requestActionEmailAction,
     createCustomApiCallAction({
       auth: microsoftOutlookAuth,
       baseUrl: () => 'https://graph.microsoft.com/v1.0/',
