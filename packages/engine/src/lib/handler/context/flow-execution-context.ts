@@ -324,7 +324,7 @@ export class FlowExecutorContext {
           ...baseExecutionOutput,
           error: this.error,
           status: FlowRunStatus.FAILED,
-          terminationReason: 'Flow execution failed',
+          terminationReason,
         };
       }
       case ExecutionVerdict.PAUSED: {
