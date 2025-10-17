@@ -95,7 +95,7 @@ const systemPropDefaultValues: Partial<Record<SystemProp, string>> = {
   [AppSystemProp.REQUEST_BODY_LIMIT]: '10',
   [SharedSystemProp.LANGFUSE_HOST]: 'https://us.cloud.langfuse.com',
   [AppSystemProp.MAX_LLM_CALLS_WITHOUT_INTERACTION]: '100',
-  [AppSystemProp.LLM_CHAT_EXPIRE_TIME]: '86400', // 24 hours
+  [AppSystemProp.LLM_CHAT_EXPIRE_TIME_SECONDS]: '86400', // 24 hours
 };
 
 export const system = {

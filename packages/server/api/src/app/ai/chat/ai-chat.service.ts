@@ -121,7 +121,7 @@ export const createChatContext = async (
   context: MCPChatContext,
 ): Promise<void> => {
   const chatExpireTime = system.getNumberOrThrow(
-    AppSystemProp.LLM_CHAT_EXPIRE_TIME,
+    AppSystemProp.LLM_CHAT_EXPIRE_TIME_SECONDS,
   );
   await cacheWrapper.setSerializedObject(
     chatContextKey(chatId, userId, projectId),
@@ -199,7 +199,7 @@ export const saveChatHistory = async (
   messages: ModelMessage[],
 ): Promise<void> => {
   const chatExpireTime = system.getNumberOrThrow(
-    AppSystemProp.LLM_CHAT_EXPIRE_TIME,
+    AppSystemProp.LLM_CHAT_EXPIRE_TIME_SECONDS,
   );
   await cacheWrapper.setSerializedObject(
     chatHistoryKey(chatId, userId, projectId),
