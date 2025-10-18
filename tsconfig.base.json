@@ -243,6 +243,9 @@
       "@openops/block-openops-tables": [
         "packages/blocks/openops-tables/src/index.ts"
       ],
+      "@openops/block-oracle-cloud": [
+        "packages/blocks/oracle-cloud/src/index.ts"
+      ],
       "@openops/block-pastebin": ["packages/blocks/pastebin/src/index.ts"],
       "@openops/block-pastefy": ["packages/blocks/pastefy/src/index.ts"],
       "@openops/block-pdf": ["packages/blocks/pdf/src/index.ts"],
