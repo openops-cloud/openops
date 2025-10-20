@@ -1,5 +1,6 @@
 import { httpClient, HttpMethod } from '@openops/blocks-common';
 import { ServiceNowAuth } from './auth';
+import { buildServiceNowApiUrl } from './build-api-url';
 import { generateAuthHeader } from './generate-auth-header';
 
 export interface ServiceNowTableField {
@@ -24,7 +25,7 @@ export async function getServiceNowTableFields(
     result: ServiceNowTableField[];
   }>({
     method: HttpMethod.GET,
-    url: `https://${auth.instanceName}.service-now.com/api/now/table/sys_dictionary`,
+    url: buildServiceNowApiUrl(auth, 'sys_dictionary'),
     headers: {
       ...generateAuthHeader({
         username: auth.username,

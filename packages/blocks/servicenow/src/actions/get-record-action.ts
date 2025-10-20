@@ -6,6 +6,7 @@ import {
 } from '@openops/blocks-framework';
 import { logger } from '@openops/server-shared';
 import { servicenowAuth, ServiceNowAuth } from '../lib/auth';
+import { buildServiceNowApiUrl } from '../lib/build-api-url';
 import { generateAuthHeader } from '../lib/generate-auth-header';
 import { getServiceNowTableFields } from '../lib/get-table-fields';
 import { servicenowTableDropdownProperty } from '../lib/table-dropdown-property';
@@ -87,7 +88,7 @@ export const getRecordAction = createAction({
 
     const response = await httpClient.sendRequest({
       method: HttpMethod.GET,
-      url: `https://${auth.instanceName}.service-now.com/api/now/table/${tableName}/${sysId}`,
+      url: buildServiceNowApiUrl(auth, `${tableName}/${sysId}`),
       headers: {
         ...generateAuthHeader({
           username: auth.username,

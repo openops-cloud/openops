@@ -1,6 +1,7 @@
 import { httpClient, HttpMethod } from '@openops/blocks-common';
 import { createAction, Property } from '@openops/blocks-framework';
 import { servicenowAuth, ServiceNowAuth } from '../lib/auth';
+import { buildServiceNowApiUrl } from '../lib/build-api-url';
 import { generateAuthHeader } from '../lib/generate-auth-header';
 import { servicenowTableDropdownProperty } from '../lib/table-dropdown-property';
 
@@ -24,7 +25,7 @@ export const deleteRecordAction = createAction({
 
     await httpClient.sendRequest({
       method: HttpMethod.DELETE,
-      url: `https://${auth.instanceName}.service-now.com/api/now/table/${tableName}/${sysId}`,
+      url: buildServiceNowApiUrl(auth, `${tableName}/${sysId}`),
       headers: {
         ...generateAuthHeader({
           username: auth.username,
