@@ -74,7 +74,7 @@ describe('Progress Service', () => {
       await progressService.sendUpdate(successParams);
       await progressService.flushProgressUpdate(successParams.engineConstants.flowRunId);
 
-      expect(saveRequestBodyMock).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({
+      expect(saveRequestBodyMock).toHaveBeenCalledWith(expect.objectContaining({
         executionCorrelationId: 'test-correlation-id-success',
         runId: 'test-run-id',
         workerHandlerId: 'test-handler-id',
@@ -109,7 +109,7 @@ describe('Progress Service', () => {
       await progressService.sendUpdate(uniqueParams);
       await progressService.flushProgressUpdate(uniqueParams.engineConstants.flowRunId);
 
-      expect(saveRequestBodyMock).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({
+      expect(saveRequestBodyMock).toHaveBeenCalledWith(expect.objectContaining({
         executionCorrelationId: 'test-correlation-id-payload',
         runId: 'test-run-id',
         workerHandlerId: 'test-handler-id',
@@ -149,7 +149,7 @@ describe('Progress Service', () => {
       await progressService.sendUpdate(paramsWithoutHandlerId);
       await progressService.flushProgressUpdate(paramsWithoutHandlerId.engineConstants.flowRunId);
 
-      expect(saveRequestBodyMock).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({
+      expect(saveRequestBodyMock).toHaveBeenCalledWith(expect.objectContaining({
         executionCorrelationId: 'test-correlation-id-null-handler',
         runId: 'test-run-id',
         workerHandlerId: null,
@@ -212,7 +212,7 @@ describe('Progress Service', () => {
 
       expect(mockMakeHttpRequest).toHaveBeenCalledTimes(1);
 
-      expect(saveRequestBodyMock).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({
+      expect(saveRequestBodyMock).toHaveBeenCalledWith(expect.objectContaining({
         executionCorrelationId: 'test-correlation-id-duplicate',
         runId: 'test-run-id',
         workerHandlerId: 'test-handler-id',
@@ -317,7 +317,7 @@ describe('Progress Service', () => {
 
       expect(mockMakeHttpRequest).toHaveBeenCalledTimes(2);
 
-      expect(saveRequestBodyMock).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({
+      expect(saveRequestBodyMock).toHaveBeenCalledWith(expect.objectContaining({
         executionCorrelationId: 'test-correlation-id-duplicate',
         runId: 'test-run-id',
         workerHandlerId: 'test-handler-id',
@@ -330,7 +330,7 @@ describe('Progress Service', () => {
         }),
       }));
 
-      expect(saveRequestBodyMock).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({
+      expect(saveRequestBodyMock).toHaveBeenCalledWith(expect.objectContaining({
         executionCorrelationId: 'test-correlation-id-duplicate',
         runId: 'test-run-id',
         workerHandlerId: 'test-handler-id',

@@ -17,7 +17,7 @@ import {
 } from '@/app/features/builder/block-properties/dynamic-array/utils';
 import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
 import { DropdownState } from '@openops/blocks-framework';
-import { Action, Trigger, isNil } from '@openops/shared';
+import { Action, EngineErrorResponse, isNil, Trigger } from '@openops/shared';
 
 import { AlertError } from './alert-error';
 import { MultiSelectBlockProperty } from './multi-select-block-property';
@@ -71,7 +71,9 @@ const DynamicDropdownBlockProperty = React.memo(
           settings,
         );
 
-        return blocksApi.options<DropdownState<unknown>>({
+        const options = await blocksApi.options<
+          DropdownState<unknown> | EngineErrorResponse
+        >({
           blockName,
           blockVersion,
           blockType,
@@ -83,6 +85,16 @@ const DynamicDropdownBlockProperty = React.memo(
           flowId: flowVersion.flowId,
           stepName: actionOrTriggerName,
         });
+
+        if ('success' in options && !options.success) {
+          return {
+            disabled: true,
+            options: [],
+            error: options.message,
+          };
+        }
+
+        return options as DropdownState<unknown>;
       },
       onError: (error) => {
         console.error(error);
