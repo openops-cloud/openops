@@ -74,7 +74,9 @@ describe('get_record action', () => {
       propsValue: {
         tableName: 'task',
         sysId: 'abc123',
-        fields: ['sys_id', 'short_description'],
+        fields: {
+          fields: ['sys_id', 'short_description'],
+        },
       },
     };
 
