@@ -46,6 +46,7 @@ export type VerdictResponse =
     }
   | {
       reason: VerdictReason.EXECUTION_LIMIT_REACHED;
+      message: string;
     };
 
 export class FlowExecutorContext {

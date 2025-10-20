@@ -8,7 +8,11 @@ import {
   VerdictReason,
   VerdictResponse,
 } from '../handler/context/flow-execution-context';
-import { ExecutionError, ExecutionErrorType } from './execution-errors';
+import {
+  ExecutionError,
+  ExecutionErrorType,
+  ExecutionLimitReachedError,
+} from './execution-errors';
 
 const executionMode = system.get<ExecutionMode>(
   SharedSystemProp.EXECUTION_MODE,
@@ -96,14 +100,13 @@ export const handleExecutionError = (
       '\n\nNote: This code is executing within an "isolated-vm" environment, meaning it ' +
       'has no access to any native Node.js modules, such as "fs", "process", "http", "crypto", etc.';
   }
-  if (
-    error instanceof ExecutionError &&
-    error.name === 'ExecutionLimitReached'
-  ) {
+
+  if (error instanceof ExecutionLimitReachedError) {
     return {
       message,
       verdictResponse: {
         reason: VerdictReason.EXECUTION_LIMIT_REACHED,
+        message: error.getMessage(),
       },
     };
   }
