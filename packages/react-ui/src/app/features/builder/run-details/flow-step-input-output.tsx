@@ -35,7 +35,7 @@ const FlowStepInputOutput = React.memo(
       : undefined;
 
     const testRunActionLimitReachedMessage = useMemo(() => {
-      if (stepDetails.status !== StepOutputStatus.TEST_RUN_LIMIT_REACHED) {
+      if (stepDetails.status !== StepOutputStatus.EXECUTION_LIMIT_REACHED) {
         return '';
       }
 
