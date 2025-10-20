@@ -409,9 +409,8 @@ export const flowRunService = {
       stepIds: [flowVersion.trigger.id],
     });
 
-    const triggerPayload = payload.find(
-      (o) => o.stepId === flowVersion.trigger.id,
-    )?.output ?? {};
+    const triggerPayload =
+      payload.find((o) => o.stepId === flowVersion.trigger.id)?.output ?? {};
 
     return this.start({
       projectId,
