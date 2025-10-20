@@ -96,12 +96,12 @@ export const blockExecutor: BaseExecutor<BlockAction> = {
   },
 };
 
-const getEnabledLimit = (
+const getExecutionLimit = (
   blockName: string,
   actionName: string,
   constants: EngineConstants,
 ): TestRunLimit | undefined => {
-  if (!constants.testRunActionLimits.isEnabled) {
+  if (!constants.isTestRun || !constants.testRunActionLimits.isEnabled) {
     return undefined;
   }
 
@@ -114,13 +114,13 @@ const getEnabledLimit = (
   return limit?.isEnabled ? limit : undefined;
 };
 
-const checkExecutionLimit = (
+const throwIfExceededExecutionLimit = (
   blockName: string,
   actionName: string,
   executionState: FlowExecutorContext,
   constants: EngineConstants,
 ): void => {
-  const limit = getEnabledLimit(blockName, actionName, constants);
+  const limit = getExecutionLimit(blockName, actionName, constants);
 
   if (limit) {
     const currentCount = executionState.getActionExecutionCount(
@@ -140,7 +140,7 @@ const incrementActionCountIfNeeded = (
   executionState: FlowExecutorContext,
   constants: EngineConstants,
 ): FlowExecutorContext => {
-  const limit = getEnabledLimit(blockName, actionName, constants);
+  const limit = getExecutionLimit(blockName, actionName, constants);
 
   if (limit) {
     return executionState.incrementActionExecutionCount(blockName, actionName);
@@ -163,7 +163,7 @@ const executeAction: ActionHandler<BlockAction> = async ({
   try {
     assertNotNullOrUndefined(action.settings.actionName, 'actionName');
 
-    checkExecutionLimit(
+    throwIfExceededExecutionLimit(
       action.settings.blockName,
       action.settings.actionName,
       executionState,
@@ -336,10 +336,16 @@ const executeAction: ActionHandler<BlockAction> = async ({
       .setStatus(stepStatus)
       .setErrorMessage(handledError.message);
 
-    return executionState
+    executionState = executionState
       .upsertStep(action.name, failedStepOutput)
       .setVerdict(ExecutionVerdict.FAILED, handledError.verdictResponse)
       .increaseTask();
+
+    if (e instanceof ExecutionLimitReachedError) {
+      throw e;
+    }
+
+    return executionState;
   }
 };
 

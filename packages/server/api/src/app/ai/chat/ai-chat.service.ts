@@ -3,7 +3,12 @@ import {
   getAiModelFromConnection,
   getAiProviderLanguageModel,
 } from '@openops/common';
-import { cacheWrapper, hashUtils } from '@openops/server-shared';
+import {
+  AppSystemProp,
+  cacheWrapper,
+  hashUtils,
+  system,
+} from '@openops/server-shared';
 import {
   AiConfigParsed,
   ApplicationError,
@@ -17,9 +22,6 @@ import { aiConfigService } from '../config/ai-config.service';
 import { loadPrompt } from './prompts.service';
 import { Conversation } from './types';
 import { mergeToolResultsIntoMessages } from './utils';
-
-// Chat expiration time is 24 hour
-const DEFAULT_EXPIRE_TIME = 86400;
 
 const chatContextKey = (
   chatId: string,
@@ -118,10 +120,13 @@ export const createChatContext = async (
   projectId: string,
   context: MCPChatContext,
 ): Promise<void> => {
+  const chatExpireTime = system.getNumberOrThrow(
+    AppSystemProp.LLM_CHAT_EXPIRE_TIME_SECONDS,
+  );
   await cacheWrapper.setSerializedObject(
     chatContextKey(chatId, userId, projectId),
     context,
-    DEFAULT_EXPIRE_TIME,
+    chatExpireTime,
   );
 };
 
@@ -193,10 +198,13 @@ export const saveChatHistory = async (
   projectId: string,
   messages: ModelMessage[],
 ): Promise<void> => {
+  const chatExpireTime = system.getNumberOrThrow(
+    AppSystemProp.LLM_CHAT_EXPIRE_TIME_SECONDS,
+  );
   await cacheWrapper.setSerializedObject(
     chatHistoryKey(chatId, userId, projectId),
     messages,
-    DEFAULT_EXPIRE_TIME,
+    chatExpireTime,
   );
 };
 

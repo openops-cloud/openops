@@ -66,6 +66,7 @@ export class EngineConstants {
     public readonly progressUpdateType: ProgressUpdateType,
     public readonly serverHandlerId: string | null,
     public readonly testRunActionLimits: TestRunLimitSettings,
+    public readonly isTestRun: boolean,
     public readonly resumePayload?: ResumePayload,
   ) {}
 
@@ -94,6 +95,7 @@ export class EngineConstants {
       input.progressUpdateType,
       input.serverHandlerId ?? null,
       input.flowVersion.testRunActionLimits,
+      input.runEnvironment === 'TESTING',
       input.executionType === ExecutionType.RESUME
         ? input.resumePayload
         : undefined,
@@ -125,6 +127,7 @@ export class EngineConstants {
       ProgressUpdateType.NONE,
       null,
       input.flowVersion.testRunActionLimits,
+      true,
     );
   }
 
@@ -153,6 +156,7 @@ export class EngineConstants {
       ProgressUpdateType.NONE,
       null,
       input.flowVersion.testRunActionLimits,
+      true,
     );
   }
 
@@ -181,6 +185,7 @@ export class EngineConstants {
       ProgressUpdateType.NONE,
       null,
       input.flowVersion.testRunActionLimits,
+      input.test,
     );
   }
 

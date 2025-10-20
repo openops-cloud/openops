@@ -171,7 +171,8 @@ export class FlowExecutorContext {
     targetMap[stepName] = stepOutput;
 
     const error =
-      stepOutput.status === StepOutputStatus.FAILED
+      stepOutput.status === StepOutputStatus.FAILED ||
+      stepOutput.status === StepOutputStatus.TEST_RUN_LIMIT_REACHED
         ? { stepName, message: stepOutput.errorMessage }
         : this.error;
 
@@ -275,6 +276,21 @@ export class FlowExecutorContext {
     return this.actionExecutionCounts[key] ?? 0;
   }
 
+  private parseErrorMessage(
+    errorMessage: string | undefined,
+    fallback?: string,
+  ): string | undefined {
+    if (!errorMessage) {
+      return fallback;
+    }
+    try {
+      const parsed = JSON.parse(errorMessage);
+      return parsed.message || errorMessage;
+    } catch {
+      return errorMessage;
+    }
+  }
+
   public async toResponse(): Promise<FlowRunResponse> {
     const baseExecutionOutput = {
       duration: this.duration,
@@ -290,19 +306,25 @@ export class FlowExecutorContext {
             ...baseExecutionOutput,
             error: this.error,
             status: FlowRunStatus.INTERNAL_ERROR,
+            terminationReason: 'Flow execution encountered an internal error',
           };
         }
         if (verdictResponse?.reason === VerdictReason.EXECUTION_LIMIT_REACHED) {
           return {
             ...baseExecutionOutput,
             error: this.error,
-            status: FlowRunStatus.TEST_RUN_LIMIT_REACHED,
+            status: FlowRunStatus.STOPPED,
+            terminationReason: this.parseErrorMessage(
+              this.error?.message,
+              'Test run execution limit reached',
+            ),
           };
         }
         return {
           ...baseExecutionOutput,
           error: this.error,
           status: FlowRunStatus.FAILED,
+          terminationReason: this.parseErrorMessage(this.error?.message),
         };
       }
       case ExecutionVerdict.PAUSED: {

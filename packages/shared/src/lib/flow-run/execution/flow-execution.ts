@@ -11,7 +11,6 @@ export enum FlowRunStatus {
   STOPPED = 'STOPPED',
   SUCCEEDED = 'SUCCEEDED',
   TIMEOUT = 'TIMEOUT',
-  TEST_RUN_LIMIT_REACHED = 'TEST_RUN_LIMIT_REACHED',
 }
 
 export const PauseMetadata = Type.Object({
@@ -47,6 +46,7 @@ const BaseExecutionResponse = {
   tags: Type.Optional(Type.Array(Type.String())),
   error: Type.Optional(FlowError),
   stopResponse: Type.Optional(StopResponse),
+  terminationReason: Type.Optional(Type.String()),
 };
 
 export const FlowRunResponse = Type.Union([
@@ -64,7 +64,6 @@ export const FlowRunResponse = Type.Union([
       Type.Literal(FlowRunStatus.TIMEOUT),
       Type.Literal(FlowRunStatus.INTERNAL_ERROR),
       Type.Literal(FlowRunStatus.STOPPED),
-      Type.Literal(FlowRunStatus.TEST_RUN_LIMIT_REACHED),
     ]),
   }),
 ]);
@@ -76,7 +75,6 @@ export const TERMINAL_STATUSES = Object.freeze<FlowRunStatus[]>([
   FlowRunStatus.TIMEOUT,
   FlowRunStatus.FAILED,
   FlowRunStatus.INTERNAL_ERROR,
-  FlowRunStatus.TEST_RUN_LIMIT_REACHED,
 ]);
 
 export const isFlowStateTerminal = (s: FlowRunStatus): boolean =>
@@ -86,8 +84,7 @@ export const isFailedState = (status: FlowRunStatus): boolean => {
   return (
     status === FlowRunStatus.FAILED ||
     status === FlowRunStatus.INTERNAL_ERROR ||
-    status === FlowRunStatus.TIMEOUT ||
-    status === FlowRunStatus.TEST_RUN_LIMIT_REACHED
+    status === FlowRunStatus.TIMEOUT
   );
 };
 

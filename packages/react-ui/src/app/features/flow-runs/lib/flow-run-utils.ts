@@ -55,8 +55,8 @@ export const flowRunUtils = {
           variant: 'success',
           Icon: CircleCheck,
         };
-      case StepOutputStatus.FAILED:
       case StepOutputStatus.TEST_RUN_LIMIT_REACHED:
+      case StepOutputStatus.FAILED:
         return {
           variant: 'error',
           Icon: CircleX,
@@ -109,11 +109,6 @@ export const flowRunUtils = {
           Icon: X,
         };
       case FlowRunStatus.TIMEOUT:
-        return {
-          variant: 'error',
-          Icon: X,
-        };
-      case FlowRunStatus.TEST_RUN_LIMIT_REACHED:
         return {
           variant: 'error',
           Icon: X,

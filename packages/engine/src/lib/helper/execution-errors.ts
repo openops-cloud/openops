@@ -17,7 +17,7 @@ export class ExecutionError extends Error {
   }
 }
 
-function formatMessage(message: string): string {
+function formatMessage(message: string) {
   return JSON.stringify(
     {
       message,

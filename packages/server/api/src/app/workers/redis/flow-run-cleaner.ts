@@ -50,6 +50,7 @@ async function markExpiredWorkflowsAsFailed(
         executionState: null,
         tasks: flowRun.tasks ?? 0,
         tags: flowRun.tags ?? [],
+        terminationReason: flowRun.terminationReason,
       });
     }
   } catch (error) {

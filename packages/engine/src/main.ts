@@ -1,5 +1,7 @@
+import { getAiTelemetrySDK } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { EngineOperationType } from '@openops/shared';
+import { NodeSDK } from '@opentelemetry/sdk-node';
 import { Static, Type } from '@sinclair/typebox';
 import { execSync } from 'child_process';
 import { existsSync, mkdirSync } from 'fs';
@@ -29,12 +31,25 @@ function installCodeBlockDependencies(): void {
   );
 }
 
+let telemetrySDK: NodeSDK | undefined;
+
+function initTelemetry(): void {
+  telemetrySDK = getAiTelemetrySDK();
+  telemetrySDK?.start();
+}
+
+initTelemetry();
+
+async function cleanup(): Promise<void> {
+  return telemetrySDK?.shutdown();
+}
+
 if (process.env.AWS_LAMBDA_FUNCTION_NAME) {
   logger.info('Running in a lambda environment, calling lambdaHandler...');
   exports.handler = lambdaHandler;
 } else {
   installCodeBlockDependencies();
-  start().catch((err) => {
+  start({ cleanup }).catch((err) => {
     // eslint-disable-next-line no-console
     console.log(`Failed to start the engine ${err}`, err);
     process.exit(1);

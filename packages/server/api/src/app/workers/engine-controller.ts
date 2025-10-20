@@ -140,6 +140,7 @@ export const flowEngineWorker: FastifyPluginAsyncTypebox = async (app) => {
       executionState: getExecutionState(runDetails),
       projectId: request.principal.projectId,
       tags: runDetails.tags ?? [],
+      terminationReason: runDetails.terminationReason,
     });
 
     if (!populatedRun) {
@@ -274,7 +275,6 @@ function getExecutionState(
       FlowRunStatus.TIMEOUT,
       FlowRunStatus.INTERNAL_ERROR,
       FlowRunStatus.STOPPED,
-      FlowRunStatus.TEST_RUN_LIMIT_REACHED,
     ].includes(flowRunResponse.status)
   ) {
     return null;
@@ -320,14 +320,6 @@ async function getFlowResponse(
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         body: {
           message: 'The flow has failed and there is no response returned',
-        },
-        headers: {},
-      };
-    case FlowRunStatus.TEST_RUN_LIMIT_REACHED:
-      return {
-        status: StatusCodes.INTERNAL_SERVER_ERROR,
-        body: {
-          message: 'Test run action limit reached',
         },
         headers: {},
       };
