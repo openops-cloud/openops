@@ -226,6 +226,11 @@ export type EngineResponse<T> = {
   response: T;
 };
 
+export type EngineErrorResponse = {
+  message: string;
+  success: boolean;
+};
+
 export enum EngineResponseStatus {
   OK = 'OK',
   ERROR = 'ERROR',

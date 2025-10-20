@@ -4,7 +4,7 @@ import {
   addConnectionBrackets,
   removeConnectionBrackets,
 } from '../app-connection/connections-utils';
-import { applyFunctionToValuesSync, isNil, isString } from '../common';
+import { applyFunctionToKeysAndValuesSync, isNil, isString } from '../common';
 import { ApplicationError, ErrorCode } from '../common/application-error';
 import { openOpsId } from '../common/id-generator';
 import {
@@ -1033,7 +1033,7 @@ function duplicateStepCascading(
     step.displayName = `${step.displayName} Copy`;
     step.name = oldNameToNewName[step.name];
     oldStepsNameToReplace.forEach((oldName) => {
-      step.settings.input = applyFunctionToValuesSync(
+      step.settings.input = applyFunctionToKeysAndValuesSync(
         step.settings.input,
         (value: unknown) => {
           if (isString(value)) {
