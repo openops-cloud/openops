@@ -65,6 +65,7 @@ export const updateFlowVersion = (
             id: updatedFlowVersion.version.id,
             state: updatedFlowVersion.version.state,
             updated: updatedFlowVersion.version.updated,
+            testRunActionLimits: updatedFlowVersion.version.testRunActionLimits,
           },
           saving: flowUpdatesQueue.size() !== 0,
         };

@@ -11,6 +11,7 @@ import {
   AddBlockRequestBody,
   BlockOptionRequest,
   BlockScope,
+  EngineErrorResponse,
   GetBlockRequestParams,
   GetBlockRequestQuery,
   ListBlocksRequestQuery,
@@ -36,9 +37,9 @@ export const blocksApi = {
       version: request.version ?? undefined,
     });
   },
-  options<T extends DropdownState<unknown> | BlockPropertyMap>(
-    request: BlockOptionRequest,
-  ): Promise<T> {
+  options<
+    T extends DropdownState<unknown> | BlockPropertyMap | EngineErrorResponse,
+  >(request: BlockOptionRequest): Promise<T> {
     return api.post<T>(`/v1/blocks/options`, request);
   },
   mapToMetadata(
