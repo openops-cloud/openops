@@ -70,5 +70,3 @@ describe('delete_record action', () => {
     );
   });
 });
-
-
