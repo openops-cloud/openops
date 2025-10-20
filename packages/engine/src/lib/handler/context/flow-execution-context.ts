@@ -1,6 +1,7 @@
 import {
   ActionType,
   assertEqual,
+  buildBlockActionKey,
   FlowError,
   FlowRunResponse,
   FlowRunStatus,
@@ -250,7 +251,7 @@ export class FlowExecutorContext {
   }
 
   private static getActionKey(blockName: string, actionName: string): string {
-    return `${blockName}|${actionName}`;
+    return buildBlockActionKey(blockName, actionName);
   }
 
   public incrementActionExecutionCount(
