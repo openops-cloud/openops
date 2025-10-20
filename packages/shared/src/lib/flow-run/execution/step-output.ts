@@ -8,7 +8,7 @@ export enum StepOutputStatus {
   RUNNING = 'RUNNING',
   STOPPED = 'STOPPED',
   SUCCEEDED = 'SUCCEEDED',
-  TEST_RUN_LIMIT_REACHED = 'TEST_RUN_LIMIT_REACHED',
+  EXECUTION_LIMIT_REACHED = 'EXECUTION_LIMIT_REACHED',
 }
 
 type BaseStepOutputParams<T extends ActionType | TriggerType, OUTPUT> = {

@@ -4,19 +4,32 @@ import {
   ExecutionVerdict,
   FlowExecutorContext,
   VerdictReason,
+  VerdictResponse,
 } from './handler/context/flow-execution-context';
 import { ExecutionLimitReachedError } from './helper/execution-errors';
+
+export function wasExecutionLimitReached(
+  flowExecutionContext: FlowExecutorContext,
+): flowExecutionContext is FlowExecutorContext & {
+  verdictResponse: Extract<
+    VerdictResponse,
+    { reason: VerdictReason.EXECUTION_LIMIT_REACHED }
+  >;
+} {
+  const { verdict, verdictResponse } = flowExecutionContext;
+  return (
+    verdict === ExecutionVerdict.FAILED &&
+    verdictResponse?.reason === VerdictReason.EXECUTION_LIMIT_REACHED
+  );
+}
 
 export function throwIfExecutionLimitReached(
   flowExecutionContext: FlowExecutorContext,
 ): void {
-  const { verdict, verdictResponse } = flowExecutionContext;
-
-  if (
-    verdict === ExecutionVerdict.FAILED &&
-    verdictResponse?.reason === VerdictReason.EXECUTION_LIMIT_REACHED
-  ) {
-    throw new ExecutionLimitReachedError(verdictResponse.message);
+  if (wasExecutionLimitReached(flowExecutionContext)) {
+    throw new ExecutionLimitReachedError(
+      flowExecutionContext.verdictResponse.message,
+    );
   }
 }
 
@@ -55,7 +68,7 @@ export const throwIfExceededExecutionLimit = (
   }
 };
 
-export const getExecutionLimit = (
+const getExecutionLimit = (
   blockName: string,
   actionName: string,
   constants: EngineConstants,

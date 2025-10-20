@@ -1,6 +1,7 @@
 import { SharedSystemProp, system } from '@openops/server-shared';
 import { BlockAction, CodeAction } from '@openops/shared';
 import { ExecutionMode } from '../core/code/execution-mode';
+import { wasExecutionLimitReached } from '../execution-limit-reached';
 import { EngineConstants } from '../handler/context/engine-constants';
 import {
   ExecutionVerdict,
@@ -65,11 +66,7 @@ export async function continueIfFailureHandler(
   const continueOnFailure =
     action.settings.errorHandlingOptions?.continueOnFailure?.value;
 
-  if (
-    executionState.verdict === ExecutionVerdict.FAILED &&
-    executionState.verdictResponse?.reason ===
-      VerdictReason.EXECUTION_LIMIT_REACHED
-  ) {
+  if (wasExecutionLimitReached(executionState)) {
     return executionState;
   }
 

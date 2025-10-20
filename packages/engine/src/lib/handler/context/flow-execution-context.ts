@@ -174,7 +174,7 @@ export class FlowExecutorContext {
 
     const error =
       stepOutput.status === StepOutputStatus.FAILED ||
-      stepOutput.status === StepOutputStatus.TEST_RUN_LIMIT_REACHED
+      stepOutput.status === StepOutputStatus.EXECUTION_LIMIT_REACHED
         ? { stepName, message: stepOutput.errorMessage }
         : this.error;
 
