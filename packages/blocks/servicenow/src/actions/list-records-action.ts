@@ -1,17 +1,13 @@
 import { httpClient, HttpMethod } from '@openops/blocks-common';
 import { createAction, Property } from '@openops/blocks-framework';
-import {
-  FilterType,
-  isSingleValueFilter,
-  ViewFilterTypesEnum,
-} from '@openops/common';
+import { FilterType, ViewFilterTypesEnum } from '@openops/common';
 import { servicenowAuth, ServiceNowAuth } from '../lib/auth';
-import { createFieldValueProperty } from '../lib/create-field-value-property';
+import { buildServiceNowApiUrl } from '../lib/build-api-url';
 import { servicenowFieldsDropdownProperty } from '../lib/fields-dropdown-property';
 import { buildServiceNowQuery } from '../lib/filter-to-query';
 import { generateAuthHeader } from '../lib/generate-auth-header';
-import { getServiceNowTableFields } from '../lib/get-table-fields';
 import { servicenowTableDropdownProperty } from '../lib/table-dropdown-property';
+import { createFiltersProperties } from './create-filters-properties';
 
 export const listRecordsAction = createAction({
   auth: servicenowAuth,
@@ -46,134 +42,10 @@ export const listRecordsAction = createAction({
         if (!auth || !tableName) {
           return {};
         }
-
-        const properties: { [key: string]: any } = {};
-
-        try {
-          const tableFields = await getServiceNowTableFields(
-            auth as ServiceNowAuth,
-            tableName as unknown as string,
-          );
-
-          properties['filters'] = Property.Array({
-            displayName: 'Fields to filter by',
-            required: false,
-            properties: {
-              fieldName: Property.StaticDropdown<string>({
-                displayName: 'Field name',
-                required: true,
-                options: {
-                  options: tableFields.map((f) => ({
-                    label: f.column_label
-                      ? `${f.column_label} (${f.element})`
-                      : f.element,
-                    value: f.element,
-                  })),
-                },
-              }),
-              filterType: Property.StaticDropdown<ViewFilterTypesEnum>({
-                displayName: 'Filter type',
-                required: true,
-                options: {
-                  options: Object.keys(ViewFilterTypesEnum)
-                    .filter((key) => !key.startsWith('single_select_'))
-                    .map((key) => ({
-                      label:
-                        ViewFilterTypesEnum[
-                          key as keyof typeof ViewFilterTypesEnum
-                        ],
-                      value:
-                        ViewFilterTypesEnum[
-                          key as keyof typeof ViewFilterTypesEnum
-                        ],
-                    })),
-                },
-              }),
-              value: Property.DynamicProperties({
-                displayName: 'Value to search for',
-                required: true,
-                refreshers: ['fieldName', 'filterType'],
-                props: async ({ fieldName, filterType }) => {
-                  const shouldDisplayValueProperty =
-                    fieldName &&
-                    !isSingleValueFilter(
-                      filterType as unknown as ViewFilterTypesEnum,
-                    );
-                  const currentField = fieldName as unknown as string;
-                  const serviceNowField = tableFields.find(
-                    (f) => f.element === currentField,
-                  );
-
-                  const innerProps: { [key: string]: any } = {};
-
-                  if (!shouldDisplayValueProperty || !serviceNowField) {
-                    innerProps['value'] = {};
-                    return innerProps;
-                  }
-
-                  innerProps['value'] = await createFieldValueProperty(
-                    serviceNowField,
-                    auth as ServiceNowAuth,
-                    tableName as unknown as string,
-                    true,
-                  );
-
-                  return innerProps;
-                },
-              }),
-            },
-          });
-        } catch (error) {
-          properties['filters'] = Property.Array({
-            displayName: 'Fields to filter by',
-            required: false,
-            properties: {
-              fieldName: Property.ShortText({
-                displayName: 'Field name',
-                required: true,
-              }),
-              filterType: Property.StaticDropdown<ViewFilterTypesEnum>({
-                displayName: 'Filter type',
-                required: true,
-                options: {
-                  options: Object.keys(ViewFilterTypesEnum).map((key) => ({
-                    label:
-                      ViewFilterTypesEnum[
-                        key as keyof typeof ViewFilterTypesEnum
-                      ],
-                    value:
-                      ViewFilterTypesEnum[
-                        key as keyof typeof ViewFilterTypesEnum
-                      ],
-                  })),
-                },
-              }),
-              value: Property.DynamicProperties({
-                displayName: 'Value to search for',
-                required: true,
-                refreshers: ['filterType'],
-                props: async ({ filterType }) => {
-                  const shouldDisplayValueProperty = !isSingleValueFilter(
-                    filterType as unknown as ViewFilterTypesEnum,
-                  );
-
-                  const innerProps: { [key: string]: any } = {
-                    value: shouldDisplayValueProperty
-                      ? Property.ShortText({
-                          displayName: 'Value',
-                          required: true,
-                        })
-                      : {},
-                  };
-
-                  return innerProps;
-                },
-              }),
-            },
-          });
-        }
-
-        return properties;
+        return createFiltersProperties(
+          auth as ServiceNowAuth,
+          tableName as unknown as string,
+        );
       },
     }),
     limit: Property.Number({
@@ -222,7 +94,7 @@ export const listRecordsAction = createAction({
 
     const response = await httpClient.sendRequest({
       method: HttpMethod.GET,
-      url: `https://${auth.instanceName}.service-now.com/api/now/table/${tableName}`,
+      url: buildServiceNowApiUrl(auth, tableName as string),
       headers: {
         ...generateAuthHeader({
           username: auth.username,

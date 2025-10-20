@@ -102,7 +102,9 @@ export async function createFieldValueProperty(
   if (field.reference) {
     return Property.ShortText({
       displayName,
-      description: `Reference to ${field.reference} table (sys_id)`,
+      description: `Reference to ${JSON.stringify(
+        field.reference,
+      )} table (sys_id)`,
       required,
     });
   }
