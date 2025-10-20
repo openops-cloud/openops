@@ -91,7 +91,7 @@ export async function createFieldValueProperty(
   if (
     internalType === 'string' &&
     field.max_length &&
-    parseInt(field.max_length) > 255
+    Number.parseInt(field.max_length) > 255
   ) {
     return Property.LongText({
       displayName,

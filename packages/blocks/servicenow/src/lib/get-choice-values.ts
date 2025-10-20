@@ -1,4 +1,5 @@
 import { httpClient, HttpMethod } from '@openops/blocks-common';
+import { logger } from '@openops/server-shared';
 import { ServiceNowAuth } from './auth';
 import { generateAuthHeader } from './generate-auth-header';
 
@@ -45,6 +46,7 @@ export async function getServiceNowChoiceValues(
       })) || []
     );
   } catch (error) {
+    logger.error('Error fetching choice values', { error });
     return [];
   }
 }

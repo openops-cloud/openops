@@ -8,33 +8,51 @@ export async function createFiltersProperties(
   auth: ServiceNowAuth,
   tableName: string,
 ) {
-  const properties: { [key: string]: any } = {};
+  let tableFields: Awaited<ReturnType<typeof getServiceNowTableFields>> = [];
+  let hasError = false;
 
   try {
-    const tableFields = await getServiceNowTableFields(auth, tableName);
+    tableFields = await getServiceNowTableFields(auth, tableName);
+  } catch (error) {
+    console.error(
+      `Failed to fetch ServiceNow table fields for ${tableName}:`,
+      error,
+    );
+    hasError = true;
+  }
 
-    properties['filters'] = Property.Array({
-      displayName: 'Fields to filter by',
+  const fieldNameProperty = hasError
+    ? Property.ShortText({
+        displayName: 'Field name',
+        required: true,
+      })
+    : Property.StaticDropdown<string>({
+        displayName: 'Field name',
+        required: true,
+        options: {
+          options: tableFields.map((f) => ({
+            label: f.column_label
+              ? `${f.column_label} (${f.element})`
+              : f.element,
+            value: f.element,
+          })),
+        },
+      });
+
+  return {
+    filters: Property.Array({
+      displayName: hasError
+        ? 'Fields to filter by (Failed to load field list)'
+        : 'Fields to filter by',
       required: false,
       properties: {
-        fieldName: Property.StaticDropdown<string>({
-          displayName: 'Field name',
-          required: true,
-          options: {
-            options: tableFields.map((f) => ({
-              label: f.column_label
-                ? `${f.column_label} (${f.element})`
-                : f.element,
-              value: f.element,
-            })),
-          },
-        }),
+        fieldName: fieldNameProperty,
         filterType: Property.StaticDropdown<ViewFilterTypesEnum>({
           displayName: 'Filter type',
           required: true,
           options: {
             options: Object.keys(ViewFilterTypesEnum)
-              .filter((key) => !key.startsWith('single_select_'))
+              .filter((key) => hasError || !key.startsWith('single_select_'))
               .map((key) => ({
                 label:
                   ViewFilterTypesEnum[key as keyof typeof ViewFilterTypesEnum],
@@ -46,82 +64,45 @@ export async function createFiltersProperties(
         value: Property.DynamicProperties({
           displayName: 'Value to search for',
           required: true,
-          refreshers: ['fieldName', 'filterType'],
+          refreshers: hasError ? ['filterType'] : ['fieldName', 'filterType'],
           props: async ({ fieldName, filterType }) => {
-            const shouldDisplayValueProperty =
-              fieldName &&
-              !isSingleValueFilter(
-                filterType as unknown as ViewFilterTypesEnum,
-              );
+            const shouldDisplayValueProperty = !isSingleValueFilter(
+              filterType as unknown as ViewFilterTypesEnum,
+            );
+
+            if (!shouldDisplayValueProperty) {
+              return { value: {} };
+            }
+
+            if (hasError) {
+              return {
+                value: Property.ShortText({
+                  displayName: 'Value',
+                  required: true,
+                }),
+              };
+            }
+
             const currentField = fieldName as unknown as string;
             const serviceNowField = tableFields.find(
               (f) => f.element === currentField,
             );
 
-            const innerProps: { [key: string]: any } = {};
-
-            if (!shouldDisplayValueProperty || !serviceNowField) {
-              innerProps['value'] = {};
-              return innerProps;
+            if (!fieldName || !serviceNowField) {
+              return { value: {} };
             }
 
-            innerProps['value'] = await createFieldValueProperty(
-              serviceNowField,
-              auth,
-              tableName,
-              true,
-            );
-
-            return innerProps;
-          },
-        }),
-      },
-    });
-  } catch (error) {
-    properties['filters'] = Property.Array({
-      displayName: 'Fields to filter by',
-      required: false,
-      properties: {
-        fieldName: Property.ShortText({
-          displayName: 'Field name',
-          required: true,
-        }),
-        filterType: Property.StaticDropdown<ViewFilterTypesEnum>({
-          displayName: 'Filter type',
-          required: true,
-          options: {
-            options: Object.keys(ViewFilterTypesEnum).map((key) => ({
-              label:
-                ViewFilterTypesEnum[key as keyof typeof ViewFilterTypesEnum],
-              value:
-                ViewFilterTypesEnum[key as keyof typeof ViewFilterTypesEnum],
-            })),
-          },
-        }),
-        value: Property.DynamicProperties({
-          displayName: 'Value to search for',
-          required: true,
-          refreshers: ['filterType'],
-          props: async ({ filterType }) => {
-            const shouldDisplayValueProperty = !isSingleValueFilter(
-              filterType as unknown as ViewFilterTypesEnum,
-            );
-
-            const innerProps: { [key: string]: any } = {
-              value: shouldDisplayValueProperty
-                ? Property.ShortText({
-                    displayName: 'Value',
-                    required: true,
-                  })
-                : {},
+            return {
+              value: await createFieldValueProperty(
+                serviceNowField,
+                auth,
+                tableName,
+                true,
+              ),
             };
-
-            return innerProps;
           },
         }),
       },
-    });
-  }
-
-  return properties;
+    }),
+  };
 }
