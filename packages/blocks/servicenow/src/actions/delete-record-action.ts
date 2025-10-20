@@ -22,7 +22,7 @@ export const deleteRecordAction = createAction({
     const auth = context.auth as ServiceNowAuth;
     const { tableName, sysId } = context.propsValue;
 
-    const response = await httpClient.sendRequest({
+    await httpClient.sendRequest({
       method: HttpMethod.DELETE,
       url: `https://${auth.instanceName}.service-now.com/api/now/table/${tableName}/${sysId}`,
       headers: {
@@ -34,6 +34,9 @@ export const deleteRecordAction = createAction({
       },
     });
 
-    return response.body;
+    return {
+      success: true,
+      message: `The record with id "${sysId}" was deleted`,
+    };
   },
 });
