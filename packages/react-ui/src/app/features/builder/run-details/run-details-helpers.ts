@@ -23,9 +23,16 @@ export function getRunMessage(
   return null;
 }
 
-export function getStatusText(status: FlowRunStatus, timeout: number): string {
+export function getStatusText(
+  status: FlowRunStatus,
+  timeout: number,
+  terminationReason?: string,
+): string {
   switch (status) {
     case FlowRunStatus.STOPPED:
+      if (terminationReason) {
+        return `${t('Workflow Run was stopped.')} ${terminationReason}`;
+      }
       return t('Workflow Run was stopped');
     case FlowRunStatus.SUCCEEDED:
       return t('Run Succeeded');

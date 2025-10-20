@@ -28,7 +28,11 @@ const RunDetailsBar = React.memo(
 
     const statusText = useMemo(() => {
       if (!run) return '';
-      return getStatusText(run.status, timeoutSeconds ?? -1);
+      return getStatusText(
+        run.status,
+        timeoutSeconds ?? -1,
+        run.terminationReason,
+      );
     }, [run, timeoutSeconds]);
 
     if (!run) {
