@@ -1,6 +1,7 @@
 import { SharedSystemProp, system } from '@openops/server-shared';
 import { BlockAction, CodeAction } from '@openops/shared';
 import { ExecutionMode } from '../core/code/execution-mode';
+import { wasExecutionLimitReached } from '../execution-limit-reached';
 import { EngineConstants } from '../handler/context/engine-constants';
 import {
   ExecutionVerdict,
@@ -8,7 +9,11 @@ import {
   VerdictReason,
   VerdictResponse,
 } from '../handler/context/flow-execution-context';
-import { ExecutionError, ExecutionErrorType } from './execution-errors';
+import {
+  ExecutionError,
+  ExecutionErrorType,
+  ExecutionLimitReachedError,
+} from './execution-errors';
 
 const executionMode = system.get<ExecutionMode>(
   SharedSystemProp.EXECUTION_MODE,
@@ -61,11 +66,7 @@ export async function continueIfFailureHandler(
   const continueOnFailure =
     action.settings.errorHandlingOptions?.continueOnFailure?.value;
 
-  if (
-    executionState.verdict === ExecutionVerdict.FAILED &&
-    executionState.verdictResponse?.reason ===
-      VerdictReason.EXECUTION_LIMIT_REACHED
-  ) {
+  if (wasExecutionLimitReached(executionState)) {
     return executionState;
   }
 
@@ -96,14 +97,13 @@ export const handleExecutionError = (
       '\n\nNote: This code is executing within an "isolated-vm" environment, meaning it ' +
       'has no access to any native Node.js modules, such as "fs", "process", "http", "crypto", etc.';
   }
-  if (
-    error instanceof ExecutionError &&
-    error.name === 'ExecutionLimitReached'
-  ) {
+
+  if (error instanceof ExecutionLimitReachedError) {
     return {
       message,
       verdictResponse: {
         reason: VerdictReason.EXECUTION_LIMIT_REACHED,
+        message: error.getMessage(),
       },
     };
   }

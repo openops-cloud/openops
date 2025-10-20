@@ -323,7 +323,7 @@ function evaluateError(error: Error): {
 
   if (error instanceof ExecutionLimitReachedError) {
     status = FlowRunStatus.STOPPED;
-    message = error.message;
+    message = error.getMessage();
   }
 
   return {

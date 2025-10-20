@@ -1,6 +1,7 @@
 import {
   ActionType,
   assertEqual,
+  buildBlockActionKey,
   FlowError,
   FlowRunResponse,
   FlowRunStatus,
@@ -45,6 +46,7 @@ export type VerdictResponse =
     }
   | {
       reason: VerdictReason.EXECUTION_LIMIT_REACHED;
+      message: string;
     };
 
 export class FlowExecutorContext {
@@ -172,7 +174,7 @@ export class FlowExecutorContext {
 
     const error =
       stepOutput.status === StepOutputStatus.FAILED ||
-      stepOutput.status === StepOutputStatus.TEST_RUN_LIMIT_REACHED
+      stepOutput.status === StepOutputStatus.EXECUTION_LIMIT_REACHED
         ? { stepName, message: stepOutput.errorMessage }
         : this.error;
 
@@ -250,7 +252,7 @@ export class FlowExecutorContext {
   }
 
   private static getActionKey(blockName: string, actionName: string): string {
-    return `${blockName}|${actionName}`;
+    return buildBlockActionKey(blockName, actionName);
   }
 
   public incrementActionExecutionCount(

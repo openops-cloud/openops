@@ -16,20 +16,21 @@ import {
   AUTHENTICATION_PROPERTY_NAME,
   BlockAction,
   ExecutionType,
-  findTestRunLimit,
   GenericStepOutput,
   isNil,
   StepOutputStatus,
-  TestRunLimit,
 } from '@openops/shared';
 import { URL } from 'url';
+import {
+  incrementActionCountIfNeeded,
+  throwIfExceededExecutionLimit,
+} from '../execution-limit-reached';
 import { blockLoader } from '../helper/block-loader';
 import {
   continueIfFailureHandler,
   handleExecutionError,
   runWithExponentialBackoff,
 } from '../helper/error-handling';
-import { ExecutionLimitReachedError } from '../helper/execution-errors';
 import { createConnectionService } from '../services/connections.service';
 import { createFilesService } from '../services/files.service';
 import { createContextStore } from '../services/storage.service';
@@ -94,59 +95,6 @@ export const blockExecutor: BaseExecutor<BlockAction> = {
       );
     }
   },
-};
-
-const getExecutionLimit = (
-  blockName: string,
-  actionName: string,
-  constants: EngineConstants,
-): TestRunLimit | undefined => {
-  if (!constants.isTestRun || !constants.testRunActionLimits.isEnabled) {
-    return undefined;
-  }
-
-  const limit = findTestRunLimit(
-    constants.testRunActionLimits.limits,
-    blockName,
-    actionName,
-  );
-
-  return limit?.isEnabled ? limit : undefined;
-};
-
-const throwIfExceededExecutionLimit = (
-  blockName: string,
-  actionName: string,
-  executionState: FlowExecutorContext,
-  constants: EngineConstants,
-): void => {
-  const limit = getExecutionLimit(blockName, actionName, constants);
-
-  if (limit) {
-    const currentCount = executionState.getActionExecutionCount(
-      blockName,
-      actionName,
-    );
-
-    if (currentCount >= limit.limit) {
-      throw new ExecutionLimitReachedError(blockName, actionName, limit.limit);
-    }
-  }
-};
-
-const incrementActionCountIfNeeded = (
-  blockName: string,
-  actionName: string,
-  executionState: FlowExecutorContext,
-  constants: EngineConstants,
-): FlowExecutorContext => {
-  const limit = getExecutionLimit(blockName, actionName, constants);
-
-  if (limit) {
-    return executionState.incrementActionExecutionCount(blockName, actionName);
-  }
-
-  return executionState;
 };
 
 const executeAction: ActionHandler<BlockAction> = async ({
@@ -329,23 +277,17 @@ const executeAction: ActionHandler<BlockAction> = async ({
     const stepStatus =
       handledError.verdictResponse?.reason ===
       VerdictReason.EXECUTION_LIMIT_REACHED
-        ? StepOutputStatus.TEST_RUN_LIMIT_REACHED
+        ? StepOutputStatus.EXECUTION_LIMIT_REACHED
         : StepOutputStatus.FAILED;
 
     const failedStepOutput = stepOutput
       .setStatus(stepStatus)
       .setErrorMessage(handledError.message);
 
-    executionState = executionState
+    return executionState
       .upsertStep(action.name, failedStepOutput)
       .setVerdict(ExecutionVerdict.FAILED, handledError.verdictResponse)
       .increaseTask();
-
-    if (e instanceof ExecutionLimitReachedError) {
-      throw e;
-    }
-
-    return executionState;
   }
 };
 
