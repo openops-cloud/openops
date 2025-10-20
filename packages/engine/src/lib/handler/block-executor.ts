@@ -129,7 +129,7 @@ const throwIfExceededExecutionLimit = (
     );
 
     if (currentCount >= limit.limit) {
-      throw new ExecutionLimitReachedError(blockName, actionName, limit.limit);
+      throw new ExecutionLimitReachedError(limit.limit);
     }
   }
 };
@@ -336,12 +336,10 @@ const executeAction: ActionHandler<BlockAction> = async ({
       .setStatus(stepStatus)
       .setErrorMessage(handledError.message);
 
-    executionState = executionState
+    return executionState
       .upsertStep(action.name, failedStepOutput)
       .setVerdict(ExecutionVerdict.FAILED, handledError.verdictResponse)
       .increaseTask();
-
-    return executionState;
   }
 };
 

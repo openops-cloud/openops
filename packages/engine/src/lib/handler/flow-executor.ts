@@ -8,6 +8,7 @@ import {
 } from '@openops/shared';
 import { performance } from 'node:perf_hooks';
 import { throwIfCancellationRequested } from '../cancellation-request-validator';
+import { throwIfExecutionLimitReached } from '../execution-limit-reached';
 import { progressService } from '../services/progress.service';
 import { throwIfExecutionTimeExceeded } from '../timeout-validator';
 import { BaseExecutor } from './base-executor';
@@ -116,6 +117,8 @@ export const flowExecutor = {
         flowExecutionContext,
         constants,
       );
+
+      throwIfExecutionLimitReached(flowExecutionContext);
 
       if (
         flowExecutionContext.verdict !== ExecutionVerdict.RUNNING ||
