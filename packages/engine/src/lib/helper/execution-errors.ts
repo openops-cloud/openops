@@ -122,6 +122,6 @@ export class ExecutionLimitReachedError extends ExecutionError {
       return JSON.parse(this.message).message as string;
     }
 
-    return this.message as string;
+    return this.message;
   }
 }
