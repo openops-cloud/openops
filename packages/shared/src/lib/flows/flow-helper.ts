@@ -46,6 +46,13 @@ type GetStepFromSubFlow = {
 const actionSchemaValidator = TypeCompiler.Compile(SingleActionSchema);
 const triggerSchemaValidation = TypeCompiler.Compile(TriggerWithOptionalId);
 
+export function buildBlockActionKey(
+  blockName: string,
+  actionName: string,
+): string {
+  return `${blockName}|${actionName}`;
+}
+
 function isValid(flowVersion: FlowVersion): boolean {
   let valid = true;
   const steps = flowHelper.getAllSteps(flowVersion.trigger);

@@ -99,3 +99,29 @@ export class FetchError extends ExecutionError {
     );
   }
 }
+
+export class ExecutionLimitReachedError extends ExecutionError {
+  formated: boolean;
+
+  constructor(arg: number | string) {
+    if (typeof arg === 'number') {
+      super(
+        'ExecutionLimitReached',
+        formatMessage(`Action limit reached: ${arg} runs`),
+        ExecutionErrorType.USER,
+      );
+      this.formated = true;
+    } else {
+      super('ExecutionLimitReached', arg, ExecutionErrorType.USER);
+      this.formated = false;
+    }
+  }
+
+  getMessage(): string {
+    if (this.formated) {
+      return JSON.parse(this.message).message as string;
+    }
+
+    return this.message;
+  }
+}

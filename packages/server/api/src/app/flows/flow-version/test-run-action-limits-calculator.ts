@@ -2,6 +2,7 @@ import { fileBlocksUtils } from '@openops/server-shared';
 import {
   Action,
   ActionType,
+  buildBlockActionKey,
   findTestRunLimit,
   flowHelper,
   FlowOperationRequest,
@@ -117,7 +118,7 @@ export async function calculateTestRunActionLimits(
       continue;
     }
 
-    const key = `${blockName}|${actionName}`;
+    const key = buildBlockActionKey(blockName, actionName);
     if (uniquePairs.has(key)) {
       continue;
     }

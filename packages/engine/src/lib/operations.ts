@@ -34,6 +34,7 @@ import {
 import { testExecutionContext } from './handler/context/test-execution-context';
 import { flowExecutor } from './handler/flow-executor';
 import { blockHelper } from './helper/block-helper';
+import { ExecutionLimitReachedError } from './helper/execution-errors';
 import { triggerHelper } from './helper/trigger-helper';
 import { resolveVariable } from './resolve-variable';
 import { progressService } from './services/progress.service';
@@ -318,6 +319,11 @@ function evaluateError(error: Error): {
   if (error instanceof CancellationRequestedError) {
     status = FlowRunStatus.STOPPED;
     message = error.message;
+  }
+
+  if (error instanceof ExecutionLimitReachedError) {
+    status = FlowRunStatus.STOPPED;
+    message = error.getMessage();
   }
 
   return {
