@@ -241,7 +241,7 @@ describe('createFieldValueProperty', () => {
 
       expect(result).toMatchObject({
         displayName: 'Assigned To',
-        description: 'Reference to sys_user table (sys_id)',
+        description: 'Reference to "sys_user" table (sys_id)',
         required: false,
       });
     });
