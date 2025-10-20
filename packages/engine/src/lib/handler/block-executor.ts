@@ -341,10 +341,6 @@ const executeAction: ActionHandler<BlockAction> = async ({
       .setVerdict(ExecutionVerdict.FAILED, handledError.verdictResponse)
       .increaseTask();
 
-    if (e instanceof ExecutionLimitReachedError) {
-      throw e;
-    }
-
     return executionState;
   }
 };
