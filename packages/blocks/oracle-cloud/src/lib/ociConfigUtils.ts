@@ -1,6 +1,9 @@
-import { OracleCloudAuth } from "@openops/common";
+import { OracleCloudAuth } from '@openops/common';
 
-export function toOCIConfig(auth: OracleCloudAuth, pemFilePath: string): string {
+export function toOCIConfig(
+  auth: OracleCloudAuth,
+  pemFilePath: string,
+): string {
   return `[DEFAULT]
 user=${auth.userOcid}
 fingerprint=${auth.fingerprint}

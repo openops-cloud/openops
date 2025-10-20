@@ -1,4 +1,4 @@
-import { BlockAuth, Property } from "@openops/blocks-framework";
+import { BlockAuth, Property } from '@openops/blocks-framework';
 
 const markdown = `
 1. Log into Oracle Cloud(OCI) console.\n
@@ -16,40 +16,43 @@ export interface OracleCloudAuth {
 }
 
 export const oracleCloudAuth = BlockAuth.CustomAuth({
-  authProviderKey: "OCI",
-  authProviderDisplayName: "Oracle Cloud Infrastructure",
+  authProviderKey: 'OCI',
+  authProviderDisplayName: 'Oracle Cloud Infrastructure',
   authProviderLogoUrl: `https://static.openops.com/blocks/oracle-cloud.svg`,
   description: markdown,
   props: {
     tenancyOcid: Property.ShortText({
-      displayName: "Tenancy OCID",
-      required: true
+      displayName: 'Tenancy OCID',
+      required: true,
     }),
     userOcid: Property.ShortText({
-      displayName: "User OCID",
-      required: true
+      displayName: 'User OCID',
+      required: true,
     }),
     fingerprint: Property.ShortText({
-      displayName: "API Key Fingerprint",
-      required: true
+      displayName: 'API Key Fingerprint',
+      required: true,
     }),
     privateKeyPem: Property.SecretText({
-      displayName: "Private Key (base64 format of PEM)",
-      required: true
+      displayName: 'Private Key (base64 format of PEM)',
+      required: true,
     }),
     region: Property.ShortText({
-      displayName: "Region",
+      displayName: 'Region',
       required: true,
-      description: "Example: us-ashburn-1"
-    })
+      description: 'Example: us-ashburn-1',
+    }),
   },
   required: true,
   validate: async ({ auth }) => {
-    if (!auth.tenancyOcid) return { valid: false, error: "Tenancy OCID is required" };
-    if (!auth.userOcid) return { valid: false, error: "User OCID is required" };
-    if (!auth.fingerprint) return { valid: false, error: "Fingerprint is required" };
-    if (!auth.privateKeyPem) return { valid: false, error: "Private Key PEM is required" };
-    if (!auth.region) return { valid: false, error: "Region is required" };
+    if (!auth.tenancyOcid)
+      return { valid: false, error: 'Tenancy OCID is required' };
+    if (!auth.userOcid) return { valid: false, error: 'User OCID is required' };
+    if (!auth.fingerprint)
+      return { valid: false, error: 'Fingerprint is required' };
+    if (!auth.privateKeyPem)
+      return { valid: false, error: 'Private Key PEM is required' };
+    if (!auth.region) return { valid: false, error: 'Region is required' };
     return { valid: true };
-  }
+  },
 });

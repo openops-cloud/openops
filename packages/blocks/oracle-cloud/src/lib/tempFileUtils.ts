@@ -1,9 +1,12 @@
-import fs from "fs/promises";
-import os from "os";
-import path from "path";
-import crypto from "crypto";
+import crypto from 'crypto';
+import fs from 'fs/promises';
+import os from 'os';
+import path from 'path';
 
-export async function writeTempFile(content: string, extension = ""): Promise<string> {
+export async function writeTempFile(
+  content: string,
+  extension = '',
+): Promise<string> {
   const tmpDir = os.tmpdir();
   const fileName = `oci-${crypto.randomUUID()}${extension}`;
   const filePath = path.join(tmpDir, fileName);
