@@ -23,9 +23,7 @@ describe('delete_record action', () => {
 
   test('should delete a record successfully', async () => {
     const mockResponse = {
-      body: {
-        success: true,
-      },
+      body: {},
     };
 
     (httpClient.sendRequest as jest.Mock).mockResolvedValue(mockResponse);
@@ -49,7 +47,10 @@ describe('delete_record action', () => {
       },
     });
 
-    expect(result).toEqual(mockResponse.body);
+    expect(result).toEqual({
+      success: true,
+      message: 'The record with id "abc123" was deleted',
+    });
   });
 
   test('should handle API errors', async () => {
