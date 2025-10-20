@@ -257,12 +257,14 @@ export class FlowExecutorContext {
             ...baseExecutionOutput,
             error: this.error,
             status: FlowRunStatus.INTERNAL_ERROR,
+            terminationReason: 'Flow execution encountered an internal error',
           };
         }
         return {
           ...baseExecutionOutput,
           error: this.error,
           status: FlowRunStatus.FAILED,
+          terminationReason: 'Flow execution failed',
         };
       }
       case ExecutionVerdict.PAUSED: {
