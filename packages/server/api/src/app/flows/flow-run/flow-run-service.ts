@@ -409,10 +409,14 @@ export const flowRunService = {
       stepIds: [flowVersion.trigger.id],
     });
 
+    const triggerPayload = payload.find(
+      (o) => o.stepId === flowVersion.trigger.id,
+    )?.output;
+
     return this.start({
       projectId,
       flowVersionId,
-      payload,
+      payload: triggerPayload,
       environment: RunEnvironment.TESTING,
       executionType: ExecutionType.BEGIN,
       synchronousHandlerId: webhookResponseWatcher.getServerId(),
