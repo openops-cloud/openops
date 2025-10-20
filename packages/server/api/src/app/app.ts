@@ -5,7 +5,7 @@ import { fastifyRequestContext } from '@fastify/request-context';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import { BlockMetadata } from '@openops/blocks-framework';
-import { isLLMTelemetryEnabled } from '@openops/common';
+import { getAiTelemetrySDK } from '@openops/common';
 import {
   AppSystemProp,
   bodyConverterModule,
@@ -27,14 +27,10 @@ import {
   spreadIfDefined,
   UserInvitation,
 } from '@openops/shared';
-import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
-import { NodeSDK } from '@opentelemetry/sdk-node';
-import { SpanExporter } from '@opentelemetry/sdk-trace-base';
 import { createAdapter, RedisAdapter } from '@socket.io/redis-adapter';
 import chalk from 'chalk';
 import { FastifyInstance, FastifyRequest, HTTPMethods } from 'fastify';
 import fastifySocketIO from 'fastify-socket.io';
-import { LangfuseExporter } from 'langfuse-vercel';
 import * as process from 'node:process';
 import { Socket } from 'socket.io';
 import { aiModule } from './ai/ai.module';
@@ -73,17 +69,7 @@ import { workerModule } from './workers/worker-module';
 export const setupApp = async (
   app: FastifyInstance,
 ): Promise<FastifyInstance> => {
-  const otelSDK = isLLMTelemetryEnabled()
-    ? new NodeSDK({
-        traceExporter: new LangfuseExporter({
-          secretKey: system.get(SharedSystemProp.LANGFUSE_SECRET_KEY),
-          publicKey: system.get(SharedSystemProp.LANGFUSE_PUBLIC_KEY),
-          baseUrl: system.get(SharedSystemProp.LANGFUSE_HOST),
-          environment: system.get(SharedSystemProp.ENVIRONMENT_NAME),
-        }) as SpanExporter,
-        instrumentations: [getNodeAutoInstrumentations()],
-      })
-    : undefined;
+  const otelSDK = getAiTelemetrySDK();
   otelSDK?.start();
 
   await app.register(swagger, {

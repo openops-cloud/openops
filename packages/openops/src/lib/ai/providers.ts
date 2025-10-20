@@ -6,7 +6,11 @@ import {
   ApplicationErrorParams,
   GetProvidersResponse,
 } from '@openops/shared';
+import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { NodeSDK } from '@opentelemetry/sdk-node';
+import { SpanExporter } from '@opentelemetry/sdk-trace-base';
 import { AISDKError, generateText, LanguageModel } from 'ai';
+import { LangfuseExporter } from 'langfuse-vercel';
 import { anthropicProvider } from './providers/anthropic';
 import { azureProvider } from './providers/azure-openai';
 import { cerebrasProvider } from './providers/cerebras';
@@ -134,6 +138,20 @@ export const validateAiProviderConfig = async (
 export const isLLMTelemetryEnabled = () =>
   !!system.get(SharedSystemProp.LANGFUSE_SECRET_KEY) &&
   !!system.get(SharedSystemProp.LANGFUSE_PUBLIC_KEY);
+
+export const getAiTelemetrySDK = () => {
+  return isLLMTelemetryEnabled()
+    ? new NodeSDK({
+        traceExporter: new LangfuseExporter({
+          secretKey: system.get(SharedSystemProp.LANGFUSE_SECRET_KEY),
+          publicKey: system.get(SharedSystemProp.LANGFUSE_PUBLIC_KEY),
+          baseUrl: system.get(SharedSystemProp.LANGFUSE_HOST),
+          environment: system.get(SharedSystemProp.ENVIRONMENT_NAME),
+        }) as unknown as SpanExporter,
+        instrumentations: [getNodeAutoInstrumentations()],
+      })
+    : undefined;
+};
 
 const invalidConfigError = (
   errorName: string,

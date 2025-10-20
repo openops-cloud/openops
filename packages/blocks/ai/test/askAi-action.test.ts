@@ -3,6 +3,7 @@ jest.mock('@openops/common', () => ({
   getAiModelFromConnection: jest.fn(
     (model: string, customModel?: string) => customModel || model,
   ),
+  isLLMTelemetryEnabled: jest.fn(() => false),
 }));
 
 jest.mock('ai', () => ({
@@ -59,12 +60,15 @@ describe('analyze action', () => {
 
     const result = await askAi.run(context as any);
 
-    expect(generateObject).toHaveBeenCalledWith({
-      model: 'languageModel',
-      prompt: 'Hello',
-      schema: analysisLLMSchema,
-      maxRetries: 2,
-    });
+    expect(generateObject).toHaveBeenCalledWith(
+      expect.objectContaining({
+        model: 'languageModel',
+        prompt: 'Hello',
+        schema: analysisLLMSchema,
+        maxRetries: 2,
+        experimental_telemetry: { isEnabled: false },
+      }),
+    );
 
     expect(result).toEqual({ textAnswer: 'answer', classifications: [] });
   });
@@ -188,6 +192,39 @@ describe('analyze action', () => {
 
     expect(result).toBe('ok');
   });
+  test.each([true, false])(
+    'should set experimental_telemetry based on isLLMTelemetryEnabled=%p',
+    async (isLLMTelemetryEnabledValue) => {
+      const { getAiProviderLanguageModel, isLLMTelemetryEnabled } =
+        jest.requireMock('@openops/common') as {
+          getAiProviderLanguageModel: jest.Mock;
+          isLLMTelemetryEnabled: jest.Mock;
+        };
+      getAiProviderLanguageModel.mockResolvedValue('lm');
+      (generateObject as jest.Mock).mockResolvedValue({
+        object: { textAnswer: 't', classifications: [] },
+      });
+
+      const auth = {
+        provider: AiProviderEnum.OPENAI,
+        model: 'gpt',
+        apiKey: 'k',
+        providerSettings: {},
+        modelSettings: {},
+      };
+
+      const context = createContext(auth, { prompt: 'P' });
+
+      isLLMTelemetryEnabled.mockReturnValueOnce(isLLMTelemetryEnabledValue);
+      await askAi.run(context as any);
+
+      expect(generateObject).toHaveBeenCalledWith(
+        expect.objectContaining({
+          experimental_telemetry: { isEnabled: isLLMTelemetryEnabledValue },
+        }),
+      );
+    },
+  );
 });
 
 function createContext(auth?: unknown, props?: unknown): unknown {
