@@ -15,7 +15,6 @@ import { assertNotNullOrUndefined } from '@openops/shared';
 import axios from 'axios';
 import FormData from 'form-data';
 import { HttpsProxyAgent } from 'https-proxy-agent';
-import { applyAuthentication } from '../common/apply-authentication';
 import { httpAuth } from '../common/auth';
 import { httpMethodDropdown } from '../common/props';
 
@@ -171,10 +170,27 @@ export const httpSendRequestAction = createAction({
     await validateHost(url);
     await validateHost(context.propsValue.proxy_settings?.proxy_host);
 
-    let request: HttpRequest = {
+    const mergeHeaders = (
+      authHeaders: HttpHeaders,
+      userHeaders: HttpHeaders,
+    ) => {
+      const toLowerCaseKeys = (obj: HttpHeaders) =>
+        Object.fromEntries(
+          Object.entries(obj).map(([k, v]) => [k.toLowerCase(), v]),
+        );
+
+      const auth = toLowerCaseKeys(authHeaders);
+      const user = toLowerCaseKeys(userHeaders);
+
+      return { ...auth, ...user };
+    };
+
+    const authHeaders = (context.auth?.value as HttpHeaders) ?? {};
+
+    const request: HttpRequest = {
       method,
       url,
-      headers: (headers ?? {}) as HttpHeaders,
+      headers: mergeHeaders(authHeaders, (headers ?? {}) as HttpHeaders),
       queryParams: (queryParams ?? {}) as QueryParams,
       timeout: timeout ? timeout * 1000 : 0,
     };
@@ -191,8 +207,6 @@ export const httpSendRequestAction = createAction({
         request.body = bodyInput;
       }
     }
-
-    request = applyAuthentication(request, (context.auth as any)?.value);
 
     try {
       if (use_proxy) {

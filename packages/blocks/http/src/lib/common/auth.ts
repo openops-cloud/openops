@@ -20,7 +20,7 @@ export const httpAuth = BlockAuth.CustomAuth({
   required: false,
   description,
   props: {
-    value: Property.Json({
+    value: Property.Object({
       displayName: 'Auth Object',
       required: false,
     }),
