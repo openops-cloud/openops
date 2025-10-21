@@ -1,16 +1,11 @@
 import { BlockAuth, Property } from '@openops/blocks-framework';
 
 const description = `
-Configure authentication credentials for HTTP requests. 
+Provide optional HTTP headers. To authenticate, set the Authorization header.
 
-Choose from multiple authentication methods:
-- **None**: No authentication required
-- **API Key**: Add an API key to headers or query parameters
-- **Bearer Token**: Add a bearer token to the Authorization header
-- **Basic Auth**: Use username and password for basic authentication
-- **Custom Headers**: Add custom authentication headers
-
-Fill in only the fields relevant to your selected authentication type.
+Examples:
+- Bearer token: { Authorization: 'Bearer <token>' }
+- Basic auth: { Authorization: 'Basic <base64(username:password)>' }
 `;
 
 export const httpAuth = BlockAuth.CustomAuth({
@@ -23,16 +18,9 @@ export const httpAuth = BlockAuth.CustomAuth({
     value: Property.Object({
       displayName: 'Auth Object',
       required: false,
+      defaultValue: {
+        Authorization: 'Bearer ',
+      },
     }),
   },
 });
-export interface HttpAuth {
-  authentication_type: string;
-  api_key_name?: string;
-  api_key_value?: string;
-  api_key_location?: string;
-  bearer_token?: string;
-  basic_auth_username?: string;
-  basic_auth_password?: string;
-  custom_headers?: Record<string, string>;
-}
