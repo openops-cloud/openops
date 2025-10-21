@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { applyFunctionToValues, isNil, isString } from '@openops/shared';
+import { applyFunctionToKeysAndValues, isNil, isString } from '@openops/shared';
 import { initCodeSandbox } from '../core/code/code-sandbox';
 import { FlowExecutorContext } from '../handler/context/flow-execution-context';
 import { createConnectionService } from '../services/connections.service';
@@ -37,7 +37,7 @@ export const createPropsResolver = ({
         apiUrl,
         currentState,
       };
-      const resolvedInput = await applyFunctionToValues<T>(
+      const resolvedInput = await applyFunctionToKeysAndValues<T>(
         unresolvedInput,
         (token) =>
           resolveInputAsync({
@@ -46,7 +46,7 @@ export const createPropsResolver = ({
             censoredInput: false,
           }),
       );
-      const censoredInput = await applyFunctionToValues<T>(
+      const censoredInput = await applyFunctionToKeysAndValues<T>(
         unresolvedInput,
         (token) =>
           resolveInputAsync({

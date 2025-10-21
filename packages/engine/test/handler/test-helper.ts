@@ -28,6 +28,8 @@ export const generateMockEngineConstants = (params?: Partial<EngineConstants>): 
         params?.filesServiceType ?? 'local',
         params?.progressUpdateType ?? ProgressUpdateType.NONE,
         params?.serverHandlerId ?? null,
+        params?.testRunActionLimits ?? { isEnabled: false, limits: [] },
+        params?.isTestRun ?? false,
         params?.resumePayload,
     )
 }

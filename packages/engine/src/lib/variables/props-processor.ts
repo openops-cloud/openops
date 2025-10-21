@@ -41,7 +41,7 @@ export const propsProcessor = {
     if (isAuthenticationProperty) {
       const { processedInput: authProcessedInput, errors: authErrors } =
         await propsProcessor.applyProcessorsAndValidators(
-          resolvedInput[AUTHENTICATION_PROPERTY_NAME],
+          resolvedInput[AUTHENTICATION_PROPERTY_NAME] ?? {},
           auth.props,
           undefined,
           requireAuth,
