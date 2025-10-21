@@ -1,14 +1,20 @@
 import { TestStepDataViewer } from '@openops/components/ui';
 import { t } from 'i18next';
 import { Timer } from 'lucide-react';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { flagsHooks } from '@/app/common/hooks/flags-hooks';
 import { useTheme } from '@/app/common/providers/theme-provider';
 import { useBuilderStateContext } from '@/app/features/builder/builder-hooks';
 import { StepStatusIcon } from '@/app/features/flow-runs/components/step-status-icon';
 import { formatUtils } from '@/app/lib/utils';
-import { FlagId, flowHelper, StepOutput } from '@openops/shared';
+import {
+  FlagId,
+  flowHelper,
+  StepOutput,
+  StepOutputStatus,
+} from '@openops/shared';
+import { TestRunActionLimitReachedPlate } from './test-run-action-limit-reached-plate';
 
 const FlowStepInputOutput = React.memo(
   ({ stepDetails }: { stepDetails: StepOutput }) => {
@@ -28,15 +34,46 @@ const FlowStepInputOutput = React.memo(
       ? flowHelper.getStep(flowVersion, selectedStepName)
       : undefined;
 
+    const testRunActionLimitReachedMessage = useMemo(() => {
+      if (
+        stepDetails.status !== StepOutputStatus.EXECUTION_LIMIT_REACHED ||
+        !stepDetails.errorMessage
+      ) {
+        return undefined;
+      }
+
+      const fallbackMessage = t('Action limit reached.');
+
+      try {
+        const parsed = JSON.parse(stepDetails.errorMessage);
+        return typeof parsed.message === 'string' && parsed.message
+          ? parsed.message
+          : fallbackMessage;
+      } catch (error) {
+        console.error(error);
+        return fallbackMessage;
+      }
+    }, [stepDetails.errorMessage, stepDetails.status]);
+
     const { theme } = useTheme();
     if (!stepDetails) {
       return null;
     }
     return (
       <div className="h-full flex flex-col gap-2 p-4">
-        <div className="flex items-center gap-2 justify-start mb-4">
-          <StepStatusIcon status={stepDetails.status} size="5"></StepStatusIcon>
-          <div>{selectedStep?.displayName}</div>
+        <div>
+          <div className="flex items-center gap-2 justify-start mb-4">
+            <StepStatusIcon
+              status={stepDetails.status}
+              size="5"
+            ></StepStatusIcon>
+            <div>{selectedStep?.displayName}</div>
+          </div>
+          {testRunActionLimitReachedMessage && (
+            <TestRunActionLimitReachedPlate
+              error={testRunActionLimitReachedMessage}
+            />
+          )}
         </div>
         <div className="flex items-center gap-1 justify-start">
           {durationEnabled && (
