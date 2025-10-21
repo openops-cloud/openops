@@ -311,7 +311,7 @@ function TestRunLimitsForm({
                                           field.onChange(
                                             Number.isFinite(parsed) &&
                                               parsed >= min
-                                              ? parsed
+                                              ? Math.min(parsed, max)
                                               : min,
                                           );
                                         }}
