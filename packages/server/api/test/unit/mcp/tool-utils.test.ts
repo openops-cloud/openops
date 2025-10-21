@@ -153,7 +153,7 @@ describe('sanitizeMessages', () => {
       },
     ])(
       'should handle $description',
-      ({ input, expected }: { input: ModelMessage[]; expected: any }) => {
+      ({ input, expected }: { input: ModelMessage[]; expected: ModelMessage[] }) => {
         const result = sanitizeMessages(input);
         expect(result).toEqual(expected);
       },
