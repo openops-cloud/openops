@@ -21,7 +21,7 @@ services:
     environment:
       OPS_COMPONENT: app
       OPS_VERSION: ${OPS_VERSION:-latest}
-      OPS_OPENOPS_TABLES_VERSION: 0.2.6
+      OPS_OPENOPS_TABLES_VERSION: 0.2.6-ops-2890
       OPS_ANALYTICS_VERSION: 0.14.1
     depends_on:
       openops-tables:
@@ -36,7 +36,7 @@ services:
     image: public.ecr.aws/openops/openops-engine:${OPS_VERSION:-latest}
     restart: unless-stopped
     env_file: .env
-    command: ["cp -r /var/tmp-base/. /tmp/ && node main.js; exit $?"]
+    command: ['cp -r /var/tmp-base/. /tmp/ && node main.js; exit $?']
     environment:
       OPS_BASE_CODE_DIRECTORY: /tmp/codes
       OPS_COMPONENT: engine
@@ -47,7 +47,7 @@ services:
       - ${HOST_AZURE_CONFIG_DIR:-openops_azure_cli_data}:/tmp/azure
       - ${HOST_CLOUDSDK_CONFIG:-openops_gcloud_cli_data}:/tmp/gcloud
   openops-tables:
-    image: public.ecr.aws/openops/openops-tables:0.2.6
+    image: public.ecr.aws/openops/openops-tables:0.2.6-ops-2890
     restart: unless-stopped
     environment:
       BASEROW_PUBLIC_URL: ${OPS_OPENOPS_TABLES_PUBLIC_URL}
