@@ -3,16 +3,6 @@ import { ServiceNowAuth } from './auth';
 import { getServiceNowChoiceValues } from './get-choice-values';
 import { ServiceNowTableField } from './get-table-fields';
 
-/**
- * Creates the appropriate Property type for a ServiceNow field value,
- * including handling choice fields with dynamic options.
- *
- * @param field The ServiceNow field metadata
- * @param auth ServiceNow authentication object
- * @param tableName The table name containing the field
- * @param required Whether the property should be required
- * @returns A Property configuration object
- */
 export async function createFieldValueProperty(
   field: ServiceNowTableField,
   auth: ServiceNowAuth,

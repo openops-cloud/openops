@@ -8,9 +8,6 @@ export interface ServiceNowChoice {
   value: string;
 }
 
-/**
- * Fetches choice values for a specific field from ServiceNow sys_choice table
- */
 export async function getServiceNowChoiceValues(
   auth: ServiceNowAuth,
   tableName: string,

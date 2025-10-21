@@ -3,12 +3,6 @@ import { logger } from '@openops/server-shared';
 import { ServiceNowAuth } from './auth';
 import { getServiceNowTableFields } from './get-table-fields';
 
-/**
- * Creates a dynamic property for selecting ServiceNow table fields.
- * Returns a multi-select dropdown with all available fields for the selected table.
- *
- * @returns A DynamicProperties configuration for field selection
- */
 export function servicenowFieldsDropdownProperty() {
   return Property.DynamicProperties({
     displayName: 'Model',

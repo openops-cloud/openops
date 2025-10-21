@@ -3,9 +3,6 @@ import { ServiceNowAuth } from '../lib/auth';
 import { createFieldValueProperty } from '../lib/create-field-value-property';
 import { getServiceNowTableFields } from '../lib/get-table-fields';
 
-/**
- * Filters table fields to only include writable, non-primary, non-collection fields
- */
 function filterWritableFields(
   tableFields: Awaited<ReturnType<typeof getServiceNowTableFields>>,
 ) {
@@ -17,9 +14,6 @@ function filterWritableFields(
   );
 }
 
-/**
- * Maps table fields to dropdown options
- */
 function mapFieldsToOptions(
   tableFields: Awaited<ReturnType<typeof getServiceNowTableFields>>,
 ) {
@@ -29,14 +23,6 @@ function mapFieldsToOptions(
   }));
 }
 
-/**
- * Creates field properties for ServiceNow records
- * @param auth ServiceNow authentication
- * @param tableName ServiceNow table name
- * @param displayName Display name for the array property
- * @param valuePropertyName Name of the value property (e.g., 'fieldValue' or 'newFieldValue')
- * @param valueDisplayName Display name for the value property
- */
 async function createFieldsProperties(
   auth: ServiceNowAuth,
   tableName: string,

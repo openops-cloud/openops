@@ -1,8 +1,5 @@
 import { ViewFilterTypesEnum } from '@openops/common';
 
-/**
- * Maps ViewFilterTypesEnum to ServiceNow query operators
- */
 export function mapFilterTypeToServiceNowOperator(
   filterType: ViewFilterTypesEnum,
 ): string {
@@ -35,9 +32,6 @@ export function mapFilterTypeToServiceNowOperator(
   return mapping[filterType] || '=';
 }
 
-/**
- * Builds a ServiceNow encoded query string from structured filters
- */
 export function buildServiceNowQuery(
   filters: Array<{
     fieldName: string;
