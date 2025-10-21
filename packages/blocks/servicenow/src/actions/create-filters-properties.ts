@@ -3,13 +3,16 @@ import { isSingleValueFilter, ViewFilterTypesEnum } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { ServiceNowAuth } from '../lib/auth';
 import { createFieldValueProperty } from '../lib/create-field-value-property';
-import { getServiceNowTableFields } from '../lib/get-table-fields';
+import {
+  getServiceNowTableFields,
+  ServiceNowTableField,
+} from '../lib/get-table-fields';
 
 export async function createFiltersProperties(
   auth: ServiceNowAuth,
   tableName: string,
 ) {
-  let tableFields: Awaited<ReturnType<typeof getServiceNowTableFields>> = [];
+  let tableFields: ServiceNowTableField[] = [];
   let hasError = false;
 
   try {

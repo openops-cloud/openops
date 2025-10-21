@@ -1,11 +1,12 @@
 import { Property } from '@openops/blocks-framework';
 import { ServiceNowAuth } from '../lib/auth';
 import { createFieldValueProperty } from '../lib/create-field-value-property';
-import { getServiceNowTableFields } from '../lib/get-table-fields';
+import {
+  getServiceNowTableFields,
+  ServiceNowTableField,
+} from '../lib/get-table-fields';
 
-function filterWritableFields(
-  tableFields: Awaited<ReturnType<typeof getServiceNowTableFields>>,
-) {
+function filterWritableFields(tableFields: ServiceNowTableField[]) {
   return tableFields.filter(
     (f) =>
       f.read_only !== 'true' &&
@@ -14,9 +15,7 @@ function filterWritableFields(
   );
 }
 
-function mapFieldsToOptions(
-  tableFields: Awaited<ReturnType<typeof getServiceNowTableFields>>,
-) {
+function mapFieldsToOptions(tableFields: ServiceNowTableField[]) {
   return tableFields.map((f) => ({
     label: f.column_label ? `${f.column_label} (${f.element})` : f.element,
     value: f.element,

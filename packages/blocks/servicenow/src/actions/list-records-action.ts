@@ -62,13 +62,15 @@ export const listRecordsAction = createAction({
 
     const queryParams: Record<string, string> = {};
 
-    const filtersProps = context.propsValue.filters['filters'] as unknown as {
-      fieldName: string;
-      value: { value: unknown };
-      filterType: ViewFilterTypesEnum;
-    }[];
+    const filtersProps = context.propsValue.filters['filters'] as unknown as
+      | {
+          fieldName: string;
+          value: { value: unknown };
+          filterType: ViewFilterTypesEnum;
+        }[]
+      | undefined;
 
-    if (filtersProps && filtersProps.length > 0) {
+    if (filtersProps?.length) {
       const filters = filtersProps.map((filter) => ({
         fieldName: filter.fieldName,
         value: filter.value['value'],
