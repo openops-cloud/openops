@@ -202,7 +202,7 @@ export function extractFiltersFromProps(filtersProps: unknown):
       filterType: ViewFilterTypesEnum;
     }[]
   | undefined {
-  const filters = filtersProps as unknown as
+  const filters = filtersProps as
     | {
         fieldName: string;
         value: { value: unknown };
