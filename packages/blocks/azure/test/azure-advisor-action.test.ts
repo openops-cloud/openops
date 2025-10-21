@@ -14,6 +14,7 @@ const azureCliMock = {
 
 jest.mock('../src/lib/azure-cli', () => azureCliMock);
 
+import { tr } from 'zod/v4/locales';
 import { advisorAction } from '../src/lib/actions/azure-advisor-action';
 
 const auth = {
@@ -67,7 +68,7 @@ describe('advisorAction', () => {
       },
       filterByProperty: {
         type: 'DYNAMIC',
-        required: false,
+        required: true,
       },
     });
   });

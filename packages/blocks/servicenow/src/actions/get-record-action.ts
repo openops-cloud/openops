@@ -26,7 +26,7 @@ export const getRecordAction = createAction({
     }),
     fields: Property.DynamicProperties({
       displayName: 'Model',
-      required: false,
+      required: true,
       refreshers: ['auth', 'tableName'],
       props: async ({ auth, tableName }) => {
         const props: DynamicPropsValue = {};

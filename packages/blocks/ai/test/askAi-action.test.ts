@@ -24,7 +24,7 @@ describe('analyze action', () => {
       model: {
         type: 'DYNAMIC',
         displayName: 'Model',
-        required: false,
+        required: true,
       },
       prompt: {
         type: 'LONG_TEXT',

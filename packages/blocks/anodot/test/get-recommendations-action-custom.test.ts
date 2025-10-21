@@ -55,7 +55,7 @@ describe('getRecommendationsCustomAction', () => {
         type: 'CHECKBOX',
       },
       customTags: {
-        required: false,
+        required: true,
         type: 'DYNAMIC',
       },
       useEnrichmentTags: {
@@ -63,7 +63,7 @@ describe('getRecommendationsCustomAction', () => {
         type: 'CHECKBOX',
       },
       enrichmentTags: {
-        required: false,
+        required: true,
         type: 'DYNAMIC',
       },
       useTypeId: {
@@ -71,7 +71,7 @@ describe('getRecommendationsCustomAction', () => {
         type: 'CHECKBOX',
       },
       typeId: {
-        required: false,
+        required: true,
         type: 'DYNAMIC',
       },
       useService: {
@@ -79,7 +79,7 @@ describe('getRecommendationsCustomAction', () => {
         type: 'CHECKBOX',
       },
       service: {
-        required: false,
+        required: true,
         type: 'DYNAMIC',
       },
       useRegion: {
@@ -87,7 +87,7 @@ describe('getRecommendationsCustomAction', () => {
         type: 'CHECKBOX',
       },
       region: {
-        required: false,
+        required: true,
         type: 'DYNAMIC',
       },
       useLinkedAccountId: {
@@ -95,7 +95,7 @@ describe('getRecommendationsCustomAction', () => {
         type: 'CHECKBOX',
       },
       linkedAccountId: {
-        required: false,
+        required: true,
         type: 'DYNAMIC',
       },
       useInstanceType: {
@@ -103,7 +103,7 @@ describe('getRecommendationsCustomAction', () => {
         type: 'CHECKBOX',
       },
       instanceType: {
-        required: false,
+        required: true,
         type: 'DYNAMIC',
       },
       useResourceId: {
@@ -111,7 +111,7 @@ describe('getRecommendationsCustomAction', () => {
         type: 'CHECKBOX',
       },
       resourceId: {
-        required: false,
+        required: true,
         type: 'DYNAMIC',
       },
       useAnnualSavings: {
@@ -119,7 +119,7 @@ describe('getRecommendationsCustomAction', () => {
         type: 'CHECKBOX',
       },
       annualSavingsProperty: {
-        required: false,
+        required: true,
         type: 'DYNAMIC',
       },
       categories: {
