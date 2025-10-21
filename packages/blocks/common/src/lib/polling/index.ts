@@ -1,5 +1,6 @@
-import { Store, StoreScope } from '@openops/blocks-framework';
-import { isNil } from '@openops/shared';
+import { Store } from '@openops/blocks-framework';
+import { getContext, logger } from '@openops/server-shared';
+import { ApplicationError, ErrorCode, isNil } from '@openops/shared';
 
 interface TimebasedPolling<AuthValue, PropsValue> {
   strategy: DedupeStrategy.TIMEBASED;
@@ -58,6 +59,7 @@ export const pollingHelper = {
     switch (polling.strategy) {
       case DedupeStrategy.TIMEBASED: {
         const lastEpochMilliSeconds = await store.get<number>('lastPoll');
+
         if (isNil(lastEpochMilliSeconds)) {
           throw new Error("lastPoll doesn't exist in the store.");
         }
@@ -71,10 +73,15 @@ export const pollingHelper = {
           (acc, item) => Math.max(acc, item.epochMilliSeconds),
           lastEpochMilliSeconds,
         );
-        await store.put('lastPoll', newLastEpochMilliSeconds);
-        return items
+
+        const itemsToPoll = items
           .filter((f) => f.epochMilliSeconds > lastEpochMilliSeconds)
           .map((item) => item.data);
+
+        throwIfExecutionTimeExceeded();
+        await store.put('lastPoll', newLastEpochMilliSeconds);
+
+        return itemsToPoll;
       }
       case DedupeStrategy.LAST_ITEM: {
         const lastItemId = await store.get<unknown>('lastItem');
@@ -97,11 +104,15 @@ export const pollingHelper = {
           // Get the last polling.maxItemsToPoll items
           newItems = newItems.slice(-maxItemsToPoll);
         }
+
         const newLastItem = newItems?.[0]?.id;
+        const itemsToPoll = newItems.map((item) => item.data);
         if (!isNil(newLastItem)) {
+          throwIfExecutionTimeExceeded();
           await store.put('lastItem', newLastItem);
         }
-        return newItems.map((item) => item.data);
+
+        return itemsToPoll;
       }
     }
   },
@@ -183,5 +194,16 @@ function getFirstFiveOrAll(array: unknown[]) {
     return array;
   } else {
     return array.slice(0, 5);
+  }
+}
+
+function throwIfExecutionTimeExceeded(): void {
+  const deadlineTimestamp = getContext()['deadlineTimestamp'];
+  if (deadlineTimestamp && Date.now() > Number(deadlineTimestamp)) {
+    logger.error('Engine execution time exceeded.');
+    throw new ApplicationError({
+      code: ErrorCode.EXECUTION_TIMEOUT,
+      params: {},
+    });
   }
 }

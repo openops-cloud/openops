@@ -4,10 +4,12 @@ import {
   TriggerStrategy,
 } from '@openops/blocks-framework';
 import {
+  ApplicationError,
   assertEqual,
   assertNotNullOrUndefined,
   AUTHENTICATION_PROPERTY_NAME,
   BlockTrigger,
+  ErrorCode,
   EventPayload,
   ExecuteTriggerOperation,
   ExecuteTriggerResponse,
@@ -224,26 +226,43 @@ export const triggerHelper = {
             };
           }
         }
-        const items = await trigger.run({
-          ...context,
-          files: createFilesService({
-            apiUrl: constants.internalApiUrl,
-            engineToken: params.engineToken!,
-            flowId: params.flowVersion.flowId,
-            stepName: triggerName,
-            type: 'db',
-          }),
-        });
-        if (!Array.isArray(items)) {
-          throw new Error(
-            `Trigger run should return an array of items, but returned ${typeof items}`,
-          );
+
+        try {
+          const items = await trigger.run({
+            ...context,
+            files: createFilesService({
+              apiUrl: constants.internalApiUrl,
+              engineToken: params.engineToken!,
+              flowId: params.flowVersion.flowId,
+              stepName: triggerName,
+              type: 'db',
+            }),
+          });
+
+          if (!Array.isArray(items)) {
+            throw new Error(
+              `Trigger run should return an array of items, but returned ${typeof items}`,
+            );
+          }
+
+          return {
+            success: true,
+            output: items,
+            input: resolvedInput,
+          };
+        } catch (error) {
+          if (
+            error instanceof ApplicationError &&
+            error.error.code === ErrorCode.EXECUTION_TIMEOUT
+          ) {
+            return {
+              success: false,
+              message: 'Engine execution time exceeded.',
+            };
+          }
+
+          throw error;
         }
-        return {
-          success: true,
-          output: items,
-          input: resolvedInput,
-        };
       }
     }
   },
