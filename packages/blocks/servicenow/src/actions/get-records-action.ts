@@ -9,11 +9,11 @@ import { generateAuthHeader } from '../lib/generate-auth-header';
 import { servicenowTableDropdownProperty } from '../lib/table-dropdown-property';
 import { createFiltersProperties } from './create-filters-properties';
 
-export const listRecordsAction = createAction({
+export const getRecordsAction = createAction({
   auth: servicenowAuth,
-  name: 'list_records',
-  description: 'List records from a ServiceNow table with optional filters.',
-  displayName: 'List Records',
+  name: 'get_records',
+  description: 'Retrieve records from a specified user table',
+  displayName: 'Get Records',
   isWriteAction: false,
   props: {
     tableName: servicenowTableDropdownProperty(),
@@ -90,8 +90,10 @@ export const listRecordsAction = createAction({
       queryParams['sysparm_limit'] = String(limit);
     }
 
-    if (fields && Array.isArray(fields) && fields.length > 0) {
-      queryParams['sysparm_fields'] = fields.join(',');
+    const selectedFields = (fields as { selected?: string[] })?.selected;
+
+    if (Array.isArray(selectedFields) && selectedFields) {
+      queryParams['sysparm_fields'] = selectedFields.join(',');
     }
 
     const response = await httpClient.sendRequest({

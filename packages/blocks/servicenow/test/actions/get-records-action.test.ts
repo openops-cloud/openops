@@ -1,6 +1,6 @@
 import { httpClient, HttpMethod } from '@openops/blocks-common';
 import { FilterType, ViewFilterTypesEnum } from '@openops/common';
-import { listRecordsAction } from '../../src/actions/list-records-action';
+import { getRecordsAction } from '../../src/actions/get-records-action';
 
 jest.mock('@openops/blocks-common', () => ({
   httpClient: {
@@ -11,7 +11,7 @@ jest.mock('@openops/blocks-common', () => ({
   },
 }));
 
-describe('list_records action', () => {
+describe('get_records action', () => {
   const mockAuth = {
     username: 'testuser',
     password: 'testpass',
@@ -22,7 +22,7 @@ describe('list_records action', () => {
     jest.clearAllMocks();
   });
 
-  test('should list records with filters', async () => {
+  test('should retrieve records with filters', async () => {
     const mockResponse = {
       body: {
         result: [
@@ -54,11 +54,11 @@ describe('list_records action', () => {
           ],
         },
         limit: 50,
-        fields: ['sys_id', 'short_description'],
+        fields: { selected: ['sys_id', 'short_description'] },
       },
     };
 
-    const result = await listRecordsAction.run(context as any);
+    const result = await getRecordsAction.run(context as any);
 
     expect(httpClient.sendRequest).toHaveBeenCalledWith({
       method: HttpMethod.GET,
@@ -77,7 +77,7 @@ describe('list_records action', () => {
     expect(result).toEqual(mockResponse.body);
   });
 
-  test('should list records without filters', async () => {
+  test('should retrieve records without filters', async () => {
     const mockResponse = {
       body: {
         result: [{ sys_id: 'abc123' }],
@@ -99,7 +99,7 @@ describe('list_records action', () => {
       },
     };
 
-    const result = await listRecordsAction.run(context as any);
+    const result = await getRecordsAction.run(context as any);
 
     expect(httpClient.sendRequest).toHaveBeenCalledWith({
       method: HttpMethod.GET,
@@ -134,7 +134,7 @@ describe('list_records action', () => {
       },
     };
 
-    await expect(listRecordsAction.run(context as any)).rejects.toThrow(
+    await expect(getRecordsAction.run(context as any)).rejects.toThrow(
       'API Error',
     );
   });
@@ -175,7 +175,7 @@ describe('list_records action', () => {
       },
     };
 
-    await listRecordsAction.run(context as any);
+    await getRecordsAction.run(context as any);
 
     expect(httpClient.sendRequest).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -214,7 +214,7 @@ describe('list_records action', () => {
       },
     };
 
-    await listRecordsAction.run(context as any);
+    await getRecordsAction.run(context as any);
 
     expect(httpClient.sendRequest).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -253,7 +253,7 @@ describe('list_records action', () => {
       },
     };
 
-    await listRecordsAction.run(context as any);
+    await getRecordsAction.run(context as any);
 
     expect(httpClient.sendRequest).toHaveBeenCalledWith(
       expect.objectContaining({

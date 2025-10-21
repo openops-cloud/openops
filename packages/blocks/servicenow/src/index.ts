@@ -4,7 +4,7 @@ import { BlockCategory } from '@openops/shared';
 import { createRecordAction } from './actions/create-record-action';
 import { deleteRecordAction } from './actions/delete-record-action';
 import { getRecordAction } from './actions/get-record-action';
-import { listRecordsAction } from './actions/list-records-action';
+import { getRecordsAction } from './actions/get-records-action';
 import { updateRecordAction } from './actions/update-record-action';
 import { servicenowAuth } from './lib/auth';
 import { generateAuthHeader } from './lib/generate-auth-header';
@@ -17,7 +17,7 @@ export const servicenow = createBlock({
   authors: [],
   categories: [BlockCategory.COLLABORATION],
   actions: [
-    listRecordsAction,
+    getRecordsAction,
     getRecordAction,
     createRecordAction,
     updateRecordAction,

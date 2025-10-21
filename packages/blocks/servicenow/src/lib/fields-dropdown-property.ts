@@ -34,7 +34,7 @@ export function servicenowFieldsDropdownProperty() {
 
         const defaultValues = fields.map((field) => field.element);
 
-        props['fields'] = Property.StaticMultiSelectDropdown<string>({
+        props['selected'] = Property.StaticMultiSelectDropdown<string>({
           displayName: 'Fields',
           description: 'Select the fields to return.',
           required: true,
