@@ -1,5 +1,6 @@
 import { httpClient, HttpMethod } from '@openops/blocks-common';
 import { createAction, Property } from '@openops/blocks-framework';
+import { logger } from '@openops/server-shared';
 import { servicenowAuth, ServiceNowAuth } from '../lib/auth';
 import { buildServiceNowApiUrl } from '../lib/build-api-url';
 import { generateAuthHeader } from '../lib/generate-auth-header';
@@ -72,6 +73,9 @@ export const upsertRecordAction = createAction({
           recordToUpdate = getResponse.body.result;
         }
       } catch (error) {
+        logger.debug(`Unable to retrieve record with sys_id = ${sysId}`, {
+          error,
+        });
         recordToUpdate = undefined;
       }
     }
