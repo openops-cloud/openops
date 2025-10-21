@@ -1,4 +1,5 @@
 import { httpClient, HttpMethod } from '@openops/blocks-common';
+import { Property, Validators } from '@openops/blocks-framework';
 import { FilterType, ViewFilterTypesEnum } from '@openops/common';
 import { logger } from '@openops/server-shared';
 import { ServiceNowAuth } from '../lib/auth';
@@ -7,6 +8,14 @@ import { buildServiceNowQuery } from '../lib/filter-to-query';
 import { generateAuthHeader } from '../lib/generate-auth-header';
 
 type RecordType = 'record' | 'request';
+
+export const limitProperty = Property.Number({
+  displayName: 'Limit',
+  description: 'Maximum number of records to return. Default is 10000.',
+  required: true,
+  defaultValue: 10000,
+  validators: [Validators.minValue(1)],
+});
 
 interface DeleteRecordParams {
   auth: ServiceNowAuth;

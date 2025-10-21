@@ -3,7 +3,11 @@ import { FilterType } from '@openops/common';
 import { servicenowAuth, ServiceNowAuth } from '../lib/auth';
 import { servicenowFieldsDropdownProperty } from '../lib/fields-dropdown-property';
 import { servicenowTableDropdownProperty } from '../lib/table-dropdown-property';
-import { extractFiltersFromProps, runGetRecordsAction } from './action-runners';
+import {
+  extractFiltersFromProps,
+  limitProperty,
+  runGetRecordsAction,
+} from './action-runners';
 import { createFiltersProperties } from './create-filters-properties';
 
 export const getRecordsAction = createAction({
@@ -45,12 +49,7 @@ export const getRecordsAction = createAction({
         );
       },
     }),
-    limit: Property.Number({
-      displayName: 'Limit',
-      description: 'Maximum number of records to return. Default is 100.',
-      required: false,
-      defaultValue: 100,
-    }),
+    limit: limitProperty,
     fields: servicenowFieldsDropdownProperty(),
   },
   async run(context) {
