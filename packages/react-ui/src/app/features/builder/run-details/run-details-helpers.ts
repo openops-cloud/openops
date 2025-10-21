@@ -32,10 +32,7 @@ export function getStatusText(
 ): string {
   switch (status) {
     case FlowRunStatus.STOPPED:
-      if (
-        terminationReason &&
-        terminationReason.includes(ACTION_LIMIT_REACHED_MESSAGE)
-      ) {
+      if (terminationReason?.startsWith(ACTION_LIMIT_REACHED_MESSAGE)) {
         return t('Run Stopped due to Action Limits');
       }
       return t('Workflow Run was stopped');
