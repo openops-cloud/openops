@@ -107,6 +107,9 @@ export function hasToolProvider(
   https://github.com/anthropics/claude-code/issues/6695
 */
 export function sanitizeMessages(messages: ModelMessage[]): ModelMessage[] {
+  const malformedInputError = {
+    error: 'Malformed input. Input must be an object.',
+  };
   return messages.map((message) => {
     if (!Array.isArray(message.content)) {
       return message;
@@ -116,6 +119,16 @@ export function sanitizeMessages(messages: ModelMessage[]): ModelMessage[] {
       if (part.type === 'tool-call' && typeof part.input === 'string') {
         try {
           const parsedInput = JSON.parse(part.input);
+          if (
+            typeof parsedInput !== 'object' ||
+            parsedInput === null ||
+            Array.isArray(parsedInput)
+          ) {
+            return {
+              ...part,
+              input: malformedInputError,
+            };
+          }
           return {
             ...part,
             input: parsedInput,
@@ -123,7 +136,7 @@ export function sanitizeMessages(messages: ModelMessage[]): ModelMessage[] {
         } catch {
           return {
             ...part,
-            input: { error: 'Malformed input. Input must be an object.' },
+            input: malformedInputError,
           };
         }
       }
