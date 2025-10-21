@@ -108,7 +108,6 @@ export function hasToolProvider(
 */
 export function sanitizeMessages(messages: ModelMessage[]): ModelMessage[] {
   return messages.map((message) => {
-    // Only process messages with array content
     if (!Array.isArray(message.content)) {
       return message;
     }
