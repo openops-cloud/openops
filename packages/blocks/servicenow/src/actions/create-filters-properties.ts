@@ -1,5 +1,6 @@
 import { Property } from '@openops/blocks-framework';
 import { isSingleValueFilter, ViewFilterTypesEnum } from '@openops/common';
+import { logger } from '@openops/server-shared';
 import { ServiceNowAuth } from '../lib/auth';
 import { createFieldValueProperty } from '../lib/create-field-value-property';
 import { getServiceNowTableFields } from '../lib/get-table-fields';
@@ -14,7 +15,7 @@ export async function createFiltersProperties(
   try {
     tableFields = await getServiceNowTableFields(auth, tableName);
   } catch (error) {
-    console.error(
+    logger.error(
       `Failed to fetch ServiceNow table fields for ${tableName}:`,
       error,
     );
