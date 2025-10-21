@@ -153,7 +153,14 @@ describe('sanitizeMessages', () => {
       },
     ])(
       'should handle $description',
-      ({ input, expected }: { input: ModelMessage[]; expected: ModelMessage[] }) => {
+      ({
+        input,
+        expected,
+      }: {
+        input: ModelMessage[];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        expected: any;
+      }) => {
         const result = sanitizeMessages(input);
         expect(result).toEqual(expected);
       },
