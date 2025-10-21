@@ -15,6 +15,8 @@ import { assertNotNullOrUndefined } from '@openops/shared';
 import axios from 'axios';
 import FormData from 'form-data';
 import { HttpsProxyAgent } from 'https-proxy-agent';
+import { applyAuthentication } from '../common/apply-authentication';
+import { httpAuth } from '../common/auth';
 import { httpMethodDropdown } from '../common/props';
 
 export const httpSendRequestAction = createAction({
@@ -22,6 +24,7 @@ export const httpSendRequestAction = createAction({
   displayName: 'Send HTTP request',
   description: 'Send HTTP request',
   isWriteAction: true,
+  auth: httpAuth,
   props: {
     method: httpMethodDropdown,
     url: Property.ShortText({
@@ -168,11 +171,11 @@ export const httpSendRequestAction = createAction({
     await validateHost(url);
     await validateHost(context.propsValue.proxy_settings?.proxy_host);
 
-    const request: HttpRequest = {
+    let request: HttpRequest = {
       method,
       url,
-      headers: headers as HttpHeaders,
-      queryParams: queryParams as QueryParams,
+      headers: (headers ?? {}) as HttpHeaders,
+      queryParams: (queryParams ?? {}) as QueryParams,
       timeout: timeout ? timeout * 1000 : 0,
     };
     if (body) {
@@ -188,6 +191,8 @@ export const httpSendRequestAction = createAction({
         request.body = bodyInput;
       }
     }
+
+    request = applyAuthentication(request, (context.auth as any)?.value);
 
     try {
       if (use_proxy) {
