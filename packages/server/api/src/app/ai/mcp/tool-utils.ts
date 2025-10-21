@@ -98,3 +98,43 @@ export function hasToolProvider(
     (tool) => (tool as { toolProvider?: string }).toolProvider === provider,
   );
 }
+
+/*
+  This function is used to sanitize the messages to ensure that the input is an object.
+  It happens that a tool call could be hallucinated and the input is a string instead of an object.
+  Anthropic API will throw an error and the conversation will be broken.
+  Example error: messages.79.content.1.tool_use.input: Input should be a valid dictionary
+  https://github.com/anthropics/claude-code/issues/6695
+*/
+export function sanitizeMessages(messages: ModelMessage[]): ModelMessage[] {
+  return messages.map((message) => {
+    // Only process messages with array content
+    if (!Array.isArray(message.content)) {
+      return message;
+    }
+
+    const sanitizedContent = message.content.map((part) => {
+      if (part.type === 'tool-call' && typeof part.input === 'string') {
+        try {
+          const parsedInput = JSON.parse(part.input);
+          return {
+            ...part,
+            input: parsedInput,
+          };
+        } catch {
+          return {
+            ...part,
+            input: { error: 'Malformed input. Input must be an object.' },
+          };
+        }
+      }
+
+      return part;
+    });
+
+    return {
+      ...message,
+      content: sanitizedContent,
+    } as ModelMessage;
+  });
+}
