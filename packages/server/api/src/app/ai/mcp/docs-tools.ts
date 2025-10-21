@@ -28,7 +28,7 @@ export async function getDocsTools(): Promise<MCPTool> {
   const searchTool = tools['search'];
 
   const toolSet = {
-    docsMcpClient: tool({
+    OpenOps_Docs: tool({
       description: 'Search OpenOps documentation',
       inputSchema: z.object({
         query: z.string().describe('The search query'),
@@ -48,7 +48,7 @@ export async function getDocsTools(): Promise<MCPTool> {
           );
           return result;
         } catch (error) {
-          logger.error('docsMcpClient error:', { error });
+          logger.error('OpenOps Docs MCP client error:', { error });
           return Promise.resolve({
             success: false,
             error: error instanceof Error ? error.message : String(error),
