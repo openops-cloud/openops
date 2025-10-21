@@ -54,7 +54,6 @@ describe('list_records action', () => {
           ],
         },
         limit: 50,
-        offset: 0,
         fields: ['sys_id', 'short_description'],
       },
     };
