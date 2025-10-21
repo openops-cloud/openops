@@ -1,5 +1,5 @@
 import { httpClient, HttpMethod } from '@openops/blocks-common';
-import { createAction, Property } from '@openops/blocks-framework';
+import { createAction, Property, Validators } from '@openops/blocks-framework';
 import { FilterType, ViewFilterTypesEnum } from '@openops/common';
 import { servicenowAuth, ServiceNowAuth } from '../lib/auth';
 import { buildServiceNowApiUrl } from '../lib/build-api-url';
@@ -50,9 +50,10 @@ export const getRecordsAction = createAction({
     }),
     limit: Property.Number({
       displayName: 'Limit',
-      description: 'Maximum number of records to return. Default is 100.',
-      required: false,
-      defaultValue: 100,
+      description: 'Maximum number of records to return. Default is 10000.',
+      required: true,
+      defaultValue: 10000,
+      validators: [Validators.minValue(1)],
     }),
     fields: servicenowFieldsDropdownProperty(),
   },

@@ -18,7 +18,7 @@ export async function createFiltersProperties(
   try {
     tableFields = await getServiceNowTableFields(auth, tableName);
   } catch (error) {
-    logger.error(
+    logger.warn(
       `Failed to fetch ServiceNow table fields for ${tableName}:`,
       error,
     );
