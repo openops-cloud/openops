@@ -39,13 +39,19 @@ const FlowStepInputOutput = React.memo(
         stepDetails.status !== StepOutputStatus.EXECUTION_LIMIT_REACHED ||
         !stepDetails.errorMessage
       ) {
-        return '';
+        return undefined;
       }
 
+      const fallbackMessage = t('Action limit reached.');
+
       try {
-        return JSON.parse(stepDetails.errorMessage).message;
-      } catch {
-        return t('Action limit reached.');
+        const parsed = JSON.parse(stepDetails.errorMessage);
+        return typeof parsed.message === 'string' && parsed.message
+          ? parsed.message
+          : fallbackMessage;
+      } catch (error) {
+        console.error(error);
+        return fallbackMessage;
       }
     }, [stepDetails.errorMessage, stepDetails.status]);
 
