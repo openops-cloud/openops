@@ -533,6 +533,7 @@
   "Automate your FinOps processes, pick a template or start from scratch in order to see here your workflows stats": "Automate your FinOps processes, pick a template or start from scratch in order to see here your workflows stats",
   "Workflow triggered successfully.": "Workflow triggered successfully.",
   "Check the Runs page for details": "Check the Runs page for details",
+  "Configure limit": "Configure limit",
   "Set Action Limits": "Set Action Limits",
   "Workflows with loops may trigger the same action repeatedly. To prevent unintended activity during testing, we recommend setting execution limits per action.": "Workflows with loops may trigger the same action repeatedly. To prevent unintended activity during testing, we recommend setting execution limits per action.",
   "Enable run limits": "Enable run limits",
