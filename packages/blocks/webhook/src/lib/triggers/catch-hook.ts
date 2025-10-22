@@ -50,7 +50,7 @@ export const catchWebhook = createTrigger({
     }),
     authFields: Property.DynamicProperties({
       displayName: 'Authentication Fields',
-      required: false,
+      required: true,
       refreshers: ['authType'],
       props: async ({ authType }) => {
         if (!authType) {

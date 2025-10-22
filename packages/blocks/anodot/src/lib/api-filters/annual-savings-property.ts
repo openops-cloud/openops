@@ -11,7 +11,7 @@ export function annualSavingsProperty() {
       displayName: 'Annual savings greater than',
       description:
         'Only get recommendations where the annual savings are greater than.',
-      required: false,
+      required: true,
       refreshers: ['useAnnualSavings'],
       props: async ({ useAnnualSavings }): Promise<{ [key: string]: any }> => {
         if (!useAnnualSavings) {

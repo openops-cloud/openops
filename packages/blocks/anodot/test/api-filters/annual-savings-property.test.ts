@@ -10,7 +10,7 @@ describe('annualSavingsProperty', () => {
         type: 'CHECKBOX',
       },
       annualSavingsProperty: {
-        required: false,
+        required: true,
         type: 'DYNAMIC',
       },
     });

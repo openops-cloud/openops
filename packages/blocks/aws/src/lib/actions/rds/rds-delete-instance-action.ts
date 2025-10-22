@@ -30,7 +30,7 @@ export const rdsDeleteInstanceAction = createAction({
     }),
     snapshotIdentifierProperty: Property.DynamicProperties({
       displayName: '',
-      required: false,
+      required: true,
       refreshers: ['takeSnapshot'],
       props: async ({ takeSnapshot }) => {
         if (!takeSnapshot) {
