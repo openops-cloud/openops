@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v5.0.0
       - name: Lookup node_modules cache
         id: node-modules-cache
-        uses: actions/cache@v4.2.4
+        uses: actions/cache@v4.3.0
         with:
           path: node_modules
           key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
@@ -33,13 +33,13 @@ jobs:
       - uses: actions/checkout@v5.0.0
       - name: Restore node_modules cache
         id: node-modules-cache
-        uses: actions/cache/restore@v4.2.4
+        uses: actions/cache/restore@v4.3.0
         with:
           path: node_modules
           key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
           fail-on-cache-miss: true
       - name: Restore NX cache
-        uses: actions/cache@v4.2.4
+        uses: actions/cache@v4.3.0
         with:
           path: .nx/cache
           key: nx-lint-${{ github.sha }}
@@ -69,7 +69,7 @@ jobs:
         uses: actions/checkout@v5.0.0
       - name: Restore node_modules cache
         id: node-modules-cache
-        uses: actions/cache/restore@v4.2.4
+        uses: actions/cache/restore@v4.3.0
         with:
           path: node_modules
           key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
@@ -83,7 +83,7 @@ jobs:
           fi
       - name: Commit changes for dependabot
         if: failure() && startsWith(github.head_ref, 'dependabot/')
-        uses: stefanzweifel/git-auto-commit-action@778341af668090896ca464160c2def5d1d1a3eb0
+        uses: stefanzweifel/git-auto-commit-action@28e16e81777b558cc906c8750092100bbb34c5e3
         with:
           commit_message: Update THIRD_PARTY_LICENSES.txt
   test:
@@ -112,13 +112,13 @@ jobs:
       - uses: actions/checkout@v5.0.0
       - name: Restore node_modules cache
         id: node-modules-cache
-        uses: actions/cache/restore@v4.2.4
+        uses: actions/cache/restore@v4.3.0
         with:
           path: node_modules
           key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
           fail-on-cache-miss: true
       - name: Restore NX cache
-        uses: actions/cache@v4.2.4
+        uses: actions/cache@v4.3.0
         with:
           path: .nx/cache
           key: nx-test-${{ matrix.test-suits.key || matrix.test-suits.name }}-${{ github.sha }}
@@ -145,13 +145,13 @@ jobs:
       - uses: actions/checkout@v5.0.0
       - name: Restore node_modules cache
         id: node-modules-cache
-        uses: actions/cache/restore@v4.2.4
+        uses: actions/cache/restore@v4.3.0
         with:
           path: node_modules
           key: node-modules-cache-${{ hashFiles('package-lock.json', '.npmrc') }}
           fail-on-cache-miss: true
       - name: Restore NX cache
-        uses: actions/cache@v4.2.4
+        uses: actions/cache@v4.3.0
         with:
           path: .nx/cache
           key: nx-build-${{ github.sha }}
@@ -164,7 +164,7 @@ jobs:
           npx nx run-many --target=build
           ./tools/truncate-nx-cache.sh
       - name: Save build cache
-        uses: actions/cache/save@v4.2.4
+        uses: actions/cache/save@v4.3.0
         with:
           path: dist
           key: dist-${{ github.sha }}
@@ -185,7 +185,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5.0.0
       - name: Restore build cache
-        uses: actions/cache/restore@v4.2.4
+        uses: actions/cache/restore@v4.3.0
         with:
           path: dist
           key: dist-${{ github.sha }}
@@ -194,7 +194,7 @@ jobs:
         uses: docker/setup-buildx-action@v3.11.1
       - name: Configure AWS credentials
         if: vars.ECR_REGION
-        uses: aws-actions/configure-aws-credentials@v5.0.0
+        uses: aws-actions/configure-aws-credentials@v5.1.0
         with:
           aws-access-key-id: ${{ secrets.ECR_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.ECR_SECRET_ACCESS_KEY }}
@@ -251,7 +251,7 @@ jobs:
     needs: build-images
     steps:
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v5.0.0
+        uses: aws-actions/configure-aws-credentials@v5.1.0
         with:
           aws-access-key-id: ${{ secrets.ECR_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.ECR_SECRET_ACCESS_KEY }}
