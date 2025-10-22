@@ -300,7 +300,11 @@ export const createBuilderStore = (initialState: BuilderInitialState) =>
         ) =>
           set(
             (state) => {
-              if (state.readonly) {
+              if (
+                state.readonly &&
+                operation.type !==
+                  FlowOperationType.UPDATE_TEST_RUN_ACTION_LIMITS
+              ) {
                 console.warn('Cannot apply operation while readonly');
                 return state;
               }
