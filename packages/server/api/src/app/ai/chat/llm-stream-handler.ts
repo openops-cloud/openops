@@ -12,6 +12,7 @@ import {
   ToolSet,
 } from 'ai';
 import { sanitizeMessages } from '../mcp/tool-utils';
+import { createVoidTool } from '../mcp/void-tool';
 import {
   addCacheControlToMessages,
   addCacheControlToTools,
@@ -61,12 +62,22 @@ export function getLLMAsyncStream(
   const availableToolsString =
     availableTools.length > 0 ? `"${availableTools.join(', ')}"` : 'none';
 
+  const cachedTools = addCacheControlToTools(tools);
+  const toolsProxy = new Proxy(cachedTools ?? ({} as ToolSet), {
+    get: (target, prop: string | symbol): unknown => {
+      if (typeof prop === 'string' && prop in target) {
+        return target[prop];
+      }
+      return createVoidTool(String(prop));
+    },
+  });
+
   const { fullStream } = streamText({
     model: languageModel,
     system: systemPrompt,
     messages: currentMessages,
     ...aiConfig.modelSettings,
-    tools: addCacheControlToTools(tools),
+    tools: toolsProxy,
     toolChoice,
     maxRetries: MAX_RETRIES,
     stopWhen: stepCountIs(maxRecursionDepth),
