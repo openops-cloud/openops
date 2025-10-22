@@ -93,7 +93,7 @@ export const getRecordsAction = createAction({
 
     const selectedFields = (fields as { selected?: string[] })?.selected;
 
-    if (Array.isArray(selectedFields) && selectedFields) {
+    if (Array.isArray(selectedFields)) {
       queryParams['sysparm_fields'] = selectedFields.join(',');
     }
 
