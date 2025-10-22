@@ -11,6 +11,7 @@ import {
   TextStreamPart,
   ToolSet,
 } from 'ai';
+import { sanitizeMessages } from '../mcp/tool-utils';
 import {
   addCacheControlToMessages,
   addCacheControlToTools,
@@ -54,11 +55,12 @@ export function getLLMAsyncStream(
 
   const hasTools = tools && Object.keys(tools).length !== 0;
   const toolChoice = hasTools ? 'auto' : 'none';
+  const currentMessages = sanitizeMessages(chatHistory);
 
   const { fullStream } = streamText({
     model: languageModel,
     system: systemPrompt,
-    messages: chatHistory,
+    messages: currentMessages,
     ...aiConfig.modelSettings,
     tools: addCacheControlToTools(tools),
     toolChoice,

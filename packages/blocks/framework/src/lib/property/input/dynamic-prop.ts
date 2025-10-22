@@ -42,5 +42,5 @@ export type DynamicProperties<R extends boolean> = BasePropertySchema & {
     DynamicPropsValue,
     PropertyType.DYNAMIC,
     ValidationInputType.ANY,
-    R
+    true
   >;

@@ -109,6 +109,8 @@ export const flowVersionService = {
         });
 
         operations = handleImportFlowOperation(flowVersion, previousVersion);
+        mutatedFlowVersion.testRunActionLimits =
+          previousVersion.testRunActionLimits;
         break;
       }
 

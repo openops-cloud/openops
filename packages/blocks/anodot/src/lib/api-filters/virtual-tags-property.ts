@@ -9,7 +9,7 @@ export function virtualTagsProperty() {
     virtualTag: Property.DynamicProperties({
       displayName: 'Virtual tag filters',
       description: 'Each virtual tag represents a collection of custom tags.',
-      required: false,
+      required: true,
       refreshers: ['useVirtualTag'],
       props: async ({ useVirtualTag }): Promise<{ [key: string]: any }> => {
         if (!useVirtualTag) {
