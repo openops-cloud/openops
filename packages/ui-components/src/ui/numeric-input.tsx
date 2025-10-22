@@ -85,28 +85,31 @@ const NumericInput = forwardRef<HTMLInputElement, NumericInputProps>(
       onChange?.(newValue);
     }, [internalValue, step, min, onChange]);
 
+    const applyValidation = useCallback(() => {
+      const numValue = Number.parseFloat(internalValue);
+      if (!Number.isNaN(numValue)) {
+        let clampedValue = numValue;
+        if (min !== undefined && clampedValue < min) {
+          clampedValue = min;
+        }
+        if (max !== undefined && clampedValue > max) {
+          clampedValue = max;
+        }
+        if (clampedValue !== numValue) {
+          setInternalValue(String(clampedValue));
+          onChange?.(clampedValue);
+        }
+      } else {
+        handleChange(min ? String(min) : '');
+      }
+    }, [internalValue, min, max, onChange, handleChange]);
+
     const handleBlur = useCallback(
       (e: React.FocusEvent<HTMLInputElement>) => {
-        const numValue = Number.parseFloat(internalValue);
-
-        if (!Number.isNaN(numValue)) {
-          let clampedValue = numValue;
-          if (min !== undefined && clampedValue < min) {
-            clampedValue = min;
-          }
-          if (max !== undefined && clampedValue > max) {
-            clampedValue = max;
-          }
-          if (clampedValue !== numValue) {
-            setInternalValue(String(clampedValue));
-            onChange?.(clampedValue);
-          }
-        } else {
-          handleChange(min ? String(min) : '');
-        }
+        applyValidation();
         props.onBlur?.(e);
       },
-      [internalValue, props, min, max, onChange, handleChange],
+      [applyValidation, props],
     );
 
     const handleKeyDown = useCallback(
@@ -117,16 +120,18 @@ const NumericInput = forwardRef<HTMLInputElement, NumericInputProps>(
         } else if (e.key === 'ArrowDown') {
           e.preventDefault();
           handleDecrement();
+        } else if (e.key === 'Enter') {
+          applyValidation();
         }
         props.onKeyDown?.(e);
       },
-      [props, handleIncrement, handleDecrement],
+      [props, handleIncrement, handleDecrement, applyValidation],
     );
 
     return (
       <div className="relative flex items-center">
         <Input
-          type="number"
+          type="text"
           inputMode="decimal"
           className={cn('pr-8 overflow-y-hidden', className)}
           ref={ref}
@@ -143,6 +148,11 @@ const NumericInput = forwardRef<HTMLInputElement, NumericInputProps>(
             variant="ghost"
             size="xs"
             onClick={handleIncrement}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+              }
+            }}
             disabled={
               disabled ||
               (max !== undefined && Number.parseFloat(internalValue) >= max)
@@ -157,6 +167,11 @@ const NumericInput = forwardRef<HTMLInputElement, NumericInputProps>(
             variant="ghost"
             size="xs"
             onClick={handleDecrement}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+              }
+            }}
             disabled={
               disabled ||
               (min !== undefined && Number.parseFloat(internalValue) <= min)
